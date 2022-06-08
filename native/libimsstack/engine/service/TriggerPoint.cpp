@@ -1,21 +1,25 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20110719  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
-#include "SipHeaderName.h"
-#include "ISipMessage.h"
+
 #include "ISipHeader.h"
+#include "ISipMessage.h"
+#include "SipHeaderName.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
 #include "TriggerPoint.h"
@@ -24,27 +28,29 @@ __IMS_TRACE_TAG_IMS__;
 
 PUBLIC
 TriggerPoint::TriggerPoint(
-        IN CONST SipMethod& objMethod_, IN IMS_BOOL bMethodNegated_ /* = IMS_FALSE */) :
-        nEvaluationRule(SPT_SIP_RULE_MATCH | SPT_SDP_RULE_CONTAIN),
-        bMethodNegated(bMethodNegated_),
-        objMethod(objMethod_)
+        IN const SipMethod& objMethod, IN IMS_BOOL bMethodNegated /*= IMS_FALSE*/) :
+        m_nEvaluationRule(SPT_SIP_RULE_MATCH | SPT_SDP_RULE_CONTAIN),
+        m_bMethodNegated(bMethodNegated),
+        m_objMethod(objMethod)
 {
 }
 
 PUBLIC
-TriggerPoint::TriggerPoint(IN CONST TriggerPoint& objRHS) :
-        nEvaluationRule(objRHS.nEvaluationRule),
-        bMethodNegated(objRHS.bMethodNegated),
-        objMethod(objRHS.objMethod),
-        objSDPMLines(objRHS.objSDPMLines),
-        objSDPALines(objRHS.objSDPALines)
+TriggerPoint::TriggerPoint(IN const TriggerPoint& other) :
+        m_nEvaluationRule(other.m_nEvaluationRule),
+        m_bMethodNegated(other.m_bMethodNegated),
+        m_objMethod(other.m_objMethod),
+        m_objSdpMLines(other.m_objSdpMLines),
+        m_objSdpALines(other.m_objSdpALines)
 {
-    for (IMS_UINT32 i = 0; i < objRHS.objHeaders.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < other.m_objHeaders.GetSize(); ++i)
     {
-        const ISipHeader* piHeader = objRHS.objHeaders.GetAt(i);
+        const ISipHeader* piHeader = other.m_objHeaders.GetAt(i);
 
         if (piHeader == IMS_NULL)
+        {
             continue;
+        }
 
         ISipHeader* piNewHeader = piHeader->Clone();
 
@@ -54,7 +60,7 @@ TriggerPoint::TriggerPoint(IN CONST TriggerPoint& objRHS) :
             continue;
         }
 
-        if (!objHeaders.Append(piNewHeader))
+        if (!m_objHeaders.Append(piNewHeader))
         {
             piNewHeader->Destroy();
 
@@ -62,12 +68,14 @@ TriggerPoint::TriggerPoint(IN CONST TriggerPoint& objRHS) :
         }
     }
 
-    for (IMS_UINT32 i = 0; i < objRHS.objNegatedHeaders.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < other.m_objNegatedHeaders.GetSize(); ++i)
     {
-        const ISipHeader* piHeader = objRHS.objNegatedHeaders.GetAt(i);
+        const ISipHeader* piHeader = other.m_objNegatedHeaders.GetAt(i);
 
         if (piHeader == IMS_NULL)
+        {
             continue;
+        }
 
         ISipHeader* piNewHeader = piHeader->Clone();
 
@@ -77,7 +85,7 @@ TriggerPoint::TriggerPoint(IN CONST TriggerPoint& objRHS) :
             continue;
         }
 
-        if (!objNegatedHeaders.Append(piNewHeader))
+        if (!m_objNegatedHeaders.Append(piNewHeader))
         {
             piNewHeader->Destroy();
 
@@ -93,25 +101,25 @@ TriggerPoint::~TriggerPoint()
 }
 
 PUBLIC
-TriggerPoint& TriggerPoint::operator=(IN CONST TriggerPoint& objRHS)
+TriggerPoint& TriggerPoint::operator=(IN const TriggerPoint& other)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this != &objRHS)
+    if (this != &other)
     {
         RemoveAllHeaders();
 
-        nEvaluationRule = objRHS.nEvaluationRule;
+        m_nEvaluationRule = other.m_nEvaluationRule;
 
-        bMethodNegated = objRHS.bMethodNegated;
-        objMethod = objRHS.objMethod;
+        m_bMethodNegated = other.m_bMethodNegated;
+        m_objMethod = other.m_objMethod;
 
-        for (IMS_UINT32 i = 0; i < objRHS.objHeaders.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < other.m_objHeaders.GetSize(); ++i)
         {
-            const ISipHeader* piHeader = objRHS.objHeaders.GetAt(i);
+            const ISipHeader* piHeader = other.m_objHeaders.GetAt(i);
 
             if (piHeader == IMS_NULL)
+            {
                 continue;
+            }
 
             ISipHeader* piNewHeader = piHeader->Clone();
 
@@ -121,7 +129,7 @@ TriggerPoint& TriggerPoint::operator=(IN CONST TriggerPoint& objRHS)
                 continue;
             }
 
-            if (!objHeaders.Append(piNewHeader))
+            if (!m_objHeaders.Append(piNewHeader))
             {
                 piNewHeader->Destroy();
 
@@ -129,12 +137,14 @@ TriggerPoint& TriggerPoint::operator=(IN CONST TriggerPoint& objRHS)
             }
         }
 
-        for (IMS_UINT32 i = 0; i < objRHS.objNegatedHeaders.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < other.m_objNegatedHeaders.GetSize(); ++i)
         {
-            const ISipHeader* piHeader = objRHS.objNegatedHeaders.GetAt(i);
+            const ISipHeader* piHeader = other.m_objNegatedHeaders.GetAt(i);
 
             if (piHeader == IMS_NULL)
+            {
                 continue;
+            }
 
             ISipHeader* piNewHeader = piHeader->Clone();
 
@@ -144,7 +154,7 @@ TriggerPoint& TriggerPoint::operator=(IN CONST TriggerPoint& objRHS)
                 continue;
             }
 
-            if (!objNegatedHeaders.Append(piNewHeader))
+            if (!m_objNegatedHeaders.Append(piNewHeader))
             {
                 piNewHeader->Destroy();
 
@@ -152,26 +162,19 @@ TriggerPoint& TriggerPoint::operator=(IN CONST TriggerPoint& objRHS)
             }
         }
 
-        objSDPMLines = objRHS.objSDPMLines;
-        objSDPALines = objRHS.objSDPALines;
+        m_objSdpMLines = other.m_objSdpMLines;
+        m_objSdpALines = other.m_objSdpALines;
     }
 
     return (*this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL TriggerPoint::AddHeader(IN IMS_SINT32 nType, IN CONST AString& strValue,
-        IN CONST AString& strName /* = AString::ConstNull() */,
-        IN IMS_BOOL bHeaderNegated /* = IMS_FALSE */)
+IMS_BOOL TriggerPoint::AddHeader(IN IMS_SINT32 nType, IN const AString& strValue,
+        IN const AString& strName /*= AString::ConstNull()*/,
+        IN IMS_BOOL bHeaderNegated /*= IMS_FALSE*/)
 {
     ISipHeader* piHeader = IMS_NULL;
-
-    //---------------------------------------------------------------------------------------------
 
     if (nType != ISipHeader::UNKNOWN)
     {
@@ -191,7 +194,7 @@ IMS_BOOL TriggerPoint::AddHeader(IN IMS_SINT32 nType, IN CONST AString& strValue
 
     if (!bHeaderNegated)
     {
-        if (!objHeaders.Append(piHeader))
+        if (!m_objHeaders.Append(piHeader))
         {
             piHeader->Destroy();
 
@@ -202,7 +205,7 @@ IMS_BOOL TriggerPoint::AddHeader(IN IMS_SINT32 nType, IN CONST AString& strValue
     }
     else
     {
-        if (!objNegatedHeaders.Append(piHeader))
+        if (!m_objNegatedHeaders.Append(piHeader))
         {
             piHeader->Destroy();
 
@@ -215,23 +218,16 @@ IMS_BOOL TriggerPoint::AddHeader(IN IMS_SINT32 nType, IN CONST AString& strValue
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL TriggerPoint::AddSDPInfo(IN CONST IMS_CHAR cName, IN CONST AString& strValue)
+IMS_BOOL TriggerPoint::AddSdpInfo(IN const IMS_CHAR cName, IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (cName == 'm')
     {
-        objSDPMLines.Append(strValue);
+        m_objSdpMLines.Append(strValue);
     }
     else if (cName == 'a')
     {
-        objSDPALines.Append(strValue);
+        m_objSdpALines.Append(strValue);
     }
     else
     {
@@ -241,108 +237,79 @@ IMS_BOOL TriggerPoint::AddSDPInfo(IN CONST IMS_CHAR cName, IN CONST AString& str
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void TriggerPoint::RemoveAllHeaders()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!objHeaders.IsEmpty())
+    if (!m_objHeaders.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objHeaders.GetSize(); ++i)
         {
-            ISipHeader* piHeader = objHeaders.GetAt(i);
+            ISipHeader* piHeader = m_objHeaders.GetAt(i);
 
             if (piHeader == IMS_NULL)
+            {
                 continue;
+            }
 
             piHeader->Destroy();
         }
 
-        objHeaders.Clear();
+        m_objHeaders.Clear();
     }
 
-    if (!objNegatedHeaders.IsEmpty())
+    if (!m_objNegatedHeaders.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objNegatedHeaders.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objNegatedHeaders.GetSize(); ++i)
         {
-            ISipHeader* piHeader = objNegatedHeaders.GetAt(i);
+            ISipHeader* piHeader = m_objNegatedHeaders.GetAt(i);
 
             if (piHeader == IMS_NULL)
+            {
                 continue;
+            }
 
             piHeader->Destroy();
         }
 
-        objNegatedHeaders.Clear();
+        m_objNegatedHeaders.Clear();
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void TriggerPoint::RemoveAllSDPInfo()
+void TriggerPoint::RemoveAllSdpInfo()
 {
-    //---------------------------------------------------------------------------------------------
-
-    objSDPMLines.Clear();
-    objSDPALines.Clear();
+    m_objSdpMLines.Clear();
+    m_objSdpALines.Clear();
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-void TriggerPoint::SetEvaluationRule(IN IMS_SINT32 nRule)
-{
-    //---------------------------------------------------------------------------------------------
-
-    nEvaluationRule = nRule;
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL TriggerPoint::Evaluate(IN CONST ISipMessage* piSIPMsg) const
+IMS_BOOL TriggerPoint::Evaluate(IN const ISipMessage* piSipMsg) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    if (!bMethodNegated)
+    if (!m_bMethodNegated)
     {
-        if (!objMethod.Equals(piSIPMsg->GetMethod()))
+        if (!m_objMethod.Equals(piSipMsg->GetMethod()))
         {
             return IMS_FALSE;
         }
     }
     else
     {
-        if (objMethod.Equals(piSIPMsg->GetMethod()))
+        if (m_objMethod.Equals(piSipMsg->GetMethod()))
         {
             return IMS_FALSE;
         }
     }
 
     // In case the method is only matched ...
-    if (objHeaders.IsEmpty() && objNegatedHeaders.IsEmpty())
+    if (m_objHeaders.IsEmpty() && m_objNegatedHeaders.IsEmpty())
     {
-        if (CompareSDPInfo(objSDPMLines, objSDPALines, piSIPMsg, nEvaluationRule) == SPT_MATCH_NOK)
+        if (CompareSdpInfo(m_objSdpMLines, m_objSdpALines, piSipMsg, m_nEvaluationRule) ==
+                SPT_MATCH_NOK)
         {
             IMS_TRACE_D("TriggerPoint :: SDP is not matched", 0, 0, 0);
             return IMS_FALSE;
@@ -353,14 +320,16 @@ IMS_BOOL TriggerPoint::Evaluate(IN CONST ISipMessage* piSIPMsg) const
 
     IMS_SINT32 nMatchResult = SPT_MATCH_NOK;
 
-    for (IMS_UINT32 i = 0; i < objNegatedHeaders.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objNegatedHeaders.GetSize(); ++i)
     {
-        const ISipHeader* piHeader = objNegatedHeaders.GetAt(i);
+        const ISipHeader* piHeader = m_objNegatedHeaders.GetAt(i);
 
         if (piHeader == IMS_NULL)
+        {
             continue;
+        }
 
-        nMatchResult = CompareHeaderInMessage(piHeader, piSIPMsg, nEvaluationRule, IMS_TRUE);
+        nMatchResult = CompareHeaderInMessage(piHeader, piSipMsg, m_nEvaluationRule, IMS_TRUE);
 
         if (nMatchResult == SPT_MATCH_NOK)
         {
@@ -370,14 +339,16 @@ IMS_BOOL TriggerPoint::Evaluate(IN CONST ISipMessage* piSIPMsg) const
         }
     }
 
-    for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objHeaders.GetSize(); ++i)
     {
-        const ISipHeader* piHeader = objHeaders.GetAt(i);
+        const ISipHeader* piHeader = m_objHeaders.GetAt(i);
 
         if (piHeader == IMS_NULL)
+        {
             continue;
+        }
 
-        nMatchResult = CompareHeaderInMessage(piHeader, piSIPMsg, nEvaluationRule);
+        nMatchResult = CompareHeaderInMessage(piHeader, piSipMsg, m_nEvaluationRule);
 
         if (nMatchResult == SPT_MATCH_NOK)
         {
@@ -387,7 +358,8 @@ IMS_BOOL TriggerPoint::Evaluate(IN CONST ISipMessage* piSIPMsg) const
         }
     }
 
-    if (CompareSDPInfo(objSDPMLines, objSDPALines, piSIPMsg, nEvaluationRule) == SPT_MATCH_NOK)
+    if (CompareSdpInfo(m_objSdpMLines, m_objSdpALines, piSipMsg, m_nEvaluationRule) ==
+            SPT_MATCH_NOK)
     {
         IMS_TRACE_D("TriggerPoint :: SDP is not matched", 0, 0, 0);
         return IMS_FALSE;
@@ -396,43 +368,31 @@ IMS_BOOL TriggerPoint::Evaluate(IN CONST ISipMessage* piSIPMsg) const
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_UINT32 TriggerPoint::GetCount() const
 {
     // Method
     IMS_UINT32 nCount = 1;
 
-    //---------------------------------------------------------------------------------------------
-
     // Headers
-    nCount += objHeaders.GetSize();
+    nCount += m_objHeaders.GetSize();
 
     // Negated Headers
-    nCount += objNegatedHeaders.GetSize();
+    nCount += m_objNegatedHeaders.GetSize();
 
     // Additional fields
 
     return nCount;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareHeader(IN CONST ISipHeader* piHeader,
-        IN CONST ISipHeader* piOtherHeader, IN IMS_SINT32 nEvaluationRule,
-        IN IMS_BOOL bConditionNegated /* = IMS_FALSE */)
+PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareHeader(IN const ISipHeader* piHeader,
+        IN const ISipHeader* piOtherHeader, IN IMS_SINT32 nEvaluationRule,
+        IN IMS_BOOL bConditionNegated /*= IMS_FALSE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     if ((piHeader == IMS_NULL) || (piOtherHeader == IMS_NULL))
+    {
         return SPT_MATCH_NOK;
+    }
 
     // The below header fields will be evaluated for only SIP parameters ...
     if (IsParameterComparisonRequired(piHeader))
@@ -464,7 +424,9 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareHeader(IN CONST ISipHeader* piHea
             const SipParameter* pOtherParameter = objOtherParameters.GetAt(i);
 
             if (pOtherParameter == IMS_NULL)
+            {
                 continue;
+            }
 
             if (pParameter->Equals(pOtherParameter))
             {
@@ -523,30 +485,27 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareHeader(IN CONST ISipHeader* piHea
     return SPT_MATCH_NOK;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareHeaderInMessage(IN CONST ISipHeader* piHeader,
-        IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nEvaluationRule,
+PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareHeaderInMessage(IN const ISipHeader* piHeader,
+        IN const ISipMessage* piSipMsg, IN IMS_SINT32 nEvaluationRule,
         IN IMS_BOOL bConditionNegated /* = IMS_FALSE */)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if ((piHeader == IMS_NULL) || (piSIPMsg == IMS_NULL))
+    if ((piHeader == IMS_NULL) || (piSipMsg == IMS_NULL))
     {
         return SPT_MATCH_NOK;
     }
 
-    IMSList<AString> objValues = piSIPMsg->GetHeaders(piHeader->GetType(), piHeader->GetName());
+    IMSList<AString> objValues = piSipMsg->GetHeaders(piHeader->GetType(), piHeader->GetName());
 
     if (objValues.IsEmpty())
     {
         if (bConditionNegated)
+        {
             return SPT_MATCH_OK;
+        }
         else
+        {
             return SPT_MATCH_NOK;
+        }
     }
     else
     {
@@ -608,14 +567,9 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareHeaderInMessage(IN CONST ISipHead
     return nMatchResult;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareSDPInfo(IN CONST IMSList<AString>& objMLines,
-        IN CONST IMSList<AString>& objALines, IN CONST ISipMessage* piSIPMsg,
-        IN IMS_SINT32 nEvaluationRule, IN IMS_BOOL bConditionNegated /* = IMS_FALSE */)
+PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareSdpInfo(IN const IMSList<AString>& objMLines,
+        IN const IMSList<AString>& objALines, IN const ISipMessage* piSipMsg,
+        IN IMS_SINT32 nEvaluationRule, IN IMS_BOOL bConditionNegated /*= IMS_FALSE*/)
 {
     if (objMLines.IsEmpty() && objALines.IsEmpty())
     {
@@ -623,14 +577,18 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareSDPInfo(IN CONST IMSList<AString>
         return SPT_MATCH_OK;
     }
 
-    ISipMessageBodyPart* pBodyPart = piSIPMsg->GetSdpBodyPart();
+    ISipMessageBodyPart* pBodyPart = piSipMsg->GetSdpBodyPart();
 
     if (pBodyPart == IMS_NULL)
     {
         if (bConditionNegated)
+        {
             return SPT_MATCH_OK;
+        }
         else
+        {
             return SPT_MATCH_NOK;
+        }
     }
 
     AString strBodyPart = pBodyPart->GetContent().ToString();
@@ -672,12 +630,16 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareSDPInfo(IN CONST IMSList<AString>
     if (bConditionNegated)
     {
         if ((nMatchResult & SPT_MATCH_OK) == SPT_MATCH_OK)
+        {
             return SPT_MATCH_NOK;
+        }
     }
     else
     {
         if ((nMatchResult & SPT_MATCH_NOK) == SPT_MATCH_NOK)
+        {
             return SPT_MATCH_NOK;
+        }
     }
 
     // a-line
@@ -714,30 +676,27 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareSDPInfo(IN CONST IMSList<AString>
     if (bConditionNegated)
     {
         if ((nMatchResult & SPT_MATCH_OK) == SPT_MATCH_OK)
+        {
             return SPT_MATCH_NOK;
+        }
     }
     else
     {
         if ((nMatchResult & SPT_MATCH_NOK) == SPT_MATCH_NOK)
+        {
             return SPT_MATCH_NOK;
+        }
     }
 
     return SPT_MATCH_OK;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE GLOBAL IMS_SINT32 TriggerPoint::GetIndexOf(IN CONST AStringArray& objSDPLines,
-        IN CONST AString& strToken, IN IMS_BOOL bContain /* = IMS_TRUE */)
+PRIVATE GLOBAL IMS_SINT32 TriggerPoint::GetIndexOf(IN const AStringArray& objSdpLines,
+        IN const AString& strToken, IN IMS_BOOL bContain /*= IMS_TRUE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_SINT32 i = 0; i < objSDPLines.GetCount(); ++i)
+    for (IMS_SINT32 i = 0; i < objSdpLines.GetCount(); ++i)
     {
-        const AString& strLine = objSDPLines.GetElementAt(i);
+        const AString& strLine = objSdpLines.GetElementAt(i);
 
         if (bContain)
         {
@@ -758,13 +717,10 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::GetIndexOf(IN CONST AStringArray& objSDP
     return AString::NPOS;
 }
 
-/*
- Checks if SIP header parameter needs to be compared for the specified header.
-
-Remarks
-
-*/
-PRIVATE GLOBAL IMS_BOOL TriggerPoint::IsParameterComparisonRequired(IN CONST ISipHeader* piHeader)
+/**
+ * @brief Checks if SIP header parameter needs to be compared for the specified header.
+ */
+PRIVATE GLOBAL IMS_BOOL TriggerPoint::IsParameterComparisonRequired(IN const ISipHeader* piHeader)
 {
     if ((piHeader->GetType() == ISipHeader::ACCEPT_CONTACT) ||
             (piHeader->GetType() == ISipHeader::CONTACT_ANY) ||
@@ -777,40 +733,35 @@ PRIVATE GLOBAL IMS_BOOL TriggerPoint::IsParameterComparisonRequired(IN CONST ISi
     return IMS_FALSE;
 }
 
-/*
- Splits the message for each lines.
-
-Remarks
-
-*/
+/**
+ * @brief Splits the message for each lines.
+ */
 PRIVATE GLOBAL void TriggerPoint::SplitLines(
-        IN CONST AString& strSDP, OUT AStringArray& objSDPLines)
+        IN const AString& strSdp, OUT AStringArray& objSdpLines)
 {
     IMS_SINT32 nLineStart = 0;
-    IMS_SINT32 nEOL = 0;
+    IMS_SINT32 nEndOfLine = 0;
     IMS_SINT32 nNextLineStart = 0;
 
-    //---------------------------------------------------------------------------------------------
-
-    while (nLineStart < strSDP.GetLength())
+    while (nLineStart < strSdp.GetLength())
     {
-        nEOL = strSDP.GetIndexOf(TextParser::CHAR_LF, nLineStart);
+        nEndOfLine = strSdp.GetIndexOf(TextParser::CHAR_LF, nLineStart);
 
-        if (nEOL == AString::NPOS)
+        if (nEndOfLine == AString::NPOS)
         {
-            nEOL = strSDP.GetLength();
+            nEndOfLine = strSdp.GetLength();
         }
 
-        nNextLineStart = nEOL + 1;
+        nNextLineStart = nEndOfLine + 1;
 
-        if ((nEOL > 0) && (strSDP[nEOL - 1] == TextParser::CHAR_CR))
+        if ((nEndOfLine > 0) && (strSdp[nEndOfLine - 1] == TextParser::CHAR_CR))
         {
-            --nEOL;
+            --nEndOfLine;
         }
 
-        if (nEOL > nLineStart)
+        if (nEndOfLine > nLineStart)
         {
-            objSDPLines.AddElement(strSDP.GetSubStr(nLineStart, nEOL - nLineStart));
+            objSdpLines.AddElement(strSdp.GetSubStr(nLineStart, nEndOfLine - nLineStart));
         }
 
         nLineStart = nNextLineStart;

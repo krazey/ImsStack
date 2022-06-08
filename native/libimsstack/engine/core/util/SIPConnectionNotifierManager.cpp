@@ -1143,14 +1143,14 @@ PRIVATE GLOBAL Service* SIPConnectionNotifierManagerPrivate::RouteSIPRequest(
         }
 
         // Check the Request-URI validation
-        IMS_BOOL bValidity = pService->ValidateRequestURI(objRequestURI);
+        IMS_BOOL bValidity = pService->ValidateRequestUri(objRequestURI);
 
         if (!bValidity &&
                 SipFeatures::IsHostPartValidationRequiredForIncomingRequestRouting(
                         piSSC->GetSlotId()))
         {
             // Checks if IP and port is matched with those in the Contact address.
-            bValidity = pService->ValidateRequestURIForIPAndPort(objRequestURI);
+            bValidity = pService->ValidateRequestUriForIpAndPort(objRequestURI);
         }
 
         if (!bValidity)

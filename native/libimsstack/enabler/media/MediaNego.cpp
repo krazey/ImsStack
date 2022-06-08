@@ -504,13 +504,13 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* eAudioDi
 
         // Reject the peer media line with non-matching IP version
         if (pDescriptor->GetRemoteAddress().GetVersion() !=
-                m_pMediaEnvironment->pIService->GetIPAddress().GetVersion())
+                m_pMediaEnvironment->pIService->GetIpAddress().GetVersion())
         {
             if (pDescriptor->GetRemotePort() != 0)
             {
                 IMS_TRACE_D("NegotiateSDP() - NOT Matched IP Version [%d / %d]",
                         pDescriptor->GetRemoteAddress().GetVersion(),
-                        m_pMediaEnvironment->pIService->GetIPAddress().GetVersion(), 0);
+                        m_pMediaEnvironment->pIService->GetIpAddress().GetVersion(), 0);
                 SetMediaDescriptorAsNotSupported(pDescriptor, pSDPMedia);
                 errorReason = ERROR_IP_MISMATCH;
                 bNegoFailed = IMS_TRUE;

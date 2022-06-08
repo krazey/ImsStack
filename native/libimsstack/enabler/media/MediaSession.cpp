@@ -188,7 +188,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::SetEnvironment(IN MediaEnvironment* pEnvir
     if (pEnvironment->eServiceType == MEDIA_SERVICE_EMERGENCY &&
             pEnvironment->pIService != IMS_NULL)
     {
-        IMS_BOOL bIsIPv6 = pEnvironment->pIService->GetIPAddress().IsIPv6Address();
+        IMS_BOOL bIsIPv6 = pEnvironment->pIService->GetIpAddress().IsIPv6Address();
         MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
         if (pMediaManager != IMS_NULL)
         {

@@ -84,7 +84,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileConfigurer::CreateAudioProfile(OUT AudioProfi
     // In Ipv4, this is not necessary.
     if (pEnvironment->eNetworkType == MEDIA_NETWORK_WIFI)
     {
-        pAudioProfile->objIpAddr = pEnvironment->pIService->GetIPAddress();
+        pAudioProfile->objIpAddr = pEnvironment->pIService->GetIpAddress();
     }
     else
     {
@@ -96,9 +96,9 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileConfigurer::CreateAudioProfile(OUT AudioProfi
         }
 
         pResourceMngr->UpdatePdnResource(
-                nPDNType, pEnvironment->pIService->GetIPAddress().IsIPv6Address());
+                nPDNType, pEnvironment->pIService->GetIpAddress().IsIPv6Address());
         // Android IP
-        pAudioProfile->objIpAddr = pEnvironment->pIService->GetIPAddress();
+        pAudioProfile->objIpAddr = pEnvironment->pIService->GetIpAddress();
     }
 
     // Setting RTP/RTCP port from resource manager

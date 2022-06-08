@@ -1,19 +1,22 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090608  toastops@                 Created
-    </table>
-
-    Description
-     Service is the base class for IMS services, and follows the Generic Connection Framework
-    (GCF).
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "ServiceTrace.h"
 #include "ServiceMutex.h"
+#include "ServiceTrace.h"
+
 #include "Service.h"
 #include "ServiceManager.h"
 
@@ -25,9 +28,8 @@ public:
     ServiceManagerPrivate();
     virtual ~ServiceManagerPrivate();
 
-private:
-    ServiceManagerPrivate(IN const ServiceManagerPrivate& objRHS);
-    ServiceManagerPrivate& operator=(IN const ServiceManagerPrivate& objRHS);
+    ServiceManagerPrivate(IN const ServiceManagerPrivate&) = delete;
+    ServiceManagerPrivate& operator=(IN const ServiceManagerPrivate&) = delete;
 
 public:
     IMS_BOOL AttachService(IN Service* pService);
@@ -38,34 +40,29 @@ public:
 
 private:
     // EngineActivity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
 private:
     friend class ServiceManager;
 
-    IMutex* piLock;
-    IMSList<Service*> objServices;
+    IMutex* m_piLock;
+    IMSList<Service*> m_objServices;
 };
 
 PUBLIC
 ServiceManagerPrivate::ServiceManagerPrivate() :
         EngineActivity(),
-        piLock(IMS_NULL)
+        m_piLock(IMS_NULL)
 {
-    piLock = MutexService::GetMutexService()->CreateMutex();
+    m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
 
 PUBLIC
 ServiceManagerPrivate::~ServiceManagerPrivate()
 {
-    MutexService::GetMutexService()->DestroyMutex(piLock);
+    MutexService::GetMutexService()->DestroyMutex(m_piLock);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL ServiceManagerPrivate::AttachService(IN Service* pService)
 {
@@ -77,9 +74,9 @@ IMS_BOOL ServiceManagerPrivate::AttachService(IN Service* pService)
     // Add the service to the pending service storage.
     // The registration will be triggered by the application after opening the service.
 
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    if (!objServices.Append(pService))
+    if (!m_objServices.Append(pService))
     {
         IMS_TRACE_E(0, "Appending a Service (%s, %d) failed", pService->GetAppId().GetStr(),
                 pService->GetSlotId(), 0);
@@ -89,47 +86,37 @@ IMS_BOOL ServiceManagerPrivate::AttachService(IN Service* pService)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void ServiceManagerPrivate::DetachService(IN Service* pService)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objServices.GetSize(); ++i)
     {
-        Service* pTmpService = objServices.GetAt(i);
+        Service* pTmpService = m_objServices.GetAt(i);
 
         if (pTmpService->Equals(pService))
         {
-            objServices.RemoveAt(i);
+            m_objServices.RemoveAt(i);
             break;
         }
     }
 
-    if (objServices.IsEmpty())
+    if (m_objServices.IsEmpty())
     {
         IMS_TRACE_I("ServiceManager :: No services", 0, 0, 0);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 Service* ServiceManagerPrivate::GetService(
         IN IMS_SINT32 nSlotId, IN const AString& strAppId, IN const AString& strServiceId) const
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objServices.GetSize(); ++i)
     {
-        Service* pService = objServices.GetAt(i);
+        Service* pService = m_objServices.GetAt(i);
 
         if ((pService->GetSlotId() == nSlotId) && strAppId.Equals(pService->GetAppId()) &&
                 strServiceId.Equals(pService->GetServiceId()))
@@ -141,20 +128,15 @@ Service* ServiceManagerPrivate::GetService(
     return IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void ServiceManagerPrivate::GetServices(
         IN IMS_SINT32 nSlotId, OUT IMSList<Service*>& objServicesOnSlot) const
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objServices.GetSize(); ++i)
     {
-        Service* pService = objServices.GetAt(i);
+        Service* pService = m_objServices.GetAt(i);
 
         if (pService->GetSlotId() == nSlotId)
         {
@@ -163,143 +145,73 @@ void ServiceManagerPrivate::GetServices(
     }
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_BOOL ServiceManagerPrivate::DispatchMessage(IN IMSMSG& objMSG)
+PRIVATE VIRTUAL IMS_BOOL ServiceManagerPrivate::DispatchMessage(IN ImsMessage& objMsg)
 {
-    return EngineActivity::DispatchMessage(objMSG);
+    return EngineActivity::DispatchMessage(objMsg);
 }
 
 PUBLIC
 ServiceManager::ServiceManager() :
-        pSvcMngrP(new ServiceManagerPrivate())
+        m_pServiceMngrPrivate(new ServiceManagerPrivate())
 {
 }
 
 PUBLIC VIRTUAL ServiceManager::~ServiceManager()
 {
-    if (pSvcMngrP != IMS_NULL)
+    if (m_pServiceMngrPrivate != IMS_NULL)
     {
-        delete pSvcMngrP;
+        delete m_pServiceMngrPrivate;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL ServiceManager::AttachService(IN Service* pService)
 {
-    return pSvcMngrP->AttachService(pService);
+    return m_pServiceMngrPrivate->AttachService(pService);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void ServiceManager::DetachService(IN Service* pService)
 {
-    pSvcMngrP->DetachService(pService);
+    m_pServiceMngrPrivate->DetachService(pService);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 Service* ServiceManager::GetService(
         IN IMS_SINT32 nSlotId, IN const AString& strAppId, IN const AString& strServiceId) const
 {
-    return pSvcMngrP->GetService(nSlotId, strAppId, strServiceId);
+    return m_pServiceMngrPrivate->GetService(nSlotId, strAppId, strServiceId);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 const IMSList<Service*>& ServiceManager::GetServices() const
 {
-    return pSvcMngrP->objServices;
+    return m_pServiceMngrPrivate->m_objServices;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMSList<Service*> ServiceManager::GetServices(IN IMS_SINT32 nSlotId) const
 {
     IMSList<Service*> objServices;
 
-    pSvcMngrP->GetServices(nSlotId, objServices);
+    m_pServiceMngrPrivate->GetServices(nSlotId, objServices);
 
     return objServices;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL ServiceManager* ServiceManager::GetInstance()
 {
-    static ServiceManager* pSvcMngr = IMS_NULL;
+    static ServiceManager* s_pServiceManager = IMS_NULL;
 
-    if (pSvcMngr == IMS_NULL)
+    if (s_pServiceManager == IMS_NULL)
     {
-        pSvcMngr = new ServiceManager();
-        pSvcMngr->StartUp();
+        s_pServiceManager = new ServiceManager();
     }
 
-    return pSvcMngr;
+    return s_pServiceManager;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void ServiceManager::ServiceClosed(IN Service* pService)
 {
     DetachService(pService);
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE
-IMS_BOOL ServiceManager::StartUp()
-{
-    // Register the URI scheme for the creation of Service (CoreService)
-
-    // Activate the packet data connection ...
-
-    // Waits ISIM ready
-    // Read the IMPI/HOME DOMAIN NAME/IMPU from ISIM ...
-
-    return IMS_TRUE;
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE
-void ServiceManager::CleanUp()
-{
-    // ProtocolPermission::GetInstance()->Deregister(strName);
 }

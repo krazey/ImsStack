@@ -1141,12 +1141,12 @@ PROTECTED VIRTUAL IMS_SINT32 SessionRefreshHelper::GetTimerInterval() const
             if (nRefreshMethod == SipConfigV::SESSION_REFRESH_INVITE)
             {
                 nRefreshMethodTxnTV = SipConfigProxy::GetTimerValueB(
-                        pService->GetSlotId(), pService->GetSIPProfile(), pSipConfigV);
+                        pService->GetSlotId(), pService->GetSipProfile(), pSipConfigV);
             }
             else if (nRefreshMethod == SipConfigV::SESSION_REFRESH_UPDATE)
             {
                 nRefreshMethodTxnTV = SipConfigProxy::GetTimerValueF(
-                        pService->GetSlotId(), pService->GetSIPProfile(), pSipConfigV);
+                        pService->GetSlotId(), pService->GetSipProfile(), pSipConfigV);
             }
         }
 
@@ -1154,7 +1154,7 @@ PROTECTED VIRTUAL IMS_SINT32 SessionRefreshHelper::GetTimerInterval() const
         {
             // (T1 * 64) seconds
             nRefreshMethodTxnTV = SipConfigProxy::GetTimerValueT1(pService->GetSlotId(),
-                                          pService->GetSIPProfile(), pSipConfigV) *
+                                          pService->GetSipProfile(), pSipConfigV) *
                     64;
         }
 
@@ -1249,7 +1249,7 @@ PROTECTED VIRTUAL void SessionRefreshHelper::RefreshTerminated()
 PROTECTED VIRTUAL IMS_BOOL SessionRefreshHelper::IsSessionTimerUpdateRequiredByReInvite() const
 {
     return SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-            pService->GetSlotId(), pService->GetSIPProfile());
+            pService->GetSlotId(), pService->GetSipProfile());
 }
 
 PRIVATE

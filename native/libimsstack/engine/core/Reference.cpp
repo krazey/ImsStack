@@ -1342,13 +1342,13 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_NotifyRequest(IN ISipServerConnecti
     }
 
     if (SipConfigProxy::IsRequestUriValidationRequiredInMidDialog(
-                GetSlotId(), GetService()->GetSIPProfile()))
+                GetSlotId(), GetService()->GetSipProfile()))
     {
         // Checks if Request-URI is matched or not
         const AString& strRequestURI = piSSC->GetRequestUri();
         SipAddress objRequestURI(strRequestURI);
 
-        if (!GetService()->ValidateRequestURI(objRequestURI, piSSC->GetDialog(), IMS_TRUE))
+        if (!GetService()->ValidateRequestUri(objRequestURI, piSSC->GetDialog(), IMS_TRUE))
         {
             IMS_TRACE_D("Request-URI (%s) in mid-dialog request is not matched",
                     SipDebug::GetUri1(strRequestURI).GetStr(), 0, 0);

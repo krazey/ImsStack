@@ -1,7 +1,24 @@
-#ifndef _INTERFACE_FEATURE_CAPS_H_
-#define _INTERFACE_FEATURE_CAPS_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_FEATURE_CAPS_H_
+#define INTERFACE_FEATURE_CAPS_H_
 
 #include "AString.h"
+
+#include "ISipMessage.h"
 
 /**
  * @brief This class provides an interface to manage/control the feature capabilities.
@@ -17,7 +34,7 @@ public:
      * @param strName the feature name
      * @param strValue the feature value
      */
-    virtual void AddFeature(IN CONST AString& strName, IN CONST AString& strValue) = 0;
+    virtual void AddFeature(IN const AString& strName, IN const AString& strValue) = 0;
 
     /**
      * @brief Adds an additional feature parameter for a Contact header
@@ -27,13 +44,13 @@ public:
      *
      * @param strName the feature name
      * @param strValue the feature value
-     * @param nSIPMethod an SIP method; refer to @ref SipMethod class\n
+     * @param nSipMethod an SIP method; refer to @ref SipMethod class\n
      *                   (Allowed for INVITE, SUBSCRIBE, REFER, NOTIFY, OPTIONS, PUBLISH)
      * @param nMessageType an SIP message type (0: request, 1: response, 2: any);
      *                     refer to @ref ISipMessage class
      */
-    virtual void AddFeature(IN CONST AString& strName, IN CONST AString& strValue,
-            IN IMS_SINT32 nSIPMethod, IN IMS_SINT32 nMessageType = 2 /* ANY */) = 0;
+    virtual void AddFeature(IN const AString& strName, IN const AString& strValue,
+            IN IMS_SINT32 nSipMethod, IN IMS_SINT32 nMessageType = ISipMessage::TYPE_ANY) = 0;
 
     /**
      * @brief Removes an added feature parameter for a Contact header.
@@ -43,7 +60,7 @@ public:
      * @param strName the feature name
      * @param strValue the feature value
      */
-    virtual void RemoveFeature(IN CONST AString& strName, IN CONST AString& strValue) = 0;
+    virtual void RemoveFeature(IN const AString& strName, IN const AString& strValue) = 0;
 
     /**
      * @brief Removes an added feature parameter for a Contact header
@@ -53,13 +70,13 @@ public:
      *
      * @param strName the feature name
      * @param strValue the feature value
-     * @param nSIPMethod an SIP method; refer to @ref SipMethod class\n
+     * @param nSipMethod an SIP method; refer to @ref SipMethod class\n
      *                   (Allowed for INVITE, SUBSCRIBE, REFER, NOTIFY, OPTIONS, PUBLISH)
      * @param nMessageType an SIP message type (0: request, 1: response, 2: any);
      *                     refer to @ref ISipMessage class
      */
-    virtual void RemoveFeature(IN CONST AString& strName, IN CONST AString& strValue,
-            IN IMS_SINT32 nSIPMethod, IN IMS_SINT32 nMessageType = 2 /* ANY */) = 0;
+    virtual void RemoveFeature(IN const AString& strName, IN const AString& strValue,
+            IN IMS_SINT32 nSipMethod, IN IMS_SINT32 nMessageType = ISipMessage::TYPE_ANY) = 0;
 
     /**
      * @brief Removes all the features for a Contact header.
@@ -78,7 +95,7 @@ public:
      * @param strValue the feature value
      */
     virtual void AddExcludedFeatureForRegCaps(
-            IN CONST AString& strName, IN CONST AString& strValue) = 0;
+            IN const AString& strName, IN const AString& strValue) = 0;
 
     /**
      * @brief Removes an added feature parameter to exclude a specific feature parameter
@@ -90,7 +107,7 @@ public:
      * @param strValue the feature value
      */
     virtual void RemoveExcludedFeatureForRegCaps(
-            IN CONST AString& strName, IN CONST AString& strValue) = 0;
+            IN const AString& strName, IN const AString& strValue) = 0;
 
     /**
      * @brief Removes all the excluded features for the RegCaps.
@@ -98,4 +115,4 @@ public:
     virtual void RemoveAllExcludedFeaturesForRegCaps() = 0;
 };
 
-#endif  // _INTERFACE_FEATURE_CAPS_H_
+#endif

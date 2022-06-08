@@ -50,18 +50,18 @@ private:
     virtual IServiceFilterCriteria* GetFilterCriteria() const;
     virtual const AStringArray& GetPathHeaders() const;
     virtual const IRegInfo* GetRegInfo() const;
-    virtual const IPAddress& GetIPAddress() const;
+    virtual const IPAddress& GetIpAddress() const;
     // MULTI_REG_SIP_PROFILE
-    virtual SipProfile* GetSIPProfile() const;
+    virtual SipProfile* GetSipProfile() const;
     virtual const AStringArray& GetUserIdentities() const;
     virtual const AString& GetUserIdentity(IN IMS_SINT32 nScheme) const;
     virtual const SipParameter* GetInstanceParameter() const;
 
-    virtual const SipAddress* GetPublicGRUU() const;
-    virtual const SipAddress* GetTemporaryGRUU() const;
-    virtual const IMSList<SipAddress*>& GetTemporaryGRUUs() const;
+    virtual const SipAddress* GetPublicGruu() const;
+    virtual const SipAddress* GetTemporaryGruu() const;
+    virtual const IMSList<SipAddress*>& GetTemporaryGruus() const;
 
-    virtual IMS_BOOL IsBehindNAT() const;
+    virtual IMS_BOOL IsBehindNat() const;
     virtual IMS_BOOL IsImsConnected() const;
     virtual IMS_BOOL IsWithinTrustDomain() const;
 
@@ -70,7 +70,7 @@ private:
     virtual IMS_BOOL RemoveFeatureTags(
             IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE);
     // MULTI_REG_SIP_PROFILE
-    virtual void SetSIPProfile(IN SipProfile* pProfile);
+    virtual void SetSipProfile(IN SipProfile* pProfile);
 
     // ICoreService interface
     virtual ICapabilities* CreateCapabilities(IN CONST AString& strFrom, IN CONST AString& strTo);

@@ -35,7 +35,7 @@ RetransmissionHelper::RetransmissionHelper(
     const ISipConfigV* piSipConfigV = pService_->GetISipConfigV();
 
     nDuration = SipConfigProxy::GetTimerValueT1(
-            pService_->GetSlotId(), pService_->GetSIPProfile(), piSipConfigV);
+            pService_->GetSlotId(), pService_->GetSipProfile(), piSipConfigV);
 
     nCumulativeDuration = nDuration;
     nMaxDuration = nDuration * 64;
@@ -44,7 +44,7 @@ RetransmissionHelper::RetransmissionHelper(
     {
         // Interval cap will be read from the timer T2...
         nIntervalCap = SipConfigProxy::GetTimerValueT2(
-                pService_->GetSlotId(), pService_->GetSIPProfile(), piSipConfigV);
+                pService_->GetSlotId(), pService_->GetSipProfile(), piSipConfigV);
     }
     else
     {

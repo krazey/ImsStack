@@ -1,101 +1,124 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090527  toastops@                 Created
-    </table>
-
-    Description
-     Service is the base class for IMS services, and follows
-    the Generic Connection Framework (GCF).
-*/
-
-#ifndef _SERVICE_H_
-#define _SERVICE_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SERVICE_H_
+#define SERVICE_H_
 
 #include "IPAddress.h"
+
+#include "IConfigUpdateListener.h"
+#include "private/AppConfig.h"
+#include "private/CoreServiceConfig.h"
+
 #include "Connection.h"
+// CONTACT_FEATURE_CAPS
+#include "FeatureCaps.h"
+#include "IRegBindingListener.h"
 #include "Sip.h"
 #include "SipAddress.h"
 #include "SipMethod.h"
 #include "SipProfile.h"
-#include "private/AppConfig.h"
-#include "private/CoreServiceConfig.h"
-#include "IConfigUpdateListener.h"
-#include "IRegBindingListener.h"
-// CONTACT_FEATURE_CAPS
-#include "FeatureCaps.h"
 #include "ServiceFilterCriteria.h"
 
-class SipConfigV;
-class ISipDialog;
-class ISipConnectionNotifier;
-class ISipMessage;
-class ISipClientConnection;
-class ISipServerConnection;
-class IServiceManagerListener;
+class CallerCapability;
+class Capabilities;
 class IRegBinding;
 class IRegInfo;
-class CallerCapability;
-class PreferenceHeader;
+class IServiceManagerListener;
+class ISipClientConnection;
+class ISipConnectionNotifier;
+class ISipDialog;
+class ISipMessage;
+class ISipServerConnection;
 class Method;
 class MethodManager;
-class Capabilities;
 class PageMessage;
+class PreferenceHeader;
 class Reference;
 class Session;
 class SessionEx;
+class SipConfigV;
 
+/**
+ * @brief Service is the base class for IMS services.
+ */
 class Service : public Connection, public IConfigUpdateListener, public IRegBindingListener
 {
 public:
-    Service(IN CONST AString& strScheme_, IN CONST AString& strAppId_,
-            IN CONST AString& strServiceId_, IN CONST SipAddress* pIMPU_ = IMS_NULL);
+    Service(IN const AString& strScheme, IN const AString& strAppId, IN const AString& strServiceId,
+            IN const SipAddress* pImpu = IMS_NULL);
     virtual ~Service();
 
-private:
-    Service(IN CONST Service& objRHS);
-    Service& operator=(IN CONST Service& objRHS);
+    Service(IN const Service&) = delete;
+    Service& operator=(IN const Service&) = delete;
 
 public:
-    // IService interface implementations
-    virtual const AString& GetAppId() const;
-    virtual const AString& GetScheme() const;
+    inline virtual const AString& GetAppId() const { return m_strAppId; }
+    inline virtual const AString& GetScheme() const { return m_strScheme; }
 
-    virtual IMS_BOOL CreateConfig(IN CONST AppConfig& objAppConfig);
-    virtual void HandleSessionInvitationReceived(IN Session* pSession);
-    virtual void HandlePageMessageReceived(IN PageMessage* pPageMessage);
-    virtual void HandleReferenceReceived(IN Reference* pReference);
-    virtual void HandleCapabilityQueryReceived(IN Capabilities* pCapabilities);
+    virtual IMS_BOOL CreateConfig(IN const AppConfig& objAppConfig);
+    inline virtual void HandleSessionInvitationReceived(IN Session* /*pSession*/)
+    {
+        // The subclass MUST implement this method to handle an incoming INVITE request
+    }
+    virtual void HandlePageMessageReceived(IN PageMessage* /*pPageMessage*/)
+    {
+        // The subclass MUST implement this method to handle an incoming MESSAGE request
+    }
+    virtual void HandleReferenceReceived(IN Reference* /*pReference*/)
+    {
+        // The subclass MUST implement this method to handle an incoming REFER request
+    }
+    virtual void HandleCapabilityQueryReceived(IN Capabilities* /*pCapabilities*/)
+    {
+        // The subclass MUST implement this method to handle an incoming OPTIONS request
+    }
 
-    ISipClientConnection* CreateConnection(IN CONST SipAddress* pFrom, IN CONST SipAddress* pTo,
-            IN CONST SipMethod& objMethod, IN IMS_BOOL bPrivacy = IMS_FALSE);
-    ISipClientConnection* CreateConnection(IN ISipDialog* piDialog, IN CONST SipMethod& objMethod,
+    ISipClientConnection* CreateConnection(IN const SipAddress* pFrom, IN const SipAddress* pTo,
+            IN const SipMethod& objMethod, IN IMS_BOOL bPrivacy = IMS_FALSE);
+    ISipClientConnection* CreateConnection(IN ISipDialog* piDialog, IN const SipMethod& objMethod,
             IN IMS_BOOL bPrivacy = IMS_FALSE);
-    ISipClientConnection* CreateCancelConnection(IN ISipClientConnection* piSCC);
-    IMS_BOOL CreateResponse(IN_OUT ISipServerConnection* piSSC, IN IMS_SINT32 nStatusCode,
-            IN CONST AString& strPhrase = AString::ConstNull(), IN IMS_BOOL bPrivacy = IMS_FALSE);
-    IMS_BOOL InitAck(IN ISipClientConnection* piSCC);
-    IMS_BOOL Equals(IN CONST Service* pService) const;
-    IMS_UINT32 EvaluateFilterCriteria(IN CONST ISipMessage* piSIPMsg) const;
-    const AString& GetServiceId() const;
-    AppConfig* GetAppConfig() const;
-    const CoreServiceConfig* GetServiceConfig() const;
-    const IPAddress& GetIPAddress() const;
-    const IMSList<PreferenceHeader*>& GetAcceptContactHeaders() const;
-    const AString& GetAssociatedURI(IN IMS_SINT32 nScheme) const;
-    const AStringArray& GetAssociatedURIs() const;
+    ISipClientConnection* CreateCancelConnection(IN ISipClientConnection* piScc);
+    IMS_BOOL CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode,
+            IN const AString& strPhrase = AString::ConstNull(), IN IMS_BOOL bPrivacy = IMS_FALSE);
+    IMS_BOOL InitAck(IN ISipClientConnection* piScc);
+    IMS_BOOL Equals(IN const Service* pService) const;
+    IMS_UINT32 EvaluateFilterCriteria(IN const ISipMessage* piSipMsg) const;
+    inline const AString& GetServiceId() const { return m_strServiceId; }
+    inline AppConfig* GetAppConfig() const { return m_pAppConfig; }
+    inline const CoreServiceConfig* GetServiceConfig() const
+    {
+        return m_pAppConfig->GetCoreServiceConfigEx(m_strServiceId);
+    }
+    const IPAddress& GetIpAddress() const;
+    inline const IMSList<PreferenceHeader*>& GetAcceptContactHeaders() const
+    {
+        return m_objAcceptContacts;
+    }
+    const AString& GetAssociatedUri(IN IMS_SINT32 nScheme) const;
+    const AStringArray& GetAssociatedUris() const;
     const SipAddress& GetAuthorizedUserId() const;
-    const CallerCapability* GetCallerCapability() const;
+    inline const CallerCapability* GetCallerCapability() const { return m_pCallerCapability; }
     const SipAddress& GetContactAddress() const;
     const SipAddress* GetContactAddressForOutgoingMessage() const;
     ISipHeader* GetContactHeader(IN IMS_BOOL bPrivacy = IMS_FALSE, IN IMS_BOOL bRequest = IMS_TRUE,
-            IN IMS_SINT32 nSIPMethod = (-1) /* SipMethod::INVALID */) const;
-    const SipAddress& GetDefaultUserId() const;
+            IN IMS_SINT32 nSipMethod = SipMethod::INVALID) const;
+    inline const SipAddress& GetDefaultUserId() const { return m_objImpu; }
     // CONTACT_FEATURE_CAPS
-    IFeatureCaps* GetFeatureCaps() const;
-    ServiceFilterCriteria* GetFilterCriteria() const;
+    inline IFeatureCaps* GetFeatureCaps() const { return m_pFeatureCaps; }
+    inline ServiceFilterCriteria* GetFilterCriteria() const { return m_pFilterCriteria; }
     const SipParameter* GetInstanceParameter() const;
     const AStringArray& GetPathHeaders() const;
     const IRegInfo* GetRegInfo() const;
@@ -105,82 +128,101 @@ public:
     {
         return DYNAMIC_CAST(const SipConfigV*, GetISipConfigV());
     }
-    // MULTI_REG_SIP_PROFILE
-    SipProfile* GetSIPProfile() const;
-    // MULTI_SUBS
+    SipProfile* GetSipProfile() const;
     const AString& GetSubscriberId() const;
 
-    const SipAddress* GetPublicGRUU() const;
-    const SipAddress* GetTemporaryGRUU() const;
-    const IMSList<SipAddress*>& GetTemporaryGRUUs() const;
+    const SipAddress* GetPublicGruu() const;
+    const SipAddress* GetTemporaryGruu() const;
+    const IMSList<SipAddress*>& GetTemporaryGruus() const;
 
-    IMS_BOOL IsBehindNAT() const;
-    IMS_BOOL IsEventPackageSupported(IN CONST AString& strEvent) const;
-    IMS_BOOL IsImsConnected() const;
+    IMS_BOOL IsBehindNat() const;
+    IMS_BOOL IsEventPackageSupported(IN const AString& strEvent) const;
+    inline IMS_BOOL IsImsConnected() const { return m_bImsConnected; }
     IMS_BOOL IsWithinTrustDomain() const;
 
-    IMS_BOOL AddFeatureTags(
-            IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE);
-    IMS_BOOL RemoveFeatureTags(
-            IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE);
-    IMS_BOOL UpdateFeatureTags(IN CONST IMSList<AString>& objFeatureTags,
-            IN IMS_BOOL bRegRequired = IMS_TRUE, IN IMS_SINT32 nOP = 1 /* 1: add, 2: remove */);
+    inline IMS_BOOL AddFeatureTags(
+            IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE)
+    {
+        return UpdateFeatureTags(objFeatureTags, bRegRequired, FEATURE_TAG_OP_ADD);
+    }
+    inline IMS_BOOL RemoveFeatureTags(
+            IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE)
+    {
+        return UpdateFeatureTags(objFeatureTags, bRegRequired, FEATURE_TAG_OP_REMOVE);
+    }
+    IMS_BOOL UpdateFeatureTags(IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired,
+            IN IMS_SINT32 nOperation);
 
     void NotifyError(IN IMS_SINT32 nErrorCode);
-    IMS_BOOL NotifyRequest(IN ISipServerConnection* piSSC);
-    // Sends SIP response
-    IMS_BOOL SendResponse(IN ISipServerConnection* piSSC, IN IMS_SINT32 nStatusCode,
-            IN CONST AString& strPhrase = AString::ConstNull());
-    void SetServiceManagerListener(IN IServiceManagerListener* piListener);
-    // MULTI_REG_SIP_PROFILE
-    void SetSIPProfile(IN SipProfile* pProfile);
+    inline IMS_BOOL NotifyRequest(IN ISipServerConnection* piSsc)
+    {
+        return ServerConnection_NotifyRequest(piSsc);
+    }
+    IMS_BOOL SendResponse(IN ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode,
+            IN const AString& strPhrase = AString::ConstNull());
+    inline void SetServiceManagerListener(IN IServiceManagerListener* piListener)
+    {
+        m_piServiceManagerListener = piListener;
+    }
+    inline void SetSipProfile(IN SipProfile* pProfile) { m_pSipProfile = pProfile; }
     void RegisterMethod(IN Method* pMethod);
     void DeregisterMethod(IN Method* pMethod);
 
-    IMS_BOOL ValidateMethod(IN CONST SipMethod& objMethod);
-    IMS_BOOL ValidateRequestURI(IN CONST SipAddress& objRequestURI,
+    IMS_BOOL ValidateMethod(IN const SipMethod& objMethod);
+    IMS_BOOL ValidateRequestUri(IN const SipAddress& objRequestUri,
             IN ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
-    IMS_BOOL ValidateRequestURIForIPAndPort(IN CONST SipAddress& objRequestURI,
+    IMS_BOOL ValidateRequestUriForIpAndPort(IN const SipAddress& objRequestURI,
             IN ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
 
     static IMS_BOOL ValidateFromAndTo(
-            IN CONST AString& strFrom, IN CONST AString& strTo, IN IMS_BOOL bToLenient);
-    static IMS_BOOL ValidateReferTo(IN CONST AString& strURI, IN CONST AString& strMethod);
+            IN const AString& strFrom, IN const AString& strTo, IN IMS_BOOL bToLenient);
+    static IMS_BOOL ValidateReferTo(IN const AString& strUri, IN const AString& strMethod);
 
 protected:
     // Connection class - overrides
-    virtual void Close();
+    void Close() override;
     // Activity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
     // IConfigUpdateListener class
-    virtual void ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCPI,
+    void ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCpi,
             IN const AString& strConfName = AString::ConstNull(),
-            IN const AString& strExtraParam = AString::ConstNull());
+            IN const AString& strExtraParam = AString::ConstNull()) override;
 
     // IRegBindingListener class
-    virtual void RegBinding_OnActive();
-    virtual void RegBinding_OnDestroy();
-    virtual void RegBinding_OnInit(IN CONST SipAddress* pAOR);
-    virtual void RegBinding_OnQueryCapability(OUT CallerCapability*& pCapability);
-    virtual void RegBinding_OnQueryRegistrationHeaders(OUT AStringArray& objHeaders);
-    virtual void RegBinding_OnTerminated();
+    void RegBinding_OnActive() override;
+    void RegBinding_OnDestroy() override;
+    void RegBinding_OnInit(IN const SipAddress* pAor) override;
+    void RegBinding_OnQueryCapability(OUT CallerCapability*& pCapability) override;
+    void RegBinding_OnQueryRegistrationHeaders(OUT AStringArray& objHeaders) override;
+    void RegBinding_OnTerminated() override;
 
-    virtual void Abort();
+    inline virtual void Abort() {}
     virtual void Exception_NotifyError(IN IMS_SINT32 nErrorCode) = 0;
-    virtual IMS_BOOL ServerConnection_NotifyRequest(IN ISipServerConnection* piSSC);
+    inline virtual IMS_BOOL ServerConnection_NotifyRequest(IN ISipServerConnection* /*piSsc*/)
+    {
+        // The subclass MUST implement this method to handle new incoming SIP requests
+        return IMS_FALSE;
+    }
 
-    void FormContactHeader(IN CONST SipMethod& objMethod, IN IMS_BOOL bPrivacy,
-            IN IMS_BOOL bRequest, OUT AString& strContact, OUT IMS_BOOL& bIsContactGRUU) const;
-    IRegBinding* GetRegBinding() const;
-    IMS_BOOL IsUserIdProvisioned() const;
-    void SetGRUUOptionTagInMidDialog(IN ISipDialog* piDialog, IN_OUT ISipMessage*& piSIPMsg);
+    void FormContactHeader(IN const SipMethod& objMethod, IN IMS_BOOL bPrivacy,
+            IN IMS_BOOL bRequest, OUT AString& strContact, OUT IMS_BOOL& bIsContactGruu) const;
+    inline IRegBinding* GetRegBinding() const { return m_piRegBinding; }
+    inline IMS_BOOL IsUserIdProvisioned() const { return m_bProvisionedUserId; }
+    void SetGruuOptionTagInMidDialog(IN ISipDialog* piDialog, IN_OUT ISipMessage*& piSipMsg);
 
 private:
     void CreateDefaultPublicUserId();
-    IMS_UINT32 GetServiceCode() const;
-    IMS_BOOL IsRegBindingOnActive() const;
-    IMS_BOOL SetPPreferredIdentityHeader(IN IMS_SINT32 nPreferredId, IN_OUT ISipMessage*& piSIPMsg);
+    inline IMS_UINT32 GetServiceCode() const
+    {
+        AString strServiceCode = m_strAppId + m_strServiceId;
+        return strServiceCode.GetHashCode();
+    }
+    inline IMS_BOOL IsRegBindingOnActive() const
+    {
+        return (IsImsConnected() && (m_piRegBinding != IMS_NULL));
+    }
+    IMS_BOOL SetPPreferredIdentityHeader(IN IMS_SINT32 nPreferredId, IN_OUT ISipMessage*& piSipMsg);
     void SetRegBinding(IN IRegBinding* piRegBinding);
     void UpdateAuthorizedUserIds();
     void UpdateCallerCapabilityNPreference();
@@ -192,6 +234,12 @@ protected:
         AMSG_SERVICE_MAX = (AMSG_USER + 1)
     };
 
+    enum
+    {
+        FEATURE_TAG_OP_ADD = 1,
+        FEATURE_TAG_OP_REMOVE = 2
+    };
+
 private:
     friend class ServiceResolver;
 
@@ -200,203 +248,202 @@ private:
     {
     public:
         inline CachedRegBinding() :
-                nPortUC(Sip::PORT_UNSPECIFIED),
-                nPortUS(Sip::PORT_UNSPECIFIED),
-                nPortFlowControl(Sip::PORT_UNSPECIFIED),
-                nTransportExt(Sip::TRANSPORT_EXT_ANY),
-                objIPA(IPAddress::NONE),
-                objContactAddress(SipAddress::ConstNull()),
-                pContactAddressForOutgoingMessage(IMS_NULL),
-                objSecurityClients(AStringArray::ConstNull()),
-                objSecurityVerifys(AStringArray::ConstNull()),
-                pPubGRUU(IMS_NULL),
-                pTempGRUU(IMS_NULL),
-                objAssociatedURIs(AStringArray::ConstNull())
+                m_nPortUc(Sip::PORT_UNSPECIFIED),
+                m_nPortUs(Sip::PORT_UNSPECIFIED),
+                m_nPortFlowControl(Sip::PORT_UNSPECIFIED),
+                m_nTransportExt(Sip::TRANSPORT_EXT_ANY),
+                m_objIp(IPAddress::NONE),
+                m_objContactAddress(SipAddress::ConstNull()),
+                m_pContactAddressForOutgoingMessage(IMS_NULL),
+                m_objSecurityClients(AStringArray::ConstNull()),
+                m_objSecurityVerifys(AStringArray::ConstNull()),
+                m_pPubGruu(IMS_NULL),
+                m_pTempGruu(IMS_NULL),
+                m_objAssociatedUris(AStringArray::ConstNull())
         {
         }
         inline ~CachedRegBinding()
         {
-            if (pContactAddressForOutgoingMessage != IMS_NULL)
+            if (m_pContactAddressForOutgoingMessage != IMS_NULL)
             {
-                delete pContactAddressForOutgoingMessage;
+                delete m_pContactAddressForOutgoingMessage;
             }
 
-            if (pPubGRUU != IMS_NULL)
+            if (m_pPubGruu != IMS_NULL)
             {
-                delete pPubGRUU;
+                delete m_pPubGruu;
             }
 
-            if (pTempGRUU != IMS_NULL)
+            if (m_pTempGruu != IMS_NULL)
             {
-                delete pTempGRUU;
+                delete m_pTempGruu;
             }
         }
 
-    private:
-        CachedRegBinding(IN CONST CachedRegBinding& objRHS);
-        const CachedRegBinding& operator=(IN CONST CachedRegBinding& objRHS);
+        CachedRegBinding(IN const CachedRegBinding&) = delete;
+        const CachedRegBinding& operator=(IN const CachedRegBinding&) = delete;
 
     public:
-        inline IMS_SINT32 GetPortUC() const { return nPortUC; }
-        inline IMS_SINT32 GetPortUS() const { return nPortUS; }
+        inline IMS_SINT32 GetPortUc() const { return m_nPortUc; }
+        inline IMS_SINT32 GetPortUs() const { return m_nPortUs; }
         // RFC5626_FLOW_CONTROL
-        inline IMS_SINT32 GetPortFlowControl() const { return nPortFlowControl; }
+        inline IMS_SINT32 GetPortFlowControl() const { return m_nPortFlowControl; }
         // MULTI_REG_TRANSPORT
-        inline IMS_SINT32 GetTransportExt() const { return nTransportExt; }
-        inline const IPAddress& GetIPAddress() const { return objIPA; }
-        inline const SipAddress& GetContactAddress() const { return objContactAddress; }
+        inline IMS_SINT32 GetTransportExt() const { return m_nTransportExt; }
+        inline const IPAddress& GetIpAddress() const { return m_objIp; }
+        inline const SipAddress& GetContactAddress() const { return m_objContactAddress; }
         inline const SipAddress* GetContactAddressForOutgoingMessage() const
         {
-            return pContactAddressForOutgoingMessage;
+            return m_pContactAddressForOutgoingMessage;
         }
 
-        inline const AStringArray& GetSecurityClients() const { return objSecurityClients; }
-        inline const AStringArray& GetSecurityVerifys() const { return objSecurityVerifys; }
+        inline const AStringArray& GetSecurityClients() const { return m_objSecurityClients; }
+        inline const AStringArray& GetSecurityVerifys() const { return m_objSecurityVerifys; }
 
-        inline const SipAddress* GetPublicGRUU() const { return pPubGRUU; }
-        inline const SipAddress* GetTemporaryGRUU() const { return pTempGRUU; }
+        inline const SipAddress* GetPublicGruu() const { return m_pPubGruu; }
+        inline const SipAddress* GetTemporaryGruu() const { return m_pTempGruu; }
 
-        inline const AStringArray& GetAssociatedURIs() const { return objAssociatedURIs; }
+        inline const AStringArray& GetAssociatedUris() const { return m_objAssociatedUris; }
 
-        inline void SetPortUC(IN IMS_SINT32 nPortUC) { this->nPortUC = nPortUC; }
-        inline void SetPortUS(IN IMS_SINT32 nPortUS) { this->nPortUS = nPortUS; }
+        inline void SetPortUc(IN IMS_SINT32 nPortUc) { m_nPortUc = nPortUc; }
+        inline void SetPortUs(IN IMS_SINT32 nPortUs) { m_nPortUs = nPortUs; }
         // RFC5626_FLOW_CONTROL
         inline void SetPortFlowControl(IN IMS_SINT32 nPortFlowControl)
         {
-            this->nPortFlowControl = nPortFlowControl;
+            m_nPortFlowControl = nPortFlowControl;
         }
         // MULTI_REG_TRANSPORT
         inline void SetTransportExt(IN IMS_SINT32 nTransportExt)
         {
-            this->nTransportExt = nTransportExt;
+            m_nTransportExt = nTransportExt;
         }
-        inline void SetIPAddress(IN CONST IPAddress& objIPA) { this->objIPA = objIPA; }
-        inline void SetContactAddress(IN CONST SipAddress& objContactAddress)
+        inline void SetIpAddress(IN const IPAddress& objIp) { m_objIp = objIp; }
+        inline void SetContactAddress(IN const SipAddress& objContactAddress)
         {
-            this->objContactAddress = objContactAddress;
+            m_objContactAddress = objContactAddress;
         }
-        inline void SetContactAddressForOutgoingMessage(IN CONST SipAddress* pContactAddress)
+        inline void SetContactAddressForOutgoingMessage(IN const SipAddress* pContactAddress)
         {
-            if (pContactAddressForOutgoingMessage != IMS_NULL)
+            if (m_pContactAddressForOutgoingMessage != IMS_NULL)
             {
-                delete pContactAddressForOutgoingMessage;
-                pContactAddressForOutgoingMessage = IMS_NULL;
+                delete m_pContactAddressForOutgoingMessage;
+                m_pContactAddressForOutgoingMessage = IMS_NULL;
             }
 
             if (pContactAddress != IMS_NULL)
             {
-                pContactAddressForOutgoingMessage = new SipAddress(*pContactAddress);
+                m_pContactAddressForOutgoingMessage = new SipAddress(*pContactAddress);
             }
         }
-        inline void SetSecurityClients(IN CONST AStringArray& objSecurityClients)
+        inline void SetSecurityClients(IN const AStringArray& objSecurityClients)
         {
-            this->objSecurityClients = objSecurityClients;
+            m_objSecurityClients = objSecurityClients;
         }
-        inline void SetSecurityVerifys(IN CONST AStringArray& objSecurityVerifys)
+        inline void SetSecurityVerifys(IN const AStringArray& objSecurityVerifys)
         {
-            this->objSecurityVerifys = objSecurityVerifys;
+            m_objSecurityVerifys = objSecurityVerifys;
         }
 
-        inline void SetPublicGRUU(IN CONST SipAddress* pPubGRUU)
+        inline void SetPublicGruu(IN const SipAddress* pPubGruu)
         {
-            if (this->pPubGRUU != IMS_NULL)
+            if (m_pPubGruu != IMS_NULL)
             {
-                delete this->pPubGRUU;
-                this->pPubGRUU = IMS_NULL;
+                delete m_pPubGruu;
+                m_pPubGruu = IMS_NULL;
             }
 
-            if (pPubGRUU != IMS_NULL)
+            if (pPubGruu != IMS_NULL)
             {
-                this->pPubGRUU = new SipAddress(*pPubGRUU);
+                m_pPubGruu = new SipAddress(*pPubGruu);
             }
         }
 
-        inline void SetTemporaryGRUU(IN CONST SipAddress* pTempGRUU)
+        inline void SetTemporaryGruu(IN const SipAddress* pTempGruu)
         {
-            if (this->pTempGRUU != IMS_NULL)
+            if (m_pTempGruu != IMS_NULL)
             {
-                delete this->pTempGRUU;
-                this->pTempGRUU = IMS_NULL;
+                delete m_pTempGruu;
+                m_pTempGruu = IMS_NULL;
             }
 
-            if (pTempGRUU != IMS_NULL)
+            if (pTempGruu != IMS_NULL)
             {
-                this->pTempGRUU = new SipAddress(*pTempGRUU);
+                m_pTempGruu = new SipAddress(*pTempGruu);
             }
         }
 
-        inline void SetAssociatedURIs(IN CONST AStringArray& objAssociatedURIs)
+        inline void SetAssociatedUris(IN const AStringArray& objAssociatedUris)
         {
-            this->objAssociatedURIs = objAssociatedURIs;
+            m_objAssociatedUris = objAssociatedUris;
         }
 
     public:
         // port-uc / port-us
-        IMS_SINT32 nPortUC;
-        IMS_SINT32 nPortUS;
+        IMS_SINT32 m_nPortUc;
+        IMS_SINT32 m_nPortUs;
         // RFC5626_FLOW_CONTROL
-        IMS_SINT32 nPortFlowControl;
+        IMS_SINT32 m_nPortFlowControl;
         // MULTI_REG_TRANSPORT
-        IMS_SINT32 nTransportExt;
+        IMS_SINT32 m_nTransportExt;
         // IP address
-        IPAddress objIPA;
+        IPAddress m_objIp;
         // Contact address
-        SipAddress objContactAddress;
-        SipAddress* pContactAddressForOutgoingMessage;
+        SipAddress m_objContactAddress;
+        SipAddress* m_pContactAddressForOutgoingMessage;
         // Security-Client/Security-Verify headers
-        AStringArray objSecurityClients;
-        AStringArray objSecurityVerifys;
+        AStringArray m_objSecurityClients;
+        AStringArray m_objSecurityVerifys;
 
         // Public / Temporary GRUU
-        SipAddress* pPubGRUU;
-        SipAddress* pTempGRUU;
+        SipAddress* m_pPubGruu;
+        SipAddress* m_pTempGruu;
 
         // Authorized URIs
-        AStringArray objAssociatedURIs;
+        AStringArray m_objAssociatedUris;
     };
 
     // In case of JSR 281, it MUST be a "imscore"
-    AString strScheme;
+    AString m_strScheme;
     // Unique id for identifying the application which this service belongs to
-    AString strAppId;
+    AString m_strAppId;
     // Unique id for identifying this service
-    AString strServiceId;
+    AString m_strServiceId;
     // IMS registry; Storage for application & service specific configurations
-    AppConfig* pAppConfig;
+    AppConfig* m_pAppConfig;
     // Reference of ServiceManager listener
-    IServiceManagerListener* piServiceManagerListener;
+    IServiceManagerListener* m_piServiceManagerListener;
 
     // Registration state
-    IMS_BOOL bImsConnected;
-    IRegBinding* piRegBinding;
+    IMS_BOOL m_bImsConnected;
+    IRegBinding* m_piRegBinding;
     // For cached reg-bindings to handle the existing dialog after IMS de-registration
-    CachedRegBinding objCachedRegBinding;
+    CachedRegBinding m_objCachedRegBinding;
     // MULTI_REG_SIP_PROFILE
-    RCPtr<SipProfile> pSIPProfile;
+    RCPtr<SipProfile> m_pSipProfile;
 
     // AOR; Public User Identity
     // P-Preferred-Identity, From, AOR for registration
-    IMS_BOOL bFlag_ProvisionedUserId;
-    SipAddress objIMPU;
-    IMSList<ISipHeader*> objAuthorizedUserIds;
+    IMS_BOOL m_bProvisionedUserId;
+    SipAddress m_objImpu;
+    IMSList<ISipHeader*> m_objAuthorizedUserIds;
 
     // Default feature tags
-    IMS_UINT32 nFeatureTags;
+    IMS_UINT32 m_nFeatureTags;
     // Caller preference; This field is included in Accept-Contact/Reject-Contact header.
-    IMSList<PreferenceHeader*> objAcceptContacts;
+    IMSList<PreferenceHeader*> m_objAcceptContacts;
     // Service capability; It is used to indicate the caller capability in Contact header
-    CallerCapability* pCallerCapability;
+    CallerCapability* m_pCallerCapability;
     // Flag to track the caller capability changes
-    IMS_BOOL bFlag_CallerCapabilityChanged;
+    IMS_BOOL m_bCallerCapabilityChanged;
 
     // Storage for Method class which maintains for some duration
-    MethodManager* pMethodMngr;
+    MethodManager* m_pMethodMngr;
 
     // Service specific initial filter criteria
-    ServiceFilterCriteria* pFilterCriteria;
+    ServiceFilterCriteria* m_pFilterCriteria;
 
     // CONTACT_FEATURE_CAPS
-    FeatureCaps* pFeatureCaps;
+    FeatureCaps* m_pFeatureCaps;
 };
 
-#endif  // _SERVICE_H_
+#endif

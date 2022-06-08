@@ -189,11 +189,11 @@ PRIVATE VIRTUAL const IRegInfo* CoreServiceImpl::GetRegInfo() const
 Remarks
 
 */
-PRIVATE VIRTUAL const IPAddress& CoreServiceImpl::GetIPAddress() const
+PRIVATE VIRTUAL const IPAddress& CoreServiceImpl::GetIpAddress() const
 {
     //---------------------------------------------------------------------------------------------
 
-    return pService->GetIPAddress();
+    return pService->GetIpAddress();
 }
 
 /*
@@ -201,11 +201,11 @@ PRIVATE VIRTUAL const IPAddress& CoreServiceImpl::GetIPAddress() const
 Remarks
  MULTI_REG_SIP_PROFILE
 */
-PRIVATE VIRTUAL SipProfile* CoreServiceImpl::GetSIPProfile() const
+PRIVATE VIRTUAL SipProfile* CoreServiceImpl::GetSipProfile() const
 {
     //---------------------------------------------------------------------------------------------
 
-    return pService->GetSIPProfile();
+    return pService->GetSipProfile();
 }
 
 /*
@@ -217,7 +217,7 @@ PRIVATE VIRTUAL const AStringArray& CoreServiceImpl::GetUserIdentities() const
 {
     //---------------------------------------------------------------------------------------------
 
-    return pService->GetAssociatedURIs();
+    return pService->GetAssociatedUris();
 }
 
 /*
@@ -229,7 +229,7 @@ PRIVATE VIRTUAL const AString& CoreServiceImpl::GetUserIdentity(IN IMS_SINT32 nS
 {
     //---------------------------------------------------------------------------------------------
 
-    return pService->GetAssociatedURI(nScheme);
+    return pService->GetAssociatedUri(nScheme);
 }
 
 /*
@@ -249,11 +249,11 @@ PRIVATE VIRTUAL const SipParameter* CoreServiceImpl::GetInstanceParameter() cons
 Remarks
 
 */
-PRIVATE VIRTUAL const SipAddress* CoreServiceImpl::GetPublicGRUU() const
+PRIVATE VIRTUAL const SipAddress* CoreServiceImpl::GetPublicGruu() const
 {
     //---------------------------------------------------------------------------------------------
 
-    return pService->GetPublicGRUU();
+    return pService->GetPublicGruu();
 }
 
 /*
@@ -261,11 +261,11 @@ PRIVATE VIRTUAL const SipAddress* CoreServiceImpl::GetPublicGRUU() const
 Remarks
 
 */
-PRIVATE VIRTUAL const SipAddress* CoreServiceImpl::GetTemporaryGRUU() const
+PRIVATE VIRTUAL const SipAddress* CoreServiceImpl::GetTemporaryGruu() const
 {
     //---------------------------------------------------------------------------------------------
 
-    return pService->GetTemporaryGRUU();
+    return pService->GetTemporaryGruu();
 }
 
 /*
@@ -273,11 +273,11 @@ PRIVATE VIRTUAL const SipAddress* CoreServiceImpl::GetTemporaryGRUU() const
 Remarks
 
 */
-PRIVATE VIRTUAL const IMSList<SipAddress*>& CoreServiceImpl::GetTemporaryGRUUs() const
+PRIVATE VIRTUAL const IMSList<SipAddress*>& CoreServiceImpl::GetTemporaryGruus() const
 {
     //---------------------------------------------------------------------------------------------
 
-    return pService->GetTemporaryGRUUs();
+    return pService->GetTemporaryGruus();
 }
 
 /*
@@ -285,11 +285,11 @@ PRIVATE VIRTUAL const IMSList<SipAddress*>& CoreServiceImpl::GetTemporaryGRUUs()
 Remarks
 
 */
-PRIVATE VIRTUAL IMS_BOOL CoreServiceImpl::IsBehindNAT() const
+PRIVATE VIRTUAL IMS_BOOL CoreServiceImpl::IsBehindNat() const
 {
     //---------------------------------------------------------------------------------------------
 
-    return pService->IsBehindNAT();
+    return pService->IsBehindNat();
 }
 
 /*
@@ -347,11 +347,11 @@ PRIVATE VIRTUAL IMS_BOOL CoreServiceImpl::RemoveFeatureTags(
 Remarks
  MULTI_REG_SIP_PROFILE
 */
-PRIVATE VIRTUAL void CoreServiceImpl::SetSIPProfile(IN SipProfile* pProfile)
+PRIVATE VIRTUAL void CoreServiceImpl::SetSipProfile(IN SipProfile* pProfile)
 {
     //---------------------------------------------------------------------------------------------
 
-    pService->SetSIPProfile(pProfile);
+    pService->SetSipProfile(pProfile);
 }
 
 /*

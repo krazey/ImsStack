@@ -53,7 +53,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
     }
     //
     // Step 1. Setting IP from IService
-    pVideoProfile->objIpAddr = pEnvironment->pIService->GetIPAddress();
+    pVideoProfile->objIpAddr = pEnvironment->pIService->GetIpAddress();
 
     //
     // Step 2. Setting RTP/RTCP port from resource manager
@@ -538,7 +538,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::UpdateVideoProfile(
     }
     IMS_TRACE_D("UpdateVideoProfile() Entered.", 0, 0, 0);
 
-    pVideoProfile->objIpAddr = pEnvironment->pIService->GetIPAddress();
+    pVideoProfile->objIpAddr = pEnvironment->pIService->GetIpAddress();
 
     return IMS_TRUE;
 }

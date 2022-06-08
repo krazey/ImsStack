@@ -820,8 +820,8 @@ void GeolocationPidfCreator::SetTupleId(IN const AString& strId)
 PUBLIC GLOBAL
 AString GeolocationPidfCreator::CreateEntityUri(IN IMS_SINT32 nSlotId)
 {
-    const ISubscriberConfig *piSubsConfig
-            = Configuration::GetInstance()->GetSubscriberConfig(AString::ConstNull(), nSlotId);
+    const ISubscriberConfig* piSubsConfig =
+            Configuration::GetInstance()->GetSubscriberConfig(nSlotId);
 
     if (piSubsConfig == IMS_NULL)
     {

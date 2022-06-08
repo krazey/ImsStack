@@ -119,7 +119,7 @@ PRIVATE GLOBAL void MtcCapabilityQueryHandler::SetSessionLevelDescription(
 
     // Create a session-level mandatory descriptions
     if (!objSessionDesc.CreateMandatoryLines(
-                piService->GetAuthorizedUserId().GetUri(), piService->GetIPAddress()))
+                piService->GetAuthorizedUserId().GetUri(), piService->GetIpAddress()))
     {
         IMS_TRACE_E(0, "Creating a session descriptor failed", 0, 0, 0);
         return;

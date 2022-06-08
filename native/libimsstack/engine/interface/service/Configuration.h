@@ -1,12 +1,25 @@
-#ifndef _CONFIGURATION_H_
-#define _CONFIGURATION_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef CONFIGURATION_H_
+#define CONFIGURATION_H_
 
 #include "IAppConfig.h"
-#include "ISubscriberConfig.h"
 #include "IMediaConfig.h"
 #include "ISipConfig.h"
-
-class IConfigBuffer;
+#include "ISubscriberConfig.h"
 
 /**
  * @brief This class provides the configuration interface for each IMS services.
@@ -14,11 +27,13 @@ class IConfigBuffer;
 class Configuration
 {
 private:
-    Configuration();
-    Configuration(IN const Configuration& objRHS);
+    inline Configuration() {}
 
 public:
-    ~Configuration();
+    inline ~Configuration() {}
+
+    Configuration(IN const Configuration&) = delete;
+    Configuration& operator=(IN const Configuration&) = delete;
 
 public:
     /**
@@ -29,7 +44,7 @@ public:
      * @param nSlotId slot id to be retrieved
      * @return A string array containing all application identifiers for the local point
      */
-    AStringArray GetLocalAppIds(IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    AStringArray GetLocalAppIds(IN IMS_SINT32 nSlotId) const;
 
     /**
      * @brief Returns the registry for an IMS application with the specified application
@@ -41,8 +56,7 @@ public:
      * @remark It replaces the below method:\n
      *           ImsRegistry* GetRegistry(IN const AString &strAppId) const;
      */
-    const IAppConfig* GetAppConfig(
-            IN const AString& strAppId, IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    const IAppConfig* GetAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId) const;
 
     /**
      * @brief Returns IMS_TRUE if there is a registry for the IMS application
@@ -54,7 +68,7 @@ public:
      * @remark It replaces the below method:\n
      *           IMS_BOOL HasRegistry(IN const AString &strAppId) const;
      */
-    IMS_BOOL HasAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    IMS_BOOL HasAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId) const;
 
     /**
      * @brief Removes the registry for the IMS application and deletes the binding to the owning
@@ -69,7 +83,7 @@ public:
      *         It replaces the below method:\n
      *             void RemoveRegistry(IN const AString &strAppId);
      */
-    void RemoveAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    void RemoveAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId);
 
     /**
      * @brief Sets the registry for an IMS application and binds it to a parent UI(JAVA)
@@ -129,7 +143,7 @@ public:
      *               IN const ImsRegistry &objRegistry);
      */
     IMS_RESULT SetAppConfig(IN const AString& strAppId, IN const AString& strClassName,
-            IN const ImsRegistry& objRegistry, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+            IN const ImsRegistry& objRegistry, IN IMS_SINT32 nSlotId);
 
     /**
      * @brief Returns a Configuration that enables dynamic installation of IMS applications.
@@ -144,7 +158,7 @@ public:
      * @return Pointer to IMediaConfig or null
      * @note IMS EXTENSION METHOD
      */
-    const IMediaConfig* GetMediaConfig(IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    const IMediaConfig* GetMediaConfig(IN IMS_SINT32 nSlotId) const;
 
     /**
      * @brief Returns a configuration information of a SIP signalling.
@@ -153,7 +167,7 @@ public:
      * @return Pointer to ISipConfig or null
      * @note IMS EXTENSION METHOD
      */
-    const ISipConfig* GetSipConfig(IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    const ISipConfig* GetSipConfig(IN IMS_SINT32 nSlotId) const;
 
     /**
      * @brief Returns a configuration information of an IMS subscriber which has a public user
@@ -171,29 +185,13 @@ public:
             IN IMS_SINT32 nSlotId, IN const AString& strId = AString::ConstNull()) const;
 
     /**
-     * @brief Returns a configuration information of an IMS subscriber which has a public user
-     *        identities, home domain name, and so on.
-     *
-     * @param strId an identifier to find out a subscriber's configuration\n
-     *              Pre-defined identifiers:\n
-     *              - "default" : default subscriber info.
-     *              - "fake" : fake subscriber info. (for fake registration)
-     * @param nSlotId slot id to be retrieved
-     * @return Pointer to ISubscriberConfig or null
-     * @note IMS EXTENSION METHOD
-     * @deprecated for backward compatibility; use #GetSubscriberConfig(IMS_SINT32, const AString).
-     */
-    const ISubscriberConfig* GetSubscriberConfig(IN const AString& strId = AString::ConstNull(),
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
-
-    /**
      * @brief Returns the trace modules. Refer to ITraceTag.h.
      *
      * @param nSlotId slot id to be retrieved
      * @return the trace modules as bitmask
      * @note IMS EXTENSION METHOD
      */
-    IMS_UINT32 GetTraceModule(IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    IMS_UINT32 GetTraceModule(IN IMS_SINT32 nSlotId) const;
 
     /**
      * @brief Returns the trace option. Refer to ITraceOption.h.
@@ -202,7 +200,7 @@ public:
      * @return the trace options as bitmask
      * @note IMS EXTENSION METHOD
      */
-    IMS_UINT32 GetTraceOption(IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    IMS_UINT32 GetTraceOption(IN IMS_SINT32 nSlotId) const;
 
     /**
      * @brief Checks if the server info. MUST be hidden in the release mode or not.
@@ -212,7 +210,7 @@ public:
      *         Otherwise, returns IMS_FALSE.
      * @note IMS EXTENSION METHOD
      */
-    IMS_BOOL IsServerInfoHiddenInLog(IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    IMS_BOOL IsServerInfoHiddenInLog(IN IMS_SINT32 nSlotId) const;
 
     /**
      * @brief Initializes the configurations which needs to be initialized for each slot.
@@ -236,4 +234,4 @@ public:
     void RefreshConfigs(IN IMS_SINT32 nSlotId);
 };
 
-#endif  // _CONFIGURATION_H_
+#endif

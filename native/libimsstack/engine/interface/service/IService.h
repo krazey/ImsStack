@@ -1,15 +1,32 @@
-#ifndef _INTERFACE_SERVICE_H_
-#define _INTERFACE_SERVICE_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SERVICE_H_
+#define INTERFACE_SERVICE_H_
 
-#include "IPAddress.h"
 #include "AStringArray.h"
+#include "IPAddress.h"
+
 #include "IConnection.h"
 #include "SipAddress.h"
+#include "SipMethod.h"
 
-class SipProfile;
-class IRegInfo;
 class IFeatureCaps;
+class IRegInfo;
 class IServiceFilterCriteria;
+class SipProfile;
 
 /**
  * @brief This class provides a base service interface for IMS services,
@@ -71,14 +88,14 @@ public:
      *
      * @param bPrivacy flag to indicate if the privacy is required or not
      * @param bRequest flag to indicate if the contact header is for request or response
-     * @param nSIPMethod SIP method to be set to obtain the method-specific Contact header\n
+     * @param nSipMethod SIP method to be set to obtain the method-specific Contact header\n
      *                   - INVITE, SUBSCRIBE, REFER, NOTIFY, OPTIONS, PUBLISH
      * @return Contact header for this service.
      * @note IMS EXTENSION METHOD
      */
     virtual ISipHeader* GetContactHeader(IN IMS_BOOL bPrivacy = IMS_FALSE,
             IN IMS_BOOL bRequest = IMS_TRUE,
-            IN IMS_SINT32 nSIPMethod = (-1) /* SipMethod::INVALID */) const = 0;
+            IN IMS_SINT32 nSipMethod = SipMethod::INVALID) const = 0;
 
     /**
      * @brief Returns the instance of feature capability (caller capability) for this service.
@@ -118,7 +135,7 @@ public:
      * @return IP address for this service.
      * @note IMS EXTENSION METHOD
      */
-    virtual const IPAddress& GetIPAddress() const = 0;
+    virtual const IPAddress& GetIpAddress() const = 0;
 
     /**
      * @brief Returns the SIP profile of this service.
@@ -129,7 +146,7 @@ public:
      * @return Pointer to SIPProfiile.
      * @note IMS EXTENSION METHOD, MULTI_REG_SIP_PROFILE
      */
-    virtual SipProfile* GetSIPProfile() const = 0;
+    virtual SipProfile* GetSipProfile() const = 0;
 
     /**
      * @brief Returns network provisioned user identities. The first item is the network-chosen
@@ -171,7 +188,7 @@ public:
      * @return Pointer to public GRUU.
      * @note IMS EXTENSION METHOD
      */
-    virtual const SipAddress* GetPublicGRUU() const = 0;
+    virtual const SipAddress* GetPublicGruu() const = 0;
 
     /**
      * @brief Returns the valid (the latest) temporary GRUU.
@@ -179,7 +196,7 @@ public:
      * @return Pointer to temporary GRUU.
      * @note IMS EXTENSION METHOD
      */
-    virtual const SipAddress* GetTemporaryGRUU() const = 0;
+    virtual const SipAddress* GetTemporaryGruu() const = 0;
 
     /**
      * @brief Returns the valid temporary GRUUs.
@@ -187,7 +204,7 @@ public:
      * @return List of temporary GRUU.
      * @note IMS EXTENSION METHOD
      */
-    virtual const IMSList<SipAddress*>& GetTemporaryGRUUs() const = 0;
+    virtual const IMSList<SipAddress*>& GetTemporaryGruus() const = 0;
 
     /**
      * @brief Checks if the UA is located behind a NAT or not.
@@ -196,7 +213,7 @@ public:
      *         Otherwise, returns IMS_FALSE.
      * @note IMS EXTENSION METHOD
      */
-    virtual IMS_BOOL IsBehindNAT() const = 0;
+    virtual IMS_BOOL IsBehindNat() const = 0;
 
     /**
      * @brief Returns whether the service is connected to the IMS network.
@@ -228,7 +245,7 @@ public:
      * @note IMS EXTENSION METHOD
      */
     virtual IMS_BOOL AddFeatureTags(
-            IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) = 0;
+            IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) = 0;
 
     /**
      * @brief Removes the specified feature tags from this service.
@@ -242,7 +259,7 @@ public:
      * @note IMS EXTENSION METHOD
      */
     virtual IMS_BOOL RemoveFeatureTags(
-            IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) = 0;
+            IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) = 0;
 
     /**
      * @brief Sets the SIP profile for specific configuration of SIP connections
@@ -255,7 +272,7 @@ public:
      * @param pProfile SIP profile to be set
      * @note IMS EXTENSION METHOD, MULTI_REG_SIP_PROFILE
      */
-    virtual void SetSIPProfile(IN SipProfile* pProfile) = 0;
+    virtual void SetSipProfile(IN SipProfile* pProfile) = 0;
 };
 
-#endif  // _INTERFACE_SERVICE_H_
+#endif

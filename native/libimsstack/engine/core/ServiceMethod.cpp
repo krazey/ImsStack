@@ -657,7 +657,7 @@ Remarks
 PROTECTED
 IMS_BOOL ServiceMethod::IsPrivacyRequested(IN IMS_BOOL bRequest /* = IMS_TRUE */) const
 {
-    if (SipConfigProxy::IsGruuConfigured(GetSlotId(), pService->GetSIPProfile()))
+    if (SipConfigProxy::IsGruuConfigured(GetSlotId(), pService->GetSipProfile()))
     {
         ISipMessage* piSIPMsg = IMS_NULL;
 

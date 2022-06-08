@@ -776,7 +776,7 @@ IMS_BOOL SDPOAState::CreateCapabilities(
 
     SdpSessionDescription objSessionDesc;
 
-    if (!objSessionDesc.CreateMandatoryLines(strUserID, pService->GetIPAddress()))
+    if (!objSessionDesc.CreateMandatoryLines(strUserID, pService->GetIpAddress()))
     {
         return IMS_FALSE;
     }

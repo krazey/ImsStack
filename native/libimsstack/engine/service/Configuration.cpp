@@ -1,63 +1,59 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090531  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceUtil.h"
-#include "private/ConfigurationManager.h"
+
 #include "private/AppConfig.h"
-#include "private/SubscriberConfig.h"
+#include "private/ConfigurationManager.h"
 #include "private/EngineConfig.h"
+#include "private/ImsRegistryLoader.h"
 #include "private/MediaConfig.h"
 #include "private/SipConfig.h"
-#include "private/ImsRegistryLoader.h"
+#include "private/SubscriberConfig.h"
+
 #include "ConfigLoader.h"
 #include "Configuration.h"
 
-PRIVATE
-Configuration::Configuration() {}
-
 PUBLIC
-Configuration::~Configuration() {}
-
-PUBLIC
-AStringArray Configuration::GetLocalAppIds(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+AStringArray Configuration::GetLocalAppIds(IN IMS_SINT32 nSlotId) const
 {
     return ConfigurationManager::GetInstance()->GetAppIds(nSlotId);
 }
 
 PUBLIC
 const IAppConfig* Configuration::GetAppConfig(
-        IN const AString& strAppId, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+        IN const AString& strAppId, IN IMS_SINT32 nSlotId) const
 {
     return ConfigurationManager::GetInstance()->GetAppConfig(strAppId, nSlotId);
 }
 
 PUBLIC
-IMS_BOOL Configuration::HasAppConfig(
-        IN const AString& strAppId, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+IMS_BOOL Configuration::HasAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId) const
 {
     return ConfigurationManager::GetInstance()->IsAppConfigured(strAppId, nSlotId);
 }
 
 PUBLIC
-void Configuration::RemoveAppConfig(
-        IN const AString& strAppId, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+void Configuration::RemoveAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId)
 {
     ConfigurationManager::GetInstance()->RemoveAppConfig(strAppId, nSlotId);
 }
 
 PUBLIC
-IMS_RESULT Configuration::SetAppConfig(
-        IN const AString& strAppId, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+IMS_RESULT Configuration::SetAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId)
 {
     if (strAppId.GetLength() == 0)
     {
@@ -96,28 +92,28 @@ IMS_RESULT Configuration::SetAppConfig(
 
 PUBLIC
 IMS_RESULT Configuration::SetAppConfig(IN const AString& strAppId, IN const AString& strClassName,
-        IN const ImsRegistry& objRegistry, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+        IN const ImsRegistry& objRegistry, IN IMS_SINT32 nSlotId)
 {
     if (strAppId.GetLength() == 0)
     {
-        return IMS_FAILURE;  // Throw exception
+        return IMS_FAILURE;
     }
 
     if (strClassName.GetLength() == 0)
     {
-        return IMS_FAILURE;  // Throw exception
+        return IMS_FAILURE;
     }
 
     if (objRegistry.GetCount() == 0)
     {
-        return IMS_FAILURE;  // Throw exception
+        return IMS_FAILURE;
     }
 
     AppConfig* pAppConfig = new AppConfig(strAppId);
 
     if (pAppConfig == IMS_NULL)
     {
-        return IMS_FAILURE;  // throw exception
+        return IMS_FAILURE;
     }
 
     if (!pAppConfig->Create(objRegistry, nSlotId))
@@ -138,33 +134,31 @@ IMS_RESULT Configuration::SetAppConfig(IN const AString& strAppId, IN const AStr
 
 PUBLIC GLOBAL Configuration* Configuration::GetInstance()
 {
-    static Configuration* pConfiguration = IMS_NULL;
+    static Configuration* s_pConfiguration = IMS_NULL;
 
-    if (pConfiguration == IMS_NULL)
+    if (s_pConfiguration == IMS_NULL)
     {
-        pConfiguration = new Configuration();
+        s_pConfiguration = new Configuration();
     }
 
-    return pConfiguration;
+    return s_pConfiguration;
 }
 
-//// IMS extensions
-
 PUBLIC
-const IMediaConfig* Configuration::GetMediaConfig(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+const IMediaConfig* Configuration::GetMediaConfig(IN IMS_SINT32 nSlotId) const
 {
     return ConfigurationManager::GetInstance()->GetMediaConfig(nSlotId);
 }
 
 PUBLIC
-const ISipConfig* Configuration::GetSipConfig(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+const ISipConfig* Configuration::GetSipConfig(IN IMS_SINT32 nSlotId) const
 {
     return ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
 }
 
 PUBLIC
 const ISubscriberConfig* Configuration::GetSubscriberConfig(
-        IN IMS_SINT32 nSlotId, IN const AString& strId /* = AString::ConstNull()*/) const
+        IN IMS_SINT32 nSlotId, IN const AString& strId /*= AString::ConstNull()*/) const
 {
     if (strId.IsNULL())
     {
@@ -176,15 +170,7 @@ const ISubscriberConfig* Configuration::GetSubscriberConfig(
 }
 
 PUBLIC
-const ISubscriberConfig* Configuration::GetSubscriberConfig(
-        IN const AString& strId /* = AString::ConstNull()*/,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
-{
-    return GetSubscriberConfig(nSlotId, strId);
-}
-
-PUBLIC
-IMS_UINT32 Configuration::GetTraceModule(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+IMS_UINT32 Configuration::GetTraceModule(IN IMS_SINT32 nSlotId) const
 {
     const EngineConfig* pEngineConfig =
             ConfigurationManager::GetInstance()->GetEngineConfig(nSlotId);
@@ -198,7 +184,7 @@ IMS_UINT32 Configuration::GetTraceModule(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/
 }
 
 PUBLIC
-IMS_UINT32 Configuration::GetTraceOption(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+IMS_UINT32 Configuration::GetTraceOption(IN IMS_SINT32 nSlotId) const
 {
     const EngineConfig* pEngineConfig =
             ConfigurationManager::GetInstance()->GetEngineConfig(nSlotId);
@@ -212,7 +198,7 @@ IMS_UINT32 Configuration::GetTraceOption(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/
 }
 
 PUBLIC
-IMS_BOOL Configuration::IsServerInfoHiddenInLog(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+IMS_BOOL Configuration::IsServerInfoHiddenInLog(IN IMS_SINT32 nSlotId) const
 {
     const SubscriberConfig* pSubsConfig = ConfigurationManager::GetInstance()->GetSubscriberConfig(
             SubscriberConfig::GetDefaultId(), nSlotId);

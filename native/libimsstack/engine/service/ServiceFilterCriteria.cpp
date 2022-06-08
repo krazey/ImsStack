@@ -1,31 +1,35 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20110719  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
 #include "ServiceFilterCriteria.h"
 
 __IMS_TRACE_TAG_IMS__;
 
 PUBLIC
 ServiceFilterCriteria::ServiceFilterCriteria() :
-        objCalleePreferences(IMSMap<IMS_SINT32, IMS_BOOL>()),
-        nNextTriggerPointId(1),
-        objTPs(IMSMap<IMS_UINT32, TriggerPoint*>())
+        m_objCalleePreferences(IMSMap<IMS_SINT32, IMS_BOOL>()),
+        m_nNextTriggerPointId(1),
+        m_objTriggerPoints(IMSMap<IMS_UINT32, TriggerPoint*>())
 {
-    objCalleePreferences.Add(SipMethod::INVITE, IMS_FALSE);
-    objCalleePreferences.Add(SipMethod::OPTIONS, IMS_FALSE);
-    objCalleePreferences.Add(SipMethod::MESSAGE, IMS_FALSE);
-    objCalleePreferences.Add(SipMethod::REFER, IMS_FALSE);
+    m_objCalleePreferences.Add(SipMethod::INVITE, IMS_FALSE);
+    m_objCalleePreferences.Add(SipMethod::OPTIONS, IMS_FALSE);
+    m_objCalleePreferences.Add(SipMethod::MESSAGE, IMS_FALSE);
+    m_objCalleePreferences.Add(SipMethod::REFER, IMS_FALSE);
 }
 
 PUBLIC VIRTUAL ServiceFilterCriteria::~ServiceFilterCriteria()
@@ -33,44 +37,31 @@ PUBLIC VIRTUAL ServiceFilterCriteria::~ServiceFilterCriteria()
     RemoveAllTriggerPoints();
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_UINT32 ServiceFilterCriteria::AddTriggerPoint(IN CONST TriggerPoint& objTP)
+PUBLIC VIRTUAL IMS_UINT32 ServiceFilterCriteria::AddTriggerPoint(
+        IN const TriggerPoint& objTriggerPoint)
 {
-    TriggerPoint* pTP = new TriggerPoint(objTP);
+    TriggerPoint* pTriggerPoint = new TriggerPoint(objTriggerPoint);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pTP == IMS_NULL)
+    if (pTriggerPoint == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a TriggerPoint failed", 0, 0, 0);
         return 0;
     }
 
-    if (!objTPs.Add(nNextTriggerPointId, pTP))
+    if (!m_objTriggerPoints.Add(m_nNextTriggerPointId, pTriggerPoint))
     {
         IMS_TRACE_E(0, "Adding a TriggerPoint failed", 0, 0, 0);
         return 0;
     }
 
-    ++nNextTriggerPointId;
+    ++m_nNextTriggerPointId;
 
-    return (nNextTriggerPointId - 1);
+    return (m_nNextTriggerPointId - 1);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void ServiceFilterCriteria::RemoveTriggerPoint(IN IMS_SINT32 nTriggerPointId)
 {
-    IMS_SLONG nIndex = objTPs.GetIndexOfKey(nTriggerPointId);
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SLONG nIndex = m_objTriggerPoints.GetIndexOfKey(nTriggerPointId);
 
     if (nIndex < 0)
     {
@@ -78,118 +69,81 @@ PUBLIC VIRTUAL void ServiceFilterCriteria::RemoveTriggerPoint(IN IMS_SINT32 nTri
         return;
     }
 
-    TriggerPoint* pTP = objTPs.GetValueAt(nIndex);
+    TriggerPoint* pTriggerPoint = m_objTriggerPoints.GetValueAt(nIndex);
 
-    if (pTP != IMS_NULL)
+    if (pTriggerPoint != IMS_NULL)
     {
-        delete pTP;
+        delete pTriggerPoint;
     }
 
-    objTPs.RemoveAt(nIndex);
+    m_objTriggerPoints.RemoveAt(nIndex);
 
-    if (objTPs.IsEmpty())
+    if (m_objTriggerPoints.IsEmpty())
     {
-        nNextTriggerPointId = 1;
+        m_nNextTriggerPointId = 1;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void ServiceFilterCriteria::RemoveAllTriggerPoints()
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objTPs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objTriggerPoints.GetSize(); ++i)
     {
-        TriggerPoint* pTP = objTPs.GetValueAt(i);
+        TriggerPoint* pTriggerPoint = m_objTriggerPoints.GetValueAt(i);
 
-        if (pTP == IMS_NULL)
+        if (pTriggerPoint == IMS_NULL)
+        {
             continue;
+        }
 
-        delete pTP;
+        delete pTriggerPoint;
     }
 
-    objTPs.Clear();
+    m_objTriggerPoints.Clear();
 
-    nNextTriggerPointId = 1;
+    m_nNextTriggerPointId = 1;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void ServiceFilterCriteria::SetCalleePreference(
-        IN CONST SipMethod& objMethod, IN IMS_BOOL bCalleePreference /* = IMS_TRUE */)
+        IN const SipMethod& objMethod, IN IMS_BOOL bCalleePreference /*= IMS_TRUE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!objMethod.Equals(SipMethod::INVITE) && !objMethod.Equals(SipMethod::OPTIONS) &&
             !objMethod.Equals(SipMethod::MESSAGE) && !objMethod.Equals(SipMethod::REFER))
     {
         return;
     }
 
-    objCalleePreferences.SetValue(objMethod.ToInt(), bCalleePreference);
+    m_objCalleePreferences.SetValue(objMethod.ToInt(), bCalleePreference);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_UINT32 ServiceFilterCriteria::Evaluate(IN CONST ISipMessage* piSIPMsg) const
+IMS_UINT32 ServiceFilterCriteria::Evaluate(IN const ISipMessage* piSipMsg) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objTPs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objTriggerPoints.GetSize(); ++i)
     {
-        TriggerPoint* pTP = objTPs.GetValueAt(i);
+        TriggerPoint* pTriggerPoint = m_objTriggerPoints.GetValueAt(i);
 
-        if (pTP == IMS_NULL)
-            continue;
-
-        if (pTP->Evaluate(piSIPMsg))
+        if (pTriggerPoint == IMS_NULL)
         {
-            return pTP->GetCount();
+            continue;
+        }
+
+        if (pTriggerPoint->Evaluate(piSipMsg))
+        {
+            return pTriggerPoint->GetCount();
         }
     }
 
     return 0;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL ServiceFilterCriteria::IsCalleePreferenceSupported(IN CONST SipMethod& objMethod) const
+IMS_BOOL ServiceFilterCriteria::IsCalleePreferenceSupported(IN const SipMethod& objMethod) const
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!objMethod.Equals(SipMethod::INVITE) && !objMethod.Equals(SipMethod::OPTIONS) &&
             !objMethod.Equals(SipMethod::MESSAGE) && !objMethod.Equals(SipMethod::REFER))
     {
         return IMS_FALSE;
     }
 
-    return objCalleePreferences.GetValue(objMethod.ToInt());
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL ServiceFilterCriteria::IsEmpty() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objTPs.IsEmpty();
+    return m_objCalleePreferences.GetValue(objMethod.ToInt());
 }

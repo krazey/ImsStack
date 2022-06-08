@@ -245,7 +245,7 @@ IMS_RESULT Session::Accept()
     if (pRefreshHelper != IMS_NULL)
     {
         if (!SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-                    GetSlotId(), GetService()->GetSIPProfile()))
+                    GetSlotId(), GetService()->GetSipProfile()))
         {
             if ((nState == STATE_RENEGOTIATING) && piSSC->GetMethod().Equals(SipMethod::INVITE))
             {
@@ -1068,7 +1068,7 @@ IMS_RESULT Session::Reject()
         RestoreEx();
 
         if (SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-                    GetSlotId(), GetService()->GetSIPProfile()))
+                    GetSlotId(), GetService()->GetSipProfile()))
         {
             pRefreshHelper->UpdateOnMessageSent(piSSC);
         }
@@ -1276,7 +1276,7 @@ IMS_RESULT Session::RejectEx(
         RestoreEx();
 
         if (SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-                    GetSlotId(), GetService()->GetSIPProfile()))
+                    GetSlotId(), GetService()->GetSipProfile()))
         {
             pRefreshHelper->UpdateOnMessageSent(piSSC);
         }
@@ -2221,7 +2221,7 @@ IMS_RESULT Session::Update()
 
     // Checks if the session refresh is ongoing...
     if (SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-                GetSlotId(), GetService()->GetSIPProfile()))
+                GetSlotId(), GetService()->GetSipProfile()))
     {
         if ((pRefreshHelper != IMS_NULL) && (pRefreshHelper->IsRequestPending()))
         {
@@ -2308,7 +2308,7 @@ IMS_RESULT Session::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */,
 
     // Checks if the session refresh is ongoing...
     if (SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-                GetSlotId(), GetService()->GetSIPProfile()))
+                GetSlotId(), GetService()->GetSipProfile()))
     {
         if ((pRefreshHelper != IMS_NULL) && (pRefreshHelper->IsRequestPending()))
         {
@@ -3649,7 +3649,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_NotifyRequest(IN ISipServerConne
     const AString& strRequestURI = piSSC_CANCEL->GetRequestUri();
     SipAddress objRequestURI(strRequestURI);
 
-    if (!GetService()->ValidateRequestURI(objRequestURI))
+    if (!GetService()->ValidateRequestUri(objRequestURI))
     {
         IMS_BOOL bRURIMatched = IMS_FALSE;
         IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_START);
@@ -3837,13 +3837,13 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_NotifyRequest(IN ISipServerConnection
     }
 
     if (SipConfigProxy::IsRequestUriValidationRequiredInMidDialog(
-                GetSlotId(), GetService()->GetSIPProfile()))
+                GetSlotId(), GetService()->GetSipProfile()))
     {
         // Checks if Request-URI is matched or not
         const AString& strRequestURI = piSSC->GetRequestUri();
         SipAddress objRequestURI(strRequestURI);
 
-        if (!GetService()->ValidateRequestURI(objRequestURI, piSSC->GetDialog(), IMS_TRUE))
+        if (!GetService()->ValidateRequestUri(objRequestURI, piSSC->GetDialog(), IMS_TRUE))
         {
             IMS_TRACE_D("Request-URI (%s) in mid-dialog request is not matched",
                     SipDebug::GetUri1(strRequestURI).GetStr(), 0, 0);
@@ -3893,7 +3893,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_NotifyRequest(IN ISipServerConnection
     // Update a session refresh timer
     if (objMethod.Equals(SipMethod::INVITE) &&
             !SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-                    GetSlotId(), GetService()->GetSIPProfile()))
+                    GetSlotId(), GetService()->GetSipProfile()))
     {
         IMS_TRACE_D("re-INVITE request will not participate in the session refresh", 0, 0, 0);
 
@@ -4146,7 +4146,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::Refreshable_RefreshStarted()
     else
     {
         if (!SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-                    GetSlotId(), GetService()->GetSIPProfile()))
+                    GetSlotId(), GetService()->GetSipProfile()))
         {
             if ((nState == STATE_RENEGOTIATING) || (nState == STATE_REESTABLISHING))
             {
@@ -4786,10 +4786,10 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleRequestToUPDATE(IN ISipServerConnect
 
         AString strWarning;
 
-        if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSIPProfile()))
+        if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
         {
             AString strUAString =
-                    SipConfigProxy::GetUaString(GetSlotId(), GetService()->GetSIPProfile());
+                    SipConfigProxy::GetUaString(GetSlotId(), GetService()->GetSipProfile());
 
             strUAString = strUAString.Replace(" ", "");
 
@@ -6681,10 +6681,10 @@ IMS_RESULT Session::HandleRequestToINVITEWithinDialog(IN ISipServerConnection* p
 
         AString strWarning;
 
-        if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSIPProfile()))
+        if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
         {
             AString strUAString =
-                    SipConfigProxy::GetUaString(GetSlotId(), GetService()->GetSIPProfile());
+                    SipConfigProxy::GetUaString(GetSlotId(), GetService()->GetSipProfile());
 
             strUAString = strUAString.Replace(" ", "");
 
@@ -7539,7 +7539,7 @@ IMS_RESULT Session::SendRequestForRefresh(IN IMS_SINT32 nMethod /* = SipMethod::
         }
     }
     else if (!SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-                     GetSlotId(), GetService()->GetSIPProfile()) &&
+                     GetSlotId(), GetService()->GetSipProfile()) &&
             ((nState == STATE_RENEGOTIATING) || (nState == STATE_REESTABLISHING)))
     {
         // Send a refresh request : UPDATE
@@ -7568,10 +7568,10 @@ IMS_RESULT Session::SendRequestForRefresh(IN IMS_SINT32 nMethod /* = SipMethod::
     // Set the headers for the invitation
 
     // User-Agent : configuration options ?
-    if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSIPProfile()))
+    if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
     {
-        UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetService()->GetSIPProfile(),
-                GetService()->GetServiceId(), GetService()->GetIPAddress(), GetSlotId(), piSIPMsg);
+        UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetService()->GetSipProfile(),
+                GetService()->GetServiceId(), GetService()->GetIpAddress(), GetSlotId(), piSIPMsg);
     }
 
     // Set SDP message if any offer; According to the configuration options
@@ -7660,10 +7660,10 @@ IMS_RESULT Session::SendRequestToACK(IN ISipClientConnection* piSCC, IN IMS_SINT
     }
 
     // Sets User-Agent header field
-    if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSIPProfile()))
+    if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
     {
-        UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetService()->GetSIPProfile(),
-                GetService()->GetServiceId(), GetService()->GetIPAddress(), GetSlotId(), piSIPMsg);
+        UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetService()->GetSipProfile(),
+                GetService()->GetServiceId(), GetService()->GetIpAddress(), GetSlotId(), piSIPMsg);
     }
 
     // Add a specific header for ACK request (Require, ...)
@@ -7916,10 +7916,10 @@ IMS_RESULT Session::SendRequestToCANCEL()
     ISipMessage* piSIPMsg = piCancel->GetMessage();
 
     // Sets User-Agent header field
-    if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSIPProfile()))
+    if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
     {
-        UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetService()->GetSIPProfile(),
-                GetService()->GetServiceId(), GetService()->GetIPAddress(), GetSlotId(), piSIPMsg);
+        UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetService()->GetSipProfile(),
+                GetService()->GetServiceId(), GetService()->GetIpAddress(), GetSlotId(), piSIPMsg);
     }
 
     // REFUSE_SDP_OFFER_ANSWER_EXCHANGE
@@ -7979,7 +7979,7 @@ IMS_RESULT Session::SendRequestToINVITE(IN IMS_BOOL bSessionRefresh /* = IMS_FAL
     if (pRefreshHelper != IMS_NULL)
     {
         if (!SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-                    GetSlotId(), GetService()->GetSIPProfile()))
+                    GetSlotId(), GetService()->GetSipProfile()))
         {
             if (GetState() != STATE_INITIATED)
             {
@@ -8030,7 +8030,7 @@ IMS_RESULT Session::SendRequestToINVITE(IN IMS_BOOL bSessionRefresh /* = IMS_FAL
 
     // Update a session refresh timer info.
     if (SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-                GetSlotId(), GetService()->GetSIPProfile()))
+                GetSlotId(), GetService()->GetSipProfile()))
     {
         if (pRefreshHelper != IMS_NULL)
         {
@@ -8170,7 +8170,7 @@ IMS_RESULT Session::SendRequestToINVITEOn422Received()
     if (pRefreshHelper != IMS_NULL)
     {
         if (!SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-                    GetSlotId(), GetService()->GetSIPProfile()))
+                    GetSlotId(), GetService()->GetSipProfile()))
         {
             if (nState != STATE_INITIATED)
             {
@@ -8210,7 +8210,7 @@ IMS_RESULT Session::SendRequestToINVITEOn422Received()
 
     // Update a session refresh timer info.
     if (SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
-                GetSlotId(), GetService()->GetSIPProfile()))
+                GetSlotId(), GetService()->GetSipProfile()))
     {
         if (pRefreshHelper != IMS_NULL)
         {
@@ -8471,7 +8471,7 @@ void Session::Start2xxRetransmission()
 
     const ISipConfigV* piSipConfigV = GetService()->GetISipConfigV();
     IMS_SINT32 nTH = SipConfigProxy::GetTimerValueH(
-            GetSlotId(), GetService()->GetSIPProfile(), piSipConfigV, IMS_FALSE);
+            GetSlotId(), GetService()->GetSipProfile(), piSipConfigV, IMS_FALSE);
 
     if (nTH > 0)
     {
@@ -8480,7 +8480,7 @@ void Session::Start2xxRetransmission()
     else
     {
         IMS_SINT32 nTB = SipConfigProxy::GetTimerValueB(
-                GetSlotId(), GetService()->GetSIPProfile(), piSipConfigV, IMS_FALSE);
+                GetSlotId(), GetService()->GetSipProfile(), piSipConfigV, IMS_FALSE);
 
         if (nTB > 0)
         {
@@ -8508,7 +8508,7 @@ void Session::Start2xxRetransmission()
         return;
     }
 
-    const SipProfile* pSIPProfile = GetService()->GetSIPProfile();
+    const SipProfile* pSIPProfile = GetService()->GetSipProfile();
     const ISipConfigV* piSipConfigV = GetService()->GetISipConfigV();
 
     IMS_SINT32 nT1 = SipConfigProxy::GetTimerValueT1(GetSlotId(), pSIPProfile, piSipConfigV);

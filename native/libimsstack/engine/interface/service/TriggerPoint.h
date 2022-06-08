@@ -1,11 +1,27 @@
-#ifndef _TRIGGER_POINT_H_
-#define _TRIGGER_POINT_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef TRIGGER_POINT_H_
+#define TRIGGER_POINT_H_
 
 #include "AStringArray.h"
+
 #include "SipMethod.h"
 
-class ISipMessage;
 class ISipHeader;
+class ISipMessage;
 
 /**
  * @brief This class defines a trigger point which can be used for an initial filter criteria.
@@ -15,12 +31,12 @@ class ISipHeader;
 class TriggerPoint
 {
 public:
-    explicit TriggerPoint(IN CONST SipMethod& objMethod_, IN IMS_BOOL bMethodNegated_ = IMS_FALSE);
-    TriggerPoint(IN CONST TriggerPoint& objRHS);
+    explicit TriggerPoint(IN const SipMethod& objMethod, IN IMS_BOOL bMethodNegated = IMS_FALSE);
+    TriggerPoint(IN const TriggerPoint& other);
     ~TriggerPoint();
 
 public:
-    TriggerPoint& operator=(IN CONST TriggerPoint& objRHS);
+    TriggerPoint& operator=(IN const TriggerPoint& other);
 
 public:
     /**
@@ -32,8 +48,8 @@ public:
      * @param bHeaderNegated flag to indicate whether the header is negated or not
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL AddHeader(IN IMS_SINT32 nType, IN CONST AString& strValue,
-            IN CONST AString& strName = AString::ConstNull(),
+    IMS_BOOL AddHeader(IN IMS_SINT32 nType, IN const AString& strValue,
+            IN const AString& strName = AString::ConstNull(),
             IN IMS_BOOL bHeaderNegated = IMS_FALSE);
 
     // Add an additional parameter for SDP later ...
@@ -44,7 +60,7 @@ public:
      * @param strValue the value of SDP line
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL AddSDPInfo(IN CONST IMS_CHAR cName, IN CONST AString& strValue);
+    IMS_BOOL AddSdpInfo(IN const IMS_CHAR cName, IN const AString& strValue);
 
     /**
      * @brief Removes all the SIP headers from this trigger point.
@@ -53,7 +69,7 @@ public:
     /**
      * @brief Removes all the SDP information from this trigger point.
      */
-    void RemoveAllSDPInfo();
+    void RemoveAllSdpInfo();
     /**
      * @brief Sets the evaluation rules for this trigger point.
      *
@@ -64,25 +80,25 @@ public:
      *                 #SPT_SDP_RULE_MATCH\n
      *                 #SPT_SDP_RULE_CONTAIN
      */
-    void SetEvaluationRule(IN IMS_SINT32 nRule);
+    inline void SetEvaluationRule(IN IMS_SINT32 nRule) { m_nEvaluationRule = nRule; }
 
 protected:
-    IMS_BOOL Evaluate(IN CONST ISipMessage* piSIPMsg) const;
+    IMS_BOOL Evaluate(IN const ISipMessage* piSipMsg) const;
     IMS_UINT32 GetCount() const;
 
-    static IMS_SINT32 CompareHeader(IN CONST ISipHeader* piHeader,
-            IN CONST ISipHeader* piOtherHeader, IN IMS_SINT32 nEvaluationRule,
+    static IMS_SINT32 CompareHeader(IN const ISipHeader* piHeader,
+            IN const ISipHeader* piOtherHeader, IN IMS_SINT32 nEvaluationRule,
             IN IMS_BOOL bConditionNegated = IMS_FALSE);
-    static IMS_SINT32 CompareHeaderInMessage(IN CONST ISipHeader* piHeader,
-            IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nEvaluationRule,
+    static IMS_SINT32 CompareHeaderInMessage(IN const ISipHeader* piHeader,
+            IN const ISipMessage* piSipMsg, IN IMS_SINT32 nEvaluationRule,
             IN IMS_BOOL bConditionNegated = IMS_FALSE);
-    static IMS_SINT32 CompareSDPInfo(IN CONST IMSList<AString>& objMLines,
-            IN CONST IMSList<AString>& objALines, IN CONST ISipMessage* piSIPMsg,
+    static IMS_SINT32 CompareSdpInfo(IN const IMSList<AString>& objMLines,
+            IN const IMSList<AString>& objALines, IN const ISipMessage* piSipMsg,
             IN IMS_SINT32 nEvaluationRule, IN IMS_BOOL bConditionNegated = IMS_FALSE);
-    static IMS_SINT32 GetIndexOf(IN CONST AStringArray& objSDPLines, IN CONST AString& strToken,
+    static IMS_SINT32 GetIndexOf(IN const AStringArray& objSdpLines, IN const AString& strToken,
             IN IMS_BOOL bContain = IMS_TRUE);
-    static IMS_BOOL IsParameterComparisonRequired(IN CONST ISipHeader* piHeader);
-    static void SplitLines(IN CONST AString& strSDP, OUT AStringArray& objSDPLines);
+    static IMS_BOOL IsParameterComparisonRequired(IN const ISipHeader* piHeader);
+    static void SplitLines(IN const AString& strSdp, OUT AStringArray& objSdpLines);
 
 public:
     /// Matching rules
@@ -114,19 +130,19 @@ private:
 
     // Rule for SIP header or SDP information
     // Default : SPT_SIP_RULE_MATCH | SPT_SDP_RULE_CONTAIN
-    IMS_SINT32 nEvaluationRule;
+    IMS_SINT32 m_nEvaluationRule;
 
     // SPT : SIP method
-    IMS_BOOL bMethodNegated;
-    SipMethod objMethod;
+    IMS_BOOL m_bMethodNegated;
+    SipMethod m_objMethod;
 
     // SPT : Header field
-    IMSList<ISipHeader*> objHeaders;
-    IMSList<ISipHeader*> objNegatedHeaders;
+    IMSList<ISipHeader*> m_objHeaders;
+    IMSList<ISipHeader*> m_objNegatedHeaders;
 
     // Additional field : SDP, ...
-    IMSList<AString> objSDPMLines;
-    IMSList<AString> objSDPALines;
+    IMSList<AString> m_objSdpMLines;
+    IMSList<AString> m_objSdpALines;
 };
 
-#endif  // _TRIGGER_POINT_H_
+#endif

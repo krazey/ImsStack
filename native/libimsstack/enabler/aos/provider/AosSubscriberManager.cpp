@@ -185,7 +185,7 @@ const ISubscriberConfig* AosSubscriberManager::GetSubscriberConfig(
         IN IMS_SINT32 nType /*= IAosSubscriber::NORMAL*/) const
 {
     return Configuration::GetInstance()->GetSubscriberConfig(
-            (nType == IAosSubscriber::FAKE) ? ID_FAKE : AString::ConstNull(), m_nSlotId);
+            m_nSlotId, (nType == IAosSubscriber::FAKE) ? ID_FAKE : AString::ConstNull());
 }
 
 PRIVATE

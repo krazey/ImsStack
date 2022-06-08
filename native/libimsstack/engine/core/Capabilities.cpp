@@ -953,13 +953,13 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
     AString strContact(AString::ConstNull());
     Service* pService = GetService();
     IMS_BOOL bGRUUSupported =
-            SipConfigProxy::IsGruuConfigured(GetSlotId(), GetService()->GetSIPProfile());
+            SipConfigProxy::IsGruuConfigured(GetSlotId(), GetService()->GetSipProfile());
 
-    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), GetService()->GetSIPProfile()))
+    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), GetService()->GetSipProfile()))
     {
         SipAddress objContact;
         // 4 Consider the Privacy information (temp-gruu)
-        const SipAddress* pPubGRUU = bGRUUSupported ? pService->GetPublicGRUU() : IMS_NULL;
+        const SipAddress* pPubGRUU = bGRUUSupported ? pService->GetPublicGruu() : IMS_NULL;
 
         if (pPubGRUU != IMS_NULL)
         {
@@ -974,7 +974,7 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
         }
 
         if (SipConfigProxy::IsMultipleRegConfigured(
-                    pService->GetSlotId(), pService->GetSIPProfile()))
+                    pService->GetSlotId(), pService->GetSipProfile()))
         {
             objContact.AddParameter(Sip::STR_OB, AString::ConstNull());
         }
@@ -984,7 +984,7 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
     else
     {
         // 4 Consider the Privacy information (temp-gruu)
-        const SipAddress* pPubGRUU = bGRUUSupported ? pService->GetPublicGRUU() : IMS_NULL;
+        const SipAddress* pPubGRUU = bGRUUSupported ? pService->GetPublicGruu() : IMS_NULL;
 
         if (pPubGRUU != IMS_NULL)
         {
@@ -1021,7 +1021,7 @@ PRIVATE
 IMS_BOOL Capabilities::CreateSDP(OUT AString& strSDP, IN IMS_BOOL bCheckSupport /* = IMS_TRUE */,
         IN IMS_BOOL bRequest /* = IMS_FALSE */) const
 {
-    IPAddress objLocalAddress = GetService()->GetIPAddress();
+    IPAddress objLocalAddress = GetService()->GetIpAddress();
 
     //---------------------------------------------------------------------------------------------
 

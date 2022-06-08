@@ -487,13 +487,13 @@ void UceOptions::SetContactHeader(IN IMS_UINT32 capabilities, ISipMessage* piSIP
     IService* piService = (IService*)m_piCoreService;
     AString strMyContact = AString::ConstEmpty();
 
-    if (piService->GetPublicGRUU() == IMS_NULL)
+    if (piService->GetPublicGruu() == IMS_NULL)
     {
         strMyContact.Append(piService->GetContactAddress().ToString());
     }
     else
     {
-        strMyContact.Append(piService->GetPublicGRUU()->ToString());
+        strMyContact.Append(piService->GetPublicGruu()->ToString());
         piSIPMessage->AddHeader(ISipHeader::SUPPORTED, "gruu");
     }
 
