@@ -169,8 +169,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::StartQosTimer(
         nDuration =
                 m_objContext.GetConfigurationProxy().GetInt(Feature::DEDICATED_BEARER_WAIT_TIMER);
 
-        // TODO: restore when QoS event from media module is activated.
-        // if (nDuration < 0)
+        if (nDuration < 0)
         {
             IMS_TRACE_D("StartQosTimer : start the timer to enable QoS by force.", 0, 0, 0);
             eType = QosTimerType::FORCE_AVAILABLE;
