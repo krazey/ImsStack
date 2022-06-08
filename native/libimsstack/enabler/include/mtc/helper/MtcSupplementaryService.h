@@ -58,9 +58,5 @@ private:
     IMSMap<SuppType, SuppService*> m_objSuppService;
     MtcConfigurationProxy& m_objConfigurationProxy;
     IMS_SINT32 m_nCnapType;
-
-    static const IMS_CHAR STR_VERSTAT[];
-    static const IMS_CHAR STR_VERSTAT_TN_VALIDATION_PASSED[];
-    static const IMS_CHAR STR_VERSTAT_TN_VALIDATION_FAILED[];
 };
 #endif
