@@ -31,7 +31,6 @@ public final class AgentFactory {
     public static final int PHONE_STATE = 13;
     public static final int TELEPHONY_STATE = 14;
     public static final int TELEPHONY_SUBSCRIBER = 15;
-    public static final int GBA = 16;
     public static final int CELL_INFO = 17;
     public static final int PHONE_CALL_DB = 18;
     public static final int IMS_PHONE = 19;
@@ -116,7 +115,6 @@ public final class AgentFactory {
 
         // below types should be initialized and cleaned up from VoLTE package
         agents.put(CELL_INFO, new CellInfoAgent(slotId));
-        agents.put(GBA, new GBAAgent(slotId));
         agents.put(VONR, new VoNRAgent(slotId));
 
         sAgentSlots.put(slotId, agents);
@@ -215,6 +213,7 @@ public final class AgentFactory {
                 agents.put(ConfigInterface.class, new ConfigAgent(slotId));
                 agents.put(IpSecInterface.class, new IpSecAgent(slotId));
                 agents.put(SubsInfoInterface.class, new SubsInfoAgent(slotId));
+                agents.put(GbaInterface.class, new GbaAgent(slotId));
             }
         }
     }

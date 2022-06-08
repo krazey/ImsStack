@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-package com.android.imsstack.core.agents.agentif;
+package com.android.imsstack.core.agents;
 
 import com.android.imsstack.util.ImsLog;
 
 import java.util.HashMap;
 
+/**
+ * Description of Ua security protocol identifiers defined in 3GPP TS 33.220 H.3
+ */
 public class UaCipherSuite {
     private HashMap<String, Integer> mUaSecurityProtocolIds = new HashMap<>();
-    static private UaCipherSuite mUaCipherSuite = null;
+    private static UaCipherSuite sUaCipherSuite = new UaCipherSuite();
 
     private UaCipherSuite() {
         init();
     }
 
     public static UaCipherSuite getInstance() {
-        if (mUaCipherSuite == null) {
-            mUaCipherSuite = new UaCipherSuite();
-        }
-
-        return mUaCipherSuite;
+        return sUaCipherSuite;
     }
 
-    public int getCipherSuiteValue(String securityProtocol) {
+    protected int getCipherSuiteValue(String securityProtocol) {
         if (mUaSecurityProtocolIds.containsKey(securityProtocol)) {
             return mUaSecurityProtocolIds.get(securityProtocol);
         }

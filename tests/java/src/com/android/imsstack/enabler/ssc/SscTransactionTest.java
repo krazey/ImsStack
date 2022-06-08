@@ -35,8 +35,8 @@ import android.telephony.CarrierConfigManager;
 import android.util.Pair;
 
 import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.GbaInterface;
 import com.android.imsstack.core.agents.TRMAgent;
-import com.android.imsstack.core.agents.agentif.IGBA;
 import com.android.imsstack.core.agents.agentif.ITRM;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
@@ -79,7 +79,7 @@ public class SscTransactionTest {
 
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigAgent mMockConfigAgent;
-    @Mock private IGBA mMockGbaAgent;
+    @Mock private GbaInterface mMockGbaAgent;
     @Mock private Handler mMockCallbackHandler;
     @Mock private SscAuthAgent mMockSscAuthAgent;
     @Mock private SscHttpConnectionGov mMockSscHttpConnectionGov;
@@ -595,7 +595,7 @@ public class SscTransactionTest {
         }
 
         @Override
-        protected IGBA getGbaAgent() {
+        protected GbaInterface getGbaAgent() {
             return mMockGbaAgent;
         }
     }

@@ -18,36 +18,34 @@ package com.android.imsstack.core.agents;
 
 import android.content.Context;
 import android.net.Uri;
+import android.telephony.CarrierConfigManager;
+import android.telephony.TelephonyManager;
+import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
 
-import android.telephony.CarrierConfigManager;
-import android.telephony.gba.UaSecurityProtocolIdentifier;
-import android.telephony.TelephonyManager;
-
-import com.android.imsstack.core.agents.agentif.IGBA;
-import com.android.imsstack.core.agents.agentif.UaCipherSuite;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 
-import java.lang.InterruptedException;
-
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-public class GBAAgent implements IGBA {
+/**
+ * Provides the APIs for getting key pair of bootstrapped security association.
+ */
+public class GbaAgent implements GbaInterface {
     private int mSlotId = -1;
     private Context mContext;
     private ExecutorService mExecutorService = null;
 
-    public GBAAgent(int slotId) {
+    public GbaAgent(int slotId) {
         mSlotId = slotId;
     }
 
@@ -68,16 +66,16 @@ public class GBAAgent implements IGBA {
 
     @Override
     public Pair<String, String> getGbaKey(int appType, int gbaMode, boolean isTls, String nafFqdn,
-            String securityProtocol, boolean isForced) {
+            String securityProtocol, boolean forceBootStrapping) {
         ImsLog.d(mSlotId, "appType : " + appType + ",gbaMode : " + gbaMode + ", isTls : " + isTls
                 + ", nafFqdn : " + nafFqdn + ", Protocol : " + securityProtocol
-                + ", isForced : " + isForced);
+                + ", forceBootStrapping : " + forceBootStrapping);
 
         Uri nafUri = getNafUri(gbaMode, isTls, nafFqdn);
         GbaCredentials credintials = null;
         try {
             credintials = requestTelephonyGbaAuthentication(appType, nafUri, securityProtocol,
-                    isForced).get(30L, TimeUnit.SECONDS);
+                    forceBootStrapping).get(30L, TimeUnit.SECONDS);
         } catch (CancellationException e) {
             ImsLog.e(mSlotId, "CancellationException");
         } catch (ExecutionException e) {
@@ -97,10 +95,10 @@ public class GBAAgent implements IGBA {
     }
 
     private CompletableFuture<GbaCredentials> requestTelephonyGbaAuthentication(int appType,
-            Uri nafUri, String securityProtocol, boolean isForced) {
+            Uri nafUri, String securityProtocol, boolean forceBootStrapping) {
         int protocol =
                 UaSecurityProtocolIdentifier.UA_SECURITY_PROTOCOL_3GPP_HTTP_DIGEST_AUTHENTICATION;
-        if (TextUtils.isEmpty(securityProtocol) == false) {
+        if (!TextUtils.isEmpty(securityProtocol)) {
             protocol = UaSecurityProtocolIdentifier.UA_SECURITY_PROTOCOL_3GPP_TLS_DEFAULT;
         }
 
@@ -109,7 +107,7 @@ public class GBAAgent implements IGBA {
                         .setOrg(UaSecurityProtocolIdentifier.ORG_3GPP)
                         .setProtocol(protocol);
 
-        if (TextUtils.isEmpty(securityProtocol) == false) {
+        if (!TextUtils.isEmpty(securityProtocol)) {
             int tlsCipherSuite = UaCipherSuite.getInstance().getCipherSuiteValue(securityProtocol);
             uspi.setTlsCipherSuite(tlsCipherSuite);
         }
@@ -117,7 +115,8 @@ public class GBAAgent implements IGBA {
         CompletableFuture<GbaCredentials> credentialsFuture = new CompletableFuture<>();
 
         TelephonyManager tm = getTelephonyManager();
-        tm.bootstrapAuthenticationRequest(appType, nafUri, uspi.build(), isForced, getExecutor(),
+        tm.bootstrapAuthenticationRequest(appType, nafUri, uspi.build(), forceBootStrapping,
+                getExecutor(),
                 new TelephonyManager.BootstrapAuthenticationCallback() {
                     @Override
                     public void onKeysAvailable(byte[] gbaKey, String transactionId) {
@@ -145,26 +144,21 @@ public class GBAAgent implements IGBA {
     }
 
     private Uri getNafUri(int gbaMode, boolean isTls, String nafFqdn) {
-        final String STR_GBA = "3GPP-bootstrapping";
+        String scheme = isTls ? "https" : "http";
 
-        String scheme = "http";
-        if (isTls) { // KEY_UT_TRANSPORT_TYPE_INT
-            scheme = "https";
-        }
-
-        String nafPrefix;
+        String nafPrefix = "";
         switch (gbaMode) { // KEY_GBA_MODE_INT
             case CarrierConfigManager.GBA_ME: // 1
-                nafPrefix = STR_GBA;
+                nafPrefix = "3GPP-bootstrapping";
                 break;
             case CarrierConfigManager.GBA_U: // 2
-                nafPrefix = STR_GBA + "-uicc";
+                nafPrefix = "3GPP-bootstrapping-uicc";
                 break;
             case CarrierConfigManager.GBA_DIGEST: // 3
-                nafPrefix = STR_GBA + "-digest";
+                nafPrefix = "3GPP-bootstrapping-digest";
                 break;
             default:
-                nafPrefix = STR_GBA;
+                // do nothing
                 break;
         }
 
@@ -181,20 +175,20 @@ public class GBAAgent implements IGBA {
     }
 
     private class GbaCredentials {
-        private String transactionId;
-        private String key;
+        private String mTransactionId;
+        private String mKey;
 
         private GbaCredentials(String transactionId, String key) {
-            this.transactionId = transactionId;
-            this.key = key;
+            this.mTransactionId = transactionId;
+            this.mKey = key;
         }
 
         private String getTransactionId() {
-            return transactionId;
+            return mTransactionId;
         }
 
         private String getKey() {
-            return key;
+            return mKey;
         }
     }
 }

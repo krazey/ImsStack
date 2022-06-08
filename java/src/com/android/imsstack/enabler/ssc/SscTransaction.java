@@ -23,8 +23,8 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.GbaInterface;
 import com.android.imsstack.core.agents.TRMAgent;
-import com.android.imsstack.core.agents.agentif.IGBA;
 import com.android.imsstack.core.agents.agentif.ITRM;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.CfServiceUpdateData;
@@ -434,13 +434,13 @@ public class SscTransaction {
     }
 
     @VisibleForTesting
-    protected IGBA getGbaAgent() {
-        return (IGBA) AgentFactory.getAgent(AgentFactory.GBA, mSlotId);
+    protected GbaInterface getGbaAgent() {
+        return AgentFactory.getInstance().getAgent(GbaInterface.class, mSlotId);
     }
 
-    private boolean getGbaKey(boolean isForced) {
-        IGBA gba = getGbaAgent();
-        if (gba == null) {
+    private boolean getGbaKey(boolean forceBootStrapping) {
+        GbaInterface gbaAgent = getGbaAgent();
+        if (gbaAgent == null) {
             return false;
         }
 
@@ -455,10 +455,10 @@ public class SscTransaction {
         String nafFqdn = authAgent.getNafFqdnFromRealm();
         String securityProtocol = authAgent.getCipherSuite();
 
-        Pair<String, String> keyPair = gba.getGbaKey(appType, gbaMode, isTls, nafFqdn,
-                securityProtocol, isForced);
+        Pair<String, String> keyPair = gbaAgent.getGbaKey(appType, gbaMode, isTls, nafFqdn,
+                securityProtocol, forceBootStrapping);
         if (keyPair == null || keyPair.first == null || keyPair.second == null) {
-            ImsLog.e(mSlotId, "gba failure");
+            ImsLog.e(mSlotId, "Getting gba key failure");
             authAgent.setIsCredentialInfoUpdated(false);
             return false;
         }

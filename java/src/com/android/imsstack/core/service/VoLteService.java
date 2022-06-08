@@ -15,7 +15,6 @@ import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IBatteryState;
 import com.android.imsstack.core.agents.agentif.ICallSetting;
 import com.android.imsstack.core.agents.agentif.ICellInfo;
-import com.android.imsstack.core.agents.agentif.IGBA;
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgentManager;
@@ -96,7 +95,7 @@ public class VoLteService implements IVoLteService {
 
         dcGov_SetApnEnable(true);
 
-        // 8. local application load (Auto Configuration, GBA...)
+        // 8. local application load (Auto Configuration...)
         initOperatorSpecificApp();
 
         // 10. Load Additional Operator Specific logic
@@ -243,12 +242,6 @@ public class VoLteService implements IVoLteService {
     }
 
     protected void initOperatorSpecificApp() {
-        ImsLog.i("");
-
-        IGBA gba = (IGBA)AgentFactory.getAgent(AgentFactory.GBA, mSlotID);
-        if (gba != null) {
-            gba.init(mContext);
-        }
     }
 
     protected void setOperatorSpecificLogic() {
@@ -370,11 +363,6 @@ public class VoLteService implements IVoLteService {
 
     protected void clearOperatorSpecificApp() {
         ImsLog.i("");
-
-        IGBA gba = (IGBA)AgentFactory.getAgent(AgentFactory.GBA, mSlotID);
-        if (gba != null) {
-            gba.cleanup();
-        }
 
         ICallSettingService callSettingService =
                 (ICallSettingService)getService(IVoLteService.TYPE_CALLSETTING);
