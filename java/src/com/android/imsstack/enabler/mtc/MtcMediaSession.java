@@ -31,7 +31,7 @@ import com.android.imsstack.util.ImsLog;
 /**
  * class to handles call from videoprovider and invoke jni methods to libimsstack
  */
-public class MtcMediaSession implements MediaSession.IMediaSurfaceHandler {
+public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInterface {
     /**
      * Listener for events relating to an MTC media session.
      * <p>
@@ -63,7 +63,7 @@ public class MtcMediaSession implements MediaSession.IMediaSurfaceHandler {
          * Called when the peer dimension is changed
          */
         public void onMediaSessionPeerDimensionsChanged(MtcMediaSession session,
-                final int videoResolution) {
+                final int width, final int height) {
             // no-op
         }
     }
@@ -250,6 +250,17 @@ public class MtcMediaSession implements MediaSession.IMediaSurfaceHandler {
 
     public Surface getDisplaySurface() {
         return mDisplaySurface;
+    }
+
+    /**
+     * Notify when the received video frame resolution is different with the current resolution.
+     * @param width width of resolution changed.
+     * @param height height of resolution changed.
+     */
+    public void peerDimensionChanged(final int width, final int height) {
+        ImsLog.d("peerDimensionChanged width[" + width + "] height[" + height + "]");
+
+        mListener.onMediaSessionPeerDimensionsChanged(this, width, height);
     }
 
     /**

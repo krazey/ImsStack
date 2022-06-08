@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.imsstack.enabler.media;
 
 import android.annotation.NonNull;
@@ -21,6 +22,7 @@ import android.os.Parcelable;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.VideoConfig;
 
+import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
 import com.android.imsstack.util.ImsLog;
 
 /**
@@ -29,15 +31,15 @@ import com.android.imsstack.util.ImsLog;
  */
 public class VideoSessionCallbackHandler {
 
-    private final MediaSession mMediaSession;
+    private final IMtcMediaInterface mMtcMediaInterface;
 
-    public VideoSessionCallbackHandler(@NonNull final MediaSession mediaSession) {
-        mMediaSession = mediaSession;
+    public VideoSessionCallbackHandler(@NonNull final IMtcMediaInterface mtcMediaInterface) {
+        mMtcMediaInterface = mtcMediaInterface;
         ImsLog.v("Constructor - Exit");
     }
 
-    private MediaSession getMediaSession() {
-        return mMediaSession;
+    private IMtcMediaInterface getMtcMediaInterface() {
+        return mMtcMediaInterface;
     }
 
     /**
@@ -54,7 +56,7 @@ public class VideoSessionCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         parcel.writeInt(result);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -71,7 +73,7 @@ public class VideoSessionCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         parcel.writeInt(state);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -90,7 +92,7 @@ public class VideoSessionCallbackHandler {
         videoConfig.writeToParcel(parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         parcel.writeInt(result);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -107,19 +109,7 @@ public class VideoSessionCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         videoConfig.writeToParcel(parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
 
-        getMediaSession().sendRequest(parcel);
-    }
-
-    /**
-     * Handles notification when the received video frame resolution is different with the current
-     * resolution.
-     *
-     * @param width width of resolution changed.
-     * @param height height of resolution changed.
-     */
-    public void peerDimensionChanged(final int width, final int height) {
-        ImsLog.v("peerDimensionChanged: width=" + width + ",height=" + height);
-        //TODO: send it to video provider
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -137,7 +127,7 @@ public class VideoSessionCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         parcel.writeInt(packetType);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -155,7 +145,7 @@ public class VideoSessionCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         parcel.writeInt(packetLossPercentage);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**

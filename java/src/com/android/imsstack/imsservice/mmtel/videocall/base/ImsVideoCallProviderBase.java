@@ -291,8 +291,8 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         // no-op
     }
 
-    protected void handleMediaSessionPeerDimensionsChanged(final int videoResolution) {
-        changePeerDimensions(getVideoWidth(videoResolution), getVideoHeight(videoResolution));
+    protected void handleMediaSessionPeerDimensionsChanged(final int width, final int height) {
+        changePeerDimensions(width, height);
     }
 
     protected VideoDimension getCurrentVideoDimension() {
@@ -329,8 +329,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
                 VideoDimension vd = VideoCallUtils.getVideoDimension(videoQuality);
 
                 if (vd != null) {
-                    handleMediaSessionPeerDimensionsChanged(
-                            getVideoResolution(vd.getWidth(), vd.getHeight()));
+                    handleMediaSessionPeerDimensionsChanged(vd.getWidth(), vd.getHeight());
                 }
             }
         }
@@ -403,18 +402,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
             default:
                 return MtcMediaSession.ORIENTATION_0;
         }
-    }
-
-    protected static int getVideoResolution(int width, int height) {
-        return (int) (((width << 16) & 0xFFFF0000) | (height & 0x0000FFFF));
-    }
-
-    protected static int getVideoHeight(int resolution) {
-        return (int) (resolution & 0x0000FFFF);
-    }
-
-    protected static int getVideoWidth(int resolution) {
-        return (int) ((resolution >> 16) & 0x0000FFFF);
     }
 
     protected static String getDefaultDialerPackage() {
@@ -506,8 +493,8 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
 
         @Override
         public void onMediaSessionPeerDimensionsChanged(MtcMediaSession session,
-                final int videoResolution) {
-            handleMediaSessionPeerDimensionsChanged(videoResolution);
+                final int width, final int height) {
+            handleMediaSessionPeerDimensionsChanged(width, height);
         }
     };
 }

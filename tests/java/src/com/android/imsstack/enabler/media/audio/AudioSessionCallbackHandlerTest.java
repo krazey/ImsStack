@@ -18,17 +18,15 @@ package com.android.imsstack.enabler.media;
 
 import static org.mockito.Mockito.verify;
 
-import android.net.InetAddresses;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.CallQuality;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.ImsMediaSession;
-import com.android.imsstack.enabler.media.MediaConstants;
-import com.android.imsstack.enabler.media.MediaSession;
-import com.android.imsstack.enabler.media.MediaTestUtils;
-import java.util.List;
+
+import com.android.imsstack.enabler.mtc.MtcMediaSession;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,10 +36,12 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 @RunWith(JUnit4.class)
 public class AudioSessionCallbackHandlerTest {
 
-    @Mock MediaSession mMockMediaSession;
+    @Mock MtcMediaSession mMockMtcMediaSession;
     @Captor ArgumentCaptor<Parcel> mCaptorParcel;
 
     private AudioSessionCallbackHandler mAudioSessionCallbackHandler;
@@ -50,7 +50,7 @@ public class AudioSessionCallbackHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         // create the instance to test
-        mAudioSessionCallbackHandler = new AudioSessionCallbackHandler(mMockMediaSession);
+        mAudioSessionCallbackHandler = new AudioSessionCallbackHandler(mMockMtcMediaSession);
     }
 
     @Test
@@ -63,7 +63,7 @@ public class AudioSessionCallbackHandlerTest {
 
         mAudioSessionCallbackHandler.openSessionResponse(ImsMediaSession.RESULT_SUCCESS);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -77,7 +77,7 @@ public class AudioSessionCallbackHandlerTest {
 
         mAudioSessionCallbackHandler.openSessionResponse(ImsMediaSession.RESULT_NO_RESOURCES);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -92,7 +92,7 @@ public class AudioSessionCallbackHandlerTest {
 
         mAudioSessionCallbackHandler.sessionChanged(ImsMediaSession.SESSION_STATE_OPEN);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -110,7 +110,7 @@ public class AudioSessionCallbackHandlerTest {
         mAudioSessionCallbackHandler.modifySessionResponse(audioConfig,
             ImsMediaSession.RESULT_SUCCESS);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -128,7 +128,7 @@ public class AudioSessionCallbackHandlerTest {
         mAudioSessionCallbackHandler.addConfigResponse(audioConfig,
             ImsMediaSession.RESULT_SUCCESS);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -146,7 +146,7 @@ public class AudioSessionCallbackHandlerTest {
         mAudioSessionCallbackHandler.confirmConfigResponse(audioConfig,
             ImsMediaSession.RESULT_SUCCESS);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -162,7 +162,7 @@ public class AudioSessionCallbackHandlerTest {
 
         mAudioSessionCallbackHandler.firstMediaPacketReceived(audioConfig);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -185,7 +185,7 @@ public class AudioSessionCallbackHandlerTest {
 
         mAudioSessionCallbackHandler.headerExtensionReceived(rtpExtensions);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -200,7 +200,7 @@ public class AudioSessionCallbackHandlerTest {
 
         mAudioSessionCallbackHandler.onNotifyMediaInactivity(ImsMediaSession.PACKET_TYPE_RTP);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -215,7 +215,7 @@ public class AudioSessionCallbackHandlerTest {
 
         mAudioSessionCallbackHandler.onNotifyPacketLoss(MediaTestUtils.PACKET_LOSS_PERCENT);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -230,7 +230,7 @@ public class AudioSessionCallbackHandlerTest {
 
         mAudioSessionCallbackHandler.onNotifyJitter(MediaTestUtils.JITTER);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -245,7 +245,7 @@ public class AudioSessionCallbackHandlerTest {
         callQuality.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         mAudioSessionCallbackHandler.mediaQualityChanged(callQuality);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 }
