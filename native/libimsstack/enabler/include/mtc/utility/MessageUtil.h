@@ -226,6 +226,8 @@ public:
     static const IMS_CHAR STR_URN[];
     static const IMS_CHAR STR_VIDEO[];
     static const IMS_CHAR STR_TEXT[];
+    static const IMS_CHAR STR_P_TTA_VOLTE_INFO[];
+    static const IMS_CHAR STR_AVCHANGE[];
 
 private:
     static const IMS_SINT32 INVALID_INDEX;

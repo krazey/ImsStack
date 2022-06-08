@@ -61,6 +61,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormStartMessage()
     SetPreconditionHeader();
     SetPEarlyMediaHeader();
     SetLocation();
+    SetCarrierSpecificHeaders();
 
     return IMS_SUCCESS;
 }
@@ -152,6 +153,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAcceptMessage()
     SetPreconditionHeader();
     SetSrvccContactParameter();
     SetTipHeader();
+    SetCarrierSpecificHeaders();
 
     return IMS_SUCCESS;
 }
@@ -200,6 +202,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormUpdateMessage(
     SetAlertInfoHeader(bIncludeAlertInfo);
     SetSupportedHeader();
     SetPreconditionHeader();
+    SetCarrierSpecificHeaders();
 
     return IMS_SUCCESS;
 }
@@ -214,6 +217,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAcceptUpdateMessage()
     }
 
     SetPreconditionHeader();
+    SetCarrierSpecificHeaders();
 
     return IMS_SUCCESS;
 }
@@ -644,6 +648,25 @@ void MessageFormatter::SetReasonHeader(IN CONST AString& strReason)
 
     MessageUtil::AddValueIfNotExists(
             m_piNextMessage, strReason, ISipHeader::UNKNOWN, SipHeaderName::REASON);
+}
+
+/* -------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------- */
+PRIVATE
+void MessageFormatter::SetCarrierSpecificHeaders()
+{
+    // TODO: add SetCarrierSpecificHeaders() to all message depends on the requirements
+    MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+    if (objConfig.Is(Feature::CARRIER_SPECIFIC_SIP_HEADER, MessageUtil::STR_P_TTA_VOLTE_INFO))
+    {
+        if (m_eFormType == FormType::START || m_eFormType == FormType::ACCEPT ||
+                m_eFormType == FormType::UPDATE || m_eFormType == FormType::ACCEPT_UPDATE)
+        {
+            IMS_TRACE_D("SetCarrierSpecificHeaders : avchange", 0, 0, 0);
+            MessageUtil::AddValueIfNotExists(m_piNextMessage, MessageUtil::STR_AVCHANGE,
+                    ISipHeader::UNKNOWN, MessageUtil::STR_P_TTA_VOLTE_INFO);
+        }
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------

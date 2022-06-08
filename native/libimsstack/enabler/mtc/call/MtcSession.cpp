@@ -160,9 +160,24 @@ void MtcSession::UpdateCallTypeFromMessage(IN const IMessage& objMessage)
 PRIVATE
 void MtcSession::UpdateCapabilityFromMessage(IN const IMessage& objMessage)
 {
-    m_bVideoCapable = IsRegisteredFeature(ImsAosFeature::MMTEL) &&
-            IsRegisteredFeature(ImsAosFeature::VIDEO) &&
-            MessageUtil::IsVideoFeatureIncluded(&objMessage);
+    if (GetConfigurationProxy().Is(Feature::SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS))
+    {
+        m_bVideoCapable = IMS_TRUE;
+    }
+    else if (GetConfigurationProxy().Is(
+                     Feature::CARRIER_SPECIFIC_SIP_HEADER, MessageUtil::STR_P_TTA_VOLTE_INFO))
+    {
+        AString strAvchange;
+        MessageUtil::GetHeader(
+                &objMessage, ISipHeader::UNKNOWN, strAvchange, MessageUtil::STR_P_TTA_VOLTE_INFO);
+        m_bVideoCapable = strAvchange.Equals(MessageUtil::STR_AVCHANGE);
+    }
+    else
+    {
+        m_bVideoCapable = IsRegisteredFeature(ImsAosFeature::MMTEL) &&
+                IsRegisteredFeature(ImsAosFeature::VIDEO) &&
+                MessageUtil::IsVideoFeatureIncluded(&objMessage);
+    }
     m_bRttCapable = IsRegisteredFeature(ImsAosFeature::MMTEL) &&
             IsRegisteredFeature(ImsAosFeature::TEXT) &&
             MessageUtil::IsTextFeatureIncluded(&objMessage);

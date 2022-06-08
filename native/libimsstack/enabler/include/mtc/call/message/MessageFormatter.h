@@ -75,6 +75,7 @@ private:
     void SetPEarlyMediaHeader();
     void SetAlertInfoHeader(IN IMS_BOOL bIncludeAlertInfo);
     void SetReasonHeader(IN CONST AString& strReason);
+    void SetCarrierSpecificHeaders();
 
     IMS_SINT32 GetRejectStatusCode(IN const FailReason& objReason);
     void GetRejectPhrase(IN const FailReason& objReason, OUT AString& strPhrase);

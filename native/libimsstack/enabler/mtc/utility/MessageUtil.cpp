@@ -74,6 +74,8 @@ const IMS_CHAR MessageUtil::STR_TIMER[] = "timer";
 const IMS_CHAR MessageUtil::STR_URN[] = "urn";
 const IMS_CHAR MessageUtil::STR_VIDEO[] = "video";
 const IMS_CHAR MessageUtil::STR_TEXT[] = "text";
+const IMS_CHAR MessageUtil::STR_P_TTA_VOLTE_INFO[] = "P-TTA-VoLTE-Info";
+const IMS_CHAR MessageUtil::STR_AVCHANGE[] = "avchange";
 
 const IMS_SINT32 MessageUtil::INVALID_INDEX = -1;
 
