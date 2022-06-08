@@ -32,16 +32,12 @@ FailReason StartErrorHandler::Handle(IN const IMessage* piMessage) const
         return GetFailReasonForTransactionTimeout();
     }
 
-    FailReason objReason = HandleResponse(*piMessage);
-
-    if (m_objContext.GetCallInfo().bEmergency && IsRetry1xRequiredForEmergencyCall(*piMessage))
+    if (!m_objContext.GetCallInfo().bEmergency && IsRetry1xRequiredForNormalCall(*piMessage))
     {
         return FailReason(FAIL_REASON_SESSION_RETRY1X);
     }
-    else
-    {
-        return objReason;
-    }
+
+    return HandleResponse(*piMessage);
 }
 
 PRIVATE
@@ -207,8 +203,14 @@ FailReason StartErrorHandler::Handle404Response() const
 PRIVATE
 FailReason StartErrorHandler::Handle407Response() const
 {
-    ControlAos(ImsAosControl::REGISTER_REINITIATE);  // FIXME: INVITE auth
-    return FailReason(FAIL_REASON_SESSION_SERVERERROR, SipStatusCode::SC_407);
+    if (m_objContext.GetCallInfo().bEmergency)
+    {
+        return FailReason(FAIL_REASON_SESSION_RETRY1X);
+    }
+    else
+    {
+        return FailReason(FAIL_REASON_SESSION_SERVERERROR, SipStatusCode::SC_407);
+    }
 }
 
 PRIVATE
@@ -328,22 +330,17 @@ IMS_BOOL StartErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage) c
 }
 
 PRIVATE
-IMS_BOOL StartErrorHandler::IsRetry1xRequiredForEmergencyCall(IN const IMessage& objMessage) const
+IMS_BOOL StartErrorHandler::IsRetry1xRequiredForNormalCall(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-
-    if (nStatusCode == SipStatusCode::SC_407)
-    {
-        return IMS_FALSE;
-    }
-    return IMS_TRUE;
+    return m_objContext.GetConfigurationProxy().Is(Feature::REJECT_CODE_FOR_CSFB, nStatusCode);
 }
 
 PRIVATE
 IMS_BOOL StartErrorHandler::IsNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const
 {
     if (m_objContext.GetConfigurationProxy().Is(Feature::
-                        EMERGENCY_RETRY_WITHOUT_CHECKING380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL))
+            EMERGENCY_RETRY_WITHOUT_CHECKING380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL))
     {
         return IMS_TRUE;
     }

@@ -48,7 +48,7 @@ private:
     FailReason Handle6xxResponse(IN const IMessage& objMessage) const;
 
     IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage) const;
-    IMS_BOOL IsRetry1xRequiredForEmergencyCall(IN const IMessage& objMessage) const;
+    IMS_BOOL IsRetry1xRequiredForNormalCall(IN const IMessage& objMessage) const;
     IMS_BOOL IsNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const;
     IMS_BOOL IsIpcanResourceUnavailable(IN const IMessage& objMessage) const;
     IMS_BOOL HasEmergencyServiceTypeInBody(IN const IMessage& objMessage) const;
