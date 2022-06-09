@@ -16,9 +16,6 @@
     <!-- Ut/Xcap AOSP -->
     <boolean name="carrier_supports_ss_over_ut_bool" value="false"/>
 
-    <!-- Ringing timer and Ringback timer -->
-    <int name="ringing_timer_millis_int" value="180000"/>
-    <int name="ringback_timer_millis_int" value="180000"/>
     <boolean name="imssms.sms_over_ims_supported_bool" value="false"/>
 
     <!-- MTC default -->

@@ -16,10 +16,6 @@
     <!-- USSD overIMS if volte registered -->
     <int name="carrier_ussd_method_int" value="1"/>
 
-    <!-- Ringing timer and Ringback timer -->
-    <int name="ringing_timer_millis_int" value="60000"/>
-    <int name="ringback_timer_millis_int" value="60000"/>
-
     <int-array name="imsvoice.srvcc_type_int_array" num="3">
         <item value="0"/>
         <item value="1"/>
