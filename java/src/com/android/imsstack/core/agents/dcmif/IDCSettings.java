@@ -3,14 +3,19 @@ package com.android.imsstack.core.agents.dcmif;
 public interface IDCSettings extends IDC {
 
     /**
-     * Return service is allowed in roaming state.
+     * Return whether VoLTE service is allowed in roaming state
      */
     boolean isRoamingAllowed();
 
     /**
-     * Return VoPS value should be checked when request to use Ims Apn
+     * Return whether VoPS value should be notified when the VoPS is not supported
      */
     boolean isVopsRequired();
+
+    /**
+     * Return whether VoPS value should be checked when request IMS PDN
+     */
+    boolean isVopsRequiredForPdn();
 
     /**
      * Return list of RAT technologies on which IMS is supported

@@ -503,7 +503,7 @@ public abstract class Apn extends Handler implements IApn {
 
         if (mType.getType() == DCConstants.TYPE_IMS) {
             if (mDcSettings != null) {
-                if (mDcSettings.isVopsRequired()) {
+                if (mDcSettings.isVopsRequiredForPdn()) {
                     nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_MMTEL);
                 }
             }

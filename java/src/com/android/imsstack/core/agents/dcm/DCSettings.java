@@ -9,7 +9,6 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDCSettings;
 import com.android.imsstack.core.config.CarrierConfig;
-
 import com.android.imsstack.util.ImsLog;
 
 public class DCSettings implements IDCSettings {
@@ -67,18 +66,31 @@ public class DCSettings implements IDCSettings {
 
         boolean ignoreVops = mCarrierConfig.getBoolean(
                 CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, false);
-        int[] noVopsRequire = mCarrierConfig.getIntArray(
+        if (ignoreVops && !isVopsRequiredForPdn()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean isVopsRequiredForPdn() {
+        if (mCarrierConfig == null) {
+            return true;
+        }
+
+        int[] noVopsRequired = mCarrierConfig.getIntArray(
                 CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY);
         IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
 
-        if (ignoreVops && (noVopsRequire != null) && (dcnw != null)) {
-            for (int i = 0; i < noVopsRequire.length ; i++) {
+        if ((noVopsRequired != null) && (dcnw != null)) {
+            for (int i = 0; i < noVopsRequired.length; i++) {
                 if (dcnw.isRoaming()) {
-                    if(noVopsRequire[i] == CarrierConfigManager.Ims.NETWORK_TYPE_ROAMING) {
+                    if (noVopsRequired[i] == CarrierConfigManager.Ims.NETWORK_TYPE_ROAMING) {
                         return false;
                     }
                 } else {
-                    if(noVopsRequire[i] == CarrierConfigManager.Ims.NETWORK_TYPE_HOME) {
+                    if (noVopsRequired[i] == CarrierConfigManager.Ims.NETWORK_TYPE_HOME) {
                         return false;
                     }
                 }
