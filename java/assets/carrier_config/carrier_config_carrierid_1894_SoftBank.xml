@@ -3,8 +3,6 @@
     <!-- Carrier configurations -->
     <!-- Aos -->
     <int name="ims.isim_index_for_impu_int" value="0"/>
-    <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="0">
-    </int-array>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
 
     <!-- Assets: non-carrier configurations -->

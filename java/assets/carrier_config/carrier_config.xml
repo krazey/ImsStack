@@ -13,6 +13,8 @@
     </int-array>
 
     <!-- Aos -->
+    <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="0">
+    </int-array>
     <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="false"/>
     <boolean name="imsemergency.disable_t3482_for_emergency_bool" value="false"/>
     <int name="ims.ims_preferred_iptype_int" value="1"/>

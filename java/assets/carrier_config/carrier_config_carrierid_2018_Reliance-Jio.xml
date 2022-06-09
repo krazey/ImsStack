@@ -8,6 +8,11 @@
         <item value="2"/>
     </int-array>
     <int name="imswfc.registration_private_header_int" value="2"/>
+    <!-- KEY_REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE -->
+    <int-array name="ims.registration_permanent_error_code_int_array" num="2">
+        <item value="403"/>
+        <item value="404"/>
+    </int-array>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
