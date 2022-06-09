@@ -298,7 +298,7 @@ enum
 {
     CNAP_SCHEME_PAID = 0,
     CNAP_SCHEME_FROM = 1,
-    CNAP_SCHEME_PAID_FROM = 2, /* CNAP INDICATION */
+    // if there is an issue for this, PAID preferred will be added again.
 };
 
 enum
@@ -608,8 +608,6 @@ inline const IMS_CHAR* Str_CNAP(IN IMS_UINT32 eType)
             return "CNAP_SCHEME_PAID ";
         case CNAP_SCHEME_FROM:
             return "CNAP_SCHEME_FROM";
-        case CNAP_SCHEME_PAID_FROM:
-            return "CNAP_SCHEME_PAID_FROM";
         default:
             return "__INVALID__";
     }
