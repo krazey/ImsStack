@@ -1,0 +1,125 @@
+package com.android.imsstack.enabler.mts;
+
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Parcel;
+
+import com.android.imsstack.enabler.IUIMS;
+import com.android.imsstack.enabler.mts.MtsController;
+import com.android.imsstack.jni.JNIIms;
+import com.android.imsstack.jni.JNIImsListener;
+import com.android.imsstack.util.ImsLog;
+
+import com.android.internal.annotations.VisibleForTesting;
+
+public class MtsJni {
+    /* JNI Message */
+    private static final int JAVA2MTSENABLER = 1000;
+    private static final int MTSENABLER2JAVA = 1050;
+
+    public static final int NOTI_MTSENABLER_SEND_MO_SMS = JAVA2MTSENABLER + 1;
+    public static final int NOTI_MTSENABLER_SEND_MT_RESULT = JAVA2MTSENABLER + 2;
+
+    public static final int NOTI_MTS_RAT_SELECTION = JAVA2MTSENABLER + 10;
+    public static final int NOTI_EXIT_SCBM = JAVA2MTSENABLER + 11;
+
+    private static final int REPORT_MTS_MO_STATUS = MTSENABLER2JAVA + 1;
+    private static final int REPORT_MTS_MT_SMS = MTSENABLER2JAVA + 2;
+
+    private static final int REQUEST_MTS_RAT_SELECTION = MTSENABLER2JAVA + 10;
+    private static final int REQUEST_MTS_EXIT_RAT_SELECTION = MTSENABLER2JAVA + 11;
+
+    protected Handler mHandler = null;
+
+    private static MtsJni mMtsJni = null;
+    private long mNativeObj = 0;
+    private MtsJniImsListener mNativeListener = new MtsJniImsListener();
+
+    static public MtsJni getInstance() {
+        synchronized (MtsJni.class) {
+            if (mMtsJni == null) {
+                mMtsJni = new MtsJni();
+            }
+        }
+        return mMtsJni;
+    }
+
+    public void init(Handler handler, int slotId) {
+        mNativeObj = JNIIms.getInterface(IUIMS.APP_MTS, slotId);
+        ImsLog.d("mNativeObj (" + mNativeObj + ")");
+
+        if (mNativeObj == 0) {
+            throw new IllegalStateException("mNativeObj is zero");
+        }
+
+        JNIIms.setListener(mNativeObj, mNativeListener);
+
+        mHandler = handler;
+    }
+
+    public void release() {
+        ImsLog.d("");
+
+        if (mNativeObj != 0) {
+            JNIIms.removeListener(mNativeObj, mNativeListener);
+            JNIIms.releaseInterface(mNativeObj);
+            mNativeObj = 0;
+        }
+
+        mHandler = null;
+    }
+
+    public void sendMessage(Parcel parcel) {
+        if (parcel == null) {
+            ImsLog.i("parcel is null");
+            return;
+        }
+        ImsLog.i("send Message to native.");
+        byte[] baData = parcel.marshall();
+
+        JNIIms.sendData(mNativeObj, baData);
+
+        parcel.recycle();
+        parcel = null;
+    }
+
+    private class MtsJniImsListener implements JNIImsListener {
+        @Override
+        public void onMessage(Parcel parcel) {
+            int msgName = parcel.readInt();
+            ImsLog.d("msg=" + msgName);
+
+            switch (msgName) {
+                case REPORT_MTS_MO_STATUS: {
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(MtsController.REPORTMOSTATUS_REASON, parcel.readInt());
+                    bundle.putInt(MtsController.REPORTMOSTATUS_SMSFORMAT, parcel.readInt());
+                    bundle.putInt(MtsController.REPORTMOSTATUS_RETRYAFTER, parcel.readInt());
+                    bundle.putInt(MtsController.REPORTMOSTATUS_SEQID, parcel.readInt());
+
+                    Message msg = Message.obtain();
+                    msg.what = MtsController.REQUEST_REPORT_MO_STATUS;
+                    msg.obj = bundle;
+                    mHandler.sendMessage(msg);
+                    break;
+                }
+
+                case REPORT_MTS_MT_SMS: {
+                    int smsformat = parcel.readInt();
+                    String encodedData = parcel.readString();
+                    Message msg = Message.obtain();
+                    msg.what =  MtsController.REQUEST_REPORT_MT_SMS;
+                    msg.arg1 = smsformat;
+                    msg.obj = encodedData;
+                    mHandler.sendMessage(msg);
+                    break;
+                }
+
+                default:
+                    ImsLog.e("OnMessage : no handle message");
+                    break;
+            }
+        }
+    }
+}

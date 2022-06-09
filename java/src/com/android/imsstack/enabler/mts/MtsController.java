@@ -7,28 +7,11 @@ import android.os.Message;
 import android.os.Parcel;
 
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.IUIMS;
-import com.android.imsstack.jni.JNIIms;
-import com.android.imsstack.jni.JNIImsListener;
 import com.android.imsstack.util.ImsLog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 public class MtsController {
-    /* JNI Message */
-    private static final int JAVA2MTSENABLER = 1000;
-    private static final int MTSENABLER2JAVA = 1050;
-
-    private static final int NOTI_MTSENABLER_SEND_MO_SMS = JAVA2MTSENABLER + 1;
-    private static final int NOTI_MTSENABLER_SEND_MT_RESULT = JAVA2MTSENABLER + 2;
-
-    private static final int NOTI_MTS_RAT_SELECTION = JAVA2MTSENABLER + 10;
-    private static final int NOTI_EXIT_SCBM = JAVA2MTSENABLER + 11;
-
-    private static final int REPORT_MTS_MO_STATUS = MTSENABLER2JAVA + 1;
-    private static final int REPORT_MTS_MT_SMS = MTSENABLER2JAVA + 2;
-
-    private static final int REQUEST_MTS_RAT_SELECTION = MTSENABLER2JAVA + 10;
-    private static final int REQUEST_MTS_EXIT_RAT_SELECTION = MTSENABLER2JAVA + 11;
-
     /* MtsController Message */
     // 1 : Request Report Mo Status
     public static final int REQUEST_REPORT_MO_STATUS = 1;
@@ -37,6 +20,15 @@ public class MtsController {
     public static final int NOTIFICATION_MTS_SEND_MO_SMS = 101;
 
     /* GII-SMSImpl Message */
+    public static final int MO_INVALID = 0;
+    public static final int MO_SUCCESS = 1;
+    public static final int MO_IMS_TEMP_FAILURE = 2;
+    public static final int MO_IMS_PERM_FAILURE = 3;
+    public static final int MO_IMS_LIMITEDSMSSVCREGI = 4;
+    public static final int MO_RETRY_CS = 5;
+    public static final int MO_RETRY_CS_OR_SGS = 6;
+
+    public static final int MT_INVALID = 0;
     public static final int MT_SUCCESS = 1;
     public static final int MT_FAILURE = 2;
     public static final int MT_SMS_FORMAT_FAILURE = 3;
@@ -71,10 +63,9 @@ public class MtsController {
         }
     }
 
-    private long mNativeObj = 0;
+    private MtsJni mMtsJni;
     private IBaseContext mContext = null;
     private MessageHandler mHandler = null;
-    private JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
     private Listener mListener = null;
 
     public MtsController(IBaseContext context) {
@@ -85,14 +76,17 @@ public class MtsController {
         mHandler = new MessageHandler(mContext.getCallLooper());
     }
 
-    public void cleanup() {
+    @VisibleForTesting
+    public MtsController(IBaseContext context, Looper looper) {
         ImsLog.d("");
 
-        if (mNativeObj != 0) {
-            JNIIms.removeListener(mNativeObj, mNativeListener);
-            JNIIms.releaseInterface(mNativeObj);
-            mNativeObj = 0;
-        }
+        mContext = context;
+
+        mHandler = new MessageHandler(looper);
+    }
+
+    public void cleanup() {
+        ImsLog.d("");
 
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
@@ -102,29 +96,31 @@ public class MtsController {
         mListener = null;
     }
 
-    public void startNativeConnection() {
-        mNativeObj = JNIIms.getInterface(IUIMS.APP_MTS, mContext.getSlotId());
-        ImsLog.d("mNativeObj (" + mNativeObj + ")");
-
-        if (mNativeObj == 0) {
-            throw new IllegalStateException("mNativeObj is zero");
-        }
-
-        JNIIms.setListener(mNativeObj, mNativeListener);
-    }
-
     public void setListener(Listener listener) {
         mListener = listener;
+    }
+
+    public void startNativeConnection() {
+        ImsLog.d("");
+
+        mMtsJni = MtsJni.getInstance();
+        mMtsJni.init(mHandler, mContext.getSlotId());
+    }
+
+    @VisibleForTesting
+    public void startNativeConnection(MtsJni mtsJni) {
+        mMtsJni = mtsJni;
+        mMtsJni.init(mHandler, mContext.getSlotId());
+    }
+
+    @VisibleForTesting
+    public Handler getHandler() {
+        return mHandler;
     }
 
     public boolean sendMessage(int smsFormat, String smsData, String targetAddress, int seqId) {
         ImsLog.d("smsFormat : " + smsFormat + ", encodedDataLength = " + smsData
                 + ", complexData = " + targetAddress + ", seqId = " + seqId );
-
-        if (mNativeObj == 0) {
-            processNotifySendMoSmsError(smsFormat, seqId);
-            return false;
-        }
 
         if (smsData == null || targetAddress == null) {
             processNotifySendMoSmsError(smsFormat, seqId);
@@ -138,16 +134,12 @@ public class MtsController {
             return false;
         }
 
-        parcel.writeInt(NOTI_MTSENABLER_SEND_MO_SMS);
+        parcel.writeInt(MtsJni.NOTI_MTSENABLER_SEND_MO_SMS);
         parcel.writeInt(smsFormat);
         parcel.writeString(smsData);
         parcel.writeString(targetAddress);
         parcel.writeInt(seqId);
-
-        byte[] baData = parcel.marshall();
-        parcel.recycle();
-        parcel = null;
-        JNIIms.sendData(mNativeObj, baData);
+        mMtsJni.sendMessage(parcel);
         return true;
     }
 
@@ -160,7 +152,7 @@ public class MtsController {
         }
 
         Bundle bundle = new Bundle();
-        bundle.putInt(REPORTMOSTATUS_REASON, 2 /*MO_IMS_TEMP_FAILURE*/);
+        bundle.putInt(REPORTMOSTATUS_REASON, MO_IMS_TEMP_FAILURE);
         bundle.putInt(REPORTMOSTATUS_SMSFORMAT, smsFormat);
         bundle.putInt(REPORTMOSTATUS_RETRYAFTER, 0);
         bundle.putInt(REPORTMOSTATUS_SEQID, seqId);
@@ -172,23 +164,15 @@ public class MtsController {
     }
 
     private int notifySendMtResult(int mtResult) {
-        if (mNativeObj == 0) {
-            return (-1);
-        }
-
         Parcel parcel = Parcel.obtain();
         if (parcel == null) {
             ImsLog.e("parcel is null");
             return (-1);
         }
 
-        parcel.writeInt(NOTI_MTSENABLER_SEND_MT_RESULT);
+        parcel.writeInt(MtsJni.NOTI_MTSENABLER_SEND_MT_RESULT);
         parcel.writeInt(mtResult);
-
-        byte[] baData = parcel.marshall();
-        parcel.recycle();
-        parcel = null;
-        JNIIms.sendData(mNativeObj, baData);
+        mMtsJni.sendMessage(parcel);
         return 0;
     }
 
@@ -225,45 +209,6 @@ public class MtsController {
                     break;
 
                 default :
-                    break;
-            }
-        }
-    }
-
-    private class JNIImsListenerProxy implements JNIImsListener {
-        @Override
-        public void onMessage(Parcel parcel) {
-            int msgName = parcel.readInt();
-            ImsLog.d("msg=" + msgName);
-
-            switch (msgName) {
-                case REPORT_MTS_MO_STATUS: {
-                    Bundle bundle = new Bundle();
-                    bundle.putInt(REPORTMOSTATUS_REASON, parcel.readInt());
-                    bundle.putInt(REPORTMOSTATUS_SMSFORMAT, parcel.readInt());
-                    bundle.putInt(REPORTMOSTATUS_RETRYAFTER, parcel.readInt());
-                    bundle.putInt(REPORTMOSTATUS_SEQID, parcel.readInt());
-
-                    Message msg = Message.obtain();
-                    msg.what = REQUEST_REPORT_MO_STATUS;
-                    msg.obj = bundle;
-                    mHandler.sendMessage(msg);
-                    break;
-                }
-
-                case REPORT_MTS_MT_SMS: {
-                    int smsformat = parcel.readInt();
-                    String encodedData = parcel.readString();
-                    Message msg = Message.obtain();
-                    msg.what =  REQUEST_REPORT_MT_SMS;
-                    msg.arg1 = smsformat;
-                    msg.obj = encodedData;
-                    mHandler.sendMessage(msg);
-                    break;
-                }
-
-                default:
-                    ImsLog.e("OnMessage : no handle message");
                     break;
             }
         }
