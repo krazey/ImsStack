@@ -975,7 +975,6 @@ IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
             eFeature = Feature::RINGING_TIMER;
             break;
         case TIMER_RETRY_AFTER:
-            // TODO: value must be millisec
             // if silent redial uses 'Retry-After' header, it mustn't call StartTimer() here.
             eFeature = Feature::SILENT_REDIAL_INTERVAL;
             break;

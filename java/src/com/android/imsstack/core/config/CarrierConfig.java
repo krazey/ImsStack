@@ -336,8 +336,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_of_local_numbers_int";
         public static final String KEY_DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR_BOOL =
                 KEY_PREFIX + "default_eps_bearer_context_usage_restriction_on_cellular_bool";
-        public static final String KEY_SILENT_REDIAL_INTERVAL_INT =
-                KEY_PREFIX + "silent_redial_interval_int";
+        public static final String KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT =
+                KEY_PREFIX + "silent_redial_interval_millis_int";
         public static final String KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT =
                 KEY_PREFIX + "call_type_after_audio_and_video_call_merged_int";
         public static final String KEY_SHORT_CALL_CODE_INT_ARRAY =

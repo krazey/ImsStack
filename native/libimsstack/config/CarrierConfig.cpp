@@ -526,8 +526,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_OF_LOCAL_NUMBERS_INT[] =
 const IMS_CHAR CarrierConfig::ImsVoice::
         KEY_DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR_BOOL[] = KEY_IMS_VOICE_PREFIX
         "default_eps_bearer_context_usage_restriction_on_cellular_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_SILENT_REDIAL_INTERVAL_INT[] =
-        KEY_IMS_VOICE_PREFIX "silent_redial_interval_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT[] =
+        KEY_IMS_VOICE_PREFIX "silent_redial_interval_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT[] =
         KEY_IMS_VOICE_PREFIX "call_type_after_audio_and_video_call_merged_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SHORT_CALL_CODE_INT_ARRAY[] =

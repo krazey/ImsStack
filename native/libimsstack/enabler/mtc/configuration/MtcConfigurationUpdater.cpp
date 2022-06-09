@@ -92,7 +92,7 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
     objItems.bDefaultEpsBearerContextUsageRestrictionOnCellular = piCc->GetBoolean(CarrierConfig::
                     ImsVoice::KEY_DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR_BOOL);
     objItems.nSilentRedialInterval =
-            piCc->GetInt(CarrierConfig::ImsVoice::KEY_SILENT_REDIAL_INTERVAL_INT);
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT);
     objItems.nCallTypeAfterAudioAndVideoCallMerged = piCc->GetInt(
             CarrierConfig::ImsVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT);
     objItems.objShortCallCodes =
