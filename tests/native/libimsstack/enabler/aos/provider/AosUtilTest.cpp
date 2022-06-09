@@ -25,16 +25,28 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "msg/SipMessage.h"
+#include "SipMessageBodyPart.h"
 #include "interface/IAosBlock.h"
 #include "provider/AosUtil.h"
 
 using ::testing::Return;
 using ::testing::ReturnNull;
+using ::testing::ReturnRef;
 
 class AosUtilTest : public ::testing::Test
 {
 public:
     AosUtil* pAosUtil;
+
+    enum
+    {
+        FEATURE_NONE = 0x0,
+        FEATURE_SUBSCRIPTION = 0x01,
+        FEATURE_IPSEC = 0x02,
+        FEATURE_TRM = 0x04,
+        FEATURE_TRM_BLOCK = 0x08,
+        FEATURE_VONR = 0x10
+    };
 
 protected:
     virtual void SetUp() override
@@ -179,6 +191,152 @@ TEST_F(AosUtilTest, GetProxyFromContact)
             .WillOnce(Return(strHeader));
     EXPECT_TRUE(pAosUtil->GetProxyFromContact(
             static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
+}
+
+TEST_F(AosUtilTest, GetWarningHeader)
+{
+    AString strReult = AString::ConstEmpty();
+    EXPECT_EQ(strReult, pAosUtil->GetWarningHeader(IMS_NULL));
+
+    MockISipMessage objMockSipMsg;
+    AString strHeader = "";
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::WARNING, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_EQ(strReult, pAosUtil->GetWarningHeader(static_cast<ISipMessage*>(&objMockSipMsg)));
+
+    strHeader.Append("301 isi.edu "
+                     "incompatible network address type 'E.164'"
+                     " ");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::WARNING, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_EQ(strHeader, pAosUtil->GetWarningHeader(static_cast<ISipMessage*>(&objMockSipMsg)));
+}
+
+TEST_F(AosUtilTest, IsReasonPhraseExist)
+{
+    AString strReason = "";
+    EXPECT_FALSE(pAosUtil->IsReasonPhraseExist(IMS_NULL, strReason));
+
+    MockISipMessage objMockSipMsg;
+    AString strHeader = "";
+    EXPECT_CALL(objMockSipMsg, GetReasonPhrase()).WillOnce(ReturnRef(strHeader));
+    EXPECT_FALSE(
+            pAosUtil->IsReasonPhraseExist(static_cast<ISipMessage*>(&objMockSipMsg), strReason));
+
+    strHeader.Append("Q.850; cause=17; text="
+                     "unallocated (unassigned) number"
+                     " ");
+    EXPECT_CALL(objMockSipMsg, GetReasonPhrase()).WillOnce(ReturnRef(strHeader));
+    EXPECT_FALSE(
+            pAosUtil->IsReasonPhraseExist(static_cast<ISipMessage*>(&objMockSipMsg), strReason));
+
+    strReason.Append("cause=17");
+    EXPECT_CALL(objMockSipMsg, GetReasonPhrase()).WillOnce(ReturnRef(strHeader));
+    EXPECT_TRUE(
+            pAosUtil->IsReasonPhraseExist(static_cast<ISipMessage*>(&objMockSipMsg), strReason));
+}
+
+TEST_F(AosUtilTest, IsInitialRegistrationRequired)
+{
+    EXPECT_FALSE(pAosUtil->IsInitialRegistrationRequired(IMS_NULL));
+
+    IMSList<ISipMessageBodyPart*> objBodyParts;
+    objBodyParts.Clear();
+
+    MockISipMessage objMockSipMsg;
+    EXPECT_CALL(objMockSipMsg, GetBodyParts()).WillOnce(Return(objBodyParts));
+    EXPECT_FALSE(
+            pAosUtil->IsInitialRegistrationRequired(static_cast<ISipMessage*>(&objMockSipMsg)));
+
+    SipMessageBodyPart objBodyPart;
+    ISipMessageBodyPart* piBodyPart = static_cast<ISipMessageBodyPart*>(&objBodyPart);
+
+    AString strContent = "";
+    strContent.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    strContent.Append("<ims-3gpp version=\"1\"><alternative-service>");
+    strContent.Append("<type>restoration</type>");
+    strContent.Append("<reason></reason>");
+    strContent.Append("<action>initial-registration</action>");
+    strContent.Append("</alternative-service></ims-3gpp>");
+    ByteArray objContent(strContent);
+
+    piBodyPart->SetContent(objContent);
+    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, "application/3gpp-ims+xml");
+
+    objBodyParts.Append(piBodyPart);
+
+    EXPECT_CALL(objMockSipMsg, GetBodyParts()).WillOnce(Return(objBodyParts));
+    EXPECT_TRUE(pAosUtil->IsInitialRegistrationRequired(static_cast<ISipMessage*>(&objMockSipMsg)));
+}
+
+TEST_F(AosUtilTest, IsParameterIncluded3)
+{
+    IMS_SINT32 nHeaderType = 0;
+    AString strParameter = "test";
+    EXPECT_FALSE(pAosUtil->IsParameterIncluded(IMS_NULL, nHeaderType, strParameter));
+
+    MockISipMessage objMockSipMsg;
+    IMSList<AString> objHeaders;
+    objHeaders.Clear();
+    EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, (AString::ConstNull())))
+            .WillOnce(Return(objHeaders));
+    EXPECT_FALSE(pAosUtil->IsParameterIncluded(
+            static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strParameter));
+
+    AString strHeader = "";
+    objHeaders.Append(strHeader);
+    EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, (AString::ConstNull())))
+            .WillOnce(Return(objHeaders));
+    EXPECT_FALSE(pAosUtil->IsParameterIncluded(
+            static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strParameter));
+
+    strHeader = "test";
+    objHeaders.Append(strHeader);
+    EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, (AString::ConstNull())))
+            .WillOnce(Return(objHeaders));
+    EXPECT_TRUE(pAosUtil->IsParameterIncluded(
+            static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strParameter));
+}
+
+TEST_F(AosUtilTest, IsParameterIncluded4)
+{
+    IMS_SINT32 nHeaderType = 0;
+    AString strName = "name";
+    AString strParameter = "test";
+    EXPECT_FALSE(pAosUtil->IsParameterIncluded(IMS_NULL, nHeaderType, strName, strParameter));
+
+    MockISipMessage objMockSipMsg;
+    IMSList<AString> objHeaders;
+    objHeaders.Clear();
+    EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, strName)).WillOnce(Return(objHeaders));
+    EXPECT_FALSE(pAosUtil->IsParameterIncluded(
+            static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strName, strParameter));
+
+    AString strHeader = "";
+    objHeaders.Append(strHeader);
+    strHeader = "test";
+    objHeaders.Append(strHeader);
+    EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, strName)).WillOnce(Return(objHeaders));
+    EXPECT_TRUE(pAosUtil->IsParameterIncluded(
+            static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strName, strParameter));
+}
+
+TEST_F(AosUtilTest, CheckFeature)
+{
+    IMS_UINT32 nFeatures = 0;
+    pAosUtil->AddFeature(FEATURE_SUBSCRIPTION, nFeatures);
+    EXPECT_TRUE(pAosUtil->IsFeatureOn(FEATURE_SUBSCRIPTION, nFeatures));
+
+    pAosUtil->AddFeature(FEATURE_IPSEC, nFeatures);
+    EXPECT_TRUE(pAosUtil->IsFeatureOn(FEATURE_IPSEC, nFeatures));
+
+    pAosUtil->RemoveFeature(FEATURE_IPSEC, nFeatures);
+    EXPECT_FALSE(pAosUtil->IsFeatureOn(FEATURE_IPSEC, nFeatures));
+    EXPECT_FALSE(pAosUtil->IsFeatureCleared(nFeatures));
+
+    pAosUtil->AddFeature(FEATURE_VONR, nFeatures);
+    pAosUtil->ClearFeature(nFeatures);
+    EXPECT_TRUE(pAosUtil->IsFeatureCleared(nFeatures));
 }
 
 TEST_F(AosUtilTest, SetRetryTimeDuration)
@@ -380,6 +538,35 @@ TEST_F(AosUtilTest, ManageIntList)
     pAosUtil->RemoveElementToList(BLOCK_CELLULAR_VOPS_OFF, combineReasons);
     pAosUtil->RemoveElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, combineReasons);
     EXPECT_FALSE(pAosUtil->IsElementExistInList(reasons, combineReasons));
+}
+
+TEST_F(AosUtilTest, GetUserInfoFromSipAddress)
+{
+    AString strSipAddress = AString::ConstNull();
+    AString strUserInfo = AString::ConstNull();
+    pAosUtil->GetUserInfoFromSipAddress(strSipAddress, strUserInfo);
+    EXPECT_EQ(AString::ConstNull(), strUserInfo);
+
+    strSipAddress.Append("10.168.219.102");
+    pAosUtil->GetUserInfoFromSipAddress(strSipAddress, strUserInfo);
+    EXPECT_EQ(AString::ConstNull(), strUserInfo);
+
+    strSipAddress = "";
+    strSipAddress.Append("sip:1234@ims.google.com");
+    pAosUtil->GetUserInfoFromSipAddress(strSipAddress, strUserInfo);
+    AString strResult = "1234";
+    EXPECT_EQ(strResult, strUserInfo);
+
+    strSipAddress = "";
+    strSipAddress.Append("sips:1234@ims.google.com");
+    pAosUtil->GetUserInfoFromSipAddress(strSipAddress, strUserInfo);
+    EXPECT_EQ(strResult, strUserInfo);
+
+    strSipAddress = "";
+    strSipAddress.Append("tel:+1234@ims.google.com");
+    pAosUtil->GetUserInfoFromSipAddress(strSipAddress, strUserInfo);
+    strResult = "+1234@ims.google.com";
+    EXPECT_EQ(strResult, strUserInfo);
 }
 
 TEST_F(AosUtilTest, checkNetworkType)

@@ -273,6 +273,11 @@ AString AosUtil::GetWarningHeader(IN const ISipMessage* piSipMsg)
 PUBLIC
 IMS_BOOL AosUtil::IsReasonPhraseExist(IN const ISipMessage* piSipMsg, IN AString strReason)
 {
+    if (piSipMsg == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
     AString strPhrase = piSipMsg->GetReasonPhrase();
 
     if (strPhrase.GetLength() > 0)
