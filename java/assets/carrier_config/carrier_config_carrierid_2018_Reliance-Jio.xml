@@ -20,7 +20,6 @@
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
     <int name="imsss.ut_transport_type_int" value="1"/>
     <int name="imsss.ut_as_server_port_int" value="7077"/>
-    <int name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
 
     <!-- Ut/Xcap -->
     <!--<boolean name="imsss.xcap_root_uri_requires_srv_query_bool" value="true"/>-->
@@ -31,6 +30,6 @@
     <int name="ut_oir_network_default_operation_int" value="1"/>
 
     <!-- Do not retry SMS in CS on failure -->
-    <int name="imssms.sms_csfb_retry_on_failure_bool" value="false"/>
+    <boolean name="imssms.sms_csfb_retry_on_failure_bool" value="false"/>
 
 </carrier_config>
