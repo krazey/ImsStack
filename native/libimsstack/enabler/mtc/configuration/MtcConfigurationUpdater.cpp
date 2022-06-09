@@ -57,6 +57,8 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL);
     objItems.nMoCallRequestTimeout =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT);
+    objItems.objAudioInactivityCallEndReasons = piCc->GetIntArray(
+            CarrierConfig::ImsVoice::KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY);
     objItems.n18xTimer = piCc->GetInt(CarrierConfig::ImsVoice::KEY_18X_TIMER_MILLIS_INT);
     objItems.bSupportConferenceReferSubscribe =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL);

@@ -250,6 +250,55 @@ PUBLIC VIRTUAL CallStateName EstablishedState::NotifyErrorToUssiInfo(
     return eState;
 }
 
+PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType)
+{
+    IMS_TRACE_I("OnReceivingMediaDataFailed", 0, 0, 0);
+
+    if (IsCallEndNeededByAudioInactivity(eMediaType))
+    {
+        FailReason objReason(FAIL_REASON_MEDIA_NODATA);
+        HandleTerminate(objReason);
+        m_objContext.GetUiNotifier().SendTerminated(objReason);
+        return CallStateName::TERMINATING;
+    }
+
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
+    if (eMediaType == MEDIATYPE_VIDEO && eCallType == CallType::VT)
+    {
+        // TODO: downgrade to voip
+    }
+    else if (eMediaType == MEDIATYPE_TEXT && eCallType == CallType::RTT)
+    {
+        // TODO: downgrade to voip
+    }
+    // TODO: check VIDEO_RTT case
+
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName EstablishedState::OnVideoLowestBitRate()
+{
+    IMS_TRACE_I("OnVideoLowestBitRate", 0, 0, 0);
+
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
+    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
+    {
+        // TODO: downgrade to voip
+    }
+
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName EstablishedState::OnMediaFailed(IN FailReason objReason)
+{
+    IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
+
+    HandleTerminate(objReason);
+    m_objContext.GetUiNotifier().SendTerminated(objReason);
+
+    return CallStateName::TERMINATING;
+}
+
 PRIVATE
 IMS_RESULT EstablishedState::HandleUpdate(
         IN UpdateType eUpdateType, IN CallType eCallType, IN MediaInfo* pMediaInfo)

@@ -206,6 +206,31 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnTimerExpired(IN IMS_SINT32 nType)
     return GetStateName();
 }
 
+PUBLIC VIRTUAL CallStateName UpdatingState::OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType)
+{
+    IMS_TRACE_I("OnReceivingMediaDataFailed", 0, 0, 0);
+
+    if (IsCallEndNeededByAudioInactivity(eMediaType))
+    {
+        FailReason objReason(FAIL_REASON_MEDIA_NODATA);
+        HandleTerminate(objReason);
+        m_objContext.GetUiNotifier().SendTerminated(objReason);
+        return CallStateName::TERMINATING;
+    }
+
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName UpdatingState::OnMediaFailed(IN FailReason objReason)
+{
+    IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
+
+    HandleTerminate(objReason);
+    m_objContext.GetUiNotifier().SendTerminated(objReason);
+
+    return CallStateName::TERMINATING;
+}
+
 PRIVATE
 IMS_RESULT UpdatingState::HandleSdpAnswer()
 {

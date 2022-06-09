@@ -129,6 +129,12 @@ public:
     virtual CallStateName Error_NotifyError(
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage);
 
+    virtual CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType);
+    virtual CallStateName OnVideoLowestBitRate();
+    virtual CallStateName OnReceivingNetworkToneStarted();
+    virtual CallStateName OnReceivingNetworkToneFailed();
+    virtual CallStateName OnMediaFailed(IN FailReason objReason);
+
 protected:
     enum TimerType
     {
@@ -195,6 +201,8 @@ protected:
             IN const AString& strUssdString, IN UssiError eErrorCode = UssiError::CODE_NONE);
     void SendTransactionResponse(IN ISipServerConnection* piSipServerConnection,
             IN IMS_UINT32 nResponseCode, IN const AString& strPhrase = AString::ConstEmpty());
+
+    IMS_BOOL IsCallEndNeededByAudioInactivity(IN IMS_UINT32 eMediaType) const;
 
     IMtcCallContext& m_objContext;
 

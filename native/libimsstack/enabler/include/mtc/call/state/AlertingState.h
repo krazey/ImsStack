@@ -46,6 +46,9 @@ public:
     CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     CallStateName UssiStarted(IN ISession* piSession) override;
 
+    CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
+    CallStateName OnMediaFailed(IN FailReason objReason) override;
+
 private:
     IMS_RESULT SendAccept();
 };

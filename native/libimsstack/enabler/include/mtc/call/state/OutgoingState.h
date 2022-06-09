@@ -46,6 +46,11 @@ public:
 
     CallStateName UssiStarted(IN ISession* piSession) override;
 
+    CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
+    CallStateName OnReceivingNetworkToneStarted() override;
+    CallStateName OnReceivingNetworkToneFailed() override;
+    CallStateName OnMediaFailed(IN FailReason objReason) override;
+
 private:
     IMS_RESULT SendPrack(IN ISession* piSession);  // TODO: Updating can use this also.
     IMS_RESULT SendAck(IN ISession* piSession);    // TODO: differs from UpdatingState::SendAck()?

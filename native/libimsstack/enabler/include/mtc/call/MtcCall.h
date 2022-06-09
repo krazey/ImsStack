@@ -21,6 +21,7 @@
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "helper/block/IMtcBlockChecker.h"
+#include "media/IMediaReportEventListener.h"
 #include "media/MtcMediaManager.h"
 #include "precondition/MtcPreconditionManager.h"
 #include "ussi/UssiController.h"
@@ -53,7 +54,8 @@ class MtcCall final :
         public IMtcCallStateFactory<MtcCallState, CallStateName>,
         public IMtcCallStateWatcher<CallStateName>,
         public ISipClientConnectionListener,
-        public ISipErrorListener
+        public ISipErrorListener,
+        public IMediaReportEventListener
 {
 public:
     MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo);
@@ -202,6 +204,12 @@ public:
             IN ISipClientConnection* piForkedScc = IMS_NULL) override;
     virtual void Error_NotifyError(
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
+
+    virtual void OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
+    virtual void OnVideoLowestBitRate() override;
+    virtual void OnReceivingNetworkToneStarted() override;
+    virtual void OnReceivingNetworkToneFailed() override;
+    virtual void OnMediaFailed(IN FailReason objReason) override;
 
 private:
     static IMutex* s_pKeyCreationLock;

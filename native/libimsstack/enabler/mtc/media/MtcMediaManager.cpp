@@ -12,19 +12,19 @@
 #include "precondition/QosDef.h"
 #include "SipStatusCode.h"
 #include "utility/MessageUtil.h"
+#include "FailReason.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcMediaManager::MtcMediaManager(IN IMtcCallContext& objContext) :
-        m_pCallListener(IMS_NULL),
+        m_pMediaReportListener(IMS_NULL),
         m_pQosListener(IMS_NULL),
         m_objProfileManager(MtcMediaProfileManager()),
         m_objContext(objContext),
         m_pMediaInfo(new MediaInfo()),
         m_pOldMediaInfo(new MediaInfo()),
         m_bLocalTone(IMS_FALSE),
-        m_eRtpBlockedMediaTypes(MEDIATYPE_NONE),
         m_piMediaSession(IMS_NULL),
         m_eState(MediaState::IDLE),
         m_eOldState(MediaState::IDLE)
@@ -36,7 +36,7 @@ PUBLIC VIRTUAL MtcMediaManager::~MtcMediaManager()
 {
     IMS_TRACE_D("~MtcMediaManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
 
-    m_pCallListener = IMS_NULL;
+    m_pMediaReportListener = IMS_NULL;
     m_pQosListener = IMS_NULL;
 
     if (m_pMediaInfo)
@@ -56,18 +56,38 @@ PUBLIC VIRTUAL MtcMediaManager::~MtcMediaManager()
 PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(
         IN IMS_UINT32 eReportType, IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/)
 {
-    /**
-     * REPORT_SUCCESS
-     * REPORT_CLOSE_SESSION
-     * REPORT_DATA_RECEIVE_FAILED
-     * REPORT_DATA_RECEIVE_STARTED
-     * REPORT_VIDEO_LOWEST_BIT_RATE
-     * REPORT_CHECK_RADIO_CONNECTION
-     * REPORT_NW_TONE_RTP_RECEIVE_STARTED
-     * REPORT_NW_TONE_RTP_RECEIVE_FAILED
-     */
-
     IMS_TRACE_D("MediaSession_Notify : Report[%d] Media[%d]", eReportType, eMediaType, 0);
+    IMS_UINT32 eReportedMediaType = MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaType);
+
+    switch (eReportType)
+    {
+        case REPORT_SUCCESS:
+            SetState(MediaState::STARTED);
+            break;
+        case REPORT_CLOSE_SESSION:
+            SetState(MediaState::TERMINATED);
+            break;
+        case REPORT_DATA_RECEIVE_FAILED:
+            m_pMediaReportListener->OnReceivingMediaDataFailed(eReportedMediaType);
+            break;
+        case REPORT_DATA_RECEIVE_STARTED:
+            HandleReceivingMediaDataStarted(eReportedMediaType);
+            break;
+        case REPORT_VIDEO_LOWEST_BIT_RATE:
+            m_pMediaReportListener->OnVideoLowestBitRate();
+            break;
+        case REPORT_CHECK_RADIO_CONNECTION:
+            // TODO: need to ping check?
+            break;
+        case REPORT_NW_TONE_RTP_RECEIVE_STARTED:
+            HandleReceivingNetworkToneStarted();
+            break;
+        case REPORT_NW_TONE_RTP_RECEIVE_FAILED:
+            HandleReceivingNetworkToneFailed();
+            break;
+        default:
+            break;
+    }
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyFailures(IN IMS_UINT32 eReportType,
@@ -75,6 +95,15 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyFailures(IN IMS_UINT32 e
 {
     IMS_TRACE_D("MediaSession_NotifyFailures : Report[%d] Error[%d] Media[%d]", eReportType, eError,
             eMediaType);
+
+    if (eError == RtpError::NO_RESOURCES)
+    {
+        m_pMediaReportListener->OnMediaFailed(FailReason(FAIL_REASON_MEDIA_CODEC));
+    }
+    else if (eError != RtpError::NO_ERROR)
+    {
+        m_pMediaReportListener->OnMediaFailed(FailReason(FAIL_REASON_MEDIA_INITFAIL));
+    }
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyQos(IN IMS_UINTP nNegoId,
@@ -100,9 +129,10 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_DRAInfo(IN IMediaDRAMsgParam* 
     UNUSED_PARAM(pMsg);
 }
 
-PUBLIC VIRTUAL void MtcMediaManager::SetCallListener(IN IUCMediaListener* pListener)
+PUBLIC VIRTUAL void MtcMediaManager::SetMediaReportEventListener(
+        IN IMediaReportEventListener* pListener)
 {
-    m_pCallListener = pListener;
+    m_pMediaReportListener = pListener;
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::SetQosListener(IN IMediaQosEventListener* pListener)
@@ -848,25 +878,24 @@ IMS_UINT32 MtcMediaManager::GetDurationWaitingNetworkTone(
 }
 
 PRIVATE
-void MtcMediaManager::HandleMediaSuccess() {}
-
-PRIVATE
-void MtcMediaManager::HandleReceivingRtpDataStarted()
+void MtcMediaManager::HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType)
 {
-    m_eRtpBlockedMediaTypes = MEDIATYPE_NONE;
+    if (eMediaType == MEDIATYPE_VIDEO)
+    {
+        // TODO: Send CVO Result, INFO_TYPE_VIDEO_DATA_RECV for 3rd party call UI.
+    }
 }
 
 PRIVATE
-void MtcMediaManager::HandleReceivingRtpDataFailed() {}
+void MtcMediaManager::HandleReceivingNetworkToneStarted()
+{
+    IMS_TRACE_D("HandleReceivingNetworkToneStarted", 0, 0, 0);
+    // TODO: set network tone, set dynamic network tone timer.
+}
 
 PRIVATE
-void MtcMediaManager::HandleMediaError() {}
-
-PRIVATE
-void MtcMediaManager::HandleReceivingNetworkToneStarted() {}
-
-PRIVATE
-void MtcMediaManager::HandleReceivingNetworkToneFailed() {}
-
-PRIVATE
-void MtcMediaManager::HandleReceivedDtmfEvent() {}
+void MtcMediaManager::HandleReceivingNetworkToneFailed()
+{
+    IMS_TRACE_D("HandleReceivingNetworkToneFailed", 0, 0, 0);
+    // TODO: set local tone (check 180 response) or enforced local tone
+}

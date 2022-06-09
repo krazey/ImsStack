@@ -52,6 +52,7 @@ MtcCall::MtcCall(
 
     m_objTimer.SetListener(this);
     m_objPreconditionManager.SetListener(this);
+    m_objMediaManager.SetMediaReportEventListener(this);
 }
 
 PUBLIC VIRTUAL MtcCall::~MtcCall()
@@ -1161,6 +1162,61 @@ PUBLIC VIRTUAL void MtcCall::Error_NotifyError(
                     return pState->Error_NotifyError(piSc, nCode, strMessage);
                 });
     }
+}
+
+PUBLIC VIRTUAL void MtcCall::OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType)
+{
+    IMS_TRACE_I("OnReceivingMediaDataFailed : key[%d]", m_nKey, 0, 0);
+
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->OnReceivingMediaDataFailed(eMediaType);
+            });
+}
+
+PUBLIC VIRTUAL void MtcCall::OnVideoLowestBitRate()
+{
+    IMS_TRACE_I("OnVideoLowestBitRate : key[%d]", m_nKey, 0, 0);
+
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->OnVideoLowestBitRate();
+            });
+}
+
+PUBLIC VIRTUAL void MtcCall::OnReceivingNetworkToneStarted()
+{
+    IMS_TRACE_I("OnReceivingNetworkToneStarted : key[%d]", m_nKey, 0, 0);
+
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->OnReceivingNetworkToneStarted();
+            });
+}
+
+PUBLIC VIRTUAL void MtcCall::OnReceivingNetworkToneFailed()
+{
+    IMS_TRACE_I("OnReceivingNetworkToneFailed : key[%d]", m_nKey, 0, 0);
+
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->OnReceivingNetworkToneFailed();
+            });
+}
+
+PUBLIC VIRTUAL void MtcCall::OnMediaFailed(IN FailReason objReason)
+{
+    IMS_TRACE_I("OnMediaFailed : key[%d]", m_nKey, 0, 0);
+
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->OnMediaFailed(objReason);
+            });
 }
 
 PRIVATE
