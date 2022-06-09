@@ -30,6 +30,13 @@ public:
     virtual IMS_BOOL IsAvailableOnRemote() const;
 
     /**
+     * Returns whether the extension is required on the remote.
+     *
+     * @return True if required on the remote.
+     */
+    virtual IMS_BOOL IsRequiredOnRemote() const;
+
+    /**
      * Returns the extension's option tag
      *
      * @return Option tag string.

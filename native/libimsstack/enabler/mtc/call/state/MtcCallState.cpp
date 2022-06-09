@@ -930,6 +930,12 @@ IMS_BOOL MtcCallState::IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const
         return IMS_FALSE;
     }
 
+    if (m_objContext.GetSession()->GetExtensionSet().IsRequiredOnRemote(
+            MtcExtensionSet::OPTION_TAG_RPR))
+    {
+        return IMS_TRUE;
+    }
+
     if (bIncludeSdp)
     {
         return IMS_TRUE;

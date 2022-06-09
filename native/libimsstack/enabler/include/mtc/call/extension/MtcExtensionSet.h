@@ -32,7 +32,7 @@ public:
     /**
      * Checks if the given extension is available on both local and remote.
      *
-     * @param eExtensionTag Option tag of the extension to inspect the availability.
+     * @param strOptionTag Option tag of the extension to inspect the availability.
      * @return True if the given extension is available.
      */
     IMS_BOOL IsAvailableOnBoth(IN const AString& strOptionTag) const;
@@ -44,6 +44,14 @@ public:
      * @return True if the given extension is available.
      */
     IMS_BOOL IsAvailableOnLocal(IN const AString& strOptionTag) const;
+
+    /**
+     * Checks if the given extension is required on the remote.
+     *
+     * @param strOptionTag Option tag of the extension to inspect the availability.
+     * @return True if the given extension is required.
+     */
+    IMS_BOOL IsRequiredOnRemote(IN const AString& strOptionTag) const;
 
     /**
      * Checks if the all required extensions in the message are available on the local.

@@ -69,6 +69,13 @@ IMS_BOOL MtcExtensionSet::IsAvailableOnLocal(IN const AString& strOptionTag) con
 }
 
 PUBLIC
+IMS_BOOL MtcExtensionSet::IsRequiredOnRemote(IN const AString& strOptionTag) const
+{
+    IMS_SLONG nIndex = m_objExtensions.GetIndexOfKey(strOptionTag);
+    return nIndex >= 0 && m_objExtensions.GetValueAt(nIndex)->IsRequiredOnRemote();
+}
+
+PUBLIC
 IMS_BOOL MtcExtensionSet::IsSupportRequiredExtensions(IN const IMessage& pMessage) const
 {
     IMSList<AString> lstRequiredExtensions;

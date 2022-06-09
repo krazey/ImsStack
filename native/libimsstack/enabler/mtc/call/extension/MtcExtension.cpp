@@ -35,6 +35,11 @@ PUBLIC VIRTUAL IMS_BOOL MtcExtension::IsAvailableOnRemote() const
     return m_bRequiredOnRemote || m_bSupportedOnRemote;
 }
 
+PUBLIC VIRTUAL IMS_BOOL MtcExtension::IsRequiredOnRemote() const
+{
+    return m_bRequiredOnRemote;
+}
+
 PUBLIC VIRTUAL const AString& MtcExtension::GetOptionTag() const
 {
     return m_strOptionTag;

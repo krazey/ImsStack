@@ -20,6 +20,7 @@ public:
 
     IMtcExtension* Clone() const override;
     IMS_BOOL IsAvailableOnRemote() const override;
+    IMS_BOOL IsRequiredOnRemote() const override;
     const AString& GetOptionTag() const override;
 
     void FormatRequest(IN IMS_UINT32 nMethod, IN_OUT IMessage& objRequest) override;
