@@ -49,6 +49,8 @@ PUBLIC VIRTUAL AosMngr::~AosMngr()
             sizeof(AosMngr), this);
 
     DestroyAoS();
+
+    DestroyStaticConfig();
 }
 
 PUBLIC
@@ -208,6 +210,13 @@ void AosMngr::CreateAoS()
 
     IMS_TRACE_I("[SLOT%d] CreateAoS :: (%s) creation is completed", m_nSlotId, strLog.GetStr(), 0);
     delete piAosBuilder;
+}
+
+PRIVATE
+void AosMngr::DestroyStaticConfig()
+{
+    AosStaticConfig* pConfig = AosStaticConfig::GetInstance();
+    pConfig->Destroy();
 }
 
 PRIVATE

@@ -45,6 +45,7 @@ public:
 private:
     void CreateStaticConfig();
     void CreateAoS();
+    void DestroyStaticConfig();
     void DestroyAoS();
 
     IAosBuilder* AosBuilderFactory();

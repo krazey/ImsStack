@@ -79,6 +79,23 @@ IMS_BOOL AosStaticConfig::Create()
 }
 
 PUBLIC
+void AosStaticConfig::Destroy()
+{
+    IMS_TRACE_D("Destroy", 0, 0, 0);
+
+    for (IMS_UINT32 i = 0; i < m_objProfiles.GetSize(); i++)
+    {
+        AosStaticProfile* pProfile = m_objProfiles.GetAt(i);
+        if (pProfile != IMS_NULL)
+        {
+            delete pProfile;
+        }
+    }
+
+    m_objProfiles.Clear();
+}
+
+PUBLIC
 AosStaticProfile* AosStaticConfig::GetProfile(
         IN const AString& strAppId, IN const AString& strServiceId)
 {
