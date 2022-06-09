@@ -19,46 +19,131 @@ package com.android.imsstack.imsservice.mmtel.ut.base;
 import android.content.Context;
 import android.os.Bundle;
 
+/**
+ * Provides the Ut interface interworking to get/set the supplementary service configuration.
+ * {link @IImsUt}
+ */
 public interface UtInterface {
     /**
-     * Definitions of operational methods.
+     * Provide current Ut service availability
      */
-    public boolean isUtAvailable();
-    public void start(Context context);
-    public void setListener(UtListener listener);
-    public void setServiceStateListener(IUtServiceStateListener listener);
+    boolean isUtAvailable();
 
     /**
-     * Callback to inform service state changed
+     * Initialize Ut service
      */
-    public void onServiceStateChanged();
+    void start(Context context);
+
+    /**
+     * Set listener for Ut operation result
+     */
+    void setListener(UtListener listener);
+
+    /**
+     * Set listener to listen to Ut service state change
+     */
+    void setServiceStateListener(IUtServiceStateListener listener);
+
+    /**
+     * Inform service state change
+     */
+    void onServiceStateChanged();
 
     /**
      * Implementation of IImsUt.
      */
     public void close();
 
-    public int queryCallBarring(int condition);
-    public int queryCallBarringForServiceClass(int condition, int serviceClass);
-    public int queryCallForward(int condition, String number);
-    public int queryCallWaiting();
-    public int queryCLIR();
-    public int queryCLIP();
-    public int queryCOLR();
-    public int queryCOLP();
+    /**
+     * Implementation of IImsUt.
+     */
+    void queryCallBarring(int tId, int condition);
 
-    public int transact(Bundle ssInfo);
+    /**
+     * Implementation of IImsUt.
+     */
+    void queryCallBarringForServiceClass(int tId, int condition, int serviceClass);
 
-    public int updateCallBarring(int condition, int action, String[] barringList);
-    public int updateCallBarringForServiceClass(int cbType, int action, String[] barringList,
+    /**
+     * Implementation of IImsUt.
+     */
+    void queryCallForward(int tId, int condition, String number);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void queryCallWaiting(int tId);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void queryCLIR(int tId);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void queryCLIP(int tId);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void queryCOLR(int tId);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void queryCOLP(int tId);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void transact(int tId, Bundle ssInfo);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void updateCallBarring(int tId, int condition, int action, String[] barringList);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void updateCallBarringForServiceClass(int tId, int cbType, int action, String[] barringList,
             int serviceClass);
-    public int updateCallBarringWithPassword(int condition, int action, String[] barringList,
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void updateCallBarringWithPassword(int tId, int condition, int action, String[] barringList,
             int serviceClass, String password);
-    public int updateCallForward(int action, int condition, String number, int serviceClass,
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void updateCallForward(int tId, int action, int condition, String number, int serviceClass,
             int timeSeconds);
-    public int updateCallWaiting(boolean enable, int serviceClass);
-    public int updateCLIR(int clirMode);
-    public int updateCLIP(boolean enable);
-    public int updateCOLR(int presentation);
-    public int updateCOLP(boolean enable);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void updateCallWaiting(int tId, boolean enable, int serviceClass);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void updateCLIR(int tId, int clirMode);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void updateCLIP(int tId, boolean enable);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void updateCOLR(int tId, int presentation);
+
+    /**
+     * Implementation of IImsUt.
+     */
+    void updateCOLP(int tId, boolean enable);
 }

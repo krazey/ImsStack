@@ -23,38 +23,36 @@ public class SscServiceClassUtil {
     public static final int SERVICE_CLASS_DATA          = (1 << 1);
     public static final int SERVICE_CLASS_FAX           = (1 << 2);
     public static final int SERVICE_CLASS_SMS           = (1 << 3);
-    public static final int SERVICE_CLASS_DATA_SYNC     = (1 << 4); // used for video
+    public static final int SERVICE_CLASS_DATA_SYNC     = (1 << 4);
     public static final int SERVICE_CLASS_DATA_ASYNC    = (1 << 5);
     public static final int SERVICE_CLASS_PACKET        = (1 << 6);
     public static final int SERVICE_CLASS_PAD           = (1 << 7);
-    public static final int SERVICE_CLASS_MAX           = (1 << 7); // Max SERVICE_CLASS value
 
-    // IMS internal SC
-    public static final int SERVICE_CLASS_CALL = SERVICE_CLASS_VOICE + SERVICE_CLASS_DATA_SYNC;
+    /**
+     * IMS internal Service Classes.
+     * video class is defined according to #ImsPhoneMmiCode.isSupportedOverImsPhone()
+     */
+    public static final int SERVICE_CLASS_VIDEO = SERVICE_CLASS_DATA_SYNC + SERVICE_CLASS_PACKET;
+    public static final int SERVICE_CLASS_CALL = SERVICE_CLASS_VOICE + SERVICE_CLASS_VIDEO;
 
-    public static boolean isValid(int serviceClass) {
-        if (serviceClass == SERVICE_CLASS_NONE || isAudio(serviceClass) || isVideo(serviceClass)) {
+    protected static boolean isValid(int serviceClass) {
+        if (hasVoice(serviceClass) || hasVideo(serviceClass)
+                || serviceClass == SERVICE_CLASS_NONE) {
             return true;
         }
+
         return false;
     }
 
-    public static boolean isAudio(int serviceClass) {
-        return isClassType(serviceClass, SERVICE_CLASS_VOICE);
+    protected static boolean hasVoice(int serviceClass) {
+        return (serviceClass & SERVICE_CLASS_VOICE) == SERVICE_CLASS_VOICE;
     }
 
-    public static boolean isVideo(int serviceClass) {
-        return isClassType(serviceClass, SERVICE_CLASS_DATA_SYNC);
+    protected static boolean hasVideo(int serviceClass) {
+        return (serviceClass & SERVICE_CLASS_VIDEO) == SERVICE_CLASS_VIDEO;
     }
 
-    private static boolean isClassType(int serviceClass, int serviceClassType) {
-        if ((serviceClass & serviceClassType) != 0) {
-            return true;
-        }
-        return false;
-    }
-
-    public static int removeNotValidSC(int serviceClass) {
+    protected static int removeInvalidServiceClass(int serviceClass) {
         return serviceClass & SERVICE_CLASS_CALL;
     }
 }

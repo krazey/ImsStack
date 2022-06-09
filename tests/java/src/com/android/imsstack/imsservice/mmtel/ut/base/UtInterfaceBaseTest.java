@@ -22,8 +22,6 @@ import static org.mockito.Mockito.verify;
 import android.telephony.ims.ImsReasonInfo;
 import android.util.Log;
 
-import com.android.imsstack.enabler.ssc.SscConstant;
-import com.android.imsstack.enabler.ssc.SscServiceClassUtil;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtServiceStateListener;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtInterfaceBase;
 
@@ -59,103 +57,6 @@ public class UtInterfaceBaseTest {
     public void test_onServiceStateChanged() {
         mockUtServiceStateListener.onServiceStateChanged();
         verify(mockUtServiceStateListener, Mockito.times(1)).onServiceStateChanged();
-    }
-
-    @Test
-    public void test_queryCallBarring() {
-        int queryCondition = SscConstant.CONDITION_BIC_WR;
-        assertEquals(result, mUtInterfaceBase.queryCallBarring(queryCondition));
-    }
-
-    @Test
-    public void test_queryCallBarringForServiceClass() {
-        int queryCondition = SscConstant.CONDITION_BAOC;
-        assertEquals(result, mUtInterfaceBase.queryCallBarringForServiceClass(queryCondition,
-                SscServiceClassUtil.SERVICE_CLASS_VOICE));
-    }
-
-    @Test
-    public void test_queryCallForward() {
-        int queryCondition = SscConstant.CONDITION_CFU;
-        assertEquals(result, mUtInterfaceBase.queryCallForward(queryCondition, " "));
-    }
-
-    @Test
-    public void test_queryCallWaiting() {
-        assertEquals(result, mUtInterfaceBase.queryCallWaiting());
-    }
-
-    @Test
-    public void test_queryCLIR() {
-        assertEquals(result, mUtInterfaceBase.queryCLIR());
-    }
-
-    @Test
-    public void test_queryCLIP() {
-        assertEquals(result, mUtInterfaceBase.queryCLIP());
-    }
-
-    @Test
-    public void test_queryCOLR() {
-        assertEquals(result, mUtInterfaceBase.queryCOLR());
-    }
-
-    @Test
-    public void test_queryCOLP() {
-        assertEquals(result, mUtInterfaceBase.queryCOLP());
-    }
-
-    @Test
-    public void test_updateCallBarring() {
-        int queryCondition = SscConstant.CONDITION_BAOC;
-        assertEquals(result, mUtInterfaceBase.updateCallBarring(queryCondition,
-                SscConstant.STATUS_ENABLE, null));
-    }
-
-    @Test
-    public void test_updateCallBarringForServiceClass() {
-        int cbType = SscConstant.CONDITION_BAIC;
-        assertEquals(result, mUtInterfaceBase.updateCallBarringForServiceClass(cbType,
-                SscConstant.STATUS_ENABLE, null, SscServiceClassUtil.SERVICE_CLASS_VOICE));
-    }
-
-    @Test
-    public void test_updateCallBarringWithPassword() {
-        assertEquals(result,
-                mUtInterfaceBase.updateCallBarringWithPassword(SscConstant.CONDITION_BIC_WR,
-                SscConstant.STATUS_ENABLE, null, SscServiceClassUtil.SERVICE_CLASS_VOICE, null));
-    }
-
-    @Test
-    public void test_updateCallForward() {
-        assertEquals(result, mUtInterfaceBase.updateCallForward(SscConstant.ACTION_REGISTRATION,
-                SscConstant.CONDITION_CFNRC, "+1234567890", 0, 0));
-    }
-
-    @Test
-    public void test_updateCallWaiting() {
-        assertEquals(result, mUtInterfaceBase.updateCallWaiting(true,
-                SscServiceClassUtil.SERVICE_CLASS_VOICE));
-    }
-
-    @Test
-    public void test_updateCLIR() {
-        assertEquals(result, mUtInterfaceBase.updateCLIR(SscConstant.OIR_INVOCATION));
-    }
-
-    @Test
-    public void test_updateCLIP() {
-        assertEquals(result, mUtInterfaceBase.updateCLIP(true));
-    }
-
-    @Test
-    public void test_updateCOLR() {
-        assertEquals(result, mUtInterfaceBase.updateCOLR(SscConstant.TIR_PROVISIONED));
-    }
-
-    @Test
-    public void test_updateCOLP() {
-        assertEquals(result, mUtInterfaceBase.updateCOLP(true));
     }
 
     @After

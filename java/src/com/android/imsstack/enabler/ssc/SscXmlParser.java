@@ -191,7 +191,7 @@ public class SscXmlParser {
                 continue;
             }
 
-            if (SscServiceClassUtil.isVideo(ruleData.getServiceClass())) {
+            if (SscServiceClassUtil.hasVideo(ruleData.getServiceClass())) {
                 SscXmlFormat.setRuleId(slotId, SscXmlFormat.MEDIA_TYPE_VIDEO, ssType.getSsName(),
                         ruleData.getSsCondition(), ruleData.getRuleId());
             } else {
@@ -783,7 +783,7 @@ public class SscXmlParser {
                     if (SscXmlFormat.AUDIO.equals(mediaValue)) {
                         ruleData.addServiceClass(SscServiceClassUtil.SERVICE_CLASS_VOICE);
                     } else if (SscXmlFormat.VIDEO.equals(mediaValue)) {
-                        ruleData.addServiceClass(SscServiceClassUtil.SERVICE_CLASS_DATA_SYNC);
+                        ruleData.addServiceClass(SscServiceClassUtil.SERVICE_CLASS_VIDEO);
                     }
                 } else if (nodeName.endsWith(SscXmlFormat.IDENTITY)) {
                     String identity = getIdentityInCondition(childNode);
@@ -896,13 +896,12 @@ public class SscXmlParser {
         }
 
         if (queryData.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VOICE
-                && SscServiceClassUtil.isVideo(responseData.getServiceClass())) {
+                && SscServiceClassUtil.hasVideo(responseData.getServiceClass())) {
             return false;
         }
 
-        if (queryData.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_DATA_SYNC
+        if (queryData.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VIDEO
                 && responseData.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VOICE) {
-            //&& !SscServiceClassUtil.isVideo(responseData.getServiceClass())) {
             return false;
         }
 

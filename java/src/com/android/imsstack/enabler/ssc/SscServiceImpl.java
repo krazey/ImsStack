@@ -52,6 +52,7 @@ import com.android.imsstack.enabler.ssc.data.TipServiceData;
 import com.android.imsstack.enabler.ssc.data.TirServiceData;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtInterfaceBase;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
@@ -61,11 +62,12 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class SscServiceImpl extends IImsUt.Stub implements Closeable
 */
 public class SscServiceImpl extends UtInterfaceBase {
-    // Constants--------------------------------------------------
     private static final int EVENT_UT_TRANSACTION_STARTED = 1001;
     private static final int EVENT_UT_INITIALIZE_MODULES = 1002;
 
-    // Variables--------------------------------------------------
+    private static final int REQUEST_TYPE_QUERY = 0;
+    private static final int REQUEST_TYPE_UPDATE = 1;
+
     private Context mContext = null;
     private SscTransactionFactory mSscTransactionFactory = null;
     private SscTransaction mSscTransaction = null;
@@ -191,6 +193,35 @@ public class SscServiceImpl extends UtInterfaceBase {
         }
     }
 
+    private void handleInvalidRequest(int tId, int requestType) {
+        if (mUtListener != null) {
+            ImsReasonInfo ri = new ImsReasonInfo(ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED,
+                    ImsReasonInfo.CODE_UNSPECIFIED, null);
+            if (requestType == REQUEST_TYPE_QUERY) {
+                postAndRunTask(new Runnable() {
+                        @Override
+                        public void run() {
+                            mUtListener.utConfigurationQueryFailed(tId, ri);
+                        }
+                });
+            } else if (requestType == REQUEST_TYPE_UPDATE) {
+                postAndRunTask(new Runnable() {
+                        @Override
+                        public void run() {
+                            mUtListener.utConfigurationUpdateFailed(tId, ri);
+                        }
+                });
+            }
+        }
+    }
+
+    private void postAndRunTask(Runnable task) {
+        if (mSscCallbackHandler != null) {
+            MessageExecutor messageExecutor = new MessageExecutor(mSscCallbackHandler.getLooper());
+            messageExecutor.execute(task);
+        }
+    }
+
     @VisibleForTesting
     public void setSscTransactionFactory(SscTransactionFactory transactionFactory) {
         mSscTransactionFactory = transactionFactory;
@@ -207,23 +238,23 @@ public class SscServiceImpl extends UtInterfaceBase {
     }
 
     @Override
-    public int queryCallBarring(int condition) {
-        return queryCallBarringForServiceClass(condition, SscServiceClassUtil.SERVICE_CLASS_CALL);
+    public void queryCallBarring(int tId, int condition) {
+        queryCallBarringForServiceClass(tId, condition, SscServiceClassUtil.SERVICE_CLASS_NONE);
     }
 
     @Override
-    public int queryCallBarringForServiceClass(int condition, int serviceClass) {
+    public void queryCallBarringForServiceClass(int tId, int condition, int serviceClass) {
         // Check valid service class or not
         boolean isValid = SscServiceClassUtil.isValid(serviceClass);
         if (isValid == false) {
-            ImsLog.e("Invalid serviceclass " + serviceClass);
-            return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+            ImsLog.e(mSlotId, "Invalid serviceclass " + serviceClass);
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            return;
         }
 
         // remove service classes except voice and video
-        serviceClass = SscServiceClassUtil.removeNotValidSC(serviceClass);
+        serviceClass = SscServiceClassUtil.removeInvalidServiceClass(serviceClass);
 
-        int tId = SscConfig.getNewTid();
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -245,27 +276,28 @@ public class SscServiceImpl extends UtInterfaceBase {
                         SscConstant.EVENT_SSC_QUERY_CB, tId, condition, serviceClass));
                 break;
             default:
-                ImsLog.e("Invalid or Not Supported CBType : " + condition);
-                return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+                ImsLog.e(mSlotId, "Invalid CB condition : " + condition);
+                handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+                return;
         }
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     @Override
-    public int queryCallForward(int condition, String number) {
-        return queryCallForwardForServiceClass(condition, number,
-                SscServiceClassUtil.SERVICE_CLASS_CALL);
+    public void queryCallForward(int tId, int condition, String number) {
+        queryCallForwardForServiceClass(tId, condition, number,
+                SscServiceClassUtil.SERVICE_CLASS_NONE);
     }
 
     //@Override
-    private int queryCallForwardForServiceClass(int condition, String number, int serviceClass) {
+    private void queryCallForwardForServiceClass(int tId, int condition, String number,
+            int serviceClass) {
         if (condition == SscConstant.CONDITION_CFA || condition == SscConstant.CONDITION_CFAC) {
             if (SscConfig.isCfQueryAllAndCfAllConditionalSupported(mSlotId) == false) {
                 ImsLog.d(mSlotId, "isCfQueryAllAndCfAllConditionalSupported is false");
-                return ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1);
+                handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+                return;
             }
         }
 
@@ -273,13 +305,13 @@ public class SscServiceImpl extends UtInterfaceBase {
         boolean isValid = SscServiceClassUtil.isValid(serviceClass);
         if (isValid == false) {
             ImsLog.e(mSlotId, "Invalid serviceClass " + serviceClass);
-            return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            return;
         }
 
         // remove service classes except voice and video
-        serviceClass = SscServiceClassUtil.removeNotValidSC(serviceClass);
+        serviceClass = SscServiceClassUtil.removeInvalidServiceClass(serviceClass);
 
-        int tId = SscConfig.getNewTid();
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -299,18 +331,16 @@ public class SscServiceImpl extends UtInterfaceBase {
                         SscConstant.EVENT_SSC_QUERY_CF, tId, condition, number, serviceClass));
                 break;
             default :
-                ImsLog.e(mSlotId, "Invalid or Not Supported CF condition : " + condition);
-                return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+                ImsLog.e(mSlotId, "Invalid CF condition : " + condition);
+                handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+                return;
         }
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     @Override
-    public int queryCallWaiting() {
-        int tId = SscConfig.getNewTid();
+    public void queryCallWaiting(int tId) {
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -322,13 +352,10 @@ public class SscServiceImpl extends UtInterfaceBase {
                 SscConstant.EVENT_SSC_QUERY_CW, tId, -1));
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     @Override
-    public int queryCLIR() {
-        int tId = SscConfig.getNewTid();
+    public void queryCLIR(int tId) {
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -340,13 +367,10 @@ public class SscServiceImpl extends UtInterfaceBase {
                 SscConstant.EVENT_SSC_QUERY_OIR, tId, -1));
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     @Override
-    public int queryCLIP() {
-        int tId = SscConfig.getNewTid();
+    public void queryCLIP(int tId) {
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -358,13 +382,10 @@ public class SscServiceImpl extends UtInterfaceBase {
                 SscConstant.EVENT_SSC_QUERY_OIP, tId, -1));
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     @Override
-    public int queryCOLR() {
-        int tId = SscConfig.getNewTid();
+    public void queryCOLR(int tId) {
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -376,13 +397,10 @@ public class SscServiceImpl extends UtInterfaceBase {
                 SscConstant.EVENT_SSC_QUERY_TIR, tId, -1));
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     @Override
-    public int queryCOLP() {
-        int tId = SscConfig.getNewTid();
+    public void queryCOLP(int tId) {
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -394,41 +412,40 @@ public class SscServiceImpl extends UtInterfaceBase {
                 SscConstant.EVENT_SSC_QUERY_TIP, tId, -1));
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     @Override
-    public int updateCallBarring(int condition, int action, String[] barringList) {
-        return updateCallBarringWithPassword(condition, action, barringList,
-                SscServiceClassUtil.SERVICE_CLASS_VOICE, null);
+    public void updateCallBarring(int tId, int condition, int action, String[] barringList) {
+        updateCallBarringWithPassword(tId, condition, action, barringList,
+                SscServiceClassUtil.SERVICE_CLASS_NONE, null);
     }
 
     @Override
-    public int updateCallBarringForServiceClass(int condition, int action, String[] barringList,
-            int serviceClass) {
-        return updateCallBarringWithPassword(condition, action, barringList, serviceClass, null);
+    public void updateCallBarringForServiceClass(int tId, int condition, int action,
+            String[] barringList, int serviceClass) {
+        updateCallBarringWithPassword(tId, condition, action, barringList, serviceClass, null);
     }
 
     @Override
-    public int updateCallBarringWithPassword(int condition, int action, String[] barringList,
-            int serviceClass, String password) {
-        if (action == SscConstant.ACTION_INVALID) {
-            ImsLog.e("Invalid or Not Supported Action : " + action);
-            return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void updateCallBarringWithPassword(int tId, int condition, int action,
+            String[] barringList, int serviceClass, String password) {
+        if (action != SscConstant.STATUS_ENABLE && action != SscConstant.STATUS_DISABLE) {
+            ImsLog.e(mSlotId, "Invalid action : " + action);
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            return;
         }
 
         // Check valid service class or not
         boolean isValid = SscServiceClassUtil.isValid(serviceClass);
         if (isValid == false) {
-            ImsLog.e("Invalid serviceClass: " + serviceClass);
-            return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+            ImsLog.e(mSlotId, "Invalid serviceClass: " + serviceClass);
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            return;
         }
 
         // remove service classes except voice and video
-        serviceClass = SscServiceClassUtil.removeNotValidSC(serviceClass);
+        serviceClass = SscServiceClassUtil.removeInvalidServiceClass(serviceClass);
 
-        int tId = SscConfig.getNewTid();
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -451,22 +468,22 @@ public class SscServiceImpl extends UtInterfaceBase {
                         serviceClass, password));
                 break;
             default:
-                ImsLog.e("Invalid or Not Supported condition : " + condition);
-                return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+                ImsLog.e(mSlotId, "Invalid  condition : " + condition);
+                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+                return;
         }
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     @Override
-    public int updateCallForward(int action, int condition, String number, int serviceClass,
-            int timeSeconds) {
+    public void updateCallForward(int tId, int action, int condition, String number,
+            int serviceClass, int timeSeconds) {
         if (action == SscConstant.ACTION_ERASURE) {
             if (SscConfig.isCfActionErasureSupported(mSlotId) == false) {
                 ImsLog.e(mSlotId, "isCfActionErasureSupported is false");
-                return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+                return;
             }
         }
 
@@ -485,28 +502,31 @@ public class SscServiceImpl extends UtInterfaceBase {
                 timeSeconds = 0;
                 break;
             default:
-                ImsLog.e("Invalid or Not Supported Action : " + action);
-                return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+                ImsLog.e(mSlotId, "Invalid action");
+                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+                return;
         }
 
         if (timeSeconds > 0) {
             if (timeSeconds < SscConstant.CFNR_TIMER_MIN
                     || timeSeconds > SscConstant.CFNR_TIMER_MAX) {
-                return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+                ImsLog.e(mSlotId, "Invalid timer : " + timeSeconds);
+                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+                return;
             }
         }
 
         // Check valid service class or not
         boolean isValid = SscServiceClassUtil.isValid(serviceClass);
         if (isValid == false) {
-            ImsLog.e("Invalid serviceClass " + serviceClass);
-            return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+            ImsLog.e(mSlotId, "Invalid serviceClass " + serviceClass);
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            return;
         }
 
         // remove service classes except voice and video
-        serviceClass = SscServiceClassUtil.removeNotValidSC(serviceClass);
+        serviceClass = SscServiceClassUtil.removeInvalidServiceClass(serviceClass);
 
-        int tId = SscConfig.getNewTid();
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -538,17 +558,16 @@ public class SscServiceImpl extends UtInterfaceBase {
                 }
                 break;
             default:
-                ImsLog.e("Invalid or Not Supported Condition : " + condition);
-                return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+                ImsLog.e(mSlotId, "Invalid Condition : " + condition);
+                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+                return;
         }
 
         postRequestMessage(requestData);
-        return tId;
     }
 
     @Override
-    public int updateCallWaiting(boolean enable, int serviceClass) {
-        int tId = SscConfig.getNewTid();
+    public void updateCallWaiting(int tId, boolean enable, int serviceClass) {
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -560,13 +579,10 @@ public class SscServiceImpl extends UtInterfaceBase {
                 SscConstant.EVENT_SSC_UPDATE_CW, tId, (enable ? 1 : 0)));
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     @Override
-    public int updateCLIR(int clirMode) {
-        int tId = SscConfig.getNewTid();
+    public void updateCLIR(int tId, int clirMode) {
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -578,13 +594,10 @@ public class SscServiceImpl extends UtInterfaceBase {
                 SscConstant.EVENT_SSC_UPDATE_OIR, tId, clirMode, clirMode, clirMode));
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     @Override
-    public int updateCLIP(boolean enable) {
-        int tId = SscConfig.getNewTid();
+    public void updateCLIP(int tId, boolean enable) {
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -596,13 +609,10 @@ public class SscServiceImpl extends UtInterfaceBase {
                 SscConstant.EVENT_SSC_UPDATE_OIP, tId, (enable ? 1 : 0)));
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     @Override
-    public int updateCOLR(int presentation) {
-        int tId = SscConfig.getNewTid();
+    public void updateCOLR(int tId, int presentation) {
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -611,16 +621,13 @@ public class SscServiceImpl extends UtInterfaceBase {
         }
 
         requestData.offerSscData(new TirServiceData(mSlotId, ESsType.TIR,
-                SscConstant.EVENT_SSC_UPDATE_TIR,  tId, presentation, presentation));
+                SscConstant.EVENT_SSC_UPDATE_TIR, tId, presentation, presentation));
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     @Override
-    public int updateCOLP(boolean enable) {
-        int tId = SscConfig.getNewTid();
+    public void updateCOLP(int tId, boolean enable) {
         SscRequestData requestData = new SscRequestData(tId);
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
@@ -632,8 +639,6 @@ public class SscServiceImpl extends UtInterfaceBase {
                 SscConstant.EVENT_SSC_UPDATE_TIP, tId, (enable ? 1 : 0)));
 
         postRequestMessage(requestData);
-
-        return tId;
     }
 
     private void startTransaction(SscData data) {
@@ -647,7 +652,7 @@ public class SscServiceImpl extends UtInterfaceBase {
                     mSscCallbackHandler);
             mSscTransaction.startPutTransaction((SscServiceData)data);
         } else {
-            ImsLog.e("Invalid Request Type");
+            ImsLog.e(mSlotId, "Invalid Request Type");
             postFailResponseMessage(data);
         }
     }
@@ -666,11 +671,11 @@ public class SscServiceImpl extends UtInterfaceBase {
         }
 
         if (isUtAvailable() == false) {
-            ImsLog.w("Clear pending data due to Ut is not available");
+            ImsLog.w(mSlotId, "Clear pending data due to Ut is not available");
             postFailResponseMessage(sscData);
         } else if (sscData.getSsType() != ESsType.NONE
                 && !SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
-            ImsLog.w("Clear pending data due to entire query failed");
+            ImsLog.w(mSlotId, "Clear pending data due to entire query failed");
             postFailResponseMessage(sscData);
         } else {
             adjustEvent(sscData);
@@ -749,11 +754,11 @@ public class SscServiceImpl extends UtInterfaceBase {
         @Override
         public void handleMessage(Message msg) {
             if (msg == null) {
-                ImsLog.e("Message is null");
+                ImsLog.e(mSlotId, "Message is null");
                 return;
             }
 
-            ImsLog.d("Message : " + msg.what);
+            ImsLog.d(mSlotId, "Message : " + msg.what);
             switch(msg.what) {
                 case EVENT_UT_TRANSACTION_STARTED: {
                     SscData requestData = (SscData)msg.obj;
@@ -771,12 +776,12 @@ public class SscServiceImpl extends UtInterfaceBase {
                     // to avoid initializers malfunction
                     synchronized (lock) {
                         lock.notifyAll();
-                        ImsLog.d("Lock is released from handleMessage::SscRequestHandler");
+                        ImsLog.d(mSlotId, "Lock is released from handleMessage::SscRequestHandler");
                     }
                     break;
                 }
                 default:
-                    ImsLog.w("Invalid Message");
+                    ImsLog.w(mSlotId, "Invalid Message");
                     break;
             }
         }
@@ -790,14 +795,14 @@ public class SscServiceImpl extends UtInterfaceBase {
         @Override
         public void handleMessage(Message msg) {
             if (msg == null) {
-                ImsLog.e("Message is null");
+                ImsLog.e(mSlotId, "Message is null");
                 return;
             }
 
-            ImsLog.d("Message : " + msg.what);
+            ImsLog.d(mSlotId, "Message : " + msg.what);
             SscRequestResult rr = (SscRequestResult) msg.obj;
             if (rr == null) {
-                ImsLog.e("SscRequestResult is null");
+                ImsLog.e(mSlotId, "SscRequestResult is null");
                 return;
             }
 
@@ -810,20 +815,20 @@ public class SscServiceImpl extends UtInterfaceBase {
             if (resultState == SscConstant.REQUEST_FAILURE) {
                 if (rr.getCode() == SscConstant.HTTP_PRECONDITION_FAILURE) {
                     if (handlePreconditionFailure(requestData) == true) {
-                        ImsLog.d("handlePreconditionFailure");
+                        ImsLog.d(mSlotId, "handlePreconditionFailure");
                         return;
                     }
                 }
 
                 if (handleRetryWhenFailure(requestData) == true) {
-                    ImsLog.d("Need to retry. retryCount = " + requestData.getRetryCount());
+                    ImsLog.d(mSlotId, "Need to retry. retryCount = " + requestData.getRetryCount());
                     return;
                 }
             }
 
             if (resultState == SscConstant.REQUEST_SUCCESS) {
                 if (handleAdditionalRequestWhenSuccess(requestData) == true) {
-                    ImsLog.d("Need to send additional request");
+                    ImsLog.d(mSlotId, "Need to send additional request");
                     return;
                 }
             }
@@ -909,7 +914,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         private void notifyRequestResult(int eventNum, int transactionId, int state,
                 SscServiceData data) {
-            ImsLog.d("eventNum : " + eventNum + ", tId : " + transactionId);
+            ImsLog.d(mSlotId, "eventNum : " + eventNum + ", tId : " + transactionId);
             try {
                 switch (eventNum) {
                     case SscConstant.EVENT_SSC_QUERY_DOCUMENT:
@@ -944,7 +949,7 @@ public class SscServiceImpl extends UtInterfaceBase {
                         }
                         break;
                     default:
-                        ImsLog.e("Invalid Message");
+                        ImsLog.e(mSlotId, "Invalid Message");
                         break;
                 }
             } catch (Exception e) {
@@ -955,7 +960,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         private void onConfigurationUpdated(final int id) {
             if (mUtListener == null) {
-                ImsLog.d("UtListener is null");
+                ImsLog.d(mSlotId, "UtListener is null");
                 return;
             }
 
@@ -964,7 +969,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         private void onConfigurationUpdateFailed(final int id, final SscServiceData data) {
             if (mUtListener == null) {
-                ImsLog.d("UtListener is null");
+                ImsLog.d(mSlotId, "UtListener is null");
                 return;
             }
 
@@ -1028,12 +1033,12 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         private void onConfigurationQueried(final int id, SscServiceData data) {
             if (mUtListener == null) {
-                ImsLog.d("UtListener is null");
+                ImsLog.d(mSlotId, "UtListener is null");
                 return;
             }
 
             if (data == null) {
-                ImsLog.e("SscServiceData is null");
+                ImsLog.e(mSlotId, "SscServiceData is null");
                 return;
             }
 
@@ -1067,14 +1072,14 @@ public class SscServiceImpl extends UtInterfaceBase {
                      */
                     break;
                 default:
-                    ImsLog.e("Invalid SscServiceData");
+                    ImsLog.e(mSlotId, "Invalid SscServiceData");
                     return;
             }
         }
 
         private void onConfigurationQueryFailed(final int id, final SscServiceData data) {
             if (mUtListener == null) {
-                ImsLog.d("UtListener is null");
+                ImsLog.d(mSlotId, "UtListener is null");
                 return;
             }
 
@@ -1083,21 +1088,21 @@ public class SscServiceImpl extends UtInterfaceBase {
         }
 
         private ImsSsInfo[] createCallBarringInfo(SscServiceData data) {
-            ImsLog.d("");
+            ImsLog.d(mSlotId, "");
 
             if (data == null) {
-                ImsLog.e("SscServiceData is null");
+                ImsLog.e(mSlotId, "SscServiceData is null");
                 return null;
             }
 
             if (data.getSsType() != ESsType.OCB && data.getSsType() != ESsType.ICB) {
-                ImsLog.e("Invalid SsType");
+                ImsLog.e(mSlotId, "Invalid SsType");
                 return null;
             }
 
             CbServiceData cbData = (CbServiceData)data;
             if (cbData.getRuleSet() == null || cbData.getRuleSet().size() <= 0) {
-                ImsLog.e("CB ruleset is null or empty");
+                ImsLog.e(mSlotId, "CB ruleset is null or empty");
                 ImsSsInfo cbInfo[] = new ImsSsInfo[1];
 
                 // No RuleSet case : status_disable
@@ -1174,16 +1179,16 @@ public class SscServiceImpl extends UtInterfaceBase {
 */
 
         private ImsCallForwardInfo[] createCallForwardInfo(SscServiceData data) {
-            ImsLog.d("");
+            ImsLog.d(mSlotId, "");
 
             if (data.getSsType() != ESsType.CF) {
-                ImsLog.e("Invalid SStype");
+                ImsLog.e(mSlotId, "Invalid SStype");
                 return null;
             }
 
             CfServiceData cfData = (CfServiceData)data;
             if (cfData.getRuleSet() == null || cfData.getRuleSet().size() <= 0) {
-                ImsLog.e("CF ruleset is null or empty");
+                ImsLog.e(mSlotId, "CF ruleset is null or empty");
                 ImsCallForwardInfo cfInfo[] = new ImsCallForwardInfo[1];
                 // No RuleSet case
                 cfInfo[0] = new ImsCallForwardInfo(cfData.getCondition(),
@@ -1228,7 +1233,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         private String getValueOfElement(String key, ArrayList<SscRuleElement> elementList) {
             if (key == null || elementList == null) {
-                ImsLog.e("key or elementList is null");
+                ImsLog.e(mSlotId, "key or elementList is null");
                 return null;
             }
 
@@ -1244,7 +1249,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         private ImsSsInfo[] createCallWaitingInfo(SscServiceData data) {
             if (data.getSsType() != ESsType.CW) {
-                ImsLog.e("Invalid SStype");
+                ImsLog.e(mSlotId, "Invalid SStype");
                 return null;
             }
 
@@ -1285,7 +1290,7 @@ public class SscServiceImpl extends UtInterfaceBase {
                 }
             }
 
-            ImsLog.d("reasonCode = " + reasonCode + ", errorPhrase = " + errorPhrase);
+            ImsLog.d(mSlotId, "reasonCode = " + reasonCode + ", errorPhrase = " + errorPhrase);
 
             return new ImsReasonInfo(reasonCode, ImsReasonInfo.CODE_UNSPECIFIED, errorPhrase);
         }
@@ -1299,7 +1304,7 @@ public class SscServiceImpl extends UtInterfaceBase {
         public void run() {
             Looper.prepare();
 
-            ImsLog.d("SscServiceThread is running ... (" + Process.myTid() + ")");
+            ImsLog.d(mSlotId, "SscServiceThread is running ... (" + Process.myTid() + ")");
 
             mSscRequestHandler = new SscRequestHandler(Looper.myLooper());
             mSscCallbackHandler = new SscCallbackHandler(Looper.myLooper());

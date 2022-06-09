@@ -26,6 +26,8 @@ import android.telephony.ims.stub.ImsUtImplBase;
 import android.text.TextUtils;
 
 import com.android.imsstack.enabler.IBaseContext;
+import com.android.imsstack.enabler.ssc.SscConstant;
+import com.android.imsstack.imsservice.mmtel.ut.UtCommand;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtListener;
@@ -39,6 +41,8 @@ public final class ImsUtImpl extends ImsUtImplBase {
     private final IBaseContext mContext;
     private ImsUtListener mListener = null;
     private UtInterface mUt = null;
+    private UtListener mUtListenerProxy = null;
+    private int mTransactionId = 1;
 
     public ImsUtImpl(IBaseContext context) {
         mContext = context;
@@ -52,10 +56,13 @@ public final class ImsUtImpl extends ImsUtImplBase {
         }
 
         mUt.start(mContext.getContext());
-        mUt.setListener(new UtListenerProxy());
+        mUtListenerProxy = new UtListenerProxy();
+        mUt.setListener(mUtListenerProxy);
     }
 
     public void clear() {
+        mUtListenerProxy = null;
+
         if (mUt == null) {
             return;
         }
@@ -67,6 +74,16 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
     public UtInterface getUtInterface() {
         return mUt;
+    }
+
+    private int getTransactionId() {
+        synchronized (this) {
+            if (mTransactionId == 0x7FFFFFFF) {
+                mTransactionId = 1;
+            }
+
+            return mTransactionId++;
+        }
     }
 
     @Override
@@ -88,7 +105,13 @@ public final class ImsUtImpl extends ImsUtImplBase {
         if (mUt == null) {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
-        return mUt.queryCallBarring(cbType);
+
+        int tId = getTransactionId();
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_CB,
+                SscConstant.ACTION_INTERROGATION, mUtListenerProxy).setCondition(cbType).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -102,7 +125,13 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.queryCallBarringForServiceClass(cbType, serviceClass);
+        int tId = getTransactionId();
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_CB,
+                SscConstant.ACTION_INTERROGATION, mUtListenerProxy).setCondition(cbType)
+                .setServiceClass(serviceClass).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -115,7 +144,13 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.queryCallForward(condition, number);
+        int tId = getTransactionId();
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_CF,
+                SscConstant.ACTION_INTERROGATION, mUtListenerProxy).setCondition(condition)
+                .setTargetNumber(number).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -128,7 +163,12 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.queryCallWaiting();
+        int tId = getTransactionId();
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_CW,
+                SscConstant.ACTION_INTERROGATION, mUtListenerProxy).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -141,7 +181,12 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.queryCLIR();
+        int tId = getTransactionId();
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_OIR,
+                SscConstant.ACTION_INTERROGATION, mUtListenerProxy).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -154,7 +199,12 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.queryCLIP();
+        int tId = getTransactionId();
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_OIP,
+                SscConstant.ACTION_INTERROGATION, mUtListenerProxy).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -167,7 +217,12 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.queryCOLR();
+        int tId = getTransactionId();
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_TIR,
+                SscConstant.ACTION_INTERROGATION, mUtListenerProxy).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -180,7 +235,12 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.queryCOLP();
+        int tId = getTransactionId();
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_TIP,
+                SscConstant.ACTION_INTERROGATION, mUtListenerProxy).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -193,7 +253,10 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.transact(ssInfo);
+        int tId = getTransactionId();
+        mUt.transact(tId, ssInfo);
+
+        return tId;
     }
 
     @Override
@@ -207,7 +270,12 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.updateCallBarring(cbType, action, barringList);
+        int tId = getTransactionId();
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_CB, action,
+                mUtListenerProxy).setCondition(cbType).setBarringList(barringList).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -223,7 +291,13 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.updateCallBarringForServiceClass(cbType, action, barringList, serviceClass);
+        int tId = getTransactionId();
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_CB, action,
+                mUtListenerProxy).setCondition(cbType).setBarringList(barringList)
+                .setServiceClass(serviceClass).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -240,8 +314,13 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.updateCallBarringWithPassword(cbType, action, barringList, serviceClass,
-                password);
+        int tId = getTransactionId();
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_CB, action,
+                mUtListenerProxy).setCondition(cbType).setBarringList(barringList)
+                .setServiceClass(serviceClass).setPassword(password).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -257,7 +336,13 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.updateCallForward(action, condition, number, serviceClass, timeSeconds);
+        int tId = getTransactionId();
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_CF, action,
+                mUtListenerProxy).setCondition(condition).setTargetNumber(number)
+                .setServiceClass(serviceClass).setNoReplyTimer(timeSeconds).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -270,7 +355,13 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.updateCallWaiting(enable, serviceClass);
+        int tId = getTransactionId();
+        int action = enable ? SscConstant.ACTION_ACTIVATION : SscConstant.ACTION_DEACTIVATION;
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_CW, action,
+                mUtListenerProxy).setEnable(enable).setServiceClass(serviceClass).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -283,14 +374,14 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        int action  = ImsMMICode.ACTION_NONE;
-        if (clirMode == 1) {
-            action = ImsMMICode.ACTION_ACTIVATE;
-        } else if (clirMode == 2) {
-            action = ImsMMICode.ACTION_DEACTIVATE;
-        }
+        int tId = getTransactionId();
+        int action = (clirMode == SscConstant.OIR_INVOCATION)
+                ? SscConstant.STATUS_ENABLE : SscConstant.ACTION_DEACTIVATION;
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_OIR, action,
+                mUtListenerProxy).setClirMode(clirMode).build();
+        utCmd.startTransaction();
 
-        return mUt.updateCLIR(clirMode);
+        return tId;
     }
 
     @Override
@@ -303,7 +394,13 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.updateCLIP(enable);
+        int tId = getTransactionId();
+        int action = enable ? SscConstant.ACTION_ACTIVATION : SscConstant.ACTION_DEACTIVATION;
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_OIP, action,
+                mUtListenerProxy).setEnable(enable).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -316,7 +413,14 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.updateCOLR(presentation);
+        int tId = getTransactionId();
+        int action = (presentation == SscConstant.TIR_PROVISIONED)
+                ? SscConstant.ACTION_ACTIVATION : SscConstant.ACTION_DEACTIVATION;
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_TIR, action,
+                mUtListenerProxy).setColrPresentation(presentation).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override
@@ -329,7 +433,13 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        return mUt.updateCOLP(enable);
+        int tId = getTransactionId();
+        int action = enable ? SscConstant.ACTION_ACTIVATION : SscConstant.ACTION_DEACTIVATION;
+        UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_TIP, action,
+                mUtListenerProxy).setEnable(enable).build();
+        utCmd.startTransaction();
+
+        return tId;
     }
 
     @Override

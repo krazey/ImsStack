@@ -98,17 +98,16 @@ public class SscConstant {
     public static final int TIR_PROVISIONED = ImsSsInfo.SERVICE_PROVISIONED; // 1
 
     // CF, CB Action Param
-    public static final int ACTION_INVALID = ImsUtImplBase.INVALID_RESULT; // -1
     public static final int ACTION_DEACTIVATION = 0; // ImsUtInterface.ACTION_DEACTIVATION
     public static final int ACTION_ACTIVATION = 1; // ImsUtInterface.ACTION_ACTIVATION
     public static final int ACTION_REGISTRATION = 3; // ImsUtInterface.ACTION_REGISTRATION
     public static final int ACTION_ERASURE = 4; // ImsUtInterface.ACTION_ERASURE
-    //public static final int ACTION_INTERROGATION = 5; // ImsUtInterface.ACTION_INTERROGATION
+    public static final int ACTION_INTERROGATION = 5; // ImsUtInterface.ACTION_INTERROGATION
 
     // CF, CB Status Param
     public static final int STATUS_NOT_REGISTERED = ImsSsInfo.NOT_REGISTERED; // -1
-    public static final int STATUS_DISABLE = ImsSsInfo.DISABLED; // 0
-    public static final int STATUS_ENABLE = ImsSsInfo.ENABLED; // 1
+    public static final int STATUS_DISABLE = ImsSsInfo.DISABLED; // 0, Same as ACTION_DEACTIVATION
+    public static final int STATUS_ENABLE = ImsSsInfo.ENABLED; // 1, Same as ACTION_ACTIVATION
 
     // RequestResult Param
     public static final int REQUEST_FAILURE = 0;
@@ -125,7 +124,7 @@ public class SscConstant {
     public static final int BLOCK_REASON_GBA_FAILURE                        = 0x00000001;
     public static final int BLOCK_REASON_DNS_QUERY_FAILURE                  = 0x00000002;
     public static final int BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT          = 0x00000004;
-    public static final int BLOCK_REASON_PDN_CONNECTION_TIMEROUT            = 0x00000008;
+    public static final int BLOCK_REASON_PDN_CONNECTION_TIMEOUT            = 0x00000008;
     public static final int BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP        = 0x00000010;
     public static final int BLOCK_REASON_BY_RESPONSE_CODE_TEMP              = 0x00000020;
 
