@@ -234,6 +234,8 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByAsset(
             CarrierConfig::Assets::KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL);
     objItems.nOipTypeForUnavailable =
             piCc->GetInt(CarrierConfig::Assets::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT);
+    objItems.bEnableOipHeaderPolicyFallBack =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL);
     objItems.nEmergencyRttGuardTimer =
             piCc->GetInt(CarrierConfig::Assets::KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT);
     objItems.bRetryEmergencyCallOverEmergencyPdnWithNextPcscf = piCc->GetBoolean(CarrierConfig::

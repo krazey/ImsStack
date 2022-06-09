@@ -51,6 +51,10 @@ private:
     IMS_SINT32 ConvertCdivCause(IN IMS_SINT32 nCause);
     IMS_SINT32 GetCallingNumVerificationResult(IN AString& strValue);
     IMS_SINT32 GetCnvHeaderType(IN IMessage* piMessage);
+    OipType GetOipTypeByHeader(
+            IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack);
+    void GetCnapByHeader(IN IMessage* piMessage, IN IMS_BOOL bFromHeader, OUT AString& strCnap,
+            IN IMS_BOOL bDoFallBack);
     void LoadConfig();
     IMS_BOOL IsExist(IN SuppType suppType);
 

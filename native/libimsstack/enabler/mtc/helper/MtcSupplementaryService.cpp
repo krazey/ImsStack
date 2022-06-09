@@ -134,40 +134,17 @@ IMS_BOOL MtcSupplementaryService::UpdateCallerId(IN IMessage* piMessage)
         }
     }
 
-    OipType eOipType = OipType::NONE;
-    IMS_SINT32 nDeterninationPolicyHeader =
-            m_nCnapType == CNAP_SCHEME_PAID ? ISipHeader::P_ASSERTED_IDENTITY : ISipHeader::FROM;
-    IMSList<AString> objHeaders;
-    MessageUtil::GetHeaders(piMessage, nDeterninationPolicyHeader, objHeaders);
-    for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); i++)
+    IMS_BOOL bPolicyFallBack =
+            m_objConfigurationProxy.Is(Feature::ENABLE_OIP_HEADER_POLICY_FALLBACK);
+    IMS_BOOL bOipSourceFromHeader = m_objConfigurationProxy.Is(Feature::OIP_SOURCE_FROM_HEADER);
+    OipType eOipType = GetOipTypeByHeader(piMessage, bOipSourceFromHeader, bPolicyFallBack);
+    if (eOipType == OipType::INVALID)
     {
-        // only PAID can be multiple.
-        SipAddress objAddr(objHeaders.GetAt(i));
-        if (objAddr.GetDisplayName().EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS) ||
-                objAddr.GetUser().EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS))
-        {
-            eOipType = OipType::RESTRICTED;
-            break;
-        }
-        else if (objAddr.GetDisplayName().EqualsIgnoreCase(MessageUtil::STR_UNAVAILABLE) ||
-                objAddr.GetUser().EqualsIgnoreCase(MessageUtil::STR_UNAVAILABLE))
-        {
-            // TODO: CarrierConfig.h : 0 - NONE, 1 - RESTRICTED
-            if (m_objConfigurationProxy.GetInt(Feature::OIP_TYPE_FOR_UNAVAILABLE) == 0)
-            {
-                eOipType = OipType::NONE;
-            }
-            else
-            {
-                eOipType = OipType::RESTRICTED;
-            }
-            break;
-        }
-
-        eOipType = OipType::IDENTITY;
+        eOipType = OipType::NONE;
     }
 
-    IMS_TRACE_I("UpdateCallerId CNAP-Policy[%d] OIP-Type[%d]", m_nCnapType, eOipType, 0);
+    IMS_TRACE_I("UpdateCallerId FromHeader[%s] OIP-Type[%d]", _TRACE_B_(bOipSourceFromHeader),
+            eOipType, 0);
     Add(SuppType::CALLER_ID, static_cast<IMS_SINT32>(eOipType));
     return IMS_TRUE;
 }
@@ -175,23 +152,19 @@ IMS_BOOL MtcSupplementaryService::UpdateCallerId(IN IMessage* piMessage)
 PUBLIC
 IMS_BOOL MtcSupplementaryService::UpdateCnap(IN IMessage* piMessage)
 {
-    AString strDisplayName;
+    AString strCnap;
+    IMS_BOOL bPolicyFallBack =
+            m_objConfigurationProxy.Is(Feature::ENABLE_OIP_HEADER_POLICY_FALLBACK);
+    IMS_BOOL bOipSourceFromHeader = m_objConfigurationProxy.Is(Feature::OIP_SOURCE_FROM_HEADER);
 
-    if (m_nCnapType == CNAP_SCHEME_PAID)
-    {
-        MessageUtil::GetDisplayName(piMessage, ISipHeader::P_ASSERTED_IDENTITY, strDisplayName);
-    }
-    else if (m_nCnapType == CNAP_SCHEME_FROM)
-    {
-        MessageUtil::GetDisplayName(piMessage, ISipHeader::FROM, strDisplayName);
-    }
+    GetCnapByHeader(piMessage, bOipSourceFromHeader, strCnap, bPolicyFallBack);
 
-    if (strDisplayName.GetLength() <= 0)
+    if (strCnap.GetLength() <= 0)
     {
         return IMS_FALSE;
     }
 
-    Add(SuppType::CNAP, strDisplayName);
+    Add(SuppType::CNAP, strCnap);
 
     return IMS_TRUE;
 }
@@ -588,6 +561,65 @@ IMS_SINT32 MtcSupplementaryService::GetCnvHeaderType(IN IMessage* piMessage)
 
     IMS_TRACE_D("GetCNVHeaderType - FROM", 0, 0, 0);
     return ISipHeader::FROM;
+}
+
+PRIVATE
+OipType MtcSupplementaryService::GetOipTypeByHeader(
+        IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack)
+{
+    OipType eOipType = OipType::INVALID;
+    IMSList<AString> objHeaders;
+    IMS_SINT32 nDeterminationPolicyHeader =
+            bFromHeader ? ISipHeader::FROM : ISipHeader::P_ASSERTED_IDENTITY;
+    MessageUtil::GetHeaders(piMessage, nDeterminationPolicyHeader, objHeaders);
+    for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); i++)
+    {
+        // only PAID can be multiple.
+        SipAddress objAddr(objHeaders.GetAt(i));
+        if (objAddr.GetDisplayName().EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS) ||
+                objAddr.GetUser().EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS))
+        {
+            eOipType = OipType::RESTRICTED;
+            break;
+        }
+        else if (objAddr.GetDisplayName().EqualsIgnoreCase(MessageUtil::STR_UNAVAILABLE) ||
+                objAddr.GetUser().EqualsIgnoreCase(MessageUtil::STR_UNAVAILABLE))
+        {
+            // TODO: CarrierConfig.h : 0 - NONE, 1 - RESTRICTED
+            if (m_objConfigurationProxy.GetInt(Feature::OIP_TYPE_FOR_UNAVAILABLE) == 0)
+            {
+                eOipType = OipType::NONE;
+            }
+            else
+            {
+                eOipType = OipType::RESTRICTED;
+            }
+            break;
+        }
+
+        eOipType = OipType::IDENTITY;
+    }
+
+    if (eOipType == OipType::INVALID && bDoFallBack)
+    {
+        return GetOipTypeByHeader(piMessage, !bFromHeader, IMS_FALSE);
+    }
+
+    return eOipType;
+}
+
+PRIVATE
+void MtcSupplementaryService::GetCnapByHeader(IN IMessage* piMessage, IN IMS_BOOL bFromHeader,
+        OUT AString& strCnap, IN IMS_BOOL bDoFallBack)
+{
+    IMS_SINT32 nDeterminationPolicyHeader =
+            bFromHeader ? ISipHeader::FROM : ISipHeader::P_ASSERTED_IDENTITY;
+    MessageUtil::GetDisplayName(piMessage, nDeterminationPolicyHeader, strCnap);
+
+    if (strCnap.GetLength() <= 0 && bDoFallBack)
+    {
+        return GetCnapByHeader(piMessage, !bFromHeader, strCnap, IMS_FALSE);
+    }
 }
 
 PRIVATE

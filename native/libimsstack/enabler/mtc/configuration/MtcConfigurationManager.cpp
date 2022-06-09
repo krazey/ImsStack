@@ -405,12 +405,6 @@ IMS_SINT32 MtcConfigurationManager::GetMinimumBatteryLevelForLimitVideoCall() co
     return m_objCarrierConfig.nMinimumBatteryLevelForLimitVideoCall;
 }
 
-PUBLIC
-IMS_BOOL MtcConfigurationManager::IsSupportVideoTextFeatureInContactHeaderSimultaneously() const
-{
-    return m_objCarrierConfig.bSupportVideoTextFeatureInContactHeaderSimultaneously;
-}
-
 // rtt configurations
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsTextOnDefaultBearerSupported() const
@@ -541,6 +535,12 @@ PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetOipTypeForUnavailable() const
 {
     return m_objAsset.nOipTypeForUnavailable;
+}
+
+PUBLIC
+IMS_BOOL MtcConfigurationManager::IsEnableOipHeaderPolicyFallBack() const
+{
+    return m_objAsset.bEnableOipHeaderPolicyFallBack;
 }
 
 PUBLIC

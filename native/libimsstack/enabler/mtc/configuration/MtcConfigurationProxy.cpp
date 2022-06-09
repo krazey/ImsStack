@@ -101,6 +101,8 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_objManager.IsEnableFakeQosCallFlowOnWifi();
         case Feature::SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS:
             return m_objManager.IsSupportVideoCallUpgradeRegardlessOfFeatureTags();
+        case Feature::ENABLE_OIP_HEADER_POLICY_FALLBACK:
+            return m_objManager.IsEnableOipHeaderPolicyFallBack();
         case Feature::RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF:
             return m_objManager.IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf();
         case Feature::CHECK_AVCHANGE_FEATURE_FOR_CALL_CONVERTING_CAPABILITY:

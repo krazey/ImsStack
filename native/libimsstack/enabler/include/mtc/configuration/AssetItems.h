@@ -16,6 +16,7 @@ public:
             nMediaTypeForOfferlessReinvite(0),
             bSupportVideoCallUpgradeRegardlessOfFeatureTags(IMS_FALSE),
             nOipTypeForUnavailable(1),
+            bEnableOipHeaderPolicyFallBack(IMS_FALSE),
             nEmergencyRttGuardTimer(0),
             bRetryEmergencyCallOverEmergencyPdnWithNextPcscf(IMS_FALSE),
             nPreAlertingTimer(0),
@@ -78,6 +79,7 @@ public:
     IMS_SINT32 nMediaTypeForOfferlessReinvite;
     IMS_BOOL bSupportVideoCallUpgradeRegardlessOfFeatureTags;
     IMS_SINT32 nOipTypeForUnavailable;
+    IMS_BOOL bEnableOipHeaderPolicyFallBack;
     IMS_SINT32 nEmergencyRttGuardTimer;
     IMS_BOOL bRetryEmergencyCallOverEmergencyPdnWithNextPcscf;
     IMS_SINT32 nPreAlertingTimer;

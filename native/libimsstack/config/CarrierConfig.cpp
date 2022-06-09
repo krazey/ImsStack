@@ -986,6 +986,8 @@ const IMS_CHAR
                 "support_video_call_upgrade_regardless_of_feature_tags_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT[] =
         "oip_type_for_unavailable_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL[] =
+        "enable_oip_header_policy_fallback_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT[] =
         "emergency_rtt_guard_timer_millis_int";
 const IMS_CHAR

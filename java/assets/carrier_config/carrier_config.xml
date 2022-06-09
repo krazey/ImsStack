@@ -417,6 +417,7 @@
     <int name="media_type_for_offerless_reinvite_int" value="0"/>
     <boolean name="support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
     <int name="oip_type_for_unavailable_int" value="1"/>
+    <boolean name="enable_oip_header_policy_fallback_bool" value="false"/>
     <int name="emergency_rtt_guard_timer_millis_int" value="0"/>
     <boolean name="retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
     <int name="prealerting_timer_millis_int" value="0"/>

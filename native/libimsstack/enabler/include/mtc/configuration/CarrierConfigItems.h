@@ -65,7 +65,6 @@ public:
             bSupportEarlySession(IMS_FALSE),
             bAllowTextWithVideo(IMS_FALSE),
             nMinimumBatteryLevelForLimitVideoCall(0),
-            bSupportVideoTextFeatureInContactHeaderSimultaneously(IMS_TRUE),
             bTextOnDefaultBearerSupported(IMS_FALSE),
             bTextQosPreconditionSupported(IMS_TRUE),
             nPolicyOnTextQosDeactivation(2),
@@ -157,7 +156,6 @@ public:
     IMS_BOOL bSupportEarlySession;
     IMS_BOOL bAllowTextWithVideo;
     IMS_SINT32 nMinimumBatteryLevelForLimitVideoCall;
-    IMS_BOOL bSupportVideoTextFeatureInContactHeaderSimultaneously;
 
     // rtt configurations
     IMS_BOOL bTextOnDefaultBearerSupported;
