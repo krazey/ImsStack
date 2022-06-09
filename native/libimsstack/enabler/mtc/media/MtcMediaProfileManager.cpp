@@ -339,26 +339,6 @@ void MtcMediaProfileManager::UpdateProfileForMediaActivation(IN ISession* piActi
 }
 
 PUBLIC
-void MtcMediaProfileManager::HandleProfilesInConfirmedState(
-        IN ISession* piConfirmedSession, IN IMediaSession* piMediaSession)
-{
-    IMS_TRACE_D("HandleProfilesInConfirmedState", 0, 0, 0);
-    SetConfirmed(piConfirmedSession, IMS_TRUE);
-
-    for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
-    {
-        ISession* piSession = m_objMediaProfiles.GetKeyAt(index);
-
-        if (piConfirmedSession == piSession)
-        {
-            continue;
-        }
-
-        DestroyMediaProfile(piSession, piMediaSession);
-    }
-}
-
-PUBLIC
 ISession* MtcMediaProfileManager::GetSessionWithNegoId(IN IMS_UINTP nNegoId)
 {
     for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)

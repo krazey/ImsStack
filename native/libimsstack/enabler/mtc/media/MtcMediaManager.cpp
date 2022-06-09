@@ -245,11 +245,6 @@ PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaSession()
         return;
     }
 
-    if (GetState() >= MediaState::TERMINATING)
-    {
-        return;
-    }
-
     IMS_TRACE_D("DestroyMediaSession", 0, 0, 0);
     pMediaManager->DestroySession((MediaSession*)m_piMediaSession);
 }
@@ -552,7 +547,7 @@ PUBLIC VIRTUAL void MtcMediaManager::SetConfirmedSession(IN ISession* piSession)
     m_piMediaSession->SetOptions(GetMediaNegoId(piSession),
             IMediaSession::OptionType::SET_CONFIRMED_SESSION, IMS_TRUE, 0);
 
-    m_objProfileManager.HandleProfilesInConfirmedState(piSession, m_piMediaSession);
+    m_objProfileManager.SetConfirmed(piSession, IMS_TRUE);
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::UpdateStatsReportOption(IN IMS_UINT32 eAction)

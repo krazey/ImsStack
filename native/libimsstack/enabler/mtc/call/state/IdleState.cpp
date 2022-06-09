@@ -192,8 +192,6 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
 {
     ISession* piSession = GetISession();
 
-    InitMediaSession();
-
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
     m_objContext.GetSession()->HandleRequest(IMessage::SESSION_START, *piMessage);
     m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
@@ -205,6 +203,8 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     }
 
     m_objContext.GetCallInfo().eInitialCallType = m_objContext.GetSession()->GetCallType();
+
+    InitMediaSession();
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     objPreconditionManager.CreateQos(piSession);
@@ -280,7 +280,6 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
     IMS_TRACE_D("OnUssiAttached", 0, 0, 0);
 
     ISession* piSession = GetISession();
-    InitMediaSession();
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
     m_objContext.GetSession()->HandleRequest(IMessage::SESSION_START, *piMessage);
@@ -293,6 +292,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
     }
 
     m_objContext.GetCallInfo().eInitialCallType = m_objContext.GetSession()->GetCallType();
+    InitMediaSession();
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {

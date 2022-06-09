@@ -80,8 +80,6 @@ public:
     IMS_BOOL IsPemSendInOtherEarlySession(IN ISession* piSession);  // EarlySession? or ISession?
     IMS_BOOL IsConfirmedDialogState();
     void UpdateProfileForMediaActivation(IN ISession* piActiveSession);
-    void HandleProfilesInConfirmedState(
-            IN ISession* piConfirmedSession, IN IMediaSession* piMediaSession);
 
     ISession* GetSessionWithNegoId(IN IMS_UINTP nNegoId);
     ISession* GetActiveSession();
