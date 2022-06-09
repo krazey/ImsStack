@@ -14,7 +14,7 @@
     <int name="ut_oir_network_default_operation_int" value="1"/>
 
     <!-- USSD overIMS if volte registered -->
-    <int name="carrier_ussd_method_int" value="1">
+    <int name="carrier_ussd_method_int" value="1"/>
 
     <!-- Ringing timer and Ringback timer -->
     <int name="ringing_timer_millis_int" value="60000"/>
