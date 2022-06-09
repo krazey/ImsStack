@@ -29,14 +29,19 @@ using namespace android::telephony::imsmedia;
 
 class AudioMediaSession : public BaseSession
 {
-private:
-    AudioMediaSession(IN const AudioMediaSession& obj);
-    AudioMediaSession& operator=(IN const AudioMediaSession& obj);
-
-    // == PUBLIC METHOD ==============================================================
 public:
+    enum
+    {
+        STATE_NONE = 0,
+        STATE_IDLE,
+        STATE_LIVE,
+        STATE_PAUSED,
+    };
+
     AudioMediaSession(IN IMS_SINT32 nSlodId = 0);
     virtual ~AudioMediaSession();
+    void SetNegoId(IMS_UINTP nNegoId);
+    IMS_BOOL IsSameNegoId(IMS_UINTP nNegoId);
     void SetConfig(IN AudioConfiguration* pConfig);
 
     /*
@@ -101,6 +106,7 @@ protected:
     MediaQualityThreshold m_objMediaQualityThreshold;
     IPAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
+    IMSList<IMS_UINTP> m_listNegoId;
 };
 
 #endif /* End of _IMS_AUDIO_MEDIA_SESSION_H_*/

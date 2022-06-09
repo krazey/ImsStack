@@ -30,6 +30,16 @@ using namespace android::telephony::imsmedia;
 class VideoMediaSession : public BaseSession
 {
 public:
+    enum
+    {
+        STATE_IDLE = 0,
+        STATE_PREVIEW,
+        STATE_RECORDING,
+        STATE_PAUSE_IMAGE,
+        STATE_RENDERING,
+        STATE_PAUSED,
+    };
+
     VideoMediaSession(IN IMS_SINT32 nSlodId = 0);
     virtual ~VideoMediaSession();
     void SetConfig(IN VideoConfiguration* pConfig);
@@ -75,18 +85,10 @@ public:
     //    virtual void SendNotifyInfoToListener(IMS_SINT32 nEvent, AString strNotifyInfo = IMS_NULL,
     //        IMS_SINT32 nNotifyInfo = -1, IMS_BOOL bNotifyInfo = IMS_FALSE);
     virtual void SendEventToUi(IN IMS_SINT32 nEvent, IN IMS_SINT32 nResult);
+    IMS_SINT32 GetLocalPort();
+    IMS_SINT32 GetRemotePort();
 
 private:
-    enum VideoSessionState
-    {
-        STATE_IDLE = 0,
-        STATE_PREVIEW,
-        STATE_RECORDING,
-        STATE_PAUSE_IMAGE,
-        STATE_RENDERING,
-        STATE_PAUSED,
-    };
-
     IMS_BOOL OnSetSurfaceCmd(IN IMS_UINTP pParam);
     IMS_BOOL OnSelectCameraCmd(IN IMS_UINTP pParam);
     IMS_BOOL OnChangeCameraZoomCmd(IN IMS_UINTP pParam);
@@ -104,7 +106,6 @@ protected:
     IMS_SINT32 m_nCameraZoom;
     IMS_BOOL m_bPreviewSurfaceSet;
     IMS_BOOL m_bDisplaySurfaceSet;
-    VideoSessionState m_nState;
 };
 
 #endif /* End of _IMS_VIDEO_MEDIA_SESSION_H_*/

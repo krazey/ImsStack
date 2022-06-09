@@ -67,7 +67,7 @@ IMS_BOOL JniMediaSessionThread::OnOpenSession(IN ImsMediaMsgParamBase* pParam)
         objParcel.writeString16(
                 android::String16(pOpenParam->m_objLocalAddress.ToString().GetStr()));
         objParcel.writeInt32(pOpenParam->m_nLocalPort);
-        // pOpenParam->m_objAudioConfig.writeToParcel(&objParcel);
+        delete pOpenParam;
     }
     else if (pParam->m_eMediaType == MEDIA_TYPE_VIDEO)
     {
@@ -76,10 +76,12 @@ IMS_BOOL JniMediaSessionThread::OnOpenSession(IN ImsMediaMsgParamBase* pParam)
         objParcel.writeString16(
                 android::String16(pOpenParam->m_objLocalAddress.ToString().GetStr()));
         objParcel.writeInt32(pOpenParam->m_nLocalPort);
-        // pOpenParam->m_objVideoConfig.writeToParcel(&objParcel);
+        delete pOpenParam;
     }
-
-    delete pParam;
+    else
+    {
+        delete pParam;
+    }
 
     SendData2Java(objParcel, IMS_TRUE);
 
@@ -104,15 +106,19 @@ IMS_BOOL JniMediaSessionThread::OnModifySession(IN ImsMediaMsgParamBase* pParam)
     {
         ImsMediaMsgConfigParam* pConfigParam = reinterpret_cast<ImsMediaMsgConfigParam*>(pParam);
         pConfigParam->m_objAudioConfig.writeToParcel(&objParcel);
+        delete pConfigParam;
     }
     else if (pParam->m_eMediaType == MEDIA_TYPE_VIDEO)
     {
         ImsMediaMsgVideoConfigParam* pConfigParam =
                 reinterpret_cast<ImsMediaMsgVideoConfigParam*>(pParam);
         pConfigParam->m_objVideoConfig.writeToParcel(&objParcel);
+        delete pConfigParam;
     }
-
-    delete pParam;
+    else
+    {
+        delete pParam;
+    }
 
     SendData2Java(objParcel, IMS_TRUE);
 

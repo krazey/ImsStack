@@ -45,9 +45,33 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
     IMS_TRACE_I("+AudioMediaSession()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL AudioMediaSession::~AudioMediaSession()
+PUBLIC
+VIRTUAL AudioMediaSession::~AudioMediaSession()
 {
     IMS_TRACE_I("~AudioMediaSession()", 0, 0, 0);
+}
+
+PUBLIC
+void AudioMediaSession::SetNegoId(IMS_UINTP nNegoId)
+{
+    m_listNegoId.Append(nNegoId);
+}
+
+PUBLIC
+IMS_BOOL AudioMediaSession::IsSameNegoId(IMS_UINTP nNegoId)
+{
+    IMS_BOOL bRet = IMS_FALSE;
+
+    // check nego id
+    for (IMS_UINT32 i = 0; i < m_listNegoId.GetSize(); i++)
+    {
+        if (nNegoId == m_listNegoId.GetAt(i))
+        {
+            bRet = IMS_TRUE;
+            break;
+        }
+    }
+    return bRet;
 }
 
 PUBLIC

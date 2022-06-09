@@ -22,16 +22,12 @@ BaseSession::BaseSession(IN IMS_SINT32 nSlodId) :
         m_nSlodId(nSlodId),
         m_piMediaSessionListener(IMS_NULL),
         m_pEnvironment(IMS_NULL),
-        m_eEnforcedDirection(MEDIA_DIRECTION_INVALID)
+        m_eEnforcedDirection(MEDIA_DIRECTION_INVALID),
+        m_nState(0)
 {
 }
 
 PUBLIC VIRTUAL BaseSession::~BaseSession() {}
-
-PUBLIC VIRTUAL void BaseSession::SetNegoId(IMS_UINTP nNegoId)
-{
-    m_listNegoId.Append(nNegoId);
-}
 
 PUBLIC VIRTUAL void BaseSession::SetServiceType(MEDIA_SERVICE_TYPE eServiceType)
 {
@@ -55,20 +51,9 @@ PUBLIC VIRTUAL void BaseSession::SetDirection(MEDIA_DIRECTION eDir)
     m_eEnforcedDirection = eDir;
 }
 
-PUBLIC VIRTUAL IMS_BOOL BaseSession::IsSameNegoId(IMS_UINTP nNegoId)
+PUBLIC VIRTUAL IMS_SINT32 BaseSession::GetState()
 {
-    IMS_BOOL bRet = IMS_FALSE;
-
-    // check nego id
-    for (IMS_UINT32 i = 0; i < m_listNegoId.GetSize(); i++)
-    {
-        if (nNegoId == m_listNegoId.GetAt(i))
-        {
-            bRet = IMS_TRUE;
-            break;
-        }
-    }
-    return bRet;
+    return m_nState;
 }
 
 // do it later : IsSameRemoteNetwork is currently not used

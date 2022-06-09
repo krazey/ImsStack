@@ -887,6 +887,12 @@ IMediaDescriptor* MediaNego::GetMediaDescriptor(IN IMedia* pIMedia)
     }
 }
 
+PUBLIC
+IMS_BOOL MediaNego::IsForking()
+{
+    return m_bForking;
+}
+
 PRIVATE
 IMSList<IMedia*> MediaNego::GetIMediaListFromSession(
         IN ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType)

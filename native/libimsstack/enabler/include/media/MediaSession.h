@@ -22,7 +22,7 @@
 #include "MediaNego.h"
 #include "audio/AudioMediaSession.h"
 #include "video/VideoMediaSession.h"
-//#include "text/TextMediaSession.h"
+#include <mutex>
 
 class MediaSessionTypeNode
 {
@@ -91,7 +91,6 @@ public:
     IMS_BOOL HoldSession();
     void ReportToClient(IN RtpError eError, IN MEDIA_CONTENT_TYPE eMediaType);
     IMS_SINTP GetCallKey() { return m_nCallKey; };
-    IMS_BOOL IsVideoExist() { return (m_listVideoSession.IsEmpty()) ? IMS_FALSE : IMS_TRUE; };
 
 public:
     /************************************************************/
@@ -157,15 +156,7 @@ private:
     void UpdateMediaQualityThresholdForHold();
     void UpdateAudioQualityThresholdForHold();
     void UpdateVideoQualityThresholdForHold();
-    void Open(IN AudioMediaSession* pAudioSession, IN VideoMediaSession* pVideoSession = IMS_NULL);
-    void Modify(
-            IN AudioMediaSession* pAudioSession, IN VideoMediaSession* pVideoSession = IMS_NULL);
-    void Close(IN AudioMediaSession* pAudioSession, IN VideoMediaSession* pVideoSession = IMS_NULL);
-    void Add(IN AudioMediaSession* pAudioSession);
-    void Delete(IN AudioMediaSession* pAudioSession);
-    void Confirm(IN AudioMediaSession* pAudioSession);
-    void SetMediaQuality(
-            IN AudioMediaSession* pAudioSession, IN VideoMediaSession* pVideoSession = IMS_NULL);
+    void SetMediaQuality(IN AudioMediaSession* pAudioSession);
     IMS_BOOL OnResponse(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
     IMS_BOOL SendVideoMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
     void CreateNotExistingSession(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
@@ -175,25 +166,21 @@ protected:
     IMS_UINTP CreateAudioMediaSession(IN IMS_UINTP nNegoId);
     IMS_UINTP CreateVideoMediaSession(IN IMS_UINTP nNegoId);
     MediaNego* FindMediaNego(IN IMS_UINTP nNegoId);
-    AudioMediaSession* FindAudioSession(IN IMS_UINTP nNegoId);
-    VideoMediaSession* FindVideoSession(IN IMS_UINTP nNegoId = IMS_NULL);
+    AudioMediaSession* FindAudioSession(IN IMS_UINTP nNegoId = IMS_NULL);
     void ConfirmMediaSession(IN IMS_UINTP nNegoId);
     void ConfirmMediaNego(IN IMS_UINTP nNegoId);
     void ConfirmAudioMediaSession(IN IMS_UINTP nNegoId);
-    void ConfirmVideoMediaSession(IN IMS_UINTP nNegoId);
     void ConfirmMediaSessionTypeNode(IN IMS_UINTP nNegoId);
     IMS_BOOL DeleteMediaNego(IN IMS_UINTP nNegoId);
     IMS_BOOL DeleteAudioMediaSession(IN IMS_UINTP nNegoId);
-    IMS_BOOL DeleteVideoMediaSession(IN IMS_UINTP nNegoId);
+    IMS_BOOL DeleteVideoMediaSession();
     IMS_BOOL DeleteMediaSessionTypeNode(IN IMS_UINTP nNegoId);
     void ClearMediaNego();
     void ClearAudioMediaSession();
-    void ClearVideoMediaSession();
     void ClearMediaSessionTypeNode();
-    void ProcessOfferSdp(IN IMS_UINTP nNegoId);
-    void ProcessAnswerSdp(IN IMS_UINTP nNegoId);
+    void OpenSession(IN IMS_UINTP nNegoId);
+    IMS_BOOL AddSession(IN IMS_UINTP nNegoId);
     IMS_BOOL ProcessRun(IN IMS_UINTP nNegoId);
-    void UpdateLocalAddress(IN IMS_UINTP nNegoId);
     void UpdateAudioLocalAddress(IN IMS_UINTP nNegoId);
     void UpdateVideoLocalAddress(IN IMS_UINTP nNegoId);
 
@@ -203,18 +190,18 @@ protected:
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* param);
     void CreateMediaSessionTypeNode(IN IMS_UINTP nNegoId, IN ISession* pSession);
     IMS_BOOL IsExistingTypeNode(IN AString strIpAddr, IN IMS_UINT32 nPort);
-    IMS_BOOL OnResponseOpenSession(IN IMS_UINTP pParam_);
-    IMS_BOOL OnResponseModifySession(IN IMS_UINTP pParam_);
-    IMS_BOOL OnResponseAddConfig(IN IMS_UINTP pParam_);
-    IMS_BOOL OnResponseConfirmConfig(IN IMS_UINTP pParam_);
-    IMS_BOOL OnNotifyFirstPacket(IN IMS_UINTP pParam_);
-    IMS_BOOL OnNotifyMediaInactivity(IN IMS_UINTP pParam_);
-    IMS_BOOL OnNofityPacketLoss(IN IMS_UINTP pParam_);
-    IMS_BOOL OnNofityJitter(IN IMS_UINTP pParam_);
-    IMS_BOOL OnNofityMediaQualityChange(IN IMS_UINTP pParam_);
-    IMS_BOOL OnResponseSessionChanged(IN IMS_UINTP pParam_);
-    IMS_BOOL OnNofityHeaderExtension(IN IMS_UINTP pParam_);
-    IMS_BOOL OnNotifyQosInfo(IN IMS_UINTP pParam_);
+    IMS_BOOL OnResponseOpenSession(IN IMS_UINTP pParam);
+    IMS_BOOL OnResponseModifySession(IN IMS_UINTP pParam);
+    IMS_BOOL OnResponseAddConfig(IN IMS_UINTP pParam);
+    IMS_BOOL OnResponseConfirmConfig(IN IMS_UINTP pParam);
+    IMS_BOOL OnNotifyFirstPacket(IN IMS_UINTP pParam);
+    IMS_BOOL OnNotifyMediaInactivity(IN IMS_UINTP pParam);
+    IMS_BOOL OnNofityPacketLoss(IN IMS_UINTP pParam);
+    IMS_BOOL OnNofityJitter(IN IMS_UINTP pParam);
+    IMS_BOOL OnNofityMediaQualityChange(IN IMS_UINTP pParam);
+    IMS_BOOL OnResponseSessionChanged(IN IMS_UINTP pParam);
+    IMS_BOOL OnNofityHeaderExtension(IN IMS_UINTP pParam);
+    IMS_BOOL OnNotifyQosInfo(IN IMS_UINTP pParam);
     IMS_BOOL OnNotifyMediaDetach();
     ImsMediaBasicSessionInfoParam* GetBasicSessionInfofromRemoteArress(
             IN AString strIpAddr, IN IMS_SINT32 nPort);
@@ -235,14 +222,13 @@ protected:
     IMS_SINTP m_nCallKey;
     IMediaSessionClientListener* m_pClientListener;
     MediaEnvironment* m_pEnvironment;
-    IMS_BOOL m_bSessionOpened;
-    IMS_SINT32 m_nCommandBuffer;
     SessionState m_eSessionState;
     IMSMap<IMS_UINTP, MediaNego*> m_objMapMediaNego;
     IMSList<AudioMediaSession*> m_listAudioSession;
-    IMSList<VideoMediaSession*> m_listVideoSession;
-    // IMSList<TextMediaSession*> m_listTextSession;
+    VideoMediaSession* m_pVideoSession;
     IMS_UINT32 m_nRtpTimer;
     IMSList<MediaSessionTypeNode*> m_listMediaSessionTypeNode;
+    IMS_SINT32 m_nAudioSessionState;
+    std::mutex m_objMutex;
 };
 #endif

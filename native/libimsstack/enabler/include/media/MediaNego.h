@@ -67,6 +67,7 @@ public:
     VIDEO_RESOLUTION GetNegotiatedVideoQuality(void);
     // TEXT_CODEC GetNegotiatedTextQuality(void);    // TODO_MEDIA
     IMediaDescriptor* GetMediaDescriptor(IN IMedia* pIMedia);
+    IMS_BOOL IsForking();
 
 private:
     IMSList<IMedia*> GetIMediaListFromSession(

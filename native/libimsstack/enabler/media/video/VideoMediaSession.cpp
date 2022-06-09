@@ -41,8 +41,7 @@ PUBLIC VideoMediaSession::VideoMediaSession(IN IMS_SINT32 nSlotId) :
         m_nCameraId(-1),
         m_nCameraZoom(-1),
         m_bPreviewSurfaceSet(IMS_FALSE),
-        m_bDisplaySurfaceSet(IMS_FALSE),
-        m_nState(STATE_IDLE)
+        m_bDisplaySurfaceSet(IMS_FALSE)
 {
     IMS_TRACE_I("+VideoMediaSession()", 0, 0, 0);
 }
@@ -430,11 +429,12 @@ IMS_BOOL VideoMediaSession::UpdateLocalEndPoint(IN VideoProfile* pNegoProfile)
     {
         m_objLocalAddress = pNegoProfile->objIpAddr;
     }
+
     m_nLocalPort = pNegoProfile->nDataPort;
 
     IMS_TRACE_D("UpdateLocalEndPoint() - LocalIP[%s], LocalPort[%d]",
             m_objLocalAddress.ToString().GetStr(), m_nLocalPort, 0);
-    // modem id??
+
     return IMS_TRUE;
 }
 
@@ -445,6 +445,7 @@ void VideoMediaSession::UpdateLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UI
     {
         m_objLocalAddress = objLocalAddr;
     }
+
     m_nLocalPort = nPort;
 
     IMS_TRACE_D("UpdateLocalEndPoint() - LocalIP[%s], LocalPort[%d]",
@@ -485,6 +486,7 @@ PUBLIC
 IMS_BOOL VideoMediaSession::Open()
 {
     IMS_TRACE_I("Open()", 0, 0, 0);
+
     if (m_piMediaSessionListener != IMS_NULL)
     {
         ImsMediaMsgVideoOpenConfigParam* pParam = new ImsMediaMsgVideoOpenConfigParam();
@@ -506,14 +508,18 @@ IMS_BOOL VideoMediaSession::Open()
         {
             OnSetSurfaceCmd(reinterpret_cast<IMS_UINTP>(new ImsMediaVideoParam(SURFACE_FAR)));
         }
+
+        return IMS_TRUE;
     }
-    return IMS_TRUE;
+
+    return IMS_FALSE;
 }
 
 PUBLIC
 IMS_BOOL VideoMediaSession::Modify()
 {
     IMS_TRACE_I("Modify()", 0, 0, 0);
+
     if (m_piMediaSessionListener != IMS_NULL)
     {
         ImsMediaMsgVideoConfigParam* pParam = new ImsMediaMsgVideoConfigParam();
@@ -538,6 +544,7 @@ PUBLIC
 IMS_BOOL VideoMediaSession::Close()
 {
     IMS_TRACE_I("Close()", 0, 0, 0);
+
     if (m_piMediaSessionListener != IMS_NULL)
     {
         ImsMediaMsgParamBase* pParam = new ImsMediaMsgParamBase();
@@ -547,6 +554,7 @@ IMS_BOOL VideoMediaSession::Close()
 
         m_nState = STATE_IDLE;
     }
+
     return IMS_TRUE;
 }
 
@@ -568,7 +576,7 @@ IMS_BOOL VideoMediaSession::SetMediaQuality()
     return bResult;
 }
 
-PRIVATE
+PUBLIC
 void VideoMediaSession::SendEventToUi(IMS_SINT32 nEvent, IMS_SINT32 nResult)
 {
     IMS_TRACE_I("SendEventToUi() - nEvent[%d], nResult[%d]", nEvent, 0, 0);
@@ -577,6 +585,18 @@ void VideoMediaSession::SendEventToUi(IMS_SINT32 nEvent, IMS_SINT32 nResult)
     {
         m_piMediaSessionListener->MediaSession_SendEventToUi(nEvent, nResult);
     }
+}
+
+PUBLIC
+IMS_SINT32 VideoMediaSession::GetLocalPort()
+{
+    return m_nLocalPort;
+}
+
+PUBLIC
+IMS_SINT32 VideoMediaSession::GetRemotePort()
+{
+    return m_objVideoConfig.getRemotePort();
 }
 
 PRIVATE

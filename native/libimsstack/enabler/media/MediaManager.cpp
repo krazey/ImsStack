@@ -124,6 +124,7 @@ PUBLIC VIRTUAL void MediaManager::Timer_TimerExpired(IN ITimer* piTimer)
     {
         return;
     }
+
     IMS_TRACE_I("Timer_TimerExpired - close all session", 0, 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_lstSessionNode.GetSize(); i++)
@@ -237,46 +238,16 @@ IMS_BOOL MediaManager::handleRequestMsg(IN IMS_SINT32 eEvent, IN IMS_SINTP nCall
     IMS_TRACE_I("handleRequestMsg() - MSG[%d, %s], CallKey[%d]",
             eEvent, IMMedia::PrintMsg(eEvent), nCallKey);
 
-    MEDIA_CONTENT_TYPE eType = param->m_eMediaType;
-
     MediaSessionNode* pNode = FindSessionNode(nCallKey);
+
     if (pNode == IMS_NULL || pNode->pMessageHandler == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    if(pNode->pMessageHandler->SendMessageToMediaService(eEvent, param))
+    if (pNode->pMessageHandler->SendMessageToMediaService(eEvent, param))
     {
-        if (eEvent== IMMedia::REQUEST_CLOSE_SESSION)
-        {
-            IMS_TRACE_D("handleRequestMsg() CloseSession type[%d] is successfully sent to JNI",
-                    eType, 0, 0);
-            MediaSession* pMediaSession = GetSession(nCallKey);
-            if (pMediaSession != IMS_NULL)
-            {
-                // TODO_MEDIA text
-                /*if (pMediaSession->IsTextExist())
-                {
-                    if (eType == MEDIA_TYPE_TEXT)
-                    {
-                        DestroySession(pMediaSession);
-                    }
-                }
-                else */
-                if (pMediaSession->IsVideoExist())
-                {
-                    if (eType == MEDIA_TYPE_VIDEO)
-                    {
-                        DestroySession(pMediaSession);
-                    }
-                }
-                else
-                {
-                    DestroySession(pMediaSession);
-                }
-            }
-        }
-        else if (IMMedia::CategorizeMessageType(eEvent) == IMMedia::MSG_REQUEST_SET_WAIT)
+        if (IMMedia::CategorizeMessageType(eEvent) == IMMedia::MSG_REQUEST_SET_WAIT)
         {
             IMS_TRACE_D("handleRequestMsg() start timer - wait media framework response", 0, 0, 0);
             StartTimer(TIME_WAIT_MEDIA_RESPONSE);
@@ -284,6 +255,7 @@ IMS_BOOL MediaManager::handleRequestMsg(IN IMS_SINT32 eEvent, IN IMS_SINTP nCall
 
         return IMS_TRUE;
     }
+
     return IMS_FALSE;
 }
 
