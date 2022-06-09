@@ -687,9 +687,6 @@ const IMS_CHAR CarrierConfig::ImsVt::KEY_ALLOW_TEXT_WITH_VIDEO_BOOL[] =
         KEY_IMS_VT_PREFIX "allow_text_with_video_bool";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT[] =
         KEY_IMS_VT_PREFIX "minimum_battery_level_for_limit_video_call_int";
-const IMS_CHAR CarrierConfig::ImsVt::
-        KEY_SUPPORT_VIDEO_TEXT_FEATURE_IN_CONTACT_HEADER_SIMULTANEOUSLY_BOOL[] = KEY_IMS_VT_PREFIX
-        "support_video_text_feature_in_contact_header_simultaneously_bool";
 // Media
 const IMS_CHAR CarrierConfig::ImsVt::KEY_HEVC_SUPPORT_BOOL[] =
         KEY_IMS_VT_PREFIX "hevc_support_bool";
