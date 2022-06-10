@@ -15,15 +15,15 @@
  */
 package com.android.imsstack.test.menu;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceScreen;
-import android.text.TextUtils;
+import android.telephony.CarrierConfigManager;
+import android.telephony.ims.ImsManager;
+import android.telephony.ims.ProvisioningManager;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.view.Window;
@@ -37,6 +37,7 @@ import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.CarrierConfigUtils;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.IoUtils;
@@ -46,8 +47,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -57,6 +58,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
 
     private static final String KEY_CLEAR_TEST_CONFIG = "clear_test_config";
     private static final String KEY_TEST_CARRIER_ID = "test_carrier_id";
+    private static final String KEY_VOLTE_PROVISIONING = "volte_provisioning";
     private static final String KEY_ASSETS_PREFIX = "assets_";
     private static final String KEY_CONFIG_BOOLEAN_ITEMS = "config_boolean_items";
     private static final String KEY_CONFIG_BOOLEAN_VALUE = "config_boolean_value";
@@ -116,6 +118,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
     private final SparseArray<EditTextPreference> mConfigValues = new SparseArray<>(CONFIG_I_MAX);
     private ListPreference mClearTestConfig;
     private ListPreference mTestCarrierId;
+    private ListPreference mVoLteProvisioning;
     private boolean mConfigChanged = false;
 
     @SuppressWarnings("deprecation")
@@ -231,14 +234,14 @@ public class CarrierConfigMenu extends PreferenceActivity {
             }
         }
 
-        mClearTestConfig = (ListPreference)findPreference(KEY_CLEAR_TEST_CONFIG);
+        mClearTestConfig = (ListPreference) findPreference(KEY_CLEAR_TEST_CONFIG);
 
         if (mClearTestConfig != null) {
             mClearTestConfig.setValue("");
             mClearTestConfig.setOnPreferenceChangeListener(new ListItemChangeListener());
         }
 
-        mTestCarrierId = (ListPreference)findPreference(KEY_TEST_CARRIER_ID);
+        mTestCarrierId = (ListPreference) findPreference(KEY_TEST_CARRIER_ID);
 
         if (mTestCarrierId != null) {
             int carrierId = ImsPrivateProperties.Persistent.getInt(
@@ -247,6 +250,13 @@ public class CarrierConfigMenu extends PreferenceActivity {
             mTestCarrierId.setValue(String.valueOf(carrierId));
             mTestCarrierId.setSummary(mTestCarrierId.getEntry());
             mTestCarrierId.setOnPreferenceChangeListener(new ListItemChangeListener());
+        }
+
+        mVoLteProvisioning = (ListPreference) findPreference(KEY_VOLTE_PROVISIONING);
+
+        if (mVoLteProvisioning != null) {
+            mVoLteProvisioning.setValue("-1");
+            mVoLteProvisioning.setOnPreferenceChangeListener(new ListItemChangeListener());
         }
     }
 
@@ -288,6 +298,43 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     ImsPrivateProperties.Persistent.setInt(
                             ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID,
                             newCarrierId, mSlotId);
+                }
+            } else if (KEY_VOLTE_PROVISIONING.equals(preference.getKey())) {
+                String value = newValue.toString();
+
+                mVoLteProvisioning.setValue(value);
+                mVoLteProvisioning.setSummary(mVoLteProvisioning.getEntry());
+
+                int provisioningStatus = parseInt(value, 0);
+                int subId = MSimUtils.getSubId(mSlotId);
+
+                if (CarrierConfigUtils.getBoolean(
+                        CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL,
+                        subId)) {
+                    ImsLog.d(mSlotId, "VoLte-Provisioning-Required: subId="
+                            + subId + ", status=" + provisioningStatus);
+
+                    ImsManager imsMngr = AppContext.getSystemService(ImsManager.class);
+
+                    if (imsMngr != null) {
+                        try {
+                            ProvisioningManager pm = imsMngr.getProvisioningManager(subId);
+
+                            if (pm != null) {
+                                pm.setProvisioningIntValue(
+                                        ProvisioningManager.KEY_VOLTE_PROVISIONING_STATUS,
+                                        provisioningStatus);
+                                pm.setProvisioningIntValue(
+                                        ProvisioningManager.KEY_VT_PROVISIONING_STATUS,
+                                        provisioningStatus);
+                                pm.setProvisioningIntValue(
+                                        ProvisioningManager.KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE,
+                                        provisioningStatus);
+                            }
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+                    }
                 }
             }
 
