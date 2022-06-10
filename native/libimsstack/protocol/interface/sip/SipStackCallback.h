@@ -1,8 +1,25 @@
-#ifndef _SIP_STACK_CALLBACK_H_
-#define _SIP_STACK_CALLBACK_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_STACK_CALLBACK_H_
+#define SIP_STACK_CALLBACK_H_
 
-#include "ISipUserData.h"
+#include "ImsTypeDef.h"
+
 #include "ISipTimerUtil.h"
+#include "ISipUserData.h"
 #include "txn/sip_txn_common.h"
 
 // Definition of function prototypes for SIP stack transaction layer
@@ -35,6 +52,6 @@ struct SipStackCallbacks
     SipStack_DisplayTxnKey pfnDisplayTxnKey;
 };
 
-GLOBAL void SipStackCallback_SetCallbacks(IN const SipStackCallbacks& stCallbacks);
+GLOBAL void SipStackCallback_SetCallbacks(IN const SipStackCallbacks& objCallbacks);
 
-#endif  // _SIP_STACK_CALLBACK_H_
+#endif

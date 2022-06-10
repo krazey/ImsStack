@@ -1,5 +1,20 @@
-#ifndef _SIP_MESSAGE_BUFFER_H_
-#define _SIP_MESSAGE_BUFFER_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_MESSAGE_BUFFER_H_
+#define SIP_MESSAGE_BUFFER_H_
 
 #include "RCObject.h"
 
@@ -7,11 +22,11 @@ class SipMessageBuffer : public RCObject
 {
 public:
     SipMessageBuffer();
-    SipMessageBuffer(IN const SipMessageBuffer& objRHS);
+    SipMessageBuffer(IN const SipMessageBuffer& other);
     virtual ~SipMessageBuffer();
 
 private:
-    SipMessageBuffer& operator=(IN const SipMessageBuffer& objRHS);
+    SipMessageBuffer& operator=(IN const SipMessageBuffer&) = delete;
 
 public:
     IMS_BYTE* GetBuffer();
@@ -31,9 +46,9 @@ public:
     };
 
     // Variable for a temporary message storage to form a SIP message
-    IMS_BYTE MESSAGE[MAX_MSG_SIZE];
+    IMS_BYTE m_baBuffer[MAX_MSG_SIZE];
     // Buffer for dual VoLTE
-    IMS_BYTE** ppBuffer;
+    IMS_BYTE** m_ppBuffer;
 };
 
-#endif  // _SIP_MESSAGE_BUFFER_H_
+#endif
