@@ -524,6 +524,9 @@
     <boolean name="ut_host_header_requires_port_number_bool" value="false"/>
     <int name="ut_xcap_apn_inactivity_timer_sec_int" value="120"/>
     <boolean name="ut_display_error_phrase_with_409_error_bool" value="false"/>
+    <boolean name="ut_omit_namespace_of_document_element_bool" value="false"/>
+    <boolean name="ut_omit_namespace_ss_bool" value="false"/>
+    <boolean name="ut_omit_namespace_cp_bool" value="false"/>
 
     <!-- Uce -->
     <boolean name="add_video_tag_contact_header_in_publish_bool" value="false"/>
