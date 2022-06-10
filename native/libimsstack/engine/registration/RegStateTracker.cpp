@@ -1,279 +1,143 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20101207  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
 #include "RegContact.h"
-#include "SipConfigProxy.h"
 #include "RegStateTracker.h"
+#include "SipConfigProxy.h"
 
 __IMS_TRACE_TAG_REG__;
 
 PUBLIC
 RegStateTracker::RegStateTracker() :
         RCObject(),
-        strSubsId(AString::ConstNull()),
-        pAuthorizedAOR(IMS_NULL),
-        objIPAddress(IPAddress::NONE),
-        objPublicIPAddress(IPAddress::IPv6NONE),
-        pContactAddressForOutgoingMessage(IMS_NULL),
-        pPreferredContact(IMS_NULL),
-        nTransportExt(0),
-        nPortFlowControl(0),
-        nPortUC(0),
-        nPortUS(0),
-        pSIPProfile(IMS_NULL)
+        m_strSubsId(AString::ConstNull()),
+        m_pAuthorizedAor(IMS_NULL),
+        m_objIpAddress(IPAddress::NONE),
+        m_objPublicIpAddress(IPAddress::IPv6NONE),
+        m_pContactAddressForOutgoingMessage(IMS_NULL),
+        m_pPreferredContact(IMS_NULL),
+        m_nTransportExt(0),
+        m_nPortFlowControl(0),
+        m_nPortUc(0),
+        m_nPortUs(0),
+        m_pSipProfile(IMS_NULL)
 {
 }
 
 PUBLIC
-RegStateTracker::RegStateTracker(IN const RegStateTracker& objRHS) :
-        RCObject(objRHS),
-        strSubsId(objRHS.strSubsId),
-        pAuthorizedAOR(IMS_NULL),
-        objIPAddress(objRHS.objIPAddress),
-        objPublicIPAddress(objRHS.objPublicIPAddress),
-        pContactAddressForOutgoingMessage(IMS_NULL),
-        pPreferredContact(objRHS.pPreferredContact),
-        nTransportExt(objRHS.nTransportExt),
-        nPortFlowControl(objRHS.nPortFlowControl),
-        nPortUC(objRHS.nPortUC),
-        nPortUS(objRHS.nPortUS),
-        pSIPProfile(objRHS.pSIPProfile)
+RegStateTracker::RegStateTracker(IN const RegStateTracker& other) :
+        RCObject(other),
+        m_strSubsId(other.m_strSubsId),
+        m_pAuthorizedAor(IMS_NULL),
+        m_objIpAddress(other.m_objIpAddress),
+        m_objPublicIpAddress(other.m_objPublicIpAddress),
+        m_pContactAddressForOutgoingMessage(IMS_NULL),
+        m_pPreferredContact(other.m_pPreferredContact),
+        m_nTransportExt(other.m_nTransportExt),
+        m_nPortFlowControl(other.m_nPortFlowControl),
+        m_nPortUc(other.m_nPortUc),
+        m_nPortUs(other.m_nPortUs),
+        m_pSipProfile(other.m_pSipProfile)
 {
-    if (objRHS.pAuthorizedAOR != IMS_NULL)
+    if (other.m_pAuthorizedAor != IMS_NULL)
     {
-        pAuthorizedAOR = new SipAddress(*(objRHS.pAuthorizedAOR));
+        m_pAuthorizedAor = new SipAddress(*(other.m_pAuthorizedAor));
     }
 
-    if (objRHS.pContactAddressForOutgoingMessage != IMS_NULL)
+    if (other.m_pContactAddressForOutgoingMessage != IMS_NULL)
     {
-        pContactAddressForOutgoingMessage =
-                new SipAddress(*(objRHS.pContactAddressForOutgoingMessage));
+        m_pContactAddressForOutgoingMessage =
+                new SipAddress(*(other.m_pContactAddressForOutgoingMessage));
     }
 }
 
 PUBLIC VIRTUAL RegStateTracker::~RegStateTracker()
 {
-    if (pAuthorizedAOR != IMS_NULL)
+    if (m_pAuthorizedAor != IMS_NULL)
     {
-        delete pAuthorizedAOR;
+        delete m_pAuthorizedAor;
     }
 
-    if (pContactAddressForOutgoingMessage != IMS_NULL)
+    if (m_pContactAddressForOutgoingMessage != IMS_NULL)
     {
-        delete pContactAddressForOutgoingMessage;
+        delete m_pContactAddressForOutgoingMessage;
     }
 
     IMS_TRACE_D("Destructor :: RegStateTracker", 0, 0, 0);
 }
 
 PUBLIC
-const SipAddress& RegStateTracker::GetAOR() const
+const SipAddress& RegStateTracker::GetAuthorizedAor() const
 {
-    //---------------------------------------------------------------------------------------------
+    if (m_pAuthorizedAor == IMS_NULL)
+    {
+        return m_objAor;
+    }
 
-    return objAOR;
-}
-
-PUBLIC
-const AStringArray& RegStateTracker::GetAssociatedURIs() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objAssociatedURIs;
-}
-
-PUBLIC
-const SipAddress& RegStateTracker::GetAuthorizedAOR() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pAuthorizedAOR == IMS_NULL)
-        return objAOR;
-
-    return (*pAuthorizedAOR);
+    return (*m_pAuthorizedAor);
 }
 
 PUBLIC
 const SipAddress& RegStateTracker::GetContactAddress() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pPreferredContact != IMS_NULL)
+    if (m_pPreferredContact != IMS_NULL)
     {
-        return pPreferredContact->GetContactAddress();
+        return m_pPreferredContact->GetContactAddress();
     }
 
-    return objPreferredContactAddress;
-}
-
-PUBLIC
-const SipAddress* RegStateTracker::GetContactAddressForOutgoingMessage() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pContactAddressForOutgoingMessage;
-}
-
-PUBLIC
-const IPAddress& RegStateTracker::GetIPAddress() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objIPAddress;
-}
-
-PUBLIC
-const AStringArray& RegStateTracker::GetPathHeaders() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objPaths;
-}
-
-PUBLIC
-IMS_SINT32 RegStateTracker::GetPortFlowControl() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nPortFlowControl;
-}
-
-PUBLIC
-IMS_SINT32 RegStateTracker::GetPortUC() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nPortUC;
-}
-
-PUBLIC
-IMS_SINT32 RegStateTracker::GetPortUS() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nPortUS;
-}
-
-PUBLIC
-const RegContact* RegStateTracker::GetPreferredContact() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pPreferredContact;
-}
-
-PUBLIC
-const IPAddress& RegStateTracker::GetPublicIPAddress() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objPublicIPAddress;
-}
-
-PUBLIC
-const AStringArray& RegStateTracker::GetSecurityClients() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objSecurityClients;
-}
-
-PUBLIC
-const AStringArray& RegStateTracker::GetSecurityVerifys() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objSecurityVerifys;
-}
-
-PUBLIC
-const AStringArray& RegStateTracker::GetServiceRoutes() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objServiceRoutes;
-}
-
-PUBLIC
-SipProfile* RegStateTracker::GetSIPProfile() const
-{
-    return pSIPProfile.Get();
-}
-
-PUBLIC
-const AString& RegStateTracker::GetSubscriberId() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strSubsId;
-}
-
-PUBLIC
-IMS_SINT32 RegStateTracker::GetTransportExt() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nTransportExt;
+    return m_objPreferredContactAddress;
 }
 
 PUBLIC
 IMS_BOOL RegStateTracker::IsWithinTrustDomain(IN IMS_SINT32 nSlotId) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return SipConfigProxy::IsTrustDomainConfigured(nSlotId, GetSIPProfile());
+    return SipConfigProxy::IsTrustDomainConfigured(nSlotId, GetSipProfile());
 }
 
 PRIVATE
-void RegStateTracker::SetAOR(IN CONST SipAddress& objAOR)
+void RegStateTracker::SetAssociatedUris(IN const AStringArray& objAssociatedUris)
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->objAOR = objAOR;
-}
-
-PRIVATE
-void RegStateTracker::SetAssociatedURIs(IN CONST AStringArray& objAssociatedURIs)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->objAssociatedURIs = objAssociatedURIs;
+    m_objAssociatedUris = objAssociatedUris;
 
     // The topmost user identity is an authorized & registered explicitly by the network
-    if (this->objAssociatedURIs.IsEmpty())
+    if (m_objAssociatedUris.IsEmpty())
     {
-        if (pAuthorizedAOR != IMS_NULL)
+        if (m_pAuthorizedAor != IMS_NULL)
         {
-            delete pAuthorizedAOR;
-            pAuthorizedAOR = IMS_NULL;
+            delete m_pAuthorizedAor;
+            m_pAuthorizedAor = IMS_NULL;
         }
     }
     else
     {
-        const AString& strIMPU = this->objAssociatedURIs.GetFirstElement();
+        const AString& strImpu = m_objAssociatedUris.GetFirstElement();
 
-        if (pAuthorizedAOR != IMS_NULL)
+        if (m_pAuthorizedAor != IMS_NULL)
         {
-            delete pAuthorizedAOR;
-            pAuthorizedAOR = IMS_NULL;
+            delete m_pAuthorizedAor;
+            m_pAuthorizedAor = IMS_NULL;
         }
 
-        pAuthorizedAOR = new SipAddress();
+        m_pAuthorizedAor = new SipAddress();
 
-        if (pAuthorizedAOR != IMS_NULL)
+        if (m_pAuthorizedAor != IMS_NULL)
         {
-            if (!pAuthorizedAOR->Create(strIMPU))
+            if (!m_pAuthorizedAor->Create(strImpu))
             {
                 IMS_TRACE_E(0, "Creating an authorized AOR failed", 0, 0, 0);
             }
@@ -286,130 +150,50 @@ void RegStateTracker::SetAssociatedURIs(IN CONST AStringArray& objAssociatedURIs
 }
 
 PRIVATE
-void RegStateTracker::SetPathHeaders(IN CONST AStringArray& objPaths)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->objPaths = objPaths;
-}
-
-PRIVATE
-void RegStateTracker::SetPortFlowControl(IN IMS_SINT32 nPort)
-{
-    //---------------------------------------------------------------------------------------------
-
-    nPortFlowControl = nPort;
-}
-
-PRIVATE
-void RegStateTracker::SetPortUC(IN IMS_SINT32 nPort)
-{
-    //---------------------------------------------------------------------------------------------
-
-    nPortUC = nPort;
-}
-
-PRIVATE
-void RegStateTracker::SetPortUS(IN IMS_SINT32 nPort)
-{
-    //---------------------------------------------------------------------------------------------
-
-    nPortUS = nPort;
-}
-
-PRIVATE
 void RegStateTracker::SetPreferredContact(IN RegContact* pContact)
 {
-    //---------------------------------------------------------------------------------------------
+    m_pPreferredContact = pContact;
 
-    this->pPreferredContact = pContact;
-
-    if (this->pPreferredContact != IMS_NULL)
+    if (m_pPreferredContact != IMS_NULL)
     {
-        objIPAddress = this->pPreferredContact->GetIPAddress();
-        objPreferredContactAddress = this->pPreferredContact->GetContactAddress();
+        m_objIpAddress = m_pPreferredContact->GetIpAddress();
+        m_objPreferredContactAddress = m_pPreferredContact->GetContactAddress();
     }
 }
 
 PRIVATE
-void RegStateTracker::SetPublicIPAddress(IN CONST IPAddress& objIP)
+void RegStateTracker::SetSecurityClients(IN const IMSList<SipSecurityHeader>& objClients)
 {
-    //---------------------------------------------------------------------------------------------
-
-    objPublicIPAddress = objIP;
-}
-
-PRIVATE
-void RegStateTracker::SetSecurityClients(IN CONST IMSList<SipSecurityHeader>& objClients)
-{
-    //---------------------------------------------------------------------------------------------
-
-    objSecurityClients.RemoveAllElements();
+    m_objSecurityClients.RemoveAllElements();
 
     for (IMS_UINT32 i = 0; i < objClients.GetSize(); ++i)
     {
         const SipSecurityHeader& objHeader = objClients.GetAt(i);
 
-        objSecurityClients.AddElement(objHeader.ToString());
+        m_objSecurityClients.AddElement(objHeader.ToString());
     }
 }
 
 PRIVATE
-void RegStateTracker::SetSecurityVerifys(IN CONST IMSList<SipSecurityHeader>& objVerifys)
+void RegStateTracker::SetSecurityVerifys(IN const IMSList<SipSecurityHeader>& objVerifys)
 {
-    //---------------------------------------------------------------------------------------------
-
-    objSecurityVerifys.RemoveAllElements();
+    m_objSecurityVerifys.RemoveAllElements();
 
     for (IMS_UINT32 i = 0; i < objVerifys.GetSize(); ++i)
     {
         const SipSecurityHeader& objHeader = objVerifys.GetAt(i);
 
-        objSecurityVerifys.AddElement(objHeader.ToString());
+        m_objSecurityVerifys.AddElement(objHeader.ToString());
     }
 }
 
 PRIVATE
-void RegStateTracker::SetServiceRoutes(IN CONST AStringArray& objServiceRoutes)
+void RegStateTracker::SetUserInfoForContactHeader(IN const AString& strUserInfo)
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->objServiceRoutes = objServiceRoutes;
-}
-
-PRIVATE
-void RegStateTracker::SetSIPProfile(IN SipProfile* pProfile)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->pSIPProfile = pProfile;
-}
-
-PRIVATE
-void RegStateTracker::SetSubscriberId(IN CONST AString& strSubsId)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->strSubsId = strSubsId;
-}
-
-PRIVATE
-void RegStateTracker::SetTransportExt(IN IMS_SINT32 nTransportExt)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->nTransportExt = nTransportExt;
-}
-
-PRIVATE
-void RegStateTracker::SetUserInfoForContactHeader(IN CONST AString& strUserInfo)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pContactAddressForOutgoingMessage != IMS_NULL)
+    if (m_pContactAddressForOutgoingMessage != IMS_NULL)
     {
-        delete pContactAddressForOutgoingMessage;
-        pContactAddressForOutgoingMessage = IMS_NULL;
+        delete m_pContactAddressForOutgoingMessage;
+        m_pContactAddressForOutgoingMessage = IMS_NULL;
     }
 
     if (strUserInfo.IsNULL())
@@ -417,10 +201,10 @@ void RegStateTracker::SetUserInfoForContactHeader(IN CONST AString& strUserInfo)
         return;
     }
 
-    pContactAddressForOutgoingMessage = new SipAddress(GetContactAddress());
+    m_pContactAddressForOutgoingMessage = new SipAddress(GetContactAddress());
 
-    if (pContactAddressForOutgoingMessage != IMS_NULL)
+    if (m_pContactAddressForOutgoingMessage != IMS_NULL)
     {
-        pContactAddressForOutgoingMessage->SetUser(strUserInfo);
+        m_pContactAddressForOutgoingMessage->SetUser(strUserInfo);
     }
 }

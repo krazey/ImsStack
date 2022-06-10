@@ -262,13 +262,13 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
 
     piScc->SetSipProfile(GetSipProfile());
 
-    IMS_SINT32 nPortS = m_piRegBinding->GetPortUS();
-    IMS_SINT32 nPortC = m_piRegBinding->GetPortUC();
+    IMS_SINT32 nPortS = m_piRegBinding->GetPortUs();
+    IMS_SINT32 nPortC = m_piRegBinding->GetPortUc();
 
     // Sets the transport tuples
     // RFC5626_FLOW_CONTROL
     // MULTI_REG_TRANSPORT
-    piScc->SetTransportTuple(m_piRegBinding->GetIPAddress(), nPortS, nPortC,
+    piScc->SetTransportTuple(m_piRegBinding->GetIpAddress(), nPortS, nPortC,
             m_piRegBinding->GetPortFlowControl(), m_piRegBinding->GetTransportExt());
 
     // Sets the transaction timer values
@@ -502,9 +502,9 @@ ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
 
     piScc->SetSipProfile(GetSipProfile());
 
-    IMS_SINT32 nPortS = IsRegBindingOnActive() ? m_piRegBinding->GetPortUS()
+    IMS_SINT32 nPortS = IsRegBindingOnActive() ? m_piRegBinding->GetPortUs()
                                                : m_objCachedRegBinding.GetPortUs();
-    IMS_SINT32 nPortC = IsRegBindingOnActive() ? m_piRegBinding->GetPortUC()
+    IMS_SINT32 nPortC = IsRegBindingOnActive() ? m_piRegBinding->GetPortUc()
                                                : m_objCachedRegBinding.GetPortUc();
 
     // Sets the transport tuples
@@ -512,7 +512,7 @@ ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
     {
         // RFC5626_FLOW_CONTROL
         // MULTI_REG_TRANSPORT
-        piScc->SetTransportTuple(m_piRegBinding->GetIPAddress(), nPortS, nPortC,
+        piScc->SetTransportTuple(m_piRegBinding->GetIpAddress(), nPortS, nPortC,
                 m_piRegBinding->GetPortFlowControl(), m_piRegBinding->GetTransportExt());
     }
     else
@@ -699,8 +699,8 @@ ISipClientConnection* Service::CreateCancelConnection(IN ISipClientConnection* p
             if (!objSecurityVerifys.IsEmpty())
             {
                 // Sets the transport tuples
-                piCancelScc->SetTransportTuple(m_piRegBinding->GetIPAddress(),
-                        m_piRegBinding->GetPortUS(), m_piRegBinding->GetPortUC(),
+                piCancelScc->SetTransportTuple(m_piRegBinding->GetIpAddress(),
+                        m_piRegBinding->GetPortUs(), m_piRegBinding->GetPortUc(),
                         m_piRegBinding->GetPortFlowControl(), m_piRegBinding->GetTransportExt());
             }
         }
@@ -879,8 +879,8 @@ IMS_BOOL Service::InitAck(IN ISipClientConnection* piScc)
         if (!objSecurityVerifys.IsEmpty())
         {
             // Sets the transport tuples
-            piScc->SetTransportTuple(m_piRegBinding->GetIPAddress(), m_piRegBinding->GetPortUS(),
-                    m_piRegBinding->GetPortUC(), m_piRegBinding->GetPortFlowControl(),
+            piScc->SetTransportTuple(m_piRegBinding->GetIpAddress(), m_piRegBinding->GetPortUs(),
+                    m_piRegBinding->GetPortUc(), m_piRegBinding->GetPortFlowControl(),
                     m_piRegBinding->GetTransportExt());
         }
     }
@@ -939,7 +939,7 @@ const IPAddress& Service::GetIpAddress() const
         return IPAddress::NONE;
     }
 
-    return m_piRegBinding->GetIPAddress();
+    return m_piRegBinding->GetIpAddress();
 }
 
 PUBLIC
@@ -1018,7 +1018,7 @@ const AStringArray& Service::GetAssociatedUris() const
         return AStringArray::ConstNull();
     }
 
-    return m_piRegBinding->GetAssociatedURIs();
+    return m_piRegBinding->GetAssociatedUris();
 }
 
 PUBLIC
@@ -1034,7 +1034,7 @@ const SipAddress& Service::GetAuthorizedUserId() const
         return GetDefaultUserId();
     }
 
-    return m_piRegBinding->GetAuthorizedAOR();
+    return m_piRegBinding->GetAuthorizedAor();
 }
 
 PUBLIC
@@ -1151,7 +1151,7 @@ SipProfile* Service::GetSipProfile() const
 {
     if (m_pSipProfile.IsNull())
     {
-        return (m_piRegBinding != IMS_NULL) ? m_piRegBinding->GetSIPProfile() : IMS_NULL;
+        return (m_piRegBinding != IMS_NULL) ? m_piRegBinding->GetSipProfile() : IMS_NULL;
     }
 
     return m_pSipProfile.Get();
@@ -1176,7 +1176,7 @@ const SipAddress* Service::GetPublicGruu() const
         return IMS_NULL;
     }
 
-    return m_piRegBinding->GetPublicGRUU();
+    return m_piRegBinding->GetPublicGruu();
 }
 
 PUBLIC
@@ -1187,7 +1187,7 @@ const SipAddress* Service::GetTemporaryGruu() const
         return IMS_NULL;
     }
 
-    return m_piRegBinding->GetTemporaryGRUU();
+    return m_piRegBinding->GetTemporaryGruu();
 }
 
 PUBLIC
@@ -1198,7 +1198,7 @@ const IMSList<SipAddress*>& Service::GetTemporaryGruus() const
         return SipAddress::ConstEmptyList();
     }
 
-    return m_piRegBinding->GetTemporaryGRUUs();
+    return m_piRegBinding->GetTemporaryGruus();
 }
 
 PUBLIC
@@ -1209,7 +1209,7 @@ IMS_BOOL Service::IsBehindNat() const
         return IMS_FALSE;
     }
 
-    return m_piRegBinding->IsBehindNAT();
+    return m_piRegBinding->IsBehindNat();
 }
 
 PUBLIC
@@ -2357,13 +2357,13 @@ void Service::UpdateRegBindings()
     }
     else
     {
-        m_objCachedRegBinding.SetPortUc(m_piRegBinding->GetPortUC());
-        m_objCachedRegBinding.SetPortUs(m_piRegBinding->GetPortUS());
+        m_objCachedRegBinding.SetPortUc(m_piRegBinding->GetPortUc());
+        m_objCachedRegBinding.SetPortUs(m_piRegBinding->GetPortUs());
         // RFC5626_FLOW_CONTROL
         m_objCachedRegBinding.SetPortFlowControl(m_piRegBinding->GetPortFlowControl());
         // MULTI_REG_TRANSPORT
         m_objCachedRegBinding.SetTransportExt(m_piRegBinding->GetTransportExt());
-        m_objCachedRegBinding.SetIpAddress(m_piRegBinding->GetIPAddress());
+        m_objCachedRegBinding.SetIpAddress(m_piRegBinding->GetIpAddress());
         m_objCachedRegBinding.SetContactAddress(m_piRegBinding->GetContactAddress());
         m_objCachedRegBinding.SetContactAddressForOutgoingMessage(
                 m_piRegBinding->GetContactAddressForOutgoingMessage());
@@ -2372,9 +2372,9 @@ void Service::UpdateRegBindings()
         m_objCachedRegBinding.SetSecurityVerifys(m_piRegBinding->GetSecurityVerifys());
         // }
         // GRUU {
-        m_objCachedRegBinding.SetPublicGruu(m_piRegBinding->GetPublicGRUU());
-        m_objCachedRegBinding.SetTemporaryGruu(m_piRegBinding->GetTemporaryGRUU());
+        m_objCachedRegBinding.SetPublicGruu(m_piRegBinding->GetPublicGruu());
+        m_objCachedRegBinding.SetTemporaryGruu(m_piRegBinding->GetTemporaryGruu());
         // }
-        m_objCachedRegBinding.SetAssociatedUris(m_piRegBinding->GetAssociatedURIs());
+        m_objCachedRegBinding.SetAssociatedUris(m_piRegBinding->GetAssociatedUris());
     }
 }

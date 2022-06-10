@@ -1,562 +1,212 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100912  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _INTERFACE_REG_BINDING_H_
-#define _INTERFACE_REG_BINDING_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_REG_BINDING_H_
+#define INTERFACE_REG_BINDING_H_
 
 #include "AStringArray.h"
 #include "IPAddress.h"
+
 #include "SipAddress.h"
 
 class CallerCapability;
-class SipProfile;
 class IRegBindingListener;
 class IRegInfo;
+class SipProfile;
 
-/*
-
-IRegBinding interface
-
-Example
-
-See Also
-
-*/
 class IRegBinding
 {
 public:
-    /*
-     Returns the network authorized public user identities.
+    /**
+     * @brief Returns the network authorized public user identities.
+     *
+     * @return The list of public user identity.
+     */
+    virtual const AStringArray& GetAssociatedUris() const = 0;
 
-    Remarks
+    /**
+     * @brief Returns the network authorized & registered public user identity.
+     *
+     * @return The registered public user identity.
+     */
+    virtual const SipAddress& GetAuthorizedAor() const = 0;
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    AStringArray            List of public user identity
-    </table>
-
-    */
-    virtual const AStringArray& GetAssociatedURIs() const = 0;
-
-    /*
-     Returns the network authorized & registered public user identity.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    SipAddress              Registered public user identity
-    </table>
-
-    */
-    virtual const SipAddress& GetAuthorizedAOR() const = 0;
-
-    /*
-     Returns the preferred contact address with the highest 'q' value of this registration.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    SipAddress              Preferred contact address
-    </table>
-
-    */
+    /**
+     * @brief Returns the preferred contact address with the highest 'q' value of this registration.
+     *
+     * @return The preferred contact address.
+     */
     virtual const SipAddress& GetContactAddress() const = 0;
 
-    /*
-     Returns the preferred contact address for all the outgoing SIP message.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    SipAddress              Preferred contact address
-    </table>
-
-    */
+    /**
+     * @brief Returns the preferred contact address for all the outgoing SIP message.
+     *
+     * @return The preferred contact address for outgoing SIP messages.
+     */
     virtual const SipAddress* GetContactAddressForOutgoingMessage() const = 0;
 
-    /*
-     Returns the IP address of the preferred contact address.
+    /**
+     * @brief Returns the IP address of the preferred contact address.
+     *
+     * @return The IP address of preferred contact address.
+     */
+    virtual const IPAddress& GetIpAddress() const = 0;
 
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IPAddress               IP address of preferred contact address
-    </table>
-
-    */
-    virtual const IPAddress& GetIPAddress() const = 0;
-
-    /*
-     Returns the Path header list.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    AStringArray            List of Path header
-    </table>
-
-    */
+    /**
+     * @brief Returns the Path header list.
+     *
+     * @return The list of Path header.
+     */
     virtual const AStringArray& GetPathHeaders() const = 0;
 
-    /*
-     Returns the port number for the flow control based on RFC5626.
-
-    Remarks
-     RFC5626_FLOW_CONTROL
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_SINT32              Port number
-    </table>
-
-    */
+    /**
+     * @brief Returns the port number for the flow control based on RFC5626.
+     *
+     * @return The port number for the flow control.
+     * @note RFC5626_FLOW_CONTROL
+     */
     virtual IMS_SINT32 GetPortFlowControl() const = 0;
 
-    /*
-     Returns the protected / unprotected client port number (UE).
+    /**
+     * @brief Returns the protected / unprotected client port number (UE).
+     *
+     * @return The UE's client port number.
+     */
+    virtual IMS_SINT32 GetPortUc() const = 0;
 
-    Remarks
+    /**
+     * @brief Returns the protected / unprotected server port number (UE).
+     *
+     * @return The UE's server port number.
+     */
+    virtual IMS_SINT32 GetPortUs() const = 0;
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_SINT32              Port number
-    </table>
-
-    */
-    virtual IMS_SINT32 GetPortUC() const = 0;
-
-    /*
-     Returns the protected / unprotected server port number (UE).
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_SINT32              Port number
-    </table>
-
-    */
-    virtual IMS_SINT32 GetPortUS() const = 0;
-
-    /*
-     Returns the reginfo when the 'reg' event package subscription is supported.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    const IRegInfo*         Pointer to IRegInfo
-    </table>
-
-    */
+    /**
+     * @brief Returns the reginfo when the 'reg' event package subscription is supported.
+     *
+     * @return The IRegInfo instance.
+     */
     virtual const IRegInfo* GetRegInfo() const = 0;
 
-    /*
-     Returns the list of Security-Client header if present.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    AStringArray            List of Security-Client header
-    </table>
-
-    */
+    /**
+     * @brief Returns the list of Security-Client header if present.
+     *
+     * @return The list of Security-Client header.
+     */
     virtual const AStringArray& GetSecurityClients() const = 0;
 
-    /*
-     Returns the list of Security-Verify header if present.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    AStringArray            List of Security-Verify header
-    </table>
-
-    */
+    /**
+     * @brief Returns the list of Security-Verify header if present.
+     *
+     * @return The list of Security-Server header.
+     */
     virtual const AStringArray& GetSecurityVerifys() const = 0;
 
-    /*
-     Returns the preloaded route set for the outgoing SIP request.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    AStringArray            List of preloaded route
-    </table>
-
-    */
+    /**
+     * @brief Returns the preloaded route set for the outgoing SIP request.
+     *
+     * @return The list of preloaded route for outgoing SIP requests.
+     */
     virtual const AStringArray& GetServiceRoutes() const = 0;
 
-    /*
-     Returns the SIP profile of registration binding.
+    /**
+     * @brief Returns the SIP profile of registration binding.
+     *
+     * @return The SipProfile instance.
+     */
+    virtual SipProfile* GetSipProfile() const = 0;
 
-    Remarks
-     MULTI_REG_SIP_PROFILE
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    SipProfile              Instance of SipProfile
-    </table>
-
-    */
-    virtual SipProfile* GetSIPProfile() const = 0;
-
-    /*
-     Returns the state of registration binding.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_SINT32              State of RegBinding
-    </table>
-
-    */
+    /**
+     * @brief Returns the state of registration binding.
+     *
+     * @return The state of RegBinding.\n
+     *         #STATE_CREATED\n
+     *         #STATE_INIT\n
+     *         #STATE_INIT_PENDING\n
+     *         #STATE_ACTIVE\n
+     *         #STATE_ACTIVE_PENDING\n
+     *         #STATE_ACTIVE_TERMINATING\n
+     *         #STATE_TERMINATED
+     */
     virtual IMS_SINT32 GetState() const = 0;
 
-    /*
-     Returns the subscription identifier which can identify the subscriber.
-
-    Remarks
-     MULTI_SUBS
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    AString                 Identifier of the subscriber
-    </table>
-
-    */
+    /**
+     * @brief Returns the subscription identifier which can identify the subscriber.
+     *
+     * @return The idnetifier of the subscriber.
+     */
     virtual const AString& GetSubscriberId() const = 0;
 
-    /*
-     Returns the transport extensions.
-
-    Remarks
-     MULTI_REG_TRANSPORT
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_SINT32              Transport extension (Sip::TRANSPORT_EXT_XXX in Sip.h)
-    </table>
-
-    */
+    /**
+     * @brief Returns the transport extensions.
+     *
+     * @return The transport extension (Sip#TRANSPORT_EXT_XXX in Sip.h).
+     */
     virtual IMS_SINT32 GetTransportExt() const = 0;
 
-    /*
-     Returns the instance("+sip.instance") header parameter.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    SipParameter*           Pointer to SIP header parameter for "+sip.instance"
-    </table>
-
-    */
+    /**
+     * @brief Returns the instance("+sip.instance") header parameter.
+     *
+     * @return The SipParameter instance for "+sip.instance" parameter.
+     */
     virtual const SipParameter* GetInstanceParameter() const = 0;
 
-    /*
-     Returns the public GRUU.
+    /**
+     * @brief Returns the public GRUU.
+     *
+     * @return The public GRUU.
+     */
+    virtual const SipAddress* GetPublicGruu() const = 0;
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
+    /**
+     * @brief Returns the valid (the latest) temporary GRUU.
+     *
+     * @return The temporary GRUU.
+     */
+    virtual const SipAddress* GetTemporaryGruu() const = 0;
 
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    SipAddress*             Pointer to public GRUU
-    </table>
+    /**
+     * @brief Returns the valid temporary GRUUs.
+     *
+     * @return The list of temporary GRUU.
+     */
+    virtual const IMSList<SipAddress*>& GetTemporaryGruus() const = 0;
 
-    */
-    virtual const SipAddress* GetPublicGRUU() const = 0;
+    /**
+     * @brief Checks if the UA is located behind a NAT or not.
+     *
+     * @return true if UA is located behind a NAT / FW, false otherwise.
+     */
+    virtual IMS_BOOL IsBehindNat() const = 0;
 
-    /*
-     Returns the valid (the latest) temporary GRUU.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    SipAddress*             Pointer to temporary GRUU
-    </table>
-
-    */
-    virtual const SipAddress* GetTemporaryGRUU() const = 0;
-
-    /*
-
-     Returns the valid temporary GRUUs.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMSList<SipAddress*>    List of temporary GRUU
-    </table>
-
-    */
-    virtual const IMSList<SipAddress*>& GetTemporaryGRUUs() const = 0;
-
-    /*
-     Checks if the UA is located behind a NAT or not.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_TRUE                UA is located behind a NAT / FW
-    IMS_FALSE               UA is not located behind a NAT / FW
-    </table>
-
-    */
-    virtual IMS_BOOL IsBehindNAT() const = 0;
-
-    /*
-     Checks if the UA is located within the trust domain.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_TRUE                UA is located within the trust domain
-    IMS_FALSE               UA is not located within the trust domain
-    </table>
-
-    */
+    /**
+     * @brief Checks if the UA is located within the trust domain.
+     *
+     * @return true if UA is located within the trust domain, false otherwise.
+     */
     virtual IMS_BOOL IsWithinTrustDomain() const = 0;
 
-    /*
-     Notifies the registration when the caller capability is changed to refresh
-    the IMS registration if the device is already registered to the IMS network.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
+    /**
+     * @brief Notifies the registration when the caller capability is changed to refresh
+     *        the IMS registration if the device is already registered to the IMS network.
+     */
     virtual void NotifyCallerCapabilityChanged() = 0;
 
-    /*
-     Sets the listener for this registration binding.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    piListener              Listener to be set
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
+    /**
+     * @brief Sets the listener for this registration binding.
+     */
     virtual void SetListener(IN IRegBindingListener* piListener) = 0;
 
 public:
@@ -572,4 +222,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_REG_BINDING_H_
+#endif

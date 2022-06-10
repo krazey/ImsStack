@@ -1,126 +1,59 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100720  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "AStringBuffer.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
-#include "AStringBuffer.h"
+
 #include "INamedNodeMap.h"
 #include "INode.h"
-#include "SipDebug.h"
+
 #include "RegInfoConst.h"
 #include "RegInfoContact.h"
+#include "SipDebug.h"
 
 __IMS_TRACE_TAG_REG__;
 
 PUBLIC
 RegInfoContact::RegInfoContact() :
-        strId(AString::ConstNull()),
-        nState(STATE_CREATED),
-        nEvent(EVENT_UNREGISTERED),
-        nDurationRegistered(0),
-        nExpires(0),
-        nRetryAfter(0),
-        strDisplayName(AString::ConstNull()),
-        strQValue(AString::ConstNull()),
-        strCallId(AString::ConstNull()),
-        nCSeq(0),
-        strPubGRUU(AString::ConstNull()),
-        objTempGRUU(TempGRUU()),
-        objUnknownParameters(IMSMap<AString, AString>())
+        m_strId(AString::ConstNull()),
+        m_nState(STATE_CREATED),
+        m_nEvent(EVENT_UNREGISTERED),
+        m_nDurationRegistered(0),
+        m_nExpires(0),
+        m_nRetryAfter(0),
+        m_strDisplayName(AString::ConstNull()),
+        m_strQValue(AString::ConstNull()),
+        m_strCallId(AString::ConstNull()),
+        m_nCSeq(0),
+        m_strPubGruu(AString::ConstNull()),
+        m_objTempGruu(TempGruu()),
+        m_objUnknownParameters(IMSMap<AString, AString>())
 {
 }
 
 PUBLIC VIRTUAL RegInfoContact::~RegInfoContact()
 {
-    IMS_TRACE_D("Destructor :: uri=%s, id=%s", SipDebug::GetUri1(objURI.ToString()).GetStr(),
-            strId.GetStr(), 0);
+    IMS_TRACE_D("Destructor :: uri=%s, id=%s", SipDebug::GetUri1(m_objUri.ToString()).GetStr(),
+            m_strId.GetStr(), 0);
 }
 
-PUBLIC VIRTUAL IMS_UINT32 RegInfoContact::GetCSeq() const
+PUBLIC VIRTUAL const AString& RegInfoContact::GetUnknownParameter(IN const AString& strName) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return nCSeq;
-}
-
-PUBLIC VIRTUAL const AString& RegInfoContact::GetDisplayName() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strDisplayName;
-}
-
-PUBLIC VIRTUAL IMS_SINT32 RegInfoContact::GetEvent() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nEvent;
-}
-
-PUBLIC VIRTUAL IMS_UINT32 RegInfoContact::GetExpiresValue() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nExpires;
-}
-
-PUBLIC VIRTUAL IMS_UINT32 RegInfoContact::GetFirstCSeq() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objTempGRUU.nFirstCSeq;
-}
-
-PUBLIC VIRTUAL const AString& RegInfoContact::GetPublicGRUU() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strPubGRUU;
-}
-
-PUBLIC VIRTUAL const AString& RegInfoContact::GetTemporaryGRUU() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objTempGRUU.strGRUU;
-}
-
-PUBLIC VIRTUAL const AString& RegInfoContact::GetQValue() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strQValue;
-}
-
-PUBLIC VIRTUAL IMS_UINT32 RegInfoContact::GetRetryAfterValue() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nRetryAfter;
-}
-
-PUBLIC VIRTUAL IMS_SINT32 RegInfoContact::GetState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nState;
-}
-
-PUBLIC VIRTUAL const AString& RegInfoContact::GetUnknownParameter(IN CONST AString& strName) const
-{
-    IMS_SLONG nIndex = objUnknownParameters.GetIndexOfKey(strName);
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SLONG nIndex = m_objUnknownParameters.GetIndexOfKey(strName);
 
     if (nIndex < 0)
     {
@@ -128,7 +61,7 @@ PUBLIC VIRTUAL const AString& RegInfoContact::GetUnknownParameter(IN CONST AStri
         return AString::ConstNull();
     }
 
-    const AString& strValue = objUnknownParameters.GetValueAt(nIndex);
+    const AString& strValue = m_objUnknownParameters.GetValueAt(nIndex);
 
     if (strValue.GetLength() == 0)
     {
@@ -138,25 +71,9 @@ PUBLIC VIRTUAL const AString& RegInfoContact::GetUnknownParameter(IN CONST AStri
     return strValue;
 }
 
-PUBLIC VIRTUAL const IMSMap<AString, AString>& RegInfoContact::GetUnknownParameters() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objUnknownParameters;
-}
-
-PUBLIC VIRTUAL const SipAddress& RegInfoContact::GetURI() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objURI;
-}
-
 PUBLIC
 IMS_BOOL RegInfoContact::Equals(IN INode* piNode) const
 {
-    //---------------------------------------------------------------------------------------------
-
     if (piNode == IMS_NULL)
     {
         return IMS_FALSE;
@@ -175,15 +92,15 @@ IMS_BOOL RegInfoContact::Equals(IN INode* piNode) const
         return IMS_FALSE;
     }
 
-    INode* piNode_Id = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
+    INode* piNodeId = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
 
-    if (piNode_Id == IMS_NULL)
+    if (piNodeId == IMS_NULL)
     {
         piNode->DestroyNamedNodeMap(piNodeMap);
         return IMS_FALSE;
     }
 
-    if (!strId.EqualsIgnoreCase(piNode_Id->GetNodeValue()))
+    if (!m_strId.EqualsIgnoreCase(piNodeId->GetNodeValue()))
     {
         piNode->DestroyNamedNodeMap(piNodeMap);
         return IMS_FALSE;
@@ -197,8 +114,6 @@ IMS_BOOL RegInfoContact::Equals(IN INode* piNode) const
 PUBLIC
 IMS_BOOL RegInfoContact::Update(IN INode* piNode)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (piNode == IMS_NULL)
     {
         return IMS_FALSE;
@@ -212,7 +127,7 @@ IMS_BOOL RegInfoContact::Update(IN INode* piNode)
         return IMS_FALSE;
     }
 
-    if (nState == STATE_CREATED)
+    if (m_nState == STATE_CREATED)
     {
         // Updates all the fields
 
@@ -235,7 +150,7 @@ IMS_BOOL RegInfoContact::Update(IN INode* piNode)
 
             if (strNodeName.EqualsIgnoreCase(RegInfoConst::ELEMENT_URI))
             {
-                if (!SetURI(piChildNode))
+                if (!SetUri(piChildNode))
                 {
                     piNode->DestroyNamedNodeMap(piNodeMap);
                     return IMS_FALSE;
@@ -251,11 +166,11 @@ IMS_BOOL RegInfoContact::Update(IN INode* piNode)
             }
             else if (strNodeName.EqualsIgnoreCase(RegInfoConst::ELEMENT_PUB_GRUU))
             {
-                SetPublicGRUU(piChildNode);
+                SetPublicGruu(piChildNode);
             }
             else if (strNodeName.EqualsIgnoreCase(RegInfoConst::ELEMENT_TEMP_GRUU))
             {
-                SetTemporaryGRUU(piChildNode);
+                SetTemporaryGruu(piChildNode);
             }
             else
             {
@@ -267,8 +182,8 @@ IMS_BOOL RegInfoContact::Update(IN INode* piNode)
 
         if (!IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG())
         {
-            IMS_TRACE_I("Contact :: uri=%s, id=%s", SipDebug::GetUri1(objURI.ToString()).GetStr(),
-                    strId.GetStr(), 0);
+            IMS_TRACE_I("Contact :: uri=%s, id=%s", SipDebug::GetUri1(m_objUri.ToString()).GetStr(),
+                    m_strId.GetStr(), 0);
         }
     }
     else
@@ -288,11 +203,11 @@ IMS_BOOL RegInfoContact::Update(IN INode* piNode)
             }
             else if (strNodeName.EqualsIgnoreCase(RegInfoConst::ELEMENT_PUB_GRUU))
             {
-                SetPublicGRUU(piChildNode);
+                SetPublicGruu(piChildNode);
             }
             else if (strNodeName.EqualsIgnoreCase(RegInfoConst::ELEMENT_TEMP_GRUU))
             {
-                SetTemporaryGRUU(piChildNode);
+                SetTemporaryGruu(piChildNode);
             }
             else
             {
@@ -337,48 +252,57 @@ IMS_BOOL RegInfoContact::Update(IN INode* piNode)
     return IMS_TRUE;
 }
 
-void RegInfoContact::DisplayRegInfo(IN const AString& strTag /* = AString::ConstNull()*/)
+void RegInfoContact::DisplayRegInfo(IN const AString& strTag /*= AString::ConstNull()*/)
 {
+    // clang-format off
     static const IMS_CHAR* pszState[] = {
             "CREATED",
             "ACTIVE",
-            "TERMINATED",
+            "TERMINATED"
     };
 
-    static const IMS_CHAR* pszEvent[] = {"REGISTERED", "CREATED", "REFRESHED", "SHORTENED",
-            "EXPIRED", "DEACTIVATED", "PROBATION", "UNREGISTERED", "REJECTED"};
-
-    //---------------------------------------------------------------------------------------------
+    static const IMS_CHAR* pszEvent[] = {
+            "REGISTERED",
+            "CREATED",
+            "REFRESHED",
+            "SHORTENED",
+            "EXPIRED",
+            "DEACTIVATED",
+            "PROBATION",
+            "UNREGISTERED",
+            "REJECTED"
+    };
+    // clang-format on
 
     AStringBuffer objLog(512);
 
-    objLog.Append("id=").Append(strId);
-    objLog.Append(", state=").Append(pszState[nState]);
-    objLog.Append(", event=").Append(pszEvent[nEvent]);
-    objLog.Append(", duration-registered=").Append(nDurationRegistered);
-    objLog.Append(", expires=").Append(nExpires);
-    objLog.Append(", callid=").Append(SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'));
-    objLog.Append(", cseq=").Append(nCSeq);
-    objLog.Append(", retry-after=").Append(nRetryAfter);
-    objLog.Append(", q-value=").Append(strQValue);
-    objLog.Append(", first-cseq=").Append(objTempGRUU.nFirstCSeq);
+    objLog.Append("id=").Append(m_strId);
+    objLog.Append(", state=").Append(pszState[m_nState]);
+    objLog.Append(", event=").Append(pszEvent[m_nEvent]);
+    objLog.Append(", duration-registered=").Append(m_nDurationRegistered);
+    objLog.Append(", expires=").Append(m_nExpires);
+    objLog.Append(", callid=").Append(SipDebug::GetCharA1(m_strCallId.GetStr(), 8, '@'));
+    objLog.Append(", cseq=").Append(m_nCSeq);
+    objLog.Append(", retry-after=").Append(m_nRetryAfter);
+    objLog.Append(", q-value=").Append(m_strQValue);
+    objLog.Append(", first-cseq=").Append(m_objTempGruu.m_nFirstCSeq);
 
     if (!IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG())
     {
-        objLog.Append(", display-name=").Append(SipDebug::GetCharA1(strDisplayName.GetStr(), 6));
-        objLog.Append(", uri=").Append(SipDebug::GetUri1(objURI.ToString()));
-        objLog.Append(", pub-gruu=").Append(SipDebug::GetUri1(strPubGRUU));
-        objLog.Append(", temp-gruu=").Append(SipDebug::GetUri1(objTempGRUU.strGRUU));
+        objLog.Append(", display-name=").Append(SipDebug::GetCharA1(m_strDisplayName.GetStr(), 6));
+        objLog.Append(", uri=").Append(SipDebug::GetUri1(m_objUri.ToString()));
+        objLog.Append(", pub-gruu=").Append(SipDebug::GetUri1(m_strPubGruu));
+        objLog.Append(", temp-gruu=").Append(SipDebug::GetUri1(m_objTempGruu.m_strGruu));
     }
 
-    objLog.Append(", unknown-param-count=").Append(objUnknownParameters.GetSize());
+    objLog.Append(", unknown-param-count=").Append(m_objUnknownParameters.GetSize());
 
     IMS_TRACE_I("CON(%s) :: %s", strTag.GetStr(), objLog.GetCharString(), 0);
 
-    for (IMS_UINT32 i = 0; i < objUnknownParameters.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objUnknownParameters.GetSize(); ++i)
     {
-        const AString& strName = objUnknownParameters.GetKeyAt(i);
-        const AString& strValue = objUnknownParameters.GetValueAt(i);
+        const AString& strName = m_objUnknownParameters.GetKeyAt(i);
+        const AString& strValue = m_objUnknownParameters.GetValueAt(i);
 
         IMS_TRACE_D("(%s) unknown-param :: %s=%s", strTag.GetStr(), strName.GetStr(),
                 SipDebug::GetCharA1(strValue.GetStr(), 6));
@@ -390,23 +314,19 @@ void RegInfoContact::SetCallId(IN INamedNodeMap* piNodeMap)
 {
     INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_CALLID);
 
-    //---------------------------------------------------------------------------------------------
-
     if (piNode == IMS_NULL)
     {
         IMS_TRACE_D("No 'callid' attribute", 0, 0, 0);
         return;
     }
 
-    strCallId = piNode->GetNodeValue();
+    m_strCallId = piNode->GetNodeValue();
 }
 
 PRIVATE
 void RegInfoContact::SetCSeq(IN INamedNodeMap* piNodeMap)
 {
     INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_CSEQ);
-
-    //---------------------------------------------------------------------------------------------
 
     if (piNode == IMS_NULL)
     {
@@ -415,23 +335,21 @@ void RegInfoContact::SetCSeq(IN INamedNodeMap* piNodeMap)
     }
 
     const AString& strCSeq = piNode->GetNodeValue();
-    IMS_BOOL bOK = IMS_FALSE;
-    IMS_UINT32 nNewCSeq = strCSeq.ToUInt32(&bOK);
+    IMS_BOOL bOk = IMS_FALSE;
+    IMS_UINT32 nNewCSeq = strCSeq.ToUInt32(&bOk);
 
-    if (!bOK)
+    if (!bOk)
     {
         return;
     }
 
-    nCSeq = nNewCSeq;
+    m_nCSeq = nNewCSeq;
 }
 
 PRIVATE
 void RegInfoContact::SetDurationRegistered(IN INamedNodeMap* piNodeMap)
 {
     INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_DURATION_REGISTERED);
-
-    //---------------------------------------------------------------------------------------------
 
     if (piNode == IMS_NULL)
     {
@@ -440,23 +358,21 @@ void RegInfoContact::SetDurationRegistered(IN INamedNodeMap* piNodeMap)
     }
 
     const AString& strDurationRegistered = piNode->GetNodeValue();
-    IMS_BOOL bOK = IMS_FALSE;
-    IMS_UINT32 nNewDurationRegistered = strDurationRegistered.ToUInt32(&bOK);
+    IMS_BOOL bOk = IMS_FALSE;
+    IMS_UINT32 nNewDurationRegistered = strDurationRegistered.ToUInt32(&bOk);
 
-    if (!bOK)
+    if (!bOk)
     {
         return;
     }
 
-    nDurationRegistered = nNewDurationRegistered;
+    m_nDurationRegistered = nNewDurationRegistered;
 }
 
 PRIVATE
 IMS_BOOL RegInfoContact::SetEvent(IN INamedNodeMap* piNodeMap)
 {
     INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_EVENT);
-
-    //---------------------------------------------------------------------------------------------
 
     if (piNode == IMS_NULL)
     {
@@ -468,39 +384,39 @@ IMS_BOOL RegInfoContact::SetEvent(IN INamedNodeMap* piNodeMap)
 
     if (strEvent.EqualsIgnoreCase(RegInfoConst::ATTR_EVENT_REGISTERED))
     {
-        nEvent = EVENT_REGISTERED;
+        m_nEvent = EVENT_REGISTERED;
     }
     else if (strEvent.EqualsIgnoreCase(RegInfoConst::ATTR_EVENT_CREATED))
     {
-        nEvent = EVENT_CREATED;
+        m_nEvent = EVENT_CREATED;
     }
     else if (strEvent.EqualsIgnoreCase(RegInfoConst::ATTR_EVENT_REFRESHED))
     {
-        nEvent = EVENT_REFRESHED;
+        m_nEvent = EVENT_REFRESHED;
     }
     else if (strEvent.EqualsIgnoreCase(RegInfoConst::ATTR_EVENT_SHORTENED))
     {
-        nEvent = EVENT_SHORTENED;
+        m_nEvent = EVENT_SHORTENED;
     }
     else if (strEvent.EqualsIgnoreCase(RegInfoConst::ATTR_EVENT_EXPIRED))
     {
-        nEvent = EVENT_EXPIRED;
+        m_nEvent = EVENT_EXPIRED;
     }
     else if (strEvent.EqualsIgnoreCase(RegInfoConst::ATTR_EVENT_DEACTIVATED))
     {
-        nEvent = EVENT_DEACTIVATED;
+        m_nEvent = EVENT_DEACTIVATED;
     }
     else if (strEvent.EqualsIgnoreCase(RegInfoConst::ATTR_EVENT_PROBATION))
     {
-        nEvent = EVENT_PROBATION;
+        m_nEvent = EVENT_PROBATION;
     }
     else if (strEvent.EqualsIgnoreCase(RegInfoConst::ATTR_EVENT_UNREGISTERED))
     {
-        nEvent = EVENT_UNREGISTERED;
+        m_nEvent = EVENT_UNREGISTERED;
     }
     else if (strEvent.EqualsIgnoreCase(RegInfoConst::ATTR_EVENT_REJECTED))
     {
-        nEvent = EVENT_REJECTED;
+        m_nEvent = EVENT_REJECTED;
     }
 
     return IMS_TRUE;
@@ -512,8 +428,6 @@ void RegInfoContact::SetExpiresValue(IN INamedNodeMap* piNodeMap)
     // If 'event' is "shortened", then it MUST be present
     INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_EXPIRES);
 
-    //---------------------------------------------------------------------------------------------
-
     if (piNode == IMS_NULL)
     {
         IMS_TRACE_D("No 'expires' attribute", 0, 0, 0);
@@ -521,15 +435,15 @@ void RegInfoContact::SetExpiresValue(IN INamedNodeMap* piNodeMap)
     }
 
     const AString& strExpires = piNode->GetNodeValue();
-    IMS_BOOL bOK = IMS_FALSE;
-    IMS_UINT32 nNewExpires = strExpires.ToUInt32(&bOK);
+    IMS_BOOL bOk = IMS_FALSE;
+    IMS_UINT32 nNewExpires = strExpires.ToUInt32(&bOk);
 
-    if (!bOK)
+    if (!bOk)
     {
         return;
     }
 
-    nExpires = nNewExpires;
+    m_nExpires = nNewExpires;
 }
 
 PRIVATE
@@ -537,15 +451,13 @@ IMS_BOOL RegInfoContact::SetId(IN INamedNodeMap* piNodeMap)
 {
     INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
 
-    //---------------------------------------------------------------------------------------------
-
     if (piNode == IMS_NULL)
     {
         IMS_TRACE_E(0, "Can't find 'id' attribute", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    strId = piNode->GetNodeValue();
+    m_strId = piNode->GetNodeValue();
 
     return IMS_TRUE;
 }
@@ -555,15 +467,13 @@ void RegInfoContact::SetQValue(IN INamedNodeMap* piNodeMap)
 {
     INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_Q);
 
-    //---------------------------------------------------------------------------------------------
-
     if (piNode == IMS_NULL)
     {
         IMS_TRACE_D("No 'q' attribute", 0, 0, 0);
         return;
     }
 
-    strQValue = piNode->GetNodeValue();
+    m_strQValue = piNode->GetNodeValue();
 }
 
 PRIVATE
@@ -572,8 +482,6 @@ void RegInfoContact::SetRetryAfterValue(IN INamedNodeMap* piNodeMap)
     // If 'event' is "probation", then it MUST be present.
     INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_RETRY_AFTER);
 
-    //---------------------------------------------------------------------------------------------
-
     if (piNode == IMS_NULL)
     {
         IMS_TRACE_D("No 'retry-after' attribute", 0, 0, 0);
@@ -581,23 +489,21 @@ void RegInfoContact::SetRetryAfterValue(IN INamedNodeMap* piNodeMap)
     }
 
     const AString& strRetryAfter = piNode->GetNodeValue();
-    IMS_BOOL bOK = IMS_FALSE;
-    IMS_UINT32 nNewRetryAfter = strRetryAfter.ToUInt32(&bOK);
+    IMS_BOOL bOk = IMS_FALSE;
+    IMS_UINT32 nNewRetryAfter = strRetryAfter.ToUInt32(&bOk);
 
-    if (!bOK)
+    if (!bOk)
     {
         return;
     }
 
-    nRetryAfter = nNewRetryAfter;
+    m_nRetryAfter = nNewRetryAfter;
 }
 
 PRIVATE
 IMS_BOOL RegInfoContact::SetState(IN INamedNodeMap* piNodeMap)
 {
     INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_STATE);
-
-    //---------------------------------------------------------------------------------------------
 
     if (piNode == IMS_NULL)
     {
@@ -609,11 +515,11 @@ IMS_BOOL RegInfoContact::SetState(IN INamedNodeMap* piNodeMap)
 
     if (strState.EqualsIgnoreCase(RegInfoConst::ATTR_STATE_ACTIVE))
     {
-        nState = STATE_ACTIVE;
+        m_nState = STATE_ACTIVE;
     }
     else if (strState.EqualsIgnoreCase(RegInfoConst::ATTR_STATE_TERMINATED))
     {
-        nState = STATE_TERMINATED;
+        m_nState = STATE_TERMINATED;
     }
 
     return IMS_TRUE;
@@ -622,8 +528,6 @@ IMS_BOOL RegInfoContact::SetState(IN INamedNodeMap* piNodeMap)
 PRIVATE
 void RegInfoContact::SetDisplayName(IN INode* piNode)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (piNode == IMS_NULL)
     {
         return;
@@ -631,15 +535,13 @@ void RegInfoContact::SetDisplayName(IN INode* piNode)
 
     INode* piContent = piNode->GetFirstChild();
 
-    strDisplayName = piContent->GetNodeValue();
+    m_strDisplayName = piContent->GetNodeValue();
 }
 
 PRIVATE
-void RegInfoContact::SetPublicGRUU(IN INode* piNode)
+void RegInfoContact::SetPublicGruu(IN INode* piNode)
 {
     INamedNodeMap* piNodeMap = piNode->GetAttributes();
-
-    //---------------------------------------------------------------------------------------------
 
     if (piNodeMap == IMS_NULL)
     {
@@ -655,17 +557,15 @@ void RegInfoContact::SetPublicGRUU(IN INode* piNode)
         return;
     }
 
-    strPubGRUU = piAttrNode->GetNodeValue();
+    m_strPubGruu = piAttrNode->GetNodeValue();
 
     piNode->DestroyNamedNodeMap(piNodeMap);
 }
 
 PRIVATE
-void RegInfoContact::SetTemporaryGRUU(IN INode* piNode)
+void RegInfoContact::SetTemporaryGruu(IN INode* piNode)
 {
     INamedNodeMap* piNodeMap = piNode->GetAttributes();
-
-    //---------------------------------------------------------------------------------------------
 
     if (piNodeMap == IMS_NULL)
     {
@@ -681,13 +581,13 @@ void RegInfoContact::SetTemporaryGRUU(IN INode* piNode)
         return;
     }
 
-    objTempGRUU.strGRUU = piAttrNode->GetNodeValue();
+    m_objTempGruu.m_strGruu = piAttrNode->GetNodeValue();
 
     piAttrNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_FIRST_CSEQ);
 
     if (piAttrNode == IMS_NULL)
     {
-        objTempGRUU.nFirstCSeq = 0;
+        m_objTempGruu.m_nFirstCSeq = 0;
         piNode->DestroyNamedNodeMap(piNodeMap);
 
         IMS_TRACE_D("Temp-GRUU :: Can't find 'first-cseq' attribute", 0, 0, 0);
@@ -695,17 +595,17 @@ void RegInfoContact::SetTemporaryGRUU(IN INode* piNode)
     }
 
     const AString& strFirstCSeq = piAttrNode->GetNodeValue();
-    IMS_BOOL bOK = IMS_FALSE;
-    IMS_UINT32 nNewFirstCSeq = strFirstCSeq.ToUInt32(&bOK);
+    IMS_BOOL bOk = IMS_FALSE;
+    IMS_UINT32 nNewFirstCSeq = strFirstCSeq.ToUInt32(&bOk);
 
-    if (!bOK)
+    if (!bOk)
     {
-        objTempGRUU.nFirstCSeq = 0;
+        m_objTempGruu.m_nFirstCSeq = 0;
         piNode->DestroyNamedNodeMap(piNodeMap);
         return;
     }
 
-    objTempGRUU.nFirstCSeq = nNewFirstCSeq;
+    m_objTempGruu.m_nFirstCSeq = nNewFirstCSeq;
 
     piNode->DestroyNamedNodeMap(piNodeMap);
 }
@@ -714,8 +614,6 @@ PRIVATE
 void RegInfoContact::SetUnknownParameter(IN INode* piNode)
 {
     INamedNodeMap* piNodeMap = piNode->GetAttributes();
-
-    //---------------------------------------------------------------------------------------------
 
     if (piNodeMap == IMS_NULL)
     {
@@ -774,14 +672,12 @@ void RegInfoContact::SetUnknownParameter(IN INode* piNode)
         }
     }
 
-    objUnknownParameters.SetValue(strName, strValue);
+    m_objUnknownParameters.SetValue(strName, strValue);
 }
 
 PRIVATE
-IMS_BOOL RegInfoContact::SetURI(IN INode* piNode)
+IMS_BOOL RegInfoContact::SetUri(IN INode* piNode)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (piNode == IMS_NULL)
     {
         IMS_TRACE_E(0, "No uri element", 0, 0, 0);
@@ -796,12 +692,12 @@ IMS_BOOL RegInfoContact::SetURI(IN INode* piNode)
         return IMS_FALSE;
     }
 
-    const AString& strURI = piContent->GetNodeValue();
+    const AString& strUri = piContent->GetNodeValue();
 
-    if (!objURI.Create(strURI))
+    if (!m_objUri.Create(strUri))
     {
         IMS_TRACE_E(
-                0, "Creating a Contact URI (%s) failed", SipDebug::GetUri1(strURI).GetStr(), 0, 0);
+                0, "Creating a Contact URI (%s) failed", SipDebug::GetUri1(strUri).GetStr(), 0, 0);
         return IMS_FALSE;
     }
 

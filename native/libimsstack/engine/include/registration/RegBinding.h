@@ -1,23 +1,26 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100912  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef REG_BINDING_H_
+#define REG_BINDING_H_
 
-    Description
-
-*/
-
-#ifndef _REG_BINDING_H_
-#define _REG_BINDING_H_
-
-#include "RegObserver.h"
 #include "IRegBinding.h"
+#include "RegObserver.h"
 
-class IRegistrationEx;
 class IRegContact;
+class IRegistrationEx;
 class ISipConnectionNotifier;
 
 class RegBinding : public RegObserver, public IRegBinding
@@ -28,54 +31,60 @@ public:
 protected:
     virtual ~RegBinding();
 
+    RegBinding(IN const RegBinding&) = delete;
+    RegBinding& operator=(IN const RegBinding&) = delete;
+
 public:
     IMS_BOOL Create(IN IRegistrationEx* piRegEx);
     void Destroy();
-    IMS_BOOL IsSameContact(IN IRegContact* piContact) const;
-    IMS_BOOL IsSameRegistration(IN IRegistrationEx* piRegEx) const;
+    inline IMS_BOOL IsSameContact(IN IRegContact* piContact) const
+    {
+        return (m_piContact != piContact) ? IMS_FALSE : IMS_TRUE;
+    }
+    inline IMS_BOOL IsSameRegistration(IN IRegistrationEx* piRegEx) const
+    {
+        return (m_piRegEx != piRegEx) ? IMS_FALSE : IMS_TRUE;
+    }
     void QueryCapability(OUT CallerCapability*& pCapability) const;
     void QueryRegistrationHeaders(OUT AStringArray& objHeaders) const;
     void UpdateContact(IN IRegContact* piContact);
 
 protected:
     // RegObserver class
-    virtual void Update(IN IMS_SINT32 nWhat);
+    void Update(IN IMS_SINT32 nWhat) override;
 
     // IRegBinding class
-    virtual const AStringArray& GetAssociatedURIs() const;
-    virtual const SipAddress& GetAuthorizedAOR() const;
-    virtual const SipAddress& GetContactAddress() const;
-    virtual const SipAddress* GetContactAddressForOutgoingMessage() const;
-    virtual const IPAddress& GetIPAddress() const;
-    virtual const AStringArray& GetPathHeaders() const;
-    virtual IMS_SINT32 GetPortFlowControl() const;
-    virtual IMS_SINT32 GetPortUC() const;
-    virtual IMS_SINT32 GetPortUS() const;
-    virtual const IRegInfo* GetRegInfo() const;
-    virtual const AStringArray& GetSecurityClients() const;
-    virtual const AStringArray& GetSecurityVerifys() const;
-    virtual const AStringArray& GetServiceRoutes() const;
-    // MULTI_REG_SIP_PROFILE
-    virtual SipProfile* GetSIPProfile() const;
-    virtual IMS_SINT32 GetState() const;
-    // MULTI_SUBS
-    virtual const AString& GetSubscriberId() const;
-    // MULTI_REG_TRANSPORT
-    virtual IMS_SINT32 GetTransportExt() const;
-    virtual const SipParameter* GetInstanceParameter() const;
+    const AStringArray& GetAssociatedUris() const override;
+    const SipAddress& GetAuthorizedAor() const override;
+    const SipAddress& GetContactAddress() const override;
+    const SipAddress* GetContactAddressForOutgoingMessage() const override;
+    const IPAddress& GetIpAddress() const override;
+    const AStringArray& GetPathHeaders() const override;
+    IMS_SINT32 GetPortFlowControl() const override;
+    IMS_SINT32 GetPortUc() const override;
+    IMS_SINT32 GetPortUs() const override;
+    const IRegInfo* GetRegInfo() const override;
+    const AStringArray& GetSecurityClients() const override;
+    const AStringArray& GetSecurityVerifys() const override;
+    const AStringArray& GetServiceRoutes() const override;
+    SipProfile* GetSipProfile() const override;
+    inline IMS_SINT32 GetState() const override { return m_nState; }
+    const AString& GetSubscriberId() const override;
+    IMS_SINT32 GetTransportExt() const override;
+    const SipParameter* GetInstanceParameter() const override;
 
-    virtual const SipAddress* GetPublicGRUU() const;
-    virtual const SipAddress* GetTemporaryGRUU() const;
-    virtual const IMSList<SipAddress*>& GetTemporaryGRUUs() const;
+    const SipAddress* GetPublicGruu() const override;
+    const SipAddress* GetTemporaryGruu() const override;
+    const IMSList<SipAddress*>& GetTemporaryGruus() const override;
 
-    virtual IMS_BOOL IsBehindNAT() const;
-    virtual IMS_BOOL IsWithinTrustDomain() const;
-    virtual void NotifyCallerCapabilityChanged();
-    virtual void SetListener(IN IRegBindingListener* piListener);
+    IMS_BOOL IsBehindNat() const override;
+    IMS_BOOL IsWithinTrustDomain() const override;
+    void NotifyCallerCapabilityChanged() override;
+    void SetListener(IN IRegBindingListener* piListener) override;
 
 private:
-    void CreateSIPConnectionNotifier();
-    void DestroySIPConnectionNotifier();
+    void CreateSipConnectionNotifier();
+    void DestroySipConnectionNotifier();
     IMS_BOOL IsBindingActive() const;
     // REG_RESTORATION_FOR_ACTIVE_BINDING
     void RestoreTransportResourceForClientInitiatedConnection();
@@ -85,17 +94,17 @@ private:
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 private:
-    IRegistrationEx* piRegEx;
-    IRegContact* piContact;
+    IRegistrationEx* m_piRegEx;
+    IRegContact* m_piContact;
 
-    IMS_SINT32 nState;
-    ISipConnectionNotifier* piSCN;
+    IMS_SINT32 m_nState;
+    ISipConnectionNotifier* m_piScn;
 
-    IRegBindingListener* piListener;
+    IRegBindingListener* m_piListener;
 
     // Flag to indicate that the reg-state is transited from ACTIVE to TERMINATED
     // since the registration procedure is failed by the txn timeout or failure response.
-    IMS_BOOL bDeregistrationNOK;
+    IMS_BOOL m_bDeregistrationFailed;
 };
 
-#endif  // _REG_BINDING_H_
+#endif

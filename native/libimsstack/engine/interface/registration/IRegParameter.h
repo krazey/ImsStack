@@ -1,10 +1,26 @@
-#ifndef _INTERFACE_REG_PARAMETER_H_
-#define _INTERFACE_REG_PARAMETER_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_REG_PARAMETER_H_
+#define INTERFACE_REG_PARAMETER_H_
 
 #include "AStringArray.h"
+
+#include "SipAddress.h"
 #include "SipSecurityHeader.h"
 #include "SipTimerValues.h"
-#include "SipAddress.h"
 
 class ISipMessageBodyPart;
 
@@ -21,7 +37,7 @@ public:
      * @param objHeaders List of SIP header format (ex. Require: pref)
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL AddExtraHeaders(IN CONST AStringArray& objHeaders) = 0;
+    virtual IMS_BOOL AddExtraHeaders(IN const AStringArray& objHeaders) = 0;
 
     /**
      * @brief Adds the message body to be set during the registration in active.
@@ -39,7 +55,7 @@ public:
      * @param strRoute Route information (sip/sips URI or other)
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL AddPreloadedRoute(IN CONST AString& strRoute) = 0;
+    virtual IMS_BOOL AddPreloadedRoute(IN const AString& strRoute) = 0;
 
     /**
      * @brief Adds the preloaded route header.
@@ -51,8 +67,8 @@ public:
      * @param strScheme URI scheme (sip or sips); default is "sip"
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL AddPreloadedRoute(IN CONST AString& strHost, IN IMS_SINT32 nPort,
-            IN CONST AString& strScheme = AString::ConstNull()) = 0;
+    virtual IMS_BOOL AddPreloadedRoute(IN const AString& strHost, IN IMS_SINT32 nPort,
+            IN const AString& strScheme = AString::ConstNull()) = 0;
 
     /**
      * @brief Adds the Security-Client header.
@@ -60,7 +76,7 @@ public:
      * @param objSecurityHeader Object to SipSecurityHeader (Security-Client)
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL AddSecurityClient(IN CONST SipSecurityHeader& objSecurityHeader) = 0;
+    virtual IMS_BOOL AddSecurityClient(IN const SipSecurityHeader& objSecurityHeader) = 0;
 
     /**
      * @brief Returns the default SIP port for each registration.
@@ -118,7 +134,7 @@ public:
      *
      * @param objHeaders List of SIP header format (ex. Require: pref)
      */
-    virtual void RemoveExtraHeaders(IN CONST AStringArray& objHeaders) = 0;
+    virtual void RemoveExtraHeaders(IN const AStringArray& objHeaders) = 0;
 
     /**
      * @brief Removes all the Security-Client headers.
@@ -178,14 +194,14 @@ public:
      *
      * @param objSecurityVerifys List of Security-Verify header
      */
-    virtual void SetSecurityVerifys(IN CONST IMSList<SipSecurityHeader>& objSecurityVerifys) = 0;
+    virtual void SetSecurityVerifys(IN const IMSList<SipSecurityHeader>& objSecurityVerifys) = 0;
 
     /**
      * @brief Sets the timer values of SIP transaction layer for registration.
      *
-     * @param objTVs Object of SipTimerValues
+     * @param objTimerValues Object of SipTimerValues
      */
-    virtual void SetSIPTimerValues(IN CONST SipTimerValues& objTVs) = 0;
+    virtual void SetSipTimerValues(IN const SipTimerValues& objTimerValues) = 0;
 
     /**
      * @brief Sets the transport extensions for this registration.
@@ -212,4 +228,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_REG_PARAMETER_H_
+#endif

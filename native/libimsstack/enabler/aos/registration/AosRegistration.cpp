@@ -398,7 +398,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
         case PROPERTY_ASSOCIATED_URI:
             if (m_piRegistration != IMS_NULL)
             {
-                const AStringArray& objUris = m_piRegistration->GetAssociatedURIs();
+                const AStringArray& objUris = m_piRegistration->GetAssociatedUris();
 
                 if (!objUris.IsEmpty())
                 {
@@ -2076,11 +2076,11 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
         }
         else
         {
-            A_IMS_TRACE_D(REGID, "SetAor :: GetAssociatedURIs from normal registration", 0, 0, 0);
+            A_IMS_TRACE_D(REGID, "SetAor :: GetAssociatedUris from normal registration", 0, 0, 0);
             IRegistration* piRegistration = RegistrationManager::GetInstance()->GetRegistration(
                     m_nSlotId, static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
             objImpu = (piRegistration == IMS_NULL) ? pSubscriber->GetFakeImpus()
-                                                   : piRegistration->GetAssociatedURIs();
+                                                   : piRegistration->GetAssociatedUris();
         }
     }
 
@@ -2185,7 +2185,7 @@ PROTECTED VIRTUAL void AosRegistration::SetTcpCriterionLength()
     }
 
     m_pSipProfile->SetTcpCriterionLength(nLength);
-    m_piRegistration->SetSIPProfile(m_pSipProfile.Get());
+    m_piRegistration->SetSipProfile(m_pSipProfile.Get());
 }
 
 PROTECTED VIRTUAL void AosRegistration::SetDefaultTransport() {}
@@ -3064,7 +3064,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessSubscriberFailed(IN IMS_SINT3
                 m_strPuid = objPuids.GetElementAt(1);
                 const SipAddress objAor(m_strPuid);
 
-                m_piRegistration->SetAOR(objAor);
+                m_piRegistration->SetAor(objAor);
                 m_piContext->GetPcscf()->SetAllPcscfValid();
 
                 ProcessImsiBasedSubscriber();
@@ -3854,7 +3854,7 @@ PROTECTED VIRTUAL void AosRegistration::RecordImpu()
 
     ISubscriberInfo* piSubsInfo =
             PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotId);
-    const AStringArray& objAssociatedUris = m_piRegistration->GetAssociatedURIs();
+    const AStringArray& objAssociatedUris = m_piRegistration->GetAssociatedUris();
 
     IMS_CHAR strSize[4];
     IMS_Itoa(strSize, objAssociatedUris.GetCount(), 10);
@@ -3936,10 +3936,10 @@ PROTECTED VIRTUAL void AosRegistration::Registration_AuthenticationChallenged(
     }
 }
 
-PROTECTED VIRTUAL void AosRegistration::Registration_NotifyAKAResponse(IN IMS_SINT32 nResult,
+PROTECTED VIRTUAL void AosRegistration::Registration_NotifyAkaResponse(IN IMS_SINT32 nResult,
         IN const ByteArray& objIK, IN const ByteArray& objCK, OUT IMS_BOOL& bResultOfSA)
 {
-    A_IMS_TRACE_I(REGID, "Registration_NotifyAKAResponse :: result(%d)", nResult, 0, 0);
+    A_IMS_TRACE_I(REGID, "Registration_NotifyAkaResponse :: result(%d)", nResult, 0, 0);
 
     bResultOfSA = IMS_FALSE;
 
@@ -4675,7 +4675,7 @@ PROTECTED VIRTUAL AosSubscription* AosRegistration::GetSubscription(
         IN IRegSubscription* piRegSubscription)
 {
     return new AosSubscription(m_piContext, piRegSubscription,
-            m_piRegistration->GetAuthorizedAOR().ToString(), m_piRegContact->GetContactAddress());
+            m_piRegistration->GetAuthorizedAor().ToString(), m_piRegContact->GetContactAddress());
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessSubscription_Success() {}
@@ -5118,7 +5118,7 @@ void AosRegistration::UpdateUserInfoInContact()
         return;
     }
 
-    const AStringArray& objAssociatedUris = m_piRegistration->GetAssociatedURIs();
+    const AStringArray& objAssociatedUris = m_piRegistration->GetAssociatedUris();
 
     if (objAssociatedUris.IsEmpty())
     {

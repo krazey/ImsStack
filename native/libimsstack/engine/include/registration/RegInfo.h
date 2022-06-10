@@ -1,21 +1,25 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100719  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _REG_INFO_H_
-#define _REG_INFO_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef REG_INFO_H_
+#define REG_INFO_H_
 
 #include "IMSList.h"
-#include "RegInfoRegistration.h"
+
 #include "IRegInfo.h"
+#include "RegInfoRegistration.h"
 
 class IDocument;
 class INode;
@@ -29,9 +33,9 @@ public:
 
 public:
     // IRegInfo interface
-    virtual IRegInfoRegistration* GetRegistration(IN CONST AString& strAOR) const;
-    virtual IRegInfoRegistration* GetRegistration(IN CONST SipAddress& objAOR) const;
-    virtual IMSList<IRegInfoRegistration*> GetRegistrations() const;
+    IRegInfoRegistration* GetRegistration(IN const AString& strAor) const override;
+    IRegInfoRegistration* GetRegistration(IN const SipAddress& objAor) const override;
+    IMSList<IRegInfoRegistration*> GetRegistrations() const override;
 
     void AddListener(IN IRegInfoListener* piListener);
     void RemoveListener(IN IRegInfoListener* piListener);
@@ -52,10 +56,10 @@ private:
         STATUS_UPDATE_FAILED
     };
 
-    IMS_BOOL bIsCreated;
-    IMS_UINT32 nVersion;
-    IMSList<IRegInfoListener*> objListeners;
-    IMSList<RegInfoRegistration*> objRegistrations;
+    IMS_BOOL m_bIsCreated;
+    IMS_UINT32 m_nVersion;
+    IMSList<IRegInfoListener*> m_objListeners;
+    IMSList<RegInfoRegistration*> m_objRegistrations;
 };
 
-#endif  // _REG_INFO_H_
+#endif

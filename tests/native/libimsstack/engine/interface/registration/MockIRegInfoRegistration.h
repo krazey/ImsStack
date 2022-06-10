@@ -10,7 +10,7 @@
 class MockIRegInfoRegistration : public IRegInfoRegistration
 {
 public:
-    MOCK_METHOD(const SipAddress&, GetAOR, (), (const, override));
+    MOCK_METHOD(const SipAddress&, GetAor, (), (const, override));
     MOCK_METHOD(
             IRegInfoContact*, GetContact, (IN CONST SipAddress & objContactUri), (const, override));
     MOCK_METHOD(IMSList<IRegInfoContact*>, GetContacts, (), (const, override));

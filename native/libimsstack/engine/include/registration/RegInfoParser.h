@@ -1,53 +1,23 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100720  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _REG_INFO_PARSER_H_
-#define _REG_INFO_PARSER_H_
-
-#ifdef __IMS_ASYNC_XML_PARSER__
-
-#include "IXmlTransactionListener.h"
-#include "IXmlTransaction.h"
-#include "IXmlTransactionProvider.h"
-#include "RegKey.h"
-
-class IRegInfoParserListener;
-
-class RegInfoParser : public IXmlTransactionListener
-{
-public:
-    RegInfoParser(IN const RegKey& objRegKey_, IN IXmlTransactionProvider*& piXmlTxnProvider);
-    virtual ~RegInfoParser();
-
-public:
-    const RegKey& GetRegKey() const;
-    IMS_BOOL Parse(IN const AString& strRegInfo);
-    void SetListener(IN IRegInfoParserListener* piListener);
-
-private:
-    // IXmlTransactionListener interface
-    virtual IMS_RESULT XmlTransaction_NotifyParsingCompleted(IN IXmlTransaction* piTransaction);
-
-private:
-    RegKey objRegKey;
-    IXmlTransactionProvider*& piXmlTxnProvider;
-
-    IXmlTransaction* piXMLTxn;
-    IRegInfoParserListener* piListener;
-};
-
-#else
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef REG_INFO_PARSER_H_
+#define REG_INFO_PARSER_H_
 
 #include "AString.h"
+
 #include "RegKey.h"
 
 class IRegInfoParserListener;
@@ -55,20 +25,17 @@ class IRegInfoParserListener;
 class RegInfoParser
 {
 public:
-    explicit RegInfoParser(IN const RegKey& objRegKey_);
-    virtual ~RegInfoParser();
+    explicit RegInfoParser(IN const RegKey& objRegKey);
+    inline virtual ~RegInfoParser() {}
 
 public:
-    const RegKey& GetRegKey() const;
+    inline const RegKey& GetRegKey() const { return m_objRegKey; }
     IMS_BOOL Parse(IN const AString& strRegInfo);
-    void SetListener(IN IRegInfoParserListener* piListener);
+    inline void SetListener(IN IRegInfoParserListener* piListener) { m_piListener = piListener; }
 
 private:
-    RegKey objRegKey;
-
-    IRegInfoParserListener* piListener;
+    RegKey m_objRegKey;
+    IRegInfoParserListener* m_piListener;
 };
 
-#endif  // __IMS_ASYNC_XML_PARSER__
-
-#endif  // _REG_INFO_PARSER_H_
+#endif

@@ -374,7 +374,7 @@ void AosSubscription::PrintRegInfo(IN IMSList<IRegInfoContact*>& objRegInfo)
         strLog.Append(RegInfoEventToString(piCurr->GetEvent()));
         strLog.Append("]");
         strLog.Append("[uri/");
-        strLog.Append(piCurr->GetURI().GetUri().GetStr());
+        strLog.Append(piCurr->GetUri().GetUri().GetStr());
         strLog.Append("]");
 
         if (piCurr->GetQValue().GetLength() > 0)
@@ -872,7 +872,7 @@ PROTECTED VIRTUAL IRegInfoContact* AosSubscription::GetRegInfoContact(
             continue;
         }
 
-        if (CompareUriAssociatedWithContact(piRegInfoContact->GetURI()))
+        if (CompareUriAssociatedWithContact(piRegInfoContact->GetUri()))
         {
             break;
         }

@@ -1,50 +1,46 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100719  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceMutex.h"
-#ifdef __IMS_ASYNC_XML_PARSER__
-#include "IXmlTransactionProvider.h"
-#include "XmlFactory.h"
-#endif
+
 #include "RegInfo.h"
-#include "RegInfoParser.h"
 #include "RegInfoManager.h"
+#include "RegInfoParser.h"
 
 __IMS_TRACE_TAG_REG__;
 
 PRIVATE
 RegInfoManager::RegInfoManager() :
-        piLock(IMS_NULL),
-        objParsers(IMSList<RegInfoParser*>()),
-        objRegInfos(IMSMap<RegKey, RegInfo*>())
-#ifdef __IMS_ASYNC_XML_PARSER__
-        ,
-        piXmlTxnProvider(IMS_NULL)
-#endif
+        m_piLock(IMS_NULL),
+        m_objParsers(IMSList<RegInfoParser*>()),
+        m_objRegInfos(IMSMap<RegKey, RegInfo*>())
 {
-    piLock = MutexService::GetMutexService()->CreateMutex();
+    m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
 
 PRIVATE VIRTUAL RegInfoManager::~RegInfoManager()
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    if (!objRegInfos.IsEmpty())
+    if (!m_objRegInfos.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objRegInfos.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objRegInfos.GetSize(); ++i)
         {
-            RegInfo* pRegInfo = objRegInfos.GetValueAt(i);
+            RegInfo* pRegInfo = m_objRegInfos.GetValueAt(i);
 
             if (pRegInfo != IMS_NULL)
             {
@@ -52,14 +48,14 @@ PRIVATE VIRTUAL RegInfoManager::~RegInfoManager()
             }
         }
 
-        objRegInfos.Clear();
+        m_objRegInfos.Clear();
     }
 
-    if (!objParsers.IsEmpty())
+    if (!m_objParsers.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objParsers.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objParsers.GetSize(); ++i)
         {
-            RegInfoParser* pParser = objParsers.GetAt(i);
+            RegInfoParser* pParser = m_objParsers.GetAt(i);
 
             if (pParser != IMS_NULL)
             {
@@ -67,18 +63,10 @@ PRIVATE VIRTUAL RegInfoManager::~RegInfoManager()
             }
         }
 
-        objParsers.Clear();
+        m_objParsers.Clear();
     }
 
-#ifdef __IMS_ASYNC_XML_PARSER__
-    if (piXmlTxnProvider != IMS_NULL)
-    {
-        XmlFactory::GetInstance()->DestroyTransactionProvider(piXmlTxnProvider);
-        piXmlTxnProvider = IMS_NULL;
-    }
-#endif
-
-    MutexService::GetMutexService()->DestroyMutex(piLock);
+    MutexService::GetMutexService()->DestroyMutex(m_piLock);
 }
 
 PUBLIC
@@ -97,9 +85,9 @@ IMS_BOOL RegInfoManager::CreateRegInfo(IN const RegKey& objRegKey)
             return IMS_FALSE;
         }
 
-        LockGuard objLock(piLock);
+        LockGuard objLock(m_piLock);
 
-        if (!objRegInfos.Add(objRegKey, pRegInfo))
+        if (!m_objRegInfos.Add(objRegKey, pRegInfo))
         {
             delete pRegInfo;
 
@@ -113,22 +101,22 @@ IMS_BOOL RegInfoManager::CreateRegInfo(IN const RegKey& objRegKey)
 PUBLIC
 void RegInfoManager::DestroyRegInfo(IN const RegKey& objRegKey)
 {
-    LockGuard objLock(piLock);
-    IMS_SLONG nIndex = objRegInfos.GetIndexOfKey(objRegKey);
+    LockGuard objLock(m_piLock);
+    IMS_SLONG nIndex = m_objRegInfos.GetIndexOfKey(objRegKey);
 
     if (nIndex < 0)
     {
         return;
     }
 
-    RegInfo* pRegInfo = objRegInfos.GetValueAt(nIndex);
+    RegInfo* pRegInfo = m_objRegInfos.GetValueAt(nIndex);
 
     if (pRegInfo != IMS_NULL)
     {
         delete pRegInfo;
     }
 
-    objRegInfos.RemoveAt(nIndex);
+    m_objRegInfos.RemoveAt(nIndex);
 
     IMS_TRACE_I("RegInfo(%d:%d) is destroyed", objRegKey.GetSlotId(), objRegKey.GetFlowId(), 0);
 }
@@ -136,48 +124,34 @@ void RegInfoManager::DestroyRegInfo(IN const RegKey& objRegKey)
 PUBLIC
 RegInfo* RegInfoManager::GetRegInfo(IN const RegKey& objRegKey)
 {
-    LockGuard objLock(piLock);
-    IMS_SLONG nIndex = objRegInfos.GetIndexOfKey(objRegKey);
+    LockGuard objLock(m_piLock);
+    IMS_SLONG nIndex = m_objRegInfos.GetIndexOfKey(objRegKey);
 
     if (nIndex < 0)
     {
         return IMS_NULL;
     }
 
-    return objRegInfos.GetValueAt(nIndex);
+    return m_objRegInfos.GetValueAt(nIndex);
 }
 
 PUBLIC
 const RegInfo* RegInfoManager::GetRegInfo(IN const RegKey& objRegKey) const
 {
-    LockGuard objLock(piLock);
-    IMS_SLONG nIndex = objRegInfos.GetIndexOfKey(objRegKey);
+    LockGuard objLock(m_piLock);
+    IMS_SLONG nIndex = m_objRegInfos.GetIndexOfKey(objRegKey);
 
     if (nIndex < 0)
     {
         return IMS_NULL;
     }
 
-    return objRegInfos.GetValueAt(nIndex);
+    return m_objRegInfos.GetValueAt(nIndex);
 }
 
 PUBLIC
 IMS_BOOL RegInfoManager::Initialize()
 {
-#ifdef __IMS_ASYNC_XML_PARSER__
-    if (piXmlTxnProvider != IMS_NULL)
-    {
-        return IMS_TRUE;
-    }
-
-    piXmlTxnProvider = XmlFactory::GetInstance()->CreateTransactionProvider();
-
-    if (piXmlTxnProvider == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-#endif
-
     return IMS_TRUE;
 }
 
@@ -198,20 +172,7 @@ IMS_BOOL RegInfoManager::Update(IN const RegKey& objRegKey, IN const AString& st
         return IMS_FALSE;
     }
 
-#ifdef __IMS_ASYNC_XML_PARSER__
-
-    if (piXmlTxnProvider == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    RegInfoParser* pParser = new RegInfoParser(objRegKey, piXmlTxnProvider);
-
-#else
-
     RegInfoParser* pParser = new RegInfoParser(objRegKey);
-
-#endif  // __IMS_ASYNC_XML_PARSER__
 
     if (pParser == IMS_NULL)
     {
@@ -242,9 +203,9 @@ IMS_BOOL RegInfoManager::Update(IN const RegKey& objRegKey, IN const AString& st
 PUBLIC
 void RegInfoManager::DisplayRegInfo()
 {
-    for (IMS_UINT32 i = 0; i < objRegInfos.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objRegInfos.GetSize(); ++i)
     {
-        RegInfo* pRegInfo = objRegInfos.GetValueAt(i);
+        RegInfo* pRegInfo = m_objRegInfos.GetValueAt(i);
 
         IMS_TRACE_D("___ REG INFO (%d) -- START ___", i, 0, 0);
         pRegInfo->DisplayRegInfo();
@@ -254,14 +215,14 @@ void RegInfoManager::DisplayRegInfo()
 
 PUBLIC GLOBAL RegInfoManager* RegInfoManager::GetInstance()
 {
-    static RegInfoManager* pRegInfoMngr = IMS_NULL;
+    static RegInfoManager* s_pRegInfoMngr = IMS_NULL;
 
-    if (pRegInfoMngr == IMS_NULL)
+    if (s_pRegInfoMngr == IMS_NULL)
     {
-        pRegInfoMngr = new RegInfoManager();
+        s_pRegInfoMngr = new RegInfoManager();
     }
 
-    return pRegInfoMngr;
+    return s_pRegInfoMngr;
 }
 
 PRIVATE VIRTUAL void RegInfoManager::RegInfoParser_ParsingCompleted(
@@ -299,25 +260,25 @@ PRIVATE VIRTUAL void RegInfoManager::RegInfoParser_ParsingFailed(IN RegInfoParse
 PRIVATE
 IMS_BOOL RegInfoManager::AddRegInfoParser(IN RegInfoParser* pParser)
 {
-    LockGuard objLock(piLock);
-    return objParsers.Append(pParser);
+    LockGuard objLock(m_piLock);
+    return m_objParsers.Append(pParser);
 }
 
 PRIVATE
 void RegInfoManager::RemoveRegInfoParser(IN RegInfoParser*& pParser)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    for (IMS_UINT32 i = 0; i < objParsers.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objParsers.GetSize(); ++i)
     {
-        RegInfoParser* pTmpParser = objParsers.GetAt(i);
+        RegInfoParser* pTmpParser = m_objParsers.GetAt(i);
 
         if (pParser == pTmpParser)
         {
             delete pParser;
             pParser = IMS_NULL;
 
-            objParsers.RemoveAt(i);
+            m_objParsers.RemoveAt(i);
             return;
         }
     }

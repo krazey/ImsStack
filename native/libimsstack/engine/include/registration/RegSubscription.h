@@ -1,30 +1,33 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100518  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef REG_SUBSCRIPTION_H_
+#define REG_SUBSCRIPTION_H_
 
-    Description
-
-*/
-
-#ifndef _REG_SUBSCRIBER_H_
-#define _REG_SUBSCRIBER_H_
-
-#include "base/Method.h"
-#include "IRegSubscription.h"
-#include "util/IDialogMethod.h"
-#include "util/IRefreshable.h"
 #include "IRegInfoListener.h"
+#include "IRegSubscription.h"
 #include "RegKey.h"
 #include "RegStateTracker.h"
+#include "base/Method.h"
+#include "util/IDialogMethod.h"
+#include "util/IRefreshable.h"
 
+class IRegSubscriptionListener;
+class IRegistration;
 class ISipConnectionNotifier;
 class SipTimerValues;
-class IRegistration;
-class IRegSubscriptionListener;
 class SubState;
 class SubscriberRefreshHelper;
 
@@ -36,85 +39,86 @@ class RegSubscription :
         public IRegInfoListener
 {
 public:
-    RegSubscription(IN CONST RegKey& objRegKey_, IN RegStateTracker* pRegStateTracker_,
-            IN IMS_UINT32 nExpiresValue_ = 0, IN CONST SipTimerValues* pSIPTVs_ = IMS_NULL);
+    RegSubscription(IN const RegKey& objRegKey, IN RegStateTracker* pRegStateTracker,
+            IN IMS_UINT32 nExpiresValue = 0, IN const SipTimerValues* pTimerValues = IMS_NULL);
     virtual ~RegSubscription();
 
-private:
-    RegSubscription(IN CONST RegSubscription& objRHS);
-    RegSubscription& operator=(IN CONST RegSubscription& objRHS);
+    RegSubscription(IN const RegSubscription&) = delete;
+    RegSubscription& operator=(IN const RegSubscription&) = delete;
 
 public:
     // IRegBase interface
-    virtual ISipMessage* GetNextRequest();
-    virtual ISipMessage* GetPreviousRequest() const;
-    virtual ISipMessage* GetPreviousResponse() const;
-    // SIP_MESSAGE_MEDIATOR
-    virtual void SetSipMessageMediator(IN IMessageMediator* piMediator);
+    ISipMessage* GetNextRequest() override;
+    inline ISipMessage* GetPreviousRequest() const override { return m_piPreviousRequest; }
+    inline ISipMessage* GetPreviousResponse() const override { return m_piPreviousResponse; }
+    void SetSipMessageMediator(IN IMessageMediator* piMediator) override;
 
     // IRegSubscription interface
-    virtual void DestroyEx();
-    virtual IMS_SINT32 DisableFeatures(IN IMS_SINT32 nFeatures);
-    virtual IMS_SINT32 EnableFeatures(IN IMS_SINT32 nFeatures);
-    virtual IMS_UINT32 GetExpires() const;
-    virtual const IRegInfo* GetRegInfo() const;
-    virtual IMS_SINT32 GetState() const;
-    virtual IMS_RESULT SetContactParameter(
-            IN CONST AString& strParameter, IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */);
-    virtual void SetExpires(IN IMS_UINT32 nExpires);
-    virtual void SetListener(IN IRegSubscriptionListener* piListener);
-    virtual void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
-            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
-    virtual IMS_RESULT Subscribe();
-    virtual IMS_RESULT Unsubscribe();
+    void DestroyEx() override;
+    IMS_SINT32 DisableFeatures(IN IMS_SINT32 nFeatures) override;
+    IMS_SINT32 EnableFeatures(IN IMS_SINT32 nFeatures) override;
+    inline IMS_UINT32 GetExpires() const override { return m_nExpiresValue; }
+    const IRegInfo* GetRegInfo() const override;
+    inline IMS_SINT32 GetState() const override { return m_nState; }
+    IMS_RESULT SetContactParameter(IN const AString& strParameter,
+            IN IMS_SINT32 nOperation = CONTACT_PARAM_OP_ADD) override;
+    void SetExpires(IN IMS_UINT32 nExpires) override;
+    inline void SetListener(IN IRegSubscriptionListener* piListener) override
+    {
+        m_piListener = piListener;
+    }
+    void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
+            IN IMS_SINT32 nValueEorLt, IN IMS_SINT32 nValueGt) override;
+    IMS_RESULT Subscribe() override;
+    IMS_RESULT Unsubscribe() override;
 
 private:
     // Activity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
     // Method class
-    virtual IMS_BOOL InitInstance();
-    // IMS_AUTH_SIP_DIGEST
-    virtual IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piSCC);
+    IMS_BOOL InitInstance() override;
+    IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piScc) override;
 
     // Method class - Handle to the outgoing request / incoming response message
-    virtual void NotifySIPResponse(IN ISipClientConnection* piSCC);
-    virtual void NotifySIPError(
-            IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
+    void NotifySIPResponse(IN ISipClientConnection* piScc) override;
+    void NotifySIPError(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
     // IDialogMethod interface
-    virtual IMS_BOOL Dialog_Compare(IN ISipServerConnection* piSSC) const;
-    virtual IMS_BOOL Dialog_NotifyRequest(IN ISipServerConnection* piSSC);
+    IMS_BOOL Dialog_Compare(IN ISipServerConnection* piSsc) const override;
+    IMS_BOOL Dialog_NotifyRequest(IN ISipServerConnection* piSsc) override;
 
     // IRefreshable interface
-    virtual void Refreshable_RefreshCompleted(
-            IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode = 0);
-    virtual IMS_BOOL Refreshable_RefreshStarted();
-    virtual void Refreshable_RefreshTerminated();
+    void Refreshable_RefreshCompleted(
+            IN ISipClientConnection* piScc, IN IMS_SINT32 nCode = 0) override;
+    IMS_BOOL Refreshable_RefreshStarted() override;
+    void Refreshable_RefreshTerminated() override;
 
     // IRegInfoListener interface
-    virtual void RegInfo_Updated(IN IMS_BOOL bStale = IMS_FALSE);
-    virtual void RegInfo_UpdateFailed();
+    inline void RegInfo_Updated(IN IMS_BOOL bStale = IMS_FALSE) override { (void)bStale; }
+    inline void RegInfo_UpdateFailed() override {}
 
     void CheckDialogNCallListener();
     void ClearNextRequest();
-    IMS_BOOL CopyHeadersAndBodyParts(IN_OUT ISipMessage*& piSIPMsg);
-    IMS_BOOL IsFeatureEnabled(IN IMS_SINT32 nFeature) const;
-    void SetOngoingConnection(IN ISipClientConnection* piSCC);
-    void SetPreviousRequest(IN ISipMessage* piSIPMsg);
-    void SetPreviousResponse(IN ISipMessage* piSIPMsg);
-    IMS_BOOL SendResponse(IN ISipServerConnection* piSSC, IN IMS_SINT32 nStatusCode);
-    IMS_BOOL SetContactHeader(IN_OUT ISipMessage*& piSIPMsg, OUT IMS_BOOL& bIsContactGRUU);
-    IMS_BOOL SetHeaders(IN_OUT ISipMessage*& piSIPMsg);
+    IMS_BOOL CopyHeadersAndBodyParts(IN_OUT ISipMessage*& piSipMsg);
+    inline IMS_BOOL IsFeatureEnabled(IN IMS_SINT32 nFeature) const
+    {
+        return (m_nFeatureSet & nFeature) != 0;
+    }
+    void SetOngoingConnection(IN ISipClientConnection* piScc);
+    void SetPreviousRequest(IN ISipMessage* piSipMsg);
+    void SetPreviousResponse(IN ISipMessage* piSipMsg);
+    IMS_BOOL SendResponse(IN ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode);
+    IMS_BOOL SetContactHeader(IN_OUT ISipMessage*& piSipMsg, OUT IMS_BOOL& bIsContactGruu);
+    IMS_BOOL SetHeaders(IN_OUT ISipMessage*& piSipMsg);
     void SetState(IN IMS_SINT32 nState);
     IMS_BOOL SubscribeOnImplicitRefresh();
-
     // IMS_REQUEST_URI_VALIDATION_IN_MID_DIALOG
-    IMS_BOOL ValidateRequestURI(IN CONST SipAddress& objRequestURI, IN ISipDialog* piDialog) const;
+    IMS_BOOL ValidateRequestUri(IN const SipAddress& objRequestUri, IN ISipDialog* piDialog) const;
 
     static ISipClientConnection* CreateConnection(IN RegSubscription* pRegSub);
-    static IMS_UINT16 GetReasonParameter(IN ISipMessage* piMessage);
-
+    static IMS_UINT16 GetReasonParameter(IN ISipMessage* piSipMsg);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 private:
@@ -138,94 +142,36 @@ private:
     static const IMS_CHAR MEDIA_TYPE[];
     static const IMS_CHAR MEDIA_SUB_TYPE[];
 
-#ifdef __IMS_ASYNC_XML_PARSER__
-    class Notification
-    {
-    public:
-        inline Notification() :
-                nMSG(0),
-                nWParam(0),
-                nLParam(0)
-        {
-        }
-        inline Notification(IN IMS_SINT32 nMSG_, IN IMS_SINT32 nWParam_, IN IMS_SINT32 nLParam_) :
-                nMSG(nMSG_),
-                nWParam(nWParam_),
-                nLParam(nLParam_)
-        {
-        }
-        inline Notification(IN CONST Notification& objRHS) :
-                nMSG(objRHS.nMSG),
-                nWParam(objRHS.nWParam),
-                nLParam(objRHS.nLParam)
-        {
-        }
-        inline ~Notification() {}
-
-    public:
-        inline Notification& operator=(IN CONST Notification& objRHS)
-        {
-            if (this != &objRHS)
-            {
-                nMSG = objRHS.nMSG;
-                nWParam = objRHS.nWParam;
-                nLParam = objRHS.nLParam;
-            }
-
-            return (*this);
-        }
-
-    public:
-        IMS_SINT32 nMSG;
-        IMS_SINT32 nWParam;
-        IMS_SINT32 nLParam;
-    };
-#endif  // __IMS_ASYNC_XML_PARSER__
-
     // Runtime features
-    IMS_SINT32 nFeatureSet;
-
+    IMS_SINT32 m_nFeatureSet;
     // State of Subscription
-    IMS_SINT32 nState;
-    IMS_UINT32 nExpiresValue;
-
+    IMS_SINT32 m_nState;
+    IMS_UINT32 m_nExpiresValue;
     // Storage for pending operation for subscription
-    IMS_SINT32 nPendingOperation;
+    IMS_SINT32 m_nPendingOperation;
     // Listener for this RegSubscription
-    IRegSubscriptionListener* piListener;
-
+    IRegSubscriptionListener* m_piListener;
     // Registration key
-    RegKey objRegKey;
+    RegKey m_objRegKey;
     // Registration State Tracker
-    RCPtr<RegStateTracker> pRegStateTracker;
-
+    RCPtr<RegStateTracker> m_pRegStateTracker;
     // Subscription information for subscriber behavior
-    SubState* pSubState;
-
+    SubState* m_pSubState;
     // Subscription refresh timer
-    SubscriberRefreshHelper* pRefreshHelper;
-
+    SubscriberRefreshHelper* m_pRefreshHelper;
     // Current SIP connection for abnormal cases
-    ISipClientConnection* piOngoingSCC;
-
+    ISipClientConnection* m_piOngoingScc;
     // Message for the next SUBSCIRBE request
-    ISipMessage* piNextRequest;
+    ISipMessage* m_piNextRequest;
     // Message for the previous SUBSCRIBE request
-    ISipMessage* piPreviousRequest;
+    ISipMessage* m_piPreviousRequest;
     // Message for the previous SUBSCRIBE response
-    ISipMessage* piPreviousResponse;
-
-#ifdef __IMS_ASYNC_XML_PARSER__
-    // Queue for reginfo notification
-    IMSList<Notification> objNotifications;
-#endif
-
+    ISipMessage* m_piPreviousResponse;
     // Timer values of SIP transaction layer
-    SipTimerValues* pSIPTVs;
-
+    SipTimerValues* m_pSipTimerValues;
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
     // To handle a notification properly after de-REG
-    ISipConnectionNotifier* piReferredSCN;
+    ISipConnectionNotifier* m_piReferredScn;
 };
 
-#endif  // _REG_SUBSCRIBER_H_
+#endif

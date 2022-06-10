@@ -288,7 +288,7 @@ protected:
     /// IRegistrationListener
     virtual void Registration_AuthenticationChallenged(
             IN IMS_SINT32 nAlgorithm, OUT IMS_BOOL& bResponseToChallenge);
-    virtual void Registration_NotifyAKAResponse(IN IMS_SINT32 nResult, IN const ByteArray& objIK,
+    virtual void Registration_NotifyAkaResponse(IN IMS_SINT32 nResult, IN const ByteArray& objIK,
             IN const ByteArray& objCK, OUT IMS_BOOL& bResultOfSA);
     virtual void Registration_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh);
     virtual void Registration_Started();

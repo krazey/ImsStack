@@ -1,5 +1,20 @@
-#ifndef _INTERFACE_REGISTRATION_LISTENER_H_
-#define _INTERFACE_REGISTRATION_LISTENER_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_REGISTRATION_LISTENER_H_
+#define INTERFACE_REGISTRATION_LISTENER_H_
 
 #include "ByteArray.h"
 
@@ -34,12 +49,12 @@ public:
      * This method is invoked only and only if the algorithm is AKAv1-MD5.
      *
      * @param nResult Result of AKA authentication; refer to IMS_AKA class in Credential.h
-     * @param objIK Integrity key value; it is valid if nResult is only RESULT_OK
-     * @param objCK Ciphering key value; it is valid if nResult is only RESULT_OK
-     * @param bResultOfSA Result of security association
+     * @param objIk Integrity key value; it is valid if nResult is only RESULT_OK
+     * @param objCk Ciphering key value; it is valid if nResult is only RESULT_OK
+     * @param bResultOfSa Result of security association
      */
-    virtual void Registration_NotifyAKAResponse(IN IMS_SINT32 nResult, IN CONST ByteArray& objIK,
-            IN CONST ByteArray& objCK, OUT IMS_BOOL& bResultOfSA) = 0;
+    virtual void Registration_NotifyAkaResponse(IN IMS_SINT32 nResult, IN const ByteArray& objIk,
+            IN const ByteArray& objCk, OUT IMS_BOOL& bResultOfSa) = 0;
 
     /**
      * @brief Notifies the application when the registration's refresh timer is expired.
@@ -87,4 +102,4 @@ public:
     virtual void Registration_Terminated(IN IMS_SINT32 nReason) = 0;
 };
 
-#endif  // _INTERFACE_REGISTRATION_LISTENER_H_
+#endif

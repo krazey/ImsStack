@@ -1,282 +1,217 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090908  toastops@                 Created
-    20100321  hwangoo.park@             Change Register(...) for expires value
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-#include "ServicePhoneInfo.h"
-#include "ServiceUtil.h"
-#include "ServiceNetwork.h"
-#include "TextParser.h"
-#include "NATHelper.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "IDigestAka.h"
+#include "NATHelper.h"
+#include "ServiceMemory.h"
+#include "ServiceNetwork.h"
+#include "ServicePhoneInfo.h"
+#include "ServiceTrace.h"
+#include "ServiceUtil.h"
+#include "TextParser.h"
+
 #include "private/ConfigurationManager.h"
 #include "private/SubscriberConfig.h"
+
 #include "Connector.h"
-#include "ISipHeader.h"
-#include "ISipMessage.h"
-#include "ISipConnectionNotifier.h"
-#include "ISipClientConnection.h"
-#include "ISipGenericChallenge.h"
-#include "ISipTransportHelper.h"
-#include "Sip.h"
-#include "SipHeaderName.h"
-#include "SipDebug.h"
-#include "SipParsingHelper.h"
-#include "SipStatusCode.h"
-#include "SipParameter.h"
-#include "SipConfigProxy.h"
-#include "SipFactory.h"
-#include "base/IMS.h"
-#include "base/SubscriberTracker.h"
-#include "PAccessNetworkInfoHeader.h"
-#include "SipTimerValuesHelper.h"
-#include "SIPURNHelper.h"
-#include "IRegistrationListener.h"
-#include "IRegUserIdentityNotifier.h"
 #include "IRegBindingStateListener.h"
-#include "RegObserver.h"
+#include "IRegInfoContact.h"
+#include "IRegInfoRegistration.h"
+#include "IRegUserIdentityNotifier.h"
+#include "IRegistrationListener.h"
+#include "ISipClientConnection.h"
+#include "ISipConnectionNotifier.h"
+#include "ISipHeader.h"
+#include "ISipGenericChallenge.h"
+#include "ISipMessage.h"
+#include "ISipTransportHelper.h"
+#include "PAccessNetworkInfoHeader.h"
+#include "RegBindingProxy.h"
 #include "RegFlow.h"
+#include "RegInfo.h"
+#include "RegInfoManager.h"
+#include "RegObserver.h"
 #include "RegParameter.h"
 #include "RegRefreshHelper.h"
 #include "RegSubscription.h"
-#include "IRegInfoRegistration.h"
-#include "IRegInfoContact.h"
-#include "RegInfoManager.h"
-#include "RegInfo.h"
-#include "RegBindingProxy.h"
-#ifdef __IMS_TEST_AKA__
-#include "AKAHelper.h"
-#endif
 #include "Registration.h"
+#include "Sip.h"
+#include "SipConfigProxy.h"
+#include "SipDebug.h"
+#include "SipFactory.h"
+#include "SipHeaderName.h"
+#include "SipParameter.h"
+#include "SipParsingHelper.h"
+#include "SipStatusCode.h"
+#include "SipTimerValuesHelper.h"
+#include "SipUrnHelper.h"
+#include "base/IMS.h"
+#include "base/SubscriberTracker.h"
 
 __IMS_TRACE_TAG_REG__;
 
 PUBLIC
 Registration::Registration() :
         EngineActivity(),
-        bDestroyed(IMS_FALSE),
-        nState(STATE_CREATED),
-        nSubState(SUB_STATE_IDLE),
-        pRegFlow(IMS_NULL),
-        pRegParam(IMS_NULL),
-        objContacts(IMSList<RegContact*>()),
-        piListener(IMS_NULL),
-        piBindingStateListener(IMS_NULL),
-        piUserIdNotifier(IMS_NULL),
-        pRefreshHelper(IMS_NULL),
-        piDigestAKA(IMS_NULL),
-        // IMS_AUTH_NONCE_REUSE
-        piGenericChallenge(IMS_NULL),
-        piOngoingSCC(IMS_NULL),
-        piNextRequest(IMS_NULL),
-        piPreviousRequest(IMS_NULL),
-        piPreviousResponse(IMS_NULL),
-        // SIP_MESSAGE_MEDIATOR
-        piMessageMediator(IMS_NULL),
-        objObservers(IMSList<RegObserver*>()),
-        bIsBehindNAT(IMS_FALSE),
-        bIsWithinTrustDomain(IMS_TRUE),
-        bActiveBindingsRestorationEnabled(IMS_FALSE),
-        nRefCountForSCNEL(0)
+        m_bDestroyed(IMS_FALSE),
+        m_nState(STATE_CREATED),
+        m_nSubState(SUB_STATE_IDLE),
+        m_pRegFlow(IMS_NULL),
+        m_pRegParam(IMS_NULL),
+        m_objContacts(IMSList<RegContact*>()),
+        m_piListener(IMS_NULL),
+        m_piBindingStateListener(IMS_NULL),
+        m_piUserIdNotifier(IMS_NULL),
+        m_pRefreshHelper(IMS_NULL),
+        m_piDigestAka(IMS_NULL),
+        m_piGenericChallenge(IMS_NULL),
+        m_piOngoingScc(IMS_NULL),
+        m_piNextRequest(IMS_NULL),
+        m_piPreviousRequest(IMS_NULL),
+        m_piPreviousResponse(IMS_NULL),
+        m_piMessageMediator(IMS_NULL),
+        m_objObservers(IMSList<RegObserver*>()),
+        m_bIsBehindNat(IMS_FALSE),
+        m_bIsWithinTrustDomain(IMS_TRUE),
+        m_bActiveBindingsRestorationEnabled(IMS_FALSE),
+        m_nRefCountForScnErrorListener(0)
 {
-    pStateTracker = new RegStateTracker();
+    m_pStateTracker = new RegStateTracker();
 }
 
 PUBLIC VIRTUAL Registration::~Registration()
 {
-    if (piOngoingSCC != IMS_NULL)
+    if (m_piOngoingScc != IMS_NULL)
     {
-        piOngoingSCC->Close();
-        piOngoingSCC = IMS_NULL;
+        m_piOngoingScc->Close();
+        m_piOngoingScc = IMS_NULL;
     }
 
     ClearNextRequest();
     SetPreviousRequest(IMS_NULL);
     SetPreviousResponse(IMS_NULL);
 
-    if (piDigestAKA != IMS_NULL)
+    if (m_piDigestAka != IMS_NULL)
     {
-        piDigestAKA->Destroy();
-        piDigestAKA = IMS_NULL;
+        m_piDigestAka->Destroy();
+        m_piDigestAka = IMS_NULL;
     }
 
     // IMS_AUTH_NONCE_REUSE {
     SetAuthenticationChallenge(IMS_NULL);
     // }
 
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
-        delete pRefreshHelper;
-        pRefreshHelper = IMS_NULL;
+        delete m_pRefreshHelper;
+        m_pRefreshHelper = IMS_NULL;
     }
 
-    if (pRegParam != IMS_NULL)
+    if (m_pRegParam != IMS_NULL)
     {
-        delete pRegParam;
-        pRegParam = IMS_NULL;
+        delete m_pRegParam;
+        m_pRegParam = IMS_NULL;
     }
 
     RegBindingProxy::DestroyBinding(GetSlotId(), this);
 
     IMS_TRACE_D("Destructor :: Registration - %s",
-            (pRegFlow != IMS_NULL) ? SipDebug::GetCharA1(pRegFlow->GetCallId().GetStr(), 8, '@')
-                                   : "__UNKNOWN__",
+            (m_pRegFlow != IMS_NULL) ? SipDebug::GetCharA1(m_pRegFlow->GetCallId().GetStr(), 8, '@')
+                                     : "__UNKNOWN__",
             0, 0);
 
-    if (pRegFlow != IMS_NULL)
+    if (m_pRegFlow != IMS_NULL)
     {
-        delete pRegFlow;
-        pRegFlow = IMS_NULL;
+        delete m_pRegFlow;
+        m_pRegFlow = IMS_NULL;
     }
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL Registration::Equals(IN CONST IRegistration* piReg) const
+PUBLIC VIRTUAL IMS_BOOL Registration::Equals(IN const IRegistration* piReg) const
 {
     const Registration* pReg = DYNAMIC_CAST(const Registration*, piReg);
-
-    //---------------------------------------------------------------------------------------------
 
     if (pReg == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    return pRegFlow->GetRegKey().Equals(pReg->pRegFlow->GetRegKey());
+    return m_pRegFlow->GetRegKey().Equals(pReg->m_pRegFlow->GetRegKey());
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL Registration::IsBehindNAT() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return bIsBehindNAT;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL Registration::IsWithinTrustDomain() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return bIsWithinTrustDomain && pStateTracker->IsWithinTrustDomain(GetSlotId());
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL const RegInfo* Registration::GetRegInfo() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pRegFlow == IMS_NULL)
+    if (m_pRegFlow == IMS_NULL)
+    {
         return IMS_NULL;
+    }
 
-    return RegInfoManager::GetInstance()->GetRegInfo(pRegFlow->GetRegKey());
+    return RegInfoManager::GetInstance()->GetRegInfo(m_pRegFlow->GetRegKey());
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL const RegStateTracker* Registration::GetStateTracker() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStateTracker.Get();
-}
-
-/*
-
-Remarks
- MULTI_SUBS
- MULTI_REG_SIP_PROFILE
-*/
 PUBLIC
-IMS_BOOL Registration::Create(IN IMS_UINT32 nFlowId, IN CONST SipAddress& objAOR,
-        IN CONST AString& strSubsId /* = AString::ConstNull() */,
-        IN SipProfile* pSIPProfile /* = IMS_NULL*/)
+IMS_BOOL Registration::Create(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor,
+        IN const AString& strSubsId /*= AString::ConstNull()*/,
+        IN SipProfile* pProfile /*= IMS_NULL*/)
 {
-    //---------------------------------------------------------------------------------------------
+    m_pRegFlow = new RegFlow(RegKey(GetSlotId(), nFlowId));
 
-    pRegFlow = new RegFlow(RegKey(GetSlotId(), nFlowId));
-
-    if (pRegFlow == IMS_NULL)
+    if (m_pRegFlow == IMS_NULL)
     {
         IMS_TRACE_E(0, "Instantiating RegFlow(%d:%d) failed", GetSlotId(), nFlowId, 0);
         return IMS_FALSE;
     }
 
-    pRegParam = new RegParameter(GetSlotId());
+    m_pRegParam = new RegParameter(GetSlotId());
 
-    if (pRegParam == IMS_NULL)
+    if (m_pRegParam == IMS_NULL)
     {
         IMS_TRACE_E(0, "Instantiating RegParameter failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if (!pRegParam->UpdateProfile(objAOR, strSubsId))
+    if (!m_pRegParam->UpdateProfile(objAor, strSubsId))
     {
         IMS_TRACE_E(0, "Updating a profile failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    pRefreshHelper = new RegRefreshHelper(this);
+    m_pRefreshHelper = new RegRefreshHelper(this);
 
-    if (pRefreshHelper == IMS_NULL)
+    if (m_pRefreshHelper == IMS_NULL)
     {
         IMS_TRACE_E(0, "Instantiating RefreshHelper failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    // MULTI_REG_SIP_PROFILE
-    SetSIPProfile(pSIPProfile);
+    SetSipProfile(pProfile);
 
-    pStateTracker->SetAOR(objAOR);
-    pStateTracker->SetSubscriberId(strSubsId);
+    m_pStateTracker->SetAor(objAor);
+    m_pStateTracker->SetSubscriberId(strSubsId);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void Registration::Destroy()
 {
-    //---------------------------------------------------------------------------------------------
+    m_bDestroyed = IMS_TRUE;
 
-    bDestroyed = IMS_TRUE;
+    IMS_TRACE_D("Registration :: Destroy() - SCNEL=%d", m_nRefCountForScnErrorListener, 0, 0);
 
-    IMS_TRACE_D("Registration :: Destroy() - SCNEL=%d", nRefCountForSCNEL, 0, 0);
-
-    RegInfo* pRegInfo = RegInfoManager::GetInstance()->GetRegInfo(pRegFlow->GetRegKey());
+    RegInfo* pRegInfo = RegInfoManager::GetInstance()->GetRegInfo(m_pRegFlow->GetRegKey());
 
     if (pRegInfo != IMS_NULL)
     {
@@ -286,65 +221,44 @@ void Registration::Destroy()
     DestroyAllContacts();
     UpdateBindingState(BINDING_DESTROY);
 
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
-        if (pRefreshHelper->IsRequestPending())
+        if (m_pRefreshHelper->IsRequestPending())
         {
-            pRefreshHelper->AbortConnection();
+            m_pRefreshHelper->AbortConnection();
         }
     }
 
-    if (piOngoingSCC != IMS_NULL)
+    if (m_piOngoingScc != IMS_NULL)
     {
-        piOngoingSCC->Close();
-        piOngoingSCC = IMS_NULL;
+        m_piOngoingScc->Close();
+        m_piOngoingScc = IMS_NULL;
     }
 
-    if (piDigestAKA != IMS_NULL)
+    if (m_piDigestAka != IMS_NULL)
     {
-        piDigestAKA->Destroy();
-        piDigestAKA = IMS_NULL;
+        m_piDigestAka->Destroy();
+        m_piDigestAka = IMS_NULL;
     }
 
-    // SIP_MESSAGE_MEDIATOR
     SetSipMessageMediator(IMS_NULL);
 
     // NAT_REQ_UE_PUBLIC_IP
     if (NATHelper::IsNATResolverRequired())
     {
         NATHelper::GetInstance()->RemovePublicAddress(
-                GetSlotId(), pRegFlow->GetRegKey().GetFlowId());
+                GetSlotId(), m_pRegFlow->GetRegKey().GetFlowId());
     }
 
     PostMessage(AMSG_DESTROY, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-const IMSList<RegContact*>& Registration::GetAllContactsEx() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objContacts;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL Registration::HasActiveBindings() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = objContacts.GetAt(i);
+        RegContact* pContact = m_objContacts.GetAt(i);
 
         if (pContact->IsActiveBinding())
         {
@@ -355,19 +269,12 @@ IMS_BOOL Registration::HasActiveBindings() const
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL Registration::IsAllBindingsRemoved() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = objContacts.GetAt(i);
+        RegContact* pContact = m_objContacts.GetAt(i);
 
         if (!pContact->IsEmpty())
         {
@@ -378,118 +285,98 @@ IMS_BOOL Registration::IsAllBindingsRemoved() const
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_BOOL Registration::DispatchMessage(IN IMSMSG& objMSG)
+PRIVATE VIRTUAL IMS_BOOL Registration::DispatchMessage(IN ImsMessage& objMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    switch (objMSG.GetName())
+    switch (objMsg.GetName())
     {
         case AMSG_REGISTRATION_STARTED:
-            if (piListener != IMS_NULL)
+            if (m_piListener != IMS_NULL)
             {
-                piListener->Registration_Started();
+                m_piListener->Registration_Started();
             }
             return IMS_TRUE;
-
         case AMSG_REGISTRATION_START_FAILED:
-            if (piListener != IMS_NULL)
+            if (m_piListener != IMS_NULL)
             {
-                piListener->Registration_StartFailed(LONG_TO_SINT(objMSG.nWparam));
+                m_piListener->Registration_StartFailed(LONG_TO_SINT(objMsg.nWparam));
             }
             return IMS_TRUE;
-
         case AMSG_REGISTRATION_UPDATED:
-            if (piListener != IMS_NULL)
+            if (m_piListener != IMS_NULL)
             {
-                piListener->Registration_Updated();
+                m_piListener->Registration_Updated();
             }
             return IMS_TRUE;
-
         case AMSG_REGISTRATION_UPDATE_FAILED:
-            if (piListener != IMS_NULL)
+            if (m_piListener != IMS_NULL)
             {
-                piListener->Registration_UpdateFailed(LONG_TO_SINT(objMSG.nWparam));
+                m_piListener->Registration_UpdateFailed(LONG_TO_SINT(objMsg.nWparam));
             }
             return IMS_TRUE;
-
         case AMSG_REGISTRATION_REMOVED:
-            if (piListener != IMS_NULL)
+            if (m_piListener != IMS_NULL)
             {
-                piListener->Registration_Removed();
+                m_piListener->Registration_Removed();
             }
             return IMS_TRUE;
-
         case AMSG_REGISTRATION_TERMINATED:
-            if (piListener != IMS_NULL)
+            if (m_piListener != IMS_NULL)
             {
-                piListener->Registration_Terminated(LONG_TO_SINT(objMSG.nWparam));
+                m_piListener->Registration_Terminated(LONG_TO_SINT(objMsg.nWparam));
             }
             return IMS_TRUE;
-
         case AMSG_REGISTRATION_AKA_RESPONSE_RECEIVED:
-            if (bDestroyed)
+            if (m_bDestroyed)
             {
                 IMS_TRACE_D("Registration is already destroyed :: AKA_RESPONSE_RECEIVED", 0, 0, 0);
                 return IMS_TRUE;
             }
 
-            if (!CreateSA(objActiveCredential, objActiveSAKey))
+            if (!CreateSa(m_objActiveCredential, m_objActiveSaKey))
             {
                 IMS_TRACE_E(0, "Creating SA failed", 0, 0, 0);
                 return IMS_TRUE;
             }
 
-            if (!RespondToPendingChallenge(objActiveCredential))
+            if (!RespondToPendingChallenge(m_objActiveCredential))
             {
                 RestoreSecurityHeaders();
             }
             return IMS_TRUE;
-
         case AMSG_REGISTRATION_BINDING_STATE_CHANGED:
-            if (piBindingStateListener == IMS_NULL)
+            if (m_piBindingStateListener == IMS_NULL)
             {
                 IMS_TRACE_D("IRegBindingStateListener is null", 0, 0, 0);
                 return IMS_TRUE;
             }
 
-            if (LONG_TO_INT(objMSG.nWparam) == BINDING_STATE_CALLER_CAPABILITY)
+            if (LONG_TO_INT(objMsg.nWparam) == BINDING_STATE_CALLER_CAPABILITY)
             {
-                piBindingStateListener->RegBindingState_CallerCapabilityChanged();
+                m_piBindingStateListener->RegBindingState_CallerCapabilityChanged();
             }
             return IMS_TRUE;
-
         default:
             break;
     }
 
-    return EngineActivity::DispatchMessage(objMSG);
+    return EngineActivity::DispatchMessage(objMsg);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::ClientConnection_NotifyResponse(
-        IN ISipClientConnection* piSCC, IN ISipClientConnection* /* piForkedSCC = IMS_NULL */)
+        IN ISipClientConnection* piScc, IN ISipClientConnection* /*piForkedScc = IMS_NULL*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
+    {
         return;
+    }
 
-    if (piSCC->Receive() != IMS_SUCCESS)
+    if (piScc->Receive() != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "No message received", 0, 0, 0);
         return;
     }
 
-    IMS_SINT32 nStatusCode = piSCC->GetStatusCode();
+    IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
     IMS_TRACE_I("Registration - %d response to REGISTER received", nStatusCode, 0, 0);
 
@@ -506,7 +393,7 @@ PRIVATE VIRTUAL void Registration::ClientConnection_NotifyResponse(
             (nPrevSubState == SUB_STATE_REGISTERING) ? SipMethod::REGISTER : SipDebug::M_DEREGISTER,
             nStatusCode);
 
-    SetPreviousResponse(piSCC->GetMessage());
+    SetPreviousResponse(piScc->GetMessage());
 
     // Authentication challenged by S-CSCF
     if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
@@ -516,18 +403,18 @@ PRIVATE VIRTUAL void Registration::ClientConnection_NotifyResponse(
         // }
 
         // Update the Security-xxx headers
-        pRegParam->UpdateSecurityHeaders(piSCC->GetMessage());
+        m_pRegParam->UpdateSecurityHeaders(piScc->GetMessage());
 
         // Respond to the authentication challenge
-        if (!RespondToChallenge(piSCC))
+        if (!RespondToChallenge(piScc))
         {
             RestoreSecurityHeaders();
         }
 
         if (GetSubState() == SUB_STATE_IDLE)
         {
-            piSCC->Close();
-            piOngoingSCC = IMS_NULL;
+            piScc->Close();
+            m_piOngoingScc = IMS_NULL;
         }
 
         // 3 Do not close SipConnection in here
@@ -537,22 +424,22 @@ PRIVATE VIRTUAL void Registration::ClientConnection_NotifyResponse(
     // Reset the flags after the transaction completed
     SetSubState(SUB_STATE_IDLE);
 
-    piSCC->Close();
-    piOngoingSCC = IMS_NULL;
+    piScc->Close();
+    m_piOngoingScc = IMS_NULL;
 
-    ISipMessage* piSIPMsg = GetPreviousResponse();
+    ISipMessage* piSipMsg = GetPreviousResponse();
 
     // Handle the response except for 401/407
     if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
         // Update the Security-xxx headers
-        pRegParam->UpdateSecurityHeaders(piSIPMsg);
+        m_pRegParam->UpdateSecurityHeaders(piSipMsg);
 
         // Update the sequence number
-        UpdateCSeqNumber(piSIPMsg);
+        UpdateCSeqNumber(piSipMsg);
 
         // Update the bindings
-        IMS_RESULT nBindingUpdateResult = UpdateBindings(piSIPMsg);
+        IMS_RESULT nBindingUpdateResult = UpdateBindings(piSipMsg);
         IMS_SINT32 nReason = REASON_NONE;
 
         if (nBindingUpdateResult == BINDING_UPDATE_NO_EXPIRES)
@@ -564,13 +451,13 @@ PRIVATE VIRTUAL void Registration::ClientConnection_NotifyResponse(
         UpdateRefreshTimer();
 
         // Check the UA location
-        CheckUALocation(piSIPMsg);
+        CheckUaLocation(piSipMsg);
 
         // Store the persistent header information
-        StorePersistentHeaders(piSIPMsg);
+        StorePersistentHeaders(piSipMsg);
 
         // IMS_AUTH_NONCE_REUSE {
-        SetNextNonce(piSIPMsg);
+        SetNextNonce(piSipMsg);
         // }
 
         // Go to "ACTIVE" state
@@ -596,28 +483,30 @@ PRIVATE VIRTUAL void Registration::ClientConnection_NotifyResponse(
         }
 
         if (nBindingUpdateResult == BINDING_UPDATE_OK)
+        {
             UpdateBindingState(BINDING_RESULT_OK);
+        }
         else
+        {
             UpdateBindingState(BINDING_RESULT_NOK);
+        }
 
         CallListener(nPrevState, nPrevSubState, nReason);
     }
     else
     {
-        // 140225, hwangoo.park
         // Do not clear the authentication challenge...
         // Initial registration required: 305 / 408 / 500 / 504 / 600 / txn timeout
         // // IMS_AUTH_NONCE_REUSE {
         // SetAuthenticationChallenge(IMS_NULL);
         // // }
 
-        // 13.01.29, hwangoo.park
         // Do not check the status code to support re-use of Call-ID & CSeq number
         // when the registration is failed
         // if (nStatusCode == SipStatusCode::SC_423)
         {
             // Update the sequence number
-            UpdateCSeqNumber(piSIPMsg);
+            UpdateCSeqNumber(piSipMsg);
         }
 
         if (nPrevState == STATE_INIT)
@@ -631,26 +520,21 @@ PRIVATE VIRTUAL void Registration::ClientConnection_NotifyResponse(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::Error_NotifyError(
-        IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage)
+        IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
 {
-    //---------------------------------------------------------------------------------------------
-
     (void)strMessage;
 
     IMS_TRACE_I("Registration::Error_NotifyError() - Code (%d), Message (%s)", nCode,
             strMessage.GetStr(), 0);
 
-    if (piSC == IMS_NULL)
+    if (piSc == IMS_NULL)
+    {
         return;
+    }
 
-    piSC->Close();
-    piOngoingSCC = IMS_NULL;
+    piSc->Close();
+    m_piOngoingScc = IMS_NULL;
 
     IMS_SINT32 nPrevState = GetState();
     IMS_SINT32 nPrevSubState = GetSubState();
@@ -690,131 +574,72 @@ PRIVATE VIRTUAL void Registration::Error_NotifyError(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL ISipMessage* Registration::GetNextRequest()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piNextRequest == IMS_NULL)
+    if (m_piNextRequest == IMS_NULL)
     {
-        piNextRequest = SipParsingHelper::CreateMessage(ISipMessage::TYPE_REQUEST);
+        m_piNextRequest = SipParsingHelper::CreateMessage(ISipMessage::TYPE_REQUEST);
     }
 
-    return piNextRequest;
+    return m_piNextRequest;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL ISipMessage* Registration::GetPreviousRequest() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return piPreviousRequest;
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL ISipMessage* Registration::GetPreviousResponse() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return piPreviousResponse;
-}
-
-/*
-
-Remarks
- SIP_MESSAGE_MEDIATOR
-*/
 PRIVATE VIRTUAL void Registration::SetSipMessageMediator(IN IMessageMediator* piMediator)
 {
-    //---------------------------------------------------------------------------------------------
+    m_piMessageMediator = piMediator;
 
-    piMessageMediator = piMediator;
-
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
-        pRefreshHelper->SetMessageMediator(piMessageMediator);
+        m_pRefreshHelper->SetMessageMediator(m_piMessageMediator);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_BOOL Registration::CreateBinding(
-        IN CONST AString& strAppId, IN CONST AString& strServiceId)
+        IN const AString& strAppId, IN const AString& strServiceId)
 {
-    //---------------------------------------------------------------------------------------------
-
     return RegBindingProxy::CreateBinding(GetSlotId(), strAppId, strServiceId, this);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::DestroyBinding(
-        IN CONST AString& strAppId, IN CONST AString& strServiceId)
+        IN const AString& strAppId, IN const AString& strServiceId)
 {
-    //---------------------------------------------------------------------------------------------
-
     RegBindingProxy::DestroyBinding(GetSlotId(), strAppId, strServiceId);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IRegContact* Registration::CreateContact(IN CONST IPAddress& objIPA,
-        IN IMS_SINT32 nPort, IN IMS_SINT32 nExpiresPolicy /* = POLICY_EXPIRES_CONFIG */,
-        IN IMS_UINT32 nExpiresValue /* = DEFAULT_EXPIRES */)
+PRIVATE VIRTUAL IRegContact* Registration::CreateContact(IN const IPAddress& objIpAddr,
+        IN IMS_SINT32 nPort, IN IMS_SINT32 nExpiresPolicy /*= POLICY_EXPIRES_CONFIG*/,
+        IN IMS_UINT32 nExpiresValue /*= DEFAULT_EXPIRES*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     // If the contact address is already present in the list,
     // then just adds the service capability to the contact.
-    for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pTmpContact = objContacts.GetAt(i);
+        RegContact* pTmpContact = m_objContacts.GetAt(i);
 
-        if (objIPA.Equals(pTmpContact->GetIPAddress()) && (nPort == pTmpContact->GetPort()))
+        if (objIpAddr.Equals(pTmpContact->GetIpAddress()) && (nPort == pTmpContact->GetPort()))
         {
-            IMS_TRACE_D("RegContact (%s, %d) already exists", SipDebug::GetIp(objIPA), nPort, 0);
+            IMS_TRACE_D("RegContact (%s, %d) already exists", SipDebug::GetIp(objIpAddr), nPort, 0);
             return pTmpContact;
         }
     }
 
-    SipProfile* pSIPProfile = pStateTracker->GetSIPProfile();
+    SipProfile* pProfile = m_pStateTracker->GetSipProfile();
 
     // If not present, add a new Contact information
     RegContact* pNewContact = new RegContact(
-            GetSlotId(), objIPA, nPort, this, pRegFlow->GetRegKey().GetFlowId(), pSIPProfile);
+            GetSlotId(), objIpAddr, nPort, this, m_pRegFlow->GetRegKey().GetFlowId(), pProfile);
 
     if (pNewContact == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Creating a Contact (%s:%d) failed", SipDebug::GetIp(objIPA), nPort, 0);
+        IMS_TRACE_E(0, "Creating a Contact (%s:%d) failed", SipDebug::GetIp(objIpAddr), nPort, 0);
         return IMS_NULL;
     }
 
     // Set user-info field
-    pNewContact->SetAOR(pStateTracker->GetAOR());
+    pNewContact->SetAor(m_pStateTracker->GetAor());
 
     // Set "+sip.instance" parameter
-    IMS_SINT32 nDeviceId = SipConfigProxy::GetDeviceId(GetSlotId(), pSIPProfile);
+    IMS_SINT32 nDeviceId = SipConfigProxy::GetDeviceId(GetSlotId(), pProfile);
 
     if (nDeviceId != ISipConfig::DEVICE_ID_NONE)
     {
@@ -823,11 +648,11 @@ PRIVATE VIRTUAL IRegContact* Registration::CreateContact(IN CONST IPAddress& obj
 
         if (nDeviceId == ISipConfig::DEVICE_ID_PREDEFINED)
         {
-            strDeviceId = SipConfigProxy::GetPredefinedDeviceId(GetSlotId(), pSIPProfile);
+            strDeviceId = SipConfigProxy::GetPredefinedDeviceId(GetSlotId(), pProfile);
         }
         else
         {
-            strDeviceId = SIPURNHelper::GetURN(GetSlotId(), nDeviceId);
+            strDeviceId = SipUrnHelper::GetUrn(GetSlotId(), nDeviceId);
         }
 
         strInstance.Append('"');
@@ -845,14 +670,13 @@ PRIVATE VIRTUAL IRegContact* Registration::CreateContact(IN CONST IPAddress& obj
     {
         case IRegistration::POLICY_EXPIRES_CONFIG:
         {
-            if (SipConfigProxy::IsRegExpiresConfigured(GetSlotId(), pSIPProfile))
+            if (SipConfigProxy::IsRegExpiresConfigured(GetSlotId(), pProfile))
             {
                 // Ignore the passed expiration (nExpiresValue)
-                pNewContact->SetExpires(SipConfigProxy::GetRegExpires(GetSlotId(), pSIPProfile));
+                pNewContact->SetExpires(SipConfigProxy::GetRegExpires(GetSlotId(), pProfile));
             }
+            break;
         }
-        break;
-
         case IRegistration::POLICY_EXPIRES_APP:
             pNewContact->SetExpires(nExpiresValue);
             break;
@@ -861,9 +685,9 @@ PRIVATE VIRTUAL IRegContact* Registration::CreateContact(IN CONST IPAddress& obj
             break;
     }
 
-    IMS_TRACE_D("RegContact (%s, %d) added", SipDebug::GetIp(objIPA), nPort, 0);
+    IMS_TRACE_D("RegContact (%s, %d) added", SipDebug::GetIp(objIpAddr), nPort, 0);
 
-    if (!objContacts.Append(pNewContact))
+    if (!m_objContacts.Append(pNewContact))
     {
         delete pNewContact;
         return IMS_NULL;
@@ -874,41 +698,27 @@ PRIVATE VIRTUAL IRegContact* Registration::CreateContact(IN CONST IPAddress& obj
     return pNewContact;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::DestroyAllContacts()
 {
-    //---------------------------------------------------------------------------------------------
-
-    while (!objContacts.IsEmpty())
+    while (!m_objContacts.IsEmpty())
     {
-        RegContact* pContact = objContacts.GetAt(0);
+        RegContact* pContact = m_objContacts.GetAt(0);
 
         // Notify the removal of contact to the RegBinding ...
         UpdateBindingState(BINDING_DESTROY_CONTACT);
 
         delete pContact;
-        objContacts.RemoveAt(0);
+        m_objContacts.RemoveAt(0);
     }
 
-    pStateTracker->SetPreferredContact(IMS_NULL);
+    m_pStateTracker->SetPreferredContact(IMS_NULL);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::DestroyContact(IN IRegContact* piContact)
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = objContacts.GetAt(i);
+        RegContact* pContact = m_objContacts.GetAt(i);
 
         if (pContact == piContact)
         {
@@ -916,7 +726,7 @@ PRIVATE VIRTUAL void Registration::DestroyContact(IN IRegContact* piContact)
             UpdateBindingState(BINDING_DESTROY_CONTACT);
 
             delete pContact;
-            objContacts.RemoveAt(i);
+            m_objContacts.RemoveAt(i);
             break;
         }
     }
@@ -924,26 +734,20 @@ PRIVATE VIRTUAL void Registration::DestroyContact(IN IRegContact* piContact)
     ChoosePreferredContact();
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void Registration::DestroyContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort)
+PRIVATE VIRTUAL void Registration::DestroyContact(
+        IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort)
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = objContacts.GetAt(i);
+        RegContact* pContact = m_objContacts.GetAt(i);
 
-        if (objIPA.Equals(pContact->GetIPAddress()) && (nPort == pContact->GetPort()))
+        if (objIpAddr.Equals(pContact->GetIpAddress()) && (nPort == pContact->GetPort()))
         {
             // Notify the removal of contact to the RegBinding ...
             UpdateBindingState(BINDING_DESTROY_CONTACT);
 
             delete pContact;
-            objContacts.RemoveAt(i);
+            m_objContacts.RemoveAt(i);
             break;
         }
     }
@@ -951,90 +755,28 @@ PRIVATE VIRTUAL void Registration::DestroyContact(IN CONST IPAddress& objIPA, IN
     ChoosePreferredContact();
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL const Credential* Registration::GetCredential() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return &objActiveCredential;
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL const SipAddress& Registration::GetAOR() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStateTracker->GetAOR();
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL const AStringArray& Registration::GetAssociatedURIs() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStateTracker->GetAssociatedURIs();
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL const SipAddress& Registration::GetAuthorizedAOR() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStateTracker->GetAuthorizedAOR();
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMSList<IRegContact*> Registration::GetAllContacts() const
 {
-    IMSList<IRegContact*> objIContacts;
+    IMSList<IRegContact*> objAllContacts;
 
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = objContacts.GetAt(i);
+        RegContact* pContact = m_objContacts.GetAt(i);
 
-        objIContacts.Append(pContact);
+        objAllContacts.Append(pContact);
     }
 
-    return objIContacts;
+    return objAllContacts;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IRegContact* Registration::GetContact(
-        IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort) const
+        IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = objContacts.GetAt(i);
+        RegContact* pContact = m_objContacts.GetAt(i);
 
-        if (objIPA.Equals(pContact->GetIPAddress()) && (nPort == pContact->GetPort()))
+        if (objIpAddr.Equals(pContact->GetIpAddress()) && (nPort == pContact->GetPort()))
         {
             return pContact;
         }
@@ -1043,90 +785,11 @@ PRIVATE VIRTUAL IRegContact* Registration::GetContact(
     return IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IRegContact* Registration::GetPreferredContact() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return const_cast<RegContact*>(pStateTracker->GetPreferredContact());
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IRegParameter* Registration::GetParameter() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pRegParam;
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL const IPAddress& Registration::GetPublicIPAddress() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStateTracker->GetPublicIPAddress();
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL const AStringArray& Registration::GetServiceRoutes() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStateTracker->GetServiceRoutes();
-}
-
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
-PRIVATE VIRTUAL SipProfile* Registration::GetSIPProfile() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return (!pStateTracker.IsNull()) ? pStateTracker->GetSIPProfile() : IMS_NULL;
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_SINT32 Registration::GetState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nState;
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_BOOL Registration::IsBindingsUpdated() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = objContacts.GetAt(i);
+        RegContact* pContact = m_objContacts.GetAt(i);
 
         if (pContact->IsBindingsUpdated())
         {
@@ -1138,42 +801,10 @@ PRIVATE VIRTUAL IMS_BOOL Registration::IsBindingsUpdated() const
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_BOOL Registration::IsBindingsUpdating() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return (GetSubState() != SUB_STATE_IDLE);
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_BOOL Registration::IsNetworkInterworkingRequired() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    // Emergency / normal registration
-    return IMS_TRUE;
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_RESULT Registration::Register(IN IMS_SINT32 nExpires /* = (-1) */)
+PRIVATE VIRTUAL IMS_RESULT Registration::Register(IN IMS_SINT32 nExpires /*= (-1)*/)
 {
     IMS_SINT32 nCurrentState = GetState();
     IMS_SINT32 nCurrentSubState = GetSubState();
-
-    //---------------------------------------------------------------------------------------------
 
     if ((nCurrentState == STATE_INIT) || (nCurrentState == STATE_TERMINATED))
     {
@@ -1197,28 +828,28 @@ PRIVATE VIRTUAL IMS_RESULT Registration::Register(IN IMS_SINT32 nExpires /* = (-
     // Updates Call-ID
     if (nCurrentState == STATE_CREATED)
     {
-        pRegFlow->UpdateCallId(pStateTracker->GetIPAddress());
+        m_pRegFlow->UpdateCallId(m_pStateTracker->GetIpAddress());
     }
 
-    ISipClientConnection* piSCC = CreateConnection(this);
+    ISipClientConnection* piScc = CreateConnection(this);
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Instantiating a SIP connection failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    piSCC->SetListener(this);
-    piSCC->SetErrorListener(this);
+    piScc->SetListener(this);
+    piScc->SetErrorListener(this);
 
     // Form REGISTER request
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Copy the headers from the application
-    if (piNextRequest != IMS_NULL)
+    if (m_piNextRequest != IMS_NULL)
     {
         // Set the headers and body parts if application already sets
-        if (piSIPMsg->CopyHeadersAndBodyParts(piNextRequest) != IMS_SUCCESS)
+        if (piSipMsg->CopyHeadersAndBodyParts(m_piNextRequest) != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Copying SIP headers and message body parts failed", 0, 0, 0);
             goto EXIT_Register;
@@ -1226,7 +857,7 @@ PRIVATE VIRTUAL IMS_RESULT Registration::Register(IN IMS_SINT32 nExpires /* = (-
     }
 
     // Form the generic headers
-    if (SetHeaders(piSCC) != IMS_SUCCESS)
+    if (SetHeaders(piScc) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting the generic headers failed", 0, 0, 0);
         goto EXIT_Register;
@@ -1235,7 +866,7 @@ PRIVATE VIRTUAL IMS_RESULT Registration::Register(IN IMS_SINT32 nExpires /* = (-
     // Sets Contact headers
     if ((nExpires == 0) || IsAllBindingsRemoved())
     {
-        if (SetContactNExpiresHeader(piSIPMsg, 0) != IMS_SUCCESS)
+        if (SetContactNExpiresHeader(piSipMsg, 0) != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting Contact & Expires header failed", 0, 0, 0);
             goto EXIT_Register;
@@ -1248,15 +879,15 @@ PRIVATE VIRTUAL IMS_RESULT Registration::Register(IN IMS_SINT32 nExpires /* = (-
         if (nExpires != (-1))
         {
             // Updates the expires value for this registration (e.g. 423 response)
-            for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+            for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
             {
-                RegContact* pContact = objContacts.GetAt(i);
+                RegContact* pContact = m_objContacts.GetAt(i);
 
                 pContact->SetExpires(nExpires);
             }
         }
 
-        if (SetContactNExpiresHeader(piSIPMsg, nExpires) != IMS_SUCCESS)
+        if (SetContactNExpiresHeader(piSipMsg, nExpires) != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting Contact & Expires header failed", 0, 0, 0);
             goto EXIT_Register;
@@ -1269,31 +900,31 @@ PRIVATE VIRTUAL IMS_RESULT Registration::Register(IN IMS_SINT32 nExpires /* = (-
     if ((nCurrentState == STATE_CREATED) || (nCurrentState == STATE_ACTIVE))
     {
         // Set the credential information in case of re/de-registration
-        SetNextAuthenticationInfo(piSCC);
+        SetNextAuthenticationInfo(piScc);
     }
     // }
 
     // SIP_MESSAGE_MEDIATOR
-    (void)AdjustMessage(piSCC->GetMessage(), IMessageMediator::MESSAGE_NORMAL);
+    (void)AdjustMessage(piScc->GetMessage(), IMessageMediator::MESSAGE_NORMAL);
 
     // Send a REGISTER request to the network
-    if (piSCC->Send() != IMS_SUCCESS)
+    if (piScc->Send() != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Sending REGISTER request failed", 0, 0, 0);
         goto EXIT_Register;
     }
 
     // Update the refresh data
-    pRefreshHelper->UpdateOnMessageSent(piSCC);
+    m_pRefreshHelper->UpdateOnMessageSent(piScc);
 
     // Clear the next request
     ClearNextRequest();
 
     // Store the ongoing SIP client connection
-    SetOngoingConnection(piSCC);
+    SetOngoingConnection(piScc);
 
     // Update the last request/response message
-    SetPreviousRequest(piSCC->GetMessage());
+    SetPreviousRequest(piScc->GetMessage());
     SetPreviousResponse(IMS_NULL);
 
     // Change the state
@@ -1322,20 +953,13 @@ PRIVATE VIRTUAL IMS_RESULT Registration::Register(IN IMS_SINT32 nExpires /* = (-
 
 EXIT_Register:
     SetSubState(SUB_STATE_IDLE);
-    piSCC->Close();
+    piScc->Close();
 
     return IMS_FAILURE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT Registration::Deregister()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_ACTIVE)
     {
         IMS_TRACE_E(
@@ -1350,39 +974,39 @@ PRIVATE VIRTUAL IMS_RESULT Registration::Deregister()
         return IMS_FAILURE;
     }
 
-    ISipClientConnection* piSCC = CreateConnection(this);
+    ISipClientConnection* piScc = CreateConnection(this);
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Instantiating a SIP connection failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    piSCC->SetListener(this);
-    piSCC->SetErrorListener(this);
+    piScc->SetListener(this);
+    piScc->SetErrorListener(this);
 
     // Form REGISTER request
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Copy the headers from the application
-    if (piNextRequest != IMS_NULL)
+    if (m_piNextRequest != IMS_NULL)
     {
         // Set the headers and body parts if application already sets
-        if (piSIPMsg->CopyHeadersAndBodyParts(piNextRequest) != IMS_SUCCESS)
+        if (piSipMsg->CopyHeadersAndBodyParts(m_piNextRequest) != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Copying SIP headers and message body parts failed", 0, 0, 0);
             goto EXIT_Deregister;
         }
     }
 
-    if (SetHeaders(piSCC) != IMS_SUCCESS)
+    if (SetHeaders(piScc) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting the generic headers failed", 0, 0, 0);
         goto EXIT_Deregister;
     }
 
     // Sets Contact headers
-    if (SetContactNExpiresHeader(piSIPMsg, 0) != IMS_SUCCESS)
+    if (SetContactNExpiresHeader(piSipMsg, 0) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting Contact & Expires header failed", 0, 0, 0);
         goto EXIT_Deregister;
@@ -1392,30 +1016,30 @@ PRIVATE VIRTUAL IMS_RESULT Registration::Deregister()
 
     // IMS_AUTH_NONCE_REUSE {
     // Set the credential information in case of re/de-registration
-    SetNextAuthenticationInfo(piSCC);
+    SetNextAuthenticationInfo(piScc);
     // }
 
     // SIP_MESSAGE_MEDIATOR
-    (void)AdjustMessage(piSCC->GetMessage(), IMessageMediator::MESSAGE_NORMAL);
+    (void)AdjustMessage(piScc->GetMessage(), IMessageMediator::MESSAGE_NORMAL);
 
     // Send a REGISTER request to the network
-    if (piSCC->Send() != IMS_SUCCESS)
+    if (piScc->Send() != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Sending de-REGISTER request failed", 0, 0, 0);
         goto EXIT_Deregister;
     }
 
     // Update the refresh data
-    pRefreshHelper->UpdateOnMessageSent(piSCC);
+    m_pRefreshHelper->UpdateOnMessageSent(piScc);
 
     // Clear the next request
     ClearNextRequest();
 
     // Store the ongoing SIP client connection
-    SetOngoingConnection(piSCC);
+    SetOngoingConnection(piScc);
 
     // Update the last request/response message
-    SetPreviousRequest(piSCC->GetMessage());
+    SetPreviousRequest(piScc->GetMessage());
     SetPreviousResponse(IMS_NULL);
 
     // Change the state
@@ -1430,20 +1054,14 @@ PRIVATE VIRTUAL IMS_RESULT Registration::Deregister()
 
 EXIT_Deregister:
     SetSubState(SUB_STATE_IDLE);
-    piSCC->Close();
+    piScc->Close();
 
     return IMS_FAILURE;
 }
 
-/*
-
-Remarks
- REG_RESTORATION_FOR_ACTIVE_BINDING
-*/
+// REG_RESTORATION_FOR_ACTIVE_BINDING
 PRIVATE VIRTUAL void Registration::RemoveActiveBindingsForcingly()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_ACTIVE)
     {
         IMS_TRACE_D("Registration :: No active bindings", 0, 0, 0);
@@ -1456,10 +1074,10 @@ PRIVATE VIRTUAL void Registration::RemoveActiveBindingsForcingly()
 
         SetSubState(SUB_STATE_IDLE);
 
-        if (piOngoingSCC != IMS_NULL)
+        if (m_piOngoingScc != IMS_NULL)
         {
-            piOngoingSCC->Close();
-            piOngoingSCC = IMS_NULL;
+            m_piOngoingScc->Close();
+            m_piOngoingScc = IMS_NULL;
         }
 
         ClearNextRequest();
@@ -1470,84 +1088,71 @@ PRIVATE VIRTUAL void Registration::RemoveActiveBindingsForcingly()
     UpdateBindingState(BINDING_RESTORE);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::Restore()
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_I("Registration::Restore - State (%s)", StateToString(GetState()), 0, 0);
 
     // 4 contact handling/ connection if present
     //  Reset the refresh timer
-    pRefreshHelper->UpdateRefreshTimer(0);
+    m_pRefreshHelper->UpdateRefreshTimer(0);
 
     SetState(STATE_CREATED);
     SetSubState(SUB_STATE_IDLE);
     UpdateBindingState(BINDING_RESTORE);
 
     // Remove all the bindings if present
-    for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = objContacts.GetAt(i);
+        RegContact* pContact = m_objContacts.GetAt(i);
 
         pContact->Restore();
 
         // IMS_IPSEC_UDP_ENC
-        if (pRegParam->IsSecurityAssociationRequiredViaUDPEnc())
+        if (m_pRegParam->IsSecurityAssociationRequiredViaUdpEnc())
         {
-            pContact->SetHostInfo(pContact->GetIPAddress());
+            pContact->SetHostInfo(pContact->GetIpAddress());
         }
     }
 
-    if (piOngoingSCC != IMS_NULL)
+    if (m_piOngoingScc != IMS_NULL)
     {
-        piOngoingSCC->Close();
-        piOngoingSCC = IMS_NULL;
+        m_piOngoingScc->Close();
+        m_piOngoingScc = IMS_NULL;
     }
 
     ClearNextRequest();
     SetPreviousRequest(IMS_NULL);
     SetPreviousResponse(IMS_NULL);
 
-    pRegFlow->Restore();
-    pRegParam->Restore();
+    m_pRegFlow->Restore();
+    m_pRegParam->Restore();
 
     // IMS_AUTH_NONCE_REUSE {
     SetAuthenticationChallenge(IMS_NULL);
     // }
 
     // Abort the authentication procedure
-    if (piDigestAKA != IMS_NULL)
+    if (m_piDigestAka != IMS_NULL)
     {
-        piDigestAKA->Destroy();
-        piDigestAKA = IMS_NULL;
+        m_piDigestAka->Destroy();
+        m_piDigestAka = IMS_NULL;
     }
 
     // NAT_REQ_UE_PUBLIC_IP
-    bIsBehindNAT = IMS_FALSE;
-    pStateTracker->SetPublicIPAddress(IPAddress::NONE);
+    m_bIsBehindNat = IMS_FALSE;
+    m_pStateTracker->SetPublicIpAddress(IPAddress::NONE);
 
     if (NATHelper::IsNATResolverRequired())
     {
         NATHelper::GetInstance()->RemovePublicAddress(
-                GetSlotId(), pRegFlow->GetRegKey().GetFlowId());
+                GetSlotId(), m_pRegFlow->GetRegKey().GetFlowId());
     }
 }
 
-/*
-
-Remarks
- REG_RESTORATION_FOR_ACTIVE_BINDING
-*/
+// REG_RESTORATION_FOR_ACTIVE_BINDING
 PRIVATE VIRTUAL IMS_RESULT Registration::RestoreActiveBindings()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!bActiveBindingsRestorationEnabled)
+    if (!m_bActiveBindingsRestorationEnabled)
     {
         IMS_TRACE_D("Registration :: Restoration(for active bindings) is disabled", 0, 0, 0);
         return IMS_FAILURE;
@@ -1564,207 +1169,115 @@ PRIVATE VIRTUAL IMS_RESULT Registration::RestoreActiveBindings()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
- REG_RESTORATION_FOR_ACTIVE_BINDING
-*/
-PRIVATE VIRTUAL void Registration::SetActiveBindingsRestorationUsage(IN IMS_BOOL bEnabled)
+PRIVATE VIRTUAL void Registration::SetAor(
+        IN const SipAddress& objAor, IN const AString& strSubsId /*= AString::ConstNull()*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    bActiveBindingsRestorationEnabled = bEnabled;
-}
-
-/*
-
-Remarks
- MULTI_SUBS
-*/
-PRIVATE VIRTUAL void Registration::SetAOR(
-        IN CONST SipAddress& objAOR, IN CONST AString& strSubsId /* = AString::ConstNull() */)
-{
-    //---------------------------------------------------------------------------------------------
-
-    pStateTracker->SetAOR(objAOR);
-    pStateTracker->SetSubscriberId(strSubsId);
+    m_pStateTracker->SetAor(objAor);
+    m_pStateTracker->SetSubscriberId(strSubsId);
 
     // Update the profile
-    pRegParam->UpdateProfile(objAOR, strSubsId);
+    m_pRegParam->UpdateProfile(objAor, strSubsId);
 
     // Updates the user-info field in all Contacts
-    const SipAddress& objTmpAOR = pStateTracker->GetAOR();
+    const SipAddress& objTmpAor = m_pStateTracker->GetAor();
 
-    for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = objContacts.GetAt(i);
+        RegContact* pContact = m_objContacts.GetAt(i);
 
-        pContact->SetAOR(objTmpAOR);
+        pContact->SetAor(objTmpAor);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void Registration::SetListener(IN IRegistrationListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->piListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
-        IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT)
+        IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLt, IN IMS_SINT32 nValueGt)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pRefreshHelper == IMS_NULL)
+    if (m_pRefreshHelper == IMS_NULL)
+    {
         return;
+    }
 
     switch (nPolicy)
     {
         case REFRESH_POLICY_NO_REFRESH:
-            pRefreshHelper->SetPolicy(
-                    RefreshHelper::POLICY_NO_REFRESH, nCriteriaInterval, nValueEorLT, nValueGT);
+            m_pRefreshHelper->SetPolicy(
+                    RefreshHelper::POLICY_NO_REFRESH, nCriteriaInterval, nValueEorLt, nValueGt);
             break;
-
         case REFRESH_POLICY_SPEC:
-            pRefreshHelper->SetPolicy(
-                    RefreshHelper::POLICY_SPEC, nCriteriaInterval, nValueEorLT, nValueGT);
+            m_pRefreshHelper->SetPolicy(
+                    RefreshHelper::POLICY_SPEC, nCriteriaInterval, nValueEorLt, nValueGt);
             break;
-
         case REFRESH_POLICY_REMAIN_TIME:
-            pRefreshHelper->SetPolicy(
-                    RefreshHelper::POLICY_REMAIN_TIME, nCriteriaInterval, nValueEorLT, nValueGT);
+            m_pRefreshHelper->SetPolicy(
+                    RefreshHelper::POLICY_REMAIN_TIME, nCriteriaInterval, nValueEorLt, nValueGt);
             break;
-
         case REFRESH_POLICY_RATIO:
-            pRefreshHelper->SetPolicy(
-                    RefreshHelper::POLICY_RATIO, nCriteriaInterval, nValueEorLT, nValueGT);
+            m_pRefreshHelper->SetPolicy(
+                    RefreshHelper::POLICY_RATIO, nCriteriaInterval, nValueEorLt, nValueGt);
             break;
-
         default:
             IMS_TRACE_E(0, "Invalid refresh policy (%d)", nPolicy, 0, 0);
             break;
     }
 }
 
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
-PRIVATE VIRTUAL void Registration::SetSIPProfile(IN SipProfile* pProfile)
+PRIVATE VIRTUAL void Registration::SetSipProfile(IN SipProfile* pProfile)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!pStateTracker.IsNull())
+    if (!m_pStateTracker.IsNull())
     {
-        pStateTracker->SetSIPProfile(pProfile);
+        m_pStateTracker->SetSipProfile(pProfile);
     }
 
-    if (pRegParam != IMS_NULL)
+    if (m_pRegParam != IMS_NULL)
     {
-        pRegParam->UpdateSIPProfile(pProfile);
+        m_pRegParam->UpdateSipProfile(pProfile);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void Registration::SetBindingStateListener(IN IRegBindingStateListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->piBindingStateListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::SetFlagForWithinTrustDomain(IN IMS_BOOL bWithinTrustDomain)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWithinTrustDomain != bWithinTrustDomain)
+    if (m_bIsWithinTrustDomain != bWithinTrustDomain)
     {
-        IMS_TRACE_I("WithinTrustDomain:: %s > %s", _TRACE_B_(bIsWithinTrustDomain),
+        IMS_TRACE_I("WithinTrustDomain:: %s > %s", _TRACE_B_(m_bIsWithinTrustDomain),
                 _TRACE_B_(bWithinTrustDomain), 0);
 
-        bIsWithinTrustDomain = bWithinTrustDomain;
+        m_bIsWithinTrustDomain = bWithinTrustDomain;
     }
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void Registration::SetUserIdentityNotifier(
-        IN IRegUserIdentityNotifier* piUserIdNotifier)
+PRIVATE VIRTUAL void Registration::SetUserInfoForContactHeader(IN const AString& strUserInfo)
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->piUserIdNotifier = piUserIdNotifier;
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void Registration::SetUserInfoForContactHeader(IN CONST AString& strUserInfo)
-{
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "Invalid state (%s)", StateToString(GetState()), 0, 0);
         return;
     }
 
-    if (!pStateTracker.IsNull())
+    if (!m_pStateTracker.IsNull())
     {
-        pStateTracker->SetUserInfoForContactHeader(strUserInfo);
+        m_pStateTracker->SetUserInfoForContactHeader(strUserInfo);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IRegSubscription* Registration::CreateSubscription(
-        IN SipAddress* pResourceUri /* = IMS_NULL */)
+        IN SipAddress* pResourceUri /*= IMS_NULL*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "Invalid state (%s)", StateToString(GetState()), 0, 0);
         return IMS_NULL;
     }
 
-    RegSubscription* pSubscription = new RegSubscription(pRegFlow->GetRegKey(), pStateTracker.Get(),
-            pRefreshHelper->GetDuration(), pRegParam->GetSIPTimerValues());
+    RegSubscription* pSubscription =
+            new RegSubscription(m_pRegFlow->GetRegKey(), m_pStateTracker.Get(),
+                    m_pRefreshHelper->GetDuration(), m_pRegParam->GetSipTimerValues());
 
     if (pSubscription == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    SipAddress objResourceUri = GetAuthorizedAOR();
+    SipAddress objResourceUri = GetAuthorizedAor();
 
     if (pResourceUri == IMS_NULL)
     {
@@ -1781,7 +1294,7 @@ PRIVATE VIRTUAL IRegSubscription* Registration::CreateSubscription(
     }
 
     //// Register the listener to obtain the reginfo ...
-    RegInfo* pRegInfo = RegInfoManager::GetInstance()->GetRegInfo(pRegFlow->GetRegKey());
+    RegInfo* pRegInfo = RegInfoManager::GetInstance()->GetRegInfo(m_pRegFlow->GetRegKey());
 
     if (pRegInfo != IMS_NULL)
     {
@@ -1791,17 +1304,10 @@ PRIVATE VIRTUAL IRegSubscription* Registration::CreateSubscription(
     return pSubscription;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::ConnectionNotifierError_NotifyError(
-        IN ISipConnectionNotifier* piSCN, IN IMS_SINT32 nCode, IN CONST AString& strMessage)
+        IN ISipConnectionNotifier* piScn, IN IMS_SINT32 nCode, IN const AString& strMessage)
 {
-    //---------------------------------------------------------------------------------------------
-
-    (void)piSCN;
+    (void)piScn;
 
     IMS_TRACE_D("ConnectionNotifierError_NotifyError :: code=%d, message=%s", nCode,
             strMessage.GetStr(), 0);
@@ -1813,11 +1319,11 @@ PRIVATE VIRTUAL void Registration::ConnectionNotifierError_NotifyError(
     }
 
     // REG_RESTORATION_FOR_ACTIVE_BINDING
-    if (bActiveBindingsRestorationEnabled)
+    if (m_bActiveBindingsRestorationEnabled)
     {
         NetworkService* pNetworkService = NetworkService::GetNetworkService();
         INetworkConnection* piConnection =
-                pNetworkService->FindConnection(pStateTracker->GetIPAddress());
+                pNetworkService->FindConnection(m_pStateTracker->GetIpAddress());
 
         // Checks if the data connection is lost or not...
         // If the loss of data connection detects,
@@ -1845,116 +1351,76 @@ PRIVATE VIRTUAL void Registration::ConnectionNotifierError_NotifyError(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::AddObserver(IN RegObserver* pObserver)
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objObservers.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objObservers.GetSize(); ++i)
     {
-        RegObserver* pTmpObserver = objObservers.GetAt(i);
-
-        if (pObserver == pTmpObserver)
-            return;
-    }
-
-    objObservers.Append(pObserver);
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void Registration::RemoveObserver(IN RegObserver* pObserver)
-{
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objObservers.GetSize(); ++i)
-    {
-        RegObserver* pTmpObserver = objObservers.GetAt(i);
+        RegObserver* pTmpObserver = m_objObservers.GetAt(i);
 
         if (pObserver == pTmpObserver)
         {
-            objObservers.RemoveAt(i);
+            return;
+        }
+    }
+
+    m_objObservers.Append(pObserver);
+}
+
+PRIVATE VIRTUAL void Registration::RemoveObserver(IN RegObserver* pObserver)
+{
+    for (IMS_UINT32 i = 0; i < m_objObservers.GetSize(); ++i)
+    {
+        RegObserver* pTmpObserver = m_objObservers.GetAt(i);
+
+        if (pObserver == pTmpObserver)
+        {
+            m_objObservers.RemoveAt(i);
             return;
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_SINT32 Registration::AddReferenceForSCNEL()
+PRIVATE VIRTUAL IMS_SINT32 Registration::AddReferenceForScnErrorListener()
 {
-    //---------------------------------------------------------------------------------------------
-
 #ifdef __IMS_DEBUG__
-    IMS_TRACE_D("Registration :: SCNEL (add) - %d >> %d", nRefCountForSCNEL,
-            (nRefCountForSCNEL + 1), 0);
+    IMS_TRACE_D("Registration :: SCNEL (add) - %d >> %d", m_nRefCountForScnErrorListener,
+            (m_nRefCountForScnErrorListener + 1), 0);
 #endif
 
-    ++nRefCountForSCNEL;
+    ++m_nRefCountForScnErrorListener;
 
-    return nRefCountForSCNEL;
+    return m_nRefCountForScnErrorListener;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_SINT32 Registration::RemoveReferenceForSCNEL()
+PRIVATE VIRTUAL IMS_SINT32 Registration::RemoveReferenceForScnErrorListener()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nRefCountForSCNEL > 0)
+    if (m_nRefCountForScnErrorListener > 0)
     {
 #ifdef __IMS_DEBUG__
-        IMS_TRACE_D("Registration :: SCNEL (remove) - %d >> %d", nRefCountForSCNEL,
-                (nRefCountForSCNEL - 1), 0);
+        IMS_TRACE_D("Registration :: SCNEL (remove) - %d >> %d", m_nRefCountForScnErrorListener,
+                (m_nRefCountForScnErrorListener - 1), 0);
 #endif
 
-        --nRefCountForSCNEL;
+        --m_nRefCountForScnErrorListener;
 
-        if (nRefCountForSCNEL == 0)
+        if (m_nRefCountForScnErrorListener == 0)
         {
             IMS_TRACE_D("Registration :: SCNEL (0)", 0, 0, 0);
         }
     }
 
-    return nRefCountForSCNEL;
+    return m_nRefCountForScnErrorListener;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::NotifyCallerCapabilityChanged()
 {
-    //---------------------------------------------------------------------------------------------
-
     PostMessage(AMSG_REGISTRATION_BINDING_STATE_CHANGED, BINDING_STATE_CALLER_CAPABILITY, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::Refreshable_RefreshCompleted(
-        IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode /* = 0 */)
+        IN ISipClientConnection* piScc, IN IMS_SINT32 nCode /*= 0*/)
 {
-    IMS_SINT32 nStatusCode = piSCC->GetStatusCode();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
     IMS_TRACE_I("_____ REGISTRATION REFRESH COMPLETED ... Refresh Code (%d, %d)", nCode,
             nStatusCode, 0);
@@ -1974,7 +1440,7 @@ PRIVATE VIRTUAL void Registration::Refreshable_RefreshCompleted(
         SipDebug::Send(
                 GetSlotId(), SipDebug::MSG_RSP, SipDebug::DIR_IN, SipMethod::REGISTER, nStatusCode);
 
-        SetPreviousResponse(piSCC->GetMessage());
+        SetPreviousResponse(piScc->GetMessage());
 
         // Authentication challenged by S-CSCF
         if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
@@ -1984,17 +1450,17 @@ PRIVATE VIRTUAL void Registration::Refreshable_RefreshCompleted(
             // }
 
             // Update the Security-xxx headers
-            pRegParam->UpdateSecurityHeaders(piSCC->GetMessage());
+            m_pRegParam->UpdateSecurityHeaders(piScc->GetMessage());
 
             // Respond to the authentication challenge
-            if (!RespondToChallenge(piSCC))
+            if (!RespondToChallenge(piScc))
             {
                 RestoreSecurityHeaders();
             }
 
             if (GetSubState() == SUB_STATE_IDLE)
             {
-                pRefreshHelper->AbortConnection();
+                m_pRefreshHelper->AbortConnection();
             }
 
             // 3 Do not close SipConnection in here
@@ -2004,18 +1470,18 @@ PRIVATE VIRTUAL void Registration::Refreshable_RefreshCompleted(
         // Reset the flags after the transaction completed
         SetSubState(SUB_STATE_IDLE);
 
-        ISipMessage* piSIPMsg = GetPreviousResponse();
+        ISipMessage* piSipMsg = GetPreviousResponse();
 
         if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
             // Update the Security-xxx headers
-            pRegParam->UpdateSecurityHeaders(piSIPMsg);
+            m_pRegParam->UpdateSecurityHeaders(piSipMsg);
 
             // Update the sequence number
-            UpdateCSeqNumber(piSIPMsg);
+            UpdateCSeqNumber(piSipMsg);
 
             // Update the bindings
-            IMS_RESULT nBindingUpdateResult = UpdateBindings(piSIPMsg);
+            IMS_RESULT nBindingUpdateResult = UpdateBindings(piSipMsg);
             IMS_SINT32 nReason = REASON_NONE;
 
             if (nBindingUpdateResult == BINDING_UPDATE_NO_EXPIRES)
@@ -2027,13 +1493,13 @@ PRIVATE VIRTUAL void Registration::Refreshable_RefreshCompleted(
             UpdateRefreshTimer();
 
             // Check the UA location
-            CheckUALocation(piSIPMsg);
+            CheckUaLocation(piSipMsg);
 
             // Store the persistent header information
-            StorePersistentHeaders(piSIPMsg);
+            StorePersistentHeaders(piSipMsg);
 
             // IMS_AUTH_NONCE_REUSE {
-            SetNextNonce(piSIPMsg);
+            SetNextNonce(piSipMsg);
             // }
 
             // Go to "ACTIVE" state
@@ -2052,28 +1518,30 @@ PRIVATE VIRTUAL void Registration::Refreshable_RefreshCompleted(
             }
 
             if (nBindingUpdateResult == BINDING_UPDATE_OK)
+            {
                 UpdateBindingState(BINDING_RESULT_OK);
+            }
             else
+            {
                 UpdateBindingState(BINDING_RESULT_NOK);
+            }
 
             CallListener(nPrevState, nPrevSubState, nReason);
         }
         else
         {
-            // 140225, hwangoo.park
             // Do not clear the authentication challenge...
             // Initial registration required: 305 / 408 / 500 / 504 / txn timeout
             // // IMS_AUTH_NONCE_REUSE {
             // SetAuthenticationChallenge(IMS_NULL);
             // // }
 
-            // 13.01.29, hwangoo.park
             // Do not check the status code to support re-use of Call-ID & CSeq number
             // when the registration is failed
             // if (nStatusCode == SipStatusCode::SC_423)
             {
                 // Update the sequence number
-                UpdateCSeqNumber(piSIPMsg);
+                UpdateCSeqNumber(piSipMsg);
             }
 
             UpdateBindingState(BINDING_RESULT_NOK);
@@ -2119,18 +1587,11 @@ PRIVATE VIRTUAL void Registration::Refreshable_RefreshCompleted(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_BOOL Registration::Refreshable_RefreshStarted()
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
 
-    //---------------------------------------------------------------------------------------------
-
-    IMS_TRACE_I("_____ REGISTRATION REFRESH STARTED ... State(%d)", nState, 0, 0);
+    IMS_TRACE_I("_____ REGISTRATION REFRESH STARTED ... State(%d)", m_nState, 0, 0);
 
     if (IsBindingsUpdating())
     {
@@ -2138,9 +1599,9 @@ PRIVATE VIRTUAL IMS_BOOL Registration::Refreshable_RefreshStarted()
         return IMS_TRUE;
     }
 
-    if (piListener != IMS_NULL)
+    if (m_piListener != IMS_NULL)
     {
-        piListener->Registration_RefreshTimerExpired(bDoImplicitRefresh);
+        m_piListener->Registration_RefreshTimerExpired(bDoImplicitRefresh);
     }
 
     if (bDoImplicitRefresh)
@@ -2151,15 +1612,8 @@ PRIVATE VIRTUAL IMS_BOOL Registration::Refreshable_RefreshStarted()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::Refreshable_RefreshTerminated()
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_I("_____ REGISTRATION REFRESH TERMINATED ...", 0, 0, 0);
 
     // IMS_AUTH_NONCE_REUSE {
@@ -2170,61 +1624,38 @@ PRIVATE VIRTUAL void Registration::Refreshable_RefreshTerminated()
     PostMessage(AMSG_REGISTRATION_TERMINATED, REASON_REFRESH_TIMEOUT, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::RegCapabilityChange_ServiceAdded(
-        IN CONST AString& strAppId, IN CONST AString& strServiceId)
+        IN const AString& strAppId, IN const AString& strServiceId)
 {
     AStringArray objHeaders;
-
-    //---------------------------------------------------------------------------------------------
-
     RegBindingProxy::QueryRegistrationHeaders(GetSlotId(), strAppId, strServiceId, objHeaders);
 
     // Adds extra headers
     if (!objHeaders.IsEmpty())
     {
-        IRegParameter* piRegParameter = pRegParam;
+        IRegParameter* piRegParameter = m_pRegParam;
 
         piRegParameter->AddExtraHeaders(objHeaders);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::RegCapabilityChange_ServiceRemoved(
-        IN CONST AString& strAppId, IN CONST AString& strServiceId)
+        IN const AString& strAppId, IN const AString& strServiceId)
 {
     AStringArray objHeaders;
-
-    //---------------------------------------------------------------------------------------------
-
     RegBindingProxy::QueryRegistrationHeaders(GetSlotId(), strAppId, strServiceId, objHeaders);
 
     // Removes extra headers
     if (!objHeaders.IsEmpty())
     {
-        IRegParameter* piRegParameter = pRegParam;
+        IRegParameter* piRegParameter = m_pRegParam;
 
         piRegParameter->RemoveExtraHeaders(objHeaders);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /* = IMS_FALSE */)
+PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /*= IMS_FALSE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     (void)bStale;
 
     if (GetState() != STATE_ACTIVE)
@@ -2233,7 +1664,7 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /* = IMS_F
     }
 
     // Check the 'state' & 'event' reg info.
-    RegInfo* pRegInfo = RegInfoManager::GetInstance()->GetRegInfo(pRegFlow->GetRegKey());
+    RegInfo* pRegInfo = RegInfoManager::GetInstance()->GetRegInfo(m_pRegFlow->GetRegKey());
     IRegInfoRegistration* piRegInfoReg = IMS_NULL;
 
     if (pRegInfo == IMS_NULL)
@@ -2243,14 +1674,14 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /* = IMS_F
 
     IMS_TRACE_D("RegInfo :: Updated", 0, 0, 0);
 
-    const SipAddress& objAOR = pStateTracker->GetAuthorizedAOR();
+    const SipAddress& objAor = m_pStateTracker->GetAuthorizedAor();
 
-    piRegInfoReg = pRegInfo->GetRegistration(objAOR);
+    piRegInfoReg = pRegInfo->GetRegistration(objAor);
 
     if (piRegInfoReg == IMS_NULL)
     {
         IMS_TRACE_E(0, "Cannot find the RegInfo (%s)",
-                SipDebug::GetCharA1(objAOR.GetUser().GetStr(), 5), 0, 0);
+                SipDebug::GetCharA1(objAor.GetUser().GetStr(), 5), 0, 0);
         return;
     }
 
@@ -2263,7 +1694,9 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /* = IMS_F
         const IRegInfoContact* piRegInfoContact = objRegInfoContacts.GetAt(i);
 
         if (piRegInfoContact == IMS_NULL)
+        {
             continue;
+        }
 
         IMS_SINT32 nState = piRegInfoContact->GetState();
         IMS_SINT32 nEvent = piRegInfoContact->GetEvent();
@@ -2272,21 +1705,27 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /* = IMS_F
         if ((nState == IRegInfoContact::STATE_ACTIVE) &&
                 (nEvent == IRegInfoContact::EVENT_SHORTENED) && (nExpires != 0))
         {
-            for (IMS_UINT32 j = 0; j < objContacts.GetSize(); ++j)
+            for (IMS_UINT32 j = 0; j < m_objContacts.GetSize(); ++j)
             {
-                RegContact* pContact = objContacts.GetAt(j);
+                RegContact* pContact = m_objContacts.GetAt(j);
 
                 if (pContact == IMS_NULL)
+                {
                     continue;
+                }
 
-                if (pContact->GetContactAddress().Equals(piRegInfoContact->GetURI()))
+                if (pContact->GetContactAddress().Equals(piRegInfoContact->GetUri()))
                 {
                     bUpdateRefreshTimer = IMS_TRUE;
 
                     if (nShortenedExpires == 0)
+                    {
                         nShortenedExpires = nExpires;
+                    }
                     else if (nShortenedExpires > nExpires)
+                    {
                         nShortenedExpires = nExpires;
+                    }
                 }
             }
         }
@@ -2295,33 +1734,14 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /* = IMS_F
     if (bUpdateRefreshTimer)
     {
         IMS_TRACE_D("RegInfo :: Active & Shortened (%d)", nShortenedExpires, 0, 0);
-        pRefreshHelper->UpdateRefreshTimer(static_cast<IMS_SINT32>(nShortenedExpires));
+        m_pRefreshHelper->UpdateRefreshTimer(static_cast<IMS_SINT32>(nShortenedExpires));
     }
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void Registration::RegInfo_UpdateFailed()
+PRIVATE VIRTUAL void Registration::DigestAka_OnResponse(IN const ByteArray& objRes,
+        IN const ByteArray& objIk /*= ByteArray::ConstNull()*/,
+        IN const ByteArray& objCk /*= ByteArray::ConstNull()*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    // 4 nothing to do in here
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void Registration::DigestAka_OnResponse(IN const ByteArray& objRES,
-        IN const ByteArray& objIK /* = ByteArray::ConstNull() */,
-        IN const ByteArray& objCK /* = ByteArray::ConstNull() */)
-{
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_I("Registration :: AKA RES received", 0, 0, 0);
 
     if (GetSubState() == SUB_STATE_IDLE)
@@ -2330,33 +1750,26 @@ PRIVATE VIRTUAL void Registration::DigestAka_OnResponse(IN const ByteArray& objR
         return;
     }
 
-    objActiveCredential = pRegParam->GetCredential();
-    objActiveSAKey.SetIK(objIK);
-    objActiveSAKey.SetCK(objCK);
+    m_objActiveCredential = m_pRegParam->GetCredential();
+    m_objActiveSaKey.SetIK(objIk);
+    m_objActiveSaKey.SetCK(objCk);
 
-    IMS_SINT32 nType = objActiveCredential.GetType();
+    IMS_SINT32 nType = m_objActiveCredential.GetType();
 
     if (nType == Credential::TYPE_AKAv1_MD5)
     {
-        objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_OK, objRES);
+        m_objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_OK, objRes);
     }
     else if (nType == Credential::TYPE_AKAv2_MD5)
     {
-        objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_OK, objRES, objIK, objCK);
+        m_objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_OK, objRes, objIk, objCk);
     }
 
     PostMessage(AMSG_REGISTRATION_AKA_RESPONSE_RECEIVED, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void Registration::DigestAka_OnAutsFailed(IN const ByteArray& objAUTS)
+PRIVATE VIRTUAL void Registration::DigestAka_OnAutsFailed(IN const ByteArray& objAuts)
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_I("Registration :: AUTS failed", 0, 0, 0);
 
     if (GetSubState() == SUB_STATE_IDLE)
@@ -2365,35 +1778,28 @@ PRIVATE VIRTUAL void Registration::DigestAka_OnAutsFailed(IN const ByteArray& ob
         return;
     }
 
-    objActiveCredential = pRegParam->GetCredential();
-    objActiveSAKey.SetIK(ByteArray::ConstNull());
-    objActiveSAKey.SetCK(ByteArray::ConstNull());
+    m_objActiveCredential = m_pRegParam->GetCredential();
+    m_objActiveSaKey.SetIK(ByteArray::ConstNull());
+    m_objActiveSaKey.SetCK(ByteArray::ConstNull());
 
-    IMS_SINT32 nType = objActiveCredential.GetType();
+    IMS_SINT32 nType = m_objActiveCredential.GetType();
 
     if (nType == Credential::TYPE_AKAv1_MD5)
     {
-        objActiveCredential.SetAKAResponse(
-                IMS_AKA::RESULT_NOK_SQN_SYNC_FAILED, ByteArray::ConstNull(), objAUTS);
+        m_objActiveCredential.SetAKAResponse(
+                IMS_AKA::RESULT_NOK_SQN_SYNC_FAILED, ByteArray::ConstNull(), objAuts);
     }
     else if (nType == Credential::TYPE_AKAv2_MD5)
     {
-        objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_NOK_SQN_SYNC_FAILED,
-                ByteArray::ConstNull(), ByteArray::ConstNull(), ByteArray::ConstNull(), objAUTS);
+        m_objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_NOK_SQN_SYNC_FAILED,
+                ByteArray::ConstNull(), ByteArray::ConstNull(), ByteArray::ConstNull(), objAuts);
     }
 
     PostMessage(AMSG_REGISTRATION_AKA_RESPONSE_RECEIVED, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void Registration::DigestAka_OnMacFailed()
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_I("Registration :: MAC failed", 0, 0, 0);
 
     if (GetSubState() == SUB_STATE_IDLE)
@@ -2402,54 +1808,43 @@ PRIVATE VIRTUAL void Registration::DigestAka_OnMacFailed()
         return;
     }
 
-    objActiveCredential = pRegParam->GetCredential();
-    objActiveSAKey.SetIK(ByteArray::ConstNull());
-    objActiveSAKey.SetCK(ByteArray::ConstNull());
+    m_objActiveCredential = m_pRegParam->GetCredential();
+    m_objActiveSaKey.SetIK(ByteArray::ConstNull());
+    m_objActiveSaKey.SetCK(ByteArray::ConstNull());
 
-    IMS_SINT32 nType = objActiveCredential.GetType();
+    IMS_SINT32 nType = m_objActiveCredential.GetType();
 
     if (nType == Credential::TYPE_AKAv1_MD5)
     {
-        objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_NOK_MAC_INVALID, ByteArray::ConstNull());
+        m_objActiveCredential.SetAKAResponse(
+                IMS_AKA::RESULT_NOK_MAC_INVALID, ByteArray::ConstNull());
     }
     else if (nType == Credential::TYPE_AKAv2_MD5)
     {
-        objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_NOK_MAC_INVALID, ByteArray::ConstNull(),
-                ByteArray::ConstNull(), ByteArray::ConstNull());
+        m_objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_NOK_MAC_INVALID,
+                ByteArray::ConstNull(), ByteArray::ConstNull(), ByteArray::ConstNull());
     }
 
     PostMessage(AMSG_REGISTRATION_AKA_RESPONSE_RECEIVED, 0, 0);
 }
 
-/*
-
-Remarks
- SIP_MESSAGE_MEDIATOR
-*/
 PRIVATE
-IMS_RESULT Registration::AdjustMessage(IN_OUT ISipMessage* piSIPMsg,
-        IN IMS_SINT32 nMessage /* = IMessageMediator::MESSAGE_NORMAL */)
+IMS_RESULT Registration::AdjustMessage(
+        IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage /*= IMessageMediator::MESSAGE_NORMAL*/)
 {
-    if (piMessageMediator == IMS_NULL)
+    if (m_piMessageMediator == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
-    return piMessageMediator->MessageMediator_AdjustMessage(piSIPMsg, nMessage);
+    return m_piMessageMediator->MessageMediator_AdjustMessage(piSipMsg, nMessage);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Registration::CallListener(
         IN IMS_SINT32 nPrevState, IN IMS_SINT32 nPrevSubState, IN IMS_SINT32 nReason)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piListener == IMS_NULL)
+    if (m_piListener == IMS_NULL)
     {
         IMS_TRACE_E(0, "NO LISTENER REGISTERED", 0, 0, 0);
         return;
@@ -2470,7 +1865,6 @@ void Registration::CallListener(
                 }
             }
             break;
-
         case STATE_ACTIVE:
             if ((nPrevSubState == SUB_STATE_REGISTERING) || (nPrevSubState == SUB_STATE_REFRESHING))
             {
@@ -2488,7 +1882,6 @@ void Registration::CallListener(
                 PostMessage(AMSG_REGISTRATION_REMOVED, 0, 0);
             }
             break;
-
         case STATE_TERMINATED:
             break;
 
@@ -2497,22 +1890,15 @@ void Registration::CallListener(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void Registration::CheckUALocation(IN ISipMessage* piSIPMsg)
+void Registration::CheckUaLocation(IN ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return;
     }
 
-    AString strViaHdr = piSIPMsg->GetHeader(ISipHeader::VIA);
+    AString strViaHdr = piSipMsg->GetHeader(ISipHeader::VIA);
     ISipHeader* piHeader = SipParsingHelper::CreateHeader(ISipHeader::VIA, strViaHdr);
 
     if (piHeader == IMS_NULL)
@@ -2531,13 +1917,13 @@ void Registration::CheckUALocation(IN ISipMessage* piSIPMsg)
 
         // NAT_REQ_UE_PUBLIC_IP
         // FIXME: Is it required to check "sent-by"?
-        if (bIsBehindNAT && pRegParam->IsSecurityAssociationPresent())
+        if (m_bIsBehindNat && m_pRegParam->IsSecurityAssociationPresent())
         {
             // Don't clear the flag.
         }
         else
         {
-            bIsBehindNAT = IMS_FALSE;
+            m_bIsBehindNat = IMS_FALSE;
         }
         return;
     }
@@ -2555,13 +1941,13 @@ void Registration::CheckUALocation(IN ISipMessage* piSIPMsg)
 
         // NAT_REQ_UE_PUBLIC_IP
         // FIXME: Is it required to check "sent-by"?
-        if (bIsBehindNAT && pRegParam->IsSecurityAssociationPresent())
+        if (m_bIsBehindNat && m_pRegParam->IsSecurityAssociationPresent())
         {
             // Don't clear the flag.
         }
         else
         {
-            bIsBehindNAT = IMS_FALSE;
+            m_bIsBehindNat = IMS_FALSE;
         }
         return;
     }
@@ -2594,76 +1980,69 @@ void Registration::CheckUALocation(IN ISipMessage* piSIPMsg)
     // Compares the sent-by address & the address of 'received' parameter
     IPAddress objSentBy(strHost);
     IPAddress objReceived(pParameter->GetValue());
-    IMS_BOOL bIsPublicIPUpdateRequired = IMS_TRUE;
-    IMS_BOOL bIsSentByPublicIP = IMS_FALSE;
+    IMS_BOOL bIsPublicIpUpdateRequired = IMS_TRUE;
+    IMS_BOOL bIsSentByPublicIp = IMS_FALSE;
 
-    if (!IPAddress::NONE.Equals(pStateTracker->GetPublicIPAddress()) &&
-            objSentBy.Equals(pStateTracker->GetPublicIPAddress()))
+    if (!IPAddress::NONE.Equals(m_pStateTracker->GetPublicIpAddress()) &&
+            objSentBy.Equals(m_pStateTracker->GetPublicIpAddress()))
     {
-        bIsSentByPublicIP = IMS_TRUE;
+        bIsSentByPublicIp = IMS_TRUE;
     }
 
     // NAT_REQ_UE_PUBLIC_IP
-    if (bIsBehindNAT && pRegParam->IsSecurityAssociationPresent() && bIsSentByPublicIP)
+    if (m_bIsBehindNat && m_pRegParam->IsSecurityAssociationPresent() && bIsSentByPublicIp)
     {
-        bIsPublicIPUpdateRequired = IMS_FALSE;
+        bIsPublicIpUpdateRequired = IMS_FALSE;
     }
     else
     {
         if (objSentBy.IsIPv6Address() && objReceived.IsIPv6Address())
         {
-            bIsBehindNAT = !objSentBy.Equals(objReceived);
+            m_bIsBehindNat = !objSentBy.Equals(objReceived);
         }
         else if (objSentBy.IsIPv4Address() && objReceived.IsIPv4Address())
         {
-            bIsBehindNAT = !objSentBy.Equals(objReceived);
+            m_bIsBehindNat = !objSentBy.Equals(objReceived);
         }
         else
         {
-            bIsBehindNAT = !strHost.Equals(pParameter->GetValue());
+            m_bIsBehindNat = !strHost.Equals(pParameter->GetValue());
         }
     }
 
     piHeader->Destroy();
 
-    IMS_TRACE_D("UA is %s behind on a NAT", (bIsBehindNAT) ? "located" : "not located", 0, 0);
+    IMS_TRACE_D("UA is %s behind on a NAT", (m_bIsBehindNat) ? "located" : "not located", 0, 0);
 
     // NAT_REQ_UE_PUBLIC_IP
-    if (bIsPublicIPUpdateRequired)
+    if (bIsPublicIpUpdateRequired)
     {
-        if (bIsBehindNAT)
+        if (m_bIsBehindNat)
         {
-            pStateTracker->SetPublicIPAddress(objReceived);
+            m_pStateTracker->SetPublicIpAddress(objReceived);
         }
         else
         {
-            pStateTracker->SetPublicIPAddress(IPAddress::NONE);
+            m_pStateTracker->SetPublicIpAddress(IPAddress::NONE);
         }
 
         if (NATHelper::IsNATResolverRequired())
         {
             NATHelper::GetInstance()->SetPublicAddress(GetSlotId(),
-                    pRegFlow->GetRegKey().GetFlowId(), objSentBy,
-                    (bIsBehindNAT ? objReceived : IPAddress::NONE));
+                    m_pRegFlow->GetRegKey().GetFlowId(), objSentBy,
+                    (m_bIsBehindNat ? objReceived : IPAddress::NONE));
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Registration::ChoosePreferredContact()
 {
     RegContact* pPreferredContact = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = objContacts.GetAt(i);
+        RegContact* pContact = m_objContacts.GetAt(i);
 
         if (pPreferredContact == IMS_NULL)
         {
@@ -2681,36 +2060,22 @@ void Registration::ChoosePreferredContact()
         }
     }
 
-    pStateTracker->SetPreferredContact(pPreferredContact);
+    m_pStateTracker->SetPreferredContact(pPreferredContact);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Registration::ClearNextRequest()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piNextRequest != IMS_NULL)
+    if (m_piNextRequest != IMS_NULL)
     {
-        piNextRequest->Destroy();
-        piNextRequest = IMS_NULL;
+        m_piNextRequest->Destroy();
+        m_piNextRequest = IMS_NULL;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IDigestAka* Registration::CreateDigestAKA(IN CONST SubscriberConfig* pSubsConfig)
+IDigestAka* Registration::CreateDigestAka(IN const SubscriberConfig* pSubsConfig)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (pSubsConfig == IMS_NULL)
     {
         return IMS_NULL;
@@ -2740,17 +2105,10 @@ IDigestAka* Registration::CreateDigestAKA(IN CONST SubscriberConfig* pSubsConfig
     return IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL Registration::CreateSA(IN CONST Credential& objCredential, IN CONST IMS_SA_KEY& objSAKey)
+IMS_BOOL Registration::CreateSa(IN const Credential& objCredential, IN const IMS_SA_KEY& objSaKey)
 {
     IMS_SINT32 nAlgorithm = objCredential.GetType();
-
-    //---------------------------------------------------------------------------------------------
 
     if ((nAlgorithm != Credential::TYPE_AKAv1_MD5) && (nAlgorithm != Credential::TYPE_AKAv2_MD5))
     {
@@ -2759,103 +2117,89 @@ IMS_BOOL Registration::CreateSA(IN CONST Credential& objCredential, IN CONST IMS
     }
 
     // Checks if the security association is required or not...
-    if (!pRegParam->IsSecurityAssociationRequired())
+    if (!m_pRegParam->IsSecurityAssociationRequired())
     {
         IMS_TRACE_D("Security association is not required ...", 0, 0, 0);
         return IMS_TRUE;
     }
 
-    if (piListener == IMS_NULL)
+    if (m_piListener == IMS_NULL)
     {
         IMS_TRACE_D("Security association is not required ... ; no listener", 0, 0, 0);
         return IMS_TRUE;
     }
 
-    IMS_BOOL bResultOfSA = IMS_TRUE;
+    IMS_BOOL bResultOfSa = IMS_TRUE;
 
-    if (SipConfigProxy::IsIpSecConfigured(GetSlotId(), pStateTracker->GetSIPProfile()))
+    if (SipConfigProxy::IsIpSecConfigured(GetSlotId(), m_pStateTracker->GetSipProfile()))
     {
         IMSList<SipSecurityHeader> objSecurityVerifys;
 
-        pRegParam->SetSecurityVerifys(objSecurityVerifys);
+        m_pRegParam->SetSecurityVerifys(objSecurityVerifys);
 
         // Notifies the information which IK & CK will be used for this authentication.
-        piListener->Registration_NotifyAKAResponse(objCredential.GetAKAResponse().nStatus,
-                objSAKey.GetIK(), objSAKey.GetCK(), bResultOfSA);
+        m_piListener->Registration_NotifyAkaResponse(objCredential.GetAKAResponse().nStatus,
+                objSaKey.GetIK(), objSaKey.GetCK(), bResultOfSa);
 
         // If the result of AKA is not OK, clear the Security-Server headers
-        if (!bResultOfSA || (objCredential.GetAKAResponse().nStatus != IMS_AKA::RESULT_OK))
+        if (!bResultOfSa || (objCredential.GetAKAResponse().nStatus != IMS_AKA::RESULT_OK))
         {
             RestoreSecurityHeaders();
         }
 
         // Updates the transport extension rules for SIP layer
-        pRegParam->SetTransportExtForIPSec();
+        m_pRegParam->SetTransportExtForIpSec();
     }
     else
     {
         // Notifies the information which IK & CK will be used for this authentication.
-        piListener->Registration_NotifyAKAResponse(objCredential.GetAKAResponse().nStatus,
-                objSAKey.GetIK(), objSAKey.GetCK(), bResultOfSA);
+        m_piListener->Registration_NotifyAkaResponse(objCredential.GetAKAResponse().nStatus,
+                objSaKey.GetIK(), objSaKey.GetCK(), bResultOfSa);
     }
 
-    return bResultOfSA;
+    return bResultOfSa;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_SINT32 Registration::GetPortUC() const
+IMS_SINT32 Registration::GetPortUc() const
 {
-    IMS_SINT32 nPortUC = pRegParam->GetProtectedPortUC();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nPortUc = m_pRegParam->GetProtectedPortUc();
 
     // Check if the UE supports the Security Association Agreement.
     // If nPortUC returns Sip::PORT_UNSPECIFIED, then it does not support "sec-agree".
-    if (nPortUC == Sip::PORT_UNSPECIFIED)
+    if (nPortUc == Sip::PORT_UNSPECIFIED)
     {
         IMS_SINT32 nState = GetState();
         IMS_SINT32 nPrevState = GetSubState();
 
         if ((nState == STATE_CREATED) || ((nState == STATE_INIT) && (nPrevState != SUB_STATE_IDLE)))
         {
-            return (pRegParam != IMS_NULL) ? pRegParam->GetPort() : Sip::PORT_5060;
+            return (m_pRegParam != IMS_NULL) ? m_pRegParam->GetPort() : Sip::PORT_5060;
         }
 
-        return GetPortUS();
+        return GetPortUs();
     }
-    else if (nPortUC == 0)
+    else if (nPortUc == 0)
     {
-        if (!SipConfigProxy::IsIpSecConfigured(GetSlotId(), pStateTracker->GetSIPProfile()))
+        if (!SipConfigProxy::IsIpSecConfigured(GetSlotId(), m_pStateTracker->GetSipProfile()))
         {
-            return GetPortUS();
+            return GetPortUs();
         }
     }
 
-    return nPortUC;
+    return nPortUc;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_SINT32 Registration::GetPortUS() const
+IMS_SINT32 Registration::GetPortUs() const
 {
-    const RegContact* pContact = pStateTracker->GetPreferredContact();
-
-    //---------------------------------------------------------------------------------------------
+    const RegContact* pContact = m_pStateTracker->GetPreferredContact();
 
     if (pContact == IMS_NULL)
     {
-        if (pRegParam != IMS_NULL)
+        if (m_pRegParam != IMS_NULL)
         {
-            return pRegParam->GetPort();
+            return m_pRegParam->GetPort();
         }
 
         return Sip::PORT_5060;
@@ -2864,19 +2208,12 @@ IMS_SINT32 Registration::GetPortUS() const
     return pContact->GetPort();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 const SubscriberConfig* Registration::GetSubsConfig() const
 {
     const SubscriberConfig* pSubsConfig = IMS_NULL;
-    const AString& strSubsId = pStateTracker->GetSubscriberId();
+    const AString& strSubsId = m_pStateTracker->GetSubscriberId();
     ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
-
-    //---------------------------------------------------------------------------------------------
 
     if (strSubsId.GetLength() > 0)
     {
@@ -2884,38 +2221,18 @@ const SubscriberConfig* Registration::GetSubsConfig() const
     }
     else
     {
-        const SipAddress& objAOR = pStateTracker->GetAOR();
+        const SipAddress& objAor = m_pStateTracker->GetAor();
         const AString& strId =
-                SubscriberTracker::GetInstance()->GetSubscriberId(GetSlotId(), &objAOR);
+                SubscriberTracker::GetInstance()->GetSubscriberId(GetSlotId(), &objAor);
         pSubsConfig = pConfigMngr->GetSubscriberConfig(strId, GetSlotId());
     }
 
     return pSubsConfig;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_SINT32 Registration::GetSubState() const
+IMS_BOOL Registration::IsAkaSupported(IN const SubscriberConfig* pSubsConfig) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return nSubState;
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE
-IMS_BOOL Registration::IsAkaSupported(IN CONST SubscriberConfig* pSubsConfig) const
-{
-    //---------------------------------------------------------------------------------------------
-
     if (pSubsConfig == IMS_NULL)
     {
         return IMS_FALSE;
@@ -2944,17 +2261,10 @@ IMS_BOOL Registration::IsAkaSupported(IN CONST SubscriberConfig* pSubsConfig) co
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL Registration::IsFlowControlRequired() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pRegParam->GetFlowControlOption() == IRegParameter::FLOW_CONTROL_BY_PROVISION)
+    if (m_pRegParam->GetFlowControlOption() == IRegParameter::FLOW_CONTROL_BY_PROVISION)
     {
         return IMS_TRUE;
     }
@@ -2967,16 +2277,17 @@ IMS_BOOL Registration::IsFlowControlRequired() const
     // Otherwise, Sip::PORT_UNSPECIFIED is selected.
     ISipMessage* piRequest = GetPreviousRequest();
     ISipMessage* piResponse = GetPreviousResponse();
-    const RegContact* pRegContact = pStateTracker->GetPreferredContact();
+    const RegContact* pRegContact = m_pStateTracker->GetPreferredContact();
 
-    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), pStateTracker->GetSIPProfile()) &&
+    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), m_pStateTracker->GetSipProfile()) &&
             (piRequest != IMS_NULL) && (piResponse != IMS_NULL) && (pRegContact != IMS_NULL))
     {
-        const AString OUTBOUND("outbound");
+        const AString strOutbound("outbound");
 
         if ((pRegContact->GetInstanceParameter() != IMS_NULL) &&
                 (pRegContact->GetRegIdParameter() != IMS_NULL) &&
-                piRequest->IsOptionSupported(OUTBOUND) && piResponse->IsOptionRequired(OUTBOUND))
+                piRequest->IsOptionSupported(strOutbound) &&
+                piResponse->IsOptionRequired(strOutbound))
         {
             return IMS_TRUE;
         }
@@ -2985,54 +2296,40 @@ IMS_BOOL Registration::IsFlowControlRequired() const
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Registration::ReformContactHeader(IN_OUT ISipMessage* piSIPMsg)
+IMS_RESULT Registration::ReformContactHeader(IN_OUT ISipMessage* piSipMsg)
 {
-    IMS_SINT32 nHCount = piSIPMsg->GetHeaderCount(ISipHeader::CONTACT_NORMAL);
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nHCount = piSipMsg->GetHeaderCount(ISipHeader::CONTACT_NORMAL);
 
     while (nHCount > 0)
     {
-        piSIPMsg->RemoveHeader(ISipHeader::CONTACT_NORMAL);
+        piSipMsg->RemoveHeader(ISipHeader::CONTACT_NORMAL);
         --nHCount;
     }
 
-    return SetContactNExpiresHeader(piSIPMsg);
+    return SetContactNExpiresHeader(piSipMsg);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL Registration::RegisterOnImplicitRefresh()
 {
-    ISipClientConnection* piSCC = CreateConnection(this);
+    ISipClientConnection* piScc = CreateConnection(this);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a new SIP connection for registration refresh failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
     // Form the generic headers
-    if (SetHeaders(piSCC) != IMS_SUCCESS)
+    if (SetHeaders(piScc) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting the generic headers failed", 0, 0, 0);
         goto EXIT_RegisterOnImplicitRefresh;
     }
 
     // Sets Contact headers
-    if (SetContactNExpiresHeader(piSCC->GetMessage()) != IMS_SUCCESS)
+    if (SetContactNExpiresHeader(piScc->GetMessage()) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting Contact & Expires header failed", 0, 0, 0);
         goto EXIT_RegisterOnImplicitRefresh;
@@ -3040,11 +2337,11 @@ IMS_BOOL Registration::RegisterOnImplicitRefresh()
 
     // IMS_AUTH_NONCE_REUSE {
     // Set the credential information in case of re/de-registration
-    SetNextAuthenticationInfo(piSCC);
+    SetNextAuthenticationInfo(piScc);
     // }
 
     // Send a refresh REGISTER request to the network
-    if (pRefreshHelper->SendRefreshRequest(piSCC) != IMS_SUCCESS)
+    if (m_pRefreshHelper->SendRefreshRequest(piScc) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Sending a registration refresh request failed", 0, 0, 0);
         goto EXIT_RegisterOnImplicitRefresh;
@@ -3054,7 +2351,7 @@ IMS_BOOL Registration::RegisterOnImplicitRefresh()
     UpdateBindingState(BINDING_REGISTERING);
 
     // Update the last request/response message
-    SetPreviousRequest(piSCC->GetMessage());
+    SetPreviousRequest(piScc->GetMessage());
     SetPreviousResponse(IMS_NULL);
 
     //// DEBUG
@@ -3063,37 +2360,30 @@ IMS_BOOL Registration::RegisterOnImplicitRefresh()
     return IMS_TRUE;
 
 EXIT_RegisterOnImplicitRefresh:
-    piSCC->Close();
+    piScc->Close();
 
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
+IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piScc)
 {
     IMS_SINT32 nPrevState = GetState();
     IMS_SINT32 nPrevSubState = GetSubState();
     IMS_BOOL bResponseToChallenge = IMS_FALSE;
     IMS_SINT32 nAlgorithm = Credential::TYPE_MD5;
-    ISipGenericChallenge* pChallenge = piSCC->GetAuthenticationChallenge();
-
-    //---------------------------------------------------------------------------------------------
+    ISipGenericChallenge* pChallenge = piScc->GetAuthenticationChallenge();
 
     // Reset the flags after the transaction completed
     SetSubState(SUB_STATE_IDLE);
 
     if (pChallenge != IMS_NULL)
     {
-        if (piListener != IMS_NULL)
+        if (m_piListener != IMS_NULL)
         {
             nAlgorithm = Credential::TranslateAlgorithm(pChallenge->GetAlgorithm());
 
-            piListener->Registration_AuthenticationChallenged(nAlgorithm, bResponseToChallenge);
+            m_piListener->Registration_AuthenticationChallenged(nAlgorithm, bResponseToChallenge);
         }
     }
     else
@@ -3108,7 +2398,7 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
         if (pSubsConfig == IMS_NULL)
         {
             IMS_TRACE_E(0, "SubscriberConfig is null; subsId=%s",
-                    pStateTracker->GetSubscriberId().GetStr(), 0, 0);
+                    m_pStateTracker->GetSubscriberId().GetStr(), 0, 0);
 
             if (nPrevState == STATE_INIT)
             {
@@ -3121,7 +2411,7 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
             return IMS_FALSE;
         }
 
-        Credential& objCredential = pRegParam->GetCredential();
+        Credential& objCredential = m_pRegParam->GetCredential();
 
         objCredential.SetType(nAlgorithm);
 
@@ -3135,12 +2425,12 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
             objCredential.SetRealm(pChallenge->GetRealm());
 
             // Request the RES to the ISIM module
-            if (piDigestAKA == IMS_NULL)
+            if (m_piDigestAka == IMS_NULL)
             {
-                piDigestAKA = CreateDigestAKA(pSubsConfig);
+                m_piDigestAka = CreateDigestAka(pSubsConfig);
             }
 
-            if (piDigestAKA == IMS_NULL)
+            if (m_piDigestAka == IMS_NULL)
             {
                 if (nPrevState == STATE_INIT)
                 {
@@ -3153,7 +2443,7 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
                 return IMS_FALSE;
             }
 
-            piDigestAKA->SetListener(this);
+            m_piDigestAka->SetListener(this);
 
             // Decoding base64 encoded nonce value and pass the decoded value to the ISIM
             AString strNonce = AString::FromBase64(pChallenge->GetNonce());
@@ -3170,7 +2460,7 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
             // Set the sub-state and waits the response from ISIM module
             SetSubState(nPrevSubState);
 
-            if (piDigestAKA->GetAuthResponse(objChallenge) != IMS_SUCCESS)
+            if (m_piDigestAka->GetAuthResponse(objChallenge) != IMS_SUCCESS)
             {
                 SetSubState(SUB_STATE_IDLE);
 
@@ -3195,46 +2485,6 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
 
             return IMS_TRUE;
         }
-#ifdef __IMS_TEST_AKA__
-        else if (nAlgorithm == Credential::TYPE_AKAv1_MD5)
-        {
-            AKAHelper objAKAHelper;
-            // Decoding base64 encoded nonce value and pass the decoded value to the ISIM
-            AString strNonce = AString::FromBase64(pChallenge->GetNonce());
-            const IMS_BYTE* pbyNonce = reinterpret_cast<const IMS_BYTE*>(strNonce.GetStr());
-            ByteArray objChallenge;
-
-            // Length of RAND (1) + RAND (16)
-            objChallenge.Append(0x10);
-            objChallenge.Append(&pbyNonce[0], 16);
-            // Length of AUTN (1) + AUTN (16)
-            objChallenge.Append(0x10);
-            objChallenge.Append(&pbyNonce[16], 16);
-
-            objAKAHelper.Authenticate(objCredential.GetPassword(), objChallenge);
-
-            // Update the 'realm' parameter from WWW-Authenticate header
-            objCredential.SetRealm(pChallenge->GetRealm());
-
-            objActiveCredential = objCredential;
-            objActiveSAKey.SetIK(objAKAHelper.GetIK());
-            objActiveSAKey.SetCK(objAKAHelper.GetCK());
-
-            objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_OK, objAKAHelper.GetRES());
-
-            // Set the sub-state and waits the response from ISIM module
-            SetSubState(nPrevSubState);
-
-            // IMS_AUTH_NONCE_REUSE {
-            // Keep the authentication challenge for re/de-registration
-            SetAuthenticationChallenge(pChallenge);
-            // }
-
-            PostMessage(AMSG_REGISTRATION_AKA_RESPONSE_RECEIVED, 0, 0);
-
-            return IMS_TRUE;
-        }
-#endif
         else
         {
             // do nothing !!!
@@ -3243,7 +2493,7 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
         IMS_TRACE_D("RespondToChallenge :: Respond to MD5 authentication challenge ...", 0, 0, 0);
 
         // Overwrite the realm parameter if it required
-        if (pRegParam->IsAuthRealmLenient() &&
+        if (m_pRegParam->IsAuthRealmLenient() &&
                 (!objCredential.GetRealm().Equals(pChallenge->GetRealm())))
         {
             IMS_TRACE_D("auth_realm_leniency is true; %s -> %s",
@@ -3253,7 +2503,7 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
             objCredential.SetRealm(pChallenge->GetRealm());
         }
 
-        if (piSCC->InitResubmissionRequest() != IMS_SUCCESS)
+        if (piScc->InitResubmissionRequest() != IMS_SUCCESS)
         {
             if (nPrevState == STATE_INIT)
             {
@@ -3267,7 +2517,7 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
         }
 
         // Authentication algorithm will be MD5
-        if (piSCC->SetCredentials(objCredential) != IMS_SUCCESS)
+        if (piScc->SetCredentials(objCredential) != IMS_SUCCESS)
         {
             if (nPrevState == STATE_INIT)
             {
@@ -3281,9 +2531,9 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
         }
 
         // SIP_MESSAGE_MEDIATOR
-        (void)AdjustMessage(piSCC->GetMessage(), IMessageMediator::MESSAGE_RESUBMIT);
+        (void)AdjustMessage(piScc->GetMessage(), IMessageMediator::MESSAGE_RESUBMIT);
 
-        if (piSCC->Send() != IMS_SUCCESS)
+        if (piScc->Send() != IMS_SUCCESS)
         {
             if (nPrevState == STATE_INIT)
             {
@@ -3304,7 +2554,7 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
         if (pChallenge->GetQop().GetLength() > 0)
         {
             // Set the active credential
-            objActiveCredential = objCredential;
+            m_objActiveCredential = objCredential;
 
             // Keep the authentication challenge for re/de-registration
             SetAuthenticationChallenge(pChallenge);
@@ -3312,11 +2562,11 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
         // }
 
         // Update the last request/response message
-        SetPreviousRequest(piSCC->GetMessage());
+        SetPreviousRequest(piScc->GetMessage());
         SetPreviousResponse(IMS_NULL);
 
         // Remove the previous credential information for re-authentication
-        piSCC->RemoveAllCredentials();
+        piScc->RemoveAllCredentials();
     }
     else
     {
@@ -3337,24 +2587,17 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piSCC)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredential)
+IMS_BOOL Registration::RespondToPendingChallenge(IN const Credential& objCredential)
 {
     IMS_SINT32 nPrevState = GetState();
     IMS_SINT32 nPrevSubState = GetSubState();
-
-    //---------------------------------------------------------------------------------------------
 
     IMS_TRACE_D("Start to respond to AKA authentication challenge ...", 0, 0, 0);
 
     if ((nPrevSubState == SUB_STATE_REGISTERING) || (nPrevSubState == SUB_STATE_DEREGISTERING))
     {
-        if (piOngoingSCC == IMS_NULL)
+        if (m_piOngoingScc == IMS_NULL)
         {
             if (nPrevState == STATE_INIT)
             {
@@ -3367,10 +2610,10 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
             return IMS_FALSE;
         }
 
-        if (piOngoingSCC->InitResubmissionRequest() != IMS_SUCCESS)
+        if (m_piOngoingScc->InitResubmissionRequest() != IMS_SUCCESS)
         {
-            piOngoingSCC->Close();
-            piOngoingSCC = IMS_NULL;
+            m_piOngoingScc->Close();
+            m_piOngoingScc = IMS_NULL;
 
             if (nPrevState == STATE_INIT)
             {
@@ -3385,44 +2628,44 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
 
         // RFC5626_FLOW_CONTROL
         // MULTI_REG_TRANSPORT
-        IMS_SINT32 nPortUS = GetPortUS();
+        IMS_SINT32 nPortUs = GetPortUs();
         IMS_SINT32 nPortFlowControl = Sip::PORT_UNSPECIFIED;
-        IMS_SINT32 nTransportExt = pRegParam->GetTransportExtForRegOnly();
+        IMS_SINT32 nTransportExt = m_pRegParam->GetTransportExtForRegOnly();
 
         if (nPrevState == STATE_INIT)
         {
-            if (!pRegParam->IsSecurityAssociationPresent())
+            if (!m_pRegParam->IsSecurityAssociationPresent())
             {
-                nPortUS = GetPortUC();
+                nPortUs = GetPortUc();
             }
             else
             {
                 // Update the protected server port if SA established
-                UpdateProtectedServerPortForContact(piOngoingSCC->GetMessage());
+                UpdateProtectedServerPortForContact(m_piOngoingScc->GetMessage());
             }
 
-            nPortFlowControl = pRegParam->GetPortFlowControl();
-            nTransportExt |= pRegParam->GetTransportExt();
+            nPortFlowControl = m_pRegParam->GetPortFlowControl();
+            nTransportExt |= m_pRegParam->GetTransportExt();
         }
         else
         {
-            nPortFlowControl = pStateTracker->GetPortFlowControl();
-            nTransportExt |= pStateTracker->GetTransportExt();
+            nPortFlowControl = m_pStateTracker->GetPortFlowControl();
+            nTransportExt |= m_pStateTracker->GetTransportExt();
         }
 
-        piOngoingSCC->SetTransportTuple(pStateTracker->GetIPAddress(), nPortUS, GetPortUC(),
+        m_piOngoingScc->SetTransportTuple(m_pStateTracker->GetIpAddress(), nPortUs, GetPortUc(),
                 nPortFlowControl, nTransportExt);
 
         // IMS_IPSEC_UDP_ENC
         if ((nPrevSubState == SUB_STATE_REGISTERING) &&
-                pRegParam->IsSecurityAssociationRequiredViaUDPEnc())
+                m_pRegParam->IsSecurityAssociationRequiredViaUdpEnc())
         {
             UpdateHostInfoInAllContacts();
 
-            if (ReformContactHeader(piOngoingSCC->GetMessage()) != IMS_SUCCESS)
+            if (ReformContactHeader(m_piOngoingScc->GetMessage()) != IMS_SUCCESS)
             {
-                piOngoingSCC->Close();
-                piOngoingSCC = IMS_NULL;
+                m_piOngoingScc->Close();
+                m_piOngoingScc = IMS_NULL;
 
                 if (nPrevState == STATE_INIT)
                 {
@@ -3436,10 +2679,10 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
             }
         }
 
-        if (pRegParam->FormRouteHeaders(piOngoingSCC, pStateTracker) != IMS_SUCCESS)
+        if (m_pRegParam->FormRouteHeaders(m_piOngoingScc, m_pStateTracker) != IMS_SUCCESS)
         {
-            piOngoingSCC->Close();
-            piOngoingSCC = IMS_NULL;
+            m_piOngoingScc->Close();
+            m_piOngoingScc = IMS_NULL;
 
             if (nPrevState == STATE_INIT)
             {
@@ -3452,10 +2695,10 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
             return IMS_FALSE;
         }
 
-        if (pRegParam->FormSecurityHeaders(piOngoingSCC) != IMS_SUCCESS)
+        if (m_pRegParam->FormSecurityHeaders(m_piOngoingScc) != IMS_SUCCESS)
         {
-            piOngoingSCC->Close();
-            piOngoingSCC = IMS_NULL;
+            m_piOngoingScc->Close();
+            m_piOngoingScc = IMS_NULL;
 
             if (nPrevState == STATE_INIT)
             {
@@ -3468,10 +2711,10 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
             return IMS_FALSE;
         }
 
-        if (piOngoingSCC->SetCredentials(objCredential) != IMS_SUCCESS)
+        if (m_piOngoingScc->SetCredentials(objCredential) != IMS_SUCCESS)
         {
-            piOngoingSCC->Close();
-            piOngoingSCC = IMS_NULL;
+            m_piOngoingScc->Close();
+            m_piOngoingScc = IMS_NULL;
 
             if (nPrevState == STATE_INIT)
             {
@@ -3486,11 +2729,11 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
 
         // Sets a new P-Access-Network-Info header on re-submitted message (2nd-REGISTER)
         if (SipConfigProxy::IsPanInfoInInitialRegRequired(
-                    GetSlotId(), pStateTracker->GetSIPProfile()))
+                    GetSlotId(), m_pStateTracker->GetSipProfile()))
         {
-            ISipMessage* piSIPMsg = piOngoingSCC->GetMessage();
-            PAccessNetworkInfoHeader::SetHeader(GetSlotId(), pStateTracker->GetIPAddress(),
-                    pStateTracker->GetSIPProfile(), piSIPMsg);
+            ISipMessage* piSipMsg = m_piOngoingScc->GetMessage();
+            PAccessNetworkInfoHeader::SetHeader(GetSlotId(), m_pStateTracker->GetIpAddress(),
+                    m_pStateTracker->GetSipProfile(), piSipMsg);
         }
         else
         {
@@ -3501,14 +2744,14 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
             }
             else
             {
-                ISipMessage* piSIPMsg = piOngoingSCC->GetMessage();
-                PAccessNetworkInfoHeader::SetHeader(GetSlotId(), pStateTracker->GetIPAddress(),
-                        pStateTracker->GetSIPProfile(), piSIPMsg);
+                ISipMessage* piSipMsg = m_piOngoingScc->GetMessage();
+                PAccessNetworkInfoHeader::SetHeader(GetSlotId(), m_pStateTracker->GetIpAddress(),
+                        m_pStateTracker->GetSipProfile(), piSipMsg);
             }
         }
 
         // SIP_MESSAGE_MEDIATOR
-        (void)AdjustMessage(piOngoingSCC->GetMessage(), IMessageMediator::MESSAGE_RESUBMIT);
+        (void)AdjustMessage(m_piOngoingScc->GetMessage(), IMessageMediator::MESSAGE_RESUBMIT);
 
         ISipTransportHelper* piTransHelper = SipFactory::GetTransportHelper(GetSlotId());
 
@@ -3517,10 +2760,10 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
             piTransHelper->ApplyIpSecForServerSockets();
         }
 
-        if (piOngoingSCC->Send() != IMS_SUCCESS)
+        if (m_piOngoingScc->Send() != IMS_SUCCESS)
         {
-            piOngoingSCC->Close();
-            piOngoingSCC = IMS_NULL;
+            m_piOngoingScc->Close();
+            m_piOngoingScc = IMS_NULL;
 
             if (nPrevState == STATE_INIT)
             {
@@ -3534,18 +2777,18 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
         }
 
         // Update the last request/response message
-        SetPreviousRequest(piOngoingSCC->GetMessage());
+        SetPreviousRequest(m_piOngoingScc->GetMessage());
         SetPreviousResponse(IMS_NULL);
 
         // Remove the previous credential information for re-authentication
-        piOngoingSCC->RemoveAllCredentials();
+        m_piOngoingScc->RemoveAllCredentials();
     }
     // SUB_STATE_REFRESHING
     else
     {
-        ISipClientConnection* piSCC = pRefreshHelper->GetConnection();
+        ISipClientConnection* piScc = m_pRefreshHelper->GetConnection();
 
-        if (piSCC == IMS_NULL)
+        if (piScc == IMS_NULL)
         {
             UpdateBindingState(BINDING_RESULT_NOK);
 
@@ -3553,9 +2796,9 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
             return IMS_FALSE;
         }
 
-        if (piSCC->InitResubmissionRequest() != IMS_SUCCESS)
+        if (piScc->InitResubmissionRequest() != IMS_SUCCESS)
         {
-            pRefreshHelper->AbortConnection();
+            m_pRefreshHelper->AbortConnection();
 
             UpdateBindingState(BINDING_RESULT_NOK);
 
@@ -3564,17 +2807,16 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
         }
 
         // RFC5626_FLOW_CONTROL
-        // MULTI_REG_TRANSPORT
-        IMS_SINT32 nTransportExt = pRegParam->GetTransportExtForRegOnly();
+        IMS_SINT32 nTransportExt = m_pRegParam->GetTransportExtForRegOnly();
 
-        nTransportExt |= pStateTracker->GetTransportExt();
+        nTransportExt |= m_pStateTracker->GetTransportExt();
 
-        piSCC->SetTransportTuple(pStateTracker->GetIPAddress(), GetPortUS(), GetPortUC(),
-                pStateTracker->GetPortFlowControl(), nTransportExt);
+        piScc->SetTransportTuple(m_pStateTracker->GetIpAddress(), GetPortUs(), GetPortUc(),
+                m_pStateTracker->GetPortFlowControl(), nTransportExt);
 
-        if (pRegParam->FormRouteHeaders(piSCC, pStateTracker) != IMS_SUCCESS)
+        if (m_pRegParam->FormRouteHeaders(piScc, m_pStateTracker) != IMS_SUCCESS)
         {
-            pRefreshHelper->AbortConnection();
+            m_pRefreshHelper->AbortConnection();
 
             UpdateBindingState(BINDING_RESULT_NOK);
 
@@ -3582,9 +2824,9 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
             return IMS_FALSE;
         }
 
-        if (pRegParam->FormSecurityHeaders(piSCC) != IMS_SUCCESS)
+        if (m_pRegParam->FormSecurityHeaders(piScc) != IMS_SUCCESS)
         {
-            pRefreshHelper->AbortConnection();
+            m_pRefreshHelper->AbortConnection();
 
             UpdateBindingState(BINDING_RESULT_NOK);
 
@@ -3592,9 +2834,9 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
             return IMS_FALSE;
         }
 
-        if (piSCC->SetCredentials(objCredential) != IMS_SUCCESS)
+        if (piScc->SetCredentials(objCredential) != IMS_SUCCESS)
         {
-            pRefreshHelper->AbortConnection();
+            m_pRefreshHelper->AbortConnection();
 
             UpdateBindingState(BINDING_RESULT_NOK);
 
@@ -3603,16 +2845,16 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
         }
 
         // Sets a new P-Access-Network-Info header on re-submitted message (2nd-REGISTER)
-        ISipMessage* piSIPMsg = piSCC->GetMessage();
-        PAccessNetworkInfoHeader::SetHeader(GetSlotId(), pStateTracker->GetIPAddress(),
-                pStateTracker->GetSIPProfile(), piSIPMsg);
+        ISipMessage* piSipMsg = piScc->GetMessage();
+        PAccessNetworkInfoHeader::SetHeader(GetSlotId(), m_pStateTracker->GetIpAddress(),
+                m_pStateTracker->GetSipProfile(), piSipMsg);
 
         // SIP_MESSAGE_MEDIATOR
-        (void)AdjustMessage(piSCC->GetMessage(), IMessageMediator::MESSAGE_RESUBMIT);
+        (void)AdjustMessage(piScc->GetMessage(), IMessageMediator::MESSAGE_RESUBMIT);
 
-        if (piSCC->Send() != IMS_SUCCESS)
+        if (piScc->Send() != IMS_SUCCESS)
         {
-            pRefreshHelper->AbortConnection();
+            m_pRefreshHelper->AbortConnection();
 
             UpdateBindingState(BINDING_RESULT_NOK);
 
@@ -3621,11 +2863,11 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
         }
 
         // Update the last request/response message
-        SetPreviousRequest(piSCC->GetMessage());
+        SetPreviousRequest(piScc->GetMessage());
         SetPreviousResponse(IMS_NULL);
 
         // Remove the previous credential information for re-authentication
-        piSCC->RemoveAllCredentials();
+        piScc->RemoveAllCredentials();
     }
 
     IMS_TRACE_D("Terminate to respond to AKA authentication challenge ...", 0, 0, 0);
@@ -3633,77 +2875,58 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN CONST Credential& objCredent
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Registration::RestoreSecurityHeaders()
 {
-    pRegParam->RemoveSecurityServers();
+    m_pRegParam->RemoveSecurityServers();
 
     if (GetState() == STATE_INIT)
     {
-        pRegParam->RemovePreferredSecurityHeaders();
+        m_pRegParam->RemovePreferredSecurityHeaders();
     }
     else
     {
-        pRegParam->RestoreSecurityHeaders();
+        m_pRegParam->RestoreSecurityHeaders();
     }
 }
 
 // IMS_AUTH_NONCE_REUSE {
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Registration::SetAuthenticationChallenge(IN ISipGenericChallenge* piChallenge)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (piChallenge == IMS_NULL)
     {
-        if (piGenericChallenge != IMS_NULL)
+        if (m_piGenericChallenge != IMS_NULL)
         {
-            piGenericChallenge->Destroy();
-            piGenericChallenge = IMS_NULL;
+            m_piGenericChallenge->Destroy();
+            m_piGenericChallenge = IMS_NULL;
         }
 
         return;
     }
 
-    if (piGenericChallenge != IMS_NULL)
+    if (m_piGenericChallenge != IMS_NULL)
     {
         IMS_TRACE_D("Authentication challenge (%s) is already present",
-                piGenericChallenge->GetNonce().GetStr(), 0, 0);
+                m_piGenericChallenge->GetNonce().GetStr(), 0, 0);
         return;
     }
 
-    piGenericChallenge = piChallenge->Clone();
+    m_piGenericChallenge = piChallenge->Clone();
 }
 // }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_RESULT Registration::SetContactNExpiresHeader(
-        IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nExpires /* = (-1) */)
+        IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nExpires /*= (-1)*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     // de-REG
     if (nExpires == 0)
     {
         // Wildcard Contact header : remove all the bindings related to this IMPU.
-        if (objContacts.IsEmpty())
+        if (m_objContacts.IsEmpty())
         {
-            if (piSIPMsg->SetHeader(ISipHeader::CONTACT_WILDCARD, "*") != IMS_SUCCESS)
+            if (piSipMsg->SetHeader(ISipHeader::CONTACT_WILDCARD, "*") != IMS_SUCCESS)
             {
                 IMS_TRACE_E(0, "Setting Contact header (using wildcard [*]) failed", 0, 0, 0);
                 return IMS_FAILURE;
@@ -3711,7 +2934,7 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
 
             // If the Contact header uses a wildcard option,
             // the Expires header field needs to be set as 0.
-            if (piSIPMsg->SetHeader(ISipHeader::EXPIRES_SEC, "0") != IMS_SUCCESS)
+            if (piSipMsg->SetHeader(ISipHeader::EXPIRES_SEC, "0") != IMS_SUCCESS)
             {
                 IMS_TRACE_E(0, "Setting Expires header failed", 0, 0, 0);
                 return IMS_FAILURE;
@@ -3721,9 +2944,9 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
         {
             AString strContact;
 
-            for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+            for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
             {
-                RegContact* pContact = objContacts.GetAt(i);
+                RegContact* pContact = m_objContacts.GetAt(i);
 
                 strContact = pContact->ToString();
 
@@ -3733,7 +2956,7 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
                 strContact.Append(TextParser::CHAR_EQUAL);
                 strContact.Append('0');
 
-                if (piSIPMsg->AddHeader(ISipHeader::CONTACT_NORMAL, strContact) != IMS_SUCCESS)
+                if (piSipMsg->AddHeader(ISipHeader::CONTACT_NORMAL, strContact) != IMS_SUCCESS)
                 {
                     IMS_TRACE_E(0, "Adding Contact header failed", 0, 0, 0);
                     return IMS_FAILURE;
@@ -3742,7 +2965,7 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
 
             // If the Contact header uses a wildcard option,
             // the Expires header field needs to be set as 0.
-            if (SetExpiresHeader(piSIPMsg, 0) != IMS_SUCCESS)
+            if (SetExpiresHeader(piSipMsg, 0) != IMS_SUCCESS)
             {
                 return IMS_FAILURE;
             }
@@ -3750,11 +2973,11 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
     }
     else
     {
-        for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
         {
-            RegContact* pContact = objContacts.GetAt(i);
+            RegContact* pContact = m_objContacts.GetAt(i);
 
-            if (piSIPMsg->AddHeader(ISipHeader::CONTACT_NORMAL, pContact->ToStringWithExpires()) !=
+            if (piSipMsg->AddHeader(ISipHeader::CONTACT_NORMAL, pContact->ToStringWithExpires()) !=
                     IMS_SUCCESS)
             {
                 IMS_TRACE_E(0, "Adding Contact header failed", 0, 0, 0);
@@ -3762,7 +2985,7 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
             }
         }
 
-        if (SetExpiresHeader(piSIPMsg, nExpires) != IMS_SUCCESS)
+        if (SetExpiresHeader(piSipMsg, nExpires) != IMS_SUCCESS)
         {
             return IMS_FAILURE;
         }
@@ -3771,18 +2994,12 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_RESULT Registration::SetExpiresHeader(
-        IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nExpires /* = (-1) */)
+        IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nExpires /*= (-1)*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!SipConfigProxy::IsExpiresHeaderInRegRequired(GetSlotId(), pStateTracker->GetSIPProfile()))
+    if (!SipConfigProxy::IsExpiresHeaderInRegRequired(
+                GetSlotId(), m_pStateTracker->GetSipProfile()))
     {
         // "expires" header parameter will be used to represent the registration expiration
         return IMS_SUCCESS;
@@ -3792,7 +3009,8 @@ IMS_RESULT Registration::SetExpiresHeader(
     {
         AString strExpires;
         strExpires.Sprintf("%u", nExpires);
-        if (piSIPMsg->SetHeader(ISipHeader::EXPIRES_SEC, strExpires) != IMS_SUCCESS)
+
+        if (piSipMsg->SetHeader(ISipHeader::EXPIRES_SEC, strExpires) != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting Expires header failed", 0, 0, 0);
             return IMS_FAILURE;
@@ -3800,7 +3018,7 @@ IMS_RESULT Registration::SetExpiresHeader(
     }
     else
     {
-        RegContact* pPreferredContact = objContacts.IsEmpty() ? IMS_NULL : objContacts.GetAt(0);
+        RegContact* pPreferredContact = m_objContacts.IsEmpty() ? IMS_NULL : m_objContacts.GetAt(0);
 
         if ((pPreferredContact != IMS_NULL) &&
                 (pPreferredContact->GetInitialExpires() !=
@@ -3808,7 +3026,8 @@ IMS_RESULT Registration::SetExpiresHeader(
         {
             AString strExpires;
             strExpires.Sprintf("%u", pPreferredContact->GetInitialExpires());
-            if (piSIPMsg->SetHeader(ISipHeader::EXPIRES_SEC, strExpires) != IMS_SUCCESS)
+
+            if (piSipMsg->SetHeader(ISipHeader::EXPIRES_SEC, strExpires) != IMS_SUCCESS)
             {
                 IMS_TRACE_E(0, "Setting Expires header failed", 0, 0, 0);
                 return IMS_FAILURE;
@@ -3819,40 +3038,33 @@ IMS_RESULT Registration::SetExpiresHeader(
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Registration::SetHeaders(IN ISipClientConnection* piSCC)
+IMS_RESULT Registration::SetHeaders(IN ISipClientConnection* piScc)
 {
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
     AString strCSeqHdr;
 
-    //---------------------------------------------------------------------------------------------
-
     strCSeqHdr.Sprintf(
-            "%lu %s", pRegFlow->IncreaseNGetCSeqValue(), SipMethod::ToName(SipMethod::REGISTER));
+            "%lu %s", m_pRegFlow->IncreaseNGetCSeqValue(), SipMethod::ToName(SipMethod::REGISTER));
 
-    if (piSIPMsg->SetHeader(ISipHeader::CSEQ, strCSeqHdr) != IMS_SUCCESS)
+    if (piSipMsg->SetHeader(ISipHeader::CSEQ, strCSeqHdr) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting CSeq header failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
     // Set Call-ID header
-    if (piSIPMsg->SetHeader(ISipHeader::CALL_ID, pRegFlow->GetCallId()) != IMS_SUCCESS)
+    if (piSipMsg->SetHeader(ISipHeader::CALL_ID, m_pRegFlow->GetCallId()) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting Call-ID header failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
     // HEADER_REQ_SESSION-ID
-    if (pRegFlow->GetSessionId().GetLength() > 0)
+    if (m_pRegFlow->GetSessionId().GetLength() > 0)
     {
         // Set Session-ID header
-        if (piSIPMsg->SetHeader(ISipHeader::UNKNOWN, pRegFlow->GetSessionId(),
+        if (piSipMsg->SetHeader(ISipHeader::UNKNOWN, m_pRegFlow->GetSessionId(),
                     SipHeaderName::SESSION_ID) != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting Session-ID failed", 0, 0, 0);
@@ -3860,13 +3072,13 @@ IMS_RESULT Registration::SetHeaders(IN ISipClientConnection* piSCC)
         }
     }
 
-    if (pRegParam->FormHeaders(piSCC, pStateTracker) != IMS_SUCCESS)
+    if (m_pRegParam->FormHeaders(piScc, m_pStateTracker) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Forming REGISTER request failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    if (pRegParam->FormSecurityHeaders(piSCC) != IMS_SUCCESS)
+    if (m_pRegParam->FormSecurityHeaders(piScc) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Forming security headers failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -3880,18 +3092,18 @@ IMS_RESULT Registration::SetHeaders(IN ISipClientConnection* piSCC)
         // re-REG / de-REG
         if (GetState() == STATE_ACTIVE)
         {
-            PAccessNetworkInfoHeader::SetHeader(GetSlotId(), piContact->GetIPAddress(),
-                    pStateTracker->GetSIPProfile(), piSIPMsg);
+            PAccessNetworkInfoHeader::SetHeader(GetSlotId(), piContact->GetIpAddress(),
+                    m_pStateTracker->GetSipProfile(), piSipMsg);
         }
         else
         {
             // Configuration for an initial REGISTER / SA is present on INIT
             if (SipConfigProxy::IsPanInfoInInitialRegRequired(
-                        GetSlotId(), pStateTracker->GetSIPProfile()) ||
-                    pRegParam->IsSecurityAssociationPresent())
+                        GetSlotId(), m_pStateTracker->GetSipProfile()) ||
+                    m_pRegParam->IsSecurityAssociationPresent())
             {
-                PAccessNetworkInfoHeader::SetHeader(GetSlotId(), piContact->GetIPAddress(),
-                        pStateTracker->GetSIPProfile(), piSIPMsg);
+                PAccessNetworkInfoHeader::SetHeader(GetSlotId(), piContact->GetIpAddress(),
+                        m_pStateTracker->GetSipProfile(), piSipMsg);
             }
         }
     }
@@ -3900,36 +3112,23 @@ IMS_RESULT Registration::SetHeaders(IN ISipClientConnection* piSCC)
 }
 
 // IMS_AUTH_NONCE_REUSE {
-/*
-
-Remarks
-
-*/
 PRIVATE
-void Registration::SetNextAuthenticationInfo(IN_OUT ISipClientConnection*& piSCC)
+void Registration::SetNextAuthenticationInfo(IN_OUT ISipClientConnection*& piScc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piGenericChallenge != IMS_NULL)
+    if (m_piGenericChallenge != IMS_NULL)
     {
-        piGenericChallenge->IncreaseNonceCount();
+        m_piGenericChallenge->IncreaseNonceCount();
 
-        piSCC->SetCredentials(objActiveCredential);
-        piSCC->SetAuthenticationChallenge(piGenericChallenge);
+        piScc->SetCredentials(m_objActiveCredential);
+        piScc->SetAuthenticationChallenge(m_piGenericChallenge);
     }
 }
 
-/*
-
-Remarks
- SIP_DIGEST_AUTH_NONCE_REUSE
-*/
+// SIP_DIGEST_AUTH_NONCE_REUSE
 PRIVATE
-void Registration::SetNextNonce(IN ISipMessage* piSIPMsg)
+void Registration::SetNextNonce(IN ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piGenericChallenge == IMS_NULL)
+    if (m_piGenericChallenge == IMS_NULL)
     {
         return;
     }
@@ -3943,7 +3142,7 @@ void Registration::SetNextNonce(IN ISipMessage* piSIPMsg)
     }
 
     AString strAuthenticationInfo =
-            piSIPMsg->GetHeader(ISipHeader::UNKNOWN, 0, SipHeaderName::AUTHENTICATION_INFO);
+            piSipMsg->GetHeader(ISipHeader::UNKNOWN, 0, SipHeaderName::AUTHENTICATION_INFO);
 
     if (strAuthenticationInfo.GetLength() == 0)
     {
@@ -3972,182 +3171,140 @@ void Registration::SetNextNonce(IN ISipMessage* piSIPMsg)
     {
         if (strValue.StartsWith(TextParser::CHAR_DQUOT))
         {
-            piGenericChallenge->SetNonce(strValue.Mid(1, strValue.GetLength() - 2));
+            m_piGenericChallenge->SetNonce(strValue.Mid(1, strValue.GetLength() - 2));
         }
         else
         {
-            piGenericChallenge->SetNonce(strValue);
+            m_piGenericChallenge->SetNonce(strValue);
         }
     }
 }
 // }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void Registration::SetOngoingConnection(IN ISipClientConnection* piSCC)
+void Registration::SetOngoingConnection(IN ISipClientConnection* piScc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piOngoingSCC != IMS_NULL)
+    if (m_piOngoingScc != IMS_NULL)
     {
-        piOngoingSCC->Close();
-        piOngoingSCC = IMS_NULL;
+        m_piOngoingScc->Close();
+        m_piOngoingScc = IMS_NULL;
     }
 
-    if (piSCC != IMS_NULL)
+    if (piScc != IMS_NULL)
     {
-        piOngoingSCC = piSCC;
+        m_piOngoingScc = piScc;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void Registration::SetPreviousRequest(IN ISipMessage* piSIPMsg)
+void Registration::SetPreviousRequest(IN ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piPreviousRequest != IMS_NULL)
+    if (m_piPreviousRequest != IMS_NULL)
     {
-        piPreviousRequest->Destroy();
-        piPreviousRequest = IMS_NULL;
+        m_piPreviousRequest->Destroy();
+        m_piPreviousRequest = IMS_NULL;
     }
 
-    if (piSIPMsg != IMS_NULL)
+    if (piSipMsg != IMS_NULL)
     {
-        piPreviousRequest = piSIPMsg->Clone();
+        m_piPreviousRequest = piSipMsg->Clone();
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void Registration::SetPreviousResponse(IN ISipMessage* piSIPMsg)
+void Registration::SetPreviousResponse(IN ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piPreviousResponse != IMS_NULL)
+    if (m_piPreviousResponse != IMS_NULL)
     {
-        piPreviousResponse->Destroy();
-        piPreviousResponse = IMS_NULL;
+        m_piPreviousResponse->Destroy();
+        m_piPreviousResponse = IMS_NULL;
     }
 
-    if (piSIPMsg != IMS_NULL)
+    if (piSipMsg != IMS_NULL)
     {
-        piPreviousResponse = piSIPMsg->Clone();
+        m_piPreviousResponse = piSipMsg->Clone();
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Registration::SetState(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_I("Registration (%s) :: %s to %s",
-            SipDebug::GetUri1(pStateTracker->GetAOR().GetUri()).GetStr(),
-            StateToString(this->nState), StateToString(nState));
+            SipDebug::GetUri1(m_pStateTracker->GetAor().GetUri()).GetStr(), StateToString(m_nState),
+            StateToString(nState));
 
-    this->nState = nState;
+    m_nState = nState;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Registration::SetSubState(IN IMS_SINT32 nSubState)
 {
-    //---------------------------------------------------------------------------------------------
-
-    IMS_TRACE_I("Registration (Sub-State) :: %s to %s", SubStateToString(this->nSubState),
+    IMS_TRACE_I("Registration (Sub-State) :: %s to %s", SubStateToString(m_nSubState),
             SubStateToString(nSubState), 0);
 
-    this->nSubState = nSubState;
+    m_nSubState = nSubState;
 
-    if (this->nSubState == SUB_STATE_IDLE)
+    if (m_nSubState == SUB_STATE_IDLE)
     {
         // Release the registration flow
         IMS_UINT32 nSubscriber = RegFlow::NO_SUBSCRIBER;
 
-        if (pRegFlow->IsReserved(&nSubscriber))
+        if (m_pRegFlow->IsReserved(&nSubscriber))
         {
             if (nSubscriber == GetName().GetHashCode())
             {
-                pRegFlow->Release();
+                m_pRegFlow->Release();
             }
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void Registration::StorePersistentHeaders(IN CONST ISipMessage* piSIPMsg)
+void Registration::StorePersistentHeaders(IN const ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
     // IMS_IPSEC_UDP_ENC
-    if (pRegParam->IsSecurityAssociationRequiredViaUDPEnc())
+    if (m_pRegParam->IsSecurityAssociationRequiredViaUdpEnc())
     {
         ChoosePreferredContact();
     }
 
     // Stores the public user identities
-    AStringArray objTmpArray = piSIPMsg->GetHeaders(ISipHeader::P_ASSOCIATED_URI);
+    AStringArray objTmpArray = piSipMsg->GetHeaders(ISipHeader::P_ASSOCIATED_URI);
 
     // If P-Associated-URI does not contains in 200 OK,
     // the explicit registration AOR will be added.
     if (objTmpArray.IsEmpty())
     {
-        objTmpArray.AddElement(pStateTracker->GetAOR().ToString());
+        objTmpArray.AddElement(m_pStateTracker->GetAor().ToString());
 
         IMS_TRACE_D("P-Associated-URI is not present; AOR (%s)",
                 SipDebug::GetUri1(objTmpArray.GetElementAt(0)).GetStr(), 0, 0);
     }
 
-    if (piUserIdNotifier != IMS_NULL)
+    if (m_piUserIdNotifier != IMS_NULL)
     {
         AStringArray objReorderedUserIds;
 
-        if (piUserIdNotifier->RegUserIdentity_ReorderUserIdentities(
+        if (m_piUserIdNotifier->RegUserIdentity_ReorderUserIdentities(
                     objTmpArray, objReorderedUserIds))
         {
-            pStateTracker->SetAssociatedURIs(objReorderedUserIds);
+            m_pStateTracker->SetAssociatedUris(objReorderedUserIds);
         }
         else
         {
-            pStateTracker->SetAssociatedURIs(objTmpArray);
+            m_pStateTracker->SetAssociatedUris(objTmpArray);
         }
     }
     else
     {
-        pStateTracker->SetAssociatedURIs(objTmpArray);
+        m_pStateTracker->SetAssociatedUris(objTmpArray);
     }
 
     // Stores the Service-Route headers for the next outgoing request
-    objTmpArray = piSIPMsg->GetHeaders(ISipHeader::SERVICE_ROUTE);
+    objTmpArray = piSipMsg->GetHeaders(ISipHeader::SERVICE_ROUTE);
 
     // Update the service-routes if preloaded route set is present
-    const AStringArray& objPreloadedRoutes = pRegParam->GetPreloadedRoutes();
+    const AStringArray& objPreloadedRoutes = m_pRegParam->GetPreloadedRoutes();
 
     if (!objPreloadedRoutes.IsEmpty())
     {
@@ -4157,57 +3314,49 @@ void Registration::StorePersistentHeaders(IN CONST ISipMessage* piSIPMsg)
         }
     }
 
-    pStateTracker->SetServiceRoutes(objTmpArray);
+    m_pStateTracker->SetServiceRoutes(objTmpArray);
 
     // Path header fields
-    objTmpArray = piSIPMsg->GetHeaders(ISipHeader::PATH);
-    pStateTracker->SetPathHeaders(objTmpArray);
+    objTmpArray = piSipMsg->GetHeaders(ISipHeader::PATH);
+    m_pStateTracker->SetPathHeaders(objTmpArray);
 
-    // MULTI_REG_TRANSPORT
-    pStateTracker->SetTransportExt(pRegParam->GetTransportExt());
+    m_pStateTracker->SetTransportExt(m_pRegParam->GetTransportExt());
 
     // RFC5626_FLOW_CONTROL
     // If IPSEC is supported and the flow control needs to be supported,
     // then the flow control port SHALL be a port_uc.
     if (IsFlowControlRequired())
     {
-        pStateTracker->SetPortFlowControl(pRegParam->GetPortFlowControl());
+        m_pStateTracker->SetPortFlowControl(m_pRegParam->GetPortFlowControl());
     }
     else
     {
-        pStateTracker->SetPortFlowControl(Sip::PORT_UNSPECIFIED);
+        m_pStateTracker->SetPortFlowControl(Sip::PORT_UNSPECIFIED);
     }
 
     // Updates the protected client /server port (uc / us)
-    pStateTracker->SetPortUC(GetPortUC());
-    pStateTracker->SetPortUS(GetPortUS());
+    m_pStateTracker->SetPortUc(GetPortUc());
+    m_pStateTracker->SetPortUs(GetPortUs());
 
     // Security-Client / Security-Verify headers
-    pStateTracker->SetSecurityClients(pRegParam->GetSecurityClients());
-    pStateTracker->SetSecurityVerifys(pRegParam->GetSecurityVerifys());
+    m_pStateTracker->SetSecurityClients(m_pRegParam->GetSecurityClients());
+    m_pStateTracker->SetSecurityVerifys(m_pRegParam->GetSecurityVerifys());
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Registration::UpdateBindings(IN CONST ISipMessage* piSIPMsg)
+IMS_RESULT Registration::UpdateBindings(IN const ISipMessage* piSipMsg)
 {
-    IMS_SINT32 nHeaderCount = piSIPMsg->GetHeaderCount(ISipHeader::CONTACT_ANY);
+    IMS_SINT32 nHeaderCount = piSipMsg->GetHeaderCount(ISipHeader::CONTACT_ANY);
     AString strHeader;
     ISipHeader* piHeader;
 
     IMS_SINT32 nExpiresValue = (-1);
     IMSList<ISipHeader*> objHeaders;
 
-    //---------------------------------------------------------------------------------------------
-
     // Extract the expiration value from Expires header field
-    if (piSIPMsg->IsHeaderPresent(ISipHeader::EXPIRES_ANY))
+    if (piSipMsg->IsHeaderPresent(ISipHeader::EXPIRES_ANY))
     {
-        strHeader = piSIPMsg->GetHeader(ISipHeader::EXPIRES_ANY);
+        strHeader = piSipMsg->GetHeader(ISipHeader::EXPIRES_ANY);
         piHeader = SipParsingHelper::CreateHeader(ISipHeader::EXPIRES_ANY, strHeader);
 
         if (piHeader != IMS_NULL)
@@ -4215,12 +3364,12 @@ IMS_RESULT Registration::UpdateBindings(IN CONST ISipMessage* piSIPMsg)
             // 4 Make up for test equipment's fault (e.g. Anite)
             if (piHeader->GetValue().Contains(TextParser::CHAR_DQUOT))
             {
-                IMS_BOOL bOK = IMS_FALSE;
+                IMS_BOOL bOk = IMS_FALSE;
                 AString strValue = TextParser::TrimDQUOT(piHeader->GetValue());
 
-                nExpiresValue = strValue.ToInt32(&bOK);
+                nExpiresValue = strValue.ToInt32(&bOk);
 
-                if (!bOK)
+                if (!bOk)
                 {
                     nExpiresValue = (-1);
                 }
@@ -4237,7 +3386,7 @@ IMS_RESULT Registration::UpdateBindings(IN CONST ISipMessage* piSIPMsg)
     // Process more operation for Contact headers
     for (IMS_SINT32 i = 0; i < nHeaderCount; ++i)
     {
-        strHeader = piSIPMsg->GetHeader(ISipHeader::CONTACT_ANY, i);
+        strHeader = piSipMsg->GetHeader(ISipHeader::CONTACT_ANY, i);
         piHeader = SipParsingHelper::CreateHeader(ISipHeader::CONTACT_ANY, strHeader);
 
         if (piHeader == IMS_NULL)
@@ -4262,9 +3411,9 @@ IMS_RESULT Registration::UpdateBindings(IN CONST ISipMessage* piSIPMsg)
         {
             // Only for de-registration procedure
             // So, all the registration contacts transit to "STATE_TERMINATED"
-            for (IMS_UINT32 j = 0; j < objContacts.GetSize(); ++j)
+            for (IMS_UINT32 j = 0; j < m_objContacts.GetSize(); ++j)
             {
-                RegContact* pContact = objContacts.GetAt(j);
+                RegContact* pContact = m_objContacts.GetAt(j);
 
                 pContact->SetTerminated();
             }
@@ -4280,9 +3429,9 @@ IMS_RESULT Registration::UpdateBindings(IN CONST ISipMessage* piSIPMsg)
 
     // For each registration contact, updates the parameter ('expires')
     // If no match found, it transits to "STATE_TERMINATED"
-    for (IMS_UINT32 j = 0; j < objContacts.GetSize(); ++j)
+    for (IMS_UINT32 j = 0; j < m_objContacts.GetSize(); ++j)
     {
-        RegContact* pContact = objContacts.GetAt(j);
+        RegContact* pContact = m_objContacts.GetAt(j);
         IMS_SINT32 nUpdateResult = pContact->UpdateParameter(objHeaders, nExpiresValue);
 
         if (nUpdateResult == RegContact::UPDATE_OK)
@@ -4304,114 +3453,75 @@ IMS_RESULT Registration::UpdateBindings(IN CONST ISipMessage* piSIPMsg)
     // Destroy the local resource
     DestroyAllHeaders(objHeaders);
 
-    ////////////////////////////
-    /// Remove the contact in the state, "STATE_TERMINATED"
-#if 0
-    for (IMS_UINT32 k = 0; k < objContacts.GetSize(); ++k)
-    {
-        RegContact *pContact = objContacts.GetAt(k);
-
-        // State & Event : check this two field before removing Contact
-        if (!pContact->IsActiveBinding() && pContact->IsEmpty())
-        {
-            objContacts.RemoveAt(k);
-            --k;
-        }
-    }
-#endif
-
     return nBindingUpdateResult;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Registration::UpdateBindingState(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objObservers.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objObservers.GetSize(); ++i)
     {
-        RegObserver* pObserver = objObservers.GetAt(i);
+        RegObserver* pObserver = m_objObservers.GetAt(i);
 
         if (pObserver == IMS_NULL)
+        {
             continue;
+        }
 
         pObserver->Update(nState);
     }
 }
 
-/*
-
-Remarks
- IMS_IPSEC_UDP_ENC
-*/
+// IMS_IPSEC_UDP_ENC
 PRIVATE
 void Registration::UpdateHostInfoInAllContacts()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pRegParam->IsSecurityAssociationRequiredViaUDPEnc())
+    if (m_pRegParam->IsSecurityAssociationRequiredViaUdpEnc())
     {
-        for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
         {
-            RegContact* pContact = objContacts.GetAt(i);
+            RegContact* pContact = m_objContacts.GetAt(i);
 
-            pContact->SetHostInfo(pStateTracker->GetPublicIPAddress());
+            pContact->SetHostInfo(m_pStateTracker->GetPublicIpAddress());
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void Registration::UpdateCSeqNumber(IN CONST ISipMessage* piSIPMsg)
+void Registration::UpdateCSeqNumber(IN const ISipMessage* piSipMsg)
 {
-    AString strCSeq = piSIPMsg->GetHeader(ISipHeader::CSEQ);
-    IMS_SINT32 nPosOfSP = strCSeq.GetIndexOf(TextParser::CHAR_SP);
+    AString strCSeq = piSipMsg->GetHeader(ISipHeader::CSEQ);
+    IMS_SINT32 nPosOfSp = strCSeq.GetIndexOf(TextParser::CHAR_SP);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (nPosOfSP == AString::NPOS)
+    if (nPosOfSp == AString::NPOS)
     {
         // TODO:: select the proper value to increase sequence number when an error occurs
         // If CSeq header is invalid, the number will be increased as much as 5
-        (void)pRegFlow->IncreaseNGetCSeqValue(5);
+        (void)m_pRegFlow->IncreaseNGetCSeqValue(5);
         return;
     }
 
-    strCSeq = strCSeq.GetSubStr(0, nPosOfSP);
+    strCSeq = strCSeq.GetSubStr(0, nPosOfSp);
 
-    IMS_BOOL bOK = IMS_FALSE;
-    IMS_SINT32 nSeqNum = strCSeq.ToInt32(&bOK);
+    IMS_BOOL bOk = IMS_FALSE;
+    IMS_SINT32 nSeqNum = strCSeq.ToInt32(&bOk);
 
-    if (!bOK)
+    if (!bOk)
     {
         // If the number is not converted, the number will be increased as much as 5
-        (void)pRegFlow->IncreaseNGetCSeqValue(5);
+        (void)m_pRegFlow->IncreaseNGetCSeqValue(5);
         return;
     }
 
     IMS_TRACE_I("Registration - Sequence Number Changed (%d >> %d)",
-            pRegFlow->IncreaseNGetCSeqValue(0), nSeqNum, 0);
+            m_pRegFlow->IncreaseNGetCSeqValue(0), nSeqNum, 0);
 
     // Store the current sequence number (last one) from the last successful response.
-    pRegFlow->SetCSeqValue(nSeqNum);
+    m_pRegFlow->SetCSeqValue(nSeqNum);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void Registration::UpdateProtectedServerPortForContact(IN_OUT ISipMessage* piSIPMsg)
+void Registration::UpdateProtectedServerPortForContact(IN_OUT ISipMessage* piSipMsg)
 {
     IRegContact* piRegContact = GetPreferredContact();
 
@@ -4421,11 +3531,11 @@ void Registration::UpdateProtectedServerPortForContact(IN_OUT ISipMessage* piSIP
         return;
     }
 
-    IMS_SINT32 nHCount = piSIPMsg->GetHeaderCount(ISipHeader::CONTACT_NORMAL);
+    IMS_SINT32 nHCount = piSipMsg->GetHeaderCount(ISipHeader::CONTACT_NORMAL);
 
     if (nHCount == 1)
     {
-        AString strContact = piSIPMsg->GetHeader(ISipHeader::CONTACT_NORMAL);
+        AString strContact = piSipMsg->GetHeader(ISipHeader::CONTACT_NORMAL);
         ISipHeader* piHeader =
                 SipParsingHelper::CreateHeader(ISipHeader::CONTACT_NORMAL, strContact);
 
@@ -4444,8 +3554,8 @@ void Registration::UpdateProtectedServerPortForContact(IN_OUT ISipMessage* piSIP
 
                     pAddress->SetPort(nPort);
 
-                    piSIPMsg->RemoveHeader(ISipHeader::CONTACT_NORMAL);
-                    piSIPMsg->SetHeader(
+                    piSipMsg->RemoveHeader(ISipHeader::CONTACT_NORMAL);
+                    piSipMsg->SetHeader(
                             ISipHeader::CONTACT_NORMAL, piHeader->ToStringWithoutName());
                 }
             }
@@ -4453,7 +3563,7 @@ void Registration::UpdateProtectedServerPortForContact(IN_OUT ISipMessage* piSIP
             {
                 // Exceptional case
                 IMS_TRACE_D("ReformContactHeader :: SipAddress is null", 0, 0, 0);
-                ReformContactHeader(piSIPMsg);
+                ReformContactHeader(piSipMsg);
             }
 
             piHeader->Destroy();
@@ -4462,32 +3572,27 @@ void Registration::UpdateProtectedServerPortForContact(IN_OUT ISipMessage* piSIP
         {
             // Exceptional case
             IMS_TRACE_D("ReformContactHeader :: ISipHeader is null", 0, 0, 0);
-            ReformContactHeader(piSIPMsg);
+            ReformContactHeader(piSipMsg);
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Registration::UpdateRefreshTimer()
 {
     IMS_UINT32 nExpirationValue = 0;
     IMS_UINT32 nAnchorContact = 0xFFFFFFFF;
 
-    //---------------------------------------------------------------------------------------------
-
     // Select the minimum expiration value among the registered contacts
     // (State of contact is 'active')
-    for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        const RegContact* pContact = objContacts.GetAt(i);
+        const RegContact* pContact = m_objContacts.GetAt(i);
 
         if (!pContact->IsActiveBinding())
+        {
             continue;
+        }
 
         IMS_UINT32 nTmpVal = pContact->GetExpires();
 
@@ -4511,129 +3616,110 @@ void Registration::UpdateRefreshTimer()
 
     if (nAnchorContact != 0xFFFFFFFF)
     {
-        const RegContact* pContact = objContacts.GetAt(nAnchorContact);
+        const RegContact* pContact = m_objContacts.GetAt(nAnchorContact);
 
-        pRefreshHelper->SetContactAddress(pContact->GetContactAddress());
+        m_pRefreshHelper->SetContactAddress(pContact->GetContactAddress());
     }
 
-    pRefreshHelper->UpdateRefreshTimer(static_cast<IMS_SINT32>(nExpirationValue));
+    m_pRefreshHelper->UpdateRefreshTimer(static_cast<IMS_SINT32>(nExpirationValue));
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL ISipClientConnection* Registration::CreateConnection(IN Registration* pReg)
 {
-    AString strAOR = pReg->pStateTracker->GetAOR().ToString();
-    const RegContact* pContact = pReg->pStateTracker->GetPreferredContact();
-
-    //---------------------------------------------------------------------------------------------
+    AString strAor = pReg->m_pStateTracker->GetAor().ToString();
+    const RegContact* pContact = pReg->m_pStateTracker->GetPreferredContact();
 
     if (pContact == IMS_NULL)
     {
-        IMS_TRACE_E(0, "No contacts for the registration (%s)", SipDebug::GetUri1(strAOR).GetStr(),
+        IMS_TRACE_E(0, "No contacts for the registration (%s)", SipDebug::GetUri1(strAor).GetStr(),
                 0, 0);
         return IMS_NULL;
     }
 
-    ISipClientConnection* piSCC = DYNAMIC_CAST(ISipClientConnection*, Connector::Open(strAOR));
+    ISipClientConnection* piScc = DYNAMIC_CAST(ISipClientConnection*, Connector::Open(strAor));
 
-    IMS_TRACE_D("CreateConnection - To (%s), Method (REGISTER)", SipDebug::GetUri1(strAOR).GetStr(),
+    IMS_TRACE_D("CreateConnection - To (%s), Method (REGISTER)", SipDebug::GetUri1(strAor).GetStr(),
             0, 0);
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a SIP client connection failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    // MULTI_REG_SIP_PROFILE
-    piSCC->SetSipProfile(pReg->pStateTracker->GetSIPProfile());
+    piScc->SetSipProfile(pReg->m_pStateTracker->GetSipProfile());
 
     // Sets the transport tuples
     // RFC5626_FLOW_CONTROL
-    // MULTI_REG_TRANSPORT
-    IMS_SINT32 nTransportExt = pReg->pRegParam->GetTransportExtForRegOnly();
+    IMS_SINT32 nTransportExt = pReg->m_pRegParam->GetTransportExtForRegOnly();
 
     if (pReg->GetState() == STATE_CREATED)
     {
-        nTransportExt |= pReg->pRegParam->GetTransportExt();
+        nTransportExt |= pReg->m_pRegParam->GetTransportExt();
 
-        piSCC->SetTransportTuple(pContact->GetIPAddress(), pReg->GetPortUC(), pReg->GetPortUC(),
-                pReg->pRegParam->GetPortFlowControl(), nTransportExt);
+        piScc->SetTransportTuple(pContact->GetIpAddress(), pReg->GetPortUc(), pReg->GetPortUc(),
+                pReg->m_pRegParam->GetPortFlowControl(), nTransportExt);
     }
     else
     {
-        nTransportExt |= pReg->pStateTracker->GetTransportExt();
+        nTransportExt |= pReg->m_pStateTracker->GetTransportExt();
 
-        piSCC->SetTransportTuple(pContact->GetIPAddress(), pReg->GetPortUS(),
-                pReg->pStateTracker->GetPortUC(), pReg->pStateTracker->GetPortFlowControl(),
+        piScc->SetTransportTuple(pContact->GetIpAddress(), pReg->GetPortUs(),
+                pReg->m_pStateTracker->GetPortUc(), pReg->m_pStateTracker->GetPortFlowControl(),
                 nTransportExt);
     }
 
     // Sets the SIP transaction timers
-    const SipTimerValues* pSIPTVs = pReg->pRegParam->GetSIPTimerValues();
+    const SipTimerValues* pSipTimerValues = pReg->m_pRegParam->GetSipTimerValues();
 
-    if (pSIPTVs != IMS_NULL)
+    if (pSipTimerValues != IMS_NULL)
     {
-        piSCC->SetTransactionTimerValues(*pSIPTVs);
+        piScc->SetTransactionTimerValues(*pSipTimerValues);
     }
     else
     {
-        piSCC->SetTransactionTimerValues(SipTimerValuesHelper::GetValues(
-                pReg->GetSlotId(), pReg->pStateTracker->GetSIPProfile()));
+        piScc->SetTransactionTimerValues(SipTimerValuesHelper::GetValues(
+                pReg->GetSlotId(), pReg->m_pStateTracker->GetSipProfile()));
     }
 
-    if (piSCC->InitRequest(SipMethod::ToName(SipMethod::REGISTER), IMS_NULL) != IMS_SUCCESS)
+    if (piScc->InitRequest(SipMethod::ToName(SipMethod::REGISTER), IMS_NULL) != IMS_SUCCESS)
     {
-        piSCC->Close();
+        piScc->Close();
         return IMS_NULL;
     }
 
     // Set From header
-    if (piSCC->GetMessage()->SetHeader(ISipHeader::FROM, strAOR) != IMS_SUCCESS)
+    if (piScc->GetMessage()->SetHeader(ISipHeader::FROM, strAor) != IMS_SUCCESS)
     {
-        piSCC->Close();
+        piScc->Close();
         return IMS_NULL;
     }
 
-    return piSCC;
+    return piScc;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL void Registration::DestroyAllHeaders(IN_OUT IMSList<ISipHeader*>& objHeaders)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (objHeaders.IsEmpty())
+    {
         return;
+    }
 
     for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
     {
         ISipHeader* piHeader = objHeaders.GetAt(i);
 
         if (piHeader != IMS_NULL)
+        {
             piHeader->Destroy();
+        }
     }
 
     objHeaders.Clear();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL const IMS_CHAR* Registration::StateToString(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nState)
     {
         case STATE_CREATED:
@@ -4649,15 +3735,8 @@ PRIVATE GLOBAL const IMS_CHAR* Registration::StateToString(IN IMS_SINT32 nState)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL const IMS_CHAR* Registration::SubStateToString(IN IMS_SINT32 nSubState)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nSubState)
     {
         case SUB_STATE_IDLE:

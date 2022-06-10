@@ -1,223 +1,133 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090911  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "ServiceTrace.h"
 #include "ServiceSystemTime.h"
+#include "ServiceTrace.h"
+
+#include "RegFlow.h"
 #include "SipDebug.h"
 #include "SipFactory.h"
-#include "RegFlow.h"
 
 __IMS_TRACE_TAG_REG__;
 
 PUBLIC
-RegFlow::RegFlow(IN const RegKey& objRegKey_) :
-        objRegKey(objRegKey_),
-        strCallId(AString::ConstNull()),
-        nCSeqValue(0),
-        nSubscriber(NO_SUBSCRIBER),
-        strSessionId(AString::ConstNull())  // HEADER_REQ_SESSION-ID
+RegFlow::RegFlow(IN const RegKey& objRegKey) :
+        m_objRegKey(objRegKey),
+        m_strCallId(AString::ConstNull()),
+        m_nCSeqValue(0),
+        m_nSubscriber(NO_SUBSCRIBER),
+        m_strSessionId(AString::ConstNull())
 {
-    SipFactory::GenerateCallId(AString::ConstNull(), strCallId);
-
-    // HEADER_REQ_SESSION-ID
-    SipFactory::GenerateSessionId(objRegKey.GetSlotId(), strCallId, strSessionId);
+    SipFactory::GenerateCallId(AString::ConstNull(), m_strCallId);
+    SipFactory::GenerateSessionId(objRegKey.GetSlotId(), m_strCallId, m_strSessionId);
 }
 
 PUBLIC
-RegFlow::RegFlow(IN const RegFlow& objRHS) :
-        objRegKey(objRHS.objRegKey),
-        strCallId(objRHS.strCallId),
-        nCSeqValue(objRHS.nCSeqValue),
-        nSubscriber(objRHS.nSubscriber),
-        strSessionId(objRHS.strSessionId)  // HEADER_REQ_SESSION-ID
+RegFlow::RegFlow(IN const RegFlow& other) :
+        m_objRegKey(other.m_objRegKey),
+        m_strCallId(other.m_strCallId),
+        m_nCSeqValue(other.m_nCSeqValue),
+        m_nSubscriber(other.m_nSubscriber),
+        m_strSessionId(other.m_strSessionId)
 {
 }
 
 PUBLIC
 RegFlow::~RegFlow()
 {
-    IMS_TRACE_D("Destructor :: %X, %s, %u", nSubscriber,
-            SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'), nCSeqValue);
+    IMS_TRACE_D("Destructor :: %X, %s, %u", m_nSubscriber,
+            SipDebug::GetCharA1(m_strCallId.GetStr(), 8, '@'), m_nCSeqValue);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-RegFlow& RegFlow::operator=(IN const RegFlow& objRHS)
+RegFlow& RegFlow::operator=(IN const RegFlow& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        objRegKey = objRHS.objRegKey;
+        m_objRegKey = other.m_objRegKey;
 
-        strCallId = objRHS.strCallId;
-        nCSeqValue = objRHS.nCSeqValue;
-
-        nSubscriber = objRHS.nSubscriber;
-
-        // HEADER_REQ_SESSION-ID
-        strSessionId = objRHS.strSessionId;
+        m_strCallId = other.m_strCallId;
+        m_nCSeqValue = other.m_nCSeqValue;
+        m_nSubscriber = other.m_nSubscriber;
+        m_strSessionId = other.m_strSessionId;
     }
 
     return (*this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL RegFlow::Capture(IN IMS_UINT32 nSubscriber_ /* = DEFAULT_SUSCRIBER */)
+IMS_BOOL RegFlow::Capture(IN IMS_UINT32 nSubscriber /*= DEFAULT_SUSCRIBER*/)
 {
-    if (nSubscriber != NO_SUBSCRIBER)
+    if (m_nSubscriber != NO_SUBSCRIBER)
     {
         return IMS_FALSE;
     }
 
-    nSubscriber = nSubscriber_;
+    m_nSubscriber = nSubscriber;
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-const AString& RegFlow::GetCallId() const
-{
-    return strCallId;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const RegKey& RegFlow::GetRegKey() const
-{
-    return objRegKey;
-}
-
-/*
-
-Remarks
- HEADER_REQ_SESSION-ID
-*/
-PUBLIC
-const AString& RegFlow::GetSessionId() const
-{
-    return strSessionId;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_SINT32 RegFlow::IncreaseNGetCSeqValue(IN IMS_SINT32 nIncrement /* = 1 */)
+IMS_SINT32 RegFlow::IncreaseNGetCSeqValue(IN IMS_SINT32 nIncrement /*= 1*/)
 {
     if (nIncrement == 0)
     {
-        return nCSeqValue;
+        return m_nCSeqValue;
     }
 
-    nCSeqValue += nIncrement;
+    m_nCSeqValue += nIncrement;
 
-    return nCSeqValue;
+    return m_nCSeqValue;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL RegFlow::IsReserved(OUT IMS_UINT32* pnSubscriber_ /* = IMS_NULL */) const
+IMS_BOOL RegFlow::IsReserved(OUT IMS_UINT32* pnSubscriber /*= IMS_NULL*/) const
 {
-    if (pnSubscriber_ != IMS_NULL)
+    if (pnSubscriber != IMS_NULL)
     {
-        *pnSubscriber_ = nSubscriber;
+        *pnSubscriber = m_nSubscriber;
     }
 
-    return (nSubscriber != NO_SUBSCRIBER) ? IMS_TRUE : IMS_FALSE;
+    return (m_nSubscriber != NO_SUBSCRIBER) ? IMS_TRUE : IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-void RegFlow::Release()
-{
-    nSubscriber = NO_SUBSCRIBER;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 void RegFlow::Restore()
 {
-    SipFactory::GenerateCallId(AString::ConstNull(), strCallId);
+    SipFactory::GenerateCallId(AString::ConstNull(), m_strCallId);
 
-    nSubscriber = NO_SUBSCRIBER;
-    nCSeqValue = 0;
-
-    // HEADER_REQ_SESSION-ID
-    SipFactory::GenerateSessionId(objRegKey.GetSlotId(), strCallId, strSessionId);
+    m_nSubscriber = NO_SUBSCRIBER;
+    m_nCSeqValue = 0;
+    SipFactory::GenerateSessionId(m_objRegKey.GetSlotId(), m_strCallId, m_strSessionId);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void RegFlow::SetCSeqValue(IN IMS_SINT32 nValue)
-{
-    nCSeqValue = nValue;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void RegFlow::UpdateCallId(IN const IPAddress& objIP)
+void RegFlow::UpdateCallId(IN const IPAddress& objIpAddr)
 {
     // Check if the Call-ID already contains '@' character
-    if (strCallId.Contains('@'))
+    if (m_strCallId.Contains('@'))
     {
         return;
     }
 
-    if (objIP.IsIPv4Address() || objIP.IsIPv6Address())
+    if (objIpAddr.IsIPv4Address() || objIpAddr.IsIPv6Address())
     {
-        strCallId.Append('@');
-        strCallId.Append(objIP.ToString());
-
-        // HEADER_REQ_SESSION-ID
-        SipFactory::GenerateSessionId(objRegKey.GetSlotId(), strCallId, strSessionId);
+        m_strCallId.Append('@');
+        m_strCallId.Append(objIpAddr.ToString());
+        SipFactory::GenerateSessionId(m_objRegKey.GetSlotId(), m_strCallId, m_strSessionId);
     }
 }
