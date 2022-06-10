@@ -5,6 +5,14 @@
     <int name="ims.isim_index_for_impu_int" value="0"/>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
 
+    <!-- KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
+    <int name="subscription_error_retry_max_count_for_reg_event_with_initial_registration_int" value="2"/>
+    <int-array name="subscription_error_code_for_reg_event_with_initial_registration_int_array" num="3">
+        <item value="500"/>
+        <item value="503"/>
+        <item value="600"/>
+    </int-array>
+
     <!-- Assets: non-carrier configurations -->
     <!-- Ims General -->
     <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
