@@ -1,5 +1,20 @@
-#ifndef _REGISTRATION_MANAGER_H_
-#define _REGISTRATION_MANAGER_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef REGISTRATION_MANAGER_H_
+#define REGISTRATION_MANAGER_H_
 
 #include "IRegistration.h"
 
@@ -13,42 +28,43 @@ class RegistrationManager
 {
 private:
     RegistrationManager();
-    RegistrationManager(IN CONST RegistrationManager& objRHS);
-    RegistrationManager& operator=(IN CONST RegistrationManager& objRHS);
 
 public:
     ~RegistrationManager();
 
+    RegistrationManager(IN const RegistrationManager&) = delete;
+    RegistrationManager& operator=(IN const RegistrationManager&) = delete;
+
 public:
     /**
      * @brief Creates Registration object for IMS registration.
      *
      * @param nFlowId Registration flow id
-     * @param strAOR Address-Of-Record(public user identity to be registered)
+     * @param strAor Address-Of-Record(public user identity to be registered)
      * @param bFake Flag to indicate whether it's used for fake or not
      * @param strSubsId Subscriber configuration's identifier as a string
-     * @param pSIPProfile SIP profile for this registration
+     * @param pProfile SIP profile for this registration
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      * @note MULTI_SUBS, MULTI_REG_SIP_PROFILE
      */
-    IMS_BOOL CreateRegistration(IN IMS_UINT32 nFlowId, IN CONST AString& strAOR,
-            IN IMS_BOOL bFake = IMS_FALSE, IN CONST AString& strSubsId = AString::ConstNull(),
-            IN SipProfile* pSIPProfile = IMS_NULL);
+    IMS_BOOL CreateRegistration(IN IMS_UINT32 nFlowId, IN const AString& strAor,
+            IN IMS_BOOL bFake = IMS_FALSE, IN const AString& strSubsId = AString::ConstNull(),
+            IN SipProfile* pProfile = IMS_NULL);
 
     /**
      * @brief Creates Registration object for IMS registration.
      *
      * @param nFlowId Registration flow id
-     * @param strAOR Address-Of-Record(public user identity to be registered)
+     * @param strAor Address-Of-Record(public user identity to be registered)
      * @param bFake Flag to indicate whether it's used for fake or not
      * @param strSubsId Subscriber configuration's identifier as a string
-     * @param pSIPProfile SIP profile for this registration
+     * @param pProfile SIP profile for this registration
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      * @note MULTI_SUBS, MULTI_REG_SIP_PROFILE
      */
-    IMS_BOOL CreateRegistration(IN IMS_UINT32 nFlowId, IN CONST SipAddress& objAOR,
-            IN IMS_BOOL bFake = IMS_FALSE, IN CONST AString& strSubsId = AString::ConstNull(),
-            IN SipProfile* pSIPProfile = IMS_NULL);
+    IMS_BOOL CreateRegistration(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor,
+            IN IMS_BOOL bFake = IMS_FALSE, IN const AString& strSubsId = AString::ConstNull(),
+            IN SipProfile* pProfile = IMS_NULL);
 
     /**
      * @brief Destroys the specified Registration object.
@@ -65,11 +81,11 @@ public:
      * @brief Checks if "reg" event package subscription is supported or not.
      *
      * @param nSlotId Slot id
-     * @param pSIPProfile SIP profile to be checked
+     * @param pProfile SIP profile to be checked
      * @note MULTI_SUBS, MULTI_REG_SIP_PROFILE
      */
     IMS_BOOL IsRegSubscriptionSupported(
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0, IN SipProfile* pSIPProfile = IMS_NULL) const;
+            IN IMS_SINT32 nSlotId, IN SipProfile* pProfile = IMS_NULL) const;
 
     /**
      * @brief Gets the Registration object with the specified slot-id and flow id.
@@ -85,7 +101,7 @@ public:
     static RegistrationManager* GetInstance();
 
 private:
-    RegistrationManagerPrivate* pRegMngrP;
+    RegistrationManagerPrivate* m_pRegMngrPrivate;
 };
 
-#endif  // _REGISTRATION_MANAGER_H_
+#endif

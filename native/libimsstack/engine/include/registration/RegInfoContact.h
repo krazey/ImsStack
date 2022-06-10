@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100720  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _REG_INFO_CONTACT_H_
-#define _REG_INFO_CONTACT_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef REG_INFO_CONTACT_H_
+#define REG_INFO_CONTACT_H_
 
 #include "IRegInfoContact.h"
 
@@ -26,19 +29,22 @@ public:
 
 public:
     // IRegInfoContact interface
-    virtual IMS_UINT32 GetCSeq() const;
-    virtual const AString& GetDisplayName() const;
-    virtual IMS_SINT32 GetEvent() const;
-    virtual IMS_UINT32 GetExpiresValue() const;
-    virtual IMS_UINT32 GetFirstCSeq() const;
-    virtual const AString& GetPublicGRUU() const;
-    virtual const AString& GetTemporaryGRUU() const;
-    virtual const AString& GetQValue() const;
-    virtual IMS_UINT32 GetRetryAfterValue() const;
-    virtual IMS_SINT32 GetState() const;
-    virtual const AString& GetUnknownParameter(IN CONST AString& strName) const;
-    virtual const IMSMap<AString, AString>& GetUnknownParameters() const;
-    virtual const SipAddress& GetURI() const;
+    inline IMS_UINT32 GetCSeq() const override { return m_nCSeq; }
+    inline const AString& GetDisplayName() const override { return m_strDisplayName; }
+    inline IMS_SINT32 GetEvent() const override { return m_nEvent; }
+    inline IMS_UINT32 GetExpiresValue() const override { return m_nExpires; }
+    inline IMS_UINT32 GetFirstCSeq() const override { return m_objTempGruu.m_nFirstCSeq; }
+    inline const AString& GetPublicGruu() const override { return m_strPubGruu; }
+    inline const AString& GetTemporaryGruu() const override { return m_objTempGruu.m_strGruu; }
+    inline const AString& GetQValue() const override { return m_strQValue; }
+    inline IMS_UINT32 GetRetryAfterValue() const override { return m_nRetryAfter; }
+    inline IMS_SINT32 GetState() const override { return m_nState; }
+    const AString& GetUnknownParameter(IN const AString& strName) const override;
+    inline const IMSMap<AString, AString>& GetUnknownParameters() const override
+    {
+        return m_objUnknownParameters;
+    }
+    inline const SipAddress& GetUri() const override { return m_objUri; }
 
     IMS_BOOL Equals(IN INode* piNode) const;
     IMS_BOOL Update(IN INode* piNode);
@@ -59,77 +65,77 @@ private:
 
     // Elements
     void SetDisplayName(IN INode* piNode);
-    void SetPublicGRUU(IN INode* piNode);
-    void SetTemporaryGRUU(IN INode* piNode);
+    void SetPublicGruu(IN INode* piNode);
+    void SetTemporaryGruu(IN INode* piNode);
     void SetUnknownParameter(IN INode* piNode);
-    IMS_BOOL SetURI(IN INode* piNode);
+    IMS_BOOL SetUri(IN INode* piNode);
 
 private:
-    class TempGRUU
+    class TempGruu
     {
     public:
-        inline TempGRUU() :
-                strGRUU(AString::ConstNull()),
-                nFirstCSeq(0)
+        inline TempGruu() :
+                m_strGruu(AString::ConstNull()),
+                m_nFirstCSeq(0)
         {
         }
-        inline TempGRUU(IN CONST TempGRUU& objRHS) :
-                strGRUU(objRHS.strGRUU),
-                nFirstCSeq(objRHS.nFirstCSeq)
+        inline TempGruu(IN const TempGruu& other) :
+                m_strGruu(other.m_strGruu),
+                m_nFirstCSeq(other.m_nFirstCSeq)
         {
         }
-        inline ~TempGRUU() {}
+        inline ~TempGruu() {}
 
     public:
-        inline TempGRUU& operator=(IN CONST TempGRUU& objRHS)
+        inline TempGruu& operator=(IN const TempGruu& other)
         {
-            if (this != &objRHS)
+            if (this != &other)
             {
-                strGRUU = objRHS.strGRUU;
-                nFirstCSeq = objRHS.nFirstCSeq;
+                m_strGruu = other.m_strGruu;
+                m_nFirstCSeq = other.m_nFirstCSeq;
             }
 
             return (*this);
         }
 
     public:
-        AString strGRUU;
-        IMS_UINT32 nFirstCSeq;
+        AString m_strGruu;
+        IMS_UINT32 m_nFirstCSeq;
     };
 
 private:
-    AString strId;
-    IMS_SINT32 nState;
-    IMS_SINT32 nEvent;
+    AString m_strId;
+    IMS_SINT32 m_nState;
+    IMS_SINT32 m_nEvent;
     // The amount of time that the contact has been bound to the address-of-record, in seconds
-    IMS_UINT32 nDurationRegistered;
+    IMS_UINT32 m_nDurationRegistered;
 
     // The number of seconds remaining until the binding is due to expire
     // "shortened" event
-    IMS_UINT32 nExpires;
+    IMS_UINT32 m_nExpires;
     // The amount of seconds after which the owner of the contact is expected
     // to retry its registration
     // "probation" event
-    IMS_UINT32 nRetryAfter;
+    IMS_UINT32 m_nRetryAfter;
     // URI associated with this contact
-    SipAddress objURI;
+    SipAddress m_objUri;
     // Display name
-    AString strDisplayName;
+    AString m_strDisplayName;
 
     // The relative priority of this contact compared to other registered contacts
-    AString strQValue;
+    AString m_strQValue;
     // The current Call-ID carried in the REGISTER that was last used to update this contact
-    AString strCallId;
+    AString m_strCallId;
     // The last CSeq value present in a REGISTER request that updated this contact
-    IMS_UINT32 nCSeq;
+    IMS_UINT32 m_nCSeq;
 
     // Public GRUU
-    AString strPubGRUU;
+    AString m_strPubGruu;
     // Temporary GRUU
-    TempGRUU objTempGRUU;
+    TempGruu m_objTempGruu;
 
     // Map for unknown parameters
-    IMSMap<AString, AString> objUnknownParameters;
+    IMSMap<AString, AString> m_objUnknownParameters;
 };
 
-#endif  // _REG_INFO_CONTACT_H_
+#endif

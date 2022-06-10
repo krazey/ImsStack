@@ -1,108 +1,63 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090904  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "SipStatusCode.h"
+
 #include "RegRefreshHelper.h"
+#include "SipStatusCode.h"
 
 __IMS_TRACE_TAG_REG__;
 
 PUBLIC
-RegRefreshHelper::RegRefreshHelper(IN IRefreshable* piRefreshable_) :
-        RefreshHelper(piRefreshable_, IMS_TRUE)
+RegRefreshHelper::RegRefreshHelper(IN IRefreshable* piRefreshable) :
+        RefreshHelper(piRefreshable, IMS_TRUE)
 {
 }
 
 PUBLIC VIRTUAL RegRefreshHelper::~RegRefreshHelper()
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_D("Destructor :: RegRefreshHelper", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL RegRefreshHelper::AddSpecificHeader(IN ISipConnection* piSC)
+PUBLIC VIRTUAL IMS_RESULT RegRefreshHelper::SendRefreshRequest(IN ISipClientConnection* piScc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    (void)piSC;
-
-    return IMS_TRUE;
-}
-
-PUBLIC VIRTUAL IMS_RESULT RegRefreshHelper::SendRefreshRequest(IN ISipClientConnection* piSCC)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
-    if (!AddSpecificHeader(piSCC))
+    if (!AddSpecificHeader(piScc))
     {
         IMS_TRACE_E(0, "Adding the specific headers for a re-registration request failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    if (RefreshHelper::SendRefreshRequest(piSCC) != IMS_SUCCESS)
+    if (RefreshHelper::SendRefreshRequest(piScc) != IMS_SUCCESS)
     {
         return IMS_FAILURE;
     }
 
-    UpdateOnMessageSent(piSCC);
+    UpdateOnMessageSent(piScc);
 
     return IMS_SUCCESS;
-}
-
-PUBLIC VIRTUAL IMS_RESULT RegRefreshHelper::UpdateOnMessageReceived(IN CONST ISipConnection* piSC)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void)piSC;
-
-    return IMS_SUCCESS;
-}
-
-PUBLIC VIRTUAL IMS_RESULT RegRefreshHelper::UpdateOnMessageSent(IN CONST ISipConnection* piSC)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void)piSC;
-
-    return IMS_SUCCESS;
-}
-
-PUBLIC
-const SipAddress& RegRefreshHelper::GetContactAddress() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objContactAddress;
-}
-
-PUBLIC
-void RegRefreshHelper::SetContactAddress(IN CONST SipAddress& objContactAddress)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->objContactAddress = objContactAddress;
 }
 
 PUBLIC
 IMS_BOOL RegRefreshHelper::UpdateRefreshTimer(IN IMS_SINT32 nDuration)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Stop the refresh timer if it is running...
     if (IsTimerActive())
     {
@@ -127,22 +82,19 @@ IMS_BOOL RegRefreshHelper::UpdateRefreshTimer(IN IMS_SINT32 nDuration)
 }
 
 PROTECTED VIRTUAL void RegRefreshHelper::RefreshCompleted(
-        IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode /* = 0 */)
+        IN ISipClientConnection* piScc, IN IMS_SINT32 nCode /*= 0*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     // do something ...
     if (nCode == 0)
     {
-        IMS_SINT32 nStatusCode = piSCC->GetStatusCode();
+        IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
         if ((nStatusCode >= SipStatusCode::SC_200) && (nStatusCode < SipStatusCode::SC_300))
         {
             // Update the refresh timer
-            if (UpdateOnMessageReceived(piSCC) != IMS_SUCCESS)
+            if (UpdateOnMessageReceived(piScc) != IMS_SUCCESS)
             {
-                // Internal error ???
-                Refreshable_RefreshCompleted(piSCC, nCode);
+                Refreshable_RefreshCompleted(piScc, nCode);
                 return;
             }
 
@@ -157,13 +109,11 @@ PROTECTED VIRTUAL void RegRefreshHelper::RefreshCompleted(
         // StopRefresh();
     }
 
-    Refreshable_RefreshCompleted(piSCC, nCode);
+    Refreshable_RefreshCompleted(piScc, nCode);
 }
 
 PROTECTED VIRTUAL void RegRefreshHelper::RefreshStarted()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (Refreshable_RefreshStarted() != IMS_TRUE)
     {
         // Clean up the refresh timer related resources
@@ -174,7 +124,5 @@ PROTECTED VIRTUAL void RegRefreshHelper::RefreshStarted()
 
 PROTECTED VIRTUAL void RegRefreshHelper::RefreshTerminated()
 {
-    //---------------------------------------------------------------------------------------------
-
     Refreshable_RefreshTerminated();
 }

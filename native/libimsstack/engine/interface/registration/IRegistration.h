@@ -1,17 +1,32 @@
-#ifndef _INTERFACE_REGISTRATION_H_
-#define _INTERFACE_REGISTRATION_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_REGISTRATION_H_
+#define INTERFACE_REGISTRATION_H_
 
-#include "SipAddress.h"
 #include "IRegBase.h"
 #include "IRegContact.h"
 #include "IRegParameter.h"
+#include "SipAddress.h"
 
 class Credential;
-class SipProfile;
-class IRegistrationListener;
 class IRegBindingStateListener;
-class IRegUserIdentityNotifier;
 class IRegSubscription;
+class IRegUserIdentityNotifier;
+class IRegistrationListener;
+class SipProfile;
 
 /**
  * @brief This class provides an interface to access/control IMS registration.
@@ -27,7 +42,7 @@ public:
      * @return If the registration binding is successfully created, returns IMS_TRUE.\n
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL CreateBinding(IN CONST AString& strAppId, IN CONST AString& strServiceId) = 0;
+    virtual IMS_BOOL CreateBinding(IN const AString& strAppId, IN const AString& strServiceId) = 0;
 
     /**
      * @brief Destroys a registration binding information with the specified service.
@@ -35,12 +50,12 @@ public:
      * @param strAppId an IMS application identifier
      * @param strServiceId an IMS service identifier
      */
-    virtual void DestroyBinding(IN CONST AString& strAppId, IN CONST AString& strServiceId) = 0;
+    virtual void DestroyBinding(IN const AString& strAppId, IN const AString& strServiceId) = 0;
 
     /**
      * @brief Creates a Contact information with a registration duration.
      *
-     * @param objIPA IP address of device
+     * @param objIpAddr IP address of device
      * @param nPort port number of device; listening channel for an incoming SIP message
      * @param nExpiresPolicy policy of expiration value\n
      *                       #POLICY_EXPIRES_CONFIG\n
@@ -49,7 +64,7 @@ public:
      * @param nExpiresValue expiration value (duration of this binding)
      * @return Pointer to IRegContact or null.
      */
-    virtual IRegContact* CreateContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort,
+    virtual IRegContact* CreateContact(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort,
             IN IMS_SINT32 nExpiresPolicy = POLICY_EXPIRES_CONFIG,
             IN IMS_UINT32 nExpiresValue = DEFAULT_EXPIRES) = 0;
 
@@ -63,10 +78,10 @@ public:
     /**
      * @brief Destroys the Contact with the specified IP & Port.
      *
-     * @param objIPA IP address of Contact
+     * @param objIpAddr IP address of Contact
      * @param nPort port number of Contact
      */
-    virtual void DestroyContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort) = 0;
+    virtual void DestroyContact(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort) = 0;
 
     /**
      * @brief Checks if the specified registration equals or not.
@@ -75,7 +90,7 @@ public:
      * @return If the specified registration equals, returns IMS_TRUE.\n
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL Equals(IN CONST IRegistration* piReg) const = 0;
+    virtual IMS_BOOL Equals(IN const IRegistration* piReg) const = 0;
 
     /**
      * @brief Returns the current credential.
@@ -94,7 +109,7 @@ public:
      *
      * @return (Temporary) public user identity.
      */
-    virtual const SipAddress& GetAOR() const = 0;
+    virtual const SipAddress& GetAor() const = 0;
 
     /**
      * @brief Returns the network provisioned user identities.
@@ -103,7 +118,7 @@ public:
      *
      * @return Network provisioned user identities.
      */
-    virtual const AStringArray& GetAssociatedURIs() const = 0;
+    virtual const AStringArray& GetAssociatedUris() const = 0;
 
     /**
      * @brief Returns the authorized (topmost in P-Associated-URI) public user identity
@@ -111,7 +126,7 @@ public:
      *
      * @return Authorized public user identity.
      */
-    virtual const SipAddress& GetAuthorizedAOR() const = 0;
+    virtual const SipAddress& GetAuthorizedAor() const = 0;
 
     /**
      * @brief Returns all the Contacts for this registration.
@@ -123,11 +138,11 @@ public:
     /**
      * @brief Returns the Contact which are matched with IP & Port.
      *
-     * @param objIPA IP address to be compared
+     * @param objIpAddr IP address to be compared
      * @param nPort port number to be compared
      * @return Pointer to IRegContact.
      */
-    virtual IRegContact* GetContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort) const = 0;
+    virtual IRegContact* GetContact(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort) const = 0;
 
     /**
      * @brief Returns the preferred contact (highest 'q' value) among the contacts.
@@ -154,7 +169,7 @@ public:
      * @return Reference to IPAddress.
      * @note NAT_REQ_UE_PUBLIC_IP
      */
-    virtual const IPAddress& GetPublicIPAddress() const = 0;
+    virtual const IPAddress& GetPublicIpAddress() const = 0;
 
     /**
      * @brief Returns the service route set of this registration.
@@ -171,7 +186,7 @@ public:
      * @return Pointer to SipProfile.
      * @note MULTI_REG_SIP_PROFILE
      */
-    virtual SipProfile* GetSIPProfile() const = 0;
+    virtual SipProfile* GetSipProfile() const = 0;
 
     /**
      * @brief Returns the state of this registration.
@@ -190,7 +205,7 @@ public:
      * @return If UA is located behind a NAT / FW, returns IMS_TRUE.\n
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL IsBehindNAT() const = 0;
+    virtual IMS_BOOL IsBehindNat() const = 0;
 
     /**
      * @brief Checks if the binding (contact) is update or not.
@@ -292,12 +307,12 @@ public:
     /**
      * @brief Sets the public user identity to be registered.
      *
-     * @param objAOR public user identity to be registered
+     * @param objAor public user identity to be registered
      * @param strSubsId an identifier for SubscriberConfig
      * @note MULTI_SUBS
      */
-    virtual void SetAOR(
-            IN CONST SipAddress& objAOR, IN CONST AString& strSubsId = AString::ConstNull()) = 0;
+    virtual void SetAor(
+            IN const SipAddress& objAor, IN const AString& strSubsId = AString::ConstNull()) = 0;
 
     /**
      * @brief Sets the listener for this registration.
@@ -318,13 +333,13 @@ public:
      *                #REFRESH_POLICY_REMAIN_TIME\n
      *                #REFRESH_POLICY_RATIO
      * @param nCriteriaInterval Criteria interval to determine the refresh interval
-     * @param nValueEorLT Interval value when the refresh duration is equal or less
+     * @param nValueEorLt Interval value when the refresh duration is equal or less
      *                    than the criteria interval
-     * @param nValueGT Interval value when the refresh duration is greater
+     * @param nValueGt Interval value when the refresh duration is greater
                        than the criteria interval
      */
     virtual void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
-            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT) = 0;
+            IN IMS_SINT32 nValueEorLt, IN IMS_SINT32 nValueGt) = 0;
 
     /**
      * @brief Sets the SIP profile for this registration.
@@ -336,7 +351,7 @@ public:
      * @param pProfile Pointer to SipProfile
      * @note MULTI_REG_SIP_PROFILE
      */
-    virtual void SetSIPProfile(IN SipProfile* pProfile) = 0;
+    virtual void SetSipProfile(IN SipProfile* pProfile) = 0;
 
     /**
      * @brief Sets the listener to monitor the changes of the service's state.
@@ -373,7 +388,7 @@ public:
      *
      * @param strUserInfo User-info field value to be set
      */
-    virtual void SetUserInfoForContactHeader(IN CONST AString& strUserInfo) = 0;
+    virtual void SetUserInfoForContactHeader(IN const AString& strUserInfo) = 0;
 
     /**
      * @brief Creates the subscription with 'reg' event package for this registration.
@@ -468,4 +483,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_REGISTRATION_H_
+#endif

@@ -657,7 +657,7 @@ PRIVATE
 IMS_UINT32 AosIpsecHelper::GetValidUePort()
 {
     const IMS_UINT32 MAX_COUNT = 20;
-    const IPAddress& objUeIPA = m_piRegContact->GetIPAddress();
+    const IPAddress& objUeIPA = m_piRegContact->GetIpAddress();
     NetworkService* pNetworkService = NetworkService::GetNetworkService();
     IMS_UINT32 nUePort = m_pNewIpsec->CreateUePort();
 

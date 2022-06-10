@@ -1,28 +1,27 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20101207  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ServiceResolver.h"
+
 #include "RegBinding.h"
 #include "RegBindingProxy.h"
+#include "ServiceResolver.h"
 
 __IMS_TRACE_TAG_REG__;
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL IMS_BOOL RegBindingProxy::CreateBinding(IN IMS_SINT32 nSlotId,
         IN const AString& strAppId, IN const AString& strServiceId, IN IRegistrationEx* piRegEx)
 {
@@ -55,11 +54,6 @@ PUBLIC GLOBAL IMS_BOOL RegBindingProxy::CreateBinding(IN IMS_SINT32 nSlotId,
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
         IN IMS_SINT32 nSlotId, IN const AString& strAppId, IN const AString& strServiceId)
 {
@@ -80,19 +74,14 @@ PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
             strServiceId.GetStr(), nSlotId);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
         IN IMS_SINT32 nSlotId, IN IRegistrationEx* piRegEx)
 {
-    IMSList<IRegBinding*> objIRegBindings = ServiceResolver::GetRegBindings(nSlotId);
+    IMSList<IRegBinding*> objRegBindings = ServiceResolver::GetRegBindings(nSlotId);
 
-    for (IMS_UINT32 i = 0; i < objIRegBindings.GetSize();)
+    for (IMS_UINT32 i = 0; i < objRegBindings.GetSize();)
     {
-        RegBinding* pRegBinding = DYNAMIC_CAST(RegBinding*, objIRegBindings.GetAt(i));
+        RegBinding* pRegBinding = DYNAMIC_CAST(RegBinding*, objRegBindings.GetAt(i));
 
         if (pRegBinding == IMS_NULL)
         {
@@ -106,7 +95,7 @@ PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
             // The destructor will be invoked inside of Destroy method
             pRegBinding->Destroy();
 
-            objIRegBindings.RemoveAt(i);
+            objRegBindings.RemoveAt(i);
         }
         else
         {
@@ -114,14 +103,9 @@ PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
         }
     }
 
-    IMS_TRACE_D("REG (DESTROY) :: COUNT (%d)", objIRegBindings.GetSize(), 0, 0);
+    IMS_TRACE_D("REG (DESTROY) :: COUNT (%d)", objRegBindings.GetSize(), 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL IMS_BOOL RegBindingProxy::BindContact(IN IMS_SINT32 nSlotId,
         IN const AString& strAppId, IN const AString& strServiceId, IN IRegContact* piContact)
 {
@@ -143,11 +127,6 @@ PUBLIC GLOBAL IMS_BOOL RegBindingProxy::BindContact(IN IMS_SINT32 nSlotId,
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL void RegBindingProxy::UnbindContact(
         IN IMS_SINT32 nSlotId, IN const AString& strAppId, IN const AString& strServiceId)
 {
@@ -168,18 +147,13 @@ PUBLIC GLOBAL void RegBindingProxy::UnbindContact(
             strServiceId.GetStr(), nSlotId);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL void RegBindingProxy::UnbindContact(IN IMS_SINT32 nSlotId, IN IRegContact* piContact)
 {
-    IMSList<IRegBinding*> objIRegBindings = ServiceResolver::GetRegBindings(nSlotId);
+    IMSList<IRegBinding*> objRegBindings = ServiceResolver::GetRegBindings(nSlotId);
 
-    for (IMS_UINT32 i = 0; i < objIRegBindings.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < objRegBindings.GetSize(); ++i)
     {
-        RegBinding* pRegBinding = DYNAMIC_CAST(RegBinding*, objIRegBindings.GetAt(i));
+        RegBinding* pRegBinding = DYNAMIC_CAST(RegBinding*, objRegBindings.GetAt(i));
 
         if (pRegBinding != IMS_NULL)
         {
@@ -192,11 +166,6 @@ PUBLIC GLOBAL void RegBindingProxy::UnbindContact(IN IMS_SINT32 nSlotId, IN IReg
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL void RegBindingProxy::QueryCapability(IN IMS_SINT32 nSlotId,
         IN const AString& strAppId, IN const AString& strServiceId,
         OUT CallerCapability*& pCapability)
@@ -214,11 +183,6 @@ PUBLIC GLOBAL void RegBindingProxy::QueryCapability(IN IMS_SINT32 nSlotId,
     pRegBinding->QueryCapability(pCapability);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL void RegBindingProxy::QueryRegistrationHeaders(IN IMS_SINT32 nSlotId,
         IN const AString& strAppId, IN const AString& strServiceId, OUT AStringArray& objHeaders)
 {

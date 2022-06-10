@@ -1,24 +1,28 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20101207  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef REG_STATE_TRACKER_H_
+#define REG_STATE_TRACKER_H_
 
-    Description
-
-*/
-
-#ifndef _REG_STATE_TRACKER_H_
-#define _REG_STATE_TRACKER_H_
-
-#include "RCObject.h"
 #include "AStringArray.h"
 #include "IPAddress.h"
+#include "RCObject.h"
+
 #include "SipAddress.h"
-#include "SipSecurityHeader.h"
 #include "SipProfile.h"
+#include "SipSecurityHeader.h"
 
 class RegContact;
 
@@ -26,97 +30,91 @@ class RegStateTracker : public RCObject
 {
 public:
     RegStateTracker();
-    RegStateTracker(IN const RegStateTracker& objRHS);
+    RegStateTracker(IN const RegStateTracker& other);
     virtual ~RegStateTracker();
 
-private:
-    RegStateTracker& operator=(IN const RegStateTracker& objRHS);
+    RegStateTracker& operator=(IN const RegStateTracker&) = delete;
 
 public:
-    const SipAddress& GetAOR() const;
-    const AStringArray& GetAssociatedURIs() const;
-    const SipAddress& GetAuthorizedAOR() const;
+    inline const SipAddress& GetAor() const { return m_objAor; }
+    inline const AStringArray& GetAssociatedUris() const { return m_objAssociatedUris; }
+    const SipAddress& GetAuthorizedAor() const;
     const SipAddress& GetContactAddress() const;
-    const SipAddress* GetContactAddressForOutgoingMessage() const;
-    const IPAddress& GetIPAddress() const;
-    const AStringArray& GetPathHeaders() const;
-    IMS_SINT32 GetPortFlowControl() const;
-    IMS_SINT32 GetPortUC() const;
-    IMS_SINT32 GetPortUS() const;
-    const RegContact* GetPreferredContact() const;
+    inline const SipAddress* GetContactAddressForOutgoingMessage() const
+    {
+        return m_pContactAddressForOutgoingMessage;
+    }
+    inline const IPAddress& GetIpAddress() const { return m_objIpAddress; }
+    inline const AStringArray& GetPathHeaders() const { return m_objPaths; }
+    inline IMS_SINT32 GetPortFlowControl() const { return m_nPortFlowControl; }
+    inline IMS_SINT32 GetPortUc() const { return m_nPortUc; }
+    inline IMS_SINT32 GetPortUs() const { return m_nPortUs; }
+    inline const RegContact* GetPreferredContact() const { return m_pPreferredContact; }
     // NAT_REQ_UE_PUBLIC_IP
-    const IPAddress& GetPublicIPAddress() const;
-    const AStringArray& GetSecurityClients() const;
-    const AStringArray& GetSecurityVerifys() const;
-    const AStringArray& GetServiceRoutes() const;
-    // MULTI_REG_SIP_PROFILE
-    SipProfile* GetSIPProfile() const;
-    // MULTI_SUBS
-    const AString& GetSubscriberId() const;
-    // MULTI_REG_TRANSPORT
-    IMS_SINT32 GetTransportExt() const;
-
+    inline const IPAddress& GetPublicIpAddress() const { return m_objPublicIpAddress; }
+    inline const AStringArray& GetSecurityClients() const { return m_objSecurityClients; }
+    inline const AStringArray& GetSecurityVerifys() const { return m_objSecurityVerifys; }
+    inline const AStringArray& GetServiceRoutes() const { return m_objServiceRoutes; }
+    inline SipProfile* GetSipProfile() const { return m_pSipProfile.Get(); }
+    inline const AString& GetSubscriberId() const { return m_strSubsId; }
+    inline IMS_SINT32 GetTransportExt() const { return m_nTransportExt; }
     IMS_BOOL IsWithinTrustDomain(IN IMS_SINT32 nSlotId) const;
 
 private:
-    void SetAOR(IN CONST SipAddress& objAOR);
-    void SetAssociatedURIs(IN CONST AStringArray& objAssociatedURIs);
-    void SetPathHeaders(IN CONST AStringArray& objPaths);
-    void SetPortFlowControl(IN IMS_SINT32 nPort);
-    void SetPortUC(IN IMS_SINT32 nPort);
-    void SetPortUS(IN IMS_SINT32 nPort);
+    inline void SetAor(IN const SipAddress& objAor) { m_objAor = objAor; }
+    void SetAssociatedUris(IN const AStringArray& objAssociatedUris);
+    inline void SetPathHeaders(IN const AStringArray& objPaths) { m_objPaths = objPaths; }
+    inline void SetPortFlowControl(IN IMS_SINT32 nPort) { m_nPortFlowControl = nPort; }
+    inline void SetPortUc(IN IMS_SINT32 nPort) { m_nPortUc = nPort; }
+    inline void SetPortUs(IN IMS_SINT32 nPort) { m_nPortUs = nPort; }
     void SetPreferredContact(IN RegContact* pContact);
     // NAT_REQ_UE_PUBLIC_IP
-    void SetPublicIPAddress(IN CONST IPAddress& objIP);
-    void SetSecurityClients(IN CONST IMSList<SipSecurityHeader>& objClients);
-    void SetSecurityVerifys(IN CONST IMSList<SipSecurityHeader>& objVerifys);
-    void SetServiceRoutes(IN CONST AStringArray& objServiceRoutes);
-    // MULTI_REG_SIP_PROFILE
-    void SetSIPProfile(IN SipProfile* pProfile);
-    // MULTI_SUBS
-    void SetSubscriberId(IN CONST AString& strSubsId);
-    // MULTI_REG_TRANSPORT
-    void SetTransportExt(IN IMS_SINT32 nTransportExt);
-    void SetUserInfoForContactHeader(IN CONST AString& strUserInfo);
+    inline void SetPublicIpAddress(IN const IPAddress& objIpAddr)
+    {
+        m_objPublicIpAddress = objIpAddr;
+    }
+    void SetSecurityClients(IN const IMSList<SipSecurityHeader>& objClients);
+    void SetSecurityVerifys(IN const IMSList<SipSecurityHeader>& objVerifys);
+    inline void SetServiceRoutes(IN const AStringArray& objServiceRoutes)
+    {
+        m_objServiceRoutes = objServiceRoutes;
+    }
+    inline void SetSipProfile(IN SipProfile* pProfile) { m_pSipProfile = pProfile; }
+    inline void SetSubscriberId(IN const AString& strSubsId) { m_strSubsId = strSubsId; }
+    inline void SetTransportExt(IN IMS_SINT32 nTransportExt) { m_nTransportExt = nTransportExt; }
+    void SetUserInfoForContactHeader(IN const AString& strUserInfo);
 
 private:
     friend class Registration;
     friend class FakeRegistration;
 
     // MULTI_SUBS : Identifier of the subscriber
-    AString strSubsId;
+    AString m_strSubsId;
     // IMPU : Public User Identity
-    SipAddress objAOR;
+    SipAddress m_objAor;
     // IMPU : Network authorized Public User Identity (Topmost one in P-Associated-URI)
-    SipAddress* pAuthorizedAOR;
-
+    SipAddress* m_pAuthorizedAor;
     // Preferred Contact address
-    IPAddress objIPAddress;
+    IPAddress m_objIpAddress;
     // NAT_REQ_UE_PUBLIC_IP
-    IPAddress objPublicIPAddress;
-    SipAddress objPreferredContactAddress;
-    SipAddress* pContactAddressForOutgoingMessage;
-    RegContact* pPreferredContact;
-
-    // MULTI_REG_TRANSPORT
-    IMS_SINT32 nTransportExt;
+    IPAddress m_objPublicIpAddress;
+    SipAddress m_objPreferredContactAddress;
+    SipAddress* m_pContactAddressForOutgoingMessage;
+    RegContact* m_pPreferredContact;
+    IMS_SINT32 m_nTransportExt;
     // RFC5626_FLOW_CONTROL
-    IMS_SINT32 nPortFlowControl;
+    IMS_SINT32 m_nPortFlowControl;
     // Protected client / server port (uc / us)
-    IMS_SINT32 nPortUC;
-    IMS_SINT32 nPortUS;
-
+    IMS_SINT32 m_nPortUc;
+    IMS_SINT32 m_nPortUs;
     // Persistent information which MUST be kept while the registration is active
-    AStringArray objAssociatedURIs;
-    AStringArray objServiceRoutes;
-    AStringArray objPaths;
-
+    AStringArray m_objAssociatedUris;
+    AStringArray m_objServiceRoutes;
+    AStringArray m_objPaths;
     // Security related headers
-    AStringArray objSecurityClients;
-    AStringArray objSecurityVerifys;
-
-    // MULTI_REG_SIP_PROFILE
-    RCPtr<SipProfile> pSIPProfile;
+    AStringArray m_objSecurityClients;
+    AStringArray m_objSecurityVerifys;
+    RCPtr<SipProfile> m_pSipProfile;
 };
 
-#endif  // _REG_STATE_TRACKER_H_
+#endif

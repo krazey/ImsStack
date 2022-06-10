@@ -1,5 +1,20 @@
-#ifndef _INTERFACE_REG_SUBSCRIPTION_H_
-#define _INTERFACE_REG_SUBSCRIPTION_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_REG_SUBSCRIPTION_H_
+#define INTERFACE_REG_SUBSCRIPTION_H_
 
 #include "IRegBase.h"
 #include "IRegInfo.h"
@@ -61,12 +76,14 @@ public:
      * @brief Sets the contact header parameter on the confirmed state.
      *
      * @param strParameter Header parameter
-     * @param nOperation Operation (0: add or 1: remove)
+     * @param nOperation Operations
+     *                   #CONTACT_PARAM_OP_ADD
+     *                   #CONTACT_PARAM_OP_REMOVE
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      * @note CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
      */
-    virtual IMS_RESULT SetContactParameter(IN CONST AString& strParameter,
-            IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */) = 0;
+    virtual IMS_RESULT SetContactParameter(
+            IN const AString& strParameter, IN IMS_SINT32 nOperation = CONTACT_PARAM_OP_ADD) = 0;
 
     /**
      * @brief Sets the expiration value for this subscription.
@@ -98,13 +115,13 @@ public:
      *                #REFRESH_POLICY_REMAIN_TIME\n
      *                #REFRESH_POLICY_RATIO
      * @param nCriteriaInterval Criteria interval to determine the refresh interval
-     * @param nValueEorLT Interval value when the refresh duration is equal or less
+     * @param nValueEorLt Interval value when the refresh duration is equal or less
      *                    than the criteria interval
-     * @param nValueGT Interval value when the refresh duration is greater
+     * @param nValueGt Interval value when the refresh duration is greater
      *                 than the criteria interval
      */
     virtual void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
-            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT) = 0;
+            IN IMS_SINT32 nValueEorLt, IN IMS_SINT32 nValueGt) = 0;
 
     /**
      * @brief Starts or updates a durative subscription.
@@ -236,6 +253,13 @@ public:
         /// regardless of SIP request's length.
         FEATURE_USE_TCP_TRANSPORT_ON_INITIAL_SUBSCRIPTION = 0x02
     };
+
+    /// Operations for setting contact parameter
+    enum
+    {
+        CONTACT_PARAM_OP_ADD = 0,
+        CONTACT_PARAM_OP_REMOVE = 1
+    };
 };
 
-#endif  // _INTERFACE_REG_SUBSCRIPTION_H_
+#endif

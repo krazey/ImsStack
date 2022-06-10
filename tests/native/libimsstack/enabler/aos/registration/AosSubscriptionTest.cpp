@@ -386,7 +386,7 @@ TEST_F(AosSubscriptionTest, checkNotifyReceived)
 
     SipAddress objSipAddress;
     objSipAddress.Create(ANONYMOUS_ADDRESS);
-    EXPECT_CALL(objMockIRegInfoContact1, GetURI())
+    EXPECT_CALL(objMockIRegInfoContact1, GetUri())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objSipAddress));
 
@@ -414,7 +414,7 @@ TEST_F(AosSubscriptionTest, checkNotifyReceived)
 
     SipAddress objSipAddress2;
     objSipAddress2.Create(ADDRESS1);
-    EXPECT_CALL(objMockIRegInfoContact2, GetURI())
+    EXPECT_CALL(objMockIRegInfoContact2, GetUri())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objSipAddress2));
 
@@ -477,7 +477,7 @@ TEST_F(AosSubscriptionTest, checkNotifyReceived)
             .WillOnce(Return(IRegInfoContact::EVENT_REJECTED))
             .WillOnce(Return(IRegInfoContact::EVENT_REJECTED));
 
-    EXPECT_CALL(objMockIRegInfoContact3, GetURI())
+    EXPECT_CALL(objMockIRegInfoContact3, GetUri())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objSipAddress2));
 

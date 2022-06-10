@@ -1,24 +1,28 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090908  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _REG_PARAMETER_H_
-#define _REG_PARAMETER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef REG_PARAMETER_H_
+#define REG_PARAMETER_H_
 
 #include "AStringArray.h"
-#include "SipAddress.h"
 #include "Credential.h"
-#include "IRegParameter.h"
 #include "ImsSlot.h"
+
+#include "IRegParameter.h"
 #include "RegStateTracker.h"
+#include "SipAddress.h"
 
 class ISipMessage;
 class ISipClientConnection;
@@ -32,125 +36,155 @@ public:
     explicit RegParameter(IN IMS_SINT32 nSlotId);
     virtual ~RegParameter();
 
-private:
-    RegParameter(IN CONST RegParameter& objRHS);
-    RegParameter& operator=(IN CONST RegParameter& objRHS);
+    RegParameter(IN const RegParameter&) = delete;
+    RegParameter& operator=(IN const RegParameter&) = delete;
 
 public:
     // IRegParameter interface
-    virtual IMS_SINT32 GetPort() const;
-    virtual const SipAddress& GetTopmostRouteAddress() const;
-    virtual void SetSecurityVerifys(IN CONST IMSList<SipSecurityHeader>& objSecurityVerifys);
+    inline IMS_SINT32 GetPort() const override { return m_nPort; }
+    inline const SipAddress& GetTopmostRouteAddress() const override
+    {
+        return m_objTopmostRouteAddress;
+    }
+    inline void SetSecurityVerifys(IN const IMSList<SipSecurityHeader>& objSecurityVerifys) override
+    {
+        m_objSecurityVerifys = objSecurityVerifys;
+    }
 
     IMS_RESULT FormHeaders(
-            IN_OUT ISipClientConnection*& piSCC, IN CONST RCPtr<RegStateTracker> pStateTracker);
+            IN_OUT ISipClientConnection*& piScc, IN const RCPtr<RegStateTracker> pStateTracker);
     IMS_RESULT FormRouteHeaders(
-            IN_OUT ISipClientConnection*& piSCC, IN CONST RCPtr<RegStateTracker> pStateTracker);
-    IMS_RESULT FormSecurityHeaders(IN_OUT ISipClientConnection*& piSCC);
-    Credential& GetCredential();
-    IMS_SINT32 GetFlowControlOption() const;
-    IMS_SINT32 GetPortFlowControl() const;
-    const AStringArray& GetPreloadedRoutes() const;
-    IMS_SINT32 GetProtectedPortUC() const;
-    IMS_SINT32 GetProtectedPortUS() const;
-    const IMSList<SipSecurityHeader>& GetSecurityClients() const;
+            IN_OUT ISipClientConnection*& piScc, IN const RCPtr<RegStateTracker> pStateTracker);
+    IMS_RESULT FormSecurityHeaders(IN_OUT ISipClientConnection*& piScc);
+    inline Credential& GetCredential() { return m_objCredential; }
+    inline IMS_SINT32 GetFlowControlOption() const { return m_nFlowControlOption; }
+    inline IMS_SINT32 GetPortFlowControl() const { return m_nPortFlowControl; }
+    inline const AStringArray& GetPreloadedRoutes() const { return m_objPreloadedRoutes; }
+    IMS_SINT32 GetProtectedPortUc() const;
+    IMS_SINT32 GetProtectedPortUs() const;
+    inline const IMSList<SipSecurityHeader>& GetSecurityClients() const
+    {
+        return m_objSecurityClients;
+    }
     const IMSList<SipSecurityHeader>& GetSecurityVerifys() const;
-    const SipTimerValues* GetSIPTimerValues() const;
-    IMS_SINT32 GetTransportExt() const;
-    IMS_SINT32 GetTransportExtForRegOnly() const;
-    IMS_BOOL IsAuthRealmLenient() const;
-    IMS_BOOL IsSecurityAssociationPresent() const;
-    IMS_BOOL IsSecurityAssociationRequired() const;
+    inline const SipTimerValues* GetSipTimerValues() const { return m_pSipTimerValues; }
+    inline IMS_SINT32 GetTransportExt() const { return m_nTransportExt; }
+    inline IMS_SINT32 GetTransportExtForRegOnly() const { return m_nTransportExtForRegOnly; }
+    inline IMS_BOOL IsAuthRealmLenient() const { return m_bIsAuthRealmLenient; }
+    inline IMS_BOOL IsSecurityAssociationPresent() const
+    {
+        return (!m_objSecurityServers.IsEmpty() || !m_objSecurityVerifys.IsEmpty());
+    }
+    inline IMS_BOOL IsSecurityAssociationRequired() const
+    {
+        return (!m_objSecurityClients.IsEmpty() || !m_objNewSecurityClients.IsEmpty());
+    }
     // IMS_IPSEC_UDP_ENC
-    IMS_BOOL IsSecurityAssociationRequiredViaUDPEnc() const;
+    inline IMS_BOOL IsSecurityAssociationRequiredViaUdpEnc() const
+    {
+        return ((m_nTransportExt & Sip::TRANSPORT_EXT_IPSEC_UDP_ENC) != 0);
+    }
     void RemovePreferredSecurityHeaders();
-    void RemoveSecurityServers();
+    inline void RemoveSecurityServers() { m_objSecurityServers.Clear(); }
     void Restore();
     void RestoreSecurityHeaders();
-    void SetTransportExtForIPSec();
-    // MULTI_SUBS
+    void SetTransportExtForIpSec();
     IMS_BOOL UpdateProfile(
-            IN CONST SipAddress& objAOR, IN CONST AString& strSubsId = AString::ConstNull());
-    IMS_BOOL UpdateSecurityHeaders(IN CONST ISipMessage* piSIPMsg);
-    // MULTI_REG_SIP_PROFILE
-    void UpdateSIPProfile(IN SipProfile* pSIPProfile);
+            IN const SipAddress& objAor, IN const AString& strSubsId = AString::ConstNull());
+    IMS_BOOL UpdateSecurityHeaders(IN const ISipMessage* piSipMsg);
+    void UpdateSipProfile(IN SipProfile* pProfile);
 
 private:
     // IRegParameter interface
-    virtual IMS_BOOL AddExtraHeaders(IN CONST AStringArray& objHeaders);
-    virtual IMS_BOOL AddMessageBodyPart(IN ISipMessageBodyPart* piBodyPart);
-    virtual IMS_BOOL AddPreloadedRoute(IN CONST AString& strRoute);
-    virtual IMS_BOOL AddPreloadedRoute(IN CONST AString& strHost, IN IMS_SINT32 nPort,
-            IN CONST AString& strScheme = AString::ConstNull());
-    virtual IMS_BOOL AddSecurityClient(IN CONST SipSecurityHeader& objSecurityHeader);
-    virtual const SipSecurityHeader* GetPreferredSecurityClient() const;
-    virtual const SipSecurityHeader* GetPreferredSecurityServer() const;
-    virtual const IMSList<SipSecurityHeader>& GetSecurityServers() const;
-    virtual void RemoveAllMessageBodyParts();
-    virtual void RemoveAllPreloadedRoutes();
-    virtual void RemoveExtraHeaders(IN CONST AStringArray& objHeaders);
-    virtual void RemoveSecurityClients();
-    virtual void SetAuthenticationCredentials(IN IMS_BOOL bPolicy);
-    virtual void SetFlowControlOption(IN IMS_SINT32 nOption);
-    virtual void SetPort(IN IMS_SINT32 nPort);
-    virtual void SetPortFlowControl(IN IMS_SINT32 nPort);
-    virtual void SetSIPTimerValues(IN CONST SipTimerValues& objTVs);
-    virtual void SetTransportExt(IN IMS_SINT32 nTransportExt);
-    virtual void SetTransportExtForRegOnly(IN IMS_SINT32 nTransportExt);
+    IMS_BOOL AddExtraHeaders(IN const AStringArray& objHeaders) override;
+    IMS_BOOL AddMessageBodyPart(IN ISipMessageBodyPart* piBodyPart) override;
+    IMS_BOOL AddPreloadedRoute(IN const AString& strRoute) override;
+    IMS_BOOL AddPreloadedRoute(IN const AString& strHost, IN IMS_SINT32 nPort,
+            IN const AString& strScheme = AString::ConstNull()) override;
+    inline IMS_BOOL AddSecurityClient(IN const SipSecurityHeader& objSecurityHeader) override
+    {
+        return m_objNewSecurityClients.Append(objSecurityHeader);
+    }
+    inline const SipSecurityHeader* GetPreferredSecurityClient() const override
+    {
+        return m_pPreferredSecurityClient;
+    }
+    inline const SipSecurityHeader* GetPreferredSecurityServer() const override
+    {
+        return m_pPreferredSecurityServer;
+    }
+    inline const IMSList<SipSecurityHeader>& GetSecurityServers() const override
+    {
+        return m_objSecurityServers;
+    }
+    void RemoveAllMessageBodyParts() override;
+    inline void RemoveAllPreloadedRoutes() override { m_objPreloadedRoutes.RemoveAllElements(); }
+    void RemoveExtraHeaders(IN const AStringArray& objHeaders) override;
+    inline void RemoveSecurityClients() override { m_objNewSecurityClients.Clear(); }
+    inline void SetAuthenticationCredentials(IN IMS_BOOL bPolicy) override
+    {
+        m_bPolicyForAuthenticationCredentials = bPolicy;
+    }
+    inline void SetFlowControlOption(IN IMS_SINT32 nOption) override
+    {
+        m_nFlowControlOption = nOption;
+    }
+    inline void SetPort(IN IMS_SINT32 nPort) override { m_nPort = nPort; }
+    inline void SetPortFlowControl(IN IMS_SINT32 nPort) override { m_nPortFlowControl = nPort; }
+    void SetSipTimerValues(IN const SipTimerValues& objTimerValues) override;
+    void SetTransportExt(IN IMS_SINT32 nTransportExt) override;
+    inline void SetTransportExtForRegOnly(IN IMS_SINT32 nTransportExt) override
+    {
+        m_nTransportExtForRegOnly = nTransportExt;
+    }
 
     void ChoosePreferredSecurityClient();
     void ChoosePreferredSecurityServer();
 
-    // MULTI_SUBS
     static const ImsSubscriberInfo* GetImsSubscriberInfo(IN IMS_SINT32 nSlotId,
-            IN CONST SipAddress& objAOR, IN CONST AString& strSubsId = AString::ConstNull());
+            IN const SipAddress& objAor, IN const AString& strSubsId = AString::ConstNull());
 
 private:
     // Policy for Authorization header
-    IMS_BOOL bPolicyForAuthenticationCredentials;
-    // MULTI_REG_TRANSPORT
-    IMS_SINT32 nTransportExt;
-    IMS_SINT32 nTransportExtForRegOnly;
+    IMS_BOOL m_bPolicyForAuthenticationCredentials;
+    IMS_SINT32 m_nTransportExt;
+    IMS_SINT32 m_nTransportExtForRegOnly;
     // Default SIP port number
-    IMS_SINT32 nPort;
+    IMS_SINT32 m_nPort;
     // RFC5626_FLOW_CONTROL
-    IMS_SINT32 nFlowControlOption;
-    IMS_SINT32 nPortFlowControl;
-
+    IMS_SINT32 m_nFlowControlOption;
+    IMS_SINT32 m_nPortFlowControl;
     // Address of S-CSCF (Registrar)
-    AString strServingCSCF;
-
+    AString m_strServingCscf;
     // Preloaded route set (in this moment, only one pre-configured route exists)
-    AStringArray objPreloadedRoutes;
+    AStringArray m_objPreloadedRoutes;
     // Topmost Route address
-    SipAddress objTopmostRouteAddress;
+    SipAddress m_objTopmostRouteAddress;
 
     // Security-Client headers
-    IMSList<SipSecurityHeader> objSecurityClients;
-    IMSList<SipSecurityHeader> objNewSecurityClients;
-    IMSList<SipSecurityHeader> objOldSecurityClients;
+    IMSList<SipSecurityHeader> m_objSecurityClients;
+    IMSList<SipSecurityHeader> m_objNewSecurityClients;
+    IMSList<SipSecurityHeader> m_objOldSecurityClients;
     // Security-Server header
-    IMSList<SipSecurityHeader> objSecurityServers;
-    IMSList<SipSecurityHeader> objOldSecurityServers;
+    IMSList<SipSecurityHeader> m_objSecurityServers;
+    IMSList<SipSecurityHeader> m_objOldSecurityServers;
     // Security-Verify header
-    IMSList<SipSecurityHeader> objSecurityVerifys;
-    IMSList<SipSecurityHeader> objOldSecurityVerifys;
+    IMSList<SipSecurityHeader> m_objSecurityVerifys;
+    IMSList<SipSecurityHeader> m_objOldSecurityVerifys;
 
     // Preferred Security Client/Server
-    SipSecurityHeader* pPreferredSecurityClient;
-    SipSecurityHeader* pPreferredSecurityServer;
+    SipSecurityHeader* m_pPreferredSecurityClient;
+    SipSecurityHeader* m_pPreferredSecurityServer;
 
     // Extra headers from IMS registry
-    ExtraHeaders* pExtraHeaders;
+    ExtraHeaders* m_pExtraHeaders;
     // Message body parts which are always added in initial-REG/re-REG/de-REG
-    IMSList<ISipMessageBodyPart*> objBodyParts;
-
+    IMSList<ISipMessageBodyPart*> m_objBodyParts;
     // Credentials if present
-    Credential objCredential;
-    IMS_BOOL bIsAuthRealmLenient;
-
+    Credential m_objCredential;
+    IMS_BOOL m_bIsAuthRealmLenient;
     // Timer values of SIP transaction layer for this registration
-    SipTimerValues* pSIPTVs;
+    SipTimerValues* m_pSipTimerValues;
 };
 
-#endif  // _REG_PARAMETER_H_
+#endif

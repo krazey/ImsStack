@@ -1,7 +1,23 @@
-#ifndef _INTERFACE_REG_INFO_CONTACT_H_
-#define _INTERFACE_REG_INFO_CONTACT_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_REG_INFO_CONTACT_H_
+#define INTERFACE_REG_INFO_CONTACT_H_
 
 #include "IMSMap.h"
+
 #include "SipAddress.h"
 
 /**
@@ -60,14 +76,14 @@ public:
      *
      * @return Public GRUU of contact.
      */
-    virtual const AString& GetPublicGRUU() const = 0;
+    virtual const AString& GetPublicGruu() const = 0;
 
     /**
      * @brief Returns the temporary GRUU of contact.
      *
      * @return Temporary GRUU of contact.
      */
-    virtual const AString& GetTemporaryGRUU() const = 0;
+    virtual const AString& GetTemporaryGruu() const = 0;
 
     /**
      * @brief Returns the q-value of contact.
@@ -101,7 +117,7 @@ public:
      *         - AString#ConstNull : parameter does not exist
      *         - AString#ConstEmepty : parameter exists, but empty value (ex. feature-tag, ...)
      */
-    virtual const AString& GetUnknownParameter(IN CONST AString& strName) const = 0;
+    virtual const AString& GetUnknownParameter(IN const AString& strName) const = 0;
 
     /**
      * @brief Returns the unknown parameters of contact.
@@ -115,7 +131,7 @@ public:
      *
      * @return URI of contact.
      */
-    virtual const SipAddress& GetURI() const = 0;
+    virtual const SipAddress& GetUri() const = 0;
 
 public:
     /// State of Contact
@@ -152,4 +168,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_REG_INFO_CONTACT_H_
+#endif

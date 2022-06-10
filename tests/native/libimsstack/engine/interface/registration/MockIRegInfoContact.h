@@ -16,15 +16,15 @@ public:
     MOCK_METHOD(IMS_SINT32, GetEvent, (), (const, override));
     MOCK_METHOD(IMS_UINT32, GetExpiresValue, (), (const, override));
     MOCK_METHOD(IMS_UINT32, GetFirstCSeq, (), (const, override));
-    MOCK_METHOD(const AString&, GetPublicGRUU, (), (const, override));
-    MOCK_METHOD(const AString&, GetTemporaryGRUU, (), (const, override));
+    MOCK_METHOD(const AString&, GetPublicGruu, (), (const, override));
+    MOCK_METHOD(const AString&, GetTemporaryGruu, (), (const, override));
     MOCK_METHOD(const AString&, GetQValue, (), (const, override));
     MOCK_METHOD(IMS_UINT32, GetRetryAfterValue, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
     MOCK_METHOD(
             const AString&, GetUnknownParameter, (IN CONST AString & strName), (const, override));
     MOCK_METHOD((const IMSMap<AString, AString>&), GetUnknownParameters, (), (const, override));
-    MOCK_METHOD(const SipAddress&, GetURI, (), (const, override));
+    MOCK_METHOD(const SipAddress&, GetUri, (), (const, override));
 };
 
 #endif  // MOCK_I_REG_INFO_CONTACT_H_
