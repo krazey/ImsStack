@@ -170,4 +170,10 @@
         android:key="test_carrier_id" android:defaultValue="0" android:enabled="true"
         android:selectable="true">
     </ListPreference>
+    <ListPreference android:title="VoLte Provisioning"
+        android:entryValues="@array/volte_provisioning_value"
+        android:entries="@array/volte_provisioning_entry"
+        android:key="volte_provisioning" android:defaultValue="-1" android:enabled="true"
+        android:selectable="true">
+    </ListPreference>
 </PreferenceScreen>
