@@ -20,6 +20,8 @@ android_test {
         "mockito-target",
         "platform-test-annotations",
         "truth-prebuilt",
+        "frameworks-base-testutils",
+        "mockito-target-extended-minus-junit4",
         "testables",
         // TODO: move this to libs after API review
         "android.telephony.imsmedia",

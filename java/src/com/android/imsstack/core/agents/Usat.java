@@ -299,7 +299,7 @@ public interface Usat {
         }
 
         /**
-         * Returns the network type which the call is performed on.
+         * Returns the network type.
          * If the network type is {@link TelephonyManager#NETWORK_TYPE_UNKNOWN} or
          * {@link TelephonyManager#NETWORK_TYPE_IWLAN}, the location information will not be
          * included in the command parameter.

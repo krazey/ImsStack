@@ -52,8 +52,10 @@ public class UsatAgent extends Handler implements UsatInterface {
 
     /** Call control by USIM */
     private static final int TAG_CALL_CONTROL = 0xD4;
-    /** Address: 0x06 or 0x86 */
+    /** Address: 0x06 */
     private static final int TAG_ADDRESS = 0x06;
+    /** Address: 0x86 */
+    private static final int TAG_ADDRESS_1 = 0x86;
     /** SS string: 0x09 or 0x89 */
     private static final int TAG_SS_STRING = 0x09;
     /** USSD string: 0x0A or 0x8A */
@@ -101,6 +103,10 @@ public class UsatAgent extends Handler implements UsatInterface {
 
         boolean isOk() {
             return sw1 == 0x90 || sw1 == 0x91 || sw1 == 0x9e || sw1 == 0x9f;
+        }
+
+        boolean isValidForClass2Sms() {
+            return (sw1 == 0x6F || sw1 == 0x62 || sw1 == 0x63) || isOk();
         }
 
         @Override
@@ -514,8 +520,49 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @return A hexadecimal string format of this command.
      */
     private String encodeCommandForMoSmsControl(Usat.MoSmsControlCommand cmd) {
-        // TODO: add the encoding for MO SMS control
-        return null;
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        buffer.write(TAG_MO_SMS_CONTROL);
+        // Sets an approximate length.
+        // This will be adjusted after encoding all the parameters.
+        buffer.write(0x00);
+
+        // Device identities (Source(TERMINAL/ME) --> Destination(UICC))
+        writeDeviceIdentities(buffer, DEVICE_IDENTITY_TERMINAL, DEVICE_IDENTITY_UICC);
+
+        // RP_Destination_Address of the Service Center
+        if (!writeAddress(buffer, cmd.getRpDestinationAddress())) {
+            ImsLog.w(getSlotId(), "USAT: writing RP_Destination_Address failed");
+            return null;
+        }
+
+        // TP_Destination_Address
+        if (!writeAddress(buffer, cmd.getTpDestinationAddress())) {
+            ImsLog.w(getSlotId(), "USAT: writing TP_Destination_Address failed");
+            return null;
+        }
+
+        // Location information (if available) based on network type
+        int networkType = cmd.getNetworkType();
+
+        byte[] locationInfo = getLocationInfo(networkType);
+
+        buffer.write(TAG_LOCATION_INFORMATION);
+
+        if (locationInfo != null) {
+            buffer.write(locationInfo.length);
+            buffer.writeBytes(locationInfo);
+        } else {
+            ImsLog.d(getSlotId(), "USAT: no location information.");
+            buffer.write(0);
+        }
+
+        byte[] data = buffer.toByteArray();
+
+        // Adjust the length field of BER-TLV data object.
+        data = refineBerTlvDataObject(data);
+
+        return SimUtils.bytesToHexString(data);
     }
 
     /**
@@ -527,8 +574,58 @@ public class UsatAgent extends Handler implements UsatInterface {
      */
     private Usat.MoSmsControlCommandResponse decodeCommandResponseForMoSmsControl(
             Usat.MoSmsControlCommand cmd, UsatResult result) {
-        // TODO: add the decoding for MO SMS control
-        return null;
+        if (isCommandAborted(cmd)) {
+            return null;
+        }
+
+        int responseResult = (result.data != null && result.data.length > 0)
+                ? (result.data[0] & 0xFF) : -1;
+
+        int cmdResult = 0;
+        String[] addresses = null;
+        if (!result.isOk()) {
+            return new Usat.MoSmsControlCommandResponse(cmd, Usat.RESULT_NOT_ALLOWED, null, null);
+        }
+
+        if (responseResult == 0x00) {
+            cmdResult = Usat.RESULT_ALLOWED;
+        } else if (responseResult == 0x01) {
+            cmdResult = Usat.RESULT_NOT_ALLOWED;
+        } else if (responseResult == 0x02) {
+            cmdResult = Usat.RESULT_ALLOWED_WITH_MODIFICATION;
+
+            ArrayList<DataObject> dataObjects = new ArrayList<>();
+
+            if (!extractDataObjectFromBuffer(result.data, dataObjects)) {
+                return new Usat.MoSmsControlCommandResponse(cmd, Usat.RESULT_NOT_ALLOWED, null,
+                        null);
+            }
+
+            ImsLog.i(getSlotId(), "USAT: response data objects size = " + dataObjects.size());
+
+            addresses = new String[] { null, null };
+
+            for (int i = 0; i < dataObjects.size(); i++) {
+                if (i == 2) break;
+                DataObject object = dataObjects.get(i);
+                final int tag = object.tag;
+                final byte[] value = object.value;
+                if (tag == TAG_ADDRESS || tag == TAG_ADDRESS_1) {
+                    if (value.length != 0) {
+                        addresses[i] = PhoneNumberUtils.calledPartyBCDToString(
+                                value, 0, value.length, PhoneNumberUtils.BCD_EXTENDED_TYPE_EF_ADN);
+                    }
+                }
+            }
+
+            if (addresses[0] == null || addresses[1] == null) {
+                cmdResult = Usat.RESULT_NOT_ALLOWED;
+                addresses[0] = null;
+                addresses[1] = null;
+            }
+        }
+
+        return new Usat.MoSmsControlCommandResponse(cmd, cmdResult, addresses[0], addresses[1]);
     }
 
     /**
@@ -574,8 +671,33 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @return A hexadecimal string format of this command.
      */
     private String encodeCommandForSmsPpDownload(Usat.SmsPpDownloadCommand cmd) {
-        // TODO: add the encoding for SMS-PP downalod
-        return null;
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        buffer.write(TAG_SMS_PP_DOWNLOAD);
+        // This will be adjusted after encoding all the parameters.
+        buffer.write(0x00);
+
+        // Device identities (Source(NETWORK) --> Destination(UICC))
+        writeDeviceIdentities(buffer, DEVICE_IDENTITY_NETWORK, DEVICE_IDENTITY_UICC);
+
+        // writeAddress (RP_Originating Address of Service Centre)
+        if (!writeAddress(buffer, cmd.getRpOriginatingAddress())) {
+            ImsLog.w(getSlotId(), "USAT: writing RP_Originating_Address failed");
+            return null;
+        }
+
+        // SMS TPDU
+        buffer.write(TAG_SMS_TPDU);
+        byte[] tpdu = cmd.getTpdu();
+        writeLength(buffer, tpdu.length);
+        buffer.writeBytes(tpdu);
+
+        byte[] data = buffer.toByteArray();
+
+        // Adjust the length field of BER-TLV data object.
+        data = refineBerTlvDataObject(data);
+
+        return SimUtils.bytesToHexString(data);
     }
 
     /**
@@ -587,8 +709,20 @@ public class UsatAgent extends Handler implements UsatInterface {
      */
     private Usat.SmsPpDownloadCommandResponse decodeCommandResponseForSmsPpDownload(
             Usat.SmsPpDownloadCommand cmd, UsatResult result) {
-        // TODO: add the decoding for SMS-PP download
-        return null;
+        if (isCommandAborted(cmd)) {
+            return null;
+        }
+
+        int cmdResult;
+        if (result.isValidForClass2Sms()) {
+            cmdResult = Usat.RESULT_DATA_DOWNLOAD_OK;
+            ImsLog.i(getSlotId(), "USAT: sms-pp download ok");
+        } else {
+            cmdResult = Usat.RESULT_DATA_DOWNLOAD_ERROR;
+            ImsLog.i(getSlotId(), "USAT: sms-pp download error");
+        }
+
+        return new Usat.SmsPpDownloadCommandResponse(cmd, cmdResult, result.data);
     }
 
     /**
