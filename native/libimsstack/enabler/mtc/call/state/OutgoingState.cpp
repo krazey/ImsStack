@@ -551,6 +551,10 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingMediaDataFailed(IN IMS_UI
 
     if (IsCallEndNeededByAudioInactivity(eMediaType))
     {
+        if (m_objContext.GetSession() == IMS_NULL)
+        {
+            return GetStateName();
+        }
         ISession* piSession = &m_objContext.GetSession()->GetISession();
         FailReason objReason(FAIL_REASON_MEDIA_NODATA);
         HandleCancel(piSession, objReason);
@@ -580,6 +584,10 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnMediaFailed(IN FailReason objReaso
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
 
+    if (m_objContext.GetSession() == IMS_NULL)
+    {
+        return GetStateName();
+    }
     ISession* piSession = &m_objContext.GetSession()->GetISession();
     HandleCancel(piSession, objReason);
     OnStartFailed(piSession, objReason);
@@ -648,24 +656,12 @@ void OutgoingState::HandleCancel(IN ISession* piSession, IN const FailReason& ob
     IMS_TRACE_D("HandleCancel", 0, 0, 0);
     StopTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
 
-    if (objReason.nReason == FAIL_REASON_SESSION_EARLYDIALOG)
-    {
-        return;
-    }
-
     m_objContext.GetMediaManager().Terminate();
     if (objReason.nReason == FAIL_REASON_SESSION_PRECONDITION)
     {
         m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_TRUE);
     }
 
-    /* TODO: move to MessageSender?
-    if (piSession->GetState() <= ISession::STATE_INITIATED)
-    {
-        IMS_TRACE_I("HandleCancel : %d %s", piSession->GetState(), PS_FR(objReason), 0);
-        return;
-    }
-    */
     MtcSession* pSession = m_objContext.GetSession(piSession);
     if (pSession != IMS_NULL)
     {
@@ -798,7 +794,7 @@ PRIVATE
 void OutgoingState::OnSessionForked(IN ISession* piOriginSession)
 {
     if (m_objContext.GetConfigurationProxy().Is(
-                Feature::MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING))
+            Feature::MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING))
     {
         return;
     }

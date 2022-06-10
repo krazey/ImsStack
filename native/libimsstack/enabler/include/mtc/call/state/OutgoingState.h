@@ -55,13 +55,13 @@ private:
     IMS_RESULT SendPrack(IN ISession* piSession);  // TODO: Updating can use this also.
     IMS_RESULT SendAck(IN ISession* piSession);    // TODO: differs from UpdatingState::SendAck()?
     void HandleCancel(IN ISession* piSession, IN const FailReason& objReason);
+    CallStateName HandleSilentRetry(IN const FailReason& objReason);
+    CallStateName ContinueSilentRetry();
     void HandleCountrySpecificServiceUrn(IN IMessage* piMessage);
     void SendProgressing();
     void OnStarted(IN ISession* piSession);
     void OnStartFailed(IN ISession* piSession, IN const FailReason& objReason);
     void OnSessionForked(IN ISession* piOriginSession);
-    CallStateName HandleSilentRetry(IN const FailReason& objReason);
-    CallStateName ContinueSilentRetry();
 
     IMS_BOOL m_bRemoteAlerted;
     IMS_SINT32 m_nSilentRedialCount;
