@@ -40,7 +40,6 @@ import com.android.imsstack.core.agents.TRMAgent;
 import com.android.imsstack.core.agents.agentif.ITRM;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
-import com.android.imsstack.enabler.ssc.data.CfServiceQueryData;
 import com.android.imsstack.enabler.ssc.data.CfServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.SscData;
 import com.android.imsstack.enabler.ssc.data.SscRequestResult;
@@ -126,7 +125,7 @@ public class SscTransactionTest {
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
 
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, false);
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
 
     @Test
@@ -137,7 +136,7 @@ public class SscTransactionTest {
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
 
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, false);
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
 
     @Test
@@ -150,7 +149,7 @@ public class SscTransactionTest {
 
         triggerCallbackMessage(SscNetConnection.EVENT_PDN_CONNECTION_FAILED);
 
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, false);
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
 
     @Test
@@ -163,7 +162,7 @@ public class SscTransactionTest {
 
         triggerCallbackMessage(SscNetConnection.EVENT_PDN_CONNECTION_TIMEOUT);
 
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, false);
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
 
     @Test
@@ -175,7 +174,7 @@ public class SscTransactionTest {
 
         verify(mMockSscXui).getXui(eq(SLOT_0), eq(null));
 
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, false);
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
 
     @Test
@@ -187,7 +186,7 @@ public class SscTransactionTest {
 
         verify(mMockSscUrl).getQueryUri(any(), anyString());
 
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, false);
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
 
     @Test
@@ -220,7 +219,7 @@ public class SscTransactionTest {
         verify(mMockSscAuthAgent).setIsCredentialInfoUpdated(eq(false));
         verify(mMockSscServiceStateAgent).setGbaRequestFailed(eq(SLOT_0), eq(true));
 
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, false);
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
 
     @Test
@@ -253,7 +252,7 @@ public class SscTransactionTest {
                 eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq(""));
         verify(mMockSscAuthAgent).setIsCredentialInfoUpdated(eq(false));
 
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, false);
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
 
     @Test
@@ -269,7 +268,7 @@ public class SscTransactionTest {
                 eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq(""));
         verify(mMockSscServiceStateAgent).setSocketConnectionExpired(eq(SLOT_0), eq(true));
 
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, false);
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
 
     @Test
@@ -293,7 +292,7 @@ public class SscTransactionTest {
         verify(mMockSscHttpConnectionGov).getInputStream(eq(SLOT_0));
         verify(mMockSscXmlGov).parseXmlStream(eq(queryData), any());
 
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, true);
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true);
     }
 
     @Test
@@ -312,7 +311,7 @@ public class SscTransactionTest {
         verify(mMockSscServiceStateAgent).setErrorResponseCode(eq(SLOT_0), eq(httpErrorResponse));
         verify(mMockSscHttpConnectionGov).getInputStream(eq(SLOT_0));
 
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, false);
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
 
     @Test
@@ -329,7 +328,7 @@ public class SscTransactionTest {
         mSscTransaction.startGetTransaction(queryData);
         sleepToWaitThreadRun();
 
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, false);
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
 
     @Test
@@ -355,7 +354,7 @@ public class SscTransactionTest {
                 eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq(""));
         verify(mMockSscXmlGov).parseXmlStream(eq(queryData), any());
 
-        processTransactionSuccess(SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING,
+        processTransactionSuccess(SscConstant.EVENT_SSC_QUERY_CF,
                 SscHttpConnection.HTTP_GET_REQUEST);
     }
 
@@ -371,7 +370,7 @@ public class SscTransactionTest {
 
         verify(mMockSscXmlGov).createXmlStream(eq(updateData));
 
-        processTransactionFailure(SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD, false);
+        processTransactionFailure(SscConstant.EVENT_SSC_UPDATE_CF, false);
     }
 
     @Test
@@ -398,7 +397,7 @@ public class SscTransactionTest {
         verify(mMockSscHttpConnectionGov).getInputStream(eq(SLOT_0));
         verify(mMockSscXmlGov).parseXmlStream(eq(updateData), any());
 
-        processTransactionFailure(SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD, true);
+        processTransactionFailure(SscConstant.EVENT_SSC_UPDATE_CF, true);
     }
 
     @Test
@@ -420,7 +419,30 @@ public class SscTransactionTest {
         verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
                 eq(SscHttpConnection.HTTP_PUT_REQUEST), eq(mDefaultRequestUri), eq(xmlBody));
 
-        processTransactionSuccess(SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
+        processTransactionSuccess(SscConstant.EVENT_SSC_UPDATE_CF,
+                SscHttpConnection.HTTP_PUT_REQUEST);
+    }
+
+    @Test
+    public void startPutTransaction_successForInsert() {
+        int httpSuccessResponse = SscConstant.HTTP_OK;
+        String xmlBody = createXmlStream();
+        SscServiceData insertData = getInsertData(ESsType.CF);
+
+        when(mMockSscXmlGov.createXmlStream(eq(insertData))).thenReturn(xmlBody);
+        when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
+                eq(SscHttpConnection.HTTP_PUT_REQUEST), eq(mDefaultRequestUri), eq(xmlBody)))
+                .thenReturn(httpSuccessResponse);
+        when(mMockSscHttpConnectionGov.getInputStream(eq(SLOT_0))).thenReturn(null);
+
+        mSscTransaction.startPutTransaction(insertData);
+        sleepToWaitThreadRun();
+
+        verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
+                eq(SscHttpConnection.HTTP_PUT_REQUEST), eq(mDefaultRequestUri), eq(xmlBody));
+        verify(mMockSscXmlGov).updateTagsAndRules();
+
+        processTransactionSuccess(SscConstant.EVENT_SSC_INSERT_CF,
                 SscHttpConnection.HTTP_PUT_REQUEST);
     }
 
@@ -432,7 +454,7 @@ public class SscTransactionTest {
         String requestUri = "/simservs.ngn.etsi.org/users/" + sipXui + "simservs.xml";
         String xmlBody = createXmlStream();
         SscServiceData updateData = new CbServiceUpdateData(SLOT_0, ESsType.OCB,
-                SscConstant.EVENT_SSC_UPDATE_CALL_BARRING, mTransactionId,
+                SscConstant.EVENT_SSC_UPDATE_CB, mTransactionId,
                 SscConstant.ACTION_ACTIVATION, SscConstant.CONDITION_BAIC, null,
                 SscServiceClassUtil.SERVICE_CLASS_CALL, cbPassword);
 
@@ -450,7 +472,7 @@ public class SscTransactionTest {
         verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
                 eq(SscHttpConnection.HTTP_PUT_REQUEST), eq(requestUri), eq(xmlBody));
 
-        processTransactionSuccess(SscConstant.EVENT_SSC_UPDATE_CALL_BARRING,
+        processTransactionSuccess(SscConstant.EVENT_SSC_UPDATE_CB,
                 SscHttpConnection.HTTP_PUT_REQUEST);
     }
 
@@ -505,16 +527,19 @@ public class SscTransactionTest {
     }
 
     private SscServiceQueryData getQueryData(int condition) {
-        return new CfServiceQueryData(SLOT_0, ESsType.CF,
-                SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, mTransactionId, condition, "",
-                SscServiceClassUtil.SERVICE_CLASS_CALL);
+        return SscXmlGovTest.createQueryData(ESsType.CF, mTransactionId, condition);
     }
 
     private SscServiceData getUpdateData(int condition, int action, String number,
             int timeSeconds) {
         return new CfServiceUpdateData(SLOT_0, ESsType.CF,
-                SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD, mTransactionId, action, condition,
+                SscConstant.EVENT_SSC_UPDATE_CF, mTransactionId, action, condition,
                 number, timeSeconds, SscServiceClassUtil.SERVICE_CLASS_CALL);
+    }
+
+    private SscServiceData getInsertData(ESsType ssType) {
+        return SscXmlGovTest.createInsertData(ssType, mTransactionId, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFU, null);
     }
 
     private void sleepToWaitThreadRun() {

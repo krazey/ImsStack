@@ -21,7 +21,9 @@ import android.text.TextUtils;
 import com.android.imsstack.enabler.ssc.data.CfServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -29,30 +31,24 @@ import org.w3c.dom.NodeList;
 import java.util.Hashtable;
 
 public class SscXmlCreator {
-    protected Hashtable<ESsType, IXmlCreator> mXMLCreatorTable = null;
+    protected Hashtable<ESsType, IXmlCreator> mXmlCreatorTable = null;
 
     public SscXmlCreator() {
         ImsLog.d("");
 
-        if (mXMLCreatorTable == null) {
-            mXMLCreatorTable = new Hashtable<ESsType, IXmlCreator>();
-        }
-
-        mXMLCreatorTable.put(ESsType.OIP,   new XmlCreatorOip());
-        mXMLCreatorTable.put(ESsType.OIR,   new XmlCreatorOir());
-        mXMLCreatorTable.put(ESsType.TIP,   new XmlCreatorTip());
-        mXMLCreatorTable.put(ESsType.TIR,   new XmlCreatorTir());
-
-        mXMLCreatorTable.put(ESsType.CF,    new XmlCreatorCf());
-        mXMLCreatorTable.put(ESsType.OCB,   new XmlCreatorCb());
-        mXMLCreatorTable.put(ESsType.ICB,   new XmlCreatorCb());
-        mXMLCreatorTable.put(ESsType.CW,    new XmlCreatorCw());
-
-        //mXMLCreatorTable.put(ESsType.ICBA,   new XMLCreatorICBA());
-        mXMLCreatorTable.put(ESsType.ICBA,   new XmlCreatorCb());
+        mXmlCreatorTable = new Hashtable<ESsType, IXmlCreator>();
+        mXmlCreatorTable.put(ESsType.OIP, new XmlCreatorOip());
+        mXmlCreatorTable.put(ESsType.OIR, new XmlCreatorOir());
+        mXmlCreatorTable.put(ESsType.TIP, new XmlCreatorTip());
+        mXmlCreatorTable.put(ESsType.TIR, new XmlCreatorTir());
+        mXmlCreatorTable.put(ESsType.CF, new XmlCreatorCf());
+        mXmlCreatorTable.put(ESsType.OCB, new XmlCreatorCb());
+        mXmlCreatorTable.put(ESsType.ICB, new XmlCreatorCb());
+        mXmlCreatorTable.put(ESsType.CW, new XmlCreatorCw());
+        mXmlCreatorTable.put(ESsType.ICBA, new XmlCreatorCb());
     }
 
-    public Element createXML(Document doc, SscServiceData data) {
+    protected Element createXml(Document doc, SscServiceData data) {
         if (doc == null) {
             ImsLog.e("doc is null");
             return null;
@@ -63,13 +59,13 @@ public class SscXmlCreator {
             return null;
         }
 
-        IXmlCreator xmlCreator = mXMLCreatorTable.get(data.getSsType());
+        IXmlCreator xmlCreator = mXmlCreatorTable.get(data.getSsType());
         if (xmlCreator == null) {
             ImsLog.e("XML creator is null");
             return null;
         }
 
-        return xmlCreator.createXMLElement(doc, data);
+        return xmlCreator.createXmlElement(doc, data);
     }
 
     private Element getElementByTagName(Element rootElement, String tagName) {
@@ -151,22 +147,99 @@ public class SscXmlCreator {
         return ruleElement;
     }
 
-    public interface IXmlCreator {
-        Element createXMLElement(Document doc, SscServiceData data);
+    /**
+     * Createing new rule element and ruleset element. This method must be used only when the
+     * xcap server doesn't have same rule in XML data.
+     */
+    private Element createRuleAndRuleSet(Document doc, SscServiceData data) {
+        int slotId = data.getSlotId();
+        ImsLog.d(slotId, "");
+
+        String serviceName = data.getSsType().getSsName();
+        Element serviceElement = updateServiceElement(doc, slotId, serviceName,
+                SscConstant.STATUS_ENABLE);
+        if (serviceElement == null) {
+            return null;
+        }
+
+        String ruleSetTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.RULESET);
+        Element ruleSetElement = getElementByTagName(serviceElement, ruleSetTag);
+        if (ruleSetElement == null) {
+            ruleSetElement = doc.createElement(ruleSetTag);
+            serviceElement.appendChild(ruleSetElement);
+        }
+
+        String ruleTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.RULE);
+        Element ruleElement = doc.createElement(ruleTag);
+        ruleSetElement.appendChild(ruleElement);
+
+        int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_DATA)
+                ? SscXmlFormat.MEDIA_TYPE_VIDEO : SscXmlFormat.MEDIA_TYPE_AUDIO;
+        String defaultRuleId = SscXmlFormat.getDefaultRuleId(slotId, mediaType, serviceName,
+                data.getCondition());
+        if (TextUtils.isEmpty(defaultRuleId)) {
+            return null;
+        }
+
+        Attr attrRuleId = doc.createAttribute(SscXmlFormat.ID);
+        attrRuleId.setValue(defaultRuleId);
+        ruleElement.setAttributeNode(attrRuleId);
+
+        String conditionTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.CONDITIONS);
+        Element conditionElement = doc.createElement(conditionTag);
+        ruleElement.appendChild(conditionElement);
+
+        String ruleConditionTag = SscXmlFormat.getRuleConditionTag(slotId, serviceName,
+                data.getCondition());
+        if (!TextUtils.isEmpty(ruleConditionTag)) {
+            Element ruleConditionElement = doc.createElement(ruleConditionTag);
+            conditionElement.appendChild(ruleConditionElement);
+        }
+
+        String serviceCapabilityName = SscXmlFormat.SC_CD;
+        if (SscXmlFormat.ICB.equals(serviceName) || SscXmlFormat.OCB.equals(serviceName)) {
+            serviceCapabilityName = SscXmlFormat.SC_CB;
+        }
+
+        if (mediaType == SscXmlFormat.MEDIA_TYPE_AUDIO) {
+            boolean audioCapability = SscXmlFormat.getMediaCapability(slotId, serviceCapabilityName,
+                    SscXmlFormat.MEDIA_TYPE_AUDIO);
+            if (audioCapability) {
+                String mediaTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.MEDIA);
+                Element mediaElement = doc.createElement(mediaTag);
+                mediaElement.setTextContent(SscXmlFormat.AUDIO);
+                conditionElement.appendChild(mediaElement);
+            }
+        } else if (mediaType == SscXmlFormat.MEDIA_TYPE_VIDEO) {
+            boolean videoCapability = SscXmlFormat.getMediaCapability(slotId, serviceCapabilityName,
+                    SscXmlFormat.MEDIA_TYPE_VIDEO);
+            if (videoCapability) {
+                String mediaTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.MEDIA);
+                Element mediaElement = doc.createElement(mediaTag);
+                mediaElement.setTextContent(SscXmlFormat.VIDEO);
+                conditionElement.appendChild(mediaElement);
+            }
+        }
+
+        return serviceElement;
+    }
+
+    private interface IXmlCreator {
+        Element createXmlElement(Document doc, SscServiceData data);
     }
 
     protected class XmlCreatorOip implements IXmlCreator {
         @Override
-        public Element createXMLElement(Document doc, SscServiceData data) {
+        public Element createXmlElement(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
-            return updateServiceElement(doc, slotId, data.getSsType().getSSName(), data.getState());
+            return updateServiceElement(doc, slotId, data.getSsType().getSsName(), data.getState());
         }
     }
 
     protected class XmlCreatorOir implements IXmlCreator {
         @Override
-        public Element createXMLElement(Document doc, SscServiceData data) {
+        public Element createXmlElement(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
 
@@ -192,7 +265,7 @@ public class SscXmlCreator {
             }
 
             Element oirServiceElement =
-                    updateServiceElement(doc, slotId, data.getSsType().getSSName(), state);
+                    updateServiceElement(doc, slotId, data.getSsType().getSsName(), state);
             if (oirServiceElement == null) {
                 return null;
             }
@@ -222,16 +295,16 @@ public class SscXmlCreator {
 
     protected class XmlCreatorTip implements IXmlCreator {
         @Override
-        public Element createXMLElement(Document doc, SscServiceData data) {
+        public Element createXmlElement(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
-            return updateServiceElement(doc, slotId, data.getSsType().getSSName(), data.getState());
+            return updateServiceElement(doc, slotId, data.getSsType().getSsName(), data.getState());
         }
     }
 
     protected class XmlCreatorTir implements IXmlCreator {
         @Override
-        public Element createXMLElement(Document doc, SscServiceData data) {
+        public Element createXmlElement(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
 
@@ -245,7 +318,7 @@ public class SscXmlCreator {
             }
 
             Element tirServiceElement = updateServiceElement(doc, slotId,
-                    data.getSsType().getSSName(), state);
+                    data.getSsType().getSsName(), state);
             if (tirServiceElement == null) {
                 return null;
             }
@@ -273,7 +346,11 @@ public class SscXmlCreator {
 
     protected class XmlCreatorCf implements IXmlCreator {
         @Override
-        public Element createXMLElement(Document doc, SscServiceData data) {
+        public Element createXmlElement(Document doc, SscServiceData data) {
+            if (data.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CF) {
+                return createCfRuleAndRuleSet(doc, data);
+            }
+
             if (data.getCondition() == SscConstant.CONDITION_CFNR_TIMER) {
                 if (SscXmlFormat.getIsNoReplyTimerOmitted(data.getSlotId())) {
                     return createNoReplyTimer(doc, data);
@@ -284,10 +361,10 @@ public class SscXmlCreator {
 
             if (data.getState() == SscConstant.ACTION_ACTIVATION ||
                     data.getState() == SscConstant.ACTION_DEACTIVATION) {
-                return updateXmlCfRuleCondition(doc, data);
+                return updateCfCondition(doc, data);
             }
 
-            return updateXmlCfRule(doc, data);
+            return updateCfRule(doc, data);
         }
 /*
         private Element updateXmlCfService(Document doc, SscServiceData data) {
@@ -295,7 +372,7 @@ public class SscXmlCreator {
             ImsLog.d(slotId, "");
 
             Element cfServiceElement = updateServiceElement(
-                doc, slotId, data.getSsType().getSSName(), data.getState());
+                doc, slotId, data.getSsType().getSsName(), data.getState());
             if (cfServiceElement == null) {
                 return null;
             }
@@ -305,21 +382,21 @@ public class SscXmlCreator {
                 CfServiceUpdateData tempCfData = new CfServiceUpdateData(slotId, data.getSsType(),
                         0, 0, data.getState(), i, cfData.getForwardToNumber(), -1,
                         data.getServiceClass());
-                updateXmlCfRule(doc, tempCfData);
+                updateCfRule(doc, tempCfData);
             }
 
             if (data.getCondition() == SscConstant.CONDITION_CFA) {
                 CfServiceUpdateData tempCfData = new CfServiceUpdateData(slotId, data.getSsType(),
                         0, 0, data.getState(), SscConstant.CONDITION_CFU,
                         cfData.getForwardToNumber(), -1, data.getServiceClass());
-                updateXmlCfRule(doc, tempCfData);
+                updateCfRule(doc, tempCfData);
             }
 
             if (SscXmlFormat.getCfnlExist(slotId)) {
                 CfServiceUpdateData tempCfData = new CfServiceUpdateData(slotId, data.getSsType(),
                         0, 0, data.getState(), SscConstant.CONDITION_CFNL,
                         cfData.getForwardToNumber(), -1, data.getServiceClass());
-                updateXmlCfRule(doc, tempCfData);
+                updateCfRule(doc, tempCfData);
             }
 
             if (cfData.getReplyTimer() > 0) {
@@ -329,14 +406,24 @@ public class SscXmlCreator {
             return cfServiceElement;
         }
 */
-        private Element updateXmlCfRule(Document doc, SscServiceData data) {
+        private Element updateCfRule(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
 
             int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_DATA) ?
-                    SscXmlFormat.MEDIA_VIDEO : SscXmlFormat.MEDIA_AUDIO;
-            String ruleId = SscXmlFormat.getRuleId(
-                    slotId, mediaType, data.getSsType().getSSName(), data.getCondition());
+                    SscXmlFormat.MEDIA_TYPE_VIDEO : SscXmlFormat.MEDIA_TYPE_AUDIO;
+            String ruleId = null;
+            if (data.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CF) {
+                ruleId = SscXmlFormat.getDefaultRuleId(slotId, mediaType,
+                        data.getSsType().getSsName(), data.getCondition());
+            } else {
+                ruleId = SscXmlFormat.getRuleId(slotId, mediaType, data.getSsType().getSsName(),
+                        data.getCondition());
+            }
+
+            if (ruleId == null) {
+                return null;
+            }
 
             int state = SscConstant.STATUS_DISABLE;
             if(data.getState() == SscConstant.ACTION_ACTIVATION ||
@@ -372,7 +459,7 @@ public class SscXmlCreator {
                     }
                     forwrdToElement.appendChild(targetElement);
                 }
-                targetElement.setTextContent(makeValueInTargetTo(slotId,
+                targetElement.setTextContent(getSscUtils().getUriFromNumber(slotId,
                         cfData.getForwardToNumber()));
             }
 
@@ -386,11 +473,11 @@ public class SscXmlCreator {
             return cfRuleElement;
         }
 
-        private Element updateXmlCfRuleCondition(Document doc, SscServiceData data) {
+        private Element updateCfCondition(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
 
-            Element cfRuleElement = updateXmlCfRule(doc, data);
+            Element cfRuleElement = updateCfRule(doc, data);
             if (cfRuleElement == null) {
                 return null;
             }
@@ -419,6 +506,30 @@ public class SscXmlCreator {
             noReplyTimerElement.setTextContent(Integer.toString(cfData.getReplyTimer()));
 
             return noReplyTimerElement;
+        }
+
+        private Element createCfRuleAndRuleSet(Document doc, SscServiceData data) {
+            int slotId = data.getSlotId();
+            ImsLog.d(slotId, "");
+
+            boolean provisionStatus = SscXmlFormat.getProvisionStatus(slotId, SscXmlFormat.SC_CD,
+                    data.getCondition());
+            if (!provisionStatus) {
+                ImsLog.d(slotId, "Not provisioned condition " + data.getCondition());
+                return null;
+            }
+
+            Element cfServiceElement = createRuleAndRuleSet(doc, data);
+            if (cfServiceElement == null) {
+                return null;
+            }
+
+            Element cfRuleElement = updateCfRule(doc, data);
+            if (cfRuleElement == null) {
+                return null;
+            }
+
+            return cfServiceElement;
         }
 
         private Element createNoReplyTimer(Document doc, SscServiceData data) {
@@ -451,93 +562,77 @@ public class SscXmlCreator {
 
             return cfServiceElement;
         }
-
-        private String makeValueInTargetTo(int slotId, String number) {
-            if (TextUtils.isEmpty(number)) {
-                ImsLog.d("Number is empty !!!");
-                return null;
-            }
-
-            String domain = null;
-            String phoneContext = SscConfig.getPhoneContextForTargetAddress(slotId);
-            if (!TextUtils.isEmpty(phoneContext)) {
-                domain = phoneContext;
-            } else {
-                domain = SscUtils.getInstance().getDomain(slotId);
-            }
-
-            if (domain == null) {
-                ImsLog.w("Domain is null !!!");
-                return null;
-            }
-
-            final String ZERO = "0";
-            final String ccToAdd = SscConfig.getCountryCodeToReplaceZeroWithCountryCode(slotId);
-            if (!TextUtils.isEmpty(ccToAdd) && !number.startsWith("+")) {
-                if (number.startsWith(ZERO)) {
-                    number = number.substring(1);
-                }
-                number = ccToAdd + number;
-            }
-
-            final String ccToRemove = SscConfig.getCountryCodeToReplaceCountryCodeWithZero(slotId);
-            if (!TextUtils.isEmpty(ccToRemove) && number.startsWith(ccToRemove)) {
-                number = number.replaceFirst(ccToRemove, ZERO);
-            }
-
-            final String format = SscConfig.getTargetAddrScheme(slotId);
-            ImsLog.d("number : " + number + ", format : " + format + ", domain : " + domain);
-
-            // IR92 2.2.3 Addressing
-            String addressing = null;
-            if ("sip".equalsIgnoreCase(format)) {
-                addressing = "sip:" + number;
-                // local numbering
-                if (!number.startsWith("+")) {
-                    addressing += ";phone-context=" + domain;
-                }
-                addressing += "@" + domain + ";user=phone";
-            } else if ("tel".equalsIgnoreCase(format)) {
-                addressing = "tel:" + number;
-                // local numbering
-                if (!number.startsWith("+")) {
-                    addressing += ";phone-context=" + domain;
-                }
-            } else {
-                addressing = number;
-            }
-
-            return addressing;
-        }
     }
 
     protected class XmlCreatorCb implements IXmlCreator {
         @Override
-        public Element createXMLElement(Document doc, SscServiceData data) {
+        public Element createXmlElement(Document doc, SscServiceData data) {
+            if (data.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CB) {
+                return createCbRuleAndRuleSet(doc, data);
+            }
+
+            return updateCbRule(doc, data);
+        }
+
+        private Element updateCbRule(Document doc, SscServiceData data) {
+            int slotId = data.getSlotId();
+            ImsLog.d(slotId, "");
+            int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_DATA)
+                    ? SscXmlFormat.MEDIA_TYPE_VIDEO : SscXmlFormat.MEDIA_TYPE_AUDIO;
+            String ruleId = null;
+            if (data.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CB) {
+                ruleId = SscXmlFormat.getDefaultRuleId(slotId, mediaType,
+                        data.getSsType().getSsName(), data.getCondition());
+            } else {
+                ruleId = SscXmlFormat.getRuleId(slotId, mediaType, data.getSsType().getSsName(),
+                        data.getCondition());
+            }
+
+            return updateRuleElement(doc, slotId, ruleId, data.getState());
+        }
+
+        private Element createCbRuleAndRuleSet(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
 
-            int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_DATA) ?
-                    SscXmlFormat.MEDIA_VIDEO : SscXmlFormat.MEDIA_AUDIO;
-            String ruleId = SscXmlFormat.getRuleId(
-                    slotId, mediaType, data.getSsType().getSSName(), data.getCondition());
+            boolean provisionStatus = SscXmlFormat.getProvisionStatus(slotId, SscXmlFormat.SC_CB,
+                    data.getCondition());
+            if (!provisionStatus) {
+                ImsLog.d(slotId, "Not provisioned condition " + data.getCondition());
+                return null;
+            }
 
-            return updateRuleElement(doc, slotId, ruleId, data.getState());
+            Element cbServiceElement = createRuleAndRuleSet(doc, data);
+            if (cbServiceElement == null) {
+                return null;
+            }
+
+            Element cbRuleElement = updateCbRule(doc, data);
+            if (cbRuleElement == null) {
+                return null;
+            }
+
+            return cbServiceElement;
         }
     }
 
     protected class XmlCreatorCw implements IXmlCreator {
         @Override
-        public Element createXMLElement(Document doc, SscServiceData data) {
+        public Element createXmlElement(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
-            return updateServiceElement(doc, slotId, data.getSsType().getSSName(), data.getState());
+            return updateServiceElement(doc, slotId, data.getSsType().getSsName(), data.getState());
         }
+    }
+
+    @VisibleForTesting
+    protected SscUtils getSscUtils() {
+        return SscUtils.getInstance();
     }
 /*
     protected class XMLCreatorICBA implements IXmlCreator {
         @Override
-        public Document createXMLElement(Document doc, SscServiceData data) {
+        public Document createXmlElement(Document doc, SscServiceData data) {
             ImsLog.d("");
 
             if (!(inputData instanceof ICBAServiceData)) {

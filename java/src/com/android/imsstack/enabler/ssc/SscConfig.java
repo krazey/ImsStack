@@ -266,6 +266,10 @@ public final class SscConfig {
                 CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL);
     }
 
+    protected static boolean insertNewRule(int slotId) {
+        return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL);
+    }
+
     // Specific APIs
     public static boolean isCfnlOverUtSupported(int slotId) {
         int[] serverBasedServices = getServerBasedServices(slotId);

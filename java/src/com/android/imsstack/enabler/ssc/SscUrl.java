@@ -66,7 +66,7 @@ public class SscUrl {
 
     private String getDocumentQueryUri(SscServiceQueryData data, String xui) {
         int slotId = data.getSlotId();
-        String urlQuery = getQueryPrefixFromDB(slotId);
+        String urlQuery = getUriPrefixFromConfig(slotId);
         urlQuery += URI_AUID + URI_USERS + "/" + xui + URI_DOC;
 
         ImsLog.d("urlQuery : " + urlQuery);
@@ -75,38 +75,40 @@ public class SscUrl {
 
     protected String getQueryUri(SscServiceQueryData data, String xui) {
         int slotId = data.getSlotId();
-        String querUri = getQueryPrefixFromDB(slotId);
-        querUri += URI_AUID + URI_USERS + "/" + xui + URI_DOC;
+        String queryUri = getUriPrefixFromConfig(slotId);
+        queryUri += URI_AUID + URI_USERS + "/" + xui + URI_DOC;
 
         if (data.getSsType() != ESsType.NONE) {
-            querUri += URI_NODE_SELECTOR_SEPARATOR
+            queryUri += URI_NODE_SELECTOR_SEPARATOR
                     + "/" + SscXmlFormat.getSsElement(slotId, SscXmlFormat.SIMSERVS)
-                    + "/" + SscXmlFormat.getSsElement(slotId, data.getSsType().getSSName());
+                    + "/" + SscXmlFormat.getSsElement(slotId, data.getSsType().getSsName());
         }
 
-        if (querUri.contains(SscXmlFormat.NS_SS_PREFIX)
-                || querUri.contains(SscXmlFormat.NS_CP_PREFIX)) {
-            querUri += "?";
-            if (querUri.contains(SscXmlFormat.NS_SS_PREFIX)) {
-                querUri += SscXmlFormat.NS_SS_URI;
+        if (queryUri.contains(SscXmlFormat.NS_SS_PREFIX)
+                || queryUri.contains(SscXmlFormat.NS_CP_PREFIX)) {
+            queryUri += "?";
+            if (queryUri.contains(SscXmlFormat.NS_SS_PREFIX)) {
+                queryUri += SscXmlFormat.NS_SS_URI;
             }
-            if (querUri.contains(SscXmlFormat.NS_CP_PREFIX)) {
-                querUri += SscXmlFormat.NS_CP_URI;
+            if (queryUri.contains(SscXmlFormat.NS_CP_PREFIX)) {
+                queryUri += SscXmlFormat.NS_CP_URI;
             }
         }
 
-        ImsLog.d("querUri : " + querUri);
-        return querUri;
+        ImsLog.d("queryUri : " + queryUri);
+        return queryUri;
     }
 
     protected String getUpdateUri(SscServiceData data, String xui) {
         int slotId = data.getSlotId();
-        String updateUri = getQueryPrefixFromDB(slotId);
+        String updateUri = getUriPrefixFromConfig(slotId);
         updateUri += URI_AUID + URI_USERS + "/" + xui + URI_DOC + URI_NODE_SELECTOR_SEPARATOR;
 
         switch (data.getSsType()) {
             case CF:
-                if (data.getCondition() == SscConstant.CONDITION_CFNR_TIMER) {
+                if (data.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CF) {
+                    updateUri += getServiceUri(data);
+                } else if (data.getCondition() == SscConstant.CONDITION_CFNR_TIMER) {
                     if (SscXmlFormat.getIsNoReplyTimerOmitted(slotId)) {
                         updateUri += getServiceUri(data);
                     } else {
@@ -125,7 +127,11 @@ public class SscUrl {
             case ICB:
             case OCB:
             case ICBA:
-                updateUri += getRuleUri(data);
+                if (data.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CB) {
+                    updateUri += getServiceUri(data);
+                } else {
+                    updateUri += getRuleUri(data);
+                }
                 break;
             case CW:
             case OIR:
@@ -155,14 +161,14 @@ public class SscUrl {
 
     private String getServiceUri(SscServiceData data) {
         return "/" + SscXmlFormat.getSsElement(data.getSlotId(), SscXmlFormat.SIMSERVS)
-                + "/" + SscXmlFormat.getSsElement(data.getSlotId(), data.getSsType().getSSName());
+                + "/" + SscXmlFormat.getSsElement(data.getSlotId(), data.getSsType().getSsName());
     }
 
     private String getRuleUri(SscServiceData data) {
         int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_DATA) ?
-                SscXmlFormat.MEDIA_VIDEO : SscXmlFormat.MEDIA_AUDIO;
+                SscXmlFormat.MEDIA_TYPE_VIDEO : SscXmlFormat.MEDIA_TYPE_AUDIO;
         String ruleId = SscXmlFormat.getRuleId(
-                data.getSlotId(), mediaType, data.getSsType().getSSName(), data.getCondition());
+                data.getSlotId(), mediaType, data.getSsType().getSsName(), data.getCondition());
 
         String uri = getServiceUri(data);
         uri += "/" + SscXmlFormat.getCpElement(data.getSlotId(), SscXmlFormat.RULESET)
@@ -291,9 +297,9 @@ public class SscUrl {
         return uriAddr;
     }
 
-    private String getQueryPrefixFromDB(int slotId) {
-        String urlQueryPrefix = SscConfig.getAuidPrefix(slotId);
-        return (TextUtils.isEmpty(urlQueryPrefix)) ? "" :
-                (urlQueryPrefix.startsWith("/") ? urlQueryPrefix : "/" + urlQueryPrefix);
+    private String getUriPrefixFromConfig(int slotId) {
+        String uriPrefix = SscConfig.getAuidPrefix(slotId);
+        return (TextUtils.isEmpty(uriPrefix)) ? "" :
+                (uriPrefix.startsWith("/") ? uriPrefix : "/" + uriPrefix);
     }
 }

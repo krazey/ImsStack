@@ -30,8 +30,11 @@ public class SscXmlFormat {
         private boolean mIsCfnlExistInServer = false;
         private String mNsSsPrefix = "";
         private String mNsCpPrefix = "";
+        // namespace, tag name
         private HashMap<String, String> mTags = new HashMap<>();
+        // service name, condition, rule ID for audio
         private HashMap<String, HashMap<Integer, String>> mAudioRuleIds = new HashMap<>();
+        // service name, condition, rule ID for video
         private HashMap<String, HashMap<Integer, String>> mVideoRuleIds = new HashMap<>();
 
         /**
@@ -50,8 +53,8 @@ public class SscXmlFormat {
          * media type.
          * The params consist of media type and status
          */
-        private HashMap<String, Boolean> mCfMeidaCapability = new HashMap<>();
-        private HashMap<String, Boolean> mCbMeidaCapability = new HashMap<>();
+        private HashMap<Integer, Boolean> mCfMeidaCapability = new HashMap<>();
+        private HashMap<Integer, Boolean> mCbMeidaCapability = new HashMap<>();
 
         private UtXmlData() {
             mCfProvisionStatus.put(SscConstant.CONDITION_CFU, true);
@@ -67,11 +70,11 @@ public class SscXmlFormat {
             mCbProvisionStatus.put(SscConstant.CONDITION_BIC_WR, true);
             mCbProvisionStatus.put(SscConstant.CONDITION_ACR, true);
 
-            mCfMeidaCapability.put(AUDIO, false);
-            mCfMeidaCapability.put(VIDEO, false);
+            mCfMeidaCapability.put(MEDIA_TYPE_AUDIO, false);
+            mCfMeidaCapability.put(MEDIA_TYPE_VIDEO, false);
 
-            mCbMeidaCapability.put(AUDIO, false);
-            mCbMeidaCapability.put(VIDEO, false);
+            mCbMeidaCapability.put(MEDIA_TYPE_AUDIO, false);
+            mCbMeidaCapability.put(MEDIA_TYPE_VIDEO, false);
         }
 
         private void setIsNoReplyTimerOmitted(boolean isNoReplyTimerOmitted) {
@@ -209,9 +212,23 @@ public class SscXmlFormat {
     public static final String PROVISIONED = "provisioned";
     public static final String PHRASE = "phrase";
 
-    public static final int MEDIA_AUDIO = 0;
-    public static final int MEDIA_VIDEO = 1;
+    // CF default rule ids
+    public static final String RULE_ID_CFU = "call-diversion-unconditional";
+    public static final String RULE_ID_CFB = "call-diversion-busy";
+    public static final String RULE_ID_CFNR = "call-diversion-no-reply";
+    public static final String RULE_ID_CFNRC = "call-diversion-not-reachable";
+    public static final String RULE_ID_CFNL = "call-diversion-not-logged-in";
 
+    // CB default rule ids
+    public static final String RULE_ID_BAIC = "call-barring-all-incoming";
+    public static final String RULE_ID_BAOC = "call-barring-all-outgoing";
+    public static final String RULE_ID_BOIC = "call-barring-outgoing-international";
+    public static final String RULE_ID_BOIC_EXHC = "call-barring-outgoing-internationalExHC";
+    public static final String RULE_ID_BIC_WR = "call-barring-incoming-in-roaming";
+    public static final String RULE_ID_ACR = "call-barring-anonymous";
+
+    public static final int MEDIA_TYPE_AUDIO = 0;
+    public static final int MEDIA_TYPE_VIDEO = 1;
 
     public static void init(int slotId) {
         ImsLog.d("init (" + slotId + ")");
@@ -239,7 +256,7 @@ public class SscXmlFormat {
     }
 
     private static UtXmlData getXmlData(int slotId) {
-        if (mXmlDatas.containsKey(slotId) == false) {
+        if (!mXmlDatas.containsKey(slotId)) {
             ImsLog.w("wrong slot - " + slotId );
             return null;
         }
@@ -249,7 +266,7 @@ public class SscXmlFormat {
 
     private static String getTag(UtXmlData xmlData, String elementName) {
         HashMap<String, String> tags = xmlData.getTags();
-        if (tags.containsKey(elementName) == false) {
+        if (!tags.containsKey(elementName)) {
             return null;
         }
 
@@ -279,9 +296,13 @@ public class SscXmlFormat {
     }
 
     protected static String getSsElement(int slotId, String elementName) {
+        if (SscConfig.isOmitNamespaceSs(slotId)) {
+            return elementName;
+        }
+
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
-            return elementName;
+            return NS_SS_PREFIX + elementName;
         }
 
         String tag = getTag(xmlData, elementName);
@@ -293,6 +314,10 @@ public class SscXmlFormat {
     }
 
     protected static String getCpElement(int slotId, String elementName) {
+        if (SscConfig.isOmitNamespaceCp(slotId)) {
+            return elementName;
+        }
+
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return NS_CP_PREFIX + elementName;
@@ -324,13 +349,13 @@ public class SscXmlFormat {
         }
 
         HashMap<String, HashMap<Integer, String>> services = null;
-        if (mediaType == MEDIA_AUDIO) {
+        if (mediaType == MEDIA_TYPE_AUDIO) {
             services = xmlData.getAudioRuleIds();
-        } else { // MEDIA_VIDEO
+        } else { // MEDIA_TYPE_VIDEO
             services = xmlData.getVideoRuleIds();
         }
 
-        if (services.containsKey(serviceName) == false) {
+        if (!services.containsKey(serviceName)) {
             services.put(serviceName, new HashMap<Integer, String>());
         }
 
@@ -348,18 +373,137 @@ public class SscXmlFormat {
         }
 
         HashMap<String, HashMap<Integer, String>> services = null;
-        if (mediaType == MEDIA_AUDIO) {
+        if (mediaType == MEDIA_TYPE_AUDIO) {
             services = xmlData.getAudioRuleIds();
         } else {
             services = xmlData.getVideoRuleIds();
         }
 
-        if (services.containsKey(serviceName) == false) {
+        if (!services.containsKey(serviceName)) {
             ImsLog.e(slotId, "no ruleId");
             return null;
         }
 
         return services.get(serviceName).get(condition);
+    }
+
+    protected static String getDefaultRuleId(int slotId, int mediaType, String serviceName,
+            int condition) {
+        String ruleId = null;
+        if (CD.equals(serviceName)) {
+            switch (condition) {
+                case SscConstant.CONDITION_CFU:
+                    ruleId = RULE_ID_CFU;
+                    break;
+                case SscConstant.CONDITION_CFB:
+                    ruleId = RULE_ID_CFB;
+                    break;
+                case SscConstant.CONDITION_CFNR:
+                    ruleId = RULE_ID_CFNR;
+                    break;
+                case SscConstant.CONDITION_CFNRC:
+                    ruleId = RULE_ID_CFNRC;
+                    break;
+                case SscConstant.CONDITION_CFNL:
+                    ruleId = RULE_ID_CFNL;
+                    break;
+                default:
+                    // do nothing
+                    break;
+            }
+        } else if (ICB.equals(serviceName)) {
+            switch (condition) {
+                case SscConstant.CONDITION_BAIC:
+                    ruleId = RULE_ID_BAIC;
+                    break;
+                case SscConstant.CONDITION_BIC_WR:
+                    ruleId = RULE_ID_BIC_WR;
+                    break;
+                case SscConstant.CONDITION_ACR:
+                    ruleId = RULE_ID_ACR;
+                    break;
+                default:
+                    // do nothing
+                    break;
+            }
+        } else if (OCB.equals(serviceName)) {
+            switch (condition) {
+                case SscConstant.CONDITION_BAOC:
+                    ruleId = RULE_ID_BAOC;
+                    break;
+                case SscConstant.CONDITION_BOIC:
+                    ruleId = RULE_ID_BOIC;
+                    break;
+                case SscConstant.CONDITION_BOIC_EXHC:
+                    ruleId = RULE_ID_BOIC_EXHC;
+                    break;
+                default:
+                    // do nothing
+                    break;
+            }
+        }
+
+        if (ruleId != null && mediaType == MEDIA_TYPE_VIDEO) {
+            ruleId += "-video";
+        }
+
+        ImsLog.d(slotId, "default rule id is " + ruleId);
+        return ruleId;
+    }
+
+    protected static String getRuleConditionTag(int slotId, String serviceName, int condition) {
+        String ruleConditionTag = null;
+        if (CD.equals(serviceName)) {
+            switch (condition) {
+                case SscConstant.CONDITION_CFU:
+                    ruleConditionTag = "";
+                    break;
+                case SscConstant.CONDITION_CFB:
+                    ruleConditionTag = CFB;
+                    break;
+                case SscConstant.CONDITION_CFNR:
+                    ruleConditionTag = CFNR;
+                    break;
+                case SscConstant.CONDITION_CFNRC:
+                    ruleConditionTag = CFNRC;
+                    break;
+                case SscConstant.CONDITION_CFNL:
+                    ruleConditionTag = CFNL;
+                    break;
+                default:
+                    // do nothing
+                    break;
+            }
+        } else if (ICB.equals(serviceName) || OCB.equals(serviceName)) {
+            switch (condition) {
+                case SscConstant.CONDITION_BAIC:
+                case SscConstant.CONDITION_BAOC:
+                    ruleConditionTag = "";
+                    break;
+                case SscConstant.CONDITION_BIC_WR:
+                    ruleConditionTag = BIC_WR;
+                    break;
+                case SscConstant.CONDITION_ACR:
+                    ruleConditionTag = ACR;
+                    break;
+                case SscConstant.CONDITION_BOIC:
+                    ruleConditionTag = BOIC;
+                    break;
+                case SscConstant.CONDITION_BOIC_EXHC:
+                    ruleConditionTag = BOIC_EXHC;
+                    break;
+                default:
+                    // do nothing
+                    break;
+            }
+        }
+
+        if (TextUtils.isEmpty(ruleConditionTag)) {
+            // in case of unconditional, no rule condition tag
+            return "";
+        }
+
+        return getSsElement(slotId, ruleConditionTag);
     }
 
     protected static boolean getIsNoReplyTimerOmitted(int slotId) {
@@ -416,17 +560,17 @@ public class SscXmlFormat {
         xmlData.setIsCfnlExist(isCfnlExist);
     }
 
-    protected static boolean getProvisionStatus(int slotId, String capabilityName, int condition) {
+    protected static boolean getProvisionStatus(int slotId, String serviceName, int condition) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return false;
         }
 
-        if (capabilityName == SC_CD) {
+        if (SC_CD.equals(serviceName)) {
             if (xmlData.mCfProvisionStatus.containsKey(condition)) {
                 return xmlData.mCfProvisionStatus.get(condition);
             }
-        } else if (capabilityName == SC_CB) {
+        } else if (SC_CB.equals(serviceName)) {
             if (xmlData.mCbProvisionStatus.containsKey(condition)) {
                 return xmlData.mCbProvisionStatus.get(condition);
             }
@@ -435,32 +579,32 @@ public class SscXmlFormat {
         return false;
     }
 
-    protected static void setProvisionStatus(int slotId, String capabilityName, int condition,
+    protected static void setProvisionStatus(int slotId, String serviceName, int condition,
             boolean provisioned) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return;
         }
 
-        if (capabilityName == SC_CD) {
+        if (SC_CD.equals(serviceName)) {
             xmlData.mCfProvisionStatus.put(condition, provisioned);
-        } else if (capabilityName == SC_CB) {
+        } else if (SC_CB.equals(serviceName)) {
             xmlData.mCbProvisionStatus.put(condition, provisioned);
         }
     }
 
-    protected static boolean getMediaCapability(int slotId, String capabilityName,
-            String mediaType) {
+    protected static boolean getMediaCapability(int slotId, String serviceName,
+            int mediaType) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return false;
         }
 
-        if (capabilityName == SC_CD) {
+        if (SC_CD.equals(serviceName)) {
             if (xmlData.mCfMeidaCapability.containsKey(mediaType)) {
                 return xmlData.mCfMeidaCapability.get(mediaType);
             }
-        } else if (capabilityName == SC_CB) {
+        } else if (SC_CB.equals(serviceName)) {
             if (xmlData.mCbMeidaCapability.containsKey(mediaType)) {
                 return xmlData.mCbMeidaCapability.get(mediaType);
             }
@@ -469,16 +613,16 @@ public class SscXmlFormat {
         return false;
     }
 
-    protected static void setMediaCapability(int slotId, String capabilityName, String mediaType,
+    protected static void setMediaCapability(int slotId, String serviceName, int mediaType,
             boolean mediaCapability) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return;
         }
 
-        if (capabilityName == SC_CD) {
+        if (SC_CD.equals(serviceName)) {
             xmlData.mCfMeidaCapability.put(mediaType, mediaCapability);
-        } else if (capabilityName == SC_CB) {
+        } else if (SC_CB.equals(serviceName)) {
             xmlData.mCbMeidaCapability.put(mediaType, mediaCapability);
         }
     }

@@ -228,7 +228,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         switch(condition) {
@@ -236,18 +236,13 @@ public class SscServiceImpl extends UtInterfaceBase {
             case SscConstant.CONDITION_BOIC:
             case SscConstant.CONDITION_BOIC_EXHC:
                 requestData.offerSscData(new CbServiceQueryData(mSlotId, ESsType.OCB,
-                        SscConstant.EVENT_SSC_QUERY_CALL_BARRING, tId, condition, serviceClass));
+                        SscConstant.EVENT_SSC_QUERY_CB, tId, condition, serviceClass));
                 break;
             case SscConstant.CONDITION_BAIC:
             case SscConstant.CONDITION_BIC_WR:
-                requestData.offerSscData(new CbServiceQueryData(mSlotId, ESsType.ICB,
-                        SscConstant.EVENT_SSC_QUERY_CALL_BARRING, tId, condition, serviceClass));
-                break;
             case SscConstant.CONDITION_ACR:
-            case SscConstant.CONDITION_BSIC:
-                requestData.offerSscData(new CbServiceQueryData(mSlotId, ESsType.ICBA,
-                        SscConstant.EVENT_SSC_QUERY_CALL_BARRING_INCOMING, tId, condition,
-                        serviceClass));
+                requestData.offerSscData(new CbServiceQueryData(mSlotId, ESsType.ICB,
+                        SscConstant.EVENT_SSC_QUERY_CB, tId, condition, serviceClass));
                 break;
             default:
                 ImsLog.e("Invalid or Not Supported CBType : " + condition);
@@ -289,7 +284,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         switch (condition) {
@@ -301,8 +296,7 @@ public class SscServiceImpl extends UtInterfaceBase {
             case SscConstant.CONDITION_CFAC:
             case SscConstant.CONDITION_CFNL:
                 requestData.offerSscData(new CfServiceQueryData(mSlotId, ESsType.CF,
-                        SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING, tId, condition, number,
-                        serviceClass));
+                        SscConstant.EVENT_SSC_QUERY_CF, tId, condition, number, serviceClass));
                 break;
             default :
                 ImsLog.e(mSlotId, "Invalid or Not Supported CF condition : " + condition);
@@ -321,11 +315,11 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.CW,
-                SscConstant.EVENT_SSC_QUERY_CALL_WAITING, tId, -1));
+                SscConstant.EVENT_SSC_QUERY_CW, tId, -1));
 
         postRequestMessage(requestData);
 
@@ -339,7 +333,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.OIR,
@@ -357,7 +351,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.OIP,
@@ -375,7 +369,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.TIR,
@@ -393,7 +387,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.TIP,
@@ -439,7 +433,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         switch (condition) {
@@ -447,14 +441,14 @@ public class SscServiceImpl extends UtInterfaceBase {
             case SscConstant.CONDITION_BOIC :
             case SscConstant.CONDITION_BOIC_EXHC :
                 requestData.offerSscData(new CbServiceUpdateData(mSlotId, ESsType.OCB,
-                        SscConstant.EVENT_SSC_UPDATE_CALL_BARRING,  tId, action, condition,
-                        barringList, serviceClass, password));
+                        SscConstant.EVENT_SSC_UPDATE_CB,  tId, action, condition, barringList,
+                        serviceClass, password));
                 break;
             case SscConstant.CONDITION_BAIC :
             case SscConstant.CONDITION_BIC_WR :
                 requestData.offerSscData(new CbServiceUpdateData(mSlotId, ESsType.ICB,
-                        SscConstant.EVENT_SSC_UPDATE_CALL_BARRING, tId, action, condition,
-                        barringList, serviceClass, password));
+                        SscConstant.EVENT_SSC_UPDATE_CB, tId, action, condition, barringList,
+                        serviceClass, password));
                 break;
             default:
                 ImsLog.e("Invalid or Not Supported condition : " + condition);
@@ -517,7 +511,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         switch (condition) {
@@ -527,19 +521,19 @@ public class SscServiceImpl extends UtInterfaceBase {
             case SscConstant.CONDITION_CFNRC:
             case SscConstant.CONDITION_CFNL:
                 requestData.offerSscData(new CfServiceUpdateData(mSlotId, ESsType.CF,
-                        SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD, tId, action, condition,
-                        number, timeSeconds, serviceClass));
+                        SscConstant.EVENT_SSC_UPDATE_CF, tId, action, condition, number,
+                        timeSeconds, serviceClass));
                 break;
             case SscConstant.CONDITION_CFA:
             case SscConstant.CONDITION_CFAC:
                 for (int i = SscConstant.CONDITION_CFNRC; i > SscConstant.CONDITION_CFU; i--) {
                     requestData.offerSscData(new CfServiceUpdateData(
-                            mSlotId, ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
-                            tId, action, i, number, timeSeconds, serviceClass));
+                            mSlotId, ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF, tId, action, i,
+                            number, timeSeconds, serviceClass));
                 }
                 if (condition == SscConstant.CONDITION_CFA) {
                     requestData.offerSscData(new CfServiceUpdateData(mSlotId, ESsType.CF,
-                            SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD, tId, action,
+                            SscConstant.EVENT_SSC_UPDATE_CF, tId, action,
                             SscConstant.CONDITION_CFU, number, timeSeconds, serviceClass));
                 }
                 break;
@@ -559,11 +553,11 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         requestData.offerSscData(new CwServiceData(mSlotId, ESsType.CW,
-                SscConstant.EVENT_SSC_UPDATE_CALL_WAITING, tId, (enable ? 1 : 0)));
+                SscConstant.EVENT_SSC_UPDATE_CW, tId, (enable ? 1 : 0)));
 
         postRequestMessage(requestData);
 
@@ -577,7 +571,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         requestData.offerSscData(new OirServiceData(mSlotId, ESsType.OIR,
@@ -595,7 +589,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         requestData.offerSscData(new OipServiceData(mSlotId, ESsType.OIP,
@@ -613,7 +607,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         requestData.offerSscData(new TirServiceData(mSlotId, ESsType.TIR,
@@ -631,7 +625,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, tId, 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
         requestData.offerSscData(new TipServiceData(mSlotId, ESsType.TIP,
@@ -664,8 +658,8 @@ public class SscServiceImpl extends UtInterfaceBase {
             return;
         }
 
-        SscData SscData = requestData.peakSscData();
-        if (SscData == null) {
+        SscData sscData = requestData.peakSscData();
+        if (sscData == null) {
             mSscRequestQueue.pollFirst();
             processQueueData();
             return;
@@ -673,13 +667,15 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         if (isUtAvailable() == false) {
             ImsLog.w("Clear pending data due to Ut is not available");
-            postFailResponseMessage(SscData);
-        } else if (SscData.getSsType() != ESsType.NONE &&
-                SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+            postFailResponseMessage(sscData);
+        } else if (sscData.getSsType() != ESsType.NONE
+                && !SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             ImsLog.w("Clear pending data due to entire query failed");
-            postFailResponseMessage(SscData);
+            postFailResponseMessage(sscData);
         } else {
-            Message msg = Message.obtain(mSscRequestHandler, EVENT_UT_TRANSACTION_STARTED, SscData);
+            adjustEvent(sscData);
+
+            Message msg = Message.obtain(mSscRequestHandler, EVENT_UT_TRANSACTION_STARTED, sscData);
             mSscRequestHandler.sendMessage(msg);
         }
     }
@@ -702,6 +698,49 @@ public class SscServiceImpl extends UtInterfaceBase {
         mSscCallbackHandler.sendMessage(msg);
     }
 
+    /**
+     * This method adjusts event number of SscData to comply with following requirement according to
+     * KEY_UT_INSERT_NEW_RULE_BOOL.
+     * For versions earlier than IR.92 v9.0, the UE must insert a new <rule> element with a rule
+     * ID different from any existing rule ID in the XML document.
+     * For IR.92 v10 and later, the UE must consider that the supplementary service is
+     * not provisioned for the user and must not insert a new <rule> element with a rule ID
+     * different from any existing rule ID in the XML document.
+     * @param sscData event number is updated to process insert operation
+     */
+    private void adjustEvent(SscData sscData) {
+        if (!SscConfig.insertNewRule(sscData.getSlotId())) {
+            return;
+        }
+
+        if (sscData.getEventNumber() != SscConstant.EVENT_SSC_UPDATE_CB
+                && sscData.getEventNumber() != SscConstant.EVENT_SSC_UPDATE_CF) {
+            return;
+        }
+
+        SscServiceData data = (SscServiceData) sscData;
+        if (sscData.getEventNumber() == SscConstant.EVENT_SSC_UPDATE_CF
+                && data.getCondition() == SscConstant.CONDITION_CFNR_TIMER) {
+            return;
+        }
+
+        int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_DATA)
+                ? SscXmlFormat.MEDIA_TYPE_VIDEO : SscXmlFormat.MEDIA_TYPE_AUDIO;
+        String ruleId = SscXmlFormat.getRuleId(data.getSlotId(), mediaType,
+                data.getSsType().getSsName(), data.getCondition());
+        if (ruleId != null) {
+            return;
+        }
+
+        if (sscData.getEventNumber() == SscConstant.EVENT_SSC_UPDATE_CB) {
+            ImsLog.w(mSlotId, "Need to insert new rule ID for CB");
+            sscData.setEventNumber(SscConstant.EVENT_SSC_INSERT_CB);
+        } else if (sscData.getEventNumber() == SscConstant.EVENT_SSC_UPDATE_CF) {
+            ImsLog.w(mSlotId, "Need to insert new rule ID for CF");
+            sscData.setEventNumber(SscConstant.EVENT_SSC_INSERT_CF);
+        }
+    }
+
     private final class SscRequestHandler extends Handler {
         private SscRequestHandler(Looper looper) {
             super(looper);
@@ -720,7 +759,7 @@ public class SscServiceImpl extends UtInterfaceBase {
                     SscData requestData = (SscData)msg.obj;
                     if (requestData != null) {
                          // before starting transaction, set flag as false.
-                         SscDnsQuery.getInstance().setNAFFailed(false);
+                         //SscDnsQuery.getInstance().setNAFFailed(false);
                          startTransaction(requestData);
                     }
                     break;
@@ -790,7 +829,7 @@ public class SscServiceImpl extends UtInterfaceBase {
             }
 
             int eventNum = msg.what;
-            if (eventNum == SscConstant.EVENT_SSC_BASE) {
+            if (eventNum == SscConstant.EVENT_SSC_QUERY_DOCUMENT) {
                 if (resultState == SscConstant.REQUEST_FAILURE) {
                     // set actual event requested
                     requestData.pollSscData();
@@ -820,7 +859,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
             requestData.increasePreconditionFailedCount();
             requestData.offerSscDataFirst(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                    SscConstant.EVENT_SSC_BASE, requestData.getTransactionId(), 0));
+                    SscConstant.EVENT_SSC_QUERY_DOCUMENT, requestData.getTransactionId(), 0));
             processQueueData();
             return true;
         }
@@ -842,25 +881,25 @@ public class SscServiceImpl extends UtInterfaceBase {
                 if (cfUpdateData.getCondition() == SscConstant.CONDITION_CFNRC) {
                     if (SscXmlFormat.getCfnlExist(mSlotId)) {
                         requestData.offerSscDataFirst(new CfServiceUpdateData(mSlotId, ESsType.CF,
-                                SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
-                                cfUpdateData.getTransactionId(), cfUpdateData.getState(),
-                                SscConstant.CONDITION_CFNL, cfUpdateData.getForwardToNumber(),
-                                cfUpdateData.getReplyTimer(), cfUpdateData.getServiceClass()));
+                                SscConstant.EVENT_SSC_UPDATE_CF, cfUpdateData.getTransactionId(),
+                                cfUpdateData.getState(), SscConstant.CONDITION_CFNL,
+                                cfUpdateData.getForwardToNumber(), cfUpdateData.getReplyTimer(),
+                                cfUpdateData.getServiceClass()));
                     }
                 } else if (cfUpdateData.getCondition() == SscConstant.CONDITION_CFNR) {
                     if (SscXmlFormat.getIsNoReplyTimerInRule(mSlotId) == false &&
                             cfUpdateData.getReplyTimer() > 0) {
                         requestData.offerSscDataFirst(new CfServiceUpdateData(mSlotId, ESsType.CF,
-                                SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
-                                cfUpdateData.getTransactionId(), cfUpdateData.getState(),
-                                SscConstant.CONDITION_CFNR_TIMER, cfUpdateData.getForwardToNumber(),
-                                cfUpdateData.getReplyTimer(), cfUpdateData.getServiceClass()));
+                                SscConstant.EVENT_SSC_UPDATE_CF, cfUpdateData.getTransactionId(),
+                                cfUpdateData.getState(), SscConstant.CONDITION_CFNR_TIMER,
+                                cfUpdateData.getForwardToNumber(), cfUpdateData.getReplyTimer(),
+                                cfUpdateData.getServiceClass()));
                     }
                 }
             }
 
-            SscData SscData = requestData.peakSscData();
-            if (SscData == null) {
+            SscData nextRequest = requestData.peakSscData();
+            if (nextRequest == null) {
                 return false;
             }
 
@@ -873,40 +912,31 @@ public class SscServiceImpl extends UtInterfaceBase {
             ImsLog.d("eventNum : " + eventNum + ", tId : " + transactionId);
             try {
                 switch (eventNum) {
-                    case SscConstant.EVENT_SSC_BASE:
+                    case SscConstant.EVENT_SSC_QUERY_DOCUMENT:
                         // do nothing
                         break;
-                    case SscConstant.EVENT_SSC_QUERY_CALL_BARRING:
-                    case SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING:
-                    case SscConstant.EVENT_SSC_QUERY_CALL_WAITING:
+                    case SscConstant.EVENT_SSC_QUERY_CB:
+                    case SscConstant.EVENT_SSC_QUERY_CF:
+                    case SscConstant.EVENT_SSC_QUERY_CW:
                     case SscConstant.EVENT_SSC_QUERY_OIR:
                     case SscConstant.EVENT_SSC_QUERY_OIP:
                     case SscConstant.EVENT_SSC_QUERY_TIR:
                     case SscConstant.EVENT_SSC_QUERY_TIP:
-                        //case SscConstant.EVENT_SSC_TRANSACT:
                         if (state == SscConstant.REQUEST_FAILURE) {
                             onConfigurationQueryFailed(transactionId, data);
                         } else if (state == SscConstant.REQUEST_SUCCESS) {
                             onConfigurationQueried(transactionId, data);
                         }
                         break;
-                    case SscConstant.EVENT_SSC_QUERY_CALL_BARRING_INCOMING:
-                        if (state == SscConstant.REQUEST_FAILURE) {
-                            onConfigurationQueryFailed(transactionId, data);
-                        } else if (state == SscConstant.REQUEST_SUCCESS) {
-                            //Bundle bundle
-                            //    = getUtConfigurationQueryICBBundle(data);
-                            //onConfigurationQueried(transactionId, bundle);
-                        }
-                        break;
-                    case SscConstant.EVENT_SSC_UPDATE_CALL_BARRING:
-                    case SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD:
-                    case SscConstant.EVENT_SSC_UPDATE_CALL_WAITING:
+                    case SscConstant.EVENT_SSC_UPDATE_CB:
+                    case SscConstant.EVENT_SSC_UPDATE_CF:
+                    case SscConstant.EVENT_SSC_UPDATE_CW:
                     case SscConstant.EVENT_SSC_UPDATE_OIR:
                     case SscConstant.EVENT_SSC_UPDATE_OIP:
                     case SscConstant.EVENT_SSC_UPDATE_TIR:
                     case SscConstant.EVENT_SSC_UPDATE_TIP:
-                    case SscConstant.EVENT_SSC_UPDATE_CALL_BARRING_ANONYMOUS:
+                    case SscConstant.EVENT_SSC_INSERT_CB:
+                    case SscConstant.EVENT_SSC_INSERT_CF:
                         if (state == SscConstant.REQUEST_FAILURE) {
                             onConfigurationUpdateFailed(transactionId, data);
                         } else if (state == SscConstant.REQUEST_SUCCESS) {
@@ -1171,7 +1201,7 @@ public class SscServiceImpl extends UtInterfaceBase {
                 int status = ruleData.getState();
                 int serviceClass = ruleData.getServiceClass();
 
-                String number = getValueOfElement(SscXmlFormat.TARGET, ruleData.getActionList());
+                String number = ruleData.getForwardToNumber();
                 if (TextUtils.isEmpty(number)) {
                     number = "";
                     // IR92 - in case of empty target, consider CF is disabled

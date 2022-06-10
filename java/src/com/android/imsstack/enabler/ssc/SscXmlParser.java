@@ -53,7 +53,8 @@ public class SscXmlParser {
      */
     public SscServiceData getSscServiceFromDoc(SscServiceQueryData queryData, Document doc,
             Document cachedDoc) {
-        ImsLog.d(queryData.getSlotId(), "");
+        int slotId = queryData.getSlotId();
+        ImsLog.d(slotId, "");
 
         int responseCode = queryData.getResponseCode();
         if (responseCode < 200 || responseCode >= 300) {
@@ -86,13 +87,13 @@ public class SscXmlParser {
                 data = getCwServiceData(queryData, doc);
                 break;
             case NONE:
-                updateTagsAndRules(queryData, doc);
-                //if (SscConfig.requiresInsertingNewRule(queryData.getSlotId())) {
-                updateCfProvisionStatusFromServiceCapability(queryData, doc);
-                updateCbProvisionStatusFromServiceCapability(queryData, doc);
-                //}
-                data = new SscServiceData(queryData.getSlotId(), queryData.getSsType(),
-                        queryData.getEventNumber(), queryData.getTransactionId(), 1);
+                updateTagsAndRules(slotId, doc);
+                if (SscConfig.insertNewRule(slotId)) {
+                    updateCfProvisionStatusFromServiceCapability(slotId, doc);
+                    updateCbProvisionStatusFromServiceCapability(slotId, doc);
+                }
+                data = new SscServiceData(slotId, queryData.getSsType(), queryData.getEventNumber(),
+                        queryData.getTransactionId(), 1);
                 break;
             default:
                 ImsLog.e("Invalid SS Type");
@@ -104,6 +105,15 @@ public class SscXmlParser {
         }
 
         return data;
+    }
+
+    protected void updateTagsAndRules(int slotId, Document doc) {
+        Element rootElement = (Element) doc.getDocumentElement();
+        updateTags(slotId, rootElement);
+        updateRuleIds(slotId, rootElement);
+        checkCfnrTimerPosition(slotId, rootElement);
+        checkCfnlRuleExist(slotId, rootElement);
+        SscXmlFormat.displayTags(slotId);
     }
 
     private void updateCachedDoc(SscServiceQueryData queryData, Document doc, Document cachedDoc) {
@@ -118,7 +128,7 @@ public class SscXmlParser {
         }
 
         NodeList serviceElementList = cachedDoc.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, queryData.getSsType().getSSName()));
+                SscXmlFormat.getSsElement(slotId, queryData.getSsType().getSsName()));
         if (serviceElementList.getLength() == 0) {
             return;
         }
@@ -163,14 +173,14 @@ public class SscXmlParser {
 
     private void updateRuleIdForService(int slotId, ESsType ssType, Element rootElement) {
         NodeList serviceElement = rootElement.getElementsByTagName(
-                SscXmlFormat.getSsElement(slotId, ssType.getSSName()));
+                SscXmlFormat.getSsElement(slotId, ssType.getSsName()));
         if (serviceElement.getLength() == 0) {
-            ImsLog.d(slotId, ssType.getSSName() + " is null");
+            ImsLog.d(slotId, ssType.getSsName() + " is null");
             return;
         }
 
         SscServiceQueryData queryData = new SscServiceQueryData(slotId, ssType,
-                SscConstant.EVENT_SSC_QUERY_ALL, 0, SscServiceClassUtil.SERVICE_CLASS_CALL);
+                SscConstant.EVENT_SSC_QUERY_DOCUMENT, 0, SscServiceClassUtil.SERVICE_CLASS_CALL);
         ArrayList<SscRuleData> ruleSet = getRuleSetData(queryData, (Element)serviceElement.item(0));
         if (ruleSet == null) {
             return;
@@ -182,10 +192,10 @@ public class SscXmlParser {
             }
 
             if (SscServiceClassUtil.isVideo(ruleData.getServiceClass())) {
-                SscXmlFormat.setRuleId(slotId, SscXmlFormat.MEDIA_VIDEO, ssType.getSSName(),
+                SscXmlFormat.setRuleId(slotId, SscXmlFormat.MEDIA_TYPE_VIDEO, ssType.getSsName(),
                         ruleData.getSsCondition(), ruleData.getRuleId());
             } else {
-                SscXmlFormat.setRuleId(slotId, SscXmlFormat.MEDIA_AUDIO, ssType.getSSName(),
+                SscXmlFormat.setRuleId(slotId, SscXmlFormat.MEDIA_TYPE_AUDIO, ssType.getSsName(),
                         ruleData.getSsCondition(), ruleData.getRuleId());
             }
         }
@@ -227,17 +237,6 @@ public class SscXmlParser {
         } else {
             SscXmlFormat.setCfnlExist(slotId, false);
         }
-    }
-
-    private void updateTagsAndRules(SscServiceQueryData queryData, Document doc) {
-        int slotId = queryData.getSlotId();
-        ImsLog.d(slotId, "");
-        Element rootElement = (Element) doc.getDocumentElement();
-        updateTags(slotId, rootElement);
-        updateRuleIds(slotId, rootElement);
-        checkCfnrTimerPosition(slotId, rootElement);
-        checkCfnlRuleExist(slotId, rootElement);
-        SscXmlFormat.displayTags(queryData.getSlotId());
     }
 
     private SscServiceData getErrorPhrase(SscServiceQueryData queryData, Document doc) {
@@ -436,12 +435,9 @@ public class SscXmlParser {
         return data;
     }
 
-    private void updateCfProvisionStatusFromServiceCapability(SscServiceQueryData queryData,
-            Document doc) {
-        int slotId = queryData.getSlotId();
-        String allNamespaces = "*";
-
-        NodeList scCdNodeList = doc.getElementsByTagNameNS(allNamespaces, SscXmlFormat.SC_CD);
+    private void updateCfProvisionStatusFromServiceCapability(int slotId, Document doc) {
+        NodeList scCdNodeList = doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId,
+                SscXmlFormat.SC_CD));
         if (scCdNodeList.getLength() == 0) {
             ImsLog.e(slotId, "target node is null");
             return;
@@ -453,59 +449,59 @@ public class SscXmlParser {
             return;
         }
 
-        NodeList conditionNodeList = scCdElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_CONDITIONS);
+        NodeList conditionNodeList = scCdElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CONDITIONS));
         if (conditionNodeList.getLength() == 0) {
             ImsLog.e(slotId, "target node is null");
             return;
         }
 
         Element conditionElement = (Element) conditionNodeList.item(0);
-        NodeList conditionCfuNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_CFU);
+        NodeList conditionCfuNodeList = conditionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CFU));
         if (conditionCfuNodeList.getLength() > 0) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFU,
                     getProvisionedAttribute((Element) conditionCfuNodeList.item(0)));
         }
-        NodeList conditionCfbNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_CFB);
+        NodeList conditionCfbNodeList = conditionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CFB));
         if (conditionCfbNodeList.getLength() > 0) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFB,
                     getProvisionedAttribute((Element) conditionCfbNodeList.item(0)));
         }
-        NodeList conditionCfnrNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_CFNR);
+        NodeList conditionCfnrNodeList = conditionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CFNR));
         if (conditionCfnrNodeList.getLength() > 0) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFNR,
                     getProvisionedAttribute((Element) conditionCfnrNodeList.item(0)));
         }
-        NodeList conditionCfnrcNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_CFNRC);
+        NodeList conditionCfnrcNodeList = conditionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CFNRC));
         if (conditionCfnrcNodeList.getLength() > 0) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFNRC,
                     getProvisionedAttribute((Element) conditionCfnrcNodeList.item(0)));
         }
-        NodeList conditionCfnlNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_CFNL);
+        NodeList conditionCfnlNodeList = conditionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CFNL));
         if (conditionCfnlNodeList.getLength() > 0) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFNL,
                     getProvisionedAttribute((Element) conditionCfnlNodeList.item(0)));
         }
 
-        NodeList scMediaNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_MEDIA);
+        NodeList scMediaNodeList = conditionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_MEDIA));
         if (scMediaNodeList.getLength() > 0) {
             Element scMediaElement = (Element) scMediaNodeList.item(0);
-            NodeList mediaNodeList = scMediaElement.getElementsByTagNameNS(allNamespaces,
-                    SscXmlFormat.MEDIA);
+            NodeList mediaNodeList = scMediaElement.getElementsByTagName(
+                    SscXmlFormat.getSsElement(slotId, SscXmlFormat.MEDIA));
             for (int i = 0; i < mediaNodeList.getLength(); i++) {
                 String mediaValue = mediaNodeList.item(i).getTextContent().trim();
                 if (SscXmlFormat.AUDIO.equals(mediaValue)) {
-                    SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CD, SscXmlFormat.AUDIO,
-                            true);
+                    SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CD,
+                            SscXmlFormat.MEDIA_TYPE_AUDIO, true);
                 } else if (SscXmlFormat.VIDEO.equals(mediaValue)) {
-                    SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CD, SscXmlFormat.VIDEO,
-                            true);
+                    SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CD,
+                            SscXmlFormat.MEDIA_TYPE_VIDEO, true);
                 }
             }
         }
@@ -542,12 +538,9 @@ public class SscXmlParser {
         return data;
     }
 
-    private void updateCbProvisionStatusFromServiceCapability(SscServiceQueryData queryData,
-            Document doc) {
-        int slotId = queryData.getSlotId();
-        String allNamespaces = "*";
-
-        NodeList scCbNodeList = doc.getElementsByTagNameNS(allNamespaces, SscXmlFormat.SC_CB);
+    private void updateCbProvisionStatusFromServiceCapability(int slotId, Document doc) {
+        NodeList scCbNodeList = doc.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CB));
         if (scCbNodeList.getLength() == 0) {
             ImsLog.e(slotId, "target node is null");
             return;
@@ -559,63 +552,63 @@ public class SscXmlParser {
             return;
         }
 
-        NodeList conditionNodeList = scCbElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_CONDITIONS);
+        NodeList conditionNodeList = scCbElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CONDITIONS));
         if (conditionNodeList.getLength() == 0) {
             ImsLog.e(slotId, "target node is null");
             return;
         }
 
         Element conditionElement = (Element) conditionNodeList.item(0);
-        NodeList conditionCbuNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_CBU);
+        NodeList conditionCbuNodeList = conditionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_CBU));
         if (conditionCbuNodeList.getLength() > 0) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB, SscConstant.CONDITION_BAIC,
                     getProvisionedAttribute((Element) conditionCbuNodeList.item(0)));
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB, SscConstant.CONDITION_BAOC,
                     getProvisionedAttribute((Element) conditionCbuNodeList.item(0)));
         }
-        NodeList conditionBoicNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_BOIC);
+        NodeList conditionBoicNodeList = conditionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_BOIC));
         if (conditionBoicNodeList.getLength() > 0) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB, SscConstant.CONDITION_BOIC,
                     getProvisionedAttribute((Element) conditionBoicNodeList.item(0)));
         }
-        NodeList conditionBoicExhcNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_BOIC_EXHC);
+        NodeList conditionBoicExhcNodeList = conditionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_BOIC_EXHC));
         if (conditionBoicExhcNodeList.getLength() > 0) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB,
                     SscConstant.CONDITION_BOIC_EXHC,
                     getProvisionedAttribute((Element) conditionBoicExhcNodeList.item(0)));
         }
-        NodeList conditionBicWrcNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_BIC_WR);
+        NodeList conditionBicWrcNodeList = conditionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_BIC_WR));
         if (conditionBicWrcNodeList.getLength() > 0) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB,
                     SscConstant.CONDITION_BIC_WR,
                     getProvisionedAttribute((Element) conditionBicWrcNodeList.item(0)));
         }
-        NodeList conditionAcrNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_ACR);
+        NodeList conditionAcrNodeList = conditionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_ACR));
         if (conditionAcrNodeList.getLength() > 0) {
             SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB, SscConstant.CONDITION_ACR,
                     getProvisionedAttribute((Element) conditionAcrNodeList.item(0)));
         }
 
-        NodeList scMediaNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
-                SscXmlFormat.SC_MEDIA);
+        NodeList scMediaNodeList = conditionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(slotId, SscXmlFormat.SC_MEDIA));
         if (scMediaNodeList.getLength() > 0) {
             Element scMediaElement = (Element) scMediaNodeList.item(0);
-            NodeList mediaNodeList = scMediaElement.getElementsByTagNameNS(allNamespaces,
-                    SscXmlFormat.MEDIA);
+            NodeList mediaNodeList = scMediaElement.getElementsByTagName(
+                    SscXmlFormat.getSsElement(slotId, SscXmlFormat.MEDIA));
             for (int i = 0; i < mediaNodeList.getLength(); i++) {
                 String mediaValue = mediaNodeList.item(i).getTextContent().trim();
                 if (SscXmlFormat.AUDIO.equals(mediaValue)) {
-                    SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CB, SscXmlFormat.AUDIO,
-                            true);
+                    SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CB,
+                            SscXmlFormat.MEDIA_TYPE_AUDIO, true);
                 } else if (SscXmlFormat.VIDEO.equals(mediaValue)) {
-                    SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CB, SscXmlFormat.VIDEO,
-                            true);
+                    SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CB,
+                            SscXmlFormat.MEDIA_TYPE_VIDEO, true);
                 }
             }
         }
@@ -649,7 +642,7 @@ public class SscXmlParser {
         int slotId = queryData.getSlotId();
 
         String strTopExpression = "//";
-        strTopExpression += SscXmlFormat.getXMLSS(slotId) + queryData.getSsType().getSSName();
+        strTopExpression += SscXmlFormat.getXMLSS(slotId) + queryData.getSsType().getSsName();
 
         String expression = strTopExpression;
 
@@ -794,7 +787,7 @@ public class SscXmlParser {
                     }
                 } else if (nodeName.endsWith(SscXmlFormat.IDENTITY)) {
                     String identity = getIdentityInCondition(childNode);
-                    if (TextUtils.isEmpty(identity) == false) {
+                    if (!TextUtils.isEmpty(identity)) {
                         conditions.add(new SscRuleElement(SscXmlFormat.IDENTITY, identity));
                     }
                 } else if (childNode.getTextContent() != null) {
@@ -828,8 +821,8 @@ public class SscXmlParser {
 
                 if (nodeName.endsWith(SscXmlFormat.FORWARD_TO)) {
                     String targetNumber = getTargetNumberInForwardTo(slotId, (Element)childNode);
-                    if (TextUtils.isEmpty(targetNumber) == false) {
-                        actions.add(new SscRuleElement(SscXmlFormat.TARGET, targetNumber));
+                    if (!TextUtils.isEmpty(targetNumber)) {
+                        ruleData.setForwardToNumber(targetNumber);
                     }
                 } else if (childNode.getTextContent() != null) {
                     actions.add(new SscRuleElement(nodeName, childNode.getTextContent()));
@@ -898,7 +891,7 @@ public class SscXmlParser {
             return false;
         }
 
-        if (queryData.getEventNumber() == SscConstant.EVENT_SSC_QUERY_ALL) {
+        if (queryData.getEventNumber() == SscConstant.EVENT_SSC_QUERY_DOCUMENT) {
             return true;
         }
 
@@ -937,7 +930,8 @@ public class SscXmlParser {
         NodeList targetNodes = forwardToElement.getElementsByTagName(
                 SscXmlFormat.getSsElement(slotId, SscXmlFormat.TARGET));
         if (targetNodes.getLength() > 0) {
-            return getNumberInTargetTo(targetNodes.item(0).getTextContent().trim());
+            return SscUtils.getInstance().getNumberFromUri(
+                    targetNodes.item(0).getTextContent().trim());
         }
 
         return null;
@@ -975,46 +969,6 @@ public class SscXmlParser {
         }
 
         return null;
-    }
-
-    private String getNumberInTargetTo(final String targetTo) {
-        if (targetTo == null) {
-            return null;
-        }
-
-        String targetNumber = "";
-        // tel:+4477009900123 -> +4477009900123
-        // tel:004477009900123;phone-context=exampl.com -> 004477009900123
-        if (targetTo.startsWith("tel:")) {
-            int beginIndex = 4;
-            int endIndex = targetTo.indexOf(";phone-context");
-            if (endIndex == -1 || beginIndex > endIndex || beginIndex >= targetTo.length()) {
-                targetNumber = targetTo.substring(beginIndex);
-            } else {
-                targetNumber = targetTo.substring(beginIndex, endIndex);
-            }
-        }
-        // sip:+4477009900123@example.com;user=phone -> +4477009900123
-        // sip:004477009900123;phone-context=example.com@example.com;user=phone -> 004477009900123
-        else if (targetTo.startsWith("sip:")) {
-            int beginIndex = 4;
-            int endIndex = targetTo.indexOf(";phone-context");
-            if (endIndex == -1) {
-                endIndex = targetTo.indexOf("@");
-            }
-
-            if (endIndex == -1 || beginIndex > endIndex || beginIndex >= targetTo.length()) {
-                targetNumber = targetTo.substring(beginIndex);
-            } else {
-                targetNumber = targetTo.substring(beginIndex, endIndex);
-            }
-        } else {
-            targetNumber = targetTo;
-        }
-
-        ImsLog.d("forwarded to is " + targetNumber);
-
-        return targetNumber;
     }
 
     private int getActiveAttribute(Element element) {
