@@ -9,6 +9,8 @@
     <!-- IPSEC_ON -->
     <!-- <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="false"/> -->
 
+    <string name="ims.ims_user_agent_string">TTA-VoLTE/2.0 MI10 Lite/MIUI12 Device_Type/Android_Phone LGU</string>
+
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="false"/>
     <!-- IPSEC_ON -->
     <!-- <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/> -->

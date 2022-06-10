@@ -5,6 +5,7 @@
     <boolean name="ims.allow_algorithm_parameter_in_sip_authorization_header_bool" value="true"/>
     <boolean name="ims.use_sip_user_agent_header_only_for_ua_string_bool" value="true"/>
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
+    <string name="ims.ims_user_agent_string">TTA-VoLTE/2.0 MI10 Lite/MIUI12 Device_Type/Android_Phone SKT</string>
     <int-array name="ims.ipsec_authentication_algorithms_int_array" num="1">
         <item value="1"/>
     </int-array>
