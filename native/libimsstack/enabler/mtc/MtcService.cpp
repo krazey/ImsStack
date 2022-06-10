@@ -50,6 +50,11 @@ PUBLIC VIRTUAL MtcService::~MtcService()
         m_pJniService->SetMtcService(IMS_NULL);
     }
 
+    if (m_piCoreService)
+    {
+        m_piCoreService->Close();
+    }
+
     if (m_eType == ServiceType::NORMAL)
     {
         m_pAosConnector->SetReady(IMS_FALSE, ImsAosService::MTC);
