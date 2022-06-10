@@ -3,10 +3,6 @@
     <!-- Ims General -->
     <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
     <!-- Aos -->
-    <int-array name="ims.ims_identity_priority_int_array" num="2">
-        <item value="0"/>
-        <item value="2"/>
-    </int-array>
     <int name="imswfc.registration_private_header_int" value="2"/>
     <!-- KEY_REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE -->
     <int-array name="ims.registration_permanent_error_code_int_array" num="2">
