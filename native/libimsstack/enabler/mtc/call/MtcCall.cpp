@@ -542,7 +542,7 @@ PUBLIC VIRTUAL void MtcCall::RemoveSession(IN const ISession* piSession)
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
     {
         MtcSession* pSession = m_lstSessions.GetAt(nIndex);
-        if (&pSession->GetISession() != piSession)
+        if (&pSession->GetISession() == piSession)
         {
             m_lstSessions.RemoveAt(nIndex);
             delete pSession;
