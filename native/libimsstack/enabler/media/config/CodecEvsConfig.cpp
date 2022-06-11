@@ -117,9 +117,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CMR_INT, CMR_NOT_PRESENT);
     m_nChAwRecv =
             piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT);
-    // TODO_MEDIA
-    //    m_nModeSetList = piCcBundle->GetString(
-    //            CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT);
+    m_nModeSetList = piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT);
     piCcSubBundle->ReleaseBundle();
     piCcSubBundle = IMS_NULL;
 

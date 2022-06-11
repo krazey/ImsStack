@@ -430,8 +430,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "audio_maxptime_int";
         public static final String KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY =
                 KEY_PREFIX + "audio_candidate_attribute_string_array";
-        public static final String KEY_EVS_AMRWB_IO_MODE_SET_STRING =
-                KEY_PREFIX + "evs_amrwb_io_mode_set_string";
+        public static final String KEY_EVS_AMRWB_IO_MODE_SET_INT =
+                KEY_PREFIX + "evs_amrwb_io_mode_set_int";
     }
 
     public static class ImsVt {

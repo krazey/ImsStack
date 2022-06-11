@@ -634,8 +634,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_MAXPTIME_INT[] =
         KEY_IMS_VOICE_PREFIX "audio_maxptime_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "audio_candidate_attribute_string_array";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_STRING[] =
-        KEY_IMS_VOICE_PREFIX "evs_amrwb_io_mode_set_string";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT[] =
+        KEY_IMS_VOICE_PREFIX "evs_amrwb_io_mode_set_int";
 
 //// ImsVt
 #define KEY_IMS_VT_PREFIX "imsvt."

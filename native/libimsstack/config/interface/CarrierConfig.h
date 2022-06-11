@@ -560,7 +560,7 @@ public:
         static const IMS_CHAR KEY_AUDIO_PTIME_INT[];
         static const IMS_CHAR KEY_AUDIO_MAXPTIME_INT[];
         static const IMS_CHAR KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY[];
-        static const IMS_CHAR KEY_EVS_AMRWB_IO_MODE_SET_STRING[];
+        static const IMS_CHAR KEY_EVS_AMRWB_IO_MODE_SET_INT[];
 
         // Session refresher types
         enum
