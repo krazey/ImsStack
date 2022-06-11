@@ -2,7 +2,7 @@
 #include "Connector.h"
 #include "ServiceTrace.h"
 #include "IIpcan.h"
-#include "IMSCore.h"
+#include "ImsCore.h"
 #include "ImsServiceConfig.h"
 #include "IImsAos.h"
 #include "ImsAos.h"
@@ -246,7 +246,7 @@ void MtcService::AttachCoreServiceInterface()
     AString strAppName = ImsServiceConfig::GetAppName(ImsAppId::MTC);
 
     m_piCoreService = reinterpret_cast<ICoreService*>(
-            Connector::Open(IMSCore::CONNECTION_SCHEME, strAppName, strParams));
+            Connector::Open(ImsCore::CONNECTION_SCHEME, strAppName, strParams));
 
     if (m_piCoreService == IMS_NULL)
     {

@@ -42,7 +42,7 @@
 #include "util/CancellableMethodManager.h"
 #include "util/DialogMethodManager.h"
 #include "util/ForkedDialogMethodManager.h"
-#include "util/SIPConnectionNotifierManager.h"
+#include "util/SipConnectionNotifierManager.h"
 
 __IMS_TRACE_TAG_IMS__;
 
@@ -889,7 +889,7 @@ PRIVATE GLOBAL void SIPConnectionNotifierManagerPrivate::HandleSIPRequest(
         if (!bHandled)
         {
             // Send 481 response
-            IMS_TRACE_D("SIPConnectionNotifierManager :: Sending 481 response "
+            IMS_TRACE_D("SipConnectionNotifierManager :: Sending 481 response "
                         "to CANCEL request ...",
                     0, 0, 0);
 
@@ -920,7 +920,7 @@ PRIVATE GLOBAL void SIPConnectionNotifierManagerPrivate::HandleSIPRequest(
                     objMethod.Equals(SipMethod::INVITE) || objMethod.Equals(SipMethod::UPDATE) ||
                     objMethod.Equals(SipMethod::REFER))
             {
-                IMS_TRACE_D("SIPConnectionNotifierManager :: Dialog is already terminated, "
+                IMS_TRACE_D("SipConnectionNotifierManager :: Dialog is already terminated, "
                             "but try to route the message to the proper service method",
                         0, 0, 0);
                 bRequestWithinDialog = IMS_TRUE;
@@ -948,14 +948,14 @@ PRIVATE GLOBAL void SIPConnectionNotifierManagerPrivate::HandleSIPRequest(
         {
             if (piSSC->GetMethod().Equals(SipMethod::ACK))
             {
-                IMS_TRACE_D("SIPConnectionNotifierManager :: ACK request is received, "
+                IMS_TRACE_D("SipConnectionNotifierManager :: ACK request is received, "
                             "but no dialog(%s) matched ...",
                         SipDebug::GetStr1(piDialog->GetDialogId(), 8, '@').GetStr(), 0, 0);
             }
             else
             {
                 // Send 481 response
-                IMS_TRACE_D("SIPConnectionNotifierManager :: Sending 481 response "
+                IMS_TRACE_D("SipConnectionNotifierManager :: Sending 481 response "
                             "to %s request within the dialog (%s) ...",
                         piSSC->GetMethod().ToString().GetStr(),
                         SipDebug::GetStr1(piDialog->GetDialogId(), 8, '@').GetStr(), 0);
@@ -990,7 +990,7 @@ PRIVATE GLOBAL void SIPConnectionNotifierManagerPrivate::HandleSIPRequest(
             {
                 piSSC->Close();
 
-                IMS_TRACE_D("SIPConnectionNotifierManager :: ACK request is received, ignored...",
+                IMS_TRACE_D("SipConnectionNotifierManager :: ACK request is received, ignored...",
                         0, 0, 0);
                 return;
             }
@@ -1002,7 +1002,7 @@ PRIVATE GLOBAL void SIPConnectionNotifierManagerPrivate::HandleSIPRequest(
             }
 
             // Send 404 response (480 ???)
-            IMS_TRACE_D("SIPConnectionNotifierManager :: Sending %d response to %s request ...",
+            IMS_TRACE_D("SipConnectionNotifierManager :: Sending %d response to %s request ...",
                     objStatusCode.ToInt(), piSSC->GetMethod().ToString().GetStr(), 0);
 
             SendResponse(
@@ -1466,13 +1466,13 @@ PRIVATE GLOBAL void SIPConnectionNotifierManagerPrivate::SetServerHeader(
 }
 
 PRIVATE
-SIPConnectionNotifierManager::SIPConnectionNotifierManager() :
+SipConnectionNotifierManager::SipConnectionNotifierManager() :
         pSCNMngrP(new SIPConnectionNotifierManagerPrivate())
 {
 }
 
 PRIVATE
-SIPConnectionNotifierManager::~SIPConnectionNotifierManager()
+SipConnectionNotifierManager::~SipConnectionNotifierManager()
 {
     if (pSCNMngrP != IMS_NULL)
     {
@@ -1486,7 +1486,7 @@ Remarks
 
 */
 PUBLIC
-ISipConnectionNotifier* SIPConnectionNotifierManager::CreateConnectionNotifier(
+ISipConnectionNotifier* SipConnectionNotifierManager::CreateConnectionNotifier(
         IN CONST AString& strScheme, IN CONST IPAddress& objIPA, IN IMS_SINT32 nPortS,
         IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl, IN CONST AString& strParams,
         IN CONST SipAddress& objUserId)
@@ -1508,7 +1508,7 @@ Remarks
 
 */
 PUBLIC
-ISipConnectionNotifier* SIPConnectionNotifierManager::GetConnectionNotifier(
+ISipConnectionNotifier* SipConnectionNotifierManager::GetConnectionNotifier(
         IN CONST IPAddress& objIP, IN IMS_SINT32 nPort)
 {
     //---------------------------------------------------------------------------------------------
@@ -1527,7 +1527,7 @@ Remarks
 
 */
 PUBLIC
-void SIPConnectionNotifierManager::ReleaseConnectionNotifier(IN ISipConnectionNotifier*& piSCN)
+void SipConnectionNotifierManager::ReleaseConnectionNotifier(IN ISipConnectionNotifier*& piSCN)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1546,15 +1546,15 @@ void SIPConnectionNotifierManager::ReleaseConnectionNotifier(IN ISipConnectionNo
 Remarks
 
 */
-PUBLIC GLOBAL SIPConnectionNotifierManager* SIPConnectionNotifierManager::GetInstance()
+PUBLIC GLOBAL SipConnectionNotifierManager* SipConnectionNotifierManager::GetInstance()
 {
-    static SIPConnectionNotifierManager* pSCNMngr = IMS_NULL;
+    static SipConnectionNotifierManager* pSCNMngr = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
     if (pSCNMngr == IMS_NULL)
     {
-        pSCNMngr = new SIPConnectionNotifierManager();
+        pSCNMngr = new SipConnectionNotifierManager();
     }
 
     return pSCNMngr;
@@ -1565,9 +1565,9 @@ PUBLIC GLOBAL SIPConnectionNotifierManager* SIPConnectionNotifierManager::GetIns
 Remarks
 
 */
-PUBLIC GLOBAL void SIPConnectionNotifierManager::Init(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL void SipConnectionNotifierManager::Init(IN IMS_SINT32 nSlotId)
 {
-    SIPConnectionNotifierManager* pSCNMngr = GetInstance();
+    SipConnectionNotifierManager* pSCNMngr = GetInstance();
 
     //---------------------------------------------------------------------------------------------
 

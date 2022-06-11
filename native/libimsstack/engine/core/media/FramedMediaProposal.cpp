@@ -12,13 +12,13 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "IMSCore.h"
+#include "ImsCore.h"
 #include "media/FramedMediaProposal.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-FramedMediaProposal::FramedMediaProposal(IN ISDPOAState* piOAState_) :
+FramedMediaProposal::FramedMediaProposal(IN ISdpOaState* piOAState_) :
         MediaProposal(piOAState_)
 {
 }
@@ -34,5 +34,5 @@ PUBLIC VIRTUAL IMS_SINT32 FramedMediaProposal::GetType() const
 {
     //---------------------------------------------------------------------------------------------
 
-    return IMSCore::MEDIA_TYPE_FRAMED;
+    return ImsCore::MEDIA_TYPE_FRAMED;
 }

@@ -13,11 +13,11 @@
 #include "ServiceMemory.h"
 #include "ServiceThread.h"
 #include "SystemConfig.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 
-PRIVATE GLOBAL IMS_SINT32* IMS::ERROR_CODE = IMS_NULL;
+PRIVATE GLOBAL IMS_SINT32* Ims::ERROR_CODE = IMS_NULL;
 
-PUBLIC GLOBAL void IMS::Init()
+PUBLIC GLOBAL void Ims::Init()
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
@@ -29,7 +29,7 @@ PUBLIC GLOBAL void IMS::Init()
     }
 }
 
-PUBLIC GLOBAL void IMS::Init(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL void Ims::Init(IN IMS_SINT32 nSlotId)
 {
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
     {
@@ -42,7 +42,7 @@ PUBLIC GLOBAL void IMS::Init(IN IMS_SINT32 nSlotId)
     }
 }
 
-PUBLIC GLOBAL void IMS::SetLastError(IN IMS_SINT32 nErrorCode)
+PUBLIC GLOBAL void Ims::SetLastError(IN IMS_SINT32 nErrorCode)
 {
     IMS_SINT32 nSlotId = IMS_SLOT_0;
 
@@ -54,7 +54,7 @@ PUBLIC GLOBAL void IMS::SetLastError(IN IMS_SINT32 nErrorCode)
     SetLastError(nErrorCode, nSlotId);
 }
 
-PUBLIC GLOBAL IMS_SINT32 IMS::GetLastError()
+PUBLIC GLOBAL IMS_SINT32 Ims::GetLastError()
 {
     IMS_SINT32 nSlotId = IMS_SLOT_0;
 
@@ -66,7 +66,7 @@ PUBLIC GLOBAL IMS_SINT32 IMS::GetLastError()
     return GetLastError(nSlotId);
 }
 
-PRIVATE GLOBAL void IMS::SetLastError(IN IMS_SINT32 nErrorCode, IN IMS_SINT32 nSlotId)
+PRIVATE GLOBAL void Ims::SetLastError(IN IMS_SINT32 nErrorCode, IN IMS_SINT32 nSlotId)
 {
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
     {
@@ -79,7 +79,7 @@ PRIVATE GLOBAL void IMS::SetLastError(IN IMS_SINT32 nErrorCode, IN IMS_SINT32 nS
     }
 }
 
-PRIVATE GLOBAL IMS_SINT32 IMS::GetLastError(IN IMS_SINT32 nSlotId)
+PRIVATE GLOBAL IMS_SINT32 Ims::GetLastError(IN IMS_SINT32 nSlotId)
 {
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
     {

@@ -13,7 +13,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "SipDebug.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "ISessionState.h"
 #include "offeranswer/SdpSessionParameter.h"
 #include "SessionDescriptor.h"
@@ -56,7 +56,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN CONST AString& str
 
     if (piSessionState == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -68,7 +68,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN CONST AString& str
             (nState != ISessionState::SESSION_STATE_ESTABLISHED) &&
             (nState != ISessionState::SESSION_STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -76,7 +76,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN CONST AString& str
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -85,7 +85,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN CONST AString& str
     // Check a syntax of the attribute
     if (!objAttribute.Decode(strAttribute))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -94,7 +94,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN CONST AString& str
     {
         if (objAttribute.GetAttributeEx().Equals(RESERVED_ATTRIBUTE[i]))
         {
-            IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+            Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
             IMS_TRACE_E(0, "Reserved attribute (%s) can't be added", strAttribute.GetStr(), 0, 0);
             return IMS_FAILURE;
@@ -104,17 +104,17 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN CONST AString& str
     // Check if it already exists in the session
     if (pSessionParam->Contains(objAttribute))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     if (!pSessionParam->AddAttribute(objAttribute))
     {
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -125,7 +125,7 @@ PRIVATE VIRTUAL IMSList<AString> SessionDescriptor::GetAttributes() const
 
     if (piSessionState == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMSList<AString>();
     }
 
@@ -133,7 +133,7 @@ PRIVATE VIRTUAL IMSList<AString> SessionDescriptor::GetAttributes() const
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMSList<AString>();
     }
 
@@ -156,7 +156,7 @@ PRIVATE VIRTUAL AString SessionDescriptor::GetProtocolVersion() const
 
     if (piSessionState == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString::ConstNull();
     }
 
@@ -176,7 +176,7 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetSessionId() const
 
     if (piSessionState == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString::ConstNull();
     }
 
@@ -196,7 +196,7 @@ PRIVATE VIRTUAL AString SessionDescriptor::GetSessionInfo() const
 
     if (piSessionState == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString::ConstNull();
     }
 
@@ -223,7 +223,7 @@ PRIVATE VIRTUAL AString SessionDescriptor::GetSessionName() const
 
     if (piSessionState == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString::ConstNull();
     }
 
@@ -243,7 +243,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST AString& 
 
     if (piSessionState == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -255,7 +255,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST AString& 
             (nState != ISessionState::SESSION_STATE_ESTABLISHED) &&
             (nState != ISessionState::SESSION_STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -263,7 +263,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST AString& 
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -272,7 +272,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST AString& 
     // Check a syntax of the attribute
     if (!objAttribute.Decode(strAttribute))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -281,7 +281,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST AString& 
     {
         if (objAttribute.GetAttributeEx().EqualsIgnoreCase(RESERVED_ATTRIBUTE[i]))
         {
-            IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+            Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
             IMS_TRACE_E(0, "Reserved attribute (%s) can't be removed", strAttribute.GetStr(), 0, 0);
             return IMS_FAILURE;
@@ -291,13 +291,13 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST AString& 
     // Check if it already exists in the session
     if (!pSessionParam->Contains(objAttribute))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     pSessionParam->RemoveAttribute(objAttribute);  // throw exception : OPERATION_FAILED ???
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -308,7 +308,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionInfo(IN CONST AString& s
 
     if (piSessionState == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -318,7 +318,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionInfo(IN CONST AString& s
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -326,7 +326,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionInfo(IN CONST AString& s
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -334,13 +334,13 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionInfo(IN CONST AString& s
 
     if (!objSessionInfo.Decode(strInfo))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     pSessionParam->SetInformation(objSessionInfo);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -351,7 +351,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionName(IN CONST AString& s
 
     if (piSessionState == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -361,7 +361,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionName(IN CONST AString& s
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -369,17 +369,17 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionName(IN CONST AString& s
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
     if (!pSessionParam->GetSessionName().Decode(strName))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -397,7 +397,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN IMS_SINT32 nType,
             (nState != ISessionState::SESSION_STATE_ESTABLISHED) &&
             (nState != ISessionState::SESSION_STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set an attribute (%d, %s) in the state (%d)", nType,
                 strAttrValue.GetStr(), nState);
@@ -410,7 +410,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN IMS_SINT32 nType,
             (nType == SdpAttribute::SENDONLY) || (nType == SdpAttribute::SETUP) ||
             (nType == SdpAttribute::CONNECTION))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Not allowed attribute (%d, %s)", nType, strAttrValue.GetStr(), 0);
         return IMS_FAILURE;
@@ -420,7 +420,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN IMS_SINT32 nType,
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal session parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -431,7 +431,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN IMS_SINT32 nType,
     // Check a syntax of the attribute
     if (!objAttribute.SetValue(nType, strAttrValue, strType))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Setting an attribute (%s) failed", strAttrValue.GetStr(), 0, 0);
         return IMS_FAILURE;
@@ -440,7 +440,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN IMS_SINT32 nType,
     // Check if it already exists in the session
     if (pSessionParam->Contains(objAttribute))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Attribute (%s) already exists", objAttribute.GetValue().GetStr(), 0, 0);
         return IMS_FAILURE;
@@ -448,13 +448,13 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN IMS_SINT32 nType,
 
     if (!pSessionParam->AddAttribute(objAttribute))
     {
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Adding an attribute (%s) failed", objAttribute.GetValue().GetStr(), 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -472,7 +472,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttributeInt(IN IMS_SINT32 nTyp
             (nState != ISessionState::SESSION_STATE_ESTABLISHED) &&
             (nState != ISessionState::SESSION_STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set an attribute (%d, %d) in the state (%d)", nType, nAttrValue,
                 nState);
@@ -484,7 +484,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttributeInt(IN IMS_SINT32 nTyp
     if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
             (nType == SdpAttribute::SENDONLY))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Not allowed attribute (%d, %d)", nType, nAttrValue, 0);
         return IMS_FAILURE;
@@ -495,7 +495,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttributeInt(IN IMS_SINT32 nTyp
 
         if (pSessionParam == IMS_NULL)
         {
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
             IMS_TRACE_E(0, "No proposal session parameter", 0, 0, 0);
             return IMS_FAILURE;
@@ -533,7 +533,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddBandwidth(IN IMS_SINT32 nType,
             (nState != ISessionState::SESSION_STATE_ESTABLISHED) &&
             (nState != ISessionState::SESSION_STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set a bandwidth (%d, %d) in the state (%d)", nType, nBandwidth,
                 nState);
@@ -544,7 +544,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddBandwidth(IN IMS_SINT32 nType,
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal session parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -555,7 +555,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddBandwidth(IN IMS_SINT32 nType,
     // Check a syntax of the attribute
     if (!objBandwidth.SetValue(nType, nBandwidth, strType))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Decoding an bandwidth (%d, %d, %s) failed", nType, nBandwidth,
                 strType.GetStr());
@@ -564,13 +564,13 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddBandwidth(IN IMS_SINT32 nType,
 
     if (!pSessionParam->AddBandwidth(objBandwidth))
     {
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Adding a bandwidth (%s) failed", objBandwidth.GetValue().GetStr(), 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -584,7 +584,7 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetAttribute(
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer session parameter", 0, 0, 0);
         return AString::ConstNull();
@@ -596,7 +596,7 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetAttribute(
             (nType == SdpAttribute::SENDONLY) || (nType == SdpAttribute::SETUP) ||
             (nType == SdpAttribute::CONNECTION))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Not allowed attribute (%d)", nType, 0, 0);
         return AString::ConstNull();
@@ -611,11 +611,11 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetAttribute(
 
     if (pAttribute == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NOT_FOUND);
+        Ims::SetLastError(ImsError::NOT_FOUND);
         return AString::ConstNull();
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pAttribute->GetAttributeValue();
 }
@@ -629,7 +629,7 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetAttributeInt(
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer session parameter", 0, 0, 0);
         return INVALID_VALUE;
@@ -640,7 +640,7 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetAttributeInt(
     if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
             (nType == SdpAttribute::SENDONLY))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Not allowed attribute (%d)", nType, 0, 0);
         return INVALID_VALUE;
@@ -663,7 +663,7 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetAttributeInt(
 
     if (pAttribute == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NOT_FOUND);
+        Ims::SetLastError(ImsError::NOT_FOUND);
         return INVALID_VALUE;
     }
 
@@ -682,11 +682,11 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetAttributeInt(
         IMS_TRACE_E(0, "Converting the attribute (integer format: %d, %s) failed", nType,
                 strType.GetStr(), 0);
 
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return INVALID_VALUE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return nAttrValue;
 }
@@ -700,7 +700,7 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetBandwidth(
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer session parameter", 0, 0, 0);
         return INVALID_VALUE;
@@ -715,11 +715,11 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetBandwidth(
 
     if (pBandwidth == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NOT_FOUND);
+        Ims::SetLastError(ImsError::NOT_FOUND);
         return INVALID_VALUE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pBandwidth->GetBandwidth();
 }
@@ -732,7 +732,7 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetDirection() const
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer session parameter", 0, 0, 0);
         return Sdp::DIRECTION_NONE;
@@ -747,7 +747,7 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetSessionVersion() const
 
     if (piSessionState == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString::ConstNull();
     }
 
@@ -767,7 +767,7 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetUsername() const
 
     if (piSessionState == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString::ConstNull();
     }
 
@@ -793,7 +793,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST SdpAttrib
             (nState != ISessionState::SESSION_STATE_ESTABLISHED) &&
             (nState != ISessionState::SESSION_STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set an attribute (%d, %s) in the state (%d)",
                 objAttribute.GetAttribute(), objAttribute.GetAttributeValue().GetStr(), nState);
@@ -804,7 +804,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST SdpAttrib
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal session parameter", 0, 0, 0);
         return Sdp::DIRECTION_NONE;
@@ -817,12 +817,12 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST SdpAttrib
     if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
             (nType == SdpAttribute::SENDONLY))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         IMS_TRACE_E(0, "Not allowed attribute (%d)", nType, 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     if (nType == SdpAttribute::SETUP)
     {
@@ -838,7 +838,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST SdpAttrib
     // Check if it already exists in the session
     if (!pSessionParam->Contains(objAttribute))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Attribute (%s) does not exist", objAttribute.GetValue().GetStr(), 0, 0);
         return IMS_FAILURE;
@@ -863,7 +863,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN IMS_SINT32 nTyp
             (nState != ISessionState::SESSION_STATE_ESTABLISHED) &&
             (nState != ISessionState::SESSION_STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set an attribute (%d, %s) in the state (%d)", nType,
                 strAttrValue.GetStr(), nState);
@@ -874,7 +874,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN IMS_SINT32 nTyp
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal session parameter", 0, 0, 0);
         return Sdp::DIRECTION_NONE;
@@ -885,12 +885,12 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN IMS_SINT32 nTyp
     if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
             (nType == SdpAttribute::SENDONLY))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         IMS_TRACE_E(0, "Not allowed attribute (%d)", nType, 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     if (nType == SdpAttribute::SETUP)
     {
@@ -911,7 +911,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN IMS_SINT32 nTyp
 
         if (!pSessionParam->Contains(objAttribute))
         {
-            IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+            Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
             IMS_TRACE_E(0, "Attribute (%s) does not exist", strAttrValue.GetStr(), 0, 0);
             return IMS_FAILURE;
@@ -940,7 +940,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAllBandwidths()
             (nState != ISessionState::SESSION_STATE_ESTABLISHED) &&
             (nState != ISessionState::SESSION_STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to remove all the bandwidths in the state (%d)", nState, 0, 0);
         return IMS_FAILURE;
@@ -950,7 +950,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAllBandwidths()
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal session parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -960,7 +960,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAllBandwidths()
 
     pSessionParam->SetBandwidths(objBandwidths);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -977,7 +977,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetConnectionAddress(IN CONST AStr
             (nState != ISessionState::SESSION_STATE_ESTABLISHED) &&
             (nState != ISessionState::SESSION_STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set the address (%s) in the state (%d)", strAddress.GetStr(),
                 nState, 0);
@@ -988,7 +988,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetConnectionAddress(IN CONST AStr
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal session parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -996,14 +996,14 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetConnectionAddress(IN CONST AStr
 
     if (!pSessionParam->SetConnectionAddress(strAddress))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Setting a connection address (%s) in c-line of session-level",
                 SipDebug::GetIp(strAddress), 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1020,7 +1020,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetDirection(IN IMS_SINT32 nDirect
             (nState != ISessionState::SESSION_STATE_ESTABLISHED) &&
             (nState != ISessionState::SESSION_STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set the direction (%d) in the state (%d)", nDirection, nState, 0);
         return IMS_FAILURE;
@@ -1030,13 +1030,13 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetDirection(IN IMS_SINT32 nDirect
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal session parameter", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     pSessionParam->SetDirection(nDirection);
 
@@ -1055,7 +1055,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetOriginAddress(IN CONST AString&
             (nState != ISessionState::SESSION_STATE_ESTABLISHED) &&
             (nState != ISessionState::SESSION_STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set the address (%s) in the state (%d)",
                 SipDebug::GetIp(strAddress), nState, 0);
@@ -1066,7 +1066,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetOriginAddress(IN CONST AString&
 
     if (pSessionParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal session parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -1076,14 +1076,14 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetOriginAddress(IN CONST AString&
 
     if (!objOrigin.SetAddress(strAddress))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Setting an unicast address (%s) in o-line of session-level",
                 SipDebug::GetIp(strAddress), 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }

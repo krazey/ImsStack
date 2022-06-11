@@ -18,7 +18,7 @@
 #include "SipStatusCode.h"
 #include "SipHeaderName.h"
 #include "SipConfigProxy.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "Service.h"
 #include "Message.h"
 #include "IOnPageMessageListener.h"
@@ -60,7 +60,7 @@ const ByteArray& PageMessage::GetContent() const
 
     if (GetState() != STATE_RECEIVED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return ByteArray::ConstNull();
     }
 
@@ -68,11 +68,11 @@ const ByteArray& PageMessage::GetContent() const
 
     if (pMessage == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return ByteArray::ConstNull();
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     ISipMessage* piSIPMsg = pMessage->GetMessage();
     IMSList<ISipMessageBodyPart*> objBodyParts = piSIPMsg->GetBodyParts();
@@ -104,7 +104,7 @@ AString PageMessage::GetContentType() const
 
     if (GetState() != STATE_RECEIVED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return AString::ConstNull();
     }
 
@@ -112,11 +112,11 @@ AString PageMessage::GetContentType() const
 
     if (pMessage == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return AString::ConstNull();
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     ISipMessage* piSIPMsg = pMessage->GetMessage();
     IMSList<ISipMessageBodyPart*> objBodyParts = piSIPMsg->GetBodyParts();
@@ -161,13 +161,13 @@ IMS_RESULT PageMessage::Send(IN CONST ByteArray& objContent, IN CONST AString& s
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_UNSENT)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -175,14 +175,14 @@ IMS_RESULT PageMessage::Send(IN CONST ByteArray& objContent, IN CONST AString& s
             (!objContent.IsNULL() && strContentType.IsNULL()))
     {
         IMS_TRACE_E(0, "One of the arguments is NULL", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     if (!strContentType.IsNULL() && !TextParser::IsValidMediaType(strContentType))
     {
         IMS_TRACE_E(0, "Invalid content type (%s)", strContentType.GetStr(), 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -206,7 +206,7 @@ IMS_RESULT PageMessage::Send(IN CONST ByteArray& objContent, IN CONST AString& s
         {
             piSCC->Close();
 
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
             return IMS_FAILURE;
         }
 
@@ -254,13 +254,13 @@ IMS_RESULT PageMessage::Accept(IN IMS_SINT32 nStatusCode /* = 200 */)
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_RECEIVED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -301,13 +301,13 @@ IMS_RESULT PageMessage::Reject(IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nRetryAf
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_RECEIVED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 

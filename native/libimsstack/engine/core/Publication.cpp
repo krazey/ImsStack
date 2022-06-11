@@ -15,7 +15,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "SipStatusCode.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "base/IRefreshListener.h"
 #include "Service.h"
 #include "IOnPublicationListener.h"
@@ -129,7 +129,7 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
@@ -137,7 +137,7 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
     {
         IMS_TRACE_E(0, "To publish an event state, the state MUST be an INACTIVE or ACTIVE state",
                 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -145,14 +145,14 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
             (!objState.IsNULL() && strContentType.IsNULL()))
     {
         IMS_TRACE_E(0, "One of the arguments is NULL", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     if (!strContentType.IsNULL() && !TextParser::IsValidMediaType(strContentType))
     {
         IMS_TRACE_E(0, "Invalid content type (%s)", strContentType.GetStr(), 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -163,7 +163,7 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
         // 1 : save all the information ? try to send later .... ???
         // SetState(STATE_PENDING);
 
-        // IMS::SetLastError(IMSError::NO_ERROR);
+        // Ims::SetLastError(ImsError::NO_ERROR);
         // return IMS_FAILURE;
     }
 
@@ -224,7 +224,7 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
         if (piBodyPart == IMS_NULL)
         {
             piSCC->Close();
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
             return IMS_FAILURE;
         }
 
@@ -256,7 +256,7 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
 
     SetState(STATE_PENDING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -285,14 +285,14 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Unpublish()
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "To unpublish an event state, the state MUST be an ACTIVE state", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -305,7 +305,7 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Unpublish()
 
         // SetState(STATE_PENDING);
 
-        // IMS::SetLastError(IMSError::NO_ERROR);
+        // Ims::SetLastError(ImsError::NO_ERROR);
         // return IMS_FAILURE;
     }
 
@@ -349,7 +349,7 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Unpublish()
 
     SetState(STATE_PENDING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }

@@ -15,21 +15,21 @@
 
 #include "util/IDialogMethod.h"
 #include "util/ICancellableMethod.h"
-#include "ISIPConnectionFactory.h"
+#include "ISipConnectionFactory.h"
 #include "EngineActivity.h"
 
 class Service;
 
-class SIPConnectionFactory :
+class SipConnectionFactory :
         public EngineActivity,
         public IDialogMethod,
         public ICancellableMethod,
-        public ISIPConnectionFactory
+        public ISipConnectionFactory
 {
 public:
-    SIPConnectionFactory(IN Service* pService_);
-    SIPConnectionFactory(IN Service* pService_, IN ISipServerConnection* piSSC);
-    virtual ~SIPConnectionFactory();
+    SipConnectionFactory(IN Service* pService_);
+    SipConnectionFactory(IN Service* pService_, IN ISipServerConnection* piSSC);
+    virtual ~SipConnectionFactory();
 
 public:
     // EngineActivity class
@@ -48,7 +48,7 @@ public:
     // SIP_MESSAGE_MEDIATOR
     virtual void SetMessageMediator(IN IMessageMediator* piMediator);
 
-    // ISIPConnectionFactory class
+    // ISipConnectionFactory class
     virtual ISipClientConnection* CreateClientConnection(
             IN CONST SipMethod& objMethod, IN CONST SipAddress* pFrom, IN CONST SipAddress* pTo);
     virtual ISipClientConnection* CreateClientConnection(
@@ -57,7 +57,7 @@ public:
             IN CONST AString& strPhrase = AString::ConstNull());
     virtual ISipServerConnection* GetNewServerConnection();
     virtual void SetDialog(IN ISipDialog* piDialog);
-    virtual void SetListener(IN ISIPConnectionFactoryListener* piListener);
+    virtual void SetListener(IN ISipConnectionFactoryListener* piListener);
     virtual void SetSSCForCANCEL(IN ISipServerConnection* piSSC);
 
 private:
@@ -68,7 +68,7 @@ private:
 
     Service* pService;
     ISipDialog* piDialog;
-    ISIPConnectionFactoryListener* piListener;
+    ISipConnectionFactoryListener* piListener;
     // It is only maintained for a new incoming request
     ISipServerConnection* piInitialSSC;
     ISipServerConnection* piInviteSSC;

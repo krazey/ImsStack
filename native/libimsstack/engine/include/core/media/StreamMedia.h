@@ -20,7 +20,7 @@ class StreamMediaImpl;
 class StreamMedia : public Media
 {
 public:
-    StreamMedia(IN Service* pService_, IN ISDPOAState* piOAState_);
+    StreamMedia(IN Service* pService_, IN ISdpOaState* piOAState_);
     virtual ~StreamMedia();
 
 private:
@@ -32,7 +32,7 @@ public:
     virtual IMS_SINT32 GetType() const;
 
 protected:
-    virtual MediaProposal* CreateMediaProposal(IN ISDPOAState* piOAState);
+    virtual MediaProposal* CreateMediaProposal(IN ISdpOaState* piOAState);
 };
 
 #endif  // _STREAM_MEDIA_H_

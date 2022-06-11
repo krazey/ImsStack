@@ -6,7 +6,7 @@
 /**
  * @brief This class defines the constant values for ICoreService ("imscore" protocol).
  */
-class IMSCore
+class ImsCore
 {
 public:
     //// Connection related constants

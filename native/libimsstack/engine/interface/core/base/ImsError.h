@@ -6,10 +6,10 @@
 /**
  * @brief This class defines IMS error values.
  */
-class IMSError
+class ImsError
 {
-private:
-    IMSError();
+public:
+    ImsError() = delete;
 
 public:
     /**

@@ -20,7 +20,9 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-PUBLIC GLOBAL const SIPHeaderProperty PubState::RESTRICTED_HEADER_PROPERTIES[] =
+// clang-format off
+PUBLIC GLOBAL
+const SipHeaderProperty PubState::RESTRICTED_HEADER_PROPERTIES[] =
 {
     // Header type, Header name, Is single header ?
     {ISipHeader::ACCEPT_CONTACT,        IMS_NULL,                      IMS_FALSE},
@@ -47,6 +49,7 @@ PUBLIC GLOBAL const SIPHeaderProperty PubState::RESTRICTED_HEADER_PROPERTIES[] =
     {ISipHeader::UNKNOWN,               SipHeaderName::CONTENT_LENGTH, IMS_TRUE },
     {ISipHeader::UNKNOWN,               "l",                           IMS_TRUE }
 };
+// clang-format on
 
 PUBLIC
 PubState::PubState() :
@@ -261,11 +264,11 @@ void PubState::StoreMessage(IN CONST ISipMessage* piSIPMsg)
         // Remove an inaccessible headers if present
         IMS_UINT32 nCount =
                 sizeof(RESTRICTED_HEADER_PROPERTIES) / sizeof(RESTRICTED_HEADER_PROPERTIES[0]);
-        const SIPHeaderProperty* pHeaderProperties = &(RESTRICTED_HEADER_PROPERTIES[0]);
+        const SipHeaderProperty* pHeaderProperties = &(RESTRICTED_HEADER_PROPERTIES[0]);
 
         for (IMS_UINT32 i = 0; i < nCount; ++i)
         {
-            const SIPHeaderProperty* pProperty = &(pHeaderProperties[i]);
+            const SipHeaderProperty* pProperty = &(pHeaderProperties[i]);
 
             if (pProperty->bSingleHeader)
             {

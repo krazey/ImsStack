@@ -10,8 +10,8 @@
 
 */
 #include "StaticSip.h"
-#include "base/IMS.h"
-#include "util/SIPConnectionNotifierManager.h"
+#include "base/Ims.h"
+#include "util/SipConnectionNotifierManager.h"
 #include "base/SubscriberTracker.h"
 #include "EngineLoader.h"
 
@@ -22,16 +22,16 @@ PUBLIC GLOBAL void EngineLoader::Initialize(IN IMS_SINT32 nSlotId)
     // Service
     SubscriberTracker::GetInstance()->InitForSlot(nSlotId);
 
-    // J180
+    // sipcore
     StaticSip::InitializeForSlot(nSlotId);
 
-    // J281
-    IMS::Init(nSlotId);
-    SIPConnectionNotifierManager::Init(nSlotId);
+    // core
+    Ims::Init(nSlotId);
+    SipConnectionNotifierManager::Init(nSlotId);
 }
 
 PUBLIC GLOBAL void EngineLoader::Uninitialize(IN IMS_SINT32 nSlotId)
 {
-    // J180
+    // sipcore
     StaticSip::UninitializeForSlot(nSlotId);
 }

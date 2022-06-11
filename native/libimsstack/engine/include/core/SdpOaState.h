@@ -13,7 +13,7 @@
 #ifndef _SDP_OFFER_ANSWER_STATE_H_
 #define _SDP_OFFER_ANSWER_STATE_H_
 
-#include "ISDPOAState.h"
+#include "ISdpOaState.h"
 #include "SdpParser.h"
 #include "SessionParameter.h"
 
@@ -21,19 +21,19 @@ class ISipMessage;
 class Service;
 class SessionCapabilities;
 
-class SDPOAState : public ISDPOAState
+class SdpOaState : public ISdpOaState
 {
 public:
-    explicit SDPOAState(IN IMS_BOOL bSDPVersionCheck_ = IMS_TRUE,
+    explicit SdpOaState(IN IMS_BOOL bSDPVersionCheck_ = IMS_TRUE,
             IN IMS_BOOL bAlwaysIncreaseSDPVersion_ = IMS_FALSE);
-    SDPOAState(IN CONST SDPOAState& objRHS);
-    virtual ~SDPOAState();
+    SdpOaState(IN CONST SdpOaState& objRHS);
+    virtual ~SdpOaState();
 
 private:
-    SDPOAState& operator=(IN CONST SDPOAState& objRHS);
+    SdpOaState& operator=(IN CONST SdpOaState& objRHS);
 
 public:
-    // ISDPOAState interface implementations
+    // ISdpOaState interface implementations
     virtual void AbortProposal();
     virtual IMS_SINT32 CreateProposalView();
     virtual IMS_SINT32 GetSessionCurrentView(OUT SdpSessionParameter*& pSessionParam) const;

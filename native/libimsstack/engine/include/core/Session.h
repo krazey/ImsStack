@@ -33,7 +33,7 @@ class IRefreshListener;
 class IOnSessionListener;
 class ISessionParameter;
 class MethodManager;
-class SDPOAState;
+class SdpOaState;
 class SessionDescriptor;
 class SessionRefreshHelper;
 class RetransmissionHelper;
@@ -478,7 +478,7 @@ private:
     IMS_SINT32 nTerminationReason;
     AString strTerminationReasonFromApp;
 
-    SDPOAState* pOAState;
+    SdpOaState* pOAState;
     SessionDescriptor* pSessionDescriptor;
     IMSList<Media*> objMedias;
 

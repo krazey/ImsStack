@@ -39,10 +39,10 @@
 #include "SipTimerValuesHelper.h"
 #include "SubscriberRefreshHelper.h"
 #include "SubscriberState.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "util/DialogMethodManager.h"
 // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
-#include "util/SIPConnectionNotifierManager.h"
+#include "util/SipConnectionNotifierManager.h"
 #include "util/UserAgentHeader.h"
 
 __IMS_TRACE_TAG_REG__;
@@ -96,7 +96,7 @@ RegSubscription::RegSubscription(IN const RegKey& objRegKey, IN RegStateTracker*
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
     if (!m_pRegStateTracker.IsNull())
     {
-        m_piReferredScn = SIPConnectionNotifierManager::GetInstance()->GetConnectionNotifier(
+        m_piReferredScn = SipConnectionNotifierManager::GetInstance()->GetConnectionNotifier(
                 m_pRegStateTracker->GetIpAddress(), m_pRegStateTracker->GetPortUs());
     }
 }
@@ -139,7 +139,7 @@ PUBLIC VIRTUAL RegSubscription::~RegSubscription()
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
     if (m_piReferredScn != IMS_NULL)
     {
-        SIPConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piReferredScn);
+        SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piReferredScn);
         m_piReferredScn = IMS_NULL;
     }
 
@@ -192,7 +192,7 @@ PUBLIC VIRTUAL void RegSubscription::DestroyEx()
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
     if (m_piReferredScn != IMS_NULL)
     {
-        SIPConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piReferredScn);
+        SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piReferredScn);
         m_piReferredScn = IMS_NULL;
     }
 
@@ -288,14 +288,14 @@ PUBLIC VIRTUAL IMS_RESULT RegSubscription::Subscribe()
     {
         IMS_TRACE_E(
                 0, "To subscribe an event, the state MUST be an INACTIVE or ACTIVE state", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
     if (m_pSubState->IsInstantSubscription())
     {
         IMS_TRACE_E(0, "INVALID OPERATION :: It is for an instant subscription.", 0, 0, 0);
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
 
@@ -307,7 +307,7 @@ PUBLIC VIRTUAL IMS_RESULT RegSubscription::Subscribe()
 
         SetState(STATE_PENDING);
 
-        IMS::SetLastError(IMSError::NO_ERROR);
+        Ims::SetLastError(ImsError::NO_ERROR);
         return IMS_FAILURE;
     }
 
@@ -397,7 +397,7 @@ PUBLIC VIRTUAL IMS_RESULT RegSubscription::Subscribe()
 
     SetState(STATE_PENDING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -407,7 +407,7 @@ PUBLIC VIRTUAL IMS_RESULT RegSubscription::Unsubscribe()
     if (GetState() != STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "To unsubscribe an event, the state MUST be an ACTIVE state", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -419,7 +419,7 @@ PUBLIC VIRTUAL IMS_RESULT RegSubscription::Unsubscribe()
 
         SetState(STATE_PENDING);
 
-        IMS::SetLastError(IMSError::NO_ERROR);
+        Ims::SetLastError(ImsError::NO_ERROR);
         return IMS_FAILURE;
     }
 
@@ -485,7 +485,7 @@ PUBLIC VIRTUAL IMS_RESULT RegSubscription::Unsubscribe()
 
     SetState(STATE_PENDING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1146,7 +1146,7 @@ IMS_BOOL RegSubscription::CopyHeadersAndBodyParts(IN_OUT ISipMessage*& piSipMsg)
         // Set the headers and body parts if application already sets
         if (piSipMsg->CopyHeadersAndBodyParts(m_piNextRequest) != IMS_SUCCESS)
         {
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
             IMS_TRACE_E(0, "Copying SIP headers and message body parts failed", 0, 0, 0);
             return IMS_FALSE;
         }
@@ -1213,7 +1213,7 @@ IMS_BOOL RegSubscription::SendResponse(IN ISipServerConnection* piSsc, IN IMS_SI
         IMS_TRACE_E(0, "Initializing a SIP response failed - SipError(%d)",
                 SipError::GetLastError(), 0, 0);
 
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FALSE;
     }
 
@@ -1227,7 +1227,7 @@ IMS_BOOL RegSubscription::SendResponse(IN ISipServerConnection* piSsc, IN IMS_SI
         // Set Contact headers
         if (!SetContactHeader(piSipMsg, bIsContactGruu))
         {
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
             return IMS_FALSE;
         }
 
@@ -1245,7 +1245,7 @@ IMS_BOOL RegSubscription::SendResponse(IN ISipServerConnection* piSsc, IN IMS_SI
         {
             if (piSipMsg->AddHeader(ISipHeader::ALLOW, objMethods.GetElementAt(j)) != IMS_SUCCESS)
             {
-                IMS::SetLastError(IMSError::GENERAL_ERROR);
+                Ims::SetLastError(ImsError::GENERAL_ERROR);
                 return IMS_FALSE;
             }
         }
@@ -1286,7 +1286,7 @@ IMS_BOOL RegSubscription::SendResponse(IN ISipServerConnection* piSsc, IN IMS_SI
         return IMS_FALSE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_TRUE;
 }

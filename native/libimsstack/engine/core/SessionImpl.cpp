@@ -12,8 +12,8 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "base/IMS.h"
-#include "IMSCore.h"
+#include "base/Ims.h"
+#include "ImsCore.h"
 #include "CapabilitiesImpl.h"
 #include "ReferenceImpl.h"
 #include "SubscriptionImpl.h"
@@ -174,7 +174,7 @@ PRIVATE VIRTUAL ICapabilities* SessionImpl::CreateCapabilities()
     if (pCapabilitiesImpl == IMS_NULL)
     {
         pCapabilities->Destroy();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating CapabilitiesImpl failed", 0, 0, 0);
         return IMS_NULL;
@@ -200,18 +200,18 @@ PRIVATE VIRTUAL IMedia* SessionImpl::CreateMedia(IN CONST AString& strType,
 
     switch (pMedia->GetType())
     {
-        case IMSCore::MEDIA_TYPE_STREAM:
+        case ImsCore::MEDIA_TYPE_STREAM:
             pMediaImpl = new StreamMediaImpl(DYNAMIC_CAST(StreamMedia*, pMedia));
             break;
 
-        case IMSCore::MEDIA_TYPE_FRAMED:
+        case ImsCore::MEDIA_TYPE_FRAMED:
             pMediaImpl = new FramedMediaImpl(DYNAMIC_CAST(FramedMedia*, pMedia));
             break;
 
-        case IMSCore::MEDIA_TYPE_BASIC_RELIABLE:
+        case ImsCore::MEDIA_TYPE_BASIC_RELIABLE:
             break;
 
-        case IMSCore::MEDIA_TYPE_BASIC_UNRELIABLE:
+        case ImsCore::MEDIA_TYPE_BASIC_UNRELIABLE:
             break;
 
         default:
@@ -222,7 +222,7 @@ PRIVATE VIRTUAL IMedia* SessionImpl::CreateMedia(IN CONST AString& strType,
     {
         pSession->RemoveMedia(pMedia);
 
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_NULL;
     }
 
@@ -231,11 +231,11 @@ PRIVATE VIRTUAL IMedia* SessionImpl::CreateMedia(IN CONST AString& strType,
         delete pMediaImpl;
         pSession->RemoveMedia(pMedia);
 
-        IMS::SetLastError(IMSError::LIST_OPERATION_FAILED);
+        Ims::SetLastError(ImsError::LIST_OPERATION_FAILED);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pMediaImpl->GetInterface();
 }
@@ -257,7 +257,7 @@ PRIVATE VIRTUAL IReference* SessionImpl::CreateReference(
     if (pReferenceImpl == IMS_NULL)
     {
         pReference->Destroy();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating ReferenceImpl failed", 0, 0, 0);
         return IMS_NULL;
@@ -284,18 +284,18 @@ PRIVATE VIRTUAL IMSList<IMedia*> SessionImpl::GetMedia()
 
             switch (pMedia->GetType())
             {
-                case IMSCore::MEDIA_TYPE_STREAM:
+                case ImsCore::MEDIA_TYPE_STREAM:
                     pMediaImpl = new StreamMediaImpl(DYNAMIC_CAST(StreamMedia*, pMedia));
                     break;
 
-                case IMSCore::MEDIA_TYPE_FRAMED:
+                case ImsCore::MEDIA_TYPE_FRAMED:
                     pMediaImpl = new FramedMediaImpl(DYNAMIC_CAST(FramedMedia*, pMedia));
                     break;
 
-                case IMSCore::MEDIA_TYPE_BASIC_RELIABLE:
+                case ImsCore::MEDIA_TYPE_BASIC_RELIABLE:
                     break;
 
-                case IMSCore::MEDIA_TYPE_BASIC_UNRELIABLE:
+                case ImsCore::MEDIA_TYPE_BASIC_UNRELIABLE:
                     break;
 
                 default:
@@ -375,7 +375,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionImpl::RemoveMedia(IN IMedia* piMedia)
 
     if (piMedia == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -393,7 +393,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionImpl::RemoveMedia(IN IMedia* piMedia)
 
     if (i >= objMediaImpls.GetSize())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -401,7 +401,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionImpl::RemoveMedia(IN IMedia* piMedia)
 
     if (pSession->RemoveMedia(pMediaImpl->GetMedia()) != IMS_SUCCESS)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -414,7 +414,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionImpl::RemoveMedia(IN IMedia* piMedia)
         objMediaImpls.RemoveAt(i);
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -472,7 +472,7 @@ PRIVATE VIRTUAL ISubscription* SessionImpl::CreateSubscription(IN CONST AString&
     if (pSubscriptionImpl == IMS_NULL)
     {
         pSubscription->Destroy();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating SubscriptionImpl failed", 0, 0, 0);
         return IMS_NULL;

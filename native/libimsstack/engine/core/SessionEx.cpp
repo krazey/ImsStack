@@ -24,10 +24,10 @@
 #include "SipHeaderUtils.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "Service.h"
 #include "offeranswer/SdpOfferAnswer.h"
-#include "SDPOAState.h"
+#include "SdpOaState.h"
 #include "media/Media.h"
 #include "SessionRefreshHelper.h"
 #include "ReliableProvResponseHelper.h"
@@ -75,7 +75,7 @@ IMS_RESULT SessionEx::RespondToEarlyUpdate(
 
     if (nEarlyState != EARLY_STATE_UPDATE_RECEIVED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Early UPDATE :: invalid state", 0, 0, 0);
         return IMS_FAILURE;
@@ -85,7 +85,7 @@ IMS_RESULT SessionEx::RespondToEarlyUpdate(
 
     if (piSSC == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
 
@@ -162,7 +162,7 @@ IMS_RESULT SessionEx::RespondToEarlyUpdate(
     IMS_BOOL bIsEarlyUpdateRejected = IMS_FALSE;
 
     if (SipStatusCode::IsFinal(nStatusCode) &&
-            GetOfferAnswerState() == SDPOAState::STATE_OFFER_CHANGE_RECEIVED)
+            GetOfferAnswerState() == SdpOaState::STATE_OFFER_CHANGE_RECEIVED)
     {
         IMS_BOOL bHasSDPInRequest = IMS_FALSE;
 
@@ -230,7 +230,7 @@ IMS_RESULT SessionEx::RespondToEarlyUpdate(
 
     CloseConnection(IMessage::SESSION_EARLY_UPDATE);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -248,7 +248,7 @@ IMS_RESULT SessionEx::RespondToPRAck(
 
     if (pRPRHelper == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "ReliableProvResponseHelper is null", 0, 0, 0);
         return IMS_FAILURE;
@@ -256,7 +256,7 @@ IMS_RESULT SessionEx::RespondToPRAck(
 
     if (pRPRHelper->GetState() != ReliableProvResponseHelper::STATE_PRACK_RECEIVED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "ReliableProvResponseHelper :: invalid state", 0, 0, 0);
         return IMS_FAILURE;
@@ -266,7 +266,7 @@ IMS_RESULT SessionEx::RespondToPRAck(
 
     if (piSSC == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
 
@@ -280,7 +280,7 @@ IMS_RESULT SessionEx::RespondToPRAck(
     IMS_BOOL bIsPRAckRejected = IMS_FALSE;
 
     if (SipStatusCode::IsFinal(nStatusCode) &&
-            GetOfferAnswerState() == SDPOAState::STATE_OFFER_CHANGE_RECEIVED)
+            GetOfferAnswerState() == SdpOaState::STATE_OFFER_CHANGE_RECEIVED)
     {
         IMS_BOOL bHasSDPInRequest = IMS_FALSE;
         Message* pMessage = GetPreviousRequest(IMessage::SESSION_PRACK);
@@ -348,7 +348,7 @@ IMS_RESULT SessionEx::RespondToPRAck(
 
     CloseConnection(IMessage::SESSION_PRACK);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -365,7 +365,7 @@ IMS_RESULT SessionEx::SendPRAck()
 
     if (pRPRHelper == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "ReliableProvResponseHelper is null", 0, 0, 0);
         return IMS_FAILURE;
@@ -373,7 +373,7 @@ IMS_RESULT SessionEx::SendPRAck()
 
     if (pRPRHelper->GetState() != ReliableProvResponseHelper::STATE_RPR_RECEIVED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "ReliableProvResponseHelper :: invalid state", 0, 0, 0);
         return IMS_FAILURE;
@@ -383,7 +383,7 @@ IMS_RESULT SessionEx::SendPRAck()
 
     if (piDialog == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
 
@@ -425,7 +425,7 @@ IMS_RESULT SessionEx::SendPRAck()
 
         pRPRHelper->UpdateOnMessageSent(piSIPMsg);
 
-        IMS::SetLastError(IMSError::NO_ERROR);
+        Ims::SetLastError(ImsError::NO_ERROR);
 
         return IMS_SUCCESS;
     }
@@ -437,8 +437,8 @@ IMS_RESULT SessionEx::SendPRAck()
     IMS_BOOL bHasSDPAnswer = IMS_FALSE;
     IMS_SINT32 nOAState = GetOfferAnswerState();
 
-    if ((nOAState == SDPOAState::STATE_OFFER_RECEIVED) ||
-            (nOAState == SDPOAState::STATE_OFFER_CHANGE_RECEIVED))
+    if ((nOAState == SdpOaState::STATE_OFFER_RECEIVED) ||
+            (nOAState == SdpOaState::STATE_OFFER_CHANGE_RECEIVED))
     {
         bHasSDPAnswer = IMS_TRUE;
 
@@ -485,7 +485,7 @@ IMS_RESULT SessionEx::SendPRAck()
 
     pRPRHelper->UpdateOnMessageSent(piSCC->GetMessage());
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -504,7 +504,7 @@ IMS_RESULT SessionEx::SendRPR(IN IMS_SINT32 nStatusCode,
 
     if (pRPRHelper == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "ReliableProvResponseHelper is null", 0, 0, 0);
         return IMS_FAILURE;
@@ -512,7 +512,7 @@ IMS_RESULT SessionEx::SendRPR(IN IMS_SINT32 nStatusCode,
 
     if (pRPRHelper->GetState() != ReliableProvResponseHelper::STATE_IDLE)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "ReliableProvResponseHelper :: invalid state", 0, 0, 0);
         return IMS_FAILURE;
@@ -520,7 +520,7 @@ IMS_RESULT SessionEx::SendRPR(IN IMS_SINT32 nStatusCode,
 
     if (!SipStatusCode::IsProvisional(nStatusCode))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -528,7 +528,7 @@ IMS_RESULT SessionEx::SendRPR(IN IMS_SINT32 nStatusCode,
 
     if ((nState != STATE_NEGOTIATING) && (nState != STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -548,7 +548,7 @@ IMS_RESULT SessionEx::SendRPR(IN IMS_SINT32 nStatusCode,
 
     if (pMessage == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
 
@@ -557,7 +557,7 @@ IMS_RESULT SessionEx::SendRPR(IN IMS_SINT32 nStatusCode,
     // Do nothing if the handling method is not INVITE
     if (!piSIPMsg->GetMethod().Equals(SipMethod::INVITE))
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
 
@@ -566,7 +566,7 @@ IMS_RESULT SessionEx::SendRPR(IN IMS_SINT32 nStatusCode,
     if (piSSC == IMS_NULL)
     {
         IMS_TRACE_E(0, "SIP server connection is null", 0, 0, 0);
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
 
@@ -628,7 +628,7 @@ IMS_RESULT SessionEx::SendRPR(IN IMS_SINT32 nStatusCode,
         UpdateMedia(Media::SESSION_EARLY_UPDATE);
 
         if ((nState == STATE_NEGOTIATING) &&
-                (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
+                (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
         {
             AddSessionToCallControlHelperIfNotPresent();
         }
@@ -636,7 +636,7 @@ IMS_RESULT SessionEx::SendRPR(IN IMS_SINT32 nStatusCode,
 
     pRPRHelper->UpdateOnMessageSent(piSSC->GetMessage());
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -655,7 +655,7 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
 
     if ((nState != STATE_NEGOTIATING) && (nState != STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Early UPDATE :: invalid state", 0, 0, 0);
         return IMS_FAILURE;
@@ -663,7 +663,7 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
 
     if (piSSC_PendingUpdate != IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Early UPDATE :: PendingUpdate", 0, 0, 0);
         return IMS_FAILURE;
@@ -675,7 +675,7 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
     {
         if (GetPreviousRequest(IMessage::SESSION_UPDATE) != IMS_NULL)
         {
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
             IMS_TRACE_E(0, "Early UPDATE :: invalid state", 0, 0, 0);
             return IMS_FAILURE;
@@ -684,7 +684,7 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
 
     if (nEarlyState != EARLY_STATE_IDLE)
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
 
         IMS_TRACE_E(0, "Early UPDATE :: invalid state", 0, 0, 0);
         return IMS_FAILURE;
@@ -694,7 +694,7 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
 
     if (piDialog == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
 
@@ -722,7 +722,7 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
 
     IMS_BOOL bHasSDPOffer = IMS_FALSE;
 
-    if (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED)
+    if (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED)
     {
         bHasSDPOffer = IMS_TRUE;
     }
@@ -750,7 +750,7 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
 
     SetEarlyState(EARLY_STATE_UPDATE_SENT);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1278,8 +1278,8 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUPDATE(IN ISipServerConne
 
     // If we have received an UPDATE request when we have already sent an UPDATE,
     // the received UPDATE should be rejected with 491 Request Pending response.
-    if ((nOfferAnswerState == SDPOAState::STATE_OFFER_SENT) ||
-            (nOfferAnswerState == SDPOAState::STATE_OFFER_CHANGE_SENT))
+    if ((nOfferAnswerState == SdpOaState::STATE_OFFER_SENT) ||
+            (nOfferAnswerState == SdpOaState::STATE_OFFER_CHANGE_SENT))
     {
         if ((piSIPMsg != IMS_NULL) && (piSIPMsg->GetSdpBodyPart() != IMS_NULL))
         {
@@ -1289,8 +1289,8 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUPDATE(IN ISipServerConne
 
     // If we have received an UPDATE request when we are already processing another
     // UPDATE, the 2nd UPDATE should be rejected with 500 Server Internal Error response.
-    else if ((nOfferAnswerState == SDPOAState::STATE_OFFER_RECEIVED) ||
-            (nOfferAnswerState == SDPOAState::STATE_OFFER_CHANGE_RECEIVED))
+    else if ((nOfferAnswerState == SdpOaState::STATE_OFFER_RECEIVED) ||
+            (nOfferAnswerState == SdpOaState::STATE_OFFER_CHANGE_RECEIVED))
     {
         if ((piSIPMsg != IMS_NULL) && (piSIPMsg->GetSdpBodyPart() != IMS_NULL))
         {
@@ -1656,8 +1656,8 @@ IMS_BOOL SessionEx::IsEarlyUpdateInProgress() const
 
     IMS_SINT32 nOAState = GetOfferAnswerState();
 
-    if ((nOAState == SDPOAState::STATE_OFFER_RECEIVED) ||
-            (nOAState == SDPOAState::STATE_OFFER_CHANGE_RECEIVED))
+    if ((nOAState == SdpOaState::STATE_OFFER_RECEIVED) ||
+            (nOAState == SdpOaState::STATE_OFFER_CHANGE_RECEIVED))
     {
         // Checks if the early UPDATE is already received when sending PRACK request
         IMessage* piRequest = GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);

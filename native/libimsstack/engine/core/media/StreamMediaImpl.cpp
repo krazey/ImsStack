@@ -12,7 +12,7 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "media/MediaDescriptor.h"
 #include "media/StreamMediaProposalImpl.h"
 #include "media/StreamMediaImpl.h"
@@ -78,9 +78,9 @@ PRIVATE VIRTUAL IMSList<IMediaDescriptor*> StreamMediaImpl::GetMediaDescriptors(
 
     //---------------------------------------------------------------------------------------------
     /*
-    if (IMSError::GetLastError() != IMSError::NO_ERROR)
+    if (ImsError::GetLastError() != ImsError::NO_ERROR)
     {
-        IMS_TRACE_E(0, "Getting MediaDescriptors failed - %d", IMSError::GetLastError(), 0, 0);
+        IMS_TRACE_E(0, "Getting MediaDescriptors failed - %d", ImsError::GetLastError(), 0, 0);
         return IMSList<IMediaDescriptor*>();
     }
     */
@@ -113,7 +113,7 @@ PRIVATE VIRTUAL IMedia* StreamMediaImpl::GetProposal(
         }
         else
         {
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
             return IMS_NULL;
         }
     }

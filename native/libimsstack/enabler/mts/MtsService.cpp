@@ -1,7 +1,7 @@
 #include "Connector.h"
 #include "ICoreService.h"
 #include "IMessage.h"
-#include "IMSCore.h"
+#include "ImsCore.h"
 #include "IPageMessage.h"
 #include "IServiceFilterCriteria.h"
 #include "ISipHeader.h"
@@ -407,7 +407,7 @@ void MtsService::Init(
     aStrParams.Sprintf("%s=%s", "serviceId", GetId().GetStr());
 
     m_piCoreService = DYNAMIC_CAST(
-            ICoreService*, (Connector::Open(IMSCore::CONNECTION_SCHEME, GetAppId(), aStrParams)));
+            ICoreService*, (Connector::Open(ImsCore::CONNECTION_SCHEME, GetAppId(), aStrParams)));
 
     if (m_piCoreService == IMS_NULL)
     {

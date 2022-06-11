@@ -27,7 +27,7 @@
 #include "SipDebug.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "base/SubscriberTracker.h"
 #include "base/Method.h"
 
@@ -170,7 +170,7 @@ IMS_BOOL Method::InitMethod(IN CONST AString& strFrom, IN CONST AString& strTo,
 
         if (pUserAOR == IMS_NULL)
         {
-            IMS::SetLastError(IMSError::NO_MEMORY);
+            Ims::SetLastError(ImsError::NO_MEMORY);
             return IMS_FALSE;
         }
     }
@@ -180,13 +180,13 @@ IMS_BOOL Method::InitMethod(IN CONST AString& strFrom, IN CONST AString& strTo,
 
         if (pUserAOR == IMS_NULL)
         {
-            IMS::SetLastError(IMSError::NO_MEMORY);
+            Ims::SetLastError(ImsError::NO_MEMORY);
             return IMS_FALSE;
         }
 
         if (!pUserAOR->Create(strFrom))
         {
-            IMS::SetLastError(IMSError::PARSING_ERROR);
+            Ims::SetLastError(ImsError::PARSING_ERROR);
             return IMS_FALSE;
         }
     }
@@ -198,7 +198,7 @@ IMS_BOOL Method::InitMethod(IN CONST AString& strFrom, IN CONST AString& strTo,
 
         if (pRemoteUserAOR == IMS_NULL)
         {
-            IMS::SetLastError(IMSError::NO_MEMORY);
+            Ims::SetLastError(ImsError::NO_MEMORY);
             return IMS_FALSE;
         }
     }
@@ -208,13 +208,13 @@ IMS_BOOL Method::InitMethod(IN CONST AString& strFrom, IN CONST AString& strTo,
 
         if (pRemoteUserAOR == IMS_NULL)
         {
-            IMS::SetLastError(IMSError::NO_MEMORY);
+            Ims::SetLastError(ImsError::NO_MEMORY);
             return IMS_FALSE;
         }
 
         if (!pRemoteUserAOR->Create(strTo))
         {
-            IMS::SetLastError(IMSError::PARSING_ERROR);
+            Ims::SetLastError(ImsError::PARSING_ERROR);
             return IMS_FALSE;
         }
     }
@@ -245,7 +245,7 @@ IMS_BOOL Method::InitMethod(
 
     if (pUserAOR == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_FALSE;
     }
 
@@ -254,7 +254,7 @@ IMS_BOOL Method::InitMethod(
 
     if (pRemoteUserAOR == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_FALSE;
     }
 

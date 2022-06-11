@@ -12,7 +12,7 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "media/MediaDescriptor.h"
 #include "media/FramedMediaProposalImpl.h"
 
@@ -39,9 +39,9 @@ PRIVATE VIRTUAL IMSList<IMediaDescriptor*> FramedMediaProposalImpl::GetMediaDesc
 
     //---------------------------------------------------------------------------------------------
     /*
-    if (IMSError::GetLastError() != IMSError::NO_ERROR)
+    if (ImsError::GetLastError() != ImsError::NO_ERROR)
     {
-        IMS_TRACE_E(0, "Getting MediaDescriptors failed - %d", IMSError::GetLastError(), 0, 0);
+        IMS_TRACE_E(0, "Getting MediaDescriptors failed - %d", ImsError::GetLastError(), 0, 0);
         return IMSList<IMediaDescriptor*>();
     }
     */
@@ -69,7 +69,7 @@ PRIVATE VIRTUAL IMedia* FramedMediaProposalImpl::GetProposal(
 
     IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
 
-    IMS::SetLastError(IMSError::ILLEGAL_STATE);
+    Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
     return IMS_NULL;
 }
@@ -87,7 +87,7 @@ PRIVATE VIRTUAL IMS_SINT32 FramedMediaProposalImpl::GetUpdateState() const
 
     IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
 
-    IMS::SetLastError(IMSError::ILLEGAL_STATE);
+    Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
     return UPDATE_INVALID;
 }
@@ -100,7 +100,7 @@ PRIVATE VIRTUAL IMS_RESULT FramedMediaProposalImpl::SetDirection(IN IMS_SINT32 n
 
     IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
 
-    IMS::SetLastError(IMSError::ILLEGAL_STATE);
+    Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
     return IMS_FAILURE;
 }

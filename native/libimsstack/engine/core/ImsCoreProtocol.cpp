@@ -18,17 +18,17 @@
 #include "SipError.h"
 #include "ServiceManager.h"
 #include "CoreServiceImpl.h"
-#include "IMSCoreProtocol.h"
+#include "ImsCoreProtocol.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PRIVATE
-IMSCoreProtocol::IMSCoreProtocol() :
+ImsCoreProtocol::ImsCoreProtocol() :
         ServiceProtocol()
 {
 }
 
-PUBLIC VIRTUAL IMSCoreProtocol::~IMSCoreProtocol() {}
+PUBLIC VIRTUAL ImsCoreProtocol::~ImsCoreProtocol() {}
 
 /*
  Returns a singleton object of IMS Core Protocol.
@@ -38,13 +38,13 @@ Remarks
      ILLEGAL_ARGUMENT,
      CONNECTION_NOT_FOUND
 */
-PUBLIC GLOBAL IMSCoreProtocol* IMSCoreProtocol::GetInstance()
+PUBLIC GLOBAL ImsCoreProtocol* ImsCoreProtocol::GetInstance()
 {
-    static IMSCoreProtocol* pIMSCore = IMS_NULL;
+    static ImsCoreProtocol* pIMSCore = IMS_NULL;
 
     if (pIMSCore == IMS_NULL)
     {
-        pIMSCore = new IMSCoreProtocol();
+        pIMSCore = new ImsCoreProtocol();
     }
 
     return pIMSCore;
@@ -58,7 +58,7 @@ Remarks
      ILLEGAL_ARGUMENT,
      CONNECTION_NOT_FOUND
 */
-PRIVATE VIRTUAL IService* IMSCoreProtocol::CreateService(
+PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
         IN const AString& strAppId, IN const AString& strServiceId, IN const AString& strUserId)
 {
     IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
@@ -179,7 +179,7 @@ PRIVATE VIRTUAL IService* IMSCoreProtocol::CreateService(
 Remarks
 
 */
-PRIVATE GLOBAL IMS_BOOL IMSCoreProtocol::IsRegistryConsistent(
+PRIVATE GLOBAL IMS_BOOL ImsCoreProtocol::IsRegistryConsistent(
         IN const AppConfig* pAppConfig, IN const CoreServiceConfig* pServiceConfig)
 {
     if (pAppConfig->IsStreamMediaAudioSupported() || pAppConfig->IsStreamMediaVideoSupported())

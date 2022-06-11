@@ -15,13 +15,13 @@
 
 #include "media/IMediaState.h"
 
-class ISDPOAState;
+class ISdpOaState;
 class MediaDescriptor;
 
 class MediaProposal : public IMediaState
 {
 public:
-    MediaProposal(IN ISDPOAState* piOAState_);
+    MediaProposal(IN ISdpOaState* piOAState_);
     virtual ~MediaProposal();
 
 private:
@@ -48,7 +48,7 @@ protected:
     virtual SdpMediaParameter* GetProposalMediaParameter(IN IMS_SINT32 nMid);
 
 private:
-    ISDPOAState* piOAState;
+    ISdpOaState* piOAState;
     IMSList<MediaDescriptor*> objDescriptors;
 };
 

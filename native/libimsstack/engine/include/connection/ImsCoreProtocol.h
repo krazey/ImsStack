@@ -14,22 +14,22 @@
 #define _IMS_CORE_PROTOCOL_H_
 
 #include "ServiceProtocol.h"
-#include "IMSCore.h"
+#include "ImsCore.h"
 
 class AppConfig;
 class CoreServiceConfig;
 
-class IMSCoreProtocol : public ServiceProtocol
+class ImsCoreProtocol : public ServiceProtocol
 {
 private:
-    IMSCoreProtocol();
-    IMSCoreProtocol(IN const IMSCoreProtocol& objRHS);
+    ImsCoreProtocol();
+    ImsCoreProtocol(IN const ImsCoreProtocol& objRHS);
 
 public:
-    virtual ~IMSCoreProtocol();
+    virtual ~ImsCoreProtocol();
 
 public:
-    static IMSCoreProtocol* GetInstance();
+    static ImsCoreProtocol* GetInstance();
 
 private:
     // ServiceProtocol class
@@ -37,7 +37,7 @@ private:
             IN const AString& strUserId);
     inline virtual const IMS_CHAR* GetConnectionScheme() const
     {
-        return IMSCore::CONNECTION_SCHEME;
+        return ImsCore::CONNECTION_SCHEME;
     }
 
     static IMS_BOOL IsRegistryConsistent(

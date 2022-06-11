@@ -17,7 +17,6 @@
 // == INCLUDES =============================================================
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
-#include "IMSCore.h"
 #include "ICoreService.h"
 #include "ISessionDescriptor.h"
 #include "Configuration.h"

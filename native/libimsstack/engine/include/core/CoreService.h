@@ -55,7 +55,7 @@ public:
             IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent);
     AString GetLocalUserId() const;
     void SetListener(IN IOnCoreServiceListener* piListener);
-    ISIPConnectionFactory* CreateSIPConnectionFactory();
+    ISipConnectionFactory* CreateSIPConnectionFactory();
     void SetDirectListener(IN IOnDirectCoreServiceListener* piListener);
 
 private:

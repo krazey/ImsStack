@@ -15,7 +15,7 @@
 
 #include "ISipMessage.h"
 #include "util/EventPackage.h"
-#include "SIPHeaderProperty.h"
+#include "SipHeaderProperty.h"
 
 /*
 This class defines a state & behavior for a subscription state.
@@ -66,7 +66,7 @@ public:
     static IMS_SINT32 GetReasonFromSubscriptionState(IN IMS_SINT32 nReason);
 
 protected:
-    virtual const SIPHeaderProperty* GetRestrictedHeaders(OUT IMS_UINT32& nCount) const;
+    virtual const SipHeaderProperty* GetRestrictedHeaders(OUT IMS_UINT32& nCount) const;
 
     inline IMS_BOOL IsConfigurationSet(IN IMS_SINT32 nValue) const
     {

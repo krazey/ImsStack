@@ -18,7 +18,7 @@
 class StreamMediaProposal : public MediaProposal
 {
 public:
-    StreamMediaProposal(IN ISDPOAState* piOAState_);
+    StreamMediaProposal(IN ISdpOaState* piOAState_);
     virtual ~StreamMediaProposal();
 
 private:

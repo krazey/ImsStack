@@ -22,7 +22,6 @@
 #include "SipParsingHelper.h"
 #include "SipParameter.h"
 #include "SipConfigProxy.h"
-#include "base/IMS.h"
 #include "Service.h"
 #include "SessionRefreshHelper.h"
 

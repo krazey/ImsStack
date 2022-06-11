@@ -17,15 +17,15 @@
 #include "ISipServerConnection.h"
 #include "SipParsingHelper.h"
 #include "SipParameter.h"
-#include "base/IMS.h"
-#include "IMSCore.h"
+#include "base/Ims.h"
+#include "ImsCore.h"
 #include "Capabilities.h"
 #include "PageMessage.h"
 #include "Publication.h"
 #include "Reference.h"
 #include "SessionEx.h"
 #include "Subscription.h"
-#include "SIPConnectionFactory.h"
+#include "SipConnectionFactory.h"
 #include "IOnCoreServiceListener.h"
 #include "IOnDirectCoreServiceListener.h"
 #include "CoreService.h"
@@ -40,7 +40,7 @@ Remarks
 PUBLIC
 CoreService::CoreService(IN CONST AString& strAppId_, IN CONST AString& strServiceId_,
         IN CONST SipAddress* pIMPU_ /* = IMS_NULL */) :
-        Service(IMSCore::CONNECTION_SCHEME, strAppId_, strServiceId_, pIMPU_),
+        Service(ImsCore::CONNECTION_SCHEME, strAppId_, strServiceId_, pIMPU_),
         piCoreServiceListener(IMS_NULL),
         piDirectCoreServiceListener(IMS_NULL)
 {
@@ -170,7 +170,7 @@ Capabilities* CoreService::CreateCapabilities(IN CONST AString& strFrom, IN CONS
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
 
         IMS_TRACE_E(0, "Service MUST be opened", 0, 0, 0);
         return IMS_NULL;
@@ -179,7 +179,7 @@ Capabilities* CoreService::CreateCapabilities(IN CONST AString& strFrom, IN CONS
     // Validates From/To arguments
     if (!ValidateFromAndTo(strFrom, strTo, IMS_FALSE))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
@@ -187,7 +187,7 @@ Capabilities* CoreService::CreateCapabilities(IN CONST AString& strFrom, IN CONS
 
     if (pCapabilities == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating Capabilities failed", 0, 0, 0);
         return IMS_NULL;
@@ -196,13 +196,13 @@ Capabilities* CoreService::CreateCapabilities(IN CONST AString& strFrom, IN CONS
     if (!pCapabilities->InitMethod(strFrom, strTo, GetAuthorizedUserId()))
     {
         delete pCapabilities;
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Initializing Capabilities failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pCapabilities;
 }
@@ -220,7 +220,7 @@ PageMessage* CoreService::CreatePageMessage(IN CONST AString& strFrom, IN CONST 
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
 
         IMS_TRACE_E(0, "Service MUST be opened", 0, 0, 0);
         return IMS_NULL;
@@ -229,7 +229,7 @@ PageMessage* CoreService::CreatePageMessage(IN CONST AString& strFrom, IN CONST 
     // Validates From/To arguments
     if (!ValidateFromAndTo(strFrom, strTo, IMS_FALSE))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
@@ -237,7 +237,7 @@ PageMessage* CoreService::CreatePageMessage(IN CONST AString& strFrom, IN CONST 
 
     if (pPageMessage == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating PageMessage failed", 0, 0, 0);
         return IMS_NULL;
@@ -246,13 +246,13 @@ PageMessage* CoreService::CreatePageMessage(IN CONST AString& strFrom, IN CONST 
     if (!pPageMessage->InitMethod(strFrom, strTo, GetAuthorizedUserId()))
     {
         delete pPageMessage;
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Initializing PageMessage failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pPageMessage;
 }
@@ -271,7 +271,7 @@ Publication* CoreService::CreatePublication(
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
 
         IMS_TRACE_E(0, "Service MUST be opened", 0, 0, 0);
         return IMS_NULL;
@@ -280,13 +280,13 @@ Publication* CoreService::CreatePublication(
     // Validates From/To arguments
     if (!ValidateFromAndTo(strFrom, strTo, IMS_TRUE))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
     if (!IsEventPackageSupported(strEvent))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Invalid argument: Event (%s)", strEvent.GetStr(), 0, 0);
         return IMS_NULL;
@@ -296,7 +296,7 @@ Publication* CoreService::CreatePublication(
 
     if (pPublication == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating Publication failed", 0, 0, 0);
         return IMS_NULL;
@@ -305,13 +305,13 @@ Publication* CoreService::CreatePublication(
     if (!pPublication->InitMethod(strFrom, strTo, GetAuthorizedUserId()))
     {
         delete pPublication;
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Initializing Publication failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pPublication;
 }
@@ -330,7 +330,7 @@ Reference* CoreService::CreateReference(IN CONST AString& strFrom, IN CONST AStr
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
 
         IMS_TRACE_E(0, "Service MUST be opened", 0, 0, 0);
         return IMS_NULL;
@@ -339,14 +339,14 @@ Reference* CoreService::CreateReference(IN CONST AString& strFrom, IN CONST AStr
     // Validates From/To arguments
     if (!ValidateFromAndTo(strFrom, strTo, IMS_FALSE))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
     // Checks Refer-To argument
     if (!ValidateReferTo(strReferTo, strReferMethod))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
@@ -354,7 +354,7 @@ Reference* CoreService::CreateReference(IN CONST AString& strFrom, IN CONST AStr
 
     if (pReference == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating Reference failed", 0, 0, 0);
         return IMS_NULL;
@@ -363,13 +363,13 @@ Reference* CoreService::CreateReference(IN CONST AString& strFrom, IN CONST AStr
     if (!pReference->InitMethod(strFrom, strTo, GetAuthorizedUserId()))
     {
         delete pReference;
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Initializing Reference failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pReference;
 }
@@ -387,7 +387,7 @@ Session* CoreService::CreateSession(IN CONST AString& strFrom, IN CONST AString&
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
 
         IMS_TRACE_E(0, "Service MUST be opened", 0, 0, 0);
         return IMS_NULL;
@@ -396,7 +396,7 @@ Session* CoreService::CreateSession(IN CONST AString& strFrom, IN CONST AString&
     // Validates From/To arguments
     if (!ValidateFromAndTo(strFrom, strTo, IMS_FALSE))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
@@ -404,7 +404,7 @@ Session* CoreService::CreateSession(IN CONST AString& strFrom, IN CONST AString&
 
     if (pSession == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating Session failed", 0, 0, 0);
         return IMS_NULL;
@@ -413,13 +413,13 @@ Session* CoreService::CreateSession(IN CONST AString& strFrom, IN CONST AString&
     if (!pSession->InitMethod(strFrom, strTo, GetAuthorizedUserId()))
     {
         delete pSession;
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Initializing Session failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pSession;
 }
@@ -437,7 +437,7 @@ SessionEx* CoreService::CreateSessionEx(IN CONST AString& strFrom, IN CONST AStr
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
 
         IMS_TRACE_E(0, "Service MUST be opened", 0, 0, 0);
         return IMS_NULL;
@@ -446,7 +446,7 @@ SessionEx* CoreService::CreateSessionEx(IN CONST AString& strFrom, IN CONST AStr
     // Validates From/To arguments
     if (!ValidateFromAndTo(strFrom, strTo, IMS_FALSE))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
@@ -454,7 +454,7 @@ SessionEx* CoreService::CreateSessionEx(IN CONST AString& strFrom, IN CONST AStr
 
     if (pSession == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating SessionImpl failed", 0, 0, 0);
         return IMS_NULL;
@@ -463,13 +463,13 @@ SessionEx* CoreService::CreateSessionEx(IN CONST AString& strFrom, IN CONST AStr
     if (!pSession->InitMethod(strFrom, strTo, GetAuthorizedUserId()))
     {
         delete pSession;
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Initializing Session failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pSession;
 }
@@ -488,7 +488,7 @@ Subscription* CoreService::CreateSubscription(
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
 
         IMS_TRACE_E(0, "Service MUST be opened", 0, 0, 0);
         return IMS_NULL;
@@ -497,14 +497,14 @@ Subscription* CoreService::CreateSubscription(
     // Validates From/To arguments
     if (!ValidateFromAndTo(strFrom, strTo, IMS_TRUE))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
     // Checks an event package from the application configuration
     if (!IsEventPackageSupported(strEvent))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Invalid argument: Event (%s)", strEvent.GetStr(), 0, 0);
         return IMS_NULL;
@@ -514,7 +514,7 @@ Subscription* CoreService::CreateSubscription(
 
     if (pSubscription == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating Subscription failed", 0, 0, 0);
         return IMS_NULL;
@@ -523,13 +523,13 @@ Subscription* CoreService::CreateSubscription(
     if (!pSubscription->InitMethod(strFrom, strTo, GetAuthorizedUserId()))
     {
         delete pSubscription;
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Initializing Subscription failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pSubscription;
 }
@@ -566,11 +566,11 @@ Remarks
 
 */
 PUBLIC
-ISIPConnectionFactory* CoreService::CreateSIPConnectionFactory()
+ISipConnectionFactory* CoreService::CreateSIPConnectionFactory()
 {
     //---------------------------------------------------------------------------------------------
 
-    return new SIPConnectionFactory(this);
+    return new SipConnectionFactory(this);
 }
 
 /*
@@ -841,7 +841,7 @@ IMS_SINT32 CoreService::CheckAndHandleDirectSIPRequest(IN ISipServerConnection* 
         return RESULT_DIRECT_TXN_NOT_HANDLED;
     }
 
-    SIPConnectionFactory* pSCF = new SIPConnectionFactory(this, piSSC);
+    SipConnectionFactory* pSCF = new SipConnectionFactory(this, piSSC);
 
     IMS_SINT32 nResult =
             piDirectCoreServiceListener->OnDirectCoreService_TransactionReceived(this, pSCF);

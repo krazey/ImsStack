@@ -19,7 +19,7 @@
 
 class SipAddress;
 class ISipMessage;
-class SDPOAState;
+class SdpOaState;
 class SessionDescriptor;
 class Media;
 
@@ -103,7 +103,7 @@ private:
     SipAddress objUserAoR;
 
     IMS_SINT32 nState;
-    SDPOAState* pOAState;
+    SdpOaState* pOAState;
     SessionDescriptor* pSessionDescriptor;
     IMSList<Media*> objMedias;
 };

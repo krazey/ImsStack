@@ -18,14 +18,14 @@
 #include "media/MediaDescriptor.h"
 
 class Service;
-class ISDPOAState;
+class ISdpOaState;
 class MediaProposal;
 class IOnMediaListener;
 
 class Media : public IMediaState
 {
 public:
-    Media(IN Service* pService_, IN ISDPOAState* piOAState_);
+    Media(IN Service* pService_, IN ISdpOaState* piOAState_);
 
 protected:
     virtual ~Media();
@@ -75,7 +75,7 @@ protected:
     virtual SdpMediaParameter* GetPeerMediaParameter(IN IMS_SINT32 nMid) const;
     virtual SdpMediaParameter* GetProposalMediaParameter(IN IMS_SINT32 nMid);
 
-    virtual MediaProposal* CreateMediaProposal(IN ISDPOAState* piOAState) = 0;
+    virtual MediaProposal* CreateMediaProposal(IN ISdpOaState* piOAState) = 0;
     virtual IMS_BOOL PreviewInitInstance();
     virtual IMS_BOOL PostInitInstance();
     virtual void PreviewCleanupMedia();
@@ -176,7 +176,7 @@ private:
     friend class MediaFactory;
 
     Service* pService;
-    ISDPOAState* piOAState;
+    ISdpOaState* piOAState;
 
     IMS_SINT32 nState;
     IMS_SINT32 nUpdateState;

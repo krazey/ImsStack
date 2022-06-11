@@ -18,7 +18,7 @@
 #include "SipHeaderName.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "private/AppConfig.h"
 #include "Message.h"
 
@@ -82,7 +82,7 @@ ISipMessageBodyPart* Message::CreateBodyPartEx()
 
     if (piBodyPart == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_NULL;
     }
 
@@ -90,7 +90,7 @@ ISipMessageBodyPart* Message::CreateBodyPartEx()
 
     if (pBodyPart == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_NULL;
     }
 
@@ -98,11 +98,11 @@ ISipMessageBodyPart* Message::CreateBodyPartEx()
     {
         delete pBodyPart;
 
-        IMS::SetLastError(IMSError::LIST_OPERATION_FAILED);
+        Ims::SetLastError(ImsError::LIST_OPERATION_FAILED);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return piBodyPart;
 }
@@ -133,7 +133,7 @@ void Message::UpdateSentMessage(IN ISipMessage* piSIPMsg)
 
     if (piSIPMessage == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return;
     }
 
@@ -176,7 +176,7 @@ PUBLIC GLOBAL Message* Message::CreateMessage(IN Message* pMessage)
 
     if (pNewMessage == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_NULL;
     }
 
@@ -188,7 +188,7 @@ PUBLIC GLOBAL Message* Message::CreateMessage(IN Message* pMessage)
         {
             delete pNewMessage;
 
-            IMS::SetLastError(IMSError::NO_MEMORY);
+            Ims::SetLastError(ImsError::NO_MEMORY);
             return IMS_NULL;
         }
 
@@ -199,7 +199,7 @@ PUBLIC GLOBAL Message* Message::CreateMessage(IN Message* pMessage)
         }
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pNewMessage;
 }
@@ -217,7 +217,7 @@ PUBLIC GLOBAL Message* Message::CreateUnsentMessage(IN AppConfig* pAppConfig, IN
 
     if (pMessage == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_NULL;
     }
 
@@ -230,11 +230,11 @@ PUBLIC GLOBAL Message* Message::CreateUnsentMessage(IN AppConfig* pAppConfig, IN
     {
         delete pMessage;
 
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pMessage;
 }
@@ -253,7 +253,7 @@ PUBLIC GLOBAL Message* Message::CreateReceivedMessage(
 
     if (pMessage == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_NULL;
     }
 
@@ -265,7 +265,7 @@ PUBLIC GLOBAL Message* Message::CreateReceivedMessage(
         {
             delete pMessage;
 
-            IMS::SetLastError(IMSError::NO_MEMORY);
+            Ims::SetLastError(ImsError::NO_MEMORY);
             return IMS_NULL;
         }
 
@@ -276,7 +276,7 @@ PUBLIC GLOBAL Message* Message::CreateReceivedMessage(
         }
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pMessage;
 }
@@ -335,7 +335,7 @@ PRIVATE VIRTUAL IMessageBodyPart* Message::CreateBodyPart()
 
     if (nState != STATE_UNSENT)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Invalid state (%d)", nState, 0, 0);
         return IMS_NULL;
@@ -345,7 +345,7 @@ PRIVATE VIRTUAL IMessageBodyPart* Message::CreateBodyPart()
 
     if (piBodyPart == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_NULL;
     }
 
@@ -353,7 +353,7 @@ PRIVATE VIRTUAL IMessageBodyPart* Message::CreateBodyPart()
 
     if (pBodyPart == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_NULL;
     }
 
@@ -361,7 +361,7 @@ PRIVATE VIRTUAL IMessageBodyPart* Message::CreateBodyPart()
     {
         delete pBodyPart;
 
-        IMS::SetLastError(IMSError::LIST_OPERATION_FAILED);
+        Ims::SetLastError(ImsError::LIST_OPERATION_FAILED);
         return IMS_NULL;
     }
 
@@ -400,13 +400,13 @@ PRIVATE VIRTUAL IMS_RESULT Message::AddHeader(IN CONST AString& strName, IN CONS
 
     if (strHName.GetLength() == 0)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     if (strValue.IsNULL())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -414,7 +414,7 @@ PRIVATE VIRTUAL IMS_RESULT Message::AddHeader(IN CONST AString& strName, IN CONS
 
     if (piHeader == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -426,7 +426,7 @@ PRIVATE VIRTUAL IMS_RESULT Message::AddHeader(IN CONST AString& strName, IN CONS
 
         piHeader->Destroy();
 
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
@@ -436,7 +436,7 @@ PRIVATE VIRTUAL IMS_RESULT Message::AddHeader(IN CONST AString& strName, IN CONS
 
         piHeader->Destroy();
 
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
@@ -444,13 +444,13 @@ PRIVATE VIRTUAL IMS_RESULT Message::AddHeader(IN CONST AString& strName, IN CONS
     {
         piHeader->Destroy();
 
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
     piHeader->Destroy();
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -468,7 +468,7 @@ PRIVATE VIRTUAL IMSList<AString> Message::GetHeaders(IN CONST AString& strName) 
 
     if (strHName.GetLength() == 0)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMSList<AString>();
     }
 
@@ -476,7 +476,7 @@ PRIVATE VIRTUAL IMSList<AString> Message::GetHeaders(IN CONST AString& strName) 
 
     if (piHeader == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMSList<AString>();
     }
 
@@ -488,7 +488,7 @@ PRIVATE VIRTUAL IMSList<AString> Message::GetHeaders(IN CONST AString& strName) 
 
         piHeader->Destroy();
 
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMSList<AString>();
     }
 
@@ -498,13 +498,13 @@ PRIVATE VIRTUAL IMSList<AString> Message::GetHeaders(IN CONST AString& strName) 
 
         piHeader->Destroy();
 
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMSList<AString>();
     }
 
     piHeader->Destroy();
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return piSIPMessage->GetHeaders(nHType, strHName);
 }
@@ -582,7 +582,7 @@ IMS_BOOL Message::CreateBodyParts()
 
             if (pBodyPart == IMS_NULL)
             {
-                IMS::SetLastError(IMSError::NO_MEMORY);
+                Ims::SetLastError(ImsError::NO_MEMORY);
                 return IMS_FALSE;
             }
 
@@ -590,7 +590,7 @@ IMS_BOOL Message::CreateBodyParts()
             {
                 delete pBodyPart;
 
-                IMS::SetLastError(IMSError::LIST_OPERATION_FAILED);
+                Ims::SetLastError(ImsError::LIST_OPERATION_FAILED);
                 return IMS_FALSE;
             }
         }
@@ -613,7 +613,7 @@ IMS_BOOL Message::CreateBodyParts()
 
                 if (pBodyPart == IMS_NULL)
                 {
-                    IMS::SetLastError(IMSError::NO_MEMORY);
+                    Ims::SetLastError(ImsError::NO_MEMORY);
                     return IMS_FALSE;
                 }
 
@@ -621,7 +621,7 @@ IMS_BOOL Message::CreateBodyParts()
                 {
                     delete pBodyPart;
 
-                    IMS::SetLastError(IMSError::LIST_OPERATION_FAILED);
+                    Ims::SetLastError(ImsError::LIST_OPERATION_FAILED);
                     return IMS_FALSE;
                 }
             }

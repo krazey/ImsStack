@@ -57,7 +57,7 @@
 #include "SipStatusCode.h"
 #include "SipTimerValuesHelper.h"
 #include "SipUrnHelper.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "base/SubscriberTracker.h"
 
 __IMS_TRACE_TAG_REG__;
@@ -942,7 +942,7 @@ PRIVATE VIRTUAL IMS_RESULT Registration::Register(IN IMS_SINT32 nExpires /*= (-1
         UpdateBindingState(BINDING_DEREGISTERING);
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     //// DEBUG
     SipDebug::Send(GetSlotId(), SipDebug::MSG_REQ, SipDebug::DIR_OUT,
@@ -1045,7 +1045,7 @@ PRIVATE VIRTUAL IMS_RESULT Registration::Deregister()
     // Change the state
     UpdateBindingState(BINDING_DEREGISTERING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     //// DEBUG
     SipDebug::Send(GetSlotId(), SipDebug::MSG_REQ, SipDebug::DIR_OUT, SipDebug::M_DEREGISTER);
