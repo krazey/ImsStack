@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <carrier_config>
     <!-- Ims General -->
+    <boolean name="ims.use_sip_user_agent_header_only_for_ua_string_bool" value="true"/>
     <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
     <boolean name="allow_sip_instance_parameter_in_contact_for_non_register_request_bool" value="true"/>
     <boolean name="use_reset_when_closing_sip_tcp_connection_bool" value="true"/>

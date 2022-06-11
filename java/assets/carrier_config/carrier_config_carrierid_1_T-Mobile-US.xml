@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <carrier_config>
     <!-- Ims General -->
+    <boolean name="ims.use_sip_user_agent_header_only_for_ua_string_bool" value="true"/>
     <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
     <!-- Aos -->
     <int name="ims.sip_preferred_transport_int" value="2"/>
