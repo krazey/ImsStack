@@ -493,6 +493,8 @@
         <item value="2"/>
         <item value="2"/>
     </int-array>
+    <int name="video_cvo_value_int" value="1"/>
+    <int name="video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
     <boolean name="video_codec_h264_sprop_parameter_sets_bool" value="false"/>
     <boolean name="video_codec_hevc_sprop_parameter_sets_bool" value="false"/>
     <boolean name="video_hold_with_direction_inactive_bool" value="false"/>

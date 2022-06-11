@@ -465,6 +465,7 @@ public:
         this->bSupportAvpf = pProfile->bSupportAvpf;
         this->nCvoId = pProfile->nCvoId;
         this->bSupportCapaNegoForAvpf = pProfile->bSupportCapaNegoForAvpf;
+        this->objCapaNego = pProfile->objCapaNego;
     }
 };
 #endif /* End of _IMS_VIDEO_NEGO_PROFILE_H_*/

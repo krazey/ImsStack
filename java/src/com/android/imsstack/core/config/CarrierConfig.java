@@ -818,6 +818,10 @@ public class CarrierConfig {
                 "audio_rtp_dscp_int";
         public static final String KEY_AUDIO_TELEPHONE_EVENT_DURATION_INT_ARRAY =
                 "audio_telephone_event_duration_int_array";
+        public static final String KEY_VIDEO_CVO_VALUE_INT =
+                "video_cvo_value_int";
+        public static final String KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT =
+                "video_sdp_offer_cap_nego_for_avpf_int";
         public static final String KEY_VIDEO_CODEC_H264_SPROP_PARAMETER_SETS_BOOL =
                 "video_codec_h264_sprop_parameter_sets_bool";
         public static final String KEY_VIDEO_CODEC_HEVC_SPROP_PARAMETER_SETS_BOOL =

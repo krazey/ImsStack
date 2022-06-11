@@ -94,14 +94,15 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
     nVideoDscp = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_DSCP_INT);
     nVideoSendPeriodicSpsPps =
             piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT);
-    // nCvoId = piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT); // TODO_MEDIA later
+    nCvoId = piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT);
     bVideoAvpfTrrEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TRR_BOOL);
     bVideoAvpfNackEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_NACK_BOOL);
     bVideoAvpfTmmbrEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_BOOL);
     bVideoAvpfPliEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_PLI_BOOL);
     bVideoAvpfFirEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FIR_BOOL);
     // TODO_MEDIA need to check if it is needed for KR
-    // nSdpOfferCapNegoForAvpf = piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_XXX);
+    nSdpOfferCapNegoForAvpf =
+            piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT);
     nVideoAvpfTmmbrDownIntervalSec =
             piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_DOWN_INTERVAL_SEC_INT);
     nVideoAvpfTmmbrUpIntervalSec =
@@ -265,8 +266,19 @@ IMS_SINT32 VideoConfiguration::GetVideoSendPeriodicSpsPps() const
 PUBLIC
 IMS_BOOL VideoConfiguration::IsVideoAvpfEnabled() const
 {
-    return bVideoAvpfTrrEnabled || bVideoAvpfNackEnabled || bVideoAvpfTmmbrEnabled ||
-            bVideoAvpfPliEnabled || bVideoAvpfFirEnabled;
+    // TODO Media - return bVideoAvpfTrrEnabled || bVideoAvpfNackEnabled || bVideoAvpfTmmbrEnabled
+    // ||
+    //         bVideoAvpfPliEnabled || bVideoAvpfFirEnabled;
+
+    if (nSdpOfferCapNegoForAvpf == MediaConfiguration::CAPNEG_OFFER_WITHOUT_ACAP ||
+            nSdpOfferCapNegoForAvpf == MediaConfiguration::CAPNEG_OFFER_WITH_ACAP)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 /*!

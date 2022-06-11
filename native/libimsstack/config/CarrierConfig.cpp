@@ -704,8 +704,6 @@ const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT[] =
         KEY_IMS_VT_PREFIX "video_send_periodic_sps_pps_int";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_ENABLE_BOOL[] =
         KEY_IMS_VT_PREFIX "video_avpf_enable_bool";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_SDP_OFFER_CAPNEGO_FOR_AVPF_INT[] =
-        KEY_IMS_VT_PREFIX "video_sdp_offer_capnego_for_avpf_int";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TRR_BOOL[] =
         KEY_IMS_VT_PREFIX "video_avpf_trr_bool";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_NACK_BOOL[] =
@@ -1088,6 +1086,9 @@ const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_SDP_ANSWER_FULL_CAPABILITY_BOOL[
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT[] = "audio_rtp_dscp_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_INT_ARRAY[] =
         "audio_telephone_event_duration_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT[] = "video_cvo_value_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT[] =
+        "video_sdp_offer_cap_nego_for_avpf_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_H264_SPROP_PARAMETER_SETS_BOOL[] =
         "video_codec_h264_sprop_parameter_sets_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_HEVC_SPROP_PARAMETER_SETS_BOOL[] =
