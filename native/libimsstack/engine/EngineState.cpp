@@ -12,7 +12,7 @@
 
 #include "ServiceMemory.h"
 #include "StaticSip.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "EngineState.h"
 
 // Initialization / Uninitialization for Engine
@@ -22,7 +22,7 @@ PUBLIC GLOBAL IMS_BOOL EngineState::Initialize()
     IMS_BOOL bResult = StaticSip::Initialize();
 
     // Initialize another function blocks
-    IMS::Init();
+    Ims::Init();
 
     return bResult;
 }

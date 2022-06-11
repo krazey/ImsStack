@@ -20,7 +20,7 @@
 #include "SipParsingHelper.h"
 #include "SipParameter.h"
 
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "Service.h"
 #include "ServiceMethod.h"
 
@@ -208,13 +208,13 @@ Message* ServiceMethod::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
 
     if (nIndex < 0)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
     PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pPreviousMessage->pRequest;
 }
@@ -233,7 +233,7 @@ Message* ServiceMethod::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
 
     if (nIndex < 0)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
@@ -241,11 +241,11 @@ Message* ServiceMethod::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
 
     if (pPreviousMessage->objResponses.IsEmpty())
     {
-        IMS::SetLastError(IMSError::NOT_FOUND);
+        Ims::SetLastError(ImsError::NOT_FOUND);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pPreviousMessage->objResponses.GetAt(pPreviousMessage->objResponses.GetSize() - 1);
 }
@@ -264,13 +264,13 @@ IMSList<Message*> ServiceMethod::GetPreviousResponses(IN IMS_SINT32 nServiceMeth
 
     if (nIndex < 0)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMSList<Message*>();
     }
 
     PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pPreviousMessage->objResponses;
 }
@@ -436,7 +436,7 @@ ISipClientConnection* ServiceMethod::CreateCancelConnection(IN ISipClientConnect
         // Set the headers and body parts if application already sets
         if (piSIPMsg->CopyHeadersAndBodyParts(pNextRequest->GetMessage()) != IMS_SUCCESS)
         {
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Copying SIP headers and message body parts failed", 0, 0, 0);
 
@@ -467,7 +467,7 @@ ISipClientConnection* ServiceMethod::CreateConnection(IN CONST SipMethod& objMet
 
     if (piSCC == IMS_NULL)
     {
-        IMS_TRACE_E(IMS::GetLastError(), "Creating SIP connection (%s) failed",
+        IMS_TRACE_E(Ims::GetLastError(), "Creating SIP connection (%s) failed",
                 objMethod.ToString().GetStr(), 0, 0);
         return IMS_NULL;
     }
@@ -483,7 +483,7 @@ ISipClientConnection* ServiceMethod::CreateConnection(IN CONST SipMethod& objMet
         // Set the headers and body parts if application already sets
         if (piSIPMsg->CopyHeadersAndBodyParts(pNextRequest->GetMessage()) != IMS_SUCCESS)
         {
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Copying SIP headers and message body parts failed", 0, 0, 0);
 
@@ -525,7 +525,7 @@ ISipClientConnection* ServiceMethod::CreateConnection(
 
     if (piSCC == IMS_NULL)
     {
-        IMS_TRACE_E(IMS::GetLastError(), "Creating SIP connection (%s) within a dialog failed",
+        IMS_TRACE_E(Ims::GetLastError(), "Creating SIP connection (%s) within a dialog failed",
                 objMethod.ToString().GetStr(), 0, 0);
         return IMS_NULL;
     }
@@ -541,7 +541,7 @@ ISipClientConnection* ServiceMethod::CreateConnection(
         // Set the headers and body parts if application already sets
         if (piSIPMsg->CopyHeadersAndBodyParts(pNextRequest->GetMessage()) != IMS_SUCCESS)
         {
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Copying SIP headers and message body parts failed", 0, 0, 0);
 
@@ -595,7 +595,7 @@ IMS_BOOL ServiceMethod::CreateResponse(IN_OUT ISipServerConnection* piSSC,
         // Set the headers and body parts if application already sets
         if (piSIPMsg->CopyHeadersAndBodyParts(pNextResponse->GetMessage()) != IMS_SUCCESS)
         {
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Copying SIP headers and message body parts failed", 0, 0, 0);
             return IMS_FALSE;
@@ -917,14 +917,14 @@ IMS_BOOL ServiceMethod::UpdateRequestOnReceived(
     else
     {
         delete pMessage;
-        IMS::SetLastError(IMSError::ALREADY_EXISTS);
+        Ims::SetLastError(ImsError::ALREADY_EXISTS);
 
         IMS_TRACE_E(
                 0, "MESSAGE (%s) ALREADY EXISTS", Message::GetMessageType(nServiceMethod), 0, 0);
         return IMS_FALSE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_TRUE;
 }
@@ -1018,7 +1018,7 @@ IMS_BOOL ServiceMethod::UpdateResponseOnReceived(
         return IMS_FALSE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_TRUE;
 }
@@ -1141,7 +1141,7 @@ ISipConnection* ServiceMethod::GetConnection(IN IMS_SINT32 nServiceMethod) const
 
     if (nIndex < 0)
     {
-        IMS::SetLastError(IMSError::NO_SIP_CONNECTION);
+        Ims::SetLastError(ImsError::NO_SIP_CONNECTION);
         return IMS_NULL;
     }
 
@@ -1152,11 +1152,11 @@ ISipConnection* ServiceMethod::GetConnection(IN IMS_SINT32 nServiceMethod) const
         IMS_TRACE_D("SIP connection (ServiceMethod: %s) is not found",
                 Message::GetMessageType(nServiceMethod), 0, 0);
 
-        IMS::SetLastError(IMSError::NO_SIP_CONNECTION);
+        Ims::SetLastError(ImsError::NO_SIP_CONNECTION);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pPreviousMessage->piSC;
 }

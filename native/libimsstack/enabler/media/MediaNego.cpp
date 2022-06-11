@@ -15,7 +15,7 @@
  */
 
 #include "ServiceTrace.h"
-#include "IMSCore.h"
+#include "ImsCore.h"
 #include "ICoreService.h"
 #include "ISessionDescriptor.h"
 #include "config/MediaSessionConfigFactory.h"
@@ -942,7 +942,7 @@ IMSList<IMedia*> MediaNego::GetIMediaListFromSession(
         for (IMS_UINT32 i = nCountMediaRequired - objIMediaList.GetSize(); i > 0; i--)
         {
             IMS_TRACE_D("GetIMediaListFromSession()- Create Media", 0, 0, 0);
-            pSession->CreateMedia(IMSCore::MEDIA_STREAM, IMedia::DIRECTION_SEND_RECEIVE, 1);
+            pSession->CreateMedia(ImsCore::MEDIA_STREAM, IMedia::DIRECTION_SEND_RECEIVE, 1);
         }
     }
 

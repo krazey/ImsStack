@@ -29,7 +29,7 @@
 #include "SipDebug.h"
 #include "SipStatusCode.h"
 #include "SipUrnHelper.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 
 __IMS_TRACE_TAG_REG__;
 
@@ -487,7 +487,7 @@ PRIVATE VIRTUAL IMS_RESULT FakeRegistration::Register(IN IMS_SINT32 nExpires /*=
         UpdateBindingState(BINDING_DEREGISTERING);
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     // 4 REG. OK
     PostMessage(AMSG_REGISTRATION_RESPONSE_RECEIVED, SipStatusCode::SC_200, 0);
@@ -516,7 +516,7 @@ PRIVATE VIRTUAL IMS_RESULT FakeRegistration::Deregister()
     // Change the state
     UpdateBindingState(BINDING_DEREGISTERING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     // 4 de-REG. OK
     PostMessage(AMSG_REGISTRATION_RESPONSE_RECEIVED, SipStatusCode::SC_200, 0);

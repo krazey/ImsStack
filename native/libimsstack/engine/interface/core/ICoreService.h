@@ -10,7 +10,7 @@ class IReference;
 class ISession;
 class ISubscription;
 class ICoreServiceListener;
-class ISIPConnectionFactory;
+class ISipConnectionFactory;
 class IDirectCoreServiceListener;
 
 /**
@@ -129,9 +129,9 @@ public:
     /**
      * @brief Creates the SIP connection factory.
      *
-     * @return Pointer to ISIPConnectionFactory
+     * @return Pointer to ISipConnectionFactory
      */
-    virtual ISIPConnectionFactory* CreateSIPConnectionFactory() = 0;
+    virtual ISipConnectionFactory* CreateSIPConnectionFactory() = 0;
 
     /**
      * @brief Sets a listener for this ICoreService, replacing any previous

@@ -21,7 +21,7 @@
 class FramedMedia : public Media
 {
 public:
-    FramedMedia(IN Service* pService_, IN ISDPOAState* piOAState_);
+    FramedMedia(IN Service* pService_, IN ISdpOaState* piOAState_);
     virtual ~FramedMedia();
 
 private:
@@ -34,7 +34,7 @@ public:
 
 protected:
     // Media class
-    virtual MediaProposal* CreateMediaProposal(IN ISDPOAState* piOAState);
+    virtual MediaProposal* CreateMediaProposal(IN ISdpOaState* piOAState);
 };
 
 #endif  // _FRAMED_MEDIA_H_

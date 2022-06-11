@@ -12,13 +12,13 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "IMSCore.h"
+#include "ImsCore.h"
 #include "media/StreamMediaProposal.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-StreamMediaProposal::StreamMediaProposal(IN ISDPOAState* piOAState_) :
+StreamMediaProposal::StreamMediaProposal(IN ISdpOaState* piOAState_) :
         MediaProposal(piOAState_)
 {
 }
@@ -34,5 +34,5 @@ PUBLIC VIRTUAL IMS_SINT32 StreamMediaProposal::GetType() const
 {
     //---------------------------------------------------------------------------------------------
 
-    return IMSCore::MEDIA_TYPE_STREAM;
+    return ImsCore::MEDIA_TYPE_STREAM;
 }

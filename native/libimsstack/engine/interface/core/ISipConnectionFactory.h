@@ -8,7 +8,7 @@ class ISipClientConnection;
 class ISipServerConnection;
 class ISipDialog;
 class SipAddress;
-class ISIPConnectionFactoryListener;
+class ISipConnectionFactoryListener;
 
 /**
  * @brief This class provides an interface to use J180 interface layer directly
@@ -16,7 +16,7 @@ class ISIPConnectionFactoryListener;
  *
  * @see ISipClientConnection, ISipServerConnection, ISipDialog
  */
-class ISIPConnectionFactory : public IMethod
+class ISipConnectionFactory : public IMethod
 {
 public:
     /**
@@ -71,9 +71,9 @@ public:
     /**
      * @brief Sets the listener to receive a new SIP server connection inside of SIP dialog.
      *
-     * @param piListener Pointer to ISIPConnectionFactoryListener
+     * @param piListener Pointer to ISipConnectionFactoryListener
      */
-    virtual void SetListener(IN ISIPConnectionFactoryListener* piListener) = 0;
+    virtual void SetListener(IN ISipConnectionFactoryListener* piListener) = 0;
 
     /**
      * @brief Sets the INVITE server transaction to handle an incoming CANCEL request.

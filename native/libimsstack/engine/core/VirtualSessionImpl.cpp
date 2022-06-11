@@ -12,8 +12,8 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "base/IMS.h"
-#include "IMSCore.h"
+#include "base/Ims.h"
+#include "ImsCore.h"
 #include "media/FramedMediaImpl.h"
 #include "media/StreamMediaImpl.h"
 #include "SessionDescriptor.h"
@@ -156,18 +156,18 @@ PRIVATE VIRTUAL IMedia* VirtualSessionImpl::CreateMedia(IN CONST AString& strTyp
 
     switch (pMedia->GetType())
     {
-        case IMSCore::MEDIA_TYPE_STREAM:
+        case ImsCore::MEDIA_TYPE_STREAM:
             pMediaImpl = new StreamMediaImpl(DYNAMIC_CAST(StreamMedia*, pMedia));
             break;
 
-        case IMSCore::MEDIA_TYPE_FRAMED:
+        case ImsCore::MEDIA_TYPE_FRAMED:
             pMediaImpl = new FramedMediaImpl(DYNAMIC_CAST(FramedMedia*, pMedia));
             break;
 
-        case IMSCore::MEDIA_TYPE_BASIC_RELIABLE:
+        case ImsCore::MEDIA_TYPE_BASIC_RELIABLE:
             break;
 
-        case IMSCore::MEDIA_TYPE_BASIC_UNRELIABLE:
+        case ImsCore::MEDIA_TYPE_BASIC_UNRELIABLE:
             break;
 
         default:
@@ -178,7 +178,7 @@ PRIVATE VIRTUAL IMedia* VirtualSessionImpl::CreateMedia(IN CONST AString& strTyp
     {
         pSession->RemoveMedia(pMedia);
 
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_NULL;
     }
 
@@ -187,11 +187,11 @@ PRIVATE VIRTUAL IMedia* VirtualSessionImpl::CreateMedia(IN CONST AString& strTyp
         delete pMediaImpl;
         pSession->RemoveMedia(pMedia);
 
-        IMS::SetLastError(IMSError::LIST_OPERATION_FAILED);
+        Ims::SetLastError(ImsError::LIST_OPERATION_FAILED);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pMediaImpl->GetInterface();
 }
@@ -224,18 +224,18 @@ PRIVATE VIRTUAL IMSList<IMedia*> VirtualSessionImpl::GetMedia()
 
             switch (pMedia->GetType())
             {
-                case IMSCore::MEDIA_TYPE_STREAM:
+                case ImsCore::MEDIA_TYPE_STREAM:
                     pMediaImpl = new StreamMediaImpl(DYNAMIC_CAST(StreamMedia*, pMedia));
                     break;
 
-                case IMSCore::MEDIA_TYPE_FRAMED:
+                case ImsCore::MEDIA_TYPE_FRAMED:
                     pMediaImpl = new FramedMediaImpl(DYNAMIC_CAST(FramedMedia*, pMedia));
                     break;
 
-                case IMSCore::MEDIA_TYPE_BASIC_RELIABLE:
+                case ImsCore::MEDIA_TYPE_BASIC_RELIABLE:
                     break;
 
-                case IMSCore::MEDIA_TYPE_BASIC_UNRELIABLE:
+                case ImsCore::MEDIA_TYPE_BASIC_UNRELIABLE:
                     break;
 
                 default:
@@ -322,7 +322,7 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RemoveMedia(IN IMedia* piMedia)
 
     if (piMedia == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -340,7 +340,7 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RemoveMedia(IN IMedia* piMedia)
 
     if (i >= objMediaImpls.GetSize())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -348,7 +348,7 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RemoveMedia(IN IMedia* piMedia)
 
     if (pSession->RemoveMedia(pMediaImpl->GetMedia()) != IMS_SUCCESS)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -361,7 +361,7 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RemoveMedia(IN IMedia* piMedia)
         objMediaImpls.RemoveAt(i);
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }

@@ -31,7 +31,7 @@
 #include "SipConfigProxy.h"
 #include "SipTimerValuesHelper.h"
 
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "base/IRefreshListener.h"
 #include "util/OperatorFeatureResolver.h"
 #include "util/UserAgentHeader.h"
@@ -41,7 +41,7 @@
 #include "util/CallerPreferenceManager.h"
 #include "util/CancellableMethodManager.h"
 #include "util/DialogMethodManager.h"
-#include "SDPOAState.h"
+#include "SdpOaState.h"
 #include "Capabilities.h"
 #include "Reference.h"
 #include "Subscription.h"
@@ -199,7 +199,7 @@ IMS_RESULT Session::Accept()
 
     if ((nState != STATE_NEGOTIATING) && (nState != STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0,
                 "To accept a session, the state MUST be a NEGOTIATING or RENEGOTIATING; "
@@ -210,7 +210,7 @@ IMS_RESULT Session::Accept()
 
     if (HasPendingPRAck())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0,
                 "UAS MUST delay sending 2XX until the provisional response "
@@ -251,7 +251,7 @@ IMS_RESULT Session::Accept()
             {
                 if (!pRefreshHelper->AddSpecificHeaderWithoutParameterChange(piSSC))
                 {
-                    IMS::SetLastError(IMSError::GENERAL_ERROR);
+                    Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                     IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
                     return IMS_FAILURE;
@@ -261,7 +261,7 @@ IMS_RESULT Session::Accept()
             {
                 if (!pRefreshHelper->AddSpecificHeader(piSSC))
                 {
-                    IMS::SetLastError(IMSError::GENERAL_ERROR);
+                    Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                     IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
                     return IMS_FAILURE;
@@ -272,7 +272,7 @@ IMS_RESULT Session::Accept()
         {
             if (!pRefreshHelper->AddSpecificHeader(piSSC))
             {
-                IMS::SetLastError(IMSError::GENERAL_ERROR);
+                Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                 IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
                 return IMS_FAILURE;
@@ -309,7 +309,7 @@ IMS_RESULT Session::Accept()
         UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
 
         // Case) Initial offer is sent by 200 OK
-        if (GetOfferAnswerState() == SDPOAState::STATE_OFFER_SENT)
+        if (GetOfferAnswerState() == SdpOaState::STATE_OFFER_SENT)
         {
             UpdateMedia(Media::SESSION_START);
         }
@@ -329,7 +329,7 @@ IMS_RESULT Session::Accept()
         // If re-INVITE is received with SDP, it will be set by the SDP offer/answer context
         // If no SDP in the re-INVITE, generate the SDP from the current view (capabilities)
         if (piSIPMsg->GetMethod().Equals(SipMethod::INVITE) &&
-                (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
+                (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
         {
             if ((pOAState != IMS_NULL) && (pOAState->IsOfferProgress()))
             {
@@ -378,7 +378,7 @@ IMS_RESULT Session::Accept()
         UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
 
         // Case) Offer is sent by 200 OK
-        if (GetOfferAnswerState() == SDPOAState::STATE_OFFER_CHANGE_SENT)
+        if (GetOfferAnswerState() == SdpOaState::STATE_OFFER_CHANGE_SENT)
             UpdateMedia(Media::SESSION_UPDATE);
         else
             UpdateMedia(Media::SESSION_UPDATED);
@@ -418,7 +418,7 @@ IMS_RESULT Session::Accept()
 
     IMS_TRACE_D("Session is accepted", 0, 0, 0);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -435,7 +435,7 @@ Capabilities* Session::CreateCapabilities()
 
     if (!IsMidDialogTransactionCreatable())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Capabilities can't be created in the state(%s)", StateToString(GetState()),
                 0, 0);
@@ -447,7 +447,7 @@ Capabilities* Session::CreateCapabilities()
 
     if (pCapabilities == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating Capabilities failed", 0, 0, 0);
         return IMS_NULL;
@@ -456,13 +456,13 @@ Capabilities* Session::CreateCapabilities()
     if (!pCapabilities->InitMethod(this))
     {
         delete pCapabilities;
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Initializing Capabilities failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pCapabilities;
 }
@@ -480,8 +480,8 @@ Media* Session::CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
 
     if (pOAState == IMS_NULL)
     {
-        IMS_TRACE_E(0, "SDPOAState is null", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        IMS_TRACE_E(0, "SdpOaState is null", 0, 0, 0);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_NULL;
     }
 
@@ -491,14 +491,14 @@ Media* Session::CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
     {
         IMS_SINT32 nSDPOAState = GetOfferAnswerState();
 
-        if ((nSDPOAState != SDPOAState::STATE_IDLE) &&
-                (nSDPOAState != SDPOAState::STATE_ESTABLISHED))
+        if ((nSDPOAState != SdpOaState::STATE_IDLE) &&
+                (nSDPOAState != SdpOaState::STATE_ESTABLISHED))
         {
             IMS_TRACE_E(0,
                     "To create a media, the state MUST be an INITIALIZED or ESTABLISHED; "
                     "(%s, %d)",
                     StateToString(nState), nSDPOAState, 0);
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
             return IMS_NULL;
         }
     }
@@ -512,7 +512,7 @@ Media* Session::CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
         }
         else
         {
-            IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+            Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
             IMS_TRACE_E(0, "Direction argument is invalid", 0, 0, 0);
             return IMS_NULL;
@@ -523,7 +523,7 @@ Media* Session::CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
     {
         if (!CheckNCreateSessionDescriptor())
         {
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Can't create an initial SDP offer", 0, 0, 0);
             return IMS_NULL;
@@ -549,7 +549,7 @@ Media* Session::CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pMedia;
 }
@@ -566,7 +566,7 @@ Reference* Session::CreateReference(IN CONST AString& strReferTo, IN CONST AStri
 
     if (!IsMidDialogTransactionCreatable())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(
                 0, "Reference can't be created in the state(%s)", StateToString(GetState()), 0, 0);
@@ -575,7 +575,7 @@ Reference* Session::CreateReference(IN CONST AString& strReferTo, IN CONST AStri
 
     if (!Service::ValidateReferTo(strReferTo, strReferMethod))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
@@ -586,7 +586,7 @@ Reference* Session::CreateReference(IN CONST AString& strReferTo, IN CONST AStri
 
     if (pReference == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating Reference failed", 0, 0, 0);
         return IMS_NULL;
@@ -595,13 +595,13 @@ Reference* Session::CreateReference(IN CONST AString& strReferTo, IN CONST AStri
     if (!pReference->InitMethod(this))
     {
         delete pReference;
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Initializing Reference failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pReference;
 }
@@ -618,7 +618,7 @@ Subscription* Session::CreateSubscription(IN CONST AString& strEvent)
 
     if (!IsMidDialogTransactionCreatable())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Subscription can't be created in the state(%s)", StateToString(GetState()),
                 0, 0);
@@ -628,7 +628,7 @@ Subscription* Session::CreateSubscription(IN CONST AString& strEvent)
     // Checks an event package from the application configuration
     if (!GetService()->IsEventPackageSupported(strEvent))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Invalid argument: event (%s)", strEvent.GetStr(), 0, 0);
         return IMS_NULL;
@@ -641,7 +641,7 @@ Subscription* Session::CreateSubscription(IN CONST AString& strEvent)
 
     if (pSubscription == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating Subscription failed", 0, 0, 0);
         return IMS_NULL;
@@ -650,13 +650,13 @@ Subscription* Session::CreateSubscription(IN CONST AString& strEvent)
     if (!pSubscription->InitMethod(this))
     {
         delete pSubscription;
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Initializing Subscription failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pSubscription;
 }
@@ -817,14 +817,14 @@ const IMSList<Media*>& Session::GetMedia() const
 
     if (GetState() == STATE_TERMINATED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "To get a media, the state MUST not be a TERMINATED; (%s)",
                 StateToString(GetState()), 0, 0);
         return objMedias;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return objMedias;
 }
@@ -983,7 +983,7 @@ IMS_RESULT Session::Reject()
 
     if ((nState != STATE_NEGOTIATING) && (nState != STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0,
                 "To reject a session, the state MUST be a NEGOTIATING or RENEGOTIATING; "
@@ -1017,7 +1017,7 @@ IMS_RESULT Session::Reject()
         {
             CloseConnection(IMessage::SESSION_START);
 
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
             SetState(STATE_TERMINATED);
             CleanupMedia();
             CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
@@ -1046,7 +1046,7 @@ IMS_RESULT Session::Reject()
         {
             CloseConnection(IMessage::SESSION_UPDATE);
 
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
             SetState(STATE_ESTABLISHED);
             CleanupMedia();
 
@@ -1082,7 +1082,7 @@ IMS_RESULT Session::Reject()
 
     IMS_TRACE_D("Session :: Reject ()", 0, 0, 0);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1099,7 +1099,7 @@ IMS_RESULT Session::Reject(IN IMS_SINT32 nStatusCode)
 
     if (GetState() != STATE_NEGOTIATING)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "To reject a session, the state MUST be a NEGOTIATING; (%s)",
                 StateToString(GetState()), 0, 0);
@@ -1113,7 +1113,7 @@ IMS_RESULT Session::Reject(IN IMS_SINT32 nStatusCode)
             (nStatusCode != STATUSCODE_600_BUSY_EVERYWHERE) &&
             (nStatusCode != STATUSCODE_603_DECLINE))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Unsupported status code (%d) to reject a session", nStatusCode, 0, 0);
         return IMS_FAILURE;
@@ -1143,7 +1143,7 @@ IMS_RESULT Session::Reject(IN IMS_SINT32 nStatusCode)
     {
         CloseConnection(IMessage::SESSION_START);
 
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         SetState(STATE_TERMINATED);
         CleanupMedia();
         CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
@@ -1167,7 +1167,7 @@ IMS_RESULT Session::Reject(IN IMS_SINT32 nStatusCode)
 
     PostMessage(AMSG_SESSION_START_FAILED, 0, 0);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1187,7 +1187,7 @@ IMS_RESULT Session::RejectEx(
 
     if ((nState != STATE_NEGOTIATING) && (nState != STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0,
                 "To reject a session, the state MUST be a NEGOTIATING or RENEGOTIATING; "
@@ -1225,7 +1225,7 @@ IMS_RESULT Session::RejectEx(
         {
             CloseConnection(IMessage::SESSION_START);
 
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
             SetState(STATE_TERMINATED);
             CleanupMedia();
             CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
@@ -1254,7 +1254,7 @@ IMS_RESULT Session::RejectEx(
         {
             CloseConnection(IMessage::SESSION_UPDATE);
 
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
             SetState(STATE_ESTABLISHED);
             CleanupMedia();
 
@@ -1290,7 +1290,7 @@ IMS_RESULT Session::RejectEx(
 
     IMS_TRACE_D("Session :: RejectEx (%d)", nStatusCode, 0, 0);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1307,7 +1307,7 @@ IMS_RESULT Session::RejectWithDiversion(IN CONST AString& strAlternativeUserAddr
 
     if (GetState() != STATE_NEGOTIATING)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "To reject a session, the state MUST be a NEGOTIATING; (%s)",
                 StateToString(GetState()), 0, 0);
@@ -1319,7 +1319,7 @@ IMS_RESULT Session::RejectWithDiversion(IN CONST AString& strAlternativeUserAddr
 
     if (piHeader == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "No contact headers in 3xx response", 0, 0, 0);
         return IMS_FAILURE;
@@ -1352,7 +1352,7 @@ IMS_RESULT Session::RejectWithDiversion(IN CONST AString& strAlternativeUserAddr
     {
         CloseConnection(IMessage::SESSION_START);
 
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         SetState(STATE_TERMINATED);
         CleanupMedia();
         CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
@@ -1374,7 +1374,7 @@ IMS_RESULT Session::RejectWithDiversion(IN CONST AString& strAlternativeUserAddr
 
     PostMessage(AMSG_SESSION_START_FAILED, 0, 0);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1395,10 +1395,10 @@ IMS_RESULT Session::RemoveMedia(IN Media* pMedia)
     {
         IMS_SINT32 nSDPOAState = GetOfferAnswerState();
 
-        if ((nSDPOAState != SDPOAState::STATE_IDLE) &&
-                (nSDPOAState != SDPOAState::STATE_ESTABLISHED))
+        if ((nSDPOAState != SdpOaState::STATE_IDLE) &&
+                (nSDPOAState != SdpOaState::STATE_ESTABLISHED))
         {
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
             IMS_TRACE_E(0,
                     "To remove a media, the state MUST be a INITIATED or ESTABLISHED; "
@@ -1410,7 +1410,7 @@ IMS_RESULT Session::RemoveMedia(IN Media* pMedia)
 
     if (pMedia == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -1428,7 +1428,7 @@ IMS_RESULT Session::RemoveMedia(IN Media* pMedia)
 
     if (i >= objMedias.GetSize())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "No matched media (%p)", pMedia, 0, 0);
         return IMS_FAILURE;
@@ -1454,7 +1454,7 @@ IMS_RESULT Session::RemoveMedia(IN Media* pMedia)
         }
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1475,10 +1475,10 @@ IMS_RESULT Session::RemoveMedia(IN IMS_UINT32 nIndex)
     {
         IMS_SINT32 nSDPOAState = GetOfferAnswerState();
 
-        if ((nSDPOAState != SDPOAState::STATE_IDLE) &&
-                (nSDPOAState != SDPOAState::STATE_ESTABLISHED))
+        if ((nSDPOAState != SdpOaState::STATE_IDLE) &&
+                (nSDPOAState != SdpOaState::STATE_ESTABLISHED))
         {
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
             IMS_TRACE_E(0,
                     "To remove a media, the state MUST be a INITIATED or ESTABLISHED; "
@@ -1490,7 +1490,7 @@ IMS_RESULT Session::RemoveMedia(IN IMS_UINT32 nIndex)
 
     if (nIndex >= objMedias.GetSize())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Invalid index (%d) in the total size (%d)", nIndex, objMedias.GetSize(), 0);
         return IMS_FAILURE;
@@ -1501,7 +1501,7 @@ IMS_RESULT Session::RemoveMedia(IN IMS_UINT32 nIndex)
 
     if (pMedia == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -1522,7 +1522,7 @@ IMS_RESULT Session::RemoveMedia(IN IMS_UINT32 nIndex)
         }
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1539,7 +1539,7 @@ IMS_RESULT Session::Restore()
 
     if (GetState() != STATE_ESTABLISHED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "To restore a media, the state MUST be a ESTABLISHED; (%s)",
                 StateToString(GetState()), 0, 0);
@@ -1552,7 +1552,7 @@ IMS_RESULT Session::Restore()
     // Remove the local capabilities that are not negotiated ?????
     RestoreEx();
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1572,7 +1572,7 @@ IMS_RESULT Session::SendAck()
     if ((nCallState != CallState::STATE_INVITE_2XX_RECEIVED) &&
             (nCallState != CallState::STATE_REINVITE_2XX_RECEIVED))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Invalid call state (%d) to send ACK", nCallState, 0, 0);
         return IMS_FAILURE;
@@ -1589,7 +1589,7 @@ IMS_RESULT Session::SendAck()
 
     if (piSCC == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
@@ -1601,7 +1601,7 @@ IMS_RESULT Session::SendAck()
 
     CloseConnection(nServiceMethod);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1619,7 +1619,7 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
 
     if (!SipStatusCode::IsProvisional(nStatusCode))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Invalid provisional response code (%d, %s)", nStatusCode,
                 strReason.GetStr(), 0);
@@ -1630,7 +1630,7 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
 
     if ((bFlag_UpdateRequestor) || (IsMobileOriginated() && (nState == STATE_NEGOTIATING)))
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
 
         IMS_TRACE_E(0, "Session is the mobile-terminated session", 0, 0, 0);
         return IMS_FAILURE;
@@ -1638,7 +1638,7 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
 
     if ((nState != STATE_NEGOTIATING) && (nState != STATE_RENEGOTIATING))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         IMS_TRACE_E(0,
                 "To send a provisional response, the state MUST be a NEGOTIATING "
                 "or RENEGOTIATING; (%s)",
@@ -1662,7 +1662,7 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
 
     if (pMessage == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
 
@@ -1671,7 +1671,7 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
     // Do nothing if the handling method is not INVITE
     if (!piSIPMsg->GetMethod().Equals(SipMethod::INVITE))
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
 
@@ -1679,7 +1679,7 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
 
     if (piSSC == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
 
         IMS_TRACE_E(0, "SIP server connection is null", 0, 0, 0);
         return IMS_FAILURE;
@@ -1896,7 +1896,7 @@ IMS_RESULT Session::Start()
 
     if (GetState() != STATE_INITIATED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "To start a session, the state MUST be an INITIATED; (%s)",
                 StateToString(GetState()), 0, 0);
@@ -1908,7 +1908,7 @@ IMS_RESULT Session::Start()
     if (objMedias.IsEmpty())
     {
         IMS_TRACE_E(0, "No media in a session", 0, 0, 0);
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 #endif
@@ -1917,7 +1917,7 @@ IMS_RESULT Session::Start()
     if (!IsMediaInitializationDone())
     {
         IMS_TRACE_E(0, "Media is not ready", 0, 0, 0);
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
@@ -1934,7 +1934,7 @@ IMS_RESULT Session::Start()
 
     SetState(STATE_NEGOTIATING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1953,7 +1953,7 @@ IMS_RESULT Session::Terminate()
 
     if ((nState == STATE_TERMINATING) || (nState == STATE_TERMINATED))
     {
-        IMS::SetLastError(IMSError::NO_ERROR);
+        Ims::SetLastError(ImsError::NO_ERROR);
 
         IMS_TRACE_D("Session is already terminating or terminated in Terminate()", 0, 0, 0);
         return IMS_SUCCESS;
@@ -1975,7 +1975,7 @@ IMS_RESULT Session::Terminate()
         case STATE_CREATED:
         case STATE_INITIATED:
             SetState(STATE_TERMINATED);
-            IMS::SetLastError(IMSError::NO_ERROR);
+            Ims::SetLastError(ImsError::NO_ERROR);
 
             IMS_TRACE_D("Session is terminated in the state (%s)", StateToString(GetState()), 0, 0);
             return IMS_SUCCESS;
@@ -2029,7 +2029,7 @@ IMS_RESULT Session::Terminate()
             break;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -2050,7 +2050,7 @@ IMS_RESULT Session::TerminateEx(IN IMS_BOOL bTerminateMethodBYE /* = IMS_FALSE *
 
     if ((nState == STATE_TERMINATING) || (nState == STATE_TERMINATED))
     {
-        IMS::SetLastError(IMSError::NO_ERROR);
+        Ims::SetLastError(ImsError::NO_ERROR);
 
         IMS_TRACE_D("Session is already terminating or terminated in Terminate()", 0, 0, 0);
         return IMS_SUCCESS;
@@ -2085,7 +2085,7 @@ IMS_RESULT Session::TerminateEx(IN IMS_BOOL bTerminateMethodBYE /* = IMS_FALSE *
         case STATE_CREATED:
         case STATE_INITIATED:
             SetState(STATE_TERMINATED);
-            IMS::SetLastError(IMSError::NO_ERROR);
+            Ims::SetLastError(ImsError::NO_ERROR);
 
             IMS_TRACE_D("Session is terminated in the state (%s)", StateToString(GetState()), 0, 0);
             return IMS_SUCCESS;
@@ -2188,7 +2188,7 @@ IMS_RESULT Session::TerminateEx(IN IMS_BOOL bTerminateMethodBYE /* = IMS_FALSE *
             break;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -2205,7 +2205,7 @@ IMS_RESULT Session::Update()
 
     if (GetState() != STATE_ESTABLISHED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "To update a session, the state MUST be an ESTABLISHED; (%s)",
                 StateToString(GetState()), 0, 0);
@@ -2214,7 +2214,7 @@ IMS_RESULT Session::Update()
 
     if (!HasPendingUpdate())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         IMS_TRACE_E(0, "There are no updates to be made to the session", 0, 0, 0);
         return IMS_FAILURE;
     }
@@ -2225,7 +2225,7 @@ IMS_RESULT Session::Update()
     {
         if ((pRefreshHelper != IMS_NULL) && (pRefreshHelper->IsRequestPending()))
         {
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
             IMS_TRACE_E(0, "Session refresh is ongoing", 0, 0, 0);
             return IMS_FAILURE;
         }
@@ -2233,7 +2233,7 @@ IMS_RESULT Session::Update()
 
     if (objMedias.IsEmpty() || !IsMediaInitializationDone())
     {
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         IMS_TRACE_E(0, "There is no media or all the medias are not ready to update the session", 0,
                 0, 0);
         return IMS_FAILURE;
@@ -2262,7 +2262,7 @@ IMS_RESULT Session::Update()
     bFlag_UpdateRequestor = IMS_TRUE;
     SetState(STATE_RENEGOTIATING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -2299,7 +2299,7 @@ IMS_RESULT Session::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */,
 
     if (GetState() != STATE_ESTABLISHED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "To update a session, the state MUST be an ESTABLISHED; (%s)",
                 StateToString(GetState()), 0, 0);
@@ -2312,7 +2312,7 @@ IMS_RESULT Session::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */,
     {
         if ((pRefreshHelper != IMS_NULL) && (pRefreshHelper->IsRequestPending()))
         {
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
             IMS_TRACE_E(0, "Session refresh is ongoing", 0, 0, 0);
             return IMS_FAILURE;
         }
@@ -2320,7 +2320,7 @@ IMS_RESULT Session::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */,
 
     if (objMedias.IsEmpty() || !IsMediaInitializationDone())
     {
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         IMS_TRACE_E(0, "There is no media or all the medias are not ready to update the session", 0,
                 0, 0);
         return IMS_FAILURE;
@@ -2344,7 +2344,7 @@ IMS_RESULT Session::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */,
     bFlag_UpdateRequestor = IMS_TRUE;
     SetState(STATE_RENEGOTIATING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -2716,7 +2716,7 @@ PROTECTED VIRTUAL void Session::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
     // SIP_TXN_N_DIALOG_HANDLING_ON_NO_REG
     if (bFlag_TerminatePending || (nState == STATE_TERMINATING))
     {
-        if (nErrorCode == IMSError::SERVICE_CLOSED)
+        if (nErrorCode == ImsError::SERVICE_CLOSED)
         {
             SetTerminationReason(TERMINATION_REASON_SERVICE_CLOSED);
         }
@@ -2739,7 +2739,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::InitInstance()
 
     if (GetState() != STATE_CREATED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FALSE;
     }
 
@@ -2756,11 +2756,11 @@ PROTECTED VIRTUAL IMS_BOOL Session::InitInstance()
         bFlag_100TryingNotification = pSipConfigV->Is100TryingNotificationRequired();
     }
 
-    pOAState = new SDPOAState(bSDPVersionCheck, IMS_TRUE);
+    pOAState = new SdpOaState(bSDPVersionCheck, IMS_TRUE);
 
     if (pOAState == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_FALSE;
     }
 
@@ -2769,7 +2769,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::InitInstance()
 
     if (pRefreshHelper == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_FALSE;
     }
 
@@ -2838,7 +2838,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::NotifySIPRequest(IN ISipServerConnection* pi
         return IMS_FALSE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_TRUE;
 }
@@ -2994,7 +2994,7 @@ PROTECTED VIRTUAL void Session::NotifySIPResponse(IN ISipClientConnection* piSCC
 
     // Update the Offer/Answer state
     if (objMethod.Equals(SipMethod::PRACK) &&
-            (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
+            (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
     {
         // no-op :: ignore PRACK response if SDP OA state is in ESTABLISHED
         IMS_TRACE_D("Session :: PRACK response doesn't participate in SDP OAE", 0, 0, 0);
@@ -3457,14 +3457,14 @@ PROTECTED VIRTUAL SdpSessionParameter* Session::GetSessionParameter() const
 
     if (nState == STATE_ESTABLISHED)
     {
-        if (pOAState->GetSessionCurrentView(pSessionParam) != ISDPOAState::RESULT_SUCCESS)
+        if (pOAState->GetSessionCurrentView(pSessionParam) != ISdpOaState::RESULT_SUCCESS)
         {
             return IMS_NULL;
         }
     }
     else
     {
-        if (pOAState->GetSessionProposalView(pSessionParam) != ISDPOAState::RESULT_SUCCESS)
+        if (pOAState->GetSessionProposalView(pSessionParam) != ISdpOaState::RESULT_SUCCESS)
         {
             return IMS_NULL;
         }
@@ -3546,8 +3546,8 @@ PROTECTED VIRTUAL SdpSessionParameter* Session::GetProposalSessionParameter()
         {
             IMS_SINT32 nResult = pOAState->CreateProposalView();
 
-            if ((nResult != ISDPOAState::RESULT_SUCCESS) &&
-                    (nResult != ISDPOAState::RESULT_ALREADY_EXIST))
+            if ((nResult != ISdpOaState::RESULT_SUCCESS) &&
+                    (nResult != ISdpOaState::RESULT_ALREADY_EXIST))
             {
                 return IMS_NULL;
             }
@@ -5053,7 +5053,7 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
 
         // Create a new offer with only SDP session parameter
         // The media parameters are created when CreateMedia() method invoked
-        if (!pOAState->InitiateOffer(SDPOAState::OFFER_NEW))
+        if (!pOAState->InitiateOffer(SdpOaState::OFFER_NEW))
         {
             IMS_TRACE_E(0, "Initiating SDP offer failed", 0, 0, 0);
             return IMS_FALSE;
@@ -5082,7 +5082,7 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
 
         // IDLE :: incoming INVITE w/o SDP
         // OFFER_RECEIVED :: incoming INVITE w/ SDP
-        if ((nOAState != SDPOAState::STATE_IDLE) && (nOAState != SDPOAState::STATE_OFFER_RECEIVED))
+        if ((nOAState != SdpOaState::STATE_IDLE) && (nOAState != SdpOaState::STATE_OFFER_RECEIVED))
         {
             IMS_TRACE_E(0, "__ SessionDescriptor can't be created in offer/answer state (%d) __",
                     nOAState, 0, 0);
@@ -5104,9 +5104,9 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
 
         // Create a new offer with only SDP session parameter
         // The media parameters are created when CreateMedia() method invoked
-        if (nOAState == SDPOAState::STATE_IDLE)
+        if (nOAState == SdpOaState::STATE_IDLE)
         {
-            if (!pOAState->InitiateOffer(SDPOAState::OFFER_NEW))
+            if (!pOAState->InitiateOffer(SdpOaState::OFFER_NEW))
             {
                 IMS_TRACE_E(0, "Initiating SDP offer (MT) failed", 0, 0, 0);
                 return IMS_FALSE;
@@ -5121,7 +5121,7 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
             return IMS_FALSE;
         }
 
-        if (nOAState == SDPOAState::STATE_IDLE)
+        if (nOAState == SdpOaState::STATE_IDLE)
         {
             IMS_TRACE_D("__ SessionDescriptor is created in IDLE state __", 0, 0, 0);
         }
@@ -5163,7 +5163,7 @@ IMS_BOOL Session::CheckNSetSDPBodyPart(IN_OUT ISipMessage*& piSIPMsg)
 
     if (piBodyPart == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating SDP body part failed", 0, 0, 0);
         return IMS_FALSE;
@@ -5267,8 +5267,8 @@ IMS_BOOL Session::CheckNTerminateSession(IN ISipMessage* piSIPMsg)
                 {
                     if (pOAState->IsSessionChanged())
                     {
-                        if ((GetOfferAnswerState() == SDPOAState::STATE_IDLE) ||
-                                (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
+                        if ((GetOfferAnswerState() == SdpOaState::STATE_IDLE) ||
+                                (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
                         {
                             pOAState->CompleteExchange();
                         }
@@ -5374,7 +5374,7 @@ IMS_SINT32 Session::GetOfferAnswerState() const
 
     if (pOAState == IMS_NULL)
     {
-        return SDPOAState::STATE_IDLE;
+        return SdpOaState::STATE_IDLE;
     }
 
     return pOAState->GetState();
@@ -5418,8 +5418,8 @@ IMS_SINT32 Session::HandleSDPOfferAnswer(IN ISipMessage* piSIPMsg)
 
         if (((nOAResult == SdpOfferAnswer::RESULT_SUCCESS) ||
                     (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)) &&
-                ((nOAState == SDPOAState::STATE_OFFER_RECEIVED) ||
-                        (nOAState == SDPOAState::STATE_OFFER_CHANGE_RECEIVED)))
+                ((nOAState == SdpOaState::STATE_OFFER_RECEIVED) ||
+                        (nOAState == SdpOaState::STATE_OFFER_CHANGE_RECEIVED)))
         {
             SessionParameter* pSessionParam = pOAState->GetProposalView();
 
@@ -5611,7 +5611,7 @@ IMS_BOOL Session::SetSDPBodyPartFromCurrentView(IN_OUT ISipMessage*& piSIPMsg)
 
     if (pOAState == IMS_NULL)
     {
-        IMS_TRACE_E(0, "SDPOAState is null", 0, 0, 0);
+        IMS_TRACE_E(0, "SdpOaState is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -5788,15 +5788,15 @@ IMS_BOOL Session::UpdateMedia(IN IMS_SINT32 nTrigger)
 
     switch (GetOfferAnswerState())
     {
-        case SDPOAState::STATE_OFFER_SENT:
-        case SDPOAState::STATE_OFFER_CHANGE_SENT:
+        case SdpOaState::STATE_OFFER_SENT:
+        case SdpOaState::STATE_OFFER_CHANGE_SENT:
             bResult = UpdateMediaOnOfferSent(nTrigger);
             break;
 
-        case SDPOAState::STATE_ESTABLISHED:
-            if (pOAState->GetMode() != SDPOAState::MODE_IDLE)
+        case SdpOaState::STATE_ESTABLISHED:
+            if (pOAState->GetMode() != SdpOaState::MODE_IDLE)
             {
-                if (pOAState->GetMode() == SDPOAState::MODE_OFFERER)
+                if (pOAState->GetMode() == SdpOaState::MODE_OFFERER)
                     bResult = UpdateMediaOnAnswerReceived(nTrigger);
                 else
                     bResult = UpdateMediaOnAnswerSent(nTrigger);
@@ -5807,8 +5807,8 @@ IMS_BOOL Session::UpdateMedia(IN IMS_SINT32 nTrigger)
             }
             break;
 
-        case SDPOAState::STATE_OFFER_RECEIVED:
-        case SDPOAState::STATE_OFFER_CHANGE_RECEIVED:
+        case SdpOaState::STATE_OFFER_RECEIVED:
+        case SdpOaState::STATE_OFFER_CHANGE_RECEIVED:
             bResult = UpdateMediaOnOfferReceived(nTrigger);
             break;
 
@@ -5818,8 +5818,8 @@ IMS_BOOL Session::UpdateMedia(IN IMS_SINT32 nTrigger)
     }
 
     // Move the proposed view to the current view
-    if ((GetOfferAnswerState() == SDPOAState::STATE_IDLE) ||
-            (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
+    if ((GetOfferAnswerState() == SdpOaState::STATE_IDLE) ||
+            (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
     {
         pOAState->CompleteExchange();
     }
@@ -5872,13 +5872,13 @@ IMS_BOOL Session::UpdateOfferAnswerStateOnMessageReceived(IN CONST ISipMessage* 
                 piSIPMsg->GetMethod().Equals(SipMethod::INVITE))
         {
             if ((nState == STATE_NEGOTIATING) &&
-                    (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
+                    (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
             {
                 IMS_TRACE_D("UpdateOfferAnswerStateOnMessageReceived() :: "
                             "Ignore the SDP in subsequent RPR as offer-answer is completed",
                         0, 0, 0);
 
-                pOAState->UpdateStateOnTransactionCompleted(piSIPMsg, SDPOAState::MESSAGE_RECEIVED);
+                pOAState->UpdateStateOnTransactionCompleted(piSIPMsg, SdpOaState::MESSAGE_RECEIVED);
                 return IMS_TRUE;
             }
         }
@@ -5890,7 +5890,7 @@ IMS_BOOL Session::UpdateOfferAnswerStateOnMessageReceived(IN CONST ISipMessage* 
         bIsCallEstablished = IMS_TRUE;
     }
 
-    return pOAState->UpdateState(piSIPMsg, SDPOAState::MESSAGE_RECEIVED, bIsCallEstablished,
+    return pOAState->UpdateState(piSIPMsg, SdpOaState::MESSAGE_RECEIVED, bIsCallEstablished,
             (bFlag_SDPNonRPRAllowed ||
                     IsConfigurationSet(CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR)));
 }
@@ -5919,7 +5919,7 @@ IMS_BOOL Session::UpdateOfferAnswerStateOnMessageSent(IN CONST ISipMessage* piSI
         bIsCallEstablished = IMS_TRUE;
     }
 
-    return pOAState->UpdateState(piSIPMsg, SDPOAState::MESSAGE_SENT, bIsCallEstablished,
+    return pOAState->UpdateState(piSIPMsg, SdpOaState::MESSAGE_SENT, bIsCallEstablished,
             (bFlag_SDPNonRPRAllowed ||
                     IsConfigurationSet(CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR)));
 }
@@ -6290,7 +6290,7 @@ IMS_RESULT Session::HandleRequestToBYE(IN ISipServerConnection* piSSC)
 
     UpdateRequestOnReceived(IMessage::SESSION_TERMINATE, piSSC);
 
-    if (IMS::GetLastError() == IMSError::ALREADY_EXISTS)
+    if (Ims::GetLastError() == ImsError::ALREADY_EXISTS)
     {
         GetService()->SendResponse(piSSC, SipStatusCode::SC_200);
         piSSC->Close();
@@ -6495,7 +6495,7 @@ IMS_RESULT Session::HandleRequestToINVITE(IN ISipServerConnection* piSSC)
     // Restore the media state if it needs
 
     // Check & create a session descriptor when an initial offer received
-    if (GetOfferAnswerState() != SDPOAState::STATE_IDLE)
+    if (GetOfferAnswerState() != SdpOaState::STATE_IDLE)
     {
         // Incoming INVITE w/ SDP
         CheckNCreateSessionDescriptor();
@@ -6605,7 +6605,7 @@ IMS_RESULT Session::HandleRequestToINVITEWithinDialog(IN ISipServerConnection* p
     }
     // Offer is sent by 200 OK, and waits for ACK w/ SDP answer
     else if ((nState == STATE_REESTABLISHING) &&
-            (GetOfferAnswerState() == SDPOAState::STATE_OFFER_CHANGE_SENT))
+            (GetOfferAnswerState() == SdpOaState::STATE_OFFER_CHANGE_SENT))
     {
         ISipMessage* piSIPMsg = piSSC->GetMessage();
 
@@ -6873,7 +6873,7 @@ IMS_RESULT Session::HandleRequestToREFER(IN ISipServerConnection* piSSC)
     {
         piSSC->Close();
         delete pReference;
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Initializing Reference failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -6882,7 +6882,7 @@ IMS_RESULT Session::HandleRequestToREFER(IN ISipServerConnection* piSSC)
     if (!pReference->ServerConnection_NotifyRequest(piSSC))
     {
         delete pReference;
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Handling Reference failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -7094,7 +7094,7 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
         IMS_RESULT nResult = HandleProvisionalResponse(piSCC);
 
         if ((nState == STATE_NEGOTIATING) && SipStatusCode::IsProvisional(nStatusCode) &&
-                (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
+                (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
         {
             // 'Replaces' header handling ...
             // For explicit call transfer in early dialog state
@@ -7618,7 +7618,7 @@ IMS_RESULT Session::SendRequestToACK(IN ISipClientConnection* piSCC, IN IMS_SINT
 
     if (!GetService()->InitAck(piSCC))
     {
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
@@ -7653,7 +7653,7 @@ IMS_RESULT Session::SendRequestToACK(IN ISipClientConnection* piSCC, IN IMS_SINT
             if (piSIPMsg->AddHeader(ISipHeader::ALLOW, objMethods.GetElementAt(i)) != IMS_SUCCESS)
             {
                 IMS_TRACE_E(0, "Adding Allow header failed", 0, 0, 0);
-                IMS::SetLastError(IMSError::GENERAL_ERROR);
+                Ims::SetLastError(ImsError::GENERAL_ERROR);
                 return IMS_FAILURE;
             }
         }
@@ -7695,7 +7695,7 @@ IMS_RESULT Session::SendRequestToACK(IN ISipClientConnection* piSCC, IN IMS_SINT
         // ACK transaction will be closed by the caller
         ClearConnection(IMessage::SESSION_ACK);
 
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
@@ -7986,7 +7986,7 @@ IMS_RESULT Session::SendRequestToINVITE(IN IMS_BOOL bSessionRefresh /* = IMS_FAL
                 if (!pRefreshHelper->AddSpecificHeaderWithoutParameterChange(piSCC))
                 {
                     piSCC->Close();
-                    IMS::SetLastError(IMSError::GENERAL_ERROR);
+                    Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                     IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
                     return IMS_FAILURE;
@@ -7997,7 +7997,7 @@ IMS_RESULT Session::SendRequestToINVITE(IN IMS_BOOL bSessionRefresh /* = IMS_FAL
                 if (!pRefreshHelper->AddSpecificHeader(piSCC))
                 {
                     piSCC->Close();
-                    IMS::SetLastError(IMSError::GENERAL_ERROR);
+                    Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                     IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
                     return IMS_FAILURE;
@@ -8009,7 +8009,7 @@ IMS_RESULT Session::SendRequestToINVITE(IN IMS_BOOL bSessionRefresh /* = IMS_FAL
             if (!pRefreshHelper->AddSpecificHeader(piSCC))
             {
                 piSCC->Close();
-                IMS::SetLastError(IMSError::GENERAL_ERROR);
+                Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                 IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
                 return IMS_FAILURE;
@@ -8177,7 +8177,7 @@ IMS_RESULT Session::SendRequestToINVITEOn422Received()
                 if (!pRefreshHelper->AddSpecificHeaderWithoutParameterChange(piSCC))
                 {
                     piSCC->Close();
-                    IMS::SetLastError(IMSError::GENERAL_ERROR);
+                    Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                     IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
                     return IMS_FAILURE;
@@ -8188,7 +8188,7 @@ IMS_RESULT Session::SendRequestToINVITEOn422Received()
                 if (!pRefreshHelper->AddSpecificHeader(piSCC))
                 {
                     piSCC->Close();
-                    IMS::SetLastError(IMSError::GENERAL_ERROR);
+                    Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                     IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
                     return IMS_FAILURE;
@@ -8200,7 +8200,7 @@ IMS_RESULT Session::SendRequestToINVITEOn422Received()
             if (!pRefreshHelper->AddSpecificHeader(piSCC))
             {
                 piSCC->Close();
-                IMS::SetLastError(IMSError::GENERAL_ERROR);
+                Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                 IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
                 return IMS_FAILURE;
@@ -8290,7 +8290,7 @@ IMS_RESULT Session::SendRequestToUPDATE(IN IMS_BOOL bSessionRefresh /* = IMS_FAL
     {
         if (!pRefreshHelper->AddSpecificHeader(piSCC))
         {
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
             IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
             return IMS_FAILURE;
         }

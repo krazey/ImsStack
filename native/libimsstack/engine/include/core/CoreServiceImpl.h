@@ -84,7 +84,7 @@ private:
             IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent);
     virtual AString GetLocalUserId() const;
     virtual void SetListener(IN ICoreServiceListener* piListener);
-    virtual ISIPConnectionFactory* CreateSIPConnectionFactory();
+    virtual ISipConnectionFactory* CreateSIPConnectionFactory();
     virtual void SetDirectListener(IN IDirectCoreServiceListener* piListener);
 
     // IOnCoreServiceListener interface
@@ -102,7 +102,7 @@ private:
 
     // IOnDirectCoreServiceListener interface
     virtual IMS_SINT32 OnDirectCoreService_TransactionReceived(
-            IN CoreService* pService, IN ISIPConnectionFactory* piSCF);
+            IN CoreService* pService, IN ISipConnectionFactory* piSCF);
 
 private:
     ICoreServiceListener* piCoreServiceListener;

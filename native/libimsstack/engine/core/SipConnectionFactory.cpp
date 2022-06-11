@@ -17,16 +17,16 @@
 #include "ISipDialog.h"
 #include "SipStatusCode.h"
 #include "SipDebug.h"
-#include "ISIPConnectionFactoryListener.h"
+#include "ISipConnectionFactoryListener.h"
 #include "util/CancellableMethodManager.h"
 #include "util/DialogMethodManager.h"
 #include "Service.h"
-#include "SIPConnectionFactory.h"
+#include "SipConnectionFactory.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-SIPConnectionFactory::SIPConnectionFactory(IN Service* pService_) :
+SipConnectionFactory::SipConnectionFactory(IN Service* pService_) :
         pService(pService_),
         piDialog(IMS_NULL),
         piListener(IMS_NULL),
@@ -37,7 +37,7 @@ SIPConnectionFactory::SIPConnectionFactory(IN Service* pService_) :
 }
 
 PUBLIC
-SIPConnectionFactory::SIPConnectionFactory(IN Service* pService_, IN ISipServerConnection* piSSC) :
+SipConnectionFactory::SipConnectionFactory(IN Service* pService_, IN ISipServerConnection* piSSC) :
         pService(pService_),
         piDialog(IMS_NULL),
         piListener(IMS_NULL),
@@ -48,7 +48,7 @@ SIPConnectionFactory::SIPConnectionFactory(IN Service* pService_, IN ISipServerC
     CancellableMethodManager::GetInstance()->AddMethod(GetName(), this);
 }
 
-PUBLIC VIRTUAL SIPConnectionFactory::~SIPConnectionFactory()
+PUBLIC VIRTUAL SipConnectionFactory::~SipConnectionFactory()
 {
     if (piDialog != IMS_NULL)
     {
@@ -61,7 +61,7 @@ PUBLIC VIRTUAL SIPConnectionFactory::~SIPConnectionFactory()
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::DispatchMessage(IN IMSMSG& objMSG)
+PUBLIC VIRTUAL IMS_BOOL SipConnectionFactory::DispatchMessage(IN IMSMSG& objMSG)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -98,7 +98,7 @@ PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::DispatchMessage(IN IMSMSG& objMSG)
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::Dialog_Compare(IN ISipServerConnection* piSSC) const
+PUBLIC VIRTUAL IMS_BOOL SipConnectionFactory::Dialog_Compare(IN ISipServerConnection* piSSC) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -125,7 +125,7 @@ PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::Dialog_Compare(IN ISipServerConnec
 
         if (strDialogId.Equals(strReferDialogId))
         {
-            IMS_TRACE_D("SIPConnectionFactory :: Dialog (%s), Refer's Dialog (%s)",
+            IMS_TRACE_D("SipConnectionFactory :: Dialog (%s), Refer's Dialog (%s)",
                     SipDebug::GetCharA1(strDialogId.GetStr(), 8, '@'),
                     SipDebug::GetCharA2(strReferDialogId.GetStr(), 8, '@'), 0);
             return IMS_TRUE;
@@ -147,7 +147,7 @@ PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::Dialog_Compare(IN ISipServerConnec
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::Dialog_NotifyRequest(IN ISipServerConnection* piSSC)
+PUBLIC VIRTUAL IMS_BOOL SipConnectionFactory::Dialog_NotifyRequest(IN ISipServerConnection* piSSC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -172,7 +172,7 @@ PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::Dialog_NotifyRequest(IN ISipServer
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::Cancellable_Compare(
+PUBLIC VIRTUAL IMS_BOOL SipConnectionFactory::Cancellable_Compare(
         IN ISipServerConnection* piSSC_CANCEL) const
 {
     //---------------------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::Cancellable_Compare(
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::Cancellable_NotifyRequest(
+PUBLIC VIRTUAL IMS_BOOL SipConnectionFactory::Cancellable_NotifyRequest(
         IN ISipServerConnection* piSSC_CANCEL)
 {
     //---------------------------------------------------------------------------------------------
@@ -214,7 +214,7 @@ PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::Cancellable_NotifyRequest(
 Remarks
 
 */
-PUBLIC VIRTUAL void SIPConnectionFactory::Destroy()
+PUBLIC VIRTUAL void SipConnectionFactory::Destroy()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -229,7 +229,7 @@ PUBLIC VIRTUAL void SIPConnectionFactory::Destroy()
 Remarks
  SIP_MESSAGE_MEDIATOR
 */
-PUBLIC VIRTUAL void SIPConnectionFactory::SetMessageMediator(IN IMessageMediator* /* piMediator */)
+PUBLIC VIRTUAL void SipConnectionFactory::SetMessageMediator(IN IMessageMediator* /* piMediator */)
 {
     // no-op
 }
@@ -239,7 +239,7 @@ PUBLIC VIRTUAL void SIPConnectionFactory::SetMessageMediator(IN IMessageMediator
 Remarks
 
 */
-PUBLIC VIRTUAL ISipClientConnection* SIPConnectionFactory::CreateClientConnection(
+PUBLIC VIRTUAL ISipClientConnection* SipConnectionFactory::CreateClientConnection(
         IN CONST SipMethod& objMethod, IN CONST SipAddress* pFrom, IN CONST SipAddress* pTo)
 {
     //---------------------------------------------------------------------------------------------
@@ -295,7 +295,7 @@ PUBLIC VIRTUAL ISipClientConnection* SIPConnectionFactory::CreateClientConnectio
 Remarks
 
 */
-PUBLIC VIRTUAL ISipClientConnection* SIPConnectionFactory::CreateClientConnection(
+PUBLIC VIRTUAL ISipClientConnection* SipConnectionFactory::CreateClientConnection(
         IN ISipDialog* piDialog, IN CONST SipMethod& objMethod)
 {
     //---------------------------------------------------------------------------------------------
@@ -322,7 +322,7 @@ PUBLIC VIRTUAL ISipClientConnection* SIPConnectionFactory::CreateClientConnectio
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::CreateResponse(IN_OUT ISipServerConnection* piSSC,
+PUBLIC VIRTUAL IMS_BOOL SipConnectionFactory::CreateResponse(IN_OUT ISipServerConnection* piSSC,
         IN IMS_SINT32 nStatusCode, IN CONST AString& strPhrase /* = AString::ConstNull() */)
 {
     //---------------------------------------------------------------------------------------------
@@ -341,7 +341,7 @@ PUBLIC VIRTUAL IMS_BOOL SIPConnectionFactory::CreateResponse(IN_OUT ISipServerCo
 Remarks
 
 */
-PUBLIC VIRTUAL ISipServerConnection* SIPConnectionFactory::GetNewServerConnection()
+PUBLIC VIRTUAL ISipServerConnection* SipConnectionFactory::GetNewServerConnection()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -353,7 +353,7 @@ PUBLIC VIRTUAL ISipServerConnection* SIPConnectionFactory::GetNewServerConnectio
 Remarks
 
 */
-PUBLIC VIRTUAL void SIPConnectionFactory::SetDialog(IN ISipDialog* piDialog)
+PUBLIC VIRTUAL void SipConnectionFactory::SetDialog(IN ISipDialog* piDialog)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -374,7 +374,7 @@ PUBLIC VIRTUAL void SIPConnectionFactory::SetDialog(IN ISipDialog* piDialog)
 Remarks
 
 */
-PUBLIC VIRTUAL void SIPConnectionFactory::SetListener(IN ISIPConnectionFactoryListener* piListener)
+PUBLIC VIRTUAL void SipConnectionFactory::SetListener(IN ISipConnectionFactoryListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -386,7 +386,7 @@ PUBLIC VIRTUAL void SIPConnectionFactory::SetListener(IN ISIPConnectionFactoryLi
 Remarks
 
 */
-PUBLIC VIRTUAL void SIPConnectionFactory::SetSSCForCANCEL(IN ISipServerConnection* piSSC)
+PUBLIC VIRTUAL void SipConnectionFactory::SetSSCForCANCEL(IN ISipServerConnection* piSSC)
 {
     //---------------------------------------------------------------------------------------------
 

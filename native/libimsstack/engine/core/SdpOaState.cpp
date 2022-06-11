@@ -20,7 +20,7 @@
 #include "Service.h"
 #include "offeranswer/SdpOfferAnswer.h"
 #include "offeranswer/SdpSessionParameter.h"
-#include "SDPOAState.h"
+#include "SdpOaState.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
@@ -152,181 +152,183 @@ public:
     SessionParameter objCapabilities;
 };
 
-PRIVATE GLOBAL const IMS_SINT32
-SDPOAState::STATE_SENT[SDPOAState::STATE_MAX][SDPOAState::TRIGGER_MAX] =
+// clang-format off
+PRIVATE GLOBAL
+const IMS_SINT32 SdpOaState::STATE_SENT[SdpOaState::STATE_MAX][SdpOaState::TRIGGER_MAX] =
 {
     //STATE_IDLE
     {
-        SDPOAState::STATE_OFFER_SENT,              // TRIGGER_INVITE
-        SDPOAState::STATE_IDLE,                    // TRIGGER_ACK
-        SDPOAState::STATE_OFFER_SENT,              // TRIGGER_PRACK
-        SDPOAState::STATE_OFFER_SENT,              // TRIGGER_UPDATE
-        SDPOAState::STATE_OFFER_SENT,              // TRIGGER_SUCCESS_RESP
-        SDPOAState::STATE_IDLE,                    // TRIGGER_FAILURE_RESP
-        SDPOAState::STATE_OFFER_SENT,              // TRIGGER_RPR
-        SDPOAState::STATE_OFFER_SENT,              // TRIGGER_PROVISIONAL_RESP
-        SDPOAState::STATE_IDLE,                    // TRIGGER_CANCEL
-        SDPOAState::STATE_IDLE                     // TRIGGER_BYE
+        SdpOaState::STATE_OFFER_SENT,              // TRIGGER_INVITE
+        SdpOaState::STATE_IDLE,                    // TRIGGER_ACK
+        SdpOaState::STATE_OFFER_SENT,              // TRIGGER_PRACK
+        SdpOaState::STATE_OFFER_SENT,              // TRIGGER_UPDATE
+        SdpOaState::STATE_OFFER_SENT,              // TRIGGER_SUCCESS_RESP
+        SdpOaState::STATE_IDLE,                    // TRIGGER_FAILURE_RESP
+        SdpOaState::STATE_OFFER_SENT,              // TRIGGER_RPR
+        SdpOaState::STATE_OFFER_SENT,              // TRIGGER_PROVISIONAL_RESP
+        SdpOaState::STATE_IDLE,                    // TRIGGER_CANCEL
+        SdpOaState::STATE_IDLE                     // TRIGGER_BYE
     },
 
     //STATE_OFFER_SENT -- Offer sent by Engine
     {
-        SDPOAState::STATE_INVALID,                 // TRIGGER_INVITE
-        SDPOAState::STATE_INVALID,                 // TRIGGER_ACK
-        SDPOAState::STATE_INVALID,                 // TRIGGER_PRACK
-        SDPOAState::STATE_INVALID,                 // TRIGGER_UPDATE
-        SDPOAState::STATE_OFFER_SENT,              // TRIGGER_SUCCESS_RESP
-        SDPOAState::STATE_OFFER_SENT,              // TRIGGER_FAILURE_RESP
-        SDPOAState::STATE_INVALID,                 // TRIGGER_RPR
-        SDPOAState::STATE_INVALID,                 // TRIGGER_PROVISIONAL_RESP
-        SDPOAState::STATE_OFFER_SENT,              // TRIGGER_CANCEL
-        SDPOAState::STATE_OFFER_SENT               // TRIGGER_BYE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_INVITE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_ACK
+        SdpOaState::STATE_INVALID,                 // TRIGGER_PRACK
+        SdpOaState::STATE_INVALID,                 // TRIGGER_UPDATE
+        SdpOaState::STATE_OFFER_SENT,              // TRIGGER_SUCCESS_RESP
+        SdpOaState::STATE_OFFER_SENT,              // TRIGGER_FAILURE_RESP
+        SdpOaState::STATE_INVALID,                 // TRIGGER_RPR
+        SdpOaState::STATE_INVALID,                 // TRIGGER_PROVISIONAL_RESP
+        SdpOaState::STATE_OFFER_SENT,              // TRIGGER_CANCEL
+        SdpOaState::STATE_OFFER_SENT               // TRIGGER_BYE
     },
 
     // STATE_OFFER_RECEIVED -- Offer received by Engine
     {
-        SDPOAState::STATE_INVALID,                 // TRIGGER_INVITE
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_ACK
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_PRACK
-        SDPOAState::STATE_INVALID,                 // TRIGGER_UPDATE
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_SUCCESS_RESP
-        SDPOAState::STATE_IDLE,                    // TRIGGER_FAILURE_RESP
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_RPR
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_PROVISIONAL_RESP
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_CANCEL
-        SDPOAState::STATE_OFFER_RECEIVED           // TRIGGER_BYE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_INVITE
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_ACK
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_PRACK
+        SdpOaState::STATE_INVALID,                 // TRIGGER_UPDATE
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_SUCCESS_RESP
+        SdpOaState::STATE_IDLE,                    // TRIGGER_FAILURE_RESP
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_RPR
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_PROVISIONAL_RESP
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_CANCEL
+        SdpOaState::STATE_OFFER_RECEIVED           // TRIGGER_BYE
     },
 
     // STATE_ESTABLISHED -- Offer/Answer exchange done
     {
-        SDPOAState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_INVITE
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_ACK
-        SDPOAState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_PRACK
-        SDPOAState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_UPDATE
-        SDPOAState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_SUCCESS_RESP
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_FAILURE_RESP
-        SDPOAState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_RPR
-        SDPOAState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_PROVISIONAL_RESP
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_CANCEL
-        SDPOAState::STATE_ESTABLISHED              // TRIGGER_BYE
+        SdpOaState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_INVITE
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_ACK
+        SdpOaState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_PRACK
+        SdpOaState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_UPDATE
+        SdpOaState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_SUCCESS_RESP
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_FAILURE_RESP
+        SdpOaState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_RPR
+        SdpOaState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_PROVISIONAL_RESP
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_CANCEL
+        SdpOaState::STATE_ESTABLISHED              // TRIGGER_BYE
     },
 
     // STATE_OFFER_CHANGE_SENT -- Counter offer made
     {
-        SDPOAState::STATE_INVALID,                 // TRIGGER_INVITE
-        SDPOAState::STATE_INVALID,                 // TRIGGER_ACK
-        SDPOAState::STATE_INVALID,                 // TRIGGER_PRACK
-        SDPOAState::STATE_INVALID,                 // TRIGGER_UPDATE
-        SDPOAState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_SUCCESS_RESP
-        SDPOAState::STATE_INVALID,                 // TRIGGER_FAILURE_RESP
-        SDPOAState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_RPR
-        SDPOAState::STATE_INVALID,                 // TRIGGER_PROVISIONAL_RESP
-        SDPOAState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_CANCEL
-        SDPOAState::STATE_OFFER_CHANGE_SENT        // TRIGGER_BYE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_INVITE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_ACK
+        SdpOaState::STATE_INVALID,                 // TRIGGER_PRACK
+        SdpOaState::STATE_INVALID,                 // TRIGGER_UPDATE
+        SdpOaState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_SUCCESS_RESP
+        SdpOaState::STATE_INVALID,                 // TRIGGER_FAILURE_RESP
+        SdpOaState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_RPR
+        SdpOaState::STATE_INVALID,                 // TRIGGER_PROVISIONAL_RESP
+        SdpOaState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_CANCEL
+        SdpOaState::STATE_OFFER_CHANGE_SENT        // TRIGGER_BYE
     },
 
     // STATE_OFFER_CHANGE_RECEIVED -- Counter offer received
     {
-        SDPOAState::STATE_INVALID,                 // TRIGGER_INVITE
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_ACK
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_PRACK
-        SDPOAState::STATE_INVALID,                 // TRIGGER_UPDATE
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_SUCCESS_RESP
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_FAILURE_RESP
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_RPR
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_PROVISIONAL_RESP
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_CANCEL
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED    // TRIGGER_BYE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_INVITE
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_ACK
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_PRACK
+        SdpOaState::STATE_INVALID,                 // TRIGGER_UPDATE
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_SUCCESS_RESP
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_FAILURE_RESP
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_RPR
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_PROVISIONAL_RESP
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_CANCEL
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED    // TRIGGER_BYE
     }
 };
 
-PRIVATE GLOBAL const IMS_SINT32
-SDPOAState::STATE_RECEIVED[SDPOAState::STATE_MAX][SDPOAState::TRIGGER_MAX] =
+PRIVATE GLOBAL
+const IMS_SINT32 SdpOaState::STATE_RECEIVED[SdpOaState::STATE_MAX][SdpOaState::TRIGGER_MAX] =
 {
     //STATE_IDLE
     {
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_INVITE
-        SDPOAState::STATE_INVALID,                 // TRIGGER_ACK
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_PRACK
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_UPDATE
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_SUCCESS_RESP
-        SDPOAState::STATE_IDLE,                    // TRIGGER_FAILURE_RESP
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_RPR
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_PROVISIONAL_RESP
-        SDPOAState::STATE_INVALID,                 // TRIGGER_CANCEL
-        SDPOAState::STATE_INVALID                  // TRIGGER_BYE
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_INVITE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_ACK
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_PRACK
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_UPDATE
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_SUCCESS_RESP
+        SdpOaState::STATE_IDLE,                    // TRIGGER_FAILURE_RESP
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_RPR
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_PROVISIONAL_RESP
+        SdpOaState::STATE_INVALID,                 // TRIGGER_CANCEL
+        SdpOaState::STATE_INVALID                  // TRIGGER_BYE
     },
 
     //STATE_OFFER_SENT -- Offer sent by Engine
     {
-        SDPOAState::STATE_INVALID,                 // TRIGGER_INVITE
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_ACK
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_PRACK
-        SDPOAState::STATE_INVALID,                 // TRIGGER_UPDATE
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_SUCCESS_RESP
-        SDPOAState::STATE_IDLE,                    // TRIGGER_FAILURE_RESP
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_RPR
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_PROVISIONAL_RESP
-        SDPOAState::STATE_OFFER_SENT,              // TRIGGER_CANCEL
-        SDPOAState::STATE_OFFER_SENT               // TRIGGER_BYE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_INVITE
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_ACK
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_PRACK
+        SdpOaState::STATE_INVALID,                 // TRIGGER_UPDATE
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_SUCCESS_RESP
+        SdpOaState::STATE_IDLE,                    // TRIGGER_FAILURE_RESP
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_RPR
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_PROVISIONAL_RESP
+        SdpOaState::STATE_OFFER_SENT,              // TRIGGER_CANCEL
+        SdpOaState::STATE_OFFER_SENT               // TRIGGER_BYE
     },
 
     // STATE_OFFER_RECEIVED -- Offer received by Engine
     {
-        SDPOAState::STATE_INVALID,                 // TRIGGER_INVITE
-        SDPOAState::STATE_INVALID,                 // TRIGGER_ACK
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_PRACK
-        SDPOAState::STATE_INVALID,                 // TRIGGER_UPDATE
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_SUCCESS_RESP
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_FAILURE_RESP
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_RPR
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_PROVISIONAL_RESP
-        SDPOAState::STATE_OFFER_RECEIVED,          // TRIGGER_CANCEL
-        SDPOAState::STATE_OFFER_RECEIVED           // TRIGGER_BYE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_INVITE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_ACK
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_PRACK
+        SdpOaState::STATE_INVALID,                 // TRIGGER_UPDATE
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_SUCCESS_RESP
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_FAILURE_RESP
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_RPR
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_PROVISIONAL_RESP
+        SdpOaState::STATE_OFFER_RECEIVED,          // TRIGGER_CANCEL
+        SdpOaState::STATE_OFFER_RECEIVED           // TRIGGER_BYE
     },
 
     // STATE_ESTABLISHED -- Offer/Answer exchange done
     {
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_INVITE
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_ACK
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_PRACK
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_UPDATE
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_SUCCESS_RESP
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_FAILURE_RESP
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_RPR
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_PROVISIONAL_RESP
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_CANCEL
-        SDPOAState::STATE_ESTABLISHED              // TRIGGER_BYE
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_INVITE
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_ACK
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_PRACK
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_UPDATE
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_SUCCESS_RESP
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_FAILURE_RESP
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_RPR
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_PROVISIONAL_RESP
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_CANCEL
+        SdpOaState::STATE_ESTABLISHED              // TRIGGER_BYE
     },
 
     // STATE_OFFER_CHANGE_SENT -- Counter offer made
     {
-        SDPOAState::STATE_INVALID,                 // TRIGGER_INVITE
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_ACK
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_PRACK
-        SDPOAState::STATE_INVALID,                 // TRIGGER_UPDATE
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_SUCCESS_RESP
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_FAILURE_RESP
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_RPR
-        SDPOAState::STATE_ESTABLISHED,             // TRIGGER_PROVISIONAL_RESP
-        SDPOAState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_CANCEL
-        SDPOAState::STATE_OFFER_CHANGE_SENT        // TRIGGER_BYE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_INVITE
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_ACK
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_PRACK
+        SdpOaState::STATE_INVALID,                 // TRIGGER_UPDATE
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_SUCCESS_RESP
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_FAILURE_RESP
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_RPR
+        SdpOaState::STATE_ESTABLISHED,             // TRIGGER_PROVISIONAL_RESP
+        SdpOaState::STATE_OFFER_CHANGE_SENT,       // TRIGGER_CANCEL
+        SdpOaState::STATE_OFFER_CHANGE_SENT        // TRIGGER_BYE
     },
 
     // STATE_OFFER_CHANGE_RECEIVED -- Counter offer received
     {
-        SDPOAState::STATE_INVALID,                 // TRIGGER_INVITE
-        SDPOAState::STATE_INVALID,                 // TRIGGER_ACK
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_PRACK
-        SDPOAState::STATE_INVALID,                 // TRIGGER_UPDATE
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_SUCCESS_RESP
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_FAILURE_RESP
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_RPR
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_PROVISIONAL_RESP
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_CANCEL
-        SDPOAState::STATE_OFFER_CHANGE_RECEIVED    // TRIGGER_BYE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_INVITE
+        SdpOaState::STATE_INVALID,                 // TRIGGER_ACK
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_PRACK
+        SdpOaState::STATE_INVALID,                 // TRIGGER_UPDATE
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_SUCCESS_RESP
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_FAILURE_RESP
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_RPR
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_PROVISIONAL_RESP
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED,   // TRIGGER_CANCEL
+        SdpOaState::STATE_OFFER_CHANGE_RECEIVED    // TRIGGER_BYE
     }
 };
+// clang-format on
 
 /*
 
@@ -334,7 +336,7 @@ Remarks
 
 */
 PUBLIC
-SDPOAState::SDPOAState(IN IMS_BOOL bSDPVersionCheck_ /* = IMS_TRUE */,
+SdpOaState::SdpOaState(IN IMS_BOOL bSDPVersionCheck_ /* = IMS_TRUE */,
         IN IMS_BOOL bAlwaysIncreaseSDPVersion_ /* = IMS_FALSE*/) :
         nState(STATE_IDLE),
         nOldState(STATE_IDLE),
@@ -359,7 +361,7 @@ Remarks
 
 */
 PUBLIC
-SDPOAState::SDPOAState(IN CONST SDPOAState& objRHS) :
+SdpOaState::SdpOaState(IN CONST SdpOaState& objRHS) :
         nState(objRHS.nState),
         nOldState(objRHS.nOldState),
         nMode(objRHS.nMode),
@@ -399,7 +401,7 @@ SDPOAState::SDPOAState(IN CONST SDPOAState& objRHS) :
 Remarks
 
 */
-PUBLIC VIRTUAL SDPOAState::~SDPOAState()
+PUBLIC VIRTUAL SdpOaState::~SdpOaState()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -428,7 +430,7 @@ PUBLIC VIRTUAL SDPOAState::~SDPOAState()
 Remarks
 
 */
-PUBLIC VIRTUAL void SDPOAState::AbortProposal()
+PUBLIC VIRTUAL void SdpOaState::AbortProposal()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -451,7 +453,7 @@ PUBLIC VIRTUAL void SDPOAState::AbortProposal()
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_SINT32 SDPOAState::CreateProposalView()
+PUBLIC VIRTUAL IMS_SINT32 SdpOaState::CreateProposalView()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -459,22 +461,22 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::CreateProposalView()
             (nState != STATE_ESTABLISHED) && (nState != STATE_OFFER_CHANGE_RECEIVED))
     {
         IMS_TRACE_E(0, "Invalid state (%d)", nState, 0, 0);
-        return ISDPOAState::RESULT_INVALID_STATE;
+        return ISdpOaState::RESULT_INVALID_STATE;
     }
 
     if (pProposalView != IMS_NULL)
     {
-        return ISDPOAState::RESULT_ALREADY_EXIST;
+        return ISdpOaState::RESULT_ALREADY_EXIST;
     }
 
     // Create a new SDP offer
     if (!InitiateOffer(OFFER_CHANGE))
     {
         IMS_TRACE_E(0, "Initiating new offer failed", 0, 0, 0);
-        return ISDPOAState::RESULT_ERROR;
+        return ISdpOaState::RESULT_ERROR;
     }
 
-    return ISDPOAState::RESULT_SUCCESS;
+    return ISdpOaState::RESULT_SUCCESS;
 }
 
 /*
@@ -483,7 +485,7 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::CreateProposalView()
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetSessionCurrentView(
+PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetSessionCurrentView(
         OUT SdpSessionParameter*& pSessionParam) const
 {
     //---------------------------------------------------------------------------------------------
@@ -491,18 +493,18 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetSessionCurrentView(
     if (nState != STATE_ESTABLISHED)
     {
         IMS_TRACE_D("SessionCurrentView :: Invalid state (%d)", nState, 0, 0);
-        return ISDPOAState::RESULT_INVALID_STATE;
+        return ISdpOaState::RESULT_INVALID_STATE;
     }
 
     if (pCurrentView == IMS_NULL)
     {
         IMS_TRACE_E(0, "Error (Current View does not exist)", 0, 0, 0);
-        return ISDPOAState::RESULT_ERROR;
+        return ISdpOaState::RESULT_ERROR;
     }
 
     pSessionParam = &(pCurrentView->GetSessionParameterNC());
 
-    return ISDPOAState::RESULT_SUCCESS;
+    return ISdpOaState::RESULT_SUCCESS;
 }
 
 /*
@@ -511,7 +513,7 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetSessionCurrentView(
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetSessionPeerView(
+PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetSessionPeerView(
         OUT SdpSessionParameter*& pSessionParam) const
 {
     //---------------------------------------------------------------------------------------------
@@ -519,12 +521,12 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetSessionPeerView(
     if (pPeerView == IMS_NULL)
     {
         IMS_TRACE_E(0, "Error (Peer View does not exist)", 0, 0, 0);
-        return ISDPOAState::RESULT_ERROR;
+        return ISdpOaState::RESULT_ERROR;
     }
 
     pSessionParam = &(pPeerView->GetSessionParameterNC());
 
-    return ISDPOAState::RESULT_SUCCESS;
+    return ISdpOaState::RESULT_SUCCESS;
 }
 
 /*
@@ -533,7 +535,7 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetSessionPeerView(
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetSessionProposalView(
+PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetSessionProposalView(
         OUT SdpSessionParameter*& pSessionParam) const
 {
     //---------------------------------------------------------------------------------------------
@@ -543,18 +545,18 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetSessionProposalView(
             (nState != STATE_OFFER_CHANGE_SENT) && (nState != STATE_OFFER_CHANGE_RECEIVED))
     {
         IMS_TRACE_E(0, "Invalid state (%d)", nState, 0, 0);
-        return ISDPOAState::RESULT_INVALID_STATE;
+        return ISdpOaState::RESULT_INVALID_STATE;
     }
 
     if (pProposalView == IMS_NULL)
     {
         IMS_TRACE_E(0, "Error (Proposed View does not exist)", 0, 0, 0);
-        return ISDPOAState::RESULT_ERROR;
+        return ISdpOaState::RESULT_ERROR;
     }
 
     pSessionParam = &(pProposalView->GetSessionParameterNC());
 
-    return ISDPOAState::RESULT_SUCCESS;
+    return ISdpOaState::RESULT_SUCCESS;
 }
 
 /*
@@ -563,28 +565,28 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetSessionProposalView(
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_SINT32 SDPOAState::CreateMediaParameter(OUT SdpMediaParameter*& pMediaParam)
+PUBLIC VIRTUAL IMS_SINT32 SdpOaState::CreateMediaParameter(OUT SdpMediaParameter*& pMediaParam)
 {
     //---------------------------------------------------------------------------------------------
 
     if (pProposalView == IMS_NULL)
     {
         IMS_TRACE_E(0, "Invalid state (Proposed View is NULL)", 0, 0, 0);
-        return ISDPOAState::RESULT_INVALID_STATE;
+        return ISdpOaState::RESULT_INVALID_STATE;
     }
 
     if (!bOfferProgress)
     {
         IMS_TRACE_E(0, "Invalid state (Offer is not in progress)", 0, 0, 0);
-        return ISDPOAState::RESULT_INVALID_STATE;
+        return ISdpOaState::RESULT_INVALID_STATE;
     }
 
     pMediaParam = pProposalView->CreateMediaParameter();
 
     if (pMediaParam == IMS_NULL)
-        return ISDPOAState::RESULT_ERROR;
+        return ISdpOaState::RESULT_ERROR;
 
-    return ISDPOAState::RESULT_SUCCESS;
+    return ISdpOaState::RESULT_SUCCESS;
 }
 
 /*
@@ -593,7 +595,7 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::CreateMediaParameter(OUT SdpMediaParameter
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaCurrentView(
+PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetMediaCurrentView(
         IN IMS_SINT32 nMid, OUT SdpMediaParameter*& pMediaParam) const
 {
     //---------------------------------------------------------------------------------------------
@@ -601,13 +603,13 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaCurrentView(
     if (nState != STATE_ESTABLISHED)
     {
         IMS_TRACE_D("MediaCurrentView :: Invalid state (%d)", nState, 0, 0);
-        return ISDPOAState::RESULT_INVALID_STATE;
+        return ISdpOaState::RESULT_INVALID_STATE;
     }
 
     if (pCurrentView == IMS_NULL)
     {
         IMS_TRACE_E(0, "Error (Current View does not exist)", 0, 0, 0);
-        return ISDPOAState::RESULT_ERROR;
+        return ISdpOaState::RESULT_ERROR;
     }
 
     pMediaParam = pCurrentView->GetMediaParameter(nMid);
@@ -615,10 +617,10 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaCurrentView(
     if (pMediaParam == IMS_NULL)
     {
         IMS_TRACE_E(0, "Can't find the media parameter (%d) from the current view", nMid, 0, 0);
-        return ISDPOAState::RESULT_NOT_FOUND;
+        return ISdpOaState::RESULT_NOT_FOUND;
     }
 
-    return ISDPOAState::RESULT_SUCCESS;
+    return ISdpOaState::RESULT_SUCCESS;
 }
 
 /*
@@ -627,7 +629,7 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaCurrentView(
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaPeerView(
+PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetMediaPeerView(
         IN IMS_SINT32 nMid, OUT SdpMediaParameter*& pMediaParam) const
 {
     //---------------------------------------------------------------------------------------------
@@ -636,14 +638,14 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaPeerView(
     if (nState != STATE_ESTABLISHED)
     {
         IMS_TRACE_E(0, "Invalid state (%d)", nState, 0, 0);
-        return ISDPOAState::RESULT_INVALID_STATE;
+        return ISdpOaState::RESULT_INVALID_STATE;
     }
     */
 
     if (pPeerView == IMS_NULL)
     {
         IMS_TRACE_E(0, "Error (Peer View does not exist)", 0, 0, 0);
-        return ISDPOAState::RESULT_ERROR;
+        return ISdpOaState::RESULT_ERROR;
     }
 
     pMediaParam = pPeerView->GetMediaParameter(nMid);
@@ -660,16 +662,16 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaPeerView(
             {
                 IMS_TRACE_E(0, "Can't find the media parameter (%d) from the proposal view", nMid,
                         0, 0);
-                return ISDPOAState::RESULT_NOT_FOUND;
+                return ISdpOaState::RESULT_NOT_FOUND;
             }
         }
         else
         {
-            return ISDPOAState::RESULT_NOT_FOUND;
+            return ISdpOaState::RESULT_NOT_FOUND;
         }
     }
 
-    return ISDPOAState::RESULT_SUCCESS;
+    return ISdpOaState::RESULT_SUCCESS;
 }
 
 /*
@@ -678,7 +680,7 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaPeerView(
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaProposalView(
+PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetMediaProposalView(
         IN IMS_SINT32 nMid, OUT SdpMediaParameter*& pMediaParam) const
 {
     //---------------------------------------------------------------------------------------------
@@ -688,13 +690,13 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaProposalView(
             (nState != STATE_OFFER_CHANGE_SENT) && (nState != STATE_OFFER_CHANGE_RECEIVED))
     {
         IMS_TRACE_E(0, "Invalid state (%d)", nState, 0, 0);
-        return ISDPOAState::RESULT_INVALID_STATE;
+        return ISdpOaState::RESULT_INVALID_STATE;
     }
 
     if (pProposalView == IMS_NULL)
     {
         IMS_TRACE_E(0, "Error (Proposed View does not exist)", 0, 0, 0);
-        return ISDPOAState::RESULT_ERROR;
+        return ISdpOaState::RESULT_ERROR;
     }
 
     pMediaParam = pProposalView->GetMediaParameter(nMid);
@@ -702,10 +704,10 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaProposalView(
     if (pMediaParam == IMS_NULL)
     {
         IMS_TRACE_E(0, "Can't find the media parameter (%d) from the proposed view", nMid, 0, 0);
-        return ISDPOAState::RESULT_NOT_FOUND;
+        return ISdpOaState::RESULT_NOT_FOUND;
     }
 
-    return ISDPOAState::RESULT_SUCCESS;
+    return ISdpOaState::RESULT_SUCCESS;
 }
 
 /*
@@ -714,7 +716,7 @@ PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaProposalView(
 Remarks
 
 */
-PUBLIC VIRTUAL void SDPOAState::MarkRejectedOrRemoved(IN IMS_SINT32 nMid)
+PUBLIC VIRTUAL void SdpOaState::MarkRejectedOrRemoved(IN IMS_SINT32 nMid)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -738,7 +740,7 @@ PUBLIC VIRTUAL void SDPOAState::MarkRejectedOrRemoved(IN IMS_SINT32 nMid)
 Remarks
 
 */
-PUBLIC VIRTUAL void SDPOAState::RemoveMediaParameter(IN IMS_SINT32 nMid)
+PUBLIC VIRTUAL void SdpOaState::RemoveMediaParameter(IN IMS_SINT32 nMid)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -763,7 +765,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SDPOAState::CreateCapabilities(
+IMS_BOOL SdpOaState::CreateCapabilities(
         IN Service* pService, IN CONST AString& strUserID, IN IMS_BOOL bMProf /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
@@ -871,7 +873,7 @@ Remarks
 
 */
 PUBLIC
-const SessionParameter* SDPOAState::GetCapabilities() const
+const SessionParameter* SdpOaState::GetCapabilities() const
 {
     const SessionParameter& objSessionParam = pCapabilities->GetCapabilities();
 
@@ -887,7 +889,7 @@ Remarks
 
 */
 PUBLIC
-SessionParameter* SDPOAState::GetCurrentView() const
+SessionParameter* SdpOaState::GetCurrentView() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -901,7 +903,7 @@ Remarks
 
 */
 PUBLIC
-SessionParameter* SDPOAState::GetPeerView() const
+SessionParameter* SdpOaState::GetPeerView() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -915,7 +917,7 @@ Remarks
 
 */
 PUBLIC
-SessionParameter* SDPOAState::GetProposalView() const
+SessionParameter* SdpOaState::GetProposalView() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -929,7 +931,7 @@ Remarks
 
 */
 PUBLIC
-IMS_SINT32 SDPOAState::GetMode() const
+IMS_SINT32 SdpOaState::GetMode() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -943,7 +945,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SDPOAState::GetSDP(OUT AString& strSDP) const
+IMS_BOOL SdpOaState::GetSDP(OUT AString& strSDP) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -972,7 +974,7 @@ Remarks
 
 */
 PUBLIC
-IMS_SINT32 SDPOAState::GetState() const
+IMS_SINT32 SdpOaState::GetState() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -986,7 +988,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SDPOAState::InitiateOffer(IN IMS_SINT32 nType)
+IMS_BOOL SdpOaState::InitiateOffer(IN IMS_SINT32 nType)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1047,7 +1049,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SDPOAState::InitiateMediaOffer(IN CONST AString &strMediaType,
+IMS_BOOL SdpOaState::InitiateMediaOffer(IN CONST AString &strMediaType,
         OUT IMSList<SdpMediaParameter*> &objNewMediaParams)
 {
     //---------------------------------------------------------------------------------------------
@@ -1103,7 +1105,7 @@ Remarks
 
 */
 /*PUBLIC
-IMS_BOOL SDPOAState::Create(IN CONST SdpParser &objParser)
+IMS_BOOL SdpOaState::Create(IN CONST SdpParser &objParser)
 {
     SessionParameter *pSessionParam = new SessionParameter();
 
@@ -1140,7 +1142,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SDPOAState::IsOfferProgress() const
+IMS_BOOL SdpOaState::IsOfferProgress() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1154,7 +1156,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SDPOAState::IsSessionChanged() const
+IMS_BOOL SdpOaState::IsSessionChanged() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1168,7 +1170,7 @@ Remarks
 
 */
 PUBLIC
-IMS_SINT32 SDPOAState::HandleOfferAnswer(IN CONST ISipMessage* piSIPMsg)
+IMS_SINT32 SdpOaState::HandleOfferAnswer(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1305,7 +1307,7 @@ Remarks
 
 */
 PUBLIC
-void SDPOAState::CompleteExchange()
+void SdpOaState::CompleteExchange()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1350,7 +1352,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SDPOAState::RestoreState()
+IMS_BOOL SdpOaState::RestoreState()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1395,7 +1397,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SDPOAState::UpdateState(IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nMessageFlow,
+IMS_BOOL SdpOaState::UpdateState(IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nMessageFlow,
         IN IMS_BOOL bIsCallEstablished, IN IMS_BOOL bAllowOAForNonRPR /* = IMS_FALSE */)
 {
     const SipMethod& objMethod = piSIPMsg->GetMethod();
@@ -1663,7 +1665,7 @@ Remarks
 
 */
 PUBLIC
-void SDPOAState::UpdateStateOnTransactionCompleted(
+void SdpOaState::UpdateStateOnTransactionCompleted(
         IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nMessageFlow)
 {
     //---------------------------------------------------------------------------------------------
@@ -1689,7 +1691,7 @@ Remarks
 
 */
 PUBLIC
-void SDPOAState::CreateRefusedView()
+void SdpOaState::CreateRefusedView()
 {
     if (pRefusedView != IMS_NULL)
     {
@@ -1721,7 +1723,7 @@ Remarks
 
 */
 PUBLIC
-void SDPOAState::DestroyRefusedView()
+void SdpOaState::DestroyRefusedView()
 {
     if (pRefusedView != IMS_NULL)
     {
@@ -1737,7 +1739,7 @@ Remarks
 
 */
 PUBLIC
-SessionParameter* SDPOAState::GetRefusedView() const
+SessionParameter* SdpOaState::GetRefusedView() const
 {
     return pRefusedView;
 }
@@ -1750,7 +1752,7 @@ Remarks
 
 */
 PRIVATE
-SessionParameter* SDPOAState::GetCurrentCapabilities()
+SessionParameter* SdpOaState::GetCurrentCapabilities()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1784,7 +1786,7 @@ Remarks
 
 */
 PRIVATE
-SessionParameter*& SDPOAState::GetNewProposalView()
+SessionParameter*& SdpOaState::GetNewProposalView()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1803,7 +1805,7 @@ Remarks
 
 */
 PRIVATE
-SessionParameter*& SDPOAState::GetNewPeerView()
+SessionParameter*& SdpOaState::GetNewPeerView()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1822,7 +1824,7 @@ Remarks
 
 */
 PUBLIC
-IMS_SINT32 SDPOAState::HandleAnswer(IN CONST SdpParser& objParser)
+IMS_SINT32 SdpOaState::HandleAnswer(IN CONST SdpParser& objParser)
 {
     SessionParameter* pAnswer = new SessionParameter();
 
@@ -1901,7 +1903,7 @@ Remarks
 
 */
 PUBLIC
-IMS_SINT32 SDPOAState::HandleOffer(IN CONST SdpParser& objParser)
+IMS_SINT32 SdpOaState::HandleOffer(IN CONST SdpParser& objParser)
 {
     SessionParameter* pOffer = new SessionParameter();
 
@@ -2062,7 +2064,7 @@ Remarks
 
 */
 PRIVATE
-void SDPOAState::SetCapabilities()
+void SdpOaState::SetCapabilities()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2083,7 +2085,7 @@ Remarks
 
 */
 PRIVATE
-void SDPOAState::SetProposedView(IN SessionParameter* pSessionParam)
+void SdpOaState::SetProposedView(IN SessionParameter* pSessionParam)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2100,7 +2102,7 @@ Remarks
 
 */
 PRIVATE
-void SDPOAState::SetCurrentView(IN SessionParameter* pSessionParam)
+void SdpOaState::SetCurrentView(IN SessionParameter* pSessionParam)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2117,7 +2119,7 @@ Remarks
 
 */
 PRIVATE
-void SDPOAState::SetLastOfferMade(IN SessionParameter* pSessionParam)
+void SdpOaState::SetLastOfferMade(IN SessionParameter* pSessionParam)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2134,7 +2136,7 @@ Remarks
 
 */
 PRIVATE
-void SDPOAState::SetOldState(IN IMS_SINT32 nOldState)
+void SdpOaState::SetOldState(IN IMS_SINT32 nOldState)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2151,7 +2153,7 @@ Remarks
 
 */
 PRIVATE
-void SDPOAState::SetState(IN IMS_SINT32 nState)
+void SdpOaState::SetState(IN IMS_SINT32 nState)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2166,7 +2168,7 @@ void SDPOAState::SetState(IN IMS_SINT32 nState)
 Remarks
 
 */
-PRIVATE GLOBAL const IMS_CHAR* SDPOAState::StateToString(IN IMS_SINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* SdpOaState::StateToString(IN IMS_SINT32 nState)
 {
     //---------------------------------------------------------------------------------------------
 

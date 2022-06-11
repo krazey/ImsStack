@@ -13,7 +13,7 @@
 
 #include "ServiceMemory.h"
 #include "SipHeaderName.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "IMessage.h"
 #include "MessageBodyPart.h"
 
@@ -55,7 +55,7 @@ PRIVATE VIRTUAL AString MessageBodyPart::GetHeader(IN CONST AString& strName) co
 
     if (strName.IsNULL())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString();
     }
 
@@ -63,11 +63,11 @@ PRIVATE VIRTUAL AString MessageBodyPart::GetHeader(IN CONST AString& strName) co
 
     if (!strTmp.StartsWith("CONTENT-"))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString();
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return piBodyPart->GetHeader(GetHeaderType(strTmp), strName);
 }
@@ -78,13 +78,13 @@ PRIVATE VIRTUAL IMS_RESULT MessageBodyPart::SetContent(IN CONST ByteArray& objCo
 
     if (piMessage->GetState() != IMessage::STATE_UNSENT)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
     piBodyPart->SetContent(objContent);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -96,7 +96,7 @@ PRIVATE VIRTUAL IMS_RESULT MessageBodyPart::SetHeader(
 
     if (strName.IsNULL() || strValue.IsNULL())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -104,13 +104,13 @@ PRIVATE VIRTUAL IMS_RESULT MessageBodyPart::SetHeader(
 
     if (piMessage->GetState() != IMessage::STATE_UNSENT)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
     piBodyPart->SetHeader(GetHeaderType(strName), strValue, strName);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }

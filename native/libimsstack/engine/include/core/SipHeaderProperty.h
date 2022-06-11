@@ -15,7 +15,7 @@
 
 // Property of the SIP headers for the engine
 //    : It is usually used by the refresh helper (subscription/publication/ ...).
-struct SIPHeaderProperty
+struct SipHeaderProperty
 {
     IMS_SINT32 nType;
     const IMS_CHAR* pszName;

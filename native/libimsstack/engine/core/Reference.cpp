@@ -24,7 +24,7 @@
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"
 #include "SipConfigProxy.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "Service.h"
 #include "util/DialogMethodManager.h"
 #include "CallControlHelper.h"
@@ -190,19 +190,19 @@ IMS_RESULT Reference::Accept()
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_PROCEEDING)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
     SetState(STATE_REFERRING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -219,13 +219,13 @@ IMS_RESULT Reference::ConnectReferMethod(IN Method* pReferMethod)
 
     if (pReferMethod == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_REFERRING)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -234,11 +234,11 @@ IMS_RESULT Reference::ConnectReferMethod(IN Method* pReferMethod)
     if (!pReferredMethod->SetReferredMessageListener(this))
     {
         IMS_TRACE_E(0, "Not implemented method", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -314,7 +314,7 @@ IMS_RESULT Reference::Refer(IN IMS_BOOL bImplicitSubscription)
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
@@ -322,7 +322,7 @@ IMS_RESULT Reference::Refer(IN IMS_BOOL bImplicitSubscription)
     {
         IMS_TRACE_E(
                 0, "To send the reference request, the state MUST be an INITIATED state", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -342,7 +342,7 @@ IMS_RESULT Reference::Refer(IN IMS_BOOL bImplicitSubscription)
     if (piSCC == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a new SIP connection failed", 0, 0, 0);
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
@@ -360,7 +360,7 @@ IMS_RESULT Reference::Refer(IN IMS_BOOL bImplicitSubscription)
     if (!objReferToURI.Create(strReferToURI))
     {
         IMS_TRACE_E(0, "Parsing Refer-To (URI) failed", 0, 0, 0);
-        IMS::SetLastError(IMSError::PARSING_ERROR);
+        Ims::SetLastError(ImsError::PARSING_ERROR);
         return IMS_FAILURE;
     }
 
@@ -370,7 +370,7 @@ IMS_RESULT Reference::Refer(IN IMS_BOOL bImplicitSubscription)
                 IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting a 'method' parameter failed", 0, 0, 0);
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
             return IMS_FAILURE;
         }
     }
@@ -427,7 +427,7 @@ IMS_RESULT Reference::Refer(IN IMS_BOOL bImplicitSubscription)
 
     SetState(STATE_PROCEEDING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -444,13 +444,13 @@ IMS_RESULT Reference::Reject()
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_PROCEEDING)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -490,14 +490,14 @@ IMS_RESULT Reference::SetReplaces(IN CONST AString& strSessionId)
     if (GetState() != STATE_INITIATED)
     {
         IMS_TRACE_E(0, "To set the Replaces header, the state MUST be an INITIATED state", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
     if (strSessionId.IsNULL() || strSessionId.IsEmpty())
     {
         IMS_TRACE_E(0, "Session id is null or empty string", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -539,19 +539,19 @@ IMS_RESULT Reference::AcceptEx(
 
     if (!SipStatusCode::IsFinalSuccess(nStatusCode))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_INITIATED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -606,7 +606,7 @@ IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
@@ -614,7 +614,7 @@ IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
     {
         IMS_TRACE_E(
                 0, "To send the reference request, the state MUST be an INITIATED state", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -634,7 +634,7 @@ IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
     if (piSCC == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a new SIP connection failed", 0, 0, 0);
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
@@ -652,7 +652,7 @@ IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
     if (!objReferToURI.Create(strReferToURI))
     {
         IMS_TRACE_E(0, "Parsing Refer-To (URI) failed", 0, 0, 0);
-        IMS::SetLastError(IMSError::PARSING_ERROR);
+        Ims::SetLastError(ImsError::PARSING_ERROR);
         return IMS_FAILURE;
     }
 
@@ -662,7 +662,7 @@ IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
                 IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting a 'method' parameter failed", 0, 0, 0);
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
             return IMS_FAILURE;
         }
     }
@@ -679,7 +679,7 @@ IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
         {
             IMS_TRACE_E(0, "Setting the additional header parameters (%s) failed",
                     strHeadersForReferTo.GetStr(), 0, 0);
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
             return IMS_FAILURE;
         }
     }
@@ -731,7 +731,7 @@ IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
 
     SetState(STATE_PROCEEDING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -748,19 +748,19 @@ IMS_RESULT Reference::RejectEx(IN IMS_SINT32 nStatusCode)
 
     if (!SipStatusCode::IsFinalFailure(nStatusCode))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_INITIATED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -806,7 +806,7 @@ IMS_RESULT Reference::SendNotification(IN IMS_SINT32 nSubState, IN CONST ByteArr
     if (GetState() != STATE_REFERRING)
     {
         IMS_TRACE_E(0, "Notification can't be sent in %s", StateToString(GetState()), 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -815,7 +815,7 @@ IMS_RESULT Reference::SendNotification(IN IMS_SINT32 nSubState, IN CONST ByteArr
     if (nSubState == SubState::SUB_STATE_INIT)
     {
         IMS_TRACE_E(0, "Invalid sub-state", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -1591,7 +1591,7 @@ IMS_RESULT Reference::DoNotification(IN IMS_SINT32 nSubState, IN CONST ByteArray
     if (piSCC == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a new SIP connection failed", 0, 0, 0);
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 

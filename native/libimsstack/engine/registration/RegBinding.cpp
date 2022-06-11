@@ -27,7 +27,7 @@
 #include "Sip.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
-#include "util/SIPConnectionNotifierManager.h"
+#include "util/SipConnectionNotifierManager.h"
 
 __IMS_TRACE_TAG_REG__;
 
@@ -552,7 +552,7 @@ PROTECTED VIRTUAL void RegBinding::SetListener(IN IRegBindingListener* piListene
 PRIVATE
 void RegBinding::CreateSipConnectionNotifier()
 {
-    SIPConnectionNotifierManager* pScnMngr = SIPConnectionNotifierManager::GetInstance();
+    SipConnectionNotifierManager* pScnMngr = SipConnectionNotifierManager::GetInstance();
 
     if (m_piRegEx == IMS_NULL)
     {
@@ -616,7 +616,7 @@ void RegBinding::CreateSipConnectionNotifier()
             m_piRegEx->RemoveReferenceForScnErrorListener();
         }
 
-        SIPConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(piTempScn);
+        SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(piTempScn);
     }
 }
 
@@ -633,7 +633,7 @@ void RegBinding::DestroySipConnectionNotifier()
         m_piScn->RemoveErrorListener(m_piRegEx);
     }
 
-    SIPConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piScn);
+    SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piScn);
     m_piScn = IMS_NULL;
 }
 

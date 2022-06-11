@@ -18,7 +18,7 @@
 class FramedMediaProposal : public MediaProposal
 {
 public:
-    FramedMediaProposal(IN ISDPOAState* piOAState_);
+    FramedMediaProposal(IN ISdpOaState* piOAState_);
     virtual ~FramedMediaProposal();
 
 private:

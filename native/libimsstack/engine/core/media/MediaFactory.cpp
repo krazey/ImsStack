@@ -12,8 +12,8 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "IMSCore.h"
-#include "base/IMS.h"
+#include "ImsCore.h"
+#include "base/Ims.h"
 #include "SdpMedia.h"
 #include "media/StreamMedia.h"
 #include "media/FramedMedia.h"
@@ -22,32 +22,32 @@
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC GLOBAL Media* MediaFactory::CreateOutgoingMedia(IN CONST AString& strMType,
-        IN IMS_SINT32 nDirection, IN Service* pService, IN ISDPOAState* piOAState,
+        IN IMS_SINT32 nDirection, IN Service* pService, IN ISdpOaState* piOAState,
         IN IMS_SINT32 nCountOfDescriptor)
 {
     Media* pMedia = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
-    if (strMType.Equals(IMSCore::MEDIA_STREAM))
+    if (strMType.Equals(ImsCore::MEDIA_STREAM))
     {
         pMedia = new StreamMedia(pService, piOAState);
     }
-    else if (strMType.Equals(IMSCore::MEDIA_FRAMED))
+    else if (strMType.Equals(ImsCore::MEDIA_FRAMED))
     {
         pMedia = new FramedMedia(pService, piOAState);
     }
-    else if (strMType.Equals(IMSCore::MEDIA_BASIC_RELIABLE))
+    else if (strMType.Equals(ImsCore::MEDIA_BASIC_RELIABLE))
     {
     }
-    else if (strMType.Equals(IMSCore::MEDIA_BASIC_UNRELIABLE))
+    else if (strMType.Equals(ImsCore::MEDIA_BASIC_UNRELIABLE))
     {
     }
     else
     {
         IMS_TRACE_E(0, "Trying to create an unsupported media (%s)", strMType.GetStr(), 0, 0);
 
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
@@ -69,7 +69,7 @@ PUBLIC GLOBAL Media* MediaFactory::CreateOutgoingMedia(IN CONST AString& strMTyp
 }
 
 PUBLIC GLOBAL Media* MediaFactory::CreateIncomingMedia(IN IMS_SINT32 nTransportProtocol,
-        IN Service* pService, IN ISDPOAState* piOAState, IN CONST IMSList<IMS_SINT32>& objMids)
+        IN Service* pService, IN ISdpOaState* piOAState, IN CONST IMSList<IMS_SINT32>& objMids)
 {
     const IMS_CHAR* pszMType = IMS_NULL;
     Media* pMedia = IMS_NULL;
@@ -83,22 +83,22 @@ PUBLIC GLOBAL Media* MediaFactory::CreateIncomingMedia(IN IMS_SINT32 nTransportP
         case SdpMedia::TRANSPORT_RTP_SAVP:
         case SdpMedia::TRANSPORT_RTP_SAVPF:
         case SdpMedia::TRANSPORT_UDP_TLS_RTP_SAVP:
-            pszMType = IMSCore::MEDIA_STREAM;
+            pszMType = ImsCore::MEDIA_STREAM;
             pMedia = new StreamMedia(pService, piOAState);
             break;
 
         case SdpMedia::TRANSPORT_TCP_MSRP:
         case SdpMedia::TRANSPORT_TCP_TLS_MSRP:
-            pszMType = IMSCore::MEDIA_FRAMED;
+            pszMType = ImsCore::MEDIA_FRAMED;
             pMedia = new FramedMedia(pService, piOAState);
             break;
 
         case SdpMedia::TRANSPORT_UDP:
-            pszMType = IMSCore::MEDIA_BASIC_UNRELIABLE;
+            pszMType = ImsCore::MEDIA_BASIC_UNRELIABLE;
             break;
 
         case SdpMedia::TRANSPORT_TCP:
-            pszMType = IMSCore::MEDIA_BASIC_RELIABLE;
+            pszMType = ImsCore::MEDIA_BASIC_RELIABLE;
             break;
 
         default:

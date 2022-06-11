@@ -18,14 +18,14 @@
 
 /*
 
-SDPOAState interface
+SdpOaState interface
 
 Example
 
 See Also
 
 */
-class ISDPOAState
+class ISdpOaState
 {
 public:
     /*

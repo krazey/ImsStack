@@ -15,7 +15,6 @@
  */
 
 #include "ServiceTrace.h"
-#include "IMSCore.h"
 #include "ISessionDescriptor.h"
 #include "offeranswer/SdpAvCodec.h"
 

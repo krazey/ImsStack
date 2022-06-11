@@ -13,8 +13,8 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
-#include "base/IMS.h"
-#include "IMSCore.h"
+#include "base/Ims.h"
+#include "ImsCore.h"
 #include "media/MediaDescriptor.h"
 #include "media/StreamMediaProposal.h"
 #include "media/StreamMedia.h"
@@ -22,7 +22,7 @@
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-StreamMedia::StreamMedia(IN Service* pService_, IN ISDPOAState* piOAState_) :
+StreamMedia::StreamMedia(IN Service* pService_, IN ISdpOaState* piOAState_) :
         Media(pService_, piOAState_)
 {
     SetInitializationDone(IMS_TRUE);
@@ -39,10 +39,10 @@ PUBLIC VIRTUAL IMS_SINT32 StreamMedia::GetType() const
 {
     //---------------------------------------------------------------------------------------------
 
-    return IMSCore::MEDIA_TYPE_STREAM;
+    return ImsCore::MEDIA_TYPE_STREAM;
 }
 
-PROTECTED VIRTUAL MediaProposal* StreamMedia::CreateMediaProposal(IN ISDPOAState* piOAState)
+PROTECTED VIRTUAL MediaProposal* StreamMedia::CreateMediaProposal(IN ISdpOaState* piOAState)
 {
     StreamMediaProposal* pMediaProposal = new StreamMediaProposal(piOAState);
 

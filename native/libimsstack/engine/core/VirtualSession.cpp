@@ -23,9 +23,9 @@
 #include "SipMethod.h"
 #include "SipStatusCode.h"
 
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "Service.h"
-#include "SDPOAState.h"
+#include "SdpOaState.h"
 #include "SessionDescriptor.h"
 #include "media/MediaFactory.h"
 #include "VirtualSession.h"
@@ -90,8 +90,8 @@ IMS_BOOL VirtualSession::CheckNSetSDPBodyPart(IN_OUT ISipMessage*& piSIPMsg)
 {
     IMS_SINT32 nOAState = GetOfferAnswerState();
 
-    if ((nOAState != SDPOAState::STATE_OFFER_RECEIVED) &&
-            (nOAState != SDPOAState::STATE_OFFER_CHANGE_RECEIVED))
+    if ((nOAState != SdpOaState::STATE_OFFER_RECEIVED) &&
+            (nOAState != SdpOaState::STATE_OFFER_CHANGE_RECEIVED))
     {
         IMS_TRACE_I("No SDP offer in VritualSession", 0, 0, 0);
         return IMS_FALSE;
@@ -119,7 +119,7 @@ IMS_BOOL VirtualSession::CheckNSetSDPBodyPart(IN_OUT ISipMessage*& piSIPMsg)
     if (piBodyPart == IMS_NULL)
     {
         RestoreOfferAnswerState();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating SDP body part failed", 0, 0, 0);
         return IMS_FALSE;
@@ -213,8 +213,8 @@ Media* VirtualSession::CreateMedia(IN const AString& strType, IN IMS_SINT32 nDir
 {
     if (pOAState == IMS_NULL)
     {
-        IMS_TRACE_E(0, "SDPOAState is null", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        IMS_TRACE_E(0, "SdpOaState is null", 0, 0, 0);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_NULL;
     }
 
@@ -224,14 +224,14 @@ Media* VirtualSession::CreateMedia(IN const AString& strType, IN IMS_SINT32 nDir
     {
         IMS_SINT32 nSDPOAState = GetOfferAnswerState();
 
-        if ((nSDPOAState != SDPOAState::STATE_IDLE) &&
-                (nSDPOAState != SDPOAState::STATE_ESTABLISHED))
+        if ((nSDPOAState != SdpOaState::STATE_IDLE) &&
+                (nSDPOAState != SdpOaState::STATE_ESTABLISHED))
         {
             IMS_TRACE_E(0,
                     "To create a media, the state MUST be an INITIALIZED or ESTABLISHED; "
                     "(%s, %d)",
                     StateToString(nState), nSDPOAState, 0);
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
             return IMS_NULL;
         }
     }
@@ -245,7 +245,7 @@ Media* VirtualSession::CreateMedia(IN const AString& strType, IN IMS_SINT32 nDir
         }
         else
         {
-            IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+            Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
             IMS_TRACE_E(0, "Direction argument is invalid", 0, 0, 0);
             return IMS_NULL;
@@ -256,7 +256,7 @@ Media* VirtualSession::CreateMedia(IN const AString& strType, IN IMS_SINT32 nDir
     {
         if (!CheckNCreateSessionDescriptor())
         {
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Can't create an initial SDP offer", 0, 0, 0);
             return IMS_NULL;
@@ -282,7 +282,7 @@ Media* VirtualSession::CreateMedia(IN const AString& strType, IN IMS_SINT32 nDir
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pMedia;
 }
@@ -297,14 +297,14 @@ const IMSList<Media*>& VirtualSession::GetMedia() const
 {
     if (GetState() == STATE_TERMINATED)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "To get a media, the state MUST not be a TERMINATED; (%s)",
                 StateToString(GetState()), 0, 0);
         return objMedias;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return objMedias;
 }
@@ -350,10 +350,10 @@ IMS_RESULT VirtualSession::RemoveMedia(IN Media* pMedia)
     {
         IMS_SINT32 nSDPOAState = GetOfferAnswerState();
 
-        if ((nSDPOAState != SDPOAState::STATE_IDLE) &&
-                (nSDPOAState != SDPOAState::STATE_ESTABLISHED))
+        if ((nSDPOAState != SdpOaState::STATE_IDLE) &&
+                (nSDPOAState != SdpOaState::STATE_ESTABLISHED))
         {
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
             IMS_TRACE_E(0,
                     "To remove a media, the state MUST be a INITIATED or ESTABLISHED; "
@@ -365,7 +365,7 @@ IMS_RESULT VirtualSession::RemoveMedia(IN Media* pMedia)
 
     if (pMedia == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -383,7 +383,7 @@ IMS_RESULT VirtualSession::RemoveMedia(IN Media* pMedia)
 
     if (i >= objMedias.GetSize())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "No matched media (%p)", pMedia, 0, 0);
         return IMS_FAILURE;
@@ -409,7 +409,7 @@ IMS_RESULT VirtualSession::RemoveMedia(IN Media* pMedia)
         }
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -428,10 +428,10 @@ IMS_RESULT VirtualSession::RemoveMedia(IN IMS_UINT32 nIndex)
     {
         IMS_SINT32 nSDPOAState = GetOfferAnswerState();
 
-        if ((nSDPOAState != SDPOAState::STATE_IDLE) &&
-                (nSDPOAState != SDPOAState::STATE_ESTABLISHED))
+        if ((nSDPOAState != SdpOaState::STATE_IDLE) &&
+                (nSDPOAState != SdpOaState::STATE_ESTABLISHED))
         {
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
             IMS_TRACE_E(0,
                     "To remove a media, the state MUST be a INITIATED or ESTABLISHED; "
@@ -443,7 +443,7 @@ IMS_RESULT VirtualSession::RemoveMedia(IN IMS_UINT32 nIndex)
 
     if (nIndex >= objMedias.GetSize())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Invalid index (%d) in the total size (%d)", nIndex, objMedias.GetSize(), 0);
         return IMS_FAILURE;
@@ -454,7 +454,7 @@ IMS_RESULT VirtualSession::RemoveMedia(IN IMS_UINT32 nIndex)
 
     if (pMedia == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -475,7 +475,7 @@ IMS_RESULT VirtualSession::RemoveMedia(IN IMS_UINT32 nIndex)
         }
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -555,14 +555,14 @@ PROTECTED VIRTUAL SdpSessionParameter* VirtualSession::GetSessionParameter() con
 
     if (nState == STATE_ESTABLISHED)
     {
-        if (pOAState->GetSessionCurrentView(pSessionParam) != ISDPOAState::RESULT_SUCCESS)
+        if (pOAState->GetSessionCurrentView(pSessionParam) != ISdpOaState::RESULT_SUCCESS)
         {
             return IMS_NULL;
         }
     }
     else
     {
-        if (pOAState->GetSessionProposalView(pSessionParam) != ISDPOAState::RESULT_SUCCESS)
+        if (pOAState->GetSessionProposalView(pSessionParam) != ISdpOaState::RESULT_SUCCESS)
         {
             return IMS_NULL;
         }
@@ -638,8 +638,8 @@ PROTECTED VIRTUAL SdpSessionParameter* VirtualSession::GetProposalSessionParamet
         {
             IMS_SINT32 nResult = pOAState->CreateProposalView();
 
-            if ((nResult != ISDPOAState::RESULT_SUCCESS) &&
-                    (nResult != ISDPOAState::RESULT_ALREADY_EXIST))
+            if ((nResult != ISdpOaState::RESULT_SUCCESS) &&
+                    (nResult != ISdpOaState::RESULT_ALREADY_EXIST))
             {
                 return IMS_NULL;
             }
@@ -669,7 +669,7 @@ IMS_BOOL VirtualSession::CheckNCreateSessionDescriptor()
 
     // IDLE :: 183 response w/o SDP
     // OFFER_RECEIVED :: 183 response w/ SDP
-    if ((nOAState != SDPOAState::STATE_IDLE) && (nOAState != SDPOAState::STATE_OFFER_RECEIVED))
+    if ((nOAState != SdpOaState::STATE_IDLE) && (nOAState != SdpOaState::STATE_OFFER_RECEIVED))
     {
         IMS_TRACE_E(0, "__ SessionDescriptor can't be created in offer/answer state (%d) __",
                 nOAState, 0, 0);
@@ -690,9 +690,9 @@ IMS_BOOL VirtualSession::CheckNCreateSessionDescriptor()
 
     // Create a new offer with only SDP session parameter
     // The media parameters are created when CreateMedia() method invoked
-    if (nOAState == SDPOAState::STATE_IDLE)
+    if (nOAState == SdpOaState::STATE_IDLE)
     {
-        if (!pOAState->InitiateOffer(SDPOAState::OFFER_NEW))
+        if (!pOAState->InitiateOffer(SdpOaState::OFFER_NEW))
         {
             IMS_TRACE_E(0, "Initiating SDP offer (MT) failed", 0, 0, 0);
             return IMS_FALSE;
@@ -707,7 +707,7 @@ IMS_BOOL VirtualSession::CheckNCreateSessionDescriptor()
         return IMS_FALSE;
     }
 
-    if (nOAState == SDPOAState::STATE_IDLE)
+    if (nOAState == SdpOaState::STATE_IDLE)
     {
         IMS_TRACE_D("__ SessionDescriptor is created in IDLE state __", 0, 0, 0);
     }
@@ -729,7 +729,7 @@ IMS_SINT32 VirtualSession::GetOfferAnswerState() const
 {
     if (pOAState == IMS_NULL)
     {
-        return SDPOAState::STATE_IDLE;
+        return SdpOaState::STATE_IDLE;
     }
 
     return pOAState->GetState();
@@ -758,8 +758,8 @@ IMS_SINT32 VirtualSession::HandleSDPOfferAnswer(IN const ISipMessage* piSIPMsg)
 
         if (((nOAResult == SdpOfferAnswer::RESULT_SUCCESS) ||
                     (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)) &&
-                ((nOAState == SDPOAState::STATE_OFFER_RECEIVED) ||
-                        (nOAState == SDPOAState::STATE_OFFER_CHANGE_RECEIVED)))
+                ((nOAState == SdpOaState::STATE_OFFER_RECEIVED) ||
+                        (nOAState == SdpOaState::STATE_OFFER_CHANGE_RECEIVED)))
         {
             SessionParameter* pSessionParam = pOAState->GetProposalView();
 
@@ -829,15 +829,15 @@ IMS_BOOL VirtualSession::UpdateMedia(IN IMS_SINT32 nTrigger)
 
     switch (GetOfferAnswerState())
     {
-        case SDPOAState::STATE_OFFER_SENT:
-        case SDPOAState::STATE_OFFER_CHANGE_SENT:
+        case SdpOaState::STATE_OFFER_SENT:
+        case SdpOaState::STATE_OFFER_CHANGE_SENT:
             bResult = UpdateMediaOnOfferSent(nTrigger);
             break;
 
-        case SDPOAState::STATE_ESTABLISHED:
-            if (pOAState->GetMode() != SDPOAState::MODE_IDLE)
+        case SdpOaState::STATE_ESTABLISHED:
+            if (pOAState->GetMode() != SdpOaState::MODE_IDLE)
             {
-                if (pOAState->GetMode() == SDPOAState::MODE_OFFERER)
+                if (pOAState->GetMode() == SdpOaState::MODE_OFFERER)
                     bResult = UpdateMediaOnAnswerReceived(nTrigger);
                 else
                     bResult = UpdateMediaOnAnswerSent(nTrigger);
@@ -848,8 +848,8 @@ IMS_BOOL VirtualSession::UpdateMedia(IN IMS_SINT32 nTrigger)
             }
             break;
 
-        case SDPOAState::STATE_OFFER_RECEIVED:
-        case SDPOAState::STATE_OFFER_CHANGE_RECEIVED:
+        case SdpOaState::STATE_OFFER_RECEIVED:
+        case SdpOaState::STATE_OFFER_CHANGE_RECEIVED:
             bResult = UpdateMediaOnOfferReceived(nTrigger);
             break;
 
@@ -859,8 +859,8 @@ IMS_BOOL VirtualSession::UpdateMedia(IN IMS_SINT32 nTrigger)
     }
 
     // Move the proposed view to the current view
-    if ((GetOfferAnswerState() == SDPOAState::STATE_IDLE) ||
-            (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
+    if ((GetOfferAnswerState() == SdpOaState::STATE_IDLE) ||
+            (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
     {
         pOAState->CompleteExchange();
     }
@@ -908,13 +908,13 @@ IMS_BOOL VirtualSession::UpdateOfferAnswerStateOnMessageReceived(IN const ISipMe
                 piSIPMsg->GetMethod().Equals(SipMethod::INVITE))
         {
             if ((nState == STATE_NEGOTIATING) &&
-                    (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
+                    (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
             {
                 IMS_TRACE_D("UpdateOfferAnswerStateOnMessageReceived() :: "
                             "Ignore the SDP in subsequent RPR as offer-answer is completed",
                         0, 0, 0);
 
-                pOAState->UpdateStateOnTransactionCompleted(piSIPMsg, SDPOAState::MESSAGE_RECEIVED);
+                pOAState->UpdateStateOnTransactionCompleted(piSIPMsg, SdpOaState::MESSAGE_RECEIVED);
                 return IMS_TRUE;
             }
         }
@@ -927,7 +927,7 @@ IMS_BOOL VirtualSession::UpdateOfferAnswerStateOnMessageReceived(IN const ISipMe
     }
 
     return pOAState->UpdateState(
-            piSIPMsg, SDPOAState::MESSAGE_RECEIVED, bIsCallEstablished, IMS_FALSE);
+            piSIPMsg, SdpOaState::MESSAGE_RECEIVED, bIsCallEstablished, IMS_FALSE);
 }
 
 /*
@@ -952,7 +952,7 @@ IMS_BOOL VirtualSession::UpdateOfferAnswerStateOnMessageSent(IN const ISipMessag
         bIsCallEstablished = IMS_TRUE;
     }
 
-    return pOAState->UpdateState(piSIPMsg, SDPOAState::MESSAGE_SENT, bIsCallEstablished, IMS_FALSE);
+    return pOAState->UpdateState(piSIPMsg, SdpOaState::MESSAGE_SENT, bIsCallEstablished, IMS_FALSE);
 }
 
 /*
@@ -987,7 +987,7 @@ void VirtualSession::Init(IN const SipAddress* pUserAoR)
         bSDPVersionCheck = pSipConfigV->IsSessionSDPVersionCheckSupported();
     }
 
-    pOAState = new SDPOAState(bSDPVersionCheck, IMS_TRUE);
+    pOAState = new SdpOaState(bSDPVersionCheck, IMS_TRUE);
 
     SetState(STATE_NEGOTIATING);
 }

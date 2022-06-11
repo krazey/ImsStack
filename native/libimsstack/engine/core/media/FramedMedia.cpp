@@ -13,8 +13,8 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
-#include "base/IMS.h"
-#include "IMSCore.h"
+#include "base/Ims.h"
+#include "ImsCore.h"
 #include "media/MediaDescriptor.h"
 #include "media/FramedMediaProposal.h"
 #include "media/FramedMedia.h"
@@ -22,7 +22,7 @@
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-FramedMedia::FramedMedia(IN Service* pService_, IN ISDPOAState* piOAState_) :
+FramedMedia::FramedMedia(IN Service* pService_, IN ISdpOaState* piOAState_) :
         Media(pService_, piOAState_)
 {
     SetInitializationDone(IMS_TRUE);
@@ -39,10 +39,10 @@ PUBLIC VIRTUAL IMS_SINT32 FramedMedia::GetType() const
 {
     //---------------------------------------------------------------------------------------------
 
-    return IMSCore::MEDIA_TYPE_FRAMED;
+    return ImsCore::MEDIA_TYPE_FRAMED;
 }
 
-PROTECTED VIRTUAL MediaProposal* FramedMedia::CreateMediaProposal(IN ISDPOAState* piOAState)
+PROTECTED VIRTUAL MediaProposal* FramedMedia::CreateMediaProposal(IN ISdpOaState* piOAState)
 {
     FramedMediaProposal* pMediaProposal = new FramedMediaProposal(piOAState);
 

@@ -11,7 +11,7 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "CapabilitiesImpl.h"
 #include "PageMessageImpl.h"
 #include "PublicationImpl.h"
@@ -377,7 +377,7 @@ PRIVATE VIRTUAL ICapabilities* CoreServiceImpl::CreateCapabilities(
     {
         // TODO:: Destroy() or delete ???
         pCapabilities->Destroy();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating CapabilitiesImpl failed", 0, 0, 0);
         return IMS_NULL;
@@ -409,7 +409,7 @@ PRIVATE VIRTUAL IPageMessage* CoreServiceImpl::CreatePageMessage(
     {
         // TODO:: Destroy() or delete ???
         pPageMessage->Destroy();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating PageMessageImpl failed", 0, 0, 0);
         return IMS_NULL;
@@ -441,7 +441,7 @@ PRIVATE VIRTUAL IPublication* CoreServiceImpl::CreatePublication(
     {
         // TODO:: Destroy() or delete ???
         pPublication->Destroy();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating PublicationImpl failed", 0, 0, 0);
         return IMS_NULL;
@@ -473,7 +473,7 @@ PRIVATE VIRTUAL IReference* CoreServiceImpl::CreateReference(IN CONST AString& s
     {
         // TODO:: Destroy() or delete ???
         pReference->Destroy();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating ReferenceImpl failed", 0, 0, 0);
         return IMS_NULL;
@@ -505,7 +505,7 @@ PRIVATE VIRTUAL ISession* CoreServiceImpl::CreateSession(
     {
         // TODO:: Destroy() or delete ???
         pSession->Destroy();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating SessionImpl failed", 0, 0, 0);
         return IMS_NULL;
@@ -537,7 +537,7 @@ PRIVATE VIRTUAL ISubscription* CoreServiceImpl::CreateSubscription(
     {
         // TODO:: Destroy() or delete ???
         pSubscription->Destroy();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating SubscriptionImpl failed", 0, 0, 0);
         return IMS_NULL;
@@ -575,7 +575,7 @@ PRIVATE VIRTUAL void CoreServiceImpl::SetListener(IN ICoreServiceListener* piLis
 Remarks
 
 */
-PRIVATE VIRTUAL ISIPConnectionFactory* CoreServiceImpl::CreateSIPConnectionFactory()
+PRIVATE VIRTUAL ISipConnectionFactory* CoreServiceImpl::CreateSIPConnectionFactory()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -633,7 +633,7 @@ PRIVATE VIRTUAL void CoreServiceImpl::OnCoreService_PageMessageReceived(
     {
         // TODO:: Destroy() or delete ???
         pMessage->Destroy();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating PageMessageImpl failed", 0, 0, 0);
         return;
@@ -673,7 +673,7 @@ PRIVATE VIRTUAL void CoreServiceImpl::OnCoreService_ReferenceReceived(
     {
         pReference->Reject();
         pReference->Destroy();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating ReferenceImpl failed", 0, 0, 0);
         return;
@@ -738,7 +738,7 @@ PRIVATE VIRTUAL void CoreServiceImpl::OnCoreService_SessionInvitationReceived(
     {
         pSession->Reject(ISession::STATUSCODE_480_TEMPORARILY_UNAVAILABLE);
         pSession->Destroy();
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating SessionImpl failed", 0, 0, 0);
         return;
@@ -804,7 +804,7 @@ PRIVATE VIRTUAL void CoreServiceImpl::OnCoreService_CapabilityQueryReceived(
         pCapabilities->Reject(SipStatusCode::SC_480);
         pCapabilities->Destroy();
 
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating CapabilitiesImpl failed", 0, 0, 0);
         return;
@@ -819,7 +819,7 @@ Remarks
 
 */
 PRIVATE VIRTUAL IMS_SINT32 CoreServiceImpl::OnDirectCoreService_TransactionReceived(
-        IN CoreService* pService, IN ISIPConnectionFactory* piSCF)
+        IN CoreService* pService, IN ISipConnectionFactory* piSCF)
 {
     //---------------------------------------------------------------------------------------------
 

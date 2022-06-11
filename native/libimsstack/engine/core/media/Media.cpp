@@ -12,9 +12,9 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "Service.h"
-#include "ISDPOAState.h"
+#include "ISdpOaState.h"
 #include "media/IOnMediaListener.h"
 #include "media/MediaProposal.h"
 #include "media/Media.h"
@@ -26,7 +26,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 // 3 it needs to be modified using any active class to send/receive MSG.
 
 PUBLIC
-Media::Media(IN Service* pService_, IN ISDPOAState* piOAState_) :
+Media::Media(IN Service* pService_, IN ISdpOaState* piOAState_) :
         pService(pService_),
         piOAState(piOAState_),
         nState(STATE_INACTIVE),
@@ -95,7 +95,7 @@ MediaProposal* Media::GetProposal(IN IMS_BOOL bIMSExtension /* = IMS_TRUE */) co
         }
         else
         {
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
             return IMS_NULL;
         }
     }
@@ -118,7 +118,7 @@ IMS_SINT32 Media::GetUpdateState() const
 
     if (GetState() != STATE_ACTIVE)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return UPDATE_INVALID;
     }
 
@@ -134,13 +134,13 @@ IMS_RESULT Media::SetDirection(IN IMS_SINT32 nDirection)
 
     if ((nState != STATE_INACTIVE) && (nState != STATE_ACTIVE))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
     if ((nDirection < DIRECTION_INACTIVE) || (nDirection > DIRECTION_SEND_RECEIVE))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
@@ -657,7 +657,7 @@ PROTECTED VIRTUAL SdpMediaParameter* Media::GetMediaParameter(IN IMS_SINT32 nMid
 
         if ((nUpdateState == UPDATE_MODIFIED) || (nUpdateState == UPDATE_REMOVED))
         {
-            if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISDPOAState::RESULT_SUCCESS)
+            if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
             {
                 return IMS_NULL;
             }
@@ -666,7 +666,7 @@ PROTECTED VIRTUAL SdpMediaParameter* Media::GetMediaParameter(IN IMS_SINT32 nMid
         {
             // Read-only; Using this media parameter, the application MUST NOT modify any
             // parameters.
-            if (piOAState->GetMediaCurrentView(nMid, pMediaParam) != ISDPOAState::RESULT_SUCCESS)
+            if (piOAState->GetMediaCurrentView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
             {
                 return IMS_NULL;
             }
@@ -674,7 +674,7 @@ PROTECTED VIRTUAL SdpMediaParameter* Media::GetMediaParameter(IN IMS_SINT32 nMid
     }
     else
     {
-        if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISDPOAState::RESULT_SUCCESS)
+        if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
         {
             return IMS_NULL;
         }
@@ -705,7 +705,7 @@ PROTECTED VIRTUAL SdpMediaParameter* Media::GetPeerMediaParameter(IN IMS_SINT32 
 
     //---------------------------------------------------------------------------------------------
 
-    if (piOAState->GetMediaPeerView(nMid, pMediaParam) != ISDPOAState::RESULT_SUCCESS)
+    if (piOAState->GetMediaPeerView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
     {
         return IMS_NULL;
     }
@@ -758,7 +758,7 @@ PROTECTED VIRTUAL SdpMediaParameter* Media::GetProposalMediaParameter(IN IMS_SIN
         {
             SdpMediaParameter* pMediaParam = IMS_NULL;
 
-            if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISDPOAState::RESULT_SUCCESS)
+            if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
             {
                 IMS_TRACE_E(0, "There is no proposed view", 0, 0, 0);
                 return IMS_NULL;
@@ -771,7 +771,7 @@ PROTECTED VIRTUAL SdpMediaParameter* Media::GetProposalMediaParameter(IN IMS_SIN
     {
         SdpMediaParameter* pMediaParam = IMS_NULL;
 
-        if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISDPOAState::RESULT_SUCCESS)
+        if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
         {
             IMS_TRACE_E(0, "There is no proposed view", 0, 0, 0);
             return IMS_NULL;
@@ -822,7 +822,7 @@ IMS_BOOL Media::InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDi
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nResult != ISDPOAState::RESULT_SUCCESS) && (nResult != ISDPOAState::RESULT_ALREADY_EXIST))
+    if ((nResult != ISdpOaState::RESULT_SUCCESS) && (nResult != ISdpOaState::RESULT_ALREADY_EXIST))
     {
         IMS_TRACE_E(0, "Creating a proposal view failed", 0, 0, 0);
         return IMS_FALSE;
@@ -846,7 +846,7 @@ IMS_BOOL Media::InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDi
         {
             nResult = piOAState->CreateMediaParameter(pMediaParam);
 
-            if (nResult != ISDPOAState::RESULT_SUCCESS)
+            if (nResult != ISdpOaState::RESULT_SUCCESS)
             {
                 IMS_TRACE_E(0, "Creating a SDP media parameter (%d) failed", i, 0, 0);
                 return IMS_FALSE;
@@ -999,7 +999,7 @@ void Media::UpdateMediaDescriptors()
 
         nResult = piOAState->GetProposedView(pDescriptor->GetMid(), pMediaParam);
 
-        if (nResult != ISDPOAState::RESULT_SUCCESS)
+        if (nResult != ISdpOaState::RESULT_SUCCESS)
         {
             IMS_TRACE_E(0, "Getting a proposed media descriptor (%d) failed", i, 0, 0);
             return;

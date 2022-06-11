@@ -17,7 +17,7 @@
 #include "offeranswer/SdpMediaFormatParameter.h"
 #include "offeranswer/SdpMediaParameter.h"
 #include "SipDebug.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "media/IMediaState.h"
 #include "media/MediaDescriptor.h"
 
@@ -109,7 +109,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN CONST AString& strAt
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to add an attribute (%s) in the state (%d)", strAttribute.GetStr(),
                 nState, 0);
@@ -120,7 +120,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN CONST AString& strAt
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -131,7 +131,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN CONST AString& strAt
     // Check a syntax of the attribute
     if (!objAttribute.Decode(strAttribute))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Decoding an attribute (%s) failed", strAttribute.GetStr(), 0, 0);
         return IMS_FAILURE;
@@ -140,7 +140,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN CONST AString& strAt
     // Check if it is a reserved or not
     if (IsAttributeReserved(pMediaParam, objAttribute.GetAttributeEx()))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Trying to set a reserved attribute (%s)", strAttribute.GetStr(), 0, 0);
         return IMS_FAILURE;
@@ -149,7 +149,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN CONST AString& strAt
     // Check if it already exists in the session
     if (pMediaParam->Contains(objAttribute))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Attribute (%s) already exists", strAttribute.GetStr(), 0, 0);
         return IMS_FAILURE;
@@ -157,13 +157,13 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN CONST AString& strAt
 
     if (!pMediaParam->AddAttribute(objAttribute))
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
 
         IMS_TRACE_E(0, "Adding an attribute (%s) failed", strAttribute.GetStr(), 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -176,7 +176,7 @@ PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes() const
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
         return IMSList<AString>();
@@ -203,7 +203,7 @@ PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetBandwidthInfo() const
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
         return IMSList<AString>();
@@ -230,7 +230,7 @@ PRIVATE VIRTUAL AString MediaDescriptor::GetMediaDescription() const
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
         return AString::ConstNull();
@@ -239,7 +239,7 @@ PRIVATE VIRTUAL AString MediaDescriptor::GetMediaDescription() const
     // Check a session state
     if (piMediaState->GetMediaState() == IMediaState::MEDIA_STATE_INACTIVE)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return AString::ConstNull();
     }
 
@@ -254,7 +254,7 @@ PRIVATE VIRTUAL AString MediaDescriptor::GetMediaTitle() const
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
         return AString::ConstNull();
@@ -282,7 +282,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST AString& st
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to remove an attribute (%s) in the state (%d)",
                 strAttribute.GetStr(), nState, 0);
@@ -293,7 +293,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST AString& st
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -304,7 +304,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST AString& st
     // Check a syntax of the attribute
     if (!objAttribute.Decode(strAttribute))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Decoding an attribute (%s) failed", strAttribute.GetStr(), 0, 0);
         return IMS_FAILURE;
@@ -313,7 +313,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST AString& st
     // Check if it is a reserved or not
     if (IsAttributeReserved(pMediaParam, objAttribute.GetAttributeEx()))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(
                 0, "Trying to set a reserved attribute (%s) failed", strAttribute.GetStr(), 0, 0);
@@ -323,7 +323,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST AString& st
     // Check if it already exists in the session
     if (!pMediaParam->Contains(objAttribute))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Attribute (%s) already exists", strAttribute.GetStr(), 0, 0);
         return IMS_FAILURE;
@@ -331,7 +331,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST AString& st
 
     pMediaParam->RemoveAttribute(objAttribute);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -349,7 +349,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetBandwidthInfo(
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set bandwidth in the state (%d)", nState, 0, 0);
         return IMS_FAILURE;
@@ -359,7 +359,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetBandwidthInfo(
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -374,7 +374,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetBandwidthInfo(
 
         if (!objBandwidth.Decode(strBandwidth))
         {
-            IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+            Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
             IMS_TRACE_E(0, "Trying to set bandwidth in the state (%d)", nState, 0, 0);
             return IMS_FAILURE;
@@ -385,7 +385,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetBandwidthInfo(
 
     pMediaParam->SetBandwidths(objBandwidths);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -400,7 +400,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaTitle(IN CONST AString& strT
     // Check a media state
     if (nState != IMediaState::MEDIA_STATE_INACTIVE)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(
                 0, "Trying to set a title (%s) in the state (%d)", strTitle.GetStr(), nState, 0);
@@ -411,7 +411,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaTitle(IN CONST AString& strT
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -421,7 +421,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaTitle(IN CONST AString& strT
 
     if (!objMediaTitle.Decode(strTitle))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Decoding a media title (%s) failed", strTitle.GetStr(), 0, 0);
         return IMS_FAILURE;
@@ -429,7 +429,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaTitle(IN CONST AString& strT
 
     pMediaParam->SetInformation(objMediaTitle);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -447,7 +447,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN IMS_SINT32 nType,
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set an attribute (%d, %s) in the state (%d)", nType,
                 strAttrValue.GetStr(), nState);
@@ -460,7 +460,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN IMS_SINT32 nType,
             (nType == SdpAttribute::SENDONLY) || (nType == SdpAttribute::SETUP) ||
             (nType == SdpAttribute::CONNECTION))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Not allowed attribute (%d, %s)", nType, strAttrValue.GetStr(), 0);
         return IMS_FAILURE;
@@ -470,7 +470,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN IMS_SINT32 nType,
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -480,7 +480,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN IMS_SINT32 nType,
     {
         pMediaParam->SetAttributeMid(strAttrValue);
 
-        IMS::SetLastError(IMSError::NO_ERROR);
+        Ims::SetLastError(ImsError::NO_ERROR);
         return IMS_SUCCESS;
     }
 
@@ -489,7 +489,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN IMS_SINT32 nType,
     // Check a syntax of the attribute
     if (!objAttribute.SetValue(nType, strAttrValue, strType))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Setting an attribute (%s) failed", strAttrValue.GetStr(), 0, 0);
         return IMS_FAILURE;
@@ -498,7 +498,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN IMS_SINT32 nType,
     // Check if it already exists in the session
     if (pMediaParam->Contains(objAttribute))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Attribute (%s) already exists", objAttribute.GetValue().GetStr(), 0, 0);
         return IMS_FAILURE;
@@ -506,13 +506,13 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN IMS_SINT32 nType,
 
     if (!pMediaParam->AddAttribute(objAttribute))
     {
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Adding an attribute (%s) failed", objAttribute.GetValue().GetStr(), 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -530,7 +530,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttributeInt(IN IMS_SINT32 nType,
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set an attribute (%d, %d) in the state (%d)", nType, nAttrValue,
                 nState);
@@ -542,7 +542,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttributeInt(IN IMS_SINT32 nType,
     if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
             (nType == SdpAttribute::SENDONLY))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Not allowed attribute (%d, %d)", nType, nAttrValue, 0);
         return IMS_FAILURE;
@@ -553,7 +553,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttributeInt(IN IMS_SINT32 nType,
 
         if (pMediaParam == IMS_NULL)
         {
-            IMS::SetLastError(IMSError::ILLEGAL_STATE);
+            Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
             IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
             return IMS_FAILURE;
@@ -591,7 +591,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddBandwidth(IN IMS_SINT32 nType,
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to add a bandwidth (%d, %d) in the state (%d)", nType, nBandwidth,
                 nState);
@@ -602,7 +602,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddBandwidth(IN IMS_SINT32 nType,
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -613,7 +613,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddBandwidth(IN IMS_SINT32 nType,
     // Check a syntax of the attribute
     if (!objBandwidth.SetValue(nType, nBandwidth, strType))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Decoding an bandwidth (%d, %d, %s) failed", nType, nBandwidth,
                 strType.GetStr());
@@ -622,13 +622,13 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddBandwidth(IN IMS_SINT32 nType,
 
     if (!pMediaParam->AddBandwidth(objBandwidth))
     {
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Adding a bandwidth (%s) failed", objBandwidth.GetValue().GetStr(), 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -642,7 +642,7 @@ PRIVATE VIRTUAL const AString& MediaDescriptor::GetAttribute(
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
         return AString::ConstNull();
@@ -654,7 +654,7 @@ PRIVATE VIRTUAL const AString& MediaDescriptor::GetAttribute(
             (nType == SdpAttribute::SENDONLY) || (nType == SdpAttribute::SETUP) ||
             (nType == SdpAttribute::CONNECTION))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Not allowed attribute (%d)", nType, 0, 0);
         return AString::ConstNull();
@@ -673,11 +673,11 @@ PRIVATE VIRTUAL const AString& MediaDescriptor::GetAttribute(
 
     if (pAttribute == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NOT_FOUND);
+        Ims::SetLastError(ImsError::NOT_FOUND);
         return AString::ConstNull();
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pAttribute->GetAttributeValue();
 }
@@ -691,7 +691,7 @@ PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes(
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
         return IMSList<AString>();
@@ -703,7 +703,7 @@ PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes(
             (nType == SdpAttribute::SENDONLY) || (nType == SdpAttribute::SETUP) ||
             (nType == SdpAttribute::CONNECTION))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Not allowed attribute (%d)", nType, 0, 0);
         return IMSList<AString>();
@@ -745,7 +745,7 @@ PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes(
         }
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return objAttributeValues;
 }
@@ -759,7 +759,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetAttributeInt(
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
         return INVALID_VALUE;
@@ -770,7 +770,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetAttributeInt(
     if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
             (nType == SdpAttribute::SENDONLY))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Not allowed attribute (%d)", nType, 0, 0);
         return INVALID_VALUE;
@@ -793,7 +793,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetAttributeInt(
 
     if (pAttribute == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NOT_FOUND);
+        Ims::SetLastError(ImsError::NOT_FOUND);
         return INVALID_VALUE;
     }
 
@@ -824,7 +824,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetAttributeInt(
 
                 if (bOK)
                 {
-                    IMS::SetLastError(IMSError::NO_ERROR);
+                    Ims::SetLastError(ImsError::NO_ERROR);
 
                     return nAttrValue;
                 }
@@ -834,11 +834,11 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetAttributeInt(
         IMS_TRACE_E(0, "Converting the attribute (integer format: %d, %s) failed", nType,
                 strType.GetStr(), 0);
 
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return INVALID_VALUE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return nAttrValue;
 }
@@ -852,7 +852,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetBandwidth(
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
         return INVALID_VALUE;
@@ -867,11 +867,11 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetBandwidth(
 
     if (pBandwidth == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NOT_FOUND);
+        Ims::SetLastError(ImsError::NOT_FOUND);
         return INVALID_VALUE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return pBandwidth->GetBandwidth();
 }
@@ -884,7 +884,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetDirection() const
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
         return Sdp::DIRECTION_NONE;
@@ -901,13 +901,13 @@ PRIVATE VIRTUAL const SdpMedia* MediaDescriptor::GetMediaDescriptionEx() const
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return &(pMediaParam->GetMedia());
 }
@@ -922,7 +922,7 @@ PRIVATE VIRTUAL const IMSList<SdpMediaFormat*>& MediaDescriptor::GetMediaFormats
     {
         static IMSList<SdpMediaFormat*> objMediaFormats;
 
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
         return objMediaFormats;
@@ -943,7 +943,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST SdpAttribut
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to remove an attribute (%s) in the state (%d)",
                 objAttribute.GetAttributeValue().GetStr(), nState, 0);
@@ -954,7 +954,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST SdpAttribut
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -967,12 +967,12 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST SdpAttribut
     if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
             (nType == SdpAttribute::SENDONLY))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         IMS_TRACE_E(0, "Not allowed attribute (%d)", nType, 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     if (nType == SdpAttribute::SETUP)
     {
@@ -993,7 +993,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST SdpAttribut
     // Check if it already exists in the session
     if (!pMediaParam->Contains(objAttribute))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Attribute (%s) does not exist", objAttribute.GetValue().GetStr(), 0, 0);
         return IMS_FAILURE;
@@ -1018,7 +1018,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN IMS_SINT32 nType,
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to remove an attribute (%d, %s) in the state (%d)", nType,
                 strAttrValue.GetStr(), nState);
@@ -1029,7 +1029,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN IMS_SINT32 nType,
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -1038,7 +1038,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN IMS_SINT32 nType,
     // Remove all the attributes if the type is ATTRIBTUE_ALL
     if (nType == SdpAttribute::ATTRIBUTE_ALL)
     {
-        IMS::SetLastError(IMSError::NO_ERROR);
+        Ims::SetLastError(ImsError::NO_ERROR);
 
         pMediaParam->RemoveAttributes();
         return IMS_SUCCESS;
@@ -1049,12 +1049,12 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN IMS_SINT32 nType,
     if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
             (nType == SdpAttribute::SENDONLY))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         IMS_TRACE_E(0, "Not allowed attribute (%d)", nType, 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     if (nType == SdpAttribute::SETUP)
     {
@@ -1080,7 +1080,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN IMS_SINT32 nType,
 
         if (!pMediaParam->Contains(objAttribute))
         {
-            IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+            Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
             IMS_TRACE_E(0, "Attribute (%s) does not exist", objAttribute.GetValue().GetStr(), 0, 0);
             return IMS_FAILURE;
@@ -1110,7 +1110,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveMediaFormat(
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to remove a media format (%d, %s) in the state (%d)", nType,
                 strValue.GetStr(), nState);
@@ -1121,7 +1121,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveMediaFormat(
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -1144,7 +1144,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetConnectionAddress(IN CONST AStrin
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set a media connection address (%s) in the state (%d)",
                 SipDebug::GetIp(strAddress), nState, 0);
@@ -1155,7 +1155,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetConnectionAddress(IN CONST AStrin
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -1163,14 +1163,14 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetConnectionAddress(IN CONST AStrin
 
     if (!pMediaParam->SetConnectionAddress(strAddress))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Setting a connection address (%s) in c-line of media-level",
                 SipDebug::GetIp(strAddress), 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -1187,7 +1187,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetDirection(IN IMS_SINT32 nDirectio
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(
                 0, "Trying to set a media direction (%d) in the state (%d)", nDirection, nState, 0);
@@ -1198,13 +1198,13 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetDirection(IN IMS_SINT32 nDirectio
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     pMediaParam->SetDirection(nDirection);
 
@@ -1224,7 +1224,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaDescription(IN IMS_SINT32 nT
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(
                 0, "Trying to set a media description (%d) in the state (%d)", nType, nState, 0);
@@ -1235,7 +1235,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaDescription(IN IMS_SINT32 nT
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -1266,7 +1266,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaFormat(IN CONST SdpMediaForm
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set a media format (%d, %s) in the state (%d)",
                 pMediaFormat->GetType(), pMediaFormat->GetValue().GetStr(), nState);
@@ -1277,7 +1277,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaFormat(IN CONST SdpMediaForm
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -1370,7 +1370,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaFormat(IN IMS_SINT32 nType,
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set a media format (%d, %s) in the state (%d)", nType,
                 strValue.GetStr(), nState);
@@ -1381,7 +1381,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaFormat(IN IMS_SINT32 nType,
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -1430,7 +1430,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetPort(IN IMS_SINT32 nPort)
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to set a media port (%d) in the state (%d)", nPort, nState, 0);
         return IMS_FAILURE;
@@ -1440,7 +1440,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetPort(IN IMS_SINT32 nPort)
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -1461,13 +1461,13 @@ PRIVATE VIRTUAL const SdpMedia* MediaDescriptor::GetMediaDescriptionExAsLocal() 
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No media parameter", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return &(pMediaParam->GetMedia());
 }
@@ -1583,7 +1583,7 @@ PRIVATE VIRTUAL const SdpPrecondition* MediaDescriptor::GetPrecondition(
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
         return IMS_NULL;
@@ -1605,7 +1605,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemovePrecondition(
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "Trying to remove a precondition (%d, %d) in the state (%d)", nAttribute,
                 nType, nState);
@@ -1616,7 +1616,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemovePrecondition(
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -1640,7 +1640,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetPrecondition(
             (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
             (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(
                 0, "Trying to set a precondition (%d) in the state (%d)", nAttribute, nState, 0);
@@ -1651,7 +1651,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetPrecondition(
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No proposal media parameter", 0, 0, 0);
         return IMS_FAILURE;
@@ -1659,7 +1659,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetPrecondition(
 
     if (!pMediaParam->SetPrecondition(nAttribute, const_cast<SdpPrecondition*>(pPrecondition)))
     {
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Setting a precondition (%d) failed", nAttribute, 0, 0);
         return IMS_FAILURE;

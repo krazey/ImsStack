@@ -13,9 +13,9 @@
 #ifndef _IMS_H_
 #define _IMS_H_
 
-#include "base/IMSError.h"
+#include "base/ImsError.h"
 
-class IMS
+class Ims
 {
 public:
     static void Init();

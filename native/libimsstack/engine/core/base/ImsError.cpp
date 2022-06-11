@@ -10,12 +10,12 @@
 
 */
 
-#include "base/IMS.h"
-#include "base/IMSError.h"
+#include "base/Ims.h"
+#include "base/ImsError.h"
 
 #define IMS_ERROR_CODE(CODE)  \
     {                         \
-        IMSError::CODE, #CODE \
+        ImsError::CODE, #CODE \
     }
 #define IMS_ERROR_CODE_END() \
     {                        \
@@ -28,6 +28,7 @@ struct IMSErrorCode
     const IMS_CHAR* pszMessage;
 };
 
+// clang-format off
 static const IMSErrorCode gstErrorCode[] =
 {
     IMS_ERROR_CODE(NO_ERROR),
@@ -54,22 +55,23 @@ static const IMSErrorCode gstErrorCode[] =
 
     IMS_ERROR_CODE_END()
 };
+// clang-format on
 
-PUBLIC GLOBAL IMS_SINT32 IMSError::GetLastError()
+PUBLIC GLOBAL IMS_SINT32 ImsError::GetLastError()
 {
     //---------------------------------------------------------------------------------------------
 
-    return IMS::GetLastError();
+    return Ims::GetLastError();
 }
 
-PUBLIC GLOBAL const IMS_CHAR* IMSError::GetLastErrorString()
+PUBLIC GLOBAL const IMS_CHAR* ImsError::GetLastErrorString()
 {
     //---------------------------------------------------------------------------------------------
 
-    return GetString(IMS::GetLastError());
+    return GetString(Ims::GetLastError());
 }
 
-PUBLIC GLOBAL const IMS_CHAR* IMSError::GetString(IN IMS_SINT32 nError)
+PUBLIC GLOBAL const IMS_CHAR* ImsError::GetString(IN IMS_SINT32 nError)
 {
     IMS_UINT32 nCount = sizeof(gstErrorCode) / sizeof(gstErrorCode[0]);
 

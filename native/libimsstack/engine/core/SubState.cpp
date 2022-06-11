@@ -360,7 +360,7 @@ PUBLIC GLOBAL IMS_SINT32 SubState::GetReasonFromSubscriptionState(IN IMS_SINT32 
     }
 }
 
-PROTECTED VIRTUAL const SIPHeaderProperty* SubState::GetRestrictedHeaders(
+PROTECTED VIRTUAL const SipHeaderProperty* SubState::GetRestrictedHeaders(
         OUT IMS_UINT32& nCount) const
 {
     //---------------------------------------------------------------------------------------------
@@ -434,11 +434,11 @@ void SubState::StoreMessage(IN CONST ISipMessage* piSIPMsg)
         // Remove an inaccessible headers if present
         IMS_UINT32 nCount = 0;
 
-        const SIPHeaderProperty* pHeaderProperties = GetRestrictedHeaders(nCount);
+        const SipHeaderProperty* pHeaderProperties = GetRestrictedHeaders(nCount);
 
         for (IMS_UINT32 i = 0; i < nCount; ++i)
         {
-            const SIPHeaderProperty* pProperty = &(pHeaderProperties[i]);
+            const SipHeaderProperty* pProperty = &(pHeaderProperties[i]);
 
             if (pProperty->bSingleHeader)
             {

@@ -26,8 +26,8 @@
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "SipConfigProxy.h"
-#include "base/IMS.h"
-#include "IMSCore.h"
+#include "base/Ims.h"
+#include "ImsCore.h"
 #include "ServiceManager.h"
 #include "Service.h"
 #include "util/CallerCapability.h"
@@ -86,7 +86,7 @@ IMSList<AString> Capabilities::GetRemoteUserIdentities() const
 
     if (GetState() != STATE_ACTIVE)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMSList<AString>();
     }
 
@@ -117,13 +117,13 @@ PUBLIC VIRTUAL IMS_BOOL Capabilities::HasCapabilities(IN CONST AString& strConne
 
     if (GetState() != STATE_ACTIVE)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FALSE;
     }
 
     if (strConnection.IsNULL())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FALSE;
     }
 
@@ -131,7 +131,7 @@ PUBLIC VIRTUAL IMS_BOOL Capabilities::HasCapabilities(IN CONST AString& strConne
     {
         IMS_TRACE_E(0, "No remote capabilities", 0, 0, 0);
 
-        IMS::SetLastError(IMSError::NOT_FOUND);
+        Ims::SetLastError(ImsError::NOT_FOUND);
         return IMS_FALSE;
     }
 
@@ -141,7 +141,7 @@ PUBLIC VIRTUAL IMS_BOOL Capabilities::HasCapabilities(IN CONST AString& strConne
     // Parse the connection string and validate it.
     if (!ParseConnectionName(strConnection, strAppId, strServiceId))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FALSE;
     }
 
@@ -152,7 +152,7 @@ PUBLIC VIRTUAL IMS_BOOL Capabilities::HasCapabilities(IN CONST AString& strConne
 
     if (objAppIds.IsEmpty())
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FALSE;
     }
 
@@ -169,7 +169,7 @@ PUBLIC VIRTUAL IMS_BOOL Capabilities::HasCapabilities(IN CONST AString& strConne
 
     if (!bFound)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "AppId (%s) can't be found from the configuration manager",
                 strAppId.GetStr(), 0, 0);
@@ -206,13 +206,13 @@ IMS_RESULT Capabilities::QueryCapabilities(IN IMS_BOOL bSDPInRequest,
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_INACTIVE)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -321,13 +321,13 @@ IMS_RESULT Capabilities::QueryCapabilitiesEx()
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_INACTIVE)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -389,13 +389,13 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Accept(
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_PENDING)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -490,13 +490,13 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::AcceptEx()
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_PENDING)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -544,13 +544,13 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Reject(
 
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_PENDING)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 

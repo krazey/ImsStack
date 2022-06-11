@@ -15,7 +15,7 @@
 #include "Protocol.h"
 #else
 #include "SipProtocol.h"
-#include "IMSCoreProtocol.h"
+#include "ImsCoreProtocol.h"
 
 #endif  // ___IMS_DYNAMIC_BINDER___
 
@@ -77,7 +77,7 @@ struct ProtocolBinder
 };
 
 static const ProtocolBinder PROTOCOL_BINDER[] = {
-        {IMSCore::CONNECTION_SCHEME, IMSCoreProtocol::GetInstance()},
+        {ImsCore::CONNECTION_SCHEME, ImsCoreProtocol::GetInstance()},
         {Sip::CONNECTION_SCHEME_SIP, SipProtocol::GetInstance()    }
   //    { Sip::CONNECTION_SCHEME_SIPS, SipProtocol::GetInstance() }
 };

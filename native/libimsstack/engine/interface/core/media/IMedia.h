@@ -118,7 +118,7 @@ public:
     /**
      * @brief Returns the media type of this media.
      *
-     * @return Type of the current media (MEDIA_TYPE_xxx in IMSCore.h).
+     * @return Type of the current media (MEDIA_TYPE_xxx in ImsCore.h).
      */
     virtual IMS_SINT32 GetType() const = 0;
 

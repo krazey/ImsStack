@@ -20,7 +20,7 @@
 #include "SipDebug.h"
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "base/IRefreshListener.h"
 #include "Service.h"
 #include "Message.h"
@@ -161,7 +161,7 @@ IMS_RESULT Subscription::Poll()
 #if 0
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 #endif
@@ -169,7 +169,7 @@ IMS_RESULT Subscription::Poll()
     if (GetState() != STATE_INACTIVE)
     {
         IMS_TRACE_E(0, "To subscribe(poll) an event, the state MUST be an INACTIVE state", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -215,7 +215,7 @@ IMS_RESULT Subscription::Poll()
 
     SetState(STATE_PENDING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -247,7 +247,7 @@ IMS_RESULT Subscription::Subscribe()
 #if 0
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 #endif
@@ -256,14 +256,14 @@ IMS_RESULT Subscription::Subscribe()
     {
         IMS_TRACE_E(
                 0, "To subscribe an event, the state MUST be an INACTIVE or ACTIVE state", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
     if (pSubState->IsInstantSubscription())
     {
         IMS_TRACE_E(0, "INVALID OPERATION :: It is for an instant subscription.", 0, 0, 0);
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
 
@@ -275,7 +275,7 @@ IMS_RESULT Subscription::Subscribe()
 
         SetState(STATE_PENDING);
 
-        IMS::SetLastError(IMSError::NO_ERROR);
+        Ims::SetLastError(ImsError::NO_ERROR);
         return IMS_FAILURE;
     }
 
@@ -346,7 +346,7 @@ IMS_RESULT Subscription::Subscribe()
 
     SetState(STATE_PENDING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
@@ -365,7 +365,7 @@ IMS_RESULT Subscription::Unsubscribe()
 #if 0
     if (!IsServiceOpen())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
     }
 #endif
@@ -373,7 +373,7 @@ IMS_RESULT Subscription::Unsubscribe()
     if (GetState() != STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "To unsubscribe an event, the state MUST be an ACTIVE state", 0, 0, 0);
-        IMS::SetLastError(IMSError::ILLEGAL_STATE);
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
@@ -385,7 +385,7 @@ IMS_RESULT Subscription::Unsubscribe()
 
         SetState(STATE_PENDING);
 
-        IMS::SetLastError(IMSError::NO_ERROR);
+        Ims::SetLastError(ImsError::NO_ERROR);
         return IMS_FAILURE;
     }
 
@@ -427,7 +427,7 @@ IMS_RESULT Subscription::Unsubscribe()
 
     SetState(STATE_PENDING);
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }

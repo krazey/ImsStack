@@ -12,7 +12,7 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ISDPOAState.h"
+#include "ISdpOaState.h"
 #include "media/Media.h"
 #include "media/MediaDescriptor.h"
 #include "media/MediaProposal.h"
@@ -20,7 +20,7 @@
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-MediaProposal::MediaProposal(IN ISDPOAState* piOAState_) :
+MediaProposal::MediaProposal(IN ISdpOaState* piOAState_) :
         piOAState(piOAState_),
         objDescriptors(IMSList<MediaDescriptor*>())
 {
@@ -56,7 +56,7 @@ IMS_BOOL MediaProposal::CreateDescriptor(IN CONST IMSList<MediaDescriptor*>& obj
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nResult != ISDPOAState::RESULT_SUCCESS) && (nResult != ISDPOAState::RESULT_ALREADY_EXIST))
+    if ((nResult != ISdpOaState::RESULT_SUCCESS) && (nResult != ISdpOaState::RESULT_ALREADY_EXIST))
     {
         IMS_TRACE_E(0, "Creating a proposed view failed", 0, 0, 0);
         return IMS_FALSE;
@@ -191,7 +191,7 @@ PROTECTED VIRTUAL SdpMediaParameter* MediaProposal::GetMediaParameter(IN IMS_SIN
 
     //---------------------------------------------------------------------------------------------
 
-    if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISDPOAState::RESULT_SUCCESS)
+    if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
     {
         return IMS_NULL;
     }
@@ -221,7 +221,7 @@ PROTECTED VIRTUAL SdpMediaParameter* MediaProposal::GetPeerMediaParameter(IN IMS
 
     //---------------------------------------------------------------------------------------------
 
-    if (piOAState->GetMediaPeerView(nMid, pMediaParam) != ISDPOAState::RESULT_SUCCESS)
+    if (piOAState->GetMediaPeerView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
     {
         return IMS_NULL;
     }
@@ -235,7 +235,7 @@ PROTECTED VIRTUAL SdpMediaParameter* MediaProposal::GetProposalMediaParameter(IN
 
     //---------------------------------------------------------------------------------------------
 
-    if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISDPOAState::RESULT_SUCCESS)
+    if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
     {
         IMS_TRACE_E(0, "There is no proposed view", 0, 0, 0);
         return IMS_NULL;

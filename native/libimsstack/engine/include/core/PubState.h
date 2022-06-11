@@ -15,7 +15,7 @@
 
 #include "ISipMessage.h"
 #include "util/EventPackage.h"
-#include "SIPHeaderProperty.h"
+#include "SipHeaderProperty.h"
 
 /*
 This class defines a state & behavior for a published event state.
@@ -84,7 +84,7 @@ public:
         NO_EXPIRES = (-1)
     };
 
-    static const SIPHeaderProperty RESTRICTED_HEADER_PROPERTIES[];
+    static const SipHeaderProperty RESTRICTED_HEADER_PROPERTIES[];
 
 private:
     // Event package for the publication

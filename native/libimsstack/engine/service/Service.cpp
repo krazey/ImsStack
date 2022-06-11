@@ -43,7 +43,7 @@
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "SipTimerValuesHelper.h"
-#include "base/IMS.h"
+#include "base/Ims.h"
 #include "base/Method.h"
 #include "util/CallerCapability.h"
 #include "util/CallerPreference.h"
@@ -51,7 +51,7 @@
 #include "util/CallerPreferenceManager.h"
 #include "util/MethodManager.h"
 #include "util/PreferenceHeader.h"
-#include "util/SIPConnectionNotifierManager.h"
+#include "util/SipConnectionNotifierManager.h"
 #include "util/UserAgentHeader.h"
 
 __IMS_TRACE_TAG_IMS__;
@@ -219,13 +219,13 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
 {
     if (!IsImsConnected())
     {
-        IMS::SetLastError(IMSError::SERVICE_CLOSED);
+        Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_NULL;
     }
 
     if ((pFrom == IMS_NULL) || (pTo == IMS_NULL))
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
@@ -234,7 +234,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
             objMethod.Equals(SipMethod::BYE) || objMethod.Equals(SipMethod::INFO) ||
             objMethod.Equals(SipMethod::UPDATE) || objMethod.Equals(SipMethod::PRACK))
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_NULL;
     }
 
@@ -254,7 +254,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
 
     if (piScc == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::CONNECTION_NOT_FOUND);
+        Ims::SetLastError(ImsError::CONNECTION_NOT_FOUND);
 
         IMS_TRACE_E(0, "Creating a new SIP connection failed", 0, 0, 0);
         return IMS_NULL;
@@ -285,7 +285,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
     if (piScc->InitRequest(objMethod.ToString(), IMS_NULL) != IMS_SUCCESS)
     {
         piScc->Close();
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Initializing SIP request failed", 0, 0, 0);
         return IMS_NULL;
@@ -297,7 +297,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
     if (piSipMsg->SetHeader(ISipHeader::FROM, pFrom->ToString()) != IMS_SUCCESS)
     {
         piScc->Close();
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Setting From header failed", 0, 0, 0);
         return IMS_NULL;
@@ -310,7 +310,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
         if (piScc->SetRequestUri(strTarget) != IMS_SUCCESS)
         {
             piScc->Close();
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Setting Request-URI failed", 0, 0, 0);
             return IMS_NULL;
@@ -320,7 +320,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
         if (piSipMsg->SetHeader(ISipHeader::TO, strTarget) != IMS_SUCCESS)
         {
             piScc->Close();
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Setting To header failed", 0, 0, 0);
             return IMS_NULL;
@@ -341,7 +341,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
         if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContact) != IMS_SUCCESS)
         {
             piScc->Close();
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
             return IMS_NULL;
@@ -361,7 +361,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
         if (piSipMsg->AddHeader(ISipHeader::ACCEPT_CONTACT, pHeader->ToString()) != IMS_SUCCESS)
         {
             piScc->Close();
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Adding Accept-Contact header failed", 0, 0, 0);
             return IMS_NULL;
@@ -378,7 +378,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
         if (piSipMsg->AddHeader(ISipHeader::ROUTE, objServiceRoutes.GetElementAt(j)) != IMS_SUCCESS)
         {
             piScc->Close();
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Adding Route header failed", 0, 0, 0);
             return IMS_NULL;
@@ -397,7 +397,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
             if (piSipMsg->AddHeader(ISipHeader::ALLOW, objMethods.GetElementAt(j)) != IMS_SUCCESS)
             {
                 piScc->Close();
-                IMS::SetLastError(IMSError::GENERAL_ERROR);
+                Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                 IMS_TRACE_E(0, "Adding Allow header failed", 0, 0, 0);
                 return IMS_NULL;
@@ -410,7 +410,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
         if (!SetPPreferredIdentityHeader(pSipConfigV->GetPreferredId(), piSipMsg))
         {
             piScc->Close();
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Setting P-Preferred-Identity header failed", 0, 0, 0);
             return IMS_NULL;
@@ -441,7 +441,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
             if (piSipMsg->AddHeader(ISipHeader::SECURITY_VERIFY, strHeader) != IMS_SUCCESS)
             {
                 piScc->Close();
-                IMS::SetLastError(IMSError::GENERAL_ERROR);
+                Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                 IMS_TRACE_E(0, "Adding Security-Verify failed", 0, 0, 0);
                 return IMS_NULL;
@@ -457,7 +457,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
     }
     // }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return piScc;
 }
@@ -472,14 +472,14 @@ ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
 
     if (piDialog == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
     }
 
     // Checks if the method is allowed
     if (objMethod.Equals(SipMethod::ACK) || objMethod.Equals(SipMethod::CANCEL))
     {
-        IMS::SetLastError(IMSError::INVALID_OPERATION);
+        Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_NULL;
     }
 
@@ -493,7 +493,7 @@ ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
 
     if (piScc == IMS_NULL)
     {
-        IMS::SetLastError(IMSError::NO_MEMORY);
+        Ims::SetLastError(ImsError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Creating a new SIP connection failed - SipError (%d)",
                 SipError::GetLastError(), 0, 0);
@@ -554,7 +554,7 @@ ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
                 if (piSipMsg->AddHeader(ISipHeader::ACCEPT_CONTACT, strHeader) != IMS_SUCCESS)
                 {
                     piScc->Close();
-                    IMS::SetLastError(IMSError::GENERAL_ERROR);
+                    Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                     IMS_TRACE_E(0, "Adding Accept-Contact header failed", 0, 0, 0);
                     return IMS_NULL;
@@ -571,7 +571,7 @@ ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
                         IMS_SUCCESS)
                 {
                     piScc->Close();
-                    IMS::SetLastError(IMSError::GENERAL_ERROR);
+                    Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                     IMS_TRACE_E(0, "Adding Accept-Contact header failed", 0, 0, 0);
                     return IMS_NULL;
@@ -592,7 +592,7 @@ ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
             if (piSipMsg->AddHeader(ISipHeader::ALLOW, objMethods.GetElementAt(j)) != IMS_SUCCESS)
             {
                 piScc->Close();
-                IMS::SetLastError(IMSError::GENERAL_ERROR);
+                Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                 IMS_TRACE_E(0, "Adding Allow header failed", 0, 0, 0);
                 return IMS_NULL;
@@ -605,7 +605,7 @@ ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
         if (!SetPPreferredIdentityHeader(pSipConfigV->GetPreferredId(), piSipMsg))
         {
             piScc->Close();
-            IMS::SetLastError(IMSError::GENERAL_ERROR);
+            Ims::SetLastError(ImsError::GENERAL_ERROR);
 
             IMS_TRACE_E(0, "Setting P-Preferred-Identity header failed", 0, 0, 0);
             return IMS_NULL;
@@ -625,7 +625,7 @@ ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
     // In case of PRACK method, then do not contain the Security related headers.
     if (objMethod.Equals(SipMethod::PRACK))
     {
-        IMS::SetLastError(IMSError::NO_ERROR);
+        Ims::SetLastError(ImsError::NO_ERROR);
 
         return piScc;
     }
@@ -646,7 +646,7 @@ ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
             if (piSipMsg->AddHeader(ISipHeader::SECURITY_VERIFY, strHeader) != IMS_SUCCESS)
             {
                 piScc->Close();
-                IMS::SetLastError(IMSError::GENERAL_ERROR);
+                Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                 IMS_TRACE_E(0, "Adding Security-Verify failed", 0, 0, 0);
                 return IMS_NULL;
@@ -669,7 +669,7 @@ ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
         SetGruuOptionTagInMidDialog(piDialog, piSipMsg);
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return piScc;
 }
@@ -723,7 +723,7 @@ IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT
         IMS_TRACE_E(0, "Initializing a SIP response failed - SipError(%d)",
                 SipError::GetLastError(), 0, 0);
 
-        IMS::SetLastError(IMSError::GENERAL_ERROR);
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FALSE;
     }
 
@@ -755,7 +755,7 @@ IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT
     // In case of CANCEL response, do not perform any more operations.
     if (objMethod.Equals(SipMethod::CANCEL))
     {
-        IMS::SetLastError(IMSError::NO_ERROR);
+        Ims::SetLastError(ImsError::NO_ERROR);
         return IMS_TRUE;
     }
 
@@ -789,7 +789,7 @@ IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT
             if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContact) != IMS_SUCCESS)
             {
                 IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
-                IMS::SetLastError(IMSError::GENERAL_ERROR);
+                Ims::SetLastError(ImsError::GENERAL_ERROR);
                 return IMS_FALSE;
             }
 
@@ -818,7 +818,7 @@ IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT
                         IMS_SUCCESS)
                 {
                     IMS_TRACE_E(0, "Adding Allow header failed", 0, 0, 0);
-                    IMS::SetLastError(IMSError::GENERAL_ERROR);
+                    Ims::SetLastError(ImsError::GENERAL_ERROR);
                     return IMS_FALSE;
                 }
             }
@@ -830,7 +830,7 @@ IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT
                 if (!SetPPreferredIdentityHeader(pSipConfigV->GetPreferredId(), piSipMsg))
                 {
                     IMS_TRACE_E(0, "Setting P-Preferred-Identity header failed", 0, 0, 0);
-                    IMS::SetLastError(IMSError::GENERAL_ERROR);
+                    Ims::SetLastError(ImsError::GENERAL_ERROR);
                     return IMS_FALSE;
                 }
             }
@@ -858,7 +858,7 @@ IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT
         }
     }
 
-    IMS::SetLastError(IMSError::NO_ERROR);
+    Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_TRUE;
 }
@@ -1847,7 +1847,7 @@ PROTECTED VIRTUAL void Service::RegBinding_OnDestroy()
 
     if (m_bImsConnected)
     {
-        NotifyError(IMSError::SERVICE_CLOSED);
+        NotifyError(ImsError::SERVICE_CLOSED);
     }
 
     m_bImsConnected = IMS_FALSE;
@@ -1900,7 +1900,7 @@ PROTECTED VIRTUAL void Service::RegBinding_OnTerminated()
 
     if (m_bImsConnected)
     {
-        NotifyError(IMSError::SERVICE_CLOSED);
+        NotifyError(ImsError::SERVICE_CLOSED);
     }
 
     m_bImsConnected = IMS_FALSE;

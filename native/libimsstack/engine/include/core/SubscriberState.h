@@ -39,7 +39,7 @@ public:
 
 protected:
     // SubState class
-    virtual const SIPHeaderProperty* GetRestrictedHeaders(OUT IMS_UINT32& nCount) const;
+    virtual const SipHeaderProperty* GetRestrictedHeaders(OUT IMS_UINT32& nCount) const;
 
 private:
     IMS_SINT32 TranslateMessage(IN CONST ISipMessage* piSIPMsg);
@@ -88,7 +88,7 @@ private:
     // ONLY OUTGOING SUBSCRIPTION WILL BE CONCERNED ...
     static IMS_SINT32 STATE[STATE_MAX][MESSAGE_MAX];
 
-    static const SIPHeaderProperty RESTRICTED_HEADER_PROPERTIES[];
+    static const SipHeaderProperty RESTRICTED_HEADER_PROPERTIES[];
 };
 
 #endif  // _SUBSCRIBER_STATE_H_

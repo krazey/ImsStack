@@ -21,8 +21,9 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-PUBLIC GLOBAL IMS_SINT32
-SubscriberState::STATE[SubState::STATE_MAX][SubscriberState::MESSAGE_MAX] =
+// clang-format off
+PUBLIC GLOBAL
+IMS_SINT32 SubscriberState::STATE[SubState::STATE_MAX][SubscriberState::MESSAGE_MAX] =
 {
     // STATE_INVALID
     {
@@ -49,7 +50,8 @@ SubscriberState::STATE[SubState::STATE_MAX][SubscriberState::MESSAGE_MAX] =
 };
 
 // 4 send it to "Util" directory ?
-PUBLIC GLOBAL const SIPHeaderProperty SubscriberState::RESTRICTED_HEADER_PROPERTIES[] =
+PUBLIC GLOBAL
+const SipHeaderProperty SubscriberState::RESTRICTED_HEADER_PROPERTIES[] =
 {
         // Header type, Header name, Is single header ?
         {ISipHeader::ACCEPT_CONTACT,        IMS_NULL,                      IMS_FALSE},
@@ -75,6 +77,7 @@ PUBLIC GLOBAL const SIPHeaderProperty SubscriberState::RESTRICTED_HEADER_PROPERT
         {ISipHeader::UNKNOWN,               SipHeaderName::CONTENT_LENGTH, IMS_TRUE },
         {ISipHeader::UNKNOWN,               "l",                           IMS_TRUE }
 };
+// clang-format on
 
 PUBLIC
 SubscriberState::SubscriberState() :
@@ -169,7 +172,7 @@ PUBLIC VIRTUAL IMS_BOOL SubscriberState::UpdateState(IN CONST ISipMessage* piSIP
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL const SIPHeaderProperty* SubscriberState::GetRestrictedHeaders(
+PROTECTED VIRTUAL const SipHeaderProperty* SubscriberState::GetRestrictedHeaders(
         OUT IMS_UINT32& nCount) const
 {
     //---------------------------------------------------------------------------------------------

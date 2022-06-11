@@ -16,7 +16,7 @@
 #define _INTERFACE_ON_DIRECT_CORE_SERVICE_LISTENER_H_
 
 class CoreService;
-class ISIPConnectionFactory;
+class ISipConnectionFactory;
 
 /*
 
@@ -39,7 +39,7 @@ public:
     parameter               description
     ----------              ----------
     piService               Pointer to the concerned IService
-    piSCF                   Pointer to the ISIPConnectionFactory
+    piSCF                   Pointer to the ISipConnectionFactory
     </table>
 
     Returns
@@ -51,7 +51,7 @@ public:
 
     */
     virtual IMS_SINT32 OnDirectCoreService_TransactionReceived(
-            IN CoreService* pService, IN ISIPConnectionFactory* piSCF) = 0;
+            IN CoreService* pService, IN ISipConnectionFactory* piSCF) = 0;
 };
 
 #endif  // _INTERFACE_ON_DIRECT_CORE_SERVICE_LISTENER_H_
