@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "msg/SipHeaders.h"
 #include "msg/SipIntegerHeader.h"
-#include "msg/SipParameterList.h"
+#include "msg/SipParameters.h"
 #include "msg/sip_msgutil.h"
 
 namespace android
@@ -305,10 +305,9 @@ TEST_F(SipIntegerHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pMinSeHeader->DecodeHdr((char*)"1400;generic-param=generic-value", 32));
     SipParameters* pParameters = pMinSeHeader->GetParameters();
     ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList* pSipParameterList = pParameters->GetParameterList();
-    ASSERT_TRUE(pSipParameterList != nullptr);
-    EXPECT_EQ(1, pSipParameterList->GetCount());
-    SipNameValue* pNameVal = pSipParameterList->GetNameValNode(0);
+    SipParameterList& objParameterList = pParameters->GetParameterList();
+    EXPECT_EQ(1, objParameterList.GetCount());
+    SipNameValue* pNameVal = objParameterList.GetNameValNode(0);
     EXPECT_STREQ("generic-param", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("generic-value", pNameVal->m_valueList.GetAt(0));
@@ -327,10 +326,9 @@ TEST_F(SipIntegerHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->DecodeHdr((char*)"1600;refresher=uas", 18));
     pParameters = pSessionExpiresHeader->GetParameters();
     ASSERT_TRUE(pParameters != nullptr);
-    pSipParameterList = pParameters->GetParameterList();
-    ASSERT_TRUE(pSipParameterList != nullptr);
-    EXPECT_EQ(1, pSipParameterList->GetCount());
-    pNameVal = pSipParameterList->GetNameValNode(0);
+    SipParameterList& objParameterList1 = pParameters->GetParameterList();
+    EXPECT_EQ(1, objParameterList1.GetCount());
+    pNameVal = objParameterList1.GetNameValNode(0);
     EXPECT_STREQ("refresher", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("uas", pNameVal->m_valueList.GetAt(0));

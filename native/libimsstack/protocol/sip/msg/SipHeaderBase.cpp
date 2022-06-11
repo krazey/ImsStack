@@ -253,27 +253,30 @@ const SIP_CHAR* SipHeaderBase::GetValue() const
 SIP_BOOL SipHeaderBase::EncodeHeaderParameters(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    SipParameterList* pParameterList =
-            (m_pParameters != SIP_NULL) ? m_pParameters->GetParameterList() : SIP_NULL;
-
-    if ((bParams == SIP_TRUE) && (pParameterList != SIP_NULL))
+    if (m_pParameters == SIP_NULL)
     {
-        return pParameterList->EncodeList(ppCurrPos, SIP_SEMI);
+        return SIP_TRUE;
     }
+
+    SipParameterList& objParameterList = m_pParameters->GetParameterList();
+
+    if (bParams == SIP_TRUE)
+    {
+        return objParameterList.Encode(ppCurrPos, SIP_SEMI);
+    }
+
     return SIP_TRUE;
 }
 
 SIP_BOOL SipHeaderBase::EncodeParameters(AStringBuffer& objBuffer) const
 {
-    SipParameterList* pParameterList =
-            (m_pParameters != SIP_NULL) ? m_pParameters->GetParameterList() : SIP_NULL;
-
-    if (pParameterList != SIP_NULL)
+    if (m_pParameters == SIP_NULL)
     {
-        return pParameterList->EncodeList(objBuffer, SIP_SEMI);
+        return SIP_TRUE;
     }
 
-    return SIP_TRUE;
+    SipParameterList& objParameterList = m_pParameters->GetParameterList();
+    return objParameterList.Encode(objBuffer, SIP_SEMI);
 }
 
 SIP_BOOL SipHeaderBase::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
@@ -317,9 +320,9 @@ SIP_BOOL SipHeaderBase::DecodeHeaderParameters(
         return SIP_FALSE;
     }
 
-    SipParameterList* pParameterList = m_pParameters->GetParameterList();
+    SipParameterList& objParameterList = m_pParameters->GetParameterList();
 
-    if (pParameterList->DecHdrSipParameterList(pStart, pEnd, cDelimeter) == SIP_FALSE)
+    if (objParameterList.Decode(pStart, pEnd, cDelimeter) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -400,7 +403,6 @@ SipNameAddrHeader::SipNameAddrHeader(const SipNameAddrHeader& objSipNameAddrHead
     if (objSipNameAddrHeader.m_pNameAddr != SIP_NULL)
     {
         m_pNameAddr = new SipNameAddr(*(objSipNameAddrHeader.m_pNameAddr));
-        m_pNameAddr->SetParameterComponent(this);
     }
 }
 
@@ -408,7 +410,6 @@ SipNameAddrHeader::~SipNameAddrHeader()
 {
     if (m_pNameAddr != SIP_NULL)
     {
-        m_pNameAddr->SetParameterComponent(SIP_NULL);
         m_pNameAddr->SipDelete();
     }
 }
@@ -453,81 +454,9 @@ SIP_CHAR* SipNameAddrHeader::GetTag()
         return SIP_NULL;
     }
 
-    SipParameterList* pParameterList = pParameters->GetParameterList();
+    SipParameterList& objParameterList = pParameters->GetParameterList();
 
-    return (pParameterList != SIP_NULL) ? pParameterList->GetParamValue("tag") : SIP_NULL;
-}
-
-SIP_BOOL SipNameAddrHeader::IsValidComponent(const SIP_CHAR* pszComponent) const
-{
-    SIP_INT32 eHdrType = GetHdrType();
-    if ((eHdrType == SipHeaderBase::TO) || (eHdrType == SipHeaderBase::FROM) ||
-            (eHdrType == SipHeaderBase::CONTACT) || (eHdrType == SipHeaderBase::RECORD_ROUTE) ||
-            (eHdrType == SipHeaderBase::ROUTE))
-    {
-        if (SipPf_Stricmp(pszComponent, SIP_USER) == 0)
-        {
-            return SIP_TRUE;
-        }
-        else if (SipPf_Stricmp(pszComponent, SIP_PASSWORD) == 0)
-        {
-            return SIP_TRUE;
-        }
-        else if (SipPf_Stricmp(pszComponent, SIP_HOST) == 0)
-        {
-            return SIP_TRUE;
-        }
-        else if (SipPf_Stricmp(pszComponent, SIP_PORT) == 0)
-        {
-            return SIP_TRUE;
-        }
-        else if (SipPf_Stricmp(pszComponent, SIP_USER_PRM) == 0)
-        {
-            return SIP_TRUE;
-        }
-        else if (SipPf_Stricmp(pszComponent, SIP_METHOD) == 0)
-        {
-            return SIP_TRUE;
-        }
-        else if (SipPf_Stricmp(pszComponent, SIP_MADDR_PRM) == 0)
-        {
-            return SIP_TRUE;
-        }
-        else if (SipPf_Stricmp(pszComponent, SIP_TTL_PRM) == 0)
-        {
-            return SIP_TRUE;
-        }
-        else if (SipPf_Stricmp(pszComponent, SIP_TRNSPORT_PRM) == 0)
-        {
-            return SIP_TRUE;
-        }
-        else if (SipPf_Stricmp(pszComponent, SIP_LR_PRM) == 0)
-        {
-            return SIP_TRUE;
-        }
-        else if (SipPf_Stricmp(pszComponent, SIP_OTHER_PRM) == 0)
-        {
-            return SIP_TRUE;
-        }
-        else if (SipPf_Stricmp(pszComponent, SIP_HEADERS) == 0)
-        {
-            return SIP_TRUE;
-        }
-    }
-    return SIP_FALSE;
-}
-
-SIP_BOOL SipNameAddrHeader::IsPercentEncHdr() const
-{
-    SIP_INT32 eHdrType = GetHdrType();
-    if ((eHdrType == SipHeaderBase::TO) || (eHdrType == SipHeaderBase::FROM) ||
-            (eHdrType == SipHeaderBase::ROUTE) || (eHdrType == SipHeaderBase::RECORD_ROUTE) ||
-            (eHdrType == SipHeaderBase::CONTACT) || (eHdrType == SipHeaderBase::HISTORY_INFO) ||
-            (eHdrType == SipHeaderBase::TRIGGER_CONSENT))
-    {
-        return SIP_TRUE;
-    }
-    return SIP_FALSE;
+    return objParameterList.GetParamValue("tag");
 }
 
 SIP_BOOL SipNameAddrHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
@@ -537,8 +466,6 @@ SIP_BOOL SipNameAddrHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) c
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing name-addr", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-
-    m_pNameAddr->SetParameterComponent(DYNAMIC_CAST(IParameterComponent*, this));
 
     if (m_pNameAddr->Encode(objBuffer, SIP_TRUE) == SIP_FALSE)
     {
@@ -557,7 +484,6 @@ SIP_BOOL SipNameAddrHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*D
         return SIP_FALSE;
     }
 
-    m_pNameAddr->SetParameterComponent(this);
     if (m_pNameAddr->EncodeNameAddr(ppCurrPos) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode name address fail", SIP_ZERO, SIP_ZERO);
@@ -630,11 +556,6 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         if (pAddrSpec == SIP_NULL)
         {
             return SIP_FALSE;
-        }
-
-        if (IsPercentEncHdr() == SIP_TRUE)
-        {
-            pAddrSpec->SetParameterComponent(static_cast<IParameterComponent*>(this));
         }
 
         if (pAddrSpec->DecodeAddrSpec(pStartPt, nLen) == SIP_FALSE)

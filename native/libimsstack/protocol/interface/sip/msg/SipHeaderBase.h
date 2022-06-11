@@ -5,7 +5,7 @@
 
 #include "sip_pf_datatypes.h"
 #include "msg/sip_comdef.h"
-#include "msg/SipParameterList.h"
+#include "msg/SipParameters.h"
 #include "msg/SipAddrSpec.h"
 #include "SipPercentEncoding.h"
 #include "msg/IParameterComponent.h"
@@ -141,7 +141,7 @@ public:
     };
 
 private:
-    int m_eHdrType;
+    SIP_INT32 m_eHdrType;
     SIP_CHAR* m_pszValue;
     SipParameters* m_pParameters;
 
@@ -175,7 +175,7 @@ protected:
             SIP_CHAR*& pszCommentEnd);
 };
 
-class SipNameAddrHeader : public SipHeaderBase, public IParameterComponent
+class SipNameAddrHeader : public SipHeaderBase
 {
 protected:
     SipNameAddr* m_pNameAddr;
@@ -184,14 +184,14 @@ public:
     SipNameAddrHeader(SIP_INT32 eHdrType);
     SipNameAddrHeader(const SipNameAddrHeader& objSipNameAddrHeader);
     virtual ~SipNameAddrHeader();
-    virtual SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const;
+
     SIP_BOOL SetAddrSpec(SipAddrSpec* pAddrSpec);
     SipNameAddr* GetNameAddr();
     SIP_CHAR* GetTag();
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
     virtual SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
-    SIP_BOOL IsPercentEncHdr() const;
+
     inline SIP_BOOL IsValidHeader() const
     {
         return (m_pNameAddr == SIP_NULL) ? SIP_FALSE : SIP_TRUE;

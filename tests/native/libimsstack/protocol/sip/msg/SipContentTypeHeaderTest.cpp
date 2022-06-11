@@ -161,10 +161,9 @@ TEST_F(SipContentTypeHeaderTest, DecodeHdr)
 
     SipParameters* pParameters = pHeader->GetParameters();
     ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList* pSipParameterList = pParameters->GetParameterList();
-    ASSERT_TRUE(pSipParameterList != nullptr);
+    SipParameterList& objParameterList = pParameters->GetParameterList();
 
-    EXPECT_EQ(1, pSipParameterList->GetCount());
+    EXPECT_EQ(1, objParameterList.GetCount());
     SIP_CHAR* pBoundary = pHeader->GetBoundary();
     ASSERT_TRUE(pBoundary != nullptr);
 
@@ -184,10 +183,9 @@ TEST_F(SipContentTypeHeaderTest, DecodeHdr)
 
     pParameters = pHeader->GetParameters();
     ASSERT_TRUE(pParameters != nullptr);
-    pSipParameterList = pParameters->GetParameterList();
-    ASSERT_TRUE(pSipParameterList != nullptr);
+    SipParameterList& objParameterList1 = pParameters->GetParameterList();
 
-    EXPECT_EQ(1, pSipParameterList->GetCount());
+    EXPECT_EQ(1, objParameterList1.GetCount());
     pBoundary = pHeader->GetBoundary();
     ASSERT_TRUE(pBoundary != nullptr);
 

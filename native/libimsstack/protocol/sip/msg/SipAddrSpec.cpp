@@ -28,8 +28,7 @@ SipUri::SipUri() :
         m_nPort(SIP_ZERO),
         m_eHostType(SipAddrSpec::HOST_NAME),
         m_pUriParamList(SIP_NULL),
-        m_pUriHdrParamList(SIP_NULL),
-        m_pParameterComponent(SIP_NULL)
+        m_pUriHdrParamList(SIP_NULL)
 {
 }
 
@@ -49,8 +48,7 @@ SipUri::SipUri(const SipUri& objSipUri) :
         m_nPort(objSipUri.m_nPort),
         m_eHostType(objSipUri.m_eHostType),
         m_pUriParamList(SIP_NULL),
-        m_pUriHdrParamList(SIP_NULL),
-        m_pParameterComponent(objSipUri.m_pParameterComponent)
+        m_pUriHdrParamList(SIP_NULL)
 {
     if (objSipUri.m_pUriParamList != SIP_NULL)
     {
@@ -99,6 +97,60 @@ SipUri::~SipUri()
     }
 }
 
+SIP_BOOL SipUri::IsValidComponent(const SIP_CHAR* pszComponent) const
+{
+    if (SipPf_Stricmp(pszComponent, SIP_USER) == 0)
+    {
+        return SIP_TRUE;
+    }
+    else if (SipPf_Stricmp(pszComponent, SIP_PASSWORD) == 0)
+    {
+        return SIP_TRUE;
+    }
+    else if (SipPf_Stricmp(pszComponent, SIP_HOST) == 0)
+    {
+        return SIP_TRUE;
+    }
+    else if (SipPf_Stricmp(pszComponent, SIP_PORT) == 0)
+    {
+        return SIP_TRUE;
+    }
+    else if (SipPf_Stricmp(pszComponent, SIP_USER_PRM) == 0)
+    {
+        return SIP_TRUE;
+    }
+    else if (SipPf_Stricmp(pszComponent, SIP_METHOD) == 0)
+    {
+        return SIP_TRUE;
+    }
+    else if (SipPf_Stricmp(pszComponent, SIP_MADDR_PRM) == 0)
+    {
+        return SIP_TRUE;
+    }
+    else if (SipPf_Stricmp(pszComponent, SIP_TTL_PRM) == 0)
+    {
+        return SIP_TRUE;
+    }
+    else if (SipPf_Stricmp(pszComponent, SIP_TRNSPORT_PRM) == 0)
+    {
+        return SIP_TRUE;
+    }
+    else if (SipPf_Stricmp(pszComponent, SIP_LR_PRM) == 0)
+    {
+        return SIP_TRUE;
+    }
+    else if (SipPf_Stricmp(pszComponent, SIP_OTHER_PRM) == 0)
+    {
+        return SIP_TRUE;
+    }
+    else if (SipPf_Stricmp(pszComponent, SIP_HEADERS) == 0)
+    {
+        return SIP_TRUE;
+    }
+
+    return SIP_FALSE;
+}
+
 /******************************************************************************
  * Function name      : SipUri::SetUser
  *
@@ -125,20 +177,6 @@ SIP_BOOL SipUri::SetUser(const SIP_CHAR* pszUser)
 SIP_BOOL SipUri::SetPassword(const SIP_CHAR* pszPass)
 {
     return SetCharVar(pszPass, m_pszPassword);
-}
-
-/******************************************************************************
- * Function name      : SipUri::SetParameterComponent
- *
- * Description    :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
-SIP_VOID SipUri::SetParameterComponent(IParameterComponent* pParameterComponent)
-{
-    m_pParameterComponent = pParameterComponent;
 }
 
 /******************************************************************************
@@ -199,34 +237,18 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 {
     if (m_pszUser != SIP_NULL)
     {
-        if ((m_pParameterComponent != SIP_NULL) &&
-                m_pParameterComponent->IsValidComponent(SIP_USER))
-        {
-            SIP_CHAR* pszTempUser =
-                    SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, (SIP_CHAR*)SIP_USER);
-            objBuffer += pszTempUser;
-            delete[] pszTempUser;
-        }
-        else
-        {
-            objBuffer += m_pszUser;
-        }
+        SIP_CHAR* pszTempUser =
+                SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, (SIP_CHAR*)SIP_USER);
+        objBuffer += pszTempUser;
+        delete[] pszTempUser;
 
         if (m_pszPassword != SIP_NULL)
         {
             objBuffer += COLON;
 
-            if ((m_pParameterComponent != SIP_NULL) &&
-                    m_pParameterComponent->IsValidComponent(SIP_PASSWORD))
-            {
-                SIP_CHAR* pszTempPassword = SipPercentEncoding::DoPerEnc_Password(m_pszPassword);
-                objBuffer += pszTempPassword;
-                delete[] pszTempPassword;
-            }
-            else
-            {
-                objBuffer += m_pszPassword;
-            }
+            SIP_CHAR* pszTempPassword = SipPercentEncoding::DoPerEnc_Password(m_pszPassword);
+            objBuffer += pszTempPassword;
+            delete[] pszTempPassword;
         }
 
         objBuffer += ATRATE;
@@ -240,16 +262,11 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
             objBuffer += m_pszHost;
             objBuffer += RIGHT_SQUARE;
         }
-        else if ((m_pParameterComponent != SIP_NULL) &&
-                (m_pParameterComponent->IsValidComponent(SIP_HOST)))
+        else
         {
             SIP_CHAR* pszTempHost = SipPercentEncoding::DoPerEnc_Host(m_pszHost);
             objBuffer += pszTempHost;
             delete[] pszTempHost;
-        }
-        else
-        {
-            objBuffer += m_pszHost;
         }
 
         if ((m_nPort != SIP_ZERO) && (m_nPort != SIP_UNSPECIFIED_PORT))
@@ -260,14 +277,16 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     }
     else
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Encode: Host value is missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Encode: Host value is missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if ((bParams == SIP_TRUE) && (m_pUriParamList != SIP_NULL))
     {
-        m_pUriParamList->EncodeUriParamList(objBuffer, SIP_SEMI, m_pParameterComponent);
+        const_cast<SipUri*>(this)->SetComponentType(IParameterComponent::URI);
+        m_pUriParamList->Encode(objBuffer, SIP_SEMI,
+                const_cast<IParameterComponent*>(static_cast<const IParameterComponent*>(this)));
     }
 
     // "?"   header   *( "&"   header )
@@ -277,8 +296,8 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 
         if (objHeaders.IsEmpty() == SIP_TRUE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                    "Encode: No URI header parameters", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODENCODER, "Encode: No URI header parameters", SIP_ZERO, SIP_ZERO);
             return SIP_TRUE;
         }
 
@@ -299,10 +318,14 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
                     objBuffer += AMPERSAND;
                 }
 
-                pNameValue->EncodeFromUriHdrList(objBuffer, m_pParameterComponent);
+                const_cast<SipUri*>(this)->SetComponentType(IParameterComponent::HEADER);
+                pNameValue->Encode(objBuffer,
+                        const_cast<IParameterComponent*>(
+                                static_cast<const IParameterComponent*>(this)));
             }
         }
     }
+    const_cast<SipUri*>(this)->SetComponentType(IParameterComponent::NORMAL);
 
     return SIP_TRUE;
 }
@@ -317,19 +340,10 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
        userinfo = ( user / telephone-subscriber ) [ ":" password ] "@"  */
     if (m_pszUser != SIP_NULL)
     {
-        /*Do Percent Encoding if Required*/
-        if ((m_pParameterComponent != SIP_NULL) &&
-                m_pParameterComponent->IsValidComponent(SIP_USER))
-        {
-            SIP_CHAR* pszTempUser =
-                    SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, (SIP_CHAR*)SIP_USER);
-            SipPf_Strcpy(*ppCurrPos, pszTempUser);
-            delete[] pszTempUser;
-        }
-        else
-        {
-            SipPf_Strcpy(*ppCurrPos, m_pszUser);
-        }
+        SIP_CHAR* pszTempUser =
+                SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, (SIP_CHAR*)SIP_USER);
+        SipPf_Strcpy(*ppCurrPos, pszTempUser);
+        delete[] pszTempUser;
 
         SipEnc_UpdateCurrPos(ppCurrPos);
 
@@ -338,18 +352,9 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
             /*encode the password*/
             SIP_ENC_COLON(*ppCurrPos);
 
-            /*Do Percent Encoding if Required*/
-            if ((m_pParameterComponent != SIP_NULL) &&
-                    m_pParameterComponent->IsValidComponent(SIP_PASSWORD))
-            {
-                SIP_CHAR* pszTempPassword = SipPercentEncoding::DoPerEnc_Password(m_pszPassword);
-                SipPf_Strcpy(*ppCurrPos, pszTempPassword);
-                delete[] pszTempPassword;
-            }
-            else
-            {
-                SipPf_Strcpy(*ppCurrPos, m_pszPassword);
-            }
+            SIP_CHAR* pszTempPassword = SipPercentEncoding::DoPerEnc_Password(m_pszPassword);
+            SipPf_Strcpy(*ppCurrPos, pszTempPassword);
+            delete[] pszTempPassword;
 
             SipEnc_UpdateCurrPos(ppCurrPos);
         }
@@ -374,18 +379,12 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
             (*ppCurrPos)++;
         }
         /*Do Percent Encoding if Required*/
-        else if ((m_pParameterComponent != SIP_NULL) &&
-                (m_pParameterComponent->IsValidComponent(SIP_HOST)))
+        else
         {
             SIP_CHAR* pszTempHost = SipPercentEncoding::DoPerEnc_Host(m_pszHost);
             SipPf_Strcpy(*ppCurrPos, pszTempHost);
             SipEnc_UpdateCurrPos(ppCurrPos);
             delete[] pszTempHost;
-        }
-        else
-        {
-            SipPf_Strcpy(*ppCurrPos, m_pszHost);
-            SipEnc_UpdateCurrPos(ppCurrPos);
         }
 
         /*Encoding of Port*/
@@ -412,23 +411,24 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
     /*encoding of URI params*/
     if (m_pUriParamList != SIP_NULL)
     {
-        m_pUriParamList->EncodeUriParamList(ppCurrPos, SIP_SEMI, m_pParameterComponent);
+        SetComponentType(IParameterComponent::URI);
+        m_pUriParamList->Encode(ppCurrPos, SIP_SEMI, static_cast<IParameterComponent*>(this));
     }
 
     /*encoding of Hdr params*/
     // "?"   header   *( "&"   header )
     if (m_pUriHdrParamList != SIP_NULL)
     {
-        SipVector<SipNameValue*>& sipList = m_pUriHdrParamList->GetList();
+        SetComponentType(IParameterComponent::HEADER);
 
+        SipVector<SipNameValue*>& sipList = m_pUriHdrParamList->GetList();
         if (sipList.IsEmpty() == SIP_TRUE)
         {
-            // ADD LOG
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "EncodeSipUri: Empty list", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        /*Put a semicolon*/
+        /*Put a QUESTION MARK*/
         SIP_ENC_QMARK(*ppCurrPos);
 
         SIP_UINT32 nSize = sipList.GetSize();
@@ -445,11 +445,13 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
                 {
                     SIP_ENC_AMPERSAND(*ppCurrPos);
                 }
-
-                pParamNamValue->EncodeFromUriHdrList(ppCurrPos, m_pParameterComponent);
+                pParamNamValue->Encode(ppCurrPos,
+                        const_cast<IParameterComponent*>(
+                                static_cast<const IParameterComponent*>(this)));
             }
         }
     }
+    SetComponentType(IParameterComponent::NORMAL);
 
     return SIP_TRUE;
 }
@@ -480,15 +482,7 @@ SIP_BOOL SipUri::DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         }
 
         /*Do percentage Encoding*/
-        if ((m_pParameterComponent != SIP_NULL) &&
-                (m_pParameterComponent->IsValidComponent(SIP_PASSWORD)))
-        {
-            m_pszPassword = SipPercentEncoding::DoPercentDecoding(pszPassword);
-        }
-        else
-        {
-            m_pszPassword = pszPassword;
-        }
+        m_pszPassword = SipPercentEncoding::DoPercentDecoding(pszPassword);
 
         pEndPt = pTempPos;
     }
@@ -500,14 +494,7 @@ SIP_BOOL SipUri::DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         return SIP_FALSE;
     }
     /*Do percentage Encoding*/
-    if ((m_pParameterComponent != SIP_NULL) && (m_pParameterComponent->IsValidComponent(SIP_USER)))
-    {
-        m_pszUser = SipPercentEncoding::DoPercentDecoding(pszUser);
-    }
-    else
-    {
-        m_pszUser = pszUser;
-    }
+    m_pszUser = SipPercentEncoding::DoPercentDecoding(pszUser);
 
     return SIP_TRUE;
 }
@@ -573,9 +560,7 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         return SIP_FALSE;
     }
 
-    if ((m_pParameterComponent != SIP_NULL) &&
-            (m_pParameterComponent->IsValidComponent(SIP_HOST)) &&
-            (m_eHostType == SipAddrSpec::HOST_NAME))
+    if (m_eHostType == SipAddrSpec::HOST_NAME)
     {
         m_pszHost = SipPercentEncoding::DoPercentDecoding(m_pszHost);
     }
@@ -594,15 +579,8 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 
         SIP_CHAR* pszPortTemp = SIP_NULL;
 
-        if ((m_pParameterComponent != SIP_NULL) &&
-                (m_pParameterComponent->IsValidComponent(SIP_PORT)))
-        {
-            pszPortTemp = SipPercentEncoding::DoPercentDecoding(pszPort);
-        }
-        else
-        {
-            pszPortTemp = pszPort;
-        }
+        pszPortTemp = SipPercentEncoding::DoPercentDecoding(pszPort);
+
         m_nPort = SipPf_Atoi(pszPortTemp);
         delete[] pszPortTemp;
 
@@ -664,9 +642,12 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             return SIP_FALSE;
         }
 
-        if (m_pUriHdrParamList->DecUriHdrSipParameterList(
-                    pHeaderStart, pEndPt, AMPERSAND, m_pParameterComponent) == SIP_FALSE)
+        SetComponentType(IParameterComponent::HEADER);
+
+        if (m_pUriHdrParamList->Decode(pHeaderStart, pEndPt, AMPERSAND,
+                    static_cast<IParameterComponent*>(this)) == SIP_FALSE)
         {
+            SetComponentType(IParameterComponent::NORMAL);
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Hdr prm Decode Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
@@ -686,16 +667,19 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             return SIP_FALSE;
         }
 
-        if (m_pUriParamList->DecUriSipParameterList(
-                    pUriParamStart, pEndPt, SIP_SEMI, m_pParameterComponent) == SIP_FALSE)
+        SetComponentType(IParameterComponent::URI);
+        if (m_pUriParamList->Decode(pUriParamStart, pEndPt, SIP_SEMI,
+                    static_cast<IParameterComponent*>(this)) == SIP_FALSE)
         {
+            SetComponentType(IParameterComponent::NORMAL);
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Uri Prm Decode Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         pEndPt = pTempPos;
-        pTempPos = SIP_NULL;
     }
+
+    SetComponentType(IParameterComponent::NORMAL);
     /* Decode host:port part in SIP URI */
     if (DecHostPort(pStartPt, pEndPt) == SIP_FALSE)
     {
@@ -719,8 +703,7 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 SipAddrSpec::SipAddrSpec() :
         m_eUriType(SipUri::SCHEME_SIP),
         m_pSipUri(SIP_NULL),
-        m_pszAbsUri(SIP_NULL),
-        m_pParameterComponent(SIP_NULL)
+        m_pszAbsUri(SIP_NULL)
 {
 }
 
@@ -736,8 +719,7 @@ SipAddrSpec::SipAddrSpec() :
 SipAddrSpec::SipAddrSpec(const SipAddrSpec& objAddressSpec) :
         m_eUriType(objAddressSpec.m_eUriType),
         m_pSipUri(SIP_NULL),
-        m_pszAbsUri(SipPf_Strdup(objAddressSpec.m_pszAbsUri)),
-        m_pParameterComponent(objAddressSpec.m_pParameterComponent)
+        m_pszAbsUri(SipPf_Strdup(objAddressSpec.m_pszAbsUri))
 {
     if (objAddressSpec.m_pSipUri != SIP_NULL)
     {
@@ -780,15 +762,6 @@ SIP_BOOL SipAddrSpec::SetAbsUri(const SIP_CHAR* pszSipUri)
     return SetCharVar(pszSipUri, m_pszAbsUri);
 }
 
-SIP_VOID SipAddrSpec::SetParameterComponent(IParameterComponent* pParameterComponent)
-{
-    m_pParameterComponent = pParameterComponent;
-    if (m_pSipUri != SIP_NULL)
-    {
-        m_pSipUri->SetParameterComponent(pParameterComponent);
-    }
-}
-
 SipUri* SipAddrSpec::GetSipUri()
 {
     if (m_pSipUri != SIP_NULL)
@@ -810,8 +783,6 @@ SIP_BOOL SipAddrSpec::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
         {
             objBuffer += SIP_SIPS_ENC;
         }
-
-        m_pSipUri->SetParameterComponent(m_pParameterComponent);
 
         if (m_pSipUri->Encode(objBuffer, bParams) == SIP_FALSE)
         {
@@ -857,8 +828,6 @@ SIP_BOOL SipAddrSpec::EncodeAddrSpec(SIP_CHAR** ppCurrPos) const
         }
 
         SipEnc_UpdateCurrPos(ppCurrPos);
-
-        m_pSipUri->SetParameterComponent(m_pParameterComponent);
 
         if (m_pSipUri->EncodeSipUri(ppCurrPos) == SIP_FALSE)
         {
@@ -926,7 +895,6 @@ SIP_BOOL SipAddrSpec::DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             return SIP_FALSE;
         }
         /*Set PercentEncoding Value*/
-        pSipUri->SetParameterComponent(m_pParameterComponent);
 
         /*Decode the sip uri*/
         if (pSipUri->DecodeSipUri(pStartPt, nDecLen) == SIP_FALSE)
@@ -955,15 +923,13 @@ SIP_BOOL SipAddrSpec::DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 /*SipNameAddr Class implementation*/
 SipNameAddr::SipNameAddr() :
         m_pszDispName(SIP_NULL),
-        m_pAddrSpec(SIP_NULL),
-        m_pParameterComponent(SIP_NULL)
+        m_pAddrSpec(SIP_NULL)
 {
 }
 
 SipNameAddr::SipNameAddr(const SipNameAddr& objNameAddr) :
         m_pszDispName(SipPf_Strdup(objNameAddr.m_pszDispName)),
-        m_pAddrSpec(SIP_NULL),
-        m_pParameterComponent(objNameAddr.m_pParameterComponent)
+        m_pAddrSpec(SIP_NULL)
 {
     if (objNameAddr.m_pAddrSpec != SIP_NULL)
     {
@@ -1015,15 +981,6 @@ SIP_BOOL SipNameAddr::SetDisplayName(const SIP_CHAR* pszDisplayName)
     return SetCharVar(pszDisplayName, m_pszDispName);
 }
 
-SIP_VOID SipNameAddr::SetParameterComponent(IParameterComponent* pParameterComponent)
-{
-    m_pParameterComponent = pParameterComponent;
-    if (m_pAddrSpec != SIP_NULL)
-    {
-        m_pAddrSpec->SetParameterComponent(pParameterComponent);
-    }
-}
-
 SIP_BOOL SipNameAddr::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 {
     if (m_pAddrSpec == SIP_NULL)
@@ -1045,8 +1002,6 @@ SIP_BOOL SipNameAddr::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     }
 
     objBuffer += LEFT_ANGLE;
-
-    m_pAddrSpec->SetParameterComponent(m_pParameterComponent);
 
     if (m_pAddrSpec->Encode(objBuffer, bParams) == SIP_FALSE)
     {
@@ -1090,8 +1045,6 @@ SIP_BOOL SipNameAddr::EncodeNameAddr(SIP_CHAR** ppCurrPos)
     }
 
     SIP_ENC_LAQUOT(*ppCurrPos);
-
-    m_pAddrSpec->SetParameterComponent(m_pParameterComponent);
 
     if (m_pAddrSpec->EncodeAddrSpec(ppCurrPos) == SIP_FALSE)
     {
@@ -1146,8 +1099,6 @@ SIP_BOOL SipNameAddr::DecodeNameAddr(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-
-    m_pAddrSpec->SetParameterComponent(m_pParameterComponent);
 
     /*Get the length of address spec*/
     SIP_UINT32 nDecLen = pEndPt - pTempNext + SIP_ONE;

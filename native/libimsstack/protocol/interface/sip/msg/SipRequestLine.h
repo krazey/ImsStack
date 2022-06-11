@@ -6,7 +6,7 @@
 #include "SipPercentEncoding.h"
 #include "msg/IParameterComponent.h"
 
-class SipRequestLine : public SipRefBase, public IParameterComponent
+class SipRequestLine : public SipRefBase
 {
 private:
     SIP_CHAR* m_pszMethod;
@@ -40,7 +40,6 @@ public:
     inline const SIP_CHAR* GetSipVersion() const { return m_pszSipVersion; }
 
     SipAddrSpec* GetReqUri();
-    SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const;
 };
 
 #endif  //__SIP_REQUEST_LINE_H__

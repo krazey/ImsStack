@@ -59,7 +59,6 @@ SipRequestLine::SipRequestLine(const SipRequestLine& objHeader) :
     if (objHeader.m_pReqUri != SIP_NULL)
     {
         m_pReqUri = new SipAddrSpec(*(objHeader.m_pReqUri));
-        m_pReqUri->SetParameterComponent(this);
     }
 }
 
@@ -80,7 +79,6 @@ SipRequestLine::~SipRequestLine()
     }
     if (m_pReqUri != SIP_NULL)
     {
-        m_pReqUri->SetParameterComponent(SIP_NULL);
         m_pReqUri->SipDelete();
     }
     if (m_pszSipVersion != SIP_NULL)
@@ -127,9 +125,6 @@ SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
 
     /* Put a space */
     SIP_ENC_SP(*ppCurrPos);
-
-    /*Set Startline for Percent Encoding*/
-    m_pReqUri->SetParameterComponent(this);
 
     /* Encode Request Uri*/
     m_pReqUri->EncodeAddrSpec(ppCurrPos);
@@ -190,7 +185,6 @@ SIP_BOOL SipRequestLine::SetReqUri(SipAddrSpec* pAddrSpec)
     if (pAddrSpec)
     {
         m_pReqUri = pAddrSpec;
-        m_pReqUri->SetParameterComponent(this);
         m_pReqUri->increment();
     }
     return SIP_TRUE;
@@ -213,68 +207,6 @@ SipAddrSpec* SipRequestLine::GetReqUri()
     }
 
     return m_pReqUri;
-}
-
-/******************************************************************************
- * Function name      : SipRequestLine::IsValidComponent
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
-SIP_BOOL SipRequestLine::IsValidComponent(const SIP_CHAR* pszComponent) const
-{
-    if (SipPf_Stricmp(pszComponent, SIP_USER) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_PASSWORD) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_HOST) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_PORT) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_USER_PRM) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_METHOD) == 0)
-    {
-        return SIP_FALSE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_MADDR_PRM) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_TTL_PRM) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_TRNSPORT_PRM) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_LR_PRM) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_OTHER_PRM) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_HEADERS) == 0)
-    {
-        return SIP_FALSE;
-    }
-    return SIP_FALSE;
 }
 
 /******************************************************************************
@@ -328,9 +260,6 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
                 "SipRequestLine::DecodeRequestLine:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-
-    /*Set the Requestline For Percent Encoding*/
-    m_pReqUri->SetParameterComponent(static_cast<IParameterComponent*>(this));
 
     /*Check for validity of Address Spec of Req URI */
 #ifdef SIP_STRICT_PARSING

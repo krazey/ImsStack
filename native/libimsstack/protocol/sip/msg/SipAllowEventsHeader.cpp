@@ -73,8 +73,8 @@ SIP_BOOL SipAllowEventsHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bPara
 
     objBuffer += pszValue;
 
-    return (m_pEventTemplateList != SIP_NULL) ?
-            m_pEventTemplateList->EncodeList(objBuffer, SIP_DOT) : SIP_TRUE;
+    return (m_pEventTemplateList != SIP_NULL) ? m_pEventTemplateList->Encode(objBuffer, SIP_DOT)
+                                              : SIP_TRUE;
 }
 
 /******************************************************************************
@@ -98,7 +98,7 @@ SIP_BOOL SipAllowEventsHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParam
     SipPf_Strcpy(*ppCurrPos, pszValue);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    return (m_pEventTemplateList != SIP_NULL) ? m_pEventTemplateList->EncodeList(ppCurrPos, SIP_DOT)
+    return (m_pEventTemplateList != SIP_NULL) ? m_pEventTemplateList->Encode(ppCurrPos, SIP_DOT)
                                               : SIP_TRUE;
 }
 
@@ -142,7 +142,7 @@ SIP_BOOL SipAllowEventsHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     if (pTempPos != pEndPt)
     {
-        m_pEventTemplateList = new SipParameterList(GetHdrType());
+        m_pEventTemplateList = new SipParameterList();
         if (m_pEventTemplateList == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -150,7 +150,7 @@ SIP_BOOL SipAllowEventsHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         }
         /*Update the tempPos to the start of eventTamplate*/
         pTempPos = pTempPos + SIP_TWO;
-        if (m_pEventTemplateList->DecUriSipParameterList(pTempPos, pEndPt, SIP_DOT) == SIP_FALSE)
+        if (m_pEventTemplateList->Decode(pTempPos, pEndPt, SIP_DOT) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Hdr Prm Decoding Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;

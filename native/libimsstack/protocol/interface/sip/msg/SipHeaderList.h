@@ -26,13 +26,11 @@ public:
     /*Function for decoding of headers*/
     SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
-    SipHeaderBase* GetListObj();
-    SipHeaderBase* GetListObj(SipHeaderBase* pHeader);
+    SipHeaderBase* GetListObj(SipHeaderBase* pHeader = SIP_NULL);
     SIP_BOOL AddHeader(SipHeaderBase* pHeader);
     SIP_BOOL InsertHdrAtPos(SipHeaderBase* pHeader, SIP_UINT32 nIndex);
     void RemoveHdr(SIP_UINT32 nIndex);
 
-    SIP_BOOL IsOptionalValHdr() const;
     inline SIP_UINT32 GetSize() const { return m_headerList.GetSize(); }
 };
 

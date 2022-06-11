@@ -42,7 +42,7 @@ SIP_BOOL SipPChargingFunctionAddressesHeader::Encode(
         return SIP_FALSE;
     }
 
-    if (m_pChargeAddr->EncodeFromList(objBuffer) == SIP_FALSE)
+    if (m_pChargeAddr->Encode(objBuffer) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -62,7 +62,7 @@ SIP_BOOL SipPChargingFunctionAddressesHeader::EncodeHdr(
         return SIP_FALSE;
     }
 
-    if (m_pChargeAddr->EncodeFromList(ppCurrPos) == SIP_FALSE)
+    if (m_pChargeAddr->Encode(ppCurrPos) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
                 "SipPChargingFunctionAddressesHeader::EncodeHdr: Name Value Encoding failed",
@@ -109,7 +109,7 @@ SIP_BOOL SipPChargingFunctionAddressesHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_
     }
 
     /*Decode the Header Value*/
-    m_pChargeAddr = new SipNameValue(GetHdrType());
+    m_pChargeAddr = new SipNameValue();
     if (m_pChargeAddr == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -117,7 +117,7 @@ SIP_BOOL SipPChargingFunctionAddressesHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_
         return SIP_FALSE;
     }
 
-    if (m_pChargeAddr->DecHdrNameVal(pStartPt, pEndPt) == SIP_FALSE)
+    if (m_pChargeAddr->Decode(pStartPt, pEndPt) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipAuthInfoHeader::DecodeHdr: Name Value Decoding Successful", SIP_ZERO, SIP_ZERO);

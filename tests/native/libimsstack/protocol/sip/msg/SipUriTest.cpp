@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+#include "sip_abnfUtil.h"
 #include "msg/SipAddrSpec.h"
 
 namespace android
@@ -45,6 +46,29 @@ TEST_F(SipUriTest, CopyConstructor)
     EXPECT_STREQ("password", pCopySipUri->GetPassword());
 
     pCopySipUri->SipDelete();
+}
+
+TEST_F(SipUriTest, IsValidComponent)
+{
+    SipUri* pSipUri = new SipUri();
+    ASSERT_TRUE(pSipUri != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pSipUri->IsValidComponent(nullptr));
+    EXPECT_EQ(SIP_FALSE, pSipUri->IsValidComponent("sip"));
+    EXPECT_EQ(SIP_TRUE, pSipUri->IsValidComponent(SIP_USER));
+    EXPECT_EQ(SIP_TRUE, pSipUri->IsValidComponent(SIP_PASSWORD));
+    EXPECT_EQ(SIP_TRUE, pSipUri->IsValidComponent(SIP_HOST));
+    EXPECT_EQ(SIP_TRUE, pSipUri->IsValidComponent(SIP_PORT));
+    EXPECT_EQ(SIP_TRUE, pSipUri->IsValidComponent(SIP_USER_PRM));
+    EXPECT_EQ(SIP_TRUE, pSipUri->IsValidComponent(SIP_METHOD));
+    EXPECT_EQ(SIP_TRUE, pSipUri->IsValidComponent(SIP_MADDR_PRM));
+    EXPECT_EQ(SIP_TRUE, pSipUri->IsValidComponent(SIP_TTL_PRM));
+    EXPECT_EQ(SIP_TRUE, pSipUri->IsValidComponent(SIP_TRNSPORT_PRM));
+    EXPECT_EQ(SIP_TRUE, pSipUri->IsValidComponent(SIP_LR_PRM));
+    EXPECT_EQ(SIP_TRUE, pSipUri->IsValidComponent(SIP_OTHER_PRM));
+    EXPECT_EQ(SIP_TRUE, pSipUri->IsValidComponent(SIP_HEADERS));
+
+    pSipUri->SipDelete();
 }
 
 TEST_F(SipUriTest, EncodeSipUri)

@@ -62,36 +62,6 @@ TEST_F(SipRequestLineTest, CopyConstructor)
     pCopyRequestLine->SipDelete();
 }
 
-TEST_F(SipRequestLineTest, IsValidComponent)
-{
-    SipRequestLine* pRequestLine = new SipRequestLine();
-    ASSERT_TRUE(pRequestLine != nullptr);
-
-    EXPECT_EQ(SIP_FALSE, pRequestLine->IsValidComponent(nullptr));
-
-    pRequestLine->SipDelete();
-    pRequestLine = nullptr;
-
-    pRequestLine = new SipRequestLine();
-    ASSERT_TRUE(pRequestLine != nullptr);
-
-    EXPECT_EQ(SIP_TRUE, pRequestLine->IsValidComponent(SIP_USER));
-    EXPECT_EQ(SIP_TRUE, pRequestLine->IsValidComponent(SIP_PASSWORD));
-    EXPECT_EQ(SIP_TRUE, pRequestLine->IsValidComponent(SIP_HOST));
-    EXPECT_EQ(SIP_TRUE, pRequestLine->IsValidComponent(SIP_PORT));
-    EXPECT_EQ(SIP_TRUE, pRequestLine->IsValidComponent(SIP_USER_PRM));
-    EXPECT_EQ(SIP_FALSE, pRequestLine->IsValidComponent(SIP_METHOD));
-    EXPECT_EQ(SIP_TRUE, pRequestLine->IsValidComponent(SIP_MADDR_PRM));
-    EXPECT_EQ(SIP_TRUE, pRequestLine->IsValidComponent(SIP_TTL_PRM));
-    EXPECT_EQ(SIP_TRUE, pRequestLine->IsValidComponent(SIP_TRNSPORT_PRM));
-    EXPECT_EQ(SIP_TRUE, pRequestLine->IsValidComponent(SIP_LR_PRM));
-    EXPECT_EQ(SIP_TRUE, pRequestLine->IsValidComponent(SIP_OTHER_PRM));
-    EXPECT_EQ(SIP_FALSE, pRequestLine->IsValidComponent(SIP_HEADERS));
-
-    pRequestLine->SipDelete();
-    pRequestLine = nullptr;
-}
-
 TEST_F(SipRequestLineTest, EncodeRequestLine)
 {
     const int BUFFER_SIZE = 4096;

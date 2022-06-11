@@ -72,7 +72,7 @@ SIP_BOOL SipAuthInfoHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*
             return SIP_FALSE;
         }
 
-        if (pNameValue->EncodeFromList(objBuffer) == SIP_FALSE)
+        if (pNameValue->Encode(objBuffer) == SIP_FALSE)
         {
             return SIP_FALSE;
         }
@@ -109,7 +109,7 @@ SIP_BOOL SipAuthInfoHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams =
             return SIP_FALSE;
         }
 
-        if (pNameValue->EncodeFromList(ppCurrPos) == SIP_FALSE)
+        if (pNameValue->Encode(ppCurrPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Name Value Encode fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
@@ -157,14 +157,14 @@ SIP_BOOL SipAuthInfoHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             pTempPos = pEndPt;
         }
 
-        SipNameValue* pNmVl = new SipNameValue(GetHdrType());
+        SipNameValue* pNmVl = new SipNameValue();
         if (pNmVl == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        if (pNmVl->DecUriNameVal(pStartPt, pTempPos, SIP_NULL) == SIP_FALSE)
+        if (pNmVl->Decode(pStartPt, pTempPos, SIP_NULL) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name Value Decode fail", SIP_ZERO, SIP_ZERO);
             delete pNmVl;

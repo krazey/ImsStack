@@ -139,9 +139,8 @@ TEST_F(SipIdentityHeaderTest, DecodeHdr)
 
     SipParameters* pParameters = pHeader->GetParameters();
     ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList* pSipParameterList = pParameters->GetParameterList();
-    ASSERT_TRUE(pSipParameterList != nullptr);
-    EXPECT_EQ(2, pSipParameterList->GetCount());
+    SipParameterList& pSipParameterList = pParameters->GetParameterList();
+    EXPECT_EQ(2, pSipParameterList.GetCount());
 
     SipIdentityHeader* pCopyHeader = reinterpret_cast<SipIdentityHeader*>(
             SipIdentityHeader::GetNewObj(SipHeaderBase::IDENTITY, pHeader));

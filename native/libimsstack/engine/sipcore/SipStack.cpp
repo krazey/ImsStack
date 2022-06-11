@@ -1181,18 +1181,13 @@ GLOBAL IMSList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader)
 
     if (pParams != IMS_NULL)
     {
-        SipParameterList* pParamList = pParams->GetParameterList();
+        SipParameterList& objParameterList = pParams->GetParameterList();
 
-        if (pParamList == IMS_NULL)
-        {
-            return objParams;
-        }
-
-        IMS_UINT32 nParamCount = pParamList->GetCount();
+        IMS_UINT32 nParamCount = objParameterList.GetCount();
 
         for (IMS_UINT32 i = 0; i < nParamCount; ++i)
         {
-            SipNameValue* pNameVal = pParamList->GetNameValNode(i);
+            SipNameValue* pNameVal = objParameterList.GetNameValNode(i);
 
             if (pNameVal == IMS_NULL)
             {

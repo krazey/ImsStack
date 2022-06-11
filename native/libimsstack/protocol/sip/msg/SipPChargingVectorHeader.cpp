@@ -40,7 +40,7 @@ SIP_BOOL SipPChargingVectorHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bPa
         return SIP_FALSE;
     }
 
-    if (m_pChargingVectorList->EncodeFromList(objBuffer) == SIP_FALSE)
+    if (m_pChargingVectorList->Encode(objBuffer) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -60,7 +60,7 @@ SIP_BOOL SipPChargingVectorHeader::EncodeHdr(
         return SIP_FALSE;
     }
 
-    if (m_pChargingVectorList->EncodeFromList(ppCurrPos) == SIP_FALSE)
+    if (m_pChargingVectorList->Encode(ppCurrPos) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
                 "SipPChargingVectorHeader::EncodeHdr: Name Value Encoding failed", SIP_ZERO,
@@ -107,7 +107,7 @@ SIP_BOOL SipPChargingVectorHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDec
     }
 
     /*Decode the Header Value*/
-    m_pChargingVectorList = new SipNameValue(GetHdrType());
+    m_pChargingVectorList = new SipNameValue();
     if (m_pChargingVectorList == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -115,7 +115,7 @@ SIP_BOOL SipPChargingVectorHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDec
         return SIP_FALSE;
     }
 
-    if (m_pChargingVectorList->DecHdrNameVal(pStartPt, pEndPt) == SIP_FALSE)
+    if (m_pChargingVectorList->Decode(pStartPt, pEndPt) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipAuthInfoHeader::DecodeHdr: Name Value Decoding Successful", SIP_ZERO, SIP_ZERO);

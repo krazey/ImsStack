@@ -1,6 +1,6 @@
 #include "msg/SipHeaderBase.h"
 #include "msg/SipAuthBase.h"
-#include "msg/SipParameterList.h"
+#include "msg/SipParameters.h"
 #include "sip_error.h"
 #include "sip_debug.h"
 #include "SipTrace.h"
@@ -67,7 +67,7 @@ SIP_BOOL SipAuthBase::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) con
             objBuffer += COMMA;
         }
 
-        if (pNameValue->EncodeFromList(objBuffer) == SIP_FALSE)
+        if (pNameValue->Encode(objBuffer) == SIP_FALSE)
         {
             return SIP_FALSE;
         }
@@ -107,7 +107,7 @@ SIP_BOOL SipAuthBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_T
             (*ppCurrPos)++;
         }
 
-        if (pParamNamValue->EncodeFromList(ppCurrPos) == SIP_FALSE)
+        if (pParamNamValue->Encode(ppCurrPos) == SIP_FALSE)
         {
             return SIP_FALSE;
         }
@@ -270,14 +270,14 @@ SIP_BOOL SipAuthBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             pTempNext = pEndPt;
         }
 
-        SipNameValue* pNmVl = new SipNameValue(GetHdrType());
+        SipNameValue* pNmVl = new SipNameValue();
         if (pNmVl == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        if (pNmVl->DecHdrNameVal(pStartPt, pTempPre) == SIP_FALSE)
+        if (pNmVl->Decode(pStartPt, pTempPre) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name Value decode Fail", SIP_ZERO, SIP_ZERO);
             delete pNmVl;

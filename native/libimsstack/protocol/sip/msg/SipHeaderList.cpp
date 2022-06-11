@@ -120,6 +120,11 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
         return SIP_FALSE;
     }
 
+    if (pHeader->GetHdrType() == SipHeaderBase::AUTHENTICATION_INFO)
+    {
+        nMsgOptions = nMsgOptions | ESIPMSGOPT_ENCMULTILINE;
+    }
+
     if (pHeader->EncodeHdr(ppCurrPos, bParams) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode failed", SIP_ZERO, SIP_ZERO);
@@ -136,11 +141,6 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "pHeader is NULL", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
-        }
-
-        if (pHeader->GetHdrType() == SipHeaderBase::AUTHENTICATION_INFO)
-        {
-            nMsgOptions = nMsgOptions | ESIPMSGOPT_ENCMULTILINE;
         }
 
         if (pHeader->GetHdrType() == SipHeaderBase::UNKNOWN)
@@ -176,20 +176,6 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipHeaderList::GetListObj
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
-SipHeaderBase* SipHeaderList::GetListObj()
-{
-    SIP_INT32 eHdrType = GetHdrType();
-    return gaFactoryArray[eHdrType](eHdrType, SIP_NULL);
-}
 /******************************************************************************
  * Function name      : SipHeaderList::GetListObj
  *
@@ -316,7 +302,21 @@ SIP_BOOL SipHeaderList::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             return SIP_FALSE;
         }
 
-        return pHdrBase->DecodeHdr(pStartPt, nDecLen);
+        if (pHdrBase->DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Hdr Decoding Fail", SIP_ZERO, SIP_ZERO);
+            pHdrBase->SipDelete();
+            return SIP_FALSE;
+        }
+
+        if (AddHeader(pHdrBase) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list Failed", SIP_ZERO, SIP_ZERO);
+            pHdrBase->SipDelete();
+            return SIP_FALSE;
+        }
+
+        return SIP_TRUE;
     }
 
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;

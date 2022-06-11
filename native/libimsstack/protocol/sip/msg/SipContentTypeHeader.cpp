@@ -149,15 +149,11 @@ SIP_CHAR* SipContentTypeHeader::GetBoundary()
         return SIP_NULL;
     }
 
-    SipParameterList* pParameterList = pParameters->GetParameterList();
+    SipParameterList& objParameterList = pParameters->GetParameterList();
 
-    if (pParameterList == SIP_NULL)
-    {
-        return SIP_NULL;
-    }
-
-    SIP_CHAR* pszVal = pParameterList->GetParamValue("boundary");
+    SIP_CHAR* pszVal = objParameterList.GetParamValue("boundary");
     SIP_CHAR* pszStripDquoteVal = StripDQUOTE(pszVal);
+
     if (pszStripDquoteVal == SIP_NULL)
     {
         return pszVal;

@@ -187,17 +187,16 @@ TEST_F(SipAcceptHeaderTest, DecodeHdr)
 
     SipParameters* pParameters = pHeader->GetParameters();
     ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList* pSipParameterList = pParameters->GetParameterList();
-    ASSERT_TRUE(pSipParameterList != nullptr);
+    SipParameterList& objParameterList = pParameters->GetParameterList();
 
-    EXPECT_EQ(2, pSipParameterList->GetCount());
+    EXPECT_EQ(2, objParameterList.GetCount());
 
-    SipNameValue* pNameVal = pSipParameterList->GetNameValNode(0);
+    SipNameValue* pNameVal = objParameterList.GetNameValNode(0);
     EXPECT_STREQ("q", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("0.4", pNameVal->m_valueList.GetAt(0));
 
-    pNameVal = pSipParameterList->GetNameValNode(1);
+    pNameVal = objParameterList.GetNameValNode(1);
     EXPECT_STREQ("level", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("1", pNameVal->m_valueList.GetAt(0));

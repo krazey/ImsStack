@@ -89,58 +89,6 @@ TEST_F(SipNameAddrHeaderTest, GetNameAddr)
     pHeader->SipDelete();
 }
 
-TEST_F(SipNameAddrHeaderTest, IsValidComponent)
-{
-    SipNameAddrHeader* pHeader = reinterpret_cast<SipNameAddrHeader*>(
-            SipNameAddrHeader::GetNewObj(SipHeaderBase::TO, nullptr));
-    ASSERT_TRUE(pHeader != nullptr);
-
-    EXPECT_EQ(SIP_FALSE, pHeader->IsValidComponent(nullptr));
-    EXPECT_EQ(SIP_FALSE, pHeader->IsValidComponent("sip"));
-    EXPECT_EQ(SIP_TRUE, pHeader->IsValidComponent(SIP_USER));
-    EXPECT_EQ(SIP_TRUE, pHeader->IsValidComponent(SIP_PASSWORD));
-    EXPECT_EQ(SIP_TRUE, pHeader->IsValidComponent(SIP_HOST));
-    EXPECT_EQ(SIP_TRUE, pHeader->IsValidComponent(SIP_PORT));
-    EXPECT_EQ(SIP_TRUE, pHeader->IsValidComponent(SIP_USER_PRM));
-    EXPECT_EQ(SIP_TRUE, pHeader->IsValidComponent(SIP_METHOD));
-    EXPECT_EQ(SIP_TRUE, pHeader->IsValidComponent(SIP_MADDR_PRM));
-    EXPECT_EQ(SIP_TRUE, pHeader->IsValidComponent(SIP_TTL_PRM));
-    EXPECT_EQ(SIP_TRUE, pHeader->IsValidComponent(SIP_TRNSPORT_PRM));
-    EXPECT_EQ(SIP_TRUE, pHeader->IsValidComponent(SIP_LR_PRM));
-    EXPECT_EQ(SIP_TRUE, pHeader->IsValidComponent(SIP_OTHER_PRM));
-    EXPECT_EQ(SIP_TRUE, pHeader->IsValidComponent(SIP_HEADERS));
-
-    pHeader->SipDelete();
-    pHeader = nullptr;
-}
-
-TEST_F(SipNameAddrHeaderTest, IsPercentEncHdr)
-{
-    const SIP_INT32 nCount = 9;
-    SIP_INT32 arPercentEncodeHeaders[nCount][2] = {
-            {SipHeaderBase::TO,              SIP_TRUE },
-            {SipHeaderBase::FROM,            SIP_TRUE },
-            {SipHeaderBase::ROUTE,           SIP_TRUE },
-            {SipHeaderBase::RECORD_ROUTE,    SIP_TRUE },
-            {SipHeaderBase::CONTACT,         SIP_TRUE },
-            {SipHeaderBase::HISTORY_INFO,    SIP_TRUE },
-            {SipHeaderBase::TRIGGER_CONSENT, SIP_TRUE },
-            {SipHeaderBase::REFERRED_BY,     SIP_FALSE},
-            {SipHeaderBase::REFER_TO,        SIP_FALSE}
-    };
-
-    for (SIP_INT32 i = 0; i < nCount; i++)
-    {
-        SipNameAddrHeader* pHeader = reinterpret_cast<SipNameAddrHeader*>(
-                SipNameAddrHeader::GetNewObj(arPercentEncodeHeaders[i][0], nullptr));
-        ASSERT_TRUE(pHeader != nullptr);
-
-        EXPECT_EQ(arPercentEncodeHeaders[i][1], pHeader->IsPercentEncHdr());
-
-        pHeader->SipDelete();
-    }
-}
-
 TEST_F(SipNameAddrHeaderTest, EncodeHdr)
 {
     SipNameAddrHeader* pHeader = reinterpret_cast<SipNameAddrHeader*>(
@@ -274,10 +222,9 @@ TEST_F(SipNameAddrHeaderTest, DecodeHdr)
 
     SipParameters* pParameters = pHeader->GetParameters();
     ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList* pSipParameterList = pParameters->GetParameterList();
-    ASSERT_TRUE(pSipParameterList != nullptr);
-    EXPECT_EQ(1, pSipParameterList->GetCount());
-    SipNameValue* pNameVal = pSipParameterList->GetNameValNode(0);
+    SipParameterList& objParameterList = pParameters->GetParameterList();
+    EXPECT_EQ(1, objParameterList.GetCount());
+    SipNameValue* pNameVal = objParameterList.GetNameValNode(0);
     EXPECT_STREQ("param-name", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("param-value", pNameVal->m_valueList.GetAt(0));

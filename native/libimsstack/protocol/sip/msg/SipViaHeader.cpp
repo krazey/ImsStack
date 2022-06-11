@@ -309,9 +309,9 @@ const SIP_CHAR* SipViaHeader::GetBranch() const
     {
         return SIP_NULL;
     }
-    SipParameterList* pParameterList = pParameters->GetParameterList();
+    SipParameterList& objParameterList = pParameters->GetParameterList();
 
-    return pParameterList->GetParamValue("branch");
+    return objParameterList.GetParamValue("branch");
 }
 
 /******************************************************************************

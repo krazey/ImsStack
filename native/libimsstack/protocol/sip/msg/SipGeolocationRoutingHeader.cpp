@@ -66,7 +66,7 @@ SIP_BOOL SipGeolocationRoutingHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL 
         return SIP_FALSE;
     }
 
-    return m_pGeoLocationRoutingList->EncodeFromList(objBuffer);
+    return m_pGeoLocationRoutingList->Encode(objBuffer);
 }
 
 /******************************************************************************
@@ -87,7 +87,7 @@ SIP_BOOL SipGeolocationRoutingHeader::EncodeHdr(
         return SIP_FALSE;
     }
 
-    return m_pGeoLocationRoutingList->EncodeFromList(ppCurrPos);
+    return m_pGeoLocationRoutingList->Encode(ppCurrPos);
 }
 
 SIP_BOOL SipGeolocationRoutingHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
@@ -98,7 +98,7 @@ SIP_BOOL SipGeolocationRoutingHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 n
         return SIP_FALSE;
     }
 
-    m_pGeoLocationRoutingList = new SipNameValue(GetHdrType());
+    m_pGeoLocationRoutingList = new SipNameValue();
     if (m_pGeoLocationRoutingList == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -106,7 +106,7 @@ SIP_BOOL SipGeolocationRoutingHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 n
     }
 
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    return m_pGeoLocationRoutingList->DecHdrNameVal(pStartPt, pEndPt);
+    return m_pGeoLocationRoutingList->Decode(pStartPt, pEndPt);
 }
 
 SipHeaderBase* SipGeolocationRoutingHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)

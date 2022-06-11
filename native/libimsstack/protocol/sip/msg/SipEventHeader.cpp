@@ -188,7 +188,7 @@ SIP_BOOL SipEventHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
         pTempPos = pTempPos + SIP_TWO;
 
-        if (m_pEventTemplateList->DecUriSipParameterList(pTempPos, pEndPt, SIP_DOT) == SIP_FALSE)
+        if (m_pEventTemplateList->Decode(pTempPos, pEndPt, SIP_DOT) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODDECODER, "Event Package Decoding Failed", SIP_ZERO, SIP_ZERO);

@@ -5,10 +5,10 @@
 
 #include "sip_pf_datatypes.h"
 #include "SipRefBase.h"
-#include "msg/SipParameterList.h"
+#include "msg/SipParameters.h"
 #include "msg/IParameterComponent.h"
 
-class SipUri : public SipRefBase
+class SipUri : public SipRefBase, public IParameterComponent
 {
 public:
     /*Enumeration for URI Scheme*/
@@ -33,8 +33,6 @@ private:
     // "?"   header   *( "&"   header )
     // each node consists of a SipNameValue obj for one header
     SipParameterList* m_pUriHdrParamList;
-    // For Percent Encoding and Decoding
-    IParameterComponent* m_pParameterComponent;
 
     SIP_BOOL DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
@@ -46,6 +44,8 @@ public:
     SipUri(const SipUri& objSipUri);
     /*destructor*/
     ~SipUri();
+
+    virtual SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const;
 
     SIP_BOOL DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
@@ -81,7 +81,6 @@ public:
     SIP_BOOL DecodeSipUri(SIP_CHAR** ppCurrPos);
 
     SIP_BOOL RemoveHdrParam(const SIP_CHAR* pszName);
-    SIP_VOID SetParameterComponent(IParameterComponent* pParameterComponent);
 };
 
 class SipAddrSpec : public SipRefBase
@@ -102,8 +101,6 @@ private:
 protected:
     SipUri* m_pSipUri;
     SIP_CHAR* m_pszAbsUri;
-
-    IParameterComponent* m_pParameterComponent;
 
 public:
     SipAddrSpec();
@@ -127,7 +124,6 @@ public:
 
     inline const SIP_CHAR* GetAbsUri() const { return m_pszAbsUri; }
 
-    SIP_VOID SetParameterComponent(IParameterComponent* pParameterComponent);
     /*get methods*/
 
     /* Get methods as reference */
@@ -139,7 +135,6 @@ class SipNameAddr : public SipRefBase
 public:
     SIP_CHAR* m_pszDispName;
     SipAddrSpec* m_pAddrSpec;
-    IParameterComponent* m_pParameterComponent;
 
 public:
     SipNameAddr();
@@ -157,8 +152,6 @@ public:
     SipAddrSpec* GetAddrSpec();
 
     SIP_BOOL SetDisplayName(const SIP_CHAR* pszDisplayName);
-
-    SIP_VOID SetParameterComponent(IParameterComponent* pParameterComponent);
 
     inline const SIP_CHAR* GetDisplayName() const { return m_pszDispName; }
 };

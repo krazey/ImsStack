@@ -255,10 +255,9 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     EXPECT_STREQ("render", pHeader->GetValue());
     SipParameters* pParameters = pHeader->GetParameters();
     ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList* pSipParameterList = pParameters->GetParameterList();
-    ASSERT_TRUE(pSipParameterList != nullptr);
-    EXPECT_EQ(1, pSipParameterList->GetCount());
-    SipNameValue* pNameVal = pSipParameterList->GetNameValNode(0);
+    SipParameterList& objParameterList = pParameters->GetParameterList();
+    EXPECT_EQ(1, objParameterList.GetCount());
+    SipNameValue* pNameVal = objParameterList.GetNameValNode(0);
     EXPECT_STREQ("handling", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("optional", pNameVal->m_valueList.GetAt(0));
@@ -304,10 +303,9 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     EXPECT_STREQ("*", pHeader->GetValue());
     pParameters = pHeader->GetParameters();
     ASSERT_TRUE(pParameters != nullptr);
-    pSipParameterList = pParameters->GetParameterList();
-    ASSERT_TRUE(pSipParameterList != nullptr);
-    EXPECT_EQ(1, pSipParameterList->GetCount());
-    pNameVal = pSipParameterList->GetNameValNode(0);
+    SipParameterList& objParameterList1 = pParameters->GetParameterList();
+    EXPECT_EQ(1, objParameterList1.GetCount());
+    pNameVal = objParameterList1.GetNameValNode(0);
     EXPECT_STREQ("param-name", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("param-value", pNameVal->m_valueList.GetAt(0));
