@@ -25,6 +25,7 @@
 #include "INetworkWatcher.h"
 
 #include "handle/AosHandle.h"
+#include "handle/AosFeatureTag.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosHandle.h"
 #include "interface/IAosNConfiguration.h"
@@ -147,8 +148,6 @@ protected:
 
     void SetSuspendedReason(IN IMS_UINT32 nReason) { m_pAosHandle->SetSuspendedReason(nReason); }
 
-    IImsAosMonitor* GetMonitor() { return m_pAosHandle->m_piMonitor; }
-
     void SetNetSrvIn(IN IMS_BOOL bNetSrvIn) { m_pAosHandle->m_bNetSrvIn = bNetSrvIn; }
 
     IImsAosInfo* GetAosInfo() { return m_pAosHandle->m_piInfo; }
@@ -217,6 +216,21 @@ protected:
     IMS_UINT32 ConvertToAosFeature(IN IMS_UINT32 nConfigFeature)
     {
         return m_pAosHandle->ConvertToAosFeature(nConfigFeature);
+    }
+
+    void SetRegFeatureTagRequired(IN IMS_BOOL bRequired)
+    {
+        m_pAosHandle->m_bRegFeatureTagRequired = bRequired;
+    }
+
+    void SetFeatureTagList(IN AosFeatureTagList& objFeatureTagList)
+    {
+        m_pAosHandle->m_objFeatureTagList = objFeatureTagList;
+    }
+
+    void SetBindedFeatureTagList(IN AosFeatureTagList& objBindedFeatureTagList)
+    {
+        m_pAosHandle->m_objBindedFeatureTagList = objBindedFeatureTagList;
     }
 };
 
@@ -354,6 +368,41 @@ TEST_F(AosHandleTest, SetNetworkRegBinded_IsNetworkRegBinded)
     EXPECT_FALSE(m_pAosHandle->IsNetworkRegBinded());
 }
 
+TEST_F(AosHandleTest, IsRegFeatureTagRequired_)
+{
+    IMS_BOOL bRegFeatureTagRequired = m_pAosHandle->IsRegFeatureTagRequired();
+
+    SetRegFeatureTagRequired(IMS_TRUE);
+    EXPECT_TRUE(m_pAosHandle->IsRegFeatureTagRequired());
+
+    SetRegFeatureTagRequired(IMS_FALSE);
+    EXPECT_FALSE(m_pAosHandle->IsRegFeatureTagRequired());
+
+    SetRegFeatureTagRequired(bRegFeatureTagRequired);
+}
+
+TEST_F(AosHandleTest, GetFeatureTagList_)
+{
+    AosFeatureTagList& objFeatureTagList = m_pAosHandle->GetFeatureTagList();
+    AosFeatureTagList objTestFeatureTagList;
+
+    SetFeatureTagList(objTestFeatureTagList);
+    EXPECT_TRUE(m_pAosHandle->GetFeatureTagList().Equals(objTestFeatureTagList));
+
+    SetFeatureTagList(objFeatureTagList);
+}
+
+TEST_F(AosHandleTest, GetBindedFeatureTagList_)
+{
+    AosFeatureTagList& objBindedFeatureTagList = m_pAosHandle->GetBindedFeatureTagList();
+    AosFeatureTagList objTestBindedFeatureTagList;
+
+    SetBindedFeatureTagList(objTestBindedFeatureTagList);
+    EXPECT_TRUE(m_pAosHandle->GetBindedFeatureTagList().Equals(objTestBindedFeatureTagList));
+
+    SetBindedFeatureTagList(objBindedFeatureTagList);
+}
+
 TEST_F(AosHandleTest, ProcessFeatureTagChange_NoChange)
 {
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
@@ -362,6 +411,18 @@ TEST_F(AosHandleTest, ProcessFeatureTagChange_NoChange)
     ClearBindedFeature();
     AddFeature(ImsAosFeature::MMTEL);
     AddBindedFeature(ImsAosFeature::MMTEL);
+
+    m_pAosHandle->ProcessFeatureTagChange();
+}
+
+TEST_F(AosHandleTest, ProcessFeatureTagChange_STATE_INVALID)
+{
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
+
+    ClearFeature();
+    ClearBindedFeature();
+    AddFeature(ImsAosFeature::MMTEL);
+    SetState(AosHandle::STATE_INVALID);
 
     m_pAosHandle->ProcessFeatureTagChange();
 }
@@ -414,6 +475,16 @@ TEST_F(AosHandleTest, ProcessFeatureTagChange_STATE_CONNECTED)
     m_pAosHandle->ProcessFeatureTagChange();
 }
 
+TEST_F(AosHandleTest, App_StateChanged_)
+{
+    EXPECT_TRUE(m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTED, 0));
+    EXPECT_TRUE(m_pAosHandle->App_StateChanged(IAosApplication::APP_CONNECTED, 0));
+    EXPECT_TRUE(m_pAosHandle->App_StateChanged(IAosApplication::APP_UPDATING, 0));
+    EXPECT_TRUE(m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0));
+    EXPECT_FALSE(m_pAosHandle->App_StateChanged(-1, 0));
+    EXPECT_FALSE(m_pAosHandle->App_StateChanged(4, 0));
+}
+
 TEST_F(AosHandleTest, SetListener_)
 {
     IImsAosListener* piListener = static_cast<IImsAosListener*>(&m_objMockIImsAosListener);
@@ -463,6 +534,18 @@ TEST_F(AosHandleTest, App_Notify_No_Notify)
 
     SetState(AosHandle::STATE_DISCONNECTING);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnecting(_)).Times(0);
+    EXPECT_FALSE(m_pAosHandle->App_Notify());
+}
+
+TEST_F(AosHandleTest, App_Notify_STATE_INVALID)
+{
+    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    ASSERT_NE(GetListener(), nullptr);
+
+    SetNotify(IMS_TRUE);
+    ASSERT_TRUE(GetNotify());
+
+    SetState(AosHandle::STATE_INVALID);
     EXPECT_FALSE(m_pAosHandle->App_Notify());
 }
 
@@ -631,12 +714,16 @@ TEST_F(AosHandleTest, IsImsSuspended_)
     EXPECT_TRUE(m_pAosHandle->IsImsSuspended());
 }
 
-TEST_F(AosHandleTest, SetMonitor_)
+TEST_F(AosHandleTest, SetMonitor_GetMonitor)
 {
+    IImsAosMonitor* piMonitor = m_pAosHandle->GetMonitor();
+
     MockIImsAosMonitor objMockIImsAosMonitor;
-    IImsAosMonitor* piMonitor = static_cast<IImsAosMonitor*>(&objMockIImsAosMonitor);
+    IImsAosMonitor* piTestMonitor = static_cast<IImsAosMonitor*>(&objMockIImsAosMonitor);
+    m_pAosHandle->SetMonitor(piTestMonitor);
+    EXPECT_EQ(m_pAosHandle->GetMonitor(), piTestMonitor);
+
     m_pAosHandle->SetMonitor(piMonitor);
-    EXPECT_EQ(GetMonitor(), piMonitor);
 }
 
 TEST_F(AosHandleTest, SetReady_Not_Mtc)
@@ -648,13 +735,28 @@ TEST_F(AosHandleTest, SetReady_Not_Mtc)
     EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::SIP_CONTROLLER));
 }
 
+TEST_F(AosHandleTest, SetReady_Null_CallTracker)
+{
+    IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker();
+
+    AosProvider::GetInstance()->SetCallTracker(IMS_NULL, 0);
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::MTC));
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_FALSE, ImsAosService::MTC));
+
+    AosProvider::GetInstance()->SetCallTracker(piCallTracker);
+}
+
 TEST_F(AosHandleTest, SetReady_Mtc)
 {
+    IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker();
+
     MockIAosCallTracker objMockIAosCallTracker;
     AosProvider::GetInstance()->SetCallTracker(
             static_cast<IAosCallTracker*>(&objMockIAosCallTracker), 0);
     EXPECT_TRUE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::MTC));
     EXPECT_FALSE(m_pAosHandle->SetReady(IMS_FALSE, ImsAosService::MTC));
+
+    AosProvider::GetInstance()->SetCallTracker(piCallTracker);
 }
 
 TEST_F(AosHandleTest, NetTracker_StatusChanged_)
@@ -1018,6 +1120,12 @@ TEST_F(AosHandleTest, IsNetworkTypeMatchedToRat_)
     EXPECT_FALSE(IsNetworkTypeMatchedToRat(3, NW_REPORT_RADIO_LTE));
     EXPECT_FALSE(IsNetworkTypeMatchedToRat(3, NW_REPORT_RADIO_WLAN));
     EXPECT_TRUE(IsNetworkTypeMatchedToRat(3, NW_REPORT_RADIO_NR));
+
+    EXPECT_FALSE(IsNetworkTypeMatchedToRat(0, NW_REPORT_RADIO_NOSRV));
+    EXPECT_FALSE(IsNetworkTypeMatchedToRat(0, NW_REPORT_RADIO_CDMA));
+    EXPECT_FALSE(IsNetworkTypeMatchedToRat(0, NW_REPORT_RADIO_EHRPD));
+    EXPECT_FALSE(IsNetworkTypeMatchedToRat(0, NW_REPORT_RADIO_GSM));
+    EXPECT_FALSE(IsNetworkTypeMatchedToRat(0, NW_REPORT_RADIO_WCDMA));
 }
 
 TEST_F(AosHandleTest, IsServiceFeature_)
@@ -1126,4 +1234,5 @@ TEST_F(AosHandleTest, ConvertToAosFeature_)
             ImsAosFeature::VIDEO);
     EXPECT_EQ(ConvertToAosFeature(CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_SMS),
             ImsAosFeature::SMSIP);
+    EXPECT_EQ(ConvertToAosFeature(0), ImsAosFeature::NONE);
 }
