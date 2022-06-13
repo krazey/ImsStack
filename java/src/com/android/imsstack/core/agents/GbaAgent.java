@@ -120,9 +120,14 @@ public class GbaAgent implements GbaInterface {
                 new TelephonyManager.BootstrapAuthenticationCallback() {
                     @Override
                     public void onKeysAvailable(byte[] gbaKey, String transactionId) {
-                        String key = Base64.encodeToString(gbaKey, Base64.NO_WRAP);
-                        GbaCredentials credintials = new GbaCredentials(transactionId, key);
-                        credentialsFuture.complete(credintials);
+                        if (gbaKey == null || TextUtils.isEmpty(transactionId)) {
+                            ImsLog.e(mSlotId, "onKeysAvailable with wrong value");
+                            credentialsFuture.complete(null);
+                        } else {
+                            String key = Base64.encodeToString(gbaKey, Base64.NO_WRAP);
+                            GbaCredentials credintials = new GbaCredentials(transactionId, key);
+                            credentialsFuture.complete(credintials);
+                        }
                     }
 
                     @Override
