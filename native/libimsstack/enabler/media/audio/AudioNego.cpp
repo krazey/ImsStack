@@ -1483,16 +1483,51 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
             // bandwidth list
-            if (pEvsFmtp->bShowBwList == IMS_TRUE)
+            if (pEvsFmtp->nBwList != 0 && pEvsFmtp->bShowBwList)
             {
                 if (strFmtp.GetLength() > 0)
                 {
-                    strFmtp.Append(";");
+                    strFmtp.Append("; ");
                 }
 
-                AString strTemp;
+                AString strTemp, strMode, strFirstBandwidth, strLastBandwidth;
+                IMS_UINT32 nBandwidthList;
+                IMS_UINT32 nBandwidthListTotalCnt = 0;
+
+                // TODO Media: Need to check that '11' is proper later
+                for (nBandwidthList = 0; nBandwidthList <= 11; nBandwidthList++)
+                {
+                    if ((pEvsFmtp->nBwList) & (1 << nBandwidthList))
+                    {
+                        if (strTemp.GetLength() > 0)
+                        {
+                            strTemp.Append(",");
+                        }
+
+                        strMode.Sprintf("%s", EVS_BW[nBandwidthList].GetStr());
+                        strTemp.Append(strMode);
+                        nBandwidthListTotalCnt++;
+
+                        if (nBandwidthListTotalCnt == 1)
+                        {
+                            strFirstBandwidth = EVS_BW[nBandwidthList];
+                        }
+
+                        strLastBandwidth = EVS_BW[nBandwidthList];
+                    }
+                }
+
+                if (nBandwidthListTotalCnt > 1)
+                {
+                    strTemp = "";
+                    strTemp.Append(strFirstBandwidth);
+                    strTemp.Append("-");
+                    strTemp.Append(strLastBandwidth);
+                }
+
                 strFmtp.Append("bw=");
-                strFmtp.Append(EVS_BW_LIST[pEvsFmtp->nBwList]);
+                strFmtp.Append(strTemp);
+                IMS_TRACE_D("MakeSdpFromProfile() - bwList[%s]", strTemp.GetStr(), 0, 0);
             }
             // bitrate list
             if (pEvsFmtp->bShowBrList == IMS_TRUE)
