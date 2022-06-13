@@ -777,6 +777,32 @@ IMS_BOOL AudioNego::SetPort(IN IMS_UINT32 nPort)
 }
 
 PUBLIC
+IPAddress AudioNego::GetNegotiatedRemoteAddr()
+{
+    AudioProfile* pProfile = GetNegotiatedDestProfile();
+
+    if (pProfile != IMS_NULL)
+    {
+        return pProfile->objIpAddr;
+    }
+
+    return IPAddress("");
+}
+
+PUBLIC
+IMS_UINT32 AudioNego::GetNegotiatedRemotePort()
+{
+    AudioProfile* pProfile = GetNegotiatedDestProfile();
+
+    if (pProfile != IMS_NULL)
+    {
+        return pProfile->nDataPort;
+    }
+
+    return 0;
+}
+
+PUBLIC
 AudioNego::OaModel* AudioNego::GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed)
 {
     OaModel* pLatestOaModel = IMS_NULL;
@@ -811,6 +837,7 @@ IMS_BOOL AudioNego::GetNegotiatedProfileSet(OUT AudioProfile*& pSrcProfile,
         OUT AudioProfile*& pDestProfile, OUT AudioProfile*& pNegotiatedProfile)
 {
     OaModel* pOaModel = GetNegotiatedOaModel();
+
     if (pOaModel != IMS_NULL)
     {
         pSrcProfile = pOaModel->pSrcProfile;
@@ -822,6 +849,19 @@ IMS_BOOL AudioNego::GetNegotiatedProfileSet(OUT AudioProfile*& pSrcProfile,
     {
         return IMS_FALSE;
     }
+}
+
+PUBLIC
+AudioProfile* AudioNego::GetNegotiatedDestProfile()
+{
+    OaModel* pOaModel = GetNegotiatedOaModel();
+
+    if (pOaModel != IMS_NULL)
+    {
+        return pOaModel->pDestProfile;
+    }
+
+    return IMS_NULL;
 }
 
 PUBLIC

@@ -15,16 +15,17 @@
  */
 
 // == INCLUDES =============================================================
-#include "ServiceMessage.h"
-#include "ServiceTrace.h"
+#include "Configuration.h"
+#include "config/MediaSessionConfigFactory.h"
+#include "EnablerUtils.h"
 #include "ICoreService.h"
 #include "ISessionDescriptor.h"
-#include "Configuration.h"
 #include "MediaDef.h"
-#include "EnablerUtils.h"
-#include "MediaSession.h"
 #include "MediaManager.h"
-#include "config/MediaSessionConfigFactory.h"
+#include "MediaNegoUtil.h"
+#include "MediaSession.h"
+#include "ServiceMessage.h"
+#include "ServiceTrace.h"
 
 // == DEFINES =========================================================
 __IMS_TRACE_TAG_USER_DECL__("MED.SS");
@@ -39,13 +40,10 @@ MediaSession::MediaSession(
         m_nCallKey(nCallKey),
         m_pClientListener(IMS_NULL),
         m_pEnvironment(IMS_NULL),
-        m_eSessionState(EARLY_SESSION),
-        m_pVideoSession(IMS_NULL),
-        m_nRtpTimer(0),
-        m_nAudioSessionState(0)
+        m_nRtpTimer(0)
 {
-    IMS_TRACE_D("+MediaSession() - ServiceType[%" PFLS_u "], CallKey[%d]", eServiceType,
-            nCallKey, 0);
+    IMS_TRACE_D(
+            "+MediaSession() - ServiceType[%" PFLS_u "], CallKey[%d]", eServiceType, nCallKey, 0);
 
     CreateMediaConfig(eServiceType);
 }
@@ -56,9 +54,8 @@ PUBLIC VIRTUAL MediaSession::~MediaSession()
     std::lock_guard<std::mutex> guard(m_objMutex);
 
     ClearMediaNego();
-    ClearAudioMediaSession();
-    DeleteVideoMediaSession();
-    ClearMediaSessionTypeNode();
+    m_objAudioController.CloseSession();
+    m_objVideoController.CloseSession();
 
     if (m_pEnvironment != IMS_NULL)
     {
@@ -80,6 +77,7 @@ MEDIA_NETWORK_TYPE MediaSession::GetNetworkType()
     {
         return m_pEnvironment->eNetworkType;
     }
+
     return MEDIA_NETWORK_NONE;
 }
 
@@ -123,33 +121,17 @@ PUBLIC VIRTUAL void MediaSession::OnNotify(
 PUBLIC
 IMS_BOOL MediaSession::IsHoldSession(IN IMS_UINTP nNegoId)
 {
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
-
-    if (pAudioSession != IMS_NULL)
-    {
-        return pAudioSession->IsDirectionHold();
-    }
-
-    return IMS_FALSE;
+    return (m_objAudioController.IsHoldSession(nNegoId) && m_objVideoController.IsHoldSession());
 }
 
 PUBLIC
 IMS_BOOL MediaSession::HoldSession()
 {
     IMS_TRACE_D("HoldSession()", 0, 0, 0);
-    AudioMediaSession* pAudioSession = FindAudioSession();
-
-    if (pAudioSession != IMS_NULL)
-    {
-        UpdateMediaQualityThresholdForHold();
-        pAudioSession->SetMediaQuality();
-        HoldRtpConfig();
-        pAudioSession->Modify();
-    }
-
+    m_objAudioController.HoldSession();
+    m_objVideoController.HoldSession();
     return IMS_FALSE;
 }
-
 
 PUBLIC
 void MediaSession::ReportToClient(IN RtpError eError, IN MEDIA_CONTENT_TYPE eMediaType)
@@ -166,7 +148,6 @@ void MediaSession::ReportToClient(IN RtpError eError, IN MEDIA_CONTENT_TYPE eMed
         }
     }
 }
-
 
 PUBLIC VIRTUAL void MediaSession::SetMtcListener(
         IN IMediaSessionClientListener* piMediaSessionListener)
@@ -229,29 +210,27 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
 {
     IMS_TRACE_I("CreateProfile() - nNegoId[%" PFLS_x "], MediaType[%d]", nNegoId, eMediaType, 0);
 
-    IMS_UINTP nMediaNego = CreateMediaNego(nNegoId);
+    MediaNego* pMediaNego = CreateMediaNego(nNegoId);
 
-    if (nMediaNego == IMS_NULL)
+    if (pMediaNego == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    if (CreateAudioMediaSession(nMediaNego) == IMS_NULL)
+    IMS_UINTP nMediaNego = reinterpret_cast<IMS_UINTP>(pMediaNego);
+
+    AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+
+    if (pAudioNego != NULL)
     {
-        return IMS_NULL;
+        m_objAudioController.CreateSession(this, nMediaNego, pAudioNego->GetConfig());
     }
 
-    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
-    {
-        if (CreateVideoMediaSession(nMediaNego) == IMS_NULL)
-        {
-            return IMS_NULL;
-        }
-    }
+    VideoNego* pVideoNego = pMediaNego->GetVideoNego();
 
-    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
+    if (pVideoNego != IMS_NULL)
     {
-        // TODO_MEDIA: add implementation for Text
+        m_objVideoController.CreateSession(this, pVideoNego->GetConfig());
     }
 
     IMS_TRACE_I("CreateProfile() - exit nMediaNego[%" PFLS_x "], Size[%d]", nMediaNego,
@@ -262,33 +241,17 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::DestroyProfile(IMS_UINTP nNegoId)
 {
-    IMS_TRACE_D("DestroyProfile() - nNegoId[%" PFLS_x "], SessionState[%d]", nNegoId,
-            m_eSessionState, 0);
+    IMS_TRACE_D("DestroyProfile() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
 
     if (nNegoId == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    if (m_eSessionState == CONFIRMED_SESSION)
-    {
-        IMS_TRACE_E(0, "DestroyProfile() - error confirmed session", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
-
-    if (pAudioSession != IMS_NULL)
-    {
-        pAudioSession->Delete();
-        IMS_BOOL bRet = IMS_TRUE;
-        bRet &= DeleteMediaNego(nNegoId);
-        bRet &= DeleteAudioMediaSession(nNegoId);
-        bRet &= DeleteMediaSessionTypeNode(nNegoId);
-        return bRet;
-    }
-
-    return IMS_FALSE;
+    IMS_BOOL bRet = IMS_TRUE;
+    bRet &= DeleteMediaNego(nNegoId);
+    bRet &= m_objAudioController.DeleteSession(nNegoId);
+    return bRet;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSDP(IN IMS_UINTP nNegoId, OUT ISession* pSession,
@@ -299,21 +262,33 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSDP(IN IMS_UINTP nNegoId, OUT ISession
             pSession, eMediaType);
     IMS_TRACE_I("FormSDP() - DIR = Audio[%d], Video[%d], Text[%d]", eAudioDir, eVideoDir, eTextDir);
 
-    CreateNotExistingSession(nNegoId, eMediaType);
-
     MediaNego* pMediaNego = FindMediaNego(nNegoId);
+
     if (pMediaNego == IMS_NULL)
     {
         IMS_TRACE_E(0, "FormSDP() - Can't find nNegoId[%d]", nNegoId, 0, 0);
         return IMS_FALSE;
     }
 
-    OpenSession(nNegoId);
-
     if (pMediaNego->FormSDP(pSession, eMediaType, eAudioDir, eVideoDir, eTextDir) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "FormSDP() - FormSDP Failed", 0, 0, 0);
         return IMS_FALSE;
+    }
+
+    // audio
+    if (pMediaNego->GetAudioNego() != IMS_NULL)
+    {
+        m_objAudioController.UpdateLocalAddress(pMediaNego->GetAudioNego());
+        m_objAudioController.OpenSession(nNegoId);
+    }
+
+    // video
+    if (pMediaNego->GetVideoNego() != IMS_NULL)
+    {
+        m_objVideoController.CreateSession(this, pMediaNego->GetVideoNego()->GetConfig());
+        m_objVideoController.UpdateLocalAddress(pMediaNego->GetVideoNego());
+        m_objVideoController.OpenSession();
     }
 
     return IMS_TRUE;
@@ -336,9 +311,18 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSDP(IN IMS_UINTP nNegoId, IN ISes
 
     if (pMediaNego->NegotiateSDP(pSession, eAudioDir, eVideoDir, eTextDir, errorReason) == IMS_TRUE)
     {
-        if (AddSession(nNegoId) == IMS_TRUE)
+        // audio
+        if (pMediaNego->GetAudioNego() != IMS_NULL)
         {
-            CreateMediaSessionTypeNode(nNegoId, pSession);
+            m_objAudioController.AddSession(nNegoId);
+        }
+
+        // video
+        if (pMediaNego->GetVideoNego() != IMS_NULL)
+        {
+            m_objVideoController.CreateSession(this, pMediaNego->GetVideoNego()->GetConfig());
+            m_objVideoController.UpdateLocalAddress(pMediaNego->GetVideoNego());
+            m_objVideoController.OpenSession();
         }
 
         return IMS_TRUE;
@@ -371,7 +355,37 @@ PUBLIC VIRTUAL void MediaSession::FinalizeSDP(IN IMS_UINTP nNegoId, IN ISession*
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
 {
-    ProcessRun(nNegoId);
+    IMS_TRACE_D("ProcessRun() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+
+    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+
+    if (pMediaNego == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "ProcessRun() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        return IMS_FALSE;
+    }
+
+    if (IsHoldSession(nNegoId) != IMS_TRUE)
+    {
+        IMS_TRACE_D(
+                "ProcessRun() - Need to hold active Session except callKey[%d]", m_nCallKey, 0, 0);
+        MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
+
+        if (pMediaManager == IMS_NULL)
+        {
+            IMS_TRACE_E(0, "ProcessRun() - No MediaManager", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        pMediaManager->OtherSessionHold(m_nCallKey);
+    }
+
+    m_objAudioController.UpdateRtpConfig(nNegoId, pMediaNego->GetAudioNego());
+    m_objAudioController.UpdateSession(nNegoId);
+
+    m_objVideoController.UpdateRtpConfig(pMediaNego->GetVideoNego());
+    m_objVideoController.UpdateSession();
+
     return IMS_TRUE;
 }
 
@@ -387,22 +401,9 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Terminate()
         return IMS_FALSE;
     }
 
-    AudioMediaSession* pAudioSession = FindAudioSession();
-
-    if (pAudioSession != IMS_NULL)
-    {
-        pAudioSession->Close();
-        m_nAudioSessionState = AudioMediaSession::STATE_NONE;
-    }
-
-    if (m_pVideoSession != IMS_NULL)
-    {
-        m_pVideoSession->Close();
-    }
-
-    ClearAudioMediaSession();
+    m_objAudioController.CloseSession();
+    m_objVideoController.CloseSession();
     ClearMediaNego();
-    DeleteVideoMediaSession();
 
     return IMS_TRUE;
 }
@@ -607,7 +608,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
             }
             break;
         case SET_DIRECTION:
-            // TODO_MEDIA later
+            // TODO_MEDIA: add implementation
             // if (param1 == (IMS_SINT32)MEDIA_CONTENT_TYPE::MEDIA_TYPE_AUDIO)
             // {
             //     pAudioNego = pMediaNego->GetAudioNego();
@@ -622,13 +623,10 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
             // }
             break;
         case SET_CONFIRMED_SESSION:
-            if (m_eSessionState == EARLY_SESSION && param1 == IMS_TRUE)
-            {
-                m_eSessionState = READY_TO_CONFIRM;
-            }
+            m_objAudioController.SetConfirmSession(param1);
             break;
-        case SET_DRA_REPORT_OPTION:   // for Q3 (Analyzer)
-        case SET_CONFERENCE_ENABLE:   // TODO: for video conference
+        case SET_DRA_REPORT_OPTION:  // for Q3 (Analyzer)
+        case SET_CONFERENCE_ENABLE:  // TODO: for video conference
         case SET_CVO_SUPPORT:
         case SEND_FAST_VIDEO_UPDATE:  // for video
             break;
@@ -641,8 +639,8 @@ PUBLIC VIRTUAL void MediaSession::SetNetworkToneRTPTimer(
         MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer)
 {
     (void)eMediaType;  // do it later
-    IMS_TRACE_I("SetNetworkToneRTPTimer() - CallKey[%d], eMediaType[%d], nRtpTimer[%d]",
-            m_nCallKey, eMediaType, nRtpTimer);
+    IMS_TRACE_I("SetNetworkToneRTPTimer() - CallKey[%d], eMediaType[%d], nRtpTimer[%d]", m_nCallKey,
+            eMediaType, nRtpTimer);
 
     m_nRtpTimer = nRtpTimer;
 }
@@ -667,7 +665,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::SendMessage(IN IMS_SINT32 nMsg, IN IMS_UIN
             bRet = OnResponse(nMsg, pParam);
             break;
         case IMMedia::MSG_VIDEO_NOTIFICATION:
-            bRet = SendVideoMessage(nMsg, pParam);
+            bRet = m_objVideoController.SendMessage(nMsg, pParam);
             break;
         default:
             break;
@@ -681,11 +679,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::SendDtmf(
 {
     if (GetDTMFEnabled(nNegoId) == IMS_TRUE)
     {
-        AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
-        if (pAudioSession != IMS_NULL)
-        {
-            return pAudioSession->SendDtmf(cDtmfCode, nDuration);
-        }
+        return m_objAudioController.SendDtmf(nNegoId, cDtmfCode, nDuration);
     }
 
     return IMS_FALSE;
@@ -715,158 +709,6 @@ IMS_BOOL MediaSession::CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType)
     }
 
     return IMS_TRUE;
-}
-
-PRIVATE
-void MediaSession::UpdateAudioRtpConfig(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_I("UpdateAudioRtpConfig() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
-    if (pMediaNego == IMS_NULL)
-    {
-        return;
-    }
-
-    AudioNego* pAudioNego = pMediaNego->GetAudioNego();
-    if (pAudioNego == IMS_NULL)
-    {
-        return;
-    }
-
-    AudioProfile* pSrcProfile = IMS_NULL;
-    AudioProfile* pDestProfile = IMS_NULL;
-    AudioProfile* pNegoProfile = IMS_NULL;
-
-    if (pAudioNego->GetNegotiatedProfileSet(pSrcProfile, pDestProfile, pNegoProfile) == IMS_TRUE)
-    {
-        AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
-        if (pAudioSession != IMS_NULL)
-        {
-            pAudioSession->UpdateRtpConfig(pSrcProfile, pDestProfile, pNegoProfile);
-        }
-    }
-}
-
-PRIVATE
-void MediaSession::UpdateVideoRtpConfig(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_I("UpdateVideoRtpConfig() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
-    if (pMediaNego == IMS_NULL)
-    {
-        return;
-    }
-
-    VideoNego* pVideoNego = pMediaNego->GetVideoNego();
-    if (pVideoNego == IMS_NULL)
-    {
-        return;
-    }
-
-    VideoProfile* pSrcProfile = IMS_NULL;
-    VideoProfile* pDestProfile = IMS_NULL;
-    VideoProfile* pNegoProfile = IMS_NULL;
-
-    if (pVideoNego->GetNegotiatedProfileSet(pSrcProfile, pDestProfile, pNegoProfile) == IMS_TRUE)
-    {
-        if (m_pVideoSession != IMS_NULL)
-        {
-            m_pVideoSession->UpdateRtpConfig(pSrcProfile, pDestProfile, pNegoProfile);
-        }
-    }
-}
-
-PRIVATE
-void MediaSession::HoldRtpConfig()
-{
-    HoldAudioRtpConfig();
-    HoldVideoRtpConfig();
-}
-
-PRIVATE
-void MediaSession::HoldAudioRtpConfig()
-{
-    IMS_TRACE_I("HoldAudioRtpConfig()", 0, 0, 0);
-
-    AudioMediaSession* pAudioSession = FindAudioSession();
-
-    if (pAudioSession != IMS_NULL)
-    {
-        pAudioSession->HoldRtpConfig();
-    }
-}
-
-PRIVATE
-void MediaSession::HoldVideoRtpConfig()
-{
-    IMS_TRACE_I("HoldVideoRtpConfig()", 0, 0, 0);
-
-    if (m_pVideoSession != IMS_NULL)
-    {
-        m_pVideoSession->HoldRtpConfig();
-    }
-}
-
-PRIVATE
-void MediaSession::UpdateMediaQualityThreshold(IN IMS_UINTP nNegoId)
-{
-    UpdateAudioQualityThreshold(nNegoId);
-    UpdateVideoQualityThreshold(nNegoId);
-}
-
-PRIVATE
-void MediaSession::UpdateAudioQualityThreshold(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_I("UpdateAudioQualityThreshold() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
-
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
-
-    if (pAudioSession != IMS_NULL)
-    {
-        pAudioSession->UpdateMediaQualityThreshold(IsHoldSession(nNegoId));
-    }
-}
-
-PRIVATE
-void MediaSession::UpdateVideoQualityThreshold(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_I("UpdateVideoQualityThreshold() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
-
-    if (m_pVideoSession != IMS_NULL)
-    {
-        m_pVideoSession->UpdateMediaQualityThreshold(IsHoldSession(nNegoId));
-    }
-}
-
-PRIVATE
-void MediaSession::UpdateMediaQualityThresholdForHold()
-{
-    UpdateAudioQualityThresholdForHold();
-    UpdateVideoQualityThresholdForHold();
-}
-
-PRIVATE
-void MediaSession::UpdateAudioQualityThresholdForHold()
-{
-    IMS_TRACE_I("UpdateAudioQualityThresholdForHold()", 0, 0, 0);
-
-    AudioMediaSession* pAudioSession = FindAudioSession();
-
-    if (pAudioSession != IMS_NULL)
-    {
-        pAudioSession->UpdateMediaQualityThreshold(IMS_TRUE);
-    }
-}
-
-PRIVATE
-void MediaSession::UpdateVideoQualityThresholdForHold()
-{
-    IMS_TRACE_I("UpdateVideoQualityThresholdForHold()", 0, 0, 0);
-
-    if (m_pVideoSession != IMS_NULL)
-    {
-        m_pVideoSession->UpdateMediaQualityThreshold(IMS_TRUE);
-    }
 }
 
 PRIVATE
@@ -930,30 +772,8 @@ IMS_BOOL MediaSession::OnResponse(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
     return bRet;
 }
 
-PRIVATE
-IMS_BOOL MediaSession::SendVideoMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
-{
-    if (m_pVideoSession != IMS_NULL)
-    {
-        return m_pVideoSession->OnVideoMessages(nMsg, pParam);
-    }
-
-    return IMS_FALSE;
-}
-
-PRIVATE
-void MediaSession::CreateNotExistingSession(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType)
-{
-    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO) && m_pVideoSession == IMS_NULL)
-    {
-        CreateVideoMediaSession(nNegoId);
-    }
-
-    // TODO_MEDIA: add implementation for text
-}
-
 PROTECTED
-IMS_UINTP MediaSession::CreateMediaNego(IN IMS_UINTP nNegoId)
+MediaNego* MediaSession::CreateMediaNego(IN IMS_UINTP nNegoId)
 {
     IMS_TRACE_I("CreateMediaNego() nNegoId[%d]", nNegoId, 0, 0);
 
@@ -984,67 +804,7 @@ IMS_UINTP MediaSession::CreateMediaNego(IN IMS_UINTP nNegoId)
     }
 
     m_objMapMediaNego.Add(reinterpret_cast<IMS_UINTP>(pMediaNego), pMediaNego);
-    return (IMS_UINTP)pMediaNego;
-}
-
-PROTECTED
-IMS_UINTP MediaSession::CreateAudioMediaSession(IN IMS_UINTP nNegoId)
-{
-    AudioMediaSession* pAudioSession = new AudioMediaSession();
-
-    if (pAudioSession == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "CreateAudioMediaSession() - fail to create AudioMediaSession", 0, 0, 0);
-        return IMS_NULL;
-    }
-
-    pAudioSession->SetNegoId(nNegoId);
-    pAudioSession->SetMediaSessionListener(this);
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
-
-    if (pMediaNego != IMS_NULL)
-    {
-        AudioNego* pAudioNego = pMediaNego->GetAudioNego();
-
-        if (pAudioNego != IMS_NULL)
-        {
-            pAudioSession->SetConfig(pAudioNego->GetConfig());
-        }
-    }
-
-    m_listAudioSession.Append(pAudioSession);
-    return IMS_TRUE;
-}
-
-PROTECTED
-IMS_UINTP MediaSession::CreateVideoMediaSession(IN IMS_UINTP nNegoId)
-{
-    if (m_pVideoSession == IMS_NULL)
-    {
-        m_pVideoSession = new VideoMediaSession();
-
-        if (m_pVideoSession == IMS_NULL)
-        {
-            IMS_TRACE_E(0, "CreateVideoMediaSession() - fail to create VideoMediaSession", 0, 0, 0);
-            return IMS_NULL;
-        }
-
-        m_pVideoSession->SetMediaSessionListener(this);
-    }
-
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
-
-    if (pMediaNego != IMS_NULL)
-    {
-        VideoNego* pVideoNego = pMediaNego->GetVideoNego();
-
-        if (pVideoNego != IMS_NULL)
-        {
-            m_pVideoSession->SetConfig(pVideoNego->GetConfig());
-        }
-    }
-
-    return IMS_TRUE;
+    return pMediaNego;
 }
 
 PROTECTED
@@ -1052,6 +812,7 @@ MediaNego* MediaSession::FindMediaNego(IN IMS_UINTP nNegoId)
 {
     MediaNego* pMediaNego = IMS_NULL;
     IMS_SLONG nIndex = m_objMapMediaNego.GetIndexOfKey(nNegoId);
+
     if (nIndex < 0)
     {
         IMS_TRACE_E(0, "FindMediaNego -- invalid nNegoId[%d]", nNegoId, 0, 0);
@@ -1059,111 +820,13 @@ MediaNego* MediaSession::FindMediaNego(IN IMS_UINTP nNegoId)
     }
 
     pMediaNego = m_objMapMediaNego.GetValueAt(nIndex);
+
     if (pMediaNego == IMS_NULL)
     {
         return IMS_NULL;
     }
 
     return pMediaNego;
-}
-
-PROTECTED
-AudioMediaSession* MediaSession::FindAudioSession(IN IMS_UINTP nNegoId)
-{
-    if (m_listAudioSession.IsEmpty() == IMS_TRUE)
-    {
-        return IMS_NULL;
-    }
-
-    if (nNegoId == IMS_NULL)
-    {
-        return m_listAudioSession.GetAt(0);
-    }
-
-    AudioMediaSession* pAudioSession = IMS_NULL;
-
-    for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
-    {
-        pAudioSession = m_listAudioSession.GetAt(nIndex);
-
-        if (pAudioSession != IMS_NULL && pAudioSession->IsSameNegoId(nNegoId) == IMS_TRUE)
-        {
-            return pAudioSession;
-        }
-    }
-
-    return IMS_NULL;
-}
-
-PROTECTED
-void MediaSession::ConfirmAudioMediaSession(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_D("ConfirmAudioMediaSession() - nNegoId[%" PFLS_x "], Size[%d]", nNegoId,
-            m_listAudioSession.GetSize(), 0);
-
-    if (m_listAudioSession.GetSize() <= 1)
-    {
-        return;
-    }
-
-    AudioMediaSession* pAudioSession = IMS_NULL;
-    IMS_SINT32 nIndex = 0;
-
-    while (m_listAudioSession.GetSize() > nIndex)
-    {
-        pAudioSession = m_listAudioSession.GetAt(nIndex);
-        if (pAudioSession == IMS_NULL)
-        {
-            IMS_TRACE_E(0, "ConfirmAudioMediaSession() - invalid pAudioSession", 0, 0, 0);
-            m_listAudioSession.RemoveAt(nIndex);
-        }
-        else if (pAudioSession->IsSameNegoId(nNegoId) == IMS_FALSE)
-        {
-            delete pAudioSession;
-            pAudioSession = IMS_NULL;
-            m_listAudioSession.RemoveAt(nIndex);
-        }
-        else
-        {
-            nIndex++;
-        }
-    }
-}
-
-PROTECTED
-void MediaSession::ConfirmMediaSessionTypeNode(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_D("ConfirmMediaSessionTypeNode() - nNegoId[%" PFLS_x "], Size[%d]", nNegoId,
-            m_listMediaSessionTypeNode.GetSize(), 0);
-
-    if (m_listMediaSessionTypeNode.GetSize() <= 1)
-    {
-        return;
-    }
-
-    MediaSessionTypeNode* pMediaSessionTypeNode = IMS_NULL;
-    IMS_SINT32 nIndex = 0;
-
-    while (m_listMediaSessionTypeNode.GetSize() > nIndex)
-    {
-        pMediaSessionTypeNode = m_listMediaSessionTypeNode.GetAt(nIndex);
-        if (pMediaSessionTypeNode == IMS_NULL)
-        {
-            IMS_TRACE_E(
-                    0, "ConfirmMediaSessionTypeNode() - invalid pMediaSessionTypeNode", 0, 0, 0);
-            m_listMediaSessionTypeNode.RemoveAt(nIndex);
-        }
-        else if (pMediaSessionTypeNode->m_nNegoId != nNegoId)
-        {
-            delete pMediaSessionTypeNode;
-            pMediaSessionTypeNode = IMS_NULL;
-            m_listMediaSessionTypeNode.RemoveAt(nIndex);
-        }
-        else
-        {
-            nIndex++;
-        }
-    }
 }
 
 PROTECTED
@@ -1199,91 +862,6 @@ IMS_BOOL MediaSession::DeleteMediaNego(IN IMS_UINTP nNegoId)
 }
 
 PROTECTED
-IMS_BOOL MediaSession::DeleteAudioMediaSession(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_D("DeleteAudioMediaSession() - nNegoId[%" PFLS_x "], Size[%d]", nNegoId,
-            m_listAudioSession.GetSize(), 0);
-
-    if (nNegoId == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    AudioMediaSession* pAudioSession = IMS_NULL;
-    for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
-    {
-        pAudioSession = m_listAudioSession.GetAt(nIndex);
-        if (pAudioSession != IMS_NULL && pAudioSession->IsSameNegoId(nNegoId) == IMS_TRUE)
-        {
-            delete pAudioSession;
-            pAudioSession = IMS_NULL;
-            m_listAudioSession.RemoveAt(nIndex);
-            return IMS_TRUE;
-        }
-    }
-    IMS_TRACE_E(0, "DeleteAudioMediaSession() - Nothing matched with this NegoId", 0, 0, 0);
-    return IMS_FALSE;
-}
-
-PROTECTED
-IMS_BOOL MediaSession::DeleteVideoMediaSession()
-{
-    IMS_TRACE_D("DeleteVideoMediaSession()", 0, 0, 0);
-
-    if (m_pVideoSession != IMS_NULL)
-    {
-        if (m_pVideoSession->GetState() != VideoMediaSession::STATE_IDLE)
-        {
-            m_pVideoSession->Close();
-        }
-
-        delete m_pVideoSession;
-        m_pVideoSession = IMS_NULL;
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
-}
-
-PROTECTED
-IMS_BOOL MediaSession::DeleteMediaSessionTypeNode(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_D("DeleteMediaSessionTypeNode() - nNegoId[%" PFLS_x "], Size[%d]", nNegoId,
-            m_listMediaSessionTypeNode.GetSize(), 0);
-
-    if (nNegoId == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    MediaSessionTypeNode* pMediaSessionTypeNode = IMS_NULL;
-    IMS_BOOL bRet = IMS_FALSE;
-    IMS_UINT32 nIndex = 0;
-
-    while (m_listMediaSessionTypeNode.GetSize() > nIndex)
-    {
-        if (pMediaSessionTypeNode != IMS_NULL && pMediaSessionTypeNode->m_nNegoId == nNegoId)
-        {
-            delete pMediaSessionTypeNode;
-            pMediaSessionTypeNode = IMS_NULL;
-            m_listMediaSessionTypeNode.RemoveAt(nIndex);
-            bRet = IMS_TRUE;
-        }
-        else
-        {
-            nIndex++;
-        }
-    }
-
-    if (bRet == IMS_FALSE)
-    {
-        IMS_TRACE_E(0, "DeleteMediaSessionTypeNode() - Nothing matched with this NegoId", 0, 0, 0);
-    }
-
-    return bRet;
-}
-
-PROTECTED
 void MediaSession::ClearMediaNego()
 {
     IMS_TRACE_D("ClearMediaNego() m_objMapMediaNego size[%d]", m_objMapMediaNego.GetSize(), 0, 0);
@@ -1307,234 +885,10 @@ void MediaSession::ClearMediaNego()
 }
 
 PROTECTED
-void MediaSession::ClearAudioMediaSession()
-{
-    IMS_TRACE_D("ClearAudioMediaSession() size[%d]", m_listAudioSession.GetSize(), 0, 0);
-
-    AudioMediaSession* pAudioSession = IMS_NULL;
-
-    while (m_listAudioSession.GetSize() > 0)
-    {
-        pAudioSession = m_listAudioSession.GetValueAt(0);
-
-        if (pAudioSession != IMS_NULL)
-        {
-            delete pAudioSession;
-            pAudioSession = IMS_NULL;
-        }
-
-        m_listAudioSession.RemoveAt(0);
-    }
-
-    m_listAudioSession.Clear();
-}
-
-PROTECTED
-void MediaSession::ClearMediaSessionTypeNode()
-{
-    IMS_TRACE_D("ClearMediaSessionTypeNode() m_listMediaSessionTypeNode size[%d]",
-            m_listMediaSessionTypeNode.GetSize(), 0, 0);
-
-    MediaSessionTypeNode* pMediaSessionTypeNode = IMS_NULL;
-
-    while (m_listMediaSessionTypeNode.GetSize() > 0)
-    {
-        pMediaSessionTypeNode = m_listMediaSessionTypeNode.GetValueAt(0);
-
-        if (pMediaSessionTypeNode != IMS_NULL)
-        {
-            delete pMediaSessionTypeNode;
-            pMediaSessionTypeNode = IMS_NULL;
-        }
-        m_listMediaSessionTypeNode.RemoveAt(0);
-    }
-
-    m_listMediaSessionTypeNode.Clear();
-}
-
-PROTECTED
-void MediaSession::OpenSession(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_I("OpenSession() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
-
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
-
-    if (pAudioSession != IMS_NULL && m_nAudioSessionState == AudioMediaSession::STATE_NONE)
-    {
-        UpdateAudioLocalAddress(nNegoId);
-        pAudioSession->Open();
-        m_nAudioSessionState = AudioMediaSession::STATE_IDLE;
-    }
-
-    if (m_pVideoSession != IMS_NULL && m_pVideoSession->GetState() == VideoMediaSession::STATE_IDLE)
-    {
-        UpdateVideoLocalAddress(nNegoId);
-        m_pVideoSession->Open();
-    }
-}
-
-PROTECTED
-IMS_BOOL MediaSession::AddSession(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_I("AddSession() - nNegoId[%" PFLS_x "], audio list size[%d]", nNegoId,
-            m_listAudioSession.GetSize(), 0);
-
-    if (m_listAudioSession.GetSize() == 1)
-    {
-        return IMS_FALSE;
-    }
-
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
-
-    if (pAudioSession != IMS_NULL && m_nAudioSessionState != AudioMediaSession::STATE_NONE)
-    {
-        UpdateMediaQualityThreshold(nNegoId);
-        UpdateAudioRtpConfig(nNegoId);
-        pAudioSession->SetMediaQuality();
-        pAudioSession->Add();
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
-}
-
-PROTECTED
-IMS_BOOL MediaSession::ProcessRun(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_D("ProcessRun() - nNegoId[%" PFLS_x "] audio list[%d], SessionState[%d]", nNegoId,
-            m_listAudioSession.GetSize(), m_eSessionState);
-
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
-
-    if (pAudioSession == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "ProcessRun() - No AudioSession : nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (m_pVideoSession == IMS_NULL)
-    {
-        IMS_TRACE_D("ProcessRun() - No VideoSession : nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
-    }
-
-    if (IsHoldSession(nNegoId) != IMS_TRUE)
-    {
-        IMS_TRACE_D(
-                "ProcessRun() - Need to hold active Session except callKey[%d]", m_nCallKey, 0, 0);
-        MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
-
-        if (pMediaManager == IMS_NULL)
-        {
-            IMS_TRACE_E(0, "ProcessRun() - No MediaManager", 0, 0, 0);
-            return IMS_FALSE;
-        }
-
-        pMediaManager->OtherSessionHold(m_nCallKey);
-    }
-
-    IMS_BOOL isJustConfirmedWithMultiConfig =
-            (m_eSessionState == READY_TO_CONFIRM) && (m_listAudioSession.GetSize() > 1);
-
-    if (isJustConfirmedWithMultiConfig == IMS_FALSE)
-    {
-        UpdateMediaQualityThreshold(nNegoId);
-
-        if (pAudioSession != IMS_NULL)
-        {
-            UpdateAudioRtpConfig(nNegoId);
-            pAudioSession->SetMediaQuality();
-            pAudioSession->Modify();
-        }
-    }
-    else
-    {
-        UpdateAudioRtpConfig(nNegoId);
-        pAudioSession->SetMediaQuality();
-        pAudioSession->Confirm();
-        ConfirmAudioMediaSession(nNegoId);
-        ConfirmMediaSessionTypeNode(nNegoId);
-    }
-
-    if (m_pVideoSession != IMS_NULL)
-    {
-        UpdateVideoRtpConfig(nNegoId);
-
-        if (m_pVideoSession->GetRemotePort() == 0 || m_pVideoSession->GetLocalPort() == 0)
-        {
-            m_pVideoSession->Close();
-        }
-        else
-        {
-            m_pVideoSession->SetMediaQuality();
-            m_pVideoSession->Modify();
-        }
-    }
-
-    if (m_eSessionState == READY_TO_CONFIRM)
-    {
-        m_eSessionState = CONFIRMED_SESSION;
-    }
-
-    return IMS_TRUE;
-}
-
-PROTECTED
-void MediaSession::UpdateAudioLocalAddress(IN IMS_UINTP nNegoId)
-{
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
-
-    if (pMediaNego == IMS_NULL)
-    {
-        return;
-    }
-
-    AudioNego* pAudioNego = pMediaNego->GetAudioNego();
-
-    if (pAudioNego == IMS_NULL)
-    {
-        return;
-    }
-
-    IPAddress objLocalAddr = pAudioNego->GetLocalAddr();
-    IMS_UINT32 nPort = pAudioNego->GetLocalPort();
-
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
-
-    if (pAudioSession != IMS_NULL)
-    {
-        pAudioSession->UpdateLocalEndPoint(objLocalAddr, nPort);
-    }
-}
-
-PROTECTED
-void MediaSession::UpdateVideoLocalAddress(IN IMS_UINTP nNegoId)
-{
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
-    if (pMediaNego == IMS_NULL)
-    {
-        return;
-    }
-
-    VideoNego* pVideoNego = pMediaNego->GetVideoNego();
-    if (pVideoNego == IMS_NULL)
-    {
-        return;
-    }
-
-    IPAddress objLocalAddr = pVideoNego->GetLocalAddr();
-    IMS_UINT32 nPort = pVideoNego->GetLocalPort();
-
-    if (m_pVideoSession != IMS_NULL)
-    {
-        m_pVideoSession->UpdateLocalEndPoint(objLocalAddr, nPort);
-    }
-}
-
-PROTECTED
 VIRTUAL void MediaSession::MediaSession_SendEventToUi(IMS_SINT32 nEvent, IMS_SINT32 nResult)
 {
-    IMS_TRACE_D("MediaSession_SendEventToUi() : CallKey[%d] nEvent[%d], nResult[%d]",
-            m_nCallKey, nEvent, nResult);
+    IMS_TRACE_D("MediaSession_SendEventToUi() : CallKey[%d] nEvent[%d], nResult[%d]", m_nCallKey,
+            nEvent, nResult);
     IMSMSG objMsg(nEvent, m_nCallKey, nResult);
     MessageService::PostMessage(MediaManager::GetThreadName(m_nSlotId), objMsg);
 }
@@ -1542,89 +896,12 @@ VIRTUAL void MediaSession::MediaSession_SendEventToUi(IMS_SINT32 nEvent, IMS_SIN
 PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_SendMsgToMediaManager(
         IN IMS_SINT32 nEvent, IN ImsMediaMsgParamBase* param)
 {
-    IMS_TRACE_D("MediaSession_SendMsgToMediaManager() : CallKey[%d] nEvent[%d]",
-            m_nCallKey, nEvent, 0);
+    IMS_TRACE_D(
+            "MediaSession_SendMsgToMediaManager() : CallKey[%d] nEvent[%d]", m_nCallKey, nEvent, 0);
     MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
     if (pMediaManager != IMS_NULL)
     {
         return pMediaManager->handleRequestMsg(nEvent, m_nCallKey, param);
-    }
-    return IMS_FALSE;
-}
-
-PROTECTED
-void MediaSession::CreateMediaSessionTypeNode(IN IMS_UINTP nNegoId, IN ISession* pSession)
-{
-    if (pSession == IMS_NULL)
-    {
-        return;
-    }
-
-    // Check the requested media type
-    IMSList<IMedia*> lstIMedia = pSession->GetMedia();
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
-    if (pMediaNego == IMS_NULL)
-    {
-        return;
-    }
-
-    for (IMS_UINT32 nIndex = 0; nIndex < lstIMedia.GetSize(); nIndex++)
-    {
-        IMediaDescriptor* pDescriptor = pMediaNego->GetMediaDescriptor(lstIMedia.GetAt(nIndex));
-        if (pDescriptor == IMS_NULL)
-        {
-            return;
-        }
-
-        SdpMedia* pSDPMedia = (SdpMedia*)pDescriptor->GetMediaDescriptionEx();
-        if (pSDPMedia == IMS_NULL)
-        {
-            return;
-        }
-
-        IMS_SINT32 nPort = pSDPMedia->GetPort();
-
-        if (nPort != -1)
-        {
-            if (IsExistingTypeNode(pDescriptor->GetRemoteAddress().ToString(), nPort) == IMS_FALSE)
-            {
-                MediaSessionTypeNode* pMediaSessionTypeNode = new MediaSessionTypeNode();
-
-                pMediaSessionTypeNode->m_strIpAddr = pDescriptor->GetRemoteAddress().ToString();
-                pMediaSessionTypeNode->m_nPort = nPort;
-                pMediaSessionTypeNode->m_nNegoId = nNegoId;
-
-                IMS_SINT32 nType = pSDPMedia->GetType();
-                if (nType == SdpMedia::TYPE_AUDIO)
-                {
-                    pMediaSessionTypeNode->m_eMediaType = MEDIA_TYPE_AUDIO;
-                }
-                else if (nType == SdpMedia::TYPE_VIDEO)
-                {
-                    pMediaSessionTypeNode->m_eMediaType = MEDIA_TYPE_VIDEO;
-                }
-                else if (nType == SdpMedia::TYPE_TEXT)
-                {
-                    pMediaSessionTypeNode->m_eMediaType = MEDIA_TYPE_TEXT;
-                }
-
-                m_listMediaSessionTypeNode.Append(pMediaSessionTypeNode);
-            }
-        }
-    }
-}
-
-PROTECTED
-IMS_BOOL MediaSession::IsExistingTypeNode(IN AString strIpAddr, IN IMS_UINT32 nPort)
-{
-    for (IMS_UINT32 nIndex = 0; nIndex < m_listMediaSessionTypeNode.GetSize(); nIndex++)
-    {
-        if (m_listMediaSessionTypeNode.GetAt(nIndex)->m_strIpAddr == strIpAddr &&
-                m_listMediaSessionTypeNode.GetAt(nIndex)->m_nPort == nPort)
-        {
-            IMS_TRACE_I("checkExistingTypeNode() - Found existing one", 0, 0, 0);
-            return IMS_TRUE;
-        }
     }
     return IMS_FALSE;
 }
@@ -1636,8 +913,8 @@ IMS_BOOL MediaSession::OnResponseOpenSession(IN IMS_UINTP pParam_)
     MEDIA_CONTENT_TYPE eMediaType = pParam->m_eMediaType;
     RtpError eResult = pParam->m_eResult;
 
-    IMS_TRACE_I("OnResponseOpenSession() - CallKey[%d], eMediaType[%d], eResult[%d]",
-            m_nCallKey, eMediaType, eResult);
+    IMS_TRACE_I("OnResponseOpenSession() - CallKey[%d], eMediaType[%d], eResult[%d]", m_nCallKey,
+            eMediaType, eResult);
 
     ReportToClient(eResult, pParam->m_eMediaType);
 
@@ -1654,8 +931,8 @@ IMS_BOOL MediaSession::OnResponseModifySession(IN IMS_UINTP pParam_)
     AudioConfig objAudioConfig = pParam->m_objAudioConfig;
     (void)objAudioConfig;
 
-    IMS_TRACE_I("OnResponseModifySession() - CallKey[%d], eMediaType[%d], eResult[%d]",
-            m_nCallKey, eMediaType, eResult);
+    IMS_TRACE_I("OnResponseModifySession() - CallKey[%d], eMediaType[%d], eResult[%d]", m_nCallKey,
+            eMediaType, eResult);
 
     ReportToClient(eResult, pParam->m_eMediaType);
 
@@ -1672,8 +949,8 @@ IMS_BOOL MediaSession::OnResponseAddConfig(IN IMS_UINTP pParam_)
     AudioConfig objAudioConfig = pParam->m_objAudioConfig;
     (void)objAudioConfig;
 
-    IMS_TRACE_I("OnResponseAddConfig() - CallKey[%d], eMediaType[%d], eResult[%d]",
-            m_nCallKey, eMediaType, eResult);
+    IMS_TRACE_I("OnResponseAddConfig() - CallKey[%d], eMediaType[%d], eResult[%d]", m_nCallKey,
+            eMediaType, eResult);
 
     ReportToClient(eResult, pParam->m_eMediaType);
 
@@ -1690,8 +967,8 @@ IMS_BOOL MediaSession::OnResponseConfirmConfig(IN IMS_UINTP pParam_)
     AudioConfig objAudioConfig = pParam->m_objAudioConfig;
     (void)objAudioConfig;
 
-    IMS_TRACE_I("OnResponseConfirmConfig() - CallKey[%d], eMediaType[%d], eResult[%d]",
-            m_nCallKey, eMediaType, eResult);
+    IMS_TRACE_I("OnResponseConfirmConfig() - CallKey[%d], eMediaType[%d], eResult[%d]", m_nCallKey,
+            eMediaType, eResult);
 
     ReportToClient(eResult, pParam->m_eMediaType);
 
@@ -1705,8 +982,8 @@ IMS_BOOL MediaSession::OnNotifyFirstPacket(IN IMS_UINTP pParam_)
     ImsMediaResponseConfigParam* pParam = reinterpret_cast<ImsMediaResponseConfigParam*>(pParam_);
     MEDIA_CONTENT_TYPE eMediaType = pParam->m_eMediaType;
 
-    IMS_TRACE_I("OnResponseConfirmConfig() - CallKey[%d], eMediaType[%d]", m_nCallKey,
-            eMediaType, 0);
+    IMS_TRACE_I(
+            "OnResponseConfirmConfig() - CallKey[%d], eMediaType[%d]", m_nCallKey, eMediaType, 0);
 
     m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_STARTED, pParam->m_eMediaType);
 
@@ -1738,8 +1015,8 @@ IMS_BOOL MediaSession::OnNofityPacketLoss(IN IMS_UINTP pParam_)
     MEDIA_CONTENT_TYPE eMediaType = pParam->m_eMediaType;
     IMS_SINT32 nPacketLossPercentage = pParam->m_nResponse;
 
-    IMS_TRACE_I("OnNofityPacketLoss() - CallKey[%d], eMediaType[%d], nPacketLoss[%d]",
-            m_nCallKey, eMediaType, nPacketLossPercentage);
+    IMS_TRACE_I("OnNofityPacketLoss() - CallKey[%d], eMediaType[%d], nPacketLoss[%d]", m_nCallKey,
+            eMediaType, nPacketLossPercentage);
 
     // do it later :
     // TBD : need to discuss how to use this info
@@ -1845,8 +1122,8 @@ IMS_BOOL MediaSession::OnNotifyQosInfo(IN IMS_UINTP pParam_)
     IMS_SINT32 nPort = pParam->m_nPort;
     IMS_BOOL bResult = pParam->m_bResult;
 
-    IMS_TRACE_I("OnNotifyQosInfo() - CallKey[%d], nPort[%d], bResult[%d]", m_nCallKey,
-            nPort, bResult);
+    IMS_TRACE_I(
+            "OnNotifyQosInfo() - CallKey[%d], nPort[%d], bResult[%d]", m_nCallKey, nPort, bResult);
 
     ImsMediaBasicSessionInfoParam* pBasicSessionInfo =
             GetBasicSessionInfofromRemoteArress(objIpAddr.ToString(), nPort);
@@ -1873,91 +1150,17 @@ PROTECTED
 ImsMediaBasicSessionInfoParam* MediaSession::GetBasicSessionInfofromRemoteArress(
         IN AString strIpAddr, IN IMS_SINT32 nPort)
 {
-    MediaSessionTypeNode* pMediaSessionTypeNode = IMS_NULL;
-    for (IMS_UINT32 nIndex = 0; nIndex < m_listMediaSessionTypeNode.GetSize(); nIndex++)
+    IMS_UINTP nNegoId;
+    MEDIA_CONTENT_TYPE eMediaType;
+
+    if (MediaNegoUtil::GetMediaNegoInfo(
+                &m_objMapMediaNego, strIpAddr, nPort, nNegoId, eMediaType) == IMS_TRUE)
     {
-        pMediaSessionTypeNode = m_listMediaSessionTypeNode.GetAt(nIndex);
-        if (pMediaSessionTypeNode->m_strIpAddr == strIpAddr &&
-                pMediaSessionTypeNode->m_nPort == nPort)
-        {
-            ImsMediaBasicSessionInfoParam* pBasicSessionInfo = new ImsMediaBasicSessionInfoParam();
-            pBasicSessionInfo->m_nNegoId = pMediaSessionTypeNode->m_nNegoId;
-            pBasicSessionInfo->m_eMediaType = pMediaSessionTypeNode->m_eMediaType;
-
-            return pBasicSessionInfo;
-        }
+        ImsMediaBasicSessionInfoParam* pBasicSessionInfo = new ImsMediaBasicSessionInfoParam();
+        pBasicSessionInfo->m_nNegoId = nNegoId;
+        pBasicSessionInfo->m_eMediaType = eMediaType;
+        return pBasicSessionInfo;
     }
+
     return IMS_NULL;
-}
-
-PROTECTED
-IMS_UINTP MediaSession::GetNegoIdfromRemoteAddress(IN AString strIpAddr, IN IMS_SINT32 nPort)
-{
-    MediaSessionTypeNode* pMediaSessionTypeNode = IMS_NULL;
-    for (IMS_UINT32 nIndex = 0; nIndex < m_listMediaSessionTypeNode.GetSize(); nIndex++)
-    {
-        pMediaSessionTypeNode = m_listMediaSessionTypeNode.GetAt(nIndex);
-        if (pMediaSessionTypeNode->m_strIpAddr == strIpAddr &&
-                pMediaSessionTypeNode->m_nPort == nPort)
-        {
-            return pMediaSessionTypeNode->m_nNegoId;
-        }
-    }
-    return IMS_NULL;
-}
-
-PROTECTED
-IMS_BOOL MediaSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
-{
-    (void)pParam;
-    return IMS_TRUE;
-}
-
-PROTECTED
-IMS_BOOL MediaSession::OnFarframeInd(IN IMS_UINTP pParam)
-{
-    (void)pParam;
-    return IMS_TRUE;
-}
-
-PROTECTED
-IMS_BOOL MediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
-{
-    (void)pParam;
-    return IMS_TRUE;
-}
-
-PROTECTED
-IMS_BOOL MediaSession::OnChangeCameraZoomCmd(IN IMS_UINTP pParam)
-{
-    (void)pParam;
-    return IMS_TRUE;
-}
-
-PROTECTED
-IMS_BOOL MediaSession::OnSetPauseImageCmd(IN IMS_UINTP pParam)
-{
-    (void)pParam;
-    return IMS_TRUE;
-}
-
-PROTECTED
-IMS_BOOL MediaSession::OnPeerDimensionChangedInd(IN IMS_UINTP pParam)
-{
-    (void)pParam;
-    return IMS_TRUE;
-}
-
-PROTECTED
-IMS_BOOL MediaSession::OnVideoDataUsageCmd(IN IMS_UINTP pParam)
-{
-    (void)pParam;
-    return IMS_TRUE;
-}
-
-PROTECTED
-IMS_BOOL MediaSession::OnVideoDataUsageInfoCmd(IN IMS_UINTP pParam)
-{
-    (void)pParam;
-    return IMS_TRUE;
 }

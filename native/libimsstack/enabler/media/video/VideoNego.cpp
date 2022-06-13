@@ -693,6 +693,32 @@ IMS_BOOL VideoNego::SetPort(IN IMS_UINT32 nPort)
 }
 
 PUBLIC
+IPAddress VideoNego::GetNegotiatedRemoteAddr()
+{
+    VideoProfile* pProfile = GetNegotiatedDestProfile();
+
+    if (pProfile != IMS_NULL)
+    {
+        return pProfile->objIpAddr;
+    }
+
+    return IPAddress("");
+}
+
+PUBLIC
+IMS_UINT32 VideoNego::GetNegotiatedRemotePort()
+{
+    VideoProfile* pProfile = GetNegotiatedDestProfile();
+
+    if (pProfile != IMS_NULL)
+    {
+        return pProfile->nDataPort;
+    }
+
+    return 0;
+}
+
+PUBLIC
 IMS_BOOL VideoNego::GetNegotiatedCvoResult()
 {
     IMS_TRACE_I(
@@ -700,13 +726,12 @@ IMS_BOOL VideoNego::GetNegotiatedCvoResult()
     return m_bNegotiatedCvoResult;
 }
 
-// -- Condition checking APIs
-// -------------------------------------------------------------------------
 PUBLIC
 IMS_BOOL VideoNego::GetNegotiatedProfileSet(OUT VideoProfile*& pSrcProfile,
         OUT VideoProfile*& pDestProfile, OUT VideoProfile*& pNegotiatedProfile)
 {
     OaModel* pOaModel = GetNegotiatedOaModel();
+
     if (pOaModel != IMS_NULL)
     {
         pSrcProfile = pOaModel->pSrcProfile;
@@ -718,6 +743,19 @@ IMS_BOOL VideoNego::GetNegotiatedProfileSet(OUT VideoProfile*& pSrcProfile,
     {
         return IMS_FALSE;
     }
+}
+
+PUBLIC
+VideoProfile* VideoNego::GetNegotiatedDestProfile()
+{
+    OaModel* pOaModel = GetNegotiatedOaModel();
+
+    if (pOaModel != IMS_NULL)
+    {
+        return pOaModel->pDestProfile;
+    }
+
+    return IMS_NULL;
 }
 
 PUBLIC

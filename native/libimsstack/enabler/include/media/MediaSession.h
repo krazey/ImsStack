@@ -20,72 +20,22 @@
 #include "IMediaSession.h"
 #include "IMediaSessionClientListener.h"
 #include "MediaNego.h"
-#include "audio/AudioMediaSession.h"
-#include "video/VideoMediaSession.h"
+#include "audio/AudioController.h"
+#include "video/VideoController.h"
 #include <mutex>
-
-class MediaSessionTypeNode
-{
-public:
-    AString m_strIpAddr;
-    IMS_SINT32 m_nPort;
-    IMS_UINTP m_nNegoId;
-    MEDIA_CONTENT_TYPE m_eMediaType;
-
-public:
-    MediaSessionTypeNode() :
-            m_strIpAddr(AString::ConstNull()),
-            m_nPort(0),
-            m_nNegoId(0),
-            m_eMediaType(MEDIA_TYPE_INVALID){};
-
-    MediaSessionTypeNode(IN AString strIpAddr, IN IMS_SINT32 nPort, IN IMS_UINTP nNegoId,
-            IN MEDIA_CONTENT_TYPE eMediaType) :
-            m_strIpAddr(strIpAddr),
-            m_nPort(nPort),
-            m_nNegoId(nNegoId),
-            m_eMediaType(eMediaType){};
-};
 
 class MediaSession : public IMediaSessionListener, public IMediaSession
 {
 public:
-    enum SessionState
-    {
-        EARLY_SESSION = 0,
-        READY_TO_CONFIRM,   // session just become confirm
-        CONFIRMED_SESSION,  // in confirmed already
-    };
-
-    enum MediaSessionMsgType
-    {
-        RUN = 0,
-        STOP,
-    };
-
     MediaSession();
     MediaSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey, IN IMS_UINT32 nSlotId);
     virtual ~MediaSession();
-    // set Callback
-
-    // SDP negotiation APIs ------------------------------------------------------------------------
-
-    // operation APIs --------------------------------------------------------------------------
     IMS_BOOL ProcessStop(IN IMS_UINTP nNegoId = 0);
-    // getter
     MediaEnvironment* GetEnvironment(void);
     MEDIA_NETWORK_TYPE GetNetworkType(void);
     IMS_BOOL GetDTMFEnabled(IN IMS_UINTP nNegoId);
-    // DTMF
-
-    /* Set Optional operation */
-
-    //-- MediaService API
-
-    // interface to ImsService
     void SendImsMediaRequest();
     virtual void OnMediaResponse();
-    // nofity from session
     void OnNotify(IN IMS_UINT32 eReportType, IN MEDIA_CONTENT_TYPE eMediaType);
     IMS_BOOL IsHoldSession(IN IMS_UINTP nNegoId);
     IMS_BOOL HoldSession();
@@ -93,17 +43,8 @@ public:
     IMS_SINTP GetCallKey() { return m_nCallKey; };
 
 public:
-    /************************************************************/
-    /******  IMediaSession  *************************************/
-    /************************************************************/
-
-    // -- Set Callback ----------------------------------------------------------------------------
     virtual void SetMtcListener(IN IMediaSessionClientListener* pISessionListener);
-
-    // -- Environment Setting ---------------------------------------------------------------------
     virtual IMS_BOOL SetEnvironment(IN MediaEnvironment* pEnvironment);
-
-    // -- Negotiation APIs ------------------------------------------------------------------------
     virtual IMS_UINTP CreateProfile(
             IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO);
     virtual IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID);
@@ -114,16 +55,8 @@ public:
             OUT IMS_SINT32* eAudioDir, OUT IMS_SINT32* eVideoDir, OUT IMS_SINT32* eTextDir,
             OUT MediaNego::MediaNegoResult& errorReason);
     virtual void FinalizeSDP(IN IMS_UINTP nNegoID, IN ISession* pSession);
-
-    //-- Additional Negotiation APIs --------------------------------------------------------------
-
-    // -- Operation APIs --------------------------------------------------------------------------
     virtual IMS_BOOL Run(IN IMS_UINTP nNegoID);
     virtual IMS_BOOL Terminate();
-
-    // -- Additional Operation APIs----------------------------------------------------------------
-
-    // -- Condition checking APIs -----------------------------------------------------------------
     virtual NEGO_STATE GetNegoState(IN IMS_UINTP nNegoID);
     virtual MEDIA_CONTENT_TYPE GetNegotiatedMediaType(IN IMS_UINTP nNegoId);
     // virtual AString GetNegotiatedCodec(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type);
@@ -133,8 +66,6 @@ public:
     //         IN MEDIA_CONTENT_TYPE type);
     virtual MEDIA_DIRECTION GetNegotiatedDirection(
             IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
-
-    // -- Additional function APIs ----------------------------------------------------------------
     virtual void SetOptions(
             IN IMS_UINTP nNegoId, IN OptionType type, IN IMS_SINT32 param1, IN IMS_SINT32 param2);
     virtual void SetNetworkToneRTPTimer(IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer);
@@ -144,51 +75,21 @@ public:
 
 private:
     IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
-    void UpdateRtpConfig(IN IMS_UINTP nNegoId);
-    void UpdateAudioRtpConfig(IN IMS_UINTP nNegoId);
-    void UpdateVideoRtpConfig(IN IMS_UINTP nNegoId);
-    void HoldRtpConfig();
-    void HoldAudioRtpConfig();
-    void HoldVideoRtpConfig();
-    void UpdateMediaQualityThreshold(IN IMS_UINTP nNegoId);
-    void UpdateAudioQualityThreshold(IN IMS_UINTP nNegoId);
-    void UpdateVideoQualityThreshold(IN IMS_UINTP nNegoId);
-    void UpdateMediaQualityThresholdForHold();
-    void UpdateAudioQualityThresholdForHold();
-    void UpdateVideoQualityThresholdForHold();
     void SetMediaQuality(IN AudioMediaSession* pAudioSession);
     IMS_BOOL OnResponse(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
-    IMS_BOOL SendVideoMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
-    void CreateNotExistingSession(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
 
 protected:
-    IMS_UINTP CreateMediaNego(IN IMS_UINTP nNegoId);
-    IMS_UINTP CreateAudioMediaSession(IN IMS_UINTP nNegoId);
-    IMS_UINTP CreateVideoMediaSession(IN IMS_UINTP nNegoId);
+    // for MediaNego
+    MediaNego* CreateMediaNego(IN IMS_UINTP nNegoId);
     MediaNego* FindMediaNego(IN IMS_UINTP nNegoId);
-    AudioMediaSession* FindAudioSession(IN IMS_UINTP nNegoId = IMS_NULL);
-    void ConfirmMediaSession(IN IMS_UINTP nNegoId);
     void ConfirmMediaNego(IN IMS_UINTP nNegoId);
-    void ConfirmAudioMediaSession(IN IMS_UINTP nNegoId);
-    void ConfirmMediaSessionTypeNode(IN IMS_UINTP nNegoId);
     IMS_BOOL DeleteMediaNego(IN IMS_UINTP nNegoId);
-    IMS_BOOL DeleteAudioMediaSession(IN IMS_UINTP nNegoId);
-    IMS_BOOL DeleteVideoMediaSession();
-    IMS_BOOL DeleteMediaSessionTypeNode(IN IMS_UINTP nNegoId);
     void ClearMediaNego();
-    void ClearAudioMediaSession();
-    void ClearMediaSessionTypeNode();
-    void OpenSession(IN IMS_UINTP nNegoId);
-    IMS_BOOL AddSession(IN IMS_UINTP nNegoId);
-    IMS_BOOL ProcessRun(IN IMS_UINTP nNegoId);
-    void UpdateAudioLocalAddress(IN IMS_UINTP nNegoId);
-    void UpdateVideoLocalAddress(IN IMS_UINTP nNegoId);
 
     // IMediaSessionListener
     virtual void MediaSession_SendEventToUi(IMS_SINT32 nEvent, IMS_SINT32 nResult);
     virtual IMS_BOOL MediaSession_SendMsgToMediaManager(
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* param);
-    void CreateMediaSessionTypeNode(IN IMS_UINTP nNegoId, IN ISession* pSession);
     IMS_BOOL IsExistingTypeNode(IN AString strIpAddr, IN IMS_UINT32 nPort);
     IMS_BOOL OnResponseOpenSession(IN IMS_UINTP pParam);
     IMS_BOOL OnResponseModifySession(IN IMS_UINTP pParam);
@@ -205,30 +106,16 @@ protected:
     IMS_BOOL OnNotifyMediaDetach();
     ImsMediaBasicSessionInfoParam* GetBasicSessionInfofromRemoteArress(
             IN AString strIpAddr, IN IMS_SINT32 nPort);
-    IMS_UINTP GetNegoIdfromRemoteAddress(IN AString strIpAddr, IN IMS_SINT32 nPort);
-
-    IMS_BOOL OnSetSurfaceCmd(IN IMS_UINTP pParam);
-    IMS_BOOL OnFarframeInd(IN IMS_UINTP pParam);
-    IMS_BOOL OnStartPreviewCameraCmd(IN IMS_UINTP pParam);
-    IMS_BOOL OnSelectCameraCmd(IN IMS_UINTP pParam);
-    IMS_BOOL OnChangeCameraZoomCmd(IN IMS_UINTP pParam);
-    IMS_BOOL OnSetPauseImageCmd(IN IMS_UINTP pParam);
-    IMS_BOOL OnPeerDimensionChangedInd(IN IMS_UINTP pParam);
-    IMS_BOOL OnVideoDataUsageCmd(IN IMS_UINTP pParam);
-    IMS_BOOL OnVideoDataUsageInfoCmd(IN IMS_UINTP pParam);
 
 protected:
     IMS_UINT32 m_nSlotId;
     IMS_SINTP m_nCallKey;
     IMediaSessionClientListener* m_pClientListener;
     MediaEnvironment* m_pEnvironment;
-    SessionState m_eSessionState;
     IMSMap<IMS_UINTP, MediaNego*> m_objMapMediaNego;
-    IMSList<AudioMediaSession*> m_listAudioSession;
-    VideoMediaSession* m_pVideoSession;
+    AudioController m_objAudioController;
+    VideoController m_objVideoController;
     IMS_UINT32 m_nRtpTimer;
-    IMSList<MediaSessionTypeNode*> m_listMediaSessionTypeNode;
-    IMS_SINT32 m_nAudioSessionState;
     std::mutex m_objMutex;
 };
 #endif

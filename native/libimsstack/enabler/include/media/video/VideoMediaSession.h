@@ -87,6 +87,7 @@ public:
     virtual void SendEventToUi(IN IMS_SINT32 nEvent, IN IMS_SINT32 nResult);
     IMS_SINT32 GetLocalPort();
     IMS_SINT32 GetRemotePort();
+    IMS_SINT32 GetCameraId();
 
 private:
     IMS_BOOL OnSetSurfaceCmd(IN IMS_UINTP pParam);

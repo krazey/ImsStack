@@ -44,7 +44,11 @@ public:
             MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) = 0;
 
     /**
-     * REPORT_QOS
+     * @brief Notify QOS parameter
+     *
+     * @param nNegoId identifier of dialog to report
+     * @param bSuccess Qos callback result
+     * @param eMediaType media type of notify
      */
     virtual void MediaSession_NotifyQos(IMS_UINTP nNegoId, IMS_BOOL bSuccess,
             MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) = 0;

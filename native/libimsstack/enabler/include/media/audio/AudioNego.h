@@ -123,12 +123,16 @@ public:
     IMS_BOOL SetPort(IN IMS_UINT32 nPort);
     IPAddress GetLocalAddr() { return m_objBaseProfile.objIpAddr; };
     IMS_UINT32 GetLocalPort() { return m_objBaseProfile.nDataPort; };
-
+    IPAddress GetNegotiatedRemoteAddr();
+    IMS_UINT32 GetNegotiatedRemotePort();
     // -- Condition checking APIs
     // -------------------------------------------------------------------------
     OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
     IMS_BOOL GetNegotiatedProfileSet(OUT AudioProfile*& pSrcProfile,
             OUT AudioProfile*& pDestProfile, OUT AudioProfile*& pNegotiatedProfile);
+    AudioProfile* GetNegotiatedDestProfile();
+
+    IMS_UINT32 GetLatestRemotePort();
     MEDIA_DIRECTION GetNegotiatedDirection(void);
     AUDIO_CODEC GetNegotiatedCodec(void);
     AUDIO_CODEC_BITRATE GetNegotiatedAudioCodecRate(void);

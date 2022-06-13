@@ -123,12 +123,15 @@ public:
     IMS_BOOL SetPort(IN IMS_UINT32 nPort);
     IPAddress GetLocalAddr() { return m_objBaseProfile.objIpAddr; };
     IMS_UINT32 GetLocalPort() { return m_objBaseProfile.nDataPort; };
+    IPAddress GetNegotiatedRemoteAddr();
+    IMS_UINT32 GetNegotiatedRemotePort();
     IMS_BOOL GetNegotiatedCvoResult();
     // -- Condition checking APIs
     // -------------------------------------------------------------------------
     OaModel* GetNegotiatedOaModel(IN IMS_BOOL bCheckConfirmed = IMS_FALSE);
     IMS_BOOL GetNegotiatedProfileSet(OUT VideoProfile*& pSrcProfile,
             OUT VideoProfile*& pDestProfile, OUT VideoProfile*& pNegotiatedProfile);
+    VideoProfile* GetNegotiatedDestProfile();
     MEDIA_DIRECTION GetNegotiatedDirection();
     VIDEO_RESOLUTION GetNegotiatedResolution(IN IMS_BOOL bCheckConfirmed = IMS_FALSE);
     IMS_SINT32 GetNegotiatedRtpPort();
