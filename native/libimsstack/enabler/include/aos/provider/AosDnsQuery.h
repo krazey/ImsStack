@@ -32,23 +32,23 @@ public:
     virtual ~AosDnsQuery();
 
 private:
-    AosDnsQuery(IN CONST AosDnsQuery& objRHS);
-    AosDnsQuery& operator=(IN CONST AosDnsQuery& objRHS);
+    AosDnsQuery(IN const AosDnsQuery& objRhs);
+    AosDnsQuery& operator=(IN const AosDnsQuery& objRhs);
 
 public:
-    void SetListener(IN IAosDnsQueryListener* piListener_);
-    void Request(IN AString& strDomainName_, IN INetworkConnection* piConnection_);
+    void SetListener(IN IAosDnsQueryListener* piListener);
+    IMS_BOOL Request(IN AString& strDomainName, IN INetworkConnection* piConnection);
 
     // Delete myself
-    void Destroy();
+    IMS_BOOL Destroy();
 
-    void DnsQueryPrivate_Ready();
-    void DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN IMSList<IPAddress> objIPs);
-    void DnsQueryPrivate_Terminated();
+    IMS_BOOL DnsQueryPrivate_Ready();
+    IMS_BOOL DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN IMSList<IPAddress> objIps);
+    IMS_BOOL DnsQueryPrivate_Terminated();
 
 private:
     // IMSActivityEx
-    IMS_BOOL OnMessage(IN IMSMSG& objMSG);
+    IMS_BOOL OnMessage(IN IMSMSG& objMsg);
 
     enum
     {
@@ -59,22 +59,30 @@ private:
         MSG_TERMINATED
     };
 
+private:
+    // Use only for Unit test
+    IMS_BOOL ResetEvent(IN IMS_UINT32 nEvent);
+    IMS_BOOL SetEvent(IN IMS_UINT32 nEvent);
+
 public:
-    static IMS_UINT32 nIdentity;
+    static IMS_UINT32 m_nIdentity;
 
 private:
-    AosDnsQueryPrivate* pPrivate;
-    IAosDnsQueryListener* piListener;
-    AString strDomainName;
-    INetworkConnection* piConnection;
-    IMSList<IPAddress> objIPAs;
+    AosDnsQueryPrivate* m_pPrivate;
+    IAosDnsQueryListener* m_piListener;
+    AString m_strDomainName;
+    INetworkConnection* m_piConnection;
+    IMSList<IPAddress> m_objIps;
+
+private:
+    friend class AosDnsQueryTest;
 };
 
 class IAosDnsQueryListener
 {
 public:
     virtual void DnsQuery_Ready() = 0;
-    virtual void DnsQuery_Done(IN IMS_BOOL bResult, IN IMSList<IPAddress> objIPs) = 0;
+    virtual void DnsQuery_Done(IN IMS_BOOL bResult, IN IMSList<IPAddress> objIps) = 0;
 };
 
 #endif  // AOS_DNS_QUERY_H_
