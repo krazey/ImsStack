@@ -520,7 +520,7 @@ IMS_BOOL VideoMediaSession::Modify()
 {
     IMS_TRACE_I("Modify()", 0, 0, 0);
 
-    if (m_piMediaSessionListener != IMS_NULL)
+    if (m_piMediaSessionListener != IMS_NULL && m_nState != STATE_IDLE)
     {
         ImsMediaMsgVideoConfigParam* pParam = new ImsMediaMsgVideoConfigParam();
         pParam->m_eMediaType = MEDIA_TYPE_VIDEO;
@@ -564,7 +564,7 @@ IMS_BOOL VideoMediaSession::SetMediaQuality()
     IMS_TRACE_I("SetMediaQuality()", 0, 0, 0);
     IMS_BOOL bResult = IMS_FALSE;
 
-    if (m_piMediaSessionListener != IMS_NULL)
+    if (m_piMediaSessionListener != IMS_NULL && m_nState != STATE_IDLE)
     {
         ImsMediaMsgSetMediaQualityParam* pParam = new ImsMediaMsgSetMediaQualityParam();
         pParam->m_eMediaType = MEDIA_TYPE_VIDEO;
@@ -597,6 +597,12 @@ PUBLIC
 IMS_SINT32 VideoMediaSession::GetRemotePort()
 {
     return m_objVideoConfig.getRemotePort();
+}
+
+PUBLIC
+IMS_SINT32 VideoMediaSession::GetCameraId()
+{
+    return m_nCameraId;
 }
 
 PRIVATE
