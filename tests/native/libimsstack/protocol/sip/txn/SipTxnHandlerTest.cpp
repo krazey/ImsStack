@@ -17,7 +17,6 @@
 #include "SipUtil.h"
 #include "txn/SipTxnHandler.h"
 #include "transport/SipTransportInfo.h"
-#include "IMSTypeDef.h"
 #include "SipStackCallback.h"
 #include "txn/SipTimeoutData.h"
 
@@ -139,90 +138,29 @@ protected:
 
         pTxnHandler = new SipTxnHandler();
         pSipMsg = new SipMessage();
-        pSipMsg->SetMessageType(ESIP_REQTYPE);
+        pSipMsg->SetMessageType(SipMessage::REQ_TYPE);
 
-        // Fill Request line
-        SIP_CHAR* pReqUri = (SIP_CHAR*)"sip:2222@ims.mnc861.mcc405.3gppnetwork.org";
-        SipAddrSpec* pAddrSpec = new SipAddrSpec();
-        ASSERT_TRUE(pAddrSpec->DecodeAddrSpec(pReqUri, strlen(pReqUri)));
-
-        SipRequestLine* pobjReqLine = new SipRequestLine((SIP_CHAR*)"INVITE", pAddrSpec, "SIP/2.0");
-        ASSERT_TRUE(pobjReqLine != nullptr);
-
-        EXPECT_EQ(SIP_TRUE, pSipMsg->SetRequestline(pobjReqLine));
-
-        // Fill Mandatory Headers
-        SipHeaderBase* pToHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::TO);
-        ASSERT_TRUE(pToHdr != nullptr);
-        SipHeaderBase* pCallIDHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::CALL_ID);
-        ASSERT_TRUE(pCallIDHdr != nullptr);
-        SipHeaderBase* pCSeqHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::CSEQ);
-        ASSERT_TRUE(pCSeqHdr != nullptr);
-        SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
-        ASSERT_TRUE(pViaHdr != nullptr);
-        SipHeaderBase* pFromHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::FROM);
-        ASSERT_TRUE(pFromHdr != nullptr);
-
-        SIP_CHAR* pCallIdValue = (SIP_CHAR*)"137132a-3c0d31@2409:192.168.35.156";
-        SIP_CHAR* pCSeqValue = (SIP_CHAR*)"1 INVITE";
-        SIP_CHAR* pViaValue = (SIP_CHAR*)"SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8";
-        SIP_CHAR* pFromValue = (SIP_CHAR*)"<sip:alice@atlanta.com>;tag=1928301774";
-        SIP_CHAR* pToValue = (SIP_CHAR*)"<sip:1111@ims.mnc861.mcc405.3gppnetwork.org>";
-
-        EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
-        EXPECT_EQ(SIP_TRUE, pFromHdr->DecodeHdr(pFromValue, strlen(pFromValue)));
-        EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, strlen(pToValue)));
-        EXPECT_EQ(SIP_TRUE, pCallIDHdr->DecodeHdr(pCallIdValue, strlen(pCallIdValue)));
-        EXPECT_EQ(SIP_TRUE, pCSeqHdr->DecodeHdr(pCSeqValue, strlen(pCSeqValue)));
-
-        EXPECT_EQ(SIP_TRUE, pSipMsg->SetHeader(pViaHdr));
-        EXPECT_EQ(SIP_TRUE, pSipMsg->SetHeader(pToHdr));
-        EXPECT_EQ(SIP_TRUE, pSipMsg->SetHeader(pFromHdr));
-        EXPECT_EQ(SIP_TRUE, pSipMsg->SetHeader(pCallIDHdr));
-        EXPECT_EQ(SIP_TRUE, pSipMsg->SetHeader(pCSeqHdr));
-
-        pViaHdr->SipDelete();
-        pFromHdr->SipDelete();
-        pToHdr->SipDelete();
-        pCallIDHdr->SipDelete();
-        pCSeqHdr->SipDelete();
+        char* pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
+CSeq: 1 INVITE\r\n\
+\r\n";
+        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
 
         // Response Msg
         pRespSipMsg = new SipMessage();
-        pRespSipMsg->SetMessageType(ESIP_RESPTYPE);
+        pRespSipMsg->SetMessageType(SipMessage::RESP_TYPE);
 
-        SipStatusLine* pStatusLine = new SipStatusLine("SIP/2.0", "406", "Not Acceptable");
-        pRespSipMsg->SetStatusLine(pStatusLine);
-
-        // Fill Mandatory Headers
-        SipHeaderBase* pRespToHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::TO);
-        ASSERT_TRUE(pRespToHdr != nullptr);
-        SipHeaderBase* pRespCallIDHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::CALL_ID);
-        ASSERT_TRUE(pRespCallIDHdr != nullptr);
-        SipHeaderBase* pRespCSeqHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::CSEQ);
-        ASSERT_TRUE(pRespCSeqHdr != nullptr);
-        SipHeaderBase* pRespViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
-        ASSERT_TRUE(pRespViaHdr != nullptr);
-        SipHeaderBase* pRespFromHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::FROM);
-        ASSERT_TRUE(pRespFromHdr != nullptr);
-
-        EXPECT_EQ(SIP_TRUE, pRespViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
-        EXPECT_EQ(SIP_TRUE, pRespFromHdr->DecodeHdr(pFromValue, strlen(pFromValue)));
-        EXPECT_EQ(SIP_TRUE, pRespToHdr->DecodeHdr(pToValue, strlen(pToValue)));
-        EXPECT_EQ(SIP_TRUE, pRespCallIDHdr->DecodeHdr(pCallIdValue, strlen(pCallIdValue)));
-        EXPECT_EQ(SIP_TRUE, pRespCSeqHdr->DecodeHdr(pCSeqValue, strlen(pCSeqValue)));
-
-        EXPECT_EQ(SIP_TRUE, pRespSipMsg->SetHeader(pRespViaHdr));
-        EXPECT_EQ(SIP_TRUE, pRespSipMsg->SetHeader(pRespToHdr));
-        EXPECT_EQ(SIP_TRUE, pRespSipMsg->SetHeader(pRespFromHdr));
-        EXPECT_EQ(SIP_TRUE, pRespSipMsg->SetHeader(pRespCallIDHdr));
-        EXPECT_EQ(SIP_TRUE, pRespSipMsg->SetHeader(pRespCSeqHdr));
-
-        pRespViaHdr->SipDelete();
-        pRespFromHdr->SipDelete();
-        pRespToHdr->SipDelete();
-        pRespCallIDHdr->SipDelete();
-        pRespCSeqHdr->SipDelete();
+        pMsg = (char*)"SIP/2.0 406 Not Acceptable\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
+CSeq: 1 INVITE\r\n\
+\r\n";
+        EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
 
         pSipUserData = new ISipUserData(SIP_NULL);
 

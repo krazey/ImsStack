@@ -9,11 +9,9 @@
 class SipTxnFsmData
 {
 public:
-    SipTxnFsmData();
-    virtual ~SipTxnFsmData();
     SipTxnFsmData(
             SipMessage* pSipMsg, SipTransportParameter* pTranspParam, ISipUserData* pUserData);
-
+    virtual ~SipTxnFsmData();
     /************ INPUT Variables ***********/
     /* SIP Req/Resp Object */
     SipMessage* m_pSipMsgIn;
