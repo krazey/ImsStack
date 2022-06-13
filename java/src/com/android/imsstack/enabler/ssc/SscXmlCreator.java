@@ -315,7 +315,7 @@ public class SscXmlCreator {
                 updateXmlCfRule(doc, tempCfData);
             }
 
-            if (SscXmlFormat.getIsCfnlProvisioned(slotId)) {
+            if (SscXmlFormat.getCfnlExist(slotId)) {
                 CfServiceUpdateData tempCfData = new CfServiceUpdateData(slotId, data.getSsType(),
                         0, 0, data.getState(), SscConstant.CONDITION_CFNL,
                         cfData.getForwardToNumber(), -1, data.getServiceClass());

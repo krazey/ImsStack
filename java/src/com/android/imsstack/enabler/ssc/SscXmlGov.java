@@ -116,7 +116,7 @@ public class SscXmlGov {
 
         ImsLog.d(slotId, "\n" + strDocument);
 
-        SscServiceData data = mSscXmlParser.getSSCServiceFromDoc(queryData, document, mSimservDoc);
+        SscServiceData data = mSscXmlParser.getSscServiceFromDoc(queryData, document, mSimservDoc);
         if (data == null) {
             ImsLog.e("SscServiceData is null");
             return null;
