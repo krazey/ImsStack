@@ -330,7 +330,7 @@ PUBLIC VIRTUAL void AosHandle::Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState
 Remarks
 
 */
-PUBLIC VIRTUAL void AosHandle::App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam)
+PUBLIC VIRTUAL IMS_BOOL AosHandle::App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam)
 {
     A_IMS_TRACE_I(APPPROFILE, "App_StateChanged :: [%s/%s] [state(%d)]", m_strAppId.GetStr(),
             m_strServiceId.GetStr(), nState);
@@ -344,10 +344,10 @@ PUBLIC VIRTUAL void AosHandle::App_StateChanged(IN IMS_UINT32 nState, IN IMS_UIN
         {
             IMSMSG objMSG(HANDLE_MSG_APP_STATUS, nState, nParam);
             OnStateMessage(objMSG);
-            break;
+            return IMS_TRUE;
         }
         default:
-            break;
+            return IMS_FALSE;
     }
 }
 

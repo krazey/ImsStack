@@ -87,7 +87,7 @@ public:
 
     virtual void Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState = 0);
 
-    virtual void App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam);
+    virtual IMS_BOOL App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam);
     virtual IMS_BOOL App_Notify();
 
     virtual void Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked);
