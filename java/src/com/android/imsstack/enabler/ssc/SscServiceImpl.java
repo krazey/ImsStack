@@ -840,7 +840,7 @@ public class SscServiceImpl extends UtInterfaceBase {
             if (previousRequest instanceof CfServiceUpdateData) {
                 CfServiceUpdateData cfUpdateData = (CfServiceUpdateData) previousRequest;
                 if (cfUpdateData.getCondition() == SscConstant.CONDITION_CFNRC) {
-                    if (SscXmlFormat.getIsCfnlProvisioned(mSlotId)) {
+                    if (SscXmlFormat.getCfnlExist(mSlotId)) {
                         requestData.offerSscDataFirst(new CfServiceUpdateData(mSlotId, ESsType.CF,
                                 SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
                                 cfUpdateData.getTransactionId(), cfUpdateData.getState(),

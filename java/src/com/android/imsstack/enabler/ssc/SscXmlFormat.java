@@ -27,12 +27,52 @@ public class SscXmlFormat {
     private static class UtXmlData {
         private boolean mIsNoReplyTimerOmitted = false;
         private boolean mIsNoReplyTimerInRule = false;
-        private boolean mIsCfnlProvisioned = false;
+        private boolean mIsCfnlExistInServer = false;
         private String mNsSsPrefix = "";
         private String mNsCpPrefix = "";
         private HashMap<String, String> mTags = new HashMap<>();
         private HashMap<String, HashMap<Integer, String>> mAudioRuleIds = new HashMap<>();
         private HashMap<String, HashMap<Integer, String>> mVideoRuleIds = new HashMap<>();
+
+        /**
+         * mCfProvisionStatus and mCbProvisionStatus are used to check whether the conditioins are
+         * provisioned by XCAP server only when creating ruleset and rule element to support IR.92
+         * v9.0. If not provisioned, UE will not create rule element for condition.
+         * The params consist of condition and provisioned status
+         */
+        private HashMap<Integer, Boolean> mCfProvisionStatus = new HashMap<>();
+        private HashMap<Integer, Boolean> mCbProvisionStatus = new HashMap<>();
+
+        /**
+         * mCfMeidaCapability and mCbMeidaCapability are used to check whether the media
+         * capabilities are supported by XCAP server only when creating ruleset and rule
+         * element to support IR.92 v9.0. If not supported, UE will not create media element for
+         * media type.
+         * The params consist of media type and status
+         */
+        private HashMap<String, Boolean> mCfMeidaCapability = new HashMap<>();
+        private HashMap<String, Boolean> mCbMeidaCapability = new HashMap<>();
+
+        private UtXmlData() {
+            mCfProvisionStatus.put(SscConstant.CONDITION_CFU, true);
+            mCfProvisionStatus.put(SscConstant.CONDITION_CFB, true);
+            mCfProvisionStatus.put(SscConstant.CONDITION_CFNR, true);
+            mCfProvisionStatus.put(SscConstant.CONDITION_CFNRC, true);
+            mCfProvisionStatus.put(SscConstant.CONDITION_CFNL, true);
+
+            mCbProvisionStatus.put(SscConstant.CONDITION_BAIC, true);
+            mCbProvisionStatus.put(SscConstant.CONDITION_BAOC, true);
+            mCbProvisionStatus.put(SscConstant.CONDITION_BOIC, true);
+            mCbProvisionStatus.put(SscConstant.CONDITION_BOIC_EXHC, true);
+            mCbProvisionStatus.put(SscConstant.CONDITION_BIC_WR, true);
+            mCbProvisionStatus.put(SscConstant.CONDITION_ACR, true);
+
+            mCfMeidaCapability.put(AUDIO, false);
+            mCfMeidaCapability.put(VIDEO, false);
+
+            mCbMeidaCapability.put(AUDIO, false);
+            mCbMeidaCapability.put(VIDEO, false);
+        }
 
         private void setIsNoReplyTimerOmitted(boolean isNoReplyTimerOmitted) {
             mIsNoReplyTimerOmitted = isNoReplyTimerOmitted;
@@ -42,8 +82,8 @@ public class SscXmlFormat {
             mIsNoReplyTimerInRule = isNoReplyTimerInRule;
         }
 
-        private void setIsCfnlProvisioned(boolean isCfnlProvisioned) {
-            mIsCfnlProvisioned = isCfnlProvisioned;
+        private void setIsCfnlExist(boolean isCfnlExistInServer) {
+            mIsCfnlExistInServer = isCfnlExistInServer;
         }
 
         private boolean getIsNoReplyTimerOmitted() {
@@ -54,8 +94,8 @@ public class SscXmlFormat {
             return mIsNoReplyTimerInRule;
         }
 
-        private boolean getIsCfnlProvisioned() {
-            return mIsCfnlProvisioned;
+        private boolean getIsCfnlExist() {
+            return mIsCfnlExistInServer;
         }
 
         private HashMap<String, String> getTags() {
@@ -80,7 +120,7 @@ public class SscXmlFormat {
             = "xmlns(ss=http://uri.etsi.org/ngn/params/xml/simservs/xcap)";
     public static final String NS_CP_URI = "xmlns(cp=urn:ietf:params:xml:ns:common-policy)";
 
-    // SS service Elements
+    // SS Service Elements
     public static final String SIMSERVS = "simservs";
     public static final String CW = "communication-waiting";
     public static final String CD = "communication-diversion";
@@ -91,17 +131,35 @@ public class SscXmlFormat {
     public static final String TIP = "terminating-identity-presentation";
     public static final String TIR = "terminating-identity-presentation-restriction";
 
+    // SS Service Capability Elements
+    public static final String SC_CD = "communication-diversion-serv-cap";
+    public static final String SC_CB = "communication-barring-serv-cap";
+
     // SS CF Condition Elements
     public static final String CFB = "busy";
     public static final String CFNR = "no-answer";
     public static final String CFNRC = "not-reachable";
     public static final String CFNL = "not-registered";
 
+    // SS CF Service Capability Condition Elements
+    public static final String SC_CFU = "serv-cap-unconditional";
+    public static final String SC_CFB = "serv-cap-busy";
+    public static final String SC_CFNR = "serv-cap-no-answer";
+    public static final String SC_CFNRC = "serv-cap-not-reachable";
+    public static final String SC_CFNL = "serv-cap-not-registered";
+
     // SS CB Condition Elements
     public static final String BOIC = "international";
     public static final String BOIC_EXHC = "international-exHC";
     public static final String BIC_WR = "roaming";
     public static final String ACR = "anonymous";
+
+    // SS CB Service Capability Condition Elements
+    public static final String SC_CBU = "serv-cap-unconditional";
+    public static final String SC_BOIC = "serv-cap-international";
+    public static final String SC_BOIC_EXHC = "serv-cap-international-exHC";
+    public static final String SC_BIC_WR = "serv-cap-roaming";
+    public static final String SC_ACR = "serv-cap-anonymous";
 
     // SS Elements
     public static final String NOREPLYTIMER = "NoReplyTimer";
@@ -121,6 +179,10 @@ public class SscXmlFormat {
             = "reveal-served-user-identity-to-caller";
     public static final String REVEAL_IDENTITY_TO_USER = "reveal-identity-to-caller";
     public static final String REVEAL_IDENTITY_TO_TARGET = "reveal-identity-to-target";
+
+    // SS Service Capability Elements
+    public static final String SC_CONDITIONS = "serv-cap-conditions";
+    public static final String SC_MEDIA = "serv-cap-media";
 
     // CP Elements
     public static final String RULESET = "ruleset";
@@ -144,6 +206,7 @@ public class SscXmlFormat {
     // Attributes
     public static final String ID = "id";
     public static final String ACTIVE = "active";
+    public static final String PROVISIONED = "provisioned";
     public static final String PHRASE = "phrase";
 
     public static final int MEDIA_AUDIO = 0;
@@ -335,21 +398,88 @@ public class SscXmlFormat {
         xmlData.setIsNoReplyTimerInRule(isNoReplyTimerInRule);
     }
 
-    protected static boolean getIsCfnlProvisioned(int slotId) {
+    protected static boolean getCfnlExist(int slotId) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return false;
         }
 
-        return xmlData.getIsCfnlProvisioned();
+        return xmlData.getIsCfnlExist();
     }
 
-    protected static void setIsCfnlProvisioned(int slotId, boolean isCfnlProvisioned) {
+    protected static void setCfnlExist(int slotId, boolean isCfnlExist) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return;
         }
 
-        xmlData.setIsCfnlProvisioned(isCfnlProvisioned);
+        xmlData.setIsCfnlExist(isCfnlExist);
+    }
+
+    protected static boolean getProvisionStatus(int slotId, String capabilityName, int condition) {
+        UtXmlData xmlData = getXmlData(slotId);
+        if (xmlData == null) {
+            return false;
+        }
+
+        if (capabilityName == SC_CD) {
+            if (xmlData.mCfProvisionStatus.containsKey(condition)) {
+                return xmlData.mCfProvisionStatus.get(condition);
+            }
+        } else if (capabilityName == SC_CB) {
+            if (xmlData.mCbProvisionStatus.containsKey(condition)) {
+                return xmlData.mCbProvisionStatus.get(condition);
+            }
+        }
+
+        return false;
+    }
+
+    protected static void setProvisionStatus(int slotId, String capabilityName, int condition,
+            boolean provisioned) {
+        UtXmlData xmlData = getXmlData(slotId);
+        if (xmlData == null) {
+            return;
+        }
+
+        if (capabilityName == SC_CD) {
+            xmlData.mCfProvisionStatus.put(condition, provisioned);
+        } else if (capabilityName == SC_CB) {
+            xmlData.mCbProvisionStatus.put(condition, provisioned);
+        }
+    }
+
+    protected static boolean getMediaCapability(int slotId, String capabilityName,
+            String mediaType) {
+        UtXmlData xmlData = getXmlData(slotId);
+        if (xmlData == null) {
+            return false;
+        }
+
+        if (capabilityName == SC_CD) {
+            if (xmlData.mCfMeidaCapability.containsKey(mediaType)) {
+                return xmlData.mCfMeidaCapability.get(mediaType);
+            }
+        } else if (capabilityName == SC_CB) {
+            if (xmlData.mCbMeidaCapability.containsKey(mediaType)) {
+                return xmlData.mCbMeidaCapability.get(mediaType);
+            }
+        }
+
+        return false;
+    }
+
+    protected static void setMediaCapability(int slotId, String capabilityName, String mediaType,
+            boolean mediaCapability) {
+        UtXmlData xmlData = getXmlData(slotId);
+        if (xmlData == null) {
+            return;
+        }
+
+        if (capabilityName == SC_CD) {
+            xmlData.mCfMeidaCapability.put(mediaType, mediaCapability);
+        } else if (capabilityName == SC_CB) {
+            xmlData.mCbMeidaCapability.put(mediaType, mediaCapability);
+        }
     }
 }

@@ -44,10 +44,14 @@ public class SscXmlParser {
         ImsLog.d("");
     }
 
-    // NOTICE
-    // This SscServiceData doesn't have EventNumber value.
-    // It must be set with ESsType info or add the value in other way.
-    public SscServiceData getSSCServiceFromDoc(SscServiceQueryData queryData, Document doc,
+    /**
+     * This method returns supplementary service data getting from XML of XCAP server
+     * @param queryData queried data that is used when sending HTTP GET request
+     * @param doc XML data received from XCAP server
+     * @param cachedDoc XML data that is cached from previous response from XCAP server
+     * @return parsed and optimized data according to queryData
+     */
+    public SscServiceData getSscServiceFromDoc(SscServiceQueryData queryData, Document doc,
             Document cachedDoc) {
         ImsLog.d(queryData.getSlotId(), "");
 
@@ -83,6 +87,10 @@ public class SscXmlParser {
                 break;
             case NONE:
                 updateTagsAndRules(queryData, doc);
+                //if (SscConfig.requiresInsertingNewRule(queryData.getSlotId())) {
+                updateCfProvisionStatusFromServiceCapability(queryData, doc);
+                updateCbProvisionStatusFromServiceCapability(queryData, doc);
+                //}
                 data = new SscServiceData(queryData.getSlotId(), queryData.getSsType(),
                         queryData.getEventNumber(), queryData.getTransactionId(), 1);
                 break;
@@ -215,9 +223,9 @@ public class SscXmlParser {
         NodeList elementList = rootElement.getElementsByTagName(
                 SscXmlFormat.getSsElement(slotId, SscXmlFormat.CFNL));
         if (elementList.getLength() > 0) {
-            SscXmlFormat.setIsCfnlProvisioned(slotId, true);
+            SscXmlFormat.setCfnlExist(slotId, true);
         } else {
-            SscXmlFormat.setIsCfnlProvisioned(slotId, false);
+            SscXmlFormat.setCfnlExist(slotId, false);
         }
     }
 
@@ -428,151 +436,80 @@ public class SscXmlParser {
         return data;
     }
 
-    /*
-    // This class is not using now. made for future usage.
-    protected SscServiceData getCFServerCapaData(SscServiceQueryData queryData,
-            Document doc, XPath xpath) {
-        ImsLog.d("");
+    private void updateCfProvisionStatusFromServiceCapability(SscServiceQueryData queryData,
+            Document doc) {
+        int slotId = queryData.getSlotId();
+        String allNamespaces = "*";
 
-        String strTopExpression = "//" + queryData.getSsType().getSSName();
-        String expression = strTopExpression;
-
-        Node node = getNode(expression, doc, xpath);
-        if (node == null) {
-            ImsLog.e("target node is null");
-            return null;
+        NodeList scCdNodeList = doc.getElementsByTagNameNS(allNamespaces, SscXmlFormat.SC_CD);
+        if (scCdNodeList.getLength() == 0) {
+            ImsLog.e(slotId, "target node is null");
+            return;
         }
 
-        int cfCapaActive = "true".equals(getActiveNodeText(node)) ? 1 : 0;
-        CFServerCapaData data = new CFServerCapaData(queryData.getSlotId(),
-                                                    queryData.getSsType(),
-                                                    queryData.getEventNumber(),
-                                                    queryData.getTransactionId(),
-                                                    cfCapaActive);
-
-        expression += "/" + SscXmlFormat.SERVCAPCONDITIONS + "/*";
-
-        NodeList conditionsNodeList = getNodeList(expression, doc, xpath);
-        if (conditionsNodeList == null) {
-            ImsLog.e("conditionNodeList is null");
-            return data;
+        Element scCdElement = (Element) scCdNodeList.item(0);
+        int active = getActiveAttribute(scCdElement);
+        if (active == SscConstant.STATUS_DISABLE) {
+            return;
         }
 
-        for (int idx = 0; idx < conditionsNodeList.getLength(); idx++) {
-            Element condition = (Element)conditionsNodeList.item(idx);
+        NodeList conditionNodeList = scCdElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_CONDITIONS);
+        if (conditionNodeList.getLength() == 0) {
+            ImsLog.e(slotId, "target node is null");
+            return;
+        }
 
-            if (condition == null) {
-                ImsLog.e("condition is null");
-                break;
-            }
+        Element conditionElement = (Element) conditionNodeList.item(0);
+        NodeList conditionCfuNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_CFU);
+        if (conditionCfuNodeList.getLength() > 0) {
+            SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFU,
+                    getProvisionedAttribute((Element) conditionCfuNodeList.item(0)));
+        }
+        NodeList conditionCfbNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_CFB);
+        if (conditionCfbNodeList.getLength() > 0) {
+            SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFB,
+                    getProvisionedAttribute((Element) conditionCfbNodeList.item(0)));
+        }
+        NodeList conditionCfnrNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_CFNR);
+        if (conditionCfnrNodeList.getLength() > 0) {
+            SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFNR,
+                    getProvisionedAttribute((Element) conditionCfnrNodeList.item(0)));
+        }
+        NodeList conditionCfnrcNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_CFNRC);
+        if (conditionCfnrcNodeList.getLength() > 0) {
+            SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFNRC,
+                    getProvisionedAttribute((Element) conditionCfnrcNodeList.item(0)));
+        }
+        NodeList conditionCfnlNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_CFNL);
+        if (conditionCfnlNodeList.getLength() > 0) {
+            SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CD, SscConstant.CONDITION_CFNL,
+                    getProvisionedAttribute((Element) conditionCfnlNodeList.item(0)));
+        }
 
-            if (SscXmlFormat.SERVCAPMEDIA.equals(condition.getNodeName())) {
-                //NodeList mediaNodeList = condition.getChildNodes();
-                expression = strTopExpression
-                            + "/" + SscXmlFormat.SERVCAPCONDITIONS
-                            + "/" + SscXmlFormat.SERVCAPMEDIA + "/*";
-
-                NodeList mediaNodeList = getNodeList(expression, doc, xpath);
-                if (mediaNodeList == null) {
-                    ImsLog.e("media Node List is null");
-                    continue;
-                }
-
-                for (int mediaIdx = 0; mediaIdx < mediaNodeList.getLength(); mediaIdx++) {
-                    Element media = (Element)mediaNodeList.item(mediaIdx);
-                    if (media == null) {
-                        ImsLog.e("media target node is null");
-                        break;
-                    }
-
-                    if (SscXmlFormat.AUDIO.equals(media.getTextContent())) {
-                        data.setServCapMediaAudio(SscConstant.STATUS_ENABLE);
-                    } else if (SscXmlFormat.VIDEO.equals(media.getTextContent())) {
-                        data.setServCapMediaVideo(SscConstant.STATUS_ENABLE);
-                    } else {
-                        ImsLog.w("");
-                    }
-                } // End of Media List
-            } else {
-                int enable = "true".equals(condition.getAttribute("provisioned")) ? 1 : 0;
-                String nodeName = condition.getNodeName();
-
-                if ("serv-cap-anonymous".equals(nodeName)) {
-                    data.setServCapAnonymous(enable);
-                } else if ("serv-cap-busy".equals(nodeName)) {
-                    data.setServCapbusy(enable);
-                } else if ("serv-cap-external-list".equals(nodeName)) {
-                    data.setServCapExternalList(enable);
-                } else if ("serv-cap-identity".equals(nodeName)) {
-                    data.setServCapIdentity(enable);
-                } else if ("serv-cap-not-registered".equals(nodeName)) {
-                    data.setServCapNotRegistered(enable);
-                } else if ("serv-cap-no-answer".equals(nodeName)) {
-                    data.setServCapNoAnswer(enable);
-                } else if ("serv-cap-not-reachable".equals(nodeName)) {
-                    data.setServCapNotReachable(enable);
-                } else if ("serv-cap-presence-status".equals(nodeName)) {
-                    data.setServCapPresenceStatus(enable);
-                } else if ("serv-cap-rule-deactivated".equals(nodeName)) {
-                    data.setServCapRuleDeactivated(enable);
-                } else if ("serv-cap-validity".equals(nodeName)) {
-                    data.setServCapValidity(enable);
-                } else {
-                    ImsLog.w("");
+        NodeList scMediaNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_MEDIA);
+        if (scMediaNodeList.getLength() > 0) {
+            Element scMediaElement = (Element) scMediaNodeList.item(0);
+            NodeList mediaNodeList = scMediaElement.getElementsByTagNameNS(allNamespaces,
+                    SscXmlFormat.MEDIA);
+            for (int i = 0; i < mediaNodeList.getLength(); i++) {
+                String mediaValue = mediaNodeList.item(i).getTextContent().trim();
+                if (SscXmlFormat.AUDIO.equals(mediaValue)) {
+                    SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CD, SscXmlFormat.AUDIO,
+                            true);
+                } else if (SscXmlFormat.VIDEO.equals(mediaValue)) {
+                    SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CD, SscXmlFormat.VIDEO,
+                            true);
                 }
             }
         }
-
-        expression = strTopExpression + "/serv-cap-actions/*";
-
-        NodeList actionNodeList = getNodeList(expression, doc, xpath);
-        if (actionNodeList == null) { // In case of No action
-            ImsLog.w("actionNodeList is null");
-            return data;
-        }
-
-        for (int idx = 0; idx < actionNodeList.getLength(); idx++) {
-            Element action = (Element)actionNodeList.item(idx);
-
-            if (action == null) {
-                ImsLog.e("condition is null");
-                break;
-            }
-
-            if ("serv-cap-target".equals(action.getNodeName())) {
-                expression = strTopExpression
-                            + "/serv-cap-actions" + "/serv-cap-target" + "/telephony-type";
-                Node childNode = getNode(expression, doc, xpath);
-                if (childNode != null) {
-                    data.setServCapTarget(childNode.getNodeName());
-                }
-            } else {
-                int enable = "true".equals(action.getAttribute("provisioned")) ? 1 : 0;
-                String nodeName = action.getNodeName();
-
-                if ("serv-cap-notify-caller".equals(nodeName)) {
-                    data.setServCapNotifyCaller(enable);
-                } else if ("serv-cap-notify-served-user".equals(nodeName)) {
-                    data.setServCapNotifyServedUser(enable);
-                } else if ("serv-cap-notify-served-user-on-outbound-call".equals(nodeName)) {
-                    data.setServCapNotifyServedUserOnOutboundCall(enable);
-                } else if ("serv-cap-reveal-identity-to-caller".equals(nodeName)) {
-                    data.setServCapRevealIdentifyToCaller(enable);
-                } else if ("serv-cap-reveal-served-user-identity-to-caller".equals(nodeName)) {
-                    data.setServCapRevealServedUserIdentityToCaller(enable);
-                } else if ("serv-cap-reveal-identity-to-target".equals(nodeName)) {
-                    data.setServCapRevealIdentityToTarget(enable);
-                } else {
-                    ImsLog.w("");
-                }
-            }
-        }
-
-        ImsLog.d(data.toString());
-
-        return data;
     }
-     */
 
     private SscServiceData getCbServiceData(SscServiceQueryData queryData, Document doc) {
         int slotId = queryData.getSlotId();
@@ -605,111 +542,85 @@ public class SscXmlParser {
         return data;
     }
 
-/*
-    // This class is not using now. made for future usage.
-    protected SscServiceData getCBServerCapaData(SscServiceQueryData queryData,
-            Document doc, XPath xpath) {
-        ImsLog.d("");
+    private void updateCbProvisionStatusFromServiceCapability(SscServiceQueryData queryData,
+            Document doc) {
+        int slotId = queryData.getSlotId();
+        String allNamespaces = "*";
 
-        String strTopExpression = "//" + queryData.getSsType().getSSName();
-        String expression = strTopExpression;
-
-        Node node = getNode(expression, doc, xpath);
-        if (node == null) {
-            ImsLog.e("target node is null");
-            return null;
+        NodeList scCbNodeList = doc.getElementsByTagNameNS(allNamespaces, SscXmlFormat.SC_CB);
+        if (scCbNodeList.getLength() == 0) {
+            ImsLog.e(slotId, "target node is null");
+            return;
         }
 
-        String cbActive = getActiveNodeText(node);
-        int CBPavaActive = "true".equals(cbActive) ? 1 : 0;
-
-        CBServerCapaData data = new CBServerCapaData(queryData.getSlotId(),
-                                                    queryData.getSsType(),
-                                                    queryData.getEventNumber(),
-                                                    queryData.getTransactionId(),
-                                                    CBPavaActive);
-
-        expression += "/" + SscXmlFormat.SERVCAPCONDITIONS + "/*";
-
-        NodeList conditionsNodeList = getNodeList(expression, doc, xpath);
-        if (conditionsNodeList == null) {
-            ImsLog.e("conditionNodeList is null");
-            return data;
+        Element scCbElement = (Element) scCbNodeList.item(0);
+        int active = getActiveAttribute(scCbElement);
+        if (active == SscConstant.STATUS_DISABLE) {
+            return;
         }
 
-        for (int idx = 0; idx < conditionsNodeList.getLength(); idx++) {
-            Element condition = (Element)conditionsNodeList.item(idx);
+        NodeList conditionNodeList = scCbElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_CONDITIONS);
+        if (conditionNodeList.getLength() == 0) {
+            ImsLog.e(slotId, "target node is null");
+            return;
+        }
 
-            if (condition == null) {
-                ImsLog.e("condition is null");
-                break;
-            }
+        Element conditionElement = (Element) conditionNodeList.item(0);
+        NodeList conditionCbuNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_CBU);
+        if (conditionCbuNodeList.getLength() > 0) {
+            SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB, SscConstant.CONDITION_BAIC,
+                    getProvisionedAttribute((Element) conditionCbuNodeList.item(0)));
+            SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB, SscConstant.CONDITION_BAOC,
+                    getProvisionedAttribute((Element) conditionCbuNodeList.item(0)));
+        }
+        NodeList conditionBoicNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_BOIC);
+        if (conditionBoicNodeList.getLength() > 0) {
+            SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB, SscConstant.CONDITION_BOIC,
+                    getProvisionedAttribute((Element) conditionBoicNodeList.item(0)));
+        }
+        NodeList conditionBoicExhcNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_BOIC_EXHC);
+        if (conditionBoicExhcNodeList.getLength() > 0) {
+            SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB,
+                    SscConstant.CONDITION_BOIC_EXHC,
+                    getProvisionedAttribute((Element) conditionBoicExhcNodeList.item(0)));
+        }
+        NodeList conditionBicWrcNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_BIC_WR);
+        if (conditionBicWrcNodeList.getLength() > 0) {
+            SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB,
+                    SscConstant.CONDITION_BIC_WR,
+                    getProvisionedAttribute((Element) conditionBicWrcNodeList.item(0)));
+        }
+        NodeList conditionAcrNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_ACR);
+        if (conditionAcrNodeList.getLength() > 0) {
+            SscXmlFormat.setProvisionStatus(slotId, SscXmlFormat.SC_CB, SscConstant.CONDITION_ACR,
+                    getProvisionedAttribute((Element) conditionAcrNodeList.item(0)));
+        }
 
-            if (SscXmlFormat.SERVCAPMEDIA.equals(condition.getNodeName())) {
-
-                //NodeList mediaNodeList = condition.getChildNodes();
-                expression = strTopExpression
-                            + "/" + SscXmlFormat.SERVCAPCONDITIONS
-                            + "/" + SscXmlFormat.SERVCAPMEDIA + "/*";
-
-                NodeList mediaNodeList = getNodeList(expression, doc, xpath);
-                if (mediaNodeList == null) {
-                    ImsLog.e("media Node List is null");
-                    continue;
-                }
-                for (int mediaIdx = 0; mediaIdx < mediaNodeList.getLength(); mediaIdx++) {
-                    Node mediaNode = mediaNodeList.item(mediaIdx);
-
-                    if (mediaNode == null) {
-                        ImsLog.e("media target node is null");
-                        continue;
-                    }
-
-                    if (SscXmlFormat.AUDIO.equals(mediaNode.getTextContent())) {
-                        data.setServCapMediaAudio(SscConstant.STATUS_ENABLE);
-                    } else if (SscXmlFormat.VIDEO.equals(mediaNode.getTextContent())) {
-                        data.setServCapMediaVideo(SscConstant.STATUS_ENABLE);
-                    } else {
-                        ImsLog.w("");
-                    }
-                } // End of Media List
-            } else {
-                int enable = "true".equals(condition.getAttribute("provisioned")) ? 1 : 0;
-                String nodeName = condition.getNodeName();
-
-                if ("serv-cap-anonymous".equals(nodeName)) {
-                    data.setServCapAnonymous(enable);
-                } else if ("serv-cap-communication-diverted".equals(nodeName)) {
-                    data.setServCapCommunicationDiverted(enable);
-                } else if ("serv-cap-external-list".equals(nodeName)) {
-                    data.setServCapExternalList(enable);
-                } else if ("serv-cap-identity".equals(nodeName)) {
-                    data.setServCapIdentity(enable);
-                } else if ("serv-cap-international".equals(nodeName)) {
-                    data.setServCapInternational(enable);
-                } else if ("serv-cap-international-exHC".equals(nodeName)) {
-                    data.setServCapInternationalExHC(enable);
-                } else if ("serv-cap-other-identity".equals(nodeName)) {
-                    data.setServCapOtherIdentity(enable);
-                } else if ("serv-cap-presence-status".equals(nodeName)) {
-                    data.setServCapPresenceStatus(enable);
-                } else if ("serv-cap-roaming".equals(nodeName)) {
-                    data.setServCapRoaming(enable);
-                } else if ("serv-cap-rule-deactivated".equals(nodeName)) {
-                    data.setServCapRuleDeactivated(enable);
-                } else if ("serv-cap-validity".equals(nodeName)) {
-                    data.setServCapValidity(enable);
-                } else {
-                    ImsLog.w("");
+        NodeList scMediaNodeList = conditionElement.getElementsByTagNameNS(allNamespaces,
+                SscXmlFormat.SC_MEDIA);
+        if (scMediaNodeList.getLength() > 0) {
+            Element scMediaElement = (Element) scMediaNodeList.item(0);
+            NodeList mediaNodeList = scMediaElement.getElementsByTagNameNS(allNamespaces,
+                    SscXmlFormat.MEDIA);
+            for (int i = 0; i < mediaNodeList.getLength(); i++) {
+                String mediaValue = mediaNodeList.item(i).getTextContent().trim();
+                if (SscXmlFormat.AUDIO.equals(mediaValue)) {
+                    SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CB, SscXmlFormat.AUDIO,
+                            true);
+                } else if (SscXmlFormat.VIDEO.equals(mediaValue)) {
+                    SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CB, SscXmlFormat.VIDEO,
+                            true);
                 }
             }
         }
-
-        ImsLog.d(data.toString());
-
-        return data;
     }
-*/
+
     private SscServiceData getCwServiceData(SscServiceQueryData queryData, Document doc) {
         int slotId = queryData.getSlotId();
         NodeList cwNodeList =
@@ -1112,6 +1023,11 @@ public class SscXmlParser {
         // it indicates that the service is activated.
         return "false".equalsIgnoreCase(active) ?
                 SscConstant.STATUS_DISABLE : SscConstant.STATUS_ENABLE;
+    }
+
+    private boolean getProvisionedAttribute(Element element) {
+        String provisioned = element.getAttribute(SscXmlFormat.PROVISIONED);
+        return "false".equalsIgnoreCase(provisioned) ? false : true;
     }
 
     private int getNoPeplyTimer(int slotId, Element element) {
