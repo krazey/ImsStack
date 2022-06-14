@@ -18,7 +18,7 @@ PUBLIC
 MtcConfigurationManager::~MtcConfigurationManager()
 {
     ICarrierConfig* piCc =
-            ConfigService::GetConfigService()->GetCarrierConfig(ThreadService::GetCurrentSlotId());
+            ConfigService::GetConfigService()->GetCarrierConfig(ThreadService::GetCurrentSlotId(0));
     piCc->RemoveListener(this);
 }
 
@@ -27,7 +27,7 @@ void MtcConfigurationManager::Init()
 {
     IMS_TRACE_I("Init", 0, 0, 0);
     ICarrierConfig* piCc =
-            ConfigService::GetConfigService()->GetCarrierConfig(ThreadService::GetCurrentSlotId());
+            ConfigService::GetConfigService()->GetCarrierConfig(ThreadService::GetCurrentSlotId(0));
     piCc->AddListener(this);
 
     UpdateFullConfig(piCc);

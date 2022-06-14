@@ -6,6 +6,7 @@
 #include "IMtcService.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
+#include "call/IMtcCall.h"
 
 class ICoreService;
 class IMtcService;

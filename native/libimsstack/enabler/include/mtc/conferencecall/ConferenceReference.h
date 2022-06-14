@@ -1,12 +1,14 @@
 #ifndef CONFERENCE_REFERENCE_H_
 #define CONFERENCE_REFERENCE_H_
 
+#include "AString.h"
 #include "IReferenceListener.h"
+#include "call/IMtcCall.h"
 #include "conferencecall/IConferenceReference.h"
+#include "MtcDef.h"
 
 class CallConnectionIdManager;
 class IReference;
-class IMtcCall;
 class IMtcContext;
 class IConferenceReferenceListener;
 

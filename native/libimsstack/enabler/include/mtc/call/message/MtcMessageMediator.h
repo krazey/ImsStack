@@ -3,6 +3,7 @@
 
 #include "IMSTypeDef.h"
 #include "base/IMessageMediator.h"
+#include "call/IMtcCall.h"
 
 class IMtcCallContext;
 class ISipMessage;

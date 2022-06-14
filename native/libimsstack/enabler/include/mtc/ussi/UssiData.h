@@ -1,6 +1,8 @@
 #ifndef USSI_DATA_H_
 #define USSI_DATA_H_
 
+#include "AString.h"
+#include "ImsTypeDef.h"
 #include "INodeList.h"
 #include "ussi/UssiDef.h"
 

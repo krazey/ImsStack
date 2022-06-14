@@ -2,6 +2,7 @@
 #define NETWORK_BLOCK_RULE_H_
 
 #include "IMSTypeDef.h"
+#include "call/IMtcCall.h"
 #include "helper/block/IMtcBlockRule.h"
 
 class IMtcCallContext;

@@ -4,8 +4,8 @@
 #include "AString.h"
 #include "ICoreService.h"
 #include "ICoreServiceListener.h"
-#include "interface/aos/IImsAosListener.h"
-#include "interface/aos/IImsAosMonitor.h"
+#include "IImsAosListener.h"
+#include "IImsAosMonitor.h"
 #include "IMSService.h"
 #include "IMSTypeDef.h"
 #include "IMtcContext.h"
@@ -89,6 +89,7 @@ private:
     void AttachCoreServiceInterface();
     void AttachAosInterface();
     void SetServiceFilterCriteria();
+    void SetAosReady(IN IMS_BOOL);
 
 private:
     ServiceType m_eType;

@@ -49,6 +49,7 @@ cc_test {
         "libimsstack_platform_headers",
         "libimsstack_platform_os_android_system-intf_headers",
         "libimsstack_protocol_headers",
+        "libimsmedia_config_headers",
     ],
     static_libs: [
         "libimsstack-config",
@@ -58,6 +59,7 @@ cc_test {
         "libimsstack-main",
         "libimsstack-platform",
         "libimsstack-protocol",
+        "libimsmedia_config",
     ],
 
     test_config: "ImsStackNativeTests.xml",
