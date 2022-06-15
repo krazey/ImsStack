@@ -81,8 +81,8 @@ private:
     IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piScc) override;
 
     // Method class - Handle to the outgoing request / incoming response message
-    void NotifySIPResponse(IN ISipClientConnection* piScc) override;
-    void NotifySIPError(
+    void NotifySipResponse(IN ISipClientConnection* piScc) override;
+    void NotifySipError(
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
     // IDialogMethod interface

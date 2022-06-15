@@ -1,9 +1,26 @@
-#ifndef _INTERFACE_REFERENCE_H_
-#define _INTERFACE_REFERENCE_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_REFERENCE_H_
+#define INTERFACE_REFERENCE_H_
 
 #include "ByteArray.h"
+
 #include "IServiceMethod.h"
 #include "ISubscriptionState.h"
+#include "SipStatusCode.h"
 
 class INotificationListener;
 class IReferenceListener;
@@ -111,9 +128,7 @@ public:
      * @param strSessionId The identity of the ISession to be replaced
      * @return If it is successfully set, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetReplaces(IN CONST AString& strSessionId) = 0;
-
-    //// IMS extensions
+    virtual IMS_RESULT SetReplaces(IN const AString& strSessionId) = 0;
 
     /**
      * @brief Sends a successful final response to an incoming reference from a remote endpoint.
@@ -126,8 +141,8 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT AcceptEx(
-            IN IMS_SINT32 nStatusCode = 202, IN IMS_BOOL b100Trying = IMS_TRUE) = 0;
+    virtual IMS_RESULT AcceptEx(IN IMS_SINT32 nStatusCode = SipStatusCode::SC_202,
+            IN IMS_BOOL b100Trying = IMS_TRUE) = 0;
 
     /**
      * @brief Sends the reference request to the remote endpoint.
@@ -146,7 +161,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT ReferEx(IN IMS_BOOL bImplicitSubscription,
-            IN CONST AString& strHeadersForReferTo = AString::ConstNull()) = 0;
+            IN const AString& strHeadersForReferTo = AString::ConstNull()) = 0;
 
     /**
      * @brief Sends a failure final response to an incoming reference from a remote endpoint.
@@ -178,7 +193,7 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SendNotification(IN IMS_SINT32 nSubState, IN CONST ByteArray& objContent,
+    virtual IMS_RESULT SendNotification(IN IMS_SINT32 nSubState, IN const ByteArray& objContent,
             IN IMS_SINT32 nReason = ISubscriptionState::REASON_NONE,
             IN IMS_SINT32 nExpires = (-1)) = 0;
 
@@ -213,4 +228,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_REFERENCE_H_
+#endif

@@ -1,107 +1,46 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100328  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
 #include "ISipHeader.h"
 #include "util/EventPackage.h"
 
 PUBLIC
 EventPackage::EventPackage() :
-        strEvent(AString::ConstNull()),
-        piEventHeader(IMS_NULL),
-        nInitialDuration(-1)
+        m_strEvent(AString::ConstNull()),
+        m_piEventHeader(IMS_NULL),
+        m_nInitialDuration(-1)
 {
 }
 
 PUBLIC VIRTUAL EventPackage::~EventPackage()
 {
-    if (piEventHeader != IMS_NULL)
-        piEventHeader->Destroy();
-}
-
-PUBLIC
-IMS_UINT32 EventPackage::GetDefaultDuration() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    // Default duration for all event packages...
-    return DEFAULT_DURATION;
-}
-
-PUBLIC
-IMS_SINT32 EventPackage::GetDuration() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nInitialDuration;
-}
-
-PUBLIC
-const AString& EventPackage::GetEvent() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strEvent;
-}
-
-PUBLIC
-const ISipHeader* EventPackage::GetEventHeader() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return piEventHeader;
-}
-
-PUBLIC
-const AStringArray& EventPackage::GetMIMETypes() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objMIMETypes;
-}
-
-PUBLIC
-void EventPackage::SetDuration(IN IMS_SINT32 nDuration)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->nInitialDuration = nDuration;
-}
-
-PUBLIC
-void EventPackage::SetEvent(IN CONST AString& strEvent)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->strEvent = strEvent;
+    if (m_piEventHeader != IMS_NULL)
+    {
+        m_piEventHeader->Destroy();
+    }
 }
 
 PUBLIC
 void EventPackage::SetEventHeader(IN ISipHeader* piHeader)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this->piEventHeader != IMS_NULL)
+    if (m_piEventHeader != IMS_NULL)
     {
-        this->piEventHeader->Destroy();
+        m_piEventHeader->Destroy();
     }
 
-    this->piEventHeader = piHeader;
-}
-
-PUBLIC
-void EventPackage::SetMIMETypes(IN CONST AStringArray& objMIMETypes)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->objMIMETypes = objMIMETypes;
+    m_piEventHeader = piHeader;
 }

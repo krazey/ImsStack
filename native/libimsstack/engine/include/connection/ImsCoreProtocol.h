@@ -23,10 +23,12 @@ class ImsCoreProtocol : public ServiceProtocol
 {
 private:
     ImsCoreProtocol();
-    ImsCoreProtocol(IN const ImsCoreProtocol& objRHS);
 
 public:
-    virtual ~ImsCoreProtocol();
+    inline virtual ~ImsCoreProtocol() {}
+
+    ImsCoreProtocol(IN const ImsCoreProtocol&) = delete;
+    ImsCoreProtocol& operator=(IN const ImsCoreProtocol&) = delete;
 
 public:
     static ImsCoreProtocol* GetInstance();

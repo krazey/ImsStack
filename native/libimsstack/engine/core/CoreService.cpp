@@ -1,172 +1,126 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090527  toastops@                 Created
-    </table>
-
-    Description
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "Sip.h"
+
+#include "Capabilities.h"
+#include "CoreService.h"
+#include "IOnCoreServiceListener.h"
+#include "IOnDirectCoreServiceListener.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
-#include "SipParsingHelper.h"
-#include "SipParameter.h"
-#include "base/Ims.h"
 #include "ImsCore.h"
-#include "Capabilities.h"
 #include "PageMessage.h"
 #include "Publication.h"
 #include "Reference.h"
 #include "SessionEx.h"
-#include "Subscription.h"
+#include "Sip.h"
 #include "SipConnectionFactory.h"
-#include "IOnCoreServiceListener.h"
-#include "IOnDirectCoreServiceListener.h"
-#include "CoreService.h"
+#include "SipParameter.h"
+#include "SipParsingHelper.h"
+#include "Subscription.h"
+#include "base/Ims.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-CoreService::CoreService(IN CONST AString& strAppId_, IN CONST AString& strServiceId_,
-        IN CONST SipAddress* pIMPU_ /* = IMS_NULL */) :
-        Service(ImsCore::CONNECTION_SCHEME, strAppId_, strServiceId_, pIMPU_),
-        piCoreServiceListener(IMS_NULL),
-        piDirectCoreServiceListener(IMS_NULL)
+CoreService::CoreService(IN const AString& strAppId, IN const AString& strServiceId,
+        IN const SipAddress* pImpu /*= IMS_NULL*/) :
+        Service(ImsCore::CONNECTION_SCHEME, strAppId, strServiceId, pImpu),
+        m_piCoreServiceListener(IMS_NULL),
+        m_piDirectCoreServiceListener(IMS_NULL)
 {
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL CoreService::~CoreService()
 {
     IMS_TRACE_D("Destructor :: CoreService (%s)", GetServiceId().GetStr(), 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void CoreService::Close()
 {
-    //---------------------------------------------------------------------------------------------
-
-    objReasonInfo.SetReasonType(IReasonInfo::REASON_TYPE_USER_ACTION);
+    m_objReasonInfo.SetReasonType(IReasonInfo::REASON_TYPE_USER_ACTION);
 
     Service::Close();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void CoreService::Abort()
 {
-    //---------------------------------------------------------------------------------------------
-
-    objReasonInfo.SetReasonType(IReasonInfo::REASON_TYPE_USER_ACTION);
+    m_objReasonInfo.SetReasonType(IReasonInfo::REASON_TYPE_USER_ACTION);
 
     Service::Abort();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void CoreService::HandleSessionInvitationReceived(IN Session* pSession)
 {
     // The subclass MUST implement this method to handle an incoming INVITE request
 
-    if (piCoreServiceListener == IMS_NULL)
+    if (m_piCoreServiceListener == IMS_NULL)
     {
         IMS_TRACE_D("NO CORE SERVICE LISTENER", 0, 0, 0);
         return;
     }
 
-    piCoreServiceListener->OnCoreService_SessionInvitationReceived(
+    m_piCoreServiceListener->OnCoreService_SessionInvitationReceived(
             this, DYNAMIC_CAST(SessionEx*, pSession));
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void CoreService::HandlePageMessageReceived(IN PageMessage* pPageMessage)
 {
     // The subclass MUST implement this method to handle an incoming MESSAGE request
 
-    if (piCoreServiceListener == IMS_NULL)
+    if (m_piCoreServiceListener == IMS_NULL)
     {
         IMS_TRACE_D("NO CORE SERVICE LISTENER", 0, 0, 0);
         return;
     }
 
-    piCoreServiceListener->OnCoreService_PageMessageReceived(this, pPageMessage);
+    m_piCoreServiceListener->OnCoreService_PageMessageReceived(this, pPageMessage);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void CoreService::HandleReferenceReceived(IN Reference* pReference)
 {
     // The subclass MUST implement this method to handle an incoming REFER request
 
-    if (piCoreServiceListener == IMS_NULL)
+    if (m_piCoreServiceListener == IMS_NULL)
     {
         IMS_TRACE_D("NO CORE SERVICE LISTENER", 0, 0, 0);
         return;
     }
 
-    piCoreServiceListener->OnCoreService_ReferenceReceived(this, pReference);
+    m_piCoreServiceListener->OnCoreService_ReferenceReceived(this, pReference);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void CoreService::HandleCapabilityQueryReceived(IN Capabilities* pCapabilities)
 {
     // The subclass MUST implement this method to handle an incoming OPTIONS request
 
-    if (piCoreServiceListener == IMS_NULL)
+    if (m_piCoreServiceListener == IMS_NULL)
     {
         IMS_TRACE_D("NO CORE SERVICE LISTENER", 0, 0, 0);
         return;
     }
 
-    piCoreServiceListener->OnCoreService_CapabilityQueryReceived(this, pCapabilities);
+    m_piCoreServiceListener->OnCoreService_CapabilityQueryReceived(this, pCapabilities);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-Capabilities* CoreService::CreateCapabilities(IN CONST AString& strFrom, IN CONST AString& strTo)
+Capabilities* CoreService::CreateCapabilities(IN const AString& strFrom, IN const AString& strTo)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
@@ -207,16 +161,9 @@ Capabilities* CoreService::CreateCapabilities(IN CONST AString& strFrom, IN CONS
     return pCapabilities;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-PageMessage* CoreService::CreatePageMessage(IN CONST AString& strFrom, IN CONST AString& strTo)
+PageMessage* CoreService::CreatePageMessage(IN const AString& strFrom, IN const AString& strTo)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
@@ -257,17 +204,10 @@ PageMessage* CoreService::CreatePageMessage(IN CONST AString& strFrom, IN CONST 
     return pPageMessage;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 Publication* CoreService::CreatePublication(
-        IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent)
+        IN const AString& strFrom, IN const AString& strTo, IN const AString& strEvent)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
@@ -316,17 +256,10 @@ Publication* CoreService::CreatePublication(
     return pPublication;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-Reference* CoreService::CreateReference(IN CONST AString& strFrom, IN CONST AString& strTo,
-        IN CONST AString& strReferTo, IN CONST AString& strReferMethod)
+Reference* CoreService::CreateReference(IN const AString& strFrom, IN const AString& strTo,
+        IN const AString& strReferTo, IN const AString& strReferMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
@@ -374,16 +307,9 @@ Reference* CoreService::CreateReference(IN CONST AString& strFrom, IN CONST AStr
     return pReference;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-Session* CoreService::CreateSession(IN CONST AString& strFrom, IN CONST AString& strTo)
+Session* CoreService::CreateSession(IN const AString& strFrom, IN const AString& strTo)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
@@ -424,16 +350,9 @@ Session* CoreService::CreateSession(IN CONST AString& strFrom, IN CONST AString&
     return pSession;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-SessionEx* CoreService::CreateSessionEx(IN CONST AString& strFrom, IN CONST AString& strTo)
+SessionEx* CoreService::CreateSessionEx(IN const AString& strFrom, IN const AString& strTo)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
@@ -474,17 +393,10 @@ SessionEx* CoreService::CreateSessionEx(IN CONST AString& strFrom, IN CONST AStr
     return pSession;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 Subscription* CoreService::CreateSubscription(
-        IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent)
+        IN const AString& strFrom, IN const AString& strTo, IN const AString& strEvent)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Checks if the current service is already opened
     if (!IsImsConnected())
     {
@@ -534,118 +446,62 @@ Subscription* CoreService::CreateSubscription(
     return pSubscription;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-AString CoreService::GetLocalUserId() const
+ISipConnectionFactory* CoreService::CreateSipConnectionFactory()
 {
-    //---------------------------------------------------------------------------------------------
-
-    return GetAuthorizedUserId().ToString();
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void CoreService::SetListener(IN IOnCoreServiceListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    piCoreServiceListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-ISipConnectionFactory* CoreService::CreateSIPConnectionFactory()
-{
-    //---------------------------------------------------------------------------------------------
-
     return new SipConnectionFactory(this);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-void CoreService::SetDirectListener(IN IOnDirectCoreServiceListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    piDirectCoreServiceListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void CoreService::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Error code: LOSS_OF_NETWORK__NO_COMMUNICATION_WITH_PROXY
     (void)nErrorCode;
 
     // Notify the service closed
-    if (piCoreServiceListener == IMS_NULL)
+    if (m_piCoreServiceListener == IMS_NULL)
     {
         IMS_TRACE_E(0, "CoreService - LISTENER IS NOT REGISTERED", 0, 0, 0);
         return;
     }
 
     // TODO:: define a new reason type
-    objReasonInfo.SetReasonType(IReasonInfo::REASON_TYPE_NONE);
+    m_objReasonInfo.SetReasonType(IReasonInfo::REASON_TYPE_NONE);
 
-    piCoreServiceListener->OnCoreService_ServiceClosed(this, &objReasonInfo);
+    m_piCoreServiceListener->OnCoreService_ServiceClosed(this, &m_objReasonInfo);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServerConnection* piSSC)
+PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServerConnection* piSsc)
 {
-    //---------------------------------------------------------------------------------------------
-
     // If the application does not set the listener, then sends 480 response to the request.
-    if (piCoreServiceListener == IMS_NULL)
+    if (m_piCoreServiceListener == IMS_NULL)
     {
         IMS_TRACE_E(0, "NO CORE SERVICE LISTENER", 0, 0, 0);
 
-        if (CheckAndHandleDirectSIPRequest(piSSC) == RESULT_DIRECT_TXN_HANDLED)
+        if (CheckAndHandleDirectSipRequest(piSsc) == RESULT_DIRECT_TXN_HANDLED)
         {
             return IMS_TRUE;
         }
 
-        SendResponse(piSSC, SipStatusCode::SC_480);
+        SendResponse(piSsc, SipStatusCode::SC_480);
         return IMS_FALSE;
     }
 
-    ISipMessage* piSIPMsg = piSSC->GetMessage();
+    ISipMessage* piSipMsg = piSsc->GetMessage();
     AString strRemoteUserId;
 
     // Gets the remote user identity;
     // If P-Asserted-Identity is present, then gets this header field value.
     // Otherwise, gets From header field value.
-    if (piSIPMsg->IsHeaderPresent(ISipHeader::P_ASSERTED_IDENTITY))
-        strRemoteUserId = piSIPMsg->GetHeader(ISipHeader::P_ASSERTED_IDENTITY);
+    if (piSipMsg->IsHeaderPresent(ISipHeader::P_ASSERTED_IDENTITY))
+    {
+        strRemoteUserId = piSipMsg->GetHeader(ISipHeader::P_ASSERTED_IDENTITY);
+    }
     else
-        strRemoteUserId = piSIPMsg->GetHeader(ISipHeader::FROM);
+    {
+        strRemoteUserId = piSipMsg->GetHeader(ISipHeader::FROM);
+    }
 
-    const SipMethod& objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSipMsg->GetMethod();
     Method* pMethod = IMS_NULL;
 
     IMS_TRACE_I("CoreService (%s) :: %s request received ...", GetServiceId().GetStr(),
@@ -653,7 +509,7 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
 
     // Checks if the direct listener is registered or not...
     // And if direct listener is present, pass the transaction to that listener.
-    if (CheckAndHandleDirectSIPRequest(piSSC) == RESULT_DIRECT_TXN_HANDLED)
+    if (CheckAndHandleDirectSipRequest(piSsc) == RESULT_DIRECT_TXN_HANDLED)
     {
         IMS_TRACE_D("The owner of direct listener handles the message", 0, 0, 0);
         return IMS_TRUE;
@@ -670,17 +526,14 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
                 IMS_TRACE_E(0, "Creating Session failed", 0, 0, 0);
                 return IMS_FALSE;
             }
+            break;
         }
-        break;
-
         case SipMethod::CANCEL:
         {
             // Get a session information from the CANCEL transaction
-            // NotifyCancelRequest(piSSC);
+            // NotifyCancelRequest(piSsc);
             return IMS_TRUE;
         }
-        break;
-
         case SipMethod::MESSAGE:
         {
             pMethod = new PageMessage(this);
@@ -690,9 +543,8 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
                 IMS_TRACE_E(0, "Creating PageMessage failed", 0, 0, 0);
                 return IMS_FALSE;
             }
+            break;
         }
-        break;
-
         case SipMethod::OPTIONS:
         {
             pMethod = new Capabilities(this);
@@ -702,22 +554,21 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
                 IMS_TRACE_E(0, "Creating Capabilities failed", 0, 0, 0);
                 return IMS_FALSE;
             }
+            break;
         }
-        break;
-
         case SipMethod::REFER:
         {
-            if (piSIPMsg->GetHeaderCount(ISipHeader::REFER_TO) != 1)
+            if (piSipMsg->GetHeaderCount(ISipHeader::REFER_TO) != 1)
             {
-                SendResponse(piSSC, SipStatusCode::SC_400, AString("Mandatory Header Missing"));
+                SendResponse(piSsc, SipStatusCode::SC_400, AString("Mandatory Header Missing"));
                 return IMS_FALSE;
             }
 
-            AString strReferTo = piSIPMsg->GetHeader(ISipHeader::REFER_TO);
+            AString strReferTo = piSipMsg->GetHeader(ISipHeader::REFER_TO);
 
             if (strReferTo.IsNULL() || strReferTo.IsEmpty())
             {
-                SendResponse(piSSC, SipStatusCode::SC_400, AString("Invalid Header Field"));
+                SendResponse(piSsc, SipStatusCode::SC_400, AString("Invalid Header Field"));
                 return IMS_FALSE;
             }
 
@@ -725,7 +576,7 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
 
             if (piHeader == IMS_NULL)
             {
-                SendResponse(piSSC, SipStatusCode::SC_400, AString("Invalid Header Field"));
+                SendResponse(piSsc, SipStatusCode::SC_400, AString("Invalid Header Field"));
                 return IMS_FALSE;
             }
 
@@ -734,7 +585,7 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
             if (pAddress == IMS_NULL)
             {
                 piHeader->Destroy();
-                SendResponse(piSSC, SipStatusCode::SC_400, AString("Invalid Header Field"));
+                SendResponse(piSsc, SipStatusCode::SC_400, AString("Invalid Header Field"));
                 return IMS_FALSE;
             }
 
@@ -744,7 +595,7 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
                     (pMethodP->GetValue().IsNULL() || pMethodP->GetValue().IsEmpty()))
             {
                 piHeader->Destroy();
-                SendResponse(piSSC, SipStatusCode::SC_400, AString("Mandatory Parameter Missing"));
+                SendResponse(piSsc, SipStatusCode::SC_400, AString("Mandatory Parameter Missing"));
                 return IMS_FALSE;
             }
 
@@ -777,9 +628,8 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
                 IMS_TRACE_E(0, "Creating Reference failed", 0, 0, 0);
                 return IMS_FALSE;
             }
+            break;
         }
-        break;
-
         default:
             IMS_TRACE_I("Method (%s) is not supported by this service (%s)",
                     objMethod.ToString().GetStr(), GetServiceId().GetStr(), 0);
@@ -789,7 +639,7 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
                     objMethod.Equals(SipMethod::UPDATE) || objMethod.Equals(SipMethod::PRACK) ||
                     objMethod.Equals(SipMethod::NOTIFY))
             {
-                SendResponse(piSSC, SipStatusCode::SC_481);
+                SendResponse(piSsc, SipStatusCode::SC_481);
             }
             else
             {
@@ -797,11 +647,11 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
                 // 405 Method Not Allowed ???
                 if (!objMethod.Equals(SipMethod::ACK))
                 {
-                    SendResponse(piSSC, SipStatusCode::SC_405);
+                    SendResponse(piSsc, SipStatusCode::SC_405);
                 }
             }
 
-            piSSC->Close();
+            piSsc->Close();
             return IMS_TRUE;
     }
 
@@ -815,7 +665,7 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
     }
 
     // Handle the request in detailed procedure
-    if (!pMethod->ServerConnection_NotifyRequest(piSSC))
+    if (!pMethod->ServerConnection_NotifyRequest(piSsc))
     {
         pMethod->Destroy();
 
@@ -826,31 +676,24 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_SINT32 CoreService::CheckAndHandleDirectSIPRequest(IN ISipServerConnection* piSSC)
+IMS_SINT32 CoreService::CheckAndHandleDirectSipRequest(IN ISipServerConnection* piSsc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piDirectCoreServiceListener == IMS_NULL)
+    if (m_piDirectCoreServiceListener == IMS_NULL)
     {
         return RESULT_DIRECT_TXN_NOT_HANDLED;
     }
 
-    SipConnectionFactory* pSCF = new SipConnectionFactory(this, piSSC);
+    SipConnectionFactory* pScf = new SipConnectionFactory(this, piSsc);
 
     IMS_SINT32 nResult =
-            piDirectCoreServiceListener->OnDirectCoreService_TransactionReceived(this, pSCF);
+            m_piDirectCoreServiceListener->OnDirectCoreService_TransactionReceived(this, pScf);
 
     if (nResult != RESULT_DIRECT_TXN_HANDLED)
     {
-        if (pSCF != IMS_NULL)
+        if (pScf != IMS_NULL)
         {
-            delete pSCF;
+            delete pScf;
         }
     }
 

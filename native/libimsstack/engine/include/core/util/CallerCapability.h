@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090609  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _CALLER_CAPABILITY_H_
-#define _CALLER_CAPABILITY_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef CALLER_CAPABILITY_H_
+#define CALLER_CAPABILITY_H_
 
 #include "AString.h"
 
@@ -24,38 +27,37 @@ class ISipConfigV;
 class CallerCapability
 {
 public:
-    explicit CallerCapability(IN IMS_UINT32 nID_);
+    explicit CallerCapability(IN IMS_UINT32 nId);
     ~CallerCapability();
 
-private:
-    CallerCapability(IN CONST CallerCapability& objRHS);
-    CallerCapability& operator=(IN CONST CallerCapability& objRHS);
+    CallerCapability(IN const CallerCapability&) = delete;
+    CallerCapability& operator=(IN const CallerCapability&) = delete;
 
 public:
-    IMS_BOOL AddFeature(IN CONST Feature* pFeature);
-    IMS_BOOL AddFeature(IN CONST FeatureSet* pFeatureSet);
-    IMS_BOOL AddFeatures(IN CONST CallerCapability* pCC);
+    IMS_BOOL AddFeature(IN const Feature* pFeature);
+    IMS_BOOL AddFeature(IN const FeatureSet* pFeatureSet);
+    IMS_BOOL AddFeatures(IN const CallerCapability* pCc);
     void Clear();
-    IMS_BOOL Create(IN CONST AppConfig* pAppConfig, IN CONST CoreServiceConfig* pServiceConfig,
-            IN CONST ISipConfigV* piSipConfigV);
-    IMS_BOOL Equals(IN CONST CallerCapability* pCC) const;
-    const IMSList<FeatureSet*>& GetFeatures() const;
-    IMS_BOOL HasFeature(IN CONST Feature* pFeature) const;
-    IMS_BOOL IsEmpty() const;
-    IMS_BOOL RemoveFeature(IN CONST Feature* pFeature);
-    IMS_BOOL RemoveFeature(IN CONST FeatureSet* pFeatureSet);
-    IMS_BOOL RemoveFeatures(IN CONST CallerCapability* pCC, IN IMS_BOOL bRemoveRef = IMS_TRUE);
+    IMS_BOOL Create(IN const AppConfig* pAppConfig, IN const CoreServiceConfig* pServiceConfig,
+            IN const ISipConfigV* piSipConfigV);
+    IMS_BOOL Equals(IN const CallerCapability* pCc) const;
+    inline const IMSList<FeatureSet*>& GetFeatures() const { return m_objContactFeatures; }
+    IMS_BOOL HasFeature(IN const Feature* pFeature) const;
+    inline IMS_BOOL IsEmpty() const { return m_objContactFeatures.IsEmpty(); }
+    IMS_BOOL RemoveFeature(IN const Feature* pFeature);
+    IMS_BOOL RemoveFeature(IN const FeatureSet* pFeatureSet);
+    IMS_BOOL RemoveFeatures(IN const CallerCapability* pCc, IN IMS_BOOL bRemoveRef = IMS_TRUE);
     AString ToString() const;
 
 private:
-    IMS_BOOL Attach(IN CONST AString& strTag, IN CONST AString& strValue = AString::ConstNull());
-    void Detach(IN CONST AString& strTag);
-    FeatureSet* Lookup(IN CONST AString& strTag) const;
+    IMS_BOOL Attach(IN const AString& strTag, IN const AString& strValue = AString::ConstNull());
+    void Detach(IN const AString& strTag);
+    FeatureSet* Lookup(IN const AString& strTag) const;
 
-    IMS_SINT32 AddFeature(IN CONST AString& strTag);
-    IMS_SINT32 AddFeature(IN CONST AString& strTag, IN CONST AString& strValue);
-    IMS_SINT32 RemoveFeature(IN CONST AString& strTag);
-    IMS_SINT32 RemoveFeature(IN CONST AString& strTag, IN CONST AString& strValue);
+    IMS_SINT32 AddFeature(IN const AString& strTag);
+    IMS_SINT32 AddFeature(IN const AString& strTag, IN const AString& strValue);
+    IMS_SINT32 RemoveFeature(IN const AString& strTag);
+    IMS_SINT32 RemoveFeature(IN const AString& strTag, IN const AString& strValue);
 
 private:
     enum
@@ -64,8 +66,8 @@ private:
         FEATURE_CHANGED = 0x02
     };
 
-    IMS_UINT32 nID;
-    IMSList<FeatureSet*> objContactFeatures;
+    IMS_UINT32 m_nId;
+    IMSList<FeatureSet*> m_objContactFeatures;
 };
 
-#endif  // _CALLER_CAPABILITY_H_
+#endif

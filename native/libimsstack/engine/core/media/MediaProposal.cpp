@@ -1,60 +1,58 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091208  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
 #include "ISdpOaState.h"
 #include "media/Media.h"
-#include "media/MediaDescriptor.h"
 #include "media/MediaProposal.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-MediaProposal::MediaProposal(IN ISdpOaState* piOAState_) :
-        piOAState(piOAState_),
-        objDescriptors(IMSList<MediaDescriptor*>())
+MediaProposal::MediaProposal(IN ISdpOaState* piOaState) :
+        m_piOaState(piOaState),
+        m_objDescriptors(IMSList<MediaDescriptor*>())
 {
 }
 
 PUBLIC VIRTUAL MediaProposal::~MediaProposal()
 {
-    if (!objDescriptors.IsEmpty())
+    IMS_TRACE_D("Destructor :: MediaProposal", 0, 0, 0);
+
+    if (!m_objDescriptors.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objDescriptors.GetSize(); ++i)
         {
-            MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
+            MediaDescriptor* pDescriptor = m_objDescriptors.GetAt(i);
 
             if (pDescriptor != IMS_NULL)
+            {
                 delete pDescriptor;
+            }
         }
 
-        objDescriptors.Clear();
+        m_objDescriptors.Clear();
     }
 }
 
-PUBLIC VIRTUAL const IMSList<MediaDescriptor*>& MediaProposal::GetMediaDescriptors() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objDescriptors;
-}
-
 PUBLIC
-IMS_BOOL MediaProposal::CreateDescriptor(IN CONST IMSList<MediaDescriptor*>& objDescriptors)
+IMS_BOOL MediaProposal::CreateDescriptor(IN const IMSList<MediaDescriptor*>& objDescriptors)
 {
-    IMS_SINT32 nResult = piOAState->CreateProposalView();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nResult = m_piOaState->CreateProposalView();
 
     if ((nResult != ISdpOaState::RESULT_SUCCESS) && (nResult != ISdpOaState::RESULT_ALREADY_EXIST))
     {
@@ -65,7 +63,6 @@ IMS_BOOL MediaProposal::CreateDescriptor(IN CONST IMSList<MediaDescriptor*>& obj
     for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
     {
         const MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
-
         MediaDescriptor* pNewDescriptor = new MediaDescriptor(this, pDescriptor->GetMid());
 
         if (pNewDescriptor == IMS_NULL)
@@ -74,7 +71,7 @@ IMS_BOOL MediaProposal::CreateDescriptor(IN CONST IMSList<MediaDescriptor*>& obj
             return IMS_FALSE;
         }
 
-        if (!this->objDescriptors.Append(pNewDescriptor))
+        if (!m_objDescriptors.Append(pNewDescriptor))
         {
             delete pNewDescriptor;
             return IMS_FALSE;
@@ -87,9 +84,7 @@ IMS_BOOL MediaProposal::CreateDescriptor(IN CONST IMSList<MediaDescriptor*>& obj
 PUBLIC
 IMS_SINT32 MediaProposal::GetDirection() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objDescriptors.IsEmpty())
+    if (m_objDescriptors.IsEmpty())
     {
         return Media::DIRECTION_NONE;
     }
@@ -111,38 +106,44 @@ IMS_SINT32 MediaProposal::GetDirection() const
     IMS_SINT32 nDirection = pMediaParam->GetDirection();
 
     if (nDirection == Sdp::DIRECTION_INACTIVE)
+    {
         return Media::DIRECTION_INACTIVE;
+    }
     else if (nDirection == Sdp::DIRECTION_RECVONLY)
+    {
         return Media::DIRECTION_RECEIVE;
+    }
     else if (nDirection == Sdp::DIRECTION_SENDONLY)
+    {
         return Media::DIRECTION_SEND;
+    }
     else if (nDirection == Sdp::DIRECTION_SENDRECV)
+    {
         return Media::DIRECTION_SEND_RECEIVE;
+    }
     else
+    {
         return Media::DIRECTION_NONE;
+    }
 }
 
 PUBLIC
 MediaDescriptor* MediaProposal::GetMediaDescriptor() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objDescriptors.IsEmpty())
+    if (m_objDescriptors.IsEmpty())
     {
         return IMS_NULL;
     }
 
-    return objDescriptors.GetAt(0);
+    return m_objDescriptors.GetAt(0);
 }
 
 PUBLIC
 MediaDescriptor* MediaProposal::GetMediaDescriptor(IN IMS_SINT32 nMid) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objDescriptors.GetSize(); ++i)
     {
-        MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
+        MediaDescriptor* pDescriptor = m_objDescriptors.GetAt(i);
 
         if (nMid == pDescriptor->GetMid())
         {
@@ -157,10 +158,8 @@ PROTECTED VIRTUAL const AString& MediaProposal::GetConnectionAddress() const
 {
     SdpSessionParameter* pSessionParam = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
     // First, check the current view
-    piOAState->GetSessionCurrentView(pSessionParam);
+    m_piOaState->GetSessionCurrentView(pSessionParam);
 
     if (pSessionParam != IMS_NULL)
     {
@@ -168,7 +167,7 @@ PROTECTED VIRTUAL const AString& MediaProposal::GetConnectionAddress() const
     }
 
     // If the current view does not exist, then check the proposed view
-    piOAState->GetSessionProposalView(pSessionParam);
+    m_piOaState->GetSessionProposalView(pSessionParam);
 
     if (pSessionParam != IMS_NULL)
     {
@@ -178,20 +177,11 @@ PROTECTED VIRTUAL const AString& MediaProposal::GetConnectionAddress() const
     return AString::ConstNull();
 }
 
-PROTECTED VIRTUAL IMS_SINT32 MediaProposal::GetMediaState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return MEDIA_STATE_PROPOSAL;
-}
-
 PROTECTED VIRTUAL SdpMediaParameter* MediaProposal::GetMediaParameter(IN IMS_SINT32 nMid) const
 {
     SdpMediaParameter* pMediaParam = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
+    if (m_piOaState->GetMediaProposalView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
     {
         return IMS_NULL;
     }
@@ -203,9 +193,7 @@ PROTECTED VIRTUAL const AString& MediaProposal::GetPeerConnectionAddress() const
 {
     SdpSessionParameter* pSessionParam = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    piOAState->GetSessionPeerView(pSessionParam);
+    m_piOaState->GetSessionPeerView(pSessionParam);
 
     if (pSessionParam != IMS_NULL)
     {
@@ -219,9 +207,7 @@ PROTECTED VIRTUAL SdpMediaParameter* MediaProposal::GetPeerMediaParameter(IN IMS
 {
     SdpMediaParameter* pMediaParam = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (piOAState->GetMediaPeerView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
+    if (m_piOaState->GetMediaPeerView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
     {
         return IMS_NULL;
     }
@@ -233,9 +219,7 @@ PROTECTED VIRTUAL SdpMediaParameter* MediaProposal::GetProposalMediaParameter(IN
 {
     SdpMediaParameter* pMediaParam = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
+    if (m_piOaState->GetMediaProposalView(nMid, pMediaParam) != ISdpOaState::RESULT_SUCCESS)
     {
         IMS_TRACE_E(0, "There is no proposed view", 0, 0, 0);
         return IMS_NULL;

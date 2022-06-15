@@ -1,5 +1,20 @@
-#ifndef _INTERFACE_MESSAGE_MEDIATOR_H_
-#define _INTERFACE_MESSAGE_MEDIATOR_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_MESSAGE_MEDIATOR_H_
+#define INTERFACE_MESSAGE_MEDIATOR_H_
 
 #include "ISipMessage.h"
 
@@ -46,7 +61,7 @@ public:
      * change the SIP mandatory headers.\n
      * If those fields are changed, the Engine does not guarantee the correct behavior.
      *
-     * @param piSIPMsg SIP message to be sent to the network
+     * @param piSipMsg SIP message to be sent to the network
      * @param nMessage Category of this message (MESSAGE_XXX)\n
      *                 #MESSAGE_NORMAL\n
      *                 #MESSAGE_RESUBMIT\n
@@ -58,7 +73,7 @@ public:
      * @see ISipMessage
      */
     virtual IMS_RESULT MessageMediator_AdjustMessage(
-            IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL) = 0;
+            IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL) = 0;
 };
 
-#endif  // _INTERFACE_MESSAGE_MEDIATOR_H_
+#endif

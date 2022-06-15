@@ -1,45 +1,47 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090529  lovil@                    Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
+#include "private/AppConfig.h"
+
 #include "ISipConnection.h"
-#include "ISipMessage.h"
 #include "ISipHeader.h"
+#include "Message.h"
 #include "SipHeaderName.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "base/Ims.h"
-#include "private/AppConfig.h"
-#include "Message.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-Message::Message(IN AppConfig* pAppConfig_, IN IMS_SINT32 nState_) :
-        pAppConfig(pAppConfig_),
-        nState(nState_),
-        piSIPMessage(IMS_NULL),
-        objBodyParts(IMSList<MessageBodyPart*>())
+Message::Message(IN AppConfig* pAppConfig, IN IMS_SINT32 nState) :
+        m_pAppConfig(pAppConfig),
+        m_nState(nState),
+        m_piSipMsg(IMS_NULL),
+        m_objBodyParts(IMSList<MessageBodyPart*>())
 {
 }
 
 PUBLIC VIRTUAL Message::~Message()
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
     {
-        MessageBodyPart* pBodyPart = objBodyParts.GetAt(i);
+        MessageBodyPart* pBodyPart = m_objBodyParts.GetAt(i);
 
         if (pBodyPart != IMS_NULL)
         {
@@ -47,38 +49,19 @@ PUBLIC VIRTUAL Message::~Message()
         }
     }
 
-    objBodyParts.Clear();
+    m_objBodyParts.Clear();
 
-    if (piSIPMessage != IMS_NULL)
+    if (m_piSipMsg != IMS_NULL)
     {
-        piSIPMessage->Destroy();
-        piSIPMessage = IMS_NULL;
+        m_piSipMsg->Destroy();
+        m_piSipMsg = IMS_NULL;
     }
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL ISipMessage* Message::GetMessage() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return piSIPMessage;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 ISipMessageBodyPart* Message::CreateBodyPartEx()
 {
-    ISipMessageBodyPart* piBodyPart = piSIPMessage->CreateBodyPart();
-
-    //---------------------------------------------------------------------------------------------
+    ISipMessageBodyPart* piBodyPart = m_piSipMsg->CreateBodyPart();
 
     if (piBodyPart == IMS_NULL)
     {
@@ -94,7 +77,7 @@ ISipMessageBodyPart* Message::CreateBodyPartEx()
         return IMS_NULL;
     }
 
-    if (!objBodyParts.Append(pBodyPart))
+    if (!m_objBodyParts.Append(pBodyPart))
     {
         delete pBodyPart;
 
@@ -107,72 +90,58 @@ ISipMessageBodyPart* Message::CreateBodyPartEx()
     return piBodyPart;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void Message::UpdateSentMessage(IN ISipMessage* piSIPMsg)
+void Message::UpdateSentMessage(IN ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nState != STATE_UNSENT)
+    if (m_nState != STATE_UNSENT)
     {
-        IMS_TRACE_E(0, "Invalid state (%d)", nState, 0, 0);
+        IMS_TRACE_E(0, "Invalid state (%d)", m_nState, 0, 0);
         return;
     }
 
-    if (piSIPMessage != IMS_NULL)
+    if (m_piSipMsg != IMS_NULL)
     {
-        piSIPMessage->Destroy();
-        piSIPMessage = IMS_NULL;
+        m_piSipMsg->Destroy();
+        m_piSipMsg = IMS_NULL;
     }
 
-    piSIPMessage = DYNAMIC_CAST(ISipMessage*, piSIPMsg->Clone());
+    m_piSipMsg = DYNAMIC_CAST(ISipMessage*, piSipMsg->Clone());
 
-    if (piSIPMessage == IMS_NULL)
+    if (m_piSipMsg == IMS_NULL)
     {
         Ims::SetLastError(ImsError::NO_MEMORY);
         return;
     }
 
     // Update a message body parts if present (except for SDP message body)
-    IMSList<ISipMessageBodyPart*> objIBodyParts = piSIPMessage->GetBodyParts();
+    IMSList<ISipMessageBodyPart*> objSipBodyParts = m_piSipMsg->GetBodyParts();
 
-    if (!objIBodyParts.IsEmpty())
+    if (!objSipBodyParts.IsEmpty())
     {
-        if (objIBodyParts.GetSize() != objBodyParts.GetSize())
+        if (objSipBodyParts.GetSize() != m_objBodyParts.GetSize())
         {
             // fatal error ????
         }
 
-        for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
         {
-            MessageBodyPart* pBodyPart = objBodyParts.GetAt(i);
+            MessageBodyPart* pBodyPart = m_objBodyParts.GetAt(i);
 
-            pBodyPart->SetBodyPart(objIBodyParts.GetAt(i));
+            pBodyPart->SetBodyPart(objSipBodyParts.GetAt(i));
         }
     }
 
-    nState = STATE_SENT;
+    m_nState = STATE_SENT;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL Message* Message::CreateMessage(IN Message* pMessage)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (pMessage == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    Message* pNewMessage = new Message(pMessage->pAppConfig, pMessage->nState);
+    Message* pNewMessage = new Message(pMessage->m_pAppConfig, pMessage->m_nState);
 
     if (pNewMessage == IMS_NULL)
     {
@@ -180,11 +149,11 @@ PUBLIC GLOBAL Message* Message::CreateMessage(IN Message* pMessage)
         return IMS_NULL;
     }
 
-    if (pMessage->piSIPMessage != IMS_NULL)
+    if (pMessage->m_piSipMsg != IMS_NULL)
     {
-        pNewMessage->piSIPMessage = pMessage->piSIPMessage->Clone();
+        pNewMessage->m_piSipMsg = pMessage->m_piSipMsg->Clone();
 
-        if (pNewMessage->piSIPMessage == IMS_NULL)
+        if (pNewMessage->m_piSipMsg == IMS_NULL)
         {
             delete pNewMessage;
 
@@ -204,16 +173,9 @@ PUBLIC GLOBAL Message* Message::CreateMessage(IN Message* pMessage)
     return pNewMessage;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL Message* Message::CreateUnsentMessage(IN AppConfig* pAppConfig, IN IMS_BOOL bRequest)
 {
     Message* pMessage = new Message(pAppConfig, STATE_UNSENT);
-
-    //---------------------------------------------------------------------------------------------
 
     if (pMessage == IMS_NULL)
     {
@@ -222,11 +184,15 @@ PUBLIC GLOBAL Message* Message::CreateUnsentMessage(IN AppConfig* pAppConfig, IN
     }
 
     if (bRequest)
-        pMessage->piSIPMessage = SipParsingHelper::CreateMessage(ISipMessage::TYPE_REQUEST);
+    {
+        pMessage->m_piSipMsg = SipParsingHelper::CreateMessage(ISipMessage::TYPE_REQUEST);
+    }
     else
-        pMessage->piSIPMessage = SipParsingHelper::CreateMessage(ISipMessage::TYPE_RESPONSE);
+    {
+        pMessage->m_piSipMsg = SipParsingHelper::CreateMessage(ISipMessage::TYPE_RESPONSE);
+    }
 
-    if (pMessage->piSIPMessage == IMS_NULL)
+    if (pMessage->m_piSipMsg == IMS_NULL)
     {
         delete pMessage;
 
@@ -239,17 +205,10 @@ PUBLIC GLOBAL Message* Message::CreateUnsentMessage(IN AppConfig* pAppConfig, IN
     return pMessage;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL Message* Message::CreateReceivedMessage(
-        IN AppConfig* pAppConfig, IN ISipMessage* piSIPMsg)
+        IN AppConfig* pAppConfig, IN ISipMessage* piSipMsg)
 {
     Message* pMessage = new Message(pAppConfig, STATE_RECEIVED);
-
-    //---------------------------------------------------------------------------------------------
 
     if (pMessage == IMS_NULL)
     {
@@ -257,11 +216,11 @@ PUBLIC GLOBAL Message* Message::CreateReceivedMessage(
         return IMS_NULL;
     }
 
-    if (piSIPMsg != IMS_NULL)
+    if (piSipMsg != IMS_NULL)
     {
-        pMessage->piSIPMessage = piSIPMsg->Clone();
+        pMessage->m_piSipMsg = piSipMsg->Clone();
 
-        if (pMessage->piSIPMessage == IMS_NULL)
+        if (pMessage->m_piSipMsg == IMS_NULL)
         {
             delete pMessage;
 
@@ -283,8 +242,6 @@ PUBLIC GLOBAL Message* Message::CreateReceivedMessage(
 
 PUBLIC GLOBAL const IMS_CHAR* Message::GetMessageType(IN IMS_SINT32 nServiceMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nServiceMethod)
     {
         case CAPABILITIES_QUERY:
@@ -324,24 +281,17 @@ PUBLIC GLOBAL const IMS_CHAR* Message::GetMessageType(IN IMS_SINT32 nServiceMeth
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMessageBodyPart* Message::CreateBodyPart()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nState != STATE_UNSENT)
+    if (m_nState != STATE_UNSENT)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Invalid state (%d)", nState, 0, 0);
+        IMS_TRACE_E(0, "Invalid state (%d)", m_nState, 0, 0);
         return IMS_NULL;
     }
 
-    ISipMessageBodyPart* piBodyPart = piSIPMessage->CreateBodyPart();
+    ISipMessageBodyPart* piBodyPart = m_piSipMsg->CreateBodyPart();
 
     if (piBodyPart == IMS_NULL)
     {
@@ -357,7 +307,7 @@ PRIVATE VIRTUAL IMessageBodyPart* Message::CreateBodyPart()
         return IMS_NULL;
     }
 
-    if (!objBodyParts.Append(pBodyPart))
+    if (!m_objBodyParts.Append(pBodyPart))
     {
         delete pBodyPart;
 
@@ -368,35 +318,21 @@ PRIVATE VIRTUAL IMessageBodyPart* Message::CreateBodyPart()
     return pBodyPart;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMSList<IMessageBodyPart*> Message::GetBodyParts() const
 {
     IMSList<IMessageBodyPart*> objIBodyParts;
 
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
     {
-        objIBodyParts.Append(objBodyParts.GetAt(i));
+        objIBodyParts.Append(m_objBodyParts.GetAt(i));
     }
 
     return objIBodyParts;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_RESULT Message::AddHeader(IN CONST AString& strName, IN CONST AString& strValue)
+PRIVATE VIRTUAL IMS_RESULT Message::AddHeader(IN const AString& strName, IN const AString& strValue)
 {
     AString strHName = strName.Trim();
-
-    //---------------------------------------------------------------------------------------------
 
     if (strHName.GetLength() == 0)
     {
@@ -430,7 +366,7 @@ PRIVATE VIRTUAL IMS_RESULT Message::AddHeader(IN CONST AString& strName, IN CONS
         return IMS_FAILURE;
     }
 
-    if (!pAppConfig->IsHeaderWritable(strHName))
+    if (!m_pAppConfig->IsHeaderWritable(strHName))
     {
         IMS_TRACE_E(0, "Header (%s: %s) is not writable", strHName.GetStr(), strValue.GetStr(), 0);
 
@@ -440,7 +376,7 @@ PRIVATE VIRTUAL IMS_RESULT Message::AddHeader(IN CONST AString& strName, IN CONS
         return IMS_FAILURE;
     }
 
-    if (piSIPMessage->AddHeader(piHeader->GetType(), strValue, strHName) != IMS_SUCCESS)
+    if (m_piSipMsg->AddHeader(piHeader->GetType(), strValue, strHName) != IMS_SUCCESS)
     {
         piHeader->Destroy();
 
@@ -455,16 +391,9 @@ PRIVATE VIRTUAL IMS_RESULT Message::AddHeader(IN CONST AString& strName, IN CONS
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMSList<AString> Message::GetHeaders(IN CONST AString& strName) const
+PRIVATE VIRTUAL IMSList<AString> Message::GetHeaders(IN const AString& strName) const
 {
     AString strHName = strName.Trim();
-
-    //---------------------------------------------------------------------------------------------
 
     if (strHName.GetLength() == 0)
     {
@@ -492,7 +421,7 @@ PRIVATE VIRTUAL IMSList<AString> Message::GetHeaders(IN CONST AString& strName) 
         return IMSList<AString>();
     }
 
-    if (!pAppConfig->IsHeaderReadable(strHName))
+    if (!m_pAppConfig->IsHeaderReadable(strHName))
     {
         IMS_TRACE_E(0, "Header (%s) is not readable.", strHName.GetStr(), 0, 0);
 
@@ -506,79 +435,24 @@ PRIVATE VIRTUAL IMSList<AString> Message::GetHeaders(IN CONST AString& strName) 
 
     Ims::SetLastError(ImsError::NO_ERROR);
 
-    return piSIPMessage->GetHeaders(nHType, strHName);
+    return m_piSipMsg->GetHeaders(nHType, strHName);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL const SipMethod& Message::GetMethod() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return piSIPMessage->GetMethod();
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL const AString& Message::GetReasonPhrase() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return piSIPMessage->GetReasonPhrase();
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_SINT32 Message::GetState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nState;
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_SINT32 Message::GetStatusCode() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return piSIPMessage->GetStatusCode();
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL Message::CreateBodyParts()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMessage == IMS_NULL)
+    if (m_piSipMsg == IMS_NULL)
     {
         return IMS_TRUE;
     }
 
-    IMSList<ISipMessageBodyPart*> objSIPBodyParts = piSIPMessage->GetBodyParts();
+    IMSList<ISipMessageBodyPart*> objSipBodyParts = m_piSipMsg->GetBodyParts();
 
-    if (!objSIPBodyParts.IsEmpty())
+    if (!objSipBodyParts.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objSIPBodyParts.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < objSipBodyParts.GetSize(); ++i)
         {
-            MessageBodyPart* pBodyPart = new MessageBodyPart(this, objSIPBodyParts.GetAt(i));
+            MessageBodyPart* pBodyPart = new MessageBodyPart(this, objSipBodyParts.GetAt(i));
 
             if (pBodyPart == IMS_NULL)
             {
@@ -586,7 +460,7 @@ IMS_BOOL Message::CreateBodyParts()
                 return IMS_FALSE;
             }
 
-            if (!objBodyParts.Append(pBodyPart))
+            if (!m_objBodyParts.Append(pBodyPart))
             {
                 delete pBodyPart;
 
@@ -598,18 +472,18 @@ IMS_BOOL Message::CreateBodyParts()
 
     // In case of 2xx response to OPTIONS,
     // If SDP body is present, it needs to be added the body parts.
-    if (piSIPMessage->GetType() == ISipMessage::TYPE_RESPONSE)
+    if (m_piSipMsg->GetType() == ISipMessage::TYPE_RESPONSE)
     {
-        const SipMethod& objMethod = piSIPMessage->GetMethod();
-        IMS_SINT32 nStatusCode = piSIPMessage->GetStatusCode();
+        const SipMethod& objMethod = m_piSipMsg->GetMethod();
+        IMS_SINT32 nStatusCode = m_piSipMsg->GetStatusCode();
 
         if (objMethod.Equals(SipMethod::OPTIONS) && SipStatusCode::IsFinalSuccess(nStatusCode))
         {
-            ISipMessageBodyPart* piSIPBodyPart = piSIPMessage->GetSdpBodyPart();
+            ISipMessageBodyPart* piSipBodyPart = m_piSipMsg->GetSdpBodyPart();
 
-            if (piSIPBodyPart != IMS_NULL)
+            if (piSipBodyPart != IMS_NULL)
             {
-                MessageBodyPart* pBodyPart = new MessageBodyPart(this, piSIPBodyPart);
+                MessageBodyPart* pBodyPart = new MessageBodyPart(this, piSipBodyPart);
 
                 if (pBodyPart == IMS_NULL)
                 {
@@ -617,7 +491,7 @@ IMS_BOOL Message::CreateBodyParts()
                     return IMS_FALSE;
                 }
 
-                if (!objBodyParts.Prepend(pBodyPart))
+                if (!m_objBodyParts.Prepend(pBodyPart))
                 {
                     delete pBodyPart;
 
@@ -631,31 +505,23 @@ IMS_BOOL Message::CreateBodyParts()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL IMS_BOOL Message::IsInaccessibleHeader(
-        IN IMS_SINT32 nHType, IN CONST AString& strHName)
+        IN IMS_SINT32 nHType, IN const AString& strHName)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nHType)
     {
-        case ISipHeader::AUTHORIZATION:
-        case ISipHeader::MAX_FORWARDS:
-        case ISipHeader::MIN_EXPIRES:
-        case ISipHeader::PROXY_AUTHENTICATE:
-        case ISipHeader::PROXY_AUTHORIZATION:
-        case ISipHeader::RECORD_ROUTE:
-        case ISipHeader::SECURITY_CLIENT:
-        case ISipHeader::SECURITY_SERVER:
-        case ISipHeader::SECURITY_VERIFY:
-        case ISipHeader::SERVICE_ROUTE:
+        case ISipHeader::AUTHORIZATION:        // FALL-THROUGH
+        case ISipHeader::MAX_FORWARDS:         // FALL-THROUGH
+        case ISipHeader::MIN_EXPIRES:          // FALL-THROUGH
+        case ISipHeader::PROXY_AUTHENTICATE:   // FALL-THROUGH
+        case ISipHeader::PROXY_AUTHORIZATION:  // FALL-THROUGH
+        case ISipHeader::RECORD_ROUTE:         // FALL-THROUGH
+        case ISipHeader::SECURITY_CLIENT:      // FALL-THROUGH
+        case ISipHeader::SECURITY_SERVER:      // FALL-THROUGH
+        case ISipHeader::SECURITY_VERIFY:      // FALL-THROUGH
+        case ISipHeader::SERVICE_ROUTE:        // FALL-THROUGH
         case ISipHeader::VIA:
             return IMS_TRUE;
-
         case ISipHeader::UNKNOWN:
             switch (strHName[0])
             {
@@ -669,7 +535,6 @@ PRIVATE GLOBAL IMS_BOOL Message::IsInaccessibleHeader(
                     break;
             }
             break;
-
         default:
             break;
     }
@@ -677,41 +542,33 @@ PRIVATE GLOBAL IMS_BOOL Message::IsInaccessibleHeader(
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE GLOBAL IMS_BOOL Message::IsReadOnlyHeader(IN IMS_SINT32 nHType, IN CONST AString& strHName)
+PRIVATE GLOBAL IMS_BOOL Message::IsReadOnlyHeader(IN IMS_SINT32 nHType, IN const AString& strHName)
 {
-    //---------------------------------------------------------------------------------------------
-
     (void)strHName;
 
     switch (nHType)
     {
-        case ISipHeader::ACCEPT_CONTACT:
-        case ISipHeader::CALL_ID:
-        case ISipHeader::CONTACT_NORMAL:
-        case ISipHeader::CONTACT_WILDCARD:
-        case ISipHeader::CONTACT_ANY:
-        case ISipHeader::CONTENT_LENGTH:
-        case ISipHeader::CSEQ:
-        case ISipHeader::EVENT:
-        case ISipHeader::FROM:
-        case ISipHeader::P_ACCESS_NETWORK_INFO:
-        case ISipHeader::P_ASSERTED_IDENTITY:
-        case ISipHeader::P_ASSOCIATED_URI:
-        case ISipHeader::P_PREFERRED_IDENTITY:
-        case ISipHeader::RACK:
-        case ISipHeader::REFER_TO:
-        case ISipHeader::REFERRED_BY:
-        case ISipHeader::REPLACES:
-        case ISipHeader::RSEQ:
-        case ISipHeader::TO:
+        case ISipHeader::ACCEPT_CONTACT:         // FALL-THROUGH
+        case ISipHeader::CALL_ID:                // FALL-THROUGH
+        case ISipHeader::CONTACT_NORMAL:         // FALL-THROUGH
+        case ISipHeader::CONTACT_WILDCARD:       // FALL-THROUGH
+        case ISipHeader::CONTACT_ANY:            // FALL-THROUGH
+        case ISipHeader::CONTENT_LENGTH:         // FALL-THROUGH
+        case ISipHeader::CSEQ:                   // FALL-THROUGH
+        case ISipHeader::EVENT:                  // FALL-THROUGH
+        case ISipHeader::FROM:                   // FALL-THROUGH
+        case ISipHeader::P_ACCESS_NETWORK_INFO:  // FALL-THROUGH
+        case ISipHeader::P_ASSERTED_IDENTITY:    // FALL-THROUGH
+        case ISipHeader::P_ASSOCIATED_URI:       // FALL-THROUGH
+        case ISipHeader::P_PREFERRED_IDENTITY:   // FALL-THROUGH
+        case ISipHeader::RACK:                   // FALL-THROUGH
+        case ISipHeader::REFER_TO:               // FALL-THROUGH
+        case ISipHeader::REFERRED_BY:            // FALL-THROUGH
+        case ISipHeader::REPLACES:               // FALL-THROUGH
+        case ISipHeader::RSEQ:                   // FALL-THROUGH
+        case ISipHeader::TO:                     // FALL-THROUGH
         case ISipHeader::WWW_AUTHENTICATE:
             return IMS_TRUE;
-
         default:
             break;
     }

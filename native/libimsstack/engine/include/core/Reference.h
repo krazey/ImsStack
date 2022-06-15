@@ -1,30 +1,34 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100413  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef REFERENCE_H_
+#define REFERENCE_H_
 
-    Description
-
-     RFC 3515, RFC 3420, RFC 3725, RFC 3891, RFC 4488, RFC 4508, RFC 5368, RFC 3265
-*/
-
-#ifndef _REFERENCE_H_
-#define _REFERENCE_H_
-
-#include "SipMethod.h"
-#include "ServiceMethod.h"
-#include "util/IDialogMethod.h"
 #include "ISubscriptionState.h"
-#include "util/IReferredMessageListener.h"
 #include "Replaces.h"
+#include "ServiceMethod.h"
+#include "SipMethod.h"
+#include "SipStatusCode.h"
+#include "util/IDialogMethod.h"
+#include "util/IReferredMessageListener.h"
 
 class IOnNotificationListener;
 class IOnReferenceListener;
 class SubState;
 
+// Reference: RFC 3515, RFC 3420, RFC 3725, RFC 3891, RFC 4488, RFC 4508, RFC 5368, RFC 3265
 class Reference : public ServiceMethod, public IDialogMethod, public IReferredMessageListener
 {
 public:
@@ -34,94 +38,90 @@ public:
         NotifierState();
         ~NotifierState();
 
-    private:
-        NotifierState(IN CONST NotifierState& objRHS);
-        NotifierState& operator=(IN CONST NotifierState& objRHS);
+        NotifierState(IN const NotifierState&) = delete;
+        NotifierState& operator=(IN const NotifierState&) = delete;
 
     public:
-        void AddSCC(IN ISipClientConnection* piSCC);
-        void RemoveSCC(IN ISipClientConnection* piSCC);
+        inline void AddScc(IN ISipClientConnection* piScc) { m_objSccs.Append(piScc); }
+        void RemoveScc(IN ISipClientConnection* piScc);
 
     private:
-        IMSList<ISipClientConnection*> objSCCs;
+        IMSList<ISipClientConnection*> m_objSccs;
     };
 
 public:
-    Reference(IN Service* pService_, IN CONST AString& strReferToURI_,
-            IN CONST AString& strReferMethod_, IN CONST Replaces& objReplaces_,
-            IN IMS_BOOL bImplicitRoutingRequired_ = IMS_FALSE);
+    Reference(IN Service* pService, IN const AString& strReferToUri,
+            IN const AString& strReferMethod, IN const Replaces& objReplaces,
+            IN IMS_BOOL bImplicitRoutingRequired = IMS_FALSE);
     virtual ~Reference();
 
-private:
-    Reference(IN CONST Reference& objReference);
-    Reference& operator=(IN CONST Reference& objReference);
+    Reference(IN const Reference&) = delete;
+    Reference& operator=(IN const Reference&) = delete;
 
 public:
     // Method class
-    virtual void Destroy();
+    void Destroy() override;
 
     // IReference interface
     IMS_RESULT Accept();
     IMS_RESULT ConnectReferMethod(IN Method* pReferMethod);
-    const SipMethod& GetReferMethod() const;
-    const AString& GetReferToUserId() const;
+    inline const SipMethod& GetReferMethod() const { return m_objReferMethod; }
+    inline const AString& GetReferToUserId() const { return m_strReferToUri; }
     const AString& GetReplaces() const;
-    IMS_SINT32 GetState() const;
+    inline IMS_SINT32 GetState() const { return m_nState; }
     IMS_RESULT Refer(IN IMS_BOOL bImplicitSubscription);
     IMS_RESULT Reject();
-    void SetListener(IN IOnReferenceListener* piListener);
-    IMS_RESULT SetReplaces(IN CONST AString& strSessionId);
-
-    //// IMS extensions
-    IMS_RESULT AcceptEx(IN IMS_SINT32 nStatusCode = 202, IN IMS_BOOL b100Trying = IMS_TRUE);
+    inline void SetListener(IN IOnReferenceListener* piListener) { m_piListener = piListener; }
+    IMS_RESULT SetReplaces(IN const AString& strSessionId);
+    IMS_RESULT AcceptEx(
+            IN IMS_SINT32 nStatusCode = SipStatusCode::SC_202, IN IMS_BOOL b100Trying = IMS_TRUE);
     IMS_RESULT ReferEx(IN IMS_BOOL bImplicitSubscription,
-            IN CONST AString& strHeadersForReferTo = AString::ConstNull());
+            IN const AString& strHeadersForReferTo = AString::ConstNull());
     IMS_RESULT RejectEx(IN IMS_SINT32 nStatusCode);
-    IMS_RESULT SendNotification(IN IMS_SINT32 nSubState, IN CONST ByteArray& objContent,
+    IMS_RESULT SendNotification(IN IMS_SINT32 nSubState, IN const ByteArray& objContent,
             IN IMS_SINT32 nReason = ISubscriptionState::REASON_NONE, IN IMS_SINT32 nExpires = (-1));
-    void SetNotificationListener(IN IOnNotificationListener* piListener);
+    inline void SetNotificationListener(IN IOnNotificationListener* piListener)
+    {
+        m_piNotificationListener = piListener;
+    }
     void SetImplicitRoutingRequired(IN IMS_BOOL bFlag);
 
 protected:
     // Activity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
     // Method class
-    // IMS_AUTH_SIP_DIGEST
-    virtual IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piSCC);
-
+    IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piScc) override;
     // Handle the exceptions
-    virtual void Exception_NotifyError(IN IMS_SINT32 nErrorCode);
-    virtual IMS_BOOL InitInstance();
-
+    void Exception_NotifyError(IN IMS_SINT32 nErrorCode) override;
+    IMS_BOOL InitInstance() override;
     // Handle the incoming request / outgoing response message
-    virtual IMS_BOOL NotifySIPRequest(IN ISipServerConnection* piSSC);
-
+    IMS_BOOL NotifySipRequest(IN ISipServerConnection* piSsc) override;
     // Handle to the outgoing request / incoming response message
-    virtual void NotifySIPResponse(IN ISipClientConnection* piSCC);
-    virtual void NotifySIPError(
-            IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
+    void NotifySipResponse(IN ISipClientConnection* piScc) override;
+    void NotifySipError(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
     // IDialogMethod interface
-    virtual IMS_BOOL Dialog_Compare(IN ISipServerConnection* piSSC) const;
-    virtual IMS_BOOL Dialog_NotifyRequest(IN ISipServerConnection* piSSC);
+    IMS_BOOL Dialog_Compare(IN ISipServerConnection* piSsc) const override;
+    IMS_BOOL Dialog_NotifyRequest(IN ISipServerConnection* piSsc) override;
 
     // IReferredMessageListener interface
-    virtual void ReferredMessage_NotifyOnActive(IN ISipMessage* piSIPMsg);
-    virtual void ReferredMessage_NotifyOnTerminated(
-            IN IMS_SINT32 nReasonCode = SubState::REASON_NONE, IN ISipMessage* piSIPMsg = IMS_NULL);
+    void ReferredMessage_NotifyOnActive(IN ISipMessage* piSipMsg) override;
+    void ReferredMessage_NotifyOnTerminated(IN IMS_SINT32 nReasonCode = SubState::REASON_NONE,
+            IN ISipMessage* piSipMsg = IMS_NULL) override;
 
 private:
     void CleanupOnDestroy();
-    ISipClientConnection* CreateConnectionL(IN ISipDialog* piDialog, IN CONST SipMethod& objMethod);
-    IMS_RESULT DoNotification(IN IMS_SINT32 nSubState, IN CONST ByteArray& objContent,
+    ISipClientConnection* CreateConnectionL(IN ISipDialog* piDialog, IN const SipMethod& objMethod);
+    IMS_RESULT DoNotification(IN IMS_SINT32 nSubState, IN const ByteArray& objContent,
             IN IMS_SINT32 nReasonCode = SubState::REASON_NONE, IN IMS_SINT32 nExpires = (-1));
     void SetState(IN IMS_SINT32 nState);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 public:
-    // Refer to IReference class
+    /// Refer to IReference class
     enum
     {
         STATE_INITIATED = 1,
@@ -147,35 +147,32 @@ protected:
 
 private:
     // State of Reference
-    IMS_SINT32 nState;
+    IMS_SINT32 m_nState;
     // Target URI in Refer-To header
-    AString strReferToURI;
+    AString m_strReferToUri;
     // method uri parameter in Refer-To header
-    SipMethod objReferMethod;
+    SipMethod m_objReferMethod;
     // replaces uri-header parameter in Refer-To header
     // It contains callid, from-tag, to-tag
-    Replaces* pReplaces;
+    Replaces* m_pReplaces;
     // User's request to the implicit subscription
-    IMS_BOOL bFlag_ImplicitSubscription;
+    IMS_BOOL m_bImplicitSubscription;
     // Referred method
-    Method* pReferredMethod;
+    Method* m_pReferredMethod;
     // Listener for this reference
-    IOnReferenceListener* piListener;
-
+    IOnReferenceListener* m_piListener;
     // Subscription state
-    SubState* pSubState;
+    SubState* m_pSubState;
     // Flag to indicate that the reference is created inside of any dialog (INVITE)
-    IMS_BOOL bFlag_ReferenceInOtherDialog;
+    IMS_BOOL m_bReferenceInOtherDialog;
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
-    IMS_BOOL bFlag_ImplicitRoutingRequired;
-
+    IMS_BOOL m_bImplicitRoutingRequired;
     // Queue for NOTIFY request messages
-    IMSList<Message*> objNotifyMessages;
-
+    IMSList<Message*> m_objNotifyMessages;
     // Notification listener for notifier's behavior
-    IOnNotificationListener* piNotificationListener;
+    IOnNotificationListener* m_piNotificationListener;
     // Notifier's state
-    NotifierState* pNotifierState;
+    NotifierState* m_pNotifierState;
 };
 
-#endif  // _REFERENCE_H_
+#endif

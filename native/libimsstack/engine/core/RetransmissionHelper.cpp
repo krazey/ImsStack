@@ -1,119 +1,103 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090722  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-#include "ServiceTimer.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "IMSLib.h"
-#include "SipConfigProxy.h"
+#include "ServiceMemory.h"
+#include "ServiceTimer.h"
+#include "ServiceTrace.h"
+
 #include "IRetransmissionHelperListener.h"
-#include "Service.h"
 #include "RetransmissionHelper.h"
+#include "Service.h"
+#include "SipConfigProxy.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 RetransmissionHelper::RetransmissionHelper(
-        IN Service* pService_, IN IMS_BOOL bIntervalCap /* = IMS_TRUE */) :
-        nDuration(TIMER_T1),
-        nCumulativeDuration(TIMER_T1),
-        nMaxDuration(TIMER_MAX),
-        nIntervalCap(TIMER_MAX),
-        piTimer(IMS_NULL),
-        piListener(IMS_NULL)
+        IN Service* pService, IN IMS_BOOL bIntervalCap /*= IMS_TRUE*/) :
+        m_nDuration(TIMER_T1),
+        m_nCumulativeDuration(TIMER_T1),
+        m_nMaxDuration(TIMER_MAX),
+        m_nIntervalCap(TIMER_MAX),
+        m_piTimer(IMS_NULL),
+        m_piListener(IMS_NULL)
 {
-    const ISipConfigV* piSipConfigV = pService_->GetISipConfigV();
+    const ISipConfigV* piSipConfigV = pService->GetISipConfigV();
 
-    nDuration = SipConfigProxy::GetTimerValueT1(
-            pService_->GetSlotId(), pService_->GetSipProfile(), piSipConfigV);
+    m_nDuration = SipConfigProxy::GetTimerValueT1(
+            pService->GetSlotId(), pService->GetSipProfile(), piSipConfigV);
 
-    nCumulativeDuration = nDuration;
-    nMaxDuration = nDuration * 64;
+    m_nCumulativeDuration = m_nDuration;
+    m_nMaxDuration = m_nDuration * 64;
 
     if (bIntervalCap)
     {
         // Interval cap will be read from the timer T2...
-        nIntervalCap = SipConfigProxy::GetTimerValueT2(
-                pService_->GetSlotId(), pService_->GetSipProfile(), piSipConfigV);
+        m_nIntervalCap = SipConfigProxy::GetTimerValueT2(
+                pService->GetSlotId(), pService->GetSipProfile(), piSipConfigV);
     }
     else
     {
-        nIntervalCap = nMaxDuration;
+        m_nIntervalCap = m_nMaxDuration;
     }
 }
 
 PUBLIC VIRTUAL RetransmissionHelper::~RetransmissionHelper()
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_D("Destructor :: RetransmissionHelper", 0, 0, 0);
 
-    if (piTimer != IMS_NULL)
+    if (m_piTimer != IMS_NULL)
     {
-        piTimer->KillTimer();
-        TimerService::GetTimerService()->DestroyTimer(piTimer);
-        piTimer = IMS_NULL;
+        m_piTimer->KillTimer();
+        TimerService::GetTimerService()->DestroyTimer(m_piTimer);
+        m_piTimer = IMS_NULL;
     }
-}
-
-PUBLIC
-void RetransmissionHelper::SetListener(IN IRetransmissionHelperListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->piListener = piListener;
 }
 
 PUBLIC
 void RetransmissionHelper::SetMaxDuration(IN IMS_SINT32 nValue)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piTimer != IMS_NULL)
+    if (m_piTimer != IMS_NULL)
+    {
         return;
+    }
 
-    nMaxDuration = nValue;
+    m_nMaxDuration = nValue;
 }
 
 PUBLIC
 IMS_RESULT RetransmissionHelper::Start()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piTimer != IMS_NULL)
+    if (m_piTimer != IMS_NULL)
     {
         IMS_TRACE_D("Retransmission timer is already running ...", 0, 0, 0);
         return IMS_SUCCESS;
     }
 
-    piTimer = TimerService::GetTimerService()->CreateTimer();
+    m_piTimer = TimerService::GetTimerService()->CreateTimer();
 
-    if (piTimer == IMS_NULL)
+    if (m_piTimer == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a retransmission timer failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    piTimer->SetTimer(nDuration, this);
-    /*
-    {
-        piTimer->Close();
-        piTimer = IMS_NULL;
+    m_piTimer->SetTimer(m_nDuration, this);
 
-        IMS_ERROR0("Starting a retransmission timer failed");
-        return IMS_FAILURE;
-    }*/
-
-    IMS_TRACE_I("Retransmission timer (%p) is started .....", piTimer, 0, 0);
+    IMS_TRACE_I("Retransmission timer (%p) is started .....", m_piTimer, 0, 0);
 
     return IMS_SUCCESS;
 }
@@ -121,97 +105,95 @@ IMS_RESULT RetransmissionHelper::Start()
 PUBLIC
 void RetransmissionHelper::Stop()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piTimer == IMS_NULL)
+    if (m_piTimer == IMS_NULL)
+    {
         return;
+    }
 
-    IMS_TRACE_I("Retransmission timer (%p) is stopped .....", piTimer, 0, 0);
+    IMS_TRACE_I("Retransmission timer (%p) is stopped .....", m_piTimer, 0, 0);
 
-    piTimer->KillTimer();
-    TimerService::GetTimerService()->DestroyTimer(piTimer);
-    piTimer = IMS_NULL;
+    m_piTimer->KillTimer();
+    TimerService::GetTimerService()->DestroyTimer(m_piTimer);
+    m_piTimer = IMS_NULL;
 }
 
 PROTECTED VIRTUAL void RetransmissionHelper::Timer_TimerExpired(IN ITimer* piTimer)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this->piTimer == IMS_NULL)
+    if (m_piTimer == IMS_NULL)
     {
         return;
     }
 
-    if (this->piTimer != piTimer)
+    if (m_piTimer != piTimer)
     {
         return;
     }
 
-    if (nCumulativeDuration == nMaxDuration)
+    if (m_nCumulativeDuration == m_nMaxDuration)
     {
-        if (piListener != IMS_NULL)
+        if (m_piListener != IMS_NULL)
         {
-            if (piListener->RetransmissionHelper_NotifyStatus(NOTIFICATION_TIMER_EXPIRED) !=
+            if (m_piListener->RetransmissionHelper_NotifyStatus(NOTIFICATION_TIMER_EXPIRED) !=
                     IMS_SUCCESS)
             {
                 return;
             }
         }
 
-        this->piTimer->KillTimer();
-        TimerService::GetTimerService()->DestroyTimer(this->piTimer);
-        this->piTimer = IMS_NULL;
+        m_piTimer->KillTimer();
+        TimerService::GetTimerService()->DestroyTimer(m_piTimer);
+        m_piTimer = IMS_NULL;
         return;
     }
 
-    if (piListener != IMS_NULL)
+    if (m_piListener != IMS_NULL)
     {
-        if (piListener->RetransmissionHelper_NotifyStatus(NOTIFICATION_RETRANSMIT) != IMS_SUCCESS)
+        if (m_piListener->RetransmissionHelper_NotifyStatus(NOTIFICATION_RETRANSMIT) != IMS_SUCCESS)
         {
             return;
         }
     }
 
-    IMS_SINT32 nTempDuration = nDuration << 1;
-    IMS_SINT32 nNextDuration = IMS_MIN(nTempDuration, nIntervalCap);
+    IMS_SINT32 nTempDuration = m_nDuration << 1;
+    IMS_SINT32 nNextDuration = IMS_MIN(nTempDuration, m_nIntervalCap);
 
-    nTempDuration = nNextDuration + nCumulativeDuration;
+    nTempDuration = nNextDuration + m_nCumulativeDuration;
 
-    if (nTempDuration <= nMaxDuration)
+    if (nTempDuration <= m_nMaxDuration)
     {
-        nDuration = nNextDuration;
-        nCumulativeDuration = nTempDuration;
+        m_nDuration = nNextDuration;
+        m_nCumulativeDuration = nTempDuration;
     }
     else
     {
-        nDuration = nMaxDuration - nCumulativeDuration;
-        nCumulativeDuration = nMaxDuration;
+        m_nDuration = m_nMaxDuration - m_nCumulativeDuration;
+        m_nCumulativeDuration = m_nMaxDuration;
     }
 
-    this->piTimer->KillTimer();
-    TimerService::GetTimerService()->DestroyTimer(this->piTimer);
+    m_piTimer->KillTimer();
+    TimerService::GetTimerService()->DestroyTimer(m_piTimer);
 
-    this->piTimer = TimerService::GetTimerService()->CreateTimer();
+    m_piTimer = TimerService::GetTimerService()->CreateTimer();
 
-    if (this->piTimer == IMS_NULL)
+    if (m_piTimer == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a retransmission timer falied", 0, 0, 0);
 
-        if (piListener != IMS_NULL)
+        if (m_piListener != IMS_NULL)
         {
-            piListener->RetransmissionHelper_NotifyStatus(NOTIFICATION_INTERNAL_ERROR);
+            m_piListener->RetransmissionHelper_NotifyStatus(NOTIFICATION_INTERNAL_ERROR);
         }
 
         return;
     }
 
-    if (!this->piTimer->SetTimer(nDuration, this))
+    if (!m_piTimer->SetTimer(m_nDuration, this))
     {
         IMS_TRACE_E(0, "Starting a retransmission timer falied", 0, 0, 0);
 
-        if (piListener != IMS_NULL)
+        if (m_piListener != IMS_NULL)
         {
-            piListener->RetransmissionHelper_NotifyStatus(NOTIFICATION_INTERNAL_ERROR);
+            m_piListener->RetransmissionHelper_NotifyStatus(NOTIFICATION_INTERNAL_ERROR);
         }
 
         return;

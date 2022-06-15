@@ -1,20 +1,23 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091208  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef STREAM_MEDIA_IMPL_H_
+#define STREAM_MEDIA_IMPL_H_
 
-    Description
-
-*/
-
-#ifndef _STREAM_MEDIA_IMPL_H_
-#define _STREAM_MEDIA_IMPL_H_
-
-#include "media/MediaImpl.h"
 #include "media/IOnMediaListener.h"
+#include "media/MediaImpl.h"
 #include "media/StreamMedia.h"
 
 class StreamMediaProposalImpl;
@@ -22,39 +25,44 @@ class StreamMediaProposalImpl;
 class StreamMediaImpl : public MediaImpl, public IMedia, public IOnMediaListener
 {
 public:
-    StreamMediaImpl(IN StreamMedia* pStreamMedia_);
+    StreamMediaImpl(IN StreamMedia* pStreamMedia);
     virtual ~StreamMediaImpl();
 
-private:
-    StreamMediaImpl(IN CONST StreamMediaImpl& objRHS);
-    StreamMediaImpl& operator=(IN CONST StreamMediaImpl& objRHS);
+    StreamMediaImpl(IN const StreamMediaImpl&) = delete;
+    StreamMediaImpl& operator=(IN const StreamMediaImpl&) = delete;
 
 private:
     // MediaImpl class
-    virtual IMS_BOOL Equals(IN CONST IMedia* piMedia) const;
-    virtual IMedia* GetInterface();
-    virtual Media* GetMedia() const;
+    IMS_BOOL Equals(IN const IMedia* piMedia) const override;
+    inline IMedia* GetInterface() override { return this; }
+    inline Media* GetMedia() const override { return m_pStreamMedia; }
 
     // IMedia interface
-    virtual IMS_SINT32 GetDirection() const;
-    virtual IMSList<IMediaDescriptor*> GetMediaDescriptors() const;
-    virtual IMedia* GetProposal(IN IMS_BOOL bIMSExtension = IMS_TRUE) const;
-    virtual IMS_SINT32 GetState() const;
-    virtual IMS_SINT32 GetUpdateState() const;
-    virtual IMS_RESULT SetDirection(IN IMS_SINT32 nDirection);
+    inline IMS_SINT32 GetDirection() const override { return m_pStreamMedia->GetDirection(); }
+    IMSList<IMediaDescriptor*> GetMediaDescriptors() const override;
+    IMedia* GetProposal() const override;
+    inline IMS_SINT32 GetState() const override { return m_pStreamMedia->GetState(); }
+    inline IMS_SINT32 GetUpdateState() const override { return m_pStreamMedia->GetUpdateState(); }
+    inline IMS_RESULT SetDirection(IN IMS_SINT32 nDirection) override
+    {
+        return m_pStreamMedia->SetDirection(nDirection);
+    }
+    inline IMediaDescriptor* GetMediaDescriptor() const override
+    {
+        return m_pStreamMedia->GetMediaDescriptor();
+    }
+    inline IMS_SINT32 GetType() const override { return m_pStreamMedia->GetType(); }
+    inline void RemoveMediaDescriptor(IN IMS_UINT32 nPosition) override
+    {
+        m_pStreamMedia->RemoveMediaDescriptor(nPosition);
+    }
 
-    //// IMS extensions
-    virtual IMediaDescriptor* GetMediaDescriptor() const;
-    virtual IMS_SINT32 GetType() const;
-    virtual void RemoveMediaDescriptor(IN IMS_UINT32 nPosition);
-
-    virtual void OnMedia_FictitiousMediaCreated(IN Media* pMedia);
-    virtual void OnMedia_FictitiousMediaDestroyed(IN Media* pMedia);
+    void OnMedia_FictitiousMediaCreated(IN Media* pMedia) override;
+    void OnMedia_FictitiousMediaDestroyed(IN Media* pMedia) override;
 
 private:
-    StreamMediaProposalImpl* pStreamMediaProposal;
-
-    StreamMedia* pStreamMedia;
+    StreamMedia* m_pStreamMedia;
+    StreamMediaProposalImpl* m_pStreamMediaProposal;
 };
 
-#endif  // _STREAM_MEDIA_IMPL_H_
+#endif

@@ -1,52 +1,42 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100503  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "TextParser.h"
-#include "base/Ims.h"
-#include "ImsCore.h"
-#include "media/MediaDescriptor.h"
-#include "media/FramedMediaProposal.h"
+
 #include "media/FramedMedia.h"
+#include "media/FramedMediaProposal.h"
+#include "media/MediaDescriptor.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-FramedMedia::FramedMedia(IN Service* pService_, IN ISdpOaState* piOAState_) :
-        Media(pService_, piOAState_)
+FramedMedia::FramedMedia(IN Service* pService, IN ISdpOaState* piOaState) :
+        Media(pService, piOaState)
 {
     SetInitializationDone(IMS_TRUE);
 }
 
 PUBLIC VIRTUAL FramedMedia::~FramedMedia()
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_D("Destructor :: FramedMedia", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_SINT32 FramedMedia::GetType() const
+PROTECTED VIRTUAL MediaProposal* FramedMedia::CreateMediaProposal(IN ISdpOaState* piOaState)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return ImsCore::MEDIA_TYPE_FRAMED;
-}
-
-PROTECTED VIRTUAL MediaProposal* FramedMedia::CreateMediaProposal(IN ISdpOaState* piOAState)
-{
-    FramedMediaProposal* pMediaProposal = new FramedMediaProposal(piOAState);
-
-    //---------------------------------------------------------------------------------------------
+    FramedMediaProposal* pMediaProposal = new FramedMediaProposal(piOaState);
 
     if (pMediaProposal == IMS_NULL)
     {

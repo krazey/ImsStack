@@ -1,30 +1,36 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090622  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
+#include "offeranswer/SdpSessionParameter.h"
+
+#include "ISessionState.h"
+#include "SessionDescriptor.h"
 #include "SipDebug.h"
 #include "base/Ims.h"
-#include "ISessionState.h"
-#include "offeranswer/SdpSessionParameter.h"
-#include "SessionDescriptor.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
+// clang-format off
 PUBLIC GLOBAL const IMS_CHAR*
 SessionDescriptor::RESERVED_ATTRIBUTE[SessionDescriptor::MAX_RESERVED_ATTRIBUTE] =
 {
     "charset",
-    "charset:ISO8895-1",  // ??? It needs confirmation
+    "charset:ISO8895-1",  // ? It needs confirmation
     "group",
     "maxprate",
     "ice-lite",
@@ -41,27 +47,26 @@ SessionDescriptor::RESERVED_ATTRIBUTE[SessionDescriptor::MAX_RESERVED_ATTRIBUTE]
     "acap",
     "tcap",
 };
+// clang-format on
 
 PUBLIC
-SessionDescriptor::SessionDescriptor(IN ISessionState* piSessionState_) :
-        piSessionState(piSessionState_)
+SessionDescriptor::SessionDescriptor(IN ISessionState* piSessionState) :
+        m_piSessionState(piSessionState)
 {
 }
 
 PUBLIC VIRTUAL SessionDescriptor::~SessionDescriptor() {}
 
-PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN CONST AString& strAttribute)
+PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN const AString& strAttribute)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSessionState == IMS_NULL)
+    if (m_piSessionState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING) &&
@@ -72,7 +77,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN CONST AString& str
         return IMS_FAILURE;
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -121,15 +126,13 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN CONST AString& str
 
 PRIVATE VIRTUAL IMSList<AString> SessionDescriptor::GetAttributes() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSessionState == IMS_NULL)
+    if (m_piSessionState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMSList<AString>();
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetPeerSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -137,12 +140,12 @@ PRIVATE VIRTUAL IMSList<AString> SessionDescriptor::GetAttributes() const
         return IMSList<AString>();
     }
 
-    const IMSList<SdpAttribute>& objSDPAttributes = pSessionParam->GetAttributes();
+    const IMSList<SdpAttribute>& objSdpAttributes = pSessionParam->GetAttributes();
     IMSList<AString> objAttributes;
 
-    for (IMS_UINT32 i = 0; i < objSDPAttributes.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < objSdpAttributes.GetSize(); ++i)
     {
-        const SdpAttribute& objAttribute = objSDPAttributes.GetAt(i);
+        const SdpAttribute& objAttribute = objSdpAttributes.GetAt(i);
 
         objAttributes.Append(objAttribute.GetValue());
     }
@@ -152,15 +155,13 @@ PRIVATE VIRTUAL IMSList<AString> SessionDescriptor::GetAttributes() const
 
 PRIVATE VIRTUAL AString SessionDescriptor::GetProtocolVersion() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSessionState == IMS_NULL)
+    if (m_piSessionState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString::ConstNull();
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetPeerSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -172,15 +173,13 @@ PRIVATE VIRTUAL AString SessionDescriptor::GetProtocolVersion() const
 
 PRIVATE VIRTUAL const AString& SessionDescriptor::GetSessionId() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSessionState == IMS_NULL)
+    if (m_piSessionState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString::ConstNull();
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetPeerSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -192,15 +191,13 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetSessionId() const
 
 PRIVATE VIRTUAL AString SessionDescriptor::GetSessionInfo() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSessionState == IMS_NULL)
+    if (m_piSessionState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString::ConstNull();
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetPeerSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -219,15 +216,13 @@ PRIVATE VIRTUAL AString SessionDescriptor::GetSessionInfo() const
 
 PRIVATE VIRTUAL AString SessionDescriptor::GetSessionName() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSessionState == IMS_NULL)
+    if (m_piSessionState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString::ConstNull();
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetPeerSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -237,18 +232,16 @@ PRIVATE VIRTUAL AString SessionDescriptor::GetSessionName() const
     return pSessionParam->GetSessionName().GetValue();
 }
 
-PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST AString& strAttribute)
+PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN const AString& strAttribute)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSessionState == IMS_NULL)
+    if (m_piSessionState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING) &&
@@ -259,7 +252,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST AString& 
         return IMS_FAILURE;
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -295,25 +288,23 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST AString& 
         return IMS_FAILURE;
     }
 
-    pSessionParam->RemoveAttribute(objAttribute);  // throw exception : OPERATION_FAILED ???
+    pSessionParam->RemoveAttribute(objAttribute);
 
     Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionInfo(IN CONST AString& strInfo)
+PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionInfo(IN const AString& strInfo)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSessionState == IMS_NULL)
+    if (m_piSessionState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING))
@@ -322,7 +313,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionInfo(IN CONST AString& s
         return IMS_FAILURE;
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -345,18 +336,16 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionInfo(IN CONST AString& s
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionName(IN CONST AString& strName)
+PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionName(IN const AString& strName)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSessionState == IMS_NULL)
+    if (m_piSessionState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING))
@@ -365,7 +354,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionName(IN CONST AString& s
         return IMS_FAILURE;
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -385,12 +374,10 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetSessionName(IN CONST AString& s
 }
 
 PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN IMS_SINT32 nType,
-        IN CONST AString& strAttrValue, IN CONST AString& strType /* = AString::ConstNull() */)
+        IN const AString& strAttrValue, IN const AString& strType /*= AString::ConstNull()*/)
 {
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING) &&
@@ -416,7 +403,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN IMS_SINT32 nType,
         return IMS_FAILURE;
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -460,12 +447,10 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN IMS_SINT32 nType,
 }
 
 PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttributeInt(IN IMS_SINT32 nType,
-        IN IMS_SINT32 nAttrValue, IN CONST AString& strType /* = AString::ConstNull() */)
+        IN IMS_SINT32 nAttrValue, IN const AString& strType /*= AString::ConstNull()*/)
 {
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING) &&
@@ -491,7 +476,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttributeInt(IN IMS_SINT32 nTyp
     }
     else if ((nType == SdpAttribute::SETUP) || (nType == SdpAttribute::CONNECTION))
     {
-        SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+        SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
         if (pSessionParam == IMS_NULL)
         {
@@ -521,12 +506,10 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttributeInt(IN IMS_SINT32 nTyp
 }
 
 PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddBandwidth(IN IMS_SINT32 nType,
-        IN IMS_SINT32 nBandwidth, IN CONST AString& strType /* = AString::ConstNull() */)
+        IN IMS_SINT32 nBandwidth, IN const AString& strType /*= AString::ConstNull()*/)
 {
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING) &&
@@ -540,7 +523,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddBandwidth(IN IMS_SINT32 nType,
         return IMS_FAILURE;
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -576,11 +559,9 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddBandwidth(IN IMS_SINT32 nType,
 }
 
 PRIVATE VIRTUAL const AString& SessionDescriptor::GetAttribute(
-        IN IMS_SINT32 nType, IN CONST AString& strType /* = AString::ConstNull() */) const
+        IN IMS_SINT32 nType, IN const AString& strType /*= AString::ConstNull()*/) const
 {
-    SdpSessionParameter* pSessionParam = piSessionState->GetPeerSessionParameter();
-
-    //---------------------------------------------------------------------------------------------
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -605,9 +586,13 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetAttribute(
     const SdpAttribute* pAttribute = IMS_NULL;
 
     if (nType != SdpAttribute::ATTRIBUTE_OTHER)
+    {
         pAttribute = pSessionParam->GetAttribute(nType);
+    }
     else
+    {
         pAttribute = pSessionParam->GetAttribute(strType);
+    }
 
     if (pAttribute == IMS_NULL)
     {
@@ -621,11 +606,9 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetAttribute(
 }
 
 PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetAttributeInt(
-        IN IMS_SINT32 nType, IN CONST AString& strType /* = AString::ConstNull() */) const
+        IN IMS_SINT32 nType, IN const AString& strType /*= AString::ConstNull()*/) const
 {
-    SdpSessionParameter* pSessionParam = piSessionState->GetPeerSessionParameter();
-
-    //---------------------------------------------------------------------------------------------
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -657,9 +640,13 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetAttributeInt(
     const SdpAttribute* pAttribute = IMS_NULL;
 
     if (nType != SdpAttribute::ATTRIBUTE_OTHER)
+    {
         pAttribute = pSessionParam->GetAttribute(nType);
+    }
     else
+    {
         pAttribute = pSessionParam->GetAttribute(strType);
+    }
 
     if (pAttribute == IMS_NULL)
     {
@@ -674,10 +661,10 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetAttributeInt(
         return INVALID_VALUE;
     }
 
-    IMS_BOOL bOK = IMS_FALSE;
-    IMS_SINT32 nAttrValue = strAttrValue.ToInt32(&bOK);
+    IMS_BOOL bOk = IMS_FALSE;
+    IMS_SINT32 nAttrValue = strAttrValue.ToInt32(&bOk);
 
-    if (!bOK)
+    if (!bOk)
     {
         IMS_TRACE_E(0, "Converting the attribute (integer format: %d, %s) failed", nType,
                 strType.GetStr(), 0);
@@ -692,11 +679,9 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetAttributeInt(
 }
 
 PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetBandwidth(
-        IN IMS_SINT32 nType, IN CONST AString& strType /* = AString::ConstNull() */) const
+        IN IMS_SINT32 nType, IN const AString& strType /*= AString::ConstNull()*/) const
 {
-    SdpSessionParameter* pSessionParam = piSessionState->GetPeerSessionParameter();
-
-    //---------------------------------------------------------------------------------------------
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -709,9 +694,13 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetBandwidth(
     const SdpBandwidth* pBandwidth = IMS_NULL;
 
     if (nType != SdpBandwidth::TYPE_OTHER)
+    {
         pBandwidth = pSessionParam->GetBandwidth(nType);
+    }
     else
+    {
         pBandwidth = pSessionParam->GetBandwidth(strType);
+    }
 
     if (pBandwidth == IMS_NULL)
     {
@@ -726,9 +715,7 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetBandwidth(
 
 PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetDirection() const
 {
-    SdpSessionParameter* pSessionParam = piSessionState->GetPeerSessionParameter();
-
-    //---------------------------------------------------------------------------------------------
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -743,15 +730,13 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetDirection() const
 
 PRIVATE VIRTUAL const AString& SessionDescriptor::GetSessionVersion() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSessionState == IMS_NULL)
+    if (m_piSessionState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString::ConstNull();
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetPeerSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -763,15 +748,13 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetSessionVersion() const
 
 PRIVATE VIRTUAL const AString& SessionDescriptor::GetUsername() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSessionState == IMS_NULL)
+    if (m_piSessionState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return AString::ConstNull();
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetPeerSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -781,12 +764,10 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetUsername() const
     return pSessionParam->GetOrigin().GetUsername();
 }
 
-PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST SdpAttribute& objAttribute)
+PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN const SdpAttribute& objAttribute)
 {
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING) &&
@@ -800,7 +781,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST SdpAttrib
         return IMS_FAILURE;
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -850,13 +831,11 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN CONST SdpAttrib
 }
 
 PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN IMS_SINT32 nType,
-        IN CONST AString& strAttrValue /* = AString::ConstNull() */,
-        IN CONST AString& strType /* = AString::ConstNull() */)
+        IN const AString& strAttrValue /*= AString::ConstNull()*/,
+        IN const AString& strType /*= AString::ConstNull()*/)
 {
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING) &&
@@ -870,7 +849,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN IMS_SINT32 nTyp
         return IMS_FAILURE;
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -931,9 +910,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN IMS_SINT32 nTyp
 PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAllBandwidths()
 {
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING) &&
@@ -946,7 +923,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAllBandwidths()
         return IMS_FAILURE;
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -965,12 +942,10 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAllBandwidths()
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetConnectionAddress(IN CONST AString& strAddress)
+PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetConnectionAddress(IN const AString& strAddress)
 {
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING) &&
@@ -984,7 +959,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetConnectionAddress(IN CONST AStr
         return IMS_FAILURE;
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -1011,9 +986,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetConnectionAddress(IN CONST AStr
 PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetDirection(IN IMS_SINT32 nDirection)
 {
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING) &&
@@ -1026,7 +999,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetDirection(IN IMS_SINT32 nDirect
         return IMS_FAILURE;
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -1043,12 +1016,10 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetDirection(IN IMS_SINT32 nDirect
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetOriginAddress(IN CONST AString& strAddress)
+PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetOriginAddress(IN const AString& strAddress)
 {
     // Check a session state
-    IMS_SINT32 nState = piSessionState->GetSessionState();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nState = m_piSessionState->GetSessionState();
 
     if ((nState != ISessionState::SESSION_STATE_INITIATED) &&
             (nState != ISessionState::SESSION_STATE_NEGOTIATING) &&
@@ -1062,7 +1033,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetOriginAddress(IN CONST AString&
         return IMS_FAILURE;
     }
 
-    SdpSessionParameter* pSessionParam = piSessionState->GetProposalSessionParameter();
+    SdpSessionParameter* pSessionParam = m_piSessionState->GetProposalSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -1090,16 +1061,12 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetOriginAddress(IN CONST AString&
 
 PRIVATE VIRTUAL IPAddress SessionDescriptor::GetLocalAddress() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return IPAddress(piSessionState->GetConnectionAddress());
+    return IPAddress(m_piSessionState->GetConnectionAddress());
 }
 
 PRIVATE VIRTUAL IPAddress SessionDescriptor::GetRemoteAddress() const
 {
     IPAddress objAddress;
-
-    //---------------------------------------------------------------------------------------------
 
     if (!objAddress.Parse(GetRemoteAddressAsString()))
     {
@@ -1112,7 +1079,5 @@ PRIVATE VIRTUAL IPAddress SessionDescriptor::GetRemoteAddress() const
 
 PRIVATE VIRTUAL const AString& SessionDescriptor::GetRemoteAddressAsString() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return piSessionState->GetPeerConnectionAddress();
+    return m_piSessionState->GetPeerConnectionAddress();
 }

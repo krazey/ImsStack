@@ -47,7 +47,7 @@ IMS_RESULT MessageSender::SendProvisionalResponse(IN IMS_SINT32 eStatusCode, IN 
 
     if (bReliable)
     {
-        return m_objSession.SendRPR(eStatusCode, AString::ConstNull(), bIncludeSdp);
+        return m_objSession.SendRpr(eStatusCode, AString::ConstNull(), bIncludeSdp);
     }
 
     return m_objSession.SendProvisionalResponse(eStatusCode);
@@ -63,7 +63,7 @@ IMS_RESULT MessageSender::SendPrack()
         return IMS_FAILURE;
     }
 
-    return m_objSession.SendPRAck();
+    return m_objSession.SendPrack();
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ IMS_RESULT MessageSender::RespondToPrack(IN IMS_SINT32 eStatusCode)
         return IMS_FAILURE;
     }
 
-    return m_objSession.RespondToPRAck(eStatusCode);
+    return m_objSession.RespondToPrack(eStatusCode);
 }
 
 /* -------------------------------------------------------------------------------------------------

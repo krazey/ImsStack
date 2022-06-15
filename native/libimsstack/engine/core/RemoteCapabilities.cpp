@@ -1,60 +1,61 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091201  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
+
 #include "Feature.h"
+#include "ServiceIdentifier.h"
 #include "private/AppConfig.h"
 #include "private/CoreServiceConfig.h"
-#include "ServiceIdentifier.h"
+
 #include "RemoteCapabilities.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 RemoteCapabilities::RemoteCapabilities() :
-        bAudioSupported(IMS_FALSE),
-        bVideoSupported(IMS_FALSE),
-        bFramedMediaSupported(IMS_FALSE),
-        bApplicationSupported(IMS_FALSE),
-        objAppSubTypes(IMSList<FeatureSet*>()),
-        objEvents(IMSList<FeatureSet*>()),
-        objICSIs(IMSList<FeatureSet*>()),
-        objIARIs(IMSList<FeatureSet*>()),
-        objFeatureTags(IMSList<FeatureSet*>())
+        m_bAudioSupported(IMS_FALSE),
+        m_bVideoSupported(IMS_FALSE),
+        m_bFramedMediaSupported(IMS_FALSE),
+        m_bApplicationSupported(IMS_FALSE),
+        m_objAppSubTypes(IMSList<FeatureSet*>()),
+        m_objEvents(IMSList<FeatureSet*>()),
+        m_objIcsis(IMSList<FeatureSet*>()),
+        m_objIaris(IMSList<FeatureSet*>()),
+        m_objFeatureTags(IMSList<FeatureSet*>())
 {
 }
 
 PUBLIC
 RemoteCapabilities::~RemoteCapabilities()
 {
-    //---------------------------------------------------------------------------------------------
-
-    RemoveAllFeatureSets(objAppSubTypes);
-    RemoveAllFeatureSets(objEvents);
-    RemoveAllFeatureSets(objIARIs);
-    RemoveAllFeatureSets(objICSIs);
-    RemoveAllFeatureSets(objFeatureTags);
+    RemoveAllFeatureSets(m_objAppSubTypes);
+    RemoveAllFeatureSets(m_objEvents);
+    RemoveAllFeatureSets(m_objIaris);
+    RemoveAllFeatureSets(m_objIcsis);
+    RemoveAllFeatureSets(m_objFeatureTags);
 }
 
 PUBLIC
-IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString>& objCapabilities)
+IMS_BOOL RemoteCapabilities::Create(IN const IMSList<AString>& objCapabilities)
 {
     FeatureSet* pFeatureSet;
     AString strName;
     AString strValue;
-
-    //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objCapabilities.GetSize(); ++i)
     {
@@ -99,7 +100,7 @@ IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString>& objCapabilities)
         // ICSIs
         if (pFeatureSet->GetTag().Equals(Feature::OTHER_G_3GPP_ICSI_REF))
         {
-            if (!objICSIs.Append(pFeatureSet))
+            if (!m_objIcsis.Append(pFeatureSet))
             {
                 delete pFeatureSet;
                 goto EXIT_Create;
@@ -108,7 +109,7 @@ IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString>& objCapabilities)
         // IARIs
         else if (pFeatureSet->GetTag().Equals(Feature::OTHER_G_3GPP_IARI_REF))
         {
-            if (!objIARIs.Append(pFeatureSet))
+            if (!m_objIaris.Append(pFeatureSet))
             {
                 delete pFeatureSet;
                 goto EXIT_Create;
@@ -119,7 +120,7 @@ IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString>& objCapabilities)
         {
             if (pFeatureSet->Contains(TextParser::STR_TRUE))
             {
-                bAudioSupported = IMS_TRUE;
+                m_bAudioSupported = IMS_TRUE;
             }
 
             delete pFeatureSet;
@@ -129,7 +130,7 @@ IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString>& objCapabilities)
         {
             if (pFeatureSet->Contains(TextParser::STR_TRUE))
             {
-                bVideoSupported = IMS_TRUE;
+                m_bVideoSupported = IMS_TRUE;
             }
 
             delete pFeatureSet;
@@ -139,7 +140,7 @@ IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString>& objCapabilities)
         {
             if (pFeatureSet->Contains(TextParser::STR_TRUE))
             {
-                bFramedMediaSupported = IMS_TRUE;
+                m_bFramedMediaSupported = IMS_TRUE;
             }
 
             delete pFeatureSet;
@@ -149,7 +150,7 @@ IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString>& objCapabilities)
         {
             if (pFeatureSet->Contains(TextParser::STR_TRUE))
             {
-                bApplicationSupported = IMS_TRUE;
+                m_bApplicationSupported = IMS_TRUE;
             }
 
             delete pFeatureSet;
@@ -157,7 +158,7 @@ IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString>& objCapabilities)
         // app_subtype
         else if (pFeatureSet->GetTag().Equals(Feature::OTHER_APP_SUBTYPE))
         {
-            if (!objAppSubTypes.Append(pFeatureSet))
+            if (!m_objAppSubTypes.Append(pFeatureSet))
             {
                 delete pFeatureSet;
                 goto EXIT_Create;
@@ -166,7 +167,7 @@ IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString>& objCapabilities)
         // events
         else if (pFeatureSet->GetTag().Equals(Feature::BASE_TAG[Feature::BASE_EVENTS]))
         {
-            if (!objEvents.Append(pFeatureSet))
+            if (!m_objEvents.Append(pFeatureSet))
             {
                 delete pFeatureSet;
                 goto EXIT_Create;
@@ -178,7 +179,7 @@ IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString>& objCapabilities)
             // If the name is a feature-tag, then appends it to the list of feature-tag
             if (Feature::IsFeatureTag(pFeatureSet->GetTag()))
             {
-                if (!objFeatureTags.Append(pFeatureSet))
+                if (!m_objFeatureTags.Append(pFeatureSet))
                 {
                     delete pFeatureSet;
                     goto EXIT_Create;
@@ -195,32 +196,28 @@ IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString>& objCapabilities)
 
 EXIT_Create:
 
-    bAudioSupported = IMS_FALSE;
-    bVideoSupported = IMS_FALSE;
-    bFramedMediaSupported = IMS_FALSE;
-    bApplicationSupported = IMS_FALSE;
+    m_bAudioSupported = IMS_FALSE;
+    m_bVideoSupported = IMS_FALSE;
+    m_bFramedMediaSupported = IMS_FALSE;
+    m_bApplicationSupported = IMS_FALSE;
 
-    RemoveAllFeatureSets(objAppSubTypes);
-    RemoveAllFeatureSets(objEvents);
-    RemoveAllFeatureSets(objIARIs);
-    RemoveAllFeatureSets(objICSIs);
-    RemoveAllFeatureSets(objFeatureTags);
+    RemoveAllFeatureSets(m_objAppSubTypes);
+    RemoveAllFeatureSets(m_objEvents);
+    RemoveAllFeatureSets(m_objIaris);
+    RemoveAllFeatureSets(m_objIcsis);
+    RemoveAllFeatureSets(m_objFeatureTags);
 
     return IMS_FALSE;
 }
 
-/*
-
-Checks if a certain FeatureTag is supported by the remote device.
-
-*/
+/**
+ * @brief Checks if a certain FeatureTag is supported by the remote device.
+ */
 PUBLIC
 IMS_BOOL RemoteCapabilities::IsCompatible(
-        IN CONST AppConfig* pAppConfig, IN CONST AString& strServiceId) const
+        IN const AppConfig* pAppConfig, IN const AString& strServiceId) const
 {
     IMS_BOOL bIsCompatible = IMS_TRUE;
-
-    //---------------------------------------------------------------------------------------------
 
     if (pAppConfig == IMS_NULL)
     {
@@ -262,177 +259,138 @@ IMS_BOOL RemoteCapabilities::IsCompatible(
     return bIsCompatible;
 }
 
-/*
-
-Checks if the remote device supports streaming audio or audio content-type.
-
-*/
+/**
+ * @brief Checks if a certain application subtype is supported by the remote device.
+ */
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsAudioSupported() const
+IMS_BOOL RemoteCapabilities::IsAppSubTypeSupported(IN const AString& strAppSubType) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return bAudioSupported;
-}
-
-/*
-
-Checks if the remote device supports streaming video or video content-type.
-
-*/
-PRIVATE
-IMS_BOOL RemoteCapabilities::IsVideoSupported() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return bVideoSupported;
-}
-
-/*
-
-Checks if the remote device supports Framed Media, MSRP.
-
-*/
-PRIVATE
-IMS_BOOL RemoteCapabilities::IsFramedMediaSupported() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return bFramedMediaSupported;
-}
-
-/*
-
-Checks if a certain application subtype is supported by the remote device.
-
-*/
-PRIVATE
-IMS_BOOL RemoteCapabilities::IsAppSubTypeSupported(IN CONST AString& strAppSubType) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (objAppSubTypes.IsEmpty())
-        return IMS_FALSE;
-
-    for (IMS_UINT32 i = 0; i < objAppSubTypes.GetSize(); ++i)
+    if (m_objAppSubTypes.IsEmpty())
     {
-        FeatureSet* pFeatureSet = objAppSubTypes.GetAt(i);
+        return IMS_FALSE;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objAppSubTypes.GetSize(); ++i)
+    {
+        FeatureSet* pFeatureSet = m_objAppSubTypes.GetAt(i);
 
         if (pFeatureSet->Contains(strAppSubType))
+        {
             return IMS_TRUE;
+        }
     }
 
     return IMS_FALSE;
 }
 
-/*
-
-Checks if a certain event is supported by the remote device.
-
-*/
+/**
+ * @brief Checks if a certain event is supported by the remote device.
+ */
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsEventSupported(IN CONST AString& strEvent) const
+IMS_BOOL RemoteCapabilities::IsEventSupported(IN const AString& strEvent) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objEvents.IsEmpty())
-        return IMS_FALSE;
-
-    for (IMS_UINT32 i = 0; i < objEvents.GetSize(); ++i)
+    if (m_objEvents.IsEmpty())
     {
-        FeatureSet* pFeatureSet = objEvents.GetAt(i);
+        return IMS_FALSE;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objEvents.GetSize(); ++i)
+    {
+        FeatureSet* pFeatureSet = m_objEvents.GetAt(i);
 
         if (pFeatureSet->Contains(strEvent))
+        {
             return IMS_TRUE;
+        }
     }
 
     return IMS_FALSE;
 }
 
-/*
-
-Checks if a certain IARI is supported by the remote device.
-
-*/
+/**
+ * @brief Checks if a certain IARI is supported by the remote device.
+ */
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsIARISupported(IN CONST AString& strIARI) const
+IMS_BOOL RemoteCapabilities::IsIariSupported(IN const AString& strIari) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objIARIs.IsEmpty())
-        return IMS_FALSE;
-
-    for (IMS_UINT32 i = 0; i < objIARIs.GetSize(); ++i)
+    if (m_objIaris.IsEmpty())
     {
-        FeatureSet* pFeatureSet = objIARIs.GetAt(i);
-
-        if (pFeatureSet->Contains(strIARI))
-            return IMS_TRUE;
+        return IMS_FALSE;
     }
 
-    return IMS_FALSE;
-}
-
-/*
-
-Checks if a certain ICSI is supported by the remote device.
-
-*/
-PRIVATE
-IMS_BOOL RemoteCapabilities::IsICSISupported(IN CONST AString& strICSI) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (objICSIs.IsEmpty())
-        return IMS_FALSE;
-
-    for (IMS_UINT32 i = 0; i < objICSIs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objIaris.GetSize(); ++i)
     {
-        FeatureSet* pFeatureSet = objICSIs.GetAt(i);
+        FeatureSet* pFeatureSet = m_objIaris.GetAt(i);
 
-        if (pFeatureSet->Contains(strICSI))
+        if (pFeatureSet->Contains(strIari))
+        {
             return IMS_TRUE;
+        }
     }
 
     return IMS_FALSE;
 }
 
-/*
-
-Checks if a certain FeatureTag is supported by the remote device.
-
-*/
+/**
+ * @brief Checks if a certain ICSI is supported by the remote device.
+ */
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsFeatureTagSupported(IN CONST AString& strFeatureTag) const
+IMS_BOOL RemoteCapabilities::IsIcsiSupported(IN const AString& strIcsi) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objFeatureTags.IsEmpty())
+    if (m_objIcsis.IsEmpty())
+    {
         return IMS_FALSE;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objIcsis.GetSize(); ++i)
+    {
+        FeatureSet* pFeatureSet = m_objIcsis.GetAt(i);
+
+        if (pFeatureSet->Contains(strIcsi))
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+/**
+ * @brief Checks if a certain FeatureTag is supported by the remote device.
+ */
+PRIVATE
+IMS_BOOL RemoteCapabilities::IsFeatureTagSupported(IN const AString& strFeatureTag) const
+{
+    if (m_objFeatureTags.IsEmpty())
+    {
+        return IMS_FALSE;
+    }
 
     Feature objFeature(strFeatureTag);
 
-    for (IMS_UINT32 i = 0; i < objFeatureTags.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objFeatureTags.GetSize(); ++i)
     {
-        FeatureSet* pFeatureSet = objFeatureTags.GetAt(i);
+        FeatureSet* pFeatureSet = m_objFeatureTags.GetAt(i);
 
         if (pFeatureSet->Contains(&objFeature))
+        {
             return IMS_TRUE;
+        }
     }
 
     return IMS_FALSE;
 }
 
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsBasicMediaCompatible(IN CONST AppConfig* pAppConfig) const
+IMS_BOOL RemoteCapabilities::IsBasicMediaCompatible(IN const AppConfig* pAppConfig) const
 {
     AString strLowerMimeType;
     const AStringArray& objMimeTypes = pAppConfig->GetBasicMediaMimeTypes();
 
-    //---------------------------------------------------------------------------------------------
-
     if (objMimeTypes.IsEmpty())
+    {
         return IMS_TRUE;
+    }
 
     for (IMS_SINT32 i = 0; i < objMimeTypes.GetCount(); ++i)
     {
@@ -449,7 +407,9 @@ IMS_BOOL RemoteCapabilities::IsBasicMediaCompatible(IN CONST AppConfig* pAppConf
                 AString strAppSubType = strLowerMimeType.GetSubStr(nStartIndex + 1);
 
                 if (!IsAppSubTypeSupported(strAppSubType))
+                {
                     return IMS_FALSE;
+                }
             }
         }
         else if (strLowerMimeType.StartsWith(Feature::BASE_TAG[Feature::BASE_AUDIO]))
@@ -472,19 +432,21 @@ IMS_BOOL RemoteCapabilities::IsBasicMediaCompatible(IN CONST AppConfig* pAppConf
 }
 
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsEventCompatible(IN CONST AppConfig* pAppConfig) const
+IMS_BOOL RemoteCapabilities::IsEventCompatible(IN const AppConfig* pAppConfig) const
 {
     const AStringArray& objEvents = pAppConfig->GetSupportedEventPackages();
 
-    //---------------------------------------------------------------------------------------------
-
     if (objEvents.IsEmpty())
+    {
         return IMS_TRUE;
+    }
 
     for (IMS_SINT32 i = 0; i < objEvents.GetCount(); ++i)
     {
         if (!IsEventSupported(objEvents.GetElementAt(i)))
+        {
             return IMS_FALSE;
+        }
     }
 
     return IMS_TRUE;
@@ -492,14 +454,14 @@ IMS_BOOL RemoteCapabilities::IsEventCompatible(IN CONST AppConfig* pAppConfig) c
 
 PRIVATE
 IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
-        IN CONST AppConfig* pAppConfig, IN CONST AString& strServiceId) const
+        IN const AppConfig* pAppConfig, IN const AString& strServiceId) const
 {
     const IMSList<CoreServiceConfig*>& objCoreServiceConfigs = pAppConfig->GetCoreServiceConfigs();
 
-    //---------------------------------------------------------------------------------------------
-
     if (objCoreServiceConfigs.IsEmpty())
+    {
         return IMS_TRUE;
+    }
 
     // For a dedicated service in the application
     if (!strServiceId.IsNULL())
@@ -535,31 +497,33 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
 
 PRIVATE
 IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
-        IN CONST CoreServiceConfig* pServiceConfig) const
+        IN const CoreServiceConfig* pServiceConfig) const
 {
     /// Evaluate the ICSIs
-    const IMSList<ServiceIdentifier>& objLocalICSIs = pServiceConfig->GetICSIs();
+    const IMSList<ServiceIdentifier>& objLocalIcsis = pServiceConfig->GetICSIs();
 
-    //---------------------------------------------------------------------------------------------
-
-    if (!objLocalICSIs.IsEmpty())
+    if (!objLocalIcsis.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objLocalICSIs.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < objLocalIcsis.GetSize(); ++i)
         {
-            const ServiceIdentifier& objICSI = objLocalICSIs.GetAt(i);
+            const ServiceIdentifier& objIcsi = objLocalIcsis.GetAt(i);
 
-            if (!IsICSISupported(objICSI.GetName()))
+            if (!IsIcsiSupported(objIcsi.GetName()))
+            {
                 return IMS_FALSE;
+            }
         }
     }
 
     /// Evaluates the IARI
     if (pServiceConfig->IsIARISupported())
     {
-        const ServiceIdentifier& objIARI = pServiceConfig->GetIARI();
+        const ServiceIdentifier& objIari = pServiceConfig->GetIARI();
 
-        if (!IsIARISupported(objIARI.GetName()))
+        if (!IsIariSupported(objIari.GetName()))
+        {
             return IMS_FALSE;
+        }
     }
 
     /// Evaluates the feature-tags
@@ -572,7 +536,9 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
             const ServiceIdentifier& objFTag = objLocalFeatureTags.GetAt(i);
 
             if (!IsFeatureTagSupported(objFTag.GetName()))
+            {
                 return IMS_FALSE;
+            }
         }
     }
 
@@ -582,17 +548,19 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
 PRIVATE GLOBAL void RemoteCapabilities::RemoveAllFeatureSets(
         IN_OUT IMSList<FeatureSet*>& objFeatureSets)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (objFeatureSets.IsEmpty())
+    {
         return;
+    }
 
     for (IMS_UINT32 i = 0; i < objFeatureSets.GetSize(); ++i)
     {
         FeatureSet* pFeatureSet = objFeatureSets.GetAt(i);
 
         if (pFeatureSet != IMS_NULL)
+        {
             delete pFeatureSet;
+        }
     }
 
     objFeatureSets.Clear();

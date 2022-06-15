@@ -1,17 +1,22 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090826  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SESSION_REFRESH_HELPER_H_
+#define SESSION_REFRESH_HELPER_H_
 
-    Description
-
-*/
-
-#ifndef _SESSION_REFRESH_HELPER_H_
-#define _SESSION_REFRESH_HELPER_H_
+#include "private/SipConfigV.h"
 
 #include "util/RefreshHelper.h"
 
@@ -21,67 +26,92 @@ class Service;
 class SessionRefreshHelper : public RefreshHelper
 {
 public:
-    SessionRefreshHelper(IN Service* pService_, IN IRefreshable* piRefreshable_);
+    SessionRefreshHelper(IN Service* pService, IN IRefreshable* piRefreshable);
     virtual ~SessionRefreshHelper();
 
 public:
-    virtual IMS_BOOL AddSpecificHeader(IN ISipConnection* piSC);
-    virtual IMS_BOOL AddSpecificHeaderWithoutParameterChange(IN ISipConnection* piSC);
-    virtual IMS_RESULT SendRefreshRequest(IN ISipClientConnection* piSCC);
-    virtual IMS_RESULT UpdateOnMessageReceived(IN CONST ISipConnection* piSC);
-    virtual IMS_RESULT UpdateOnMessageSent(IN CONST ISipConnection* piSC);
+    IMS_BOOL AddSpecificHeader(IN ISipConnection* piSc) override;
+    IMS_RESULT SendRefreshRequest(IN ISipClientConnection* piScc) override;
+    IMS_RESULT UpdateOnMessageReceived(IN const ISipConnection* piSc) override;
+    IMS_RESULT UpdateOnMessageSent(IN const ISipConnection* piSc) override;
 
-    IMS_BOOL AddSpecificHeaderOnEarlyUPDATE(
-            IN ISipConnection* piSC, IN IMS_BOOL bTimerOptionSupported);
+    IMS_BOOL AddSpecificHeaderWithoutParameterChange(IN ISipConnection* piSc);
+    IMS_BOOL AddSpecificHeaderOnEarlyUpdate(
+            IN ISipConnection* piSc, IN IMS_BOOL bTimerOptionSupported);
     IMS_SINT32 GetRefreshMethod() const;
     IMS_BOOL IsSessionTimerSupported(
-            IN CONST ISipConnection* piSC, IN IMS_BOOL bCheckSEPresentity = IMS_TRUE);
-    IMS_BOOL IsSessionTimerSupportedBySessionExpires() const;
-    void StopSessionTimer(IN CONST ISipConnection* piSC);
-    void UpdateTimerOptionOnRequestReceived(IN CONST ISipConnection* piSC);
+            IN const ISipConnection* piSc, IN IMS_BOOL bCheckSePresentity = IMS_TRUE);
+    inline IMS_BOOL IsSessionTimerSupportedBySessionExpires() const
+    {
+        return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_CHECK_SESSION_EXPIRES) != 0);
+    }
+    void StopSessionTimer(IN const ISipConnection* piSc);
+    void UpdateTimerOptionOnRequestReceived(IN const ISipConnection* piSc);
 
 protected:
-    virtual IMS_SINT32 GetTimerInterval() const;
-    virtual void RefreshCompleted(IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode = 0);
-    virtual void RefreshStarted();
-    virtual void RefreshTerminated();
-
+    IMS_SINT32 GetTimerInterval() const override;
+    void RefreshCompleted(IN ISipClientConnection* piScc, IN IMS_SINT32 nCode = 0) override;
+    void RefreshStarted() override;
+    inline void RefreshTerminated() override { Refreshable_RefreshTerminated(); }
     IMS_BOOL IsSessionTimerUpdateRequiredByReInvite() const override;
 
 private:
-    IMS_BOOL IsLocalSessionTimerRequired() const;
-    IMS_BOOL IsMinSEHeaderRequired() const;
-    IMS_BOOL IsRefresherParameterControlledOnEarlyUPDATE() const;
-    IMS_BOOL IsRequireHeaderRequired() const;
-    IMS_BOOL IsSessionExpiresHeaderRequired() const;
-    IMS_BOOL IsSessionRefreshRequired(IN CONST ISipConnection* piSC) const;
-    IMS_BOOL IsSessionTimerSupportedOnRemoteUA() const;
-    IMS_BOOL IsSessionTimerSupportedOnUAC() const;
+    inline IMS_BOOL IsLocalSessionTimerRequired() const
+    {
+        return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_LOCAL_TIMER_REQUIRED) != 0);
+    }
+    inline IMS_BOOL IsMinSeHeaderRequired() const
+    {
+        return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_MIN_SE) != 0);
+    }
+    inline IMS_BOOL IsRefresherParameterControlledOnEarlyUpdate() const
+    {
+        return ((m_nSipHeaders &
+                        SipConfigV::SESSION_HEADER_NO_REFRESHER_CONTROLLED_ON_EARLY_UPDATE) == 0);
+    }
+    inline IMS_BOOL IsRequireHeaderRequired() const
+    {
+        return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_TIMER_OPTION) != 0);
+    }
+    inline IMS_BOOL IsSessionExpiresHeaderRequired() const
+    {
+        return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_SESSION_EXPIRES) != 0);
+    }
+    IMS_BOOL IsSessionRefreshRequired(IN const ISipConnection* piSc) const;
+    inline IMS_BOOL IsSessionTimerSupportedOnRemoteUa() const
+    {
+        return IsTimerSupportedOnRemoteEnd(TIMER_SUPPORTED_ON_REMOTE_UA);
+    }
+    inline IMS_BOOL IsSessionTimerSupportedOnUac() const
+    {
+        return IsTimerSupportedOnRemoteEnd(TIMER_SUPPORTED_ON_INITIAL_INVITE) ||
+                IsTimerSupportedOnRemoteEnd(TIMER_SUPPORTED_ON_SESSION_UPDATE);
+    }
     void NegotiateRefresher(IN IMS_BOOL bTimerOptionSupported);
-    void UpdateProperties(IN CONST ISipConnection* piSC, IN IMS_BOOL bTimerOptionSupported,
+    void UpdateProperties(IN const ISipConnection* piSc, IN IMS_BOOL bTimerOptionSupported,
             IN IMS_BOOL bSent = IMS_FALSE);
 
     inline IMS_BOOL IsTimerSupportedOnRemoteEnd(IN IMS_SINT32 nFlag) const
     {
-        return (nTimerSupportedOnRemoteEnd & nFlag) != 0;
+        return (m_nTimerSupportedOnRemoteEnd & nFlag) != 0;
     }
     inline void ClearTimerSupportedOnRemoteEnd(IN IMS_SINT32 nFlag)
     {
-        nTimerSupportedOnRemoteEnd &= (~nFlag);
+        m_nTimerSupportedOnRemoteEnd &= (~nFlag);
     }
     inline void SetTimerSupportedOnRemoteEnd(IN IMS_SINT32 nFlag)
     {
-        nTimerSupportedOnRemoteEnd |= nFlag;
+        m_nTimerSupportedOnRemoteEnd |= nFlag;
     }
     inline void SetOrClearTimerSupportedOnRemoteEnd(IN IMS_BOOL bSet, IN IMS_SINT32 nFlag)
     {
         if (bSet)
         {
-            nTimerSupportedOnRemoteEnd |= nFlag;
+            m_nTimerSupportedOnRemoteEnd |= nFlag;
         }
         else
         {
-            nTimerSupportedOnRemoteEnd &= (~nFlag);
+            m_nTimerSupportedOnRemoteEnd &= (~nFlag);
         }
     }
 
@@ -107,31 +137,29 @@ private:
     static const IMS_CHAR STR_UAC[];
     static const IMS_CHAR STR_UAS[];
 
-    IMS_SINT32 nMinSE;
-    IMS_SINT32 nSessionInterval;
-    IMS_SINT32 nRefresher;
-    IMS_SINT32 nRefreshRequest;
-    IMS_BOOL bUPDATEAllowed;
+    IMS_SINT32 m_nMinSe;
+    IMS_SINT32 m_nSessionInterval;
+    IMS_SINT32 m_nRefresher;
+    IMS_SINT32 m_nRefreshRequest;
+    IMS_BOOL m_bUpdateMethodAllowed;
 
     enum
     {
-        // UAS: Incoming initial INVITE request
+        /// UAS: Incoming initial INVITE request
         TIMER_SUPPORTED_ON_INITIAL_INVITE = 0x0001,
-        // UAS: Incoming re-INVITE or UPDATE request (session update)
+        /// UAS: Incoming re-INVITE or UPDATE request (session update)
         TIMER_SUPPORTED_ON_SESSION_UPDATE = 0x0002,
-        // UAC/UAS: Most recent 200 OK response
+        /// UAC/UAS: Most recent 200 OK response
         TIMER_SUPPORTED_ON_REMOTE_UA = 0x0004,
-        // UAS: Temporary condition
+        /// UAS: Temporary condition
         TIMER_SUPPORTED_TEMPORARY_ON_INCOMING_INVITE = 0x4000,
         TIMER_SUPPORTED_TEMPORARY_ON_INCOMING_UPDATE = 0x8000
     };
 
-    IMS_SINT32 nTimerSupportedOnRemoteEnd;
-
+    IMS_SINT32 m_nTimerSupportedOnRemoteEnd;
     // SipConfigV :: SESSION_HEADER_XXX
-    IMS_SINT32 nSIPHeaders;
-
-    Service* pService;
+    IMS_SINT32 m_nSipHeaders;
+    Service* m_pService;
 };
 
-#endif  // _SESSION_REFRESH_HELPER_H_
+#endif

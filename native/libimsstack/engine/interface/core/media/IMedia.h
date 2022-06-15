@@ -1,5 +1,20 @@
-#ifndef _INTERFACE_MEDIA_H_
-#define _INTERFACE_MEDIA_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_MEDIA_H_
+#define INTERFACE_MEDIA_H_
 
 #include "media/IMediaDescriptor.h"
 
@@ -59,10 +74,9 @@ public:
      * After the ISession has been accepted or rejected, this proposed media should be
      * considered discarded.
      *
-     * @param bIMSExtension Flag to indicate that IMS extension is supported or not
      * @return Pointer to IMedia.
      */
-    virtual IMedia* GetProposal(IN IMS_BOOL bIMSExtension = IMS_TRUE) const = 0;
+    virtual IMedia* GetProposal() const = 0;
 
     /**
      * @brief Returns the current state of this IMedia.
@@ -105,8 +119,6 @@ public:
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     virtual IMS_RESULT SetDirection(IN IMS_SINT32 nDirection) = 0;
-
-    //// IMS extensions
 
     /**
      * @brief Returns the first media descriptor associated with this IMedia.
@@ -199,4 +211,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_MEDIA_H_
+#endif

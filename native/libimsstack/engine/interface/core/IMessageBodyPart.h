@@ -1,5 +1,20 @@
-#ifndef _INTERFACE_MESSAGE_BODY_PART_H_
-#define _INTERFACE_MESSAGE_BODY_PART_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_MESSAGE_BODY_PART_H_
+#define INTERFACE_MESSAGE_BODY_PART_H_
 
 #include "ByteArray.h"
 
@@ -29,7 +44,7 @@ public:
      * @param strName The header name, in full form
      * @return A string containing the header value or null if the header doesn't exist.
      */
-    virtual AString GetHeader(IN CONST AString& strName) const = 0;
+    virtual AString GetHeader(IN const AString& strName) const = 0;
 
     /**
      * @brief Sets the content to this IMessageBodyPart.
@@ -38,7 +53,7 @@ public:
      * @return If the content is successfully set, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetContent(IN CONST ByteArray& objContent) = 0;
+    virtual IMS_RESULT SetContent(IN const ByteArray& objContent) = 0;
 
     /**
      * @brief Sets a header to this IMessageBodyPart.
@@ -51,7 +66,7 @@ public:
      * @return If the header is successfully set, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetHeader(IN CONST AString& strName, IN CONST AString& strValue) = 0;
+    virtual IMS_RESULT SetHeader(IN const AString& strName, IN const AString& strValue) = 0;
 };
 
-#endif  // _INTERFACE_MESSAGE_BODY_PART_H_
+#endif

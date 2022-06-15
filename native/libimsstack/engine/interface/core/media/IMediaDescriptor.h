@@ -1,13 +1,27 @@
-#ifndef _INTERFACE_MEDIA_DESCRIPTOR_H_
-#define _INTERFACE_MEDIA_DESCRIPTOR_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_MEDIA_DESCRIPTOR_H_
+#define INTERFACE_MEDIA_DESCRIPTOR_H_
 
 #include "IPAddress.h"
-#include "SdpMedia.h"
+
 #include "SdpAttribute.h"
 #include "SdpBandwidth.h"
+#include "SdpMedia.h"
 #include "offeranswer/SdpMediaFormat.h"
-
-// IMS_SDP_PRECONDITION
 #include "offeranswer/SdpPrecondition.h"
 
 /**
@@ -61,7 +75,7 @@ public:
      * @param strAttribute Attribute to be added
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT AddAttribute(IN CONST AString& strAttribute) = 0;
+    virtual IMS_RESULT AddAttribute(IN const AString& strAttribute) = 0;
 
     /**
      * @brief Returns all attributes (a=) for the IMedia.
@@ -123,7 +137,7 @@ public:
      * @param strAttribute Attribute to be removed
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT RemoveAttribute(IN CONST AString& strAttribute) = 0;
+    virtual IMS_RESULT RemoveAttribute(IN const AString& strAttribute) = 0;
 
     /**
      * @brief Sets the proposed bandwidth (b=) to be used by the media.
@@ -139,7 +153,7 @@ public:
      * @param strBandwidthInfos List of bandwidth attributes to be set
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetBandwidthInfo(IN CONST IMSList<AString>& strBandwidthInfos) = 0;
+    virtual IMS_RESULT SetBandwidthInfo(IN const IMSList<AString>& strBandwidthInfos) = 0;
 
     /**
      * @brief Sets a title (i=) to the IMedia.
@@ -155,9 +169,7 @@ public:
      * @param strTitle Title value to be set
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetMediaTitle(IN CONST AString& strTitle) = 0;
-
-    //// IMS extensions
+    virtual IMS_RESULT SetMediaTitle(IN const AString& strTitle) = 0;
 
     /**
      * @brief Adds an attribute (a=) to the IMedia.
@@ -190,8 +202,8 @@ public:
      * @param strType Name of unknown attribute type
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT AddAttribute(IN IMS_SINT32 nType, IN CONST AString& strAttrValue,
-            IN CONST AString& strType = AString::ConstNull()) = 0;
+    virtual IMS_RESULT AddAttribute(IN IMS_SINT32 nType, IN const AString& strAttrValue,
+            IN const AString& strType = AString::ConstNull()) = 0;
 
     /**
      * @brief Adds an attribute (a=) to the IMedia.
@@ -229,7 +241,7 @@ public:
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT AddAttributeInt(IN IMS_SINT32 nType, IN IMS_SINT32 nAttrValue,
-            IN CONST AString& strType = AString::ConstNull()) = 0;
+            IN const AString& strType = AString::ConstNull()) = 0;
 
     /**
      * @brief Sets the proposed bandwidth (b=) to be used by the media.
@@ -250,7 +262,7 @@ public:
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT AddBandwidth(IN IMS_SINT32 nType, IN IMS_SINT32 nBandwidth,
-            IN CONST AString& strType = AString::ConstNull()) = 0;
+            IN const AString& strType = AString::ConstNull()) = 0;
 
     /**
      * @brief Returns the specified attribute (a=) for the IMedia.
@@ -271,7 +283,7 @@ public:
      * @return Attribute value or null if not present.
      */
     virtual const AString& GetAttribute(
-            IN IMS_SINT32 nType, IN CONST AString& strType = AString::ConstNull()) const = 0;
+            IN IMS_SINT32 nType, IN const AString& strType = AString::ConstNull()) const = 0;
 
     /**
      * @brief Returns the specified attributes (a=) for the IMedia.
@@ -291,7 +303,7 @@ public:
      * @return Attribute value or null if not present.
      */
     virtual IMSList<AString> GetAttributes(
-            IN IMS_SINT32 nType, IN CONST AString& strType = AString::ConstNull()) const = 0;
+            IN IMS_SINT32 nType, IN const AString& strType = AString::ConstNull()) const = 0;
 
     /**
      * @brief Returns the specified attribute (a=) for the IMedia.
@@ -313,7 +325,7 @@ public:
      * @return Attribute value as integer or INVALID_VALUE if not present.
      */
     virtual IMS_SINT32 GetAttributeInt(
-            IN IMS_SINT32 nType, IN CONST AString& strType = AString::ConstNull()) const = 0;
+            IN IMS_SINT32 nType, IN const AString& strType = AString::ConstNull()) const = 0;
 
     /**
      * @brief Returns the proposed bandwidth (b=) to be used by the media.
@@ -325,7 +337,7 @@ public:
      * @return Bandwidth value as integer or INVALID_VALUE if not present.
      */
     virtual IMS_SINT32 GetBandwidth(
-            IN IMS_SINT32 nType, IN CONST AString& strType = AString::ConstNull()) const = 0;
+            IN IMS_SINT32 nType, IN const AString& strType = AString::ConstNull()) const = 0;
 
     /**
      * @brief Returns the direction of the media.
@@ -369,7 +381,7 @@ public:
      * @param objAttribute Attribute to be removed
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT RemoveAttribute(IN CONST SdpAttribute& objAttribute) = 0;
+    virtual IMS_RESULT RemoveAttribute(IN const SdpAttribute& objAttribute) = 0;
 
     /**
      * @brief Removes an attribute (a=) form the IMedia.
@@ -395,8 +407,8 @@ public:
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT RemoveAttribute(IN IMS_SINT32 nType,
-            IN CONST AString& strAttrValue = AString::ConstNull(),
-            IN CONST AString& strType = AString::ConstNull()) = 0;
+            IN const AString& strAttrValue = AString::ConstNull(),
+            IN const AString& strType = AString::ConstNull()) = 0;
 
     /**
      * @brief Returns the specified media formats (rtpmap/fmtp/...) of the media.
@@ -413,7 +425,7 @@ public:
      * @param strValue Value of media format (payload type, '*', ...)
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT RemoveMediaFormat(IN IMS_SINT32 nType, IN CONST AString& strValue) = 0;
+    virtual IMS_RESULT RemoveMediaFormat(IN IMS_SINT32 nType, IN const AString& strValue) = 0;
 
     /**
      * @brief Sets the connection address of the media.
@@ -429,7 +441,7 @@ public:
      * @param strAddress Numeric IP address
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetConnectionAddress(IN CONST AString& strAddress) = 0;
+    virtual IMS_RESULT SetConnectionAddress(IN const AString& strAddress) = 0;
 
     /**
      * @brief Sets the direction of the media.
@@ -467,7 +479,7 @@ public:
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT SetMediaDescription(IN IMS_SINT32 nType, IN IMS_SINT32 nPort,
-            IN IMS_SINT32 nTransportProtocol, IN CONST AStringArray& objFormats) = 0;
+            IN IMS_SINT32 nTransportProtocol, IN const AStringArray& objFormats) = 0;
 
     /**
      * @brief This method will set/modify the format for this media.
@@ -485,7 +497,7 @@ public:
      * @param pMediaFormat Pointer to SdpMediaFormat; if rtpmap, then SdpAvCodec
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetMediaFormat(IN CONST SdpMediaFormat* pMediaFormat) = 0;
+    virtual IMS_RESULT SetMediaFormat(IN const SdpMediaFormat* pMediaFormat) = 0;
 
     /**
      * @brief This method will set/modify the format for this media.
@@ -502,14 +514,14 @@ public:
      *
      * @param nType Media format type; SdpMediaFormat::TYPE_RTP, ... SdpMediaFormat.h
      * @param strValue Value of media format (payload type, '*', ...)
-     * @param strAnyMAP Any MAP string for this media (rtpmap, ...) excluding the format\n
+     * @param strAnyMap Any MAP string for this media (rtpmap, ...) excluding the format\n
      *                  ("a=rtpmap:97 AMR/8000" -> "AMR/8000")
-     * @param strFMTP Format specific parameter for this media (fmtp) excluding the format\n
+     * @param strFmtp Format specific parameter for this media (fmtp) excluding the format\n
      *                ("a=fmtp:97 mode-set=12" -> "mode-set=12")
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetMediaFormat(IN IMS_SINT32 nType, IN CONST AString& strValue,
-            IN CONST AString& strAnyMAP, IN CONST AString& strFMTP) = 0;
+    virtual IMS_RESULT SetMediaFormat(IN IMS_SINT32 nType, IN const AString& strValue,
+            IN const AString& strAnyMap, IN const AString& strFmtp) = 0;
 
     /**
      * @brief Sets the port number of the media description field (m=) of the current SDP
@@ -600,7 +612,7 @@ public:
      * @note IMS_SDP_PRECONDITION
      */
     virtual IMS_RESULT SetPrecondition(
-            IN IMS_SINT32 nAttribute, IN CONST SdpPrecondition* pPrecondition) = 0;
+            IN IMS_SINT32 nAttribute, IN const SdpPrecondition* pPrecondition) = 0;
 
 public:
     /// Return value of integer value
@@ -610,4 +622,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_MEDIA_DESCRIPTOR_H_
+#endif

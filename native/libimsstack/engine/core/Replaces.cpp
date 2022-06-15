@@ -1,109 +1,112 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100415  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "TextParser.h"
+
 #include "Replaces.h"
 
 PUBLIC
 Replaces::Replaces() :
-        strCallId(AString::ConstNull()),
-        strFromTag(AString::ConstNull()),
-        strToTag(AString::ConstNull()),
-        bIsEarlyOnly(IMS_FALSE),
-        pDialog(IMS_NULL)
+        m_strCallId(AString::ConstNull()),
+        m_strFromTag(AString::ConstNull()),
+        m_strToTag(AString::ConstNull()),
+        m_bIsEarlyOnly(IMS_FALSE),
+        m_pDialog(IMS_NULL)
 {
 }
 
 PUBLIC
-Replaces::Replaces(IN CONST AString& strCallId_, IN CONST AString& strLocalTag_,
-        IN CONST AString& strRemoteTag_, IN IMS_BOOL bIsEarlyOnly_ /* = IMS_FALSE */) :
-        strCallId(strCallId_),
-        strFromTag(strLocalTag_),
-        strToTag(strRemoteTag_),
-        bIsEarlyOnly(bIsEarlyOnly_)
+Replaces::Replaces(IN const AString& strCallId, IN const AString& strLocalTag,
+        IN const AString& strRemoteTag, IN IMS_BOOL bIsEarlyOnly /*= IMS_FALSE*/) :
+        m_strCallId(strCallId),
+        m_strFromTag(strLocalTag),
+        m_strToTag(strRemoteTag),
+        m_bIsEarlyOnly(bIsEarlyOnly)
 {
-    pDialog = new Dialog(strCallId, strFromTag, strToTag);
+    m_pDialog = new Dialog(m_strCallId, m_strFromTag, m_strToTag);
 }
 
 PUBLIC
-Replaces::Replaces(IN CONST Replaces& objRHS) :
-        strCallId(objRHS.strCallId),
-        strFromTag(objRHS.strFromTag),
-        strToTag(objRHS.strToTag),
-        bIsEarlyOnly(objRHS.bIsEarlyOnly),
-        pDialog(IMS_NULL)
+Replaces::Replaces(IN const Replaces& other) :
+        m_strCallId(other.m_strCallId),
+        m_strFromTag(other.m_strFromTag),
+        m_strToTag(other.m_strToTag),
+        m_bIsEarlyOnly(other.m_bIsEarlyOnly),
+        m_pDialog(IMS_NULL)
 {
-    if (objRHS.pDialog != IMS_NULL)
+    if (other.m_pDialog != IMS_NULL)
     {
-        if (strToTag.Equals(objRHS.pDialog->GetLocalTag()))
-            pDialog = new Dialog(strCallId, strToTag, strFromTag);
+        if (m_strToTag.Equals(other.m_pDialog->GetLocalTag()))
+        {
+            m_pDialog = new Dialog(m_strCallId, m_strToTag, m_strFromTag);
+        }
         else
-            pDialog = new Dialog(strCallId, strFromTag, strToTag);
+        {
+            m_pDialog = new Dialog(m_strCallId, m_strFromTag, m_strToTag);
+        }
     }
 }
 
 PUBLIC
 Replaces::~Replaces()
 {
-    if (pDialog != IMS_NULL)
+    if (m_pDialog != IMS_NULL)
     {
-        delete pDialog;
-        pDialog = IMS_NULL;
+        delete m_pDialog;
+        m_pDialog = IMS_NULL;
     }
 }
 
 PUBLIC
-Replaces& Replaces::operator=(IN CONST Replaces& objRHS)
+Replaces& Replaces::operator=(IN const Replaces& other)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this != &objRHS)
+    if (this != &other)
     {
-        strCallId = objRHS.strCallId;
-        strFromTag = objRHS.strFromTag;
-        strToTag = objRHS.strToTag;
-        bIsEarlyOnly = objRHS.bIsEarlyOnly;
+        m_strCallId = other.m_strCallId;
+        m_strFromTag = other.m_strFromTag;
+        m_strToTag = other.m_strToTag;
+        m_bIsEarlyOnly = other.m_bIsEarlyOnly;
 
-        if (objRHS.pDialog != IMS_NULL)
+        if (other.m_pDialog != IMS_NULL)
         {
-            if (pDialog != IMS_NULL)
+            if (m_pDialog != IMS_NULL)
             {
-                delete pDialog;
-                pDialog = IMS_NULL;
+                delete m_pDialog;
+                m_pDialog = IMS_NULL;
             }
 
-            if (strToTag.Equals(objRHS.pDialog->GetLocalTag()))
-                pDialog = new Dialog(strCallId, strToTag, strFromTag);
+            if (m_strToTag.Equals(other.m_pDialog->GetLocalTag()))
+            {
+                m_pDialog = new Dialog(m_strCallId, m_strToTag, m_strFromTag);
+            }
             else
-                pDialog = new Dialog(strCallId, strFromTag, strToTag);
+            {
+                m_pDialog = new Dialog(m_strCallId, m_strFromTag, m_strToTag);
+            }
         }
     }
 
     return (*this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL Replaces::Create(IN CONST AString& strReplacesHeader, IN IMS_BOOL bUAS /* = IMS_TRUE */)
+IMS_BOOL Replaces::Create(IN const AString& strReplacesHeader, IN IMS_BOOL bUas /*= IMS_TRUE*/)
 {
     AString strReplaces = TextParser::DoPercentDecoding(strReplacesHeader);
     IMSList<AString> objTokens = strReplaces.Split(TextParser::CHAR_SEMICOLON);
-
-    //---------------------------------------------------------------------------------------------
 
     if (objTokens.GetSize() < 3)
     {
@@ -111,7 +114,7 @@ IMS_BOOL Replaces::Create(IN CONST AString& strReplacesHeader, IN IMS_BOOL bUAS 
     }
 
     // call-id
-    strCallId = objTokens.GetAt(0);
+    m_strCallId = objTokens.GetAt(0);
 
     // to-tag & from-tag
     for (IMS_UINT32 i = 1; i < objTokens.GetSize(); ++i)
@@ -122,158 +125,101 @@ IMS_BOOL Replaces::Create(IN CONST AString& strReplacesHeader, IN IMS_BOOL bUAS 
 
         if (strName.EqualsIgnoreCase("to-tag"))
         {
-            strToTag = strTemp.GetSubStr(nIndex + 1);
+            m_strToTag = strTemp.GetSubStr(nIndex + 1);
         }
         else if (strName.EqualsIgnoreCase("from-tag"))
         {
-            strFromTag = strTemp.GetSubStr(nIndex + 1);
+            m_strFromTag = strTemp.GetSubStr(nIndex + 1);
         }
         else if (strName.EqualsIgnoreCase("early-only"))
         {
-            bIsEarlyOnly = IMS_TRUE;
+            m_bIsEarlyOnly = IMS_TRUE;
         }
     }
 
-    if (strCallId.IsNULL() || strToTag.IsNULL() || strFromTag.IsNULL())
+    if (m_strCallId.IsNULL() || m_strToTag.IsNULL() || m_strFromTag.IsNULL())
     {
         return IMS_FALSE;
     }
 
-    if (pDialog != IMS_NULL)
+    if (m_pDialog != IMS_NULL)
     {
-        delete pDialog;
-        pDialog = IMS_NULL;
+        delete m_pDialog;
+        m_pDialog = IMS_NULL;
     }
 
-    if (bUAS)
-        pDialog = new Dialog(strCallId, strToTag, strFromTag);
+    if (bUas)
+    {
+        m_pDialog = new Dialog(m_strCallId, m_strToTag, m_strFromTag);
+    }
     else
-        pDialog = new Dialog(strCallId, strFromTag, strToTag);
+    {
+        m_pDialog = new Dialog(m_strCallId, m_strFromTag, m_strToTag);
+    }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL Replaces::Equals(IN CONST Replaces* pOther) const
+IMS_BOOL Replaces::Equals(IN const Replaces* pOther) const
 {
-    //---------------------------------------------------------------------------------------------
-
     if (pOther == IMS_NULL)
+    {
         return IMS_FALSE;
+    }
 
-    if (!strCallId.Equals(pOther->strCallId))
+    if (!m_strCallId.Equals(pOther->m_strCallId))
+    {
         return IMS_FALSE;
+    }
 
-    if (!strFromTag.Equals(pOther->strFromTag))
+    if (!m_strFromTag.Equals(pOther->m_strFromTag))
+    {
         return IMS_FALSE;
+    }
 
-    if (!strToTag.Equals(pOther->strToTag))
+    if (!m_strToTag.Equals(pOther->m_strToTag))
+    {
         return IMS_FALSE;
+    }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-const AString& Replaces::GetCallId() const
+IMS_BOOL Replaces::IsSameDialog(IN const Replaces* pOther) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return strCallId;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& Replaces::GetFromTag() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strFromTag;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& Replaces::GetToTag() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strToTag;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL Replaces::IsEarlyOnly() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return bIsEarlyOnly;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL Replaces::IsSameDialog(IN CONST Replaces* pOther) const
-{
-    //---------------------------------------------------------------------------------------------
-
     if (pOther == IMS_NULL)
+    {
         return IMS_FALSE;
+    }
 
-    if ((pDialog == IMS_NULL) || (pOther->pDialog == IMS_NULL))
+    if ((m_pDialog == IMS_NULL) || (pOther->m_pDialog == IMS_NULL))
+    {
         return IMS_FALSE;
+    }
 
-    return pDialog->Equals(pOther->pDialog);
+    return m_pDialog->Equals(pOther->m_pDialog);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AString Replaces::ToString(IN IMS_BOOL bPercentEncoding) const
 {
     AString strReplaces;
 
-    //---------------------------------------------------------------------------------------------
-
     if (bPercentEncoding)
     {
         // Check if '@' is present in Call-ID header
-        IMS_SINT32 nIndex = strCallId.GetIndexOf(TextParser::CHAR_AT);
+        IMS_SINT32 nIndex = m_strCallId.GetIndexOf(TextParser::CHAR_AT);
 
         if (nIndex == AString::NPOS)
         {
-            strReplaces.Append(strCallId);
+            strReplaces.Append(m_strCallId);
         }
         else
         {
-            AString strUserPart = strCallId.GetSubStr(0, nIndex);
-            AString strDomainPart = strCallId.GetSubStr(nIndex + 1);
+            AString strUserPart = m_strCallId.GetSubStr(0, nIndex);
+            AString strDomainPart = m_strCallId.GetSubStr(nIndex + 1);
 
             strReplaces.Append(strUserPart);
             strReplaces.Append("%40");
@@ -281,20 +227,20 @@ AString Replaces::ToString(IN IMS_BOOL bPercentEncoding) const
         }
 
         strReplaces.Append("%3Bfrom-tag%3D");
-        strReplaces.Append(strFromTag);
+        strReplaces.Append(m_strFromTag);
         strReplaces.Append("%3Bto-tag%3D");
-        strReplaces.Append(strToTag);
+        strReplaces.Append(m_strToTag);
     }
     else
     {
-        strReplaces.Append(strCallId);
+        strReplaces.Append(m_strCallId);
         strReplaces.Append(";from-tag=");
-        strReplaces.Append(strFromTag);
+        strReplaces.Append(m_strFromTag);
         strReplaces.Append(";to-tag=");
-        strReplaces.Append(strToTag);
+        strReplaces.Append(m_strToTag);
     }
 
-    if (bIsEarlyOnly)
+    if (m_bIsEarlyOnly)
     {
         strReplaces.Append(";early-only");
     }

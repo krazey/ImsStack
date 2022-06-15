@@ -1,120 +1,89 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091201  toastops@                 Created
-    </table>
-
-    Description
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "IMSLib.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "IMSLib.h"
-#include "private/ConfigurationManager.h"
-#include "private/SipConfigV.h"
-#include "private/MediaConfig.h"
+
 #include "private/CapProperty.h"
-#include "SdpSessionDescription.h"
-#include "SdpMediaDescription.h"
-#include "ServiceProtocol.h"
+#include "private/ConfigurationManager.h"
+#include "private/MediaConfig.h"
+#include "private/SipConfigV.h"
+
+#include "Capabilities.h"
+#include "IOnCapabilitiesListener.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
+#include "ImsCore.h"
+#include "RemoteCapabilities.h"
+#include "SdpSessionDescription.h"
+#include "SdpMediaDescription.h"
+#include "Service.h"
+#include "ServiceManager.h"
+#include "ServiceProtocol.h"
 #include "Sip.h"
+#include "SipConfigProxy.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
-#include "SipConfigProxy.h"
 #include "base/Ims.h"
-#include "ImsCore.h"
-#include "ServiceManager.h"
-#include "Service.h"
 #include "util/CallerCapability.h"
-#include "IOnCapabilitiesListener.h"
-#include "RemoteCapabilities.h"
-#include "Capabilities.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC GLOBAL const IMS_CHAR Capabilities::DEFAULT_MEDIA_TYPE[] = "application/sdp";
 
 PUBLIC
-Capabilities::Capabilities(IN Service* pService_) :
-        ServiceMethod(pService_),
-        nState(STATE_INACTIVE),
-        objRemoteUserIdentities(IMSList<AString>()),
-        piListener(IMS_NULL),
-        pRemoteCapabilities(IMS_NULL)
+Capabilities::Capabilities(IN Service* pService) :
+        ServiceMethod(pService),
+        m_nState(STATE_INACTIVE),
+        m_objRemoteUserIdentities(IMSList<AString>()),
+        m_piListener(IMS_NULL),
+        m_pRemoteCapabilities(IMS_NULL)
 {
 }
 
 PUBLIC VIRTUAL Capabilities::~Capabilities()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pRemoteCapabilities != IMS_NULL)
+    if (m_pRemoteCapabilities != IMS_NULL)
     {
-        delete pRemoteCapabilities;
-        pRemoteCapabilities = IMS_NULL;
+        delete m_pRemoteCapabilities;
+        m_pRemoteCapabilities = IMS_NULL;
     }
 
-    objRemoteUserIdentities.Clear();
+    m_objRemoteUserIdentities.Clear();
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL void Capabilities::Destroy()
-{
-    //---------------------------------------------------------------------------------------------
-
-    ServiceMethod::Destroy();
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMSList<AString> Capabilities::GetRemoteUserIdentities() const
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_ACTIVE)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMSList<AString>();
     }
 
-    return objRemoteUserIdentities;
+    return m_objRemoteUserIdentities;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_SINT32 Capabilities::GetState() const
+/**
+ * @brief Checks if the remote endpoint has the needed capabilities
+ *        of the IMS application with the given argument.
+ */
+PUBLIC VIRTUAL IMS_BOOL Capabilities::HasCapabilities(IN const AString& strConnection) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return nState;
-}
-
-/*
-
-Checks if the remote endpoint has the needed capabilities
-of the IMS application with the given argument.
-
-*/
-PUBLIC VIRTUAL IMS_BOOL Capabilities::HasCapabilities(IN CONST AString& strConnection) const
-{
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_ACTIVE)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -127,7 +96,7 @@ PUBLIC VIRTUAL IMS_BOOL Capabilities::HasCapabilities(IN CONST AString& strConne
         return IMS_FALSE;
     }
 
-    if (pRemoteCapabilities == IMS_NULL)
+    if (m_pRemoteCapabilities == IMS_NULL)
     {
         IMS_TRACE_E(0, "No remote capabilities", 0, 0, 0);
 
@@ -179,7 +148,7 @@ PUBLIC VIRTUAL IMS_BOOL Capabilities::HasCapabilities(IN CONST AString& strConne
     const AppConfig* pAppConfig = pConfigMngr->GetAppConfig(strAppId, GetSlotId());
 
     // Check if the capabilities are compatible with the specified application.
-    IMS_BOOL bSupported = pRemoteCapabilities->IsCompatible(pAppConfig, strServiceId);
+    IMS_BOOL bSupported = m_pRemoteCapabilities->IsCompatible(pAppConfig, strServiceId);
 
     if (bSupported)
     {
@@ -193,17 +162,10 @@ PUBLIC VIRTUAL IMS_BOOL Capabilities::HasCapabilities(IN CONST AString& strConne
     return bSupported;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT Capabilities::QueryCapabilities(IN IMS_BOOL bSDPInRequest,
-        IN IMS_BOOL bContactInRequest /* = IMS_TRUE */, IN IMS_BOOL bCheckSupport /* = IMS_TRUE */)
+IMS_RESULT Capabilities::QueryCapabilities(IN IMS_BOOL bSdpInRequest,
+        IN IMS_BOOL bContactInRequest /*= IMS_TRUE*/, IN IMS_BOOL bCheckSupport /*= IMS_TRUE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsServiceOpen())
     {
         Ims::SetLastError(ImsError::SERVICE_CLOSED);
@@ -218,35 +180,35 @@ IMS_RESULT Capabilities::QueryCapabilities(IN IMS_BOOL bSDPInRequest,
 
     // Create new connection and get SipMessage
     ISipDialog* piDialog = GetDialog();
-    ISipClientConnection* piSCC = IMS_NULL;
+    ISipClientConnection* piScc = IMS_NULL;
 
     if (piDialog == IMS_NULL)
     {
-        piSCC = CreateConnection(SipMethod(SipMethod::OPTIONS));
+        piScc = CreateConnection(SipMethod(SipMethod::OPTIONS));
     }
     else
     {
-        piSCC = CreateConnection(piDialog, SipMethod(SipMethod::OPTIONS));
+        piScc = CreateConnection(piDialog, SipMethod(SipMethod::OPTIONS));
     }
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating an OPTIONS SIP connection failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
 #if 0
     // Sets Expires header
-    if (piSIPMsg->SetHeader(ISipHeader::EXPIRES_SEC, "0") != IMS_SUCCESS)
+    if (piSipMsg->SetHeader(ISipHeader::EXPIRES_SEC, "0") != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting Expires header failed", 0, 0, 0);
         goto EXIT_QueryCapabilities;
     }
 
     // Sets Accept header
-    if (piSIPMsg->PrependHeader(ISipHeader::ACCEPT, DEFAULT_MEDIA_TYPE) != IMS_SUCCESS)
+    if (piSipMsg->PrependHeader(ISipHeader::ACCEPT, DEFAULT_MEDIA_TYPE) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting Accept header failed", 0, 0, 0);
         goto EXIT_QueryCapabilities;
@@ -257,50 +219,50 @@ IMS_RESULT Capabilities::QueryCapabilities(IN IMS_BOOL bSDPInRequest,
     if (bContactInRequest)
     {
         AString strContactHeader;
-        IMS_BOOL bIsContactGRUU = IMS_FALSE;
+        IMS_BOOL bIsContactGruu = IMS_FALSE;
 
-        if (CreateContactHeader(strContactHeader, bIsContactGRUU))
+        if (CreateContactHeader(strContactHeader, bIsContactGruu))
         {
-            if (piSIPMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
+            if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
             {
                 IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
                 goto EXIT_QueryCapabilities;
             }
 
-            const AString strGRUU(Sip::STR_GRUU);
+            const AString strGruu(Sip::STR_GRUU);
 
-            if (bIsContactGRUU && !piSIPMsg->IsOptionSupported(strGRUU))
+            if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
             {
-                piSIPMsg->AddHeader(ISipHeader::SUPPORTED, strGRUU);
+                piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
             }
         }
     }
 
     // Set SDP
-    if (bSDPInRequest)
+    if (bSdpInRequest)
     {
         // Create SDP for the response to OPTIONS request
-        AString strSDP;
+        AString strSdp;
 
-        if (!CreateSDP(strSDP, bCheckSupport, IMS_TRUE))
+        if (!CreateSdp(strSdp, bCheckSupport, IMS_TRUE))
         {
             IMS_TRACE_E(0, "Creating SDP message for OPTIONS request failed", 0, 0, 0);
             goto EXIT_QueryCapabilities;
         }
 
-        ISipMessageBodyPart* piSIPBodyPart = piSIPMsg->CreateSdpBodyPart();
+        ISipMessageBodyPart* piSipBodyPart = piSipMsg->CreateSdpBodyPart();
 
-        if (piSIPBodyPart == IMS_NULL)
+        if (piSipBodyPart == IMS_NULL)
         {
             goto EXIT_QueryCapabilities;
         }
 
-        piSIPBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, DEFAULT_MEDIA_TYPE);
-        piSIPBodyPart->SetContent(strSDP);
+        piSipBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, DEFAULT_MEDIA_TYPE);
+        piSipBodyPart->SetContent(strSdp);
     }
 
     // Send OPTIONS request to the network
-    if (!SendNUpdateRequest(IMessage::CAPABILITIES_QUERY, piSCC))
+    if (!SendNUpdateRequest(IMessage::CAPABILITIES_QUERY, piScc))
     {
         goto EXIT_QueryCapabilities;
     }
@@ -310,15 +272,13 @@ IMS_RESULT Capabilities::QueryCapabilities(IN IMS_BOOL bSDPInRequest,
     return IMS_SUCCESS;
 
 EXIT_QueryCapabilities:
-    piSCC->Close();
+    piScc->Close();
     return IMS_FAILURE;
 }
 
 PUBLIC
 IMS_RESULT Capabilities::QueryCapabilitiesEx()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsServiceOpen())
     {
         Ims::SetLastError(ImsError::SERVICE_CLOSED);
@@ -333,25 +293,25 @@ IMS_RESULT Capabilities::QueryCapabilitiesEx()
 
     // Create new connection and get SipMessage
     ISipDialog* piDialog = GetDialog();
-    ISipClientConnection* piSCC = IMS_NULL;
+    ISipClientConnection* piScc = IMS_NULL;
 
     if (piDialog == IMS_NULL)
     {
-        piSCC = CreateConnection(SipMethod(SipMethod::OPTIONS));
+        piScc = CreateConnection(SipMethod(SipMethod::OPTIONS));
     }
     else
     {
-        piSCC = CreateConnection(piDialog, SipMethod(SipMethod::OPTIONS));
+        piScc = CreateConnection(piDialog, SipMethod(SipMethod::OPTIONS));
     }
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating an OPTIONS SIP connection failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
     // Send OPTIONS request to the network
-    if (!SendNUpdateRequest(IMessage::CAPABILITIES_QUERY, piSCC))
+    if (!SendNUpdateRequest(IMessage::CAPABILITIES_QUERY, piScc))
     {
         goto EXIT_QueryCapabilities;
     }
@@ -361,32 +321,13 @@ IMS_RESULT Capabilities::QueryCapabilitiesEx()
     return IMS_SUCCESS;
 
 EXIT_QueryCapabilities:
-    piSCC->Close();
+    piScc->Close();
     return IMS_FAILURE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL void Capabilities::SetListener(IN IOnCapabilitiesListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->piListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_RESULT Capabilities::Accept(
-        IN IMS_BOOL bFeatureInContact /* = IMS_TRUE */, IN IMS_BOOL bCheckSupport /* = IMS_TRUE */)
+        IN IMS_BOOL bFeatureInContact /*= IMS_TRUE*/, IN IMS_BOOL bCheckSupport /*= IMS_TRUE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsServiceOpen())
     {
         Ims::SetLastError(ImsError::SERVICE_CLOSED);
@@ -399,24 +340,24 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Accept(
         return IMS_FAILURE;
     }
 
-    ISipServerConnection* piSSC = GetServerConnection(IMessage::CAPABILITIES_QUERY);
+    ISipServerConnection* piSsc = GetServerConnection(IMessage::CAPABILITIES_QUERY);
 
-    if (piSSC == IMS_NULL)
+    if (piSsc == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
     // Send a 200 OK to OPTIONS request
-    if (CreateResponse(piSSC, SipStatusCode::SC_200) == IMS_FALSE)
+    if (CreateResponse(piSsc, SipStatusCode::SC_200) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Initializing the response to OPTIONS request failed", 0, 0, 0);
     }
 
     // Now, the variable, piSIPMsg will be used for OPTIONS response message
-    ISipMessage* piSIPMsg = piSSC->GetMessage();
+    ISipMessage* piSipMsg = piSsc->GetMessage();
 
     // Sets Accept header
-    if (piSIPMsg->PrependHeader(ISipHeader::ACCEPT, DEFAULT_MEDIA_TYPE) != IMS_SUCCESS)
+    if (piSipMsg->PrependHeader(ISipHeader::ACCEPT, DEFAULT_MEDIA_TYPE) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting Accept header failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -428,44 +369,44 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Accept(
 
     // Sets Contact header with all the service's capability in this device.
     AString strContactHeader;
-    IMS_BOOL bIsContactGRUU = IMS_FALSE;
+    IMS_BOOL bIsContactGruu = IMS_FALSE;
 
-    if (CreateContactHeader(strContactHeader, bIsContactGRUU, bFeatureInContact))
+    if (CreateContactHeader(strContactHeader, bIsContactGruu, bFeatureInContact))
     {
-        if (piSIPMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
+        if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
             return IMS_FAILURE;
         }
 
-        const AString strGRUU(Sip::STR_GRUU);
+        const AString strGruu(Sip::STR_GRUU);
 
-        if (bIsContactGRUU && !piSIPMsg->IsOptionSupported(strGRUU))
+        if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
         {
-            piSIPMsg->AddHeader(ISipHeader::SUPPORTED, strGRUU);
+            piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
         }
     }
 
     // Create SDP for the response to OPTIONS request
-    AString strSDP;
+    AString strSdp;
 
-    if (!CreateSDP(strSDP, bCheckSupport))
+    if (!CreateSdp(strSdp, bCheckSupport))
     {
         IMS_TRACE_E(0, "Creating SDP message for OPTIONS response failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    ISipMessageBodyPart* piSIPBodyPart = piSIPMsg->CreateSdpBodyPart();
+    ISipMessageBodyPart* piSipBodyPart = piSipMsg->CreateSdpBodyPart();
 
-    if (piSIPBodyPart == IMS_NULL)
+    if (piSipBodyPart == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
-    piSIPBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, DEFAULT_MEDIA_TYPE);
-    piSIPBodyPart->SetContent(strSDP);
+    piSipBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, DEFAULT_MEDIA_TYPE);
+    piSipBodyPart->SetContent(strSdp);
 
-    if (!SendNUpdateResponse(IMessage::CAPABILITIES_QUERY, piSSC))
+    if (!SendNUpdateResponse(IMessage::CAPABILITIES_QUERY, piSsc))
     {
         IMS_TRACE_E(0, "Accepting Capabilities failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -479,15 +420,8 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Accept(
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_RESULT Capabilities::AcceptEx()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsServiceOpen())
     {
         Ims::SetLastError(ImsError::SERVICE_CLOSED);
@@ -500,15 +434,15 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::AcceptEx()
         return IMS_FAILURE;
     }
 
-    ISipServerConnection* piSSC = GetServerConnection(IMessage::CAPABILITIES_QUERY);
+    ISipServerConnection* piSsc = GetServerConnection(IMessage::CAPABILITIES_QUERY);
 
-    if (piSSC == IMS_NULL)
+    if (piSsc == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
     // Send a 200 OK to OPTIONS request
-    if (CreateResponse(piSSC, SipStatusCode::SC_200) == IMS_FALSE)
+    if (CreateResponse(piSsc, SipStatusCode::SC_200) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Initializing the response to OPTIONS request failed", 0, 0, 0);
     }
@@ -518,7 +452,7 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::AcceptEx()
     // Accept-Language headers
     // Supported headers
 
-    if (!SendNUpdateResponse(IMessage::CAPABILITIES_QUERY, piSSC))
+    if (!SendNUpdateResponse(IMessage::CAPABILITIES_QUERY, piSsc))
     {
         IMS_TRACE_E(0, "Accepting Capabilities failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -532,16 +466,9 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::AcceptEx()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_RESULT Capabilities::Reject(
-        IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nRetryAfter /* = 0 */)
+        IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nRetryAfter /*= 0*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsServiceOpen())
     {
         Ims::SetLastError(ImsError::SERVICE_CLOSED);
@@ -554,19 +481,21 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Reject(
         return IMS_FAILURE;
     }
 
-    ISipServerConnection* piSSC = GetServerConnection(IMessage::CAPABILITIES_QUERY);
+    ISipServerConnection* piSsc = GetServerConnection(IMessage::CAPABILITIES_QUERY);
 
-    if (piSSC == IMS_NULL)
+    if (piSsc == IMS_NULL)
+    {
         return IMS_FAILURE;
+    }
 
     // Send a failure final response to OPTIONS request
-    if (CreateResponse(piSSC, nStatusCode) == IMS_FALSE)
+    if (CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Initializing the response to OPTIONS request failed", 0, 0, 0);
     }
 
     // Now, the variable, piSIPMsg will be used for OPTIONS response message
-    ISipMessage* piSIPMsg = piSSC->GetMessage();
+    ISipMessage* piSipMsg = piSsc->GetMessage();
 
     if (nRetryAfter > 0)
     {
@@ -574,7 +503,7 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Reject(
 
         strRetryAfter.SetNumber(nRetryAfter);
 
-        piSIPMsg->AddHeader(ISipHeader::RETRY_AFTER_SEC, strRetryAfter);
+        piSipMsg->AddHeader(ISipHeader::RETRY_AFTER_SEC, strRetryAfter);
     }
 
     // Accept headers
@@ -584,25 +513,25 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Reject(
 
     // Sets Contact header with all the service's capability in this device.
     AString strContactHeader;
-    IMS_BOOL bIsContactGRUU = IMS_FALSE;
+    IMS_BOOL bIsContactGruu = IMS_FALSE;
 
-    if (CreateContactHeader(strContactHeader, bIsContactGRUU, IMS_FALSE))
+    if (CreateContactHeader(strContactHeader, bIsContactGruu, IMS_FALSE))
     {
-        if (piSIPMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
+        if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
             return IMS_FAILURE;
         }
 
-        const AString strGRUU(Sip::STR_GRUU);
+        const AString strGruu(Sip::STR_GRUU);
 
-        if (bIsContactGRUU && !piSIPMsg->IsOptionSupported(strGRUU))
+        if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
         {
-            piSIPMsg->AddHeader(ISipHeader::SUPPORTED, strGRUU);
+            piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
         }
     }
 
-    if (!SendNUpdateResponse(IMessage::CAPABILITIES_QUERY, piSSC))
+    if (!SendNUpdateResponse(IMessage::CAPABILITIES_QUERY, piSsc))
     {
         IMS_TRACE_E(0, "Rejecting Capabilities failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -616,21 +545,17 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Reject(
     return IMS_SUCCESS;
 }
 
-/*
- This method handles the incoming OPTIONS request within a dialog.
-This OPTIONS request received within a dialog generates a 200 (OK) response
-that is identical to one constructed outside a dialog and does not have
-any impact on the dialog.
-
-Remarks
-
-*/
-PUBLIC GLOBAL IMS_RESULT Capabilities::HandleOPTIONSRequestWithinDialog(
-        IN Service* pService, IN CONST Method* pOwnerMethod, IN ISipServerConnection* piSSC)
+/**
+ * @brief This method handles the incoming OPTIONS request within a dialog.
+ *
+ * This OPTIONS request received within a dialog generates a 200 (OK) response
+ * that is identical to one constructed outside a dialog and does not have
+ * any impact on the dialog.
+ */
+PUBLIC GLOBAL IMS_RESULT Capabilities::HandleOptionsRequestWithinDialog(
+        IN Service* pService, IN const Method* pOwnerMethod, IN ISipServerConnection* piSsc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if ((pService == IMS_NULL) || (piSSC == IMS_NULL))
+    if ((pService == IMS_NULL) || (piSsc == IMS_NULL))
     {
         return IMS_FAILURE;
     }
@@ -639,8 +564,8 @@ PUBLIC GLOBAL IMS_RESULT Capabilities::HandleOPTIONSRequestWithinDialog(
 
     if (pCapabilities == IMS_NULL)
     {
-        pService->SendResponse(piSSC, SipStatusCode::SC_488);
-        piSSC->Close();
+        pService->SendResponse(piSsc, SipStatusCode::SC_488);
+        piSsc->Close();
 
         IMS_TRACE_E(0, "Creating Capabilities failed", 0, 0, 0);
         return IMS_SUCCESS;
@@ -648,15 +573,15 @@ PUBLIC GLOBAL IMS_RESULT Capabilities::HandleOPTIONSRequestWithinDialog(
 
     if (!pCapabilities->InitMethod(pOwnerMethod, IMS_FALSE))
     {
-        pService->SendResponse(piSSC, SipStatusCode::SC_488);
-        piSSC->Close();
+        pService->SendResponse(piSsc, SipStatusCode::SC_488);
+        piSsc->Close();
         delete pCapabilities;
 
         IMS_TRACE_E(0, "Initializing Capabilities failed", 0, 0, 0);
         return IMS_SUCCESS;
     }
 
-    if (!pCapabilities->ServerConnection_NotifyRequest(piSSC))
+    if (!pCapabilities->ServerConnection_NotifyRequest(piSsc))
     {
         delete pCapabilities;
 
@@ -667,53 +592,35 @@ PUBLIC GLOBAL IMS_RESULT Capabilities::HandleOPTIONSRequestWithinDialog(
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_BOOL Capabilities::DispatchMessage(IN IMSMSG& objMSG)
+PRIVATE VIRTUAL IMS_BOOL Capabilities::DispatchMessage(IN ImsMessage& objMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    switch (objMSG.GetName())
+    switch (objMsg.GetName())
     {
         case AMSG_CAPABILITY_QUERY_RECEIVED:
             GetService()->HandleCapabilityQueryReceived(this);
             return IMS_TRUE;
-
         case AMSG_CAPABILITY_QUERY_DELIVERED:
-            if (piListener != IMS_NULL)
+            if (m_piListener != IMS_NULL)
             {
-                piListener->OnCapabilities_QueryDelivered(this);
+                m_piListener->OnCapabilities_QueryDelivered(this);
             }
             return IMS_TRUE;
-
         case AMSG_CAPABILITY_QUERY_DELIVERY_FAILED:
-            if (piListener != IMS_NULL)
+            if (m_piListener != IMS_NULL)
             {
-                piListener->OnCapabilities_QueryDeliveryFailed(this);
+                m_piListener->OnCapabilities_QueryDeliveryFailed(this);
             }
             return IMS_TRUE;
-
         default:
             break;
     }
 
-    return EngineActivity::DispatchMessage(objMSG);
+    return EngineActivity::DispatchMessage(objMsg);
 }
 
-/*
-
-Remarks
-
-*/
-// IMS_AUTH_SIP_DIGEST
-PRIVATE VIRTUAL IMS_BOOL Capabilities::SendRequestToChallenge(IN ISipClientConnection* piSCC)
+PRIVATE VIRTUAL IMS_BOOL Capabilities::SendRequestToChallenge(IN ISipClientConnection* piScc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -721,30 +628,23 @@ PRIVATE VIRTUAL IMS_BOOL Capabilities::SendRequestToChallenge(IN ISipClientConne
     // Clear the connection to preserve the SIP connection
     ClearConnection(IMessage::CAPABILITIES_QUERY);
 
-    if (!SendNUpdateRequestEx(IMessage::CAPABILITIES_QUERY, piSCC, MESSAGE_CLASS_RESUBMIT))
+    if (!SendNUpdateRequestEx(IMessage::CAPABILITIES_QUERY, piScc, MESSAGE_CLASS_RESUBMIT))
     {
         // Revert the SIP connection
-        UpdateConnection(IMessage::CAPABILITIES_QUERY, piSCC);
+        UpdateConnection(IMessage::CAPABILITIES_QUERY, piScc);
         return IMS_FALSE;
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_BOOL Capabilities::NotifySIPRequest(IN ISipServerConnection* piSSC)
+PRIVATE VIRTUAL IMS_BOOL Capabilities::NotifySipRequest(IN ISipServerConnection* piSsc)
 {
-    ISipMessage* piSIPMsg = piSSC->GetMessage();
-
-    //---------------------------------------------------------------------------------------------
+    ISipMessage* piSipMsg = piSsc->GetMessage();
 
     IMS_TRACE_I("Capabilities - OPTIONS REQUEST RECEIVED ...", 0, 0, 0);
 
-    if (!UpdateRequestOnReceived(IMessage::CAPABILITIES_QUERY, piSSC))
+    if (!UpdateRequestOnReceived(IMessage::CAPABILITIES_QUERY, piSsc))
     {
         IMS_TRACE_E(0, "Updating SIP message failed", 0, 0, 0);
     }
@@ -767,19 +667,19 @@ PRIVATE VIRTUAL IMS_BOOL Capabilities::NotifySIPRequest(IN ISipServerConnection*
     }
 
     AString strContactHeader;
-    AString strSDP;
-    ISipMessageBodyPart* piSIPBodyPart;
-    IMS_BOOL bIsContactGRUU = IMS_FALSE;
+    AString strSdp;
+    ISipMessageBodyPart* piSipBodyPart;
+    IMS_BOOL bIsContactGruu = IMS_FALSE;
 
     // Send a 200 OK to OPTIONS request
-    if (CreateResponse(piSSC, SipStatusCode::SC_200) == IMS_FALSE)
+    if (CreateResponse(piSsc, SipStatusCode::SC_200) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Initializing the response to OPTIONS request failed", 0, 0, 0);
-        goto EXIT_NotifySIPRequest;
+        goto EXIT_NotifySipRequest;
     }
 
     // Now, the variable, piSIPMsg will be used for OPTIONS response message
-    piSIPMsg = piSSC->GetMessage();
+    piSipMsg = piSsc->GetMessage();
 
     // Accept headers
     // Accept-Encoding headers
@@ -788,48 +688,48 @@ PRIVATE VIRTUAL IMS_BOOL Capabilities::NotifySIPRequest(IN ISipServerConnection*
 
     // Sets Contact header with all the service's capability in this device.
 
-    if (CreateContactHeader(strContactHeader, bIsContactGRUU))
+    if (CreateContactHeader(strContactHeader, bIsContactGruu))
     {
-        if (piSIPMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
+        if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
-            goto EXIT_NotifySIPRequest;
+            goto EXIT_NotifySipRequest;
         }
 
-        const AString strGRUU(Sip::STR_GRUU);
+        const AString strGruu(Sip::STR_GRUU);
 
-        if (bIsContactGRUU && !piSIPMsg->IsOptionSupported(strGRUU))
+        if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
         {
-            piSIPMsg->AddHeader(ISipHeader::SUPPORTED, strGRUU);
+            piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
         }
     }
 
     // Create SDP for the response to OPTIONS request
-    if (!CreateSDP(strSDP))
+    if (!CreateSdp(strSdp))
     {
         IMS_TRACE_E(0, "Creating SDP message for OPTIONS response failed", 0, 0, 0);
-        goto EXIT_NotifySIPRequest;
+        goto EXIT_NotifySipRequest;
     }
 
-    piSIPBodyPart = piSIPMsg->CreateSdpBodyPart();
+    piSipBodyPart = piSipMsg->CreateSdpBodyPart();
 
-    if (piSIPBodyPart == IMS_NULL)
+    if (piSipBodyPart == IMS_NULL)
     {
-        goto EXIT_NotifySIPRequest;
+        goto EXIT_NotifySipRequest;
     }
 
-    piSIPBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, DEFAULT_MEDIA_TYPE);
-    piSIPBodyPart->SetContent(strSDP);
+    piSipBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, DEFAULT_MEDIA_TYPE);
+    piSipBodyPart->SetContent(strSdp);
 
-    if (!SendNUpdateResponse(IMessage::CAPABILITIES_QUERY, piSSC))
+    if (!SendNUpdateResponse(IMessage::CAPABILITIES_QUERY, piSsc))
     {
         IMS_TRACE_E(0, "Accepting Capabilities by engine failed", 0, 0, 0);
-        goto EXIT_NotifySIPRequest;
+        goto EXIT_NotifySipRequest;
     }
 
     SetState(STATE_ACTIVE);
 
-EXIT_NotifySIPRequest:
+EXIT_NotifySipRequest:
 
     IMS_TRACE_I("INCOMING OPTIONS REQUEST HAS BEEN HANDLED BY ENGINE", 0, 0, 0);
 
@@ -841,19 +741,12 @@ EXIT_NotifySIPRequest:
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void Capabilities::NotifySIPResponse(IN ISipClientConnection* piSCC)
+PRIVATE VIRTUAL void Capabilities::NotifySipResponse(IN ISipClientConnection* piScc)
 {
-    IMS_SINT32 nStatusCode = piSCC->GetStatusCode();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
     // Add the response message received
-    UpdateResponseOnReceived(IMessage::CAPABILITIES_QUERY, piSCC);
+    UpdateResponseOnReceived(IMessage::CAPABILITIES_QUERY, piScc);
 
     // Handle the response to OPTIONS request ...
     if (SipStatusCode::Is1XX(nStatusCode))
@@ -866,7 +759,7 @@ PRIVATE VIRTUAL void Capabilities::NotifySIPResponse(IN ISipClientConnection* pi
         // AUTH_SIP_DIGEST {
         // In case of other method except for REGISTER,
         // the UE only supports the authentication algorithm, MD5
-        if (RespondToChallenge(piSCC))
+        if (RespondToChallenge(piScc))
         {
             return;
         }
@@ -876,7 +769,7 @@ PRIVATE VIRTUAL void Capabilities::NotifySIPResponse(IN ISipClientConnection* pi
     // Check the status code
     if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
-        HandleCapabilities(piSCC);
+        HandleCapabilities(piScc);
 
         CloseConnection(IMessage::CAPABILITIES_QUERY);
 
@@ -892,24 +785,17 @@ PRIVATE VIRTUAL void Capabilities::NotifySIPResponse(IN ISipClientConnection* pi
     }
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void Capabilities::NotifySIPError(
-        IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage)
+PRIVATE VIRTUAL void Capabilities::NotifySipError(
+        IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
 {
-    const SipMethod& objMethod = piSC->GetMethod();
-
-    //---------------------------------------------------------------------------------------------
+    const SipMethod& objMethod = piSc->GetMethod();
 
     (void)nCode;
     (void)strMessage;
 
     if (!objMethod.Equals(SipMethod::OPTIONS))
     {
-        piSC->Close();
+        piSc->Close();
         return;
     }
 
@@ -919,19 +805,12 @@ PRIVATE VIRTUAL void Capabilities::NotifySIPError(
     PostMessage(AMSG_CAPABILITY_QUERY_DELIVERY_FAILED, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
-        OUT IMS_BOOL& bIsContactGRUU, IN IMS_BOOL bWithFeature /* = IMS_TRUE */) const
+        OUT IMS_BOOL& bIsContactGruu, IN IMS_BOOL bWithFeature /*= IMS_TRUE*/) const
 {
     IMSList<Service*> objServices = ServiceManager::GetInstance()->GetServices(GetSlotId());
-    CallerCapability objCC(0);
-
-    //---------------------------------------------------------------------------------------------
+    CallerCapability objCc(0);
 
     if (bWithFeature)
     {
@@ -939,32 +818,32 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
         for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
         {
             const Service* pService = objServices.GetAt(i);
-            const CallerCapability* pCC = pService->GetCallerCapability();
+            const CallerCapability* pCc = pService->GetCallerCapability();
 
-            if (pCC != IMS_NULL)
+            if (pCc != IMS_NULL)
             {
-                objCC.AddFeatures(pCC);
+                objCc.AddFeatures(pCc);
             }
         }
     }
 
-    bIsContactGRUU = IMS_FALSE;
+    bIsContactGruu = IMS_FALSE;
 
     AString strContact(AString::ConstNull());
     Service* pService = GetService();
-    IMS_BOOL bGRUUSupported =
+    IMS_BOOL bGruuSupported =
             SipConfigProxy::IsGruuConfigured(GetSlotId(), GetService()->GetSipProfile());
 
     if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), GetService()->GetSipProfile()))
     {
         SipAddress objContact;
         // 4 Consider the Privacy information (temp-gruu)
-        const SipAddress* pPubGRUU = bGRUUSupported ? pService->GetPublicGruu() : IMS_NULL;
+        const SipAddress* pPubGruu = bGruuSupported ? pService->GetPublicGruu() : IMS_NULL;
 
-        if (pPubGRUU != IMS_NULL)
+        if (pPubGruu != IMS_NULL)
         {
-            bIsContactGRUU = IMS_TRUE;
-            objContact = *pPubGRUU;
+            bIsContactGruu = IMS_TRUE;
+            objContact = *pPubGruu;
         }
         else
         {
@@ -984,12 +863,12 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
     else
     {
         // 4 Consider the Privacy information (temp-gruu)
-        const SipAddress* pPubGRUU = bGRUUSupported ? pService->GetPublicGruu() : IMS_NULL;
+        const SipAddress* pPubGruu = bGruuSupported ? pService->GetPublicGruu() : IMS_NULL;
 
-        if (pPubGRUU != IMS_NULL)
+        if (pPubGruu != IMS_NULL)
         {
-            bIsContactGRUU = IMS_TRUE;
-            strContact = pPubGRUU->ToString();
+            bIsContactGruu = IMS_TRUE;
+            strContact = pPubGruu->ToString();
         }
         else
         {
@@ -1003,27 +882,20 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
     //// Constructs the Contact header with contact-feature parameters
     strContactHeader.Append(strContact);
 
-    if (!objCC.IsEmpty())
+    if (!objCc.IsEmpty())
     {
         strContactHeader.Append(TextParser::CHAR_SEMICOLON);
-        strContactHeader.Append(objCC.ToString());
+        strContactHeader.Append(objCc.ToString());
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL Capabilities::CreateSDP(OUT AString& strSDP, IN IMS_BOOL bCheckSupport /* = IMS_TRUE */,
-        IN IMS_BOOL bRequest /* = IMS_FALSE */) const
+IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp, IN IMS_BOOL bCheckSupport /*= IMS_TRUE*/,
+        IN IMS_BOOL bRequest /*= IMS_FALSE*/) const
 {
     IPAddress objLocalAddress = GetService()->GetIpAddress();
-
-    //---------------------------------------------------------------------------------------------
 
     if (objLocalAddress.Equals(IPAddress::NONE))
     {
@@ -1033,7 +905,7 @@ IMS_BOOL Capabilities::CreateSDP(OUT AString& strSDP, IN IMS_BOOL bCheckSupport 
     SdpSessionDescription objSessionDesc;
 
     // Create a session-level mandatory descriptions
-    if (!objSessionDesc.CreateMandatoryLines(GetUserAOR()->GetUri(), objLocalAddress))
+    if (!objSessionDesc.CreateMandatoryLines(GetUserAor()->GetUri(), objLocalAddress))
     {
         IMS_TRACE_E(0, "Creating a session descriptor failed", 0, 0, 0);
         return IMS_FALSE;
@@ -1045,10 +917,10 @@ IMS_BOOL Capabilities::CreateSDP(OUT AString& strSDP, IN IMS_BOOL bCheckSupport 
     IMS_BOOL bFramedMediaMaxSizePresent = IMS_FALSE;
     AStringArray objAcceptTypes;
     IMS_UINT32 nMaxSize = 0;
-    SdpDescription objSessionSDPFields;
-    SdpDescription objFramedSDPFields;
-    SdpDescription objAudioSDPFields;
-    SdpDescription objVideoSDPFields;
+    SdpDescription objSessionSdpFields;
+    SdpDescription objFramedSdpFields;
+    SdpDescription objAudioSdpFields;
+    SdpDescription objVideoSdpFields;
     IMSList<Service*> objServices = ServiceManager::GetInstance()->GetServices(GetSlotId());
 
     for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
@@ -1057,8 +929,8 @@ IMS_BOOL Capabilities::CreateSDP(OUT AString& strSDP, IN IMS_BOOL bCheckSupport 
         AppConfig* pAppConfig = pService->GetAppConfig();
 
         // Collects SDP fields from IMS registry for session-level properties
-        CollectSDPFieldsFromRegistry(
-                pAppConfig, bRequest, CapProperty::SECTOR_SESSION, objSessionSDPFields);
+        CollectSdpFieldsFromRegistry(
+                pAppConfig, bRequest, CapProperty::SECTOR_SESSION, objSessionSdpFields);
 
         if ((!bCheckSupport) || (bCheckSupport && pAppConfig->IsStreamMediaAudioSupported()))
         {
@@ -1066,8 +938,8 @@ IMS_BOOL Capabilities::CreateSDP(OUT AString& strSDP, IN IMS_BOOL bCheckSupport 
 
             // Collects SDP fields from IMS registry for media-level properties
             // (StreamMedia - audio)
-            CollectSDPFieldsFromRegistry(
-                    pAppConfig, bRequest, CapProperty::SECTOR_STREAM_AUDIO, objAudioSDPFields);
+            CollectSdpFieldsFromRegistry(
+                    pAppConfig, bRequest, CapProperty::SECTOR_STREAM_AUDIO, objAudioSdpFields);
         }
 
         if ((!bCheckSupport) || (bCheckSupport && pAppConfig->IsStreamMediaVideoSupported()))
@@ -1076,8 +948,8 @@ IMS_BOOL Capabilities::CreateSDP(OUT AString& strSDP, IN IMS_BOOL bCheckSupport 
 
             // Collects SDP fields from IMS registry for media-level properties
             // (StreamMedia - video)
-            CollectSDPFieldsFromRegistry(
-                    pAppConfig, bRequest, CapProperty::SECTOR_STREAM_VIDEO, objVideoSDPFields);
+            CollectSdpFieldsFromRegistry(
+                    pAppConfig, bRequest, CapProperty::SECTOR_STREAM_VIDEO, objVideoSdpFields);
         }
 
         if ((!bCheckSupport) || (bCheckSupport && pAppConfig->IsFramedMediaSupported()))
@@ -1111,16 +983,16 @@ IMS_BOOL Capabilities::CreateSDP(OUT AString& strSDP, IN IMS_BOOL bCheckSupport 
             }
 
             // Collects SDP fields from IMS registry for media-level properties (FramedMedia)
-            CollectSDPFieldsFromRegistry(
-                    pAppConfig, bRequest, CapProperty::SECTOR_FRAMED, objFramedSDPFields);
+            CollectSdpFieldsFromRegistry(
+                    pAppConfig, bRequest, CapProperty::SECTOR_FRAMED, objFramedSdpFields);
         }
     }
 
     //// Copy the collected SDP fields to the SdpSessionDescription
-    CopySDPFields(objSessionSDPFields, objSessionDesc);
+    CopySdpFields(objSessionSdpFields, objSessionDesc);
 
     // Form a SdpDescription to the raw SDP format
-    strSDP.Append(objSessionDesc.Encode());
+    strSdp.Append(objSessionDesc.Encode());
 
     const MediaConfig* pMediaConfig =
             ConfigurationManager::GetInstance()->GetMediaConfig(GetSlotId());
@@ -1139,10 +1011,10 @@ IMS_BOOL Capabilities::CreateSDP(OUT AString& strSDP, IN IMS_BOOL bCheckSupport 
         }
 
         //// Copy the collected SDP fields to the SdpMediaDescription for StreamMedia (audio)
-        CopySDPFields(objAudioSDPFields, objStreamAudioDesc);
+        CopySdpFields(objAudioSdpFields, objStreamAudioDesc);
 
         // Form a SdpDescription to the raw SDP format
-        strSDP.Append(objStreamAudioDesc.Encode());
+        strSdp.Append(objStreamAudioDesc.Encode());
     }
 
     // Form a SDP in case of StreamVideo
@@ -1159,10 +1031,10 @@ IMS_BOOL Capabilities::CreateSDP(OUT AString& strSDP, IN IMS_BOOL bCheckSupport 
         }
 
         //// Copy the collected SDP fields to the SdpMediaDescription for StreamMedia (video)
-        CopySDPFields(objVideoSDPFields, objStreamVideoDesc);
+        CopySdpFields(objVideoSdpFields, objStreamVideoDesc);
 
         // Form a SdpDescription to the raw SDP format
-        strSDP.Append(objStreamVideoDesc.Encode());
+        strSdp.Append(objStreamVideoDesc.Encode());
     }
 
     // Form a SDP in case of Framed
@@ -1207,29 +1079,22 @@ IMS_BOOL Capabilities::CreateSDP(OUT AString& strSDP, IN IMS_BOOL bCheckSupport 
         }
 
         //// Copy the collected SDP fields to the SdpMediaDescription for FramedMedia
-        CopySDPFields(objFramedSDPFields, objFramedMediaDesc);
+        CopySdpFields(objFramedSdpFields, objFramedMediaDesc);
 
         // Form a SdpDescription to the raw SDP format
-        strSDP.Append(objFramedMediaDesc.Encode());
+        strSdp.Append(objFramedMediaDesc.Encode());
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void Capabilities::HandleCapabilities(IN ISipClientConnection* piSCC)
+void Capabilities::HandleCapabilities(IN ISipClientConnection* piScc)
 {
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
-
-    //---------------------------------------------------------------------------------------------
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Gets the Contact headers
-    IMSList<AString> objContacts = piSIPMsg->GetHeaders(ISipHeader::CONTACT_ANY);
+    IMSList<AString> objContacts = piSipMsg->GetHeaders(ISipHeader::CONTACT_ANY);
 
     if (objContacts.IsEmpty())
     {
@@ -1257,7 +1122,7 @@ void Capabilities::HandleCapabilities(IN ISipClientConnection* piSCC)
                         strScheme.EqualsIgnoreCase(Sip::STR_SIPS) ||
                         strScheme.EqualsIgnoreCase(Sip::STR_TEL))
                 {
-                    objRemoteUserIdentities.Append(pAddress->ToString());
+                    m_objRemoteUserIdentities.Append(pAddress->ToString());
                 }
             }
 
@@ -1291,41 +1156,33 @@ void Capabilities::HandleCapabilities(IN ISipClientConnection* piSCC)
         }
     }
 
-    if (pRemoteCapabilities != IMS_NULL)
+    if (m_pRemoteCapabilities != IMS_NULL)
     {
-        delete pRemoteCapabilities;
-        pRemoteCapabilities = IMS_NULL;
+        delete m_pRemoteCapabilities;
+        m_pRemoteCapabilities = IMS_NULL;
     }
 
-    pRemoteCapabilities = new RemoteCapabilities();
+    m_pRemoteCapabilities = new RemoteCapabilities();
 
-    if (pRemoteCapabilities == IMS_NULL)
+    if (m_pRemoteCapabilities == IMS_NULL)
     {
         IMS_TRACE_E(0, "Allocating RemoteCapabilties failed", 0, 0, 0);
         return;
     }
 
-    if (!pRemoteCapabilities->Create(objTokens))
+    if (!m_pRemoteCapabilities->Create(objTokens))
     {
         IMS_TRACE_E(0, "Creating a remote capabilities failed", 0, 0, 0);
         return;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL Capabilities::ParseConnectionName(
-        IN CONST AString& strConnection, OUT AString& strAppId, OUT AString& strServiceId) const
+        IN const AString& strConnection, OUT AString& strAppId, OUT AString& strServiceId) const
 {
     AString strServiceType;
     AString strParams;
-
-    //---------------------------------------------------------------------------------------------
-
     Protocol::ParseName(strConnection, strServiceType, strAppId, strParams);
 
     if (!strServiceType.EqualsIgnoreCase(GetService()->GetScheme()))
@@ -1374,107 +1231,78 @@ IMS_BOOL Capabilities::ParseConnectionName(
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Capabilities::SetState(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
+    IMS_TRACE_I("Capabilities :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
-    IMS_TRACE_I("Capabilities :: %s to %s", StateToString(this->nState), StateToString(nState), 0);
-
-    this->nState = nState;
+    m_nState = nState;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE GLOBAL void Capabilities::CollectSDPFieldsFromRegistry(IN CONST AppConfig* pAppConfig,
-        IN IMS_BOOL bRequest, IN IMS_SINT32 nSector, IN_OUT SdpDescription& objSDPDesc)
+PRIVATE GLOBAL void Capabilities::CollectSdpFieldsFromRegistry(IN const AppConfig* pAppConfig,
+        IN IMS_BOOL bRequest, IN IMS_SINT32 nSector, IN_OUT SdpDescription& objSdpDesc)
 {
-    AStringArray objSDPLines;
-
-    //---------------------------------------------------------------------------------------------
+    AStringArray objSdpLines;
 
     // Collects session-level/media-level SDP lines
-
-    objSDPLines =
+    objSdpLines =
             pAppConfig->GetCapabilitySDPs(nSector, CapProperty::MESSAGE_TYPE_REQUEST_RESPONSE);
-    SetSDPFields(objSDPLines, objSDPDesc);
+    SetSdpFields(objSdpLines, objSdpDesc);
 
     if (bRequest)
     {
         // Clear the previous elements
-        objSDPLines.RemoveAllElements();
+        objSdpLines.RemoveAllElements();
 
         // Gets SDP fields for outgoing OPTIONS request
-        objSDPLines = pAppConfig->GetCapabilitySDPs(nSector, CapProperty::MESSAGE_TYPE_REQUEST);
-        SetSDPFields(objSDPLines, objSDPDesc);
+        objSdpLines = pAppConfig->GetCapabilitySDPs(nSector, CapProperty::MESSAGE_TYPE_REQUEST);
+        SetSdpFields(objSdpLines, objSdpDesc);
     }
     else
     {
         // Clear the previous elements
-        objSDPLines.RemoveAllElements();
+        objSdpLines.RemoveAllElements();
 
         // Gets SDP fields for outgoing OPTIONS response
-        objSDPLines = pAppConfig->GetCapabilitySDPs(nSector, CapProperty::MESSAGE_TYPE_RESPONSE);
-        SetSDPFields(objSDPLines, objSDPDesc);
+        objSdpLines = pAppConfig->GetCapabilitySDPs(nSector, CapProperty::MESSAGE_TYPE_RESPONSE);
+        SetSdpFields(objSdpLines, objSdpDesc);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE GLOBAL void Capabilities::CopySDPFields(
-        IN CONST SdpDescription& objSDPDesc, IN_OUT SdpDescription& objConcreteSDPDesc)
+PRIVATE GLOBAL void Capabilities::CopySdpFields(
+        IN const SdpDescription& objSdpDesc, IN_OUT SdpDescription& objConcreteSdpDesc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objSDPDesc.Contains(Sdp::TYPE_B))
+    if (objSdpDesc.Contains(Sdp::TYPE_B))
     {
-        const IMSList<SdpBandwidth>& objBandwidths = objSDPDesc.GetBandwidths();
+        const IMSList<SdpBandwidth>& objBandwidths = objSdpDesc.GetBandwidths();
 
         for (IMS_UINT32 i = 0; i < objBandwidths.GetSize(); ++i)
         {
             const SdpBandwidth& objBandwidth = objBandwidths.GetAt(i);
 
-            objConcreteSDPDesc.AddBandwidth(objBandwidth);
+            objConcreteSdpDesc.AddBandwidth(objBandwidth);
         }
     }
 
-    if (objSDPDesc.Contains(Sdp::TYPE_A))
+    if (objSdpDesc.Contains(Sdp::TYPE_A))
     {
-        const IMSList<SdpAttribute>& objAttributes = objSDPDesc.GetAttributes();
+        const IMSList<SdpAttribute>& objAttributes = objSdpDesc.GetAttributes();
 
         for (IMS_UINT32 i = 0; i < objAttributes.GetSize(); ++i)
         {
             const SdpAttribute& objAttr = objAttributes.GetAt(i);
 
-            objConcreteSDPDesc.AddAttribute(objAttr);
+            objConcreteSdpDesc.AddAttribute(objAttr);
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE GLOBAL void Capabilities::SetSDPFields(
-        IN CONST AStringArray& objSDPLines, IN_OUT SdpDescription& objSDPDesc)
+PRIVATE GLOBAL void Capabilities::SetSdpFields(
+        IN const AStringArray& objSdpLines, IN_OUT SdpDescription& objSdpDesc)
 {
     SdpDescription objTempDesc;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (!objTempDesc.Decode(objSDPLines))
+    if (!objTempDesc.Decode(objSdpLines))
     {
         IMS_TRACE_E(0, "Decoding SDP fields from Cap property failed", 0, 0, 0);
         return;
@@ -1488,9 +1316,9 @@ PRIVATE GLOBAL void Capabilities::SetSDPFields(
         {
             const SdpBandwidth& objBandwidth = objBandwidths.GetAt(i);
 
-            if (!objSDPDesc.Contains(objBandwidth))
+            if (!objSdpDesc.Contains(objBandwidth))
             {
-                objSDPDesc.AddBandwidth(objBandwidth);
+                objSdpDesc.AddBandwidth(objBandwidth);
             }
         }
     }
@@ -1503,10 +1331,9 @@ PRIVATE GLOBAL void Capabilities::SetSDPFields(
         {
             const SdpAttribute& objAttr = objAttributes.GetAt(i);
 
-            // Attribute value is compared. Is it OK?????
-            if (!objSDPDesc.Contains(objAttr))
+            if (!objSdpDesc.Contains(objAttr))
             {
-                objSDPDesc.AddAttribute(objAttr);
+                objSdpDesc.AddAttribute(objAttr);
             }
         }
     }
@@ -1514,8 +1341,6 @@ PRIVATE GLOBAL void Capabilities::SetSDPFields(
 
 PRIVATE GLOBAL const IMS_CHAR* Capabilities::StateToString(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nState)
     {
         case STATE_INACTIVE:

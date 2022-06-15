@@ -34,12 +34,12 @@ public:
     inline void SessionEarlyMediaUpdateFailed(IN ISession*) override {}
     inline void SessionEarlyMediaUpdateReceived(IN ISession*) override {}
     inline void SessionForkedResponseReceived(IN ISession*, IN ISession*) override {}
-    inline void SessionPRAckDelivered(IN ISession*) override {}
-    inline void SessionPRAckDeliveryFailed(IN ISession*) override {}
-    inline void SessionPRAckReceived(IN ISession*) override {}
+    inline void SessionPrackDelivered(IN ISession*) override {}
+    inline void SessionPrackDeliveryFailed(IN ISession*) override {}
+    inline void SessionPrackReceived(IN ISession*) override {}
     inline void SessionProvisionalResponseReceived(IN ISession*, IN IMS_UINT32) override {}
-    inline void SessionRPRDeliveryFailed(IN ISession*) override {}
-    inline void SessionRPRReceived(IN ISession*, IN IMS_UINT32) override {}
+    inline void SessionRprDeliveryFailed(IN ISession*) override {}
+    inline void SessionRprReceived(IN ISession*, IN IMS_UINT32) override {}
     inline void SessionTransactionReceived(IN ISession*, IN ISipServerConnection*) override {}
 
     // ITimerListener interface implementation.

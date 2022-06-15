@@ -1,45 +1,47 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100503  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "media/MediaDescriptor.h"
-#include "media/FramedMediaProposalImpl.h"
+
 #include "media/FramedMediaImpl.h"
+#include "media/FramedMediaProposalImpl.h"
+#include "media/MediaDescriptor.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-FramedMediaImpl::FramedMediaImpl(IN FramedMedia* pFramedMedia_) :
-        pFramedMediaProposal(IMS_NULL),
-        pFramedMedia(pFramedMedia_)
+FramedMediaImpl::FramedMediaImpl(IN FramedMedia* pFramedMedia) :
+        m_pFramedMedia(pFramedMedia),
+        m_pFramedMediaProposal(IMS_NULL)
 {
-    pFramedMedia->SetMediaListener(this);
+    m_pFramedMedia->SetMediaListener(this);
 }
 
 PUBLIC VIRTUAL FramedMediaImpl::~FramedMediaImpl()
 {
-    if (pFramedMediaProposal != IMS_NULL)
+    if (m_pFramedMediaProposal != IMS_NULL)
     {
-        delete pFramedMediaProposal;
-        pFramedMediaProposal = IMS_NULL;
+        delete m_pFramedMediaProposal;
+        m_pFramedMediaProposal = IMS_NULL;
     }
 }
 
-PRIVATE VIRTUAL IMS_BOOL FramedMediaImpl::Equals(IN CONST IMedia* piMedia) const
+PRIVATE VIRTUAL IMS_BOOL FramedMediaImpl::Equals(IN const IMedia* piMedia) const
 {
     const FramedMediaImpl* pMediaImpl = DYNAMIC_CAST(const FramedMediaImpl*, piMedia);
-
-    //---------------------------------------------------------------------------------------------
 
     if (pMediaImpl == IMS_NULL)
     {
@@ -49,39 +51,9 @@ PRIVATE VIRTUAL IMS_BOOL FramedMediaImpl::Equals(IN CONST IMedia* piMedia) const
     return (this == pMediaImpl);
 }
 
-PRIVATE VIRTUAL IMedia* FramedMediaImpl::GetInterface()
-{
-    //---------------------------------------------------------------------------------------------
-
-    return this;
-}
-
-PRIVATE VIRTUAL Media* FramedMediaImpl::GetMedia() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia;
-}
-
-PRIVATE VIRTUAL IMS_SINT32 FramedMediaImpl::GetDirection() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->GetDirection();
-}
-
 PRIVATE VIRTUAL IMSList<IMediaDescriptor*> FramedMediaImpl::GetMediaDescriptors() const
 {
-    const IMSList<MediaDescriptor*>& objMediaDescriptors = pFramedMedia->GetMediaDescriptors();
-
-    //---------------------------------------------------------------------------------------------
-    /*
-    if (ImsError::GetLastError() != ImsError::NO_ERROR)
-    {
-        IMS_TRACE_E(0, "Getting MediaDescriptors failed - %d", ImsError::GetLastError(), 0, 0);
-        return IMSList<IMediaDescriptor*>();
-    }
-    */
+    const IMSList<MediaDescriptor*>& objMediaDescriptors = m_pFramedMedia->GetMediaDescriptors();
 
     if (objMediaDescriptors.IsEmpty())
     {
@@ -99,15 +71,13 @@ PRIVATE VIRTUAL IMSList<IMediaDescriptor*> FramedMediaImpl::GetMediaDescriptors(
     return objIMediaDescriptors;
 }
 
-PRIVATE VIRTUAL IMedia* FramedMediaImpl::GetProposal(
-        IN IMS_BOOL bIMSExtension /* = IMS_TRUE */) const
+PRIVATE VIRTUAL IMedia* FramedMediaImpl::GetProposal() const
 {
-    //---------------------------------------------------------------------------------------------
-
     if ((GetState() != STATE_ACTIVE) || (GetUpdateState() != UPDATE_MODIFIED))
     {
-        if (bIMSExtension && (GetState() == STATE_ACTIVE) && (GetUpdateState() == UPDATE_REMOVED))
+        if ((GetState() == STATE_ACTIVE) && (GetUpdateState() == UPDATE_REMOVED))
         {
+            // no-op
         }
         else
         {
@@ -115,63 +85,19 @@ PRIVATE VIRTUAL IMedia* FramedMediaImpl::GetProposal(
         }
     }
 
-    return pFramedMediaProposal;
-}
-
-PRIVATE VIRTUAL IMS_SINT32 FramedMediaImpl::GetState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->GetState();
-}
-
-PRIVATE VIRTUAL IMS_SINT32 FramedMediaImpl::GetUpdateState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->GetUpdateState();
-}
-
-PRIVATE VIRTUAL IMS_RESULT FramedMediaImpl::SetDirection(IN IMS_SINT32 nDirection)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->SetDirection(nDirection);
-}
-
-PRIVATE VIRTUAL IMediaDescriptor* FramedMediaImpl::GetMediaDescriptor() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->GetMediaDescriptor();
-}
-
-PRIVATE VIRTUAL IMS_SINT32 FramedMediaImpl::GetType() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->GetType();
-}
-
-PRIVATE VIRTUAL void FramedMediaImpl::RemoveMediaDescriptor(IN IMS_UINT32 nPosition)
-{
-    //---------------------------------------------------------------------------------------------
-
-    pFramedMedia->RemoveMediaDescriptor(nPosition);
+    return m_pFramedMediaProposal;
 }
 
 PRIVATE VIRTUAL void FramedMediaImpl::OnMedia_FictitiousMediaCreated(IN Media* pMedia)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pFramedMedia != pMedia)
+    if (m_pFramedMedia != pMedia)
     {
         IMS_TRACE_E(0, "MEDIA MISMATCHED", 0, 0, 0);
         return;
     }
 
     FramedMediaProposal* pMediaProposal =
-            DYNAMIC_CAST(FramedMediaProposal*, pFramedMedia->GetProposal());
+            DYNAMIC_CAST(FramedMediaProposal*, m_pFramedMedia->GetProposal());
 
     if (pMediaProposal == IMS_NULL)
     {
@@ -180,15 +106,15 @@ PRIVATE VIRTUAL void FramedMediaImpl::OnMedia_FictitiousMediaCreated(IN Media* p
         return;
     }
 
-    if (pFramedMediaProposal != IMS_NULL)
+    if (m_pFramedMediaProposal != IMS_NULL)
     {
-        delete pFramedMediaProposal;
-        pFramedMediaProposal = IMS_NULL;
+        delete m_pFramedMediaProposal;
+        m_pFramedMediaProposal = IMS_NULL;
     }
 
-    pFramedMediaProposal = new FramedMediaProposalImpl(pMediaProposal);
+    m_pFramedMediaProposal = new FramedMediaProposalImpl(pMediaProposal);
 
-    if (pFramedMediaProposal == IMS_NULL)
+    if (m_pFramedMediaProposal == IMS_NULL)
     {
         IMS_TRACE_E(0, "NO MEMORY", 0, 0, 0);
         return;
@@ -197,17 +123,15 @@ PRIVATE VIRTUAL void FramedMediaImpl::OnMedia_FictitiousMediaCreated(IN Media* p
 
 PRIVATE VIRTUAL void FramedMediaImpl::OnMedia_FictitiousMediaDestroyed(IN Media* pMedia)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pFramedMedia != pMedia)
+    if (m_pFramedMedia != pMedia)
     {
         IMS_TRACE_E(0, "MEDIA MISMATCHED", 0, 0, 0);
         return;
     }
 
-    if (pFramedMediaProposal != IMS_NULL)
+    if (m_pFramedMediaProposal != IMS_NULL)
     {
-        delete pFramedMediaProposal;
-        pFramedMediaProposal = IMS_NULL;
+        delete m_pFramedMediaProposal;
+        m_pFramedMediaProposal = IMS_NULL;
     }
 }

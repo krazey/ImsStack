@@ -1,5 +1,20 @@
-#ifndef _INTERFACE_CAPABILITIES_H_
-#define _INTERFACE_CAPABILITIES_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_CAPABILITIES_H_
+#define INTERFACE_CAPABILITIES_H_
 
 #include "IServiceMethod.h"
 
@@ -44,12 +59,12 @@ public:
      * @return If this ICapabilities has the given capabilities, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL HasCapabilities(IN CONST AString& strConnection) const = 0;
+    virtual IMS_BOOL HasCapabilities(IN const AString& strConnection) const = 0;
 
     /**
      * @brief Sends a capability request to a remote endpoint.
      *
-     * @param bSDPInRequest Flag to indicate if SDP needs to be included
+     * @param bSdpInRequest Flag to indicate if SDP needs to be included
      *                      in the capability query request
      * @param bContactInRequest Flag to indicate if Contact header needs to be include
      *                          in the capability query request
@@ -60,7 +75,7 @@ public:
      *                      Its default value sets to TRUE according to the specification maybe.
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT QueryCapabilities(IN IMS_BOOL bSDPInRequest,
+    virtual IMS_RESULT QueryCapabilities(IN IMS_BOOL bSdpInRequest,
             IN IMS_BOOL bContactInRequest = IMS_TRUE, IN IMS_BOOL bCheckSupport = IMS_TRUE) = 0;
 
     virtual IMS_RESULT QueryCapabilitiesEx() = 0;
@@ -73,8 +88,6 @@ public:
      * @param piListener Pointer to the listener for receiving the result of capability query
      */
     virtual void SetListener(IN ICapabilitiesListener* piListener) = 0;
-
-    //// IMS extensions
 
     /**
      * @brief Sends a successful final response to an incoming capability query
@@ -123,4 +136,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_CAPABILITIES_H_
+#endif

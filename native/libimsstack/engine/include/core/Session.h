@@ -1,47 +1,46 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090622  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SESSION_H_
+#define SESSION_H_
 
-    Description
-
-*/
-
-#ifndef _SESSION_H_
-#define _SESSION_H_
-
-#include "ServiceMethod.h"
+#include "CallState.h"
+#include "IRetryTaskHelperListener.h"
 #include "ISessionState.h"
+#include "ServiceMethod.h"
+#include "RetryCmd.h"
+#include "RetryTaskHelper.h"
+#include "SipStatusCode.h"
+#include "VirtualSession.h"
 #include "util/ICancellableMethod.h"
 #include "util/IDialogMethod.h"
 #include "util/IRefreshable.h"
-#include "IRetransmissionHelperListener.h"
-#include "CallState.h"
-#define __IMS_SESSION_RETRY_TASK__
-#ifdef __IMS_SESSION_RETRY_TASK__
-#include "RetryCmd.h"
-#include "RetryTaskHelper.h"
-#include "IRetryTaskHelperListener.h"
-#endif
-#include "VirtualSession.h"
 
-class ISipAckPackage;
-class IRefreshListener;
+class Capabilities;
 class IOnSessionListener;
+class IRefreshListener;
 class ISessionParameter;
+class ISipAckPackage;
+class Media;
 class MethodManager;
+class Reference;
+class Replaces;
 class SdpOaState;
 class SessionDescriptor;
 class SessionRefreshHelper;
-class RetransmissionHelper;
-class Capabilities;
-class Reference;
 class Subscription;
-class Media;
-class Replaces;
 
 class Session :
         public ServiceMethod,
@@ -49,74 +48,75 @@ class Session :
         public ICancellableMethod,
         public IDialogMethod,
         public IRefreshable,
-        public IRetransmissionHelperListener
-#ifdef __IMS_SESSION_RETRY_TASK__
-        ,
         public RetryCmd,
         public IRetryTaskHelperListener
-#endif
 {
 public:
-    explicit Session(IN Service* pService_);
+    explicit Session(IN Service* pService);
     virtual ~Session();
 
-private:
-    Session(IN CONST Session& objRHS);
-    Session& operator=(IN CONST Session& objRHS);
+    Session(IN const Session&) = delete;
+    Session& operator=(IN const Session&) = delete;
 
 public:
     // Method class
-    virtual void Destroy();
-    // SIP_MESSAGE_MEDIATOR
-    virtual void SetMessageMediator(IN IMessageMediator* piMediator);
+    void Destroy() override;
+    void SetMessageMediator(IN IMessageMediator* piMediator) override;
 
     // ISession interface
     IMS_RESULT Accept();
     Capabilities* CreateCapabilities();
-    Media* CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
-            IN IMS_SINT32 nCountOfDescriptor = 0, IN IMS_BOOL bIMSExtension = IMS_TRUE);
-    Reference* CreateReference(IN CONST AString& strReferTo, IN CONST AString& strReferMethod);
-    // IMS extensions - To handle midcall or in-dialog transactions
-    Subscription* CreateSubscription(IN CONST AString& strEvent);
-    ISipClientConnection* CreateTransaction(IN CONST SipMethod& objMethod);
-    IMS_SINT32 GetConfiguration() const;
+    Media* CreateMedia(IN const AString& strType, IN IMS_SINT32 nDirection,
+            IN IMS_SINT32 nCountOfDescriptor = 0);
+    Reference* CreateReference(IN const AString& strReferTo, IN const AString& strReferMethod);
+    // To handle midcall or in-dialog transactions
+    Subscription* CreateSubscription(IN const AString& strEvent);
+    ISipClientConnection* CreateTransaction(IN const SipMethod& objMethod);
     const ISipHeader* GetContactHeader() const;
     const Replaces* GetReplaces() const;
-    const AString& GetSessionId() const;
+    inline const AString& GetSessionId() const { return m_strSessionIdForCallControl; }
     IMS_SINT32 GetTerminationReason() const;
     const IMSList<Media*>& GetMedia() const;
     SessionDescriptor* GetSessionDescriptor();
-    IMS_SINT32 GetState() const;
+    inline IMS_SINT32 GetState() const { return m_nState; }
     IMS_BOOL HasPendingUpdate() const;
     IMS_BOOL IsFinalResponseReceivedForInitialInviteRequest() const;
     IMS_BOOL IsReliableProvResponseSupported() const;
-    IMS_BOOL IsSDPNegotiationAllowedForNonRPR() const;
+    inline IMS_BOOL IsSdpNegotiationAllowedForNonRpr() const { return m_bSdpNonRprAllowed; }
     IMS_RESULT Reject();
     IMS_RESULT Reject(IN IMS_SINT32 nStatusCode);
     IMS_RESULT RejectEx(
-            IN IMS_SINT32 nStatusCode, IN CONST AString& strReasonPhrase = AString::ConstNull());
-    IMS_RESULT RejectWithDiversion(IN CONST AString& strAlternativeUserAddress);
+            IN IMS_SINT32 nStatusCode, IN const AString& strReasonPhrase = AString::ConstNull());
+    IMS_RESULT RejectWithDiversion(IN const AString& strAlternativeUserAddress);
     IMS_RESULT RemoveMedia(IN Media* pMedia);
     IMS_RESULT RemoveMedia(IN IMS_UINT32 nIndex);
     IMS_RESULT Restore();
     IMS_RESULT SendAck();
     IMS_RESULT SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
-            IN CONST AString& strReason = AString::ConstNull(), IN IMS_SINT32 nFlags = 0);
-    void Set100TryingNotification(IN IMS_BOOL b100TryingNotification);
-    IMS_RESULT SetCallerPreference(IN CONST IMSList<AString>& objCallerPreference);
-    void SetConfiguration(IN IMS_SINT32 nConfigValue);
+            IN const AString& strReason = AString::ConstNull(), IN IMS_SINT32 nFlags = 0);
+    inline void Set100TryingNotification(IN IMS_BOOL b100TryingNotification)
+    {
+        m_b100TryingNotification = b100TryingNotification;
+    }
+    IMS_RESULT SetCallerPreference(IN const IMSList<AString>& objCallerPreference);
     // CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
     IMS_RESULT SetContactParameter(
-            IN CONST AString& strParameter, IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */);
+            IN const AString& strParameter, IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */);
     void SetImplicitRoutingRequired(IN IMS_BOOL bFlag);
-    void SetReasonForCallTermination(IN IMS_SINT32 nReason);
-    void SetRefreshListener(IN IRefreshListener* piListener);
+    inline void SetReasonForCallTermination(IN IMS_SINT32 nReason)
+    {
+        m_strTerminationReasonFromApp.Sprintf("%x", nReason);
+    }
+    inline void SetRefreshListener(IN IRefreshListener* piListener)
+    {
+        m_piRefreshListener = piListener;
+    }
     void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
-            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
-    void SetListener(IN IOnSessionListener* piListener);
+            IN IMS_SINT32 nValueEorLt, IN IMS_SINT32 nValueGt);
+    inline void SetListener(IN IOnSessionListener* piListener) { m_piSessionListener = piListener; }
     IMS_RESULT Start();
     IMS_RESULT Terminate();
-    IMS_RESULT TerminateEx(IN IMS_BOOL bTerminateMethodBYE = IMS_FALSE);
+    IMS_RESULT TerminateEx(IN IMS_BOOL bTerminateMethodBye = IMS_FALSE);
     IMS_RESULT Update();
     IMS_RESULT UpdateEx(
             IN IMS_SINT32 nMethod = SipMethod::INVALID, IN IMS_BOOL bSessionRefresh = IMS_FALSE);
@@ -126,115 +126,111 @@ public:
     void DestroyFailureSdp();
     ISessionParameter* GetFailureSdp() const;
     // }
-    inline VirtualSession* GetVirtualEarlySession() const { return pVirtualEarlySession.Get(); }
+    inline VirtualSession* GetVirtualEarlySession() const { return m_pVirtualEarlySession.Get(); }
+
+    inline IMS_SINT32 GetConfiguration() const { return m_nConfigValue; }
+    inline void SetConfiguration(IN IMS_SINT32 nConfigValue) { m_nConfigValue = nConfigValue; }
+    inline IMS_BOOL IsConfigurationSet(IN IMS_SINT32 nValue) const
+    {
+        return (m_nConfigValue & nValue) != 0;
+    }
 
 protected:
     // Activity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
     // Method class
-
     // Handle the exceptions
-    virtual void Exception_NotifyError(IN IMS_SINT32 nErrorCode);
-    virtual IMS_BOOL InitInstance();
-
+    void Exception_NotifyError(IN IMS_SINT32 nErrorCode) override;
+    IMS_BOOL InitInstance() override;
     // Handle the incoming request / outgoing response message
-    virtual IMS_BOOL NotifySIPRequest(IN ISipServerConnection* piSSC);
-
+    IMS_BOOL NotifySipRequest(IN ISipServerConnection* piSsc) override;
     // Handle to the outgoing request / incoming response message
-    virtual IMS_BOOL NotifySIPForkedResponse(
-            IN ISipClientConnection* piSCC, IN ISipClientConnection* piForkedSCC);
-    virtual void NotifySIPResponse(IN ISipClientConnection* piSCC);
-    virtual void NotifySIPError(
-            IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
-
-    // IMS_AUTH_SIP_DIGEST
-    virtual IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piSCC);
-
-    // Handle the reference
-    virtual IMS_BOOL SetReferredMessageListener(IN IReferredMessageListener* piListener);
+    IMS_BOOL NotifySipForkedResponse(
+            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc) override;
+    void NotifySipResponse(IN ISipClientConnection* piScc) override;
+    void NotifySipError(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
+    IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piScc);
+    IMS_BOOL SetReferredMessageListener(IN IReferredMessageListener* piListener) override;
 
     // ISessionState interface
-    virtual const AString& GetConnectionAddress() const;
-    virtual IMS_SINT32 GetSessionState() const;
-    virtual SdpSessionParameter* GetSessionParameter() const;
-    virtual const AString& GetPeerConnectionAddress() const;
-    virtual SdpSessionParameter* GetPeerSessionParameter() const;
-    virtual SdpSessionParameter* GetProposalSessionParameter();
+    const AString& GetConnectionAddress() const override;
+    IMS_SINT32 GetSessionState() const override;
+    SdpSessionParameter* GetSessionParameter() const override;
+    const AString& GetPeerConnectionAddress() const override;
+    SdpSessionParameter* GetPeerSessionParameter() const override;
+    SdpSessionParameter* GetProposalSessionParameter() override;
 
     // ICancellableMethod interface
-    virtual IMS_BOOL Cancellable_Compare(IN ISipServerConnection* piSSC_CANCEL) const;
-    virtual IMS_BOOL Cancellable_NotifyRequest(IN ISipServerConnection* piSSC_CANCEL);
+    IMS_BOOL Cancellable_Compare(IN ISipServerConnection* piSscCancel) const override;
+    IMS_BOOL Cancellable_NotifyRequest(IN ISipServerConnection* piSscCancel) override;
 
     // IDialogMethod interface
-    virtual IMS_BOOL Dialog_Compare(IN ISipServerConnection* piSSC) const;
-    virtual IMS_BOOL Dialog_NotifyRequest(IN ISipServerConnection* piSSC);
+    IMS_BOOL Dialog_Compare(IN ISipServerConnection* piSsc) const override;
+    IMS_BOOL Dialog_NotifyRequest(IN ISipServerConnection* piSsc) override;
 
     // IRefreshable interface
-    virtual void Refreshable_RefreshCompleted(
-            IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode = 0);
-    virtual IMS_BOOL Refreshable_RefreshStarted();
-    virtual void Refreshable_RefreshTerminated();
+    void Refreshable_RefreshCompleted(
+            IN ISipClientConnection* piScc, IN IMS_SINT32 nCode = 0) override;
+    IMS_BOOL Refreshable_RefreshStarted() override;
+    void Refreshable_RefreshTerminated() override;
 
-    // IRetransmissionHelperListener interface
-    virtual IMS_RESULT RetransmissionHelper_NotifyStatus(IN IMS_SINT32 nStatus);
-
-#ifdef __IMS_SESSION_RETRY_TASK__
     // RetryCmd class
-    virtual IMS_RESULT ExecuteCmd();
+    IMS_RESULT ExecuteCmd() override;
     // IRetryTaskHelperListener interface
-    virtual void RetryTaskHelper_OnCompleted(
-            IN RetryTaskHelper* pTaskHelper, IN RetryCmd* pCmd, IN IMS_SINT32 nCode = 0);
-#endif
+    void RetryTaskHelper_OnCompleted(
+            IN RetryTaskHelper* pTaskHelper, IN RetryCmd* pCmd, IN IMS_SINT32 nCode = 0) override;
 
     // Session class
     virtual Session* CreateSession();
-    virtual IMS_RESULT HandleProvisionalResponse(IN ISipClientConnection* piSCC);
-    virtual IMS_RESULT HandleRequestToUPDATE(IN ISipServerConnection* piSSC);
-    virtual IMS_RESULT HandleResponseToUPDATE(IN ISipClientConnection* piSCC);
-    virtual IMS_BOOL HasPendingPRAck() const;
-    virtual IMS_BOOL IsEarlyUpdateInProgress() const;
+    virtual IMS_RESULT HandleProvisionalResponse(IN ISipClientConnection* piScc);
+    virtual IMS_RESULT HandleRequestToUpdate(IN ISipServerConnection* piSsc);
+    virtual IMS_RESULT HandleResponseToUpdate(IN ISipClientConnection* piScc);
+    inline virtual IMS_BOOL HasPendingPrack() const { return IMS_FALSE; }
+    inline virtual IMS_BOOL IsEarlyUpdateInProgress() const { return IMS_FALSE; }
 
-    IMS_BOOL AddRefreshSpecificHeaders(IN ISipConnection* piSC);
+    IMS_BOOL AddRefreshSpecificHeaders(IN ISipConnection* piSc);
     IMS_BOOL CheckNSetListenerCall(IN IMS_SINT32 nListenerCall);
     // Methods for handling SDP & Session Descriptor related operations
     IMS_BOOL CheckNCreateSessionDescriptor();
-    IMS_BOOL CheckNSetSDPBodyPart(IN_OUT ISipMessage*& piSIPMsg);
-    IMS_BOOL CheckNTerminateSession(IN ISipMessage* piSIPMsg);
-    ISipClientConnection* CreateConnectionL(IN ISipDialog* piDialog, IN CONST SipMethod& objMethod);
-    IMS_SINT32 GetCallState() const;
+    IMS_BOOL CheckNSetSdpBodyPart(IN_OUT ISipMessage*& piSipMsg);
+    IMS_BOOL CheckNTerminateSession(IN ISipMessage* piSipMsg);
+    ISipClientConnection* CreateConnectionL(IN ISipDialog* piDialog, IN const SipMethod& objMethod);
+    inline IMS_SINT32 GetCallState() const { return m_objCallState.GetState(); }
     IMS_SINT32 GetOfferAnswerState() const;
-    SessionRefreshHelper* GetRefreshHelper() const;
-    IMS_SINT32 HandleSDPOfferAnswer(IN ISipMessage* piSIPMsg);
-
-    inline IMS_BOOL IsConfigurationSet(IN IMS_SINT32 nValue) const
-    {
-        return (nConfigValue & nValue) != 0;
-    }
+    inline SessionRefreshHelper* GetRefreshHelper() const { return m_pRefreshHelper; }
+    IMS_SINT32 HandleSdpOfferAnswer(IN ISipMessage* piSipMsg);
     IMS_BOOL IsInviteFinalResponseReceived(IN IMS_SINT32 nServiceMethod) const;
     IMS_BOOL IsMidDialogTransactionCreatable() const;
-    IMS_BOOL IsTerminatePending() const;
+    inline IMS_BOOL IsTerminatePending() const { return m_bTerminatePending; }
     void NotifyAlerting();
     void RestoreEx();
-    IMS_RESULT SendResponseToRefreshUPDATE(IN ISipServerConnection* piSSC);
-    IMS_BOOL SetSDPBodyPartFromCurrentView(IN_OUT ISipMessage*& piSIPMsg);
+    IMS_RESULT SendResponseToRefreshUpdate(IN ISipServerConnection* piSsc);
+    IMS_BOOL SetSdpBodyPartFromCurrentView(IN_OUT ISipMessage*& piSipMsg);
     // REFUSE_SDP_OFFER_ANSWER_EXCHANGE {
-    IMS_BOOL SetSDPBodyPartFromRefusedView(IN_OUT ISipMessage*& piSIPMsg);
+    IMS_BOOL SetSdpBodyPartFromRefusedView(IN_OUT ISipMessage*& piSipMsg);
     // }
     void SetTerminationReason(IN IMS_SINT32 nReason);
 
-    void UpdateCallStateOnMessageReceived(
-            IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nMode = CallState::MODE_RECEIVED);
-    void UpdateCallStateOnMessageSent(IN CONST ISipMessage* piSIPMsg);
+    inline void UpdateCallStateOnMessageReceived(
+            IN const ISipMessage* piSipMsg, IN IMS_SINT32 nMode = CallState::MODE_RECEIVED)
+    {
+        m_objCallState.UpdateState(piSipMsg, nMode);
+    }
+    inline void UpdateCallStateOnMessageSent(IN const ISipMessage* piSipMsg)
+    {
+        m_objCallState.UpdateState(piSipMsg, CallState::MODE_SENT);
+    }
     IMS_BOOL UpdateMedia(IN IMS_SINT32 nTrigger);
 
     IMS_BOOL RestoreOfferAnswerState();
-    IMS_BOOL UpdateOfferAnswerStateOnMessageReceived(IN CONST ISipMessage* piSIPMsg);
-    IMS_BOOL UpdateOfferAnswerStateOnMessageSent(IN CONST ISipMessage* piSIPMsg);
+    IMS_BOOL UpdateOfferAnswerStateOnMessageReceived(IN const ISipMessage* piSipMsg);
+    IMS_BOOL UpdateOfferAnswerStateOnMessageSent(IN const ISipMessage* piSipMsg);
     // CALLER_PREFERENCE_MANAGER
     void UpdateCallerPreference(
-            IN CONST ISipMessage* piPreviousSIPMsg, IN IMS_SINT32 nStatusCode = 200);
-    static void RemoveRecordRouteHeaders(IN ISipMessage* piSIPMsg);
+            IN const ISipMessage* piPrevSipMsg, IN IMS_SINT32 nStatusCode = SipStatusCode::SC_200);
+    static void RemoveRecordRouteHeaders(IN ISipMessage* piSipMsg);
 
     inline void AddSessionToCallControlHelperIfNotPresent()
     {
@@ -251,19 +247,27 @@ private:
     void CleanupOnDestroy();
 
     // For UAS behavior
-    IMS_RESULT HandleRequestToACK(IN ISipServerConnection* piSSC);
-    IMS_RESULT HandleRequestToBYE(IN ISipServerConnection* piSSC);
-    IMS_RESULT HandleRequestToCANCEL(IN ISipServerConnection* piSSC);
-    IMS_RESULT HandleRequestToINVITE(IN ISipServerConnection* piSSC);
-    IMS_RESULT HandleRequestToINVITEWithinDialog(IN ISipServerConnection* piSSC);
-    IMS_RESULT HandleRequestToREFER(IN ISipServerConnection* piSSC);
+    IMS_RESULT HandleRequestToAck(IN ISipServerConnection* piSsc);
+    IMS_RESULT HandleRequestToBye(IN ISipServerConnection* piSsc);
+    IMS_RESULT HandleRequestToCancel(IN ISipServerConnection* piSsc);
+    IMS_RESULT HandleRequestToInvite(IN ISipServerConnection* piSsc);
+    IMS_RESULT HandleRequestToInviteWithinDialog(IN ISipServerConnection* piSsc);
+    IMS_RESULT HandleRequestToRefer(IN ISipServerConnection* piSsc);
 
     // For UAC behavior
-    IMS_RESULT HandleResponseToBYE(IN ISipClientConnection* piSCC);
-    IMS_RESULT HandleResponseToCANCEL(IN ISipClientConnection* piSCC);
-    IMS_RESULT HandleResponseToINVITE(IN ISipClientConnection* piSCC);
+    IMS_RESULT HandleResponseToBye(IN ISipClientConnection* piScc);
+    IMS_RESULT HandleResponseToCancel(IN ISipClientConnection* piScc);
+    IMS_RESULT HandleResponseToInvite(IN ISipClientConnection* piScc);
 
-    IMS_BOOL IsSessionUpdateNotificationInProgress() const;
+    // RACE_CONDITION : SESSION_UPDATE
+    inline IMS_BOOL IsSessionUpdateNotificationInProgress() const
+    {
+        return m_bSessionUpdateNotificationInProgress;
+    }
+    inline void SetSessionUpdateNotificationState(IN IMS_BOOL bInProgress)
+    {
+        m_bSessionUpdateNotificationInProgress = bInProgress;
+    }
 
     // ACK_RETRANSMISSION_TO_2XX
     void RemoveStrayAcks();
@@ -271,29 +275,27 @@ private:
 
     // For UAC behavior
     IMS_RESULT SendRequestForRefresh(IN IMS_SINT32 nMethod = SipMethod::INVALID);
-    IMS_RESULT SendRequestToACK(IN ISipClientConnection* piSCC, IN IMS_SINT32 nServiceMethod);
-    IMS_RESULT SendRequestToBYE();
-    IMS_RESULT SendRequestToBYEInternal();
-    IMS_RESULT SendRequestToCANCEL();
-    IMS_RESULT SendRequestToINVITE(IN IMS_BOOL bSessionRefresh = IMS_FALSE);
-    IMS_RESULT SendRequestToINVITEOn422Received();
-    IMS_RESULT SendRequestToUPDATE(IN IMS_BOOL bSessionRefresh = IMS_FALSE);
+    IMS_RESULT SendRequestToAck(IN ISipClientConnection* piScc, IN IMS_SINT32 nServiceMethod);
+    IMS_RESULT SendRequestToBye();
+    IMS_RESULT SendRequestToByeInternal();
+    IMS_RESULT SendRequestToCancel();
+    IMS_RESULT SendRequestToInvite(IN IMS_BOOL bSessionRefresh = IMS_FALSE);
+    IMS_RESULT SendRequestToInviteOn422Received();
+    IMS_RESULT SendRequestToUpdate(IN IMS_BOOL bSessionRefresh = IMS_FALSE);
 
     // For UAS behavior
-    IMS_RESULT SendResponseEx(IN ISipServerConnection* piSSC, IN IMS_SINT32 nServiceMethod,
+    IMS_RESULT SendResponseEx(IN ISipServerConnection* piSsc, IN IMS_SINT32 nServiceMethod,
             IN IMS_SINT32 nStatusCode);
 
     void SetReasonHeaderFromPreviousRequest(IN IMS_SINT32 nRequest);
-    // RACE_CONDITION : SESSION_UPDATE
-    void SetSessionUpdateNotificationState(IN IMS_BOOL bInProgress);
     void SetState(IN IMS_SINT32 nState);
     void Start2xxRetransmission();
     void Stop2xxRetransmission();
 
     void TerminateOnNegotiating();
-    void TerminateOnEstablishing();
+    inline void TerminateOnEstablishing() { m_bTerminatePending = IMS_TRUE; }
     void TerminateOnReNegotiating();
-    void TerminateOnReEstablishing();
+    inline void TerminateOnReEstablishing() { m_bTerminatePending = IMS_TRUE; }
 
     // RACE_CONDITION : 200 OK to CANCEL and 200 OK to forked INVITE
     void TerminateForkedSessionsOnNegotiating();
@@ -302,7 +304,7 @@ private:
     // Methods for handling SDP & Media related operations
     IMS_BOOL AddMedia(IN Media* pMedia);
     void CleanupMedia();
-    IMS_BOOL CreateMediaFromSDP();
+    IMS_BOOL CreateMediaFromSdp();
     IMS_BOOL IsMediaInitializationDone() const;
     IMS_BOOL UpdateMediaOnAnswerReceived(IN IMS_SINT32 nTrigger);
     IMS_BOOL UpdateMediaOnAnswerSent(IN IMS_SINT32 nTrigger);
@@ -312,7 +314,7 @@ private:
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 public:
-    // Refer to ISession class
+    /// Refer to ISession class
     enum
     {
         STATE_CREATED = 0,
@@ -326,7 +328,7 @@ public:
         STATE_TERMINATED = 8
     };
 
-    // Refer to ISession class
+    /// Refer to ISession class
     enum
     {
         STATUSCODE_433_ANONYMITY_DISALLOWED = 433,
@@ -337,85 +339,91 @@ public:
         STATUSCODE_603_DECLINE = 603
     };
 
-    // Refer to ISession class
+    /// Refer to ISession class
     enum
     {
         TERMINATION_REASON_INVALID = (-1),
 
-        // Unknown reason
+        /// Unknown reason
         TERMINATION_REASON_UNKNOWN = 0,
-        // CANCEL or BYE is sent by the user
+        /// CANCEL or BYE is sent by the user
         TERMINATION_REASON_USER_ACTION,
-        // CANCEL or BYE is received from the remote user or CSCF
+        /// CANCEL or BYE is received from the remote user or CSCF
         TERMINATION_REASON_REMOTE_ACTION,
-        // Session refresh was failed by 408 response
+        /// Session refresh was failed by 408 response
         TERMINATION_REASON_REFRESH_408,
-        // Session refresh was failed by 481 response
+        /// Session refresh was failed by 481 response
         TERMINATION_REASON_REFRESH_481,
-        // Session refresh was failed by the transaction timeout
+        /// Session refresh was failed by the transaction timeout
         TERMINATION_REASON_REFRESH_TXN_TIMEOUT,
-        // Session refresh was failed by the session refresh timeout
+        /// Session refresh was failed by the session refresh timeout
         TERMINATION_REASON_REFRESH_TIMEOUT,
-        // Session is terminated by the de-registration (by user or network)
+        /// Session is terminated by the de-registration (by user or network)
         TERMINATION_REASON_SERVICE_CLOSED,
 
         TERMINATION_REASON_MAX
     };
 
-    // Policy for session refresh
+    /// Policy for session refresh
     enum
     {
-        // No refresh by engine
+        /// No refresh by engine
         REFRESH_POLICY_NO_REFRESH = (-1),
 
-        // Default policy; Select the refresh time according to 3GPP spec.
-        //     nCriteriaInterval : Criteria value for the refresh duration
-        //    nValueEorLT : Ratio when the refresh duration is equal or less
-        //              than the criteria interval (1 ~ 100; default 50)
-        //    nValueGT : Interval value when the refresh duration is greater
-        //              than the criteria interval
+        /// Default policy; Select the refresh time according to 3GPP spec.
+        ///     nCriteriaInterval : Criteria value for the refresh duration
+        ///    nValueEorLT : Ratio when the refresh duration is equal or less
+        ///              than the criteria interval (1 ~ 100; default 50)
+        ///    nValueGT : Interval value when the refresh duration is greater
+        ///              than the criteria interval
         REFRESH_POLICY_SPEC = 0,
 
-        // Set the remain time before it is expired
-        //    nCriteriaInterval : Criteria value for the refresh duration
-        //    nValueEorLT : Interval value when the refresh duration is equal or less
-        //              than the criteria interval
-        //    nValueGT : Interval value when the refresh duration is greater
-        //              than the criteria interval
+        /// Set the remain time before it is expired
+        ///    nCriteriaInterval : Criteria value for the refresh duration
+        ///    nValueEorLT : Interval value when the refresh duration is equal or less
+        ///              than the criteria interval
+        ///    nValueGT : Interval value when the refresh duration is greater
+        ///              than the criteria interval
         REFRESH_POLICY_REMAIN_TIME,
 
-        // Set the ratio before it is expired
-        //    nCriteriaInterval : Criteria value for the refresh duration
-        //    nValueEorLT : Ratio when the refresh duration is equal or less
-        //              than the criteria interval (1 ~ 100)
-        //    nValueGT : Ratio when the refresh duration is greater
-        //              than the criteria interval (1 ~ 100)
-        // Ex) Expires: 3600, Ratio: 10
-        //        -> Refresh timer is expired after 3240s
+        /// Set the ratio before it is expired
+        ///    nCriteriaInterval : Criteria value for the refresh duration
+        ///    nValueEorLT : Ratio when the refresh duration is equal or less
+        ///              than the criteria interval (1 ~ 100)
+        ///    nValueGT : Ratio when the refresh duration is greater
+        ///              than the criteria interval (1 ~ 100)
+        /// Ex) Expires: 3600, Ratio: 10
+        ///        -> Refresh timer is expired after 3240s
         REFRESH_POLICY_RATIO
     };
 
-    // Option flags for sending SIP request/response
+    /// Option flags for sending SIP request/response
     enum
     {
         FLAG_NONE = 0x0000,
         FLAG_REMOVE_RECORD_ROUTES = 0x0001
     };
 
-    // Runtime configuration for session control
+    /// Runtime configuration for session control
     enum
     {
         CONFIG_NONE = 0x00000000,
-        // RFC 6337, Section 3.1.1
-        // This will be applied for MO signaling.
+        /// RFC 6337, Section 3.1.1
+        /// This will be applied for MO signaling.
         CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE = 0x00000001,
-        // This is to avoid the session update failure when the service is disconnected by re-REG.
+        /// This is to avoid the session update failure when the service is disconnected by re-REG.
         CONFIG_IGNORE_DEREG_ON_SESSION_UPDATE = 0x00000002,
-        // This is to override SIP configuration for SDP handling of non-RPR.
+        /// This is to override SIP configuration for SDP handling of non-RPR.
         CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR = 0x00000004,
-        // This is to indicate that early session model is supported.
-        // ex. VRBT (Video RingBack Tone) for KR operators
+        /// This is to indicate that early session model is supported.
+        /// ex. VRBT (Video RingBack Tone) for KR operators
         CONFIG_SUPPORT_EARLY_SESSION_MODEL = 0x00000008
+    };
+
+    /// Index for the most recent response message
+    enum
+    {
+        INDEX_MOST_RECENT_MESSAGE = 0xFFFFFFFF
     };
 
 protected:
@@ -439,7 +447,7 @@ protected:
         AMSG_SESSION_MAX
     };
 
-    // To guard the duplicated listener call
+    /// To guard the duplicated listener call
     enum
     {
         LISTENER_CALL_START_FAILED = 0x00000001,
@@ -448,70 +456,55 @@ protected:
     };
 
 private:
-    IMS_SINT32 nState;
+    IMS_SINT32 m_nState;
     // Call state
-    CallState objCallState;
-
-    IMS_BOOL bFlag_Alerting;
-    IMS_BOOL bFlag_SDPInInitialINVITE;
-    IMS_BOOL bFlag_TerminatePending;
-    IMS_BOOL bFlag_UpdateRequestor;
-    IMS_BOOL bFlag_SDPNonRPRAllowed;
-    IMS_BOOL bFlag_100TryingNotification;
+    CallState m_objCallState;
+    IMS_BOOL m_bAlerting;
+    IMS_BOOL m_bSdpInInitialInvite;
+    IMS_BOOL m_bTerminatePending;
+    IMS_BOOL m_bUpdateRequestor;
+    IMS_BOOL m_bSdpNonRprAllowed;
+    IMS_BOOL m_b100TryingNotification;
     // TERMINATE_METHOD - default : CANCEL; it can be a BYE by enabler
-    IMS_BOOL bFlag_TerminateMethodBYE;
+    IMS_BOOL m_bTerminateMethodBye;
     // RACE_CONDITION : SESSION_UPDATE
     // Checks if the result of session-update request is notified or not
-    IMS_BOOL bFlag_SessionUpdateNotificationInProgress;
+    IMS_BOOL m_bSessionUpdateNotificationInProgress;
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
-    IMS_BOOL bFlag_ImplicitRoutingRequired;
+    IMS_BOOL m_bImplicitRoutingRequired;
     // FIX_TIMING_ISSUE: ACK_WITH_SDP_IN_PROGRESS
-    IMS_BOOL bFlag_AckWithSDPInProgress;
-
+    IMS_BOOL m_bAckWithSdpInProgress;
     // Runtime configuration for session control
-    IMS_SINT32 nConfigValue;
-
+    IMS_SINT32 m_nConfigValue;
     // Manages completed listener calls
-    IMS_SINT32 nCompletedListenerCalls;
-
+    IMS_SINT32 m_nCompletedListenerCalls;
     // Reason of session termination (refer to ISession::TERMINATION_REASON_XXX)
-    IMS_SINT32 nTerminationReason;
-    AString strTerminationReasonFromApp;
+    IMS_SINT32 m_nTerminationReason;
+    AString m_strTerminationReasonFromApp;
 
-    SdpOaState* pOAState;
-    SessionDescriptor* pSessionDescriptor;
-    IMSList<Media*> objMedias;
+    SdpOaState* m_pOaState;
+    SessionDescriptor* m_pSessionDescriptor;
+    IMSList<Media*> m_objMedias;
 
-    IOnSessionListener* piSessionListener;
-
+    IOnSessionListener* m_piSessionListener;
     // For session refresh
-    IRefreshListener* piRefreshListener;
-    SessionRefreshHelper* pRefreshHelper;
-    // For 2xx retransmission when receiving an incoming INVITE request
-    RetransmissionHelper* pRetransmissionHelper;
+    IRefreshListener* m_piRefreshListener;
+    SessionRefreshHelper* m_pRefreshHelper;
     // For call transfer/hold/ ...
-    IReferredMessageListener* piReferredMessageListener;
-
-#ifdef __IMS_SESSION_RETRY_TASK__
-    RetryTaskHelper* pRetransmissionTask;
-#endif
+    IReferredMessageListener* m_piReferredMessageListener;
+    RetryTaskHelper* m_pRetransmissionTask;
     // ACK_RETRANSMISSION_TO_2XX
-    ISipAckPackage* piAckPackage;
-
+    ISipAckPackage* m_piAckPackage;
     // Remote session id for 3rd-party call control
-    AString strSessionIdForCallControl;
-
+    AString m_strSessionIdForCallControl;
     // For internal BYE transaction
-    ISipClientConnection* piSCC_BYE;
-
+    ISipClientConnection* m_piSccBye;
     // CALLER_PREFERENCE_MANAGER
-    IMSList<AString> objPreviousCallerPreference;
-
+    IMSList<AString> m_objPreviousCallerPreference;
     // Management of forked session to handle PRACK
-    RCPtr<MethodManager> pForkedSessions;
-
+    RCPtr<MethodManager> m_pForkedSessions;
     // EARLY_SESSION_MODEL
-    RCPtr<VirtualSession> pVirtualEarlySession;
+    RCPtr<VirtualSession> m_pVirtualEarlySession;
 };
 
-#endif  // _SESSION_H_
+#endif

@@ -1,39 +1,44 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100413  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "private/SipConfigV.h"
 #include "TextParser.h"
-#include "ISipHeader.h"
-#include "ISipMessage.h"
-#include "ISipDialog.h"
-#include "ISipServerConnection.h"
-#include "Sip.h"
-#include "SipFeatures.h"
-#include "SipDebug.h"
-#include "SipHeaderName.h"
-#include "SipStatusCode.h"
-#include "SipConfigProxy.h"
-#include "base/Ims.h"
-#include "Service.h"
-#include "util/DialogMethodManager.h"
+
+#include "private/SipConfigV.h"
+
 #include "CallControlHelper.h"
 #include "Capabilities.h"
 #include "IOnNotificationListener.h"
 #include "IOnReferenceListener.h"
+#include "ISipDialog.h"
+#include "ISipHeader.h"
+#include "ISipMessage.h"
+#include "ISipServerConnection.h"
 #include "ImplicitNotifierState.h"
 #include "ImplicitSubscriberState.h"
 #include "Reference.h"
+#include "Service.h"
+#include "Sip.h"
+#include "SipConfigProxy.h"
+#include "SipDebug.h"
+#include "SipFeatures.h"
+#include "SipHeaderName.h"
+#include "SipStatusCode.h"
+#include "base/Ims.h"
+#include "util/DialogMethodManager.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
@@ -42,152 +47,118 @@ PUBLIC GLOBAL const IMS_CHAR Reference::MEDIA_TYPE[] = "message/sipfrag";
 
 PUBLIC
 Reference::NotifierState::NotifierState() :
-        objSCCs(IMSList<ISipClientConnection*>())
+        m_objSccs(IMSList<ISipClientConnection*>())
 {
 }
 
 PUBLIC
 Reference::NotifierState::~NotifierState()
 {
-    if (!objSCCs.IsEmpty())
+    if (!m_objSccs.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objSCCs.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objSccs.GetSize(); ++i)
         {
-            ISipClientConnection* piSCC = objSCCs.GetAt(i);
+            ISipClientConnection* piScc = m_objSccs.GetAt(i);
 
-            if (piSCC != IMS_NULL)
+            if (piScc != IMS_NULL)
             {
-                piSCC->Close();
+                piScc->Close();
             }
         }
 
-        objSCCs.Clear();
+        m_objSccs.Clear();
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void Reference::NotifierState::AddSCC(IN ISipClientConnection* piSCC)
+void Reference::NotifierState::RemoveScc(IN ISipClientConnection* piScc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    objSCCs.Append(piSCC);
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void Reference::NotifierState::RemoveSCC(IN ISipClientConnection* piSCC)
-{
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objSCCs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objSccs.GetSize(); ++i)
     {
-        ISipClientConnection* piTempSCC = objSCCs.GetAt(i);
+        ISipClientConnection* piTempScc = m_objSccs.GetAt(i);
 
-        if (piSCC == piTempSCC)
+        if (piScc == piTempScc)
         {
-            objSCCs.RemoveAt(i);
+            m_objSccs.RemoveAt(i);
             break;
         }
     }
 }
 
 PUBLIC
-Reference::Reference(IN Service* pService_, IN CONST AString& strReferToURI_,
-        IN CONST AString& strReferMethod_, IN CONST Replaces& objReplaces_,
-        IN IMS_BOOL bImplicitRoutingRequired_ /* = IMS_FALSE */) :
-        ServiceMethod(pService_),
-        nState(STATE_INITIATED),
-        strReferToURI(strReferToURI_),
-        objReferMethod(strReferMethod_),
-        pReplaces(IMS_NULL),
-        bFlag_ImplicitSubscription(IMS_FALSE),
-        pReferredMethod(IMS_NULL),
-        piListener(IMS_NULL),
-        pSubState(IMS_NULL),
-        bFlag_ReferenceInOtherDialog(IMS_FALSE),
-        bFlag_ImplicitRoutingRequired(bImplicitRoutingRequired_),
-        objNotifyMessages(IMSList<Message*>()),
-        piNotificationListener(IMS_NULL),
-        pNotifierState(IMS_NULL)
+Reference::Reference(IN Service* pService, IN const AString& strReferToUri,
+        IN const AString& strReferMethod, IN const Replaces& objReplaces,
+        IN IMS_BOOL bImplicitRoutingRequired /*= IMS_FALSE*/) :
+        ServiceMethod(pService),
+        m_nState(STATE_INITIATED),
+        m_strReferToUri(strReferToUri),
+        m_objReferMethod(strReferMethod),
+        m_pReplaces(IMS_NULL),
+        m_bImplicitSubscription(IMS_FALSE),
+        m_pReferredMethod(IMS_NULL),
+        m_piListener(IMS_NULL),
+        m_pSubState(IMS_NULL),
+        m_bReferenceInOtherDialog(IMS_FALSE),
+        m_bImplicitRoutingRequired(bImplicitRoutingRequired),
+        m_objNotifyMessages(IMSList<Message*>()),
+        m_piNotificationListener(IMS_NULL),
+        m_pNotifierState(IMS_NULL)
 {
     const AString& strSessionId =
-            CallControlHelper::GetInstance()->GetSessionIdFromReplaces(&objReplaces_);
+            CallControlHelper::GetInstance()->GetSessionIdFromReplaces(&objReplaces);
 
     if (!strSessionId.IsNULL())
     {
-        pReplaces = new Replaces(objReplaces_);
+        m_pReplaces = new Replaces(objReplaces);
     }
 }
 
 PUBLIC VIRTUAL Reference::~Reference()
 {
-    //---------------------------------------------------------------------------------------------
-
     CleanupOnDestroy();
 
-    if (pReplaces != IMS_NULL)
+    if (m_pReplaces != IMS_NULL)
     {
-        delete pReplaces;
+        delete m_pReplaces;
     }
 
-    while (!objNotifyMessages.IsEmpty())
+    while (!m_objNotifyMessages.IsEmpty())
     {
-        Message* pMessage = objNotifyMessages.GetAt(0);
+        Message* pMessage = m_objNotifyMessages.GetAt(0);
 
         if (pMessage != IMS_NULL)
+        {
             delete pMessage;
+        }
 
-        objNotifyMessages.RemoveAt(0);
+        m_objNotifyMessages.RemoveAt(0);
     }
 
-    if (pSubState != IMS_NULL)
+    if (m_pSubState != IMS_NULL)
     {
-        delete pSubState;
+        delete m_pSubState;
     }
 
-    if (pReferredMethod != IMS_NULL)
+    if (m_pReferredMethod != IMS_NULL)
     {
-        pReferredMethod->SetReferredMessageListener(IMS_NULL);
+        m_pReferredMethod->SetReferredMessageListener(IMS_NULL);
     }
 
-    if (pNotifierState != IMS_NULL)
+    if (m_pNotifierState != IMS_NULL)
     {
-        delete pNotifierState;
+        delete m_pNotifierState;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void Reference::Destroy()
 {
-    //---------------------------------------------------------------------------------------------
-
     CleanupOnDestroy();
     ServiceMethod::Destroy();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Reference::Accept()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsServiceOpen())
     {
         Ims::SetLastError(ImsError::SERVICE_CLOSED);
@@ -207,16 +178,9 @@ IMS_RESULT Reference::Accept()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Reference::ConnectReferMethod(IN Method* pReferMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (pReferMethod == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
@@ -229,9 +193,9 @@ IMS_RESULT Reference::ConnectReferMethod(IN Method* pReferMethod)
         return IMS_FAILURE;
     }
 
-    pReferredMethod = pReferMethod;
+    m_pReferredMethod = pReferMethod;
 
-    if (!pReferredMethod->SetReferredMessageListener(this))
+    if (!m_pReferredMethod->SetReferredMessageListener(this))
     {
         IMS_TRACE_E(0, "Not implemented method", 0, 0, 0);
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
@@ -243,75 +207,23 @@ IMS_RESULT Reference::ConnectReferMethod(IN Method* pReferMethod)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-const SipMethod& Reference::GetReferMethod() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objReferMethod;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& Reference::GetReferToUserId() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strReferToURI;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 const AString& Reference::GetReplaces() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pReplaces == IMS_NULL)
+    if (m_pReplaces == IMS_NULL)
     {
         return AString::ConstNull();
     }
 
     IMS_TRACE_D("___ Replaces: %s ___",
-            SipDebug::GetStr1(pReplaces->ToString(IMS_FALSE), 8, '@').GetStr(), 0, 0);
+            SipDebug::GetStr1(m_pReplaces->ToString(IMS_FALSE), 8, '@').GetStr(), 0, 0);
 
-    return CallControlHelper::GetInstance()->GetSessionIdFromReplaces(pReplaces);
+    return CallControlHelper::GetInstance()->GetSessionIdFromReplaces(m_pReplaces);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_SINT32 Reference::GetState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nState;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Reference::Refer(IN IMS_BOOL bImplicitSubscription)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsServiceOpen())
     {
         Ims::SetLastError(ImsError::SERVICE_CLOSED);
@@ -328,45 +240,45 @@ IMS_RESULT Reference::Refer(IN IMS_BOOL bImplicitSubscription)
 
     ISipDialog* piDialog = GetDialog();
     SipMethod objMethod(SipMethod::REFER);
-    ISipClientConnection* piSCC = IMS_NULL;
+    ISipClientConnection* piScc = IMS_NULL;
 
     if (piDialog == IMS_NULL)
     {
-        piSCC = CreateConnection(objMethod);
+        piScc = CreateConnection(objMethod);
     }
     else
     {
-        piSCC = CreateConnectionL(piDialog, objMethod);
+        piScc = CreateConnectionL(piDialog, objMethod);
     }
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a new SIP connection failed", 0, 0, 0);
         Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
     if (SipFeatures::IsEventHeaderApplicableForRefer(GetSlotId()))
     {
         // Event header
-        piSIPMsg->SetHeader(ISipHeader::EVENT, EVENT_REFER);
+        piSipMsg->SetHeader(ISipHeader::EVENT, EVENT_REFER);
     }
 
     // Refer-To header
-    SipAddress objReferToURI;
+    SipAddress objReferToUri;
 
-    if (!objReferToURI.Create(strReferToURI))
+    if (!objReferToUri.Create(m_strReferToUri))
     {
         IMS_TRACE_E(0, "Parsing Refer-To (URI) failed", 0, 0, 0);
         Ims::SetLastError(ImsError::PARSING_ERROR);
         return IMS_FAILURE;
     }
 
-    if (!objReferMethod.Equals(SipMethod::INVALID))
+    if (!m_objReferMethod.Equals(SipMethod::INVALID))
     {
-        if (objReferToURI.SetParameter(Sip::STR_METHOD, objReferMethod.ToString().GetStr()) !=
+        if (objReferToUri.SetParameter(Sip::STR_METHOD, m_objReferMethod.ToString().GetStr()) !=
                 IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting a 'method' parameter failed", 0, 0, 0);
@@ -375,54 +287,54 @@ IMS_RESULT Reference::Refer(IN IMS_BOOL bImplicitSubscription)
         }
     }
 
-    if (pReplaces != IMS_NULL)
+    if (m_pReplaces != IMS_NULL)
     {
-        objReferToURI.SetHeader(ISipHeader::REPLACES, pReplaces->ToString(IMS_TRUE));
+        objReferToUri.SetHeader(ISipHeader::REPLACES, m_pReplaces->ToString(IMS_TRUE));
     }
 
-    piSIPMsg->SetHeader(ISipHeader::REFER_TO, objReferToURI.ToString());
+    piSipMsg->SetHeader(ISipHeader::REFER_TO, objReferToUri.ToString());
 
     if (SipFeatures::IsReferSubHeaderSupported(GetSlotId()))
     {
         // Supported header : "norefersub"
-        piSIPMsg->AddHeader(ISipHeader::SUPPORTED, "norefersub");
+        piSipMsg->AddHeader(ISipHeader::SUPPORTED, "norefersub");
 
         // Refer-Sub header : "true" / "false"
         if (bImplicitSubscription)
         {
-            piSIPMsg->SetHeader(
+            piSipMsg->SetHeader(
                     ISipHeader::UNKNOWN, TextParser::STR_SMALL_TRUE, SipHeaderName::REFER_SUB);
         }
         else
         {
-            piSIPMsg->SetHeader(
+            piSipMsg->SetHeader(
                     ISipHeader::UNKNOWN, TextParser::STR_SMALL_FALSE, SipHeaderName::REFER_SUB);
         }
     }
 
     // Try to send a SUBSCRIBE request to the network
-    if (!SendNUpdateRequest(IMessage::REFERENCE_REFER, piSCC))
+    if (!SendNUpdateRequest(IMessage::REFERENCE_REFER, piScc))
     {
-        piSCC->Close();
+        piScc->Close();
         return IMS_FAILURE;
     }
 
-    pSubState->SetOperation(SubState::OPERATION_CREATE);
+    m_pSubState->SetOperation(SubState::OPERATION_CREATE);
 
     // Update the subscription state
-    if (!pSubState->UpdateState(piSIPMsg))
+    if (!m_pSubState->UpdateState(piSipMsg))
     {
-        pSubState->SetOperation(SubState::NO_OPERATION);
+        m_pSubState->SetOperation(SubState::NO_OPERATION);
         return IMS_FAILURE;
     }
 
     // Store the flag to indicate if the implicit subscription is requested or not
-    bFlag_ImplicitSubscription = bImplicitSubscription;
+    m_bImplicitSubscription = bImplicitSubscription;
 
     // Update the dialog state for REFER-created dialog (to handle early NOTIFY request)
-    if (bFlag_ReferenceInOtherDialog)
+    if (m_bReferenceInOtherDialog)
     {
-        CheckNCreateDialog(piSCC, IMS_TRUE);
+        CheckNCreateDialog(piScc, IMS_TRUE);
     }
 
     SetState(STATE_PROCEEDING);
@@ -432,16 +344,9 @@ IMS_RESULT Reference::Refer(IN IMS_BOOL bImplicitSubscription)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Reference::Reject()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsServiceOpen())
     {
         Ims::SetLastError(ImsError::SERVICE_CLOSED);
@@ -464,29 +369,9 @@ IMS_RESULT Reference::Reject()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void Reference::SetListener(IN IOnReferenceListener* piListener)
+IMS_RESULT Reference::SetReplaces(IN const AString& strSessionId)
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->piListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_RESULT Reference::SetReplaces(IN CONST AString& strSessionId)
-{
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_INITIATED)
     {
         IMS_TRACE_E(0, "To set the Replaces header, the state MUST be an INITIATED state", 0, 0, 0);
@@ -501,10 +386,10 @@ IMS_RESULT Reference::SetReplaces(IN CONST AString& strSessionId)
         return IMS_FAILURE;
     }
 
-    if (pReplaces != IMS_NULL)
+    if (m_pReplaces != IMS_NULL)
     {
-        delete pReplaces;
-        pReplaces = IMS_NULL;
+        delete m_pReplaces;
+        m_pReplaces = IMS_NULL;
     }
 
     Replaces* pTmpReplaces =
@@ -516,9 +401,9 @@ IMS_RESULT Reference::SetReplaces(IN CONST AString& strSessionId)
         return IMS_FAILURE;
     }
 
-    pReplaces = new Replaces(*pTmpReplaces);
+    m_pReplaces = new Replaces(*pTmpReplaces);
 
-    if (pReplaces == IMS_NULL)
+    if (m_pReplaces == IMS_NULL)
     {
         return IMS_FAILURE;
     }
@@ -526,17 +411,10 @@ IMS_RESULT Reference::SetReplaces(IN CONST AString& strSessionId)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT Reference::AcceptEx(
-        IN IMS_SINT32 nStatusCode /* = 202 */, IN IMS_BOOL b100Trying /* = IMS_TRUE */)
+IMS_RESULT Reference::AcceptEx(IN IMS_SINT32 nStatusCode /*= SipStatusCode::SC_202*/,
+        IN IMS_BOOL b100Trying /*= IMS_TRUE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!SipStatusCode::IsFinalSuccess(nStatusCode))
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
@@ -555,12 +433,14 @@ IMS_RESULT Reference::AcceptEx(
         return IMS_FAILURE;
     }
 
-    ISipServerConnection* piSSC = GetServerConnection(IMessage::REFERENCE_REFER);
+    ISipServerConnection* piSsc = GetServerConnection(IMessage::REFERENCE_REFER);
 
-    if (piSSC == IMS_NULL)
+    if (piSsc == IMS_NULL)
+    {
         return IMS_FAILURE;
+    }
 
-    if (CreateResponse(piSSC, nStatusCode) == IMS_FALSE)
+    if (CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Initializing the response to REFER request failed", 0, 0, 0);
 
@@ -569,7 +449,7 @@ IMS_RESULT Reference::AcceptEx(
     }
 
     // Send a response to REFER request immediately...
-    if (!SendNUpdateResponse(IMessage::REFERENCE_REFER, piSSC))
+    if (!SendNUpdateResponse(IMessage::REFERENCE_REFER, piSsc))
     {
         IMS_TRACE_E(0, "Sending the response to REFER request failed ...", 0, 0, 0);
 
@@ -578,7 +458,7 @@ IMS_RESULT Reference::AcceptEx(
     }
 
     // Check & create a dialog
-    CheckNCreateDialog(piSSC, bFlag_ReferenceInOtherDialog);
+    CheckNCreateDialog(piSsc, m_bReferenceInOtherDialog);
 
     SetState(STATE_REFERRING);
 
@@ -593,17 +473,10 @@ IMS_RESULT Reference::AcceptEx(
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
-        IN CONST AString& strHeadersForReferTo /* = AString::ConstNull() */)
+        IN const AString& strHeadersForReferTo /*= AString::ConstNull()*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsServiceOpen())
     {
         Ims::SetLastError(ImsError::SERVICE_CLOSED);
@@ -620,45 +493,45 @@ IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
 
     ISipDialog* piDialog = GetDialog();
     SipMethod objMethod(SipMethod::REFER);
-    ISipClientConnection* piSCC = IMS_NULL;
+    ISipClientConnection* piScc = IMS_NULL;
 
     if (piDialog == IMS_NULL)
     {
-        piSCC = CreateConnection(objMethod);
+        piScc = CreateConnection(objMethod);
     }
     else
     {
-        piSCC = CreateConnectionL(piDialog, objMethod);
+        piScc = CreateConnectionL(piDialog, objMethod);
     }
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a new SIP connection failed", 0, 0, 0);
         Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
     if (SipFeatures::IsEventHeaderApplicableForRefer(GetSlotId()))
     {
         // Event header
-        piSIPMsg->SetHeader(ISipHeader::EVENT, EVENT_REFER);
+        piSipMsg->SetHeader(ISipHeader::EVENT, EVENT_REFER);
     }
 
     // Refer-To header
-    SipAddress objReferToURI;
+    SipAddress objReferToUri;
 
-    if (!objReferToURI.Create(strReferToURI))
+    if (!objReferToUri.Create(m_strReferToUri))
     {
         IMS_TRACE_E(0, "Parsing Refer-To (URI) failed", 0, 0, 0);
         Ims::SetLastError(ImsError::PARSING_ERROR);
         return IMS_FAILURE;
     }
 
-    if (!objReferMethod.Equals(SipMethod::INVALID))
+    if (!m_objReferMethod.Equals(SipMethod::INVALID))
     {
-        if (objReferToURI.SetParameter(Sip::STR_METHOD, objReferMethod.ToString().GetStr()) !=
+        if (objReferToUri.SetParameter(Sip::STR_METHOD, m_objReferMethod.ToString().GetStr()) !=
                 IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting a 'method' parameter failed", 0, 0, 0);
@@ -667,15 +540,15 @@ IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
         }
     }
 
-    if (pReplaces != IMS_NULL)
+    if (m_pReplaces != IMS_NULL)
     {
-        objReferToURI.SetHeader(ISipHeader::REPLACES, pReplaces->ToString(IMS_TRUE));
+        objReferToUri.SetHeader(ISipHeader::REPLACES, m_pReplaces->ToString(IMS_TRUE));
     }
 
     // Sets the additional header parameters
     if (strHeadersForReferTo.GetLength() > 0)
     {
-        if (objReferToURI.SetHeaders(strHeadersForReferTo, IMS_FALSE) != IMS_SUCCESS)
+        if (objReferToUri.SetHeaders(strHeadersForReferTo, IMS_FALSE) != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting the additional header parameters (%s) failed",
                     strHeadersForReferTo.GetStr(), 0, 0);
@@ -684,49 +557,49 @@ IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
         }
     }
 
-    piSIPMsg->SetHeader(ISipHeader::REFER_TO, objReferToURI.ToString());
+    piSipMsg->SetHeader(ISipHeader::REFER_TO, objReferToUri.ToString());
 
     if (SipFeatures::IsReferSubHeaderSupported(GetSlotId()))
     {
         // Supported header : "norefersub"
-        piSIPMsg->AddHeader(ISipHeader::SUPPORTED, "norefersub");
+        piSipMsg->AddHeader(ISipHeader::SUPPORTED, "norefersub");
 
         // Refer-Sub header : "true" / "false"
         if (bImplicitSubscription)
         {
-            piSIPMsg->SetHeader(
+            piSipMsg->SetHeader(
                     ISipHeader::UNKNOWN, TextParser::STR_SMALL_TRUE, SipHeaderName::REFER_SUB);
         }
         else
         {
-            piSIPMsg->SetHeader(
+            piSipMsg->SetHeader(
                     ISipHeader::UNKNOWN, TextParser::STR_SMALL_FALSE, SipHeaderName::REFER_SUB);
         }
     }
 
     // Try to send a SUBSCRIBE request to the network
-    if (!SendNUpdateRequest(IMessage::REFERENCE_REFER, piSCC))
+    if (!SendNUpdateRequest(IMessage::REFERENCE_REFER, piScc))
     {
-        piSCC->Close();
+        piScc->Close();
         return IMS_FAILURE;
     }
 
-    pSubState->SetOperation(SubState::OPERATION_CREATE);
+    m_pSubState->SetOperation(SubState::OPERATION_CREATE);
 
     // Update the subscription state
-    if (!pSubState->UpdateState(piSIPMsg))
+    if (!m_pSubState->UpdateState(piSipMsg))
     {
-        pSubState->SetOperation(SubState::NO_OPERATION);
+        m_pSubState->SetOperation(SubState::NO_OPERATION);
         return IMS_FAILURE;
     }
 
     // Store the flag to indicate if the implicit subscription is requested or not
-    bFlag_ImplicitSubscription = bImplicitSubscription;
+    m_bImplicitSubscription = bImplicitSubscription;
 
     // Update the dialog state for REFER-created dialog (to handle early NOTIFY request)
-    if (bFlag_ReferenceInOtherDialog)
+    if (m_bReferenceInOtherDialog)
     {
-        CheckNCreateDialog(piSCC, IMS_TRUE);
+        CheckNCreateDialog(piScc, IMS_TRUE);
     }
 
     SetState(STATE_PROCEEDING);
@@ -736,16 +609,9 @@ IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Reference::RejectEx(IN IMS_SINT32 nStatusCode)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!SipStatusCode::IsFinalFailure(nStatusCode))
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
@@ -764,12 +630,14 @@ IMS_RESULT Reference::RejectEx(IN IMS_SINT32 nStatusCode)
         return IMS_FAILURE;
     }
 
-    ISipServerConnection* piSSC = GetServerConnection(IMessage::REFERENCE_REFER);
+    ISipServerConnection* piSsc = GetServerConnection(IMessage::REFERENCE_REFER);
 
-    if (piSSC == IMS_NULL)
+    if (piSsc == IMS_NULL)
+    {
         return IMS_FAILURE;
+    }
 
-    if (CreateResponse(piSSC, nStatusCode) == IMS_FALSE)
+    if (CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Initializing the response to REFER request failed", 0, 0, 0);
 
@@ -778,7 +646,7 @@ IMS_RESULT Reference::RejectEx(IN IMS_SINT32 nStatusCode)
     }
 
     // Send a response to REFER request immediately...
-    if (!SendNUpdateResponse(IMessage::REFERENCE_REFER, piSSC))
+    if (!SendNUpdateResponse(IMessage::REFERENCE_REFER, piSsc))
     {
         IMS_TRACE_E(0, "Sending the response to REFER request failed ...", 0, 0, 0);
 
@@ -793,13 +661,8 @@ IMS_RESULT Reference::RejectEx(IN IMS_SINT32 nStatusCode)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT Reference::SendNotification(IN IMS_SINT32 nSubState, IN CONST ByteArray& objContent,
+IMS_RESULT Reference::SendNotification(IN IMS_SINT32 nSubState, IN const ByteArray& objContent,
         IN IMS_SINT32 nReason /*= ISubscriptionState::REASON_NONE*/,
         IN IMS_SINT32 nExpires /*= (-1)*/)
 {
@@ -824,115 +687,74 @@ IMS_RESULT Reference::SendNotification(IN IMS_SINT32 nSubState, IN CONST ByteArr
     return DoNotification(nSubState, objContent, nReason, nExpires);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-void Reference::SetNotificationListener(IN IOnNotificationListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    piNotificationListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 void Reference::SetImplicitRoutingRequired(IN IMS_BOOL bFlag)
 {
-    //---------------------------------------------------------------------------------------------
-
-    bFlag_ImplicitRoutingRequired = bFlag;
+    m_bImplicitRoutingRequired = bFlag;
 
     // FIXME: If the routing address needs to be provisioned by the application,
     // please add a second argument for it.
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Reference::DispatchMessage(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL Reference::DispatchMessage(IN ImsMessage& objMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    switch (objMSG.GetName())
+    switch (objMsg.GetName())
     {
         case AMSG_REFERENCE_DELIVERED:
-            if (piListener != IMS_NULL)
+            if (m_piListener != IMS_NULL)
             {
-                piListener->OnReference_Delivered(this);
+                m_piListener->OnReference_Delivered(this);
             }
             return IMS_TRUE;
-
         case AMSG_REFERENCE_DELIVERY_FAILED:
-            if (piListener != IMS_NULL)
+            if (m_piListener != IMS_NULL)
             {
-                piListener->OnReference_DeliveryFailed(this);
+                m_piListener->OnReference_DeliveryFailed(this);
             }
             return IMS_TRUE;
-
         case AMSG_REFERENCE_NOTIFY:
-            if (!objNotifyMessages.IsEmpty())
+            if (!m_objNotifyMessages.IsEmpty())
             {
-                Message* pMessage = objNotifyMessages.GetAt(0);
+                Message* pMessage = m_objNotifyMessages.GetAt(0);
 
-                if (piListener != IMS_NULL)
+                if (m_piListener != IMS_NULL)
                 {
-                    piListener->OnReference_NotifyReceived(this, pMessage);
+                    m_piListener->OnReference_NotifyReceived(this, pMessage);
                 }
 
-                objNotifyMessages.RemoveAt(0);
+                m_objNotifyMessages.RemoveAt(0);
                 delete pMessage;
             }
             return IMS_TRUE;
-
         case AMSG_REFERENCE_TERMINATED:
-            if (piListener != IMS_NULL)
+            if (m_piListener != IMS_NULL)
             {
-                piListener->OnReference_Terminated(this);
+                m_piListener->OnReference_Terminated(this);
             }
             return IMS_TRUE;
-
         case AMSG_NOTIFICATION_DELIVERED:
-            if (piNotificationListener != IMS_NULL)
+            if (m_piNotificationListener != IMS_NULL)
             {
-                piNotificationListener->OnNotification_Delivered(this);
+                m_piNotificationListener->OnNotification_Delivered(this);
             }
             return IMS_TRUE;
-
         case AMSG_NOTIFICATION_DELIVERY_FAILED:
-            if (piNotificationListener != IMS_NULL)
+            if (m_piNotificationListener != IMS_NULL)
             {
-                piNotificationListener->OnNotification_DeliveryFailed(
-                        this, LONG_TO_SINT(objMSG.nLparam));
+                m_piNotificationListener->OnNotification_DeliveryFailed(
+                        this, LONG_TO_SINT(objMsg.nLparam));
             }
             return IMS_TRUE;
-
         default:
             break;
     }
 
-    return EngineActivity::DispatchMessage(objMSG);
+    return EngineActivity::DispatchMessage(objMsg);
 }
 
-/*
-
-Remarks
-
-*/
-// IMS_AUTH_SIP_DIGEST
-PROTECTED VIRTUAL IMS_BOOL Reference::SendRequestToChallenge(IN ISipClientConnection* piSCC)
+PROTECTED VIRTUAL IMS_BOOL Reference::SendRequestToChallenge(IN ISipClientConnection* piScc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -940,15 +762,15 @@ PROTECTED VIRTUAL IMS_BOOL Reference::SendRequestToChallenge(IN ISipClientConnec
     // Clear the connection to preserve the SIP connection
     ClearConnection(IMessage::REFERENCE_REFER);
 
-    if (!SendNUpdateRequestEx(IMessage::REFERENCE_REFER, piSCC, MESSAGE_CLASS_RESUBMIT))
+    if (!SendNUpdateRequestEx(IMessage::REFERENCE_REFER, piScc, MESSAGE_CLASS_RESUBMIT))
     {
         // Revert the SIP connection
-        UpdateConnection(IMessage::REFERENCE_REFER, piSCC);
+        UpdateConnection(IMessage::REFERENCE_REFER, piScc);
         return IMS_FALSE;
     }
 
     // Update the subscription state
-    if (!pSubState->UpdateState(piSCC->GetMessage()))
+    if (!m_pSubState->UpdateState(piScc->GetMessage()))
     {
         return IMS_FALSE;
     }
@@ -956,15 +778,8 @@ PROTECTED VIRTUAL IMS_BOOL Reference::SendRequestToChallenge(IN ISipClientConnec
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void Reference::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
 {
-    //---------------------------------------------------------------------------------------------
-
     (void)nErrorCode;
 
     if (GetState() == STATE_PROCEEDING)
@@ -982,35 +797,28 @@ PROTECTED VIRTUAL void Reference::Exception_NotifyError(IN IMS_SINT32 nErrorCode
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL Reference::InitInstance()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pSubState == IMS_NULL)
+    if (m_pSubState == IMS_NULL)
     {
         if (IsMobileOriginated())
         {
-            pSubState = new ImplicitSubscriberState();
+            m_pSubState = new ImplicitSubscriberState();
         }
         else
         {
-            pSubState = new ImplicitNotifierState();
-            pNotifierState = new NotifierState();
+            m_pSubState = new ImplicitNotifierState();
+            m_pNotifierState = new NotifierState();
         }
 
-        if (pSubState == IMS_NULL)
+        if (m_pSubState == IMS_NULL)
         {
             IMS_TRACE_E(0, "Creating a subscription state (MO: %s) failed",
                     TextParser::BooleanToString(IsMobileOriginated()), 0, 0);
             return IMS_FALSE;
         }
 
-        if (!pSubState->CreateEventPackage(EVENT_REFER))
+        if (!m_pSubState->CreateEventPackage(EVENT_REFER))
         {
             IMS_TRACE_E(0, "Creating an event package for an event (refer) failed", 0, 0, 0);
             return IMS_FALSE;
@@ -1022,24 +830,17 @@ PROTECTED VIRTUAL IMS_BOOL Reference::InitInstance()
 
     if (GetDialog() != IMS_NULL)
     {
-        bFlag_ReferenceInOtherDialog = IMS_TRUE;
+        m_bReferenceInOtherDialog = IMS_TRUE;
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Reference::NotifySIPRequest(IN ISipServerConnection* piSSC)
+PROTECTED VIRTUAL IMS_BOOL Reference::NotifySipRequest(IN ISipServerConnection* piSsc)
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_I("Reference - REFER REQUEST RECEIVED ...", 0, 0, 0);
 
-    if (!UpdateRequestOnReceived(IMessage::REFERENCE_REFER, piSSC))
+    if (!UpdateRequestOnReceived(IMessage::REFERENCE_REFER, piSsc))
     {
         IMS_TRACE_E(0, "Updating SIP message failed", 0, 0, 0);
     }
@@ -1054,7 +855,7 @@ PROTECTED VIRTUAL IMS_BOOL Reference::NotifySIPRequest(IN ISipServerConnection* 
             IMS_TRACE_I("INCOMING REFER REQUEST WILL BE HANDLED BY APPLICATION", 0, 0, 0);
 
             // Notify the information which the Reference is received
-            if (!bFlag_ReferenceInOtherDialog)
+            if (!m_bReferenceInOtherDialog)
             {
                 GetService()->HandleReferenceReceived(this);
             }
@@ -1064,7 +865,7 @@ PROTECTED VIRTUAL IMS_BOOL Reference::NotifySIPRequest(IN ISipServerConnection* 
     }
 
     // Send a 202 ACCEPTED to REFER request
-    if (CreateResponse(piSSC, SipStatusCode::SC_202) == IMS_FALSE)
+    if (CreateResponse(piSsc, SipStatusCode::SC_202) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Initializing the response to REFER request failed", 0, 0, 0);
 
@@ -1073,7 +874,7 @@ PROTECTED VIRTUAL IMS_BOOL Reference::NotifySIPRequest(IN ISipServerConnection* 
     }
 
     // Send a response to REFER request immediately...
-    if (!SendNUpdateResponse(IMessage::REFERENCE_REFER, piSSC))
+    if (!SendNUpdateResponse(IMessage::REFERENCE_REFER, piSsc))
     {
         IMS_TRACE_E(0, "Sending the response to REFER request failed ...", 0, 0, 0);
 
@@ -1082,7 +883,7 @@ PROTECTED VIRTUAL IMS_BOOL Reference::NotifySIPRequest(IN ISipServerConnection* 
     }
 
     // Check & create a dialog
-    CheckNCreateDialog(piSSC, bFlag_ReferenceInOtherDialog);
+    CheckNCreateDialog(piSsc, m_bReferenceInOtherDialog);
 
     SetState(STATE_PROCEEDING);
 
@@ -1091,7 +892,7 @@ PROTECTED VIRTUAL IMS_BOOL Reference::NotifySIPRequest(IN ISipServerConnection* 
     // Send a NOTIFY request with 'active' sub-state
     DoNotification(SubState::SUB_STATE_ACTIVE, AString("SIP/2.0 100 Trying"));
 
-    if (!bFlag_ReferenceInOtherDialog)
+    if (!m_bReferenceInOtherDialog)
     {
         GetService()->HandleReferenceReceived(this);
     }
@@ -1099,21 +900,14 @@ PROTECTED VIRTUAL IMS_BOOL Reference::NotifySIPRequest(IN ISipServerConnection* 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void Reference::NotifySIPResponse(IN ISipClientConnection* piSCC)
+PROTECTED VIRTUAL void Reference::NotifySipResponse(IN ISipClientConnection* piScc)
 {
-    const SipMethod& objMethod = piSCC->GetMethod();
-
-    //---------------------------------------------------------------------------------------------
+    const SipMethod& objMethod = piScc->GetMethod();
 
     // REFER-Issuer behavior
     if (objMethod.Equals(SipMethod::REFER))
     {
-        if (!pSubState->UpdateState(piSCC->GetMessage()))
+        if (!m_pSubState->UpdateState(piScc->GetMessage()))
         {
             CloseConnection(IMessage::REFERENCE_REFER);
             SetState(STATE_TERMINATED);
@@ -1124,7 +918,7 @@ PROTECTED VIRTUAL void Reference::NotifySIPResponse(IN ISipClientConnection* piS
         }
 
         // Add the response message received
-        if (!UpdateResponseOnReceived(IMessage::REFERENCE_REFER, piSCC))
+        if (!UpdateResponseOnReceived(IMessage::REFERENCE_REFER, piScc))
         {
             CloseConnection(IMessage::REFERENCE_REFER);
             SetState(STATE_TERMINATED);
@@ -1134,7 +928,7 @@ PROTECTED VIRTUAL void Reference::NotifySIPResponse(IN ISipClientConnection* piS
             return;
         }
 
-        IMS_SINT32 nStatusCode = piSCC->GetStatusCode();
+        IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
         // AUTH_SIP_DIGEST {
         // Handle 401/407 response
@@ -1142,7 +936,7 @@ PROTECTED VIRTUAL void Reference::NotifySIPResponse(IN ISipClientConnection* piS
         {
             // In case of other method except for REGISTER,
             // the UE only supports the authentication algorithm, MD5
-            if (RespondToChallenge(piSCC))
+            if (RespondToChallenge(piScc))
             {
                 return;
             }
@@ -1152,7 +946,7 @@ PROTECTED VIRTUAL void Reference::NotifySIPResponse(IN ISipClientConnection* piS
         // Check the status code
         if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
-            CheckNCreateDialog(piSCC, bFlag_ReferenceInOtherDialog);
+            CheckNCreateDialog(piScc, m_bReferenceInOtherDialog);
 
             CloseConnection(IMessage::REFERENCE_REFER);
 
@@ -1165,19 +959,23 @@ PROTECTED VIRTUAL void Reference::NotifySIPResponse(IN ISipClientConnection* piS
 
             SetState(STATE_TERMINATED);
 
-            if (bFlag_ImplicitSubscription)
+            if (m_bImplicitSubscription)
+            {
                 PostMessage(AMSG_REFERENCE_DELIVERY_FAILED, 0, 0);
+            }
             else
+            {
                 PostMessage(AMSG_REFERENCE_DELIVERED, 0, 0);
+            }
         }
     }
     // REFER-Recipient behavior
     else if (objMethod.Equals(SipMethod::NOTIFY))
     {
         // Update the subscription state for NOTIFY response
-        pSubState->UpdateState(piSCC->GetMessage());
+        m_pSubState->UpdateState(piScc->GetMessage());
 
-        IMS_SINT32 nStatusCode = piSCC->GetStatusCode();
+        IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
         if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
@@ -1188,14 +986,14 @@ PROTECTED VIRTUAL void Reference::NotifySIPResponse(IN ISipClientConnection* piS
             PostMessage(AMSG_NOTIFICATION_DELIVERY_FAILED, 0, nStatusCode);
         }
 
-        if (pNotifierState != IMS_NULL)
+        if (m_pNotifierState != IMS_NULL)
         {
-            pNotifierState->RemoveSCC(piSCC);
+            m_pNotifierState->RemoveScc(piScc);
         }
 
-        piSCC->Close();
+        piScc->Close();
 
-        if (pSubState->GetState() == SubState::STATE_TERMINATED)
+        if (m_pSubState->GetState() == SubState::STATE_TERMINATED)
         {
             SetState(STATE_TERMINATED);
             PostMessage(AMSG_REFERENCE_TERMINATED, 0, 0);
@@ -1205,21 +1003,14 @@ PROTECTED VIRTUAL void Reference::NotifySIPResponse(IN ISipClientConnection* piS
     {
         IMS_TRACE_E(0, "___ NOT HANDLED METHOD (%s) ___", objMethod.ToString().GetStr(), 0, 0);
 
-        piSCC->Close();
+        piScc->Close();
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void Reference::NotifySIPError(
-        IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage)
+PROTECTED VIRTUAL void Reference::NotifySipError(
+        IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
 {
-    const SipMethod& objMethod = piSC->GetMethod();
-
-    //---------------------------------------------------------------------------------------------
+    const SipMethod& objMethod = piSc->GetMethod();
 
     (void)nCode;
     (void)strMessage;
@@ -1236,12 +1027,12 @@ PROTECTED VIRTUAL void Reference::NotifySIPError(
 
         PostMessage(AMSG_NOTIFICATION_DELIVERY_FAILED, 0, 0);
 
-        if (pNotifierState != IMS_NULL)
+        if (m_pNotifierState != IMS_NULL)
         {
-            pNotifierState->RemoveSCC(DYNAMIC_CAST(ISipClientConnection*, piSC));
+            m_pNotifierState->RemoveScc(DYNAMIC_CAST(ISipClientConnection*, piSc));
         }
 
-        piSC->Close();
+        piSc->Close();
     }
 
     if (GetState() == STATE_PROCEEDING)
@@ -1256,22 +1047,15 @@ PROTECTED VIRTUAL void Reference::NotifySIPError(
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_Compare(IN ISipServerConnection* piSSC) const
+PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_Compare(IN ISipServerConnection* piSsc) const
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsServiceOpen())
     {
         return IMS_FALSE;
     }
 
     // Filters some method which does not handle in the reference (implicit subscription)
-    if (!piSSC->GetMethod().Equals(SipMethod::NOTIFY))
+    if (!piSsc->GetMethod().Equals(SipMethod::NOTIFY))
     {
         return IMS_FALSE;
     }
@@ -1283,13 +1067,13 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_Compare(IN ISipServerConnection* pi
         // In case of an early NOTIFY received ...
         if (GetState() == STATE_PROCEEDING)
         {
-            ISipClientConnection* piSCC = GetClientConnection(IMessage::REFERENCE_REFER);
+            ISipClientConnection* piScc = GetClientConnection(IMessage::REFERENCE_REFER);
 
             IMS_TRACE_I("Checks if the early NOTIFY is received or not ...", 0, 0, 0);
 
-            if (piSCC != IMS_NULL)
+            if (piScc != IMS_NULL)
             {
-                piDialog = piSCC->GetDialog();
+                piDialog = piScc->GetDialog();
             }
         }
     }
@@ -1300,7 +1084,7 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_Compare(IN ISipServerConnection* pi
         return IMS_FALSE;
     }
 
-    if (!piDialog->IsSameDialog(piSSC))
+    if (!piDialog->IsSameDialog(piSsc))
     {
         return IMS_FALSE;
     }
@@ -1308,23 +1092,16 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_Compare(IN ISipServerConnection* pi
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_NotifyRequest(IN ISipServerConnection* piSSC)
+PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_NotifyRequest(IN ISipServerConnection* piSsc)
 {
-    const SipMethod& objMethod = piSSC->GetMethod();
-
-    //---------------------------------------------------------------------------------------------
+    const SipMethod& objMethod = piSsc->GetMethod();
 
     if (!objMethod.Equals(SipMethod::NOTIFY))
     {
         // Handling of OPTIONS request
         if (objMethod.Equals(SipMethod::OPTIONS))
         {
-            if (Capabilities::HandleOPTIONSRequestWithinDialog(GetService(), this, piSSC) !=
+            if (Capabilities::HandleOptionsRequestWithinDialog(GetService(), this, piSsc) !=
                     IMS_SUCCESS)
             {
                 return IMS_FALSE;
@@ -1333,10 +1110,10 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_NotifyRequest(IN ISipServerConnecti
             return IMS_TRUE;
         }
 
-        GetService()->SendResponse(piSSC, SipStatusCode::SC_405);
-        piSSC->Close();
+        GetService()->SendResponse(piSsc, SipStatusCode::SC_405);
+        piSsc->Close();
 
-        IMS_TRACE_E(0, "___ UNHANDLED SIP METHOD (%s) ___", piSSC->GetMethod().ToString().GetStr(),
+        IMS_TRACE_E(0, "___ UNHANDLED SIP METHOD (%s) ___", piSsc->GetMethod().ToString().GetStr(),
                 0, 0);
         return IMS_FALSE;
     }
@@ -1345,16 +1122,16 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_NotifyRequest(IN ISipServerConnecti
                 GetSlotId(), GetService()->GetSipProfile()))
     {
         // Checks if Request-URI is matched or not
-        const AString& strRequestURI = piSSC->GetRequestUri();
-        SipAddress objRequestURI(strRequestURI);
+        const AString& strRequestUri = piSsc->GetRequestUri();
+        SipAddress objRequestUri(strRequestUri);
 
-        if (!GetService()->ValidateRequestUri(objRequestURI, piSSC->GetDialog(), IMS_TRUE))
+        if (!GetService()->ValidateRequestUri(objRequestUri, piSsc->GetDialog(), IMS_TRUE))
         {
             IMS_TRACE_D("Request-URI (%s) in mid-dialog request is not matched",
-                    SipDebug::GetUri1(strRequestURI).GetStr(), 0, 0);
+                    SipDebug::GetUri1(strRequestUri).GetStr(), 0, 0);
 
-            GetService()->SendResponse(piSSC, SipStatusCode::SC_404);
-            piSSC->Close();
+            GetService()->SendResponse(piSsc, SipStatusCode::SC_404);
+            piSsc->Close();
             return IMS_FALSE;
         }
     }
@@ -1362,62 +1139,62 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_NotifyRequest(IN ISipServerConnecti
     // Update the dialog info.
     if (GetState() == STATE_PROCEEDING)
     {
-        CheckNCreateDialog(piSSC, bFlag_ReferenceInOtherDialog);
+        CheckNCreateDialog(piSsc, m_bReferenceInOtherDialog);
     }
 
     // Update the subscription state for NOTIFY request
-    if (!pSubState->UpdateState(piSSC->GetMessage()))
+    if (!m_pSubState->UpdateState(piSsc->GetMessage()))
     {
-        piSSC->Close();
+        piSsc->Close();
         return IMS_FALSE;
     }
 
     Message* pMessage =
-            Message::CreateReceivedMessage(GetService()->GetAppConfig(), piSSC->GetMessage());
+            Message::CreateReceivedMessage(GetService()->GetAppConfig(), piSsc->GetMessage());
 
     if (pMessage == IMS_NULL)
     {
         // Internal error ... ???
-        if (GetService()->SendResponse(piSSC, SipStatusCode::SC_500))
+        if (GetService()->SendResponse(piSsc, SipStatusCode::SC_500))
         {
-            pSubState->UpdateState(piSSC->GetMessage());
+            m_pSubState->UpdateState(piSsc->GetMessage());
         }
 
-        piSSC->Close();
+        piSsc->Close();
         return IMS_FALSE;
     }
 
     // Send a 2xx response to NOTIFY request immediately
-    if (GetService()->SendResponse(piSSC, SipStatusCode::SC_200) == IMS_FALSE)
+    if (GetService()->SendResponse(piSsc, SipStatusCode::SC_200) == IMS_FALSE)
     {
         delete pMessage;
-        piSSC->Close();
+        piSsc->Close();
 
         IMS_TRACE_E(0, "Creating & sending the response to NOTIFY request failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
     // Update the subscription state for NOTIFY response
-    if (!pSubState->UpdateState(piSSC->GetMessage()))
+    if (!m_pSubState->UpdateState(piSsc->GetMessage()))
     {
         delete pMessage;
-        piSSC->Close();
+        piSsc->Close();
 
         return IMS_FALSE;
     }
 
-    if (!objNotifyMessages.Append(pMessage))
+    if (!m_objNotifyMessages.Append(pMessage))
     {
         delete pMessage;
 
         IMS_TRACE_E(0, "Queueing NOTIFY message failed", 0, 0, 0);
     }
 
-    piSSC->Close();
+    piSsc->Close();
 
     PostMessage(AMSG_REFERENCE_NOTIFY, 0, 0);
 
-    if (pSubState->GetState() == SubState::STATE_TERMINATED)
+    if (m_pSubState->GetState() == SubState::STATE_TERMINATED)
     {
         PostMessage(AMSG_REFERENCE_TERMINATED, 0, 0);
     }
@@ -1425,30 +1202,23 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_NotifyRequest(IN ISipServerConnecti
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void Reference::ReferredMessage_NotifyOnActive(IN ISipMessage* piSIPMsg)
+PROTECTED VIRTUAL void Reference::ReferredMessage_NotifyOnActive(IN ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
     // 1 In this moment, only includes the start line
 
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         // Nothing to do...
         return;
     }
 
     // 4 ACK ?
-    if (!objReferMethod.Equals(SipMethod::INVALID))
+    if (!m_objReferMethod.Equals(SipMethod::INVALID))
     {
-        if (!objReferMethod.Equals(piSIPMsg->GetMethod()))
+        if (!m_objReferMethod.Equals(piSipMsg->GetMethod()))
         {
             IMS_TRACE_E(0, "Not matched method (Refer-To: %s, Message: %s)",
-                    objReferMethod.ToString().GetStr(), piSIPMsg->GetMethod().ToString().GetStr(),
+                    m_objReferMethod.ToString().GetStr(), piSipMsg->GetMethod().ToString().GetStr(),
                     0);
             return;
         }
@@ -1456,15 +1226,15 @@ PROTECTED VIRTUAL void Reference::ReferredMessage_NotifyOnActive(IN ISipMessage*
     else
     {
         // As a default, INVITE method
-        if (!piSIPMsg->GetMethod().Equals(SipMethod::INVITE))
+        if (!piSipMsg->GetMethod().Equals(SipMethod::INVITE))
         {
             IMS_TRACE_E(0, "Not matched method (Refer-To: empty, Message: %s)",
-                    piSIPMsg->GetMethod().ToString().GetStr(), 0, 0);
+                    piSipMsg->GetMethod().ToString().GetStr(), 0, 0);
             return;
         }
     }
 
-    ByteArray objContent = piSIPMsg->ToByteArray(ISipMessage::OPT_START_LINE);
+    ByteArray objContent = piSipMsg->ToByteArray(ISipMessage::OPT_START_LINE);
 
     if (objContent.GetLength() == 0)
     {
@@ -1475,53 +1245,39 @@ PROTECTED VIRTUAL void Reference::ReferredMessage_NotifyOnActive(IN ISipMessage*
     DoNotification(SubState::SUB_STATE_ACTIVE, objContent);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void Reference::ReferredMessage_NotifyOnTerminated(
-        IN IMS_SINT32 nReasonCode /* = SubState::REASON_NONE */,
-        IN ISipMessage* piSIPMsg /* = IMS_NULL */)
+        IN IMS_SINT32 nReasonCode /*= SubState::REASON_NONE*/,
+        IN ISipMessage* piSipMsg /*= IMS_NULL*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     // 1 In this moment, only includes the start line
 
     ByteArray objContent;
 
-    if (piSIPMsg != IMS_NULL)
+    if (piSipMsg != IMS_NULL)
     {
-        if (!objReferMethod.Equals(piSIPMsg->GetMethod()))
+        if (!m_objReferMethod.Equals(piSipMsg->GetMethod()))
         {
             IMS_TRACE_E(0, "Not matched method (Refer-To: %s, Message: %s)",
-                    objReferMethod.ToString().GetStr(), piSIPMsg->GetMethod().ToString().GetStr(),
+                    m_objReferMethod.ToString().GetStr(), piSipMsg->GetMethod().ToString().GetStr(),
                     0);
             return;
         }
 
-        objContent = piSIPMsg->ToByteArray(ISipMessage::OPT_START_LINE);
+        objContent = piSipMsg->ToByteArray(ISipMessage::OPT_START_LINE);
     }
 
     DoNotification(SubState::SUB_STATE_TERMINATED, objContent, nReasonCode);
 
-    if (pReferredMethod != IMS_NULL)
+    if (m_pReferredMethod != IMS_NULL)
     {
-        pReferredMethod->SetReferredMessageListener(IMS_NULL);
-        pReferredMethod = IMS_NULL;
+        m_pReferredMethod->SetReferredMessageListener(IMS_NULL);
+        m_pReferredMethod = IMS_NULL;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Reference::CleanupOnDestroy()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_TERMINATED)
     {
         ISipDialog* piDialog = GetDialog();
@@ -1539,46 +1295,31 @@ void Reference::CleanupOnDestroy()
     GetService()->DeregisterMethod(this);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 ISipClientConnection* Reference::CreateConnectionL(
-        IN ISipDialog* piDialog, IN CONST SipMethod& objMethod)
+        IN ISipDialog* piDialog, IN const SipMethod& objMethod)
 {
-    ISipClientConnection* piSCC = CreateConnection(piDialog, objMethod);
-
-    //---------------------------------------------------------------------------------------------
+    ISipClientConnection* piScc = CreateConnection(piDialog, objMethod);
 
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
-    if (bFlag_ImplicitRoutingRequired && (piSCC != IMS_NULL))
+    if (m_bImplicitRoutingRequired && (piScc != IMS_NULL))
     {
         const AStringArray& objServiceRoutes = GetService()->GetServiceRoutes();
 
         if (!objServiceRoutes.IsEmpty())
         {
-            piSCC->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
+            piScc->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
         }
     }
 
-    return piSCC;
+    return piScc;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Reference::DoNotification(IN IMS_SINT32 nSubState, IN CONST ByteArray& objContent,
-        IN IMS_SINT32 nReasonCode /* = SubState::REASON_NONE */,
-        IN IMS_SINT32 nExpires /* = (-1) */)
+IMS_RESULT Reference::DoNotification(IN IMS_SINT32 nSubState, IN const ByteArray& objContent,
+        IN IMS_SINT32 nReasonCode /*= SubState::REASON_NONE*/, IN IMS_SINT32 nExpires /*= (-1)*/)
 {
     ISipDialog* piDialog = GetDialog();
-
-    //---------------------------------------------------------------------------------------------
 
     if (piDialog == IMS_NULL)
     {
@@ -1586,33 +1327,33 @@ IMS_RESULT Reference::DoNotification(IN IMS_SINT32 nSubState, IN CONST ByteArray
     }
 
     SipMethod objMethod(SipMethod::NOTIFY);
-    ISipClientConnection* piSCC = GetService()->CreateConnection(piDialog, objMethod);
+    ISipClientConnection* piScc = GetService()->CreateConnection(piDialog, objMethod);
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a new SIP connection failed", 0, 0, 0);
         Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
-    piSCC->SetListener(this);
-    piSCC->SetErrorListener(this);
+    piScc->SetListener(this);
+    piScc->SetErrorListener(this);
 
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
-    if (bFlag_ImplicitRoutingRequired)
+    if (m_bImplicitRoutingRequired)
     {
         const AStringArray& objServiceRoutes = GetService()->GetServiceRoutes();
 
         if (!objServiceRoutes.IsEmpty())
         {
-            piSCC->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
+            piScc->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
         }
     }
 
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Event header
-    piSIPMsg->SetHeader(ISipHeader::EVENT, EVENT_REFER);
+    piSipMsg->SetHeader(ISipHeader::EVENT, EVENT_REFER);
 
     // Subscription-State header
     AString strSubState;
@@ -1674,71 +1415,57 @@ IMS_RESULT Reference::DoNotification(IN IMS_SINT32 nSubState, IN CONST ByteArray
         strSubState += strExpires;
     }
 
-    piSIPMsg->SetHeader(ISipHeader::SUBSCRIPTION_STATE, strSubState);
+    piSipMsg->SetHeader(ISipHeader::SUBSCRIPTION_STATE, strSubState);
 
     // Set contents (message/sipfrag)
     if (!objContent.IsNULL())
     {
-        piSIPMsg->SetHeader(ISipHeader::CONTENT_TYPE, MEDIA_TYPE);
+        piSipMsg->SetHeader(ISipHeader::CONTENT_TYPE, MEDIA_TYPE);
 
-        ISipMessageBodyPart* piSIPBodyPart = piSIPMsg->CreateBodyPart();
+        ISipMessageBodyPart* piSipBodyPart = piSipMsg->CreateBodyPart();
 
-        if (piSIPBodyPart == IMS_NULL)
+        if (piSipBodyPart == IMS_NULL)
         {
             IMS_TRACE_E(0, "Creating a new SIP message body part failed", 0, 0, 0);
-            piSCC->Close();
+            piScc->Close();
             return IMS_FAILURE;
         }
 
-        piSIPBodyPart->SetContent(objContent);
+        piSipBodyPart->SetContent(objContent);
     }
 
     // SIP_MESSAGE_MEDIATOR
-    (void)AdjustMessage(piSCC->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
+    (void)AdjustMessage(piScc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
     // Try to send a NOTIFY request to the network
-    if (piSCC->Send() != IMS_SUCCESS)
+    if (piScc->Send() != IMS_SUCCESS)
     {
         IMS_TRACE_E(
                 0, "Sending a NOTIFY request through the implicit subscription failed", 0, 0, 0);
-        piSCC->Close();
+        piScc->Close();
         return IMS_FAILURE;
     }
 
-    pSubState->UpdateState(piSCC->GetMessage());
+    m_pSubState->UpdateState(piScc->GetMessage());
 
-    if (pNotifierState != IMS_NULL)
+    if (m_pNotifierState != IMS_NULL)
     {
-        pNotifierState->AddSCC(piSCC);
+        m_pNotifierState->AddScc(piScc);
     }
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Reference::SetState(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
+    IMS_TRACE_I("Reference :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
-    IMS_TRACE_I("Reference :: %s to %s", StateToString(this->nState), StateToString(nState), 0);
-
-    this->nState = nState;
+    m_nState = nState;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL const IMS_CHAR* Reference::StateToString(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nState)
     {
         case STATE_INITIATED:

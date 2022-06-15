@@ -1,13 +1,30 @@
-#ifndef _INTERFACE_CORE_SERVICE_LISTENER_H_
-#define _INTERFACE_CORE_SERVICE_LISTENER_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_CORE_SERVICE_LISTENER_H_
+#define INTERFACE_CORE_SERVICE_LISTENER_H_
 
+#include "ImsTypeDef.h"
+
+class ICapabilities;
 class ICoreService;
-class IReasonInfo;
+class IMessage;
 class IPageMessage;
+class IReasonInfo;
 class IReference;
 class ISession;
-class IMessage;
-class ICapabilities;
 
 /**
  * @brief This class provides a listener interface to receive notifications on remotely
@@ -66,7 +83,6 @@ public:
     virtual void CoreService_UnsolicitedNotifyReceived(
             IN ICoreService* piService, IN IMessage* piNotify) = 0;
 
-    //// IMS extensions
     /**
      * @brief Notifies the application when a capability query is received from a remote endpoint.
      *
@@ -77,4 +93,4 @@ public:
             IN ICoreService* piService, IN ICapabilities* piCapabilities) = 0;
 };
 
-#endif  // _INTERFACE_CORE_SERVICE_LISTENER_H_
+#endif

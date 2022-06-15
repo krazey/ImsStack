@@ -178,12 +178,12 @@ public:
     void SessionEarlyMediaUpdateReceived(IN ISession* piSession) override;
     void SessionForkedResponseReceived(
             IN ISession* piSession, IN ISession* piForkedSession) override;
-    void SessionPRAckDelivered(IN ISession* piSession) override;
-    void SessionPRAckDeliveryFailed(IN ISession* piSession) override;
-    void SessionPRAckReceived(IN ISession* piSession) override;
+    void SessionPrackDelivered(IN ISession* piSession) override;
+    void SessionPrackDeliveryFailed(IN ISession* piSession) override;
+    void SessionPrackReceived(IN ISession* piSession) override;
     void SessionProvisionalResponseReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) override;
-    void SessionRPRDeliveryFailed(IN ISession* piSession) override;
-    void SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) override;
+    void SessionRprDeliveryFailed(IN ISession* piSession) override;
+    void SessionRprReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) override;
     void SessionTransactionReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) override;
 

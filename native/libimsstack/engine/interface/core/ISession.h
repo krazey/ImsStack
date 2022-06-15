@@ -1,19 +1,34 @@
-#ifndef _INTERFACE_SESSION_H_
-#define _INTERFACE_SESSION_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SESSION_H_
+#define INTERFACE_SESSION_H_
 
 #include "IServiceMethod.h"
 #include "SipMethod.h"
 
-class ISipHeader;
-class ISipClientConnection;
 class ICapabilities;
-class IReference;
-class ISubscription;
-class ISessionListener;
-class ISessionDescriptor;
 class IMedia;
+class IReference;
 class IRefreshListener;
+class ISessionDescriptor;
+class ISessionListener;
 class ISessionParameter;
+class ISipClientConnection;
+class ISipHeader;
+class ISubscription;
 class Replaces;
 
 /**
@@ -80,11 +95,10 @@ public:
      *                   #IMedia#DIRECTION_SEND\n
      *                   #IMedia#DIRECTION_SEND_RECEIVE
      * @param nCountOfDescriptor Count of the media descriptor on the IMedia
-     * @param bIMSExtension Flag to indicate that IMS extension is supported or not
      * @return Pointer to new IMedia.
      */
-    virtual IMedia* CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
-            IN IMS_SINT32 nCountOfDescriptor = 0, IN IMS_BOOL bIMSExtension = IMS_TRUE) = 0;
+    virtual IMedia* CreateMedia(IN const AString& strType, IN IMS_SINT32 nDirection,
+            IN IMS_SINT32 nCountOfDescriptor = 0) = 0;
 
     /**
      * @brief This method is used for referring the remote endpoint
@@ -96,7 +110,7 @@ public:
      * @return Pointer to new IReference.
      */
     virtual IReference* CreateReference(
-            IN CONST AString& strReferTo, IN CONST AString& strReferMethod) = 0;
+            IN const AString& strReferTo, IN const AString& strReferMethod) = 0;
 
     /**
      * @brief Returns the IMedia that are part of this ISession.
@@ -188,7 +202,7 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT RejectWithDiversion(IN CONST AString& strAlternativeUserAddress) = 0;
+    virtual IMS_RESULT RejectWithDiversion(IN const AString& strAlternativeUserAddress) = 0;
 
     /**
      * @brief Removes a IMedia from the ISession.
@@ -260,15 +274,13 @@ public:
      */
     virtual IMS_RESULT Update() = 0;
 
-    //// IMS extensions
-
     /**
      * @brief Creates a subscription for the specified event using the existing session dialog.
      *
      * @param strEvent Event package name
      * @return Pointer to new ISubscription.
      */
-    virtual ISubscription* CreateSubscription(IN CONST AString& strEvent) = 0;
+    virtual ISubscription* CreateSubscription(IN const AString& strEvent) = 0;
 
     /**
      * @brief Creates a new mid-call or in-dialog transaction using this ISession.
@@ -276,7 +288,7 @@ public:
      * @param objMethod SIP method for this transaction
      * @return Pointer to new ISipClientConnection.
      */
-    virtual ISipClientConnection* CreateTransaction(IN CONST SipMethod& objMethod) = 0;
+    virtual ISipClientConnection* CreateTransaction(IN const SipMethod& objMethod) = 0;
 
     /**
      * @brief Returns the configurations for session control.
@@ -355,7 +367,7 @@ public:
      * @return If the SDP negotiation is allowed for non-RPR message, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL IsSDPNegotiationAllowedForNonRPR() const = 0;
+    virtual IMS_BOOL IsSdpNegotiationAllowedForNonRpr() const = 0;
 
     /**
      * @brief This method can be used a reject a session invitation or a session update depending
@@ -372,7 +384,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT RejectEx(IN IMS_SINT32 nStatusCode,
-            IN CONST AString& strReasonPhrase = AString::ConstNull()) = 0;
+            IN const AString& strReasonPhrase = AString::ConstNull()) = 0;
 
     /**
      * @brief Responds to the incoming UPDATE request with the specified status code
@@ -385,7 +397,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT RespondToEarlyUpdate(
-            IN IMS_SINT32 nStatusCode, IN CONST AString& strReason = AString::ConstNull()) = 0;
+            IN IMS_SINT32 nStatusCode, IN const AString& strReason = AString::ConstNull()) = 0;
 
     /**
      * @brief Responds to the incoming PRACK request with the specified status code
@@ -397,8 +409,8 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT RespondToPRAck(
-            IN IMS_SINT32 nStatusCode, IN CONST AString& strReason = AString::ConstNull()) = 0;
+    virtual IMS_RESULT RespondToPrack(
+            IN IMS_SINT32 nStatusCode, IN const AString& strReason = AString::ConstNull()) = 0;
 
     /**
      * @brief Sends an ACK request for the successful final response
@@ -415,7 +427,7 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SendPRAck() = 0;
+    virtual IMS_RESULT SendPrack() = 0;
 
     /**
      * @brief Sends a provisional response (not RPR) to the incoming INVITE request.
@@ -429,7 +441,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
-            IN CONST AString& strReason = AString::ConstNull(), IN IMS_SINT32 nFlags = 0) = 0;
+            IN const AString& strReason = AString::ConstNull(), IN IMS_SINT32 nFlags = 0) = 0;
 
     /**
      * @brief Sends a reliable provisional response (not provisional response) to
@@ -440,7 +452,7 @@ public:
      * @param nStatusCode SIP status code
      * @param strReason Application-defined any reason phrase;
      *                  default value is pre-defined string
-     * @param bSDP Flag to indicate that the RPR SHOULD contain the SDP if it is available\n
+     * @param bSdp Flag to indicate that the RPR SHOULD contain the SDP if it is available\n
      *             By default, the RPR contains the SDP if it is available
      *             according to the specification.
      * @param nFlags The additional option flags when sending the provisional response\n
@@ -448,8 +460,8 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SendRPR(IN IMS_SINT32 nStatusCode,
-            IN CONST AString& strReason = AString::ConstNull(), IN IMS_BOOL bSDP = IMS_TRUE,
+    virtual IMS_RESULT SendRpr(IN IMS_SINT32 nStatusCode,
+            IN const AString& strReason = AString::ConstNull(), IN IMS_BOOL bSdp = IMS_TRUE,
             IN IMS_SINT32 nFlags = 0) = 0;
 
     /**
@@ -461,7 +473,7 @@ public:
      * @return If the caller preference is successfully set, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetCallerPreference(IN CONST IMSList<AString>& objCallerPreference) = 0;
+    virtual IMS_RESULT SetCallerPreference(IN const IMSList<AString>& objCallerPreference) = 0;
 
     /**
      * @brief Sets the configurations for session control.
@@ -479,7 +491,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      * @note CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
      */
-    virtual IMS_RESULT SetContactParameter(IN CONST AString& strParameter,
+    virtual IMS_RESULT SetContactParameter(IN const AString& strParameter,
             IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */) = 0;
 
     /**
@@ -525,13 +537,13 @@ public:
      *                #REFRESH_POLICY_REMAIN_TIME\n
      *                #REFRESH_POLICY_RATIO
      * @param nCriteriaInterval Criteria interval to determine the refresh interval
-     * @param nValueEorLT Interval value when the refresh duration is equal or less
+     * @param nValueEorLt Interval value when the refresh duration is equal or less
      *                    than the criteria interval
-     * @param nValueGT Interval value when the refresh duration is greater
+     * @param nValueGt Interval value when the refresh duration is greater
      *                 than the criteria interval
      */
     virtual void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
-            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT) = 0;
+            IN IMS_SINT32 nValueEorLt, IN IMS_SINT32 nValueGt) = 0;
 
     /**
      * @brief Terminates or cancel (including cancel to re-INVITE request) a session.
@@ -549,12 +561,12 @@ public:
      *       CANCEL request will be sent and finally the SessionUpdateFailed()
      *       callback will be invoked.
      *
-     * @param bTerminateMethodBYE Flag to indicate that BYE method will be used
+     * @param bTerminateMethodBye Flag to indicate that BYE method will be used
      *                            to terminate the session (default is CANCEL)
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT TerminateEx(IN IMS_BOOL bTerminateMethodBYE = IMS_FALSE) = 0;
+    virtual IMS_RESULT TerminateEx(IN IMS_BOOL bTerminateMethodBye = IMS_FALSE) = 0;
 
     /**
      * @brief Sends an UPDATE request before a final response to the INVITE request is generated.
@@ -750,6 +762,12 @@ public:
         /// ex. VRBT (Video RingBack Tone) for KR operators
         CONFIG_SUPPORT_EARLY_SESSION_MODEL = 0x00000008
     };
+
+    /// Index for the most recent response message
+    enum
+    {
+        INDEX_MOST_RECENT_MESSAGE = 0xFFFFFFFF
+    };
 };
 
-#endif  // _INTERFACE_SESSION_H_
+#endif

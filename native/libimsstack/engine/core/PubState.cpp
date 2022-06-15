@@ -1,22 +1,26 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100424  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
 #include "ISipHeader.h"
+#include "PubState.h"
 #include "SipHeaderName.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
-#include "PubState.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
@@ -53,124 +57,70 @@ const SipHeaderProperty PubState::RESTRICTED_HEADER_PROPERTIES[] =
 
 PUBLIC
 PubState::PubState() :
-        nState(STATE_INIT),
-        nOperation(NO_OPERATION),
-        nPublicationDuration(NO_EXPIRES),
-        strEntityTag(AString::ConstNull()),
-        piSIPMsg(IMS_NULL)
+        m_nState(STATE_INIT),
+        m_nOperation(NO_OPERATION),
+        m_nPublicationDuration(NO_EXPIRES),
+        m_strEntityTag(AString::ConstNull()),
+        m_piSipMsg(IMS_NULL)
 {
 }
 
 PUBLIC
 PubState::~PubState()
 {
-    if (piSIPMsg != IMS_NULL)
+    if (m_piSipMsg != IMS_NULL)
     {
-        piSIPMsg->Destroy();
+        m_piSipMsg->Destroy();
     }
 }
 
 PUBLIC
 void PubState::Clear()
 {
-    //---------------------------------------------------------------------------------------------
-
     // Clear the event package
-    objEventPackage.SetDuration(NO_EXPIRES);
-    objEventPackage.SetEventHeader(IMS_NULL);
+    m_objEventPackage.SetDuration(NO_EXPIRES);
+    m_objEventPackage.SetEventHeader(IMS_NULL);
 
-    nState = STATE_INIT;
-    nOperation = NO_OPERATION;
-    nPublicationDuration = NO_EXPIRES;
-    strEntityTag = AString::ConstNull();
+    m_nState = STATE_INIT;
+    m_nOperation = NO_OPERATION;
+    m_nPublicationDuration = NO_EXPIRES;
+    m_strEntityTag = AString::ConstNull();
 
-    if (piSIPMsg != IMS_NULL)
+    if (m_piSipMsg != IMS_NULL)
     {
-        piSIPMsg->Destroy();
-        piSIPMsg = IMS_NULL;
+        m_piSipMsg->Destroy();
+        m_piSipMsg = IMS_NULL;
     }
 }
 
 PUBLIC
-IMS_BOOL PubState::CreateEventPackage(IN CONST AString& strEvent)
+IMS_BOOL PubState::CreateEventPackage(IN const AString& strEvent)
 {
-    //---------------------------------------------------------------------------------------------
-
     // 1 : Load an event package from configuration
 
-    objEventPackage.SetEvent(strEvent);
+    m_objEventPackage.SetEvent(strEvent);
 
     return IMS_TRUE;
 }
 
 PUBLIC
-IMS_SINT32 PubState::GetDuration() const
+IMS_BOOL PubState::SetHeaders(IN_OUT ISipMessage*& piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return nPublicationDuration;
-}
-
-PUBLIC
-const AString& PubState::GetEntityTag() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strEntityTag;
-}
-
-PUBLIC
-EventPackage* PubState::GetEventPackage()
-{
-    //---------------------------------------------------------------------------------------------
-
-    return &objEventPackage;
-}
-
-PUBLIC
-IMS_SINT32 PubState::GetOperation() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nOperation;
-}
-
-PUBLIC
-IMS_SINT32 PubState::GetState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nState;
-}
-
-PUBLIC
-IMS_BOOL PubState::IsTerminated() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return (GetState() == STATE_TERMINATED);
-}
-
-PUBLIC
-IMS_BOOL PubState::SetHeaders(IN_OUT ISipMessage*& piSIPMsg)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (this->piSIPMsg == IMS_NULL)
+    if (m_piSipMsg == IMS_NULL)
     {
         // Nothing to do ...
         return IMS_TRUE;
     }
 
-    if (piSIPMsg->CopyHeadersAndBodyParts(this->piSIPMsg) != IMS_SUCCESS)
+    if (piSipMsg->CopyHeadersAndBodyParts(m_piSipMsg) != IMS_SUCCESS)
     {
         return IMS_FALSE;
     }
 
     // Set SIP-If-Match header if the entity-tag is present
-    if (!strEntityTag.IsNULL())
+    if (!m_strEntityTag.IsNULL())
     {
-        if (piSIPMsg->SetHeader(ISipHeader::SIP_IF_MATCH, strEntityTag) != IMS_SUCCESS)
+        if (piSipMsg->SetHeader(ISipHeader::SIP_IF_MATCH, m_strEntityTag) != IMS_SUCCESS)
         {
             return IMS_FALSE;
         }
@@ -180,24 +130,14 @@ IMS_BOOL PubState::SetHeaders(IN_OUT ISipMessage*& piSIPMsg)
 }
 
 PUBLIC
-void PubState::SetOperation(IN IMS_SINT32 nOperation)
+IMS_BOOL PubState::UpdateState(IN const ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->nOperation = nOperation;
-}
-
-PUBLIC
-IMS_BOOL PubState::UpdateState(IN CONST ISipMessage* piSIPMsg)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    if (!piSIPMsg->GetMethod().Equals(SipMethod::PUBLISH))
+    if (!piSipMsg->GetMethod().Equals(SipMethod::PUBLISH))
     {
         return IMS_FALSE;
     }
@@ -205,9 +145,9 @@ IMS_BOOL PubState::UpdateState(IN CONST ISipMessage* piSIPMsg)
     // Update the publication state information...
 
     // On PUBLISH request sent ...
-    if (piSIPMsg->GetType() == ISipMessage::TYPE_REQUEST)
+    if (piSipMsg->GetType() == ISipMessage::TYPE_REQUEST)
     {
-        if (!UpdateOnPUBLISHRequest(piSIPMsg))
+        if (!UpdateOnPublishRequest(piSipMsg))
         {
             IMS_TRACE_E(0, "Updating the publication state on PUBLISH request failed", 0, 0, 0);
             return IMS_FALSE;
@@ -216,7 +156,7 @@ IMS_BOOL PubState::UpdateState(IN CONST ISipMessage* piSIPMsg)
     // On PUBLISH response received ...
     else
     {
-        if (!UpdateOnPUBLISHResponse(piSIPMsg))
+        if (!UpdateOnPublishResponse(piSipMsg))
         {
             IMS_TRACE_E(0, "Updating the publication state on PUBLISH response failed", 0, 0, 0);
             return IMS_FALSE;
@@ -229,37 +169,30 @@ IMS_BOOL PubState::UpdateState(IN CONST ISipMessage* piSIPMsg)
 PRIVATE
 IMS_BOOL PubState::UpdateStateOnTxnTimerExpired()
 {
-    //---------------------------------------------------------------------------------------------
-
     SetState(STATE_TERMINATED);
-
     return IMS_TRUE;
 }
 
 PRIVATE
 void PubState::SetState(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
+    IMS_TRACE_I("PUB_STATE : %s - %s >> %s", m_objEventPackage.GetEvent().GetStr(),
+            StateToString(m_nState), StateToString(nState));
 
-    IMS_TRACE_I("PUB_STATE : %s - %s >> %s", objEventPackage.GetEvent().GetStr(),
-            StateToString(this->nState), StateToString(nState));
-
-    this->nState = nState;
+    m_nState = nState;
 }
 
 PRIVATE
-void PubState::StoreMessage(IN CONST ISipMessage* piSIPMsg)
+void PubState::StoreMessage(IN const ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this->piSIPMsg != IMS_NULL)
+    if (m_piSipMsg != IMS_NULL)
     {
-        this->piSIPMsg->Destroy();
+        m_piSipMsg->Destroy();
     }
 
-    this->piSIPMsg = piSIPMsg->Clone();
+    m_piSipMsg = piSipMsg->Clone();
 
-    if (this->piSIPMsg != IMS_NULL)
+    if (m_piSipMsg != IMS_NULL)
     {
         // Remove an inaccessible headers if present
         IMS_UINT32 nCount =
@@ -273,9 +206,13 @@ void PubState::StoreMessage(IN CONST ISipMessage* piSIPMsg)
             if (pProperty->bSingleHeader)
             {
                 if (pProperty->nType != ISipHeader::UNKNOWN)
-                    this->piSIPMsg->RemoveHeader(pProperty->nType);
+                {
+                    m_piSipMsg->RemoveHeader(pProperty->nType);
+                }
                 else
-                    this->piSIPMsg->RemoveHeader(pProperty->nType, pProperty->pszName);
+                {
+                    m_piSipMsg->RemoveHeader(pProperty->nType, pProperty->pszName);
+                }
             }
             else
             {
@@ -283,44 +220,41 @@ void PubState::StoreMessage(IN CONST ISipMessage* piSIPMsg)
 
                 if (pProperty->nType != ISipHeader::UNKNOWN)
                 {
-                    nHeaderCount = this->piSIPMsg->GetHeaderCount(pProperty->nType);
+                    nHeaderCount = m_piSipMsg->GetHeaderCount(pProperty->nType);
 
                     for (IMS_SINT32 j = 0; j < nHeaderCount; ++j)
                     {
-                        this->piSIPMsg->RemoveHeader(pProperty->nType);
+                        m_piSipMsg->RemoveHeader(pProperty->nType);
                     }
                 }
                 else
                 {
-                    nHeaderCount =
-                            this->piSIPMsg->GetHeaderCount(pProperty->nType, pProperty->pszName);
+                    nHeaderCount = m_piSipMsg->GetHeaderCount(pProperty->nType, pProperty->pszName);
 
                     for (IMS_SINT32 j = 0; j < nHeaderCount; ++j)
                     {
-                        this->piSIPMsg->RemoveHeader(pProperty->nType, pProperty->pszName);
+                        m_piSipMsg->RemoveHeader(pProperty->nType, pProperty->pszName);
                     }
                 }
             }
         }
 
         // Remove all the message body parts if present...
-        this->piSIPMsg->RemoveBodyParts();
+        m_piSipMsg->RemoveBodyParts();
     }
 }
 
 PRIVATE
-IMS_BOOL PubState::UpdateOnPUBLISHRequest(IN CONST ISipMessage* piSIPMsg)
+IMS_BOOL PubState::UpdateOnPublishRequest(IN const ISipMessage* piSipMsg)
 {
     AString strHeader;
     ISipHeader* piHeader;
     EventPackage* pEventPackage = GetEventPackage();
 
-    //---------------------------------------------------------------------------------------------
-
     // Extracts a duartion of publication from Expires header
-    if (piSIPMsg->IsHeaderPresent(ISipHeader::EXPIRES_ANY))
+    if (piSipMsg->IsHeaderPresent(ISipHeader::EXPIRES_ANY))
     {
-        strHeader = piSIPMsg->GetHeader(ISipHeader::EXPIRES_ANY);
+        strHeader = piSipMsg->GetHeader(ISipHeader::EXPIRES_ANY);
         piHeader = SipParsingHelper::CreateHeader(ISipHeader::EXPIRES_ANY, strHeader);
 
         if (piHeader != IMS_NULL)
@@ -340,13 +274,13 @@ IMS_BOOL PubState::UpdateOnPUBLISHRequest(IN CONST ISipMessage* piSIPMsg)
     // Extracts an Event header
     if (GetOperation() == OPERATION_CREATE)
     {
-        if (!piSIPMsg->IsHeaderPresent(ISipHeader::EVENT))
+        if (!piSipMsg->IsHeaderPresent(ISipHeader::EVENT))
         {
             IMS_TRACE_E(0, "Mandatory header missing : Event header", 0, 0, 0);
             return IMS_FALSE;
         }
 
-        strHeader = piSIPMsg->GetHeader(ISipHeader::EVENT);
+        strHeader = piSipMsg->GetHeader(ISipHeader::EVENT);
         piHeader = SipParsingHelper::CreateHeader(ISipHeader::EVENT, strHeader);
 
         pEventPackage->SetEventHeader(piHeader);
@@ -355,7 +289,7 @@ IMS_BOOL PubState::UpdateOnPUBLISHRequest(IN CONST ISipMessage* piSIPMsg)
     // Stores an initial/update PUBLISH request for refresh/removal operation
     if (GetOperation() == OPERATION_CREATE || GetOperation() == OPERATION_MODIFY)
     {
-        StoreMessage(piSIPMsg);
+        StoreMessage(piSipMsg);
     }
 
     SetState(STATE_PENDING);
@@ -364,11 +298,9 @@ IMS_BOOL PubState::UpdateOnPUBLISHRequest(IN CONST ISipMessage* piSIPMsg)
 }
 
 PRIVATE
-IMS_BOOL PubState::UpdateOnPUBLISHResponse(IN CONST ISipMessage* piSIPMsg)
+IMS_BOOL PubState::UpdateOnPublishResponse(IN const ISipMessage* piSipMsg)
 {
-    IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
     if (SipStatusCode::Is1XX(nStatusCode))
     {
@@ -380,17 +312,17 @@ IMS_BOOL PubState::UpdateOnPUBLISHResponse(IN CONST ISipMessage* piSIPMsg)
         SetState(STATE_ACTIVE);
 
         // Extracts a duartion of subscription from Expires header
-        if (piSIPMsg->IsHeaderPresent(ISipHeader::EXPIRES_ANY))
+        if (piSipMsg->IsHeaderPresent(ISipHeader::EXPIRES_ANY))
         {
-            AString strHeader = piSIPMsg->GetHeader(ISipHeader::EXPIRES_ANY);
+            AString strHeader = piSipMsg->GetHeader(ISipHeader::EXPIRES_ANY);
             ISipHeader* piHeader =
                     SipParsingHelper::CreateHeader(ISipHeader::EXPIRES_ANY, strHeader);
 
             if (piHeader != IMS_NULL)
             {
-                nPublicationDuration = piHeader->GetValueInt();
+                m_nPublicationDuration = piHeader->GetValueInt();
 
-                if (nPublicationDuration < 0)
+                if (m_nPublicationDuration < 0)
                 {
                     // Transit the state to TERMINATED
                     SetState(STATE_TERMINATED);
@@ -406,7 +338,7 @@ IMS_BOOL PubState::UpdateOnPUBLISHResponse(IN CONST ISipMessage* piSIPMsg)
         }
 
         // Updates the entity-tag
-        strEntityTag = piSIPMsg->GetHeader(ISipHeader::SIP_ETAG);
+        m_strEntityTag = piSipMsg->GetHeader(ISipHeader::SIP_ETAG);
     }
     else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
     {
@@ -417,7 +349,7 @@ IMS_BOOL PubState::UpdateOnPUBLISHResponse(IN CONST ISipMessage* piSIPMsg)
         }
 
         // Clear the entity-tag
-        strEntityTag = AString::ConstNull();
+        m_strEntityTag = AString::ConstNull();
 
         return IMS_TRUE;
     }
@@ -430,7 +362,7 @@ IMS_BOOL PubState::UpdateOnPUBLISHResponse(IN CONST ISipMessage* piSIPMsg)
         }
 
         // Clear the entity-tag
-        strEntityTag = AString::ConstNull();
+        m_strEntityTag = AString::ConstNull();
     }
 
     return IMS_TRUE;
@@ -438,8 +370,6 @@ IMS_BOOL PubState::UpdateOnPUBLISHResponse(IN CONST ISipMessage* piSIPMsg)
 
 PRIVATE GLOBAL const IMS_CHAR* PubState::StateToString(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nState)
     {
         case STATE_INIT:

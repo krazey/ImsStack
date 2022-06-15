@@ -1,17 +1,32 @@
-#ifndef _INTERFACE_CORE_SERVICE_H_
-#define _INTERFACE_CORE_SERVICE_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_CORE_SERVICE_H_
+#define INTERFACE_CORE_SERVICE_H_
 
 #include "IService.h"
 
 class ICapabilities;
+class ICoreServiceListener;
+class IDirectCoreServiceListener;
 class IPageMessage;
 class IPublication;
 class IReference;
 class ISession;
-class ISubscription;
-class ICoreServiceListener;
 class ISipConnectionFactory;
-class IDirectCoreServiceListener;
+class ISubscription;
 
 /**
  * @brief This class provides an interface to give the application the possibility to
@@ -31,7 +46,7 @@ public:
      * @return Pointer to new ICapabilities.
      */
     virtual ICapabilities* CreateCapabilities(
-            IN CONST AString& strFrom, IN CONST AString& strTo) = 0;
+            IN const AString& strFrom, IN const AString& strTo) = 0;
 
     /**
      * @brief Creates a IPageMessage with strFrom as sender, addressed to strTo.
@@ -42,7 +57,7 @@ public:
      *              to send a IPageMessage to
      * @return Pointer to new IPageMessage.
      */
-    virtual IPageMessage* CreatePageMessage(IN CONST AString& strFrom, IN CONST AString& strTo) = 0;
+    virtual IPageMessage* CreatePageMessage(IN const AString& strFrom, IN const AString& strTo) = 0;
 
     /**
      * @brief Creates a IPublication for an event package with strFrom as sender
@@ -59,7 +74,7 @@ public:
      * @return Pointer to new IPublication.
      */
     virtual IPublication* CreatePublication(
-            IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent) = 0;
+            IN const AString& strFrom, IN const AString& strTo, IN const AString& strEvent) = 0;
 
     /**
      * @brief Creates a IReference with strFrom as sender, addressed to strTo and strReferTo
@@ -73,8 +88,8 @@ public:
      *                       e.g. "INVITE", "BYE" or null
      * @return Pointer to new IReference.
      */
-    virtual IReference* CreateReference(IN CONST AString& strFrom, IN CONST AString& strTo,
-            IN CONST AString& strReferTo, IN CONST AString& strReferMethod) = 0;
+    virtual IReference* CreateReference(IN const AString& strFrom, IN const AString& strTo,
+            IN const AString& strReferTo, IN const AString& strReferMethod) = 0;
 
     /**
      * @brief Creates a ISession with strFrom as sender, with strTo as recipient.
@@ -87,7 +102,7 @@ public:
      * @param strTo The recipient SIP or TEL URI with an optional display name
      * @return Pointer to new ISession.
      */
-    virtual ISession* CreateSession(IN CONST AString& strFrom, IN CONST AString& strTo) = 0;
+    virtual ISession* CreateSession(IN const AString& strFrom, IN const AString& strTo) = 0;
 
     /**
      * @brief Creates a ISubscription for an event package with strFrom as sender
@@ -104,7 +119,7 @@ public:
      * @return Pointer to new ISubscription.
      */
     virtual ISubscription* CreateSubscription(
-            IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent) = 0;
+            IN const AString& strFrom, IN const AString& strTo, IN const AString& strEvent) = 0;
 
     /**
      * @brief Returns the display name and public user identity for the ICoreService.
@@ -125,13 +140,12 @@ public:
      */
     virtual void SetListener(IN ICoreServiceListener* piListener) = 0;
 
-    //// IMS extensions
     /**
      * @brief Creates the SIP connection factory.
      *
      * @return Pointer to ISipConnectionFactory
      */
-    virtual ISipConnectionFactory* CreateSIPConnectionFactory() = 0;
+    virtual ISipConnectionFactory* CreateSipConnectionFactory() = 0;
 
     /**
      * @brief Sets a listener for this ICoreService, replacing any previous
@@ -160,4 +174,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_CORE_SERVICE_H_
+#endif

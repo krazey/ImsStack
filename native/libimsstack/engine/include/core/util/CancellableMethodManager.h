@@ -1,24 +1,27 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100518  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _CANCELLABLE_METHOD_MANAGER_H_
-#define _CANCELLABLE_METHOD_MANAGER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef CANCELLABLE_METHOD_MANAGER_H_
+#define CANCELLABLE_METHOD_MANAGER_H_
 
 #include "AString.h"
 #include "IMSMap.h"
 
+class ICancellableMethod;
 class IMutex;
 class ISipServerConnection;
-class ICancellableMethod;
 
 class CancellableMethodManager
 {
@@ -26,25 +29,25 @@ private:
     CancellableMethodManager();
     ~CancellableMethodManager();
 
-private:
-    CancellableMethodManager(IN const CancellableMethodManager& objRHS);
-    CancellableMethodManager& operator=(IN const CancellableMethodManager& objRHS);
+public:
+    CancellableMethodManager(IN const CancellableMethodManager&) = delete;
+    CancellableMethodManager& operator=(IN const CancellableMethodManager&) = delete;
 
 public:
-    IMS_BOOL AddMethod(IN CONST AString& strName, IN ICancellableMethod* piMethod);
-    void RemoveMethod(IN CONST AString& strName);
+    IMS_BOOL AddMethod(IN const AString& strName, IN ICancellableMethod* piMethod);
+    void RemoveMethod(IN const AString& strName);
 
     static CancellableMethodManager* GetInstance();
 
 private:
-    IMS_BOOL HandleCancelRequest(IN ISipServerConnection* piSSC);
+    IMS_BOOL HandleCancelRequest(IN ISipServerConnection* piSsc);
 
 private:
-    friend class SIPConnectionNotifierManagerPrivate;
+    friend class SipConnectionNotifierManagerPrivate;
 
-    IMutex* piLock;
+    IMutex* m_piLock;
     // Name (identifier), Pointer of ICancellableMethod
-    IMSMap<AString, ICancellableMethod*> objCancellableMethods;
+    IMSMap<AString, ICancellableMethod*> m_objCancellableMethods;
 };
 
-#endif  // _CANCELLABLE_METHOD_MANAGER_H_
+#endif

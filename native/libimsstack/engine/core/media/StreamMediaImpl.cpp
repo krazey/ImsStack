@@ -1,46 +1,48 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091208  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
 #include "base/Ims.h"
 #include "media/MediaDescriptor.h"
-#include "media/StreamMediaProposalImpl.h"
 #include "media/StreamMediaImpl.h"
+#include "media/StreamMediaProposalImpl.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-StreamMediaImpl::StreamMediaImpl(IN StreamMedia* pStreamMedia_) :
-        pStreamMediaProposal(IMS_NULL),
-        pStreamMedia(pStreamMedia_)
+StreamMediaImpl::StreamMediaImpl(IN StreamMedia* pStreamMedia) :
+        m_pStreamMedia(pStreamMedia),
+        m_pStreamMediaProposal(IMS_NULL)
 {
-    pStreamMedia->SetMediaListener(this);
+    m_pStreamMedia->SetMediaListener(this);
 }
 
 PUBLIC VIRTUAL StreamMediaImpl::~StreamMediaImpl()
 {
-    if (pStreamMediaProposal != IMS_NULL)
+    if (m_pStreamMediaProposal != IMS_NULL)
     {
-        delete pStreamMediaProposal;
-        pStreamMediaProposal = IMS_NULL;
+        delete m_pStreamMediaProposal;
+        m_pStreamMediaProposal = IMS_NULL;
     }
 }
 
-PRIVATE VIRTUAL IMS_BOOL StreamMediaImpl::Equals(IN CONST IMedia* piMedia) const
+PRIVATE VIRTUAL IMS_BOOL StreamMediaImpl::Equals(IN const IMedia* piMedia) const
 {
     const StreamMediaImpl* pMediaImpl = DYNAMIC_CAST(const StreamMediaImpl*, piMedia);
-
-    //---------------------------------------------------------------------------------------------
 
     if (pMediaImpl == IMS_NULL)
     {
@@ -50,40 +52,9 @@ PRIVATE VIRTUAL IMS_BOOL StreamMediaImpl::Equals(IN CONST IMedia* piMedia) const
     return (this == pMediaImpl);
 }
 
-PRIVATE VIRTUAL IMedia* StreamMediaImpl::GetInterface()
-{
-    //---------------------------------------------------------------------------------------------
-
-    return this;
-}
-
-PRIVATE VIRTUAL Media* StreamMediaImpl::GetMedia() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia;
-}
-
-// IMedia interface
-PRIVATE VIRTUAL IMS_SINT32 StreamMediaImpl::GetDirection() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->GetDirection();
-}
-
 PRIVATE VIRTUAL IMSList<IMediaDescriptor*> StreamMediaImpl::GetMediaDescriptors() const
 {
-    const IMSList<MediaDescriptor*>& objMediaDescriptors = pStreamMedia->GetMediaDescriptors();
-
-    //---------------------------------------------------------------------------------------------
-    /*
-    if (ImsError::GetLastError() != ImsError::NO_ERROR)
-    {
-        IMS_TRACE_E(0, "Getting MediaDescriptors failed - %d", ImsError::GetLastError(), 0, 0);
-        return IMSList<IMediaDescriptor*>();
-    }
-    */
+    const IMSList<MediaDescriptor*>& objMediaDescriptors = m_pStreamMedia->GetMediaDescriptors();
 
     if (objMediaDescriptors.IsEmpty())
     {
@@ -101,15 +72,13 @@ PRIVATE VIRTUAL IMSList<IMediaDescriptor*> StreamMediaImpl::GetMediaDescriptors(
     return objIMediaDescriptors;
 }
 
-PRIVATE VIRTUAL IMedia* StreamMediaImpl::GetProposal(
-        IN IMS_BOOL bIMSExtension /* = IMS_TRUE */) const
+PRIVATE VIRTUAL IMedia* StreamMediaImpl::GetProposal() const
 {
-    //---------------------------------------------------------------------------------------------
-
     if ((GetState() != STATE_ACTIVE) || (GetUpdateState() != UPDATE_MODIFIED))
     {
-        if (bIMSExtension && (GetState() == STATE_ACTIVE) && (GetUpdateState() == UPDATE_REMOVED))
+        if ((GetState() == STATE_ACTIVE) && (GetUpdateState() == UPDATE_REMOVED))
         {
+            // no-op
         }
         else
         {
@@ -118,63 +87,19 @@ PRIVATE VIRTUAL IMedia* StreamMediaImpl::GetProposal(
         }
     }
 
-    return pStreamMediaProposal;
-}
-
-PRIVATE VIRTUAL IMS_SINT32 StreamMediaImpl::GetState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->GetState();
-}
-
-PRIVATE VIRTUAL IMS_SINT32 StreamMediaImpl::GetUpdateState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->GetUpdateState();
-}
-
-PRIVATE VIRTUAL IMS_RESULT StreamMediaImpl::SetDirection(IN IMS_SINT32 nDirection)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->SetDirection(nDirection);
-}
-
-PRIVATE VIRTUAL IMediaDescriptor* StreamMediaImpl::GetMediaDescriptor() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->GetMediaDescriptor();
-}
-
-PRIVATE VIRTUAL IMS_SINT32 StreamMediaImpl::GetType() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->GetType();
-}
-
-PRIVATE VIRTUAL void StreamMediaImpl::RemoveMediaDescriptor(IN IMS_UINT32 nPosition)
-{
-    //---------------------------------------------------------------------------------------------
-
-    pStreamMedia->RemoveMediaDescriptor(nPosition);
+    return m_pStreamMediaProposal;
 }
 
 PRIVATE VIRTUAL void StreamMediaImpl::OnMedia_FictitiousMediaCreated(IN Media* pMedia)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pStreamMedia != pMedia)
+    if (m_pStreamMedia != pMedia)
     {
         IMS_TRACE_E(0, "MEDIA MISMATCHED", 0, 0, 0);
         return;
     }
 
     StreamMediaProposal* pMediaProposal =
-            DYNAMIC_CAST(StreamMediaProposal*, pStreamMedia->GetProposal());
+            DYNAMIC_CAST(StreamMediaProposal*, m_pStreamMedia->GetProposal());
 
     if (pMediaProposal == IMS_NULL)
     {
@@ -183,14 +108,14 @@ PRIVATE VIRTUAL void StreamMediaImpl::OnMedia_FictitiousMediaCreated(IN Media* p
         return;
     }
 
-    if (pStreamMediaProposal != IMS_NULL)
+    if (m_pStreamMediaProposal != IMS_NULL)
     {
-        delete pStreamMediaProposal;
+        delete m_pStreamMediaProposal;
     }
 
-    pStreamMediaProposal = new StreamMediaProposalImpl(pMediaProposal);
+    m_pStreamMediaProposal = new StreamMediaProposalImpl(pMediaProposal);
 
-    if (pStreamMediaProposal == IMS_NULL)
+    if (m_pStreamMediaProposal == IMS_NULL)
     {
         IMS_TRACE_E(0, "NO MEMORY", 0, 0, 0);
         return;
@@ -199,17 +124,15 @@ PRIVATE VIRTUAL void StreamMediaImpl::OnMedia_FictitiousMediaCreated(IN Media* p
 
 PRIVATE VIRTUAL void StreamMediaImpl::OnMedia_FictitiousMediaDestroyed(IN Media* pMedia)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pStreamMedia != pMedia)
+    if (m_pStreamMedia != pMedia)
     {
         IMS_TRACE_E(0, "MEDIA MISMATCHED", 0, 0, 0);
         return;
     }
 
-    if (pStreamMediaProposal != IMS_NULL)
+    if (m_pStreamMediaProposal != IMS_NULL)
     {
-        delete pStreamMediaProposal;
-        pStreamMediaProposal = IMS_NULL;
+        delete m_pStreamMediaProposal;
+        m_pStreamMediaProposal = IMS_NULL;
     }
 }

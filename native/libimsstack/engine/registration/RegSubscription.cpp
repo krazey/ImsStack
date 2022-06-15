@@ -629,7 +629,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::SendRequestToChallenge(IN ISipClientCo
     return IMS_TRUE;
 }
 
-PRIVATE VIRTUAL void RegSubscription::NotifySIPResponse(IN ISipClientConnection* piScc)
+PRIVATE VIRTUAL void RegSubscription::NotifySipResponse(IN ISipClientConnection* piScc)
 {
     ISipMessage* piSipMsg = piScc->GetMessage();
     const SipMethod& objMethod = piSipMsg->GetMethod();
@@ -758,7 +758,7 @@ PRIVATE VIRTUAL void RegSubscription::NotifySIPResponse(IN ISipClientConnection*
     // 3 check "nPendingOperation" member field
 }
 
-PRIVATE VIRTUAL void RegSubscription::NotifySIPError(
+PRIVATE VIRTUAL void RegSubscription::NotifySipError(
         IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
 {
     const SipMethod& objMethod = piSc->GetMethod();
@@ -1707,7 +1707,7 @@ IMS_BOOL RegSubscription::ValidateRequestUri(
 
 PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSubscription* pRegSub)
 {
-    AString strAor = pRegSub->GetUserAOR()->ToString();
+    AString strAor = pRegSub->GetUserAor()->ToString();
     RegStateTracker* pStateTracker = pRegSub->m_pRegStateTracker.Get();
     ISipClientConnection* piScc = IMS_NULL;
     IMS_BOOL bOverwriteTarget = IMS_FALSE;
@@ -1729,7 +1729,7 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
     }
     else
     {
-        if (!pRegSub->GetUserAOR()->IsSchemeSip() && !pRegSub->GetUserAOR()->IsSchemeSips())
+        if (!pRegSub->GetUserAor()->IsSchemeSip() && !pRegSub->GetUserAor()->IsSchemeSips())
         {
             bOverwriteTarget = IMS_TRUE;
             strAor = ImsIdentity::GetAnonymousUserId();
@@ -1785,7 +1785,7 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
         // Re-write the Request-URI & To header if the URI is not "sip" or "sips" URI
         if (bOverwriteTarget)
         {
-            strAor = pRegSub->GetUserAOR()->ToString();
+            strAor = pRegSub->GetUserAor()->ToString();
 
             if (piScc->SetRequestUri(strAor) != IMS_SUCCESS)
             {

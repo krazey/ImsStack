@@ -1,22 +1,26 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20110517  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SUBSCRIBER_TRACKER_H_
+#define SUBSCRIBER_TRACKER_H_
 
-    Description
-
-*/
-
-#ifndef _SUBSCRIBER_TRACKER_H_
-#define _SUBSCRIBER_TRACKER_H_
-
-#include "IMSList.h"
 #include "IMSMap.h"
-#include "SipAddress.h"
+#include "IMSList.h"
+
 #include "ISubscriberInfoListener.h"
+#include "SipAddress.h"
 
 class IMutex;
 
@@ -24,22 +28,23 @@ class SubscriberTracker : public ISubscriberInfoListener
 {
 private:
     SubscriberTracker();
-    SubscriberTracker(IN const SubscriberTracker& objRHS);
-    SubscriberTracker& operator=(IN const SubscriberTracker& objRHS);
 
 public:
     virtual ~SubscriberTracker();
 
+    SubscriberTracker(IN const SubscriberTracker&) = delete;
+    SubscriberTracker& operator=(IN const SubscriberTracker&) = delete;
+
 public:
-    const AString& GetSubscriberId(IN IMS_SINT32 nSlotId, IN const AString& strAOR) const;
-    const AString& GetSubscriberId(IN IMS_SINT32 nSlotId, IN const SipAddress* pAOR) const;
+    const AString& GetSubscriberId(IN IMS_SINT32 nSlotId, IN const AString& strAor) const;
+    const AString& GetSubscriberId(IN IMS_SINT32 nSlotId, IN const SipAddress* pAor) const;
 
     static SubscriberTracker* GetInstance();
 
 protected:
     // ISubscriberInfoListener class
-    virtual void SubscriberInfo_UpdateIMPU(IN IMS_SINT32 nSlotId, IN const AString& strId,
-            IN const AString& strOld, IN const AString& strNew);
+    void SubscriberInfo_UpdateIMPU(IN IMS_SINT32 nSlotId, IN const AString& strId,
+            IN const AString& strOld, IN const AString& strNew) override;
 
 private:
     IMSMap<AString, IMSList<SipAddress*>>* GetSubscribers(IN IMS_SINT32 nSlotId) const;
@@ -49,10 +54,10 @@ private:
 private:
     friend class EngineLoader;
 
-    IMutex* piLock;
+    IMutex* m_piLock;
     // < SubscriberConfig id, IMPUs >
     // DEFAULT_ID : "default"
-    IMSMap<AString, IMSList<SipAddress*>>* pSubscriberMaps;
+    IMSMap<AString, IMSList<SipAddress*>>* m_pSubscriberMaps;
 };
 
-#endif  // _SUBSCRIBER_TRACKER_H_
+#endif

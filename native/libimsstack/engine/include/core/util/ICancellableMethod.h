@@ -1,54 +1,26 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100518  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _INTERFACE_CANCELLABLE_METHOD_H_
-#define _INTERFACE_CANCELLABLE_METHOD_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_CANCELLABLE_METHOD_H_
+#define INTERFACE_CANCELLABLE_METHOD_H_
 
 class ICancellableMethod
 {
 public:
-    /*
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
-    virtual IMS_BOOL Cancellable_Compare(IN ISipServerConnection* piSSC_CANCEL) const = 0;
-
-    /*
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
-    virtual IMS_BOOL Cancellable_NotifyRequest(IN ISipServerConnection* piSSC_CANCEL) = 0;
+    virtual IMS_BOOL Cancellable_Compare(IN ISipServerConnection* piSscCancel) const = 0;
+    virtual IMS_BOOL Cancellable_NotifyRequest(IN ISipServerConnection* piSscCancel) = 0;
 };
 
-#endif  // _INTERFACE_CANCELLABLE_METHOD_H_
+#endif

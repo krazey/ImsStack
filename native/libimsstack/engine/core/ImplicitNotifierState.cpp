@@ -1,27 +1,32 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100420  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
 #include "ISipHeader.h"
+#include "ImplicitNotifierState.h"
 #include "Sip.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
-#include "ImplicitNotifierState.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
+// clang-format off
 PUBLIC GLOBAL IMS_SINT32
-ImplicitNotifierState::STATE[SubState::STATE_MAX][ImplicitNotifierState::MESSAGE_MAX] =
+ImplicitNotifierState::s_nState[SubState::STATE_MAX][ImplicitNotifierState::MESSAGE_MAX] =
 {
     // STATE_INVALID
     {
@@ -40,6 +45,7 @@ ImplicitNotifierState::STATE[SubState::STATE_MAX][ImplicitNotifierState::MESSAGE
         SubState::STATE_INVALID
     },
 };
+// clang-format on
 
 PUBLIC
 ImplicitNotifierState::ImplicitNotifierState() :
@@ -48,26 +54,22 @@ ImplicitNotifierState::ImplicitNotifierState() :
     InitializeStateTable();
 }
 
-PUBLIC VIRTUAL ImplicitNotifierState::~ImplicitNotifierState() {}
-
-PUBLIC VIRTUAL IMS_BOOL ImplicitNotifierState::UpdateState(IN CONST ISipMessage* piSIPMsg)
+PUBLIC VIRTUAL IMS_BOOL ImplicitNotifierState::UpdateState(IN const ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    const SipMethod& objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSipMsg->GetMethod();
 
     // Update the subscription state information...
     if (objMethod.Equals(SipMethod::REFER))
     {
         // On REFER request received ...
-        if (piSIPMsg->GetType() == ISipMessage::TYPE_REQUEST)
+        if (piSipMsg->GetType() == ISipMessage::TYPE_REQUEST)
         {
-            if (!UpdateOnREFERRequest(piSIPMsg))
+            if (!UpdateOnReferRequest(piSipMsg))
             {
                 IMS_TRACE_E(0, "Updating the notifier state on REFER request failed", 0, 0, 0);
                 return IMS_FALSE;
@@ -79,7 +81,7 @@ PUBLIC VIRTUAL IMS_BOOL ImplicitNotifierState::UpdateState(IN CONST ISipMessage*
             // Reset the flag for subscription duration changed
             SetDurationUpdated(IMS_FALSE);
 
-            if (!UpdateOnREFERResponse(piSIPMsg))
+            if (!UpdateOnReferResponse(piSipMsg))
             {
                 IMS_TRACE_E(0, "Updating the notifier state on REFER response failed", 0, 0, 0);
                 return IMS_FALSE;
@@ -89,12 +91,12 @@ PUBLIC VIRTUAL IMS_BOOL ImplicitNotifierState::UpdateState(IN CONST ISipMessage*
     else if (objMethod.Equals(SipMethod::NOTIFY))
     {
         // On NOTIFY request sent ...
-        if (piSIPMsg->GetType() == ISipMessage::TYPE_REQUEST)
+        if (piSipMsg->GetType() == ISipMessage::TYPE_REQUEST)
         {
             // Reset the flag for subscription duration changed
             SetDurationUpdated(IMS_FALSE);
 
-            if (!UpdateOnNOTIFYRequest(piSIPMsg))
+            if (!UpdateOnNotifyRequest(piSipMsg))
             {
                 IMS_TRACE_E(0, "Updating the notifier state on NOTIFY request failed", 0, 0, 0);
                 return IMS_FALSE;
@@ -103,7 +105,7 @@ PUBLIC VIRTUAL IMS_BOOL ImplicitNotifierState::UpdateState(IN CONST ISipMessage*
         // On NOTIFY response received ...
         else
         {
-            if (!UpdateOnNOTIFYResponse(piSIPMsg))
+            if (!UpdateOnNotifyResponse(piSipMsg))
             {
                 IMS_TRACE_E(0, "Updating the notifier state on NOTIFY response failed", 0, 0, 0);
                 return IMS_FALSE;
@@ -111,12 +113,12 @@ PUBLIC VIRTUAL IMS_BOOL ImplicitNotifierState::UpdateState(IN CONST ISipMessage*
         }
     }
 
-    IMS_SINT32 nSIPMsg = TranslateMessage(piSIPMsg);
+    IMS_SINT32 nSipMsg = TranslateMessage(piSipMsg);
 
-    if (nSIPMsg == MESSAGE_INVALID)
+    if (nSipMsg == MESSAGE_INVALID)
     {
         IMS_TRACE_I(
-                "SUBS_STATE - NO TRANSITION (%s)", piSIPMsg->GetMethod().ToString().GetStr(), 0, 0);
+                "SUBS_STATE - NO TRANSITION (%s)", piSipMsg->GetMethod().ToString().GetStr(), 0, 0);
         return IMS_TRUE;
     }
 
@@ -124,21 +126,19 @@ PUBLIC VIRTUAL IMS_BOOL ImplicitNotifierState::UpdateState(IN CONST ISipMessage*
     // then change the state.
     IMS_SINT32 nState = GetState();
 
-    if (STATE[nState][nSIPMsg] != STATE_INVALID)
+    if (s_nState[nState][nSipMsg] != STATE_INVALID)
     {
-        SetState(piSIPMsg, STATE[nState][nSIPMsg]);
+        SetState(piSipMsg, s_nState[nState][nSipMsg]);
     }
 
     return IMS_TRUE;
 }
 
 PRIVATE
-IMS_SINT32 ImplicitNotifierState::TranslateMessage(IN CONST ISipMessage* piSIPMsg)
+IMS_SINT32 ImplicitNotifierState::TranslateMessage(IN const ISipMessage* piSipMsg)
 {
-    IMS_SINT32 nMsgType = piSIPMsg->GetType();
-    const SipMethod& objMethod = piSIPMsg->GetMethod();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nMsgType = piSipMsg->GetType();
+    const SipMethod& objMethod = piSipMsg->GetMethod();
 
     if (nMsgType == ISipMessage::TYPE_REQUEST)
     {
@@ -151,16 +151,22 @@ IMS_SINT32 ImplicitNotifierState::TranslateMessage(IN CONST ISipMessage* piSIPMs
             IMS_SINT32 nSubStateValue = GetSubState();
 
             if (nSubStateValue == SUB_STATE_ACTIVE)
+            {
                 return MESSAGE_NOTIFY_ACTIVE;
+            }
             else if (nSubStateValue == SUB_STATE_PENDING)
+            {
                 return MESSAGE_NOTIFY_PENDING;
+            }
             else if (nSubStateValue == SUB_STATE_TERMINATED)
+            {
                 return MESSAGE_NOTIFY_TERMINATED;
+            }
         }
     }
     else if (nMsgType == ISipMessage::TYPE_RESPONSE)
     {
-        IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
+        IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
         if (objMethod.Equals(SipMethod::REFER))
         {
@@ -197,16 +203,24 @@ IMS_SINT32 ImplicitNotifierState::TranslateMessage(IN CONST ISipMessage* piSIPMs
             else if (SipStatusCode::IsFinalSuccess(nStatusCode))
             {
                 if (GetSubState() == SUB_STATE_TERMINATED)
+                {
                     return MESSAGE_NOTIFY_XXX_TERMINATED;
+                }
                 else
+                {
                     return MESSAGE_NOTIFY_2XX;
+                }
             }
             else
             {
                 if (GetSubState() == SUB_STATE_TERMINATED)
+                {
                     return MESSAGE_NOTIFY_XXX_TERMINATED;
+                }
                 else
+                {
                     return MESSAGE_NOTIFY_NON2XX;
+                }
             }
         }
     }
@@ -215,31 +229,29 @@ IMS_SINT32 ImplicitNotifierState::TranslateMessage(IN CONST ISipMessage* piSIPMs
 }
 
 PRIVATE
-IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYRequest(IN CONST ISipMessage* piSIPMsg)
+IMS_BOOL ImplicitNotifierState::UpdateOnNotifyRequest(IN const ISipMessage* piSipMsg)
 {
     AString strHeader;
     ISipHeader* piHeader;
     EventPackage* pEventPackage = GetEventPackage();
 
-    //---------------------------------------------------------------------------------------------
-
     // In such a case (of a subscription-creating NOTIFY), Event header needs to be updated.
     if (pEventPackage->GetEventHeader() == IMS_NULL)
     {
-        if (!piSIPMsg->IsHeaderPresent(ISipHeader::EVENT))
+        if (!piSipMsg->IsHeaderPresent(ISipHeader::EVENT))
         {
             IMS_TRACE_E(0, "Mandatory header missing : Event header", 0, 0, 0);
             return IMS_FALSE;
         }
 
-        strHeader = piSIPMsg->GetHeader(ISipHeader::EVENT);
+        strHeader = piSipMsg->GetHeader(ISipHeader::EVENT);
         piHeader = SipParsingHelper::CreateHeader(ISipHeader::EVENT, strHeader);
 
         pEventPackage->SetEventHeader(piHeader);
     }
 
     // Extracts a subs-state & "expires" parameter from Subscription-State header
-    strHeader = piSIPMsg->GetHeader(ISipHeader::SUBSCRIPTION_STATE);
+    strHeader = piSipMsg->GetHeader(ISipHeader::SUBSCRIPTION_STATE);
     piHeader = SipParsingHelper::CreateHeader(ISipHeader::SUBSCRIPTION_STATE, strHeader);
 
     if (piHeader == IMS_NULL)
@@ -318,11 +330,9 @@ IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYRequest(IN CONST ISipMessage* piSI
 }
 
 PRIVATE
-IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYResponse(IN CONST ISipMessage* piSIPMsg)
+IMS_BOOL ImplicitNotifierState::UpdateOnNotifyResponse(IN const ISipMessage* piSipMsg)
 {
-    IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
     if (SipStatusCode::Is1XX(nStatusCode))
     {
@@ -359,15 +369,15 @@ IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYResponse(IN CONST ISipMessage* piS
         if (nStatusCode == SipStatusCode::SC_481)
         {
             // Transit the state to TERMINATED
-            SetState(piSIPMsg, STATE_TERMINATED);
+            SetState(piSipMsg, STATE_TERMINATED);
         }
         else
         {
             // If no "Retry-After" header ...
-            if (!piSIPMsg->IsHeaderPresent(ISipHeader::RETRY_AFTER_ANY))
+            if (!piSipMsg->IsHeaderPresent(ISipHeader::RETRY_AFTER_ANY))
             {
                 // Transit the state to TERMINATED
-                SetState(piSIPMsg, STATE_TERMINATED);
+                SetState(piSipMsg, STATE_TERMINATED);
             }
         }
     }
@@ -376,23 +386,21 @@ IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYResponse(IN CONST ISipMessage* piS
 }
 
 PRIVATE
-IMS_BOOL ImplicitNotifierState::UpdateOnREFERRequest(IN CONST ISipMessage* piSIPMsg)
+IMS_BOOL ImplicitNotifierState::UpdateOnReferRequest(IN const ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Extracts an Event header
     if (GetState() == STATE_INIT)
     {
         AString strHeader;
 
-        if (!piSIPMsg->IsHeaderPresent(ISipHeader::EVENT))
+        if (!piSipMsg->IsHeaderPresent(ISipHeader::EVENT))
         {
             IMS_TRACE_D("No Event header in REFER", 0, 0, 0);
             strHeader = Sip::STR_REFER;
         }
         else
         {
-            strHeader = piSIPMsg->GetHeader(ISipHeader::EVENT);
+            strHeader = piSipMsg->GetHeader(ISipHeader::EVENT);
         }
 
         ISipHeader* piHeader = SipParsingHelper::CreateHeader(ISipHeader::EVENT, strHeader);
@@ -404,17 +412,15 @@ IMS_BOOL ImplicitNotifierState::UpdateOnREFERRequest(IN CONST ISipMessage* piSIP
 }
 
 PRIVATE
-IMS_BOOL ImplicitNotifierState::UpdateOnREFERResponse(IN CONST ISipMessage* piSIPMsg)
+IMS_BOOL ImplicitNotifierState::UpdateOnReferResponse(IN const ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() == STATE_TERMINATED)
     {
         IMS_TRACE_D("Subscription is already in TERMINATED state...", 0, 0, 0);
         return IMS_TRUE;
     }
 
-    IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
+    IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
     if (SipStatusCode::Is1XX(nStatusCode))
     {
@@ -429,14 +435,14 @@ IMS_BOOL ImplicitNotifierState::UpdateOnREFERResponse(IN CONST ISipMessage* piSI
         if (GetOperation() == OPERATION_REMOVE)
         {
             // Transit the state to TERMINATED
-            SetState(piSIPMsg, STATE_TERMINATED);
+            SetState(piSipMsg, STATE_TERMINATED);
         }
         else
         {
             // In case of an initial SUBSCRIBE request sent ...
             if (GetState() == STATE_TERMINATED)
             {
-                SetState(piSIPMsg, STATE_INIT);
+                SetState(piSipMsg, STATE_INIT);
             }
         }
 
@@ -447,7 +453,7 @@ IMS_BOOL ImplicitNotifierState::UpdateOnREFERResponse(IN CONST ISipMessage* piSI
         if (GetState() == STATE_SUBSCRIBING)
         {
             // Transit the state to TERMINATED
-            SetState(piSIPMsg, STATE_TERMINATED);
+            SetState(piSipMsg, STATE_TERMINATED);
         }
     }
 
@@ -460,17 +466,17 @@ PRIVATE GLOBAL void ImplicitNotifierState::InitializeStateTable()
     IMS_SINT32 i;
     IMS_SINT32 j;
 
-    //---------------------------------------------------------------------------------------------
-
     if (bInitialized)
+    {
         return;
+    }
 
     // ONLY OUTGOING SUBSCRIPTION WILL BE CONCERNED ...
     for (i = 0; i < STATE_MAX; ++i)
     {
         for (j = 0; j < MESSAGE_MAX; ++j)
         {
-            STATE[i][j] = STATE_INVALID;
+            s_nState[i][j] = STATE_INVALID;
         }
     }
 
@@ -481,7 +487,7 @@ PRIVATE GLOBAL void ImplicitNotifierState::InitializeStateTable()
     // SUBSCRIBER : STATE_INIT
 
     // REFER
-    STATE[STATE_INIT][MESSAGE_REFER] = STATE_SUBSCRIBING;
+    s_nState[STATE_INIT][MESSAGE_REFER] = STATE_SUBSCRIBING;
 
     // NOTIFY
 
@@ -489,26 +495,26 @@ PRIVATE GLOBAL void ImplicitNotifierState::InitializeStateTable()
     // SUBSCRIBER : STATE_SUBSCRIBING
 
     // REFER
-    STATE[STATE_SUBSCRIBING][MESSAGE_REFER_200] = STATE_ACTIVE;
-    STATE[STATE_SUBSCRIBING][MESSAGE_REFER_202] = STATE_PENDING;
-    STATE[STATE_SUBSCRIBING][MESSAGE_REFER_481] = STATE_TERMINATED;
-    STATE[STATE_SUBSCRIBING][MESSAGE_REFER_NON2XX] = STATE_TERMINATED;
+    s_nState[STATE_SUBSCRIBING][MESSAGE_REFER_200] = STATE_ACTIVE;
+    s_nState[STATE_SUBSCRIBING][MESSAGE_REFER_202] = STATE_PENDING;
+    s_nState[STATE_SUBSCRIBING][MESSAGE_REFER_481] = STATE_TERMINATED;
+    s_nState[STATE_SUBSCRIBING][MESSAGE_REFER_NON2XX] = STATE_TERMINATED;
 
     // NOTIFY
-    STATE[STATE_SUBSCRIBING][MESSAGE_NOTIFY_ACTIVE] = STATE_ACTIVE;
-    STATE[STATE_SUBSCRIBING][MESSAGE_NOTIFY_PENDING] = STATE_PENDING;
-    STATE[STATE_SUBSCRIBING][MESSAGE_NOTIFY_TERMINATED] = STATE_TERMINATED;
+    s_nState[STATE_SUBSCRIBING][MESSAGE_NOTIFY_ACTIVE] = STATE_ACTIVE;
+    s_nState[STATE_SUBSCRIBING][MESSAGE_NOTIFY_PENDING] = STATE_PENDING;
+    s_nState[STATE_SUBSCRIBING][MESSAGE_NOTIFY_TERMINATED] = STATE_TERMINATED;
 
     /////////////////////////////////
     // SUBSCRIBER : STATE_PENDING
 
     // REFER
-    STATE[STATE_PENDING][MESSAGE_REFER_481] = STATE_TERMINATED;
+    s_nState[STATE_PENDING][MESSAGE_REFER_481] = STATE_TERMINATED;
 
     // NOTIFY
-    STATE[STATE_PENDING][MESSAGE_NOTIFY_ACTIVE] = STATE_ACTIVE;
-    STATE[STATE_PENDING][MESSAGE_NOTIFY_XXX_TERMINATED] = STATE_TERMINATED;
-    STATE[STATE_PENDING][MESSAGE_NOTIFY_NON2XX] = STATE_TERMINATED;
+    s_nState[STATE_PENDING][MESSAGE_NOTIFY_ACTIVE] = STATE_ACTIVE;
+    s_nState[STATE_PENDING][MESSAGE_NOTIFY_XXX_TERMINATED] = STATE_TERMINATED;
+    s_nState[STATE_PENDING][MESSAGE_NOTIFY_NON2XX] = STATE_TERMINATED;
 
     ////////////////////////////////
     // SUBSCRIBER : STATE_ACTIVE
@@ -516,9 +522,9 @@ PRIVATE GLOBAL void ImplicitNotifierState::InitializeStateTable()
     // REFER
 
     // NOTIFY
-    STATE[STATE_ACTIVE][MESSAGE_NOTIFY_PENDING] = STATE_PENDING;
-    STATE[STATE_ACTIVE][MESSAGE_NOTIFY_XXX_TERMINATED] = STATE_TERMINATED;
-    STATE[STATE_ACTIVE][MESSAGE_NOTIFY_NON2XX] = STATE_TERMINATED;
+    s_nState[STATE_ACTIVE][MESSAGE_NOTIFY_PENDING] = STATE_PENDING;
+    s_nState[STATE_ACTIVE][MESSAGE_NOTIFY_XXX_TERMINATED] = STATE_TERMINATED;
+    s_nState[STATE_ACTIVE][MESSAGE_NOTIFY_NON2XX] = STATE_TERMINATED;
 
     ////////////////////////////////////
     // SUBSCRIBER : STATE_TERMINATED

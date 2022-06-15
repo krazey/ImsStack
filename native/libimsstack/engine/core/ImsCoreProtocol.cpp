@@ -1,24 +1,29 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091126  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "ServiceTrace.h"
 #include "ServiceThread.h"
+#include "ServiceTrace.h"
+
 #include "private/ConfigurationManager.h"
-#include "SipDebug.h"
-#include "SipError.h"
-#include "ServiceManager.h"
+
 #include "CoreServiceImpl.h"
 #include "ImsCoreProtocol.h"
+#include "ServiceManager.h"
+#include "SipDebug.h"
+#include "SipError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
@@ -28,36 +33,32 @@ ImsCoreProtocol::ImsCoreProtocol() :
 {
 }
 
-PUBLIC VIRTUAL ImsCoreProtocol::~ImsCoreProtocol() {}
-
-/*
- Returns a singleton object of IMS Core Protocol.
-
-Remarks
- It throws the error as follows:
-     ILLEGAL_ARGUMENT,
-     CONNECTION_NOT_FOUND
-*/
+/**
+ * @brief Returns a singleton object of IMS Core Protocol.
+ *
+ * It throws the error as follows:
+ *   ILLEGAL_ARGUMENT,
+ *   CONNECTION_NOT_FOUND
+ */
 PUBLIC GLOBAL ImsCoreProtocol* ImsCoreProtocol::GetInstance()
 {
-    static ImsCoreProtocol* pIMSCore = IMS_NULL;
+    static ImsCoreProtocol* s_pImsCoreProtocol = IMS_NULL;
 
-    if (pIMSCore == IMS_NULL)
+    if (s_pImsCoreProtocol == IMS_NULL)
     {
-        pIMSCore = new ImsCoreProtocol();
+        s_pImsCoreProtocol = new ImsCoreProtocol();
     }
 
-    return pIMSCore;
+    return s_pImsCoreProtocol;
 }
 
-/*
- Creates a IMS Service.
-
-Remarks
- It throws the error as follows:
-     ILLEGAL_ARGUMENT,
-     CONNECTION_NOT_FOUND
-*/
+/**
+ * @brief Creates a IMS Service.
+ *
+ * It throws the error as follows:
+ *   ILLEGAL_ARGUMENT,
+ *   CONNECTION_NOT_FOUND
+ */
 PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
         IN const AString& strAppId, IN const AString& strServiceId, IN const AString& strUserId)
 {
@@ -173,12 +174,9 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
     return piCoreService;
 }
 
-/*
- Checks if the IMS registry is consistent.
-
-Remarks
-
-*/
+/**
+ * @brief Checks if the IMS registry is consistent.
+ */
 PRIVATE GLOBAL IMS_BOOL ImsCoreProtocol::IsRegistryConsistent(
         IN const AppConfig* pAppConfig, IN const CoreServiceConfig* pServiceConfig)
 {

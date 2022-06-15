@@ -1,7 +1,23 @@
-#ifndef _INTERFACE_SESSION_DESCRIPTOR_H_
-#define _INTERFACE_SESSION_DESCRIPTOR_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SESSION_DESCRIPTOR_H_
+#define INTERFACE_SESSION_DESCRIPTOR_H_
 
 #include "IPAddress.h"
+
 #include "SdpAttribute.h"
 
 /**
@@ -57,7 +73,7 @@ public:
      * @return If the attribute is successfully set, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT AddAttribute(IN CONST AString& strAttribute) = 0;
+    virtual IMS_RESULT AddAttribute(IN const AString& strAttribute) = 0;
 
     /**
      * @brief Returns all attributes (a=) for the ISession.
@@ -116,7 +132,7 @@ public:
      * @return If the attribute is successfully removed, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT RemoveAttribute(IN CONST AString& strAttribute) = 0;
+    virtual IMS_RESULT RemoveAttribute(IN const AString& strAttribute) = 0;
 
     /**
      * @brief Sets the textual information (i=) about the session.
@@ -134,7 +150,7 @@ public:
      * @return If the session information is successfully set, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetSessionInfo(IN CONST AString& strInfo) = 0;
+    virtual IMS_RESULT SetSessionInfo(IN const AString& strInfo) = 0;
 
     /**
      * @brief Sets the name of the session (s=).
@@ -152,9 +168,7 @@ public:
      * @return If the session name is successfully set, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetSessionName(IN CONST AString& strName) = 0;
-
-    //// IMS extensions
+    virtual IMS_RESULT SetSessionName(IN const AString& strName) = 0;
 
     /**
      * @brief Adds an attribute (a=) to the ISession.
@@ -184,8 +198,8 @@ public:
      * @return If the attribute is successfully added, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT AddAttribute(IN IMS_SINT32 nType, IN CONST AString& strAttrValue,
-            IN CONST AString& strType = AString::ConstNull()) = 0;
+    virtual IMS_RESULT AddAttribute(IN IMS_SINT32 nType, IN const AString& strAttrValue,
+            IN const AString& strType = AString::ConstNull()) = 0;
 
     /**
      * @brief Adds an attribute (a=) to the ISession.
@@ -220,7 +234,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT AddAttributeInt(IN IMS_SINT32 nType, IN IMS_SINT32 nAttrValue,
-            IN CONST AString& strType = AString::ConstNull()) = 0;
+            IN const AString& strType = AString::ConstNull()) = 0;
 
     /**
      * @brief Sets the proposed bandwidth (b=) to be used by the session.
@@ -242,7 +256,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT AddBandwidth(IN IMS_SINT32 nType, IN IMS_SINT32 nBandwidth,
-            IN CONST AString& strType = AString::ConstNull()) = 0;
+            IN const AString& strType = AString::ConstNull()) = 0;
 
     /**
      * @brief Returns the specified attribute (a=) for the ISession.
@@ -271,7 +285,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual const AString& GetAttribute(
-            IN IMS_SINT32 nType, IN CONST AString& strType = AString::ConstNull()) const = 0;
+            IN IMS_SINT32 nType, IN const AString& strType = AString::ConstNull()) const = 0;
 
     /**
      * @brief Returns the specified attribute (a=) for the ISession.
@@ -293,7 +307,7 @@ public:
      * @return Attribute value as integer or INVALID_VALUE if not present.
      */
     virtual IMS_SINT32 GetAttributeInt(
-            IN IMS_SINT32 nType, IN CONST AString& strType = AString::ConstNull()) const = 0;
+            IN IMS_SINT32 nType, IN const AString& strType = AString::ConstNull()) const = 0;
 
     /**
      * @brief Returns the proposed bandwidth (b=) to be used by the media.
@@ -305,7 +319,7 @@ public:
      * @return Bandwidth value as integer or INVALID_VALUE if not present.
      */
     virtual IMS_SINT32 GetBandwidth(
-            IN IMS_SINT32 nType, IN CONST AString& strType = AString::ConstNull()) const = 0;
+            IN IMS_SINT32 nType, IN const AString& strType = AString::ConstNull()) const = 0;
 
     /**
      * @brief Returns the direction of the session.
@@ -345,7 +359,7 @@ public:
      * @return If the attribute is successfully removed, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT RemoveAttribute(IN CONST SdpAttribute& objAttribute) = 0;
+    virtual IMS_RESULT RemoveAttribute(IN const SdpAttribute& objAttribute) = 0;
 
     /**
      * @brief Removes an attribute (a=) from the ISession.
@@ -365,8 +379,8 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT RemoveAttribute(IN IMS_SINT32 nType,
-            IN CONST AString& strAttrValue = AString::ConstNull(),
-            IN CONST AString& strType = AString::ConstNull()) = 0;
+            IN const AString& strAttrValue = AString::ConstNull(),
+            IN const AString& strType = AString::ConstNull()) = 0;
 
     /**
      * @brief Removes all the bandwidths from the ISession.
@@ -397,7 +411,7 @@ public:
      * @return If the connection is successfully set, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetConnectionAddress(IN CONST AString& strAddress) = 0;
+    virtual IMS_RESULT SetConnectionAddress(IN const AString& strAddress) = 0;
 
     /**
      * @brief Sets the direction of the session.
@@ -431,7 +445,7 @@ public:
      * @return If the address is successfully set, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetOriginAddress(IN CONST AString& strAddress) = 0;
+    virtual IMS_RESULT SetOriginAddress(IN const AString& strAddress) = 0;
 
     /**
      * @brief Returns the IP address of the local endpoint.
@@ -462,4 +476,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_SESSION_DESCRIPTOR_H_
+#endif

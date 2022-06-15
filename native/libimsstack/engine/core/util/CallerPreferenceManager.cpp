@@ -1,40 +1,34 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20120802  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
 #include "util/CallerPreferenceManager.h"
 
 PRIVATE
 CallerPreferenceManager::CallerPreferenceManager() :
-        objEmptyPreferenceWrapper(PreferenceWrapper()),
-        objPreferenceWrappers(IMSMap<AString, PreferenceWrapper>())
+        m_objEmptyPreferenceWrapper(PreferenceWrapper()),
+        m_objPreferenceWrappers(IMSMap<AString, PreferenceWrapper>())
 {
 }
 
-PRIVATE
-CallerPreferenceManager::~CallerPreferenceManager() {}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL CallerPreferenceManager::CreatePreferenceWrapper(
-        IN CONST AString& strName, IN CONST AString& strDialogId)
+        IN const AString& strName, IN const AString& strDialogId)
 {
-    IMS_SLONG nIndex = objPreferenceWrappers.GetIndexOfKey(strName);
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SLONG nIndex = m_objPreferenceWrappers.GetIndexOfKey(strName);
 
     if (nIndex >= 0)
     {
@@ -45,36 +39,22 @@ IMS_BOOL CallerPreferenceManager::CreatePreferenceWrapper(
 
     objPreferenceWrapper.SetDialogId(strDialogId);
 
-    return objPreferenceWrappers.SetValue(strName, objPreferenceWrapper);
+    return m_objPreferenceWrappers.SetValue(strName, objPreferenceWrapper);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void CallerPreferenceManager::DestroyPreferenceWrapper(IN CONST AString& strName)
+void CallerPreferenceManager::DestroyPreferenceWrapper(IN const AString& strName)
 {
-    //---------------------------------------------------------------------------------------------
-
-    objPreferenceWrappers.Remove(strName);
+    m_objPreferenceWrappers.Remove(strName);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 const IMSList<AString>& CallerPreferenceManager::GetAcceptContacts(
-        IN CONST AString& strDialogId) const
+        IN const AString& strDialogId) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objPreferenceWrappers.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objPreferenceWrappers.GetSize(); ++i)
     {
-        const PreferenceWrapper& objPreferenceWrapper = objPreferenceWrappers.GetValueAt(i);
+        const PreferenceWrapper& objPreferenceWrapper = m_objPreferenceWrappers.GetValueAt(i);
 
         if (strDialogId.Equals(objPreferenceWrapper.GetDialogId()))
         {
@@ -82,93 +62,65 @@ const IMSList<AString>& CallerPreferenceManager::GetAcceptContacts(
         }
     }
 
-    return objEmptyPreferenceWrapper.GetAcceptContacts();
+    return m_objEmptyPreferenceWrapper.GetAcceptContacts();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 const IMSList<AString>& CallerPreferenceManager::GetAcceptContactsByName(
-        IN CONST AString& strName) const
+        IN const AString& strName) const
 {
-    IMS_SLONG nIndex = objPreferenceWrappers.GetIndexOfKey(strName);
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SLONG nIndex = m_objPreferenceWrappers.GetIndexOfKey(strName);
 
     if (nIndex < 0)
     {
-        return objEmptyPreferenceWrapper.GetAcceptContacts();
+        return m_objEmptyPreferenceWrapper.GetAcceptContacts();
     }
 
-    const PreferenceWrapper& objPreferenceWrapper = objPreferenceWrappers.GetValueAt(nIndex);
+    const PreferenceWrapper& objPreferenceWrapper = m_objPreferenceWrappers.GetValueAt(nIndex);
 
     return objPreferenceWrapper.GetAcceptContacts();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void CallerPreferenceManager::UpdateAcceptContacts(
-        IN CONST AString& strName, IN CONST IMSList<AString>& objAcceptContacts)
+        IN const AString& strName, IN const IMSList<AString>& objAcceptContacts)
 {
-    IMS_SLONG nIndex = objPreferenceWrappers.GetIndexOfKey(strName);
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SLONG nIndex = m_objPreferenceWrappers.GetIndexOfKey(strName);
 
     if (nIndex < 0)
     {
         return;
     }
 
-    PreferenceWrapper& objPreferenceWrapper = objPreferenceWrappers.GetValueAt(nIndex);
+    PreferenceWrapper& objPreferenceWrapper = m_objPreferenceWrappers.GetValueAt(nIndex);
 
     objPreferenceWrapper.SetAcceptContacts(objAcceptContacts);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void CallerPreferenceManager::UpdateDialogId(
-        IN CONST AString& strName, IN CONST AString& strDialogId)
+        IN const AString& strName, IN const AString& strDialogId)
 {
-    IMS_SLONG nIndex = objPreferenceWrappers.GetIndexOfKey(strName);
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SLONG nIndex = m_objPreferenceWrappers.GetIndexOfKey(strName);
 
     if (nIndex < 0)
     {
         return;
     }
 
-    PreferenceWrapper& objPreferenceWrapper = objPreferenceWrappers.GetValueAt(nIndex);
+    PreferenceWrapper& objPreferenceWrapper = m_objPreferenceWrappers.GetValueAt(nIndex);
 
     objPreferenceWrapper.SetDialogId(strDialogId);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL CallerPreferenceManager* CallerPreferenceManager::GetInstance()
 {
-    static CallerPreferenceManager* pCallerPreferenceMngr = IMS_NULL;
+    static CallerPreferenceManager* s_pCallerPreferenceMngr = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pCallerPreferenceMngr == IMS_NULL)
+    if (s_pCallerPreferenceMngr == IMS_NULL)
     {
-        pCallerPreferenceMngr = new CallerPreferenceManager();
+        s_pCallerPreferenceMngr = new CallerPreferenceManager();
     }
 
-    return pCallerPreferenceMngr;
+    return s_pCallerPreferenceMngr;
 }

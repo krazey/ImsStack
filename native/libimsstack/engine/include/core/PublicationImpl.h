@@ -1,71 +1,92 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100423  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef PUBLICATION_IMPL_H_
+#define PUBLICATION_IMPL_H_
 
-    Description
-
-*/
-
-#ifndef _PUBLICATION_IMPL_H_
-#define _PUBLICATION_IMPL_H_
-
-#include "IPublication.h"
 #include "IOnPublicationListener.h"
+#include "IPublication.h"
 #include "Publication.h"
 
 class PublicationImpl : public IPublication, public IOnPublicationListener
 {
 public:
-    explicit PublicationImpl(IN Publication* pPublication_);
+    explicit PublicationImpl(IN Publication* pPublication);
     virtual ~PublicationImpl();
 
-private:
-    PublicationImpl(IN CONST PublicationImpl& objRHS);
-    PublicationImpl& operator=(IN CONST PublicationImpl& objRHS);
+    PublicationImpl(IN const PublicationImpl&) = delete;
+    PublicationImpl& operator=(IN const PublicationImpl&) = delete;
 
 private:
     // IMethod interface
-    virtual void Destroy();
-    // SIP_MESSAGE_MEDIATOR
-    virtual void SetMessageMediator(IN IMessageMediator* piMediator);
+    void Destroy() override;
+    inline void SetMessageMediator(IN IMessageMediator* piMediator) override
+    {
+        m_pPublication->SetMessageMediator(piMediator);
+    }
 
     // IServiceMethod interface
-    virtual IMessage* GetNextRequest();
-    virtual IMessage* GetNextResponse();
-    virtual IMessage* GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const;
-    virtual IMessage* GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const;
-    virtual IMSList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const;
-    virtual IMSList<AString> GetRemoteUserId() const;
+    inline IMessage* GetNextRequest() override { return m_pPublication->GetNextRequest(); }
+    inline IMessage* GetNextResponse() override { return m_pPublication->GetNextResponse(); }
+    inline IMessage* GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const override
+    {
+        return m_pPublication->GetPreviousRequest(nServiceMethod);
+    }
+    inline IMessage* GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const override
+    {
+        return m_pPublication->GetPreviousResponse(nServiceMethod);
+    }
+    IMSList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const override;
+    inline IMSList<AString> GetRemoteUserId() const override
+    {
+        return m_pPublication->GetRemoteUserId();
+    }
 
     // IPublication interface
-    virtual const AString& GetEvent() const;
-    virtual IMS_SINT32 GetState() const;
-    virtual IMS_RESULT Publish(IN CONST ByteArray& objState, IN CONST AString& strContentType);
-    virtual void SetListener(IN IPublicationListener* piListener);
-    virtual IMS_RESULT Unpublish();
-
-    //// IMS extensions
-    virtual void SetRefreshListener(IN IRefreshListener* piListener);
-    virtual void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
-            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
+    inline const AString& GetEvent() const override { return m_pPublication->GetEvent(); }
+    inline IMS_SINT32 GetState() const override { return m_pPublication->GetState(); }
+    inline IMS_RESULT Publish(
+            IN const ByteArray& objState, IN const AString& strContentType) override
+    {
+        return m_pPublication->Publish(objState, strContentType);
+    }
+    inline void SetListener(IN IPublicationListener* piListener) override
+    {
+        m_piListener = piListener;
+    }
+    inline IMS_RESULT Unpublish() override { return m_pPublication->Unpublish(); }
+    inline void SetRefreshListener(IN IRefreshListener* piListener) override
+    {
+        m_pPublication->SetRefreshListener(piListener);
+    }
+    inline void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
+            IN IMS_SINT32 nValueEorLt, IN IMS_SINT32 nValueGt) override
+    {
+        m_pPublication->SetRefreshPolicy(nPolicy, nCriteriaInterval, nValueEorLt, nValueGt);
+    }
 
     // IOnPublicationListener interface
-    virtual void OnPublication_Delivered(IN Publication* pPublication);
-    virtual void OnPublication_DeliveryFailed(IN Publication* pPublication);
-    virtual void OnPublication_Terminated(IN Publication* pPublication);
-    //[2012/11/5]hyunho.shin : add publication refresh api
-    virtual void OnPublication_RefreshStarted(IN Publication* pPublication);
-    virtual void OnPublication_RefreshCompleted(IN Publication* pPublication);
-    //[2012/11/5]hyunho.shin : end
+    void OnPublication_Delivered(IN Publication* pPublication) override;
+    void OnPublication_DeliveryFailed(IN Publication* pPublication) override;
+    void OnPublication_Terminated(IN Publication* pPublication) override;
+    void OnPublication_RefreshStarted(IN Publication* pPublication) override;
+    void OnPublication_RefreshCompleted(IN Publication* pPublication) override;
 
 private:
-    IPublicationListener* piListener;
-
-    Publication* pPublication;
+    Publication* m_pPublication;
+    IPublicationListener* m_piListener;
 };
 
-#endif  // _PUBLICATION_IMPL_H_
+#endif
