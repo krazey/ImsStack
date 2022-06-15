@@ -17,7 +17,9 @@
 #define AOS_SUBSCRIPTION_H_
 
 #include "AString.h"
+#include "ServicePhoneInfo.h"
 #include "ITimer.h"
+#include "IVoNr.h"
 #include "interface/IAosVonr.h"
 #include "IRegSubscriptionListener.h"
 
@@ -48,15 +50,18 @@ public:
 
     virtual IMS_UINT32 GetState();
     virtual IMS_BOOL IsSubHolded();
+    virtual IMS_BOOL IsTrmSupported() const;
+    virtual IMS_BOOL IsVonrSupported() const;
 
 protected:
     void ClearThrottlingCount();
 
     const SipAddress& GetContactAddress();
+    ITrm* GetTrmPhoneInfoService();
+    IVoNr* GetVonrService();
+
     IMS_BOOL IsSubTrying() const;
     IMS_BOOL IsTerminated() const;
-    IMS_BOOL IsTrmSupported() const;
-    IMS_BOOL IsVonrSupported() const;
 
     void ReportState(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand = 0);
     void ReportNotifyEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nRetryAfter = 0);
@@ -74,18 +79,21 @@ protected:
     virtual IMS_BOOL ProcessFailureResponse_423(IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL ProcessFailureResponse_504();
     virtual IMS_BOOL IsRetryActionDueToRetrycounter();
-    virtual IMS_BOOL IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode);
 
 public:
+    virtual IMS_BOOL IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL IsInitialRegistrationRequired(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL IsInitialRegistrationWithNextPcscfRequired(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL IsInitialRegistrationRequiredInWifi(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL IsResubscriptionStopped(IN IMS_SINT32 nStatusCode);
+    virtual IMS_BOOL ProcessFailed_StatusCode(IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
+
+    virtual IMS_BOOL IsRegRequiredByNotofy(IN IMS_UINT32 nFeature);
+    virtual IMS_BOOL IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature);
 
 protected:
     virtual void RequestCommand(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand);
 
-    virtual IMS_BOOL ProcessFailed_StatusCode(IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
     virtual void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode);
     virtual void ProcessStartFailed_Others(IN IMS_SINT32 nReason);
     virtual void ProcessUpdateFailed_StatusCode(IN IMS_SINT32 nStatusCode);
@@ -121,9 +129,6 @@ protected:
 
     // ITimerListener Interface
     virtual void Timer_TimerExpired(IN ITimer* piTimer);
-
-    virtual IMS_BOOL IsRegRequiredByNotofy(IN IMS_UINT32 nFeature);
-    virtual IMS_BOOL IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature);
 
     static const IMS_CHAR* StateToString(IN IMS_UINT32 nState);
     static const IMS_CHAR* RegSubReasonToString(IN IMS_SINT32 nReason);
@@ -179,6 +184,8 @@ protected:
     ITimer* m_piRetryTimer;
     IAosTrm* m_piTrm;
     IAosVonr* m_piVonr;
+    ITrm* m_piPhoneTrm;
+    IVoNr* m_piServiceVonr;
 
     IMS_UINT32 m_nThrottlingCount;
 

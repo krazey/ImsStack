@@ -54,6 +54,8 @@ AosSubscription::AosSubscription(IN IAosAppContext* piContext,
         m_piRetryTimer(IMS_NULL),
         m_piTrm(IMS_NULL),
         m_piVonr(IMS_NULL),
+        m_piPhoneTrm(IMS_NULL),
+        m_piServiceVonr(IMS_NULL),
         m_nThrottlingCount(0),
         m_objContactAddress(objContactAddress),
         m_strAor(strAor),
@@ -95,14 +97,14 @@ PUBLIC VIRTUAL void AosSubscription::Initialize()
     SetRefreshPolicy();
     m_piRegSubscription->SetListener(this);
 
-    ITrm* piPhoneTrm = PhoneInfoService::GetPhoneInfoService()->GetTrm();
+    ITrm* piPhoneTrm = GetTrmPhoneInfoService();
     if (piPhoneTrm != IMS_NULL && piPhoneTrm->IsTrmSupported())
     {
         m_bIsTrmSupported = IMS_TRUE;
         m_piTrm = AosProvider::GetInstance()->GetTrm(m_piContext->GetSlotId());
     }
 
-    IVoNr* piServiceVonr = VoNrService::GetVoNrService()->GetVoNr(m_piContext->GetSlotId());
+    IVoNr* piServiceVonr = GetVonrService();
     if (piServiceVonr != IMS_NULL && piServiceVonr->IsVoNrSupported())
     {
         m_piVonr = AosProvider::GetInstance()->GetVonr(m_piContext->GetSlotId());
@@ -189,6 +191,16 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubHolded()
     return bResult;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsTrmSupported() const
+{
+    return m_bIsTrmSupported;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsVonrSupported() const
+{
+    return (m_piVonr != IMS_NULL);
+}
+
 PROTECTED
 void AosSubscription::ClearThrottlingCount()
 {
@@ -202,6 +214,26 @@ const SipAddress& AosSubscription::GetContactAddress()
 }
 
 PROTECTED
+ITrm* AosSubscription::GetTrmPhoneInfoService()
+{
+    if (m_piPhoneTrm == IMS_NULL)
+    {
+        m_piPhoneTrm = PhoneInfoService::GetPhoneInfoService()->GetTrm();
+    }
+    return m_piPhoneTrm;
+}
+
+PROTECTED
+IVoNr* AosSubscription::GetVonrService()
+{
+    if (m_piServiceVonr == IMS_NULL)
+    {
+        m_piServiceVonr = VoNrService::GetVoNrService()->GetVoNr(m_piContext->GetSlotId());
+    }
+    return m_piServiceVonr;
+}
+
+PROTECTED
 IMS_BOOL AosSubscription::IsSubTrying() const
 {
     return (m_nState == STATE_SUBSCRIBING || m_nState == STATE_SUBREFRESHING);
@@ -211,18 +243,6 @@ PROTECTED
 IMS_BOOL AosSubscription::IsTerminated() const
 {
     return m_bIsTerminated;
-}
-
-PROTECTED
-IMS_BOOL AosSubscription::IsTrmSupported() const
-{
-    return m_bIsTrmSupported;
-}
-
-PROTECTED
-IMS_BOOL AosSubscription::IsVonrSupported() const
-{
-    return (m_piVonr != IMS_NULL);
 }
 
 PROTECTED
@@ -475,7 +495,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetrycounter()
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode)
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode)
 {
     IMS_SINT32 nRetryInfoSubTerminated =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetRetryCountSubErrorSubTerminated();
@@ -621,15 +641,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsResubscriptionStopped(IN IMS_SINT32 n
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void AosSubscription::RequestCommand(
-        IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand)
-{
-    IMS_TRACE_I("RequestCommand:: reason(%d), command(%d) ", nReason, nCommand, 0);
-    SetState(STATE_OFFLINE);
-    ReportState(nReason, nCommand);
-}
-
-PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
         IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed)
 {
     A_IMS_TRACE_I(AOSTAG, "ProcessFailed_StatusCode :: status code (%d)", nStatusCode, 0, 0);
@@ -685,6 +697,34 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
     }
     m_bIsErrChecked = IMS_FALSE;
     return IMS_FALSE;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRegRequiredByNotofy(IN IMS_UINT32 nFeature)
+{
+    if (AosUtil::GetInstance()->IsFeatureOn(nFeature,
+                GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegistration()))
+    {
+        return IMS_TRUE;
+    }
+    return IMS_FALSE;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature)
+{
+    if (AosUtil::GetInstance()->IsFeatureOn(nFeature,
+                GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegWithWaitTime()))
+    {
+        return IMS_TRUE;
+    }
+    return IMS_FALSE;
+}
+
+PROTECTED VIRTUAL void AosSubscription::RequestCommand(
+        IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand)
+{
+    IMS_TRACE_I("RequestCommand:: reason(%d), command(%d) ", nReason, nCommand, 0);
+    SetState(STATE_OFFLINE);
+    ReportState(nReason, nCommand);
 }
 
 PROTECTED VIRTUAL void AosSubscription::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)
@@ -1148,26 +1188,6 @@ PUBLIC VIRTUAL void AosSubscription::Timer_TimerExpired(IN ITimer* piTimer)
     StopTimer();
 
     ProcessTimerExpired();
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRegRequiredByNotofy(IN IMS_UINT32 nFeature)
-{
-    if (AosUtil::GetInstance()->IsFeatureOn(nFeature,
-                GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegistration()))
-    {
-        return IMS_TRUE;
-    }
-    return IMS_FALSE;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature)
-{
-    if (AosUtil::GetInstance()->IsFeatureOn(nFeature,
-                GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegWithWaitTime()))
-    {
-        return IMS_TRUE;
-    }
-    return IMS_FALSE;
 }
 
 PROTECTED GLOBAL const IMS_CHAR* AosSubscription::StateToString(IN IMS_UINT32 nState)
