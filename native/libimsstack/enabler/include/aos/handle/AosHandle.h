@@ -154,18 +154,14 @@ public:
         BLOCK_SMS_CAPABILITY = 0x4,
 
         // Network
-        BLOCK_NETWORK = 0x8,
-        BLOCK_VOPS = 0x10,
+        BLOCK_VOPS = 0x8,
 
         // DM
-        BLOCK_SMS_OVER_IP_NETWORK_INDICATION = 0x20,
-
-        // Reg
-        BLOCK_LIMITED_REGISTRATION = 0x40,
+        BLOCK_SMS_OVER_IP_NETWORK_INDICATION = 0x10,
 
         // VoWiFi
-        BLOCK_VOWIFI_CAPABILITY = 0x80,
-        BLOCK_VIWIFI_CAPABILITY = 0x100
+        BLOCK_VOWIFI_CAPABILITY = 0x20,
+        BLOCK_VIWIFI_CAPABILITY = 0x40
     };
 
 protected:
@@ -191,7 +187,6 @@ protected:
     IMS_UINT32 GetNetworkType() const;
     IMS_UINT32 GetMobileNetworkType() const;
     IMS_UINT32 GetBlock(IN IMS_UINT32 nEvent);
-    IMS_UINT32 GetAosReason(IN IMS_UINT32 nFeature);
     IMS_UINT32 GetAosFeature(IN IMS_UINT32 nBlock);
 
     IMS_UINT32 ConvertToAosFeature(IN IMS_UINT32 nConfigFeature);
@@ -202,7 +197,7 @@ protected:
     IMS_BOOL PreProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded);
     void ProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded, IN IMS_BOOL bPreProcess = IMS_TRUE);
     void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked);
-    void ProcessCheckBlock(IN IMS_UINT32 nBlock = 0, IN IMS_BOOL bRunStateMachine = IMS_TRUE);
+    void ProcessCheckBlock(IN IMS_BOOL bRunStateMachine = IMS_TRUE);
     void ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bAdd);
     void ProcessUnavailableFeatureChanged();
 
