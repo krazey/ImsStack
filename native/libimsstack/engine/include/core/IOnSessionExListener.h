@@ -1,197 +1,94 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100615  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_ON_SESSION_EX_LISTENER_H_
+#define INTERFACE_ON_SESSION_EX_LISTENER_H_
 
-    Description
+#include "SessionEx.h"
 
-*/
-
-#ifndef _INTERFACE_ON_SESSION_EX_LISTENER_H_
-#define _INTERFACE_ON_SESSION_EX_LISTENER_H_
-
-class SessionEx;
 class VirtualSession;
 
-/*
-
-IOnSessionExListener interface
-
-Example
-
-See Also
-
-*/
 class IOnSessionExListener
 {
 public:
-    /*
-     Notifies the application that the UPDATE was successfully delivered on the early state.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    pSessionEx              Pointer to SessionEx object
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
+    /**
+     * @brief Notifies the application that the UPDATE was successfully delivered
+     *        on the early state.
+     *
+     * @param pSessionEx The SessionEx object
+     */
     virtual void OnSessionEx_EarlyMediaUpdated(IN SessionEx* pSessionEx) = 0;
 
-    /*
-     Notifies the application that the UPDATE was not successfully delivered on the early state.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    pSessionEx              Pointer to SessionEx object
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
+    /**
+     * @brief Notifies the application that the UPDATE was not successfully delivered
+     *        on the early state.
+     *
+     * @param pSessionEx The SessionEx object
+     */
     virtual void OnSessionEx_EarlyMediaUpdateFailed(IN SessionEx* pSessionEx) = 0;
 
-    /*
-     Notifies the application that the acknowledgement of the provisional response is received.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    pSessionEx              Pointer to SessionEx object
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
+    /**
+     * @brief Notifies the application that the acknowledgement of the provisional response
+     *        is received.
+     *
+     * @param pSessionEx The SessionEx object
+     */
     virtual void OnSessionEx_EarlyMediaUpdateReceived(IN SessionEx* pSessionEx) = 0;
 
-    /*
-     Notifies the application that the acknowledgement of the provisional response
-    was successfully delivered.
+    /**
+     * @brief Notifies the application that the acknowledgement of the provisional response
+     *        was successfully delivered.
+     *
+     * @param pSessionEx The SessionEx object
+     */
+    virtual void OnSessionEx_PrackDelivered(IN SessionEx* pSessionEx) = 0;
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    pSessionEx              Pointer to SessionEx object
-    </table>
+    /**
+     * @brief Notifies the application that the acknowledgement of the provisional response
+     *        was not successfully delivered.
+     *
+     * @param pSessionEx The SessionEx object
+     */
+    virtual void OnSessionEx_PrackDeliveryFailed(IN SessionEx* pSessionEx) = 0;
 
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
+    /**
+     * @brief Notifies the application that the acknowledgement of the provisional response
+     *        is received.
+     *
+     * @param pSessionEx The SessionEx object
+     */
+    virtual void OnSessionEx_PrackReceived(IN SessionEx* pSessionEx) = 0;
 
-    </table>
+    /**
+     * @brief Notifies the application that the RPR delivery is failed (no PRACK received).
+     *
+     * @param pSessionEx The SessionEx object
+     */
+    virtual void OnSessionEx_RprDeliveryFailed(IN SessionEx* pSessionEx) = 0;
 
-    */
-    virtual void OnSessionEx_PRAckDelivered(IN SessionEx* pSessionEx) = 0;
-
-    /*
-     Notifies the application that the acknowledgement of the provisional response
-    was not successfully delivered.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    pSessionEx              Pointer to SessionEx object
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
-    virtual void OnSessionEx_PRAckDeliveryFailed(IN SessionEx* pSessionEx) = 0;
-
-    /*
-     Notifies the application that the acknowledgement of the provisional response is received.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    pSessionEx              Pointer to SessionEx object
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
-    virtual void OnSessionEx_PRAckReceived(IN SessionEx* pSessionEx) = 0;
-
-    /*
-     Notifies the application that the RPR delivery is failed (no PRACK received).
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    pSession                Pointer to SessionEx object
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
-    virtual void OnSessionEx_RPRDeliveryFailed(IN SessionEx* pSessionEx) = 0;
-
-    /*
-     Notifies the application that the reliable provisional response is received.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    pSessionEx              Pointer to SessionEx object
-    pVirtualSession         Pointer to VirtualSession object
-    nIndex                  Index of the current response message
-                            (0xFFFFFFFF : most recent message)
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
-    virtual void OnSessionEx_RPRReceived(IN SessionEx* pSessionEx,
-            IN VirtualSession* pVirtualSession, IN IMS_UINT32 nIndex = 0xFFFFFFFF) = 0;
+    /**
+     * @brief Notifies the application that the reliable provisional response is received.
+     *
+     * @param pSessionEx The SessionEx object
+     * @param pVirtualSession The VirtualSession object
+     * @param nIndex The index of the current response message\n
+     *               #Session#INDEX_MOST_RECENT_MESSAGE
+     */
+    virtual void OnSessionEx_RprReceived(IN SessionEx* pSessionEx,
+            IN VirtualSession* pVirtualSession,
+            IN IMS_UINT32 nIndex = Session::INDEX_MOST_RECENT_MESSAGE) = 0;
 };
 
-#endif  // _INTERFACE_ON_SESSION_EX_LISTENER_H_
+#endif

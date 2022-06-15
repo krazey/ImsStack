@@ -1,9 +1,25 @@
-#ifndef _INTERFACE_SESSION_LISTENER_H_
-#define _INTERFACE_SESSION_LISTENER_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SESSION_LISTENER_H_
+#define INTERFACE_SESSION_LISTENER_H_
 
-class ISipServerConnection;
-class ISession;
+#include "ISession.h"
+
 class IReference;
+class ISipServerConnection;
 
 /**
  * @brief This class provides a listener interface to receive notification on session events.
@@ -88,8 +104,6 @@ public:
      */
     virtual void SessionUpdateReceived(IN ISession* piSession) = 0;
 
-    //// IMS extensions
-
     /**
      * @brief Notifies the application that the CANCEL operation is successfully done
      *        during an active call.
@@ -144,7 +158,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionPRAckDelivered(IN ISession* piSession) = 0;
+    virtual void SessionPrackDelivered(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the acknowledgement of the provisional response
@@ -152,7 +166,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionPRAckDeliveryFailed(IN ISession* piSession) = 0;
+    virtual void SessionPrackDeliveryFailed(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the acknowledgement of the provisional response
@@ -160,43 +174,44 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionPRAckReceived(IN ISession* piSession) = 0;
+    virtual void SessionPrackReceived(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the provisional response is received.
      *
      * @param piSession The concerned ISession
      * @param nIndex Index of the current response message\n
-     *               (0xFFFFFFFF : most recent message)
+     *               #ISession#INDEX_MOST_RECENT_MESSAGE
      */
     virtual void SessionProvisionalResponseReceived(
-            IN ISession* piSession, IN IMS_UINT32 nIndex = 0xFFFFFFFF) = 0;
+            IN ISession* piSession, IN IMS_UINT32 nIndex = ISession::INDEX_MOST_RECENT_MESSAGE) = 0;
 
     /**
      * @brief Notifies the application that the reliable provisional response delivery is failed.
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionRPRDeliveryFailed(IN ISession* piSession) = 0;
+    virtual void SessionRprDeliveryFailed(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the reliable provisional response is received.
      *
      * @param piSession The concerned ISession
      * @param nIndex Index of the current response message\n
-     *               (0xFFFFFFFF : most recent message)
+     *               #ISession#INDEX_MOST_RECENT_MESSAGE
      */
-    virtual void SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex = 0xFFFFFFFF) = 0;
+    virtual void SessionRprReceived(
+            IN ISession* piSession, IN IMS_UINT32 nIndex = ISession::INDEX_MOST_RECENT_MESSAGE) = 0;
 
     /**
      * @brief Notifies the application that the new SIP transaction
      *        within the session dialog is received.
      *
      * @param piSession The concerned ISession
-     * @param piSSC New ISipServerConnection which contains an incoming SIP request
+     * @param piSsc New ISipServerConnection which contains an incoming SIP request
      */
     virtual void SessionTransactionReceived(
-            IN ISession* piSession, IN ISipServerConnection* piSSC) = 0;
+            IN ISession* piSession, IN ISipServerConnection* piSsc) = 0;
 };
 
-#endif  // _INTERFACE_SESSION_LISTENER_H_
+#endif

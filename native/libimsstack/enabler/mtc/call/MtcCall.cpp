@@ -868,7 +868,7 @@ PUBLIC VIRTUAL void MtcCall::SessionForkedResponseReceived(
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::SessionPRAckDelivered(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionPrackDelivered(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionPRAckDelivered : key[%d]", m_nKey, 0, 0);
 
@@ -885,7 +885,7 @@ PUBLIC VIRTUAL void MtcCall::SessionPRAckDelivered(IN ISession* piSession)
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::SessionPRAckDeliveryFailed(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionPrackDeliveryFailed(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionPRAckDeliveryFailed : key[%d]", m_nKey, 0, 0);
 
@@ -902,7 +902,7 @@ PUBLIC VIRTUAL void MtcCall::SessionPRAckDeliveryFailed(IN ISession* piSession)
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::SessionPRAckReceived(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionPrackReceived(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionPRAckReceived : key[%d]", m_nKey, 0, 0);
 
@@ -937,7 +937,7 @@ PUBLIC VIRTUAL void MtcCall::SessionProvisionalResponseReceived(
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::SessionRPRDeliveryFailed(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionRprDeliveryFailed(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionRPRDeliveryFailed : key[%d]", m_nKey, 0, 0);
 
@@ -954,7 +954,7 @@ PUBLIC VIRTUAL void MtcCall::SessionRPRDeliveryFailed(IN ISession* piSession)
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex)
+PUBLIC VIRTUAL void MtcCall::SessionRprReceived(IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
     IMS_TRACE_I("SessionRPRReceived : key[%d]", m_nKey, 0, 0);
 

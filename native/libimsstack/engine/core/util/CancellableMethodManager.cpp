@@ -1,87 +1,83 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100518  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "ServiceTrace.h"
 #include "ServiceMutex.h"
+#include "ServiceTrace.h"
+
 #include "ISipDialog.h"
 #include "ISipServerConnection.h"
-#include "util/ICancellableMethod.h"
 #include "util/CancellableMethodManager.h"
+#include "util/ICancellableMethod.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PRIVATE
 CancellableMethodManager::CancellableMethodManager() :
-        piLock(IMS_NULL),
-        objCancellableMethods(IMSMap<AString, ICancellableMethod*>())
+        m_piLock(IMS_NULL),
+        m_objCancellableMethods(IMSMap<AString, ICancellableMethod*>())
 {
-    piLock = MutexService::GetMutexService()->CreateMutex();
+    m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
 
 PRIVATE
 CancellableMethodManager::~CancellableMethodManager()
 {
     {
-        LockGuard objLock(piLock);
-        objCancellableMethods.Clear();
+        LockGuard objLock(m_piLock);
+        m_objCancellableMethods.Clear();
     }
 
-    MutexService::GetMutexService()->DestroyMutex(piLock);
+    MutexService::GetMutexService()->DestroyMutex(m_piLock);
 }
 
 PUBLIC
 IMS_BOOL CancellableMethodManager::AddMethod(
-        IN CONST AString& strName, IN ICancellableMethod* piMethod)
+        IN const AString& strName, IN ICancellableMethod* piMethod)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    //---------------------------------------------------------------------------------------------
-
-    return objCancellableMethods.SetValue(strName, piMethod);
+    return m_objCancellableMethods.SetValue(strName, piMethod);
 }
 
 PUBLIC
-void CancellableMethodManager::RemoveMethod(IN CONST AString& strName)
+void CancellableMethodManager::RemoveMethod(IN const AString& strName)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    //---------------------------------------------------------------------------------------------
-
-    objCancellableMethods.Remove(strName);
+    m_objCancellableMethods.Remove(strName);
 }
 
 PUBLIC GLOBAL CancellableMethodManager* CancellableMethodManager::GetInstance()
 {
-    static CancellableMethodManager* pCancellableMethodMngr = IMS_NULL;
+    static CancellableMethodManager* s_pCancellableMethodMngr = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pCancellableMethodMngr == IMS_NULL)
+    if (s_pCancellableMethodMngr == IMS_NULL)
     {
-        pCancellableMethodMngr = new CancellableMethodManager();
+        s_pCancellableMethodMngr = new CancellableMethodManager();
     }
 
-    return pCancellableMethodMngr;
+    return s_pCancellableMethodMngr;
 }
 
 PRIVATE
-IMS_BOOL CancellableMethodManager::HandleCancelRequest(IN ISipServerConnection* piSSC)
+IMS_BOOL CancellableMethodManager::HandleCancelRequest(IN ISipServerConnection* piSsc)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (objCancellableMethods.IsEmpty())
+    if (m_objCancellableMethods.IsEmpty())
     {
         IMS_TRACE_D("There is no method to handle SIP CANCEL request", 0, 0, 0);
         return IMS_FALSE;
@@ -89,12 +85,14 @@ IMS_BOOL CancellableMethodManager::HandleCancelRequest(IN ISipServerConnection* 
 
     ICancellableMethod* piMethod = IMS_NULL;
 
-    for (IMS_UINT32 i = 0; i < objCancellableMethods.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objCancellableMethods.GetSize(); ++i)
     {
-        piMethod = objCancellableMethods.GetValueAt(i);
+        piMethod = m_objCancellableMethods.GetValueAt(i);
 
-        if (piMethod->Cancellable_Compare(piSSC))
+        if (piMethod->Cancellable_Compare(piSsc))
+        {
             break;
+        }
 
         piMethod = IMS_NULL;
     }
@@ -105,7 +103,7 @@ IMS_BOOL CancellableMethodManager::HandleCancelRequest(IN ISipServerConnection* 
         return IMS_FALSE;
     }
 
-    if (!piMethod->Cancellable_NotifyRequest(piSSC))
+    if (!piMethod->Cancellable_NotifyRequest(piSsc))
     {
         IMS_TRACE_E(0, "Handling an incoming CANCEL request failed", 0, 0, 0);
     }

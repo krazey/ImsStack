@@ -1,58 +1,62 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091208  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _MEDIA_H_
-#define _MEDIA_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef MEDIA_H_
+#define MEDIA_H_
 
 #include "offeranswer/SdpMediaParameter.h"
+
+#include "ImsCore.h"
 #include "media/IMediaState.h"
 #include "media/MediaDescriptor.h"
 
-class Service;
+class IOnMediaListener;
 class ISdpOaState;
 class MediaProposal;
-class IOnMediaListener;
+class Service;
 
 class Media : public IMediaState
 {
 public:
-    Media(IN Service* pService_, IN ISdpOaState* piOAState_);
+    Media(IN Service* pService, IN ISdpOaState* piOaState);
 
 protected:
     virtual ~Media();
 
-private:
-    Media(IN CONST Media& objRHS);
-    Media& operator=(IN CONST Media& objRHS);
+public:
+    Media(IN const Media&) = delete;
+    Media& operator=(IN const Media&) = delete;
 
 public:
     // IMedia interface
     virtual IMS_SINT32 GetType() const = 0;
 
-    IMS_SINT32 GetDirection() const;
-    const IMSList<MediaDescriptor*>& GetMediaDescriptors() const;
-    MediaProposal* GetProposal(IN IMS_BOOL bIMSExtension = IMS_TRUE) const;
-    IMS_SINT32 GetState() const;
+    inline IMS_SINT32 GetDirection() const { return m_nDirection; }
+    inline const IMSList<MediaDescriptor*>& GetMediaDescriptors() const { return m_objDescriptors; }
+    MediaProposal* GetProposal() const;
+    inline IMS_SINT32 GetState() const { return m_nState; }
     IMS_SINT32 GetUpdateState() const;
     IMS_RESULT SetDirection(IN IMS_SINT32 nDirection);
-    void SetMediaListener(IN IOnMediaListener* piListener);
-    //// IMS extensions
+    inline void SetMediaListener(IN IOnMediaListener* piListener) { m_piListener = piListener; }
     MediaDescriptor* GetMediaDescriptor() const;
     void RemoveMediaDescriptor(IN IMS_UINT32 nPosition);
     void SetMid(IN IMS_SINT32 nMid);
 
     IMS_BOOL Equals(IN Media* pMedia) const;
-    IMS_BOOL IsDirectionOnlyUpdated() const;
-    IMS_BOOL IsInitializationDone() const;
+    inline IMS_BOOL IsDirectionOnlyUpdated() const { return m_bDirectionOnlyUpdated; }
+    inline IMS_BOOL IsInitializationDone() const { return m_bInitializationDone; }
 
     // When an error occurred in Session handling, Session will invoke this method.
     // It will cleanup all the resources which assign to this media.
@@ -64,45 +68,46 @@ public:
     // then it will restore the media state to the previous state.
     void RestoreMedia();
     // Notify the session transition to the media
-    void TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOAStatus);
+    void TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOaStatus);
 
 protected:
     // IMediaState interface
-    virtual const AString& GetConnectionAddress() const;
-    virtual IMS_SINT32 GetMediaState() const;
-    virtual SdpMediaParameter* GetMediaParameter(IN IMS_SINT32 nMid) const;
-    virtual const AString& GetPeerConnectionAddress() const;
-    virtual SdpMediaParameter* GetPeerMediaParameter(IN IMS_SINT32 nMid) const;
-    virtual SdpMediaParameter* GetProposalMediaParameter(IN IMS_SINT32 nMid);
+    const AString& GetConnectionAddress() const override;
+    IMS_SINT32 GetMediaState() const override;
+    SdpMediaParameter* GetMediaParameter(IN IMS_SINT32 nMid) const override;
+    const AString& GetPeerConnectionAddress() const override;
+    SdpMediaParameter* GetPeerMediaParameter(IN IMS_SINT32 nMid) const override;
+    SdpMediaParameter* GetProposalMediaParameter(IN IMS_SINT32 nMid) override;
 
-    virtual MediaProposal* CreateMediaProposal(IN ISdpOaState* piOAState) = 0;
-    virtual IMS_BOOL PreviewInitInstance();
-    virtual IMS_BOOL PostInitInstance();
-    virtual void PreviewCleanupMedia();
-    virtual void PostCleanupMedia();
-    virtual void PreviewRemoveMedia();
-    virtual void PostRemoveMedia();
+    virtual MediaProposal* CreateMediaProposal(IN ISdpOaState* piOaState) = 0;
+    inline virtual IMS_BOOL PreviewInitInstance() { return IMS_TRUE; }
+    inline virtual IMS_BOOL PostInitInstance() { return IMS_TRUE; }
+    inline virtual void PreviewCleanupMedia() {}
+    inline virtual void PostCleanupMedia() {}
+    inline virtual void PreviewRemoveMedia() {}
+    inline virtual void PostRemoveMedia() {}
 
     IMS_BOOL InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDirection);
-    IMS_BOOL InitInstance(IN CONST IMSList<IMS_SINT32>& objMids);
+    IMS_BOOL InitInstance(IN const IMSList<IMS_SINT32>& objMids);
     IMS_BOOL IsMediaAccepted() const;
     IMS_BOOL IsMediaProposed() const;
-    Service* GetService() const;
-    void SetInitializationDone(IN IMS_BOOL bInitializationDone);
+    inline Service* GetService() const { return m_pService; }
+    inline void SetInitializationDone(IN IMS_BOOL bInitializationDone)
+    {
+        m_bInitializationDone = bInitializationDone;
+    }
     void SetState(IN IMS_SINT32 nState);
     void SetUpdateState(IN IMS_SINT32 nState);
 
 private:
-    void UpdateMediaDescriptors();
-
-    static IMS_SINT32 ConvertDirectionSDPToMedia(IN IMS_SINT32 nDirection);
-    static IMS_SINT32 ConvertDirectionMediaToSDP(IN IMS_SINT32 nDirection);
+    static IMS_SINT32 ConvertDirectionSdpToMedia(IN IMS_SINT32 nDirection);
+    static IMS_SINT32 ConvertDirectionMediaToSdp(IN IMS_SINT32 nDirection);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
     static const IMS_CHAR* UpdateStateToString(IN IMS_SINT32 nUpdateState);
 
 public:
-    // Status of Offer / Answer
+    /// Status of Offer / Answer
     enum
     {
         OFFER_SENT = 0,
@@ -112,7 +117,7 @@ public:
         NO_SDP
     };
 
-    // Status of session establishment
+    /// Status of session establishment
     enum
     {
         SESSION_START = 0,
@@ -128,7 +133,7 @@ public:
         SESSION_TERMINATED
     };
 
-    // Types of direction (media flow); Refer to IMedia
+    /// Types of direction (media flow); Refer to IMedia
     enum
     {
         DIRECTION_NONE = (-1),
@@ -138,7 +143,7 @@ public:
         DIRECTION_SEND_RECEIVE
     };
 
-    // Types of main media state; Refer to IMedia interface
+    /// Types of main media state; Refer to IMedia interface
     enum
     {
         STATE_INACTIVE = 1,
@@ -148,7 +153,7 @@ public:
         STATE_PROPOSAL
     };
 
-    // Types of update state on STATE_ACTIVE state; Refer to IMedia
+    /// Types of update state on STATE_ACTIVE state; Refer to IMedia
     enum
     {
         UPDATE_INVALID = 0,
@@ -157,37 +162,33 @@ public:
         UPDATE_REMOVED
     };
 
-    //// IMS extensions
-
-    // Rule types for creation of media descriptor; Refer to IMedia
+    /// Rule types for creation of media descriptor; Refer to IMedia
     enum
     {
-        // Media descriptor will not be created.
-        // It can be used in case the application does not want to send SDP in INVITE request.
+        /// Media descriptor will not be created.
+        /// It can be used in case the application does not want to send SDP in INVITE request.
         DESCRIPTOR_NONE = (-1),
-        // Media descriptor will be created according to the media profile.
+        /// Media descriptor will be created according to the media profile.
         DESCRIPTOR_FROM_PROFILE = 0
-        // The value greater than 0 means the count of media descriptor
-        // when creating Media object.
-        // This value can be used in Session::CreateMedia(...) method.
+        /// The value greater than 0 means the count of media descriptor
+        /// when creating Media object.
+        /// This value can be used in Session::CreateMedia(...) method.
     };
 
 private:
     friend class MediaFactory;
 
-    Service* pService;
-    ISdpOaState* piOAState;
-
-    IMS_SINT32 nState;
-    IMS_SINT32 nUpdateState;
-    IMS_SINT32 nDirection;
-    IMSList<MediaDescriptor*> objDescriptors;
-    IOnMediaListener* piListener;
-
-    IMS_BOOL bFlag_DirectionOnlyUpdated;
-    IMS_BOOL bFlag_InitializationDone;
-    IMS_BOOL bFlag_InitialOfferReceived;
-    MediaProposal* pMediaProposal;
+    Service* m_pService;
+    ISdpOaState* m_piOaState;
+    IMS_SINT32 m_nState;
+    IMS_SINT32 m_nUpdateState;
+    IMS_SINT32 m_nDirection;
+    IMSList<MediaDescriptor*> m_objDescriptors;
+    IOnMediaListener* m_piListener;
+    IMS_BOOL m_bDirectionOnlyUpdated;
+    IMS_BOOL m_bInitializationDone;
+    IMS_BOOL m_bInitialOfferReceived;
+    MediaProposal* m_pMediaProposal;
 };
 
-#endif  // _MEDIA_H_
+#endif

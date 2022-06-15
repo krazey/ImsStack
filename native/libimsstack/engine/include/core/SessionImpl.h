@@ -1,164 +1,247 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090719  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SESSION_IMPL_H_
+#define SESSION_IMPL_H_
 
-    Description
-
-*/
-
-#ifndef _SESSION_IMPL_H_
-#define _SESSION_IMPL_H_
-
-#include "ISession.h"
-#include "IOnSessionListener.h"
 #include "IOnSessionExListener.h"
+#include "IOnSessionListener.h"
+#include "ISession.h"
+#include "SessionDescriptor.h"
 #include "SessionEx.h"
 #include "VirtualSessionImpl.h"
 
 class ICapabilities;
-class IReference;
-class ISubscription;
-class ISessionDescriptor;
 class IMedia;
+class IReference;
+class ISessionDescriptor;
+class ISubscription;
 class MediaImpl;
 class VirtualSession;
 
 class SessionImpl : public ISession, public IOnSessionListener, public IOnSessionExListener
 {
 public:
-    explicit SessionImpl(IN SessionEx* piSession_);
+    explicit SessionImpl(IN SessionEx* piSession);
     virtual ~SessionImpl();
 
-private:
-    SessionImpl(IN CONST SessionImpl& objRHS);
-    SessionImpl& operator=(IN CONST SessionImpl& objRHS);
+    SessionImpl(IN const SessionImpl&) = delete;
+    SessionImpl& operator=(IN const SessionImpl&) = delete;
 
 public:
-    inline SessionEx* GetSession() const { return pSession; }
+    inline SessionEx* GetSession() const { return m_pSession; }
 
 private:
     // IMethod interface
-    virtual void Destroy();
-    // SIP_MESSAGE_MEDIATOR
-    virtual void SetMessageMediator(IN IMessageMediator* piMediator);
+    void Destroy() override;
+    inline void SetMessageMediator(IN IMessageMediator* piMediator) override
+    {
+        m_pSession->SetMessageMediator(piMediator);
+    }
 
     // IServiceMethod interface
-    virtual IMessage* GetNextRequest();
-    virtual IMessage* GetNextResponse();
-    virtual IMessage* GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const;
-    virtual IMessage* GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const;
-    virtual IMSList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const;
-    virtual IMSList<AString> GetRemoteUserId() const;
+    inline IMessage* GetNextRequest() override { return m_pSession->GetNextRequest(); }
+    inline IMessage* GetNextResponse() override { return m_pSession->GetNextResponse(); }
+    inline IMessage* GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const override
+    {
+        return m_pSession->GetPreviousRequest(nServiceMethod);
+    }
+    inline IMessage* GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const override
+    {
+        return m_pSession->GetPreviousResponse(nServiceMethod);
+    }
+    IMSList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const override;
+    inline IMSList<AString> GetRemoteUserId() const override
+    {
+        return m_pSession->GetRemoteUserId();
+    }
 
     // ISession interface
-    virtual IMS_RESULT Accept();
-    virtual ICapabilities* CreateCapabilities();
-    virtual IMedia* CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
-            IN IMS_SINT32 nCountOfDescriptor = 0, IN IMS_BOOL bIMSExtension = IMS_TRUE);
-    virtual IReference* CreateReference(
-            IN CONST AString& strReferTo, IN CONST AString& strReferMethod);
-    virtual IMSList<IMedia*> GetMedia();
-    virtual ISessionDescriptor* GetSessionDescriptor();
-    virtual IMS_SINT32 GetState() const;
-    virtual IMS_BOOL HasPendingUpdate() const;
-    virtual IMS_RESULT Reject();
-    virtual IMS_RESULT Reject(IN IMS_SINT32 nStatusCode);
-    virtual IMS_RESULT RejectWithDiversion(IN CONST AString& strAlternativeUserAddress);
-    virtual IMS_RESULT RemoveMedia(IN IMedia* piMedia);
-    virtual IMS_RESULT Restore();
-    virtual void SetListener(IN ISessionListener* piListener);
-    virtual IMS_RESULT Start();
-    virtual IMS_RESULT Terminate();
-    virtual IMS_RESULT Update();
-    //// IMS extensions
-    virtual ISubscription* CreateSubscription(IN CONST AString& strEvent);
-    virtual ISipClientConnection* CreateTransaction(IN CONST SipMethod& objMethod);
-    virtual IMS_SINT32 GetConfiguration() const;
-    virtual const ISipHeader* GetContactHeader() const;
-    virtual const Replaces* GetReplaces() const;
-    virtual const AString& GetSessionId() const;
-    virtual IMS_SINT32 GetTerminationReason() const;
-    virtual IMS_BOOL IsFinalResponseReceivedForInitialInviteRequest() const;
-    virtual IMS_BOOL IsReliableProvResponseSupported() const;
-    virtual IMS_BOOL IsSDPNegotiationAllowedForNonRPR() const;
-    virtual IMS_RESULT RejectEx(
-            IN IMS_SINT32 nStatusCode, IN CONST AString& strReasonPhrase = AString::ConstNull());
-    virtual IMS_RESULT RespondToEarlyUpdate(
-            IN IMS_SINT32 nStatusCode, IN CONST AString& strReason = AString::ConstNull());
-    virtual IMS_RESULT RespondToPRAck(
-            IN IMS_SINT32 nStatusCode, IN CONST AString& strReason = AString::ConstNull());
-    virtual IMS_RESULT SendAck();
-    virtual IMS_RESULT SendPRAck();
-    virtual IMS_RESULT SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
-            IN CONST AString& strReason = AString::ConstNull(), IN IMS_SINT32 nFlags = 0);
-    virtual IMS_RESULT SendRPR(IN IMS_SINT32 nStatusCode,
-            IN CONST AString& strReason = AString::ConstNull(), IN IMS_BOOL bSDP = IMS_TRUE,
-            IN IMS_SINT32 nFlags = 0);
-    virtual IMS_RESULT SetCallerPreference(IN CONST IMSList<AString>& objCallerPreference);
-    virtual void SetConfiguration(IN IMS_SINT32 nConfigValue);
+    inline IMS_RESULT Accept() override { return m_pSession->Accept(); }
+    ICapabilities* CreateCapabilities() override;
+    IMedia* CreateMedia(IN const AString& strType, IN IMS_SINT32 nDirection,
+            IN IMS_SINT32 nCountOfDescriptor = 0) override;
+    IReference* CreateReference(
+            IN const AString& strReferTo, IN const AString& strReferMethod) override;
+    IMSList<IMedia*> GetMedia() override;
+    inline ISessionDescriptor* GetSessionDescriptor() override
+    {
+        return m_pSession->GetSessionDescriptor();
+    }
+    inline IMS_SINT32 GetState() const override { return m_pSession->GetState(); }
+    inline IMS_BOOL HasPendingUpdate() const override { return m_pSession->HasPendingUpdate(); }
+    inline IMS_RESULT Reject() override { return m_pSession->Reject(); }
+    inline IMS_RESULT Reject(IN IMS_SINT32 nStatusCode) override
+    {
+        return m_pSession->Reject(nStatusCode);
+    }
+    inline IMS_RESULT RejectWithDiversion(IN const AString& strAlternativeUserAddress) override
+    {
+        return m_pSession->RejectWithDiversion(strAlternativeUserAddress);
+    }
+    IMS_RESULT RemoveMedia(IN IMedia* piMedia) override;
+    inline IMS_RESULT Restore() override { return m_pSession->Restore(); }
+    inline void SetListener(IN ISessionListener* piListener) override { m_piListener = piListener; }
+    inline IMS_RESULT Start() override { return m_pSession->Start(); }
+    inline IMS_RESULT Terminate() override { return m_pSession->Terminate(); }
+    inline IMS_RESULT Update() override { return m_pSession->Update(); }
+
+    ISubscription* CreateSubscription(IN const AString& strEvent) override;
+    inline ISipClientConnection* CreateTransaction(IN const SipMethod& objMethod) override
+    {
+        return m_pSession->CreateTransaction(objMethod);
+    }
+    inline IMS_SINT32 GetConfiguration() const override { return m_pSession->GetConfiguration(); }
+    inline const ISipHeader* GetContactHeader() const override
+    {
+        return m_pSession->GetContactHeader();
+    }
+    inline const Replaces* GetReplaces() const override { return m_pSession->GetReplaces(); }
+    inline const AString& GetSessionId() const override { return m_pSession->GetSessionId(); }
+    inline IMS_SINT32 GetTerminationReason() const override
+    {
+        return m_pSession->GetTerminationReason();
+    }
+    inline IMS_BOOL IsFinalResponseReceivedForInitialInviteRequest() const override
+    {
+        return m_pSession->IsFinalResponseReceivedForInitialInviteRequest();
+    }
+    inline IMS_BOOL IsReliableProvResponseSupported() const override
+    {
+        return m_pSession->IsReliableProvResponseSupported();
+    }
+    inline IMS_BOOL IsSdpNegotiationAllowedForNonRpr() const override
+    {
+        return m_pSession->IsSdpNegotiationAllowedForNonRpr();
+    }
+    inline IMS_RESULT RejectEx(IN IMS_SINT32 nStatusCode,
+            IN const AString& strReasonPhrase = AString::ConstNull()) override
+    {
+        return m_pSession->RejectEx(nStatusCode, strReasonPhrase);
+    }
+    inline IMS_RESULT RespondToEarlyUpdate(
+            IN IMS_SINT32 nStatusCode, IN const AString& strReason = AString::ConstNull()) override
+    {
+        return m_pSession->RespondToEarlyUpdate(nStatusCode, strReason);
+    }
+    inline IMS_RESULT RespondToPrack(
+            IN IMS_SINT32 nStatusCode, IN const AString& strReason = AString::ConstNull()) override
+    {
+        return m_pSession->RespondToPrack(nStatusCode, strReason);
+    }
+    inline IMS_RESULT SendAck() override { return m_pSession->SendAck(); }
+    inline IMS_RESULT SendPrack() override { return m_pSession->SendPrack(); }
+    inline IMS_RESULT SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
+            IN const AString& strReason = AString::ConstNull(), IN IMS_SINT32 nFlags = 0) override
+    {
+        return m_pSession->SendProvisionalResponse(nStatusCode, strReason, nFlags);
+    }
+    inline IMS_RESULT SendRpr(IN IMS_SINT32 nStatusCode,
+            IN const AString& strReason = AString::ConstNull(), IN IMS_BOOL bSdp = IMS_TRUE,
+            IN IMS_SINT32 nFlags = 0) override
+    {
+        return m_pSession->SendRpr(nStatusCode, strReason, bSdp, nFlags);
+    }
+    inline IMS_RESULT SetCallerPreference(IN const IMSList<AString>& objCallerPreference) override
+    {
+        return m_pSession->SetCallerPreference(objCallerPreference);
+    }
+    inline void SetConfiguration(IN IMS_SINT32 nConfigValue) override
+    {
+        m_pSession->SetConfiguration(nConfigValue);
+    }
     // CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
-    virtual IMS_RESULT SetContactParameter(
-            IN CONST AString& strParameter, IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */);
-    virtual void SetImplicitRoutingRequired(IN IMS_BOOL bFlag);
-    virtual void SetReasonForCallTermination(IN IMS_SINT32 nReason);
-    virtual void SetRefreshListener(IN IRefreshListener* piListener);
-    virtual void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
-            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
-    virtual IMS_RESULT TerminateEx(IN IMS_BOOL bTerminateMethodBYE = IMS_FALSE);
-    virtual IMS_RESULT UpdateEarlyMedia();
-    virtual IMS_RESULT UpdateEx(
-            IN IMS_SINT32 nMethod = SipMethod::INVALID, IN IMS_BOOL bSessionRefresh = IMS_FALSE);
+    inline IMS_RESULT SetContactParameter(IN const AString& strParameter,
+            IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */) override
+    {
+        return m_pSession->SetContactParameter(strParameter, nOperation);
+    }
+    inline void SetImplicitRoutingRequired(IN IMS_BOOL bFlag) override
+    {
+        return m_pSession->SetImplicitRoutingRequired(bFlag);
+    }
+    inline void SetReasonForCallTermination(IN IMS_SINT32 nReason) override
+    {
+        return m_pSession->SetReasonForCallTermination(nReason);
+    }
+    inline void SetRefreshListener(IN IRefreshListener* piListener) override
+    {
+        m_pSession->SetRefreshListener(piListener);
+    }
+    inline void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
+            IN IMS_SINT32 nValueEorLt, IN IMS_SINT32 nValueGt) override
+    {
+        m_pSession->SetRefreshPolicy(nPolicy, nCriteriaInterval, nValueEorLt, nValueGt);
+    }
+    inline IMS_RESULT TerminateEx(IN IMS_BOOL bTerminateMethodBye = IMS_FALSE) override
+    {
+        return m_pSession->TerminateEx(bTerminateMethodBye);
+    }
+    inline IMS_RESULT UpdateEarlyMedia() override { return m_pSession->UpdateEarlyMedia(); }
+    inline IMS_RESULT UpdateEx(IN IMS_SINT32 nMethod = SipMethod::INVALID,
+            IN IMS_BOOL bSessionRefresh = IMS_FALSE) override
+    {
+        return m_pSession->UpdateEx(nMethod, bSessionRefresh);
+    }
 
     // REFUSE_SDP_OFFER_ANSWER_EXCHANGE {
-    virtual IMS_RESULT CreateFailureSdp();
-    virtual void DestroyFailureSdp();
-    virtual ISessionParameter* GetFailureSdp() const;
+    inline IMS_RESULT CreateFailureSdp() override { return m_pSession->CreateFailureSdp(); }
+    inline void DestroyFailureSdp() override { m_pSession->DestroyFailureSdp(); }
+    inline ISessionParameter* GetFailureSdp() const override { return m_pSession->GetFailureSdp(); }
     // }
     // EARLY_SESSION_MODEL {
-    inline virtual ISession* GetOwnerSession() const { return IMS_NULL; }
-    inline virtual ISession* GetVirtualSession() const { return pVirtualSessionImpl; }
+    inline ISession* GetOwnerSession() const override { return IMS_NULL; }
+    inline ISession* GetVirtualSession() const override { return m_pVirtualSessionImpl; }
     // }
 
     // IOnSessionListener interface
-    virtual void OnSession_Alerting(IN Session* pSession);
-    virtual void OnSession_ReferenceReceived(IN Session* pSession, IN Reference* pReference);
-    virtual void OnSession_Started(IN Session* pSession);
-    virtual void OnSession_StartFailed(IN Session* pSession);
-    virtual void OnSession_Terminated(IN Session* pSession);
-    virtual void OnSession_Updated(IN Session* pSession);
-    virtual void OnSession_UpdateFailed(IN Session* pSession);
-    virtual void OnSession_UpdateReceived(IN Session* pSession);
-    virtual void OnSession_CancelDelivered(IN Session* pSession);
-    virtual void OnSession_CancelDeliveryFailed(IN Session* pSession);
-    virtual IMS_BOOL OnSession_ForkedResponseReceived(
-            IN Session* pSession, IN Session* pForkedSession);
-    virtual void OnSession_ProvisionalResponseReceived(
-            IN Session* pSession, IN IMS_UINT32 nIndex = 0xFFFFFFFF);
-    virtual IMS_BOOL OnSession_TransactionReceived(
-            IN Session* pSession, IN ISipServerConnection* piSSC);
+    void OnSession_Alerting(IN Session* pSession) override;
+    void OnSession_ReferenceReceived(IN Session* pSession, IN Reference* pReference) override;
+    void OnSession_Started(IN Session* pSession) override;
+    void OnSession_StartFailed(IN Session* pSession) override;
+    void OnSession_Terminated(IN Session* pSession) override;
+    void OnSession_Updated(IN Session* pSession) override;
+    void OnSession_UpdateFailed(IN Session* pSession) override;
+    void OnSession_UpdateReceived(IN Session* pSession) override;
+    void OnSession_CancelDelivered(IN Session* pSession) override;
+    void OnSession_CancelDeliveryFailed(IN Session* pSession) override;
+    IMS_BOOL OnSession_ForkedResponseReceived(
+            IN Session* pSession, IN Session* pForkedSession) override;
+    void OnSession_ProvisionalResponseReceived(IN Session* pSession,
+            IN IMS_UINT32 nIndex = Session::INDEX_MOST_RECENT_MESSAGE) override;
+    IMS_BOOL OnSession_TransactionReceived(
+            IN Session* pSession, IN ISipServerConnection* piSsc) override;
 
     // IOnSessionExListener interface
-    virtual void OnSessionEx_EarlyMediaUpdated(IN SessionEx* pSessionEx);
-    virtual void OnSessionEx_EarlyMediaUpdateFailed(IN SessionEx* pSessionEx);
-    virtual void OnSessionEx_EarlyMediaUpdateReceived(IN SessionEx* pSessionEx);
-    virtual void OnSessionEx_PRAckDelivered(IN SessionEx* pSessionEx);
-    virtual void OnSessionEx_PRAckDeliveryFailed(IN SessionEx* pSessionEx);
-    virtual void OnSessionEx_PRAckReceived(IN SessionEx* pSessionEx);
-    virtual void OnSessionEx_RPRDeliveryFailed(IN SessionEx* pSessionEx);
-    virtual void OnSessionEx_RPRReceived(IN SessionEx* pSessionEx,
-            IN VirtualSession* pVirtualSession, IN IMS_UINT32 nIndex = 0xFFFFFFFF);
+    void OnSessionEx_EarlyMediaUpdated(IN SessionEx* pSessionEx) override;
+    void OnSessionEx_EarlyMediaUpdateFailed(IN SessionEx* pSessionEx) override;
+    void OnSessionEx_EarlyMediaUpdateReceived(IN SessionEx* pSessionEx) override;
+    void OnSessionEx_PrackDelivered(IN SessionEx* pSessionEx) override;
+    void OnSessionEx_PrackDeliveryFailed(IN SessionEx* pSessionEx) override;
+    void OnSessionEx_PrackReceived(IN SessionEx* pSessionEx) override;
+    void OnSessionEx_RprDeliveryFailed(IN SessionEx* pSessionEx) override;
+    void OnSessionEx_RprReceived(IN SessionEx* pSessionEx, IN VirtualSession* pVirtualSession,
+            IN IMS_UINT32 nIndex = Session::INDEX_MOST_RECENT_MESSAGE) override;
 
     void UpdateVirtualSession(IN VirtualSession* pVirtualSession);
 
 private:
-    ISessionListener* piListener;
-    SessionEx* pSession;
-    IMSList<MediaImpl*> objMediaImpls;
-    VirtualSessionImpl* pVirtualSessionImpl;
+    SessionEx* m_pSession;
+    ISessionListener* m_piListener;
+    IMSList<MediaImpl*> m_objMediaImpls;
+    VirtualSessionImpl* m_pVirtualSessionImpl;
 };
 
-#endif  // _SESSION_IMPL_H_
+#endif

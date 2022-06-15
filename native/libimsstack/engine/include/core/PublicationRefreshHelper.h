@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100424  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _PUBLICATION_REFRESH_HELPER_H_
-#define _PUBLICATION_REFRESH_HELPER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef PUBLICATION_REFRESH_HELPER_H_
+#define PUBLICATION_REFRESH_HELPER_H_
 
 #include "util/RefreshHelper.h"
 
@@ -20,24 +23,28 @@ class PubState;
 class PublicationRefreshHelper : public RefreshHelper
 {
 public:
-    PublicationRefreshHelper(IN IRefreshable* piRefreshable_, IN CONST PubState* pPubState_);
+    PublicationRefreshHelper(IN IRefreshable* piRefreshable, IN const PubState* pPubState);
     virtual ~PublicationRefreshHelper();
 
+    PublicationRefreshHelper(IN const PublicationRefreshHelper&) = delete;
+    PublicationRefreshHelper& operator=(IN const PublicationRefreshHelper&) = delete;
+
 public:
-    virtual IMS_BOOL AddSpecificHeader(IN ISipConnection* piSC);
-    virtual IMS_RESULT SendRefreshRequest(IN ISipClientConnection* piSCC);
-    virtual IMS_RESULT UpdateOnMessageReceived(IN CONST ISipConnection* piSC);
-    virtual IMS_RESULT UpdateOnMessageSent(IN CONST ISipConnection* piSC);
+    inline IMS_BOOL AddSpecificHeader(IN ISipConnection* /*piSc*/) override { return IMS_TRUE; }
+    IMS_RESULT SendRefreshRequest(IN ISipClientConnection* piScc) override;
+    IMS_RESULT UpdateOnMessageReceived(IN const ISipConnection* piSc) override;
+    inline IMS_RESULT UpdateOnMessageSent(IN const ISipConnection* /*piSc*/) override
+    {
+        return IMS_SUCCESS;
+    }
 
 protected:
-    virtual void RefreshCompleted(IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode = 0);
-    virtual void RefreshStarted();
-    virtual void RefreshTerminated();
+    void RefreshCompleted(IN ISipClientConnection* piScc, IN IMS_SINT32 nCode = 0) override;
+    void RefreshStarted() override;
+    inline void RefreshTerminated() override { Refreshable_RefreshTerminated(); }
 
 private:
-public:
-private:
-    const PubState* pPubState;
+    const PubState* m_pPubState;
 };
 
-#endif  // _PUBLICATION_REFRESH_HELPER_H_
+#endif

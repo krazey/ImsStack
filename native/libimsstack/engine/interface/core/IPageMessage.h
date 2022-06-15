@@ -1,8 +1,25 @@
-#ifndef _INTERFACE_PAGE_MESSAGE_H_
-#define _INTERFACE_PAGE_MESSAGE_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_PAGE_MESSAGE_H_
+#define INTERFACE_PAGE_MESSAGE_H_
+
+#include "ByteArray.h"
 
 #include "IServiceMethod.h"
-#include "ByteArray.h"
+#include "SipStatusCode.h"
 
 class IPageMessageListener;
 
@@ -58,7 +75,7 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT Send(IN CONST ByteArray& objContent, IN CONST AString& strContentType) = 0;
+    virtual IMS_RESULT Send(IN const ByteArray& objContent, IN const AString& strContentType) = 0;
 
     /**
      * @brief Sets a listener for this IPageMessage, replacing any previous IPageMessageListener.
@@ -67,8 +84,6 @@ public:
      */
     virtual void SetListener(IN IPageMessageListener* piListener) = 0;
 
-    //// IMS extensions
-
     /**
      * @brief Sends a successful final response to an incoming page message from a remote endpoint.
      *
@@ -76,7 +91,7 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT Accept(IN IMS_SINT32 nStatusCode = 200) = 0;
+    virtual IMS_RESULT Accept(IN IMS_SINT32 nStatusCode = SipStatusCode::SC_200) = 0;
 
     /**
      * @brief Sends a failure final response to an incoming page message from a remote endpoint.
@@ -98,4 +113,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_PAGE_MESSAGE_H_
+#endif

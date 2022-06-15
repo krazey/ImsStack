@@ -1,55 +1,61 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091208  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef MEDIA_PROPOSAL_H_
+#define MEDIA_PROPOSAL_H_
 
-    Description
-
-*/
-
-#ifndef _MEDIA_PROPOSAL_H_
-#define _MEDIA_PROPOSAL_H_
-
+#include "ImsCore.h"
 #include "media/IMediaState.h"
+#include "media/MediaDescriptor.h"
 
 class ISdpOaState;
-class MediaDescriptor;
 
 class MediaProposal : public IMediaState
 {
 public:
-    MediaProposal(IN ISdpOaState* piOAState_);
+    MediaProposal(IN ISdpOaState* piOaState);
     virtual ~MediaProposal();
 
-private:
-    MediaProposal(IN CONST MediaProposal& objRHS);
-    MediaProposal& operator=(IN CONST MediaProposal& objRHS);
+    MediaProposal(IN const MediaProposal&) = delete;
+    MediaProposal& operator=(IN const MediaProposal&) = delete;
 
 public:
     // IMedia interface
-    virtual const IMSList<MediaDescriptor*>& GetMediaDescriptors() const;
+    inline virtual const IMSList<MediaDescriptor*>& GetMediaDescriptors() const
+    {
+        return m_objDescriptors;
+    }
     virtual IMS_SINT32 GetType() const = 0;
 
-    IMS_BOOL CreateDescriptor(IN CONST IMSList<MediaDescriptor*>& objDescriptors);
+    IMS_BOOL CreateDescriptor(IN const IMSList<MediaDescriptor*>& objDescriptors);
     IMS_SINT32 GetDirection() const;
     MediaDescriptor* GetMediaDescriptor() const;
     MediaDescriptor* GetMediaDescriptor(IN IMS_SINT32 nMid) const;
 
 protected:
     // IMediaState interface
-    virtual const AString& GetConnectionAddress() const;
-    virtual IMS_SINT32 GetMediaState() const;
-    virtual SdpMediaParameter* GetMediaParameter(IN IMS_SINT32 nMid) const;
-    virtual const AString& GetPeerConnectionAddress() const;
-    virtual SdpMediaParameter* GetPeerMediaParameter(IN IMS_SINT32 nMid) const;
-    virtual SdpMediaParameter* GetProposalMediaParameter(IN IMS_SINT32 nMid);
+    const AString& GetConnectionAddress() const override;
+    inline IMS_SINT32 GetMediaState() const override { return MEDIA_STATE_PROPOSAL; }
+    SdpMediaParameter* GetMediaParameter(IN IMS_SINT32 nMid) const override;
+    const AString& GetPeerConnectionAddress() const override;
+    SdpMediaParameter* GetPeerMediaParameter(IN IMS_SINT32 nMid) const override;
+    SdpMediaParameter* GetProposalMediaParameter(IN IMS_SINT32 nMid) override;
 
 private:
-    ISdpOaState* piOAState;
-    IMSList<MediaDescriptor*> objDescriptors;
+    ISdpOaState* m_piOaState;
+    IMSList<MediaDescriptor*> m_objDescriptors;
 };
 
-#endif  // _MEDIA_PROPOSAL_H_
+#endif

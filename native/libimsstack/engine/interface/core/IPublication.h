@@ -1,11 +1,27 @@
-#ifndef _INTERFACE_PUBLICATION_H_
-#define _INTERFACE_PUBLICATION_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_PUBLICATION_H_
+#define INTERFACE_PUBLICATION_H_
 
-#include "IServiceMethod.h"
 #include "ByteArray.h"
 
-class IRefreshListener;
+#include "IServiceMethod.h"
+
 class IPublicationListener;
+class IRefreshListener;
 
 /**
  * @brief This class provides an interface for publishing event state to a remote endpoint.
@@ -40,7 +56,7 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT Publish(IN CONST ByteArray& objState, IN CONST AString& strContentType) = 0;
+    virtual IMS_RESULT Publish(IN const ByteArray& objState, IN const AString& strContentType) = 0;
 
     /**
      * @brief Sets a listener for this IPublication, replacing any previous IPublicationListener.
@@ -56,8 +72,6 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT Unpublish() = 0;
-
-    //// IMS extensions
 
     /**
      * @brief Sets a refresh listener for this IPublication, replacing any previous
@@ -81,13 +95,13 @@ public:
      *                #REFRESH_POLICY_REMAIN_TIME\n
      *                #REFRESH_POLICY_RATIO
      * @param nCriteriaInterval Criteria interval to determine the refresh interval
-     * @param nValueEorLT Interval value when the refresh duration is equal or less
+     * @param nValueEorLt Interval value when the refresh duration is equal or less
      *                    than the criteria interval
-     * @param nValueGT Interval value when the refresh duration is greater
+     * @param nValueGt Interval value when the refresh duration is greater
      *                 than the criteria interval
      */
     virtual void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
-            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT) = 0;
+            IN IMS_SINT32 nValueEorLt, IN IMS_SINT32 nValueGt) = 0;
 
 public:
     /// States of IPublication
@@ -97,8 +111,6 @@ public:
         STATE_PENDING = 2,
         STATE_ACTIVE = 3
     };
-
-    //// IMS extensions
 
     /// Policy for publication refresh
     enum
@@ -134,4 +146,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_PUBLICATION_H_
+#endif

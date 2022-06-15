@@ -1,23 +1,27 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100412  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
+
 #include "ISipHeader.h"
+#include "ISubscriptionState.h"
 #include "Sip.h"
 #include "SipDebug.h"
 #include "SipParameter.h"
-#include "ISubscriptionState.h"
 #include "SubState.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
@@ -32,153 +36,66 @@ PUBLIC GLOBAL const IMS_CHAR SubState::STR_REASON_NORESOURCE[] = "noresource";
 
 PUBLIC
 SubState::SubState() :
-        nState(STATE_INIT),
-        nOperation(NO_OPERATION),
-        nConfigValue(CONFIG_NONE),
-        nSubscriptionDuration(NO_EXPIRES),
-        nSubStateValue(SUB_STATE_INIT),
-        bFlag_SubscriptionDurationUpdated(IMS_FALSE),
-        bFlag_InstantSubscription(IMS_FALSE),
-        piSIPMsg(IMS_NULL)
+        m_nState(STATE_INIT),
+        m_nOperation(NO_OPERATION),
+        m_nConfigValue(CONFIG_NONE),
+        m_nSubscriptionDuration(NO_EXPIRES),
+        m_nSubStateValue(SUB_STATE_INIT),
+        m_bSubscriptionDurationUpdated(IMS_FALSE),
+        m_bInstantSubscription(IMS_FALSE),
+        m_piSipMsg(IMS_NULL)
 {
 }
 
 PUBLIC VIRTUAL SubState::~SubState()
 {
-    if (piSIPMsg != IMS_NULL)
+    if (m_piSipMsg != IMS_NULL)
     {
-        piSIPMsg->Destroy();
+        m_piSipMsg->Destroy();
     }
 }
 
 PUBLIC VIRTUAL void SubState::Clear()
 {
-    //---------------------------------------------------------------------------------------------
-
     // Clear the event package
-    objEventPackage.SetDuration(NO_EXPIRES);
-    objEventPackage.SetEventHeader(IMS_NULL);
+    m_objEventPackage.SetDuration(NO_EXPIRES);
+    m_objEventPackage.SetEventHeader(IMS_NULL);
 
-    nState = STATE_INIT;
-    nOperation = NO_OPERATION;
-    nSubscriptionDuration = NO_EXPIRES;
-    nSubStateValue = SUB_STATE_INIT;
+    m_nState = STATE_INIT;
+    m_nOperation = NO_OPERATION;
+    m_nSubscriptionDuration = NO_EXPIRES;
+    m_nSubStateValue = SUB_STATE_INIT;
 
-    bFlag_SubscriptionDurationUpdated = IMS_FALSE;
-    bFlag_InstantSubscription = IMS_FALSE;
+    m_bSubscriptionDurationUpdated = IMS_FALSE;
+    m_bInstantSubscription = IMS_FALSE;
 
-    if (piSIPMsg != IMS_NULL)
+    if (m_piSipMsg != IMS_NULL)
     {
-        piSIPMsg->Destroy();
-        piSIPMsg = IMS_NULL;
+        m_piSipMsg->Destroy();
+        m_piSipMsg = IMS_NULL;
     }
 }
 
 PUBLIC
-IMS_BOOL SubState::CreateEventPackage(IN CONST AString& strEvent)
+IMS_BOOL SubState::CreateEventPackage(IN const AString& strEvent)
 {
-    //---------------------------------------------------------------------------------------------
-
     // 1 : Load an event package from configuration
 
-    objEventPackage.SetEvent(strEvent);
-
+    m_objEventPackage.SetEvent(strEvent);
     return IMS_TRUE;
-}
-
-PUBLIC
-IMS_SINT32 SubState::GetConfiguration() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nConfigValue;
-}
-
-PUBLIC
-IMS_SINT32 SubState::GetDuration() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nSubscriptionDuration;
-}
-
-PUBLIC
-EventPackage* SubState::GetEventPackage()
-{
-    //---------------------------------------------------------------------------------------------
-
-    return &objEventPackage;
-}
-
-PUBLIC
-ISipMessage* SubState::GetInitialMessage() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return piSIPMsg;
-}
-
-PUBLIC
-IMS_SINT32 SubState::GetOperation() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nOperation;
-}
-
-PUBLIC
-IMS_SINT32 SubState::GetState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nState;
-}
-
-PUBLIC
-IMS_SINT32 SubState::GetSubState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nSubStateValue;
-}
-
-PUBLIC
-IMS_BOOL SubState::IsInstantSubscription() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return bFlag_InstantSubscription;
-}
-
-PUBLIC
-IMS_BOOL SubState::IsSubscriptionDurationUpdated() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return bFlag_SubscriptionDurationUpdated;
-}
-
-PUBLIC
-IMS_BOOL SubState::IsTerminated() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return (GetState() == STATE_TERMINATED);
 }
 
 #if 0
 PUBLIC
-IMS_BOOL SubState::SetHeadersAndBodyParts(IN_OUT ISipMessage *&piSIPMsg)
+IMS_BOOL SubState::SetHeadersAndBodyParts(IN_OUT ISipMessage *&piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this->piSIPMsg == IMS_NULL)
+    if (m_piSipMsg == IMS_NULL)
     {
         // Nothing to do ...
         return IMS_TRUE;
     }
 
-    if (piSIPMsg->CopyHeadersAndBodyParts(this->piSIPMsg) != IMS_SUCCESS)
+    if (piSipMsg->CopyHeadersAndBodyParts(m_piSipMsg) != IMS_SUCCESS)
     {
         return IMS_FALSE;
     }
@@ -188,28 +105,16 @@ IMS_BOOL SubState::SetHeadersAndBodyParts(IN_OUT ISipMessage *&piSIPMsg)
 #endif
 
 PUBLIC
-void SubState::SetConfiguration(IN IMS_SINT32 nConfigValue)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->nConfigValue = nConfigValue;
-}
-
-PUBLIC
 void SubState::SetOperation(IN IMS_SINT32 nOperation)
 {
-    //---------------------------------------------------------------------------------------------
-
-    IMS_TRACE_I("SubState :: %s to %s", OperationToString(this->nOperation),
+    IMS_TRACE_I("SubState :: %s to %s", OperationToString(m_nOperation),
             OperationToString(nOperation), 0);
 
-    this->nOperation = nOperation;
+    m_nOperation = nOperation;
 }
 
-PUBLIC GLOBAL IMS_SINT32 SubState::ExtractExpiresParameter(IN CONST ISipHeader* piHeader)
+PUBLIC GLOBAL IMS_SINT32 SubState::ExtractExpiresParameter(IN const ISipHeader* piHeader)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (piHeader == IMS_NULL)
     {
         return NO_EXPIRES;
@@ -227,21 +132,21 @@ PUBLIC GLOBAL IMS_SINT32 SubState::ExtractExpiresParameter(IN CONST ISipHeader* 
         return NO_EXPIRES;
     }
 
-    IMS_BOOL bOK = IMS_FALSE;
+    IMS_BOOL bOk = IMS_FALSE;
     IMS_SINT32 nExpires = NO_EXPIRES;
 
     // 4 Make up for test equipment's fault (e.g. Anite)
     if (pParameter->GetValue().Contains(TextParser::CHAR_DQUOT))
     {
         AString strValue = TextParser::TrimDQUOT(pParameter->GetValue());
-        nExpires = strValue.ToInt32(&bOK);
+        nExpires = strValue.ToInt32(&bOk);
     }
     else
     {
-        nExpires = pParameter->GetValue().ToInt32(&bOK);
+        nExpires = pParameter->GetValue().ToInt32(&bOk);
     }
 
-    if (!bOK)
+    if (!bOk)
     {
         return NO_EXPIRES;
     }
@@ -249,10 +154,8 @@ PUBLIC GLOBAL IMS_SINT32 SubState::ExtractExpiresParameter(IN CONST ISipHeader* 
     return nExpires;
 }
 
-PUBLIC GLOBAL IMS_SINT32 SubState::ExtractReasonParameter(IN CONST ISipHeader* piHeader)
+PUBLIC GLOBAL IMS_SINT32 SubState::ExtractReasonParameter(IN const ISipHeader* piHeader)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (piHeader == IMS_NULL)
     {
         return REASON_NONE;
@@ -273,25 +176,35 @@ PUBLIC GLOBAL IMS_SINT32 SubState::ExtractReasonParameter(IN CONST ISipHeader* p
     const AString& strReason = pParameter->GetValue();
 
     if (strReason.EqualsIgnoreCase(STR_REASON_NORESOURCE))
+    {
         return REASON_NORESOURCE;
+    }
     else if (strReason.EqualsIgnoreCase(STR_REASON_DEACTIVATED))
+    {
         return REASON_DEACTIVATED;
+    }
     else if (strReason.EqualsIgnoreCase(STR_REASON_PROBATION))
+    {
         return REASON_PROBATION;
+    }
     else if (strReason.EqualsIgnoreCase(STR_REASON_REJECTED))
+    {
         return REASON_REJECTED;
+    }
     else if (strReason.EqualsIgnoreCase(STR_REASON_TIMEOUT))
+    {
         return REASON_TIMEOUT;
+    }
     else if (strReason.EqualsIgnoreCase(STR_REASON_GIVEUP))
+    {
         return REASON_GIVEUP;
+    }
 
     return REASON_NONE;
 }
 
-PUBLIC GLOBAL IMS_SINT32 SubState::ExtractSubStateValue(IN CONST ISipHeader* piHeader)
+PUBLIC GLOBAL IMS_SINT32 SubState::ExtractSubStateValue(IN const ISipHeader* piHeader)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (piHeader == IMS_NULL)
     {
         return SUB_STATE_INIT;
@@ -322,8 +235,6 @@ PUBLIC GLOBAL IMS_SINT32 SubState::ExtractSubStateValue(IN CONST ISipHeader* piH
 
 PUBLIC GLOBAL IMS_SINT32 SubState::GetSubStateFromSubscriptionState(IN IMS_SINT32 nSubState)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nSubState)
     {
         case ISubscriptionState::STATE_ACTIVE:
@@ -339,8 +250,6 @@ PUBLIC GLOBAL IMS_SINT32 SubState::GetSubStateFromSubscriptionState(IN IMS_SINT3
 
 PUBLIC GLOBAL IMS_SINT32 SubState::GetReasonFromSubscriptionState(IN IMS_SINT32 nReason)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nReason)
     {
         case ISubscriptionState::REASON_DEACTIVATED:
@@ -363,73 +272,34 @@ PUBLIC GLOBAL IMS_SINT32 SubState::GetReasonFromSubscriptionState(IN IMS_SINT32 
 PROTECTED VIRTUAL const SipHeaderProperty* SubState::GetRestrictedHeaders(
         OUT IMS_UINT32& nCount) const
 {
-    //---------------------------------------------------------------------------------------------
-
     nCount = 0;
-
     return IMS_NULL;
 }
 
 PROTECTED
-void SubState::SetDuration(IN IMS_SINT32 nDuration)
+void SubState::SetState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
-
-    nSubscriptionDuration = nDuration;
-}
-
-PROTECTED
-void SubState::SetDurationUpdated(IN IMS_BOOL bDurationUpdated)
-{
-    //---------------------------------------------------------------------------------------------
-
-    bFlag_SubscriptionDurationUpdated = bDurationUpdated;
-}
-
-PROTECTED
-void SubState::SetInstantSubscription(IN IMS_BOOL bInstantSubscription)
-{
-    //---------------------------------------------------------------------------------------------
-
-    bFlag_InstantSubscription = bInstantSubscription;
-}
-
-PROTECTED
-void SubState::SetState(IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nState)
-{
-    AString strCallId = piSIPMsg->GetHeader(ISipHeader::CALL_ID);
-
-    //-----------------------------------------------------------------------------------------
+    AString strCallId = piSipMsg->GetHeader(ISipHeader::CALL_ID);
 
     (void)strCallId;
 
     IMS_TRACE_I("SUB_STATE : %s - %s >> %s", SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'),
-            StateToString(this->nState), StateToString(nState));
+            StateToString(m_nState), StateToString(nState));
 
-    this->nState = nState;
+    m_nState = nState;
 }
 
 PROTECTED
-void SubState::SetSubState(IN IMS_SINT32 nSubState)
+void SubState::StoreMessage(IN const ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    nSubStateValue = nSubState;
-}
-
-PROTECTED
-void SubState::StoreMessage(IN CONST ISipMessage* piSIPMsg)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (this->piSIPMsg != IMS_NULL)
+    if (m_piSipMsg != IMS_NULL)
     {
-        this->piSIPMsg->Destroy();
+        m_piSipMsg->Destroy();
     }
 
-    this->piSIPMsg = piSIPMsg->Clone();
+    m_piSipMsg = piSipMsg->Clone();
 
-    if (this->piSIPMsg != IMS_NULL)
+    if (m_piSipMsg != IMS_NULL)
     {
         // Remove an inaccessible headers if present
         IMS_UINT32 nCount = 0;
@@ -443,9 +313,13 @@ void SubState::StoreMessage(IN CONST ISipMessage* piSIPMsg)
             if (pProperty->bSingleHeader)
             {
                 if (pProperty->nType != ISipHeader::UNKNOWN)
-                    this->piSIPMsg->RemoveHeader(pProperty->nType);
+                {
+                    m_piSipMsg->RemoveHeader(pProperty->nType);
+                }
                 else
-                    this->piSIPMsg->RemoveHeader(pProperty->nType, pProperty->pszName);
+                {
+                    m_piSipMsg->RemoveHeader(pProperty->nType, pProperty->pszName);
+                }
             }
             else
             {
@@ -453,21 +327,20 @@ void SubState::StoreMessage(IN CONST ISipMessage* piSIPMsg)
 
                 if (pProperty->nType != ISipHeader::UNKNOWN)
                 {
-                    nHeaderCount = this->piSIPMsg->GetHeaderCount(pProperty->nType);
+                    nHeaderCount = m_piSipMsg->GetHeaderCount(pProperty->nType);
 
                     for (IMS_SINT32 j = 0; j < nHeaderCount; ++j)
                     {
-                        this->piSIPMsg->RemoveHeader(pProperty->nType);
+                        m_piSipMsg->RemoveHeader(pProperty->nType);
                     }
                 }
                 else
                 {
-                    nHeaderCount =
-                            this->piSIPMsg->GetHeaderCount(pProperty->nType, pProperty->pszName);
+                    nHeaderCount = m_piSipMsg->GetHeaderCount(pProperty->nType, pProperty->pszName);
 
                     for (IMS_SINT32 j = 0; j < nHeaderCount; ++j)
                     {
-                        this->piSIPMsg->RemoveHeader(pProperty->nType, pProperty->pszName);
+                        m_piSipMsg->RemoveHeader(pProperty->nType, pProperty->pszName);
                     }
                 }
             }
@@ -477,8 +350,6 @@ void SubState::StoreMessage(IN CONST ISipMessage* piSIPMsg)
 
 PRIVATE GLOBAL const IMS_CHAR* SubState::OperationToString(IN IMS_SINT32 nOperation)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nOperation)
     {
         case NO_OPERATION:
@@ -500,8 +371,6 @@ PRIVATE GLOBAL const IMS_CHAR* SubState::OperationToString(IN IMS_SINT32 nOperat
 
 PRIVATE GLOBAL const IMS_CHAR* SubState::StateToString(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nState)
     {
         case STATE_INIT:

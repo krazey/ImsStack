@@ -1,21 +1,25 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20120508  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "AStringBuffer.h"
 #include "ServiceMemory.h"
-#include "ServiceTrace.h"
 #include "ServiceNetwork.h"
 #include "ServiceNetworkPolicy.h"
+#include "ServiceTrace.h"
 #include "ServiceUtil.h"
-#include "AStringBuffer.h"
+
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "SipConfigProxy.h"
@@ -23,29 +27,29 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-PUBLIC GLOBAL void UserAgentHeader::SetHeader(IN CONST AString& strName,
-        IN CONST SipProfile* pSIPProfile, IN CONST AString& /*strServiceId*/,
-        IN CONST IPAddress& /*objIP*/, IN IMS_SINT32 nSlotId, IN_OUT ISipMessage*& piSIPMsg)
+PUBLIC GLOBAL void UserAgentHeader::SetHeader(IN const AString& strName,
+        IN const SipProfile* pProfile, IN const AString& /*strServiceId*/,
+        IN const IPAddress& /*objIpAddr*/, IN IMS_SINT32 nSlotId, IN_OUT ISipMessage*& piSipMsg)
 {
     if (strName.GetLength() == 0)
     {
         return;
     }
 
-    if (!SipConfigProxy::IsUserAgentConfigured(nSlotId, pSIPProfile))
+    if (!SipConfigProxy::IsUserAgentConfigured(nSlotId, pProfile))
     {
         return;
     }
 
     AString strUaString;
 
-    if (piSIPMsg->GetMethod().Equals(SipMethod::REGISTER))
+    if (piSipMsg->GetMethod().Equals(SipMethod::REGISTER))
     {
-        strUaString = SipConfigProxy::GetRegUaString(nSlotId, pSIPProfile);
+        strUaString = SipConfigProxy::GetRegUaString(nSlotId, pProfile);
     }
     else
     {
-        strUaString = SipConfigProxy::GetUaString(nSlotId, pSIPProfile);
+        strUaString = SipConfigProxy::GetUaString(nSlotId, pProfile);
     }
 
     if (strUaString.GetLength() == 0)
@@ -54,7 +58,7 @@ PUBLIC GLOBAL void UserAgentHeader::SetHeader(IN CONST AString& strName,
         return;
     }
 
-    if (piSIPMsg->SetHeader(ISipHeader::UNKNOWN, strUaString, strName) != IMS_SUCCESS)
+    if (piSipMsg->SetHeader(ISipHeader::UNKNOWN, strUaString, strName) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting %s header failed", strName.GetStr(), 0, 0);
         return;

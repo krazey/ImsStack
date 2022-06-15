@@ -859,7 +859,7 @@ IMS_BOOL MtcCallState::IsInvalidOfferAnswer(
 PROTECTED
 IMS_BOOL MtcCallState::IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage) const
 {
-    if (piSession->IsSDPNegotiationAllowedForNonRPR())
+    if (piSession->IsSdpNegotiationAllowedForNonRpr())
     {
         return IMS_FALSE;
     }

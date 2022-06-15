@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date          author                    description
-    --------      --------------            ----------
-    20091201    toastops@               Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _CAPABILITIES_H_
-#define _CAPABILITIES_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef CAPABILITIES_H_
+#define CAPABILITIES_H_
 
 #include "SdpDescription.h"
 #include "ServiceMethod.h"
@@ -22,71 +25,64 @@ class RemoteCapabilities;
 class Capabilities : public ServiceMethod
 {
 public:
-    explicit Capabilities(IN Service* pService_);
+    explicit Capabilities(IN Service* pService);
     virtual ~Capabilities();
 
-private:
-    Capabilities(IN CONST Capabilities& objRHS);
-    Capabilities& operator=(IN CONST Capabilities& objRHS);
+    Capabilities(IN const Capabilities&) = delete;
+    Capabilities& operator=(IN const Capabilities&) = delete;
 
 public:
     // Method class
-    virtual void Destroy();
+    inline void Destroy() override { ServiceMethod::Destroy(); }
 
     // ICapabilities interface
     IMSList<AString> GetRemoteUserIdentities() const;
-    IMS_SINT32 GetState() const;
-    IMS_BOOL HasCapabilities(IN CONST AString& strConnection) const;
-    IMS_RESULT QueryCapabilities(IN IMS_BOOL bSDPInRequest,
+    inline IMS_SINT32 GetState() const { return m_nState; }
+    IMS_BOOL HasCapabilities(IN const AString& strConnection) const;
+    IMS_RESULT QueryCapabilities(IN IMS_BOOL bSdpInRequest,
             IN IMS_BOOL bContactInRequest = IMS_TRUE, IN IMS_BOOL bCheckSupport = IMS_TRUE);
     IMS_RESULT QueryCapabilitiesEx();
-    void SetListener(IN IOnCapabilitiesListener* piListener);
-
-    //// IMS extensions
+    inline void SetListener(IN IOnCapabilitiesListener* piListener) { m_piListener = piListener; }
     IMS_RESULT Accept(
             IN IMS_BOOL bFeatureInContact = IMS_TRUE, IN IMS_BOOL bCheckSupport = IMS_TRUE);
     IMS_RESULT AcceptEx();
     IMS_RESULT Reject(IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nRetryAfter = 0);
 
-    static IMS_RESULT HandleOPTIONSRequestWithinDialog(
-            IN Service* pService, IN CONST Method* pOwnerMethod, IN ISipServerConnection* piSSC);
+    static IMS_RESULT HandleOptionsRequestWithinDialog(
+            IN Service* pService, IN const Method* pOwnerMethod, IN ISipServerConnection* piSsc);
 
 protected:
     // Activity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
-
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
     // Method class
-    // IMS_AUTH_SIP_DIGEST
-    virtual IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piSCC);
-
+    IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piScc) override;
     // Handle the incoming request / outgoing response message
-    virtual IMS_BOOL NotifySIPRequest(IN ISipServerConnection* piSSC);
-
+    IMS_BOOL NotifySipRequest(IN ISipServerConnection* piSsc) override;
     // Handle to the outgoing request / incoming response message
-    virtual void NotifySIPResponse(IN ISipClientConnection* piSCC);
-    virtual void NotifySIPError(
-            IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
+    void NotifySipResponse(IN ISipClientConnection* piScc);
+    void NotifySipError(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
 private:
-    IMS_BOOL CreateContactHeader(OUT AString& strContactHeader, OUT IMS_BOOL& bIsContactGRUU,
+    IMS_BOOL CreateContactHeader(OUT AString& strContactHeader, OUT IMS_BOOL& bIsContactGruu,
             IN IMS_BOOL bWithFeature = IMS_TRUE) const;
-    IMS_BOOL CreateSDP(OUT AString& strSDP, IN IMS_BOOL bCheckSupport = IMS_TRUE,
+    IMS_BOOL CreateSdp(OUT AString& strSdp, IN IMS_BOOL bCheckSupport = IMS_TRUE,
             IN IMS_BOOL bRequest = IMS_FALSE) const;
-    void HandleCapabilities(IN ISipClientConnection* piSCC);
-    IMS_BOOL ParseConnectionName(IN CONST AString& strConnection, OUT AString& strAppId,
+    void HandleCapabilities(IN ISipClientConnection* piScc);
+    IMS_BOOL ParseConnectionName(IN const AString& strConnection, OUT AString& strAppId,
             OUT AString& strServiceId) const;
     void SetState(IN IMS_SINT32 nState);
 
-    static void CollectSDPFieldsFromRegistry(IN CONST AppConfig* pAppConfig, IN IMS_BOOL bRequest,
-            IN IMS_SINT32 nSector, IN_OUT SdpDescription& objSDPDesc);
-    static void CopySDPFields(
-            IN CONST SdpDescription& objSDPDesc, IN_OUT SdpDescription& objConcreteSDPDesc);
-    static void SetSDPFields(IN CONST AStringArray& objSDPLines, IN_OUT SdpDescription& objSDPDesc);
+    static void CollectSdpFieldsFromRegistry(IN const AppConfig* pAppConfig, IN IMS_BOOL bRequest,
+            IN IMS_SINT32 nSector, IN_OUT SdpDescription& objSdpDesc);
+    static void CopySdpFields(
+            IN const SdpDescription& objSdpDesc, IN_OUT SdpDescription& objConcreteSdpDesc);
+    static void SetSdpFields(IN const AStringArray& objSdpLines, IN_OUT SdpDescription& objSdpDesc);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 public:
-    // Refer to ICapabilities class
+    /// Refer to ICapabilities class
     enum
     {
         STATE_INACTIVE = 1,
@@ -106,11 +102,10 @@ protected:
 private:
     static const IMS_CHAR DEFAULT_MEDIA_TYPE[];
 
-    IMS_SINT32 nState;
-    IMSList<AString> objRemoteUserIdentities;
-    IOnCapabilitiesListener* piListener;
-
-    RemoteCapabilities* pRemoteCapabilities;
+    IMS_SINT32 m_nState;
+    IMSList<AString> m_objRemoteUserIdentities;
+    IOnCapabilitiesListener* m_piListener;
+    RemoteCapabilities* m_pRemoteCapabilities;
 };
 
-#endif  // _CAPABILITIES_H_
+#endif

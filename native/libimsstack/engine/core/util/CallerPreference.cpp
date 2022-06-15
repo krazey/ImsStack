@@ -1,25 +1,30 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090609  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
+
+#include "Feature.h"
+#include "ISipConfigV.h"
+#include "ServiceIdentifier.h"
 #include "private/AppConfig.h"
 #include "private/CoreServiceConfig.h"
-#include "Feature.h"
-#include "ServiceIdentifier.h"
-#include "ISipConfigV.h"
-#include "util/PreferenceHeader.h"
+
 #include "util/CallerPreference.h"
+#include "util/PreferenceHeader.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
@@ -27,13 +32,13 @@ class PreferenceScore
 {
 public:
     inline PreferenceScore() :
-            nNPF(0),
-            nNCF(0),
-            nNVM(0),
-            nNVM4CS(0)
-            //, nNF4CS(0)
+            m_nNpf(0),
+            m_nNcf(0),
+            m_nNvm(0),
+            m_nNvmForCs(0)
+            //, m_nNfForCs(0)
             ,
-            nScore(0)
+            m_nScore(0)
     {
     }
     inline ~PreferenceScore() {}
@@ -41,32 +46,57 @@ public:
 public:
     inline void Clear()
     {
-        nNPF = 0;
-        nNCF = 0;
-        nNVM = 0;
-        nNVM4CS = 0;
-        // nNF4CS = 0;
-        nScore = 0;
+        m_nNpf = 0;
+        m_nNcf = 0;
+        m_nNvm = 0;
+        m_nNvmForCs = 0;
+        // m_nNfForCs = 0;
+        m_nScore = 0;
     }
-    inline IMS_SINT32 GetNpf() const { return nNPF; }
-    inline IMS_SINT32 GetNcf() const { return nNCF; }
-    inline IMS_SINT32 GetNvm() const { return nNVM; }
-    inline IMS_SINT32 GetNvmCs() const { return nNVM4CS; }
-    inline IMS_SINT32 GetScore() const { return nScore; }
-    inline void IncreaseNpf() { ++nNPF; }
-    inline void IncreaseNcf() { ++nNCF; }
-    inline void IncreaseNvm() { ++nNVM; }
-    inline void IncreaseNvmCs() { ++nNVM4CS; }
-    inline void SetScore(IN IMS_SINT32 nScore) { this->nScore = nScore; }
+    inline IMS_SINT32 GetNpf() const { return m_nNpf; }
+    inline IMS_SINT32 GetNcf() const { return m_nNcf; }
+    inline IMS_SINT32 GetNvm() const { return m_nNvm; }
+    inline IMS_SINT32 GetNvmCs() const { return m_nNvmForCs; }
+    inline IMS_SINT32 GetScore() const { return m_nScore; }
+    inline void IncreaseNpf() { ++m_nNpf; }
+    inline void IncreaseNcf() { ++m_nNcf; }
+    inline void IncreaseNvm() { ++m_nNvm; }
+    inline void IncreaseNvmCs() { ++m_nNvmForCs; }
+    inline void SetScore(IN IMS_SINT32 nScore) { m_nScore = nScore; }
 
-    void ProcessAcceptContact(IN CONST AppConfig* pAppConfig,
-            IN CONST CoreServiceConfig* pServiceConfig, IN CONST PreferenceHeader* pHeader,
-            IN CONST IMSList<FeatureSet*>& objExtraFeatures);
+    void ProcessAcceptContact(IN const AppConfig* pAppConfig,
+            IN const CoreServiceConfig* pServiceConfig, IN const PreferenceHeader* pHeader,
+            IN const IMSList<FeatureSet*>& objExtraFeatures);
 
-    static IMS_BOOL FindMatchFor(IN CONST AStringArray& objVR, IN CONST FeatureSet* pVA);
+    /**
+     * @brief Finds a matched value between the Registry and Accept-Contact header.
+     *
+     * @param objVr The properties from Registry
+     * @param pVa The feature sets from Accept-Contact header
+     * @return true if one of them is matched, false otherwise.
+     */
+    static IMS_BOOL FindMatchFor(IN const AStringArray& objVr, IN const FeatureSet* pVa);
+
+    /**
+     * @brief Check if there are any matches between the Registry and Accept-Contact header.
+     *
+     * @param pVa The feature sets from Accept-Contact header
+     * @param objVr The properties from Registry
+     * @param bCaseSensitive The flag specifying whether the comparison is case-sensitive or not
+     * @return true if the Registry contains any values of Accept-Contact header, false otherwise.
+     */
     static IMS_BOOL IsIn(
-            IN CONST FeatureSet* pVA, IN CONST AStringArray& objVR, IN IMS_BOOL bCaseSensitive);
-    static IMS_BOOL IsIn(IN CONST FeatureSet* pVA, IN CONST FeatureSet* pVR);
+            IN const FeatureSet* pVa, IN const AStringArray& objVr, IN IMS_BOOL bCaseSensitive);
+    /**
+     * @brief Check if there are any matches between the Registry and Accept-Contact header.
+     *
+     * The comparison is case-sensitive.
+     *
+     * @param pVa The feature sets from Accept-Contact header
+     * @param objVr The properties from Registry
+     * @return true if the Registry contains any values of Accept-Contact header, false otherwise.
+     */
+    static IMS_BOOL IsIn(IN const FeatureSet* pVa, IN const FeatureSet* pVr);
 
 private:
     enum
@@ -75,95 +105,94 @@ private:
     };
 
     // Number of features in "Accept-Contact" header
-    IMS_SINT32 nNPF;
-
+    IMS_SINT32 m_nNpf;
     // Number of "Accept-Contact" feature tags where the Registry implies the same tag
-    IMS_SINT32 nNCF;
-
+    IMS_SINT32 m_nNcf;
     // Number of value matches between "Accept-Contact" and Registry for a feature tag
-    IMS_SINT32 nNVM;
-
+    IMS_SINT32 m_nNvm;
     // Number of matches for IARI, ICSI and Feature Tags fields in the CoreService property
     // for a given CS
-    IMS_SINT32 nNVM4CS;
-
+    IMS_SINT32 m_nNvmForCs;
     // Total number of features implied from IARI, ICSI and Feature Tags fields
     // in the CoreService property
     // for a given CS
-    // IMS_SINT32 nNF4CS;
-
+    // IMS_SINT32 m_nNfForCs;
     // Score of an "Accept-Contact" header for the given CS
-    IMS_SINT32 nScore;
+    IMS_SINT32 m_nScore;
 };
 
 PUBLIC GLOBAL IMS_BOOL PreferenceScore::FindMatchFor(
-        IN CONST AStringArray& objVR, IN CONST FeatureSet* pVA)
+        IN const AStringArray& objVr, IN const FeatureSet* pVa)
 {
-    const IMSList<Feature*>& objFeatures = pVA->GetFeatures();
-
-    //---------------------------------------------------------------------------------------------
+    const IMSList<Feature*>& objFeatures = pVa->GetFeatures();
 
     for (IMS_UINT32 i = 0; i < objFeatures.GetSize(); ++i)
     {
         const Feature* pFeature = objFeatures.GetAt(i);
 
         // If there is a value r in VR such that a == r, then SUCCESS
-        if (objVR.Contains(pFeature->GetValue(), IMS_FALSE))
-            return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
-}
-
-PUBLIC GLOBAL IMS_BOOL PreferenceScore::IsIn(
-        IN CONST FeatureSet* pVA, IN CONST AStringArray& objVR, IN IMS_BOOL bCaseSensitive)
-{
-    const IMSList<Feature*>& objFeatures = pVA->GetFeatures();
-
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objFeatures.GetSize(); ++i)
-    {
-        const Feature* pFeature = objFeatures.GetAt(i);
-
-        // If there is a value r in VR such that a == r, then SUCCESS
-        if (objVR.Contains(pFeature->GetValue(), bCaseSensitive))
-            return IMS_TRUE;
-
-        // If a is on the form !b (negation),
-        if (pFeature->GetValue().StartsWith('!'))
+        if (objVr.Contains(pFeature->GetValue(), IMS_FALSE))
         {
-            AString strTmp = pFeature->GetValue().GetSubStr(1);
-
-            if (!objVR.Contains(strTmp, bCaseSensitive))
-                return IMS_TRUE;
+            return IMS_TRUE;
         }
     }
 
     return IMS_FALSE;
 }
 
-PUBLIC GLOBAL IMS_BOOL PreferenceScore::IsIn(IN CONST FeatureSet* pVA, IN CONST FeatureSet* pVR)
+PUBLIC GLOBAL IMS_BOOL PreferenceScore::IsIn(
+        IN const FeatureSet* pVa, IN const AStringArray& objVr, IN IMS_BOOL bCaseSensitive)
 {
-    const IMSList<Feature*>& objFeatures = pVA->GetFeatures();
-
-    //---------------------------------------------------------------------------------------------
+    const IMSList<Feature*>& objFeatures = pVa->GetFeatures();
 
     for (IMS_UINT32 i = 0; i < objFeatures.GetSize(); ++i)
     {
         const Feature* pFeature = objFeatures.GetAt(i);
 
         // If there is a value r in VR such that a == r, then SUCCESS
-        if (pVR->Contains(pFeature))
+        if (objVr.Contains(pFeature->GetValue(), bCaseSensitive))
+        {
             return IMS_TRUE;
+        }
 
         // If a is on the form !b (negation),
         if (pFeature->GetValue().StartsWith('!'))
         {
             AString strTmp = pFeature->GetValue().GetSubStr(1);
 
-            if (!pVR->Contains(strTmp))
+            if (!objVr.Contains(strTmp, bCaseSensitive))
+            {
                 return IMS_TRUE;
+            }
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+PUBLIC GLOBAL IMS_BOOL PreferenceScore::IsIn(IN const FeatureSet* pVa, IN const FeatureSet* pVr)
+{
+    const IMSList<Feature*>& objFeatures = pVa->GetFeatures();
+
+    for (IMS_UINT32 i = 0; i < objFeatures.GetSize(); ++i)
+    {
+        const Feature* pFeature = objFeatures.GetAt(i);
+
+        // If there is a value r in VR such that a == r, then SUCCESS
+        if (pVr->Contains(pFeature))
+        {
+            return IMS_TRUE;
+        }
+
+        // If a is on the form !b (negation),
+        if (pFeature->GetValue().StartsWith('!'))
+        {
+            AString strTmp = pFeature->GetValue().GetSubStr(1);
+
+            if (!pVr->Contains(strTmp))
+            {
+                return IMS_TRUE;
+            }
         }
     }
 
@@ -171,16 +200,14 @@ PUBLIC GLOBAL IMS_BOOL PreferenceScore::IsIn(IN CONST FeatureSet* pVA, IN CONST 
 }
 
 PUBLIC
-void PreferenceScore::ProcessAcceptContact(IN CONST AppConfig* pAppConfig,
-        IN CONST CoreServiceConfig* pServiceConfig, IN CONST PreferenceHeader* pHeader,
-        IN CONST IMSList<FeatureSet*>& objExtraFeatures)
+void PreferenceScore::ProcessAcceptContact(IN const AppConfig* pAppConfig,
+        IN const CoreServiceConfig* pServiceConfig, IN const PreferenceHeader* pHeader,
+        IN const IMSList<FeatureSet*>& objExtraFeatures)
 {
     const AStringArray& objBasicMimeTypes = pAppConfig->GetBasicMediaMimeTypes();
     AStringArray objTopLevelMimeTypes;
     AStringArray objAppSubLevelMimeTypes;
     IMSList<AString> objTokens;
-
-    //---------------------------------------------------------------------------------------------
 
     for (IMS_SINT32 i = 0; i < objBasicMimeTypes.GetCount(); ++i)
     {
@@ -194,18 +221,18 @@ void PreferenceScore::ProcessAcceptContact(IN CONST AppConfig* pAppConfig,
         objTopLevelMimeTypes.AddElement(objTokens.GetAt(0));
     }
 
-    AStringArray objSupportedICSIs;
+    AStringArray objSupportedIcsis;
     IMSList<FeatureSet*> objSupportedFeatureSets;
 
     if (pServiceConfig != IMS_NULL)
     {
-        const IMSList<ServiceIdentifier>& objICSIs = pServiceConfig->GetICSIs();
+        const IMSList<ServiceIdentifier>& objIcsis = pServiceConfig->GetICSIs();
 
-        for (IMS_UINT32 i = 0; i < objICSIs.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < objIcsis.GetSize(); ++i)
         {
-            AString strValue = TextParser::DoPercentDecoding(objICSIs.GetAt(i).GetName());
+            AString strValue = TextParser::DoPercentDecoding(objIcsis.GetAt(i).GetName());
 
-            objSupportedICSIs.AddElement(strValue);
+            objSupportedIcsis.AddElement(strValue);
         }
 
         objSupportedFeatureSets = pServiceConfig->GetFeatureSets();
@@ -217,11 +244,11 @@ void PreferenceScore::ProcessAcceptContact(IN CONST AppConfig* pAppConfig,
         }
     }
 
-    const IMSList<FeatureSet*>& objACFeatureSets = pHeader->GetFeatureSets();
+    const IMSList<FeatureSet*>& objAcFeatureSets = pHeader->GetFeatureSets();
 
-    for (IMS_UINT32 i = 0; i < objACFeatureSets.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < objAcFeatureSets.GetSize(); ++i)
     {
-        const FeatureSet* pFeatureSet = objACFeatureSets.GetAt(i);
+        const FeatureSet* pFeatureSet = objAcFeatureSets.GetAt(i);
         const AString& strTag = pFeatureSet->GetTag();
 
         IncreaseNpf();
@@ -263,7 +290,9 @@ void PreferenceScore::ProcessAcceptContact(IN CONST AppConfig* pAppConfig,
                 IncreaseNcf();
 
                 if (IsIn(pFeatureSet, objEventPackages, IMS_TRUE))
+                {
                     IncreaseNvm();
+                }
             }
         }
         else if (strTag.EqualsIgnoreCase(Feature::BASE_TAG[Feature::BASE_APPLICATION]))
@@ -283,7 +312,9 @@ void PreferenceScore::ProcessAcceptContact(IN CONST AppConfig* pAppConfig,
                 IncreaseNcf();
 
                 if (FindMatchFor(objAppSubLevelMimeTypes, pFeatureSet))
+                {
                     IncreaseNvm();
+                }
             }
         }
         else if (strTag.EqualsIgnoreCase(Feature::OTHER_G_3GPP_IARI_REF))
@@ -297,11 +328,11 @@ void PreferenceScore::ProcessAcceptContact(IN CONST AppConfig* pAppConfig,
 
                     IncreaseNcf();
 
-                    AStringArray objIARI;
+                    AStringArray objIari;
 
-                    objIARI.AddElement(strValue);
+                    objIari.AddElement(strValue);
 
-                    if (IsIn(pFeatureSet, objIARI, IMS_FALSE))
+                    if (IsIn(pFeatureSet, objIari, IMS_FALSE))
                     {
                         IncreaseNvm();
                         IncreaseNvmCs();
@@ -311,11 +342,11 @@ void PreferenceScore::ProcessAcceptContact(IN CONST AppConfig* pAppConfig,
         }
         else if (strTag.EqualsIgnoreCase(Feature::OTHER_G_3GPP_ICSI_REF))
         {
-            if (objSupportedICSIs.GetCount() != 0)
+            if (objSupportedIcsis.GetCount() != 0)
             {
                 IncreaseNcf();
 
-                if (IsIn(pFeatureSet, objSupportedICSIs, IMS_FALSE))
+                if (IsIn(pFeatureSet, objSupportedIcsis, IMS_FALSE))
                 {
                     IncreaseNvm();
                     IncreaseNvmCs();
@@ -363,12 +394,10 @@ void PreferenceScore::ProcessAcceptContact(IN CONST AppConfig* pAppConfig,
     }
 }
 
-PUBLIC GLOBAL IMS_BOOL CallerPreference::CreateAcceptContactHeaders(IN CONST AppConfig* pAppConfig,
-        IN CONST CoreServiceConfig* pServiceConfig, IN CONST ISipConfigV* piSipConfigV,
+PUBLIC GLOBAL IMS_BOOL CallerPreference::CreateAcceptContactHeaders(IN const AppConfig* pAppConfig,
+        IN const CoreServiceConfig* pServiceConfig, IN const ISipConfigV* piSipConfigV,
         OUT IMSList<PreferenceHeader*>& objHeaders)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (pAppConfig == IMS_NULL)
     {
         IMS_TRACE_E(0, "Application config is an invalid", 0, 0, 0);
@@ -395,14 +424,14 @@ PUBLIC GLOBAL IMS_BOOL CallerPreference::CreateAcceptContactHeaders(IN CONST App
         }
 
         // ICSI
-        const IMSList<ServiceIdentifier>& objICSIs = pServiceConfig->GetICSIs();
+        const IMSList<ServiceIdentifier>& objIcsis = pServiceConfig->GetICSIs();
 
-        for (IMS_UINT32 i = 0; i < objICSIs.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < objIcsis.GetSize(); ++i)
         {
-            const ServiceIdentifier& objICSI = objICSIs.GetAt(i);
+            const ServiceIdentifier& objIcsi = objIcsis.GetAt(i);
 
-            AddFeature(Feature::OTHER_G_3GPP_ICSI_REF, objICSI.GetName(),
-                    objICSI.IsExplicitPresent(), objICSI.IsRequirePresent(), objHeaders);
+            AddFeature(Feature::OTHER_G_3GPP_ICSI_REF, objIcsi.GetName(),
+                    objIcsi.IsExplicitPresent(), objIcsi.IsRequirePresent(), objHeaders);
         }
 
         // Feature-Tags
@@ -469,15 +498,22 @@ PUBLIC GLOBAL IMS_BOOL CallerPreference::CreateAcceptContactHeaders(IN CONST App
                 AddFeature(Feature::OTHER_APP_SUBTYPE, objTokens.GetAt(1), objHeaders);
             }
             else if (strType.EqualsIgnoreCase(Feature::BASE_TAG[Feature::BASE_VIDEO]))
+            {
                 AddFeature(strType, objHeaders);
+            }
             else if (strType.EqualsIgnoreCase(Feature::BASE_TAG[Feature::BASE_AUDIO]))
+            {
                 AddFeature(strType, objHeaders);
-#if 0
-            else if (strType.EqualsIgnoreCase("text"))
-                AddFeature(strType, objHeaders);
-            else if (strType.EqualsIgnoreCase("image"))
-                AddFeature(strType, objHeaders);
-#endif
+            }
+            // Currently, "text"/"image" is not supported for a IMS service.
+            // else if (strType.EqualsIgnoreCase("text"))
+            //{
+            //    AddFeature(strType, objHeaders);
+            //}
+            // else if (strType.EqualsIgnoreCase("image"))
+            //{
+            //    AddFeature(strType, objHeaders);
+            //}
         }
     }
 
@@ -496,21 +532,21 @@ PUBLIC GLOBAL IMS_BOOL CallerPreference::CreateAcceptContactHeaders(IN CONST App
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_SINT32 CallerPreference::GetCandidateScore(IN CONST AppConfig* pAppConfig,
-        IN CONST CoreServiceConfig* pServiceConfig, IN CONST IMSList<PreferenceHeader*>& objHeaders,
-        IN CONST IMSList<FeatureSet*>& objExtraFeatures)
+PUBLIC GLOBAL IMS_SINT32 CallerPreference::GetCandidateScore(IN const AppConfig* pAppConfig,
+        IN const CoreServiceConfig* pServiceConfig, IN const IMSList<PreferenceHeader*>& objHeaders,
+        IN const IMSList<FeatureSet*>& objExtraFeatures)
 {
     IMS_SINT32 nScore = 0;
     IMS_SINT32 nNumberOfHeaders = static_cast<IMS_SINT32>(objHeaders.GetSize());
     IMS_SINT32 nSumOfNvmCs = 0;
     IMS_SINT32 nNfCs = 0;
 
-    //---------------------------------------------------------------------------------------------
-
     if (pServiceConfig != IMS_NULL)
     {
         if (pServiceConfig->IsIARISupported())
+        {
             ++nNfCs;
+        }
 
         nNfCs += pServiceConfig->GetICSIs().GetSize();
         nNfCs += pServiceConfig->GetFeatureTags().GetSize();
@@ -523,7 +559,9 @@ PUBLIC GLOBAL IMS_SINT32 CallerPreference::GetCandidateScore(IN CONST AppConfig*
         PreferenceHeader* pHeader = objHeaders.GetAt(i);
 
         if (pHeader == IMS_NULL)
+        {
             continue;
+        }
 
         objScore.Clear();
 
@@ -569,36 +607,28 @@ PUBLIC GLOBAL IMS_SINT32 CallerPreference::GetCandidateScore(IN CONST AppConfig*
 }
 
 PRIVATE GLOBAL void CallerPreference::AddFeature(
-        IN CONST AString& strTag, OUT IMSList<PreferenceHeader*>& objHeaders)
+        IN const AString& strTag, OUT IMSList<PreferenceHeader*>& objHeaders)
 {
-    //---------------------------------------------------------------------------------------------
-
     AddFeature(IMS_TRUE, strTag, AString::ConstNull(), IMS_FALSE, IMS_FALSE, objHeaders);
 }
 
-PRIVATE GLOBAL void CallerPreference::AddFeature(IN CONST AString& strTag,
-        IN CONST AString& strValue, OUT IMSList<PreferenceHeader*>& objHeaders)
+PRIVATE GLOBAL void CallerPreference::AddFeature(IN const AString& strTag,
+        IN const AString& strValue, OUT IMSList<PreferenceHeader*>& objHeaders)
 {
-    //---------------------------------------------------------------------------------------------
-
     AddFeature(IMS_FALSE, strTag, strValue, IMS_FALSE, IMS_FALSE, objHeaders);
 }
 
-PRIVATE GLOBAL void CallerPreference::AddFeature(IN CONST AString& strTag,
-        IN CONST AString& strValue, IN IMS_BOOL bExplicit, IN IMS_BOOL bRequire,
+PRIVATE GLOBAL void CallerPreference::AddFeature(IN const AString& strTag,
+        IN const AString& strValue, IN IMS_BOOL bExplicit, IN IMS_BOOL bRequire,
         OUT IMSList<PreferenceHeader*>& objHeaders)
 {
-    //---------------------------------------------------------------------------------------------
-
     AddFeature(IMS_FALSE, strTag, strValue, bExplicit, bRequire, objHeaders);
 }
 
 PRIVATE GLOBAL void CallerPreference::AddFeature(IN IMS_BOOL bBooleanFeature,
-        IN CONST AString& strTag, IN CONST AString& strValue, IN IMS_BOOL bExplicit,
+        IN const AString& strTag, IN const AString& strValue, IN IMS_BOOL bExplicit,
         IN IMS_BOOL bRequire, OUT IMSList<PreferenceHeader*>& objHeaders)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Implement "If the feature T is already part of some member in Fs, then Fs is unchanged."
     for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
     {
@@ -660,9 +690,13 @@ PRIVATE GLOBAL void CallerPreference::AddFeature(IN IMS_BOOL bBooleanFeature,
     PreferenceHeader* pHeader = new PreferenceHeader(bExplicit, bRequire);
 
     if (bBooleanFeature)
+    {
         pHeader->AddFeature(strTag);
+    }
     else
+    {
         pHeader->AddFeature(strTag, strValue);
+    }
 
     if (!objHeaders.Append(pHeader))
     {

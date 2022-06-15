@@ -1,22 +1,25 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20140203  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_CONNECTION_FACTORY_H_
+#define SIP_CONNECTION_FACTORY_H_
 
-    Description
-
-*/
-
-#ifndef _SIP_CONNECTION_FACTORY_H_
-#define _SIP_CONNECTION_FACTORY_H_
-
-#include "util/IDialogMethod.h"
-#include "util/ICancellableMethod.h"
-#include "ISipConnectionFactory.h"
 #include "EngineActivity.h"
+#include "ISipConnectionFactory.h"
+#include "util/ICancellableMethod.h"
+#include "util/IDialogMethod.h"
 
 class Service;
 
@@ -27,38 +30,42 @@ class SipConnectionFactory :
         public ISipConnectionFactory
 {
 public:
-    SipConnectionFactory(IN Service* pService_);
-    SipConnectionFactory(IN Service* pService_, IN ISipServerConnection* piSSC);
+    SipConnectionFactory(IN Service* pService);
+    SipConnectionFactory(IN Service* pService, IN ISipServerConnection* piSsc);
     virtual ~SipConnectionFactory();
+
+    SipConnectionFactory(IN const SipConnectionFactory&) = delete;
+    SipConnectionFactory& operator=(IN const SipConnectionFactory&) = delete;
 
 public:
     // EngineActivity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
     // IDialogMethod class
-    virtual IMS_BOOL Dialog_Compare(IN ISipServerConnection* piSSC) const;
-    virtual IMS_BOOL Dialog_NotifyRequest(IN ISipServerConnection* piSSC);
+    IMS_BOOL Dialog_Compare(IN ISipServerConnection* piSsc) const override;
+    IMS_BOOL Dialog_NotifyRequest(IN ISipServerConnection* piSsc) override;
 
     // ICancellableMethod class
-    virtual IMS_BOOL Cancellable_Compare(IN ISipServerConnection* piSSC_CANCEL) const;
-    virtual IMS_BOOL Cancellable_NotifyRequest(IN ISipServerConnection* piSSC_CANCEL);
+    IMS_BOOL Cancellable_Compare(IN ISipServerConnection* piSscCancel) const override;
+    IMS_BOOL Cancellable_NotifyRequest(IN ISipServerConnection* piSscCancel) override;
 
     // IMethod class
-    virtual void Destroy();
-    // SIP_MESSAGE_MEDIATOR
-    virtual void SetMessageMediator(IN IMessageMediator* piMediator);
-
+    void Destroy() override;
+    inline void SetMessageMediator(IN IMessageMediator* /*piMediator*/) override {}
     // ISipConnectionFactory class
-    virtual ISipClientConnection* CreateClientConnection(
-            IN CONST SipMethod& objMethod, IN CONST SipAddress* pFrom, IN CONST SipAddress* pTo);
-    virtual ISipClientConnection* CreateClientConnection(
-            IN ISipDialog* piDialog, IN CONST SipMethod& objMethod);
-    virtual IMS_BOOL CreateResponse(IN_OUT ISipServerConnection* piSSC, IN IMS_SINT32 nStatusCode,
-            IN CONST AString& strPhrase = AString::ConstNull());
-    virtual ISipServerConnection* GetNewServerConnection();
-    virtual void SetDialog(IN ISipDialog* piDialog);
-    virtual void SetListener(IN ISipConnectionFactoryListener* piListener);
-    virtual void SetSSCForCANCEL(IN ISipServerConnection* piSSC);
+    ISipClientConnection* CreateClientConnection(IN const SipMethod& objMethod,
+            IN const SipAddress* pFrom, IN const SipAddress* pTo) override;
+    ISipClientConnection* CreateClientConnection(
+            IN ISipDialog* piDialog, IN const SipMethod& objMethod) override;
+    IMS_BOOL CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode,
+            IN const AString& strPhrase = AString::ConstNull()) override;
+    inline ISipServerConnection* GetNewServerConnection() override { return m_piInitialSsc; }
+    void SetDialog(IN ISipDialog* piDialog) override;
+    inline void SetListener(IN ISipConnectionFactoryListener* piListener) override
+    {
+        m_piListener = piListener;
+    }
+    inline void SetSscForCancel(IN ISipServerConnection* piSsc) override { m_piInviteSsc = piSsc; }
 
 private:
     enum
@@ -66,12 +73,12 @@ private:
         AMSG_SSC_FOR_MID_DIALOG_RECEIVED = AMSG_USER
     };
 
-    Service* pService;
-    ISipDialog* piDialog;
-    ISipConnectionFactoryListener* piListener;
+    Service* m_pService;
+    ISipDialog* m_piDialog;
+    ISipConnectionFactoryListener* m_piListener;
     // It is only maintained for a new incoming request
-    ISipServerConnection* piInitialSSC;
-    ISipServerConnection* piInviteSSC;
+    ISipServerConnection* m_piInitialSsc;
+    ISipServerConnection* m_piInviteSsc;
 };
 
-#endif  // _SIP_CONNECTION_FACTORY_H_
+#endif

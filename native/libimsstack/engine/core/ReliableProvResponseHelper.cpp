@@ -1,17 +1,21 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100614  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ReliableProvResponseHelper.h"
@@ -19,11 +23,11 @@
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-ReliableProvResponseHelper::ReliableProvResponseHelper(IN IMS_BOOL bIsMobileOriginated_) :
-        bIsMobileOriginated(bIsMobileOriginated_),
-        nState(STATE_IDLE),
-        nRSeqNumber(1),
-        nCSeqNumber(0)
+ReliableProvResponseHelper::ReliableProvResponseHelper(IN IMS_BOOL bIsMobileOriginated) :
+        m_bIsMobileOriginated(bIsMobileOriginated),
+        m_nState(STATE_IDLE),
+        m_nRSeqNumber(1),
+        m_nCSeqNumber(0)
 {
     IMS_TRACE_D("Constructor :: ReliableProvResponseHelper", 0, 0, 0);
 }
@@ -35,67 +39,54 @@ ReliableProvResponseHelper::~ReliableProvResponseHelper()
 }
 
 PUBLIC
-IMS_SINT32 ReliableProvResponseHelper::GetState() const
+void ReliableProvResponseHelper::Initialize(IN ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return nState;
-}
-
-PUBLIC
-void ReliableProvResponseHelper::Initialize(IN ISipMessage* piSIPMsg)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return;
     }
 
-    IMS_BOOL bOK;
+    IMS_BOOL bOk;
     IMS_SINT32 nNumber;
 
-    if (bIsMobileOriginated)
+    if (m_bIsMobileOriginated)
     {
         // When the first RPR is received ...
 
-        AString strRSeq = piSIPMsg->GetHeader(ISipHeader::RSEQ);
+        AString strRSeq = piSipMsg->GetHeader(ISipHeader::RSEQ);
 
-        nNumber = strRSeq.ToInt32(&bOK);
+        nNumber = strRSeq.ToInt32(&bOk);
 
-        if (bOK)
+        if (bOk)
         {
-            nRSeqNumber = nNumber;
+            m_nRSeqNumber = nNumber;
         }
     }
     else
     {
         // When a new request is received ...
-
-        nRSeqNumber = 1;
+        m_nRSeqNumber = 1;
     }
 
-    AString strCSeq = piSIPMsg->GetHeader(ISipHeader::CSEQ);
+    AString strCSeq = piSipMsg->GetHeader(ISipHeader::CSEQ);
     IMS_SINT32 nIndex = strCSeq.GetIndexOf(' ');
 
     strCSeq.Truncate(nIndex);
 
-    nNumber = strCSeq.ToInt32(&bOK);
+    nNumber = strCSeq.ToInt32(&bOk);
 
-    if (bOK)
+    if (bOk)
     {
-        nCSeqNumber = nNumber;
+        m_nCSeqNumber = nNumber;
     }
 
-    objMethod = piSIPMsg->GetMethod();
+    m_objMethod = piSipMsg->GetMethod();
 }
 
 PUBLIC
-IMS_BOOL ReliableProvResponseHelper::SetRAckHeader(IN_OUT ISipMessage*& piSIPMsg) const
+IMS_BOOL ReliableProvResponseHelper::SetRAckHeader(IN_OUT ISipMessage*& piSipMsg) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -103,9 +94,9 @@ IMS_BOOL ReliableProvResponseHelper::SetRAckHeader(IN_OUT ISipMessage*& piSIPMsg
     // response-num LWS CSeq-num LWS METHOD
     AString strRAck;
 
-    strRAck.Sprintf("%u %u %s", nRSeqNumber, nCSeqNumber, objMethod.ToString().GetStr());
+    strRAck.Sprintf("%u %u %s", m_nRSeqNumber, m_nCSeqNumber, m_objMethod.ToString().GetStr());
 
-    if (piSIPMsg->SetHeader(ISipHeader::RACK, strRAck) != IMS_SUCCESS)
+    if (piSipMsg->SetHeader(ISipHeader::RACK, strRAck) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting RAck header failed", 0, 0, 0);
         return IMS_FALSE;
@@ -115,19 +106,17 @@ IMS_BOOL ReliableProvResponseHelper::SetRAckHeader(IN_OUT ISipMessage*& piSIPMsg
 }
 
 PUBLIC
-IMS_BOOL ReliableProvResponseHelper::SetRSeqHeader(IN_OUT ISipMessage*& piSIPMsg) const
+IMS_BOOL ReliableProvResponseHelper::SetRSeqHeader(IN_OUT ISipMessage*& piSipMsg) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
     AString strRSeq;
-    strRSeq.SetNumber(nRSeqNumber);
+    strRSeq.SetNumber(m_nRSeqNumber);
 
-    if (piSIPMsg->SetHeader(ISipHeader::RSEQ, strRSeq) != IMS_SUCCESS)
+    if (piSipMsg->SetHeader(ISipHeader::RSEQ, strRSeq) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting RSeq header failed", 0, 0, 0);
         return IMS_FALSE;
@@ -137,20 +126,18 @@ IMS_BOOL ReliableProvResponseHelper::SetRSeqHeader(IN_OUT ISipMessage*& piSIPMsg
 }
 
 PUBLIC
-IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageReceived(IN ISipMessage* piSIPMsg)
+IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageReceived(IN ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    const SipMethod& objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSipMsg->GetMethod();
 
     if (objMethod.Equals(SipMethod::PRACK))
     {
-        if (piSIPMsg->GetType() == ISipMessage::TYPE_RESPONSE)
+        if (piSipMsg->GetType() == ISipMessage::TYPE_RESPONSE)
         {
             SetState(STATE_IDLE);
         }
@@ -161,18 +148,18 @@ IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageReceived(IN ISipMessage* piS
     }
     else
     {
-        if (piSIPMsg->GetType() == ISipMessage::TYPE_RESPONSE)
+        if (piSipMsg->GetType() == ISipMessage::TYPE_RESPONSE)
         {
-            AString strRSeq = piSIPMsg->GetHeader(ISipHeader::RSEQ);
-            IMS_BOOL bOK = IMS_FALSE;
-            IMS_SINT32 nNumber = strRSeq.ToInt32(&bOK);
+            AString strRSeq = piSipMsg->GetHeader(ISipHeader::RSEQ);
+            IMS_BOOL bOk = IMS_FALSE;
+            IMS_SINT32 nNumber = strRSeq.ToInt32(&bOk);
 
-            if (!bOK)
+            if (!bOk)
             {
                 return IMS_FALSE;
             }
 
-            nRSeqNumber = nNumber;
+            m_nRSeqNumber = nNumber;
 
             SetState(STATE_RPR_RECEIVED);
         }
@@ -182,20 +169,18 @@ IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageReceived(IN ISipMessage* piS
 }
 
 PUBLIC
-IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageSent(IN ISipMessage* piSIPMsg)
+IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageSent(IN ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    const SipMethod& objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSipMsg->GetMethod();
 
     if (objMethod.Equals(SipMethod::PRACK))
     {
-        if (piSIPMsg->GetType() == ISipMessage::TYPE_RESPONSE)
+        if (piSipMsg->GetType() == ISipMessage::TYPE_RESPONSE)
         {
             SetState(STATE_IDLE);
         }
@@ -206,10 +191,10 @@ IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageSent(IN ISipMessage* piSIPMs
     }
     else
     {
-        if (piSIPMsg->GetType() == ISipMessage::TYPE_RESPONSE)
+        if (piSipMsg->GetType() == ISipMessage::TYPE_RESPONSE)
         {
             // Increment the response sequence number for the following RPRs
-            ++nRSeqNumber;
+            ++m_nRSeqNumber;
 
             SetState(STATE_RPR_SENT);
         }
@@ -221,29 +206,22 @@ IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageSent(IN ISipMessage* piSIPMs
 PUBLIC
 IMS_BOOL ReliableProvResponseHelper::UpdateOnOperationFailed()
 {
-    //---------------------------------------------------------------------------------------------
-
     SetState(STATE_IDLE);
-
     return IMS_TRUE;
 }
 
 PRIVATE
 void ReliableProvResponseHelper::SetState(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
+    IMS_TRACE_I(
+            "ReliableProvResponse :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
-    IMS_TRACE_I("ReliableProvResponse :: %s to %s", StateToString(this->nState),
-            StateToString(nState), 0);
-
-    this->nState = nState;
+    m_nState = nState;
 }
 
 PRIVATE
 const IMS_CHAR* ReliableProvResponseHelper::StateToString(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nState)
     {
         case STATE_IDLE:

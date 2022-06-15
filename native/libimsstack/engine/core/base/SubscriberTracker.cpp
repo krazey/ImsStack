@@ -1,21 +1,26 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20110517  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "ServiceTrace.h"
 #include "ServiceMutex.h"
+#include "ServiceTrace.h"
 #include "SystemConfig.h"
+
 #include "private/ConfigurationManager.h"
 #include "private/SubscriberConfig.h"
+
 #include "SipDebug.h"
 #include "base/SubscriberTracker.h"
 
@@ -23,58 +28,48 @@ __IMS_TRACE_TAG_IMS__;
 
 PRIVATE
 SubscriberTracker::SubscriberTracker() :
-        piLock(IMS_NULL),
-        pSubscriberMaps(IMS_NULL)
+        m_piLock(IMS_NULL),
+        m_pSubscriberMaps(IMS_NULL)
 {
-    piLock = MutexService::GetMutexService()->CreateMutex();
-    pSubscriberMaps = new IMSMap<AString, IMSList<SipAddress*>>[SystemConfig::GetMaxSimSlot()];
+    m_piLock = MutexService::GetMutexService()->CreateMutex();
+    m_pSubscriberMaps = new IMSMap<AString, IMSList<SipAddress*>>[SystemConfig::GetMaxSimSlot()];
 }
 
 PUBLIC VIRTUAL SubscriberTracker::~SubscriberTracker()
 {
-    if (pSubscriberMaps != IMS_NULL)
+    if (m_pSubscriberMaps != IMS_NULL)
     {
-        delete[] pSubscriberMaps;
+        delete[] m_pSubscriberMaps;
     }
 
-    MutexService::GetMutexService()->DestroyMutex(piLock);
+    MutexService::GetMutexService()->DestroyMutex(m_piLock);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 const AString& SubscriberTracker::GetSubscriberId(
-        IN IMS_SINT32 nSlotId, IN const AString& strAOR) const
+        IN IMS_SINT32 nSlotId, IN const AString& strAor) const
 {
     //// Supports a multiple subscriber configurations
-    SipAddress objAOR;
+    SipAddress objAor;
 
-    if (!objAOR.Create(strAOR))
+    if (!objAor.Create(strAor))
     {
         return AString::ConstNull();
     }
 
-    return GetSubscriberId(nSlotId, &objAOR);
+    return GetSubscriberId(nSlotId, &objAor);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 const AString& SubscriberTracker::GetSubscriberId(
-        IN IMS_SINT32 nSlotId, IN const SipAddress* pAOR) const
+        IN IMS_SINT32 nSlotId, IN const SipAddress* pAor) const
 {
-    if (pAOR == IMS_NULL)
+    if (pAor == IMS_NULL)
     {
         return AString::ConstNull();
     }
 
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
     IMSMap<AString, IMSList<SipAddress*>>* pSubscribers = GetSubscribers(nSlotId);
 
@@ -94,13 +89,13 @@ const AString& SubscriberTracker::GetSubscriberId(
     for (IMS_UINT32 i = 0; i < pSubscribers->GetSize(); ++i)
     {
         const AString& strId = pSubscribers->GetKeyAt(i);
-        const IMSList<SipAddress*>& objIMPUs = pSubscribers->GetValueAt(i);
+        const IMSList<SipAddress*>& objImpus = pSubscribers->GetValueAt(i);
 
-        for (IMS_UINT32 j = 0; j < objIMPUs.GetSize(); ++j)
+        for (IMS_UINT32 j = 0; j < objImpus.GetSize(); ++j)
         {
-            const SipAddress* pIMPU = objIMPUs.GetAt(j);
+            const SipAddress* pImpu = objImpus.GetAt(j);
 
-            if (pIMPU->Equals(*pAOR))
+            if (pImpu->Equals(*pAor))
             {
                 return strId;
             }
@@ -110,35 +105,25 @@ const AString& SubscriberTracker::GetSubscriberId(
     return AString::ConstNull();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL SubscriberTracker* SubscriberTracker::GetInstance()
 {
-    static SubscriberTracker* pSubsTracker = IMS_NULL;
+    static SubscriberTracker* s_pSubsTracker = IMS_NULL;
 
-    if (pSubsTracker == IMS_NULL)
+    if (s_pSubsTracker == IMS_NULL)
     {
-        pSubsTracker = new SubscriberTracker();
+        s_pSubsTracker = new SubscriberTracker();
     }
 
-    return pSubsTracker;
+    return s_pSubsTracker;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SubscriberTracker::SubscriberInfo_UpdateIMPU(IN IMS_SINT32 nSlotId,
-        IN const AString& strId, IN const AString& strOLD, IN const AString& strNEW)
+        IN const AString& strId, IN const AString& strOld, IN const AString& strNew)
 {
     IMS_TRACE_I("Subscriber :: ID (%s), OLD (%s), NEW (%s)", strId.GetStr(),
-            SipDebug::GetUri1(strOLD).GetStr(), SipDebug::GetUri2(strNEW).GetStr());
+            SipDebug::GetUri1(strOld).GetStr(), SipDebug::GetUri2(strNew).GetStr());
 
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
     IMSMap<AString, IMSList<SipAddress*>>* pSubscribers = GetSubscribers(nSlotId);
 
@@ -151,115 +136,115 @@ PROTECTED VIRTUAL void SubscriberTracker::SubscriberInfo_UpdateIMPU(IN IMS_SINT3
 
     if (nIndex < 0)
     {
-        if ((strOLD.GetLength() == 0) && (strNEW.GetLength() == 0))
+        if ((strOld.GetLength() == 0) && (strNew.GetLength() == 0))
         {
             // Ignore the issue...
             return;
         }
 
         // New subscriber configuration
-        SipAddress* pIMPU = new SipAddress();
+        SipAddress* pImpu = new SipAddress();
 
-        if (pIMPU == IMS_NULL)
+        if (pImpu == IMS_NULL)
         {
             return;
         }
 
-        if (!pIMPU->Create(strNEW))
+        if (!pImpu->Create(strNew))
         {
-            delete pIMPU;
+            delete pImpu;
 
-            IMS_TRACE_E(0, "Creating SIP address (%s) failed", SipDebug::GetUri1(strNEW).GetStr(),
+            IMS_TRACE_E(0, "Creating SIP address (%s) failed", SipDebug::GetUri1(strNew).GetStr(),
                     0, 0);
             return;
         }
 
-        IMSList<SipAddress*> objIMPUs;
+        IMSList<SipAddress*> objImpus;
 
-        objIMPUs.Append(pIMPU);
+        objImpus.Append(pImpu);
 
-        pSubscribers->Add(strId, objIMPUs);
+        pSubscribers->Add(strId, objImpus);
 
         return;
     }
 
-    if ((strOLD.GetLength() == 0) && (strNEW.GetLength() == 0))
+    if ((strOld.GetLength() == 0) && (strNew.GetLength() == 0))
     {
         // Remove all the IMPUs
-        IMSList<SipAddress*>& objIMPUs = pSubscribers->GetValueAt(nIndex);
+        IMSList<SipAddress*>& objImpus = pSubscribers->GetValueAt(nIndex);
 
-        while (!objIMPUs.IsEmpty())
+        while (!objImpus.IsEmpty())
         {
-            SipAddress* pIMPU = objIMPUs.GetAt(0);
+            SipAddress* pImpu = objImpus.GetAt(0);
 
-            if (pIMPU != IMS_NULL)
+            if (pImpu != IMS_NULL)
             {
-                delete pIMPU;
+                delete pImpu;
             }
 
-            objIMPUs.RemoveAt(0);
+            objImpus.RemoveAt(0);
         }
 
         return;
     }
 
     // If OLD & NEW is same value, then ignore the below procedure
-    if (strOLD.Equals(strNEW))
+    if (strOld.Equals(strNew))
     {
         return;
     }
 
-    IMSList<SipAddress*>& objIMPUs = pSubscribers->GetValueAt(nIndex);
+    IMSList<SipAddress*>& objImpus = pSubscribers->GetValueAt(nIndex);
 
     // OLD : empty, NEW : not empty
     // OLD : not empty, NEW : empty
     // OLD : not empty, NEW : not empty
 
     // First, check an old IMPU and remove it if present
-    if ((strOLD.GetLength() != 0) && !objIMPUs.IsEmpty())
+    if ((strOld.GetLength() != 0) && !objImpus.IsEmpty())
     {
-        SipAddress objOLD(strOLD);
+        SipAddress objOld(strOld);
 
-        for (IMS_UINT32 i = 0; i < objIMPUs.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < objImpus.GetSize(); ++i)
         {
-            SipAddress* pIMPU = objIMPUs.GetAt(i);
+            SipAddress* pImpu = objImpus.GetAt(i);
 
-            if (pIMPU == IMS_NULL)
+            if (pImpu == IMS_NULL)
             {
                 continue;
             }
 
-            if (pIMPU->Equals(objOLD))
+            if (pImpu->Equals(objOld))
             {
                 // Remove and escape the loop
-                delete pIMPU;
+                delete pImpu;
 
-                objIMPUs.RemoveAt(i);
+                objImpus.RemoveAt(i);
                 break;
             }
         }
     }
 
     // Adds a new IMPU
-    if (strNEW.GetLength() != 0)
+    if (strNew.GetLength() != 0)
     {
-        SipAddress* pIMPU = new SipAddress();
+        SipAddress* pImpu = new SipAddress();
 
-        if (pIMPU == IMS_NULL)
+        if (pImpu == IMS_NULL)
         {
             return;
         }
 
-        if (!pIMPU->Create(strNEW))
+        if (!pImpu->Create(strNew))
         {
-            delete pIMPU;
+            delete pImpu;
 
-            IMS_TRACE_E(0, "Creating SIP address (%s) failed", SipDebug::GetUri1(strNEW).GetStr(),
+            IMS_TRACE_E(0, "Creating SIP address (%s) failed", SipDebug::GetUri1(strNew).GetStr(),
                     0, 0);
             return;
         }
 
-        objIMPUs.Append(pIMPU);
+        objImpus.Append(pImpu);
     }
 }
 
@@ -272,7 +257,7 @@ IMSMap<AString, IMSList<SipAddress*>>* SubscriberTracker::GetSubscribers(
         return IMS_NULL;
     }
 
-    return &pSubscriberMaps[nSlotId];
+    return &m_pSubscriberMaps[nSlotId];
 }
 
 PRIVATE
@@ -327,19 +312,19 @@ void SubscriberTracker::InitForSlot(IN IMS_SINT32 nSlotId)
                 continue;
             }
 
-            const AStringArray& objIMPUs = pSubsInfo->GetPublicUserIds();
+            const AStringArray& objImpus = pSubsInfo->GetPublicUserIds();
 
-            for (IMS_SINT32 k = 0; k < objIMPUs.GetCount(); ++k)
+            for (IMS_SINT32 k = 0; k < objImpus.GetCount(); ++k)
             {
-                const AString& strIMPU = objIMPUs.GetElementAt(k);
+                const AString& strImpu = objImpus.GetElementAt(k);
 
-                if (strIMPU.GetLength() == 0)
+                if (strImpu.GetLength() == 0)
                 {
                     continue;
                 }
 
                 SubscriberInfo_UpdateIMPU(
-                        nSlotId, pSubsConfig->GetId(), AString::ConstNull(), strIMPU);
+                        nSlotId, pSubsConfig->GetId(), AString::ConstNull(), strImpu);
             }
         }
     }

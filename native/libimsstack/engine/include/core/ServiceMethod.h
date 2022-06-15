@@ -1,37 +1,41 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090729  toastops@                 Created
-    </table>
-
-    Description
-*/
-
-#ifndef _SERVICE_METHOD_H_
-#define _SERVICE_METHOD_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SERVICE_METHOD_H_
+#define SERVICE_METHOD_H_
 
 #include "IMSMap.h"
-#include "base/Method.h"
-#include "Message.h"
 
-class Service;
+#include "Message.h"
+#include "Service.h"
+#include "base/Method.h"
+
 class PreviousMessage;
 
 class ServiceMethod : public Method
 {
 public:
-    explicit ServiceMethod(IN Service* pService_);
+    explicit ServiceMethod(IN Service* pService);
     virtual ~ServiceMethod();
 
-private:
-    ServiceMethod(IN CONST ServiceMethod& objRHS);
-    ServiceMethod& operator=(IN CONST ServiceMethod& objRHS);
+    ServiceMethod(IN const ServiceMethod&) = delete;
+    ServiceMethod& operator=(IN const ServiceMethod&) = delete;
 
 public:
     // IMethod interface
-    virtual void Destroy();
+    void Destroy() override;
 
     // IServiceMethod interface
     Message* GetNextRequest();
@@ -39,54 +43,64 @@ public:
     Message* GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const;
     Message* GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const;
     IMSList<Message*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const;
-    IMSList<AString> GetRemoteUserId() const;
+    inline IMSList<AString> GetRemoteUserId() const { return GetRemoteUserIds(); }
 
 protected:
-    // MULTI_SUBS
-    virtual const AString& GetSubscriberId() const;
+    inline const AString& GetSubscriberId() const override { return m_pService->GetSubscriberId(); }
 
     void ClearConnection(IN IMS_SINT32 nServiceMethod);
     void CloseConnection(IN IMS_SINT32 nServiceMethod);
-    void CopyPreviousMessage(IN IMS_SINT32 nServiceMethod_From, IN IMS_SINT32 nServiceMethod_To);
-    ISipClientConnection* CreateCancelConnection(IN ISipClientConnection* piSCC);
-    ISipClientConnection* CreateConnection(IN CONST SipMethod& objMethod);
-    ISipClientConnection* CreateConnection(IN ISipDialog* piDialog, IN CONST SipMethod& objMethod);
-    IMS_BOOL CreateResponse(IN_OUT ISipServerConnection* piSSC, IN IMS_SINT32 nStatusCode,
-            IN CONST AString& strPhrase = AString::ConstNull());
-    ISipClientConnection* GetClientConnection(IN IMS_SINT32 nServiceMethod) const;
-    ISipServerConnection* GetServerConnection(IN IMS_SINT32 nServiceMethod) const;
-    Service* GetService() const;
+    void CopyPreviousMessage(IN IMS_SINT32 nSrcServiceMethod, IN IMS_SINT32 nDstServiceMethod);
+    ISipClientConnection* CreateCancelConnection(IN ISipClientConnection* piScc);
+    ISipClientConnection* CreateConnection(IN const SipMethod& objMethod);
+    ISipClientConnection* CreateConnection(IN ISipDialog* piDialog, IN const SipMethod& objMethod);
+    IMS_BOOL CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode,
+            IN const AString& strPhrase = AString::ConstNull());
+    inline ISipClientConnection* GetClientConnection(IN IMS_SINT32 nServiceMethod) const
+    {
+        return DYNAMIC_CAST(ISipClientConnection*, GetConnection(nServiceMethod));
+    }
+    inline ISipServerConnection* GetServerConnection(IN IMS_SINT32 nServiceMethod) const
+    {
+        return DYNAMIC_CAST(ISipServerConnection*, GetConnection(nServiceMethod));
+    }
+    inline Service* GetService() const { return m_pService; }
     IMS_BOOL IsPrivacyRequested(IN IMS_BOOL bRequest = IMS_TRUE) const;
-    IMS_BOOL IsServiceOpen() const;
+    inline IMS_BOOL IsServiceOpen() const { return m_pService->IsImsConnected(); }
     IMS_BOOL RemovePreviousMessage(IN IMS_SINT32 nServiceMethod);
-    IMS_BOOL SendNUpdateRequest(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC);
-    IMS_BOOL SendNUpdateResponse(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC);
-    IMS_BOOL SendNUpdateRequestEx(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC,
+    inline IMS_BOOL SendNUpdateRequest(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc)
+    {
+        return SendNUpdateRequestEx(nServiceMethod, piSc, MESSAGE_CLASS_NORMAL);
+    }
+    inline IMS_BOOL SendNUpdateResponse(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc)
+    {
+        return SendNUpdateResponseEx(nServiceMethod, piSc, MESSAGE_CLASS_NORMAL);
+    }
+    IMS_BOOL SendNUpdateRequestEx(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc,
             IN IMS_SINT32 nMessageClass = MESSAGE_CLASS_NORMAL);
-    IMS_BOOL SendNUpdateResponseEx(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC,
+    IMS_BOOL SendNUpdateResponseEx(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc,
             IN IMS_SINT32 nMessageClass = MESSAGE_CLASS_NORMAL);
-    void UpdateConnection(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC);
-    IMS_BOOL UpdateRequestOnReceived(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC);
-    IMS_BOOL UpdateRequestOnSent(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC);
-    IMS_BOOL UpdateResponseOnReceived(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC);
-    IMS_BOOL UpdateResponseOnSent(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC);
+    void UpdateConnection(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc);
+    IMS_BOOL UpdateRequestOnReceived(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc);
+    IMS_BOOL UpdateRequestOnSent(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc);
+    IMS_BOOL UpdateResponseOnReceived(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc);
+    IMS_BOOL UpdateResponseOnSent(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc);
 
 private:
     IMS_BOOL AddPreviousResponse(IN IMS_SINT32 nServiceMethod, IN Message* pMessage);
     IMS_BOOL SetPreviousRequest(
-            IN IMS_SINT32 nServiceMethod, IN Message* pMessage, IN ISipConnection* piSC);
+            IN IMS_SINT32 nServiceMethod, IN Message* pMessage, IN ISipConnection* piSc);
     ISipConnection* GetConnection(IN IMS_SINT32 nServiceMethod) const;
 
 private:
     // Reference to Service
-    Service* pService;
-
+    Service* m_pService;
     // Message object to outgoing SIP request message
-    Message* pNextRequest;
+    Message* m_pNextRequest;
     // Message object to outgoing SIP response message
-    Message* pNextResponse;
+    Message* m_pNextResponse;
     // Storage for the previous SIP message according to the method type
-    IMSMap<IMS_SINT32, PreviousMessage*> objPreviousMessages;
+    IMSMap<IMS_SINT32, PreviousMessage*> m_objPreviousMessages;
 };
 
-#endif  //_SERVICE_METHOD_H_
+#endif

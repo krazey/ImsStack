@@ -1,15 +1,18 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090715  lovil@                    Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "base/Ims.h"
 #include "base/ImsError.h"
 
@@ -22,14 +25,14 @@
         0, IMS_NULL          \
     }
 
-struct IMSErrorCode
+struct ImsErrorCode
 {
     IMS_SINT32 nCode;
     const IMS_CHAR* pszMessage;
 };
 
 // clang-format off
-static const IMSErrorCode gstErrorCode[] =
+static const ImsErrorCode s_objErrorCode[] =
 {
     IMS_ERROR_CODE(NO_ERROR),
     IMS_ERROR_CODE(GENERAL_ERROR),
@@ -59,30 +62,26 @@ static const IMSErrorCode gstErrorCode[] =
 
 PUBLIC GLOBAL IMS_SINT32 ImsError::GetLastError()
 {
-    //---------------------------------------------------------------------------------------------
-
     return Ims::GetLastError();
 }
 
 PUBLIC GLOBAL const IMS_CHAR* ImsError::GetLastErrorString()
 {
-    //---------------------------------------------------------------------------------------------
-
     return GetString(Ims::GetLastError());
 }
 
 PUBLIC GLOBAL const IMS_CHAR* ImsError::GetString(IN IMS_SINT32 nError)
 {
-    IMS_UINT32 nCount = sizeof(gstErrorCode) / sizeof(gstErrorCode[0]);
-
-    //---------------------------------------------------------------------------------------------
+    IMS_UINT32 nCount = sizeof(s_objErrorCode) / sizeof(s_objErrorCode[0]);
 
     for (IMS_UINT32 i = 0; i < nCount; ++i)
     {
-        const IMSErrorCode* pCode = &(gstErrorCode[i]);
+        const ImsErrorCode* pCode = &(s_objErrorCode[i]);
 
         if ((pCode->nCode == 0) || (pCode->pszMessage == IMS_NULL))
+        {
             break;
+        }
 
         if (pCode->nCode == nError)
         {

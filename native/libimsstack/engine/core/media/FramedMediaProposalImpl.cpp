@@ -1,50 +1,29 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100503  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
 #include "base/Ims.h"
-#include "media/MediaDescriptor.h"
 #include "media/FramedMediaProposalImpl.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-PUBLIC
-FramedMediaProposalImpl::FramedMediaProposalImpl(IN FramedMediaProposal* pMediaProposal_) :
-        pMediaProposal(pMediaProposal_)
-{
-}
-
-PUBLIC VIRTUAL FramedMediaProposalImpl::~FramedMediaProposalImpl() {}
-
-PRIVATE VIRTUAL IMS_SINT32 FramedMediaProposalImpl::GetDirection() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pMediaProposal->GetDirection();
-}
-
 PRIVATE VIRTUAL IMSList<IMediaDescriptor*> FramedMediaProposalImpl::GetMediaDescriptors() const
 {
-    const IMSList<MediaDescriptor*>& objMediaDescriptors = pMediaProposal->GetMediaDescriptors();
-
-    //---------------------------------------------------------------------------------------------
-    /*
-    if (ImsError::GetLastError() != ImsError::NO_ERROR)
-    {
-        IMS_TRACE_E(0, "Getting MediaDescriptors failed - %d", ImsError::GetLastError(), 0, 0);
-        return IMSList<IMediaDescriptor*>();
-    }
-    */
+    const IMSList<MediaDescriptor*>& objMediaDescriptors = m_pMediaProposal->GetMediaDescriptors();
 
     if (objMediaDescriptors.IsEmpty())
     {
@@ -62,11 +41,8 @@ PRIVATE VIRTUAL IMSList<IMediaDescriptor*> FramedMediaProposalImpl::GetMediaDesc
     return objIMediaDescriptors;
 }
 
-PRIVATE VIRTUAL IMedia* FramedMediaProposalImpl::GetProposal(
-        IN IMS_BOOL /* bIMSExtension = IMS_TRUE */) const
+PRIVATE VIRTUAL IMedia* FramedMediaProposalImpl::GetProposal() const
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
 
     Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -74,17 +50,8 @@ PRIVATE VIRTUAL IMedia* FramedMediaProposalImpl::GetProposal(
     return IMS_NULL;
 }
 
-PRIVATE VIRTUAL IMS_SINT32 FramedMediaProposalImpl::GetState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return STATE_PROPOSAL;
-}
-
 PRIVATE VIRTUAL IMS_SINT32 FramedMediaProposalImpl::GetUpdateState() const
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
 
     Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -94,8 +61,6 @@ PRIVATE VIRTUAL IMS_SINT32 FramedMediaProposalImpl::GetUpdateState() const
 
 PRIVATE VIRTUAL IMS_RESULT FramedMediaProposalImpl::SetDirection(IN IMS_SINT32 nDirection)
 {
-    //---------------------------------------------------------------------------------------------
-
     (void)nDirection;
 
     IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
@@ -103,25 +68,4 @@ PRIVATE VIRTUAL IMS_RESULT FramedMediaProposalImpl::SetDirection(IN IMS_SINT32 n
     Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
     return IMS_FAILURE;
-}
-
-PRIVATE VIRTUAL IMediaDescriptor* FramedMediaProposalImpl::GetMediaDescriptor() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pMediaProposal->GetMediaDescriptor();
-}
-
-PRIVATE VIRTUAL IMS_SINT32 FramedMediaProposalImpl::GetType() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pMediaProposal->GetType();
-}
-
-PRIVATE VIRTUAL void FramedMediaProposalImpl::RemoveMediaDescriptor(IN IMS_UINT32 nPosition)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void)nPosition;
 }

@@ -1,21 +1,25 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090527  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef CORE_SERVICE_IMPL_H_
+#define CORE_SERVICE_IMPL_H_
 
-    Description
-*/
-
-#ifndef _CORE_SERVICE_IMPL_H_
-#define _CORE_SERVICE_IMPL_H_
-
+#include "CoreService.h"
 #include "ICoreService.h"
 #include "IOnCoreServiceListener.h"
 #include "IOnDirectCoreServiceListener.h"
-#include "CoreService.h"
 
 class ISipConnectionNotifier;
 class ISipServerConnection;
@@ -26,89 +30,136 @@ class CoreServiceImpl :
         public IOnDirectCoreServiceListener
 {
 public:
-    CoreServiceImpl(IN CoreService* pCoreService_);
+    CoreServiceImpl(IN CoreService* pCoreService);
     virtual ~CoreServiceImpl();
 
-private:
-    CoreServiceImpl(IN CONST CoreServiceImpl& objRHS);
-    CoreServiceImpl& operator=(IN CONST CoreServiceImpl& objRHS);
+    CoreServiceImpl(IN const CoreServiceImpl&) = delete;
+    CoreServiceImpl& operator=(IN const CoreServiceImpl&) = delete;
 
 private:
     // IConnection interface
-    virtual void Close();
+    void Close() override;
 
     // IService interface
-    virtual const AString& GetAppId() const;
-    virtual const AString& GetScheme() const;
-    virtual const SipAddress& GetAuthorizedUserId() const;
-    virtual const SipAddress& GetContactAddress() const;
-    virtual const SipAddress* GetContactAddressForOutgoingMessage() const;
-    virtual ISipHeader* GetContactHeader(IN IMS_BOOL bPrivacy = IMS_FALSE,
+    inline const AString& GetAppId() const override { return m_pService->GetAppId(); }
+    inline const AString& GetScheme() const override { return m_pService->GetScheme(); }
+    inline const SipAddress& GetAuthorizedUserId() const override
+    {
+        return m_pService->GetAuthorizedUserId();
+    }
+    inline const SipAddress& GetContactAddress() const override
+    {
+        return m_pService->GetContactAddress();
+    }
+    inline const SipAddress* GetContactAddressForOutgoingMessage() const override
+    {
+        return m_pService->GetContactAddressForOutgoingMessage();
+    }
+    inline ISipHeader* GetContactHeader(IN IMS_BOOL bPrivacy = IMS_FALSE,
             IN IMS_BOOL bRequest = IMS_TRUE,
-            IN IMS_SINT32 nSIPMethod = (-1) /* SipMethod::INVALID */) const;
-    virtual IFeatureCaps* GetFeatureCaps() const;
-    virtual IServiceFilterCriteria* GetFilterCriteria() const;
-    virtual const AStringArray& GetPathHeaders() const;
-    virtual const IRegInfo* GetRegInfo() const;
-    virtual const IPAddress& GetIpAddress() const;
-    // MULTI_REG_SIP_PROFILE
-    virtual SipProfile* GetSipProfile() const;
-    virtual const AStringArray& GetUserIdentities() const;
-    virtual const AString& GetUserIdentity(IN IMS_SINT32 nScheme) const;
-    virtual const SipParameter* GetInstanceParameter() const;
+            IN IMS_SINT32 nSipMethod = SipMethod::INVALID) const override
+    {
+        return m_pService->GetContactHeader(bPrivacy, bRequest, nSipMethod);
+    }
+    inline IFeatureCaps* GetFeatureCaps() const override { return m_pService->GetFeatureCaps(); }
+    inline IServiceFilterCriteria* GetFilterCriteria() const override
+    {
+        return m_pService->GetFilterCriteria();
+    }
+    inline const AStringArray& GetPathHeaders() const override
+    {
+        return m_pService->GetPathHeaders();
+    }
+    inline const IRegInfo* GetRegInfo() const override { return m_pService->GetRegInfo(); }
+    inline const IPAddress& GetIpAddress() const override { return m_pService->GetIpAddress(); }
+    inline SipProfile* GetSipProfile() const override { return m_pService->GetSipProfile(); }
+    inline const AStringArray& GetUserIdentities() const override
+    {
+        return m_pService->GetAssociatedUris();
+    }
+    inline const AString& GetUserIdentity(IN IMS_SINT32 nScheme) const override
+    {
+        return m_pService->GetAssociatedUri(nScheme);
+    }
+    inline const SipParameter* GetInstanceParameter() const override
+    {
+        return m_pService->GetInstanceParameter();
+    }
 
-    virtual const SipAddress* GetPublicGruu() const;
-    virtual const SipAddress* GetTemporaryGruu() const;
-    virtual const IMSList<SipAddress*>& GetTemporaryGruus() const;
+    inline const SipAddress* GetPublicGruu() const override { return m_pService->GetPublicGruu(); }
+    inline const SipAddress* GetTemporaryGruu() const override
+    {
+        return m_pService->GetTemporaryGruu();
+    }
+    inline const IMSList<SipAddress*>& GetTemporaryGruus() const override
+    {
+        return m_pService->GetTemporaryGruus();
+    }
 
-    virtual IMS_BOOL IsBehindNat() const;
-    virtual IMS_BOOL IsImsConnected() const;
-    virtual IMS_BOOL IsWithinTrustDomain() const;
+    inline IMS_BOOL IsBehindNat() const override { return m_pService->IsBehindNat(); }
+    inline IMS_BOOL IsImsConnected() const override { return m_pService->IsImsConnected(); }
+    inline IMS_BOOL IsWithinTrustDomain() const override
+    {
+        return m_pService->IsWithinTrustDomain();
+    }
 
-    virtual IMS_BOOL AddFeatureTags(
-            IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE);
-    virtual IMS_BOOL RemoveFeatureTags(
-            IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE);
-    // MULTI_REG_SIP_PROFILE
-    virtual void SetSipProfile(IN SipProfile* pProfile);
+    inline IMS_BOOL AddFeatureTags(
+            IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) override
+    {
+        return m_pService->AddFeatureTags(objFeatureTags, bRegRequired);
+    }
+    inline IMS_BOOL RemoveFeatureTags(
+            IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) override
+    {
+        return m_pService->RemoveFeatureTags(objFeatureTags, bRegRequired);
+    }
+    inline void SetSipProfile(IN SipProfile* pProfile) override
+    {
+        m_pService->SetSipProfile(pProfile);
+    }
 
     // ICoreService interface
-    virtual ICapabilities* CreateCapabilities(IN CONST AString& strFrom, IN CONST AString& strTo);
-    virtual IPageMessage* CreatePageMessage(IN CONST AString& strFrom, IN CONST AString& strTo);
-    virtual IPublication* CreatePublication(
-            IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent);
-    virtual IReference* CreateReference(IN CONST AString& strFrom, IN CONST AString& strTo,
-            IN CONST AString& strReferTo, IN CONST AString& strReferMethod);
-    virtual ISession* CreateSession(IN CONST AString& strFrom, IN CONST AString& strTo);
-    virtual ISubscription* CreateSubscription(
-            IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent);
-    virtual AString GetLocalUserId() const;
-    virtual void SetListener(IN ICoreServiceListener* piListener);
-    virtual ISipConnectionFactory* CreateSIPConnectionFactory();
-    virtual void SetDirectListener(IN IDirectCoreServiceListener* piListener);
+    ICapabilities* CreateCapabilities(IN const AString& strFrom, IN const AString& strTo) override;
+    IPageMessage* CreatePageMessage(IN const AString& strFrom, IN const AString& strTo) override;
+    IPublication* CreatePublication(IN const AString& strFrom, IN const AString& strTo,
+            IN const AString& strEvent) override;
+    IReference* CreateReference(IN const AString& strFrom, IN const AString& strTo,
+            IN const AString& strReferTo, IN const AString& strReferMethod) override;
+    ISession* CreateSession(IN const AString& strFrom, IN const AString& strTo) override;
+    ISubscription* CreateSubscription(IN const AString& strFrom, IN const AString& strTo,
+            IN const AString& strEvent) override;
+    inline AString GetLocalUserId() const override { return m_pService->GetLocalUserId(); }
+    inline void SetListener(IN ICoreServiceListener* piListener) override
+    {
+        m_piCoreServiceListener = piListener;
+    }
+    inline ISipConnectionFactory* CreateSipConnectionFactory() override
+    {
+        return m_pService->CreateSipConnectionFactory();
+    }
+    void SetDirectListener(IN IDirectCoreServiceListener* piListener) override;
 
     // IOnCoreServiceListener interface
-    virtual void OnCoreService_PageMessageReceived(
-            IN CoreService* pService, IN PageMessage* pMessage);
-    virtual void OnCoreService_ReferenceReceived(
-            IN CoreService* pService, IN Reference* pReference);
-    virtual void OnCoreService_ServiceClosed(IN CoreService* pService, IN ReasonInfo* pReasonInfo);
-    virtual void OnCoreService_SessionInvitationReceived(
-            IN CoreService* pService, IN SessionEx* pSession);
-    virtual void OnCoreService_UnsolicitedNotifyReceived(
-            IN CoreService* pService, IN Message* pNotify);
-    virtual void OnCoreService_CapabilityQueryReceived(
-            IN CoreService* pService, IN Capabilities* pCapabilities);
+    void OnCoreService_PageMessageReceived(
+            IN CoreService* pService, IN PageMessage* pMessage) override;
+    void OnCoreService_ReferenceReceived(
+            IN CoreService* pService, IN Reference* pReference) override;
+    void OnCoreService_ServiceClosed(IN CoreService* pService, IN ReasonInfo* pReasonInfo) override;
+    void OnCoreService_SessionInvitationReceived(
+            IN CoreService* pService, IN SessionEx* pSession) override;
+    void OnCoreService_UnsolicitedNotifyReceived(
+            IN CoreService* pService, IN Message* pNotify) override;
+    void OnCoreService_CapabilityQueryReceived(
+            IN CoreService* pService, IN Capabilities* pCapabilities) override;
 
     // IOnDirectCoreServiceListener interface
-    virtual IMS_SINT32 OnDirectCoreService_TransactionReceived(
-            IN CoreService* pService, IN ISipConnectionFactory* piSCF);
+    IMS_SINT32 OnDirectCoreService_TransactionReceived(
+            IN CoreService* pService, IN ISipConnectionFactory* piScf) override;
 
 private:
-    ICoreServiceListener* piCoreServiceListener;
-    IDirectCoreServiceListener* piDirectCoreServiceListener;
-
-    CoreService* pService;
+    CoreService* m_pService;
+    ICoreServiceListener* m_piCoreServiceListener;
+    IDirectCoreServiceListener* m_piDirectCoreServiceListener;
 };
 
-#endif  // _CORE_SERVICE_IMPL_H_
+#endif

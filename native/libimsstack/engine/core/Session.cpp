@@ -1,201 +1,168 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090622  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "IMSLib.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "IMSLib.h"
+
 #include "private/SipConfigV.h"
+
 #include "offeranswer/SdpOfferAnswer.h"
+#include "offeranswer/SdpProfile.h"
+
+#include "CallControlHelper.h"
+#include "Capabilities.h"
+#include "IOnSessionListener.h"
+#include "ISipAckPackage.h"
+#include "ISipDialog.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
-#include "ISipDialog.h"
 #include "ISipServerConnection.h"
-#include "ISipAckPackage.h"
+#include "Reference.h"
+#include "Replaces.h"
+#include "SdpOaState.h"
+#include "Service.h"
+#include "Session.h"
+#include "SessionDescriptor.h"
+#include "SessionRefreshHelper.h"
 #include "Sip.h"
+#include "SipConfigProxy.h"
 #include "SipDebug.h"
 #include "SipHeaderName.h"
 #include "SipHeaderUtils.h"
-#include "SipParsingHelper.h"
 #include "SipMethod.h"
-#include "SipStatusCode.h"
 #include "SipParameter.h"
-#include "SipConfigProxy.h"
+#include "SipParsingHelper.h"
+#include "SipStatusCode.h"
 #include "SipTimerValuesHelper.h"
-
-#include "base/Ims.h"
+#include "Subscription.h"
 #include "base/IRefreshListener.h"
-#include "util/OperatorFeatureResolver.h"
-#include "util/UserAgentHeader.h"
-#include "Service.h"
-#include "util/MethodManager.h"
-// CALLER_PREFERENCE_MANAGER
+#include "base/Ims.h"
+#include "media/MediaFactory.h"
 #include "util/CallerPreferenceManager.h"
 #include "util/CancellableMethodManager.h"
 #include "util/DialogMethodManager.h"
-#include "SdpOaState.h"
-#include "Capabilities.h"
-#include "Reference.h"
-#include "Subscription.h"
-#include "CallControlHelper.h"
-#include "Replaces.h"
-#include "SessionRefreshHelper.h"
-#include "SessionDescriptor.h"
-#include "RetransmissionHelper.h"
-#include "media/MediaFactory.h"
-#include "IOnSessionListener.h"
-#include "offeranswer/SdpProfile.h"
-#include "Session.h"
+#include "util/OperatorFeatureResolver.h"
+#include "util/UserAgentHeader.h"
+#include "util/MethodManager.h"
 
 #define __IMS_SEND_ACK_IN_TERMINATING_STATE__
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-Session::Session(IN Service* pService_) :
-        ServiceMethod(pService_),
-        nState(STATE_CREATED),
-        bFlag_Alerting(IMS_FALSE),
-        bFlag_SDPInInitialINVITE(IMS_FALSE),
-        bFlag_TerminatePending(IMS_FALSE),
-        bFlag_UpdateRequestor(IMS_FALSE),
-        bFlag_SDPNonRPRAllowed(IMS_FALSE),
-        bFlag_100TryingNotification(IMS_FALSE),
-        bFlag_TerminateMethodBYE(IMS_FALSE),
-        bFlag_SessionUpdateNotificationInProgress(IMS_FALSE),
-        bFlag_ImplicitRoutingRequired(IMS_FALSE),
-        bFlag_AckWithSDPInProgress(IMS_FALSE),
-        nConfigValue(CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE),
-        nCompletedListenerCalls(0),
-        nTerminationReason(TERMINATION_REASON_UNKNOWN),
-        strTerminationReasonFromApp(AString::ConstNull()),
-        pOAState(IMS_NULL),
-        pSessionDescriptor(IMS_NULL),
-        piSessionListener(IMS_NULL),
-        piRefreshListener(IMS_NULL),
-        pRefreshHelper(IMS_NULL),
-        pRetransmissionHelper(IMS_NULL),
-        piReferredMessageListener(IMS_NULL)
-#ifdef __IMS_SESSION_RETRY_TASK__
-        ,
-        pRetransmissionTask(IMS_NULL)
-#endif
-        ,
-        piAckPackage(IMS_NULL),
-        strSessionIdForCallControl(AString::ConstNull()),
-        piSCC_BYE(IMS_NULL),
-        objPreviousCallerPreference(IMSList<AString>()),
-        pForkedSessions(IMS_NULL),
-        pVirtualEarlySession(IMS_NULL)
+Session::Session(IN Service* pService) :
+        ServiceMethod(pService),
+        m_nState(STATE_CREATED),
+        m_bAlerting(IMS_FALSE),
+        m_bSdpInInitialInvite(IMS_FALSE),
+        m_bTerminatePending(IMS_FALSE),
+        m_bUpdateRequestor(IMS_FALSE),
+        m_bSdpNonRprAllowed(IMS_FALSE),
+        m_b100TryingNotification(IMS_FALSE),
+        m_bTerminateMethodBye(IMS_FALSE),
+        m_bSessionUpdateNotificationInProgress(IMS_FALSE),
+        m_bImplicitRoutingRequired(IMS_FALSE),
+        m_bAckWithSdpInProgress(IMS_FALSE),
+        m_nConfigValue(CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE),
+        m_nCompletedListenerCalls(0),
+        m_nTerminationReason(TERMINATION_REASON_UNKNOWN),
+        m_strTerminationReasonFromApp(AString::ConstNull()),
+        m_pOaState(IMS_NULL),
+        m_pSessionDescriptor(IMS_NULL),
+        m_piSessionListener(IMS_NULL),
+        m_piRefreshListener(IMS_NULL),
+        m_pRefreshHelper(IMS_NULL),
+        m_piReferredMessageListener(IMS_NULL),
+        m_pRetransmissionTask(IMS_NULL),
+        m_piAckPackage(IMS_NULL),
+        m_strSessionIdForCallControl(AString::ConstNull()),
+        m_piSccBye(IMS_NULL),
+        m_objPreviousCallerPreference(IMSList<AString>()),
+        m_pForkedSessions(IMS_NULL),
+        m_pVirtualEarlySession(IMS_NULL)
 {
 }
 
 PUBLIC VIRTUAL Session::~Session()
 {
-    //---------------------------------------------------------------------------------------------
-
     CleanupOnDestroy();
 
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
-        delete pRefreshHelper;
-        pRefreshHelper = IMS_NULL;
+        delete m_pRefreshHelper;
+        m_pRefreshHelper = IMS_NULL;
     }
 
-    if (pRetransmissionHelper != IMS_NULL)
+    if (m_pRetransmissionTask != IMS_NULL)
     {
-        delete pRetransmissionHelper;
-        pRetransmissionHelper = IMS_NULL;
+        delete m_pRetransmissionTask;
+        m_pRetransmissionTask = IMS_NULL;
     }
 
-#ifdef __IMS_SESSION_RETRY_TASK__
-    if (pRetransmissionTask != IMS_NULL)
+    if (m_piAckPackage != IMS_NULL)
     {
-        delete pRetransmissionTask;
-        pRetransmissionTask = IMS_NULL;
-    }
-#endif
-
-    if (piAckPackage != IMS_NULL)
-    {
-        piAckPackage->Destroy();
-        piAckPackage = IMS_NULL;
+        m_piAckPackage->Destroy();
+        m_piAckPackage = IMS_NULL;
     }
 
-    if (pSessionDescriptor != IMS_NULL)
+    if (m_pSessionDescriptor != IMS_NULL)
     {
-        delete pSessionDescriptor;
-        pSessionDescriptor = IMS_NULL;
+        delete m_pSessionDescriptor;
+        m_pSessionDescriptor = IMS_NULL;
     }
 
-    if (!objMedias.IsEmpty())
+    if (!m_objMedias.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
         {
-            Media* pMedia = objMedias.GetAt(i);
+            Media* pMedia = m_objMedias.GetAt(i);
 
             MediaFactory::DestroyMedia(pMedia);
         }
 
-        objMedias.Clear();
+        m_objMedias.Clear();
     }
 
-    if (pOAState != IMS_NULL)
+    if (m_pOaState != IMS_NULL)
     {
-        delete pOAState;
-        pOAState = IMS_NULL;
+        delete m_pOaState;
+        m_pOaState = IMS_NULL;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void Session::Destroy()
 {
-    //---------------------------------------------------------------------------------------------
-
     CleanupOnDestroy();
     ServiceMethod::Destroy();
 }
 
-/*
-
-Remarks
- SIP_MESSAGE_MEDIATOR
-*/
 PUBLIC VIRTUAL void Session::SetMessageMediator(IN IMessageMediator* piMediator)
 {
-    //---------------------------------------------------------------------------------------------
-
     Method::SetMessageMediator(piMediator);
 
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
-        pRefreshHelper->SetMessageMediator(piMediator);
+        m_pRefreshHelper->SetMessageMediator(piMediator);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::Accept()
 {
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     if ((nState != STATE_NEGOTIATING) && (nState != STATE_RENEGOTIATING))
     {
@@ -208,7 +175,7 @@ IMS_RESULT Session::Accept()
         return IMS_FAILURE;
     }
 
-    if (HasPendingPRAck())
+    if (HasPendingPrack())
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
@@ -219,37 +186,41 @@ IMS_RESULT Session::Accept()
         return IMS_FAILURE;
     }
 
-    ISipServerConnection* piSSC = IMS_NULL;
+    ISipServerConnection* piSsc = IMS_NULL;
 
     // Create an answer if offer received
 
     if (nState == STATE_NEGOTIATING)
-        piSSC = GetServerConnection(IMessage::SESSION_START);
+    {
+        piSsc = GetServerConnection(IMessage::SESSION_START);
+    }
     else
-        piSSC = GetServerConnection(IMessage::SESSION_UPDATE);
+    {
+        piSsc = GetServerConnection(IMessage::SESSION_UPDATE);
+    }
 
-    if (piSSC == IMS_NULL)
+    if (piSsc == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
-    if (CreateResponse(piSSC, SipStatusCode::SC_200) == IMS_FALSE)
+    if (CreateResponse(piSsc, SipStatusCode::SC_200) == IMS_FALSE)
     {
         return IMS_FAILURE;
     }
 
-    ISipMessage* piSIPMsg = piSSC->GetMessage();
+    ISipMessage* piSipMsg = piSsc->GetMessage();
 
     // Session-Expires
     // Require
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
         if (!SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
                     GetSlotId(), GetService()->GetSipProfile()))
         {
-            if ((nState == STATE_RENEGOTIATING) && piSSC->GetMethod().Equals(SipMethod::INVITE))
+            if ((nState == STATE_RENEGOTIATING) && piSsc->GetMethod().Equals(SipMethod::INVITE))
             {
-                if (!pRefreshHelper->AddSpecificHeaderWithoutParameterChange(piSSC))
+                if (!m_pRefreshHelper->AddSpecificHeaderWithoutParameterChange(piSsc))
                 {
                     Ims::SetLastError(ImsError::GENERAL_ERROR);
 
@@ -259,7 +230,7 @@ IMS_RESULT Session::Accept()
             }
             else
             {
-                if (!pRefreshHelper->AddSpecificHeader(piSSC))
+                if (!m_pRefreshHelper->AddSpecificHeader(piSsc))
                 {
                     Ims::SetLastError(ImsError::GENERAL_ERROR);
 
@@ -270,7 +241,7 @@ IMS_RESULT Session::Accept()
         }
         else
         {
-            if (!pRefreshHelper->AddSpecificHeader(piSSC))
+            if (!m_pRefreshHelper->AddSpecificHeader(piSsc))
             {
                 Ims::SetLastError(ImsError::GENERAL_ERROR);
 
@@ -282,9 +253,9 @@ IMS_RESULT Session::Accept()
 
     if (nState == STATE_NEGOTIATING)
     {
-        CheckNSetSDPBodyPart(piSIPMsg);
+        CheckNSetSdpBodyPart(piSipMsg);
 
-        if (!SendNUpdateResponse(IMessage::SESSION_START, piSSC))
+        if (!SendNUpdateResponse(IMessage::SESSION_START, piSsc))
         {
             CloseConnection(IMessage::SESSION_START);
 
@@ -303,10 +274,10 @@ IMS_RESULT Session::Accept()
         // CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
 
         // Update the call state
-        UpdateCallStateOnMessageSent(piSSC->GetMessage());
+        UpdateCallStateOnMessageSent(piSsc->GetMessage());
 
         // Update the media information
-        UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
+        UpdateOfferAnswerStateOnMessageSent(piSsc->GetMessage());
 
         // Case) Initial offer is sent by 200 OK
         if (GetOfferAnswerState() == SdpOaState::STATE_OFFER_SENT)
@@ -328,31 +299,31 @@ IMS_RESULT Session::Accept()
     {
         // If re-INVITE is received with SDP, it will be set by the SDP offer/answer context
         // If no SDP in the re-INVITE, generate the SDP from the current view (capabilities)
-        if (piSIPMsg->GetMethod().Equals(SipMethod::INVITE) &&
+        if (piSipMsg->GetMethod().Equals(SipMethod::INVITE) &&
                 (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
         {
-            if ((pOAState != IMS_NULL) && (pOAState->IsOfferProgress()))
+            if ((m_pOaState != IMS_NULL) && (m_pOaState->IsOfferProgress()))
             {
                 // Offer change will be sent in 200 OK to re-INVITE request
-                CheckNSetSDPBodyPart(piSIPMsg);
+                CheckNSetSdpBodyPart(piSipMsg);
             }
             else
             {
-                SetSDPBodyPartFromCurrentView(piSIPMsg);
+                SetSdpBodyPartFromCurrentView(piSipMsg);
             }
         }
         else
         {
-            CheckNSetSDPBodyPart(piSIPMsg);
+            CheckNSetSdpBodyPart(piSipMsg);
         }
 
         // For in-dialog INVITE request... (when ACK waiting timer expired)
-        if (piSIPMsg->GetMethod().Equals(SipMethod::INVITE))
+        if (piSipMsg->GetMethod().Equals(SipMethod::INVITE))
         {
-            piSSC->SetErrorListener(this);
+            piSsc->SetErrorListener(this);
         }
 
-        if (!SendNUpdateResponse(IMessage::SESSION_UPDATE, piSSC))
+        if (!SendNUpdateResponse(IMessage::SESSION_UPDATE, piSsc))
         {
             CloseConnection(IMessage::SESSION_UPDATE);
 
@@ -373,33 +344,41 @@ IMS_RESULT Session::Accept()
         // CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
 
         // Update the call state
-        UpdateCallStateOnMessageSent(piSSC->GetMessage());
+        UpdateCallStateOnMessageSent(piSsc->GetMessage());
         // Update the media information
-        UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
+        UpdateOfferAnswerStateOnMessageSent(piSsc->GetMessage());
 
         // Case) Offer is sent by 200 OK
         if (GetOfferAnswerState() == SdpOaState::STATE_OFFER_CHANGE_SENT)
+        {
             UpdateMedia(Media::SESSION_UPDATE);
+        }
         else
+        {
             UpdateMedia(Media::SESSION_UPDATED);
+        }
 
-        if (piSSC->GetMethod().Equals(SipMethod::INVITE))
+        if (piSsc->GetMethod().Equals(SipMethod::INVITE))
+        {
             SetState(STATE_REESTABLISHING);
+        }
         else
+        {
             SetState(STATE_ESTABLISHED);
+        }
     }
 
     // Create a dialog after sending 2xx without 1xx response with a tag
-    CheckNCreateDialog(piSSC);
+    CheckNCreateDialog(piSsc);
 
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
-        pRefreshHelper->UpdateOnMessageSent(piSSC);
+        m_pRefreshHelper->UpdateOnMessageSent(piSsc);
     }
 
     Stop2xxRetransmission();
 
-    if (piSSC->GetMethod().Equals(SipMethod::INVITE))
+    if (piSsc->GetMethod().Equals(SipMethod::INVITE))
     {
         Start2xxRetransmission();
 
@@ -423,16 +402,9 @@ IMS_RESULT Session::Accept()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 Capabilities* Session::CreateCapabilities()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsMidDialogTransactionCreatable())
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -467,18 +439,11 @@ Capabilities* Session::CreateCapabilities()
     return pCapabilities;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-Media* Session::CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
-        IN IMS_SINT32 nCountOfDescriptor /* = 0 */, IN IMS_BOOL bIMSExtension /* = IMS_TRUE */)
+Media* Session::CreateMedia(IN const AString& strType, IN IMS_SINT32 nDirection,
+        IN IMS_SINT32 nCountOfDescriptor /*= 0*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         IMS_TRACE_E(0, "SdpOaState is null", 0, 0, 0);
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -489,15 +454,15 @@ Media* Session::CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
 
     if ((nState != STATE_INITIATED) && (nState != STATE_ESTABLISHED))
     {
-        IMS_SINT32 nSDPOAState = GetOfferAnswerState();
+        IMS_SINT32 nSdpOaState = GetOfferAnswerState();
 
-        if ((nSDPOAState != SdpOaState::STATE_IDLE) &&
-                (nSDPOAState != SdpOaState::STATE_ESTABLISHED))
+        if ((nSdpOaState != SdpOaState::STATE_IDLE) &&
+                (nSdpOaState != SdpOaState::STATE_ESTABLISHED))
         {
             IMS_TRACE_E(0,
                     "To create a media, the state MUST be an INITIALIZED or ESTABLISHED; "
                     "(%s, %d)",
-                    StateToString(nState), nSDPOAState, 0);
+                    StateToString(nState), nSdpOaState, 0);
             Ims::SetLastError(ImsError::ILLEGAL_STATE);
             return IMS_NULL;
         }
@@ -506,7 +471,7 @@ Media* Session::CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
     if ((nDirection != Media::DIRECTION_INACTIVE) && (nDirection != Media::DIRECTION_RECEIVE) &&
             (nDirection != Media::DIRECTION_SEND) && (nDirection != Media::DIRECTION_SEND_RECEIVE))
     {
-        if (bIMSExtension && (nDirection == Media::DIRECTION_NONE))
+        if (nDirection == Media::DIRECTION_NONE)
         {
             // Do not specify the SDP direction in the media-level description
         }
@@ -519,7 +484,7 @@ Media* Session::CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
         }
     }
 
-    if (objMedias.IsEmpty())
+    if (m_objMedias.IsEmpty())
     {
         if (!CheckNCreateSessionDescriptor())
         {
@@ -533,7 +498,7 @@ Media* Session::CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
     // Create a new SDP media parameter
 
     Media* pMedia = MediaFactory::CreateOutgoingMedia(
-            strType, nDirection, GetService(), pOAState, nCountOfDescriptor);
+            strType, nDirection, GetService(), m_pOaState, nCountOfDescriptor);
 
     if (pMedia == IMS_NULL)
     {
@@ -554,16 +519,9 @@ Media* Session::CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
     return pMedia;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-Reference* Session::CreateReference(IN CONST AString& strReferTo, IN CONST AString& strReferMethod)
+Reference* Session::CreateReference(IN const AString& strReferTo, IN const AString& strReferMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsMidDialogTransactionCreatable())
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -582,7 +540,7 @@ Reference* Session::CreateReference(IN CONST AString& strReferTo, IN CONST AStri
     // If the Reference can not be created, throw exception
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
     Reference* pReference = new Reference(
-            GetService(), strReferTo, strReferMethod, Replaces(), bFlag_ImplicitRoutingRequired);
+            GetService(), strReferTo, strReferMethod, Replaces(), m_bImplicitRoutingRequired);
 
     if (pReference == IMS_NULL)
     {
@@ -606,16 +564,9 @@ Reference* Session::CreateReference(IN CONST AString& strReferTo, IN CONST AStri
     return pReference;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-Subscription* Session::CreateSubscription(IN CONST AString& strEvent)
+Subscription* Session::CreateSubscription(IN const AString& strEvent)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsMidDialogTransactionCreatable())
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -637,7 +588,7 @@ Subscription* Session::CreateSubscription(IN CONST AString& strEvent)
     // If the subscriptino can not be created, throw exception
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
     Subscription* pSubscription =
-            new Subscription(GetService(), strEvent, bFlag_ImplicitRoutingRequired);
+            new Subscription(GetService(), strEvent, m_bImplicitRoutingRequired);
 
     if (pSubscription == IMS_NULL)
     {
@@ -661,29 +612,21 @@ Subscription* Session::CreateSubscription(IN CONST AString& strEvent)
     return pSubscription;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-ISipClientConnection* Session::CreateTransaction(IN CONST SipMethod& objMethod)
+ISipClientConnection* Session::CreateTransaction(IN const SipMethod& objMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (objMethod.ToInt())
     {
-        case SipMethod::ACK:
-        case SipMethod::BYE:
-        case SipMethod::CANCEL:
-        case SipMethod::INVITE:
-        case SipMethod::OPTIONS:
-        case SipMethod::PRACK:
-        case SipMethod::REFER:
+        case SipMethod::ACK:      // FALL-THROUGH
+        case SipMethod::BYE:      // FALL-THROUGH
+        case SipMethod::CANCEL:   // FALL-THROUGH
+        case SipMethod::INVITE:   // FALL-THROUGH
+        case SipMethod::OPTIONS:  // FALL-THROUGH
+        case SipMethod::PRACK:    // FALL-THROUGH
+        case SipMethod::REFER:    // FALL-THROUGH
         case SipMethod::UPDATE:
             IMS_TRACE_E(0, "Method (%s) is not allowed", objMethod.ToString().GetStr(), 0, 0);
             return IMS_NULL;
-
         default:
             break;
     }
@@ -699,30 +642,10 @@ ISipClientConnection* Session::CreateTransaction(IN CONST SipMethod& objMethod)
     return GetService()->CreateConnection(piDialog, objMethod);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_SINT32 Session::GetConfiguration() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nConfigValue;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 const ISipHeader* Session::GetContactHeader() const
 {
     ISipDialog* piDialog = GetDialog();
-
-    //---------------------------------------------------------------------------------------------
 
     if (piDialog != IMS_NULL)
     {
@@ -737,17 +660,10 @@ const ISipHeader* Session::GetContactHeader() const
     return IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 const Replaces* Session::GetReplaces() const
 {
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     if ((nState != STATE_NEGOTIATING) && (nState != STATE_ESTABLISHING) &&
             (nState != STATE_ESTABLISHED) && (nState != STATE_RENEGOTIATING) &&
@@ -766,33 +682,13 @@ const Replaces* Session::GetReplaces() const
     return CallControlHelper::GetInstance()->GetReplacesFromSessionId(GetSessionId());
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& Session::GetSessionId() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strSessionIdForCallControl;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_SINT32 Session::GetTerminationReason() const
 {
-    //---------------------------------------------------------------------------------------------
-
     // Checks if session already notifies the terminated event.
-    if ((nCompletedListenerCalls & LISTENER_CALL_TERMINATED) != 0)
+    if ((m_nCompletedListenerCalls & LISTENER_CALL_TERMINATED) != 0)
     {
-        return nTerminationReason;
+        return m_nTerminationReason;
     }
 
     if (GetState() != STATE_TERMINATED)
@@ -802,79 +698,45 @@ IMS_SINT32 Session::GetTerminationReason() const
         return TERMINATION_REASON_INVALID;
     }
 
-    return nTerminationReason;
+    return m_nTerminationReason;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 const IMSList<Media*>& Session::GetMedia() const
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() == STATE_TERMINATED)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "To get a media, the state MUST not be a TERMINATED; (%s)",
                 StateToString(GetState()), 0, 0);
-        return objMedias;
+        return m_objMedias;
     }
 
     Ims::SetLastError(ImsError::NO_ERROR);
 
-    return objMedias;
+    return m_objMedias;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 SessionDescriptor* Session::GetSessionDescriptor()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!CheckNCreateSessionDescriptor())
     {
         return IMS_NULL;
     }
 
-    return pSessionDescriptor;
+    return m_pSessionDescriptor;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_SINT32 Session::GetState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nState;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL Session::HasPendingUpdate() const
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() == STATE_ESTABLISHED)
     {
-        for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
         {
-            const Media* pMedia = objMedias.GetAt(i);
+            const Media* pMedia = m_objMedias.GetAt(i);
 
             if ((pMedia->GetState() == Media::STATE_INACTIVE) ||
                     ((pMedia->GetState() == Media::STATE_ACTIVE) &&
@@ -891,22 +753,15 @@ IMS_BOOL Session::HasPendingUpdate() const
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL Session::IsFinalResponseReceivedForInitialInviteRequest() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pForkedSessions.IsNull())
+    if (m_pForkedSessions.IsNull())
     {
         return IsInviteFinalResponseReceived(IMessage::SESSION_START);
     }
 
-    const IMSList<Method*>& objMethods = pForkedSessions->GetMethods();
+    const IMSList<Method*>& objMethods = m_pForkedSessions->GetMethods();
 
     if (objMethods.IsEmpty())
     {
@@ -931,55 +786,30 @@ IMS_BOOL Session::IsFinalResponseReceivedForInitialInviteRequest() const
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL Session::IsReliableProvResponseSupported() const
 {
     Message* pMessage = GetPreviousRequest(IMessage::SESSION_START);
-
-    //---------------------------------------------------------------------------------------------
 
     if (pMessage == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    ISipMessage* piSIPMsg = pMessage->GetMessage();
+    ISipMessage* piSipMsg = pMessage->GetMessage();
 
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    return piSIPMsg->IsOptionSupported(Sip::STR_100REL);
+    return piSipMsg->IsOptionSupported(Sip::STR_100REL);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL Session::IsSDPNegotiationAllowedForNonRPR() const
-{
-    return bFlag_SDPNonRPRAllowed;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::Reject()
 {
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     if ((nState != STATE_NEGOTIATING) && (nState != STATE_RENEGOTIATING))
     {
@@ -992,28 +822,32 @@ IMS_RESULT Session::Reject()
         return IMS_FAILURE;
     }
 
-    ISipServerConnection* piSSC = IMS_NULL;
+    ISipServerConnection* piSsc = IMS_NULL;
 
     // Create an answer if offer received
 
     if (nState == STATE_NEGOTIATING)
-        piSSC = GetServerConnection(IMessage::SESSION_START);
+    {
+        piSsc = GetServerConnection(IMessage::SESSION_START);
+    }
     else
-        piSSC = GetServerConnection(IMessage::SESSION_UPDATE);
+    {
+        piSsc = GetServerConnection(IMessage::SESSION_UPDATE);
+    }
 
-    if (piSSC == IMS_NULL)
+    if (piSsc == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
-    if (CreateResponse(piSSC, SipStatusCode::SC_486) == IMS_FALSE)
+    if (CreateResponse(piSsc, SipStatusCode::SC_486) == IMS_FALSE)
     {
         return IMS_FAILURE;
     }
 
     if (nState == STATE_NEGOTIATING)
     {
-        if (!SendNUpdateResponse(IMessage::SESSION_START, piSSC))
+        if (!SendNUpdateResponse(IMessage::SESSION_START, piSsc))
         {
             CloseConnection(IMessage::SESSION_START);
 
@@ -1030,8 +864,8 @@ IMS_RESULT Session::Reject()
         CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
 
         // Update the call state
-        UpdateCallStateOnMessageSent(piSSC->GetMessage());
-        UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
+        UpdateCallStateOnMessageSent(piSsc->GetMessage());
+        UpdateOfferAnswerStateOnMessageSent(piSsc->GetMessage());
         UpdateMedia(Media::SESSION_START_FAILED);
 
         CloseConnection(IMessage::SESSION_START);
@@ -1042,7 +876,7 @@ IMS_RESULT Session::Reject()
     }
     else
     {
-        if (!SendNUpdateResponse(IMessage::SESSION_UPDATE, piSSC))
+        if (!SendNUpdateResponse(IMessage::SESSION_UPDATE, piSsc))
         {
             CloseConnection(IMessage::SESSION_UPDATE);
 
@@ -1062,15 +896,15 @@ IMS_RESULT Session::Reject()
         CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
 
         // Update the call state
-        UpdateCallStateOnMessageSent(piSSC->GetMessage());
-        UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
+        UpdateCallStateOnMessageSent(piSsc->GetMessage());
+        UpdateOfferAnswerStateOnMessageSent(piSsc->GetMessage());
         UpdateMedia(Media::SESSION_UPDATE_FAILED);
         RestoreEx();
 
         if (SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
                     GetSlotId(), GetService()->GetSipProfile()))
         {
-            pRefreshHelper->UpdateOnMessageSent(piSSC);
+            m_pRefreshHelper->UpdateOnMessageSent(piSsc);
         }
 
         CloseConnection(IMessage::SESSION_UPDATE);
@@ -1087,16 +921,9 @@ IMS_RESULT Session::Reject()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::Reject(IN IMS_SINT32 nStatusCode)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_NEGOTIATING)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -1123,23 +950,23 @@ IMS_RESULT Session::Reject(IN IMS_SINT32 nStatusCode)
 
     // Create an answer if offer received
 
-    ISipServerConnection* piSSC = GetServerConnection(IMessage::SESSION_START);
+    ISipServerConnection* piSsc = GetServerConnection(IMessage::SESSION_START);
 
-    if (piSSC == IMS_NULL)
+    if (piSsc == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
-    if (CreateResponse(piSSC, nStatusCode) == IMS_FALSE)
+    if (CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
     {
         return IMS_FAILURE;
     }
 
     // REFUSE_SDP_OFFER_ANSWER_EXCHANGE
-    ISipMessage* piSIPMsg = piSSC->GetMessage();
-    SetSDPBodyPartFromRefusedView(piSIPMsg);
+    ISipMessage* piSipMsg = piSsc->GetMessage();
+    SetSdpBodyPartFromRefusedView(piSipMsg);
 
-    if (!SendNUpdateResponse(IMessage::SESSION_START, piSSC))
+    if (!SendNUpdateResponse(IMessage::SESSION_START, piSsc))
     {
         CloseConnection(IMessage::SESSION_START);
 
@@ -1156,8 +983,8 @@ IMS_RESULT Session::Reject(IN IMS_SINT32 nStatusCode)
     CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
 
     // Update the call state
-    UpdateCallStateOnMessageSent(piSSC->GetMessage());
-    UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
+    UpdateCallStateOnMessageSent(piSsc->GetMessage());
+    UpdateOfferAnswerStateOnMessageSent(piSsc->GetMessage());
     UpdateMedia(Media::SESSION_START_FAILED);
 
     CloseConnection(IMessage::SESSION_START);
@@ -1172,18 +999,11 @@ IMS_RESULT Session::Reject(IN IMS_SINT32 nStatusCode)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::RejectEx(
-        IN IMS_SINT32 nStatusCode, IN CONST AString& strReasonPhrase /* = AString::ConstNull() */)
+        IN IMS_SINT32 nStatusCode, IN const AString& strReasonPhrase /*= AString::ConstNull()*/)
 {
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     if ((nState != STATE_NEGOTIATING) && (nState != STATE_RENEGOTIATING))
     {
@@ -1196,32 +1016,36 @@ IMS_RESULT Session::RejectEx(
         return IMS_FAILURE;
     }
 
-    ISipServerConnection* piSSC = IMS_NULL;
+    ISipServerConnection* piSsc = IMS_NULL;
 
     // Create an answer if offer received
 
     if (nState == STATE_NEGOTIATING)
-        piSSC = GetServerConnection(IMessage::SESSION_START);
+    {
+        piSsc = GetServerConnection(IMessage::SESSION_START);
+    }
     else
-        piSSC = GetServerConnection(IMessage::SESSION_UPDATE);
+    {
+        piSsc = GetServerConnection(IMessage::SESSION_UPDATE);
+    }
 
-    if (piSSC == IMS_NULL)
+    if (piSsc == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
-    if (CreateResponse(piSSC, nStatusCode, strReasonPhrase) == IMS_FALSE)
+    if (CreateResponse(piSsc, nStatusCode, strReasonPhrase) == IMS_FALSE)
     {
         return IMS_FAILURE;
     }
 
     // REFUSE_SDP_OFFER_ANSWER_EXCHANGE
-    ISipMessage* piSIPMsg = piSSC->GetMessage();
-    SetSDPBodyPartFromRefusedView(piSIPMsg);
+    ISipMessage* piSipMsg = piSsc->GetMessage();
+    SetSdpBodyPartFromRefusedView(piSipMsg);
 
     if (nState == STATE_NEGOTIATING)
     {
-        if (!SendNUpdateResponse(IMessage::SESSION_START, piSSC))
+        if (!SendNUpdateResponse(IMessage::SESSION_START, piSsc))
         {
             CloseConnection(IMessage::SESSION_START);
 
@@ -1238,8 +1062,8 @@ IMS_RESULT Session::RejectEx(
         CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
 
         // Update the call state
-        UpdateCallStateOnMessageSent(piSSC->GetMessage());
-        UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
+        UpdateCallStateOnMessageSent(piSsc->GetMessage());
+        UpdateOfferAnswerStateOnMessageSent(piSsc->GetMessage());
         UpdateMedia(Media::SESSION_START_FAILED);
 
         CloseConnection(IMessage::SESSION_START);
@@ -1250,7 +1074,7 @@ IMS_RESULT Session::RejectEx(
     }
     else
     {
-        if (!SendNUpdateResponse(IMessage::SESSION_UPDATE, piSSC))
+        if (!SendNUpdateResponse(IMessage::SESSION_UPDATE, piSsc))
         {
             CloseConnection(IMessage::SESSION_UPDATE);
 
@@ -1270,15 +1094,15 @@ IMS_RESULT Session::RejectEx(
         CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
 
         // Update the call state
-        UpdateCallStateOnMessageSent(piSSC->GetMessage());
-        UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
+        UpdateCallStateOnMessageSent(piSsc->GetMessage());
+        UpdateOfferAnswerStateOnMessageSent(piSsc->GetMessage());
         UpdateMedia(Media::SESSION_UPDATE_FAILED);
         RestoreEx();
 
         if (SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
                     GetSlotId(), GetService()->GetSipProfile()))
         {
-            pRefreshHelper->UpdateOnMessageSent(piSSC);
+            m_pRefreshHelper->UpdateOnMessageSent(piSsc);
         }
 
         CloseConnection(IMessage::SESSION_UPDATE);
@@ -1295,16 +1119,9 @@ IMS_RESULT Session::RejectEx(
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT Session::RejectWithDiversion(IN CONST AString& strAlternativeUserAddress)
+IMS_RESULT Session::RejectWithDiversion(IN const AString& strAlternativeUserAddress)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_NEGOTIATING)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -1331,24 +1148,24 @@ IMS_RESULT Session::RejectWithDiversion(IN CONST AString& strAlternativeUserAddr
 
     // Create an answer if offer received
 
-    ISipServerConnection* piSSC = GetServerConnection(IMessage::SESSION_START);
+    ISipServerConnection* piSsc = GetServerConnection(IMessage::SESSION_START);
 
-    if (piSSC == IMS_NULL)
+    if (piSsc == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
-    if (CreateResponse(piSSC, SipStatusCode::SC_302) == IMS_FALSE)
+    if (CreateResponse(piSsc, SipStatusCode::SC_302) == IMS_FALSE)
     {
         return IMS_FAILURE;
     }
 
-    ISipMessage* piSIPMsg = piSSC->GetMessage();
+    ISipMessage* piSipMsg = piSsc->GetMessage();
 
     // Set Contact header
-    piSIPMsg->SetHeader(ISipHeader::CONTACT_ANY, strAlternativeUserAddress);
+    piSipMsg->SetHeader(ISipHeader::CONTACT_ANY, strAlternativeUserAddress);
 
-    if (!SendNUpdateResponse(IMessage::SESSION_START, piSSC))
+    if (!SendNUpdateResponse(IMessage::SESSION_START, piSsc))
     {
         CloseConnection(IMessage::SESSION_START);
 
@@ -1365,8 +1182,8 @@ IMS_RESULT Session::RejectWithDiversion(IN CONST AString& strAlternativeUserAddr
     CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
 
     // Update the call state
-    UpdateCallStateOnMessageSent(piSSC->GetMessage());
-    UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
+    UpdateCallStateOnMessageSent(piSsc->GetMessage());
+    UpdateOfferAnswerStateOnMessageSent(piSsc->GetMessage());
     UpdateMedia(Media::SESSION_START_FAILED);
 
     CloseConnection(IMessage::SESSION_START);
@@ -1379,31 +1196,24 @@ IMS_RESULT Session::RejectWithDiversion(IN CONST AString& strAlternativeUserAddr
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::RemoveMedia(IN Media* pMedia)
 {
     IMS_SINT32 nState = GetState();
 
-    //---------------------------------------------------------------------------------------------
-
     if ((nState != STATE_INITIATED) && (nState != STATE_ESTABLISHED))
     {
-        IMS_SINT32 nSDPOAState = GetOfferAnswerState();
+        IMS_SINT32 nSdpOaState = GetOfferAnswerState();
 
-        if ((nSDPOAState != SdpOaState::STATE_IDLE) &&
-                (nSDPOAState != SdpOaState::STATE_ESTABLISHED))
+        if ((nSdpOaState != SdpOaState::STATE_IDLE) &&
+                (nSdpOaState != SdpOaState::STATE_ESTABLISHED))
         {
             Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
             IMS_TRACE_E(0,
                     "To remove a media, the state MUST be a INITIATED or ESTABLISHED; "
                     "(%s, %d)",
-                    StateToString(nState), nSDPOAState, 0);
+                    StateToString(nState), nSdpOaState, 0);
             return IMS_FAILURE;
         }
     }
@@ -1416,9 +1226,9 @@ IMS_RESULT Session::RemoveMedia(IN Media* pMedia)
 
     IMS_UINT32 i;
 
-    for (i = 0; i < objMedias.GetSize(); ++i)
+    for (i = 0; i < m_objMedias.GetSize(); ++i)
     {
-        const Media* pExistingMedia = objMedias.GetAt(i);
+        const Media* pExistingMedia = m_objMedias.GetAt(i);
 
         if (pExistingMedia->Equals(pMedia))
         {
@@ -1426,7 +1236,7 @@ IMS_RESULT Session::RemoveMedia(IN Media* pMedia)
         }
     }
 
-    if (i >= objMedias.GetSize())
+    if (i >= m_objMedias.GetSize())
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
@@ -1434,22 +1244,22 @@ IMS_RESULT Session::RemoveMedia(IN Media* pMedia)
         return IMS_FAILURE;
     }
 
-    IMS_BOOL bMidSyncRequired = (i < (objMedias.GetSize() - 1));
-    Media* pMatchedMedia = objMedias.GetAt(i);
+    IMS_BOOL bMidSyncRequired = (i < (m_objMedias.GetSize() - 1));
+    Media* pMatchedMedia = m_objMedias.GetAt(i);
 
     pMatchedMedia->RemoveMedia();
 
     if ((pMatchedMedia->GetState() == Media::STATE_INACTIVE) ||
             (pMatchedMedia->GetState() == Media::STATE_DELETED))
     {
-        objMedias.RemoveAt(i);
+        m_objMedias.RemoveAt(i);
     }
 
     if (bMidSyncRequired)
     {
-        for (IMS_UINT32 j = i; j < objMedias.GetSize(); j++)
+        for (IMS_UINT32 j = i; j < m_objMedias.GetSize(); j++)
         {
-            Media* pMedia = objMedias.GetAt(j);
+            Media* pMedia = m_objMedias.GetAt(j);
             pMedia->SetMid(j);
         }
     }
@@ -1459,45 +1269,39 @@ IMS_RESULT Session::RemoveMedia(IN Media* pMedia)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::RemoveMedia(IN IMS_UINT32 nIndex)
 {
     IMS_SINT32 nState = GetState();
 
-    //---------------------------------------------------------------------------------------------
-
     if ((nState != STATE_INITIATED) && (nState != STATE_ESTABLISHED))
     {
-        IMS_SINT32 nSDPOAState = GetOfferAnswerState();
+        IMS_SINT32 nSdpOaState = GetOfferAnswerState();
 
-        if ((nSDPOAState != SdpOaState::STATE_IDLE) &&
-                (nSDPOAState != SdpOaState::STATE_ESTABLISHED))
+        if ((nSdpOaState != SdpOaState::STATE_IDLE) &&
+                (nSdpOaState != SdpOaState::STATE_ESTABLISHED))
         {
             Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
             IMS_TRACE_E(0,
                     "To remove a media, the state MUST be a INITIATED or ESTABLISHED; "
                     "(%s, %d)",
-                    StateToString(nState), nSDPOAState, 0);
+                    StateToString(nState), nSdpOaState, 0);
             return IMS_FAILURE;
         }
     }
 
-    if (nIndex >= objMedias.GetSize())
+    if (nIndex >= m_objMedias.GetSize())
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
-        IMS_TRACE_E(0, "Invalid index (%d) in the total size (%d)", nIndex, objMedias.GetSize(), 0);
+        IMS_TRACE_E(
+                0, "Invalid index (%d) in the total size (%d)", nIndex, m_objMedias.GetSize(), 0);
         return IMS_FAILURE;
     }
 
-    IMS_BOOL bMidSyncRequired = (nIndex < (objMedias.GetSize() - 1));
-    Media* pMedia = objMedias.GetAt(nIndex);
+    IMS_BOOL bMidSyncRequired = (nIndex < (m_objMedias.GetSize() - 1));
+    Media* pMedia = m_objMedias.GetAt(nIndex);
 
     if (pMedia == IMS_NULL)
     {
@@ -1510,14 +1314,14 @@ IMS_RESULT Session::RemoveMedia(IN IMS_UINT32 nIndex)
     if ((pMedia->GetState() == Media::STATE_INACTIVE) ||
             (pMedia->GetState() == Media::STATE_DELETED))
     {
-        objMedias.RemoveAt(nIndex);
+        m_objMedias.RemoveAt(nIndex);
     }
 
     if (bMidSyncRequired)
     {
-        for (IMS_UINT32 j = nIndex; j < objMedias.GetSize(); j++)
+        for (IMS_UINT32 j = nIndex; j < m_objMedias.GetSize(); j++)
         {
-            Media* pMedia = objMedias.GetAt(j);
+            Media* pMedia = m_objMedias.GetAt(j);
             pMedia->SetMid(j);
         }
     }
@@ -1527,16 +1331,9 @@ IMS_RESULT Session::RemoveMedia(IN IMS_UINT32 nIndex)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::Restore()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_ESTABLISHED)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -1548,8 +1345,7 @@ IMS_RESULT Session::Restore()
 
     // Restore the proposal view
     RestoreOfferAnswerState();
-
-    // Remove the local capabilities that are not negotiated ?????
+    // Remove the local capabilities that are not negotiated?
     RestoreEx();
 
     Ims::SetLastError(ImsError::NO_ERROR);
@@ -1557,17 +1353,10 @@ IMS_RESULT Session::Restore()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::SendAck()
 {
     IMS_SINT32 nCallState = GetCallState();
-
-    //---------------------------------------------------------------------------------------------
 
     if ((nCallState != CallState::STATE_INVITE_2XX_RECEIVED) &&
             (nCallState != CallState::STATE_REINVITE_2XX_RECEIVED))
@@ -1581,19 +1370,23 @@ IMS_RESULT Session::SendAck()
     IMS_SINT32 nServiceMethod;
 
     if (nCallState == CallState::STATE_INVITE_2XX_RECEIVED)
+    {
         nServiceMethod = IMessage::SESSION_START;
+    }
     else
+    {
         nServiceMethod = IMessage::SESSION_UPDATE;
+    }
 
-    ISipClientConnection* piSCC = GetClientConnection(nServiceMethod);
+    ISipClientConnection* piScc = GetClientConnection(nServiceMethod);
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
-    if (SendRequestToACK(piSCC, nServiceMethod) != IMS_SUCCESS)
+    if (SendRequestToAck(piScc, nServiceMethod) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Sending ACK request failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -1606,17 +1399,10 @@ IMS_RESULT Session::SendAck()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
-        IN CONST AString& strReason /* = AString::ConstNull() */, IN IMS_SINT32 nFlags /* =  0 */)
+        IN const AString& strReason /*= AString::ConstNull()*/, IN IMS_SINT32 nFlags /*= 0*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!SipStatusCode::IsProvisional(nStatusCode))
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
@@ -1628,7 +1414,7 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
 
     IMS_SINT32 nState = GetState();
 
-    if ((bFlag_UpdateRequestor) || (IsMobileOriginated() && (nState == STATE_NEGOTIATING)))
+    if (m_bUpdateRequestor || (IsMobileOriginated() && (nState == STATE_NEGOTIATING)))
     {
         Ims::SetLastError(ImsError::INVALID_OPERATION);
 
@@ -1666,18 +1452,18 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
         return IMS_FAILURE;
     }
 
-    ISipMessage* piSIPMsg = pMessage->GetMessage();
+    ISipMessage* piSipMsg = pMessage->GetMessage();
 
     // Do nothing if the handling method is not INVITE
-    if (!piSIPMsg->GetMethod().Equals(SipMethod::INVITE))
+    if (!piSipMsg->GetMethod().Equals(SipMethod::INVITE))
     {
         Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
 
-    ISipServerConnection* piSSC = GetServerConnection(nServiceMethod);
+    ISipServerConnection* piSsc = GetServerConnection(nServiceMethod);
 
-    if (piSSC == IMS_NULL)
+    if (piSsc == IMS_NULL)
     {
         Ims::SetLastError(ImsError::INVALID_OPERATION);
 
@@ -1689,7 +1475,7 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
             strReason.IsNULL() ? SipStatusCode::GetReasonPhrase(nStatusCode) : strReason.GetStr(),
             0);
 
-    if (CreateResponse(piSSC, nStatusCode) == IMS_FALSE)
+    if (CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Initializing a response failed - SipError (%d)", SipError::GetLastError(),
                 0, 0);
@@ -1699,81 +1485,41 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
     // REMOVE_RECORD_ROUTE_HEADERS
     if ((nFlags & FLAG_REMOVE_RECORD_ROUTES) != 0)
     {
-        RemoveRecordRouteHeaders(piSSC->GetMessage());
+        RemoveRecordRouteHeaders(piSsc->GetMessage());
     }
 
-    if (!SendNUpdateResponse(nServiceMethod, piSSC))
+    if (!SendNUpdateResponse(nServiceMethod, piSsc))
     {
         IMS_TRACE_E(0, "Sending a response failed - SipError (%d)", SipError::GetLastError(), 0, 0);
         return IMS_FAILURE;
     }
 
     // Update the call state
-    UpdateCallStateOnMessageSent(piSSC->GetMessage());
+    UpdateCallStateOnMessageSent(piSsc->GetMessage());
 
-    CheckNCreateDialog(piSSC);
+    CheckNCreateDialog(piSsc);
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void Session::Set100TryingNotification(IN IMS_BOOL b100TryingNotification)
+IMS_RESULT Session::SetCallerPreference(IN const IMSList<AString>& objCallerPreference)
 {
-    //---------------------------------------------------------------------------------------------
-
-    bFlag_100TryingNotification = b100TryingNotification;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_RESULT Session::SetCallerPreference(IN CONST IMSList<AString>& objCallerPreference)
-{
-    //---------------------------------------------------------------------------------------------
-
     // CALLER_PREFERENCE_MANAGER
-    objPreviousCallerPreference.Clear();
-    objPreviousCallerPreference = objCallerPreference;
+    m_objPreviousCallerPreference.Clear();
+    m_objPreviousCallerPreference = objCallerPreference;
 
     CallerPreferenceManager::GetInstance()->UpdateAcceptContacts(GetName(), objCallerPreference);
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-void Session::SetConfiguration(IN IMS_SINT32 nConfigValue)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->nConfigValue = nConfigValue;
-}
-
-/*
-
-Remarks
- CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
-
-*/
+// CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
 PUBLIC
 IMS_RESULT Session::SetContactParameter(
-        IN CONST AString& strParameter, IN IMS_SINT32 nOperation /* = 0 (0: ADD, 1: REMOVE) */)
+        IN const AString& strParameter, IN IMS_SINT32 nOperation /*= 0 (0: ADD, 1: REMOVE)*/)
 {
     ISipDialog* piDialog = GetDialog();
-
-    //---------------------------------------------------------------------------------------------
 
     // FIXME: needs to check the dialog's state?
 
@@ -1785,60 +1531,20 @@ IMS_RESULT Session::SetContactParameter(
     return piDialog->SetContactParameter(strParameter, nOperation);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void Session::SetImplicitRoutingRequired(IN IMS_BOOL bFlag)
 {
-    //---------------------------------------------------------------------------------------------
-
-    bFlag_ImplicitRoutingRequired = bFlag;
+    m_bImplicitRoutingRequired = bFlag;
 
     // FIXME: If the routing address needs to be provisioned by the application,
     // please add a second argument for it.
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-void Session::SetReasonForCallTermination(IN IMS_SINT32 nReason)
-{
-    //---------------------------------------------------------------------------------------------
-
-    strTerminationReasonFromApp.Sprintf("%x", nReason);
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void Session::SetRefreshListener(IN IRefreshListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    piRefreshListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 void Session::SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
-        IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT)
+        IN IMS_SINT32 nValueEorLt, IN IMS_SINT32 nValueGt)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pRefreshHelper == IMS_NULL)
+    if (m_pRefreshHelper == IMS_NULL)
     {
         return;
     }
@@ -1846,54 +1552,30 @@ void Session::SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInt
     switch (nPolicy)
     {
         case REFRESH_POLICY_NO_REFRESH:
-            pRefreshHelper->SetPolicy(
-                    RefreshHelper::POLICY_NO_REFRESH, nCriteriaInterval, nValueEorLT, nValueGT);
+            m_pRefreshHelper->SetPolicy(
+                    RefreshHelper::POLICY_NO_REFRESH, nCriteriaInterval, nValueEorLt, nValueGt);
             break;
-
         case REFRESH_POLICY_SPEC:
-            pRefreshHelper->SetPolicy(
-                    RefreshHelper::POLICY_SPEC, nCriteriaInterval, nValueEorLT, nValueGT);
+            m_pRefreshHelper->SetPolicy(
+                    RefreshHelper::POLICY_SPEC, nCriteriaInterval, nValueEorLt, nValueGt);
             break;
-
         case REFRESH_POLICY_REMAIN_TIME:
-            pRefreshHelper->SetPolicy(
-                    RefreshHelper::POLICY_REMAIN_TIME, nCriteriaInterval, nValueEorLT, nValueGT);
+            m_pRefreshHelper->SetPolicy(
+                    RefreshHelper::POLICY_REMAIN_TIME, nCriteriaInterval, nValueEorLt, nValueGt);
             break;
-
         case REFRESH_POLICY_RATIO:
-            pRefreshHelper->SetPolicy(
-                    RefreshHelper::POLICY_RATIO, nCriteriaInterval, nValueEorLT, nValueGT);
+            m_pRefreshHelper->SetPolicy(
+                    RefreshHelper::POLICY_RATIO, nCriteriaInterval, nValueEorLt, nValueGt);
             break;
-
         default:
             IMS_TRACE_E(0, "Invalid refresh policy (%d)", nPolicy, 0, 0);
             break;
     }
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-void Session::SetListener(IN IOnSessionListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    piSessionListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::Start()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_INITIATED)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -1922,7 +1604,7 @@ IMS_RESULT Session::Start()
     }
 
     // Send INVITE request
-    if (SendRequestToINVITE() != IMS_SUCCESS)
+    if (SendRequestToInvite() != IMS_SUCCESS)
     {
         SetState(STATE_TERMINATED);
         CleanupMedia();
@@ -1939,17 +1621,10 @@ IMS_RESULT Session::Start()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::Terminate()
 {
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     if ((nState == STATE_TERMINATING) || (nState == STATE_TERMINATED))
     {
@@ -1972,37 +1647,34 @@ IMS_RESULT Session::Terminate()
 
     switch (nState)
     {
-        case STATE_CREATED:
+        case STATE_CREATED:  // FALL-THROUGH
         case STATE_INITIATED:
             SetState(STATE_TERMINATED);
             Ims::SetLastError(ImsError::NO_ERROR);
 
             IMS_TRACE_D("Session is terminated in the state (%s)", StateToString(GetState()), 0, 0);
             return IMS_SUCCESS;
-
         case STATE_NEGOTIATING:
             TerminateOnNegotiating();
             break;
-
         case STATE_ESTABLISHING:
             TerminateOnEstablishing();
             break;
-
         case STATE_ESTABLISHED:
             // Checks if the session refresh is ongoing...
-            if (pRefreshHelper != IMS_NULL)
+            if (m_pRefreshHelper != IMS_NULL)
             {
-                if (pRefreshHelper->IsRequestPending())
+                if (m_pRefreshHelper->IsRequestPending())
                 {
                     IMS_TRACE_D("Stopping the session refresh on Terminate()", 0, 0, 0);
 
-                    pRefreshHelper->AbortConnection();
+                    m_pRefreshHelper->AbortConnection();
                 }
             }
 
             SetState(STATE_TERMINATING);
 
-            if (SendRequestToBYE() != IMS_SUCCESS)
+            if (SendRequestToBye() != IMS_SUCCESS)
             {
                 SetState(STATE_TERMINATED);
 
@@ -2012,19 +1684,15 @@ IMS_RESULT Session::Terminate()
                 return IMS_FAILURE;
             }
             break;
-
         case STATE_RENEGOTIATING:
             TerminateOnReNegotiating();
             break;
-
         case STATE_REESTABLISHING:
             TerminateOnReEstablishing();
             break;
-
-        case STATE_TERMINATING:
+        case STATE_TERMINATING:  // FALL-THROUGH
         case STATE_TERMINATED:
             break;
-
         default:
             break;
     }
@@ -2034,17 +1702,10 @@ IMS_RESULT Session::Terminate()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT Session::TerminateEx(IN IMS_BOOL bTerminateMethodBYE /* = IMS_FALSE */)
+IMS_RESULT Session::TerminateEx(IN IMS_BOOL bTerminateMethodBye /*= IMS_FALSE*/)
 {
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     IMS_TRACE_D("TerminateEx()", 0, 0, 0);
 
@@ -2056,14 +1717,14 @@ IMS_RESULT Session::TerminateEx(IN IMS_BOOL bTerminateMethodBYE /* = IMS_FALSE *
         return IMS_SUCCESS;
     }
 
-    bFlag_TerminateMethodBYE = bTerminateMethodBYE;
+    m_bTerminateMethodBye = bTerminateMethodBye;
 
     // Cease the 2xx retransmission
     Stop2xxRetransmission();
 
     IMS_SINT32 nCallState = GetCallState();
 
-    if (!bFlag_TerminateMethodBYE && bFlag_UpdateRequestor && (nState == STATE_RENEGOTIATING) &&
+    if (!m_bTerminateMethodBye && m_bUpdateRequestor && (nState == STATE_RENEGOTIATING) &&
             ((nCallState == CallState::STATE_REINVITE_SENT) ||
                     (nCallState == CallState::STATE_REINVITE_1XX_RECEIVED)))
     {
@@ -2082,37 +1743,34 @@ IMS_RESULT Session::TerminateEx(IN IMS_BOOL bTerminateMethodBYE /* = IMS_FALSE *
 
     switch (nState)
     {
-        case STATE_CREATED:
+        case STATE_CREATED:  // FALL-THROUGH
         case STATE_INITIATED:
             SetState(STATE_TERMINATED);
             Ims::SetLastError(ImsError::NO_ERROR);
 
             IMS_TRACE_D("Session is terminated in the state (%s)", StateToString(GetState()), 0, 0);
             return IMS_SUCCESS;
-
         case STATE_NEGOTIATING:
             TerminateOnNegotiating();
             break;
-
         case STATE_ESTABLISHING:
             TerminateOnEstablishing();
             break;
-
         case STATE_ESTABLISHED:
             // Checks if the session refresh is ongoing...
-            if (pRefreshHelper != IMS_NULL)
+            if (m_pRefreshHelper != IMS_NULL)
             {
-                if (pRefreshHelper->IsRequestPending())
+                if (m_pRefreshHelper->IsRequestPending())
                 {
                     IMS_TRACE_D("Stopping the session refresh on Terminate()", 0, 0, 0);
 
-                    pRefreshHelper->AbortConnection();
+                    m_pRefreshHelper->AbortConnection();
                 }
             }
 
             SetState(STATE_TERMINATING);
 
-            if (SendRequestToBYE() != IMS_SUCCESS)
+            if (SendRequestToBye() != IMS_SUCCESS)
             {
                 SetState(STATE_TERMINATED);
 
@@ -2122,15 +1780,14 @@ IMS_RESULT Session::TerminateEx(IN IMS_BOOL bTerminateMethodBYE /* = IMS_FALSE *
                 return IMS_FAILURE;
             }
             break;
-
         case STATE_RENEGOTIATING:
-            if (bFlag_TerminateMethodBYE)
+            if (m_bTerminateMethodBye)
             {
                 TerminateOnReNegotiating();
                 break;
             }
 
-            if (bFlag_UpdateRequestor)
+            if (m_bUpdateRequestor)
             {
                 if (nCallState == CallState::STATE_REINVITE_SENT)
                 {
@@ -2155,7 +1812,7 @@ IMS_RESULT Session::TerminateEx(IN IMS_BOOL bTerminateMethodBYE /* = IMS_FALSE *
                     // RemovePreviousMessage(IMessage::SESSION_CANCEL);
 
                     // Send CANCEL
-                    if (SendRequestToCANCEL() != IMS_SUCCESS)
+                    if (SendRequestToCancel() != IMS_SUCCESS)
                     {
                         SetState(STATE_TERMINATED);
 
@@ -2175,15 +1832,11 @@ IMS_RESULT Session::TerminateEx(IN IMS_BOOL bTerminateMethodBYE /* = IMS_FALSE *
                 TerminateOnReNegotiating();
             }
             break;
-
         case STATE_REESTABLISHING:
             TerminateOnReEstablishing();
             break;
-
-        case STATE_TERMINATING:
-        case STATE_TERMINATED:
-            break;
-
+        case STATE_TERMINATING:  // FALL-THROUGH
+        case STATE_TERMINATED:   // FALL-THROUGH
         default:
             break;
     }
@@ -2193,16 +1846,9 @@ IMS_RESULT Session::TerminateEx(IN IMS_BOOL bTerminateMethodBYE /* = IMS_FALSE *
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::Update()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_ESTABLISHED)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -2223,7 +1869,7 @@ IMS_RESULT Session::Update()
     if (SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
                 GetSlotId(), GetService()->GetSipProfile()))
     {
-        if ((pRefreshHelper != IMS_NULL) && (pRefreshHelper->IsRequestPending()))
+        if ((m_pRefreshHelper != IMS_NULL) && (m_pRefreshHelper->IsRequestPending()))
         {
             Ims::SetLastError(ImsError::ILLEGAL_STATE);
             IMS_TRACE_E(0, "Session refresh is ongoing", 0, 0, 0);
@@ -2231,7 +1877,7 @@ IMS_RESULT Session::Update()
         }
     }
 
-    if (objMedias.IsEmpty() || !IsMediaInitializationDone())
+    if (m_objMedias.IsEmpty() || !IsMediaInitializationDone())
     {
         Ims::SetLastError(ImsError::GENERAL_ERROR);
         IMS_TRACE_E(0, "There is no media or all the medias are not ready to update the session", 0,
@@ -2246,20 +1892,20 @@ IMS_RESULT Session::Update()
 
     if (objMethod.Equals(SipMethod::INVITE))
     {
-        if (SendRequestToINVITE() != IMS_SUCCESS)
+        if (SendRequestToInvite() != IMS_SUCCESS)
         {
             return IMS_FAILURE;
         }
     }
     else
     {
-        if (SendRequestToUPDATE() != IMS_SUCCESS)
+        if (SendRequestToUpdate() != IMS_SUCCESS)
         {
             return IMS_FAILURE;
         }
     }
 
-    bFlag_UpdateRequestor = IMS_TRUE;
+    m_bUpdateRequestor = IMS_TRUE;
     SetState(STATE_RENEGOTIATING);
 
     Ims::SetLastError(ImsError::NO_ERROR);
@@ -2267,17 +1913,10 @@ IMS_RESULT Session::Update()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT Session::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */,
-        IN IMS_BOOL bSessionRefresh /* = IMS_FALSE */)
+IMS_RESULT Session::UpdateEx(
+        IN IMS_SINT32 nMethod /*= SipMethod::INVALID*/, IN IMS_BOOL bSessionRefresh /*= IMS_FALSE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     // CASE: session refresh
     if (bSessionRefresh)
     {
@@ -2310,7 +1949,7 @@ IMS_RESULT Session::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */,
     if (SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
                 GetSlotId(), GetService()->GetSipProfile()))
     {
-        if ((pRefreshHelper != IMS_NULL) && (pRefreshHelper->IsRequestPending()))
+        if ((m_pRefreshHelper != IMS_NULL) && (m_pRefreshHelper->IsRequestPending()))
         {
             Ims::SetLastError(ImsError::ILLEGAL_STATE);
             IMS_TRACE_E(0, "Session refresh is ongoing", 0, 0, 0);
@@ -2318,7 +1957,7 @@ IMS_RESULT Session::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */,
         }
     }
 
-    if (objMedias.IsEmpty() || !IsMediaInitializationDone())
+    if (m_objMedias.IsEmpty() || !IsMediaInitializationDone())
     {
         Ims::SetLastError(ImsError::GENERAL_ERROR);
         IMS_TRACE_E(0, "There is no media or all the medias are not ready to update the session", 0,
@@ -2328,20 +1967,20 @@ IMS_RESULT Session::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */,
 
     if (nMethod == SipMethod::INVITE)
     {
-        if (SendRequestToINVITE() != IMS_SUCCESS)
+        if (SendRequestToInvite() != IMS_SUCCESS)
         {
             return IMS_FAILURE;
         }
     }
     else
     {
-        if (SendRequestToUPDATE() != IMS_SUCCESS)
+        if (SendRequestToUpdate() != IMS_SUCCESS)
         {
             return IMS_FAILURE;
         }
     }
 
-    bFlag_UpdateRequestor = IMS_TRUE;
+    m_bUpdateRequestor = IMS_TRUE;
     SetState(STATE_RENEGOTIATING);
 
     Ims::SetLastError(ImsError::NO_ERROR);
@@ -2350,91 +1989,67 @@ IMS_RESULT Session::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */,
 }
 
 // REFUSE_SDP_OFFER_ANSWER_EXCHANGE {
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT Session::CreateFailureSdp()
 {
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
-    pOAState->CreateRefusedView();
+    m_pOaState->CreateRefusedView();
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void Session::DestroyFailureSdp()
 {
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return;
     }
 
-    pOAState->DestroyRefusedView();
+    m_pOaState->DestroyRefusedView();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 ISessionParameter* Session::GetFailureSdp() const
 {
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    return pOAState->GetRefusedView();
+    return m_pOaState->GetRefusedView();
 }
 // }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN ImsMessage& objMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    switch (objMSG.GetName())
+    switch (objMsg.GetName())
     {
         case AMSG_SESSION_INVITATION_RECEIVED:
             GetService()->HandleSessionInvitationReceived(this);
             return IMS_TRUE;
-
         case AMSG_SESSION_ALERTING:
-            if (piSessionListener != IMS_NULL)
+            if (m_piSessionListener != IMS_NULL)
             {
-                piSessionListener->OnSession_Alerting(this);
+                m_piSessionListener->OnSession_Alerting(this);
             }
             return IMS_TRUE;
-
         case AMSG_SESSION_REFERENCE_RECEIVED:
         {
-            Reference* pReference = reinterpret_cast<Reference*>(objMSG.nLparam);
+            Reference* pReference = reinterpret_cast<Reference*>(objMsg.nLparam);
 
             if (pReference == IMS_NULL)
             {
                 return IMS_TRUE;
             }
 
-            if (piSessionListener != IMS_NULL)
+            if (m_piSessionListener != IMS_NULL)
             {
-                piSessionListener->OnSession_ReferenceReceived(this, pReference);
+                m_piSessionListener->OnSession_ReferenceReceived(this, pReference);
             }
             else
             {
@@ -2442,98 +2057,89 @@ PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN IMSMSG& objMSG)
                 pReference->Reject();
                 pReference->Destroy();
             }
-        }
             return IMS_TRUE;
-
+        }
         case AMSG_SESSION_STARTED:
-            if (piSessionListener != IMS_NULL)
+            if (m_piSessionListener != IMS_NULL)
             {
                 if (CheckNSetListenerCall(LISTENER_CALL_STARTED))
                 {
-                    piSessionListener->OnSession_Started(this);
+                    m_piSessionListener->OnSession_Started(this);
                 }
             }
 
             // ACK_WITH_SDP_IN_PROGRESS
-            if (bFlag_AckWithSDPInProgress)
+            if (m_bAckWithSdpInProgress)
             {
-                bFlag_AckWithSDPInProgress = IMS_FALSE;
+                m_bAckWithSdpInProgress = IMS_FALSE;
             }
             return IMS_TRUE;
-
         case AMSG_SESSION_START_FAILED:
-            if (piSessionListener != IMS_NULL)
+            if (m_piSessionListener != IMS_NULL)
             {
                 if (CheckNSetListenerCall(LISTENER_CALL_START_FAILED))
                 {
-                    piSessionListener->OnSession_StartFailed(this);
+                    m_piSessionListener->OnSession_StartFailed(this);
                 }
             }
             return IMS_TRUE;
-
         case AMSG_SESSION_TERMINATED:
             // 'Replaces' header handling ...
             RemoveSessionFromCallControlHelper();
 
-            if (piSessionListener != IMS_NULL)
+            if (m_piSessionListener != IMS_NULL)
             {
                 if (CheckNSetListenerCall(LISTENER_CALL_TERMINATED))
                 {
-                    piSessionListener->OnSession_Terminated(this);
+                    m_piSessionListener->OnSession_Terminated(this);
                 }
             }
             return IMS_TRUE;
-
         case AMSG_SESSION_UPDATED:
-            if (piSessionListener != IMS_NULL)
+            if (m_piSessionListener != IMS_NULL)
             {
-                piSessionListener->OnSession_Updated(this);
+                m_piSessionListener->OnSession_Updated(this);
             }
 
             // RACE_CONDITION : SESSION_UPDATE
             SetSessionUpdateNotificationState(IMS_FALSE);
 
             // ACK_WITH_SDP_IN_PROGRESS
-            if (bFlag_AckWithSDPInProgress)
+            if (m_bAckWithSdpInProgress)
             {
-                bFlag_AckWithSDPInProgress = IMS_FALSE;
+                m_bAckWithSdpInProgress = IMS_FALSE;
             }
             return IMS_TRUE;
-
         case AMSG_SESSION_UPDATE_FAILED:
-            if (piSessionListener != IMS_NULL)
+            if (m_piSessionListener != IMS_NULL)
             {
-                piSessionListener->OnSession_UpdateFailed(this);
+                m_piSessionListener->OnSession_UpdateFailed(this);
             }
 
             // RACE_CONDITION : SESSION_UPDATE
             SetSessionUpdateNotificationState(IMS_FALSE);
             return IMS_TRUE;
-
         case AMSG_SESSION_UPDATE_RECEIVED:
-            if (piSessionListener != IMS_NULL)
+            if (m_piSessionListener != IMS_NULL)
             {
-                piSessionListener->OnSession_UpdateReceived(this);
+                m_piSessionListener->OnSession_UpdateReceived(this);
             }
             return IMS_TRUE;
-
         case AMSG_SESSION_CANCEL_DELIVERED:
-            if (piSessionListener != IMS_NULL)
+            if (m_piSessionListener != IMS_NULL)
             {
-                piSessionListener->OnSession_CancelDelivered(this);
+                m_piSessionListener->OnSession_CancelDelivered(this);
             }
             return IMS_TRUE;
-
         case AMSG_SESSION_CANCEL_DELIVERY_FAILED:
-            if (piSessionListener != IMS_NULL)
+            if (m_piSessionListener != IMS_NULL)
             {
-                piSessionListener->OnSession_CancelDeliveryFailed(this);
+                m_piSessionListener->OnSession_CancelDeliveryFailed(this);
             }
             return IMS_TRUE;
-
         case AMSG_SESSION_FORKED_RESPONSE_RECEIVED:
         {
-            Session* pForkedSession = reinterpret_cast<Session*>(objMSG.nLparam);
+            Session* pForkedSession = reinterpret_cast<Session*>(objMsg.nLparam);
 
             if (pForkedSession == IMS_NULL)
             {
@@ -2541,7 +2147,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN IMSMSG& objMSG)
             }
 
             // RACE_CONDITION (MO CANCEL & forked INVITE response)
-            IMS_BOOL bTerminated = (piSessionListener == IMS_NULL) ? IMS_TRUE : IMS_FALSE;
+            IMS_BOOL bTerminated = (m_piSessionListener == IMS_NULL) ? IMS_TRUE : IMS_FALSE;
             IMS_SINT32 nState = GetState();
 
             if ((nState == STATE_TERMINATING) || (nState == STATE_TERMINATED))
@@ -2566,101 +2172,90 @@ PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN IMSMSG& objMSG)
                         pForkedSession->SendAck();
 
                         pForkedSession->SetTerminationReason(TERMINATION_REASON_USER_ACTION);
-                        pForkedSession->SendRequestToBYEInternal();
+                        pForkedSession->SendRequestToByeInternal();
                     }
                 }
 
                 pForkedSession->Destroy();
 
                 if ((nState == STATE_TERMINATING) && SipStatusCode::IsFinal(nStatusCode) &&
-                        (piSessionListener != IMS_NULL))
+                        (m_piSessionListener != IMS_NULL))
                 {
                     SetState(STATE_TERMINATED);
-                    piSessionListener->OnSession_Terminated(this);
+                    m_piSessionListener->OnSession_Terminated(this);
                 }
                 return IMS_TRUE;
             }
 
-            if (!piSessionListener->OnSession_ForkedResponseReceived(this, pForkedSession))
+            if (!m_piSessionListener->OnSession_ForkedResponseReceived(this, pForkedSession))
             {
                 pForkedSession->Destroy();
             }
-        }
             return IMS_TRUE;
-
+        }
         case AMSG_SESSION_PROVISIONAL_RESPONSE_RECEIVED:
-            if (piSessionListener != IMS_NULL)
+            if (m_piSessionListener != IMS_NULL)
             {
-                piSessionListener->OnSession_ProvisionalResponseReceived(this, objMSG.nLparam);
+                m_piSessionListener->OnSession_ProvisionalResponseReceived(this, objMsg.nLparam);
             }
             return IMS_TRUE;
-
         case AMSG_SESSION_TRANSACTION_RECEIVED:
         {
-            ISipServerConnection* piSSC = reinterpret_cast<ISipServerConnection*>(objMSG.nLparam);
+            ISipServerConnection* piSsc = reinterpret_cast<ISipServerConnection*>(objMsg.nLparam);
 
-            if (piSSC == IMS_NULL)
+            if (piSsc == IMS_NULL)
             {
                 return IMS_TRUE;
             }
 
-            if (piSessionListener != IMS_NULL)
+            if (m_piSessionListener != IMS_NULL)
             {
-                if (!piSessionListener->OnSession_TransactionReceived(this, piSSC))
+                if (!m_piSessionListener->OnSession_TransactionReceived(this, piSsc))
                 {
-                    GetService()->SendResponse(piSSC, SipStatusCode::SC_480);
-                    piSSC->Close();
+                    GetService()->SendResponse(piSsc, SipStatusCode::SC_480);
+                    piSsc->Close();
                 }
             }
             else
             {
                 // 4 Find a proper response code
-                GetService()->SendResponse(piSSC, SipStatusCode::SC_480);
-                piSSC->Close();
+                GetService()->SendResponse(piSsc, SipStatusCode::SC_480);
+                piSsc->Close();
             }
-        }
             return IMS_TRUE;
-
+        }
         case AMSG_SESSION_DELAYED_DIALOG_TRANSACTION_RECEIVED:
         {
             // ACK_WITH_SDP_IN_PROGRESS
-            ISipServerConnection* piSSC = reinterpret_cast<ISipServerConnection*>(objMSG.nLparam);
+            ISipServerConnection* piSsc = reinterpret_cast<ISipServerConnection*>(objMsg.nLparam);
 
-            if (piSSC != IMS_NULL)
+            if (piSsc != IMS_NULL)
             {
-                const SipMethod& objMethod = piSSC->GetMethod();
+                const SipMethod& objMethod = piSsc->GetMethod();
 
-                if (bFlag_AckWithSDPInProgress &&
+                if (m_bAckWithSdpInProgress &&
                         (objMethod.Equals(SipMethod::INVITE) ||
                                 objMethod.Equals(SipMethod::UPDATE)))
                 {
                     // To avoid an infinite loop, clear the flag
-                    bFlag_AckWithSDPInProgress = IMS_FALSE;
+                    m_bAckWithSdpInProgress = IMS_FALSE;
                     IMS_TRACE_D("CriticialError :: AckWithSDPInProgress is cleared", 0, 0, 0);
                 }
 
-                Dialog_NotifyRequest(piSSC);
+                Dialog_NotifyRequest(piSsc);
             }
-        }
             return IMS_TRUE;
-
+        }
         default:
             break;
     }
 
-    return EngineActivity::DispatchMessage(objMSG);
+    return EngineActivity::DispatchMessage(objMsg);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void Session::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
 {
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     (void)nErrorCode;
 
@@ -2669,9 +2264,11 @@ PROTECTED VIRTUAL void Session::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
             StateToString(nState), 0);
 
     if (nState == STATE_TERMINATED)
+    {
         return;
+    }
 
-    if ((nState == STATE_NEGOTIATING) || (nState == STATE_ESTABLISHING) /* ACK wait timeout */)
+    if ((nState == STATE_NEGOTIATING) || (nState == STATE_ESTABLISHING) /*ACK wait timeout*/)
     {
         CloseConnection(IMessage::SESSION_START);
         CleanupMedia();
@@ -2679,7 +2276,7 @@ PROTECTED VIRTUAL void Session::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
         // Cease the 2xx retransmission
         Stop2xxRetransmission();
 
-        if (!bFlag_TerminatePending)
+        if (!m_bTerminatePending)
         {
             // To send a BYE by enabler
             if (IsMobileOriginated() && (nState == STATE_NEGOTIATING))
@@ -2696,7 +2293,7 @@ PROTECTED VIRTUAL void Session::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
         }
     }
     else if (((nState == STATE_RENEGOTIATING) ||
-                     (nState == STATE_REESTABLISHING) /* ACK wait timeout */) &&
+                     (nState == STATE_REESTABLISHING) /*ACK wait timeout*/) &&
             !IsConfigurationSet(CONFIG_IGNORE_DEREG_ON_SESSION_UPDATE))
     {
         CloseConnection(IMessage::SESSION_UPDATE);
@@ -2706,7 +2303,7 @@ PROTECTED VIRTUAL void Session::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
         // Cease the 2xx retransmission
         Stop2xxRetransmission();
 
-        if (!bFlag_TerminatePending)
+        if (!m_bTerminatePending)
         {
             PostMessage(AMSG_SESSION_UPDATE_FAILED, 0, 0);
             return;
@@ -2714,7 +2311,7 @@ PROTECTED VIRTUAL void Session::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
     }
 
     // SIP_TXN_N_DIALOG_HANDLING_ON_NO_REG
-    if (bFlag_TerminatePending || (nState == STATE_TERMINATING))
+    if (m_bTerminatePending || (nState == STATE_TERMINATING))
     {
         if (nErrorCode == ImsError::SERVICE_CLOSED)
         {
@@ -2728,15 +2325,8 @@ PROTECTED VIRTUAL void Session::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL Session::InitInstance()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_CREATED)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
@@ -2744,30 +2334,30 @@ PROTECTED VIRTUAL IMS_BOOL Session::InitInstance()
     }
 
     // Instantiate SDP offer/answer object
-    IMS_BOOL bSDPVersionCheck = IMS_TRUE;
+    IMS_BOOL bSdpVersionCheck = IMS_TRUE;
     const SipConfigV* pSipConfigV = GetService()->GetSipConfigV();
 
     if (pSipConfigV != IMS_NULL)
     {
-        bFlag_SDPNonRPRAllowed = pSipConfigV->IsSessionSDPNonRPRAllowed();
-        bSDPVersionCheck = pSipConfigV->IsSessionSDPVersionCheckSupported();
+        m_bSdpNonRprAllowed = pSipConfigV->IsSessionSDPNonRPRAllowed();
+        bSdpVersionCheck = pSipConfigV->IsSessionSDPVersionCheckSupported();
 
         // Flag to check if the 100 Trying response should be notified or not
-        bFlag_100TryingNotification = pSipConfigV->Is100TryingNotificationRequired();
+        m_b100TryingNotification = pSipConfigV->Is100TryingNotificationRequired();
     }
 
-    pOAState = new SdpOaState(bSDPVersionCheck, IMS_TRUE);
+    m_pOaState = new SdpOaState(bSdpVersionCheck, IMS_TRUE);
 
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_FALSE;
     }
 
     // Create a session refresh helper
-    pRefreshHelper = new SessionRefreshHelper(GetService(), this);
+    m_pRefreshHelper = new SessionRefreshHelper(GetService(), this);
 
-    if (pRefreshHelper == IMS_NULL)
+    if (m_pRefreshHelper == IMS_NULL)
     {
         Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_FALSE;
@@ -2795,34 +2385,27 @@ PROTECTED VIRTUAL IMS_BOOL Session::InitInstance()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Session::NotifySIPRequest(IN ISipServerConnection* piSSC)
+PROTECTED VIRTUAL IMS_BOOL Session::NotifySipRequest(IN ISipServerConnection* piSsc)
 {
-    ISipMessage* piSIPMsg = piSSC->GetMessage();
-
-    //---------------------------------------------------------------------------------------------
+    ISipMessage* piSipMsg = piSsc->GetMessage();
 
     IMS_TRACE_D("___>>> INCOMING SESSION RECEIVED <<<___", 0, 0, 0);
 
     // Update the call state
-    UpdateCallStateOnMessageReceived(piSIPMsg);
+    UpdateCallStateOnMessageReceived(piSipMsg);
 
     // Negotiate session timer info.
-    switch (pRefreshHelper->UpdateOnMessageReceived(piSSC))
+    switch (m_pRefreshHelper->UpdateOnMessageReceived(piSsc))
     {
-        case SessionRefreshHelper::RESULT_ERROR:
+        case SessionRefreshHelper::RESULT_ERROR:  // FALL-THROUGH
         case SessionRefreshHelper::RESULT_REJECT_500:
-            GetService()->SendResponse(piSSC, SipStatusCode::SC_500);
+            GetService()->SendResponse(piSsc, SipStatusCode::SC_500);
             return IMS_FALSE;
 
         case SessionRefreshHelper::RESULT_REJECT_422:
-            CreateResponse(piSSC, SipStatusCode::SC_422);
-            pRefreshHelper->AddSpecificHeader(piSSC);
-            piSSC->Send();
+            CreateResponse(piSsc, SipStatusCode::SC_422);
+            m_pRefreshHelper->AddSpecificHeader(piSsc);
+            piSsc->Send();
             return IMS_FALSE;
 
         default:
@@ -2830,9 +2413,9 @@ PROTECTED VIRTUAL IMS_BOOL Session::NotifySIPRequest(IN ISipServerConnection* pi
     }
 
     // Update the Offer/Answer state
-    UpdateOfferAnswerStateOnMessageReceived(piSIPMsg);
+    UpdateOfferAnswerStateOnMessageReceived(piSipMsg);
 
-    if (HandleRequestToINVITE(piSSC) != IMS_SUCCESS)
+    if (HandleRequestToInvite(piSsc) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Handling INVITE request failed", 0, 0, 0);
         return IMS_FALSE;
@@ -2843,29 +2426,22 @@ PROTECTED VIRTUAL IMS_BOOL Session::NotifySIPRequest(IN ISipServerConnection* pi
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Session::NotifySIPForkedResponse(
-        IN ISipClientConnection* piSCC, IN ISipClientConnection* piForkedSCC)
+PROTECTED VIRTUAL IMS_BOOL Session::NotifySipForkedResponse(
+        IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSCC != GetClientConnection(IMessage::SESSION_START))
+    if (piScc != GetClientConnection(IMessage::SESSION_START))
     {
         IMS_TRACE_E(0, "No client connection matches for a forked response", 0, 0, 0);
 
-        piForkedSCC->Close();
+        piForkedScc->Close();
         return IMS_FALSE;
     }
 
-    if (!piForkedSCC->GetMethod().Equals(SipMethod::INVITE))
+    if (!piForkedScc->GetMethod().Equals(SipMethod::INVITE))
     {
         IMS_TRACE_E(0, "SIP forked response is non-INVITE, so the session ignores it", 0, 0, 0);
 
-        piForkedSCC->Close();
+        piForkedScc->Close();
         return IMS_FALSE;
     }
 
@@ -2874,73 +2450,73 @@ PROTECTED VIRTUAL IMS_BOOL Session::NotifySIPForkedResponse(
 
     if (pSession == IMS_NULL)
     {
-        piForkedSCC->Close();
+        piForkedScc->Close();
         return IMS_FALSE;
     }
 
     // Management of forked sessions
-    if (pForkedSessions.IsNull())
+    if (m_pForkedSessions.IsNull())
     {
-        pForkedSessions = new MethodManager();
+        m_pForkedSessions = new MethodManager();
 
         // First forked session detected
-        pForkedSessions->AddMethod(this);
-        pForkedSessions->AddMethod(pSession);
+        m_pForkedSessions->AddMethod(this);
+        m_pForkedSessions->AddMethod(pSession);
     }
     else
     {
         // New forked session
-        pForkedSessions->AddMethod(pSession);
+        m_pForkedSessions->AddMethod(pSession);
     }
 
-    pSession->pForkedSessions = pForkedSessions;
+    pSession->m_pForkedSessions = m_pForkedSessions;
 
     // Set a configuration as the original configuration
-    pSession->nConfigValue = nConfigValue;
+    pSession->m_nConfigValue = m_nConfigValue;
 
     // Update the dialog info. enforcelly
-    pSession->CheckNCreateDialog(piForkedSCC, IMS_TRUE);
+    pSession->CheckNCreateDialog(piForkedScc, IMS_TRUE);
 
-    if (bFlag_SDPInInitialINVITE)
+    if (m_bSdpInInitialInvite)
     {
         // INVITE request has been sent with SDP, so creates a media from the SDP.
-        pSession->bFlag_SDPInInitialINVITE = IMS_TRUE;
+        pSession->m_bSdpInInitialInvite = IMS_TRUE;
         pSession->CheckNCreateSessionDescriptor();
 
         // Update the proposed view from this session capabilities
-        const SessionParameter* pCapabilities = pOAState->GetCapabilities();
-        SessionParameter* pProposalView = pSession->pOAState->GetProposalView();
+        const SessionParameter* pCapabilities = m_pOaState->GetCapabilities();
+        SessionParameter* pProposalView = pSession->m_pOaState->GetProposalView();
 
         (*pProposalView) = (*pCapabilities);
 
         // Create all the medias from the proposal view
-        if (!pSession->CreateMediaFromSDP())
+        if (!pSession->CreateMediaFromSdp())
         {
             pSession->Destroy();
-            piForkedSCC->Close();
+            piForkedScc->Close();
 
             IMS_TRACE_E(0, "Creating the media from SDP failed", 0, 0, 0);
             return IMS_FALSE;
         }
     }
 
-    if (!pSession->UpdateRequestOnSent(IMessage::SESSION_START, piForkedSCC))
+    if (!pSession->UpdateRequestOnSent(IMessage::SESSION_START, piForkedScc))
     {
         pSession->Destroy();
-        piForkedSCC->Close();
+        piForkedScc->Close();
 
         IMS_TRACE_E(0, "Updating request on sent failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
     // Set listener for the forked client connection
-    piForkedSCC->SetListener(pSession);
-    piForkedSCC->SetErrorListener(pSession);
+    piForkedScc->SetListener(pSession);
+    piForkedScc->SetErrorListener(pSession);
 
     // Update the call state
-    pSession->UpdateCallStateOnMessageSent(piForkedSCC->GetMessage());
+    pSession->UpdateCallStateOnMessageSent(piForkedScc->GetMessage());
     // Update the Offer/Answer state
-    pSession->UpdateOfferAnswerStateOnMessageSent(piForkedSCC->GetMessage());
+    pSession->UpdateOfferAnswerStateOnMessageSent(piForkedScc->GetMessage());
     // Update the media state
     pSession->UpdateMedia(Media::SESSION_START);
 
@@ -2948,46 +2524,39 @@ PROTECTED VIRTUAL IMS_BOOL Session::NotifySIPForkedResponse(
 
     PostMessage(AMSG_SESSION_FORKED_RESPONSE_RECEIVED, 0, reinterpret_cast<IMS_UINTP>(pSession));
 
-    pSession->HandleAllSIPResponse(piForkedSCC);
+    pSession->HandleAllSipResponse(piForkedScc);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void Session::NotifySIPResponse(IN ISipClientConnection* piSCC)
+PROTECTED VIRTUAL void Session::NotifySipResponse(IN ISipClientConnection* piScc)
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_I("___ Response received at the state, %s", StateToString(GetState()), 0, 0);
 
     if (GetState() == STATE_TERMINATED)
     {
         IMS_TRACE_E(0, "Response message will not be handled in the TERMINATED state", 0, 0, 0);
 
-        if (piSCC->GetMethod().Equals(SipMethod::INVITE) &&
-                (piSCC->GetStatusCode() >= SipStatusCode::SC_200))
+        if (piScc->GetMethod().Equals(SipMethod::INVITE) &&
+                (piScc->GetStatusCode() >= SipStatusCode::SC_200))
         {
             RestoreOfferAnswerState();
 
-            SendRequestToACK(piSCC, IMessage::SERVICEMETHOD_INVALID);
+            SendRequestToAck(piScc, IMessage::SERVICEMETHOD_INVALID);
         }
         return;
     }
 
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Update the call state
-    UpdateCallStateOnMessageReceived(piSIPMsg);
+    UpdateCallStateOnMessageReceived(piSipMsg);
 
     // Handle the response according to the SIP method.
-    const SipMethod& objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSipMsg->GetMethod();
 
     // Update a session refresh timer
-    if (pRefreshHelper->UpdateOnMessageReceived(piSCC) != SessionRefreshHelper::RESULT_SUCCESS)
+    if (m_pRefreshHelper->UpdateOnMessageReceived(piScc) != SessionRefreshHelper::RESULT_SUCCESS)
     {
         IMS_TRACE_E(0, "Updating a session refresh timer failed", 0, 0, 0);
     }
@@ -3003,78 +2572,66 @@ PROTECTED VIRTUAL void Session::NotifySIPResponse(IN ISipClientConnection* piSCC
     {
         if (IsConfigurationSet(CONFIG_SUPPORT_EARLY_SESSION_MODEL) &&
                 (GetState() == STATE_NEGOTIATING) &&
-                (piSIPMsg->GetStatusCode() == SipStatusCode::SC_183) &&
-                OperatorFeatureResolver::IsMessageForEarlySessionModel(piSIPMsg))
+                (piSipMsg->GetStatusCode() == SipStatusCode::SC_183) &&
+                OperatorFeatureResolver::IsMessageForEarlySessionModel(piSipMsg))
         {
-            if (pVirtualEarlySession.IsNull())
+            if (m_pVirtualEarlySession.IsNull())
             {
-                pVirtualEarlySession = new VirtualSession(GetService(), GetUserAOR());
+                m_pVirtualEarlySession = new VirtualSession(GetService(), GetUserAor());
             }
 
-            pVirtualEarlySession->Notify18xResponse(piSIPMsg);
+            m_pVirtualEarlySession->Notify18xResponse(piSipMsg);
         }
         else
         {
             if ((GetCallState() == CallState::STATE_INVITE_2XX_RECEIVED) ||
-                    (piSIPMsg->GetSdpBodyPart() != IMS_NULL) ||
-                    (piSIPMsg->GetStatusCode() == SipStatusCode::SC_180))
+                    (piSipMsg->GetSdpBodyPart() != IMS_NULL) ||
+                    (piSipMsg->GetStatusCode() == SipStatusCode::SC_180))
             {
                 // KT
                 // 183 (to-tag1) -> 183 (early-session, to-tag2) -> 200-INVITE (to-tag2)
                 // 183 (early-session, to-tag1) -> 183 (forking, to-tag2) -> 200-INVITE (to-tag3)
-                pVirtualEarlySession = IMS_NULL;
+                m_pVirtualEarlySession = IMS_NULL;
             }
 
-            UpdateOfferAnswerStateOnMessageReceived(piSIPMsg);
+            UpdateOfferAnswerStateOnMessageReceived(piSipMsg);
         }
     }
 
     switch (objMethod.ToInt())
     {
-        // ACK request will be sent inside of HandleResponseToINVITE() method.
+        // ACK request will be sent inside of HandleResponseToInvite() method.
         case SipMethod::INVITE:
-            HandleResponseToINVITE(piSCC);
+            HandleResponseToInvite(piScc);
             break;
-
         case SipMethod::BYE:
             // 3 check if the same connection exists or not
-            HandleResponseToBYE(piSCC);
+            HandleResponseToBye(piScc);
             break;
-
         case SipMethod::CANCEL:
-            HandleResponseToCANCEL(piSCC);
+            HandleResponseToCancel(piScc);
             break;
-
         case SipMethod::UPDATE:
-            if (piSCC != GetClientConnection(IMessage::SESSION_UPDATE))
+            if (piScc != GetClientConnection(IMessage::SESSION_UPDATE))
             {
                 // Do nothing ...
                 break;
             }
 
-            HandleResponseToUPDATE(piSCC);
+            HandleResponseToUpdate(piScc);
             break;
-
         case SipMethod::PRACK:
             break;
-
         default:
             IMS_TRACE_E(0, "Not handled method (%s)", objMethod.ToString().GetStr(), 0, 0);
             break;
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void Session::NotifySIPError(
-        IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage)
+PROTECTED VIRTUAL void Session::NotifySipError(
+        IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
 {
-    const SipMethod& objMethod = piSC->GetMethod();
-
-    //---------------------------------------------------------------------------------------------
+    const SipMethod& objMethod = piSc->GetMethod();
 
     (void)nCode;
     (void)strMessage;
@@ -3086,7 +2643,7 @@ PROTECTED VIRTUAL void Session::NotifySIPError(
             IMS_SINT32 nOldState = GetState();
 
             if ((nOldState == STATE_NEGOTIATING) ||
-                    (nOldState == STATE_ESTABLISHING) /* ACK wait timeout */)
+                    (nOldState == STATE_ESTABLISHING) /*ACK wait timeout*/)
             {
                 CloseConnection(IMessage::SESSION_START);
 
@@ -3095,9 +2652,9 @@ PROTECTED VIRTUAL void Session::NotifySIPError(
                 // Cease the 2xx retransmission
                 Stop2xxRetransmission();
 
-                if (bFlag_TerminatePending)
+                if (m_bTerminatePending)
                 {
-                    bFlag_TerminatePending = IMS_FALSE;
+                    m_bTerminatePending = IMS_FALSE;
 
                     if (nOldState == STATE_NEGOTIATING)
                     {
@@ -3106,7 +2663,7 @@ PROTECTED VIRTUAL void Session::NotifySIPError(
                     else
                     {
                         // ACK wait timer expired ...
-                        if (SendRequestToBYE() != IMS_SUCCESS)
+                        if (SendRequestToBye() != IMS_SUCCESS)
                         {
                             SetState(STATE_TERMINATED);
 
@@ -3135,7 +2692,7 @@ PROTECTED VIRTUAL void Session::NotifySIPError(
                 }
             }
             else if ((nOldState == STATE_RENEGOTIATING) ||
-                    (nOldState == STATE_REESTABLISHING) /* ACK wait timeout */)
+                    (nOldState == STATE_REESTABLISHING) /*ACK wait timeout*/)
             {
                 // CALLER_PREFERENCE_MANAGER
                 if (nOldState == STATE_RENEGOTIATING)
@@ -3156,11 +2713,11 @@ PROTECTED VIRTUAL void Session::NotifySIPError(
                 RestoreOfferAnswerState();
                 RestoreEx();
 
-                if (bFlag_TerminatePending)
+                if (m_bTerminatePending)
                 {
-                    bFlag_TerminatePending = IMS_FALSE;
+                    m_bTerminatePending = IMS_FALSE;
 
-                    if (SendRequestToBYE() != IMS_SUCCESS)
+                    if (SendRequestToBye() != IMS_SUCCESS)
                     {
                         SetState(STATE_TERMINATED);
 
@@ -3185,16 +2742,15 @@ PROTECTED VIRTUAL void Session::NotifySIPError(
                     PostMessage(AMSG_SESSION_UPDATE_FAILED, 0, 0);
                 }
             }
+            break;
         }
-        break;
-
         case SipMethod::BYE:
-            if (piSC == piSCC_BYE)
+            if (piSc == m_piSccBye)
             {
-                if (piSCC_BYE != IMS_NULL)
+                if (m_piSccBye != IMS_NULL)
                 {
-                    piSCC_BYE->Close();
-                    piSCC_BYE = IMS_NULL;
+                    m_piSccBye->Close();
+                    m_piSccBye = IMS_NULL;
                 }
 
                 if (GetState() != STATE_TERMINATED)
@@ -3213,7 +2769,6 @@ PROTECTED VIRTUAL void Session::NotifySIPError(
                 PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
             }
             break;
-
         case SipMethod::CANCEL:
             // CALL_TERMINATION_AFTER_CANCEL_OF_REINVITE
             {
@@ -3263,7 +2818,6 @@ PROTECTED VIRTUAL void Session::NotifySIPError(
                 }
             }
             break;
-
         case SipMethod::UPDATE:
             if (GetState() != STATE_RENEGOTIATING)
             {
@@ -3282,47 +2836,36 @@ PROTECTED VIRTUAL void Session::NotifySIPError(
 
             PostMessage(AMSG_SESSION_UPDATE_FAILED, 0, 0);
             break;
-
-        case SipMethod::ACK:
+        case SipMethod::ACK:  // FALL-THROUGH
         case SipMethod::PRACK:
             // If the transaction timer of PRACK is expired before the call is established,
             // it SHOULD be notified to the application and the application SHOULD terminate the
             // call. (RFC 3261 recommendation)
             break;
-
         default:
             IMS_TRACE_E(0, "Not handled method (%s)", objMethod.ToString().GetStr(), 0, 0);
-
-            piSC->Close();
+            piSc->Close();
             break;
     }
 }
 
-/*
-
-Remarks
-
-*/
-// IMS_AUTH_SIP_DIGEST
-PROTECTED VIRTUAL IMS_BOOL Session::SendRequestToChallenge(IN ISipClientConnection* piSCC)
+PROTECTED VIRTUAL IMS_BOOL Session::SendRequestToChallenge(IN ISipClientConnection* piScc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
     // For session refresh case
-    if (piSCC == pRefreshHelper->GetConnection())
+    if (piScc == m_pRefreshHelper->GetConnection())
     {
-        if (pRefreshHelper->SendRefreshRequest(piSCC) != IMS_SUCCESS)
+        if (m_pRefreshHelper->SendRefreshRequest(piScc) != IMS_SUCCESS)
         {
             return IMS_FALSE;
         }
 
         // Update the call state
-        UpdateCallStateOnMessageSent(piSCC->GetMessage());
+        UpdateCallStateOnMessageSent(piScc->GetMessage());
 
         return IMS_TRUE;
     }
@@ -3330,73 +2873,66 @@ PROTECTED VIRTUAL IMS_BOOL Session::SendRequestToChallenge(IN ISipClientConnecti
     IMS_SINT32 nServiceMethod = IMessage::SESSION_START;
 
     if (GetState() == STATE_NEGOTIATING)
+    {
         nServiceMethod = IMessage::SESSION_START;
+    }
     else
+    {
         nServiceMethod = IMessage::SESSION_UPDATE;
+    }
 
     // Try to send an INVITE request to the network
 
     // Clear the connection to preserve the SIP connection
     ClearConnection(nServiceMethod);
 
-    if (!SendNUpdateRequestEx(nServiceMethod, piSCC, MESSAGE_CLASS_RESUBMIT))
+    if (!SendNUpdateRequestEx(nServiceMethod, piScc, MESSAGE_CLASS_RESUBMIT))
     {
         // Revert the SIP connection
-        UpdateConnection(nServiceMethod, piSCC);
+        UpdateConnection(nServiceMethod, piScc);
         return IMS_FALSE;
     }
 
     // Update the call state
-    UpdateCallStateOnMessageSent(piSCC->GetMessage());
+    UpdateCallStateOnMessageSent(piScc->GetMessage());
 
     // Update the Offer/Answer state
-    UpdateOfferAnswerStateOnMessageSent(piSCC->GetMessage());
+    UpdateOfferAnswerStateOnMessageSent(piScc->GetMessage());
 
     // Update the media state also.
     if (GetState() == STATE_NEGOTIATING)
+    {
         UpdateMedia(Media::SESSION_START);
+    }
     else
+    {
         UpdateMedia(Media::SESSION_UPDATE);
+    }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL Session::SetReferredMessageListener(
         IN IReferredMessageListener* piListener)
 {
-    //---------------------------------------------------------------------------------------------
-
-    piReferredMessageListener = piListener;
-
+    m_piReferredMessageListener = piListener;
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL const AString& Session::GetConnectionAddress() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return AString::ConstNull();
     }
 
     SdpSessionParameter* pSessionParam = IMS_NULL;
 
-    pOAState->GetSessionCurrentView(pSessionParam);
+    m_pOaState->GetSessionCurrentView(pSessionParam);
 
     if (pSessionParam == IMS_NULL)
     {
-        pOAState->GetSessionProposalView(pSessionParam);
+        m_pOaState->GetSessionProposalView(pSessionParam);
     }
 
     if (pSessionParam == IMS_NULL)
@@ -3408,63 +2944,67 @@ PROTECTED VIRTUAL const AString& Session::GetConnectionAddress() const
     return pSessionParam->GetConnectionAddress();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_SINT32 Session::GetSessionState() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nState == STATE_CREATED)
+    if (m_nState == STATE_CREATED)
+    {
         return SESSION_STATE_CREATED;
-    else if (nState == STATE_INITIATED)
+    }
+    else if (m_nState == STATE_INITIATED)
+    {
         return SESSION_STATE_INITIATED;
-    else if (nState == STATE_NEGOTIATING)
+    }
+    else if (m_nState == STATE_NEGOTIATING)
+    {
         return SESSION_STATE_NEGOTIATING;
-    else if (nState == STATE_ESTABLISHING)
+    }
+    else if (m_nState == STATE_ESTABLISHING)
+    {
         return SESSION_STATE_ESTABLISHING;
-    else if (nState == STATE_ESTABLISHED)
+    }
+    else if (m_nState == STATE_ESTABLISHED)
+    {
         return SESSION_STATE_ESTABLISHED;
-    else if (nState == STATE_RENEGOTIATING)
+    }
+    else if (m_nState == STATE_RENEGOTIATING)
+    {
         return SESSION_STATE_RENEGOTIATING;
-    else if (nState == STATE_REESTABLISHING)
+    }
+    else if (m_nState == STATE_REESTABLISHING)
+    {
         return SESSION_STATE_REESTABLISHING;
-    else if (nState == STATE_TERMINATING)
+    }
+    else if (m_nState == STATE_TERMINATING)
+    {
         return SESSION_STATE_TERMINATING;
-    else if (nState == STATE_TERMINATED)
+    }
+    else if (m_nState == STATE_TERMINATED)
+    {
         return SESSION_STATE_TERMINATED;
-    else
-        return (-1);
+    }
+
+    return (-1);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL SdpSessionParameter* Session::GetSessionParameter() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return IMS_NULL;
     }
 
     SdpSessionParameter* pSessionParam = IMS_NULL;
 
-    if (nState == STATE_ESTABLISHED)
+    if (m_nState == STATE_ESTABLISHED)
     {
-        if (pOAState->GetSessionCurrentView(pSessionParam) != ISdpOaState::RESULT_SUCCESS)
+        if (m_pOaState->GetSessionCurrentView(pSessionParam) != ISdpOaState::RESULT_SUCCESS)
         {
             return IMS_NULL;
         }
     }
     else
     {
-        if (pOAState->GetSessionProposalView(pSessionParam) != ISdpOaState::RESULT_SUCCESS)
+        if (m_pOaState->GetSessionProposalView(pSessionParam) != ISdpOaState::RESULT_SUCCESS)
         {
             return IMS_NULL;
         }
@@ -3473,23 +3013,16 @@ PROTECTED VIRTUAL SdpSessionParameter* Session::GetSessionParameter() const
     return pSessionParam;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL const AString& Session::GetPeerConnectionAddress() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return AString::ConstNull();
     }
 
     SdpSessionParameter* pSessionParam = IMS_NULL;
 
-    pOAState->GetSessionPeerView(pSessionParam);
+    m_pOaState->GetSessionPeerView(pSessionParam);
 
     if (pSessionParam == IMS_NULL)
     {
@@ -3500,51 +3033,37 @@ PROTECTED VIRTUAL const AString& Session::GetPeerConnectionAddress() const
     return pSessionParam->GetConnectionAddress();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL SdpSessionParameter* Session::GetPeerSessionParameter() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return IMS_NULL;
     }
 
     SdpSessionParameter* pSessionParam = IMS_NULL;
 
-    pOAState->GetSessionPeerView(pSessionParam);
+    m_pOaState->GetSessionPeerView(pSessionParam);
 
     return pSessionParam;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL SdpSessionParameter* Session::GetProposalSessionParameter()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return IMS_NULL;
     }
 
     SdpSessionParameter* pSessionParam = IMS_NULL;
 
-    pOAState->GetSessionProposalView(pSessionParam);
+    m_pOaState->GetSessionProposalView(pSessionParam);
 
     if (pSessionParam == IMS_NULL)
     {
         // Checks and create a proposal view if it does not exist
-        if (!pOAState->IsOfferProgress())
+        if (!m_pOaState->IsOfferProgress())
         {
-            IMS_SINT32 nResult = pOAState->CreateProposalView();
+            IMS_SINT32 nResult = m_pOaState->CreateProposalView();
 
             if ((nResult != ISdpOaState::RESULT_SUCCESS) &&
                     (nResult != ISdpOaState::RESULT_ALREADY_EXIST))
@@ -3552,22 +3071,15 @@ PROTECTED VIRTUAL SdpSessionParameter* Session::GetProposalSessionParameter()
                 return IMS_NULL;
             }
 
-            pOAState->GetSessionProposalView(pSessionParam);
+            m_pOaState->GetSessionProposalView(pSessionParam);
         }
     }
 
     return pSessionParam;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_Compare(IN ISipServerConnection* piSSC_CANCEL) const
+PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_Compare(IN ISipServerConnection* piSscCancel) const
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_I("CANCEL comparing ... Session (%d), Call (%d)", GetState(), GetCallState(), 0);
 
     // SIP_TXN_N_DIALOG_HANDLING_ON_NO_REG
@@ -3579,7 +3091,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_Compare(IN ISipServerConnection*
     }
 #endif
 
-    ISipServerConnection* piSSC_INVITE = IMS_NULL;
+    ISipServerConnection* piSscInvite = IMS_NULL;
     IMS_SINT32 nState = GetState();
 
     if (nState == STATE_NEGOTIATING)
@@ -3590,17 +3102,17 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_Compare(IN ISipServerConnection*
             return IMS_FALSE;
         }
 
-        piSSC_INVITE = GetServerConnection(IMessage::SESSION_START);
+        piSscInvite = GetServerConnection(IMessage::SESSION_START);
     }
     else if (nState == STATE_RENEGOTIATING)
     {
-        if (bFlag_UpdateRequestor)
+        if (m_bUpdateRequestor)
         {
             IMS_TRACE_D("CANCEL is ignored ... (not update receiver)", 0, 0, 0);
             return IMS_FALSE;
         }
 
-        piSSC_INVITE = GetServerConnection(IMessage::SESSION_UPDATE);
+        piSscInvite = GetServerConnection(IMessage::SESSION_UPDATE);
     }
     // CANCEL_HANDLING_AFTER_200_OK_TO_INVITE
     else
@@ -3616,59 +3128,52 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_Compare(IN ISipServerConnection*
                 return IMS_FALSE;
             }
 
-            piSSC_INVITE = GetServerConnection(IMessage::SESSION_START);
+            piSscInvite = GetServerConnection(IMessage::SESSION_START);
         }
     }
 
-    if (piSSC_INVITE == IMS_NULL)
+    if (piSscInvite == IMS_NULL)
     {
         IMS_TRACE_D("No INVITE server transaction in %s", StateToString(nState), 0, 0);
         return IMS_FALSE;
     }
 
-    return piSSC_CANCEL->IsSameTransaction(piSSC_INVITE);
+    return piSscCancel->IsSameTransaction(piSscInvite);
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_NotifyRequest(IN ISipServerConnection* piSSC_CANCEL)
+PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_NotifyRequest(IN ISipServerConnection* piSscCancel)
 {
-    ISipMessage* piSIPMsg = piSSC_CANCEL->GetMessage();
+    ISipMessage* piSipMsg = piSscCancel->GetMessage();
 
-    //---------------------------------------------------------------------------------------------
-
-    if (!piSIPMsg->GetMethod().Equals(SipMethod::CANCEL))
+    if (!piSipMsg->GetMethod().Equals(SipMethod::CANCEL))
     {
         return IMS_FALSE;
     }
 
     // Checks if Request-URI is matched or not
-    const AString& strRequestURI = piSSC_CANCEL->GetRequestUri();
-    SipAddress objRequestURI(strRequestURI);
+    const AString& strRequestUri = piSscCancel->GetRequestUri();
+    SipAddress objRequestUri(strRequestUri);
 
-    if (!GetService()->ValidateRequestUri(objRequestURI))
+    if (!GetService()->ValidateRequestUri(objRequestUri))
     {
-        IMS_BOOL bRURIMatched = IMS_FALSE;
+        IMS_BOOL bRUriMatched = IMS_FALSE;
         IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_START);
-        ISipMessage* piSIPMsg = (piMessage != IMS_NULL) ? piMessage->GetMessage() : IMS_NULL;
+        ISipMessage* piSipMsg = (piMessage != IMS_NULL) ? piMessage->GetMessage() : IMS_NULL;
 
-        if (piSIPMsg != IMS_NULL)
+        if (piSipMsg != IMS_NULL)
         {
-            SipAddress objOrigRURI(piSIPMsg->GetRequestUri());
-            bRURIMatched = objRequestURI.Equals(objOrigRURI);
+            SipAddress objOrigRUri(piSipMsg->GetRequestUri());
+            bRUriMatched = objRequestUri.Equals(objOrigRUri);
         }
 
-        if (!bRURIMatched)
+        if (!bRUriMatched)
         {
             IMS_TRACE_D("Request-URI (%s) in a CANCEL request is not matched",
-                    SipDebug::GetUri1(strRequestURI).GetStr(), 0, 0);
+                    SipDebug::GetUri1(strRequestUri).GetStr(), 0, 0);
 
-            (void)CreateResponse(piSSC_CANCEL, SipStatusCode::SC_404);
-            (void)piSSC_CANCEL->Send();
-            piSSC_CANCEL->Close();
+            (void)CreateResponse(piSscCancel, SipStatusCode::SC_404);
+            (void)piSscCancel->Send();
+            piSscCancel->Close();
             return IMS_TRUE;
         }
     }
@@ -3676,7 +3181,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_NotifyRequest(IN ISipServerConne
     IMS_SINT32 nCallState = GetCallState();
 
     IMS_TRACE_I(
-            "CANCEL request received ... State : Session (%d), Call (%d)", nState, nCallState, 0);
+            "CANCEL request received ... State : Session (%d), Call (%d)", m_nState, nCallState, 0);
 
     if ((nCallState != CallState::STATE_INVITE_RECEIVED) &&
             (nCallState != CallState::STATE_INVITE_1XX_SENT) &&
@@ -3690,37 +3195,9 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_NotifyRequest(IN ISipServerConne
         // then send 200 OK to CANCEL.
         // Then, UAC will send BYE request...
         // When INVITE_TXN_HANDLING_CORRECTION is enabled:
-        (void)CreateResponse(piSSC_CANCEL, SipStatusCode::SC_200);
-        (void)piSSC_CANCEL->Send();
-        piSSC_CANCEL->Close();
-
-// CANCEL_HANDLING_AFTER_200_OK_TO_INVITE
-// LGU+ requirement - After 200 OK sent & CANCEL received, terminate the session.
-// 140501, The below requirement is removed by LGU+.
-#if 0
-        {
-            IMS_SINT32 nState = GetState();
-
-            if (nState == STATE_ESTABLISHING)
-            {
-                IMS_TRACE_D("Session will be terminated by CANCEL after user accepts...",
-                        0, 0, 0);
-
-                // Cease the 2xx retransmission
-                Stop2xxRetransmission();
-
-                CleanupMedia();
-
-                SetTerminationReason(TERMINATION_REASON_REMOTE_ACTION);
-
-                SendRequestToBYEInternal();
-
-                SetState(STATE_TERMINATED);
-                PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
-            }
-        }
-#endif
-
+        (void)CreateResponse(piSscCancel, SipStatusCode::SC_200);
+        (void)piSscCancel->Send();
+        piSscCancel->Close();
         return IMS_TRUE;
     }
 
@@ -3732,28 +3209,21 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_NotifyRequest(IN ISipServerConne
         nMethodForCancel = IMessage::SESSION_CANCEL;
     }
 
-    if (!UpdateRequestOnReceived(nMethodForCancel, piSSC_CANCEL))
+    if (!UpdateRequestOnReceived(nMethodForCancel, piSscCancel))
     {
         IMS_TRACE_E(0, "Updating SIP message failed", 0, 0, 0);
     }
 
-    HandleRequestToCANCEL(piSSC_CANCEL);
+    HandleRequestToCancel(piSscCancel);
 
     CloseConnection(nMethodForCancel);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Session::Dialog_Compare(IN ISipServerConnection* piSSC) const
+PROTECTED VIRTUAL IMS_BOOL Session::Dialog_Compare(IN ISipServerConnection* piSsc) const
 {
     // Filters some method which does not handle in the session
-
-    //---------------------------------------------------------------------------------------------
 
     // SIP_TXN_N_DIALOG_HANDLING_ON_NO_REG
 #if 0
@@ -3770,13 +3240,13 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_Compare(IN ISipServerConnection* piSS
         return IMS_FALSE;
     }
 
-    const SipMethod& objMethod = piSSC->GetMethod();
+    const SipMethod& objMethod = piSsc->GetMethod();
 
     if (objMethod.Equals(SipMethod::REFER))
     {
         // If the server transaction has the same dialog identifier with a dialog of this session,
         // then it will be handled by this session.
-        ISipDialog* piReferDialog = piSSC->GetDialog();
+        ISipDialog* piReferDialog = piSsc->GetDialog();
 
         if (piReferDialog == IMS_NULL)
         {
@@ -3802,7 +3272,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_Compare(IN ISipServerConnection* piSS
         // return IMS_FALSE;
     }
 
-    if (!piDialog->IsSameDialog(piSSC))
+    if (!piDialog->IsSameDialog(piSsc))
     {
         return IMS_FALSE;
     }
@@ -3810,29 +3280,22 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_Compare(IN ISipServerConnection* piSS
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Session::Dialog_NotifyRequest(IN ISipServerConnection* piSSC)
+PROTECTED VIRTUAL IMS_BOOL Session::Dialog_NotifyRequest(IN ISipServerConnection* piSsc)
 {
-    ISipMessage* piSIPMsg = piSSC->GetMessage();
-    const SipMethod& objMethod = piSIPMsg->GetMethod();
-
-    //---------------------------------------------------------------------------------------------
+    ISipMessage* piSipMsg = piSsc->GetMessage();
+    const SipMethod& objMethod = piSipMsg->GetMethod();
 
     IMS_TRACE_I(
             "Dialog_NotifyRequest - %s request received...", objMethod.ToString().GetStr(), 0, 0);
 
     // FIX_TIMING_ISSUE: ACK_WITH_SDP_IN_PROGRESS
-    if (bFlag_AckWithSDPInProgress &&
+    if (m_bAckWithSdpInProgress &&
             (objMethod.Equals(SipMethod::INVITE) || objMethod.Equals(SipMethod::UPDATE)) &&
-            (piSIPMsg->GetSdpBodyPart() != IMS_NULL))
+            (piSipMsg->GetSdpBodyPart() != IMS_NULL))
     {
         IMS_TRACE_I("Processing of incoming request will be delayed", 0, 0, 0);
         PostMessage(AMSG_SESSION_DELAYED_DIALOG_TRANSACTION_RECEIVED, 0,
-                reinterpret_cast<IMS_UINTP>(piSSC));
+                reinterpret_cast<IMS_UINTP>(piSsc));
         return IMS_TRUE;
     }
 
@@ -3840,33 +3303,33 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_NotifyRequest(IN ISipServerConnection
                 GetSlotId(), GetService()->GetSipProfile()))
     {
         // Checks if Request-URI is matched or not
-        const AString& strRequestURI = piSSC->GetRequestUri();
-        SipAddress objRequestURI(strRequestURI);
+        const AString& strRequestUri = piSsc->GetRequestUri();
+        SipAddress objRequestUri(strRequestUri);
 
-        if (!GetService()->ValidateRequestUri(objRequestURI, piSSC->GetDialog(), IMS_TRUE))
+        if (!GetService()->ValidateRequestUri(objRequestUri, piSsc->GetDialog(), IMS_TRUE))
         {
             IMS_TRACE_D("Request-URI (%s) in mid-dialog request is not matched",
-                    SipDebug::GetUri1(strRequestURI).GetStr(), 0, 0);
+                    SipDebug::GetUri1(strRequestUri).GetStr(), 0, 0);
 
             // PATCH_SIP_DIALOG_TERMINATED_STATE
             if (objMethod.Equals(SipMethod::BYE))
             {
-                UpdateRequestOnReceived(IMessage::SESSION_TERMINATE, piSSC);
+                UpdateRequestOnReceived(IMessage::SESSION_TERMINATE, piSsc);
             }
 
             if (!objMethod.Equals(SipMethod::ACK))
             {
-                GetService()->SendResponse(piSSC, SipStatusCode::SC_404);
+                GetService()->SendResponse(piSsc, SipStatusCode::SC_404);
             }
 
             // PATCH_SIP_DIALOG_TERMINATED_STATE
             // The dialog state will be transited to "TERMINATED" state,
             // so notify the application that this session is terminated...
-            if (piSSC->GetMethod().Equals(SipMethod::BYE))
+            if (piSsc->GetMethod().Equals(SipMethod::BYE))
             {
-                UpdateResponseOnSent(IMessage::SESSION_TERMINATE, piSSC);
+                UpdateResponseOnSent(IMessage::SESSION_TERMINATE, piSsc);
 
-                bFlag_TerminatePending = IMS_FALSE;
+                m_bTerminatePending = IMS_FALSE;
 
                 // Cease the 2xx retransmission
                 Stop2xxRetransmission();
@@ -3881,14 +3344,14 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_NotifyRequest(IN ISipServerConnection
                 PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
             }
 
-            piSSC->Close();
+            piSsc->Close();
 
             return IMS_FALSE;
         }
     }
 
     // Update the call state
-    UpdateCallStateOnMessageReceived(piSIPMsg);
+    UpdateCallStateOnMessageReceived(piSipMsg);
 
     // Update a session refresh timer
     if (objMethod.Equals(SipMethod::INVITE) &&
@@ -3897,11 +3360,11 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_NotifyRequest(IN ISipServerConnection
     {
         IMS_TRACE_D("re-INVITE request will not participate in the session refresh", 0, 0, 0);
 
-        pRefreshHelper->UpdateTimerOptionOnRequestReceived(piSSC);
+        m_pRefreshHelper->UpdateTimerOptionOnRequestReceived(piSsc);
     }
     else
     {
-        switch (pRefreshHelper->UpdateOnMessageReceived(piSSC))
+        switch (m_pRefreshHelper->UpdateOnMessageReceived(piSsc))
         {
             case SessionRefreshHelper::RESULT_ERROR:
                 IMS_TRACE_E(0, "Updating a session refresh timer failed", 0, 0, 0);
@@ -3923,122 +3386,107 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_NotifyRequest(IN ISipServerConnection
             // ACK_RETRANSMISSION_TO_2XX
             RemoveStrayAcks();
 
-            if (HandleRequestToINVITEWithinDialog(piSSC) != IMS_SUCCESS)
+            if (HandleRequestToInviteWithinDialog(piSsc) != IMS_SUCCESS)
             {
                 return IMS_FALSE;
             }
             break;
-
         case SipMethod::ACK:
-            HandleRequestToACK(piSSC);
+            HandleRequestToAck(piSsc);
 
             // When ACK request is received, the server connection has been created newly...
             // So, close the server connection directly.
-            piSSC->Close();
+            piSsc->Close();
             break;
-
         case SipMethod::BYE:
-            if (HandleRequestToBYE(piSSC) != IMS_SUCCESS)
+            if (HandleRequestToBye(piSsc) != IMS_SUCCESS)
             {
                 return IMS_FALSE;
             }
             break;
-
         case SipMethod::INFO:
-            if (piSessionListener == IMS_NULL)
+            if (m_piSessionListener == IMS_NULL)
             {
                 IMS_TRACE_D("No session listener", 0, 0, 0);
 
                 // 4 Find a proper response code
-                GetService()->CreateResponse(piSSC, SipStatusCode::SC_480);
-                piSSC->Send();
-                piSSC->Close();
+                GetService()->CreateResponse(piSsc, SipStatusCode::SC_480);
+                piSsc->Send();
+                piSsc->Close();
                 break;
             }
 
-            PostMessage(AMSG_SESSION_TRANSACTION_RECEIVED, 0, reinterpret_cast<IMS_UINTP>(piSSC));
+            PostMessage(AMSG_SESSION_TRANSACTION_RECEIVED, 0, reinterpret_cast<IMS_UINTP>(piSsc));
             break;
-
         case SipMethod::REFER:
-            if (HandleRequestToREFER(piSSC) != IMS_SUCCESS)
+            if (HandleRequestToRefer(piSsc) != IMS_SUCCESS)
             {
                 return IMS_FALSE;
             }
             break;
-
         case SipMethod::OPTIONS:
-            if (Capabilities::HandleOPTIONSRequestWithinDialog(GetService(), this, piSSC) !=
+            if (Capabilities::HandleOptionsRequestWithinDialog(GetService(), this, piSsc) !=
                     IMS_SUCCESS)
             {
                 return IMS_FALSE;
             }
             break;
-
         case SipMethod::UPDATE:
             // ACK_RETRANSMISSION_TO_2XX
             RemoveStrayAcks();
 
-            if (HandleRequestToUPDATE(piSSC) != IMS_SUCCESS)
+            if (HandleRequestToUpdate(piSsc) != IMS_SUCCESS)
             {
                 return IMS_FALSE;
             }
             break;
-
         case SipMethod::PRACK:
             // PRACK method will be handled by SessionEx class.
             break;
-
         default:
             // Unknown method received
-            if (piSessionListener == IMS_NULL)
+            if (m_piSessionListener == IMS_NULL)
             {
                 IMS_TRACE_D("No session listener", 0, 0, 0);
 
                 // 4 Find a proper response code
-                GetService()->CreateResponse(piSSC, SipStatusCode::SC_480);
-                piSSC->Send();
-                piSSC->Close();
+                GetService()->CreateResponse(piSsc, SipStatusCode::SC_480);
+                piSsc->Send();
+                piSsc->Close();
                 break;
             }
 
-            PostMessage(AMSG_SESSION_TRANSACTION_RECEIVED, 0, reinterpret_cast<IMS_UINTP>(piSSC));
+            PostMessage(AMSG_SESSION_TRANSACTION_RECEIVED, 0, reinterpret_cast<IMS_UINTP>(piSsc));
             break;
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void Session::Refreshable_RefreshCompleted(
-        IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode /* = 0 */)
+        IN ISipClientConnection* piScc, IN IMS_SINT32 nCode /*= 0*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_I("___ SESSION REFRESH COMPLETED ... Code (%d)", nCode, 0, 0);
 
-    if (piRefreshListener != IMS_NULL)
+    if (m_piRefreshListener != IMS_NULL)
     {
-        piRefreshListener->Refresh_NotifyCompleted(piSCC);
+        m_piRefreshListener->Refresh_NotifyCompleted(piScc);
     }
 
     // In case, the session refresh request is successfully done.
     if (nCode == 0)
     {
-        const SipMethod& objMethod = piSCC->GetMethod();
-        IMS_SINT32 nStatusCode = piSCC->GetStatusCode();
+        const SipMethod& objMethod = piScc->GetMethod();
+        IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
         // Update the call state
-        UpdateCallStateOnMessageReceived(piSCC->GetMessage());
+        UpdateCallStateOnMessageReceived(piScc->GetMessage());
 
         if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
             if (objMethod.Equals(SipMethod::INVITE))
             {
-                if (SendRequestToACK(piSCC, IMessage::SESSION_UPDATE) != IMS_SUCCESS)
+                if (SendRequestToAck(piScc, IMessage::SESSION_UPDATE) != IMS_SUCCESS)
                 {
                     // Clean up the session resources
                     // SetState(STATE_TERMINATED);
@@ -4061,12 +3509,16 @@ PROTECTED VIRTUAL void Session::Refreshable_RefreshCompleted(
             }
 
             if (nStatusCode == SipStatusCode::SC_408)
+            {
                 SetTerminationReason(TERMINATION_REASON_REFRESH_408);
+            }
             else
+            {
                 SetTerminationReason(TERMINATION_REASON_REFRESH_481);
+            }
 
             // Send BYE request
-            if (SendRequestToBYEInternal() != IMS_SUCCESS)
+            if (SendRequestToByeInternal() != IMS_SUCCESS)
             {
                 SetState(STATE_TERMINATED);
 
@@ -4082,13 +3534,13 @@ PROTECTED VIRTUAL void Session::Refreshable_RefreshCompleted(
         {
             // In case of other method except for REGISTER,
             // the UE only supports the authentication algorithm, MD5
-            if (RespondToChallenge(piSCC))
+            if (RespondToChallenge(piScc))
             {
                 return;
             }
         }
 
-        ResetChallengeCount(piSCC);
+        ResetChallengeCount(piScc);
         // }
     }
     // The session refresh request is timed out.
@@ -4105,7 +3557,7 @@ PROTECTED VIRTUAL void Session::Refreshable_RefreshCompleted(
         SetTerminationReason(TERMINATION_REASON_REFRESH_TXN_TIMEOUT);
 
         // Send a BYE ???
-        if (SendRequestToBYEInternal() != IMS_SUCCESS)
+        if (SendRequestToByeInternal() != IMS_SUCCESS)
         {
             SetState(STATE_TERMINATED);
 
@@ -4117,23 +3569,16 @@ PROTECTED VIRTUAL void Session::Refreshable_RefreshCompleted(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL Session::Refreshable_RefreshStarted()
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
     IMS_SINT32 nState = GetState();
 
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_I("___ SESSION REFRESH STARTED ... State(%d)", nState, 0, 0);
 
-    if (piRefreshListener != IMS_NULL)
+    if (m_piRefreshListener != IMS_NULL)
     {
-        piRefreshListener->Refresh_NotifyTimerExpired(bDoImplicitRefresh);
+        m_piRefreshListener->Refresh_NotifyTimerExpired(bDoImplicitRefresh);
     }
 
     IMS_BOOL bRefreshable = IMS_FALSE;
@@ -4171,20 +3616,13 @@ PROTECTED VIRTUAL IMS_BOOL Session::Refreshable_RefreshStarted()
     return (bDoImplicitRefresh == IMS_TRUE) ? IMS_FALSE : IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void Session::Refreshable_RefreshTerminated()
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_D("___ SESSION REFRESH TERMINATED ...", 0, 0, 0);
 
-    if (piRefreshListener != IMS_NULL)
+    if (m_piRefreshListener != IMS_NULL)
     {
-        piRefreshListener->Refresh_NotifyTerminated();
+        m_piRefreshListener->Refresh_NotifyTerminated();
     }
 
     if (GetState() == STATE_ESTABLISHED)
@@ -4193,8 +3631,7 @@ PROTECTED VIRTUAL void Session::Refreshable_RefreshTerminated()
 
         SetTerminationReason(TERMINATION_REASON_REFRESH_TIMEOUT);
 
-        // Send a BYE ???
-        if (SendRequestToBYEInternal() != IMS_SUCCESS)
+        if (SendRequestToByeInternal() != IMS_SUCCESS)
         {
             SetState(STATE_TERMINATED);
 
@@ -4206,238 +3643,48 @@ PROTECTED VIRTUAL void Session::Refreshable_RefreshTerminated()
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_RESULT Session::RetransmissionHelper_NotifyStatus(IN IMS_SINT32 nStatus)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pRetransmissionHelper == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "Stray notification received", 0, 0, 0);
-        return IMS_FAILURE;
-    }
-
-    IMS_SINT32 nState = GetState();
-
-    switch (nStatus)
-    {
-        case RetransmissionHelper::NOTIFICATION_INTERNAL_ERROR:
-            IMS_TRACE_D("RetransmissionHelper :: INTERNAL_ERROR", 0, 0, 0);
-
-            if (nState == STATE_ESTABLISHING)
-            {
-                CleanupMedia();
-
-                if (bFlag_TerminatePending)
-                {
-                    bFlag_TerminatePending = IMS_FALSE;
-
-                    // ACK wait timer expired ...
-                    if (SendRequestToBYE() != IMS_SUCCESS)
-                    {
-                        SetState(STATE_TERMINATED);
-
-                        PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
-                    }
-                    else
-                    {
-                        SetState(STATE_TERMINATING);
-                    }
-                }
-                else
-                {
-                    // To send a BYE by enabler
-                    SetState(STATE_ESTABLISHED);
-
-                    PostMessage(AMSG_SESSION_START_FAILED, 0, 0);
-                }
-            }
-            else if (nState == STATE_REESTABLISHING)
-            {
-                CloseConnection(IMessage::SESSION_UPDATE);
-
-                RestoreOfferAnswerState();
-                RestoreEx();
-
-                if (bFlag_TerminatePending)
-                {
-                    bFlag_TerminatePending = IMS_FALSE;
-
-                    // ACK wait timer expired ...
-                    if (SendRequestToBYE() != IMS_SUCCESS)
-                    {
-                        SetState(STATE_TERMINATED);
-
-                        PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
-                    }
-                    else
-                    {
-                        SetState(STATE_TERMINATING);
-                    }
-                }
-                else
-                {
-                    SetState(STATE_ESTABLISHED);
-
-                    PostMessage(AMSG_SESSION_UPDATE_FAILED, 0, 0);
-                }
-            }
-            break;
-
-        case RetransmissionHelper::NOTIFICATION_RETRANSMIT:
-            IMS_TRACE_D("RetransmissionHelper :: RETRANSMIT", 0, 0, 0);
-
-            {
-                ISipServerConnection* piINVITE = IMS_NULL;
-
-                if (nState == STATE_ESTABLISHING)
-                {
-                    piINVITE = GetServerConnection(IMessage::SESSION_START);
-                }
-                else
-                {
-                    piINVITE = GetServerConnection(IMessage::SESSION_UPDATE);
-                }
-
-                if (piINVITE == IMS_NULL)
-                    return IMS_FAILURE;
-
-                if (piINVITE->Send() != IMS_SUCCESS)
-                    return IMS_FAILURE;
-            }
-            break;
-
-        case RetransmissionHelper::NOTIFICATION_TIMER_EXPIRED:
-            IMS_TRACE_D("RetransmissionHelper :: TIMER_EXPIRED", 0, 0, 0);
-
-            if (nState == STATE_ESTABLISHING)
-            {
-                CleanupMedia();
-
-                if (bFlag_TerminatePending)
-                {
-                    bFlag_TerminatePending = IMS_FALSE;
-
-                    // ACK wait timer expired ...
-                    if (SendRequestToBYE() != IMS_SUCCESS)
-                    {
-                        SetState(STATE_TERMINATED);
-
-                        PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
-                    }
-                    else
-                    {
-                        SetState(STATE_TERMINATING);
-                    }
-                }
-                else
-                {
-                    // To send a BYE by enabler
-                    SetState(STATE_ESTABLISHED);
-
-                    PostMessage(AMSG_SESSION_START_FAILED, 0, 0);
-                }
-            }
-            else if (nState == STATE_REESTABLISHING)
-            {
-                CloseConnection(IMessage::SESSION_UPDATE);
-
-                RestoreOfferAnswerState();
-                RestoreEx();
-
-                if (bFlag_TerminatePending)
-                {
-                    bFlag_TerminatePending = IMS_FALSE;
-
-                    // ACK wait timer expired ...
-                    if (SendRequestToBYE() != IMS_SUCCESS)
-                    {
-                        SetState(STATE_TERMINATED);
-
-                        PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
-                    }
-                    else
-                    {
-                        SetState(STATE_TERMINATING);
-                    }
-                }
-                else
-                {
-                    SetState(STATE_ESTABLISHED);
-
-                    PostMessage(AMSG_SESSION_UPDATE_FAILED, 0, 0);
-                }
-            }
-            break;
-
-        default:
-            return IMS_FAILURE;
-    }
-
-    return IMS_SUCCESS;
-}
-
-#ifdef __IMS_SESSION_RETRY_TASK__
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_RESULT Session::ExecuteCmd()
 {
-    ISipServerConnection* piINVITE = IMS_NULL;
-
-    //---------------------------------------------------------------------------------------------
+    ISipServerConnection* piSscInvite = IMS_NULL;
 
     IMS_TRACE_D("RetransmissionTask :: RETRANSMIT", 0, 0, 0);
 
     if (GetState() == STATE_ESTABLISHING)
     {
-        piINVITE = GetServerConnection(IMessage::SESSION_START);
+        piSscInvite = GetServerConnection(IMessage::SESSION_START);
     }
     else
     {
-        piINVITE = GetServerConnection(IMessage::SESSION_UPDATE);
+        piSscInvite = GetServerConnection(IMessage::SESSION_UPDATE);
     }
 
-    if (piINVITE == IMS_NULL)
+    if (piSscInvite == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
-    if (piINVITE->Send() != IMS_SUCCESS)
+    if (piSscInvite->Send() != IMS_SUCCESS)
     {
         return IMS_FAILURE;
     }
 
-    pRefreshHelper->UpdateOnMessageSent(piINVITE);
+    m_pRefreshHelper->UpdateOnMessageSent(piSscInvite);
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void Session::RetryTaskHelper_OnCompleted(
-        IN RetryTaskHelper* pTaskHelper, IN RetryCmd* pCmd, IN IMS_SINT32 nCode /* = 0 */)
+        IN RetryTaskHelper* pTaskHelper, IN RetryCmd* pCmd, IN IMS_SINT32 nCode /*= 0*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     (void)pCmd;
 
-    if (pRetransmissionTask == IMS_NULL)
+    if (m_pRetransmissionTask == IMS_NULL)
     {
         IMS_TRACE_E(0, "Stray notification received", 0, 0, 0);
         return;
     }
 
-    if (pRetransmissionTask != pTaskHelper)
+    if (m_pRetransmissionTask != pTaskHelper)
     {
         IMS_TRACE_E(0, "Not matched retry task received", 0, 0, 0);
         return;
@@ -4449,7 +3696,6 @@ PROTECTED VIRTUAL void Session::RetryTaskHelper_OnCompleted(
     {
         case RetryTaskHelper::RESULT_OK:
             break;
-
         case RetryTaskHelper::RESULT_NOK_INTERNAL_OPERATION:
             IMS_TRACE_D("RetransmissionTask :: INTERNAL_ERROR", 0, 0, 0);
 
@@ -4457,12 +3703,12 @@ PROTECTED VIRTUAL void Session::RetryTaskHelper_OnCompleted(
             {
                 CleanupMedia();
 
-                if (bFlag_TerminatePending)
+                if (m_bTerminatePending)
                 {
-                    bFlag_TerminatePending = IMS_FALSE;
+                    m_bTerminatePending = IMS_FALSE;
 
                     // ACK wait timer expired ...
-                    if (SendRequestToBYE() != IMS_SUCCESS)
+                    if (SendRequestToBye() != IMS_SUCCESS)
                     {
                         SetState(STATE_TERMINATED);
 
@@ -4488,12 +3734,12 @@ PROTECTED VIRTUAL void Session::RetryTaskHelper_OnCompleted(
                 RestoreOfferAnswerState();
                 RestoreEx();
 
-                if (bFlag_TerminatePending)
+                if (m_bTerminatePending)
                 {
-                    bFlag_TerminatePending = IMS_FALSE;
+                    m_bTerminatePending = IMS_FALSE;
 
                     // ACK wait timer expired ...
-                    if (SendRequestToBYE() != IMS_SUCCESS)
+                    if (SendRequestToBye() != IMS_SUCCESS)
                     {
                         SetState(STATE_TERMINATED);
 
@@ -4514,7 +3760,6 @@ PROTECTED VIRTUAL void Session::RetryTaskHelper_OnCompleted(
 
             pTaskHelper->Terminate();
             break;
-
         case RetryTaskHelper::RESULT_NOK_TIMER_EXPIRED:
             IMS_TRACE_D("RetransmissionTask :: TIMER_EXPIRED", 0, 0, 0);
 
@@ -4522,12 +3767,12 @@ PROTECTED VIRTUAL void Session::RetryTaskHelper_OnCompleted(
             {
                 CleanupMedia();
 
-                if (bFlag_TerminatePending)
+                if (m_bTerminatePending)
                 {
-                    bFlag_TerminatePending = IMS_FALSE;
+                    m_bTerminatePending = IMS_FALSE;
 
                     // ACK wait timer expired ...
-                    if (SendRequestToBYE() != IMS_SUCCESS)
+                    if (SendRequestToBye() != IMS_SUCCESS)
                     {
                         SetState(STATE_TERMINATED);
 
@@ -4553,12 +3798,12 @@ PROTECTED VIRTUAL void Session::RetryTaskHelper_OnCompleted(
                 RestoreOfferAnswerState();
                 RestoreEx();
 
-                if (bFlag_TerminatePending)
+                if (m_bTerminatePending)
                 {
-                    bFlag_TerminatePending = IMS_FALSE;
+                    m_bTerminatePending = IMS_FALSE;
 
                     // ACK wait timer expired ...
-                    if (SendRequestToBYE() != IMS_SUCCESS)
+                    if (SendRequestToBye() != IMS_SUCCESS)
                     {
                         SetState(STATE_TERMINATED);
 
@@ -4579,23 +3824,14 @@ PROTECTED VIRTUAL void Session::RetryTaskHelper_OnCompleted(
 
             pTaskHelper->Terminate();
             break;
-
         default:
             break;
     }
 }
-#endif
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL Session* Session::CreateSession()
 {
     Session* pSession = new Session(GetService());
-
-    //---------------------------------------------------------------------------------------------
 
     if (pSession == IMS_NULL)
     {
@@ -4614,20 +3850,13 @@ PROTECTED VIRTUAL Session* Session::CreateSession()
     return pSession;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientConnection* piSCC)
+PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientConnection* piScc)
 {
-    IMS_SINT32 nStatusCode = piSCC->GetStatusCode();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
     if (nStatusCode == SipStatusCode::SC_100)
     {
-        if (bFlag_100TryingNotification)
+        if (m_b100TryingNotification)
         {
             // INDEX_FOR_PROVISIONAL_RESPONSE_MESSAGE
             IMSList<Message*> objResponses;
@@ -4653,17 +3882,17 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientCon
         return IMS_SUCCESS;
     }
 
-    if (bFlag_SDPNonRPRAllowed || IsConfigurationSet(CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR))
+    if (m_bSdpNonRprAllowed || IsConfigurationSet(CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR))
     {
         // Check & create a session descriptor when an initial offer received
         CheckNCreateSessionDescriptor();
 
-        IMS_SINT32 nOAResult = HandleSDPOfferAnswer(piSCC->GetMessage());
+        IMS_SINT32 nOaResult = HandleSdpOfferAnswer(piScc->GetMessage());
 
-        if ((nOAResult == SdpOfferAnswer::RESULT_NOT_CHANGED) ||
-                (nOAResult == SdpOfferAnswer::RESULT_SUCCESS) ||
-                (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT) ||
-                (nOAResult == SdpOfferAnswer::RESULT_NOT_FOUND))
+        if ((nOaResult == SdpOfferAnswer::RESULT_NOT_CHANGED) ||
+                (nOaResult == SdpOfferAnswer::RESULT_SUCCESS) ||
+                (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT) ||
+                (nOaResult == SdpOfferAnswer::RESULT_NOT_FOUND))
         {
             // Update the media state
             UpdateMedia(Media::SESSION_EARLY_UPDATE);
@@ -4707,15 +3936,8 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientCon
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_RESULT Session::HandleRequestToUPDATE(IN ISipServerConnection* piSSC)
+PROTECTED VIRTUAL IMS_RESULT Session::HandleRequestToUpdate(IN ISipServerConnection* piSsc)
 {
-    //---------------------------------------------------------------------------------------------
-
     // 4 Check if we have sent a session refresh request
     IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
 
@@ -4737,46 +3959,46 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleRequestToUPDATE(IN ISipServerConnect
                             "to the UPDATE request",
                         0, 0, 0);
 
-                if (SendResponseToRefreshUPDATE(piSSC) != IMS_SUCCESS)
+                if (SendResponseToRefreshUpdate(piSsc) != IMS_SUCCESS)
                 {
-                    piSSC->Close();
+                    piSsc->Close();
                     return IMS_FAILURE;
                 }
 
-                piSSC->Close();
+                piSsc->Close();
                 return IMS_SUCCESS;
             }
         }
     }
 
     // Update the Offer/Answer state
-    UpdateOfferAnswerStateOnMessageReceived(piSSC->GetMessage());
+    UpdateOfferAnswerStateOnMessageReceived(piSsc->GetMessage());
 
-    IMS_SINT32 nOAResult = HandleSDPOfferAnswer(piSSC->GetMessage());
+    IMS_SINT32 nOaResult = HandleSdpOfferAnswer(piSsc->GetMessage());
 
-    if ((nOAResult == SdpOfferAnswer::RESULT_FAILURE) ||
-            (nOAResult == SdpOfferAnswer::RESULT_NOT_DONE))
+    if ((nOaResult == SdpOfferAnswer::RESULT_FAILURE) ||
+            (nOaResult == SdpOfferAnswer::RESULT_NOT_DONE))
     {
         IMS_TRACE_I("Rejecting SDP Offer/Answer with 400 (Bad Request) ...", 0, 0, 0);
 
-        if (GetService()->SendResponse(piSSC, SipStatusCode::SC_400) == IMS_FALSE)
+        if (GetService()->SendResponse(piSsc, SipStatusCode::SC_400) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "Rejecting SDP Offer/Answer failed", 0, 0, 0);
         }
 
         // Update the Offer/Answer state
-        UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
+        UpdateOfferAnswerStateOnMessageSent(piSsc->GetMessage());
         RestoreOfferAnswerState();
 
-        piSSC->Close();
+        piSsc->Close();
 
         return IMS_SUCCESS;
     }
-    else if (nOAResult == SdpOfferAnswer::RESULT_NOT_FOUND)
+    else if (nOaResult == SdpOfferAnswer::RESULT_NOT_FOUND)
     {
         IMS_TRACE_I("Rejecting SDP Offer/Answer with 606 (Not Acceptable) ...", 0, 0, 0);
 
-        if (GetService()->CreateResponse(piSSC, SipStatusCode::SC_606) == IMS_FALSE)
+        if (GetService()->CreateResponse(piSsc, SipStatusCode::SC_606) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "Rejecting SDP Offer/Answer failed", 0, 0, 0);
 
@@ -4788,44 +4010,46 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleRequestToUPDATE(IN ISipServerConnect
 
         if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
         {
-            AString strUAString =
+            AString strUaString =
                     SipConfigProxy::GetUaString(GetSlotId(), GetService()->GetSipProfile());
 
-            strUAString = strUAString.Replace(" ", "");
+            strUaString = strUaString.Replace(" ", "");
 
-            if (strUAString.GetLength() != 0)
-                strWarning.Sprintf("304 %s \"Media Type Not Available\"", strUAString.GetStr());
+            if (strUaString.GetLength() != 0)
+            {
+                strWarning.Sprintf("304 %s \"Media Type Not Available\"", strUaString.GetStr());
+            }
             else
+            {
                 strWarning = "304 \"Media Type Not Available\"";
+            }
         }
         else
         {
             strWarning = "304 \"Media Type Not Available\"";
         }
 
-        (void)piSSC->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
+        (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
-        // SIP_MESSAGE_MEDIATOR
-        (void)AdjustMessage(piSSC->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
-
-        if (piSSC->Send() != IMS_SUCCESS)
+        if (piSsc->Send() != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Sending a response message failed", 0, 0, 0);
         }
 
         // Update the Offer/Answer state
-        UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
+        UpdateOfferAnswerStateOnMessageSent(piSsc->GetMessage());
         RestoreOfferAnswerState();
 
-        piSSC->Close();
+        piSsc->Close();
 
         return IMS_SUCCESS;
     }
-    else if (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)
+    else if (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)
     {
         IMS_TRACE_D("QoS precondition is required ...", 0, 0, 0);
     }
-    else if (nOAResult == SdpOfferAnswer::RESULT_NOT_CHANGED)
+    else if (nOaResult == SdpOfferAnswer::RESULT_NOT_CHANGED)
     {
         IMS_TRACE_D("NO MEDIA STATE CHANGED", 0, 0, 0);
     }
@@ -4836,7 +4060,7 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleRequestToUPDATE(IN ISipServerConnect
         CopyPreviousMessage(IMessage::SESSION_UPDATE, IMessage::SESSION_STALE_UPDATE);
     }
 
-    UpdateRequestOnReceived(IMessage::SESSION_UPDATE, piSSC);
+    UpdateRequestOnReceived(IMessage::SESSION_UPDATE, piSsc);
 
     // Update the media state
     UpdateMedia(Media::SESSION_UPDATE);
@@ -4848,18 +4072,11 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleRequestToUPDATE(IN ISipServerConnect
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_RESULT Session::HandleResponseToUPDATE(IN ISipClientConnection* piSCC)
+PROTECTED VIRTUAL IMS_RESULT Session::HandleResponseToUpdate(IN ISipClientConnection* piScc)
 {
-    IMS_SINT32 nStatusCode = piSCC->GetMessage()->GetStatusCode();
+    IMS_SINT32 nStatusCode = piScc->GetMessage()->GetStatusCode();
 
-    //---------------------------------------------------------------------------------------------
-
-    UpdateResponseOnReceived(IMessage::SESSION_UPDATE, piSCC);
+    UpdateResponseOnReceived(IMessage::SESSION_UPDATE, piScc);
 
     if (SipStatusCode::Is1XX(nStatusCode))
     {
@@ -4872,14 +4089,14 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleResponseToUPDATE(IN ISipClientConnec
     {
         // In case of other method except for REGISTER,
         // the UE only supports the authentication algorithm, MD5
-        if (RespondToChallenge(piSCC))
+        if (RespondToChallenge(piScc))
         {
             return IMS_SUCCESS;
         }
     }
     // }
 
-    bFlag_UpdateRequestor = IMS_FALSE;
+    m_bUpdateRequestor = IMS_FALSE;
 
     if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
@@ -4894,11 +4111,11 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleResponseToUPDATE(IN ISipClientConnec
         // Check & create a session descriptor when an initial offer received
         CheckNCreateSessionDescriptor();
 
-        IMS_SINT32 nOAResult = HandleSDPOfferAnswer(piSCC->GetMessage());
+        IMS_SINT32 nOaResult = HandleSdpOfferAnswer(piScc->GetMessage());
 
-        if ((nOAResult == SdpOfferAnswer::RESULT_NOT_CHANGED) ||
-                (nOAResult == SdpOfferAnswer::RESULT_SUCCESS) ||
-                (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT))
+        if ((nOaResult == SdpOfferAnswer::RESULT_NOT_CHANGED) ||
+                (nOaResult == SdpOfferAnswer::RESULT_SUCCESS) ||
+                (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT))
         {
             // Update the media state
             UpdateMedia(Media::SESSION_UPDATED);
@@ -4960,92 +4177,49 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleResponseToUPDATE(IN ISipClientConnec
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Session::HasPendingPRAck() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return IMS_FALSE;
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL Session::IsEarlyUpdateInProgress() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return IMS_FALSE;
-}
-
-/*
-
-Remarks
-
-*/
 PROTECTED
-IMS_BOOL Session::AddRefreshSpecificHeaders(IN ISipConnection* piSC)
+IMS_BOOL Session::AddRefreshSpecificHeaders(IN ISipConnection* piSc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pRefreshHelper == IMS_NULL)
+    if (m_pRefreshHelper == IMS_NULL)
     {
         return IMS_TRUE;
     }
 
-    return pRefreshHelper->AddSpecificHeader(piSC);
+    return m_pRefreshHelper->AddSpecificHeader(piSc);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL Session::CheckNSetListenerCall(IN IMS_SINT32 nListenerCall)
 {
-    if ((nCompletedListenerCalls & nListenerCall) != nListenerCall)
+    if ((m_nCompletedListenerCalls & nListenerCall) != nListenerCall)
     {
-        nCompletedListenerCalls |= nListenerCall;
+        m_nCompletedListenerCalls |= nListenerCall;
         return IMS_TRUE;
     }
 
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL Session::CheckNCreateSessionDescriptor()
 {
-    //---------------------------------------------------------------------------------------------
-
     // Case 1) Initial offer from the local user agent
     if (GetState() == STATE_INITIATED)
     {
-        if (pSessionDescriptor != IMS_NULL)
+        if (m_pSessionDescriptor != IMS_NULL)
         {
             IMS_TRACE_D("SessionDescriptor already exists", 0, 0, 0);
             return IMS_TRUE;
         }
 
         // Create a media capabilities for this service & session
-        const SipAddress* pUserAor = GetUserAOR();
+        const SipAddress* pUserAor = GetUserAor();
         const SipAddress::UserInfoPart* pUserInfo = pUserAor->GetUserInfoPart();
         const AString& strUserId = (pUserInfo != IMS_NULL) ? pUserInfo->GetUser()
                 : pUserAor->IsSchemeTel()                  ? pUserAor->GetHost()
                                                            : pUserAor->GetUser();
 
-        if (!pOAState->CreateCapabilities(GetService(), strUserId))
+        if (!m_pOaState->CreateCapabilities(GetService(), strUserId))
         {
             IMS_TRACE_E(0, "Creating SDP capabilities failed", 0, 0, 0);
             return IMS_FALSE;
@@ -5053,15 +4227,15 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
 
         // Create a new offer with only SDP session parameter
         // The media parameters are created when CreateMedia() method invoked
-        if (!pOAState->InitiateOffer(SdpOaState::OFFER_NEW))
+        if (!m_pOaState->InitiateOffer(SdpOaState::OFFER_NEW))
         {
             IMS_TRACE_E(0, "Initiating SDP offer failed", 0, 0, 0);
             return IMS_FALSE;
         }
 
-        pSessionDescriptor = new SessionDescriptor(this);
+        m_pSessionDescriptor = new SessionDescriptor(this);
 
-        if (pSessionDescriptor == IMS_NULL)
+        if (m_pSessionDescriptor == IMS_NULL)
         {
             IMS_TRACE_E(0, "Instantiating SessionDescriptor failed", 0, 0, 0);
             return IMS_FALSE;
@@ -5072,31 +4246,31 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
     // Case 2) Initial offer from the peer user agent
     else
     {
-        if (pSessionDescriptor != IMS_NULL)
+        if (m_pSessionDescriptor != IMS_NULL)
         {
             IMS_TRACE_D("SessionDescriptor already exists", 0, 0, 0);
             return IMS_TRUE;
         }
 
-        IMS_SINT32 nOAState = GetOfferAnswerState();
+        IMS_SINT32 nOaState = GetOfferAnswerState();
 
         // IDLE :: incoming INVITE w/o SDP
         // OFFER_RECEIVED :: incoming INVITE w/ SDP
-        if ((nOAState != SdpOaState::STATE_IDLE) && (nOAState != SdpOaState::STATE_OFFER_RECEIVED))
+        if ((nOaState != SdpOaState::STATE_IDLE) && (nOaState != SdpOaState::STATE_OFFER_RECEIVED))
         {
             IMS_TRACE_E(0, "__ SessionDescriptor can't be created in offer/answer state (%d) __",
-                    nOAState, 0, 0);
+                    nOaState, 0, 0);
             return IMS_FALSE;
         }
 
         // Create a media capabilities for this service & session
-        const SipAddress* pUserAor = GetUserAOR();
+        const SipAddress* pUserAor = GetUserAor();
         const SipAddress::UserInfoPart* pUserInfo = pUserAor->GetUserInfoPart();
         const AString& strUserId = (pUserInfo != IMS_NULL) ? pUserInfo->GetUser()
                 : pUserAor->IsSchemeTel()                  ? pUserAor->GetHost()
                                                            : pUserAor->GetUser();
 
-        if (!pOAState->CreateCapabilities(GetService(), strUserId))
+        if (!m_pOaState->CreateCapabilities(GetService(), strUserId))
         {
             IMS_TRACE_E(0, "Creating SDP capabilities failed", 0, 0, 0);
             return IMS_FALSE;
@@ -5104,24 +4278,24 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
 
         // Create a new offer with only SDP session parameter
         // The media parameters are created when CreateMedia() method invoked
-        if (nOAState == SdpOaState::STATE_IDLE)
+        if (nOaState == SdpOaState::STATE_IDLE)
         {
-            if (!pOAState->InitiateOffer(SdpOaState::OFFER_NEW))
+            if (!m_pOaState->InitiateOffer(SdpOaState::OFFER_NEW))
             {
                 IMS_TRACE_E(0, "Initiating SDP offer (MT) failed", 0, 0, 0);
                 return IMS_FALSE;
             }
         }
 
-        pSessionDescriptor = new SessionDescriptor(this);
+        m_pSessionDescriptor = new SessionDescriptor(this);
 
-        if (pSessionDescriptor == IMS_NULL)
+        if (m_pSessionDescriptor == IMS_NULL)
         {
             IMS_TRACE_E(0, "Instantiating SessionDescriptor failed", 0, 0, 0);
             return IMS_FALSE;
         }
 
-        if (nOAState == SdpOaState::STATE_IDLE)
+        if (nOaState == SdpOaState::STATE_IDLE)
         {
             IMS_TRACE_D("__ SessionDescriptor is created in IDLE state __", 0, 0, 0);
         }
@@ -5134,32 +4308,25 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
-IMS_BOOL Session::CheckNSetSDPBodyPart(IN_OUT ISipMessage*& piSIPMsg)
+IMS_BOOL Session::CheckNSetSdpBodyPart(IN_OUT ISipMessage*& piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objMedias.IsEmpty())
+    if (m_objMedias.IsEmpty())
     {
         IMS_TRACE_D("There is no media", 0, 0, 0);
         return IMS_TRUE;
     }
 
     // SDP message to be set
-    AString strSDP;
+    AString strSdp;
 
-    if (!pOAState->GetSDP(strSDP))
+    if (!m_pOaState->GetSdp(strSdp))
     {
         IMS_TRACE_D("There is no SDP message body", 0, 0, 0);
         return IMS_TRUE;
     }
 
-    ISipMessageBodyPart* piBodyPart = piSIPMsg->CreateSdpBodyPart();
+    ISipMessageBodyPart* piBodyPart = piSipMsg->CreateSdpBodyPart();
 
     if (piBodyPart == IMS_NULL)
     {
@@ -5169,55 +4336,48 @@ IMS_BOOL Session::CheckNSetSDPBodyPart(IN_OUT ISipMessage*& piSIPMsg)
         return IMS_FALSE;
     }
 
-    ByteArray objSDP(strSDP);
+    ByteArray objSdp(strSdp);
 
     piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, Sip::STR_APPLICATION_SDP);
-    piBodyPart->SetContent(objSDP);
+    piBodyPart->SetContent(objSdp);
 
     // Set the Content-Length header
-    AString strCLEN;
-    strCLEN.SetNumber(objSDP.GetLength());
+    AString strCLen;
+    strCLen.SetNumber(objSdp.GetLength());
 
     piBodyPart->SetHeader(
-            ISipMessageBodyPart::CONTENT_UNKNOWN, strCLEN, SipHeaderName::CONTENT_LENGTH);
+            ISipMessageBodyPart::CONTENT_UNKNOWN, strCLen, SipHeaderName::CONTENT_LENGTH);
 
     IMS_TRACE_D("SDP is formed by SDP offer/answer context", 0, 0, 0);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
-IMS_BOOL Session::CheckNTerminateSession(IN ISipMessage* piSIPMsg)
+IMS_BOOL Session::CheckNTerminateSession(IN ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!bFlag_TerminatePending)
+    if (!m_bTerminatePending)
     {
         IMS_TRACE_D("No pending terminate()", 0, 0, 0);
         return IMS_FALSE;
     }
 
     // Reset the flag
-    bFlag_TerminatePending = IMS_FALSE;
+    m_bTerminatePending = IMS_FALSE;
 
     if (IsMobileOriginated() && (GetState() == STATE_NEGOTIATING))
     {
         // Check the SIP status code to terminate the session
-        IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
+        IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
         if (SipStatusCode::Is1XX(nStatusCode))
         {
             CleanupMedia();
 
-            if (bFlag_TerminateMethodBYE)
+            if (m_bTerminateMethodBye)
             {
                 // Send BYE
-                if (SendRequestToBYE() != IMS_SUCCESS)
+                if (SendRequestToBye() != IMS_SUCCESS)
                 {
                     SetState(STATE_TERMINATED);
 
@@ -5228,7 +4388,7 @@ IMS_BOOL Session::CheckNTerminateSession(IN ISipMessage* piSIPMsg)
             else
             {
                 // Send CANCEL
-                if (SendRequestToCANCEL() != IMS_SUCCESS)
+                if (SendRequestToCancel() != IMS_SUCCESS)
                 {
                     SetState(STATE_TERMINATED);
 
@@ -5247,30 +4407,34 @@ IMS_BOOL Session::CheckNTerminateSession(IN ISipMessage* piSIPMsg)
             IMS_SINT32 nServiceMethod = IMessage::SERVICEMETHOD_INVALID;
 
             if (nState == STATE_NEGOTIATING)
+            {
                 nServiceMethod = IMessage::SESSION_START;
+            }
             else if (nState == STATE_RENEGOTIATING)
+            {
                 nServiceMethod = IMessage::SESSION_UPDATE;
+            }
 
-            ISipClientConnection* piSCC = GetClientConnection(nServiceMethod);
+            ISipClientConnection* piScc = GetClientConnection(nServiceMethod);
 
-            if ((piSCC != IMS_NULL) && (piSIPMsg->GetMethod().Equals(SipMethod::INVITE)))
+            if ((piScc != IMS_NULL) && (piSipMsg->GetMethod().Equals(SipMethod::INVITE)))
             {
                 // Check & create a session descriptor when an initial offer received
                 CheckNCreateSessionDescriptor();
 
-                IMS_SINT32 nOAResult = HandleSDPOfferAnswer(piSIPMsg);
+                IMS_SINT32 nOaResult = HandleSdpOfferAnswer(piSipMsg);
 
-                if ((nOAResult == SdpOfferAnswer::RESULT_NOT_CHANGED) ||
-                        (nOAResult == SdpOfferAnswer::RESULT_SUCCESS) ||
-                        (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT) ||
-                        (nOAResult == SdpOfferAnswer::RESULT_NOT_FOUND))
+                if ((nOaResult == SdpOfferAnswer::RESULT_NOT_CHANGED) ||
+                        (nOaResult == SdpOfferAnswer::RESULT_SUCCESS) ||
+                        (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT) ||
+                        (nOaResult == SdpOfferAnswer::RESULT_NOT_FOUND))
                 {
-                    if (pOAState->IsSessionChanged())
+                    if (m_pOaState->IsSessionChanged())
                     {
                         if ((GetOfferAnswerState() == SdpOaState::STATE_IDLE) ||
                                 (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
                         {
-                            pOAState->CompleteExchange();
+                            m_pOaState->CompleteExchange();
                         }
                     }
                 }
@@ -5279,14 +4443,14 @@ IMS_BOOL Session::CheckNTerminateSession(IN ISipMessage* piSIPMsg)
                     RestoreOfferAnswerState();
                 }
 
-                SendRequestToACK(piSCC, nServiceMethod);
+                SendRequestToAck(piScc, nServiceMethod);
             }
 #endif  // __IMS_SEND_ACK_IN_TERMINATING_STATE__
 
             CleanupMedia();
 
             // Send BYE
-            if (SendRequestToBYE() != IMS_SUCCESS)
+            if (SendRequestToBye() != IMS_SUCCESS)
             {
                 SetState(STATE_TERMINATED);
 
@@ -5308,7 +4472,7 @@ IMS_BOOL Session::CheckNTerminateSession(IN ISipMessage* piSIPMsg)
     else
     {
         // ACK request is received, now we can terminate the session
-        if (SendRequestToBYE() != IMS_SUCCESS)
+        if (SendRequestToBye() != IMS_SUCCESS)
         {
             SetState(STATE_TERMINATED);
             PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
@@ -5322,106 +4486,59 @@ IMS_BOOL Session::CheckNTerminateSession(IN ISipMessage* piSIPMsg)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 ISipClientConnection* Session::CreateConnectionL(
-        IN ISipDialog* piDialog, IN CONST SipMethod& objMethod)
+        IN ISipDialog* piDialog, IN const SipMethod& objMethod)
 {
-    ISipClientConnection* piSCC = CreateConnection(piDialog, objMethod);
-
-    //---------------------------------------------------------------------------------------------
+    ISipClientConnection* piScc = CreateConnection(piDialog, objMethod);
 
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
-    if (bFlag_ImplicitRoutingRequired && (piSCC != IMS_NULL))
+    if (m_bImplicitRoutingRequired && (piScc != IMS_NULL))
     {
         const AStringArray& objServiceRoutes = GetService()->GetServiceRoutes();
 
         if (!objServiceRoutes.IsEmpty())
         {
-            piSCC->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
+            piScc->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
         }
     }
 
-    return piSCC;
+    return piScc;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED
-IMS_SINT32 Session::GetCallState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objCallState.GetState();
-}
-
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_SINT32 Session::GetOfferAnswerState() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return SdpOaState::STATE_IDLE;
     }
 
-    return pOAState->GetState();
+    return m_pOaState->GetState();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
-SessionRefreshHelper* Session::GetRefreshHelper() const
+IMS_SINT32 Session::HandleSdpOfferAnswer(IN ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pRefreshHelper;
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED
-IMS_SINT32 Session::HandleSDPOfferAnswer(IN ISipMessage* piSIPMsg)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return SdpOfferAnswer::RESULT_NOT_CHANGED;
     }
 
-    IMS_SINT32 nOAResult = pOAState->HandleOfferAnswer(piSIPMsg);
+    IMS_SINT32 nOaResult = m_pOaState->HandleOfferAnswer(piSipMsg);
 
     // If incoming SDP offer contains "qos" attributes and precondition is not supported,
     // then the corresponding SDP attributes will be removed.
     if (!SdpProfile::GetInstance()->IsAttributePreconditionSupported(GetSlotId()))
     {
-        IMS_SINT32 nOAState = pOAState->GetState();
+        IMS_SINT32 nOaState = m_pOaState->GetState();
 
-        if (((nOAResult == SdpOfferAnswer::RESULT_SUCCESS) ||
-                    (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)) &&
-                ((nOAState == SdpOaState::STATE_OFFER_RECEIVED) ||
-                        (nOAState == SdpOaState::STATE_OFFER_CHANGE_RECEIVED)))
+        if (((nOaResult == SdpOfferAnswer::RESULT_SUCCESS) ||
+                    (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)) &&
+                ((nOaState == SdpOaState::STATE_OFFER_RECEIVED) ||
+                        (nOaState == SdpOaState::STATE_OFFER_CHANGE_RECEIVED)))
         {
-            SessionParameter* pSessionParam = pOAState->GetProposalView();
+            SessionParameter* pSessionParam = m_pOaState->GetProposalView();
 
             if (pSessionParam != IMS_NULL)
             {
@@ -5446,37 +4563,23 @@ IMS_SINT32 Session::HandleSDPOfferAnswer(IN ISipMessage* piSIPMsg)
         }
     }
 
-    return nOAResult;
+    return nOaResult;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL Session::IsInviteFinalResponseReceived(IN IMS_SINT32 nServiceMethod) const
 {
     Message* pMessage = GetPreviousResponse(nServiceMethod);
-    ISipMessage* piSIPMsg = (pMessage != IMS_NULL) ? pMessage->GetMessage() : IMS_NULL;
+    ISipMessage* piSipMsg = (pMessage != IMS_NULL) ? pMessage->GetMessage() : IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    return (piSIPMsg != IMS_NULL) && piSIPMsg->GetMethod().Equals(SipMethod::INVITE) &&
-            (piSIPMsg->GetStatusCode() >= SipStatusCode::SC_200);
+    return (piSipMsg != IMS_NULL) && piSipMsg->GetMethod().Equals(SipMethod::INVITE) &&
+            (piSipMsg->GetStatusCode() >= SipStatusCode::SC_200);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL Session::IsMidDialogTransactionCreatable() const
 {
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     if ((nState == STATE_ESTABLISHED) || (nState == STATE_RENEGOTIATING) ||
             (nState == STATE_REESTABLISHING))
@@ -5497,34 +4600,14 @@ IMS_BOOL Session::IsMidDialogTransactionCreatable() const
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED
-IMS_BOOL Session::IsTerminatePending() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return bFlag_TerminatePending;
-}
-
-/*
-
-Remarks
-
-*/
 PROTECTED
 void Session::NotifyAlerting()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() == STATE_NEGOTIATING)
     {
-        if (!bFlag_Alerting)
+        if (!m_bAlerting)
         {
-            bFlag_Alerting = IMS_TRUE;
+            m_bAlerting = IMS_TRUE;
 
             IMS_TRACE_D("Session :: Alerting ...", 0, 0, 0);
 
@@ -5533,19 +4616,12 @@ void Session::NotifyAlerting()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void Session::RestoreEx()
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
     {
-        Media* pMedia = objMedias.GetAt(i);
+        Media* pMedia = m_objMedias.GetAt(i);
 
         if (pMedia->GetState() == Media::STATE_INACTIVE)
         {
@@ -5557,15 +4633,10 @@ void Session::RestoreEx()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
-IMS_RESULT Session::SendResponseToRefreshUPDATE(IN ISipServerConnection* piSSC)
+IMS_RESULT Session::SendResponseToRefreshUpdate(IN ISipServerConnection* piSsc)
 {
-    if (!CreateResponse(piSSC, SipStatusCode::SC_200))
+    if (!CreateResponse(piSsc, SipStatusCode::SC_200))
     {
         IMS_TRACE_E(0, "Creating a response failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -5573,9 +4644,9 @@ IMS_RESULT Session::SendResponseToRefreshUPDATE(IN ISipServerConnection* piSSC)
 
     // Session-Expires
     // Require
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
-        if (!pRefreshHelper->AddSpecificHeader(piSSC))
+        if (!m_pRefreshHelper->AddSpecificHeader(piSsc))
         {
             IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
             return IMS_FAILURE;
@@ -5583,39 +4654,32 @@ IMS_RESULT Session::SendResponseToRefreshUPDATE(IN ISipServerConnection* piSSC)
     }
 
     // SIP_MESSAGE_MEDIATOR
-    (void)AdjustMessage(piSSC->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
+    (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
-    if (piSSC->Send() != IMS_SUCCESS)
+    if (piSsc->Send() != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Sending a response to UPDATE request (session refresh) failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
-        pRefreshHelper->UpdateOnMessageSent(piSSC);
+        m_pRefreshHelper->UpdateOnMessageSent(piSsc);
     }
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
-IMS_BOOL Session::SetSDPBodyPartFromCurrentView(IN_OUT ISipMessage*& piSIPMsg)
+IMS_BOOL Session::SetSdpBodyPartFromCurrentView(IN_OUT ISipMessage*& piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         IMS_TRACE_E(0, "SdpOaState is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    SessionParameter* pCurrentView = pOAState->GetCurrentView();
+    SessionParameter* pCurrentView = m_pOaState->GetCurrentView();
 
     if (pCurrentView == IMS_NULL)
     {
@@ -5623,7 +4687,7 @@ IMS_BOOL Session::SetSDPBodyPartFromCurrentView(IN_OUT ISipMessage*& piSIPMsg)
         return IMS_FALSE;
     }
 
-    ISipMessageBodyPart* piBodyPart = piSIPMsg->CreateSdpBodyPart();
+    ISipMessageBodyPart* piBodyPart = piSipMsg->CreateSdpBodyPart();
 
     if (piBodyPart == IMS_NULL)
     {
@@ -5631,32 +4695,29 @@ IMS_BOOL Session::SetSDPBodyPartFromCurrentView(IN_OUT ISipMessage*& piSIPMsg)
         return IMS_FALSE;
     }
 
-    ByteArray objSDP(pCurrentView->ToSDP());
+    ByteArray objSdp(pCurrentView->ToSdp());
 
     piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, Sip::STR_APPLICATION_SDP);
-    piBodyPart->SetContent(objSDP);
+    piBodyPart->SetContent(objSdp);
 
     // Set the Content-Length header
-    AString strCLEN;
-    strCLEN.SetNumber(objSDP.GetLength());
+    AString strCLen;
+    strCLen.SetNumber(objSdp.GetLength());
 
     piBodyPart->SetHeader(
-            ISipMessageBodyPart::CONTENT_UNKNOWN, strCLEN, SipHeaderName::CONTENT_LENGTH);
+            ISipMessageBodyPart::CONTENT_UNKNOWN, strCLen, SipHeaderName::CONTENT_LENGTH);
 
     IMS_TRACE_D("SDP is formed by the current view", 0, 0, 0);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
- REFUSE_SDP_OFFER_ANSWER_EXCHANGE
-*/
+// REFUSE_SDP_OFFER_ANSWER_EXCHANGE
 PROTECTED
-IMS_BOOL Session::SetSDPBodyPartFromRefusedView(IN_OUT ISipMessage*& piSIPMsg)
+IMS_BOOL Session::SetSdpBodyPartFromRefusedView(IN_OUT ISipMessage*& piSipMsg)
 {
-    SessionParameter* pRefusedView = (pOAState != IMS_NULL) ? pOAState->GetRefusedView() : IMS_NULL;
+    SessionParameter* pRefusedView =
+            (m_pOaState != IMS_NULL) ? m_pOaState->GetRefusedView() : IMS_NULL;
 
     if (pRefusedView == IMS_NULL)
     {
@@ -5664,7 +4725,7 @@ IMS_BOOL Session::SetSDPBodyPartFromRefusedView(IN_OUT ISipMessage*& piSIPMsg)
         return IMS_TRUE;
     }
 
-    const SipMethod& objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSipMsg->GetMethod();
 
     if (!objMethod.Equals(SipMethod::INVITE) && !objMethod.Equals(SipMethod::BYE) &&
             !objMethod.Equals(SipMethod::CANCEL))
@@ -5673,7 +4734,7 @@ IMS_BOOL Session::SetSDPBodyPartFromRefusedView(IN_OUT ISipMessage*& piSIPMsg)
         return IMS_FALSE;
     }
 
-    ISipMessageBodyPart* piBodyPart = piSIPMsg->CreateSdpBodyPart();
+    ISipMessageBodyPart* piBodyPart = piSipMsg->CreateSdpBodyPart();
 
     if (piBodyPart == IMS_NULL)
     {
@@ -5681,39 +4742,34 @@ IMS_BOOL Session::SetSDPBodyPartFromRefusedView(IN_OUT ISipMessage*& piSIPMsg)
         return IMS_FALSE;
     }
 
-    ByteArray objSDP(pRefusedView->ToSDP());
+    ByteArray objSdp(pRefusedView->ToSdp());
 
     piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, Sip::STR_APPLICATION_SDP);
-    piBodyPart->SetContent(objSDP);
+    piBodyPart->SetContent(objSdp);
 
     // Set the Content-Length header
-    AString strCLEN;
-    strCLEN.SetNumber(objSDP.GetLength());
+    AString strCLen;
+    strCLen.SetNumber(objSdp.GetLength());
 
     piBodyPart->SetHeader(
-            ISipMessageBodyPart::CONTENT_UNKNOWN, strCLEN, SipHeaderName::CONTENT_LENGTH);
+            ISipMessageBodyPart::CONTENT_UNKNOWN, strCLen, SipHeaderName::CONTENT_LENGTH);
 
     IMS_TRACE_I("SDP is formed by the refused view", 0, 0, 0);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void Session::SetTerminationReason(IN IMS_SINT32 nReason)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nTerminationReason != TERMINATION_REASON_UNKNOWN)
+    if (m_nTerminationReason != TERMINATION_REASON_UNKNOWN)
+    {
         return;
+    }
 
-    nTerminationReason = nReason;
+    m_nTerminationReason = nReason;
 
-    switch (nTerminationReason)
+    switch (m_nTerminationReason)
     {
         case TERMINATION_REASON_USER_ACTION:
             IMS_TRACE_D("Session is terminated by user action", 0, 0, 0);
@@ -5741,46 +4797,12 @@ void Session::SetTerminationReason(IN IMS_SINT32 nReason)
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED
-void Session::UpdateCallStateOnMessageReceived(
-        IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nMode /* = CallState::MODE_RECEIVED */)
-{
-    //---------------------------------------------------------------------------------------------
-
-    objCallState.UpdateState(piSIPMsg, nMode);
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED
-void Session::UpdateCallStateOnMessageSent(IN CONST ISipMessage* piSIPMsg)
-{
-    //---------------------------------------------------------------------------------------------
-
-    objCallState.UpdateState(piSIPMsg, CallState::MODE_SENT);
-}
-
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL Session::UpdateMedia(IN IMS_SINT32 nTrigger)
 {
     IMS_BOOL bResult = IMS_FALSE;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (!pOAState->IsSessionChanged())
+    if (!m_pOaState->IsSessionChanged())
     {
         IMS_TRACE_D("UpdateMedia :: No session changed", 0, 0, 0);
         return IMS_TRUE;
@@ -5788,30 +4810,31 @@ IMS_BOOL Session::UpdateMedia(IN IMS_SINT32 nTrigger)
 
     switch (GetOfferAnswerState())
     {
-        case SdpOaState::STATE_OFFER_SENT:
+        case SdpOaState::STATE_OFFER_SENT:  // FALL-THROUGH
         case SdpOaState::STATE_OFFER_CHANGE_SENT:
             bResult = UpdateMediaOnOfferSent(nTrigger);
             break;
-
         case SdpOaState::STATE_ESTABLISHED:
-            if (pOAState->GetMode() != SdpOaState::MODE_IDLE)
+            if (m_pOaState->GetMode() != SdpOaState::MODE_IDLE)
             {
-                if (pOAState->GetMode() == SdpOaState::MODE_OFFERER)
+                if (m_pOaState->GetMode() == SdpOaState::MODE_OFFERER)
+                {
                     bResult = UpdateMediaOnAnswerReceived(nTrigger);
+                }
                 else
+                {
                     bResult = UpdateMediaOnAnswerSent(nTrigger);
+                }
             }
             else
             {
                 IMS_TRACE_D("UpdateMedia :: SDP Offer/Answer is IDLE", 0, 0, 0);
             }
             break;
-
         case SdpOaState::STATE_OFFER_RECEIVED:
         case SdpOaState::STATE_OFFER_CHANGE_RECEIVED:
             bResult = UpdateMediaOnOfferReceived(nTrigger);
             break;
-
         default:
             IMS_TRACE_D("UpdateMedia :: NOT HANDLED", 0, 0, 0);
             return IMS_FALSE;
@@ -5821,41 +4844,27 @@ IMS_BOOL Session::UpdateMedia(IN IMS_SINT32 nTrigger)
     if ((GetOfferAnswerState() == SdpOaState::STATE_IDLE) ||
             (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
     {
-        pOAState->CompleteExchange();
+        m_pOaState->CompleteExchange();
     }
 
     return bResult;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL Session::RestoreOfferAnswerState()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    return pOAState->RestoreState();
+    return m_pOaState->RestoreState();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
-IMS_BOOL Session::UpdateOfferAnswerStateOnMessageReceived(IN CONST ISipMessage* piSIPMsg)
+IMS_BOOL Session::UpdateOfferAnswerStateOnMessageReceived(IN const ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -5868,8 +4877,8 @@ IMS_BOOL Session::UpdateOfferAnswerStateOnMessageReceived(IN CONST ISipMessage* 
     //[RFC3261] requires that any SDP in subsequent responses be ignored.
     if (IsConfigurationSet(CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE))
     {
-        if ((piSIPMsg->GetType() == ISipMessage::TYPE_RESPONSE) &&
-                piSIPMsg->GetMethod().Equals(SipMethod::INVITE))
+        if ((piSipMsg->GetType() == ISipMessage::TYPE_RESPONSE) &&
+                piSipMsg->GetMethod().Equals(SipMethod::INVITE))
         {
             if ((nState == STATE_NEGOTIATING) &&
                     (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
@@ -5878,7 +4887,8 @@ IMS_BOOL Session::UpdateOfferAnswerStateOnMessageReceived(IN CONST ISipMessage* 
                             "Ignore the SDP in subsequent RPR as offer-answer is completed",
                         0, 0, 0);
 
-                pOAState->UpdateStateOnTransactionCompleted(piSIPMsg, SdpOaState::MESSAGE_RECEIVED);
+                m_pOaState->UpdateStateOnTransactionCompleted(
+                        piSipMsg, SdpOaState::MESSAGE_RECEIVED);
                 return IMS_TRUE;
             }
         }
@@ -5890,22 +4900,14 @@ IMS_BOOL Session::UpdateOfferAnswerStateOnMessageReceived(IN CONST ISipMessage* 
         bIsCallEstablished = IMS_TRUE;
     }
 
-    return pOAState->UpdateState(piSIPMsg, SdpOaState::MESSAGE_RECEIVED, bIsCallEstablished,
-            (bFlag_SDPNonRPRAllowed ||
-                    IsConfigurationSet(CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR)));
+    return m_pOaState->UpdateState(piSipMsg, SdpOaState::MESSAGE_RECEIVED, bIsCallEstablished,
+            (m_bSdpNonRprAllowed || IsConfigurationSet(CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR)));
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
-IMS_BOOL Session::UpdateOfferAnswerStateOnMessageSent(IN CONST ISipMessage* piSIPMsg)
+IMS_BOOL Session::UpdateOfferAnswerStateOnMessageSent(IN const ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pOAState == IMS_NULL)
+    if (m_pOaState == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -5919,29 +4921,21 @@ IMS_BOOL Session::UpdateOfferAnswerStateOnMessageSent(IN CONST ISipMessage* piSI
         bIsCallEstablished = IMS_TRUE;
     }
 
-    return pOAState->UpdateState(piSIPMsg, SdpOaState::MESSAGE_SENT, bIsCallEstablished,
-            (bFlag_SDPNonRPRAllowed ||
-                    IsConfigurationSet(CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR)));
+    return m_pOaState->UpdateState(piSipMsg, SdpOaState::MESSAGE_SENT, bIsCallEstablished,
+            (m_bSdpNonRprAllowed || IsConfigurationSet(CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR)));
 }
 
-/*
-
-Remarks
- CALLER_PREFERENCE_MANAGER
-*/
 PROTECTED
 void Session::UpdateCallerPreference(
-        IN CONST ISipMessage* piPreviousSIPMsg, IN IMS_SINT32 nStatusCode /* = 200 */)
+        IN const ISipMessage* piPrevSipMsg, IN IMS_SINT32 nStatusCode /*= SipStatusCode::SC_200*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piPreviousSIPMsg == IMS_NULL)
+    if (piPrevSipMsg == IMS_NULL)
     {
         IMS_TRACE_E(0, "ISipMessage is null", 0, 0, 0);
         return;
     }
 
-    const SipMethod& objMethod = piPreviousSIPMsg->GetMethod();
+    const SipMethod& objMethod = piPrevSipMsg->GetMethod();
 
     if (objMethod.Equals(SipMethod::INVITE))
     {
@@ -5958,7 +4952,7 @@ void Session::UpdateCallerPreference(
                 CallerPreferenceManager::GetInstance()->UpdateDialogId(
                         GetName(), piDialog->GetDialogId());
                 CallerPreferenceManager::GetInstance()->UpdateAcceptContacts(
-                        GetName(), piPreviousSIPMsg->GetHeaders(ISipHeader::ACCEPT_CONTACT));
+                        GetName(), piPrevSipMsg->GetHeaders(ISipHeader::ACCEPT_CONTACT));
             }
         }
         else if (nState == STATE_RENEGOTIATING)
@@ -5967,14 +4961,14 @@ void Session::UpdateCallerPreference(
                     SipStatusCode::IsFinalSuccess(nStatusCode))
             {
                 CallerPreferenceManager::GetInstance()->UpdateAcceptContacts(
-                        GetName(), piPreviousSIPMsg->GetHeaders(ISipHeader::ACCEPT_CONTACT));
+                        GetName(), piPrevSipMsg->GetHeaders(ISipHeader::ACCEPT_CONTACT));
             }
             else
             {
                 // If the re-INVITE has been failed, restore the caller preference
                 // to the previous one
                 CallerPreferenceManager::GetInstance()->UpdateAcceptContacts(
-                        GetName(), objPreviousCallerPreference);
+                        GetName(), m_objPreviousCallerPreference);
             }
         }
     }
@@ -5983,7 +4977,7 @@ void Session::UpdateCallerPreference(
         if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
             CallerPreferenceManager::GetInstance()->UpdateAcceptContacts(
-                    GetName(), piPreviousSIPMsg->GetHeaders(ISipHeader::ACCEPT_CONTACT));
+                    GetName(), piPrevSipMsg->GetHeaders(ISipHeader::ACCEPT_CONTACT));
         }
     }
     else
@@ -5993,114 +4987,92 @@ void Session::UpdateCallerPreference(
     }
 }
 
-/*
-
-Remarks
- REMOVE_RECORD_ROUTE_HEADERS
-*/
-PROTECTED GLOBAL void Session::RemoveRecordRouteHeaders(IN ISipMessage* piSIPMsg)
+// REMOVE_RECORD_ROUTE_HEADERS
+PROTECTED GLOBAL void Session::RemoveRecordRouteHeaders(IN ISipMessage* piSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return;
     }
 
     IMS_TRACE_D("Remove Record-Route headers in {%s, %d}",
-            piSIPMsg->GetMethod().ToString().GetStr(), piSIPMsg->GetStatusCode(), 0);
+            piSipMsg->GetMethod().ToString().GetStr(), piSipMsg->GetStatusCode(), 0);
 
-    IMS_SINT32 nHCount = piSIPMsg->GetHeaderCount(ISipHeader::RECORD_ROUTE);
+    IMS_SINT32 nHCount = piSipMsg->GetHeaderCount(ISipHeader::RECORD_ROUTE);
 
     while (nHCount > 0)
     {
-        piSIPMsg->RemoveHeader(ISipHeader::RECORD_ROUTE);
+        piSipMsg->RemoveHeader(ISipHeader::RECORD_ROUTE);
         --nHCount;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Session::AddSessionToCallControlHelper()
 {
     // If the sessionId is already present, please remove the session from the CallControlHelper
-    if (strSessionIdForCallControl.GetLength() > 0)
+    if (m_strSessionIdForCallControl.GetLength() > 0)
     {
         RemoveSessionFromCallControlHelper();
     }
 
-    strSessionIdForCallControl = CallControlHelper::CreateSessionId();
+    m_strSessionIdForCallControl = CallControlHelper::CreateSessionId();
 
     // Create a Replaces header info...
     Replaces* pReplaces = CallControlHelper::CreateReplaces(IsMobileOriginated(), GetDialog());
 
-    CallControlHelper::GetInstance()->AddSession(strSessionIdForCallControl, pReplaces);
+    CallControlHelper::GetInstance()->AddSession(m_strSessionIdForCallControl, pReplaces);
 
-    IMS_TRACE_D("CallControlHelper :: AddSession (%s)", strSessionIdForCallControl.GetStr(), 0, 0);
+    IMS_TRACE_D(
+            "CallControlHelper :: AddSession (%s)", m_strSessionIdForCallControl.GetStr(), 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Session::RemoveSessionFromCallControlHelper()
 {
-    if (strSessionIdForCallControl.GetLength() <= 0)
+    if (m_strSessionIdForCallControl.GetLength() <= 0)
     {
         IMS_TRACE_D("No session id for the 3rd-party call control", 0, 0, 0);
         return;
     }
 
-    CallControlHelper::GetInstance()->RemoveSession(strSessionIdForCallControl);
+    CallControlHelper::GetInstance()->RemoveSession(m_strSessionIdForCallControl);
 
     IMS_TRACE_D("CallControlHelper :: RemoveSession (%s), Count (%d)",
-            strSessionIdForCallControl.GetStr(),
+            m_strSessionIdForCallControl.GetStr(),
             CallControlHelper::GetInstance()->GetSessionCount(), 0);
 
-    strSessionIdForCallControl = AString::ConstNull();
+    m_strSessionIdForCallControl = AString::ConstNull();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Session::CleanupOnDestroy()
 {
-    //---------------------------------------------------------------------------------------------
-
-    pVirtualEarlySession = IMS_NULL;
+    m_pVirtualEarlySession = IMS_NULL;
 
     // Close the SIP client connection for an internal BYE
-    if (piSCC_BYE != IMS_NULL)
+    if (m_piSccBye != IMS_NULL)
     {
-        piSCC_BYE->Close();
-        piSCC_BYE = IMS_NULL;
+        m_piSccBye->Close();
+        m_piSccBye = IMS_NULL;
     }
 
     // Checks if the session refresh is ongoing...
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
-        if (pRefreshHelper->IsRequestPending())
+        if (m_pRefreshHelper->IsRequestPending())
         {
             IMS_TRACE_D("Stopping the session refresh on CleanupOnDestroy()", 0, 0, 0);
 
-            pRefreshHelper->AbortConnection();
+            m_pRefreshHelper->AbortConnection();
         }
     }
 
     // Management of forked sessions
-    if (!pForkedSessions.IsNull())
+    if (!m_pForkedSessions.IsNull())
     {
-        pForkedSessions->RemoveMethod(this);
-        pForkedSessions = IMS_NULL;
+        m_pForkedSessions->RemoveMethod(this);
+        m_pForkedSessions = IMS_NULL;
     }
 
     // Guard code for Cancellable & Dialog
@@ -6121,17 +5093,10 @@ void Session::CleanupOnDestroy()
     GetService()->DeregisterMethod(this);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::HandleRequestToACK(IN ISipServerConnection* piSSC)
+IMS_RESULT Session::HandleRequestToAck(IN ISipServerConnection* piSsc)
 {
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     // UAS_REINVITE_RECEIVED_BEFORE_ACK
     // It's an optimization for the race condition handling between ACK and re-INVITE.
@@ -6143,42 +5108,42 @@ IMS_RESULT Session::HandleRequestToACK(IN ISipServerConnection* piSSC)
                 (piMessage->GetState() == IMessage::STATE_RECEIVED))
         {
             // Don't process ACK request anymore if it doesn't match
-            IMS_UINT32 nCSeqINVITE = piMessage->GetMessage()->GetCSeqNumber();
-            IMS_UINT32 nCSeqACK = piSSC->GetMessage()->GetCSeqNumber();
+            IMS_UINT32 nCSeqInvite = piMessage->GetMessage()->GetCSeqNumber();
+            IMS_UINT32 nCSeqAck = piSsc->GetMessage()->GetCSeqNumber();
 
-            if (nCSeqINVITE != nCSeqACK)
+            if (nCSeqInvite != nCSeqAck)
             {
-                IMS_TRACE_D("Stray ACK is received; CSeq-INVITE=%d, CSeq-ACK=%d", nCSeqINVITE,
-                        nCSeqACK, 0);
+                IMS_TRACE_D("Stray ACK is received; CSeq-INVITE=%d, CSeq-ACK=%d", nCSeqInvite,
+                        nCSeqAck, 0);
                 return IMS_SUCCESS;
             }
         }
     }
 
-    ISipMessage* piSIPMsg = piSSC->GetMessage();
+    ISipMessage* piSipMsg = piSsc->GetMessage();
 
     // CANCEL_HANDLING_AFTER_200_OK_TO_INVITE
     // When INVITE_TXN_HANDLING_CORRECTION is enabled:
     CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
 
-    UpdateRequestOnReceived(IMessage::SESSION_ACK, piSSC);
+    UpdateRequestOnReceived(IMessage::SESSION_ACK, piSsc);
     // ACK transaction will be closed by the caller
     ClearConnection(IMessage::SESSION_ACK);
 
     // Update the Offer/Answer state
-    UpdateOfferAnswerStateOnMessageReceived(piSIPMsg);
+    UpdateOfferAnswerStateOnMessageReceived(piSipMsg);
 
     // Check the termination pending & do the termination procedure
-    if (CheckNTerminateSession(piSIPMsg))
+    if (CheckNTerminateSession(piSipMsg))
     {
         return IMS_SUCCESS;
     }
 
-    IMS_SINT32 nOAResult = HandleSDPOfferAnswer(piSIPMsg);
+    IMS_SINT32 nOaResult = HandleSdpOfferAnswer(piSipMsg);
 
-    if ((nOAResult == SdpOfferAnswer::RESULT_NOT_CHANGED) ||
-            (nOAResult == SdpOfferAnswer::RESULT_SUCCESS) ||
-            (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT))
+    if ((nOaResult == SdpOfferAnswer::RESULT_NOT_CHANGED) ||
+            (nOaResult == SdpOfferAnswer::RESULT_SUCCESS) ||
+            (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT))
     {
         UpdateMedia(Media::SESSION_UPDATED);
     }
@@ -6190,9 +5155,9 @@ IMS_RESULT Session::HandleRequestToACK(IN ISipServerConnection* piSSC)
     if ((nState == STATE_ESTABLISHING) || (nState == STATE_REESTABLISHING))
     {
         // ACK_WITH_SDP_IN_PROGRESS
-        if (piSIPMsg->GetSdpBodyPart() != IMS_NULL)
+        if (piSipMsg->GetSdpBodyPart() != IMS_NULL)
         {
-            bFlag_AckWithSDPInProgress = IMS_TRUE;
+            m_bAckWithSdpInProgress = IMS_TRUE;
         }
 
         // Notify the session establishment to MEDIA
@@ -6205,7 +5170,7 @@ IMS_RESULT Session::HandleRequestToACK(IN ISipServerConnection* piSSC)
         {
             // 'Replaces' header handling ...
             // RACE_CONDITION: ACK & re-INVITE in MT
-            if (nOAResult != SdpOfferAnswer::RESULT_NOT_CHANGED)
+            if (nOaResult != SdpOfferAnswer::RESULT_NOT_CHANGED)
             {
                 AddSessionToCallControlHelper();
             }
@@ -6243,7 +5208,7 @@ IMS_RESULT Session::HandleRequestToACK(IN ISipServerConnection* piSSC)
         {
             bInitialSession = IMS_FALSE;
         }
-        else if ((nCompletedListenerCalls & LISTENER_CALL_STARTED) != 0)
+        else if ((m_nCompletedListenerCalls & LISTENER_CALL_STARTED) != 0)
         {
             bInitialSession = IMS_FALSE;
         }
@@ -6278,22 +5243,15 @@ IMS_RESULT Session::HandleRequestToACK(IN ISipServerConnection* piSSC)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::HandleRequestToBYE(IN ISipServerConnection* piSSC)
+IMS_RESULT Session::HandleRequestToBye(IN ISipServerConnection* piSsc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    UpdateRequestOnReceived(IMessage::SESSION_TERMINATE, piSSC);
+    UpdateRequestOnReceived(IMessage::SESSION_TERMINATE, piSsc);
 
     if (Ims::GetLastError() == ImsError::ALREADY_EXISTS)
     {
-        GetService()->SendResponse(piSSC, SipStatusCode::SC_200);
-        piSSC->Close();
+        GetService()->SendResponse(piSsc, SipStatusCode::SC_200);
+        piSsc->Close();
 
         return IMS_SUCCESS;
     }
@@ -6301,9 +5259,9 @@ IMS_RESULT Session::HandleRequestToBYE(IN ISipServerConnection* piSSC)
     IMS_SINT32 nOldState = GetState();
 
     // RACE CONDITION : reset the terminate request flag
-    if (bFlag_TerminatePending)
+    if (m_bTerminatePending)
     {
-        bFlag_TerminatePending = IMS_FALSE;
+        m_bTerminatePending = IMS_FALSE;
 
         IMS_TRACE_D("The pending terminate request will be reset", 0, 0, 0);
     }
@@ -6315,19 +5273,19 @@ IMS_RESULT Session::HandleRequestToBYE(IN ISipServerConnection* piSSC)
 
     SetState(STATE_TERMINATED);
 
-    if (CreateResponse(piSSC, SipStatusCode::SC_200) == IMS_FALSE)
+    if (CreateResponse(piSsc, SipStatusCode::SC_200) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Initializing the response to BYE request failed", 0, 0, 0);
         goto EXIT_HandleByeRequest;
     }
 
-    if (!SendNUpdateResponse(IMessage::SESSION_TERMINATE, piSSC))
+    if (!SendNUpdateResponse(IMessage::SESSION_TERMINATE, piSsc))
     {
         goto EXIT_HandleByeRequest;
     }
 
     // Update the call state
-    UpdateCallStateOnMessageSent(piSSC->GetMessage());
+    UpdateCallStateOnMessageSent(piSsc->GetMessage());
 
 EXIT_HandleByeRequest:
 
@@ -6343,26 +5301,19 @@ EXIT_HandleByeRequest:
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::HandleRequestToCANCEL(IN ISipServerConnection* piSSC)
+IMS_RESULT Session::HandleRequestToCancel(IN ISipServerConnection* piSsc)
 {
-    //---------------------------------------------------------------------------------------------
-
     // RACE CONDITION : reset the terminate request flag
-    if (bFlag_TerminatePending)
+    if (m_bTerminatePending)
     {
-        bFlag_TerminatePending = IMS_FALSE;
+        m_bTerminatePending = IMS_FALSE;
 
         IMS_TRACE_D("The pending terminate request will be reset", 0, 0, 0);
     }
 
     // Send a 200 OK to CANCEL request
-    if (CreateResponse(piSSC, SipStatusCode::SC_200) == IMS_FALSE)
+    if (CreateResponse(piSsc, SipStatusCode::SC_200) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Initializing the response to CANCEL request failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -6376,13 +5327,12 @@ IMS_RESULT Session::HandleRequestToCANCEL(IN ISipServerConnection* piSSC)
         nMethodForCancel = IMessage::SESSION_CANCEL;
     }
 
-    if (!SendNUpdateResponse(nMethodForCancel, piSSC))
+    if (!SendNUpdateResponse(nMethodForCancel, piSsc))
     {
         return IMS_FAILURE;
     }
 
     // Send a failure final response (487) to an INVITE request
-    ISipServerConnection* piSSC_INVITE = IMS_NULL;
     IMS_SINT32 nCallState = GetCallState();
     IMS_SINT32 nServiceMethod = IMessage::SERVICEMETHOD_INVALID;
 
@@ -6397,9 +5347,9 @@ IMS_RESULT Session::HandleRequestToCANCEL(IN ISipServerConnection* piSSC)
         nServiceMethod = IMessage::SESSION_UPDATE;
     }
 
-    piSSC_INVITE = GetServerConnection(nServiceMethod);
+    ISipServerConnection* piSscInvite = GetServerConnection(nServiceMethod);
 
-    if (piSSC_INVITE == IMS_NULL)
+    if (piSscInvite == IMS_NULL)
     {
         IMS_TRACE_E(0, "INVITE transaction does not exist", 0, 0, 0);
 
@@ -6413,7 +5363,7 @@ IMS_RESULT Session::HandleRequestToCANCEL(IN ISipServerConnection* piSSC)
 
     IMS_SINT32 nState = GetState();
 
-    if (CreateResponse(piSSC_INVITE, SipStatusCode::SC_487) == IMS_FALSE)
+    if (CreateResponse(piSscInvite, SipStatusCode::SC_487) == IMS_FALSE)
     {
         if (nState == STATE_NEGOTIATING)
         {
@@ -6435,7 +5385,7 @@ IMS_RESULT Session::HandleRequestToCANCEL(IN ISipServerConnection* piSSC)
         return IMS_FAILURE;
     }
 
-    if (!SendNUpdateResponse(nServiceMethod, piSSC_INVITE))
+    if (!SendNUpdateResponse(nServiceMethod, piSscInvite))
     {
         if (nState == STATE_NEGOTIATING)
         {
@@ -6458,7 +5408,7 @@ IMS_RESULT Session::HandleRequestToCANCEL(IN ISipServerConnection* piSSC)
     }
 
     // Update the call state
-    UpdateCallStateOnMessageSent(piSSC_INVITE->GetMessage());
+    UpdateCallStateOnMessageSent(piSscInvite->GetMessage());
 
     if (nState == STATE_NEGOTIATING)
     {
@@ -6480,17 +5430,10 @@ IMS_RESULT Session::HandleRequestToCANCEL(IN ISipServerConnection* piSSC)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::HandleRequestToINVITE(IN ISipServerConnection* piSSC)
+IMS_RESULT Session::HandleRequestToInvite(IN ISipServerConnection* piSsc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    UpdateRequestOnReceived(IMessage::SESSION_START, piSSC);
+    UpdateRequestOnReceived(IMessage::SESSION_START, piSsc);
 
     // Restore the media state if it needs
 
@@ -6501,59 +5444,59 @@ IMS_RESULT Session::HandleRequestToINVITE(IN ISipServerConnection* piSSC)
         CheckNCreateSessionDescriptor();
     }
 
-    IMS_SINT32 nOAResult = HandleSDPOfferAnswer(piSSC->GetMessage());
+    IMS_SINT32 nOaResult = HandleSdpOfferAnswer(piSsc->GetMessage());
 
-    if ((nOAResult == SdpOfferAnswer::RESULT_FAILURE) ||
-            (nOAResult == SdpOfferAnswer::RESULT_NOT_DONE))
+    if ((nOaResult == SdpOfferAnswer::RESULT_FAILURE) ||
+            (nOaResult == SdpOfferAnswer::RESULT_NOT_DONE))
     {
         IMS_TRACE_D("Rejecting SDP Offer/Answer with 400 (Bad Request) ...", 0, 0, 0);
 
-        if (CreateResponse(piSSC, SipStatusCode::SC_400) == IMS_FALSE)
+        if (CreateResponse(piSsc, SipStatusCode::SC_400) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "Rejecting SDP Offer/Answer failed", 0, 0, 0);
             return IMS_FAILURE;
         }
 
-        if (!SendNUpdateResponse(IMessage::SESSION_START, piSSC))
+        if (!SendNUpdateResponse(IMessage::SESSION_START, piSsc))
         {
             IMS_TRACE_E(0, "Sending a response message failed", 0, 0, 0);
             return IMS_FAILURE;
         }
 
         // Update the call state
-        UpdateCallStateOnMessageSent(piSSC->GetMessage());
+        UpdateCallStateOnMessageSent(piSsc->GetMessage());
 
         return IMS_SUCCESS;
     }
-    else if (nOAResult == SdpOfferAnswer::RESULT_NOT_FOUND)
+    else if (nOaResult == SdpOfferAnswer::RESULT_NOT_FOUND)
     {
         IMS_TRACE_D("Rejecting SDP Offer/Answer with 606 (Not Acceptable) ...", 0, 0, 0);
 
-        if (CreateResponse(piSSC, SipStatusCode::SC_400) == IMS_FALSE)
+        if (CreateResponse(piSsc, SipStatusCode::SC_400) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "Rejecting SDP Offer/Answer failed", 0, 0, 0);
             return IMS_FAILURE;
         }
 
         AString strWarning("304 \"Media Type Not Available\"");
-        (void)piSSC->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
 
-        if (!SendNUpdateResponse(IMessage::SESSION_START, piSSC))
+        if (!SendNUpdateResponse(IMessage::SESSION_START, piSsc))
         {
             IMS_TRACE_E(0, "Sending a response message failed", 0, 0, 0);
             return IMS_FAILURE;
         }
 
         // Update the call state
-        UpdateCallStateOnMessageSent(piSSC->GetMessage());
+        UpdateCallStateOnMessageSent(piSsc->GetMessage());
 
         return IMS_SUCCESS;
     }
-    else if (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)
+    else if (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)
     {
         IMS_TRACE_D("QoS precondition is required ...", 0, 0, 0);
     }
-    else if (nOAResult == SdpOfferAnswer::RESULT_NOT_CHANGED)
+    else if (nOaResult == SdpOfferAnswer::RESULT_NOT_CHANGED)
     {
         IMS_TRACE_D("NO MEDIA STATE CHANGED", 0, 0, 0);
     }
@@ -6570,24 +5513,17 @@ IMS_RESULT Session::HandleRequestToINVITE(IN ISipServerConnection* piSSC)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::HandleRequestToINVITEWithinDialog(IN ISipServerConnection* piSSC)
+IMS_RESULT Session::HandleRequestToInviteWithinDialog(IN ISipServerConnection* piSsc)
 {
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     if ((nState == STATE_TERMINATING) || (nState == STATE_TERMINATED))
     {
         IMS_TRACE_D("re-INVITE is received in TERMINATING or TERMINATED state (%d)", nState, 0, 0);
 
-        GetService()->SendResponse(piSSC, SipStatusCode::SC_488);
-        piSSC->Close();
+        GetService()->SendResponse(piSsc, SipStatusCode::SC_488);
+        piSsc->Close();
         return IMS_SUCCESS;
     }
 
@@ -6599,7 +5535,7 @@ IMS_RESULT Session::HandleRequestToINVITEWithinDialog(IN ISipServerConnection* p
     }
     // Checks the message validity:
     // If re-INVITE is sent, we needs to reject the message with 491 Request Pending response.
-    else if ((nState == STATE_RENEGOTIATING) || (pOAState->IsOfferProgress()))
+    else if ((nState == STATE_RENEGOTIATING) || (m_pOaState->IsOfferProgress()))
     {
         nStatusCode = SipStatusCode::SC_491;
     }
@@ -6607,9 +5543,9 @@ IMS_RESULT Session::HandleRequestToINVITEWithinDialog(IN ISipServerConnection* p
     else if ((nState == STATE_REESTABLISHING) &&
             (GetOfferAnswerState() == SdpOaState::STATE_OFFER_CHANGE_SENT))
     {
-        ISipMessage* piSIPMsg = piSSC->GetMessage();
+        ISipMessage* piSipMsg = piSsc->GetMessage();
 
-        if ((piSIPMsg != IMS_NULL) && (piSIPMsg->GetSdpBodyPart() != IMS_NULL))
+        if ((piSipMsg != IMS_NULL) && (piSipMsg->GetSdpBodyPart() != IMS_NULL))
         {
             nStatusCode = SipStatusCode::SC_500;
         }
@@ -6619,59 +5555,59 @@ IMS_RESULT Session::HandleRequestToINVITEWithinDialog(IN ISipServerConnection* p
     {
         IMS_TRACE_I("Rejecting re-INVITE with %d ...", nStatusCode, 0, 0);
 
-        if (GetService()->CreateResponse(piSSC, nStatusCode))
+        if (GetService()->CreateResponse(piSsc, nStatusCode))
         {
             // Sets Retry-After header field
-            AString strRAHdr;
+            AString strRetryAfter;
 
-            strRAHdr.SetNumber(SipHeaderUtils::GenerateRetryAfterSeconds(10));
+            strRetryAfter.SetNumber(SipHeaderUtils::GenerateRetryAfterSeconds(10));
 
-            piSSC->GetMessage()->SetHeader(ISipHeader::RETRY_AFTER_SEC, strRAHdr);
+            piSsc->GetMessage()->SetHeader(ISipHeader::RETRY_AFTER_SEC, strRetryAfter);
 
-            piSSC->Send();
+            piSsc->Send();
 
             // Update the call state
-            UpdateCallStateOnMessageSent(piSSC->GetMessage());
+            UpdateCallStateOnMessageSent(piSsc->GetMessage());
         }
 
-        piSSC->Close();
+        piSsc->Close();
 
         return IMS_SUCCESS;
     }
 
     // Update the Offer/Answer state
-    UpdateOfferAnswerStateOnMessageReceived(piSSC->GetMessage());
+    UpdateOfferAnswerStateOnMessageReceived(piSsc->GetMessage());
 
-    IMS_SINT32 nOAResult = HandleSDPOfferAnswer(piSSC->GetMessage());
+    IMS_SINT32 nOaResult = HandleSdpOfferAnswer(piSsc->GetMessage());
 
-    if ((nOAResult == SdpOfferAnswer::RESULT_FAILURE) ||
-            (nOAResult == SdpOfferAnswer::RESULT_NOT_DONE))
+    if ((nOaResult == SdpOfferAnswer::RESULT_FAILURE) ||
+            (nOaResult == SdpOfferAnswer::RESULT_NOT_DONE))
     {
         IMS_TRACE_I("Rejecting SDP Offer/Answer with 400 (Bad Request) ...", 0, 0, 0);
 
-        if (GetService()->SendResponse(piSSC, SipStatusCode::SC_400) == IMS_FALSE)
+        if (GetService()->SendResponse(piSsc, SipStatusCode::SC_400) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "Rejecting SDP Offer/Answer failed", 0, 0, 0);
         }
 
         // Update the call state
-        UpdateCallStateOnMessageSent(piSSC->GetMessage());
+        UpdateCallStateOnMessageSent(piSsc->GetMessage());
         // Update the Offer/Answer state
-        UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
+        UpdateOfferAnswerStateOnMessageSent(piSsc->GetMessage());
         RestoreOfferAnswerState();
 
-        piSSC->Close();
+        piSsc->Close();
 
         return IMS_SUCCESS;
     }
-    else if (nOAResult == SdpOfferAnswer::RESULT_NOT_FOUND)
+    else if (nOaResult == SdpOfferAnswer::RESULT_NOT_FOUND)
     {
         // Original status code: 606, KDDI: 488
         IMS_SINT32 nStatusCode = SipStatusCode::SC_488;
 
         IMS_TRACE_I("Rejecting SDP Offer/Answer with %d (Not Acceptable) ...", nStatusCode, 0, 0);
 
-        if (GetService()->CreateResponse(piSSC, nStatusCode) == IMS_FALSE)
+        if (GetService()->CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "Rejecting SDP Offer/Answer failed", 0, 0, 0);
 
@@ -6683,46 +5619,48 @@ IMS_RESULT Session::HandleRequestToINVITEWithinDialog(IN ISipServerConnection* p
 
         if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
         {
-            AString strUAString =
+            AString strUaString =
                     SipConfigProxy::GetUaString(GetSlotId(), GetService()->GetSipProfile());
 
-            strUAString = strUAString.Replace(" ", "");
+            strUaString = strUaString.Replace(" ", "");
 
-            if (strUAString.GetLength() != 0)
-                strWarning.Sprintf("304 %s \"Media Type Not Available\"", strUAString.GetStr());
+            if (strUaString.GetLength() != 0)
+            {
+                strWarning.Sprintf("304 %s \"Media Type Not Available\"", strUaString.GetStr());
+            }
             else
+            {
                 strWarning = "304 \"Media Type Not Available\"";
+            }
         }
         else
         {
             strWarning = "304 \"Media Type Not Available\"";
         }
 
-        (void)piSSC->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
+        (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
-        // SIP_MESSAGE_MEDIATOR
-        (void)AdjustMessage(piSSC->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
-
-        if (piSSC->Send() != IMS_SUCCESS)
+        if (piSsc->Send() != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Sending a response message failed", 0, 0, 0);
         }
 
         // Update the call state
-        UpdateCallStateOnMessageSent(piSSC->GetMessage());
+        UpdateCallStateOnMessageSent(piSsc->GetMessage());
         // Update the Offer/Answer state
-        UpdateOfferAnswerStateOnMessageSent(piSSC->GetMessage());
+        UpdateOfferAnswerStateOnMessageSent(piSsc->GetMessage());
         RestoreOfferAnswerState();
 
-        piSSC->Close();
+        piSsc->Close();
 
         return IMS_SUCCESS;
     }
-    else if (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)
+    else if (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)
     {
         IMS_TRACE_D("QoS precondition is required ...", 0, 0, 0);
     }
-    else if (nOAResult == SdpOfferAnswer::RESULT_NOT_CHANGED)
+    else if (nOaResult == SdpOfferAnswer::RESULT_NOT_CHANGED)
     {
         IMS_TRACE_D("NO MEDIA STATE CHANGED", 0, 0, 0);
     }
@@ -6759,7 +5697,7 @@ IMS_RESULT Session::HandleRequestToINVITEWithinDialog(IN ISipServerConnection* p
         }
     }
 
-    UpdateRequestOnReceived(IMessage::SESSION_UPDATE, piSSC);
+    UpdateRequestOnReceived(IMessage::SESSION_UPDATE, piSsc);
 
     // Update the media state
     UpdateMedia(Media::SESSION_UPDATE);
@@ -6772,21 +5710,21 @@ IMS_RESULT Session::HandleRequestToINVITEWithinDialog(IN ISipServerConnection* p
     // Send 180 Ringing
     IMS_DEBUG_("Sending 180 \"Ringing\" ...");
 
-    if (CreateResponse(piSSC, SipStatusCode::SC_180) == IMS_FALSE)
+    if (CreateResponse(piSsc, SipStatusCode::SC_180) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Initializing a response failed - SipError (%d)",
                 SipError::GetLastError(), 0, 0);
         return IMS_FAILURE;
     }
 
-    if (!SendNUpdateResponse(IMessage::SESSION_START, piSSC))
+    if (!SendNUpdateResponse(IMessage::SESSION_START, piSsc))
     {
         IMS_TRACE_E(0, "Sending a response failed - SipError (%d)",
                 SipError::GetLastError(), 0, 0);
         return IMS_FAILURE;
     }
 
-    CheckNCreateDialog(piSSC);
+    CheckNCreateDialog(piSsc);
 #endif
 
     SetState(STATE_RENEGOTIATING);
@@ -6799,44 +5737,37 @@ IMS_RESULT Session::HandleRequestToINVITEWithinDialog(IN ISipServerConnection* p
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::HandleRequestToREFER(IN ISipServerConnection* piSSC)
+IMS_RESULT Session::HandleRequestToRefer(IN ISipServerConnection* piSsc)
 {
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     if ((nState == STATE_TERMINATING) || (nState == STATE_TERMINATED))
     {
         IMS_TRACE_D("REFER is received in TERMINATING or TERMINATED state (%d)", nState, 0, 0);
 
-        GetService()->SendResponse(piSSC, SipStatusCode::SC_488);
-        piSSC->Close();
+        GetService()->SendResponse(piSsc, SipStatusCode::SC_488);
+        piSsc->Close();
         return IMS_SUCCESS;
     }
 
-    ISipMessage* piSIPMsg = piSSC->GetMessage();
+    ISipMessage* piSipMsg = piSsc->GetMessage();
 
-    if (piSIPMsg->GetHeaderCount(ISipHeader::REFER_TO) != 1)
+    if (piSipMsg->GetHeaderCount(ISipHeader::REFER_TO) != 1)
     {
         GetService()->SendResponse(
-                piSSC, SipStatusCode::SC_400, AString("Mandatory Header Missing"));
-        piSSC->Close();
+                piSsc, SipStatusCode::SC_400, AString("Mandatory Header Missing"));
+        piSsc->Close();
         return IMS_FAILURE;
     }
 
-    AString strReferTo = piSIPMsg->GetHeader(ISipHeader::REFER_TO);
+    AString strReferTo = piSipMsg->GetHeader(ISipHeader::REFER_TO);
     SipAddress objReferTo;
 
     if (!objReferTo.Create(strReferTo))
     {
-        GetService()->SendResponse(piSSC, SipStatusCode::SC_400, AString("Invalid Header Field"));
-        piSSC->Close();
+        GetService()->SendResponse(piSsc, SipStatusCode::SC_400, AString("Invalid Header Field"));
+        piSsc->Close();
         return IMS_FAILURE;
     }
 
@@ -6845,8 +5776,8 @@ IMS_RESULT Session::HandleRequestToREFER(IN ISipServerConnection* piSSC)
     if (pMethodP == IMS_NULL)
     {
         GetService()->SendResponse(
-                piSSC, SipStatusCode::SC_400, AString("Mandatory Parameter Missing"));
-        piSSC->Close();
+                piSsc, SipStatusCode::SC_400, AString("Mandatory Parameter Missing"));
+        piSsc->Close();
         return IMS_FAILURE;
     }
 
@@ -6863,7 +5794,7 @@ IMS_RESULT Session::HandleRequestToREFER(IN ISipServerConnection* piSSC)
 
     if (pReference == IMS_NULL)
     {
-        piSSC->Close();
+        piSsc->Close();
 
         IMS_TRACE_E(0, "Creating Reference failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -6871,7 +5802,7 @@ IMS_RESULT Session::HandleRequestToREFER(IN ISipServerConnection* piSSC)
 
     if (!pReference->InitMethod(this, IMS_FALSE))
     {
-        piSSC->Close();
+        piSsc->Close();
         delete pReference;
         Ims::SetLastError(ImsError::GENERAL_ERROR);
 
@@ -6879,7 +5810,7 @@ IMS_RESULT Session::HandleRequestToREFER(IN ISipServerConnection* piSSC)
         return IMS_FAILURE;
     }
 
-    if (!pReference->ServerConnection_NotifyRequest(piSSC))
+    if (!pReference->ServerConnection_NotifyRequest(piSsc))
     {
         delete pReference;
         Ims::SetLastError(ImsError::GENERAL_ERROR);
@@ -6893,27 +5824,20 @@ IMS_RESULT Session::HandleRequestToREFER(IN ISipServerConnection* piSSC)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::HandleResponseToBYE(IN ISipClientConnection* piSCC)
+IMS_RESULT Session::HandleResponseToBye(IN ISipClientConnection* piScc)
 {
     IMS_SINT32 nOldState = GetState();
-    IMS_SINT32 nStatusCode = piSCC->GetMessage()->GetStatusCode();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nStatusCode = piScc->GetMessage()->GetStatusCode();
 
     IMS_TRACE_I("Session - Got a %d response to BYE request", nStatusCode, 0, 0);
 
-    if (piSCC == piSCC_BYE)
+    if (piScc == m_piSccBye)
     {
-        if (piSCC_BYE != IMS_NULL)
+        if (m_piSccBye != IMS_NULL)
         {
-            piSCC_BYE->Close();
-            piSCC_BYE = IMS_NULL;
+            m_piSccBye->Close();
+            m_piSccBye = IMS_NULL;
         }
 
         SetState(STATE_TERMINATED);
@@ -6926,7 +5850,7 @@ IMS_RESULT Session::HandleResponseToBYE(IN ISipClientConnection* piSCC)
         return IMS_SUCCESS;
     }
 
-    UpdateResponseOnReceived(IMessage::SESSION_TERMINATE, piSCC);
+    UpdateResponseOnReceived(IMessage::SESSION_TERMINATE, piScc);
 
     if (SipStatusCode::Is1XX(nStatusCode))
     {
@@ -6953,17 +5877,10 @@ IMS_RESULT Session::HandleResponseToBYE(IN ISipClientConnection* piSCC)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::HandleResponseToCANCEL(IN ISipClientConnection* piSCC)
+IMS_RESULT Session::HandleResponseToCancel(IN ISipClientConnection* piScc)
 {
-    IMS_SINT32 nStatusCode = piSCC->GetMessage()->GetStatusCode();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nStatusCode = piScc->GetMessage()->GetStatusCode();
 
     IMS_TRACE_I("Session - Got a %d response to CANCEL request", nStatusCode, 0, 0);
 
@@ -6997,7 +5914,7 @@ IMS_RESULT Session::HandleResponseToCANCEL(IN ISipClientConnection* piSCC)
         }
     }
 
-    UpdateResponseOnReceived(nMethodForCancel, piSCC);
+    UpdateResponseOnReceived(nMethodForCancel, piScc);
 
     if (SipStatusCode::Is1XX(nStatusCode))
     {
@@ -7008,18 +5925,14 @@ IMS_RESULT Session::HandleResponseToCANCEL(IN ISipClientConnection* piSCC)
         // The response of CANCEL request needs to be notified to the application
         // regardless of the current session state.
         // if (nMethodForCancel == IMessage::SESSION_CANCEL)
-        {
-            PostMessage(AMSG_SESSION_CANCEL_DELIVERED, 0, 0);
-        }
+        PostMessage(AMSG_SESSION_CANCEL_DELIVERED, 0, 0);
     }
     else
     {
         // The response of CANCEL request needs to be notified to the application
         // regardless of the current session state.
         // if (nMethodForCancel == IMessage::SESSION_CANCEL)
-        {
-            PostMessage(AMSG_SESSION_CANCEL_DELIVERY_FAILED, 0, 0);
-        }
+        PostMessage(AMSG_SESSION_CANCEL_DELIVERY_FAILED, 0, 0);
     }
 
     CloseConnection(nMethodForCancel);
@@ -7027,31 +5940,28 @@ IMS_RESULT Session::HandleResponseToCANCEL(IN ISipClientConnection* piSCC)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
+IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
 {
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
-    IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
-
-    //---------------------------------------------------------------------------------------------
+    ISipMessage* piSipMsg = piScc->GetMessage();
+    IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
     if (SipStatusCode::IsProvisional(nStatusCode) || SipStatusCode::IsFinalSuccess(nStatusCode))
     {
-        CheckNCreateDialog(piSCC);
+        CheckNCreateDialog(piScc);
     }
 
     IMS_SINT32 nState = GetState();
     IMS_SINT32 nServiceMethod = IMessage::SERVICEMETHOD_INVALID;
 
     if (nState == STATE_NEGOTIATING)
+    {
         nServiceMethod = IMessage::SESSION_START;
+    }
     else if (nState == STATE_RENEGOTIATING)
+    {
         nServiceMethod = IMessage::SESSION_UPDATE;
+    }
     else if (nState == STATE_TERMINATING)
     {
         IMS_SINT32 nCallState = GetCallState();
@@ -7072,10 +5982,10 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
     }
 
     // INVITE specific handling
-    UpdateResponseOnReceived(nServiceMethod, piSCC);
+    UpdateResponseOnReceived(nServiceMethod, piScc);
 
     // Check the termination pending & do the termination procedure
-    if (CheckNTerminateSession(piSIPMsg))
+    if (CheckNTerminateSession(piSipMsg))
     {
         return IMS_SUCCESS;
     }
@@ -7091,7 +6001,7 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
     // Handle 1xx response first...
     if (SipStatusCode::Is1XX(nStatusCode))
     {
-        IMS_RESULT nResult = HandleProvisionalResponse(piSCC);
+        IMS_RESULT nResult = HandleProvisionalResponse(piScc);
 
         if ((nState == STATE_NEGOTIATING) && SipStatusCode::IsProvisional(nStatusCode) &&
                 (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
@@ -7111,14 +6021,14 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
     {
         // In case of other method except for REGISTER,
         // the UE only supports the authentication algorithm, MD5
-        if (RespondToChallenge(piSCC))
+        if (RespondToChallenge(piScc))
         {
             return IMS_SUCCESS;
         }
     }
     // }
 
-    bFlag_UpdateRequestor = IMS_FALSE;
+    m_bUpdateRequestor = IMS_FALSE;
 
     // Handle a final response according to the status code ...
     switch (nStatusCode)
@@ -7128,26 +6038,34 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
             // Check & create a session descriptor when an initial offer received
             CheckNCreateSessionDescriptor();
 
-            IMS_SINT32 nOAResult = HandleSDPOfferAnswer(piSIPMsg);
+            IMS_SINT32 nOaResult = HandleSdpOfferAnswer(piSipMsg);
 
-            if ((nOAResult == SdpOfferAnswer::RESULT_NOT_CHANGED) ||
-                    (nOAResult == SdpOfferAnswer::RESULT_SUCCESS) ||
-                    (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT))
+            if ((nOaResult == SdpOfferAnswer::RESULT_NOT_CHANGED) ||
+                    (nOaResult == SdpOfferAnswer::RESULT_SUCCESS) ||
+                    (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT))
             {
                 // Update the media state
                 if (nState == STATE_NEGOTIATING)
+                {
                     UpdateMedia(Media::SESSION_STARTED);
+                }
                 else if (nState == STATE_RENEGOTIATING)
+                {
                     UpdateMedia(Media::SESSION_UPDATED);
+                }
                 else if (nState == STATE_TERMINATING)
+                {
                     UpdateMedia(Media::SESSION_TERMINATED);
+                }
                 else
+                {
                     RestoreOfferAnswerState();
+                }
 
                 if (nState == STATE_NEGOTIATING)
                 {
                     // 'Replaces' header handling ...
-                    if (nOAResult != SdpOfferAnswer::RESULT_NOT_CHANGED)
+                    if (nOaResult != SdpOfferAnswer::RESULT_NOT_CHANGED)
                     {
                         // Replace the existing session id to new one
                         AddSessionToCallControlHelper();
@@ -7180,29 +6098,35 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
                 }
 
                 // Send ACK to 2xx - INVITE
-                SendRequestToACK(piSCC, nServiceMethod);
+                SendRequestToAck(piScc, nServiceMethod);
 
                 // Send BYE request if the session is in TERMINATING state
                 if (nState == STATE_TERMINATING)
                 {
                     // 4 Set Reason header
                     SetReasonHeaderFromPreviousRequest(IMessage::SESSION_TERMINATE);
-                    SendRequestToBYE();
+                    SendRequestToBye();
                 }
             }
             else
             {
                 // Update the media state
                 if (nState == STATE_NEGOTIATING)
+                {
                     UpdateMedia(Media::SESSION_START_FAILED);
+                }
                 else if (nState == STATE_RENEGOTIATING)
+                {
                     UpdateMedia(Media::SESSION_UPDATE_FAILED);
+                }
                 else if (nState == STATE_TERMINATING)
+                {
                     UpdateMedia(Media::SESSION_TERMINATED);
+                }
 
                 // Send ACK to 2xx - INVITE
-                SendRequestToACK(piSCC, nServiceMethod);
-                // piSCC->Close();
+                SendRequestToAck(piScc, nServiceMethod);
+                // piScc->Close();
                 // SetInviteConnection(IMS_NULL);
 
                 // This can only happen if the other end sends response to an INVITE/re-INVITE
@@ -7239,24 +6163,23 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
                     // Send BYE request if the session is in TERMINATING state
                     // 4 Set Reason header
                     SetReasonHeaderFromPreviousRequest(IMessage::SESSION_TERMINATE);
-                    SendRequestToBYE();
+                    SendRequestToBye();
                 }
             }
             break;
         }
-
         case SipStatusCode::SC_422:
             if (nState == STATE_NEGOTIATING)
             {
-                IMS_BOOL bMinSEPresent = piSIPMsg->IsHeaderPresent(ISipHeader::MIN_SE);
+                IMS_BOOL bMinSePresent = piSipMsg->IsHeaderPresent(ISipHeader::MIN_SE);
 
                 CloseConnection(nServiceMethod);
 
-                if (bMinSEPresent)
+                if (bMinSePresent)
                 {
                     SetState(STATE_INITIATED);
 
-                    if (SendRequestToINVITEOn422Received() == IMS_SUCCESS)
+                    if (SendRequestToInviteOn422Received() == IMS_SUCCESS)
                     {
                         return IMS_SUCCESS;
                     }
@@ -7273,7 +6196,7 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
 
                 SetState(STATE_ESTABLISHED);
 
-                if (SendRequestToINVITEOn422Received() == IMS_SUCCESS)
+                if (SendRequestToInviteOn422Received() == IMS_SUCCESS)
                 {
                     return IMS_SUCCESS;
                 }
@@ -7292,8 +6215,7 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
                 PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
             }
             break;
-
-        case SipStatusCode::SC_486:  // Busy here
+        case SipStatusCode::SC_486:  // Busy here, FALL-THROUGH
         case SipStatusCode::SC_480:  // Temporarily unavailable
             // 486 : INVITE is rejected by the other side
             // 480 : INVITE is rejected by the proxy because the remote user is not registered
@@ -7325,7 +6247,6 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
                 PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
             }
             break;
-
         case SipStatusCode::SC_487:  // Request terminated
             // This is the response to our cancelled INVITE, in the terminating session.
             if (nState == STATE_NEGOTIATING)
@@ -7356,7 +6277,6 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
                 PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
             }
             break;
-
         case SipStatusCode::SC_488:  // Not acceptable here
             // INVITE is rejected because the media negotiation failed
             if (nState == STATE_NEGOTIATING)
@@ -7387,7 +6307,6 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
                 PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
             }
             break;
-
         default:
         {
             if (nState == STATE_NEGOTIATING)
@@ -7421,7 +6340,7 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
             // 2XX response case except for 200
             if (SipStatusCode::IsFinalSuccess(nStatusCode))
             {
-                SendRequestToACK(piSCC, nServiceMethod);
+                SendRequestToAck(piScc, nServiceMethod);
             }
         }
         break;
@@ -7432,40 +6351,16 @@ IMS_RESULT Session::HandleResponseToINVITE(IN ISipClientConnection* piSCC)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
- RACE_CONDITION : SESSION_UPDATE
-*/
-PRIVATE
-IMS_BOOL Session::IsSessionUpdateNotificationInProgress() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return bFlag_SessionUpdateNotificationInProgress;
-}
-
-/*
-
-Remarks
- ACK_RETRANSMISSION_TO_2XX
-*/
+// ACK_RETRANSMISSION_TO_2XX
 PRIVATE
 void Session::RemoveStrayAcks()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piAckPackage != IMS_NULL)
+    if (m_piAckPackage != IMS_NULL)
     {
-        piAckPackage->RemoveStrayAcks();
+        m_piAckPackage->RemoveStrayAcks();
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 SipMethod Session::SelectUpdateMethod() const
 {
@@ -7473,18 +6368,15 @@ SipMethod Session::SelectUpdateMethod() const
     // 2. Select a re-INVITE if an updated application-specific offer
     // 3. Select an UPDATE if any media was removed or direction was changed
     // 4. Select an UPDATE if the session refresh required
-
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() != STATE_ESTABLISHED)
     {
         IMS_TRACE_E(0, "Invalid state (%s)", StateToString(GetState()), 0, 0);
         return SipMethod();
     }
 
-    for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
     {
-        const Media* pMedia = objMedias.GetAt(i);
+        const Media* pMedia = m_objMedias.GetAt(i);
 
         if ((pMedia->GetState() == Media::STATE_INACTIVE) ||
                 (pMedia->GetUpdateState() == Media::UPDATE_MODIFIED))
@@ -7494,9 +6386,9 @@ SipMethod Session::SelectUpdateMethod() const
         }
     }
 
-    for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
     {
-        const Media* pMedia = objMedias.GetAt(i);
+        const Media* pMedia = m_objMedias.GetAt(i);
 
         if ((pMedia->GetState() == Media::STATE_ACTIVE) &&
                 (pMedia->GetUpdateState() == Media::UPDATE_REMOVED))
@@ -7511,25 +6403,18 @@ SipMethod Session::SelectUpdateMethod() const
     return SipMethod(SipMethod::UPDATE);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::SendRequestForRefresh(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */)
+IMS_RESULT Session::SendRequestForRefresh(IN IMS_SINT32 nMethod /*= SipMethod::INVALID*/)
 {
     SipMethod objMethod(nMethod);
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     if (nState == STATE_ESTABLISHED)
     {
         // Send a refresh request : UPDATE or re-INVITE
         if (objMethod.Equals(SipMethod::INVALID))
         {
-            objMethod = pRefreshHelper->GetRefreshMethod();
+            objMethod = m_pRefreshHelper->GetRefreshMethod();
         }
 
         if (!objMethod.Equals(SipMethod::INVITE) && !objMethod.Equals(SipMethod::UPDATE))
@@ -7545,7 +6430,7 @@ IMS_RESULT Session::SendRequestForRefresh(IN IMS_SINT32 nMethod /* = SipMethod::
         // Send a refresh request : UPDATE
         if (objMethod.Equals(SipMethod::INVALID))
         {
-            objMethod = pRefreshHelper->GetRefreshMethod();
+            objMethod = m_pRefreshHelper->GetRefreshMethod();
         }
 
         if (!objMethod.Equals(SipMethod::UPDATE))
@@ -7555,15 +6440,15 @@ IMS_RESULT Session::SendRequestForRefresh(IN IMS_SINT32 nMethod /* = SipMethod::
         }
     }
 
-    ISipClientConnection* piSCC = CreateConnectionL(GetDialog(), objMethod);
+    ISipClientConnection* piScc = CreateConnectionL(GetDialog(), objMethod);
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a new SIP connection for a session refresh failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Set the headers for the invitation
 
@@ -7571,18 +6456,18 @@ IMS_RESULT Session::SendRequestForRefresh(IN IMS_SINT32 nMethod /* = SipMethod::
     if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
     {
         UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetService()->GetSipProfile(),
-                GetService()->GetServiceId(), GetService()->GetIpAddress(), GetSlotId(), piSIPMsg);
+                GetService()->GetServiceId(), GetService()->GetIpAddress(), GetSlotId(), piSipMsg);
     }
 
     // Set SDP message if any offer; According to the configuration options
     if (objMethod.Equals(SipMethod::INVITE))
     {
-        SetSDPBodyPartFromCurrentView(piSIPMsg);
+        SetSdpBodyPartFromCurrentView(piSipMsg);
     }
 
-    if (pRefreshHelper->SendRefreshRequest(piSCC) != IMS_SUCCESS)
+    if (m_pRefreshHelper->SendRefreshRequest(piScc) != IMS_SUCCESS)
     {
-        piSCC->Close();
+        piScc->Close();
 
         IMS_TRACE_E(0, "Sending a session refresh request (%s) failed",
                 objMethod.ToString().GetStr(), 0, 0);
@@ -7592,10 +6477,10 @@ IMS_RESULT Session::SendRequestForRefresh(IN IMS_SINT32 nMethod /* = SipMethod::
     if (objMethod.Equals(SipMethod::INVITE))
     {
         // Update the call state
-        UpdateCallStateOnMessageSent(piSCC->GetMessage());
+        UpdateCallStateOnMessageSent(piScc->GetMessage());
 
         // Update the Offer/Answer state
-        // UpdateOfferAnswerStateOnMessageSent(piSCC->GetMessage());
+        // UpdateOfferAnswerStateOnMessageSent(piScc->GetMessage());
     }
 
     // ACK_RETRANSMISSION_TO_2XX
@@ -7604,42 +6489,35 @@ IMS_RESULT Session::SendRequestForRefresh(IN IMS_SINT32 nMethod /* = SipMethod::
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::SendRequestToACK(IN ISipClientConnection* piSCC, IN IMS_SINT32 nServiceMethod)
+IMS_RESULT Session::SendRequestToAck(IN ISipClientConnection* piScc, IN IMS_SINT32 nServiceMethod)
 {
-    IMS_SINT32 nStatusCode = piSCC->GetStatusCode();
+    IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
-    //---------------------------------------------------------------------------------------------
-
-    if (!GetService()->InitAck(piSCC))
+    if (!GetService()->InitAck(piScc))
     {
         Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
-    if (bFlag_ImplicitRoutingRequired)
+    if (m_bImplicitRoutingRequired)
     {
         const AStringArray& objServiceRoutes = GetService()->GetServiceRoutes();
 
         if (!objServiceRoutes.IsEmpty())
         {
-            piSCC->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
+            piScc->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
         }
     }
 
     // Set SDP message if any offer
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
     // FIX_TIMING_ISSUE_UPDATE_N_INVITE_200OK
     if (!IsEarlyUpdateInProgress())
     {
-        CheckNSetSDPBodyPart(piSIPMsg);
+        CheckNSetSdpBodyPart(piSipMsg);
     }
 
     const SipConfigV* pSipConfigV = GetService()->GetSipConfigV();
@@ -7650,7 +6528,7 @@ IMS_RESULT Session::SendRequestToACK(IN ISipClientConnection* piSCC, IN IMS_SINT
 
         for (IMS_SINT32 i = 0; i < objMethods.GetCount(); ++i)
         {
-            if (piSIPMsg->AddHeader(ISipHeader::ALLOW, objMethods.GetElementAt(i)) != IMS_SUCCESS)
+            if (piSipMsg->AddHeader(ISipHeader::ALLOW, objMethods.GetElementAt(i)) != IMS_SUCCESS)
             {
                 IMS_TRACE_E(0, "Adding Allow header failed", 0, 0, 0);
                 Ims::SetLastError(ImsError::GENERAL_ERROR);
@@ -7663,7 +6541,7 @@ IMS_RESULT Session::SendRequestToACK(IN ISipClientConnection* piSCC, IN IMS_SINT
     if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
     {
         UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetService()->GetSipProfile(),
-                GetService()->GetServiceId(), GetService()->GetIpAddress(), GetSlotId(), piSIPMsg);
+                GetService()->GetServiceId(), GetService()->GetIpAddress(), GetSlotId(), piSipMsg);
     }
 
     // Add a specific header for ACK request (Require, ...)
@@ -7676,7 +6554,7 @@ IMS_RESULT Session::SendRequestToACK(IN ISipClientConnection* piSCC, IN IMS_SINT
 
         for (IMS_UINT32 i = 0; i < objRequires.GetSize(); ++i)
         {
-            piSIPMsg->AddHeader(ISipHeader::REQUIRE, objRequires.GetAt(i));
+            piSipMsg->AddHeader(ISipHeader::REQUIRE, objRequires.GetAt(i));
         }
 
         // Sets Proxy-Require header fields from the previous INVITE request
@@ -7685,12 +6563,12 @@ IMS_RESULT Session::SendRequestToACK(IN ISipClientConnection* piSCC, IN IMS_SINT
 
         for (IMS_UINT32 i = 0; i < objProxyRequires.GetSize(); ++i)
         {
-            piSIPMsg->AddHeader(
+            piSipMsg->AddHeader(
                     ISipHeader::UNKNOWN, objProxyRequires.GetAt(i), SipHeaderName::PROXY_REQUIRE);
         }
     }
 
-    if (!SendNUpdateRequest(IMessage::SESSION_ACK, piSCC))
+    if (!SendNUpdateRequest(IMessage::SESSION_ACK, piScc))
     {
         // ACK transaction will be closed by the caller
         ClearConnection(IMessage::SESSION_ACK);
@@ -7703,30 +6581,36 @@ IMS_RESULT Session::SendRequestToACK(IN ISipClientConnection* piSCC, IN IMS_SINT
     ClearConnection(IMessage::SESSION_ACK);
 
     // Update the call state
-    UpdateCallStateOnMessageSent(piSCC->GetMessage());
+    UpdateCallStateOnMessageSent(piScc->GetMessage());
     // Update the Offer/Answer state
-    UpdateOfferAnswerStateOnMessageSent(piSCC->GetMessage());
+    UpdateOfferAnswerStateOnMessageSent(piScc->GetMessage());
 
     // Update the media state
     if (nServiceMethod == IMessage::SESSION_START)
+    {
         UpdateMedia(Media::SESSION_STARTED);
+    }
     else if (nServiceMethod == IMessage::SESSION_UPDATE)
+    {
         UpdateMedia(Media::SESSION_UPDATED);
+    }
     else
+    {
         RestoreOfferAnswerState();
+    }
 
     // ACK_RETRANSMISSION_TO_2XX
     if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
-        if (piAckPackage == IMS_NULL)
+        if (m_piAckPackage == IMS_NULL)
         {
-            piAckPackage = piSCC->GrabAck();
+            m_piAckPackage = piScc->GrabAck();
         }
         else
         {
-            ISipAckPackage* piTempPackage = piSCC->GrabAck();
+            ISipAckPackage* piTempPackage = piScc->GrabAck();
 
-            if ((piTempPackage != IMS_NULL) && (piTempPackage != piAckPackage))
+            if ((piTempPackage != IMS_NULL) && (piTempPackage != m_piAckPackage))
             {
                 IMS_TRACE_D("Session :: ACK package is different (fatal error)", 0, 0, 0);
             }
@@ -7736,168 +6620,143 @@ IMS_RESULT Session::SendRequestToACK(IN ISipClientConnection* piSCC, IN IMS_SINT
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::SendRequestToBYE()
+IMS_RESULT Session::SendRequestToBye()
 {
     SipMethod objMethod(SipMethod::BYE);
-    ISipClientConnection* piSCC = CreateConnectionL(GetDialog(), objMethod);
+    ISipClientConnection* piScc = CreateConnectionL(GetDialog(), objMethod);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
     // Set the headers for the session termination
-    piSCC->SetExtensionTokenForViaBranch(strTerminationReasonFromApp);
+    piScc->SetExtensionTokenForViaBranch(m_strTerminationReasonFromApp);
 
     // Update a session refresh timer info.
-    pRefreshHelper->StopSessionTimer(piSCC);
+    m_pRefreshHelper->StopSessionTimer(piScc);
 
     // REFUSE_SDP_OFFER_ANSWER_EXCHANGE
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
-    SetSDPBodyPartFromRefusedView(piSIPMsg);
+    ISipMessage* piSipMsg = piScc->GetMessage();
+    SetSdpBodyPartFromRefusedView(piSipMsg);
 
     // Try to send an BYE request to the network
-    if (!SendNUpdateRequest(IMessage::SESSION_TERMINATE, piSCC))
+    if (!SendNUpdateRequest(IMessage::SESSION_TERMINATE, piScc))
     {
-        piSCC->Close();
+        piScc->Close();
         return IMS_FAILURE;
     }
 
     // Update the call state
-    UpdateCallStateOnMessageSent(piSCC->GetMessage());
+    UpdateCallStateOnMessageSent(piScc->GetMessage());
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::SendRequestToBYEInternal()
+IMS_RESULT Session::SendRequestToByeInternal()
 {
     SipMethod objMethod(SipMethod::BYE);
-    ISipClientConnection* piSCC = CreateConnectionL(GetDialog(), objMethod);
+    ISipClientConnection* piScc = CreateConnectionL(GetDialog(), objMethod);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
     // Set the headers for the session termination
-    piSCC->SetExtensionTokenForViaBranch(strTerminationReasonFromApp);
+    piScc->SetExtensionTokenForViaBranch(m_strTerminationReasonFromApp);
 
     // Update a session refresh timer info.
-    pRefreshHelper->StopSessionTimer(piSCC);
+    m_pRefreshHelper->StopSessionTimer(piScc);
 
 #if 0
     // KR
     {
-        if ((nTerminationReason == TERMINATION_REASON_REFRESH_TIMEOUT)
-            || (nTerminationReason == TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
+        if ((m_nTerminationReason == TERMINATION_REASON_REFRESH_TIMEOUT)
+            || (m_nTerminationReason == TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
         {
-            piSCC->AddHeader(SipHeaderName::REASON,
+            piScc->AddHeader(SipHeaderName::REASON,
                     "SIP; cause=103; text=\"Session-Expire\"; fc=9602");
-            piSCC->AddHeader("P-SKT-BYE-CAUSE", "no_upd");
+            piScc->AddHeader("P-SKT-BYE-CAUSE", "no_upd");
         }
         else
         {
-            if ((nTerminationReason == TERMINATION_REASON_REFRESH_408)
-                || (nTerminationReason == TERMINATION_REASON_REFRESH_481)
-                || (nTerminationReason == TERMINATION_REASON_REMOTE_ACTION))
+            if ((m_nTerminationReason == TERMINATION_REASON_REFRESH_408)
+                || (m_nTerminationReason == TERMINATION_REASON_REFRESH_481)
+                || (m_nTerminationReason == TERMINATION_REASON_REMOTE_ACTION))
             {
-                piSCC->AddHeader(SipHeaderName::REASON,
+                piScc->AddHeader(SipHeaderName::REASON,
                         "ETC; cause=104; text=\"Unknown\"; fc=9999");
             }
-            else if (nTerminationReason == TERMINATION_REASON_USER_ACTION)
+            else if (m_nTerminationReason == TERMINATION_REASON_USER_ACTION)
             {
-                piSCC->AddHeader(SipHeaderName::REASON,
+                piScc->AddHeader(SipHeaderName::REASON,
                         "USER; cause=101;text=\"USER triggered\"; fc=9501");
             }
             else
             {
-                piSCC->AddHeader(SipHeaderName::REASON,
+                piScc->AddHeader(SipHeaderName::REASON,
                         "ETC; cause=104; text=\"Unknown\"; fc=9999");
             }
 
-            piSCC->AddHeader("P-SKT-BYE-CAUSE", "normal");
+            piScc->AddHeader("P-SKT-BYE-CAUSE", "normal");
         }
     }
     // VZW
     {
-        if ((nTerminationReason == TERMINATION_REASON_REFRESH_TIMEOUT)
-                || (nTerminationReason == TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
+        if ((m_nTerminationReason == TERMINATION_REASON_REFRESH_TIMEOUT)
+                || (m_nTerminationReason == TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
         {
-            piSCC->AddHeader(SipHeaderName::REASON, "USER;text=\"Session Expired\"");
+            piScc->AddHeader(SipHeaderName::REASON, "USER;text=\"Session Expired\"");
         }
     }
 #endif
 
-    // SIP_MESSAGE_MEDIATOR
-    (void)AdjustMessage(piSCC->GetMessage(), MESSAGE_CLASS_INTERNAL_BYE);
+    (void)AdjustMessage(piScc->GetMessage(), MESSAGE_CLASS_INTERNAL_BYE);
 
     // Try to send an BYE request to the network
-    if (piSCC->Send() != IMS_SUCCESS)
+    if (piScc->Send() != IMS_SUCCESS)
     {
-        piSCC->Close();
+        piScc->Close();
         return IMS_FAILURE;
     }
 
     // Update the call state
-    UpdateCallStateOnMessageSent(piSCC->GetMessage());
+    UpdateCallStateOnMessageSent(piScc->GetMessage());
 
-    if (piSCC_BYE != IMS_NULL)
+    if (m_piSccBye != IMS_NULL)
     {
-        piSCC_BYE->Close();
+        m_piSccBye->Close();
     }
 
-    piSCC_BYE = piSCC;
+    m_piSccBye = piScc;
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::SendRequestToCANCEL()
+IMS_RESULT Session::SendRequestToCancel()
 {
-    // Message *pInviteRequest = GetPreviousRequest(IMessage::SESSION_START);
-
-    //---------------------------------------------------------------------------------------------
-
-    // if (pInviteRequest == IMS_NULL)
-    //{
-    //     return IMS_FAILURE;
-    // }
-
-    ISipClientConnection* piSCC = IMS_NULL;
+    ISipClientConnection* piScc = IMS_NULL;
 
     if (GetState() == STATE_RENEGOTIATING)
-        piSCC = GetClientConnection(IMessage::SESSION_UPDATE);
+    {
+        piScc = GetClientConnection(IMessage::SESSION_UPDATE);
+    }
     else
-        piSCC = GetClientConnection(IMessage::SESSION_START);
+    {
+        piScc = GetClientConnection(IMessage::SESSION_START);
+    }
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Can't retrieve the previous SIP connection (INVITE)", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    ISipClientConnection* piCancel = CreateCancelConnection(piSCC);
+    ISipClientConnection* piCancel = CreateCancelConnection(piScc);
 
     if (piCancel == IMS_NULL)
     {
@@ -7913,17 +6772,17 @@ IMS_RESULT Session::SendRequestToCANCEL()
         nMethodForCancel = IMessage::SESSION_CANCEL;
     }
 
-    ISipMessage* piSIPMsg = piCancel->GetMessage();
+    ISipMessage* piSipMsg = piCancel->GetMessage();
 
     // Sets User-Agent header field
     if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
     {
         UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetService()->GetSipProfile(),
-                GetService()->GetServiceId(), GetService()->GetIpAddress(), GetSlotId(), piSIPMsg);
+                GetService()->GetServiceId(), GetService()->GetIpAddress(), GetSlotId(), piSipMsg);
     }
 
     // REFUSE_SDP_OFFER_ANSWER_EXCHANGE
-    SetSDPBodyPartFromRefusedView(piSIPMsg);
+    SetSdpBodyPartFromRefusedView(piSipMsg);
 
     // Try to send an CANCEL request to the network
     if (!SendNUpdateRequest(nMethodForCancel, piCancel))
@@ -7938,54 +6797,47 @@ IMS_RESULT Session::SendRequestToCANCEL()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::SendRequestToINVITE(IN IMS_BOOL bSessionRefresh /* = IMS_FALSE */)
+IMS_RESULT Session::SendRequestToInvite(IN IMS_BOOL bSessionRefresh /*= IMS_FALSE*/)
 {
     IMS_SINT32 nServiceMethod;
-    ISipClientConnection* piSCC = IMS_NULL;
+    ISipClientConnection* piScc = IMS_NULL;
     SipMethod objMethod(SipMethod::INVITE);
-
-    //---------------------------------------------------------------------------------------------
 
     if (GetState() == STATE_INITIATED)
     {
         nServiceMethod = IMessage::SESSION_START;
-        piSCC = CreateConnection(objMethod);
+        piScc = CreateConnection(objMethod);
     }
     else
     {
         nServiceMethod = IMessage::SESSION_UPDATE;
-        piSCC = CreateConnectionL(GetDialog(), objMethod);
+        piScc = CreateConnectionL(GetDialog(), objMethod);
     }
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a new SIP connection failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Set the headers for the invitation
 
     // Min-SE : configuration option
     // Session-Expires : configuration options
     // Supported : configuration options
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
         if (!SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
                     GetSlotId(), GetService()->GetSipProfile()))
         {
             if (GetState() != STATE_INITIATED)
             {
-                if (!pRefreshHelper->AddSpecificHeaderWithoutParameterChange(piSCC))
+                if (!m_pRefreshHelper->AddSpecificHeaderWithoutParameterChange(piScc))
                 {
-                    piSCC->Close();
+                    piScc->Close();
                     Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                     IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
@@ -7994,9 +6846,9 @@ IMS_RESULT Session::SendRequestToINVITE(IN IMS_BOOL bSessionRefresh /* = IMS_FAL
             }
             else
             {
-                if (!pRefreshHelper->AddSpecificHeader(piSCC))
+                if (!m_pRefreshHelper->AddSpecificHeader(piScc))
                 {
-                    piSCC->Close();
+                    piScc->Close();
                     Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                     IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
@@ -8006,9 +6858,9 @@ IMS_RESULT Session::SendRequestToINVITE(IN IMS_BOOL bSessionRefresh /* = IMS_FAL
         }
         else
         {
-            if (!pRefreshHelper->AddSpecificHeader(piSCC))
+            if (!m_pRefreshHelper->AddSpecificHeader(piScc))
             {
-                piSCC->Close();
+                piScc->Close();
                 Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                 IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
@@ -8020,89 +6872,86 @@ IMS_RESULT Session::SendRequestToINVITE(IN IMS_BOOL bSessionRefresh /* = IMS_FAL
     if (bSessionRefresh)
     {
         // Set SDP message from the current view
-        SetSDPBodyPartFromCurrentView(piSIPMsg);
+        SetSdpBodyPartFromCurrentView(piSipMsg);
     }
     else
     {
         // Set SDP message if any offer
-        CheckNSetSDPBodyPart(piSIPMsg);
+        CheckNSetSdpBodyPart(piSipMsg);
     }
 
     // Update a session refresh timer info.
     if (SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
                 GetSlotId(), GetService()->GetSipProfile()))
     {
-        if (pRefreshHelper != IMS_NULL)
+        if (m_pRefreshHelper != IMS_NULL)
         {
-            pRefreshHelper->StopSessionTimer(piSCC);
+            m_pRefreshHelper->StopSessionTimer(piScc);
         }
     }
 
     // CALLER_PREFERENCE_MANAGER
     if (GetState() != STATE_INITIATED)
     {
-        objPreviousCallerPreference =
+        m_objPreviousCallerPreference =
                 CallerPreferenceManager::GetInstance()->GetAcceptContactsByName(GetName());
     }
 
     // Try to send an INVITE request to the network
-    if (!SendNUpdateRequest(nServiceMethod, piSCC))
+    if (!SendNUpdateRequest(nServiceMethod, piScc))
     {
         // CALLER_PREFERENCE_MANAGER
-        objPreviousCallerPreference.Clear();
+        m_objPreviousCallerPreference.Clear();
 
-        piSCC->Close();
+        piScc->Close();
         return IMS_FAILURE;
     }
 
     // Update the call state
-    UpdateCallStateOnMessageSent(piSCC->GetMessage());
+    UpdateCallStateOnMessageSent(piScc->GetMessage());
     // Update the Offer/Answer state
-    UpdateOfferAnswerStateOnMessageSent(piSCC->GetMessage());
+    UpdateOfferAnswerStateOnMessageSent(piScc->GetMessage());
 
     // Update the media state
     if (GetState() == STATE_INITIATED)
-        UpdateMedia(Media::SESSION_START);
-    else
-        UpdateMedia(Media::SESSION_UPDATE);
-
-    if ((GetState() == STATE_INITIATED) && !objMedias.IsEmpty())
     {
-        bFlag_SDPInInitialINVITE = IMS_TRUE;
+        UpdateMedia(Media::SESSION_START);
+    }
+    else
+    {
+        UpdateMedia(Media::SESSION_UPDATE);
+    }
+
+    if ((GetState() == STATE_INITIATED) && !m_objMedias.IsEmpty())
+    {
+        m_bSdpInInitialInvite = IMS_TRUE;
     }
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::SendRequestToINVITEOn422Received()
+IMS_RESULT Session::SendRequestToInviteOn422Received()
 {
     IMS_SINT32 nState = GetState();
     IMS_SINT32 nServiceMethod;
-    ISipClientConnection* piSCC = IMS_NULL;
+    ISipClientConnection* piScc = IMS_NULL;
     SipMethod objMethod(SipMethod::INVITE);
-
-    //---------------------------------------------------------------------------------------------
 
     IMS_TRACE_D("SendRequestToINVITEOn422Received()", 0, 0, 0);
 
     if (nState == STATE_INITIATED)
     {
         nServiceMethod = IMessage::SESSION_START;
-        piSCC = CreateConnection(objMethod);
+        piScc = CreateConnection(objMethod);
     }
     else
     {
         nServiceMethod = IMessage::SESSION_UPDATE;
-        piSCC = CreateConnectionL(GetDialog(), objMethod);
+        piScc = CreateConnectionL(GetDialog(), objMethod);
     }
 
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a new SIP connection failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -8112,31 +6961,31 @@ IMS_RESULT Session::SendRequestToINVITEOn422Received()
 
     if (piPreviousRequest == IMS_NULL)
     {
-        piSCC->Close();
+        piScc->Close();
 
         IMS_TRACE_E(0, "Previous request is null", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Copy all the headers and message bodies from the previous request message
-    if (piSIPMsg->CopyHeadersAndBodyParts(piPreviousRequest->GetMessage()) != IMS_SUCCESS)
+    if (piSipMsg->CopyHeadersAndBodyParts(piPreviousRequest->GetMessage()) != IMS_SUCCESS)
     {
-        piSCC->Close();
+        piScc->Close();
 
         IMS_TRACE_E(0, "Copying SIP headers and message body parts failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
     // Remove the transaction-related headers
-    piSIPMsg->RemoveHeader(ISipHeader::VIA);
+    piSipMsg->RemoveHeader(ISipHeader::VIA);
 
-    piSIPMsg->RemoveHeader(ISipHeader::MIN_SE);
-    piSIPMsg->RemoveHeader(ISipHeader::SESSION_EXPIRES);
+    piSipMsg->RemoveHeader(ISipHeader::MIN_SE);
+    piSipMsg->RemoveHeader(ISipHeader::SESSION_EXPIRES);
 
     // Correct the header value if it is required
-    AString strCSeqHdr = piSIPMsg->GetHeader(ISipHeader::CSEQ);
+    AString strCSeqHdr = piSipMsg->GetHeader(ISipHeader::CSEQ);
     ISipHeader* piHeader = SipParsingHelper::CreateHeader(ISipHeader::CSEQ, strCSeqHdr);
 
     if (piHeader != IMS_NULL)
@@ -8157,7 +7006,7 @@ IMS_RESULT Session::SendRequestToINVITEOn422Received()
 
                 IMS_TRACE_D("New CSeq header :: %s", strNewCSeqHdr.GetStr(), 0, 0);
 
-                piSIPMsg->SetHeader(ISipHeader::CSEQ, strNewCSeqHdr);
+                piSipMsg->SetHeader(ISipHeader::CSEQ, strNewCSeqHdr);
             }
         }
 
@@ -8167,16 +7016,16 @@ IMS_RESULT Session::SendRequestToINVITEOn422Received()
     // Min-SE : configuration option
     // Session-Expires : configuration options
     // Supported : configuration options
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
         if (!SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
                     GetSlotId(), GetService()->GetSipProfile()))
         {
             if (nState != STATE_INITIATED)
             {
-                if (!pRefreshHelper->AddSpecificHeaderWithoutParameterChange(piSCC))
+                if (!m_pRefreshHelper->AddSpecificHeaderWithoutParameterChange(piScc))
                 {
-                    piSCC->Close();
+                    piScc->Close();
                     Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                     IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
@@ -8185,9 +7034,9 @@ IMS_RESULT Session::SendRequestToINVITEOn422Received()
             }
             else
             {
-                if (!pRefreshHelper->AddSpecificHeader(piSCC))
+                if (!m_pRefreshHelper->AddSpecificHeader(piScc))
                 {
-                    piSCC->Close();
+                    piScc->Close();
                     Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                     IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
@@ -8197,9 +7046,9 @@ IMS_RESULT Session::SendRequestToINVITEOn422Received()
         }
         else
         {
-            if (!pRefreshHelper->AddSpecificHeader(piSCC))
+            if (!m_pRefreshHelper->AddSpecificHeader(piScc))
             {
-                piSCC->Close();
+                piScc->Close();
                 Ims::SetLastError(ImsError::GENERAL_ERROR);
 
                 IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
@@ -8212,33 +7061,33 @@ IMS_RESULT Session::SendRequestToINVITEOn422Received()
     if (SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(
                 GetSlotId(), GetService()->GetSipProfile()))
     {
-        if (pRefreshHelper != IMS_NULL)
+        if (m_pRefreshHelper != IMS_NULL)
         {
-            pRefreshHelper->StopSessionTimer(piSCC);
+            m_pRefreshHelper->StopSessionTimer(piScc);
         }
     }
 
     // CALLER_PREFERENCE_MANAGER
     if (nState != STATE_INITIATED)
     {
-        objPreviousCallerPreference =
+        m_objPreviousCallerPreference =
                 CallerPreferenceManager::GetInstance()->GetAcceptContactsByName(GetName());
     }
 
     // Try to send an INVITE request to the network
-    if (!SendNUpdateRequest(nServiceMethod, piSCC))
+    if (!SendNUpdateRequest(nServiceMethod, piScc))
     {
         // CALLER_PREFERENCE_MANAGER
-        objPreviousCallerPreference.Clear();
+        m_objPreviousCallerPreference.Clear();
 
-        piSCC->Close();
+        piScc->Close();
         return IMS_FAILURE;
     }
 
     // Update the call state
-    UpdateCallStateOnMessageSent(piSCC->GetMessage());
+    UpdateCallStateOnMessageSent(piScc->GetMessage());
     // Update the Offer/Answer state
-    UpdateOfferAnswerStateOnMessageSent(piSCC->GetMessage());
+    UpdateOfferAnswerStateOnMessageSent(piScc->GetMessage());
 
     // Update the media state
     if (nState == STATE_INITIATED)
@@ -8252,43 +7101,36 @@ IMS_RESULT Session::SendRequestToINVITEOn422Received()
         SetState(STATE_RENEGOTIATING);
     }
 
-    if ((nState == STATE_INITIATED) && !objMedias.IsEmpty())
+    if ((nState == STATE_INITIATED) && !m_objMedias.IsEmpty())
     {
-        bFlag_SDPInInitialINVITE = IMS_TRUE;
+        m_bSdpInInitialInvite = IMS_TRUE;
     }
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_RESULT Session::SendRequestToUPDATE(IN IMS_BOOL bSessionRefresh /* = IMS_FALSE */)
+IMS_RESULT Session::SendRequestToUpdate(IN IMS_BOOL bSessionRefresh /*= IMS_FALSE*/)
 {
     SipMethod objMethod(SipMethod::UPDATE);
-    ISipClientConnection* piSCC = CreateConnectionL(GetDialog(), objMethod);
+    ISipClientConnection* piScc = CreateConnectionL(GetDialog(), objMethod);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a new SIP connection failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Set the headers for the invitation
 
     // Min-SE : configuration option
     // Session-Expires : configuration options
     // Supported : configuration options
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
-        if (!pRefreshHelper->AddSpecificHeader(piSCC))
+        if (!m_pRefreshHelper->AddSpecificHeader(piScc))
         {
             Ims::SetLastError(ImsError::GENERAL_ERROR);
             IMS_TRACE_E(0, "Adding the session refresh headers failed", 0, 0, 0);
@@ -8299,29 +7141,29 @@ IMS_RESULT Session::SendRequestToUPDATE(IN IMS_BOOL bSessionRefresh /* = IMS_FAL
     if (bSessionRefresh)
     {
         // Set SDP message from the current view
-        SetSDPBodyPartFromCurrentView(piSIPMsg);
+        SetSdpBodyPartFromCurrentView(piSipMsg);
     }
     else
     {
         // Set SDP message if any offer
-        CheckNSetSDPBodyPart(piSIPMsg);
+        CheckNSetSdpBodyPart(piSipMsg);
     }
 
     // Update a session refresh timer info.
-    if (pRefreshHelper != IMS_NULL)
+    if (m_pRefreshHelper != IMS_NULL)
     {
-        pRefreshHelper->StopSessionTimer(piSCC);
+        m_pRefreshHelper->StopSessionTimer(piScc);
     }
 
     // Try to send an UPDATE request to the network
-    if (!SendNUpdateRequest(IMessage::SESSION_UPDATE, piSCC))
+    if (!SendNUpdateRequest(IMessage::SESSION_UPDATE, piScc))
     {
-        piSCC->Close();
+        piScc->Close();
         return IMS_FAILURE;
     }
 
     // Update the Offer/Answer state
-    UpdateOfferAnswerStateOnMessageSent(piSCC->GetMessage());
+    UpdateOfferAnswerStateOnMessageSent(piScc->GetMessage());
 
     // Update the media state
     UpdateMedia(Media::SESSION_UPDATE);
@@ -8329,18 +7171,11 @@ IMS_RESULT Session::SendRequestToUPDATE(IN IMS_BOOL bSessionRefresh /* = IMS_FAL
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_RESULT Session::SendResponseEx(
-        IN ISipServerConnection* piSSC, IN IMS_SINT32 nServiceMethod, IN IMS_SINT32 nStatusCode)
+        IN ISipServerConnection* piSsc, IN IMS_SINT32 nServiceMethod, IN IMS_SINT32 nStatusCode)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (CreateResponse(piSSC, nStatusCode) == IMS_FALSE)
+    if (CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Initializing a response failed - SipError (%d)", SipError::GetLastError(),
                 0, 0);
@@ -8348,7 +7183,7 @@ IMS_RESULT Session::SendResponseEx(
     }
 
     // Update a new SIP response message
-    if (piSSC->GetMethod().Equals(SipMethod::INVITE))
+    if (piSsc->GetMethod().Equals(SipMethod::INVITE))
     {
         switch (nStatusCode)
         {
@@ -8361,29 +7196,22 @@ IMS_RESULT Session::SendResponseEx(
         }
     }
 
-    if (!SendNUpdateResponse(nServiceMethod, piSSC))
+    if (!SendNUpdateResponse(nServiceMethod, piSsc))
     {
         IMS_TRACE_E(0, "Sending a response failed - SipError (%d)", SipError::GetLastError(), 0, 0);
         return IMS_FAILURE;
     }
 
     // Update the call state
-    UpdateCallStateOnMessageSent(piSSC->GetMessage());
+    UpdateCallStateOnMessageSent(piSsc->GetMessage());
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Session::SetReasonHeaderFromPreviousRequest(IN IMS_SINT32 nRequest)
 {
     Message* pPrevRequest = GetPreviousRequest(nRequest);
-
-    //---------------------------------------------------------------------------------------------
 
     if (pPrevRequest == IMS_NULL)
     {
@@ -8397,109 +7225,52 @@ void Session::SetReasonHeaderFromPreviousRequest(IN IMS_SINT32 nRequest)
         return;
     }
 
-    ISipMessage* piPrevSIPMsg = pPrevRequest->GetMessage();
-    ISipMessage* piNextSIPMsg = pNextRequest->GetMessage();
+    ISipMessage* piPrevSipMsg = pPrevRequest->GetMessage();
+    ISipMessage* piNextSipMsg = pNextRequest->GetMessage();
 
-    if ((piPrevSIPMsg != IMS_NULL) && (piNextSIPMsg != IMS_NULL))
+    if ((piPrevSipMsg != IMS_NULL) && (piNextSipMsg != IMS_NULL))
     {
-        const AString REASON(SipHeaderName::REASON);
-        AString strReason = piPrevSIPMsg->GetHeader(ISipHeader::UNKNOWN, 0, REASON);
+        const AString strReasonHeaderName(SipHeaderName::REASON);
+        AString strReason = piPrevSipMsg->GetHeader(ISipHeader::UNKNOWN, 0, strReasonHeaderName);
 
         if (strReason.GetLength() > 0)
         {
-            piNextSIPMsg->SetHeader(ISipHeader::UNKNOWN, strReason, REASON);
+            piNextSipMsg->SetHeader(ISipHeader::UNKNOWN, strReason, strReasonHeaderName);
         }
 
         // KR requirements
         {
-            const AString P_SKT_BYE_CAUSE("P-SKT-BYE-CAUSE");
-            AString strByeCause = piPrevSIPMsg->GetHeader(ISipHeader::UNKNOWN, 0, P_SKT_BYE_CAUSE);
+            const AString strPSktByeCause("P-SKT-BYE-CAUSE");
+            AString strByeCause = piPrevSipMsg->GetHeader(ISipHeader::UNKNOWN, 0, strPSktByeCause);
 
             if (strByeCause.GetLength() > 0)
             {
-                piNextSIPMsg->SetHeader(ISipHeader::UNKNOWN, strByeCause, P_SKT_BYE_CAUSE);
+                piNextSipMsg->SetHeader(ISipHeader::UNKNOWN, strByeCause, strPSktByeCause);
             }
         }
     }
 }
 
-/*
-
-Remarks
- RACE_CONDITION : SESSION_UPDATE
-*/
-PRIVATE
-void Session::SetSessionUpdateNotificationState(IN IMS_BOOL bInProgress)
-{
-    //---------------------------------------------------------------------------------------------
-
-    bFlag_SessionUpdateNotificationInProgress = bInProgress;
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Session::SetState(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
+    IMS_TRACE_I("Session :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
-    IMS_TRACE_I("Session :: %s to %s", StateToString(this->nState), StateToString(nState), 0);
-
-    this->nState = nState;
+    m_nState = nState;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Session::Start2xxRetransmission()
 {
-    //---------------------------------------------------------------------------------------------
+    m_pRetransmissionTask = new RetryTaskHelper();
 
-#ifndef __IMS_SESSION_RETRY_TASK__
-    pRetransmissionHelper = new RetransmissionHelper();
-
-    if (pRetransmissionHelper == IMS_NULL)
+    if (m_pRetransmissionTask == IMS_NULL)
     {
         return;
     }
 
-    const ISipConfigV* piSipConfigV = GetService()->GetISipConfigV();
-    IMS_SINT32 nTH = SipConfigProxy::GetTimerValueH(
-            GetSlotId(), GetService()->GetSipProfile(), piSipConfigV, IMS_FALSE);
-
-    if (nTH > 0)
-    {
-        pRetransmissionHelper->SetMaxDuration(nTH);
-    }
-    else
-    {
-        IMS_SINT32 nTB = SipConfigProxy::GetTimerValueB(
-                GetSlotId(), GetService()->GetSipProfile(), piSipConfigV, IMS_FALSE);
-
-        if (nTB > 0)
-        {
-            pRetransmissionHelper->SetMaxDuration(nTB);
-        }
-    }
-
-    pRetransmissionHelper->SetListener(this);
-    pRetransmissionHelper->Start();
-#else
-    pRetransmissionTask = new RetryTaskHelper();
-
-    if (pRetransmissionTask == IMS_NULL)
-    {
-        return;
-    }
-
-    pRetransmissionTask->SetListener(this);
-    pRetransmissionTask->SetCommand(this);
+    m_pRetransmissionTask->SetListener(this);
+    m_pRetransmissionTask->SetCommand(this);
 
     RetryTimer* pTimer = new RetryTimer();
 
@@ -8508,102 +7279,79 @@ void Session::Start2xxRetransmission()
         return;
     }
 
-    const SipProfile* pSIPProfile = GetService()->GetSipProfile();
+    const SipProfile* pProfile = GetService()->GetSipProfile();
     const ISipConfigV* piSipConfigV = GetService()->GetISipConfigV();
 
-    IMS_SINT32 nT1 = SipConfigProxy::GetTimerValueT1(GetSlotId(), pSIPProfile, piSipConfigV);
-    IMS_SINT32 nT2 = SipConfigProxy::GetTimerValueT2(GetSlotId(), pSIPProfile, piSipConfigV);
-    IMS_SINT32 nTH = nT1 * 64;
+    IMS_SINT32 nT1 = SipConfigProxy::GetTimerValueT1(GetSlotId(), pProfile, piSipConfigV);
+    IMS_SINT32 nT2 = SipConfigProxy::GetTimerValueT2(GetSlotId(), pProfile, piSipConfigV);
+    IMS_SINT32 nTimerH = nT1 * 64;
 
-    IMS_SINT32 nTV = nT1;
-    IMS_SINT32 nTxnExpires = nTH;
+    IMS_SINT32 nTimerValue = nT1;
+    IMS_SINT32 nTxnExpires = nTimerH;
     IMS_SINT32 nMultiplier = 1;
 
     while (1)
     {
-        if (nTV == nT2)
+        if (nTimerValue == nT2)
         {
-            nTV = nT2;
+            nTimerValue = nT2;
         }
         else
         {
-            nTV = IMS_MIN(nMultiplier * nT1, nT2);
+            nTimerValue = IMS_MIN(nMultiplier * nT1, nT2);
             nMultiplier *= 2;
 
             // Exceptional case
-            if ((nTV <= 0) || (nTV > nTxnExpires))
+            if ((nTimerValue <= 0) || (nTimerValue > nTxnExpires))
             {
-                IMS_TRACE_D(
-                        "2XX retransmission timer value fallback :: TV(%d), T2(%d)", nTV, nT2, 0);
+                IMS_TRACE_D("2XX retransmission timer value fallback :: TV(%d), T2(%d)",
+                        nTimerValue, nT2, 0);
 
-                nTV = nT2;
+                nTimerValue = nT2;
             }
         }
 
-        pTimer->AddValue(nTV);
+        pTimer->AddValue(nTimerValue);
 
-        nTH -= nTV;
+        nTimerH -= nTimerValue;
 
-        if (nTH < nT2)
+        if (nTimerH < nT2)
         {
-            if (nTH > 0)
+            if (nTimerH > 0)
             {
-                pTimer->AddValue(nTH);
+                pTimer->AddValue(nTimerH);
             }
             break;
         }
     }
 
-    pRetransmissionTask->SetTimer(pTimer);
+    m_pRetransmissionTask->SetTimer(pTimer);
 
-    pRetransmissionTask->Start(RetryTaskHelper::START_TIMER);
-#endif  // __IMS_SESSION_RETRY_TASK__
+    m_pRetransmissionTask->Start(RetryTaskHelper::START_TIMER);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Session::Stop2xxRetransmission()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pRetransmissionHelper != IMS_NULL)
+    if (m_pRetransmissionTask != IMS_NULL)
     {
-        pRetransmissionHelper->Stop();
+        m_pRetransmissionTask->Terminate();
 
-        delete pRetransmissionHelper;
-        pRetransmissionHelper = IMS_NULL;
-    }
-
-#ifdef __IMS_SESSION_RETRY_TASK__
-    if (pRetransmissionTask != IMS_NULL)
-    {
-        pRetransmissionTask->Terminate();
-
-        RetryTimer* pTimer = pRetransmissionTask->SetTimer(IMS_NULL);
+        RetryTimer* pTimer = m_pRetransmissionTask->SetTimer(IMS_NULL);
 
         if (pTimer != IMS_NULL)
+        {
             delete pTimer;
+        }
 
-        delete pRetransmissionTask;
-        pRetransmissionTask = IMS_NULL;
+        delete m_pRetransmissionTask;
+        m_pRetransmissionTask = IMS_NULL;
     }
-#endif
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Session::TerminateOnNegotiating()
 {
-    //---------------------------------------------------------------------------------------------
-
     // Session : MO
     if (IsMobileOriginated())
     {
@@ -8612,17 +7360,17 @@ void Session::TerminateOnNegotiating()
         if (nCallState == CallState::STATE_INVITE_SENT)
         {
             // Set the flag and wait & send CANCEL when receiving 1xx response
-            bFlag_TerminatePending = IMS_TRUE;
+            m_bTerminatePending = IMS_TRUE;
 
             IMS_TRACE_I("_____ No 1xx response to INVITE received _____", 0, 0, 0);
             return;
         }
         else if (nCallState == CallState::STATE_INVITE_1XX_RECEIVED)
         {
-            if (bFlag_TerminateMethodBYE)
+            if (m_bTerminateMethodBye)
             {
                 // Send BYE
-                if (SendRequestToBYE() != IMS_SUCCESS)
+                if (SendRequestToBye() != IMS_SUCCESS)
                 {
                     SetState(STATE_TERMINATED);
 
@@ -8638,7 +7386,7 @@ void Session::TerminateOnNegotiating()
             else
             {
                 // Send CANCEL
-                if (SendRequestToCANCEL() != IMS_SUCCESS)
+                if (SendRequestToCancel() != IMS_SUCCESS)
                 {
                     SetState(STATE_TERMINATED);
 
@@ -8656,7 +7404,7 @@ void Session::TerminateOnNegotiating()
         else if (nCallState == CallState::STATE_INVITE_2XX_RECEIVED)
         {
             // Send BYE
-            if (SendRequestToBYE() != IMS_SUCCESS)
+            if (SendRequestToBye() != IMS_SUCCESS)
             {
                 SetState(STATE_TERMINATED);
 
@@ -8672,9 +7420,9 @@ void Session::TerminateOnNegotiating()
     // Session : MT
     else
     {
-        ISipServerConnection* piSSC = GetServerConnection(IMessage::SESSION_START);
+        ISipServerConnection* piSsc = GetServerConnection(IMessage::SESSION_START);
 
-        if (piSSC == IMS_NULL)
+        if (piSsc == IMS_NULL)
         {
             SetState(STATE_TERMINATED);
 
@@ -8682,7 +7430,7 @@ void Session::TerminateOnNegotiating()
             return;
         }
 
-        if (SendResponseEx(piSSC, IMessage::SESSION_START, SipStatusCode::SC_486) != IMS_SUCCESS)
+        if (SendResponseEx(piSsc, IMessage::SESSION_START, SipStatusCode::SC_486) != IMS_SUCCESS)
         {
             SetState(STATE_TERMINATED);
 
@@ -8696,35 +7444,15 @@ void Session::TerminateOnNegotiating()
     }
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE
-void Session::TerminateOnEstablishing()
-{
-    //---------------------------------------------------------------------------------------------
-
-    bFlag_TerminatePending = IMS_TRUE;
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Session::TerminateOnReNegotiating()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bFlag_UpdateRequestor)
+    if (m_bUpdateRequestor)
     {
         // Abort the ongoing transaction
         CloseConnection(IMessage::SESSION_UPDATE);
 
-        if (SendRequestToBYE() != IMS_SUCCESS)
+        if (SendRequestToBye() != IMS_SUCCESS)
         {
             SetState(STATE_TERMINATED);
 
@@ -8742,9 +7470,9 @@ void Session::TerminateOnReNegotiating()
 
         if (pMessage != IMS_NULL)
         {
-            ISipServerConnection* piSSC = GetServerConnection(IMessage::SESSION_UPDATE);
+            ISipServerConnection* piSsc = GetServerConnection(IMessage::SESSION_UPDATE);
 
-            if (piSSC == IMS_NULL)
+            if (piSsc == IMS_NULL)
             {
                 SetState(STATE_TERMINATED);
 
@@ -8754,7 +7482,7 @@ void Session::TerminateOnReNegotiating()
                 return;
             }
 
-            if (SendResponseEx(piSSC, IMessage::SESSION_UPDATE, SipStatusCode::SC_488) !=
+            if (SendResponseEx(piSsc, IMessage::SESSION_UPDATE, SipStatusCode::SC_488) !=
                     IMS_SUCCESS)
             {
                 SetState(STATE_TERMINATED);
@@ -8766,7 +7494,7 @@ void Session::TerminateOnReNegotiating()
             }
         }
 
-        if (SendRequestToBYE() != IMS_SUCCESS)
+        if (SendRequestToBye() != IMS_SUCCESS)
         {
             SetState(STATE_TERMINATED);
 
@@ -8780,33 +7508,15 @@ void Session::TerminateOnReNegotiating()
     }
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE
-void Session::TerminateOnReEstablishing()
-{
-    //---------------------------------------------------------------------------------------------
-
-    bFlag_TerminatePending = IMS_TRUE;
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Session::TerminateForkedSessionsOnNegotiating()
 {
-    if (pForkedSessions.IsNull())
+    if (m_pForkedSessions.IsNull())
     {
         return;
     }
 
-    const IMSList<Method*>& objMethods = pForkedSessions->GetMethods();
+    const IMSList<Method*>& objMethods = m_pForkedSessions->GetMethods();
 
     if (objMethods.IsEmpty())
     {
@@ -8824,11 +7534,6 @@ void Session::TerminateForkedSessionsOnNegotiating()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Session::TerminateForkedSession()
 {
@@ -8840,17 +7545,10 @@ void Session::TerminateForkedSession()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL Session::AddMedia(IN Media* pMedia)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!objMedias.Append(pMedia))
+    if (!m_objMedias.Append(pMedia))
     {
         IMS_TRACE_E(0, "Appending Media object failed", 0, 0, 0);
         return IMS_FALSE;
@@ -8859,37 +7557,25 @@ IMS_BOOL Session::AddMedia(IN Media* pMedia)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void Session::CleanupMedia()
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
     {
-        Media* pMedia = objMedias.GetAt(i);
+        Media* pMedia = m_objMedias.GetAt(i);
 
         if (pMedia != IMS_NULL)
+        {
             pMedia->CleanupMedia();
+        }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL Session::CreateMediaFromSDP()
+IMS_BOOL Session::CreateMediaFromSdp()
 {
-    SessionParameter* pSessionParam = pOAState->GetProposalView();
+    SessionParameter* pSessionParam = m_pOaState->GetProposalView();
     IMS_SINT32 nMediaCount = pSessionParam->GetMediaCount();
-
-    //---------------------------------------------------------------------------------------------
 
     if (nMediaCount != 0)
     {
@@ -8909,16 +7595,15 @@ IMS_BOOL Session::CreateMediaFromSDP()
 
                 switch (pMediaParam->GetMedia().GetTransportProtocol())
                 {
-                    case SdpMedia::TRANSPORT_RTP_AVP:
-                    case SdpMedia::TRANSPORT_RTP_AVPF:
-                    case SdpMedia::TRANSPORT_RTP_SAVP:
-                    case SdpMedia::TRANSPORT_RTP_SAVPF:
-                    case SdpMedia::TRANSPORT_TCP_MSRP:
-                    case SdpMedia::TRANSPORT_TCP_TLS_MSRP:
-                    case SdpMedia::TRANSPORT_UDP:
+                    case SdpMedia::TRANSPORT_RTP_AVP:       // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_RTP_AVPF:      // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_RTP_SAVP:      // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_RTP_SAVPF:     // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_TCP_MSRP:      // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_TCP_TLS_MSRP:  // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_UDP:           // FALL-THROUGH
                     case SdpMedia::TRANSPORT_TCP:
                         break;
-
                     default:
                         IMS_TRACE_I(
                                 "Unsupported media type(%s, %s) received; So, it will be ignored",
@@ -8927,7 +7612,7 @@ IMS_BOOL Session::CreateMediaFromSDP()
                         continue;
                 }
 
-                if (nMediaIndex >= objMedias.GetSize())
+                if (nMediaIndex >= m_objMedias.GetSize())
                 {
                     IMSList<IMS_SINT32> objMids;
 
@@ -8944,11 +7629,13 @@ IMS_BOOL Session::CreateMediaFromSDP()
 
                     // New media; Create and add to the current session.
                     Media* pMedia = MediaFactory::CreateIncomingMedia(
-                            pMediaParam->GetMedia().GetTransportProtocol(), GetService(), pOAState,
-                            objMids);
+                            pMediaParam->GetMedia().GetTransportProtocol(), GetService(),
+                            m_pOaState, objMids);
 
                     if (pMedia == IMS_NULL)
+                    {
                         continue;
+                    }
 
                     if (!AddMedia(pMedia))
                     {
@@ -8965,20 +7652,13 @@ IMS_BOOL Session::CreateMediaFromSDP()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL Session::IsMediaInitializationDone() const
 {
-    //---------------------------------------------------------------------------------------------
-
     // Check if the created media is initialized or not
-    for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
     {
-        const Media* pMedia = objMedias.GetAt(i);
+        const Media* pMedia = m_objMedias.GetAt(i);
 
         if (!pMedia->IsInitializationDone())
         {
@@ -8989,21 +7669,12 @@ IMS_BOOL Session::IsMediaInitializationDone() const
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL Session::UpdateMediaOnAnswerReceived(IN IMS_SINT32 nTrigger)
 {
-    Media* pMedia;
-
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
     {
-        pMedia = objMedias.GetAt(i);
+        Media* pMedia = m_objMedias.GetAt(i);
 
         if (pMedia == IMS_NULL)
         {
@@ -9017,21 +7688,12 @@ IMS_BOOL Session::UpdateMediaOnAnswerReceived(IN IMS_SINT32 nTrigger)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL Session::UpdateMediaOnAnswerSent(IN IMS_SINT32 nTrigger)
 {
-    Media* pMedia;
-
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
     {
-        pMedia = objMedias.GetAt(i);
+        Media* pMedia = m_objMedias.GetAt(i);
 
         if (pMedia == IMS_NULL)
         {
@@ -9045,18 +7707,11 @@ IMS_BOOL Session::UpdateMediaOnAnswerSent(IN IMS_SINT32 nTrigger)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL Session::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 {
-    SessionParameter* pSessionParam = pOAState->GetProposalView();
+    SessionParameter* pSessionParam = m_pOaState->GetProposalView();
     IMS_SINT32 nMediaCount = pSessionParam->GetMediaCount();
-
-    //---------------------------------------------------------------------------------------------
 
     if (nMediaCount != 0)
     {
@@ -9076,17 +7731,16 @@ IMS_BOOL Session::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 
                 switch (pMediaParam->GetMedia().GetTransportProtocol())
                 {
-                    case SdpMedia::TRANSPORT_RTP_AVP:
-                    case SdpMedia::TRANSPORT_RTP_AVPF:
-                    case SdpMedia::TRANSPORT_RTP_SAVP:
-                    case SdpMedia::TRANSPORT_RTP_SAVPF:
-                    case SdpMedia::TRANSPORT_UDP_TLS_RTP_SAVP:
-                    case SdpMedia::TRANSPORT_TCP_MSRP:
-                    case SdpMedia::TRANSPORT_TCP_TLS_MSRP:
-                    case SdpMedia::TRANSPORT_UDP:
+                    case SdpMedia::TRANSPORT_RTP_AVP:           // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_RTP_AVPF:          // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_RTP_SAVP:          // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_RTP_SAVPF:         // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_UDP_TLS_RTP_SAVP:  // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_TCP_MSRP:          // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_TCP_TLS_MSRP:      // FALL-THROUGH
+                    case SdpMedia::TRANSPORT_UDP:               // FALL-THROUGH
                     case SdpMedia::TRANSPORT_TCP:
                         break;
-
                     default:
                         IMS_TRACE_I(
                                 "Unsupported media type(%s, %s) received; So, it will be ignored",
@@ -9097,7 +7751,7 @@ IMS_BOOL Session::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
                         continue;
                 }
 
-                if (nMediaIndex >= objMedias.GetSize())
+                if (nMediaIndex >= m_objMedias.GetSize())
                 {
                     IMSList<IMS_SINT32> objMids;
 
@@ -9114,11 +7768,13 @@ IMS_BOOL Session::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 
                     // New media; Create and add to the current session.
                     Media* pMedia = MediaFactory::CreateIncomingMedia(
-                            pMediaParam->GetMedia().GetTransportProtocol(), GetService(), pOAState,
-                            objMids);
+                            pMediaParam->GetMedia().GetTransportProtocol(), GetService(),
+                            m_pOaState, objMids);
 
                     if (pMedia == IMS_NULL)
+                    {
                         continue;
+                    }
 
                     pMedia->TransitMedia(nTrigger, Media::OFFER_RECEIVED);
 
@@ -9131,7 +7787,7 @@ IMS_BOOL Session::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
                 else
                 {
                     // Existing media; check if the SDP has been changed
-                    Media* pMedia = objMedias.GetAt(nMediaIndex);
+                    Media* pMedia = m_objMedias.GetAt(nMediaIndex);
 
                     pMedia->TransitMedia(nTrigger, Media::OFFER_RECEIVED);
                 }
@@ -9144,21 +7800,12 @@ IMS_BOOL Session::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL Session::UpdateMediaOnOfferSent(IN IMS_SINT32 nTrigger)
 {
-    Media* pMedia;
-
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
     {
-        pMedia = objMedias.GetAt(i);
+        Media* pMedia = m_objMedias.GetAt(i);
 
         if (pMedia == IMS_NULL)
         {
@@ -9172,15 +7819,8 @@ IMS_BOOL Session::UpdateMediaOnOfferSent(IN IMS_SINT32 nTrigger)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL const IMS_CHAR* Session::StateToString(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nState)
     {
         case STATE_CREATED:

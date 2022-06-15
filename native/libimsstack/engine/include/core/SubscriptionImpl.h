@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100326  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SUBSCRIPTION_IMPL_H_
-#define _SUBSCRIPTION_IMPL_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SUBSCRIPTION_IMPL_H_
+#define SUBSCRIPTION_IMPL_H_
 
 #include "ISubscription.h"
 #include "IOnSubscriptionListener.h"
@@ -20,54 +23,74 @@
 class SubscriptionImpl : public ISubscription, public IOnSubscriptionListener
 {
 public:
-    explicit SubscriptionImpl(IN Subscription* pSubscription_);
+    explicit SubscriptionImpl(IN Subscription* pSubscription);
     virtual ~SubscriptionImpl();
 
-private:
-    SubscriptionImpl(IN CONST SubscriptionImpl& objRHS);
-    SubscriptionImpl& operator=(IN CONST SubscriptionImpl& objRHS);
+    SubscriptionImpl(IN const SubscriptionImpl&) = delete;
+    SubscriptionImpl& operator=(IN const SubscriptionImpl&) = delete;
 
 private:
     // IMethod interface
-    virtual void Destroy();
-    // SIP_MESSAGE_MEDIATOR
-    virtual void SetMessageMediator(IN IMessageMediator* piMediator);
+    void Destroy() override;
+    inline void SetMessageMediator(IN IMessageMediator* piMediator) override
+    {
+        m_pSubscription->SetMessageMediator(piMediator);
+    }
 
     // IServiceMethod interface
-    virtual IMessage* GetNextRequest();
-    virtual IMessage* GetNextResponse();
-    virtual IMessage* GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const;
-    virtual IMessage* GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const;
-    virtual IMSList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const;
-    virtual IMSList<AString> GetRemoteUserId() const;
+    inline IMessage* GetNextRequest() override { return m_pSubscription->GetNextRequest(); }
+    inline IMessage* GetNextResponse() override { return m_pSubscription->GetNextResponse(); }
+    inline IMessage* GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const override
+    {
+        return m_pSubscription->GetPreviousRequest(nServiceMethod);
+    }
+    inline IMessage* GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const override
+    {
+        return m_pSubscription->GetPreviousResponse(nServiceMethod);
+    }
+    IMSList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const override;
+    inline IMSList<AString> GetRemoteUserId() const override
+    {
+        return m_pSubscription->GetRemoteUserId();
+    }
 
     // ISubscription interface
-    virtual const AString& GetEvent() const;
-    virtual IMS_SINT32 GetState() const;
-    virtual IMS_RESULT Poll();
-    virtual void SetListener(IN ISubscriptionListener* piListener);
-    virtual IMS_RESULT Subscribe();
-    virtual IMS_RESULT Unsubscribe();
+    inline const AString& GetEvent() const override { return m_pSubscription->GetEvent(); }
+    inline IMS_SINT32 GetState() const override { return m_pSubscription->GetState(); }
+    inline IMS_RESULT Poll() override { return m_pSubscription->Poll(); }
+    inline void SetListener(IN ISubscriptionListener* piListener) override
+    {
+        m_piListener = piListener;
+    }
+    inline IMS_RESULT Subscribe() override { return m_pSubscription->Subscribe(); }
+    inline IMS_RESULT Unsubscribe() override { return m_pSubscription->Unsubscribe(); }
 
-    //// IMS extensions
-    virtual void SetImplicitRoutingRequired(IN IMS_BOOL bFlag);
-    virtual void SetRefreshListener(IN IRefreshListener* piListener);
-    virtual void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
-            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
+    inline void SetImplicitRoutingRequired(IN IMS_BOOL bFlag) override
+    {
+        m_pSubscription->SetImplicitRoutingRequired(bFlag);
+    }
+    inline void SetRefreshListener(IN IRefreshListener* piListener) override
+    {
+        m_pSubscription->SetRefreshListener(piListener);
+    }
+    inline void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
+            IN IMS_SINT32 nValueEorLt, IN IMS_SINT32 nValueGt) override
+    {
+        m_pSubscription->SetRefreshPolicy(nPolicy, nCriteriaInterval, nValueEorLt, nValueGt);
+    }
 
     // IOnSubscriptionListener interface
-    virtual IMS_BOOL OnSubscription_ForkedNotifyReceived(
-            IN Subscription* pSubscription, IN Subscription* pForkedSubscription);
-    virtual void OnSubscription_NotifyReceived(
-            IN Subscription* pSubscription, IN Message* pNotify, OUT IMS_BOOL& bDestroyNotify);
-    virtual void OnSubscription_Started(IN Subscription* pSubscription);
-    virtual void OnSubscription_StartFailed(IN Subscription* pSubscription);
-    virtual void OnSubscription_Terminated(IN Subscription* pSubscription);
+    IMS_BOOL OnSubscription_ForkedNotifyReceived(
+            IN Subscription* pSubscription, IN Subscription* pForkedSubscription) override;
+    void OnSubscription_NotifyReceived(IN Subscription* pSubscription, IN Message* pNotify,
+            OUT IMS_BOOL& bDestroyNotify) override;
+    void OnSubscription_Started(IN Subscription* pSubscription) override;
+    void OnSubscription_StartFailed(IN Subscription* pSubscription) override;
+    void OnSubscription_Terminated(IN Subscription* pSubscription) override;
 
 private:
-    ISubscriptionListener* piListener;
-
-    Subscription* pSubscription;
+    Subscription* m_pSubscription;
+    ISubscriptionListener* m_piListener;
 };
 
-#endif  // _SUBSCRIPTION_IMPL_H_
+#endif

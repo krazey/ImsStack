@@ -1,184 +1,148 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100415  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "TextParser.h"
+
+#include "CallControlHelper.h"
 #include "ISipDialog.h"
 #include "Replaces.h"
-#include "CallControlHelper.h"
 
 PRIVATE
 CallControlHelper::CallControlHelper() :
-        nGlobalSessionId(0),
-        objSessions(IMSMap<AString, Replaces*>())
+        m_nGlobalSessionId(0),
+        m_objSessions(IMSMap<AString, Replaces*>())
 {
 }
 
 PRIVATE
 CallControlHelper::~CallControlHelper()
 {
-    if (!objSessions.IsEmpty())
+    if (!m_objSessions.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objSessions.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objSessions.GetSize(); ++i)
         {
-            Replaces* pReplaces = objSessions.GetValueAt(i);
+            Replaces* pReplaces = m_objSessions.GetValueAt(i);
 
             if (pReplaces != IMS_NULL)
+            {
                 delete pReplaces;
+            }
         }
 
-        objSessions.Clear();
+        m_objSessions.Clear();
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL CallControlHelper::AddSession(IN CONST AString& strSessionId, IN Replaces* pReplaces)
+IMS_BOOL CallControlHelper::AddSession(IN const AString& strSessionId, IN Replaces* pReplaces)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (pReplaces == IMS_NULL)
+    {
         return IMS_FALSE;
+    }
 
-    IMS_SLONG nIndex = objSessions.GetIndexOfKey(strSessionId);
+    IMS_SLONG nIndex = m_objSessions.GetIndexOfKey(strSessionId);
 
     if (nIndex >= 0)
     {
-        Replaces* pOldReplaces = objSessions.GetValueAt(nIndex);
+        Replaces* pOldReplaces = m_objSessions.GetValueAt(nIndex);
 
         if (pOldReplaces != IMS_NULL)
         {
             delete pOldReplaces;
         }
 
-        objSessions.RemoveAt(nIndex);
+        m_objSessions.RemoveAt(nIndex);
     }
 
-    return objSessions.Add(strSessionId, pReplaces);
+    return m_objSessions.Add(strSessionId, pReplaces);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_UINT32 CallControlHelper::GetSessionCount() const
+void CallControlHelper::RemoveSession(IN const AString& strSessionId)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return objSessions.GetSize();
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void CallControlHelper::RemoveSession(IN CONST AString& strSessionId)
-{
-    IMS_SLONG nIndex = objSessions.GetIndexOfKey(strSessionId);
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SLONG nIndex = m_objSessions.GetIndexOfKey(strSessionId);
 
     if (nIndex < 0)
     {
         return;
     }
 
-    Replaces* pReplaces = objSessions.GetValueAt(nIndex);
+    Replaces* pReplaces = m_objSessions.GetValueAt(nIndex);
 
     if (pReplaces != IMS_NULL)
     {
         delete pReplaces;
     }
 
-    objSessions.RemoveAt(nIndex);
+    m_objSessions.RemoveAt(nIndex);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-Replaces* CallControlHelper::GetReplacesFromSessionId(IN CONST AString& strSessionId)
+Replaces* CallControlHelper::GetReplacesFromSessionId(IN const AString& strSessionId)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objSessions.IsEmpty())
+    if (m_objSessions.IsEmpty())
     {
         return IMS_NULL;
     }
 
-    IMS_SLONG nIndex = objSessions.GetIndexOfKey(strSessionId);
+    IMS_SLONG nIndex = m_objSessions.GetIndexOfKey(strSessionId);
 
     if (nIndex < 0)
     {
         return IMS_NULL;
     }
 
-    return objSessions.GetValueAt(nIndex);
+    return m_objSessions.GetValueAt(nIndex);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-const AString& CallControlHelper::GetSessionIdFromReplaces(IN CONST Replaces* pReplaces)
+const AString& CallControlHelper::GetSessionIdFromReplaces(IN const Replaces* pReplaces)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (pReplaces == IMS_NULL)
     {
         return AString::ConstNull();
     }
 
-    for (IMS_UINT32 i = 0; i < objSessions.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objSessions.GetSize(); ++i)
     {
-        const Replaces* pTmpReplaces = objSessions.GetValueAt(i);
+        const Replaces* pTmpReplaces = m_objSessions.GetValueAt(i);
 
         if (pTmpReplaces == IMS_NULL)
+        {
             continue;
+        }
 
         if (pTmpReplaces->IsSameDialog(pReplaces))
         {
-            return objSessions.GetKeyAt(i);
+            return m_objSessions.GetKeyAt(i);
         }
     }
 
     return AString::ConstNull();
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL Replaces* CallControlHelper::CreateReplaces(IN IMS_BOOL bMO, IN ISipDialog* piDialog)
+PUBLIC GLOBAL Replaces* CallControlHelper::CreateReplaces(IN IMS_BOOL bMo, IN ISipDialog* piDialog)
 {
-    //---------------------------------------------------------------------------------------------
-
-    (void)bMO;
+    (void)bMo;
 
     if (piDialog == IMS_NULL)
+    {
         return IMS_NULL;
+    }
 
     Replaces* pReplaces = new Replaces(piDialog->GetComponent(ISipDialog::COMPONENT_CALL_ID),
             piDialog->GetComponent(ISipDialog::COMPONENT_LOCAL_TAG),
@@ -192,46 +156,32 @@ PUBLIC GLOBAL Replaces* CallControlHelper::CreateReplaces(IN IMS_BOOL bMO, IN IS
     return pReplaces;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const AString CallControlHelper::CreateSessionId()
 {
-    CallControlHelper* pCCH = CallControlHelper::GetInstance();
+    CallControlHelper* pCch = CallControlHelper::GetInstance();
 
-    //---------------------------------------------------------------------------------------------
-
-    pCCH->nGlobalSessionId++;
+    pCch->m_nGlobalSessionId++;
 
     AString strSessionId;
 
-    strSessionId.Sprintf("sid%08x", pCCH->nGlobalSessionId);
+    strSessionId.Sprintf("sid%08x", pCch->m_nGlobalSessionId);
 
-    if (pCCH->nGlobalSessionId == 0xFFFFFFFE)
+    if (pCch->m_nGlobalSessionId == 0xFFFFFFFE)
     {
-        pCCH->nGlobalSessionId = 0;
+        pCch->m_nGlobalSessionId = 0;
     }
 
     return strSessionId;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL CallControlHelper* CallControlHelper::GetInstance()
 {
-    static CallControlHelper* pCCHelper = IMS_NULL;
+    static CallControlHelper* s_pCcHelper = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pCCHelper == IMS_NULL)
+    if (s_pCcHelper == IMS_NULL)
     {
-        pCCHelper = new CallControlHelper();
+        s_pCcHelper = new CallControlHelper();
     }
 
-    return pCCHelper;
+    return s_pCcHelper;
 }

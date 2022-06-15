@@ -1,10 +1,25 @@
-#ifndef _INTERFACE_MESSAGE_H_
-#define _INTERFACE_MESSAGE_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_MESSAGE_H_
+#define INTERFACE_MESSAGE_H_
 
 #include "SipMethod.h"
 
-class ISipMessage;
 class IMessageBodyPart;
+class ISipMessage;
 
 /**
  * @brief This class provides functionality to manipulate headers and body parts
@@ -23,7 +38,7 @@ public:
      * @param strValue The header value
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT AddHeader(IN CONST AString& strName, IN CONST AString& strValue) = 0;
+    virtual IMS_RESULT AddHeader(IN const AString& strName, IN const AString& strValue) = 0;
 
     /**
      * @brief Creates a new IMessageBodyPart and adds it to the message.
@@ -45,7 +60,7 @@ public:
      * @param strName The header name, in full or compact form
      * @return List of SIP header field(s).
      */
-    virtual IMSList<AString> GetHeaders(IN CONST AString& strName) const = 0;
+    virtual IMSList<AString> GetHeaders(IN const AString& strName) const = 0;
 
     /**
      * @brief Returns the SIP message for this IMessage.
@@ -127,4 +142,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_MESSAGE_H_
+#endif

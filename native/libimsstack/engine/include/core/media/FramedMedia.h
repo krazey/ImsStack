@@ -1,40 +1,43 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100503  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef FRAMED_MEDIA_H_
+#define FRAMED_MEDIA_H_
 
-    Description
-
-*/
-
-#ifndef _FRAMED_MEDIA_H_
-#define _FRAMED_MEDIA_H_
-
-#include "IMSMap.h"
 #include "AStringArray.h"
 #include "ByteArray.h"
+#include "IMSMap.h"
+
 #include "media/Media.h"
 
 class FramedMedia : public Media
 {
 public:
-    FramedMedia(IN Service* pService_, IN ISdpOaState* piOAState_);
+    FramedMedia(IN Service* pService, IN ISdpOaState* piOaState);
     virtual ~FramedMedia();
 
-private:
-    FramedMedia(IN CONST FramedMedia& objRHS);
-    FramedMedia& operator=(IN CONST FramedMedia& objRHS);
+    FramedMedia(IN const FramedMedia&) = delete;
+    FramedMedia& operator=(IN const FramedMedia&) = delete;
 
 public:
     // Media class
-    virtual IMS_SINT32 GetType() const;
+    inline IMS_SINT32 GetType() const override { return ImsCore::MEDIA_TYPE_FRAMED; }
 
 protected:
     // Media class
-    virtual MediaProposal* CreateMediaProposal(IN ISdpOaState* piOAState);
+    MediaProposal* CreateMediaProposal(IN ISdpOaState* piOaState) override;
 };
 
-#endif  // _FRAMED_MEDIA_H_
+#endif

@@ -1,17 +1,21 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100330  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
 #include "ISipMessage.h"
 #include "SipStatusCode.h"
 #include "SubState.h"
@@ -21,46 +25,33 @@ __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 SubscriberRefreshHelper::SubscriberRefreshHelper(
-        IN IRefreshable* piRefreshable_, IN CONST SubState* pSubState_) :
-        RefreshHelper(piRefreshable_, IMS_FALSE),
-        pSubState(pSubState_)
+        IN IRefreshable* piRefreshable, IN const SubState* pSubState) :
+        RefreshHelper(piRefreshable, IMS_FALSE),
+        m_pSubState(pSubState)
 {
 }
 
 PUBLIC VIRTUAL SubscriberRefreshHelper::~SubscriberRefreshHelper()
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_D("Destructor :: SubscriberRefreshHelper", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL SubscriberRefreshHelper::AddSpecificHeader(IN ISipConnection* piSC)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void)piSC;
-
-    return IMS_TRUE;
-}
-
 PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::SendRefreshRequest(
-        IN ISipClientConnection* piSCC)
+        IN ISipClientConnection* piScc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSCC == IMS_NULL)
+    if (piScc == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
-    if (!AddSpecificHeader(piSCC))
+    if (!AddSpecificHeader(piScc))
     {
         IMS_TRACE_E(0, "Adding the specific headers for a subscription refresh request failed", 0,
                 0, 0);
         return IMS_FAILURE;
     }
 
-    if (RefreshHelper::SendRefreshRequest(piSCC) != IMS_SUCCESS)
+    if (RefreshHelper::SendRefreshRequest(piScc) != IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Sending a subscription refresh request failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -70,42 +61,41 @@ PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::SendRefreshRequest(
 }
 
 PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageReceived(
-        IN CONST ISipConnection* piSC)
+        IN const ISipConnection* piSc)
 {
-    ISipMessage* piSIPMsg = piSC->GetMessage();
+    ISipMessage* piSipMsg = piSc->GetMessage();
 
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
-    const SipMethod& objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSipMsg->GetMethod();
 
     // Case 1) SUBSCRIBE response received ...
     if (objMethod.Equals(SipMethod::SUBSCRIBE))
     {
         // If the subscription is in TERMINATED state & the refresh timer is active,
         // then stop the refresh timer...
-        if (pSubState->IsTerminated())
+        if (m_pSubState->IsTerminated())
         {
             StopRefresh();
-
             return IMS_SUCCESS;
         }
 
-        IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
+        IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
         if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
-            if (pSubState->IsSubscriptionDurationUpdated())
+            if (m_pSubState->IsSubscriptionDurationUpdated())
             {
-                if (pSubState->GetDuration() <= 0)
+                if (m_pSubState->GetDuration() <= 0)
+                {
                     StopRefresh();
+                }
                 else
                 {
-                    SetDuration(pSubState->GetDuration());
+                    SetDuration(m_pSubState->GetDuration());
 
                     StopRefresh();
 
@@ -132,19 +122,17 @@ PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageReceived(
 }
 
 PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageSent(
-        IN CONST ISipConnection* piSC)
+        IN const ISipConnection* piSc)
 {
-    ISipMessage* piSIPMsg = piSC->GetMessage();
+    ISipMessage* piSipMsg = piSc->GetMessage();
 
-    //---------------------------------------------------------------------------------------------
-
-    if (piSIPMsg == IMS_NULL)
+    if (piSipMsg == IMS_NULL)
     {
         return IMS_FAILURE;
     }
 
     // Case 1) SUBSCRIBE request sent ...
-    if (piSIPMsg->GetMethod().Equals(SipMethod::SUBSCRIBE))
+    if (piSipMsg->GetMethod().Equals(SipMethod::SUBSCRIBE))
     {
         // No actions after sending SUBSCRIBE request ...
     }
@@ -153,25 +141,24 @@ PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageSent(
     {
         // If the subscription is in TERMINATED state & the refresh timer is active,
         // then stop the refresh timer...
-        if (pSubState->IsTerminated())
+        if (m_pSubState->IsTerminated())
         {
             StopRefresh();
-
             return IMS_SUCCESS;
         }
 
-        IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
+        IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
-        if (pSubState->IsSubscriptionDurationUpdated())
+        if (m_pSubState->IsSubscriptionDurationUpdated())
         {
             StopRefresh();
         }
 
         if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
-            if (pSubState->IsSubscriptionDurationUpdated() && (pSubState->GetDuration() > 0))
+            if (m_pSubState->IsSubscriptionDurationUpdated() && (m_pSubState->GetDuration() > 0))
             {
-                SetDuration(pSubState->GetDuration());
+                SetDuration(m_pSubState->GetDuration());
 
                 if (!StartRefresh())
                 {
@@ -193,23 +180,21 @@ PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageSent(
 }
 
 PROTECTED VIRTUAL void SubscriberRefreshHelper::RefreshCompleted(
-        IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode /* = 0 */)
+        IN ISipClientConnection* piScc, IN IMS_SINT32 nCode /*= 0*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    Refreshable_RefreshCompleted(piSCC, nCode);
+    Refreshable_RefreshCompleted(piScc, nCode);
 
     // do something ...
     if (nCode == 0)
     {
-        IMS_SINT32 nStatusCode = piSCC->GetStatusCode();
+        IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
         if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
             StopRefresh();
         }
 
-        UpdateOnMessageReceived(piSCC);
+        UpdateOnMessageReceived(piScc);
     }
     else if (nCode == TRANSACTION_TIMEOUT)
     {
@@ -220,19 +205,10 @@ PROTECTED VIRTUAL void SubscriberRefreshHelper::RefreshCompleted(
 
 PROTECTED VIRTUAL void SubscriberRefreshHelper::RefreshStarted()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (Refreshable_RefreshStarted() != IMS_TRUE)
     {
         // Clean up the refresh timer related resources
 
         Refreshable_RefreshTerminated();
     }
-}
-
-PROTECTED VIRTUAL void SubscriberRefreshHelper::RefreshTerminated()
-{
-    //---------------------------------------------------------------------------------------------
-
-    Refreshable_RefreshTerminated();
 }

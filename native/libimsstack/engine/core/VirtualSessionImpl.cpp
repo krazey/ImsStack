@@ -1,23 +1,27 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20201023  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "base/Ims.h"
+
 #include "ImsCore.h"
-#include "media/FramedMediaImpl.h"
-#include "media/StreamMediaImpl.h"
 #include "SessionDescriptor.h"
 #include "VirtualSessionImpl.h"
+#include "base/Ims.h"
+#include "media/FramedMediaImpl.h"
+#include "media/StreamMediaImpl.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
@@ -28,9 +32,9 @@ void virtualSessionImpl_MethodNotSupported()
 }
 
 PUBLIC
-VirtualSessionImpl::VirtualSessionImpl(IN ISession* piOwnerSession_, IN VirtualSession* pSession_) :
-        piOwnerSession(piOwnerSession_),
-        pSession(pSession_)
+VirtualSessionImpl::VirtualSessionImpl(IN ISession* piOwnerSession, IN VirtualSession* pSession) :
+        m_piOwnerSession(piOwnerSession),
+        m_pSession(pSession)
 {
     IMS_TRACE_I("VirtualSessionImpl - C", 0, 0, 0);
 }
@@ -39,14 +43,14 @@ PUBLIC VIRTUAL VirtualSessionImpl::~VirtualSessionImpl()
 {
     IMS_TRACE_I("VirtualSessionImpl - D", 0, 0, 0);
 
-    piOwnerSession = IMS_NULL;
-    pSession = IMS_NULL;
+    m_piOwnerSession = IMS_NULL;
+    m_pSession = IMS_NULL;
 
-    if (!objMediaImpls.IsEmpty())
+    if (!m_objMediaImpls.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objMediaImpls.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objMediaImpls.GetSize(); ++i)
         {
-            MediaImpl* pMediaImpl = objMediaImpls.GetAt(i);
+            MediaImpl* pMediaImpl = m_objMediaImpls.GetAt(i);
 
             if (pMediaImpl != IMS_NULL)
             {
@@ -54,7 +58,7 @@ PUBLIC VIRTUAL VirtualSessionImpl::~VirtualSessionImpl()
             }
         }
 
-        objMediaImpls.Clear();
+        m_objMediaImpls.Clear();
     }
 }
 
@@ -63,7 +67,6 @@ PRIVATE VIRTUAL void VirtualSessionImpl::Destroy()
     virtualSessionImpl_MethodNotSupported();
 }
 
-// SIP_MESSAGE_MEDIATOR
 PRIVATE VIRTUAL void VirtualSessionImpl::SetMessageMediator(IN IMessageMediator* /*piMediator*/)
 {
     virtualSessionImpl_MethodNotSupported();
@@ -83,9 +86,9 @@ PRIVATE VIRTUAL IMessage* VirtualSessionImpl::GetNextResponse()
 
 PRIVATE VIRTUAL IMessage* VirtualSessionImpl::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->GetPreviousRequest(nServiceMethod);
+        return m_piOwnerSession->GetPreviousRequest(nServiceMethod);
     }
 
     return IMS_NULL;
@@ -94,9 +97,9 @@ PRIVATE VIRTUAL IMessage* VirtualSessionImpl::GetPreviousRequest(IN IMS_SINT32 n
 PRIVATE VIRTUAL IMessage* VirtualSessionImpl::GetPreviousResponse(
         IN IMS_SINT32 nServiceMethod) const
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->GetPreviousResponse(nServiceMethod);
+        return m_piOwnerSession->GetPreviousResponse(nServiceMethod);
     }
 
     return IMS_NULL;
@@ -105,9 +108,9 @@ PRIVATE VIRTUAL IMessage* VirtualSessionImpl::GetPreviousResponse(
 PRIVATE VIRTUAL IMSList<IMessage*> VirtualSessionImpl::GetPreviousResponses(
         IN IMS_SINT32 nServiceMethod) const
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->GetPreviousResponses(nServiceMethod);
+        return m_piOwnerSession->GetPreviousResponses(nServiceMethod);
     }
 
     return IMSList<IMessage*>();
@@ -115,9 +118,9 @@ PRIVATE VIRTUAL IMSList<IMessage*> VirtualSessionImpl::GetPreviousResponses(
 
 PRIVATE VIRTUAL IMSList<AString> VirtualSessionImpl::GetRemoteUserId() const
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->GetRemoteUserId();
+        return m_piOwnerSession->GetRemoteUserId();
     }
 
     return IMSList<AString>();
@@ -135,17 +138,16 @@ PRIVATE VIRTUAL ICapabilities* VirtualSessionImpl::CreateCapabilities()
     return IMS_NULL;
 }
 
-PRIVATE VIRTUAL IMedia* VirtualSessionImpl::CreateMedia(IN CONST AString& strType,
-        IN IMS_SINT32 nDirection, IN IMS_SINT32 nCountOfDescriptor /* = 0 */,
-        IN IMS_BOOL bIMSExtension /* = IMS_TRUE */)
+PRIVATE VIRTUAL IMedia* VirtualSessionImpl::CreateMedia(IN const AString& strType,
+        IN IMS_SINT32 nDirection, IN IMS_SINT32 nCountOfDescriptor /* = 0 */)
 {
-    if (pSession.IsNull())
+    if (m_pSession.IsNull())
     {
         IMS_TRACE_E(0, "VirtualSession is null", 0, 0, 0);
         return IMS_NULL;
     }
 
-    Media* pMedia = pSession->CreateMedia(strType, nDirection, nCountOfDescriptor, bIMSExtension);
+    Media* pMedia = m_pSession->CreateMedia(strType, nDirection, nCountOfDescriptor);
 
     if (pMedia == IMS_NULL)
     {
@@ -159,33 +161,27 @@ PRIVATE VIRTUAL IMedia* VirtualSessionImpl::CreateMedia(IN CONST AString& strTyp
         case ImsCore::MEDIA_TYPE_STREAM:
             pMediaImpl = new StreamMediaImpl(DYNAMIC_CAST(StreamMedia*, pMedia));
             break;
-
         case ImsCore::MEDIA_TYPE_FRAMED:
             pMediaImpl = new FramedMediaImpl(DYNAMIC_CAST(FramedMedia*, pMedia));
             break;
-
-        case ImsCore::MEDIA_TYPE_BASIC_RELIABLE:
-            break;
-
-        case ImsCore::MEDIA_TYPE_BASIC_UNRELIABLE:
-            break;
-
+        case ImsCore::MEDIA_TYPE_BASIC_RELIABLE:    // FALL-THROUGH
+        case ImsCore::MEDIA_TYPE_BASIC_UNRELIABLE:  // FALL-THROUGH
         default:
             break;
     }
 
     if (pMediaImpl == IMS_NULL)
     {
-        pSession->RemoveMedia(pMedia);
+        m_pSession->RemoveMedia(pMedia);
 
         Ims::SetLastError(ImsError::NO_MEMORY);
         return IMS_NULL;
     }
 
-    if (!objMediaImpls.Append(pMediaImpl))
+    if (!m_objMediaImpls.Append(pMediaImpl))
     {
         delete pMediaImpl;
-        pSession->RemoveMedia(pMedia);
+        m_pSession->RemoveMedia(pMedia);
 
         Ims::SetLastError(ImsError::LIST_OPERATION_FAILED);
         return IMS_NULL;
@@ -197,7 +193,7 @@ PRIVATE VIRTUAL IMedia* VirtualSessionImpl::CreateMedia(IN CONST AString& strTyp
 }
 
 PRIVATE VIRTUAL IReference* VirtualSessionImpl::CreateReference(
-        IN CONST AString& /*strReferTo*/, IN CONST AString& /*strReferMethod*/)
+        IN const AString& /*strReferTo*/, IN const AString& /*strReferMethod*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_NULL;
@@ -205,20 +201,20 @@ PRIVATE VIRTUAL IReference* VirtualSessionImpl::CreateReference(
 
 PRIVATE VIRTUAL IMSList<IMedia*> VirtualSessionImpl::GetMedia()
 {
-    if (pSession.IsNull())
+    if (m_pSession.IsNull())
     {
         IMS_TRACE_E(0, "VirtualSession is null", 0, 0, 0);
         return IMSList<IMedia*>();
     }
 
-    const IMSList<Media*>& objMedias = pSession->GetMedia();
+    const IMSList<Media*>& objMedias = m_pSession->GetMedia();
 
-    if (objMedias.GetSize() > objMediaImpls.GetSize())
+    if (objMedias.GetSize() > m_objMediaImpls.GetSize())
     {
         MediaImpl* pMediaImpl;
 
         // Newly added media
-        for (IMS_UINT32 i = objMediaImpls.GetSize(); i < objMedias.GetSize(); ++i)
+        for (IMS_UINT32 i = m_objMediaImpls.GetSize(); i < objMedias.GetSize(); ++i)
         {
             Media* pMedia = objMedias.GetAt(i);
 
@@ -227,28 +223,22 @@ PRIVATE VIRTUAL IMSList<IMedia*> VirtualSessionImpl::GetMedia()
                 case ImsCore::MEDIA_TYPE_STREAM:
                     pMediaImpl = new StreamMediaImpl(DYNAMIC_CAST(StreamMedia*, pMedia));
                     break;
-
                 case ImsCore::MEDIA_TYPE_FRAMED:
                     pMediaImpl = new FramedMediaImpl(DYNAMIC_CAST(FramedMedia*, pMedia));
                     break;
-
                 case ImsCore::MEDIA_TYPE_BASIC_RELIABLE:
-                    break;
-
                 case ImsCore::MEDIA_TYPE_BASIC_UNRELIABLE:
-                    break;
-
                 default:
                     break;
             }
 
-            objMediaImpls.Append(pMediaImpl);
+            m_objMediaImpls.Append(pMediaImpl);
 
             pMediaImpl = IMS_NULL;
         }
     }
 
-    if (objMediaImpls.IsEmpty())
+    if (m_objMediaImpls.IsEmpty())
     {
         IMS_TRACE_D("No media in the current session", 0, 0, 0);
         return IMSList<IMedia*>();
@@ -256,9 +246,9 @@ PRIVATE VIRTUAL IMSList<IMedia*> VirtualSessionImpl::GetMedia()
 
     IMSList<IMedia*> objIMedias;
 
-    for (IMS_UINT32 i = 0; i < objMediaImpls.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objMediaImpls.GetSize(); ++i)
     {
-        MediaImpl* pMediaImpl = objMediaImpls.GetAt(i);
+        MediaImpl* pMediaImpl = m_objMediaImpls.GetAt(i);
 
         objIMedias.Append(pMediaImpl->GetInterface());
     }
@@ -268,23 +258,23 @@ PRIVATE VIRTUAL IMSList<IMedia*> VirtualSessionImpl::GetMedia()
 
 PRIVATE VIRTUAL ISessionDescriptor* VirtualSessionImpl::GetSessionDescriptor()
 {
-    if (pSession.IsNull())
+    if (m_pSession.IsNull())
     {
         IMS_TRACE_E(0, "VirtualSession is null", 0, 0, 0);
         return IMS_NULL;
     }
 
-    return pSession->GetSessionDescriptor();
+    return m_pSession->GetSessionDescriptor();
 }
 
 PRIVATE VIRTUAL IMS_SINT32 VirtualSessionImpl::GetState() const
 {
-    if (pSession.IsNull())
+    if (m_pSession.IsNull())
     {
         return STATE_TERMINATED;
     }
 
-    return pSession->GetState();
+    return m_pSession->GetState();
 }
 
 PRIVATE VIRTUAL IMS_BOOL VirtualSessionImpl::HasPendingUpdate() const
@@ -299,14 +289,14 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::Reject()
     return IMS_FAILURE;
 }
 
-PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::Reject(IN IMS_SINT32 /* nStatusCode*/)
+PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::Reject(IN IMS_SINT32 /*nStatusCode*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_FAILURE;
 }
 
 PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RejectWithDiversion(
-        IN CONST AString& /*strAlternativeUserAddress*/)
+        IN const AString& /*strAlternativeUserAddress*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_FAILURE;
@@ -314,7 +304,7 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RejectWithDiversion(
 
 PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RemoveMedia(IN IMedia* piMedia)
 {
-    if (pSession.IsNull())
+    if (m_pSession.IsNull())
     {
         IMS_TRACE_E(0, "VirtualSession is null", 0, 0, 0);
         return IMS_FAILURE;
@@ -328,9 +318,9 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RemoveMedia(IN IMedia* piMedia)
 
     IMS_UINT32 i;
 
-    for (i = 0; i < objMediaImpls.GetSize(); ++i)
+    for (i = 0; i < m_objMediaImpls.GetSize(); ++i)
     {
-        const MediaImpl* pMediaImpl = objMediaImpls.GetAt(i);
+        const MediaImpl* pMediaImpl = m_objMediaImpls.GetAt(i);
 
         if (pMediaImpl->Equals(piMedia))
         {
@@ -338,15 +328,15 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RemoveMedia(IN IMedia* piMedia)
         }
     }
 
-    if (i >= objMediaImpls.GetSize())
+    if (i >= m_objMediaImpls.GetSize())
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
-    MediaImpl* pMediaImpl = objMediaImpls.GetAt(i);
+    MediaImpl* pMediaImpl = m_objMediaImpls.GetAt(i);
 
-    if (pSession->RemoveMedia(pMediaImpl->GetMedia()) != IMS_SUCCESS)
+    if (m_pSession->RemoveMedia(pMediaImpl->GetMedia()) != IMS_SUCCESS)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
@@ -358,7 +348,7 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RemoveMedia(IN IMedia* piMedia)
     {
         delete pMediaImpl;
 
-        objMediaImpls.RemoveAt(i);
+        m_objMediaImpls.RemoveAt(i);
     }
 
     Ims::SetLastError(ImsError::NO_ERROR);
@@ -395,17 +385,15 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::Update()
     return IMS_FAILURE;
 }
 
-//// IMS extensions
-
 PRIVATE VIRTUAL ISubscription* VirtualSessionImpl::CreateSubscription(
-        IN CONST AString& /*strEvent*/)
+        IN const AString& /*strEvent*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_NULL;
 }
 
 PRIVATE VIRTUAL ISipClientConnection* VirtualSessionImpl::CreateTransaction(
-        IN CONST SipMethod& /*objMethod*/)
+        IN const SipMethod& /*objMethod*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_NULL;
@@ -413,9 +401,9 @@ PRIVATE VIRTUAL ISipClientConnection* VirtualSessionImpl::CreateTransaction(
 
 PRIVATE VIRTUAL IMS_SINT32 VirtualSessionImpl::GetConfiguration() const
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->GetConfiguration();
+        return m_piOwnerSession->GetConfiguration();
     }
 
     return 0;
@@ -423,9 +411,9 @@ PRIVATE VIRTUAL IMS_SINT32 VirtualSessionImpl::GetConfiguration() const
 
 PRIVATE VIRTUAL const ISipHeader* VirtualSessionImpl::GetContactHeader() const
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->GetContactHeader();
+        return m_piOwnerSession->GetContactHeader();
     }
 
     return IMS_NULL;
@@ -433,9 +421,9 @@ PRIVATE VIRTUAL const ISipHeader* VirtualSessionImpl::GetContactHeader() const
 
 PRIVATE VIRTUAL const Replaces* VirtualSessionImpl::GetReplaces() const
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->GetReplaces();
+        return m_piOwnerSession->GetReplaces();
     }
 
     return IMS_NULL;
@@ -443,9 +431,9 @@ PRIVATE VIRTUAL const Replaces* VirtualSessionImpl::GetReplaces() const
 
 PRIVATE VIRTUAL const AString& VirtualSessionImpl::GetSessionId() const
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->GetSessionId();
+        return m_piOwnerSession->GetSessionId();
     }
 
     return AString::ConstNull();
@@ -453,9 +441,9 @@ PRIVATE VIRTUAL const AString& VirtualSessionImpl::GetSessionId() const
 
 PRIVATE VIRTUAL IMS_SINT32 VirtualSessionImpl::GetTerminationReason() const
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->GetTerminationReason();
+        return m_piOwnerSession->GetTerminationReason();
     }
 
     return ISession::TERMINATION_REASON_INVALID;
@@ -463,9 +451,9 @@ PRIVATE VIRTUAL IMS_SINT32 VirtualSessionImpl::GetTerminationReason() const
 
 PRIVATE VIRTUAL IMS_BOOL VirtualSessionImpl::IsFinalResponseReceivedForInitialInviteRequest() const
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->IsFinalResponseReceivedForInitialInviteRequest();
+        return m_piOwnerSession->IsFinalResponseReceivedForInitialInviteRequest();
     }
 
     return IMS_FALSE;
@@ -473,40 +461,40 @@ PRIVATE VIRTUAL IMS_BOOL VirtualSessionImpl::IsFinalResponseReceivedForInitialIn
 
 PRIVATE VIRTUAL IMS_BOOL VirtualSessionImpl::IsReliableProvResponseSupported() const
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->IsReliableProvResponseSupported();
+        return m_piOwnerSession->IsReliableProvResponseSupported();
     }
 
     return IMS_FALSE;
 }
 
-PRIVATE VIRTUAL IMS_BOOL VirtualSessionImpl::IsSDPNegotiationAllowedForNonRPR() const
+PRIVATE VIRTUAL IMS_BOOL VirtualSessionImpl::IsSdpNegotiationAllowedForNonRpr() const
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->IsSDPNegotiationAllowedForNonRPR();
+        return m_piOwnerSession->IsSdpNegotiationAllowedForNonRpr();
     }
 
     return IMS_FALSE;
 }
 
-PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RejectEx(IN IMS_SINT32 /*nStatusCode*/,
-        IN CONST AString& /*strReasonPhrase = AString::ConstNull() */)
+PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RejectEx(
+        IN IMS_SINT32 /*nStatusCode*/, IN const AString& /*strReasonPhrase = AString::ConstNull()*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_FAILURE;
 }
 
 PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RespondToEarlyUpdate(
-        IN IMS_SINT32 /*nStatusCode*/, IN CONST AString& /*strReason = AString::ConstNull() */)
+        IN IMS_SINT32 /*nStatusCode*/, IN const AString& /*strReason = AString::ConstNull()*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_FAILURE;
 }
 
-PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RespondToPRAck(
-        IN IMS_SINT32 /*nStatusCode*/, IN CONST AString& /*strReason = AString::ConstNull() */)
+PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::RespondToPrack(
+        IN IMS_SINT32 /*nStatusCode*/, IN const AString& /*strReason = AString::ConstNull()*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_FAILURE;
@@ -518,26 +506,26 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::SendAck()
     return IMS_FAILURE;
 }
 
-PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::SendPRAck()
+PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::SendPrack()
 {
-    if (piOwnerSession != IMS_NULL)
+    if (m_piOwnerSession != IMS_NULL)
     {
-        return piOwnerSession->SendPRAck();
+        return m_piOwnerSession->SendPrack();
     }
 
     return IMS_FAILURE;
 }
 
 PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::SendProvisionalResponse(
-        IN IMS_SINT32 /*nStatusCode*/, IN CONST AString& /*strReason = AString::ConstNull()*/,
+        IN IMS_SINT32 /*nStatusCode*/, IN const AString& /*strReason = AString::ConstNull()*/,
         IN IMS_SINT32 /*nFlags = 0*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_FAILURE;
 }
 
-PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::SendRPR(IN IMS_SINT32 /*nStatusCode*/,
-        IN CONST AString& /*strReason = AString::ConstNull()*/, IN IMS_BOOL /*bSDP = IMS_TRUE*/,
+PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::SendRpr(IN IMS_SINT32 /*nStatusCode*/,
+        IN const AString& /*strReason = AString::ConstNull()*/, IN IMS_BOOL /*bSDP = IMS_TRUE*/,
         IN IMS_SINT32 /*nFlags = 0*/)
 {
     virtualSessionImpl_MethodNotSupported();
@@ -545,7 +533,7 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::SendRPR(IN IMS_SINT32 /*nStatusCo
 }
 
 PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::SetCallerPreference(
-        IN CONST IMSList<AString>& /*objCallerPreference*/)
+        IN const IMSList<AString>& /*objCallerPreference*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_FAILURE;
@@ -557,7 +545,7 @@ PRIVATE VIRTUAL void VirtualSessionImpl::SetConfiguration(IN IMS_SINT32 /*nConfi
 }
 
 PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::SetContactParameter(
-        IN CONST AString& /*strParameter*/, IN IMS_SINT32 /*nOperation = 0 (0: ADD, 1: REMOVE)*/)
+        IN const AString& /*strParameter*/, IN IMS_SINT32 /*nOperation = 0 (0: ADD, 1: REMOVE)*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_FAILURE;
@@ -579,14 +567,14 @@ PRIVATE VIRTUAL void VirtualSessionImpl::SetRefreshListener(IN IRefreshListener*
 }
 
 PRIVATE VIRTUAL void VirtualSessionImpl::SetRefreshPolicy(IN IMS_SINT32 /*nPolicy*/,
-        IN IMS_SINT32 /*nCriteriaInterval*/, IN IMS_SINT32 /*nValueEorLT*/,
-        IN IMS_SINT32 /*nValueGT*/)
+        IN IMS_SINT32 /*nCriteriaInterval*/, IN IMS_SINT32 /*nValueEorLt*/,
+        IN IMS_SINT32 /*nValueGt*/)
 {
     virtualSessionImpl_MethodNotSupported();
 }
 
 PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::TerminateEx(
-        IN IMS_BOOL /*bTerminateMethodBYE = IMS_FALSE*/)
+        IN IMS_BOOL /*bTerminateMethodBye = IMS_FALSE*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_FAILURE;

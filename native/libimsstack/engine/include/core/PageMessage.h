@@ -1,18 +1,23 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100506  hwangoo.park@             Created
-    </table>
-
-    Description
-*/
-
-#ifndef _PAGE_MESSAGE_H_
-#define _PAGE_MESSAGE_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef PAGE_MESSAGE_H_
+#define PAGE_MESSAGE_H_
 
 #include "ServiceMethod.h"
+#include "SipStatusCode.h"
 
 class IOnPageMessageListener;
 
@@ -20,50 +25,43 @@ class PageMessage : public ServiceMethod
 {
 public:
     explicit PageMessage(IN Service* pService);
-    virtual ~PageMessage();
+    inline virtual ~PageMessage() {}
 
-private:
-    PageMessage(IN CONST PageMessage& objRHS);
-    PageMessage& operator=(IN CONST PageMessage& objRHS);
+    PageMessage(IN const PageMessage&) = delete;
+    PageMessage& operator=(IN const PageMessage&) = delete;
 
 public:
     // Method class
-    virtual void Destroy();
+    inline void Destroy() override { ServiceMethod::Destroy(); }
 
     // IPageMessage interface
     const ByteArray& GetContent() const;
     AString GetContentType() const;
-    IMS_SINT32 GetState() const;
-    IMS_RESULT Send(IN CONST ByteArray& objContent, IN CONST AString& strContentType);
-    void SetListener(IN IOnPageMessageListener* piListener);
-
-    //// IMS extensions
-    IMS_RESULT Accept(IN IMS_SINT32 nStatusCode = 200);
+    inline IMS_SINT32 GetState() const { return m_nState; }
+    IMS_RESULT Send(IN const ByteArray& objContent, IN const AString& strContentType);
+    inline void SetListener(IN IOnPageMessageListener* piListener) { m_piListener = piListener; }
+    IMS_RESULT Accept(IN IMS_SINT32 nStatusCode = SipStatusCode::SC_200);
     IMS_RESULT Reject(IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nRetryAfter = 0);
 
 protected:
     // Activity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
     // Method class
-    // IMS_AUTH_SIP_DIGEST
-    virtual IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piSCC);
-
+    IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piScc) override;
     // Handlie the incoming request / outgoing response message
-    virtual IMS_BOOL NotifySIPRequest(IN ISipServerConnection* piSSC);
-
+    IMS_BOOL NotifySipRequest(IN ISipServerConnection* piSsc) override;
     // Handle to the outgoing request / incoming response message
-    virtual void NotifySIPResponse(IN ISipClientConnection* piSCC);
-    virtual void NotifySIPError(
-            IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
+    void NotifySipResponse(IN ISipClientConnection* piScc) override;
+    void NotifySipError(
+            IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
 private:
     void SetState(IN IMS_SINT32 nState);
-
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 public:
-    // Refer to the state in IPageMessage
+    /// Refer to the state in IPageMessage
     enum
     {
         STATE_UNSENT = 1,
@@ -81,8 +79,8 @@ protected:
     };
 
 private:
-    IMS_SINT32 nState;
-    IOnPageMessageListener* piListener;
+    IMS_SINT32 m_nState;
+    IOnPageMessageListener* m_piListener;
 };
 
-#endif  // _PAGE_MESSAGE_H_
+#endif

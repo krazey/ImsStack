@@ -1,58 +1,34 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090605  lovil@                    Created
-    </table>
-
-    Description
-    A MessageBodyPart can contain different kinds of content, for example text,
-    an image or an audio clip.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "SipHeaderName.h"
-#include "base/Ims.h"
+
 #include "IMessage.h"
 #include "MessageBodyPart.h"
+#include "SipHeaderName.h"
+#include "base/Ims.h"
 
 PUBLIC
-MessageBodyPart::MessageBodyPart(IN IMessage* piMessage_, IN ISipMessageBodyPart* piBodyPart_) :
-        piMessage(piMessage_),
-        piBodyPart(piBodyPart_)
+MessageBodyPart::MessageBodyPart(IN IMessage* piMessage, IN ISipMessageBodyPart* piBodyPart) :
+        m_piMessage(piMessage),
+        m_piBodyPart(piBodyPart)
 {
 }
 
-PUBLIC VIRTUAL MessageBodyPart::~MessageBodyPart() {}
-
-PUBLIC
-ISipMessageBodyPart* MessageBodyPart::GetBodyPart() const
+PRIVATE VIRTUAL AString MessageBodyPart::GetHeader(IN const AString& strName) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return piBodyPart;
-}
-
-PUBLIC
-void MessageBodyPart::SetBodyPart(IN ISipMessageBodyPart* piNewBodyPart)
-{
-    //---------------------------------------------------------------------------------------------
-
-    piBodyPart = piNewBodyPart;
-}
-
-PRIVATE VIRTUAL const ByteArray& MessageBodyPart::GetContent() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return piBodyPart->GetContent();
-}
-
-PRIVATE VIRTUAL AString MessageBodyPart::GetHeader(IN CONST AString& strName) const
-{
-    //---------------------------------------------------------------------------------------------
-
     if (strName.IsNULL())
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
@@ -69,20 +45,18 @@ PRIVATE VIRTUAL AString MessageBodyPart::GetHeader(IN CONST AString& strName) co
 
     Ims::SetLastError(ImsError::NO_ERROR);
 
-    return piBodyPart->GetHeader(GetHeaderType(strTmp), strName);
+    return m_piBodyPart->GetHeader(GetHeaderType(strTmp), strName);
 }
 
-PRIVATE VIRTUAL IMS_RESULT MessageBodyPart::SetContent(IN CONST ByteArray& objContent)
+PRIVATE VIRTUAL IMS_RESULT MessageBodyPart::SetContent(IN const ByteArray& objContent)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piMessage->GetState() != IMessage::STATE_UNSENT)
+    if (m_piMessage->GetState() != IMessage::STATE_UNSENT)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
-    piBodyPart->SetContent(objContent);
+    m_piBodyPart->SetContent(objContent);
 
     Ims::SetLastError(ImsError::NO_ERROR);
 
@@ -90,10 +64,8 @@ PRIVATE VIRTUAL IMS_RESULT MessageBodyPart::SetContent(IN CONST ByteArray& objCo
 }
 
 PRIVATE VIRTUAL IMS_RESULT MessageBodyPart::SetHeader(
-        IN CONST AString& strName, IN CONST AString& strValue)
+        IN const AString& strName, IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (strName.IsNULL() || strValue.IsNULL())
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
@@ -102,33 +74,43 @@ PRIVATE VIRTUAL IMS_RESULT MessageBodyPart::SetHeader(
 
     // Check the syntax : strValue
 
-    if (piMessage->GetState() != IMessage::STATE_UNSENT)
+    if (m_piMessage->GetState() != IMessage::STATE_UNSENT)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
-    piBodyPart->SetHeader(GetHeaderType(strName), strValue, strName);
+    m_piBodyPart->SetHeader(GetHeaderType(strName), strValue, strName);
 
     Ims::SetLastError(ImsError::NO_ERROR);
 
     return IMS_SUCCESS;
 }
 
-PRIVATE GLOBAL IMS_SINT32 MessageBodyPart::GetHeaderType(IN CONST AString& strName)
+PRIVATE GLOBAL IMS_SINT32 MessageBodyPart::GetHeaderType(IN const AString& strName)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (strName.EqualsIgnoreCase(SipHeaderName::CONTENT_TYPE))
+    {
         return ISipMessageBodyPart::CONTENT_TYPE;
+    }
     else if (strName.EqualsIgnoreCase(SipHeaderName::CONTENT_DISPOSITION))
+    {
         return ISipMessageBodyPart::CONTENT_DISPOSITION;
+    }
     else if (strName.EqualsIgnoreCase(SipHeaderName::CONTENT_TRANSFER_ENCODING))
+    {
         return ISipMessageBodyPart::CONTENT_TRANSFER_ENCODING;
+    }
     else if (strName.EqualsIgnoreCase(SipHeaderName::CONTENT_ID))
+    {
         return ISipMessageBodyPart::CONTENT_ID;
+    }
     else if (strName.EqualsIgnoreCase(SipHeaderName::CONTENT_DESCRIPTION))
+    {
         return ISipMessageBodyPart::CONTENT_DESCRIPTION;
+    }
     else
+    {
         return ISipMessageBodyPart::CONTENT_UNKNOWN;
+    }
 }
