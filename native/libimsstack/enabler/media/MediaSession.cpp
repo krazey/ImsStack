@@ -314,6 +314,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSDP(IN IMS_UINTP nNegoId, IN ISes
         // audio
         if (pMediaNego->GetAudioNego() != IMS_NULL)
         {
+            m_objAudioController.UpdateRtpConfig(nNegoId, pMediaNego->GetAudioNego());
             m_objAudioController.AddSession(nNegoId);
         }
 

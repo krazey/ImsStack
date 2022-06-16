@@ -189,7 +189,7 @@ IMS_BOOL AudioController::ConfirmSession(IN IMS_UINTP nNegoId)
 
     AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
 
-    if (pAudioSession != NULL)
+    if (pAudioSession == NULL)
     {
         return IMS_FALSE;
     }
