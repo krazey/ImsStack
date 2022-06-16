@@ -23,7 +23,8 @@ public:
     OutgoingState(IN const OutgoingState&) = delete;
     OutgoingState& operator=(IN const OutgoingState&) = delete;
 
-    CallStateName Terminate(IN const FailReason& objReason) override;
+    CallStateName Terminate(IN const CallReasonInfo& objReason) override;
+
     CallStateName HandleSrvccFailure(IN UpdateType eUpdateType) override;
 
     CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
@@ -49,18 +50,18 @@ public:
     CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
     CallStateName OnReceivingNetworkToneStarted() override;
     CallStateName OnReceivingNetworkToneFailed() override;
-    CallStateName OnMediaFailed(IN FailReason objReason) override;
+    CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
 
 private:
     IMS_RESULT SendPrack(IN ISession* piSession);  // TODO: Updating can use this also.
     IMS_RESULT SendAck(IN ISession* piSession);    // TODO: differs from UpdatingState::SendAck()?
-    void HandleCancel(IN ISession* piSession, IN const FailReason& objReason);
-    CallStateName HandleSilentRetry(IN const FailReason& objReason);
+    void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);
+    CallStateName HandleSilentRetry(IN const CallReasonInfo& objReason);
     CallStateName ContinueSilentRetry();
     void HandleCountrySpecificServiceUrn(IN IMessage* piMessage);
     void SendProgressing();
     void OnStarted(IN ISession* piSession);
-    void OnStartFailed(IN ISession* piSession, IN const FailReason& objReason);
+    void OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason);
     void OnSessionForked(IN ISession* piOriginSession);
 
     IMS_BOOL m_bRemoteAlerted;

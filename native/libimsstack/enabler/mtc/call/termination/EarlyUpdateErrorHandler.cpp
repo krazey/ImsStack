@@ -12,18 +12,18 @@ PUBLIC
 EarlyUpdateErrorHandler::~EarlyUpdateErrorHandler() {}
 
 PUBLIC
-FailReason EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage) const
+CallReasonInfo EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage) const
 {
     if (IsTransactionTimeout(piMessage))
     {
         IMS_TRACE_I("Handle : Timeout", 0, 0, 0);
-        return FailReason(FAIL_REASON_SESSION_RES_TIMEOUT);
+        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT);
     }
 
     IMS_SINT32 nStatusCode = piMessage->GetStatusCode();
     IMS_ASSERT(nStatusCode >= SipStatusCode::SC_300);
 
-    return FailReason(FAIL_REASON_SESSION_SETUPFAILED, nStatusCode);
+    return CallReasonInfo(CODE_SESSION_INTERNAL_ERROR, nStatusCode);
 }
 
 PRIVATE

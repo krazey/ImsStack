@@ -1,3 +1,3 @@
 package com.android.imsstack.enabler.mtc;
 
-parcelable FailInfo;
+parcelable CallReasonInfo;

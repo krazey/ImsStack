@@ -1,7 +1,7 @@
 #ifndef INTERFACE_MTC_BLOCK_RULE_H_
 #define INTERFACE_MTC_BLOCK_RULE_H_
 
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "IMSTypeDef.h"
 #include "MtcDef.h"
 
@@ -23,19 +23,19 @@ public:
             PENDING,
         };
 
-        Result(IN Status _eStatus, IN const FailReason& _objReason) :
+        Result(IN Status _eStatus, IN const CallReasonInfo& _objReason) :
                 eStatus(_eStatus),
                 objReason(_objReason)
         {
         }
 
         Result(IN Status _eStatus) :
-                Result(_eStatus, FailReason(FAIL_REASON_NONE))
+                Result(_eStatus, CallReasonInfo(CODE_NONE))
         {
         }
 
         Status eStatus;
-        FailReason objReason;
+        CallReasonInfo objReason;
     };
 
     virtual ~IMtcBlockRule() {}
@@ -47,7 +47,7 @@ public:
      * Notifying listener happens only once per each checking.
      *
      * @param objListener Listener to be notified the result if it was in pending.
-     * @return Result. `FailReason` is valid only  when the status is `BLOCKED`.
+     * @return Result. `CallReasonInfo` is valid only  when the status is `BLOCKED`.
      */
     virtual Result Check(IN IMtcBlockRuleCheckListener& objListener) = 0;
 };
@@ -64,7 +64,7 @@ public:
      * Notifies the block check result.
      *
      * @param objResult Result. `eStatus` is not `PENDING`.
-     *                  `FailReason` is valid only when `eStatus` is `BLOCKED`.
+     *                  `CallReasonInfo` is valid only when `eStatus` is `BLOCKED`.
      */
     virtual void OnBlockRuleChecked(IN IMtcBlockRule::Result objResult) = 0;
 };

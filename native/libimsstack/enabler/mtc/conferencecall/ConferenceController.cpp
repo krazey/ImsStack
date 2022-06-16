@@ -107,7 +107,7 @@ PUBLIC VIRTUAL void ConferenceController::OnSubscriptionUpdated(IN SubscriptionU
         case SubscriptionUpdateType::TERMINATED:
             CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_UNSUBSCRIBE);  // to stop timer
             m_objOperationQueue.CreateNPut(
-                    CONTROL_OPERATION_TERMINATE_CONFERENCE, FAIL_REASON_CONF_UNKNOWN, IMS_TRUE);
+                    CONTROL_OPERATION_TERMINATE_CONFERENCE, CODE_UNSPECIFIED, IMS_TRUE);
             break;
         case SubscriptionUpdateType::NOTIFY_RECEIVED:
             if (m_objParticipantList.GetSize() <= 0)
@@ -118,7 +118,7 @@ PUBLIC VIRTUAL void ConferenceController::OnSubscriptionUpdated(IN SubscriptionU
             {
                 IMS_TRACE_D("OnSubscriptionUpdated terminate conference by alone", 0, 0, 0);
                 m_objOperationQueue.CreateNPut(
-                        CONTROL_OPERATION_TERMINATE_CONFERENCE, FAIL_REASON_CONF_ALONE, IMS_TRUE);
+                        CONTROL_OPERATION_TERMINATE_CONFERENCE, CODE_USER_TERMINATED, IMS_TRUE);
             }
 
             NotifyConferenceInfo();
@@ -165,7 +165,7 @@ PUBLIC VIRTUAL void ConferenceController::OnReferenceStartFailed(IN IConferenceR
 
     if (piConfRef->GetType() == REFERENCE_TYPE_BYE)
     {
-        m_objNotifier.NotifyDropFailed(FailReason(FAIL_REASON_NONE), m_objParticipantList);
+        m_objNotifier.NotifyDropFailed(CallReasonInfo(CODE_NONE), m_objParticipantList);
         m_objOperationQueue.Clear();
         SetState(STATE_IDLE);
     }
@@ -351,7 +351,7 @@ PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN IMSList<ConfUser*>& 
 
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
-        m_objNotifier.NotifyJoinFailed(FailReason(FAIL_REASON_UNKNOWN, -1), m_objParticipantList);
+        m_objNotifier.NotifyJoinFailed(CallReasonInfo(CODE_UNSPECIFIED, -1), m_objParticipantList);
         return;
     }
 
@@ -393,13 +393,13 @@ PROTECTED VIRTUAL void ConferenceController::ProcessDrop(IN IMSList<ConfUser*>& 
     if (nIndex < 0)
     {
         // cannot find the user in participant list.
-        m_objNotifier.NotifyDropFailed(FailReason(FAIL_REASON_NONE), m_objParticipantList);
+        m_objNotifier.NotifyDropFailed(CallReasonInfo(CODE_NONE), m_objParticipantList);
         return;
     }
 
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
-        m_objNotifier.NotifyDropFailed(FailReason(FAIL_REASON_NONE), m_objParticipantList);
+        m_objNotifier.NotifyDropFailed(CallReasonInfo(CODE_NONE), m_objParticipantList);
         return;
     }
 
@@ -767,10 +767,10 @@ PROTECTED VIRTUAL void ConferenceController::NotifyCmdResult()
             m_objNotifier.NotifyMerged(m_objParticipantList);
             break;
         case STATE_JOINING:
-            m_objNotifier.NotifyJoined(FailReason(FAIL_REASON_NONE), m_objParticipantList);
+            m_objNotifier.NotifyJoined(CallReasonInfo(CODE_NONE), m_objParticipantList);
             break;
         case STATE_DROPPING:
-            m_objNotifier.NotifyDropped(FailReason(FAIL_REASON_NONE), m_objParticipantList);
+            m_objNotifier.NotifyDropped(CallReasonInfo(CODE_NONE), m_objParticipantList);
             break;
         case STATE_IDLE:
             break;
@@ -790,14 +790,14 @@ PROTECTED VIRTUAL void ConferenceController::TerminateIndividualCall(IN IMS_UINT
     IMS_TRACE_I("TerminateIndividualCall : [%d]", nConnectionId, 0, 0);
 
     m_objCallManager.GetCallByCallKey(m_objConnectionIdManager.GetCallKey(nConnectionId))
-            ->Terminate(FailReason(FAIL_REASON_CONF_JOINED, -1));
+            ->Terminate(CallReasonInfo(CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE, -1));
     CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_TERMINATE_1TO1_SESSION);
 }
 
 PROTECTED VIRTUAL void ConferenceController::TerminateConference(IN IMS_SINT32 nTerminateReason)
 {
     IMS_TRACE_I("TerminateConference", 0, 0, 0);
-    GetConferenceCall()->Terminate(FailReason(nTerminateReason, -1));
+    GetConferenceCall()->Terminate(CallReasonInfo(nTerminateReason, -1));
     CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_TERMINATE_CONFERENCE);
 }
 

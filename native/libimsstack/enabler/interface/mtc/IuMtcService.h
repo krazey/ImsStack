@@ -1,7 +1,7 @@
 #ifndef INTERFACE_UI_MTC_SERVICE_H_
 #define INTERFACE_UI_MTC_SERVICE_H_
 
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "ImsMessageDef.h"
 #include "IUBaseParam.h"
 #include "MtcDef.h"
@@ -318,7 +318,7 @@ class IUUCAutoRejectedCallParam
 public:
     inline IUUCAutoRejectedCallParam()
         : IUUCIncomingCallInfoParam()
-        , nReason(FAIL_REASON_NONE)
+        , nReason(CODE_NONE)
         , piSession(IMS_NULL)
         , strJNIServiceName(AString::ConstNull())
     {

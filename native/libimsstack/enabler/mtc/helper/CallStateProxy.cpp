@@ -79,8 +79,7 @@ void CallStateProxy::RemoveListener(IN IMtcCallStateListener* pListener)
 
 PUBLIC
 void CallStateProxy::UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eState,
-        IN CallType eCallType, IN IMS_BOOL bEmergency,
-        IN IMS_SINT32 nReason /* = FAIL_REASON_NONE */)
+        IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason /* = CODE_NONE */)
 {
     IMS_TRACE_D("UpdateCallState", 0, 0, 0);
     IMS_BOOL bTotalCallStateUpdated = UpdateTotalCallState();

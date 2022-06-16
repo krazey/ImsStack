@@ -16,38 +16,38 @@ PUBLIC
 CancelHandler::~CancelHandler() {}
 
 PUBLIC
-FailReason CancelHandler::Handle(IN const IMessage& objMessage) const
+CallReasonInfo CancelHandler::Handle(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nReasonCause = 0;
     AString strReasonText;
     if (!MessageUtil::GetCauseAndTextFromReasonHeader(&objMessage, nReasonCause, strReasonText))
     {
         IMS_TRACE_D("Handle : No Reason header", 0, 0, 0);
-        return FailReason(FAIL_REASON_SESSION_TERMINATED);
+        return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE);
     }
 
-    return GetFailReasonFromReasonHeader(nReasonCause, strReasonText);
+    return GetCallReasonInfoFromReasonHeader(nReasonCause, strReasonText);
 }
 
 PRIVATE
-FailReason CancelHandler::GetFailReasonFromReasonHeader(
+CallReasonInfo CancelHandler::GetCallReasonInfoFromReasonHeader(
         IN IMS_SINT32 nCause, IN const AString& strText) const
 {
     AString strNormalizedText = strText.SimplifyWSP().MakeLower();
 
     if (nCause == SipStatusCode::SC_200 && strNormalizedText.Contains(REASON_TEXT_CALL_COMPLETED))
     {
-        return FailReason(FAIL_REASON_SESSION_MULTIDEVICE_ACCEPTED);
+        return CallReasonInfo(CODE_ANSWERED_ELSEWHERE);
     }
     else if (nCause == SipStatusCode::SC_600 && strNormalizedText.Contains(REASON_TEXT_CALL_BUSY))
     {
-        return FailReason(FAIL_REASON_SESSION_MULTIDEVICE_REJECTED);
+        return CallReasonInfo(CODE_REJECTED_ELSEWHERE);
     }
     else if (nCause == SipStatusCode::SC_603 &&
             strNormalizedText.Contains(REASON_TEXT_CALL_DECLINED))
     {
-        return FailReason(FAIL_REASON_SESSION_MULTIDEVICE_REJECTED);
+        return CallReasonInfo(CODE_REJECTED_ELSEWHERE);
     }
 
-    return FailReason(FAIL_REASON_SESSION_TERMINATED);
+    return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE);
 }

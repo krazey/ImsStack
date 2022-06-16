@@ -10,7 +10,7 @@ class IMessage;
 class IMtcSessionContext;
 class ISession;
 class AString;
-struct FailReason;
+struct CallReasonInfo;
 
 class MessageFormatter
 {
@@ -47,13 +47,13 @@ public:
     virtual IMS_RESULT FormEarlyUpdateMessage(IN UpdateType eUpdateType);
     virtual IMS_RESULT FormEarlyUpdateResponseMessage();
     virtual IMS_RESULT FormAcceptMessage();
-    virtual IMS_RESULT FormRejectMessage(
-            IN const FailReason& objReason, OUT IMS_SINT32& eStatusCode, OUT AString& strPhrase);
+    virtual IMS_RESULT FormRejectMessage(IN const CallReasonInfo& objReason,
+            OUT IMS_SINT32& eStatusCode, OUT AString& strPhrase);
     virtual IMS_RESULT FormAckMessage();
     virtual IMS_RESULT FormUpdateMessage(IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo);
     virtual IMS_RESULT FormAcceptUpdateMessage();
-    virtual IMS_RESULT FormCancelUpdateMessage(IN const FailReason& objReason);
-    virtual IMS_RESULT FormTerminateMessage(IN const FailReason& objReason);
+    virtual IMS_RESULT FormCancelUpdateMessage(IN const CallReasonInfo& objReason);
+    virtual IMS_RESULT FormTerminateMessage(IN const CallReasonInfo& objReason);
 
 protected:
     virtual void SetLocation();
@@ -77,10 +77,10 @@ private:
     void SetReasonHeader(IN CONST AString& strReason);
     void SetCarrierSpecificHeaders();
 
-    IMS_SINT32 GetRejectStatusCode(IN const FailReason& objReason);
-    void GetRejectPhrase(IN const FailReason& objReason, OUT AString& strPhrase);
+    IMS_SINT32 GetRejectStatusCode(IN const CallReasonInfo& objReason);
+    void GetRejectPhrase(IN const CallReasonInfo& objReason, OUT AString& strPhrase);
     void GetUpdateReason(IN UpdateType eUpdateType, OUT AString& strReason);
-    void GetTerminateReason(IN const FailReason& objReason, OUT AString& strReason);
+    void GetTerminateReason(IN const CallReasonInfo& objReason, OUT AString& strReason);
     AString GetTerminateReason(IN TerminateType eType);
     AString GetRejectPhrase(IN RejectType eType);
 

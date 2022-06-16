@@ -1,5 +1,5 @@
 #include "mtc/media/MtcMediaUtil.h"
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "MtcDef.h"
 #include "ServicePhoneInfo.h"
 
@@ -233,30 +233,25 @@ PUBLIC GLOBAL MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(
     return eMediaNetworkType;
 }
 
-PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetFailReasonFromReportType(IN IMS_UINT32 eReportType)
+PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetCallReasonInfoFromReportType(IN IMS_UINT32 eReportType)
 {
-    IMS_SINT32 eFailReason = FAIL_REASON_MEDIA_UNKNOWN;
+    IMS_SINT32 eReason = CODE_MEDIA_UNSPECIFIED;
     UNUSED_PARAM(eReportType);
     /*switch (eReportType)
     {
         case REPORT_CODEC_ERROR:
-            eFailReason = FAIL_REASON_MEDIA_CODEC;
-            break;
         case REPORT_INTERNAL_ERROR:
         case REPORT_OPERATION_FAILURE:
-            eFailReason = FAIL_REASON_MEDIA_INITFAIL;
+            eReason = CODE_MEDIA_INIT_FAILED;
             break;
         case REPORT_VIDEO_LOWEST_BIT_RATE:
-            eFailReason = FAIL_REASON_MEDIA_LOWEST_BIT_RATE;
-            break;
-        case REPORT_CHECK_RADIO_CONNECTION:
-            eFailReason = FAIL_REASON_MEDIA_CHECK_RADIO_CONNECTION;
+            eReason = CODE_MEDIA_NOT_ACCEPTABLE;
             break;
         default:
             break;
     }*/
 
-    return eFailReason;
+    return eReason;
 }
 
 PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetGttModeFromTextQuality(IN IMS_UINT32 eTextQuality)

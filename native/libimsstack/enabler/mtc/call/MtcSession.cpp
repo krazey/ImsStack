@@ -70,7 +70,7 @@ PUBLIC IMS_RESULT MtcSession::Start()
     return m_objMessageSender.Start();
 }
 
-PUBLIC IMS_RESULT MtcSession::Terminate(IMS_BOOL bUseBye, IN const FailReason& objReason)
+PUBLIC IMS_RESULT MtcSession::Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason)
 {
     if (m_bTerminated)
     {

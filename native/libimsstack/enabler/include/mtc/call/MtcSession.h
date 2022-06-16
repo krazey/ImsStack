@@ -23,7 +23,7 @@ public:
     MtcSession& operator=(IN const MtcSession&) = delete;
 
     IMS_RESULT Start();
-    IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const FailReason& objReason);
+    IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason);
 
     void HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest);
     void HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse);

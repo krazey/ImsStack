@@ -275,7 +275,7 @@ public class MtcApp implements Closeable {
         mContext.getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                call.reject(IUMtcCall.Reject_Reason.REJECT_REASON_DECLINE_NOANSWER);
+                call.reject(CallReasonInfo.CODE_USER_NOANSWER);
                 android.os.SystemClock.sleep(200);
                 call.close();
             }

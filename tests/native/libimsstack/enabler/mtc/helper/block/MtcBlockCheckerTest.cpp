@@ -4,8 +4,8 @@
 
 using Result = IMtcBlockChecker::Result;
 
-const FailReason objDefaultReason(FAIL_REASON_NONE);
-const FailReason objFailReason(FAIL_REASON_SERVICE_UNAVAILABLE);
+const CallReasonInfo objDefaultReason(CODE_NONE);
+const CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
 
 class TestListener :
         public IMtcBlockCheckListener
@@ -23,15 +23,18 @@ public:
     }
 
     Result::Status m_eStatus;
-    FailReason m_objReason;
+    CallReasonInfo m_objReason;
 };
 
 class TestRule :
         public IMtcBlockRule
 {
 public:
-    TestRule(IN Result::Status eStatus, IN FailReason objReason) :
-            m_eStatus(eStatus), m_objReason(objReason) {}
+    TestRule(IN Result::Status eStatus, IN CallReasonInfo objReason) :
+            m_eStatus(eStatus),
+            m_objReason(objReason)
+    {
+    }
     TestRule(IN Result::Status eStatus) :
             TestRule(eStatus, objDefaultReason) {}
     virtual ~TestRule() {}
@@ -43,7 +46,7 @@ public:
 
 private:
     Result::Status m_eStatus;
-    FailReason m_objReason;
+    CallReasonInfo m_objReason;
 };
 
 TEST(MtcBlockCheckerTest, CheckEmptyRuleReturnsUnblocked)
@@ -75,7 +78,7 @@ TEST(MtcBlockCheckerTest, CheckSomeBlockedRuleReturnsBlocked)
     IMSList<IMtcBlockRule*> lstRules;
     lstRules.Append(new TestRule(Result::Status::UNBLOCKED));
     lstRules.Append(new TestRule(Result::Status::PENDING));
-    lstRules.Append(new TestRule(Result::Status::BLOCKED, objFailReason));
+    lstRules.Append(new TestRule(Result::Status::BLOCKED, objReason));
     TestListener objListener;
     MtcBlockChecker objChecker(lstRules, objListener);
 
@@ -135,11 +138,11 @@ TEST(MtcBlockCheckerTest, SomePendingRuleBlockedNotifiesListener)
     MtcBlockChecker objChecker(lstRules, objListener);
 
     Result objResult = objChecker.Check();
-    objChecker.OnBlockRuleChecked(Result(Result::Status::BLOCKED, objFailReason));
+    objChecker.OnBlockRuleChecked(Result(Result::Status::BLOCKED, objReason));
 
     EXPECT_EQ(Result::Status::BLOCKED, objListener.m_eStatus);
-    EXPECT_EQ(objFailReason.nReason, objListener.m_objReason.nReason);
-    EXPECT_EQ(objFailReason.nExtra, objListener.m_objReason.nExtra);
+    EXPECT_EQ(objReason.nCode, objListener.m_objReason.nCode);
+    EXPECT_EQ(objReason.nExtraCode, objListener.m_objReason.nExtraCode);
 }
 
 TEST(MtcBlockCheckerTest, ListenerNotNotifiedAfterNotifiedOnce)
@@ -151,7 +154,7 @@ TEST(MtcBlockCheckerTest, ListenerNotNotifiedAfterNotifiedOnce)
     MtcBlockChecker objChecker(lstRules, objListener);
 
     Result objResult = objChecker.Check();
-    objChecker.OnBlockRuleChecked(Result(Result::Status::BLOCKED, objFailReason));
+    objChecker.OnBlockRuleChecked(Result(Result::Status::BLOCKED, objReason));
     objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
 
     EXPECT_EQ(Result::Status::BLOCKED, objListener.m_eStatus);

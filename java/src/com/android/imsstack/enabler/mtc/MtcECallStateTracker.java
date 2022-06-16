@@ -19,7 +19,6 @@ import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.ImsGlobal;
@@ -30,9 +29,8 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
-import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.ISystem;
-import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPhoneUtils;
@@ -376,8 +374,11 @@ public class MtcECallStateTracker implements IECallStateTracker {
     }
 
     private boolean isRetryReason(int reason) {
-        if ((reason >= IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY)
-                && (reason <= IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_RAT)) {
+        // TODO : need to modify this after emergency domain selection policy is decided.
+        /*if ((reason >= IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY)
+                && (reason <= IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_RAT)) {*/
+        if ((reason == CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED)
+                || reason == CallReasonInfo.CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED) {
             return true;
         }
 
@@ -592,9 +593,9 @@ public class MtcECallStateTracker implements IECallStateTracker {
                 logi("ECall :: Terminated");
                 MtcCall mtcCall = (MtcCall)call;
 
-                FailInfo failInfo = mtcCall.getTerminationReason();
+                CallReasonInfo callReasonInfo = mtcCall.getTerminationReason();
 
-                if (failInfo == null) {
+                if (callReasonInfo == null) {
                     if (mECallState == ECALLSTATE_CREATED) {
                         logi("ECall :: Terminated w/o reason on CREATED");
 
@@ -606,9 +607,9 @@ public class MtcECallStateTracker implements IECallStateTracker {
                 } else {
                     if (mECallState == ECALLSTATE_ESTABLISHING) {
                         logi("ECall :: Terminated w/ reason="
-                                + failInfo.Reason + " on ESTABLISHING");
+                                + callReasonInfo.mCode + " on ESTABLISHING");
 
-                        if (!isRetryReason(failInfo.Reason)) {
+                        if (!isRetryReason(callReasonInfo.mCode)) {
                             if (!mProceedingExitEmergency) {
                                 mHandler.sendEmptyMessageDelayed(
                                         EVENT_EXIT_EMERGENCY_BY_CALL_TERMINATED, 1000);

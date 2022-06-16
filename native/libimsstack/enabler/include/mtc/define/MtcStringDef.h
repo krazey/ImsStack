@@ -1,7 +1,7 @@
 #ifndef MTC_STRING_DEF_H_
 #define MTC_STRING_DEF_H_
 
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "MtcDef.h"
 #include "IMSStrLib.h"
 
@@ -34,7 +34,7 @@ public:
     inline static const IMS_CHAR* PS_InfoType(IN IMS_UINT32 /*bValue*/) { return ""; }
     inline static const IMS_CHAR* PS_CWType(IN IMS_UINT32 /*bValue*/) { return ""; }
     inline static const IMS_CHAR* PS_CNAPScheme(IN IMS_UINT32 /*bValue*/) { return ""; }
-    inline static const IMS_CHAR* PS_FailReason(IN IMS_SINT32 /*bValue*/) { return ""; }
+    inline static const IMS_CHAR* PS_CallReason(IN IMS_SINT32 /*bValue*/) { return ""; }
     inline static const IMS_CHAR* PS_RejectReason(IN IMS_SINT32 /*bValue*/) { return ""; }
     inline static const IMS_CHAR* PS_BlockFeature(IN IMS_UINT32 /*bValue*/) { return ""; }
     inline static const IMS_CHAR* PS_SRVCCStatus(IN IMS_UINT32 /*bValue*/) { return ""; }
@@ -43,9 +43,9 @@ public:
     inline static const IMS_CHAR* PS_QoSType(IN IMS_SINT32 /*bValue*/) { return ""; }
     inline static const IMS_CHAR* PS_QoSStatus(IN IMS_SINT32 /*bValue*/) { return ""; }
     inline static const IMS_CHAR* PS_QoSDir(IN IMS_UINT32 /*bValue*/) { return ""; }
-    inline static const IMS_CHAR* PS_FR(IN FailReason /*bValue*/) { return ""; }
-    inline static const IMS_CHAR* PS_RR(IN FailReason /*bValue*/) { return ""; }
-    inline static const IMS_CHAR* PS_LFR(IN FailReason /*bValue*/) { return ""; }
+    inline static const IMS_CHAR* PS_FR(IN CallReasonInfo /*bValue*/) { return ""; }
+    inline static const IMS_CHAR* PS_RR(IN CallReasonInfo /*bValue*/) { return ""; }
+    inline static const IMS_CHAR* PS_LFR(IN CallReasonInfo /*bValue*/) { return ""; }
     inline static const IMS_CHAR* PS_MT(IN MediaThreshold /*bValue*/) { return ""; }
 };
 
@@ -152,8 +152,8 @@ public:
 #define PS_CNAPScheme(A) MtcDefPs::PS_CNAPScheme(A)
 #endif
 
-#ifndef PS_FailReason
-#define PS_FailReason(A) MtcDefPs::PS_FailReason(A)
+#ifndef PS_CallReason
+#define PS_CallReason(A) MtcDefPs::PS_CallReason(A)
 #endif
 
 #ifndef PS_RejectReason

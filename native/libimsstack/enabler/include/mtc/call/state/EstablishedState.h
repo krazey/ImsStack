@@ -17,12 +17,12 @@ public:
     CallStateName Hold(IN MediaInfo* pMediaInfo) override;
     CallStateName Resume(IN MediaInfo* pMediaInfo) override;
     CallStateName Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    CallStateName Terminate(IN const FailReason& objReason) override;
+    CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
     CallStateName SessionTerminated(IN ISession* piSession) override;
     CallStateName SessionUpdateReceived(IN ISession* piSession) override;
 
-    CallStateName TerminateUssi(IN const FailReason& objReason) override;
+    CallStateName TerminateUssi(IN const CallReasonInfo& objReason) override;
     CallStateName UssiTerminated(IN ISession* piSession) override;
     CallStateName SendUssd(IN const AString& strUssd) override;
     CallStateName UssiInfoReceived(
@@ -34,7 +34,7 @@ public:
 
     CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
     CallStateName OnVideoLowestBitRate() override;
-    CallStateName OnMediaFailed(IN FailReason objReason) override;
+    CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
 
 private:
     IMS_RESULT HandleUpdate(

@@ -1,7 +1,7 @@
 #ifndef EARLY_UPDATE_ERROR_HANDLER_H_
 #define EARLY_UPDATE_ERROR_HANDLER_H_
 
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "IMSTypeDef.h"
 
 class IMessage;
@@ -20,12 +20,12 @@ public:
     EarlyUpdateErrorHandler& operator=(const EarlyUpdateErrorHandler&) = delete;
 
     /**
-     * Returns `FailReason` for the incoming message.
+     * Returns `CallReasonInfo` for the incoming message.
      *
      * @param piMessage Received error response. Could be null if no response has came.
-     * @return See `FailReason.h` for the possible values.
+     * @return See `CallReasonInfo.h` for the possible values.
      */
-    FailReason Handle(IN const IMessage* piMessage) const;
+    CallReasonInfo Handle(IN const IMessage* piMessage) const;
 
 private:
     IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage) const;

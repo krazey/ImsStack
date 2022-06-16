@@ -45,20 +45,17 @@ OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
 
 PUBLIC VIRTUAL OutgoingState::~OutgoingState() {}
 
-PUBLIC VIRTUAL CallStateName OutgoingState::Terminate(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName OutgoingState::Terminate(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("Terminate : reason[%s]", PS_FR(objReason), 0, 0);
-
-    FailReason objConvertedReason(objReason);
-    objConvertedReason.nReason = ConvertTerminateReasonToFailReason(objReason.nReason);
 
     MtcSession* pSession = m_objContext.GetSession();
     if (pSession != IMS_NULL)
     {
-        HandleCancel(&pSession->GetISession(), objConvertedReason);
+        HandleCancel(&pSession->GetISession(), objReason);
     }
 
-    m_objContext.GetUiNotifier().SendStartFailed(objConvertedReason);
+    m_objContext.GetUiNotifier().SendStartFailed(objReason);
     return CallStateName::TERMINATING;
 }
 
@@ -128,7 +125,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::QosReserveFailed(
 {
     if (eNextAction == QosLossPolicy::RELEASE)
     {
-        FailReason objReason(FAIL_REASON_SESSION_PRECONDITION);
+        CallReasonInfo objReason(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
         HandleCancel(piSession, objReason);
         m_objContext.GetUiNotifier().SendStartFailed(objReason);
 
@@ -158,10 +155,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
         m_objContext.GetMediaManager().SetConferenceCall(IMS_TRUE);
     }
 
-    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
+    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
         m_objContext.GetSession(piSession)->GetMessageSender().SendAck();
-        FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
+        CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
+
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
 
@@ -173,7 +171,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
 
     if (SendAck(piSession) == IMS_FAILURE)
     {
-        FailReason objReason(FAIL_REASON_SESSION_SETUPFAILED);
+        CallReasonInfo objReason(CODE_SESSION_INTERNAL_ERROR);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
 
@@ -191,9 +189,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
     m_objContext.GetMediaManager().Terminate();
 
     IMessage* piResponse = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START);
-    FailReason objReason = StartErrorHandler(m_objContext).Handle(piResponse);
+    CallReasonInfo objReason = StartErrorHandler(m_objContext).Handle(piResponse);
 
-    if (objReason.nReason == FAIL_REASON_SESSION_RETRY_SILENT)
+    if (objReason.nCode == CODE_RETRY_AFTER_INTERNALONLY)
     {
         return HandleSilentRetry(objReason);
     }
@@ -207,7 +205,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionTerminated(IN ISession* piSes
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
     m_objContext.GetMediaManager().Terminate();
 
-    FailReason objReason = TerminationHandler().Handle(*piSession);
+    CallReasonInfo objReason = TerminationHandler().Handle(*piSession);
     OnStartFailed(piSession, objReason);
 
     return CallStateName::TERMINATING;
@@ -224,9 +222,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     objMediaManager.UpdatePemType(piSession, piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
+    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
-        FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
+        CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
 
@@ -245,7 +243,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISe
     IMS_TRACE_D("SessionEarlyMediaUpdateFailed", 0, 0, 0);
     IMessage* piResponse =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
-    FailReason objReason = EarlyUpdateErrorHandler().Handle(piResponse);
+    CallReasonInfo objReason = EarlyUpdateErrorHandler().Handle(piResponse);
 
     HandleCancel(piSession, objReason);
     OnStartFailed(piSession, objReason);
@@ -265,12 +263,12 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
 
     m_objContext.GetMediaManager().UpdatePemType(piSession, piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
+    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
         if (SendResponseToEarlyUpdate(SipStatusCode::SC_488, m_objContext.GetSession(piSession)) ==
                 IMS_FAILURE)
         {
-            FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
+            CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
             HandleCancel(piSession, objReason);
             OnStartFailed(piSession, objReason);
 
@@ -284,7 +282,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
     if (SendResponseToEarlyUpdate(SipStatusCode::SC_200, m_objContext.GetSession(piSession)) ==
             IMS_FAILURE)
     {
-        FailReason objReason(FAIL_REASON_SESSION_SETUPFAILED);
+        CallReasonInfo objReason(CODE_SESSION_INTERNAL_ERROR);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
 
@@ -365,7 +363,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* p
 
         if (SendEarlyUpdate(m_objContext.GetSession(piSession)) == IMS_FAILURE)
         {
-            FailReason objReason(FAIL_REASON_SESSION_SETUPFAILED);
+            CallReasonInfo objReason(CODE_SESSION_INTERNAL_ERROR);
             HandleCancel(piSession, objReason);
             OnStartFailed(piSession, objReason);
 
@@ -384,10 +382,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDeliveryFailed(IN ISessi
 {
     IMS_TRACE_D("SessionPRAckDeliveryFailed", 0, 0, 0);
     IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_START);
-    FailReason objReason =
-            FailReason(nStatusCode == SipStatusCode::SC_INVALID ? FAIL_REASON_SESSION_RES_TIMEOUT
-                                                                : FAIL_REASON_SESSION_SETUPFAILED,
-                    nStatusCode);
+    CallReasonInfo objReason = CallReasonInfo(
+            nStatusCode == SipStatusCode::SC_INVALID ? CODE_NETWORK_RESP_TIMEOUT : CODE_UNSPECIFIED,
+            nStatusCode);
     HandleCancel(piSession, objReason);
     OnStartFailed(piSession, objReason);
 
@@ -407,7 +404,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
     {
-        FailReason objReason(FAIL_REASON_SERVICE_UNAVAILABLE);
+        CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
 
@@ -431,9 +428,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     m_objContext.GetMediaManager().UpdatePemType(piSession, piMessage);
 
     // TODO: not to update precondition attributes?
-    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
+    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
-        FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
+        CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
 
@@ -473,7 +470,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
 
     if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
     {
-        FailReason objReason(FAIL_REASON_SERVICE_UNAVAILABLE);
+        CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
 
@@ -497,9 +494,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     objMediaManager.UpdatePemType(piSession, piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
+    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
-        FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
+        CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
 
@@ -519,7 +516,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
         // TODO: If there is no ISession in ISession::STATE_ESTABLISHED state and
         // not piSession->IsFinalResponseReceivedForInitialInviteRequest())
         {
-            FailReason objReason(FAIL_REASON_UNKNOWN);
+            CallReasonInfo objReason(CODE_UNSPECIFIED);
             HandleCancel(piSession, objReason);
             OnStartFailed(piSession, objReason);
 
@@ -554,7 +551,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingMediaDataFailed(IN IMS_UI
             return GetStateName();
         }
         ISession* piSession = &m_objContext.GetSession()->GetISession();
-        FailReason objReason(FAIL_REASON_MEDIA_NODATA);
+        CallReasonInfo objReason(CODE_MEDIA_NO_DATA);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
 
@@ -578,7 +575,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingNetworkToneFailed()
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName OutgoingState::OnMediaFailed(IN FailReason objReason)
+PUBLIC VIRTUAL CallStateName OutgoingState::OnMediaFailed(IN CallReasonInfo objReason)
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
 
@@ -601,7 +598,7 @@ CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
         case TIMER_MO_1XX_WAIT:
         {
             // TODO: fail reason name.
-            FailReason objReason(FAIL_REASON_TO_MO_PROGRESSING);
+            CallReasonInfo objReason(CODE_TIMEOUT_1XX_WAITING);
             HandleCancel(GetISession(), objReason);
             OnStartFailed(GetISession(), objReason);
             return CallStateName::TERMINATING;
@@ -609,7 +606,7 @@ CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
         case TIMER_MO_NOANSWER:
         {
             // TODO: fail reason name.
-            FailReason objReason(FAIL_REASON_TO_MO_STARTED);
+            CallReasonInfo objReason(CODE_TIMEOUT_NO_ANSWER);
             HandleCancel(GetISession(), objReason);
             OnStartFailed(GetISession(), objReason);
             return CallStateName::TERMINATING;
@@ -649,13 +646,13 @@ IMS_RESULT OutgoingState::SendAck(IN ISession* piSession)
 }
 
 PRIVATE
-void OutgoingState::HandleCancel(IN ISession* piSession, IN const FailReason& objReason)
+void OutgoingState::HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("HandleCancel", 0, 0, 0);
     StopTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
 
     m_objContext.GetMediaManager().Terminate();
-    if (objReason.nReason == FAIL_REASON_SESSION_PRECONDITION)
+    if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)
     {
         m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_TRUE);
     }
@@ -668,7 +665,7 @@ void OutgoingState::HandleCancel(IN ISession* piSession, IN const FailReason& ob
 }
 
 PRIVATE
-CallStateName OutgoingState::HandleSilentRetry(IN const FailReason& objReason)
+CallStateName OutgoingState::HandleSilentRetry(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("HandleSilentRetry", 0, 0, 0);
 
@@ -689,7 +686,7 @@ CallStateName OutgoingState::HandleSilentRetry(IN const FailReason& objReason)
     }
 
     /* TODO: Policy: retry timer */
-    IMS_SINT32 nRetryAfterSecond = objReason.nExtra;
+    IMS_SINT32 nRetryAfterSecond = objReason.nExtraCode;
     if (nRetryAfterSecond <= 0)
     {
         return ContinueSilentRetry();
@@ -715,7 +712,7 @@ CallStateName OutgoingState::ContinueSilentRetry()
     MtcSession* pSession = m_objContext.CreateSession();
     if (pSession == IMS_NULL)
     {
-        m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
 
@@ -725,7 +722,7 @@ CallStateName OutgoingState::ContinueSilentRetry()
     if (pSession->Start() == IMS_FAILURE)
     {
         m_objContext.GetMediaManager().Terminate();
-        m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
 
@@ -777,10 +774,11 @@ void OutgoingState::OnStarted(IN ISession* piSession)
 }
 
 PRIVATE
-void OutgoingState::OnStartFailed(IN ISession* piSession, IN const FailReason& objReason)
+void OutgoingState::OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason)
 {
-    if (objReason.nReason == FAIL_REASON_SESSION_RETRY_R_RAT &&
-            objReason.nExtra == CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC)
+    // TODO : need to modify this after emergency domain selection policy is decided.
+    if (objReason.nCode == CODE_LOCAL_CALL_CS_RETRY_REQUIRED /*FAIL_REASON_SESSION_RETRY_R_RAT*/ &&
+            objReason.nExtraCode == EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC)
     {
         HandleCountrySpecificServiceUrn(piSession->GetPreviousResponse(IMessage::SESSION_START));
     }
@@ -804,7 +802,10 @@ void OutgoingState::OnSessionForked(IN ISession* piOriginSession)
     }
 
     IMS_TRACE_I("OnSessionForked : Terminate previous session", 0, 0, 0);
-    pOriginMtcSession->Terminate(IMS_TRUE, FailReason(FAIL_REASON_SESSION_EARLYDIALOG));
+
+    pOriginMtcSession->Terminate(
+            IMS_TRUE, CallReasonInfo(CODE_EARLYDIALOG_FORKED_TERMINATED_INTERNALONLY));
+
     m_objContext.GetMediaManager().DestroyMediaProfile(piOriginSession);
     m_objContext.RemoveSession(piOriginSession);
 }

@@ -31,11 +31,12 @@ PUBLIC VIRTUAL CallCountBlockRule::Result CallCountBlockRule::Check(
             IMS_TRACE_I("Check : Video call cannot be placed with another call", 0, 0, 0);
             if (m_objCallInfo.ePeerType == PeerType::MO)
             {
-                return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SERVICE_MAXCALL));
+                return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_CALL_EXCEEDED));
             }
             else
             {
-                return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_MAXCALL));
+                return Result(Result::Status::BLOCKED,
+                        CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED));
             }
         }
     }
@@ -47,11 +48,12 @@ PUBLIC VIRTUAL CallCountBlockRule::Result CallCountBlockRule::Check(
 
         if (m_objCallInfo.ePeerType == PeerType::MO)
         {
-            return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SERVICE_MAXCALL));
+            return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_CALL_EXCEEDED));
         }
         else
         {
-            return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_MAXCALL));
+            return Result(
+                    Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED));
         }
     }
 

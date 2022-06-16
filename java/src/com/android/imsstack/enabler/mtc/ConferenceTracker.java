@@ -46,7 +46,7 @@ public interface ConferenceTracker {
     public static final int EVENT_REMOVE_PARTICIPANTS_REQUEST_DELIVERED = 9;
 
     /**
-     * ImsArgs#mArg1 : FailInfo
+     * ImsArgs#mArg1 : CallReasonInfo
      */
     public static final int EVENT_EXTEND_FAILED = 10;
     public static final int EVENT_MERGE_FAILED = 11;
@@ -62,7 +62,7 @@ public interface ConferenceTracker {
     public static final int EVENT_DELETE_PARTICIPANTS = 51;
     /**
      * No arguments if the operation is successfully done.
-     * ImsArgs#mArg1 : FailInfo if the operation is failed.
+     * ImsArgs#mArg1 : CallReasonInfo if the operation is failed.
      */
     public static final int EVENT_DELETE_PARTICIPANTS_REQUEST_COMPLETED = 52;
 

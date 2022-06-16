@@ -2,9 +2,8 @@ package com.android.imsstack.enabler.mtc.dialogs;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
-import com.android.imsstack.enabler.mtc.IUMtcCall;
+import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.util.ImsLog;
 
@@ -16,7 +15,7 @@ public class DialogsInfo implements Parcelable {
         public String       id = "";
 
         public int          state = DIALOG_STATE_IDLE;
-        public int          reason = IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NONE;
+        public int          reason = CallReasonInfo.CODE_NONE;
         public int          code = 0;
 
         public String       localName = "";

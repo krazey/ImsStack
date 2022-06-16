@@ -28,7 +28,7 @@ public:
 
     CallStateName HandleUserAlert() override;
     CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    CallStateName Reject(IN const FailReason& objReason) override;
+    CallStateName Reject(IN const CallReasonInfo& objReason) override;
     CallStateName HandleSrvccSuccess() override;
     CallStateName HandleSrvccFailure(IN UpdateType eUpdateType) override;
 
@@ -47,7 +47,7 @@ public:
     CallStateName UssiStarted(IN ISession* piSession) override;
 
     CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
-    CallStateName OnMediaFailed(IN FailReason objReason) override;
+    CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
 
 private:
     IMS_RESULT SendAccept();

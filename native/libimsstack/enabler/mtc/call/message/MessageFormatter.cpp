@@ -7,7 +7,7 @@
 #include "Const3GPP.h"
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "ICoreService.h"
 #include "IFeatureCaps.h"
 #include "IMessage.h"
@@ -161,7 +161,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAcceptMessage()
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormRejectMessage(
-        IN const FailReason& objReason, OUT IMS_SINT32& eStatusCode, OUT AString& strPhrase)
+        IN const CallReasonInfo& objReason, OUT IMS_SINT32& eStatusCode, OUT AString& strPhrase)
 {
     if (InitVariables(FormType::REJECT) == IMS_FAILURE)
     {
@@ -224,7 +224,8 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAcceptUpdateMessage()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormCancelUpdateMessage(IN const FailReason& objReason)
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormCancelUpdateMessage(
+        IN const CallReasonInfo& objReason)
 {
     if (InitVariables(FormType::CANCEL_UPDATE) == IMS_FAILURE)
     {
@@ -240,7 +241,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormCancelUpdateMessage(IN const Fai
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormTerminateMessage(IN const FailReason& objReason)
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormTerminateMessage(IN const CallReasonInfo& objReason)
 {
     if (InitVariables(FormType::TERMINATE) == IMS_FAILURE)
     {
@@ -672,143 +673,91 @@ void MessageFormatter::SetCarrierSpecificHeaders()
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PRIVATE
-IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const FailReason& objReason)
+IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objReason)
 {
     IMS_SINT32 eStatusCode = SipStatusCode::SC_INVALID;
 
-    switch (objReason.nReason)
+    switch (objReason.nCode)
     {
-        case REJECT_REASON_UNKNOWN:
+        case CODE_UNSPECIFIED:
             eStatusCode = SipStatusCode::SC_480;
             break;
-        case REJECT_REASON_DECLINE_USER:
+        case CODE_USER_DECLINE:
             eStatusCode = m_objContext.GetConfigurationProxy().GetInt(
                     Feature::INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE);
             break;
-        case REJECT_REASON_DECLINE_NOANSWER:
+        case CODE_USER_NOANSWER:
             eStatusCode = SipStatusCode::SC_603;
             break;
-        case REJECT_REASON_DECLINE_NOBATTERY:
+        case CODE_LOW_BATTERY:
             eStatusCode = SipStatusCode::SC_603;
             break;
-        case REJECT_REASON_DECLINE_NORMAL:
+        case CODE_LOCAL_CALL_END_UNSPECIFIED:
             eStatusCode = SipStatusCode::SC_603;
             break;
-        case REJECT_REASON_DECLINE_CW:
+        case CODE_REJECT_ONGOING_CALL_WAITING_DISABLED:
             eStatusCode = SipStatusCode::SC_486;
             break;
-        case REJECT_REASON_DECLINE_UPDATE:
-            eStatusCode = SipStatusCode::SC_603;
-            break;
-
-        case REJECT_REASON_SERVICE_UNAVAILABLE:
+        case CODE_LOCAL_SERVICE_UNAVAILABLE:
             eStatusCode = SipStatusCode::SC_480;
             break;
-        case REJECT_REASON_SERVICE_TTY:
+        case CODE_REJECT_VT_TTY_NOT_ALLOWED:
             eStatusCode = SipStatusCode::SC_480;
             break;
 
-        case REJECT_REASON_BUSY_ISCSCALL:
+        case CODE_REJECT_ONGOING_CS_CALL:
             eStatusCode = SipStatusCode::SC_486;
             break;
-        case REJECT_REASON_BUSY_ISEMERGENCY:
+        case CODE_REJECT_ONGOING_E911_CALL:
             eStatusCode = SipStatusCode::SC_486;
             break;
-        case REJECT_REASON_BUSY_ISWIFICALL:
+        case CODE_REJECT_CALL_ON_OTHER_SUB:
             eStatusCode = SipStatusCode::SC_486;
             break;
-        case REJECT_REASON_BUSY_ISOTHERSCALL:
+        case CODE_REJECT_ONGOING_CALL_SETUP:
             eStatusCode = SipStatusCode::SC_486;
             break;
-        case REJECT_REASON_BUSY_ESTABLISHING:
+        case CODE_REJECT_MAX_CALL_LIMIT_REACHED:
             eStatusCode = SipStatusCode::SC_486;
             break;
-        case REJECT_REASON_BUSY_ALERTING:
+        case CODE_LOCAL_CALL_BUSY:
             eStatusCode = SipStatusCode::SC_486;
             break;
-        case REJECT_REASON_BUSY_MAXCALL:
+        case CODE_USER_IGNORE:
             eStatusCode = SipStatusCode::SC_486;
             break;
-        case REJECT_REASON_BUSY_NORMAL:
-            eStatusCode = SipStatusCode::SC_486;
-            break;
-        case REJECT_REASON_BUSY_IGNORE:
-            eStatusCode = SipStatusCode::SC_486;
-            break;
-        case REJECT_REASON_BUSY_HIDE:
-            eStatusCode = SipStatusCode::SC_486;
-            break;
-
-        case REJECT_REASON_SESSION_NOTSUPPORT:
+        case CODE_REJECT_UNSUPPORTED_SIP_HEADERS:
             eStatusCode = SipStatusCode::SC_420;
             break;
-        case REJECT_REASON_SESSION_NOTACCEPTABLE:
+        case CODE_SIP_NOT_ACCEPTABLE:
             eStatusCode = SipStatusCode::SC_406;
             break;
-        case REJECT_REASON_SESSION_NOTACCEPTABLEHERE:
-            eStatusCode = SipStatusCode::SC_488;
-            break;
-        case REJECT_REASON_SESSION_UPDATE:
+        case CODE_REJECT_ONGOING_CALL_UPDATE:
             eStatusCode = SipStatusCode::SC_491;
             break;
-        case REJECT_REASON_SESSION_BAD:
-            eStatusCode = SipStatusCode::SC_400;
-            break;
-        case REJECT_REASON_SESSION_FAIL:
+        case CODE_SESSION_INTERNAL_ERROR:
             eStatusCode = SipStatusCode::SC_480;
             break;
-        case REJECT_REASON_SESSION_FAIL_PRECONDITION:
+        case CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED:
             eStatusCode = SipStatusCode::SC_580;
             break;
-        case REJECT_REASON_SESSION_INVALID_REFERRER_IDENTITY:
-            eStatusCode = SipStatusCode::SC_429;
-            break;
-        case REJECT_REASON_CONF_JOINED:
+        case CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE:
             eStatusCode = SipStatusCode::SC_480;
             break;
-
-        case REJECT_REASON_MEDIA_INITFAIL:
+        case CODE_MEDIA_INIT_FAILED:
             eStatusCode = SipStatusCode::SC_415;
             break;
-        case REJECT_REASON_MEDIA_CODEC:
-            eStatusCode = SipStatusCode::SC_480;
-            break;
-        case REJECT_REASON_MEDIA_LOWEST_BIT_RATE:
-            eStatusCode = SipStatusCode::SC_480;
-            break;
-        case REJECT_REASON_MEDIA_CHECK_RADIO_CONNECTION:
-            eStatusCode = SipStatusCode::SC_480;
-            break;
-        case REJECT_REASON_MEDIA_NEGOFAIL:
+        case CODE_MEDIA_NOT_ACCEPTABLE:
             eStatusCode = SipStatusCode::SC_415;
             break;
-        case REJECT_REASON_MEDIA_FORMFAIL:
-            eStatusCode = SipStatusCode::SC_480;
-            break;
-        case REJECT_REASON_MEDIA_NODATA:
-            eStatusCode = SipStatusCode::SC_480;
-            break;
-        case REJECT_REASON_MEDIA_FAIL:
-            eStatusCode = SipStatusCode::SC_480;
-            break;
-
-        case REJECT_REASON_TO_MO_PROGRESSING:
-            eStatusCode = SipStatusCode::SC_603;
-            break;
-        case REJECT_REASON_TO_MO_STARTED:
-            eStatusCode = SipStatusCode::SC_603;
-            break;
-        case REJECT_REASON_TO_MO_UPDATE:
-            eStatusCode = SipStatusCode::SC_603;
-            break;
-        case REJECT_REASON_TO_MT_NOANSWER:
+        case CODE_MEDIA_NO_DATA:
             eStatusCode = m_objContext.GetConfigurationProxy().GetInt(
                     Feature::INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER);
             break;
-        case REJECT_REASON_TO_MT_UPDATE:
+        case CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE:
             eStatusCode = SipStatusCode::SC_603;
             break;
-        case REJECT_REASON_TO_MT_PRACK:
+        case CODE_NETWORK_RESP_TIMEOUT:
             eStatusCode = SipStatusCode::SC_500;
             break;
 
@@ -823,31 +772,30 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const FailReason& objReason)
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PRIVATE
-void MessageFormatter::GetRejectPhrase(IN const FailReason& objReason, OUT AString& strPhrase)
+void MessageFormatter::GetRejectPhrase(IN const CallReasonInfo& objReason, OUT AString& strPhrase)
 {
-    switch (objReason.nReason)
+    switch (objReason.nCode)
     {
-        case REJECT_REASON_DECLINE_USER:
+        case CODE_USER_DECLINE:
             strPhrase = GetRejectPhrase(RejectType::USER_REJECT);
             break;
-        case REJECT_REASON_BUSY_ISCSCALL:
+        case CODE_REJECT_ONGOING_CS_CALL:
             strPhrase = GetRejectPhrase(RejectType::ON_CS_CALL);
             break;
-        case REJECT_REASON_BUSY_NORMAL:
-        case REJECT_REASON_BUSY_ALERTING:
-        case REJECT_REASON_BUSY_ESTABLISHING:
+        case CODE_LOCAL_CALL_BUSY:
+        case CODE_REJECT_ONGOING_CALL_SETUP:
             strPhrase = GetRejectPhrase(RejectType::ON_CONNECTING_CALL);
             break;
-        case REJECT_REASON_BUSY_MAXCALL:
+        case CODE_REJECT_MAX_CALL_LIMIT_REACHED:
             strPhrase = GetRejectPhrase(RejectType::EXCEEDS_MAX_CALL);
             break;
-        case REJECT_REASON_TO_MT_NOANSWER:
+        case CODE_MEDIA_NO_DATA:
             strPhrase = GetRejectPhrase(RejectType::NO_ANSWER_BY_USER);
             break;
-        case REJECT_REASON_SESSION_UPDATE:
+        case CODE_REJECT_ONGOING_CALL_UPDATE:
             strPhrase = GetRejectPhrase(RejectType::ON_CONVERTING);
             break;
-        case REJECT_REASON_MEDIA_NEGOFAIL:
+        case CODE_MEDIA_NOT_ACCEPTABLE:
             strPhrase = GetRejectPhrase(RejectType::NEGOTIATION_FAILURE);
             break;
         default:
@@ -885,37 +833,35 @@ void MessageFormatter::GetUpdateReason(IN UpdateType eUpdateType, OUT AString& s
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PRIVATE
-void MessageFormatter::GetTerminateReason(IN const FailReason& objReason, OUT AString& strReason)
+void MessageFormatter::GetTerminateReason(
+        IN const CallReasonInfo& objReason, OUT AString& strReason)
 {
-    switch (objReason.nReason)
+    switch (objReason.nCode)
     {
-        case FAIL_REASON_SESSION_USERTERMINATE:
+        case CODE_USER_TERMINATED:
             strReason = GetTerminateReason(TerminateType::USER_ENDS_CALL);
             break;
-        case FAIL_REASON_MEDIA_NODATA:
+        case CODE_MEDIA_NO_DATA:
             strReason = GetTerminateReason(TerminateType::RTP_TIMEOUT);
             break;
-        case FAIL_REASON_SESSION_PRECONDITION:
+        case CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED:
             strReason = GetTerminateReason(TerminateType::MEDIA_BEARER_LOSS);
             break;
-        case FAIL_REASON_SESSION_CANCELED:
+        case CODE_SIP_REQUEST_CANCELLED:
             strReason = GetTerminateReason(TerminateType::SIP_TIMEOUT);
             break;
-        case FAIL_REASON_SESSION_RES_TIMEOUT:  // FALL_THROUGH
-        case FAIL_REASON_TO_MO_PROGRESSING:
+        case CODE_NETWORK_RESP_TIMEOUT:  // FALL_THROUGH
+        case CODE_TIMEOUT_1XX_WAITING:
             strReason = GetTerminateReason(TerminateType::SIP_RESPONSE_TIMEOUT);
             break;
-        case FAIL_REASON_TO_MO_STARTED:
+        case CODE_TIMEOUT_NO_ANSWER:
             strReason = GetTerminateReason(TerminateType::CALL_SETUP_TIMEOUT);
             break;
 
-        case FAIL_REASON_SESSION_EARLYDIALOG:
+        case CODE_EARLYDIALOG_FORKED_TERMINATED_INTERNALONLY:
             strReason = GetTerminateReason(TerminateType::TERMINATING_EARLY_DIALOG);
             break;
-        case FAIL_REASON_SESSION_REFRESH_OUT:
-            strReason = GetTerminateReason(TerminateType::SESSION_RREFRESH_FAILURE);
-            break;
-        case FAIL_REASON_CONF_JOINED:
+        case CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE:
             strReason = GetTerminateReason(TerminateType::CONFERENCE_CALL_JOINED);
             break;
 

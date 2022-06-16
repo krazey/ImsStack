@@ -67,7 +67,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::Accept(
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::Reject(IN const FailReason& /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::Reject(IN const CallReasonInfo& /* objReason */)
 {
     return GetStateName();
 }
@@ -88,7 +88,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::AcceptResume(
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::RejectResume(IN const FailReason& /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::RejectResume(IN const CallReasonInfo& /* objReason */)
 {
     return GetStateName();
 }
@@ -105,17 +105,17 @@ PUBLIC VIRTUAL CallStateName MtcCallState::AcceptConvert(
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::RejectConvert(IN const FailReason& /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::RejectConvert(IN const CallReasonInfo& /* objReason */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::CancelConvert(IN const FailReason& /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::CancelConvert(IN const CallReasonInfo& /* objReason */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::Terminate(IN const FailReason& /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::Terminate(IN const CallReasonInfo& /* objReason */)
 {
     return GetStateName();
 }
@@ -149,12 +149,12 @@ PUBLIC VIRTUAL CallStateName MtcCallState::HandleSrvccSuccess()
         case CallStateName::INCOMING:
         case CallStateName::ALERTING:
             m_objContext.GetMediaManager().Terminate();
-            m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_SESSION_SRVCC));
+            m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_NONE));
             break;
         case CallStateName::ESTABLISHED:
         case CallStateName::UPDATING:
             m_objContext.GetMediaManager().Terminate();
-            m_objContext.GetUiNotifier().SendTerminated(FailReason(FAIL_REASON_SESSION_SRVCC));
+            m_objContext.GetUiNotifier().SendTerminated(CallReasonInfo(CODE_NONE));
             break;
         case CallStateName::TERMINATING:
             break;
@@ -190,7 +190,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::AcceptUssi(
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::TerminateUssi(IN const FailReason& /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::TerminateUssi(IN const CallReasonInfo& /* objReason */)
 {
     return GetStateName();
 }
@@ -419,13 +419,13 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnReceivingNetworkToneFailed()
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::OnMediaFailed(IN FailReason /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::OnMediaFailed(IN CallReasonInfo /* objReason */)
 {
     return GetStateName();
 }
 
 PROTECTED
-void MtcCallState::HandleTerminate(IN const FailReason& objReason)
+void MtcCallState::HandleTerminate(IN const CallReasonInfo& objReason)
 {
     m_objContext.GetMediaManager().Terminate();
 
@@ -436,39 +436,6 @@ void MtcCallState::HandleTerminate(IN const FailReason& objReason)
     }
 
     pSession->Terminate(IMS_TRUE, objReason);
-}
-
-PROTECTED
-IMS_SINT32 MtcCallState::ConvertTerminateReasonToFailReason(IN IMS_SINT32 eReason)
-{
-    IMS_SINT32 eFailReason = FAIL_REASON_NONE;
-
-    switch (eReason)
-    {
-        case IuMtcCall::TERMINATE_REASON_NORMAL:
-            eFailReason = FAIL_REASON_SESSION_TERMINATED;
-            break;
-        case IuMtcCall::TERMINATE_REASON_USER:
-            eFailReason = FAIL_REASON_SESSION_USERTERMINATE;
-            break;
-        case IuMtcCall::TERMINATE_REASON_LOW_BATTERY:
-            eFailReason = FAIL_REASON_SERVICE_LOWBATTERY;
-            break;
-        case IuMtcCall::TERMINATE_REASON_POWER_OFF:
-            eFailReason = FAIL_REASON_SERVICE_POWEROFF;
-            break;
-        case IuMtcCall::TERMINATE_REASON_VCC:
-            eFailReason = FAIL_REASON_SESSION_SRVCC;
-            break;
-
-        default:
-            eFailReason = eReason;
-            break;
-    }
-
-    IMS_TRACE_I("ConvertTerminateReasonToFailReason : [%d]->[%s]", eReason,
-            PS_FailReason(eFailReason), 0);
-    return eFailReason;
 }
 
 PROTECTED
@@ -533,28 +500,28 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
         if (IsAnswerMandatory(piSession, piMessage))
         {
             IMS_TRACE_E(0, "Answer must be included.", 0, 0, 0);
-            return FAIL_REASON_MEDIA_NEGOFAIL;
+            return CODE_MEDIA_NOT_ACCEPTABLE;
         }
         RunMedia(piSession, piMessage, IMS_FALSE);
-        return FAIL_REASON_NONE;
+        return CODE_NONE;
     }
 
     if (IsNeedToIgnore(piSession, piMessage) == IMS_TRUE)
     {
         RunMedia(piSession, piMessage, IMS_FALSE);
-        return FAIL_REASON_NONE;
+        return CODE_NONE;
     }
 
     if (IsInvalidOfferAnswer(piSession, piMessage) == IMS_TRUE)
     {
-        return FAIL_REASON_MEDIA_NEGOFAIL;
+        return CODE_MEDIA_NOT_ACCEPTABLE;
     }
 
     if (m_objContext.GetMediaManager().NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
     {
         IMS_TRACE_D("OnSdpReceived - Nego SDP Failed", 0, 0, 0);
         // TODO: return fail reasone? IMS_RESULT? it's always NEGOFAIL?
-        return FAIL_REASON_MEDIA_NEGOFAIL;
+        return CODE_MEDIA_NOT_ACCEPTABLE;
     }
 
     RunMedia(piSession, piMessage);
@@ -562,7 +529,7 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
     m_objContext.GetPreconditionManager().UpdateQosAttributesFromSdp(piSession);
 
     IMS_TRACE_D("OnSdpReceived - Nego Done", 0, 0, 0);
-    return FAIL_REASON_NONE;
+    return CODE_NONE;
 }
 
 PROTECTED
@@ -671,18 +638,18 @@ IMS_RESULT MtcCallState::SendResponseToPrack(IN IMS_SINT32 eStatusCode)
 }
 
 PROTECTED
-CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const FailReason& objFailReason)
+CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason)
 {
     m_objContext.GetMediaManager().Terminate();
 
-    if (objFailReason.nReason == REJECT_REASON_SESSION_FAIL_PRECONDITION)
+    if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)
     {
         m_objContext.GetPreconditionManager().FormPreconditionSdp(
                 &m_objContext.GetSession()->GetISession(), IMS_TRUE);
     }
 
-    m_objContext.GetSession()->GetMessageSender().Reject(objFailReason);
-    m_objContext.GetUiNotifier().SendStartFailed(objFailReason);
+    m_objContext.GetSession()->GetMessageSender().Reject(objReason);
+    m_objContext.GetUiNotifier().SendStartFailed(objReason);
     return CallStateName::TERMINATING;
 }
 

@@ -35,11 +35,11 @@ void JniMtcCallThread::OnStarted(IN const JniCallInfo& objCallInfo, IN MediaInfo
 }
 
 PUBLIC
-void JniMtcCallThread::OnStartFailed(IN const FailReason& objReason)
+void JniMtcCallThread::OnStartFailed(IN const CallReasonInfo& objReason)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::START_FAILED);
-    JniMtcUtils::WriteFailReasonToParcel(objReason, objParcel);
+    JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
     SendData2Java(objParcel);
 }
 
@@ -66,11 +66,11 @@ void JniMtcCallThread::OnHeld(IN const JniCallInfo& objCallInfo, IN MediaInfo* p
 }
 
 PUBLIC
-void JniMtcCallThread::OnHoldFailed(IN const FailReason& objReason)
+void JniMtcCallThread::OnHoldFailed(IN const CallReasonInfo& objReason)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::HOLD_FAILED);
-    JniMtcUtils::WriteFailReasonToParcel(objReason, objParcel);
+    JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
     SendData2Java(objParcel);
 }
 
@@ -85,11 +85,11 @@ void JniMtcCallThread::OnResumed(IN const JniCallInfo& objCallInfo, IN MediaInfo
 }
 
 PUBLIC
-void JniMtcCallThread::OnResumeFailed(IN const FailReason& objReason)
+void JniMtcCallThread::OnResumeFailed(IN const CallReasonInfo& objReason)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::RESUME_FAILED);
-    JniMtcUtils::WriteFailReasonToParcel(objReason, objParcel);
+    JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
     SendData2Java(objParcel);
 }
 
@@ -114,11 +114,11 @@ void JniMtcCallThread::OnResumedBy(IN const JniCallInfo& objCallInfo, IN MediaIn
 }
 
 PUBLIC
-void JniMtcCallThread::OnTerminated(IN const FailReason& objReason)
+void JniMtcCallThread::OnTerminated(IN const CallReasonInfo& objReason)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::TERMINATED);
-    JniMtcUtils::WriteFailReasonToParcel(objReason, objParcel);
+    JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
     SendData2Java(objParcel);
 }
 
@@ -153,11 +153,11 @@ void JniMtcCallThread::OnUpdated(IN const JniCallInfo& objCallInfo, IN MediaInfo
 }
 
 PUBLIC
-void JniMtcCallThread::OnUpdateFailed(IN const FailReason& objReason)
+void JniMtcCallThread::OnUpdateFailed(IN const CallReasonInfo& objReason)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::UPDATE_FAILED);
-    JniMtcUtils::WriteFailReasonToParcel(objReason, objParcel);
+    JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
     SendData2Java(objParcel);
 }
 
@@ -184,7 +184,7 @@ void JniMtcCallThread::OnMerged(IN const JniCallInfo& objCallInfo, IN MediaInfo*
 }
 
 PUBLIC
-void JniMtcCallThread::OnMergeFailed(IN const FailReason& /*objReason*/)
+void JniMtcCallThread::OnMergeFailed(IN const CallReasonInfo& /*objReason*/)
 {
     // TODO:
 }
@@ -196,7 +196,7 @@ void JniMtcCallThread::OnConferenceParticipantAdded()
 }
 
 PUBLIC
-void JniMtcCallThread::OnConferenceParticipantAddFailed(IN const FailReason& /*objReason*/)
+void JniMtcCallThread::OnConferenceParticipantAddFailed(IN const CallReasonInfo& /*objReason*/)
 {
     // TODO:
 }
@@ -208,7 +208,7 @@ void JniMtcCallThread::OnConferenceParticipantRemoved()
 }
 
 PUBLIC
-void JniMtcCallThread::OnConferenceParticipantRemoveFailed(IN const FailReason& /*objReason*/)
+void JniMtcCallThread::OnConferenceParticipantRemoveFailed(IN const CallReasonInfo& /*objReason*/)
 {
     // TODO:
 }
@@ -232,13 +232,13 @@ void JniMtcCallThread::OnConferenceParticipantsInfoChanged(IN const IMSList<Conf
     SendData2Java(objParcel);
 }
 
-void JniMtcCallThread::OnEctCompleted(IN IMS_RESULT nResult, IN const FailReason& objReason)
+void JniMtcCallThread::OnEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::ECT_COMPLETED);
     IMS_SINT32 _nResult = nResult == IMS_SUCCESS ? 1 : 0;
     objParcel.writeInt32(_nResult);
-    JniMtcUtils::WriteFailReasonToParcel(objReason, objParcel);
+    JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
     SendData2Java(objParcel);
 }
 

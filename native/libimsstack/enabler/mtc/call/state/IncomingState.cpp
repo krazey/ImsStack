@@ -86,7 +86,8 @@ PUBLIC VIRTUAL CallStateName IncomingState::QosReserveFailed(
     IMS_TRACE_D("QosReserveFailed", 0, 0, 0);
     if (eNextAction == QosLossPolicy::RELEASE)
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL_PRECONDITION));
+        return RejectIncomingAndToTerminating(
+                CallReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED));
     }
 
     if (eNextAction == QosLossPolicy::MODIFY)
@@ -114,9 +115,9 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
     m_objContext.GetSession()->HandleResponse(IMessage::SESSION_EARLY_UPDATE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
+    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
@@ -151,7 +152,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(
             piSession, IMessage::SESSION_EARLY_UPDATE);
     TODO: failure handler
     */
-    m_objContext.GetUiNotifier().SendStartFailed(FailReason(REJECT_REASON_SESSION_FAIL));
+    m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
     return CallStateName::TERMINATING;
 }
 
@@ -167,26 +168,27 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
                     SipStatusCode::SC_200) == IMS_FAILURE)
         {
             m_objContext.GetMediaManager().Terminate();
-            m_objContext.GetUiNotifier().SendStartFailed(FailReason(REJECT_REASON_SESSION_FAIL));
+            m_objContext.GetUiNotifier().SendStartFailed(
+                    CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
             return CallStateName::TERMINATING;
         }
 
         return GetStateName();
     }
 
-    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
+    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
         if (SendResponseToEarlyUpdate(SipStatusCode::SC_488, m_objContext.GetSession()) ==
                 IMS_FAILURE)
         {
-            return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
+            return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
         }
         return GetStateName();
     }
 
     if (SendResponseToEarlyUpdate(SipStatusCode::SC_200, m_objContext.GetSession()) == IMS_FAILURE)
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
     }
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
@@ -214,16 +216,16 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPRAckReceived(IN ISession* pi
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
     m_objContext.GetSession()->HandleRequest(IMessage::SESSION_PRACK, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
+    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
         SendResponseToPrack(SipStatusCode::SC_200);
         // According to RFC 6337, UE must send re-offer.
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_NOTACCEPTABLEHERE));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE));
     }
 
     if (SendResponseToPrack(SipStatusCode::SC_200) == IMS_FAILURE)
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
     }
 
     SetLocalQosAvailableForWifiCalling(piSession);
@@ -250,7 +252,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPRAckReceived(IN ISession* pi
 PUBLIC VIRTUAL CallStateName IncomingState::SessionRPRDeliveryFailed(IN ISession* /* piSession*/)
 {
     IMS_TRACE_D("SessionRPRDeliveryFailed", 0, 0, 0);
-    return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_TO_MT_PRACK));
+    return RejectIncomingAndToTerminating(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT));
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType)
@@ -259,26 +261,14 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnReceivingMediaDataFailed(IN IMS_UI
 
     if (IsCallEndNeededByAudioInactivity(eMediaType))
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NODATA));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NO_DATA));
     }
 
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName IncomingState::OnMediaFailed(IN FailReason objReason)
+PUBLIC VIRTUAL CallStateName IncomingState::OnMediaFailed(IN CallReasonInfo objReason)
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
-
-    IMS_SINT32 nReason = REJECT_REASON_UNKNOWN;
-
-    if (objReason.nReason == FAIL_REASON_MEDIA_CODEC)
-    {
-        nReason = REJECT_REASON_MEDIA_CODEC;
-    }
-    else if (objReason.nReason == FAIL_REASON_MEDIA_INITFAIL)
-    {
-        nReason = REJECT_REASON_MEDIA_INITFAIL;
-    }
-
-    return RejectIncomingAndToTerminating(FailReason(nReason));
+    return RejectIncomingAndToTerminating(CallReasonInfo(objReason));
 }

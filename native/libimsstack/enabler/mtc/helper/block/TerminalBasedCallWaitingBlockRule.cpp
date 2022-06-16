@@ -31,7 +31,8 @@ PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::Result TerminalBasedCallWaitin
 
     IMS_TRACE_I("Check : Terminal based call waiting is not enabled", 0, 0, 0);
 
-    return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_DECLINE_CW));
+    return Result(
+            Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CALL_WAITING_DISABLED));
 }
 
 PRIVATE

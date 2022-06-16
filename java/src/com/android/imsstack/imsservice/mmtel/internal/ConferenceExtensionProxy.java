@@ -12,7 +12,7 @@
 package com.android.imsstack.imsservice.mmtel.internal;
 
 import com.android.imsstack.enabler.mtc.CallInfo;
-import com.android.imsstack.enabler.mtc.FailInfo;
+import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.MtcCallUtils;
@@ -20,10 +20,8 @@ import com.android.imsstack.enabler.mtc.MtcConference;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
-import com.android.imsstack.util.ImsLog;
 
 import java.util.Arrays;
-import java.util.concurrent.Executor;
 
 public class ConferenceExtensionProxy extends ConferenceProxy {
     private MtcCall mForegroundCall;
@@ -136,7 +134,7 @@ public class ConferenceExtensionProxy extends ConferenceProxy {
     }
 
     private void notifyConferenceFailed() {
-        notifySessionConferenceExtendFailed(createUnknownFailInfo());
+        notifySessionConferenceExtendFailed(createUnspecifiedCallReasonInfo());
     }
 
     private void notifySessionConferenceExtended(final CallInfo callInfo,
@@ -166,7 +164,7 @@ public class ConferenceExtensionProxy extends ConferenceProxy {
         });
     }
 
-    private void notifySessionConferenceExtendFailed(final FailInfo failInfo) {
+    private void notifySessionConferenceExtendFailed(final CallReasonInfo callReasonInfo) {
         postAndRun(new Runnable() {
             @Override
             public void run() {
@@ -174,7 +172,7 @@ public class ConferenceExtensionProxy extends ConferenceProxy {
                     for (ListenerWrapper lw : mListeners) {
                         if (lw.mConferenceListener != null) {
                             lw.mConferenceListener.onCallConferenceExtendFailed(
-                                    MtcCall.getConference(mForegroundCall), failInfo);
+                                    MtcCall.getConference(mForegroundCall), callReasonInfo);
                         }
                     }
                 } catch (Throwable t) {
@@ -186,11 +184,11 @@ public class ConferenceExtensionProxy extends ConferenceProxy {
 
     private class MtcCallListenerProxy extends MtcCall.Listener {
         @Override
-        public void onCallTerminated(MtcCall call, FailInfo failInfo) {
+        public void onCallTerminated(MtcCall call, CallReasonInfo callReasonInfo) {
             if (call.equals(getConferenceCall())) {
                 notifyConferenceFailed();
             } else {
-                notifySessionTerminated(call, failInfo);
+                notifySessionTerminated(call, callReasonInfo);
 
                 int state = getState();
 
@@ -200,7 +198,7 @@ public class ConferenceExtensionProxy extends ConferenceProxy {
                 } else {
                     // If foreground or background call is terminated,
                     // then we need to restore the 1-to-1 call at most.
-                    if (!MtcCallUtils.isCallTerminatedByJoiningConference(failInfo.Reason)) {
+                    if (!MtcCallUtils.isCallTerminatedByJoiningConference(callReasonInfo.mCode)) {
                         if (state == STATE_CONFERENCE_EXTENDING) {
                             notifyConferenceFailed();
                         }
@@ -223,12 +221,12 @@ public class ConferenceExtensionProxy extends ConferenceProxy {
         }
 
         @Override
-        public void onCallHoldFailed(MtcCall call, FailInfo failInfo) {
+        public void onCallHoldFailed(MtcCall call, CallReasonInfo callReasonInfo) {
             if (!call.equals(mForegroundCall)) {
                 return;
             }
 
-            notifySessionConferenceExtendFailed(failInfo);
+            notifySessionConferenceExtendFailed(callReasonInfo);
         }
 
         @Override
@@ -258,12 +256,13 @@ public class ConferenceExtensionProxy extends ConferenceProxy {
         }
 
         @Override
-        public void onCallConferenceExtendFailed(MtcConference confCall, FailInfo failInfo) {
+        public void onCallConferenceExtendFailed(MtcConference confCall,
+                CallReasonInfo callReasonInfo) {
             if (!confCall.isSameCall(MtcCall.getConference(getConferenceCall()))) {
                 return;
             }
 
-            notifySessionConferenceExtendFailed(failInfo);
+            notifySessionConferenceExtendFailed(callReasonInfo);
         }
     }
 }

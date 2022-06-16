@@ -32,14 +32,7 @@ PUBLIC VIRTUAL NetworkBlockRule::Result NetworkBlockRule::Check(
 
     IMS_TRACE_I("Check : Network type[%d] is not applicable", nNetworkType, 0, 0);
 
-    if (m_ePeerType == PeerType::MO)
-    {
-        return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SESSION_NOTACCEPTABLEHERE));
-    }
-    else
-    {
-        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_SESSION_NOTACCEPTABLEHERE));
-    }
+    return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE));
 }
 
 PRIVATE

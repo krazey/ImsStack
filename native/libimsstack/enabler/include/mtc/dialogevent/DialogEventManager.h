@@ -29,7 +29,7 @@
 #include "dialogevent/DialogEvent.h"
 #include "define/MtcInternalMsgDef.h"
 
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 
 class DEMngr : public IMSActivityEx, public ISubscriptionListener, public IMtcTimerListener
 {
@@ -106,7 +106,7 @@ protected:
     virtual IMS_BOOL IsCallPull(IN IDialogEvent* pDialog);
     virtual AString ConvertNumber(IN AString aStrIdentity);
 
-    virtual void SendTerminatedToListn(IN FailReason terminatedReason);
+    virtual void SendTerminatedToListn(IN CallReasonInfo terminatedReason);
     virtual void SendNotifyInfoToUI(IN IMSList<DialogInfo*> lstDialogInfos);
 
     IMS_UINT32 GetCallState();

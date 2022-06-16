@@ -37,7 +37,7 @@ public:
             IN IMSList<ConfUser*> lstUsers) override;
     CallStateName HandleIncoming(
             IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
-    CallStateName Terminate(IN const FailReason& objReason) override;
+    CallStateName Terminate(IN const CallReasonInfo& objReason) override;
     CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult) override;
     CallStateName OnAttached() override;
 

@@ -77,11 +77,23 @@ public class MtcCall extends Call implements ConferenceTracker {
             // no-op
         }
 
-        public void onCallStartFailed(MtcCall call, FailInfo failInfo) {
+        /**
+        * Called when the call setup is failed.
+        *
+        * @param call the object of this {@code MtcCall}
+        * @param callReasonInfo detailed reason of the call setup failure
+        */
+        public void onCallStartFailed(MtcCall call, CallReasonInfo callReasonInfo) {
             // no-op
         }
 
-        public void onCallTerminated(MtcCall call, FailInfo failInfo) {
+        /**
+        * Called when the call is terminated.
+        *
+        * @param call the object of this {@code MtcCall}
+        * @param callReasonInfo detailed reason of the call termination
+        */
+        public void onCallTerminated(MtcCall call, CallReasonInfo callReasonInfo) {
             // no-op
         }
 
@@ -90,7 +102,13 @@ public class MtcCall extends Call implements ConferenceTracker {
             // no-op
         }
 
-        public void onCallHoldFailed(MtcCall call, FailInfo failInfo) {
+        /**
+        * Called when the call hold is failed.
+        *
+        * @param call the object of this {@code MtcCall}
+        * @param callReasonInfo detailed reason of the call hold failure
+        */
+        public void onCallHoldFailed(MtcCall call, CallReasonInfo callReasonInfo) {
             // no-op
         }
 
@@ -104,7 +122,13 @@ public class MtcCall extends Call implements ConferenceTracker {
             // no-op
         }
 
-        public void onCallResumeFailed(MtcCall call, FailInfo failInfo) {
+        /**
+        * Called when the call resume is failed.
+        *
+        * @param call the object of this {@code MtcCall}
+        * @param callReasonInfo detailed reason of the call resume failure
+        */
+        public void onCallResumeFailed(MtcCall call, CallReasonInfo callReasonInfo) {
             // no-op
         }
 
@@ -123,7 +147,13 @@ public class MtcCall extends Call implements ConferenceTracker {
             // no-op
         }
 
-        public void onCallUpdateFailed(MtcCall call, FailInfo failInfo) {
+        /**
+        * Called when the call update is failed.
+        *
+        * @param call the object of this {@code MtcCall}
+        * @param callReasonInfo detailed reason of the call update failure
+        */
+        public void onCallUpdateFailed(MtcCall call, CallReasonInfo callReasonInfo) {
             // no-op
         }
 
@@ -148,7 +178,13 @@ public class MtcCall extends Call implements ConferenceTracker {
             // no-op
         }
 
-        public void onCallTransferFailed(MtcCall call, FailInfo failInfo) {
+        /**
+        * Called when the call transfer is failed.
+        *
+        * @param call the object of this {@code MtcCall}
+        * @param callReasonInfo detailed reason of the call transfer failure
+        */
+        public void onCallTransferFailed(MtcCall call, CallReasonInfo callReasonInfo) {
             // no-op
         }
 
@@ -157,11 +193,22 @@ public class MtcCall extends Call implements ConferenceTracker {
             // no-op
         }
 
-        public void onCallCallPushRequestCompleted(MtcCall call) {
+        /**
+        * Called when the call push is completed.
+        *
+        * @param call the object of this {@code MtcCall}
+        */
+        public void onCallPushRequestCompleted(MtcCall call) {
             // no-op
         }
 
-        public void onCallCallPushRequestFailed(MtcCall call, FailInfo failInfo) {
+        /**
+        * Called when the call push is failed.
+        *
+        * @param call the object of this {@code MtcCall}
+        * @param callReasonInfo detailed reason of the call push failure
+        */
+        public void onCallPushRequestFailed(MtcCall call, CallReasonInfo callReasonInfo) {
             // no-op
         }
 
@@ -237,7 +284,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
     /** Args: Parcel */
     private static final int MSG_MESSAGE_RECEIVED = 201;
-    /** Args: FailInfo */
+    /** Args: CallReasonInfo */
     private static final int MSG_CALL_START_FAILED = 202;
     private static final int MSG_CALL_UPDATE_FAILED = 203;
     private static final int MSG_CALL_HOLD_FAILED = 204;
@@ -255,7 +302,7 @@ public class MtcCall extends Call implements ConferenceTracker {
     private MtcCall.RttSessionListener mRttListener = null;
     private MtcCallInfo mCallInfo = null;
     private MediaInfo mMediaInfo = null;
-    private FailInfo mTerminationReason = null;
+    private CallReasonInfo mTerminationReason = null;
     private int mOldCallTypeOnUpdateAccept = IUMtcCall.CALLTYPE_VOIP;
     /** It will be controlled when audio is in sendrecv & video direction is only changed */
     private int mVideoState = ONE_WAY_VIDEO_NONE;
@@ -387,10 +434,10 @@ public class MtcCall extends Call implements ConferenceTracker {
         sendRequest(parcel);
 
         if (immediateCallback && (mListener != null)) {
-            FailInfo failInfo = new FailInfo(
-                    IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_USERTERMINATE, 0, "");
+            CallReasonInfo callReasonInfo = new CallReasonInfo(
+                    CallReasonInfo.CODE_USER_TERMINATED, 0, "");
 
-            Message.obtain(mHandler, MSG_CALL_TERMINATED, failInfo).sendToTarget();
+            Message.obtain(mHandler, MSG_CALL_TERMINATED, callReasonInfo).sendToTarget();
         }
 
         mCT.updateCallState(this, CallTracker.CALL_EVENT_TERMINATING, null);
@@ -592,7 +639,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         return mCallInfo.getCallInfo();
     }
 
-    public FailInfo getTerminationReason() {
+    public CallReasonInfo getTerminationReason() {
         return mTerminationReason;
     }
 
@@ -940,8 +987,9 @@ public class MtcCall extends Call implements ConferenceTracker {
             return;
         } else if (getUpdateState() == UPDATE_STATE_RECEIVED) {
             // GLARE_CONDITION: between call mode changes
-            FailInfo fi = new FailInfo(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_UNKNOWN, 0, "");
-            Message.obtain(mHandler, MSG_CALL_UPDATE_FAILED, fi).sendToTarget();
+            CallReasonInfo callReasonInfo = new CallReasonInfo(
+                    CallReasonInfo.CODE_REJECT_ONGOING_CALL_UPDATE, 0, "");
+            Message.obtain(mHandler, MSG_CALL_UPDATE_FAILED, callReasonInfo).sendToTarget();
             return;
         }
 
@@ -1103,9 +1151,9 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
     }
 
-    private FailInfo getOrCreateTerminationReason() {
-        return (mTerminationReason != null) ? new FailInfo(mTerminationReason) :
-                new FailInfo(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_TERMINATED, 0, "");
+    private CallReasonInfo getOrCreateTerminationReason() {
+        return (mTerminationReason != null) ? new CallReasonInfo(mTerminationReason) :
+                new CallReasonInfo(CallReasonInfo.CODE_USER_TERMINATED_BY_REMOTE, 0, "");
     }
 
     private void notifyInitiating() {
@@ -1125,10 +1173,11 @@ public class MtcCall extends Call implements ConferenceTracker {
             mCT.updateCallState(this, CallTracker.CALL_EVENT_TERMINATED, null);
         }
 
-        FailInfo failInfo = (mTerminationReason != null) ? new FailInfo(mTerminationReason) :
-                new FailInfo(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_CANCELED, 0, "");
+        CallReasonInfo callReasonInfo = (mTerminationReason != null)
+                ? new CallReasonInfo(mTerminationReason) :
+                new CallReasonInfo(CallReasonInfo.CODE_SIP_REQUEST_CANCELLED, 0, "");
 
-        Message.obtain(mHandler, MSG_CALL_START_FAILED, failInfo).sendToTarget();
+        Message.obtain(mHandler, MSG_CALL_START_FAILED, callReasonInfo).sendToTarget();
     }
 
     private void removeAllCallExtrasFromSuppInfo() {
@@ -1473,23 +1522,23 @@ public class MtcCall extends Call implements ConferenceTracker {
                     break;
                 }
                 case MSG_CALL_START_FAILED: {
-                    listener.onCallStartFailed(MtcCall.this, (FailInfo)msg.obj);
+                    listener.onCallStartFailed(MtcCall.this, (CallReasonInfo) msg.obj);
                     break;
                 }
                 case MSG_CALL_UPDATE_FAILED: {
-                    listener.onCallUpdateFailed(MtcCall.this, (FailInfo)msg.obj);
+                    listener.onCallUpdateFailed(MtcCall.this, (CallReasonInfo) msg.obj);
                     break;
                 }
                 case MSG_CALL_HOLD_FAILED: {
-                    listener.onCallHoldFailed(MtcCall.this, (FailInfo)msg.obj);
+                    listener.onCallHoldFailed(MtcCall.this, (CallReasonInfo) msg.obj);
                     break;
                 }
                 case MSG_CALL_RESUME_FAILED: {
-                    listener.onCallResumeFailed(MtcCall.this, (FailInfo)msg.obj);
+                    listener.onCallResumeFailed(MtcCall.this, (CallReasonInfo) msg.obj);
                     break;
                 }
                 case MSG_CALL_TERMINATED: {
-                    listener.onCallTerminated(MtcCall.this, (FailInfo)msg.obj);
+                    listener.onCallTerminated(MtcCall.this, (CallReasonInfo) msg.obj);
                     break;
                 }
                 default:
@@ -1563,15 +1612,15 @@ public class MtcCall extends Call implements ConferenceTracker {
                     break;
                 }
                 case IUMtcCall.START_FAILED: {
-                    FailInfo failInfo = new FailInfo(parcel);
+                    CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
-                    onStartFailed(failInfo);
+                    onStartFailed(callReasonInfo);
                     break;
                 }
                 case IUMtcCall.TERMINATED: {
-                    FailInfo failInfo = new FailInfo(parcel);
+                    CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
-                    onTerminated(failInfo);
+                    onTerminated(callReasonInfo);
                     break;
                 }
                 case IUMtcCall.HELD: {
@@ -1583,9 +1632,9 @@ public class MtcCall extends Call implements ConferenceTracker {
                     break;
                 }
                 case IUMtcCall.HOLD_FAILED: {
-                    FailInfo failInfo = new FailInfo(parcel);
+                    CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
-                    onHoldFailed(failInfo);
+                    onHoldFailed(callReasonInfo);
                     break;
                 }
                 case IUMtcCall.HELD_BY: {
@@ -1605,9 +1654,9 @@ public class MtcCall extends Call implements ConferenceTracker {
                     break;
                 }
                 case IUMtcCall.RESUME_FAILED: {
-                    FailInfo failInfo = new FailInfo(parcel);
+                    CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
-                    onResumeFailed(failInfo);
+                    onResumeFailed(callReasonInfo);
                     break;
                 }
                 case IUMtcCall.RESUMED_BY: {
@@ -1635,9 +1684,9 @@ public class MtcCall extends Call implements ConferenceTracker {
                     break;
                 }
                 case IUMtcCall.UPDATE_FAILED: {
-                    FailInfo failInfo = new FailInfo(parcel);
+                    CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
-                    onUpdateFailed(failInfo);
+                    onUpdateFailed(callReasonInfo);
                     break;
                 }
                 case IUMtcCall.INCOMING_UPDATE: {
@@ -1668,9 +1717,10 @@ public class MtcCall extends Call implements ConferenceTracker {
                 }
                 case IUMtcCall.ECT_COMPLETED: {
                     int result = parcel.readInt();
-                    FailInfo failInfo = (result == 0) ? new FailInfo(parcel) : null;
+                    CallReasonInfo callReasonInfo = (result == 0)
+                            ? new CallReasonInfo(parcel) : null;
 
-                    onEctCompleted(result, failInfo);
+                    onEctCompleted(result, callReasonInfo);
                     break;
                 }
                 case IUMtcCall.REPLACED_BY: {
@@ -1685,9 +1735,10 @@ public class MtcCall extends Call implements ConferenceTracker {
                 }
                 case IUMtcCall.CALL_PUSH_COMPLETED: {
                     int result = parcel.readInt();
-                    FailInfo failInfo = (result == 0) ? new FailInfo(parcel) : null;
+                    CallReasonInfo callReasonInfo = (result == 0)
+                            ? new CallReasonInfo(parcel) : null;
 
-                    onCallPushCompleted(result, failInfo);
+                    onCallPushCompleted(result, callReasonInfo);
                     break;
                 }
                 case IUMtcCall.NOTIFY_INFO: {
@@ -1718,16 +1769,16 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         private void handleStartFailedOrTerminated(int msg, Parcel parcel) {
             if ((msg == IUMtcCall.START_FAILED) || (msg == IUMtcCall.TERMINATED)) {
-                FailInfo failInfo = new FailInfo(parcel);
+                CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
                 if (msg == IUMtcCall.START_FAILED) {
-                    if (MtcCallUtils.isCallTerminatedByCSRetry(failInfo.Reason)) {
+                    if (MtcCallUtils.isCallTerminatedByCSRetry(callReasonInfo.mCode)) {
                         setDetails(Details.TERMINATED_BY_CS_RETRY, true);
                     }
                 }
 
                 // To handle the glare condition or wait for the media resource release
-                mTerminationReason = new FailInfo(failInfo);
+                mTerminationReason = new CallReasonInfo(callReasonInfo);
             }
 
             setCallState(CallTracker.CALL_STATE_IDLE);
@@ -1792,41 +1843,41 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
         }
 
-        private void onStartFailed(FailInfo failInfo) {
-            logi("START_FAILED :: " + MtcCallUtils.toString(failInfo));
+        private void onStartFailed(CallReasonInfo callReasonInfo) {
+            logi("START_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
             setCallState(CallTracker.CALL_STATE_IDLE);
 
-            if (MtcCallUtils.isCallTerminatedByCSRetry(failInfo.Reason)) {
+            if (MtcCallUtils.isCallTerminatedByCSRetry(callReasonInfo.mCode)) {
                 setDetails(Details.TERMINATED_BY_CS_RETRY, true);
             }
 
             // To handle the glare condition or wait for the media resource release
-            mTerminationReason = new FailInfo(failInfo);
+            mTerminationReason = new CallReasonInfo(callReasonInfo);
 
             if (!isOnPreIncoming()) {
                 mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_TERMINATED, null);
             }
 
             if (mListener != null) {
-                mListener.onCallStartFailed(MtcCall.this, failInfo);
+                mListener.onCallStartFailed(MtcCall.this, callReasonInfo);
             }
         }
 
-        private void onTerminated(FailInfo failInfo) {
-            logi("TERMINATED :: " + MtcCallUtils.toString(failInfo));
+        private void onTerminated(CallReasonInfo callReasonInfo) {
+            logi("TERMINATED :: " + MtcCallUtils.toString(callReasonInfo));
 
             clearHoldState();
             setCallState(CallTracker.CALL_STATE_IDLE);
 
             // To handle the glare condition or wait for the media resource release
-            mTerminationReason = new FailInfo(failInfo);
+            mTerminationReason = new CallReasonInfo(callReasonInfo);
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_TERMINATED, null);
 
             // SYNC_WITH_MEDIA_CLOSE
             if (mListener != null) {
-                mListener.onCallTerminated(MtcCall.this, failInfo);
+                mListener.onCallTerminated(MtcCall.this, callReasonInfo);
             }
         }
 
@@ -1848,11 +1899,11 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
         }
 
-        private void onHoldFailed(FailInfo failInfo) {
-            logi("HOLD_FAILED :: " + MtcCallUtils.toString(failInfo));
+        private void onHoldFailed(CallReasonInfo callReasonInfo) {
+            logi("HOLD_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
             if (mListener != null) {
-                mListener.onCallHoldFailed(MtcCall.this, failInfo);
+                mListener.onCallHoldFailed(MtcCall.this, callReasonInfo);
             }
         }
 
@@ -1898,11 +1949,11 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
         }
 
-        private void onResumeFailed(FailInfo failInfo) {
-            logi("RESUME_FAILED :: " + MtcCallUtils.toString(failInfo));
+        private void onResumeFailed(CallReasonInfo callReasonInfo) {
+            logi("RESUME_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
             if (mListener != null) {
-                mListener.onCallResumeFailed(MtcCall.this, failInfo);
+                mListener.onCallResumeFailed(MtcCall.this, callReasonInfo);
             }
         }
 
@@ -2006,13 +2057,13 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
         }
 
-        private void onUpdateFailed(FailInfo failInfo) {
-            logi("UPDATE_FAILED :: " + MtcCallUtils.toString(failInfo));
+        private void onUpdateFailed(CallReasonInfo callReasonInfo) {
+            logi("UPDATE_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
             setUpdateState(UPDATE_STATE_IDLE);
 
             if (mListener != null) {
-                mListener.onCallUpdateFailed(MtcCall.this, failInfo);
+                mListener.onCallUpdateFailed(MtcCall.this, callReasonInfo);
             }
         }
 
@@ -2024,7 +2075,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             if (getUpdateState() == UPDATE_STATE_SENT) {
                 rejectInternal(MtcCall.this, IUMtcCall.REJECT_UPDATE,
-                        IUMtcCall.Reject_Reason.REJECT_REASON_DECLINE_UPDATE);
+                        CallReasonInfo.CODE_REJECT_ONGOING_CALL_UPDATE);
                 return;
             }
 
@@ -2061,7 +2112,7 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
         }
 
-        private void onEctCompleted(int result, FailInfo failInfo) {
+        private void onEctCompleted(int result, CallReasonInfo callReasonInfo) {
             logi("ECT_COMPLETED :: result=" + result);
 
             if (mListener == null) {
@@ -2071,7 +2122,7 @@ public class MtcCall extends Call implements ConferenceTracker {
             if (result != 0) {
                 mListener.onCallTransferred(MtcCall.this);
             } else {
-                mListener.onCallTransferFailed(MtcCall.this, failInfo);
+                mListener.onCallTransferFailed(MtcCall.this, callReasonInfo);
             }
         }
 
@@ -2109,7 +2160,7 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
         }
 
-        private void onCallPushCompleted(int result, FailInfo failInfo) {
+        private void onCallPushCompleted(int result, CallReasonInfo callReasonInfo) {
             logi("CALL_PUSH_COMPLETED :: result=" + result);
 
             if (mListener == null) {
@@ -2117,9 +2168,9 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
 
             if (result != 0) {
-                mListener.onCallCallPushRequestCompleted(MtcCall.this);
+                mListener.onCallPushRequestCompleted(MtcCall.this);
             } else {
-                mListener.onCallCallPushRequestFailed(MtcCall.this, failInfo);
+                mListener.onCallPushRequestFailed(MtcCall.this, callReasonInfo);
             }
         }
 

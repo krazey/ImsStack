@@ -12,10 +12,7 @@
 package com.android.imsstack.imsservice.mmtel.internal;
 
 import com.android.imsstack.enabler.mtc.CallFeature;
-import com.android.imsstack.enabler.mtc.FailInfo;
-import com.android.imsstack.enabler.mtc.IUMtcCall;
-import com.android.imsstack.enabler.mtc.IUMtcService;
-import com.android.imsstack.enabler.mtc.MediaInfo;
+import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.MtcCallUtils;
@@ -24,10 +21,8 @@ import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.ImsLog;
 
-import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executor;
 
 public class ConferenceProxy {
     public static interface DisposalCallback {
@@ -236,14 +231,15 @@ public class ConferenceProxy {
         });
     }
 
-    protected void notifySessionTerminated(final MtcCall call, final FailInfo failInfo) {
+    protected void notifySessionTerminated(final MtcCall call,
+            final CallReasonInfo callReasonInfo) {
         postAndRun(new Runnable() {
             @Override
             public void run() {
                 try {
                     for (ListenerWrapper lw : mListeners) {
                         if (lw.mListener != null) {
-                            lw.mListener.onCallTerminated(call, failInfo);
+                            lw.mListener.onCallTerminated(call, callReasonInfo);
                         }
                     }
                 } catch (Throwable t) {
@@ -284,7 +280,7 @@ public class ConferenceProxy {
 
     protected void terminateConferenceSession() {
         if (mConfCall != null) {
-            mConfCall.terminate(IUMtcCall.Terminate_Reason.TERMINATE_REASON_USER);
+            mConfCall.terminate(CallReasonInfo.CODE_USER_TERMINATED);
         }
     }
 
@@ -302,8 +298,8 @@ public class ConferenceProxy {
         return confCall;
     }
 
-    protected static FailInfo createUnknownFailInfo() {
-        return new FailInfo(IUMtcCall.Fail_Reason.FAIL_REASON_CONF_UNKNOWN, 0, "");
+    protected static CallReasonInfo createUnspecifiedCallReasonInfo() {
+        return new CallReasonInfo(CallReasonInfo.CODE_UNSPECIFIED, 0, "");
     }
 
     protected static void log(String s) {

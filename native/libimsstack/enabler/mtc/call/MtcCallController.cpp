@@ -27,7 +27,7 @@ PUBLIC VIRTUAL MtcCallController::~MtcCallController() {}
 
 PUBLIC
 void MtcCallController::TerminateCalls(
-        IN KeyType eKeyType, IN Key nKey, IN const FailReason& objReason)
+        IN KeyType eKeyType, IN Key nKey, IN const CallReasonInfo& objReason)
 {
     IMSList<IMtcCall*> lstCalls;
     switch (eKeyType)
@@ -152,7 +152,7 @@ void MtcCallController::Accept(IN CallKey nCallKey, IN CallType eCallType, IN Me
 }
 
 PUBLIC
-void MtcCallController::Reject(IN CallKey nCallKey, IN const FailReason& objReason)
+void MtcCallController::Reject(IN CallKey nCallKey, IN const CallReasonInfo& objReason)
 {
     m_objCallManager.GetCallByCallKey(nCallKey)->Reject(objReason);
 }
@@ -177,13 +177,13 @@ void MtcCallController::AcceptResume(
 }
 
 PUBLIC
-void MtcCallController::RejectResume(IN CallKey nCallKey, IN const FailReason& objReason)
+void MtcCallController::RejectResume(IN CallKey nCallKey, IN const CallReasonInfo& objReason)
 {
     m_objCallManager.GetCallByCallKey(nCallKey)->RejectResume(objReason);
 }
 
 PUBLIC
-void MtcCallController::Terminate(IN CallKey nCallKey, IN const FailReason& objReason)
+void MtcCallController::Terminate(IN CallKey nCallKey, IN const CallReasonInfo& objReason)
 {
     m_objCallManager.GetCallByCallKey(nCallKey)->Terminate(objReason);
 }
@@ -195,7 +195,7 @@ void MtcCallController::Update(IN CallKey nCallKey, IN CallType eCallType, IN Me
 }
 
 PUBLIC
-void MtcCallController::CancelUpdate(IN CallKey nCallKey, IN const FailReason& objReason)
+void MtcCallController::CancelUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason)
 {
     m_objCallManager.GetCallByCallKey(nCallKey)->CancelConvert(objReason);
 }
@@ -208,7 +208,7 @@ void MtcCallController::AcceptUpdate(
 }
 
 PUBLIC
-void MtcCallController::RejectUpdate(IN CallKey nCallKey, IN const FailReason& objReason)
+void MtcCallController::RejectUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason)
 {
     m_objCallManager.GetCallByCallKey(nCallKey)->RejectConvert(objReason);
 }

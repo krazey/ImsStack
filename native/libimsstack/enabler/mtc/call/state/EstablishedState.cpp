@@ -77,16 +77,14 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Convert(
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL CallStateName EstablishedState::Terminate(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName EstablishedState::Terminate(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("Terminate", 0, 0, 0);
-    FailReason objConvertedReason(objReason);
-    objConvertedReason.nReason = ConvertTerminateReasonToFailReason(objReason.nReason);
 
     // SetTerminateCodeForInvitedSessionToConf
 
-    HandleTerminate(objConvertedReason);
-    m_objContext.GetUiNotifier().SendTerminated(objConvertedReason);
+    HandleTerminate(objReason);
+    m_objContext.GetUiNotifier().SendTerminated(objReason);
 
     return CallStateName::TERMINATING;
 }
@@ -97,7 +95,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionTerminated(IN ISession* pi
     m_objContext.GetMediaManager().Terminate();
 
     m_objContext.GetUiNotifier().SendTerminated(IsConferenceCallParticipant()
-                    ? FailReason(FAIL_REASON_CONF_JOINED)
+                    ? CallReasonInfo(CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE)
                     : TerminationHandler().Handle(*piSession));
 
     return CallStateName::TERMINATING;
@@ -140,7 +138,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
     return eStateName;
 }
 
-PUBLIC VIRTUAL CallStateName EstablishedState::TerminateUssi(IN const FailReason& /*objReason*/)
+PUBLIC VIRTUAL CallStateName EstablishedState::TerminateUssi(IN const CallReasonInfo& /*objReason*/)
 {
     IMS_TRACE_D("TerminateUssi", 0, 0, 0);
 
@@ -256,7 +254,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingMediaDataFailed(IN IMS
 
     if (IsCallEndNeededByAudioInactivity(eMediaType))
     {
-        FailReason objReason(FAIL_REASON_MEDIA_NODATA);
+        CallReasonInfo objReason(CODE_MEDIA_NO_DATA);
         HandleTerminate(objReason);
         m_objContext.GetUiNotifier().SendTerminated(objReason);
         return CallStateName::TERMINATING;
@@ -289,7 +287,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnVideoLowestBitRate()
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName EstablishedState::OnMediaFailed(IN FailReason objReason)
+PUBLIC VIRTUAL CallStateName EstablishedState::OnMediaFailed(IN CallReasonInfo objReason)
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
 
@@ -502,8 +500,10 @@ CallStateName EstablishedState::TerminateUssiAfterInfoTransaction()
     IMS_TRACE_D("TerminateUssiAfterInfoTransaction", 0, 0, 0);
 
     m_objContext.GetMediaManager().Terminate();
-    FailReason objReason(FAIL_REASON_UNKNOWN);
+
+    CallReasonInfo objReason(CODE_UNSPECIFIED);
     m_objContext.GetSession()->Terminate(IMS_TRUE, objReason);
+
     m_objContext.GetUiNotifier().SendStartFailed(objReason);
 
     return CallStateName::TERMINATING;

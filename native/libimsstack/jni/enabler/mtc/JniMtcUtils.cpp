@@ -1,6 +1,6 @@
 #define IMS_STL_USE
 #include "AString.h"
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "IMSTypeDef.h"
 #include "JniCallInfo.h"
 #include "JniMtcUtils.h"
@@ -188,10 +188,10 @@ PUBLIC GLOBAL void JniMtcUtils::WriteDialogInfoToParcel(
     objParcel.writeInt32(bEnablePull);
 }
 
-PUBLIC GLOBAL void JniMtcUtils::WriteFailReasonToParcel(
-        IN const FailReason& objFailReason, IN_OUT Parcel& objParcel)
+PUBLIC GLOBAL void JniMtcUtils::WriteCallReasonInfoToParcel(
+        IN const CallReasonInfo& objReason, IN_OUT Parcel& objParcel)
 {
-    objParcel.writeInt32(objFailReason.nReason);
-    objParcel.writeInt32(objFailReason.nExtra);
-    objParcel.writeString16(android::String16(objFailReason.strExtra.GetStr()));
+    objParcel.writeInt32(objReason.nCode);
+    objParcel.writeInt32(objReason.nExtraCode);
+    objParcel.writeString16(android::String16(objReason.strExtraMessage.GetStr()));
 }
