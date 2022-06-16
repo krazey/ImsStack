@@ -572,6 +572,8 @@ public class CarrierConfig {
                 "video_over_wifi_supported_without_voice_bool";
         public static final String KEY_CDMALESS_FEATURE_TAG_REQUIRED_BOOL =
                 "cdmaless_feature_tag_required_bool";
+        public static final String KEY_REGISTRATION_RETRY_COUNT_RESET_POLICY_INT =
+                "registration_retry_count_reset_policy_int";
         // Bundle {
         public static final String KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE =
                 "specific_registration_error_bundle";

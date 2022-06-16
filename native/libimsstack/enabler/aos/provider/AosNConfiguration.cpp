@@ -427,6 +427,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSpecificRegistrationErrorMaxCoun
     return m_objSpecificRegErr.nSpecificRegErrMaxCount;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryCountResetPolicy() const
+{
+    return m_objAsset.nRegistrationRetryCountResetPolicy;
+}
+
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegistrationRetryIntervals()
 {
     return m_objRegRetryInterval.objRegistrationRetryIntervalSec;
@@ -1035,6 +1040,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_CDMALESS_FEATURE_TAG_REQUIRED_BOOL);
     m_objAsset.objEmergencyPcscfRetryWaitTimeSec = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY);
+    m_objAsset.nRegistrationRetryCountResetPolicy =
+            piCc->GetInt(CarrierConfig::Assets::KEY_REGISTRATION_RETRY_COUNT_RESET_POLICY_INT);
 }
 
 PRIVATE
