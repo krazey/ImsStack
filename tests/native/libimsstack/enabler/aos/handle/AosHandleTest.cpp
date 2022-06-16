@@ -106,6 +106,16 @@ protected:
         m_pAosHandle->AddBlock(nBlock, nBlocks);
     }
 
+    void AddHoldingBlockForMobile(IN IMS_UINT32 nBlock)
+    {
+        m_pAosHandle->AddBlock(nBlock, m_pAosHandle->m_nHoldingBlocksForMobile);
+    }
+
+    void AddHoldingBlockForWifi(IN IMS_UINT32 nBlock)
+    {
+        m_pAosHandle->AddBlock(nBlock, m_pAosHandle->m_nHoldingBlocksForWifi);
+    }
+
     void RemoveBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks)
     {
         m_pAosHandle->RemoveBlock(nBlock, nBlocks);
@@ -113,11 +123,30 @@ protected:
 
     void ClearBlocks() { m_pAosHandle->m_nBlocks = 0; }
 
+    void ClearHoldingBlocksForMobile() { m_pAosHandle->m_nHoldingBlocksForMobile = 0; }
+
+    void ClearHoldingBlocksForWifi() { m_pAosHandle->m_nHoldingBlocksForWifi = 0; }
+
     IMS_UINT32 GetBlocks() { return m_pAosHandle->m_nBlocks; }
 
     IMS_BOOL IsHandleBlocked() { return m_pAosHandle->IsHandleBlocked(); }
 
-    IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nType) { return m_pAosHandle->IsHandleBlocked(nType); }
+    IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nBlock) { return m_pAosHandle->IsHandleBlocked(nBlock); }
+
+    IMS_BOOL IsHandleBlocked(IN IMS_UINT32& nBlocks, IN IMS_UINT32 nBlock) const
+    {
+        return m_pAosHandle->IsHandleBlocked(nBlocks, nBlock);
+    }
+
+    IMS_BOOL IsHoldingBlockForMobile(IN IMS_UINT32 nBlock)
+    {
+        return m_pAosHandle->IsHandleBlocked(m_pAosHandle->m_nHoldingBlocksForMobile, nBlock);
+    }
+
+    IMS_BOOL IsHoldingBlockForWifi(IN IMS_UINT32 nBlock)
+    {
+        return m_pAosHandle->IsHandleBlocked(m_pAosHandle->m_nHoldingBlocksForWifi, nBlock);
+    }
 
     void ClearFeature() { m_pAosHandle->m_objFeatureTagList.Clear(); }
 
@@ -176,6 +205,8 @@ protected:
         return m_pAosHandle->GetImsAosReasonForSuspend(nAosReason);
     }
 
+    void SetEpdgEnabled(IN IMS_BOOL bEnabled) { m_pAosHandle->m_bEpdgEnabled = bEnabled; }
+
     IMS_BOOL IsEpdgEnabled() const { return m_pAosHandle->IsEpdgEnabled(); }
 
     IMS_BOOL IsEqualNetworkType(IN IMS_UINT32 nType, IN AosNetworkType eType) const
@@ -230,6 +261,33 @@ protected:
     {
         m_pAosHandle->m_objBindedFeatureTagList = objBindedFeatureTagList;
     }
+
+    void ReevaluateBlocks() { m_pAosHandle->ReevaluateBlocks(); }
+
+    IMS_BOOL UpdateIpcan() { return m_pAosHandle->UpdateIpcan(); }
+
+    void SetHoldingBlocksPolicyForMobile()
+    {
+        m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Append(AosHandle::BLOCK_VOLTE_CAPABILITY);
+        m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Append(AosHandle::BLOCK_VILTE_CAPABILITY);
+        m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Append(AosHandle::BLOCK_VOPS);
+    }
+
+    void SetHoldingBlocksPolicyForWifi()
+    {
+        m_pAosHandle->m_objHoldingBlocksPolicyForWifi.Append(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+        m_pAosHandle->m_objHoldingBlocksPolicyForWifi.Append(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+    }
+
+    void ClearHoldingBlocksPolicyForMobile()
+    {
+        m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Clear();
+    }
+
+    void ClearHoldingBlocksPolicyForWifi()
+    {
+        m_pAosHandle->m_objHoldingBlocksPolicyForWifi.Clear();
+    }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -237,15 +295,22 @@ TEST_F(AosHandleTest, Constructor)
     EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
 }
 
-TEST_F(AosHandleTest, AddBlock_Normal)
+TEST_F(AosHandleTest, AddBlock_IsHandleBlocked_Normal)
 {
     IMS_UINT32 nTestBlocks = AosHandle::BLOCK_NONE;
 
+    EXPECT_FALSE(IsHandleBlocked(nTestBlocks, AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(nTestBlocks, AosHandle::BLOCK_VILTE_CAPABILITY));
+
     AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, nTestBlocks);
     EXPECT_EQ(nTestBlocks, AosHandle::BLOCK_VOLTE_CAPABILITY);
+    EXPECT_TRUE(IsHandleBlocked(nTestBlocks, AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(nTestBlocks, AosHandle::BLOCK_VILTE_CAPABILITY));
 
     AddBlock(AosHandle::BLOCK_VILTE_CAPABILITY, nTestBlocks);
     EXPECT_EQ(nTestBlocks, (AosHandle::BLOCK_VOLTE_CAPABILITY | AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(nTestBlocks, AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(nTestBlocks, AosHandle::BLOCK_VILTE_CAPABILITY));
 }
 
 TEST_F(AosHandleTest, AddBlock_Duplicated)
@@ -259,16 +324,23 @@ TEST_F(AosHandleTest, AddBlock_Duplicated)
     EXPECT_EQ(nTestBlocks, AosHandle::BLOCK_VOLTE_CAPABILITY);
 }
 
-TEST_F(AosHandleTest, RemoveBlock_Normal)
+TEST_F(AosHandleTest, RemoveBlock_IsHandleBlocked_Normal)
 {
     IMS_UINT32 nTestBlocks =
             (AosHandle::BLOCK_VOLTE_CAPABILITY | AosHandle::BLOCK_VILTE_CAPABILITY);
 
+    EXPECT_TRUE(IsHandleBlocked(nTestBlocks, AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(nTestBlocks, AosHandle::BLOCK_VILTE_CAPABILITY));
+
     RemoveBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, nTestBlocks);
     EXPECT_EQ(nTestBlocks, AosHandle::BLOCK_VILTE_CAPABILITY);
+    EXPECT_FALSE(IsHandleBlocked(nTestBlocks, AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(nTestBlocks, AosHandle::BLOCK_VILTE_CAPABILITY));
 
     RemoveBlock(AosHandle::BLOCK_VILTE_CAPABILITY, nTestBlocks);
     EXPECT_EQ(nTestBlocks, AosHandle::BLOCK_NONE);
+    EXPECT_FALSE(IsHandleBlocked(nTestBlocks, AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(nTestBlocks, AosHandle::BLOCK_VILTE_CAPABILITY));
 }
 
 TEST_F(AosHandleTest, RemoveBlock_NotExisted)
@@ -760,6 +832,14 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_)
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
 
+    MockIAosConnection objMockIAosConnection;
+    EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
+    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
     m_pAosHandle->NetTracker_StatusChanged();
     EXPECT_FALSE(m_pAosHandle->IsImsSuspended());
 
@@ -1009,12 +1089,11 @@ TEST_F(AosHandleTest, GetImsAosReasonForSuspend_)
 
 TEST_F(AosHandleTest, IsEpdgEnabled_)
 {
-    MockIAosConnection objMockIAosConnection;
-    EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
-            .Times(1)
-            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
-    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled()).Times(1);
-    IsEpdgEnabled();
+    SetEpdgEnabled(IMS_TRUE);
+    EXPECT_TRUE(IsEpdgEnabled());
+
+    SetEpdgEnabled(IMS_FALSE);
+    EXPECT_FALSE(IsEpdgEnabled());
 }
 
 TEST_F(AosHandleTest, IsEqualNetworkType_)
@@ -1211,4 +1290,241 @@ TEST_F(AosHandleTest, ConvertToAosFeature_)
     EXPECT_EQ(ConvertToAosFeature(CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_SMS),
             ImsAosFeature::SMSIP);
     EXPECT_EQ(ConvertToAosFeature(0), ImsAosFeature::NONE);
+}
+
+TEST_F(AosHandleTest, ReevaluateBlocks_Test1)
+{
+    // Test1: Epdg enabled, mobile block existed
+    ClearBlocks();
+    ClearHoldingBlocksForMobile();
+
+    ClearHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForMobile();
+
+    SetEpdgEnabled(IMS_TRUE);
+    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VILTE_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VOPS);
+
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+
+    ReevaluateBlocks();
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+}
+
+TEST_F(AosHandleTest, ReevaluateBlocks_Test2)
+{
+    // Test2: Epdg enabled, mobile block not existed.
+    ClearBlocks();
+    ClearHoldingBlocksForMobile();
+
+    ClearHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForMobile();
+
+    SetEpdgEnabled(IMS_TRUE);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+
+    ReevaluateBlocks();
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+}
+
+TEST_F(AosHandleTest, ReevaluateBlocks_Test3)
+{
+    // Test3: Epdg enabled, Holding wifi block existed.
+    ClearBlocks();
+    ClearHoldingBlocksForWifi();
+
+    ClearHoldingBlocksPolicyForWifi();
+    SetHoldingBlocksPolicyForWifi();
+
+    SetEpdgEnabled(IMS_TRUE);
+    AddHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+    AddHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+
+    ReevaluateBlocks();
+
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, ReevaluateBlocks_Test4)
+{
+    // Test4: Epdg enabled, Holding wifi block not existed.
+    ClearBlocks();
+    ClearHoldingBlocksForWifi();
+
+    ClearHoldingBlocksPolicyForWifi();
+    SetHoldingBlocksPolicyForWifi();
+
+    SetEpdgEnabled(IMS_TRUE);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+
+    ReevaluateBlocks();
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, ReevaluateBlocks_Test5)
+{
+    // Test5: Epdg not enabled, wifi block existed
+    ClearBlocks();
+    ClearHoldingBlocksForWifi();
+
+    ClearHoldingBlocksPolicyForWifi();
+    SetHoldingBlocksPolicyForWifi();
+
+    SetEpdgEnabled(IMS_FALSE);
+    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+
+    ReevaluateBlocks();
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, ReevaluateBlocks_Test6)
+{
+    // Test5: Epdg not enabled, wifi block not existed
+    ClearBlocks();
+    ClearHoldingBlocksForWifi();
+
+    ClearHoldingBlocksPolicyForWifi();
+    SetHoldingBlocksPolicyForWifi();
+
+    SetEpdgEnabled(IMS_FALSE);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+
+    ReevaluateBlocks();
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, ReevaluateBlocks_Test7)
+{
+    // Test7: Epdg not enabled, Holding mobile block existed.
+    ClearBlocks();
+    ClearHoldingBlocksForMobile();
+
+    ClearHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForMobile();
+
+    SetEpdgEnabled(IMS_FALSE);
+    AddHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY);
+    AddHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY);
+    AddHoldingBlockForMobile(AosHandle::BLOCK_VOPS);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+
+    ReevaluateBlocks();
+
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+}
+
+TEST_F(AosHandleTest, ReevaluateBlocks_Test8)
+{
+    // Test8: Epdg not enabled, Holding mobile block not existed.
+    ClearBlocks();
+    ClearHoldingBlocksForMobile();
+
+    ClearHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForMobile();
+
+    SetEpdgEnabled(IMS_FALSE);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+
+    ReevaluateBlocks();
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+}
+
+TEST_F(AosHandleTest, UpdateIpcan_)
+{
+    MockIAosConnection objMockIAosConnection;
+    EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
+    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
+            .Times(4)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+
+    EXPECT_TRUE(UpdateIpcan());
+    EXPECT_FALSE(UpdateIpcan());
+    EXPECT_TRUE(UpdateIpcan());
+    EXPECT_FALSE(UpdateIpcan());
 }

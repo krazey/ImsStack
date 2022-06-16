@@ -64,6 +64,13 @@ AosHandleMtc::AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& st
     m_objServiceFeatures.Append(ImsAosFeature::TEXT);
     m_objServiceFeatures.Append(ImsAosFeature::USSI);
     m_objServiceFeatures.Append(ImsAosFeature::VERSTAT);
+
+    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VOLTE_CAPABILITY);
+    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VILTE_CAPABILITY);
+    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VOPS);
+
+    m_objHoldingBlocksPolicyForWifi.Append(BLOCK_VOWIFI_CAPABILITY);
+    m_objHoldingBlocksPolicyForWifi.Append(BLOCK_VIWIFI_CAPABILITY);
 }
 
 /*
@@ -529,47 +536,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
     }
 
     return AosHandle::IsHandleBlocked(nBlocks);
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsBlockForMobile(IN IMS_UINT32 nBlock) const
-{
-    switch (nBlock)
-    {
-        case BLOCK_VOWIFI_CAPABILITY:  // FALL-THROUGH
-        case BLOCK_VIWIFI_CAPABILITY:
-            return IMS_FALSE;
-
-        default:
-            break;
-    }
-
-    return IMS_TRUE;
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsBlockForWifi(IN IMS_UINT32 nBlock) const
-{
-    switch (nBlock)
-    {
-        case BLOCK_VOLTE_CAPABILITY:  // FALL-THROUGH
-        case BLOCK_VILTE_CAPABILITY:  // FALL-THROUGH
-        case BLOCK_VOPS:
-            return IMS_FALSE;
-
-        default:
-            break;
-    }
-
-    return IMS_TRUE;
 }
 
 /*

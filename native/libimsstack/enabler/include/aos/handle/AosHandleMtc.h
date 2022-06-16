@@ -52,8 +52,6 @@ protected:
     virtual void CleanUp();
 
     virtual IMS_BOOL IsHandleBlocked() const;
-    virtual IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock) const;
-    virtual IMS_BOOL IsBlockForWifi(IN IMS_UINT32 nBlock) const;
 
     virtual void ProcessBlockChanged();
     virtual void ProcessCapabilitiesChanged(

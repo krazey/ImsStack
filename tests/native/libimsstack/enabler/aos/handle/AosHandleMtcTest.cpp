@@ -70,6 +70,16 @@ protected:
     {
         return m_pAosHandleMtc->IsServiceFeature(nFeature);
     }
+
+    IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock)
+    {
+        return m_pAosHandleMtc->IsBlockForMobile(nBlock);
+    }
+
+    IMS_BOOL IsBlockForWifi(IN IMS_UINT32 nBlock)
+    {
+        return m_pAosHandleMtc->IsBlockForWifi(nBlock);
+    }
 };
 
 TEST_F(AosHandleMtcTest, Constructor_AosHandleMtc)
@@ -97,4 +107,10 @@ TEST_F(AosHandleMtcTest, Constructor_AosHandleMtc)
     EXPECT_TRUE(IsServiceFeature(ImsAosFeature::TEXT));
     EXPECT_TRUE(IsServiceFeature(ImsAosFeature::USSI));
     EXPECT_TRUE(IsServiceFeature(ImsAosFeature::VERSTAT));
+
+    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
 }

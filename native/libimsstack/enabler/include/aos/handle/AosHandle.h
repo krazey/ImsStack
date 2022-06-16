@@ -201,7 +201,13 @@ protected:
     void ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bAdd);
     void ProcessUnavailableFeatureChanged();
 
+    void ReevaluateBlocks();
+    void ProcessIpcanChanged();
+    IMS_BOOL UpdateIpcan();
+
     IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nType) const;
+    IMS_BOOL IsHandleBlocked(IN IMS_UINT32& nBlocks, IN IMS_UINT32 nType) const;
+
     virtual IMS_BOOL IsHandleBlocked() const;
     virtual void ProcessBlockChanged();
 
@@ -296,6 +302,10 @@ protected:
 
     IMSMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
     IMSList<IMS_UINT32> m_objServiceFeatures;
+    IMSList<IMS_UINT32> m_objHoldingBlocksPolicyForMobile;
+    IMSList<IMS_UINT32> m_objHoldingBlocksPolicyForWifi;
+
+    IMS_BOOL m_bEpdgEnabled;
 
     IMS_BOOL m_bNetSrvIn;
     IMS_UINT32 m_nNetworkType;
