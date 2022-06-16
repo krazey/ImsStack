@@ -37,11 +37,12 @@ PUBLIC GLOBAL IMtcContext* MtcContextRepository::GetContext(
 PUBLIC
 IMtcContext* MtcContextRepository::GetContextBySlot(IN IMS_SINT32 nSlotId)
 {
-    if (m_objContexts.GetIndexOfKey(nSlotId) < 0)
+    IMS_SLONG nIndex = m_objContexts.GetIndexOfKey(nSlotId);
+    if (nIndex < 0)
     {
         return IMS_NULL;
     }
-    return m_objContexts.GetValueAt(nSlotId);
+    return m_objContexts.GetValueAt(nIndex);
 }
 
 PUBLIC
