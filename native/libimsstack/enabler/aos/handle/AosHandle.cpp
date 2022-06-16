@@ -967,26 +967,6 @@ Remarks
 
 */
 PROTECTED
-IMS_UINT32 AosHandle::GetAosReason(IN IMS_UINT32 nBlock)
-{
-    switch (nBlock)
-    {
-        case BLOCK_NETWORK:
-            return AoSReason::NO_LTE_COVERAGE;
-
-        default:
-            break;
-    }
-
-    return AoSReason::NONE;
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED
 IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
 {
     IMS_UINT32 nFeature = ImsAosFeature::NONE;
@@ -995,7 +975,6 @@ IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
     {
         case BLOCK_VOLTE_CAPABILITY:   // FALL-THROUGH
         case BLOCK_VOWIFI_CAPABILITY:  // FALL-THROUGH
-        case BLOCK_NETWORK:            // FALL-THROUGH
         case BLOCK_VOPS:
             nFeature = ImsAosFeature::MMTEL;
             break;
@@ -1143,7 +1122,7 @@ void AosHandle::ProcessBlock(
 
     ProcessFeatureBlock(GetAosFeature(nBlock), bAdded);
 
-    ProcessCheckBlock(nBlock);
+    ProcessCheckBlock();
 }
 
 /*
@@ -1175,8 +1154,7 @@ Remarks
 
 */
 PROTECTED
-void AosHandle::ProcessCheckBlock(
-        IN IMS_UINT32 nBlock /* = 0 */, IN IMS_BOOL bRunStateMachine /* = IMS_TRUE */)
+void AosHandle::ProcessCheckBlock(IN IMS_BOOL bRunStateMachine /* = IMS_TRUE */)
 {
     IMS_BOOL bCurrBlocked = IMS_FALSE;
 
@@ -1191,8 +1169,7 @@ void AosHandle::ProcessCheckBlock(
 
         if (bRunStateMachine)
         {
-            IMS_UINT32 nReason = (m_bBlocked) ? GetAosReason(nBlock) : 0;
-            IMSMSG objMSG(HANDLE_MSG_BLOCK_STATUS, nReason, 0);
+            IMSMSG objMSG(HANDLE_MSG_BLOCK_STATUS, 0, 0);
             OnStateMessage(objMSG);
         }
 

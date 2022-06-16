@@ -513,7 +513,7 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
         return bBlocked;
     }
 
-    IMS_UINT32 nBlocks = (BLOCK_VOPS | BLOCK_VOLTE_CAPABILITY | BLOCK_NETWORK);
+    IMS_UINT32 nBlocks = (BLOCK_VOPS | BLOCK_VOLTE_CAPABILITY);
 
     if (GET_N_CONFIG(m_nSlotId)->GetRegWithFeatureTagUnavailable().GetSize() > 0)
     {
@@ -562,8 +562,7 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsBlockForWifi(IN IMS_UINT32 nBlock) co
     {
         case BLOCK_VOLTE_CAPABILITY:  // FALL-THROUGH
         case BLOCK_VILTE_CAPABILITY:  // FALL-THROUGH
-        case BLOCK_VOPS:              // FALL-THROUGH
-        case BLOCK_NETWORK:
+        case BLOCK_VOPS:
             return IMS_FALSE;
 
         default:
