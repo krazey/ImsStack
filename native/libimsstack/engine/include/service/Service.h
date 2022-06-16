@@ -21,6 +21,7 @@
 #include "IConfigUpdateListener.h"
 #include "private/AppConfig.h"
 #include "private/CoreServiceConfig.h"
+#include "private/SipConfigV.h"
 
 #include "Connection.h"
 // CONTACT_FEATURE_CAPS
@@ -49,7 +50,6 @@ class PreferenceHeader;
 class Reference;
 class Session;
 class SessionEx;
-class SipConfigV;
 
 /**
  * @brief Service is the base class for IMS services.
