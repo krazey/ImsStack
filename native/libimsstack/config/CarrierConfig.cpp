@@ -812,6 +812,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOIC
         "video_over_wifi_supported_without_voice_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_CDMALESS_FEATURE_TAG_REQUIRED_BOOL[] =
         "cdmaless_feature_tag_required_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_COUNT_RESET_POLICY_INT[] =
+        "registration_retry_count_reset_policy_int";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[] =
         "specific_registration_error_bundle";

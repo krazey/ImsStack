@@ -671,6 +671,18 @@ public:
     virtual IMS_SINT32 GetSpecificRegistrationErrorMaxCount() const = 0;
 
     /**
+     * @brief Indicate the policy for clearing the registration retry count
+     *
+     *        Possible values are,
+     *        CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION
+     *        CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_SUBSCRIPTION
+     *        CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_NOTIFY
+     *
+     * @return IMS_SINT32 Return the policy of clearing the retry count for registration
+     */
+    virtual IMS_SINT32 GetRegRetryCountResetPolicy() const = 0;
+
+    /**
      * @brief Get the registration retry intervals for using when registration is failed
      *        as general codes.
      *

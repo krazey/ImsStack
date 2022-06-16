@@ -887,6 +887,7 @@ public:
         static const IMS_CHAR KEY_REGISTRATION_OUT_OF_SERVICE_POLICY_INT[];
         static const IMS_CHAR KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL[];
         static const IMS_CHAR KEY_CDMALESS_FEATURE_TAG_REQUIRED_BOOL[];
+        static const IMS_CHAR KEY_REGISTRATION_RETRY_COUNT_RESET_POLICY_INT[];
         // Bundle {
         static const IMS_CHAR KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[];
         static const IMS_CHAR KEY_SPECIFIC_REGISTRATION_ERROR_FINAL_TYPE_INT[];
@@ -1124,6 +1125,14 @@ public:
             REG_ERROR_CODE_5XX = 5,
             REG_ERROR_CODE_6XX = 6,
             REG_ERROR_CODE_ALL_RESP = 9
+        };
+
+        // registration retry count reset policy
+        enum
+        {
+            REG_RETRY_COUNT_RESET_POLICY_REGISTRATION = 0,
+            REG_RETRY_COUNT_RESET_POLICY_SUBSCRIPTION = 1,
+            REG_RETRY_COUNT_RESET_POLICY_NOTIFY = 2
         };
     };
 

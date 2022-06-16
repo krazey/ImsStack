@@ -410,6 +410,7 @@
     </int-array>
     <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="0">
     </int-array>
+    <int name="registration_retry_count_reset_policy_int" value="0"/>
 
     <!-- Mtc -->
     <boolean name="check_conference_event_package_version_bool" value="true"/>
