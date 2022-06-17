@@ -2321,7 +2321,7 @@ PROTECTED VIRTUAL void AosRegistration::UpdateTransactionStarted()
 PROTECTED VIRTUAL IMS_UINT32 AosRegistration::GetActualWaitTime()
 {
     if (GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy() ==
-            CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL)
+            CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL)
     {
         const IMSVector<IMS_SINT32>& objInterval =
                 GET_N_CONFIG(m_nSlotId)->GetRegistrationRetryIntervals();
@@ -3141,7 +3141,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
         nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
     }
 
-    if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EVERY_PCSCF)
+    if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF)
     {
         m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
         if (SetNextPcscf())
@@ -3192,7 +3192,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
         IncreaseConsecutiveFailCount();
     }
 
-    if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL)
+    if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL)
     {
         if (nRetryAfter > 0)
         {
@@ -3223,7 +3223,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
         nAwt = GetActualWaitTime();
     }
 
-    if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EACH_PCSCF)
+    if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EACH_PCSCF)
     {
         if (SetNextPcscf())
         {
@@ -3249,7 +3249,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
 
     SetState(STATE_REGSTOP);
 
-    if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EACH_PCSCF)
+    if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EACH_PCSCF)
     {
         m_nPdnReactivateWaitTime = 0;
         ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
@@ -3278,7 +3278,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Update(
         }
     }
 
-    if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EVERY_PCSCF)
+    if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF)
     {
         nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
 
@@ -3301,7 +3301,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Update(
             ReportTryingState();
         }
     }
-    else if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL)
+    else if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL)
     {
         if (nStatusCode == SipStatusCode::SC_481)
         {
@@ -3800,7 +3800,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_TxnTimeout()
 PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_Others(IN IMS_SINT32 nReason)
 {
     if (GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy() ==
-            CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL)
+            CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL)
     {
         ProcessDefaultFlowRecovery_Update();
         return;

@@ -27,7 +27,7 @@
         <item value="0"/>
     </int-array>
     <int name="ims.isim_index_for_impu_int" value="0"/>
-    <int name="ims.registration_actual_wait_time_policy_int" value="1"/>
+    <int name="registration_actual_wait_time_policy_int" value="1"/>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
     <int name="ims.registration_retry_base_timer_millis_int" value="120000"/>
     <int name="ims.registration_retry_max_timer_millis_int" value="7200000"/>

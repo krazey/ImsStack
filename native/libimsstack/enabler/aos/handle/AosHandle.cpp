@@ -1012,13 +1012,13 @@ IMS_UINT32 AosHandle::ConvertToAosFeature(IN IMS_UINT32 nConfigFeature)
 {
     switch (nConfigFeature)
     {
-        case CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_MMTEL:
+        case CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL:
             return ImsAosFeature::MMTEL;
 
-        case CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_VIDEO:
+        case CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO:
             return ImsAosFeature::VIDEO;
 
-        case CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_SMS:
+        case CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_SMS:
             return ImsAosFeature::SMSIP;
 
         default:

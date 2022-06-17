@@ -45,7 +45,7 @@ struct AosNotifyTerminatedForRegEventWithInitialRegistrationBundle
 {
 public:
     AosNotifyTerminatedForRegEventWithInitialRegistrationBundle() :
-            nWaitTimeForInitRegOnTerminatedstate(0),
+            nWaitTimeForInitRegOnTerminatedState(0),
             objEventForInitRegOnTerminatedState(IMSVector<IMS_SINT32>()),
             objEventToFollowWtForInitRegOnTerminatedState(IMSVector<IMS_SINT32>())
     {
@@ -57,7 +57,7 @@ public:
             IN const AosNotifyTerminatedForRegEventWithInitialRegistrationBundle&) = delete;
 
 public:
-    IMS_SINT32 nWaitTimeForInitRegOnTerminatedstate;
+    IMS_SINT32 nWaitTimeForInitRegOnTerminatedState;
     IMSVector<IMS_SINT32> objEventForInitRegOnTerminatedState;
     IMSVector<IMS_SINT32> objEventToFollowWtForInitRegOnTerminatedState;
 };
@@ -80,25 +80,6 @@ public:
     IMSVector<IMS_SINT32> objRegistrationRetryRandomUpperValueSec;
     IMSVector<IMS_SINT32> objRegistrationRetryIntervalSec;
     IMS_BOOL bUseRegistrationRetryIntervalForSubscriptionRetry;
-};
-
-struct AosRegistrationPermanentErrorCodeBundle
-{
-public:
-    AosRegistrationPermanentErrorCodeBundle() :
-            objRegistrationPermanentErrorCode(IMSVector<IMS_SINT32>()),
-            objRegistrationPermanentErrorMaxCount(IMSVector<IMS_SINT32>())
-    {
-    }
-
-    AosRegistrationPermanentErrorCodeBundle(
-            IN const AosRegistrationPermanentErrorCodeBundle&) = delete;
-    AosRegistrationPermanentErrorCodeBundle& operator=(
-            IN const AosRegistrationPermanentErrorCodeBundle&) = delete;
-
-public:
-    IMSVector<IMS_SINT32> objRegistrationPermanentErrorCode;
-    IMSVector<IMS_SINT32> objRegistrationPermanentErrorMaxCount;
 };
 
 #endif  // AOS_CARRIER_CONFIG_BUNDLE_H_

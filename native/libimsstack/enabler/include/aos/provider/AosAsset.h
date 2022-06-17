@@ -36,7 +36,7 @@ public:
             bEmergencyCallBasedOnPAssociatedUriOfNormalRegistration(IMS_FALSE),
             bSipOverIpsecEnabledInRoaming(IMS_TRUE),
             bRegistrationContactValidation(IMS_FALSE),
-            nRegistrationOutOfServicePolicy(CarrierConfig::Ims::REGISTRATION_OOS_POLICY_DEFAULT),
+            nRegistrationOutOfServicePolicy(CarrierConfig::Assets::REGISTRATION_OOS_POLICY_DEFAULT),
             objVowifiSubscriptionErrorCodeWithInitialRegistration(IMSVector<IMS_SINT32>()),
             objSubscriptionErrorCodeForStoppingByExpirationTime(IMSVector<IMS_SINT32>()),
             objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf(
@@ -52,11 +52,18 @@ public:
             bRequiredVolteBlockByAirplaneMode(IMS_FALSE),
             bRequiredWfcBlockByAirplaneMode(IMS_FALSE),
             objSupportedRoamingRats(IMSVector<IMS_SINT32>()),
-            nEmergencyPreferredIpType(CarrierConfig::Ims::IP_VERSION_6),
+            nEmergencyPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
             nSipMessageThresholdForTransportChange(200),
             bCdmalessFeatureTagRequired(IMS_FALSE),
             objEmergencyPcscfRetryWaitTimeSec(IMSVector<IMS_SINT32>()),
-            nRegistrationRetryCountResetPolicy(0)
+            nRegistrationRetryCountResetPolicy(0),
+            objRegistrationPermanentErrorMaxCount(IMSVector<IMS_SINT32>()),
+            nImsPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
+            nImsSignallingDscp(46),
+            nRegistrationActualWaitTimePolicy(CarrierConfig::Assets::AWT_POLICY_RFC_RULE),
+            bDisableT3482ForEmergency(IMS_FALSE),
+            nRegistrationTimerForEmergencyCallMillis(0),
+            bUpdateRegistrationWithCountryChange(IMS_FALSE)
     {
     }
 
@@ -95,5 +102,12 @@ public:
     IMS_BOOL bCdmalessFeatureTagRequired;
     IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
     IMS_SINT32 nRegistrationRetryCountResetPolicy;
+    IMSVector<IMS_SINT32> objRegistrationPermanentErrorMaxCount;
+    IMS_SINT32 nImsPreferredIpType;
+    IMS_SINT32 nImsSignallingDscp;
+    IMS_SINT32 nRegistrationActualWaitTimePolicy;
+    IMS_BOOL bDisableT3482ForEmergency;
+    IMS_SINT32 nRegistrationTimerForEmergencyCallMillis;
+    IMS_BOOL bUpdateRegistrationWithCountryChange;
 };
 #endif  // AOS_ASSET_H_

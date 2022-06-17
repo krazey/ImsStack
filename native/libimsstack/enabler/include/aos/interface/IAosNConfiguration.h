@@ -389,7 +389,7 @@ public:
      *        the UE use preferred IP address type of each operator's requirement.
      *
      * @return IMS_SINT32
-     * @see CarrierConfig::Ims::IP_VERSION_4
+     * @see CarrierConfig::Assets::IP_VERSION_4
      */
     virtual IMS_SINT32 GetPreferredIpType() const = 0;
 
@@ -400,7 +400,7 @@ public:
      *        the UE use preferred IP address type of each operator's requirement.
      *
      * @return IMS_SINT32
-     * @see CarrierConfig::Ims::IP_VERSION_4
+     * @see CarrierConfig::Assets::IP_VERSION_4
      */
     virtual IMS_SINT32 GetEmergencyPreferredIpType() const = 0;
 
@@ -540,17 +540,17 @@ public:
      * @brief Indicate the actual wait time policy
      *
      *        Possible values are,
-     *        CarrierConfig::Ims::AWT_POLICY_RFC_RULE
+     *        CarrierConfig::Assets::AWT_POLICY_RFC_RULE
      *            Follow RFC 5626 section 4.5.
-     *        CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EVERY_PCSCF
+     *        CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF
      *            Indicate whether it shall calculate a wait time based on RFC 5626 4.5
      *            if the registration to every known PCSCF is attempted and handled
      *            as temporary failure without Retry-After header.
-     *        CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EACH_PCSCF
+     *        CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EACH_PCSCF
      *            Indicate whether it shall calculate a wait time based on RFC 5626 4.5
      *            if the registration to each known PCSCF is attempted and handled
      *            as temporary failure without Retry-After header.
-     *        CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL
+     *        CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL
      *            @see KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE
      *
      * @return IMS_SINT32 Return the actual wait time policy

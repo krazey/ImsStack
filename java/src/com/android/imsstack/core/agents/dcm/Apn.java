@@ -320,11 +320,11 @@ public abstract class Apn extends Handler implements IApn {
         if (mDcSettings != null) {
             if (mType.getType() == DCConstants.TYPE_EMERGENCY) {
                 if (mDcSettings.getEmergencyPreferredIpVersion()
-                        == CarrierConfig.Ims.IPV4_PREFERRED) {
+                        == CarrierConfig.Assets.IPV4_PREFERRED) {
                     ipVersion = EIpVersion.IPV4V6.getInt();
                 }
             } else if (mType.getType() == DCConstants.TYPE_IMS) {
-                if (mDcSettings.getPreferredIpVersion() == CarrierConfig.Ims.IPV4_PREFERRED) {
+                if (mDcSettings.getPreferredIpVersion() == CarrierConfig.Assets.IPV4_PREFERRED) {
                     ipVersion = EIpVersion.IPV4V6.getInt();
                 }
             }

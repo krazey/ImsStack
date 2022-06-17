@@ -117,7 +117,7 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, 
                         m_nHoldingVopsState, 0, 0);
 
                 if (!IsUnavailableFeaturePolicy(
-                            CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_VOPS) ||
+                            CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS) ||
                         !ProcessUnavailableFeatureForVops(m_nHoldingVopsState))
                 {
                     ProcessBlock(BLOCK_VOPS, IMS_TRUE);
@@ -524,12 +524,13 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
 
     if (GET_N_CONFIG(m_nSlotId)->GetRegWithFeatureTagUnavailable().GetSize() > 0)
     {
-        if (IsUnavailableFeaturePolicy(CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_VOPS))
+        if (IsUnavailableFeaturePolicy(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS))
         {
             nBlocks &= ~(BLOCK_VOPS);
         }
 
-        if (IsUnavailableFeaturePolicy(CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_CAPABILITY))
+        if (IsUnavailableFeaturePolicy(
+                    CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY))
         {
             nBlocks &= ~(BLOCK_VOLTE_CAPABILITY);
         }
@@ -579,11 +580,11 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
             if (IsNetworkTypeMatchedToRat(nNetworkType, nCurrentRat))
             {
                 if (IsUnavailableFeaturePolicy(
-                            CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_CAPABILITY))
+                            CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY))
                 {
                     IMS_BOOL bProceeded = IMS_FALSE;
 
-                    if (IsUnavailableFeature(CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_MMTEL))
+                    if (IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL))
                     {
                         ProcessUnavailableFeature(ImsAosFeature::MMTEL, IMS_TRUE);
                         bProceeded = IMS_TRUE;
@@ -595,7 +596,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
                                 IMS_TRUE);
                     }
 
-                    if (IsUnavailableFeature(CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_VIDEO))
+                    if (IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO))
                     {
                         ProcessUnavailableFeature(ImsAosFeature::VIDEO, IMS_TRUE);
                         bProceeded = IMS_TRUE;
@@ -637,11 +638,11 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
         if (IsNetworkTypeMatchedToRat(nNetworkType, nCurrentRat))
         {
             if (IsUnavailableFeaturePolicy(
-                        CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_CAPABILITY))
+                        CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY))
             {
                 IMS_BOOL bProceeded = IMS_FALSE;
 
-                if (IsUnavailableFeature(CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_MMTEL))
+                if (IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL))
                 {
                     ProcessUnavailableFeature(ImsAosFeature::MMTEL,
                             !IsCapabilityExisted(nNewCapabilities, AosCapability::VOICE));
@@ -654,7 +655,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
                             !IsCapabilityExisted(nNewCapabilities, AosCapability::VOICE));
                 }
 
-                if (IsUnavailableFeature(CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_VIDEO))
+                if (IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO))
                 {
                     ProcessUnavailableFeature(ImsAosFeature::VIDEO,
                             !IsCapabilityExisted(nNewCapabilities, AosCapability::VIDEO));
@@ -718,11 +719,11 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
             return;
     }
 
-    if (IsUnavailableFeaturePolicy(CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_CAPABILITY))
+    if (IsUnavailableFeaturePolicy(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY))
     {
         IMS_BOOL bProceeded = IMS_FALSE;
 
-        if (IsUnavailableFeature(CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_MMTEL))
+        if (IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL))
         {
             ProcessUnavailableFeature(ImsAosFeature::MMTEL,
                     !IsCapabilityExisted(nCapabilities, AosCapability::VOICE));
@@ -735,7 +736,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
                     !IsCapabilityExisted(nCapabilities, AosCapability::VOICE));
         }
 
-        if (IsUnavailableFeature(CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_VIDEO))
+        if (IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO))
         {
             ProcessUnavailableFeature(ImsAosFeature::VIDEO,
                     !IsCapabilityExisted(nCapabilities, AosCapability::VIDEO));
@@ -794,7 +795,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nStat
         }
     }
 
-    if (IsUnavailableFeaturePolicy(CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_VOPS))
+    if (IsUnavailableFeaturePolicy(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS))
     {
         if (ProcessUnavailableFeatureForVops(nState))
         {

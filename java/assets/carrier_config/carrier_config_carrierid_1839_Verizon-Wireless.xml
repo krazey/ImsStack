@@ -15,31 +15,46 @@
         <item value="0"/>
     </int-array>
     <boolean name="ims.unsubscribe_registration_event_package_bool" value="true"/>
-
-    <int name="ims.registration_actual_wait_time_policy_int" value="3"/>
+    <int name="registration_actual_wait_time_policy_int" value="3"/>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
-
     <boolean name="ims.registration_event_for_cat_required_bool" value="true"/>
     <int name="ims.preferred_ims_dscp_int" value="2"/>
-
     <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="2">
         <item value="2"/>
         <item value="2"/>
     </int-array>
-
+    <int-array name="ims.registration_permanent_error_code_int_array" num="4">
+        <item value="400"/>
+        <item value="402"/>
+        <item value="421"/>
+        <item value="484"/>
+    </int-array>
+    <int-array name="registration_permanent_error_max_count_int_array" num="1">
+        <item value="2"/>
+    </int-array>
+    <boolean name="carrier_wfc_ims_available_bool" value="true"/>
+    <boolean name="video_over_wifi_supported_without_voice_bool" value="true"/>
+    <boolean name="use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
+    <boolean name="cdmaless_feature_tag_required_bool" value="true"/>
+    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+     <int-array name="subscription_error_code_for_stopping_by_expiration_time_int_array" num="3">
+        <item value="4"/>
+        <item value="5"/>
+        <item value="6"/>
+    </int-array>
     <!-- KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
-    <int-array name="ims.event_for_initial_registration_on_terminated_state_of_reg_event_int_array" num="4">
+    <int-array name="event_for_initial_registration_on_terminated_state_of_reg_event_int_array" num="4">
         <item value="1"/>
         <item value="2"/>
         <item value="3"/>
         <item value="5"/>
     </int-array>
-    <int name="ims.wait_time_for_initial_registration_on_terminated_state_of_reg_event_int" value="60"/>
-    <int-array name="ims.event_to_follow_wait_time_for_initial_registration_on_terminated_state_of_reg_event_int_array" num="2">
+    <int name="wait_time_for_initial_registration_on_terminated_state_of_reg_event_int" value="60"/>
+    <int-array name="event_to_follow_wait_time_for_initial_registration_on_terminated_state_of_reg_event_int_array" num="2">
         <item value="2"/>
         <item value="5"/>
     </int-array>
-
+    <!-- End BUNDLE -->
     <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
     <int name="specific_registration_error_final_type_int" value="2"/>
     <int name="specific_registration_error_policy_int" value="2"/>
@@ -56,9 +71,9 @@
     <int-array name="specific_registration_error_wait_time_sec_int_array" num="1">
         <item value="30"/>
     </int-array>
-
+    <!-- End BUNDLE -->
     <!-- KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE -->
-    <int-array name="ims.registration_retry_random_upper_value_sec_int_array" num="6">
+    <int-array name="registration_retry_random_upper_value_sec_int_array" num="6">
         <item value="0"/>
         <item value="0"/>
         <item value="15"/>
@@ -66,7 +81,7 @@
         <item value="0"/>
         <item value="0"/>
     </int-array>
-    <int-array name="ims.registration_retry_interval_sec_int_array" num="6">
+    <int-array name="registration_retry_interval_sec_int_array" num="6">
         <item value="30"/>
         <item value="30"/>
         <item value="60"/>
@@ -74,18 +89,7 @@
         <item value="480"/>
         <item value="900"/>
     </int-array>
-
-    <!-- KEY_REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE -->
-    <int-array name="ims.registration_permanent_error_code_int_array" num="4">
-        <item value="400"/>
-        <item value="402"/>
-        <item value="421"/>
-        <item value="484"/>
-    </int-array>
-    <int-array name="ims.registration_permanent_error_max_count_int_array" num="1">
-        <item value="2"/>
-    </int-array>
-
+    <!-- End BUNDLE -->
     <!-- KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE -->
     <boolean name="registration_error_code_with_retry_after_time_only_defined_bool" value="true"/>
     <int-array name="registration_error_code_with_retry_after_time_int_array" num="5">
@@ -102,11 +106,11 @@
         <item value="503"/>
         <item value="600"/>
     </int-array>
-
+    <!-- End BUNDLE -->
     <!-- KEY_REGISTRATION_RETRY_BUNDLE -->
     <int name="registration_retry_default_policy_int" value="1"/>
     <int name="registration_retry_sip_503_code_policy_int" value="0"/>
-
+    <!-- End BUNDLE -->
     <!-- KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE -->
     <int name="subscription_terminated_error_code_for_reg_event_retry_max_count_int" value="2"/>
     <int-array name="subscription_terminated_error_code_for_reg_event_int_array" num="4">
@@ -115,17 +119,7 @@
         <item value="404"/>
         <item value="420"/>
     </int-array>
-    <int-array name="subscription_error_code_for_stopping_by_expiration_time_int_array" num="3">
-        <item value="4"/>
-        <item value="5"/>
-        <item value="6"/>
-    </int-array>
-
-    <boolean name="carrier_wfc_ims_available_bool" value="true"/>
-    <boolean name="video_over_wifi_supported_without_voice_bool" value="true"/>
-    <boolean name="use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
-    <boolean name="cdmaless_feature_tag_required_bool" value="true"/>
-    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+    <!-- End BUNDLE -->
 
     <!-- MTC default -->
     <int name="ims.request_uri_type_int" value="0"/>
