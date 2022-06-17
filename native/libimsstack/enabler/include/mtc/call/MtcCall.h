@@ -8,12 +8,12 @@
 #include "ISipClientConnectionListener.h"
 #include "ISipErrorListener.h"
 #include "MtcDef.h"
-#include "base/IMessageMediator.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/MtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
+#include "call/message/MtcMessageMediator.h"
 #include "call/state/MtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
 #include "call/UpdatingInfo.h"
@@ -47,7 +47,6 @@ class MtcCall final :
         public IMtcCall,
         public IMtcCallContext,
         public ISessionListener,
-        public IMessageMediator,
         public IMtcTimerListener,
         public IMtcBlockCheckListener,
         public IMtcPreconditionListener,
@@ -187,9 +186,6 @@ public:
     void SessionTransactionReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) override;
 
-    IMS_RESULT MessageMediator_AdjustMessage(
-            IN_OUT ISipMessage* piSipMessage, IN IMS_SINT32 nMessage) override;
-
     void OnTimerExpired(IN IMS_SINT32 nType) override;
 
     void OnBlockChecked(IN IMtcBlockChecker::Result objResult) override;
@@ -236,6 +232,7 @@ private:
     MtcMediaManager m_objMediaManager;
     MtcPreconditionManager m_objPreconditionManager;
     MtcSupplementaryService m_objSupplementaryService;
+    MtcMessageMediator m_objMessageMediator;
     UssiController* m_pUssiController;
 };
 

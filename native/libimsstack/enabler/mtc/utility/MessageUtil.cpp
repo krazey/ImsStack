@@ -1596,8 +1596,8 @@ PUBLIC GLOBAL CallType MessageUtil::GetCallType(
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL CallType MessageUtil::GetCallTypeFromSdp(
-        IN ISession* piSession, IN IMS_BOOL bNegoSdp, IN IMS_BOOL bPeerView)
+PUBLIC GLOBAL CallType MessageUtil::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bNegoSdp,
+        IN IMS_BOOL bPeerView, IN IMS_BOOL bCheckPort /*= IMS_TRUE*/)
 {
     IMS_BOOL bAudio = IMS_FALSE;
     IMS_BOOL bVideo = IMS_FALSE;
@@ -1648,12 +1648,16 @@ PUBLIC GLOBAL CallType MessageUtil::GetCallTypeFromSdp(
             continue;
         }
 
-        if (pSdpMedia->GetType() == SdpMedia::TYPE_AUDIO && pSdpMedia->GetPort() != 0)
+        if (bCheckPort && pSdpMedia->GetPort() == 0)
+        {
+            continue;
+        }
+
+        if (pSdpMedia->GetType() == SdpMedia::TYPE_AUDIO)
         {
             bAudio = IMS_TRUE;
         }
-
-        if (pSdpMedia->GetType() == SdpMedia::TYPE_VIDEO && pSdpMedia->GetPort() != 0)
+        else if (pSdpMedia->GetType() == SdpMedia::TYPE_VIDEO)
         {
             IMS_TRACE_D("GetCallTypeFromSdp : media state [%d]", piMedia->GetState(), 0, 0);
             if (!bNegoSdp || piMedia->GetState() != IMedia::STATE_DELETED)
@@ -1661,8 +1665,7 @@ PUBLIC GLOBAL CallType MessageUtil::GetCallTypeFromSdp(
                 bVideo = IMS_TRUE;
             }
         }
-
-        if (pSdpMedia->GetType() == SdpMedia::TYPE_TEXT && pSdpMedia->GetPort() != 0)
+        else if (pSdpMedia->GetType() == SdpMedia::TYPE_TEXT)
         {
             IMS_TRACE_D("GetCallTypeFromSdp : media state [%d]", piMedia->GetState(), 0, 0);
             if (!bNegoSdp || piMedia->GetState() != IMedia::STATE_DELETED)

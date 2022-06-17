@@ -170,7 +170,8 @@ public:
     static CallType GetCallType(
             IN const IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView);
     static CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bNegoSdp,
-            IN IMS_BOOL bPeerView);  // TODO: change name of bPeerView
+            IN IMS_BOOL bPeerView,
+            IN IMS_BOOL bCheckPort = IMS_TRUE);  // TODO: change name of bPeerView
     static CallType GetCallTypeFromAcceptContact(
             IN IMessage* piMessage, IN ISession* piSession = IMS_NULL);
     static IMS_SINT32 CheckRttUpdateRequest(

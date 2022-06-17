@@ -335,13 +335,6 @@ PUBLIC VIRTUAL CallStateName MtcCallState::SessionTransactionReceived(
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::MessageMediator_AdjustMessage(
-        IN_OUT ISipMessage* /*piSipMessage*/,
-        IN IMS_SINT32 /*nMessage = IMessageMediator::MESSAGE_NORMAL*/)
-{
-    return GetStateName();
-}
-
 PUBLIC VIRTUAL CallStateName MtcCallState::OnTimerExpired(IN IMS_SINT32 /* nType */)
 {
     return GetStateName();

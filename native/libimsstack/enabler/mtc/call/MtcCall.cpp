@@ -46,6 +46,7 @@ MtcCall::MtcCall(
         m_objMediaManager(MtcMediaManager(*this)),
         m_objPreconditionManager(MtcPreconditionManager(*this)),
         m_objSupplementaryService(MtcSupplementaryService(objContext.GetConfigurationProxy())),
+        m_objMessageMediator(MtcMessageMediator(*this)),
         m_pUssiController(IMS_NULL)
 {
     IMS_TRACE_D("+MtcCall key[%d]", m_nKey, 0, 0);
@@ -474,6 +475,7 @@ PUBLIC VIRTUAL MtcSession* MtcCall::CreateSession(IN ISession* piSession)
     }
 
     piSession->SetListener(this);
+    piSession->SetMessageMediator(&m_objMessageMediator);
 
     MtcSession* pSession = new MtcSession(*this, *piSession, m_objCallInfo.eInitialCallType);
     m_lstSessions.Append(pSession);
@@ -998,26 +1000,6 @@ PUBLIC VIRTUAL void MtcCall::SessionTransactionReceived(
                     return pState->SessionTransactionReceived(piSession, piSipServerConnection);
                 });
     }
-}
-
-PUBLIC VIRTUAL IMS_RESULT MtcCall::MessageMediator_AdjustMessage(
-        IN_OUT ISipMessage* piSipMessage, IN IMS_SINT32 nMessage)
-{
-    IMS_TRACE_I("MessageMediator_AdjustMessage : key[%d]", m_nKey, 0, 0);
-
-    if (piSipMessage == IMS_NULL)
-    {
-        OnInternalFailure();
-        return IMS_FAILURE;
-    }
-
-    m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
-            {
-                return pState->MessageMediator_AdjustMessage(piSipMessage, nMessage);
-            });
-
-    return IMS_SUCCESS;
 }
 
 PUBLIC VIRTUAL void MtcCall::OnTimerExpired(IN IMS_SINT32 nType)

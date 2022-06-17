@@ -112,8 +112,6 @@ public:
     virtual CallStateName SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex);
     virtual CallStateName SessionTransactionReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection);
-    virtual CallStateName MessageMediator_AdjustMessage(IN_OUT ISipMessage* piSipMessage,
-            IN IMS_SINT32 nMessage = IMessageMediator::MESSAGE_NORMAL);
     virtual CallStateName OnTimerExpired(IN IMS_SINT32 nType);
 
     virtual CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult);
