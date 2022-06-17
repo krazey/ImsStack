@@ -799,25 +799,19 @@ AUDIO_CODEC MediaNego::GetNegotiatedAudioQuality(void)
 PUBLIC
 VIDEO_RESOLUTION MediaNego::GetNegotiatedVideoQuality(void)
 {
-    if (m_pVideoNego != IMS_NULL)
+    if (m_pVideoNego == IMS_NULL || m_pVideoNego->GetNegotiatedRemotePort() == 0)
     {
-        VIDEO_RESOLUTION eNegotiatedResolution = m_pVideoNego->GetNegotiatedResolution();
-        if (eNegotiatedResolution == VIDEO_RESOLUTION_INVALID)
-        {
-            return VIDEO_RESOLUTION_NOT_USED;
-        }
-        // this case is left for keeping legacy I/F with UI. it need to change later
-        else if (eNegotiatedResolution == VIDEO_RESOLUTION_QCIF_PR ||
-                eNegotiatedResolution == VIDEO_RESOLUTION_QCIF_LS)
-        {
-            return VIDEO_RESOLUTION_QCIF_LS;
-        }
-        else
-        {
-            return eNegotiatedResolution;
-        }
+        return VIDEO_RESOLUTION_NOT_USED;
     }
-    return VIDEO_RESOLUTION_NOT_USED;
+
+    VIDEO_RESOLUTION eNegotiatedResolution = m_pVideoNego->GetNegotiatedResolution();
+
+    if (eNegotiatedResolution == VIDEO_RESOLUTION_INVALID)
+    {
+        return VIDEO_RESOLUTION_NOT_USED;
+    }
+
+    return eNegotiatedResolution;
 }
 
 // TODO_MEDIA text
