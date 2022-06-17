@@ -26,11 +26,6 @@ public interface ICallContext extends IBaseContext {
     public IECallStateTracker getECallStateTracker();
 
     /**
-     * Returns FDN tracker.
-     */
-    public IFDNTracker getFDNTracker();
-
-    /**
      * Returns SRVCC state tracker if it's required for this call context.
      * @Nullable
      */

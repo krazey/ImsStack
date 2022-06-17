@@ -27,7 +27,6 @@ import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcServiceStateTracker;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.base.ICallLocationPolicy;
-import com.android.imsstack.imsservice.mmtel.base.IFDNTracker;
 import com.android.imsstack.imsservice.mmtel.base.ISrvccStateTracker;
 import com.android.imsstack.imsservice.mmtel.base.ImsApp;
 import com.android.imsstack.imsservice.mmtel.base.TtyModeTracker;
@@ -56,7 +55,6 @@ public class ImsCallContext implements ICallContext {
     private ImsCallLocationPolicy mCallLocationPolicy;
 
     private WfcSettingTracker mWfcSettingTracker;
-    private ImsFDNTracker mFdnTracker;
     private MtcApp mMtcApp;
     private MtcServiceStateTracker mServiceStateTracker;
 
@@ -66,7 +64,6 @@ public class ImsCallContext implements ICallContext {
         mApp = app;
 
         mWfcSettingTracker = new WfcSettingTracker(this);
-        mFdnTracker = new ImsFDNTracker(this);
 
         mServiceStateTracker = new MtcServiceStateTracker(this);
 
@@ -79,7 +76,6 @@ public class ImsCallContext implements ICallContext {
         mMtcApp.setServiceStateListener(mServiceStateTracker);
 
         mWfcSettingTracker.init();
-        mFdnTracker.init();
     }
 
     public void clear() {
@@ -91,7 +87,6 @@ public class ImsCallContext implements ICallContext {
         mServiceStateTracker.clear();
 
         mWfcSettingTracker.clear();
-        mFdnTracker.clear();
 
         mCallLocationPolicy = null;
 
@@ -105,7 +100,6 @@ public class ImsCallContext implements ICallContext {
         log("dispose");
 
         mWfcSettingTracker.dispose();
-        mFdnTracker.dispose();
         mServiceStateTracker.dispose();
 
         mMtcApp.setServiceStateListener(null);
@@ -259,11 +253,6 @@ public class ImsCallContext implements ICallContext {
     @Override
     public IECallStateTracker getECallStateTracker() {
         return mMtcApp.getCallManager().getECallStateTracker();
-    }
-
-    @Override
-    public IFDNTracker getFDNTracker() {
-        return mFdnTracker;
     }
 
     @Override

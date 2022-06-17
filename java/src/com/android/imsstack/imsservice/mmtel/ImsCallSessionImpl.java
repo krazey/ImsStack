@@ -376,12 +376,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             emergencyCall = true;
             profile.setCallExtraBoolean(ImsCallProfile.EXTRA_EMERGENCY_CALL, true);
         }
-        else if (mCallProfile.getServiceType() != ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-            if (mCallContext.getFDNTracker().isCallBlockedByFDN(callee)) {
-                notifyCallStartFailedDueToFDN();
-                return;
-            }
-        }
 
         // Checks if the originating call is determined by USAT
         if ((mCallProfile.getServiceType() != ImsCallProfile.SERVICE_TYPE_EMERGENCY)
@@ -1791,18 +1785,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 }, delay);
             }
         }
-    }
-
-    private void notifyCallStartFailedDueToFDN() {
-        final ImsReasonInfo reasonInfo = ImsCallUtils.createReasonInfo(
-                ImsReasonInfo.CODE_FDN_BLOCKED,
-                IUMtcCall.Fail_Reason.CODE_SETUPFAILED_NONE,
-                "Outgoing call is blocked by FDN",
-                ImsCallUtils.FLAG_REASON_INFO_NONE);
-
-        notifyCallStartFailedWithDelay(reasonInfo, 100);
-
-        setState(ImsCallSessionImplBase.State.TERMINATED);
     }
 
     private void notifySuppServiceForForwardedCall(final boolean isMO) {

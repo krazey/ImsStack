@@ -18,7 +18,6 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.os.Bundle;
 import android.os.DeadObjectException;
-import android.os.RemoteException;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsInfo;
@@ -27,7 +26,6 @@ import android.telephony.ims.stub.ImsUtImplBase;
 import android.text.TextUtils;
 
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.imsservice.mmtel.base.IFDNTracker;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtListener;
@@ -71,35 +69,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
         return mUt;
     }
 
-    private boolean isServiceBlockedByFDN(int action, int serviceClass, int condition) {
-        IFDNTracker fdnTracker = getFDNTracker();
-        if (null == fdnTracker) {
-            return false;
-        }
-
-        return fdnTracker.isCallBlockedByFDN(new ImsMMICode(action, serviceClass, condition)
-                .getMMIString());
-    }
-
-    private boolean isServiceBlockedByFDN(int action, int serviceClass, int condition,
-            String number, int timeSeconds) {
-        IFDNTracker fdnTracker = getFDNTracker();
-        if (null == fdnTracker) {
-            return false;
-        }
-
-        return fdnTracker.isCallBlockedByFDN(new ImsMMICode(action, serviceClass, condition,
-                number, timeSeconds).getMMIString());
-    }
-
-    IFDNTracker getFDNTracker() {
-        if (mContext instanceof ImsCallContext) {
-            return ((ImsCallContext)mContext).getFDNTracker();
-        }
-
-        return new ImsFDNTracker(mContext);
-    }
-
     @Override
     public void close() {
         if (mUt == null) {
@@ -119,12 +88,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
         if (mUt == null) {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
-
-        if (isServiceBlockedByFDN(ImsMMICode.ACTION_INTERROGATE, ImsMMICode.CATEGORY_CB, cbType)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
-        }
-
         return mUt.queryCallBarring(cbType);
     }
 
@@ -137,11 +100,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
         if (mUt == null) {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
-        }
-
-        if (isServiceBlockedByFDN(ImsMMICode.ACTION_INTERROGATE, ImsMMICode.CATEGORY_CB, cbType)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
         }
 
         return mUt.queryCallBarringForServiceClass(cbType, serviceClass);
@@ -157,12 +115,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        if (isServiceBlockedByFDN(ImsMMICode.ACTION_INTERROGATE, ImsMMICode.CATEGORY_CF,
-                condition)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
-        }
-
         return mUt.queryCallForward(condition, number);
     }
 
@@ -174,11 +126,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
         if (mUt == null) {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
-        }
-
-        if (isServiceBlockedByFDN(ImsMMICode.ACTION_INTERROGATE, ImsMMICode.CATEGORY_CW, 0)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
         }
 
         return mUt.queryCallWaiting();
@@ -194,11 +141,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        if (isServiceBlockedByFDN(ImsMMICode.ACTION_INTERROGATE, ImsMMICode.CATEGORY_OIR, 0)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
-        }
-
         return mUt.queryCLIR();
     }
 
@@ -210,11 +152,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
         if (mUt == null) {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
-        }
-
-        if (isServiceBlockedByFDN(ImsMMICode.ACTION_INTERROGATE, ImsMMICode.CATEGORY_OIP, 0)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
         }
 
         return mUt.queryCLIP();
@@ -230,11 +167,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        if (isServiceBlockedByFDN(ImsMMICode.ACTION_INTERROGATE, ImsMMICode.CATEGORY_TIR, 0)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
-        }
-
         return mUt.queryCOLR();
     }
 
@@ -246,11 +178,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
         if (mUt == null) {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
-        }
-
-        if (isServiceBlockedByFDN(ImsMMICode.ACTION_INTERROGATE, ImsMMICode.CATEGORY_TIP, 0)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
         }
 
         return mUt.queryCOLP();
@@ -280,11 +207,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        if (isServiceBlockedByFDN(action, ImsMMICode.CATEGORY_CB, cbType)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
-        }
-
         return mUt.updateCallBarring(cbType, action, barringList);
     }
 
@@ -299,11 +221,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
         if (mUt == null) {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
-        }
-
-        if (isServiceBlockedByFDN(action, ImsMMICode.CATEGORY_CB, cbType)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
         }
 
         return mUt.updateCallBarringForServiceClass(cbType, action, barringList, serviceClass);
@@ -323,11 +240,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        if (isServiceBlockedByFDN(action, ImsMMICode.CATEGORY_CB, cbType)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
-        }
-
         return mUt.updateCallBarringWithPassword(cbType, action, barringList, serviceClass,
                 password);
     }
@@ -345,11 +257,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        if (isServiceBlockedByFDN(action, ImsMMICode.CATEGORY_CF, condition, number, timeSeconds)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
-        }
-
         return mUt.updateCallForward(action, condition, number, serviceClass, timeSeconds);
     }
 
@@ -361,12 +268,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
         if (mUt == null) {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
-        }
-
-        int action = enable ? ImsMMICode.ACTION_ACTIVATE : ImsMMICode.ACTION_DEACTIVATE;
-        if (isServiceBlockedByFDN(action, ImsMMICode.CATEGORY_CW, 0)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
         }
 
         return mUt.updateCallWaiting(enable, serviceClass);
@@ -389,11 +290,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
             action = ImsMMICode.ACTION_DEACTIVATE;
         }
 
-        if (isServiceBlockedByFDN(action, ImsMMICode.CATEGORY_OIR, 0)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
-        }
-
         return mUt.updateCLIR(clirMode);
     }
 
@@ -405,12 +301,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
         if (mUt == null) {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
-        }
-
-        int action = enable ? ImsMMICode.ACTION_ACTIVATE : ImsMMICode.ACTION_DEACTIVATE;
-        if (isServiceBlockedByFDN(action, ImsMMICode.CATEGORY_OIP, 0)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
         }
 
         return mUt.updateCLIP(enable);
@@ -426,13 +316,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
         }
 
-        int action = (presentation == 0) ?
-                ImsMMICode.ACTION_DEACTIVATE : ImsMMICode.ACTION_ACTIVATE;
-        if (isServiceBlockedByFDN(action, ImsMMICode.CATEGORY_TIR, 0)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
-        }
-
         return mUt.updateCOLR(presentation);
     }
 
@@ -444,12 +327,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
         if (mUt == null) {
             return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
-        }
-
-        int action = enable ? ImsMMICode.ACTION_ACTIVATE : ImsMMICode.ACTION_DEACTIVATE;
-        if (isServiceBlockedByFDN(action, ImsMMICode.CATEGORY_TIP, 0)) {
-            log("Call Blocked by FDN");
-            return (ImsReasonInfo.CODE_FDN_BLOCKED * (-1));  // blocked by FDN
         }
 
         return mUt.updateCOLP(enable);
