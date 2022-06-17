@@ -59,7 +59,7 @@ PUBLIC GLOBAL const IMS_CHAR ConfigMtc::APP_CONFIG[] = {
         "[Write]\n"
         "header_names=Accept Alert-Info Content-Disposition Content-ID Content-Type History-Info "
         "P-Early-Media P-Preferred-Service Privacy Referred-By Refer-Sub Require Supported Reason "
-        "Recv-Info In-Reply-To"
+        "Recv-Info In-Reply-To Geolocation Geolocation-Routing"
         "\n"
         "\n"
         "[Read]\n"
