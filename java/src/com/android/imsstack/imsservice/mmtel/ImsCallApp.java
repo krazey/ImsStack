@@ -54,7 +54,7 @@ public class ImsCallApp extends ImsApp {
         // FIXME: remove later if SS control configuration is properly provided
         getUtInterface();
 
-        mRegTracker.setFeatureManager(mFeatureManager);
+        mFeatureManager.setRegistrationTracker(mRegTracker);
         // Service feature capabilities updates
         mFeatureManager.updateFeaturesOnServiceUpDown(true);
 
@@ -87,7 +87,7 @@ public class ImsCallApp extends ImsApp {
         }
 
         if (mFeatureManager != null) {
-            mRegTracker.setFeatureManager(null);
+            mFeatureManager.setRegistrationTracker(null);
             mFeatureManager.dispose();
             mFeatureManager = null;
         }

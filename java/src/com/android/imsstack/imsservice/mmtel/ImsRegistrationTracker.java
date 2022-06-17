@@ -19,20 +19,29 @@ import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-
-public final class ImsRegistrationTracker {
+/**
+* Tracks IMS Registration status of IMS Service and the radio access
+* technology in which it is registered on. Communicates the
+* same to ImsRegistrationImpl for further notifying to framework.
+* This Class also notifies the registered feature capability to ImsFeatureManager.
+*/
+public class ImsRegistrationTracker {
     public static interface CapabilityUpdateListener {
+        /**
+        * Update failure when registration failed for requested capability
+        */
         public void onCapabilitiesUpdateFailed(int capabilities, int networkType, int reason);
     };
 
     private final IContext mContext;
     private final ImsRegistrationImpl mRegImpl;
-    private ImsFeatureManager mFeatureManager;
+    private IRegistrationFeatureListener mFeatureListener;
     private RegTracker mRegTracker;
     private int mFeatures = FeatureTagMask.NONE;
     private List<Pair<Integer, Integer>> mCapabilities;
@@ -40,7 +49,7 @@ public final class ImsRegistrationTracker {
     public ImsRegistrationTracker(IContext context, ImsRegistrationImpl regImpl) {
         mContext = context;
         mRegImpl = regImpl;
-        mFeatureManager = null;
+        mFeatureListener = null;
         mFeatures = FeatureTagMask.NONE;
         mRegTracker = new RegTracker();
         mCapabilities = new ArrayList<Pair<Integer, Integer>>();
@@ -92,6 +101,10 @@ public final class ImsRegistrationTracker {
         return ((mFeatures & FeatureTagMask.MMTEL) != 0);
     }
 
+    public boolean isSmsRegistered() {
+        return ((mFeatures & FeatureTagMask.SMSIP) != 0);
+    }
+
     public boolean isCallVoiceAndVideoRegistered() {
         return (isCallVoiceRegistered() && isCallVideoRegistered());
     }
@@ -101,19 +114,21 @@ public final class ImsRegistrationTracker {
         mRegTracker.init();
     }
 
-    public void setFeatureManager(ImsFeatureManager featureManager) {
+    /**
+     * This is invoked to set IRegistrationFeatureListener.
+    */
+    public void setRegistrationFeatureListener(IRegistrationFeatureListener listener) {
         synchronized (this) {
-            mFeatureManager = featureManager;
-            if (mFeatureManager != null) {
-                mFeatureManager.setRegistrationTracker(this);
+            if (listener != null) {
+                mFeatureListener = listener;
             }
         }
     }
 
     private void updateFeatureCapabilities() {
         synchronized (this) {
-            if (mFeatureManager != null) {
-                mFeatureManager.updateAndNotifyFeatureCapabilitiesIfChanged();
+            if (mFeatureListener != null) {
+                mFeatureListener.onRegistrationFeatureChanged();
             }
         }
     }
@@ -135,36 +150,39 @@ public final class ImsRegistrationTracker {
         logi("changeCapabilities::enabledCaps "
                 + enabledCaps + " disabledCaps " + disabledCaps);
 
-        for (int i = 0; i < disabledCaps.size(); ++i) {
-            CapabilityPair capability = disabledCaps.get(i);
-            for (int j = 0; j < mCapabilities.size(); j++) {
-                Pair<Integer, Integer> capabilityPair = mCapabilities.get(j);
-                if ((capabilityPair.first == capability.getRadioTech())
-                        && (capabilityPair.second == capability.getCapability())) {
-                    logi("Remove disabledCapabilities::NetworkType "
-                            + capability.getRadioTech() + " Capability "
-                            + capability.getCapability());
-                    mCapabilities.remove(capabilityPair);
-                    break;
+        if (disabledCaps != null) {
+            for (int i = 0; i < disabledCaps.size(); ++i) {
+                CapabilityPair capability = disabledCaps.get(i);
+                for (int j = 0; j < mCapabilities.size(); j++) {
+                    Pair<Integer, Integer> capabilityPair = mCapabilities.get(j);
+                    if ((capabilityPair.first == capability.getRadioTech())
+                            && (capabilityPair.second == capability.getCapability())) {
+                        logi("Remove disabledCapabilities::NetworkType "
+                                + capability.getRadioTech() + " Capability "
+                                + capability.getCapability());
+                        mCapabilities.remove(capabilityPair);
+                        break;
+                    }
                 }
             }
         }
+        if (enabledCaps != null) {
+            for (int i = 0; i < enabledCaps.size(); ++i) {
+                CapabilityPair capability = enabledCaps.get(i);
+                boolean alreadyExist = false;
 
-        for (int i = 0; i < enabledCaps.size(); ++i) {
-            CapabilityPair capability = enabledCaps.get(i);
-            boolean alreadyExist = false;
-
-            for (int j = 0; j < mCapabilities.size(); j++) {
-                Pair<Integer, Integer> capabilityPair = mCapabilities.get(j);
-                if ((capabilityPair.first == capability.getRadioTech())
-                        && (capabilityPair.second == capability.getCapability())) {
-                    alreadyExist = true;
+                for (int j = 0; j < mCapabilities.size(); j++) {
+                    Pair<Integer, Integer> capabilityPair = mCapabilities.get(j);
+                    if ((capabilityPair.first == capability.getRadioTech())
+                            && (capabilityPair.second == capability.getCapability())) {
+                        alreadyExist = true;
+                    }
                 }
-            }
-            if (!alreadyExist) {
-                int radioTech = capability.getRadioTech();
-                int capabilityType = capability.getCapability();
-                mCapabilities.add(new Pair<>(radioTech, capabilityType));
+                if (!alreadyExist) {
+                    int radioTech = capability.getRadioTech();
+                    int capabilityType = capability.getCapability();
+                    mCapabilities.add(new Pair<>(radioTech, capabilityType));
+                }
             }
         }
 
@@ -188,6 +206,11 @@ public final class ImsRegistrationTracker {
             }
         }
         mRegTracker.changeCapabilities(capabilityPairs);
+    }
+
+    @VisibleForTesting
+    protected IAosRegistration getIAosRegistration(int slotId) {
+        return AosFactory.getInstance().getAosRegistration(slotId);
     }
 
     private int convertToAosNetworkType(int radioTech) {
@@ -257,7 +280,7 @@ public final class ImsRegistrationTracker {
 
         public void init() {
             mNetworkType = IAosRegistrationListener.NetworkType.LTE;
-            mAosReg = AosFactory.getInstance().getAosRegistration(mContext.getSlotId());
+            mAosReg = getIAosRegistration(mContext.getSlotId());
             CommonStarter.getInstance().addListener(this);
 
             initFeatureTags();
@@ -355,6 +378,13 @@ public final class ImsRegistrationTracker {
         @Override
         public void notifyDeregistered(int reason) {
             mRegImpl.notifyDeregistered(reason);
+            boolean networkTypeChanged = updateNetworkType(
+                    IAosRegistrationListener.NetworkType.NONE);
+            boolean featureChanged = updateFeatures(FeatureTagMask.NONE);
+
+            if (networkTypeChanged || featureChanged) {
+                updateFeatureCapabilities();
+            }
         }
 
         @Override
@@ -390,7 +420,7 @@ public final class ImsRegistrationTracker {
             }
 
             if (mAosReg == null) {
-                mAosReg = AosFactory.getInstance().getAosRegistration(mContext.getSlotId());
+                mAosReg = getIAosRegistration(mContext.getSlotId());
                 if (mAosReg != null) {
                     mAosReg.addListener(this);
                 }
