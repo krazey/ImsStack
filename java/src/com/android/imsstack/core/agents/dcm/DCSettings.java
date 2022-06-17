@@ -10,6 +10,7 @@ import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDCSettings;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 public class DCSettings implements IDCSettings {
     // Constants--------------------------------------------------
@@ -29,8 +30,7 @@ public class DCSettings implements IDCSettings {
     public void init(Context context) {
         mContext = context;
 
-        ConfigInterface config = AgentFactory.getInstance().getAgent(
-                ConfigInterface.class, mSlotId);
+        ConfigInterface config = getConfigInterface(mSlotId);
 
         if (config != null) {
             mCarrierConfig = config.getCarrierConfig();
@@ -81,7 +81,7 @@ public class DCSettings implements IDCSettings {
 
         int[] noVopsRequired = mCarrierConfig.getIntArray(
                 CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY);
-        IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+        IDCNetWatcher dcnw = getDcNetWatcher(mSlotId);
 
         if ((noVopsRequired != null) && (dcnw != null)) {
             for (int i = 0; i < noVopsRequired.length; i++) {
@@ -160,6 +160,16 @@ public class DCSettings implements IDCSettings {
         }
         return false;
     }
+
     // Private/Protected methods ---------------------------------
+    @VisibleForTesting
+    protected ConfigInterface getConfigInterface(int slotId) {
+        return AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId);
+    }
+
+    @VisibleForTesting
+    protected IDCNetWatcher getDcNetWatcher(int slotId) {
+        return (IDCNetWatcher) DCFactory.getDC(DCFactory.NETWORK_WATCHER, slotId);
+    }
     //----------------------------------------------------------------------------------------------
 }
