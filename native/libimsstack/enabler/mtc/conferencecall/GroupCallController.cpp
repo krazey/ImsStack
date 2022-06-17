@@ -57,7 +57,7 @@ PROTECTED VIRTUAL void GroupCallController::ProcessGroupCall(IN IMSList<ConfUser
     IMS_TRACE_I("ProcessGroupCall", 0, 0, 0);
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
-        m_objNotifier.NotifyGroupCallFailed(FailReason(FAIL_REASON_UNKNOWN, -1));
+        m_objNotifier.NotifyGroupCallFailed(CallReasonInfo(CODE_UNSPECIFIED, -1));
         return;
     }
 
@@ -128,7 +128,7 @@ void GroupCallController::RecoverOnCreating()
 
     IMS_TRACE_D("RecoverOnCreating", 0, 0, 0);
 
-    m_objNotifier.NotifyGroupCallFailed(FailReason(FAIL_REASON_UNKNOWN, -1));
+    m_objNotifier.NotifyGroupCallFailed(CallReasonInfo(CODE_UNSPECIFIED, -1));
     m_objOperationQueue.Clear();
     SetState(STATE_IDLE);
 }

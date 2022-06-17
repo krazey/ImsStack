@@ -23,7 +23,7 @@ class JniMtcServiceThread;
 class MediaInfo;
 class MtcSession;
 enum class QosLossPolicy;
-struct FailReason;
+struct CallReasonInfo;
 
 using CallStateName = IMtcCall::State;
 
@@ -57,16 +57,16 @@ public:
             IN ISession* piSession, IN JniMtcServiceThread* pServiceThread);
     virtual CallStateName HandleUserAlert();
     virtual CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo);
-    virtual CallStateName Reject(IN const FailReason& objReason);
+    virtual CallStateName Reject(IN const CallReasonInfo& objReason);
     virtual CallStateName Hold(IN MediaInfo* pMediaInfo);
     virtual CallStateName Resume(IN MediaInfo* pMediaInfo);
     virtual CallStateName AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo);
-    virtual CallStateName RejectResume(IN const FailReason& objReason);
+    virtual CallStateName RejectResume(IN const CallReasonInfo& objReason);
     virtual CallStateName Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo);
     virtual CallStateName AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo);
-    virtual CallStateName RejectConvert(IN const FailReason& objReason);
-    virtual CallStateName CancelConvert(IN const FailReason& objReason);
-    virtual CallStateName Terminate(IN const FailReason& objReason);
+    virtual CallStateName RejectConvert(IN const CallReasonInfo& objReason);
+    virtual CallStateName CancelConvert(IN const CallReasonInfo& objReason);
+    virtual CallStateName Terminate(IN const CallReasonInfo& objReason);
     virtual CallStateName SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration);
     virtual CallStateName HandleSrvccSuccess();
     virtual CallStateName HandleSrvccFailure(IN UpdateType eUpdateType);
@@ -76,7 +76,7 @@ public:
     virtual CallStateName OnUssiAttached();
     virtual CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo);
     virtual CallStateName UssiStarted(IN ISession* piSession);
-    virtual CallStateName TerminateUssi(IN const FailReason& objReason);
+    virtual CallStateName TerminateUssi(IN const CallReasonInfo& objReason);
     virtual CallStateName UssiTerminated(IN ISession* piSession);
 
     virtual CallStateName SendUssd(IN const AString& strUssd);
@@ -131,7 +131,7 @@ public:
     virtual CallStateName OnVideoLowestBitRate();
     virtual CallStateName OnReceivingNetworkToneStarted();
     virtual CallStateName OnReceivingNetworkToneFailed();
-    virtual CallStateName OnMediaFailed(IN FailReason objReason);
+    virtual CallStateName OnMediaFailed(IN CallReasonInfo objReason);
 
 protected:
     enum TimerType
@@ -153,8 +153,7 @@ protected:
         TIMER_E911_WIFI_START,
     };
 
-    void HandleTerminate(IN const FailReason& objReason);
-    IMS_SINT32 ConvertTerminateReasonToFailReason(IN IMS_SINT32 eReason);
+    void HandleTerminate(IN const CallReasonInfo& objReason);
     void NotifyHoldResumeState();
 
     ISession* GetISession();
@@ -170,7 +169,7 @@ protected:
     IMS_RESULT SendResponseToEarlyUpdate(IN IMS_SINT32 eStatusCode, IN MtcSession* pMtcSession);
     IMS_RESULT SendResponseToPrack(IN IMS_SINT32 eStatusCode);
 
-    CallStateName RejectIncomingAndToTerminating(IN const FailReason& objFailReason);
+    CallStateName RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason);
 
     void SendPreIncomingCallReceived();
     void SendIncomingCallReceived();

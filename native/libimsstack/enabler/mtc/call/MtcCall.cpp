@@ -197,7 +197,7 @@ PUBLIC VIRTUAL void MtcCall::Accept(IN CallType eCallType, IN MediaInfo* pMediaI
     }
 }
 
-PUBLIC VIRTUAL void MtcCall::Reject(IN const FailReason& objReason)
+PUBLIC VIRTUAL void MtcCall::Reject(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("Reject : key[%d]", m_nKey, 0, 0);
 
@@ -259,7 +259,7 @@ PUBLIC VIRTUAL void MtcCall::AcceptResume(IN CallType eCallType, IN MediaInfo* p
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::RejectResume(IN const FailReason& objReason)
+PUBLIC VIRTUAL void MtcCall::RejectResume(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("RejectResume : key[%d]", m_nKey, 0, 0);
 
@@ -304,7 +304,7 @@ PUBLIC VIRTUAL void MtcCall::AcceptConvert(IN CallType eCallType, IN MediaInfo* 
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::RejectConvert(IN const FailReason& objReason)
+PUBLIC VIRTUAL void MtcCall::RejectConvert(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("RejectConvert : key[%d]", m_nKey, 0, 0);
 
@@ -315,7 +315,7 @@ PUBLIC VIRTUAL void MtcCall::RejectConvert(IN const FailReason& objReason)
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::CancelConvert(IN const FailReason& objReason)
+PUBLIC VIRTUAL void MtcCall::CancelConvert(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("CancelConvert : key[%d]", m_nKey, 0, 0);
 
@@ -326,7 +326,7 @@ PUBLIC VIRTUAL void MtcCall::CancelConvert(IN const FailReason& objReason)
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::Terminate(IN const FailReason& objReason)
+PUBLIC VIRTUAL void MtcCall::Terminate(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("Terminate : key[%d]", m_nKey, 0, 0);
 
@@ -1190,7 +1190,7 @@ PUBLIC VIRTUAL void MtcCall::OnReceivingNetworkToneFailed()
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::OnMediaFailed(IN FailReason objReason)
+PUBLIC VIRTUAL void MtcCall::OnMediaFailed(IN CallReasonInfo objReason)
 {
     IMS_TRACE_I("OnMediaFailed : key[%d]", m_nKey, 0, 0);
 

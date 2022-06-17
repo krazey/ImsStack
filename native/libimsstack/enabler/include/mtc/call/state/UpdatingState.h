@@ -17,9 +17,9 @@ public:
     void OnExit() override;
 
     CallStateName AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    CallStateName RejectConvert(IN const FailReason& objReason) override;
-    CallStateName CancelConvert(IN const FailReason& objReason) override;
-    CallStateName Terminate(IN const FailReason& objReason) override;
+    CallStateName RejectConvert(IN const CallReasonInfo& objReason) override;
+    CallStateName CancelConvert(IN const CallReasonInfo& objReason) override;
+    CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
     CallStateName SessionTerminated(IN ISession* piSession) override;
     CallStateName SessionUpdated(IN ISession* piSession) override;
@@ -29,7 +29,7 @@ public:
     CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
 
     CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
-    CallStateName OnMediaFailed(IN FailReason objReason) override;
+    CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
 
 private:
     IMS_RESULT HandleSdpAnswer();

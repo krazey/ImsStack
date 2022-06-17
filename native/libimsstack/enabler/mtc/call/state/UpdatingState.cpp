@@ -79,7 +79,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptConvert(
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::RejectConvert(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName UpdatingState::RejectConvert(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("RejectConvert", 0, 0, 0);
 
@@ -103,7 +103,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectConvert(IN const FailReason& o
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::CancelConvert(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName UpdatingState::CancelConvert(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("CancelConvert", 0, 0, 0);
 
@@ -117,19 +117,16 @@ PUBLIC VIRTUAL CallStateName UpdatingState::CancelConvert(IN const FailReason& o
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::Terminate(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName UpdatingState::Terminate(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("Terminate", 0, 0, 0);
 
     StopTimer();
 
-    FailReason objConvertedReason(objReason);
-    objConvertedReason.nReason = ConvertTerminateReasonToFailReason(objReason.nReason);
-
     // SetTerminateCodeForInvitedSessionToConf
 
-    HandleTerminate(objConvertedReason);
-    m_objContext.GetUiNotifier().SendTerminated(objConvertedReason);
+    HandleTerminate(objReason);
+    m_objContext.GetUiNotifier().SendTerminated(objReason);
 
     return CallStateName::TERMINATING;
 }
@@ -172,9 +169,9 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piS
     StopTimer();
 
     IMessage* piResponse = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_UPDATE);
-    FailReason objReason = UpdateErrorHandler(m_objContext).Handle(piResponse);
+    CallReasonInfo objReason = UpdateErrorHandler(m_objContext).Handle(piResponse);
 
-    if (objReason.nReason == FAIL_REASON_SESSION_DESTROYED)
+    if (objReason.nCode == CODE_USER_TERMINATED_BY_REMOTE)
     {
         HandleTerminate(objReason);
         m_objContext.GetUiNotifier().SendTerminated(objReason);
@@ -194,10 +191,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnTimerExpired(IN IMS_SINT32 nType)
     switch (nType)
     {
         case TIMER_CONVERT_USER_RESPONSE:
-            return RejectConvert(FailReason(REJECT_REASON_TO_MT_UPDATE));
-            break;
         case TIMER_CONVERT_REMOTE_RESPONSE:
-            return CancelConvert(FailReason(FAIL_REASON_TO_MO_UPDATE));
+            return CancelConvert(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE));
             break;
         default:
             break;
@@ -212,7 +207,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnReceivingMediaDataFailed(IN IMS_UI
 
     if (IsCallEndNeededByAudioInactivity(eMediaType))
     {
-        FailReason objReason(FAIL_REASON_MEDIA_NODATA);
+        CallReasonInfo objReason(CODE_MEDIA_NO_DATA);
         HandleTerminate(objReason);
         m_objContext.GetUiNotifier().SendTerminated(objReason);
         return CallStateName::TERMINATING;
@@ -221,7 +216,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnReceivingMediaDataFailed(IN IMS_UI
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::OnMediaFailed(IN FailReason objReason)
+PUBLIC VIRTUAL CallStateName UpdatingState::OnMediaFailed(IN CallReasonInfo objReason)
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
 
@@ -411,7 +406,7 @@ void UpdatingState::RecoverModificationFailure()
 
     m_objContext.GetMediaManager().RestoreSdp(&m_objContext.GetSession()->GetISession());
 
-    FailReason objReason(FAIL_REASON_NONE);
+    CallReasonInfo objReason(CODE_NONE);
     if (m_objContext.GetUpdatingInfo().IsHeld())
     {
         m_objContext.GetUiNotifier().SendHoldFailed(objReason);

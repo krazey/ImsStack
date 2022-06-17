@@ -25,8 +25,7 @@ PUBLIC VIRTUAL CallTypeBlockRule::Result CallTypeBlockRule::Check(
         if (m_objCallInfo.eInitialCallType == CallType::VIDEO_RTT)
         {
             IMS_TRACE_I("Check : Video RTT is not supported", 0, 0, 0);
-            return Result(
-                    Result::Status::BLOCKED, FailReason(REJECT_REASON_SESSION_NOTACCEPTABLEHERE));
+            return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE));
         }
     }
 

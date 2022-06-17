@@ -19,7 +19,7 @@ class MediaInfo;
 class SuppService;
 class IMtcCallContext;
 enum class UpdateType;
-struct FailReason;
+struct CallReasonInfo;
 
 using CallKey = IMS_ULONG;
 
@@ -82,7 +82,7 @@ public:
     virtual void Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
     // Rejects the incoming call.
-    virtual void Reject(IN const FailReason& objReason) = 0;
+    virtual void Reject(IN const CallReasonInfo& objReason) = 0;
 
     // Holds the call.
     virtual void Hold(IN MediaInfo* pMediaInfo) = 0;
@@ -94,7 +94,7 @@ public:
     virtual void AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
     // Rejects the resume request from the remote.
-    virtual void RejectResume(IN const FailReason& objReason) = 0;
+    virtual void RejectResume(IN const CallReasonInfo& objReason) = 0;
 
     // Requests call converting to the remote.
     virtual void Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
@@ -103,13 +103,13 @@ public:
     virtual void AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
     // Rejects the call converting request from the remote.
-    virtual void RejectConvert(IN const FailReason& objReason) = 0;
+    virtual void RejectConvert(IN const CallReasonInfo& objReason) = 0;
 
     // Cancels the ongoing call converting request.
-    virtual void CancelConvert(IN const FailReason& objReason) = 0;
+    virtual void CancelConvert(IN const CallReasonInfo& objReason) = 0;
 
     // Terminates the call.
-    virtual void Terminate(IN const FailReason& objReason) = 0;
+    virtual void Terminate(IN const CallReasonInfo& objReason) = 0;
 
     // Sends DTMF to the remote.
     virtual void SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) = 0;

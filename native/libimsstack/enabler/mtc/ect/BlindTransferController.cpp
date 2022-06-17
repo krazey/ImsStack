@@ -7,7 +7,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

@@ -11,7 +11,7 @@ class ISession;
 class JniMtcServiceThread;
 class MediaInfo;
 class SuppService;
-struct FailReason;
+struct CallReasonInfo;
 
 /**
  * This class represents the call that doesn't exist. It has no states and basically does nothing.
@@ -40,16 +40,16 @@ public:
     inline void HandleIncoming(IN ISession*, IN JniMtcServiceThread*) override {}
     inline void HandleUserAlert() override {}
     inline void Accept(IN CallType, IN MediaInfo*) override {}
-    inline void Reject(IN const FailReason&) override {}
+    inline void Reject(IN const CallReasonInfo&) override {}
     inline void Hold(IN MediaInfo*) override {}
     inline void Resume(IN MediaInfo*) override {}
     inline void AcceptResume(IN CallType, IN MediaInfo*) override {}
-    inline void RejectResume(IN const FailReason&) override {}
+    inline void RejectResume(IN const CallReasonInfo&) override {}
     inline void Convert(IN CallType, IN MediaInfo*) override {}
     inline void AcceptConvert(IN CallType, IN MediaInfo*) override {}
-    inline void RejectConvert(IN const FailReason&) override {}
-    inline void CancelConvert(IN const FailReason&) override {}
-    inline void Terminate(IN const FailReason&) override {}
+    inline void RejectConvert(IN const CallReasonInfo&) override {}
+    inline void CancelConvert(IN const CallReasonInfo&) override {}
+    inline void Terminate(IN const CallReasonInfo&) override {}
     inline void SendDtmf(IN const AString&, IN IMS_SINT32) override {}
     inline void SendUssd(IN const AString&) override {}
     inline void HandleSrvccSuccess() override {}

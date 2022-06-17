@@ -10,7 +10,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/MtcUiNotifier.h"
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -84,7 +84,7 @@ IMtcCall* EctController::GetTransferee() const
 
 PROTECTED VIRTUAL void EctController::OnCompleted()
 {
-    NotifyResult(IMS_SUCCESS, FAIL_REASON_ECT_COMPLETED);
+    NotifyResult(IMS_SUCCESS, CODE_USER_TERMINATED);
     TerminateTransfereeCall();
     m_objListener.OnEctCompleted();
 }
@@ -92,18 +92,18 @@ PROTECTED VIRTUAL void EctController::OnCompleted()
 PROTECTED VIRTUAL void EctController::OnFailed()
 {
     // TODO: Recover()?
-    NotifyResult(IMS_FAILURE, FAIL_REASON_ECT_COMPLETED);
+    NotifyResult(IMS_FAILURE, CODE_USER_TERMINATED);
     m_objListener.OnEctCompleted();
 }
 
 PROTECTED
 void EctController::NotifyResult(
-        IN IMS_RESULT nResult, IN IMS_SINT32 nReason /* = FAIL_REASON_NONE*/) const
+        IN IMS_RESULT nResult, IN IMS_SINT32 nReason /* = CODE_NONE*/) const
 {
     IMS_TRACE_D("NotifyResult", 0, 0, 0);
     // TODO: is reason meaningful? what kind of reason to be used for ECT failure?
     MtcUiNotifier& objNotifier = GetTransferee()->GetCallContext().GetUiNotifier();
-    objNotifier.SendEctCompleted(nResult, FailReason(nReason));
+    objNotifier.SendEctCompleted(nResult, CallReasonInfo(nReason));
 }
 
 PROTECTED
@@ -118,7 +118,7 @@ PROTECTED
 void EctController::TerminateTransfereeCall()
 {
     IMS_TRACE_I("TerminateTransfereeCall", 0, 0, 0);
-    GetTransferee()->Terminate(FailReason(FAIL_REASON_ECT_COMPLETED));
+    GetTransferee()->Terminate(CallReasonInfo(CODE_USER_TERMINATED));
 }
 
 PROTECTED

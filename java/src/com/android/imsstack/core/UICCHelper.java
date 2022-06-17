@@ -5,7 +5,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IPreference;
-import com.android.imsstack.enabler.mtc.IUMtcCall;
+import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsLog;
@@ -266,15 +266,17 @@ public class UICCHelper {
         return getHexString(objImsStatus);
     }
 
-    public static String getStringForCallDisconnected(int callConnectionId, int failReason) {
+    /**
+    * gets string that has information of call disconnection.
+    */
+    public static String getStringForCallDisconnected(int callConnectionId, int reason) {
         ByteArrayOutputStream objImsStatus = new ByteArrayOutputStream();
 
         // Event download tag
         objImsStatus.write(EVENT_DOWNLOAD_TAG);
         // Length (A+B+C+D)
-        if ((failReason >= IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_OUTOFCOVERAGE)
-                && (failReason <=
-                IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_NO_WIFI_COVERAGE)) {
+        if ((reason >= CallReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE)
+                && (reason <= CallReasonInfo.CODE_WIFI_LOST)) {
             objImsStatus.write(0x0C); // Length (3+4+3+2)
         } else {
             objImsStatus.write(0x0D); // Length (3+4+3+3)
@@ -288,7 +290,7 @@ public class UICCHelper {
         // B : Device identities
         objImsStatus.write(DEVICE_IDENTITIES); // Device identities tag
         objImsStatus.write(0x02); // Length
-        if (failReason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_TERMINATED) { // far end
+        if (reason == CallReasonInfo.CODE_USER_TERMINATED) { // far end
             objImsStatus.write(DEVICE_ID_NETWORK);  // Source device identity
             objImsStatus.write(DEVICE_ID_UICC);  // Destination device identity
         } else { // near end
@@ -308,7 +310,7 @@ public class UICCHelper {
         // - Call disconnected event: "0" if caller disconnects the call, "1" otherwise
         byte identifier = (byte)(callConnectionId);
         identifier = (byte)(identifier << 4);
-        if (failReason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_USERTERMINATE) {
+        if (reason == CallReasonInfo.CODE_USER_TERMINATED) {
             identifier = (byte)(identifier & 0x7F);
         } else {
             identifier = (byte)(identifier | 0x80);
@@ -317,9 +319,8 @@ public class UICCHelper {
 
         // D : IMS call disconnection cause
         objImsStatus.write(IMS_CALL_DISCONNECTION_CAUSE); // IMS call disconnection cause tag
-        if ((failReason >= IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_OUTOFCOVERAGE)
-                && (failReason <=
-                IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_NO_WIFI_COVERAGE)) {
+        if ((reason >= CallReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE)
+                && (reason <= CallReasonInfo.CODE_WIFI_LOST)) {
             objImsStatus.write(0x00); // Length
         } else {
             objImsStatus.write(0x01); // Length

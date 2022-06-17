@@ -46,7 +46,7 @@ public:
                 m_objConfUsers(IMSList<ConfUser*>()),
                 m_pParam(IMS_NULL),
                 m_nConnectionId(0),
-                m_nTerminateReason(FAIL_REASON_NONE)
+                m_nTerminateReason(CODE_NONE)
         {
         }
 

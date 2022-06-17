@@ -16,7 +16,7 @@ class JniMtcServiceThread;
 class MediaInfo;
 class SuppService;
 struct CallInfo;
-struct FailReason;
+struct CallReasonInfo;
 
 // TODO: remove unused parameter
 // TODO: get SuppService from the context
@@ -41,51 +41,51 @@ public:
             IN ParticipantInfo& objParticipantInfo);
     void SendStarted(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void SendStartFailed(IN const FailReason& objReason);
+    void SendStartFailed(IN const CallReasonInfo& objReason);
     void SendProgressing(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN IMS_BOOL bAlerted = IMS_FALSE);
     void SendHeld(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void SendHoldFailed(IN const FailReason& objReason);
+    void SendHoldFailed(IN const CallReasonInfo& objReason);
     void SendResumed(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void SendResumeFailed(IN const FailReason& objReason);
+    void SendResumeFailed(IN const CallReasonInfo& objReason);
     void SendHeldBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
     void SendResumedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void SendTerminated(IN const FailReason& objReason);
+    void SendTerminated(IN const CallReasonInfo& objReason);
     void SendIncomingResume(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
     void SendIncomingUpdate(IN CallType eCallTypeToUpdate, IN CallInfo* pCallInfo,
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices);
     void SendUpdated(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void SendUpdateFailed(IN const FailReason& objReason);
+    void SendUpdateFailed(IN const CallReasonInfo& objReason);
     void SendUpdatedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
     void SendNotifyInfo(IN IMS_UINT32 eType, IN AString strValue = AString::ConstNull(),
             IN IMS_SINT32 nValue = -1, IN IMS_BOOL bValue = IMS_FALSE);
     void SendExpanded(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void SendExpandFailed(IN const FailReason& objReason);
+    void SendExpandFailed(IN const CallReasonInfo& objReason);
     void SendExpandedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IMS_SINTP nReplaceKey = 0);
     void SendMerged(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN IMSList<ConfUser*> lstConfUser);
-    void SendMergeFailed(IN const FailReason& objReason);
-    void SendJoined(IN IMS_BOOL bResult, IN const FailReason& objReason);
-    void SendDropped(IN IMS_BOOL bResult, IN const FailReason& objReason);
+    void SendMergeFailed(IN const CallReasonInfo& objReason);
+    void SendJoined(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason);
+    void SendDropped(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason);
     void SendNotifyUsersInfo(IN IMSList<ConfUser*> lstConfUser);
     void SendNotifyConfInfo(IN AString strDisplayText, IN AString strSubject,
             IN IMS_SINT32 nMaxUserCount, IN IMS_UINT32 nUserCount, IN AString strHostEntity);
     void SendReplacedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IMS_SINTP nReplaceKey = 0,
             IN IMS_UINTP nType = 0);
-    void SendEctCompleted(IN IMS_RESULT nResult, IN const FailReason& objReason);
-    void SendCallPushCompleted(IN IMS_BOOL bResult, IN const FailReason& objReason);
+    void SendEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason);
+    void SendCallPushCompleted(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason);
 
 private:
     IMS_BOOL IsAvailableToSend();

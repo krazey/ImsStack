@@ -7,7 +7,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -87,5 +87,5 @@ void ConsultativeTransferController::TerminateTransferTargetCall()
     // It could be 'not safe' to send BYE to TransferTarget.
     m_objContext.GetCallManager()
             .GetCallByCallKey(m_nTransferTargetKey)
-            ->Terminate(FailReason(FAIL_REASON_ECT_COMPLETED));
+            ->Terminate(CallReasonInfo(CODE_USER_TERMINATED));
 }

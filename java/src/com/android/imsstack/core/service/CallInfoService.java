@@ -20,6 +20,7 @@ import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.core.service.serviceif.IService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
+import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.ImsEventDef;
@@ -307,7 +308,7 @@ public class CallInfoService implements IService, ICallInfoService {
     private int updateCallInfo(int key, int param) {
         int sessionKey = 0;
         int callState = IUMtcCall.VOLTE_CALL_STATE_IDLE;
-        int callStateReason = IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NONE;
+        int callStateReason = CallReasonInfo.CODE_NONE;
         int callType = IUMtcCall.VOLTE_CALL_TYPE_NORMAL;
         int callSessionType = IUMtcCall.CALLTYPE_VOIP;
 
@@ -433,11 +434,13 @@ public class CallInfoService implements IService, ICallInfoService {
             ril_emergencyType = RIL_CALL_ETYPE_EMERGENCY;
         }
 
-        if (callInfo.mStateReason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY
+        // TODO : need to modify this after emergency domain selection policy is decided.
+        if (callInfo.mStateReason == CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED
+            /*callInfo.mStateReason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY
                 || callInfo.mStateReason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY1X
                 || callInfo.mStateReason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_RAT
-                || callInfo.mStateReason
-                        == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_SILENT) {
+                || callInfo.mStateReason ==
+                        IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_SILENT*/) {
             ril_Reason = RIL_CALL_REASON_CS_REDIAL;
         }
 
@@ -1153,7 +1156,7 @@ public class CallInfoService implements IService, ICallInfoService {
 
         public int mState = IUMtcCall.VOLTE_CALL_STATE_IDLE;
         public int mOldState = IUMtcCall.VOLTE_CALL_STATE_IDLE;
-        public int mStateReason = IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NONE;
+        public int mStateReason = CallReasonInfo.CODE_NONE;
         public int mType = IUMtcCall.VOLTE_CALL_TYPE_NORMAL;
         public int mSessionType = IUMtcCall.CALLTYPE_VOIP;
         public int mSCMType = RIL_SCM_TYPE_NONE;

@@ -1,7 +1,7 @@
 #ifndef START_ERROR_HANDLER_H_
 #define START_ERROR_HANDLER_H_
 
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "IMSTypeDef.h"
 
 class IMessage;
@@ -20,32 +20,32 @@ public:
     StartErrorHandler& operator=(const StartErrorHandler&) = delete;
 
     /**
-     * Returns `FailReason` for the incoming message. Possibly contains some extra logic,
+     * Returns `CallReasonInfo` for the incoming message. Possibly contains some extra logic,
      * but retrying is not handled here.
      *
      * @param piMessage Received error response. Could be null if no response has came.
-     * @return See `FailReason.h` for the possible values.
+     * @return See `CallReasonInfo.h` for the possible values.
      */
-    FailReason Handle(IN const IMessage* piMessage) const;
+    CallReasonInfo Handle(IN const IMessage* piMessage) const;
 
 private:
-    FailReason GetFailReasonForTransactionTimeout() const;
-    FailReason HandleResponse(IN const IMessage& objMessage) const;
+    CallReasonInfo GetCallReasonInfoForTransactionTimeout() const;
+    CallReasonInfo HandleResponse(IN const IMessage& objMessage) const;
 
-    FailReason Handle3xxResponse(IN const IMessage& objMessage) const;
-    FailReason Handle380Response(IN const IMessage& objMessage) const;
+    CallReasonInfo Handle3xxResponse(IN const IMessage& objMessage) const;
+    CallReasonInfo Handle380Response(IN const IMessage& objMessage) const;
 
-    FailReason Handle4xxResponse(IN const IMessage& objMessage) const;
-    FailReason Handle403Response() const;
-    FailReason Handle404Response() const;
-    FailReason Handle407Response() const;
+    CallReasonInfo Handle4xxResponse(IN const IMessage& objMessage) const;
+    CallReasonInfo Handle403Response() const;
+    CallReasonInfo Handle404Response() const;
+    CallReasonInfo Handle407Response() const;
 
-    FailReason Handle5xxResponse(IN const IMessage& objMessage) const;
-    FailReason Handle500Response(IN const IMessage& objMessage) const;
-    FailReason Handle503Response(IN const IMessage& objMessage) const;
-    FailReason Handle504Response(IN const IMessage& objMessage) const;
+    CallReasonInfo Handle5xxResponse(IN const IMessage& objMessage) const;
+    CallReasonInfo Handle500Response(IN const IMessage& objMessage) const;
+    CallReasonInfo Handle503Response(IN const IMessage& objMessage) const;
+    CallReasonInfo Handle504Response(IN const IMessage& objMessage) const;
 
-    FailReason Handle6xxResponse(IN const IMessage& objMessage) const;
+    CallReasonInfo Handle6xxResponse(IN const IMessage& objMessage) const;
 
     IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage) const;
     IMS_BOOL IsRetry1xRequiredForNormalCall(IN const IMessage& objMessage) const;

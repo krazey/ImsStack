@@ -12,7 +12,7 @@
 package com.android.imsstack.imsservice.mmtel.internal;
 
 import com.android.imsstack.enabler.mtc.CallInfo;
-import com.android.imsstack.enabler.mtc.FailInfo;
+import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.MtcCallUtils;
@@ -30,7 +30,7 @@ public class MergeProxy extends ConferenceProxy {
     private MtcCallListenerProxy mListenerProxy = new MtcCallListenerProxy();
     private MtcConferenceListenerProxy mConferenceListenerProxy = new MtcConferenceListenerProxy();
     private int mCallRecoveryRequired = 0;
-    private FailInfo mMergeFailedReason = null;
+    private CallReasonInfo mMergeFailedReason = null;
 
     public MergeProxy(ICallContext callContext,
             MtcCall fgCall, MtcCall bgCall) {
@@ -180,7 +180,7 @@ public class MergeProxy extends ConferenceProxy {
     }
 
     private void notifyConferenceFailed() {
-        notifySessionMergeFailed(createUnknownFailInfo());
+        notifySessionMergeFailed(createUnspecifiedCallReasonInfo());
     }
 
     /* Glare condition: operations for foreground call */
@@ -331,7 +331,7 @@ public class MergeProxy extends ConferenceProxy {
         });
     }
 
-    private void notifySessionMergeFailed(final FailInfo failInfo) {
+    private void notifySessionMergeFailed(final CallReasonInfo callReasonInfo) {
         postAndRun(new Runnable() {
             @Override
             public void run() {
@@ -348,7 +348,7 @@ public class MergeProxy extends ConferenceProxy {
                         if (lw.mConferenceListener != null) {
                             lw.mConferenceListener.onCallMergeFailed(
                                     MtcCall.getConference(call1),
-                                    failInfo);
+                                    callReasonInfo);
                         }
                     }
 
@@ -356,7 +356,7 @@ public class MergeProxy extends ConferenceProxy {
                         if (lw.mConferenceListener != null) {
                             lw.mConferenceListener.onCallMergeFailed(
                                     MtcCall.getConference(call2),
-                                    failInfo);
+                                    callReasonInfo);
                         }
                     }
                 } catch (Throwable t) {
@@ -415,15 +415,15 @@ public class MergeProxy extends ConferenceProxy {
         }
     }
 
-    private boolean recoverForegroundCall(FailInfo failInfo) {
+    private boolean recoverForegroundCall(CallReasonInfo callReasonInfo) {
         if (isForegroundCallRecoveryRequired()) {
             if (mForegroundCall.isOnHold()
                     && !mForegroundCall.isTerminated()
                     && (mMergeFailedReason == null)) {
                 executeUnhold(mForegroundCall);
 
-                if (failInfo != null) {
-                    mMergeFailedReason = failInfo;
+                if (callReasonInfo != null) {
+                    mMergeFailedReason = callReasonInfo;
                 }
                 return true;
             }
@@ -440,8 +440,8 @@ public class MergeProxy extends ConferenceProxy {
                 executeUnhold(mForegroundCall);
             }
 
-            if (failInfo != null) {
-                mMergeFailedReason = failInfo;
+            if (callReasonInfo != null) {
+                mMergeFailedReason = callReasonInfo;
             }
             return true;
         }
@@ -467,14 +467,14 @@ public class MergeProxy extends ConferenceProxy {
 
     private class MtcCallListenerProxy extends MtcCall.Listener {
         @Override
-        public void onCallTerminated(MtcCall call, FailInfo failInfo) {
+        public void onCallTerminated(MtcCall call, CallReasonInfo callReasonInfo) {
             logi("onCallTerminated");
 
             int state = getState();
 
             if (call.equals(getConferenceCall())) {
                 if (!isInitialConferenceExtension()) {
-                    notifySessionTerminated(call, failInfo);
+                    notifySessionTerminated(call, callReasonInfo);
                 }
 
                 if ((state == STATE_MERGE_WAITING)
@@ -484,7 +484,7 @@ public class MergeProxy extends ConferenceProxy {
                             && mForegroundCall.isInCall()
                             && !mForegroundCall.isTerminated()) {
                         setForegroundCallRecovery(true);
-                        mMergeFailedReason = failInfo;
+                        mMergeFailedReason = callReasonInfo;
 
                         if (state == STATE_MERGE_WAITING) {
                             executeUnhold(mForegroundCall);
@@ -495,7 +495,7 @@ public class MergeProxy extends ConferenceProxy {
 
                 notifyConferenceFailed();
             } else {
-                notifySessionTerminated(call, failInfo);
+                notifySessionTerminated(call, callReasonInfo);
 
                 if ((state == STATE_HOLDING)
                         || (state == STATE_SWAP_HOLDING)) {
@@ -503,12 +503,12 @@ public class MergeProxy extends ConferenceProxy {
                         notifyConferenceFailed();
                     } else {
                         setForegroundCallRecovery(true);
-                        mMergeFailedReason = createUnknownFailInfo();
+                        mMergeFailedReason = createUnspecifiedCallReasonInfo();
                     }
                 } else {
                     // If foreground or background call is terminated,
                     // then we need to restore the 1-to-1 call at most.
-                    if (!MtcCallUtils.isCallTerminatedByJoiningConference(failInfo.Reason)) {
+                    if (!MtcCallUtils.isCallTerminatedByJoiningConference(callReasonInfo.mCode)) {
                         if (state == STATE_MERGE_WAITING) {
                             if (isInitialConferenceExtension()
                                     && call.equals(mBackgroundCall)
@@ -523,7 +523,8 @@ public class MergeProxy extends ConferenceProxy {
                             // by failing the call merge operation.
                             // This SESSION_TERMINATED event will be followed
                             // by MERGE_FAILED event.
-                            if (!MtcCallUtils.isCallTerminatedByJoiningConference(failInfo.Code)) {
+                            if (!MtcCallUtils.isCallTerminatedByJoiningConference(
+                                        callReasonInfo.mExtraCode)) {
                                 notifyConferenceFailed();
                             }
                         }
@@ -552,7 +553,7 @@ public class MergeProxy extends ConferenceProxy {
                     if (!recoverForegroundCall(null)
                             && mForegroundCall.isTerminated()) {
                         if (mMergeFailedReason == null) {
-                            mMergeFailedReason = createUnknownFailInfo();
+                            mMergeFailedReason = createUnspecifiedCallReasonInfo();
                         }
 
                         notifySessionMergeFailed(mMergeFailedReason);
@@ -584,7 +585,7 @@ public class MergeProxy extends ConferenceProxy {
         }
 
         @Override
-        public void onCallHoldFailed(MtcCall call, FailInfo failInfo) {
+        public void onCallHoldFailed(MtcCall call, CallReasonInfo callReasonInfo) {
             if (!call.equals(mForegroundCall)) {
                 // Rollback for background call
                 if (call.equals(mBackgroundCall)
@@ -594,7 +595,7 @@ public class MergeProxy extends ConferenceProxy {
                     if (!recoverForegroundCall(null)
                             && mForegroundCall.isTerminated()) {
                         notifySessionMergeFailed(
-                                (mMergeFailedReason != null) ? mMergeFailedReason : failInfo);
+                                (mMergeFailedReason != null) ? mMergeFailedReason : callReasonInfo);
                     }
                 }
                 return;
@@ -605,7 +606,7 @@ public class MergeProxy extends ConferenceProxy {
                 setForegroundCallRecovery(false);
                 notifySessionMergeFailed(mMergeFailedReason);
             } else {
-                notifySessionMergeFailed(failInfo);
+                notifySessionMergeFailed(callReasonInfo);
             }
         }
 
@@ -640,7 +641,7 @@ public class MergeProxy extends ConferenceProxy {
         }
 
         @Override
-        public void onCallResumeFailed(MtcCall call, FailInfo failInfo) {
+        public void onCallResumeFailed(MtcCall call, CallReasonInfo callReasonInfo) {
             if (!call.equals(mBackgroundCall)) {
                 if (call.equals(mForegroundCall)
                         && isForegroundCallRecoveryRequired()
@@ -655,11 +656,11 @@ public class MergeProxy extends ConferenceProxy {
             if (getState() == STATE_UNHOLDING) {
                 setForegroundCallRecovery(true);
                 executeUnhold(mForegroundCall);
-                mMergeFailedReason = failInfo;
+                mMergeFailedReason = callReasonInfo;
                 return;
             }
 
-            notifySessionMergeFailed(failInfo);
+            notifySessionMergeFailed(callReasonInfo);
         }
 
         @Override
@@ -728,7 +729,7 @@ public class MergeProxy extends ConferenceProxy {
         }
 
         @Override
-        public void onCallMergeFailed(MtcConference call, FailInfo failInfo) {
+        public void onCallMergeFailed(MtcConference call, CallReasonInfo callReasonInfo) {
             MtcCall confCall = getConferenceCall();
 
             if (!call.isSameCall(MtcCall.getConference(confCall))) {
@@ -741,15 +742,15 @@ public class MergeProxy extends ConferenceProxy {
                     && !mBackgroundCall.isTerminated()) {
                 setBackgroundCallRecovery(true);
                 executeHold(mBackgroundCall);
-                mMergeFailedReason = failInfo;
+                mMergeFailedReason = callReasonInfo;
                 return;
             }
 
-            if (recoverForegroundCall(failInfo)) {
+            if (recoverForegroundCall(callReasonInfo)) {
                 return;
             }
 
-            notifySessionMergeFailed(failInfo);
+            notifySessionMergeFailed(callReasonInfo);
         }
 
         @Override

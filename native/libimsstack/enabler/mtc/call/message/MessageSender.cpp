@@ -1,6 +1,6 @@
 #include "call/message/EmergencyMessageFormatter.h"
 #include "call/IMtcSessionContext.h"
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "ISession.h"
 #include "call/message/MessageSender.h"
 
@@ -121,7 +121,7 @@ IMS_RESULT MessageSender::Accept()
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PUBLIC
-IMS_RESULT MessageSender::Reject(IN const FailReason& objReason)
+IMS_RESULT MessageSender::Reject(IN const CallReasonInfo& objReason)
 {
     IMS_SINT32 eStatusCode;
     AString strPhrase;
@@ -177,7 +177,7 @@ IMS_RESULT MessageSender::AcceptUpdate()
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PUBLIC
-IMS_RESULT MessageSender::CancelUpdate(IN const FailReason& objReason)
+IMS_RESULT MessageSender::CancelUpdate(IN const CallReasonInfo& objReason)
 {
     if (GetFormatter().FormCancelUpdateMessage(objReason) != IMS_SUCCESS)
     {
@@ -190,14 +190,14 @@ IMS_RESULT MessageSender::CancelUpdate(IN const FailReason& objReason)
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PUBLIC
-IMS_RESULT MessageSender::Terminate(IN IMS_BOOL bUseBye, IN const FailReason& objReason)
+IMS_RESULT MessageSender::Terminate(IN IMS_BOOL bUseBye, IN const CallReasonInfo& objReason)
 {
     if (GetFormatter().FormTerminateMessage(objReason) != IMS_SUCCESS)
     {
         return IMS_FAILURE;
     }
 
-    m_objSession.SetReasonForCallTermination(objReason.nReason);
+    m_objSession.SetReasonForCallTermination(objReason.nCode);
     return m_objSession.TerminateEx(bUseBye);
 }
 

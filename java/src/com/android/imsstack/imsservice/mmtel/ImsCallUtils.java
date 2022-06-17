@@ -25,7 +25,7 @@ import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.CallInfo;
-import com.android.imsstack.enabler.mtc.FailInfo;
+import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.enabler.mtc.IncomingMtcCall;
 import com.android.imsstack.enabler.mtc.MediaInfo;
@@ -38,7 +38,6 @@ import com.android.imsstack.external.ims.ImsCallProfileEx;
 import com.android.imsstack.external.ims.ImsConferenceStateEx;
 import com.android.imsstack.external.ims.ImsDialog;
 import com.android.imsstack.external.ims.ImsDialogState;
-import com.android.imsstack.external.ims.ImsReasonInfoEx;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.ImsConstants;
 
@@ -301,8 +300,15 @@ public class ImsCallUtils {
                 d.enablePull, ImsCallMediaUtils.createMediaProfileFromMediaInfo(d.mediaInfo));
     }
 
-    public static ImsReasonInfo createReasonInfo(final FailInfo fi, int flags) {
-        return createReasonInfo(fi.Reason, fi.Code, fi.Phrase, flags);
+    /**
+    * Helper for creating the object of {@code ImsReasonInfo}
+    *
+    * @param callReasonInfo the target to be converted
+    * @param flags indicates which member of the {@code CallReasonInfo} to be converted
+    */
+    public static ImsReasonInfo createReasonInfo(final CallReasonInfo callReasonInfo, int flags) {
+        return createReasonInfo(callReasonInfo.mCode, callReasonInfo.mExtraCode,
+                callReasonInfo.mExtraMessage, flags);
     }
 
     public static ImsReasonInfo createReasonInfo(
@@ -473,20 +479,19 @@ public class ImsCallUtils {
 
     public static int getExtraCodeFromMtc(int reason, int extraCode) {
         if (MtcCallUtils.isCallTerminatedByCSRetry(reason)) {
-            if (extraCode == IUMtcCall.Fail_Reason.CODE_1XRETRY_SILENT_REDIAL) {
+            if (extraCode == CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL) {
                 return ImsReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
             } else {
-                // IUMtcCall.Fail_Reason.CODE_1XRETRY_PRIORITY_SET
-                // IUMtcCall.Fail_Reason.CODE_1XRETRY_NORMAL
-                // 150610, CODE_1XRETRY is not used by MTC enabler
                 return (extraCode > 0) ? extraCode : ImsReasonInfo.CODE_UNSPECIFIED;
             }
         } else if (MtcCallUtils.isCallTerminatedByECallRetry(reason)) {
             return (extraCode >= 300) ? extraCode : getEmergencyServiceCode(extraCode);
-        } else if (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRYVOLTE) {
+        } else if (extraCode > 0) {
+        // TODO : need to modify this after emergency domain selection policy is decided.
+        /*else if (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRYVOLTE) {
             // SIP status code
             return (extraCode > 0) ? extraCode : ImsReasonInfo.CODE_UNSPECIFIED;
-        } else if (extraCode > 0) {
+        }*/
             return extraCode;
         } else {
             Integer sipCode = sReasonToSIPStatusCode.get(reason);
@@ -499,23 +504,31 @@ public class ImsCallUtils {
         return (code != null) ? code.intValue() : ImsReasonInfo.CODE_UNSPECIFIED;
     }
 
-    public static int getRejectReasonFromImsReasonInfo(int reason) {
+    /**
+    * converts the code of {@code ImsReasonInfo} to the code of {@code CallReasonInfo}
+    * when received rejection.
+    *
+    * @param reason the code of {@code ImsReasonInfo}
+    * @return the code of {@code CallReasonInfo}
+    */
+    public static int getRejectCallReasonInfoCodeFromImsReasonInfo(int reason) {
         switch (reason) {
-        case ImsReasonInfo.CODE_LOCAL_CALL_EXCEEDED:
-            return IUMtcCall.Reject_Reason.REJECT_REASON_BUSY_MAXCALL;
-        case ImsReasonInfo.CODE_LOCAL_CALL_BUSY:
-            return IUMtcCall.Reject_Reason.REJECT_REASON_BUSY_NORMAL;
-        case ImsReasonInfo.CODE_USER_NOANSWER:
-            return IUMtcCall.Reject_Reason.REJECT_REASON_DECLINE_NOANSWER;
-        case ImsReasonInfo.CODE_LOCAL_CALL_DECLINE: // FALL_THROUGH
-        case ImsReasonInfo.CODE_USER_DECLINE:
-            return IUMtcCall.Reject_Reason.REJECT_REASON_DECLINE_USER;
-        case ImsReasonInfo.CODE_LOCAL_LOW_BATTERY: // FALL-THROUGH
-        case ImsReasonInfo.CODE_LOW_BATTERY:
-            return IUMtcCall.Reject_Reason.REJECT_REASON_DECLINE_NOBATTERY;
-        case ImsReasonInfo.CODE_USER_IGNORE: // FALL-THROUGH
-        default:
-            return IUMtcCall.Reject_Reason.REJECT_REASON_DECLINE_NORMAL;
+            case ImsReasonInfo.CODE_LOCAL_CALL_EXCEEDED:
+                return CallReasonInfo.CODE_LOCAL_CALL_EXCEEDED;
+            case ImsReasonInfo.CODE_LOCAL_CALL_BUSY:
+                return CallReasonInfo.CODE_LOCAL_CALL_BUSY;
+            case ImsReasonInfo.CODE_USER_NOANSWER:
+                return CallReasonInfo.CODE_USER_NOANSWER;
+            case ImsReasonInfo.CODE_LOCAL_CALL_DECLINE: // FALL_THROUGH
+            case ImsReasonInfo.CODE_USER_DECLINE:
+                return CallReasonInfo.CODE_USER_DECLINE;
+            case ImsReasonInfo.CODE_LOCAL_LOW_BATTERY: // FALL-THROUGH
+            case ImsReasonInfo.CODE_LOW_BATTERY:
+                return CallReasonInfo.CODE_LOW_BATTERY;
+            case ImsReasonInfo.CODE_USER_IGNORE:
+                return CallReasonInfo.CODE_USER_IGNORE;
+            default:
+                return CallReasonInfo.CODE_LOCAL_CALL_END_UNSPECIFIED;
         }
     }
 
@@ -559,21 +572,26 @@ public class ImsCallUtils {
         return profileCallType;
     }
 
-    public static int getTerminateReasonFromImsReasonInfo(int reason) {
+    /**
+    * converts the code of {@code ImsReasonInfo} to the code of {@code CallReasonInfo}
+    * when received termination.
+    *
+    * @param reason the code of {@code ImsReasonInfo}
+    * @return the code of {@code CallReasonInfo}
+    */
+    public static int getTerminateCallReasonInfoCodeFromImsReasonInfo(int reason) {
         switch (reason) {
-        case ImsReasonInfo.CODE_LOCAL_CALL_DECLINE: // FALL_THROUGH
-        case ImsReasonInfo.CODE_USER_DECLINE: // FALL_THROUGH
-        case ImsReasonInfo.CODE_USER_TERMINATED:
-            return IUMtcCall.Terminate_Reason.TERMINATE_REASON_USER;
-        case ImsReasonInfo.CODE_LOCAL_POWER_OFF:
-            return IUMtcCall.Terminate_Reason.TERMINATE_REASON_POWER_OFF;
-        case ImsReasonInfo.CODE_LOCAL_LOW_BATTERY: // FALL-THROUGH
-        case ImsReasonInfo.CODE_LOW_BATTERY:
-            return IUMtcCall.Terminate_Reason.TERMINATE_REASON_LOW_BATTERY;
-        case ImsReasonInfoEx.CODE_LOCAL_CALL_TERMINATED_BY_SRVCC:
-            return IUMtcCall.Terminate_Reason.TERMINATE_REASON_VCC;
-        default:
-            return IUMtcCall.Terminate_Reason.TERMINATE_REASON_NORMAL;
+            case ImsReasonInfo.CODE_LOCAL_CALL_DECLINE: // FALL_THROUGH
+            case ImsReasonInfo.CODE_USER_DECLINE: // FALL_THROUGH
+            case ImsReasonInfo.CODE_USER_TERMINATED:
+                return CallReasonInfo.CODE_USER_TERMINATED;
+            case ImsReasonInfo.CODE_LOCAL_POWER_OFF:
+                return CallReasonInfo.CODE_LOCAL_POWER_OFF;
+            case ImsReasonInfo.CODE_LOCAL_LOW_BATTERY: // FALL-THROUGH
+            case ImsReasonInfo.CODE_LOW_BATTERY:
+                return CallReasonInfo.CODE_LOCAL_LOW_BATTERY;
+            default:
+                return CallReasonInfo.CODE_LOCAL_CALL_END_UNSPECIFIED;
         }
     }
 
@@ -680,32 +698,35 @@ public class ImsCallUtils {
         return ImsCallMediaUtils.isVideoProfileChanged(profile.getMediaProfile(), mi);
     }
 
-    public static void refineFailInfoForExtraCode(ImsCallProfile profile, FailInfo failInfo) {
-        if (MtcCallUtils.isCallTerminatedByCSRetry(failInfo.Reason)
+    /**
+    * converts the {@code mExtraCode} of {@code CallReasonInfo} with specific case.
+    *
+    * @param profile used for this operation
+    * @param callReasonInfo the target to be converted
+    */
+    public static void refineCallReasonInfoForExtraCode(ImsCallProfile profile,
+            CallReasonInfo callReasonInfo) {
+        if (MtcCallUtils.isCallTerminatedByCSRetry(callReasonInfo.mCode)
                 && ImsCallUtils.isVoiceCall(profile.getCallType())
-                && (failInfo.Code <= IUMtcCall.Fail_Reason.CODE_1XRETRY_NONE)) {
-            failInfo.Code = IUMtcCall.Fail_Reason.CODE_1XRETRY_SILENT_REDIAL;
+                && (callReasonInfo.mExtraCode == -1)) {
+            callReasonInfo.mExtraCode = CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
         }
     }
 
-    public static void refineFailInfoForReason(ICallContext context,
-            ImsCallProfile profile, FailInfo failInfo) {
-        if ((failInfo.Reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NOTSUPPORTED)
-                && (failInfo.Code == 415)
+    /**
+    * converts the {@code mCode} of {@code CallReasonInfo} with specific case.
+    *
+    * @param profile used for this operation
+    * @param callReasonInfo the target to be converted
+    */
+    public static void refineCallReasonInfoForCode(ICallContext context,
+            ImsCallProfile profile, CallReasonInfo callReasonInfo) {
+        if ((callReasonInfo.mCode == CallReasonInfo.CODE_SIP_NOT_SUPPORTED)
+                && (callReasonInfo.mExtraCode == 415)
                 && ImsCallUtils.isVideoCall(profile.getCallType())
                 && ImsGlobal.isOperator(context.getSlotId(), "LGU")) {
-            failInfo.Reason = IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRYVOLTE;
+            callReasonInfo.mCode = CallReasonInfo.CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED;
         }
-    }
-
-    public static int getPreferredCodeFromFailInfo(ICallContext callContext, FailInfo failInfo) {
-        if (failInfo.Reason == IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_ROAMING) {
-            if ((failInfo.Code == IUMtcCall.Fail_Reason.CODE_SETUPFAILED_BLOCK_1XRETRY)
-                    && ImsGlobal.isOperator(callContext.getSlotId(), "ORG")) {
-                return ImsReasonInfoEx.CODE_LOCAL_IMS_CALL_NOT_ALLOWED_IN_ROAMING;
-            }
-        }
-        return 0;
     }
 
     public static void removeCallExtra(ImsCallProfile profile, String key) {
@@ -969,7 +990,8 @@ public class ImsCallUtils {
 
     private static int getEmergencyServiceCode(int code) {
         switch (code) {
-        case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_GENERIC:
+        // TODO : need to modify this after emergency domain selection policy is decided.
+        /*case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_GENERIC:
             return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_GENERIC;
         case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_POLICE:
             return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_POLICE;
@@ -980,9 +1002,9 @@ public class ImsCallUtils {
         case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_MARINE:
             return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_MARINE_GUARD;
         case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_MOUNTAIN:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_MOUNTAIN_RESCUE;
-        default:
-            return ImsReasonInfoEx.EXTRA_CODE_CS_CALL_RETRY;
+            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_MOUNTAIN_RESCUE;*/
+            default:
+                return CallReasonInfo.EXTRA_CODE_CALL_RETRY_NORMAL;
         }
     }
 
@@ -1041,268 +1063,184 @@ public class ImsCallUtils {
     static {
         // Reason codes: from MtcCall to ImsCall
         sMtcReasonToImsReason = new Hashtable<Integer, Integer>();
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SERVICE_UNAVAILABLE,
-                ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SERVICE_NOTREGISTERED,
-                ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED);
-
-        // In this moment, it is not used...
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SERVICE_OUT,
-                ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SERVICE_NOTSUPPORTCALL,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_NONE,
                 ImsReasonInfo.CODE_UNSPECIFIED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SERVICE_INCSCALL,
-                ImsReasonInfo.CODE_LOCAL_CALL_BUSY);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SERVICE_INVTCALL,
-                ImsReasonInfo.CODE_LOCAL_CALL_BUSY);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SERVICE_INOTHERSCALL,
-                ImsReasonInfo.CODE_LOCAL_CALL_BUSY);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_UNSPECIFIED,
+                ImsReasonInfo.CODE_UNSPECIFIED);
 
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SERVICE_MAXCALL,
-                ImsReasonInfo.CODE_LOCAL_CALL_EXCEEDED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SERVICE_POWEROFF,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE,
+                ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NOT_REGISTERED,
+                ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_POWER_OFF,
                 ImsReasonInfo.CODE_LOCAL_POWER_OFF);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SERVICE_LOWBATTERY,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_LOW_BATTERY,
                 ImsReasonInfo.CODE_LOCAL_LOW_BATTERY);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOW_BATTERY,
+                ImsReasonInfo.CODE_LOW_BATTERY);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_END_UNSPECIFIED,
+                ImsReasonInfo.CODE_UNSPECIFIED);
 
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_OUTOFCOVERAGE,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
                 ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_NO_LTE_COVERAGE,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NETWORK_NO_LTE_COVERAGE,
                 ImsReasonInfo.CODE_LOCAL_NETWORK_NO_LTE_COVERAGE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_NO_WIFI_COVERAGE,
-                ImsReasonInfoEx.CODE_LOCAL_NETWORK_NO_WIFI_COVERAGE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_NO_VOLTE,
-                ImsReasonInfo.CODE_LOCAL_NETWORK_NO_LTE_COVERAGE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_ROAMING,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_WIFI_LOST,
+                ImsReasonInfo.CODE_WIFI_LOST);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NETWORK_ROAMING,
                 ImsReasonInfo.CODE_LOCAL_NETWORK_ROAMING);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_IPCHANGE,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NETWORK_IP_CHANGED,
                 ImsReasonInfo.CODE_LOCAL_NETWORK_IP_CHANGED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_BARRING,
-                ImsReasonInfoEx.CODE_LOCAL_NETWORK_BARRED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_NETWORK_SSAC,
-                ImsReasonInfoEx.CODE_LOCAL_NETWORK_BARRED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_CALL_BARRED,
+                ImsReasonInfo.CODE_CALL_BARRED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_ACCESS_CLASS_BLOCKED,
+                ImsReasonInfo.CODE_ACCESS_CLASS_BLOCKED);
 
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVERERROR,
-                ImsReasonInfo.CODE_SIP_SERVER_ERROR);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_FORBIDDEN,
-                ImsReasonInfo.CODE_SIP_FORBIDDEN);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NOTFOUND,
-                ImsReasonInfo.CODE_SIP_NOT_FOUND);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NOTSUPPORTED,
-                ImsReasonInfo.CODE_SIP_NOT_SUPPORTED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_TEMPUNAVAILABLE,
-                ImsReasonInfo.CODE_SIP_TEMPRARILY_UNAVAILABLE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_BADADDRESS,
-                ImsReasonInfo.CODE_SIP_BAD_ADDRESS);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_BUSY,
-                ImsReasonInfo.CODE_SIP_BUSY);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_IN_SETUP,
-                ImsReasonInfoEx.CODE_LOCAL_CALL_BUSY_BY_MT_CALL);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_REJECTED,
-                ImsReasonInfo.CODE_SIP_USER_REJECTED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_CANCELED,
-                ImsReasonInfo.CODE_SIP_REQUEST_CANCELLED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_USERTERMINATE,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_TERMINATED,
                 ImsReasonInfo.CODE_USER_TERMINATED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_TERMINATED,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_TERMINATED_BY_REMOTE,
                 ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE);
-        // 313 : IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_UPDATE_FAILED
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_BADRESPONSE,
-                ImsReasonInfo.CODE_SIP_BAD_REQUEST);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NOTACCEPTABLE,
-                ImsReasonInfo.CODE_SIP_NOT_ACCEPTABLE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NOTACCEPTABLEHERE,
-                ImsReasonInfo.CODE_SIP_NOT_ACCEPTABLE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_TIMEOUT,
-                ImsReasonInfo.CODE_SIP_REQUEST_TIMEOUT);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_REFRESH_OUT,
-                ImsReasonInfo.CODE_SIP_REQUEST_TIMEOUT);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NOTREACHABLE,
-                ImsReasonInfo.CODE_SIP_NOT_REACHABLE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_REDIRECTION,
-                ImsReasonInfo.CODE_SIP_REDIRECTED);
-        // 320 : IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_EARLYDIALOG
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_DECLINE,
+                ImsReasonInfo.CODE_USER_DECLINE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_NOANSWER,
+                ImsReasonInfo.CODE_USER_NOANSWER);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_IGNORE,
+                ImsReasonInfo.CODE_USER_IGNORE);
 
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SETUPFAILED,
-                ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR);
-
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RES_TIMEOUT,
-                ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR);
-
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVER_AUTH,
-                ImsReasonInfo.CODE_SIP_CLIENT_ERROR);
-        sMtcReasonToImsReason.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVER_REQUEST_TERMINATED,
-                ImsReasonInfo.CODE_SIP_REQUEST_CANCELLED);
-        sMtcReasonToImsReason.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVER_INTERNAL_ERROR,
-                ImsReasonInfo.CODE_SIP_SERVER_ERROR);
-        sMtcReasonToImsReason.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVER_SERVICE_UNAVAILABLE,
-                ImsReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE);
-        sMtcReasonToImsReason.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVER_DECLINE,
-                ImsReasonInfo.CODE_SIP_USER_REJECTED);
-
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
                 ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY1X,
-                ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRYVOLTE,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED,
                 ImsReasonInfo.CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_RAT,
-                ImsReasonInfoEx.CODE_LOCAL_ECALL_RETRY_REQUIRED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_1X,
-                ImsReasonInfoEx.CODE_LOCAL_IMS_CALL_TO_CS_ECALL_RETRY_REQUIRED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_VOLTE,
-                ImsReasonInfoEx.CODE_LOCAL_IMS_CALL_TO_ECALL_RETRY_REQUIRED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_R_RAT,
-                ImsReasonInfoEx.CODE_LOCAL_IMS_CALL_RETRY_BY_RAT_SELECTION);
-        // IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_RAT
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY1X_FORCE,
-                ImsReasonInfoEx.CODE_LOCAL_CALL_CS_RETRY_REQUIRED_FORCE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_NO_CSFB_IN_CS_ROAM,
+                ImsReasonInfo.CODE_NO_CSFB_IN_CS_ROAM);
 
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_MULTIDEVICE_ACCEPTED,
-                ImsReasonInfoEx.CODE_SERVICE_MULTI_DEVICE_ACCEPTED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_MULTIDEVICE_REJECTED,
-                ImsReasonInfoEx.CODE_SERVICE_MULTI_DEVICE_REJECTED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_MULTIDEVICE_LIMITED,
-                ImsReasonInfoEx.CODE_SERVICE_MULTI_DEVICE_LIMITED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_MULTIDEVICE_PULLED,
-                ImsReasonInfoEx.CODE_SERVICE_MULTI_DEVICE_PULLED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_ANSWERED_ELSEWHERE,
+                ImsReasonInfo.CODE_ANSWERED_ELSEWHERE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECTED_ELSEWHERE,
+                ImsReasonInfo.CODE_REJECTED_ELSEWHERE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED,
+                ImsReasonInfo.CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_CALL_END_CAUSE_CALL_PULL,
+                ImsReasonInfo.CODE_CALL_END_CAUSE_CALL_PULL);
 
-        // ImsReasonInfo.CODE_LOCAL_CALL_VCC_ON_PROGRESSING;
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SRVCC,
-                ImsReasonInfoEx.CODE_LOCAL_CALL_TERMINATED_BY_SRVCC);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_PRECONDITION,
-                ImsReasonInfo.CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
-
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_MEDIA_INITFAIL,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MEDIA_INIT_FAILED,
                 ImsReasonInfo.CODE_MEDIA_INIT_FAILED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_MEDIA_NEGOFAIL,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MEDIA_NOT_ACCEPTABLE,
                 ImsReasonInfo.CODE_MEDIA_NOT_ACCEPTABLE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_MEDIA_NOMATCH,
-                ImsReasonInfo.CODE_MEDIA_NOT_ACCEPTABLE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_MEDIA_NODATA,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MEDIA_NO_DATA,
                 ImsReasonInfo.CODE_MEDIA_NO_DATA);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_MEDIA_UNKNOWN,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MEDIA_UNSPECIFIED,
                 ImsReasonInfo.CODE_MEDIA_UNSPECIFIED);
 
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_CONF_JOINED,
-                ImsReasonInfoEx.CODE_LOCAL_CALL_TERMINATED_BY_CONFERENCE_JOINED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_CONF_NOT_ACCEPTABLE,
-                ImsReasonInfo.CODE_SIP_NOT_ACCEPTABLE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_CONF_BUSY,
-                ImsReasonInfo.CODE_SIP_BUSY);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_CONF_NOT_ACCEPTABLE_HERE,
-                ImsReasonInfo.CODE_SIP_NOT_ACCEPTABLE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_CONF_TIMEOUT,
-                ImsReasonInfo.CODE_SIP_REQUEST_TIMEOUT);
-
-        // ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR;
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_CONF_INTERNAL_ERROR,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SESSION_INTERNAL_ERROR,
                 ImsReasonInfo.CODE_UNSPECIFIED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_CONF_ALONE,
-                ImsReasonInfo.CODE_UNSPECIFIED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_CONF_UNKNOWN,
-                ImsReasonInfo.CODE_UNSPECIFIED);
-
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_TO_MO_PROGRESSING,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE,
+                ImsReasonInfo.CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_TIMEOUT_1XX_WAITING,
                 ImsReasonInfo.CODE_TIMEOUT_1XX_WAITING);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_TO_MO_STARTED,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_TIMEOUT_NO_ANSWER,
                 ImsReasonInfo.CODE_TIMEOUT_NO_ANSWER);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_TO_MO_UPDATE,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE,
                 ImsReasonInfo.CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_TO_MT_NOANSWER,
-                ImsReasonInfo.CODE_TIMEOUT_NO_ANSWER);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_TO_MT_UPDATE,
-                ImsReasonInfo.CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE);
-        // 526: IUMtcCall.Fail_Reason.FAIL_REASON_TO_MT_PRACK
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_NETWORK_RESP_TIMEOUT,
+                ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT);
 
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_FORBIDDEN_BARRING,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_SERVER_ERROR,
+                ImsReasonInfo.CODE_SIP_SERVER_ERROR);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_FORBIDDEN,
                 ImsReasonInfo.CODE_SIP_FORBIDDEN);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_FORBIDDEN_NOPROFILE,
-                ImsReasonInfo.CODE_SIP_FORBIDDEN);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_FORBIDDEN_EXPIRATION,
-                ImsReasonInfo.CODE_SIP_FORBIDDEN);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_FORBIDDEN_NOSUBSCRIBER,
-                ImsReasonInfo.CODE_SIP_FORBIDDEN);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_NOT_FOUND,
+                ImsReasonInfo.CODE_SIP_NOT_FOUND);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_NOT_SUPPORTED,
+                ImsReasonInfo.CODE_SIP_NOT_SUPPORTED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_TEMPORARILY_UNAVAILABLE,
+                ImsReasonInfo.CODE_SIP_TEMPRARILY_UNAVAILABLE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_BAD_ADDRESS,
+                ImsReasonInfo.CODE_SIP_BAD_ADDRESS);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_BUSY,
+                ImsReasonInfo.CODE_SIP_BUSY);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_USER_REJECTED,
+                ImsReasonInfo.CODE_SIP_USER_REJECTED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REQUEST_CANCELLED,
+                ImsReasonInfo.CODE_SIP_REQUEST_CANCELLED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_BAD_REQUEST,
+                ImsReasonInfo.CODE_SIP_BAD_REQUEST);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_NOT_ACCEPTABLE,
+                ImsReasonInfo.CODE_SIP_NOT_ACCEPTABLE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REQUEST_TIMEOUT,
+                ImsReasonInfo.CODE_SIP_REQUEST_TIMEOUT);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_NOT_REACHABLE,
+                ImsReasonInfo.CODE_SIP_NOT_REACHABLE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REDIRECTED,
+                ImsReasonInfo.CODE_SIP_REDIRECTED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_CLIENT_ERROR,
+                ImsReasonInfo.CODE_SIP_CLIENT_ERROR);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE,
+                ImsReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REQUEST_PENDING,
+                ImsReasonInfo.CODE_SIP_REQUEST_PENDING);
 
-        sMtcReasonToImsReason.put(IUMtcCall.Reject_Reason.REJECT_REASON_BUSY_ISOTHERSCALL,
-                ImsReasonInfo.CODE_REJECT_CALL_ON_OTHER_SUB);
-        sMtcReasonToImsReason.put(IUMtcCall.Reject_Reason.REJECT_REASON_BUSY_ISEMERGENCY,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CALL_WAITING_DISABLED,
+                ImsReasonInfo.CODE_REJECT_ONGOING_CALL_WAITING_DISABLED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_VT_TTY_NOT_ALLOWED,
+                ImsReasonInfo.CODE_REJECT_VT_TTY_NOT_ALLOWED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_E911_CALL,
                 ImsReasonInfo.CODE_REJECT_ONGOING_E911_CALL);
-        sMtcReasonToImsReason.put(IUMtcCall.Reject_Reason.REJECT_REASON_TO_MO_PROGRESSING,
-                ImsReasonInfo.CODE_REJECT_ONGOING_CALL_SETUP);
-        sMtcReasonToImsReason.put(IUMtcCall.Reject_Reason.REJECT_REASON_BUSY_MAXCALL,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_MAX_CALL_LIMIT_REACHED,
                 ImsReasonInfo.CODE_REJECT_MAX_CALL_LIMIT_REACHED);
-        sMtcReasonToImsReason.put(IUMtcCall.Reject_Reason.REJECT_REASON_BUSY_ESTABLISHING,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_BUSY,
+                ImsReasonInfo.CODE_LOCAL_CALL_BUSY);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_UNSUPPORTED_SIP_HEADERS,
+                ImsReasonInfo.CODE_REJECT_UNSUPPORTED_SIP_HEADERS);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CALL_SETUP,
                 ImsReasonInfo.CODE_REJECT_ONGOING_CALL_SETUP);
-
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NONE,
-                ImsReasonInfo.CODE_UNSPECIFIED);
-        sMtcReasonToImsReason.put(IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_UNKNOWN,
-                ImsReasonInfo.CODE_UNSPECIFIED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CS_CALL,
+                ImsReasonInfo.CODE_REJECT_ONGOING_CS_CALL);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_CALL_ON_OTHER_SUB,
+                ImsReasonInfo.CODE_REJECT_CALL_ON_OTHER_SUB);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_EXCEEDED,
+                ImsReasonInfo.CODE_LOCAL_CALL_EXCEEDED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED,
+                ImsReasonInfo.CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_QOS_FAILURE,
+                ImsReasonInfo.CODE_REJECT_QOS_FAILURE);
 
         // Reason codes: from reason code to SIP status code
         sReasonToSIPStatusCode = new Hashtable<Integer, Integer>();
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_FORBIDDEN_BARRING, 403);
+                CallReasonInfo.CODE_CALL_BARRED, 403);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_FORBIDDEN_NOPROFILE, 403);
+                CallReasonInfo.CODE_SIP_FORBIDDEN, 403);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_FORBIDDEN_EXPIRATION, 403);
+                CallReasonInfo.CODE_SIP_SERVER_ERROR, 500);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_FORBIDDEN_NOSUBSCRIBER, 403);
+                CallReasonInfo.CODE_SIP_NOT_FOUND, 404);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_FORBIDDEN, 403);
+                CallReasonInfo.CODE_SIP_NOT_SUPPORTED, 415);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVERERROR, 500);
+                CallReasonInfo.CODE_SIP_TEMPORARILY_UNAVAILABLE, 480);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NOTFOUND, 404);
+                CallReasonInfo.CODE_SIP_BAD_ADDRESS, 484);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NOTSUPPORTED, 415);
+                CallReasonInfo.CODE_SIP_BUSY, 486);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_TEMPUNAVAILABLE, 480);
+                CallReasonInfo.CODE_SIP_USER_REJECTED, 603);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_BADADDRESS, 484);
+                CallReasonInfo.CODE_SIP_REQUEST_CANCELLED, 487);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_BUSY, 486);
+                CallReasonInfo.CODE_SIP_BAD_REQUEST, 400);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_REJECTED, 603);
+                CallReasonInfo.CODE_SIP_NOT_ACCEPTABLE, 406);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_CANCELED, 487);
+                CallReasonInfo.CODE_SIP_REQUEST_TIMEOUT, 408);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_BADRESPONSE, 400);
+                CallReasonInfo.CODE_SIP_NOT_REACHABLE, 410);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NOTACCEPTABLE, 406);
+                CallReasonInfo.CODE_SIP_REDIRECTED, 302);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NOTACCEPTABLEHERE, 488);
+                CallReasonInfo.CODE_SIP_CLIENT_ERROR, 401);
         sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_TIMEOUT, 408);
-        sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NOTREACHABLE, 410);
-        sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_REDIRECTION, 302);
-        sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_CONF_NOT_ACCEPTABLE, 406);
-        sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_CONF_BUSY, 486);
-        sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_CONF_NOT_ACCEPTABLE_HERE, 488);
-        sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_CONF_TIMEOUT, 408);
-
-        sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVER_AUTH, 401);
-        sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVER_REQUEST_TERMINATED, 487);
-        sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVER_INTERNAL_ERROR, 500);
-        sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVER_SERVICE_UNAVAILABLE, 503);
-        sReasonToSIPStatusCode.put(
-                IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVER_DECLINE, 603);
+                CallReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE, 503);
 
         // User's status: from user status (int) to user status (string)
         sUserStatusToString = new Hashtable<Integer, String>();

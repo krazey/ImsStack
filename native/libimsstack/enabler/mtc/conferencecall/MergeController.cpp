@@ -31,14 +31,14 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objU
 
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
-        m_objNotifier.NotifyMergeFailed(FailReason(FAIL_REASON_NONE));
+        m_objNotifier.NotifyMergeFailed(CallReasonInfo(CODE_NONE));
         // SendClosed(); required?
         return;
     }
 
     if (GetState() == STATE_CREATED && objUsers.GetSize() < 2)
     {
-        m_objNotifier.NotifyMergeFailed(FailReason(FAIL_REASON_NONE));
+        m_objNotifier.NotifyMergeFailed(CallReasonInfo(CODE_NONE));
         SendClosed();
         return;
     }
@@ -195,7 +195,7 @@ void MergeController::UpdateUserStateBySessionTerminated(IN IMS_UINTP nCallKey)
     {
         IMS_TRACE_D("UpdateUserStateBySessionTerminated : terminate conference by alone", 0, 0, 0);
         m_objOperationQueue.CreateNPut(
-                CONTROL_OPERATION_TERMINATE_CONFERENCE, FAIL_REASON_CONF_ALONE, IMS_TRUE);
+                CONTROL_OPERATION_TERMINATE_CONFERENCE, CODE_USER_TERMINATED, IMS_TRUE);
     }
 }
 
@@ -226,7 +226,7 @@ void MergeController::RecoverOnReferring()
     {
         IMS_TRACE_I("RecoverOnReferring : failure before start inviting members", 0, 0, 0);
         ClearIndividualCallOnMergeFailed();  // ??
-        m_objNotifier.NotifyMergeFailed(FailReason(FAIL_REASON_UNKNOWN, -1));
+        m_objNotifier.NotifyMergeFailed(CallReasonInfo(CODE_UNSPECIFIED, -1));
         m_objOperationQueue.Clear();
         SetState(STATE_IDLE);
         return;
@@ -243,7 +243,7 @@ void MergeController::RecoverOnReferring()
     {
         IMS_TRACE_I("RecoverOnReferring : failure during additional adding", 0, 0, 0);
         ClearIndividualCallOnMergeFailed();
-        m_objNotifier.NotifyMergeFailed(FailReason(FAIL_REASON_UNKNOWN, -1));
+        m_objNotifier.NotifyMergeFailed(CallReasonInfo(CODE_UNSPECIFIED, -1));
         m_objOperationQueue.Clear();
         SetState(STATE_IDLE);
         return;
@@ -266,7 +266,7 @@ IMS_BOOL MergeController::RecoverOnConferenceCallFailed()
                 piConfCall->GetState() != IMtcCall::State::UPDATING))
     {
         ClearIndividualCallOnMergeFailed();
-        m_objNotifier.NotifyMergeFailed(FailReason(FAIL_REASON_SESSION_TERMINATED, -1));
+        m_objNotifier.NotifyMergeFailed(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, -1));
         m_objOperationQueue.Clear();
         return IMS_TRUE;
     }

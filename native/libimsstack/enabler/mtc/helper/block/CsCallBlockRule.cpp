@@ -31,12 +31,5 @@ PUBLIC VIRTUAL CsCallBlockRule::Result CsCallBlockRule::Check(
 
     IMS_TRACE_I("Check : CS call exists", 0, 0, 0);
 
-    if (m_ePeerType == PeerType::MO)
-    {
-        return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SERVICE_INCSCALL));
-    }
-    else
-    {
-        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_ISCSCALL));
-    }
+    return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CS_CALL));
 }

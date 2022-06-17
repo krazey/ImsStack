@@ -8,7 +8,7 @@
 #ifndef INTERFACE_DIALOG_EVENT_MNGR_LISTENER_H_
 #define INTERFACE_DIALOG_EVENT_MNGR_LISTENER_H_
 
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "ServiceTrace.h"
 
 class IDEMngrListener
@@ -43,7 +43,7 @@ class IDEMngrTerminatedParam : public IDEMngrListenBaseParam
 public:
     inline IDEMngrTerminatedParam() :
             IDEMngrListenBaseParam(),
-            terminatedReason(FailReason(FAIL_REASON_NONE)),
+            terminatedReason(CallReasonInfo(CODE_NONE)),
             bDestroy(IMS_FALSE)
     {
         IMS_TRACE_MEM("uc", "uc_M : IDEMngrTerminatedParam[%" PFLS_u "][%" PFLS_x "]",
@@ -60,7 +60,7 @@ private:
     IDEMngrTerminatedParam& operator=(IN const IDEMngrTerminatedParam& objRHS);
 
 public:
-    FailReason terminatedReason;
+    CallReasonInfo terminatedReason;
     IMS_BOOL bDestroy;
 };
 

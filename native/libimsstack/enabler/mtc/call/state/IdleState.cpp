@@ -132,7 +132,7 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
     MtcSession* pSession = m_objContext.CreateSession(piSession);
     if (pSession == IMS_NULL)
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SERVICE_UNAVAILABLE));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
     }
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
@@ -148,13 +148,13 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
 
     if (!pSession->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_NOTSUPPORT));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SIP_HEADERS));
     }
 
     if (m_objContext.GetConfigurationProxy().Is(Feature::REJECT_OFFERLESS_INVITE) &&
             !MessageUtil::HasSdp(piMessage))
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
     m_objOperationAfterBlockCheck = [&]()
@@ -166,12 +166,11 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
     return OnBlockChecked(m_pBlockChecker->Check());
 }
 
-PUBLIC VIRTUAL CallStateName IdleState::Terminate(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName IdleState::Terminate(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("Terminate : reason[%s]", PS_FR(objReason), 0, 0);
     m_objContext.GetMediaManager().Terminate();
-    m_objContext.GetUiNotifier().SendStartFailed(
-            FailReason(ConvertTerminateReasonToFailReason(objReason.nReason)));
+    m_objContext.GetUiNotifier().SendStartFailed(objReason);
 
     return CallStateName::TERMINATING;
 }
@@ -210,9 +209,9 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     objPreconditionManager.CreateQos(piSession);
     UpdatePreconditionCapability(piSession, piMessage, IMS_FALSE);
 
-    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
+    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
     // TODO: OnPreconditionReceived()
@@ -226,7 +225,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     {
         if (SendProvisionalResponse(IMS_FALSE) == IMS_FAILURE)
         {
-            return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+            return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
         }
     }
     else
@@ -258,12 +257,12 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(
     if (m_objContext.GetConfigurationProxy().Is(Feature::REJECT_OFFERLESS_INVITE) &&
             !MessageUtil::HasSdp(piMessage))
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
     if (!m_objContext.GetUssiController()->HasValidXmlBodyForNetworkInitiatedUssi(piMessage))
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SERVICE_UNAVAILABLE));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
     }
 
     m_objOperationAfterBlockCheck = [&]()
@@ -288,15 +287,15 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
 
     if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_NOTSUPPORT));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SIP_HEADERS));
     }
 
     m_objContext.GetCallInfo().eInitialCallType = m_objContext.GetSession()->GetCallType();
     InitMediaSession();
 
-    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
+    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
     SendIncomingCallReceived();
@@ -310,7 +309,7 @@ CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
     if (m_objContext.CreateSession() == IMS_NULL)
     {
         m_objContext.GetMediaManager().Terminate();
-        m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
 
@@ -321,7 +320,7 @@ CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
     if (m_objContext.GetSession()->Start() == IMS_FAILURE)
     {
         m_objContext.GetMediaManager().Terminate();
-        m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
 
@@ -338,7 +337,7 @@ CallStateName IdleState::ContinueConference(
     if (m_objContext.CreateSession() == IMS_NULL)
     {
         m_objContext.GetMediaManager().Terminate();
-        m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
 
@@ -352,7 +351,7 @@ CallStateName IdleState::ContinueConference(
     if (m_objContext.GetSession()->Start() == IMS_FAILURE)
     {
         m_objContext.GetMediaManager().Terminate();
-        m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
 
@@ -379,7 +378,7 @@ CallStateName IdleState::ContinueStartUssi(IN MediaInfo* pMediaInfo)
     if (m_objContext.CreateSession() == IMS_NULL)
     {
         objMediaManager.Terminate();
-        m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
 
@@ -389,7 +388,7 @@ CallStateName IdleState::ContinueStartUssi(IN MediaInfo* pMediaInfo)
             m_objContext.GetParticipantInfo().GetRemoteNumber()) == IMS_FAILURE)
     {
         objMediaManager.Terminate();
-        m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
 
@@ -400,7 +399,7 @@ CallStateName IdleState::ContinueStartUssi(IN MediaInfo* pMediaInfo)
     if (m_objContext.GetSession()->Start() == IMS_FAILURE)
     {
         objMediaManager.Terminate();
-        m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
 

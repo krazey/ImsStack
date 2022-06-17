@@ -40,11 +40,11 @@ void ConferenceEventNotifier::NotifyMerged(IN ConferenceParticipantList& objPart
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyMergeFailed(IN FailReason failReason)
+void ConferenceEventNotifier::NotifyMergeFailed(IN CallReasonInfo objReason)
 {
     IMS_TRACE_I("NotifyMergeFailed", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendMergeFailed(failReason);
+    m_objConfCallContext.GetUiNotifier().SendMergeFailed(objReason);
 }
 
 PUBLIC
@@ -61,12 +61,12 @@ void ConferenceEventNotifier::NotifyGroupCallStarted()
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyGroupCallFailed(IN FailReason failReason)
+void ConferenceEventNotifier::NotifyGroupCallFailed(IN CallReasonInfo objReason)
 {
     IMS_TRACE_I("NotifyGroupCallFailed", 0, 0, 0);
 
     IUUCSessionStartFailedParam* pParam = new IUUCSessionStartFailedParam();
-    pParam->failReason = failReason;
+    pParam->objReason = objReason;
 }
 
 PUBLIC
@@ -83,54 +83,54 @@ void ConferenceEventNotifier::NotifyExpanded()
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyExpandFailed(IN FailReason failReason)
+void ConferenceEventNotifier::NotifyExpandFailed(IN CallReasonInfo objReason)
 {
     IMS_TRACE_I("NotifyExpandFailed", 0, 0, 0);
 
     IUUCSessionConfExpandFailedParam* pParam = new IUUCSessionConfExpandFailedParam();
-    pParam->failReason = failReason;
+    pParam->objReason = objReason;
 }
 
 PUBLIC
 void ConferenceEventNotifier::NotifyDropped(
-        IN FailReason failReason, IN ConferenceParticipantList& objParticipantList)
+        IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyDropped", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendDropped(IMS_TRUE, failReason);
+    m_objConfCallContext.GetUiNotifier().SendDropped(IMS_TRUE, objReason);
 
     NotifyUsersInfo(objParticipantList);
 }
 
 PUBLIC
 void ConferenceEventNotifier::NotifyDropFailed(
-        IN FailReason failReason, IN ConferenceParticipantList& objParticipantList)
+        IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyDropFailed", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendDropped(IMS_FALSE, failReason);
+    m_objConfCallContext.GetUiNotifier().SendDropped(IMS_FALSE, objReason);
 
     NotifyUsersInfo(objParticipantList);
 }
 
 PUBLIC
 void ConferenceEventNotifier::NotifyJoined(
-        IN FailReason failReason, IN ConferenceParticipantList& objParticipantList)
+        IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyJoined", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendJoined(IMS_TRUE, failReason);
+    m_objConfCallContext.GetUiNotifier().SendJoined(IMS_TRUE, objReason);
 
     NotifyUsersInfo(objParticipantList);
 }
 
 PUBLIC
 void ConferenceEventNotifier::NotifyJoinFailed(
-        IN FailReason failReason, IN ConferenceParticipantList& objParticipantList)
+        IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyJoinFailed", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendJoined(IMS_FALSE, failReason);
+    m_objConfCallContext.GetUiNotifier().SendJoined(IMS_FALSE, objReason);
 
     NotifyUsersInfo(objParticipantList);
 }
@@ -173,7 +173,7 @@ void ConferenceEventNotifier::NotifyIndividualCallTerminated(IN CallKey nKey)
             ->GetCallContext()
             .GetUiNotifier()
             .SendTerminated(
-                    FailReason(FAIL_REASON_SESSION_TERMINATED, FAIL_REASON_SESSION_TERMINATED));
+                    CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, CODE_USER_TERMINATED_BY_REMOTE));
 }
 
 PRIVATE

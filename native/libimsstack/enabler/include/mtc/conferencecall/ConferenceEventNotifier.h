@@ -21,21 +21,23 @@ public:
 
 public:
     void NotifyMerged(IN ConferenceParticipantList& objParticipantList);
-    void NotifyMergeFailed(IN FailReason failReason);
+    void NotifyMergeFailed(IN CallReasonInfo objReason);
 
     void NotifyGroupCallStarted();
-    void NotifyGroupCallFailed(IN FailReason failReason);
+    void NotifyGroupCallFailed(IN CallReasonInfo objReason);
 
     void NotifyExpanded();
-    void NotifyExpandFailed(IN FailReason failReason);
+    void NotifyExpandFailed(IN CallReasonInfo objReason);
 
-    void NotifyDropped(IN FailReason failReason, IN ConferenceParticipantList& objParticipantList);
+    void NotifyDropped(
+            IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList);
     void NotifyDropFailed(
-            IN FailReason failReason, IN ConferenceParticipantList& objParticipantList);
+            IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList);
 
-    void NotifyJoined(IN FailReason failReason, IN ConferenceParticipantList& objParticipantList);
+    void NotifyJoined(
+            IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList);
     void NotifyJoinFailed(
-            IN FailReason failReason, IN ConferenceParticipantList& objParticipantList);
+            IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList);
 
     void NotifyConferenceInfo(IN ConferenceParticipantList& objParticipantList);
     void NotifyUsersInfo(IN ConferenceParticipantList& objParticipantList);

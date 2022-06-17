@@ -793,60 +793,60 @@ PUBLIC GLOBAL IMS_SINT32 MessageUtil::GetSosTypeFromServiceUrn(IN const IMessage
     AString strValue;
     if (GetUrnValue(piMessage, STR_SERVICE, eHeaderType, strValue, strHeaderName) == IMS_FAILURE)
     {
-        return CODE_EMERGENCYSERVICE_INVALID;
+        return EXTRA_CODE_EMERGENCYSERVICE_INVALID;
     }
 
     if (!strValue.StartsWith(STR_SOS))
     {
-        return CODE_EMERGENCYSERVICE_INVALID;
+        return EXTRA_CODE_EMERGENCYSERVICE_INVALID;
     }
 
     if (strValue.EqualsIgnoreCase(STR_SOS))
     {
-        return CODE_EMERGENCYSERVICE_GENERIC;
+        return EXTRA_CODE_EMERGENCYSERVICE_GENERIC;
     }
     else if (strValue.EqualsIgnoreCase(STR_SOS_AMBULANCE))
     {
-        return CODE_EMERGENCYSERVICE_AMBULANCE;
+        return EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE;
     }
     else if (strValue.EqualsIgnoreCase(STR_SOS_ANIMAL_CONTROL))
     {
-        return CODE_EMERGENCYSERVICE_ANIMAL_CONTROL;
+        return EXTRA_CODE_EMERGENCYSERVICE_ANIMAL_CONTROL;
     }
     else if (strValue.EqualsIgnoreCase(STR_SOS_FIRE))
     {
-        return CODE_EMERGENCYSERVICE_FIRE;
+        return EXTRA_CODE_EMERGENCYSERVICE_FIRE;
     }
     else if (strValue.EqualsIgnoreCase(STR_SOS_GAS))
     {
-        return CODE_EMERGENCYSERVICE_GAS;
+        return EXTRA_CODE_EMERGENCYSERVICE_GAS;
     }
     else if (strValue.EqualsIgnoreCase(STR_SOS_MARINE))
     {
-        return CODE_EMERGENCYSERVICE_MARINE;
+        return EXTRA_CODE_EMERGENCYSERVICE_MARINE;
     }
     else if (strValue.EqualsIgnoreCase(STR_SOS_MOUNTAIN))
     {
-        return CODE_EMERGENCYSERVICE_MOUNTAIN;
+        return EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN;
     }
     else if (strValue.EqualsIgnoreCase(STR_SOS_PHYSICIAN))
     {
-        return CODE_EMERGENCYSERVICE_PHYSICIAN;
+        return EXTRA_CODE_EMERGENCYSERVICE_PHYSICIAN;
     }
     else if (strValue.EqualsIgnoreCase(STR_SOS_POISON))
     {
-        return CODE_EMERGENCYSERVICE_POISON;
+        return EXTRA_CODE_EMERGENCYSERVICE_POISON;
     }
     else if (strValue.EqualsIgnoreCase(STR_SOS_POLICE))
     {
-        return CODE_EMERGENCYSERVICE_POLICE;
+        return EXTRA_CODE_EMERGENCYSERVICE_POLICE;
     }
     else if (strValue.MakeLower().Contains(STR_SOS_COUNTRY_SPECIFIC))
     {
-        return CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC;
+        return EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC;
     }
 
-    return CODE_EMERGENCYSERVICE_INVALID;
+    return EXTRA_CODE_EMERGENCYSERVICE_INVALID;
 }
 
 /* -------------------------------------------------------------------------------------------------

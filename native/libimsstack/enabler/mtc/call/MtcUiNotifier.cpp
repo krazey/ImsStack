@@ -64,7 +64,7 @@ void MtcUiNotifier::SendStarted(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMed
 }
 
 PUBLIC
-void MtcUiNotifier::SendStartFailed(IN const FailReason& objReason)
+void MtcUiNotifier::SendStartFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendStartFailed : %s", PS_FR(objReason), 0, 0);
 
@@ -107,7 +107,7 @@ void MtcUiNotifier::SendHeld(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaI
 }
 
 PUBLIC
-void MtcUiNotifier::SendHoldFailed(IN const FailReason& objReason)
+void MtcUiNotifier::SendHoldFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendHoldFailed : %s", PS_FR(objReason), 0, 0);
 
@@ -134,7 +134,7 @@ void MtcUiNotifier::SendResumed(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMed
 }
 
 PUBLIC
-void MtcUiNotifier::SendResumeFailed(IN const FailReason& objReason)
+void MtcUiNotifier::SendResumeFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendResumeFailed : %s", PS_FR(objReason), 0, 0);
 
@@ -175,7 +175,7 @@ void MtcUiNotifier::SendResumedBy(IN CallInfo* /* pCallInfo */, IN MediaInfo* pM
 }
 
 PUBLIC
-void MtcUiNotifier::SendTerminated(IN const FailReason& objReason)
+void MtcUiNotifier::SendTerminated(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendTerminated : %s", PS_FR(objReason), 0, 0);
 
@@ -233,7 +233,7 @@ void MtcUiNotifier::SendUpdated(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMed
 }
 
 PUBLIC
-void MtcUiNotifier::SendUpdateFailed(IN const FailReason& objReason)
+void MtcUiNotifier::SendUpdateFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendUpdateFailed : %s", PS_FR(objReason), 0, 0);
 
@@ -293,7 +293,7 @@ void MtcUiNotifier::SendExpanded(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInf
 }
 
 PUBLIC
-void MtcUiNotifier::SendExpandFailed(IN const FailReason& objReason)
+void MtcUiNotifier::SendExpandFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendExpandFailed : %s", PS_FR(objReason), 0, 0);
 
@@ -303,7 +303,7 @@ void MtcUiNotifier::SendExpandFailed(IN const FailReason& objReason)
     }
 
     IUUCSessionConfExpandFailedParam* pParam = new IUUCSessionConfExpandFailedParam();
-    pParam->failReason = objReason;
+    pParam->objReason = objReason;
 }
 
 PUBLIC
@@ -340,7 +340,7 @@ void MtcUiNotifier::SendMerged(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMedi
 }
 
 PUBLIC
-void MtcUiNotifier::SendMergeFailed(IN const FailReason& objReason)
+void MtcUiNotifier::SendMergeFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendMergeFailed : %s", PS_FR(objReason), 0, 0);
 
@@ -353,7 +353,7 @@ void MtcUiNotifier::SendMergeFailed(IN const FailReason& objReason)
 }
 
 PUBLIC
-void MtcUiNotifier::SendJoined(IN IMS_BOOL bResult, IN const FailReason& objReason)
+void MtcUiNotifier::SendJoined(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendJoined : Result[%s] %s", PS_BOOL(bResult), PS_FR(objReason), 0);
 
@@ -373,7 +373,7 @@ void MtcUiNotifier::SendJoined(IN IMS_BOOL bResult, IN const FailReason& objReas
 }
 
 PUBLIC
-void MtcUiNotifier::SendDropped(IN IMS_BOOL bResult, IN const FailReason& objReason)
+void MtcUiNotifier::SendDropped(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendDropped : Result[%s] %s", PS_BOOL(bResult), PS_FR(objReason), 0);
 
@@ -444,7 +444,7 @@ void MtcUiNotifier::SendReplacedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaI
 }
 
 PUBLIC
-void MtcUiNotifier::SendEctCompleted(IN IMS_RESULT nResult, IN const FailReason& objReason)
+void MtcUiNotifier::SendEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendECTCompleted : Result[%d]", nResult, 0, 0);
 
@@ -456,7 +456,7 @@ void MtcUiNotifier::SendEctCompleted(IN IMS_RESULT nResult, IN const FailReason&
 }
 
 PUBLIC
-void MtcUiNotifier::SendCallPushCompleted(IN IMS_BOOL bResult, IN const FailReason& objReason)
+void MtcUiNotifier::SendCallPushCompleted(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendCallPushCompleted : Result[%s] %s", PS_BOOL(bResult), PS_FR(objReason), 0);
 
@@ -467,7 +467,7 @@ void MtcUiNotifier::SendCallPushCompleted(IN IMS_BOOL bResult, IN const FailReas
 
     IUUCSessionCallPushCompletedParam* pParam = new IUUCSessionCallPushCompletedParam();
     pParam->bResult = bResult;
-    pParam->failReason = objReason;
+    pParam->objReason = objReason;
 }
 
 PRIVATE

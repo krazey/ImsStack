@@ -1,7 +1,7 @@
 #ifndef TERMINATION_HANDLER_H_
 #define TERMINATION_HANDLER_H_
 
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "IMSTypeDef.h"
 
 class ISession;
@@ -14,10 +14,11 @@ public:
     TerminationHandler(const TerminationHandler&) = delete;
     TerminationHandler& operator=(const TerminationHandler&) = delete;
 
-    FailReason Handle(IN const ISession& objSession) const;
+    CallReasonInfo Handle(IN const ISession& objSession) const;
 
 private:
-    FailReason GetFailReasonFromSessionTerminationReason(IN IMS_SINT32 nTerminationReason) const;
+    CallReasonInfo GetCallReasonInfoFromSessionTerminationReason(
+            IN IMS_SINT32 nTerminationReason) const;
 };
 
 #endif

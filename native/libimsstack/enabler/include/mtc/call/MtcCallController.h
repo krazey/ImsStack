@@ -35,7 +35,7 @@ public:
      * @param nKey Key to find the calls.
      * @param objReason The calls can use this information for terminating.
      */
-    void TerminateCalls(IN KeyType eKeyType, IN Key nKey, IN const FailReason& objReason);
+    void TerminateCalls(IN KeyType eKeyType, IN Key nKey, IN const CallReasonInfo& objReason);
 
     /**
      * Removes the calls that matches the given key without terminating behavior.
@@ -108,7 +108,7 @@ public:
     // - nIMSKey: Key of the call to be manipulated.
     // - eSessionType: See MtcDef::SESSIONTYPE_*
     // - pMediaInfo: `MediaInfo`
-    void Reject(IN CallKey nCallKey, IN const FailReason& objReason);
+    void Reject(IN CallKey nCallKey, IN const CallReasonInfo& objReason);
 
     // Holds a call.
     // - nIMSKey: Key of the call to be manipulated.
@@ -128,13 +128,13 @@ public:
 
     // Rejects the resume request from the remote.
     // - nIMSKey: Key of the call to be manipulated.
-    // - failReason: Rejected reason.
-    void RejectResume(IN CallKey nCallKey, IN const FailReason& objReason);
+    // - objReason: Rejected reason.
+    void RejectResume(IN CallKey nCallKey, IN const CallReasonInfo& objReason);
 
     // Terminates a call.
     // - nIMSKey: Key of the call to be manipulated.
-    // - failReason: Terminate reason.
-    void Terminate(IN CallKey nCallKey, IN const FailReason& objReason);
+    // - objReason: Terminate reason.
+    void Terminate(IN CallKey nCallKey, IN const CallReasonInfo& objReason);
 
     // Modifies media parameters of a call.
     // - nIMSKey: Key of the call to be manipulated.
@@ -144,8 +144,8 @@ public:
 
     // Cancels the ongoing modification request.
     // - nIMSKey: Key of the call to be manipulated.
-    // - failReason: Canceled reason.
-    void CancelUpdate(IN CallKey nCallKey, IN const FailReason& objReason);
+    // - objReason: Canceled reason.
+    void CancelUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason);
 
     // Accepts the modification request from the remote.
     // - nIMSKey: Key of the call to be manipulated.
@@ -155,8 +155,8 @@ public:
 
     // Rejects the modification request from the remote.
     // - nIMSKey: Key of the call to be manipulated.
-    // - failReason: Rejected reason.
-    void RejectUpdate(IN CallKey nCallKey, IN const FailReason& objReason);
+    // - objReason: Rejected reason.
+    void RejectUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason);
 
     // Sends USSD. Nothing happens if the specified call isn't a USSI session.
     // - nIMSKey: Key of the call to be manipulated.

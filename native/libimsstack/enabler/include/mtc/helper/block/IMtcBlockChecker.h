@@ -20,7 +20,7 @@ public:
      * The checker could notify `IMtcBlockCheckListener` the final result later if pending.
      * Notifying listener happens only once per each checking.
      *
-     * @return Result. `FailReason` is valid only when the status is `BLOCKED`.
+     * @return Result. `CallReasonInfo` is valid only when the status is `BLOCKED`.
      */
     virtual Result Check() = 0;
 };
@@ -37,7 +37,7 @@ public:
      * Notifies the block check result.
      *
      * @param objResult Result. `eStatus` is not `PENDING`.
-     *                  `FailReason` is valid only when `eStatus` is `BLOCKED`.
+     *                  `CallReasonInfo` is valid only when `eStatus` is `BLOCKED`.
      */
     virtual void OnBlockChecked(IN IMtcBlockChecker::Result objResult) = 0;
 };

@@ -24,37 +24,37 @@ PUBLIC
 StartErrorHandler::~StartErrorHandler() {}
 
 PUBLIC
-FailReason StartErrorHandler::Handle(IN const IMessage* piMessage) const
+CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 {
     if (IsTransactionTimeout(piMessage))
     {
         IMS_TRACE_I("Handle : Timeout", 0, 0, 0);
-        return GetFailReasonForTransactionTimeout();
+        return GetCallReasonInfoForTransactionTimeout();
     }
 
     if (!m_objContext.GetCallInfo().bEmergency && IsRetry1xRequiredForNormalCall(*piMessage))
     {
-        return FailReason(FAIL_REASON_SESSION_RETRY1X);
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 
     return HandleResponse(*piMessage);
 }
 
 PRIVATE
-FailReason StartErrorHandler::GetFailReasonForTransactionTimeout() const
+CallReasonInfo StartErrorHandler::GetCallReasonInfoForTransactionTimeout() const
 {
     if (m_objContext.GetCallInfo().bEmergency)
     {
-        return FailReason(FAIL_REASON_SESSION_RETRY1X);
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
     else
     {
-        return FailReason(FAIL_REASON_SESSION_SERVERERROR);
+        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT);
     }
 }
 
 PRIVATE
-FailReason StartErrorHandler::HandleResponse(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::HandleResponse(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
 
@@ -74,11 +74,11 @@ FailReason StartErrorHandler::HandleResponse(IN const IMessage& objMessage) cons
     {
         return Handle6xxResponse(objMessage);
     }
-    return FailReason(FAIL_REASON_SESSION_SERVERERROR);
+    return CallReasonInfo(CODE_SIP_SERVER_ERROR);
 }
 
 PRIVATE
-FailReason StartErrorHandler::Handle3xxResponse(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::Handle3xxResponse(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
 
@@ -88,85 +88,88 @@ FailReason StartErrorHandler::Handle3xxResponse(IN const IMessage& objMessage) c
             return Handle380Response(objMessage);
     }
 
-    return FailReason(FAIL_REASON_SESSION_SERVERERROR, nStatusCode);
+    return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
 }
 
 PRIVATE
-FailReason StartErrorHandler::Handle380Response(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::Handle380Response(IN const IMessage& objMessage) const
 {
     IMS_SINT32 eSosType =
             MessageUtil::GetSosTypeFromServiceUrn(&objMessage, ISipHeader::CONTACT_NORMAL);
-    if (eSosType != CODE_EMERGENCYSERVICE_INVALID && IsNonUeDetectableEmergencyCall(objMessage))
+    if (eSosType != EXTRA_CODE_EMERGENCYSERVICE_INVALID &&
+            IsNonUeDetectableEmergencyCall(objMessage))
     {
-        return FailReason(FAIL_REASON_SESSION_RETRY_R_RAT, eSosType);
+        // TODO : need to modify this after emergency domain selection policy is decided.
+        return CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED /*FAIL_REASON_SESSION_RETRY_R_RAT*/, eSosType);
     }
 
     if (HasEmergencyServiceTypeInBody(objMessage))
     {
-        // Set to CODE_1XRETRY_NORMAL even though it's emergency service.
+        // Set to EXTRA_CODE_CALL_RETRY_NORMAL even though it's emergency service.
         // Call app will retry according to the UX scenario.
-        return FailReason(FAIL_REASON_SESSION_RETRY1X, CODE_1XRETRY_NORMAL);
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_NORMAL);
     }
     else
     {
-        return FailReason(FAIL_REASON_SESSION_RETRY1X);
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 }
 
 PRIVATE
-FailReason StartErrorHandler::Handle4xxResponse(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::Handle4xxResponse(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
 
     switch (nStatusCode)
     {
         case SipStatusCode::SC_401:
-            return FailReason(FAIL_REASON_SESSION_SERVER_AUTH,
-                    MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_CLIENT_ERROR, MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_403:
             return Handle403Response();
         case SipStatusCode::SC_404:
             return Handle404Response();
         case SipStatusCode::SC_406:
-            return FailReason(FAIL_REASON_SESSION_NOTACCEPTABLE,
-                    MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_NOT_ACCEPTABLE, MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_407:
             return Handle407Response();
         case SipStatusCode::SC_408:
-            return FailReason(FAIL_REASON_SESSION_TIMEOUT,
-                    MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_REQUEST_TIMEOUT, MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_415:
         case SipStatusCode::SC_416:
-            return FailReason(FAIL_REASON_SESSION_NOTSUPPORTED,
-                    MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_NOT_SUPPORTED, MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_422:
             // re-INVITE is sent by the engine without notification if it has Min-SE header
-            return FailReason(FAIL_REASON_SESSION_RETRY1X);
+            return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
         case SipStatusCode::SC_480:
-            return FailReason(FAIL_REASON_SESSION_TEMPUNAVAILABLE,
+            return CallReasonInfo(CODE_SIP_TEMPORARILY_UNAVAILABLE,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_484:
-            return FailReason(FAIL_REASON_SESSION_BADADDRESS,
-                    MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_BAD_ADDRESS, MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_486:
-            return FailReason(
-                    FAIL_REASON_SESSION_BUSY, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_BUSY, MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_487:
-            return FailReason(FAIL_REASON_SESSION_SERVER_REQUEST_TERMINATED,
-                    MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_REQUEST_CANCELLED, MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_488:
-            return FailReason(FAIL_REASON_SESSION_NOTACCEPTABLEHERE,
-                    MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_NOT_ACCEPTABLE, MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_499:
-            return FailReason(FAIL_REASON_SESSION_NOTREACHABLE,
-                    MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_NOT_REACHABLE, MessageUtil::GetCauseFromReasonHeader(&objMessage));
     }
 
-    return FailReason(FAIL_REASON_SESSION_SERVERERROR, nStatusCode);
+    return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
 }
 
 PRIVATE
-FailReason StartErrorHandler::Handle403Response() const
+CallReasonInfo StartErrorHandler::Handle403Response() const
 {
     const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
             Feature::POLICY_FOR_403_RESPONSE_FOR_INVITE);
@@ -184,37 +187,37 @@ FailReason StartErrorHandler::Handle403Response() const
             break;
     }
 
-    return FailReason(FAIL_REASON_SESSION_FORBIDDEN, SipStatusCode::SC_403);
+    return CallReasonInfo(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403);
 }
 
 PRIVATE
-FailReason StartErrorHandler::Handle404Response() const
+CallReasonInfo StartErrorHandler::Handle404Response() const
 {
     if (m_objContext.GetCallInfo().bUssi)
     {
-        return FailReason(FAIL_REASON_SESSION_RETRY1X);
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
     else
     {
-        return FailReason(FAIL_REASON_SESSION_NOTFOUND);
+        return CallReasonInfo(CODE_SIP_NOT_FOUND);
     }
 }
 
 PRIVATE
-FailReason StartErrorHandler::Handle407Response() const
+CallReasonInfo StartErrorHandler::Handle407Response() const
 {
     if (m_objContext.GetCallInfo().bEmergency)
     {
-        return FailReason(FAIL_REASON_SESSION_RETRY1X);
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
     else
     {
-        return FailReason(FAIL_REASON_SESSION_SERVERERROR, SipStatusCode::SC_407);
+        return CallReasonInfo(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_407);
     }
 }
 
 PRIVATE
-FailReason StartErrorHandler::Handle5xxResponse(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::Handle5xxResponse(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
 
@@ -224,7 +227,7 @@ FailReason StartErrorHandler::Handle5xxResponse(IN const IMessage& objMessage) c
             return Handle500Response(objMessage);
         case SipStatusCode::SC_501:
         case SipStatusCode::SC_502:
-            return FailReason(FAIL_REASON_SESSION_SERVERERROR, nStatusCode);
+            return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
         case SipStatusCode::SC_503:
             return Handle503Response(objMessage);
         case SipStatusCode::SC_504:
@@ -232,46 +235,46 @@ FailReason StartErrorHandler::Handle5xxResponse(IN const IMessage& objMessage) c
         case SipStatusCode::SC_505:
         case SipStatusCode::SC_513:
         case SipStatusCode::SC_580:
-            return FailReason(FAIL_REASON_SESSION_SERVERERROR, nStatusCode);
+            return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
     }
 
     return Handle500Response(objMessage);
 }
 
 PRIVATE
-FailReason StartErrorHandler::Handle500Response(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::Handle500Response(IN const IMessage& objMessage) const
 {
     if (!MessageUtil::IsHeaderPresent(&objMessage, ISipHeader::RETRY_AFTER_SEC))
     {
         if (IsIpcanResourceUnavailable(objMessage))
         {
             // TS 24.229 5.1.3.1: There's the method to examine headers but no further behavior.
-            return FailReason(FAIL_REASON_SESSION_SERVER_INTERNAL_ERROR,
-                    MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_SERVER_ERROR, MessageUtil::GetCauseFromReasonHeader(&objMessage));
         }
     }
 
-    return FailReason(FAIL_REASON_SESSION_SERVER_INTERNAL_ERROR,
-            MessageUtil::GetCauseFromReasonHeader(&objMessage));
+    return CallReasonInfo(
+            CODE_SIP_SERVER_ERROR, MessageUtil::GetCauseFromReasonHeader(&objMessage));
 }
 
 PRIVATE
-FailReason StartErrorHandler::Handle503Response(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nRetryAfter =
             MessageUtil::GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY);
     if (nRetryAfter > 0)
     {
         // TODO: Set block and CSFB for nRetryAfter duration
-        return FailReason(FAIL_REASON_SESSION_RETRY1X);
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 
-    return FailReason(FAIL_REASON_SESSION_SERVER_INTERNAL_ERROR,
-            MessageUtil::GetCauseFromReasonHeader(&objMessage));
+    return CallReasonInfo(
+            CODE_SIP_SERVER_ERROR, MessageUtil::GetCauseFromReasonHeader(&objMessage));
 }
 
 PRIVATE
-FailReason StartErrorHandler::Handle504Response(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessage) const
 {
     if (MessageUtil::ContainsAddressInPaid(&objMessage, GetPathHeader()) ||
             MessageUtil::ContainsAddressInPaid(&objMessage, GetServiceRouteHeader()))
@@ -300,22 +303,22 @@ FailReason StartErrorHandler::Handle504Response(IN const IMessage& objMessage) c
         }
     }
 
-    return FailReason(FAIL_REASON_SESSION_SERVERERROR, SipStatusCode::SC_504);
+    return CallReasonInfo(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_504);
 }
 
 PRIVATE
-FailReason StartErrorHandler::Handle6xxResponse(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::Handle6xxResponse(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
 
     switch (nStatusCode)
     {
         case SipStatusCode::SC_603:
-            return FailReason(FAIL_REASON_SESSION_SERVER_DECLINE,
-                    MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_USER_REJECTED, MessageUtil::GetCauseFromReasonHeader(&objMessage));
     }
 
-    return FailReason(FAIL_REASON_SESSION_SERVERERROR, nStatusCode);
+    return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
 }
 
 PRIVATE

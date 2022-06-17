@@ -44,7 +44,7 @@ public:
     CallStateName SessionRPRDeliveryFailed(IN ISession* piSession) override;
 
     CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
-    CallStateName OnMediaFailed(IN FailReason objReason) override;
+    CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
 };
 
 #endif

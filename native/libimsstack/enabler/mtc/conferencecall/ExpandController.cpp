@@ -177,7 +177,7 @@ void ExpandController::ProcessExpand(IN IMSList<ConfUser*>& objUsers)
 
     if (GetState() != STATE_CREATED)
     {
-        m_objNotifier.NotifyExpandFailed(FailReason(FAIL_REASON_UNKNOWN, -1));
+        m_objNotifier.NotifyExpandFailed(CallReasonInfo(CODE_UNSPECIFIED, -1));
         return;
     }
 
@@ -376,7 +376,7 @@ void ExpandController::ProcessJoinAfterExpand()
     // Invite other participants when conference session is expanded.
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
-        m_objNotifier.NotifyJoinFailed(FailReason(FAIL_REASON_UNKNOWN, -1), m_objParticipantList);
+        m_objNotifier.NotifyJoinFailed(CallReasonInfo(CODE_UNSPECIFIED, -1), m_objParticipantList);
     }
 
     SetState(STATE_JOINING);
@@ -414,7 +414,7 @@ void ExpandController::RecoverOnCreating()
 
     IMS_TRACE_D("RecoverOnCreating", 0, 0, 0);
 
-    m_objNotifier.NotifyExpandFailed(FailReason(FAIL_REASON_UNKNOWN, -1));
+    m_objNotifier.NotifyExpandFailed(CallReasonInfo(CODE_UNSPECIFIED, -1));
     m_objOperationQueue.Clear();
     SetState(STATE_IDLE);
 
@@ -428,14 +428,14 @@ void ExpandController::RecoverOnReferring()
 
     if (GetState() == STATE_EXPANDING)
     {
-        m_objNotifier.NotifyExpandFailed(FailReason(FAIL_REASON_UNKNOWN, -1));
+        m_objNotifier.NotifyExpandFailed(CallReasonInfo(CODE_UNSPECIFIED, -1));
         m_objOperationQueue.Clear();
         SetState(STATE_IDLE);
 
         if (ConferenceConfigurationWrapper::GetReferTypeForInvite() == REFER_INVITE_SINGLE)
         {
             Resume1to1Session();
-            GetConferenceCall()->Terminate(FailReason(FAIL_REASON_UNKNOWN, -1));
+            GetConferenceCall()->Terminate(CallReasonInfo(CODE_UNSPECIFIED, -1));
         }
 
         return;

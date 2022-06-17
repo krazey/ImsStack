@@ -180,11 +180,11 @@ PROTECTED VIRTUAL void UCVoNRForQct::OnNotifyCallPreferenceReady(IN IMS_UINT32 n
         return;
     }
 
-    FailReason objFailReason(FAIL_REASON_NONE);
+    CallReasonInfo objReason(CODE_NONE);
 
     // TODO, MTC BUILD
     // if (UC_BLOCK(m_nSlotId)->HandleOutSSAC(
-    //         pIUCSession->GetInitiatedSessionType(), pIUCSession, &objFailReason))
+    //         pIUCSession->GetInitiatedSessionType(), pIUCSession, &objReason))
     // {
     //     pIUCSession->SetUacBlockType(IMtcCall::VONR_BLOCK_TYPE_FINAL_FAILURE);
     //     return;

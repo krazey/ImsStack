@@ -60,7 +60,7 @@ public class MtcConference {
         }
 
         public void onCallMergeFailed(MtcConference call,
-                FailInfo failInfo) {
+                CallReasonInfo callReasonInfo) {
             // no-op
         }
 
@@ -70,7 +70,7 @@ public class MtcConference {
         }
 
         public void onCallConferenceExtendFailed(MtcConference call,
-                FailInfo failInfo) {
+                CallReasonInfo callReasonInfo) {
             // no-op
         }
 
@@ -84,7 +84,7 @@ public class MtcConference {
         }
 
         public void onCallInviteParticipantsRequestFailed(MtcConference call,
-                FailInfo failInfo) {
+                CallReasonInfo callReasonInfo) {
             // no-op
         }
 
@@ -93,7 +93,7 @@ public class MtcConference {
         }
 
         public void onCallRemoveParticipantsRequestFailed(MtcConference call,
-                FailInfo failInfo) {
+                CallReasonInfo callReasonInfo) {
             // no-op
         }
 
@@ -105,9 +105,9 @@ public class MtcConference {
         /**
          * Device's internal events.
          */
-        // If the operation is successfully done, the FailInfo will be a null.
+        // If the operation is successfully done, the CallReasonInfo will be a null.
         public void onCallDeleteParticipantsRequestCompleted(MtcConference call,
-                FailInfo failInfo) {
+                CallReasonInfo callReasonInfo) {
             // no-op
         }
     }
@@ -302,16 +302,16 @@ public class MtcConference {
 
         case IUConf.EXPANDFAILED:
         {
-            FailInfo failInfo = new FailInfo(parcel);
+                CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
-            logi("EXPANDFAILED :: " + MtcCallUtils.toString(failInfo));
+                logi("EXPANDFAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
-            mCT.updateConferenceState(this,
-                    ConferenceTracker.EVENT_EXTEND_FAILED,
-                    ImsArgs.obtain(failInfo, null, null));
+                mCT.updateConferenceState(this,
+                        ConferenceTracker.EVENT_EXTEND_FAILED,
+                        ImsArgs.obtain(callReasonInfo, null, null));
 
-            listener.onCallConferenceExtendFailed(this, failInfo);
-            break;
+                listener.onCallConferenceExtendFailed(this, callReasonInfo);
+                break;
         }
 
         case IUConf.EXPANDED_BY:
@@ -360,82 +360,82 @@ public class MtcConference {
 
         case IUConf.MERGEFAILED:
         {
-            FailInfo failInfo = new FailInfo(parcel);
+                CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
-            logi("MERGEFAILED :: " + MtcCallUtils.toString(failInfo));
+                logi("MERGEFAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
-            mCT.updateConferenceState(this,
-                    ConferenceTracker.EVENT_MERGE_FAILED,
-                    ImsArgs.obtain(failInfo, null, null));
+                mCT.updateConferenceState(this,
+                        ConferenceTracker.EVENT_MERGE_FAILED,
+                        ImsArgs.obtain(callReasonInfo, null, null));
 
-            listener.onCallMergeFailed(this, failInfo);
-            break;
+                listener.onCallMergeFailed(this, callReasonInfo);
+                break;
         }
 
         case IUConf.JOINED:
         {
-            int result = parcel.readInt();
-            FailInfo failInfo = new FailInfo(parcel);
+                int result = parcel.readInt();
+                CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
-            logi("JOINED :: result=" + result
-                    + " " + ((result == 0) ? MtcCallUtils.toString(failInfo) : ""));
+                logi("JOINED :: result=" + result
+                        + " " + ((result == 0) ? MtcCallUtils.toString(callReasonInfo) : ""));
 
-            if (result != 0) {
-                mCT.updateConferenceState(this,
-                        ConferenceTracker.EVENT_INVITE_PARTICIPANTS_REQUEST_DELIVERED,
-                        null);
+                if (result != 0) {
+                    mCT.updateConferenceState(this,
+                            ConferenceTracker.EVENT_INVITE_PARTICIPANTS_REQUEST_DELIVERED,
+                            null);
 
-                listener.onCallInviteParticipantsRequestDelivered(this);
-            } else {
-                // FIXME: it needs to add an SIP status code for some scenarios
-                mCT.updateConferenceState(this,
-                        ConferenceTracker.EVENT_INVITE_PARTICIPANTS_REQUEST_FAILED,
-                        ImsArgs.obtain(failInfo, null, null));
+                    listener.onCallInviteParticipantsRequestDelivered(this);
+                } else {
+                    // FIXME: it needs to add an SIP status code for some scenarios
+                    mCT.updateConferenceState(this,
+                            ConferenceTracker.EVENT_INVITE_PARTICIPANTS_REQUEST_FAILED,
+                            ImsArgs.obtain(callReasonInfo, null, null));
 
-                listener.onCallInviteParticipantsRequestFailed(this, failInfo);
-            }
-            break;
+                    listener.onCallInviteParticipantsRequestFailed(this, callReasonInfo);
+                }
+                break;
         }
 
         case IUConf.DROPPED:
         {
-            int result = parcel.readInt();
-            FailInfo failInfo = new FailInfo(parcel);
+                int result = parcel.readInt();
+                CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
-            logi("DROPPED :: result=" + result
-                    + " " + ((result == 0) ? MtcCallUtils.toString(failInfo) : ""));
+                logi("DROPPED :: result=" + result
+                        + " " + ((result == 0) ? MtcCallUtils.toString(callReasonInfo) : ""));
 
-            if (result != 0) {
-                mCT.updateConferenceState(this,
-                        ConferenceTracker.EVENT_REMOVE_PARTICIPANTS_REQUEST_DELIVERED,
-                        null);
+                if (result != 0) {
+                    mCT.updateConferenceState(this,
+                            ConferenceTracker.EVENT_REMOVE_PARTICIPANTS_REQUEST_DELIVERED,
+                            null);
 
-                listener.onCallRemoveParticipantsRequestDelivered(this);
-            } else {
-                mCT.updateConferenceState(this,
-                        ConferenceTracker.EVENT_REMOVE_PARTICIPANTS_REQUEST_FAILED,
-                        ImsArgs.obtain(failInfo, null, null));
+                    listener.onCallRemoveParticipantsRequestDelivered(this);
+                } else {
+                    mCT.updateConferenceState(this,
+                            ConferenceTracker.EVENT_REMOVE_PARTICIPANTS_REQUEST_FAILED,
+                            ImsArgs.obtain(callReasonInfo, null, null));
 
-                listener.onCallRemoveParticipantsRequestFailed(this, failInfo);
-            }
-            break;
+                    listener.onCallRemoveParticipantsRequestFailed(this, callReasonInfo);
+                }
+                break;
         }
 
         case IUConf.DELETED:
         {
-            int result = parcel.readInt();
-            FailInfo failInfo = new FailInfo(parcel);
+                int result = parcel.readInt();
+                CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
-            logi("DELETED :: result=" + result
-                    + " " + ((result == 0) ? MtcCallUtils.toString(failInfo) : ""));
+                logi("DELETED :: result=" + result
+                        + " " + ((result == 0) ? MtcCallUtils.toString(callReasonInfo) : ""));
 
-            mCT.updateConferenceState(this,
-                    ConferenceTracker.EVENT_DELETE_PARTICIPANTS_REQUEST_COMPLETED,
-                    (result == 0) ? ImsArgs.obtain(failInfo, null, null) : null);
+                mCT.updateConferenceState(this,
+                        ConferenceTracker.EVENT_DELETE_PARTICIPANTS_REQUEST_COMPLETED,
+                        (result == 0) ? ImsArgs.obtain(callReasonInfo, null, null) : null);
 
-            listener.onCallDeleteParticipantsRequestCompleted(this,
-                    (result == 0) ? failInfo : null);
-            break;
+                listener.onCallDeleteParticipantsRequestCompleted(this,
+                        (result == 0) ? callReasonInfo : null);
+                break;
         }
 
         case IUConf.NOTIFY_USERS_INFO:

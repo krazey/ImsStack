@@ -33,24 +33,15 @@ PRIVATE
 ProcessingCallBlockRule::Result ProcessingCallBlockRule::CheckForOutgoingCall(
         IN const IMSList<IMtcCall*>& lstCalls)
 {
-    if (IsOtherIdleCallExists(lstCalls))
+    if (IsOtherIdleCallExists(lstCalls) || IsIncomingCallExists(lstCalls) ||
+            IsOutgoingCallExists(lstCalls))
     {
-        return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SESSION_IN_SETUP));
-    }
-
-    if (IsIncomingCallExists(lstCalls))
-    {
-        return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SESSION_IN_SETUP));
-    }
-
-    if (IsOutgoingCallExists(lstCalls))
-    {
-        return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SESSION_IN_SETUP));
+        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CALL_SETUP));
     }
 
     if (IsEmergencyCallExists(m_objCallManager))
     {
-        return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SERVICE_UNAVAILABLE));
+        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
     }
 
     return Result(Result::Status::UNBLOCKED);
@@ -62,22 +53,17 @@ ProcessingCallBlockRule::Result ProcessingCallBlockRule::CheckForIncomingCall(
 {
     if (IsOtherIdleCallExists(lstCalls))
     {
-        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_NORMAL));
+        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_CALL_BUSY));
     }
 
-    if (IsIncomingCallExists(lstCalls))
+    if (IsIncomingCallExists(lstCalls) || IsOutgoingCallExists(lstCalls))
     {
-        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_ALERTING));
-    }
-
-    if (IsOutgoingCallExists(lstCalls))
-    {
-        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_ESTABLISHING));
+        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CALL_SETUP));
     }
 
     if (IsEmergencyCallExists(m_objCallManager))
     {
-        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_ISEMERGENCY));
+        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_E911_CALL));
     }
 
     return Result(Result::Status::UNBLOCKED);

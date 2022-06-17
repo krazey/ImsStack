@@ -1,7 +1,7 @@
 #ifndef CALL_STATE_PROXY_H_
 #define CALL_STATE_PROXY_H_
 
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "IMSActivity.h"
 #include "IMSTypeDef.h"
 #include "MtcDef.h"
@@ -52,7 +52,7 @@ public:
     void RemoveListener(IN IMtcCallStateListener* pListener);
 
     void UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eState, IN CallType eCallType,
-            IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason = FAIL_REASON_NONE);
+            IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason = CODE_NONE);
 
 protected:
     virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMsg) override;

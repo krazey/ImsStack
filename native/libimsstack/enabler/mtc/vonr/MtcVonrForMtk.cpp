@@ -206,9 +206,9 @@ PROTECTED VIRTUAL void UCVoNRForMtk::OnNotifyCallPreferenceReady(IN IMS_UINT32 n
     }
 
     // TODO, MTC BUILD
-    // FailReason objFailReason;
+    // CallReasonInfo objReason;
     // if (UC_BLOCK(m_nSlotId)->HandleOutSSAC(
-    //         pIUCSession->GetInitiatedSessionType(), pIUCSession, &objFailReason))
+    //         pIUCSession->GetInitiatedSessionType(), pIUCSession, &objReason))
     // {
     //     pIUCSession->SetUacBlockType(IMtcCall::VONR_BLOCK_TYPE_FINAL_FAILURE);
     //     return;

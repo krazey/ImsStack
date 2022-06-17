@@ -41,7 +41,7 @@ class MtcDialingPlan;
 class MtcSipInterfaceFactory;
 class MtcVonrManager;
 class UssiController;
-struct FailReason;
+struct CallReasonInfo;
 
 class MtcCall final :
         public IMtcCall,
@@ -76,16 +76,16 @@ public:
     void HandleIncoming(IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
     void HandleUserAlert() override;
     void Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    void Reject(IN const FailReason& objReason) override;
+    void Reject(IN const CallReasonInfo& objReason) override;
     void Hold(IN MediaInfo* pMediaInfo) override;
     void Resume(IN MediaInfo* pMediaInfo) override;
     void AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    void RejectResume(IN const FailReason& objReason) override;
+    void RejectResume(IN const CallReasonInfo& objReason) override;
     void Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     void AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    void RejectConvert(IN const FailReason& objReason) override;
-    void CancelConvert(IN const FailReason& objReason) override;
-    void Terminate(IN const FailReason& objReason) override;
+    void RejectConvert(IN const CallReasonInfo& objReason) override;
+    void CancelConvert(IN const CallReasonInfo& objReason) override;
+    void Terminate(IN const CallReasonInfo& objReason) override;
     void SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) override;
     void SendUssd(IN const AString& strUssd) override;
     void HandleSrvccSuccess() override;
@@ -205,7 +205,7 @@ public:
     virtual void OnVideoLowestBitRate() override;
     virtual void OnReceivingNetworkToneStarted() override;
     virtual void OnReceivingNetworkToneFailed() override;
-    virtual void OnMediaFailed(IN FailReason objReason) override;
+    virtual void OnMediaFailed(IN CallReasonInfo objReason) override;
 
 private:
     static IMutex* s_pKeyCreationLock;

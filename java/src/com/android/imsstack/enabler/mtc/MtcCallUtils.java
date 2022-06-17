@@ -11,15 +11,11 @@
 
 package com.android.imsstack.enabler.mtc;
 
-import android.telephony.ims.ImsStreamMediaProfile;
-
 import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.util.ImsLog;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class MtcCallUtils {
@@ -182,31 +178,23 @@ public class MtcCallUtils {
     }
 
     public static boolean isCallTerminatedByCallForward(int reason) {
-        return (reason == IUMtcCall.Fail_Reason.FAIL_REASON_ECT_COMPLETED)
-                || (reason == IUMtcCall.Fail_Reason.FAIL_REASON_ECT_REPLACED);
+        return reason == CallReasonInfo.CODE_USER_TERMINATED;
     }
 
     public static boolean isCallTerminatedByCSRetry(int reason) {
-        // IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY ?
-        return (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY1X);
+        return (reason == CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 
     public static boolean isCallTerminatedByECallRetry(int reason) {
-        // IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_RAT
-        return (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_1X)
+        return false;
+        // TODO : need to modify this after emergency domain selection policy is decided.
+        /*(reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_1X)
                 || (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_VOLTE)
-                || (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_R_RAT);
+                || (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_R_RAT)*/
     }
 
     public static boolean isCallTerminatedByJoiningConference(int reason) {
-        return (reason == IUMtcCall.Fail_Reason.FAIL_REASON_CONF_JOINED);
-    }
-
-    public static boolean isCallTerminatedByRemoteEnd(int reason) {
-        // This method is invoked on call terminated.
-        return (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_TERMINATED)
-                || (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_UNKNOWN)
-                || (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NONE);
+        return (reason == CallReasonInfo.CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE);
     }
 
     public static boolean isCallWaitingEnabled(SuppInfo si) {
@@ -300,10 +288,16 @@ public class MtcCallUtils {
         return false;
     }
 
-    public static boolean isOutgoingCallsBarred(FailInfo fi) {
+    /**
+    * checks if the call is barred.
+    *
+    * @param  callReasonInfo detailed reason of the call barred
+    * @return true if the call is barred
+    */
+    public static boolean isOutgoingCallsBarred(CallReasonInfo callReasonInfo) {
         // Q.850 : cause=53 (Outgoing calls barred within CUG)
-        return (fi.Reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_SERVER_DECLINE)
-                && (fi.Code == 53);
+        return (callReasonInfo.mCode == CallReasonInfo.CODE_SIP_USER_REJECTED)
+                && (callReasonInfo.mExtraCode == 53);
     }
 
     public static boolean isSuppInfoBoolean(int type) {
@@ -340,15 +334,21 @@ public class MtcCallUtils {
         }
     }
 
-    public static String toString(final FailInfo fi) {
+    /**
+     * Provides a string representation of the {@code CallReasonInfo}. Primarily intended for use
+     * in log statements.
+     *
+     * @return String representation of the {@code CallReasonInfo}.
+     */
+    public static String toString(final CallReasonInfo callReasonInfo) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("[ FailInfo: code=");
-        sb.append(fi.Reason);
+        sb.append("[ CallReasonInfo: code=");
+        sb.append(callReasonInfo.mCode);
         sb.append(", extraCode=");
-        sb.append(fi.Code);
+        sb.append(callReasonInfo.mExtraCode);
         sb.append(", phrase=");
-        sb.append(fi.Phrase);
+        sb.append(callReasonInfo.mExtraMessage);
         sb.append(" ]");
 
         return sb.toString();

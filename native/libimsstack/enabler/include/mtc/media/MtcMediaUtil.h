@@ -28,7 +28,7 @@ public:
     static MEDIA_SERVICE_TYPE GetMediaServiceType(IN ServiceType eServiceType);
     static MEDIA_NETWORK_TYPE GetMediaNetworkType(
             IN IMtcService* piMtcService, IN IMS_SINT32 nSlotId);
-    static IMS_SINT32 GetFailReasonFromReportType(IN IMS_UINT32 eReportType);
+    static IMS_SINT32 GetCallReasonInfoFromReportType(IN IMS_UINT32 eReportType);
     static IMS_SINT32 GetGttModeFromTextQuality(IN IMS_UINT32 eTextQuality);
 };
 

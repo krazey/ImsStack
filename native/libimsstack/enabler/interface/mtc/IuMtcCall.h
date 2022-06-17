@@ -1,7 +1,7 @@
 #ifndef INTERFACE_UI_MTC_CALL_H_
 #define INTERFACE_UI_MTC_CALL_H_
 
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "ImsMessageDef.h"
 #include "ImsMessage.h"
 #include "MtcDef.h"
@@ -99,18 +99,6 @@ public:
 
     static const IMS_SINT32 CODEC_INFO_UPDATED = (EVENT_MEDIA_I2U + 1);
 
-    enum
-    {
-        TERMINATE_REASON_UNKNOWN = 0,
-
-        TERMINATE_REASON_NORMAL = 10,
-        TERMINATE_REASON_USER = 11,
-        TERMINATE_REASON_LOW_BATTERY = 12,
-        TERMINATE_REASON_POWER_OFF = 13,
-        TERMINATE_REASON_VCC = 14,
-
-    }; /* TERMINATE_REASON_ */
-
     inline static IMS_BOOL IsMsg(IN IMS_SINT32 nMsg)
     {
         return ((nMsg > EVENT_U2I) && (nMsg < MAXIMUM));
@@ -154,7 +142,7 @@ class IUUCSessionFailParam
 {
 public:
     inline IUUCSessionFailParam() :
-            failReason(FailReason(FAIL_REASON_NONE))
+            objReason(CallReasonInfo(CODE_NONE))
     {
         IMS_TRACE_MEM("uc", "uc_M : IUUCSessionFailParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IUUCSessionFailParam), this, 0);
@@ -170,7 +158,7 @@ private:
     IUUCSessionFailParam& operator=(IN const IUUCSessionFailParam& objRHS);
 
 public:
-    FailReason failReason;
+    CallReasonInfo objReason;
 };
 
 class IUUCSessionFailedParam : public IUUCSessionBaseParam
@@ -178,7 +166,7 @@ class IUUCSessionFailedParam : public IUUCSessionBaseParam
 public:
     inline IUUCSessionFailedParam() :
             IUUCSessionBaseParam(),
-            failReason(FailReason(FAIL_REASON_NONE)),
+            objReason(CallReasonInfo(CODE_NONE)),
             aStrPhrase(AString::ConstEmpty())
     {
         IMS_TRACE_MEM("uc", "uc_M : IUUCSessionFailedParam[%" PFLS_u "][%" PFLS_x "]",
@@ -195,7 +183,7 @@ private:
     IUUCSessionFailedParam& operator=(IN const IUUCSessionFailedParam& objRHS);
 
 public:
-    FailReason failReason;
+    CallReasonInfo objReason;
     AString aStrPhrase;
 };
 

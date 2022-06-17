@@ -262,7 +262,7 @@ void JniMtcCall::Accept(IN const android::Parcel& objParcel)
 PRIVATE
 void JniMtcCall::Reject(IN const android::Parcel& objParcel)
 {
-    m_objCallController.Reject(m_nCallKey, FailReason(objParcel.readInt32()));
+    m_objCallController.Reject(m_nCallKey, CallReasonInfo(objParcel.readInt32()));
 }
 
 PRIVATE
@@ -280,7 +280,7 @@ void JniMtcCall::Resume(IN const android::Parcel& objParcel)
 PRIVATE
 void JniMtcCall::Terminate(IN const android::Parcel& objParcel)
 {
-    m_objCallController.Terminate(m_nCallKey, FailReason(objParcel.readInt32(), -1));
+    m_objCallController.Terminate(m_nCallKey, CallReasonInfo(objParcel.readInt32(), -1));
 }
 
 PRIVATE
@@ -300,13 +300,13 @@ void JniMtcCall::AcceptUpdate(IN const android::Parcel& objParcel)
 PRIVATE
 void JniMtcCall::RejectUpdate(IN const android::Parcel& objParcel)
 {
-    m_objCallController.RejectUpdate(m_nCallKey, FailReason(objParcel.readInt32()));
+    m_objCallController.RejectUpdate(m_nCallKey, CallReasonInfo(objParcel.readInt32()));
 }
 
 PRIVATE
 void JniMtcCall::CancelUpdate(IN const android::Parcel& objParcel)
 {
-    m_objCallController.CancelUpdate(m_nCallKey, FailReason(objParcel.readInt32()));
+    m_objCallController.CancelUpdate(m_nCallKey, CallReasonInfo(objParcel.readInt32()));
 }
 
 PRIVATE
@@ -319,7 +319,7 @@ void JniMtcCall::AcceptResume(IN const android::Parcel& objParcel)
 PRIVATE
 void JniMtcCall::RejectResume(IN const android::Parcel& objParcel)
 {
-    m_objCallController.RejectResume(m_nCallKey, FailReason(objParcel.readInt32()));
+    m_objCallController.RejectResume(m_nCallKey, CallReasonInfo(objParcel.readInt32()));
 }
 
 PRIVATE

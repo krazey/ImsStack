@@ -4,7 +4,7 @@
 #include "ImsTypeDef.h"
 #include "call/IMtcCallManager.h"
 #include "ect/IEctReferenceListener.h"
-#include "FailReason.h"
+#include "CallReasonInfo.h"
 #include "ITimer.h"
 
 class IMtcContext;
@@ -40,7 +40,7 @@ protected:
     virtual void OnCompleted();  // TODO: OnSucceeded?
     virtual void OnFailed();
 
-    void NotifyResult(IN IMS_RESULT nResult, IN IMS_SINT32 nReason = FAIL_REASON_NONE) const;
+    void NotifyResult(IN IMS_RESULT nResult, IN IMS_SINT32 nReason = CODE_NONE) const;
     void CreateReference();
     void TerminateTransfereeCall();
 

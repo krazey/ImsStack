@@ -706,7 +706,7 @@ PROTECTED VIRTUAL void DEMngr::HandleStartFailed(IN IMSMSG& objMSG)
 
     IMS_TRACE_I("HandleStartFailed : [%d]", nStatusCode, 0, 0);
 
-    SendTerminatedToListn(FailReason(FAIL_REASON_UNKNOWN, -1));
+    SendTerminatedToListn(CallReasonInfo(CODE_UNSPECIFIED, -1));
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -728,7 +728,7 @@ PROTECTED VIRTUAL void DEMngr::HandleTerminated(IN IMSMSG& /*objMSG*/)
 
     IMS_TRACE_I("HandleTerminated", 0, 0, 0);
 
-    SendTerminatedToListn(FailReason(FAIL_REASON_UNKNOWN, -1));
+    SendTerminatedToListn(CallReasonInfo(CODE_UNSPECIFIED, -1));
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -947,7 +947,7 @@ PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleUnSubCompleted(IN ISubscription* pISubs
     bHandle = IMS_TRUE;
     IMS_TRACE_I("HandleUnSubCompleted : [%s]", PS_BOOL(bHandle), 0, 0);
 
-    SendTerminatedToListn(FailReason(FAIL_REASON_UNKNOWN, -1));
+    SendTerminatedToListn(CallReasonInfo(CODE_UNSPECIFIED, -1));
     return bHandle;
 }
 
@@ -1217,7 +1217,7 @@ PROTECTED VIRTUAL AString DEMngr::ConvertNumber(IN AString aStrIdentity)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL void DEMngr::SendTerminatedToListn(IN FailReason terminatedReason)
+PROTECTED VIRTUAL void DEMngr::SendTerminatedToListn(IN CallReasonInfo terminatedReason)
 {
     if (m_pListener == IMS_NULL)
     {
