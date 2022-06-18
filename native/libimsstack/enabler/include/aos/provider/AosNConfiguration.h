@@ -167,8 +167,6 @@ private:
 
     AosNotifyTerminatedForRegEventWithInitialRegistrationBundle m_objNotifyTerminated;
 
-    AosRegistrationPermanentErrorCodeBundle m_objRegPermanentErrCode;
-
     AosRegistrationErrorCodeWithRetryAfterTimeBundle m_objRegErrCodeWithRetryAfterTime;
     AosRegistrationWithFeatureTagUnavailableBundle m_objRegWithFeatureTagUnavailable;
     AosRegistrationRetryBundle m_objRegRetry;

@@ -100,8 +100,6 @@ public class CarrierConfig {
         public static final String KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY =
                 KEY_PREFIX + "pcscf_discovery_method_int_array";
         // Aos
-        public static final String KEY_IMS_PREFERRED_IPTYPE_INT =
-                KEY_PREFIX + "ims_preferred_iptype_int";
         public static final String KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY =
                 KEY_PREFIX + "ims_identity_priority_int_array";
         public static final String KEY_ISIM_INDEX_FOR_IMPU_INT =
@@ -116,44 +114,10 @@ public class CarrierConfig {
                 KEY_PREFIX + "registration_event_for_cat_required_bool";
         public static final String KEY_PREFERRED_IMS_DSCP_INT =
                 KEY_PREFIX + "preferred_ims_dscp_int";
-        public static final String KEY_IMS_SIGNALLING_DSCP_INT =
-                KEY_PREFIX + "ims_signalling_dscp_int";
         public static final String KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT =
                 KEY_PREFIX + "registration_preferred_accesstype_feature_tag_int";
-        public static final String KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT =
-                KEY_PREFIX + "registration_actual_wait_time_policy_int";
-        // Bundle {
-        public static final String KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE =
-                KEY_PREFIX + "notify_terminated_for_reg_event_with_initial_registration_bundle";
-        public static final String KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT =
-                KEY_PREFIX + "wait_time_for_initial_registration_on_terminated_state_of_reg_event_int";
-        public static final String KEY_EVENT_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY =
-                KEY_PREFIX + "event_for_initial_registration_on_terminated_state_of_reg_event_int_array";
-        public static final String KEY_EVENT_TO_FOLLOW_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY =
-                KEY_PREFIX + "event_to_follow_wait_time_for_initial_registration_on_terminated_state_of_reg_event_int_array";
-        // }
-        // Bundle {
-        public static final String KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE =
-                KEY_PREFIX + "registration_retry_interval_bundle";
-        public static final String KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC_INT_ARRAY =
-                KEY_PREFIX + "registration_retry_random_upper_value_sec_int_array";
-        public static final String KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY =
-                KEY_PREFIX + "registration_retry_interval_sec_int_array";
-        public static final String KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL =
-                KEY_PREFIX + "use_registration_retry_interval_for_subscription_retry_bool";
-        // }
-        // Bundle {
-        public static final String KEY_REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE =
-                KEY_PREFIX + "registration_permanent_error_code_bundle";
         public static final String KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY =
                 KEY_PREFIX + "registration_permanent_error_code_int_array";
-        public static final String KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY =
-                KEY_PREFIX + "registration_permanent_error_max_count_int_array";
-        // }
-
-        // Indicates preferred IP version
-        public static final int IPV4_PREFERRED = 0;
-        public static final int IPV6_PREFERRED = 1;
     }
 
     public static class ImsAcs {
@@ -189,10 +153,6 @@ public class CarrierConfig {
         // Aos
         public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL =
                 KEY_PREFIX + "release_emergency_pdn_with_emergency_call_end_bool";
-        public static final String KEY_DISABLE_T3482_FOR_EMERGENCY_BOOL =
-                KEY_PREFIX + "disable_t3482_for_emergency_bool";
-        public static final String KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT =
-                KEY_PREFIX + "registration_timer_for_emergency_call_millis_int";
         public static final String KEY_PREFERRED_EMERGENCY_REGISTRATION_INT =
                 KEY_PREFIX + "preferred_emergency_registration_int";
         // Mtc
@@ -513,8 +473,6 @@ public class CarrierConfig {
 
     public static class ImsWfc {
         public static final String KEY_PREFIX = "imswfc.";
-        public static final String KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL =
-                KEY_PREFIX + "update_registration_with_country_change_bool";
         public static final String KEY_REGISTRATION_PRIVATE_HEADER_INT =
                 KEY_PREFIX + "registration_private_header_int";
         public static final String KEY_COUNTRY_CODE_INT =
@@ -574,6 +532,58 @@ public class CarrierConfig {
                 "cdmaless_feature_tag_required_bool";
         public static final String KEY_REGISTRATION_RETRY_COUNT_RESET_POLICY_INT =
                 "registration_retry_count_reset_policy_int";
+        public static final String KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY =
+                "registration_permanent_error_max_count_int_array";
+        public static final String
+                KEY_VOWIFI_SUBSCRIPTION_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY =
+                        "vowifi_subscription_error_code_with_initial_registration_int_array";
+        public static final String
+                KEY_SUBSCRIPTION_ERROR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY =
+                        "subscription_error_code_for_stopping_by_expiration_time_int_array";
+        public static final String
+                KEY_SUB_ERR_CODE_FOR_REG_EVENT_WITH_INITIAL_REG_WITH_NEXT_PCSCF_INT_ARRAY =
+                        "subscription_error_code_for_reg_event_"
+                                + "with_initial_registration_with_next_pcscf_int_array";
+        public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
+                "ignore_vops_for_volte_enable_bool";
+        public static final String KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL =
+                "sms_over_ims_available_without_voice_capability_bool";
+        public static final String KEY_IMS_DEREGISTER_ON_3G_NETWORKS_BOOL =
+                "ims_deregister_on_3g_networks_bool";
+        public static final String KEY_REQUIRED_EMERGENCY_REGISTRATION_IN_ROAMING_BOOL =
+                "required_emergency_registration_in_roaming_bool";
+        public static final String KEY_CLEAR_PERMANENT_PDN_FAILURE_INT_ARRAY =
+                "clear_permanent_pdn_failure_int_array";
+        public static final String KEY_USE_WFC_COUNTRY_CODE_AVAILABILITY_CHECK_BOOL =
+                "use_wfc_country_code_availability_check_bool";
+        public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL =
+                "required_volte_block_by_setting_bool";
+        public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL =
+                "required_volte_block_by_airplane_mode_bool";
+        public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =
+                "required_wfc_block_by_airplane_mode_bool";
+        public static final String KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY =
+                "supported_roaming_rats_int_array";
+        public static final String KEY_EMERGENCY_PREFERRED_IPTYPE_INT =
+                "emergency_preferred_iptype_int";
+        public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
+                "sip_message_threshold_for_transport_change_int";
+        public static final String KEY_PERMANENT_PDN_FAILURE_INT_ARRAY =
+                "permanent_pdn_failure_int_array";
+        public static final String KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY =
+                "emergency_pcscf_retry_wait_time_sec_int_array";
+        public static final String KEY_IMS_PREFERRED_IPTYPE_INT =
+                "ims_preferred_iptype_int";
+        public static final String KEY_IMS_SIGNALLING_DSCP_INT =
+                "ims_signalling_dscp_int";
+        public static final String KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT =
+                "registration_actual_wait_time_policy_int";
+        public static final String KEY_DISABLE_T3482_FOR_EMERGENCY_BOOL =
+                "disable_t3482_for_emergency_bool";
+        public static final String KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT =
+                "registration_timer_for_emergency_call_millis_int";
+        public static final String KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL =
+                "update_registration_with_country_change_bool";
         // Bundle {
         public static final String KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE =
                 "specific_registration_error_bundle";
@@ -640,8 +650,6 @@ public class CarrierConfig {
         public static final String KEY_REREGISTRATION_ERROR_CAUSE_WITH_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY =
                 "reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array";
         // }
-        public static final String KEY_VOWIFI_SUBSCRIPTION_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY =
-                "vowifi_subscription_error_code_with_initial_registration_int_array";
         // Bundle {
         public static final String KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE =
                 "subscription_error_code_for_reg_event_with_initial_registration_bundle";
@@ -658,10 +666,6 @@ public class CarrierConfig {
         public static final String KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_INT_ARRAY =
                 "subscription_terminated_error_code_for_reg_event_int_array";
         // }
-        public static final String KEY_SUBSCRIPTION_ERROR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY =
-                "subscription_error_code_for_stopping_by_expiration_time_int_array";
-        public static final String KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_WITH_NEXT_PCSCF_INT_ARRAY =
-                "subscription_error_code_for_reg_event_with_initial_registration_with_next_pcscf_int_array";
         // Bundle {
         public static final String KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE =
                 "registration_error_code_with_retry_after_time_bundle";
@@ -680,34 +684,31 @@ public class CarrierConfig {
         public static final String KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_POLICY_INT_ARRAY =
                 "registration_with_feature_tag_unavailable_policy_int_array";
         // }
-        public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
-                "ignore_vops_for_volte_enable_bool";
-        public static final String KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL =
-                "sms_over_ims_available_without_voice_capability_bool";
-        public static final String KEY_IMS_DEREGISTER_ON_3G_NETWORKS_BOOL =
-                "ims_deregister_on_3g_networks_bool";
-        public static final String KEY_REQUIRED_EMERGENCY_REGISTRATION_IN_ROAMING_BOOL =
-                "required_emergency_registration_in_roaming_bool";
-        public static final String KEY_CLEAR_PERMANENT_PDN_FAILURE_INT_ARRAY =
-                "clear_permanent_pdn_failure_int_array";
-        public static final String KEY_USE_WFC_COUNTRY_CODE_AVAILABILITY_CHECK_BOOL =
-                "use_wfc_country_code_availability_check_bool";
-        public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL =
-                "required_volte_block_by_setting_bool";
-        public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL =
-                "required_volte_block_by_airplane_mode_bool";
-        public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =
-                "required_wfc_block_by_airplane_mode_bool";
-        public static final String KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY =
-                "supported_roaming_rats_int_array";
-        public static final String KEY_EMERGENCY_PREFERRED_IPTYPE_INT =
-                "emergency_preferred_iptype_int";
-        public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
-                "sip_message_threshold_for_transport_change_int";
-        public static final String KEY_PERMANENT_PDN_FAILURE_INT_ARRAY =
-                "permanent_pdn_failure_int_array";
-        public static final String KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY =
-                "emergency_pcscf_retry_wait_time_sec_int_array";
+        // Bundle {
+        public static final String
+                KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE =
+                        "notify_terminated_for_reg_event_with_initial_registration_bundle";
+        public static final String
+                KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT =
+                        "wait_time_for_initial_registration_on_terminated_state_of_reg_event_int";
+        public static final String
+                KEY_EVT_FOR_INIT_REG_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY =
+                        "event_for_initial_registration_on_terminated_state_of_reg_event_int_array";
+        public static final String
+                KEY_EVT_TO_FOLLOW_WAIT_TIME_FOR_INIT_REG_ON_TERM_STATE_OF_REG_EVENT_INT_ARRAY =
+                        "event_to_follow_wait_time_for_initial_registration_"
+                                + "on_terminated_state_of_reg_event_int_array";
+        // }
+        // Bundle {
+        public static final String KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE =
+                "registration_retry_interval_bundle";
+        public static final String KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC_INT_ARRAY =
+                "registration_retry_random_upper_value_sec_int_array";
+        public static final String KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY =
+                "registration_retry_interval_sec_int_array";
+        public static final String KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL =
+                "use_registration_retry_interval_for_subscription_retry_bool";
+        // }
         // Mtc
         public static final String KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL =
                 "check_conference_event_package_version_bool";
@@ -890,6 +891,10 @@ public class CarrierConfig {
         // Uce
         public static final String KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL =
                 "add_video_tag_contact_header_in_publish_bool";
+
+        // Indicates preferred IP version
+        public static final int IPV4_PREFERRED = 0;
+        public static final int IPV6_PREFERRED = 1;
     }
 
     private static final int TYPE_BOOLEAN = 0;
@@ -1139,44 +1144,6 @@ public class CarrierConfig {
         // so we don't need to adjust these bundles.
         // KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE
         // KEY_RCS_REQUIRES_PROVISIONING_BUNDLE
-
-        // Check the following keys:
-        // KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE
-        // KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE
-        // KEY_REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE
-
-        final String[] NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE_KEYS =
-            {
-                Ims.KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT,
-                Ims.KEY_EVENT_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY,
-                Ims.KEY_EVENT_TO_FOLLOW_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY
-
-            };
-
-        setBundle(mConfig,
-                Ims.KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE,
-                NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE_KEYS);
-
-        final String[] REGISTRATION_RETRY_INTERVAL_BUNDLE_KEYS =
-            {
-                Ims.KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC_INT_ARRAY,
-                Ims.KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY,
-                Ims.KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL
-            };
-
-        setBundle(mConfig,
-                Ims.KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE,
-                REGISTRATION_RETRY_INTERVAL_BUNDLE_KEYS);
-
-        final String[] REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE_KEYS =
-            {
-                Ims.KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY,
-                Ims.KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY
-            };
-
-        setBundle(mConfig,
-                Ims.KEY_REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE,
-                REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE_KEYS);
     }
 
     private void refineBundlesForImsRtt() {
@@ -1383,6 +1350,8 @@ public class CarrierConfig {
         // KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE
         // KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE
         // KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE
+        // KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE
+        // KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE
 
         final String[] SPECIFIC_REGISTRATION_ERROR_BUNDLE_KEYS =
             {
@@ -1481,6 +1450,26 @@ public class CarrierConfig {
         setBundle(mConfig,
                 Assets.KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE,
                 REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE_KEYS);
+
+        final String[] notifyTerminatedForRegEventWithInitRegBundleKeys = {
+                Assets.KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT,
+                Assets.KEY_EVT_FOR_INIT_REG_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY,
+                Assets.KEY_EVT_TO_FOLLOW_WAIT_TIME_FOR_INIT_REG_ON_TERM_STATE_OF_REG_EVENT_INT_ARRAY
+        };
+
+        setBundle(mConfig,
+                Assets.KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE,
+                        notifyTerminatedForRegEventWithInitRegBundleKeys);
+
+        final String[] registrationRetryIntervalBundleKeys = {
+                Assets.KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC_INT_ARRAY,
+                Assets.KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY,
+                Assets.KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL
+        };
+
+        setBundle(mConfig,
+                Assets.KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE,
+                        registrationRetryIntervalBundleKeys);
     }
 
     private static void setBundle(PersistableBundle config,

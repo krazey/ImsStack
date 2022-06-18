@@ -178,8 +178,6 @@ const IMS_CHAR CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY[] =
         KEY_IMS_PREFIX "pcscf_discovery_method_int_array";
 
 // Aos
-const IMS_CHAR CarrierConfig::Ims::KEY_IMS_PREFERRED_IPTYPE_INT[] =
-        KEY_IMS_PREFIX "ims_preferred_iptype_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY[] =
         KEY_IMS_PREFIX "ims_identity_priority_int_array";
 const IMS_CHAR CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT[] =
@@ -194,48 +192,10 @@ const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_EVENT_FOR_CAT_REQUIRED_BOOL[
         KEY_IMS_PREFIX "registration_event_for_cat_required_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_PREFERRED_IMS_DSCP_INT[] =
         KEY_IMS_PREFIX "preferred_ims_dscp_int";
-const IMS_CHAR CarrierConfig::Ims::KEY_IMS_SIGNALLING_DSCP_INT[] =
-        KEY_IMS_PREFIX "ims_signalling_dscp_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT[] =
         KEY_IMS_PREFIX "registration_preferred_accesstype_feature_tag_int";
-const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT[] =
-        KEY_IMS_PREFIX "registration_actual_wait_time_policy_int";
-// Bundle {
-const IMS_CHAR
-        CarrierConfig::Ims::KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE[] =
-                KEY_IMS_PREFIX "notify_terminated_for_reg_event_with_initial_registration_bundle";
-const IMS_CHAR CarrierConfig::Ims::
-        KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT[] =
-                KEY_IMS_PREFIX
-        "wait_time_for_initial_registration_on_terminated_state_of_reg_event_int";
-const IMS_CHAR CarrierConfig::Ims::
-        KEY_EVENT_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY[] =
-                KEY_IMS_PREFIX
-        "event_for_initial_registration_on_terminated_state_of_reg_event_int_array";
-const IMS_CHAR CarrierConfig::Ims::
-        KEY_EVENT_TO_FOLLOW_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY
-                [] = KEY_IMS_PREFIX "event_to_follow_wait_time_for_initial_registration_on_"
-                                    "terminated_state_of_reg_event_int_array";
-// }
-// Bundle {
-const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE[] =
-        KEY_IMS_PREFIX "registration_retry_interval_bundle";
-const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC_INT_ARRAY[] =
-        KEY_IMS_PREFIX "registration_retry_random_upper_value_sec_int_array";
-const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY[] =
-        KEY_IMS_PREFIX "registration_retry_interval_sec_int_array";
-const IMS_CHAR
-        CarrierConfig::Ims::KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL[] =
-                KEY_IMS_PREFIX "use_registration_retry_interval_for_subscription_retry_bool";
-// }
-// Bundle {
-const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE[] =
-        KEY_IMS_PREFIX "registration_permanent_error_code_bundle";
 const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY[] =
         KEY_IMS_PREFIX "registration_permanent_error_code_int_array";
-const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY[] =
-        KEY_IMS_PREFIX "registration_permanent_error_max_count_int_array";
-// }
 
 //// ImsEmergency
 #define KEY_IMS_EMERGENCY_PREFIX "imsemergency."
@@ -264,12 +224,9 @@ const IMS_CHAR CarrierConfig::ImsEmergency::
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL[] =
                 KEY_IMS_EMERGENCY_PREFIX "release_emergency_pdn_with_emergency_call_end_bool";
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_DISABLE_T3482_FOR_EMERGENCY_BOOL[] =
-        KEY_IMS_EMERGENCY_PREFIX "disable_t3482_for_emergency_bool";
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT[] =
-        KEY_IMS_EMERGENCY_PREFIX "registration_timer_for_emergency_call_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "preferred_emergency_registration_int";
+
 // Mtc
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_ON_CELLULAR_BOOL[] =
@@ -747,8 +704,6 @@ const IMS_CHAR CarrierConfig::ImsWfc::KEY_PIDF_SHORT_CODE_STRING_ARRAY[] =
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL[] =
         KEY_IMS_WFC_PREFIX "emergency_call_over_emergency_pdn_bool";
 // Public carrier-config - ends
-const IMS_CHAR CarrierConfig::ImsWfc::KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL[] =
-        KEY_IMS_WFC_PREFIX "update_registration_with_country_change_bool";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_REGISTRATION_PRIVATE_HEADER_INT[] =
         KEY_IMS_WFC_PREFIX "registration_private_header_int";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_COUNTRY_CODE_INT[] =
@@ -814,6 +769,56 @@ const IMS_CHAR CarrierConfig::Assets::KEY_CDMALESS_FEATURE_TAG_REQUIRED_BOOL[] =
         "cdmaless_feature_tag_required_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_COUNT_RESET_POLICY_INT[] =
         "registration_retry_count_reset_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY[] =
+        "registration_permanent_error_max_count_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_VOWIFI_SUBSCRIPTION_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY[] =
+                "vowifi_subscription_error_code_with_initial_registration_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SUBSCRIPTION_ERROR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY[] =
+                "subscription_error_code_for_stopping_by_expiration_time_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SUB_ERR_CODE_FOR_REG_EVENT_WITH_INITIAL_REG_WITH_NEXT_PCSCF_INT_ARRAY[] =
+                "subscription_error_code_for_reg_event_with_initial_registration_with_next_"
+                "pcscf_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[] =
+        "ignore_vops_for_volte_enable_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL[] =
+        "sms_over_ims_available_without_voice_capability_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_IMS_DEREGISTER_ON_3G_NETWORKS_BOOL[] =
+        "ims_deregister_on_3g_networks_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_EMERGENCY_REGISTRATION_IN_ROAMING_BOOL[] =
+        "required_emergency_registration_in_roaming_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_CLEAR_PERMANENT_PDN_FAILURE_INT_ARRAY[] =
+        "clear_permanent_pdn_failure_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_USE_WFC_COUNTRY_CODE_AVAILABILITY_CHECK_BOOL[] =
+        "use_wfc_country_code_availability_check_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL[] =
+        "required_volte_block_by_setting_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL[] =
+        "required_volte_block_by_airplane_mode_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL[] =
+        "required_wfc_block_by_airplane_mode_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY[] =
+        "supported_roaming_rats_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_PREFERRED_IPTYPE_INT[] =
+        "emergency_preferred_iptype_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT[] =
+        "sip_message_threshold_for_transport_change_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_PERMANENT_PDN_FAILURE_INT_ARRAY[] =
+        "permanent_pdn_failure_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY[] =
+        "emergency_pcscf_retry_wait_time_sec_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_IMS_PREFERRED_IPTYPE_INT[] = "ims_preferred_iptype_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT[] = "ims_signalling_dscp_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT[] =
+        "registration_actual_wait_time_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_DISABLE_T3482_FOR_EMERGENCY_BOOL[] =
+        "disable_t3482_for_emergency_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT[] =
+        "registration_timer_for_emergency_call_millis_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL[] =
+        "update_registration_with_country_change_bool";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[] =
         "specific_registration_error_bundle";
@@ -888,9 +893,6 @@ const IMS_CHAR CarrierConfig::Assets::
         KEY_REREGISTRATION_ERROR_CAUSE_WITH_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY[] =
                 "reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array";
 // }
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_VOWIFI_SUBSCRIPTION_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY[] =
-                "vowifi_subscription_error_code_with_initial_registration_int_array";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::
         KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE[] =
@@ -913,13 +915,6 @@ const IMS_CHAR
         CarrierConfig::Assets::KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_INT_ARRAY[] =
                 "subscription_terminated_error_code_for_reg_event_int_array";
 // }
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_SUBSCRIPTION_ERROR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY[] =
-                "subscription_error_code_for_stopping_by_expiration_time_int_array";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_WITH_NEXT_PCSCF_INT_ARRAY
-                [] = "subscription_error_code_for_reg_event_with_initial_registration_with_next_"
-                     "pcscf_int_array";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE[] =
         "registration_error_code_with_retry_after_time_bundle";
@@ -942,34 +937,32 @@ const IMS_CHAR
         CarrierConfig::Assets::KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_POLICY_INT_ARRAY[] =
                 "registration_with_feature_tag_unavailable_policy_int_array";
 // }
-const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[] =
-        "ignore_vops_for_volte_enable_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL[] =
-        "sms_over_ims_available_without_voice_capability_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_IMS_DEREGISTER_ON_3G_NETWORKS_BOOL[] =
-        "ims_deregister_on_3g_networks_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_EMERGENCY_REGISTRATION_IN_ROAMING_BOOL[] =
-        "required_emergency_registration_in_roaming_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_CLEAR_PERMANENT_PDN_FAILURE_INT_ARRAY[] =
-        "clear_permanent_pdn_failure_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_WFC_COUNTRY_CODE_AVAILABILITY_CHECK_BOOL[] =
-        "use_wfc_country_code_availability_check_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL[] =
-        "required_volte_block_by_setting_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL[] =
-        "required_volte_block_by_airplane_mode_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL[] =
-        "required_wfc_block_by_airplane_mode_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY[] =
-        "supported_roaming_rats_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_PREFERRED_IPTYPE_INT[] =
-        "emergency_preferred_iptype_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT[] =
-        "sip_message_threshold_for_transport_change_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_PERMANENT_PDN_FAILURE_INT_ARRAY[] =
-        "permanent_pdn_failure_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY[] =
-        "emergency_pcscf_retry_wait_time_sec_int_array";
+// Bundle {
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE[] =
+                "notify_terminated_for_reg_event_with_initial_registration_bundle";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT[] =
+                "wait_time_for_initial_registration_on_terminated_state_of_reg_event_int";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_EVT_FOR_INIT_REG_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY[] =
+                "event_for_initial_registration_on_terminated_state_of_reg_event_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_EVT_TO_FOLLOW_WAIT_TIME_FOR_INIT_REG_ON_TERM_STATE_OF_REG_EVENT_INT_ARRAY[] =
+                "event_to_follow_wait_time_for_initial_registration_on_"
+                "terminated_state_of_reg_event_int_array";
+// }
+// Bundle {
+const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE[] =
+        "registration_retry_interval_bundle";
+const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC_INT_ARRAY[] =
+        "registration_retry_random_upper_value_sec_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY[] =
+        "registration_retry_interval_sec_int_array";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL[] =
+                "use_registration_retry_interval_for_subscription_retry_bool";
+// }
 // Mtc
 const IMS_CHAR CarrierConfig::Assets::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL[] =
         "check_conference_event_package_version_bool";

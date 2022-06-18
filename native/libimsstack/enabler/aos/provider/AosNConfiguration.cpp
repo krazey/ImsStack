@@ -32,7 +32,6 @@ AosNConfiguration::AosNConfiguration() :
         m_objCarrierConfig(AosCarrierConfig()),
         m_objMmtelProvisioning(AosMmtelRequiresProvisioningBundle()),
         m_objNotifyTerminated(AosNotifyTerminatedForRegEventWithInitialRegistrationBundle()),
-        m_objRegPermanentErrCode(AosRegistrationPermanentErrorCodeBundle()),
         m_objRegErrCodeWithRetryAfterTime(AosRegistrationErrorCodeWithRetryAfterTimeBundle()),
         m_objRegWithFeatureTagUnavailable(AosRegistrationWithFeatureTagUnavailableBundle()),
         m_objRegRetry(AosRegistrationRetryBundle()),
@@ -324,7 +323,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetUssdMethod() const
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredIpType() const
 {
-    return m_objCarrierConfig.nImsPreferredIpType;
+    return m_objAsset.nImsPreferredIpType;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmergencyPreferredIpType() const
@@ -374,7 +373,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredImsDscp() const
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetImsSignallingDscp() const
 {
-    return m_objCarrierConfig.nImsSignallingDscp;
+    return m_objAsset.nImsSignallingDscp;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPreferredAccessTypeFeatureTag() const
@@ -389,7 +388,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPrivateHeader() cons
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationActualWaitTimePolicy() const
 {
-    return m_objCarrierConfig.nRegistrationActualWaitTimePolicy;
+    return m_objAsset.nRegistrationActualWaitTimePolicy;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSipMessageThresholdForTransportChange() const
@@ -459,7 +458,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetNotifyEventForInitialRegistratio
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetNotifyWaitTime() const
 {
-    return m_objNotifyTerminated.nWaitTimeForInitRegOnTerminatedstate;
+    return m_objNotifyTerminated.nWaitTimeForInitRegOnTerminatedState;
 }
 
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetNotifyEventForInitialRegWithWaitTime() const
@@ -570,12 +569,12 @@ AosNConfiguration::GetReregRetryErrCodeWithInitialRegWithSamePcscf()
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrCode()
 {
-    return m_objRegPermanentErrCode.objRegistrationPermanentErrorCode;
+    return m_objCarrierConfig.objRegistrationPermanentErrorCode;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrMaxCount()
 {
-    return m_objRegPermanentErrCode.objRegistrationPermanentErrorMaxCount;
+    return m_objAsset.objRegistrationPermanentErrorMaxCount;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithRetryAfterTime()
@@ -667,6 +666,42 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                         KEY_SPECIFIC_REREGISTRATION_FAILURE_WITH_ERROR_CODE_IN_ROAMING_BOOL);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG,
+                "KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE :: SREFT(%d), SREP(%d), SREMC(%d)",
+                m_objSpecificRegErr.nSpecificRegErrFinalType,
+                m_objSpecificRegErr.nSpecificRegErrPolicy,
+                m_objSpecificRegErr.nSpecificRegErrMaxCount);
+        A_IMS_TRACE_D(LOGTAG, "SREMC(%d), SRERCSFRARE(%d), SRRFWECIR(%d)",
+                m_objSpecificRegErr.nSpecificRegErrMinCount,
+                m_objSpecificRegErr.bSpecificRegErrRetryCountSharedForRegAndRegEvent,
+                m_objSpecificRegErr.bSpecificReregFailureWithErrCodeInRoaming);
+        IMS_UINT32 nSize = m_objSpecificRegErr.objSpecificRegErrNumMultipliedByPcscfNum.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue =
+                    m_objSpecificRegErr.objSpecificRegErrNumMultipliedByPcscfNum.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "SRENMBPN(%d), ", nValue, 0, 0);
+        }
+        nSize = m_objSpecificRegErr.objSpecificRegErrCode.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objSpecificRegErr.objSpecificRegErrCode.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "SREC(%d), ", nValue, 0, 0);
+        }
+        nSize = m_objSpecificRegErr.objSpecificReregErrCode.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objSpecificRegErr.objSpecificReregErrCode.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "SRREC(%d), ", nValue, 0, 0);
+        }
+        nSize = m_objSpecificRegErr.objSpecificRegErrWaitTimeSec.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objSpecificRegErr.objSpecificRegErrWaitTimeSec.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "SREWTS(%d), ", nValue, 0, 0);
+        }
+#endif
     }
 
     // AosRegistrationRetryBundle
@@ -692,6 +727,29 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                 CarrierConfig::Assets::KEY_REGISTRATION_RETRY_SIP_503_CODE_POLICY_INT);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG, "KEY_REGISTRATION_RETRY_BUNDLE :: RRMC(%d), RRS305CP(%d), RRTFP(%d)",
+                m_objRegRetry.nRegistrationRetryMinCount,
+                m_objRegRetry.nRegistrationRetrySip305CodePolicy,
+                m_objRegRetry.nRegistrationRetryTimerFPolicy);
+        A_IMS_TRACE_D(LOGTAG, "RRWIVFB(%d), RRDP(%d), RRS503CP(%d)",
+                m_objRegRetry.bRegistrationRetryWithIpVersionFallback,
+                m_objRegRetry.nRegistrationRetryDefaultPolicy,
+                m_objRegRetry.nRegistrationRetrySip503CodePolicy);
+        IMS_UINT32 nSize = m_objRegRetry.objRegistrationRetryErrorCodeWithDifferentPcscf.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue =
+                    m_objRegRetry.objRegistrationRetryErrorCodeWithDifferentPcscf.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RRECWDP(%d), ", nValue, 0, 0);
+        }
+        nSize = m_objRegRetry.objRegistrationRetryErrorCodeWithoutIpsec.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objRegRetry.objRegistrationRetryErrorCodeWithoutIpsec.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RRECWOI(%d), ", nValue, 0, 0);
+        }
+#endif
     }
 
     // AosReregistrationRetryBundle
@@ -714,33 +772,63 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                 CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_SIP_305_CODE_POLICY_INT);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG,
+                "KEY_REREGISTRATION_RETRY_BUNDLE :: RRRETC(%d), RRRMCKR(%d), RRRS305CP(%d)",
+                m_objReregRetry.bReregistrationRetryExpireTimeChecked,
+                m_objReregRetry.nReregistrationRetryMaxCountKeptRegistration,
+                m_objReregRetry.nReregistrationRetrySip305CodePolicy);
+        IMS_UINT32 nSize =
+                m_objReregRetry.objReregistrationRetryErrorCodeWithInitialRegistration.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue =
+                    m_objReregRetry.objReregistrationRetryErrorCodeWithInitialRegistration.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RRRECWIR(%d), ", nValue, 0, 0);
+        }
+        nSize = m_objReregRetry.objReregistrationRetryErrorCodeWithInitialRegistrationWithSamePcscf
+                        .GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue =
+                    m_objReregRetry
+                            .objReregistrationRetryErrorCodeWithInitialRegistrationWithSamePcscf
+                            .GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RRRECWIRWSP(%d), ", nValue, 0, 0);
+        }
+#endif
     }
 
     // AosRegistrationRetryIntervalBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Ims::KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE);
+    piCcBundle = piCc->GetBundle(CarrierConfig::Assets::KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE);
     if (piCcBundle != IMS_NULL)
     {
         m_objRegRetryInterval.objRegistrationRetryRandomUpperValueSec = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC_INT_ARRAY);
+                CarrierConfig::Assets::KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC_INT_ARRAY);
         m_objRegRetryInterval.objRegistrationRetryIntervalSec = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY);
+                CarrierConfig::Assets::KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY);
         m_objRegRetryInterval.bUseRegistrationRetryIntervalForSubscriptionRetry =
-                piCcBundle->GetBoolean(CarrierConfig::Ims::
+                piCcBundle->GetBoolean(CarrierConfig::Assets::
                                 KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
-    }
-
-    // AosRegistrationPermanentErrorCodeBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE);
-    if (piCcBundle != IMS_NULL)
-    {
-        m_objRegPermanentErrCode.objRegistrationPermanentErrorCode = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY);
-        m_objRegPermanentErrCode.objRegistrationPermanentErrorMaxCount = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY);
-        piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG, "KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE :: URRIFSR(%d)",
+                m_objRegRetryInterval.bUseRegistrationRetryIntervalForSubscriptionRetry, 0, 0);
+        IMS_UINT32 nSize = m_objRegRetryInterval.objRegistrationRetryRandomUpperValueSec.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue =
+                    m_objRegRetryInterval.objRegistrationRetryRandomUpperValueSec.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RRRUVS(%d), ", nValue, 0, 0);
+        }
+        nSize = m_objRegRetryInterval.objRegistrationRetryIntervalSec.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objRegRetryInterval.objRegistrationRetryIntervalSec.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RRIS(%d), ", nValue, 0, 0);
+        }
+#endif
     }
 
     // AosRegistrationErrorCodeWithRetryAfterTimeBundle
@@ -760,6 +848,29 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                                 KEY_REREGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG,
+                "KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE :: RECWRATOD(%d)",
+                m_objRegErrCodeWithRetryAfterTime
+                        .bRegistrationErrorCodeWithRetryAfterTimeOnlyDefined,
+                0, 0);
+        IMS_UINT32 nSize = m_objRegErrCodeWithRetryAfterTime
+                                   .objRegistrationErrorCodeWithRetryAfterTime.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objRegErrCodeWithRetryAfterTime
+                                        .objRegistrationErrorCodeWithRetryAfterTime.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RECWRAT(%d), ", nValue, 0, 0);
+        }
+        nSize = m_objRegErrCodeWithRetryAfterTime.objReregistrationErrorCodeWithRetryAfterTime
+                        .GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objRegErrCodeWithRetryAfterTime
+                                        .objReregistrationErrorCodeWithRetryAfterTime.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RRECWRAT(%d), ", nValue, 0, 0);
+        }
+#endif
     }
 
     // AosRegistrationWithFeatureTagUnavailableBundle
@@ -775,26 +886,61 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                                 KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_POLICY_INT_ARRAY);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
+#ifdef __IMS_DEBUG__
+        IMS_UINT32 nSize = m_objRegWithFeatureTagUnavailable
+                                   .objRegistrationWithFeatureTagUnavailable.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objRegWithFeatureTagUnavailable
+                                        .objRegistrationWithFeatureTagUnavailable.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RWFTU(%d), ", nValue, 0, 0);
+        }
+        nSize = m_objRegWithFeatureTagUnavailable.objRegistrationWithFeatureTagUnavailablePolicy
+                        .GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objRegWithFeatureTagUnavailable
+                                        .objRegistrationWithFeatureTagUnavailablePolicy.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RWFTUP(%d), ", nValue, 0, 0);
+        }
+#endif
     }
-
     // AosNotifyTerminatedForRegEventWithInitialRegistrationBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Ims::
+    piCcBundle = piCc->GetBundle(CarrierConfig::Assets::
                     KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE);
     if (piCcBundle != IMS_NULL)
     {
-        m_objNotifyTerminated.nWaitTimeForInitRegOnTerminatedstate = piCcBundle->GetInt(
-                CarrierConfig::Ims::
+        m_objNotifyTerminated.nWaitTimeForInitRegOnTerminatedState = piCcBundle->GetInt(
+                CarrierConfig::Assets::
                         KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT);
-        m_objNotifyTerminated.objEventForInitRegOnTerminatedState = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::
-                        KEY_EVENT_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY);
+        m_objNotifyTerminated.objEventForInitRegOnTerminatedState =
+                piCcBundle->GetIntArray(CarrierConfig::Assets::
+                                KEY_EVT_FOR_INIT_REG_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY);
         m_objNotifyTerminated
                 .objEventToFollowWtForInitRegOnTerminatedState = piCcBundle->GetIntArray(
-                CarrierConfig::Ims::
-                        KEY_EVENT_TO_FOLLOW_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY);
+                CarrierConfig::Assets::
+                        KEY_EVT_TO_FOLLOW_WAIT_TIME_FOR_INIT_REG_ON_TERM_STATE_OF_REG_EVENT_INT_ARRAY);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
-
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG,
+                "KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE :: "
+                "WTFIROTS(%d)",
+                m_objNotifyTerminated.nWaitTimeForInitRegOnTerminatedState, 0, 0);
+        IMS_UINT32 nSize = m_objNotifyTerminated.objEventForInitRegOnTerminatedState.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objNotifyTerminated.objEventForInitRegOnTerminatedState.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "EFIROTS(%d), ", nValue, 0, 0);
+        }
+        nSize = m_objNotifyTerminated.objEventToFollowWtForInitRegOnTerminatedState.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue =
+                    m_objNotifyTerminated.objEventToFollowWtForInitRegOnTerminatedState.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "ETFWFIROTS(%d), ", nValue, 0, 0);
+        }
+#endif
         IMSVector<IMS_SINT32>& objNotifyEvents =
                 m_objNotifyTerminated.objEventForInitRegOnTerminatedState;
         m_nEventForInitRegOnTerminatedState = 0;
@@ -825,6 +971,18 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                         KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_INT_ARRAY);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG,
+                "KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE :: "
+                "SERMCWIR(%d)",
+                m_objSubErrCodeWithInitReg.nSubErrRetryMaxCountWithInitReg, 0, 0);
+        IMS_UINT32 nSize = m_objSubErrCodeWithInitReg.objSubErrCodeWithInitReg.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objSubErrCodeWithInitReg.objSubErrCodeWithInitReg.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "SECWIR(%d), ", nValue, 0, 0);
+        }
+#endif
     }
 
     // AosSubscriptionTerminatedErrorCodeForRegEventBundle
@@ -840,6 +998,20 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                                 KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_INT_ARRAY);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG,
+                "KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE :: STECRM(%d)",
+                m_objSubTerminatedErrCode.nSubTerminatedErrCodeRetryMaxCount, 0, 0);
+        IMS_UINT32 nSize =
+                m_objSubTerminatedErrCode.objSubscriptionTerminatedErrorCodeForRegEvent.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue =
+                    m_objSubTerminatedErrCode.objSubscriptionTerminatedErrorCodeForRegEvent.GetAt(
+                            i);
+            A_IMS_TRACE_D(LOGTAG, "STECFRE(%d), ", nValue, 0, 0);
+        }
+#endif
     }
 }
 
@@ -931,8 +1103,6 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
 
     /* carrier_config */
     /// ims.
-    m_objCarrierConfig.nImsPreferredIpType =
-            piCc->GetInt(CarrierConfig::Ims::KEY_IMS_PREFERRED_IPTYPE_INT);
     m_objCarrierConfig.objImsIdentityPriority =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY);
     m_objCarrierConfig.nIsimIndexForImpu =
@@ -945,27 +1115,19 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_REGISTRATION_EVENT_FOR_CAT_REQUIRED_BOOL);
     m_objCarrierConfig.nPreferredImsDscp =
             piCc->GetInt(CarrierConfig::Ims::KEY_PREFERRED_IMS_DSCP_INT);
-    m_objCarrierConfig.nImsSignallingDscp =
-            piCc->GetInt(CarrierConfig::Ims::KEY_IMS_SIGNALLING_DSCP_INT);
     m_objCarrierConfig.nRegistrationPreferredAccesstypeFeatureTag =
             piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT);
-    m_objCarrierConfig.nRegistrationActualWaitTimePolicy =
-            piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT);
+    m_objCarrierConfig.objRegistrationPermanentErrorCode =
+            piCc->GetIntArray(CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY);
     /// imssms.
     m_objCarrierConfig.bSupportLimitedAdminSmsMode =
             piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL);
     /// imsemergency.
     m_objCarrierConfig.bReleaseEmergencyPdnWithEmergencyCallEnd = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL);
-    m_objCarrierConfig.bDisableT3482ForEmergency =
-            piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_DISABLE_T3482_FOR_EMERGENCY_BOOL);
-    m_objCarrierConfig.nRegistrationTimerForEmergencyCallMillis = piCc->GetInt(
-            CarrierConfig::ImsEmergency::KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT);
     m_objCarrierConfig.nPreferredEmergencyRegistration =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT);
     /// imswfc.
-    m_objCarrierConfig.bUpdateRegistrationWithCountryChange = piCc->GetBoolean(
-            CarrierConfig::ImsWfc::KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL);
     m_objCarrierConfig.nRegistrationPrivateHeader =
             piCc->GetInt(CarrierConfig::ImsWfc::KEY_REGISTRATION_PRIVATE_HEADER_INT);
     /// asset
@@ -1002,10 +1164,9 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
     m_objAsset.objSubscriptionErrorCodeForStoppingByExpirationTime =
             piCc->GetIntArray(CarrierConfig::Assets::
                             KEY_SUBSCRIPTION_ERROR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY);
-    m_objAsset
-            .objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf = piCc->GetIntArray(
-            CarrierConfig::Assets::
-                    KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_WITH_NEXT_PCSCF_INT_ARRAY);
+    m_objAsset.objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf =
+            piCc->GetIntArray(CarrierConfig::Assets::
+                            KEY_SUB_ERR_CODE_FOR_REG_EVENT_WITH_INITIAL_REG_WITH_NEXT_PCSCF_INT_ARRAY);
     m_objAsset.bIgnoreVopsForVolteEnable =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL);
     m_objAsset.bSmsOverImsAvailableWithoutVoiceCapability = piCc->GetBoolean(
@@ -1042,6 +1203,20 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY);
     m_objAsset.nRegistrationRetryCountResetPolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REGISTRATION_RETRY_COUNT_RESET_POLICY_INT);
+    m_objAsset.objRegistrationPermanentErrorMaxCount = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY);
+    m_objAsset.nImsPreferredIpType =
+            piCc->GetInt(CarrierConfig::Assets::KEY_IMS_PREFERRED_IPTYPE_INT);
+    m_objAsset.nImsSignallingDscp =
+            piCc->GetInt(CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT);
+    m_objAsset.nRegistrationActualWaitTimePolicy =
+            piCc->GetInt(CarrierConfig::Assets::KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT);
+    m_objAsset.bDisableT3482ForEmergency =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_DISABLE_T3482_FOR_EMERGENCY_BOOL);
+    m_objAsset.nRegistrationTimerForEmergencyCallMillis = piCc->GetInt(
+            CarrierConfig::Assets::KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT);
+    m_objAsset.bUpdateRegistrationWithCountryChange = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL);
 }
 
 PRIVATE

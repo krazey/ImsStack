@@ -282,7 +282,7 @@ PROTECTED
 IMS_BOOL AosConnector::IsIpv6DelayRequired()
 {
     IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
-    IMS_SINT32 nPreferredType = CarrierConfig::Ims::IP_VERSION_6;
+    IMS_SINT32 nPreferredType = CarrierConfig::Assets::IP_VERSION_6;
 
     if (IsEmergencyType())
     {
@@ -293,7 +293,7 @@ IMS_BOOL AosConnector::IsIpv6DelayRequired()
         nPreferredType = GET_N_CONFIG(nSlotId)->GetPreferredIpType();
     }
 
-    if (nPreferredType == CarrierConfig::Ims::IP_VERSION_4)
+    if (nPreferredType == CarrierConfig::Assets::IP_VERSION_4)
     {
         return IMS_FALSE;
     }

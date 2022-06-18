@@ -119,19 +119,19 @@ public class DCSettings implements IDCSettings {
     @Override
     public int getPreferredIpVersion() {
         if (mCarrierConfig != null) {
-            return mCarrierConfig.getInt(CarrierConfig.Ims.KEY_IMS_PREFERRED_IPTYPE_INT,
-                    CarrierConfig.Ims.IPV6_PREFERRED);
+            return mCarrierConfig.getInt(CarrierConfig.Assets.KEY_IMS_PREFERRED_IPTYPE_INT,
+                    CarrierConfig.Assets.IPV6_PREFERRED);
         }
-        return CarrierConfig.Ims.IPV6_PREFERRED;
+        return CarrierConfig.Assets.IPV6_PREFERRED;
     }
 
     @Override
     public int getEmergencyPreferredIpVersion() {
         if (mCarrierConfig != null) {
             return mCarrierConfig.getInt(CarrierConfig.Assets.KEY_EMERGENCY_PREFERRED_IPTYPE_INT,
-                    CarrierConfig.Ims.IPV6_PREFERRED);
+                    CarrierConfig.Assets.IPV6_PREFERRED);
         }
-        return CarrierConfig.Ims.IPV6_PREFERRED;
+        return CarrierConfig.Assets.IPV6_PREFERRED;
     }
 
     @Override

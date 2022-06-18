@@ -53,6 +53,7 @@ public:
             nRegistrationSubscribeExpiryTimerSec(600000),
             objGeolocationPidfInSipRegisterSupport(IMSVector<IMS_SINT32>()),
             objSupportedRats(IMSVector<IMS_SINT32>()),
+            objRegistrationPermanentErrorCode(IMSVector<IMS_SINT32>()),
             bCarrierVolteRoamingAvailable(IMS_TRUE),
             bSmsOverImsSupported(IMS_TRUE),
             objSmsOverImsSupportedRats(IMSVector<IMS_SINT32>()),
@@ -60,24 +61,18 @@ public:
             objEmergencyOverImsSupportedRats(IMSVector<IMS_SINT32>()),
             nEmergencyRegistrationTimerMillis(10000),
             nRefreshGeolocationTimeoutMillis(5000),
-            nImsPreferredIpType(CarrierConfig::Ims::IP_VERSION_6),
             objImsIdentityPriority(IMSVector<IMS_SINT32>()),
             nIsimIndexForImpu(1),
             objUpdateRegistrationWithRatChange(IMSVector<IMS_SINT32>()),
             bUnsubscribeRegistrationEventPackage(IMS_FALSE),
             bRegistrationEventForCatRequired(IMS_FALSE),
             nPreferredImsDscp(CarrierConfig::Ims::PREFERRED_DSCP_NONE),
-            nImsSignallingDscp(46),
             nRegistrationPreferredAccesstypeFeatureTag(
                     CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED),
-            nRegistrationActualWaitTimePolicy(CarrierConfig::Ims::AWT_POLICY_RFC_RULE),
             bSupportLimitedAdminSmsMode(IMS_FALSE),
             bReleaseEmergencyPdnWithEmergencyCallEnd(IMS_FALSE),
-            bDisableT3482ForEmergency(IMS_FALSE),
-            nRegistrationTimerForEmergencyCallMillis(0),
             nPreferredEmergencyRegistration(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
-            bUpdateRegistrationWithCountryChange(IMS_FALSE),
             nRegistrationPrivateHeader(0)
     {
         // temp setting
@@ -120,6 +115,7 @@ public:
     IMS_SINT32 nRegistrationSubscribeExpiryTimerSec;
     IMSVector<IMS_SINT32> objGeolocationPidfInSipRegisterSupport;
     IMSVector<IMS_SINT32> objSupportedRats;
+    IMSVector<IMS_SINT32> objRegistrationPermanentErrorCode;
 
     /// imsvoice.
     IMS_BOOL bCarrierVolteRoamingAvailable;
@@ -142,28 +138,22 @@ public:
 
     /* carrier_config */
     /// ims
-    IMS_SINT32 nImsPreferredIpType;
     IMSVector<IMS_SINT32> objImsIdentityPriority;
     IMS_SINT32 nIsimIndexForImpu;
     IMSVector<IMS_SINT32> objUpdateRegistrationWithRatChange;
     IMS_BOOL bUnsubscribeRegistrationEventPackage;
     IMS_BOOL bRegistrationEventForCatRequired;
     IMS_SINT32 nPreferredImsDscp;
-    IMS_SINT32 nImsSignallingDscp;
     IMS_SINT32 nRegistrationPreferredAccesstypeFeatureTag;
-    IMS_SINT32 nRegistrationActualWaitTimePolicy;
 
     /// imssms.
     IMS_BOOL bSupportLimitedAdminSmsMode;
 
     /// imsemergency.
     IMS_BOOL bReleaseEmergencyPdnWithEmergencyCallEnd;
-    IMS_BOOL bDisableT3482ForEmergency;
-    IMS_SINT32 nRegistrationTimerForEmergencyCallMillis;
     IMS_SINT32 nPreferredEmergencyRegistration;
 
     /// imswfc.
-    IMS_BOOL bUpdateRegistrationWithCountryChange;
     IMS_SINT32 nRegistrationPrivateHeader;
 };
 #endif  // AOS_CARRIER_CONFIG_H_

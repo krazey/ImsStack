@@ -1283,11 +1283,11 @@ TEST_F(AosHandleTest, GetAosFeature_)
 
 TEST_F(AosHandleTest, ConvertToAosFeature_)
 {
-    EXPECT_EQ(ConvertToAosFeature(CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_MMTEL),
+    EXPECT_EQ(ConvertToAosFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL),
             ImsAosFeature::MMTEL);
-    EXPECT_EQ(ConvertToAosFeature(CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_VIDEO),
+    EXPECT_EQ(ConvertToAosFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO),
             ImsAosFeature::VIDEO);
-    EXPECT_EQ(ConvertToAosFeature(CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_SMS),
+    EXPECT_EQ(ConvertToAosFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_SMS),
             ImsAosFeature::SMSIP);
     EXPECT_EQ(ConvertToAosFeature(0), ImsAosFeature::NONE);
 }
