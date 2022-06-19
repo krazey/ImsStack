@@ -325,9 +325,11 @@ void JniMediaSession::OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const android::Parc
     ImsMediaNotifyQosParam* pParam = new ImsMediaNotifyQosParam();
 
     pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
-    pParam->m_objIpAddr = IPAddress((AString)objParcel.readString8());
+    AString strIpAddress;
+    ConvertString(objParcel.readString16(), strIpAddress);
+    pParam->m_objIpAddr = IPAddress(strIpAddress);
     pParam->m_nPort = objParcel.readInt32();
-    pParam->m_bResult = (IMS_BOOL)objParcel.readInt32();
+    pParam->m_bResult = (IMS_BOOL)objParcel.readBool();
 
     m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
@@ -360,4 +362,11 @@ void JniMediaSession::OnCmdChangeCameraZoom(IN IMS_SINT32 nMsg, IN const android
     ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
     pParam->nValue = objParcel.readInt32();
     m_piMediaManager->OnVideoMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
+PRIVATE
+void JniMediaSession::ConvertString(IN const android::String16& strSource, OUT AString& strDest)
+{
+    android::String8 str8(strSource);
+    strDest = str8.string();
 }

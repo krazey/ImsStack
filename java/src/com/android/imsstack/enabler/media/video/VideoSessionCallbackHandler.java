@@ -157,4 +157,26 @@ public class VideoSessionCallbackHandler {
         ImsLog.v("onNotifyVideoDataUsage: size=" + bytes);
         // TODO: send it to video provider
     }
+
+    /**
+     * Handles Qos notification
+     *
+     * @param remoteAddress Remote address
+     * @param remotePort Remote port
+     * @param result QoS connection result
+     */
+    public void onNotifyQosInfo(@NonNull String remoteAddress, int remotePort, boolean result) {
+        ImsLog.v("onNotifyQosInfo remoteAddress= " + remoteAddress + " remotePort= " + remotePort
+                + " result= " + result);
+
+        Parcel parcel = Parcel.obtain();
+
+        parcel.writeInt(MediaConstants.NOTIFY_QOS_INFO);
+        parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
+        parcel.writeString(remoteAddress);
+        parcel.writeInt(remotePort);
+        parcel.writeBoolean(result);
+
+        getMtcMediaInterface().sendRequest(parcel);
+    }
 }

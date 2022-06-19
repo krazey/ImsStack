@@ -1129,11 +1129,14 @@ IMS_BOOL MediaSession::OnNotifyQosInfo(IN IMS_UINTP pParam_)
     ImsMediaBasicSessionInfoParam* pBasicSessionInfo =
             GetBasicSessionInfofromRemoteArress(objIpAddr.ToString(), nPort);
 
-    m_pClientListener->MediaSession_NotifyQos(
-            pBasicSessionInfo->m_nNegoId, bResult, pParam->m_eMediaType);
+    if (pBasicSessionInfo != IMS_NULL)
+    {
+        m_pClientListener->MediaSession_NotifyQos(
+                pBasicSessionInfo->m_nNegoId, bResult, pParam->m_eMediaType);
+        delete pBasicSessionInfo;
+    }
 
     delete pParam;
-    delete pBasicSessionInfo;
     return IMS_TRUE;
 }
 

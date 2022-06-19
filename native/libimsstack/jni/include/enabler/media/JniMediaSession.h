@@ -54,6 +54,7 @@ private:
     void OnCmdSetSurface(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnCmdSelectCamera(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnCmdChangeCameraZoom(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
+    void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
 
 private:
     JniMediaSessionThread* m_pThread;
