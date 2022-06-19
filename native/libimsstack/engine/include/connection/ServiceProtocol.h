@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20141117  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SERVICE_PROTOCOL_H_
-#define _SERVICE_PROTOCOL_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SERVICE_PROTOCOL_H_
+#define SERVICE_PROTOCOL_H_
 
 #include "Protocol.h"
 
@@ -20,8 +23,14 @@ class IService;
 class ServiceProtocol : public Protocol
 {
 public:
-    ServiceProtocol();
-    virtual ~ServiceProtocol();
+    inline ServiceProtocol() :
+            Protocol()
+    {
+    }
+    inline virtual ~ServiceProtocol() {}
+
+    ServiceProtocol(IN const ServiceProtocol&) = delete;
+    ServiceProtocol& operator=(IN const ServiceProtocol&) = delete;
 
 public:
     virtual IConnection* OpenPrim(IN const AString& strName);
@@ -40,4 +49,4 @@ public:
     static const IMS_CHAR CONNECTION_PARAM_SERVICE_ID[];
 };
 
-#endif  // _SERVICE_PROTOCOL_H_
+#endif

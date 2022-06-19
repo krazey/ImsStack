@@ -1,29 +1,28 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090319  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
+
+#include "Connector.h"
 #include "Protocol.h"
 #include "ProtocolPermission.h"
-#include "Connector.h"
 
 __IMS_TRACE_TAG_IMS__;
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IConnection* Connector::Open(IN const AString& strName)
 {
@@ -35,28 +34,28 @@ IConnection* Connector::Open(IN const AString& strName)
         return IMS_NULL;
     }
 
-    AString strURI;
+    AString strUri;
 
     // Remove the display name and AQUOT if present
-    IMS_SINT32 nIndexOfLAQUOT = strName.GetIndexOf(TextParser::CHAR_LAQUOT);
+    IMS_SINT32 nIndexOfLaquot = strName.GetIndexOf(TextParser::CHAR_LAQUOT);
 
-    if (nIndexOfLAQUOT != AString::NPOS)
+    if (nIndexOfLaquot != AString::NPOS)
     {
-        IMS_SINT32 nIndexOfRAQUOT = strName.GetIndexOf(TextParser::CHAR_RAQUOT);
+        IMS_SINT32 nIndexOfRaquot = strName.GetIndexOf(TextParser::CHAR_RAQUOT);
 
-        strURI = strName.GetSubStr(nIndexOfLAQUOT + 1, nIndexOfRAQUOT - nIndexOfLAQUOT - 1);
+        strUri = strName.GetSubStr(nIndexOfLaquot + 1, nIndexOfRaquot - nIndexOfLaquot - 1);
     }
     else
     {
-        strURI = strName;
+        strUri = strName;
     }
 
-    strURI = strURI.Trim();
+    strUri = strUri.Trim();
 
     // Tokenize the scheme field in the given name
-    nIndexOfColon = strURI.GetIndexOf(TextParser::CHAR_COLON);
+    nIndexOfColon = strUri.GetIndexOf(TextParser::CHAR_COLON);
 
-    AString strScheme = strURI.Left(nIndexOfColon).Trim();
+    AString strScheme = strUri.Left(nIndexOfColon).Trim();
 
     // Look up the protocol to determine if this URI scheme supports or not
     Protocol* pProtocol = ProtocolPermission::GetInstance()->Lookup(strScheme);
@@ -65,18 +64,13 @@ IConnection* Connector::Open(IN const AString& strName)
     {
         // ConnectionNotFoundException
         IMS_TRACE_E(0, "Protocol permissioni is not allowed: %s, uri: %s", strName.GetStr(),
-                strURI.GetStr(), 0);
+                strUri.GetStr(), 0);
         return IMS_NULL;
     }
 
-    return pProtocol->OpenPrim(strURI);
+    return pProtocol->OpenPrim(strUri);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IConnection* Connector::Open(
         IN const AString& strScheme, IN const AString& strTarget, IN const AString& strParams)

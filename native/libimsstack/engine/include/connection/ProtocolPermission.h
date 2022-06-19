@@ -1,44 +1,39 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091027  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _PROTOCOL_PERMISSION_H_
-#define _PROTOCOL_PERMISSION_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef PROTOCOL_PERMISSION_H_
+#define PROTOCOL_PERMISSION_H_
 
 #include "AString.h"
 
 class Protocol;
-class ProtocolPermissionPrivate;
 
 class ProtocolPermission
 {
 private:
-    ProtocolPermission();
-    ProtocolPermission(IN const ProtocolPermission& objRHS);
+    inline ProtocolPermission() {}
+    inline ~ProtocolPermission() {}
 
 public:
-    ~ProtocolPermission();
-
-private:
-    ProtocolPermission& operator=(IN const ProtocolPermission& objRHS);
+    ProtocolPermission(IN const ProtocolPermission&) = delete;
+    ProtocolPermission& operator=(IN const ProtocolPermission&) = delete;
 
 public:
     Protocol* Lookup(IN const AString& strName);
-    IMS_BOOL Register(IN const AString& strName, IN Protocol* pProtocol);
-    IMS_BOOL Deregister(IN const AString& strName);
 
     static ProtocolPermission* GetInstance();
-
-private:
-    ProtocolPermissionPrivate* pProtocolPermissionP;
 };
 
-#endif  // _PROTOCOL_PERMISSION_H_
+#endif

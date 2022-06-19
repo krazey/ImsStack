@@ -1,18 +1,22 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090319  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
+
 #include "IService.h"
 #include "ServiceProtocol.h"
 
@@ -21,27 +25,6 @@ __IMS_TRACE_TAG_IMS__;
 PUBLIC GLOBAL const IMS_CHAR ServiceProtocol::CONNECTION_PARAM_USER_ID[] = "userId";
 PUBLIC GLOBAL const IMS_CHAR ServiceProtocol::CONNECTION_PARAM_SERVICE_ID[] = "serviceId";
 
-PUBLIC
-ServiceProtocol::ServiceProtocol() :
-        Protocol()
-{
-}
-
-PUBLIC VIRTUAL ServiceProtocol::~ServiceProtocol() {}
-
-/*
- Creates and opens a Connection; SipConnection, Service, and so on.
-
-Remarks
- The creation of Connections is performed dynamically by looking up a protocol implementation class
- whose name is formed from the platform name (read from a system property) and the protocol name
- of the requested connection (extracted from the parameter string supplied by the application
- programmer).
-
- It throws the error as follows:
-     ILLEGAL_ARGUMENT,
-     CONNECTION_NOT_FOUND
-*/
 PUBLIC VIRTUAL IConnection* ServiceProtocol::OpenPrim(IN const AString& strName)
 {
     AString strServiceType;
@@ -67,19 +50,6 @@ PUBLIC VIRTUAL IConnection* ServiceProtocol::OpenPrim(IN const AString& strName)
     return OpenPrim(strServiceType, strAppId, strParams);
 }
 
-/*
- Creates and opens a Connection; SipConnection, Service, and so on.
-
-Remarks
- The creation of Connections is performed dynamically by looking up a protocol implementation class
- whose name is formed from the platform name (read from a system property) and the protocol name
- of the requested connection (extracted from the parameter string supplied by the application
- programmer).
-
- It throws the error as follows:
-     ILLEGAL_ARGUMENT,
-     CONNECTION_NOT_FOUND
-*/
 PUBLIC VIRTUAL IConnection* ServiceProtocol::OpenPrim(
         IN const AString& strScheme, IN const AString& strTarget, IN const AString& strParams)
 {
@@ -119,11 +89,6 @@ PUBLIC VIRTUAL IConnection* ServiceProtocol::OpenPrim(
     return CreateService(strTarget, strServiceId, strUserId);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IService* ServiceProtocol::CreateService(IN const AString& /*strAppId*/,
         IN const AString& /*strServiceId*/, IN const AString& /*strUserId*/)
 {
@@ -131,11 +96,6 @@ PROTECTED VIRTUAL IService* ServiceProtocol::CreateService(IN const AString& /*s
     return IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL const IMS_CHAR* ServiceProtocol::GetConnectionScheme() const
 {
     // The subclass MUST implement this method
