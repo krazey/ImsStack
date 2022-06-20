@@ -52,8 +52,7 @@ private:
 TEST(MtcBlockCheckerTest, CheckEmptyRuleReturnsUnblocked)
 {
     IMSList<IMtcBlockRule*> lstRules;
-    TestListener objListener;
-    MtcBlockChecker objChecker(lstRules, objListener);
+    MtcBlockChecker objChecker(lstRules, nullptr);
 
     Result objResult = objChecker.Check();
 
@@ -65,8 +64,7 @@ TEST(MtcBlockCheckerTest, CheckAllUnblockedRuleReturnsUnblocked)
     IMSList<IMtcBlockRule*> lstRules;
     lstRules.Append(new TestRule(Result::Status::UNBLOCKED));
     lstRules.Append(new TestRule(Result::Status::UNBLOCKED));
-    TestListener objListener;
-    MtcBlockChecker objChecker(lstRules, objListener);
+    MtcBlockChecker objChecker(lstRules, nullptr);
 
     Result objResult = objChecker.Check();
 
@@ -79,8 +77,7 @@ TEST(MtcBlockCheckerTest, CheckSomeBlockedRuleReturnsBlocked)
     lstRules.Append(new TestRule(Result::Status::UNBLOCKED));
     lstRules.Append(new TestRule(Result::Status::PENDING));
     lstRules.Append(new TestRule(Result::Status::BLOCKED, objReason));
-    TestListener objListener;
-    MtcBlockChecker objChecker(lstRules, objListener);
+    MtcBlockChecker objChecker(lstRules, nullptr);
 
     Result objResult = objChecker.Check();
 
@@ -92,8 +89,7 @@ TEST(MtcBlockCheckerTest, CheckSomePendingRuleReturnsPending)
     IMSList<IMtcBlockRule*> lstRules;
     lstRules.Append(new TestRule(Result::Status::UNBLOCKED));
     lstRules.Append(new TestRule(Result::Status::PENDING));
-    TestListener objListener;
-    MtcBlockChecker objChecker(lstRules, objListener);
+    MtcBlockChecker objChecker(lstRules, nullptr);
 
     Result objResult = objChecker.Check();
 
@@ -106,7 +102,7 @@ TEST(MtcBlockCheckerTest, AllPendingRuleUnblockedNotifiesListener)
     lstRules.Append(new TestRule(Result::Status::PENDING));
     lstRules.Append(new TestRule(Result::Status::PENDING));
     TestListener objListener;
-    MtcBlockChecker objChecker(lstRules, objListener);
+    MtcBlockChecker objChecker(lstRules, &objListener);
 
     Result objResult = objChecker.Check();
     objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
@@ -121,7 +117,7 @@ TEST(MtcBlockCheckerTest, SomePendingRuleUnblockedNotNotifiesListener)
     lstRules.Append(new TestRule(Result::Status::PENDING));
     lstRules.Append(new TestRule(Result::Status::PENDING));
     TestListener objListener;
-    MtcBlockChecker objChecker(lstRules, objListener);
+    MtcBlockChecker objChecker(lstRules, &objListener);
 
     Result objResult = objChecker.Check();
     objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
@@ -135,7 +131,7 @@ TEST(MtcBlockCheckerTest, SomePendingRuleBlockedNotifiesListener)
     lstRules.Append(new TestRule(Result::Status::PENDING));
     lstRules.Append(new TestRule(Result::Status::PENDING));
     TestListener objListener;
-    MtcBlockChecker objChecker(lstRules, objListener);
+    MtcBlockChecker objChecker(lstRules, &objListener);
 
     Result objResult = objChecker.Check();
     objChecker.OnBlockRuleChecked(Result(Result::Status::BLOCKED, objReason));
@@ -151,7 +147,7 @@ TEST(MtcBlockCheckerTest, ListenerNotNotifiedAfterNotifiedOnce)
     lstRules.Append(new TestRule(Result::Status::PENDING));
     lstRules.Append(new TestRule(Result::Status::PENDING));
     TestListener objListener;
-    MtcBlockChecker objChecker(lstRules, objListener);
+    MtcBlockChecker objChecker(lstRules, &objListener);
 
     Result objResult = objChecker.Check();
     objChecker.OnBlockRuleChecked(Result(Result::Status::BLOCKED, objReason));

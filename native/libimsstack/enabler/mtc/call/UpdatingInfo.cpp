@@ -5,6 +5,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 UpdatingInfo::UpdatingInfo() :
+        m_eTargetCallType(CallType::UNKNOWN),
         m_objNegotiatedInfo(MediaInfo()),
         m_objModifyingInfo(MediaInfo()),
         m_objAlertingInfo(MediaInfo()),

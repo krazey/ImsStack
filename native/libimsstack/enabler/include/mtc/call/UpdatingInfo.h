@@ -1,6 +1,7 @@
 #ifndef UPDATING_INFO_H_
 #define UPDATING_INFO_H_
 
+#include "IMtcCall.h"
 #include "MtcDef.h"
 
 class UpdatingInfo final
@@ -12,12 +13,14 @@ public:
     UpdatingInfo& operator=(IN const UpdatingInfo&) = delete;
 
 public:
+    inline CallType GetTargetCallType() const { return m_eTargetCallType; }
     inline MediaInfo& GetNegotiatedInfo() { return m_objNegotiatedInfo; }
     inline MediaInfo& GetModifyingInfo() { return m_objModifyingInfo; }
     inline MediaInfo& GetAlertingInfo() { return m_objAlertingInfo; }
     inline MediaInfo& GetModifiedInfo() { return m_objModifiedInfo; }
     inline IMS_BOOL IsModifier() { return m_bModifier; }
     inline IMS_BOOL IsAlerted() { return m_bAlerted; }
+    inline void SetTargetCallType(IN CallType eCallType) { m_eTargetCallType = eCallType; }
     inline void SetModifier() { m_bModifier = IMS_TRUE; }
     inline void SetAlerted() { m_bAlerted = IMS_TRUE; }
 
@@ -31,6 +34,7 @@ public:
     IMS_BOOL IsModified();
 
 private:
+    CallType m_eTargetCallType;
     MediaInfo m_objNegotiatedInfo;
     MediaInfo m_objModifyingInfo;
     MediaInfo m_objAlertingInfo;

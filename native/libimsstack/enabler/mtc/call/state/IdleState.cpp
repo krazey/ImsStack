@@ -443,7 +443,8 @@ IMSList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
-    lstRules.Append(new CallTypeBlockRule(m_objContext));
+    lstRules.Append(
+            new CallTypeBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
     lstRules.Append(new TerminalBasedCallWaitingBlockRule(m_objContext));
 
     return lstRules;

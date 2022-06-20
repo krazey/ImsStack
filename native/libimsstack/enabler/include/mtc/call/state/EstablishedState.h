@@ -2,8 +2,8 @@
 #define ESTABLISHED_STATE_H_
 
 #include "IMSTypeDef.h"
-#include "call/state/MtcCallState.h"
 #include "MtcDef.h"
+#include "call/state/MtcCallState.h"
 
 class EstablishedState : public MtcCallState
 {
@@ -44,6 +44,7 @@ private:
     IMS_RESULT FormAutoAccept(IN IMS_BOOL bWithoutOffer);
     void AdjustDirectionWithHeldByMe(IN IMS_BOOL bWithoutOffer);
     IMS_BOOL IsConferenceCallParticipant();
+    IMSList<IMtcBlockRule*> GetCallUpdateBlockRules() const;
 
     CallStateName TerminateUssiAfterInfoTransaction();
 };

@@ -3,16 +3,15 @@
 
 #include "IMSTypeDef.h"
 #include "helper/block/IMtcBlockRule.h"
+#include "call/IMtcCall.h"
 
 class IMtcCallContext;
-class IMtcCallManager;
 class MtcConfigurationProxy;
-struct CallInfo;
 
 class CallTypeBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit CallTypeBlockRule(IN IMtcCallContext& objContext);
+    explicit CallTypeBlockRule(IN IMtcCallContext& objContext, CallType eCallTypeToCheck);
     virtual ~CallTypeBlockRule();
     CallTypeBlockRule(IN const CallTypeBlockRule&) = delete;
     CallTypeBlockRule& operator=(IN const CallTypeBlockRule&) = delete;
@@ -21,8 +20,7 @@ public:
 
 private:
     MtcConfigurationProxy& m_objConfiguration;
-    IMtcCallManager& m_objCallManager;
-    const CallInfo& m_objCallInfo;
+    CallType m_eCallTypeToCheck;
 };
 
 #endif

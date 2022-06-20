@@ -20,10 +20,10 @@ public:
      * Constructs a new MtcBlockChecker object.
      *
      * @param lstRules List of the rules to check. The elements are managed by this object.
-     * @param objListener Listener to be notified the result if pending.
+     * @param pListener Listener to be notified the result if pending.
      */
     MtcBlockChecker(
-            IN const IMSList<IMtcBlockRule*>& lstRules, IN IMtcBlockCheckListener& objListener);
+            IN const IMSList<IMtcBlockRule*>& lstRules, IN IMtcBlockCheckListener* pListener);
 
     ~MtcBlockChecker();
 
@@ -39,7 +39,7 @@ public:
 private:
     IMS_BOOL IsResultNotified();
 
-    IMtcBlockCheckListener& m_objListener;
+    IMtcBlockCheckListener* m_pListener;
     IMSList<IMtcBlockRule*> m_lstRules;
 
     IMS_SINT32 m_nPendingCount;

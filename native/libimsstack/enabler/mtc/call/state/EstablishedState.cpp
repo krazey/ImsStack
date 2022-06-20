@@ -14,6 +14,9 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
+#include "helper/block/CallTypeBlockRule.h"
+#include "helper/block/IMtcBlockChecker.h"
+#include "helper/block/MtcBlockChecker.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "ussi/UssiController.h"
@@ -69,6 +72,9 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Convert(
         IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("Convert", 0, 0, 0);
+
+    m_objContext.GetUpdatingInfo().SetTargetCallType(eCallType);
+
     if (HandleUpdate(UpdateType::SESSION, eCallType, pMediaInfo) == IMS_FAILURE)
     {
         // TODO
@@ -107,8 +113,10 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
 
-    m_objContext.GetSession()->HandleResponse(IMessage::SESSION_UPDATE, *piMessage);
+    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_UPDATE, *piMessage);
     m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
+    m_objContext.GetUpdatingInfo().SetTargetCallType(
+            MessageUtil::GetCallType(piMessage, piSession, IMS_TRUE));
 
     // TODO, conference
 
@@ -117,7 +125,18 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
     if (MessageUtil::HasSdp(piMessage))
     {
-        eResult = HandleReceivedUpdate(eStateName);
+        auto pBlockChecker = std::make_unique<MtcBlockChecker>(GetCallUpdateBlockRules(), nullptr);
+        IMtcBlockChecker::Result objResult = pBlockChecker->Check();
+
+        if (objResult.eStatus == IMtcBlockChecker::Result::Status::UNBLOCKED)
+        {
+            eResult = HandleReceivedUpdate(eStateName);
+        }
+        else
+        {
+            m_objContext.GetSession()->GetMessageSender().Reject(objResult.objReason);
+            eStateName = CallStateName::ESTABLISHED;
+        }
     }
     else
     {
@@ -492,6 +511,16 @@ IMS_BOOL EstablishedState::IsConferenceCallParticipant()
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+IMSList<IMtcBlockRule*> EstablishedState::GetCallUpdateBlockRules() const
+{
+    // No pending rules
+    IMSList<IMtcBlockRule*> lstRules;
+    lstRules.Append(new CallTypeBlockRule(
+            m_objContext, m_objContext.GetUpdatingInfo().GetTargetCallType()));
+    return lstRules;
 }
 
 PRIVATE
