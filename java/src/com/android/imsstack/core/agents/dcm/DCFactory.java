@@ -54,7 +54,7 @@ public final class DCFactory {
         agents = new HashMap<Integer, IDC>(MAX);
 
         agents.put(GOVERNOR, new DCGov(slotId));
-        agents.put(UTIL, new DCUtil(slotId));
+        agents.put(UTIL, new DcUtils(slotId));
         agents.put(SETTING, new DCSettings(slotId));
         agents.put(NETWORK_WATCHER, new DCNetWatcher(slotId));
         agents.put(APN, new DCApn(slotId));

@@ -24,7 +24,7 @@ import com.android.imsstack.core.agents.agentif.MsgProcInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
-import com.android.imsstack.core.agents.dcmif.IDCUtil;
+import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.ImsLog;
 
 /**
@@ -119,7 +119,7 @@ public class ApnEmergency extends Apn {
             }
 
             if (mDataState != curDataState) {
-                IDCUtil dcutil = (IDCUtil) DCFactory.getDC(DCFactory.UTIL, getSlotId());
+                IDcUtils dcutil = (IDcUtils) DCFactory.getDC(DCFactory.UTIL, getSlotId());
 
                 if (dcutil != null) {
                     dcutil.updateAllCellInfoForcinglyOnLimitedServiceState();

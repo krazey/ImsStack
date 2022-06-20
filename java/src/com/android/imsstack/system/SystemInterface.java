@@ -7,7 +7,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.ICallSetting;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDCUtil;
+import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.jni.JNIIms;
 import com.android.imsstack.jni.JNIImsListenerEx;
@@ -1732,98 +1732,99 @@ public class SystemInterface implements JNIImsListenerEx {
 
             Parcel result = Parcel.obtain();
             switch (method) {
-            case SystemConstants.ACTIVATE_DATA_CONNECTION:
-                result.writeInt(mISystemAPINetwork.activateDataConnection4Sys(
-                        parcel.readInt(), parcel.readInt()));
-                break;
-            case SystemConstants.DEACTIVATE_DATA_CONNECTION:
-                result.writeInt(mISystemAPINetwork.deactivateDataConnection4Sys(
-                        parcel.readInt(), parcel.readInt()));
-                break;
-            case SystemConstants.GET_ACCESS_NETWORK_INFO:
-                int defaultNetworkType = parcel.readInt();
-                IDCUtil.AccessNetworkInfo ani = mISystemAPINetwork.getAccessNetworkInfo4Sys(
-                        defaultNetworkType);
-
-                if (ani == null) {
-                    result.writeInt(defaultNetworkType);
-                    result.writeInt(0);
+                case SystemConstants.ACTIVATE_DATA_CONNECTION:
+                    result.writeInt(mISystemAPINetwork.activateDataConnection4Sys(
+                            parcel.readInt(), parcel.readInt()));
                     break;
-                }
+                case SystemConstants.DEACTIVATE_DATA_CONNECTION:
+                    result.writeInt(mISystemAPINetwork.deactivateDataConnection4Sys(
+                            parcel.readInt(), parcel.readInt()));
+                    break;
+                case SystemConstants.GET_ACCESS_NETWORK_INFO:
+                    int defaultNetworkType = parcel.readInt();
+                    IDcUtils.AccessNetworkInfo ani =
+                            mISystemAPINetwork.getAccessNetworkInfo4Sys(defaultNetworkType);
 
-                result.writeInt(ani.mNetworkType);
-
-                if (ani.mANI == null) {
-                    result.writeInt(0);
-                } else {
-                    result.writeInt(ani.mANI.length);
-
-                    for (int i = 0; i < ani.mANI.length; ++i) {
-                        result.writeString(ani.mANI[i]);
+                    if (ani == null) {
+                        result.writeInt(defaultNetworkType);
+                        result.writeInt(0);
+                        break;
                     }
-                }
-                break;
-            case SystemConstants.GET_APN_NAME:
-                result.writeString(mISystemAPINetwork.getApnName4Sys(parcel.readInt()));
-                break;
-            case SystemConstants.GET_DATA_CONNECTION_STATE:
-                result.writeInt(mISystemAPINetwork.getDataConnectionState4Sys(parcel.readInt()));
-                break;
-            case SystemConstants.GET_HOST_BY_NAME:
-                String[] ipAddrs = mISystemAPINetwork.getHostByName4Sys(
+
+                    result.writeInt(ani.mNetworkType);
+
+                    if (ani.mAni == null) {
+                        result.writeInt(0);
+                    } else {
+                        result.writeInt(ani.mAni.length);
+
+                        for (int i = 0; i < ani.mAni.length; ++i) {
+                            result.writeString(ani.mAni[i]);
+                        }
+                    }
+                    break;
+                case SystemConstants.GET_APN_NAME:
+                    result.writeString(mISystemAPINetwork.getApnName4Sys(parcel.readInt()));
+                    break;
+                case SystemConstants.GET_DATA_CONNECTION_STATE:
+                    result.writeInt(
+                            mISystemAPINetwork.getDataConnectionState4Sys(parcel.readInt()));
+                    break;
+                case SystemConstants.GET_HOST_BY_NAME:
+                    String[] ipAddrs = mISystemAPINetwork.getHostByName4Sys(
                             parcel.readInt(), parcel.readInt(), parcel.readString());
 
-                if (ipAddrs == null) {
-                    result.writeInt(0);
-                    break;
-                }
-
-                result.writeInt(ipAddrs.length);
-
-                for (int i = 0; i < ipAddrs.length; ++i) {
-                    result.writeString(ipAddrs[i]);
-                }
-                break;
-            case SystemConstants.GET_IFACE_ID: {
-                int apnType = parcel.readInt();
-
-                if (apnType == EApnType.WIFI.getType()) {
-                    if (mISystemAPIWifi != null) {
-                        result.writeInt(mISystemAPIWifi.getWifiIfaceId4Sys());
-                    } else {
-                        // Invalid interface id
-                        result.writeInt(-1);
+                    if (ipAddrs == null) {
+                        result.writeInt(0);
+                        break;
                     }
-                } else {
-                    result.writeInt(mISystemAPINetwork.getIfaceId4Sys(apnType));
-                }
-                break;
-            }
-            case SystemConstants.GET_IFACE_NAME:
-                result.writeString(mISystemAPINetwork.getIfaceName4Sys(parcel.readInt()));
-                break;
-            case SystemConstants.GET_LAST_ACCESS_NETWORK_INFO:
-                String[] lastANInfo = mISystemAPINetwork.getLastAccessNetworkInfo4Sys(
-                    parcel.readInt());
 
-                if (lastANInfo == null) {
-                    result.writeInt(0);
+                    result.writeInt(ipAddrs.length);
+
+                    for (int i = 0; i < ipAddrs.length; ++i) {
+                        result.writeString(ipAddrs[i]);
+                    }
+                    break;
+                case SystemConstants.GET_IFACE_ID: {
+                    int apnType = parcel.readInt();
+
+                    if (apnType == EApnType.WIFI.getType()) {
+                        if (mISystemAPIWifi != null) {
+                            result.writeInt(mISystemAPIWifi.getWifiIfaceId4Sys());
+                        } else {
+                            // Invalid interface id
+                            result.writeInt(-1);
+                        }
+                    } else {
+                        result.writeInt(mISystemAPINetwork.getIfaceId4Sys(apnType));
+                    }
                     break;
                 }
+                case SystemConstants.GET_IFACE_NAME:
+                    result.writeString(mISystemAPINetwork.getIfaceName4Sys(parcel.readInt()));
+                    break;
+                case SystemConstants.GET_LAST_ACCESS_NETWORK_INFO:
+                    String[] lastANInfo = mISystemAPINetwork.getLastAccessNetworkInfo4Sys(
+                            parcel.readInt());
 
-                result.writeInt(lastANInfo.length);
+                    if (lastANInfo == null) {
+                        result.writeInt(0);
+                        break;
+                    }
 
-                for (int i = 0; i < lastANInfo.length; ++i) {
-                    result.writeString(lastANInfo[i]);
-                }
-                break;
-            case SystemConstants.GET_LOCAL_ADDRESS:
-                result.writeString(mISystemAPINetwork.getLocalAddress4Sys(parcel.readInt(),
-                    parcel.readInt()));
-                break;
-            default:
-                result.recycle();
-                return null;
+                    result.writeInt(lastANInfo.length);
+
+                    for (int i = 0; i < lastANInfo.length; ++i) {
+                        result.writeString(lastANInfo[i]);
+                    }
+                    break;
+                case SystemConstants.GET_LOCAL_ADDRESS:
+                    result.writeString(mISystemAPINetwork.getLocalAddress4Sys(parcel.readInt(),
+                            parcel.readInt()));
+                    break;
+                default:
+                    result.recycle();
+                    return null;
             }
 
             return result;

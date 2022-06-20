@@ -25,7 +25,7 @@ import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.android.imsstack.core.agents.dcm.DCFactory;
-import com.android.imsstack.core.agents.dcmif.IDCUtil;
+import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.SimUtils;
@@ -732,14 +732,14 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @return A byte array containing the location information.
      */
     private byte[] getLocationInfo(int networkType) {
-        IDCUtil dcUtil = (IDCUtil) DCFactory.getDC(DCFactory.UTIL, getSlotId());
+        IDcUtils dcUtils = (IDcUtils) DCFactory.getDC(DCFactory.UTIL, getSlotId());
 
-        if (dcUtil == null) {
+        if (dcUtils == null) {
             return null;
         }
 
-        IDCUtil.AccessNetworkInfo dcUtilAni = dcUtil.getAccessNetworkInfo(networkType);
-        String[] ani = (dcUtilAni != null) ? dcUtilAni.mANI : null;
+        IDcUtils.AccessNetworkInfo dcAni = dcUtils.getAccessNetworkInfo(networkType);
+        String[] ani = (dcAni != null) ? dcAni.mAni : null;
 
         if (ani == null) {
             return null;
@@ -766,11 +766,11 @@ public class UsatAgent extends Handler implements UsatInterface {
         int tacOrLacLen = 4; // E-UTRAN / UTRAN / GERAN
         int cellIdLen = 7; // E-UTRAN / UTRAN
 
-        if (dcUtilAni.mNetworkType == TelephonyManager.NETWORK_TYPE_NR) {
+        if (dcAni.mNetworkType == TelephonyManager.NETWORK_TYPE_NR) {
             tacOrLacLen = 6;
             cellIdLen = 9;
-        } else if (dcUtilAni.mNetworkType == TelephonyManager.NETWORK_TYPE_GPRS
-                || dcUtilAni.mNetworkType == TelephonyManager.NETWORK_TYPE_EDGE) {
+        } else if (dcAni.mNetworkType == TelephonyManager.NETWORK_TYPE_GPRS
+                || dcAni.mNetworkType == TelephonyManager.NETWORK_TYPE_EDGE) {
             cellIdLen = 4;
         }
 

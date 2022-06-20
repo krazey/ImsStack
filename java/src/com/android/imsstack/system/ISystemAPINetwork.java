@@ -1,6 +1,6 @@
 package com.android.imsstack.system;
 
-import com.android.imsstack.core.agents.dcmif.IDCUtil;
+import com.android.imsstack.core.agents.dcmif.IDcUtils;
 
 import java.io.FileDescriptor;
 
@@ -9,7 +9,14 @@ public interface ISystemAPINetwork {
     int activateDataConnection4Sys(int apnType, int ipcanType);
     int deactivateDataConnection4Sys(int apnType, int ipcanType);
 
-    IDCUtil.AccessNetworkInfo getAccessNetworkInfo4Sys(int defaultNetworkType);
+    /**
+     * Returns the access network information of the network that the IMS is registering
+     * or was registered.
+     *
+     * @param defaultNetworkType The default network type when the network is unknown.
+     * @return The access network information.
+     */
+    IDcUtils.AccessNetworkInfo getAccessNetworkInfo4Sys(int defaultNetworkType);
     String getApnName4Sys(int apnType);
     int getDataConnectionState4Sys(int apnType);
     String[] getHostByName4Sys(int apnType, int ipVersion, String host);

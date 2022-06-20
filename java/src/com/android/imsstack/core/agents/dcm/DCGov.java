@@ -18,8 +18,7 @@ import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDC;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.core.agents.dcmif.IDCSettings;
-import com.android.imsstack.core.agents.dcmif.IDCUtil;
+import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPINetwork;
 import com.android.imsstack.system.SystemInterface;
@@ -93,9 +92,9 @@ public class DCGov implements IDC, ISystemAPINetwork {
     }
 
     @Override
-    public IDCUtil.AccessNetworkInfo getAccessNetworkInfo4Sys(int defaultNetworkType) {
+    public IDcUtils.AccessNetworkInfo getAccessNetworkInfo4Sys(int defaultNetworkType) {
         ImsLog.d(mSlotId, "");
-        IDCUtil dcutil = (IDCUtil)DCFactory.getDC(DCFactory.UTIL, mSlotId);
+        IDcUtils dcutil = (IDcUtils) DCFactory.getDC(DCFactory.UTIL, mSlotId);
         return (dcutil != null) ? dcutil.getAccessNetworkInfo(defaultNetworkType) : null;
     }
 
@@ -169,7 +168,7 @@ public class DCGov implements IDC, ISystemAPINetwork {
     @Override
     public int getLteRsrpStrength4Sys() {
         ImsLog.d(mSlotId, "");
-        IDCUtil dcutil = (IDCUtil)DCFactory.getDC(DCFactory.UTIL, mSlotId);
+        IDcUtils dcutil = (IDcUtils) DCFactory.getDC(DCFactory.UTIL, mSlotId);
         //final int rsrpsignal_default = 0;
         return (dcutil != null) ? dcutil.getLteRsrpStrength() : 0;
     }
@@ -244,14 +243,14 @@ public class DCGov implements IDC, ISystemAPINetwork {
     @Override
     public int sendPingToHostAddress4Sys(int apnType, String hostAddress) {
         ImsLog.d(mSlotId, "");
-        IDCUtil dcutil = (IDCUtil)DCFactory.getDC(DCFactory.UTIL, mSlotId);
+        IDcUtils dcutil = (IDcUtils) DCFactory.getDC(DCFactory.UTIL, mSlotId);
 
         return ((dcutil != null) && dcutil.sendPingToHostAddress(apnType, hostAddress)) ? 1 : 0;
     }
 
     @Override
     public boolean isMobileDataEnabled() {
-        IDCUtil dcutil = (IDCUtil)DCFactory.getDC(DCFactory.UTIL, mSlotId);
+        IDcUtils dcutil = (IDcUtils) DCFactory.getDC(DCFactory.UTIL, mSlotId);
         return (dcutil != null) ? dcutil.isMobileDataEnabled() : false;
     }
 
