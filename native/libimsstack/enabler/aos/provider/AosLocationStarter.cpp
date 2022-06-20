@@ -236,13 +236,13 @@ PRIVATE VIRTUAL void AosLocationStarter::Event_NotifyEvent(
 }
 
 PRIVATE
-void AosLocationStarter::HandleStartConditionChanged()
+IMS_BOOL AosLocationStarter::HandleStartConditionChanged()
 {
     IMS_BOOL bStart = IMS_FALSE;
 
     if (m_piBlock == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
     // TODO : Need to Config
@@ -299,14 +299,7 @@ void AosLocationStarter::HandleStartConditionChanged()
         }
     }
 
-    if (bStart)
-    {
-        Start();
-    }
-    else
-    {
-        Stop(DEFAULT_STOP_DELAY);
-    }
+    return (bStart) ? Start() : Stop(DEFAULT_STOP_DELAY);
 }
 
 PRIVATE

@@ -21,66 +21,120 @@
 #include "provider/AosLocationStarter.h"
 
 #include "interface/MockIAosAppContext.h"
+#include "interface/MockIAosBlock.h"
 
+using ::testing::_;
 using ::testing::AnyNumber;
+using ::testing::Return;
 using ::testing::ReturnNull;
 
 static const IMS_UINT32 DEFAULT_SHORT_UPDATE_INTERVAL = 300;
+static const IMS_UINT32 TIMER_STOP_DELAY = 0;
+static const IMS_UINT32 IMS_EVENT_WFC_SETTING_CHANGED = 0x00040000;
+static const IMS_UINT32 IMS_WFC_ON = 1;
+static const IMS_UINT32 IMS_WFC_OFF = 0;
 
-class AosLocationStarterTest : public ::testing::Test {
+class AosLocationStarterTest : public ::testing::Test
+{
 public:
     AosLocationStarter* pAosLocationStarter;
     MockIAosAppContext objMockIAosAppContext;
 
 protected:
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         pAosLocationStarter = new AosLocationStarter();
         ASSERT_TRUE(pAosLocationStarter != nullptr);
 
         EXPECT_CALL(objMockIAosAppContext, GetBlock())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnNull());
+                .Times(AnyNumber())
+                .WillRepeatedly(ReturnNull());
 
         pAosLocationStarter->Init(static_cast<IAosAppContext*>(&objMockIAosAppContext));
     }
 
-    virtual void TearDown() override {
-        if (pAosLocationStarter) {
+    virtual void TearDown() override
+    {
+        if (pAosLocationStarter)
+        {
             delete pAosLocationStarter;
         }
     }
 
-    void SetInitialized(IN IMS_BOOL bIsInitialized) {
+    void SetInitialized(IN IMS_BOOL bIsInitialized)
+    {
         pAosLocationStarter->m_bInitialized = bIsInitialized;
     }
 
-    IMSList<IMS_UINT32> GetVolteBlockReasons() {
+    IMSList<IMS_UINT32> GetVolteBlockReasons()
+    {
         return pAosLocationStarter->m_objVolteBlockReasons;
     }
 
-    IMSList<IMS_UINT32> GetWfcBlockReasons() {
-        return pAosLocationStarter->m_objWfcBlockReasons;
-    }
+    IMSList<IMS_UINT32> GetWfcBlockReasons() { return pAosLocationStarter->m_objWfcBlockReasons; }
 
-    void ClearBlockReasons() {
+    void ClearBlockReasons()
+    {
         pAosLocationStarter->m_objVolteBlockReasons.Clear();
         pAosLocationStarter->m_objWfcBlockReasons.Clear();
     }
+
+    ITimer* GetStopDeleyTimer() { return pAosLocationStarter->m_piStopDelayTimer; }
+
+    IMS_BOOL GetWfcSetting() { return pAosLocationStarter->m_bWfcSetting; }
+
+    IAosBlock* GetBlock() { return pAosLocationStarter->m_piBlock; }
+
+    void SetBlock(IN IAosBlock* piBlock) { pAosLocationStarter->m_piBlock = piBlock; }
+
+    void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
+    {
+        pAosLocationStarter->StartTimer(nType, nDuration);
+    }
+
+    void Timer_TimerExpired(IN ITimer* piTimer)
+    {
+        pAosLocationStarter->Timer_TimerExpired(piTimer);
+    }
+
+    void Event_NotifyEvent(IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam)
+    {
+        pAosLocationStarter->Event_NotifyEvent(nEvent, nWParam, nLParam);
+    }
+
+    void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
+    {
+        pAosLocationStarter->Block_Changed(nType, nParam);
+    }
 };
 
-TEST_F(AosLocationStarterTest, Init_Initialized) {
+TEST_F(AosLocationStarterTest, SlotId_GetSet)
+{
+    pAosLocationStarter->SetSlotId(0);
+    EXPECT_EQ(pAosLocationStarter->GetSlotId(), 0);
+
+    pAosLocationStarter->SetSlotId(1);
+    EXPECT_EQ(pAosLocationStarter->GetSlotId(), 1);
+
+    pAosLocationStarter->SetSlotId(2);
+    EXPECT_EQ(pAosLocationStarter->GetSlotId(), 2);
+}
+
+TEST_F(AosLocationStarterTest, Init_Initialized)
+{
     SetInitialized(IMS_TRUE);
     EXPECT_FALSE(pAosLocationStarter->Init(static_cast<IAosAppContext*>(&objMockIAosAppContext)));
 }
 
-TEST_F(AosLocationStarterTest, Init_NotInitialized) {
+TEST_F(AosLocationStarterTest, Init_NotInitialized)
+{
     SetInitialized(IMS_FALSE);
     EXPECT_TRUE(pAosLocationStarter->Init(static_cast<IAosAppContext*>(&objMockIAosAppContext)));
 }
 
-TEST_F(AosLocationStarterTest, SetPolicy_AddFeatureDisabled) {
-    pAosLocationStarter->SetPolicy(
-            IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 1);
+TEST_F(AosLocationStarterTest, SetPolicy_AddFeatureDisabled)
+{
+    pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 1);
 
     EXPECT_FALSE(pAosLocationStarter->IsPolicyEnabled(
             IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY));
@@ -88,9 +142,9 @@ TEST_F(AosLocationStarterTest, SetPolicy_AddFeatureDisabled) {
             IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 0));
 }
 
-TEST_F(AosLocationStarterTest, SetPolicy_AddFeatureNotDisabled) {
-    pAosLocationStarter->SetPolicy(
-            IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 0);
+TEST_F(AosLocationStarterTest, SetPolicy_AddFeatureNotDisabled)
+{
+    pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 0);
 
     EXPECT_TRUE(pAosLocationStarter->IsPolicyEnabled(
             IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY));
@@ -98,9 +152,9 @@ TEST_F(AosLocationStarterTest, SetPolicy_AddFeatureNotDisabled) {
             IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 0));
 }
 
-TEST_F(AosLocationStarterTest, SetPolicy_RemoveFeatureEnabled) {
-    pAosLocationStarter->SetPolicy(
-            IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 0);
+TEST_F(AosLocationStarterTest, SetPolicy_RemoveFeatureEnabled)
+{
+    pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 0);
 
     EXPECT_TRUE(pAosLocationStarter->IsPolicyEnabled(
             IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY));
@@ -108,9 +162,9 @@ TEST_F(AosLocationStarterTest, SetPolicy_RemoveFeatureEnabled) {
             IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 1));
 }
 
-TEST_F(AosLocationStarterTest, SetPolicy_RemoveFeatureNotEnabled) {
-    pAosLocationStarter->SetPolicy(
-            IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 1);
+TEST_F(AosLocationStarterTest, SetPolicy_RemoveFeatureNotEnabled)
+{
+    pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 1);
 
     EXPECT_FALSE(pAosLocationStarter->IsPolicyEnabled(
             IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY));
@@ -118,23 +172,24 @@ TEST_F(AosLocationStarterTest, SetPolicy_RemoveFeatureNotEnabled) {
             IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 1));
 }
 
-TEST_F(AosLocationStarterTest, IsPolicyEnabled_Enabled) {
-    pAosLocationStarter->SetPolicy(
-            IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 0);
+TEST_F(AosLocationStarterTest, IsPolicyEnabled_Enabled)
+{
+    pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 0);
 
     EXPECT_TRUE(pAosLocationStarter->IsPolicyEnabled(
             IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY));
 }
 
-TEST_F(AosLocationStarterTest, IsPolicyEnabled_Disabled) {
-    pAosLocationStarter->SetPolicy(
-            IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 1);
+TEST_F(AosLocationStarterTest, IsPolicyEnabled_Disabled)
+{
+    pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 1);
 
     EXPECT_FALSE(pAosLocationStarter->IsPolicyEnabled(
             IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY));
 }
 
-TEST_F(AosLocationStarterTest, AddBlockReason_VolteReason) {
+TEST_F(AosLocationStarterTest, AddBlockReason_VolteReason)
+{
     ClearBlockReasons();
     EXPECT_EQ(GetVolteBlockReasons().GetSize(), 0);
     EXPECT_EQ(GetWfcBlockReasons().GetSize(), 0);
@@ -164,7 +219,8 @@ TEST_F(AosLocationStarterTest, AddBlockReason_VolteReason) {
     EXPECT_EQ(GetWfcBlockReasons().GetSize(), 0);
 }
 
-TEST_F(AosLocationStarterTest, AddBlockReason_WfcReason) {
+TEST_F(AosLocationStarterTest, AddBlockReason_WfcReason)
+{
     ClearBlockReasons();
     EXPECT_EQ(GetVolteBlockReasons().GetSize(), 0);
     EXPECT_EQ(GetWfcBlockReasons().GetSize(), 0);
@@ -194,7 +250,8 @@ TEST_F(AosLocationStarterTest, AddBlockReason_WfcReason) {
     EXPECT_EQ(GetWfcBlockReasons().GetSize(), 6);
 }
 
-TEST_F(AosLocationStarterTest, SetUpdateInterval_ChangeIntervalParam) {
+TEST_F(AosLocationStarterTest, SetUpdateInterval_ChangeIntervalParam)
+{
     EXPECT_FALSE(pAosLocationStarter->SetUpdateInterval(DEFAULT_SHORT_UPDATE_INTERVAL - 3));
     EXPECT_FALSE(pAosLocationStarter->SetUpdateInterval(DEFAULT_SHORT_UPDATE_INTERVAL - 2));
     EXPECT_FALSE(pAosLocationStarter->SetUpdateInterval(DEFAULT_SHORT_UPDATE_INTERVAL - 1));
@@ -205,10 +262,57 @@ TEST_F(AosLocationStarterTest, SetUpdateInterval_ChangeIntervalParam) {
     EXPECT_TRUE(pAosLocationStarter->SetUpdateInterval(DEFAULT_SHORT_UPDATE_INTERVAL + 3));
 }
 
-TEST_F(AosLocationStarterTest, StartLocationInfoUpdate_Start) {
+TEST_F(AosLocationStarterTest, StartLocationInfoUpdate_Start)
+{
     EXPECT_TRUE(pAosLocationStarter->StartLocationInfoUpdate());
 }
 
-TEST_F(AosLocationStarterTest, StopLocationInfoUpdate_StopDelayTime) {
+TEST_F(AosLocationStarterTest, StopLocationInfoUpdate_StopDelayTime)
+{
     EXPECT_FALSE(pAosLocationStarter->StopLocationInfoUpdate());
+}
+
+TEST_F(AosLocationStarterTest, Timer_TimerExpired)
+{
+    IMS_UINT32 nDelayTime = 10;
+    StartTimer(TIMER_STOP_DELAY, nDelayTime * 1000);
+    EXPECT_NE(GetStopDeleyTimer(), nullptr);
+
+    Timer_TimerExpired(GetStopDeleyTimer());
+    EXPECT_EQ(GetStopDeleyTimer(), nullptr);
+}
+
+TEST_F(AosLocationStarterTest, Event_NotifyEvent_WfcOn)
+{
+    pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_SETTING, 1);
+
+    Event_NotifyEvent(IMS_EVENT_WFC_SETTING_CHANGED, IMS_WFC_ON, 0);
+    EXPECT_TRUE(GetWfcSetting());
+}
+
+TEST_F(AosLocationStarterTest, Event_NotifyEvent_WfcOff)
+{
+    pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_SETTING, 1);
+
+    Event_NotifyEvent(IMS_EVENT_WFC_SETTING_CHANGED, IMS_WFC_OFF, 0);
+    EXPECT_FALSE(GetWfcSetting());
+}
+
+TEST_F(AosLocationStarterTest, Block_Changed_PolicyStartAfterCheckingVolteBlockReason)
+{
+    pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 1);
+    pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_VOLTE_AVAILABLE, 1);
+    pAosLocationStarter->SetPolicy(
+            IAosLocationStarter::POLICY_START_AFTER_CHECKING_WFC_BLOCK_REASON, 1);
+    pAosLocationStarter->SetPolicy(
+            IAosLocationStarter::POLICY_START_AFTER_CHECKING_VOLTE_BLOCK_REASON, 0);
+
+    MockIAosBlock objMockIAosBlock;
+    EXPECT_CALL(objMockIAosBlock, GetBlockReasons(_, _)).Times(1);
+
+    IAosBlock* piOriginBlock = GetBlock();
+    SetBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    Block_Changed(0, 0);
+
+    SetBlock(piOriginBlock);
 }

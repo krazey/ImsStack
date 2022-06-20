@@ -60,7 +60,7 @@ private:
     virtual void OnFeatureEnabled(IN IMS_UINT32 nFeature);
     virtual void OnFeatureDisabled(IN IMS_UINT32 nFeature);
 
-    void HandleStartConditionChanged();
+    IMS_BOOL HandleStartConditionChanged();
     IMS_BOOL Start();
     IMS_BOOL Stop(IN IMS_UINT32 nDelayTime);
     void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
