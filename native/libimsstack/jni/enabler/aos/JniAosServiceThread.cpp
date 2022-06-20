@@ -38,7 +38,7 @@ PUBLIC VIRTUAL JniAosServiceThread::~JniAosServiceThread()
 }
 
 PUBLIC
-void JniAosServiceThread::NotifyRegistered(IN IMS_SINT32 nNetworkType,
+IMS_BOOL JniAosServiceThread::NotifyRegistered(IN IMS_SINT32 nNetworkType,
         IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags)
 {
     IMS_TRACE_D("NotifyRegistered", 0, 0, 0);
@@ -56,11 +56,11 @@ void JniAosServiceThread::NotifyRegistered(IN IMS_SINT32 nNetworkType,
         objParcel.writeString16(String16(objFeatureTags.GetAt(i).GetStr()));
     }
 
-    SendData2Java(objParcel);
+    return SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniAosServiceThread::NotifyRegistering(IN IMS_SINT32 nNetworkType,
+IMS_BOOL JniAosServiceThread::NotifyRegistering(IN IMS_SINT32 nNetworkType,
         IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags)
 {
     IMS_TRACE_D("NotifyRegistering", 0, 0, 0);
@@ -78,11 +78,11 @@ void JniAosServiceThread::NotifyRegistering(IN IMS_SINT32 nNetworkType,
         objParcel.writeString16(String16(objFeatureTags.GetAt(i).GetStr()));
     }
 
-    SendData2Java(objParcel);
+    return SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniAosServiceThread::NotifyDeregistered(IN IMS_SINT32 nReason)
+IMS_BOOL JniAosServiceThread::NotifyDeregistered(IN IMS_SINT32 nReason)
 {
     IMS_TRACE_D("NotifyDeregistered", 0, 0, 0);
 
@@ -90,11 +90,11 @@ void JniAosServiceThread::NotifyDeregistered(IN IMS_SINT32 nReason)
     objParcel.writeInt32(IIAosService::N2J_NOTIFY_DEREGISTERED);
     objParcel.writeInt32(nReason);
 
-    SendData2Java(objParcel);
+    return SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniAosServiceThread::NotifyTechnologyChangeFailed(
+IMS_BOOL JniAosServiceThread::NotifyTechnologyChangeFailed(
         IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nCauseCode)
 {
     IMS_TRACE_D("NotifyTechnologyChangeFailed", 0, 0, 0);
@@ -104,11 +104,11 @@ void JniAosServiceThread::NotifyTechnologyChangeFailed(
     objParcel.writeInt32(nNetworkType);
     objParcel.writeInt32(nCauseCode);
 
-    SendData2Java(objParcel);
+    return SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniAosServiceThread::NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris)
+IMS_BOOL JniAosServiceThread::NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris)
 {
     IMS_TRACE_D("NotifyAssociatedUriChanged", 0, 0, 0);
 
@@ -123,11 +123,11 @@ void JniAosServiceThread::NotifyAssociatedUriChanged(IN const IMSList<AString>& 
         objParcel.writeString16(String16(objUris.GetAt(i).GetStr()));
     }
 
-    SendData2Java(objParcel);
+    return SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniAosServiceThread::NotifyCapabilitiesUpdateFailed(
+IMS_BOOL JniAosServiceThread::NotifyCapabilitiesUpdateFailed(
         IN IMS_UINT32 nCapabilities, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason)
 {
     IMS_TRACE_D("NotifyCapabilitiesUpdateFailed", 0, 0, 0);
@@ -138,11 +138,11 @@ void JniAosServiceThread::NotifyCapabilitiesUpdateFailed(
     objParcel.writeInt32(nNetworkType);
     objParcel.writeInt32(nReason);
 
-    SendData2Java(objParcel);
+    return SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniAosServiceThread::NotifyAosIsimState(IN IMS_UINT32 nState)
+IMS_BOOL JniAosServiceThread::NotifyAosIsimState(IN IMS_UINT32 nState)
 {
     IMS_TRACE_D("NotifyAosIsimState", 0, 0, 0);
 
@@ -150,11 +150,11 @@ void JniAosServiceThread::NotifyAosIsimState(IN IMS_UINT32 nState)
     objParcel.writeInt32(IIAosService::N2J_NOTIFY_AOS_ISIM_STATE);
     objParcel.writeInt32(nState);
 
-    SendData2Java(objParcel);
+    return SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniAosServiceThread::NotifyRegEventState(IN IMS_UINT32 nState)
+IMS_BOOL JniAosServiceThread::NotifyRegEventState(IN IMS_UINT32 nState)
 {
     IMS_TRACE_D("NotifyRegEventState", 0, 0, 0);
 
@@ -162,11 +162,11 @@ void JniAosServiceThread::NotifyRegEventState(IN IMS_UINT32 nState)
     objParcel.writeInt32(IIAosService::N2J_NOTIFY_REG_EVENT_STATE);
     objParcel.writeInt32(nState);
 
-    SendData2Java(objParcel);
+    return SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniAosServiceThread::RequestPhoneNumberRetry(IN IMS_UINT32 nState)
+IMS_BOOL JniAosServiceThread::RequestPhoneNumberRetry(IN IMS_UINT32 nState)
 {
     IMS_TRACE_D("RequestPhoneNumberRetry", 0, 0, 0);
 
@@ -174,11 +174,11 @@ void JniAosServiceThread::RequestPhoneNumberRetry(IN IMS_UINT32 nState)
     objParcel.writeInt32(IIAosService::N2J_REQUEST_PHONE_NUMBER_RETRY);
     objParcel.writeInt32(nState);
 
-    SendData2Java(objParcel);
+    return SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniAosServiceThread::RequestWifiService(IN IMS_BOOL bIsOn)
+IMS_BOOL JniAosServiceThread::RequestWifiService(IN IMS_BOOL bIsOn)
 {
     IMS_TRACE_D("RequestWifiService", 0, 0, 0);
 
@@ -186,5 +186,5 @@ void JniAosServiceThread::RequestWifiService(IN IMS_BOOL bIsOn)
     objParcel.writeInt32(IIAosService::N2J_REQUEST_WIFI_SERVICE);
     objParcel.writeInt32(bIsOn ? 1 : 0);
 
-    SendData2Java(objParcel);
+    return SendData2Java(objParcel);
 }
