@@ -257,8 +257,8 @@ void JniMediaSession::OnNofityMediaInactitivy(
 {
     ImsMediaNotifyInactivityParam* pParam = new ImsMediaNotifyInactivityParam();
 
-    pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
-    pParam->m_eMediaProtocolType = (MEDIA_TRANSPORT_PROTOCOL)(objParcel.readInt32());
+    pParam->m_eMediaType = ConvertToMediaType(static_cast<SessionType>(objParcel.readInt32()));
+    pParam->m_eMediaProtocolType = static_cast<ProtocolType>(objParcel.readInt32());
 
     m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }

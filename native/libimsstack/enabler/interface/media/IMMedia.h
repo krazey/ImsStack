@@ -223,6 +223,12 @@ enum SessionType
     SESSION_TYPE_RTT = 2,
 };
 
+enum ProtocolType
+{
+    RTP = 0,
+    RTCP = 1,
+};
+
 enum
 {
     SURFACE_FAR = 1,
@@ -345,11 +351,10 @@ class ImsMediaNotifyInactivityParam
 {
 public:
     ImsMediaNotifyInactivityParam() :
-            m_eMediaProtocolType(MEDIA_PROTOCOL_NONE),
             m_eMediaType(MEDIA_TYPE_INVALID){};
 
 public:
-    MEDIA_TRANSPORT_PROTOCOL m_eMediaProtocolType;
+    ProtocolType m_eMediaProtocolType;
     MEDIA_CONTENT_TYPE m_eMediaType;
 };
 

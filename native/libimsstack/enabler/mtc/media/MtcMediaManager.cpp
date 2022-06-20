@@ -69,8 +69,9 @@ PUBLIC VIRTUAL MtcMediaManager::~MtcMediaManager()
     DestroyMediaSession();
 }
 
-PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(
-        IN IMS_UINT32 eReportType, IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/)
+PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportType,
+        IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/,
+        IN MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType /*= MEDIA_PROTOCOL_ANY*/)
 {
     IMS_TRACE_D("MediaSession_Notify : Report[%d] Media[%d]", eReportType, eMediaType, 0);
     IMS_UINT32 eReportedMediaType = MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaType);
@@ -86,7 +87,8 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(
         case REPORT_DATA_RECEIVE_FAILED:
             if (m_objProfileManager.IsConfirmedDialogState() || !IsLocalTone())
             {
-                m_pMediaReportListener->OnReceivingMediaDataFailed(eReportedMediaType);
+                m_pMediaReportListener->OnReceivingMediaDataFailed(
+                        eReportedMediaType, eMediaProtocolType);
             }
             break;
         case REPORT_DATA_RECEIVE_STARTED:

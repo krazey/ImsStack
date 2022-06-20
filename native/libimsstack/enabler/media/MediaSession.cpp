@@ -1000,12 +1000,14 @@ IMS_BOOL MediaSession::OnNotifyMediaInactivity(IN IMS_UINTP pParam_)
     ImsMediaNotifyInactivityParam* pParam =
             reinterpret_cast<ImsMediaNotifyInactivityParam*>(pParam_);
     MEDIA_CONTENT_TYPE eMediaType = pParam->m_eMediaType;
-    MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType = pParam->m_eMediaProtocolType;
+    MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType =
+            pParam->m_eMediaProtocolType == RTP ? MEDIA_PROTOCOL_RTP : MEDIA_PROTOCOL_RTCP;
 
     IMS_TRACE_I("OnNotifyMediaInactivity() - eMediaProtocolType[%d], eMediaType[%d]",
             eMediaProtocolType, eMediaType, 0);
 
-    m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED, pParam->m_eMediaType);
+    m_pClientListener->MediaSession_Notify(
+            REPORT_DATA_RECEIVE_FAILED, pParam->m_eMediaType, eMediaProtocolType);
 
     delete pParam;
     return IMS_TRUE;

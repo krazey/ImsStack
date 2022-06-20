@@ -34,8 +34,9 @@ public:
      * REPORT_NW_TONE_RTP_RECEIVE_STARTED
      * REPORT_NW_TONE_RTP_RECEIVE_FAILED
      */
-    virtual void MediaSession_Notify(
-            IMS_UINT32 eReportType, MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) = 0;
+    virtual void MediaSession_Notify(IMS_UINT32 eReportType,
+            MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID,
+            MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType = MEDIA_PROTOCOL_ANY) = 0;
 
     /**
      * REPORT_FAILURE

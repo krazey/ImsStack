@@ -22,7 +22,8 @@
 class IMediaReportEventListener
 {
 public:
-    virtual void OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) = 0;
+    virtual void OnReceivingMediaDataFailed(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eMediaProtocolType) = 0;
     virtual void OnVideoLowestBitRate() = 0;
     virtual void OnReceivingNetworkToneStarted() = 0;
     virtual void OnReceivingNetworkToneFailed() = 0;
