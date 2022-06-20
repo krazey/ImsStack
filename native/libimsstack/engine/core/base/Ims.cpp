@@ -42,7 +42,7 @@ PUBLIC GLOBAL void Ims::Init(IN IMS_SINT32 nSlotId)
 
     if (s_pnErrorCode != IMS_NULL)
     {
-        s_pnErrorCode[nSlotId] = 0;
+        s_pnErrorCode[nSlotId] = ImsError::NO_ERROR;
     }
 }
 
@@ -87,8 +87,8 @@ PUBLIC GLOBAL IMS_SINT32 Ims::GetLastError(IN IMS_SINT32 nSlotId)
 {
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
     {
-        return 0;
+        return ImsError::NO_ERROR;
     }
 
-    return (s_pnErrorCode != IMS_NULL) ? s_pnErrorCode[nSlotId] : 0;
+    return (s_pnErrorCode != IMS_NULL) ? s_pnErrorCode[nSlotId] : ImsError::NO_ERROR;
 }
