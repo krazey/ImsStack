@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.acs.impl;
 
+import android.annotation.NonNull;
 import android.os.Build;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -319,7 +320,8 @@ public class RequestInfo {
          * @param acServiceClientInfo Rcs Client information from message application.
          * @return instance of Builder.
          */
-        RequestInfoBuilder(int slotId, int subId, AcServiceClientInfo acServiceClientInfo) {
+        RequestInfoBuilder(int slotId, int subId,
+                @NonNull AcServiceClientInfo acServiceClientInfo) {
             mSlotId = slotId;
             mSubId = subId;
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.imsstack.enabler.acs.impl;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -32,8 +33,8 @@ import java.util.Set;
  * This class handles the RCS provisioning XML data and is created based on sub ID
  */
 public class DataContainer {
-    public  static final int VERSION_UNKNOWN = -99;
-    public  static final long VALIDITY_UNKNOWN = -99L;
+    public  static final int VERSION_UNKNOWN = 0;
+    public  static final long VALIDITY_UNKNOWN = 0L;
 
     private static final String LOCAL_FILE_NAME_PREF = "rcs_provisioning_data_";
     private static final String VERSION = "version";
@@ -205,10 +206,7 @@ public class DataContainer {
             PersistableBundle sub = data.getPersistableBundle(key);
             int version = sub.getInt(VERSION, VERSION_UNKNOWN);
 
-            // default value means not find appropriated PersistableBundle
-            if (version != VERSION_UNKNOWN) {
-                return version;
-            }
+            return version;
         }
 
         return VERSION_UNKNOWN;
