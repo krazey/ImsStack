@@ -38,13 +38,13 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_bTerminalBasedCallWaitingEnabled(IMS_TRUE/*m_objContext.GetConfigurationProxy().Is(
                 Feature::TERMINAL_BASED_CALL_WAIT_DEFAULT_ENABLED)*/)
 {
-    IMS_TRACE_I("+MtcService [slot_%d]", m_objContext.GetSlotId(), 0, 0);
+    IMS_TRACE_I("+MtcService [slot_%d][type:%d]", m_objContext.GetSlotId(), m_eType, 0);
     Init();
 }
 
 PUBLIC VIRTUAL MtcService::~MtcService()
 {
-    IMS_TRACE_I("~MtcService [slot_%d]", m_objContext.GetSlotId(), 0, 0);
+    IMS_TRACE_I("~MtcService [slot_%d][type:%d]", m_objContext.GetSlotId(), m_eType, 0);
     if (m_pJniService)
     {
         m_pJniService->SetMtcService(IMS_NULL);
@@ -55,15 +55,7 @@ PUBLIC VIRTUAL MtcService::~MtcService()
         m_piCoreService->Close();
     }
 
-    if (m_eType == ServiceType::NORMAL)
-    {
-        m_pAosConnector->SetReady(IMS_FALSE, ImsAosService::MTC);
-    }
-    else
-    {
-        m_pAosConnector->SetReady(IMS_FALSE, ImsAosService::EMERGENCY_MTC);
-    }
-
+    SetAosReady(IMS_FALSE);
     delete m_pAosConnector;
 }
 
@@ -166,14 +158,7 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
     m_eStatus = ServiceStatus::SERVICE_ACTIVE;
     m_objAosEventHandler.OnConnected(
             nFeatures, nIpcan, m_pJniService ? m_pJniService->GetThread() : IMS_NULL);
-    if (m_eType == ServiceType::NORMAL)
-    {
-        m_pAosConnector->SetReady(IMS_TRUE, ImsAosService::MTC);
-    }
-    else
-    {
-        m_pAosConnector->SetReady(IMS_TRUE, ImsAosService::EMERGENCY_MTC);
-    }
+    SetAosReady(IMS_TRUE);
 }
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Connecting() {}
@@ -290,4 +275,22 @@ void MtcService::SetServiceFilterCriteria()
     piSfc->AddTriggerPoint(objInviteTp);
 
     IMS_TRACE_D("SetServiceFilterCriteria", 0, 0, 0);
+}
+
+PRIVATE
+void MtcService::SetAosReady(IN IMS_BOOL bReady)
+{
+    if (m_pAosConnector == IMS_NULL)
+    {
+        return;
+    }
+
+    if (m_eType == ServiceType::NORMAL)
+    {
+        m_pAosConnector->SetReady(bReady, ImsAosService::MTC);
+    }
+    else
+    {
+        m_pAosConnector->SetReady(bReady, ImsAosService::EMERGENCY_MTC);
+    }
 }

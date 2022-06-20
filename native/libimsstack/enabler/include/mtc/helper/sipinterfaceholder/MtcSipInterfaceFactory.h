@@ -1,6 +1,7 @@
 #ifndef MTC_SIP_INTERFACE_FACTORY_H_
 #define MTC_SIP_INTERFACE_FACTORY_H_
 
+#include "ImsTypeDef.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 
 class SessionInterfaceHolder;

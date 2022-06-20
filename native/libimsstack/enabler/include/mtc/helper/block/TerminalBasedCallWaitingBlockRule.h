@@ -4,6 +4,7 @@
 #include "IMSTypeDef.h"
 #include "helper/block/IMtcBlockRule.h"
 
+class IMtcCall;
 class IMtcCallContext;
 class IMtcCallManager;
 

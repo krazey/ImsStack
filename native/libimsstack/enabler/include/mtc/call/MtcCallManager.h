@@ -7,7 +7,7 @@
 #include "call/IMtcCallManager.h"
 #include "IMtcService.h"
 #include "IuMtcService.h"
-#include "interface/mtc/IMtcCallStateListener.h"
+#include "IMtcCallStateListener.h"
 
 class ICoreService;
 class IMtcContext;

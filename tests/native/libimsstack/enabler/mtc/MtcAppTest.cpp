@@ -8,31 +8,30 @@
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an "AS IS" B ASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include "MtcApp.h"
+#include "IMtcService.h"
 
-using ::testing::Return;
+LOCAL IMS_SINT32 SLOT_ID = 0;
 
-class MtcAppTest : public ::testing::Test {
+namespace android
+{
+
+class MtcAppTest : public ::testing::Test
+{
+public:
+    MtcApp* pMtcApp;
 
 protected:
-    virtual void SetUp() override {
+    virtual void SetUp() override { pMtcApp = new MtcApp(SLOT_ID); }
 
-  // Set up as needed for every TEST_F(MtcAppTest, ...)
-  // A new XxxTest fixture is created and SetUp() is called before executing each TEST_F.
-
-    }
-    virtual void TearDown() override {
-    // cleans up after each test finishes. Called after executing each TEST_F.
-    }
+    virtual void TearDown() override { delete pMtcApp; }
 };
 
-TEST_F(MtcAppTest, TestName) {
-    //.. test body..
-}
+}  // namespace android

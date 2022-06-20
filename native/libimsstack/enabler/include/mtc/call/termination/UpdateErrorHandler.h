@@ -3,6 +3,7 @@
 
 #include "CallReasonInfo.h"
 #include "IMSTypeDef.h"
+#include "call/IMtcCall.h"
 
 class IMessage;
 class IMtcCallContext;

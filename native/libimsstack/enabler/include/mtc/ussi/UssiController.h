@@ -6,7 +6,9 @@
 #include "ussi/UssiEventNotifier.h"
 #include "ussi/UssiData.h"
 
+class IMessage;
 class ISipClientConnection;
+class ISipMessage;
 class ISipServerConnection;
 
 class UssiController

@@ -5,6 +5,9 @@
 #include "SdpAttribute.h"
 #include "offeranswer/SdpPrecondition.h"
 
+class IMedia;
+class IMediaDescriptor;
+
 class QosStatusRecord
 {
 public:

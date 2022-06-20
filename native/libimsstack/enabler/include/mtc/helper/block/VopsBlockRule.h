@@ -1,6 +1,7 @@
 #ifndef VOPS_BLOCK_RULE_H_
 #define VOPS_BLOCK_RULE_H_
 
+#include "call/IMtcCall.h"
 #include "helper/block/IMtcBlockRule.h"
 
 class IMtcCallContext;

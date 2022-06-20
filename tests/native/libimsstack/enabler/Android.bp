@@ -9,6 +9,7 @@ cc_defaults {
         "libimsstack_engine_headers",
         "libimsstack_platform_headers",
         "libimsstack_protocol_headers",
+        "libimsmedia_config_headers",
     ],
     static_libs: [
         "libimsstack-config",
@@ -17,6 +18,7 @@ cc_defaults {
         "libimsstack-jni",
         "libimsstack-platform",
         "libimsstack-protocol",
+        "libimsmedia_config",
     ],
 }
 
