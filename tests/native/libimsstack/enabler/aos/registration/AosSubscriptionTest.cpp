@@ -306,10 +306,6 @@ TEST_F(AosSubscriptionTest, Stop)
     SetTrmSupported(IMS_TRUE);
     SetVonrSupported(static_cast<IAosVonr*>(&objMockAosVonr));
 
-    // return (m_nState == STATE_SUBSCRIBING || m_nState == STATE_SUBREFRESHING);
-    // EXPECT_CALL(objMockAosTrm, Set(IAosTrm::TYPE_SUB, IMS_FALSE))
-    //     .Times(1);
-
     EXPECT_CALL(objMockAosVonr, Set(IAosVonr::MODULE_SUB, IMS_FALSE)).Times(1);
 
     pAosSubscription->Stop();
@@ -404,6 +400,10 @@ TEST_F(AosSubscriptionTest, CheckInitialRegRequired)
     EXPECT_FALSE(pAosSubscription->IsInitialRegistrationRequired(403));
 
     SetRetryCountRegRequired(1);
+
+    EXPECT_CALL(objMockAosConfig, GetRegRetryCountResetPolicy())
+            .WillOnce(Return(0))
+            .WillOnce(Return(1));
     EXPECT_TRUE(pAosSubscription->IsInitialRegistrationRequired(403));
 
     objErrRegRequired.Clear();
@@ -470,6 +470,10 @@ TEST_F(AosSubscriptionTest, checkInitialRegRequiredInWifi)
     EXPECT_CALL(objMockAosConfig, GetVowifiSubErrorRegRequired())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objErrRegRequiredInWifi));
+
+    EXPECT_CALL(objMockAosConfig, GetRegRetryCountResetPolicy())
+            .WillOnce(Return(0))
+            .WillOnce(Return(2));
     EXPECT_TRUE(pAosSubscription->IsInitialRegistrationRequiredInWifi(403));
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 
@@ -635,6 +639,8 @@ TEST_F(AosSubscriptionTest, processFailedStatusCode)
     objBodyParts.Append(piBodyPart);
 
     EXPECT_CALL(objMockSipMsg, GetBodyParts()).WillOnce(Return(objBodyParts));
+
+    EXPECT_CALL(objMockAosConfig, GetRegRetryCountResetPolicy()).WillOnce(Return(0));
     EXPECT_TRUE(pAosSubscription->ProcessFailed_StatusCode(504, IMS_FALSE));
 
     // nStatusCode == SipStatusCode::SC_504 GetBodyParts empty;

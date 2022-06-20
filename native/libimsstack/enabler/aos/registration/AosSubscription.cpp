@@ -724,6 +724,18 @@ PROTECTED VIRTUAL void AosSubscription::RequestCommand(
 {
     IMS_TRACE_I("RequestCommand:: reason(%d), command(%d) ", nReason, nCommand, 0);
     SetState(STATE_OFFLINE);
+    if (nCommand == COMMAND_REG_REQUIRED)
+    {
+        IMS_SINT32 nRegistrationRetryResetPolicy =
+                GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryCountResetPolicy();
+        if (nRegistrationRetryResetPolicy !=
+                CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION)
+        {
+            ReportState(nReason, COMMAND_REG_REQUIRED_WITH_REG_RETRY_TIME);
+            return;
+        }
+    }
+
     ReportState(nReason, nCommand);
 }
 
