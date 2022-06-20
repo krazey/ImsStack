@@ -1,27 +1,30 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170801  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-#include "ServiceThread.h"
-#include "ImsMessageDef.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "BaseThread.h"
+#include "ImsMessageDef.h"
+#include "ServiceMemory.h"
+#include "ServiceThread.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_BASE__;
 
 PUBLIC
 BaseThread::BaseThread() :
-        strName(AString::ConstNull()),
-        piThread(IMS_NULL)
+        m_strName(AString::ConstNull()),
+        m_piThread(IMS_NULL)
 {
 }
 
@@ -31,29 +34,29 @@ PUBLIC VIRTUAL BaseThread::~BaseThread()
 }
 
 PUBLIC
-IMS_BOOL BaseThread::Start(IN const AString& strName, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+IMS_BOOL BaseThread::Start(IN const AString& strName, IN IMS_SINT32 nSlotId)
 {
-    if (piThread != IMS_NULL)
+    if (m_piThread != IMS_NULL)
     {
         IMS_TRACE_I("Start :: Thread(%s) is already running ...", strName.GetStr(), 0, 0);
         return IMS_TRUE;
     }
 
-    this->strName = strName;
+    m_strName = strName;
 
-    piThread = ThreadService::GetThreadService()->Create(strName, nSlotId);
+    m_piThread = ThreadService::GetThreadService()->Create(m_strName, nSlotId);
 
-    if (piThread == IMS_NULL)
+    if (m_piThread == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Start :: Creating a thread(%s) failed ...", strName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Start :: Creating a thread(%s) failed ...", m_strName.GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
-    piThread->SetRunnable(this);
+    m_piThread->SetRunnable(this);
 
-    if (!piThread->Activate())
+    if (!m_piThread->Activate())
     {
-        IMS_TRACE_E(0, "Start :: Starting a thread(%s) failed ...", strName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Start :: Starting a thread(%s) failed ...", m_strName.GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
@@ -63,21 +66,21 @@ IMS_BOOL BaseThread::Start(IN const AString& strName, IN IMS_SINT32 nSlotId /* =
 PUBLIC
 void BaseThread::Terminate()
 {
-    if (piThread == IMS_NULL)
+    if (m_piThread == IMS_NULL)
     {
         return;
     }
 
     // Method call will not be returned util the current thread is exited in platform layer.
-    piThread->Deactivate();
+    m_piThread->Deactivate();
 
-    ThreadService::GetThreadService()->Destroy(piThread);
-    piThread = IMS_NULL;
+    ThreadService::GetThreadService()->Destroy(m_piThread);
+    m_piThread = IMS_NULL;
 }
 
-PROTECTED VIRTUAL IMS_BOOL BaseThread::Runnable_Run(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL BaseThread::Runnable_Run(IN ImsMessage& objMsg)
 {
-    switch (objMSG.GetName())
+    switch (objMsg.GetName())
     {
         case IMS_MSG_START:
             if (!Initialize())
@@ -85,61 +88,30 @@ PROTECTED VIRTUAL IMS_BOOL BaseThread::Runnable_Run(IN IMSMSG& objMSG)
                 return IMS_FALSE;
             }
 
-            return OnStart(objMSG);
-
+            return OnStart(objMsg);
         case IMS_MSG_TERMINATE:
-            OnTerminate(objMSG);
+            OnTerminate(objMsg);
             Uninitialize();
             return IMS_TRUE;
-
         default:
             break;
     }
 
-    if (!IsThreadMessage(objMSG))
+    if (!IsThreadMessage(objMsg))
     {
-        IMS_TRACE_D("Message(%d) is not for thread(%s)", objMSG.GetName(), GetName().GetStr(), 0);
+        IMS_TRACE_D("Message(%d) is not for thread(%s)", objMsg.GetName(), GetName().GetStr(), 0);
         return IMS_FALSE;
     }
 
-    return OnMessage(objMSG);
-}
-
-PROTECTED VIRTUAL IMS_BOOL BaseThread::Initialize()
-{
-    // no-op
-    return IMS_TRUE;
-}
-
-PROTECTED VIRTUAL void BaseThread::Uninitialize()
-{
-    // no-op
-}
-
-PROTECTED VIRTUAL IMS_BOOL BaseThread::OnStart(IN IMSMSG& /* objMSG */)
-{
-    // no-op
-    return IMS_TRUE;
-}
-
-PROTECTED VIRTUAL IMS_BOOL BaseThread::OnTerminate(IN IMSMSG& /* objMSG */)
-{
-    // no-op
-    return IMS_TRUE;
-}
-
-PROTECTED VIRTUAL IMS_BOOL BaseThread::OnMessage(IN IMSMSG& /* objMSG */)
-{
-    // no-op
-    return IMS_FALSE;
+    return OnMessage(objMsg);
 }
 
 PROTECTED
-IMS_BOOL BaseThread::IsThreadMessage(IN IMSMSG& objMSG) const
+IMS_BOOL BaseThread::IsThreadMessage(IN ImsMessage& objMsg) const
 {
-    const IMS_CHAR* pszTargetName = objMSG.GetTargetName();
+    const IMS_CHAR* pszTargetName = objMsg.GetTargetName();
 
-    if ((pszTargetName != IMS_NULL) && !strName.Equals(pszTargetName))
+    if ((pszTargetName != IMS_NULL) && !m_strName.Equals(pszTargetName))
     {
         return IMS_FALSE;
     }

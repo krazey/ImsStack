@@ -1,84 +1,78 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100324  joonhun.shin@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "ImsActivity.h"
+#include "ImsProcess.h"
 #include "ServiceMemory.h"
 #include "ServiceThread.h"
 
-#include "ImsProcess.h"
-#include "ImsActivity.h"
-
-#if 0  // public
-#endif
-
 PUBLIC
-IMSActivity::IMSActivity(IN CONST AString& strName_ /*= AString::ConstNull() */)
+ImsActivity::ImsActivity(IN const AString& strName /*= AString::ConstNull()*/) :
+        m_strName(AString::ConstNull()),
+        m_piThread(IMS_NULL)
 {
-    pIThread = ThreadService::GetThreadService()->GetCurrentThread();
+    m_piThread = ThreadService::GetThreadService()->GetCurrentThread();
+
     const AString& strThreadName =
-            (pIThread != IMS_NULL) ? pIThread->GetName() : AString::ConstEmpty();
-    IMSAppThread* pIMSAppThread = IMSProcess::GetInstance()->GetApplicationThread(strThreadName);
+            (m_piThread != IMS_NULL) ? m_piThread->GetName() : AString::ConstEmpty();
 
-    if (pIMSAppThread != IMS_NULL)
+    ImsAppThread* pAppThread = ImsProcess::GetInstance()->GetApplicationThread(strThreadName);
+
+    if (pAppThread != IMS_NULL)
     {
-        IMSActivityMngr* pIMSActivityMngr = pIMSAppThread->GetActivityMngr();
+        ImsActivityManager* pActivityManager = pAppThread->GetActivityManager();
 
-        strName = pIMSActivityMngr->GenerateName(strThreadName, strName_);
-        pIMSActivityMngr->Attach(this);
+        m_strName = pActivityManager->GenerateName(strThreadName, strName);
+        pActivityManager->Attach(this);
     }
 }
 
-PUBLIC VIRTUAL IMSActivity::~IMSActivity()
+PUBLIC VIRTUAL ImsActivity::~ImsActivity()
 {
-    AString strThreadName = GetOwnerThreadName(strName);
-    IMSAppThread* pIMSAppThread = IMSProcess::GetInstance()->GetApplicationThread(strThreadName);
+    AString strThreadName = GetOwnerThreadName(m_strName);
+    ImsAppThread* pAppThread = ImsProcess::GetInstance()->GetApplicationThread(strThreadName);
 
-    if (pIMSAppThread != IMS_NULL)
+    if (pAppThread != IMS_NULL)
     {
-        pIMSAppThread->GetActivityMngr()->Detach(this);
+        pAppThread->GetActivityManager()->Detach(this);
     }
 }
 
 PUBLIC
-IMS_BOOL IMSActivity::PostMessage(IN IMSMSG& objMSG)
+IMS_BOOL ImsActivity::PostMessage(IN ImsMessage& objMsg)
 {
-    if (pIThread == IMS_NULL)
+    if (m_piThread == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    objMSG.SetTarget(strName.GetStr());
+    objMsg.SetTarget(m_strName.GetStr());
 
-    return pIThread->PostMessageI(objMSG);
+    return m_piThread->PostMessageI(objMsg);
 }
 
 PUBLIC
-IMS_BOOL IMSActivity::PostMessage(IN IMS_UINT32 nMSG, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
+IMS_BOOL ImsActivity::PostMessage(IN IMS_UINT32 nMsg, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
 {
-    IMSMSG objMSG(nMSG, nWparam, nLparam);
-
-    return PostMessage(objMSG);
+    ImsMessage objMsg(nMsg, nWparam, nLparam);
+    return PostMessage(objMsg);
 }
 
-#if 0  // protected
-#endif
-
-#if 0  // private
-#endif
-
-PRIVATE
-AString IMSActivity::GetOwnerThreadName(CONST AString& strTargetName)
+PRIVATE GLOBAL AString ImsActivity::GetOwnerThreadName(const AString& strTargetName)
 {
-    // threadname.activityname
+    // [threadname.activityname]
     IMS_SINT32 nIndex = strTargetName.GetIndexOf('.');
-
     return strTargetName.GetSubStr(0, nIndex);
 }

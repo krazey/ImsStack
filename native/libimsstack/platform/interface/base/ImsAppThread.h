@@ -1,72 +1,76 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100323  joonhun.shin@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _IMS_APP_THREAD_H_
-#define _IMS_APP_THREAD_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_APP_THREAD_H_
+#define IMS_APP_THREAD_H_
 
 #include "BaseThread.h"
-#include "ImsApp.h"
 #include "ImsActivityManager.h"
+#include "ImsApp.h"
 
-#define ImsAppThread IMSAppThread
-
-class IMSAppThread : public BaseThread
+class ImsAppThread : public BaseThread
 {
 private:
     class AppInfo
     {
     public:
-        inline AppInfo(IN const AString& strName_, IN IMSApp_Creator pfnCreator_) :
-                strName(strName_),
-                pfnCreator(pfnCreator_)
+        inline AppInfo(IN const AString& strName, IN ImsApp_Creator pfnCreator) :
+                m_strName(strName),
+                m_pfnCreator(pfnCreator)
         {
         }
+        inline ~AppInfo() {}
 
-    private:
-        AppInfo(IN const AppInfo& objRHS);
-        AppInfo& operator=(IN const AppInfo& objRHS);
+        AppInfo(IN const AppInfo&) = delete;
+        AppInfo& operator=(IN const AppInfo&) = delete;
 
     public:
-        AString strName;
-        IMSApp_Creator pfnCreator;
+        AString m_strName;
+        ImsApp_Creator m_pfnCreator;
     };
 
 public:
-    IMSAppThread();
-    virtual ~IMSAppThread();
+    ImsAppThread();
+    inline virtual ~ImsAppThread() {}
+
+    ImsAppThread(IN const ImsAppThread&) = delete;
+    ImsAppThread& operator=(IN const ImsAppThread&) = delete;
 
 public:
-    IMSActivityMngr* GetActivityMngr();
+    inline ImsActivityManager* GetActivityManager() { return &m_objActivityManager; }
 
-    void AddApp(IN IMSApp_Creator pfnCreator, IN const AString& strName);
+    void AddApp(IN ImsApp_Creator pfnCreator, IN const AString& strName);
     void RemoveApp(IN const AString& strName);
     void RemoveAndDestroyApp(IN const AString& strName);
 
 protected:
     virtual void OnAppControl(IN IMS_SINT32 nParam, IN const AppInfo* pAppInfo);
 
-    IMS_BOOL AttachApp(IN IMSApp* pApp);
+    IMS_BOOL AttachApp(IN ImsApp* pApp);
     void DetachApp(IN const AString& strName, IN IMS_BOOL bDestroy = IMS_FALSE);
     void ControlAppAsync(IN IMS_SINT32 nParam, IN const AString& strName,
-            IN IMSApp_Creator pfnCreator = IMS_NULL);
+            IN ImsApp_Creator pfnCreator = IMS_NULL);
 
 private:
     void UnloadAllApp();
 
     // IRunnable class
-    virtual IMS_BOOL Runnable_Run(IN IMSMSG& objMSG);
+    IMS_BOOL Runnable_Run(IN ImsMessage& objMsg) override;
 
 protected:
-    // WParam for application control
+    /// WParam for application control
     enum
     {
         PARAM_APP_CONTROL_ADD = 1,
@@ -77,8 +81,8 @@ protected:
     };
 
 private:
-    IMSList<IMSApp*> objIMSApps;
-    IMSActivityMngr objActivityMngr;
+    IMSList<ImsApp*> m_objApps;
+    ImsActivityManager m_objActivityManager;
 };
 
-#endif  // _IMS_APP_THREAD_H_
+#endif

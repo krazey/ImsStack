@@ -1,80 +1,85 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100323  joonhun.shin@             Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ImsApp.h"
+#include "ServiceMemory.h"
 
 PUBLIC
-IMSApp::IMSApp(IN CONST AString& strName) :
-        IMSActivity(strName),
-        objIMSServices(IMSList<IMSService*>())
+ImsApp::ImsApp(IN const AString& strName) :
+        ImsActivity(strName),
+        m_objServices(IMSList<ImsService*>())
 {
 }
 
-PUBLIC VIRTUAL IMSApp::~IMSApp()
+PUBLIC VIRTUAL ImsApp::~ImsApp()
 {
-    while (!objIMSServices.IsEmpty())
+    while (!m_objServices.IsEmpty())
     {
-        IMSService* pService = objIMSServices.GetAt(0);
+        ImsService* pService = m_objServices.GetAt(0);
+
         if (pService != IMS_NULL)
         {
             delete pService;
         }
-        objIMSServices.RemoveAt(0);
+
+        m_objServices.RemoveAt(0);
     }
 }
 
 PUBLIC
-IMS_BOOL IMSApp::AttachService(IN IMSService* pIMSService)
+IMS_BOOL ImsApp::AttachService(IN ImsService* pService)
 {
-    if (pIMSService == IMS_NULL)
+    if (pService == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    return objIMSServices.Append(pIMSService);
+    return m_objServices.Append(pService);
 }
 
 PUBLIC
-void IMSApp::DetachService(IN IMSService* pIMSService)
+void ImsApp::DetachService(IN ImsService* pService)
 {
-    if (pIMSService == IMS_NULL)
+    if (pService == IMS_NULL)
     {
         return;
     }
 
-    for (IMS_UINT32 i = 0; i < objIMSServices.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < m_objServices.GetSize(); i++)
     {
-        IMSService* pService = objIMSServices.GetAt(i);
+        ImsService* pTempService = m_objServices.GetAt(i);
 
-        if (pService == pIMSService)
+        if (pTempService == pService)
         {
-            objIMSServices.RemoveAt(i);
+            m_objServices.RemoveAt(i);
             break;
         }
     }
 }
 
 PUBLIC
-IMSService* IMSApp::GetService(IN CONST AString& strServiceName)
+ImsService* ImsApp::GetService(IN const AString& strServiceName)
 {
     if (strServiceName.IsNULL())
     {
         return IMS_NULL;
     }
 
-    for (IMS_UINT32 i = 0; i < objIMSServices.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < m_objServices.GetSize(); i++)
     {
-        IMSService* pService = objIMSServices.GetAt(i);
+        ImsService* pService = m_objServices.GetAt(i);
 
         if (pService->GetName().Equals(strServiceName))
         {
@@ -85,33 +90,13 @@ IMSService* IMSApp::GetService(IN CONST AString& strServiceName)
     return IMS_NULL;
 }
 
-PROTECTED VIRTUAL IMS_BOOL IMSApp::OnPreprocess(IN IMSMSG& /* objMSG */)
+PRIVATE VIRTUAL IMS_BOOL ImsApp::DispatchMessage(IN ImsMessage& objMsg)
 {
-    return IMS_FALSE;
-}
+    IMS_BOOL bResult = IMS_FALSE;
 
-PROTECTED VIRTUAL IMS_BOOL IMSApp::OnMessage(IN IMSMSG& /* objMSG */)
-{
-    return IMS_FALSE;
-}
+    (void)OnPreprocess(objMsg);
+    bResult = OnMessage(objMsg);
+    (void)OnPostprocess(objMsg);
 
-PROTECTED VIRTUAL IMS_BOOL IMSApp::OnPostprocess(IN IMSMSG& /* objMSG */)
-{
-    return IMS_FALSE;
-}
-
-PROTECTED VIRTUAL IIMSActivityControl* IMSApp::GetController()
-{
-    return IMS_NULL;
-}
-
-PRIVATE VIRTUAL IMS_BOOL IMSApp::DispatchMessage(IN IMSMSG& objMSG)
-{
-    IMS_BOOL bRetValue = IMS_FALSE;
-
-    (void)OnPreprocess(objMSG);
-    bRetValue = OnMessage(objMSG);
-    (void)OnPostprocess(objMSG);
-
-    return bRetValue;
+    return bResult;
 }

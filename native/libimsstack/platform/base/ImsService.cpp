@@ -1,107 +1,66 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100324  joonhun.shin@             Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ImsService.h"
-
-#if 0  // public
-#endif
+#include "ServiceMemory.h"
 
 PUBLIC
-IMSService::IMSService(IN CONST AString& strName) :
-        IMSActivity(strName),
-        nState(IMS_INVALID_STATE),
-        nOldState(IMS_INVALID_STATE)
+ImsService::ImsService(IN const AString& strName) :
+        ImsActivity(strName),
+        m_nState(IMS_INVALID_STATE),
+        m_nOldState(IMS_INVALID_STATE)
 {
 }
 
-PUBLIC VIRTUAL IMSService::~IMSService() {}
-
-#if 0  // pretected
-#endif
-
-EMPTY_STATE_MAP(IMSService)
-
-PROTECTED VIRTUAL IMS_BOOL IMSService::OnPreprocess(IN IMSMSG& /* objMSG */)
-{
-    return IMS_FALSE;
-}
-
-PROTECTED VIRTUAL IMS_BOOL IMSService::OnMessage(IN IMSMSG& /* objMSG */)
-{
-    return IMS_FALSE;
-}
-
-PROTECTED VIRTUAL IMS_BOOL IMSService::OnPostprocess(IN IMSMSG& /* objMSG */)
-{
-    return IMS_FALSE;
-}
-
-PROTECTED VIRTUAL IIMSActivityControl* IMSService::GetController()
-{
-    return IMS_NULL;
-}
+EMPTY_STATE_MAP(ImsService)
 
 PROTECTED
-IMS_BOOL IMSService::SetState(IN IMS_UINT32 nState)
+IMS_BOOL ImsService::SetState(IN IMS_UINT32 nState)
 {
-    nOldState = this->nState;
-    this->nState = nState;
-
+    m_nOldState = m_nState;
+    m_nState = nState;
     return IMS_TRUE;
 }
 
-PROTECTED
-IMS_UINT32 IMSService::GetState()
+PRIVATE VIRTUAL IMS_BOOL ImsService::DispatchMessage(IN ImsMessage& objMsg)
 {
-    return nState;
-}
+    IMS_BOOL bResult = IMS_FALSE;
 
-PROTECTED
-IMS_UINT32 IMSService::GetOldState()
-{
-    return nOldState;
-}
+    (void)OnPreprocess(objMsg);
 
-#if 0  // private
-#endif
-
-PRIVATE VIRTUAL IMS_BOOL IMSService::DispatchMessage(IN IMSMSG& objMSG)
-{
-    IMS_BOOL bRetValue = IMS_FALSE;
-
-    (void)OnPreprocess(objMSG);
-
-    if (!OnStateMsgProcess(objMSG))
+    if (!OnStateMsgProcess(objMsg))
     {
-        bRetValue = OnMessage(objMSG);
+        bResult = OnMessage(objMsg);
     }
 
-    (void)OnPostprocess(objMSG);
+    (void)OnPostprocess(objMsg);
 
-    return bRetValue;
+    return bResult;
 }
 
 PRIVATE
-IMS_BOOL IMSService::OnStateMsgProcess(IN IMSMSG& objMSG)
+IMS_BOOL ImsService::OnStateMsgProcess(IN ImsMessage& objMsg)
 {
-    const StateMap* pstStateMap = GetStateMap();
+    const StateMap* pStateMap = GetStateMap();
     IMS_UINT32 nStateIndex = 0;
     IMS_UINT32 nMsgIndex = 0;
     IMS_BOOL bStateFound = IMS_FALSE;
 
-    while (pstStateMap[nStateIndex].nState != IMS_INVALID_STATE)
+    while (pStateMap[nStateIndex].nState != IMS_INVALID_STATE)
     {
-        if (pstStateMap[nStateIndex].nState == nState)
+        if (pStateMap[nStateIndex].nState == m_nState)
         {
             bStateFound = IMS_TRUE;
             break;
@@ -111,16 +70,17 @@ IMS_BOOL IMSService::OnStateMsgProcess(IN IMSMSG& objMSG)
 
     if (bStateFound == IMS_TRUE)
     {
-        const StateMsgMap* pstStateMsgMap = (pstStateMap[nStateIndex].pfnGetStateMsgMap)();
-        if (pstStateMsgMap != IMS_NULL)
+        const StateMsgMap* pStateMsgMap = (pStateMap[nStateIndex].pfnGetStateMsgMap)();
+
+        if (pStateMsgMap != IMS_NULL)
         {
-            while (pstStateMsgMap[nMsgIndex].nMsg != IMS_INVALID_MSG)
+            while (pStateMsgMap[nMsgIndex].nMsg != IMS_INVALID_MSG)
             {
-                if (pstStateMsgMap[nMsgIndex].nMsg == static_cast<IMS_UINT32>(objMSG.GetName()))
+                if (pStateMsgMap[nMsgIndex].nMsg == static_cast<IMS_UINT32>(objMsg.GetName()))
                 {
-                    if (pstStateMsgMap[nMsgIndex].pfnStateMsgHandler != IMS_NULL)
+                    if (pStateMsgMap[nMsgIndex].pfnStateMsgHandler != IMS_NULL)
                     {
-                        return (this->*(pstStateMsgMap[nMsgIndex].pfnStateMsgHandler))(objMSG);
+                        return (this->*(pStateMsgMap[nMsgIndex].pfnStateMsgHandler))(objMsg);
                     }
                 }
                 nMsgIndex++;

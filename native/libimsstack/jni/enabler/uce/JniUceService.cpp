@@ -58,7 +58,7 @@ JniUceService::JniUceService(CBServiceNoti pCBServiceNoti, IN IMS_UINT32 _nSimSl
         IMS_TRACE_E(0, "JniUceService:pCBServiceNoti is null", 0, 0, 0);
     }
     ImsProcess::GetInstance()->LoadAppThread(
-            STR_UCE_LISTENER_THREAD_NAME, JniUceServiceThread::GetInstance);
+            STR_UCE_LISTENER_THREAD_NAME, JniUceServiceThread::GetInstance, m_nSimSlot);
     m_pJniUceServiceThread = (JniUceServiceThread*)(ImsProcess::GetInstance()->GetApplicationThread(
             STR_UCE_LISTENER_THREAD_NAME));
     if (m_pJniUceServiceThread != NULL)

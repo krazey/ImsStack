@@ -1,52 +1,52 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100323  joonhun.shin@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "IFrameworkThreadListener.h"
+#include "ImsFramework.h"
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
 #include "SystemConfigManager.h"
-#include "IFrameworkThreadListener.h"
-#include "ImsFramework.h"
-
-#if 0  // public
-#endif
 
 PUBLIC
-IMSFramework::IMSFramework() :
-        IMSAppThread(),
-        piThisMutex(IMS_NULL),
-        objListeners(IMSList<IFrameworkThreadListener*>())
+ImsFramework::ImsFramework() :
+        ImsAppThread(),
+        m_piLock(IMS_NULL),
+        m_objListeners(IMSList<IFrameworkThreadListener*>())
 {
-    piThisMutex = MutexService::GetMutexService()->CreateMutex();
+    m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
 
-PUBLIC VIRTUAL IMSFramework::~IMSFramework()
+PUBLIC VIRTUAL ImsFramework::~ImsFramework()
 {
-    MutexService::GetMutexService()->DestroyMutex(piThisMutex);
+    MutexService::GetMutexService()->DestroyMutex(m_piLock);
     SystemConfigManager::GetInstance()->SetProxyThread(IMS_NULL);
 }
 
 PUBLIC
-void IMSFramework::AddListener(IN IFrameworkThreadListener* piListener)
+void ImsFramework::AddListener(IN IFrameworkThreadListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
         return;
     }
 
-    LockGuard objLock(piThisMutex);
+    LockGuard objLock(m_piLock);
 
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IFrameworkThreadListener* piThreadListener = objListeners.GetAt(i);
+        IFrameworkThreadListener* piThreadListener = m_objListeners.GetAt(i);
 
         if (piThreadListener == piListener)
         {
@@ -55,80 +55,76 @@ void IMSFramework::AddListener(IN IFrameworkThreadListener* piListener)
         }
     }
 
-    objListeners.Append(piListener);
+    m_objListeners.Append(piListener);
 }
 
 PUBLIC
-void IMSFramework::RemoveListener(IN IFrameworkThreadListener* piListener)
+void ImsFramework::RemoveListener(IN IFrameworkThreadListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
         return;
     }
 
-    LockGuard objLock(piThisMutex);
+    LockGuard objLock(m_piLock);
 
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IFrameworkThreadListener* piThreadListener = objListeners.GetAt(i);
+        IFrameworkThreadListener* piThreadListener = m_objListeners.GetAt(i);
 
         if (piThreadListener == piListener)
         {
-            objListeners.RemoveAt(i);
+            m_objListeners.RemoveAt(i);
             break;
         }
     }
 }
 
-#if 0  // pretected
-#endif
-
-PROTECTED VIRTUAL IMS_BOOL IMSFramework::Initialize()
+PROTECTED VIRTUAL IMS_BOOL ImsFramework::Initialize()
 {
     SystemConfigManager::CacheSystemFeatures();
     SystemConfigManager::GetInstance()->SetProxyThread(GetThread());
-
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL void IMSFramework::Uninitialize()
+PROTECTED VIRTUAL void ImsFramework::Uninitialize()
 {
     SystemConfigManager::GetInstance()->SetProxyThread(IMS_NULL);
 }
 
-PROTECTED VIRTUAL IMS_BOOL IMSFramework::OnStart(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL ImsFramework::OnStart(IN ImsMessage& objMsg)
 {
-    IMSAppThread::OnStart(objMSG);
+    ImsAppThread::OnStart(objMsg);
 
     NotifyThreadStarted();
 
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL IMSFramework::OnTerminate(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL ImsFramework::OnTerminate(IN ImsMessage& objMsg)
 {
-    IMSAppThread::OnTerminate(objMSG);
+    ImsAppThread::OnTerminate(objMsg);
 
     NotifyThreadTerminated();
 
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL IMSFramework::OnMessage(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL ImsFramework::OnMessage(IN ImsMessage& objMsg)
 {
-    IMSAppThread::OnMessage(objMSG);
+    ImsAppThread::OnMessage(objMsg);
 
     return IMS_TRUE;
 }
 
 PRIVATE
-void IMSFramework::NotifyThreadStarted()
+void ImsFramework::NotifyThreadStarted()
 {
     IMSList<IFrameworkThreadListener*> objThreadListeners;
 
     {
-        LockGuard objLock(piThisMutex);
-        objThreadListeners = objListeners;
+        LockGuard objLock(m_piLock);
+        objThreadListeners = m_objListeners;
     }
 
     for (IMS_UINT32 i = 0; i < objThreadListeners.GetSize(); ++i)
@@ -143,13 +139,13 @@ void IMSFramework::NotifyThreadStarted()
 }
 
 PRIVATE
-void IMSFramework::NotifyThreadTerminated()
+void ImsFramework::NotifyThreadTerminated()
 {
     IMSList<IFrameworkThreadListener*> objThreadListeners;
 
     {
-        LockGuard objLock(piThisMutex);
-        objThreadListeners = objListeners;
+        LockGuard objLock(m_piLock);
+        objThreadListeners = m_objListeners;
     }
 
     for (IMS_UINT32 i = 0; i < objThreadListeners.GetSize(); ++i)

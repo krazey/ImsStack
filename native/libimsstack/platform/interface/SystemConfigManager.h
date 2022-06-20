@@ -71,7 +71,7 @@ private:
 
 private:
     friend class ImsMain;
-    friend class IMSFramework;
+    friend class ImsFramework;
 
     enum
     {

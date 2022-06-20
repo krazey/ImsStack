@@ -66,7 +66,7 @@ void JniMtcService::Initialize(IN CBServiceNoti pfnNotifier)
     {
         return new JniMtcServiceThread();
     };
-    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry);
+    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry, m_nSlotId);
     m_pThread = (JniMtcServiceThread*)(ImsProcess::GetInstance()->GetThread(m_strThreadName));
 
     if (m_pThread == IMS_NULL)

@@ -1,59 +1,55 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100324  joonhun.shin@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "ImsActivityManager.h"
 #include "ServiceMemory.h"
 
-#include "ImsActivityManager.h"
-
-#if 0  // public
-#endif
-
 PUBLIC
-IMSActivityMngr::IMSActivityMngr() :
-        nMajorId(0),
-        nMinorId(0),
-        objIMSActivities(IMSList<IMSActivity*>())
+ImsActivityManager::ImsActivityManager() :
+        m_nMajorId(0),
+        m_nMinorId(0),
+        m_objActivities(IMSList<ImsActivity*>())
 {
 }
 
 PUBLIC
-IMSActivityMngr::~IMSActivityMngr() {}
-
-PUBLIC
-IMS_BOOL IMSActivityMngr::Attach(IN IMSActivity* pIMSActivity)
+IMS_BOOL ImsActivityManager::Attach(IN ImsActivity* pActivity)
 {
-    if (pIMSActivity == IMS_NULL)
+    if (pActivity == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    return objIMSActivities.Append(pIMSActivity);
+    return m_objActivities.Append(pActivity);
 }
 
 PUBLIC
-void IMSActivityMngr::Detach(IN IMSActivity* pIMSActivity)
+void ImsActivityManager::Detach(IN ImsActivity* pActivity)
 {
-    for (IMS_UINT32 i = 0; i < objIMSActivities.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objActivities.GetSize(); ++i)
     {
-        IMSActivity* pActivity = objIMSActivities.GetAt(i);
+        ImsActivity* pTempActivity = m_objActivities.GetAt(i);
 
-        if (pActivity == pIMSActivity)
+        if (pTempActivity == pActivity)
         {
-            objIMSActivities.RemoveAt(i);
+            m_objActivities.RemoveAt(i);
 
-            if (objIMSActivities.IsEmpty())
+            if (m_objActivities.IsEmpty())
             {
-                nMajorId = 0;
-                nMinorId = 0;
+                m_nMajorId = 0;
+                m_nMinorId = 0;
             }
             break;
         }
@@ -61,11 +57,11 @@ void IMSActivityMngr::Detach(IN IMSActivity* pIMSActivity)
 }
 
 PUBLIC
-IMSActivity* IMSActivityMngr::Get(IN CONST AString& strActivityName)
+ImsActivity* ImsActivityManager::Get(IN const AString& strActivityName)
 {
-    for (IMS_UINT32 i = 0; i < objIMSActivities.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objActivities.GetSize(); ++i)
     {
-        IMSActivity* pActivity = objIMSActivities.GetAt(i);
+        ImsActivity* pActivity = m_objActivities.GetAt(i);
 
         if (pActivity->GetName().Equals(strActivityName))
         {
@@ -77,7 +73,7 @@ IMSActivity* IMSActivityMngr::Get(IN CONST AString& strActivityName)
 }
 
 PUBLIC
-AString IMSActivityMngr::GenerateName(IN CONST AString& strThreadName, IN CONST AString& strName)
+AString ImsActivityManager::GenerateName(IN const AString& strThreadName, IN const AString& strName)
 {
     AString strNewName;
 
@@ -87,12 +83,12 @@ AString IMSActivityMngr::GenerateName(IN CONST AString& strThreadName, IN CONST 
     }
     else
     {
-        strNewName.Sprintf("%s.ATVT%X_%X", strThreadName.GetStr(), nMajorId, nMinorId++);
+        strNewName.Sprintf("%s.ATVT%X_%X", strThreadName.GetStr(), m_nMajorId, m_nMinorId++);
 
-        if (nMinorId == 0xFFFFFFFF)
+        if (m_nMinorId == 0xFFFFFFFF)
         {
-            nMajorId++;
-            nMinorId = 0;
+            m_nMajorId++;
+            m_nMinorId = 0;
         }
     }
 
@@ -100,42 +96,36 @@ AString IMSActivityMngr::GenerateName(IN CONST AString& strThreadName, IN CONST 
 }
 
 PUBLIC
-IMS_BOOL IMSActivityMngr::HandleMessage(IN IMSMSG& objMSG)
+IMS_BOOL ImsActivityManager::HandleMessage(IN ImsMessage& objMsg)
 {
-    AString strTartgetName = objMSG.GetTargetName();
+    AString strTartgetName = objMsg.GetTargetName();
     AString strTartgetActivityName = GetActivityNameFromMsg(strTartgetName);
 
-    IMSActivity* pIMSActivity = Get(strTartgetActivityName);
+    ImsActivity* pActivity = Get(strTartgetActivityName);
 
-    if (pIMSActivity != IMS_NULL)
+    if (pActivity != IMS_NULL)
     {
-        return pIMSActivity->DispatchMessage(objMSG);
+        return pActivity->DispatchMessage(objMsg);
     }
 
     return IMS_FALSE;
 }
 
 PUBLIC
-IIMSActivityControl* IMSActivityMngr::GetController(IN CONST AString& strControllerName)
+IImsActivityController* ImsActivityManager::GetController(IN const AString& strControllerName)
 {
-    IMSActivity* pIMSActivity = Get(strControllerName);
+    ImsActivity* pActivity = Get(strControllerName);
 
-    if (pIMSActivity != IMS_NULL)
+    if (pActivity != IMS_NULL)
     {
-        return pIMSActivity->GetController();
+        return pActivity->GetController();
     }
 
     return IMS_NULL;
 }
 
-#if 0  // protected
-#endif
-
-#if 0  // private
-#endif
-
 PRIVATE
-AString IMSActivityMngr::GetActivityNameFromMsg(IN CONST AString& strTargetName)
+AString ImsActivityManager::GetActivityNameFromMsg(IN const AString& strTargetName)
 {
     IMS_SINT32 nOffset = strTargetName.GetIndexOf('.');
     IMS_SINT32 nIndex = strTargetName.GetIndexOf('.', nOffset + 1);

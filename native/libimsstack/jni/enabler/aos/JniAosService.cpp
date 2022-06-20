@@ -88,7 +88,7 @@ void JniAosService::Initialize(IN CBServiceNoti pCbServiceNoti)
         return new JniAosServiceThread();
     };
 
-    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry);
+    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry, m_nSlotId);
     m_pJniAosServiceThread =
             (JniAosServiceThread*)(ImsProcess::GetInstance()->GetThread(m_strThreadName));
 

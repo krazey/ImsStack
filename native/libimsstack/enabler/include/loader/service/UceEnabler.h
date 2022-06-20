@@ -14,7 +14,7 @@
 
 #include "Enabler.h"
 
-class IMSApp;
+class ImsApp;
 
 class UceEnabler
     : public Enabler
@@ -29,7 +29,7 @@ public:
     virtual void Stop();
 
 private:
-    IMSApp *pApp;
+    ImsApp* pApp;
 };
 
 #endif // _UCE_ENABLER_H_

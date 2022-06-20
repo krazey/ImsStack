@@ -22,7 +22,7 @@
 #include "ServiceTrace.h"
 
 class IThread;
-class IMSActivity;
+class ImsActivity;
 
 class MessageService
 {
@@ -35,7 +35,7 @@ public:
 
     static IMS_BOOL PostMessageThread(IN IThread* piTargetThread, IN ImsMessage& objMsg);
 
-    static IMS_BOOL PostMessageActivity(IN IMSActivity* pTargetActivity, IN ImsMessage& objMsg);
+    static IMS_BOOL PostMessageActivity(IN ImsActivity* pTargetActivity, IN ImsMessage& objMsg);
 
 private:
     static AString GetThreadName(IN const AString& strTargetName);

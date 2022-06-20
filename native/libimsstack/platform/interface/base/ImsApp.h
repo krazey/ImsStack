@@ -1,48 +1,54 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100323  joonhun.shin@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _IMS_APP_H_
-#define _IMS_APP_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_APP_H_
+#define IMS_APP_H_
 
 #include "ImsActivity.h"
 #include "ImsService.h"
 
-#define ImsApp IMSApp
-
-class IMSApp : public IMSActivity
+class ImsApp : public ImsActivity
 {
 public:
-    IMSApp(IN CONST AString& strAppName);
-    virtual ~IMSApp();
+    ImsApp(IN const AString& strAppName);
+    virtual ~ImsApp();
 
-    IMS_BOOL AttachService(IN IMSService* pIMSService);
-    void DetachService(IN IMSService* pIMSService);
-    IMSService* GetService(IN CONST AString& strServiceName);
-    inline const IMSList<IMSService*> GetServices() { return objIMSServices; }
+    ImsApp(IN const ImsApp&) = delete;
+    ImsApp& operator=(IN const ImsApp&) = delete;
+
+public:
+    IMS_BOOL AttachService(IN ImsService* pService);
+    void DetachService(IN ImsService* pService);
+    ImsService* GetService(IN const AString& strServiceName);
+    inline const IMSList<ImsService*> GetServices() { return m_objServices; }
 
 protected:
-    virtual IMS_BOOL OnPreprocess(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnPostprocess(IN IMSMSG& objMSG);
-    virtual IIMSActivityControl* GetController();
+    inline virtual IMS_BOOL OnPreprocess(IN ImsMessage& /*objMsg*/) { return IMS_FALSE; }
+    inline virtual IMS_BOOL OnMessage(IN ImsMessage& /*objMsg*/) { return IMS_FALSE; }
+    inline virtual IMS_BOOL OnPostprocess(IN ImsMessage& /*objMsg*/) { return IMS_FALSE; }
+
+    inline IImsActivityController* GetController() override { return IMS_NULL; }
 
 private:
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
 private:
-    IMSList<IMSService*> objIMSServices;
+    IMSList<ImsService*> m_objServices;
 };
 
-// Definition of function pointer to create the IMSApp derived classes
-typedef IMSApp* (*IMSApp_Creator)(IN const AString& strName);
+// Definition of function pointer to create the ImsApp derived classes
+typedef ImsApp* (*ImsApp_Creator)(IN const AString& strName);
 
-#endif  // _IMS_APP_H_
+#endif

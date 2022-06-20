@@ -1,43 +1,39 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100331  joonhun.shin@             create (hwangoo.park@ base code)
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ImsStateMachine.h"
-
-#if 0  // public
-#endif
+#include "ServiceMemory.h"
 
 PUBLIC
-IMSStateMachine::IMSStateMachine(IN IMS_UINT32 nState_) :
-        nState(nState_),
-        nOldState(IMS_INVALID_STATE)
+ImsStateMachine::ImsStateMachine(IN IMS_UINT32 nState) :
+        m_nState(nState),
+        m_nOldState(IMS_INVALID_STATE)
 {
 }
 
-PUBLIC VIRTUAL IMSStateMachine::~IMSStateMachine()
+PUBLIC
+IMS_BOOL ImsStateMachine::OnStateMessage(IN ImsMessage& objMsg)
 {
-    // remove all of primitives
-}
-
-IMS_BOOL IMSStateMachine::OnStateMessage(IN IMSMSG& objMSG)
-{
-    const StateMap* pstStateMap = GetStateMap();
+    const StateMap* pStateMap = GetStateMap();
     IMS_UINT32 nStateIndex = 0;
     IMS_UINT32 nMsgIndex = 0;
     IMS_BOOL bStateFound = IMS_FALSE;
 
-    while (pstStateMap[nStateIndex].nState != IMS_INVALID_STATE)
+    while (pStateMap[nStateIndex].nState != IMS_INVALID_STATE)
     {
-        if (pstStateMap[nStateIndex].nState == nState)
+        if (pStateMap[nStateIndex].nState == m_nState)
         {
             bStateFound = IMS_TRUE;
             break;
@@ -47,16 +43,17 @@ IMS_BOOL IMSStateMachine::OnStateMessage(IN IMSMSG& objMSG)
 
     if (bStateFound == IMS_TRUE)
     {
-        const StateMsgMap* pstStateMsgMap = (pstStateMap[nStateIndex].pfnGetStateMsgMap)();
-        if (pstStateMsgMap != IMS_NULL)
+        const StateMsgMap* pStateMsgMap = (pStateMap[nStateIndex].pfnGetStateMsgMap)();
+
+        if (pStateMsgMap != IMS_NULL)
         {
-            while (pstStateMsgMap[nMsgIndex].nMsg != IMS_INVALID_MSG)
+            while (pStateMsgMap[nMsgIndex].nMsg != IMS_INVALID_MSG)
             {
-                if (pstStateMsgMap[nMsgIndex].nMsg == static_cast<IMS_UINT32>(objMSG.GetName()))
+                if (pStateMsgMap[nMsgIndex].nMsg == static_cast<IMS_UINT32>(objMsg.GetName()))
                 {
-                    if (pstStateMsgMap[nMsgIndex].pfnStateMsgHandler != IMS_NULL)
+                    if (pStateMsgMap[nMsgIndex].pfnStateMsgHandler != IMS_NULL)
                     {
-                        return (this->*(pstStateMsgMap[nMsgIndex].pfnStateMsgHandler))(objMSG);
+                        return (this->*(pStateMsgMap[nMsgIndex].pfnStateMsgHandler))(objMsg);
                     }
                 }
                 nMsgIndex++;
@@ -67,28 +64,12 @@ IMS_BOOL IMSStateMachine::OnStateMessage(IN IMSMSG& objMSG)
     return IMS_FALSE;
 }
 
-#if 0  // protected
-#endif
-
-EMPTY_STATE_MAP(IMSStateMachine)
+EMPTY_STATE_MAP(ImsStateMachine)
 
 PROTECTED
-IMS_BOOL IMSStateMachine::SetState(IN IMS_UINT32 nState)
+IMS_BOOL ImsStateMachine::SetState(IN IMS_UINT32 nState)
 {
-    nOldState = this->nState;
-    this->nState = nState;
-
+    m_nOldState = m_nState;
+    m_nState = nState;
     return IMS_TRUE;
-}
-
-PROTECTED
-IMS_UINT32 IMSStateMachine::GetState()
-{
-    return nState;
-}
-
-PROTECTED
-IMS_UINT32 IMSStateMachine::GetOldState()
-{
-    return nOldState;
 }

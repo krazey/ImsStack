@@ -136,7 +136,7 @@ void JniMtsService::Initialize(IN CBServiceNoti pCbServiceNoti)
     IMS_TRACE_D("Initialize()", 0, 0, 0);
     auto fnEntry = []() -> BaseThread * { return new JniMtsServiceThread(); };
 
-    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry);
+    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry, m_nSlotId);
     m_pJniMtsServiceThread =
             (JniMtsServiceThread*)(ImsProcess::GetInstance()->GetThread(m_strThreadName));
 

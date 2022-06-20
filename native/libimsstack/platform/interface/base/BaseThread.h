@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170801  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _BASE_THREAD_H_
-#define _BASE_THREAD_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef BASE_THREAD_H_
+#define BASE_THREAD_H_
 
 #include "IThread.h"
 
@@ -21,29 +24,32 @@ public:
     BaseThread();
     virtual ~BaseThread();
 
-public:
-    inline const AString& GetName() const { return strName; }
-    inline IThread* GetThread() const { return piThread; }
+    BaseThread(IN const BaseThread&) = delete;
+    BaseThread& operator=(IN const BaseThread&) = delete;
 
-    IMS_BOOL Start(IN const AString& strName, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+public:
+    inline const AString& GetName() const { return m_strName; }
+    inline IThread* GetThread() const { return m_piThread; }
+
+    IMS_BOOL Start(IN const AString& strName, IN IMS_SINT32 nSlotId);
     void Terminate();
 
 protected:
     // IRunnable class
-    virtual IMS_BOOL Runnable_Run(IN IMSMSG& objMSG);
+    IMS_BOOL Runnable_Run(IN ImsMessage& objMsg) override;
 
-    virtual IMS_BOOL Initialize();
-    virtual void Uninitialize();
+    inline virtual IMS_BOOL Initialize() { return IMS_TRUE; }
+    inline virtual void Uninitialize() {}
 
-    virtual IMS_BOOL OnStart(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnTerminate(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
+    inline virtual IMS_BOOL OnStart(IN ImsMessage& /*objMsg*/) { return IMS_TRUE; }
+    inline virtual IMS_BOOL OnTerminate(IN ImsMessage& /*objMsg*/) { return IMS_TRUE; }
+    inline virtual IMS_BOOL OnMessage(IN ImsMessage& /*objMsg*/) { return IMS_FALSE; }
 
-    IMS_BOOL IsThreadMessage(IN IMSMSG& objMSG) const;
+    IMS_BOOL IsThreadMessage(IN ImsMessage& objMsg) const;
 
 private:
-    AString strName;
-    IThread* piThread;
+    AString m_strName;
+    IThread* m_piThread;
 };
 
-#endif  // _BASE_THREAD_H_
+#endif

@@ -90,7 +90,7 @@ void JniMediaSession::Initialize(IN CBServiceNoti pfnNotifier, IN IMS_SINTP nNat
     {
         return new JniMediaSessionThread();
     };
-    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry);
+    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry, m_nSlotId);
     m_pThread = (JniMediaSessionThread*)(ImsProcess::GetInstance()->GetThread(m_strThreadName));
 
     if (m_pThread == IMS_NULL)

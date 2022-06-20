@@ -1,82 +1,82 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100323  joonhun.shin@             Created
-    20110525  joonhun.shin@             remove trace
-    20130328  joonhun.shin@             add muntex
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-#include "ServiceMutex.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ImsFramework.h"
 #include "ImsProcess.h"
+#include "ServiceMemory.h"
+#include "ServiceMutex.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_FWK__;
 
 #define IMS_FRAMEWORK_THREAD "Framework"
 
-class IMSThreadMap
+class ImsThreadMap
 {
 public:
-    inline IMSThreadMap(IN const AString& strName_, IN BaseThread* pThread_) :
-            strName(strName_),
-            pThread(pThread_)
+    inline ImsThreadMap(IN const AString& strName, IN BaseThread* pThread) :
+            m_strName(strName),
+            m_pThread(pThread)
     {
     }
 
+    inline ~ImsThreadMap() {}
+
+    ImsThreadMap(IN const ImsThreadMap&) = delete;
+    ImsThreadMap& operator=(IN const ImsThreadMap&) = delete;
+
 public:
-    AString strName;
-    BaseThread* pThread;
+    AString m_strName;
+    BaseThread* m_pThread;
 };
 
-#if 0  // private
-#endif
-
 PRIVATE
-IMSProcess::IMSProcess() :
-        strFrameworkThreadName(IMS_FRAMEWORK_THREAD),
-        piLock(IMS_NULL),
-        objThreads(IMSList<IMSThreadMap*>())
+ImsProcess::ImsProcess() :
+        m_strFrameworkThreadName(IMS_FRAMEWORK_THREAD),
+        m_piLock(IMS_NULL),
+        m_objThreads(IMSList<ImsThreadMap*>())
 {
-    piLock = MutexService::GetMutexService()->CreateMutex();
+    m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
 
 PRIVATE
-IMSProcess::~IMSProcess()
+ImsProcess::~ImsProcess()
 {
-    MutexService::GetMutexService()->DestroyMutex(piLock);
+    MutexService::GetMutexService()->DestroyMutex(m_piLock);
 }
 
-#if 0  // public
-#endif
-
-PUBLIC GLOBAL IMSProcess* IMSProcess::GetInstance()
+PUBLIC GLOBAL ImsProcess* ImsProcess::GetInstance()
 {
-    static IMSProcess* pIMSProcess = IMS_NULL;
+    static ImsProcess* s_pImsProcess = IMS_NULL;
 
-    if (pIMSProcess == IMS_NULL)
+    if (s_pImsProcess == IMS_NULL)
     {
-        pIMSProcess = new IMSProcess();
+        s_pImsProcess = new ImsProcess();
     }
 
-    return pIMSProcess;
+    return s_pImsProcess;
 }
 
 PUBLIC
-const AString& IMSProcess::GetFrameworkThreadName() const
+const AString& ImsProcess::GetFrameworkThreadName() const
 {
-    return strFrameworkThreadName;
+    return m_strFrameworkThreadName;
 }
 
 PUBLIC
-IMS_BOOL IMSProcess::Initialize()
+IMS_BOOL ImsProcess::Initialize()
 {
     const AString& strFwkThreadName = GetFrameworkThreadName();
 
@@ -86,7 +86,7 @@ IMS_BOOL IMSProcess::Initialize()
     }
 
     // Start a default thread
-    BaseThread* pThread = new IMSFramework();
+    BaseThread* pThread = new ImsFramework();
 
     if (pThread == IMS_NULL)
     {
@@ -95,34 +95,34 @@ IMS_BOOL IMSProcess::Initialize()
 
     (void)AttachThread(strFwkThreadName, pThread);
 
-    pThread->Start(strFwkThreadName);
+    pThread->Start(strFwkThreadName, IMS_SLOT_0);
 
     return IMS_TRUE;
 }
 
 PUBLIC
-void IMSProcess::Uninitialize()
+void ImsProcess::Uninitialize()
 {
-    IMS_TRACE_I("Uninitialize :: Thread count (%d)", objThreads.GetSize(), 0, 0);
+    IMS_TRACE_I("Uninitialize :: Thread count (%d)", m_objThreads.GetSize(), 0, 0);
 
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    while (!objThreads.IsEmpty())
+    while (!m_objThreads.IsEmpty())
     {
-        IMSThreadMap* pThreadMap = objThreads.GetAt(0);
-        if (pThreadMap->pThread != IMS_NULL)
+        ImsThreadMap* pThreadMap = m_objThreads.GetAt(0);
+        if (pThreadMap->m_pThread != IMS_NULL)
         {
-            pThreadMap->pThread->Terminate();
-            delete pThreadMap->pThread;
+            pThreadMap->m_pThread->Terminate();
+            delete pThreadMap->m_pThread;
         }
         delete pThreadMap;
-        objThreads.RemoveAt(0);
+        m_objThreads.RemoveAt(0);
     }
 }
 
 PUBLIC
-IMS_BOOL IMSProcess::LoadThread(IN const AString& strThreadName, IN Thread_Entry pfnThreadEntry,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+IMS_BOOL ImsProcess::LoadThread(
+        IN const AString& strThreadName, IN Thread_Entry pfnThreadEntry, IN IMS_SINT32 nSlotId)
 {
     if (GetThread(strThreadName) != IMS_NULL)
     {
@@ -144,9 +144,8 @@ IMS_BOOL IMSProcess::LoadThread(IN const AString& strThreadName, IN Thread_Entry
 }
 
 PUBLIC
-IMS_BOOL IMSProcess::LoadThreadWithParam(IN const AString& strThreadName,
-        IN Thread_EntryEx pfnThreadEntryEx, IN void* pvParam,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+IMS_BOOL ImsProcess::LoadThreadWithParam(IN const AString& strThreadName,
+        IN Thread_EntryEx pfnThreadEntryEx, IN void* pvParam, IN IMS_SINT32 nSlotId)
 {
     if (GetThread(strThreadName) != IMS_NULL)
     {
@@ -168,7 +167,7 @@ IMS_BOOL IMSProcess::LoadThreadWithParam(IN const AString& strThreadName,
 }
 
 PUBLIC
-void IMSProcess::UnloadThread(IN const AString& strThreadName)
+void ImsProcess::UnloadThread(IN const AString& strThreadName)
 {
     BaseThread* pThread = GetThread(strThreadName);
 
@@ -182,17 +181,17 @@ void IMSProcess::UnloadThread(IN const AString& strThreadName)
 }
 
 PUBLIC
-BaseThread* IMSProcess::GetThread(IN const AString& strThreadName)
+BaseThread* ImsProcess::GetThread(IN const AString& strThreadName)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    for (IMS_UINT32 i = 0; i < objThreads.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objThreads.GetSize(); ++i)
     {
-        IMSThreadMap* pThreadMap = objThreads.GetAt(i);
+        ImsThreadMap* pThreadMap = m_objThreads.GetAt(i);
 
-        if (pThreadMap->strName.Equals(strThreadName))
+        if (pThreadMap->m_strName.Equals(strThreadName))
         {
-            return pThreadMap->pThread;
+            return pThreadMap->m_pThread;
         }
     }
 
@@ -201,15 +200,15 @@ BaseThread* IMSProcess::GetThread(IN const AString& strThreadName)
 }
 
 PUBLIC
-IMS_BOOL IMSProcess::LoadAppThread(IN const AString& strThreadName,
-        IN AppThread_Entry pfnThreadEntry, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+IMS_BOOL ImsProcess::LoadAppThread(
+        IN const AString& strThreadName, IN AppThread_Entry pfnThreadEntry, IN IMS_SINT32 nSlotId)
 {
     if (GetThread(strThreadName) != IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    IMSAppThread* pThread = pfnThreadEntry();
+    ImsAppThread* pThread = pfnThreadEntry();
 
     if (pThread == IMS_NULL)
     {
@@ -224,16 +223,15 @@ IMS_BOOL IMSProcess::LoadAppThread(IN const AString& strThreadName,
 }
 
 PUBLIC
-IMS_BOOL IMSProcess::LoadAppThreadWithParam(IN const AString& strThreadName,
-        IN AppThread_EntryEx pfnThreadEntryEx, IN void* pvParam,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+IMS_BOOL ImsProcess::LoadAppThreadWithParam(IN const AString& strThreadName,
+        IN AppThread_EntryEx pfnThreadEntryEx, IN void* pvParam, IN IMS_SINT32 nSlotId)
 {
     if (GetThread(strThreadName) != IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    IMSAppThread* pThread = pfnThreadEntryEx(pvParam);
+    ImsAppThread* pThread = pfnThreadEntryEx(pvParam);
 
     if (pThread == IMS_NULL)
     {
@@ -248,53 +246,47 @@ IMS_BOOL IMSProcess::LoadAppThreadWithParam(IN const AString& strThreadName,
 }
 
 PUBLIC
-void IMSProcess::UnloadAppThread(IN const AString& strThreadName)
+void ImsProcess::UnloadAppThread(IN const AString& strThreadName)
 {
     UnloadThread(strThreadName);
 }
 
 PUBLIC
-IMSAppThread* IMSProcess::GetApplicationThread(IN const AString& strThreadName)
+ImsAppThread* ImsProcess::GetApplicationThread(IN const AString& strThreadName)
 {
-    return DYNAMIC_CAST(IMSAppThread*, GetThread(strThreadName));
+    return DYNAMIC_CAST(ImsAppThread*, GetThread(strThreadName));
 }
 
 PUBLIC
-IIMSActivityControl* IMSProcess::GetController(IN const AString& strControllerName)
+IImsActivityController* ImsProcess::GetController(IN const AString& strControllerName)
 {
     AString strThreadName = GetThreadName(strControllerName);
-    IMSAppThread* pAppThread = GetApplicationThread(strThreadName);
+    ImsAppThread* pAppThread = GetApplicationThread(strThreadName);
 
     IMS_TRACE_D("GetController :: Controller(%s), Thread(%s)", strControllerName.GetStr(),
             strThreadName.GetStr(), 0);
 
     if (pAppThread != IMS_NULL)
     {
-        return pAppThread->GetActivityMngr()->GetController(strControllerName);
+        return pAppThread->GetActivityManager()->GetController(strControllerName);
     }
 
     return IMS_NULL;
 }
 
-#if 0  // protected
-#endif
-
-#if 0  // private
-#endif
-
 PRIVATE
-IMS_BOOL IMSProcess::AttachThread(IN const AString& strName, IN BaseThread* pThread)
+IMS_BOOL ImsProcess::AttachThread(IN const AString& strName, IN BaseThread* pThread)
 {
     if ((pThread == IMS_NULL) || (strName.GetLength() == 0))
     {
         return IMS_FALSE;
     }
 
-    IMSThreadMap* pThreadMap = new IMSThreadMap(strName, pThread);
+    ImsThreadMap* pThreadMap = new ImsThreadMap(strName, pThread);
 
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    objThreads.Append(pThreadMap);
+    m_objThreads.Append(pThreadMap);
 
     IMS_TRACE_I("AttachThread : Thread (%s)", strName.GetStr(), 0, 0);
 
@@ -302,34 +294,33 @@ IMS_BOOL IMSProcess::AttachThread(IN const AString& strName, IN BaseThread* pThr
 }
 
 PRIVATE
-void IMSProcess::DetachThread(IN const AString& strName)
+void ImsProcess::DetachThread(IN const AString& strName)
 {
     if (strName.GetLength() == 0)
     {
         return;
     }
 
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    for (IMS_UINT32 i = 0; i < objThreads.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objThreads.GetSize(); ++i)
     {
-        IMSThreadMap* pThreadMap = objThreads.GetAt(i);
+        ImsThreadMap* pThreadMap = m_objThreads.GetAt(i);
 
-        if (pThreadMap->strName.Equals(strName))
+        if (pThreadMap->m_strName.Equals(strName))
         {
             IMS_TRACE_I("DetachThread :: Thread (%s)", strName.GetStr(), 0, 0);
 
             delete pThreadMap;
-            objThreads.RemoveAt(i);
+            m_objThreads.RemoveAt(i);
             break;
         }
     }
 }
 
 PRIVATE
-AString IMSProcess::GetThreadName(IN const AString& strTargetName)
+AString ImsProcess::GetThreadName(IN const AString& strTargetName)
 {
     IMS_SINT32 nIndex = strTargetName.GetIndexOf('.');
-
     return strTargetName.GetSubStr(0, nIndex);
 }

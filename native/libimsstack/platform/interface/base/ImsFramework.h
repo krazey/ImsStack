@@ -1,52 +1,54 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100323  joonhun.shin@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _IMS_FRAMEWORK_H_
-#define _IMS_FRAMEWORK_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_FRAMEWORK_H_
+#define IMS_FRAMEWORK_H_
 
 #include "ImsAppThread.h"
 
-class IMutex;
 class IFrameworkThreadListener;
+class IMutex;
 
-class IMSFramework : public IMSAppThread
+class ImsFramework : public ImsAppThread
 {
 public:
-    IMSFramework();
-    virtual ~IMSFramework();
+    ImsFramework();
+    virtual ~ImsFramework();
 
-private:
-    IMSFramework(IN const IMSFramework& objRHS);
-    IMSFramework& operator=(IN const IMSFramework& objRHS);
+    ImsFramework(IN const ImsFramework&) = delete;
+    ImsFramework& operator=(IN const ImsFramework&) = delete;
 
 public:
     void AddListener(IN IFrameworkThreadListener* piListener);
     void RemoveListener(IN IFrameworkThreadListener* piListener);
 
 protected:
-    virtual IMS_BOOL Initialize();
-    virtual void Uninitialize();
+    IMS_BOOL Initialize() override;
+    void Uninitialize() override;
 
-    virtual IMS_BOOL OnStart(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnTerminate(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
+    IMS_BOOL OnStart(IN ImsMessage& objMsg) override;
+    IMS_BOOL OnTerminate(IN ImsMessage& objMsg) override;
+    IMS_BOOL OnMessage(IN ImsMessage& objMsg) override;
 
 private:
     void NotifyThreadStarted();
     void NotifyThreadTerminated();
 
 private:
-    IMutex* piThisMutex;
-    IMSList<IFrameworkThreadListener*> objListeners;
+    IMutex* m_piLock;
+    IMSList<IFrameworkThreadListener*> m_objListeners;
 };
 
-#endif  // _IMS_FRAMEWORK_H_
+#endif
