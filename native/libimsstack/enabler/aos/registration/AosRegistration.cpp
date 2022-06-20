@@ -2498,6 +2498,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsRetryStopped()
 PROTECTED VIRTUAL void AosRegistration::ClearRegParameters(IN IMS_BOOL bClearPcscf /* = IMS_TRUE */)
 {
     ClearTimers();
+    ClearRetryCount();
     ClearRetryValues();
     ClearAuthChallengedCount();
     ClearPending();
@@ -2521,6 +2522,11 @@ PROTECTED VIRTUAL void AosRegistration::ClearPcscf()
     }
 }
 
+PROTECTED VIRTUAL void AosRegistration::ClearRetryCount()
+{
+    m_nConsecutiveFailure = 0;
+}
+
 PROTECTED VIRTUAL void AosRegistration::ClearRetryValues(IN IMS_BOOL bRegSuccess /* = IMS_FALSE */)
 {
     if (bRegSuccess)
@@ -2529,7 +2535,6 @@ PROTECTED VIRTUAL void AosRegistration::ClearRetryValues(IN IMS_BOOL bRegSuccess
         m_nForbiddenCount = 0;
     }
 
-    m_nConsecutiveFailure = 0;
     m_nUpperBoundWaitTime = 0;
 }
 
@@ -3028,6 +3033,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessSubscriberFailed(IN IMS_SINT3
                 A_IMS_TRACE_I(
                         REGID, "ProcessSubscriberFailed :: ignore subscriber failure", 0, 0, 0);
                 ClearRetryValues();
+                ClearRetryCount();
                 PostMessage(MSG_REG_REINITIATE, 0, 0);
                 return IMS_TRUE;
             }
@@ -4053,6 +4059,12 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Started()
     ClearRetryValues(IMS_TRUE);
     ClearAuthChallengedCount();
 
+    if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
+            CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION)
+    {
+        ClearRetryCount();
+    }
+
     if (IsIpsecSupported())
     {
         if (m_pIpsecHelper->IsEstablished())
@@ -4147,6 +4159,12 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Updated()
     ClearRetryTimers();
     ClearRetryValues(IMS_TRUE);
     ClearAuthChallengedCount();
+
+    if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
+            CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION)
+    {
+        ClearRetryCount();
+    }
 
     if (IsIpsecSupported())
     {
@@ -4677,7 +4695,14 @@ PROTECTED VIRTUAL AosSubscription* AosRegistration::GetSubscription(
             m_piRegistration->GetAuthorizedAor().ToString(), m_piRegContact->GetContactAddress());
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessSubscription_Success() {}
+PROTECTED VIRTUAL void AosRegistration::ProcessSubscription_Success()
+{
+    if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
+            CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_SUBSCRIPTION)
+    {
+        ClearRetryCount();
+    }
+}
 
 PROTECTED VIRTUAL void AosRegistration::ProcessSubscription_Failed() {}
 
@@ -4690,7 +4715,14 @@ PROTECTED VIRTUAL void AosRegistration::ProcessSubscription_Terminated(
     DestroySubscription();
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessRegEventRegistered() {}
+PROTECTED VIRTUAL void AosRegistration::ProcessRegEventRegistered()
+{
+    if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
+            CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_NOTIFY)
+    {
+        ClearRetryCount();
+    }
+}
 
 PROTECTED VIRTUAL void AosRegistration::UpdateReason() {}
 
@@ -4763,6 +4795,10 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(
             break;
         case AosSubscription::COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF:
             PostMessage(MSG_REG_REQUIRED_WITH_NEXT_PCSCF, 0, 0);
+            break;
+        case AosSubscription::COMMAND_REG_REQUIRED_WITH_REG_RETRY_TIME:
+            IncreaseConsecutiveFailCount();
+            PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, GetActualWaitTime(), 0);
             break;
         case AosSubscription::COMMAND_REG_TERMINATED:
             PostMessage(MSG_REG_TERMINATED_BY_NOTIFY, 0, 0);

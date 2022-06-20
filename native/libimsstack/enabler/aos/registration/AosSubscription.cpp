@@ -1111,6 +1111,7 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_Started()
     ClearThrottlingCount();
 
     SetState(STATE_SUBSCRIBED);
+    ReportState(REASON_SUB_ESTABLISHED);
 }
 
 PROTECTED VIRTUAL void AosSubscription::RegSubscription_StartFailed(IN IMS_SINT32 nReason)
@@ -1144,6 +1145,7 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_Updated()
 
     ClearThrottlingCount();
     SetState(STATE_SUBSCRIBED);
+    ReportState(REASON_SUB_ESTABLISHED);
 }
 
 PROTECTED VIRTUAL void AosSubscription::RegSubscription_UpdateFailed(IN IMS_SINT32 nReason)

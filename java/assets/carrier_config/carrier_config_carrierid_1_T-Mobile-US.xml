@@ -35,6 +35,7 @@
         <item value="422"/>
     </int-array>
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+    <int name="registration_retry_count_reset_policy_int" value="1"/>
     <!-- KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
     <int-array name="event_for_initial_registration_on_terminated_state_of_reg_event_int_array" num="5">
         <item value="1"/>
@@ -42,6 +43,12 @@
         <item value="3"/>
         <item value="4"/>
         <item value="5"/>
+    </int-array>
+    <!-- End BUNDLE -->
+    <!-- KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
+    <int name="subscription_error_retry_max_count_for_reg_event_with_initial_registration_int" value="1"/>
+    <int-array name="subscription_error_code_for_reg_event_with_initial_registration_int_array" num="1">
+        <item value="0"/>
     </int-array>
     <!-- End BUNDLE -->
     <!-- Uce -->

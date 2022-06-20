@@ -224,6 +224,7 @@ protected:
     /// Clear
     virtual void ClearRegParameters(IN IMS_BOOL bClearPcscf = IMS_TRUE);
     virtual void ClearPcscf();
+    virtual void ClearRetryCount();
     virtual void ClearRetryValues(IN IMS_BOOL bRegSuccess = IMS_FALSE);
     virtual void ClearAuthChallengedCount();
     virtual void ClearErrorCount();
