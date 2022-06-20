@@ -355,6 +355,16 @@ protected:
     {
         return m_pAosHandle->IsBlockForWifi(nBlock);
     }
+
+    IMS_BOOL IsUnavailableFeature(IN IMS_SINT32 nConfigFeature) const
+    {
+        return m_pAosHandle->IsUnavailableFeature(nConfigFeature);
+    }
+
+    IMS_BOOL IsUnavailableFeaturePolicy(IN IMS_SINT32 nPolicy) const
+    {
+        return m_pAosHandle->IsUnavailableFeaturePolicy(nPolicy);
+    }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -2206,4 +2216,378 @@ TEST_F(AosHandleTest, IsBlockForWifi_Test)
     EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION));
 
     ClearHoldingBlocksPolicyForMobile();
+}
+
+TEST_F(AosHandleTest, IsUnavailableFeature_Test)
+{
+    // Expectation: Return true if the config feature is existed in unavailable feature list.
+    // Else return false.
+
+    IMSVector<IMS_SINT32> objRegistrationWithFeatureTagUnavailable;
+    objRegistrationWithFeatureTagUnavailable.Add(
+            CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objRegistrationWithFeatureTagUnavailable));
+
+    EXPECT_TRUE(IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL));
+    EXPECT_FALSE(IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO));
+}
+
+TEST_F(AosHandleTest, IsUnavailableFeaturePolicy_Test)
+{
+    // Expectation: Return true if the policy is existed in unavailable feature policy list.
+    // Else return false.
+
+    IMSVector<IMS_SINT32> objRegistrationWithFeatureTagUnavailablePolicy;
+    objRegistrationWithFeatureTagUnavailablePolicy.Add(
+            CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objRegistrationWithFeatureTagUnavailablePolicy));
+
+    EXPECT_TRUE(IsUnavailableFeaturePolicy(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS));
+    EXPECT_FALSE(IsUnavailableFeaturePolicy(
+            CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, StateDisconnected_Test)
+{
+    // Test: HANDLE_MSG_BLOCK_STATUS, Handle not blocked
+    // Expectation: state-connecting, request type-attach, call reconfig(), need to notify.
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
+
+    IMSMSG objMSG(0 /*AosHandle::HANDLE_MSG_BLOCK_STATUS*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::ATTACH);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnecting_Test1)
+{
+    // Test1: HANDLE_MSG_BLOCK_STATUS, Handle blocked
+    // Expectation: state-disconnected, request type-detach, call reconfig(), need to notify.
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    SetBlocked(IMS_TRUE);
+    SetNotify(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
+
+    IMSMSG objMSG(0 /*HANDLE_MSG_BLOCK_STATUS*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::DETACH);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnecting_Test2)
+{
+    // Test2: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg binded
+    // Expectation: clear suspended reason, state-connected, need to notify
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    m_pAosHandle->SetRegBinded(IMS_TRUE);
+    SetNotify(IMS_FALSE);
+    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended()).Times(1).WillOnce(Return(IMS_FALSE));
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_CONNECTED, 0);
+
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTED);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnecting_Test3)
+{
+    // Test3: HANDLE_MSG_APP_STATUS, APP_DISCONNECTED
+    // Expectation: need to notify
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTED, 0);
+
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnected_Test1)
+{
+    // Test1: HANDLE_MSG_BLOCK_STATUS, Handle blocked
+    // Expectation: state-disconnecting, request type-detach, call reconfig(), need to notify.
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetBlocked(IMS_TRUE);
+    SetNotify(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
+
+    IMSMSG objMSG(0 /*AosHandle::HANDLE_MSG_BLOCK_STATUS*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTING);
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::DETACH);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnected_Test2)
+{
+    // Test2: HANDLE_MSG_APP_STATUS, APP_DISCONNECTED
+    // Expectation: state-connecting, need to notify
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTED, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnected_Test3)
+{
+    // Test3: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg not binded, handle blocked
+    // Expectation: state-disconnected, need to notify
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetBlocked(IMS_TRUE);
+    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetRegBinded(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_CONNECTED, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnected_Test4)
+{
+    // Test4: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg not binded, handle not blocked
+    // Expectation: state-connecting, need to notify
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetRegBinded(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_CONNECTED, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnected_Test5)
+{
+    // Test5: HANDLE_MSG_APP_STATUS, APP_UPDATING
+    // Expectation: no need to notify
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_UPDATING, 0);
+
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnected_Test6)
+{
+    // Test6: HANDLE_MSG_APP_STATUS, APP_DISCONNECTING
+    // Expectation: state-disconnecting, need to notify
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTING);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test1)
+{
+    // Test1: HANDLE_MSG_BLOCK_STATUS, Handle blocked
+    // Expectation: request type-detach, call reconfig(), no need to notify.
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    SetBlocked(IMS_TRUE);
+    SetNotify(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
+
+    IMSMSG objMSG(0 /*HANDLE_MSG_BLOCK_STATUS*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::DETACH);
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test2)
+{
+    // Test2: HANDLE_MSG_BLOCK_STATUS, Handle not blocked
+    // Expectation: request type-attach, state-connecting, call reconfig(), need to notify.
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
+
+    IMSMSG objMSG(0 /*HANDLE_MSG_BLOCK_STATUS*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::ATTACH);
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test3)
+{
+    // Test3: HANDLE_MSG_APP_STATUS, APP_DISCONNECTED, handle blocked
+    // Expectation: state-disconnected, need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    SetBlocked(IMS_TRUE);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTED, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test4)
+{
+    // Test4: HANDLE_MSG_APP_STATUS, APP_DISCONNECTED, handle not blocked
+    // Expectation: state-connecting, need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTED, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test5)
+{
+    // Test5: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg binded, handle not blocked
+    // Expectation: state-connected, need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    m_pAosHandle->SetRegBinded(IMS_TRUE);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_CONNECTED, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTED);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test6)
+{
+    // Test6: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg not binded, handle blocked
+    // Expectation: state-disconnected, need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    m_pAosHandle->SetRegBinded(IMS_FALSE);
+    SetBlocked(IMS_TRUE);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_CONNECTED, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test7)
+{
+    // Test7: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg not binded, handle not blocked
+    // Expectation: state-connecting, need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    m_pAosHandle->SetRegBinded(IMS_FALSE);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_CONNECTED, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test8)
+{
+    // Test8: HANDLE_MSG_APP_STATUS, APP_UPDATING, Reg binded, handle not blocked
+    // Expectation: state-connecting, need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    m_pAosHandle->SetRegBinded(IMS_TRUE);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_UPDATING, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test9)
+{
+    // Test9: HANDLE_MSG_APP_STATUS, APP_UPDATING, Reg not binded, handle blocked
+    // Expectation: state-disconnected, need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    m_pAosHandle->SetRegBinded(IMS_FALSE);
+    SetBlocked(IMS_TRUE);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_UPDATING, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test10)
+{
+    // Test10: HANDLE_MSG_APP_STATUS, APP_UPDATING, Reg not binded, handle not blocked
+    // Expectation: state-connecting, need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    m_pAosHandle->SetRegBinded(IMS_FALSE);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_UPDATING, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test11)
+{
+    // Test10: HANDLE_MSG_APP_STATUS, APP_DISCONNECTING
+    // Expectation: need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    m_pAosHandle->SetRegBinded(IMS_FALSE);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0);
+
+    EXPECT_TRUE(GetNotify());
 }
