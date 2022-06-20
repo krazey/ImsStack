@@ -137,8 +137,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         logi("onSetDeviceOrientation :: rotation=" + rotation);
 
         mMediaSession.setDisplayOrientation(
-                DISPLAY_NEAR_N_FAR,
-                getOrientationForUC(convertDeviceOrientation(rotation)));
+                convertAngleDegreeToEnum(getQuartile(rotation)));
     }
 
     @Override
@@ -374,7 +373,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         return (angle >= limitLeft) && (angle < limitRight);
     }
 
-    protected static int convertDeviceOrientation(int angle) {
+    protected static int getQuartile(int angle) {
         int orientation = ORIENTATION_0;
 
         // This is for the reference devices.
@@ -391,7 +390,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         return orientation;
     }
 
-    protected static int getOrientationForUC(int orientation) {
+    protected static int convertAngleDegreeToEnum(int orientation) {
         switch (orientation) {
             case ORIENTATION_90:
                 return MtcMediaSession.ORIENTATION_90;

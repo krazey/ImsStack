@@ -44,7 +44,8 @@ IMS_BOOL VideoController::SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
     {
         IMS_BOOL bRet = m_pVideoSession->OnVideoMessages(nMsg, pParam);
 
-        if (bRet == IMS_TRUE && nMsg == IMMedia::SELECT_CAMERA_CMD)
+        if (bRet == IMS_TRUE && nMsg == IMMedia::SELECT_CAMERA_CMD &&
+                m_pVideoSession->GetState() == STATE_IDLE)
         {
             OpenSession();
         }

@@ -680,7 +680,8 @@ IMS_BOOL VideoMediaSession::OnChangeCameraZoomCmd(IN IMS_UINTP pParam)
         delete param;
         return IMS_TRUE;
     }
-    return IMS_TRUE;
+
+    return IMS_FALSE;
 }
 
 PRIVATE
@@ -693,8 +694,24 @@ IMS_BOOL VideoMediaSession::OnSetPauseImageCmd(IN IMS_UINTP pParam)
 PRIVATE
 IMS_BOOL VideoMediaSession::OnChangeOrientation(IN IMS_UINTP pParam)
 {
-    (void)pParam;
-    return IMS_TRUE;
+    ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
+
+    if (param != NULL)
+    {
+        IMS_TRACE_I(
+                "OnChangeOrientation() - orientation[%d], state[%d]", param->nValue, m_nState, 0);
+
+        if (m_nState != STATE_PREVIEW)
+        {
+            m_objVideoConfig.setDeviceOrientationDegree(param->nValue);
+            this->Modify();
+        }
+
+        delete param;
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
 
 PRIVATE

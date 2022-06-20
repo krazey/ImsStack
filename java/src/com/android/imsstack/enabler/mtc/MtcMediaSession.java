@@ -303,23 +303,17 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
      * DISPLAY
      * Sets the orientation of the specified display.
      *
-     * @param display     the display type
-     *                    {@link ImsVideoCallProviderBase#DISPLAY_NEAR}
-     *                    {@link ImsVideoCallProviderBase#DISPLAY_FAR}
-     *                    {@link ImsVideoCallProviderBase#DISPLAY_NEAR_N_FAR}
      * @param orientation the orientation of the specified display
      *                    {@link MtcMediaSession#ORIENTATION_0}
      *                    {@link MtcMediaSession#ORIENTATION_90}
      *                    {@link MtcMediaSession#ORIENTATION_270}
      *                    {@link MtcMediaSession#ORIENTATION_180}
      */
-    public void setDisplayOrientation(int display, int orientation) {
-        log("setDisplayOrientation :: display=" + display +
-                ", orientation=" + orientation);
+    public void setDisplayOrientation(int orientation) {
+        log("setDisplayOrientation :: orientation=" + orientation);
         mPrevOrientation = orientation;
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcMedia.CHANGE_ORIENTATION_CMD);
-        parcel.writeInt(display);
         parcel.writeInt(orientation);
         sendRequest(parcel);
     }

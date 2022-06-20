@@ -137,7 +137,7 @@ PROTECTED VIRTUAL IMS_BOOL JniMediaSession::IsThreadSwitchingRequired(IN IMS_SIN
 PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
         IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
-    IMS_TRACE_D("HandleCallMessage() MSG[%d]", nMsg, 0, 0);
+    IMS_TRACE_D("HandleMessage() MSG[%d]", nMsg, 0, 0);
 
     if (m_piMediaManager == IMS_NULL)
     {
@@ -148,7 +148,7 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
 
     if (m_piMediaManager == IMS_NULL)
     {
-        IMS_TRACE_E(0, "HandleCallMessage() m_piMediaManager is not exist", 0, 0, 0);
+        IMS_TRACE_E(0, "HandleMessage() m_piMediaManager is not exist", 0, 0, 0);
         return;
     }
 
@@ -199,7 +199,11 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
         case IMMedia::CHANGE_CAMERA_ZOOM_CMD:
             OnCmdChangeCameraZoom(nMsg, objParcel);
             break;
+        case IMMedia::CHANGE_ORIENTATION_CMD:
+            OnCmdOrientationChanged(nMsg, objParcel);
+            break;
         default:
+            IMS_TRACE_E(0, "HandleMessage() unhandled message", 0, 0, 0);
             break;
     }
 }
@@ -358,6 +362,15 @@ void JniMediaSession::OnCmdSelectCamera(IN IMS_SINT32 nMsg, IN const android::Pa
 
 PRIVATE
 void JniMediaSession::OnCmdChangeCameraZoom(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+{
+    ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
+    pParam->nValue = objParcel.readInt32();
+    m_piMediaManager->OnVideoMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
+PRIVATE
+void JniMediaSession::OnCmdOrientationChanged(
+        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
     ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
     pParam->nValue = objParcel.readInt32();
