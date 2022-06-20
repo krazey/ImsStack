@@ -105,6 +105,9 @@ PROTECTED VIRTUAL void JniMtcService::HandleMessage(
         case IuMtcService::SET_TERMINAL_BASED_CALL_WAITING:
             SetTerminalBasedCallWaiting(objParcel);
             break;
+        case IuMtcService::OPEN_EMERGENCY_SERVICE:
+            OpenEmergencyService(objParcel);
+            break;
         default:
             break;
     }
@@ -140,4 +143,10 @@ void JniMtcService::SetTerminalBasedCallWaiting(IN const android::Parcel& objPar
     IMS_BOOL bProvisioned = (objParcel.readInt32() == 1) ? IMS_TRUE : IMS_FALSE;
     IMS_BOOL bEnabled = (objParcel.readInt32() == 1) ? IMS_TRUE : IMS_FALSE;
     m_piMtcService->SetTerminalBasedCallWaiting(bProvisioned, bEnabled);
+}
+
+PRIVATE
+void JniMtcService::OpenEmergencyService(IN const android::Parcel& /* objParcel */)
+{
+    m_piMtcService->OpenEmergencyService();
 }

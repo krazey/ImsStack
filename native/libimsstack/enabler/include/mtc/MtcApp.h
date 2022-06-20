@@ -19,6 +19,7 @@
 
 class MtcService;
 class EctManager;
+class MtcEmergencyServiceManager;
 
 class MtcApp : public ImsApp, public IMtcApp, public IMtcContext
 {
@@ -52,6 +53,7 @@ public:
     }
     inline ConferenceManager& GetConferenceManager() override { return m_objConferenceManager; }
     EctManager* GetEctManager() override;
+    MtcEmergencyServiceManager* GetEmergencyServiceManager() override;
 
 private:
     void InitConfiguration();
@@ -72,6 +74,7 @@ private:
     MtcSipInterfaceFactory m_objSipInterfaceFactory;
     ConferenceManager m_objConferenceManager;
     EctManager* m_pEctManager;
+    MtcEmergencyServiceManager* m_pEmergencyServiceManager;
 };
 
 #endif

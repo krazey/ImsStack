@@ -15,6 +15,7 @@ class MtcImsEventReceiver;
 class MtcSipInterfaceFactory;
 class ConferenceManager;
 class EctManager;
+class MtcEmergencyServiceManager;
 
 class IMtcContext
 {
@@ -32,6 +33,7 @@ public:
     virtual MtcSipInterfaceFactory& GetSipInterfaceFactory() = 0;
     virtual ConferenceManager& GetConferenceManager() = 0;
     virtual EctManager* GetEctManager() = 0;
+    virtual MtcEmergencyServiceManager* GetEmergencyServiceManager() = 0;
 };
 
 #endif

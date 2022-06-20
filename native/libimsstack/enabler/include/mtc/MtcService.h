@@ -49,6 +49,7 @@ public:
     {
         return m_bTerminalBasedCallWaitingEnabled;
     }
+    void OpenEmergencyService() override;
 
     // ICoreServiceListener implementation
     void CoreService_PageMessageReceived(

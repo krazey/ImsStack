@@ -17,6 +17,7 @@ public:
     // void SetCallback(IN IMS_SINTP nNativeObj, IN CBServiceNoti pfnNotifier);
 
     void OnServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason);  // enum class
+    void OnEmergencyServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason); // enum class
     void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey);
 
 private:

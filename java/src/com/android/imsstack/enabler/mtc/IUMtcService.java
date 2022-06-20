@@ -12,6 +12,7 @@ public class IUMtcService {
     public static final int REGISTER_SERVICE                = (EVENT_U2I + 4);
     public static final int SRVCC_STATE_CHANGED             = (EVENT_U2I + 5);
     public static final int SET_TERMINAL_BASED_CALL_WAITING = (EVENT_U2I + 6);
+    public static final int OPEN_EMERGENCY_SERVICE          = (EVENT_U2I + 7);
 
     // Event : IMS to UI
     public static final int SERVICE_CHANGED                = (EVENT_I2U + 1);

@@ -31,6 +31,7 @@ public:
     virtual void SetJniService(IN JniMtcService* pJniService) = 0;
     virtual void SetTerminalBasedCallWaiting(IN IMS_BOOL bProvisioned, IN IMS_BOOL bEnabled) = 0;
     virtual IMS_BOOL IsTerminalBasedCallWaitingEnabled() const = 0;
+    virtual void OpenEmergencyService() = 0;
 };
 
 enum class ServiceStatus

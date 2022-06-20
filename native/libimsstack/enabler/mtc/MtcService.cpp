@@ -20,6 +20,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "call/MtcCallController.h"
 #include "helper/SrvccEventHandler.h"
+#include "MtcEmergencyServiceManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -109,6 +110,12 @@ PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(
     }
 }
 
+PUBLIC VIRTUAL void MtcService::OpenEmergencyService()
+{
+    m_objContext.GetEmergencyServiceManager()->OpenEmergencyService(
+            m_pJniService ? m_pJniService->GetThread() : IMS_NULL);
+}
+
 PUBLIC VIRTUAL void MtcService::CoreService_PageMessageReceived(
         IN ICoreService* /*piService*/, IN IPageMessage* /*piMessage*/)
 {
@@ -157,7 +164,8 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
 {
     m_eStatus = ServiceStatus::SERVICE_ACTIVE;
     m_objAosEventHandler.OnConnected(
-            nFeatures, nIpcan, m_pJniService ? m_pJniService->GetThread() : IMS_NULL);
+            nFeatures, nIpcan, m_pJniService ? m_pJniService->GetThread() : IMS_NULL,
+            m_objContext.GetEmergencyServiceManager());
     SetAosReady(IMS_TRUE);
 }
 
@@ -172,7 +180,8 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 {
     m_eStatus = ServiceStatus::SERVICE_IDLE;
     m_objAosEventHandler.OnDisconnected(nReason, m_objContext.GetCallController(),
-            m_pJniService ? m_pJniService->GetThread() : IMS_NULL);
+            m_pJniService ? m_pJniService->GetThread() : IMS_NULL,
+            m_objContext.GetEmergencyServiceManager());
 }
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Suspended(IN IMS_UINT32 nReason)

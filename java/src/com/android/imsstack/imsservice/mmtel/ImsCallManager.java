@@ -122,7 +122,7 @@ public class ImsCallManager {
             checkAndExitEcbm();
 
             if (ImsCallUtils.isEmergencyCallViaWfc(profile)) {
-                sessionAttributes|= MtcCall.FLAG_WIFI_EMERGENCY;
+                sessionAttributes |= MtcCall.FLAG_WIFI_EMERGENCY;
                 wifi = true;
             } else if (isNormalCallRequiredForEmergencyCall(profile)) {
                 emergency = false;
@@ -171,6 +171,9 @@ public class ImsCallManager {
         ImsCallConnectionIds.add(mCallContext.getSlotId(), ccId);
 
         call.open(wifi, emergency, offline, ussi);
+        // if (call.getNativeCallId() != 0) {
+        //     call.open(wifi, emergency, offline, ussi);
+        // }
 
         return callSession;
     }

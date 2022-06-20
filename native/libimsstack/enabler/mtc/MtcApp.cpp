@@ -18,6 +18,7 @@
 #include "call/MtcCallController.h"
 #include "conferencecall/ConferenceManager.h"
 #include "ect/EctManager.h"
+#include "MtcEmergencyServiceManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -37,7 +38,8 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_objImsEventReceiver(MtcImsEventReceiver(nSlotId)),
         m_objSipInterfaceFactory(MtcSipInterfaceFactory()),
         m_objConferenceManager(ConferenceManager(*this)),
-        m_pEctManager(IMS_NULL)
+        m_pEctManager(IMS_NULL),
+        m_pEmergencyServiceManager(IMS_NULL)
 {
     IMS_TRACE_I("+MtcApp [slot_%d]", nSlotId, 0, 0);
     MtcContextRepository::GetInstance()->AddContext(nSlotId, this);
@@ -107,6 +109,16 @@ PUBLIC VIRTUAL EctManager* MtcApp::GetEctManager()
     }
 
     return m_pEctManager;
+}
+
+PUBLIC VIRTUAL MtcEmergencyServiceManager* MtcApp::GetEmergencyServiceManager()
+{
+    if (m_pEmergencyServiceManager == IMS_NULL)
+    {
+        m_pEmergencyServiceManager = new MtcEmergencyServiceManager(*this);
+    }
+
+    return m_pEmergencyServiceManager;
 }
 
 PRIVATE

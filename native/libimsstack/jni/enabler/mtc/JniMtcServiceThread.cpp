@@ -38,6 +38,18 @@ void JniMtcServiceThread::OnServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 
 }
 
 PUBLIC
+void JniMtcServiceThread::OnEmergencyServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason)
+{
+    IMS_TRACE_D("OnEmergencyServiceChanged [%d]", eStatus, 0, 0);
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcService::E_SERVICE_CHANGED);
+    objParcel.writeInt32(eStatus);
+    objParcel.writeInt32(eReason);
+
+    SendData2Java(objParcel);
+}
+
+PUBLIC
 void JniMtcServiceThread::OnPreIncomingCallReceived(IN IMS_ULONG nCallKey)
 {
     IMS_TRACE_D("OnPreIncomingCallReceived", 0, 0, 0);

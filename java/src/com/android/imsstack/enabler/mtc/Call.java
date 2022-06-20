@@ -116,7 +116,7 @@ public class Call implements Closeable {
     /**
      * Call id will be used to identify the conference user as User#mCallId.
      */
-    private final String mCallId;
+    private String mCallId;
     private final Bundle mCallExtras = new Bundle();
     private final int mCallIndex;
     private final String mLogTag;
@@ -283,6 +283,11 @@ public class Call implements Closeable {
 
     public void terminate(int reason, boolean immediateCallback) {
         // no-op
+    }
+
+    public void updateNativeCallObject(long nativeCallObject) {
+        mNativeCallObject = nativeCallObject;
+        mCallId = createCallId();
     }
 
     public static String callStateToString(int state) {

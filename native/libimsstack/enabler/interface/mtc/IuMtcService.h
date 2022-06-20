@@ -23,6 +23,7 @@ public:
     static const IMS_SINT32 REGISTER_SERVICE = (EVENT_U2I + 4);
     static const IMS_SINT32 SRVCC_STATE_CHANGED = (EVENT_U2I + 5);
     static const IMS_SINT32 SET_TERMINAL_BASED_CALL_WAITING = (EVENT_U2I + 6);
+    static const IMS_SINT32 OPEN_EMERGENCY_SERVICE = (EVENT_U2I + 7);
 
     // HO
     static const IMS_SINT32 HO_CONFIRM = (EVENT_U2I + 50 + 1);
@@ -50,13 +51,13 @@ public:
         SERVICE_OPENING = 5,
     };  // SERVICE_STATE
 
-    enum
+    enum class EmergencyServiceStatus
     {
-        ES_IDLE = 0,
-        ES_OPENING = 1,
-        ES_OPENED = 2,
-        ES_UNAVAILABLE = 3,
-        ES_ES = 4,
+        IDLE = 0,
+        OPENING = 1,
+        OPENED = 2,
+        UNAVAILABLE = 3,
+        ES = 4,
     };
 
     enum

@@ -28,6 +28,7 @@ private:
     void Attach();
     void NotifySrvccStateChanged(IN const android::Parcel& objParcel);
     void SetTerminalBasedCallWaiting(IN const android::Parcel& objParcel);
+    void OpenEmergencyService(IN const android::Parcel& objParcel);
 
 private:
     JniMtcServiceThread* m_pThread;

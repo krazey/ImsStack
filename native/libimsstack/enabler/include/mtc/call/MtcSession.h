@@ -121,6 +121,10 @@ public:
         return m_objContext.GetConferenceManager();
     }
     inline EctManager* GetEctManager() override { return m_objContext.GetEctManager(); }
+    inline MtcEmergencyServiceManager* GetEmergencyServiceManager() override
+    {
+        return m_objContext.GetEmergencyServiceManager();
+    }
 
     inline void SetHeldByMe(IN IMS_BOOL bHeldByMe) override { m_objContext.SetHeldByMe(bHeldByMe); }
 

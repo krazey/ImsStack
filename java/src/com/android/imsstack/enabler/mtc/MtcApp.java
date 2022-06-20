@@ -79,6 +79,7 @@ public class MtcApp implements Closeable {
     private final IBaseContext mContext;
     private final MtcCallManager mCM;
     private final MtcAppHandler mHandler;
+    private final MtcEmergencyServiceManager mEmergencyServiceManager;
     private long mNativeObject = 0;
     private JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
     private ServiceStateListener mServiceStateListener = null;
@@ -89,6 +90,7 @@ public class MtcApp implements Closeable {
 
         mCM = new MtcCallManager(mContext);
         mHandler = new MtcAppHandler(mContext.getCallLooper());
+        mEmergencyServiceManager = new MtcEmergencyServiceManager(mContext);
 
         init();
     }
@@ -100,6 +102,7 @@ public class MtcApp implements Closeable {
 
         mCM.init();
         mContext.addCommonPackageListener(mHandler);
+        mEmergencyServiceManager.init();
 
         bindJNIService();
     }
@@ -109,8 +112,8 @@ public class MtcApp implements Closeable {
 
         unbindJNIService();
 
+        mEmergencyServiceManager.clear();
         mContext.removeCommonPackageListener(mHandler);
-
         mCM.clear();
 
         MtcStateUtils.initializeState(mContext.getContext(), mContext.getSlotId());
@@ -131,6 +134,10 @@ public class MtcApp implements Closeable {
         }
 
         long nativeCallObject = JNIIms.getInterface(IUIMS.MTC_CALL, mContext.getSlotId());
+        // long nativeCallObject = 0;
+        // if ((callAttributes & MtcCall.FLAG_EMERGENCY) == 0) {
+        //     nativeCallObject = JNIIms.getInterface(IUIMS.MTC_CALL, mContext.getSlotId());
+        // }
 
         MtcCall call = new MtcCall(
                 mContext, mCM.getCallTracker(), nativeCallObject, callAttributes,
@@ -141,6 +148,11 @@ public class MtcApp implements Closeable {
         } else {
             mCM.attachPreIncomingCall(call);
         }
+
+        // if ((callAttributes & MtcCall.FLAG_EMERGENCY) != 0) {
+        //     mEmergencyServiceManager.setCallAndAttributes(call, callAttributes);
+        //     mEmergencyServiceManager.openEmergencyService(getJNIService());
+        // }
 
         return call;
     }
@@ -397,6 +409,8 @@ public class MtcApp implements Closeable {
                 int reason = parcel.readInt();
 
                 logi("VOLTE-E-REG :: state=" + state + ", reason=" + reason);
+
+                mEmergencyServiceManager.onEmergencyServiceStateChanged(state, reason);
 
                 if (mServiceStateListener != null) {
                     mServiceStateListener.onEmergencyServiceStateChanged(
