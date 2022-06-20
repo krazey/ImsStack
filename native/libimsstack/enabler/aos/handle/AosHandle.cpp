@@ -1160,7 +1160,7 @@ Remarks
 
 */
 PROTECTED
-void AosHandle::ProcessCheckBlock(IN IMS_BOOL bRunStateMachine /* = IMS_TRUE */)
+IMS_BOOL AosHandle::ProcessCheckBlock(IN IMS_BOOL bRunStateMachine /* = IMS_TRUE */)
 {
     IMS_BOOL bCurrBlocked = IMS_FALSE;
 
@@ -1180,14 +1180,19 @@ void AosHandle::ProcessCheckBlock(IN IMS_BOOL bRunStateMachine /* = IMS_TRUE */)
         }
 
         ProcessBlockChanged();
+
+        return IMS_TRUE;
     }
     else
     {
         if (!m_bBlocked)
         {
             ProcessFeatureTagChange();
+            return IMS_TRUE;
         }
     }
+
+    return IMS_FALSE;
 }
 
 /*

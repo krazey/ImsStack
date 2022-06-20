@@ -197,7 +197,7 @@ protected:
     IMS_BOOL PreProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded);
     void ProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded, IN IMS_BOOL bPreProcess = IMS_TRUE);
     void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked);
-    void ProcessCheckBlock(IN IMS_BOOL bRunStateMachine = IMS_TRUE);
+    IMS_BOOL ProcessCheckBlock(IN IMS_BOOL bRunStateMachine = IMS_TRUE);
     void ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bAdd);
     void ProcessUnavailableFeatureChanged();
 
