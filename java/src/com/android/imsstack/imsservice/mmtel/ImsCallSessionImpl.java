@@ -55,7 +55,6 @@ import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
 import com.android.imsstack.external.ims.ImsCallProfileEx;
-import com.android.imsstack.external.ims.ImsReasonInfoEx;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.base.ICallLocationPolicy;
 import com.android.imsstack.imsservice.mmtel.base.ISrvccStateListener;
@@ -670,12 +669,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         // Terminate the ongoing conference call
         clearConferenceProxy();
-
-        if (reason == ImsReasonInfoEx.CODE_LOCAL_CALL_TERMINATED_BY_SRVCC) {
-            mCallDetails.set(CallDetails.IMPLICIT_TERMINATED);
-            logi("Call is implicitly terminated by SRVCC");
-            return;
-        }
 
         mCall.terminate(ImsCallUtils.getTerminateCallReasonInfoCodeFromImsReasonInfo(reason));
 
@@ -1584,9 +1577,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     private boolean isImplicitTerminatedCondition() {
         return (mCallDetails.is(CallDetails.MERGED)
-                || mCallDetails.is(CallDetails.MERGED_N_DETACHED)
-                || (getTerminationReason(0)
-                    == ImsReasonInfoEx.CODE_LOCAL_CALL_TERMINATED_BY_SRVCC));
+                || mCallDetails.is(CallDetails.MERGED_N_DETACHED));
     }
 
     private boolean isSilentCSRedialRequired(final ImsReasonInfo reasonInfo) {
@@ -1759,10 +1750,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         setTerminationReason(reasonInfo.getCode());
 
         mCallDetails.set(CallDetails.CALL_END_FINISHED);
-
-        if (reasonInfo.getCode() != ImsReasonInfoEx.CODE_LOCAL_CALL_TERMINATED_BY_SRVCC) {
-            mCallback.invokeTerminated(this, reasonInfo);
-        }
+        mCallback.invokeTerminated(this, reasonInfo);
     }
 
     private void notifyCallTerminatedWithDelay(final ImsReasonInfo reasonInfo, long delay) {
@@ -1774,15 +1762,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         mCallDetails.set(CallDetails.CALL_END_FINISHED);
 
-        if (reasonInfo.getCode() != ImsReasonInfoEx.CODE_LOCAL_CALL_TERMINATED_BY_SRVCC) {
-            if (delay <= 0) {
-                mCallback.invokeTerminated(this, reasonInfo);
-            } else {
-                Handler h = mCallContext.getCallHandler();
-                h.postDelayed(() -> {
-                    mCallback.invokeTerminated(ImsCallSessionImpl.this, reasonInfo);
-                }, delay);
-            }
+        if (delay <= 0) {
+            mCallback.invokeTerminated(this, reasonInfo);
+        } else {
+            Handler h = mCallContext.getCallHandler();
+            h.postDelayed(() -> {
+                mCallback.invokeTerminated(ImsCallSessionImpl.this, reasonInfo);
+            }, delay);
         }
     }
 
@@ -3081,7 +3067,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             if ((sst != null) && sst.isSrvccCompleted()
                     && (getState() != ImsCallSessionImplBase.State.TERMINATED)) {
                 mCallDetails.set(CallDetails.IMPLICIT_TERMINATED);
-                setTerminationReason(ImsReasonInfoEx.CODE_LOCAL_CALL_TERMINATED_BY_SRVCC);
+                // TODO ag/18558824
+                //setTerminationReason(ImsReasonInfoEx.CODE_LOCAL_CALL_TERMINATED_BY_SRVCC);
             }
         }
 
@@ -3497,9 +3484,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             // Notify all the users that the conference call is terminated.
-            if (isMultiparty()
-                    && (getTerminationReason(0)
-                        != ImsReasonInfoEx.CODE_LOCAL_CALL_TERMINATED_BY_SRVCC)) {
+            if (isMultiparty()) {
                 ConferenceInfoHelper.updateAndNotifyDisconnectedForAllConferenceUsers(ccid);
             }
 
@@ -4567,8 +4552,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return true;
             } else if (MtcCallUtils.isCallTerminatedByJoiningConference(callReasonInfo.mExtraCode)
                     && ((mTerminationReason == ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE)
-                        || (mTerminationReason == ImsReasonInfoEx.
-                                CODE_LOCAL_CALL_TERMINATED_BY_CONFERENCE_JOINED))) {
+                        || (mTerminationReason == ImsReasonInfo
+                            .CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE))) {
                 // Rollback the call state to ESTABLISHED to handle the call terminated
                 logi("CALL_MERGE :: Call state will be restored to ESTABLISHED");
                 setState(ImsCallSessionImplBase.State.ESTABLISHED);
@@ -5000,8 +4985,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (!mCall.isConference()
                     && (getState() == ImsCallSessionImplBase.State.TERMINATED)
-                    && ((reason == ImsReasonInfoEx.
-                            CODE_LOCAL_CALL_TERMINATED_BY_CONFERENCE_JOINED)
+                    && ((reason == ImsReasonInfo.CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE)
                         || (reason == ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE))
                     && !mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
                 notifyCallTerminated(ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE,
