@@ -27,7 +27,7 @@
 #include "utility/MessageUtil.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "helper/CallStateProxy.h"
+#include "helper/ICallStateProxy.h"
 #include "call/MtcSession.h"
 #include "ICoreService.h"
 

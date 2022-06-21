@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "IMtcImsEventReceiver.h"
 #include "MtcImsEventReceiver.h"
 #include "ServiceEvent.h"
 #include "ServiceTrace.h"
@@ -21,7 +22,7 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 // Matched to undefined values in IMSEventDef
-const IMS_UINT32 MtcImsEventReceiver::UNKNOWN_VALUE = -1;
+const IMS_UINT32 IMtcImsEventReceiver::UNKNOWN_VALUE = -1;
 
 PUBLIC
 MtcImsEventReceiver::MtcImsEventReceiver(IN IMS_SINT32 nSlotId) :

@@ -40,7 +40,7 @@
 #include "conferencecall/IConferenceReference.h"
 #include "conferencecall/UriFormatter.h"
 #include "conferencecall/CallConnectionIdManager.h"
-#include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "conferencecall/IConferenceReferenceListener.h"

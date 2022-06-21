@@ -18,9 +18,11 @@
 #define MTC_DIALING_PLAN_H_
 
 #include "dialingplan/EmergencyNumberList.h"
+#include "dialingplan/IMtcDialingPlan.h"
 #include "dialingplan/NormalDialingPlan.h"
 #include "ImsIdentity.h"
 #include "AString.h"
+#include <functional>
 
 class IMtcContext;
 struct CallInfo;
@@ -29,29 +31,20 @@ using NumberFormat = NormalDialingPlan::NumberFormat;
 using LocalNumberPolicy = NormalDialingPlan::LocalNumberPolicy;
 using Scheme = NormalDialingPlan::Scheme;
 
-class MtcDialingPlan final
+class MtcDialingPlan final : public IMtcDialingPlan
 {
 public:
     explicit MtcDialingPlan(IN IMtcContext& objContext);
-    ~MtcDialingPlan();
+    virtual ~MtcDialingPlan();
     MtcDialingPlan(IN const MtcDialingPlan&) = delete;
     MtcDialingPlan& operator=(IN const MtcDialingPlan&) = delete;
 
 public:
-    /**
-     * @brief returns a translated sip/tel To-Uri
-     *
-     * @param strNumber the number a user dialed.
-     * @param objCallInfo the CallInfo of the call which contains the information of
-     *         emergency/ussi characteristic.
-     * @param eScheme the uri scheme for the translation.
-     * @return the translated sip/tel Uri.
-     */
     AString GetToUri(IN const AString& strNumber, IN const CallInfo& objCallInfo,
-            IN Scheme eScheme = Scheme::UNKNOWN);
+            IN Scheme eScheme = Scheme::UNKNOWN) override;
 
     void OnCountrySpecificServiceUrnReceived(
-            IN const AString& strNumber, IN const AString& strServiceUrn);
+            IN const AString& strNumber, IN const AString& strServiceUrn) override;
 
 private:
     IMS_BOOL IsUriForm(IN const AString& strNumber);

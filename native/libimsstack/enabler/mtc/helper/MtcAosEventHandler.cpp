@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+#include "ImsTypeDef.h"
+#include "ServiceTrace.h"
+#include "JniMtcServiceThread.h"
+#include "IMtcCallController.h"
 #include "AString.h"
 #include "IIpcan.h"
-#include "IMSTypeDef.h"
 #include "IMtcService.h"
 #include "ImsAosParameter.h"
 #include "IuMtcService.h"
-#include "JniMtcServiceThread.h"
 #include "MtcEmergencyServiceManager.h"
-#include "ServiceTrace.h"
-#include "call/MtcCallController.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcAosEventHandler.h"
 
@@ -49,7 +49,7 @@ PUBLIC
 void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
         IN JniMtcServiceThread* pServiceThread,
         IN MtcEmergencyServiceManager* /* pEmergencyServiceManager */,
-        IN MtcCallController& objCallController)
+        IN IMtcCallController& objCallController)
 {
     IMS_TRACE_I("OnConnected emergency[%s] nIpcan[%d]", _TRACE_B_(m_objService.IsEmergency()),
             nIpcan, 0);
@@ -86,7 +86,7 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
 
 PUBLIC
 void MtcAosEventHandler::OnDisconnecting(
-        IN IMS_UINT32 nReason, IN MtcCallController& objCallController)
+        IN IMS_UINT32 nReason, IN IMtcCallController& objCallController)
 {
     IMS_TRACE_I("OnDisconnecting emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
             nReason, 0);
@@ -102,7 +102,7 @@ void MtcAosEventHandler::OnDisconnecting(
 
 PUBLIC
 void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
-        IN MtcCallController& objCallController, IN JniMtcServiceThread* pServiceThread,
+        IN IMtcCallController& objCallController, IN JniMtcServiceThread* pServiceThread,
         IN MtcEmergencyServiceManager* /* pEmergencyServiceManager */)
 {
     IMS_TRACE_I("OnDisconnected emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
@@ -132,7 +132,7 @@ void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
 
 PUBLIC
 void MtcAosEventHandler::OnSuspended(
-        IN IMS_UINT32 nReason, IN MtcCallController& /*objCallController*/)
+        IN IMS_UINT32 nReason, IN IMtcCallController& /*objCallController*/)
 {
     IMS_TRACE_I("OnSuspended emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
             nReason, 0);

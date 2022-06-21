@@ -28,7 +28,7 @@
 #include "IMtcContext.h"
 #include "dialingplan/NormalDialingPlan.h"
 #include "util/TextParser.h"
-#include "helper/MtcAosConnector.h"
+#include "helper/IMtcAosConnector.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

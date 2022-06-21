@@ -43,7 +43,7 @@
 #include "call/IMtcCall.h"
 #include "dialogevent/DialogEventManager.h"
 #include "dialogevent/DialogEvent.h"
-#include "helper/CallStateProxy.h"
+#include "helper/ICallStateProxy.h"
 
 __IMS_TRACE_TAG_COM_UC__;
 

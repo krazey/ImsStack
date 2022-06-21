@@ -78,10 +78,10 @@ public:
     virtual CallStateName Resume(IN MediaInfo* pMediaInfo);
     virtual CallStateName AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo);
     virtual CallStateName RejectResume(IN const CallReasonInfo& objReason);
-    virtual CallStateName Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo);
-    virtual CallStateName AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo);
-    virtual CallStateName RejectConvert(IN const CallReasonInfo& objReason);
-    virtual CallStateName CancelConvert(IN const CallReasonInfo& objReason);
+    virtual CallStateName Update(IN CallType eCallType, IN MediaInfo* pMediaInfo);
+    virtual CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo);
+    virtual CallStateName RejectUpdate(IN const CallReasonInfo& objReason);
+    virtual CallStateName CancelUpdate(IN const CallReasonInfo& objReason);
     virtual CallStateName Terminate(IN const CallReasonInfo& objReason);
     virtual CallStateName SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration);
     virtual CallStateName HandleSrvccSuccess();

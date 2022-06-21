@@ -23,7 +23,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcCallContext.h"
-#include "helper/CallStateProxy.h"
+#include "helper/ICallStateProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

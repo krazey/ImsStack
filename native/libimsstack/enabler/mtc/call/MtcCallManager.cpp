@@ -19,7 +19,7 @@
 #include "call/MtcCallManager.h"
 #include "call/MtcSession.h"
 #include "call/NullCall.h"
-#include "helper/CallStateProxy.h"
+#include "helper/ICallStateProxy.h"
 #include "interface/mtc/IMtcCallStateListener.h"
 #include "ServiceTrace.h"
 

@@ -22,7 +22,7 @@
 
 class IMessage;
 class IMtcCallContext;
-class MtcAosConnector;
+class IMtcAosConnector;
 
 /*
  * It handles error responses when `ISessionListener::SessionStartFailed` occurs.
@@ -74,7 +74,7 @@ private:
     AString GetLastPathHeader() const;
     AString GetServiceRouteHeader() const;
     AString GetSupported() const;
-    MtcAosConnector* GetAosConnector() const;
+    IMtcAosConnector* GetAosConnector() const;
 
     IMtcCallContext& m_objContext;
 };

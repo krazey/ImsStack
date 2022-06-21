@@ -49,10 +49,10 @@ PUBLIC VIRTUAL void UpdatingState::OnExit()
     m_objContext.DeleteUpdatingInfo();
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::AcceptConvert(
+PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
         IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    IMS_TRACE_D("AcceptConvert", 0, 0, 0);
+    IMS_TRACE_D("AcceptUpdate", 0, 0, 0);
 
     m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
 
@@ -95,9 +95,9 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptConvert(
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::RejectConvert(IN const CallReasonInfo& objReason)
+PUBLIC VIRTUAL CallStateName UpdatingState::RejectUpdate(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_D("RejectConvert", 0, 0, 0);
+    IMS_TRACE_D("RejectUpdate", 0, 0, 0);
 
     m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
 
@@ -119,9 +119,9 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectConvert(IN const CallReasonInf
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::CancelConvert(IN const CallReasonInfo& objReason)
+PUBLIC VIRTUAL CallStateName UpdatingState::CancelUpdate(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_D("CancelConvert", 0, 0, 0);
+    IMS_TRACE_D("CancelUpdate", 0, 0, 0);
 
     m_objContext.GetTimer().Stop(TIMER_CONVERT_REMOTE_RESPONSE);
 
@@ -208,7 +208,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnTimerExpired(IN IMS_SINT32 nType)
     {
         case TIMER_CONVERT_USER_RESPONSE:
         case TIMER_CONVERT_REMOTE_RESPONSE:
-            return CancelConvert(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE));
+            return CancelUpdate(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE));
             break;
         default:
             break;

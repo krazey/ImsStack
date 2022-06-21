@@ -14,30 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef VOPS_BLOCK_RULE_H_
-#define VOPS_BLOCK_RULE_H_
+#ifndef INTERFACE_ECT_MANAGER_H_
+#define INTERFACE_ECT_MANAGER_H_
 
 #include "call/IMtcCall.h"
-#include "helper/block/IMtcBlockRule.h"
 
-class IMtcCallContext;
-class IMtcService;
-class IMtcImsEventReceiver;
-
-class VopsBlockRule final : public IMtcBlockRule
+class IEctManager
 {
 public:
-    explicit VopsBlockRule(IN IMtcCallContext& objContext);
-    virtual ~VopsBlockRule();
-    VopsBlockRule(IN const VopsBlockRule&) = delete;
-    VopsBlockRule& operator=(IN const VopsBlockRule&) = delete;
+    virtual ~IEctManager() {}
 
-    Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
-
-private:
-    IMtcService& m_objService;
-    IMtcImsEventReceiver& m_objEventReceiver;
-    const PeerType m_ePeerType;
+    virtual void Transfer(IN CallKey nCallKey, IN const AString& strNumber) = 0;
 };
 
 #endif

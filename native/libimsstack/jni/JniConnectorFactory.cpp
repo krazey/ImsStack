@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "IMSMap.h"
-#include "call/MtcCallController.h"
+#include "IMtcCallController.h"
 #include "IMtcService.h"
 #include "IMtsService.h"
 #include "JniAosService.h"
@@ -54,11 +54,11 @@ public:
         return pAosServiceConnector;
     }
 
-    inline JniConnector<MtcCallController, JniMtcCall>* GetMtcCallConnector()
+    inline JniConnector<IMtcCallController, JniMtcCall>* GetMtcCallConnector()
     {
         if (pMtcCallConnector == IMS_NULL)
         {
-            pMtcCallConnector = new JniConnector<MtcCallController, JniMtcCall>();
+            pMtcCallConnector = new JniConnector<IMtcCallController, JniMtcCall>();
         }
         return pMtcCallConnector;
     }
@@ -110,7 +110,7 @@ public:
 
 private:
     JniConnector<IAosService, JniAosService>* pAosServiceConnector;
-    JniConnector<MtcCallController, JniMtcCall>* pMtcCallConnector;
+    JniConnector<IMtcCallController, JniMtcCall>* pMtcCallConnector;
     JniConnector<IMtcService, JniMtcService>* pMtcServiceConnector;
     JniConnector<IMtsService, JniMtsService>* pMtsServiceConnector;
     JniConnector<IMediaManager, JniMediaSession>* pMediaSessionConnector;
@@ -200,7 +200,7 @@ JniConnector<IAosService, JniAosService>* JniConnectorFactory::GetAosServiceConn
 }
 
 PUBLIC
-JniConnector<MtcCallController, JniMtcCall>* JniConnectorFactory::GetMtcCallConnector(
+JniConnector<IMtcCallController, JniMtcCall>* JniConnectorFactory::GetMtcCallConnector(
         IN IMS_SINT32 nSlotId)
 {
     LockGuard objLock(m_piLock);

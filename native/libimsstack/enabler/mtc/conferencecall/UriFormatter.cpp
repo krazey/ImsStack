@@ -21,7 +21,7 @@
 #include "TextParser.h"
 
 #include "utility/MessageUtil.h"
-#include "dialingplan/MtcDialingPlan.h"
+#include "dialingplan/IMtcDialingPlan.h"
 #include "IMtcApp.h"
 
 #include "call/IMtcCallContext.h"

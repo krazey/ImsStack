@@ -19,22 +19,23 @@
 
 #include "call/IMtcCallManager.h"
 #include "ect/IEctControllerListener.h"
+#include "ect/IEctManager.h"
 #include "ect/EctController.h"
 #include "helper/ObjectAsyncDestroyer.h"
 
 class IMtcContext;
 
-class EctManager final : public IEctControllerListener
+class EctManager final : public IEctControllerListener, public IEctManager
 {
 public:
     explicit EctManager(IN IMtcContext& objContext);
-    ~EctManager();
+    virtual ~EctManager();
     EctManager(IN const EctManager&) = delete;
     EctManager& operator=(IN const EctManager&) = delete;
 
     void OnEctCompleted() override;
 
-    void Transfer(IN CallKey nCallKey, IN const AString& strNumber);
+    void Transfer(IN CallKey nCallKey, IN const AString& strNumber) override;
 
 private:
     IMtcContext& m_objContext;

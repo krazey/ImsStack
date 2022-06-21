@@ -42,10 +42,18 @@
 #include "precondition/MtcPreconditionManager.h"
 #include "ussi/UssiController.h"
 
+class IConferenceManager;
+class IEctManager;
+class IMtcAosConnector;
+class IMtcCallController;
+class IMtcCallManager;
 class IMtcContext;
+class IMtcDialingPlan;
 class IMtcMediaManager;
 class IMtcPreconditionManager;
 class IMtcService;
+class IMtcSipInterfaceFactory;
+class IMtcVonrManager;
 class IMutex;
 class IReference;
 class ISession;
@@ -53,9 +61,6 @@ class JniMediaSessionThread;
 class JniMtcCallThread;
 class MessageSender;
 class MtcConfigurationProxy;
-class MtcDialingPlan;
-class MtcSipInterfaceFactory;
-class MtcVonrManager;
 class UssiController;
 struct CallReasonInfo;
 
@@ -97,10 +102,10 @@ public:
     void Resume(IN MediaInfo* pMediaInfo) override;
     void AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     void RejectResume(IN const CallReasonInfo& objReason) override;
-    void Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    void AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    void RejectConvert(IN const CallReasonInfo& objReason) override;
-    void CancelConvert(IN const CallReasonInfo& objReason) override;
+    void Update(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    void AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    void RejectUpdate(IN const CallReasonInfo& objReason) override;
+    void CancelUpdate(IN const CallReasonInfo& objReason) override;
     void Terminate(IN const CallReasonInfo& objReason) override;
     void SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) override;
     void SendUssd(IN const AString& strUssd) override;
@@ -143,39 +148,42 @@ public:
         return m_objSupplementaryService;
     }
     inline IMS_SINT32 GetSlotId() override { return m_objContext.GetSlotId(); }
-    inline MtcDialingPlan& GetDialingPlan() override { return m_objContext.GetDialingPlan(); }
+    inline IMtcDialingPlan& GetDialingPlan() override { return m_objContext.GetDialingPlan(); }
     inline IMtcService* GetServiceByType(IN ServiceType eServiceType) override
     {
         return m_objContext.GetServiceByType(eServiceType);
     }
     inline IMtcCallManager& GetCallManager() override { return m_objContext.GetCallManager(); }
-    inline MtcCallController& GetCallController() override
+    inline IMtcCallController& GetCallController() override
     {
         return m_objContext.GetCallController();
     }
-    inline MtcVonrManager& GetVonrManager() override { return m_objContext.GetVonrManager(); }
+    inline IMtcVonrManager& GetVonrManager() override { return m_objContext.GetVonrManager(); }
     inline MtcConfigurationProxy& GetConfigurationProxy() override
     {
         return m_objContext.GetConfigurationProxy();
     }
-    inline CallStateProxy& GetCallStateProxy() override { return m_objContext.GetCallStateProxy(); }
-    inline MtcImsEventReceiver& GetImsEventReceiver() override
+    inline ICallStateProxy& GetCallStateProxy() override
+    {
+        return m_objContext.GetCallStateProxy();
+    }
+    inline IMtcImsEventReceiver& GetImsEventReceiver() override
     {
         return m_objContext.GetImsEventReceiver();
     }
-    inline MtcAosConnector* GetAosConnector(IN ServiceType eServiceType) override
+    inline IMtcAosConnector* GetAosConnector(IN ServiceType eServiceType) override
     {
         return m_objContext.GetAosConnector(eServiceType);
     }
-    inline MtcSipInterfaceFactory& GetSipInterfaceFactory() override
+    inline IMtcSipInterfaceFactory& GetSipInterfaceFactory() override
     {
         return m_objContext.GetSipInterfaceFactory();
     }
-    inline ConferenceManager& GetConferenceManager() override
+    inline IConferenceManager& GetConferenceManager() override
     {
         return m_objContext.GetConferenceManager();
     }
-    inline EctManager* GetEctManager() override { return m_objContext.GetEctManager(); }
+    inline IEctManager* GetEctManager() override { return m_objContext.GetEctManager(); }
     inline MtcEmergencyServiceManager* GetEmergencyServiceManager() override
     {
         return m_objContext.GetEmergencyServiceManager();

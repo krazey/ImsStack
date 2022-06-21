@@ -17,6 +17,7 @@
 #include "call/message/EmergencyMessageFormatter.h"
 #include "ICoreService.h"
 #include "IFeatureCaps.h"
+#include "IImsAosInfo.h"
 #include "ISipHeader.h"
 #include "IMtcApp.h"
 #include "IMtcService.h"
@@ -25,7 +26,7 @@
 #include "Sip.h"
 #include "SipParameter.h"
 #include "TextParser.h"
-#include "helper/MtcAosConnector.h"
+#include "helper/IMtcAosConnector.h"
 #include "call/IMtcSessionContext.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -201,7 +202,7 @@ void EmergencyMessageFormatter::SetSipInstanceFeature()
 PRIVATE
 IMS_UINT32 EmergencyMessageFormatter::GetAoSRegMode(IN ServiceType eServiceType)
 {
-    MtcAosConnector* pAosConnector = m_objContext.GetAosConnector(eServiceType);
+    IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(eServiceType);
     if (pAosConnector == IMS_NULL)
     {
         return IImsAosInfo::REG_MODE_UNKNOWN;
@@ -216,7 +217,7 @@ PRIVATE
 IMS_RESULT EmergencyMessageFormatter::GetLocalIpAddress(OUT AString& strIpAddress)
 {
     // TODO: emerency??
-    MtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
+    IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector == IMS_NULL)
     {
         return IMS_FAILURE;
@@ -236,7 +237,7 @@ IMS_RESULT EmergencyMessageFormatter::GetLocalIpAddress(OUT AString& strIpAddres
 PRIVATE
 IMS_UINT32 EmergencyMessageFormatter::GetLocalPort()
 {
-    MtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
+    IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector == IMS_NULL)
     {
         return IMS_FAILURE;

@@ -24,7 +24,7 @@
 #include "call/IMtcCall.h"
 #include "IMSMap.h"
 
-class MtcCallController;
+class IMtcCallController;
 
 class JniMtcCall final : public BaseService
 {
@@ -74,7 +74,7 @@ private:
     Jni_SendDataToJava m_pfnSendDataToJava;
     AString m_strThreadName;
     IMS_SINT32 m_nSlotId;
-    MtcCallController& m_objCallController;
+    IMtcCallController& m_objCallController;
     CallKey m_nCallKey;
     JniMediaSession* m_pJniMediaSession;
 };

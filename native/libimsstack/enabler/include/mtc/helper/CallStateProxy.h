@@ -23,6 +23,7 @@
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "IMtcCallStateListener.h"
+#include "helper/ICallStateProxy.h"
 
 class IMtcCallManager;
 struct CallInfo;
@@ -54,21 +55,23 @@ public:
     IMS_SINT32 nReason;  // enum class????
 };
 
-class CallStateProxy final : public ImsActivity
+class CallStateProxy final : public ImsActivity, public ICallStateProxy
 {
 public:
     CallStateProxy(IN IMtcCallManager& objCallManager);
-    ~CallStateProxy();
+    virtual ~CallStateProxy();
     CallStateProxy(IN const CallStateProxy&) = delete;
     CallStateProxy& operator=(IN const CallStateProxy&) = delete;
 
 public:
-    virtual IImsActivityController* GetController() override { return IMS_NULL; }
-    void AddListener(IN IMtcCallStateListener* pListener);
-    void RemoveListener(IN IMtcCallStateListener* pListener);
+    // ImsActivity implementation
+    IImsActivityController* GetController() override { return IMS_NULL; }
+
+    void AddListener(IN IMtcCallStateListener* pListener) override;
+    void RemoveListener(IN IMtcCallStateListener* pListener) override;
 
     void UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eState, IN CallType eCallType,
-            IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason = CODE_NONE);
+            IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason = CODE_NONE) override;
 
 protected:
     virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMsg) override;

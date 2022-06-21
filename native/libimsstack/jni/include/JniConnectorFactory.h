@@ -21,7 +21,7 @@
 #include "JniConnector.h"
 
 class IAosService;
-class MtcCallController;
+class IMtcCallController;
 class IMtcService;
 class IMtsService;
 class JniAosService;
@@ -45,7 +45,7 @@ public:
     void ReleaseConnectors(IN IMS_SINT32 nSlotId);
 
     JniConnector<IAosService, JniAosService>* GetAosServiceConnector(IN IMS_SINT32 nSlotId);
-    JniConnector<MtcCallController, JniMtcCall>* GetMtcCallConnector(IN IMS_SINT32 nSlotId);
+    JniConnector<IMtcCallController, JniMtcCall>* GetMtcCallConnector(IN IMS_SINT32 nSlotId);
     JniConnector<IMtcService, JniMtcService>* GetMtcServiceConnector(IN IMS_SINT32 nSlotId);
     JniConnector<IMtsService, JniMtsService>* GetMtsServiceConnector(IN IMS_SINT32 nSlotId);
     JniConnector<IMediaManager, JniMediaSession>* GetMediaSessionConnector(IN IMS_SINT32 nSlotId);

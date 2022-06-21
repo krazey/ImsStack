@@ -16,7 +16,7 @@
 
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "dialingplan/MtcDialingPlan.h"
+#include "dialingplan/IMtcDialingPlan.h"
 #include "ICoreService.h"
 #include "dialogevent/IDialogEvent.h"
 #include "call/state/IdleState.h"

@@ -21,12 +21,11 @@
 
 class IMessage;
 class AString;
-class MtcCallController;
+class IMtcCallController;
 class MtcConfigurationProxy;
 class IMtcService;
 class JniMtcServiceThread;
 class MtcEmergencyServiceManager;
-class IMtcCallManager;
 
 class MtcAosEventHandler
 {
@@ -40,12 +39,12 @@ public:
     void OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
             IN JniMtcServiceThread* pServiceThread,
             IN MtcEmergencyServiceManager* pEmergencyServiceManager,
-            IN MtcCallController& objCallController);
-    void OnDisconnecting(IN IMS_UINT32 nReason, IN MtcCallController& objCallController);
-    void OnDisconnected(IN IMS_UINT32 nReason, IN MtcCallController& objCallController,
+            IN IMtcCallController& objCallController);
+    void OnDisconnecting(IN IMS_UINT32 nReason, IN IMtcCallController& objCallController);
+    void OnDisconnected(IN IMS_UINT32 nReason, IN IMtcCallController& objCallController,
             IN JniMtcServiceThread* pServiceThread,
             IN MtcEmergencyServiceManager* pEmergencyServiceManager);
-    void OnSuspended(IN IMS_UINT32 nReason, IN MtcCallController& objCallController);
+    void OnSuspended(IN IMS_UINT32 nReason, IN IMtcCallController& objCallController);
     void OnResumed();
 
     void OnServiceConnected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpcan);

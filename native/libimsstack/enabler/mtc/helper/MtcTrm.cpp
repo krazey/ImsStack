@@ -19,7 +19,7 @@
 #include "ServiceMutex.h"
 #include "ServicePhoneInfo.h"
 
-#include "helper/CallStateProxy.h"
+#include "helper/ICallStateProxy.h"
 #include "helper/MtcTrm.h"
 #include "IuMtcService.h"
 

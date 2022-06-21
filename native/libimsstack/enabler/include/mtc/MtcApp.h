@@ -33,9 +33,18 @@
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "conferencecall/ConferenceManager.h"
 
-class MtcService;
 class EctManager;
 class MtcEmergencyServiceManager;
+class IMtcCallController;
+class IMtcCallManager;
+class IMtcDialingPlan;
+class IMtcVonrManager;
+class ICallStateProxy;
+class IMtcImsEventReceiver;
+class IMtcAosConnector;
+class IMtcSipInterfaceFactory;
+class IConferenceManager;
+class IEctManager;
 
 class MtcApp : public ImsApp, public IMtcApp, public IMtcContext
 {
@@ -52,23 +61,23 @@ public:
     // IMtcContext implementation
     inline IMS_SINT32 GetSlotId() override { return m_nSlotId; }
     IMtcService* GetServiceByType(IN ServiceType eServiceType) override;
-    inline MtcDialingPlan& GetDialingPlan() override { return m_objDialingPlan; }
-    inline MtcCallController& GetCallController() override { return m_objCallController; }
+    inline IMtcDialingPlan& GetDialingPlan() override { return m_objDialingPlan; }
+    inline IMtcCallController& GetCallController() override { return m_objCallController; }
     inline IMtcCallManager& GetCallManager() override { return m_objCallManager; }
-    inline MtcVonrManager& GetVonrManager() override { return m_objVonrManager; }
+    inline IMtcVonrManager& GetVonrManager() override { return m_objVonrManager; }
     inline MtcConfigurationProxy& GetConfigurationProxy() override
     {
         return m_objConfigurationProxy;
     }
-    inline CallStateProxy& GetCallStateProxy() override { return m_objCallStateProxy; }
-    inline MtcImsEventReceiver& GetImsEventReceiver() override { return m_objImsEventReceiver; }
-    MtcAosConnector* GetAosConnector(IN ServiceType eServiceType) override;
-    inline MtcSipInterfaceFactory& GetSipInterfaceFactory() override
+    inline ICallStateProxy& GetCallStateProxy() override { return m_objCallStateProxy; }
+    inline IMtcImsEventReceiver& GetImsEventReceiver() override { return m_objImsEventReceiver; }
+    IMtcAosConnector* GetAosConnector(IN ServiceType eServiceType) override;
+    inline IMtcSipInterfaceFactory& GetSipInterfaceFactory() override
     {
         return m_objSipInterfaceFactory;
     }
-    inline ConferenceManager& GetConferenceManager() override { return m_objConferenceManager; }
-    EctManager* GetEctManager() override;
+    inline IConferenceManager& GetConferenceManager() override { return m_objConferenceManager; }
+    IEctManager* GetEctManager() override;
     MtcEmergencyServiceManager* GetEmergencyServiceManager() override;
 
 private:
@@ -80,7 +89,7 @@ private:
 private:
     IMS_SINT32 m_nSlotId;
     MtcConfigurationProxy m_objConfigurationProxy;
-    IMSList<MtcService*> m_lstServices;
+    IMSList<IMtcService*> m_lstServices;
     MtcDialingPlan m_objDialingPlan;
     MtcCallManager m_objCallManager;
     MtcCallController m_objCallController;

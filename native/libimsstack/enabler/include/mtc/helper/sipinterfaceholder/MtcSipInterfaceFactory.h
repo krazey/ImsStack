@@ -19,16 +19,17 @@
 
 #include "ImsTypeDef.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
+#include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 
 class SessionInterfaceHolder;
 class ReferenceInterfaceHolder;
 class SubscriptionInterfaceHolder;
 
-class MtcSipInterfaceFactory final : public IInterfaceHolderListener
+class MtcSipInterfaceFactory final : public IInterfaceHolderListener, public IMtcSipInterfaceFactory
 {
 public:
     explicit MtcSipInterfaceFactory();
-    ~MtcSipInterfaceFactory();
+    virtual ~MtcSipInterfaceFactory();
     MtcSipInterfaceFactory(IN const MtcSipInterfaceFactory&) = delete;
     MtcSipInterfaceFactory& operator=(IN const MtcSipInterfaceFactory&) = delete;
 
@@ -38,9 +39,10 @@ public:
     void OnReferenceInterfaceCleared() override;
     void OnSubscriptionInterfaceCleared() override;
 
-    SessionInterfaceHolder* GetISessionHolder();
-    ReferenceInterfaceHolder* GetIReferenceHolder();
-    SubscriptionInterfaceHolder* GetISubscriptionHolder();
+    // IMtcSipInterfaceFactory implementation
+    SessionInterfaceHolder* GetISessionHolder() override;
+    ReferenceInterfaceHolder* GetIReferenceHolder() override;
+    SubscriptionInterfaceHolder* GetISubscriptionHolder() override;
 
 private:
     SessionInterfaceHolder* m_piSessionHolder;

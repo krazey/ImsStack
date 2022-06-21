@@ -19,12 +19,13 @@
 #include "ServiceTrace.h"
 
 #include "call/IMtcCallContext.h"
+#include "call/IMtcCallManager.h"
 #include "call/MtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/state/EstablishedState.h"
 #include "call/termination/TerminationHandler.h"
 #include "call/UpdatingInfo.h"
-#include "conferencecall/ConferenceManager.h"
+#include "conferencecall/IConferenceManager.h"
 #include "conferencecall/IConferenceController.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -35,6 +36,7 @@
 #include "helper/block/MtcBlockChecker.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
+#include "sipcore/SipStatusCode.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiDef.h"
 #include "utility/MessageUtil.h"
@@ -84,10 +86,10 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Resume(IN MediaInfo* pMediaInfo)
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL CallStateName EstablishedState::Convert(
+PUBLIC VIRTUAL CallStateName EstablishedState::Update(
         IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    IMS_TRACE_D("Convert", 0, 0, 0);
+    IMS_TRACE_D("Update", 0, 0, 0);
 
     m_objContext.GetUpdatingInfo().SetTargetCallType(eCallType);
 

@@ -21,8 +21,9 @@
 #include "IMSTypeDef.h"
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
+#include "helper/IMtcAosConnector.h"
 
-class MtcAosConnector
+class MtcAosConnector final : public IMtcAosConnector
 {
 public:
     inline MtcAosConnector(IN IImsAos& objImsAos, IN IImsAosInfo& objImsAosInfo) :
@@ -30,58 +31,73 @@ public:
             m_objImsAosInfo(objImsAosInfo)
     {
     }
-    inline ~MtcAosConnector() {}
+    virtual inline ~MtcAosConnector() {}
     MtcAosConnector(IN const MtcAosConnector&) = delete;
     MtcAosConnector& operator=(IN const MtcAosConnector&) = delete;
 
     // IImsAos interface wrappers.
-    inline IMS_UINT32 GetFeatures() const { return m_objImsAos.GetFeatures(); }
-    inline IMS_UINT32 GetSuspendedReason() const { return m_objImsAos.GetSuspendedReason(); }
+    inline IMS_UINT32 GetFeatures() const override { return m_objImsAos.GetFeatures(); }
+    inline IMS_UINT32 GetSuspendedReason() const override
+    {
+        return m_objImsAos.GetSuspendedReason();
+    }
     inline IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) const
     {
         return m_objImsAos.IsFeatureConnected(nFeature);
     }
-    inline IMS_BOOL IsImsConnected() const { return m_objImsAos.IsImsConnected(); }
-    inline IMS_BOOL IsImsSuspended() const { return m_objImsAos.IsImsSuspended(); }
-    inline void SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService) const
+    inline IMS_BOOL IsImsConnected() const override { return m_objImsAos.IsImsConnected(); }
+    inline IMS_BOOL IsImsSuspended() const override { return m_objImsAos.IsImsSuspended(); }
+    inline void SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService) const override
     {
         m_objImsAos.SetReady(bReady, nService);
     }
-    inline void UpdateFeature(IN IMS_UINT32 nFeatures) const
+    inline void UpdateFeature(IN IMS_UINT32 nFeatures) const override
     {
         m_objImsAos.UpdateFeature(nFeatures);
     }
-    inline IMS_BOOL Control(IN IMS_UINT32 nType) const { return m_objImsAos.Control(nType); }
+    inline IMS_BOOL Control(IN IMS_UINT32 nType) const override
+    {
+        return m_objImsAos.Control(nType);
+    }
 
     // IImsAosInfo interface wrappers.
-    inline AString GetAssociatedUri() const { return m_objImsAosInfo.GetAssociatedUri(); }
-    inline IMS_UINT32 GetConnectionType() const { return m_objImsAosInfo.GetConnectionType(); }
-    inline IMS_UINT32 GetImsState() const { return m_objImsAosInfo.GetImsState(); }
-    inline IMS_UINT32 GetIpcanType() const { return m_objImsAosInfo.GetIpcanType(); }
-    inline AString GetLastPathHeaderValue() const
+    inline AString GetAssociatedUri() const override { return m_objImsAosInfo.GetAssociatedUri(); }
+    inline IMS_UINT32 GetConnectionType() const override
+    {
+        return m_objImsAosInfo.GetConnectionType();
+    }
+    inline IMS_UINT32 GetImsState() const override { return m_objImsAosInfo.GetImsState(); }
+    inline IMS_UINT32 GetIpcanType() const override { return m_objImsAosInfo.GetIpcanType(); }
+    inline AString GetLastPathHeaderValue() const override
     {
         return m_objImsAosInfo.GetLastPathHeaderValue();
     }
-    inline AString GetLocalAddress() const { return m_objImsAosInfo.GetLocalAddress(); }
-    inline IMS_UINT32 GetLocalPort() const { return m_objImsAosInfo.GetLocalPort(); }
-    inline IMS_UINT32 GetRegisteredNetworkType() const
+    inline AString GetLocalAddress() const override { return m_objImsAosInfo.GetLocalAddress(); }
+    inline IMS_UINT32 GetLocalPort() const override { return m_objImsAosInfo.GetLocalPort(); }
+    inline IMS_UINT32 GetRegisteredNetworkType() const override
     {
         return m_objImsAosInfo.GetRegisteredNetworkType();
     }
-    inline AString GetPathHeaderValue() const { return m_objImsAosInfo.GetPathHeaderValue(); }
-    inline AString GetPcscfAddress() const { return m_objImsAosInfo.GetPcscfAddress(); }
-    inline IMS_UINT32 GetPcscfPort() const { return m_objImsAosInfo.GetPcscfPort(); }
-    inline IMS_UINT32 GetRegistrationMode() const { return m_objImsAosInfo.GetRegistrationMode(); }
-    inline AString GetSupportedHeaderValue() const
+    inline AString GetPathHeaderValue() const override
+    {
+        return m_objImsAosInfo.GetPathHeaderValue();
+    }
+    inline AString GetPcscfAddress() const override { return m_objImsAosInfo.GetPcscfAddress(); }
+    inline IMS_UINT32 GetPcscfPort() const override { return m_objImsAosInfo.GetPcscfPort(); }
+    inline IMS_UINT32 GetRegistrationMode() const override
+    {
+        return m_objImsAosInfo.GetRegistrationMode();
+    }
+    inline AString GetSupportedHeaderValue() const override
     {
         return m_objImsAosInfo.GetSupportedHeaderValue();
     }
-    inline AString GetServiceRouteHeaderValue() const
+    inline AString GetServiceRouteHeaderValue() const override
     {
         return m_objImsAosInfo.GetServiceRouteHeaderValue();
     }
 
-    inline void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized)
+    inline void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) override
     {
         return m_objImsAosInfo.NotifyEmergencyCallState(bIsInitialized);
     }

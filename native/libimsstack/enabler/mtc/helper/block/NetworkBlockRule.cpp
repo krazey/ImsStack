@@ -17,7 +17,7 @@
 #include "INetworkWatcher.h"
 #include "ServicePhoneInfo.h"
 #include "call/IMtcCallContext.h"
-#include "helper/MtcAosConnector.h"
+#include "helper/IMtcAosConnector.h"
 #include "helper/block/NetworkBlockRule.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -58,7 +58,7 @@ IMS_BOOL NetworkBlockRule::IsInEpdg(IN const IMtcService& objService)
 }
 
 PRIVATE
-IMS_BOOL NetworkBlockRule::IsWifiRegistered(IN MtcAosConnector* pAosConnector)
+IMS_BOOL NetworkBlockRule::IsWifiRegistered(IN IMtcAosConnector* pAosConnector)
 {
     IMS_UINT32 nAosRegisteredNetworkType =
             pAosConnector ? pAosConnector->GetRegisteredNetworkType() : NW_REPORT_RADIO_INVALID;

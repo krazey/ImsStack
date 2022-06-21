@@ -25,8 +25,8 @@
 #include "call/MtcSession.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "helper/MtcAosConnector.h"
-#include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
+#include "helper/IMtcAosConnector.h"
+#include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
@@ -250,7 +250,7 @@ AString MtcSession::GenerateSessionId() const
 PRIVATE
 IMS_BOOL MtcSession::IsRegisteredFeature(IMS_UINT32 nFeature)
 {
-    MtcAosConnector* pAosConnector = GetAosConnector(GetService().GetServiceType());
+    IMtcAosConnector* pAosConnector = GetAosConnector(GetService().GetServiceType());
     if (pAosConnector == IMS_NULL)
     {
         return IMS_FALSE;

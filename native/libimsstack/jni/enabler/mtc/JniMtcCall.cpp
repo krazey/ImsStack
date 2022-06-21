@@ -20,7 +20,7 @@
 #include "EnablerUtils.h"
 
 #include "call/IMtcCall.h"
-#include "call/MtcCallController.h"
+#include "IMtcCallController.h"
 #include "IuMtcService.h"
 #include "JniConnector.h"
 #include "JniConnectorFactory.h"

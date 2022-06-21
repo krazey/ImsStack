@@ -14,30 +14,26 @@
  * limitations under the License.
  */
 
-#ifndef VOPS_BLOCK_RULE_H_
-#define VOPS_BLOCK_RULE_H_
+#ifndef INTERFACE_CALL_STATE_PROXY_H_
+#define INTERFACE_CALL_STATE_PROXY_H_
 
+#include "CallReasonInfo.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
-#include "helper/block/IMtcBlockRule.h"
 
-class IMtcCallContext;
-class IMtcService;
-class IMtcImsEventReceiver;
+class IMtcCallStateListener;
 
-class VopsBlockRule final : public IMtcBlockRule
+class ICallStateProxy
 {
 public:
-    explicit VopsBlockRule(IN IMtcCallContext& objContext);
-    virtual ~VopsBlockRule();
-    VopsBlockRule(IN const VopsBlockRule&) = delete;
-    VopsBlockRule& operator=(IN const VopsBlockRule&) = delete;
+    virtual ~ICallStateProxy() {}
 
-    Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
+public:
+    virtual void AddListener(IN IMtcCallStateListener* pListener) = 0;
+    virtual void RemoveListener(IN IMtcCallStateListener* pListener) = 0;
 
-private:
-    IMtcService& m_objService;
-    IMtcImsEventReceiver& m_objEventReceiver;
-    const PeerType m_ePeerType;
+    virtual void UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eState,
+            IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason = CODE_NONE) = 0;
 };
 
 #endif

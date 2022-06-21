@@ -46,7 +46,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         ImsApp(MTC_APP_NAME),
         m_nSlotId(nSlotId),
         m_objConfigurationProxy(MtcConfigurationProxy(new MtcConfigurationManager())),
-        m_lstServices(IMSList<MtcService*>()),
+        m_lstServices(IMSList<IMtcService*>()),
         m_objDialingPlan(MtcDialingPlan(*this)),
         m_objCallManager(MtcCallManager(*this)),
         m_objCallController(MtcCallController(*this)),
@@ -103,7 +103,7 @@ PUBLIC VIRTUAL IMtcService* MtcApp::GetServiceByType(IN ServiceType eServiceType
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL MtcAosConnector* MtcApp::GetAosConnector(IN ServiceType eServiceType)
+PUBLIC VIRTUAL IMtcAosConnector* MtcApp::GetAosConnector(IN ServiceType eServiceType)
 {
     for (IMS_UINT32 i = 0; i < m_lstServices.GetSize(); i++)
     {
@@ -118,7 +118,7 @@ PUBLIC VIRTUAL MtcAosConnector* MtcApp::GetAosConnector(IN ServiceType eServiceT
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL EctManager* MtcApp::GetEctManager()
+PUBLIC VIRTUAL IEctManager* MtcApp::GetEctManager()
 {
     if (m_pEctManager == IMS_NULL)
     {
@@ -158,7 +158,7 @@ void MtcApp::InitCallManager()
 {
     m_objCallManager.Init();
     JniConnectorFactory::GetInstance()->GetMtcCallConnector(m_nSlotId)->SetEnablerService(
-            static_cast<MtcCallController*>(&m_objCallController));
+            &GetCallController());
 }
 
 PRIVATE

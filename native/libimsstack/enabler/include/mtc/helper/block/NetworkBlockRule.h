@@ -36,7 +36,7 @@ public:
 
 private:
     IMS_BOOL IsInEpdg(IN const IMtcService& objService);
-    IMS_BOOL IsWifiRegistered(IN MtcAosConnector* pAosConnector);
+    IMS_BOOL IsWifiRegistered(IN IMtcAosConnector* pAosConnector);
 
     INetworkWatcher& GetNetWatcherInfo(IN IMS_SINT32 nSlotId);
 

@@ -34,7 +34,7 @@
 #include "MtcService.h"
 #include "helper/MtcAosConnector.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "call/MtcCallController.h"
+#include "IMtcCallController.h"
 #include "helper/SrvccEventHandler.h"
 #include "MtcEmergencyServiceManager.h"
 

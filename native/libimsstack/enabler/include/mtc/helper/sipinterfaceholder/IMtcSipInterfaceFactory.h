@@ -14,30 +14,24 @@
  * limitations under the License.
  */
 
-#ifndef VOPS_BLOCK_RULE_H_
-#define VOPS_BLOCK_RULE_H_
+#ifndef INTERFACE_MTC_SIP_INTERFACE_FACTORY_H_
+#define INTERFACE_MTC_SIP_INTERFACE_FACTORY_H_
 
-#include "call/IMtcCall.h"
-#include "helper/block/IMtcBlockRule.h"
+#include "ImsTypeDef.h"
+#include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 
-class IMtcCallContext;
-class IMtcService;
-class IMtcImsEventReceiver;
+class SessionInterfaceHolder;
+class ReferenceInterfaceHolder;
+class SubscriptionInterfaceHolder;
 
-class VopsBlockRule final : public IMtcBlockRule
+class IMtcSipInterfaceFactory
 {
 public:
-    explicit VopsBlockRule(IN IMtcCallContext& objContext);
-    virtual ~VopsBlockRule();
-    VopsBlockRule(IN const VopsBlockRule&) = delete;
-    VopsBlockRule& operator=(IN const VopsBlockRule&) = delete;
+    virtual ~IMtcSipInterfaceFactory() {}
 
-    Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
-
-private:
-    IMtcService& m_objService;
-    IMtcImsEventReceiver& m_objEventReceiver;
-    const PeerType m_ePeerType;
+    virtual SessionInterfaceHolder* GetISessionHolder() = 0;
+    virtual ReferenceInterfaceHolder* GetIReferenceHolder() = 0;
+    virtual SubscriptionInterfaceHolder* GetISubscriptionHolder() = 0;
 };
 
 #endif

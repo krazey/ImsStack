@@ -112,17 +112,17 @@ public:
     // Rejects the resume request from the remote.
     virtual void RejectResume(IN const CallReasonInfo& objReason) = 0;
 
-    // Requests call converting to the remote.
-    virtual void Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    // Requests call updating(converting) to the remote.
+    virtual void Update(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
-    // Accepts the call converting request from the remote.
-    virtual void AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    // Accepts the call updating(converting) request from the remote.
+    virtual void AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
-    // Rejects the call converting request from the remote.
-    virtual void RejectConvert(IN const CallReasonInfo& objReason) = 0;
+    // Rejects the call updating(converting) request from the remote.
+    virtual void RejectUpdate(IN const CallReasonInfo& objReason) = 0;
 
-    // Cancels the ongoing call converting request.
-    virtual void CancelConvert(IN const CallReasonInfo& objReason) = 0;
+    // Cancels the ongoing call updating(converting) request.
+    virtual void CancelUpdate(IN const CallReasonInfo& objReason) = 0;
 
     // Terminates the call.
     virtual void Terminate(IN const CallReasonInfo& objReason) = 0;

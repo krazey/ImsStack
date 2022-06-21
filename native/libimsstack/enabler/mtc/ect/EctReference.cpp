@@ -29,14 +29,14 @@
 
 #include "IMtcService.h"
 #include "IMtcContext.h"
-#include "dialingplan/MtcDialingPlan.h"
+#include "dialingplan/IMtcDialingPlan.h"
 #include "utility/MessageUtil.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcCall.h"
 #include "call/MtcSession.h"
-#include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
 #include "ect/IEctReferenceListener.h"
 

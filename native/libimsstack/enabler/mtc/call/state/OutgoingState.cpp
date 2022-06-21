@@ -40,13 +40,12 @@
 #include "SipAddress.h"
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"
-#include "helper/MtcAosConnector.h"
 #include "helper/MtcSupplementaryService.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "precondition/SdpPreconditionHelper.h"
-#include "dialingplan/MtcDialingPlan.h"
-#include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
+#include "dialingplan/IMtcDialingPlan.h"
+#include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

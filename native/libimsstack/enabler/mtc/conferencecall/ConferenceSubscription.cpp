@@ -39,7 +39,7 @@
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceConst.h"
 #include "conferencecall/ConferenceSubscription.h"
-#include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

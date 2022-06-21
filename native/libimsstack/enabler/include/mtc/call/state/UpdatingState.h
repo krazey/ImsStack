@@ -32,9 +32,9 @@ public:
 public:
     void OnExit() override;
 
-    CallStateName AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    CallStateName RejectConvert(IN const CallReasonInfo& objReason) override;
-    CallStateName CancelConvert(IN const CallReasonInfo& objReason) override;
+    CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName RejectUpdate(IN const CallReasonInfo& objReason) override;
+    CallStateName CancelUpdate(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
     CallStateName SessionTerminated(IN ISession* piSession) override;

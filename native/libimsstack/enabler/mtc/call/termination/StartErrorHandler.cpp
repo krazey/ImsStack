@@ -25,7 +25,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "helper/MtcAosConnector.h"
+#include "helper/IMtcAosConnector.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -407,7 +407,7 @@ IMS_BOOL StartErrorHandler::HasEmergencyServiceTypeInBody(IN const IMessage& obj
 PRIVATE
 void StartErrorHandler::ControlAos(IMS_UINT32 nCommand) const
 {
-    MtcAosConnector* pAosConnector = GetAosConnector();
+    IMtcAosConnector* pAosConnector = GetAosConnector();
     if (pAosConnector)
     {
         pAosConnector->Control(nCommand);
@@ -417,35 +417,35 @@ void StartErrorHandler::ControlAos(IMS_UINT32 nCommand) const
 PRIVATE
 AString StartErrorHandler::GetPathHeader() const
 {
-    MtcAosConnector* pAosConnector = GetAosConnector();
+    IMtcAosConnector* pAosConnector = GetAosConnector();
     return pAosConnector ? pAosConnector->GetPathHeaderValue() : AString::ConstNull();
 }
 
 PRIVATE
 AString StartErrorHandler::GetLastPathHeader() const
 {
-    MtcAosConnector* pAosConnector = GetAosConnector();
+    IMtcAosConnector* pAosConnector = GetAosConnector();
     return pAosConnector ? pAosConnector->GetLastPathHeaderValue() : AString::ConstNull();
 }
 
 PRIVATE
 AString StartErrorHandler::GetServiceRouteHeader() const
 {
-    MtcAosConnector* pAosConnector = GetAosConnector();
+    IMtcAosConnector* pAosConnector = GetAosConnector();
     return pAosConnector ? pAosConnector->GetServiceRouteHeaderValue() : AString::ConstNull();
 }
 
 PRIVATE
 AString StartErrorHandler::GetSupported() const
 {
-    MtcAosConnector* pAosConnector = GetAosConnector();
+    IMtcAosConnector* pAosConnector = GetAosConnector();
     return pAosConnector ? pAosConnector->GetSupportedHeaderValue() : AString::ConstNull();
 }
 
 PRIVATE
-MtcAosConnector* StartErrorHandler::GetAosConnector() const
+IMtcAosConnector* StartErrorHandler::GetAosConnector() const
 {
-    MtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (pAosConnector == IMS_NULL)
     {
         IMS_TRACE_E(0, "GetAosConnector : AosConnector is null", 0, 0, 0);

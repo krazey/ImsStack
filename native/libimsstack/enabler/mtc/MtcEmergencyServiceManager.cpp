@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "helper/MtcAosConnector.h"
+#include "helper/IMtcAosConnector.h"
 #include "ImsAosParameter.h"
 #include "MtcEmergencyServiceManager.h"
 #include "ServiceTrace.h"
@@ -40,7 +40,7 @@ PUBLIC VIRTUAL MtcEmergencyServiceManager::~MtcEmergencyServiceManager()
 PUBLIC
 void MtcEmergencyServiceManager::OpenEmergencyService(IN JniMtcServiceThread* pServiceThread)
 {
-    MtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
+    IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector == IMS_NULL)
     {
         return;

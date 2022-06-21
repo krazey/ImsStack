@@ -15,7 +15,7 @@
  */
 
 #include "ImsEventDef.h"
-#include "MtcImsEventReceiver.h"
+#include "IMtcImsEventReceiver.h"
 #include "call/IMtcCallContext.h"
 #include "helper/block/CsCallBlockRule.h"
 
@@ -40,7 +40,8 @@ PUBLIC VIRTUAL CsCallBlockRule::Result CsCallBlockRule::Check(
     }
 
     IMS_UINT32 nCsCallState = m_objEventReceiver.GetWParam(IMS_EVENT_CSCALL_STATE);
-    if (nCsCallState == IMS_CSCALL_STATE_IDLE || nCsCallState == MtcImsEventReceiver::UNKNOWN_VALUE)
+    if (nCsCallState == IMS_CSCALL_STATE_IDLE ||
+            nCsCallState == IMtcImsEventReceiver::UNKNOWN_VALUE)
     {
         return Result(Result::Status::UNBLOCKED);
     }

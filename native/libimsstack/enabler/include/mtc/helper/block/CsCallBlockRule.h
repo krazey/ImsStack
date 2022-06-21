@@ -21,7 +21,7 @@
 #include "helper/block/IMtcBlockRule.h"
 
 class IMtcCallContext;
-class MtcImsEventReceiver;
+class IMtcImsEventReceiver;
 
 class CsCallBlockRule final : public IMtcBlockRule
 {
@@ -35,7 +35,7 @@ public:
 
 private:
     const IMtcService& m_objService;
-    MtcImsEventReceiver& m_objEventReceiver;
+    IMtcImsEventReceiver& m_objEventReceiver;
     const PeerType m_ePeerType;
 };
 

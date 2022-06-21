@@ -28,9 +28,11 @@
 #include "IMtcService.h"
 #include "helper/SrvccEventHandler.h"
 #include "helper/MtcAosEventHandler.h"
+#include "helper/MtcAosConnector.h"
 
 class JniMtcService;
 class JniMtcServiceThread;
+class IMtcAosConnector;
 
 class MtcService :
         public ImsService,
@@ -56,7 +58,7 @@ public:
     IMS_BOOL IsWlanIpCanType() const override;
     inline ServiceStatus GetServiceStatus() const override { return m_eStatus; }
     inline ICoreService* GetICoreService() const override { return m_piCoreService; }
-    inline MtcAosConnector* GetAosConnector() const override { return m_pAosConnector; }
+    inline IMtcAosConnector* GetAosConnector() const override { return m_pAosConnector; }
 
     void UpdateSrvccState(IN SrvccState eState) override;
     void SetJniService(IN JniMtcService* pJniService) override;

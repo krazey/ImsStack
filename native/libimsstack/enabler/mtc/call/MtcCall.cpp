@@ -34,10 +34,9 @@
 #include "call/state/TerminatingState.h"
 #include "call/state/UpdatingState.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "helper/CallStateProxy.h"
-#include "helper/MtcAosConnector.h"
+#include "helper/ICallStateProxy.h"
 #include "helper/block/MtcBlockChecker.h"
-#include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -286,9 +285,9 @@ PUBLIC VIRTUAL void MtcCall::RejectResume(IN const CallReasonInfo& objReason)
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::Update(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    IMS_TRACE_I("Convert : key[%d]", m_nKey, 0, 0);
+    IMS_TRACE_I("Update : key[%d]", m_nKey, 0, 0);
 
     if (pMediaInfo == IMS_NULL)
     {
@@ -299,13 +298,13 @@ PUBLIC VIRTUAL void MtcCall::Convert(IN CallType eCallType, IN MediaInfo* pMedia
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
             {
-                return pState->Convert(eCallType, pMediaInfo);
+                return pState->Update(eCallType, pMediaInfo);
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    IMS_TRACE_I("AcceptConvert : key[%d]", m_nKey, 0, 0);
+    IMS_TRACE_I("AcceptUpdate : key[%d]", m_nKey, 0, 0);
 
     if (pMediaInfo == IMS_NULL)
     {
@@ -316,29 +315,29 @@ PUBLIC VIRTUAL void MtcCall::AcceptConvert(IN CallType eCallType, IN MediaInfo* 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
             {
-                return pState->AcceptConvert(eCallType, pMediaInfo);
+                return pState->AcceptUpdate(eCallType, pMediaInfo);
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::RejectConvert(IN const CallReasonInfo& objReason)
+PUBLIC VIRTUAL void MtcCall::RejectUpdate(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("RejectConvert : key[%d]", m_nKey, 0, 0);
+    IMS_TRACE_I("RejectUpdate : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
             {
-                return pState->RejectConvert(objReason);
+                return pState->RejectUpdate(objReason);
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::CancelConvert(IN const CallReasonInfo& objReason)
+PUBLIC VIRTUAL void MtcCall::CancelUpdate(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("CancelConvert : key[%d]", m_nKey, 0, 0);
+    IMS_TRACE_I("CancelUpdate : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
             {
-                return pState->CancelConvert(objReason);
+                return pState->CancelUpdate(objReason);
             });
 }
 

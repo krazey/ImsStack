@@ -34,7 +34,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
-#include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
@@ -109,24 +109,24 @@ PUBLIC VIRTUAL CallStateName MtcCallState::RejectResume(IN const CallReasonInfo&
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::Convert(
+PUBLIC VIRTUAL CallStateName MtcCallState::Update(
         IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::AcceptConvert(
+PUBLIC VIRTUAL CallStateName MtcCallState::AcceptUpdate(
         IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::RejectConvert(IN const CallReasonInfo& /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::RejectUpdate(IN const CallReasonInfo& /* objReason */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::CancelConvert(IN const CallReasonInfo& /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::CancelUpdate(IN const CallReasonInfo& /* objReason */)
 {
     return GetStateName();
 }

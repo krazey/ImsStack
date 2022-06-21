@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-#include "vonr/IMtcVonrListener.h"
-#include "vonr/MtcVonr.h"
-
 #ifndef MTC_VONR_MANAGER_H_
 #define MTC_VONR_MANAGER_H_
 
-class MtcVonrManager : IMtcVonrListener
+#include "call/IMtcCall.h"
+#include "vonr/IMtcVonrListener.h"
+#include "vonr/IMtcVonrManager.h"
+#include "vonr/MtcVonr.h"
+
+class MtcVonrManager : public IMtcVonrListener, public IMtcVonrManager
+
 {
 public:
     explicit MtcVonrManager();
@@ -32,14 +35,15 @@ public:
     static IMS_BOOL IsSupported();
 
     // to check call type / VoNR mode by runtime.
-    IMS_BOOL IsUacRequired(IN IMS_BOOL bWifi);
-    void CheckBarring(IN IMtcCall* piMtcCall, IN CallType eCallType, IN IMS_BOOL bEmergency);
+    IMS_BOOL IsUacRequired(IN IMS_BOOL bWifi) override;
+    void CheckBarring(
+            IN IMtcCall* piMtcCall, IN CallType eCallType, IN IMS_BOOL bEmergency) override;
 
     // IMtcVonrListener implementation
-    virtual void OnTerminated(IN MtcVonr* pMtcVonr);
-    virtual IMS_BOOL IsOtherSessionAlive(IN MtcVonr* pMtcVonr, IN IMS_UINT32 nUacType);
-    virtual void SetInitiateType(IN MtcVonr::VonrInitType eType);
-    virtual MtcVonr::VonrInitType GetTotalInitiateType();
+    void OnTerminated(IN MtcVonr* pMtcVonr) override;
+    IMS_BOOL IsOtherSessionAlive(IN MtcVonr* pMtcVonr, IN IMS_UINT32 nUacType) override;
+    void SetInitiateType(IN MtcVonr::VonrInitType eType) override;
+    MtcVonr::VonrInitType GetTotalInitiateType() override;
 
 private:
     void Initialize();
@@ -52,4 +56,4 @@ private:
     IMS_BOOL m_bMtk;
 };
 
-#endif  // MTC_VONR_MANAGER_H_
+#endif

@@ -23,7 +23,6 @@
 #include "conferencecall/GroupCallController.h"
 #include "conferencecall/ExpandController.h"
 #include "conferencecall/ConferenceDef.h"
-#include "helper/CallStateProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

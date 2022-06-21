@@ -15,6 +15,7 @@
  */
 
 #include "ICoreService.h"
+#include "IImsAosInfo.h"
 #include "IMessage.h"
 #include "ImsIdentity.h"
 #include "ISipHeader.h"
@@ -23,8 +24,8 @@
 #include "call/IMtcCallContext.h"
 #include "call/MtcSession.h"
 #include "call/ParticipantInfo.h"
-#include "dialingplan/MtcDialingPlan.h"
-#include "helper/MtcAosConnector.h"
+#include "dialingplan/IMtcDialingPlan.h"
+#include "helper/IMtcAosConnector.h"
 #include "helper/MtcSupplementaryService.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -177,7 +178,7 @@ PRIVATE AString ParticipantInfo::GetRemoteNumberFromMessage(IN const IMessage& o
 PRIVATE
 AString ParticipantInfo::GetLocalUriForEmergencyCall() const
 {
-    MtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     IMS_UINT32 nAosRegistrationMode =
             pAosConnector ? pAosConnector->GetRegistrationMode() : IImsAosInfo::REG_MODE_UNKNOWN;
 

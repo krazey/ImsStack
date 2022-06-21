@@ -61,10 +61,10 @@ public:
     inline void Resume(IN MediaInfo*) override {}
     inline void AcceptResume(IN CallType, IN MediaInfo*) override {}
     inline void RejectResume(IN const CallReasonInfo&) override {}
-    inline void Convert(IN CallType, IN MediaInfo*) override {}
-    inline void AcceptConvert(IN CallType, IN MediaInfo*) override {}
-    inline void RejectConvert(IN const CallReasonInfo&) override {}
-    inline void CancelConvert(IN const CallReasonInfo&) override {}
+    inline void Update(IN CallType, IN MediaInfo*) override {}
+    inline void AcceptUpdate(IN CallType, IN MediaInfo*) override {}
+    inline void RejectUpdate(IN const CallReasonInfo&) override {}
+    inline void CancelUpdate(IN const CallReasonInfo&) override {}
     inline void Terminate(IN const CallReasonInfo&) override {}
     inline void SendDtmf(IN const AString&, IN IMS_SINT32) override {}
     inline void SendUssd(IN const AString&) override {}

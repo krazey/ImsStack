@@ -16,7 +16,7 @@
 
 #include "ServiceTrace.h"
 
-#include "helper/CallStateProxy.h"
+#include "helper/ICallStateProxy.h"
 #include "IMtcCallStateListener.h"
 #include "IMtcContext.h"
 #include "MtcConnector.h"

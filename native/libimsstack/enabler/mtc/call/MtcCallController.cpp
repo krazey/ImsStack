@@ -28,9 +28,9 @@
 #include "IuMtcService.h"
 #include "JniMtcCallThread.h"
 #include "conferencecall/IConferenceController.h"
-#include "conferencecall/ConferenceManager.h"
+#include "conferencecall/IConferenceManager.h"
 #include "IMtcContext.h"
-#include "ect/EctManager.h"
+#include "ect/IEctManager.h"
 
 PUBLIC
 MtcCallController::MtcCallController(IN IMtcContext& objContext) :
@@ -207,26 +207,26 @@ void MtcCallController::Terminate(IN CallKey nCallKey, IN const CallReasonInfo& 
 PUBLIC
 void MtcCallController::Update(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->Convert(eCallType, pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Update(eCallType, pMediaInfo);
 }
 
 PUBLIC
 void MtcCallController::CancelUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->CancelConvert(objReason);
+    m_objCallManager.GetCallByCallKey(nCallKey)->CancelUpdate(objReason);
 }
 
 PUBLIC
 void MtcCallController::AcceptUpdate(
         IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->AcceptConvert(eCallType, pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->AcceptUpdate(eCallType, pMediaInfo);
 }
 
 PUBLIC
 void MtcCallController::RejectUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->RejectConvert(objReason);
+    m_objCallManager.GetCallByCallKey(nCallKey)->RejectUpdate(objReason);
 }
 
 PUBLIC

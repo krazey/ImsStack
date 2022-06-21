@@ -16,7 +16,7 @@
 
 #include "ImsEventDef.h"
 #include "IMtcService.h"
-#include "MtcImsEventReceiver.h"
+#include "IMtcImsEventReceiver.h"
 #include "call/IMtcCallContext.h"
 #include "helper/block/VopsBlockRule.h"
 
