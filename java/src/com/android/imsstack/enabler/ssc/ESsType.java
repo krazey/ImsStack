@@ -82,7 +82,7 @@ public enum ESsType {
         this.mSchemaFileName = xsd;
     }
 
-    public String getSSName() {
+    public String getSsName() {
         return this.mSSName;
     }
 

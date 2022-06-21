@@ -42,6 +42,10 @@ public abstract class SscData {
         return this.mSsType;
     }
 
+    public void setEventNumber(int eventNum) {
+        mEventNum = eventNum;
+    }
+
     public int getEventNumber() {
         return mEventNum;
     }

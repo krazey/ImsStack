@@ -357,7 +357,7 @@ public class SscTransaction {
 
             Document doc = httpConnection.getInputStream(mSlotId);
             SscServiceData dataFromServer = null;
-            mXmlGov.updateXmlData(responseCode);
+            mXmlGov.syncCachedDataWithUpdatedData(responseCode);
             if (resultState == SscConstant.REQUEST_FAILURE && doc != null) {
                 dataFromServer = mXmlGov.parseXmlStream(mData, doc);
                 if (dataFromServer == null) {
@@ -372,6 +372,11 @@ public class SscTransaction {
                             SscXmlFormat.setIsNoReplyTimerOmitted(mSlotId, false);
                         }
                     }
+                }
+
+                if (mData.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CB
+                        || mData.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CF) {
+                    mXmlGov.updateTagsAndRules();
                 }
             }
 

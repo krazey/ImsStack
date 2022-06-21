@@ -18,12 +18,13 @@
 
     <!-- Ut/Xcap -->
     <!--<boolean name="imsss.xcap_root_uri_requires_srv_query_bool" value="true"/>-->
-    <boolean name="ut_omit_namespace_of_document_element_bool" value="true"/>
-    <boolean name="ut_omit_namespace_cp_bool" value="true"/>
     <!--<string  name="imsss.ut_as_server_fqdn_string"
                 value="xcap.ims.mncXXX.mccYYY.pub.3gppnetwork.org"/> -->
     <!--Ut/Xcap Assets -->
     <int name="ut_oir_network_default_operation_int" value="1"/>
+    <boolean name="ut_omit_namespace_of_document_element_bool" value="true"/>
+    <boolean name="ut_omit_namespace_cp_bool" value="true"/>
+    <boolean name="ut_insert_new_rule_bool" value="true"/>
 
     <!-- Do not retry SMS in CS on failure -->
     <boolean name="imssms.sms_csfb_retry_on_failure_bool" value="false"/>

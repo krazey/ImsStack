@@ -94,16 +94,19 @@ public class SscServiceImplTest {
     @Captor ArgumentCaptor<ImsSsInfo[]> captorSsInfos;
 
     // test configurations
-    private boolean isCfnlProvisioned = false;
-    private boolean isTimerInCfnr = false;
-    private boolean isCbRuleActivated = false;
-    private boolean isCfRuleActivated = false;
-    private boolean isCwEnabled = false;
-    private boolean isOipEnabled = false;
-    private boolean isTipEnabled = false;
-    private String errorPhrase = "";
-    private String forwardNumber = "tel:+1234567890";
-    private String defaultBehaviour = SscXmlFormat.PRESENTATION_NOT_RESTRICTED;
+    private boolean mIsCfRuleSetExist = true;
+    private boolean mIsIcbRulesExist = true;
+    private boolean mIsCfnlRuleExist = false;
+    private boolean mIsCfbRuleExist = true;
+    private boolean mIsTimerInCfnr = false;
+    private boolean mIsCbRuleActivated = false;
+    private boolean mIsCfRuleActivated = false;
+    private boolean mIsCwEnabled = false;
+    private boolean mIsOipEnabled = false;
+    private boolean mIsTipEnabled = false;
+    private String mErrorPhrase = "";
+    private String mForwardNumber = "tel:+1234567890";
+    private String mDefaultBehaviour = SscXmlFormat.PRESENTATION_NOT_RESTRICTED;
     private int mHttpSuccessResponse = SscConstant.HTTP_OK;
     private int mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
 
@@ -114,6 +117,7 @@ public class SscServiceImplTest {
         mQueryCount = 1;
         mUpdateCount = 1;
         mSscServiceImpl = new SscServiceImpl(SLOT_0);
+        SscXmlFormat.init(SLOT_0);
 
         // mockConfigAgent should be set before starting SscServiceImpl
         SscConfig.setConfigAgent(SLOT_0, mockConfigAgent);
@@ -159,12 +163,12 @@ public class SscServiceImplTest {
     }
 
     @Test
-    public void testBasicOperation_informErrorPhrase() {
+    public void testBasicOperation_informmErrorPhrase() {
         when(mockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL)))
                 .thenReturn(true);
         mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
-        errorPhrase = "check error phrase";
+        mErrorPhrase = "check error phrase";
 
         int tId = mSscServiceImpl.queryCallForward(SscConstant.CONDITION_CFU, "");
         processEntireXmlDocQueryAsFailure();
@@ -175,19 +179,19 @@ public class SscServiceImplTest {
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
         assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_NETWORK_ERROR);
-        assertEquals(reasonInfo.getExtraMessage(), errorPhrase);
+        assertEquals(reasonInfo.getExtraMessage(), mErrorPhrase);
 
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
 
     @Test
-    public void testBasicOperation_notInformErrorPhrase() {
+    public void testBasicOperation_notInformmErrorPhrase() {
         when(mockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL)))
                 .thenReturn(false);
         mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
-        errorPhrase = "check error phrase";
+        mErrorPhrase = "check error phrase";
 
         int tId = mSscServiceImpl.queryCallForward(SscConstant.CONDITION_CFU, "");
         processEntireXmlDocQueryAsFailure();
@@ -197,7 +201,7 @@ public class SscServiceImplTest {
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
-        assertNotEquals(reasonInfo.getExtraMessage(), errorPhrase);
+        assertNotEquals(reasonInfo.getExtraMessage(), mErrorPhrase);
 
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
@@ -219,7 +223,7 @@ public class SscServiceImplTest {
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
         assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
-        assertNotEquals(reasonInfo.getExtraMessage(), errorPhrase);
+        assertNotEquals(reasonInfo.getExtraMessage(), mErrorPhrase);
 
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
@@ -227,13 +231,13 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryCallBarringForServiceClass_singleRequestIcb() {
-        isCbRuleActivated = false;
+        mIsCbRuleActivated = false;
         int queryCondition = SscConstant.CONDITION_BIC_WR;
 
         int tId = mSscServiceImpl.queryCallBarringForServiceClass(queryCondition,
                 SscServiceClassUtil.SERVICE_CLASS_VOICE);
         processEntireXmlDocQueryAsSuccess();
-        processGetTransactionAsSuccess(ESsType.ICB, SscConstant.EVENT_SSC_QUERY_CALL_BARRING,
+        processGetTransactionAsSuccess(ESsType.ICB, SscConstant.EVENT_SSC_QUERY_CB,
                 queryCondition);
 
         mLooper.processAllMessages();
@@ -242,7 +246,7 @@ public class SscServiceImplTest {
         ImsSsInfo[] cbInfos = captorSsInfos.getValue();
         assertNotNull(cbInfos);
 
-        int xmlStatus = isCbRuleActivated ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+        int xmlStatus = mIsCbRuleActivated ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
         assertEquals(cbInfos[0].mStatus, xmlStatus);
 
         verify(mockSscTransaction).close();
@@ -251,13 +255,13 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryCallBarringForServiceClass_singleRequestOcb() {
-        isCbRuleActivated = true;
+        mIsCbRuleActivated = true;
         int queryCondition = SscConstant.CONDITION_BAOC;
 
         int tId = mSscServiceImpl.queryCallBarringForServiceClass(queryCondition,
                 SscServiceClassUtil.SERVICE_CLASS_VOICE);
         processEntireXmlDocQueryAsSuccess();
-        processGetTransactionAsSuccess(ESsType.OCB, SscConstant.EVENT_SSC_QUERY_CALL_BARRING,
+        processGetTransactionAsSuccess(ESsType.OCB, SscConstant.EVENT_SSC_QUERY_CB,
                 queryCondition);
 
         mLooper.processAllMessages();
@@ -266,7 +270,7 @@ public class SscServiceImplTest {
         ImsSsInfo[] cbInfos = captorSsInfos.getValue();
         assertNotNull(cbInfos);
 
-        int xmlStatus = isCbRuleActivated ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+        int xmlStatus = mIsCbRuleActivated ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
         assertEquals(cbInfos[0].mStatus, xmlStatus);
 
         verify(mockSscTransaction).close();
@@ -290,7 +294,7 @@ public class SscServiceImplTest {
         int tId = mSscServiceImpl.queryCallBarringForServiceClass(SscConstant.CONDITION_BOIC,
                 SscServiceClassUtil.SERVICE_CLASS_VOICE);
         processEntireXmlDocQueryAsSuccess();
-        processGetTransactionAsFailure(ESsType.OCB, SscConstant.EVENT_SSC_QUERY_CALL_BARRING,
+        processGetTransactionAsFailure(ESsType.OCB, SscConstant.EVENT_SSC_QUERY_CB,
                 SscConstant.CONDITION_BOIC);
 
         mLooper.processAllMessages();
@@ -305,7 +309,7 @@ public class SscServiceImplTest {
 
         int tId = mSscServiceImpl.queryCallForward(queryCondition, "");
         processEntireXmlDocQueryAsSuccess();
-        processGetTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING,
+        processGetTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_QUERY_CF,
                 queryCondition);
 
         mLooper.processAllMessages();
@@ -315,10 +319,10 @@ public class SscServiceImplTest {
         assertNotNull(cfInfos);
         assertEquals(cfInfos[0].mCondition, queryCondition);
 
-        int xmlStatus = isCfRuleActivated ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+        int xmlStatus = mIsCfRuleActivated ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
         assertEquals(cfInfos[0].mStatus, xmlStatus);
-        if (TextUtils.isEmpty(forwardNumber)) {
-            assertTrue(forwardNumber.contains(cfInfos[0].mNumber));
+        if (!TextUtils.isEmpty(mForwardNumber)) {
+            assertTrue(mForwardNumber.contains(cfInfos[0].mNumber));
         }
 
         verify(mockSscTransaction).close();
@@ -339,7 +343,7 @@ public class SscServiceImplTest {
                 processEntireXmlDocQueryAsSuccess();
             }
 
-            processGetTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING,
+            processGetTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_QUERY_CF,
                     c);
 
             mLooper.processAllMessages();
@@ -366,7 +370,7 @@ public class SscServiceImplTest {
     public void testQueryCallForward_queryFailure() {
         int tId = mSscServiceImpl.queryCallForward(SscConstant.CONDITION_CFU, "");
         processEntireXmlDocQueryAsSuccess();
-        processGetTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_QUERY_CALL_FORWARDING,
+        processGetTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_QUERY_CF,
                 SscConstant.CONDITION_CFU);
 
         mLooper.processAllMessages();
@@ -393,7 +397,7 @@ public class SscServiceImplTest {
     public void testQueryCallWaiting_success() {
         int tId = mSscServiceImpl.queryCallWaiting();
         processEntireXmlDocQueryAsSuccess();
-        processGetTransactionAsSuccess(ESsType.CW, SscConstant.EVENT_SSC_QUERY_CALL_WAITING, -1);
+        processGetTransactionAsSuccess(ESsType.CW, SscConstant.EVENT_SSC_QUERY_CW, -1);
 
         mLooper.processAllMessages();
         verify(mockUtListener).utConfigurationCallWaitingQueried(eq(tId), captorSsInfos.capture());
@@ -401,7 +405,7 @@ public class SscServiceImplTest {
         ImsSsInfo[] cwInfos = captorSsInfos.getValue();
         assertNotNull(cwInfos);
 
-        int xmlStatus = isCwEnabled ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+        int xmlStatus = mIsCwEnabled ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
         assertEquals(cwInfos[0].mStatus, xmlStatus);
 
         verify(mockSscTransaction).close();
@@ -411,7 +415,7 @@ public class SscServiceImplTest {
     public void testQueryCallWaiting_failure() {
         int tId = mSscServiceImpl.queryCallWaiting();
         processEntireXmlDocQueryAsSuccess();
-        processGetTransactionAsFailure(ESsType.CW, SscConstant.EVENT_SSC_QUERY_CALL_WAITING, -1);
+        processGetTransactionAsFailure(ESsType.CW, SscConstant.EVENT_SSC_QUERY_CW, -1);
 
         mLooper.processAllMessages();
         verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
@@ -431,8 +435,8 @@ public class SscServiceImplTest {
         ImsSsInfo ssInfo = captorSsInfo.getValue();
         assertNotNull(ssInfo);
 
-        int outGoingState = (defaultBehaviour == SscXmlFormat.PRESENTATION_NOT_RESTRICTED ?
-                SscConstant.OIR_SUPPRESSION : SscConstant.OIR_INVOCATION);
+        int outGoingState = (mDefaultBehaviour == SscXmlFormat.PRESENTATION_NOT_RESTRICTED
+                ? SscConstant.OIR_SUPPRESSION : SscConstant.OIR_INVOCATION);
         assertEquals(ssInfo.getClirOutgoingState(), outGoingState);
 
         verify(mockSscTransaction).close();
@@ -462,7 +466,7 @@ public class SscServiceImplTest {
         ImsSsInfo ssInfo = captorSsInfo.getValue();
         assertNotNull(ssInfo);
 
-        int xmlStatus = isOipEnabled ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+        int xmlStatus = mIsOipEnabled ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
         assertEquals(ssInfo.mStatus, xmlStatus);
 
         verify(mockSscTransaction).close();
@@ -481,7 +485,7 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryColr_success() {
-        defaultBehaviour = SscXmlFormat.PRESENTATION_RESTRICTED;
+        mDefaultBehaviour = SscXmlFormat.PRESENTATION_RESTRICTED;
 
         int tId = mSscServiceImpl.queryCOLR();
         processEntireXmlDocQueryAsSuccess();
@@ -494,8 +498,8 @@ public class SscServiceImplTest {
         ImsSsInfo ssInfo = captorSsInfo.getValue();
         assertNotNull(ssInfo);
 
-        int provisionedStatus = (defaultBehaviour == SscXmlFormat.PRESENTATION_NOT_RESTRICTED ?
-                SscConstant.TIR_NOT_PROVISIONED : SscConstant.TIR_PROVISIONED);
+        int provisionedStatus = (mDefaultBehaviour == SscXmlFormat.PRESENTATION_NOT_RESTRICTED
+                ? SscConstant.TIR_NOT_PROVISIONED : SscConstant.TIR_PROVISIONED);
         assertEquals(ssInfo.getProvisionStatus(), provisionedStatus);
 
         verify(mockSscTransaction).close();
@@ -525,7 +529,7 @@ public class SscServiceImplTest {
         ImsSsInfo ssInfo = captorSsInfo.getValue();
         assertNotNull(ssInfo);
 
-        int xmlStatus = isTipEnabled ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+        int xmlStatus = mIsTipEnabled ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
         assertEquals(ssInfo.mStatus, xmlStatus);
 
         verify(mockSscTransaction).close();
@@ -547,8 +551,27 @@ public class SscServiceImplTest {
         int tId = mSscServiceImpl.updateCallBarringWithPassword(SscConstant.CONDITION_BIC_WR,
                 SscConstant.STATUS_ENABLE, null, SscServiceClassUtil.SERVICE_CLASS_VOICE, null);
         processEntireXmlDocQueryAsSuccess();
-        processPutTransactionAsSuccess(ESsType.ICB, SscConstant.EVENT_SSC_UPDATE_CALL_BARRING,
+        processPutTransactionAsSuccess(ESsType.ICB, SscConstant.EVENT_SSC_UPDATE_CB,
                 SscConstant.CONDITION_BIC_WR);
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mockSscTransaction).close();
+        verifyNoMoreInteractions(mockSscTransaction);
+    }
+
+    @Test
+    public void testUpdateCallBarringWithPassword_insertNewRule() {
+        mIsIcbRulesExist = false;
+
+        when(mockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+                .thenReturn(true);
+
+        int tId = mSscServiceImpl.updateCallBarringWithPassword(SscConstant.CONDITION_BAIC,
+                SscConstant.STATUS_ENABLE, null, SscServiceClassUtil.SERVICE_CLASS_VOICE, null);
+        processEntireXmlDocQueryAsSuccess();
+        processPutTransactionAsSuccess(ESsType.ICB, SscConstant.EVENT_SSC_INSERT_CB,
+                SscConstant.CONDITION_BAIC);
 
         mLooper.processAllMessages();
         verify(mockUtListener).utConfigurationUpdated(eq(tId));
@@ -573,7 +596,7 @@ public class SscServiceImplTest {
         int tId = mSscServiceImpl.updateCallBarringWithPassword(SscConstant.CONDITION_BIC_WR,
                 SscConstant.STATUS_ENABLE, null, SscServiceClassUtil.SERVICE_CLASS_VOICE, null);
         processEntireXmlDocQueryAsSuccess();
-        processPutTransactionAsFailure(ESsType.ICB, SscConstant.EVENT_SSC_UPDATE_CALL_BARRING,
+        processPutTransactionAsFailure(ESsType.ICB, SscConstant.EVENT_SSC_UPDATE_CB,
                 SscConstant.CONDITION_BIC_WR);
 
         mLooper.processAllMessages();
@@ -584,12 +607,12 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateCallForward_singleRequest() {
-        isCfnlProvisioned = false;
+        mIsCfnlRuleExist = false;
 
         int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_REGISTRATION,
                 SscConstant.CONDITION_CFNRC, "+1234567890", 0, 0);
         processEntireXmlDocQueryAsSuccess();
-        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
                 SscConstant.CONDITION_CFNRC);
 
         mLooper.processAllMessages();
@@ -599,8 +622,68 @@ public class SscServiceImplTest {
     }
 
     @Test
+    public void testUpdateCallForward_insertNewRuleSet() {
+        mIsCfRuleSetExist = false;
+
+        when(mockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+                .thenReturn(true);
+
+        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_REGISTRATION,
+                SscConstant.CONDITION_CFNR, "+1234567890", 0, 0);
+        processEntireXmlDocQueryAsSuccess();
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_INSERT_CF,
+                SscConstant.CONDITION_CFNR);
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mockSscTransaction).close();
+        verifyNoMoreInteractions(mockSscTransaction);
+    }
+
+    @Test
+    public void testUpdateCallForward_insertNewRule() {
+        mIsCfRuleSetExist = true;
+        mIsCfbRuleExist = false;
+
+        when(mockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+                .thenReturn(true);
+
+        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFB, null, 0, 0);
+        processEntireXmlDocQueryAsSuccess();
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_INSERT_CF,
+                SscConstant.CONDITION_CFB);
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mockSscTransaction).close();
+        verifyNoMoreInteractions(mockSscTransaction);
+    }
+
+    @Test
+    public void testUpdateCallForward_notInsertNewRuleForCfnrTimer() {
+        mIsCfRuleSetExist = false;
+
+        when(mockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+                .thenReturn(true);
+
+        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_REGISTRATION,
+                SscConstant.CONDITION_CFNR, "+1234567890", 0, 25);
+        processEntireXmlDocQueryAsSuccess();
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_INSERT_CF,
+                SscConstant.CONDITION_CFNR);
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
+                SscConstant.CONDITION_CFNR_TIMER);
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mockSscTransaction).close();
+        verifyNoMoreInteractions(mockSscTransaction);
+    }
+
+    @Test
     public void testUpdateCallForward_CfnrcAndCfnl() {
-        isCfnlProvisioned = true;
+        mIsCfnlRuleExist = true;
 
         when(mockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL))).thenReturn(true);
@@ -608,9 +691,9 @@ public class SscServiceImplTest {
         int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_ERASURE,
                 SscConstant.CONDITION_CFNRC, null, 0, 0);
         processEntireXmlDocQueryAsSuccess();
-        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
                 SscConstant.CONDITION_CFNRC);
-        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
                 SscConstant.CONDITION_CFNL);
 
         mLooper.processAllMessages();
@@ -621,14 +704,14 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateCallForward_CfnrAndTimer() {
-        isTimerInCfnr = false;
+        mIsTimerInCfnr = false;
 
         int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_ACTIVATION,
                 SscConstant.CONDITION_CFNR, null, 0, 20);
         processEntireXmlDocQueryAsSuccess();
-        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
                 SscConstant.CONDITION_CFNR);
-        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
                 SscConstant.CONDITION_CFNR_TIMER);
 
         mLooper.processAllMessages();
@@ -639,13 +722,13 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateCallForward_CfnrWithTimer() {
-        isTimerInCfnr = true;
+        mIsTimerInCfnr = true;
 
         int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_ACTIVATION,
                 SscConstant.CONDITION_CFNR, null, 0, 20);
         processEntireXmlDocQueryAsSuccess();
 
-        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
                 SscConstant.CONDITION_CFNR);
 
         mLooper.processAllMessages();
@@ -656,8 +739,8 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateCallForward_CfAll() {
-        isTimerInCfnr = true;
-        isCfnlProvisioned = false;
+        mIsTimerInCfnr = true;
+        mIsCfnlRuleExist = false;
 
         int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_DEACTIVATION,
                 SscConstant.CONDITION_CFA, null, 0, 20);
@@ -667,7 +750,7 @@ public class SscServiceImplTest {
                 processEntireXmlDocQueryAsSuccess();
             }
 
-            processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
+            processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
                     c);
         }
 
@@ -694,7 +777,7 @@ public class SscServiceImplTest {
         int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_ACTIVATION,
                 SscConstant.CONDITION_CFB, null, 0, 20);
         processEntireXmlDocQueryAsSuccess();
-        processPutTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CALL_FORWARD,
+        processPutTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
                 SscConstant.CONDITION_CFB);
 
         mLooper.processAllMessages();
@@ -721,7 +804,7 @@ public class SscServiceImplTest {
     public void testUpdateCallWaiting_success() {
         int tId = mSscServiceImpl.updateCallWaiting(true, SscServiceClassUtil.SERVICE_CLASS_VOICE);
         processEntireXmlDocQueryAsSuccess();
-        processPutTransactionAsSuccess(ESsType.CW, SscConstant.EVENT_SSC_UPDATE_CALL_WAITING, -1);
+        processPutTransactionAsSuccess(ESsType.CW, SscConstant.EVENT_SSC_UPDATE_CW, -1);
 
         mLooper.processAllMessages();
         verify(mockUtListener).utConfigurationUpdated(eq(tId));
@@ -732,7 +815,7 @@ public class SscServiceImplTest {
     public void testUpdateCallWaiting_failure() {
         int tId = mSscServiceImpl.updateCallWaiting(true, SscServiceClassUtil.SERVICE_CLASS_VOICE);
         processEntireXmlDocQueryAsSuccess();
-        processPutTransactionAsFailure(ESsType.CW, SscConstant.EVENT_SSC_UPDATE_CALL_WAITING, -1);
+        processPutTransactionAsFailure(ESsType.CW, SscConstant.EVENT_SSC_UPDATE_CW, -1);
 
         mLooper.processAllMessages();
         verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), any());
@@ -835,14 +918,14 @@ public class SscServiceImplTest {
 
         SscServiceQueryData capturedData = captorQueryData.getValue();
         assertEquals(capturedData.getSsType(), ESsType.NONE);
-        assertEquals(capturedData.getEventNumber(), SscConstant.EVENT_SSC_BASE);
+        assertEquals(capturedData.getEventNumber(), SscConstant.EVENT_SSC_QUERY_DOCUMENT);
 
         capturedData.setResponseCode(200);
         Document doc = createEntireXmldoc();
         SscXmlGov.getInstance(SLOT_0).parseXmlStream(capturedData, doc);
 
         Message msg = Message.obtain();
-        msg.what = SscConstant.EVENT_SSC_BASE;
+        msg.what = SscConstant.EVENT_SSC_QUERY_DOCUMENT;
         msg.obj =  new SscRequestResult(SLOT_0, capturedData.getTransactionId(),
                 SscConstant.REQUEST_SUCCESS, 200, -1);
 
@@ -857,18 +940,18 @@ public class SscServiceImplTest {
 
         SscServiceQueryData capturedData = captorQueryData.getValue();
         assertEquals(capturedData.getSsType(), ESsType.NONE);
-        assertEquals(capturedData.getEventNumber(), SscConstant.EVENT_SSC_BASE);
+        assertEquals(capturedData.getEventNumber(), SscConstant.EVENT_SSC_QUERY_DOCUMENT);
 
         capturedData.setResponseCode(mHttpErrorResponse);
 
         Message msg = Message.obtain();
-        msg.what = SscConstant.EVENT_SSC_BASE;
+        msg.what = SscConstant.EVENT_SSC_QUERY_DOCUMENT;
         SscRequestResult rr = new SscRequestResult(SLOT_0, capturedData.getTransactionId(),
                 SscConstant.REQUEST_FAILURE, mHttpErrorResponse, -1);
-        if (!TextUtils.isEmpty(errorPhrase)) {
+        if (!TextUtils.isEmpty(mErrorPhrase)) {
             rr.setSscServiceData(new ErrorResponseData(SLOT_0, capturedData.getSsType(),
                     capturedData.getEventNumber(), capturedData.getTransactionId(),
-                    SscConstant.STATUS_DISABLE, capturedData.getResponseCode(), errorPhrase));
+                    SscConstant.STATUS_DISABLE, capturedData.getResponseCode(), mErrorPhrase));
         }
         msg.obj = rr;
 
@@ -910,10 +993,10 @@ public class SscServiceImplTest {
         mQueryCount++;
 
         SscServiceQueryData capturedData = captorQueryData.getValue();
-        assertEquals(capturedData.getSsType(), validSsType);
-        assertEquals(capturedData.getEventNumber(), validEventNum);
+        assertEquals(validSsType, capturedData.getSsType());
+        assertEquals(validEventNum, capturedData.getEventNumber());
         if (validCondition != -1) {
-            assertEquals(capturedData.getCondition(), validCondition);
+            assertEquals(validCondition, capturedData.getCondition());
         }
 
         capturedData.setResponseCode(mHttpErrorResponse);
@@ -935,10 +1018,10 @@ public class SscServiceImplTest {
         mUpdateCount++;
 
         SscServiceData capturedData = captorUpdateData.getValue();
-        assertEquals(capturedData.getSsType(), validSsType);
-        assertEquals(capturedData.getEventNumber(), validEventNum);
+        assertEquals(validSsType, capturedData.getSsType());
+        assertEquals(validEventNum, capturedData.getEventNumber());
         if (validCondition != -1) {
-            assertEquals(capturedData.getCondition(), validCondition);
+            assertEquals(validCondition, capturedData.getCondition());
         }
 
         capturedData.setResponseCode(200);
@@ -976,208 +1059,209 @@ public class SscServiceImplTest {
     }
 
     private Document createEntireXmldoc() {
-        String xml = "<ss:simservs xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" "
-                + "xmlns:SOAP-ENC=\"http://schemas.xmlsoap.org/soap/encoding/\" "
-                + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-                + "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" "
-                + "xmlns:cp=\"urn:ietf:params:xml:ns:common-policy\" "
-                + "xmlns:ss=\"http://uri.etsi.org/ngn/params/xml/simservs/xcap\" "
-                + "xmlns:ocp=\"urn:oma:xml:xdm:common-policy\" "
-                + "xmlns:utns=\"urn:com:att:tlv:utx\" "
-                + "xmlns:xe=\"urn:ietf:params:xml:ns:xcap-error\" "
-                + "xmlns:data=\"http://com/alu/icm/fs5000dbv5_0/data\" "
-                + "xmlns:prs=\"http://www.nokia.com/prs/SubscriptionAPI\"> \n"
+        String xml = "<ss:simservs xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\""
+                + "xmlns:SOAP-ENC=\"http://schemas.xmlsoap.org/soap/encoding/\""
+                + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+                + "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\""
+                + "xmlns:cp=\"urn:ietf:params:xml:ns:common-policy\""
+                + "xmlns:ss=\"http://uri.etsi.org/ngn/params/xml/simservs/xcap\""
+                + "xmlns:ocp=\"urn:oma:xml:xdm:common-policy\""
+                + "xmlns:utns=\"urn:com:att:tlv:utx\""
+                + "xmlns:xe=\"urn:ietf:params:xml:ns:xcap-error\""
+                + "xmlns:data=\"http://com/alu/icm/fs5000dbv5_0/data\""
+                + "xmlns:prs=\"http://www.nokia.com/prs/SubscriptionAPI\">"
                 //ICB
-                + "<ss:incoming-communication-barring active=\"true\">\n"
-                + "<cp:ruleset xmlns:cp=\"urn:ietf:params:xml:ns:common-policy\">\n"
-                + "<cp:rule id=\"call-barring-all-incoming\">\n"
-                + "<cp:conditions>\n"
-                + (isCbRuleActivated ? "" : "<ss:rule-deactivated/>\n")
-                + "</cp:conditions>\n"
-                + "<cp:actions>\n"
-                + "<ss:allow>false</ss:allow>\n"
-                + "</cp:actions>\n"
-                + "</cp:rule>\n"
-                + "<cp:rule id=\"call-barring-incoming-in-roaming\">\n"
-                + "<cp:conditions>\n"
-                + (isCbRuleActivated ? "" : "<ss:rule-deactivated/>\n")
-                + "<ss:roaming/>\n"
-                + "</cp:conditions>\n"
-                + "<cp:actions>\n"
-                + "<ss:allow>false</ss:allow>\n"
-                + "</cp:actions>\n"
-                + "</cp:rule>\n"
-                + "</cp:ruleset>\n"
-                + "</ss:incoming-communication-barring>\n"
+                + "<ss:incoming-communication-barring active=\"true\">"
+                + "<cp:ruleset xmlns:cp=\"urn:ietf:params:xml:ns:common-policy\">"
+                + (!mIsIcbRulesExist ? "" : "<cp:rule id=\"call-barring-all-incoming\">"
+                + "<cp:conditions>"
+                + (mIsCbRuleActivated ? "" : "<ss:rule-deactivated/>")
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:allow>false</ss:allow>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-barring-incoming-in-roaming\">"
+                + "<cp:conditions>"
+                + (mIsCbRuleActivated ? "" : "<ss:rule-deactivated/>")
+                + "<ss:roaming/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:allow>false</ss:allow>"
+                + "</cp:actions>"
+                + "</cp:rule>")
+                + "</cp:ruleset>"
+                + "</ss:incoming-communication-barring>"
                 //OCB
-                + "<ss:outgoing-communication-barring active=\"true\">\n"
-                + "<cp:ruleset xmlns:cp=\"urn:ietf:params:xml:ns:common-policy\">\n"
-                + "<cp:rule id=\"call-barring-all-outgoing\">\n"
-                + "<cp:conditions>\n"
-                + (isCbRuleActivated ? "" : "<ss:rule-deactivated/>\n")
-                + "</cp:conditions>\n"
-                + "<cp:actions>\n"
-                + "<ss:allow>false</ss:allow>\n"
-                + "</cp:actions>\n"
-                + "</cp:rule>\n"
-                + "<cp:rule id=\"call-barring-outgoing-international\">\n"
-                + "<cp:conditions>\n"
-                + (isCbRuleActivated ? "" : "<ss:rule-deactivated/>\n")
-                + "<ss:international/>\n"
-                + "</cp:conditions>\n"
-                + "<cp:actions>\n"
-                + "<ss:allow>false</ss:allow>\n"
-                + "</cp:actions>\n"
-                + "</cp:rule>\n"
-                + "<cp:rule id=\"call-barring-outgoing-internationalExHC\">\n"
-                + "<cp:conditions>\n"
-                + (isCbRuleActivated ? "" : "<ss:rule-deactivated/>\n")
-                + "<ss:international-exHC/>\n"
-                + "</cp:conditions>\n"
-                + "<cp:actions>\n"
-                + "<ss:allow>false</ss:allow>\n"
-                + "</cp:actions>\n"
-                + "</cp:rule>\n"
-                + "</cp:ruleset>\n"
+                + "<ss:outgoing-communication-barring active=\"true\">"
+                + "<cp:ruleset xmlns:cp=\"urn:ietf:params:xml:ns:common-policy\">"
+                + "<cp:rule id=\"call-barring-all-outgoing\">"
+                + "<cp:conditions>"
+                + (mIsCbRuleActivated ? "" : "<ss:rule-deactivated/>")
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:allow>false</ss:allow>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-barring-outgoing-international\">"
+                + "<cp:conditions>"
+                + (mIsCbRuleActivated ? "" : "<ss:rule-deactivated/>")
+                + "<ss:international/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:allow>false</ss:allow>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-barring-outgoing-internationalExHC\">"
+                + "<cp:conditions>"
+                + (mIsCbRuleActivated ? "" : "<ss:rule-deactivated/>")
+                + "<ss:international-exHC/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:allow>false</ss:allow>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
                 + "</ss:outgoing-communication-barring>"
                 // CW
                 + "<ss:communication-waiting active=\""
-                        + (isCwEnabled ? "true" : "false") + "\"/> \n"
+                        + (mIsCwEnabled ? "true" : "false") + "\"/>"
                 // CD
-                + "<ss:communication-diversion active=\"true\"> \n"
-                + (isTimerInCfnr ? "" : "<ss:NoReplyTimer>20</ss:NoReplyTimer> \n")
-                + "<cp:ruleset> \n"
-                + "<cp:rule id=\"call-diversion-unconditional\"> \n"
-                + "<cp:conditions> \n"
-                + (isCfRuleActivated ? "" : "<ss:rule-deactivated/>\n")
-                + "</cp:conditions> \n"
-                + "<cp:actions> \n"
-                + "<ss:forward-to> \n"
-                + "<ss:target>" + forwardNumber + "</ss:target> \n"
-                + "<ss:notify-caller>true</ss:notify-caller> \n"
-                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>\n"
+                + "<ss:communication-diversion active=\"true\">"
+                + (mIsTimerInCfnr ? "" : "<ss:NoReplyTimer>20</ss:NoReplyTimer>")
+                + (!mIsCfRuleSetExist ? "" : "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-unconditional\">"
+                + "<cp:conditions>"
+                + (mIsCfRuleActivated ? "" : "<ss:rule-deactivated/>")
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>" + mForwardNumber + "</ss:target>"
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
                 + "<ss:reveal-served-user-identity-to-caller>false"
-                + "</ss:reveal-served-user-identity-to-caller>\n"
-                + "<ss:notify-served-user>false</ss:notify-served-user> \n"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:notify-served-user>false</ss:notify-served-user>"
                 + "<ss:notify-served-user-on-outbound-call>false"
-                + "</ss:notify-served-user-on-outbound-call> \n"
-                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target> \n"
-                + "</ss:forward-to> \n"
-                + "</cp:actions> \n"
-                + "</cp:rule> \n"
-                + "<cp:rule id=\"call-diversion-busy\"> \n"
-                + "<cp:conditions> \n"
-                + (isCfRuleActivated ? "" : "<ss:rule-deactivated/>\n")
-                + "<ss:busy/> \n"
-                + "</cp:conditions> \n"
-                + "<cp:actions> \n"
-                + "<ss:forward-to> \n"
-                + "<ss:target>" + forwardNumber + "</ss:target> \n"
-                + "<ss:notify-caller>true</ss:notify-caller> \n"
-                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller> \n"
+                + "</ss:notify-served-user-on-outbound-call>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + (!mIsCfbRuleExist ? "" : "<cp:rule id=\"call-diversion-busy\">"
+                + "<cp:conditions>"
+                + (mIsCfRuleActivated ? "" : "<ss:rule-deactivated/>")
+                + "<ss:busy/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>" + mForwardNumber + "</ss:target>"
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
                 + "<ss:reveal-served-user-identity-to-caller>false"
-                + "</ss:reveal-served-user-identity-to-caller> \n"
-                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target> \n"
-                + "</ss:forward-to> \n"
-                + "</cp:actions> \n"
-                + "</cp:rule> \n"
-                + "<cp:rule id=\"call-diversion-no-reply\"> \n"
-                + "<cp:conditions> \n"
-                + (isCfRuleActivated ? "" : "<ss:rule-deactivated/>\n")
-                + "<ss:no-answer/> \n"
-                + "</cp:conditions> \n"
-                + "<cp:actions> \n"
-                + "<ss:forward-to> \n"
-                + "<ss:target>" + forwardNumber + "</ss:target> \n"
-                + (isTimerInCfnr ? "<ss:NoReplyTimer>20</ss:NoReplyTimer> \n" : "")
-                + "<ss:notify-caller>true</ss:notify-caller> \n"
-                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller> \n"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>")
+                + "<cp:rule id=\"call-diversion-no-reply\">"
+                + "<cp:conditions>"
+                + (mIsCfRuleActivated ? "" : "<ss:rule-deactivated/>")
+                + "<ss:no-answer/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>" + mForwardNumber + "</ss:target>"
+                + (mIsTimerInCfnr ? "<ss:NoReplyTimer>20</ss:NoReplyTimer>" : "")
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
                 + "<ss:reveal-served-user-identity-to-caller>false"
-                + "</ss:reveal-served-user-identity-to-caller> \n"
-                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target> \n"
-                + "</ss:forward-to> \n"
-                + "</cp:actions> \n"
-                + "</cp:rule> \n"
-                + "<cp:rule id=\"call-diversion-not-reachable\"> \n"
-                + "<cp:conditions> \n"
-                + (isCfRuleActivated ? "" : "<ss:rule-deactivated/>\n")
-                + "<ss:not-reachable/> \n"
-                + "</cp:conditions> \n"
-                + "<cp:actions> \n"
-                + "<ss:forward-to> \n"
-                + "<ss:target>" + forwardNumber + "</ss:target> \n"
-                + "<ss:notify-caller>true</ss:notify-caller> \n"
-                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller> \n"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-diversion-not-reachable\">"
+                + "<cp:conditions>"
+                + (mIsCfRuleActivated ? "" : "<ss:rule-deactivated/>")
+                + "<ss:not-reachable/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>" + mForwardNumber + "</ss:target>"
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
                 + "<ss:reveal-served-user-identity-to-caller>false"
-                + "</ss:reveal-served-user-identity-to-caller> \n"
-                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target> \n"
-                + "</ss:forward-to> \n"
-                + "</cp:actions> \n"
-                + "</cp:rule> \n"
-                + (isCfnlProvisioned ? "<cp:rule id=\"call-diversion-not-loggedin\"> \n"
-                        + "<cp:conditions> \n"
-                        + (isCfRuleActivated ? "" : "<ss:rule-deactivated/>\n")
-                        + "<ss:not-registered/> \n"
-                        + "</cp:conditions> \n"
-                        + "<cp:actions> \n"
-                        + "<ss:forward-to> \n"
-                        + "<ss:target>" + forwardNumber + "</ss:target> \n"
-                        + "<ss:notify-caller>true</ss:notify-caller> \n"
-                        + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller> \n"
-                        + "<ss:reveal-served-user-identity-to-caller>false"
-                        + "</ss:reveal-served-user-identity-to-caller> \n"
-                        + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target> \n"
-                        + "</ss:forward-to> \n"
-                        + "</cp:actions> \n"
-                        + "</cp:rule> \n" : "")
-                + "</cp:ruleset> \n"
-                + "</ss:communication-diversion> \n"
-                + "<ss:communication-diversion-serv-cap active=\"true\"> \n"
-                + "<ss:serv-cap-conditions> \n"
-                + "<ss:serv-cap-anonymous provisioned=\"false\"/> \n"
-                + "<ss:serv-cap-busy provisioned=\"true\"/> \n"
-                + "<ss:serv-cap-external-list provisioned=\"false\"/> \n"
-                + "<ss:serv-cap-identity provisioned=\"false\"/> \n"
-                + "<ss:serv-cap-media> \n"
-                + "<ss:media>audio</ss:media> \n"
-                + "</ss:serv-cap-media> \n"
-                + "<ss:serv-cap-not-registered provisioned=\"false\"/> \n"
-                + "<ss:serv-cap-no-answer provisioned=\"true\"/> \n"
-                + "<ss:serv-cap-not-reachable provisioned=\"true\"/> \n"
-                + "<ss:serv-cap-presence-status provisioned=\"false\"/> \n"
-                + "<ss:serv-cap-rule-deactivated provisioned=\"true\"/>\n"
-                + "<ss:serv-cap-selective provisioned=\"false\"/> \n"
-                + "<ss:serv-cap-validity provisioned=\"false\"/> \n"
-                + "<ss:serv-cap-unconditional provisioned=\"true\"/> \n"
-                + "<ss:serv-cap-default provisioned=\"true\"/> \n"
-                + "</ss:serv-cap-conditions> \n"
-                + "<ss:serv-cap-actions> \n"
-                + "<ss:serv-cap-target> \n"
-                + "<ss:telephony-type/> \n"
-                + "</ss:serv-cap-target> \n"
-                + "<ss:serv-cap-notify-caller provisioned=\"false\"/> \n"
-                + "<ss:serv-cap-notify-served-user provisioned=\"false\"/> \n"
-                + "<ss:serv-cap-notify-served-user-on-outbound-call provisioned=\"false\"/> \n"
-                + "<ss:serv-cap-reveal-identity-to-caller provisioned=\"false\"/> \n"
-                + "<ss:serv-cap-reveal-served-user-identity-to-caller provisioned=\"false\"/> \n"
-                + "<ss:serv-cap-reveal-identity-to-target provisioned=\"false\"/> \n"
-                + "</ss:serv-cap-actions> \n"
-                + "</ss:communication-diversion-serv-cap> \n"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + (mIsCfnlRuleExist ? "<cp:rule id=\"call-diversion-not-loggedin\">"
+                + "<cp:conditions>"
+                + (mIsCfRuleActivated ? "" : "<ss:rule-deactivated/>")
+                + "<ss:not-registered/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>" + mForwardNumber + "</ss:target>"
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
+                + "<ss:reveal-served-user-identity-to-caller>false"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>" : "")
+                + "</cp:ruleset>")
+                + "</ss:communication-diversion>"
+                // CDSC
+                + "<ss:communication-diversion-serv-cap active=\"true\">"
+                + "<ss:serv-cap-conditions>"
+                + "<ss:serv-cap-anonymous provisioned=\"false\"/>"
+                + "<ss:serv-cap-busy provisioned=\"true\"/>"
+                + "<ss:serv-cap-external-list provisioned=\"false\"/>"
+                + "<ss:serv-cap-identity provisioned=\"false\"/>"
+                + "<ss:serv-cap-media>"
+                + "<ss:media>audio</ss:media>"
+                + "</ss:serv-cap-media>"
+                + "<ss:serv-cap-not-registered provisioned=\"false\"/>"
+                + "<ss:serv-cap-no-answer provisioned=\"true\"/>"
+                + "<ss:serv-cap-not-reachable provisioned=\"true\"/>"
+                + "<ss:serv-cap-presence-status provisioned=\"false\"/>"
+                + "<ss:serv-cap-rule-deactivated provisioned=\"true\"/>"
+                + "<ss:serv-cap-selective provisioned=\"false\"/>"
+                + "<ss:serv-cap-validity provisioned=\"false\"/>"
+                + "<ss:serv-cap-unconditional provisioned=\"true\"/>"
+                + "<ss:serv-cap-default provisioned=\"true\"/>"
+                + "</ss:serv-cap-conditions>"
+                + "<ss:serv-cap-actions>"
+                + "<ss:serv-cap-target>"
+                + "<ss:telephony-type/>"
+                + "</ss:serv-cap-target>"
+                + "<ss:serv-cap-notify-caller provisioned=\"false\"/>"
+                + "<ss:serv-cap-notify-served-user provisioned=\"false\"/>"
+                + "<ss:serv-cap-notify-served-user-on-outbound-call provisioned=\"false\"/>"
+                + "<ss:serv-cap-reveal-identity-to-caller provisioned=\"false\"/>"
+                + "<ss:serv-cap-reveal-served-user-identity-to-caller provisioned=\"false\"/>"
+                + "<ss:serv-cap-reveal-identity-to-target provisioned=\"false\"/>"
+                + "</ss:serv-cap-actions>"
+                + "</ss:communication-diversion-serv-cap>"
                 // OIP
                 + "<ss:originating-identity-presentation active=\""
-                        + (isOipEnabled ? "true" : "false") + "\"/> \n"
+                        + (mIsOipEnabled ? "true" : "false") + "\"/>"
                 // OIR
-                + "<ss:originating-identity-presentation-restriction active=\"true\"> \n"
-                + "<ss:default-behaviour>" + defaultBehaviour + "</ss:default-behaviour> \n"
-                + "</ss:originating-identity-presentation-restriction> \n"
+                + "<ss:originating-identity-presentation-restriction active=\"true\">"
+                + "<ss:default-behaviour>" + mDefaultBehaviour + "</ss:default-behaviour>"
+                + "</ss:originating-identity-presentation-restriction>"
                 // TIP
                 + "<ss:terminating-identity-presentation active=\""
-                        + (isTipEnabled ? "true" : "false") + "\"/> \n"
+                        + (mIsTipEnabled ? "true" : "false") + "\"/>"
                 // TIR
-                + "<ss:terminating-identity-presentation-restriction active=\"true\"> \n"
-                + "<ss:default-behaviour>" + defaultBehaviour + "</ss:default-behaviour> \n"
-                + "</ss:terminating-identity-presentation-restriction> \n"
-                + "</ss:simservs> \n";
+                + "<ss:terminating-identity-presentation-restriction active=\"true\">"
+                + "<ss:default-behaviour>" + mDefaultBehaviour + "</ss:default-behaviour>"
+                + "</ss:terminating-identity-presentation-restriction>"
+                + "</ss:simservs>";
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder;

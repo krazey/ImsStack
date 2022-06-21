@@ -40,33 +40,45 @@ import javax.xml.transform.stream.StreamResult;
 
 public class SscXmlGov {
     private static HashMap<Integer, SscXmlGov> sUtXmlGovs = new HashMap<>();
+    private int mSlotId = 0;
     private SscXmlParser mSscXmlParser = null;
     private SscXmlCreator mSscXmlCreator = null;
     private Document mSimservDoc = null;
     private Document mSimservDocForUpdate = null;
 
-    private SscXmlGov() {
+    private SscXmlGov(int slotId) {
         ImsLog.d("");
+        mSlotId = slotId;
         mSscXmlCreator = new SscXmlCreator();
         mSscXmlParser = new SscXmlParser();
     }
 
     protected static SscXmlGov getInstance(int slotId) {
         if (!sUtXmlGovs.containsKey(slotId)) {
-            sUtXmlGovs.put(slotId, new SscXmlGov());
+            sUtXmlGovs.put(slotId, new SscXmlGov(slotId));
         }
         return sUtXmlGovs.get(slotId);
     }
 
     protected void clear() {
-        setXmlData(null);
+        cacheXmlData(null);
     }
 
-    protected void updateXmlData(int responseCode) {
+    protected void syncCachedDataWithUpdatedData(int responseCode) {
         if (responseCode >= 200 || responseCode < 300) {
             mSimservDoc = mSimservDocForUpdate;
         }
         mSimservDocForUpdate = null;
+    }
+
+    /**
+     * This method is used for updating rule ID and tags after HTTP PUT request with new rule
+     */
+    protected void updateTagsAndRules() {
+        if (mSimservDoc == null) {
+            return;
+        }
+        mSscXmlParser.updateTagsAndRules(mSlotId, mSimservDoc);
     }
 
     protected boolean isXmlDataPresent() {
@@ -95,11 +107,13 @@ public class SscXmlGov {
 
         int slotId = queryData.getSlotId();
         if (SscConfig.isOmitNamespaceSs(slotId)) {
+            ImsLog.d(slotId, "remove namespace ss");
             strDocument = removeNamespace(strDocument, SscXmlFormat.NS_SS_PREFIX);
             document = getDocFromString(strDocument);
         }
 
         if (SscConfig.isOmitNamespaceCp(slotId)) {
+            ImsLog.d(slotId, "remove namespace cp");
             strDocument = removeNamespace(strDocument, SscXmlFormat.NS_CP_PREFIX);
             document = getDocFromString(strDocument);
         }
@@ -107,11 +121,12 @@ public class SscXmlGov {
         if (queryData.getSsType() == ESsType.NONE
                 && queryData.getResponseCode() == SscConstant.HTTP_OK) {
             if (SscConfig.isOmitNamespaceOfDocumentElement(slotId)) {
+                ImsLog.d(slotId, "remove namespace of root element");
                 String docElementTag = SscXmlFormat.NS_SS_PREFIX + SscXmlFormat.SIMSERVS;
                 strDocument = strDocument.replace(docElementTag, SscXmlFormat.SIMSERVS);
                 document = getDocFromString(strDocument);
             }
-            setXmlData(document);
+            cacheXmlData(document);
         }
 
         ImsLog.d(slotId, "\n" + strDocument);
@@ -140,11 +155,11 @@ public class SscXmlGov {
                 (Element) mSimservDocForUpdate.importNode(mSimservDoc.getDocumentElement(), true);
         mSimservDocForUpdate.appendChild(rootElement);
 
-        Element resultXml = mSscXmlCreator.createXML(mSimservDocForUpdate, data);
+        Element resultXml = mSscXmlCreator.createXml(mSimservDocForUpdate, data);
         return getStringFromDoc(resultXml);
     }
 
-    private void setXmlData(Document doc) {
+    private void cacheXmlData(Document doc) {
         mSimservDoc = doc;
     }
 
@@ -186,20 +201,20 @@ public class SscXmlGov {
             return null;
         }
 
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        Document document = null;
+        Document doc = null;
         try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setNamespaceAware(false);
             DocumentBuilder builder = docFactory.newDocumentBuilder();
             InputSource is = new InputSource(new StringReader(xml));
-            document = builder.parse(is);
+            doc = builder.parse(is);
         } catch (Exception e) {
             ImsLog.e(e.toString());
             e.printStackTrace();
             return null;
         }
 
-        return document;
+        return doc;
     }
 
     private Document getNewDoc() {

@@ -22,32 +22,30 @@ import android.telephony.ims.ImsSsInfo;
 import android.telephony.ims.stub.ImsUtImplBase;
 
 public class SscConstant {
-    // Constants--------------------------------------------------
     public static final int EVENT_SSC_BASE = 13200;
 
-    // Indication message constant for framework
-    public static final int EVENT_SSC_QUERY_CALL_BARRING    = EVENT_SSC_BASE + 1;
-    public static final int EVENT_SSC_QUERY_CALL_FORWARDING = EVENT_SSC_BASE + 2;
-    public static final int EVENT_SSC_QUERY_CALL_WAITING    = EVENT_SSC_BASE + 3;
-    public static final int EVENT_SSC_QUERY_OIR             = EVENT_SSC_BASE + 4;
-    public static final int EVENT_SSC_QUERY_OIP             = EVENT_SSC_BASE + 5;
-    public static final int EVENT_SSC_QUERY_TIR             = EVENT_SSC_BASE + 6;
-    public static final int EVENT_SSC_QUERY_TIP             = EVENT_SSC_BASE + 7;
-    public static final int EVENT_SSC_QUERY_CALL_BARRING_INCOMING = EVENT_SSC_BASE + 8;
+    // Event param for callback
+    public static final int EVENT_SSC_TRANSACT = EVENT_SSC_BASE + 1;
 
-    public static final int EVENT_SSC_TRANSACT              = EVENT_SSC_BASE + 9;
+    public static final int EVENT_SSC_QUERY_DOCUMENT = EVENT_SSC_BASE + 2;
+    public static final int EVENT_SSC_QUERY_CB = EVENT_SSC_BASE + 3;
+    public static final int EVENT_SSC_QUERY_CF = EVENT_SSC_BASE + 4;
+    public static final int EVENT_SSC_QUERY_CW = EVENT_SSC_BASE + 5;
+    public static final int EVENT_SSC_QUERY_OIR = EVENT_SSC_BASE + 6;
+    public static final int EVENT_SSC_QUERY_OIP = EVENT_SSC_BASE + 7;
+    public static final int EVENT_SSC_QUERY_TIR = EVENT_SSC_BASE + 8;
+    public static final int EVENT_SSC_QUERY_TIP = EVENT_SSC_BASE + 9;
 
-    public static final int EVENT_SSC_UPDATE_CALL_BARRING   = EVENT_SSC_BASE + 10;
-    public static final int EVENT_SSC_UPDATE_CALL_FORWARD   = EVENT_SSC_BASE + 11;
-    public static final int EVENT_SSC_UPDATE_CALL_WAITING   = EVENT_SSC_BASE + 12;
-    public static final int EVENT_SSC_UPDATE_CALL_BARRING_ANONYMOUS
-                                                            = EVENT_SSC_BASE + 13;
-    public static final int EVENT_SSC_UPDATE_OIR            = EVENT_SSC_BASE + 14;
-    public static final int EVENT_SSC_UPDATE_OIP            = EVENT_SSC_BASE + 15;
-    public static final int EVENT_SSC_UPDATE_TIR            = EVENT_SSC_BASE + 16;
-    public static final int EVENT_SSC_UPDATE_TIP            = EVENT_SSC_BASE + 17;
+    public static final int EVENT_SSC_UPDATE_CB = EVENT_SSC_BASE + 10;
+    public static final int EVENT_SSC_UPDATE_CF = EVENT_SSC_BASE + 11;
+    public static final int EVENT_SSC_UPDATE_CW = EVENT_SSC_BASE + 12;
+    public static final int EVENT_SSC_UPDATE_OIR = EVENT_SSC_BASE + 13;
+    public static final int EVENT_SSC_UPDATE_OIP = EVENT_SSC_BASE + 14;
+    public static final int EVENT_SSC_UPDATE_TIR = EVENT_SSC_BASE + 15;
+    public static final int EVENT_SSC_UPDATE_TIP = EVENT_SSC_BASE + 16;
 
-    public static final int EVENT_SSC_QUERY_ALL = EVENT_SSC_BASE + 50;
+    public static final int EVENT_SSC_INSERT_CB = EVENT_SSC_BASE + 17;
+    public static final int EVENT_SSC_INSERT_CF = EVENT_SSC_BASE + 18;
 
     // NoReplyTimer value range according to 3GPP 24.604 4.9.2
     public static final int CFNR_TIMER_MIN = 5;

@@ -17,7 +17,6 @@
 package com.android.imsstack.enabler.ssc.data;
 
 import com.android.imsstack.enabler.ssc.SscConstant;
-import com.android.imsstack.util.ImsLog;
 
 import java.util.ArrayList;
 
@@ -26,6 +25,7 @@ public class SscRuleData {
     private int mSsCondition = -1;
     private int mState = SscConstant.STATUS_DISABLE;
     private int mServiceClass = 0;
+    private String mForwardToNumber = null;
 
     protected ArrayList<SscRuleElement> mRuleConditionList;
     protected ArrayList<SscRuleElement> mRuleActionList;
@@ -69,6 +69,14 @@ public class SscRuleData {
         mServiceClass |= serviceClass;
     }
 
+    public void setForwardToNumber(String number) {
+        mForwardToNumber = number;
+    }
+
+    public String getForwardToNumber() {
+        return mForwardToNumber;
+    }
+
     public ArrayList<SscRuleElement> getConditionList() {
         return mRuleConditionList;
     }
@@ -87,25 +95,22 @@ public class SscRuleData {
 
     public String toString() {
         StringBuffer sb = new StringBuffer();
+        sb.append("Rule ID : " + mRuleId + ", Status : " + mState + ", target number : "
+                + mForwardToNumber + ", ServiceClass :" + mServiceClass + "\n");
 
-        sb.append("==== Rule ID : " + mRuleId + " ====\n");
-        sb.append("==== Rule Data Start ====\n");
-        sb.append("<< Condition >>\n");
-
-        if (mRuleConditionList != null) {
+        if (mRuleConditionList != null && mRuleConditionList.size() > 0) {
+            sb.append("<< Condition >>\n");
             for (SscRuleElement rule : mRuleConditionList) {
                 sb.append(rule.toString());
             }
         }
 
-        sb.append("<<  Action  >>\n");
-        if (mRuleActionList != null) {
+        if (mRuleActionList != null && mRuleActionList.size() > 0) {
+            sb.append("<<  Action  >>\n");
             for (SscRuleElement rule : mRuleActionList) {
                 sb.append(rule.toString());
             }
         }
-        sb.append("======ServiceClass :" + mServiceClass + "=====\n");
-        sb.append("====  Rule Data End  ====\n");
 
         return sb.toString();
     }

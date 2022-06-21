@@ -536,6 +536,7 @@
     <boolean name="ut_omit_namespace_of_document_element_bool" value="false"/>
     <boolean name="ut_omit_namespace_ss_bool" value="false"/>
     <boolean name="ut_omit_namespace_cp_bool" value="false"/>
+    <boolean name="ut_insert_new_rule_bool" value="false"/>
 
     <!-- Uce -->
     <boolean name="add_video_tag_contact_header_in_publish_bool" value="false"/>
