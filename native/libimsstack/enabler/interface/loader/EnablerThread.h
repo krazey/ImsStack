@@ -1,45 +1,47 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170320  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef ENABLER_THREAD_H_
+#define ENABLER_THREAD_H_
 
-    Description
-
-*/
-
-#ifndef _ENABLER_THREAD_H_
-#define _ENABLER_THREAD_H_
-
-#include "ImsMessageDef.h"
 #include "ImsAppThread.h"
+#include "ImsMessageDef.h"
 
 class EnablerFactory;
 
 class EnablerThread : public ImsAppThread
 {
 public:
-    EnablerThread(IN EnablerFactory *pEnablerFactory_, IN IMS_SINT32 nSlotId_);
-    virtual ~EnablerThread();
+    EnablerThread(IN EnablerFactory* pEnablerFactory, IN IMS_SINT32 nSlotId);
+    inline virtual ~EnablerThread() {}
 
 public:
-    IMS_SINT32 GetSlotId() const;
+    inline IMS_SINT32 GetSlotId() const { return m_nSlotId; }
     void ControlEnablers(IN IMS_SINT32 nCtrlFlags);
 
 protected:
     // ImsAppThread class
-    virtual IMS_BOOL Initialize();
+    IMS_BOOL Initialize() override;
 
-    virtual IMS_BOOL OnStart(IN IMSMSG &objMSG);
-    virtual IMS_BOOL OnTerminate(IN IMSMSG &objMSG);
-    virtual IMS_BOOL OnMessage(IN IMSMSG &objMSG);
+    IMS_BOOL OnStart(IN ImsMessage& objMsg) override;
+    IMS_BOOL OnTerminate(IN ImsMessage& objMsg) override;
+    IMS_BOOL OnMessage(IN ImsMessage& objMsg) override;
 
     inline IMS_BOOL IsControlSet(IN IMS_SINT32 nCtrlFlags, IN IMS_SINT32 nCtrlFlag) const
     { return (nCtrlFlags & nCtrlFlag) == nCtrlFlag; }
-    inline IMS_SINT32 GetState() const
-    { return nState; }
+    inline IMS_SINT32 GetState() const { return m_nState; }
 
     void InitializeGlobals();
     void UninitializeGlobals();
@@ -51,7 +53,7 @@ protected:
     void StopEnablers();
 
 public:
-    // Bitmask for operations
+    /// Bitmask for operations
     enum
     {
         CONTROL_NONE  = 0x0000,
@@ -66,7 +68,7 @@ public:
     };
 
 private:
-    // Enabler's state
+    /// Enabler's state
     enum
     {
         STATE_INACTIVE = 0,
@@ -78,9 +80,9 @@ private:
         TMSG_CONTROL_ENABLERS = IMS_MSG_THREAD_INTERNAL_BASE
     };
 
-    EnablerFactory *pEnablerFactory;
-    IMS_SINT32 nSlotId;
-    IMS_SINT32 nState;
+    EnablerFactory* m_pEnablerFactory;
+    IMS_SINT32 m_nSlotId;
+    IMS_SINT32 m_nState;
 };
 
-#endif // _ENABLER_THREAD_H_
+#endif

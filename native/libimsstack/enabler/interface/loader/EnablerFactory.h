@@ -1,20 +1,24 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170221  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _ENABLER_FACTORY_H_
-#define _ENABLER_FACTORY_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef ENABLER_FACTORY_H_
+#define ENABLER_FACTORY_H_
 
 #include "IMSList.h"
 #include "IMSMap.h"
+
 #include "IEnabler.h"
 
 class IMutex;
@@ -25,9 +29,8 @@ public:
     EnablerFactory();
     ~EnablerFactory();
 
-private:
-    EnablerFactory(IN const EnablerFactory& objRHS);
-    EnablerFactory& operator=(IN const EnablerFactory& objRHS);
+    EnablerFactory(IN const EnablerFactory&) = delete;
+    EnablerFactory& operator=(IN const EnablerFactory&) = delete;
 
 public:
     void CreateEnablers(IN IMS_SINT32 nSlotId);
@@ -38,9 +41,9 @@ private:
     void CreateEnablers(IN IMS_SINT32 nSlotId, OUT IMSList<IEnabler*>*& pEnablers);
 
 private:
-    IMutex* piLock;
+    IMutex* m_piLock;
     // <slotId, enablers>
-    IMSMap<IMS_SINT32, IMSList<IEnabler*>* > objImsEnablers;
+    IMSMap<IMS_SINT32, IMSList<IEnabler*>*> m_objImsEnablers;
 };
 
-#endif // _ENABLER_FACTORY_H_
+#endif

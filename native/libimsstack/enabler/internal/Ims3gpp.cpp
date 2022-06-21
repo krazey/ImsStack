@@ -1,109 +1,64 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20130213  hwangoo.park@             Created
-    </table>
-
-    Description
-     This class defines the methods to get the information of 3GPP IM CN subsystem XML body.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "DomDocumentBuilderFactory.h"
-#include "DocumentBuilderFactory.h"
+
 #include "DocumentBuilder.h"
+#include "DocumentBuilderFactory.h"
+#include "DomDocumentBuilderFactory.h"
 #include "IDocument.h"
 #include "IElement.h"
+
 #include "Ims3gpp.h"
 
 __IMS_TRACE_TAG_USER_DECL__("Ims3gpp");
 
-PUBLIC GLOBAL
-const IMS_CHAR Ims3gpp::ELEMENT_ACTION[] = "action";
-PUBLIC GLOBAL
-const IMS_CHAR Ims3gpp::ELEMENT_ALTERNATIVE_SERVICE[] = "alternative-service";
-PUBLIC GLOBAL
-const IMS_CHAR Ims3gpp::ELEMENT_IMS_3GPP[] = "ims-3gpp";
-PUBLIC GLOBAL
-const IMS_CHAR Ims3gpp::ELEMENT_REASON[] = "reason";
-PUBLIC GLOBAL
-const IMS_CHAR Ims3gpp::ELEMENT_SERVICE_INFO[] = "service-info";
-PUBLIC GLOBAL
-const IMS_CHAR Ims3gpp::ELEMENT_TYPE[] = "type";
-PUBLIC GLOBAL
-const IMS_CHAR Ims3gpp::ATTR_VERSION[] = "version";
+PUBLIC GLOBAL const IMS_CHAR Ims3gpp::ELEMENT_ACTION[] = "action";
+PUBLIC GLOBAL const IMS_CHAR Ims3gpp::ELEMENT_ALTERNATIVE_SERVICE[] = "alternative-service";
+PUBLIC GLOBAL const IMS_CHAR Ims3gpp::ELEMENT_IMS_3GPP[] = "ims-3gpp";
+PUBLIC GLOBAL const IMS_CHAR Ims3gpp::ELEMENT_REASON[] = "reason";
+PUBLIC GLOBAL const IMS_CHAR Ims3gpp::ELEMENT_SERVICE_INFO[] = "service-info";
+PUBLIC GLOBAL const IMS_CHAR Ims3gpp::ELEMENT_TYPE[] = "type";
+PUBLIC GLOBAL const IMS_CHAR Ims3gpp::ATTR_VERSION[] = "version";
 
 PUBLIC
-Ims3gpp::Ims3gpp()
-    : nType(TYPE_UNKNOWN)
+Ims3gpp::Ims3gpp() :
+        m_nType(TYPE_UNKNOWN)
 {
 }
 
 PUBLIC
-Ims3gpp::Ims3gpp(IN CONST AString &str3gppIms)
-    : nType(TYPE_UNKNOWN)
+Ims3gpp::Ims3gpp(IN const AString& str3gppIms) :
+        m_nType(TYPE_UNKNOWN)
 {
     Parse(str3gppIms);
 }
 
 PUBLIC
-Ims3gpp::~Ims3gpp()
-{
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const Ims3gpp::AlternativeService& Ims3gpp::GetAlternativeService() const
-{
-    return objAlternativeService;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const Ims3gpp::ServiceInfo& Ims3gpp::GetServiceInfo() const
-{
-    return objServiceInfo;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_SINT32 Ims3gpp::GetType() const
-{
-    return nType;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL Ims3gpp::Parse(IN CONST AString &str3gppIms)
+IMS_BOOL Ims3gpp::Parse(IN const AString& str3gppIms)
 {
     DomDocumentBuilderFactory* pBuilderFactory = DomDocumentBuilderFactory::GetInstance();
-    DocumentBuilder *pDocumentBuilder = pBuilderFactory->NewDocumentBuilder();
+    DocumentBuilder* pDocumentBuilder = pBuilderFactory->NewDocumentBuilder();
 
     if (pDocumentBuilder == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    IDocument *piDocument = pDocumentBuilder->Parse(str3gppIms);
+    IDocument* piDocument = pDocumentBuilder->Parse(str3gppIms);
 
     if (piDocument == IMS_NULL)
     {
@@ -113,7 +68,7 @@ IMS_BOOL Ims3gpp::Parse(IN CONST AString &str3gppIms)
         return IMS_FALSE;
     }
 
-    IElement *piElement = piDocument->GetDocumentElement();
+    IElement* piElement = piDocument->GetDocumentElement();
 
     if (piElement == IMS_NULL)
     {
@@ -142,7 +97,7 @@ IMS_BOOL Ims3gpp::Parse(IN CONST AString &str3gppIms)
     IMS_TRACE_D("'ims-3gpp' version is %s", strVersion.GetStr(), 0, 0);
 
     // "service-info" / "alternative-service" element
-    INode *piNode = piElement->GetFirstChild();
+    INode* piNode = piElement->GetFirstChild();
 
     if (piNode != IMS_NULL)
     {
@@ -150,12 +105,12 @@ IMS_BOOL Ims3gpp::Parse(IN CONST AString &str3gppIms)
 
         if (strName.EqualsIgnoreCase(ELEMENT_ALTERNATIVE_SERVICE))
         {
-            nType = TYPE_ALTERNATIVE_SERVICE;
+            m_nType = TYPE_ALTERNATIVE_SERVICE;
             CreateAlternativeService(piNode);
         }
         else if (strName.EqualsIgnoreCase(ELEMENT_SERVICE_INFO))
         {
-            nType = TYPE_SERVICE_INFO;
+            m_nType = TYPE_SERVICE_INFO;
             CreateServiceInfo(piNode);
         }
         else
@@ -170,13 +125,8 @@ IMS_BOOL Ims3gpp::Parse(IN CONST AString &str3gppIms)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void Ims3gpp::CreateAlternativeService(IN INode *piNode)
+void Ims3gpp::CreateAlternativeService(IN INode* piNode)
 {
     // Value of type
     const IMS_CHAR VALUE_EMERGENCY[] = "emergency";
@@ -190,7 +140,7 @@ void Ims3gpp::CreateAlternativeService(IN INode *piNode)
         return;
     }
 
-    INode *piElement = piNode->GetFirstChild();
+    INode* piElement = piNode->GetFirstChild();
 
     while (piElement != IMS_NULL)
     {
@@ -198,49 +148,49 @@ void Ims3gpp::CreateAlternativeService(IN INode *piNode)
 
         if (strName.EqualsIgnoreCase(ELEMENT_TYPE))
         {
-            INode *piNode_Value = piElement->GetFirstChild();
+            INode* piNode_Value = piElement->GetFirstChild();
 
             if (piNode_Value != IMS_NULL)
             {
-                objAlternativeService.strType = piNode_Value->GetNodeValue();
+                m_objAlternativeService.m_strType = piNode_Value->GetNodeValue();
 
-                if (objAlternativeService.strType.Equals(VALUE_EMERGENCY))
+                if (m_objAlternativeService.m_strType.Equals(VALUE_EMERGENCY))
                 {
-                    objAlternativeService.nType = AlternativeService::TYPE_EMERGENCY;
+                    m_objAlternativeService.m_nType = AlternativeService::TYPE_EMERGENCY;
                 }
-                else if (objAlternativeService.strType.Equals(VALUE_RESTORATION))
+                else if (m_objAlternativeService.m_strType.Equals(VALUE_RESTORATION))
                 {
-                    objAlternativeService.nType = AlternativeService::TYPE_RESTORATION;
+                    m_objAlternativeService.m_nType = AlternativeService::TYPE_RESTORATION;
                 }
             }
         }
         else if (strName.EqualsIgnoreCase(ELEMENT_ACTION))
         {
-            INode *piNode_Value = piElement->GetFirstChild();
+            INode* piNode_Value = piElement->GetFirstChild();
 
             if (piNode_Value != IMS_NULL)
             {
-                objAlternativeService.strAction = piNode_Value->GetNodeValue();
+                m_objAlternativeService.m_strAction = piNode_Value->GetNodeValue();
 
-                if (objAlternativeService.strAction.Equals(VALUE_EMERGENCY_REGISTRATION))
+                if (m_objAlternativeService.m_strAction.Equals(VALUE_EMERGENCY_REGISTRATION))
                 {
-                    objAlternativeService.nAction
-                            = AlternativeService::ACTION_EMERGENCY_REGISTRATION;
+                    m_objAlternativeService.m_nAction =
+                            AlternativeService::ACTION_EMERGENCY_REGISTRATION;
                 }
-                else if (objAlternativeService.strAction.Equals(VALUE_INITIAL_REGISTRATION))
+                else if (m_objAlternativeService.m_strAction.Equals(VALUE_INITIAL_REGISTRATION))
                 {
-                    objAlternativeService.nAction
-                            = AlternativeService::ACTION_INITIAL_REGISTRATION;
+                    m_objAlternativeService.m_nAction =
+                            AlternativeService::ACTION_INITIAL_REGISTRATION;
                 }
             }
         }
         else if (strName.EqualsIgnoreCase(ELEMENT_REASON))
         {
-            INode *piNode_Value = piElement->GetFirstChild();
+            INode* piNode_Value = piElement->GetFirstChild();
 
             if (piNode_Value != IMS_NULL)
             {
-                objAlternativeService.strReason = piNode_Value->GetNodeValue();
+                m_objAlternativeService.m_strReason = piNode_Value->GetNodeValue();
             }
         }
 
@@ -248,33 +198,28 @@ void Ims3gpp::CreateAlternativeService(IN INode *piNode)
     }
 
     IMS_TRACE_I("ims-3gpp :: alternative-service :: type=%s, action=%s, reason=%s",
-            objAlternativeService.strType.GetStr(),
-            objAlternativeService.strAction.GetStr(),
-            objAlternativeService.strReason.GetStr());
+            m_objAlternativeService.m_strType.GetStr(),
+            m_objAlternativeService.m_strAction.GetStr(),
+            m_objAlternativeService.m_strReason.GetStr());
     IMS_TRACE_D("ims-3gpp :: alternative-service :: type=%d, action=%d",
-            objAlternativeService.nType, objAlternativeService.nAction, 0);
+            m_objAlternativeService.m_nType, m_objAlternativeService.m_nAction, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void Ims3gpp::CreateServiceInfo(IN INode *piNode)
+void Ims3gpp::CreateServiceInfo(IN INode* piNode)
 {
     if (piNode == IMS_NULL)
     {
         return;
     }
 
-    INode *piNode_Value = piNode->GetFirstChild();
+    INode* piNode_Value = piNode->GetFirstChild();
 
     if (piNode_Value != IMS_NULL)
     {
-        objServiceInfo.strServiceInfo = piNode_Value->GetNodeValue();
+        m_objServiceInfo.m_strServiceInfo = piNode_Value->GetNodeValue();
     }
 
     IMS_TRACE_I("ims-3gpp :: service-info :: service-info=%s",
-            objServiceInfo.strServiceInfo.GetStr(), 0, 0);
+            m_objServiceInfo.m_strServiceInfo.GetStr(), 0, 0);
 }

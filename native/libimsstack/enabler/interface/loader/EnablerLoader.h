@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170510  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _ENABLER_LOADER_H_
-#define _ENABLER_LOADER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef ENABLER_LOADER_H_
+#define ENABLER_LOADER_H_
 
 #include "IMSMap.h"
 #include "ISystemConfigListener.h"
@@ -26,8 +29,9 @@ private:
     EnablerLoader();
     virtual ~EnablerLoader();
 
-    EnablerLoader(IN const EnablerLoader& objRHS);
-    EnablerLoader& operator=(IN const EnablerLoader& objRHS);
+public:
+    EnablerLoader(IN const EnablerLoader&) = delete;
+    EnablerLoader& operator=(IN const EnablerLoader&) = delete;
 
 public:
     void Init();
@@ -38,8 +42,8 @@ public:
 
 protected:
     // ISystemConfigListener class
-    virtual void SystemConfig_ConfigurationChanged(
-            IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId = IMS_SLOT_ANY);
+    void SystemConfig_ConfigurationChanged(
+            IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId = IMS_SLOT_ANY) override;
 
 private:
     void CreateAndAddThread(IN IMS_SINT32 nSlotId);
@@ -53,24 +57,24 @@ private:
     class EnablerThreadParam
     {
     public:
-        inline EnablerThreadParam(IN EnablerFactory *pEnablerFactory_, IN IMS_SINT32 nSlotId_)
-            : pEnablerFactory(pEnablerFactory_)
-            , nSlotId(nSlotId_)
+        inline EnablerThreadParam(IN EnablerFactory* pEnablerFactory, IN IMS_SINT32 nSlotId) :
+                m_pEnablerFactory(pEnablerFactory),
+                m_nSlotId(nSlotId)
         {}
         inline ~EnablerThreadParam()
         {}
 
     public:
-        EnablerFactory *pEnablerFactory;
-        IMS_SINT32 nSlotId;
+        EnablerFactory* m_pEnablerFactory;
+        IMS_SINT32 m_nSlotId;
     };
 
-    static EnablerLoader *pEnablerLoader;
+    static EnablerLoader* s_pEnablerLoader;
 
-    EnablerFactory *pEnablerFactory;
+    EnablerFactory* m_pEnablerFactory;
 
     // <slot-id, enabler-thread>
-    IMSMap<IMS_SINT32, EnablerThread*> objEnablerThreads;
+    IMSMap<IMS_SINT32, EnablerThread*> m_objEnablerThreads;
 };
 
-#endif // _ENABLER_LOADER_H_
+#endif

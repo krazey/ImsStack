@@ -1,16 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170704  hwangoo.park@             Created
-    </table>
-
-    Description
-*/
-
-#ifndef _GEOLOCATION_HELPER_H_
-#define _GEOLOCATION_HELPER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef GEOLOCATION_HELPER_H_
+#define GEOLOCATION_HELPER_H_
 
 #include "GeolocationPidfCreator.h"
 
@@ -22,8 +26,9 @@ private:
     GeolocationHelper();
     ~GeolocationHelper();
 
-    GeolocationHelper(IN const GeolocationHelper& objRHS);
-    GeolocationHelper& operator=(IN const GeolocationHelper& objRHS);
+public:
+    GeolocationHelper(IN const GeolocationHelper&) = delete;
+    GeolocationHelper& operator=(IN const GeolocationHelper&) = delete;
 
 public:
     void CreatePidfCreator(IN IMS_SINT32 nSlotId);
@@ -38,9 +43,9 @@ public:
     static const AString& GetCountry(IN IMS_SINT32 nSlotId, IN IMS_BOOL bLocationUpdate);
 
 private:
-    static GeolocationHelper* pGeolocationHelper;
+    static GeolocationHelper* s_pGeolocationHelper;
 
-    GeolocationHelperPrivate* pPrivate;
+    GeolocationHelperPrivate* m_pPrivate;
 };
 
-#endif // _GEOLOCATION_HELPER_H_
+#endif
