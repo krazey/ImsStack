@@ -644,8 +644,6 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsResubscriptionStopped(IN IMS_SINT32 n
 PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
         IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed)
 {
-    A_IMS_TRACE_I(AOSTAG, "ProcessFailed_StatusCode :: status code (%d)", nStatusCode, 0, 0);
-
     m_bIsErrChecked = IMS_FALSE;
 
     if (IsRetryActionDueToRetrycounter() == IMS_TRUE)
@@ -1150,7 +1148,7 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_Updated()
 
 PROTECTED VIRTUAL void AosSubscription::RegSubscription_UpdateFailed(IN IMS_SINT32 nReason)
 {
-    A_IMS_TRACE_I(AOSTAG, "RegSubscription_UpdateFailed :: reason(%d)",
+    A_IMS_TRACE_I(AOSTAG, "RegSubscription_UpdateFailed :: reason(%s)",
             RegSubReasonToString(nReason), 0, 0);
 
     switch (nReason)
