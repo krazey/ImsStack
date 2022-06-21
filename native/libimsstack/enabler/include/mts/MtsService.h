@@ -19,8 +19,8 @@
 
 #include "ImsService.h"
 #include "ICoreServiceListener.h"
-#include "interface/aos/IImsAosListener.h"
-#include "interface/aos/IImsAosMonitor.h"
+#include "IImsAosListener.h"
+#include "IImsAosMonitor.h"
 #include "IMtsService.h"
 #include "IMtsServiceListener.h"
 
