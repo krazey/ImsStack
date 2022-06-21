@@ -22,7 +22,7 @@
 class JniSystem : public BaseService, public SystemCallback
 {
 public:
-    JniSystem(IN JniSystem_SendDataToJava pSendDataToJava);
+    JniSystem(IN JniSystem_SendDataToJava pfnSendDataToJava);
     virtual ~JniSystem();
 
     JniSystem(IN const JniSystem&) = delete;
@@ -38,7 +38,7 @@ public:
             int fileDescriptor = -1) override;
 
 private:
-    JniSystem_SendDataToJava m_pSendDataToJava;
+    JniSystem_SendDataToJava m_pfnSendDataToJava;
 };
 
 #endif

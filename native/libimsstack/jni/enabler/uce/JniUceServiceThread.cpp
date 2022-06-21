@@ -25,7 +25,7 @@ __IMS_TRACE_TAG_USER_DECL__("IMS_UCE");
 PRIVATE
 JniUceServiceThread::JniUceServiceThread() :
         m_nNativeObj(0),
-        m_pCBServiceNoti(NULL)
+        m_pfnSendDataToJava(NULL)
 {
     IMS_TRACE_D("UCE_M : JniUceServiceThread = %" PFLS_u, sizeof(JniUceServiceThread), 0, 0);
     IMS_TRACE_I("JniUceServiceThread : ", 0, 0, 0);
@@ -43,11 +43,11 @@ PUBLIC VIRTUAL JniUceServiceThread::~JniUceServiceThread()
 }
 
 PUBLIC VIRTUAL int JniUceServiceThread::SetCallback(
-        IN IMS_UINTP nNativeObj, IN CBServiceNoti pCBServiceNoti)
+        IN IMS_UINTP nNativeObj, IN Jni_SendDataToJava pfnSendDataToJava)
 {
     IMS_TRACE_I("SetCallback : ", 0, 0, 0);
     this->m_nNativeObj = nNativeObj;
-    this->m_pCBServiceNoti = pCBServiceNoti;
+    this->m_pfnSendDataToJava = pfnSendDataToJava;
     return 1;
 }
 PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::Initialize()
@@ -267,9 +267,9 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
             break;
     }
 
-    if (m_pCBServiceNoti != NULL)
+    if (m_pfnSendDataToJava != NULL)
     {
-        m_pCBServiceNoti(m_nNativeObj, parcel);
+        m_pfnSendDataToJava(m_nNativeObj, parcel);
     }
     else
     {

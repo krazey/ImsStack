@@ -24,12 +24,12 @@ class IAosService;
 class JniAosService : public BaseService
 {
 public:
-    JniAosService(IN CBServiceNoti pCbServiceNoti, IN IMS_SINT32 nSlotId);
+    JniAosService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId);
     virtual ~JniAosService();
 
     virtual int SendData(const android::Parcel& objParcel) override;
 
-    void Initialize(IN CBServiceNoti pCbServiceNoti);
+    void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
     void SetAosService(IN IAosService* piAosService);
 
     JniAosServiceThread* GetThread();

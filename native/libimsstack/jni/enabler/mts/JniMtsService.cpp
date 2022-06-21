@@ -19,7 +19,7 @@ using namespace android;
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTS");
 
-JniMtsService::JniMtsService(IN CBServiceNoti pCbServiceNoti, IN IMS_SINT32 nSlotId) :
+JniMtsService::JniMtsService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
         m_strThreadName(AString::ConstNull()),
         m_piMtsService(IMS_NULL),
@@ -27,7 +27,7 @@ JniMtsService::JniMtsService(IN CBServiceNoti pCbServiceNoti, IN IMS_SINT32 nSlo
 {
     IMS_TRACE_D("+JniMtsService SlotId[%d]", m_nSlotId, 0, 0);
 
-    Initialize(pCbServiceNoti);
+    Initialize(pfnSendDataToJava);
 }
 
 JniMtsService::~JniMtsService()
@@ -124,9 +124,9 @@ IMS_BOOL JniMtsService::Attach()
 }
 
 PRIVATE
-void JniMtsService::Initialize(IN CBServiceNoti pCbServiceNoti)
+void JniMtsService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
 {
-    if (pCbServiceNoti == IMS_NULL)
+    if (pfnSendDataToJava == IMS_NULL)
     {
         return;
     }
@@ -146,7 +146,7 @@ void JniMtsService::Initialize(IN CBServiceNoti pCbServiceNoti)
         return;
     }
 
-    m_pJniMtsServiceThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pCbServiceNoti);
+    m_pJniMtsServiceThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pfnSendDataToJava);
     Attach();
 }
 

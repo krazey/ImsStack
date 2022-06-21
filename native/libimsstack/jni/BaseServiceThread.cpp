@@ -1,16 +1,18 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20110309  joonhun.shin@             Created
-    20110502  hwangoo.park@             Adapted from RCS
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "BaseServiceThread.h"
 #include "ServiceTrace.h"
 
@@ -19,32 +21,32 @@ __IMS_TRACE_TAG_USER_DECL__("BaseService");
 PUBLIC
 BaseServiceThread::BaseServiceThread() :
         BaseThread(),
-        nNativeObject(0),
-        pfnNotifier(IMS_NULL)
+        m_nNativeObject(0),
+        m_pfnSendDataToJava(IMS_NULL)
 {
 }
-
-PUBLIC VIRTUAL BaseServiceThread::~BaseServiceThread() {}
 
 PUBLIC
-void BaseServiceThread::SetCallback(IN IMS_SINTP nNativeObject, CBServiceNoti pfnNotifier)
+void BaseServiceThread::SetCallback(
+        IN IMS_SINTP nNativeObject, Jni_SendDataToJava pfnSendDataToJava)
 {
-    this->nNativeObject = nNativeObject;
-    this->pfnNotifier = pfnNotifier;
+    m_nNativeObject = nNativeObject;
+    m_pfnSendDataToJava = pfnSendDataToJava;
 }
 
-PROTECTED VIRTUAL IMS_BOOL BaseServiceThread::OnMessage(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL BaseServiceThread::OnMessage(IN ImsMessage& objMsg)
 {
-    IMS_TRACE_D("OnMessage (%d)", objMSG.nMSG, 0, 0);
-    switch (objMSG.nMSG)
+    IMS_TRACE_D("OnMessage (%d)", objMsg.GetName(), 0, 0);
+
+    switch (objMsg.GetName())
     {
         case MESSAGE_THREAD_SWITCHING:
         {
-            android::Parcel* pParcel = reinterpret_cast<android::Parcel*>(objMSG.nLparam);
+            android::Parcel* pParcel = reinterpret_cast<android::Parcel*>(objMsg.nLparam);
             SendData2Java(*pParcel, IMS_TRUE);
             delete pParcel;
+            break;
         }
-        break;
         default:
             break;
     }
@@ -54,14 +56,14 @@ PROTECTED VIRTUAL IMS_BOOL BaseServiceThread::OnMessage(IN IMSMSG& objMSG)
 
 PROTECTED
 IMS_BOOL BaseServiceThread::SendData2Java(
-        IN const android::Parcel& objParcel, IN IMS_BOOL bThreadSwitched /* = IMS_FALSE*/)
+        IN const android::Parcel& objParcel, IN IMS_BOOL bThreadSwitched /*= IMS_FALSE*/)
 {
-    if (nNativeObject == 0)
+    if (m_nNativeObject == 0)
     {
         return IMS_FALSE;
     }
 
-    if (pfnNotifier == IMS_NULL)
+    if (m_pfnSendDataToJava == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -71,9 +73,10 @@ IMS_BOOL BaseServiceThread::SendData2Java(
     IMS_BOOL bSendCurrentThread = bThreadSwitched || !IsThreadSwitchingRequired(nMsg);
 
     IMS_TRACE_D("SendData2Java (%s)", _TRACE_B_(bSendCurrentThread), 0, 0);
+
     if (bSendCurrentThread)
     {
-        (*pfnNotifier)(nNativeObject, objParcel);
+        (*m_pfnSendDataToJava)(m_nNativeObject, objParcel);
         return IMS_TRUE;
     }
 
@@ -82,7 +85,8 @@ IMS_BOOL BaseServiceThread::SendData2Java(
     pParcelOut->setDataPosition(0);
 
     IThread* piThread = GetThread();
-    if (piThread)
+
+    if (piThread != IMS_NULL)
     {
         piThread->PostMessageI(
                 MESSAGE_THREAD_SWITCHING, 0, reinterpret_cast<IMS_UINTP>(pParcelOut));

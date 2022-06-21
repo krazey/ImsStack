@@ -25,12 +25,12 @@
 class JniMediaSession : public BaseService
 {
 public:
-    JniMediaSession(IN CBServiceNoti pfnNotifier, IN IMS_SINT32 nSlotId, IN IMS_SINTP nCallKey,
-            IN IMS_SINTP nNativeObject);
+    JniMediaSession(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId,
+            IN IMS_SINTP nCallKey, IN IMS_SINTP nNativeObject);
     virtual ~JniMediaSession();
 
     virtual int SendData(const android::Parcel& objParcel) override;
-    void Initialize(IN CBServiceNoti pfnNotifier, IN IMS_SINTP nNativeObject);
+    void Initialize(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINTP nNativeObject);
     void SetMtcCallId(IN IMS_SINTP nCallKey);
     JniMediaSessionThread* GetThread();
     static IMS_BOOL IsMediaMessage(IN IMS_SINT32 nMsg);

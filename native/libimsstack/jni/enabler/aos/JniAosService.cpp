@@ -28,7 +28,7 @@ using namespace android;
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.AOS");
 
-JniAosService::JniAosService(IN CBServiceNoti pCbServiceNoti, IN IMS_SINT32 nSlotId) :
+JniAosService::JniAosService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
         m_strThreadName(AString::ConstNull()),
         m_piAosService(IMS_NULL),
@@ -36,7 +36,7 @@ JniAosService::JniAosService(IN CBServiceNoti pCbServiceNoti, IN IMS_SINT32 nSlo
 {
     IMS_TRACE_D("+JniAosService SlotId[%d]", m_nSlotId, 0, 0);
 
-    Initialize(pCbServiceNoti);
+    Initialize(pfnSendDataToJava);
 }
 
 JniAosService::~JniAosService()
@@ -73,9 +73,9 @@ int JniAosService::SendData(const Parcel& objParcel)
 }
 
 PUBLIC
-void JniAosService::Initialize(IN CBServiceNoti pCbServiceNoti)
+void JniAosService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
 {
-    if (pCbServiceNoti == NULL)
+    if (pfnSendDataToJava == NULL)
     {
         return;
     }
@@ -99,7 +99,7 @@ void JniAosService::Initialize(IN CBServiceNoti pCbServiceNoti)
     }
 
     m_pJniAosServiceThread->SetSlotId(m_nSlotId);
-    m_pJniAosServiceThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pCbServiceNoti);
+    m_pJniAosServiceThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pfnSendDataToJava);
 
     Attach();
 }

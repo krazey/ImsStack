@@ -26,14 +26,14 @@
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
 
-JniMtcService::JniMtcService(IN CBServiceNoti pfnNotifier, IN IMS_SINT32 nSlotId) :
+JniMtcService::JniMtcService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId) :
         m_pThread(IMS_NULL),
         m_nSlotId(nSlotId),
         m_piMtcService(IMS_NULL)
 {
     IMS_TRACE_D("+JniMtcService SlotId[%d]", m_nSlotId, 0, 0);
 
-    Initialize(pfnNotifier);
+    Initialize(pfnSendDataToJava);
 }
 
 JniMtcService::~JniMtcService()
@@ -69,9 +69,9 @@ PUBLIC VIRTUAL int JniMtcService::SendData(IN const android::Parcel& objParcel)
 }
 
 PUBLIC
-void JniMtcService::Initialize(IN CBServiceNoti pfnNotifier)
+void JniMtcService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
 {
-    if (pfnNotifier == IMS_NULL)
+    if (pfnSendDataToJava == IMS_NULL)
     {
         return;
     }
@@ -92,7 +92,7 @@ void JniMtcService::Initialize(IN CBServiceNoti pfnNotifier)
     }
     IMS_TRACE_D("Initialize()", 0, 0, 0);
     m_pThread->SetSlotId(m_nSlotId);
-    m_pThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pfnNotifier);
+    m_pThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pfnSendDataToJava);
     Attach();
 }
 

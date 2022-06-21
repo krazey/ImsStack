@@ -29,10 +29,10 @@
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
 
-JniMtcCall::JniMtcCall(IN CBServiceNoti pfnNotifier, IN IMS_SINTP nCallKey /* = -1*/,
+JniMtcCall::JniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINTP nCallKey /* = -1*/,
         IN IMS_SINT32 nSlotId /* = 0*/) :
         m_pThread(IMS_NULL),
-        m_pfnNotifier(pfnNotifier),
+        m_pfnSendDataToJava(pfnSendDataToJava),
         m_strThreadName(AString::ConstNull()),
         m_nSlotId(nSlotId),
         m_objCallController(*(JniConnectorFactory::GetInstance()
@@ -84,7 +84,7 @@ PUBLIC VIRTUAL int JniMtcCall::SendData(IN const android::Parcel& objParcel)
 PUBLIC
 void JniMtcCall::Initialize()
 {
-    if (m_pfnNotifier == IMS_NULL)
+    if (m_pfnSendDataToJava == IMS_NULL)
     {
         return;
     }
@@ -105,7 +105,7 @@ void JniMtcCall::Initialize()
     }
 
     m_pThread->SetSlotId(m_nSlotId);  // TODO: required?
-    m_pThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), m_pfnNotifier);
+    m_pThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), m_pfnSendDataToJava);
 }
 
 PROTECTED VIRTUAL void JniMtcCall::HandleMessage(
@@ -216,7 +216,7 @@ void JniMtcCall::Attach()
 
     // TODO: okay?? need to check timing
     m_pJniMediaSession = new JniMediaSession(
-            m_pfnNotifier, m_nSlotId, m_nCallKey, reinterpret_cast<IMS_SINTP>(this));
+            m_pfnSendDataToJava, m_nSlotId, m_nCallKey, reinterpret_cast<IMS_SINTP>(this));
     m_objCallController.Attach(m_nCallKey, m_pThread, m_pJniMediaSession->GetThread());
 }
 

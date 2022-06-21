@@ -42,8 +42,8 @@ JniUceService::JniUceService(IN IMS_UINT32 _nSimSlot /* = 0*/) :
     m_pJniUceServiceThread = NULL;
 }
 
-JniUceService::JniUceService(CBServiceNoti pCBServiceNoti, IN IMS_UINT32 _nSimSlot /* = 0*/) :
-        m_nSimSlot(_nSimSlot)
+JniUceService::JniUceService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot /*= 0*/) :
+        m_nSimSlot(nSimSlot)
 {
     IMS_TRACE_D("UCE_M : JniUceService = %" PFLS_u, sizeof(JniUceService), 0, 0);
     //---------------------------------------------------------------------------------------------
@@ -53,9 +53,9 @@ JniUceService::JniUceService(CBServiceNoti pCBServiceNoti, IN IMS_UINT32 _nSimSl
     m_strTarget.Append(".UceApp");
     IMS_TRACE_D("JniUceService [%s]", m_strTarget.GetStr(), 0, 0);
 
-    if (pCBServiceNoti == NULL)
+    if (pfnSendDataToJava == NULL)
     {
-        IMS_TRACE_E(0, "JniUceService:pCBServiceNoti is null", 0, 0, 0);
+        IMS_TRACE_E(0, "JniUceService:pfnSendDataToJava is null", 0, 0, 0);
     }
     ImsProcess::GetInstance()->LoadAppThread(
             STR_UCE_LISTENER_THREAD_NAME, JniUceServiceThread::GetInstance, m_nSimSlot);
@@ -63,7 +63,7 @@ JniUceService::JniUceService(CBServiceNoti pCBServiceNoti, IN IMS_UINT32 _nSimSl
             STR_UCE_LISTENER_THREAD_NAME));
     if (m_pJniUceServiceThread != NULL)
     {
-        m_pJniUceServiceThread->SetCallback(reinterpret_cast<IMS_UINTP>(this), pCBServiceNoti);
+        m_pJniUceServiceThread->SetCallback(reinterpret_cast<IMS_UINTP>(this), pfnSendDataToJava);
     }
     else
     {
