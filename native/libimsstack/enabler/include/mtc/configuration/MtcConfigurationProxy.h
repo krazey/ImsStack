@@ -17,17 +17,18 @@
 #ifndef MTC_CONFIGURATION_PROXY_H_
 #define MTC_CONFIGURATION_PROXY_H_
 
-#include "IMSTypeDef.h"
 #include "AString.h"
-#include "configuration/MtcConfigurationManager.h"
+#include "IMSTypeDef.h"
 #include "configuration/ConfigDef.h"
+#include "configuration/IMtcConfigurationManager.h"
 
 class ConfigCache;
+class IMtcConfigurationManager;
 
 class MtcConfigurationProxy
 {
 public:
-    MtcConfigurationProxy();
+    MtcConfigurationProxy(IN IMtcConfigurationManager* pManager);
     ~MtcConfigurationProxy();
     MtcConfigurationProxy(IN const MtcConfigurationProxy&) = delete;
     MtcConfigurationProxy& operator=(IN const MtcConfigurationProxy&) = delete;
@@ -48,7 +49,7 @@ public:
     void OnRegistrationRefreshed();  // called by MtcService.
 
 private:
-    MtcConfigurationManager m_objManager;
+    std::unique_ptr<IMtcConfigurationManager> m_pManager;
     ConfigCache* m_pCache;
 };
 

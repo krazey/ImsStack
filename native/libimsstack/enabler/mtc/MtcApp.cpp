@@ -33,6 +33,7 @@
 #include "dialingplan/MtcDialingPlan.h"
 #include "call/MtcCallController.h"
 #include "conferencecall/ConferenceManager.h"
+#include "configuration/MtcConfigurationManager.h"
 #include "ect/EctManager.h"
 #include "MtcEmergencyServiceManager.h"
 
@@ -44,7 +45,7 @@ PUBLIC
 MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         ImsApp(MTC_APP_NAME),
         m_nSlotId(nSlotId),
-        m_objConfigurationProxy(MtcConfigurationProxy()),
+        m_objConfigurationProxy(MtcConfigurationProxy(new MtcConfigurationManager())),
         m_lstServices(IMSList<MtcService*>()),
         m_objDialingPlan(MtcDialingPlan(*this)),
         m_objCallManager(MtcCallManager(*this)),

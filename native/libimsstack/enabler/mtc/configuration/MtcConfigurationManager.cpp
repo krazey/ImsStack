@@ -30,8 +30,7 @@ MtcConfigurationManager::MtcConfigurationManager() :
 {
 }
 
-PUBLIC
-MtcConfigurationManager::~MtcConfigurationManager()
+PUBLIC VIRTUAL MtcConfigurationManager::~MtcConfigurationManager()
 {
     ICarrierConfig* piCc =
             ConfigService::GetConfigService()->GetCarrierConfig(ThreadService::GetCurrentSlotId(0));
@@ -159,7 +158,7 @@ IMS_SINT32 MtcConfigurationManager::GetRingbackTimer() const
 }
 
 PUBLIC
-const AString MtcConfigurationManager::GetConferenceFactoryUri() const
+AString MtcConfigurationManager::GetConferenceFactoryUri() const
 {
     return m_objCarrierConfig.strConferenceFactoryUri;
 }
@@ -353,7 +352,7 @@ IMS_SINT32 MtcConfigurationManager::GetCallMaxCount() const
 }
 
 PUBLIC
-const AString MtcConfigurationManager::GetCallTerminateReasonHeader(IN TerminateType eType) const
+AString MtcConfigurationManager::GetCallTerminateReasonHeader(IN TerminateType eType) const
 {
     IMS_UINT32 nIndex = static_cast<IMS_UINT32>(eType);
     if (nIndex >= m_objCarrierConfig.objCallTerminateReasonHeaders.GetSize())
@@ -366,7 +365,7 @@ const AString MtcConfigurationManager::GetCallTerminateReasonHeader(IN Terminate
 }
 
 PUBLIC
-const AString MtcConfigurationManager::GetCallRejectReasonPhrase(IN RejectType eType) const
+AString MtcConfigurationManager::GetCallRejectReasonPhrase(IN RejectType eType) const
 {
     IMS_UINT32 nIndex = static_cast<IMS_UINT32>(eType);
     if (nIndex >= m_objCarrierConfig.objCallRejectReasonPhrases.GetSize())
