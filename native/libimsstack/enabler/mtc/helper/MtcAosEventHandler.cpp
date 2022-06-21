@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-#include "IMSTypeDef.h"
-#include "helper/MtcAosEventHandler.h"
-#include "ServiceTrace.h"
-#include "JniMtcServiceThread.h"
-#include "configuration/MtcConfigurationProxy.h"
-#include "call/MtcCallController.h"
 #include "AString.h"
+#include "IIpcan.h"
+#include "IMSTypeDef.h"
 #include "IMtcService.h"
 #include "ImsAosParameter.h"
 #include "IuMtcService.h"
+#include "JniMtcServiceThread.h"
 #include "MtcEmergencyServiceManager.h"
+#include "ServiceTrace.h"
+#include "call/MtcCallController.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "helper/MtcAosEventHandler.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -32,7 +33,8 @@ PUBLIC
 MtcAosEventHandler::MtcAosEventHandler(
         IN IMtcService& objService, IN MtcConfigurationProxy& objConfiguration) :
         m_objService(objService),
-        m_objConfiguration(objConfiguration)
+        m_objConfiguration(objConfiguration),
+        m_nIpcan(IIpcan::CATEGORY_MOBILE)
 {
     IMS_TRACE_I("+MtcAosEventHandler", 0, 0, 0);
 }
@@ -44,9 +46,10 @@ MtcAosEventHandler::~MtcAosEventHandler()
 }
 
 PUBLIC
-void MtcAosEventHandler::OnConnected(
-        IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan, IN JniMtcServiceThread* pServiceThread,
-        IN MtcEmergencyServiceManager* /* pEmergencyServiceManager */)
+void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
+        IN JniMtcServiceThread* pServiceThread,
+        IN MtcEmergencyServiceManager* /* pEmergencyServiceManager */,
+        IN MtcCallController& objCallController)
 {
     IMS_TRACE_I("OnConnected emergency[%s] nIpcan[%d]", _TRACE_B_(m_objService.IsEmergency()),
             nIpcan, 0);
@@ -69,6 +72,15 @@ void MtcAosEventHandler::OnConnected(
         }
         // TODO: this must be called when registration is refreshed?
         m_objConfiguration.OnRegistrationRefreshed();
+    }
+
+    if (m_nIpcan != nIpcan)
+    {
+        m_nIpcan = nIpcan;
+        if (m_objConfiguration.Is(Feature::ENABLE_SEND_REINVITE_ON_RAT_CHANGE))
+        {
+            objCallController.HandleIpcanChanged();
+        }
     }
 }
 

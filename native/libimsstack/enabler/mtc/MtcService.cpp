@@ -179,9 +179,9 @@ PUBLIC VIRTUAL void MtcService::CoreService_CapabilityQueryReceived(
 PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
 {
     m_eStatus = ServiceStatus::SERVICE_ACTIVE;
-    m_objAosEventHandler.OnConnected(
-            nFeatures, nIpcan, m_pJniService ? m_pJniService->GetThread() : IMS_NULL,
-            m_objContext.GetEmergencyServiceManager());
+    m_objAosEventHandler.OnConnected(nFeatures, nIpcan,
+            m_pJniService ? m_pJniService->GetThread() : IMS_NULL,
+            m_objContext.GetEmergencyServiceManager(), m_objContext.GetCallController());
     SetAosReady(IMS_TRUE);
 }
 

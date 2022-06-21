@@ -70,6 +70,7 @@ public:
     inline void SendUssd(IN const AString&) override {}
     inline void HandleSrvccSuccess() override {}
     inline void HandleSrvccFailure(IN UpdateType) override {}
+    inline void HandleIpcanChanged() override {}
 
     inline CallKey GetKey() const override { return -1; }
     inline State GetState() const override { return State::IDLE; }

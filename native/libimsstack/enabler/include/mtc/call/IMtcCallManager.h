@@ -27,6 +27,8 @@
 class IMtcCallManager
 {
 public:
+    using State = IMtcCall::State;
+
     virtual ~IMtcCallManager(){};
 
     // Creates a new call and starts to manage it. Returns the created call.
@@ -54,6 +56,10 @@ public:
     // Returns a list of conference calls.
     // The list is sorted in the order in which the calls were created.
     virtual IMSList<IMtcCall*> GetCallsInConference() = 0;
+
+    // Returns a list of calls that in the specific state.
+    // The list is sorted in the order in which the calls were created.
+    virtual IMSList<IMtcCall*> GetCallsByState(IN State eState) = 0;
 };
 
 #endif

@@ -139,6 +139,9 @@ public:
     // Notifies that the SRVCC fails.
     virtual void HandleSrvccFailure(IN UpdateType eUpdateType) = 0;
 
+    // handles changing RAT during call.
+    virtual void HandleIpcanChanged() = 0;
+
     // Returns a key to uniquely identify this call.
     virtual CallKey GetKey() const = 0;
 

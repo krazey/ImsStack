@@ -26,6 +26,7 @@ class MtcConfigurationProxy;
 class IMtcService;
 class JniMtcServiceThread;
 class MtcEmergencyServiceManager;
+class IMtcCallManager;
 
 class MtcAosEventHandler
 {
@@ -36,9 +37,10 @@ public:
     MtcAosEventHandler(IN const MtcAosEventHandler&) = delete;
     MtcAosEventHandler& operator=(IN const MtcAosEventHandler&) = delete;
 
-    void OnConnected(
-            IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan, IN JniMtcServiceThread* pServiceThread,
-            IN MtcEmergencyServiceManager* pEmergencyServiceManager);
+    void OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
+            IN JniMtcServiceThread* pServiceThread,
+            IN MtcEmergencyServiceManager* pEmergencyServiceManager,
+            IN MtcCallController& objCallController);
     void OnDisconnecting(IN IMS_UINT32 nReason, IN MtcCallController& objCallController);
     void OnDisconnected(IN IMS_UINT32 nReason, IN MtcCallController& objCallController,
             IN JniMtcServiceThread* pServiceThread,
@@ -52,6 +54,7 @@ public:
 private:
     IMtcService& m_objService;
     MtcConfigurationProxy& m_objConfiguration;
+    IMS_UINT32 m_nIpcan;
 };
 
 #endif

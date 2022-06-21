@@ -142,6 +142,15 @@ PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsInConference()
             });
 }
 
+PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsByState(IN State eState)
+{
+    return GetCallsByFilter(
+            [eState](MtcCall* pCall)
+            {
+                return pCall->GetState() == eState;
+            });
+}
+
 PUBLIC VIRTUAL void MtcCallManager::OnCallStateChanged(IN CallKey nCallKey, IN State eState,
         IN Type /* eType */, IN IMS_BOOL /* bEmergency */, IN IMS_SINT32 /* nReason */)
 {

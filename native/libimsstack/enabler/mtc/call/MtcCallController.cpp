@@ -68,7 +68,7 @@ void MtcCallController::TerminateCalls(
             return;
     }
 
-    for (IMS_SIZE_T i = 0; i < lstCalls.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < lstCalls.GetSize(); i++)
     {
         IMtcCall* piCall = lstCalls.GetAt(i);
 
@@ -105,7 +105,7 @@ void MtcCallController::RemoveCalls(IN KeyType eKeyType, IN Key nKey)
             return;
     }
 
-    for (IMS_SIZE_T i = 0; i < lstCalls.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < lstCalls.GetSize(); i++)
     {
         IMtcCall* piCall = lstCalls.GetAt(i);
 
@@ -288,4 +288,19 @@ PUBLIC
 void MtcCallController::Transfer(IN CallKey nCallKey, IN const AString& strTarget)
 {
     m_objContext.GetEctManager()->Transfer(nCallKey, strTarget);
+}
+
+PUBLIC
+void MtcCallController::HandleIpcanChanged()
+{
+    IMSList<IMtcCall*> lstCalls = m_objCallManager.GetCalls();
+    for (IMS_UINT32 i = 0; i < lstCalls.GetSize(); i++)
+    {
+        IMtcCall* piCall = lstCalls.GetAt(i);
+
+        if (piCall != IMS_NULL)
+        {
+            piCall->HandleIpcanChanged();
+        }
+    }
 }

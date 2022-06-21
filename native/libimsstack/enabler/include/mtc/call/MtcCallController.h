@@ -193,6 +193,8 @@ public:
     // TODO: Consider ECT, SRVCC
     void Transfer(IN CallKey nCallKey, IN const AString& strTarget);
 
+    void HandleIpcanChanged();
+
 private:
     IMtcContext& m_objContext;
     IMtcCallManager& m_objCallManager;

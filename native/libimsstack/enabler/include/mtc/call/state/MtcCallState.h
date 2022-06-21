@@ -86,6 +86,7 @@ public:
     virtual CallStateName SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration);
     virtual CallStateName HandleSrvccSuccess();
     virtual CallStateName HandleSrvccFailure(IN UpdateType eUpdateType);
+    virtual CallStateName HandleIpcanChanged();
 
     virtual CallStateName HandleIncomingUssi(
             IN ISession* piSession, IN JniMtcServiceThread* pServiceThread);

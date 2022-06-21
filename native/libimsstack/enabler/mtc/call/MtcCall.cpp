@@ -440,6 +440,17 @@ PUBLIC VIRTUAL void MtcCall::HandleSrvccFailure(IN UpdateType eUpdateType)
             });
 }
 
+PUBLIC VIRTUAL void MtcCall::HandleIpcanChanged()
+{
+    IMS_TRACE_I("HandleIpcanChanged", 0, 0, 0);
+
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->HandleIpcanChanged();
+            });
+}
+
 PUBLIC VIRTUAL MtcSession* MtcCall::GetSession(IN const ISession* piSession)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)

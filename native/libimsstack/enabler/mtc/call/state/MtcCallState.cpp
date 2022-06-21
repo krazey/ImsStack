@@ -184,6 +184,11 @@ PUBLIC VIRTUAL CallStateName MtcCallState::HandleSrvccFailure(IN UpdateType /* e
     return GetStateName();
 }
 
+PUBLIC VIRTUAL CallStateName MtcCallState::HandleIpcanChanged()
+{
+    return GetStateName();
+}
+
 PUBLIC VIRTUAL CallStateName MtcCallState::HandleIncomingUssi(
         IN ISession* /* piSession */, IN JniMtcServiceThread* /* pServiceThread */)
 {

@@ -49,6 +49,7 @@ public:
     IMSList<IMtcCall*> GetCallsByType(IN CallType eCallType) override;
     IMSList<IMtcCall*> GetCallsByServiceType(IN ServiceType eServiceType) override;
     IMSList<IMtcCall*> GetCallsInConference() override;
+    IMSList<IMtcCall*> GetCallsByState(IN State eState) override;
 
     void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;

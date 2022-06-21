@@ -332,17 +332,33 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnMediaFailed(IN CallReasonInfo o
     return CallStateName::TERMINATING;
 }
 
+PUBLIC VIRTUAL CallStateName EstablishedState::HandleIpcanChanged()
+{
+    IMS_TRACE_I("HandleIpcanChanged", 0, 0, 0);
+
+    MediaInfo objMediaInfo;
+    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
+    if (HandleUpdate(UpdateType::SESSION, m_objContext.GetSession()->GetCallType(),
+                &objMediaInfo) == IMS_FAILURE)
+    {
+        // TODO
+    }
+
+    return CallStateName::UPDATING;
+}
+
 PRIVATE
 IMS_RESULT EstablishedState::HandleUpdate(
         IN UpdateType eUpdateType, IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("HandleUpdate", 0, 0, 0);
     m_objContext.GetUpdatingInfo().SetModifier();
-    m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
-    m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
+
+    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
+    objMediaManager.GetMediaInfo(m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
+    objMediaManager.SetMediaInfo(*pMediaInfo);
 
     MtcSession* pSession = m_objContext.GetSession();
-    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
 
     if (objMediaManager.FormSdp(&(pSession->GetISession()), eCallType) == IMS_FAILURE)
     {

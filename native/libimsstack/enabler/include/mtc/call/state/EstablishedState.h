@@ -51,6 +51,7 @@ public:
     CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
     CallStateName OnVideoLowestBitRate() override;
     CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
+    CallStateName HandleIpcanChanged() override;
 
 private:
     IMS_RESULT HandleUpdate(

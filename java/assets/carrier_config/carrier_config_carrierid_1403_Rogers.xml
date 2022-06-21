@@ -4,4 +4,7 @@
     <!-- Assets: non-carrier configurations -->
     <!-- Aos -->
     <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
+
+    <!-- MTC -->
+    <boolean name="imsvoice.enable_send_reinvite_on_rat_change_bool" value="true"/>
 </carrier_config>

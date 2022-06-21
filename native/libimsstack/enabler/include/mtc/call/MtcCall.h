@@ -106,6 +106,7 @@ public:
     void SendUssd(IN const AString& strUssd) override;
     void HandleSrvccSuccess() override;
     void HandleSrvccFailure(IN UpdateType eUpdateType) override;
+    void HandleIpcanChanged() override;
 
     inline CallKey GetKey() const override { return m_nKey; }
     inline CallStateName GetState() const override { return m_objStateMachine.GetState(); }
