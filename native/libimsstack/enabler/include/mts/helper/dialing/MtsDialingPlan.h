@@ -87,14 +87,6 @@ public:
         NUMBER_FORMAT_NON_TEL = 10
     };
 
-    enum
-    {
-        SCHEME_UNKNOWN = 0,
-        SCHEME_TEL,
-        SCHEME_SIP,
-        SCHEME_SIPS
-    };
-
 protected:
     IMS_SINT32 m_nSlotId;
 

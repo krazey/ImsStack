@@ -22,6 +22,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.util.ImsLog;
 
@@ -83,6 +86,7 @@ public class MtsController {
     private IBaseContext mContext = null;
     private MessageHandler mHandler = null;
     private Listener mListener = null;
+    private boolean mUseDialedNumber = false;
 
     public MtsController(IBaseContext context) {
         ImsLog.d("");
@@ -90,6 +94,24 @@ public class MtsController {
         mContext = context;
 
         mHandler = new MessageHandler(mContext.getCallLooper());
+
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, mContext.getSlotId());
+
+        if (config != null) {
+            CarrierConfig cc = config.getCarrierConfig();
+
+            if (cc == null) {
+                ImsLog.w(mContext.getSlotId(), "CarrierConfig is null");
+                return;
+            }
+
+            mUseDialedNumber = cc.getBoolean(
+                    CarrierConfig.Assets.KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL);
+        } else {
+            ImsLog.w(mContext.getSlotId(), "config is null");
+            return;
+        }
     }
 
     @VisibleForTesting
@@ -148,6 +170,39 @@ public class MtsController {
             ImsLog.e("parcel is null");
             processNotifySendMoSmsError(smsFormat, seqId);
             return false;
+        }
+
+        parcel.writeInt(MtsJni.NOTI_MTSENABLER_SEND_MO_SMS);
+        parcel.writeInt(smsFormat);
+        parcel.writeString(smsData);
+        parcel.writeString(targetAddress);
+        parcel.writeInt(seqId);
+        mMtsJni.sendMessage(parcel);
+        return true;
+    }
+
+    public boolean sendMessage(
+            int smsFormat, String smsData, String psiSmsc, String dialedNumber, int seqId) {
+        ImsLog.d("smsFormat : " + smsFormat + ", encodedDataLength = " + smsData
+                + ", psiSmsc = " + psiSmsc + ", dialedNumber = " + dialedNumber
+                + ", seqId = " + seqId );
+
+        if (smsData == null || (dialedNumber == null && psiSmsc == null)) {
+            processNotifySendMoSmsError(smsFormat, seqId);
+            return false;
+        }
+
+        Parcel parcel = Parcel.obtain();
+        if (parcel == null) {
+            ImsLog.e("parcel is null");
+            processNotifySendMoSmsError(smsFormat, seqId);
+            return false;
+        }
+
+        String targetAddress = psiSmsc;
+
+        if (mUseDialedNumber) {
+            targetAddress = dialedNumber;
         }
 
         parcel.writeInt(MtsJni.NOTI_MTSENABLER_SEND_MO_SMS);

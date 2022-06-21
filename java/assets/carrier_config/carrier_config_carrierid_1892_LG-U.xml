@@ -135,4 +135,7 @@
         <item value="P-SKT-BYE-CAUSE"/>
         <item value="P-TTA-VoLTE-Info"/>
     </string-array>
+
+    <!-- Mts -->
+    <int name="sms_request_uri_type_int" value="1"/>
 </carrier_config>

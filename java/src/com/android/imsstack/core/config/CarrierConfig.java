@@ -861,6 +861,11 @@ public class CarrierConfig {
                 "sdp_reoffer_fullcapa";
         public static final String KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
                 "text_hold_with_direction_inactive_bool";
+        // Mts
+        public static final String KEY_SMS_REQUEST_URI_TYPE_INT =
+                "sms_request_uri_type_int";
+        public static final String KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL =
+                "sms_use_dialed_number_for_request_uri_bool";
         // Ut/Xcap
         public static final String KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL =
                 "ut_support_cf_action_erasure_bool";

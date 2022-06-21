@@ -50,7 +50,7 @@ private:
 public:
     enum
     {
-        SCHEME_UNKNOWN = 0,
+        SCHEME_UNKNOWN = -1,
         SCHEME_TEL,
         SCHEME_SIP,
         SCHEME_SIPS

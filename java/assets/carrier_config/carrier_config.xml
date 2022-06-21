@@ -521,6 +521,10 @@
     <boolean name="sdp_reoffer_fullcapa" value="true"/>
     <boolean name="text_hold_with_direction_inactive_bool" value="false"/>
 
+    <!-- Mts -->
+    <int name="sms_request_uri_type_int" value="-1"/>
+    <boolean name="sms_use_dialed_number_for_request_uri_bool" value="false"/>
+
     <!-- Ut/Xcap -->
     <boolean name="ut_support_cf_action_erasure_bool" value="true"/>
     <boolean name="ut_query_cf_all_and_cf_all_conditional_support_bool" value="true"/>

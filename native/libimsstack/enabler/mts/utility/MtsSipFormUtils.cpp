@@ -15,6 +15,8 @@
  */
 
 #include "AString.h"
+#include "CarrierConfig.h"
+#include "Configuration.h"
 #include "IMSLib.h"
 #include "IMSStrLib.h"
 #include "IPAddress.h"
@@ -22,11 +24,10 @@
 #include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "SipParameter.h"
+#include "configuration/MtsConfigurationManager.h"
 #include "helper/dialing/MtsDialingPlan.h"
 #include "utility/MtsSipFormUtils.h"
 #include "utility/MtsSmUtils.h"
-
-#include "Configuration.h"
 
 __IMS_TRACE_TAG_COM_SMS__;
 
@@ -39,8 +40,21 @@ MtsSipFormUtils::MtsSipFormUtils(IN IMS_SINT32 nSlotId) :
 {
     IMS_TRACE_I("+MtsSipFormUtils", 0, 0, 0);
 
-    // TODO: Need to check "header_info_target_scheme" and "header_info_target_scheme"
-    m_pMtsDialingPlan = new MtsDialingPlan(nSlotId, MtsDialingPlan::NUMBER_FORMAT_GLOBAL, "tel");
+    MtsConfigurationManager* pMtsConfigurationManager = new MtsConfigurationManager();
+    AString strUriScheme;
+    if (pMtsConfigurationManager->GetRequestUriType() ==
+            CarrierConfig::Ims::REQUEST_URI_FORMAT_TEL)
+    {
+        strUriScheme = "tel";
+    }
+    else if (pMtsConfigurationManager->GetRequestUriType() ==
+            CarrierConfig::Ims::REQUEST_URI_FORMAT_SIP)
+    {
+        strUriScheme = "sip";
+    }
+
+    m_pMtsDialingPlan = new MtsDialingPlan(
+            nSlotId, MtsDialingPlan::NUMBER_FORMAT_GLOBAL, strUriScheme);
 }
 
 PUBLIC

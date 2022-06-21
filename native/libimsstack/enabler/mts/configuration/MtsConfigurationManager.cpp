@@ -23,11 +23,14 @@
 #include "ServiceThread.h"
 #include "ServiceConfig.h"
 
+#include "utility/MtsSipFormUtils.h"
+
 __IMS_TRACE_TAG_COM_SMS__;
 
 PUBLIC
 MtsConfigurationManager::MtsConfigurationManager() :
-        m_objCarrierConfig(MtsCarrierConfigItems())
+        m_objCarrierConfig(MtsCarrierConfigItems()),
+        m_objAsset(MtsAssetItems())
 {
 }
 
@@ -42,18 +45,32 @@ void MtsConfigurationManager::Init()
             ConfigService::GetConfigService()->GetCarrierConfig(ThreadService::GetCurrentSlotId());
     piCc->AddListener(this);
 
-    UpdateMtsConfig(piCc);
+    UpdateMtsCarrierConfig(piCc);
+    UpdateMtsAsset(piCc);
 }
 
 PUBLIC
-void MtsConfigurationManager::UpdateMtsConfig(IN const ICarrierConfig* piCc)
+void MtsConfigurationManager::UpdateMtsCarrierConfig(IN const ICarrierConfig* piCc)
 {
-    IMS_TRACE_I("UpdateMtsConfig", 0, 0, 0);
+    IMS_TRACE_I("UpdateMtsCarrierConfig", 0, 0, 0);
 
+    m_objCarrierConfig.nRequestUriType =
+            piCc->GetInt(CarrierConfig::Ims::KEY_REQUEST_URI_TYPE_INT);
     m_objCarrierConfig.bSmsCsfbRetryOnFailure =
             piCc->GetInt(CarrierConfig::ImsSms::KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL);
     m_objCarrierConfig.nSmsOverImsFormat =
             piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_FORMAT_INT);
+}
+
+PUBLIC
+void MtsConfigurationManager::UpdateMtsAsset(IN const ICarrierConfig* piCc)
+{
+    IMS_TRACE_I("UpdateMtsAsset", 0, 0, 0);
+
+    m_objAsset.nSmsRequestUriType =
+            piCc->GetInt(CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT);
+    m_objAsset.bUseDialedNumber =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL);
 }
 
 PUBLIC VIRTUAL void MtsConfigurationManager::CarrierConfig_NotifyConfigChanged(
@@ -63,10 +80,26 @@ PUBLIC VIRTUAL void MtsConfigurationManager::CarrierConfig_NotifyConfigChanged(
     {
         ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(
                 ThreadService::GetCurrentSlotId());
-        UpdateMtsConfig(piCc);
+        UpdateMtsCarrierConfig(piCc);
+        UpdateMtsAsset(piCc);
     }
 }
 
+// IMS Public Carrier Config
+PUBLIC
+IMS_SINT32 MtsConfigurationManager::GetRequestUriType() const
+{
+    if (m_objAsset.nSmsRequestUriType == MtsSipFormUtils::SCHEME_UNKNOWN)
+    {
+        return m_objCarrierConfig.nRequestUriType;
+    }
+    else
+    {
+        return m_objAsset.nSmsRequestUriType;
+    }
+}
+
+// Carrier Config
 PUBLIC
 IMS_BOOL MtsConfigurationManager::IsSmsCsfbRetryOnFailure() const
 {
@@ -77,4 +110,10 @@ PUBLIC
 IMS_SINT32 MtsConfigurationManager::GetSmsOverImsFormat() const
 {
     return m_objCarrierConfig.nSmsOverImsFormat;
+}
+
+PUBLIC
+IMS_BOOL MtsConfigurationManager::IsUseDialedNumber() const
+{
+    return m_objAsset.bUseDialedNumber;
 }

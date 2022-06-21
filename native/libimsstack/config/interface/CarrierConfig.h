@@ -992,6 +992,9 @@ public:
         static const IMS_CHAR KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL[];
         static const IMS_CHAR KEY_AUDIO_MAXRED_INT[];
         static const IMS_CHAR KEY_SDP_REOFFER_FULLCAPA[];
+        // Mts
+        static const IMS_CHAR KEY_SMS_REQUEST_URI_TYPE_INT[];
+        static const IMS_CHAR KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[];
         // Uce
         static const IMS_CHAR KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[];
 

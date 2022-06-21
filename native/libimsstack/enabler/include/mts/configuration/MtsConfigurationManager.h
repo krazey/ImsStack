@@ -18,6 +18,7 @@
 #define MTS_CONFIGURATION_MANAGER_H_
 
 #include "configuration/MtsCarrierConfigItems.h"
+#include "configuration/MtsAssetItems.h"
 #include "ICarrierConfigListener.h"
 
 class ICarrierConfig;
@@ -31,17 +32,25 @@ public:
     MtsConfigurationManager& operator=(IN const MtsConfigurationManager&) = delete;
 
     void Init();
-    void UpdateMtsConfig(IN const ICarrierConfig* piCc);
+    void UpdateMtsCarrierConfig(IN const ICarrierConfig* piCc);
+    void UpdateMtsAsset(IN const ICarrierConfig* piCc);
 
     // ICarrierConfigListener
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
-    // sms configurations
-    IMS_BOOL IsSmsCsfbRetryOnFailure() const;  // KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL
-    IMS_SINT32 GetSmsOverImsFormat() const;    // KEY_SMS_OVER_IMS_FORMAT_INT
+    // ims public carrier-config
+    IMS_SINT32 GetRequestUriType() const;    // tel = 0, sip = 1
+
+    // sms carrier configurations
+    IMS_BOOL IsSmsCsfbRetryOnFailure() const;
+    IMS_SINT32 GetSmsOverImsFormat() const;
+
+    // sms asset
+    IMS_BOOL IsUseDialedNumber() const;
 
 private:
     MtsCarrierConfigItems m_objCarrierConfig;
+    MtsAssetItems m_objAsset;
 };
 
 #endif

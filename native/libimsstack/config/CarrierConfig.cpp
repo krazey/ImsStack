@@ -1114,6 +1114,11 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_
         "support_multi_config_in_early_session_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT[] = "audio_maxred_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SDP_REOFFER_FULLCAPA[] = "sdp_reoffer_fullcapa";
+// Mts
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT[] =
+        "sms_request_uri_type_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[] =
+        "sms_use_dialed_number_for_request_uri_bool";
 // Uce
 const IMS_CHAR CarrierConfig::Assets::KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[] =
         "add_video_tag_contact_header_in_publish_bool";

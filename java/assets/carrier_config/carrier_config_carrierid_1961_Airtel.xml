@@ -85,4 +85,6 @@
         <item value="320"/>
     </int-array>
 
+    <!-- Mts -->
+    <int name="sms_request_uri_type_int" value="1"/>
 </carrier_config>

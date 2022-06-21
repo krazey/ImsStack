@@ -14,31 +14,29 @@
  * limitations under the License.
  */
 
-#ifndef MTS_CARRIER_CONFIG_ITEMS_H_
-#define MTS_CARRIER_CONFIG_ITEMS_H_
+#ifndef MTS_ASSET_ITEMS_H_
+#define MTS_ASSET_ITEMS_H_
 
+#include "AString.h"
 #include "IMSTypeDef.h"
 #include "IMSVector.h"
 
-struct MtsCarrierConfigItems
+struct MtsAssetItems
 {
 public:
-    MtsCarrierConfigItems() :
-            nRequestUriType(0),
-            bSmsCsfbRetryOnFailure(IMS_FALSE),
-            nSmsOverImsFormat(0)
+    MtsAssetItems() :
+            nSmsRequestUriType(-1),
+            bUseDialedNumber(IMS_FALSE)
     {
     }
 
-    MtsCarrierConfigItems(IN const MtsCarrierConfigItems&) = delete;
-    MtsCarrierConfigItems& operator=(IN const MtsCarrierConfigItems&) = delete;
+    MtsAssetItems(IN const MtsAssetItems&) = delete;
+    MtsAssetItems& operator=(IN const MtsAssetItems&) = delete;
 
 public:
-    // ims configurations
-    IMS_SINT32 nRequestUriType;
-    // sms configurations
-    IMS_BOOL bSmsCsfbRetryOnFailure;
-    IMS_SINT32 nSmsOverImsFormat;
+    // sms asset
+    IMS_SINT32 nSmsRequestUriType;
+    IMS_BOOL bUseDialedNumber;
 };
 
 #endif

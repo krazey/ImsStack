@@ -20,6 +20,7 @@
 #include "IMSLib.h"
 #include "ImsIdentity.h"
 #include "helper/dialing/MtsDialingPlan.h"
+#include "utility/MtsSipFormUtils.h"
 
 __IMS_TRACE_TAG_COM_SMS__;
 
@@ -94,7 +95,7 @@ AString MtsDialingPlan::Translate(IN const AString& strNumber, IN IMS_BOOL bAquo
 
     IMS_SINT32 nScheme = TranslateScheme(strNumber);
 
-    if (nScheme != SCHEME_TEL)
+    if (nScheme != MtsSipFormUtils::SCHEME_TEL)
     {
         if (bUssi)
         {
@@ -521,18 +522,18 @@ IMS_SINT32 MtsDialingPlan::TranslateScheme(IN const AString& /* strNumber */) co
 {
     if (m_strScheme.EqualsIgnoreCase("tel"))
     {
-        return SCHEME_TEL;
+        return MtsSipFormUtils::SCHEME_TEL;
     }
     else if (m_strScheme.EqualsIgnoreCase("sip"))
     {
-        return SCHEME_SIP;
+        return MtsSipFormUtils::SCHEME_SIP;
     }
     else if (m_strScheme.EqualsIgnoreCase("sips"))
     {
-        return SCHEME_SIPS;
+        return MtsSipFormUtils::SCHEME_SIPS;
     }
 
-    return SCHEME_UNKNOWN;
+    return MtsSipFormUtils::SCHEME_UNKNOWN;
 }
 
 PROTECTED GLOBAL IMS_SINT32 MtsDialingPlan::GetDialedNumberFormat(IN const AString& strDial)

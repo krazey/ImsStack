@@ -178,6 +178,9 @@
     <boolean name="text_hold_with_direction_inactive_bool" value="true"/>
     <boolean name="incoming_resume_event_support_bool" value="true"/>
 
+    <!-- Mts -->
+    <boolean name="sms_use_dialed_number_for_request_uri_bool" value="true"/>
+
     <!-- Uce -->
     <int name="imsuce.expire_value_publish_sec_int" value="1200"/>
     <int name="imsuce.extended_expire_value_publish_sec_int" value="86400"/>
