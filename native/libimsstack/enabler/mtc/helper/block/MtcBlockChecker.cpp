@@ -8,8 +8,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcBlockChecker::MtcBlockChecker(
-        IN const IMSList<IMtcBlockRule*>& lstRules, IN IMtcBlockCheckListener& objListener) :
-        m_objListener(objListener),
+        IN const IMSList<IMtcBlockRule*>& lstRules, IN IMtcBlockCheckListener* pListener) :
+        m_pListener(pListener),
         m_lstRules(lstRules),
         m_nPendingCount(0)
 {
@@ -23,16 +23,6 @@ MtcBlockChecker::~MtcBlockChecker()
         IMtcBlockRule* pRule = m_lstRules.GetAt(nIndex);
         delete pRule;
     }
-}
-
-PUBLIC GLOBAL IMSList<IMtcBlockRule*> MtcBlockChecker::GetCallUpdateRules(
-        IN IMtcCallContext& /* objContext */)
-{
-    IMSList<IMtcBlockRule*> lstRules;
-
-    // TODO:
-
-    return lstRules;
 }
 
 PUBLIC
@@ -96,7 +86,14 @@ void MtcBlockChecker::OnBlockRuleChecked(IN IMtcBlockChecker::Result objResult)
 
     if (m_nPendingCount <= 0)
     {
-        m_objListener.OnBlockChecked(objResult);
+        if (m_pListener != IMS_NULL)
+        {
+            m_pListener->OnBlockChecked(objResult);
+        }
+        else
+        {
+            IMS_TRACE_D("OnBlockRuleChecked : No listener", 0, 0, 0);
+        }
     }
 }
 

@@ -497,7 +497,7 @@ PUBLIC VIRTUAL MtcSession* MtcCall::CreateSession()
 PUBLIC VIRTUAL IMtcBlockChecker* MtcCall::CreateBlockChecker(
         IN const IMSList<IMtcBlockRule*>& lstRules)
 {
-    return new MtcBlockChecker(lstRules, *this);
+    return new MtcBlockChecker(lstRules, this);
 }
 
 PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
