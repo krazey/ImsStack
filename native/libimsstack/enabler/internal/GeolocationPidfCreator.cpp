@@ -1,42 +1,45 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170704  hwangoo.park@             Created
-    </table>
-
-    Description
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "IMSUUID.h"
 #include "ServiceMemory.h"
-#include "ServiceTrace.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
+#include "ServiceTrace.h"
 #include "TextParser.h"
-#include "IMSUUID.h"
+
 #include "Configuration.h"
 #include "ISubscriberConfig.h"
+
 #include "IXmlStreamWriter.h"
 #include "XmlFactory.h"
+
 #include "GeolocationPidfCreator.h"
 
 __IMS_TRACE_TAG_USER_DECL__("Geolocation");
 
 #define DEFAULT_TUPLE_ID "VoLte"
 
-
-
-LOCAL
-void geolocationPidfCreator_CreateEndElement(IN_OUT IXmlStreamWriter *piWriter)
+LOCAL void geolocationPidfCreator_CreateEndElement(IN_OUT IXmlStreamWriter* piWriter)
 {
     piWriter->WriteEndElement();
     piWriter->WriteCharacters(TextParser::STR_LF);
 }
 
-LOCAL
-void geolocationPidfCreator_CreateRootElement(IN_OUT IXmlStreamWriter *piWriter,
-        IN const AString &strEntityUri, IN IMS_SINT32 nNamespaces)
+LOCAL void geolocationPidfCreator_CreateRootElement(IN_OUT IXmlStreamWriter* piWriter,
+        IN const AString& strEntityUri, IN IMS_SINT32 nNamespaces)
 {
     piWriter->WriteStartElement("presence");
 
@@ -76,17 +79,14 @@ void geolocationPidfCreator_CreateRootElement(IN_OUT IXmlStreamWriter *piWriter,
     piWriter->WriteCharacters(TextParser::STR_LF);
 }
 
-LOCAL
-void geolocationPidfCreator_CreateXMLStartLine(IN_OUT IXmlStreamWriter *piWriter)
+LOCAL void geolocationPidfCreator_CreateXMLStartLine(IN_OUT IXmlStreamWriter* piWriter)
 {
     piWriter->WriteStartDocument("UTF-8", "1.0");
     piWriter->WriteCharacters(TextParser::STR_LF);
 }
 
-LOCAL
-void geolocationPidfCreator_CreateCirclePosition(IN_OUT IXmlStreamWriter *piWriter,
-        IN const AString &strPosition, IN const AString &strRadius,
-        IN const AString &strConfidence)
+LOCAL void geolocationPidfCreator_CreateCirclePosition(IN_OUT IXmlStreamWriter* piWriter,
+        IN const AString& strPosition, IN const AString& strRadius, IN const AString& strConfidence)
 {
     if ((strPosition.GetLength() != 0) || (strRadius.GetLength() != 0))
     {
@@ -126,11 +126,9 @@ void geolocationPidfCreator_CreateCirclePosition(IN_OUT IXmlStreamWriter *piWrit
     }
 }
 
-LOCAL
-void geolocationPidfCreator_CreateEllipsoidPosition(IN_OUT IXmlStreamWriter *piWriter,
-        IN const AString &strPosition,
-        IN const AString &strRadius, IN const AString &strVerticalAccuarcy,
-        IN const AString &strConfidence)
+LOCAL void geolocationPidfCreator_CreateEllipsoidPosition(IN_OUT IXmlStreamWriter* piWriter,
+        IN const AString& strPosition, IN const AString& strRadius,
+        IN const AString& strVerticalAccuarcy, IN const AString& strConfidence)
 {
     if (strPosition.GetLength() != 0 ||
             (strRadius.GetLength() != 0 && strVerticalAccuarcy.GetLength() != 0))
@@ -189,13 +187,12 @@ void geolocationPidfCreator_CreateEllipsoidPosition(IN_OUT IXmlStreamWriter *piW
     }
 }
 
-LOCAL
-void geolocationPidfCreator_CreateCivicAddress(IN_OUT IXmlStreamWriter *piWriter,
-        IN const AString &strCountry, IN const AString &strState,
-        IN const AString &strCity, IN const AString &strPostal)
+LOCAL void geolocationPidfCreator_CreateCivicAddress(IN_OUT IXmlStreamWriter* piWriter,
+        IN const AString& strCountry, IN const AString& strState, IN const AString& strCity,
+        IN const AString& strPostal)
 {
-    if ((strCountry.GetLength() != 0) || (strState.GetLength() != 0)
-            || (strCity.GetLength() != 0) || (strPostal.GetLength() != 0))
+    if ((strCountry.GetLength() != 0) || (strState.GetLength() != 0) ||
+            (strCity.GetLength() != 0) || (strPostal.GetLength() != 0))
     {
         // cl:civicAddress element
         piWriter->WriteStartElement("cl:civicAddress");
@@ -238,15 +235,13 @@ void geolocationPidfCreator_CreateCivicAddress(IN_OUT IXmlStreamWriter *piWriter
     }
 }
 
-LOCAL
-void geolocationPidfCreator_CreatePIDFForDevice(IN_OUT IXmlStreamWriter *piWriter,
-        IN const AString &strDeviceName, IN const AString &strDeviceId,
-        IN const AString &strCountry, IN const AString &strState,
-        IN const AString &strCity, IN const AString &strPostal,
-        IN const AString &strPosition, IN const AString &strRadius,
-        IN const AString &strVerticalAccuracy, IN const AString &strShape,
-        IN const AString &strConfidence,
-        IN const AString &strMethod, IN const AString &strTimeStamp)
+LOCAL void geolocationPidfCreator_CreatePIDFForDevice(IN_OUT IXmlStreamWriter* piWriter,
+        IN const AString& strDeviceName, IN const AString& strDeviceId,
+        IN const AString& strCountry, IN const AString& strState, IN const AString& strCity,
+        IN const AString& strPostal, IN const AString& strPosition, IN const AString& strRadius,
+        IN const AString& strVerticalAccuracy, IN const AString& strShape,
+        IN const AString& strConfidence, IN const AString& strMethod,
+        IN const AString& strTimeStamp)
 {
     // dm:device element
     piWriter->WriteStartElement("dm:device");
@@ -312,15 +307,12 @@ void geolocationPidfCreator_CreatePIDFForDevice(IN_OUT IXmlStreamWriter *piWrite
     geolocationPidfCreator_CreateEndElement(piWriter);
 }
 
-LOCAL
-void geolocationPidfCreator_CreatePIDFForTuple(IN_OUT IXmlStreamWriter *piWriter,
-        IN const AString &strTupleId,
-        IN const AString &strCountry, IN const AString &strState,
-        IN const AString &strCity, IN const AString &strPostal,
-        IN const AString &strPosition, IN const AString &strRadius,
-        IN const AString &strVerticalAccuracy, IN const AString &strShape,
-        IN const AString &strConfidence,
-        IN const AString &strMethod, IN const AString &strTimeStamp)
+LOCAL void geolocationPidfCreator_CreatePIDFForTuple(IN_OUT IXmlStreamWriter* piWriter,
+        IN const AString& strTupleId, IN const AString& strCountry, IN const AString& strState,
+        IN const AString& strCity, IN const AString& strPostal, IN const AString& strPosition,
+        IN const AString& strRadius, IN const AString& strVerticalAccuracy,
+        IN const AString& strShape, IN const AString& strConfidence, IN const AString& strMethod,
+        IN const AString& strTimeStamp)
 {
     // tuple element
     piWriter->WriteStartElement("tuple");
@@ -388,17 +380,14 @@ void geolocationPidfCreator_CreatePIDFForTuple(IN_OUT IXmlStreamWriter *piWriter
     geolocationPidfCreator_CreateEndElement(piWriter);
 }
 
-LOCAL
-void geolocationPidfCreator_CreatePIDF(IN const AString &strEntityUri,
-        IN const AString &strTupleId, IN const AString& strDeviceName,
-        IN const AString &strPredefinedDeviceId,
-        IN const AString &strCountry, IN const AString &strState,
-        IN const AString &strCity, IN const AString &strPostal,
-        IN const AString &strPosition, IN const AString &strRadius,
-        IN const AString &strVerticalAccuracy, IN const AString &strShape,
-        IN const AString &strConfidence,
-        IN const AString &strMethod, IN const AString &strTimeStamp,
-        OUT ByteArray &objContent,
+LOCAL void geolocationPidfCreator_CreatePIDF(IN const AString& strEntityUri,
+        IN const AString& strTupleId, IN const AString& strDeviceName,
+        IN const AString& strPredefinedDeviceId, IN const AString& strCountry,
+        IN const AString& strState, IN const AString& strCity, IN const AString& strPostal,
+        IN const AString& strPosition, IN const AString& strRadius,
+        IN const AString& strVerticalAccuracy, IN const AString& strShape,
+        IN const AString& strConfidence, IN const AString& strMethod,
+        IN const AString& strTimeStamp, OUT ByteArray& objContent,
         IN IMS_SINT32 nNamespaces = GeolocationPidfCreator::NAMESPACE_ALL)
 {
     XmlFactory* pXmlFactory = XmlFactory::GetInstance();
@@ -449,7 +438,7 @@ void geolocationPidfCreator_CreatePIDF(IN const AString &strEntityUri,
     piWriter->WriteEndDocument();
 
     // Set content
-    IMS_CHAR *pszXml = piWriter->Flush();
+    IMS_CHAR* pszXml = piWriter->Flush();
 
     if (pszXml != IMS_NULL)
     {
@@ -464,21 +453,19 @@ void geolocationPidfCreator_CreatePIDF(IN const AString &strEntityUri,
     pXmlFactory->DestroyStreamWriter(piWriter);
 }
 
-
-
 PUBLIC
-GeolocationPidfCreator::GeolocationPidfCreator(IN IMS_SINT32 nSlotId_)
-    : ImsSlot(nSlotId_)
-    , nFeatures(0)
-    , strDeviceName(AString::ConstNull())
-    , strDeviceId(AString::ConstNull())
-    , strTupleId(DEFAULT_TUPLE_ID)
+GeolocationPidfCreator::GeolocationPidfCreator(IN IMS_SINT32 nSlotId) :
+        ImsSlot(nSlotId),
+        m_nFeatures(0),
+        m_strDeviceName(AString::ConstNull()),
+        m_strDeviceId(AString::ConstNull()),
+        m_strTupleId(DEFAULT_TUPLE_ID)
 {
-    PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo()->GetDeviceName(strDeviceName);
+    PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo()->GetDeviceName(m_strDeviceName);
 
-    if (strDeviceName.GetLength() == 0)
+    if (m_strDeviceName.GetLength() == 0)
     {
-        strDeviceName = "Phone";
+        m_strDeviceName = "Phone";
     }
 }
 
@@ -489,10 +476,10 @@ GeolocationPidfCreator::~GeolocationPidfCreator()
 
 // This method creates PIDF for Geolocation with country only.
 PUBLIC
-IMS_BOOL GeolocationPidfCreator::Create(IN const AString &strEntityUri,
-        IN const AString &strCountry, OUT ByteArray &objContent)
+IMS_BOOL GeolocationPidfCreator::Create(
+        IN const AString& strEntityUri, IN const AString& strCountry, OUT ByteArray& objContent)
 {
-    ISystemTime *piSystemTime = SystemTimeService::GetSystemTimeService()->GetSystemTime();
+    ISystemTime* piSystemTime = SystemTimeService::GetSystemTimeService()->GetSystemTime();
     AString strTimeStamp = piSystemTime->GetUtcFormat();
 
     geolocationPidfCreator_CreatePIDF(
@@ -510,8 +497,8 @@ IMS_BOOL GeolocationPidfCreator::Create(IN const AString &strEntityUri,
 // This method creates PIDF for Geolocation based on the option (country info.),
 // but if country is not determined, then don't create PIDF.
 PUBLIC
-IMS_BOOL GeolocationPidfCreator::Create(IN const AString &strEntityUri,
-        IN IMS_BOOL bUnknownCountryAllowed, OUT ByteArray &objContent)
+IMS_BOOL GeolocationPidfCreator::Create(IN const AString& strEntityUri,
+        IN IMS_BOOL bUnknownCountryAllowed, OUT ByteArray& objContent)
 {
     ILocationProperties* piLocation = GetLocationProperties();
 
@@ -523,8 +510,7 @@ IMS_BOOL GeolocationPidfCreator::Create(IN const AString &strEntityUri,
 
     const AString& strCountry = piLocation->GetCountry();
 
-    if (!bUnknownCountryAllowed
-            && ((strCountry.GetLength() == 0) || strCountry.Equals("ZZ")))
+    if (!bUnknownCountryAllowed && ((strCountry.GetLength() == 0) || strCountry.Equals("ZZ")))
     {
         IMS_TRACE_I("Country is empty or unknown", 0, 0, 0);
         return IMS_FALSE;
@@ -569,12 +555,13 @@ IMS_BOOL GeolocationPidfCreator::Create(IN const AString &strEntityUri,
 // This method creates PIDF for Geolocation with country only or country and state.
 // but if country is not determined, then don't create PIDF.
 PUBLIC
-IMS_BOOL GeolocationPidfCreator::CreateWithoutPosition(IN const AString &strEntityUri,
-        IN IMS_BOOL bUnknownCountryAllowed, IN IMS_BOOL bIncludeState,
-        OUT ByteArray &objContent)
+IMS_BOOL GeolocationPidfCreator::CreateWithoutPosition(IN const AString& strEntityUri,
+        IN IMS_BOOL bUnknownCountryAllowed, IN IMS_BOOL bIncludeState, OUT ByteArray& objContent)
 {
     IMS_SINT32 nType = ILocationInfo::LOCATION_ALL;
-    if (bIncludeState == IMS_FALSE) {
+
+    if (bIncludeState == IMS_FALSE)
+    {
         nType = ILocationInfo::LOCATION_POSITION_N_COUNTRY;
     }
 
@@ -588,8 +575,7 @@ IMS_BOOL GeolocationPidfCreator::CreateWithoutPosition(IN const AString &strEnti
 
     const AString& strCountry = piLocation->GetCountry();
 
-    if (!bUnknownCountryAllowed
-            && ((strCountry.GetLength() == 0) || strCountry.Equals("ZZ")))
+    if (!bUnknownCountryAllowed && ((strCountry.GetLength() == 0) || strCountry.Equals("ZZ")))
     {
         IMS_TRACE_I("Country is empty or unknown", 0, 0, 0);
         return IMS_FALSE;
@@ -613,8 +599,8 @@ IMS_BOOL GeolocationPidfCreator::CreateWithoutPosition(IN const AString &strEnti
 // This method creates PIDF for Geolocation with position information.
 // If position is not available, it returns IMS_FALSE.
 PUBLIC
-IMS_BOOL GeolocationPidfCreator::CreateWithPosition(IN const AString &strEntityUri,
-        OUT ByteArray &objContent, IN IMS_SINT32 nConfidence/* = 0*/)
+IMS_BOOL GeolocationPidfCreator::CreateWithPosition(IN const AString& strEntityUri,
+        OUT ByteArray& objContent, IN IMS_SINT32 nConfidence /*= 0*/)
 {
     ILocationProperties* piLocation = GetLocationProperties();
 
@@ -640,8 +626,10 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPosition(IN const AString &strEntityU
     const AString& strCurrentTime = piLocation->GetCurrentTime();
     const AString& strMethod = IsFeatureSet(FEATURE_NO_METHOD) ?\
             AString::ConstNull() : piLocation->GetMethod();
-    const AString& strCountry = IsFeatureSet(FEATURE_NO_COUNTRY_IF_UNKNOWN) && piLocation->GetCountry().Equals("ZZ") ?\
-            AString::ConstNull() : piLocation->GetCountry();
+    const AString& strCountry =
+            IsFeatureSet(FEATURE_NO_COUNTRY_IF_UNKNOWN) && piLocation->GetCountry().Equals("ZZ")
+            ? AString::ConstNull()
+            : piLocation->GetCountry();
     const AString& strState = piLocation->GetState();
     const AString& strCity = piLocation->GetCity();
     const AString& strPostal = piLocation->GetPostal();
@@ -675,10 +663,11 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPosition(IN const AString &strEntityU
 // The PIDF will not have City, State, and Zip code information.
 // If position is not available, it returns IMS_FALSE.
 PUBLIC
-IMS_BOOL GeolocationPidfCreator::CreateWithPositionAndCountry(IN const AString &strEntityUri,
-        OUT ByteArray &objContent, IN IMS_SINT32 nConfidence/* = 0*/)
+IMS_BOOL GeolocationPidfCreator::CreateWithPositionAndCountry(IN const AString& strEntityUri,
+        OUT ByteArray& objContent, IN IMS_SINT32 nConfidence /*= 0*/)
 {
-    ILocationProperties* piLocation = GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);
+    ILocationProperties* piLocation =
+            GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);
 
     if (piLocation == IMS_NULL)
     {
@@ -702,8 +691,10 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPositionAndCountry(IN const AString &
     const AString& strCurrentTime = piLocation->GetCurrentTime();
     const AString& strMethod = IsFeatureSet(FEATURE_NO_METHOD) ?\
             AString::ConstNull() : piLocation->GetMethod();
-    const AString& strCountry = IsFeatureSet(FEATURE_NO_COUNTRY_IF_UNKNOWN) && piLocation->GetCountry().Equals("ZZ") ?\
-            AString::ConstNull() : piLocation->GetCountry();
+    const AString& strCountry =
+            IsFeatureSet(FEATURE_NO_COUNTRY_IF_UNKNOWN) && piLocation->GetCountry().Equals("ZZ")
+            ? AString::ConstNull()
+            : piLocation->GetCountry();
     const AString& strAltitude = piLocation->GetAltitude();
     const AString& strVerticalAccuracy = piLocation->GetVerticalAccuracy();
     AString strPosition;
@@ -734,8 +725,8 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPositionAndCountry(IN const AString &
 // This method creates PIDF for Geolocation with position information without CIVIC.
 // If position is not available, it returns IMS_FALSE.
 PUBLIC
-IMS_BOOL GeolocationPidfCreator::CreateWithoutCivic(IN const AString &strEntityUri,
-        OUT ByteArray &objContent, IN IMS_SINT32 nConfidence/* = 0*/)
+IMS_BOOL GeolocationPidfCreator::CreateWithoutCivic(IN const AString& strEntityUri,
+        OUT ByteArray& objContent, IN IMS_SINT32 nConfidence /*= 0*/)
 {
     ILocationProperties* piLocation = GetLocationProperties(ILocationInfo::LOCATION_POSITION);
 
@@ -790,13 +781,13 @@ IMS_BOOL GeolocationPidfCreator::CreateWithoutCivic(IN const AString &strEntityU
 
 // IMEI URN or UUID
 PUBLIC
-void GeolocationPidfCreator::SetDeviceId(IN const AString &strId)
+void GeolocationPidfCreator::SetDeviceId(IN const AString& strId)
 {
-    if (!strDeviceId.Equals(strId))
+    if (!m_strDeviceId.Equals(strId))
     {
-        IMS_TRACE_D("DeviceId :: %s >> %s", strDeviceId.GetStr(), strId.GetStr(), 0);
+        IMS_TRACE_D("DeviceId :: %s >> %s", m_strDeviceId.GetStr(), strId.GetStr(), 0);
 
-        strDeviceId = strId;
+        m_strDeviceId = strId;
     }
 }
 
@@ -804,15 +795,15 @@ void GeolocationPidfCreator::SetDeviceId(IN const AString &strId)
 PUBLIC
 void GeolocationPidfCreator::SetTupleId(IN const AString& strId)
 {
-    if (!strTupleId.Equals(strId))
+    if (!m_strTupleId.Equals(strId))
     {
-        IMS_TRACE_D("TupleId :: %s >> %s", strTupleId.GetStr(), strId.GetStr(), 0);
+        IMS_TRACE_D("TupleId :: %s >> %s", m_strTupleId.GetStr(), strId.GetStr(), 0);
 
-        strTupleId = strId;
+        m_strTupleId = strId;
 
-        if (strTupleId.GetLength() == 0)
+        if (m_strTupleId.GetLength() == 0)
         {
-            strTupleId = DEFAULT_TUPLE_ID;
+            m_strTupleId = DEFAULT_TUPLE_ID;
         }
     }
 }
@@ -836,22 +827,10 @@ AString GeolocationPidfCreator::CreateEntityUri(IN IMS_SINT32 nSlotId)
 }
 
 PRIVATE
-const AString& GeolocationPidfCreator::GetDeviceId() const
-{
-    return strDeviceId;
-}
-
-PRIVATE
-const AString& GeolocationPidfCreator::GetDeviceName() const
-{
-    return strDeviceName;
-}
-
-PRIVATE
 ILocationProperties* GeolocationPidfCreator::GetLocationProperties(IN IMS_SINT32 nType) const
 {
-    ILocationInfo* piLocationInfo
-            = PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(GetSlotId());
+    ILocationInfo* piLocationInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(GetSlotId());
 
     return (piLocationInfo != IMS_NULL) ? piLocationInfo->GetLocationProperties(nType) : IMS_NULL;
 }
@@ -861,7 +840,7 @@ const AString& GeolocationPidfCreator::GetTupleId() const
 {
     if (IsFeatureSet(FEATURE_FORMAT_TUPLE))
     {
-        return strTupleId;
+        return m_strTupleId;
     }
 
     return AString::ConstNull();

@@ -1,47 +1,43 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170320  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "DeviceConfig.h"
 #include "ServiceConfig.h"
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-#include "ServiceMessage.h"
 #include "ServiceEvent.h"
+#include "ServiceMemory.h"
+#include "ServiceMessage.h"
+#include "ServiceTrace.h"
 #include "SystemConfigManager.h"
+
 #include "Configuration.h"
-#include "GeolocationHelper.h"
+
 #include "EngineLoader.h"
+
 #include "EnablerFactory.h"
 #include "EnablerThread.h"
+#include "GeolocationHelper.h"
 
 __IMS_TRACE_TAG_USER_DECL__("EnablerThread");
 
 PUBLIC
-EnablerThread::EnablerThread(IN EnablerFactory* pEnablerFactory_, IN IMS_SINT32 nSlotId_) :
+EnablerThread::EnablerThread(IN EnablerFactory* pEnablerFactory, IN IMS_SINT32 nSlotId) :
         ImsAppThread(),
-        pEnablerFactory(pEnablerFactory_),
-        nSlotId(nSlotId_),
-        nState(STATE_INACTIVE)
+        m_pEnablerFactory(pEnablerFactory),
+        m_nSlotId(nSlotId),
+        m_nState(STATE_INACTIVE)
 {
-}
-
-PUBLIC VIRTUAL
-EnablerThread::~EnablerThread()
-{
-}
-
-PUBLIC
-IMS_SINT32 EnablerThread::GetSlotId() const
-{
-    return nSlotId;
 }
 
 PUBLIC
@@ -56,18 +52,16 @@ IMS_BOOL EnablerThread::Initialize()
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL EnablerThread::OnStart(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL IMS_BOOL EnablerThread::OnStart(IN ImsMessage& objMsg)
 {
-    IMS_TRACE_D("OnStart :: slotId=%d, %s",
-            GetSlotId(), DeviceConfig::ToString().GetStr(), 0);
+    IMS_TRACE_D("OnStart :: slotId=%d, %s", GetSlotId(), DeviceConfig::ToString().GetStr(), 0);
 
-    ImsAppThread::OnStart(objMSG);
+    ImsAppThread::OnStart(objMsg);
 
     IMS_BOOL bInitOnStart = IMS_FALSE;
-    const SystemConfig* pSC = SystemConfigManager::GetInstance()->GetConfig(GetSlotId());
+    const SystemConfig* pSc = SystemConfigManager::GetInstance()->GetConfig(GetSlotId());
 
-    if ((pSC != IMS_NULL) && (pSC->GetOperator().GetLength() > 0))
+    if ((pSc != IMS_NULL) && (pSc->GetOperator().GetLength() > 0))
     {
         if (!SystemConfig::IsMultiSimEnabled())
         {
@@ -77,7 +71,7 @@ IMS_BOOL EnablerThread::OnStart(IN IMSMSG &objMSG)
         {
             bInitOnStart = IMS_TRUE;
         }
-        else if (pSC->IsDds())
+        else if (pSc->IsDds())
         {
             bInitOnStart = IMS_TRUE;
         }
@@ -92,7 +86,7 @@ IMS_BOOL EnablerThread::OnStart(IN IMSMSG &objMSG)
         EngineLoader::Initialize(GetSlotId());
         InitializeGlobals();
 
-        pEnablerFactory->CreateEnablers(GetSlotId());
+        m_pEnablerFactory->CreateEnablers(GetSlotId());
 
         if (StartEnablers())
         {
@@ -104,8 +98,7 @@ IMS_BOOL EnablerThread::OnStart(IN IMSMSG &objMSG)
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL EnablerThread::OnTerminate(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL IMS_BOOL EnablerThread::OnTerminate(IN ImsMessage& objMsg)
 {
     IMS_TRACE_D("OnTerminate :: slotId=%d", GetSlotId(), 0, 0);
 
@@ -115,25 +108,23 @@ IMS_BOOL EnablerThread::OnTerminate(IN IMSMSG &objMSG)
         SetState(STATE_INACTIVE);
     }
 
-    pEnablerFactory->DestroyEnablers(GetSlotId());
+    m_pEnablerFactory->DestroyEnablers(GetSlotId());
 
     UninitializeGlobals();
     EngineLoader::Uninitialize(GetSlotId());
 
-    return ImsAppThread::OnTerminate(objMSG);
+    return ImsAppThread::OnTerminate(objMsg);
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL EnablerThread::OnMessage(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL IMS_BOOL EnablerThread::OnMessage(IN ImsMessage& objMsg)
 {
-    switch (objMSG.GetName())
+    switch (objMsg.GetName())
     {
         case TMSG_CONTROL_ENABLERS:
-            ControlEnablersInternal(LONG_TO_INT(objMSG.nWparam));
+            ControlEnablersInternal(LONG_TO_INT(objMsg.nWparam));
             return IMS_TRUE;
-
         default:
-            return ImsAppThread::OnMessage(objMSG);
+            return ImsAppThread::OnMessage(objMsg);
     }
 }
 
@@ -165,7 +156,7 @@ void EnablerThread::ControlEnablersInternal(IN IMS_SINT32 nCtrlFlags)
 
     if (IsControlSet(nCtrlFlags, CONTROL_DESTROY))
     {
-        pEnablerFactory->DestroyEnablers(GetSlotId());
+        m_pEnablerFactory->DestroyEnablers(GetSlotId());
 
         UninitializeGlobals();
         EngineLoader::Uninitialize(GetSlotId());
@@ -180,7 +171,7 @@ void EnablerThread::ControlEnablersInternal(IN IMS_SINT32 nCtrlFlags)
     {
         // For hot swap, the system features will be re-calculated
         // when re-starting the enablers.
-        if (nSlotId == IMS_SLOT_0)
+        if (m_nSlotId == IMS_SLOT_0)
         {
             SystemConfigManager::CacheSystemFeatures();
         }
@@ -189,7 +180,7 @@ void EnablerThread::ControlEnablersInternal(IN IMS_SINT32 nCtrlFlags)
         EngineLoader::Initialize(GetSlotId());
         InitializeGlobals();
 
-        pEnablerFactory->CreateEnablers(GetSlotId());
+        m_pEnablerFactory->CreateEnablers(GetSlotId());
     }
 
     if (IsControlSet(nCtrlFlags, CONTROL_START))
@@ -211,17 +202,17 @@ void EnablerThread::NotifyEnablerStartCompleted()
 PROTECTED
 void EnablerThread::SetState(IN IMS_SINT32 nState)
 {
-    if (this->nState != nState)
+    if (m_nState != nState)
     {
-        IMS_TRACE_I("ET%02d :: %d >> %d", GetSlotId(), this->nState, nState);
-        this->nState = nState;
+        IMS_TRACE_I("ET%02d :: %d >> %d", GetSlotId(), m_nState, nState);
+        m_nState = nState;
     }
 }
 
 PROTECTED
 IMS_BOOL EnablerThread::StartEnablers()
 {
-    const IMSList<IEnabler*>* pEnablers = pEnablerFactory->GetEnablers(GetSlotId());
+    const IMSList<IEnabler*>* pEnablers = m_pEnablerFactory->GetEnablers(GetSlotId());
 
     if (pEnablers == IMS_NULL)
     {
@@ -235,7 +226,7 @@ IMS_BOOL EnablerThread::StartEnablers()
 
     for (IMS_UINT32 i = 0; i < pEnablers->GetSize(); i++)
     {
-        IEnabler *piEnabler = pEnablers->GetAt(i);
+        IEnabler* piEnabler = pEnablers->GetAt(i);
 
         if (piEnabler != IMS_NULL)
         {
@@ -250,7 +241,7 @@ IMS_BOOL EnablerThread::StartEnablers()
 PROTECTED
 void EnablerThread::StopEnablers()
 {
-    const IMSList<IEnabler*>* pEnablers = pEnablerFactory->GetEnablers(GetSlotId());
+    const IMSList<IEnabler*>* pEnablers = m_pEnablerFactory->GetEnablers(GetSlotId());
 
     if (pEnablers == IMS_NULL)
     {
@@ -268,7 +259,7 @@ void EnablerThread::StopEnablers()
 
     for ( ; i >= 0; i--)
     {
-        IEnabler *piEnabler = pEnablers->GetAt(i);
+        IEnabler* piEnabler = pEnablers->GetAt(i);
 
         if (piEnabler != IMS_NULL)
         {

@@ -1,15 +1,18 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170221  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
 #include "SystemConfig.h"
@@ -17,24 +20,24 @@
 #include "ConfigEnabler.h"
 #include "EnablerFactory.h"
 #include "service/AosEnabler.h"
-#include "service/UceEnabler.h"
 #include "service/MtcEnabler.h"
 #include "service/MtsEnabler.h"
+#include "service/UceEnabler.h"
 
 PUBLIC
-EnablerFactory::EnablerFactory()
-    : piLock(IMS_NULL)
+EnablerFactory::EnablerFactory() :
+        m_piLock(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
     for (IMS_SINT32 i = 0; i < nSimCount; ++i)
     {
-        objImsEnablers.Add(i, new IMSList<IEnabler*>());
+        m_objImsEnablers.Add(i, new IMSList<IEnabler*>());
     }
 
     if (nSimCount > 1)
     {
-        piLock = MutexService::GetMutexService()->CreateMutex();
+        m_piLock = MutexService::GetMutexService()->CreateMutex();
     }
 }
 
@@ -42,7 +45,7 @@ PUBLIC
 EnablerFactory::~EnablerFactory()
 {
     {
-        LockGuard objLock(piLock);
+        LockGuard objLock(m_piLock);
 
         IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
@@ -50,7 +53,7 @@ EnablerFactory::~EnablerFactory()
         {
             DestroyEnablers(i);
 
-            IMSList<IEnabler*>* pEnablers = objImsEnablers.GetValueAt(i);
+            IMSList<IEnabler*>* pEnablers = m_objImsEnablers.GetValueAt(i);
 
             if (pEnablers != IMS_NULL)
             {
@@ -58,25 +61,25 @@ EnablerFactory::~EnablerFactory()
             }
         }
 
-        objImsEnablers.Clear();
+        m_objImsEnablers.Clear();
     }
 
-    MutexService::GetMutexService()->DestroyMutex(piLock);
+    MutexService::GetMutexService()->DestroyMutex(m_piLock);
 }
 
 PUBLIC
 void EnablerFactory::CreateEnablers(IN IMS_SINT32 nSlotId)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    IMS_SLONG nIndex = objImsEnablers.GetIndexOfKey(nSlotId);
+    IMS_SLONG nIndex = m_objImsEnablers.GetIndexOfKey(nSlotId);
 
     if (nIndex < 0)
     {
         return;
     }
 
-    IMSList<IEnabler*>* pEnablers = objImsEnablers.GetValueAt(nIndex);
+    IMSList<IEnabler*>* pEnablers = m_objImsEnablers.GetValueAt(nIndex);
 
     if ((pEnablers != IMS_NULL) && pEnablers->IsEmpty())
     {
@@ -87,16 +90,16 @@ void EnablerFactory::CreateEnablers(IN IMS_SINT32 nSlotId)
 PUBLIC
 void EnablerFactory::DestroyEnablers(IN IMS_SINT32 nSlotId)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    IMS_SLONG nIndex = objImsEnablers.GetIndexOfKey(nSlotId);
+    IMS_SLONG nIndex = m_objImsEnablers.GetIndexOfKey(nSlotId);
 
     if (nIndex < 0)
     {
         return;
     }
 
-    IMSList<IEnabler*>* pEnablers = objImsEnablers.GetValueAt(nIndex);
+    IMSList<IEnabler*>* pEnablers = m_objImsEnablers.GetValueAt(nIndex);
 
     if ((pEnablers != IMS_NULL) && !pEnablers->IsEmpty())
     {
@@ -104,7 +107,7 @@ void EnablerFactory::DestroyEnablers(IN IMS_SINT32 nSlotId)
 
         for ( ; i >= 0; i--)
         {
-            Enabler *pEnabler = DYNAMIC_CAST(Enabler*, pEnablers->GetAt(i));
+            Enabler* pEnabler = DYNAMIC_CAST(Enabler*, pEnablers->GetAt(i));
 
             if (pEnabler != IMS_NULL)
             {
@@ -119,21 +122,20 @@ void EnablerFactory::DestroyEnablers(IN IMS_SINT32 nSlotId)
 PUBLIC
 const IMSList<IEnabler*>* EnablerFactory::GetEnablers(IN IMS_SINT32 nSlotId) const
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    IMS_SLONG nIndex = objImsEnablers.GetIndexOfKey(nSlotId);
+    IMS_SLONG nIndex = m_objImsEnablers.GetIndexOfKey(nSlotId);
 
     if (nIndex < 0)
     {
         return IMS_NULL;
     }
 
-    return objImsEnablers.GetValueAt(nIndex);
+    return m_objImsEnablers.GetValueAt(nIndex);
 }
 
 PRIVATE
-void EnablerFactory::CreateEnablers(IN IMS_SINT32 nSlotId,
-        OUT IMSList<IEnabler*>*& pEnablers)
+void EnablerFactory::CreateEnablers(IN IMS_SINT32 nSlotId, OUT IMSList<IEnabler*>*& pEnablers)
 {
     pEnablers->Append(new ConfigEnabler(nSlotId));
     pEnablers->Append(new AosEnabler(nSlotId));

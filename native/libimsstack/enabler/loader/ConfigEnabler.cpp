@@ -31,10 +31,10 @@
 #include "GeolocationHelper.h"
 
 PUBLIC
-ConfigEnabler::ConfigEnabler(IN IMS_SINT32 nSlotId)
-    : Enabler(nSlotId)
-    , m_pConfigApp(IMS_NULL)
-    , m_bUseResetWhenClosingSipTcpConnection(IMS_FALSE)
+ConfigEnabler::ConfigEnabler(IN IMS_SINT32 nSlotId) :
+        Enabler(nSlotId),
+        m_pConfigApp(IMS_NULL),
+        m_bUseResetWhenClosingSipTcpConnection(IMS_FALSE)
 {
 }
 
@@ -51,28 +51,28 @@ PRIVATE VIRTUAL
 void ConfigEnabler::Start()
 {
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(GetSlotId());
-    ISipRtConfigHelper* piRTConfigHelper = SipFactory::GetRtConfigHelper(GetSlotId());
+    ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(GetSlotId());
 
-    if (piRTConfigHelper != IMS_NULL)
+    if (piRtConfigHelper != IMS_NULL)
     {
         // Set a socket option (TCP socket address reuse)
         SipRtConfig::SocketOption objSocketOption;
         objSocketOption.nValue = 1;
 
-        piRTConfigHelper->SetConfig(SipRtConfig::CONFIG_I_REUSEADDR, &objSocketOption);
+        piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_REUSEADDR, &objSocketOption);
 
         Configuration* pConfiguration = Configuration::GetInstance();
 
-        if (((pConfiguration->GetTraceOption(GetSlotId()) & ITraceOption::OPT_HIDE_PRIVACY)
-                == ITraceOption::OPT_HIDE_PRIVACY)
-                || IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG())
+        if (((pConfiguration->GetTraceOption(GetSlotId()) & ITraceOption::OPT_HIDE_PRIVACY) ==
+                    ITraceOption::OPT_HIDE_PRIVACY) ||
+                IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG())
         {
             // LOG_EXCLUDING_SERVER_INFO
             SipRtConfig::LogMask objLogMask;
             objLogMask.nValue |= SipRtConfig::LogMask::I_MESSAGE_HIDDEN;
             objLogMask.nValue |= SipRtConfig::LogMask::I_ROUTING_INFO_HIDDEN;
 
-            piRTConfigHelper->SetConfig(SipRtConfig::CONFIG_I_LOG_MASK, &objLogMask);
+            piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_LOG_MASK, &objLogMask);
         }
 
         if (piCc->GetBoolean(
@@ -80,18 +80,18 @@ void ConfigEnabler::Start()
         {
             m_bUseResetWhenClosingSipTcpConnection = IMS_TRUE;
             objSocketOption.nValue = 0;
-            piRTConfigHelper->SetConfig(SipRtConfig::CONFIG_I_LINGER, &objSocketOption);
+            piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_LINGER, &objSocketOption);
 
             objSocketOption.nValue = 3;  // no shutdown
-            piRTConfigHelper->SetConfig(SipRtConfig::CONFIG_I_SHUTDOWN, &objSocketOption);
+            piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_SHUTDOWN, &objSocketOption);
         }
 
         // It's based on the Verizon's requirement, but it will be applied for all the carriers.
-        SipRtConfig::TcpPortRange objTCPPortRange;
+        SipRtConfig::TcpPortRange objTcpPortRange;
 
-        objTCPPortRange.nPortStart = 40000;
-        objTCPPortRange.nPortEnd = 50000;
-        piRTConfigHelper->SetConfig(SipRtConfig::CONFIG_I_TCP_PORT_RANGE, &objTCPPortRange);
+        objTcpPortRange.nPortStart = 40000;
+        objTcpPortRange.nPortEnd = 50000;
+        piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_TCP_PORT_RANGE, &objTcpPortRange);
     }
 
     if (m_pConfigApp != IMS_NULL)
@@ -101,8 +101,8 @@ void ConfigEnabler::Start()
 
     m_pConfigApp = ConfigAppFactory::Create(GetSlotId());
 
-    GeolocationPidfCreator* pPidfCreator
-            = GeolocationHelper::GetInstance()->GetPidfCreator(GetSlotId());
+    GeolocationPidfCreator* pPidfCreator =
+            GeolocationHelper::GetInstance()->GetPidfCreator(GetSlotId());
 
     if (pPidfCreator != IMS_NULL)
     {
@@ -142,8 +142,8 @@ void ConfigEnabler::Start()
 PRIVATE VIRTUAL
 void ConfigEnabler::Stop()
 {
-    GeolocationPidfCreator* pPidfCreator
-            = GeolocationHelper::GetInstance()->GetPidfCreator(GetSlotId());
+    GeolocationPidfCreator* pPidfCreator =
+            GeolocationHelper::GetInstance()->GetPidfCreator(GetSlotId());
 
     if (pPidfCreator != IMS_NULL)
     {
@@ -156,25 +156,25 @@ void ConfigEnabler::Stop()
         ConfigAppFactory::Destroy(m_pConfigApp);
     }
 
-    ISipRtConfigHelper* piRTConfigHelper = SipFactory::GetRtConfigHelper(GetSlotId());
+    ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(GetSlotId());
 
-    if (piRTConfigHelper != IMS_NULL)
+    if (piRtConfigHelper != IMS_NULL)
     {
         SipRtConfig::SocketOption objSocketOption;
 
         objSocketOption.nValue = 1;
-        piRTConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_REUSEADDR, &objSocketOption);
-        piRTConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_LOG_MASK, IMS_NULL);
+        piRtConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_REUSEADDR, &objSocketOption);
+        piRtConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_LOG_MASK, IMS_NULL);
 
         if (m_bUseResetWhenClosingSipTcpConnection)
         {
             objSocketOption.nValue = 0;
-            piRTConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_LINGER, &objSocketOption);
+            piRtConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_LINGER, &objSocketOption);
 
             objSocketOption.nValue = 3;
-            piRTConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_SHUTDOWN, &objSocketOption);
+            piRtConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_SHUTDOWN, &objSocketOption);
         }
 
-        piRTConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_TCP_PORT_RANGE, IMS_NULL);
+        piRtConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_TCP_PORT_RANGE, IMS_NULL);
     }
 }

@@ -1,21 +1,26 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170717  hwangoo.park@             Changed from AppConfigurableParameterManager
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "ServiceEvent.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ServiceEvent.h"
-#include "IConfigurable.h"
+
 #include "Configuration.h"
+#include "IConfigurable.h"
 #include "ImsConfig.h"
+
 #include "base/ConfigApp.h"
 
 __IMS_TRACE_TAG_USER_DECL__("ConfigApp");
@@ -38,37 +43,22 @@ void ConfigApp::Start()
     PostMessage(AMSG_START, 0, 0);
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL ConfigApp::OnPreprocess(IN IMSMSG & /* objMSG */)
+PROTECTED VIRTUAL IMS_BOOL ConfigApp::OnMessage(IN ImsMessage& objMsg)
 {
-    return IMS_FALSE;
-}
-
-PROTECTED VIRTUAL
-IMS_BOOL ConfigApp::OnMessage(IN IMSMSG &objMSG)
-{
-    switch (objMSG.GetName())
+    switch (objMsg.GetName())
     {
-    case AMSG_START:
-        IMS_EVENT_AddListenerForSlotId(IMS_EVENT_CONFIG_UPDATE, this, GetSlotId());
-        break;
-
-    default:
-        return IMS_FALSE;
+        case AMSG_START:
+            IMS_EVENT_AddListenerForSlotId(IMS_EVENT_CONFIG_UPDATE, this, GetSlotId());
+            break;
+        default:
+            return IMS_FALSE;
     }
 
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL ConfigApp::OnPostprocess(IN IMSMSG & /* objMSG */)
-{
-    return IMS_FALSE;
-}
-
-PROTECTED VIRTUAL
-void ConfigApp::Event_NotifyEvent(IN IMS_SINT32 /*nEvent*/,
-        IN IMS_UINT32 /*nWParam*/, IN IMS_UINT32 /*nLParam*/)
+PROTECTED VIRTUAL void ConfigApp::Event_NotifyEvent(
+        IN IMS_SINT32 /*nEvent*/, IN IMS_UINT32 /*nWparam*/, IN IMS_UINT32 /*nLparam*/)
 {
     // Subclass MAY implement this method to handle the external events.
 }
@@ -86,12 +76,12 @@ void ConfigApp::UpdateAllForHidden(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam)
             _TRACE_B_(bSubscriberChanged), _TRACE_B_(bSipConfigChanged),
             _TRACE_B_(bSipConfigVChanged));
 
-    Configuration *pConfiguration = Configuration::GetInstance();
+    Configuration* pConfiguration = Configuration::GetInstance();
 
     // SUBSCRIBER
     if (bSubscriberChanged)
     {
-        const ISubscriberConfig *piSubConfig = pConfiguration->GetSubscriberConfig(GetSlotId());
+        const ISubscriberConfig* piSubConfig = pConfiguration->GetSubscriberConfig(GetSlotId());
 
         if (piSubConfig != IMS_NULL)
         {
@@ -107,7 +97,7 @@ void ConfigApp::UpdateAllForHidden(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam)
     // SIP configuration
     if (bSipConfigChanged)
     {
-        const ISipConfig *piSipConfig = pConfiguration->GetSipConfig(GetSlotId());
+        const ISipConfig* piSipConfig = pConfiguration->GetSipConfig(GetSlotId());
 
         if (piSipConfig != IMS_NULL)
         {
@@ -127,11 +117,11 @@ void ConfigApp::UpdateAllForHidden(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam)
     // SIP configuration V
     if (bSipConfigVChanged)
     {
-        const ISipConfig *piSipConfig = pConfiguration->GetSipConfig(GetSlotId());
+        const ISipConfig* piSipConfig = pConfiguration->GetSipConfig(GetSlotId());
 
         if (piSipConfig != IMS_NULL)
         {
-            const ISipConfigV *piSipConfigV = piSipConfig->GetSipConfigV();
+            const ISipConfigV* piSipConfigV = piSipConfig->GetSipConfigV();
 
             if (piSipConfigV != IMS_NULL)
             {
@@ -146,23 +136,22 @@ void ConfigApp::UpdateAllForHidden(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam)
     }
 }
 
-PROTECTED VIRTUAL
-void ConfigApp::UpdateAllForDM(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam)
+PROTECTED VIRTUAL void ConfigApp::UpdateAllForDm(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam)
 {
     (void) nParam;
 
     IMS_BOOL bSipConfigChanged = ((nItem & ImsConfig::FLAG_IMS_SIP) != 0);
     IMS_BOOL bSipConfigVChanged = ((nItem & ImsConfig::FLAG_IMS_COM_SIP) != 0);
 
-    IMS_TRACE_I("UpdateAllForDM :: sip=%s, sip-v=%s",
-            _TRACE_B_(bSipConfigChanged), _TRACE_B_(bSipConfigVChanged), 0);
+    IMS_TRACE_I("UpdateAllForDm :: sip=%s, sip-v=%s", _TRACE_B_(bSipConfigChanged),
+            _TRACE_B_(bSipConfigVChanged), 0);
 
-    Configuration *pConfiguration = Configuration::GetInstance();
+    Configuration* pConfiguration = Configuration::GetInstance();
 
     // SIP configuration
     if (bSipConfigChanged)
     {
-        const ISipConfig *piSipConfig = pConfiguration->GetSipConfig(GetSlotId());
+        const ISipConfig* piSipConfig = pConfiguration->GetSipConfig(GetSlotId());
 
         if (piSipConfig != IMS_NULL)
         {
@@ -182,11 +171,11 @@ void ConfigApp::UpdateAllForDM(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam)
     // SIP configuration V
     if (bSipConfigVChanged)
     {
-        const ISipConfig *piSipConfig = pConfiguration->GetSipConfig(GetSlotId());
+        const ISipConfig* piSipConfig = pConfiguration->GetSipConfig(GetSlotId());
 
         if (piSipConfig != IMS_NULL)
         {
-            const ISipConfigV *piSipConfigV = piSipConfig->GetSipConfigV();
+            const ISipConfigV* piSipConfigV = piSipConfig->GetSipConfigV();
 
             if (piSipConfigV != IMS_NULL)
             {
@@ -201,101 +190,86 @@ void ConfigApp::UpdateAllForDM(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam)
     }
 }
 
-PROTECTED VIRTUAL
-void ConfigApp::UpdateItemForPST(IN IMS_UINT32 nItem, IN IMS_UINT32 nValue)
+PROTECTED VIRTUAL void ConfigApp::UpdateItemForPst(IN IMS_UINT32 nItem, IN IMS_UINT32 nValue)
 {
-    IMS_TRACE_I("UpdateItemForPST :: item=%d, value=%d", nItem, nValue, 0);
+    IMS_TRACE_I("UpdateItemForPst :: item=%d, value=%d", nItem, nValue, 0);
 
     switch (nItem)
     {
         case ImsConfig::PST_I_PCSCF_ADDRESS:
             UpdateSubscriberConfig(IConfigurable::CP_I_PCSCF_ADDRESS_0);
             break;
-
         case ImsConfig::PST_I_PCSCF_PORT:
             UpdateSubscriberConfig(IConfigurable::CP_I_PCSCF_PORT_0);
             break;
-
         case ImsConfig::PST_I_TV_T1:
             UpdateSipConifgV(IConfigurable::CP_I_TV_T1);
             break;
-
         case ImsConfig::PST_I_TV_T2:
             UpdateSipConifgV(IConfigurable::CP_I_TV_T2);
             break;
-
         case ImsConfig::PST_I_TV_TF:
             UpdateSipConifgV(IConfigurable::CP_I_TV_TF);
             break;
-
         case ImsConfig::PST_I_SESSION_TIMER:
             UpdateSipConifgV(IConfigurable::CP_I_SESSION_EXPIRES);
             break;
-
         case ImsConfig::PST_I_MIN_SE:
             UpdateSipConifgV(IConfigurable::CP_I_SESSION_MINSE);
             break;
-
         default:
             break;
     }
 }
 
-PROTECTED VIRTUAL
-void ConfigApp::UpdateItemForSDM(IN IMS_UINT32 nItem, IN IMS_UINT32 nValue)
+PROTECTED VIRTUAL void ConfigApp::UpdateItemForSdm(IN IMS_UINT32 nItem, IN IMS_UINT32 nValue)
 {
-    IMS_TRACE_I("UpdateItemForSDM :: item=%d, value=%d", nItem, nValue, 0);
+    IMS_TRACE_I("UpdateItemForSdm :: item=%d, value=%d", nItem, nValue, 0);
 
     switch (nItem)
     {
         case ImsConfig::SDM_I_HOME_DOMAIN_NAME:
             UpdateSubscriberConfig(IConfigurable::CP_I_HOME_DOMAIN_NAME);
             break;
-
         case ImsConfig::SDM_I_TV_T1:
             UpdateSipConifgV(IConfigurable::CP_I_TV_T1);
             break;
-
         case ImsConfig::SDM_I_TV_T2:
             UpdateSipConifgV(IConfigurable::CP_I_TV_T2);
             break;
-
         case ImsConfig::SDM_I_TV_TF:
             UpdateSipConifgV(IConfigurable::CP_I_TV_TF);
             break;
-
         case ImsConfig::SDM_I_SIP_SESSION_TIMER:
             UpdateSipConifgV(IConfigurable::CP_I_SESSION_EXPIRES);
             break;
-
         case ImsConfig::SDM_I_MIN_SE:
             UpdateSipConifgV(IConfigurable::CP_I_SESSION_MINSE);
             break;
-
         default:
             break;
     }
 }
 
 PROTECTED
-IMS_BOOL ConfigApp::UpdateSipConifgV(IN IMS_SINT32 nCPI,
-        IN const AString& /*strServiceId = AString::ConstNull()*/)
+IMS_BOOL ConfigApp::UpdateSipConifgV(
+        IN IMS_SINT32 nCpi, IN const AString& /*strServiceId = AString::ConstNull()*/)
 {
-    const ISipConfig *piSipConfig = Configuration::GetInstance()->GetSipConfig(GetSlotId());
+    const ISipConfig* piSipConfig = Configuration::GetInstance()->GetSipConfig(GetSlotId());
 
     if (piSipConfig != IMS_NULL)
     {
-        const ISipConfigV *piSipConfigV = piSipConfig->GetSipConfigV();
+        const ISipConfigV* piSipConfigV = piSipConfig->GetSipConfigV();
 
         if (piSipConfigV != IMS_NULL)
         {
-            IConfigurable *piConfigurable = piSipConfigV->GetConfigurable();
+            IConfigurable* piConfigurable = piSipConfigV->GetConfigurable();
 
             if (piConfigurable != IMS_NULL)
             {
-                if (!piConfigurable->Update(nCPI))
+                if (!piConfigurable->Update(nCpi))
                 {
-                    IMS_TRACE_E(0, "UpdateSipConifgV :: [%d] failed", nCPI, 0, 0);
+                    IMS_TRACE_E(0, "UpdateSipConifgV :: [%d] failed", nCpi, 0, 0);
                     return IMS_FALSE;
                 }
 
@@ -308,20 +282,20 @@ IMS_BOOL ConfigApp::UpdateSipConifgV(IN IMS_SINT32 nCPI,
 }
 
 PROTECTED
-IMS_BOOL ConfigApp::UpdateSubscriberConfig(IN IMS_SINT32 nCPI)
+IMS_BOOL ConfigApp::UpdateSubscriberConfig(IN IMS_SINT32 nCpi)
 {
-    const ISubscriberConfig *piSubsConfig = Configuration::GetInstance(
-            )->GetSubscriberConfig(GetSlotId());
+    const ISubscriberConfig* piSubsConfig =
+            Configuration::GetInstance()->GetSubscriberConfig(GetSlotId());
 
     if (piSubsConfig != IMS_NULL)
     {
-        IConfigurable *piConfigurable = piSubsConfig->GetConfigurable();
+        IConfigurable* piConfigurable = piSubsConfig->GetConfigurable();
 
         if (piConfigurable != IMS_NULL)
         {
-            if (!piConfigurable->Update(nCPI))
+            if (!piConfigurable->Update(nCpi))
             {
-                IMS_TRACE_E(0, "UpdateSubscriberConfig :: [%d] failed", nCPI, 0, 0);
+                IMS_TRACE_E(0, "UpdateSubscriberConfig :: [%d] failed", nCpi, 0, 0);
                 return IMS_FALSE;
             }
 

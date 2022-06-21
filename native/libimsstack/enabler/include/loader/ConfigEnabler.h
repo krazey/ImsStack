@@ -32,8 +32,8 @@ public:
 
 private:
     // IEnabler class
-    virtual void Start();
-    virtual void Stop();
+    void Start() override;
+    void Stop() override;
 
 private:
     ConfigApp* m_pConfigApp;

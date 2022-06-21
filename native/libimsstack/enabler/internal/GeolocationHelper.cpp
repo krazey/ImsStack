@@ -1,19 +1,25 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170704  hwangoo.park@             Created
-    </table>
-
-    Description
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
 #include "SystemConfig.h"
+
 #include "Configuration.h"
+
 #include "GeolocationHelper.h"
 
 class GeolocationHelperPrivate
@@ -22,9 +28,8 @@ public:
     GeolocationHelperPrivate();
     ~GeolocationHelperPrivate();
 
-private:
-    GeolocationHelperPrivate(IN const GeolocationHelperPrivate& objRHS);
-    GeolocationHelperPrivate& operator=(IN const GeolocationHelperPrivate& objRHS);
+    GeolocationHelperPrivate(IN const GeolocationHelperPrivate&) = delete;
+    GeolocationHelperPrivate& operator=(IN const GeolocationHelperPrivate&) = delete;
 
 public:
     inline void CreatePidfCreator(IN IMS_SINT32 nSlotId)
@@ -34,9 +39,9 @@ public:
             return;
         }
 
-        if (ppCreator[nSlotId] == IMS_NULL)
+        if (m_ppCreator[nSlotId] == IMS_NULL)
         {
-            ppCreator[nSlotId] = new GeolocationPidfCreator(nSlotId);
+            m_ppCreator[nSlotId] = new GeolocationPidfCreator(nSlotId);
         }
     }
 
@@ -47,10 +52,10 @@ public:
             return;
         }
 
-        if (ppCreator[nSlotId] != IMS_NULL)
+        if (m_ppCreator[nSlotId] != IMS_NULL)
         {
-            delete ppCreator[nSlotId];
-            ppCreator[nSlotId] = IMS_NULL;
+            delete m_ppCreator[nSlotId];
+            m_ppCreator[nSlotId] = IMS_NULL;
         }
     }
 
@@ -61,99 +66,95 @@ public:
             nSlotId = IMS_SLOT_0;
         }
 
-        return ppCreator[nSlotId];
+        return m_ppCreator[nSlotId];
     }
 
 private:
-    GeolocationPidfCreator **ppCreator;
+    GeolocationPidfCreator** m_ppCreator;
 };
 
 PUBLIC
-GeolocationHelperPrivate::GeolocationHelperPrivate()
-    : ppCreator(IMS_NULL)
+GeolocationHelperPrivate::GeolocationHelperPrivate() :
+        m_ppCreator(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
-    ppCreator = new GeolocationPidfCreator*[nSimCount];
+    m_ppCreator = new GeolocationPidfCreator*[nSimCount];
 
     for (IMS_SINT32 i = 0; i < nSimCount; ++i)
     {
-        ppCreator[i] = IMS_NULL;
+        m_ppCreator[i] = IMS_NULL;
     }
 }
 
 PUBLIC
 GeolocationHelperPrivate::~GeolocationHelperPrivate()
 {
-    if (ppCreator != IMS_NULL)
+    if (m_ppCreator != IMS_NULL)
     {
         IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
         for (IMS_SINT32 i = 0; i < nSimCount; ++i)
         {
-            if (ppCreator[i] != IMS_NULL)
+            if (m_ppCreator[i] != IMS_NULL)
             {
-                delete ppCreator[i];
+                delete m_ppCreator[i];
             }
         }
 
-        delete[] ppCreator;
+        delete[] m_ppCreator;
     }
 }
 
-
-
-PRIVATE GLOBAL
-GeolocationHelper* GeolocationHelper::pGeolocationHelper = IMS_NULL;
+PRIVATE GLOBAL GeolocationHelper* GeolocationHelper::s_pGeolocationHelper = IMS_NULL;
 
 PRIVATE
-GeolocationHelper::GeolocationHelper()
-    : pPrivate(new GeolocationHelperPrivate())
+GeolocationHelper::GeolocationHelper() :
+        m_pPrivate(new GeolocationHelperPrivate())
 {
 }
 
 PRIVATE
 GeolocationHelper::~GeolocationHelper()
 {
-    if (pPrivate != IMS_NULL)
+    if (m_pPrivate != IMS_NULL)
     {
-        delete pPrivate;
+        delete m_pPrivate;
     }
 }
 
 PUBLIC
 void GeolocationHelper::CreatePidfCreator(IN IMS_SINT32 nSlotId)
 {
-    pPrivate->CreatePidfCreator(nSlotId);
+    m_pPrivate->CreatePidfCreator(nSlotId);
 }
 
 PUBLIC
 void GeolocationHelper::DestroyPidfCreator(IN IMS_SINT32 nSlotId)
 {
-    pPrivate->DestroyPidfCreator(nSlotId);
+    m_pPrivate->DestroyPidfCreator(nSlotId);
 }
 
 PUBLIC
 GeolocationPidfCreator* GeolocationHelper::GetPidfCreator(IN IMS_SINT32 nSlotId)
 {
-    return pPrivate->GetPidfCreator(nSlotId);
+    return m_pPrivate->GetPidfCreator(nSlotId);
 }
 
 PUBLIC GLOBAL
 GeolocationHelper* GeolocationHelper::GetInstance()
 {
-    if (pGeolocationHelper == IMS_NULL)
+    if (s_pGeolocationHelper == IMS_NULL)
     {
-        pGeolocationHelper = new GeolocationHelper();
+        s_pGeolocationHelper = new GeolocationHelper();
     }
 
-    return pGeolocationHelper;
+    return s_pGeolocationHelper;
 }
 
 // Creates an identifier for Content-ID header field
-PUBLIC GLOBAL
-AString GeolocationHelper::CreateContentId(IN IMS_SINT32 nSlotId,
-        IN const AString& strDomain/* = AString::ConstNull()*/)
+PUBLIC GLOBAL AString GeolocationHelper::CreateContentId(
+        IN IMS_SINT32 nSlotId, IN const AString& strDomain /*= AString::ConstNull()*/)
 {
     IMS_UINT32 nRandom = IMS_SYS_GetSRandom0();
     IMS_UINT32 nMicroSeconds = IMS_SYS_GetTimeInMicroSeconds();
@@ -166,12 +167,12 @@ AString GeolocationHelper::CreateContentId(IN IMS_SINT32 nSlotId,
     }
     else
     {
-        const ISubscriberConfig* piSubsConfig
-                = Configuration::GetInstance()->GetSubscriberConfig(nSlotId);
+        const ISubscriberConfig* piSubsConfig =
+                Configuration::GetInstance()->GetSubscriberConfig(nSlotId);
 
         strContentId.Sprintf("%05x%05x@%s", nMicroSeconds, nRandom,
-                (piSubsConfig == IMS_NULL) ?\
-                    "unavailable.com" : piSubsConfig->GetHomeDomainName().GetStr());
+                (piSubsConfig == IMS_NULL) ? "unavailable.com"
+                                           : piSubsConfig->GetHomeDomainName().GetStr());
     }
 
     return strContentId;
@@ -181,8 +182,8 @@ AString GeolocationHelper::CreateContentId(IN IMS_SINT32 nSlotId,
 PUBLIC GLOBAL
 const AString& GeolocationHelper::GetCountry(IN IMS_SINT32 nSlotId, IN IMS_BOOL bLocationUpdate)
 {
-    ILocationInfo *piLocationInfo
-            = PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(nSlotId);
+    ILocationInfo* piLocationInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(nSlotId);
 
     if (piLocationInfo == IMS_NULL)
     {
@@ -191,7 +192,7 @@ const AString& GeolocationHelper::GetCountry(IN IMS_SINT32 nSlotId, IN IMS_BOOL 
 
     if (bLocationUpdate)
     {
-        ILocationProperties *piLocation =
+        ILocationProperties* piLocation =
                 piLocationInfo->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);
 
         if (piLocation != IMS_NULL)

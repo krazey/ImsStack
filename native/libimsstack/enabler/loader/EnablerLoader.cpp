@@ -1,36 +1,39 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170510  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "ImsProcess.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ImsProcess.h"
 #include "SystemConfigManager.h"
+
+#include "EnablerFactory.h"
+#include "EnablerLoader.h"
+#include "EnablerThread.h"
 #include "EnablerUtils.h"
 #include "GeolocationHelper.h"
-#include "EnablerFactory.h"
-#include "EnablerThread.h"
-#include "EnablerLoader.h"
 
 __IMS_TRACE_TAG_USER_DECL__("EnablerLoader");
 
-PRIVATE GLOBAL
-EnablerLoader* EnablerLoader::pEnablerLoader = IMS_NULL;
+PRIVATE GLOBAL EnablerLoader* EnablerLoader::s_pEnablerLoader = IMS_NULL;
 
 PRIVATE
-EnablerLoader::EnablerLoader()
-    : pEnablerFactory(IMS_NULL)
-    , objEnablerThreads(IMSMap<IMS_SINT32, EnablerThread*>())
+EnablerLoader::EnablerLoader() :
+        m_pEnablerFactory(IMS_NULL),
+        m_objEnablerThreads(IMSMap<IMS_SINT32, EnablerThread*>())
 {
-    pEnablerFactory = new EnablerFactory();
+    m_pEnablerFactory = new EnablerFactory();
 
     SystemConfigManager::GetInstance()->AddListener(this);
 }
@@ -40,10 +43,10 @@ EnablerLoader::~EnablerLoader()
 {
     SystemConfigManager::GetInstance()->RemoveListener(this);
 
-    if (pEnablerFactory != IMS_NULL)
+    if (m_pEnablerFactory != IMS_NULL)
     {
-        delete pEnablerFactory;
-        pEnablerFactory = IMS_NULL;
+        delete m_pEnablerFactory;
+        m_pEnablerFactory = IMS_NULL;
     }
 }
 
@@ -64,36 +67,35 @@ void EnablerLoader::Init()
 PUBLIC GLOBAL
 void EnablerLoader::CreateInstance()
 {
-    if (pEnablerLoader == IMS_NULL)
+    if (s_pEnablerLoader == IMS_NULL)
     {
-        pEnablerLoader = new EnablerLoader();
+        s_pEnablerLoader = new EnablerLoader();
     }
 }
 
 PUBLIC GLOBAL
 void EnablerLoader::DestroyInstance()
 {
-    if (pEnablerLoader != IMS_NULL)
+    if (s_pEnablerLoader != IMS_NULL)
     {
-        delete pEnablerLoader;
-        pEnablerLoader = IMS_NULL;
+        delete s_pEnablerLoader;
+        s_pEnablerLoader = IMS_NULL;
     }
 }
 
 PUBLIC GLOBAL
 EnablerLoader* EnablerLoader::GetInstance()
 {
-    if (pEnablerLoader == IMS_NULL)
+    if (s_pEnablerLoader == IMS_NULL)
     {
         CreateInstance();
     }
 
-    return pEnablerLoader;
+    return s_pEnablerLoader;
 }
 
-PROTECTED VIRTUAL
-void EnablerLoader::SystemConfig_ConfigurationChanged(
-        IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId/* = IMS_SLOT_ANY*/)
+PROTECTED VIRTUAL void EnablerLoader::SystemConfig_ConfigurationChanged(
+        IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId /*= IMS_SLOT_ANY*/)
 {
     IMS_TRACE_I("SystemConfig :: event=%d, slotId=%d", nEvent, nSlotId, 0);
 
@@ -111,42 +113,42 @@ PRIVATE
 void EnablerLoader::CreateAndAddThread(IN IMS_SINT32 nSlotId)
 {
     AString strThreadName = EnablerUtils::GetEnablerThreadName(nSlotId);
-    EnablerThreadParam objParam(pEnablerFactory, nSlotId);
+    EnablerThreadParam objParam(m_pEnablerFactory, nSlotId);
     ImsProcess* pProcess = ImsProcess::GetInstance();
 
     pProcess->LoadAppThreadWithParam(strThreadName,
             EnablerLoader::CreateThread, reinterpret_cast<void*>(&objParam), nSlotId);
 
-    EnablerThread *pThread = DYNAMIC_CAST(
-            EnablerThread*, pProcess->GetApplicationThread(strThreadName));
+    EnablerThread* pThread =
+            DYNAMIC_CAST(EnablerThread*, pProcess->GetApplicationThread(strThreadName));
 
     if (pThread != IMS_NULL)
     {
         IMS_TRACE_I("EnablerThread created - %s", strThreadName.GetStr(), 0, 0);
 
-        objEnablerThreads.Add(nSlotId, pThread);
+        m_objEnablerThreads.Add(nSlotId, pThread);
     }
 }
 
 PRIVATE
 EnablerThread* EnablerLoader::GetEnablerThread(IN IMS_SINT32 nSlotId) const
 {
-    IMS_SLONG nIndex = objEnablerThreads.GetIndexOfKey(nSlotId);
+    IMS_SLONG nIndex = m_objEnablerThreads.GetIndexOfKey(nSlotId);
 
     if (nIndex < 0)
     {
         return IMS_NULL;
     }
 
-    return objEnablerThreads.GetValueAt(nIndex);
+    return m_objEnablerThreads.GetValueAt(nIndex);
 }
 
 PRIVATE
 void EnablerLoader::ControlEnablers(IN IMS_SINT32 nSlotId)
 {
-    SystemConfigManager* pSCM = SystemConfigManager::GetInstance();
-    const SystemConfig* pOldConfig = pSCM->GetOldConfig(nSlotId);
-    const SystemConfig* pNewConfig = pSCM->GetConfig(nSlotId);
+    SystemConfigManager* pScm = SystemConfigManager::GetInstance();
+    const SystemConfig* pOldConfig = pScm->GetOldConfig(nSlotId);
+    const SystemConfig* pNewConfig = pScm->GetConfig(nSlotId);
     IMS_SINT32 nCtrlFlags = EnablerThread::CONTROL_NONE;
 
     if (SystemConfig::IsOperatorChanged(pOldConfig, pNewConfig))
@@ -200,9 +202,8 @@ void EnablerLoader::ControlEnablers(IN IMS_SINT32 nSlotId)
 
         // If service features are changed and it's non-DDS slot, then stop the enablers.
         // SIM1: empty, SIM2: SIM_LOCKED (newly added) : SIM2 is non-DDS when it's in LOADED
-        if (SystemConfig::IsMultiSimEnabled()
-                && !SystemConfig::IsMultiImsEnabled()
-                && !SystemConfig::IsMultiImsEnabledOnDssv())
+        if (SystemConfig::IsMultiSimEnabled() && !SystemConfig::IsMultiImsEnabled() &&
+                !SystemConfig::IsMultiImsEnabledOnDssv())
         {
             if ((pNewConfig != IMS_NULL) && !pNewConfig->IsDds())
             {
@@ -234,23 +235,23 @@ void EnablerLoader::ControlEnablers(IN IMS_SINT32 nSlotId)
 
     if (nCtrlFlags != EnablerThread::CONTROL_NONE)
     {
-        EnablerThread* pET = GetEnablerThread(nSlotId);
+        EnablerThread* pThread = GetEnablerThread(nSlotId);
 
-        if (pET != IMS_NULL)
+        if (pThread != IMS_NULL)
         {
-            pET->ControlEnablers(nCtrlFlags);
+            pThread->ControlEnablers(nCtrlFlags);
         }
     }
 }
 
 PRIVATE GLOBAL ImsAppThread* EnablerLoader::CreateThread(IN void* pvParam)
 {
-    EnablerThreadParam *pParam = reinterpret_cast<EnablerThreadParam*>(pvParam);
+    EnablerThreadParam* pParam = reinterpret_cast<EnablerThreadParam*>(pvParam);
 
     if (pParam == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    return new EnablerThread(pParam->pEnablerFactory, pParam->nSlotId);
+    return new EnablerThread(pParam->m_pEnablerFactory, pParam->m_nSlotId);
 }
