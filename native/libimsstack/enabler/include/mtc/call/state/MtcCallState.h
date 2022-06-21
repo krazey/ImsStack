@@ -144,7 +144,8 @@ public:
     virtual CallStateName Error_NotifyError(
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage);
 
-    virtual CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType);
+    virtual CallStateName OnReceivingMediaDataFailed(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType);
     virtual CallStateName OnVideoLowestBitRate();
     virtual CallStateName OnReceivingNetworkToneStarted();
     virtual CallStateName OnReceivingNetworkToneFailed();
@@ -215,7 +216,8 @@ protected:
     void SendTransactionResponse(IN ISipServerConnection* piSipServerConnection,
             IN IMS_UINT32 nResponseCode, IN const AString& strPhrase = AString::ConstEmpty());
 
-    IMS_BOOL IsCallEndNeededByAudioInactivity(IN IMS_UINT32 eMediaType) const;
+    IMS_BOOL IsCallEndNeededByAudioInactivity(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) const;
 
     IMtcCallContext& m_objContext;
 

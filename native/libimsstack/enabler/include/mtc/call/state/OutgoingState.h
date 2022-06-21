@@ -63,7 +63,6 @@ public:
 
     CallStateName UssiStarted(IN ISession* piSession) override;
 
-    CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
     CallStateName OnReceivingNetworkToneStarted() override;
     CallStateName OnReceivingNetworkToneFailed() override;
     CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;

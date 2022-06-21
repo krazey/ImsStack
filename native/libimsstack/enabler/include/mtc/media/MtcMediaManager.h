@@ -40,7 +40,7 @@ public:
 public: /* IMediaSessionClientListener */
     virtual void MediaSession_Notify(IN IMS_UINT32 eReportType,
             IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID,
-            MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType = MEDIA_PROTOCOL_ANY) override;
+            IN MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType = MEDIA_PROTOCOL_ANY) override;
 
     virtual void MediaSession_NotifyFailures(IN IMS_UINT32 eReportType, IN RtpError eError,
             IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) override;

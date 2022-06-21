@@ -217,11 +217,13 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnTimerExpired(IN IMS_SINT32 nType)
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType)
+PUBLIC VIRTUAL CallStateName UpdatingState::OnReceivingMediaDataFailed(
+        IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType)
 {
-    IMS_TRACE_I("OnReceivingMediaDataFailed", 0, 0, 0);
+    IMS_TRACE_I(
+            "OnReceivingMediaDataFailed : Media[%d] Protocol[%d]", eMediaType, eProtocolType, 0);
 
-    if (IsCallEndNeededByAudioInactivity(eMediaType))
+    if (IsCallEndNeededByAudioInactivity(eMediaType, eProtocolType))
     {
         CallReasonInfo objReason(CODE_MEDIA_NO_DATA);
         HandleTerminate(objReason);

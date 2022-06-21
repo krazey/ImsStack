@@ -44,7 +44,8 @@ public:
 
     CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
 
-    CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
+    CallStateName OnReceivingMediaDataFailed(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
 
 private:

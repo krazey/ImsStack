@@ -223,7 +223,7 @@ public:
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
     virtual void OnReceivingMediaDataFailed(
-            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eMediaProtocolType) override;
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     virtual void OnVideoLowestBitRate() override;
     virtual void OnReceivingNetworkToneStarted() override;
     virtual void OnReceivingNetworkToneFailed() override;

@@ -48,7 +48,8 @@ public:
     CallStateName NotifyErrorToUssiInfo(
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
-    CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
+    CallStateName OnReceivingMediaDataFailed(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     CallStateName OnVideoLowestBitRate() override;
     CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
     CallStateName HandleIpcanChanged() override;

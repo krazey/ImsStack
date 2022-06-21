@@ -309,18 +309,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::UssiStarted(IN ISession* piSession)
     return CallStateName::ESTABLISHED;
 }
 
-PUBLIC VIRTUAL CallStateName AlertingState::OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType)
-{
-    IMS_TRACE_I("OnReceivingMediaDataFailed", 0, 0, 0);
-
-    if (IsCallEndNeededByAudioInactivity(eMediaType))
-    {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NO_DATA));
-    }
-
-    return GetStateName();
-}
-
 PUBLIC VIRTUAL CallStateName AlertingState::OnMediaFailed(IN CallReasonInfo objReason)
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);

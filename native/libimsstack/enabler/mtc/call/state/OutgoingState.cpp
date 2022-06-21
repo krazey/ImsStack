@@ -560,27 +560,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::UssiStarted(IN ISession* piSession)
     return SessionStarted(piSession);
 }
 
-PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType)
-{
-    IMS_TRACE_I("OnReceivingMediaDataFailed", 0, 0, 0);
-
-    if (IsCallEndNeededByAudioInactivity(eMediaType))
-    {
-        if (m_objContext.GetSession() == IMS_NULL)
-        {
-            return GetStateName();
-        }
-        ISession* piSession = &m_objContext.GetSession()->GetISession();
-        CallReasonInfo objReason(CODE_MEDIA_NO_DATA);
-        HandleCancel(piSession, objReason);
-        OnStartFailed(piSession, objReason);
-
-        return CallStateName::TERMINATING;
-    }
-
-    return GetStateName();
-}
-
 PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingNetworkToneStarted()
 {
     IMS_TRACE_I("OnReceivingNetworkToneStarted", 0, 0, 0);
