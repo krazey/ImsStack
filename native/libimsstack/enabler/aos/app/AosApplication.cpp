@@ -1878,6 +1878,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessPingCommand()
 PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
 {
     m_pConnector->Stop();
+
+    if (GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorFinalType() ==
+            CarrierConfig::Assets::ERROR_TYPE_REPEATED)
+    {
+        // TODO: PLMN block with T3402
+        A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: PLMN is blocked with timer", 0, 0, 0);
+    }
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessAppActivatedTimerExpired()

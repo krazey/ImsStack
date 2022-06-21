@@ -69,6 +69,7 @@
 #include "provider/AosLog.h"
 #include "provider/AosProvider.h"
 #include "provider/AosStaticProfile.h"
+#include "provider/AosRetryRepository.h"
 #include "provider/AosString.h"
 #include "provider/AosTrm.h"
 #include "provider/AosUtil.h"
@@ -803,7 +804,10 @@ IMS_SINT32 AosRegistration::GetRegExpires()
 PROTECTED
 void AosRegistration::IncreaseConsecutiveFailCount()
 {
-    m_nConsecutiveFailure++;
+    if (!GET_N_CONFIG(m_nSlotId)->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired())
+    {
+        m_nConsecutiveFailure++;
+    }
 }
 
 PROTECTED
@@ -2973,6 +2977,33 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithNextPcscf()
     ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_TERMINATED);
 }
 
+PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithAvailableNextPcscf(
+        IN IMS_BOOL bSetCurrentPcscfInvalid)
+{
+    DestroyEx();
+
+    if (bSetCurrentPcscfInvalid)
+    {
+        m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
+    }
+
+    if (SetNextPcscf(IMS_FALSE))
+    {
+        if (!CreateRegistration())
+        {
+            ProcessUnpredictableFailure();
+            return;
+        }
+
+        SetState(STATE_REGISTERING);
+        ReportTryingState();
+    }
+    else
+    {
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+    }
+}
+
 PROTECTED VIRTUAL void AosRegistration::ProcessSubReinitiate()
 {
     DestroySubscription();
@@ -3150,48 +3181,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
 
     if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF)
     {
-        m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
-        if (SetNextPcscf())
-        {
-            if (nRetryAfter > 0)
-            {
-                StartTimer(TIMER_STOP_RETRY, nRetryAfter * 1000);
-
-                SetState(STATE_REGSTOP);
-                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
-            }
-            else
-            {
-                if (!SendRegister(IMS_TRUE))
-                {
-                    ProcessUnpredictableFailure();
-                    return;
-                }
-                SetState(STATE_REGISTERING);
-                ReportTryingState();
-            }
-        }
-        else
-        {
-            m_piContext->GetPcscf()->SetAllPcscfValid();
-            if (SetFirstPcscf())
-            {
-                if (nRetryAfter == 0)
-                {
-                    IncreaseConsecutiveFailCount();
-                    nRetryAfter = GetActualWaitTime();
-                }
-
-                StartTimer(TIMER_STOP_RETRY, nRetryAfter * 1000);
-
-                SetState(STATE_REGSTOP);
-                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
-            }
-            else
-            {
-                ProcessUnpredictableFailure();
-            }
-        }
+        ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(nRetryAfter);
         return;
     }
     else
@@ -3201,28 +3191,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
 
     if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL)
     {
-        if (nRetryAfter > 0)
-        {
-            nAwt = nRetryAfter;
-        }
-        else
-        {
-            nAwt = GetActualWaitTime();
-        }
-
-        m_piContext->GetPcscf()->SetCurrentPcscfTried();
-        if (SetNextPcscf())
-        {
-            StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
-            SetState(STATE_REGSTOP);
-            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
-        }
-        else
-        {
-            // TODO: T3402 block
-            m_nPdnReactivateWaitTime = nAwt;
-            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
-        }
+        ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(nRetryAfter);
         return;
     }
     else
@@ -3268,6 +3237,121 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
     }
 }
 
+PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(
+        IN IMS_UINT32 nRetryAfter)
+{
+    m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
+    if (SetNextPcscf())
+    {
+        if (nRetryAfter > 0)
+        {
+            StartTimer(TIMER_STOP_RETRY, nRetryAfter * 1000);
+
+            SetState(STATE_REGSTOP);
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+        }
+        else
+        {
+            if (!SendRegister(IMS_TRUE))
+            {
+                ProcessUnpredictableFailure();
+                return;
+            }
+            SetState(STATE_REGISTERING);
+            ReportTryingState();
+        }
+    }
+    else
+    {
+        m_piContext->GetPcscf()->SetAllPcscfValid();
+        if (SetFirstPcscf())
+        {
+            if (nRetryAfter == 0)
+            {
+                IncreaseConsecutiveFailCount();
+                nRetryAfter = GetActualWaitTime();
+            }
+
+            StartTimer(TIMER_STOP_RETRY, nRetryAfter * 1000);
+
+            SetState(STATE_REGSTOP);
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+        }
+        else
+        {
+            ProcessUnpredictableFailure();
+        }
+    }
+}
+
+PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
+        IN IMS_UINT32 nRetryAfter)
+{
+    IMS_UINT32 nAwt = 0;
+
+    if (GET_N_CONFIG(m_nSlotId)->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired())
+    {
+        if (AosProvider::GetInstance()
+                        ->GetRetryRepository(m_piContext->GetSlotId())
+                        ->IncreaseRetryCount(AosRetryRepository::TYPE_NORMAL))
+        {
+            if (nRetryAfter > 0)
+            {
+                nAwt = nRetryAfter;
+            }
+            else
+            {
+                const IMSVector<IMS_SINT32>& objInterval =
+                        GET_N_CONFIG(m_nSlotId)->GetRegistrationRetryIntervals();
+
+                nAwt = (objInterval.GetSize() > 0) ? objInterval.GetAt(0) : RETRY_DEFAULT_WAIT_TIME;
+            }
+
+            StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
+            SetState(STATE_REGSTOP);
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+        }
+        else
+        {
+            m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
+            if (SetNextPcscf())
+            {
+                StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
+                SetState(STATE_REGSTOP);
+                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+            }
+            else
+            {
+                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+            }
+        }
+    }
+    else
+    {
+        if (nRetryAfter > 0)
+        {
+            nAwt = nRetryAfter;
+        }
+        else
+        {
+            nAwt = GetActualWaitTime();
+        }
+        m_piContext->GetPcscf()->SetCurrentPcscfTried();
+        if (SetNextPcscf())
+        {
+            StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
+            SetState(STATE_REGSTOP);
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+        }
+        else
+        {
+            // TODO: T3402 block
+            m_nPdnReactivateWaitTime = nAwt;
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
+        }
+    }
+}
+
 PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Update(
         IN IMS_SINT32 nStatusCode /* = 0 */)
 {
@@ -3310,6 +3394,53 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Update(
     }
     else if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL)
     {
+        ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(nStatusCode, nRetryAfter);
+    }
+    else
+    {
+        ProcessRegRequiredWithAvailableNextPcscf(IMS_FALSE);
+    }
+}
+
+PROTECTED VIRTUAL void
+AosRegistration::ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
+        IN IMS_SINT32 nStatusCode, IN IMS_UINT32 nRetryAfter)
+{
+    if (GET_N_CONFIG(m_nSlotId)->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired())
+    {
+        if (IsErrorCodeExisted(
+                    GET_N_CONFIG(m_nSlotId)->GetSpecificReregistrationErrorCode(), nStatusCode))
+        {
+            ProcessRegRequiredWithAvailableNextPcscf(IMS_TRUE);
+        }
+        else
+        {
+            if (AosProvider::GetInstance()
+                            ->GetRetryRepository(m_piContext->GetSlotId())
+                            ->IncreaseRetryCount(AosRetryRepository::TYPE_NORMAL))
+            {
+                IMS_UINT32 nAwt = m_pUtil->GetRetryAfterValue(m_piRegistration);
+                if (nAwt == 0)
+                {
+                    const IMSVector<IMS_SINT32>& objInterval =
+                            GET_N_CONFIG(m_nSlotId)->GetRegistrationRetryIntervals();
+
+                    nAwt = (objInterval.GetSize() > 0) ? objInterval.GetAt(0)
+                                                       : RETRY_DEFAULT_WAIT_TIME;
+                }
+
+                StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
+                SetState(STATE_REFRESHSTOP);
+                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+            }
+            else
+            {
+                ProcessRegRequiredWithAvailableNextPcscf(IMS_TRUE);
+            }
+        }
+    }
+    else
+    {
         if (nStatusCode == SipStatusCode::SC_481)
         {
             ProcessReinitiate(IMS_FALSE);
@@ -3323,7 +3454,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Update(
             nRetryAfter = GetActualWaitTime();
             if (nRetryAfter == 0)
             {
-                nRetryAfter = RETRY_DEFAULT_WAIT_TIME;
+                nRetryAfter = GetSpecificErrWaitTime();
             }
         }
 
@@ -3356,37 +3487,9 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Update(
                 ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
                 return;
             }
-
-            /* TODO: check to need about outage case
-            if (IsRegFailedWithOutage(nStatusCode))
-            {
-                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_OUTAGE);
-                return;
-            }
-            */
         }
 
         ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
-    }
-    else
-    {
-        DestroyEx();
-
-        if (SetNextPcscf(IMS_FALSE))
-        {
-            if (!CreateRegistration())
-            {
-                ProcessUnpredictableFailure();
-                return;
-            }
-
-            SetState(STATE_REGISTERING);
-            ReportTryingState();
-        }
-        else
-        {
-            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
-        }
     }
 }
 

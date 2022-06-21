@@ -252,6 +252,7 @@ protected:
     virtual void ProcessAuthenticationFailed();
     virtual void ProcessRegRequiredWithWaitTime(IN IMS_SINT32 nWaitTime);
     virtual void ProcessRegRequiredWithNextPcscf();
+    virtual void ProcessRegRequiredWithAvailableNextPcscf(IN IMS_BOOL bSetCurrentPcscfInvalid);
     virtual void ProcessSubReinitiate();
     virtual IMS_BOOL ProcessForbiddenFailed(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL ProcessSubscriberFailed(IN IMS_SINT32 nStatusCode);
@@ -261,7 +262,12 @@ protected:
     virtual void ProcessIpsecFallback(IN IMS_BOOL bIsIpsecRetry);
 
     virtual void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode = 0);
+    virtual void ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(IN IMS_UINT32 nRetryAfter);
+    virtual void ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
+            IN IMS_UINT32 nRetryAfter);
     virtual void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0);
+    virtual void ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
+            IN IMS_SINT32 nStatusCode, IN IMS_UINT32 nRetryAfter);
 
     virtual IMS_BOOL ProcessStartFailed_305();
     virtual void ProcessStartFailed_403();
@@ -556,6 +562,8 @@ protected:
     static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30;  // 30 Sec
 
 private:
+    friend class AosRegistrationTest;
+
     /// IPCAN category being registered
     IMS_SINT32 m_nRegIpcanCategory;
     IMS_UINT32 m_nPdnReactivateWaitTime;
