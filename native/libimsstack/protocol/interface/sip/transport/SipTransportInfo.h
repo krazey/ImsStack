@@ -73,9 +73,6 @@ private:
     /* SipMessage Corresponding to actual sent buffer. used in callbacks to network */
     SipMessage* m_pSentSipMsg;
 
-    /* Len > 200 bytes of MTU or Len > 1300 when MTU not known */
-    SIP_BOOL m_bExceedMTU;
-
     /***********************************************************
       Private Member Functions
      ************************************************************/
@@ -101,9 +98,6 @@ public:
     /* Returns the Transmitting SIP Buffer */
     SipTransportBuffer* GetTranspSipBuffer();
 
-    SIP_BOOL IsExceedMTU();
-
-    SIP_BOOL SetExceedMTUFlag(SIP_BOOL bFlag);
     SIP_VOID SetSentSipMsg(SipMessage* _pSipMsg);
     SipMessage* GetSentSipMsg();
 };

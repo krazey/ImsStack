@@ -10,8 +10,7 @@ SipTransportInfo::SipTransportInfo(
         m_pActualDestParam(SIP_NULL),
         m_pTranspParam(SIP_NULL),
         m_pSentBuffer(SIP_NULL),
-        m_pSentSipMsg(SIP_NULL),
-        m_bExceedMTU(SIP_FALSE)
+        m_pSentSipMsg(SIP_NULL)
 {
     if (pTranspParam == SIP_NULL)
     {
@@ -59,17 +58,6 @@ SIP_BOOL SipTransportInfo::SetMsgSentTranspParam(SipTransportParameter* pTranspP
 SipTransportBuffer* SipTransportInfo::GetTranspSipBuffer()
 {
     return m_pSentBuffer;
-}
-
-SIP_BOOL SipTransportInfo::SetExceedMTUFlag(SIP_BOOL bFlag)
-{
-    m_bExceedMTU = bFlag;
-    return SIP_TRUE;
-}
-
-SIP_BOOL SipTransportInfo::IsExceedMTU()
-{
-    return m_bExceedMTU;
 }
 
 SipMessage* SipTransportInfo::GetSentSipMsg()

@@ -67,58 +67,20 @@ SIP_BOOL SipTransportHandler::OnSendTransp(IN SipMessage* pSipMsg,
         return SIP_FALSE;
     }
 
-    SIP_INT32 eMsgType = pSipMsg->GetMsgType();
-    SIP_INT32 eMethod = pSipMsg->GetMethodType();
-
-    /*No need to check Message Size Constraint for Response type and ACK which is sent directly */
-    if (((SipMessage::REQ_TYPE == eMsgType) && (SipMessage::METHOD_ACK == eMethod)) ||
-            (SipMessage::RESP_TYPE == eMsgType))
-    {
-        /* Send Directly to N/W */
-
-        SIP_TRACE_NORMAL(
-                ESIPTRACE_MODTRANSP, "OnSendTransp: Send Directly to NW", SIP_ZERO, SIP_ZERO);
-
-        SipTransportInfo* pTranspInfo = new SipTransportInfo(pTranspParam, pTranspBuffer);
-
-        if (pTranspInfo == SIP_NULL)
-        {
-            delete pTranspBuffer;
-            return SIP_FALSE;
-        }
-
-        SipTransportParameter* pActualDestParam = new SipTransportParameter(pTranspParam);
-        pTranspInfo->SetMsgSentTranspParam(pActualDestParam);
-
-        /* store sip message for retransmit purpose. deleted when transinfo is deleted */
-        /* storing can be done outside of this api call also. for failure ack and 100 response txn
-        gives sip message */
-        SipMessage* pStoredSipMsg = new SipMessage(*pSipMsg);
-        pTranspInfo->SetSentSipMsg(pStoredSipMsg);
-
-        *ppTranspInfo = pTranspInfo;
-
-        /* No need to check the length */
-        return SIP_TRUE;
-    }
-
-    /* Check for Message Exceed Constraints */
-    SIP_BOOL bExceedMTU = SIP_FALSE;
-
-    SipTransportParameter* pActualDestParam = new SipTransportParameter(pTranspParam);
-
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pTranspParam, pTranspBuffer);
 
     if (pTranspInfo == SIP_NULL)
     {
-        delete pActualDestParam;
         delete pTranspBuffer;
         return SIP_FALSE;
     }
-    pTranspInfo->SetMsgSentTranspParam(pActualDestParam);
-    pTranspInfo->SetExceedMTUFlag(bExceedMTU);
 
-    // store sip message for retransmit purpose. deleted when transinfo is deleted
+    SipTransportParameter* pActualDestParam = new SipTransportParameter(pTranspParam);
+    pTranspInfo->SetMsgSentTranspParam(pActualDestParam);
+
+    /* store sip message for retransmit purpose. deleted when transinfo is deleted */
+    /* storing can be done outside of this api call also. for failure ack and 100 response txn
+    gives sip message */
     SipMessage* pStoredSipMsg = new SipMessage(*pSipMsg);
     pTranspInfo->SetSentSipMsg(pStoredSipMsg);
 
@@ -313,15 +275,13 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey
         return SIP_FALSE;
     }
 
-    SIP_BOOL bExceedMTU = pTranspInfo->IsExceedMTU();
     /* Check if Error occurred due to switching to TCP (Message Len Constraint)*/
-    if ((bExceedMTU == SIP_TRUE) && (eTransportType == SipTransportInfo::PROTOCOL_TCP))
+    if (eTransportType == SipTransportInfo::PROTOCOL_TCP)
     {
         /* Switch to previous Transport Information as initially given by stack user */
         /* Change Protocol in Buffer */
-        SIP_BOOL bStatus = UpdateViaSipMsg(pTranspInfo->GetSentSipMsg(),
-                pTranspInfo->GetTranspSipBuffer(), SipTransportInfo::PROTOCOL_UDP);
-        if (bStatus == SIP_FALSE)
+        if (UpdateViaSipMsg(pTranspInfo->GetSentSipMsg(), pTranspInfo->GetTranspSipBuffer(),
+                    SipTransportInfo::PROTOCOL_UDP) == SIP_FALSE)
         {
             pTxn->SipDelete();
 
@@ -329,8 +289,6 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey
                     SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-
-        pTranspInfo->SetExceedMTUFlag(SIP_FALSE);
 
         /* Change Protocol in Transport Information */
         pMsgSentTransParam->setTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
@@ -471,8 +429,7 @@ PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg(
     SIP_INT32 eMethodType = SipMessage::METHOD_INVALID;
 
     /* Check if it's proper to start Transaction Ref: RFC 3261 8.1.1.*/
-    SIP_BOOL bStatus = CheckTxnMadatoryParams(pSipMsg, &eMsgType, &eMethodType);
-    if (bStatus == SIP_FALSE)
+    if (CheckTxnMadatoryParams(pSipMsg, &eMsgType, &eMethodType) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTRANSP,
                 "GetTxnKeyFromSipMsg: CheckTxnMadatoryParams fails\n", SIP_ZERO, SIP_ZERO);

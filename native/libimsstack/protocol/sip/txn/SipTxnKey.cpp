@@ -237,19 +237,23 @@ SIP_VOID SipTxnKey::Init(SipTxnKey* pTxnKey, SIP_UINT16* pnError)
     }
 
     m_nCseqNum = pTxnKey->m_nCseqNum;
-    m_pRequestUri = new SipAddrSpec(*(pTxnKey->m_pRequestUri));
-    if (m_pRequestUri == SIP_NULL)
+
+    if (pTxnKey->m_pRequestUri != SIP_NULL)
     {
-        *pnError = E_ERR_PF_MALLOCFAILED;
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODTXN, "SipTxnKey::Init: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
-        delete[] m_pszMethod;
-        m_pszMethod = SIP_NULL;
-        delete[] m_pszViaHost;
-        m_pszViaHost = SIP_NULL;
-        delete[] m_pszViaBranchParam;
-        m_pszViaBranchParam = SIP_NULL;
-        return;
+        m_pRequestUri = new SipAddrSpec(*(pTxnKey->m_pRequestUri));
+        if (m_pRequestUri == SIP_NULL)
+        {
+            *pnError = E_ERR_PF_MALLOCFAILED;
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxnKey::Init: Memory Allocation Failed",
+                    SIP_ZERO, SIP_ZERO);
+            delete[] m_pszMethod;
+            m_pszMethod = SIP_NULL;
+            delete[] m_pszViaHost;
+            m_pszViaHost = SIP_NULL;
+            delete[] m_pszViaBranchParam;
+            m_pszViaBranchParam = SIP_NULL;
+            return;
+        }
     }
 
     if (pTxnKey->m_pszToTag != SIP_NULL)
