@@ -92,8 +92,7 @@ public:
     virtual void UpdatePemType(IN ISession* piSession, IN IMessage* piMessage) override;
 
     /* Media Operations */
-    virtual void Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly,
-            IN IMS_BOOL bNegoUpdated = IMS_TRUE) override;
+    virtual void Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly) override;
 
     virtual void Terminate() override;
 

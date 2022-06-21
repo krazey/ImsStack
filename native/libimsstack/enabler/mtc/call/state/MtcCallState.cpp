@@ -518,13 +518,11 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
             IMS_TRACE_E(0, "Answer must be included.", 0, 0, 0);
             return CODE_MEDIA_NOT_ACCEPTABLE;
         }
-        RunMedia(piSession, piMessage, IMS_FALSE);
         return CODE_NONE;
     }
 
     if (IsNeedToIgnore(piSession, piMessage) == IMS_TRUE)
     {
-        RunMedia(piSession, piMessage, IMS_FALSE);
         return CODE_NONE;
     }
 
@@ -539,8 +537,6 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
         // TODO: return fail reasone? IMS_RESULT? it's always NEGOFAIL?
         return CODE_MEDIA_NOT_ACCEPTABLE;
     }
-
-    RunMedia(piSession, piMessage);
 
     m_objContext.GetPreconditionManager().UpdateQosAttributesFromSdp(piSession);
 
@@ -588,11 +584,10 @@ ResultSetSdp MtcCallState::SetSdpToSend(
 }
 
 PROTECTED
-void MtcCallState::RunMedia(
-        IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bNegoUpdated /*= IMS_TRUE*/)
+void MtcCallState::RunMedia(IN ISession* piSession, IN IMessage* piMessage)
 {
     IMS_BOOL bEarly = !MessageUtil::IsResponseExist(piSession, SipStatusCode::SC_200);
-    m_objContext.GetMediaManager().Run(piSession, piMessage, bEarly, bNegoUpdated);
+    m_objContext.GetMediaManager().Run(piSession, piMessage, bEarly);
 }
 
 PROTECTED

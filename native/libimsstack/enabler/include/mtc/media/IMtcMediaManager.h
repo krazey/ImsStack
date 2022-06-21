@@ -138,11 +138,8 @@ public:
      *                  INVITE request.
      * @param bEarly If the call is in early dialog state, set to IMS_TRUE.
      *               Otherwise it is in confirmed state, set to IMS_FALSE.
-     * @param b180Received If there is any session received 180 Ringing response, set to IMS_TRUE.
-     *                     Otherwise set to IMS_FALSE.
      */
-    virtual void Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly,
-            IN IMS_BOOL bNegoUpdated = IMS_TRUE) = 0;
+    virtual void Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly) = 0;
 
     /**
      * @brief Terminate the media session when the call is terminated.

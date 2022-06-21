@@ -461,8 +461,8 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IM
     IMS_TRACE_D("UpdatePemType : %d", GetPemType(piSession), 0, 0);
 }
 
-PUBLIC VIRTUAL void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* piMessage,
-        IN IMS_BOOL bEarly, IN IMS_BOOL bNegoUpdated /*= IMS_TRUE*/)
+PUBLIC VIRTUAL void MtcMediaManager::Run(
+        IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly)
 {
     if (bEarly && m_objContext.GetCallInfo().ePeerType == PeerType::MO)
     {
@@ -491,14 +491,6 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* pi
             SetNetworkToneRtpTimer(MEDIATYPE_AUDIO, nTimeWaitingNetworkTone);
         }
 
-        return;
-    }
-    else if (!bNegoUpdated && (m_objProfileManager.GetActiveSession() == piSession))
-    {
-        IMS_TRACE_D("Run : there is no update about media negotiation.", 0, 0, 0);
-        IMS_TRACE_D("Run : the media is already running.", 0, 0, 0);
-
-        SetNetworkToneRtpTimer(MEDIATYPE_AUDIO, nTimeWaitingNetworkTone);
         return;
     }
 
@@ -806,8 +798,8 @@ IMS_BOOL MtcMediaManager::IsNecessaryToRunMedia(IN ISession* piSession, IN IMess
 
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
     {
-        IMS_TRACE_D("IsNecessaryToRunMedia MT case - run the media on confirmed state.", 0, 0, 0);
-        return IMS_FALSE;
+        IMS_TRACE_D("IsNecessaryToRunMedia MT case", 0, 0, 0);
+        return IMS_TRUE;
     }
 
     if (IsLocalTone())

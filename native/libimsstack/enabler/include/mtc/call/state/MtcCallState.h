@@ -177,8 +177,7 @@ protected:
     void InitMediaSession(IN MediaInfo* pMediaInfo = IMS_NULL);
     IMS_SINT32 OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage);
     ResultSetSdp SetSdpToSend(IN IMS_BOOL bAllowReOffer, IN ISession* piSession = IMS_NULL);
-    void RunMedia(
-            IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bNegoUpdated = IMS_TRUE);
+    void RunMedia(IN ISession* piSession, IN IMessage* piMessage);
 
     IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert);
     IMS_RESULT SendEarlyUpdate(IN MtcSession* pMtcSession);

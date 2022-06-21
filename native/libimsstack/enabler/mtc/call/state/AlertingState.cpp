@@ -153,6 +153,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
         return CallStateName::TERMINATING;
     }
 
+    RunMedia(piSession, piMessage);
     SendStarted();
     return CallStateName::ESTABLISHED;
 }
@@ -191,6 +192,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
     }
 
+    RunMedia(piSession, piMessage);
     return GetStateName();
 }
 
@@ -231,6 +233,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN I
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
     }
 
+    RunMedia(piSession, piMessage);
     return CallStateName::ALERTING;
 }
 
@@ -253,6 +256,8 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionPRAckReceived(IN ISession* pi
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
     }
+
+    RunMedia(piSession, piMessage);
     return CallStateName::ALERTING;
 }
 

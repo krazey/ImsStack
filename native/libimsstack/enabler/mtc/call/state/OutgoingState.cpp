@@ -194,6 +194,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
         return CallStateName::TERMINATING;
     }
 
+    RunMedia(piSession, piMessage);
     OnStarted(piSession);
 
     return CallStateName::ESTABLISHED;
@@ -249,6 +250,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
 
     // update remote qos status
     UpdatePreconditionCapability(piSession, piMessage);
+    RunMedia(piSession, piMessage);
 
     SendProgressing();
     return GetStateName();
@@ -458,6 +460,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
         m_objContext.GetPreconditionManager().SetRemoteResourceAvailable(piSession);
     }
 
+    RunMedia(piSession, piMessage);
     // TODO: StartE911RingBackTimer(m_pSessInfo->eCallType);
     SendProgressing();
     return GetStateName();
@@ -546,6 +549,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
         objPreconditionManager.StartQosTimer(piSession);
     }
 
+    RunMedia(piSession, piMessage);
     SendProgressing();
     return GetStateName();
 }

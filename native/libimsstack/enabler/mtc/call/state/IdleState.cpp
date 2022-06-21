@@ -252,6 +252,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
         return CallStateName::ALERTING;
     }
 
+    RunMedia(piSession, piMessage);
     return CallStateName::INCOMING;
 }
 
