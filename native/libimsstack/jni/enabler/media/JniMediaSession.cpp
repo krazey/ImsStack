@@ -31,7 +31,7 @@ __IMS_TRACE_TAG_USER_DECL__("JNI.MEDIA");
 extern int IMSInterface_GetSurface(const android::String8& str8Class,
         const android::String8& str8SurfaceName, long& nSurfaceObject);
 
-JniMediaSession::JniMediaSession(IN CBServiceNoti pfnNotifier, IN IMS_SINT32 nSlotId,
+JniMediaSession::JniMediaSession(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId,
         IN IMS_SINTP nCallKey, IN IMS_SINTP nNativeObject) :
         m_pThread(IMS_NULL),
         m_strThreadName(AString::ConstNull()),
@@ -41,7 +41,7 @@ JniMediaSession::JniMediaSession(IN CBServiceNoti pfnNotifier, IN IMS_SINT32 nSl
 {
     IMS_TRACE_D("+JniMediaSession SlotId[%d], nCallKey[%d]", m_nSlotId, nCallKey, 0);
 
-    Initialize(pfnNotifier, nNativeObject);
+    Initialize(pfnSendDataToJava, nNativeObject);
     m_piMediaManager = JniConnectorFactory::GetInstance()
                                ->GetMediaSessionConnector(m_nSlotId)
                                ->GetEnablerService();
@@ -77,9 +77,10 @@ PUBLIC VIRTUAL int JniMediaSession::SendData(const android::Parcel& objParcel)
 }
 
 PUBLIC
-void JniMediaSession::Initialize(IN CBServiceNoti pfnNotifier, IN IMS_SINTP nNativeObject)
+void JniMediaSession::Initialize(
+        IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINTP nNativeObject)
 {
-    if (pfnNotifier == IMS_NULL)
+    if (pfnSendDataToJava == IMS_NULL)
     {
         return;
     }
@@ -100,7 +101,7 @@ void JniMediaSession::Initialize(IN CBServiceNoti pfnNotifier, IN IMS_SINTP nNat
     }
     IMS_TRACE_D("Initialize()", 0, 0, 0);
     m_pThread->SetSlotId(m_nSlotId);
-    m_pThread->SetCallback(nNativeObject, pfnNotifier);
+    m_pThread->SetCallback(nNativeObject, pfnSendDataToJava);
 }
 
 PUBLIC

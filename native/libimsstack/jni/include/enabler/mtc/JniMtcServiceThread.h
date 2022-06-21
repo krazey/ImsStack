@@ -14,7 +14,7 @@ public:
     virtual ~JniMtcServiceThread();
 
     inline void SetSlotId(IN IMS_SINT32 nSlotId) { m_nSlotId = nSlotId; }
-    // void SetCallback(IN IMS_SINTP nNativeObj, IN CBServiceNoti pfnNotifier);
+    // void SetCallback(IN IMS_SINTP nNativeObj, IN Jni_SendDataToJava pfnSendDataToJava);
 
     void OnServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason);  // enum class
     void OnEmergencyServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason); // enum class

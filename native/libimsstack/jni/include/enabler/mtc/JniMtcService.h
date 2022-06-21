@@ -10,12 +10,12 @@ class IMtcService;
 class JniMtcService : public BaseService
 {
 public:
-    JniMtcService(IN CBServiceNoti pfnNotifier, IN IMS_SINT32 nSlotId);
+    JniMtcService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId);
     virtual ~JniMtcService();
 
     virtual int SendData(const android::Parcel& objParcel) override;
 
-    void Initialize(IN CBServiceNoti pfnNotifier);
+    void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
 
     void SetMtcService(IN IMtcService* piMtcService);
 

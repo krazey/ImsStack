@@ -1,29 +1,31 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20131220  hwangoo.park@             Created
-    </table>
-
-    Description
-     This class provides the method to create the core interfaces.
-*/
-
-#ifndef _CORE_INTERFACE_FACTORY_H_
-#define _CORE_INTERFACE_FACTORY_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef CORE_INTERFACE_FACTORY_H_
+#define CORE_INTERFACE_FACTORY_H_
 
 #include "BaseService.h"
 
 class CoreInterfaceFactory
 {
-private:
-    CoreInterfaceFactory();
-    ~CoreInterfaceFactory();
+public:
+    CoreInterfaceFactory() = delete;
 
 public:
-    static BaseService* GetInterface(
-            IN IMS_SINT32 nInterfaceType, IN CBServiceNoti pNotifier, IN IMS_SINT32 nSlotId);
+    static BaseService* GetInterface(IN IMS_SINT32 nInterfaceType,
+            IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId);
 };
 
-#endif  // _CORE_INTERFACE_FACTORY_H_
+#endif

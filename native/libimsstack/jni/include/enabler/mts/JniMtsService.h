@@ -9,7 +9,7 @@ class IMtsService;
 class JniMtsService : public BaseService
 {
 public:
-    JniMtsService(IN CBServiceNoti pCbServiceNoti, IN IMS_SINT32 nSlotId);
+    JniMtsService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId);
     virtual ~JniMtsService();
     virtual int SendData(const android::Parcel& objParcel) override;
     void SetMtsService(IN IMtsService* piMtsService);
@@ -20,7 +20,7 @@ protected:
 
 private:
     IMS_BOOL Attach();
-    void Initialize(IN CBServiceNoti pCbServiceNoti);
+    void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
     void TriggerSendMoSms(IN const android::Parcel& objParcel);
     void NotifyMtResult(IN const android::Parcel& objParcel);
 

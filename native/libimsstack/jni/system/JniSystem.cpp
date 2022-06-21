@@ -17,10 +17,10 @@
 #include "System.h"
 
 PUBLIC
-JniSystem::JniSystem(IN JniSystem_SendDataToJava pSendDataToJava) :
-        m_pSendDataToJava(pSendDataToJava)
+JniSystem::JniSystem(IN JniSystem_SendDataToJava pfnSendDataToJava) :
+        m_pfnSendDataToJava(pfnSendDataToJava)
 {
-    if (m_pSendDataToJava != IMS_NULL)
+    if (m_pfnSendDataToJava != IMS_NULL)
     {
         System::GetInstance()->SetCallback(this);
     }
@@ -44,9 +44,9 @@ PUBLIC VIRTUAL int JniSystem::SendData(IN const android::Parcel& in, OUT android
 PUBLIC VIRTUAL IMS_SINT32 JniSystem::SendDataToJava(
         IN const android::Parcel& in, OUT android::Parcel& out, int fileDescriptor /*= -1*/)
 {
-    if (m_pSendDataToJava != IMS_NULL)
+    if (m_pfnSendDataToJava != IMS_NULL)
     {
-        return m_pSendDataToJava(reinterpret_cast<IMS_SINTP>(this), in, out, fileDescriptor);
+        return m_pfnSendDataToJava(reinterpret_cast<IMS_SINTP>(this), in, out, fileDescriptor);
     }
 
     return 0;

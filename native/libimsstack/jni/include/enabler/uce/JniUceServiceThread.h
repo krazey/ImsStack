@@ -25,7 +25,7 @@ public:
     static ImsAppThread* GetInstance();
     virtual ~JniUceServiceThread();
 
-    int SetCallback(IN IMS_UINTP nNativeObj, IN CBServiceNoti pCBServiceNoti);
+    int SetCallback(IN IMS_UINTP nNativeObj, IN Jni_SendDataToJava pfnSendDataToJava);
 
 protected:
     virtual IMS_BOOL Initialize();
@@ -37,7 +37,7 @@ protected:
 
 private:
     IMS_UINTP m_nNativeObj;
-    CBServiceNoti m_pCBServiceNoti;
+    Jni_SendDataToJava m_pfnSendDataToJava;
 };
 
-#endif  // _IMS_PEOPLE_SERVICE_THREAD_H_
+#endif

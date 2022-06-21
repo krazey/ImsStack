@@ -23,7 +23,7 @@ class JniUceService : public BaseService
 {
 public:
     JniUceService(IN IMS_UINT32 nSimSlot = 0);
-    JniUceService(CBServiceNoti pCBServiceNoti, IN IMS_UINT32 nSimSlot = 0);
+    JniUceService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot = 0);
     virtual ~JniUceService();
 
     virtual int SendData(const Parcel& pParcel);

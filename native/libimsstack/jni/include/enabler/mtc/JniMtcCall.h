@@ -13,7 +13,8 @@ class MtcCallController;
 class JniMtcCall final : public BaseService
 {
 public:
-    JniMtcCall(IN CBServiceNoti pfnNotifier, IN IMS_SINTP nCallKey = -1, IN IMS_SINT32 nSlotId = 0);
+    JniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINTP nCallKey = -1,
+            IN IMS_SINT32 nSlotId = 0);
     virtual ~JniMtcCall();
 
     virtual IMS_SINT32 SendData(IN const android::Parcel& objParcel) override;
@@ -54,7 +55,7 @@ private:
 
 private:
     JniMtcCallThread* m_pThread;
-    CBServiceNoti m_pfnNotifier;
+    Jni_SendDataToJava m_pfnSendDataToJava;
     AString m_strThreadName;
     IMS_SINT32 m_nSlotId;
     MtcCallController& m_objCallController;
