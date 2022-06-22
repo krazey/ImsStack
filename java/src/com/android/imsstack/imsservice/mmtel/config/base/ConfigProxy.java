@@ -5,32 +5,26 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.PersistableBundle;
-import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.stub.ImsConfigImplBase;
-import android.telephony.ims.stub.ImsRegistrationImplBase;
-import android.text.TextUtils;
 import android.util.SparseArray;
 
-import com.android.ims.ImsConfig;
-
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.carrier.CarrierCodeLoader;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SimCarrierId;
 
+import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.Queue;
 
 public class ConfigProxy {
 
@@ -325,52 +319,18 @@ public class ConfigProxy {
             int value = cc.getInt(item.getCarrierConfigKey());
             editor.putInt(item.getName(), 64*value);
 
-            PersistableBundle bundle =
-                    cc.getBundle(CarrierConfigManager.Ims.KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE);
+            /* Set default to ENABLED for VoLTE/ViLTE/VoWiFi and SMSoIP */
+            item = provisioningItems.get(ProvisioningManager.KEY_VOLTE_PROVISIONING_STATUS);
+            editor.putInt(item.getName(), ProvisioningManager.PROVISIONING_VALUE_ENABLED);
 
-            if (bundle != null) {
-                int[] iRats = bundle.getIntArray(
-                        CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY);
+            item = provisioningItems.get(ProvisioningManager.KEY_VT_PROVISIONING_STATUS);
+            editor.putInt(item.getName(), ProvisioningManager.PROVISIONING_VALUE_ENABLED);
 
-                if (iRats != null) {
+            item = provisioningItems.get(ProvisioningManager.KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE);
+            editor.putInt(item.getName(), ProvisioningManager.PROVISIONING_VALUE_ENABLED);
 
-                    for (int i = 0; i < iRats.length; i++) {
-                        if ((iRats[i] == ImsRegistrationImplBase.REGISTRATION_TECH_LTE) ||
-                                (iRats[i] == ImsRegistrationImplBase.REGISTRATION_TECH_NR)) {
-                            item = provisioningItems.get(
-                                    ProvisioningManager.KEY_VOLTE_PROVISIONING_STATUS);
-                            editor.putInt(item.getName(),
-                                    ProvisioningManager.PROVISIONING_VALUE_DISABLED);
-                        } else if (iRats[i] == ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN) {
-                            item = provisioningItems.get(
-                                    ProvisioningManager.KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE);
-                            editor.putInt(item.getName(),
-                                    ProvisioningManager.PROVISIONING_VALUE_DISABLED);
-                        } else if (iRats[i] ==
-                                ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM) {
-                        } else {//ImsRegistrationImplBase.REGISTRATION_TECH_NONE
-                        }
-                    }
-                }
-
-                iRats = bundle.getIntArray(
-                        CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY);
-
-                if (iRats != null) {
-                    item = provisioningItems.get(ProvisioningManager.KEY_VT_PROVISIONING_STATUS);
-                    editor.putInt(item.getName(),
-                            ProvisioningManager.PROVISIONING_VALUE_DISABLED);
-                }
-
-                iRats = bundle.getIntArray(
-                        CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_SMS_INT_ARRAY);
-
-                if (iRats != null) {
-                    item = provisioningItems.get(ProvisioningManager.KEY_SMS_OVER_IP_ENABLED);
-                    editor.putInt(item.getName(),
-                            ProvisioningManager.PROVISIONING_VALUE_DISABLED);
-                }
-            }
+            item = provisioningItems.get(ProvisioningManager.KEY_SMS_OVER_IP_ENABLED);
+            editor.putInt(item.getName(), ProvisioningManager.PROVISIONING_VALUE_ENABLED);
         }
 
         editor.apply();
