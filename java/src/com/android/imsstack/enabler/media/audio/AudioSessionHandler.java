@@ -220,9 +220,9 @@ public class AudioSessionHandler  {
                 }
                     break;
 
-                case MediaConstants.NOTIFY_MEDIA_QUALITY_CHANGE:
+                case MediaConstants.NOTIFY_CALL_QUALITY_CHANGE:
                 {
-                    handleMediaQualityChanged((CallQuality) msg.obj);
+                    handleCallQualityChanged((CallQuality) msg.obj);
                 }
                     break;
 
@@ -333,10 +333,10 @@ public class AudioSessionHandler  {
         }
 
         @Override
-        public void onMediaQualityChanged(@NonNull final CallQuality callQuality) {
+        public void onCallQualityChanged(@NonNull final CallQuality callQuality) {
             ImsLog.v("Media Quality Changed: " + callQuality.toString());
 
-            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_MEDIA_QUALITY_CHANGE,
+            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_CALL_QUALITY_CHANGE,
                     callQuality).sendToTarget();
         }
     }
@@ -608,9 +608,9 @@ public class AudioSessionHandler  {
         }
     }
 
-    private void handleMediaQualityChanged(final CallQuality callQuality) {
+    private void handleCallQualityChanged(final CallQuality callQuality) {
         if (mAudioSessionCallbackHandler != null) {
-            mAudioSessionCallbackHandler.mediaQualityChanged(callQuality);
+            mAudioSessionCallbackHandler.callQualityChanged(callQuality);
         }
     }
 }

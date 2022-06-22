@@ -99,7 +99,7 @@ protected:
     IMS_BOOL OnNotifyMediaInactivity(IN IMS_UINTP pParam);
     IMS_BOOL OnNofityPacketLoss(IN IMS_UINTP pParam);
     IMS_BOOL OnNofityJitter(IN IMS_UINTP pParam);
-    IMS_BOOL OnNofityMediaQualityChange(IN IMS_UINTP pParam);
+    IMS_BOOL OnNofityCallQualityChange(IN IMS_UINTP pParam);
     IMS_BOOL OnResponseSessionChanged(IN IMS_UINTP pParam);
     IMS_BOOL OnNofityHeaderExtension(IN IMS_UINTP pParam);
     IMS_BOOL OnNotifyQosInfo(IN IMS_UINTP pParam);

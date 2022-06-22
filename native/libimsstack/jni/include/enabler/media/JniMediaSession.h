@@ -46,7 +46,7 @@ private:
             IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig, IN const android::Parcel& objParcel);
     void OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-    void OnNofityMediaQualityChange(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
+    void OnNofityCallQualityChange(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnResponseSessionChanged(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);

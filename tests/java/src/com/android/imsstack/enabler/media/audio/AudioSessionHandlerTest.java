@@ -379,11 +379,15 @@ public class AudioSessionHandlerTest {
         processAllMessages();
         verify(mMockAudioSessionCallbackHandler).onNotifyJitter(eq(MediaTestUtils.JITTER));
 
-        // Receive Media Quality Changed Notification
+    }
+
+    @Test
+    public void testCallQualityChanged() {
+        // Receive Call Quality Changed Notification
         CallQuality callQuality = MediaTestUtils.createCallQuality();
-        mAudioSessionCallback.onMediaQualityChanged(callQuality);
+        mAudioSessionCallback.onCallQualityChanged(callQuality);
         processAllMessages();
-        verify(mMockAudioSessionCallbackHandler).mediaQualityChanged(eq(callQuality));
+        verify(mMockAudioSessionCallbackHandler).callQualityChanged(eq(callQuality));
     }
 
     private void processAllMessages() {

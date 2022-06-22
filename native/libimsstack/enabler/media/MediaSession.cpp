@@ -751,8 +751,8 @@ IMS_BOOL MediaSession::OnResponse(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
         case IMMedia::NOTIFY_JITTER:
             bRet = OnNofityJitter(pParam);
             break;
-        case IMMedia::NOTIFY_MEDIA_QUALITY_CHANGE:
-            bRet = OnNofityMediaQualityChange(pParam);
+        case IMMedia::NOTIFY_CALL_QUALITY_CHANGE:
+            bRet = OnNofityCallQualityChange(pParam);
             break;
         case IMMedia::RESPONSE_SESSION_CHANGED:
             bRet = OnResponseSessionChanged(pParam);
@@ -1048,7 +1048,7 @@ IMS_BOOL MediaSession::OnNofityJitter(IN IMS_UINTP pParam_)
 }
 
 PROTECTED
-IMS_BOOL MediaSession::OnNofityMediaQualityChange(IN IMS_UINTP pParam_)
+IMS_BOOL MediaSession::OnNofityCallQualityChange(IN IMS_UINTP pParam_)
 {
     (void)pParam_;
     /* TODO_MEDIA later
@@ -1056,7 +1056,7 @@ IMS_BOOL MediaSession::OnNofityMediaQualityChange(IN IMS_UINTP pParam_)
                 reinterpret_cast<ImsMediaNotifyQualityParam*>(pParam_);
         MEDIA_CONTENT_TYPE eMediaType = pParam->m_eMediaType;
 
-        IMS_TRACE_I("OnNofityMediaQualityChange() - CallKey[%d], eMediaType[%d]",
+        IMS_TRACE_I("OnNofityCallQualityChange() - CallKey[%d], eMediaType[%d]",
                 m_nCallKey, eMediaType, 0);
 
         // do it later

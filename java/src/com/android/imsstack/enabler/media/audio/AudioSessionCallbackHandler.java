@@ -221,15 +221,15 @@ public class AudioSessionCallbackHandler {
     }
 
     /**
-     * Handles notification when a change to media quality is occurred
+     * Handles notification when a change to call quality is occurred
      *
-     * @param callQuality The media quality statistics since last report
+     * @param callQuality The call quality statistics since last report
      */
-    public void mediaQualityChanged(CallQuality callQuality) {
-        ImsLog.v("mediaQualityChanged");
+    public void callQualityChanged(CallQuality callQuality) {
+        ImsLog.v("callQualityChanged");
 
         Parcel parcel = Parcel.obtain();
-        parcel.writeInt(MediaConstants.NOTIFY_MEDIA_QUALITY_CHANGE);
+        parcel.writeInt(MediaConstants.NOTIFY_CALL_QUALITY_CHANGE);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         callQuality.writeToParcel(parcel,  Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
 
