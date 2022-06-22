@@ -352,6 +352,27 @@ PUBLIC VIRTUAL CallStateName EstablishedState::HandleIpcanChanged()
     return CallStateName::UPDATING;
 }
 
+PUBLIC VIRTUAL CallStateName EstablishedState::QosReserveFailed(
+        IN ISession* /* piSession */, IN QosLossPolicy eNextAction)
+{
+    IMS_TRACE_I("QosReserveFailed", 0, 0, 0);
+    if (eNextAction == QosLossPolicy::RELEASE)
+    {
+        CallReasonInfo objReason(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
+        HandleTerminate(objReason);
+        m_objContext.GetUiNotifier().SendTerminated(objReason);
+
+        return CallStateName::TERMINATING;
+    }
+
+    if (eNextAction == QosLossPolicy::MODIFY)
+    {
+        // TODO: downgrade to voip. send early update or send re-INVITE after call establishment.
+    }
+
+    return GetStateName();
+}
+
 PRIVATE
 IMS_RESULT EstablishedState::HandleUpdate(
         IN UpdateType eUpdateType, IN CallType eCallType, IN MediaInfo* pMediaInfo)

@@ -53,6 +53,7 @@ public:
     CallStateName OnVideoLowestBitRate() override;
     CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
     CallStateName HandleIpcanChanged() override;
+    CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction);
 
 private:
     IMS_RESULT HandleUpdate(

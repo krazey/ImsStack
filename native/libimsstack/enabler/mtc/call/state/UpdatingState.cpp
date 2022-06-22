@@ -244,6 +244,27 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnMediaFailed(IN CallReasonInfo objR
     return CallStateName::TERMINATING;
 }
 
+PUBLIC VIRTUAL CallStateName UpdatingState::QosReserveFailed(
+        IN ISession* /* piSession */, IN QosLossPolicy eNextAction)
+{
+    IMS_TRACE_I("QosReserveFailed", 0, 0, 0);
+    if (eNextAction == QosLossPolicy::RELEASE)
+    {
+        CallReasonInfo objReason(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
+        HandleTerminate(objReason);
+        m_objContext.GetUiNotifier().SendTerminated(objReason);
+
+        return CallStateName::TERMINATING;
+    }
+
+    if (eNextAction == QosLossPolicy::MODIFY)
+    {
+        // TODO: downgrade to voip. send early update or send re-INVITE after call establishment.
+    }
+
+    return GetStateName();
+}
+
 PRIVATE
 IMS_RESULT UpdatingState::HandleSdpAnswer()
 {

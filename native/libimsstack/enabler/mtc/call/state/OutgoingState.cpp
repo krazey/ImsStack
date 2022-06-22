@@ -138,10 +138,14 @@ PUBLIC VIRTUAL CallStateName OutgoingState::QosReserved(
 PUBLIC VIRTUAL CallStateName OutgoingState::QosReserveFailed(
         IN ISession* piSession, IN QosLossPolicy eNextAction)
 {
+    IMS_TRACE_I("QosReserveFailed", 0, 0, 0);
     if (eNextAction == QosLossPolicy::RELEASE)
     {
         CallReasonInfo objReason(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
         HandleCancel(piSession, objReason);
+
+        // change the reason code for CSFB in this case. discuss if extra code is needed for csfb.
+        objReason.nCode = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
         m_objContext.GetUiNotifier().SendStartFailed(objReason);
 
         return CallStateName::TERMINATING;
