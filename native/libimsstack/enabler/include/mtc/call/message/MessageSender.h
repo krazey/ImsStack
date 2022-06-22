@@ -18,8 +18,10 @@
 #define MTC_MESSAGE_SENDER_H_
 
 #include "call/message/MessageFormatter.h"
+#include "helper/TransactionTimerUpdateHelper.h"
 #include "SipMethod.h"
 #include "MtcDef.h"
+#include <functional>
 
 class IMtcSessionContext;
 class ISession;
@@ -30,8 +32,8 @@ class MessageSender
 public:
     MessageSender(IN IMtcSessionContext& objContext);
     ~MessageSender();
-    MessageSender(IN CONST MessageSender&) = delete;
-    MessageSender& operator=(IN CONST MessageSender&) = delete;
+    MessageSender(IN const MessageSender&) = delete;
+    MessageSender& operator=(IN const MessageSender&) = delete;
 
 public:
     IMS_RESULT Start();
@@ -51,12 +53,13 @@ public:
     IMS_RESULT Terminate(IN IMS_BOOL bUseBye, IN const CallReasonInfo& objReason);
 
 private:
-    MessageFormatter& GetFormatter();
+    void CreateFormatter();
 
 private:
     IMtcSessionContext& m_objContext;
     ISession& m_objSession;
-    MessageFormatter* m_pFormatter;
+    std::unique_ptr<MessageFormatter> m_pFormatter;
+    TransactionTimerUpdateHelper m_objTimerUpdateHelper;
 };
 
 #endif

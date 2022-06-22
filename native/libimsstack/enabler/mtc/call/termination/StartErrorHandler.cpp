@@ -45,7 +45,7 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
     if (IsTransactionTimeout(piMessage))
     {
         IMS_TRACE_I("Handle : Timeout", 0, 0, 0);
-        return GetCallReasonInfoForTransactionTimeout();
+        return HandleTransactionTimeout();
     }
 
     if (!m_objContext.GetCallInfo().bEmergency && IsRetry1xRequiredForNormalCall(*piMessage))
@@ -57,16 +57,47 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::GetCallReasonInfoForTransactionTimeout() const
+CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
 {
     if (m_objContext.GetCallInfo().bEmergency)
     {
+        // TODO: emergency policy is required?
         return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
-    else
+
+    Feature eFeature = m_objContext.GetCallInfo().bWifi
+            ? Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL
+            : Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL;
+
+    const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(eFeature);
+    IMS_SINT32 nReason = CODE_NETWORK_RESP_TIMEOUT;
+    switch (nPolicy)
     {
-        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT);
+        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END:
+            break;
+        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE:
+            nReason = CODE_NONE;  // TODO: check requirement. Not working currently
+            break;
+        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB:
+            nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
+            break;
+        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE:
+            nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;  // TODO : check requirement
+            break;
+        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF:
+            ControlAos(ImsAosControl::REGISTER_REINITIATE);
+            break;
+        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF:
+            ControlAos(ImsAosControl::PCSCF_NEXT);
+            break;
+        case CarrierConfig::ImsVoice::
+                MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB:
+            nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
+            ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);  // TODO: check timing
+            break;
     }
+
+    return CallReasonInfo(nReason);
 }
 
 PRIVATE
