@@ -23,18 +23,12 @@
 #include "condition/AosServiceAvailableCellular.h"
 #include "provider/AosProvider.h"
 
-#include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosBlock.h"
 #include "interface/MockIAosNConfiguration.h"
-#include "interface/MockIAosNetTracker.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Return;
-
-const IMS_UINT32 NW_REPORT_RADIO_GSM = 0x00040000;
-const IMS_UINT32 NW_REPORT_RADIO_LTE = 0x20000000;
-const IMS_UINT32 NW_REPORT_RADIO_NR = 0x80000000;
 
 class AosServiceAvailableCellurTest : public ::testing::Test
 {
@@ -86,11 +80,6 @@ protected:
     void HandleVopsChanged(IN IMS_UINT32 nState)
     {
         m_pAosServiceAvailableCellular->HandleVopsChanged(nState);
-    }
-
-    void IsAvailableRatForVops(IN IMS_UINT32 nState)
-    {
-        m_pAosServiceAvailableCellular->IsAvailableRatForVops(nState);
     }
 };
 
@@ -278,40 +267,6 @@ TEST_F(AosServiceAvailableCellurTest, HandleVopsChange_ReturnByConfig)
     HandleVopsChanged(1);
 }
 
-TEST_F(AosServiceAvailableCellurTest, HandleVopsChange_IsAvailableRatForVopsFalse)
-{
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    MockIAosBlock objMockIAosBlock;
-    EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
-
-    MockIAosAppContext objMockIAosAppContext;
-    MockIAosNetTracker objMockIAosNetTracker;
-    EXPECT_CALL(objMockIAosAppContext, GetNetTracker())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&objMockIAosNetTracker));
-
-    EXPECT_CALL(objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
-    EXPECT_CALL(objMockIAosNetTracker, GetMobileVoiceNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-
-    SetAppContext(static_cast<IAosAppContext*>(&objMockIAosAppContext));
-
-    HandleVopsChanged(0);
-    HandleVopsChanged(1);
-}
-
 TEST_F(AosServiceAvailableCellurTest, HandleVopsChange_VopsSupport)
 {
     MockIAosNConfiguration objMockIAosNConfiguration;
@@ -323,27 +278,9 @@ TEST_F(AosServiceAvailableCellurTest, HandleVopsChange_VopsSupport)
 
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(2);
+    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
 
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
-
-    MockIAosAppContext objMockIAosAppContext;
-    MockIAosNetTracker objMockIAosNetTracker;
-    EXPECT_CALL(objMockIAosAppContext, GetNetTracker())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&objMockIAosNetTracker));
-
-    EXPECT_CALL(objMockIAosNetTracker, GetNetworkType())
-            .Times(2)
-            .WillOnce(Return(NW_REPORT_RADIO_LTE))
-            .WillOnce(Return(NW_REPORT_RADIO_NR));
-    EXPECT_CALL(objMockIAosNetTracker, GetMobileVoiceNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-
-    SetAppContext(static_cast<IAosAppContext*>(&objMockIAosAppContext));
-
-    HandleVopsChanged(1);
     HandleVopsChanged(1);
 }
 
@@ -357,28 +294,9 @@ TEST_F(AosServiceAvailableCellurTest, HandleVopsChange_VopsNotSupport)
             .WillRepeatedly(Return(IMS_FALSE));
 
     MockIAosBlock objMockIAosBlock;
-    EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(2);
+    EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
-
-    MockIAosAppContext objMockIAosAppContext;
-    MockIAosNetTracker objMockIAosNetTracker;
-    EXPECT_CALL(objMockIAosAppContext, GetNetTracker())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&objMockIAosNetTracker));
-
-    EXPECT_CALL(objMockIAosNetTracker, GetNetworkType())
-            .Times(2)
-            .WillOnce(Return(NW_REPORT_RADIO_LTE))
-            .WillOnce(Return(NW_REPORT_RADIO_NR));
-    EXPECT_CALL(objMockIAosNetTracker, GetMobileVoiceNetworkType())
-            .Times(2)
-            .WillOnce(Return(NW_REPORT_RADIO_LTE))
-            .WillOnce(Return(NW_REPORT_RADIO_NR));
-
-    SetAppContext(static_cast<IAosAppContext*>(&objMockIAosAppContext));
-
-    HandleVopsChanged(0);
     HandleVopsChanged(0);
 }

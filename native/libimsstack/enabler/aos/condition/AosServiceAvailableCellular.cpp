@@ -21,7 +21,6 @@
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
 #include "provider/AosProvider.h"
-#include "provider/AosUtil.h"
 #include "condition/AosCondition.h"
 #include "condition/AosServiceAvailableCellular.h"
 
@@ -142,11 +141,6 @@ void AosServiceAvailableCellular::HandleVopsChanged(IN IMS_UINT32 nState)
         return;
     }
 
-    if (!IsAvailableRatForVops(m_bVopsState))
-    {
-        return;
-    }
-
     if (m_bVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
         RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AoSReason::NOT_SPECIFIED);
@@ -173,33 +167,4 @@ PRIVATE VIRTUAL IMS_BOOL AosServiceAvailableCellular::CheckServiceAvailable()
     }
 
     return m_piBlock->IsCleared(SERVICE_CELLULAR);
-}
-
-PRIVATE
-IMS_BOOL AosServiceAvailableCellular::IsAvailableRatForVops(IN IMS_UINT32 nState)
-{
-    IMS_UINT32 nNetworkType = m_piAppContext->GetNetTracker()->GetNetworkType();
-    IMS_UINT32 nNetVoiceNetworkType = m_piAppContext->GetNetTracker()->GetMobileVoiceNetworkType();
-    IMS_BOOL bResult = IMS_TRUE;
-
-    if (nState == IMS_VOICE_OVER_PS_SUPPORTED)
-    {
-        if (!AosUtil::GetInstance()->IsSupportedNetworkTypeForCellular(nNetworkType))
-        {
-            bResult = IMS_FALSE;
-        }
-    }
-    else
-    {
-        if (!AosUtil::GetInstance()->IsSupportedNetworkTypeForCellular(nNetworkType) ||
-                !AosUtil::GetInstance()->IsSupportedNetworkTypeForCellular(nNetVoiceNetworkType))
-        {
-            bResult = IMS_FALSE;
-        }
-    }
-
-    A_IMS_TRACE_D(AOSTAG, "IsAvailableRatForVops :: voice(0x%08X), data(0x%08X), result(%s)",
-            nNetVoiceNetworkType, nNetworkType, _TRACE_B_(bResult));
-
-    return bResult;
 }

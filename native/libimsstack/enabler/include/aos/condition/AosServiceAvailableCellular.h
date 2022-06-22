@@ -31,7 +31,6 @@ private:
     void HandleVolteSettingChanged(IN IMS_UINT32 nState) final;
     void HandleVopsChanged(IN IMS_UINT32 nState) final;
     IMS_BOOL CheckServiceAvailable() final;
-    IMS_BOOL IsAvailableRatForVops(IN IMS_UINT32 nState);
 
 private:
     IMS_BOOL m_bVolteSetting;
