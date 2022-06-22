@@ -409,8 +409,9 @@ SIP_BOOL SipParameterList::Decode(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR
     while (pStartPt <= pEndPt)
     {
         SIP_CHAR* pTempPos = SIP_NULL;
+        SIP_CHAR* pTempNext = SIP_NULL;
 
-        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, cDelimiter) == SIP_FALSE)
+        if (sipFindActualPos(pStartPt, pEndPt, &pTempPos, &pTempNext, cDelimiter) == SIP_FALSE)
         {
             pTempPos = pEndPt;
         }
@@ -444,7 +445,7 @@ SIP_BOOL SipParameterList::Decode(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR
             return SIP_TRUE;
         }
 
-        pStartPt = pTempPos + SIP_TWO;
+        pStartPt = pTempNext;
 
         if (pStartPt > pEndPt)
         {
@@ -664,8 +665,9 @@ SIP_BOOL SipNameValue::Decode(
         SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, IParameterComponent* pParameterComponent)
 {
     SIP_CHAR* pTempPos = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, EQUAL) == SIP_FALSE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPos, &pTempNext, EQUAL) == SIP_FALSE)
     {
         pTempPos = pEndPt;
     }
@@ -681,7 +683,7 @@ SIP_BOOL SipNameValue::Decode(
     if (pTempPos != pEndPt)
     {
         /*Update the pTempPos to the start of Value List*/
-        SIP_CHAR* pszValuePtr = pTempPos + SIP_TWO;
+        SIP_CHAR* pszValuePtr = pTempNext;
 
         if ((pParameterComponent != SIP_NULL) &&
                 ((pParameterComponent->GetComponentType() == IParameterComponent::HEADER) ||
