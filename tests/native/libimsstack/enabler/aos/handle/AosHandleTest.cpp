@@ -30,6 +30,7 @@
 #include "interface/IAosHandle.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosRegistration.h"
+#include "interface/IAosRegStateManager.h"
 #include "provider/AosProvider.h"
 
 #include "interface/MockIAosAppContext.h"
@@ -39,6 +40,7 @@
 #include "interface/MockIAosNConfiguration.h"
 #include "interface/MockIAosNetTracker.h"
 #include "interface/MockIAosRegistration.h"
+#include "interface/MockIAosRegStateManager.h"
 #include "interface/MockIAosService.h"
 #include "../../interface/aos/MockIImsAosInfo.h"
 #include "../../interface/aos/MockIImsAosListener.h"
@@ -64,6 +66,9 @@ public:
 
     IAosService* m_piAosService;
     MockIAosService m_objMockIAosService;
+
+    IAosRegStateManager* m_piAosRegStateManager;
+    MockIAosRegStateManager m_objMockIAosRegStateManager;
 
     const AString m_strAppId = AString("ims.app.test");
     const AString m_strServiceId = AString("ims.service.test");
@@ -96,6 +101,10 @@ protected:
         m_piAosService = AosProvider::GetInstance()->GetService();
         AosProvider::GetInstance()->SetService(static_cast<IAosService*>(&m_objMockIAosService));
 
+        m_piAosRegStateManager = AosProvider::GetInstance()->GetRegStateManager();
+        AosProvider::GetInstance()->SetRegStateManager(
+                static_cast<IAosRegStateManager*>(&m_objMockIAosRegStateManager));
+
         m_pAosHandle = new AosHandle(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
                 m_strAppId, m_strServiceId, m_nServiceType);
 
@@ -106,6 +115,7 @@ protected:
     {
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration);
         AosProvider::GetInstance()->SetService(m_piAosService);
+        AosProvider::GetInstance()->SetRegStateManager(m_piAosRegStateManager);
 
         if (m_pAosHandle)
         {
@@ -201,6 +211,8 @@ protected:
     void SetSuspendedReason(IN IMS_UINT32 nReason) { m_pAosHandle->SetSuspendedReason(nReason); }
 
     void SetNetSrvIn(IN IMS_BOOL bNetSrvIn) { m_pAosHandle->m_bNetSrvIn = bNetSrvIn; }
+
+    IMS_BOOL GetNetSrvIn() { return m_pAosHandle->m_bNetSrvIn; }
 
     IImsAosInfo* GetAosInfo() { return m_pAosHandle->m_piInfo; }
 
@@ -396,6 +408,15 @@ protected:
     {
         m_pAosHandle->m_nSuspendedReason = nReason;
     }
+
+    void CheckSuspended() { m_pAosHandle->CheckSuspended(); }
+
+    void ResetSuspendedReason(IN IMS_UINT32 nReason)
+    {
+        m_pAosHandle->ResetSuspendedReason(nReason);
+    }
+
+    void ReportRegState() { m_pAosHandle->ReportRegState(); }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -2776,4 +2797,120 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test5)
     ClearSuspendedReason();
     m_pAosHandle->SetListener(IMS_NULL);
     SetReason(AoSReason::SUSPEND_NONE);
+}
+
+TEST_F(AosHandleTest, CheckSuspended_Test1)
+{
+    // Test1: Suspended.
+    // Expectation: Suspended reason-SUSPEND_NO_SERVICE, m_bNetSrvIn is false.
+
+    ClearSuspendedReason();
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended()).Times(1).WillOnce(Return(IMS_TRUE));
+
+    CheckSuspended();
+
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+    EXPECT_FALSE(GetNetSrvIn());
+}
+
+TEST_F(AosHandleTest, CheckSuspended_Test2)
+{
+    // Test2: Not suspended.
+    // Expectation: Suspended reason-SUSPEND_NONE, m_bNetSrvIn is true.
+
+    ClearSuspendedReason();
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended()).Times(1).WillOnce(Return(IMS_FALSE));
+
+    CheckSuspended();
+
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+    EXPECT_TRUE(GetNetSrvIn());
+}
+
+TEST_F(AosHandleTest, ResetSuspendedReason_Test1)
+{
+    // Test1: reason-SUSPEND_NO_SERVICE
+    // Expectation: reset the reason from suspended reason
+
+    ClearSuspendedReason();
+    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+
+    ResetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+}
+
+TEST_F(AosHandleTest, ResetSuspendedReason_Test2)
+{
+    // Test2: reason-other than SUSPEND_NO_SERVICE
+    // Expectation: no reset the reason from suspended reason
+
+    ClearSuspendedReason();
+    SetSuspendedReasonForTest(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+
+    ResetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+
+    ClearSuspendedReason();
+}
+
+TEST_F(AosHandleTest, ReportRegState_Test1)
+{
+    // Test1: RegStateManager is null
+    // Expectation: no call SetRegState with any parameteres.
+
+    AosProvider::GetInstance()->SetRegStateManager(IMS_NULL);
+
+    EXPECT_CALL(m_objMockIAosRegStateManager, SetRegState(_, _)).Times(0);
+
+    ReportRegState();
+}
+
+TEST_F(AosHandleTest, ReportRegState_Test2)
+{
+    // Test2: RegStateManager is not null, state connected
+    // Expectation: call SetRegState with IMS_REG_ON.
+
+    AosProvider::GetInstance()->SetRegStateManager(
+            static_cast<IAosRegStateManager*>(&m_objMockIAosRegStateManager));
+    SetHandleState(AosHandle::STATE_CONNECTED);
+
+    EXPECT_CALL(m_objMockIAosRegStateManager, SetRegState(_, IMS_REG_ON)).Times(1);
+
+    ReportRegState();
+}
+
+TEST_F(AosHandleTest, ReportRegState_Test3)
+{
+    // Test3: RegStateManager is not null, state other than connected
+    // Expectation: call SetRegState with IMS_REG_OFF.
+
+    EXPECT_CALL(m_objMockIAosRegStateManager, SetRegState(_, IMS_REG_OFF)).Times(3);
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    ReportRegState();
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    ReportRegState();
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    ReportRegState();
+}
+
+TEST_F(AosHandleTest, ReportRegState_Test4)
+{
+    // Test4: RegStateManager is not null, invalid state
+    // Expectation: no call SetRegState with any parameteres.
+
+    AosProvider::GetInstance()->SetRegStateManager(IMS_NULL);
+    SetHandleState(AosHandle::STATE_INVALID);
+
+    EXPECT_CALL(m_objMockIAosRegStateManager, SetRegState(_, _)).Times(0);
+
+    ReportRegState();
 }
