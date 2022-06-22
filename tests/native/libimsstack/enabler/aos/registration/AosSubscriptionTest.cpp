@@ -587,16 +587,32 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
     // IsSubscriptionTerminated() - 1st: true, others: false
     EXPECT_CALL(objMockAosConfig, GetRetryCountSubErrorSubTerminated())
             .WillOnce(Return(1))
+            .WillOnce(Return(2))
             .WillRepeatedly(Return(0));
 
     IMSVector<IMS_SINT32> objErrSubTerminated;
     objErrSubTerminated.Clear();
     objErrSubTerminated.Add(404);
     EXPECT_CALL(objMockAosConfig, GetSubErrorSubTerminated())
+            .WillOnce(ReturnRef(objErrSubTerminated))
             .WillOnce(ReturnRef(objErrSubTerminated));
     SetRetryCountSubTerminated(0);
 
+    EXPECT_CALL(objMockIAosSubscriptionListener,
+            Subscription_StateChanged(
+                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_TERMINATED))
+            .Times(AnyNumber());
+    EXPECT_CALL(objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::COMMAND_SUB_TERMINATED, 0))
+            .Times(AnyNumber());
+    EXPECT_CALL(objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::COMMAND_REG_REQUIRED, 0))
+            .Times(AnyNumber());
+
     EXPECT_TRUE(pAosSubscription->ProcessFailed_StatusCode(404, IMS_FALSE));
+
+    SetRetryCountSubTerminated(0);
+    EXPECT_TRUE(pAosSubscription->ProcessFailed_StatusCode(404, IMS_TRUE));
 
     // IsInitialRegistrationRequired() - 1st: true, others: false
     EXPECT_CALL(objMockAosConfig, GetRetryCountSubErrorRegRequired())
@@ -610,6 +626,9 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
     EXPECT_CALL(objMockAosConfig, GetSubErrorRegRequired()).WillOnce(ReturnRef(objErrRegRequired));
 
     SetRetryCountRegRequired(2);
+
+    EXPECT_CALL(objMockAosConfig, GetRegRetryCountResetPolicy()).WillRepeatedly(Return(0));
+
     EXPECT_TRUE(pAosSubscription->ProcessFailed_StatusCode(403, IMS_FALSE));
 
     // IsInitialRegistrationWithNextPcscfRequired() - 1st: true, others: false
@@ -618,6 +637,10 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
     objErrRegRequiredWithNextPcscf.Add(403);
     EXPECT_CALL(objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
             .WillOnce(ReturnRef(objErrRegRequiredWithNextPcscf));
+
+    EXPECT_CALL(objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF, 0))
+            .Times(1);
     EXPECT_TRUE(pAosSubscription->ProcessFailed_StatusCode(403, IMS_FALSE));
 
     // IMSVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;

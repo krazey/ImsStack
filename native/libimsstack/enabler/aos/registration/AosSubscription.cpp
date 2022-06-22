@@ -685,7 +685,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
     {
         if ((!m_bIsErrChecked) && (nStatusCode == SipStatusCode::SC_481))
         {
-            RequestCommand(REASON_SUB_FAILED, COMMAND_SUB_REQUIRED);
+            RequestCommand(REASON_SUB_TERMINATED, COMMAND_SUB_REQUIRED);
             return IMS_TRUE;
         }
         else if ((!m_bIsErrChecked) && (IsResubscriptionStopped(nStatusCode) == IMS_TRUE))
