@@ -21,6 +21,7 @@ import android.os.PersistableBundle;
 
 import com.android.imsstack.enabler.acs.AcServiceClientInfo;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,7 +52,8 @@ public class ConfigContainer {
 
     private PersistableBundle mConfig;
 
-    private ConfigContainer(Context context) {
+    @VisibleForTesting
+    public ConfigContainer(Context context) {
         mContext = context;
         readDataFromFile();
     }
@@ -82,6 +84,8 @@ public class ConfigContainer {
         pb.putString(LOCAL_KEY_CLIENT_VERSION, clientInfo.getClientVersion());
         pb.putBoolean(LOCAL_KEY_RCS_ENABLED_BY_USER, clientInfo.isRcsEnabledByUser());
 
+        ImsLog.i(pb.toString());
+
         saveDataToFile();
     }
 
@@ -94,7 +98,6 @@ public class ConfigContainer {
         String key = LOCAL_KEY_PREFIX + subId;
 
         PersistableBundle pb = getDataForSubscription(key);
-
         return new AcServiceClientInfo(
                 pb.getString(LOCAL_KEY_RCS_VERSION),
                 pb.getString(LOCAL_KEY_RCS_PROFILE),
@@ -138,7 +141,7 @@ public class ConfigContainer {
         String key = LOCAL_KEY_PREFIX + subId;
 
         PersistableBundle pb = getDataForSubscription(key);
-        pb.putLong(LOCAL_KEY_LAST_UPDATE_TIME, System.currentTimeMillis());
+        pb.putLong(LOCAL_KEY_LAST_UPDATE_TIME, getCurrentTimeMillis());
 
         saveDataToFile();
     }
@@ -163,10 +166,16 @@ public class ConfigContainer {
     private PersistableBundle getDataForSubscription(String key) {
         PersistableBundle pb = mConfig.getPersistableBundle(key);
         if (pb == null) {
+            ImsLog.i("pb is null");
             pb = new PersistableBundle();
             mConfig.putPersistableBundle(key, pb);
         }
         return pb;
+    }
+
+    @VisibleForTesting
+    protected long getCurrentTimeMillis() {
+        return System.currentTimeMillis();
     }
 
     private void readDataFromFile() {
@@ -176,7 +185,7 @@ public class ConfigContainer {
                 FileInputStream inputStream = new FileInputStream(file);
                 mConfig = PersistableBundle.readFromStream(inputStream);
                 inputStream.close();
-                ImsLog.i("read config from file");
+                ImsLog.i("read config from file : " + mConfig.toString());
             } else {
                 mConfig = new PersistableBundle();
                 ImsLog.i("file is not exist");
@@ -192,7 +201,7 @@ public class ConfigContainer {
             FileOutputStream outputStream = new FileOutputStream(file);
             mConfig.writeToStream(outputStream);
             outputStream.close();
-            ImsLog.i("save data to file");
+            ImsLog.i("save data to file : " + mConfig.toString());
         } catch (Exception e) {
             ImsLog.e(e.getMessage());
         }
