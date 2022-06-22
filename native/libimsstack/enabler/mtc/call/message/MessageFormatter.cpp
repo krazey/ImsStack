@@ -51,11 +51,15 @@ MessageFormatter::MessageFormatter(IN IMtcSessionContext& objContext) :
         m_piNextMessage(IMS_NULL),
         m_eFormType(FormType::NONE)
 {
+    IMS_TRACE_I("+MessageFormatter", 0, 0, 0);
 }
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL MessageFormatter::~MessageFormatter() {}
+PUBLIC VIRTUAL MessageFormatter::~MessageFormatter()
+{
+    IMS_TRACE_I("~MessageFormatter", 0, 0, 0);
+}
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */

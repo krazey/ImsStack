@@ -397,8 +397,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* p
 
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDeliveryFailed(IN ISession* piSession)
 {
-    IMS_TRACE_D("SessionPRAckDeliveryFailed", 0, 0, 0);
-    IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_START);
+    IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_PRACK);
+    IMS_TRACE_D("SessionPRAckDeliveryFailed statusCode[%d]", nStatusCode, 0, 0);
     CallReasonInfo objReason = CallReasonInfo(
             nStatusCode == SipStatusCode::SC_INVALID ? CODE_NETWORK_RESP_TIMEOUT : CODE_UNSPECIFIED,
             nStatusCode);

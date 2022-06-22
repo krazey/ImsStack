@@ -45,7 +45,7 @@ public:
     CallReasonInfo Handle(IN const IMessage* piMessage) const;
 
 private:
-    CallReasonInfo GetCallReasonInfoForTransactionTimeout() const;
+    CallReasonInfo HandleTransactionTimeout() const;
     CallReasonInfo HandleResponse(IN const IMessage& objMessage) const;
 
     CallReasonInfo Handle3xxResponse(IN const IMessage& objMessage) const;
