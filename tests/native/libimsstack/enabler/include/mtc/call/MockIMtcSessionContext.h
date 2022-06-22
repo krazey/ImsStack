@@ -53,6 +53,7 @@ public:
     MOCK_METHOD(MtcSupplementaryService&, GetSupplementaryService, (), (override));
     MOCK_METHOD(UpdatingInfo&, GetUpdatingInfo, (), (override));
     MOCK_METHOD(UssiController*, GetUssiController, (), (override));
+    MOCK_METHOD(IMSList<IMtcCall*>, GetOtherCalls, (), (override));
     MOCK_METHOD(void, SetHeldByMe, (IMS_BOOL), (override));
     MOCK_METHOD(MtcSession*, CreateSession, (IN ISession * piSession), (override));
     MOCK_METHOD(MtcSession*, CreateSession, (), (override));

@@ -235,6 +235,7 @@ void JniMtcCall::Open(IN const android::Parcel& objParcel)
 {
     IMS_TRACE_D("Open (%" PFLS_d ")", m_nCallKey, 0, 0);
 
+    ServiceType eServiceType = JniMtcUtils::ReadServiceType(objParcel);
     JniCallInfo objJniCallInfo = JniMtcUtils::ReadCallInfo(objParcel);
 
     CallInfo objCallInfo;
@@ -243,7 +244,7 @@ void JniMtcCall::Open(IN const android::Parcel& objParcel)
     objCallInfo.bOffline = objJniCallInfo.bOffline;
     objCallInfo.bUssi = objJniCallInfo.bUssi;
 
-    m_nCallKey = m_objCallController.Open(ServiceType::NORMAL, objCallInfo);
+    m_nCallKey = m_objCallController.Open(eServiceType, objCallInfo);
     Attach();
 }
 

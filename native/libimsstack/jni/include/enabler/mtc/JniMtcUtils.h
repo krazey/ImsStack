@@ -29,6 +29,7 @@ class JniMtcUtils final
 public:
     static void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
     static CallType ReadCallType(IN const android::Parcel& objParcel);
+    static ServiceType ReadServiceType(IN const android::Parcel& objParcel);
     static JniCallInfo ReadCallInfo(IN const android::Parcel& objParcel);
     static MediaInfo* ReadMediaInfo(IN const android::Parcel& objParcel);
     static IMSMap<SuppType, SuppService*> ReadSupplementaryService(

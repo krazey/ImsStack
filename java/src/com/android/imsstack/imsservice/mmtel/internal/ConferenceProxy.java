@@ -13,6 +13,7 @@ package com.android.imsstack.imsservice.mmtel.internal;
 
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
+import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.MtcCallUtils;
@@ -292,7 +293,7 @@ public class ConferenceProxy {
         MtcCall confCall = app.createCall(MtcCall.FLAG_MO | MtcCall.FLAG_CONFERENCE);
 
         if (confCall != null) {
-            confCall.open(false, false, false, false);
+            confCall.open(IUMtcCall.SERVICETYPE_NORMAL, false, false, false, false);
         }
 
         return confCall;

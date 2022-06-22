@@ -46,6 +46,7 @@ public:
     IMtcCall* GetCallByCallKey(IN CallKey nCallKey) override;
 
     IMSList<IMtcCall*> GetCalls() override;
+    IMSList<IMtcCall*> GetCallsExcluding(IN CallKey nExcludingCallKey) override;
     IMSList<IMtcCall*> GetCallsByType(IN CallType eCallType) override;
     IMSList<IMtcCall*> GetCallsByServiceType(IN ServiceType eServiceType) override;
     IMSList<IMtcCall*> GetCallsInConference() override;

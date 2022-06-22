@@ -67,13 +67,13 @@ public:
         SERVICE_OPENING = 5,
     };  // SERVICE_STATE
 
-    enum class EmergencyServiceStatus
+    enum class EmergencyServiceState
     {
         IDLE = 0,
         OPENING = 1,
         OPENED = 2,
         UNAVAILABLE = 3,
-        ES = 4,
+        IN_CALL = 4,
     };
 
     enum

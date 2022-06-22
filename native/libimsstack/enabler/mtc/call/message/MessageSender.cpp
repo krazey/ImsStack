@@ -241,13 +241,11 @@ IMS_RESULT MessageSender::Terminate(IN IMS_BOOL bUseBye, IN const CallReasonInfo
 PRIVATE
 void MessageSender::CreateFormatter()
 {
-    /* TODO:
-    IMS_BOOL bEmergency = IMS_FALSE;
-    if (bEmergency)
+    if (m_objContext.GetCallInfo().bEmergency)
     {
-        m_pFormatter = new EmergencyMessageFormatter(m_objContext);
+        m_pFormatter = std::make_unique<EmergencyMessageFormatter>(m_objContext);
         return;
     }
-    */
+
     m_pFormatter = std::make_unique<MessageFormatter>(m_objContext);
 }

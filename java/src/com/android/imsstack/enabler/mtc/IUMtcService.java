@@ -38,12 +38,11 @@ public class IUMtcService {
     public static final int SERVICESTATUS_REASON_FORBIDDEN              = 5;
 
     // Emergency Service Mode
-    public static final int ES_IDLE            = 0;
-    public static final int ES_OPENING        = 1;
-    public static final int ES_OPENED        = 2;
-    public static final int ES_UNAVAILABLE    = 3;
-    public static final int ES_ES            = 4;
-    public static final int ES_READY            = 5;
+    public static final int ES_IDLE         = 0;
+    public static final int ES_OPENING      = 1;
+    public static final int ES_OPENED       = 2;
+    public static final int ES_UNAVAILABLE  = 3;
+    public static final int ES_IN_CALL      = 4;
 
     // Emergency Service Reason
     public static final int ES_IDLE_REASON_UNKNOWN      = -1;

@@ -30,14 +30,22 @@ public:
     MtcEmergencyServiceManager(IN const MtcEmergencyServiceManager&) = delete;
     MtcEmergencyServiceManager& operator=(IN const MtcEmergencyServiceManager&) = delete;
 
-    void OpenEmergencyService(IN JniMtcServiceThread* pServiceThread);
-    void ProcessServiceStatus(IN ServiceStatus eStatus, IN JniMtcServiceThread* pServiceThread);
-    void SetStatus(IN IuMtcService::EmergencyServiceStatus eStatus,
-            IN JniMtcServiceThread* pServiceThread);
+    inline void SetJniServiceThread(IN JniMtcServiceThread* pThread) { m_pServiceThread = pThread; }
+    void OpenEmergencyService();
+    void HandleServiceStatus(IN ServiceStatus eStatus);
+
+private:
+    void HandleServiceIdle();
+    void HandleServiceActive();
+    void HandleServiceSuspended();
+    void SetState(IN IuMtcService::EmergencyServiceState eState,
+            IN IMS_BOOL bForceNotify = IMS_FALSE);
+    void NotifyEmergencyServiceChanged(IN IMS_SINT32 eReason);
 
 private:
     IMtcContext& m_objContext;
-    IuMtcService::EmergencyServiceStatus m_eStatus;
+    JniMtcServiceThread* m_pServiceThread;
+    IuMtcService::EmergencyServiceState m_eState;
 
 };
 

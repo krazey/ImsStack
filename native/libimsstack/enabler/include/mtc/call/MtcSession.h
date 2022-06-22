@@ -85,6 +85,7 @@ public:
         return m_objContext.GetPreconditionManager();
     }
     inline UssiController* GetUssiController() override { return m_objContext.GetUssiController(); }
+    inline IMSList<IMtcCall*> GetOtherCalls() override { return m_objContext.GetOtherCalls(); }
     inline UpdatingInfo& GetUpdatingInfo() override { return m_objContext.GetUpdatingInfo(); }
     MtcSession* CreateSession(IN ISession* piSession) override
     {

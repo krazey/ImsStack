@@ -26,6 +26,7 @@
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
+#include "call/IMtcCallManager.h"
 #include "call/MtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
@@ -46,7 +47,6 @@ class IConferenceManager;
 class IEctManager;
 class IMtcAosConnector;
 class IMtcCallController;
-class IMtcCallManager;
 class IMtcContext;
 class IMtcDialingPlan;
 class IMtcMediaManager;
@@ -134,6 +134,10 @@ public:
         return m_objPreconditionManager;
     }
     inline UssiController* GetUssiController() override { return m_pUssiController; }
+    inline IMSList<IMtcCall*> GetOtherCalls() override
+    {
+        return GetCallManager().GetCallsExcluding(GetKey());
+    }
     UpdatingInfo& GetUpdatingInfo() override;
     MtcSession* CreateSession(IN ISession* piSession) override;
     MtcSession* CreateSession() override;

@@ -25,7 +25,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 MtcEmergencyServiceManager::MtcEmergencyServiceManager(IN IMtcContext& objContext) :
         m_objContext(objContext),
-        m_eStatus(IuMtcService::EmergencyServiceStatus::IDLE)
+        m_pServiceThread(IMS_NULL),
+        m_eState(IuMtcService::EmergencyServiceState::IDLE)
 {
     IMS_TRACE_I("+MtcEmergencyServiceManager", 0, 0, 0);
 
@@ -38,8 +39,17 @@ PUBLIC VIRTUAL MtcEmergencyServiceManager::~MtcEmergencyServiceManager()
 }
 
 PUBLIC
-void MtcEmergencyServiceManager::OpenEmergencyService(IN JniMtcServiceThread* pServiceThread)
+void MtcEmergencyServiceManager::OpenEmergencyService()
 {
+    IMS_TRACE_D("OpenEmergencyService", 0, 0, 0);
+
+    if (m_eState == IuMtcService::EmergencyServiceState::OPENED ||
+            m_eState == IuMtcService::EmergencyServiceState::IN_CALL)
+    {
+        SetState(IuMtcService::EmergencyServiceState::OPENED, IMS_TRUE);
+        return;
+    }
+
     IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector == IMS_NULL)
     {
@@ -47,38 +57,90 @@ void MtcEmergencyServiceManager::OpenEmergencyService(IN JniMtcServiceThread* pS
     }
 
     pAosConnector->Control(ImsAosControl::REGISTER_START);
-    SetStatus(IuMtcService::EmergencyServiceStatus::OPENING, pServiceThread);
+    SetState(IuMtcService::EmergencyServiceState::OPENING);
 }
 
 PUBLIC
-void MtcEmergencyServiceManager::ProcessServiceStatus(IN ServiceStatus eStatus,
-        IN JniMtcServiceThread* pServiceThread)
+void MtcEmergencyServiceManager::HandleServiceStatus(IN ServiceStatus eStatus)
 {
-    if (eStatus == ServiceStatus::SERVICE_ACTIVE)
+    IMS_TRACE_D("HandleServiceStatus :: %d", eStatus, 0, 0);
+
+    switch (eStatus)
     {
-        SetStatus(IuMtcService::EmergencyServiceStatus::OPENED, pServiceThread);
+        case ServiceStatus::SERVICE_IDLE:
+            HandleServiceIdle();
+            break;
+        case ServiceStatus::SERVICE_ACTIVE:
+            HandleServiceActive();
+            break;
+        case ServiceStatus::SERVICE_SUSPENDED:
+            HandleServiceSuspended();
+            break;
+        default:
+            break;
+    }
+}
+
+PRIVATE
+void MtcEmergencyServiceManager::HandleServiceIdle()
+{
+    IMS_TRACE_D("HandleServiceIdle", 0, 0, 0);
+
+    if (m_eState == IuMtcService::EmergencyServiceState::OPENING)
+    {
+        SetState(IuMtcService::EmergencyServiceState::UNAVAILABLE);
     }
     else
     {
-        SetStatus(IuMtcService::EmergencyServiceStatus::IDLE, pServiceThread);
+        SetState(IuMtcService::EmergencyServiceState::IDLE);
     }
 }
 
-PUBLIC
-void MtcEmergencyServiceManager::SetStatus(IN IuMtcService::EmergencyServiceStatus eStatus,
-        IN JniMtcServiceThread* pServiceThread)
+PRIVATE
+void MtcEmergencyServiceManager::HandleServiceActive()
 {
-    if (m_eStatus == eStatus)
+    IMS_TRACE_D("HandleServiceActive", 0, 0, 0);
+
+    if (m_eState == IuMtcService::EmergencyServiceState::OPENING)
+    {
+        SetState(IuMtcService::EmergencyServiceState::OPENED);
+    }
+}
+
+PRIVATE
+void MtcEmergencyServiceManager::HandleServiceSuspended()
+{
+    IMS_TRACE_D("HandleServiceSuspended", 0, 0, 0);
+}
+
+PRIVATE
+void MtcEmergencyServiceManager::SetState(IN IuMtcService::EmergencyServiceState eState,
+            IN IMS_BOOL bForceNotify /* = IMS_FALSE */)
+{
+    IMS_TRACE_D("SetState :: [%d] -> [%d]", m_eState, eState, 0);
+
+    if ((m_eState == eState) && !bForceNotify)
     {
         return;
     }
 
-    m_eStatus = eStatus;
+    m_eState = eState;
 
-    if (pServiceThread == IMS_NULL)
+    NotifyEmergencyServiceChanged(-1);
+}
+
+PRIVATE
+void MtcEmergencyServiceManager::NotifyEmergencyServiceChanged(IN IMS_SINT32 eReason)
+{
+    IMS_TRACE_D("NotifyEmergencyServiceChanged :: %d, %d", m_eState, eReason, 0);
+
+    if (m_pServiceThread == IMS_NULL)
     {
         return;
     }
 
-    pServiceThread->OnEmergencyServiceChanged(static_cast<IMS_SINT32>(eStatus), -1);
+    ServiceType eServiceType = ServiceType::EMERGENCY;
+
+    m_pServiceThread->OnEmergencyServiceChanged(static_cast<IMS_SINT32>(m_eState), -1,
+            static_cast<IMS_SINT32>(eServiceType));
 }

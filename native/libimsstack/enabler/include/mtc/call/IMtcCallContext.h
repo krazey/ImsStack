@@ -59,6 +59,7 @@ public:
     virtual MtcSupplementaryService& GetSupplementaryService() = 0;
     virtual UpdatingInfo& GetUpdatingInfo() = 0;
     virtual UssiController* GetUssiController() = 0;
+    virtual IMSList<IMtcCall*> GetOtherCalls() = 0;
 
     virtual void SetHeldByMe(IN IMS_BOOL bHeldByMe) = 0;
 
