@@ -53,6 +53,7 @@ cc_test {
     ],
     local_include_dirs: [
         "enabler/include/aos",
+        "enabler/include/mtc",
     ],
     header_libs: [
         "libimsstack_config_headers",

@@ -46,6 +46,7 @@ cc_test {
     ],
     local_include_dirs: [
         "include/aos",
+        "include/mtc",
     ],
     test_config: "ImsStackNativeEnablerTests.xml",
 }
