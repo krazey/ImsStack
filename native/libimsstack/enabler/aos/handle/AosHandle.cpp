@@ -1922,12 +1922,12 @@ PROTECTED VIRTUAL void AosHandle::UpdateFeatureTags()
 Remarks
 
 */
-PROTECTED VIRTUAL void AosHandle::ProcessImsSuspended(IN IMS_UINT32 nReason /* = 0 */)
+PROTECTED VIRTUAL IMS_BOOL AosHandle::ProcessImsSuspended(IN IMS_UINT32 nReason /* = 0 */)
 {
     if (IsImsConnected() == IMS_FALSE)
     {
         A_IMS_TRACE_D(APPPROFILE, "ProcessImsSuspended :: ims isn't connected", 0, 0, 0);
-        return;
+        return IMS_FALSE;
     }
 
     A_IMS_TRACE_I(APPPROFILE, "ProcessImsSuspended :: nReason(%d)", nReason, 0, 0);
@@ -1940,8 +1940,12 @@ PROTECTED VIRTUAL void AosHandle::ProcessImsSuspended(IN IMS_UINT32 nReason /* =
         if (m_piListener != IMS_NULL)
         {
             m_piListener->ImsAos_Suspended(GetImsAosReasonForSuspend(m_nReason));
+
+            return IMS_TRUE;
         }
     }
+
+    return IMS_FALSE;
 }
 
 /*
@@ -1949,18 +1953,18 @@ PROTECTED VIRTUAL void AosHandle::ProcessImsSuspended(IN IMS_UINT32 nReason /* =
 Remarks
 
 */
-PROTECTED VIRTUAL void AosHandle::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0 */)
+PROTECTED VIRTUAL IMS_BOOL AosHandle::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0 */)
 {
     if (IsImsConnected() == IMS_FALSE)
     {
         A_IMS_TRACE_D(APPPROFILE, "ProcessImsResumed :: ims isn't connected", 0, 0, 0);
-        return;
+        return IMS_FALSE;
     }
 
     if (IsImsSuspended() == IMS_FALSE)
     {
         A_IMS_TRACE_D(APPPROFILE, "ProcessImsResumed :: ims isn't suspended", 0, 0, 0);
-        return;
+        return IMS_FALSE;
     }
 
     A_IMS_TRACE_I(APPPROFILE, "ProcessImsResumed :: nReason(%d)", nReason, 0, 0);
@@ -1973,8 +1977,12 @@ PROTECTED VIRTUAL void AosHandle::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0
         if (m_piListener != IMS_NULL)
         {
             m_piListener->ImsAos_Resumed();
+
+            return IMS_TRUE;
         }
     }
+
+    return IMS_FALSE;
 }
 
 /*

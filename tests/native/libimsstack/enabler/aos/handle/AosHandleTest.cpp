@@ -365,6 +365,37 @@ protected:
     {
         return m_pAosHandle->IsUnavailableFeaturePolicy(nPolicy);
     }
+
+    IMS_BOOL IsBlocked() const { return m_pAosHandle->m_bBlocked; }
+
+    void InitializeFeatureTags() { m_pAosHandle->InitializeFeatureTags(); }
+
+    IMS_BOOL HasFeatureTag(IN const AString& strName, IN const AString& strValue) const
+    {
+        return m_pAosHandle->m_objFeatureTagList.HasFeatureTag(strName, strValue);
+    }
+
+    void UpdateFeatureTags() { m_pAosHandle->UpdateFeatureTags(); }
+
+    IMS_BOOL AddFeatureTag(IN const AString& strName)
+    {
+        return m_pAosHandle->m_objFeatureTagList.AddFeatureTag(strName);
+    }
+
+    IMS_BOOL ProcessImsSuspended(IN IMS_UINT32 nReason)
+    {
+        return m_pAosHandle->ProcessImsSuspended(nReason);
+    }
+
+    IMS_BOOL ProcessImsResumed(IN IMS_UINT32 nReason)
+    {
+        return m_pAosHandle->ProcessImsResumed(nReason);
+    }
+
+    void SetSuspendedReasonForTest(IN IMS_UINT32 nReason)
+    {
+        m_pAosHandle->m_nSuspendedReason = nReason;
+    }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -2590,4 +2621,159 @@ TEST_F(AosHandleTest, StateDisconnecting_Test11)
     m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0);
 
     EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, IsBlocked_Test)
+{
+    // Expectation: return m_bBlocked value as set
+
+    SetBlocked(IMS_TRUE);
+    EXPECT_TRUE(IsBlocked());
+
+    SetBlocked(IMS_FALSE);
+    EXPECT_FALSE(IsBlocked());
+}
+
+TEST_F(AosHandleTest, InitializeFeatureTags_Test)
+{
+    // Expectation: +cdmaless if the config is set
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
+    InitializeFeatureTags();
+    EXPECT_TRUE(HasFeatureTag("+cdmaless", AString::ConstNull()));
+
+    InitializeFeatureTags();
+    EXPECT_FALSE(HasFeatureTag("+cdmaless", AString::ConstNull()));
+}
+
+TEST_F(AosHandleTest, UpdateFeatureTags_Test)
+{
+    // Expectation: Clear feature tags if no features
+    ClearFeatureTagList();
+
+    AddFeatureTag("+cdmaless");
+    EXPECT_TRUE(HasFeatureTag("+cdmaless", AString::ConstNull()));
+
+    UpdateFeatureTags();
+    EXPECT_FALSE(HasFeatureTag("+cdmaless", AString::ConstNull()));
+
+    ClearFeatureTagList();
+}
+
+TEST_F(AosHandleTest, ProcessImsSuspended_Test1)
+{
+    // Test1: ims not connected
+    // Expectation: no suspended reason is set, return false
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    ClearSuspendedReason();
+    EXPECT_FALSE(ProcessImsSuspended(0));
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+}
+
+TEST_F(AosHandleTest, ProcessImsSuspended_Test2)
+{
+    // Test2: ims connected, suspended reason-SUSPEND_NO_SERVICE, listener is not null
+    // Expectation: Call ImsAos_Suspended, return true
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    IImsAosListener* piListener = static_cast<IImsAosListener*>(&m_objMockIImsAosListener);
+    m_pAosHandle->SetListener(piListener);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(_)).Times(1);
+
+    EXPECT_TRUE(ProcessImsSuspended(AoSReason::SUSPEND_NO_SERVICE));
+}
+
+TEST_F(AosHandleTest, ProcessImsSuspended_Test3)
+{
+    // Test3: ims connected, suspended reason-SUSPEND_NO_SERVICE, listener is null
+    // Expectation: suspended reason is set, No call ImsAos_Suspended, return false
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    ClearSuspendedReason();
+    m_pAosHandle->SetListener(IMS_NULL);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(_)).Times(0);
+
+    EXPECT_FALSE(ProcessImsSuspended(AoSReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+}
+
+TEST_F(AosHandleTest, ProcessImsResumed_Test1)
+{
+    // Test1: ims not connected
+    // Expectation: suspended reason is not reset, return false
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+
+    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+}
+
+TEST_F(AosHandleTest, ProcessImsResumed_Test2)
+{
+    // Test2: ims connected, ims not suspended
+    // Expectation: return false
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    ClearSuspendedReason();
+
+    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
+}
+
+TEST_F(AosHandleTest, ProcessImsResumed_Test3)
+{
+    // Test3: ims connected, ims suspended, still suspended after reset the reason.
+    // Expectation: reset the reason from suspended reason, return false
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    ClearSuspendedReason();
+    SetSuspendedReasonForTest((AoSReason::SUSPEND_NO_SERVICE | AoSReason::SUSPEND_NO_LTE_COVERAGE));
+
+    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+}
+
+TEST_F(AosHandleTest, ProcessImsResumed_Test4)
+{
+    // Test4: ims connected, ims suspended, no suspended reason after reset, no listener.
+    // Expectation: reset the reason from suspended reason, set reason, return false
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    ClearSuspendedReason();
+    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+    m_pAosHandle->SetListener(IMS_NULL);
+    SetReason(AoSReason::SUSPEND_NONE);
+
+    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+    EXPECT_EQ(GetReason(), AoSReason::SUSPEND_NO_SERVICE);
+}
+
+TEST_F(AosHandleTest, ProcessImsResumed_Test5)
+{
+    // Test5: ims connected, ims suspended, no suspended reason after reset, listener existed.
+    // Expectation: no suspended reason, set reason, call ImsAos_Resumed(), return true
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    ClearSuspendedReason();
+    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+    IImsAosListener* piListener = static_cast<IImsAosListener*>(&m_objMockIImsAosListener);
+    m_pAosHandle->SetListener(piListener);
+    SetReason(AoSReason::SUSPEND_NONE);
+
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(1);
+    EXPECT_TRUE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+    EXPECT_EQ(GetReason(), AoSReason::SUSPEND_NO_SERVICE);
+
+    // Clean up
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    ClearSuspendedReason();
+    m_pAosHandle->SetListener(IMS_NULL);
+    SetReason(AoSReason::SUSPEND_NONE);
 }
