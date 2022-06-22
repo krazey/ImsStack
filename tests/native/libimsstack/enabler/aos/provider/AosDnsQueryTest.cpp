@@ -89,27 +89,6 @@ TEST_F(AosDnsQueryTest, SetListener_ReceiveMessageDone)
     EXPECT_TRUE(OnMessage(objMsg));
 }
 
-TEST_F(AosDnsQueryTest, SetListener_ReceiveMessageRequest)
-{
-    MockIAosDnsQueryListener objMockIAosDnsQueryListener;
-    m_pAosDnsQuery->SetListener(static_cast<IAosDnsQueryListener*>(&objMockIAosDnsQueryListener));
-
-    AString strDomain = AString("testDomain");
-    SetDomainName(strDomain);
-
-    IMSMSG objMsg(MSG_REQUEST, 0, 0);
-    EXPECT_TRUE(OnMessage(objMsg));
-}
-
-TEST_F(AosDnsQueryTest, SetListener_ReceiveMessageDestroy)
-{
-    MockIAosDnsQueryListener objMockIAosDnsQueryListener;
-    m_pAosDnsQuery->SetListener(static_cast<IAosDnsQueryListener*>(&objMockIAosDnsQueryListener));
-
-    IMSMSG objMsg(MSG_DESTROY, 0, 0);
-    EXPECT_TRUE(OnMessage(objMsg));
-}
-
 TEST_F(AosDnsQueryTest, Request)
 {
     AString strDomain = AString("testDomain");

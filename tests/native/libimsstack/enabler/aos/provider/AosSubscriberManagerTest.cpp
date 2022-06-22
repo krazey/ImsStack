@@ -65,6 +65,8 @@ protected:
         EXPECT_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
                 .Times(AnyNumber())
                 .WillRepeatedly(ReturnRef(m_objPuids));
+
+        EXPECT_CALL(m_objMockISubscriberConfig, RemoveListener(_)).Times(AnyNumber());
     }
 
     virtual void TearDown() override
