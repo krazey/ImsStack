@@ -20,7 +20,6 @@
 // == INCLUDES =========================================================
 #include "IUMedia.h"
 #include "ServiceEvent.h"
-#include "ServiceTimer.h"
 #include "IEventListener.h"
 #include "ImsActivityEx.h"
 #include "MediaMsgHandler.h"
@@ -30,7 +29,7 @@
 
 class JniMediaSession;
 
-class MediaManager : public ImsActivityEx, public IMediaManager, public ITimerListener
+class MediaManager : public ImsActivityEx, public IMediaManager
 {
 public:
     class MediaSessionNode
@@ -58,11 +57,6 @@ public:
     static AString GetThreadName(IN IMS_SINT32 nSlotId);
     MediaMsgHandler* GetHandler(IN IMS_SINTP nCallKey);
     virtual void SetJniMediaSessionThread(IN IMS_SINTP nCallKey, IN JniMediaSessionThread* pThread);
-
-    /**
-     * ITimerListener interface implementation
-     */
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
     /**
      *
@@ -112,8 +106,6 @@ private:
      */
     virtual IMS_BOOL SendMessageToSessions(
             IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
-    void StartTimer(IN IMS_UINT32 nTime);
-    void StopTimer();
 
     // == PROTECTED METHOD ==========================================================
 protected:
@@ -129,6 +121,5 @@ protected:
     IMS_SINT32 m_nSlotId;
     IMSList<MediaSessionNode*> m_lstSessionNode;
     MediaResourceMngr* m_pResourceMngr;
-    ITimer* m_piTimer;
 };
 #endif /* _MEDIA_MANAGER_H_ */
