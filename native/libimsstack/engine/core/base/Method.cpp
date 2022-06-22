@@ -572,7 +572,7 @@ IMS_BOOL Method::SetChallengeNCredentials(IN ISipClientConnection* piScc)
     const AString& strId =
             SubscriberTracker::GetInstance()->GetSubscriberId(GetSlotId(), GetUserAor());
     const SubscriberConfig* pSubscriberConfig =
-            ConfigurationManager::GetInstance()->GetSubscriberConfig(strId);
+            ConfigurationManager::GetInstance()->GetSubscriberConfig(strId, GetSlotId());
 
     if (pSubscriberConfig == IMS_NULL)
     {

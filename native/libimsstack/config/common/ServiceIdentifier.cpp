@@ -1,19 +1,23 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090531  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "RCObject.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "RCObject.h"
 #include "TextParser.h"
+
 #include "Feature.h"
 #include "ServiceIdentifier.h"
 
@@ -23,81 +27,84 @@ class ServiceIdentifierPrivate : public RCObject
 {
 public:
     inline ServiceIdentifierPrivate() :
-            strName(AString::ConstNull()),
-            bExplicit(IMS_FALSE),
-            bRequire(IMS_FALSE)
+            m_strName(AString::ConstNull()),
+            m_bExplicit(IMS_FALSE),
+            m_bRequire(IMS_FALSE)
     {
     }
     inline virtual ~ServiceIdentifierPrivate() {}
 
+    ServiceIdentifierPrivate(IN const ServiceIdentifierPrivate&) = delete;
+    ServiceIdentifierPrivate& operator=(IN const ServiceIdentifierPrivate&) = delete;
+
 private:
     friend class ServiceIdentifier;
 
-    AString strName;
-    IMS_BOOL bExplicit;
-    IMS_BOOL bRequire;
+    AString m_strName;
+    IMS_BOOL m_bExplicit;
+    IMS_BOOL m_bRequire;
 };
 
 PUBLIC
 ServiceIdentifier::ServiceIdentifier() :
-        pServiceIdentifierP(new ServiceIdentifierPrivate())
+        m_pServiceIdPrivate(new ServiceIdentifierPrivate())
 {
-    if (pServiceIdentifierP != IMS_NULL)
+    if (m_pServiceIdPrivate != IMS_NULL)
     {
-        pServiceIdentifierP->AddReference();
+        m_pServiceIdPrivate->AddReference();
     }
 }
 
 PUBLIC
-ServiceIdentifier::ServiceIdentifier(IN const ServiceIdentifier& objRHS) :
-        pServiceIdentifierP(objRHS.pServiceIdentifierP)
+ServiceIdentifier::ServiceIdentifier(IN const ServiceIdentifier& other) :
+        m_pServiceIdPrivate(other.m_pServiceIdPrivate)
 {
-    if (pServiceIdentifierP != IMS_NULL)
+    if (m_pServiceIdPrivate != IMS_NULL)
     {
-        pServiceIdentifierP->AddReference();
+        m_pServiceIdPrivate->AddReference();
     }
 }
 
 PUBLIC VIRTUAL ServiceIdentifier::~ServiceIdentifier()
 {
-    if (pServiceIdentifierP != IMS_NULL)
+    if (m_pServiceIdPrivate != IMS_NULL)
     {
-        pServiceIdentifierP->RemoveReference();
+        m_pServiceIdPrivate->RemoveReference();
     }
 }
 
 PRIVATE
 ServiceIdentifier::ServiceIdentifier(
         IN const AString& strName, IN IMS_BOOL bExplicit, IN IMS_BOOL bRequire) :
-        pServiceIdentifierP(new ServiceIdentifierPrivate())
+        m_pServiceIdPrivate(new ServiceIdentifierPrivate())
 {
-    if (pServiceIdentifierP != IMS_NULL)
+    if (m_pServiceIdPrivate != IMS_NULL)
     {
-        pServiceIdentifierP->AddReference();
+        m_pServiceIdPrivate->AddReference();
 
-        pServiceIdentifierP->strName = strName.Trim();
-        pServiceIdentifierP->bExplicit = bExplicit;
-        pServiceIdentifierP->bRequire = bRequire;
+        m_pServiceIdPrivate->m_strName = strName.Trim();
+        m_pServiceIdPrivate->m_bExplicit = bExplicit;
+        m_pServiceIdPrivate->m_bRequire = bRequire;
     }
 }
 
 PUBLIC
-ServiceIdentifier& ServiceIdentifier::operator=(IN const ServiceIdentifier& objRHS)
+ServiceIdentifier& ServiceIdentifier::operator=(IN const ServiceIdentifier& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        ServiceIdentifierPrivate* pOldServiceIdP = pServiceIdentifierP;
+        ServiceIdentifierPrivate* pOldServiceIdPrivate = m_pServiceIdPrivate;
 
-        pServiceIdentifierP = objRHS.pServiceIdentifierP;
+        m_pServiceIdPrivate = other.m_pServiceIdPrivate;
 
-        if (pServiceIdentifierP != IMS_NULL)
+        if (m_pServiceIdPrivate != IMS_NULL)
         {
-            pServiceIdentifierP->AddReference();
+            m_pServiceIdPrivate->AddReference();
         }
 
-        if (pOldServiceIdP != IMS_NULL)
+        if (pOldServiceIdPrivate != IMS_NULL)
         {
-            pOldServiceIdP->RemoveReference();
+            pOldServiceIdPrivate->RemoveReference();
         }
     }
 
@@ -107,33 +114,33 @@ ServiceIdentifier& ServiceIdentifier::operator=(IN const ServiceIdentifier& objR
 PUBLIC
 const AString& ServiceIdentifier::GetName() const
 {
-    return pServiceIdentifierP->strName;
+    return m_pServiceIdPrivate->m_strName;
 }
 
 PUBLIC
 IMS_BOOL ServiceIdentifier::IsExplicitPresent() const
 {
-    return pServiceIdentifierP->bExplicit;
+    return m_pServiceIdPrivate->m_bExplicit;
 }
 
 PUBLIC
 IMS_BOOL ServiceIdentifier::IsRequirePresent() const
 {
-    return pServiceIdentifierP->bRequire;
+    return m_pServiceIdPrivate->m_bRequire;
 }
 
 PUBLIC
 AString ServiceIdentifier::ToString() const
 {
-    AString strServiceIdentifier(pServiceIdentifierP->strName);
+    AString strServiceIdentifier(m_pServiceIdPrivate->m_strName);
 
-    if (pServiceIdentifierP->bRequire)
+    if (m_pServiceIdPrivate->m_bRequire)
     {
         strServiceIdentifier.Append(TextParser::CHAR_SEMICOLON);
         strServiceIdentifier.Append(Feature::FLAG_REQUIRE);
     }
 
-    if (pServiceIdentifierP->bExplicit)
+    if (m_pServiceIdPrivate->m_bExplicit)
     {
         strServiceIdentifier.Append(TextParser::CHAR_SEMICOLON);
         strServiceIdentifier.Append(Feature::FLAG_EXPLICIT);

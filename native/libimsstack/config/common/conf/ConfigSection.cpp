@@ -1,60 +1,54 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091024  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "TextParser.h"
+
 #include "conf/ConfigSection.h"
 
 PUBLIC
 ConfigSection::ConfigSection() :
-        strSectionName(AString::ConstNull())
+        m_strSectionName(AString::ConstNull())
 {
 }
 
 PUBLIC
 ConfigSection::~ConfigSection()
 {
-    if (!objSectionData.IsEmpty())
+    if (!m_objSectionData.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objSectionData.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objSectionData.GetSize(); ++i)
         {
-            ConfigSectionData* pData = objSectionData.GetAt(i);
+            ConfigSectionData* pData = m_objSectionData.GetAt(i);
 
             if (pData != IMS_NULL)
             {
                 delete pData;
             }
         }
+
+        m_objSectionData.Clear();
     }
-}
-
-PUBLIC
-void ConfigSection::AddComment(IN const AString& strComment)
-{
-    objComment.Add(strComment);
-}
-
-PUBLIC
-const AString& ConfigSection::GetName() const
-{
-    return strSectionName;
 }
 
 PUBLIC
 void ConfigSection::GetKeys(OUT AStringArray& objKeys) const
 {
-    for (IMS_UINT32 i = 0; i < objSectionData.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objSectionData.GetSize(); ++i)
     {
-        const ConfigSectionData* pSectionData = objSectionData.GetAt(i);
+        const ConfigSectionData* pSectionData = m_objSectionData.GetAt(i);
 
         objKeys.AddElement(pSectionData->GetKey());
     }
@@ -63,14 +57,14 @@ void ConfigSection::GetKeys(OUT AStringArray& objKeys) const
 PUBLIC
 const AString& ConfigSection::GetValue(IN const IMS_CHAR* pszKey) const
 {
-    if (objSectionData.IsEmpty())
+    if (m_objSectionData.IsEmpty())
     {
         return AString::ConstNull();
     }
 
-    for (IMS_UINT32 i = 0; i < objSectionData.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objSectionData.GetSize(); ++i)
     {
-        const ConfigSectionData* pData = objSectionData.GetAt(i);
+        const ConfigSectionData* pData = m_objSectionData.GetAt(i);
 
         if (pData->GetKey().EqualsIgnoreCase(pszKey))
         {
@@ -89,14 +83,14 @@ IMS_BOOL ConfigSection::SetValue(IN const IMS_CHAR* pszKey, IN const AString& st
         return IMS_FALSE;
     }
 
-    if (objSectionData.IsEmpty())
+    if (m_objSectionData.IsEmpty())
     {
         return IMS_FALSE;
     }
 
-    for (IMS_UINT32 i = 0; i < objSectionData.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objSectionData.GetSize(); ++i)
     {
-        ConfigSectionData* pData = objSectionData.GetAt(i);
+        ConfigSectionData* pData = m_objSectionData.GetAt(i);
 
         if (pData->GetKey().EqualsIgnoreCase(pszKey))
         {
@@ -114,18 +108,18 @@ AString ConfigSection::ToString() const
     AString strTmpVal;
 
     // Append the comment
-    strTmpVal = objComment.ToString();
+    strTmpVal = m_objComment.ToString();
 
     // Section: [SectionName]
     strTmpVal.Append(TextParser::CHAR_LSBRACKET);
-    strTmpVal.Append(strSectionName);
+    strTmpVal.Append(m_strSectionName);
     strTmpVal.Append(TextParser::CHAR_RSBRACKET);
     strTmpVal.Append(TextParser::STR_CRLF);
 
     // Section parameters
-    for (IMS_UINT32 i = 0; i < objSectionData.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objSectionData.GetSize(); ++i)
     {
-        const ConfigSectionData* pData = objSectionData.GetAt(i);
+        const ConfigSectionData* pData = m_objSectionData.GetAt(i);
 
         strTmpVal.Append(pData->ToString());
         strTmpVal.Append(TextParser::STR_CRLF);
@@ -154,7 +148,7 @@ IMS_BOOL ConfigSection::AddSectionData(IN const AString& strKeyValue)
         return IMS_FALSE;
     }
 
-    if (!objSectionData.Append(pData))
+    if (!m_objSectionData.Append(pData))
     {
         delete pData;
 
@@ -167,16 +161,10 @@ IMS_BOOL ConfigSection::AddSectionData(IN const AString& strKeyValue)
 PRIVATE
 ConfigSectionData* ConfigSection::GetLastElement() const
 {
-    if (objSectionData.IsEmpty())
+    if (m_objSectionData.IsEmpty())
     {
         return IMS_NULL;
     }
 
-    return objSectionData.GetAt(objSectionData.GetSize() - 1);
-}
-
-PRIVATE
-void ConfigSection::SetName(IN const AString& strSectName)
-{
-    this->strSectionName = strSectName;
+    return m_objSectionData.GetAt(m_objSectionData.GetSize() - 1);
 }

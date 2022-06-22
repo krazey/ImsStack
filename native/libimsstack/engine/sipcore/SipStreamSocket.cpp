@@ -45,7 +45,7 @@ SipStreamSocket::SipStreamSocket(IN IMS_SINT32 nSlotId) :
 
     if (pSipConfig != IMS_NULL)
     {
-        m_objTcpTimerValues = pSipConfig->GetTimerValueTCP();
+        m_objTcpTimerValues = pSipConfig->GetTimerValueTcp();
     }
     else
     {
@@ -69,7 +69,7 @@ SipStreamSocket::SipStreamSocket(IN IMS_SINT32 nSlotId, IN ISocket* piSocket) :
 
     if (pSipConfig != IMS_NULL)
     {
-        m_objTcpTimerValues = pSipConfig->GetTimerValueTCP();
+        m_objTcpTimerValues = pSipConfig->GetTimerValueTcp();
     }
     else
     {
@@ -338,7 +338,7 @@ void SipStreamSocket::SetKeepAlivePolicy(IN IMS_SINT32 nPolicy)
 
         if (pSipConfig != IMS_NULL)
         {
-            m_objTcpTimerValues.m_nTvKeepAlive = pSipConfig->GetTimerValueTCP().m_nTvKeepAlive;
+            m_objTcpTimerValues.m_nTvKeepAlive = pSipConfig->GetTimerValueTcp().m_nTvKeepAlive;
         }
         else
         {

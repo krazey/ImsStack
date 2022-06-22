@@ -1246,7 +1246,7 @@ PRIVATE GLOBAL void Capabilities::CollectSdpFieldsFromRegistry(IN const AppConfi
 
     // Collects session-level/media-level SDP lines
     objSdpLines =
-            pAppConfig->GetCapabilitySDPs(nSector, CapProperty::MESSAGE_TYPE_REQUEST_RESPONSE);
+            pAppConfig->GetCapabilitySdps(nSector, CapProperty::MESSAGE_TYPE_REQUEST_RESPONSE);
     SetSdpFields(objSdpLines, objSdpDesc);
 
     if (bRequest)
@@ -1255,7 +1255,7 @@ PRIVATE GLOBAL void Capabilities::CollectSdpFieldsFromRegistry(IN const AppConfi
         objSdpLines.RemoveAllElements();
 
         // Gets SDP fields for outgoing OPTIONS request
-        objSdpLines = pAppConfig->GetCapabilitySDPs(nSector, CapProperty::MESSAGE_TYPE_REQUEST);
+        objSdpLines = pAppConfig->GetCapabilitySdps(nSector, CapProperty::MESSAGE_TYPE_REQUEST);
         SetSdpFields(objSdpLines, objSdpDesc);
     }
     else
@@ -1264,7 +1264,7 @@ PRIVATE GLOBAL void Capabilities::CollectSdpFieldsFromRegistry(IN const AppConfi
         objSdpLines.RemoveAllElements();
 
         // Gets SDP fields for outgoing OPTIONS response
-        objSdpLines = pAppConfig->GetCapabilitySDPs(nSector, CapProperty::MESSAGE_TYPE_RESPONSE);
+        objSdpLines = pAppConfig->GetCapabilitySdps(nSector, CapProperty::MESSAGE_TYPE_RESPONSE);
         SetSdpFields(objSdpLines, objSdpDesc);
     }
 }

@@ -1,58 +1,35 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091024  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "TextParser.h"
+
 #include "conf/ConfigSectionData.h"
 
 PUBLIC
-ConfigSectionData::ConfigSectionData(IN const AString& strKey_) :
-        strKey(strKey_),
-        strValue(AString::ConstEmpty())
+ConfigSectionData::ConfigSectionData(IN const AString& strKey) :
+        m_strKey(strKey),
+        m_strValue(AString::ConstEmpty())
 {
 }
 
 PUBLIC
-ConfigSectionData::ConfigSectionData(IN const AString& strKey_, IN const AString& strValue_) :
-        strKey(strKey_),
-        strValue(strValue_)
+ConfigSectionData::ConfigSectionData(IN const AString& strKey, IN const AString& strValue) :
+        m_strKey(strKey),
+        m_strValue(strValue)
 {
-}
-
-PUBLIC
-ConfigSectionData::~ConfigSectionData() {}
-
-PUBLIC
-void ConfigSectionData::AddComment(IN const AString& strComment)
-{
-    objComment.Add(strComment);
-}
-
-PUBLIC
-const AString& ConfigSectionData::GetKey() const
-{
-    return strKey;
-}
-
-PUBLIC
-const AString& ConfigSectionData::GetValue() const
-{
-    return strValue;
-}
-
-PUBLIC
-void ConfigSectionData::SetValue(IN const AString& strValue)
-{
-    this->strValue = strValue;
 }
 
 PUBLIC
@@ -61,12 +38,12 @@ AString ConfigSectionData::ToString() const
     AString strTmpVal;
 
     // Append the comments
-    strTmpVal = objComment.ToString();
+    strTmpVal = m_objComment.ToString();
 
     // key=value
-    strTmpVal.Append(strKey);
+    strTmpVal.Append(m_strKey);
     strTmpVal.Append(TextParser::CHAR_EQUAL);
-    strTmpVal.Append(strValue);
+    strTmpVal.Append(m_strValue);
 
     return strTmpVal;
 }

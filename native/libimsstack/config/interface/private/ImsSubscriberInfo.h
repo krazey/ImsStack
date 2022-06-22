@@ -24,8 +24,8 @@ public:
     ImsSubscriberInfo();
     inline virtual ~ImsSubscriberInfo() {}
 
-    ImsSubscriberInfo(IN const ImsSubscriberInfo& other) = delete;
-    ImsSubscriberInfo& operator=(IN const ImsSubscriberInfo& other) = delete;
+    ImsSubscriberInfo(IN const ImsSubscriberInfo&) = delete;
+    ImsSubscriberInfo& operator=(IN const ImsSubscriberInfo&) = delete;
 
 public:
     // IImsSubscriberInfo interface

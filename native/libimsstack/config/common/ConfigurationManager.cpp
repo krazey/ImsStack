@@ -1,26 +1,30 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090608  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "SystemConfig.h"
-#include "ConfigLoader.h"
+
 #include "AsyncConfigHelper.h"
+#include "ConfigLoader.h"
 #include "private/AppConfig.h"
-#include "private/SubscriberConfig.h"
-#include "private/EngineConfig.h"
-#include "private/SipConfig.h"
-#include "private/MediaConfig.h"
 #include "private/ConfigurationManager.h"
+#include "private/EngineConfig.h"
+#include "private/MediaConfig.h"
+#include "private/SipConfig.h"
+#include "private/SubscriberConfig.h"
 
 __IMS_TRACE_TAG_CONF__;
 
@@ -43,24 +47,23 @@ public:
     ConfigurationHolder();
     ~ConfigurationHolder();
 
-private:
-    ConfigurationHolder(IN const ConfigurationHolder& objRHS);
-    ConfigurationHolder& operator=(IN const ConfigurationHolder& objRHS);
+    ConfigurationHolder(IN const ConfigurationHolder&) = delete;
+    ConfigurationHolder& operator=(IN const ConfigurationHolder&) = delete;
 
 public:
     IMS_BOOL AddAppConfig(IN AppConfig* pAppConfig);
     AppConfig* RemoveAppConfig(IN const AString& strAppId);
     AppConfig* GetAppConfig(IN const AString& strAppId) const;
-    inline const IMSList<AppConfig*>& GetAppConfigs() const { return objAppConfigs; }
+    inline const IMSList<AppConfig*>& GetAppConfigs() const { return m_objAppConfigs; }
 
     SubscriberConfig* GetSubscriberConfig(IN const AString& strId) const;
     inline const IMSList<SubscriberConfig*>& GetSubscriberConfigs() const
     {
-        return objSubscriberConfigs;
+        return m_objSubscriberConfigs;
     }
-    inline EngineConfig* GetEngineConfig() const { return pEngineConfig; }
-    inline SipConfig* GetSipConfig() const { return pSipConfig; }
-    inline MediaConfig* GetMediaConfig() const { return pMediaConfig; }
+    inline EngineConfig* GetEngineConfig() const { return m_pEngineConfig; }
+    inline SipConfig* GetSipConfig() const { return m_pSipConfig; }
+    inline MediaConfig* GetMediaConfig() const { return m_pMediaConfig; }
 
     IMS_BOOL CreateConfigs(IN IMS_SINT32 nId);
 
@@ -77,43 +80,43 @@ private:
     IMS_BOOL CreateMediaConfig(IN IMS_SINT32 nId);
 
 private:
-    IMS_BOOL bCreated;
-    AsyncConfigHelper* pConfigHelper;
+    IMS_BOOL m_bCreated;
+    AsyncConfigHelper* m_pConfigHelper;
 
     // List of IMS application configuration
-    IMSList<AppConfig*> objAppConfigs;
+    IMSList<AppConfig*> m_objAppConfigs;
 
     // Configuration for subscriber
-    IMSList<SubscriberConfig*> objSubscriberConfigs;
+    IMSList<SubscriberConfig*> m_objSubscriberConfigs;
 
     // Configuration for J281 engine classes
-    EngineConfig* pEngineConfig;
+    EngineConfig* m_pEngineConfig;
 
     // Default configuration for SIP functionality
-    SipConfig* pSipConfig;
+    SipConfig* m_pSipConfig;
 
     // Media profile (SDP, capabilities, codecs, ...)
-    MediaConfig* pMediaConfig;
+    MediaConfig* m_pMediaConfig;
 };
 
 PUBLIC
 ConfigurationHolder::ConfigurationHolder() :
-        bCreated(IMS_FALSE),
-        pConfigHelper(IMS_NULL),
-        objAppConfigs(IMSList<AppConfig*>()),
-        objSubscriberConfigs(IMSList<SubscriberConfig*>()),
-        pEngineConfig(IMS_NULL),
-        pSipConfig(IMS_NULL),
-        pMediaConfig(IMS_NULL)
+        m_bCreated(IMS_FALSE),
+        m_pConfigHelper(IMS_NULL),
+        m_objAppConfigs(IMSList<AppConfig*>()),
+        m_objSubscriberConfigs(IMSList<SubscriberConfig*>()),
+        m_pEngineConfig(IMS_NULL),
+        m_pSipConfig(IMS_NULL),
+        m_pMediaConfig(IMS_NULL)
 {
 }
 
 PUBLIC
 ConfigurationHolder::~ConfigurationHolder()
 {
-    for (IMS_UINT32 i = 0; i < objAppConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objAppConfigs.GetSize(); ++i)
     {
-        AppConfig* pAppConfig = objAppConfigs.GetAt(i);
+        AppConfig* pAppConfig = m_objAppConfigs.GetAt(i);
 
         if (pAppConfig != IMS_NULL)
         {
@@ -121,34 +124,34 @@ ConfigurationHolder::~ConfigurationHolder()
         }
     }
 
-    objAppConfigs.Clear();
+    m_objAppConfigs.Clear();
 
     DestroyConfigs();
 
-    if (pConfigHelper != IMS_NULL)
+    if (m_pConfigHelper != IMS_NULL)
     {
-        delete pConfigHelper;
+        delete m_pConfigHelper;
     }
 }
 
 PUBLIC
 IMS_BOOL ConfigurationHolder::AddAppConfig(IN AppConfig* pAppConfig)
 {
-    return objAppConfigs.Append(pAppConfig);
+    return m_objAppConfigs.Append(pAppConfig);
 }
 
 PUBLIC
 AppConfig* ConfigurationHolder::RemoveAppConfig(IN const AString& strAppId)
 {
-    for (IMS_UINT32 i = 0; i < objAppConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objAppConfigs.GetSize(); ++i)
     {
-        AppConfig* pAppConfig = objAppConfigs.GetAt(i);
+        AppConfig* pAppConfig = m_objAppConfigs.GetAt(i);
 
         if (pAppConfig != IMS_NULL)
         {
             if (strAppId.Equals(pAppConfig->GetAppId()))
             {
-                objAppConfigs.RemoveAt(i);
+                m_objAppConfigs.RemoveAt(i);
                 return pAppConfig;
             }
         }
@@ -160,9 +163,9 @@ AppConfig* ConfigurationHolder::RemoveAppConfig(IN const AString& strAppId)
 PUBLIC
 AppConfig* ConfigurationHolder::GetAppConfig(IN const AString& strAppId) const
 {
-    for (IMS_UINT32 i = 0; i < objAppConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objAppConfigs.GetSize(); ++i)
     {
-        AppConfig* pAppConfig = objAppConfigs.GetAt(i);
+        AppConfig* pAppConfig = m_objAppConfigs.GetAt(i);
 
         if (pAppConfig != IMS_NULL)
         {
@@ -179,20 +182,20 @@ AppConfig* ConfigurationHolder::GetAppConfig(IN const AString& strAppId) const
 PUBLIC
 SubscriberConfig* ConfigurationHolder::GetSubscriberConfig(IN const AString& strId) const
 {
-    if (objSubscriberConfigs.IsEmpty())
+    if (m_objSubscriberConfigs.IsEmpty())
     {
         return IMS_NULL;
     }
 
     // In case of only one subscriber configuration, it just returns the first one.
-    if (objSubscriberConfigs.GetSize() == 1)
+    if (m_objSubscriberConfigs.GetSize() == 1)
     {
-        return objSubscriberConfigs.GetAt(0);
+        return m_objSubscriberConfigs.GetAt(0);
     }
 
-    for (IMS_UINT32 i = 0; i < objSubscriberConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objSubscriberConfigs.GetSize(); ++i)
     {
-        SubscriberConfig* pSubsConfig = objSubscriberConfigs.GetAt(i);
+        SubscriberConfig* pSubsConfig = m_objSubscriberConfigs.GetAt(i);
 
         if (pSubsConfig != IMS_NULL)
         {
@@ -204,7 +207,7 @@ SubscriberConfig* ConfigurationHolder::GetSubscriberConfig(IN const AString& str
     }
 
     // No matched subscriber configuration, just uses the default subscriber configuration
-    return objSubscriberConfigs.GetAt(0);
+    return m_objSubscriberConfigs.GetAt(0);
 }
 
 PUBLIC
@@ -241,7 +244,7 @@ IMS_BOOL ConfigurationHolder::CreateConfigs(IN IMS_SINT32 nId)
         return IMS_FALSE;
     }
 
-    bCreated = IMS_TRUE;
+    m_bCreated = IMS_TRUE;
 
     return IMS_TRUE;
 }
@@ -249,21 +252,21 @@ IMS_BOOL ConfigurationHolder::CreateConfigs(IN IMS_SINT32 nId)
 PUBLIC
 void ConfigurationHolder::InitConfigs(IN IMS_SINT32 nId)
 {
-    if (pEngineConfig != IMS_NULL)
+    if (m_pEngineConfig != IMS_NULL)
     {
-        pEngineConfig->Init();
+        m_pEngineConfig->Init();
 
         if (nId == IMS_SLOT_0)
         {
             // Updates the trace option & module mask
             TraceService::GetTraceService()->SetOption(
-                    pEngineConfig->GetTraceOption(), pEngineConfig->GetTraceModule());
+                    m_pEngineConfig->GetTraceOption(), m_pEngineConfig->GetTraceModule());
         }
     }
 
-    for (IMS_UINT32 i = 0; i < objSubscriberConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objSubscriberConfigs.GetSize(); ++i)
     {
-        SubscriberConfig* pSubsConfig = objSubscriberConfigs.GetAt(i);
+        SubscriberConfig* pSubsConfig = m_objSubscriberConfigs.GetAt(i);
 
         if (pSubsConfig != IMS_NULL)
         {
@@ -274,14 +277,14 @@ void ConfigurationHolder::InitConfigs(IN IMS_SINT32 nId)
         }
     }
 
-    if (pSipConfig != IMS_NULL)
+    if (m_pSipConfig != IMS_NULL)
     {
-        if (!pSipConfig->Init())
+        if (!m_pSipConfig->Init())
         {
             IMS_TRACE_E(0, "Creating a sip config. failed", 0, 0, 0);
         }
 
-        if (!pSipConfig->CreateDefaultServiceConfig())
+        if (!m_pSipConfig->CreateDefaultServiceConfig())
         {
             IMS_TRACE_E(0, "Creating a default service-specific sip config. failed", 0, 0, 0);
         }
@@ -291,19 +294,19 @@ void ConfigurationHolder::InitConfigs(IN IMS_SINT32 nId)
     // In this moment, the subscriber configuration only supports the async. configuration.
     // 120510, EngineConfig added
     //
-    if (pConfigHelper == IMS_NULL)
+    if (m_pConfigHelper == IMS_NULL)
     {
-        pConfigHelper = new AsyncConfigHelper();
+        m_pConfigHelper = new AsyncConfigHelper();
     }
 
-    for (IMS_UINT32 i = 0; i < objSubscriberConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objSubscriberConfigs.GetSize(); ++i)
     {
-        IAsyncConfig* piAsyncConfig = objSubscriberConfigs.GetAt(i);
+        IAsyncConfig* piAsyncConfig = m_objSubscriberConfigs.GetAt(i);
 
         if (piAsyncConfig != IMS_NULL)
         {
             piAsyncConfig->HandleMessage(
-                    IAsyncConfig::ACMSG_START, reinterpret_cast<IMS_SINTP>(pConfigHelper), 0);
+                    IAsyncConfig::ACMSG_START, reinterpret_cast<IMS_SINTP>(m_pConfigHelper), 0);
         }
     }
 }
@@ -311,7 +314,7 @@ void ConfigurationHolder::InitConfigs(IN IMS_SINT32 nId)
 PUBLIC
 void ConfigurationHolder::RefreshConfigs(IN IMS_SINT32 nId)
 {
-    if (!bCreated)
+    if (!m_bCreated)
     {
         if (CreateConfigs(nId))
         {
@@ -320,53 +323,53 @@ void ConfigurationHolder::RefreshConfigs(IN IMS_SINT32 nId)
         return;
     }
 
-    if (pEngineConfig != IMS_NULL)
+    if (m_pEngineConfig != IMS_NULL)
     {
-        pEngineConfig->Refresh();
+        m_pEngineConfig->Refresh();
     }
 
-    if (!objSubscriberConfigs.IsEmpty())
+    if (!m_objSubscriberConfigs.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objSubscriberConfigs.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objSubscriberConfigs.GetSize(); ++i)
         {
-            SubscriberConfig* pSubsConfig = objSubscriberConfigs.GetAt(i);
+            SubscriberConfig* pSubsConfig = m_objSubscriberConfigs.GetAt(i);
             pSubsConfig->Refresh();
         }
 
         CreateSubscriberConfigIfNotPresent(nId);
     }
 
-    if (pSipConfig != IMS_NULL)
+    if (m_pSipConfig != IMS_NULL)
     {
-        pSipConfig->Refresh();
-        pSipConfig->CreateDefaultServiceConfig();
+        m_pSipConfig->Refresh();
+        m_pSipConfig->CreateDefaultServiceConfig();
     }
 
-    if (pMediaConfig != IMS_NULL)
+    if (m_pMediaConfig != IMS_NULL)
     {
-        pMediaConfig->Refresh();
+        m_pMediaConfig->Refresh();
     }
 }
 
 PRIVATE
 void ConfigurationHolder::DestroyConfigs()
 {
-    if (!objSubscriberConfigs.IsEmpty())
+    if (!m_objSubscriberConfigs.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objSubscriberConfigs.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objSubscriberConfigs.GetSize(); ++i)
         {
-            SubscriberConfig* pSubsConfig = objSubscriberConfigs.GetAt(i);
+            SubscriberConfig* pSubsConfig = m_objSubscriberConfigs.GetAt(i);
             configurationManager_DestroyConfig(pSubsConfig);
         }
 
-        objSubscriberConfigs.Clear();
+        m_objSubscriberConfigs.Clear();
     }
 
-    configurationManager_DestroyConfig(pEngineConfig);
-    configurationManager_DestroyConfig(pSipConfig);
-    configurationManager_DestroyConfig(pMediaConfig);
+    configurationManager_DestroyConfig(m_pEngineConfig);
+    configurationManager_DestroyConfig(m_pSipConfig);
+    configurationManager_DestroyConfig(m_pMediaConfig);
 
-    bCreated = IMS_FALSE;
+    m_bCreated = IMS_FALSE;
 }
 
 PRIVATE
@@ -389,7 +392,7 @@ IMS_BOOL ConfigurationHolder::CreateSubscriberConfig(IN IMS_SINT32 nId)
             return IMS_FALSE;
         }
 
-        objSubscriberConfigs.Append(pSubsConfig);
+        m_objSubscriberConfigs.Append(pSubsConfig);
     }
 
     return IMS_TRUE;
@@ -406,9 +409,9 @@ IMS_BOOL ConfigurationHolder::CreateSubscriberConfigIfNotPresent(IN IMS_SINT32 n
         return IMS_TRUE;
     }
 
-    for (IMS_UINT32 i = 0; i < objSubscriberConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objSubscriberConfigs.GetSize(); ++i)
     {
-        SubscriberConfig* pSubsConfig = objSubscriberConfigs.GetAt(i);
+        SubscriberConfig* pSubsConfig = m_objSubscriberConfigs.GetAt(i);
 
         if (pSubsConfig != IMS_NULL)
         {
@@ -443,11 +446,11 @@ IMS_BOOL ConfigurationHolder::CreateSubscriberConfigIfNotPresent(IN IMS_SINT32 n
             return IMS_FALSE;
         }
 
-        objSubscriberConfigs.Append(pSubsConfig);
+        m_objSubscriberConfigs.Append(pSubsConfig);
 
         IAsyncConfig* piAsyncConfig = pSubsConfig;
         piAsyncConfig->HandleMessage(
-                IAsyncConfig::ACMSG_START, reinterpret_cast<IMS_SINTP>(pConfigHelper), 0);
+                IAsyncConfig::ACMSG_START, reinterpret_cast<IMS_SINTP>(m_pConfigHelper), 0);
     }
 
     return IMS_TRUE;
@@ -456,14 +459,14 @@ IMS_BOOL ConfigurationHolder::CreateSubscriberConfigIfNotPresent(IN IMS_SINT32 n
 PRIVATE
 IMS_BOOL ConfigurationHolder::CreateEngineConfig(IN IMS_SINT32 nId)
 {
-    if (pEngineConfig != IMS_NULL)
+    if (m_pEngineConfig != IMS_NULL)
     {
         return IMS_TRUE;
     }
 
-    pEngineConfig = new EngineConfig(nId);
+    m_pEngineConfig = new EngineConfig(nId);
 
-    if (pEngineConfig == IMS_NULL)
+    if (m_pEngineConfig == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -472,7 +475,7 @@ IMS_BOOL ConfigurationHolder::CreateEngineConfig(IN IMS_SINT32 nId)
     {
         // Updates the trace option & module mask
         TraceService::GetTraceService()->SetOption(
-                pEngineConfig->GetTraceOption(), pEngineConfig->GetTraceModule());
+                m_pEngineConfig->GetTraceOption(), m_pEngineConfig->GetTraceModule());
     }
 
     return IMS_TRUE;
@@ -481,14 +484,14 @@ IMS_BOOL ConfigurationHolder::CreateEngineConfig(IN IMS_SINT32 nId)
 PRIVATE
 IMS_BOOL ConfigurationHolder::CreateSipConfig(IN IMS_SINT32 nId)
 {
-    if (pSipConfig != IMS_NULL)
+    if (m_pSipConfig != IMS_NULL)
     {
         return IMS_TRUE;
     }
 
-    pSipConfig = new SipConfig(nId);
+    m_pSipConfig = new SipConfig(nId);
 
-    if (pSipConfig == IMS_NULL)
+    if (m_pSipConfig == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -499,22 +502,22 @@ IMS_BOOL ConfigurationHolder::CreateSipConfig(IN IMS_SINT32 nId)
 PRIVATE
 IMS_BOOL ConfigurationHolder::CreateMediaConfig(IN IMS_SINT32 nId)
 {
-    if (pMediaConfig != IMS_NULL)
+    if (m_pMediaConfig != IMS_NULL)
     {
         return IMS_TRUE;
     }
 
-    pMediaConfig = new MediaConfig(nId);
+    m_pMediaConfig = new MediaConfig(nId);
 
-    if (pMediaConfig == IMS_NULL)
+    if (m_pMediaConfig == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    if (!pMediaConfig->Init())
+    if (!m_pMediaConfig->Init())
     {
-        delete pMediaConfig;
-        pMediaConfig = IMS_NULL;
+        delete m_pMediaConfig;
+        m_pMediaConfig = IMS_NULL;
 
         IMS_TRACE_E(0, "Creating a media config. failed", 0, 0, 0);
         return IMS_FALSE;
@@ -529,9 +532,8 @@ public:
     ConfigurationManagerPrivate();
     ~ConfigurationManagerPrivate();
 
-private:
-    ConfigurationManagerPrivate(IN const ConfigurationManagerPrivate& objRHS);
-    ConfigurationManagerPrivate& operator=(IN const ConfigurationManagerPrivate& objRHS);
+    ConfigurationManagerPrivate(IN const ConfigurationManagerPrivate&) = delete;
+    ConfigurationManagerPrivate& operator=(IN const ConfigurationManagerPrivate&) = delete;
 
 public:
     inline ConfigurationHolder* GetHolder(IN IMS_SINT32 nSlotId) const
@@ -541,11 +543,11 @@ public:
             nSlotId = IMS_SLOT_0;
         }
 
-        return ppHolder[nSlotId];
+        return m_ppHolder[nSlotId];
     }
 
-    inline const AString& GetLocator() const { return strConfigLocator; }
-    inline IMS_SINT32 GetMode() const { return nConfigMode; }
+    inline const AString& GetLocator() const { return m_strConfigLocator; }
+    inline IMS_SINT32 GetMode() const { return m_nConfigMode; }
 
     IMS_BOOL Initialize(IN const AString& strConfigLocator, IN IMS_SINT32 nConfigMode);
 
@@ -553,45 +555,45 @@ private:
     friend class ConfigurationManager;
 
     // Mode of configuration (file / xml / db)
-    IMS_SINT32 nConfigMode;
+    IMS_SINT32 m_nConfigMode;
     // Locator of configuration
-    AString strConfigLocator;
+    AString m_strConfigLocator;
 
-    ConfigurationHolder** ppHolder;
+    ConfigurationHolder** m_ppHolder;
 };
 
 PUBLIC
 ConfigurationManagerPrivate::ConfigurationManagerPrivate() :
-        nConfigMode(ConfigurationManager::MODE_DB),
-        strConfigLocator(AString::ConstNull()),
-        ppHolder(IMS_NULL)
+        m_nConfigMode(ConfigurationManager::MODE_DB),
+        m_strConfigLocator(AString::ConstNull()),
+        m_ppHolder(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
-    ppHolder = new ConfigurationHolder*[nSimCount];
+    m_ppHolder = new ConfigurationHolder*[nSimCount];
 
     for (IMS_SINT32 i = 0; i < nSimCount; ++i)
     {
-        ppHolder[i] = new ConfigurationHolder();
+        m_ppHolder[i] = new ConfigurationHolder();
     }
 }
 
 PUBLIC
 ConfigurationManagerPrivate::~ConfigurationManagerPrivate()
 {
-    if (ppHolder != IMS_NULL)
+    if (m_ppHolder != IMS_NULL)
     {
         IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
         for (IMS_SINT32 i = 0; i < nSimCount; ++i)
         {
-            if (ppHolder[i] != IMS_NULL)
+            if (m_ppHolder[i] != IMS_NULL)
             {
-                delete ppHolder[i];
+                delete m_ppHolder[i];
             }
         }
 
-        delete[] ppHolder;
+        delete[] m_ppHolder;
     }
 }
 
@@ -599,8 +601,8 @@ PUBLIC
 IMS_BOOL ConfigurationManagerPrivate::Initialize(
         IN const AString& strConfigLocator, IN IMS_SINT32 nConfigMode)
 {
-    this->strConfigLocator = strConfigLocator;
-    this->nConfigMode = nConfigMode;
+    m_strConfigLocator = strConfigLocator;
+    m_nConfigMode = nConfigMode;
 
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
@@ -624,38 +626,28 @@ IMS_BOOL ConfigurationManagerPrivate::Initialize(
 
 PRIVATE
 ConfigurationManager::ConfigurationManager() :
-        pConfigMngrP(new ConfigurationManagerPrivate())
+        m_pConfigMngrPrivate(new ConfigurationManagerPrivate())
 {
 }
 
 PUBLIC
 ConfigurationManager::~ConfigurationManager()
 {
-    delete pConfigMngrP;
+    delete m_pConfigMngrPrivate;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 const AppConfig* ConfigurationManager::GetAppConfig(
-        IN const AString& strAppId, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+        IN const AString& strAppId, IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = pConfigMngrP->GetHolder(nSlotId);
+    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     return pHolder->GetAppConfig(strAppId);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-AStringArray ConfigurationManager::GetAppIds(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+AStringArray ConfigurationManager::GetAppIds(IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = pConfigMngrP->GetHolder(nSlotId);
+    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     const IMSList<AppConfig*>& objAppConfigs = pHolder->GetAppConfigs();
     AStringArray objAppIds;
 
@@ -672,14 +664,9 @@ AStringArray ConfigurationManager::GetAppIds(IN IMS_SINT32 nSlotId /* = IMS_SLOT
     return objAppIds;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL ConfigurationManager::IsAppConfigured(
-        IN const AString& strAppId, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+        IN const AString& strAppId, IN IMS_SINT32 nSlotId) const
 {
     if (GetAppConfig(strAppId, nSlotId) != IMS_NULL)
     {
@@ -689,16 +676,10 @@ IMS_BOOL ConfigurationManager::IsAppConfigured(
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void ConfigurationManager::RemoveAppConfig(
-        IN const AString& strAppId, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+void ConfigurationManager::RemoveAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId)
 {
-    ConfigurationHolder* pHolder = pConfigMngrP->GetHolder(nSlotId);
+    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     AppConfig* pAppConfig = pHolder->RemoveAppConfig(strAppId);
 
     if (pAppConfig != IMS_NULL)
@@ -709,16 +690,11 @@ void ConfigurationManager::RemoveAppConfig(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT ConfigurationManager::StoreAppConfig(IN AppConfig* pAppConfig,
-        IN const AString& strAppId, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+IMS_RESULT ConfigurationManager::StoreAppConfig(
+        IN AppConfig* pAppConfig, IN const AString& strAppId, IN IMS_SINT32 nSlotId)
 {
-    ConfigurationHolder* pHolder = pConfigMngrP->GetHolder(nSlotId);
+    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
 
     // If the app. config is already present, remove and add it.
     RemoveAppConfig(strAppId, nSlotId);
@@ -734,144 +710,100 @@ IMS_RESULT ConfigurationManager::StoreAppConfig(IN AppConfig* pAppConfig,
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_SINT32 ConfigurationManager::GetConfigMode() const
 {
-    return pConfigMngrP->GetMode();
+    return m_pConfigMngrPrivate->GetMode();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 const AString& ConfigurationManager::GetConfigLocator() const
 {
-    return pConfigMngrP->GetLocator();
+    return m_pConfigMngrPrivate->GetLocator();
 }
 
-/*
- Subscriber configuration - impl. defined
- This config. includes IMS-related information in the ISIM.
-
-Remarks
-
-*/
+/**
+ * @brief Subscriber configuration - impl. defined.
+ *        This config. includes IMS-related information in the ISIM.
+ */
 PUBLIC
 const SubscriberConfig* ConfigurationManager::GetSubscriberConfig(
-        IN const AString& strId, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+        IN const AString& strId, IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = pConfigMngrP->GetHolder(nSlotId);
+    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     return pHolder->GetSubscriberConfig(strId);
 }
 
 PUBLIC
 const IMSList<SubscriberConfig*>& ConfigurationManager::GetSubscriberConfigs(
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+        IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = pConfigMngrP->GetHolder(nSlotId);
+    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     return pHolder->GetSubscriberConfigs();
 }
 
-/*
- Engine configuration - impl. defined
- This config. includes the information for an optional/additional operation
- in J281 engine implementation.
-
-Remarks
-
-*/
+/**
+ * @brief Engine configuration - impl. defined.
+ *        This config. includes the information for an optional/additional operation
+ *        in core engine implementation.
+ */
 PUBLIC
-const EngineConfig* ConfigurationManager::GetEngineConfig(
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+const EngineConfig* ConfigurationManager::GetEngineConfig(IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = pConfigMngrP->GetHolder(nSlotId);
+    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     return pHolder->GetEngineConfig();
 }
 
-/*
- SIP configuration - impl. defined
- This config. includes the SIP-specific information for a default UA behavior.
-
-Remarks
-
-*/
+/**
+ * @brief SIP configuration - impl. defined.
+ *        This config. includes the SIP-specific information for a default UA behavior.
+ */
 PUBLIC
-const SipConfig* ConfigurationManager::GetSipConfig(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+const SipConfig* ConfigurationManager::GetSipConfig(IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = pConfigMngrP->GetHolder(nSlotId);
+    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     return pHolder->GetSipConfig();
 }
 
-/*
- Media configuration - impl. defined
- This config. includes the media-specific information (SDP for session & capabilities).
-
-Remarks
-
-*/
+/**
+ * @brief Media configuration - impl. defined.
+ *        This config. includes the media-specific information (SDP for session & capabilities).
+ */
 PUBLIC
-const MediaConfig* ConfigurationManager::GetMediaConfig(
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/) const
+const MediaConfig* ConfigurationManager::GetMediaConfig(IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = pConfigMngrP->GetHolder(nSlotId);
+    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     return pHolder->GetMediaConfig();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL ConfigurationManager* ConfigurationManager::GetInstance()
 {
-    static ConfigurationManager* pConfigMngr = IMS_NULL;
+    static ConfigurationManager* s_pConfigMngr = IMS_NULL;
 
-    if (pConfigMngr == IMS_NULL)
+    if (s_pConfigMngr == IMS_NULL)
     {
-        pConfigMngr = new ConfigurationManager();
+        s_pConfigMngr = new ConfigurationManager();
     }
 
-    return pConfigMngr;
+    return s_pConfigMngr;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL ConfigurationManager::Initialize(IN const AString& strLocator, IN IMS_SINT32 nMode)
 {
-    return pConfigMngrP->Initialize(strLocator, nMode);
+    return m_pConfigMngrPrivate->Initialize(strLocator, nMode);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void ConfigurationManager::InitConfigs(IN IMS_SINT32 nSlotId)
 {
-    ConfigurationHolder* pHolder = pConfigMngrP->GetHolder(nSlotId);
+    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     pHolder->InitConfigs(nSlotId);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void ConfigurationManager::RefreshConfigs(IN IMS_SINT32 nSlotId)
 {
-    ConfigurationHolder* pHolder = pConfigMngrP->GetHolder(nSlotId);
+    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     pHolder->RefreshConfigs(nSlotId);
 }

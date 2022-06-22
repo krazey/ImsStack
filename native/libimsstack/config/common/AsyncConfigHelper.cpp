@@ -1,53 +1,60 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20101022  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "IAsyncConfig.h"
+
 #include "AsyncConfigHelper.h"
+#include "IAsyncConfig.h"
 
 __IMS_TRACE_TAG_CONF__;
 
 class AsyncAction
 {
 public:
-    inline AsyncAction(IN IAsyncConfig* piConfig_, IN IMS_SINT32 nMSG_, IN IMS_SINTP nParam1_,
-            IN IMS_SINTP nParam2_) :
-            piConfig(piConfig_),
-            nMSG(nMSG_),
-            nParam1(nParam1_),
-            nParam2(nParam2_)
+    inline AsyncAction(IN IAsyncConfig* piConfig, IN IMS_SINT32 nMsg, IN IMS_SINTP nParam1,
+            IN IMS_SINTP nParam2) :
+            m_piConfig(piConfig),
+            m_nMsg(nMsg),
+            m_nParam1(nParam1),
+            m_nParam2(nParam2)
     {
     }
 
     inline ~AsyncAction() {}
 
+    AsyncAction(IN const AsyncAction&) = delete;
+    AsyncAction& operator=(IN const AsyncAction&) = delete;
+
 public:
-    IAsyncConfig* piConfig;
-    IMS_SINT32 nMSG;
-    IMS_SINTP nParam1;
-    IMS_SINTP nParam2;
+    IAsyncConfig* m_piConfig;
+    IMS_SINT32 m_nMsg;
+    IMS_SINTP m_nParam1;
+    IMS_SINTP m_nParam2;
 };
 
 PUBLIC
 AsyncConfigHelper::AsyncConfigHelper() :
         ImsActivityEx(),
-        objAsyncConfigs(IMSList<IAsyncConfig*>())
+        m_objAsyncConfigs(IMSList<IAsyncConfig*>())
 {
 }
 
 PUBLIC VIRTUAL AsyncConfigHelper::~AsyncConfigHelper()
 {
-    objAsyncConfigs.Clear();
+    m_objAsyncConfigs.Clear();
 }
 
 PUBLIC
@@ -58,12 +65,12 @@ void AsyncConfigHelper::Register(IN IAsyncConfig* piConfig)
         return;
     }
 
-    objAsyncConfigs.Append(piConfig);
+    m_objAsyncConfigs.Append(piConfig);
 }
 
 PUBLIC
 IMS_BOOL AsyncConfigHelper::SendTo(
-        IN IAsyncConfig* piConfig, IN IMS_SINT32 nMSG, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2)
+        IN IAsyncConfig* piConfig, IN IMS_SINT32 nMsg, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2)
 {
     if (!IsRegisteredConfig(piConfig))
     {
@@ -71,7 +78,7 @@ IMS_BOOL AsyncConfigHelper::SendTo(
         return IMS_FALSE;
     }
 
-    AsyncAction* pAction = new AsyncAction(piConfig, nMSG, nParam1, nParam2);
+    AsyncAction* pAction = new AsyncAction(piConfig, nMsg, nParam1, nParam2);
 
     if (pAction == IMS_NULL)
     {
@@ -89,25 +96,25 @@ IMS_BOOL AsyncConfigHelper::SendTo(
 PUBLIC
 void AsyncConfigHelper::Unregister(IN IAsyncConfig* piConfig)
 {
-    for (IMS_UINT32 i = 0; i < objAsyncConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objAsyncConfigs.GetSize(); ++i)
     {
-        IAsyncConfig* piTmpConfig = objAsyncConfigs.GetAt(i);
+        IAsyncConfig* piTmpConfig = m_objAsyncConfigs.GetAt(i);
 
         if (piTmpConfig == piConfig)
         {
-            objAsyncConfigs.RemoveAt(i);
+            m_objAsyncConfigs.RemoveAt(i);
             break;
         }
     }
 }
 
-PRIVATE VIRTUAL IMS_BOOL AsyncConfigHelper::OnMessage(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL AsyncConfigHelper::OnMessage(IN ImsMessage& objMsg)
 {
-    switch (objMSG.GetName())
+    switch (objMsg.GetName())
     {
         case AMSG_SEND_TO:
         {
-            AsyncAction* pAction = reinterpret_cast<AsyncAction*>(objMSG.nLparam);
+            AsyncAction* pAction = reinterpret_cast<AsyncAction*>(objMsg.nLparam);
 
             if (pAction == IMS_NULL)
             {
@@ -115,21 +122,21 @@ PRIVATE VIRTUAL IMS_BOOL AsyncConfigHelper::OnMessage(IN IMSMSG& objMSG)
                 break;
             }
 
-            if (!IsRegisteredConfig(pAction->piConfig))
+            if (!IsRegisteredConfig(pAction->m_piConfig))
             {
                 IMS_TRACE_D("AsyncConfig is not registered, so message(%d) is dropped",
-                        pAction->nMSG, 0, 0);
+                        pAction->m_nMsg, 0, 0);
 
                 delete pAction;
                 break;
             }
 
-            pAction->piConfig->HandleMessage(pAction->nMSG, pAction->nParam1, pAction->nParam2);
+            pAction->m_piConfig->HandleMessage(
+                    pAction->m_nMsg, pAction->m_nParam1, pAction->m_nParam2);
 
             delete pAction;
             break;
         }
-
         default:
             // no-op
             break;
@@ -138,12 +145,12 @@ PRIVATE VIRTUAL IMS_BOOL AsyncConfigHelper::OnMessage(IN IMSMSG& objMSG)
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AsyncConfigHelper::IsRegisteredConfig(IN IAsyncConfig* piConfig)
 {
-    for (IMS_UINT32 i = 0; i < objAsyncConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objAsyncConfigs.GetSize(); ++i)
     {
-        IAsyncConfig* piTmpConfig = objAsyncConfigs.GetAt(i);
+        IAsyncConfig* piTmpConfig = m_objAsyncConfigs.GetAt(i);
 
         if (piTmpConfig == piConfig)
         {

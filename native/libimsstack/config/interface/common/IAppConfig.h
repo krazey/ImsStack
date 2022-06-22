@@ -1,79 +1,49 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091106  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_APP_CONFIG_H_
+#define INTERFACE_APP_CONFIG_H_
 
-    Description
-
-*/
-
-#ifndef _INTERFACE_APP_CONFIG_H_
-#define _INTERFACE_APP_CONFIG_H_
-
-#include "ImsRegistry.h"
 #include "ICoreServiceConfig.h"
+#include "ImsRegistry.h"
 
 class IAppConfig
 {
 public:
-    /*
-     Returns the application id that this configuration was created with.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    AString                 Application id
-    </table>
-    */
+    /**
+     * @brief Returns the application id that this configuration was created with.
+     *
+     * @return The application id of this configuration.
+     */
     virtual const AString& GetAppId() const = 0;
 
-    /*
-     Returns the Core Service configuration from the AppConfig.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    strServiceId            Service id to be found
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    ICoreServiceConfig*     Pointer to ICoreServiceConfig object
-    </table>
-    */
+    /**
+     * @brief Returns the Core Service configuration from the AppConfig.
+     *
+     * @param strServiceId The service id to be found
+     * @return An ICoreServiceConfig instance or null if not present.
+     */
     virtual const ICoreServiceConfig* GetCoreServiceConfig(
             IN const AString& strServiceId) const = 0;
 
-    /*
-     Returns the IMS registry format from the AppConfig.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    ImsRegistry             Pointer to ImsRegistry object
-    </table>
-    */
+    /**
+     * @brief Returns the IMS registry format from the AppConfig.
+     *
+     * @return An ImsRegistry instance of this configuration.
+     */
     virtual ImsRegistry* ToRegistry() const = 0;
 };
 
-#endif  // _INTERFACE_APP_CONFIG_H_
+#endif

@@ -1,20 +1,24 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091026  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
-#include "IConfigBuffer.h"
+
 #include "ConfigLoader.h"
+#include "IConfigBuffer.h"
 #include "StaticConfig.h"
 #include "private/MediaConfig.h"
 
@@ -24,50 +28,66 @@ class MediaProfileParameter
 {
 public:
     inline MediaProfileParameter() :
-            nType(IMediaConfig::MEDIA_INVALID)
+            m_nType(IMediaConfig::MEDIA_INVALID)
     {
     }
-    inline MediaProfileParameter(IN IMS_SINT32 nType_) :
-            nType(nType_)
+    inline MediaProfileParameter(IN IMS_SINT32 nType) :
+            m_nType(nType)
+    {
+    }
+    inline MediaProfileParameter(IN const MediaProfileParameter& other) :
+            m_nType(other.m_nType),
+            m_objValues(other.m_objValues)
     {
     }
     inline ~MediaProfileParameter() {}
 
+    inline MediaProfileParameter& operator=(IN const MediaProfileParameter& other)
+    {
+        if (this != &other)
+        {
+            m_nType = other.m_nType;
+            m_objValues = other.m_objValues;
+        }
+
+        return (*this);
+    }
+
 public:
     inline IMS_BOOL AddValue(IN const AString& strValue)
     {
-        objValues.AddElement(strValue);
+        m_objValues.AddElement(strValue);
         return IMS_TRUE;
     }
 
-    inline IMS_SINT32 GetType() const { return nType; }
-    inline const AStringArray& GetValues() const { return objValues; }
+    inline IMS_SINT32 GetType() const { return m_nType; }
+    inline const AStringArray& GetValues() const { return m_objValues; }
 
 private:
-    IMS_SINT32 nType;
-    AStringArray objValues;
+    IMS_SINT32 m_nType;
+    AStringArray m_objValues;
 };
 
 class MediaProfile
 {
 public:
-    inline MediaProfile(IN const AString& strName_, IN const AString& strConfName_) :
-            strName(strName_),
-            strConfName(strConfName_)
+    inline MediaProfile(IN const AString& strName, IN const AString& strConfName) :
+            m_strName(strName),
+            m_strConfName(strConfName)
     {
     }
     inline ~MediaProfile() {}
 
 public:
     IMS_BOOL AddValue(IN IMS_SINT32 nType, IN const AString& strValue);
-    const AString& GetName() const;
+    inline const AString& GetName() const { return m_strName; }
     MediaProfileParameter* GetParameter(IN IMS_SINT32 nType) const;
 
 private:
-    AString strName;
-    AString strConfName;
+    AString m_strName;
+    AString m_strConfName;
 
-    IMSList<MediaProfileParameter> objParameters;
+    IMSList<MediaProfileParameter> m_objParameters;
 };
 
 PUBLIC
@@ -85,7 +105,7 @@ IMS_BOOL MediaProfile::AddValue(IN IMS_SINT32 nType, IN const AString& strValue)
             return IMS_FALSE;
         }
 
-        return objParameters.Append(objParameter);
+        return m_objParameters.Append(objParameter);
     }
     else
     {
@@ -94,22 +114,16 @@ IMS_BOOL MediaProfile::AddValue(IN IMS_SINT32 nType, IN const AString& strValue)
 }
 
 PUBLIC
-const AString& MediaProfile::GetName() const
-{
-    return strName;
-}
-
-PUBLIC
 MediaProfileParameter* MediaProfile::GetParameter(IN IMS_SINT32 nType) const
 {
-    if (objParameters.IsEmpty())
+    if (m_objParameters.IsEmpty())
     {
         return IMS_NULL;
     }
 
-    for (IMS_UINT32 i = 0; i < objParameters.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objParameters.GetSize(); ++i)
     {
-        const MediaProfileParameter& objParameter = objParameters.GetAt(i);
+        const MediaProfileParameter& objParameter = m_objParameters.GetAt(i);
 
         if (nType == objParameter.GetType())
         {
@@ -127,6 +141,9 @@ public:
     inline MediaConfigPrivate() {}
     inline ~MediaConfigPrivate() { Clear(); }
 
+    MediaConfigPrivate(IN const MediaConfigPrivate&) = delete;
+    MediaConfigPrivate& operator=(IN const MediaConfigPrivate&) = delete;
+
 public:
     void Clear();
     IMS_BOOL CreateProfile(IN const AString& strName, IN const AString& strConfName);
@@ -143,7 +160,7 @@ public:
     static const IMS_CHAR KEY_BASIC_RELIABLE[];
 
 private:
-    IMSList<MediaProfile*> objProfiles;
+    IMSList<MediaProfile*> m_objProfiles;
 };
 
 PUBLIC GLOBAL const IMS_CHAR MediaConfigPrivate::MPROF_CAPABILITIES[] = "capabilities";
@@ -156,9 +173,9 @@ PUBLIC GLOBAL const IMS_CHAR MediaConfigPrivate::KEY_BASIC_RELIABLE[] = "basic_r
 PUBLIC
 void MediaConfigPrivate::Clear()
 {
-    for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objProfiles.GetSize(); ++i)
     {
-        MediaProfile* pProfile = objProfiles.GetAt(i);
+        MediaProfile* pProfile = m_objProfiles.GetAt(i);
 
         if (pProfile != IMS_NULL)
         {
@@ -166,7 +183,7 @@ void MediaConfigPrivate::Clear()
         }
     }
 
-    objProfiles.Clear();
+    m_objProfiles.Clear();
 }
 
 PUBLIC
@@ -187,7 +204,7 @@ IMS_BOOL MediaConfigPrivate::CreateProfile(IN const AString& strName, IN const A
         return IMS_FALSE;
     }
 
-    if (!objProfiles.Append(pProfile))
+    if (!m_objProfiles.Append(pProfile))
     {
         delete pProfile;
 
@@ -200,18 +217,18 @@ IMS_BOOL MediaConfigPrivate::CreateProfile(IN const AString& strName, IN const A
 PUBLIC
 void MediaConfigPrivate::DestroyProfile(IN const AString& strName)
 {
-    if (objProfiles.IsEmpty())
+    if (m_objProfiles.IsEmpty())
     {
         return;
     }
 
-    for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objProfiles.GetSize(); ++i)
     {
-        MediaProfile* pProfile = objProfiles.GetAt(i);
+        MediaProfile* pProfile = m_objProfiles.GetAt(i);
 
         if (strName.EqualsIgnoreCase(pProfile->GetName()))
         {
-            objProfiles.RemoveAt(i);
+            m_objProfiles.RemoveAt(i);
             delete pProfile;
             return;
         }
@@ -221,14 +238,14 @@ void MediaConfigPrivate::DestroyProfile(IN const AString& strName)
 PUBLIC
 MediaProfile* MediaConfigPrivate::FindProfile(IN const AString& strName) const
 {
-    if (objProfiles.IsEmpty())
+    if (m_objProfiles.IsEmpty())
     {
         return IMS_NULL;
     }
 
-    for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objProfiles.GetSize(); ++i)
     {
-        MediaProfile* pProfile = objProfiles.GetAt(i);
+        MediaProfile* pProfile = m_objProfiles.GetAt(i);
 
         if (strName.EqualsIgnoreCase(pProfile->GetName()))
         {
@@ -252,21 +269,21 @@ PUBLIC GLOBAL const IMS_CHAR MediaConfig::KEY_IDS[] = "ids";
 PUBLIC
 MediaConfig::MediaConfig(IN IMS_SINT32 nSlotId) :
         ConfigBase(nSlotId),
-        pMediaConfigP(new MediaConfigPrivate())
+        m_pConfigPrivate(new MediaConfigPrivate())
 {
 }
 
 PUBLIC VIRTUAL MediaConfig::~MediaConfig()
 {
-    if (pMediaConfigP != IMS_NULL)
+    if (m_pConfigPrivate != IMS_NULL)
     {
-        delete pMediaConfigP;
+        delete m_pConfigPrivate;
     }
 }
 
 PUBLIC VIRTUAL const AStringArray& MediaConfig::GetMediaCapabilities(IN IMS_SINT32 nMediaType) const
 {
-    MediaProfile* pProfile = pMediaConfigP->GetCapabilityProfile();
+    MediaProfile* pProfile = m_pConfigPrivate->GetCapabilityProfile();
     MediaProfileParameter* pParameter = pProfile->GetParameter(nMediaType);
 
     if (pParameter == IMS_NULL)
@@ -280,7 +297,7 @@ PUBLIC VIRTUAL const AStringArray& MediaConfig::GetMediaCapabilities(IN IMS_SINT
 PUBLIC VIRTUAL const AStringArray& MediaConfig::GetMediaProfile(
         IN const AString& strName, IN IMS_SINT32 nMediaType) const
 {
-    MediaProfile* pProfile = pMediaConfigP->FindProfile(strName);
+    MediaProfile* pProfile = m_pConfigPrivate->FindProfile(strName);
 
     if (pProfile == IMS_NULL)
     {
@@ -300,7 +317,7 @@ PUBLIC VIRTUAL const AStringArray& MediaConfig::GetMediaProfile(
 PUBLIC
 void MediaConfig::Refresh()
 {
-    pMediaConfigP->Clear();
+    m_pConfigPrivate->Clear();
 
     ReadFrom();
 }
@@ -308,7 +325,7 @@ void MediaConfig::Refresh()
 PUBLIC
 IMS_BOOL MediaConfig::CreateMediaProfile(IN const AString& strName)
 {
-    MediaProfile* pProfile = pMediaConfigP->FindProfile(strName);
+    MediaProfile* pProfile = m_pConfigPrivate->FindProfile(strName);
 
     if (pProfile != IMS_NULL)
     {
@@ -344,7 +361,7 @@ IMS_BOOL MediaConfig::CreateMediaProfile(IN const AString& strName)
     // Read the value: "section_name"
     const AString& strProfConfName = piBuffer->ReadValue(strName.GetStr());
 
-    if (!pMediaConfigP->CreateProfile(strName, strProfConfName))
+    if (!m_pConfigPrivate->CreateProfile(strName, strProfConfName))
     {
         IMS_TRACE_E(0, "Creating a media profile(%s) failed", strName.GetStr(), 0, 0);
         piBuffer->Destroy();
@@ -355,7 +372,7 @@ IMS_BOOL MediaConfig::CreateMediaProfile(IN const AString& strName)
     {
         IMS_TRACE_E(0, "Reading a media profile(%s) failed", strName.GetStr(), 0, 0);
 
-        pMediaConfigP->DestroyProfile(strName);
+        m_pConfigPrivate->DestroyProfile(strName);
         piBuffer->Destroy();
         return IMS_FALSE;
     }
@@ -371,7 +388,7 @@ IMS_BOOL MediaConfig::CreateMediaProfile(IN const AString& strName)
 PUBLIC
 void MediaConfig::DestroyMediaProfile(IN const AString& strName)
 {
-    pMediaConfigP->DestroyProfile(strName);
+    m_pConfigPrivate->DestroyProfile(strName);
 }
 
 PROTECTED VIRTUAL IMS_BOOL MediaConfig::ReadFrom()
@@ -421,7 +438,7 @@ PROTECTED VIRTUAL IMS_BOOL MediaConfig::ReadFrom()
         // Read the value: "section_name"
         const AString& strConfName = piBuffer->ReadValue(strMProfName.GetStr());
 
-        if (!pMediaConfigP->CreateProfile(strMProfName, strConfName))
+        if (!m_pConfigPrivate->CreateProfile(strMProfName, strConfName))
         {
             piBuffer->Destroy();
             return IMS_FALSE;
@@ -429,7 +446,7 @@ PROTECTED VIRTUAL IMS_BOOL MediaConfig::ReadFrom()
 
         if (!ReadMediaProfile(strMProfName, strConfName))
         {
-            pMediaConfigP->DestroyProfile(strMProfName);
+            m_pConfigPrivate->DestroyProfile(strMProfName);
 
             piBuffer->Destroy();
             return IMS_FALSE;
@@ -443,11 +460,6 @@ PROTECTED VIRTUAL IMS_BOOL MediaConfig::ReadFrom()
     piBuffer->Destroy();
 
     return IMS_TRUE;
-}
-
-PROTECTED VIRTUAL IMS_BOOL MediaConfig::WriteTo()
-{
-    return IMS_FALSE;
 }
 
 PROTECTED
@@ -472,7 +484,7 @@ IMS_BOOL MediaConfig::ReadMediaProfile(
     }
 
     // Read the specific section: strMProfName
-    MediaProfile* pProfile = pMediaConfigP->FindProfile(strMProfName);
+    MediaProfile* pProfile = m_pConfigPrivate->FindProfile(strMProfName);
 
     if (pProfile == IMS_NULL)
     {
@@ -584,14 +596,4 @@ IMS_BOOL MediaConfig::ReadMediaProfile(
     piBuffer->Destroy();
 
     return IMS_TRUE;
-}
-
-PROTECTED
-IMS_BOOL MediaConfig::WriteMediaProfile(
-        IN const AString& strMProfName, IN const AString& strConfName)
-{
-    (void)strMProfName;
-    (void)strConfName;
-
-    return IMS_FALSE;
 }

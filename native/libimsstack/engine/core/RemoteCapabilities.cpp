@@ -500,7 +500,7 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
         IN const CoreServiceConfig* pServiceConfig) const
 {
     /// Evaluate the ICSIs
-    const IMSList<ServiceIdentifier>& objLocalIcsis = pServiceConfig->GetICSIs();
+    const IMSList<ServiceIdentifier>& objLocalIcsis = pServiceConfig->GetIcsis();
 
     if (!objLocalIcsis.IsEmpty())
     {
@@ -516,9 +516,9 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
     }
 
     /// Evaluates the IARI
-    if (pServiceConfig->IsIARISupported())
+    if (pServiceConfig->IsIariSupported())
     {
-        const ServiceIdentifier& objIari = pServiceConfig->GetIARI();
+        const ServiceIdentifier& objIari = pServiceConfig->GetIari();
 
         if (!IsIariSupported(objIari.GetName()))
         {

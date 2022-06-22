@@ -1,33 +1,41 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090531  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
 #include "private/CapProperty.h"
 
 class CapPropertyPrivate
 {
 public:
     inline CapPropertyPrivate() :
-            nSectorId(CapProperty::SECTOR_INVALID),
-            nMessageType(CapProperty::MESSAGE_TYPE_INVALID)
+            m_nSectorId(CapProperty::SECTOR_INVALID),
+            m_nMessageType(CapProperty::MESSAGE_TYPE_INVALID)
     {
     }
+    inline ~CapPropertyPrivate() {}
+
+    CapPropertyPrivate(IN const CapPropertyPrivate&) = delete;
+    CapPropertyPrivate& operator=(IN const CapPropertyPrivate&) = delete;
 
 private:
     friend class CapProperty;
 
-    IMS_SINT32 nSectorId;
-    IMS_SINT32 nMessageType;
-    AStringArray objSDPFields;
+    IMS_SINT32 m_nSectorId;
+    IMS_SINT32 m_nMessageType;
+    AStringArray m_objSdpFields;
 };
 
 PUBLIC GLOBAL const IMS_CHAR* CapProperty::SECTOR_STRING[CapProperty::SECTOR_MAX] = {
@@ -48,45 +56,45 @@ PUBLIC GLOBAL const IMS_CHAR* CapProperty::MESSAGE_TYPE_STRING[CapProperty::MESS
 PUBLIC
 CapProperty::CapProperty() :
         ImsProperty(ImsProperty::PKEY_CAP),
-        pCapPP(new CapPropertyPrivate())
+        m_pPropertyPrivate(new CapPropertyPrivate())
 {
 }
 
 PUBLIC
-CapProperty::CapProperty(IN IMS_SINT32 nSectorId_, IN IMS_SINT32 nMessageType_) :
+CapProperty::CapProperty(IN IMS_SINT32 nSectorId, IN IMS_SINT32 nMessageType) :
         ImsProperty(ImsProperty::PKEY_CAP),
-        pCapPP(new CapPropertyPrivate())
+        m_pPropertyPrivate(new CapPropertyPrivate())
 {
-    pCapPP->nSectorId = nSectorId_;
-    pCapPP->nMessageType = nMessageType_;
+    m_pPropertyPrivate->m_nSectorId = nSectorId;
+    m_pPropertyPrivate->m_nMessageType = nMessageType;
 }
 
 PUBLIC
-CapProperty::CapProperty(IN const CapProperty& objRHS) :
-        ImsProperty(objRHS),
-        pCapPP(new CapPropertyPrivate())
+CapProperty::CapProperty(IN const CapProperty& other) :
+        ImsProperty(other),
+        m_pPropertyPrivate(new CapPropertyPrivate())
 {
-    pCapPP->nSectorId = objRHS.pCapPP->nSectorId;
-    pCapPP->nMessageType = objRHS.pCapPP->nMessageType;
-    pCapPP->objSDPFields = objRHS.pCapPP->objSDPFields;
+    m_pPropertyPrivate->m_nSectorId = other.m_pPropertyPrivate->m_nSectorId;
+    m_pPropertyPrivate->m_nMessageType = other.m_pPropertyPrivate->m_nMessageType;
+    m_pPropertyPrivate->m_objSdpFields = other.m_pPropertyPrivate->m_objSdpFields;
 }
 
 PUBLIC VIRTUAL CapProperty::~CapProperty()
 {
-    if (pCapPP != IMS_NULL)
+    if (m_pPropertyPrivate != IMS_NULL)
     {
-        delete pCapPP;
+        delete m_pPropertyPrivate;
     }
 }
 
 PUBLIC
-CapProperty& CapProperty::operator=(IN const CapProperty& objRHS)
+CapProperty& CapProperty::operator=(IN const CapProperty& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        pCapPP->nSectorId = objRHS.pCapPP->nSectorId;
-        pCapPP->nMessageType = objRHS.pCapPP->nMessageType;
-        pCapPP->objSDPFields = objRHS.pCapPP->objSDPFields;
+        m_pPropertyPrivate->m_nSectorId = other.m_pPropertyPrivate->m_nSectorId;
+        m_pPropertyPrivate->m_nMessageType = other.m_pPropertyPrivate->m_nMessageType;
+        m_pPropertyPrivate->m_objSdpFields = other.m_pPropertyPrivate->m_objSdpFields;
     }
 
     return (*this);
@@ -94,7 +102,8 @@ CapProperty& CapProperty::operator=(IN const CapProperty& objRHS)
 
 PUBLIC VIRTUAL IMS_BOOL CapProperty::Equals(IN const AString& strValue) const
 {
-    AString strCapKey = CreateCapKey(pCapPP->nSectorId, pCapPP->nMessageType);
+    AString strCapKey =
+            CreateCapKey(m_pPropertyPrivate->m_nSectorId, m_pPropertyPrivate->m_nMessageType);
 
     return strCapKey.Equals(strValue);
 }
@@ -102,20 +111,20 @@ PUBLIC VIRTUAL IMS_BOOL CapProperty::Equals(IN const AString& strValue) const
 PUBLIC
 void CapProperty::AddValue(IN const AString& strValue)
 {
-    pCapPP->objSDPFields.AddElement(strValue);
+    m_pPropertyPrivate->m_objSdpFields.AddElement(strValue);
 }
 
 PUBLIC
 const AStringArray& CapProperty::GetValues() const
 {
-    return pCapPP->objSDPFields;
+    return m_pPropertyPrivate->m_objSdpFields;
 }
 
 PUBLIC
 void CapProperty::SetKey(IN IMS_SINT32 nSectorId, IN IMS_SINT32 nMessageType)
 {
-    pCapPP->nSectorId = nSectorId;
-    pCapPP->nMessageType = nMessageType;
+    m_pPropertyPrivate->m_nSectorId = nSectorId;
+    m_pPropertyPrivate->m_nMessageType = nMessageType;
 }
 
 PUBLIC GLOBAL AString CapProperty::CreateCapKey(IN IMS_SINT32 nSectorId, IN IMS_SINT32 nMessageType)

@@ -705,9 +705,9 @@ PRIVATE VIRTUAL IMS_BOOL RegContact::IsServiceRegistered(
 
     RCPtr<Feature> pFeature = IMS_NULL;
 
-    if (piServiceConfig->IsIARISupported())
+    if (piServiceConfig->IsIariSupported())
     {
-        const ServiceIdentifier& objIari = piServiceConfig->GetIARI();
+        const ServiceIdentifier& objIari = piServiceConfig->GetIari();
         pFeature = new Feature(Feature::OTHER_G_3GPP_IARI_REF, objIari.GetName());
 
         if (!m_pRegisteredCapabilities->HasFeature(pFeature.Get()))
@@ -718,7 +718,7 @@ PRIVATE VIRTUAL IMS_BOOL RegContact::IsServiceRegistered(
         pFeature = IMS_NULL;
     }
 
-    const IMSList<ServiceIdentifier>& objIcsis = piServiceConfig->GetICSIs();
+    const IMSList<ServiceIdentifier>& objIcsis = piServiceConfig->GetIcsis();
 
     for (IMS_UINT32 i = 0; i < objIcsis.GetSize(); i++)
     {

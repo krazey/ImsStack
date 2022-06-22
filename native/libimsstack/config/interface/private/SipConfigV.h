@@ -30,26 +30,26 @@ private:
         IMS_BOOL bSessionTimerSupported;
         IMS_SINT32 nRefresher;
         IMS_SINT32 nRefreshMethod;
-        IMS_SINT32 nMinSE;
+        IMS_SINT32 nMinSe;
         IMS_SINT32 nSessionExpires;
         IMS_SINT32 nHeaders;
-        IMS_BOOL bNoRefreshByReINVITE;
+        IMS_BOOL bNoRefreshByReInvite;
         // This value will not be managed in the non-volatile memory
         IMS_BOOL b100TryingNotification;
-        IMS_BOOL bSDPVersionCheckSupported;
-        IMS_BOOL bSDPNonRPRAllowed;
+        IMS_BOOL bSdpVersionCheckSupported;
+        IMS_BOOL bSdpNonRprAllowed;
 
         inline Session() :
                 bSessionTimerSupported(IMS_TRUE),
                 nRefresher(SESSION_REFRESHER_LOCAL),
                 nRefreshMethod(SESSION_REFRESH_UPDATE),
-                nMinSE(90),
+                nMinSe(90),
                 nSessionExpires(3600),
                 nHeaders(SESSION_HEADER_ALL),
-                bNoRefreshByReINVITE(IMS_FALSE),
+                bNoRefreshByReInvite(IMS_FALSE),
                 b100TryingNotification(IMS_FALSE),
-                bSDPVersionCheckSupported(IMS_TRUE),
-                bSDPNonRPRAllowed(IMS_FALSE)
+                bSdpVersionCheckSupported(IMS_TRUE),
+                bSdpNonRprAllowed(IMS_FALSE)
         {
         }
     };
@@ -83,38 +83,38 @@ public:
     inline IMS_SINT32 GetTimerValueT1() const { return m_nTimerValueT1; }
     inline IMS_SINT32 GetTimerValueT2() const { return m_nTimerValueT2; }
     inline IMS_SINT32 GetTimerValueT4() const { return m_nTimerValueT4; }
-    inline IMS_SINT32 GetTimerValueTA() const { return m_nTimerValueA; }
-    inline IMS_SINT32 GetTimerValueTB() const { return m_nTimerValueB; }
-    inline IMS_SINT32 GetTimerValueTC() const { return m_nTimerValueC; }
-    inline IMS_SINT32 GetTimerValueTD() const { return m_nTimerValueD; }
-    inline IMS_SINT32 GetTimerValueTE() const { return m_nTimerValueE; }
-    inline IMS_SINT32 GetTimerValueTF() const { return m_nTimerValueF; }
-    inline IMS_SINT32 GetTimerValueTG() const { return m_nTimerValueG; }
-    inline IMS_SINT32 GetTimerValueTH() const { return m_nTimerValueH; }
-    inline IMS_SINT32 GetTimerValueTI() const { return m_nTimerValueI; }
-    inline IMS_SINT32 GetTimerValueTJ() const { return m_nTimerValueJ; }
-    inline IMS_SINT32 GetTimerValueTK() const { return m_nTimerValueK; }
-    inline IMS_BOOL IsTimerValueConfiguredOnRuntime() const { return m_bIsTVConfiguredOnRuntime; }
+    inline IMS_SINT32 GetTimerValueA() const { return m_nTimerValueA; }
+    inline IMS_SINT32 GetTimerValueB() const { return m_nTimerValueB; }
+    inline IMS_SINT32 GetTimerValueC() const { return m_nTimerValueC; }
+    inline IMS_SINT32 GetTimerValueD() const { return m_nTimerValueD; }
+    inline IMS_SINT32 GetTimerValueE() const { return m_nTimerValueE; }
+    inline IMS_SINT32 GetTimerValueF() const { return m_nTimerValueF; }
+    inline IMS_SINT32 GetTimerValueG() const { return m_nTimerValueG; }
+    inline IMS_SINT32 GetTimerValueH() const { return m_nTimerValueH; }
+    inline IMS_SINT32 GetTimerValueI() const { return m_nTimerValueI; }
+    inline IMS_SINT32 GetTimerValueJ() const { return m_nTimerValueJ; }
+    inline IMS_SINT32 GetTimerValueK() const { return m_nTimerValueK; }
+    inline IMS_BOOL IsTimerValueConfiguredOnRuntime() const { return m_bIsTimerValueConfigured; }
 
     // "session"
-    inline IMS_SINT32 GetSessionExpires() const { return m_stSession.nSessionExpires; }
-    inline IMS_SINT32 GetSessionHeaders() const { return m_stSession.nHeaders; }
-    inline IMS_SINT32 GetSessionRefresher() const { return m_stSession.nRefresher; }
-    inline IMS_SINT32 GetSessionMethod() const { return m_stSession.nRefreshMethod; }
-    inline IMS_SINT32 GetSessionMinSE() const { return m_stSession.nMinSE; }
+    inline IMS_SINT32 GetSessionExpires() const { return m_objSession.nSessionExpires; }
+    inline IMS_SINT32 GetSessionHeaders() const { return m_objSession.nHeaders; }
+    inline IMS_SINT32 GetSessionRefresher() const { return m_objSession.nRefresher; }
+    inline IMS_SINT32 GetSessionMethod() const { return m_objSession.nRefreshMethod; }
+    inline IMS_SINT32 GetSessionMinSe() const { return m_objSession.nMinSe; }
     inline IMS_BOOL Is100TryingNotificationRequired() const
     {
-        return m_stSession.b100TryingNotification;
+        return m_objSession.b100TryingNotification;
     }
-    inline IMS_BOOL IsSessionNoRefreshByReINVITE() const
+    inline IMS_BOOL IsSessionNoRefreshByReInvite() const
     {
-        return m_stSession.bNoRefreshByReINVITE;
+        return m_objSession.bNoRefreshByReInvite;
     }
-    inline IMS_BOOL IsSessionTimerSupported() const { return m_stSession.bSessionTimerSupported; }
-    inline IMS_BOOL IsSessionSDPNonRPRAllowed() const { return m_stSession.bSDPNonRPRAllowed; }
-    inline IMS_BOOL IsSessionSDPVersionCheckSupported() const
+    inline IMS_BOOL IsSessionTimerSupported() const { return m_objSession.bSessionTimerSupported; }
+    inline IMS_BOOL IsSessionSdpNonRprAllowed() const { return m_objSession.bSdpNonRprAllowed; }
+    inline IMS_BOOL IsSessionSdpVersionCheckSupported() const
     {
-        return m_stSession.bSDPVersionCheckSupported;
+        return m_objSession.bSdpVersionCheckSupported;
     }
 
     // "capabilities"
@@ -130,7 +130,7 @@ protected:
 
     // ConfigBase class
     IMS_BOOL ReadFrom() override;
-    IMS_BOOL Update(IN IMS_SINT32 nCPI, IN const AString& strValue = AString::ConstNull()) override;
+    IMS_BOOL Update(IN IMS_SINT32 nCpi, IN const AString& strValue = AString::ConstNull()) override;
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
 private:
@@ -217,7 +217,7 @@ private:
     IMS_UINT32 m_nFeatureTagOptions;
 
     // Timer values for SIP transaction
-    IMS_BOOL m_bIsTVConfiguredOnRuntime;
+    IMS_BOOL m_bIsTimerValueConfigured;
     IMS_SINT32 m_nTimerValueT1;
     IMS_SINT32 m_nTimerValueT2;
     IMS_SINT32 m_nTimerValueT4;
@@ -233,7 +233,7 @@ private:
     IMS_SINT32 m_nTimerValueJ;
     IMS_SINT32 m_nTimerValueK;
 
-    Session m_stSession;
+    Session m_objSession;
 
     // Capabilities
     IMS_BOOL m_bRespByAppForCapabilities;

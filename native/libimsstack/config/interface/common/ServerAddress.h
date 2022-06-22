@@ -1,103 +1,65 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100905  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SERVER_ADDRESS_H_
-#define _SERVER_ADDRESS_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SERVER_ADDRESS_H_
+#define SERVER_ADDRESS_H_
 
 #include "AString.h"
 
 class ServerAddress
 {
 public:
-    ServerAddress(IN const AString& strAddress_, IN IMS_SINT32 nPort_ = PORT_UNSPECIFIED);
-    ~ServerAddress();
+    inline ServerAddress(IN const AString& strAddress, IN IMS_SINT32 nPort = PORT_UNSPECIFIED) :
+            m_strAddress(strAddress),
+            m_nPort(nPort)
+    {
+    }
+    inline ~ServerAddress() {}
 
-private:
-    ServerAddress(IN const ServerAddress& objRHS);
-    ServerAddress& operator=(IN const ServerAddress& objRHS);
+    ServerAddress(IN const ServerAddress&) = delete;
+    ServerAddress& operator=(IN const ServerAddress&) = delete;
 
 public:
-    /*
-     Returns the address (FQDN or IP address) of the IMS server.
+    /**
+     * @brief Returns the address (FQDN or IP address) of the IMS server.
+     *
+     * @return The address of IMS server.
+     */
+    inline const AString& GetAddress() const { return m_strAddress; }
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    AString                 Address of IMS server
-    </table>
-    */
-    const AString& GetAddress() const;
-
-    /*
-     Returns the port number of the IMS server.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_SINT32              Port number
-    </table>
-    */
-    IMS_SINT32 GetPort() const;
+    /**
+     * @brief Returns the port number of the IMS server.
+     *
+     * @return The port number.
+     */
+    inline IMS_SINT32 GetPort() const { return m_nPort; }
 
 private:
-    /*
-     Sets the address (FQDN or IP address) of the IMS server.
+    /**
+     * @brief Sets the address (FQDN or IP address) of the IMS server.
+     *
+     * @param strAddress The address of IMS server (FQDN or IP-based string)
+     */
+    inline void SetAddress(IN const AString& strAddress) { m_strAddress = strAddress; }
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    strAddress              Address of IMS server (FQDN or IP-based string)
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-    */
-    void SetAddress(IN const AString& strAddress);
-
-    /*
-     Sets the port number of the IMS server.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    nPort                   Port number
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-    */
-    void SetPort(IN IMS_SINT32 nPort);
+    /**
+     * @brief Sets the port number of the IMS server.
+     *
+     * @param nPort The port number
+     */
+    inline void SetPort(IN IMS_SINT32 nPort) { m_nPort = nPort; }
 
 public:
     enum
@@ -108,8 +70,8 @@ public:
 private:
     friend class SubscriberConfig;
 
-    AString strAddress;
-    IMS_SINT32 nPort;
+    AString m_strAddress;
+    IMS_SINT32 m_nPort;
 };
 
-#endif  // _SERVER_ADDRESS_H_
+#endif

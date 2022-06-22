@@ -1,102 +1,32 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100905  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SUBSCRIBER_CONFIG_LISTENER_H_
+#define INTERFACE_SUBSCRIBER_CONFIG_LISTENER_H_
 
-    Description
-
-*/
-
-#ifndef _INTERFACE_SUBSCRIBER_CONFIG_LISTENER_H_
-#define _INTERFACE_SUBSCRIBER_CONFIG_LISTENER_H_
-
-/*
-
-A listener type for receiving notifications about changes to the IMS subscriber configuration.
-
-Example
-
-See Also
-ISubscriberConfig
-
-*/
+/**
+ * @brief A listener type for receiving notifications about changes to the IMS subscriber
+ *        configuration.
+ */
 class ISubscriberConfigListener
 {
 public:
-    /*
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
     virtual void SubscriberConfig_InitCompleted() = 0;
-
-    /*
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
     virtual void SubscriberConfig_RefreshCompleted() = 0;
-
-    /*
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
     virtual void SubscriberConfig_RefreshStarted() = 0;
-
-    /*
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
     virtual void SubscriberConfig_NotifyError(IN IMS_SINT32 nErrorCode) = 0;
 };
 
-#endif  // _INTERFACE_SUBSCRIBER_CONFIG_LISTENER_H_
+#endif

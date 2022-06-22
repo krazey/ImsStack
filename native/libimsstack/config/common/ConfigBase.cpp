@@ -1,14 +1,18 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091026  toastops@                 Created
-    </table>
-
-    Description
-
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceConfig.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
@@ -23,26 +27,16 @@ __IMS_TRACE_TAG_CONF__;
 PUBLIC GLOBAL const IMS_CHAR ConfigBase::SECTION_UNIQUENESS[] = "Uniqueness";
 
 PUBLIC
-ConfigBase::ConfigBase(IN IMS_SINT32 nSlotId_) :
-        ImsSlot(nSlotId_),
-        objConfigUpdateListeners(IMSMap<IMS_SINT32, IMSList<IConfigUpdateListener*>>())
+ConfigBase::ConfigBase(IN IMS_SINT32 nSlotId) :
+        ImsSlot(nSlotId),
+        m_objConfigUpdateListeners(IMSMap<IMS_SINT32, IMSList<IConfigUpdateListener*>>())
 {
 }
 
 PUBLIC VIRTUAL ConfigBase::~ConfigBase() {}
 
-PROTECTED VIRTUAL IMS_BOOL ConfigBase::Init()
-{
-    return Load();
-}
-
-PUBLIC VIRTUAL void ConfigBase::Refresh()
-{
-    // no-op
-}
-
 PUBLIC
-IMS_BOOL ConfigBase::Load(IN const AString& strConfName /* = AString::ConstNull() */)
+IMS_BOOL ConfigBase::Load(IN const AString& strConfName /*= AString::ConstNull()*/)
 {
     // Read the configuration from the default medium
     if (strConfName.GetLength() == 0)
@@ -54,7 +48,7 @@ IMS_BOOL ConfigBase::Load(IN const AString& strConfName /* = AString::ConstNull(
 }
 
 PUBLIC
-IMS_BOOL ConfigBase::Store(IN const AString& strConfName /* = AString::ConstNull() */)
+IMS_BOOL ConfigBase::Store(IN const AString& strConfName /*= AString::ConstNull()*/)
 {
     // Write the configuration from the default medium
     if (strConfName.GetLength() == 0)
@@ -77,14 +71,14 @@ PROTECTED VIRTUAL IMS_BOOL ConfigBase::WriteTo()
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL ConfigBase::ReadFrom(IN const AString& /* strConfName */)
+PROTECTED VIRTUAL IMS_BOOL ConfigBase::ReadFrom(IN const AString& /*strConfName*/)
 {
     // The subclass MUST implement if it has an application/service-specific
     // configuration information.
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL ConfigBase::WriteTo(IN const AString& /* strConfName */)
+PROTECTED VIRTUAL IMS_BOOL ConfigBase::WriteTo(IN const AString& /*strConfName*/)
 {
     // The subclass MUST implement if it has an application/service-specific
     // configuration information.
@@ -92,26 +86,21 @@ PROTECTED VIRTUAL IMS_BOOL ConfigBase::WriteTo(IN const AString& /* strConfName 
 }
 
 PROTECTED VIRTUAL IMS_BOOL ConfigBase::Update(
-        IN IMS_SINT32 /* nCPI */, IN const AString& /* strValue = AString::ConstNull() */)
+        IN IMS_SINT32 /*nCpi*/, IN const AString& /*strValue = AString::ConstNull()*/)
 {
     // The subclass MUST implement if it has the configurable items.
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void ConfigBase::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 /*nSlotId*/)
-{
-    // No-op
-}
-
 PROTECTED
-IMS_BOOL ConfigBase::AddListener(IN IMS_SINT32 nCPI, IN IConfigUpdateListener* piListener)
+IMS_BOOL ConfigBase::AddListener(IN IMS_SINT32 nCpi, IN IConfigUpdateListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    IMS_SLONG nIndex = objConfigUpdateListeners.GetIndexOfKey(nCPI);
+    IMS_SLONG nIndex = m_objConfigUpdateListeners.GetIndexOfKey(nCpi);
 
     if (nIndex < 0)
     {
@@ -119,18 +108,18 @@ IMS_BOOL ConfigBase::AddListener(IN IMS_SINT32 nCPI, IN IConfigUpdateListener* p
 
         objListeners.Append(piListener);
 
-        if (!objConfigUpdateListeners.Add(nCPI, objListeners))
+        if (!m_objConfigUpdateListeners.Add(nCpi, objListeners))
         {
             return IMS_FALSE;
         }
 
-        IMS_TRACE_D("ConfigUpdateListener :: add - %d / %p", objConfigUpdateListeners.GetSize(),
+        IMS_TRACE_D("ConfigUpdateListener :: add - %d / %p", m_objConfigUpdateListeners.GetSize(),
                 piListener, 0);
 
         return IMS_TRUE;
     }
 
-    IMSList<IConfigUpdateListener*>& objListeners = objConfigUpdateListeners.GetValueAt(nIndex);
+    IMSList<IConfigUpdateListener*>& objListeners = m_objConfigUpdateListeners.GetValueAt(nIndex);
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
@@ -148,28 +137,28 @@ IMS_BOOL ConfigBase::AddListener(IN IMS_SINT32 nCPI, IN IConfigUpdateListener* p
         }
     }
 
-    IMS_TRACE_D("ConfigUpdateListener :: add - %d / %p / %d", objConfigUpdateListeners.GetSize(),
+    IMS_TRACE_D("ConfigUpdateListener :: add - %d / %p / %d", m_objConfigUpdateListeners.GetSize(),
             piListener, objListeners.GetSize());
 
     return objListeners.Append(piListener);
 }
 
 PROTECTED
-void ConfigBase::RemoveListener(IN IMS_SINT32 nCPI, IN IConfigUpdateListener* piListener)
+void ConfigBase::RemoveListener(IN IMS_SINT32 nCpi, IN IConfigUpdateListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
         return;
     }
 
-    IMS_SLONG nIndex = objConfigUpdateListeners.GetIndexOfKey(nCPI);
+    IMS_SLONG nIndex = m_objConfigUpdateListeners.GetIndexOfKey(nCpi);
 
     if (nIndex < 0)
     {
         return;
     }
 
-    IMSList<IConfigUpdateListener*>& objListeners = objConfigUpdateListeners.GetValueAt(nIndex);
+    IMSList<IConfigUpdateListener*>& objListeners = m_objConfigUpdateListeners.GetValueAt(nIndex);
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
@@ -189,19 +178,19 @@ void ConfigBase::RemoveListener(IN IMS_SINT32 nCPI, IN IConfigUpdateListener* pi
 
     if (objListeners.IsEmpty())
     {
-        objConfigUpdateListeners.RemoveAt(nIndex);
+        m_objConfigUpdateListeners.RemoveAt(nIndex);
     }
 
-    IMS_TRACE_D("ConfigUpdateListener :: remove - %d / %p / %d", objConfigUpdateListeners.GetSize(),
-            piListener, objListeners.GetSize());
+    IMS_TRACE_D("ConfigUpdateListener :: remove - %d / %p / %d",
+            m_objConfigUpdateListeners.GetSize(), piListener, objListeners.GetSize());
 }
 
 PROTECTED
-IMS_BOOL ConfigBase::NotifyUpdate(IN IMS_SINT32 nCPI,
-        IN const AString& strConfName /* = AString::ConstNull() */,
-        IN const AString& strExtraParam /* = AString::ConstNull() */)
+IMS_BOOL ConfigBase::NotifyUpdate(IN IMS_SINT32 nCpi,
+        IN const AString& strConfName /*= AString::ConstNull()*/,
+        IN const AString& strExtraParam /*= AString::ConstNull()*/)
 {
-    IMS_SLONG nIndex = objConfigUpdateListeners.GetIndexOfKey(nCPI);
+    IMS_SLONG nIndex = m_objConfigUpdateListeners.GetIndexOfKey(nCpi);
 
     if (nIndex < 0)
     {
@@ -209,7 +198,7 @@ IMS_BOOL ConfigBase::NotifyUpdate(IN IMS_SINT32 nCPI,
     }
 
     const IMSList<IConfigUpdateListener*>& objListeners =
-            objConfigUpdateListeners.GetValueAt(nIndex);
+            m_objConfigUpdateListeners.GetValueAt(nIndex);
 
     if (objListeners.IsEmpty())
     {
@@ -225,7 +214,7 @@ IMS_BOOL ConfigBase::NotifyUpdate(IN IMS_SINT32 nCPI,
             continue;
         }
 
-        piListener->ConfigUpdate_NotifyUpdate(nCPI, strConfName, strExtraParam);
+        piListener->ConfigUpdate_NotifyUpdate(nCpi, strConfName, strExtraParam);
     }
 
     return IMS_TRUE;

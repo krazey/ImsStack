@@ -1,52 +1,44 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20101022  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _INTERFACE_ASYNC_CONFIG_H_
-#define _INTERFACE_ASYNC_CONFIG_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_ASYNC_CONFIG_H_
+#define INTERFACE_ASYNC_CONFIG_H_
 
 class IAsyncConfig
 {
 public:
-    /*
-     Dispatches the asynchronous message for the configuration.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    nMSG                    Message type to be handled
-    nParam1                 Item to be handled
-    nParam2                 Value of the specified item (action)
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-    */
-    virtual void HandleMessage(IN IMS_SINT32 nMSG, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2) = 0;
+    /**
+     * @brief Dispatches the asynchronous message for the configuration.
+     *
+     * @param nMsg The message typ to be handled
+     * @param nParam1 The item to be handled
+     * @param nParam2 The value of the specified item (action)
+     */
+    virtual void HandleMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2) = 0;
 
 public:
     enum
     {
-        // Initialization operation
-        // IAsyncConfig will register itself to the AsynConfigHelper
-        // Param1 : AsyncConfigHelper*
+        /// Initialization operation
+        /// IAsyncConfig will register itself to the AsynConfigHelper
+        /// Param1 : AsyncConfigHelper*
         ACMSG_START = 1,
 
-        // Base of user-defined Async Config Message
+        /// Base of user-defined Async Config Message
         ACMSG_USER = 10
     };
 };
 
-#endif  // _INTERFACE_ASYNC_CONFIG_H_
+#endif

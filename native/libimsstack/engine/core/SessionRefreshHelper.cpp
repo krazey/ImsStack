@@ -117,7 +117,7 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeader(IN ISipConnectio
         return IMS_FALSE;
     }
 
-    IMS_SINT32 nConfigMinSe = pSipConfigV->GetSessionMinSE();
+    IMS_SINT32 nConfigMinSe = pSipConfigV->GetSessionMinSe();
 
     // Set Supported header field if the application wants to use the session timer
     if (pSipConfigV->IsSessionTimerSupported() && !piSipMsg->IsOptionSupported(STR_TIMER))
@@ -344,7 +344,7 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
         return IMS_FALSE;
     }
 
-    IMS_SINT32 nConfigMinSe = pSipConfigV->GetSessionMinSE();
+    IMS_SINT32 nConfigMinSe = pSipConfigV->GetSessionMinSe();
 
     // Set Supported header field if the application wants to use the session timer
     if (pSipConfigV->IsSessionTimerSupported() && !piSipMsg->IsOptionSupported(STR_TIMER))
@@ -691,7 +691,7 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
             return RESULT_ERROR;
         }
 
-        IMS_SINT32 nConfigMinSe = pSipConfigV->GetSessionMinSE();
+        IMS_SINT32 nConfigMinSe = pSipConfigV->GetSessionMinSe();
 
         if ((m_nSessionInterval != 0) &&
                 ((nConfigMinSe > m_nSessionInterval) || (m_nMinSe > m_nSessionInterval)))

@@ -1,30 +1,29 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100905  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServicePhoneInfo.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "AStringBuffer.h"
 #include "ImsAccessNetworkInfoType.h"
+#include "ServiceMemory.h"
+#include "ServicePhoneInfo.h"
+
+#include "ImsIdentity.h"
 #include "private/ConfigurationManager.h"
 #include "private/SubscriberConfig.h"
-#include "ImsIdentity.h"
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL AString ImsIdentity::CreateSIPUserId(
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/, IN IMS_BOOL bUserPhoneParam /* = IMS_FALSE */)
+PUBLIC GLOBAL AString ImsIdentity::CreateSipUserId(
+        IN IMS_SINT32 nSlotId, IN IMS_BOOL bUserPhoneParam /*= IMS_FALSE*/)
 {
     // "sip:<global number>@<home domain name>;user=phone" ; it will be derived from the MSISDN
     ISubscriberInfo* piSubsInfo =
@@ -35,60 +34,49 @@ PUBLIC GLOBAL AString ImsIdentity::CreateSIPUserId(
         return AString::ConstNull();
     }
 
-    AString strMSISDN;
+    AString strMsisdn;
 
-    piSubsInfo->GetPhoneNumber(strMSISDN);
+    piSubsInfo->GetPhoneNumber(strMsisdn);
 
-    return CreateSIPUserId(strMSISDN, nSlotId, bUserPhoneParam);
+    return CreateSipUserId(strMsisdn, nSlotId, bUserPhoneParam);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL AString ImsIdentity::CreateSIPUserId(IN const AString& strDialString,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/, IN IMS_BOOL bUserPhoneParam /* = IMS_FALSE */,
-        IN const AString& strPhoneContext /* = AString::ConstNull() */)
+PUBLIC GLOBAL AString ImsIdentity::CreateSipUserId(IN const AString& strDialString,
+        IN IMS_SINT32 nSlotId, IN IMS_BOOL bUserPhoneParam /*= IMS_FALSE*/,
+        IN const AString& strPhoneContext /*= AString::ConstNull()*/)
 {
     // "sip:<global number>@<home domain name>;user=phone" ;
     // It will be derived from the specified number
 
     if (strDialString.GetLength() == 0)
     {
-        return CreateSIPUserId(nSlotId);
+        return CreateSipUserId(nSlotId);
     }
 
-    AStringBuffer objURI(64);
+    AStringBuffer objUri(64);
 
-    objURI.Append("sip:");
-    objURI.Append(strDialString);
+    objUri.Append("sip:");
+    objUri.Append(strDialString);
 
     if (strDialString.Contains('#'))
     {
-        objURI.Replace('#', "%23");
+        objUri.Replace('#', "%23");
     }
 
-    objURI.Append('@');
-    objURI.Append(
+    objUri.Append('@');
+    objUri.Append(
             (strPhoneContext.GetLength() == 0) ? GetHomeDomainName(nSlotId) : strPhoneContext);
 
     if (bUserPhoneParam)
     {
-        objURI.Append(";user=phone");
+        objUri.Append(";user=phone");
     }
 
-    return static_cast<const AStringBuffer&>(objURI).GetString();
+    return static_cast<const AStringBuffer&>(objUri).GetString();
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL AString ImsIdentity::CreateSIPUserIdWithDialString(IN const AString& strDialString,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/,
-        IN const AString& strPhoneContext /* = AString::ConstNull() */)
+PUBLIC GLOBAL AString ImsIdentity::CreateSipUserIdWithDialString(IN const AString& strDialString,
+        IN IMS_SINT32 nSlotId, IN const AString& strPhoneContext /*= AString::ConstNull()*/)
 {
     // "sip:<dialstring>;phone-context=<home domain name>@<home domain name>;user=dialstring";
 
@@ -97,43 +85,37 @@ PUBLIC GLOBAL AString ImsIdentity::CreateSIPUserIdWithDialString(IN const AStrin
         return AString::ConstNull();
     }
 
-    AStringBuffer objURI(64);
+    AStringBuffer objUri(64);
 
-    objURI.Append("sip:");
-    objURI.Append(strDialString);
+    objUri.Append("sip:");
+    objUri.Append(strDialString);
 
     if (strDialString.Contains('#'))
     {
-        objURI.Replace('#', "%23");
+        objUri.Replace('#', "%23");
     }
 
-    objURI.Append(";phone-context=");
+    objUri.Append(";phone-context=");
 
     if (strPhoneContext.GetLength() == 0)
     {
-        const AString strDefaultPC = GetPhoneContext(DIALING_POLICY_HOME_LOCAL, nSlotId);
-        objURI.Append(strDefaultPC);
+        const AString strDefaultPc = GetPhoneContext(DIALING_POLICY_HOME_LOCAL, nSlotId);
+        objUri.Append(strDefaultPc);
     }
     else
     {
-        objURI.Append(strPhoneContext);
+        objUri.Append(strPhoneContext);
     }
 
-    objURI.Append('@');
-    objURI.Append(GetHomeDomainName(nSlotId));
-    objURI.Append(";user=dialstring");
+    objUri.Append('@');
+    objUri.Append(GetHomeDomainName(nSlotId));
+    objUri.Append(";user=dialstring");
 
-    return static_cast<const AStringBuffer&>(objURI).GetString();
+    return static_cast<const AStringBuffer&>(objUri).GetString();
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL AString ImsIdentity::CreateSIPUserIdWithPhone(IN const AString& strDialString,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/,
-        IN const AString& strPhoneContext /* = AString::ConstNull() */)
+PUBLIC GLOBAL AString ImsIdentity::CreateSipUserIdWithPhone(IN const AString& strDialString,
+        IN IMS_SINT32 nSlotId, IN const AString& strPhoneContext /*= AString::ConstNull()*/)
 {
     // "sip:<dialstring>;phone-context=<home domain name>@<home domain name>;user=phone";
 
@@ -142,36 +124,31 @@ PUBLIC GLOBAL AString ImsIdentity::CreateSIPUserIdWithPhone(IN const AString& st
         return AString::ConstNull();
     }
 
-    AStringBuffer objURI(64);
+    AStringBuffer objUri(64);
 
-    objURI.Append("sip:");
-    objURI.Append(strDialString);
-    objURI.Append(";phone-context=");
+    objUri.Append("sip:");
+    objUri.Append(strDialString);
+    objUri.Append(";phone-context=");
 
     if (strPhoneContext.GetLength() == 0)
     {
-        const AString strDefaultPC = GetPhoneContext(DIALING_POLICY_HOME_LOCAL, nSlotId);
-        objURI.Append(strDefaultPC);
+        const AString strDefaultPc = GetPhoneContext(DIALING_POLICY_HOME_LOCAL, nSlotId);
+        objUri.Append(strDefaultPc);
     }
     else
     {
-        objURI.Append(strPhoneContext);
+        objUri.Append(strPhoneContext);
     }
 
-    objURI.Append('@');
-    objURI.Append(GetHomeDomainName(nSlotId));
-    objURI.Append(";user=phone");
+    objUri.Append('@');
+    objUri.Append(GetHomeDomainName(nSlotId));
+    objUri.Append(";user=phone");
 
-    return static_cast<const AStringBuffer&>(objURI).GetString();
+    return static_cast<const AStringBuffer&>(objUri).GetString();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL AString ImsIdentity::CreateTelUserId(
-        IN const AString& strPhoneContext, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+        IN const AString& strPhoneContext, IN IMS_SINT32 nSlotId)
 {
     // "tel:<global number>" ; it will be derived from the MSISDN
     ISubscriberInfo* piSubsInfo =
@@ -182,20 +159,15 @@ PUBLIC GLOBAL AString ImsIdentity::CreateTelUserId(
         return AString::ConstNull();
     }
 
-    AString strMSISDN;
+    AString strMsisdn;
 
-    piSubsInfo->GetPhoneNumber(strMSISDN);
+    piSubsInfo->GetPhoneNumber(strMsisdn);
 
-    return CreateTelUserId(strMSISDN, strPhoneContext, nSlotId);
+    return CreateTelUserId(strMsisdn, strPhoneContext, nSlotId);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL AString ImsIdentity::CreateTelUserId(IN const AString& strDialString,
-        IN const AString& strPhoneContext, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+PUBLIC GLOBAL AString ImsIdentity::CreateTelUserId(
+        IN const AString& strDialString, IN const AString& strPhoneContext, IN IMS_SINT32 nSlotId)
 {
     // "tel:<global number>" ; it will be derived from the MSISDN
 
@@ -204,36 +176,30 @@ PUBLIC GLOBAL AString ImsIdentity::CreateTelUserId(IN const AString& strDialStri
         return CreateTelUserId(strPhoneContext, nSlotId);
     }
 
-    AStringBuffer objURI(64);
+    AStringBuffer objUri(64);
 
-    objURI.Append("tel:");
-    objURI.Append(strDialString);
+    objUri.Append("tel:");
+    objUri.Append(strDialString);
 
     if (!strDialString.StartsWith('+'))
     {
-        objURI.Append(";phone-context=");
+        objUri.Append(";phone-context=");
 
         if (strPhoneContext.GetLength() == 0)
         {
-            const AString strDefaultPC = GetPhoneContext(DIALING_POLICY_HOME_LOCAL, nSlotId);
-            objURI.Append(strDefaultPC);
+            const AString strDefaultPc = GetPhoneContext(DIALING_POLICY_HOME_LOCAL, nSlotId);
+            objUri.Append(strDefaultPc);
         }
         else
         {
-            objURI.Append(strPhoneContext);
+            objUri.Append(strPhoneContext);
         }
     }
 
-    return static_cast<const AStringBuffer&>(objURI).GetString();
+    return static_cast<const AStringBuffer&>(objUri).GetString();
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryHomeDomainName(
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryHomeDomainName(IN IMS_SINT32 nSlotId)
 {
     // "ims.mnc<MNC>.mcc<MCC>.3gppnetwork.org"
     // WLAN : "wlan.mnc<MNC>.mcc<MCC>.3gppnetwork.org"
@@ -246,36 +212,30 @@ PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryHomeDomainName(
         return AString::ConstNull();
     }
 
-    AString strMCC;
-    AString strMNC;
+    AString strMcc;
+    AString strMnc;
 
-    piSubsInfo->GetMcc(strMCC);
-    piSubsInfo->GetMnc(strMNC);
+    piSubsInfo->GetMcc(strMcc);
+    piSubsInfo->GetMnc(strMnc);
 
-    if ((strMCC.GetLength() == 0) || (strMNC.GetLength() == 0))
+    if ((strMcc.GetLength() == 0) || (strMnc.GetLength() == 0))
     {
         return AString::ConstNull();
     }
 
-    if (strMNC.GetLength() == 2)
+    if (strMnc.GetLength() == 2)
     {
-        strMNC.Prepend('0');
+        strMnc.Prepend('0');
     }
 
-    AString strTHDN;
+    AString strHdn;
 
-    strTHDN.Sprintf("ims.mnc%s.mcc%s.3gppnetwork.org", strMNC.GetStr(), strMCC.GetStr());
+    strHdn.Sprintf("ims.mnc%s.mcc%s.3gppnetwork.org", strMnc.GetStr(), strMcc.GetStr());
 
-    return strTHDN;
+    return strHdn;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryPrivateUserId(
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryPrivateUserId(IN IMS_SINT32 nSlotId)
 {
     // "<IMSI>@ims.mnc<MNC>.mcc<MCC>.3gppnetwork.org"
 
@@ -299,39 +259,33 @@ PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryPrivateUserId(
         return AString::ConstNull();
     }
 
-    AString strIMSI;
-    AString strMCC;
-    AString strMNC;
+    AString strImsi;
+    AString strMcc;
+    AString strMnc;
 
-    piSubsInfo->GetSubscriberId(strIMSI);
-    piSubsInfo->GetMcc(strMCC);
-    piSubsInfo->GetMnc(strMNC);
+    piSubsInfo->GetSubscriberId(strImsi);
+    piSubsInfo->GetMcc(strMcc);
+    piSubsInfo->GetMnc(strMnc);
 
-    if ((strIMSI.GetLength() == 0) || (strMCC.GetLength() == 0) || (strMNC.GetLength() == 0))
+    if ((strImsi.GetLength() == 0) || (strMcc.GetLength() == 0) || (strMnc.GetLength() == 0))
     {
         return AString::ConstNull();
     }
 
-    if (strMNC.GetLength() == 2)
+    if (strMnc.GetLength() == 2)
     {
-        strMNC.Prepend('0');
+        strMnc.Prepend('0');
     }
 
-    AString strTIMPI;
+    AString strImpi;
 
-    strTIMPI.Sprintf("%s@ims.mnc%s.mcc%s.3gppnetwork.org", strIMSI.GetStr(), strMNC.GetStr(),
-            strMCC.GetStr());
+    strImpi.Sprintf("%s@ims.mnc%s.mcc%s.3gppnetwork.org", strImsi.GetStr(), strMnc.GetStr(),
+            strMcc.GetStr());
 
-    return strTIMPI;
+    return strImpi;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryPublicUserId(
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryPublicUserId(IN IMS_SINT32 nSlotId)
 {
     // "sip:<IMSI>@ims.mnc<MNC>.mcc<MCC>.3gppnetwork.org"
 
@@ -343,37 +297,32 @@ PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryPublicUserId(
         return AString::ConstNull();
     }
 
-    AString strIMSI;
-    AString strMCC;
-    AString strMNC;
+    AString strImsi;
+    AString strMcc;
+    AString strMnc;
 
-    piSubsInfo->GetSubscriberId(strIMSI);
-    piSubsInfo->GetMcc(strMCC);
-    piSubsInfo->GetMnc(strMNC);
+    piSubsInfo->GetSubscriberId(strImsi);
+    piSubsInfo->GetMcc(strMcc);
+    piSubsInfo->GetMnc(strMnc);
 
-    if ((strIMSI.GetLength() == 0) || (strMCC.GetLength() == 0) || (strMNC.GetLength() == 0))
+    if ((strImsi.GetLength() == 0) || (strMcc.GetLength() == 0) || (strMnc.GetLength() == 0))
     {
         return AString::ConstNull();
     }
 
-    if (strMNC.GetLength() == 2)
+    if (strMnc.GetLength() == 2)
     {
-        strMNC.Prepend('0');
+        strMnc.Prepend('0');
     }
 
-    AString strTIMPU;
+    AString strImpu;
 
-    strTIMPU.Sprintf("sip:%s@ims.mnc%s.mcc%s.3gppnetwork.org", strIMSI.GetStr(), strMNC.GetStr(),
-            strMCC.GetStr());
+    strImpu.Sprintf("sip:%s@ims.mnc%s.mcc%s.3gppnetwork.org", strImsi.GetStr(), strMnc.GetStr(),
+            strMcc.GetStr());
 
-    return strTIMPU;
+    return strImpu;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const AString& ImsIdentity::GetAnonymousUserId()
 {
     // "sip:anonymous@anonymous.invalid"
@@ -382,14 +331,8 @@ PUBLIC GLOBAL const AString& ImsIdentity::GetAnonymousUserId()
     return ANONYMOUS_USER_ID;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL const AString& ImsIdentity::GetHomeDomainName(
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/,
-        IN const AString& strSubscriberId /* = AString::ConstNull() */)
+        IN IMS_SINT32 nSlotId, IN const AString& strSubscriberId /*= AString::ConstNull()*/)
 {
     const SubscriberConfig* pSubsConfig = IMS_NULL;
 
@@ -412,15 +355,10 @@ PRIVATE GLOBAL const AString& ImsIdentity::GetHomeDomainName(
     return pSubsConfig->GetHomeDomainName();
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL IMS_BOOL ImsIdentity::GetMccMnc(IN const AString& strPLMN, IN IMS_SINT32 nMncDigits,
-        OUT AString& strMcc, OUT AString& strMnc, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/)
+PUBLIC GLOBAL IMS_BOOL ImsIdentity::GetMccMnc(IN const AString& strPlmn, IN IMS_SINT32 nMncDigits,
+        OUT AString& strMcc, OUT AString& strMnc, IN IMS_SINT32 nSlotId)
 {
-    if (strPLMN.GetLength() == 0)
+    if (strPlmn.GetLength() == 0)
     {
         ISubscriberInfo* piSubsInfo =
                 PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId);
@@ -441,13 +379,13 @@ PUBLIC GLOBAL IMS_BOOL ImsIdentity::GetMccMnc(IN const AString& strPLMN, IN IMS_
             nMncDigits = 3;
         }
 
-        if (strPLMN.GetLength() < (nMncDigits + 3))
+        if (strPlmn.GetLength() < (nMncDigits + 3))
         {
             return IMS_FALSE;
         }
 
-        strMcc = strPLMN.GetSubStr(0, 3);
-        strMnc = strPLMN.GetSubStr(3, nMncDigits);
+        strMcc = strPlmn.GetSubStr(0, 3);
+        strMnc = strPlmn.GetSubStr(3, nMncDigits);
     }
 
     if ((strMcc.GetLength() == 0) || (strMnc.GetLength() == 0))
@@ -460,14 +398,9 @@ PUBLIC GLOBAL IMS_BOOL ImsIdentity::GetMccMnc(IN const AString& strPLMN, IN IMS_
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const AString ImsIdentity::GetPhoneContext(IN IMS_SINT32 nDialingPolicy,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/, IN AccessNetworkInfo* pANI /* = IMS_NULL */,
-        IN const AString& strSubscriberId /* = AString::ConstNull() */)
+        IN IMS_SINT32 nSlotId, IN AccessNetworkInfo* pAni /*= IMS_NULL*/,
+        IN const AString& strSubscriberId /*= AString::ConstNull()*/)
 {
     const SubscriberConfig* pSubsConfig = IMS_NULL;
 
@@ -487,55 +420,55 @@ PUBLIC GLOBAL const AString ImsIdentity::GetPhoneContext(IN IMS_SINT32 nDialingP
         return AString::ConstNull();
     }
 
-    const AString& strHDN = pSubsConfig->GetHomeDomainName();
+    const AString& strHdn = pSubsConfig->GetHomeDomainName();
 
     if (nDialingPolicy == DIALING_POLICY_GEO_LOCAL)
     {
-        AString strPC(AString::ConstNull());
+        AString strPc(AString::ConstNull());
 
-        if ((pANI == IMS_NULL) ||
-                ((pANI != IMS_NULL) &&
-                        (((pANI->nClass == AccessNetworkInfo::CLASS_NONE) &&
-                                 (pANI->nType == AccessNetworkInfo::TYPE_NONE)) ||
-                                ((pANI->nClass != AccessNetworkInfo::CLASS_NONE) &&
-                                        (pANI->nType != AccessNetworkInfo::TYPE_NONE)))))
+        if ((pAni == IMS_NULL) ||
+                ((pAni != IMS_NULL) &&
+                        (((pAni->nClass == AccessNetworkInfo::CLASS_NONE) &&
+                                 (pAni->nType == AccessNetworkInfo::TYPE_NONE)) ||
+                                ((pAni->nClass != AccessNetworkInfo::CLASS_NONE) &&
+                                        (pAni->nType != AccessNetworkInfo::TYPE_NONE)))))
         {
-            strPC.Sprintf("geo-local.%s", strHDN.GetStr());
+            strPc.Sprintf("geo-local.%s", strHdn.GetStr());
         }
         else
         {
-            if ((pANI->nClass == AccessNetworkInfo::CLASS_3GPP_E_UTRAN) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_3GPP_E_UTRAN_FDD) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_3GPP_E_UTRAN_TDD))
+            if ((pAni->nClass == AccessNetworkInfo::CLASS_3GPP_E_UTRAN) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_3GPP_E_UTRAN_FDD) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_3GPP_E_UTRAN_TDD))
             {
                 // EPS
                 AString strMcc;
                 AString strMnc;
-                UTRAN_CELL_ID_3GPP* pAI = &(pANI->uniAI.utran_cell_id_3gpp);
+                UTRAN_CELL_ID_3GPP* pAi = &(pAni->uniAI.utran_cell_id_3gpp);
 
-                if (pAI->acUTRAN_CELL_ID[0] != '\0')
+                if (pAi->acUTRAN_CELL_ID[0] != '\0')
                 {
-                    AString strAI(pAI->acUTRAN_CELL_ID);
+                    AString strAi(pAi->acUTRAN_CELL_ID);
                     IMS_SINT32 nMncDigits =
-                            (strAI.GetLength() == (ANI_3GPP_UTRAN_CELL_ID_MAX_TOTAL_LEN - 1)) ? 2
+                            (strAi.GetLength() == (ANI_3GPP_UTRAN_CELL_ID_MAX_TOTAL_LEN - 1)) ? 2
                                                                                               : 3;
 
-                    GetMccMnc(strAI, nMncDigits, strMcc, strMnc, nSlotId);
+                    GetMccMnc(strAi, nMncDigits, strMcc, strMnc, nSlotId);
                 }
                 else
                 {
-                    strMcc.Sprintf("%x%x%x", (pAI->aPLMNId[0] >> 4) & 0x0F, pAI->aPLMNId[0] & 0x0F,
-                            (pAI->aPLMNId[1] >> 4) & 0x0F);
+                    strMcc.Sprintf("%x%x%x", (pAi->aPLMNId[0] >> 4) & 0x0F, pAi->aPLMNId[0] & 0x0F,
+                            (pAi->aPLMNId[1] >> 4) & 0x0F);
 
-                    if ((pAI->aPLMNId[2] & 0x0F) == 0x0F)
+                    if ((pAi->aPLMNId[2] & 0x0F) == 0x0F)
                     {
                         strMnc.Sprintf(
-                                "%x%x", pAI->aPLMNId[1] & 0x0F, (pAI->aPLMNId[2] >> 4) & 0x0F);
+                                "%x%x", pAi->aPLMNId[1] & 0x0F, (pAi->aPLMNId[2] >> 4) & 0x0F);
                     }
                     else
                     {
-                        strMnc.Sprintf("%x%x%x", pAI->aPLMNId[1] & 0x0F,
-                                (pAI->aPLMNId[2] >> 4) & 0x0F, pAI->aPLMNId[2] & 0x0F);
+                        strMnc.Sprintf("%x%x%x", pAi->aPLMNId[1] & 0x0F,
+                                (pAi->aPLMNId[2] >> 4) & 0x0F, pAi->aPLMNId[2] & 0x0F);
                     }
                 }
 
@@ -546,43 +479,43 @@ PUBLIC GLOBAL const AString ImsIdentity::GetPhoneContext(IN IMS_SINT32 nDialingP
 
                 if ((strMcc.GetLength() != 0) && (strMnc.GetLength() != 0))
                 {
-                    strPC.Sprintf(
-                            "%s.%s.eps.%s", strMcc.GetStr(), strMnc.GetStr(), strHDN.GetStr());
+                    strPc.Sprintf(
+                            "%s.%s.eps.%s", strMcc.GetStr(), strMnc.GetStr(), strHdn.GetStr());
                 }
             }
-            else if ((pANI->nClass == AccessNetworkInfo::CLASS_3GPP_NR) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_3GPP_NR_FDD) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_3GPP_NR_TDD))
+            else if ((pAni->nClass == AccessNetworkInfo::CLASS_3GPP_NR) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_3GPP_NR_FDD) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_3GPP_NR_TDD))
             {
                 // 5GS
                 AString strMcc;
                 AString strMnc;
-                NR_UTRAN_CELL_ID_3GPP* pAI = &(pANI->uniAI.nr_utran_cell_id_3gpp);
+                NR_UTRAN_CELL_ID_3GPP* pAi = &(pAni->uniAI.nr_utran_cell_id_3gpp);
 
-                if (pAI->acUTRAN_CELL_ID[0] != '\0')
+                if (pAi->acUTRAN_CELL_ID[0] != '\0')
                 {
-                    AString strAI(pAI->acUTRAN_CELL_ID);
+                    AString strAi(pAi->acUTRAN_CELL_ID);
                     IMS_SINT32 nMncDigits =
-                            (strAI.GetLength() == (ANI_3GPP_NR_UTRAN_CELL_ID_MAX_TOTAL_LEN - 1))
+                            (strAi.GetLength() == (ANI_3GPP_NR_UTRAN_CELL_ID_MAX_TOTAL_LEN - 1))
                             ? 2
                             : 3;
 
-                    GetMccMnc(strAI, nMncDigits, strMcc, strMnc, nSlotId);
+                    GetMccMnc(strAi, nMncDigits, strMcc, strMnc, nSlotId);
                 }
                 else
                 {
-                    strMcc.Sprintf("%x%x%x", (pAI->aPLMNId[0] >> 4) & 0x0F, pAI->aPLMNId[0] & 0x0F,
-                            (pAI->aPLMNId[1] >> 4) & 0x0F);
+                    strMcc.Sprintf("%x%x%x", (pAi->aPLMNId[0] >> 4) & 0x0F, pAi->aPLMNId[0] & 0x0F,
+                            (pAi->aPLMNId[1] >> 4) & 0x0F);
 
-                    if ((pAI->aPLMNId[2] & 0x0F) == 0x0F)
+                    if ((pAi->aPLMNId[2] & 0x0F) == 0x0F)
                     {
                         strMnc.Sprintf(
-                                "%x%x", pAI->aPLMNId[1] & 0x0F, (pAI->aPLMNId[2] >> 4) & 0x0F);
+                                "%x%x", pAi->aPLMNId[1] & 0x0F, (pAi->aPLMNId[2] >> 4) & 0x0F);
                     }
                     else
                     {
-                        strMnc.Sprintf("%x%x%x", pAI->aPLMNId[1] & 0x0F,
-                                (pAI->aPLMNId[2] >> 4) & 0x0F, pAI->aPLMNId[2] & 0x0F);
+                        strMnc.Sprintf("%x%x%x", pAi->aPLMNId[1] & 0x0F,
+                                (pAi->aPLMNId[2] >> 4) & 0x0F, pAi->aPLMNId[2] & 0x0F);
                     }
                 }
 
@@ -593,116 +526,116 @@ PUBLIC GLOBAL const AString ImsIdentity::GetPhoneContext(IN IMS_SINT32 nDialingP
 
                 if ((strMcc.GetLength() != 0) && (strMnc.GetLength() != 0))
                 {
-                    strPC.Sprintf(
-                            "%s.%s.5gs.%s", strMcc.GetStr(), strMnc.GetStr(), strHDN.GetStr());
+                    strPc.Sprintf(
+                            "%s.%s.5gs.%s", strMcc.GetStr(), strMnc.GetStr(), strHdn.GetStr());
                 }
             }
-            else if ((pANI->nClass == AccessNetworkInfo::CLASS_3GPP_WLAN) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_IEEE_802_11) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_IEEE_802_11A) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_IEEE_802_11B) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_IEEE_802_11G) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_IEEE_802_11N))
+            else if ((pAni->nClass == AccessNetworkInfo::CLASS_3GPP_WLAN) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_IEEE_802_11) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_IEEE_802_11A) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_IEEE_802_11B) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_IEEE_802_11G) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_IEEE_802_11N))
             {
                 // I-WLAN
                 AString strMac;
-                I_WLAN_NODE_ID* pAI = &(pANI->uniAI.i_wlan_node_id);
+                I_WLAN_NODE_ID* pAi = &(pAni->uniAI.i_wlan_node_id);
 
-                if (pAI->acMAC[0] != '\0')
+                if (pAi->acMAC[0] != '\0')
                 {
-                    strMac = pAI->acMAC;
+                    strMac = pAi->acMAC;
                 }
                 else
                 {
-                    strMac.Sprintf("%02x%02x%02x%02x%02x%02x", pAI->aMAC[0], pAI->aMAC[1],
-                            pAI->aMAC[2], pAI->aMAC[3], pAI->aMAC[4], pAI->aMAC[5]);
+                    strMac.Sprintf("%02x%02x%02x%02x%02x%02x", pAi->aMAC[0], pAi->aMAC[1],
+                            pAi->aMAC[2], pAi->aMAC[3], pAi->aMAC[4], pAi->aMAC[5]);
                 }
 
-                AString strSsid(pANI->uniAI.i_wlan_node_id.acSSID);
+                AString strSsid(pAni->uniAI.i_wlan_node_id.acSSID);
 
                 strSsid = strSsid.MakeLower();
 
                 if ((strMac.GetLength() != 0) && (strSsid.GetLength() != 0))
                 {
-                    strPC.Sprintf(
-                            "%s.%s.i-wlan.%s", strSsid.GetStr(), strMac.GetStr(), strHDN.GetStr());
+                    strPc.Sprintf(
+                            "%s.%s.i-wlan.%s", strSsid.GetStr(), strMac.GetStr(), strHdn.GetStr());
                 }
             }
-            else if ((pANI->nType == AccessNetworkInfo::TYPE_3GPP2_1X) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_3GPP2_1X_HRPD) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_3GPP2_UMB))
+            else if ((pAni->nType == AccessNetworkInfo::TYPE_3GPP2_1X) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_3GPP2_1X_HRPD) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_3GPP2_UMB))
             {
                 // CDMA2000
                 // FIXME: I don't know what is the subnet id...
             }
-            else if ((pANI->nClass == AccessNetworkInfo::CLASS_3GPP_GERAN) ||
-                    (pANI->nClass == AccessNetworkInfo::CLASS_3GPP_UTRAN) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_3GPP_GERAN) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_3GPP_UTRAN_FDD) ||
-                    (pANI->nType == AccessNetworkInfo::TYPE_3GPP_UTRAN_TDD))
+            else if ((pAni->nClass == AccessNetworkInfo::CLASS_3GPP_GERAN) ||
+                    (pAni->nClass == AccessNetworkInfo::CLASS_3GPP_UTRAN) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_3GPP_GERAN) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_3GPP_UTRAN_FDD) ||
+                    (pAni->nType == AccessNetworkInfo::TYPE_3GPP_UTRAN_TDD))
             {
                 // GPRS
                 AString strMcc;
                 AString strMnc;
 
-                if ((pANI->nClass == AccessNetworkInfo::CLASS_3GPP_GERAN) ||
-                        (pANI->nType == AccessNetworkInfo::TYPE_3GPP_GERAN))
+                if ((pAni->nClass == AccessNetworkInfo::CLASS_3GPP_GERAN) ||
+                        (pAni->nType == AccessNetworkInfo::TYPE_3GPP_GERAN))
                 {
-                    CGI_3GPP* pAI = &(pANI->uniAI.cgi_3gpp);
+                    CGI_3GPP* pAi = &(pAni->uniAI.cgi_3gpp);
 
-                    if (pAI->acCGI[0] != '\0')
+                    if (pAi->acCGI[0] != '\0')
                     {
-                        AString strAI(pAI->acCGI);
+                        AString strAi(pAi->acCGI);
                         IMS_SINT32 nMncDigits =
-                                (strAI.GetLength() == (ANI_3GPP_CGI_MAX_TOTAL_LEN - 1)) ? 2 : 3;
+                                (strAi.GetLength() == (ANI_3GPP_CGI_MAX_TOTAL_LEN - 1)) ? 2 : 3;
 
-                        GetMccMnc(strAI, nMncDigits, strMcc, strMnc, nSlotId);
+                        GetMccMnc(strAi, nMncDigits, strMcc, strMnc, nSlotId);
                     }
                     else
                     {
-                        strMcc.Sprintf("%x%x%x", (pAI->aPLMNId[0] >> 4) & 0x0F,
-                                pAI->aPLMNId[0] & 0x0F, (pAI->aPLMNId[1] >> 4) & 0x0F);
+                        strMcc.Sprintf("%x%x%x", (pAi->aPLMNId[0] >> 4) & 0x0F,
+                                pAi->aPLMNId[0] & 0x0F, (pAi->aPLMNId[1] >> 4) & 0x0F);
 
-                        if ((pAI->aPLMNId[2] & 0x0F) == 0x0F)
+                        if ((pAi->aPLMNId[2] & 0x0F) == 0x0F)
                         {
                             strMnc.Sprintf(
-                                    "%x%x", pAI->aPLMNId[1] & 0x0F, (pAI->aPLMNId[2] >> 4) & 0x0F);
+                                    "%x%x", pAi->aPLMNId[1] & 0x0F, (pAi->aPLMNId[2] >> 4) & 0x0F);
                         }
                         else
                         {
-                            strMnc.Sprintf("%x%x%x", pAI->aPLMNId[1] & 0x0F,
-                                    (pAI->aPLMNId[2] >> 4) & 0x0F, pAI->aPLMNId[2] & 0x0F);
+                            strMnc.Sprintf("%x%x%x", pAi->aPLMNId[1] & 0x0F,
+                                    (pAi->aPLMNId[2] >> 4) & 0x0F, pAi->aPLMNId[2] & 0x0F);
                         }
                     }
                 }
                 else
                 {
-                    UTRAN_CELL_ID_3GPP* pAI = &(pANI->uniAI.utran_cell_id_3gpp);
+                    UTRAN_CELL_ID_3GPP* pAi = &(pAni->uniAI.utran_cell_id_3gpp);
 
-                    if (pAI->acUTRAN_CELL_ID[0] != '\0')
+                    if (pAi->acUTRAN_CELL_ID[0] != '\0')
                     {
-                        AString strAI(pAI->acUTRAN_CELL_ID);
+                        AString strAi(pAi->acUTRAN_CELL_ID);
                         IMS_SINT32 nMncDigits =
-                                (strAI.GetLength() == (ANI_3GPP_UTRAN_CELL_ID_MAX_TOTAL_LEN - 1))
+                                (strAi.GetLength() == (ANI_3GPP_UTRAN_CELL_ID_MAX_TOTAL_LEN - 1))
                                 ? 2
                                 : 3;
 
-                        GetMccMnc(strAI, nMncDigits, strMcc, strMnc, nSlotId);
+                        GetMccMnc(strAi, nMncDigits, strMcc, strMnc, nSlotId);
                     }
                     else
                     {
-                        strMcc.Sprintf("%x%x%x", (pAI->aPLMNId[0] >> 4) & 0x0F,
-                                pAI->aPLMNId[0] & 0x0F, (pAI->aPLMNId[1] >> 4) & 0x0F);
+                        strMcc.Sprintf("%x%x%x", (pAi->aPLMNId[0] >> 4) & 0x0F,
+                                pAi->aPLMNId[0] & 0x0F, (pAi->aPLMNId[1] >> 4) & 0x0F);
 
-                        if ((pAI->aPLMNId[2] & 0x0F) == 0x0F)
+                        if ((pAi->aPLMNId[2] & 0x0F) == 0x0F)
                         {
                             strMnc.Sprintf(
-                                    "%x%x", pAI->aPLMNId[1] & 0x0F, (pAI->aPLMNId[2] >> 4) & 0x0F);
+                                    "%x%x", pAi->aPLMNId[1] & 0x0F, (pAi->aPLMNId[2] >> 4) & 0x0F);
                         }
                         else
                         {
-                            strMnc.Sprintf("%x%x%x", pAI->aPLMNId[1] & 0x0F,
-                                    (pAI->aPLMNId[2] >> 4) & 0x0F, pAI->aPLMNId[2] & 0x0F);
+                            strMnc.Sprintf("%x%x%x", pAi->aPLMNId[1] & 0x0F,
+                                    (pAi->aPLMNId[2] >> 4) & 0x0F, pAi->aPLMNId[2] & 0x0F);
                         }
                     }
                 }
@@ -714,31 +647,26 @@ PUBLIC GLOBAL const AString ImsIdentity::GetPhoneContext(IN IMS_SINT32 nDialingP
 
                 if ((strMcc.GetLength() != 0) && (strMnc.GetLength() != 0))
                 {
-                    strPC.Sprintf(
-                            "%s.%s.gprs.%s", strMcc.GetStr(), strMnc.GetStr(), strHDN.GetStr());
+                    strPc.Sprintf(
+                            "%s.%s.gprs.%s", strMcc.GetStr(), strMnc.GetStr(), strHdn.GetStr());
                 }
             }
 
-            if (strPC.GetLength() == 0)
+            if (strPc.GetLength() == 0)
             {
-                strPC.Sprintf("geo-local.%s", strHDN.GetStr());
+                strPc.Sprintf("geo-local.%s", strHdn.GetStr());
             }
         }
 
-        return strPC;
+        return strPc;
     }
     else
     {
-        const AString& strPC = pSubsConfig->GetPhoneContext();
-        return (strPC.GetLength() > 0) ? strPC : strHDN;
+        const AString& strPc = pSubsConfig->GetPhoneContext();
+        return (strPc.GetLength() > 0) ? strPc : strHdn;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const AString& ImsIdentity::GetUnavailableUserId()
 {
     // "sip:unavailable@unknown.invalid"

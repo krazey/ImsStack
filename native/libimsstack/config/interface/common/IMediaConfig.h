@@ -1,55 +1,29 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091026  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _INTERFACE_MEDIA_CONFIG_H_
-#define _INTERFACE_MEDIA_CONFIG_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_MEDIA_CONFIG_H_
+#define INTERFACE_MEDIA_CONFIG_H_
 
 #include "AStringArray.h"
 
 class IMediaConfig
 {
 public:
-    /*
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-    */
     virtual const AStringArray& GetMediaCapabilities(IN IMS_SINT32 nMediaType) const = 0;
-
-    /*
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-    */
     virtual const AStringArray& GetMediaProfile(
-            IN CONST AString& strName, IN IMS_SINT32 nMediaType) const = 0;
+            IN const AString& strName, IN IMS_SINT32 nMediaType) const = 0;
 
 public:
     enum
@@ -63,4 +37,4 @@ public:
     };
 };
 
-#endif  // _INTERFACE_MEDIA_CONFIG_H_
+#endif

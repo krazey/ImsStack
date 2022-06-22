@@ -1,17 +1,21 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091106  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
 #include "ConfigLoader.h"
 #include "StaticConfig.h"
 #include "private/ConfigBase.h"
@@ -22,30 +26,30 @@ __IMS_TRACE_TAG_CONF__;
 
 class RegistryLoader
 {
-private:
-    RegistryLoader();
+public:
+    RegistryLoader() = delete;
 
 public:
     static IMS_BOOL AddStreamProperty(
-            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
     static IMS_BOOL AddFramedProperty(
-            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
     static IMS_BOOL AddBasicProperty(
-            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
     static IMS_BOOL AddEventProperty(
-            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
     static IMS_BOOL AddCoreServiceProperty(
-            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddQosProperty(IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddRegProperty(IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddQosProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddRegProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
     static IMS_BOOL AddWriteProperty(
-            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddReadProperty(IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL AddCapProperty(IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddReadProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddCapProperty(IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
     static IMS_BOOL AddMprofProperty(
-            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
     static IMS_BOOL AddConnectionProperty(
-            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+            IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
     static IMS_BOOL ValidateUniqueness(IN IMS_SINT32 nPropertyCount[ImsProperty::PKEY_MAX]);
 
 public:
@@ -90,7 +94,7 @@ PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_SDP[] = "sdp";
 PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_PROFILE[] = "profile";
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddStreamProperty(
-        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
+        IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -105,7 +109,7 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddStreamProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddFramedProperty(
-        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
+        IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -132,7 +136,7 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddFramedProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddBasicProperty(
-        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
+        IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -147,7 +151,7 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddBasicProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddEventProperty(
-        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
+        IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -162,7 +166,7 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddEventProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddCoreServiceProperty(
-        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
+        IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -183,7 +187,7 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddCoreServiceProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddQosProperty(
-        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
+        IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -204,7 +208,7 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddQosProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddRegProperty(
-        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
+        IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -214,9 +218,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddRegProperty(
     objProperty.AddElement(piBuffer->ReadValue(PARAM_SERVICE_ID));
 
     // "header_count"
-    IMS_SINT32 nCount_Header = piBuffer->ReadKeyCount(PARAM_HEADER);
+    IMS_SINT32 nHeaderCount = piBuffer->ReadKeyCount(PARAM_HEADER);
 
-    for (IMS_SINT32 i = 0; i < nCount_Header; ++i)
+    for (IMS_SINT32 i = 0; i < nHeaderCount; ++i)
     {
         // "header" parameter
         objProperty.AddElement(piBuffer->ReadValue(PARAM_HEADER, i));
@@ -228,7 +232,7 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddRegProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddWriteProperty(
-        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
+        IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -243,7 +247,7 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddWriteProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddReadProperty(
-        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
+        IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -258,7 +262,7 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddReadProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddCapProperty(
-        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
+        IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -270,9 +274,9 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddCapProperty(
     // "message_type" parameter
     objProperty.AddElement(piBuffer->ReadValue(PARAM_MESSAGE_TYPE));
 
-    IMS_SINT32 nCount_SDP = piBuffer->ReadKeyCount(PARAM_SDP);
+    IMS_SINT32 nSdpCount = piBuffer->ReadKeyCount(PARAM_SDP);
 
-    for (IMS_SINT32 i = 0; i < nCount_SDP; ++i)
+    for (IMS_SINT32 i = 0; i < nSdpCount; ++i)
     {
         objProperty.AddElement(piBuffer->ReadValue(PARAM_SDP, i));
     }
@@ -283,7 +287,7 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddCapProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddMprofProperty(
-        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
+        IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -301,7 +305,7 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddMprofProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddConnectionProperty(
-        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
+        IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 

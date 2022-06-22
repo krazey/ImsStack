@@ -1,38 +1,32 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090531  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _IMS_PROPERTY_H_
-#define _IMS_PROPERTY_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_PROPERTY_H_
+#define IMS_PROPERTY_H_
 
 #include "ImsRegistry.h"
 
-/*
-
-Class ImsProperty
-
-Example
-
-See Also
-
-*/
 class ImsProperty
 {
 public:
-    explicit ImsProperty(IN IMS_SINT32 nKey_, IN const AString& strKey_ = AString::ConstNull());
-    ImsProperty(IN const ImsProperty& objRHS);
+    explicit ImsProperty(IN IMS_SINT32 nKey, IN const AString& strKey = AString::ConstNull());
+    ImsProperty(IN const ImsProperty& other);
     virtual ~ImsProperty();
 
 public:
-    ImsProperty& operator=(IN const ImsProperty& objRHS);
+    ImsProperty& operator=(IN const ImsProperty& other);
 
 public:
     virtual IMS_BOOL Equals(IN const AString& strValue) const;
@@ -50,44 +44,44 @@ public:
     static AString ToString(IN const AStringArray& objProperty);
 
 public:
-    // Type of property key
+    /// Type of property key
     enum
     {
-        // User-defined property
+        /// User-defined property
         PKEY_CUSTOM = 0,
 
         //////
         // Basic Properties
         //////
 
-        // Media types to stream audio and/or video
+        /// Media types to stream audio and/or video
         PKEY_STREAM = 1,
-        // Messaging (MSRP)
+        /// Messaging (MSRP)
         PKEY_FRAMED,
-        // MIME content type to transfer media content
+        /// MIME content type to transfer media content
         PKEY_BASIC,
-        // Event packages
+        /// Event packages
         PKEY_EVENT,
-        // Composed capabilities of core services
+        /// Composed capabilities of core services
         PKEY_CORE_SERVICE,
-        // Support QoS aware BasicMedia
+        /// Support QoS aware BasicMedia
         PKEY_QOS,
 
         //////
         // Advanced Properties
         //////
 
-        // Headers to be added in SIP registration message
+        /// Headers to be added in SIP registration message
         PKEY_REG,
-        // Write-access headers in SIP message
+        /// Write-access headers in SIP message
         PKEY_WRITE,
-        // Read-access headers in SIP message
+        /// Read-access headers in SIP message
         PKEY_READ,
         // Configure capability
         PKEY_CAP,
-        // Media profile
+        /// Media profile
         PKEY_MPROF,
-        // Connection model for MSRP used in FramedMedia
+        /// Connection model for MSRP used in FramedMedia
         PKEY_CONNECTION,
 
         PKEY_MAX
@@ -101,8 +95,8 @@ public:
     static const IMS_CHAR STREAM_MEDIA_TYPE_VIDEO[];
 
 protected:
-    IMS_SINT32 nKey;
-    AString strKey;
+    IMS_SINT32 m_nKey;
+    AString m_strKey;
 };
 
-#endif  // _IMS_PROPERTY_H_
+#endif

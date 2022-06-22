@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100221  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _INTERFACE_CONFIGURABLE_H_
-#define _INTERFACE_CONFIGURABLE_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_CONFIGURABLE_H_
+#define INTERFACE_CONFIGURABLE_H_
 
 #include "AString.h"
 
@@ -20,77 +23,41 @@ class IConfigUpdateListener;
 class IConfigurable
 {
 public:
-    /*
-     Adds a new configuration update listener.
+    /**
+     * @brief Adds a new configuration update listener.
+     *
+     * @param nCpi The configurable parameter item to be notified
+     * @param piListener The listener for monitoring the configuration update
+     * @return IMS_TRUE if the listener is successfully added, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL AddListener(IN IMS_SINT32 nCpi, IN IConfigUpdateListener* piListener) = 0;
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    nCPI                    Configurable parameter item to be notified
-    piListener              Listener for configuration update notification
-    </table>
+    /**
+     * @brief Removes the registered configuration update listener.
+     *
+     * @param nCpi The configurable parameter item to be notified
+     * @param piListener The listener for monitoring the configuration update
+     */
+    virtual void RemoveListener(IN IMS_SINT32 nCpi, IN IConfigUpdateListener* piListener) = 0;
 
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_TRUE                The configuration update listener is successfully added
-    IMS_FALSE               The configuration update listener is not added
-    </table>
-    */
-    virtual IMS_BOOL AddListener(IN IMS_SINT32 nCPI, IN IConfigUpdateListener* piListener) = 0;
-
-    /*
-     Removes the registered configuration update listener.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    nCPI                    Configurable parameter item to be notified
-    piListener              Listener for configuration update notification
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-    */
-    virtual void RemoveListener(IN IMS_SINT32 nCPI, IN IConfigUpdateListener* piListener) = 0;
-
-    /*
-     Updates the specified configurable item.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    nCPI                    Configurable parameter item to be updated
-    strValue                Value to be updated for a specified item
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_TRUE                The configurable item is successfully updated
-    IMS_FALSE               The configurable item is not updated
-    </table>
-    */
+    /**
+     * @brief Updates the specified configurable item.
+     *
+     * @param nCpi The configurable parameter item to be updated
+     * @param strValue The value to be updated for a given item
+     * @return IMS_TRUE if the configurable item is successfully updated, IMS_FALSE otherwise.
+     */
     virtual IMS_BOOL Update(
-            IN IMS_SINT32 nCPI, IN const AString& strValue = AString::ConstNull()) = 0;
+            IN IMS_SINT32 nCpi, IN const AString& strValue = AString::ConstNull()) = 0;
 
 public:
-    // Configurable Parameter Item for configuration engine
-
-    // Updates from the storage medium or the specified value to the cache
+    /// Configurable Parameter Item for configuration engine
+    /// Updates from the storage medium or the specified value to the cache
     enum
     {
         CP_I_BASE = 0,
 
-        // Items for control message; it will be used for IConfigUpdateListener
+        /// Items for control message; it will be used for IConfigUpdateListener
         CP_I_START_SUBSCRIBER = 1,
         CP_I_START_SIP,
         CP_I_START_SIP_V,
@@ -100,7 +67,7 @@ public:
         CP_I_END_SIP_V,
         CP_I_END_PRESENCE,
 
-        // ISubscriberConfig / IImsSubscriberInfo
+        /// ISubscriberConfig / IImsSubscriberInfo
         CP_I_SUBSCRIPTION_ATTRIBUTE_ALL = 51,
         CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM,
         CP_I_SUBSCRIPTION_ATTRIBUTE_USIM,
@@ -150,7 +117,7 @@ public:
 
         CP_I_SUBSCRIBER_ALL,
 
-        // ISipConfig / ISipConfigV
+        /// ISipConfig / ISipConfigV
         CP_I_TV_T1 = 101,
         CP_I_TV_T2,
         /* milli-seconds */
@@ -161,7 +128,7 @@ public:
         CP_I_REG_SUB,
         CP_I_REG_SUB_EXPIRES,
 
-        // ISipConfigV only
+        /// ISipConfigV only
         CP_I_TV_T4,
         CP_I_TV_TA,
         CP_I_TV_TB,
@@ -184,16 +151,16 @@ public:
         CP_I_MAX = 1000
     };
 
-    // Updates from the cache to the storage medium
+    /// Updates from the cache to the storage medium
     enum
     {
         CP_I_WRITE_PROVISIONING_BASE = 10000,
 
-        // ISubscriberConfig
+        /// ISubscriberConfig
         CP_I_WRITE_PROVISIONING_SUBSCRIBER,
 
         CP_I_WRITE_PROVISIONING_MAX = 11000
     };
 };
 
-#endif  // _INTERFACE_CONFIGURABLE_H_
+#endif

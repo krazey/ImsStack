@@ -87,7 +87,7 @@ public:
     IMS_SINT32 GetTimerValueT1() const;
     IMS_SINT32 GetTimerValueT2() const;
     inline IMS_SINT32 GetTimerValue100Trying() const { return m_nTimerValue100Trying; }
-    inline const TcpTimerValues& GetTimerValueTCP() const { return m_objTcpTimerValues; }
+    inline const TcpTimerValues& GetTimerValueTcp() const { return m_objTcpTimerValues; }
 
     inline IMS_BOOL HasFeature(IN IMS_SINT32 nFeature) const
     {
@@ -102,7 +102,7 @@ public:
     {
         return HasFeature(SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX);
     }
-    inline IMS_BOOL IsDisplayNameDQUOTRequired() const
+    inline IMS_BOOL IsDisplayNameDquotRequired() const
     {
         return HasFeature(SIP_FEATURE_CAPS_DISPLAY_NAME_DQUOT);
     }
@@ -120,12 +120,12 @@ public:
     {
         return HasFeature(SIP_FEATURE_CAPS_NO_ACCEPT_CONTACT_HEADER_IN_BYE);
     }
-    inline IMS_BOOL IsPANInfoInInitialRegRequired() const
+    inline IMS_BOOL IsPaniHeaderInInitialRegRequired() const
     {
         return HasFeature(SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG);
     }
-    inline IMS_BOOL IsPermissionSIPConfigured() const { return IMS_TRUE; }
-    inline IMS_BOOL IsPermissionSIPSConfigured() const { return IMS_FALSE; }
+    inline IMS_BOOL IsPermissionSipConfigured() const { return IMS_TRUE; }
+    inline IMS_BOOL IsPermissionSipsConfigured() const { return IMS_FALSE; }
     inline IMS_BOOL IsPPreferredIdInRegSubRequired() const
     {
         return HasFeature(SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB);
@@ -215,7 +215,7 @@ protected:
 
     // ConfigBase class
     IMS_BOOL ReadFrom() override;
-    IMS_BOOL Update(IN IMS_SINT32 nCPI, IN const AString& strValue = AString::ConstNull()) override;
+    IMS_BOOL Update(IN IMS_SINT32 nCpi, IN const AString& strValue = AString::ConstNull()) override;
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
 private:

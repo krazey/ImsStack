@@ -245,13 +245,13 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()
 }
 
 PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
-        IN IMS_SINT32 nCPI, IN const AString& strValue /* = AString::ConstNull() */)
+        IN IMS_SINT32 nCpi, IN const AString& strValue /*= AString::ConstNull()*/)
 {
     IMS_BOOL bUpdateResult = IMS_TRUE;
 
     (void)strValue;
 
-    switch (nCPI)
+    switch (nCpi)
     {
         case IConfigurable::CP_I_START_SIP:
         case IConfigurable::CP_I_END_SIP:
@@ -265,7 +265,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
 
             if (piSipConfigV != IMS_NULL)
             {
-                piSipConfigV->GetConfigurable()->Update(nCPI, strValue);
+                piSipConfigV->GetConfigurable()->Update(nCpi, strValue);
             }
             break;
         }
@@ -351,14 +351,14 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
         default:
         {
             bUpdateResult = IMS_FALSE;
-            IMS_TRACE_D("No configurable parameter item (%d)", nCPI, 0, 0);
+            IMS_TRACE_D("No configurable parameter item (%d)", nCpi, 0, 0);
             break;
         }
     }
 
     if (bUpdateResult)
     {
-        NotifyUpdate(nCPI);
+        NotifyUpdate(nCpi);
     }
 
     return bUpdateResult;

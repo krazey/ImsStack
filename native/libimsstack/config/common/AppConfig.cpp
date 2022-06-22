@@ -1,117 +1,120 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090531  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "RCObject.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "RCObject.h"
+
+#include "private/AppConfig.h"
 #include "private/CapProperty.h"
 #include "private/CoreServiceConfig.h"
-#include "private/AppConfig.h"
 
 __IMS_TRACE_TAG_CONF__;
 
 class AppConfigPrivate : public RCObject
 {
 public:
-    explicit AppConfigPrivate(IN const AString& strAppId_);
+    explicit AppConfigPrivate(IN const AString& strAppId);
     ~AppConfigPrivate();
 
-private:
-    AppConfigPrivate(IN const AppConfigPrivate& objRHS);
-    AppConfigPrivate& operator=(IN const AppConfigPrivate& objRHS);
+    AppConfigPrivate(IN const AppConfigPrivate&) = delete;
+    AppConfigPrivate& operator=(IN const AppConfigPrivate&) = delete;
 
 public:
     IMS_BOOL CheckMandatoryProperty() const;
     CapProperty* GetCapProperty(IN IMS_SINT32 nSector, IN IMS_SINT32 nMessageType) const;
     CoreServiceConfig* GetCoreServiceConfig(IN const AString& strServiceId) const;
 
-    IMS_BOOL AddCapabilitySDP(
-            IN IMS_SINT32 nSector, IN IMS_SINT32 nMessageType, IN const AString& strSDPField);
+    IMS_BOOL AddCapabilitySdp(
+            IN IMS_SINT32 nSector, IN IMS_SINT32 nMessageType, IN const AString& strSdpField);
 
     static IMS_BOOL AddStreamMediaProperty(
-            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP);
+            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
     static IMS_BOOL AddFramedMediaProperty(
-            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP);
+            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
     static IMS_BOOL AddBasicMediaProperty(
-            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP);
+            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
     static IMS_BOOL AddEventProperty(
-            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP);
+            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
     static IMS_BOOL AddWriteHeaderProperty(
-            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP);
+            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
     static IMS_BOOL AddReadHeaderProperty(
-            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP);
+            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
     static IMS_BOOL AddCapabilityProperty(
-            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP);
+            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
     static IMS_BOOL AddCoreServiceProperty(
-            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP);
+            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
     static IMS_BOOL AddCoreServiceRelatedProperty(
-            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP);
+            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
 
 private:
     friend class AppConfig;
 
-    AString strAppId;
+    AString m_strAppId;
 
     // StreamMedia property
-    IMS_BOOL bStreamMediaSupported;
-    IMS_BOOL bStreamAudioSupported;
-    IMS_BOOL bStreamVideoSupported;
+    IMS_BOOL m_bStreamMediaSupported;
+    IMS_BOOL m_bStreamAudioSupported;
+    IMS_BOOL m_bStreamVideoSupported;
 
     // FramedMedia property
-    IMS_BOOL bFramedMediaSupported;
-    AStringArray objFramedMediaMimeTypes;
-    IMS_BOOL bFramedMediaTransferMaxSize;
-    IMS_UINT32 nFramedMediaTransferMaxSize;
+    IMS_BOOL m_bFramedMediaSupported;
+    AStringArray m_objFramedMediaMimeTypes;
+    IMS_BOOL m_bFramedMediaTransferMaxSize;
+    IMS_UINT32 m_nFramedMediaTransferMaxSize;
 
     // BasicMedia property
-    IMS_BOOL bBasicMediaSupported;
-    AStringArray objBasicMediaMimeTypes;
+    IMS_BOOL m_bBasicMediaSupported;
+    AStringArray m_objBasicMediaMimeTypes;
 
     // Supported event package property
-    AStringArray objEventPackages;
+    AStringArray m_objEventPackages;
 
     // CoreService property
-    IMSList<CoreServiceConfig*> objCoreServiceConfigs;
+    IMSList<CoreServiceConfig*> m_objCoreServiceConfigs;
 
     // Writable headers property
-    AStringArray objWriteHeaders;
+    AStringArray m_objWriteHeaders;
 
     // Readable headers property
-    AStringArray objReadHeaders;
+    AStringArray m_objReadHeaders;
 
     // SDP fields property for Capabilities
-    IMSList<CapProperty*> objCapabilities;
+    IMSList<CapProperty*> m_objCapabilities;
 };
 
 PUBLIC
-AppConfigPrivate::AppConfigPrivate(IN const AString& strAppId_) :
-        strAppId(strAppId_),
-        bStreamMediaSupported(IMS_FALSE),
-        bStreamAudioSupported(IMS_FALSE),
-        bStreamVideoSupported(IMS_FALSE),
-        bFramedMediaSupported(IMS_FALSE),
-        bFramedMediaTransferMaxSize(IMS_FALSE),
-        nFramedMediaTransferMaxSize(0),
-        bBasicMediaSupported(IMS_FALSE)
+AppConfigPrivate::AppConfigPrivate(IN const AString& strAppId) :
+        m_strAppId(strAppId),
+        m_bStreamMediaSupported(IMS_FALSE),
+        m_bStreamAudioSupported(IMS_FALSE),
+        m_bStreamVideoSupported(IMS_FALSE),
+        m_bFramedMediaSupported(IMS_FALSE),
+        m_bFramedMediaTransferMaxSize(IMS_FALSE),
+        m_nFramedMediaTransferMaxSize(0),
+        m_bBasicMediaSupported(IMS_FALSE)
 {
 }
 
 PUBLIC VIRTUAL AppConfigPrivate::~AppConfigPrivate()
 {
-    if (!objCoreServiceConfigs.IsEmpty())
+    if (!m_objCoreServiceConfigs.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objCoreServiceConfigs.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objCoreServiceConfigs.GetSize(); ++i)
         {
-            CoreServiceConfig* pServiceConfig = objCoreServiceConfigs.GetAt(i);
+            CoreServiceConfig* pServiceConfig = m_objCoreServiceConfigs.GetAt(i);
 
             if (pServiceConfig != IMS_NULL)
             {
@@ -119,14 +122,14 @@ PUBLIC VIRTUAL AppConfigPrivate::~AppConfigPrivate()
             }
         }
 
-        objCoreServiceConfigs.Clear();
+        m_objCoreServiceConfigs.Clear();
     }
 
-    if (!objCapabilities.IsEmpty())
+    if (!m_objCapabilities.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objCapabilities.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objCapabilities.GetSize(); ++i)
         {
-            CapProperty* pCapProperty = objCapabilities.GetAt(i);
+            CapProperty* pCapProperty = m_objCapabilities.GetAt(i);
 
             if (pCapProperty != IMS_NULL)
             {
@@ -134,7 +137,7 @@ PUBLIC VIRTUAL AppConfigPrivate::~AppConfigPrivate()
             }
         }
 
-        objCapabilities.Clear();
+        m_objCapabilities.Clear();
     }
 }
 
@@ -144,8 +147,8 @@ IMS_BOOL AppConfigPrivate::CheckMandatoryProperty() const
     // Check if the registry MUST contain at least one of the IMS properties:
     //  StreamMedia, FramedMedia, BasicMedia, Event, CoreService,
 
-    if (!bStreamMediaSupported && !bFramedMediaSupported && !bBasicMediaSupported &&
-            objEventPackages.IsEmpty() && objCoreServiceConfigs.IsEmpty())
+    if (!m_bStreamMediaSupported && !m_bFramedMediaSupported && !m_bBasicMediaSupported &&
+            m_objEventPackages.IsEmpty() && m_objCoreServiceConfigs.IsEmpty())
     {
         return IMS_FALSE;
     }
@@ -157,16 +160,16 @@ PUBLIC
 CapProperty* AppConfigPrivate::GetCapProperty(
         IN IMS_SINT32 nSector, IN IMS_SINT32 nMessageType) const
 {
-    if (objCapabilities.IsEmpty())
+    if (m_objCapabilities.IsEmpty())
     {
         return IMS_NULL;
     }
 
     AString strCapKey = CapProperty::CreateCapKey(nSector, nMessageType);
 
-    for (IMS_UINT32 i = 0; i < objCapabilities.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objCapabilities.GetSize(); ++i)
     {
-        CapProperty* pProperty = objCapabilities.GetAt(i);
+        CapProperty* pProperty = m_objCapabilities.GetAt(i);
 
         if (pProperty->Equals(strCapKey))
         {
@@ -180,9 +183,9 @@ CapProperty* AppConfigPrivate::GetCapProperty(
 PUBLIC
 CoreServiceConfig* AppConfigPrivate::GetCoreServiceConfig(IN const AString& strServiceId) const
 {
-    for (IMS_UINT32 i = 0; i < objCoreServiceConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objCoreServiceConfigs.GetSize(); ++i)
     {
-        CoreServiceConfig* pServiceConfig = objCoreServiceConfigs.GetAt(i);
+        CoreServiceConfig* pServiceConfig = m_objCoreServiceConfigs.GetAt(i);
 
         if (pServiceConfig->GetServiceId().EqualsIgnoreCase(strServiceId))
         {
@@ -194,14 +197,14 @@ CoreServiceConfig* AppConfigPrivate::GetCoreServiceConfig(IN const AString& strS
 }
 
 PUBLIC
-IMS_BOOL AppConfigPrivate::AddCapabilitySDP(
-        IN IMS_SINT32 nSector, IN IMS_SINT32 nMessageType, IN const AString& strSDPField)
+IMS_BOOL AppConfigPrivate::AddCapabilitySdp(
+        IN IMS_SINT32 nSector, IN IMS_SINT32 nMessageType, IN const AString& strSdpField)
 {
     CapProperty* pProperty = GetCapProperty(nSector, nMessageType);
 
     if (pProperty != IMS_NULL)
     {
-        pProperty->AddValue(strSDPField);
+        pProperty->AddValue(strSdpField);
     }
     else
     {
@@ -212,9 +215,9 @@ IMS_BOOL AppConfigPrivate::AddCapabilitySDP(
             return IMS_FALSE;
         }
 
-        pProperty->AddValue(strSDPField);
+        pProperty->AddValue(strSdpField);
 
-        if (!objCapabilities.Append(pProperty))
+        if (!m_objCapabilities.Append(pProperty))
         {
             delete pProperty;
             return IMS_FALSE;
@@ -225,7 +228,7 @@ IMS_BOOL AppConfigPrivate::AddCapabilitySDP(
 }
 
 PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddStreamMediaProperty(
-        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP)
+        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate)
 {
     // One or both of Audio and Video
     // { "Stream", "Audio Video" }
@@ -237,7 +240,7 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddStreamMediaProperty(
         return IMS_FALSE;
     }
 
-    pConfigP->bStreamMediaSupported = IMS_TRUE;
+    pConfigPrivate->m_bStreamMediaSupported = IMS_TRUE;
 
     AStringArray objSupportedTypes = ImsProperty::Decode(objProperty.GetElementAt(1));
 
@@ -268,11 +271,11 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddStreamMediaProperty(
 
         if (strValue.EqualsIgnoreCase(ImsProperty::STREAM_MEDIA_TYPE_AUDIO))
         {
-            pConfigP->bStreamAudioSupported = IMS_TRUE;
+            pConfigPrivate->m_bStreamAudioSupported = IMS_TRUE;
         }
         else if (strValue.EqualsIgnoreCase(ImsProperty::STREAM_MEDIA_TYPE_VIDEO))
         {
-            pConfigP->bStreamVideoSupported = IMS_TRUE;
+            pConfigPrivate->m_bStreamVideoSupported = IMS_TRUE;
         }
         else
         {
@@ -288,7 +291,7 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddStreamMediaProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddFramedMediaProperty(
-        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP)
+        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate)
 {
     // Set of MIME content types
     // { "Framed", "text/plain image/png", "4096" }
@@ -300,43 +303,43 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddFramedMediaProperty(
         return IMS_FALSE;
     }
 
-    pConfigP->objFramedMediaMimeTypes = ImsProperty::Decode(objProperty.GetElementAt(1));
+    pConfigPrivate->m_objFramedMediaMimeTypes = ImsProperty::Decode(objProperty.GetElementAt(1));
 
-    if (!ImsProperty::CheckDuplicate(pConfigP->objFramedMediaMimeTypes, IMS_FALSE))
+    if (!ImsProperty::CheckDuplicate(pConfigPrivate->m_objFramedMediaMimeTypes, IMS_FALSE))
     {
         return IMS_FALSE;
     }
 
-    pConfigP->bFramedMediaSupported = IMS_TRUE;
+    pConfigPrivate->m_bFramedMediaSupported = IMS_TRUE;
 
     const AString& strMaxSize = objProperty.GetElementAt(2);
 
     if (strMaxSize.IsEmpty() || strMaxSize.IsNULL())
     {
-        pConfigP->nFramedMediaTransferMaxSize = 0;
-        pConfigP->bFramedMediaTransferMaxSize = IMS_FALSE;
+        pConfigPrivate->m_nFramedMediaTransferMaxSize = 0;
+        pConfigPrivate->m_bFramedMediaTransferMaxSize = IMS_FALSE;
     }
     else
     {
-        IMS_BOOL bOK = IMS_TRUE;
+        IMS_BOOL bOk = IMS_TRUE;
 
-        pConfigP->nFramedMediaTransferMaxSize = strMaxSize.ToUInt32(&bOK, 10);
+        pConfigPrivate->m_nFramedMediaTransferMaxSize = strMaxSize.ToUInt32(&bOk, 10);
 
-        if (!bOK)
+        if (!bOk)
         {
             IMS_TRACE_E(0, "Property value is invalid, max-size (%s)", strMaxSize.GetStr(), 0, 0);
-            pConfigP->objFramedMediaMimeTypes.RemoveAllElements();
+            pConfigPrivate->m_objFramedMediaMimeTypes.RemoveAllElements();
             return IMS_FALSE;
         }
 
-        pConfigP->bFramedMediaTransferMaxSize = IMS_TRUE;
+        pConfigPrivate->m_bFramedMediaTransferMaxSize = IMS_TRUE;
     }
 
     return IMS_TRUE;
 }
 
 PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddBasicMediaProperty(
-        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP)
+        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate)
 {
     // Set of MIME content types
     // { "Basic", "application/myChess" }
@@ -348,20 +351,20 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddBasicMediaProperty(
         return IMS_FALSE;
     }
 
-    pConfigP->objBasicMediaMimeTypes = ImsProperty::Decode(objProperty.GetElementAt(1));
+    pConfigPrivate->m_objBasicMediaMimeTypes = ImsProperty::Decode(objProperty.GetElementAt(1));
 
-    if (!ImsProperty::CheckDuplicate(pConfigP->objBasicMediaMimeTypes, IMS_FALSE))
+    if (!ImsProperty::CheckDuplicate(pConfigPrivate->m_objBasicMediaMimeTypes, IMS_FALSE))
     {
         return IMS_FALSE;
     }
 
-    pConfigP->bBasicMediaSupported = IMS_TRUE;
+    pConfigPrivate->m_bBasicMediaSupported = IMS_TRUE;
 
     return IMS_TRUE;
 }
 
 PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddEventProperty(
-        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP)
+        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate)
 {
     // Set of event package names
     // { "Event", "presence" }
@@ -373,9 +376,9 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddEventProperty(
         return IMS_FALSE;
     }
 
-    pConfigP->objEventPackages = ImsProperty::Decode(objProperty.GetElementAt(1));
+    pConfigPrivate->m_objEventPackages = ImsProperty::Decode(objProperty.GetElementAt(1));
 
-    if (!ImsProperty::CheckDuplicate(pConfigP->objEventPackages, IMS_TRUE))
+    if (!ImsProperty::CheckDuplicate(pConfigPrivate->m_objEventPackages, IMS_TRUE))
     {
         return IMS_FALSE;
     }
@@ -384,7 +387,7 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddEventProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddWriteHeaderProperty(
-        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP)
+        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate)
 {
     // Set of SIP header names for write access
     // { "Write", "P-ImageIncluded" }
@@ -396,9 +399,9 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddWriteHeaderProperty(
         return IMS_FALSE;
     }
 
-    pConfigP->objWriteHeaders = ImsProperty::Decode(objProperty.GetElementAt(1));
+    pConfigPrivate->m_objWriteHeaders = ImsProperty::Decode(objProperty.GetElementAt(1));
 
-    if (!ImsProperty::CheckDuplicate(pConfigP->objReadHeaders, IMS_FALSE))
+    if (!ImsProperty::CheckDuplicate(pConfigPrivate->m_objReadHeaders, IMS_FALSE))
     {
         return IMS_FALSE;
     }
@@ -407,7 +410,7 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddWriteHeaderProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddReadHeaderProperty(
-        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP)
+        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate)
 {
     // Set of SIP header names for read access
     // { "Read", "P-ImageIncluded" }
@@ -419,9 +422,9 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddReadHeaderProperty(
         return IMS_FALSE;
     }
 
-    pConfigP->objReadHeaders = ImsProperty::Decode(objProperty.GetElementAt(1));
+    pConfigPrivate->m_objReadHeaders = ImsProperty::Decode(objProperty.GetElementAt(1));
 
-    if (!ImsProperty::CheckDuplicate(pConfigP->objReadHeaders, IMS_FALSE))
+    if (!ImsProperty::CheckDuplicate(pConfigPrivate->m_objReadHeaders, IMS_FALSE))
     {
         return IMS_FALSE;
     }
@@ -430,7 +433,7 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddReadHeaderProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCapabilityProperty(
-        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP)
+        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate)
 {
     // The value is multi-valued, where the first value is the "sector id" that can be "Session",
     // "Framed", "StreamAudio" or "StreamVideo". The second value is a "message type" that
@@ -448,9 +451,9 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCapabilityProperty(
 
     switch (nSectorId)
     {
-        case CapProperty::SECTOR_SESSION:
-        case CapProperty::SECTOR_FRAMED:
-        case CapProperty::SECTOR_STREAM_AUDIO:
+        case CapProperty::SECTOR_SESSION:       // FALL-THROUGH
+        case CapProperty::SECTOR_FRAMED:        // FALL-THROUGH
+        case CapProperty::SECTOR_STREAM_AUDIO:  // FALL-THROUGH
         case CapProperty::SECTOR_STREAM_VIDEO:
             break;
 
@@ -464,8 +467,8 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCapabilityProperty(
 
     switch (nMessageType)
     {
-        case CapProperty::MESSAGE_TYPE_REQUEST:
-        case CapProperty::MESSAGE_TYPE_RESPONSE:
+        case CapProperty::MESSAGE_TYPE_REQUEST:   // FALL-THROUGH
+        case CapProperty::MESSAGE_TYPE_RESPONSE:  // FALL-THROUGH
         case CapProperty::MESSAGE_TYPE_REQUEST_RESPONSE:
             break;
 
@@ -475,22 +478,22 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCapabilityProperty(
             return IMS_FALSE;
     }
 
-    AString strSDPTypes;
+    AString strSdpTypes;
 
     if (nSectorId == CapProperty::SECTOR_SESSION)
     {
-        strSDPTypes = "vosiuepcbtrzka";
+        strSdpTypes = "vosiuepcbtrzka";
     }
     else
     {
-        strSDPTypes = "micbka";
+        strSdpTypes = "micbka";
     }
 
     for (IMS_SINT32 i = 3; i < objProperty.GetCount(); ++i)
     {
-        const AString& strSDPField = objProperty.GetElementAt(i);
+        const AString& strSdpField = objProperty.GetElementAt(i);
 
-        if ((strSDPField.GetLength() < 2) || (strSDPField[1] != '='))
+        if ((strSdpField.GetLength() < 2) || (strSdpField[1] != '='))
         {
             IMS_TRACE_E(0, "Property is malformed, illegal SDP property: %s",
                     ImsProperty::ToString(objProperty).GetStr(), 0, 0);
@@ -498,21 +501,21 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCapabilityProperty(
         }
 
         // Check if the SDP field is a valid SDP line or not
-        if (!strSDPTypes.Contains(strSDPField[0]))
+        if (!strSdpTypes.Contains(strSdpField[0]))
         {
             IMS_TRACE_E(0, "Property is malformed, illegal SDP property: %s",
                     ImsProperty::ToString(objProperty).GetStr(), 0, 0);
             return IMS_FALSE;
         }
 
-        pConfigP->AddCapabilitySDP(nSectorId, nMessageType, strSDPField);
+        pConfigPrivate->AddCapabilitySdp(nSectorId, nMessageType, strSdpField);
     }
 
     return IMS_TRUE;
 }
 
 PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCoreServiceProperty(
-        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP)
+        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate)
 {
     // The CoreService property is multi-valued, where the contents of service definitions are
     // elements in the order; "service id", "IARI", "ICSIs", and "Feature Tags".
@@ -531,7 +534,7 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCoreServiceProperty(
         return IMS_FALSE;
     }
 
-    if (pConfigP->GetCoreServiceConfig(objProperty.GetElementAt(1)) != IMS_NULL)
+    if (pConfigPrivate->GetCoreServiceConfig(objProperty.GetElementAt(1)) != IMS_NULL)
     {
         IMS_TRACE_E(0, "Property is malformed, CoreService with id (%s) defined multiple times",
                 objProperty.GetElementAt(1).GetStr(), 0, 0);
@@ -546,7 +549,7 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCoreServiceProperty(
         return IMS_FALSE;
     }
 
-    if (!pConfigP->objCoreServiceConfigs.Append(pCoreServiceConfig))
+    if (!pConfigPrivate->m_objCoreServiceConfigs.Append(pCoreServiceConfig))
     {
         delete pCoreServiceConfig;
         return IMS_FALSE;
@@ -556,7 +559,7 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCoreServiceProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCoreServiceRelatedProperty(
-        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigP)
+        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate)
 {
     if (objProperty.GetCount() < 2)
     {
@@ -566,7 +569,7 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCoreServiceRelatedProperty(
     }
 
     CoreServiceConfig* pCoreServiceConfig =
-            pConfigP->GetCoreServiceConfig(objProperty.GetElementAt(1));
+            pConfigPrivate->GetCoreServiceConfig(objProperty.GetElementAt(1));
 
     if (pCoreServiceConfig == IMS_NULL)
     {
@@ -580,50 +583,50 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCoreServiceRelatedProperty(
 }
 
 PUBLIC
-AppConfig::AppConfig(IN const AString& strAppId_) :
-        pConfigP(new AppConfigPrivate(strAppId_))
+AppConfig::AppConfig(IN const AString& strAppId) :
+        m_pConfigPrivate(new AppConfigPrivate(strAppId))
 {
-    if (pConfigP != IMS_NULL)
+    if (m_pConfigPrivate != IMS_NULL)
     {
-        pConfigP->AddReference();
+        m_pConfigPrivate->AddReference();
     }
 }
 
 PUBLIC
-AppConfig::AppConfig(IN const AppConfig& objRHS) :
-        pConfigP(objRHS.pConfigP)
+AppConfig::AppConfig(IN const AppConfig& other) :
+        m_pConfigPrivate(other.m_pConfigPrivate)
 {
-    if (pConfigP != IMS_NULL)
+    if (m_pConfigPrivate != IMS_NULL)
     {
-        pConfigP->AddReference();
+        m_pConfigPrivate->AddReference();
     }
 }
 
 PUBLIC VIRTUAL AppConfig::~AppConfig()
 {
-    if (pConfigP != IMS_NULL)
+    if (m_pConfigPrivate != IMS_NULL)
     {
-        pConfigP->RemoveReference();
+        m_pConfigPrivate->RemoveReference();
     }
 }
 
 PUBLIC
-AppConfig& AppConfig::operator=(IN const AppConfig& objRHS)
+AppConfig& AppConfig::operator=(IN const AppConfig& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        AppConfigPrivate* pOldConfigP = pConfigP;
+        AppConfigPrivate* pOldConfigPrivate = m_pConfigPrivate;
 
-        pConfigP = objRHS.pConfigP;
+        m_pConfigPrivate = other.m_pConfigPrivate;
 
-        if (pConfigP != IMS_NULL)
+        if (m_pConfigPrivate != IMS_NULL)
         {
-            pConfigP->AddReference();
+            m_pConfigPrivate->AddReference();
         }
 
-        if (pOldConfigP != IMS_NULL)
+        if (pOldConfigPrivate != IMS_NULL)
         {
-            pOldConfigP->RemoveReference();
+            pOldConfigPrivate->RemoveReference();
         }
     }
 
@@ -632,13 +635,13 @@ AppConfig& AppConfig::operator=(IN const AppConfig& objRHS)
 
 PUBLIC VIRTUAL const AString& AppConfig::GetAppId() const
 {
-    return pConfigP->strAppId;
+    return m_pConfigPrivate->m_strAppId;
 }
 
 PUBLIC VIRTUAL const ICoreServiceConfig* AppConfig::GetCoreServiceConfig(
         IN const AString& strServiceId) const
 {
-    return pConfigP->GetCoreServiceConfig(strServiceId);
+    return m_pConfigPrivate->GetCoreServiceConfig(strServiceId);
 }
 
 PUBLIC VIRTUAL ImsRegistry* AppConfig::ToRegistry() const
@@ -672,13 +675,13 @@ PUBLIC VIRTUAL ImsRegistry* AppConfig::ToRegistry() const
         objProperty.RemoveAllElements();
 
         objProperty.AddElement(ImsProperty::PKEY_STRING[ImsProperty::PKEY_FRAMED]);
-        objProperty.AddElement(ImsProperty::Encode(pConfigP->objFramedMediaMimeTypes));
+        objProperty.AddElement(ImsProperty::Encode(m_pConfigPrivate->m_objFramedMediaMimeTypes));
 
-        if (pConfigP->bFramedMediaTransferMaxSize)
+        if (m_pConfigPrivate->m_bFramedMediaTransferMaxSize)
         {
             AString strTransferSize;
 
-            strTransferSize.SetNumber(pConfigP->nFramedMediaTransferMaxSize);
+            strTransferSize.SetNumber(m_pConfigPrivate->m_nFramedMediaTransferMaxSize);
             objProperty.AddElement(strTransferSize);
         }
         else
@@ -695,61 +698,61 @@ PUBLIC VIRTUAL ImsRegistry* AppConfig::ToRegistry() const
         objProperty.RemoveAllElements();
 
         objProperty.AddElement(ImsProperty::PKEY_STRING[ImsProperty::PKEY_BASIC]);
-        objProperty.AddElement(ImsProperty::Encode(pConfigP->objBasicMediaMimeTypes));
+        objProperty.AddElement(ImsProperty::Encode(m_pConfigPrivate->m_objBasicMediaMimeTypes));
 
         pRegistry->Add(objProperty);
     }
 
     // Event package property
-    if (pConfigP->objEventPackages.GetCount() > 0)
+    if (m_pConfigPrivate->m_objEventPackages.GetCount() > 0)
     {
         objProperty.AddElement(ImsProperty::PKEY_STRING[ImsProperty::PKEY_EVENT]);
 
-        for (IMS_SINT32 i = 0; i < pConfigP->objEventPackages.GetCount(); ++i)
+        for (IMS_SINT32 i = 0; i < m_pConfigPrivate->m_objEventPackages.GetCount(); ++i)
         {
-            objProperty.AddElement(pConfigP->objEventPackages.GetElementAt(i));
+            objProperty.AddElement(m_pConfigPrivate->m_objEventPackages.GetElementAt(i));
         }
 
         pRegistry->Add(objProperty);
     }
 
     // Read property
-    if (pConfigP->objReadHeaders.GetCount() > 0)
+    if (m_pConfigPrivate->m_objReadHeaders.GetCount() > 0)
     {
         objProperty.AddElement(ImsProperty::PKEY_STRING[ImsProperty::PKEY_READ]);
 
-        for (IMS_SINT32 i = 0; i < pConfigP->objReadHeaders.GetCount(); ++i)
+        for (IMS_SINT32 i = 0; i < m_pConfigPrivate->m_objReadHeaders.GetCount(); ++i)
         {
-            objProperty.AddElement(pConfigP->objReadHeaders.GetElementAt(i));
+            objProperty.AddElement(m_pConfigPrivate->m_objReadHeaders.GetElementAt(i));
         }
 
         pRegistry->Add(objProperty);
     }
 
     // Write property
-    if (pConfigP->objWriteHeaders.GetCount() > 0)
+    if (m_pConfigPrivate->m_objWriteHeaders.GetCount() > 0)
     {
         objProperty.AddElement(ImsProperty::PKEY_STRING[ImsProperty::PKEY_WRITE]);
 
-        for (IMS_SINT32 i = 0; i < pConfigP->objWriteHeaders.GetCount(); ++i)
+        for (IMS_SINT32 i = 0; i < m_pConfigPrivate->m_objWriteHeaders.GetCount(); ++i)
         {
-            objProperty.AddElement(pConfigP->objWriteHeaders.GetElementAt(i));
+            objProperty.AddElement(m_pConfigPrivate->m_objWriteHeaders.GetElementAt(i));
         }
 
         pRegistry->Add(objProperty);
     }
 
     // Cap property
-    if (pConfigP->objCapabilities.GetSize() > 0)
+    if (m_pConfigPrivate->m_objCapabilities.GetSize() > 0)
     {
         for (IMS_SINT32 i = (CapProperty::SECTOR_INVALID + 1); i < CapProperty::SECTOR_MAX; ++i)
         {
             for (IMS_SINT32 j = (CapProperty::MESSAGE_TYPE_INVALID + 1);
                     j < CapProperty::MESSAGE_TYPE_MAX; ++j)
             {
-                AStringArray objSDPFields = GetCapabilitySDPs(i, j);
+                AStringArray objSdpFields = GetCapabilitySdps(i, j);
 
-                if (objSDPFields.GetCount() > 0)
+                if (objSdpFields.GetCount() > 0)
                 {
                     objProperty.RemoveAllElements();
 
@@ -757,9 +760,9 @@ PUBLIC VIRTUAL ImsRegistry* AppConfig::ToRegistry() const
                     objProperty.AddElement(CapProperty::SectorIdToString(i));
                     objProperty.AddElement(CapProperty::MessageTypeToString(j));
 
-                    for (IMS_SINT32 k = 0; k < objSDPFields.GetCount(); ++k)
+                    for (IMS_SINT32 k = 0; k < objSdpFields.GetCount(); ++k)
                     {
-                        objProperty.AddElement(objSDPFields.GetElementAt(k));
+                        objProperty.AddElement(objSdpFields.GetElementAt(k));
                     }
 
                     pRegistry->Add(objProperty);
@@ -769,11 +772,12 @@ PUBLIC VIRTUAL ImsRegistry* AppConfig::ToRegistry() const
     }
 
     // CoreService property
-    if (pConfigP->objCoreServiceConfigs.GetSize() > 0)
+    if (m_pConfigPrivate->m_objCoreServiceConfigs.GetSize() > 0)
     {
-        for (IMS_UINT32 i = 0; i < pConfigP->objCoreServiceConfigs.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_pConfigPrivate->m_objCoreServiceConfigs.GetSize(); ++i)
         {
-            CoreServiceConfig* pCoreServiceConfig = pConfigP->objCoreServiceConfigs.GetAt(i);
+            CoreServiceConfig* pCoreServiceConfig =
+                    m_pConfigPrivate->m_objCoreServiceConfigs.GetAt(i);
 
             if (pCoreServiceConfig != IMS_NULL)
             {
@@ -786,8 +790,7 @@ PUBLIC VIRTUAL ImsRegistry* AppConfig::ToRegistry() const
 }
 
 PUBLIC
-IMS_BOOL AppConfig::Create(
-        IN const ImsRegistry& objRegistry, IN IMS_SINT32 /*nSlotId = IMS_SLOT_0*/)
+IMS_BOOL AppConfig::Create(IN const ImsRegistry& objRegistry, IN IMS_SINT32 /*nSlotId*/)
 {
     ImsRegistry objTrimmedRegistry;
     IMS_BOOL bResult = ImsProperty::TrimAndCheckProperties(objRegistry, objTrimmedRegistry);
@@ -807,7 +810,7 @@ IMS_BOOL AppConfig::Create(
 
         if (ImsProperty::PKEY_CORE_SERVICE == ImsProperty::StringToKey(objProperty.GetElementAt(0)))
         {
-            if (!AppConfigPrivate::AddCoreServiceProperty(objProperty, pConfigP))
+            if (!AppConfigPrivate::AddCoreServiceProperty(objProperty, m_pConfigPrivate))
                 return IMS_FALSE;
         }
     }
@@ -823,44 +826,37 @@ IMS_BOOL AppConfig::Create(
         switch (nKey)
         {
             case ImsProperty::PKEY_STREAM:
-                bResult = AppConfigPrivate::AddStreamMediaProperty(objProperty, pConfigP);
+                bResult = AppConfigPrivate::AddStreamMediaProperty(objProperty, m_pConfigPrivate);
                 break;
-
             case ImsProperty::PKEY_FRAMED:
-                bResult = AppConfigPrivate::AddFramedMediaProperty(objProperty, pConfigP);
+                bResult = AppConfigPrivate::AddFramedMediaProperty(objProperty, m_pConfigPrivate);
                 break;
-
             case ImsProperty::PKEY_BASIC:
-                bResult = AppConfigPrivate::AddBasicMediaProperty(objProperty, pConfigP);
+                bResult = AppConfigPrivate::AddBasicMediaProperty(objProperty, m_pConfigPrivate);
                 break;
-
             case ImsProperty::PKEY_EVENT:
-                bResult = AppConfigPrivate::AddEventProperty(objProperty, pConfigP);
+                bResult = AppConfigPrivate::AddEventProperty(objProperty, m_pConfigPrivate);
                 break;
-
             case ImsProperty::PKEY_READ:
-                bResult = AppConfigPrivate::AddReadHeaderProperty(objProperty, pConfigP);
+                bResult = AppConfigPrivate::AddReadHeaderProperty(objProperty, m_pConfigPrivate);
                 break;
-
             case ImsProperty::PKEY_WRITE:
-                bResult = AppConfigPrivate::AddWriteHeaderProperty(objProperty, pConfigP);
+                bResult = AppConfigPrivate::AddWriteHeaderProperty(objProperty, m_pConfigPrivate);
                 break;
-
             case ImsProperty::PKEY_CAP:
-                bResult = AppConfigPrivate::AddCapabilityProperty(objProperty, pConfigP);
+                bResult = AppConfigPrivate::AddCapabilityProperty(objProperty, m_pConfigPrivate);
                 break;
-
                 // CoreService related properties
             case ImsProperty::PKEY_CORE_SERVICE:
                 // It does not need to be added; Already processed.
                 bResult = IMS_TRUE;
                 break;
-
-            case ImsProperty::PKEY_QOS:
-            case ImsProperty::PKEY_REG:
-            case ImsProperty::PKEY_MPROF:
+            case ImsProperty::PKEY_QOS:    // FALL-THROUGH
+            case ImsProperty::PKEY_REG:    // FALL-THROUGH
+            case ImsProperty::PKEY_MPROF:  // FALL-THROUGH
             case ImsProperty::PKEY_CONNECTION:
-                bResult = AppConfigPrivate::AddCoreServiceRelatedProperty(objProperty, pConfigP);
+                bResult = AppConfigPrivate::AddCoreServiceRelatedProperty(
+                        objProperty, m_pConfigPrivate);
                 break;
         }
 
@@ -874,7 +870,7 @@ IMS_BOOL AppConfig::Create(
 
     // Check if the registry MUST contain at least one of the IMS properties:
     //  StreamMedia, FramedMedia, BasicMedia, Event, CoreService,
-    if (!pConfigP->CheckMandatoryProperty())
+    if (!m_pConfigPrivate->CheckMandatoryProperty())
     {
         IMS_TRACE_E(0,
                 "The registry does not support at least one of the properties:"
@@ -889,92 +885,92 @@ IMS_BOOL AppConfig::Create(
 PUBLIC
 IMS_BOOL AppConfig::Equals(IN const AString& strAppId) const
 {
-    return pConfigP->strAppId.EqualsIgnoreCase(strAppId);
+    return m_pConfigPrivate->m_strAppId.EqualsIgnoreCase(strAppId);
 }
 
 PUBLIC
 IMS_BOOL AppConfig::IsStreamMediaSupported() const
 {
-    return pConfigP->bStreamMediaSupported;
+    return m_pConfigPrivate->m_bStreamMediaSupported;
 }
 
 PUBLIC
 IMS_BOOL AppConfig::IsStreamMediaAudioSupported() const
 {
-    return pConfigP->bStreamAudioSupported;
+    return m_pConfigPrivate->m_bStreamAudioSupported;
 }
 
 PUBLIC
 IMS_BOOL AppConfig::IsStreamMediaVideoSupported() const
 {
-    return pConfigP->bStreamVideoSupported;
+    return m_pConfigPrivate->m_bStreamVideoSupported;
 }
 
 PUBLIC
 IMS_BOOL AppConfig::IsFramedMediaSupported() const
 {
-    return pConfigP->bFramedMediaSupported;
+    return m_pConfigPrivate->m_bFramedMediaSupported;
 }
 
 PUBLIC
 const AStringArray& AppConfig::GetFramedMediaMimeTypes() const
 {
-    return pConfigP->objFramedMediaMimeTypes;
+    return m_pConfigPrivate->m_objFramedMediaMimeTypes;
 }
 
 PUBLIC
 IMS_BOOL AppConfig::IsFramedMediaMaxSizePresent() const
 {
-    return pConfigP->bFramedMediaTransferMaxSize;
+    return m_pConfigPrivate->m_bFramedMediaTransferMaxSize;
 }
 
 PUBLIC
 IMS_UINT32 AppConfig::GetFramedMediaMaxSize() const
 {
-    return pConfigP->nFramedMediaTransferMaxSize;
+    return m_pConfigPrivate->m_nFramedMediaTransferMaxSize;
 }
 
 PUBLIC
 IMS_BOOL AppConfig::IsBasicMediaSupported() const
 {
-    return pConfigP->bBasicMediaSupported;
+    return m_pConfigPrivate->m_bBasicMediaSupported;
 }
 
 PUBLIC
 const AStringArray& AppConfig::GetBasicMediaMimeTypes() const
 {
-    return pConfigP->objBasicMediaMimeTypes;
+    return m_pConfigPrivate->m_objBasicMediaMimeTypes;
 }
 
 PUBLIC
 IMS_BOOL AppConfig::IsEventPackageSupported(IN const AString& strEvent) const
 {
     // Compares byte-by-byte
-    return pConfigP->objEventPackages.Contains(strEvent);
+    return m_pConfigPrivate->m_objEventPackages.Contains(strEvent);
 }
 
 PUBLIC
 const AStringArray& AppConfig::GetSupportedEventPackages() const
 {
-    return pConfigP->objEventPackages;
+    return m_pConfigPrivate->m_objEventPackages;
 }
 
 PUBLIC
 IMS_BOOL AppConfig::IsHeaderReadable(IN const AString& strHeader) const
 {
-    return pConfigP->objReadHeaders.Contains(strHeader, IMS_FALSE);
+    return m_pConfigPrivate->m_objReadHeaders.Contains(strHeader, IMS_FALSE);
 }
 
 PUBLIC
 IMS_BOOL AppConfig::IsHeaderWritable(IN const AString& strHeader) const
 {
-    return pConfigP->objWriteHeaders.Contains(strHeader, IMS_FALSE);
+    return m_pConfigPrivate->m_objWriteHeaders.Contains(strHeader, IMS_FALSE);
 }
 
 PUBLIC
-AStringArray AppConfig::GetCapabilitySDPs(IN IMS_SINT32 nSector, IN IMS_SINT32 nMessageType) const
+AStringArray AppConfig::GetCapabilitySdps(IN IMS_SINT32 nSector, IN IMS_SINT32 nMessageType) const
 {
-    CapProperty* pProperty = pConfigP->GetCapProperty(nSector, nMessageType);
+    CapProperty* pProperty = m_pConfigPrivate->GetCapProperty(nSector, nMessageType);
 
     if (pProperty != IMS_NULL)
     {
@@ -987,11 +983,11 @@ AStringArray AppConfig::GetCapabilitySDPs(IN IMS_SINT32 nSector, IN IMS_SINT32 n
 PUBLIC
 const CoreServiceConfig* AppConfig::GetCoreServiceConfigEx(IN const AString& strServiceId) const
 {
-    return pConfigP->GetCoreServiceConfig(strServiceId);
+    return m_pConfigPrivate->GetCoreServiceConfig(strServiceId);
 }
 
 PUBLIC
 const IMSList<CoreServiceConfig*>& AppConfig::GetCoreServiceConfigs() const
 {
-    return pConfigP->objCoreServiceConfigs;
+    return m_pConfigPrivate->m_objCoreServiceConfigs;
 }

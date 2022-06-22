@@ -2339,8 +2339,8 @@ PROTECTED VIRTUAL IMS_BOOL Session::InitInstance()
 
     if (pSipConfigV != IMS_NULL)
     {
-        m_bSdpNonRprAllowed = pSipConfigV->IsSessionSDPNonRPRAllowed();
-        bSdpVersionCheck = pSipConfigV->IsSessionSDPVersionCheckSupported();
+        m_bSdpNonRprAllowed = pSipConfigV->IsSessionSdpNonRprAllowed();
+        bSdpVersionCheck = pSipConfigV->IsSessionSdpVersionCheckSupported();
 
         // Flag to check if the 100 Trying response should be notified or not
         m_b100TryingNotification = pSipConfigV->Is100TryingNotificationRequired();

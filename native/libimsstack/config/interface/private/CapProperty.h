@@ -1,45 +1,39 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090531  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _CAP_PROPERTY_H_
-#define _CAP_PROPERTY_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef CAP_PROPERTY_H_
+#define CAP_PROPERTY_H_
 
 #include "private/ImsProperty.h"
 
 class CapPropertyPrivate;
 
-/*
-
-Class CapProperty
-
-Example
-
-See Also
-
-*/
 class CapProperty : public ImsProperty
 {
 public:
     CapProperty();
-    CapProperty(IN IMS_SINT32 nSectorId_, IN IMS_SINT32 nMessageType_);
-    CapProperty(IN const CapProperty& objRHS);
+    CapProperty(IN IMS_SINT32 nSectorId, IN IMS_SINT32 nMessageType);
+    CapProperty(IN const CapProperty& other);
     virtual ~CapProperty();
 
 public:
-    CapProperty& operator=(IN const CapProperty& objRHS);
+    CapProperty& operator=(IN const CapProperty& other);
 
 public:
     // ImsProperty class
-    virtual IMS_BOOL Equals(IN const AString& strValue) const;
+    IMS_BOOL Equals(IN const AString& strValue) const override;
 
     void AddValue(IN const AString& strValue);
     const AStringArray& GetValues() const;
@@ -52,7 +46,7 @@ public:
     static IMS_SINT32 StringToSectorId(IN const AString& strSectorId);
 
 public:
-    // Sector Id
+    /// Sector Id
     enum
     {
         SECTOR_INVALID = 0,
@@ -63,7 +57,7 @@ public:
         SECTOR_MAX
     };
 
-    // Message type
+    /// Message type
     enum
     {
         MESSAGE_TYPE_INVALID = 0,
@@ -77,7 +71,7 @@ public:
     static const IMS_CHAR* MESSAGE_TYPE_STRING[MESSAGE_TYPE_MAX];
 
 private:
-    CapPropertyPrivate* pCapPP;
+    CapPropertyPrivate* m_pPropertyPrivate;
 };
 
-#endif  // _CAP_PROPERTY_H_
+#endif

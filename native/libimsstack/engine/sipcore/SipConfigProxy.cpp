@@ -376,7 +376,7 @@ PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsDisplayNameDquotRequired(
 
     if (pSipConfig != IMS_NULL)
     {
-        return pSipConfig->IsDisplayNameDQUOTRequired();
+        return pSipConfig->IsDisplayNameDquotRequired();
     }
 
     return IMS_FALSE;
@@ -491,7 +491,7 @@ PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsPanInfoInInitialRegRequired(
 
     const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
 
-    return pSipConfig->IsPANInfoInInitialRegRequired();
+    return pSipConfig->IsPaniHeaderInInitialRegRequired();
 }
 
 PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsPPreferredIdInRegSubRequired(
@@ -856,9 +856,9 @@ PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetTimerValueA(IN IMS_SINT32 nSlotId,
 
     if (pSipConfigV != IMS_NULL)
     {
-        if (pSipConfigV->GetTimerValueTA() > 0)
+        if (pSipConfigV->GetTimerValueA() > 0)
         {
-            return pSipConfigV->GetTimerValueTA();
+            return pSipConfigV->GetTimerValueA();
         }
     }
 
@@ -883,9 +883,9 @@ PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetTimerValueB(IN IMS_SINT32 nSlotId,
 
     if (pSipConfigV != IMS_NULL)
     {
-        if (pSipConfigV->GetTimerValueTB() > 0)
+        if (pSipConfigV->GetTimerValueB() > 0)
         {
-            return pSipConfigV->GetTimerValueTB();
+            return pSipConfigV->GetTimerValueB();
         }
     }
 
@@ -910,9 +910,9 @@ PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetTimerValueD(IN IMS_SINT32 nSlotId,
 
     if (pSipConfigV != IMS_NULL)
     {
-        if (pSipConfigV->GetTimerValueTD() > 0)
+        if (pSipConfigV->GetTimerValueD() > 0)
         {
-            return pSipConfigV->GetTimerValueTD();
+            return pSipConfigV->GetTimerValueD();
         }
     }
 
@@ -937,9 +937,9 @@ PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetTimerValueE(IN IMS_SINT32 nSlotId,
 
     if (pSipConfigV != IMS_NULL)
     {
-        if (pSipConfigV->GetTimerValueTE() > 0)
+        if (pSipConfigV->GetTimerValueE() > 0)
         {
-            return pSipConfigV->GetTimerValueTE();
+            return pSipConfigV->GetTimerValueE();
         }
     }
 
@@ -964,9 +964,9 @@ PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetTimerValueF(IN IMS_SINT32 nSlotId,
 
     if (pSipConfigV != IMS_NULL)
     {
-        if (pSipConfigV->GetTimerValueTF() > 0)
+        if (pSipConfigV->GetTimerValueF() > 0)
         {
-            return pSipConfigV->GetTimerValueTF();
+            return pSipConfigV->GetTimerValueF();
         }
     }
 
@@ -991,9 +991,9 @@ PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetTimerValueG(IN IMS_SINT32 nSlotId,
 
     if (pSipConfigV != IMS_NULL)
     {
-        if (pSipConfigV->GetTimerValueTG() > 0)
+        if (pSipConfigV->GetTimerValueG() > 0)
         {
-            return pSipConfigV->GetTimerValueTG();
+            return pSipConfigV->GetTimerValueG();
         }
     }
 
@@ -1018,9 +1018,9 @@ PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetTimerValueH(IN IMS_SINT32 nSlotId,
 
     if (pSipConfigV != IMS_NULL)
     {
-        if (pSipConfigV->GetTimerValueTH() > 0)
+        if (pSipConfigV->GetTimerValueH() > 0)
         {
-            return pSipConfigV->GetTimerValueTH();
+            return pSipConfigV->GetTimerValueH();
         }
     }
 
@@ -1045,9 +1045,9 @@ PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetTimerValueI(IN IMS_SINT32 nSlotId,
 
     if (pSipConfigV != IMS_NULL)
     {
-        if (pSipConfigV->GetTimerValueTI() > 0)
+        if (pSipConfigV->GetTimerValueI() > 0)
         {
-            return pSipConfigV->GetTimerValueTI();
+            return pSipConfigV->GetTimerValueI();
         }
     }
 
@@ -1073,9 +1073,9 @@ PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetTimerValueJ(IN IMS_SINT32 nSlotId,
 
     if (pSipConfigV != IMS_NULL)
     {
-        if (pSipConfigV->GetTimerValueTJ() > 0)
+        if (pSipConfigV->GetTimerValueJ() > 0)
         {
-            return pSipConfigV->GetTimerValueTJ();
+            return pSipConfigV->GetTimerValueJ();
         }
     }
 
@@ -1100,9 +1100,9 @@ PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetTimerValueK(IN IMS_SINT32 nSlotId,
 
     if (pSipConfigV != IMS_NULL)
     {
-        if (pSipConfigV->GetTimerValueTK() > 0)
+        if (pSipConfigV->GetTimerValueK() > 0)
         {
-            return pSipConfigV->GetTimerValueTK();
+            return pSipConfigV->GetTimerValueK();
         }
     }
 

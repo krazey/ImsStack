@@ -635,11 +635,11 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::ReadFrom()
 }
 
 PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
-        IN IMS_SINT32 nCPI, IN const AString& strValue /*= AString::ConstNull()*/)
+        IN IMS_SINT32 nCpi, IN const AString& strValue /*= AString::ConstNull()*/)
 {
     IMS_BOOL bUpdateResult = IMS_TRUE;
 
-    switch (nCPI)
+    switch (nCpi)
     {
         case IConfigurable::CP_I_START_SUBSCRIBER:
         case IConfigurable::CP_I_END_SUBSCRIBER:
@@ -823,7 +823,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                 return IMS_FALSE;
             }
 
-            IMS_SINT32 nIndex = nCPI - IConfigurable::CP_I_IMPU_0;
+            IMS_SINT32 nIndex = nCpi - IConfigurable::CP_I_IMPU_0;
             ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
 
             if (pSubsInfo == IMS_NULL)
@@ -847,7 +847,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                             ? pSubsInfo->m_objPublicUserIds.GetElementAt(nIndex)
                             : AString::ConstNull();
 
-                    m_piSubsInfoListener->SubscriberInfo_UpdateIMPU(
+                    m_piSubsInfoListener->SubscriberInfo_UpdateImpu(
                             GetSlotId(), m_strId, strOldId, strValue);
                 }
 
@@ -878,12 +878,12 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
             {
                 if (nIndex == pSubsInfo->m_objPublicUserIds.GetCount())
                 {
-                    m_piSubsInfoListener->SubscriberInfo_UpdateIMPU(
+                    m_piSubsInfoListener->SubscriberInfo_UpdateImpu(
                             GetSlotId(), m_strId, AString::ConstNull(), strUserId);
                 }
                 else
                 {
-                    m_piSubsInfoListener->SubscriberInfo_UpdateIMPU(GetSlotId(), m_strId,
+                    m_piSubsInfoListener->SubscriberInfo_UpdateImpu(GetSlotId(), m_strId,
                             pSubsInfo->m_objPublicUserIds.GetElementAt(nIndex), strUserId);
                 }
             }
@@ -1141,7 +1141,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
             }
             else
             {
-                IMS_UINT32 nIndex = nCPI - IConfigurable::CP_I_PCSCF_ADDRESS_0;
+                IMS_UINT32 nIndex = nCpi - IConfigurable::CP_I_PCSCF_ADDRESS_0;
 
                 if (nIndex >= pPcscfAddresses->GetSize())
                 {
@@ -1202,7 +1202,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
             }
             else
             {
-                IMS_UINT32 nIndex = (nCPI - IConfigurable::CP_I_PCSCF_PORT_0);
+                IMS_UINT32 nIndex = (nCpi - IConfigurable::CP_I_PCSCF_PORT_0);
 
                 if (nIndex >= pPcscfAddresses->GetSize())
                 {
@@ -1301,16 +1301,16 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
         default:
         {
             bUpdateResult = IMS_FALSE;
-            IMS_TRACE_D("No configurable parameter item (%d)", nCPI, 0, 0);
+            IMS_TRACE_D("No configurable parameter item (%d)", nCpi, 0, 0);
             break;
         }
     }
 
     if (bUpdateResult)
     {
-        if (nCPI != IConfigurable::CP_I_SUBSCRIBER_ALL)
+        if (nCpi != IConfigurable::CP_I_SUBSCRIBER_ALL)
         {
-            NotifyUpdate(nCPI, m_strConfName, m_strId);
+            NotifyUpdate(nCpi, m_strConfName, m_strId);
         }
     }
 
@@ -1836,7 +1836,7 @@ void SubscriberConfig::CallSubscriberInfoListener(IN IMS_SINT32 nSubsInfo)
                     continue;
                 }
 
-                m_piSubsInfoListener->SubscriberInfo_UpdateIMPU(
+                m_piSubsInfoListener->SubscriberInfo_UpdateImpu(
                         GetSlotId(), m_strId, AString::ConstNull(), strUserId);
             }
         }
@@ -1858,14 +1858,14 @@ void SubscriberConfig::CallSubscriberInfoListener(IN IMS_SINT32 nSubsInfo)
                     continue;
                 }
 
-                m_piSubsInfoListener->SubscriberInfo_UpdateIMPU(
+                m_piSubsInfoListener->SubscriberInfo_UpdateImpu(
                         GetSlotId(), m_strId, strUserId, AString::ConstNull());
             }
         }
     }
     else if (nSubsInfo == SUBSCRIBER_INFO_REMOVE_ALL)
     {
-        m_piSubsInfoListener->SubscriberInfo_UpdateIMPU(
+        m_piSubsInfoListener->SubscriberInfo_UpdateImpu(
                 GetSlotId(), m_strId, AString::ConstNull(), AString::ConstNull());
     }
 }

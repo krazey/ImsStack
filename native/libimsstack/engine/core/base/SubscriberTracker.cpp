@@ -117,7 +117,7 @@ PUBLIC GLOBAL SubscriberTracker* SubscriberTracker::GetInstance()
     return s_pSubsTracker;
 }
 
-PROTECTED VIRTUAL void SubscriberTracker::SubscriberInfo_UpdateIMPU(IN IMS_SINT32 nSlotId,
+PROTECTED VIRTUAL void SubscriberTracker::SubscriberInfo_UpdateImpu(IN IMS_SINT32 nSlotId,
         IN const AString& strId, IN const AString& strOld, IN const AString& strNew)
 {
     IMS_TRACE_I("Subscriber :: ID (%s), OLD (%s), NEW (%s)", strId.GetStr(),
@@ -323,7 +323,7 @@ void SubscriberTracker::InitForSlot(IN IMS_SINT32 nSlotId)
                     continue;
                 }
 
-                SubscriberInfo_UpdateIMPU(
+                SubscriberInfo_UpdateImpu(
                         nSlotId, pSubsConfig->GetId(), AString::ConstNull(), strImpu);
             }
         }

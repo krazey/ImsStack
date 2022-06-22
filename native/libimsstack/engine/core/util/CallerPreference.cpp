@@ -226,7 +226,7 @@ void PreferenceScore::ProcessAcceptContact(IN const AppConfig* pAppConfig,
 
     if (pServiceConfig != IMS_NULL)
     {
-        const IMSList<ServiceIdentifier>& objIcsis = pServiceConfig->GetICSIs();
+        const IMSList<ServiceIdentifier>& objIcsis = pServiceConfig->GetIcsis();
 
         for (IMS_UINT32 i = 0; i < objIcsis.GetSize(); ++i)
         {
@@ -321,10 +321,10 @@ void PreferenceScore::ProcessAcceptContact(IN const AppConfig* pAppConfig,
         {
             if (pServiceConfig != IMS_NULL)
             {
-                if (pServiceConfig->GetIARI().GetName().GetLength() != 0)
+                if (pServiceConfig->GetIari().GetName().GetLength() != 0)
                 {
                     AString strValue =
-                            TextParser::DoPercentDecoding(pServiceConfig->GetIARI().GetName());
+                            TextParser::DoPercentDecoding(pServiceConfig->GetIari().GetName());
 
                     IncreaseNcf();
 
@@ -414,17 +414,17 @@ PUBLIC GLOBAL IMS_BOOL CallerPreference::CreateAcceptContactHeaders(IN const App
     if (pServiceConfig != IMS_NULL)
     {
         // IARI
-        if (pServiceConfig->IsIARISupported())
+        if (pServiceConfig->IsIariSupported())
         {
             IMS_BOOL bExplicit = ((nFeatureTags & ISipConfigV::FEATURE_TAG_IARI_EXPLICIT) != 0);
             IMS_BOOL bRequire = ((nFeatureTags & ISipConfigV::FEATURE_TAG_IARI_REQUIRE) != 0);
 
-            AddFeature(Feature::OTHER_G_3GPP_IARI_REF, pServiceConfig->GetIARI().GetName(),
+            AddFeature(Feature::OTHER_G_3GPP_IARI_REF, pServiceConfig->GetIari().GetName(),
                     bExplicit, bRequire, objHeaders);
         }
 
         // ICSI
-        const IMSList<ServiceIdentifier>& objIcsis = pServiceConfig->GetICSIs();
+        const IMSList<ServiceIdentifier>& objIcsis = pServiceConfig->GetIcsis();
 
         for (IMS_UINT32 i = 0; i < objIcsis.GetSize(); ++i)
         {
@@ -543,12 +543,12 @@ PUBLIC GLOBAL IMS_SINT32 CallerPreference::GetCandidateScore(IN const AppConfig*
 
     if (pServiceConfig != IMS_NULL)
     {
-        if (pServiceConfig->IsIARISupported())
+        if (pServiceConfig->IsIariSupported())
         {
             ++nNfCs;
         }
 
-        nNfCs += pServiceConfig->GetICSIs().GetSize();
+        nNfCs += pServiceConfig->GetIcsis().GetSize();
         nNfCs += pServiceConfig->GetFeatureTags().GetSize();
     }
 

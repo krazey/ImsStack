@@ -32,7 +32,7 @@ SipConfigV::SipConfigV(IN IMS_SINT32 nSlotId) :
         m_strPredefinedPaniForWlan(AString::ConstNull()),
         m_strPredefinedPaniForUtran(AString::ConstNull()),
         m_nFeatureTagOptions(FEATURE_TAG_MMTEL_DEFAULT),
-        m_bIsTVConfiguredOnRuntime(IMS_TRUE),
+        m_bIsTimerValueConfigured(IMS_TRUE),
         m_nTimerValueT1(DEFAULT_TIMER_T1),
         m_nTimerValueT2(DEFAULT_TIMER_T2),
         m_nTimerValueT4(DEFAULT_TIMER_T4),
@@ -47,7 +47,7 @@ SipConfigV::SipConfigV(IN IMS_SINT32 nSlotId) :
         m_nTimerValueI(DEFAULT_TIMER_T4),
         m_nTimerValueJ(DEFAULT_TIMER_T1 * 64),
         m_nTimerValueK(DEFAULT_TIMER_T4),
-        m_stSession(Session()),
+        m_objSession(Session()),
         m_bRespByAppForCapabilities(IMS_TRUE),
         m_bRespByAppForPageMessage(IMS_TRUE),
         m_bRespByAppForReference(IMS_TRUE),
@@ -87,27 +87,27 @@ PUBLIC VIRTUAL IMS_SINT32 SipConfigV::GetTimerValue(IN IMS_SINT32 nType) const
         case TIMER_T4:
             return GetTimerValueT4();
         case TIMER_A:
-            return GetTimerValueTA();
+            return GetTimerValueA();
         case TIMER_B:
-            return GetTimerValueTB();
+            return GetTimerValueB();
         case TIMER_C:
-            return GetTimerValueTC();
+            return GetTimerValueC();
         case TIMER_D:
-            return GetTimerValueTD();
+            return GetTimerValueD();
         case TIMER_E:
-            return GetTimerValueTE();
+            return GetTimerValueE();
         case TIMER_F:
-            return GetTimerValueTF();
+            return GetTimerValueF();
         case TIMER_G:
-            return GetTimerValueTG();
+            return GetTimerValueG();
         case TIMER_H:
-            return GetTimerValueTH();
+            return GetTimerValueH();
         case TIMER_I:
-            return GetTimerValueTI();
+            return GetTimerValueI();
         case TIMER_J:
-            return GetTimerValueTJ();
+            return GetTimerValueJ();
         case TIMER_K:
-            return GetTimerValueTK();
+            return GetTimerValueK();
         default:
             break;
     }
@@ -181,7 +181,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
 
     m_nTimerValueK = m_nTimerValueT4;
 
-    m_stSession.bSessionTimerSupported =
+    m_objSession.bSessionTimerSupported =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_SESSION_TIMER_SUPPORTED_BOOL);
 
     IMS_SINT32 nRefresherType =
@@ -189,15 +189,15 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
 
     if (nRefresherType == CarrierConfig::ImsVoice::SESSION_REFRESHER_TYPE_UAC)
     {
-        m_stSession.nRefresher = SESSION_REFRESHER_LOCAL;
+        m_objSession.nRefresher = SESSION_REFRESHER_LOCAL;
     }
     else if (nRefresherType == CarrierConfig::ImsVoice::SESSION_REFRESHER_TYPE_UAS)
     {
-        m_stSession.nRefresher = SESSION_REFRESHER_REMOTE;
+        m_objSession.nRefresher = SESSION_REFRESHER_REMOTE;
     }
     else
     {
-        m_stSession.nRefresher = SESSION_REFRESHER_NONE;
+        m_objSession.nRefresher = SESSION_REFRESHER_NONE;
     }
 
     IMS_SINT32 nRefreshMethod =
@@ -205,32 +205,32 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
 
     if (nRefreshMethod == CarrierConfig::ImsVoice::SESSION_REFRESH_METHOD_INVITE)
     {
-        m_stSession.nRefreshMethod = SESSION_REFRESH_INVITE;
+        m_objSession.nRefreshMethod = SESSION_REFRESH_INVITE;
     }
     else if (nRefreshMethod == CarrierConfig::ImsVoice::SESSION_REFRESH_METHOD_UPDATE_PREFERRED)
     {
-        m_stSession.nRefreshMethod = SESSION_REFRESH_UPDATE;
+        m_objSession.nRefreshMethod = SESSION_REFRESH_UPDATE;
     }
     else
     {
-        m_stSession.nRefreshMethod = SESSION_REFRESH_ANY;
+        m_objSession.nRefreshMethod = SESSION_REFRESH_ANY;
     }
 
-    m_stSession.nMinSE =
+    m_objSession.nMinSe =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_MINIMUM_SESSION_EXPIRES_TIMER_SEC_INT);
 
-    m_stSession.nSessionExpires =
+    m_objSession.nSessionExpires =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_SESSION_EXPIRES_TIMER_SEC_INT);
 
-    m_stSession.nHeaders = SESSION_HEADER_SESSION_EXPIRES | SESSION_HEADER_MIN_SE |
+    m_objSession.nHeaders = SESSION_HEADER_SESSION_EXPIRES | SESSION_HEADER_MIN_SE |
             SESSION_HEADER_CHECK_SESSION_EXPIRES | SESSION_HEADER_LOCAL_TIMER_REQUIRED;
 
-    m_stSession.bNoRefreshByReINVITE = !piCc->GetBoolean(CarrierConfig::Assets::
+    m_objSession.bNoRefreshByReInvite = !piCc->GetBoolean(CarrierConfig::Assets::
                     KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL);
 
-    m_stSession.bSDPVersionCheckSupported = IMS_TRUE;
+    m_objSession.bSdpVersionCheckSupported = IMS_TRUE;
 
-    m_stSession.bSDPNonRPRAllowed =
+    m_objSession.bSdpNonRprAllowed =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL);
 
     m_bRespByAppForCapabilities = IMS_TRUE;
@@ -241,11 +241,11 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
 }
 
 PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
-        IN IMS_SINT32 nCPI, IN const AString& strValue /*= AString::ConstNull()*/)
+        IN IMS_SINT32 nCpi, IN const AString& strValue /*= AString::ConstNull()*/)
 {
     IMS_BOOL bUpdateResult = IMS_TRUE;
 
-    switch (nCPI)
+    switch (nCpi)
     {
         case IConfigurable::CP_I_START_SIP_V:
         case IConfigurable::CP_I_END_SIP_V:
@@ -435,34 +435,34 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
         {
             if (!GetTimerValueForUpdate(
                         CarrierConfig::ImsVoice::KEY_MINIMUM_SESSION_EXPIRES_TIMER_SEC_INT, -1,
-                        strValue, m_stSession.nMinSE))
+                        strValue, m_objSession.nMinSe))
             {
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SESSION_MINSE :: %d", m_stSession.nMinSE, 0, 0);
+            IMS_TRACE_D("SESSION_MINSE :: %d", m_objSession.nMinSe, 0, 0);
             break;
         }
         case IConfigurable::CP_I_SESSION_EXPIRES:
         {
             if (!GetTimerValueForUpdate(CarrierConfig::ImsVoice::KEY_SESSION_EXPIRES_TIMER_SEC_INT,
-                        -1, strValue, m_stSession.nSessionExpires))
+                        -1, strValue, m_objSession.nSessionExpires))
             {
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SESSION_EXPIRES :: %d", m_stSession.nSessionExpires, 0, 0);
+            IMS_TRACE_D("SESSION_EXPIRES :: %d", m_objSession.nSessionExpires, 0, 0);
             break;
         }
         case IConfigurable::CP_I_SESSION_100TRYING_NOTIFICATION:
         {
             if (strValue.GetLength() > 0)
             {
-                m_stSession.b100TryingNotification = strValue.EqualsIgnoreCase("true");
+                m_objSession.b100TryingNotification = strValue.EqualsIgnoreCase("true");
             }
 
             IMS_TRACE_D("SESSION_100TRYING_NOTIFICATION :: %s",
-                    _TRACE_B_(m_stSession.b100TryingNotification), 0, 0);
+                    _TRACE_B_(m_objSession.b100TryingNotification), 0, 0);
             break;
         }
         case IConfigurable::CP_I_SIP_ALL:
@@ -473,14 +473,14 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
         default:
         {
             bUpdateResult = IMS_FALSE;
-            IMS_TRACE_D("No configurable parameter item (%d)", nCPI, 0, 0);
+            IMS_TRACE_D("No configurable parameter item (%d)", nCpi, 0, 0);
             break;
         }
     }
 
     if (bUpdateResult)
     {
-        NotifyUpdate(nCPI);
+        NotifyUpdate(nCpi);
     }
 
     return bUpdateResult;

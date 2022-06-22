@@ -166,14 +166,14 @@ IMS_BOOL CallerCapability::Create(IN const AppConfig* pAppConfig,
     if (pServiceConfig != IMS_NULL)
     {
         // IARI : "+g.3gpp.iari-ref"
-        if (pServiceConfig->IsIARISupported())
+        if (pServiceConfig->IsIariSupported())
         {
-            AddFeature(Feature::OTHER_G_3GPP_IARI_REF, pServiceConfig->GetIARI().GetName());
+            AddFeature(Feature::OTHER_G_3GPP_IARI_REF, pServiceConfig->GetIari().GetName());
         }
 
         // ICSIs : "+g.3gpp.icsi-ref"
         IMS_UINT32 j = 0;
-        const IMSList<ServiceIdentifier>& objIcsis = pServiceConfig->GetICSIs();
+        const IMSList<ServiceIdentifier>& objIcsis = pServiceConfig->GetIcsis();
 
         if (!objIcsis.IsEmpty())
         {

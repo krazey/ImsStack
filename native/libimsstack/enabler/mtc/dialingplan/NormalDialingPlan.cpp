@@ -41,7 +41,7 @@ PUBLIC GLOBAL AString& NormalDialingPlan::GetTranslatedUri(
 PUBLIC GLOBAL AString& NormalDialingPlan::GetTranslatedUriForDialString(
         IN IMtcContext& objContext, IN AString& strNumber)
 {
-    strNumber = ImsIdentity::CreateSIPUserIdWithDialString(strNumber, objContext.GetSlotId());
+    strNumber = ImsIdentity::CreateSipUserIdWithDialString(strNumber, objContext.GetSlotId());
     return strNumber;
 }
 
@@ -96,7 +96,7 @@ PRIVATE GLOBAL void NormalDialingPlan::FormSipUri(
     if (eDialedNumberFormat == NumberFormat::GLOBAL_FORMAT)
     {
         // global
-        strNumber = ImsIdentity::CreateSIPUserId(strNumber, objContext.GetSlotId(), IMS_TRUE);
+        strNumber = ImsIdentity::CreateSipUserId(strNumber, objContext.GetSlotId(), IMS_TRUE);
     }
     else
     {
@@ -104,7 +104,7 @@ PRIVATE GLOBAL void NormalDialingPlan::FormSipUri(
         AccessNetworkInfo objAni;
         AString strPhoneContext = ImsIdentity::GetPhoneContext(static_cast<IMS_SINT32>(ePolicy),
                 objContext.GetSlotId(), &GetAccessNetworkInfo(objContext, objAni));
-        strNumber = ImsIdentity::CreateSIPUserIdWithPhone(
+        strNumber = ImsIdentity::CreateSipUserIdWithPhone(
                 strNumber, objContext.GetSlotId(), strPhoneContext);
     }
 }

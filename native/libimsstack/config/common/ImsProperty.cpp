@@ -1,19 +1,23 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090531  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "IMSLib.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "IMSLib.h"
 #include "TextParser.h"
+
 #include "private/ImsProperty.h"
 
 __IMS_TRACE_TAG_CONF__;
@@ -38,33 +42,32 @@ PUBLIC GLOBAL const IMS_CHAR* ImsProperty::PKEY_STRING[ImsProperty::PKEY_MAX] = 
 };
 
 PUBLIC
-ImsProperty::ImsProperty(
-        IN IMS_SINT32 nKey_, IN const AString& strKey_ /* = AString::ConstNull() */) :
-        nKey(nKey_),
-        strKey(strKey_)
+ImsProperty::ImsProperty(IN IMS_SINT32 nKey, IN const AString& strKey /*= AString::ConstNull()*/) :
+        m_nKey(nKey),
+        m_strKey(strKey)
 {
-    if ((nKey > PKEY_CUSTOM) && (nKey < PKEY_MAX))
+    if ((m_nKey > PKEY_CUSTOM) && (m_nKey < PKEY_MAX))
     {
-        strKey = PKEY_STRING[nKey];
+        m_strKey = PKEY_STRING[m_nKey];
     }
 }
 
 PUBLIC
-ImsProperty::ImsProperty(IN const ImsProperty& objRHS) :
-        nKey(objRHS.nKey),
-        strKey(objRHS.strKey)
+ImsProperty::ImsProperty(IN const ImsProperty& other) :
+        m_nKey(other.m_nKey),
+        m_strKey(other.m_strKey)
 {
 }
 
 PUBLIC VIRTUAL ImsProperty::~ImsProperty() {}
 
 PUBLIC
-ImsProperty& ImsProperty::operator=(IN const ImsProperty& objRHS)
+ImsProperty& ImsProperty::operator=(IN const ImsProperty& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        nKey = objRHS.nKey;
-        strKey = objRHS.strKey;
+        m_nKey = other.m_nKey;
+        m_strKey = other.m_strKey;
     }
 
     return (*this);
@@ -72,12 +75,12 @@ ImsProperty& ImsProperty::operator=(IN const ImsProperty& objRHS)
 
 PUBLIC VIRTUAL IMS_BOOL ImsProperty::Equals(IN const AString& strValue) const
 {
-    return strKey.Equals(strValue);
+    return m_strKey.Equals(strValue);
 }
 
 PUBLIC VIRTUAL IMS_BOOL ImsProperty::Equals(IN const ImsProperty& objOther) const
 {
-    return Equals(objOther.strKey);
+    return Equals(objOther.m_strKey);
 }
 
 PUBLIC GLOBAL AStringArray ImsProperty::Decode(IN const AString& strValue)

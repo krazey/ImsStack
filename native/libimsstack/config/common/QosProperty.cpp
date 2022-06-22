@@ -1,17 +1,21 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090531  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
 #include "QosProperty.h"
 
 __IMS_TRACE_TAG_CONF__;
@@ -19,70 +23,51 @@ __IMS_TRACE_TAG_CONF__;
 PUBLIC
 QosProperty::QosProperty() :
         ImsProperty(ImsProperty::PKEY_QOS),
-        strContentType(AString::ConstNull())
+        m_strContentType(AString::ConstNull())
 {
-    stQos.nAverageRate = 0;
-    stQos.nBufferSize = 0;
-    stQos.nPeakRate = 0;
-    stQos.nDelay = 0;
-    stQos.nDelayVariance = 0;
-    stQos.nMaxChunkSize = 0;
-    stQos.nMinimalPolicedSize = 0;
+    m_objQos.nAverageRate = 0;
+    m_objQos.nBufferSize = 0;
+    m_objQos.nPeakRate = 0;
+    m_objQos.nDelay = 0;
+    m_objQos.nDelayVariance = 0;
+    m_objQos.nMaxChunkSize = 0;
+    m_objQos.nMinimalPolicedSize = 0;
 }
 
 PUBLIC
-QosProperty::QosProperty(IN const AString& strContentType_) :
+QosProperty::QosProperty(IN const AString& strContentType) :
         ImsProperty(ImsProperty::PKEY_QOS),
-        strContentType(strContentType_)
+        m_strContentType(strContentType)
 {
-    stQos.nAverageRate = 0;
-    stQos.nBufferSize = 0;
-    stQos.nPeakRate = 0;
-    stQos.nDelay = 0;
-    stQos.nDelayVariance = 0;
-    stQos.nMaxChunkSize = 0;
-    stQos.nMinimalPolicedSize = 0;
+    m_objQos.nAverageRate = 0;
+    m_objQos.nBufferSize = 0;
+    m_objQos.nPeakRate = 0;
+    m_objQos.nDelay = 0;
+    m_objQos.nDelayVariance = 0;
+    m_objQos.nMaxChunkSize = 0;
+    m_objQos.nMinimalPolicedSize = 0;
 }
 
 PUBLIC
-QosProperty::QosProperty(IN const QosProperty& objRHS) :
+QosProperty::QosProperty(IN const QosProperty& other) :
         ImsProperty(ImsProperty::PKEY_QOS),
-        strContentType(objRHS.strContentType),
-        stQos(objRHS.stQos)
+        m_strContentType(other.m_strContentType),
+        m_objQos(other.m_objQos)
 {
 }
 
-PUBLIC VIRTUAL QosProperty::~QosProperty() {}
-
 PUBLIC
-QosProperty& QosProperty::operator=(IN const QosProperty& objRHS)
+QosProperty& QosProperty::operator=(IN const QosProperty& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        ImsProperty::operator=(objRHS);
+        ImsProperty::operator=(other);
 
-        strContentType = objRHS.strContentType;
-        stQos = objRHS.stQos;
+        m_strContentType = other.m_strContentType;
+        m_objQos = other.m_objQos;
     }
 
     return (*this);
-}
-
-PUBLIC VIRTUAL IMS_BOOL QosProperty::Equals(IN const AString& strValue) const
-{
-    return strContentType.Equals(strValue);
-}
-
-PUBLIC
-const AString& QosProperty::GetContentType() const
-{
-    return strContentType;
-}
-
-PUBLIC
-QosProperty::QualityOfService QosProperty::GetQos() const
-{
-    return stQos;
 }
 
 PUBLIC
@@ -90,8 +75,9 @@ AString QosProperty::GetQosString() const
 {
     AString strQos;
 
-    strQos.Sprintf("%u %u %u %u %u %u %u", stQos.nAverageRate, stQos.nBufferSize, stQos.nPeakRate,
-            stQos.nDelay, stQos.nDelayVariance, stQos.nMaxChunkSize, stQos.nMinimalPolicedSize);
+    strQos.Sprintf("%u %u %u %u %u %u %u", m_objQos.nAverageRate, m_objQos.nBufferSize,
+            m_objQos.nPeakRate, m_objQos.nDelay, m_objQos.nDelayVariance, m_objQos.nMaxChunkSize,
+            m_objQos.nMinimalPolicedSize);
 
     return strQos;
 }
@@ -127,13 +113,13 @@ IMS_BOOL QosProperty::SetQos(IN const AString& strValue)
         }
     }
 
-    stQos.nAverageRate = anValue[0];
-    stQos.nBufferSize = anValue[1];
-    stQos.nPeakRate = anValue[2];
-    stQos.nDelay = anValue[3];
-    stQos.nDelayVariance = anValue[4];
-    stQos.nMaxChunkSize = anValue[5];
-    stQos.nMinimalPolicedSize = anValue[6];
+    m_objQos.nAverageRate = anValue[0];
+    m_objQos.nBufferSize = anValue[1];
+    m_objQos.nPeakRate = anValue[2];
+    m_objQos.nDelay = anValue[3];
+    m_objQos.nDelayVariance = anValue[4];
+    m_objQos.nMaxChunkSize = anValue[5];
+    m_objQos.nMinimalPolicedSize = anValue[6];
 
     return IMS_TRUE;
 }

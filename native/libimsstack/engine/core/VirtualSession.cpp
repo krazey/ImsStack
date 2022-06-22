@@ -881,7 +881,7 @@ void VirtualSession::Init(IN const SipAddress* pUserAor)
 
     if (pSipConfigV != IMS_NULL)
     {
-        bSdpVersionCheck = pSipConfigV->IsSessionSDPVersionCheckSupported();
+        bSdpVersionCheck = pSipConfigV->IsSessionSdpVersionCheckSupported();
     }
 
     m_pOaState = new SdpOaState(bSdpVersionCheck, IMS_TRUE);

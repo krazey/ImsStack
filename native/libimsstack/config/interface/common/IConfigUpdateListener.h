@@ -1,44 +1,36 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20130103  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _INTERFACE_CONFIG_UPDATE_LISTENER_H_
-#define _INTERFACE_CONFIG_UPDATE_LISTENER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_CONFIG_UPDATE_LISTENER_H_
+#define INTERFACE_CONFIG_UPDATE_LISTENER_H_
 
 #include "AString.h"
 
 class IConfigUpdateListener
 {
 public:
-    /*
-     Notifies the application that the specified configuration parameter item is updated.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    nCPI                    Configurable parameter item to be notified (refer to IConfigurable.h)
-    strConfName             Configuration name to be updated
-    strExtraParam           Extra parameter info. for each configuration
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-    */
-    virtual void ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCPI,
+    /**
+     * @brief Notifies the application that the specified configuration parameter item is updated.
+     *
+     * @param nCpi The configurable parameter item to be notified
+     * @param strConfName The configuration name to be updated
+     * @param strExtraParam  The extra parameter for each configuration item
+     */
+    virtual void ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCpi,
             IN const AString& strConfName = AString::ConstNull(),
             IN const AString& strExtraParam = AString::ConstNull()) = 0;
 };
 
-#endif  // _INTERFACE_CONFIG_UPDATE_LISTENER_H_
+#endif

@@ -135,7 +135,7 @@ protected:
 
     // ConfigBase class
     IMS_BOOL ReadFrom() override;
-    IMS_BOOL Update(IN IMS_SINT32 nCPI, IN const AString& strValue = AString::ConstNull()) override;
+    IMS_BOOL Update(IN IMS_SINT32 nCpi, IN const AString& strValue = AString::ConstNull()) override;
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
 private:
@@ -207,22 +207,22 @@ private:
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 private:
-    // State of SubscriberConfig
+    /// State of SubscriberConfig
     enum
     {
-        // Initial state
+        /// Initial state
         STATE_INIT = 0,
-        // It is in the STATE_PROVISIONING, while reading the provisioning data from ISIM.
+        /// It is in the STATE_PROVISIONING, while reading the provisioning data from ISIM.
         STATE_PROVISIONING,
-        // It is in the STATE_REFRESHING, while reading the provisioning data from ISIM
-        // by ISIM refresh.
+        /// It is in the STATE_REFRESHING, while reading the provisioning data from ISIM
+        /// by ISIM refresh.
         STATE_REFRESHING,
-        // All the provisioning data is read and IMS service can be started.
+        /// All the provisioning data is read and IMS service can be started.
         STATE_PROVISIONED
     };
 
-    // ISIM records to be read
-    // Read order: IMPI -> IMPU -> DOMAIN
+    /// ISIM records to be read
+    /// Read order: IMPI -> IMPU -> DOMAIN
     enum
     {
         ISIM_NONE = 0x0000,
@@ -250,7 +250,7 @@ private:
         ACMSG_REFRESH_ISIM_PROVISIONING
     };
 
-    // SubscriberInfo types
+    /// SubscriberInfo types
     enum
     {
         SUBSCRIBER_INFO_NONE = 0,

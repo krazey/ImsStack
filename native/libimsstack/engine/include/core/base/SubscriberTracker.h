@@ -43,7 +43,7 @@ public:
 
 protected:
     // ISubscriberInfoListener class
-    void SubscriberInfo_UpdateIMPU(IN IMS_SINT32 nSlotId, IN const AString& strId,
+    void SubscriberInfo_UpdateImpu(IN IMS_SINT32 nSlotId, IN const AString& strId,
             IN const AString& strOld, IN const AString& strNew) override;
 
 private:

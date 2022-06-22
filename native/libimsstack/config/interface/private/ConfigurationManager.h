@@ -1,47 +1,49 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090608  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _CONFIGURATION_MANAGER_H_
-#define _CONFIGURATION_MANAGER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef CONFIGURATION_MANAGER_H_
+#define CONFIGURATION_MANAGER_H_
 
 #include "AStringArray.h"
 
 class AppConfig;
 class ConfigurationManagerPrivate;
-
-class SubscriberConfig;
 class EngineConfig;
-class SipConfig;
 class MediaConfig;
+class SipConfig;
+class SubscriberConfig;
 
 class ConfigurationManager
 {
 private:
     ConfigurationManager();
-    ConfigurationManager(IN const ConfigurationManager& objRHS);
-    ConfigurationManager& operator=(IN const ConfigurationManager& objRHS);
 
 public:
     ~ConfigurationManager();
 
+    ConfigurationManager(IN const ConfigurationManager&) = delete;
+    ConfigurationManager& operator=(IN const ConfigurationManager&) = delete;
+
 public:
-    // IMS registry for J281 requirements - application configuration
-    const AppConfig* GetAppConfig(
-            IN const AString& strAppId, IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
-    AStringArray GetAppIds(IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
-    IMS_BOOL IsAppConfigured(IN const AString& strAppId, IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
-    void RemoveAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IMS_RESULT StoreAppConfig(IN AppConfig* pAppConfig, IN const AString& strAppId,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    // IMS registry: application configuration
+    const AppConfig* GetAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId) const;
+    AStringArray GetAppIds(IN IMS_SINT32 nSlotId) const;
+    IMS_BOOL IsAppConfigured(IN const AString& strAppId, IN IMS_SINT32 nSlotId) const;
+    void RemoveAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId);
+    IMS_RESULT StoreAppConfig(
+            IN AppConfig* pAppConfig, IN const AString& strAppId, IN IMS_SINT32 nSlotId);
 
     // Returns the configuration mode (file / xml / db)
     IMS_SINT32 GetConfigMode() const;
@@ -51,19 +53,18 @@ public:
     // Subscriber configuration - impl. defined
     //    This config. includes IMS-related information in the ISIM.
     const SubscriberConfig* GetSubscriberConfig(
-            IN const AString& strId, IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
-    const IMSList<SubscriberConfig*>& GetSubscriberConfigs(
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+            IN const AString& strId, IN IMS_SINT32 nSlotId) const;
+    const IMSList<SubscriberConfig*>& GetSubscriberConfigs(IN IMS_SINT32 nSlotId) const;
     // Engine configuration - impl. defined
     //    This config. includes the information for an optional/additional operation
     //    in J281 engine implementation.
-    const EngineConfig* GetEngineConfig(IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    const EngineConfig* GetEngineConfig(IN IMS_SINT32 nSlotId) const;
     // SIP configuration - impl. defined
     //    This config. includes the SIP-specific information for a default UA behavior.
-    const SipConfig* GetSipConfig(IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    const SipConfig* GetSipConfig(IN IMS_SINT32 nSlotId) const;
     // Media configuration - impl. defined
     //    This config. includes the media-specific information (SDP for session & capabilities).
-    const MediaConfig* GetMediaConfig(IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    const MediaConfig* GetMediaConfig(IN IMS_SINT32 nSlotId) const;
 
     static ConfigurationManager* GetInstance();
 
@@ -77,19 +78,18 @@ public:
 public:
     enum
     {
-        // .conf file
+        /// .conf file
         MODE_FILE = 0,
-        // .xml file
+        /// .xml file
         MODE_XML,
-        // database
+        /// database
         MODE_DB,
-        // hsyun - 110701 Add Hard coding mode
+        /// Code-base
         MODE_CODE
-        // hsyun - end
     };
 
 private:
-    ConfigurationManagerPrivate* pConfigMngrP;
+    ConfigurationManagerPrivate* m_pConfigMngrPrivate;
 };
 
-#endif  // _CONFIGURATION_MANAGER_H_
+#endif

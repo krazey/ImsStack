@@ -16,6 +16,7 @@
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
+
 #include "private/ImsSubscriberInfo.h"
 
 __IMS_TRACE_TAG_CONF__;
