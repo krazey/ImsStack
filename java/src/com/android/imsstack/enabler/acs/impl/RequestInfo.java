@@ -25,6 +25,7 @@ import android.text.TextUtils;
 import com.android.imsstack.enabler.acs.AcServiceClientInfo;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -42,10 +43,15 @@ public class RequestInfo {
 
     private final RequestInfoBuilder mBuilder;
     private String mGBAProductToken;
-    private String mRcsState;
+    private String mAcVersion = "0";
+    private String mRcsState = "0";
     private String mOtp;
     private String mToken;
-    private String mDefaultSmsApp;
+    // 0 : OS does not allow user to select SMS application
+    // 1 :  RCS messaging client is selected as the default SMS application
+    // 2 :  RCS messaging client is not selected as the default SMS application
+    private String mDefaultSmsApp = "1";
+
     private String mDefaultVvmApp;
 
     /**
@@ -95,7 +101,8 @@ public class RequestInfo {
      * @param acVersion new AC version
      */
     public void updateAcVersion(String acVersion) {
-        mBuilder.setAcVersion(acVersion);
+        ImsLog.i("[" + mBuilder.mSlotId + "] Rcs version from " + mAcVersion + " to " + acVersion);
+        mAcVersion = acVersion;
     }
 
     /**
@@ -196,6 +203,7 @@ public class RequestInfo {
     }
 
     private String getAbsoluteUri() {
+        // TODO : need to support changing host name for testing
         if (!TextUtils.isEmpty(mBuilder.mMnc) && !TextUtils.isEmpty(mBuilder.mMcc)) {
             return new StringBuilder()
                     .append("config.rcs.mnc")
@@ -242,16 +250,23 @@ public class RequestInfo {
                     URLEncoder.encode(mDefaultSmsApp, DEFAULT_CHAT_SET))));
             buffer.append(nullCheckACParamValue(String.format("&rcs_state=%s",
                     URLEncoder.encode(mRcsState, DEFAULT_CHAT_SET))));
-
-            // ATT & TMO requires
             buffer.append(nullCheckACParamValue(String.format("&provisioning_version=%s",
                     URLEncoder.encode(mBuilder.mProvisioningVersion, DEFAULT_CHAT_SET))));
+            buffer.append(nullCheckACParamValue(String.format("&SMS_port=%s",
+                    URLEncoder.encode(mBuilder.mSmsPort, DEFAULT_CHAT_SET))));
 
             // TMO requires
-            buffer.append(nullCheckACParamValue(String.format("&default_vvm_app=%s",
-                    URLEncoder.encode(mDefaultVvmApp, DEFAULT_CHAT_SET))));
+            if (!TextUtils.isEmpty(mDefaultVvmApp)) {
+                buffer.append(nullCheckACParamValue(String.format("&default_vvm_app=%s",
+                        URLEncoder.encode(mDefaultVvmApp, DEFAULT_CHAT_SET))));
+            }
 
-        } catch (UnsupportedEncodingException e) {
+            buffer.append(encodeOtp());
+            buffer.append(encodeToken());
+
+            // TODO : need to check friendly_device_name for VZW
+
+        } catch (UnsupportedEncodingException | NullPointerException e) {
             ImsLog.e("[" + mBuilder.mSlotId + "] " + "encodeParameters : " + e.getMessage());
             return "";
         }
@@ -322,6 +337,13 @@ public class RequestInfo {
          */
         RequestInfoBuilder(int slotId, int subId,
                 @NonNull AcServiceClientInfo acServiceClientInfo) {
+            new RequestInfoBuilder(slotId, subId, acServiceClientInfo,
+                    AppContext.getTelephonyManager(subId));
+        }
+
+        @VisibleForTesting
+        public RequestInfoBuilder(int slotId, int subId, AcServiceClientInfo acServiceClientInfo,
+                TelephonyManager tm) {
             mSlotId = slotId;
             mSubId = subId;
 
@@ -335,19 +357,27 @@ public class RequestInfo {
             setTerminalVersion(Build.DISPLAY);
             setTerminalName(Build.MODEL);
 
-            TelephonyManager tm = AppContext.getTelephonyManager(subId);
-            String mccMnc = (tm != null) ? tm.getSimOperator() : "";
-            if (!TextUtils.isEmpty(mccMnc)) {
-                try {
-                    String mcc = mccMnc.substring(0, 3);
-                    String mnc = mccMnc.substring(3);
-                    setMccMnc(mcc, mnc);
-                } catch (NumberFormatException e) {
-                    ImsLog.e(e.getMessage());
+            String mcc = "";
+            String mnc = "";
+            String imsi = "";
+            String imei = "";
+            if (tm != null) {
+                String mccMnc = tm.getSimOperator();
+                if (!TextUtils.isEmpty(mccMnc)) {
+                    try {
+                        mcc = mccMnc.substring(0, 3);
+                        mnc = mccMnc.substring(3);
+
+                    } catch (NumberFormatException e) {
+                        ImsLog.e(e.getMessage());
+                    }
                 }
+                imsi = tm.getSubscriberId();
+                imei = tm.getImei(mSlotId);
             }
-            setImsi(tm.getSubscriberId());
-            setImei(tm.getImei(mSlotId));
+            setMccMnc(mcc, mnc);
+            setImsi(imsi);
+            setImei(imei);
         }
 
         /**
