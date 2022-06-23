@@ -171,6 +171,8 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_pManager->IsEnableVoiceMailServiceByPaidHeader();
         case Feature::INITIALIZE_PEM_WHEN_NO_HEADER:
             return m_pManager->IsInitializePemWhenNoHeader();
+        case Feature::SEND_180_FOR_INITIAL_INVITE:
+            return m_pManager->IsSend180ForInitialInvite();
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
             return IMS_FALSE;

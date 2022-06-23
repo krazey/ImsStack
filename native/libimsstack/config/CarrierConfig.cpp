@@ -1073,6 +1073,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADE
         "initialize_p_early_media_when_no_header_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT[] =
         "policy_for_local_ringback_tone_with_180_response_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SEND_180_FOR_INITIAL_INVITE_BOOL[] =
+        "send_180_for_initial_invite_bool";
 // Media
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL[] = "audio_bw_nego_option_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_DROP_P_FRAME_BOOL[] = "video_drop_p_frame_bool";

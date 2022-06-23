@@ -182,6 +182,7 @@ public:
             IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) const = 0;
     virtual IMS_BOOL IsInitializePemWhenNoHeader() const = 0;
     virtual IMS_SINT32 GetPolicyForLocalRingbackToneWith180Response() const = 0;
+    virtual IMS_BOOL IsSend180ForInitialInvite() const = 0;
 };
 
 #endif

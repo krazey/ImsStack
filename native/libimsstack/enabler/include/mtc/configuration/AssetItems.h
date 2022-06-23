@@ -71,7 +71,8 @@ public:
             bEnableVoiceMailServiceByPaidHeader(IMS_FALSE),
             objInformationLevelOfGeolocationPidfs(IMSVector<IMS_SINT32>()),
             bInitializePemWhenNoHeader(IMS_FALSE),
-            nPolicyForLocalRingbackToneWith180Response(0)
+            nPolicyForLocalRingbackToneWith180Response(0),
+            bSend180ForInitialInvite(IMS_FALSE)
     {
     }
     ~AssetItems()
@@ -135,6 +136,7 @@ public:
     IMSVector<IMS_SINT32> objInformationLevelOfGeolocationPidfs;
     IMS_BOOL bInitializePemWhenNoHeader;
     IMS_SINT32 nPolicyForLocalRingbackToneWith180Response;
+    IMS_BOOL bSend180ForInitialInvite;
 };
 
 #endif

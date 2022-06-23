@@ -601,15 +601,25 @@ void MtcCallState::RunMedia(IN ISession* piSession, IN IMessage* piMessage)
 PROTECTED
 IMS_RESULT MtcCallState::SendProvisionalResponse(IN IMS_BOOL bUserAlert)
 {
-    ResultSetSdp eSetSdpResult = SetSdpToSend(IMS_FALSE);
-    if (eSetSdpResult == ResultSetSdp::FAILURE)
+    IMS_BOOL bIncludeSdp =
+            !m_objContext.GetConfigurationProxy().Is(Feature::SEND_180_FOR_INITIAL_INVITE);
+
+    if (bIncludeSdp)
     {
-        return IMS_FAILURE;
+        switch (SetSdpToSend(IMS_FALSE))
+        {
+            case ResultSetSdp::NO_SDP:
+                bIncludeSdp = IMS_FALSE;
+                break;
+            case ResultSetSdp::FAILURE:
+                return IMS_FAILURE;
+            case ResultSetSdp::SUCCESS:
+                break;
+        }
     }
 
     // TODO: determine the response code based on the configuration for KR carriers?
     IMS_SINT32 nStatusCode = bUserAlert ? SipStatusCode::SC_180 : SipStatusCode::SC_183;
-    IMS_BOOL bIncludeSdp = (eSetSdpResult == ResultSetSdp::SUCCESS) ? IMS_TRUE : IMS_FALSE;
 
     return m_objContext.GetSession()->GetMessageSender().SendProvisionalResponse(
             nStatusCode, IsNeedToReliable(bIncludeSdp), bIncludeSdp, IsCallWaiting());

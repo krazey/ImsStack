@@ -808,6 +808,8 @@ public class CarrierConfig {
                 "initialize_p_early_media_when_no_header_bool";
         public static final String KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT =
                 "policy_for_local_ringback_tone_with_180_response_int";
+        public static final String KEY_SEND_180_FOR_INITIAL_INVITE_BOOL =
+                "send_180_for_initial_invite_bool";
         // Media
         public static final String KEY_AUDIO_BW_NEGO_OPTION_BOOL =
                 "audio_bw_nego_option_bool";

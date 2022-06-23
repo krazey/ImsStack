@@ -338,4 +338,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByAsset(
             CarrierConfig::Assets::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL);
     objItems.nPolicyForLocalRingbackToneWith180Response = piCc->GetInt(
             CarrierConfig::Assets::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT);
+    objItems.bSend180ForInitialInvite =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_SEND_180_FOR_INITIAL_INVITE_BOOL);
 }
