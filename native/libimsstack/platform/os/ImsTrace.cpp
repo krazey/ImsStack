@@ -17,7 +17,7 @@
 #include <cutils/log.h>
 
 #include "AStringBuffer.h"
-#include "IMSStrLib.h"
+#include "ImsStrLib.h"
 #include "ImsTrace.h"
 #include "ServiceMemory.h"
 #include "ServiceSystemTime.h"

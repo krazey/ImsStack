@@ -16,7 +16,7 @@
 #ifndef AOS_STATIC_CONFIG_H_
 #define AOS_STATIC_CONFIG_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "provider/AosStaticProfile.h"
 
 class AosStaticConfig

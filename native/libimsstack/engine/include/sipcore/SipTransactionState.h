@@ -16,8 +16,8 @@
 #ifndef SIP_TRANSACTION_STATE_H_
 #define SIP_TRANSACTION_STATE_H_
 
-#include "IPAddress.h"
-#include "RCObject.h"
+#include "IpAddress.h"
+#include "RcObject.h"
 
 #include "Sip.h"
 #include "SipDialogEx.h"
@@ -29,7 +29,7 @@ class ISipTransactionStateListener;
 class ISipTransportErrorListener;
 class SipTransport;
 
-class SipTransactionState : public RCObject
+class SipTransactionState : public RcObject
 {
 public:
     SipTransactionState();

@@ -21,7 +21,7 @@
 #include "dialingplan/EmergencyNumberList.h"
 
 #include "dialingplan/ConstSosUrn.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 __IMS_TRACE_TAG_IMS__;
 

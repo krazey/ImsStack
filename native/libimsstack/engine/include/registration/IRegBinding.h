@@ -17,7 +17,7 @@
 #define INTERFACE_REG_BINDING_H_
 
 #include "AStringArray.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #include "SipAddress.h"
 

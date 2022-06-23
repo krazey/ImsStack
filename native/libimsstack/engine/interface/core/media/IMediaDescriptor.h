@@ -16,7 +16,7 @@
 #ifndef INTERFACE_MEDIA_DESCRIPTOR_H_
 #define INTERFACE_MEDIA_DESCRIPTOR_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #include "SdpAttribute.h"
 #include "SdpBandwidth.h"

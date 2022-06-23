@@ -16,7 +16,7 @@
 #ifndef FEATURE_CAPS_H_
 #define FEATURE_CAPS_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 #include "IFeatureCaps.h"
 

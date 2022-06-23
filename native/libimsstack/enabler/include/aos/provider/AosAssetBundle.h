@@ -18,7 +18,7 @@
 
 #include "IMSTypeDef.h"
 #include "AString.h"
-#include "IMSVector.h"
+#include "ImsVector.h"
 #include "CarrierConfig.h"
 
 struct AosSpecificRegistrationErrorBundle

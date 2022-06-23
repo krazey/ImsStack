@@ -16,7 +16,7 @@
 #ifndef AOS_BUILD_DIRECTOR_H_
 #define AOS_BUILD_DIRECTOR_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 class AString;
 

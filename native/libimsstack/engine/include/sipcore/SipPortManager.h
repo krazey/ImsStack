@@ -16,7 +16,7 @@
 #ifndef SIP_PORT_MANAGER_H_
 #define SIP_PORT_MANAGER_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 /**
  * @brief This class provides the port information for SIP TCP/TLS transport protocol.

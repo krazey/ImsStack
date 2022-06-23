@@ -15,7 +15,7 @@
  */
 #include "ElementImpl.h"
 #include "IDocument.h"
-#include "IMSLib.h"
+#include "ImsLib.h"
 #include "NamedNodeMap.h"
 #include "Node.h"
 #include "NodeList.h"

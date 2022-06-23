@@ -17,7 +17,7 @@
 #define AOS_PCSCF_H_
 
 #include "ITimer.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosPcscf.h"
 #include "IConfigUpdateListener.h"

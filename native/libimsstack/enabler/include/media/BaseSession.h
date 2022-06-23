@@ -17,7 +17,7 @@
 #ifndef _IMS_BASE_SESSION_H_
 #define _IMS_BASE_SESSION_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "IMediaSessionListener.h"
 #include "MediaEnvironment.h"
 

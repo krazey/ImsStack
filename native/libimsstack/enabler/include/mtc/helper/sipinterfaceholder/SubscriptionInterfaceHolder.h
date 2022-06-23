@@ -17,9 +17,9 @@
 #ifndef SUBSCRIPTION_INTERFACE_HOLDER_H_
 #define SUBSCRIPTION_INTERFACE_HOLDER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ServiceTimer.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "ISubscriptionListener.h"
 
 class ISession;

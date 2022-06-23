@@ -17,11 +17,11 @@
 #define FEATURE_H_
 
 #include "AStringArray.h"
-#include "RCObject.h"
+#include "RcObject.h"
 
 #include "ServiceIdentifier.h"
 
-class Feature : public RCObject
+class Feature : public RcObject
 {
 public:
     explicit Feature(IN const AString& strFeature);

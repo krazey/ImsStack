@@ -16,7 +16,7 @@
 #ifndef INTERFACE_SESSION_DESCRIPTOR_H_
 #define INTERFACE_SESSION_DESCRIPTOR_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #include "SdpAttribute.h"
 

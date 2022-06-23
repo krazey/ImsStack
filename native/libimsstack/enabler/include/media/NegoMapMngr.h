@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 #ifndef _NEGO_MAP_MNGR_H_
 #define _NEGO_MAP_MNGR_H_

@@ -16,8 +16,8 @@
 #ifndef SIP_STACK_STATE_H_
 #define SIP_STACK_STATE_H_
 
-#include "IMSList.h"
-#include "IMSMap.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 
 class IMutex;
 class SipProfile;

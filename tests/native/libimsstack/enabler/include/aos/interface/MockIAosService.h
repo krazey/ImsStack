@@ -20,7 +20,7 @@
 #include <gmock/gmock.h>
 
 #include "AString.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "interface/IAosServicePhoneListener.h"
 #include "interface/IAosServiceSettingListener.h"
 #include "interface/IAosService.h"

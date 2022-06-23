@@ -16,7 +16,7 @@
 #include "ServiceTrace.h"
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "interface/IAosMsgHandlerListener.h"
 #include "provider/AosUtil.h"
 #include "provider/AosMsgHandler.h"

@@ -19,7 +19,7 @@
 
 #include "BaseServiceThread.h"
 #include "MtcDef.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 class ParticipantInfo;
 

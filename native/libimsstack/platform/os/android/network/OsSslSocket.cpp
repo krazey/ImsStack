@@ -41,7 +41,7 @@ extern "C"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
-#include "SSLCertificate.h"
+#include "SslCertificate.h"
 #include "network/OsSocketDef.h"
 #include "network/OsSocketMsg.h"
 #include "network/OsSocketService.h"
@@ -79,7 +79,7 @@ LOCAL void osSslSocket_DisplayCiphers(IN SSL* pstSsl)
 class OsSsl
 {
 public:
-    explicit OsSsl(IN SSLCertificate* pCertificate);
+    explicit OsSsl(IN SslCertificate* pCertificate);
     ~OsSsl();
 
     OsSsl(IN const OsSsl&) = delete;
@@ -87,7 +87,7 @@ public:
 
 public:
     static void StartUp();
-    static SSLCertificate CreateDefaultCertificate();
+    static SslCertificate CreateDefaultCertificate();
 
 public:
     IMS_BOOL CreateSocket(IN IMS_SOCKET hSocket);
@@ -113,7 +113,7 @@ private:
     SSL* m_pstSsl;
     BIO* m_pstSocket;
 
-    SSLCertificate m_objCertificate;
+    SslCertificate m_objCertificate;
 };
 
 // Example...
@@ -126,7 +126,7 @@ PRIVATE GLOBAL const IMS_CHAR OsSsl::DEFAULT_PASSWORD[] = "";
 PRIVATE GLOBAL IMS_BOOL OsSsl::s_bSslLibInitialized = IMS_FALSE;
 
 PUBLIC
-OsSsl::OsSsl(IN SSLCertificate* pCertificate) :
+OsSsl::OsSsl(IN SslCertificate* pCertificate) :
         m_pstCtx(IMS_NULL),
         m_pstSsl(IMS_NULL),
         m_pstSocket(IMS_NULL)
@@ -172,9 +172,9 @@ PUBLIC GLOBAL void OsSsl::StartUp()
     }
 }
 
-PUBLIC GLOBAL SSLCertificate OsSsl::CreateDefaultCertificate()
+PUBLIC GLOBAL SslCertificate OsSsl::CreateDefaultCertificate()
 {
-    SSLCertificate objCertificate(DEFAULT_CERTIFICATE);
+    SslCertificate objCertificate(DEFAULT_CERTIFICATE);
 
     objCertificate.SetCAFile(DEFAULT_CA_FILE);
     objCertificate.SetPassword(DEFAULT_PASSWORD);
@@ -210,7 +210,7 @@ IMS_BOOL OsSsl::Initialize()
 
         IMS_SINT32 nFileType = SSL_FILETYPE_PEM;
 
-        if (m_objCertificate.GetKeyFileType() == SSLCertificate::FILETYPE_ASN1)
+        if (m_objCertificate.GetKeyFileType() == SslCertificate::FILETYPE_ASN1)
         {
             nFileType = SSL_FILETYPE_ASN1;
         }
@@ -533,7 +533,7 @@ PRIVATE GLOBAL IMS_SINT32 OsSsl::GetPemPassword(IN IMS_CHAR* pszBuffer, IN IMS_S
 }
 
 PUBLIC
-OsSslSocket::OsSslSocket(IN SSLCertificate* pCertificate) :
+OsSslSocket::OsSslSocket(IN SslCertificate* pCertificate) :
         OsSocket(),
         m_nSslState(SSL_STATE_IDLE),
         m_nSslConnectRetryCount(0),

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "IDigestAka.h"
-#include "NATHelper.h"
+#include "NatHelper.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServicePhoneInfo.h"
@@ -244,9 +244,9 @@ void Registration::Destroy()
     SetSipMessageMediator(IMS_NULL);
 
     // NAT_REQ_UE_PUBLIC_IP
-    if (NATHelper::IsNATResolverRequired())
+    if (NatHelper::IsNatResolverRequired())
     {
-        NATHelper::GetInstance()->RemovePublicAddress(
+        NatHelper::GetInstance()->RemovePublicAddress(
                 GetSlotId(), m_pRegFlow->GetRegKey().GetFlowId());
     }
 
@@ -1142,9 +1142,9 @@ PRIVATE VIRTUAL void Registration::Restore()
     m_bIsBehindNat = IMS_FALSE;
     m_pStateTracker->SetPublicIpAddress(IPAddress::NONE);
 
-    if (NATHelper::IsNATResolverRequired())
+    if (NatHelper::IsNatResolverRequired())
     {
-        NATHelper::GetInstance()->RemovePublicAddress(
+        NatHelper::GetInstance()->RemovePublicAddress(
                 GetSlotId(), m_pRegFlow->GetRegKey().GetFlowId());
     }
 }
@@ -2026,9 +2026,9 @@ void Registration::CheckUaLocation(IN ISipMessage* piSipMsg)
             m_pStateTracker->SetPublicIpAddress(IPAddress::NONE);
         }
 
-        if (NATHelper::IsNATResolverRequired())
+        if (NatHelper::IsNatResolverRequired())
         {
-            NATHelper::GetInstance()->SetPublicAddress(GetSlotId(),
+            NatHelper::GetInstance()->SetPublicAddress(GetSlotId(),
                     m_pRegFlow->GetRegKey().GetFlowId(), objSentBy,
                     (m_bIsBehindNat ? objReceived : IPAddress::NONE));
         }

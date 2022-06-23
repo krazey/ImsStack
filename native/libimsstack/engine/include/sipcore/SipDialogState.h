@@ -16,7 +16,7 @@
 #ifndef SIP_DIALOG_STATE_H_
 #define SIP_DIALOG_STATE_H_
 
-#include "RCObject.h"
+#include "RcObject.h"
 
 #include "SipDState.h"
 #include "SipMessageInfo.h"
@@ -35,7 +35,7 @@ class SipHeader;
  * from its peer to the UA), a local URI, a remote URI, remote target, a boolean flag called
  * "secure", and a route set, which is an ordered list of URIs.
  */
-class SipDialogState : public RCObject
+class SipDialogState : public RcObject
 {
 public:
     class PendingRemoteTarget

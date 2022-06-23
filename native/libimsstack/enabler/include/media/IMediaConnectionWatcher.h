@@ -17,7 +17,7 @@
 #ifndef _INTERFACE_IMS_MEDIA_CONNECTION_WATCHER_H_
 #define _INTERFACE_IMS_MEDIA_CONNECTION_WATCHER_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 class INetworkConnection;
 class IMediaConnectionWatcherListener;

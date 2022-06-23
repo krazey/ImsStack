@@ -17,7 +17,7 @@
 #define INTERFACE_IMS_AOS_SERVICE_H_
 
 #include "ImsMessageDef.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 class IIAosService
 {

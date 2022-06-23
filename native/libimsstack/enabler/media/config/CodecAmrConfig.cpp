@@ -15,7 +15,7 @@
  */
 
 #include "ServiceTrace.h"
-#include "IMSVector.h"
+#include "ImsVector.h"
 #include "config/CodecAmrConfig.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");

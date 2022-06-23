@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 #include "AStringBuffer.h"
-#include "IMSMap.h"
-#include "IPAddress.h"
+#include "ImsMap.h"
+#include "IpAddress.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 

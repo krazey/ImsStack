@@ -17,7 +17,7 @@
 #ifndef MTC_FACTORY_H_
 #define MTC_FACTORY_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "IMSTypeDef.h"
 #include "IMutex.h"
 

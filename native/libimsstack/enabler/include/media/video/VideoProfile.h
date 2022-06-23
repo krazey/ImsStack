@@ -18,8 +18,8 @@
 #define _IMS_VIDEO_NEGO_PROFILE_H_
 
 #include "IMSTypeDef.h"
-#include "IPAddress.h"
-#include "IMSMap.h"
+#include "IpAddress.h"
+#include "ImsMap.h"
 #include "MediaDef.h"
 #include "VideoDef.h"
 

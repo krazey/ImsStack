@@ -16,7 +16,7 @@
 #ifndef REG_SUBJECT_H_
 #define REG_SUBJECT_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 
 #include "RegObserver.h"
 

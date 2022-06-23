@@ -17,7 +17,7 @@
 #ifndef IDLE_STATE_H_
 #define IDLE_STATE_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "IMSTypeDef.h"
 #include "call/state/MtcCallState.h"
 #include "helper/block/IMtcBlockChecker.h"

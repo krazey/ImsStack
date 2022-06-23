@@ -16,7 +16,7 @@
 #ifndef AOS_IPSEC_H_
 #define AOS_IPSEC_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 #include "ByteArray.h"
 #include "SipSecurityHeader.h"
 #include "IIpSecPolicyListener.h"

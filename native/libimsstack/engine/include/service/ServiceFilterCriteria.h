@@ -16,7 +16,7 @@
 #ifndef SERVICE_FILTER_CRITERIA_H_
 #define SERVICE_FILTER_CRITERIA_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 #include "IServiceFilterCriteria.h"
 

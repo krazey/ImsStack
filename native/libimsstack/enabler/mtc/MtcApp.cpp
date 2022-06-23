@@ -16,7 +16,7 @@
 
 #include "AString.h"
 #include "Configuration.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ImsServiceConfig.h"
 #include "ServiceTrace.h"
 

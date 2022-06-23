@@ -15,7 +15,7 @@
  */
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
-#include "IMSStrLib.h"
+#include "ImsStrLib.h"
 
 #include "SipAck.h"
 #include "SipStackHeaders.h"

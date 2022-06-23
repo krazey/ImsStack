@@ -16,8 +16,8 @@
 #ifndef IMS_SOCKET_STATE_H_
 #define IMS_SOCKET_STATE_H_
 
-#include "IMSList.h"
-#include "IMSMap.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "ImsSocket.h"
 
 class IMutex;

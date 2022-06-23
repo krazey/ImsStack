@@ -18,7 +18,7 @@
 #define QOS_TIMER_H_
 
 #include "IMSTypeDef.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "ServiceTimer.h"
 #include "precondition/IQosTimerListener.h"
 #include "precondition/QosDef.h"

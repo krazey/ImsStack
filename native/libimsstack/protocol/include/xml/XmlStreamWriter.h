@@ -16,8 +16,8 @@
 #ifndef XML_STREAM_WRITER_H_
 #define XML_STREAM_WRITER_H_
 
-#include "IMSStack.h"
 #include "IXmlStreamWriter.h"
+#include "ImsStack.h"
 
 class XmlStreamWriter : public IXmlStreamWriter
 {
@@ -164,7 +164,7 @@ private:
     AString m_strDefaultNamespace;
     XmlError* m_pError;
     IMSList<XmlPrefix*> m_objPrefixes;
-    IMSStack<XmlElement*> m_objElements;
+    ImsStack<XmlElement*> m_objElements;
 };
 
 #endif

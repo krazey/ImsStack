@@ -15,7 +15,7 @@
  */
 
 #include "ServiceTrace.h"
-#include "IMSVector.h"
+#include "ImsVector.h"
 #include "config/ImsCodec.h"
 #include "config/AudioConfiguration.h"
 

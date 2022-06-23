@@ -16,7 +16,7 @@
 #ifndef SIP_TRANSPORT_ADDRESS_H_
 #define SIP_TRANSPORT_ADDRESS_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 class SipTransportAddress
 {

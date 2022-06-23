@@ -19,7 +19,7 @@
 
 #include "CallReasonInfo.h"
 #include "MtcDef.h"
-#include "IMSStrLib.h"
+#include "ImsStrLib.h"
 
 class MtcDefPs
 {

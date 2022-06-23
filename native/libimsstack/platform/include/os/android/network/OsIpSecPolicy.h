@@ -17,8 +17,8 @@
 #define OS_IPSEC_POLICY_H_
 
 #include "IIpSecPolicy.h"
-#include "IMSList.h"
 #include "ITimer.h"
+#include "ImsList.h"
 
 class IIpSecSp;
 class IIpSecSa;

@@ -1,4 +1,4 @@
-#include "IPAddress.h"
+#include "IpAddress.h"
 #include "msg/SipAddrSpec.h"
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"

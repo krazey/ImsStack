@@ -17,7 +17,7 @@
 #ifndef INTERFACE_MTC_CALL_MANAGER_H_
 #define INTERFACE_MTC_CALL_MANAGER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "IMSTypeDef.h"
 #include "call/IMtcCall.h"
 #include "IMtcService.h"

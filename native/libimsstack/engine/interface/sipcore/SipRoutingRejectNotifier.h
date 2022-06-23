@@ -16,7 +16,7 @@
 #ifndef SIP_ROUTING_REJECT_NOTIFIER_H_
 #define SIP_ROUTING_REJECT_NOTIFIER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ISipRoutingRejectNotifier.h"
 #include "SipStatusCode.h"
 

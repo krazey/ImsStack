@@ -16,9 +16,9 @@
 #ifndef SIP_MESSAGE_BUFFER_H_
 #define SIP_MESSAGE_BUFFER_H_
 
-#include "RCObject.h"
+#include "RcObject.h"
 
-class SipMessageBuffer : public RCObject
+class SipMessageBuffer : public RcObject
 {
 public:
     SipMessageBuffer();

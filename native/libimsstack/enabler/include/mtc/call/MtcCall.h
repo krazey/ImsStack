@@ -17,7 +17,7 @@
 #ifndef MTC_CALL_H_
 #define MTC_CALL_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "IMSTypeDef.h"
 #include "IMtcContext.h"
 #include "ISessionListener.h"

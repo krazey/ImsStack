@@ -17,7 +17,7 @@
 #define INTERFACE_ISIM_LISTENER_H_
 
 #include "ByteArray.h"
-#include "IMSList.h"
+#include "ImsList.h"
 
 class IIsimListener
 {

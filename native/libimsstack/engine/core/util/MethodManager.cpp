@@ -20,14 +20,14 @@
 
 PUBLIC
 MethodManager::MethodManager() :
-        RCObject(),
+        RcObject(),
         m_objMethods(IMSList<Method*>())
 {
 }
 
 PUBLIC
 MethodManager::MethodManager(IN const MethodManager& other) :
-        RCObject(other),
+        RcObject(other),
         m_objMethods(other.m_objMethods)
 {
 }

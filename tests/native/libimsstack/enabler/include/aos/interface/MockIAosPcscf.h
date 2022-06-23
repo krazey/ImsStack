@@ -20,8 +20,8 @@
 #include <gmock/gmock.h>
 
 #include "IMSTypeDef.h"
-#include "IMSList.h"
-#include "IPAddress.h"
+#include "ImsList.h"
+#include "IpAddress.h"
 #include "AStringArray.h"
 #include "interface/IAosPcscf.h"
 

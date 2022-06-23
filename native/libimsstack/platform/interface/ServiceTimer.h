@@ -16,9 +16,9 @@
 #ifndef SERVICE_TIMER_H_
 #define SERVICE_TIMER_H_
 
-#include "IMSList.h"
-#include "ImsMessage.h"
 #include "ITimer.h"
+#include "ImsList.h"
+#include "ImsMessage.h"
 
 class IMutex;
 

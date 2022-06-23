@@ -19,7 +19,7 @@
 
 #include <gmock/gmock.h>
 #include "ImsTypeDef.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "JniCallInfo.h"
 #include "call/IMtcCallContext.h"
 

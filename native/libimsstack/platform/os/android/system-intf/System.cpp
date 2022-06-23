@@ -15,8 +15,8 @@
  */
 #include <utils/String8.h>
 
-#include "IMSMap.h"
-#include "IMSStrLib.h"
+#include "ImsMap.h"
+#include "ImsStrLib.h"
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
 #include "ServiceTrace.h"

@@ -17,7 +17,7 @@
 #define AOS_CONNECTION_H_
 
 #include "AStringArray.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #include "interface/IAosConnection.h"
 #include "INetworkConnection.h"

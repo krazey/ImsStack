@@ -16,8 +16,8 @@
 #ifndef ENABLER_FACTORY_H_
 #define ENABLER_FACTORY_H_
 
-#include "IMSList.h"
-#include "IMSMap.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 
 #include "IEnabler.h"
 

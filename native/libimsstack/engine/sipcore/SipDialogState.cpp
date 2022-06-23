@@ -53,7 +53,7 @@ SipDialogState::PendingRemoteTarget::~PendingRemoteTarget()
 
 PUBLIC
 SipDialogState::SipDialogState(IN IMS_BOOL bIsCaller /*= IMS_TRUE*/) :
-        RCObject(),
+        RcObject(),
         m_bIsCaller(bIsCaller),
         m_pLocalUri(IMS_NULL),
         m_pRemoteUri(IMS_NULL),
@@ -81,7 +81,7 @@ SipDialogState::SipDialogState(IN IMS_BOOL bIsCaller /*= IMS_TRUE*/) :
 
 PUBLIC
 SipDialogState::SipDialogState(IN const SipDialogState& other) :
-        RCObject(other)
+        RcObject(other)
 {
     // NOTE: If reference count is not used, you MUST implement this copy constructor
 }

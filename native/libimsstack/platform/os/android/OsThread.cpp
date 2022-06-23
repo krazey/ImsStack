@@ -19,7 +19,7 @@
 #include <unistd.h>
 
 #include "ImsMessageDef.h"
-#include "IMSQueue.h"
+#include "ImsQueue.h"
 #include "OsMutex.h"
 #include "OsThread.h"
 #include "ServiceConfig.h"
@@ -93,7 +93,7 @@ public:
 
     // Name of this thread
     AString m_strName;
-    IMSQueue<ImsMessage> m_objMsgQ;
+    ImsQueue<ImsMessage> m_objMsgQ;
 };
 
 PUBLIC

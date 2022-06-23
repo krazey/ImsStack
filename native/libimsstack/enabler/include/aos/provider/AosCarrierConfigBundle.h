@@ -18,7 +18,7 @@
 
 #include "IMSTypeDef.h"
 #include "AString.h"
-#include "IMSVector.h"
+#include "ImsVector.h"
 
 /// ims.
 struct AosMmtelRequiresProvisioningBundle

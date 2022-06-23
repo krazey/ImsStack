@@ -15,7 +15,7 @@
  */
 #include "ServiceMemory.h"
 #include "ServiceSystemTime.h"
-#include "IMSDigest.h"
+#include "ImsDigest.h"
 
 #include "ISipHeader.h"
 #include "SipAuHelper.h"
@@ -694,10 +694,10 @@ IMS_BOOL SipAuHelperPrivate::FormCredentials(IN const SipMethod& objMethod,
             // IMS_AKA::AUTH_SQN_SYNCHRONIZATION_FAILURE
 
             // Server has requested Digest Authentication Scheme.
-            HASHHEX hhEntity = {
+            HASHHEX hEntity = {
                     0,
             };
-            HASHHEX hhA1 = {
+            HASHHEX hA1 = {
                     0,
             };
             IMS_CHAR acResponse[HASHHEX_SIZE + 1] = {
@@ -707,18 +707,18 @@ IMS_BOOL SipAuHelperPrivate::FormCredentials(IN const SipMethod& objMethod,
             // Calculate H(Entity-Body) required for the response
             if (objResponse.m_strQop.EqualsIgnoreCase(STR_QOP_AUTH_INT))
             {
-                IMSDigestEx_CalculateHEntity(strEntityBody, hhEntity);
+                ImsDigest_CalculateEntity(strEntityBody, hEntity);
             }
 
             // Calculate the H(A1)
-            IMSDigestEx_CalculateHA1(objResponse.m_strAlgorithm, objResponse.m_strUserName,
+            ImsDigest_CalculateA1(objResponse.m_strAlgorithm, objResponse.m_strUserName,
                     objResponse.m_strRealm, objResponse.m_strPassword, objResponse.m_strNonce,
-                    objResponse.m_strCNonce, hhA1);
+                    objResponse.m_strCNonce, hA1);
 
             // Calculate the response digest
-            IMSDigestEx_CalculateResponse(hhA1, objResponse.m_strNonce, objResponse.m_strNonceCount,
+            ImsDigest_CalculateResponse(hA1, objResponse.m_strNonce, objResponse.m_strNonceCount,
                     objResponse.m_strCNonce, objResponse.m_strQop, objMethod.ToString(), strUri,
-                    hhEntity, acResponse);
+                    hEntity, acResponse);
 
             strDigestRes.Append(TextParser::CHAR_DQUOT);
             strDigestRes.Append(acResponse);

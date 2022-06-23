@@ -20,7 +20,7 @@
 #include "AString.h"
 #include "IDocument.h"
 #include "IMessage.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 typedef struct DialogLR
 {

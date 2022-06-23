@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "IMSUUID.h"
+#include "ImsUuid.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
@@ -421,7 +421,7 @@ LOCAL void geolocationPidfCreator_CreatePIDF(IN const AString& strEntityUri,
         }
         else
         {
-            strDeviceId = IMSUUID::GetUUID(IMSUUID::VERSION_1);
+            strDeviceId = ImsUuid::GetUuid(ImsUuid::VERSION_1);
             strDeviceId.Prepend("urn:uuid:");
         }
 

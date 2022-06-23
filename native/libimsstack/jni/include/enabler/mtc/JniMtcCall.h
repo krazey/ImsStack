@@ -22,7 +22,7 @@
 #include "JniMtcCallThread.h"
 #include "IuMtcCall.h"
 #include "call/IMtcCall.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 class IMtcCallController;
 

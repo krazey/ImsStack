@@ -17,7 +17,7 @@
 #define INTERFACE_AOS_APP_CONTEXT_H_
 
 #include "IMSTypeDef.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "AString.h"
 
 #include "provider/AosStaticProfile.h"

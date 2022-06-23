@@ -16,7 +16,7 @@
 #ifndef AOS_STATIC_PROFILE_H_
 #define AOS_STATIC_PROFILE_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "AString.h"
 
 /// Define a flow Id for registration

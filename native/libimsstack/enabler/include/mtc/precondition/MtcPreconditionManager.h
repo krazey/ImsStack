@@ -17,7 +17,7 @@
 #ifndef MTC_PRECONDITION_MANAGER_H_
 #define MTC_PRECONDITION_MANAGER_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "IMSTypeDef.h"
 
 #include "call/IMtcCallContext.h"

@@ -16,9 +16,9 @@
 #ifndef IMS_NETWORK_CONNECTION_STATE_H_
 #define IMS_NETWORK_CONNECTION_STATE_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ImsNetworkConnection.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 class IMutex;
 

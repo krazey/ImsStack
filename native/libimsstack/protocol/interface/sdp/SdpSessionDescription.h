@@ -16,7 +16,7 @@
 #ifndef SDP_SESSION_DESCRIPTION_H_
 #define SDP_SESSION_DESCRIPTION_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #include "SdpDescription.h"
 #include "SdpOrigin.h"

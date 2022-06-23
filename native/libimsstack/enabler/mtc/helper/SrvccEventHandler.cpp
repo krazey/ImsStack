@@ -18,7 +18,7 @@
 #include "helper/SrvccEventHandler.h"
 #include "ServiceTrace.h"
 #include "helper/ISrvccStateListener.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "IMtcContext.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

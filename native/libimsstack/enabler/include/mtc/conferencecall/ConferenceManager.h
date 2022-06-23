@@ -17,7 +17,7 @@
 #ifndef CONFERENCE_MANAGER_H_
 #define CONFERENCE_MANAGER_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "conferencecall/IConferenceControllerListener.h"
 #include "conferencecall/IConferenceManager.h"
 #include "conferencecall/ConferenceController.h"

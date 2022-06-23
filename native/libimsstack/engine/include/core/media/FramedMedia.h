@@ -18,7 +18,7 @@
 
 #include "AStringArray.h"
 #include "ByteArray.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 #include "media/Media.h"
 

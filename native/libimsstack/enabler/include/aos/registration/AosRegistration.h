@@ -19,7 +19,7 @@
 #include "ITimer.h"
 
 #include "ImsActivityEx.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #include "IRegistrationListener.h"
 #include "base/IMessageMediator.h"

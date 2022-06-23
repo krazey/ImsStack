@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
-#include "IMSLib.h"
-#include "IMSStrLib.h"
+#include "ImsLib.h"
+#include "ImsStrLib.h"
 
 #include "SipHeaderName.h"
 #include "SipMessageFraming.h"

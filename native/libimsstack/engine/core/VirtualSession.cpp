@@ -39,7 +39,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 VirtualSession::VirtualSession(IN Service* pService, IN const SipAddress* pUserAor) :
-        RCObject(),
+        RcObject(),
         m_pService(pService),
         m_nState(STATE_CREATED),
         m_pOaState(IMS_NULL),
@@ -52,7 +52,7 @@ VirtualSession::VirtualSession(IN Service* pService, IN const SipAddress* pUserA
 
 PUBLIC
 VirtualSession::VirtualSession(IN const VirtualSession& other) :
-        RCObject(other)
+        RcObject(other)
 {
 }
 

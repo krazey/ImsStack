@@ -32,7 +32,7 @@ __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
 SipTransactionState::SipTransactionState() :
-        RCObject(),
+        RcObject(),
         m_nType(0),
         m_nClass(CLASS_NONE),
         m_nCSeqNumber(1),
@@ -49,7 +49,7 @@ SipTransactionState::SipTransactionState() :
 
 PUBLIC
 SipTransactionState::SipTransactionState(IN SipDialogEx* pDialogEx) :
-        RCObject(),
+        RcObject(),
         m_nType(0),
         m_nClass(CLASS_NONE),
         m_nCSeqNumber(1),
@@ -66,7 +66,7 @@ SipTransactionState::SipTransactionState(IN SipDialogEx* pDialogEx) :
 
 PUBLIC
 SipTransactionState::SipTransactionState(IN const SipTransactionState& other) :
-        RCObject(other),
+        RcObject(other),
         m_nType(other.m_nType),
         m_nClass(other.m_nClass),
         m_nCSeqNumber(other.m_nCSeqNumber),

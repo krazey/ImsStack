@@ -17,7 +17,7 @@
 #ifndef MTS_FACTORY_H_
 #define MTS_FACTORY_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 class IMtsApp;
 class MtsApp;

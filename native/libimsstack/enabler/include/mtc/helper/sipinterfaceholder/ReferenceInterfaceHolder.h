@@ -17,9 +17,9 @@
 #ifndef REFERENCE_INTERFACE_HOLDER_H_
 #define REFERENCE_INTERFACE_HOLDER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ServiceTimer.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "IReferenceListener.h"
 
 class ISession;

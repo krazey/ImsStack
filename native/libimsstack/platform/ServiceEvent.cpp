@@ -16,7 +16,7 @@
 #include "IEventReceiver.h"
 #include "IEventSender.h"
 #include "ImsActivity.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "ImsMessageDef.h"
 #include "PlatformFactory.h"
 #include "ServiceEvent.h"

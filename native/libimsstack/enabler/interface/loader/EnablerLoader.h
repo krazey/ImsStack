@@ -16,8 +16,8 @@
 #ifndef ENABLER_LOADER_H_
 #define ENABLER_LOADER_H_
 
-#include "IMSMap.h"
 #include "ISystemConfigListener.h"
+#include "ImsMap.h"
 
 class EnablerFactory;
 class EnablerThread;

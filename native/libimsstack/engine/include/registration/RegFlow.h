@@ -16,7 +16,7 @@
 #ifndef REG_FLOW_H_
 #define REG_FLOW_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #include "RegKey.h"
 

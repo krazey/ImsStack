@@ -18,7 +18,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "IMSQueue.h"
+#include "ImsQueue.h"
 #include "OsMutex.h"
 #include "OsPthread.h"
 #include "ServiceMemory.h"

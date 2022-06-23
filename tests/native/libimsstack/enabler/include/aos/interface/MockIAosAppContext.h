@@ -19,8 +19,8 @@
 
 #include <gmock/gmock.h>
 
-#include "IMSTypeDef.h"
-#include "IMSMap.h"
+#include "ImsTypeDef.h"
+#include "ImsMap.h"
 #include "AString.h"
 #include "interface/IAosAppContext.h"
 #include "provider/AosStaticProfile.h"

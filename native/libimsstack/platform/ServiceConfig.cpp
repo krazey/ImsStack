@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "ImsCarrierConfig.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "ImsMessageDef.h"
 #include "PlatformFactory.h"
 #include "ServiceConfig.h"

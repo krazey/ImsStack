@@ -17,7 +17,7 @@
 #ifndef MTC_CONTEXT_REPOSITORY_H_
 #define MTC_CONTEXT_REPOSITORY_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "IMSTypeDef.h"
 
 class IMtcContext;

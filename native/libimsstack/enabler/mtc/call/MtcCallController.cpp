@@ -15,7 +15,7 @@
  */
 
 #include "IMessage.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "call/IMtcCallManager.h"
 #include "IMtcContext.h"
 #include "ISession.h"

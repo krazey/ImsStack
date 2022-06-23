@@ -17,7 +17,7 @@
 #define REG_INFO_MANAGER_H_
 
 #include "AString.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 #include "IRegInfoParserListener.h"
 #include "RegKey.h"

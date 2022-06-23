@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "IMSVector.h"
+#include "ImsVector.h"
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
 #include "ImsEventDef.h"

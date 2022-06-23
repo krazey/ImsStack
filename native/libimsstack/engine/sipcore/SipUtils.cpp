@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "IMSHMAC.h"
-#include "IMSMD5.h"
-#include "IMSStrLib.h"
+#include "ImsHmac.h"
+#include "ImsMd5.h"
+#include "ImsStrLib.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
@@ -72,7 +72,7 @@ PUBLIC GLOBAL AString SipUtils::GenerateSessionId(
     // 128-bit result encoded using lowercase alphanumeric hex representation
     IMS_UCHAR uacSessionId[20];
 
-    IMSHMAC_SHA1(reinterpret_cast<const IMS_UCHAR*>(strCallId.GetStr()), strCallId.GetLength(),
+    ImsHmac_Sha1(reinterpret_cast<const IMS_UCHAR*>(strCallId.GetStr()), strCallId.GetLength(),
             reinterpret_cast<const IMS_UCHAR*>(strSecretKey.GetStr()), strSecretKey.GetLength(),
             uacSessionId);
 
@@ -107,7 +107,7 @@ PUBLIC GLOBAL AString SipUtils::GenerateViaBranch(IN const IMS_CHAR* pszToTag,
         IN const AString& strExtensionToken /* = AString::ConstNull() */)
 {
     const IMS_UCHAR COLON[2] = {':', '\0'};
-    MD5Context stMd5Ctx;
+    ImsMd5Context objMd5Ctx;
     IMS_UCHAR ucTemp;
     IMS_UCHAR aucBranch[16];
     IMS_CHAR acViaBranch[32 + 1] = {
@@ -115,37 +115,37 @@ PUBLIC GLOBAL AString SipUtils::GenerateViaBranch(IN const IMS_CHAR* pszToTag,
     };
 
     // Calculate H(branch)
-    IMSMD5_Initialize(&stMd5Ctx);
-    IMSMD5_Update(
-            reinterpret_cast<const IMS_UCHAR*>(pszFromTag), IMS_StrLen(pszFromTag), &stMd5Ctx);
-    IMSMD5_Update(COLON, 1, &stMd5Ctx);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszCallId), IMS_StrLen(pszCallId), &stMd5Ctx);
+    ImsMd5_Initialize(&objMd5Ctx);
+    ImsMd5_Update(
+            reinterpret_cast<const IMS_UCHAR*>(pszFromTag), IMS_StrLen(pszFromTag), &objMd5Ctx);
+    ImsMd5_Update(COLON, 1, &objMd5Ctx);
+    ImsMd5_Update(reinterpret_cast<const IMS_UCHAR*>(pszCallId), IMS_StrLen(pszCallId), &objMd5Ctx);
 
     if (pszToTag != IMS_NULL)
     {
-        IMSMD5_Update(COLON, 1, &stMd5Ctx);
-        IMSMD5_Update(
-                reinterpret_cast<const IMS_UCHAR*>(pszToTag), IMS_StrLen(pszToTag), &stMd5Ctx);
+        ImsMd5_Update(COLON, 1, &objMd5Ctx);
+        ImsMd5_Update(
+                reinterpret_cast<const IMS_UCHAR*>(pszToTag), IMS_StrLen(pszToTag), &objMd5Ctx);
     }
 
-    IMSMD5_Update(COLON, 1, &stMd5Ctx);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszRequestUri), IMS_StrLen(pszRequestUri),
-            &stMd5Ctx);
+    ImsMd5_Update(COLON, 1, &objMd5Ctx);
+    ImsMd5_Update(reinterpret_cast<const IMS_UCHAR*>(pszRequestUri), IMS_StrLen(pszRequestUri),
+            &objMd5Ctx);
 
     AString strCSeq;
     strCSeq.SetNumber(nCSeqNum);
-    IMSMD5_Update(COLON, 1, &stMd5Ctx);
-    IMSMD5_Update(
-            reinterpret_cast<const IMS_UCHAR*>(strCSeq.GetStr()), strCSeq.GetLength(), &stMd5Ctx);
+    ImsMd5_Update(COLON, 1, &objMd5Ctx);
+    ImsMd5_Update(
+            reinterpret_cast<const IMS_UCHAR*>(strCSeq.GetStr()), strCSeq.GetLength(), &objMd5Ctx);
 
     if (pszTopmostVia != IMS_NULL)
     {
-        IMSMD5_Update(COLON, 1, &stMd5Ctx);
-        IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszTopmostVia), IMS_StrLen(pszTopmostVia),
-                &stMd5Ctx);
+        ImsMd5_Update(COLON, 1, &objMd5Ctx);
+        ImsMd5_Update(reinterpret_cast<const IMS_UCHAR*>(pszTopmostVia), IMS_StrLen(pszTopmostVia),
+                &objMd5Ctx);
     }
 
-    IMSMD5_Finalize(&stMd5Ctx, aucBranch);
+    ImsMd5_Finalize(&objMd5Ctx, aucBranch);
 
     for (IMS_UINT32 i = 0; i < 16; i++)
     {

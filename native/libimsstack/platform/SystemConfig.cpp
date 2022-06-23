@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "DeviceConfig.h"
-#include "IMSStrLib.h"
+#include "ImsStrLib.h"
 #include "ServiceMemory.h"
 #include "SystemConfig.h"
 

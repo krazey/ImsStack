@@ -15,9 +15,9 @@
 
 #include <stdarg.h>
 #include "IMSTypeDef.h"
-#include "IMSList.h"
+#include "ImsList.h"
 // Temp
-#include "RCObject.h"
+#include "RcObject.h"
 
 class WCharPtr;
 

@@ -16,7 +16,7 @@
 #ifndef SOCKET_ADDRESS_H_
 #define SOCKET_ADDRESS_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 /**
  * @brief This class defines the socket address. It consists of IP address and port number.

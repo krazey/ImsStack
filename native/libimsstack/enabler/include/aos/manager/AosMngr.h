@@ -16,8 +16,8 @@
 #ifndef AOS_MNGR_H_
 #define AOS_MNGR_H_
 
-#include "IMSList.h"
-#include "IMSMap.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 
 class AString;
 class AosBuildDirector;

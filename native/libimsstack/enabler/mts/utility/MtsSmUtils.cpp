@@ -16,7 +16,7 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "IMSStrLib.h"
+#include "ImsStrLib.h"
 #include "utility/MtsSmUtils.h"
 #include "MtsApp.h"
 

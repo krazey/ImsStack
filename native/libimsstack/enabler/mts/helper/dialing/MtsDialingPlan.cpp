@@ -17,7 +17,7 @@
 #include "ServiceTrace.h"
 #include "ServiceNetwork.h"
 #include "ServiceUtil.h"
-#include "IMSLib.h"
+#include "ImsLib.h"
 #include "ImsIdentity.h"
 #include "helper/dialing/MtsDialingPlan.h"
 #include "utility/MtsSipFormUtils.h"

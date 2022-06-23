@@ -21,8 +21,8 @@
 #include "CarrierConfig.h"
 #include "configuration/AssetItems.h"
 #include "configuration/CarrierConfigItems.h"
-#include "IMSMap.h"
-#include "IMSList.h"
+#include "ImsMap.h"
+#include "ImsList.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

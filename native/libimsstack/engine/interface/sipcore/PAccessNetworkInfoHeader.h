@@ -16,8 +16,8 @@
 #ifndef P_ACCESS_NETWORK_INFO_HEADER_H_
 #define P_ACCESS_NETWORK_INFO_HEADER_H_
 
-#include "IPAddress.h"
 #include "ImsAccessNetworkInfoType.h"
+#include "IpAddress.h"
 #include "SipMethod.h"
 
 class INetworkConnection;

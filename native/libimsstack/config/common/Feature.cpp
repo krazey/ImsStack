@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "AStringBuffer.h"
-#include "IMSLib.h"
+#include "ImsLib.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
@@ -57,7 +57,7 @@ PUBLIC GLOBAL const IMS_CHAR Feature::PREFIX_3GPP_ICSI[] = "urn:urn-7:3gpp-servi
 
 PUBLIC
 Feature::Feature(IN const AString& strFeature) :
-        RCObject(),
+        RcObject(),
         m_nType(NONE),
         m_bCaseSensitivity(IMS_FALSE),
         m_strTag(AString::ConstNull()),
@@ -68,7 +68,7 @@ Feature::Feature(IN const AString& strFeature) :
 
 PUBLIC
 Feature::Feature(IN const AString& strTag, IN const AString& strValue) :
-        RCObject(),
+        RcObject(),
         m_nType(NONE),
         m_bCaseSensitivity(IMS_FALSE),
         m_strTag(AString::ConstNull()),
@@ -86,7 +86,7 @@ Feature::Feature(IN const AString& strTag, IN const AString& strValue) :
 
 PUBLIC
 Feature::Feature(IN const Feature& other) :
-        RCObject(other),
+        RcObject(other),
         m_nType(other.m_nType),
         m_bCaseSensitivity(other.m_bCaseSensitivity),
         m_strTag(other.m_strTag),
@@ -101,7 +101,7 @@ Feature& Feature::operator=(IN const Feature& other)
 {
     if (this != &other)
     {
-        RCObject::operator=(other);
+        RcObject::operator=(other);
         m_nType = other.m_nType;
         m_bCaseSensitivity = other.m_bCaseSensitivity;
         m_strTag = other.m_strTag;

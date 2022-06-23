@@ -19,8 +19,8 @@
 
 /* == INCLUDES ========================================================= */
 #include "IMSTypeDef.h"
-#include "IPAddress.h"
-#include "IMSMap.h"
+#include "IpAddress.h"
+#include "ImsMap.h"
 
 class AudioProfile
 {

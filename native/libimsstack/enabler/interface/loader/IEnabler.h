@@ -16,7 +16,7 @@
 #ifndef INTERFACE_ENABLER_H_
 #define INTERFACE_ENABLER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 
 class IEnabler
 {

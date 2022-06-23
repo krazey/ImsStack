@@ -16,8 +16,8 @@
 #ifndef NAEMD_NODE_MAP_H_
 #define NAEMD_NODE_MAP_H_
 
-#include "IMSList.h"
 #include "INamedNodeMap.h"
+#include "ImsList.h"
 
 class NamedNodeMap : public INamedNodeMap
 {

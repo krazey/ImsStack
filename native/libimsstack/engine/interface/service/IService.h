@@ -17,7 +17,7 @@
 #define INTERFACE_SERVICE_H_
 
 #include "AStringArray.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #include "IConnection.h"
 #include "SipAddress.h"

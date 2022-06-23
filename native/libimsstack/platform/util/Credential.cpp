@@ -12,8 +12,8 @@
 
 #include "ServiceMemory.h"
 #include "ByteArray.h"
-#include "IMSBase64.h"
-#include "IMSHMAC.h"
+#include "ImsBase64.h"
+#include "ImsHmac.h"
 #include "Credential.h"
 
 PUBLIC GLOBAL const IMS_CHAR Credential::STR_MD5[] = "MD5";

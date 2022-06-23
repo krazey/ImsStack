@@ -17,7 +17,7 @@
 #ifndef INTERFACE_MEDIA_MANAGER_H_
 #define INTERFACE_MEDIA_MANAGER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "IMSTypeDef.h"
 
 class IMediaManager

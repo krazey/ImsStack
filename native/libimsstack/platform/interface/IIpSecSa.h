@@ -16,7 +16,7 @@
 #ifndef INTERFACE_IPSEC_SA_H_
 #define INTERFACE_IPSEC_SA_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 class IIpSecSa
 {

@@ -16,7 +16,7 @@
 #ifndef REG_INFO_H_
 #define REG_INFO_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 
 #include "IRegInfo.h"
 #include "RegInfoRegistration.h"

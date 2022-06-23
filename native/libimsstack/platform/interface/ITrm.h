@@ -16,7 +16,7 @@
 #ifndef INTERFACE_TRM_H_
 #define INTERFACE_TRM_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ImsMessageDef.h"
 #include "ServiceMessage.h"
 #include "ServiceThread.h"

@@ -16,7 +16,7 @@
 
 #include "ImsIdentity.h"
 #include "ImsAccessNetworkInfoType.h"
-#include "IMSLib.h"
+#include "ImsLib.h"
 #include "ServiceNetwork.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"

@@ -16,7 +16,7 @@
 #ifndef AOS_FACTORY_H_
 #define AOS_FACTORY_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "AString.h"
 
 class IMutex;

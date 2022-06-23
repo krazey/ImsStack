@@ -17,7 +17,7 @@
 #define AOS_MNGR_ADAPTOR_H_
 
 #include "IMSTypeDef.h"
-#include "IMSList.h"
+#include "ImsList.h"
 
 #include "manager/ImsAosManager.h"
 

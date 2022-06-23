@@ -21,7 +21,7 @@
 #include "ImsMessageDef.h"
 #include "IUBaseParam.h"
 #include "MtcDef.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 class ISession;
 

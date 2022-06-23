@@ -16,8 +16,8 @@
 #ifndef AOS_CALL_TRACKER_H_
 #define AOS_CALL_TRACKER_H_
 
-#include "IMSList.h"
-#include "IMSMap.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 
 #include "IEventListener.h"
 #include "interface/IAosCallTracker.h"

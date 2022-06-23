@@ -16,12 +16,12 @@
 #ifndef METHOD_MANAGER_H_
 #define METHOD_MANAGER_H_
 
-#include "IMSList.h"
-#include "RCObject.h"
+#include "ImsList.h"
+#include "RcObject.h"
 
 class Method;
 
-class MethodManager : public RCObject
+class MethodManager : public RcObject
 {
 public:
     MethodManager();

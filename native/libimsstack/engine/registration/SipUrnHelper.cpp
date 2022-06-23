@@ -16,9 +16,9 @@
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
-#include "IMSMD5.h"
-#include "IMSSHA1.h"
-#include "IMSUUID.h"
+#include "ImsMd5.h"
+#include "ImsSha1.h"
+#include "ImsUuid.h"
 
 #include "SipUrnHelper.h"
 
@@ -132,16 +132,16 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(
         }
         case UUID_IMEI_MD5:
         {
-            MD5Context stMd5;
+            ImsMd5Context objMd5Ctx;
             IMS_UCHAR uacHashedImei[16];
 
             // tac (8) + snr (6)
             strImei = strImei.GetSubStr(0, 14);
 
-            IMSMD5_Initialize(&stMd5);
-            IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strImei.GetStr()), strImei.GetLength(),
-                    &stMd5);
-            IMSMD5_Finalize(&stMd5, uacHashedImei);
+            ImsMd5_Initialize(&objMd5Ctx);
+            ImsMd5_Update(reinterpret_cast<const IMS_UCHAR*>(strImei.GetStr()), strImei.GetLength(),
+                    &objMd5Ctx);
+            ImsMd5_Finalize(&objMd5Ctx, uacHashedImei);
 
             AString strHex;
 
@@ -161,16 +161,16 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(
         }
         case UUID_IMEI_SHA1:
         {
-            SHA1Context stSha1;
+            ImsSha1Context objSha1Ctx;
             IMS_UCHAR uacHashedImei[20];
 
             // tac (8) + snr (6)
             strImei = strImei.GetSubStr(0, 14);
 
-            IMSSHA1_Initialize(&stSha1);
-            IMSSHA1_Update(reinterpret_cast<const IMS_UCHAR*>(strImei.GetStr()),
-                    strImei.GetLength(), &stSha1);
-            IMSSHA1_Finalize(&stSha1, uacHashedImei);
+            ImsSha1_Initialize(&objSha1Ctx);
+            ImsSha1_Update(reinterpret_cast<const IMS_UCHAR*>(strImei.GetStr()),
+                    strImei.GetLength(), &objSha1Ctx);
+            ImsSha1_Finalize(&objSha1Ctx, uacHashedImei);
 
             AString strHex;
 
@@ -194,7 +194,7 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(
             strImei = strImei.GetSubStr(0, 14);
 
             objUrn.Append("urn:uuid:");
-            objUrn.Append(IMSUUID::GetUUID(IMSUUID::VERSION_3, strImei));
+            objUrn.Append(ImsUuid::GetUuid(ImsUuid::VERSION_3, strImei));
             break;
         }
         case UUID_IMEI_NAMED_V5:
@@ -203,7 +203,7 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(
             strImei = strImei.GetSubStr(0, 14);
 
             objUrn.Append("urn:uuid:");
-            objUrn.Append(IMSUUID::GetUUID(IMSUUID::VERSION_5, strImei));
+            objUrn.Append(ImsUuid::GetUuid(ImsUuid::VERSION_5, strImei));
             break;
         }
         case UUID_IMEI_V4:
@@ -212,7 +212,7 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(
             strImei = strImei.GetSubStr(0, 14);
 
             objUrn.Append("urn:uuid:");
-            objUrn.Append(IMSUUID::GetUUID(IMSUUID::VERSION_4, strImei));
+            objUrn.Append(ImsUuid::GetUuid(ImsUuid::VERSION_4, strImei));
             break;
         }
         default:
@@ -227,7 +227,7 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(IN IMS_SINT32 nVersion, IN const AStr
     AStringBuffer objUrn(64);
 
     objUrn.Append("urn:uuid:");
-    objUrn.Append(IMSUUID::GetUUID(nVersion, strName));
+    objUrn.Append(ImsUuid::GetUuid(nVersion, strName));
 
     return static_cast<const AStringBuffer&>(objUrn).GetString();
 }

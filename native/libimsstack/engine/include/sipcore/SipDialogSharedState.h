@@ -16,7 +16,7 @@
 #ifndef SIP_DIALOG_SHARED_STATE_H_
 #define SIP_DIALOG_SHARED_STATE_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 
 #include "SipMessageInfo.h"
 

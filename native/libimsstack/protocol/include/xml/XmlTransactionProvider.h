@@ -17,7 +17,7 @@
 #define XML_TRANSACTION_PROVIDER_H_
 
 #include "ImsActivityEx.h"
-#include "IMSQueue.h"
+#include "ImsQueue.h"
 #include "IXmlTransactionProvider.h"
 
 class XmlApp;
@@ -52,7 +52,7 @@ private:
     IMS_SINT32 m_nState;
     IXmlStateListener* m_piListener;
     XmlApp* m_pXmlApp;
-    IMSQueue<IXmlTransaction*> m_objTransactions;
+    ImsQueue<IXmlTransaction*> m_objTransactions;
 };
 
 #endif

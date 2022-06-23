@@ -4,7 +4,7 @@
 
 #include "AString.h"
 #include "ICarrierConfigListener.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "UceAssetItems.h"
 
 class ICarrierConfig;

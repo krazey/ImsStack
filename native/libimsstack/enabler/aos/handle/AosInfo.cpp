@@ -16,7 +16,7 @@
 #include "ServiceTrace.h"
 #include "ServiceNetworkPolicy.h"
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 #include "ImsAosParameter.h"
 #include "interface/IAosAppContext.h"

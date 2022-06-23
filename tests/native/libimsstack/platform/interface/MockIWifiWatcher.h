@@ -18,7 +18,7 @@
 
 #include <gmock/gmock.h>
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ImsMessageDef.h"
 #include "ServiceMessage.h"
 #include "ServiceThread.h"

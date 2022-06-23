@@ -17,7 +17,7 @@
 #ifndef CONFERENCE_PARTICIPANT_LIST_H_
 #define CONFERENCE_PARTICIPANT_LIST_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 
 #include "MtcDef.h"
 #include "conferencecall/ConferenceDef.h"

@@ -21,7 +21,7 @@
 
 #include "IMSTypeDef.h"
 #include "AStringArray.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 #include "interface/IAosConnection.h"
 
 class MockIAosConnection : public IAosConnection {
