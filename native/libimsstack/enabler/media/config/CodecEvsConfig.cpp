@@ -198,12 +198,6 @@ IMS_UINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
             case EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB:
                 nBwList = EVS_ENCODED_BW_TYPE_NB_WB;
                 break;
-            case EVS_ENCODED_BW_TYPE_WB_SWB:
-                nBwList = EVS_ENCODED_BW_TYPE_WB;
-                break;
-            case EVS_ENCODED_BW_TYPE_WB_SWB_FB:
-                nBwList = EVS_ENCODED_BW_TYPE_WB;
-                break;
         }
         IMS_TRACE_D("CheckEvsBandwidthWithBitrate - changed bwList : %d", nBwList, 0, 0);
     }
@@ -216,7 +210,6 @@ IMS_UINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
             case EVS_ENCODED_BW_TYPE_NB_WB:
             case EVS_ENCODED_BW_TYPE_SWB:
             case EVS_ENCODED_BW_TYPE_NB_WB_SWB:
-            case EVS_ENCODED_BW_TYPE_WB_SWB:
                 IMS_TRACE_D("CheckEvsBandwidthWithBitrate - no change", 0, 0, 0);
                 break;
             case EVS_ENCODED_BW_TYPE_FB:
@@ -226,12 +219,38 @@ IMS_UINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
             case EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB:
                 nBwList = EVS_ENCODED_BW_TYPE_NB_WB_SWB;
                 break;
-            case EVS_ENCODED_BW_TYPE_WB_SWB_FB:
-                nBwList = EVS_ENCODED_BW_TYPE_WB_SWB;
-                break;
         }
         IMS_TRACE_D("CheckEvsBandwidthWithBitrate - changed bwList : %d", nBwList, 0, 0);
     }
+
+    switch (nBwList)
+    {
+        case EVS_ENCODED_BW_TYPE_NB:
+            nBwList = 1 << EVS_ENCODED_BW_TYPE_NB;
+            break;
+        case EVS_ENCODED_BW_TYPE_WB:
+            nBwList = 1 << EVS_ENCODED_BW_TYPE_WB;
+            break;
+        case EVS_ENCODED_BW_TYPE_SWB:
+            nBwList = 1 << EVS_ENCODED_BW_TYPE_SWB;
+            break;
+        case EVS_ENCODED_BW_TYPE_FB:
+            nBwList = 1 << EVS_ENCODED_BW_TYPE_FB;
+            break;
+        case EVS_ENCODED_BW_TYPE_NB_WB:
+            nBwList = (1 << EVS_ENCODED_BW_TYPE_NB) | (1 << EVS_ENCODED_BW_TYPE_WB);
+            break;
+        case EVS_ENCODED_BW_TYPE_NB_WB_SWB:
+            nBwList = (1 << EVS_ENCODED_BW_TYPE_NB) | (1 << EVS_ENCODED_BW_TYPE_WB) |
+                    (1 << EVS_ENCODED_BW_TYPE_SWB);
+            break;
+        case EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB:
+            nBwList = (1 << EVS_ENCODED_BW_TYPE_NB) | (1 << EVS_ENCODED_BW_TYPE_WB) |
+                    (1 << EVS_ENCODED_BW_TYPE_SWB) | (1 << EVS_ENCODED_BW_TYPE_FB);
+            break;
+    }
+
+    IMS_TRACE_D("CheckEvsBandwidthWithBitrate - new changed bwList : 0x%04x", nBwList, 0, 0);
 
     return nBwList;
 }
