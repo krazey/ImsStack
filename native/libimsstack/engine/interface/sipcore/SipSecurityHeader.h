@@ -17,7 +17,7 @@
 #define SIP_SECURITY_HEADER_H_
 
 #include "AString.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 class ISipHeader;
 

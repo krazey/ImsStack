@@ -1,6 +1,6 @@
 #include "IMessage.h"
 #include "ISipMessage.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "call/extension/MtcExtension.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

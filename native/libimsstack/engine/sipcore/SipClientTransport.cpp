@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "NATHelper.h"
+#include "NatHelper.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 
@@ -147,9 +147,9 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
     // IMS_IPSEC_UDP_ENC
     if (IsIpSecUdpEncRequired())
     {
-        if (NATHelper::IsNATResolverRequired())
+        if (NatHelper::IsNatResolverRequired())
         {
-            objLocalAddress = NATHelper::GetInstance()->GetPublicAddress(
+            objLocalAddress = NatHelper::GetInstance()->GetPublicAddress(
                     GetSlotId(), objNearEnd.GetIpAddress());
         }
 

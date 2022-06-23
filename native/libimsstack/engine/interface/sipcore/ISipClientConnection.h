@@ -16,7 +16,7 @@
 #ifndef INTERFACE_SIP_CLIENT_CONNECTION_H_
 #define INTERFACE_SIP_CLIENT_CONNECTION_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 #include "ISipConnection.h"
 #include "Sip.h"
 

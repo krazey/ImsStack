@@ -13,7 +13,7 @@
 #ifndef _RETRY_CONDITION_H_
 #define _RETRY_CONDITION_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 
 class RetryCode;
 

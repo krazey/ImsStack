@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "RCObject.h"
+#include "RcObject.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
@@ -23,7 +23,7 @@
 
 __IMS_TRACE_TAG_CONF__;
 
-class AppConfigPrivate : public RCObject
+class AppConfigPrivate : public RcObject
 {
 public:
     explicit AppConfigPrivate(IN const AString& strAppId);

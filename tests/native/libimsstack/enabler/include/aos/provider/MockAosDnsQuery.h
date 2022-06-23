@@ -19,8 +19,8 @@
 
 #include <gmock/gmock.h>
 
-#include "IMSList.h"
-#include "IPAddress.h"
+#include "ImsList.h"
+#include "IpAddress.h"
 #include "provider/AosDnsQuery.h"
 
 class MockAosDnsQuery : public AosDnsQuery

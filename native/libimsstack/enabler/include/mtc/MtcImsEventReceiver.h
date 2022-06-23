@@ -18,8 +18,8 @@
 #define MTC_IMS_EVENT_RECEIVER_H_
 
 #include "IEventListener.h"
-#include "IMSList.h"
-#include "IMSMap.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "IMSTypeDef.h"
 #include "IMtcImsEventReceiver.h"
 

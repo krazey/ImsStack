@@ -18,8 +18,8 @@
 #define SESSION_INTERFACE_HOLDER_H_
 
 #include "ServiceTimer.h"
-#include "IMSList.h"
-#include "IMSMap.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "ISessionListener.h"
 
 class ISession;

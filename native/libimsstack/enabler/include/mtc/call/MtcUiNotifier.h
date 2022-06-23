@@ -18,7 +18,7 @@
 #define MTC_UI_NOTIFIER_H_
 
 #include "AString.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "IMSTypeDef.h"
 #include "MtcDef.h"
 #include "define/MtcStringDef.h"

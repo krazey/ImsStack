@@ -17,7 +17,7 @@
 #include "ServiceTrace.h"
 #include "ServicePhoneInfo.h"
 
-#include "IMSStrLib.h"
+#include "ImsStrLib.h"
 #include "ImsAos.h"
 #include "IImsAos.h"
 #include "ISipHeader.h"

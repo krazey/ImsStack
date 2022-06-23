@@ -17,7 +17,7 @@
 #define INTERFACE_IMS_AOS_H_
 
 #include "AString.h"
-#include "IMSList.h"
+#include "ImsList.h"
 
 class IImsAosInfo;
 class IImsAosListener;

@@ -17,7 +17,7 @@
 #define INTERFACE_SIP_CONNECTION_NOTIFIER_H_
 
 #include "IConnection.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 class ISipConnectionNotifierErrorListener;
 class ISipDialog;

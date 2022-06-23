@@ -17,8 +17,8 @@
 #ifndef MTS_CALL_TRACKER_H_
 #define MTS_CALL_TRACKER_H_
 
-#include "IMSList.h"
-#include "IMSMap.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "IMtsCallTracker.h"
 
 class MtsCallTracker final : public IMtsCallTracker

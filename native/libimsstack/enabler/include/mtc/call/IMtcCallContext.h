@@ -17,7 +17,7 @@
 #ifndef INTERFACE_MTC_CALL_CONTEXT_H_
 #define INTERFACE_MTC_CALL_CONTEXT_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "IMSTypeDef.h"
 #include "IMtcCall.h"
 #include "IMtcContext.h"

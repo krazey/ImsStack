@@ -16,7 +16,7 @@
 #ifndef INTERFACE_SUBSCRIBER_CONFIG_H_
 #define INTERFACE_SUBSCRIBER_CONFIG_H_
 
-#include "IMSVector.h"
+#include "ImsVector.h"
 
 #include "CarrierConfig.h"
 #include "IAsyncConfig.h"

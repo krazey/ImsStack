@@ -6,7 +6,7 @@
 #include "AStringArray.h"
 #include "IIpcan.h"
 #include "INetworkPing.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #include "INetworkConnection.h"
 

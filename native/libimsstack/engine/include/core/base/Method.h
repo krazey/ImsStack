@@ -16,7 +16,7 @@
 #ifndef METHOD_H_
 #define METHOD_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 #include "EngineActivity.h"
 #include "ISipClientConnection.h"

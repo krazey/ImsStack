@@ -22,7 +22,7 @@
 #include "JniCallInfo.h"
 #include "MtcDef.h"
 #include <binder/Parcel.h>
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 class JniMtcUtils final
 {

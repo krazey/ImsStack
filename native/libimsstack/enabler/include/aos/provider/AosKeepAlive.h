@@ -18,7 +18,7 @@
 
 #include "ITimer.h"
 #include "ISipKeepAliveHelperListener.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 class ISipKeepAliveHelper;
 class IAosKeepAliveListener;

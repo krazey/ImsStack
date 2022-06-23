@@ -18,7 +18,7 @@
 #define SRVCC_EVENT_HANDLER_H_
 
 #include "IMSTypeDef.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "helper/ISrvccStateListener.h"
 
 class IMtcContext;

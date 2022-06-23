@@ -17,7 +17,7 @@
 #define INTERFACE_CARRIER_CONFIG_H_
 
 #include "AString.h"
-#include "IMSVector.h"
+#include "ImsVector.h"
 
 #include "ICarrierConfigListener.h"
 

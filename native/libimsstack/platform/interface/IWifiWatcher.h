@@ -16,7 +16,7 @@
 #ifndef INTERFACE_WIFI_WATCHER_H_
 #define INTERFACE_WIFI_WATCHER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ImsMessageDef.h"
 #include "ServiceMessage.h"
 #include "ServiceThread.h"

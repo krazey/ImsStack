@@ -24,7 +24,7 @@ __IMS_TRACE_TAG_REG__;
 
 PUBLIC
 RegStateTracker::RegStateTracker() :
-        RCObject(),
+        RcObject(),
         m_strSubsId(AString::ConstNull()),
         m_pAuthorizedAor(IMS_NULL),
         m_objIpAddress(IPAddress::NONE),
@@ -41,7 +41,7 @@ RegStateTracker::RegStateTracker() :
 
 PUBLIC
 RegStateTracker::RegStateTracker(IN const RegStateTracker& other) :
-        RCObject(other),
+        RcObject(other),
         m_strSubsId(other.m_strSubsId),
         m_pAuthorizedAor(IMS_NULL),
         m_objIpAddress(other.m_objIpAddress),

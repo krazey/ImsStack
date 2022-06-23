@@ -18,7 +18,7 @@
 
 #include "IDigestAka.h"
 #include "ImsIsim.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "system-intf/ISystemListener.h"
 
 class IDigestAkaListener;

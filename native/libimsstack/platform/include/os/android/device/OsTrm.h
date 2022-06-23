@@ -17,8 +17,8 @@
 #define OS_TRM_H_
 
 #include "IIpcan.h"
-#include "IMSMap.h"
 #include "ITrm.h"
+#include "ImsMap.h"
 #include "OsTrmTimer.h"
 #include "system-intf/ISystemListener.h"
 

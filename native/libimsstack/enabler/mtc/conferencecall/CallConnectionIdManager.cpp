@@ -15,7 +15,7 @@
  */
 
 #include "ServiceTrace.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "IMSTypeDef.h"
 #include "IMtcContext.h"
 #include "conferencecall/CallConnectionIdManager.h"

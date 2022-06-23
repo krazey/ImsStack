@@ -18,7 +18,7 @@
 
 #include "IMSTypeDef.h"
 #include "AStringArray.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 class IAosConnectionListener;
 

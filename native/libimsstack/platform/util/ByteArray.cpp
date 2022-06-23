@@ -11,8 +11,8 @@
 */
 
 #include "ServiceMemory.h"
-#include "IMSLib.h"
-#include "IMSStrLib.h"
+#include "ImsLib.h"
+#include "ImsStrLib.h"
 #include "ByteArray.h"
 
 PRIVATE GLOBAL ByteArray::Data ByteArray::SHARED_NULL =

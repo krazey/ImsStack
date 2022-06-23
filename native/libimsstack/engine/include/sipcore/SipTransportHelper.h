@@ -16,7 +16,7 @@
 #ifndef SIP_TRANSPORT_HELPER_H_
 #define SIP_TRANSPORT_HELPER_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 #include "EngineActivity.h"
 #include "ISipDatagramSocketListener.h"

@@ -16,7 +16,7 @@
 #ifndef SIP_RT_CONFIG_H_
 #define SIP_RT_CONFIG_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 #include "SipAddress.h"
 
 /**

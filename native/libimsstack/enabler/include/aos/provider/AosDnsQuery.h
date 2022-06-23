@@ -17,8 +17,8 @@
 #define AOS_DNS_QUERY_H_
 
 #include "ImsActivityEx.h"
-#include "IMSList.h"
-#include "IPAddress.h"
+#include "ImsList.h"
+#include "IpAddress.h"
 #include "interface/AosInternalMsgDef.h"
 
 class INetworkConnection;

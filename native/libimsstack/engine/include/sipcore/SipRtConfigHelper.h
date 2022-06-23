@@ -16,7 +16,7 @@
 #ifndef SIP_RT_CONFIG_HELPER_H_
 #define SIP_RT_CONFIG_HELPER_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 #include "ISipRtConfigHelper.h"
 

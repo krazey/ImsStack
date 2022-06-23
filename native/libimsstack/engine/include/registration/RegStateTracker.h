@@ -17,8 +17,8 @@
 #define REG_STATE_TRACKER_H_
 
 #include "AStringArray.h"
-#include "IPAddress.h"
-#include "RCObject.h"
+#include "IpAddress.h"
+#include "RcObject.h"
 
 #include "SipAddress.h"
 #include "SipProfile.h"
@@ -26,7 +26,7 @@
 
 class RegContact;
 
-class RegStateTracker : public RCObject
+class RegStateTracker : public RcObject
 {
 public:
     RegStateTracker();

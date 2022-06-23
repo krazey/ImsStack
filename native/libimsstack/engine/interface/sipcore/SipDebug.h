@@ -16,7 +16,7 @@
 #ifndef SIP_DEBUG_H_
 #define SIP_DEBUG_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 #include "SipMethod.h"
 
 /**

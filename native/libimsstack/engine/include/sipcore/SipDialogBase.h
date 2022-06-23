@@ -21,17 +21,17 @@
 /**
  * @brief This class is a base class for SIP dialog.
  */
-class SipDialogBase : public RCObject
+class SipDialogBase : public RcObject
 {
 public:
     SipDialogBase() = delete;
     inline explicit SipDialogBase(IN SipDialogState* pDState) :
-            RCObject(),
+            RcObject(),
             m_pDState(pDState)
     {
     }
     inline SipDialogBase(IN const SipDialogBase& other) :
-            RCObject(other),
+            RcObject(other),
             m_pDState(other.m_pDState)
     {
     }
@@ -40,7 +40,7 @@ public:
 public:
     inline SipDialogBase& operator=(IN const SipDialogBase& other)
     {
-        RCObject::operator=(other);
+        RcObject::operator=(other);
         return (*this);
     }
 

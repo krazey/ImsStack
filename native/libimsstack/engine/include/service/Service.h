@@ -16,7 +16,7 @@
 #ifndef SERVICE_H_
 #define SERVICE_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #include "IConfigUpdateListener.h"
 #include "private/AppConfig.h"

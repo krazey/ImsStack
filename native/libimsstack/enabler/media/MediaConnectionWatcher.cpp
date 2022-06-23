@@ -15,7 +15,7 @@
  */
 
 // == INCLUDES =========================================================
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "MediaConnectionWatcher.h"
 #include "IMediaConnectionWatcherListener.h"
 #include "ServiceNetwork.h"

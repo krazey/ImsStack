@@ -16,7 +16,7 @@
 #ifndef SERVICE_MANAGER_H_
 #define SERVICE_MANAGER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 
 #include "IServiceManagerListener.h"
 

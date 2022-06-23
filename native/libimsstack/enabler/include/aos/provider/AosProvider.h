@@ -16,7 +16,7 @@
 #ifndef AOS_PROVIDER_H_
 #define AOS_PROVIDER_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 class IMutex;
 class IAosCallTracker;

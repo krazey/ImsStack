@@ -19,8 +19,8 @@
 
 #include <gmock/gmock.h>
 #include "AString.h"
-#include "IMSList.h"
-#include "IMSMap.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "IMtcService.h"
 #include "MtcDef.h"

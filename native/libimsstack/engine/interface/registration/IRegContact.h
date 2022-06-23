@@ -16,7 +16,7 @@
 #ifndef INTERFACE_REG_CONTACT_H_
 #define INTERFACE_REG_CONTACT_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #include "SipAddress.h"
 

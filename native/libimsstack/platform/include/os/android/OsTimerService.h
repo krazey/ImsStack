@@ -16,7 +16,7 @@
 #ifndef OS_TIMER_SERVICE_H_
 #define OS_TIMER_SERVICE_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "OsMutex.h"
 #include "system-intf/ISystemListener.h"
 

@@ -16,7 +16,7 @@
 #ifndef INTERFACE_NETWORK_WATCHER_H_
 #define INTERFACE_NETWORK_WATCHER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ImsMessageDef.h"
 #include "ServiceMessage.h"
 #include "ServiceNetworkPolicy.h"

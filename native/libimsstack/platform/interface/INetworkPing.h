@@ -16,7 +16,7 @@
 #ifndef INTERFACE_NETWORK_PING_H_
 #define INTERFACE_NETWORK_PING_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 class INetworkPingListener;
 

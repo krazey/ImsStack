@@ -18,7 +18,7 @@
 #define _MEDIA_SESSION_CONFIG_H_
 
 #include "MediaDef.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "AString.h"
 #include "ICarrierConfigListener.h"
 

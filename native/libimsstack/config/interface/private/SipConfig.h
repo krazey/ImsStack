@@ -17,7 +17,7 @@
 #define SIP_CONFIG_H_
 
 #include "AStringArray.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 #include "CarrierConfig.h"
 #include "Credential.h"

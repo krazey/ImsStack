@@ -16,7 +16,7 @@
 #ifndef AOS_SERVICE_AVAILABLE_H_
 #define AOS_SERVICE_AVAILABLE_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosBlockListener.h"

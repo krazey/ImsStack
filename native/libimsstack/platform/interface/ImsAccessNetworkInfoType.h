@@ -16,7 +16,7 @@
 #ifndef IMS_ACCESS_NETWORK_INFO_TYPE_H_
 #define IMS_ACCESS_NETWORK_INFO_TYPE_H_
 
-#include "IMSNew.h"
+#include "ImsNew.h"
 
 #define ANI_MODE_FDD "FDD"
 #define ANI_MODE_TDD "TDD"

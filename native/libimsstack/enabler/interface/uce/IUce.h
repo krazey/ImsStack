@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "AString.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "IUUceService.h"
 
 typedef enum

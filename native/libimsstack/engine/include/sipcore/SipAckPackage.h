@@ -16,7 +16,7 @@
 #ifndef SIP_ACK_PACKAGE_H_
 #define SIP_ACK_PACKAGE_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 
 #include "ISipAckPackage.h"
 #include "SipStackHeaders.h"

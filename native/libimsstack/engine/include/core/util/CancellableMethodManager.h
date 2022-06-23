@@ -17,7 +17,7 @@
 #define CANCELLABLE_METHOD_MANAGER_H_
 
 #include "AString.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 class ICancellableMethod;
 class IMutex;

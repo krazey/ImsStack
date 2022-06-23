@@ -17,7 +17,7 @@
 #ifndef MTC_SUPPLEMENTARY_SERVICE_H_
 #define MTC_SUPPLEMENTARY_SERVICE_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "MtcDef.h"
 
 class ISession;

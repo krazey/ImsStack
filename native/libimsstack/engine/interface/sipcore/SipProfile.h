@@ -18,13 +18,13 @@
 
 #include "AStringArray.h"
 #include "ISipConfig.h"
-#include "RCObject.h"
+#include "RcObject.h"
 #include "SipTimerValues.h"
 
 /**
  * @brief This class defines SIP profile for the run-time configuration of SIP engine.
  */
-class SipProfile : public RCObject
+class SipProfile : public RcObject
 {
 public:
     /// Indicates that the value is not provisioned for configuration item of integer type
@@ -58,7 +58,7 @@ public:
     {
     }
     inline SipProfile(IN const SipProfile& other) :
-            RCObject(other),
+            RcObject(other),
             m_nDefaultPort(other.m_nDefaultPort),
             m_nTcpCriterionLength(other.m_nTcpCriterionLength),
             m_nSipFeatures(other.m_nSipFeatures),

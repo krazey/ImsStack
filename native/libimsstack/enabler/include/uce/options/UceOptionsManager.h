@@ -8,7 +8,7 @@
 #define _UCE_OPTIONS_MANAGER_H_
 
 #include "ImsActivityEx.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 class UceOptions;
 class ICoreService;

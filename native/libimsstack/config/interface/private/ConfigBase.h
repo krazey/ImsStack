@@ -16,8 +16,8 @@
 #ifndef CONFIG_BASE_H_
 #define CONFIG_BASE_H_
 
-#include "IMSList.h"
-#include "IMSMap.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "ImsSlot.h"
 
 #include "ICarrierConfig.h"

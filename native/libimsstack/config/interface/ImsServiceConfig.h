@@ -16,7 +16,7 @@
 #ifndef IMS_SERVICE_CONFIG_H_
 #define IMS_SERVICE_CONFIG_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 
 #include "ImsServiceConfigTypeDef.h"
 

@@ -17,7 +17,7 @@
 #define IMS_MESSAGE_H_
 
 #include "AString.h"
-#include "IMSStrLib.h"
+#include "ImsStrLib.h"
 
 #define IMSMSG ImsMessage
 

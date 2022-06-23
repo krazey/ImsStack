@@ -16,8 +16,8 @@
 #ifndef AOS_BLOCK_H_
 #define AOS_BLOCK_H_
 
-#include "IMSHashMap.h"
-#include "IMSList.h"
+#include "ImsHashMap.h"
+#include "ImsList.h"
 #include "interface/IAosBlock.h"
 
 class IAosAppContext;
@@ -65,9 +65,9 @@ private:
     IMS_UINT32 BLOCK_ENABLED;
     BLOCK_REASON REASON[BLOCK_MAX];
 
-    IMSHashMap m_objBlock;
-    IMSHashMap m_objBlockCellular;
-    IMSHashMap m_objBlockWifi;
+    ImsHashMap m_objBlock;
+    ImsHashMap m_objBlockCellular;
+    ImsHashMap m_objBlockWifi;
 
     IMSList<IAosBlockListener*> m_objListeners;
 

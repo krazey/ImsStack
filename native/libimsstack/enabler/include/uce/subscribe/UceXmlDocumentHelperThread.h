@@ -13,8 +13,8 @@
 #ifndef _UCE_XML_DOCUMENT_HELPER_THREAD_H_
 #define _UCE_XML_DOCUMENT_HELPER_THREAD_H_
 
-#include "IMSMap.h"
-#include "IMSQueue.h"
+#include "ImsMap.h"
+#include "ImsQueue.h"
 #include "IRunnable.h"
 #include "IXmlStateListener.h"
 #include "IXmlTransactionListener.h"
@@ -69,7 +69,7 @@ private:
     AString m_strThreadName;
     IThread* m_piThread;
     IXmlTransactionProvider* m_pXMLTransactionProvider;
-    IMSQueue<IXmlTransaction*> m_objTransactionQueue;
+    ImsQueue<IXmlTransaction*> m_objTransactionQueue;
     IMSList<AString> m_objRlmiCidList;
     IMSList<AString> m_objPidfXmls;
     IMSList<UceNonCapabilityUser*> m_objNonCapabilities;

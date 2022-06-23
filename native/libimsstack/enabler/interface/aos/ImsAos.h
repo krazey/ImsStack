@@ -17,7 +17,7 @@
 #define IMS_AOS_H_
 
 #include "IMSTypeDef.h"
-#include "IMSList.h"
+#include "ImsList.h"
 
 class IImsAos;
 class AString;

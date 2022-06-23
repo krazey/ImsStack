@@ -18,7 +18,7 @@
 #define MTS_CARRIER_CONFIG_ITEMS_H_
 
 #include "IMSTypeDef.h"
-#include "IMSVector.h"
+#include "ImsVector.h"
 
 struct MtsCarrierConfigItems
 {

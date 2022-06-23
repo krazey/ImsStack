@@ -17,7 +17,7 @@
 #ifndef MTC_BLOCK_CHECKER_H_
 #define MTC_BLOCK_CHECKER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "IMSTypeDef.h"
 #include "helper/block/IMtcBlockChecker.h"
 #include "helper/block/IMtcBlockRule.h"

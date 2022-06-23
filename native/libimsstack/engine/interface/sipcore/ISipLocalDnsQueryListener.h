@@ -16,7 +16,7 @@
 #ifndef INTERFACE_SIP_LOCAL_DNS_QUERY_LISTENER_H_
 #define INTERFACE_SIP_LOCAL_DNS_QUERY_LISTENER_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 /**
  * @brief This class provides a listener interface for the local DNS query for a test purpose

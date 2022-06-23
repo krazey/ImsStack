@@ -21,7 +21,7 @@
 
 PUBLIC
 SipMessageBuffer::SipMessageBuffer() :
-        RCObject(),
+        RcObject(),
         m_ppBuffer(IMS_NULL)
 {
     IMS_MEM_Memset(m_baBuffer, 0x00, MAX_MSG_SIZE);
@@ -44,7 +44,7 @@ SipMessageBuffer::SipMessageBuffer() :
 
 PUBLIC
 SipMessageBuffer::SipMessageBuffer(IN const SipMessageBuffer& other) :
-        RCObject(other),
+        RcObject(other),
         m_ppBuffer(IMS_NULL)
 {
     IMS_MEM_Memset(m_baBuffer, 0x00, MAX_MSG_SIZE);

@@ -17,7 +17,7 @@
 #define AOS_FEATURE_TAG_H_
 
 #include "IMSTypeDef.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "AString.h"
 
 #include "ImsAosParameter.h"

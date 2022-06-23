@@ -16,7 +16,7 @@
 #ifndef SIP_CONNECTION_NOTIFIER_MANAGER_H_
 #define SIP_CONNECTION_NOTIFIER_MANAGER_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #include "SipAddress.h"
 

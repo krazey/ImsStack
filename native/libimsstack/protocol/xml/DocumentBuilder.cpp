@@ -16,7 +16,7 @@
 #include "DocumentBuilder.h"
 #include "DocumentImpl.h"
 #include "ElementImpl.h"
-#include "IMSStrLib.h"
+#include "ImsStrLib.h"
 #include "ServiceTrace.h"
 #include "TextImpl.h"
 #include "XmlApiParser.h"

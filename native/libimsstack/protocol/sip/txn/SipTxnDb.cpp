@@ -8,7 +8,7 @@
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxn.h"
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 #define SIP_MAX_HASH_BUCKETS 100
 #define SIP_MAX_HASH_ENTRIES 4000

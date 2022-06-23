@@ -16,7 +16,7 @@
 #ifndef INTERFACE_PHONE_INFO_POWER_H_
 #define INTERFACE_PHONE_INFO_POWER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ImsMessageDef.h"
 #include "ServiceMessage.h"
 #include "ServiceThread.h"

@@ -16,8 +16,8 @@
 #ifndef SUBSCRIBER_TRACKER_H_
 #define SUBSCRIBER_TRACKER_H_
 
-#include "IMSMap.h"
-#include "IMSList.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 
 #include "ISubscriberInfoListener.h"
 #include "SipAddress.h"

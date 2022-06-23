@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosLocationStarter.h"

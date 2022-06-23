@@ -18,7 +18,7 @@
 #define CONFIG_CACHE_H_
 
 #include "AString.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "ConfigDef.h"
 
 class ConfigCache final

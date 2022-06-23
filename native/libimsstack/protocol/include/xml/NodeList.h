@@ -16,8 +16,8 @@
 #ifndef NODE_LIST_H_
 #define NODE_LIST_H_
 
-#include "IMSList.h"
 #include "INodeList.h"
+#include "ImsList.h"
 
 class NodeList : public INodeList
 {

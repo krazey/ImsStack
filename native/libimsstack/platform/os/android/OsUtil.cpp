@@ -16,7 +16,7 @@
 #include <cutils/properties.h>
 #include "zlib.h"
 
-#include "IMSStrLib.h"
+#include "ImsStrLib.h"
 #include "OsUtil.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"

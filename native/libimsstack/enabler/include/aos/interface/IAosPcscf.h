@@ -17,8 +17,8 @@
 #define INTERFACE_AOS_PCSCF_H_
 
 #include "IMSTypeDef.h"
-#include "IMSList.h"
-#include "IPAddress.h"
+#include "ImsList.h"
+#include "IpAddress.h"
 #include "AStringArray.h"
 
 class IAosPcscfListener;

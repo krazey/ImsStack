@@ -20,7 +20,7 @@
 #include "../../../engine/interface/registration/MockIRegistration.h"
 #include "../../../engine/interface/sipcore/MockISipMessage.h"
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "INetworkWatcher.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"

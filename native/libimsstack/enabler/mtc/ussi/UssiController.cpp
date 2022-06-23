@@ -15,7 +15,7 @@
  */
 
 #include "IMessage.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ISession.h"
 #include "ISipClientConnection.h"
 #include "ISipHeader.h"

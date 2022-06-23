@@ -3,7 +3,7 @@
 
 #include <gmock/gmock.h>
 
-#include "IMSVector.h"
+#include "ImsVector.h"
 #include "CarrierConfig.h"
 #include "IAsyncConfig.h"
 #include "IImsSubscriberInfo.h"

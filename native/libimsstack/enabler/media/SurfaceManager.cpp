@@ -17,8 +17,8 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceMutex.h"
-#include "IMSMap.h"
-#include "IMSList.h"
+#include "ImsMap.h"
+#include "ImsList.h"
 #include "SurfaceManager.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.VS");

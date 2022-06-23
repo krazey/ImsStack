@@ -18,7 +18,7 @@
 #define MTC_EXTENSION_SET_H_
 
 #include "AString.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "IMSTypeDef.h"
 #include "call/message/IMtcMessageHandler.h"
 

@@ -18,7 +18,7 @@
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
 #include "ServiceUtil.h"
-#include "IMSStrLib.h"
+#include "ImsStrLib.h"
 #include "utility/MtsUtils.h"
 
 

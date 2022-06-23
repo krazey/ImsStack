@@ -16,7 +16,7 @@
 #ifndef VIRTUAL_SESSION_H_
 #define VIRTUAL_SESSION_H_
 
-#include "RCObject.h"
+#include "RcObject.h"
 
 #include "ISessionState.h"
 #include "Service.h"
@@ -27,7 +27,7 @@ class SdpOaState;
 class SessionDescriptor;
 class SipAddress;
 
-class VirtualSession : public RCObject, public ISessionState
+class VirtualSession : public RcObject, public ISessionState
 {
 public:
     explicit VirtualSession(IN Service* pService, IN const SipAddress* pUserAor);

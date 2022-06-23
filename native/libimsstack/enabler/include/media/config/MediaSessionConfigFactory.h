@@ -19,8 +19,8 @@
 
 // == INCLUDES =========================================================
 
-#include "IMSMap.h"
-#include "IMSList.h"
+#include "ImsMap.h"
+#include "ImsList.h"
 #include "config/MediaSessionConfig.h"
 
 class MediaSessionConfigFactory

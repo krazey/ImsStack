@@ -16,9 +16,9 @@
 #ifndef OS_VONR_H_
 #define OS_VONR_H_
 
-#include "IMSMap.h"
-#include "ImsVoNr.h"
 #include "ISystemConfigListener.h"
+#include "ImsMap.h"
+#include "ImsVoNr.h"
 #include "ServiceTimer.h"
 #include "system-intf/ISystemListener.h"
 

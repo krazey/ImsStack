@@ -16,9 +16,9 @@
 #ifndef OS_NETWORK_IPSEC_H_
 #define OS_NETWORK_IPSEC_H_
 
-#include "IMSList.h"
-#include "IMSMap.h"
 #include "INetworkIpSec.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "IpSecSaParameter.h"
 
 class OsIpSecPolicy;

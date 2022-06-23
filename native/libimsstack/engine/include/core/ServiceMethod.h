@@ -16,7 +16,7 @@
 #ifndef SERVICE_METHOD_H_
 #define SERVICE_METHOD_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 #include "Message.h"
 #include "Service.h"

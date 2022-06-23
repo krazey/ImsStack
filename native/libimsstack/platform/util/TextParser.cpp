@@ -11,7 +11,7 @@
 */
 
 #include "ServiceMemory.h"
-#include "IMSLib.h"
+#include "ImsLib.h"
 #include "AStringBuffer.h"
 #include "TextParser.h"
 

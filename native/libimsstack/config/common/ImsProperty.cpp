@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "IMSLib.h"
+#include "ImsLib.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"

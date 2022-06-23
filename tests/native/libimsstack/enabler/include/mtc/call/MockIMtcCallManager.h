@@ -18,7 +18,7 @@
 #define MOCK_I_MTC_CALL_MANAGER_H_
 
 #include <gmock/gmock.h>
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "IMtcService.h"
 #include "MtcDef.h"

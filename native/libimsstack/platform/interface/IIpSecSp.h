@@ -16,7 +16,7 @@
 #ifndef INTERFACE_IPSEC_SP_H_
 #define INTERFACE_IPSEC_SP_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 
 class IIpSecSp
 {

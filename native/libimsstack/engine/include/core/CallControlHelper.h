@@ -16,7 +16,7 @@
 #ifndef CALL_CONTROL_HELPER_H_
 #define CALL_CONTROL_HELPER_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 class ISipDialog;
 class Replaces;

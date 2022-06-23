@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "ImsIpSecType.h"
-#include "IMSStrLib.h"
+#include "ImsStrLib.h"
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"

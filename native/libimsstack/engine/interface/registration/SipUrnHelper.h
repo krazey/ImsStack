@@ -65,11 +65,11 @@ public:
      * @brief Creates UUID based URN string.
      *
      * @param nVersion UUID version\n
-     *                 IMSUUID::VERSION_1\n
-     *                 IMSUUID::VERSION_2\n
-     *                 IMSUUID::VERSION_3\n
-     *                 IMSUUID::VERSION_4\n
-     *                 IMSUUID::VERSION_5
+     *                 ImsUuid::VERSION_1\n
+     *                 ImsUuid::VERSION_2\n
+     *                 ImsUuid::VERSION_3\n
+     *                 ImsUuid::VERSION_4\n
+     *                 ImsUuid::VERSION_5
      * @param strName Any string to be hashed
      * @return An UUID URN string.
      */

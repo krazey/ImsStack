@@ -18,7 +18,7 @@
 #define GROUP_CALL_CONTROLLER_H_
 
 #include "conferencecall/ConferenceController.h"
-#include "IMSList.h"
+#include "ImsList.h"
 
 class IMtcCallContext;
 class IConferenceReference;

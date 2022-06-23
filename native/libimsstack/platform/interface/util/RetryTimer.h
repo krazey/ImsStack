@@ -13,7 +13,7 @@
 #ifndef _RETRY_TIMER_H_
 #define _RETRY_TIMER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ITimer.h"
 
 class IRetryTimerListener;

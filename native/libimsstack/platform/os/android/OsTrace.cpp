@@ -24,7 +24,7 @@
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
 #include "ImsConstDef.h"
-#include "IMSStrLib.h"
+#include "ImsStrLib.h"
 #include "ImsTraceNode.h"
 #include "OsTrace.h"
 

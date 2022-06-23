@@ -36,11 +36,11 @@
 
 __IMS_TRACE_TAG_REG__;
 
-class ExtraHeader : public RCObject
+class ExtraHeader : public RcObject
 {
 public:
     inline ExtraHeader() :
-            RCObject(),
+            RcObject(),
             m_piHeader(IMS_NULL)
     {
     }

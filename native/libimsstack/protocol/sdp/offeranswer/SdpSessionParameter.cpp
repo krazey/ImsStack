@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "AStringBuffer.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 #include "ServiceMemory.h"
 
 #include "SdpUri.h"

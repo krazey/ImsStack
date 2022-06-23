@@ -16,7 +16,7 @@
 #ifndef INTERFACE_SIP_TRANSPORT_HELPER_H_
 #define INTERFACE_SIP_TRANSPORT_HELPER_H_
 
-#include "IPAddress.h"
+#include "IpAddress.h"
 #include "SipRtConfig.h"
 
 class ISipLocalDnsQueryListener;

@@ -19,7 +19,7 @@
 
 #include "IMSTypeDef.h"
 #include "AString.h"
-#include "IMSVector.h"
+#include "ImsVector.h"
 
 struct AssetItems
 {

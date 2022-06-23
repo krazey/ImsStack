@@ -16,24 +16,24 @@
 #ifndef SIP_FORKED_TRANSACTION_MANAGER_H_
 #define SIP_FORKED_TRANSACTION_MANAGER_H_
 
-#include "IMSList.h"
-#include "RCObject.h"
+#include "ImsList.h"
+#include "RcObject.h"
 
 #include "SipStackHeaders.h"
 #include "SipStatusCode.h"
 
 class SipClientTransactionState;
 
-class SipForkedTransactionManager : public RCObject
+class SipForkedTransactionManager : public RcObject
 {
 public:
     inline SipForkedTransactionManager() :
-            RCObject(),
+            RcObject(),
             m_nStatusCode(SipStatusCode::SC_INVALID)
     {
     }
     inline SipForkedTransactionManager(IN const SipForkedTransactionManager& other) :
-            RCObject(other),
+            RcObject(other),
             m_nStatusCode(other.m_nStatusCode)
     {
     }

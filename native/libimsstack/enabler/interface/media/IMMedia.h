@@ -22,7 +22,7 @@
 #include <MediaQualityThreshold.h>
 #include "ImsMessageDef.h"
 #include "IMSTypeDef.h"
-#include "IPAddress.h"
+#include "IpAddress.h"
 #include "MediaDef.h"
 
 #define IMMEDIA     IMS_MSG_BASE_STREAMEDMEDIA

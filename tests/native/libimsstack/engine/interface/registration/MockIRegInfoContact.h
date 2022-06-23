@@ -3,7 +3,7 @@
 
 #include <gmock/gmock.h>
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "SipAddress.h"
 
 #include "IRegInfoContact.h"

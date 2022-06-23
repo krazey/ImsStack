@@ -22,7 +22,7 @@
 #include "call/ParticipantInfo.h"
 #include "MtcDef.h"
 #include <binder/Parcel.h>
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 struct JniCallInfo;
 struct CallReasonInfo;

@@ -18,7 +18,7 @@
 #define UC_TRM_H_
 
 #include "ImsActivityEx.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "ITrm.h"
 
 #include "define/MtcInternalMsgDef.h"

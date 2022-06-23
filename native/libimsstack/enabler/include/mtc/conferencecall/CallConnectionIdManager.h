@@ -17,7 +17,7 @@
 #ifndef CALL_CONNECTION_ID_MANAGER_H_
 #define CALL_CONNECTION_ID_MANAGER_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 #include "IMSTypeDef.h"
 #include "IMtcCallStateListener.h"
 

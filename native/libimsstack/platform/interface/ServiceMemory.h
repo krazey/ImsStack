@@ -17,7 +17,7 @@
 #define SERVICE_MEMORY_H_
 
 #include "IMemHeap.h"
-#include "IMSNew.h"
+#include "ImsNew.h"
 
 #ifdef IMS_DEBUG_MEM
 

@@ -17,7 +17,7 @@
 #define INTERFACE_AOS_SERVICE_H_
 
 #include "AString.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "interface/IAosServicePhoneListener.h"
 #include "interface/IAosServiceSettingListener.h"
 

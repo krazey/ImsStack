@@ -16,7 +16,7 @@
 #ifndef INTERFACE_IPSEC_POLICY_H_
 #define INTERFACE_IPSEC_POLICY_H_
 
-#include "IMSList.h"
+#include "ImsList.h"
 
 class IIpSecSa;
 class IIpSecSp;

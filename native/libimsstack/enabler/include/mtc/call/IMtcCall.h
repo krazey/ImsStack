@@ -18,9 +18,9 @@
 #define INTERFACE_MTC_CALL_H_
 
 #include "AString.h"
-#include "IMSList.h"
+#include "ImsList.h"
 #include "MtcDef.h"
-#include "IMSMap.h"
+#include "ImsMap.h"
 #include "IMSTypeDef.h"
 #include "IMtcService.h"
 

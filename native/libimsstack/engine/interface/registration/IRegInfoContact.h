@@ -16,7 +16,7 @@
 #ifndef INTERFACE_REG_INFO_CONTACT_H_
 #define INTERFACE_REG_INFO_CONTACT_H_
 
-#include "IMSMap.h"
+#include "ImsMap.h"
 
 #include "SipAddress.h"
 
