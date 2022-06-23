@@ -546,26 +546,16 @@ public:
         return m_ppHolder[nSlotId];
     }
 
-    inline const AString& GetLocator() const { return m_strConfigLocator; }
-    inline IMS_SINT32 GetMode() const { return m_nConfigMode; }
-
-    IMS_BOOL Initialize(IN const AString& strConfigLocator, IN IMS_SINT32 nConfigMode);
+    IMS_BOOL Initialize();
 
 private:
     friend class ConfigurationManager;
-
-    // Mode of configuration (file / xml / db)
-    IMS_SINT32 m_nConfigMode;
-    // Locator of configuration
-    AString m_strConfigLocator;
 
     ConfigurationHolder** m_ppHolder;
 };
 
 PUBLIC
 ConfigurationManagerPrivate::ConfigurationManagerPrivate() :
-        m_nConfigMode(ConfigurationManager::MODE_DB),
-        m_strConfigLocator(AString::ConstNull()),
         m_ppHolder(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
@@ -598,12 +588,8 @@ ConfigurationManagerPrivate::~ConfigurationManagerPrivate()
 }
 
 PUBLIC
-IMS_BOOL ConfigurationManagerPrivate::Initialize(
-        IN const AString& strConfigLocator, IN IMS_SINT32 nConfigMode)
+IMS_BOOL ConfigurationManagerPrivate::Initialize()
 {
-    m_strConfigLocator = strConfigLocator;
-    m_nConfigMode = nConfigMode;
-
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
     for (IMS_SINT32 i = 0; i < nSimCount; ++i)
@@ -710,18 +696,6 @@ IMS_RESULT ConfigurationManager::StoreAppConfig(
     return IMS_SUCCESS;
 }
 
-PUBLIC
-IMS_SINT32 ConfigurationManager::GetConfigMode() const
-{
-    return m_pConfigMngrPrivate->GetMode();
-}
-
-PUBLIC
-const AString& ConfigurationManager::GetConfigLocator() const
-{
-    return m_pConfigMngrPrivate->GetLocator();
-}
-
 /**
  * @brief Subscriber configuration - impl. defined.
  *        This config. includes IMS-related information in the ISIM.
@@ -789,9 +763,9 @@ PUBLIC GLOBAL ConfigurationManager* ConfigurationManager::GetInstance()
 }
 
 PUBLIC
-IMS_BOOL ConfigurationManager::Initialize(IN const AString& strLocator, IN IMS_SINT32 nMode)
+IMS_BOOL ConfigurationManager::Initialize()
 {
-    return m_pConfigMngrPrivate->Initialize(strLocator, nMode);
+    return m_pConfigMngrPrivate->Initialize();
 }
 
 PUBLIC
