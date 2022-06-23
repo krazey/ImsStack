@@ -92,6 +92,14 @@ AString MtsDialingPlan::Translate(IN const AString& strNumber, IN IMS_BOOL bAquo
             return strNumber;
         }
     }
+    else if (!(strNumber.StartsWith('s')) && !(strNumber.StartsWith('t')) &&
+            !(strNumber.StartsWith('S')) && !(strNumber.StartsWith('T')))
+    {
+        objUri.Prepend(':');
+        objUri.Prepend(m_strScheme);
+        objUri.Append(strNumber);
+        return static_cast<const AStringBuffer&>(objUri).GetString();
+    }
 
     IMS_SINT32 nScheme = TranslateScheme(strNumber);
 
