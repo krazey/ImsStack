@@ -133,11 +133,6 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     /**
      * Display orientation.
      */
-    public final static int ORIENTATION_0 = 0;
-    public final static int ORIENTATION_90 = 1;
-    public final static int ORIENTATION_270 = 2;
-    public final static int ORIENTATION_180 = 3;
-
     private static final int STATE_NONE = 0x0;
     private static final int STATE_AUDIO_STARTED = 0x1;
     private static final int STATE_AUDIO_PAUSED = 0x2;
@@ -301,16 +296,12 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
 
     /**
      * DISPLAY
-     * Sets the orientation of the specified display.
+     * Sets the orientation of the device.
      *
-     * @param orientation the orientation of the specified display
-     *                    {@link MtcMediaSession#ORIENTATION_0}
-     *                    {@link MtcMediaSession#ORIENTATION_90}
-     *                    {@link MtcMediaSession#ORIENTATION_270}
-     *                    {@link MtcMediaSession#ORIENTATION_180}
+     * @param orientation the orientation of degree observed 0, 90, 180, 270
      */
-    public void setDisplayOrientation(int orientation) {
-        log("setDisplayOrientation :: orientation=" + orientation);
+    public void setDeviceOrientation(int orientation) {
+        log("setDeviceOrientation :: orientation=" + orientation);
         mPrevOrientation = orientation;
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcMedia.CHANGE_ORIENTATION_CMD);

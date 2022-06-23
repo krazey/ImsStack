@@ -292,12 +292,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
 
         // TODO_MEDIA later
         m_objVideoConfig.setPauseImagePath(android::String8("/image/path"));
-        m_objVideoConfig.setDeviceOrientationDegree(VideoConfig::ORIENTATION_DEGREE_0);
-        // ORIENTATION_DEGREE_0,
-        // ORIENTATION_DEGREE_90,
-        // ORIENTATION_DEGREE_180,
-        // ORIENTATION_DEGREE_270,
-
+        m_objVideoConfig.setDeviceOrientationDegree(0);
         m_objVideoConfig.setCvoValue(pNegoProfile->nCvoId);
 
         IMS_UINT32 nRtcpFbAttr = VideoConfig::RTP_FB_NONE;
