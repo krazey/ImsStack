@@ -503,7 +503,7 @@
     <int name="sip_status_code_for_rejecting_call_type_change_int" value="200"/>
     <boolean name="initialize_p_early_media_when_no_header_bool" value="false"/>
     <int name="policy_for_local_ringback_tone_with_180_response_int" value="0"/>
-    <int name="send_180_for_initial_invite_bool" value="false"/>
+    <boolean name="send_180_for_initial_invite_bool" value="false"/>
 
     <!-- Media -->
     <boolean name="audio_bw_nego_option_bool" value="false"/>
