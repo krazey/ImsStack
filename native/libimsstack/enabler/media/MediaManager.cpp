@@ -30,8 +30,7 @@ MediaManager::MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId) :
         ImsActivityEx(strName),
         m_nSlotId(nSlotId),
         m_lstSessionNode(IMSList<MediaSessionNode*>()),
-        m_pResourceMngr(IMS_NULL),
-        m_piTimer(IMS_NULL)
+        m_pResourceMngr(IMS_NULL)
 {
     IMS_TRACE_D("+MediaManager() thread[%s], nSlotId[%d]", strName.GetStr(), nSlotId, 0);
 
@@ -59,7 +58,6 @@ PRIVATE VIRTUAL MediaManager::~MediaManager()
     }
 
     ClearMediaSessionNode();
-    StopTimer();
 
     if (m_lstSessionNode.GetSize() == 0)
     {
@@ -116,28 +114,6 @@ PUBLIC VIRTUAL void MediaManager::SetJniMediaSessionThread(
     {
         pHandler->SetJniMediaSessionThread(pThread);
     }
-}
-
-PUBLIC VIRTUAL void MediaManager::Timer_TimerExpired(IN ITimer* piTimer)
-{
-    if (m_piTimer != piTimer)
-    {
-        return;
-    }
-
-    IMS_TRACE_I("Timer_TimerExpired - close all session", 0, 0, 0);
-
-    for (IMS_UINT32 i = 0; i < m_lstSessionNode.GetSize(); i++)
-    {
-        MediaSessionNode* pSessionNode = (MediaSessionNode*)m_lstSessionNode.GetAt(i);
-        if (pSessionNode != IMS_NULL && pSessionNode->pMediaSession != IMS_NULL)
-        {
-            pSessionNode->pMediaSession->ReportToClient(
-                    RtpError::RESPONSE_WAIT_TIMEOUT, MEDIA_TYPE_AUDIOVIDEOTEXT);
-        }
-    }
-
-    StopTimer();
 }
 
 PUBLIC
@@ -209,14 +185,8 @@ PUBLIC VIRTUAL void MediaManager::OnResponse(
     IMS_TRACE_I("OnResponse() - MSG[%d, %s], CallKey[%d]", nMsg, IMMedia::PrintMsg(nMsg), nCallKey);
     if (SendMessageToSessions(nMsg, nCallKey, pParam) != IMS_TRUE)
     {
-        IMS_TRACE_E(0, "OnMessage() - Fail to process nMsg", 0, 0, 0);
+        IMS_TRACE_E(0, "OnResponse() - Fail to process nMsg", 0, 0, 0);
         return;
-    }
-
-    if (IMMedia::CategorizeMessageType(nMsg) == IMMedia::MSG_RESPONSE_RELEASE_WAIT)
-    {
-        IMS_TRACE_D("OnMessage() stop timer - got media framework response", 0, 0, 0);
-        StopTimer();
     }
 }
 
@@ -247,12 +217,6 @@ IMS_BOOL MediaManager::handleRequestMsg(IN IMS_SINT32 eEvent, IN IMS_SINTP nCall
 
     if (pNode->pMessageHandler->SendMessageToMediaService(eEvent, param))
     {
-        if (IMMedia::CategorizeMessageType(eEvent) == IMMedia::MSG_REQUEST_SET_WAIT)
-        {
-            IMS_TRACE_D("handleRequestMsg() start timer - wait media framework response", 0, 0, 0);
-            StartTimer(TIME_WAIT_MEDIA_RESPONSE);
-        }
-
         return IMS_TRUE;
     }
 
@@ -365,33 +329,6 @@ PRIVATE VIRTUAL IMS_BOOL MediaManager::SendMessageToSessions(
     }
 
     return IMS_TRUE;
-}
-
-PRIVATE
-void MediaManager::StartTimer(IN IMS_UINT32 nTime)
-{
-    //---------------------------------------------------------------------------------------------
-    StopTimer();
-
-    m_piTimer = TimerService::GetTimerService()->CreateTimer();
-    if (m_piTimer != IMS_NULL)
-    {
-        m_piTimer->SetTimer(nTime, this);
-    }
-}
-
-PRIVATE
-void MediaManager::StopTimer()
-{
-    //---------------------------------------------------------------------------------------------
-    if (m_piTimer == IMS_NULL)
-    {
-        return;
-    }
-
-    m_piTimer->KillTimer();
-    TimerService::GetTimerService()->DestroyTimer(m_piTimer);
-    m_piTimer = IMS_NULL;
 }
 
 PROTECTED VIRTUAL IMS_BOOL MediaManager::OnMessage(IN IMSMSG& objMsg)
