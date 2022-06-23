@@ -72,6 +72,19 @@
         <item value="2"/>
         <item value="2"/>
     </int-array>
+    <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
+    <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
+    <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
+    <int name="imsvoice.evs_codec_attribute_hf_only_int" value="1"/>
+    <!-- <int name="imsvoice.evs_codec_attribute_mode_switch_int" value="0"/> -->
+    <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+        <item value="1"/>
+        <item value="6"/>
+    </int-array>
+    <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
+    <!-- <int name="imsvoice.codec_attribute_cmr_int" value="0"/> -->
+    <!-- <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="1"/> -->
+    <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
 
     <!-- Video -->
     <int-array name="imsvt.video_port_rtp_int_array" num="2">
