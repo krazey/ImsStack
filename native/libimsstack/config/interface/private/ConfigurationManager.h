@@ -45,11 +45,6 @@ public:
     IMS_RESULT StoreAppConfig(
             IN AppConfig* pAppConfig, IN const AString& strAppId, IN IMS_SINT32 nSlotId);
 
-    // Returns the configuration mode (file / xml / db)
-    IMS_SINT32 GetConfigMode() const;
-    // Returns the locator of the configuration
-    const AString& GetConfigLocator() const;
-
     // Subscriber configuration - impl. defined
     //    This config. includes IMS-related information in the ISIM.
     const SubscriberConfig* GetSubscriberConfig(
@@ -69,7 +64,7 @@ public:
     static ConfigurationManager* GetInstance();
 
     //// Load a default basic configuration for IMS client platform
-    IMS_BOOL Initialize(IN const AString& strLocator, IN IMS_SINT32 nMode);
+    IMS_BOOL Initialize();
 
     // Invoked by enabler threads
     void InitConfigs(IN IMS_SINT32 nSlotId);

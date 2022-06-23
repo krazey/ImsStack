@@ -18,10 +18,11 @@
 #include "ServiceTrace.h"
 #include "SystemConfigManager.h"
 
+#include "private/ConfigurationManager.h"
+
 #include "EnablerLoader.h"
 #include "EngineState.h"
 #include "ImsMain.h"
-#include "ImsProvisioning.h"
 
 __IMS_TRACE_TAG_USER_DECL__("ImsMain")
 
@@ -55,7 +56,7 @@ PUBLIC GLOBAL void ImsMain::Uninitialize()
 
 PUBLIC GLOBAL void ImsMain::Start()
 {
-    ImsProvisioning::Initialize();
+    InitializeConfigurationManager();
 
     // Starts the platform-specific threads
     PlatformProperty::Start();
@@ -83,4 +84,15 @@ PUBLIC GLOBAL void ImsMain::Stop()
     ImsProcess::GetInstance()->Uninitialize();
 
     PlatformProperty::Stop();
+}
+
+PRIVATE GLOBAL void ImsMain::InitializeConfigurationManager()
+{
+    if (!ConfigurationManager::GetInstance()->Initialize())
+    {
+        IMS_TRACE_E(0, "Initializing ConfigurationManager failed", 0, 0, 0);
+        return;
+    }
+
+    IMS_TRACE_I(">>> ConfigurationManager: Initialized <<<", 0, 0, 0);
 }

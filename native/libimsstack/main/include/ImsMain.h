@@ -34,6 +34,9 @@ public:
     static void Uninitialize();
     static void Start();
     static void Stop();
+
+private:
+    static void InitializeConfigurationManager();
 };
 
 #endif
