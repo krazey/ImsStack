@@ -1766,18 +1766,21 @@ PROTECTED VIRTUAL void Service::Close()
     SipConfig* pSipConfig =
             const_cast<SipConfig*>(ConfigurationManager::GetInstance()->GetSipConfig(GetSlotId()));
 
-    // Remove the configuration update listener
-    const SipConfigV* pSipConfigV = pSipConfig->GetServiceConfig();
-
-    if (pSipConfigV != IMS_NULL)
+    if (pSipConfig != IMS_NULL)
     {
-        IConfigurable* piConfigurable =
-                static_cast<const ISipConfigV*>(pSipConfigV)->GetConfigurable();
+        // Remove the configuration update listener
+        const SipConfigV* pSipConfigV = pSipConfig->GetServiceConfig();
 
-        if (piConfigurable != IMS_NULL)
+        if (pSipConfigV != IMS_NULL)
         {
-            piConfigurable->RemoveListener(IConfigurable::CP_I_FEATURE_TAG_OPTIONS, this);
-            piConfigurable->RemoveListener(IConfigurable::CP_I_SIP_ALL, this);
+            IConfigurable* piConfigurable =
+                    static_cast<const ISipConfigV*>(pSipConfigV)->GetConfigurable();
+
+            if (piConfigurable != IMS_NULL)
+            {
+                piConfigurable->RemoveListener(IConfigurable::CP_I_FEATURE_TAG_OPTIONS, this);
+                piConfigurable->RemoveListener(IConfigurable::CP_I_SIP_ALL, this);
+            }
         }
     }
 
