@@ -169,6 +169,7 @@ public:
             IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) const override;
     IMS_BOOL IsInitializePemWhenNoHeader() const override;
     IMS_SINT32 GetPolicyForLocalRingbackToneWith180Response() const override;
+    IMS_BOOL IsSend180ForInitialInvite() const override;
 
 private:
     IMS_BOOL ContainsValue(IN const IMSVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue) const;

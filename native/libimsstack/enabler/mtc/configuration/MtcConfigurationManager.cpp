@@ -827,6 +827,12 @@ IMS_SINT32 MtcConfigurationManager::GetPolicyForLocalRingbackToneWith180Response
     return m_objAsset.nPolicyForLocalRingbackToneWith180Response;
 }
 
+PUBLIC
+IMS_BOOL MtcConfigurationManager::IsSend180ForInitialInvite() const
+{
+    return m_objAsset.bSend180ForInitialInvite;
+}
+
 PRIVATE
 IMS_BOOL MtcConfigurationManager::ContainsValue(
         IN const IMSVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue) const

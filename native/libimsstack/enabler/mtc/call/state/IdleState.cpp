@@ -237,7 +237,8 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
         objPreconditionManager.StartQosTimer(piSession);
     }
 
-    if (IsRprSupported())
+    if (IsRprSupported() &&
+            !m_objContext.GetConfigurationProxy().Is(Feature::SEND_180_FOR_INITIAL_INVITE))
     {
         if (SendProvisionalResponse(IMS_FALSE) == IMS_FAILURE)
         {
@@ -246,8 +247,6 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     }
     else
     {
-        IMS_TRACE_D("OnAttached - RPR is not supported.", 0, 0, 0);
-
         SendIncomingCallReceived();
         return CallStateName::ALERTING;
     }
