@@ -469,7 +469,7 @@ PUBLIC VIRTUAL MtcSession* MtcCall::GetSession()
 {
     if (m_lstSessions.IsEmpty())
     {
-        IMS_TRACE_E(0, "GetSession : Empty", 0, 0, 0);
+        IMS_TRACE_D("GetSession : Empty", 0, 0, 0);
         return IMS_NULL;
     }
 

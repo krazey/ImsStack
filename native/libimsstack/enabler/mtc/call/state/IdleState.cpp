@@ -144,6 +144,8 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
 {
     IMS_TRACE_D("HandleIncoming", 0, 0, 0);
     m_objContext.GetUiNotifier().SetJniServiceThread(pServiceThread);
+    m_objContext.GetCallInfo().eInitialCallType = CallType::UNKNOWN;
+    m_objContext.GetCallInfo().ePeerType = PeerType::MT;
 
     MtcSession* pSession = m_objContext.CreateSession(piSession);
     if (pSession == IMS_NULL)
@@ -156,8 +158,6 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
 
     m_eConferenceStartType = ConferenceType::NOT_CONFERENCE;
 
-    m_objContext.GetCallInfo().eInitialCallType = pSession->GetCallType();
-    m_objContext.GetCallInfo().ePeerType = PeerType::MT;
     m_objContext.GetCallInfo().bConference = MessageUtil::IsFocusConf(piMessage);
     m_objContext.GetParticipantInfo().HandleRequest(IMessage::SESSION_START, *piMessage);
     m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
