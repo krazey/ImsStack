@@ -97,7 +97,6 @@ TEST_F(MtcAppTest, StopWithoutStartNoCrash)
     pMtcApp->Stop();
 }
 
-#if 0
 TEST_F(MtcAppTest, GetNormalServiceAfterStop)
 {
     TestMtcApp* pMtcApp = new TestMtcApp();
@@ -125,7 +124,6 @@ TEST_F(MtcAppTest, StartTwiceWithoutStopNoDuplicatedServiceCreation)
     IMS_SINT32 nSecondServiceCount = pMtcApp->GetServiceCount();
     EXPECT_EQ(nFirstServiceCount, nSecondServiceCount);
 }
-#endif
 
 TEST_F(MtcAppTest, CreateEctManagerOnlyOnceWhenFirstGetterIsCalled)
 {

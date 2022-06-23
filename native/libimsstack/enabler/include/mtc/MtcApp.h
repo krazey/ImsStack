@@ -80,11 +80,11 @@ public:
     IEctManager* GetEctManager() override;
     MtcEmergencyServiceManager* GetEmergencyServiceManager() override;
 
-private:
-    void InitConfiguration();
-    void CreateServices();
-    void InitCallManager();
-    void DestroyServices();
+protected:
+    virtual void InitConfiguration();
+    virtual void CreateServices();
+    virtual void InitCallManager();
+    virtual void DestroyServices();
 
 protected:
     IMS_SINT32 m_nSlotId;
