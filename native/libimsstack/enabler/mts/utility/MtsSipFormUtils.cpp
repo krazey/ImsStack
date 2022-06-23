@@ -41,6 +41,7 @@ MtsSipFormUtils::MtsSipFormUtils(IN IMS_SINT32 nSlotId) :
     IMS_TRACE_I("+MtsSipFormUtils", 0, 0, 0);
 
     MtsConfigurationManager* pMtsConfigurationManager = new MtsConfigurationManager();
+    pMtsConfigurationManager->Init();
     AString strUriScheme;
     if (pMtsConfigurationManager->GetRequestUriType() ==
             CarrierConfig::Ims::REQUEST_URI_FORMAT_TEL)
