@@ -232,7 +232,7 @@ public class MediaTestUtils {
                 .setResolutionWidth(RESOLUTION_WIDTH)
                 .setResolutionHeight(RESOLUTION_HEIGHT)
                 .setPauseImagePath(IMAGE_PATH)
-                .setDeviceOrientationDegree(VideoConfig.ORIENTATION_DEGREE_0)
+                .setDeviceOrientationDegree(0)
                 .setCvoValue(CVO_VALUE)
                 .setRtcpFbTypes(RTCP_FB_TYPES)
                 .build();

@@ -57,14 +57,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
     protected static final int CALL_STATE_VIDEO_UPGRADE_REQUESTED = 5;
 
     /*
-     * Display orientation for video call
-     */
-    protected final static int ORIENTATION_0 = 0;
-    protected final static int ORIENTATION_90 = 1;
-    protected final static int ORIENTATION_180 = 2;
-    protected final static int ORIENTATION_270 = 3;
-
-    /*
      * Display type for video call
      */
     protected final static int DISPLAY_NEAR = 0;
@@ -136,8 +128,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
 
         logi("onSetDeviceOrientation :: rotation=" + rotation);
 
-        mMediaSession.setDisplayOrientation(
-                convertAngleDegreeToEnum(getQuartile(rotation)));
+        mMediaSession.setDeviceOrientation(getQuartile(rotation));
     }
 
     @Override
@@ -374,33 +365,20 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
     }
 
     protected static int getQuartile(int angle) {
-        int orientation = ORIENTATION_0;
+        int orientation = 0;
 
         // This is for the reference devices.
         final int orientationThreshold = 45;
 
         if (checkRadius(angle, 90, orientationThreshold)) {
-            orientation = ORIENTATION_90;
+            orientation = 90;
         } else if (checkRadius(angle, 180, orientationThreshold)) {
-            orientation = ORIENTATION_180;
+            orientation = 180;
         } else if (checkRadius(angle, 270, orientationThreshold)) {
-            orientation = ORIENTATION_270;
+            orientation = 270;
         }
 
         return orientation;
-    }
-
-    protected static int convertAngleDegreeToEnum(int orientation) {
-        switch (orientation) {
-            case ORIENTATION_90:
-                return MtcMediaSession.ORIENTATION_90;
-            case ORIENTATION_180:
-                return MtcMediaSession.ORIENTATION_180;
-            case ORIENTATION_270:
-                return MtcMediaSession.ORIENTATION_270;
-            default:
-                return MtcMediaSession.ORIENTATION_0;
-        }
     }
 
     protected static String getDefaultDialerPackage() {
