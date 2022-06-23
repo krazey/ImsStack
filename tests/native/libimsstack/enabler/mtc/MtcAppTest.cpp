@@ -17,11 +17,32 @@
 #include <gtest/gtest.h>
 #include "MtcApp.h"
 #include "IMtcService.h"
+#include "ect/IEctManager.h"
+#include "MtcEmergencyServiceManager.h"
+#include "IMtcImsEventReceiver.h"
+#include "call/IMtcCallManager.h"
+#include "helper/ICallStateProxy.h"
+#include "dialingplan/IMtcDialingPlan.h"
+#include "IMtcCallController.h"
+#include "conferencecall/IConferenceManager.h"
+#include "configuration/MtcConfigurationManager.h"
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
 namespace android
 {
+
+class TestMtcApp : public MtcApp
+{
+public:
+    TestMtcApp() :
+            MtcApp(SLOT_ID)
+    {
+    }
+    virtual ~TestMtcApp() {}
+
+    IMS_SINT32 GetServiceCount() { return m_lstServices.GetSize(); }
+};
 
 class MtcAppTest : public ::testing::Test
 {
@@ -33,5 +54,145 @@ protected:
 
     virtual void TearDown() override { delete pMtcApp; }
 };
+
+TEST_F(MtcAppTest, Constructor)
+{
+    ASSERT_NE(pMtcApp, nullptr);
+}
+
+TEST_F(MtcAppTest, GetSlotId)
+{
+    EXPECT_EQ(pMtcApp->GetSlotId(), SLOT_ID);
+}
+
+TEST_F(MtcAppTest, CreateNormalServiceAfterStart)
+{
+    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);
+    ASSERT_EQ(piService, nullptr);
+
+    pMtcApp->Start();
+    piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);
+    ASSERT_NE(piService, nullptr);
+}
+
+TEST_F(MtcAppTest, CreateEmergencyServiceAfterStart)
+{
+    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::EMERGENCY);
+    ASSERT_EQ(piService, nullptr);
+
+    pMtcApp->Start();
+    piService = pMtcApp->GetServiceByType(ServiceType::EMERGENCY);
+    ASSERT_NE(piService, nullptr);
+}
+
+TEST_F(MtcAppTest, ReturnNullForGetServiceForUnknownType)
+{
+    pMtcApp->Start();
+    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::UNKNOWN);
+    ASSERT_EQ(piService, nullptr);
+}
+
+TEST_F(MtcAppTest, StopWithoutStartNoCrash)
+{
+    pMtcApp->Stop();
+}
+
+#if 0
+TEST_F(MtcAppTest, GetNormalServiceAfterStop)
+{
+    TestMtcApp* pMtcApp = new TestMtcApp();
+    pMtcApp->Start();
+    pMtcApp->Stop();
+    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);
+    ASSERT_EQ(piService, nullptr);
+}
+
+TEST_F(MtcAppTest, GetEmergencyServiceAfterStop)
+{
+    TestMtcApp* pMtcApp = new TestMtcApp();
+    pMtcApp->Start();
+    pMtcApp->Stop();
+    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::EMERGENCY);
+    ASSERT_EQ(piService, nullptr);
+}
+
+TEST_F(MtcAppTest, StartTwiceWithoutStopNoDuplicatedServiceCreation)
+{
+    TestMtcApp* pMtcApp = new TestMtcApp();
+    pMtcApp->Start();
+    IMS_SINT32 nFirstServiceCount = pMtcApp->GetServiceCount();
+    pMtcApp->Start();
+    IMS_SINT32 nSecondServiceCount = pMtcApp->GetServiceCount();
+    EXPECT_EQ(nFirstServiceCount, nSecondServiceCount);
+}
+#endif
+
+TEST_F(MtcAppTest, CreateEctManagerOnlyOnceWhenFirstGetterIsCalled)
+{
+    IEctManager* pFirstManager = pMtcApp->GetEctManager();
+    IEctManager* pSecondManager = pMtcApp->GetEctManager();
+    EXPECT_EQ(pFirstManager, pSecondManager);
+}
+
+TEST_F(MtcAppTest, CreateEmergencyManagerOnlyOnceWhenFirstGetterIsCalled)
+{
+    MtcEmergencyServiceManager* pFirstManager = pMtcApp->GetEmergencyServiceManager();
+    MtcEmergencyServiceManager* pSecondManager = pMtcApp->GetEmergencyServiceManager();
+    EXPECT_EQ(pFirstManager, pSecondManager);
+}
+
+TEST_F(MtcAppTest, GetDialingPlanAfterConstructor)
+{
+    IMtcDialingPlan* piDialingPlan = &pMtcApp->GetDialingPlan();
+    ASSERT_NE(piDialingPlan, nullptr);
+}
+
+TEST_F(MtcAppTest, GetCallControllerAfterConstructor)
+{
+    IMtcCallController* piCallController = &pMtcApp->GetCallController();
+    ASSERT_NE(piCallController, nullptr);
+}
+
+TEST_F(MtcAppTest, GetCallManagerAfterConstructor)
+{
+    IMtcCallManager* piCallManager = &pMtcApp->GetCallManager();
+    ASSERT_NE(piCallManager, nullptr);
+}
+
+TEST_F(MtcAppTest, GetVonrManagerAfterConstructor)
+{
+    IMtcVonrManager* piVonrManager = &pMtcApp->GetVonrManager();
+    ASSERT_NE(piVonrManager, nullptr);
+}
+
+TEST_F(MtcAppTest, GetConfigurationProxyAfterConstructor)
+{
+    MtcConfigurationProxy* piConfigProxy = &pMtcApp->GetConfigurationProxy();
+    ASSERT_NE(piConfigProxy, nullptr);
+}
+
+TEST_F(MtcAppTest, GetCallStateProxyAfterConstructor)
+{
+    ICallStateProxy* piCallStateProxy = &pMtcApp->GetCallStateProxy();
+    ASSERT_NE(piCallStateProxy, nullptr);
+}
+
+TEST_F(MtcAppTest, GetEventReceiverAfterConstructor)
+{
+    IMtcImsEventReceiver* piEventReceiver = &pMtcApp->GetImsEventReceiver();
+    ASSERT_NE(piEventReceiver, nullptr);
+}
+
+TEST_F(MtcAppTest, GetSipInterfaceFactoryAfterConstructor)
+{
+    IMtcSipInterfaceFactory* piSipInterfaceFactory = &pMtcApp->GetSipInterfaceFactory();
+    ASSERT_NE(piSipInterfaceFactory, nullptr);
+}
+
+TEST_F(MtcAppTest, GetConferenceManagerAfterConstructor)
+{
+    IConferenceManager* piConferenceManager = &pMtcApp->GetConferenceManager();
+    ASSERT_NE(piConferenceManager, nullptr);
+}
 
 }  // namespace android

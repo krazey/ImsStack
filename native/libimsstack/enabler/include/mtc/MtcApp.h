@@ -86,7 +86,7 @@ private:
     void InitCallManager();
     void DestroyServices();
 
-private:
+protected:
     IMS_SINT32 m_nSlotId;
     MtcConfigurationProxy m_objConfigurationProxy;
     IMSList<IMtcService*> m_lstServices;

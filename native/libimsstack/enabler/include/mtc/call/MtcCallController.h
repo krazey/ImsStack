@@ -86,7 +86,7 @@ public:
     // TODO: Consider ECT, SRVCC
     void Transfer(IN CallKey nCallKey, IN const AString& strTarget) override;
 
-    void HandleIpcanChanged();
+    void HandleIpcanChanged() override;
 
 private:
     IMtcContext& m_objContext;
