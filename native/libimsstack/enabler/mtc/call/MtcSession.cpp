@@ -71,6 +71,7 @@ PUBLIC VIRTUAL MtcSession::~MtcSession()
 {
     IMS_TRACE_I("~MtcSession", 0, 0, 0);
     m_objContext.GetPreconditionManager().DestroyQos(&m_objSession);
+    m_objSession.SetMessageMediator(IMS_NULL);
     GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(&m_objSession);
 }
 
