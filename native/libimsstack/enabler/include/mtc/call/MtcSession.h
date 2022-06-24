@@ -72,11 +72,11 @@ public:
     {
         return m_objContext.GetParticipantInfo();
     }
-    inline MtcSession* GetSession(IN const ISession* piSession) override
+    inline MtcSession* GetSession(IN const ISession* piSession) const override
     {
         return m_objContext.GetSession(piSession);
     }
-    inline MtcSession* GetSession() override { return m_objContext.GetSession(); }
+    inline MtcSession* GetSession() const override { return m_objContext.GetSession(); }
     inline IMtcService& GetService() override { return m_objContext.GetService(); }
     inline MtcUiNotifier& GetUiNotifier() override { return m_objContext.GetUiNotifier(); }
     inline IMtcMediaManager& GetMediaManager() override { return m_objContext.GetMediaManager(); }

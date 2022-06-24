@@ -120,7 +120,7 @@ PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsByType(IN CallType eCa
     return GetCallsByFilter(
             [eCallType](MtcCall* pCall)
             {
-                return pCall->GetSession()->GetCallType() == eCallType;
+                return pCall->GetCallType() == eCallType;
             });
 }
 

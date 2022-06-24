@@ -80,6 +80,7 @@ public:
     MOCK_METHOD(void, HandleSrvccFailure, (IN UpdateType eUpdateType), (override));
     MOCK_METHOD(void, HandleIpcanChanged, (), (override));
     MOCK_METHOD(CallKey, GetKey, (), (const, override));
+    MOCK_METHOD(CallType, GetCallType, (), (const, override));
     MOCK_METHOD(State, GetState, (), (const, override));
     MOCK_METHOD(IMtcCallContext&, GetCallContext, (), (const, override));
 };
