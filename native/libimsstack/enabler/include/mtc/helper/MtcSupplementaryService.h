@@ -71,12 +71,10 @@ private:
             IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack);
     void GetCnapByHeader(IN IMessage* piMessage, IN IMS_BOOL bFromHeader, OUT AString& strCnap,
             IN IMS_BOOL bDoFallBack);
-    void LoadConfig();
     IMS_BOOL IsExist(IN SuppType suppType);
 
 private:
     IMSMap<SuppType, SuppService*> m_objSuppService;
     MtcConfigurationProxy& m_objConfigurationProxy;
-    IMS_SINT32 m_nCnapType;
 };
 #endif

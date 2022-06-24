@@ -32,10 +32,7 @@ MtcConfigurationProxy::MtcConfigurationProxy(IN IMtcConfigurationManager* pManag
 PUBLIC
 MtcConfigurationProxy::~MtcConfigurationProxy()
 {
-    if (m_pCache)  // just to skip unnecessary operation in normal case.
-    {
-        delete m_pCache;
-    }
+    delete m_pCache;
 }
 
 PUBLIC

@@ -312,13 +312,6 @@ enum
 
 enum
 {
-    CNAP_SCHEME_PAID = 0,
-    CNAP_SCHEME_FROM = 1,
-    // if there is an issue for this, PAID preferred will be added again.
-};
-
-enum
-{
     CALLERID_NONE = 0,
     CALLERID_NETWORK = 1,
     CALLERID_RESTRICTED = 2,
@@ -609,21 +602,6 @@ inline const IMS_CHAR* Str_VoLTE_Call_State(IN IMS_UINT32 eState)
             return "VOLTE_CALL_STATE_ALERTING";
         case VOLTE_CALL_STATE_OFFHOOK:
             return "VOLTE_CALL_STATE_OFFHOOK";
-        default:
-            return "__INVALID__";
-    }
-}
-
-/* ------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------- */
-inline const IMS_CHAR* Str_CNAP(IN IMS_UINT32 eType)
-{
-    switch (eType)
-    {
-        case CNAP_SCHEME_PAID:
-            return "CNAP_SCHEME_PAID ";
-        case CNAP_SCHEME_FROM:
-            return "CNAP_SCHEME_FROM";
         default:
             return "__INVALID__";
     }

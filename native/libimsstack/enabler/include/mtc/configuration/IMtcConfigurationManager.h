@@ -17,8 +17,9 @@
 #ifndef INTERFACE_MTC_CONFIGURATION_MANAGER_H_
 #define INTERFACE_MTC_CONFIGURATION_MANAGER_H_
 
-#include "IMSTypeDef.h"
 #include "AString.h"
+#include "ConfigDef.h"
+#include "IMSTypeDef.h"
 
 class ICarrierConfig;
 

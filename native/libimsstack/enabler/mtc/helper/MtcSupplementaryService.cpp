@@ -43,11 +43,9 @@ PUBLIC
 MtcSupplementaryService::MtcSupplementaryService(IN MtcConfigurationProxy& objConfigurationProxy,
         IN IMSMap<SuppType, SuppService*> objSuppServices) :
         m_objSuppService(objSuppServices),
-        m_objConfigurationProxy(objConfigurationProxy),
-        m_nCnapType(CNAP_SCHEME_PAID)
+        m_objConfigurationProxy(objConfigurationProxy)
 {
     IMS_TRACE_I("+MtcSupplementaryService", 0, 0, 0);
-    LoadConfig();
 }
 
 PUBLIC
@@ -568,7 +566,7 @@ IMS_SINT32 MtcSupplementaryService::GetCallingNumVerificationResult(IN AString& 
 PRIVATE
 IMS_SINT32 MtcSupplementaryService::GetCnvHeaderType(IN IMessage* piMessage)
 {
-    if (m_nCnapType == CNAP_SCHEME_PAID &&
+    if (m_objConfigurationProxy.Is(Feature::OIP_SOURCE_FROM_HEADER) == IMS_FALSE &&
             MessageUtil::IsHeaderPresent(piMessage, ISipHeader::P_ASSERTED_IDENTITY))
     {
         IMS_TRACE_D("GetCNVHeaderType - P_ASSERTED_IDENTITY", 0, 0, 0);
@@ -636,19 +634,6 @@ void MtcSupplementaryService::GetCnapByHeader(IN IMessage* piMessage, IN IMS_BOO
     {
         return GetCnapByHeader(piMessage, !bFromHeader, strCnap, IMS_FALSE);
     }
-}
-
-PRIVATE
-void MtcSupplementaryService::LoadConfig()
-{
-    IMS_BOOL bOipFrom = m_objConfigurationProxy.Is(Feature::OIP_SOURCE_FROM_HEADER);
-
-    if (bOipFrom)
-    {
-        m_nCnapType = CNAP_SCHEME_FROM;
-    }
-
-    IMS_TRACE_I("LoadConfig : Done", 0, 0, 0);
 }
 
 PRIVATE
