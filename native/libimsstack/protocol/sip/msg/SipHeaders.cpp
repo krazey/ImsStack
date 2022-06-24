@@ -699,7 +699,8 @@ SIP_BOOL sipEncodeHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos, SIP_U
         return SIP_FALSE;
     }
 
-    if ((nMsgOptions & ESIPMSGOPT_ENCSHORTFORM) == ESIPMSGOPT_ENCSHORTFORM)
+    if ((nMsgOptions & SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM) ==
+            SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM)
     {
         sipEncodeShortHdrName(eHdrType, ppMsgBuffCurrPos);
         return SIP_TRUE;

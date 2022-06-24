@@ -92,7 +92,7 @@ SipHeaderList::~SipHeaderList()
  *****************************************************************************/
 SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP_TRUE*/)
 {
-    return EncodeHdr(ppCurrPos, bParams, ESIPMSGOPT_NONE);
+    return EncodeHdr(ppCurrPos, bParams, SipConfiguration::MSG_OPT_ENCODE_NONE);
 }
 
 /******************************************************************************
@@ -122,7 +122,7 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
 
     if (pHeader->GetHdrType() == SipHeaderBase::AUTHENTICATION_INFO)
     {
-        nMsgOptions = nMsgOptions | ESIPMSGOPT_ENCMULTILINE;
+        nMsgOptions = nMsgOptions | SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE;
     }
 
     if (pHeader->EncodeHdr(ppCurrPos, bParams) == SIP_FALSE)
@@ -148,10 +148,12 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
             SIP_ENC_CRLF(*ppCurrPos);
         }
         /*case of Multiple line encoding*/
-        else if ((nMsgOptions & ESIPMSGOPT_ENCMULTILINE) == ESIPMSGOPT_ENCMULTILINE)
+        else if ((nMsgOptions & SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE) ==
+                SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE)
         {
             SIP_ENC_CRLF(*ppCurrPos);
-            if ((nMsgOptions & ESIPMSGOPT_ENCSHORTFORM) == ESIPMSGOPT_ENCSHORTFORM)
+            if ((nMsgOptions & SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM) ==
+                    SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM)
             {
                 SIP_TRACE_NORMAL(ESIPTRACE_MODENCODER, "ShortForm Hdr", SIP_ZERO, SIP_ZERO);
                 sipEncodeShortHdrName(pHeader->GetHdrType(), ppCurrPos);

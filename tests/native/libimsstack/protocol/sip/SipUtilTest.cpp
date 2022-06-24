@@ -1,0 +1,82 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include <gtest/gtest.h>
+#include "SipDefNetworkUtil.h"
+#include "SipUtil.h"
+
+class SipTransactionListener : public ISipTxnListener
+{
+public:
+    SipTransactionListener() {}
+    virtual ~SipTransactionListener() {}
+
+    virtual SIP_BOOL TxnTimeout(ISipUserData* pUserData, int eTimerType)
+    {
+        (void)pUserData;
+        (void)eTimerType;
+        return SIP_TRUE;
+    }
+
+    virtual SIP_BOOL TxnTerminated(ISipUserData* pUserData)
+    {
+        (void)pUserData;
+        return SIP_TRUE;
+    }
+};
+
+namespace android
+{
+
+class SipUtilTest : public ::testing::Test
+{
+public:
+protected:
+    virtual void SetUp() override {}
+
+    virtual void TearDown() override {}
+};
+
+TEST_F(SipUtilTest, UtilityTest)
+{
+    SipUtil* pUtil = SipUtil_GetInstance();
+    ASSERT_TRUE(pUtil == nullptr);
+
+    SipUtil_Construct();
+
+    pUtil = SipUtil_GetInstance();
+    ASSERT_TRUE(pUtil != nullptr);
+
+    EXPECT_TRUE(pUtil->GetTimer() != nullptr);
+    EXPECT_TRUE(pUtil->GetLogger() != nullptr);
+    EXPECT_TRUE(pUtil->GetNetwork() != nullptr);
+    EXPECT_TRUE(pUtil->GetTxnListener() == nullptr);
+
+    ISipNetworkUtil* pNetworkUtil = new SipDefNetworkUtil();
+    ASSERT_TRUE(pNetworkUtil != nullptr);
+    pUtil->RegisterNetwork(pNetworkUtil);
+    EXPECT_TRUE(pNetworkUtil == pUtil->GetNetwork());
+
+    ISipTxnListener* pTxnListener = new SipTransactionListener();
+    ASSERT_TRUE(pTxnListener != nullptr);
+    pUtil->RegisterTxnListener(pTxnListener);
+    EXPECT_TRUE(pTxnListener == pUtil->GetTxnListener());
+
+    SipUtil_Destruct();
+    pUtil = SipUtil_GetInstance();
+    ASSERT_TRUE(pUtil == nullptr);
+}
+
+}  // namespace android

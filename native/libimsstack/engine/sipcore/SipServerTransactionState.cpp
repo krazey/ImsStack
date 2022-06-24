@@ -207,11 +207,11 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
     ::SipTxnKey* pTxnKey = IMS_NULL;
     IMS_UINT16 nError = 0;
     IMS_SINT32 nEncodingOptions = SipPrivate::GetEncodingOptions();
-    IMS_UINT32 nMsgOptions = ESIPMSGOPT_NONE;
+    IMS_UINT32 nMsgOptions = SipConfiguration::MSG_OPT_ENCODE_NONE;
 
     if ((nEncodingOptions & SipPrivate::OPT_E_SHORTFORM) != 0)
     {
-        nMsgOptions |= ESIPMSGOPT_ENCSHORTFORM;
+        nMsgOptions |= SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM;
     }
 
     objUserData.SetMsgOptions(nMsgOptions);

@@ -929,11 +929,11 @@ GLOBAL IMS_BOOL EncodeHeaderBody(
 GLOBAL IMS_BOOL EncodeMessage(IN ::SipMessage* pMessage, IN IMS_SINT32 nOptions,
         OUT IMS_BYTE*& pBuffer, OUT IMS_SINT32& nBuffLen)
 {
-    IMS_UINT32 nMsgOptions = ESIPMSGOPT_NONE;
+    IMS_UINT32 nMsgOptions = SipConfiguration::MSG_OPT_ENCODE_NONE;
 
     if ((nOptions & SipPrivate::OPT_E_SHORTFORM) != 0)
     {
-        nMsgOptions |= ESIPMSGOPT_ENCSHORTFORM;
+        nMsgOptions |= SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM;
     }
 
     if (pMessage->EncodeMsg(reinterpret_cast<SIP_CHAR**>(&pBuffer),
@@ -1047,7 +1047,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
                     DeleteStackString(pszBoundary);
                 }
 
-                pMessage->SetContentLengthHdr(nMsgLen, ESIPMSGOPT_NONE);
+                pMessage->SetContentLengthHdr(nMsgLen, SipConfiguration::MSG_OPT_ENCODE_NONE);
             }
             else
             {
@@ -1106,7 +1106,8 @@ GLOBAL IMS_BOOL EncodePartialMessage(
             pContentLength->SipDelete();
         }
 
-        if (pMessage->GetMsgHdrs()->EncodeHdrs(&pszBuffer, ESIPMSGOPT_NONE) == SIP_FALSE)
+        if (pMessage->GetMsgHdrs()->EncodeHdrs(&pszBuffer, SipConfiguration::MSG_OPT_ENCODE_NONE) ==
+                SIP_FALSE)
         {
             IMS_TRACE_D("Encoding headers failed", 0, 0, 0);
             return IMS_FALSE;

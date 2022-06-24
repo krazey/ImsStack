@@ -43,25 +43,6 @@ SipUtil::~SipUtil()
 
 }
 
-SIP_VOID SipUtil::RegisterTimer(ISipTimerUtil* pTimerUtil)
-{
-    if (m_pTimerUtil != SIP_NULL)
-    {
-        delete m_pTimerUtil;
-    }
-
-    m_pTimerUtil = pTimerUtil;
-}
-
-SIP_VOID SipUtil::RegisterLogger(ISipLoggerUtil* pLoggerUtil)
-{
-    if (m_pLoggerUtil != SIP_NULL)
-    {
-        delete m_pLoggerUtil;
-    }
-
-    m_pLoggerUtil = pLoggerUtil;
-}
 SIP_VOID SipUtil::RegisterNetwork(ISipNetworkUtil* pNwUtil)
 {
     if (m_pNetworkUtil != SIP_NULL)
