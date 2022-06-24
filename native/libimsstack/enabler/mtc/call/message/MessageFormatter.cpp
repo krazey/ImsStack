@@ -18,21 +18,22 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcSessionContext.h"
 #include "call/message/MessageFormatter.h"
+#include "CallReasonInfo.h"
+#include "CarrierConfig.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "Const3GPP.h"
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
-#include "CallReasonInfo.h"
 #include "ICoreService.h"
 #include "IFeatureCaps.h"
 #include "IMessage.h"
 #include "ImsIdentity.h"
-#include "MtcDef.h"
 #include "ISession.h"
 #include "ISipConfig.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "MtcDef.h"
 #include "Sip.h"
 #include "SipAddress.h"
 #include "SipHeaderName.h"
@@ -474,7 +475,16 @@ void MessageFormatter::SetCallerIdHeader()
 
     if (pSuppService->nValue == CALLERID_RESTRICTED)
     {
-        MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_ID, ISipHeader::PRIVACY);
+        MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+        if (objConfig.GetInt(Feature::SESSION_PRIVACY_TYPE) ==
+                CarrierConfig::ImsVoice::SESSION_PRIVACY_TYPE_HEADER)
+        {
+            MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_HEADER, ISipHeader::PRIVACY);
+        }
+        else
+        {
+            MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_ID, ISipHeader::PRIVACY);
+        }
 
         SipAddress objSIPAddress(ImsIdentity::GetAnonymousUserId());
         objSIPAddress.SetDisplayName(MessageUtil::STR_ANONYMOUS);

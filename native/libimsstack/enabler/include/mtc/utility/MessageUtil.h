@@ -209,6 +209,7 @@ public:
     static const IMS_CHAR STR_CONTENT_TYPE_SIP_FRAG[];
     static const IMS_CHAR STR_ACCEPT_TYPE_APPLICATION_SDP[];
     static const IMS_CHAR STR_ACCEPT_TYPE_APPLICATION_3GPP_IMS_XML[];
+    static const IMS_CHAR STR_HEADER[];
     static const IMS_CHAR STR_HISTINFO[];
     static const IMS_CHAR STR_ICSI[];
     static const IMS_CHAR STR_ID[];

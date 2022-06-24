@@ -49,6 +49,7 @@ const IMS_CHAR MessageUtil::STR_CONTENT_TYPE_RESOURCE_LISTS_XML[] =
 const IMS_CHAR MessageUtil::STR_CONTENT_TYPE_SIP_FRAG[] = "message/sipfrag";
 const IMS_CHAR MessageUtil::STR_ACCEPT_TYPE_APPLICATION_SDP[] = "application/sdp";
 const IMS_CHAR MessageUtil::STR_ACCEPT_TYPE_APPLICATION_3GPP_IMS_XML[] = "application/3gpp-ims+xml";
+const IMS_CHAR MessageUtil::STR_HEADER[] = "header";
 const IMS_CHAR MessageUtil::STR_HISTINFO[] = "histinfo";
 const IMS_CHAR MessageUtil::STR_ICSI[] = "+g.3gpp.icsi-ref=";
 const IMS_CHAR MessageUtil::STR_ID[] = "id";
