@@ -1897,6 +1897,11 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pSrcProfile,
 
     for (IMS_UINT32 nDstIndex = 0; nDstIndex < pDestProfile->lstPayload.GetSize(); nDstIndex++)
     {
+        if (pNegotiatedProfile->lstPayload.GetSize() > 0)
+        {
+            break;
+        }
+
         pDstPayload = pDestProfile->lstPayload.GetAt(nDstIndex);
 
         if (pDstPayload == IMS_NULL)
