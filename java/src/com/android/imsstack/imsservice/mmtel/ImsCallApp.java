@@ -26,7 +26,6 @@ import com.android.imsstack.test.IImsTestMode;
 import com.android.imsstack.util.MSimUtils;
 
 import java.util.concurrent.Executor;
-
 public class ImsCallApp extends ImsApp {
     private final Object mLock = new Object();
     private final ImsCallContext mCallContext;
@@ -35,6 +34,7 @@ public class ImsCallApp extends ImsApp {
     private ImsFeatureManager mFeatureManager = null;
     private ImsCallManager mCallManager = null;
     private ImsEcbmImpl mEcbm = null;
+    private ImsSmsImpl mSms = null;
     private ImsUtImpl mUt = null;
     private boolean mInitCompleted = false;
 
@@ -68,6 +68,11 @@ public class ImsCallApp extends ImsApp {
         if (mEcbm != null) {
             mEcbm.dispose();
             mEcbm = null;
+        }
+
+        if (mSms != null) {
+            mSms.dispose();
+            mSms = null;
         }
 
         if (mUt != null) {
@@ -172,6 +177,10 @@ public class ImsCallApp extends ImsApp {
                 mEcbm.init();
             }
 
+            if (mSms != null) {
+                mSms.init();
+            }
+
             if (mUt != null) {
                 mUt.init();
             }
@@ -193,6 +202,10 @@ public class ImsCallApp extends ImsApp {
 
             if (mEcbm != null) {
                 mEcbm.clear();
+            }
+
+            if (mSms != null) {
+                mSms.clear();
             }
 
             if (mUt != null) {
@@ -260,6 +273,17 @@ public class ImsCallApp extends ImsApp {
         }
 
         return mEcbm;
+    }
+
+    /**
+     * Creates the object of ImsSmsImpl
+     * @return Returns the object of ImsSmsImpl
+     */
+    public ImsSmsImpl getSmsInterface() {
+        if (mSms == null) {
+            mSms = new ImsSmsImpl(mCallContext);
+        }
+        return mSms;
     }
 
     public ImsUtImpl getUtInterface() {

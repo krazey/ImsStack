@@ -1,0 +1,220 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.imsstack.imsservice.mmtel;
+
+import android.telephony.SmsManager;
+import android.telephony.SmsMessage;
+import android.telephony.ims.stub.ImsSmsImplBase;
+
+import com.android.imsstack.imsservice.mmtel.sms.SmsTransferLayer;
+import com.android.imsstack.imsservice.mmtel.sms.SmsUtils;
+import com.android.telephony.Rlog;
+
+/**
+ * Implements ImsSmsImplBase to provide Sms over Ims feature.
+ */
+public final class ImsSmsImpl extends ImsSmsImplBase {
+    private static final String TAG = "[GII-ImsSmsImpl] ";
+    private final ImsCallContext mCallContext;
+    private SmsTransferLayer mSmsTL = null;
+    private final SmsTLListenerProxy mSmsTLListener = new SmsTLListenerProxy();
+    private static boolean sReady = false;
+    private final Object mLock = new Object();
+
+    public ImsSmsImpl(ImsCallContext callContext) {
+        mCallContext = callContext;
+        init();
+    }
+
+    /**
+     * Disposes the Object
+     */
+    public void dispose() {
+        Rlog.i(TAG, "dispose");
+        clear();
+    }
+
+    /**
+     * Initialises the objects created by this Class
+     */
+    public void init() {
+        mSmsTL = new SmsTransferLayer(mCallContext);
+        if (mSmsTL != null) {
+            mSmsTL.setListener(mSmsTLListener);
+        }
+        onReady();
+    }
+
+    /**
+     * clears the objects created by this class.
+     */
+    public void clear() {
+        sReady = false;
+        mSmsTL.setListener(null);
+        mSmsTL = null;
+    }
+
+    @Override
+    public void sendSms(
+            int token, int messageRef, String format, String smsc, boolean isRetry, byte[] pdu) {
+        Rlog.d(TAG, "sendSms");
+        int smsFormat = SmsUtils.FORMAT_INT_INVALID;
+        int result;
+        if (!sReady) {
+            throw new RuntimeException("Sms Not Ready!");
+        }
+        try {
+            if (format.equals(SmsMessage.FORMAT_3GPP)) {
+                smsFormat = SmsUtils.FORMAT_INT_3GPP;
+            } else if (format.equals(SmsMessage.FORMAT_3GPP2)) {
+                smsFormat = SmsUtils.FORMAT_INT_3GPP2;
+            } else {
+                onSendSmsResultError(
+                        token,
+                        messageRef,
+                        SEND_STATUS_ERROR,
+                        SmsManager.RESULT_INVALID_SMS_FORMAT,
+                        RESULT_NO_NETWORK_ERROR);
+                return;
+            }
+
+            if (pdu == null) {
+                onSendSmsResultError(
+                        token,
+                        messageRef,
+                        SEND_STATUS_ERROR,
+                        SmsManager.RESULT_ERROR_NULL_PDU,
+                        RESULT_NO_NETWORK_ERROR);
+                return;
+
+            }
+            result = mSmsTL.sendMoTPdu(token, messageRef, smsFormat, smsc, pdu);
+            if (result == SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS) {
+                Rlog.e(TAG, "Can not send sms - Invalid smsc");
+                onSendSmsResultError(
+                            token,
+                            messageRef,
+                            SEND_STATUS_ERROR,
+                            SmsManager.RESULT_INVALID_SMSC_ADDRESS,
+                            RESULT_NO_NETWORK_ERROR);
+            } else if (result == SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED) {
+                Rlog.e(TAG, "Can not send sms - Encoding Failed");
+                onSendSmsResultError(
+                            token,
+                            messageRef,
+                            SEND_STATUS_ERROR,
+                            SmsManager.RESULT_ENCODING_ERROR,
+                            RESULT_NO_NETWORK_ERROR);
+            } else if (result == SmsUtils.SMSRL_RESULT_MTS_CONTROLLER_FAILED) {
+                //TODO: b/234531121 change the MtsController Failure codes
+                Rlog.e(TAG, "Can not send sms - Failure from MtsController");
+                onSendSmsResultError(
+                            token,
+                            messageRef,
+                            SEND_STATUS_ERROR,
+                            SmsManager.RESULT_ERROR_GENERIC_FAILURE,
+                            RESULT_NO_NETWORK_ERROR);
+            }
+        } catch (RuntimeException e) {
+            Rlog.e(TAG, "Can not send sms: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void acknowledgeSms(int token, int messageRef, int result) {
+        Rlog.d(TAG, "acknowledgeSms");
+        if (!sReady) {
+            throw new RuntimeException("Sms Not Ready!");
+        }
+        try {
+            int tlResult = mSmsTL.sendReportTPdu(token,
+                                      SmsUtils.TP_SMS_DELIVER, messageRef, result);
+            if (tlResult != SmsUtils.RESULT_SUCCESS) {
+                Rlog.i(TAG, "Sending Acknowledge Failed");
+            }
+        } catch (RuntimeException e) {
+            Rlog.e(TAG, "AcknowledgeSms Failed: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void acknowledgeSmsReport(int token, int messageRef, int result) {
+        Rlog.d(TAG, "acknowledgeSmsReport");
+        if (!sReady) {
+            throw new RuntimeException("Sms Not Ready!");
+        }
+        try {
+            int tlResult = mSmsTL.sendReportTPdu(token, SmsUtils.TP_SMS_STATUS_REPORT,
+                                                                        messageRef, result);
+            if (tlResult != SmsUtils.RESULT_SUCCESS) {
+                Rlog.i(TAG, "Sending Acknowledge Failed");
+            }
+        } catch (RuntimeException e) {
+            Rlog.e(TAG, "AcknowledgeSms Failed: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void onReady() {
+        synchronized (mLock) {
+            sReady = true;
+        }
+    }
+
+    private class SmsTLListenerProxy implements SmsTransferLayer.Listener {
+
+        @Override
+        public void notifySmsResult(int token, int result, int reason) {
+            Rlog.d(TAG, "notifySmsResult");
+            try {
+                int messageRef = 0;
+                // FIXME: extract and save messageref in SUBMIT message
+                if (result == SEND_STATUS_OK) {
+                    onSendSmsResultSuccess(token, messageRef);
+                } else {
+                    // FIXME:extract the failure code and map to SmsManager.Result
+                    onSendSmsResultError(token, messageRef, result, reason,
+                                         RESULT_NO_NETWORK_ERROR);
+                }
+            } catch (RuntimeException e) {
+                Rlog.e(TAG, "notifySmsResult Failed: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public int notifySmsReceived(int token, int format, int messageType, byte[] pdu) {
+            Rlog.d(TAG, "notifySmsReceived");
+            try {
+                int messageRef = pdu[2] & 0xff;
+                if (messageType == SmsUtils.TP_SMS_DELIVER) {
+                    onSmsReceived(token, SmsUtils.getFormatString(format), pdu);
+                    return SmsUtils.RESULT_SUCCESS;
+                } else if (messageType == SmsUtils.TP_SMS_STATUS_REPORT) {
+                    onSmsStatusReportReceived(token, SmsUtils.getFormatString(format), pdu);
+                    return SmsUtils.RESULT_SUCCESS;
+                } else {
+                    Rlog.e(TAG, "Invalid SMS received ");
+                    return mSmsTL.sendReportTPdu(token, messageType, messageRef,
+                                        ImsSmsImplBase.DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED);
+                }
+            } catch (RuntimeException e) {
+                Rlog.e(TAG, "notifySmsReceived Failed:" + e.getMessage());
+                return SmsUtils.RESULT_FAILURE;
+            }
+        }
+    }
+}
