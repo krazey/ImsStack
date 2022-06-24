@@ -40,6 +40,7 @@
 #include "ussi/UssiController.h"
 #include "ussi/UssiDef.h"
 #include "utility/MessageUtil.h"
+#include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 

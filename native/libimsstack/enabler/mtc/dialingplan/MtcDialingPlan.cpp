@@ -28,6 +28,7 @@
 #include "dialingplan/MtcDialingPlan.h"
 #include "dialingplan/EmergencyDialingPlan.h"
 #include "util/TextParser.h"
+#include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 

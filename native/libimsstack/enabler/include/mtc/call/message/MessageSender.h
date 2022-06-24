@@ -21,7 +21,7 @@
 #include "helper/TransactionTimerUpdateHelper.h"
 #include "SipMethod.h"
 #include "MtcDef.h"
-#include <functional>
+#include <memory>
 
 class IMtcSessionContext;
 class ISession;

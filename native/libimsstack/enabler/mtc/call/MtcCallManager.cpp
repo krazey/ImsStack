@@ -22,6 +22,7 @@
 #include "helper/ICallStateProxy.h"
 #include "interface/mtc/IMtcCallStateListener.h"
 #include "ServiceTrace.h"
+#include <functional>
 
 __IMS_TRACE_TAG_COM_MTC__;
 

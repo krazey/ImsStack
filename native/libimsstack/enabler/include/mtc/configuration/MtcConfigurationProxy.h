@@ -21,6 +21,7 @@
 #include "IMSTypeDef.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/IMtcConfigurationManager.h"
+#include <memory>
 
 class ConfigCache;
 class IMtcConfigurationManager;

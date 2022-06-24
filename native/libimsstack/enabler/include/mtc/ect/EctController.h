@@ -22,6 +22,7 @@
 #include "ect/IEctReferenceListener.h"
 #include "CallReasonInfo.h"
 #include "ITimer.h"
+#include <memory>
 
 class IMtcContext;
 class IMtcCall;

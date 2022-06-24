@@ -22,7 +22,7 @@
 #include "dialingplan/NormalDialingPlan.h"
 #include "ImsIdentity.h"
 #include "AString.h"
-#include <functional>
+#include <memory>
 
 class IMtcContext;
 struct CallInfo;

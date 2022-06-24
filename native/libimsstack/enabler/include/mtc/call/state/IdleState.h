@@ -23,6 +23,8 @@
 #include "helper/block/IMtcBlockChecker.h"
 #include "MtcDef.h"
 #include "precondition/QosDef.h"
+#include <memory>
+#include <functional>
 
 class AString;
 class ConfUser;

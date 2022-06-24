@@ -20,7 +20,7 @@
 #include "ISession.h"
 #include "call/message/MessageSender.h"
 #include "helper/TransactionTimerUpdateHelper.h"
-#include <functional>
+#include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 

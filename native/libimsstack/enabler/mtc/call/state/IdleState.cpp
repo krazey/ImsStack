@@ -51,6 +51,7 @@
 #include "SipStatusCode.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiController.h"
+#include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 

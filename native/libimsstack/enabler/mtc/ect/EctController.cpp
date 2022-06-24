@@ -27,6 +27,7 @@
 #include "call/IMtcCallManager.h"
 #include "call/MtcUiNotifier.h"
 #include "CallReasonInfo.h"
+#include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
