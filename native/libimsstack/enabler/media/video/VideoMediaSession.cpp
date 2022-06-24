@@ -279,16 +279,8 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
         VideoProfileConfigurer::GetWidthHeightFromResolution(pFmtp->eResolution, &nWidth, &nHeight);
-        if (nWidth < nHeight)
-        {
-            m_objVideoConfig.setResolutionWidth(nHeight);
-            m_objVideoConfig.setResolutionHeight(nWidth);
-        }
-        else
-        {
-            m_objVideoConfig.setResolutionWidth(nWidth);
-            m_objVideoConfig.setResolutionHeight(nHeight);
-        }
+        m_objVideoConfig.setResolutionWidth(nWidth);
+        m_objVideoConfig.setResolutionHeight(nHeight);
 
         // TODO_MEDIA later
         m_objVideoConfig.setPauseImagePath(android::String8("/image/path"));
@@ -664,8 +656,26 @@ IMS_BOOL VideoMediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
     if (param != NULL)
     {
         IMS_TRACE_I("OnSelectCameraCmd() - camera id[%d]", param->nValue, 0, 0);
-        m_nCameraId = param->nValue;
+        if (m_nCameraId != param->nValue)
+        {
+            m_nCameraId = param->nValue;
+        }
+
         delete param;
+
+        if (m_nState == STATE_PREVIEW || m_nState == STATE_RECORDING)
+        {
+            if (m_nCameraId != CAMERA_ID_NONE)
+            {
+                m_objVideoConfig.setCameraId(m_nCameraId);
+                this->Modify();
+            }
+            else
+            {
+                // TODO: go to pause Image mode
+            }
+        }
+
         return IMS_TRUE;
     }
 

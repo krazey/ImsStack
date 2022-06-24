@@ -40,6 +40,8 @@ public:
         STATE_PAUSED,
     };
 
+    static const IMS_SINT32 CAMERA_ID_NONE = 99;
+
     VideoMediaSession(IN IMS_SINT32 nSlodId = 0);
     virtual ~VideoMediaSession();
     void SetConfig(IN VideoConfiguration* pConfig);
