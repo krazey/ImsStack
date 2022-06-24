@@ -138,14 +138,12 @@ PUBLIC VIRTUAL MtcEmergencyServiceManager* MtcApp::GetEmergencyServiceManager()
     return m_pEmergencyServiceManager;
 }
 
-PRIVATE
-void MtcApp::InitConfiguration()
+PROTECTED VIRTUAL void MtcApp::InitConfiguration()
 {
     m_objConfigurationProxy.Init();
 }
 
-PRIVATE
-void MtcApp::CreateServices()
+PROTECTED VIRTUAL void MtcApp::CreateServices()
 {
     DestroyServices();
 
@@ -153,16 +151,14 @@ void MtcApp::CreateServices()
     m_lstServices.Append(new MtcService(*this, ServiceType::EMERGENCY));
 }
 
-PRIVATE
-void MtcApp::InitCallManager()
+PROTECTED VIRTUAL void MtcApp::InitCallManager()
 {
     m_objCallManager.Init();
     JniConnectorFactory::GetInstance()->GetMtcCallConnector(m_nSlotId)->SetEnablerService(
             &GetCallController());
 }
 
-PRIVATE
-void MtcApp::DestroyServices()
+PROTECTED VIRTUAL void MtcApp::DestroyServices()
 {
     for (IMS_UINT32 i = 0; i < m_lstServices.GetSize(); i++)
     {
