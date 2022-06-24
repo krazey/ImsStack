@@ -103,5 +103,5 @@ void ConsultativeTransferController::TerminateTransferTargetCall()
     // It could be 'not safe' to send BYE to TransferTarget.
     m_objContext.GetCallManager()
             .GetCallByCallKey(m_nTransferTargetKey)
-            ->Terminate(CallReasonInfo(CODE_USER_TERMINATED));
+            ->Terminate(CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_ECT));
 }

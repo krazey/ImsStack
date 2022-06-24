@@ -4585,7 +4585,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         private void checkAndHandleTransferOnCallTerminated(CallReasonInfo callReasonInfo) {
-            if (false/*MtcCallUtils.isCallTerminatedByCallForward(callReasonInfo.mCode)*/) {
+            if (MtcCallUtils.isCallTerminatedByCallForward(callReasonInfo)) {
                 if (mTerminationReason == ImsReasonInfo.CODE_UNSPECIFIED) {
                     //FIXME: Need to add proper reason for ECT terminated.
                     // may be CODE_USER_TERMINATED_BY_ECT

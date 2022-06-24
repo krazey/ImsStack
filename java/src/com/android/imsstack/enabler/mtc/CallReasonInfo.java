@@ -109,6 +109,9 @@ public class CallReasonInfo implements Parcelable {
     public static final int EXTRA_CODE_CALL_RETRY_SILENT_REDIAL = 1;
     public static final int EXTRA_CODE_CALL_RETRY_EMERGENCY = 2;
 
+    // CODE_USER_TERMINATED
+    public static final int EXTRA_USER_TERMINATED_ECT = 0;
+
     // FAIL_REASON_SESSION_RETRY1X_E_1X|VOLTE :: CODE
     public static final int EXTRA_CODE_EMERGENCYSERVICE_INVALID = -1;
     public static final int EXTRA_CODE_EMERGENCYSERVICE_GENERIC = 0;
