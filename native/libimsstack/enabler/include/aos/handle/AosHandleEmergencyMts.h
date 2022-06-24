@@ -26,6 +26,7 @@ public:
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
     virtual ~AosHandleEmergencyMts();
 
-private:
+protected:
+    virtual void Init();
 };
 #endif  // AOS_HANDLE_EMERGENCY_MTS_H_
