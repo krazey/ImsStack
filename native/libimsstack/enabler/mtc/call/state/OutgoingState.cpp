@@ -338,6 +338,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* p
 {
     IMS_TRACE_D("SessionPRAckDelivered", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_PRACK);
+    if (piMessage == IMS_NULL)
+    {
+        return GetStateName();
+    }
+
     UpdatePreconditionCapability(piSession, piMessage);
 
     m_objContext.GetSession(piSession)->HandleResponse(IMessage::SESSION_PRACK, *piMessage);
