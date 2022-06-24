@@ -186,6 +186,23 @@ public class ImsRegistrationTracker {
             }
         }
 
+        CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
+        if (capabilityPairs != null) {
+            mRegTracker.changeCapabilities(capabilityPairs);
+        }
+    }
+
+    @VisibleForTesting
+    protected IAosRegistration getIAosRegistration(int slotId) {
+        return AosFactory.getInstance().getAosRegistration(slotId);
+    }
+
+    protected CapabilityPairs createCapabilityPairsFromCapabilities() {
+
+        if (mCapabilities.isEmpty()) {
+            return null;
+        }
+
         CapabilityPairs capabilityPairs = new CapabilityPairs();
         for (int i = 0; i < mCapabilities.size(); i++) {
             Pair<Integer, Integer> finalcapability = mCapabilities.get(i);
@@ -205,12 +222,7 @@ public class ImsRegistrationTracker {
                         IAosRegistrationListener.Capability.VIDEO);
             }
         }
-        mRegTracker.changeCapabilities(capabilityPairs);
-    }
-
-    @VisibleForTesting
-    protected IAosRegistration getIAosRegistration(int slotId) {
-        return AosFactory.getInstance().getAosRegistration(slotId);
+        return capabilityPairs;
     }
 
     private int convertToAosNetworkType(int radioTech) {
@@ -324,19 +336,27 @@ public class ImsRegistrationTracker {
         }
 
         public void updateSipDelegateRegistration() {
-            mAosReg.updateSipDelegateRegistration();
+            if (mAosReg != null) {
+                mAosReg.updateSipDelegateRegistration();
+            }
         }
 
         public void triggerSipDelegateDeregistration() {
-            mAosReg.triggerSipDelegateDeregistration();
+            if (mAosReg != null) {
+                mAosReg.triggerSipDelegateDeregistration();
+            }
         }
 
         public void triggerFullNetworkRegistration(int sipCode, @Nullable String sipReason) {
-            mAosReg.triggerFullNetworkRegistration(sipCode, sipReason);
+            if (mAosReg != null) {
+                mAosReg.triggerFullNetworkRegistration(sipCode, sipReason);
+            }
         }
 
         public void changeCapabilities(CapabilityPairs capabilities) {
-            mAosReg.changeCapabilities(capabilities);
+            if (mAosReg != null) {
+                mAosReg.changeCapabilities(capabilities);
+            }
         }
 
         @Override
@@ -423,6 +443,10 @@ public class ImsRegistrationTracker {
                 mAosReg = getIAosRegistration(mContext.getSlotId());
                 if (mAosReg != null) {
                     mAosReg.addListener(this);
+                    CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
+                    if (capabilityPairs != null) {
+                        changeCapabilities(capabilityPairs);
+                    }
                 }
             }
         }
@@ -430,6 +454,15 @@ public class ImsRegistrationTracker {
         @Override
         public void onCommonPackageStop(int slotId) {
             logi("onCommonPackageStop :: slotId=" + slotId);
+
+            if (slotId != mContext.getSlotId()) {
+                return;
+            }
+
+            if (getIAosRegistration(mContext.getSlotId()) != null) {
+                mAosReg.removeListener(this);
+            }
+            mAosReg = null;
         }
 
         private int convertToTelephonyCapability(int capability) {
