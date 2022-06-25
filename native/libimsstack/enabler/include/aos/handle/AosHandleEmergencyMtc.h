@@ -17,7 +17,6 @@
 #define AOS_HANDLE_EMERGENCY_MTC_H_
 
 #include "handle/AosHandle.h"
-#include "IEventListener.h"
 
 class AosHandleEmergencyMtc : public AosHandle
 {
@@ -25,8 +24,5 @@ public:
     AosHandleEmergencyMtc(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
     virtual ~AosHandleEmergencyMtc();
-
-protected:
-    virtual void Init();
 };
 #endif  // AOS_HANDLE_EMERGENCY_MTC_H_

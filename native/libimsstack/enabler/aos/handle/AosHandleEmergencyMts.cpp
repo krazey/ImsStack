@@ -16,10 +16,10 @@
 #include "ServiceTrace.h"
 
 #include "interface/IAosAppContext.h"
+#include "interface/IAosNConfiguration.h"
+#include "provider/AosProvider.h"
 
 #include "handle/AosHandleEmergencyMts.h"
-
-//__IMS_TRACE_TAG_USER_DECL__("AOS");
 
 /*
 
@@ -45,4 +45,17 @@ PUBLIC VIRTUAL AosHandleEmergencyMts::~AosHandleEmergencyMts()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleEmergencyMts = %" PFLS_u "/%" PFLS_x,
             m_strAppId.GetStr(), sizeof(AosHandleEmergencyMts), this);
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL void AosHandleEmergencyMts::Init()
+{
+    if (GET_N_CONFIG(m_nSlotId)->IsEmergencySmsOverImsSupported())
+    {
+        AosHandle::Init();
+    }
 }
