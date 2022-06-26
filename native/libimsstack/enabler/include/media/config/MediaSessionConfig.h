@@ -46,7 +46,7 @@ public:
     IMS_BOOL IsSessionLevelBandwidth() const;
     IMS_BOOL IsAnbrSupported() const;
     IMS_BOOL IsSupportMultiConfigInEarlySession() const;
-    IMS_BOOL IsSdpReofferFullCapa() const;
+    IMS_BOOL IsSdpReofferFullCapability() const;
 
     static const IMS_BOOL DEFAULT_SESSION_LEVEL_BW = IMS_FALSE;
     static const IMS_BOOL DEFAULT_ANBR_CAPABILITY = IMS_FALSE;
@@ -77,6 +77,6 @@ private:
     IMS_BOOL m_bIsSessLevelBW;
     IMS_BOOL m_bAnbrSupported;
     IMS_BOOL m_bSupportMultiConfigInEarlySession;
-    IMS_BOOL m_bSdpReofferFullCapa;
+    IMS_BOOL m_bSdpReofferFullCapability;
 };
 #endif  // _MEDIA_SESSION_CONFIG_H_

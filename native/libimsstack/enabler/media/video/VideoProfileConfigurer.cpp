@@ -217,18 +217,6 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
                 {
                     pAvcPayload->objRtcpFbAttr.bTmmbrSupported = IMS_TRUE;
                     pAvcPayload->objRtcpFbAttr.nTmmbrSmaxPr = 40;
-
-                    pAvcPayload->objRtcpFbAttr.nTmmbrDownInterval =
-                            pConfig->GetVideoAvpfTmmbrDownIntervalSec();
-                    pAvcPayload->objRtcpFbAttr.nTmmbrUpInterval =
-                            pConfig->GetVideoAvpfTmmbrUpIntervalSec();
-                    pAvcPayload->objRtcpFbAttr.nTmmbrLossThreshold =
-                            pConfig->GetVideoAvpfTmmbrLossThresholdRatio();
-                    pAvcPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio =
-                            pConfig->GetVideoAvpfTmmbrMinBitrateKbps();
-                    pAvcPayload->objRtcpFbAttr.nTmmbrBitrateLevel =
-                            pConfig->GetVideoAvpfTmmbrBitrateLevel();
-                    pAvcPayload->objRtcpFbAttr.nTmmbrUpLevel = pConfig->GetVideoAvpfTmmbrUpLevel();
                 }
 
                 if (pConfig->IsVideoAvpfPliEnabled() == IMS_TRUE)
@@ -252,16 +240,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
 
                 if (pAvcPayload->objRtcpFbAttr.bTmmbrSupported == IMS_TRUE)
                 {
-                    IMS_TRACE_D("CreateVideoProfile() TMMBR - T_Down[%d], T_Up[%d],\
-                            LossRate[%d]",
-                            pAvcPayload->objRtcpFbAttr.nTmmbrDownInterval,
-                            pAvcPayload->objRtcpFbAttr.nTmmbrUpInterval,
-                            pAvcPayload->objRtcpFbAttr.nTmmbrLossThreshold);
-                    IMS_TRACE_D("CreateVideoProfile() TMMBR - Level[%d], MinBitrate[%d],\
-                            nTmmbrUpLevel[%d]",
-                            pAvcPayload->objRtcpFbAttr.nTmmbrBitrateLevel,
-                            pAvcPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio,
-                            pAvcPayload->objRtcpFbAttr.nTmmbrUpLevel);
+                    IMS_TRACE_D("CreateVideoProfile() TMMBR Supported", 0, 0, 0);
                 }
             }
 
@@ -351,18 +330,6 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
                 {
                     pHevcPayload->objRtcpFbAttr.bTmmbrSupported = IMS_TRUE;
                     pHevcPayload->objRtcpFbAttr.nTmmbrSmaxPr = 40;
-
-                    pHevcPayload->objRtcpFbAttr.nTmmbrDownInterval =
-                            pConfig->GetVideoAvpfTmmbrDownIntervalSec();
-                    pHevcPayload->objRtcpFbAttr.nTmmbrUpInterval =
-                            pConfig->GetVideoAvpfTmmbrUpIntervalSec();
-                    pHevcPayload->objRtcpFbAttr.nTmmbrLossThreshold =
-                            pConfig->GetVideoAvpfTmmbrLossThresholdRatio();
-                    pHevcPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio =
-                            pConfig->GetVideoAvpfTmmbrMinBitrateKbps();
-                    pHevcPayload->objRtcpFbAttr.nTmmbrBitrateLevel =
-                            pConfig->GetVideoAvpfTmmbrBitrateLevel();
-                    pHevcPayload->objRtcpFbAttr.nTmmbrUpLevel = pConfig->GetVideoAvpfTmmbrUpLevel();
                 }
 
                 if (pConfig->IsVideoAvpfPliEnabled() == IMS_TRUE)
@@ -384,16 +351,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
 
                 if (pHevcPayload->objRtcpFbAttr.bTmmbrSupported == IMS_TRUE)
                 {
-                    IMS_TRACE_D("CreateVideoProfile() TMMBR - T_Down[%d], T_Up[%d],\
-                            LossRate[%d]",
-                            pHevcPayload->objRtcpFbAttr.nTmmbrDownInterval,
-                            pHevcPayload->objRtcpFbAttr.nTmmbrUpInterval,
-                            pHevcPayload->objRtcpFbAttr.nTmmbrLossThreshold);
-                    IMS_TRACE_D("CreateVideoProfile() TMMBR - Level[%d], MinBitrate[%d],\
-                            nTmmbrUpLevel[%d]",
-                            pHevcPayload->objRtcpFbAttr.nTmmbrBitrateLevel,
-                            pHevcPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio,
-                            pHevcPayload->objRtcpFbAttr.nTmmbrUpLevel);
+                    IMS_TRACE_D("CreateVideoProfile() TMMBR Supported", 0, 0, 0);
                 }
             }
 

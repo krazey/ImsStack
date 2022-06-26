@@ -66,7 +66,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
     }
 
     // Media Configuration attributes
-    SetPorts(piCc, CarrierConfig::ImsVoice::KEY_AUDIO_PORT_RTP_INT_ARRAY);
+    SetPorts(piCc, CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY);
     SetRtcpIntervals(piCc, CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY);
 
     nAsBandwidthKbps = piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_AS_BANDWIDTH_KBPS_INT);
@@ -81,7 +81,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
     // Audio Configuration attributes
 
     // m_nAudioPtime = DEFAULT_PTIME;    // already set by default at creator
-    m_nAudioMaxPtime = piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_MAXPTIME_INT);
+    m_nAudioMaxPtime = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT);
     m_nAudioMaxRed = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT);
 
     m_bAudioBwNegoOptionEnabled =
@@ -106,28 +106,22 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
         }
     }
 
-    m_objAudioCandidateAttribute = piCc->GetStringArray(
-            CarrierConfig::ImsVoice::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY);
+    m_objAudioCandidateAttribute =
+            piCc->GetStringArray(CarrierConfig::Assets::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY);
 
     // rtcp-xr
-    m_bAudioRtcpxrEnabled = piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_ENABLE_BOOL);
+    m_bAudioRtcpxrEnabled = piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_ENABLE_BOOL);
     m_bAudioRtcpxrStatisticsEnabled =
-            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_STATISTICS_BOOL);
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_STATISTICS_BOOL);
     m_bAudioRtcpxrVoipMetricsEnabled =
-            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL);
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL);
     m_bAudioRtcpxrPacketLossRleEnabled =
-            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL);
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL);
     m_bAudioRtcpxrPacketDuplicateRleEnabled =
-            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL);
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL);
 
     // DTMF Duration Parameter
-    IMSVector<IMS_SINT32> objAudioTelephonyEventDurations =
-            piCc->GetIntArray(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_INT_ARRAY);
-    if (!objAudioTelephonyEventDurations.IsEmpty())
-    {
-        m_nDtmfDuration = objAudioTelephonyEventDurations.GetAt(0);
-    }
-
+    m_nDtmfDuration = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_INT);
     m_nModeChangeCapability =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT);
     m_nModeChangePeriod =

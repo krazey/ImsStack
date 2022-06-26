@@ -200,13 +200,6 @@ public:
         IMS_BOOL bPliSupported;
         IMS_BOOL bFirSupported;
 
-        IMS_UINT32 nTmmbrDownInterval;     // Time interval to determine downward
-        IMS_UINT32 nTmmbrUpInterval;       // Time interval to determine upward
-        IMS_UINT32 nTmmbrLossThreshold;    // Threshold of loss rate to cause TMMBR
-        IMS_UINT32 nTmmbrMinBitrateRatio;  // Minimum threshold of bitrate
-        IMS_UINT32 nTmmbrBitrateLevel;  // Level of bitrate change (-> n+1 step of bitrate in total)
-        IMS_UINT32 nTmmbrUpLevel;       // Limit of maxinum level upward at once (0 : infinite)
-
     public:
         RtcpFbAttributes() :
                 bTrrSupported(IMS_FALSE),
@@ -215,13 +208,7 @@ public:
                 bTmmbrSupported(IMS_FALSE),
                 nTmmbrSmaxPr(-1),
                 bPliSupported(IMS_FALSE),
-                bFirSupported(IMS_FALSE),
-                nTmmbrDownInterval(5),
-                nTmmbrUpInterval(10),
-                nTmmbrLossThreshold(5),
-                nTmmbrMinBitrateRatio(40),
-                nTmmbrBitrateLevel(5),
-                nTmmbrUpLevel(1){};
+                bFirSupported(IMS_FALSE){};
     };
 
 public:
@@ -439,18 +426,6 @@ public:
                 pNewPayload->objRtcpFbAttr.nTmmbrSmaxPr = pOldPayload->objRtcpFbAttr.nTmmbrSmaxPr;
                 pNewPayload->objRtcpFbAttr.bPliSupported = pOldPayload->objRtcpFbAttr.bPliSupported;
                 pNewPayload->objRtcpFbAttr.bFirSupported = pOldPayload->objRtcpFbAttr.bFirSupported;
-
-                pNewPayload->objRtcpFbAttr.nTmmbrDownInterval =
-                        pOldPayload->objRtcpFbAttr.nTmmbrDownInterval;
-                pNewPayload->objRtcpFbAttr.nTmmbrUpInterval =
-                        pOldPayload->objRtcpFbAttr.nTmmbrUpInterval;
-                pNewPayload->objRtcpFbAttr.nTmmbrLossThreshold =
-                        pOldPayload->objRtcpFbAttr.nTmmbrLossThreshold;
-                pNewPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio =
-                        pOldPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio;
-                pNewPayload->objRtcpFbAttr.nTmmbrBitrateLevel =
-                        pOldPayload->objRtcpFbAttr.nTmmbrBitrateLevel;
-                pNewPayload->objRtcpFbAttr.nTmmbrUpLevel = pOldPayload->objRtcpFbAttr.nTmmbrUpLevel;
             }
 
             pNewPayload->bIncludeImageAttr = pOldPayload->bIncludeImageAttr;

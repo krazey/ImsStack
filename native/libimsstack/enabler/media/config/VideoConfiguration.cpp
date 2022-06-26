@@ -37,14 +37,7 @@ VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType) :
         bVideoAvpfPliEnabled(DEFAULT_AVPF_PLI),
         bVideoAvpfFirEnabled(DEFAULT_AVPF_FIR),
         nSdpOfferCapNegoForAvpf(DEFAULT_AVPF_CAPA_NEGO),
-        nVideoAvpfTmmbrDownIntervalSec(DEFAULT_TMMBR_DOWN_INTERVAL),
-        nVideoAvpfTmmbrUpIntervalSec(DEFAULT_TMMBR_UP_INTERVAL),
-        nVideoAvpfTmmbrLossThresholdRatio(DEFAULT_TMMBR_LOSS_RATIO),
-        nVideoAvpfTmmbrMinBitrateKbps(DEFAULT_TMMBR_MIN_BR),
-        nVideoAvpfTmmbrBitrateLevel(DEFAULT_TMMBR_BR_LEVEL),
-        nVideoAvpfTmmbrUpLevel(DEFAULT_TMMBR_UP_LEVEL),
         nVideoIframeIntervalSec(DEFAULT_I_FRAME_INTERVAL),
-        bVideoDropPFrameEnabled(IMS_FALSE),
         nChannel(DEFAULT_CHANNEL),
         nVideoSamplingRate(DEFAULT_VIDEO_SAMPLING_RATE)
 {
@@ -78,7 +71,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
     }
 
     // Media Configuration attributes
-    SetPorts(piCc, CarrierConfig::ImsVt::KEY_VIDEO_PORT_RTP_INT_ARRAY);
+    SetPorts(piCc, CarrierConfig::Assets::KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY);
     SetRtcpIntervals(piCc, CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY);
 
     nAsBandwidthKbps = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AS_BANDWIDTH_KBPS_INT);
@@ -93,30 +86,22 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
     // Video Configuration attributes
     nVideoDscp = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_DSCP_INT);
     nVideoSendPeriodicSpsPps =
-            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT);
+            piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT);
     nCvoId = piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT);
-    bVideoAvpfTrrEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TRR_BOOL);
-    bVideoAvpfNackEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_NACK_BOOL);
-    bVideoAvpfTmmbrEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_BOOL);
-    bVideoAvpfPliEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_PLI_BOOL);
-    bVideoAvpfFirEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FIR_BOOL);
+
+    IMS_SINT32 nVideoAvpfFeature = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FEATURE_INT);
+    bVideoAvpfTrrEnabled = nVideoAvpfFeature & 0x01 ? IMS_TRUE : IMS_FALSE;
+    bVideoAvpfNackEnabled = (nVideoAvpfFeature >> 1) & 0x01 ? IMS_TRUE : IMS_FALSE;
+    bVideoAvpfTmmbrEnabled = (nVideoAvpfFeature >> 2) & 0x01 ? IMS_TRUE : IMS_FALSE;
+    bVideoAvpfPliEnabled = (nVideoAvpfFeature >> 3) & 0x01 ? IMS_TRUE : IMS_FALSE;
+    bVideoAvpfFirEnabled = (nVideoAvpfFeature >> 4) & 0x01 ? IMS_TRUE : IMS_FALSE;
+
     // TODO_MEDIA need to check if it is needed for KR
     nSdpOfferCapNegoForAvpf =
             piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT);
-    nVideoAvpfTmmbrDownIntervalSec =
-            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_DOWN_INTERVAL_SEC_INT);
-    nVideoAvpfTmmbrUpIntervalSec =
-            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_UP_INTERVAL_SEC_INT);
-    nVideoAvpfTmmbrLossThresholdRatio =
-            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_LOSS_THRESHOLD_RATIO_INT);
-    nVideoAvpfTmmbrMinBitrateKbps =
-            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_MIN_BITRATE_KBPS_INT);
-    nVideoAvpfTmmbrBitrateLevel =
-            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_BITRATE_LEVEL_INT);
-    nVideoAvpfTmmbrUpLevel = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_UP_LEVEL_INT);
 
-    nVideoIframeIntervalSec = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT);
-    bVideoDropPFrameEnabled = piCc->GetBoolean(CarrierConfig::Assets::KEY_VIDEO_DROP_P_FRAME_BOOL);
+    nVideoIframeIntervalSec =
+            piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT);
 
     // nChannel = DEFAULT_CHANNEL; // already set by default at creator
     // nVideoSamplingRate = DEFAULT_VIDEO_SAMPLING_RATE; // already set by default at creator
@@ -215,14 +200,8 @@ PROTECTED VIRTUAL void VideoConfiguration::ToDebugString() const
             bVideoAvpfNackEnabled, 0);
     IMS_TRACE_D("bVideoAvpfTmmbrEnabled(%d), bVideoAvpfPliEnabled(%d), bVideoAvpfFirEnabled(%d)",
             bVideoAvpfTmmbrEnabled, bVideoAvpfPliEnabled, bVideoAvpfFirEnabled);
-    IMS_TRACE_D("nVideoAvpfTmmbrDownIntervalSec(%d), nVideoAvpfTmmbrUpIntervalSec(%d)",
-            nVideoAvpfTmmbrDownIntervalSec, nVideoAvpfTmmbrUpIntervalSec, 0);
-    IMS_TRACE_D("nVideoAvpfTmmbrLossThresholdRatio(%d), nVideoAvpfTmmbrMinBitrateKbps(%d)",
-            nVideoAvpfTmmbrLossThresholdRatio, nVideoAvpfTmmbrMinBitrateKbps, 0);
-    IMS_TRACE_D("nVideoAvpfTmmbrBitrateLevel(%d), nVideoAvpfTmmbrUpLevel(%d)",
-            nVideoAvpfTmmbrBitrateLevel, nVideoAvpfTmmbrUpLevel, 0);
-    IMS_TRACE_D("nVideoIframeIntervalSec(%d), bVideoDropPFrameEnabled(%d), nVideoSamplingRate(%d)",
-            nVideoIframeIntervalSec, bVideoDropPFrameEnabled, nVideoSamplingRate);
+    IMS_TRACE_D("nVideoIframeIntervalSec(%d), nVideoSamplingRate(%d)", nVideoIframeIntervalSec,
+            nVideoSamplingRate, 0);
     for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
     {
         ToDebugStringCodecs(objCodecConfigs.GetAt(i));
@@ -342,66 +321,6 @@ IMS_SINT32 VideoConfiguration::GetSdpOfferCapNegoForAvpf() const
 }
 
 /*!
- * @brief   GetAVPF_TMMBR_DownInterval
- * @details Get avpf TMMBR Time interval to determine downward
- */
-PUBLIC
-IMS_SINT32 VideoConfiguration::GetVideoAvpfTmmbrDownIntervalSec() const
-{
-    return nVideoAvpfTmmbrDownIntervalSec;
-}
-
-/*!
- * @brief   GetAVPF_TMMBR_UpInterval
- * @details Get avpf TMMBR Time interval to determine upward
- */
-PUBLIC
-IMS_SINT32 VideoConfiguration::GetVideoAvpfTmmbrUpIntervalSec() const
-{
-    return nVideoAvpfTmmbrUpIntervalSec;
-}
-
-/*!
- * @brief   GetAVPF_TMMBR_LossThreshold
- * @details Get avpf TMMBR Threshold of loss rate to cause TMMBR
- */
-PUBLIC
-IMS_SINT32 VideoConfiguration::GetVideoAvpfTmmbrLossThresholdRatio() const
-{
-    return nVideoAvpfTmmbrLossThresholdRatio;
-}
-
-/*!
- * @brief   GetAVPF_TMMBR_MinBitrateRatio
- * @details Get avpf TMMBR Minimum threshold of bitrate
- */
-PUBLIC
-IMS_SINT32 VideoConfiguration::GetVideoAvpfTmmbrMinBitrateKbps() const
-{
-    return nVideoAvpfTmmbrMinBitrateKbps;
-}
-
-/*!
- * @brief   GetAVPF_TMMBR_BitrateLevel
- * @details Get avpf TMMBR Level of bitrate change (-> n+1 step of bitrate in total)
- */
-PUBLIC
-IMS_SINT32 VideoConfiguration::GetVideoAvpfTmmbrBitrateLevel() const
-{
-    return nVideoAvpfTmmbrBitrateLevel;
-}
-
-/*!
- * @brief   GetAVPF_TMMBR_MinBitrateRatio
- * @details Get avpf TMMBR Minimum threshold of bitrate
- */
-PUBLIC
-IMS_SINT32 VideoConfiguration::GetVideoAvpfTmmbrUpLevel() const
-{
-    return nVideoAvpfTmmbrUpLevel;
-}
-
-/*!
  * @brief   GetVideoIframeIntervalSec
  * @details
  */
@@ -409,16 +328,6 @@ PUBLIC
 IMS_SINT32 VideoConfiguration::GetVideoIframeIntervalSec() const
 {
     return nVideoIframeIntervalSec;
-}
-
-/*!
- * @brief   IsVideoDropPFrameEnabled
- * @details
- */
-PUBLIC
-IMS_BOOL VideoConfiguration::IsVideoDropPFrameEnabled() const
-{
-    return bVideoDropPFrameEnabled;
 }
 
 /*!

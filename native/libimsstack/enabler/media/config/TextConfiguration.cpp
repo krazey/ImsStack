@@ -54,7 +54,7 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
     }
 
     // Media Configuration attributes
-    SetPorts(piCc, CarrierConfig::ImsRtt::KEY_TEXT_PORT_RTP_INT_ARRAY);
+    SetPorts(piCc, CarrierConfig::ImsRtt::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY);
     SetRtcpIntervals(piCc, CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY);
 
     nAsBandwidthKbps = piCc->GetBoolean(CarrierConfig::ImsRtt::KEY_TEXT_AS_BANDWIDTH_KBPS_INT);

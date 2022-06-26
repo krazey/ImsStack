@@ -116,12 +116,6 @@ public:
     IMS_BOOL IsVideoAvpfPliEnabled() const;
     IMS_BOOL IsVideoAvpfFirEnabled() const;
     IMS_SINT32 GetSdpOfferCapNegoForAvpf() const;
-    IMS_SINT32 GetVideoAvpfTmmbrDownIntervalSec() const;
-    IMS_SINT32 GetVideoAvpfTmmbrUpIntervalSec() const;
-    IMS_SINT32 GetVideoAvpfTmmbrLossThresholdRatio() const;
-    IMS_SINT32 GetVideoAvpfTmmbrMinBitrateKbps() const;
-    IMS_SINT32 GetVideoAvpfTmmbrBitrateLevel() const;
-    IMS_SINT32 GetVideoAvpfTmmbrUpLevel() const;
     IMS_SINT32 GetVideoIframeIntervalSec() const;
     IMS_BOOL IsVideoDropPFrameEnabled() const;
     IMS_SINT32 GetChannel() const;
@@ -140,14 +134,7 @@ private:
     IMS_BOOL bVideoAvpfPliEnabled;
     IMS_BOOL bVideoAvpfFirEnabled;
     IMS_SINT32 nSdpOfferCapNegoForAvpf;
-    IMS_SINT32 nVideoAvpfTmmbrDownIntervalSec;
-    IMS_SINT32 nVideoAvpfTmmbrUpIntervalSec;
-    IMS_SINT32 nVideoAvpfTmmbrLossThresholdRatio;
-    IMS_SINT32 nVideoAvpfTmmbrMinBitrateKbps;
-    IMS_SINT32 nVideoAvpfTmmbrBitrateLevel;
-    IMS_SINT32 nVideoAvpfTmmbrUpLevel;
     IMS_SINT32 nVideoIframeIntervalSec;
-    IMS_BOOL bVideoDropPFrameEnabled;
     IMS_SINT32 nChannel;
     IMS_SINT32 nVideoSamplingRate;
 };

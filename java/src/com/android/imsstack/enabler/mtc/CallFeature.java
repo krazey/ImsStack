@@ -32,7 +32,7 @@ public final class CallFeature {
 
     public static boolean isAudioEvsSupported(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.ImsVoice.KEY_EVS_SUPPORT_BOOL);
+                .getBoolean("evs_support_bool");
     }
 
     /**
@@ -43,7 +43,7 @@ public final class CallFeature {
      */
     public static boolean isVideoHevcSupported(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.ImsVt.KEY_HEVC_SUPPORT_BOOL);
+                .getBoolean("hevc_support_bool");
     }
 
     public static boolean isCallHoldUsingInactive(int slotId) {

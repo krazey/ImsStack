@@ -34,7 +34,7 @@ MediaSessionConfig::MediaSessionConfig(IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_T
         m_bIsSessLevelBW(DEFAULT_SESSION_LEVEL_BW),
         m_bAnbrSupported(DEFAULT_ANBR_CAPABILITY),
         m_bSupportMultiConfigInEarlySession(DEFAULT_SUPPORT_MULTICONFIG),
-        m_bSdpReofferFullCapa(IMS_TRUE)
+        m_bSdpReofferFullCapability(IMS_TRUE)
 {
     IMS_TRACE_D("+MediaSessionConfig() - nSlotId(%d), serviceType(%d)", nSlotId, serviceType, 0);
 
@@ -69,7 +69,8 @@ IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL);
     m_bSupportMultiConfigInEarlySession =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL);
-    m_bSdpReofferFullCapa = piCc->GetBoolean(CarrierConfig::Assets::KEY_SDP_REOFFER_FULLCAPA);
+    m_bSdpReofferFullCapability =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL);
 
     CreateAudioConfiguration(piCc);
     CreateVideoConfiguration(piCc);
@@ -94,8 +95,8 @@ void MediaSessionConfig::ToDebugString() const
 {
     IMS_TRACE_D("m_nServiceType(%d), m_bIsSessLevelBW(%d), m_bAnbrSupported(%d)", m_nServiceType,
             m_bIsSessLevelBW, m_bAnbrSupported);
-    IMS_TRACE_D("m_bSupportMultiConfigInEarlySession(%d), m_bSdpReofferFullCapa(%d)",
-            m_bSupportMultiConfigInEarlySession, m_bSdpReofferFullCapa, 0);
+    IMS_TRACE_D("m_bSupportMultiConfigInEarlySession(%d), m_bSdpReofferFullCapability(%d)",
+            m_bSupportMultiConfigInEarlySession, m_bSdpReofferFullCapability, 0);
 }
 
 PUBLIC
@@ -141,9 +142,9 @@ IMS_BOOL MediaSessionConfig::IsSupportMultiConfigInEarlySession() const
 }
 
 PUBLIC
-IMS_BOOL MediaSessionConfig::IsSdpReofferFullCapa() const
+IMS_BOOL MediaSessionConfig::IsSdpReofferFullCapability() const
 {
-    return m_bSdpReofferFullCapa;
+    return m_bSdpReofferFullCapability;
 }
 
 PRIVATE

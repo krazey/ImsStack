@@ -419,10 +419,10 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessio
         // reuse previous profile when negotiated profile data port is 0
         if ((pPrevOaModel->pNegotiatedProfile != IMS_NULL &&
                     pPrevOaModel->pNegotiatedProfile->nDataPort == 0) ||
-                pMediaSessionConfig->IsSdpReofferFullCapa() == IMS_FALSE)
+                pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_FALSE)
         {
-            IMS_TRACE_I("FormReoffer() - reuse previous profile, m_bSdpReofferFullCapa[%d]",
-                    pMediaSessionConfig->IsSdpReofferFullCapa(), 0, 0);
+            IMS_TRACE_I("FormReoffer() - reuse previous profile, m_bSdpReofferFullCapability[%d]",
+                    pMediaSessionConfig->IsSdpReofferFullCapability(), 0, 0);
             pNewOaModel->pSrcProfile = new AudioProfile(pPrevOaModel->pNegotiatedProfile);
         }
         else

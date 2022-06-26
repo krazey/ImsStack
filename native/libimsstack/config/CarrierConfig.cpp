@@ -268,8 +268,8 @@ const IMS_CHAR CarrierConfig::ImsRtt::KEY_RED_PAYLOAD_TYPE_INT[] =
 // Public carrier-config - ends
 const IMS_CHAR CarrierConfig::ImsRtt::KEY_POLICY_ON_TEXT_QOS_DEACTIVATION_INT[] =
         KEY_IMS_RTT_PREFIX "policy_on_text_qos_deactivation_int";
-const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_PORT_RTP_INT_ARRAY[] =
-        KEY_IMS_RTT_PREFIX "text_port_rtp_int_array";
+const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY[] =
+        KEY_IMS_RTT_PREFIX "text_rtp_port_range_int_array";
 const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY[] =
         KEY_IMS_RTT_PREFIX "text_rtcp_interval_int_array";
 
@@ -567,30 +567,10 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJEC
 // Media
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL[] =
         KEY_IMS_VOICE_PREFIX "media_anbr_capability_in_modem_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_EVS_SUPPORT_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "evs_support_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_PORT_RTP_INT_ARRAY[] =
-        KEY_IMS_VOICE_PREFIX "audio_port_rtp_int_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "audio_jitter_buffer_size_int_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "audio_rtcp_interval_int_array";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_ENABLE_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "audio_rtcpxr_enable_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_STATISTICS_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "audio_rtcpxr_statistics_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "audio_rtcpxr_voip_metrics_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "audio_rtcpxr_packet_loss_rle_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "audio_rtcpxr_packet_duplicate_rle_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_PTIME_INT[] =
-        KEY_IMS_VOICE_PREFIX "audio_ptime_int";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_MAXPTIME_INT[] =
-        KEY_IMS_VOICE_PREFIX "audio_maxptime_int";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY[] =
-        KEY_IMS_VOICE_PREFIX "audio_candidate_attribute_string_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT[] =
         KEY_IMS_VOICE_PREFIX "evs_amrwb_io_mode_set_int";
 
@@ -645,46 +625,10 @@ const IMS_CHAR CarrierConfig::ImsVt::KEY_ALLOW_TEXT_WITH_VIDEO_BOOL[] =
 const IMS_CHAR CarrierConfig::ImsVt::KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT[] =
         KEY_IMS_VT_PREFIX "minimum_battery_level_for_limit_video_call_int";
 // Media
-const IMS_CHAR CarrierConfig::ImsVt::KEY_HEVC_SUPPORT_BOOL[] =
-        KEY_IMS_VT_PREFIX "hevc_support_bool";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_SDP_ANSWER_FULL_CAPABILITY_BOOL[] =
-        KEY_IMS_VT_PREFIX "video_sdp_answer_full_capability_bool";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_PORT_RTP_INT_ARRAY[] =
-        KEY_IMS_VT_PREFIX "video_port_rtp_int_array";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY[] =
         KEY_IMS_VT_PREFIX "video_rtcp_interval_int_array";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_FRAME_RATE_INT[] =
-        KEY_IMS_VT_PREFIX "video_frame_rate_int";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_BITRATE_ADAPT_ENABLE_BOOL[] =
-        KEY_IMS_VT_PREFIX "video_bitrate_adapt_enable_bool";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT[] =
-        KEY_IMS_VT_PREFIX "video_send_periodic_sps_pps_int";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_ENABLE_BOOL[] =
-        KEY_IMS_VT_PREFIX "video_avpf_enable_bool";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TRR_BOOL[] =
-        KEY_IMS_VT_PREFIX "video_avpf_trr_bool";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_NACK_BOOL[] =
-        KEY_IMS_VT_PREFIX "video_avpf_nack_bool";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_BOOL[] =
-        KEY_IMS_VT_PREFIX "video_avpf_tmmbr_bool";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_PLI_BOOL[] =
-        KEY_IMS_VT_PREFIX "video_avpf_pli_bool";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FIR_BOOL[] =
-        KEY_IMS_VT_PREFIX "video_avpf_fir_bool";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_DOWN_INTERVAL_SEC_INT[] =
-        KEY_IMS_VT_PREFIX "video_avpf_tmmbr_down_interval_sec_int";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_UP_INTERVAL_SEC_INT[] =
-        KEY_IMS_VT_PREFIX "video_avpf_tmmbr_up_interval_sec_int";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_LOSS_THRESHOLD_RATIO_INT[] =
-        KEY_IMS_VT_PREFIX "video_avpf_tmmbr_loss_threshold_ratio_int";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_MIN_BITRATE_KBPS_INT[] =
-        KEY_IMS_VT_PREFIX "video_avpf_tmmbr_min_bitrate_kbps_int";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_BITRATE_LEVEL_INT[] =
-        KEY_IMS_VT_PREFIX "video_avpf_tmmbr_bitrate_level_int";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_UP_LEVEL_INT[] =
-        KEY_IMS_VT_PREFIX "video_avpf_tmmbr_up_level_int";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT[] =
-        KEY_IMS_VT_PREFIX "video_iframe_interval_sec_int";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FEATURE_INT[] =
+        KEY_IMS_VT_PREFIX "video_avpf_feature_int";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_CODEC_BITRATE_INT_ARRAY[] =
         KEY_IMS_VT_PREFIX "video_codec_bitrate_int_array";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_CODEC_IMAGE_ATTR_STRING_ARRAY[] =
@@ -1076,51 +1020,52 @@ const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_18
 const IMS_CHAR CarrierConfig::Assets::KEY_SEND_180_FOR_INITIAL_INVITE_BOOL[] =
         "send_180_for_initial_invite_bool";
 // Media
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =
+        "audio_rtp_port_range_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL[] = "audio_bw_nego_option_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_DROP_P_FRAME_BOOL[] = "video_drop_p_frame_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_SDP_ANSWER_FULL_CAPABILITY_BOOL[] =
-        "audio_sdp_answer_full_capability_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT[] = "audio_maxptime_millis_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT[] = "audio_maxred_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT[] = "audio_rtp_dscp_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_INT_ARRAY[] =
-        "audio_telephone_event_duration_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_INT[] =
+        "audio_telephone_event_duration_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY[] =
+        "audio_candidate_attribute_string_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_ENABLE_BOOL[] = "audio_rtcpxr_enable_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_STATISTICS_BOOL[] =
+        "audio_rtcpxr_statistics_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL[] =
+        "audio_rtcpxr_voip_metrics_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL[] =
+        "audio_rtcpxr_packet_loss_rle_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL[] =
+        "audio_rtcpxr_packet_duplicate_rle_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY[] =
+        "video_rtp_port_range_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT[] = "video_cvo_value_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT[] =
         "video_sdp_offer_cap_nego_for_avpf_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_H264_SPROP_PARAMETER_SETS_BOOL[] =
-        "video_codec_h264_sprop_parameter_sets_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_HEVC_SPROP_PARAMETER_SETS_BOOL[] =
-        "video_codec_hevc_sprop_parameter_sets_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_H264_MAX_MBPS_INT[] =
-        "video_codec_h264_max_mbps_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_H264_MAX_FS_INT[] =
-        "video_codec_h264_max_fs_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_H264_MAX_CPB_INT[] =
-        "video_codec_h264_max_cpb_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_H264_MAX_DPB_INT[] =
-        "video_codec_h264_max_dpb_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_H264_MAX_BR_INT[] =
-        "video_codec_h264_max_br_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_HEVC_MAX_MBPS_INT[] =
-        "video_codec_hevc_max_mbps_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_HEVC_MAX_FS_INT[] =
-        "video_codec_hevc_max_fs_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_HEVC_MAX_CPB_INT[] =
-        "video_codec_hevc_max_cpb_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_HEVC_MAX_DPB_INT[] =
-        "video_codec_hevc_max_dpb_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_HEVC_MAX_BR_INT[] =
-        "video_codec_hevc_max_br_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_EMPTY_REDUNDANT_BOOL[] =
+const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_AVPF_ENABLE_BOOL[] = "video_avpf_enable_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT[] =
+        "video_iframe_interval_sec_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT[] =
+        "video_send_periodic_sps_pps_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL[] =
         "text_codec_empty_redundant_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL[] =
         "support_multi_config_in_early_session_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT[] = "audio_maxred_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SDP_REOFFER_FULLCAPA[] = "sdp_reoffer_fullcapa";
+const IMS_CHAR CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL[] =
+        "media_session_level_bandwidth_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL[] =
+        "sdp_answer_full_capability_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL[] =
+        "sdp_reoffer_full_capability_bool";
+
 // Mts
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT[] =
         "sms_request_uri_type_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[] =
         "sms_use_dialed_number_for_request_uri_bool";
+
 // Uce
 const IMS_CHAR CarrierConfig::Assets::KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[] =
         "add_video_tag_contact_header_in_publish_bool";

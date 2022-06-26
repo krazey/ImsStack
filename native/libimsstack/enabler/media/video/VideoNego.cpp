@@ -2083,18 +2083,6 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pSrcProfile,
                                 pDstPayload->objRtcpFbAttr.bTmmbrSupported == IMS_TRUE)
                         {
                             pNegoPayload->objRtcpFbAttr.bTmmbrSupported = IMS_TRUE;
-                            pNegoPayload->objRtcpFbAttr.nTmmbrDownInterval =
-                                    pSrcPayload->objRtcpFbAttr.nTmmbrDownInterval;
-                            pNegoPayload->objRtcpFbAttr.nTmmbrUpInterval =
-                                    pSrcPayload->objRtcpFbAttr.nTmmbrUpInterval;
-                            pNegoPayload->objRtcpFbAttr.nTmmbrLossThreshold =
-                                    pSrcPayload->objRtcpFbAttr.nTmmbrLossThreshold;
-                            pNegoPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio =
-                                    pSrcPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio;
-                            pNegoPayload->objRtcpFbAttr.nTmmbrBitrateLevel =
-                                    pSrcPayload->objRtcpFbAttr.nTmmbrBitrateLevel;
-                            pNegoPayload->objRtcpFbAttr.nTmmbrUpLevel =
-                                    pSrcPayload->objRtcpFbAttr.nTmmbrUpLevel;
                         }
                         if (pSrcPayload->objRtcpFbAttr.bPliSupported == IMS_TRUE &&
                                 pDstPayload->objRtcpFbAttr.bPliSupported == IMS_TRUE)
@@ -2282,18 +2270,6 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pSrcProfile,
                                 pDstPayload->objRtcpFbAttr.bTmmbrSupported == IMS_TRUE)
                         {
                             pNegoPayload->objRtcpFbAttr.bTmmbrSupported = IMS_TRUE;
-                            pNegoPayload->objRtcpFbAttr.nTmmbrDownInterval =
-                                    pSrcPayload->objRtcpFbAttr.nTmmbrDownInterval;
-                            pNegoPayload->objRtcpFbAttr.nTmmbrUpInterval =
-                                    pSrcPayload->objRtcpFbAttr.nTmmbrUpInterval;
-                            pNegoPayload->objRtcpFbAttr.nTmmbrLossThreshold =
-                                    pSrcPayload->objRtcpFbAttr.nTmmbrLossThreshold;
-                            pNegoPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio =
-                                    pSrcPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio;
-                            pNegoPayload->objRtcpFbAttr.nTmmbrBitrateLevel =
-                                    pSrcPayload->objRtcpFbAttr.nTmmbrBitrateLevel;
-                            pNegoPayload->objRtcpFbAttr.nTmmbrUpLevel =
-                                    pSrcPayload->objRtcpFbAttr.nTmmbrUpLevel;
                         }
                         if (pSrcPayload->objRtcpFbAttr.bPliSupported == IMS_TRUE &&
                                 pDstPayload->objRtcpFbAttr.bPliSupported == IMS_TRUE)
@@ -2435,18 +2411,6 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pSrcProfile,
                             pDstPayload->objRtcpFbAttr.bTmmbrSupported == IMS_TRUE)
                     {
                         pNegoPayload->objRtcpFbAttr.bTmmbrSupported = IMS_TRUE;
-                        pNegoPayload->objRtcpFbAttr.nTmmbrDownInterval =
-                                pSrcPayload->objRtcpFbAttr.nTmmbrDownInterval;
-                        pNegoPayload->objRtcpFbAttr.nTmmbrUpInterval =
-                                pSrcPayload->objRtcpFbAttr.nTmmbrUpInterval;
-                        pNegoPayload->objRtcpFbAttr.nTmmbrLossThreshold =
-                                pSrcPayload->objRtcpFbAttr.nTmmbrLossThreshold;
-                        pNegoPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio =
-                                pSrcPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio;
-                        pNegoPayload->objRtcpFbAttr.nTmmbrBitrateLevel =
-                                pSrcPayload->objRtcpFbAttr.nTmmbrBitrateLevel;
-                        pNegoPayload->objRtcpFbAttr.nTmmbrUpLevel =
-                                pSrcPayload->objRtcpFbAttr.nTmmbrUpLevel;
                     }
                     if (pSrcPayload->objRtcpFbAttr.bPliSupported == IMS_TRUE &&
                             pDstPayload->objRtcpFbAttr.bPliSupported == IMS_TRUE)
@@ -2514,18 +2478,6 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pSrcProfile,
                             pDstPayload->objRtcpFbAttr.bTmmbrSupported == IMS_TRUE)
                     {
                         pNegoPayload->objRtcpFbAttr.bTmmbrSupported = IMS_TRUE;
-                        pNegoPayload->objRtcpFbAttr.nTmmbrDownInterval =
-                                pSrcPayload->objRtcpFbAttr.nTmmbrDownInterval;
-                        pNegoPayload->objRtcpFbAttr.nTmmbrUpInterval =
-                                pSrcPayload->objRtcpFbAttr.nTmmbrUpInterval;
-                        pNegoPayload->objRtcpFbAttr.nTmmbrLossThreshold =
-                                pSrcPayload->objRtcpFbAttr.nTmmbrLossThreshold;
-                        pNegoPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio =
-                                pSrcPayload->objRtcpFbAttr.nTmmbrMinBitrateRatio;
-                        pNegoPayload->objRtcpFbAttr.nTmmbrBitrateLevel =
-                                pSrcPayload->objRtcpFbAttr.nTmmbrBitrateLevel;
-                        pNegoPayload->objRtcpFbAttr.nTmmbrUpLevel =
-                                pSrcPayload->objRtcpFbAttr.nTmmbrUpLevel;
                     }
                     if (pSrcPayload->objRtcpFbAttr.bPliSupported == IMS_TRUE &&
                             pDstPayload->objRtcpFbAttr.bPliSupported == IMS_TRUE)
