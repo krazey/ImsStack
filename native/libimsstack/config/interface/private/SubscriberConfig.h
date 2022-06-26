@@ -179,7 +179,7 @@ private:
     }
     void ReadIsimProvisioning();
     void RecoverIsimProvisioning(IN IMS_SINT32 nErrorCode);
-    void RefreshIsimProvisioning();
+    void RefreshIsimProvisioning(IN IMS_BOOL bEnforceIsimRefresh);
 
     inline IMS_BOOL IsIsimRecordSet(IN IMS_SINT32 nRecord) const
     {
@@ -195,7 +195,7 @@ private:
             IN IMS_SINT32 nErrorCode, IN ISubscriberConfigListener* piTargetListener = IMS_NULL);
 
     void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2);
-    void UpdateAllConfigs();
+    void UpdateAllConfigs(IN IMS_BOOL bEnforceIsimRefresh);
     void WriteProvisioning();
     void ToDebugString();
 
