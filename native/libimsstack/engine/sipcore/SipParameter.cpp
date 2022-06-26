@@ -218,7 +218,7 @@ IMS_BOOL SipParameter::Equals(IN const SipParameter* pParameter) const
 
         if (bFeatureTag)
         {
-            strValue = TextParser::TrimDQUOT(strValue);
+            strValue = TextParser::TrimDquot(strValue);
         }
 
         for (IMS_SINT32 j = 0; j < pParameter->m_objValues.GetCount(); ++j)
@@ -227,7 +227,7 @@ IMS_BOOL SipParameter::Equals(IN const SipParameter* pParameter) const
 
             if (bFeatureTag)
             {
-                strOtherValue = TextParser::TrimDQUOT(strOtherValue);
+                strOtherValue = TextParser::TrimDquot(strOtherValue);
             }
 
             if (bCaseSensitive)

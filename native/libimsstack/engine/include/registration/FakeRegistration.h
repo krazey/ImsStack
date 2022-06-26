@@ -225,7 +225,7 @@ private:
     // IMPU & Network authorized IMPU (topmost one in P-Associated-URI)
     // Persistent information (P-Associated-URI, Service-Routes) which MUST be kept
     // while the registration is active
-    RCPtr<RegStateTracker> m_pStateTracker;
+    RcPtr<RegStateTracker> m_pStateTracker;
     // Listener to notify the registration state
     IRegistrationListener* m_piListener;
     // Notifier to reorder the network provisioned user identities

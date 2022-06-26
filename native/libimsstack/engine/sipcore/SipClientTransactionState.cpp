@@ -834,7 +834,7 @@ IMS_SINT32 SipClientTransactionState::HandleResponse(IN ::SipMessage* pSipMsg)
 }
 
 PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg,
-        IN const SipTransportAddress& objFarEnd, OUT RCPtr<SipClientTransactionState>& pCtState)
+        IN const SipTransportAddress& objFarEnd, OUT RcPtr<SipClientTransactionState>& pCtState)
 {
     IMS_TRACE_I("SipClientTransactionState::MatchTransaction ... ", 0, 0, 0);
 
@@ -981,7 +981,7 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
 
     // FORKED_RESPONSE :: Check & look up the appropriate client transaction ...
     // FORKED_RESPONSE_TO_SUPPORT_EARLY_DIALOG_TERMINATION
-    RCPtr<SipForkedTransactionManager> pTmpFtm;
+    RcPtr<SipForkedTransactionManager> pTmpFtm;
 
     if (!pCtState->m_pForkedTxnMngr.IsNull())
     {
@@ -1180,7 +1180,7 @@ IMS_BOOL SipClientTransactionState::HandleForkedResponse(IN const SipMessageInfo
         return IMS_FALSE;
     }
 
-    RCPtr<SipClientTransactionState> pForkedCtState = new SipClientTransactionState(GetSlotId());
+    RcPtr<SipClientTransactionState> pForkedCtState = new SipClientTransactionState(GetSlotId());
 
     if (pForkedCtState.IsNull())
     {
@@ -1201,7 +1201,7 @@ IMS_BOOL SipClientTransactionState::HandleForkedResponse(IN const SipMessageInfo
         return IMS_FALSE;
     }
 
-    RCPtr<SipDialogState> pDState = new SipDialogState();
+    RcPtr<SipDialogState> pDState = new SipDialogState();
 
     if (pDState.IsNull())
     {

@@ -4227,7 +4227,7 @@ GLOBAL IMS_BOOL GetEntityBody(IN ::SipMessage* pMessage, OUT AString& strEntityB
 {
 #ifdef SIP_TOBEPORTED
     IMS_UINT32 nMsgBodyCount = 0;
-    RCPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
+    RcPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
     IMS_UINT32 nBuffLen = pMessageBuffer->GetLength();
     IMS_CHAR* pTmpBuffer = reinterpret_cast<IMS_CHAR*>(pMessageBuffer->GetBuffer());
 

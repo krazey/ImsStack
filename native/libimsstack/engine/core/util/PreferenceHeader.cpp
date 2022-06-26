@@ -305,7 +305,7 @@ void PreferenceHeader::ExtractProperties(IN const AString& strFeatureSet)
     }
     else if (nCount == 2)
     {
-        strValue = TextParser::TrimDQUOT(strValue);
+        strValue = TextParser::TrimDquot(strValue);
 
         if (strValue.Contains(TextParser::CHAR_COMMA))
         {

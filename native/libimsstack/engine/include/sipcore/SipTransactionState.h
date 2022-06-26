@@ -101,9 +101,9 @@ protected:
     IMS_SINT32 m_nType;   // CLIENT or SERVER
     IMS_SINT32 m_nClass;  // Class of transaction (INVITE/non-INVITE/Overlap)
     IMS_UINT32 m_nCSeqNumber;
-    RCPtr<SipProfile> m_pSipProfile;
+    RcPtr<SipProfile> m_pSipProfile;
     ISipTransactionStateListener* m_piListener;
-    RCPtr<SipDialogEx> m_pDialogEx;
+    RcPtr<SipDialogEx> m_pDialogEx;
     SipTransport* m_pTransport;
 
     ::SipMessage* m_pSipMsg;

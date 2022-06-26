@@ -38,7 +38,7 @@ public:
 
 private:
     SipMethod m_objMethod;
-    RCPtr<SipTransactionState> m_pTxnState;
+    RcPtr<SipTransactionState> m_pTxnState;
 };
 
 #endif

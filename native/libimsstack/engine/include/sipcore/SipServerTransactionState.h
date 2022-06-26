@@ -45,7 +45,7 @@ public:
     {
         m_strDefaultContact = strContact;
     }
-    IMS_SINT32 HandleRequest(OUT RCPtr<SipDialogEx>& pOrigDialogEx);
+    IMS_SINT32 HandleRequest(OUT RcPtr<SipDialogEx>& pOrigDialogEx);
 
 private:
     // ITimerListener interface

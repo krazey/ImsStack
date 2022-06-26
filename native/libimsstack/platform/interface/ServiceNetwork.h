@@ -23,7 +23,7 @@
 class IIpcan;
 class INetworkIpSec;
 class NetworkServicePrivate;
-class SSLCertificate;
+class SslCertificate;
 
 class NetworkService
 {
@@ -75,8 +75,8 @@ public:
     ISocket* CreateSocket(IN INetworkConnection* piConnection);
     ISocket* CreateSocket(IN const IMS_CHAR* pszProfileName, IN IMS_SINT32 nSlotId);
 
-    ISocket* CreateSslSocket(IN INetworkConnection* piConnection, IN SSLCertificate* pCertificate);
-    ISocket* CreateSslSocket(IN const IMS_CHAR* pszProfileName, IN SSLCertificate* pCertificate,
+    ISocket* CreateSslSocket(IN INetworkConnection* piConnection, IN SslCertificate* pCertificate);
+    ISocket* CreateSslSocket(IN const IMS_CHAR* pszProfileName, IN SslCertificate* pCertificate,
             IN IMS_SINT32 nSlotId);
     void DestroySocket(IN ISocket*& piSocket);
 

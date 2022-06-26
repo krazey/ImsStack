@@ -703,7 +703,7 @@ PRIVATE VIRTUAL IMS_BOOL RegContact::IsServiceRegistered(
         return IMS_TRUE;
     }
 
-    RCPtr<Feature> pFeature = IMS_NULL;
+    RcPtr<Feature> pFeature = IMS_NULL;
 
     if (piServiceConfig->IsIariSupported())
     {
@@ -776,7 +776,7 @@ PRIVATE VIRTUAL IMS_BOOL RegContact::IsFeatureRegistered(
         return IMS_TRUE;
     }
 
-    RCPtr<Feature> pFeature = new Feature(strFtName, strFtValue);
+    RcPtr<Feature> pFeature = new Feature(strFtName, strFtValue);
 
     if (!m_pRegisteredCapabilities->HasFeature(pFeature.Get()))
     {
@@ -1101,7 +1101,7 @@ void RegContact::UpdateRegisteredCapabilities(IN const ISipHeader* piHeader)
             continue;
         }
 
-        RCPtr<Feature> pFeature = IMS_NULL;
+        RcPtr<Feature> pFeature = IMS_NULL;
 
         if (pParameter->IsNameOnly())
         {

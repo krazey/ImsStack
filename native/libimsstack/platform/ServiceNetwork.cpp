@@ -225,7 +225,7 @@ ISocket* NetworkService::CreateSocket(IN const IMS_CHAR* pszProfileName, IN IMS_
 
 PUBLIC
 ISocket* NetworkService::CreateSslSocket(
-        IN INetworkConnection* piConnection, IN SSLCertificate* pCertificate)
+        IN INetworkConnection* piConnection, IN SslCertificate* pCertificate)
 {
     ImsNetworkConnection* pConnection = DYNAMIC_CAST(ImsNetworkConnection*, piConnection);
 
@@ -250,7 +250,7 @@ ISocket* NetworkService::CreateSslSocket(
 
 PUBLIC
 ISocket* NetworkService::CreateSslSocket(
-        IN const IMS_CHAR* pszProfileName, IN SSLCertificate* pCertificate, IN IMS_SINT32 nSlotId)
+        IN const IMS_CHAR* pszProfileName, IN SslCertificate* pCertificate, IN IMS_SINT32 nSlotId)
 {
     ImsNetworkConnection* pConnection =
             ImsNetworkConnectionState::GetInstance()->LookupHandle(pszProfileName, nSlotId);

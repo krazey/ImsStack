@@ -1,43 +1,46 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100128  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _IMS_SORTED_VECTOR_H_
-#define _IMS_SORTED_VECTOR_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_SORTED_VECTOR_H_
+#define IMS_SORTED_VECTOR_H_
 
 #include <vector>
 
 #include "ImsNew.h"
 #include "ImsVector.h"
 
-//
-// This is a wrapper class (sorted-vector) using c++ stl vector class.
-// And, it replaces the element if the added element is already present in the vector.
-//
+/**
+ * @brief This is a wrapper class (sorted-vector) using c++ stl vector class.
+ *        And, it replaces the element if the added element is already present in the vector.
+ */
 template <class T>
-class IMSSortedVector
+class ImsSortedVector
 {
 public:
-    IMSSortedVector();
-    IMSSortedVector(IN CONST IMSSortedVector<T>& objRHS);
-    virtual ~IMSSortedVector();
+    ImsSortedVector();
+    ImsSortedVector(IN const ImsSortedVector<T>& other);
+    virtual ~ImsSortedVector();
 
 public:
-    IMSSortedVector<T>& operator=(IN CONST IMSSortedVector<T>& objRHS);
+    ImsSortedVector<T>& operator=(IN const ImsSortedVector<T>& other);
 
 public:
     // Empty the vector
     inline void Clear()
     {
-        mVector.clear();
+        m_objVector.clear();
         Shrink();
     }
 
@@ -46,15 +49,18 @@ public:
     //
 
     // Returns the number of elements in the vector
-    inline IMS_UINT32 GetSize() const { return static_cast<IMS_UINT32>(mVector.size()); }
+    inline IMS_UINT32 GetSize() const { return static_cast<IMS_UINT32>(m_objVector.size()); }
     // Returns whether or not the vector is empty
-    inline IMS_BOOL IsEmpty() const { return mVector.empty() ? IMS_TRUE : IMS_FALSE; }
+    inline IMS_BOOL IsEmpty() const { return m_objVector.empty() ? IMS_TRUE : IMS_FALSE; }
     // Returns how many elements can be stored without reallocating the backing store
-    inline IMS_UINT32 GetCapacity() const { return static_cast<IMS_UINT32>(mVector.capacity()); }
+    inline IMS_UINT32 GetCapacity() const
+    {
+        return static_cast<IMS_UINT32>(m_objVector.capacity());
+    }
     // Sets the capacity. The capacity can never be reduced less than GetSize().
     inline IMS_SLONG SetCapacity(IN IMS_UINT32 nNewCapacity)
     {
-        return mVector.reserve(nNewCapacity);
+        m_objVector.reserve(nNewCapacity);
         return GetCapacity();
     }
 
@@ -93,67 +99,65 @@ public:
     inline T& Top();
 
     // Checks if the same element is present
-    inline IMS_BOOL Contains(IN CONST T& element) const;
+    inline IMS_BOOL Contains(IN const T& element) const;
     // Finds the index of an element
-    inline IMS_SLONG GetIndexOf(IN CONST T& element) const;
+    inline IMS_SLONG GetIndexOf(IN const T& element) const;
     // Finds where this element should be inserted
-    inline IMS_UINT32 GetOrderOf(IN CONST T& element) const;
+    inline IMS_UINT32 GetOrderOf(IN const T& element) const;
 
     // Merges a vector into this one
-    inline IMS_BOOL Merge(IN CONST IMSVector<T>& objVector);
-    inline IMS_BOOL Merge(IN CONST IMSSortedVector<T>& objVector);
+    inline IMS_BOOL Merge(IN const ImsVector<T>& other);
+    inline IMS_BOOL Merge(IN const ImsSortedVector<T>& other);
 
     //
     // Add an element in the right place (or replaces it if there is one)
     //
-    inline IMS_BOOL Add(IN CONST T& element);
+    inline IMS_BOOL Add(IN const T& element);
 
     //
     // Remove an element
     //
-    inline IMS_BOOL Remove(IN CONST T& element);
+    inline IMS_BOOL Remove(IN const T& element);
 
     // Remove several elements
-    inline IMS_BOOL RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount_ = 1);
+    inline IMS_BOOL RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1);
     // Remove one element
     inline IMS_BOOL RemoveAt(IN IMS_UINT32 nIndex) { return RemoveElementsAt(nIndex); }
 
     inline void Shrink();
 
 private:
-    std::vector<T> mVector;
+    std::vector<T> m_objVector;
 };
 
-//-------------------------------------------------------------------------------------------------
-
 PUBLIC
 template <class T>
-inline IMSSortedVector<T>::IMSSortedVector() :
-        mVector(std::vector<T>())
+inline ImsSortedVector<T>::ImsSortedVector() :
+        m_objVector(std::vector<T>())
 {
 }
 
 PUBLIC
 template <class T>
-inline IMSSortedVector<T>::IMSSortedVector(IN CONST IMSSortedVector<T>& objRHS) :
-        mVector(objRHS.mVector)
+inline ImsSortedVector<T>::ImsSortedVector(IN const ImsSortedVector<T>& other) :
+        m_objVector(other.m_objVector)
 {
 }
 
 PUBLIC
 template <class T>
-inline IMSSortedVector<T>::~IMSSortedVector()
+inline ImsSortedVector<T>::~ImsSortedVector()
 {
     Clear();
 }
 
 PUBLIC
 template <class T>
-inline IMSSortedVector<T>& IMSSortedVector<T>::operator=(IN CONST IMSSortedVector<T>& objRHS)
+inline ImsSortedVector<T>& ImsSortedVector<T>::operator=(IN const ImsSortedVector<T>& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        mVector = objRHS.mVector;
+        m_objVector = other.m_objVector;
     }
 
     return (*this);
@@ -161,44 +165,44 @@ inline IMSSortedVector<T>& IMSSortedVector<T>::operator=(IN CONST IMSSortedVecto
 
 PUBLIC
 template <class T>
-inline const T* IMSSortedVector<T>::GetArrayConst() const
+inline const T* ImsSortedVector<T>::GetArrayConst() const
 {
-    return mVector.data();
+    return m_objVector.data();
 }
 
 PUBLIC
 template <class T>
-inline T* IMSSortedVector<T>::GetArray()
+inline T* ImsSortedVector<T>::GetArray()
 {
-    return mVector.data();
+    return m_objVector.data();
 }
 
 PUBLIC
 template <class T>
-inline const T& IMSSortedVector<T>::operator[](IN IMS_UINT32 nIndex) const
+inline const T& ImsSortedVector<T>::operator[](IN IMS_UINT32 nIndex) const
 {
     IMS_ASSERT(nIndex < GetSize());
-    return mVector.operator[](nIndex);
+    return m_objVector.operator[](nIndex);
 }
 
 PUBLIC
 template <class T>
-inline const T& IMSSortedVector<T>::GetAt(IN IMS_UINT32 nIndex) const
+inline const T& ImsSortedVector<T>::GetAt(IN IMS_UINT32 nIndex) const
 {
-    return mVector.at(nIndex);
+    return m_objVector.at(nIndex);
 }
 
 PUBLIC
 template <class T>
-inline const T& IMSSortedVector<T>::Top() const
+inline const T& ImsSortedVector<T>::Top() const
 {
-    IMS_ASSERT(!mVector.empty());
-    return mVector.back();
+    IMS_ASSERT(!m_objVector.empty());
+    return m_objVector.back();
 }
 
 PUBLIC
 template <class T>
-inline const T& IMSSortedVector<T>::GetAtMirror(IN IMS_SLONG nIndex) const
+inline const T& ImsSortedVector<T>::GetAtMirror(IN IMS_SLONG nIndex) const
 {
     IMS_ASSERT(((nIndex > 0) ? nIndex : -nIndex) < GetSize());
     return GetAt((nIndex < 0) ? (GetSize() + nIndex) : nIndex);
@@ -206,91 +210,91 @@ inline const T& IMSSortedVector<T>::GetAtMirror(IN IMS_SLONG nIndex) const
 
 PUBLIC
 template <class T>
-inline T& IMSSortedVector<T>::GetAt(IN IMS_UINT32 nIndex)
+inline T& ImsSortedVector<T>::GetAt(IN IMS_UINT32 nIndex)
 {
-    return mVector.at(nIndex);
+    return m_objVector.at(nIndex);
 }
 
 PUBLIC
 template <class T>
-inline T& IMSSortedVector<T>::Top()
+inline T& ImsSortedVector<T>::Top()
 {
-    IMS_ASSERT(!mVector.empty());
-    return mVector.back();
+    IMS_ASSERT(!m_objVector.empty());
+    return m_objVector.back();
 }
 
 PUBLIC
 template <class T>
-inline IMS_BOOL IMSSortedVector<T>::Contains(IN CONST T& element) const
+inline IMS_BOOL ImsSortedVector<T>::Contains(IN const T& element) const
 {
     return (GetIndexOf(element) >= 0) ? IMS_TRUE : IMS_FALSE;
 }
 
 PUBLIC
 template <class T>
-inline IMS_SLONG IMSSortedVector<T>::GetIndexOf(IN CONST T& element) const
+inline IMS_SLONG ImsSortedVector<T>::GetIndexOf(IN const T& element) const
 {
-    const auto& it = std::find(mVector.begin(), mVector.end(), element);
+    const auto& it = std::find(m_objVector.begin(), m_objVector.end(), element);
 
-    if (it == mVector.end())
+    if (it == m_objVector.end())
     {
         return -1;
     }
 
-    return std::distance(mVector.begin(), it);
+    return std::distance(m_objVector.begin(), it);
 }
 
 PUBLIC
 template <class T>
-inline IMS_UINT32 IMSSortedVector<T>::GetOrderOf(IN CONST T& element) const
+inline IMS_UINT32 ImsSortedVector<T>::GetOrderOf(IN const T& element) const
 {
-    if (mVector.empty())
+    if (m_objVector.empty())
     {
         return 0;
     }
 
-    const auto& it = std::upper_bound(mVector.begin(), mVector.end(), element);
-    return std::distance(mVector.begin(), it);
+    const auto& it = std::upper_bound(m_objVector.begin(), m_objVector.end(), element);
+    return std::distance(m_objVector.begin(), it);
 }
 
 PUBLIC
 template <class T>
-inline IMS_BOOL IMSSortedVector<T>::Merge(IN CONST IMSVector<T>& objVector)
+inline IMS_BOOL ImsSortedVector<T>::Merge(IN const ImsVector<T>& other)
 {
-    for (IMS_UINT32 i = 0; i < objVector.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < other.GetSize(); i++)
     {
-        Add(objVector.GetAt(i));
+        Add(other.GetAt(i));
     }
 }
 
 PUBLIC
 template <class T>
-inline IMS_BOOL IMSSortedVector<T>::Merge(IN CONST IMSSortedVector<T>& objVector)
+inline IMS_BOOL ImsSortedVector<T>::Merge(IN const ImsSortedVector<T>& other)
 {
-    if (objVector.IsEmpty())
+    if (other.IsEmpty())
     {
         return IMS_TRUE;
     }
 
     if (IsEmpty())
     {
-        mVector = objVector.mVector;
+        m_objVector = other.m_objVector;
         return IMS_TRUE;
     }
 
-    if (objVector.GetAt(objVector.GetSize() - 1) < GetAt(0))
+    if (other.GetAt(other.GetSize() - 1) < GetAt(0))
     {
-        mVector.insert(mVector.begin(), objVector.mVector.begin(), objVector.mVector.end());
+        m_objVector.insert(m_objVector.begin(), other.m_objVector.begin(), other.m_objVector.end());
     }
-    else if (GetAt(GetSize() - 1) < objVector.GetAt(0))
+    else if (GetAt(GetSize() - 1) < other.GetAt(0))
     {
-        mVector.insert(mVector.end(), objVector.mVector.begin(), objVector.mVector.end());
+        m_objVector.insert(m_objVector.end(), other.m_objVector.begin(), other.m_objVector.end());
     }
     else
     {
-        for (IMS_UINT32 i = 0; i < objVector.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < other.GetSize(); i++)
         {
-            Add(objVector.GetAt(i));
+            Add(other.GetAt(i));
         }
     }
 
@@ -299,18 +303,18 @@ inline IMS_BOOL IMSSortedVector<T>::Merge(IN CONST IMSSortedVector<T>& objVector
 
 PUBLIC
 template <class T>
-inline IMS_BOOL IMSSortedVector<T>::Add(IN CONST T& element)
+inline IMS_BOOL ImsSortedVector<T>::Add(IN const T& element)
 {
     IMS_SLONG nIndex = GetIndexOf(element);
 
     if (nIndex < 0)
     {
         nIndex = GetOrderOf(element);
-        mVector.insert(mVector.begin() + nIndex, element);
+        m_objVector.insert(m_objVector.begin() + nIndex, element);
     }
     else
     {
-        mVector.at(nIndex) = element;
+        m_objVector.at(nIndex) = element;
     }
 
     return IMS_TRUE;
@@ -318,7 +322,7 @@ inline IMS_BOOL IMSSortedVector<T>::Add(IN CONST T& element)
 
 PUBLIC
 template <class T>
-inline IMS_BOOL IMSSortedVector<T>::Remove(IN CONST T& element)
+inline IMS_BOOL ImsSortedVector<T>::Remove(IN const T& element)
 {
     IMS_SLONG nIndex = GetIndexOf(element);
 
@@ -332,20 +336,20 @@ inline IMS_BOOL IMSSortedVector<T>::Remove(IN CONST T& element)
 
 PUBLIC
 template <class T>
-inline IMS_BOOL IMSSortedVector<T>::RemoveElementsAt(
-        IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount_ /*= 1*/)
+inline IMS_BOOL ImsSortedVector<T>::RemoveElementsAt(
+        IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount /*= 1*/)
 {
-    if (nIndex == 0 && nCount_ == GetSize())
+    if (nIndex == 0 && nCount == GetSize())
     {
-        mVector.clear();
+        m_objVector.clear();
         Shrink();
         return IMS_TRUE;
     }
 
-    while (nCount_ > 0 && !mVector.empty())
+    while (nCount > 0 && !m_objVector.empty())
     {
-        mVector.erase(mVector.begin() + nIndex);
-        nCount_--;
+        m_objVector.erase(m_objVector.begin() + nIndex);
+        nCount--;
     }
 
     Shrink();
@@ -355,16 +359,16 @@ inline IMS_BOOL IMSSortedVector<T>::RemoveElementsAt(
 
 PUBLIC
 template <class T>
-inline void IMSSortedVector<T>::Shrink()
+inline void ImsSortedVector<T>::Shrink()
 {
-    if (mVector.empty())
+    if (m_objVector.empty())
     {
-        mVector.shrink_to_fit();
+        m_objVector.shrink_to_fit();
     }
-    else if (mVector.size() <= (mVector.capacity() / 2))
+    else if (m_objVector.size() <= (m_objVector.capacity() / 2))
     {
-        mVector.shrink_to_fit();
+        m_objVector.shrink_to_fit();
     }
 }
 
-#endif  // _IMS_SORTED_VECTOR_H_
+#endif

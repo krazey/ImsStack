@@ -74,7 +74,7 @@ public:
 
 private:
     IMS_SINT32 m_nState;
-    RCPtr<SipServerTransactionState> m_pStState;
+    RcPtr<SipServerTransactionState> m_pStState;
 };
 
 #endif

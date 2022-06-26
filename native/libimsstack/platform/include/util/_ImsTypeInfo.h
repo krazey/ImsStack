@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100128  hwangoo.park@             From Android
-    </table>
-
-    Description
-
-*/
-
-#ifndef _IMS_TYPE_INFO_H_
-#define _IMS_TYPE_INFO_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_TYPE_INFO_H_
+#define IMS_TYPE_INFO_H_
 
 #include "ImsNew.h"
 
@@ -166,8 +169,6 @@ struct AGGREGATE_TRAITS
     };
 };
 
-//-------------------------------------------------------------------------------------------------
-
 //
 // Basic types traits
 //
@@ -189,8 +190,6 @@ IMS_BASIC_TYPES_TRAITS(IMS_ULONG);
 // IMS_BASIC_TYPES_TRAITS(IMS_UINT64);
 IMS_BASIC_TYPES_TRAITS(IMS_FLOAT);
 IMS_BASIC_TYPES_TRAITS(IMS_DOUBLE);
-
-//-------------------------------------------------------------------------------------------------
 
 //
 // Compare and order types
@@ -348,8 +347,6 @@ inline void MOVE_BACKWARD_TYPE(T* d, const T* s, IMS_SIZE_T n = 1)
     }
 }
 
-//-------------------------------------------------------------------------------------------------
-
 //
 // A key - value pair
 //
@@ -421,4 +418,4 @@ struct TRAIT_TRIVIAL_ASSIGN<KEY_VALUE_PAIR_T<K, V>>
     };
 };
 
-#endif  // _IMS_TYPE_INFO_H_
+#endif

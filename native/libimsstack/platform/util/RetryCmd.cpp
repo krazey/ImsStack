@@ -1,45 +1,45 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100722  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "IRetryCmdListener.h"
 #include "RetryCmd.h"
+#include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_BASE__;
 
 PUBLIC
-RetryCmd::RetryCmd(IN IMS_UINT32 nIDCmd_ /* = 0 */) :
-        nIDCmd(nIDCmd_),
-        piListener(IMS_NULL)
+RetryCmd::RetryCmd(IN IMS_UINT32 nCmdId /*= 0*/) :
+        m_nCmdId(nCmdId),
+        m_piListener(IMS_NULL)
 {
 }
 
 PUBLIC VIRTUAL RetryCmd::~RetryCmd()
 {
-    IMS_TRACE_D("Destructor :: RetryCmd (%d)", nIDCmd, 0, 0);
+    IMS_TRACE_D("Destructor :: RetryCmd (%d)", m_nCmdId, 0, 0);
 }
 
-/*
- Notify the result of this common execution.
-
-Remarks
-
-*/
+/**
+ * @brief Notify the result of this common execution.
+ */
 PROTECTED
-void RetryCmd::OnCmdCompleted(IN IMS_SINT32 nResultCode, IN IMS_SINT32 nRetryAfter /* = 0 */)
+void RetryCmd::OnCmdCompleted(IN IMS_SINT32 nResultCode, IN IMS_SINT32 nRetryAfter /*= 0*/)
 {
-    if (piListener != IMS_NULL)
+    if (m_piListener != IMS_NULL)
     {
-        piListener->RetryCmd_OnCompleted(this, nResultCode, nRetryAfter);
+        m_piListener->RetryCmd_OnCompleted(this, nResultCode, nRetryAfter);
     }
 }

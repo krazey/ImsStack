@@ -1,34 +1,47 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20111009  il.won@                   Created
-
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-#include "ServiceFile.h"
-#include "ServiceUtil.h"
-#include "ImsConstDef.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ByteArray.h"
 #include "CertificateHelper.h"
+#include "ImsConstDef.h"
+#include "ServiceFile.h"
+#include "ServiceMemory.h"
+#include "ServiceTrace.h"
+#include "ServiceUtil.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
-// const IMS_CHAR * const CertificateHelper::CERTIFICATE = "/system/etc/msrpcert.pem";
 const IMS_CHAR* const CertificateHelper::CERTIFICATE =
-        IMS_SOLUTION_STORAGE_ROOT_DIR "/databases/client.pem";
+        IMS_SOLUTION_STORAGE_ROOT_DIR "/files/client.pem";
 
 PRIVATE
 CertificateHelper::CertificateHelper()
 {
     Init();
+}
+
+PUBLIC GLOBAL CertificateHelper* CertificateHelper::GetInstance()
+{
+    static CertificateHelper* s_pCertificateHelper = IMS_NULL;
+
+    if (s_pCertificateHelper == IMS_NULL)
+    {
+        s_pCertificateHelper = new CertificateHelper();
+    }
+
+    return s_pCertificateHelper;
 }
 
 PRIVATE
@@ -38,43 +51,15 @@ void CertificateHelper::Init()
     CreateCertificate();
 
     // Set the certificate path
-    strCertificateName = CERTIFICATE;
+    m_strCertificateName = CERTIFICATE;
 
     // Generate the fingerprint
-    UtilService::GetUtilService()->GetSystemUtil()->DigestSha1(strCertificateName, strFingerPrint);
+    // Sample fingerprint: "06:11:F7:C0:1F:93:54:0F:50:AA:95:A9:84:55:7B:CD:09:78:B9:EB"
+    UtilService::GetUtilService()->GetSystemUtil()->DigestSha1(
+            m_strCertificateName, m_strFingerPrint);
 
-    IMS_TRACE_D("Init :: Certificate(%s) -> Fingerprint(%s)", strCertificateName.GetStr(),
-            strFingerPrint.GetStr(), 0);
-}
-
-PUBLIC
-CertificateHelper::~CertificateHelper() {}
-
-PUBLIC GLOBAL CertificateHelper* CertificateHelper::GetInstance()
-{
-    static CertificateHelper* pCH = IMS_NULL;
-
-    if (pCH == IMS_NULL)
-    {
-        pCH = new CertificateHelper();
-    }
-
-    return pCH;
-}
-
-PUBLIC
-const AString& CertificateHelper::GetCertificateName()
-{
-    return strCertificateName;
-}
-
-PUBLIC
-const AString& CertificateHelper::GetFingerPrint()
-{
-    // This is the correct fingerprint.
-    // strFingerPrint = "06:11:F7:C0:1F:93:54:0F:50:AA:95:A9:84:55:7B:CD:09:78:B9:EB";
-
-    return strFingerPrint;
+    IMS_TRACE_D("Init :: Certificate(%s) -> Fingerprint(%s)", m_strCertificateName.GetStr(),
+            m_strFingerPrint.GetStr(), 0);
 }
 
 PRIVATE
@@ -135,5 +120,5 @@ void CertificateHelper::CreateCertificate()
 
     IMS_FILE_Destroy(piFile);
 
-    IMS_TRACE_D("CreateCertificate - done(%s)", strCertificateName.GetStr(), 0, 0);
+    IMS_TRACE_D("CreateCertificate - done(%s)", m_strCertificateName.GetStr(), 0, 0);
 }

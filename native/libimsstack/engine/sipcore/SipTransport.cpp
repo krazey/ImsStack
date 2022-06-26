@@ -215,7 +215,7 @@ SipSocket* SipTransport::CreateTcpClientSocket()
 PUBLIC
 IMS_BOOL SipTransport::EncodeMessage(IN_OUT ::SipMessage*& pSipMsg, OUT ByteArray& objBuffer)
 {
-    RCPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
+    RcPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
     IMS_SINT32 nBuffLen = pMessageBuffer->GetLength();
     IMS_BYTE* pBuffer = pMessageBuffer->GetBuffer(GetSlotId());
 

@@ -1,20 +1,23 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090302  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ByteArray.h"
+#include "Credential.h"
 #include "ImsBase64.h"
 #include "ImsHmac.h"
-#include "Credential.h"
+#include "ServiceMemory.h"
 
 PUBLIC GLOBAL const IMS_CHAR Credential::STR_MD5[] = "MD5";
 PUBLIC GLOBAL const IMS_CHAR Credential::STR_AKAv1_MD5[] = "AKAv1-MD5";
@@ -32,303 +35,150 @@ PRIVATE GLOBAL Credential Credential::s_objSharedNull = Credential();
 
 PUBLIC
 Credential::Credential() :
-        nTypeOfMD5(TYPE_MD5),
-        strUsername(AString::ConstNull()),
-        strPassword(AString::ConstNull()),
-        strRealm(AString::ConstNull())
+        m_nTypeOfMd5(TYPE_MD5),
+        m_strUsername(AString::ConstNull()),
+        m_strPassword(AString::ConstNull()),
+        m_strRealm(AString::ConstNull())
 {
 }
 
 PUBLIC
-Credential::Credential(IN CONST AString& strUsername_, IN CONST AString& strPassword_,
-        IN CONST AString& strRealm_) :
-        nTypeOfMD5(TYPE_MD5),
-        strUsername(strUsername_),
-        strPassword(strPassword_),
-        strRealm(strRealm_)
+Credential::Credential(
+        IN const AString& strUsername, IN const AString& strPassword, IN const AString& strRealm) :
+        m_nTypeOfMd5(TYPE_MD5),
+        m_strUsername(strUsername),
+        m_strPassword(strPassword),
+        m_strRealm(strRealm)
 {
 }
 
 PUBLIC
-Credential::Credential(IN CONST Credential& objRHS) :
-        nTypeOfMD5(objRHS.nTypeOfMD5),
-        strUsername(objRHS.strUsername),
-        strPassword(objRHS.strPassword),
-        strRealm(objRHS.strRealm),
-        stAKAParam(objRHS.stAKAParam)
+Credential::Credential(IN const Credential& other) :
+        m_nTypeOfMd5(other.m_nTypeOfMd5),
+        m_strUsername(other.m_strUsername),
+        m_strPassword(other.m_strPassword),
+        m_strRealm(other.m_strRealm),
+        m_objAkaParam(other.m_objAkaParam)
 {
 }
 
 PUBLIC
-Credential::~Credential() {}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-Credential& Credential::operator=(IN CONST Credential& objRHS)
+Credential& Credential::operator=(IN const Credential& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        nTypeOfMD5 = objRHS.nTypeOfMD5;
-        strUsername = objRHS.strUsername;
-        strPassword = objRHS.strPassword;
-        strRealm = objRHS.strRealm;
-
-        stAKAParam = objRHS.stAKAParam;
+        m_nTypeOfMd5 = other.m_nTypeOfMd5;
+        m_strUsername = other.m_strUsername;
+        m_strPassword = other.m_strPassword;
+        m_strRealm = other.m_strRealm;
+        m_objAkaParam = other.m_objAkaParam;
     }
 
     return (*this);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL Credential::IsSameRealm(IN CONST AString& strRealm) const
-{
-    if (this->strRealm.Equals(strRealm))
-    {
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& Credential::GetPassword() const
-{
-    return strPassword;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& Credential::GetRealm() const
-{
-    return strRealm;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& Credential::GetUsername() const
-{
-    return strUsername;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 void Credential::SetCredentials(
-        IN CONST AString& strUsername, IN CONST AString& strPassword, IN CONST AString& strRealm)
+        IN const AString& strUsername, IN const AString& strPassword, IN const AString& strRealm)
 {
-    this->strUsername = strUsername;
-    this->strPassword = strPassword;
-    this->strRealm = strRealm;
+    m_strUsername = strUsername;
+    m_strPassword = strPassword;
+    m_strRealm = strRealm;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void Credential::SetPassword(IN CONST AString& strPassword)
+void Credential::SetAkaResponse(IN IMS_SINT32 nStatus, IN const ByteArray& objRes,
+        IN const ByteArray& objAuts /*= ByteArray::ConstNull()*/)
 {
-    this->strPassword = strPassword;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void Credential::SetRealm(IN CONST AString& strRealm)
-{
-    this->strRealm = strRealm;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void Credential::SetUsername(IN CONST AString& strUsername)
-{
-    this->strUsername = strUsername;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const IMS_AKA& Credential::GetAKAResponse() const
-{
-    return stAKAParam;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_SINT32 Credential::GetType() const
-{
-    return nTypeOfMD5;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void Credential::SetAKAResponse(IN IMS_SINT32 nStatus, IN CONST ByteArray& objRES,
-        IN CONST ByteArray& objAUTS /* = ByteArray::ConstNull() */)
-{
-    stAKAParam.nStatus = nStatus;
+    m_objAkaParam.m_nStatus = nStatus;
 
     // Update the password
-    if (nStatus == IMS_AKA::RESULT_OK)
+    if (nStatus == ImsAkaParam::RESULT_OK)
     {
-        strPassword = objRES.ToString();
+        m_strPassword = objRes.ToString();
     }
     else
     {
-        if (nStatus == IMS_AKA::RESULT_NOK_SQN_SYNC_FAILED)
+        if (nStatus == ImsAkaParam::RESULT_NOK_SQN_SYNC_FAILED)
         {
-            stAKAParam.strAUTS = objAUTS.ToString().ToBase64();
+            m_objAkaParam.m_strAuts = objAuts.ToString().ToBase64();
         }
 
-        strPassword = AString::ConstEmpty();
+        m_strPassword = AString::ConstEmpty();
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void Credential::SetAKAResponse(IN IMS_SINT32 nStatus, IN CONST ByteArray& objRES,
-        IN CONST ByteArray& objIK, IN CONST ByteArray& objCK,
-        IN CONST ByteArray& objAUTS /* = ByteArray::ConstNull() */)
+void Credential::SetAkaResponse(IN IMS_SINT32 nStatus, IN const ByteArray& objRes,
+        IN const ByteArray& objIk, IN const ByteArray& objCk,
+        IN const ByteArray& objAuts /*= ByteArray::ConstNull()*/)
 {
-    stAKAParam.nStatus = nStatus;
+    m_objAkaParam.m_nStatus = nStatus;
 
     // Update the password
-    if (nStatus == IMS_AKA::RESULT_OK)
+    if (nStatus == ImsAkaParam::RESULT_OK)
     {
-        ByteArray objPRF = objRES;
-        IMS_UCHAR aucDigest[16];
-        IMS_CHAR acPassword[128] = {
+        // Pseudo-random function for password generation
+        ByteArray objPrf = objRes;
+        IMS_UCHAR aucDigest[IMS_HMAC_MD5_SIZE];
+        IMS_CHAR acPassword[MAX_AUTH_RESP] = {
                 0,
         };
 
-        objPRF.Append(objIK);
-        objPRF.Append(objCK);
+        objPrf.Append(objIk);
+        objPrf.Append(objCk);
 
         // Do HMAC_MD5
-        IMSHMAC_MD5(STR_DIGEST_KEY_PASSWORD, DIGEST_KEY_PASSWORD, objPRF.GetData(),
-                objPRF.GetLength(), aucDigest);
+        ImsHmac_Md5(STR_DIGEST_KEY_PASSWORD, DIGEST_KEY_PASSWORD, objPrf.GetData(),
+                objPrf.GetLength(), aucDigest);
 
         // Encodes base64 format
-        IMSBase64_Encode(aucDigest, 16, acPassword, sizeof(acPassword), IMS_FALSE);
+        ImsBase64_Encode(aucDigest, IMS_HMAC_MD5_SIZE, acPassword, sizeof(acPassword), IMS_FALSE);
 
-        strPassword = acPassword;
+        m_strPassword = acPassword;
     }
     else
     {
-        if (nStatus == IMS_AKA::RESULT_NOK_SQN_SYNC_FAILED)
+        if (nStatus == ImsAkaParam::RESULT_NOK_SQN_SYNC_FAILED)
         {
-            stAKAParam.strAUTS = objAUTS.ToString().ToBase64();
+            m_objAkaParam.m_strAuts = objAuts.ToString().ToBase64();
         }
 
-        strPassword = AString::ConstEmpty();
+        m_strPassword = AString::ConstEmpty();
     }
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-void Credential::SetType(IN IMS_SINT32 nType)
+PUBLIC GLOBAL ByteArray Credential::DeriveCkForAkav2(IN const ByteArray& objCk)
 {
-    nTypeOfMD5 = nType;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL ByteArray Credential::DeriveCKForAKAv2(IN CONST ByteArray& objCK)
-{
-    if (objCK.GetLength() == 0)
+    if (objCk.GetLength() == 0)
     {
         return ByteArray::ConstNull();
     }
 
-    IMS_UCHAR aucDigest[16];
+    IMS_UCHAR aucDigest[IMS_HMAC_MD5_SIZE];
 
     // Do HMAC_MD5
-    IMSHMAC_MD5(STR_DIGEST_KEY_CK, DIGEST_KEY_CK, objCK.GetData(), objCK.GetLength(), aucDigest);
+    ImsHmac_Md5(STR_DIGEST_KEY_CK, DIGEST_KEY_CK, objCk.GetData(), objCk.GetLength(), aucDigest);
 
-    return ByteArray(reinterpret_cast<const IMS_BYTE*>(aucDigest), 16);
+    return ByteArray(reinterpret_cast<const IMS_BYTE*>(aucDigest), IMS_HMAC_MD5_SIZE);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL ByteArray Credential::DeriveIKForAKAv2(IN CONST ByteArray& objIK)
+PUBLIC GLOBAL ByteArray Credential::DeriveIkForAkav2(IN const ByteArray& objIk)
 {
-    if (objIK.GetLength() == 0)
+    if (objIk.GetLength() == 0)
     {
         return ByteArray::ConstNull();
     }
 
-    IMS_UCHAR aucDigest[16];
+    IMS_UCHAR aucDigest[IMS_HMAC_MD5_SIZE];
 
     // Do HMAC_MD5
-    IMSHMAC_MD5(STR_DIGEST_KEY_IK, DIGEST_KEY_IK, objIK.GetData(), objIK.GetLength(), aucDigest);
+    ImsHmac_Md5(STR_DIGEST_KEY_IK, DIGEST_KEY_IK, objIk.GetData(), objIk.GetLength(), aucDigest);
 
-    return ByteArray(reinterpret_cast<const IMS_BYTE*>(aucDigest), 16);
+    return ByteArray(reinterpret_cast<const IMS_BYTE*>(aucDigest), IMS_HMAC_MD5_SIZE);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL IMS_SINT32 Credential::TranslateAlgorithm(IN CONST AString& strAlgorithm)
+PUBLIC GLOBAL IMS_SINT32 Credential::TranslateAlgorithm(IN const AString& strAlgorithm)
 {
     if (strAlgorithm.EqualsIgnoreCase(STR_AKAv1_MD5))
     {

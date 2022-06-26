@@ -1,61 +1,59 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20150210  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "NatHelper.h"
 #include "ServiceMemory.h"
 #include "SystemConfig.h"
-#include "NatHelper.h"
 
 PRIVATE
-NATHelper::NATHelper() :
-        ppBindings(IMS_NULL)
+NatHelper::NatHelper() :
+        m_ppBindings(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
-    ppBindings = new IMSList<IPBinding>*[nSimCount];
+    m_ppBindings = new ImsList<IpBinding>*[nSimCount];
 
     for (IMS_SINT32 i = 0; i < nSimCount; i++)
     {
-        ppBindings[i] = new IMSList<IPBinding>();
+        m_ppBindings[i] = new ImsList<IpBinding>();
     }
 }
 
 PRIVATE
-NATHelper::~NATHelper()
+NatHelper::~NatHelper()
 {
-    if (ppBindings != IMS_NULL)
+    if (m_ppBindings != IMS_NULL)
     {
         IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
         for (IMS_SINT32 i = 0; i < nSimCount; ++i)
         {
-            if (ppBindings[i] != IMS_NULL)
+            if (m_ppBindings[i] != IMS_NULL)
             {
-                delete ppBindings[i];
+                delete m_ppBindings[i];
             }
         }
 
-        delete[] ppBindings;
+        delete[] m_ppBindings;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void NATHelper::Clear(IN IMS_SINT32 nSlotId)
+void NatHelper::Clear(IN IMS_SINT32 nSlotId)
 {
-    IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
+    ImsList<IpBinding>* pBindings = GetIpBindings(nSlotId);
 
     if (pBindings != IMS_NULL)
     {
@@ -63,72 +61,57 @@ void NATHelper::Clear(IN IMS_SINT32 nSlotId)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IPAddress NATHelper::GetPrivateAddress(IN IMS_SINT32 nSlotId, IN const IPAddress& objPublicIP) const
+IpAddress NatHelper::GetPrivateAddress(IN IMS_SINT32 nSlotId, IN const IpAddress& objPublicIp) const
 {
-    IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
+    ImsList<IpBinding>* pBindings = GetIpBindings(nSlotId);
 
     if (pBindings == IMS_NULL)
     {
-        return IPAddress::NONE;
+        return IpAddress::NONE;
     }
 
     for (IMS_UINT32 i = 0; i < pBindings->GetSize(); ++i)
     {
-        const IPBinding& objIPB = pBindings->GetAt(i);
+        const IpBinding& objIpBinding = pBindings->GetAt(i);
 
-        if (objPublicIP.Equals(objIPB.GetPublicIP()))
+        if (objPublicIp.Equals(objIpBinding.GetPublicIp()))
         {
-            return objIPB.GetPrivateIP();
+            return objIpBinding.GetPrivateIp();
         }
     }
 
-    return IPAddress::NONE;
+    return IpAddress::NONE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IPAddress NATHelper::GetPublicAddress(IN IMS_SINT32 nSlotId, IN const IPAddress& objPrivateIP) const
+IpAddress NatHelper::GetPublicAddress(IN IMS_SINT32 nSlotId, IN const IpAddress& objPrivateIp) const
 {
-    IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
+    ImsList<IpBinding>* pBindings = GetIpBindings(nSlotId);
 
     if (pBindings == IMS_NULL)
     {
-        return IPAddress::NONE;
+        return IpAddress::NONE;
     }
 
     for (IMS_UINT32 i = 0; i < pBindings->GetSize(); ++i)
     {
-        const IPBinding& objIPB = pBindings->GetAt(i);
+        const IpBinding& objIpBinding = pBindings->GetAt(i);
 
-        if (objPrivateIP.Equals(objIPB.GetPrivateIP()))
+        if (objPrivateIp.Equals(objIpBinding.GetPrivateIp()))
         {
-            return objIPB.GetPublicIP();
+            return objIpBinding.GetPublicIp();
         }
     }
 
-    return IPAddress::NONE;
+    return IpAddress::NONE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL NATHelper::IsBehindNAT(
-        IN IMS_SINT32 nSlotId, IN const IPAddress& objPrivateIP /* = IPAddress::NONE */) const
+IMS_BOOL NatHelper::IsBehindNat(
+        IN IMS_SINT32 nSlotId, IN const IpAddress& objPrivateIp /*= IpAddress::NONE*/) const
 {
-    IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
+    ImsList<IpBinding>* pBindings = GetIpBindings(nSlotId);
 
     if (pBindings == IMS_NULL)
     {
@@ -137,15 +120,16 @@ IMS_BOOL NATHelper::IsBehindNAT(
 
     for (IMS_UINT32 i = 0; i < pBindings->GetSize(); ++i)
     {
-        const IPBinding& objIPB = pBindings->GetAt(i);
-        const IPAddress& objPublicIP = objIPB.GetPublicIP();
+        const IpBinding& objIpBinding = pBindings->GetAt(i);
+        const IpAddress& objPublicIp = objIpBinding.GetPublicIp();
 
-        if (!objPrivateIP.Equals(IPAddress::NONE) && !objPrivateIP.Equals(objIPB.GetPrivateIP()))
+        if (!objPrivateIp.Equals(IpAddress::NONE) &&
+                !objPrivateIp.Equals(objIpBinding.GetPrivateIp()))
         {
             continue;
         }
 
-        if (!objPublicIP.Equals(IPAddress::NONE) && !objPublicIP.Equals(IPAddress::IPv6NONE))
+        if (!objPublicIp.Equals(IpAddress::NONE) && !objPublicIp.Equals(IpAddress::IPv6NONE))
         {
             return IMS_TRUE;
         }
@@ -154,15 +138,10 @@ IMS_BOOL NATHelper::IsBehindNAT(
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void NATHelper::RemovePublicAddress(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId)
+void NatHelper::RemovePublicAddress(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId)
 {
-    IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
+    ImsList<IpBinding>* pBindings = GetIpBindings(nSlotId);
 
     if (pBindings == IMS_NULL)
     {
@@ -171,9 +150,9 @@ void NATHelper::RemovePublicAddress(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId)
 
     for (IMS_UINT32 i = 0; i < pBindings->GetSize();)
     {
-        const IPBinding& objIPB = pBindings->GetAt(i);
+        const IpBinding& objIpBinding = pBindings->GetAt(i);
 
-        if (nId == objIPB.GetId())
+        if (nId == objIpBinding.GetId())
         {
             pBindings->RemoveAt(i);
         }
@@ -184,15 +163,10 @@ void NATHelper::RemovePublicAddress(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void NATHelper::RemovePublicAddress(IN IMS_SINT32 nSlotId, IN const IPAddress& objPrivateIP)
+void NatHelper::RemovePublicAddress(IN IMS_SINT32 nSlotId, IN const IpAddress& objPrivateIp)
 {
-    IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
+    ImsList<IpBinding>* pBindings = GetIpBindings(nSlotId);
 
     if (pBindings == IMS_NULL)
     {
@@ -201,9 +175,9 @@ void NATHelper::RemovePublicAddress(IN IMS_SINT32 nSlotId, IN const IPAddress& o
 
     for (IMS_UINT32 i = 0; i < pBindings->GetSize(); ++i)
     {
-        const IPBinding& objIPB = pBindings->GetAt(i);
+        const IpBinding& objIpBinding = pBindings->GetAt(i);
 
-        if (objPrivateIP.Equals(objIPB.GetPrivateIP()))
+        if (objPrivateIp.Equals(objIpBinding.GetPrivateIp()))
         {
             pBindings->RemoveAt(i);
             break;
@@ -211,66 +185,46 @@ void NATHelper::RemovePublicAddress(IN IMS_SINT32 nSlotId, IN const IPAddress& o
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void NATHelper::SetPublicAddress(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId,
-        IN CONST IPAddress& objPrivateIP, IN CONST IPAddress& objPublicIP)
+void NatHelper::SetPublicAddress(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId,
+        IN const IpAddress& objPrivateIp, IN const IpAddress& objPublicIp)
 {
-    RemoveIPBinding(nSlotId, nId, objPrivateIP);
+    RemoveIpBinding(nSlotId, nId, objPrivateIp);
 
-    if (!objPublicIP.Equals(IPAddress::NONE) && !objPublicIP.Equals(IPAddress::IPv6NONE))
+    if (!objPublicIp.Equals(IpAddress::NONE) && !objPublicIp.Equals(IpAddress::IPv6NONE))
     {
-        IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
+        ImsList<IpBinding>* pBindings = GetIpBindings(nSlotId);
 
         if (pBindings != IMS_NULL)
         {
-            pBindings->Append(IPBinding(nId, objPrivateIP, objPublicIP));
+            pBindings->Append(IpBinding(nId, objPrivateIp, objPublicIp));
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL NATHelper* NATHelper::GetInstance()
+PUBLIC GLOBAL NatHelper* NatHelper::GetInstance()
 {
-    static NATHelper* pNATHelper = IMS_NULL;
+    static NatHelper* s_pNatHelper = IMS_NULL;
 
-    if (pNATHelper == IMS_NULL)
+    if (s_pNatHelper == IMS_NULL)
     {
-        pNATHelper = new NATHelper();
+        s_pNatHelper = new NatHelper();
     }
 
-    return pNATHelper;
+    return s_pNatHelper;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL IMS_BOOL NATHelper::IsNATResolverRequired()
+PUBLIC GLOBAL IMS_BOOL NatHelper::IsNatResolverRequired()
 {
     // FIXME: SKT only requires, but it's not used in the moment.
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void NATHelper::RemoveIPBinding(
-        IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId, IN const IPAddress& objPrivateIP)
+void NatHelper::RemoveIpBinding(
+        IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId, IN const IpAddress& objPrivateIp)
 {
-    IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
+    ImsList<IpBinding>* pBindings = GetIpBindings(nSlotId);
 
     if (pBindings == IMS_NULL)
     {
@@ -279,9 +233,9 @@ void NATHelper::RemoveIPBinding(
 
     for (IMS_UINT32 i = 0; i < pBindings->GetSize(); ++i)
     {
-        const IPBinding& objIPB = pBindings->GetAt(i);
+        const IpBinding& objIpBinding = pBindings->GetAt(i);
 
-        if ((nId == objIPB.GetId()) && objPrivateIP.Equals(objIPB.GetPrivateIP()))
+        if ((nId == objIpBinding.GetId()) && objPrivateIp.Equals(objIpBinding.GetPrivateIp()))
         {
             pBindings->RemoveAt(i);
             break;
@@ -289,18 +243,13 @@ void NATHelper::RemoveIPBinding(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMSList<NATHelper::IPBinding>* NATHelper::GetIPBindings(IN IMS_SINT32 nSlotId) const
+ImsList<NatHelper::IpBinding>* NatHelper::GetIpBindings(IN IMS_SINT32 nSlotId) const
 {
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
     {
         nSlotId = IMS_SLOT_0;
     }
 
-    return ppBindings[nSlotId];
+    return m_ppBindings[nSlotId];
 }

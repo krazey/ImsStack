@@ -1,234 +1,224 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100426  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "AStringBuffer.h"
+#include "ServiceMemory.h"
 
 PUBLIC
 AStringBuffer::AStringBuffer() :
-        strValue(AString::ConstNull())
+        m_strValue(AString::ConstNull())
 {
 }
 
 PUBLIC
 AStringBuffer::AStringBuffer(IN IMS_SINT32 nSize) :
-        strValue(AString(nSize))
+        m_strValue(AString(nSize))
 {
 }
 
 PUBLIC
-AStringBuffer::AStringBuffer(IN CONST AString& strValue_) :
-        strValue(strValue_)
+AStringBuffer::AStringBuffer(IN const AString& strValue) :
+        m_strValue(strValue)
 {
 }
 
 PUBLIC
-AStringBuffer::AStringBuffer(IN CONST AStringBuffer& objRHS) :
-        strValue(objRHS.strValue)
+AStringBuffer::AStringBuffer(IN const AStringBuffer& other) :
+        m_strValue(other.m_strValue)
 {
 }
 
 PUBLIC
-AStringBuffer::~AStringBuffer() {}
-
-PUBLIC
-AStringBuffer& AStringBuffer::operator=(IN CONST AStringBuffer& objRHS)
+AStringBuffer& AStringBuffer::operator=(IN const AStringBuffer& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        strValue = objRHS.strValue;
+        m_strValue = other.m_strValue;
     }
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::operator=(IN CONST IMS_CHAR ch)
+AStringBuffer& AStringBuffer::operator=(IN const IMS_CHAR c)
 {
-    strValue = ch;
-
+    m_strValue = c;
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::operator=(IN CONST IMS_CHAR* pszValue)
+AStringBuffer& AStringBuffer::operator=(IN const IMS_CHAR* pszValue)
 {
-    strValue = pszValue;
-
+    m_strValue = pszValue;
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::operator=(IN CONST AString& strValue)
+AStringBuffer& AStringBuffer::operator=(IN const AString& strValue)
 {
-    this->strValue = strValue;
-
+    m_strValue = strValue;
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::operator+=(IN CONST AStringBuffer& objRHS)
+AStringBuffer& AStringBuffer::operator+=(IN const AStringBuffer& other)
 {
-    strValue += objRHS.strValue;
-
+    m_strValue += other.m_strValue;
     return (*this);
 }
 
 PUBLIC
-void AStringBuffer::SetCapacity(IN IMS_SINT32 nSize)
-{
-    strValue.Realloc(nSize);
-}
-
-PUBLIC
-AStringBuffer& AStringBuffer::Sprintf(IN CONST IMS_CHAR* pszFormat, ...)
+AStringBuffer& AStringBuffer::Sprintf(IN const IMS_CHAR* pszFormat, ...)
 {
     va_list ap;
 
     va_start(ap, pszFormat);
-    strValue.Vsprintf(pszFormat, ap);
+    m_strValue.Vsprintf(pszFormat, ap);
     va_end(ap);
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Append(IN CONST IMS_SINT16 nValue)
+AStringBuffer& AStringBuffer::Append(IN const IMS_SINT16 nValue)
 {
     AString strTmpVal;
 
     strTmpVal.SetNumber(nValue);
-    strValue.Append(strTmpVal);
+    m_strValue.Append(strTmpVal);
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Append(IN CONST IMS_UINT16 nValue)
+AStringBuffer& AStringBuffer::Append(IN const IMS_UINT16 nValue)
 {
     AString strTmpVal;
 
     strTmpVal.SetNumber(nValue);
-    strValue.Append(strTmpVal);
+    m_strValue.Append(strTmpVal);
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Append(IN CONST IMS_SINT32 nValue)
+AStringBuffer& AStringBuffer::Append(IN const IMS_SINT32 nValue)
 {
     AString strTmpVal;
 
     strTmpVal.SetNumber(nValue);
-    strValue.Append(strTmpVal);
+    m_strValue.Append(strTmpVal);
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Append(IN CONST IMS_UINT32 nValue)
+AStringBuffer& AStringBuffer::Append(IN const IMS_UINT32 nValue)
 {
     AString strTmpVal;
 
     strTmpVal.SetNumber(nValue);
-    strValue.Append(strTmpVal);
+    m_strValue.Append(strTmpVal);
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Append(IN CONST IMS_SLONG nValue)
+AStringBuffer& AStringBuffer::Append(IN const IMS_SLONG nValue)
 {
     AString strTmpVal;
 
     strTmpVal.SetNumber(static_cast<IMS_SINT64>(nValue));
-    strValue.Append(strTmpVal);
+    m_strValue.Append(strTmpVal);
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Append(IN CONST IMS_ULONG nValue)
+AStringBuffer& AStringBuffer::Append(IN const IMS_ULONG nValue)
 {
     AString strTmpVal;
 
     strTmpVal.SetNumber(static_cast<IMS_UINT64>(nValue));
-    strValue.Append(strTmpVal);
+    m_strValue.Append(strTmpVal);
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Insert(IN IMS_SINT32 i, IN CONST IMS_SINT16 nValue)
+AStringBuffer& AStringBuffer::Insert(IN IMS_SINT32 i, IN const IMS_SINT16 nValue)
 {
     AString strTmpVal;
 
     strTmpVal.SetNumber(nValue);
-    strValue.Insert(i, strTmpVal);
+    m_strValue.Insert(i, strTmpVal);
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Insert(IN IMS_SINT32 i, IN CONST IMS_UINT16 nValue)
+AStringBuffer& AStringBuffer::Insert(IN IMS_SINT32 i, IN const IMS_UINT16 nValue)
 {
     AString strTmpVal;
 
     strTmpVal.SetNumber(nValue);
-    strValue.Insert(i, strTmpVal);
+    m_strValue.Insert(i, strTmpVal);
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Insert(IN IMS_SINT32 i, IN CONST IMS_SINT32 nValue)
+AStringBuffer& AStringBuffer::Insert(IN IMS_SINT32 i, IN const IMS_SINT32 nValue)
 {
     AString strTmpVal;
 
     strTmpVal.SetNumber(nValue);
-    strValue.Insert(i, strTmpVal);
+    m_strValue.Insert(i, strTmpVal);
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Insert(IN IMS_SINT32 i, IN CONST IMS_UINT32 nValue)
+AStringBuffer& AStringBuffer::Insert(IN IMS_SINT32 i, IN const IMS_UINT32 nValue)
 {
     AString strTmpVal;
 
     strTmpVal.SetNumber(nValue);
-    strValue.Insert(i, strTmpVal);
+    m_strValue.Insert(i, strTmpVal);
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Insert(IN IMS_SINT32 i, IN CONST IMS_SLONG nValue)
+AStringBuffer& AStringBuffer::Insert(IN IMS_SINT32 i, IN const IMS_SLONG nValue)
 {
     AString strTmpVal;
 
     strTmpVal.SetNumber(static_cast<IMS_SINT64>(nValue));
-    strValue.Insert(i, strTmpVal);
+    m_strValue.Insert(i, strTmpVal);
 
     return (*this);
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Insert(IN IMS_SINT32 i, IN CONST IMS_ULONG nValue)
+AStringBuffer& AStringBuffer::Insert(IN IMS_SINT32 i, IN const IMS_ULONG nValue)
 {
     AString strTmpVal;
 
     strTmpVal.SetNumber(static_cast<IMS_UINT64>(nValue));
-    strValue.Insert(i, strTmpVal);
+    m_strValue.Insert(i, strTmpVal);
 
     return (*this);
 }

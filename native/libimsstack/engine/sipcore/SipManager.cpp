@@ -93,7 +93,7 @@ void SipManager::DetachDialogState(IN SipDialogState* pDState)
 }
 
 PUBLIC
-RCPtr<SipDialogState> SipManager::LookupDialogState(IN SipDialogState* pDState,
+RcPtr<SipDialogState> SipManager::LookupDialogState(IN SipDialogState* pDState,
         IN ::SipMessage* pSipMsg, IN IMS_BOOL bCheckForked /*= IMS_FALSE*/,
         OUT IMS_BOOL* pbIsForked /*= IMS_NULL*/)
 {

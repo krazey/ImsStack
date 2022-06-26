@@ -57,7 +57,7 @@ public:
 
 private:
     // Shared dialog information among all dialog usages
-    RCPtr<SipDialogState> m_pDState;
+    RcPtr<SipDialogState> m_pDState;
 };
 
 #endif

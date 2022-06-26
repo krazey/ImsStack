@@ -1751,18 +1751,18 @@ PRIVATE VIRTUAL void Registration::DigestAka_OnResponse(IN const ByteArray& objR
     }
 
     m_objActiveCredential = m_pRegParam->GetCredential();
-    m_objActiveSaKey.SetIK(objIk);
-    m_objActiveSaKey.SetCK(objCk);
+    m_objActiveSaKey.SetIk(objIk);
+    m_objActiveSaKey.SetCk(objCk);
 
     IMS_SINT32 nType = m_objActiveCredential.GetType();
 
     if (nType == Credential::TYPE_AKAv1_MD5)
     {
-        m_objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_OK, objRes);
+        m_objActiveCredential.SetAkaResponse(ImsAkaParam::RESULT_OK, objRes);
     }
     else if (nType == Credential::TYPE_AKAv2_MD5)
     {
-        m_objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_OK, objRes, objIk, objCk);
+        m_objActiveCredential.SetAkaResponse(ImsAkaParam::RESULT_OK, objRes, objIk, objCk);
     }
 
     PostMessage(AMSG_REGISTRATION_AKA_RESPONSE_RECEIVED, 0, 0);
@@ -1779,19 +1779,19 @@ PRIVATE VIRTUAL void Registration::DigestAka_OnAutsFailed(IN const ByteArray& ob
     }
 
     m_objActiveCredential = m_pRegParam->GetCredential();
-    m_objActiveSaKey.SetIK(ByteArray::ConstNull());
-    m_objActiveSaKey.SetCK(ByteArray::ConstNull());
+    m_objActiveSaKey.SetIk(ByteArray::ConstNull());
+    m_objActiveSaKey.SetCk(ByteArray::ConstNull());
 
     IMS_SINT32 nType = m_objActiveCredential.GetType();
 
     if (nType == Credential::TYPE_AKAv1_MD5)
     {
-        m_objActiveCredential.SetAKAResponse(
-                IMS_AKA::RESULT_NOK_SQN_SYNC_FAILED, ByteArray::ConstNull(), objAuts);
+        m_objActiveCredential.SetAkaResponse(
+                ImsAkaParam::RESULT_NOK_SQN_SYNC_FAILED, ByteArray::ConstNull(), objAuts);
     }
     else if (nType == Credential::TYPE_AKAv2_MD5)
     {
-        m_objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_NOK_SQN_SYNC_FAILED,
+        m_objActiveCredential.SetAkaResponse(ImsAkaParam::RESULT_NOK_SQN_SYNC_FAILED,
                 ByteArray::ConstNull(), ByteArray::ConstNull(), ByteArray::ConstNull(), objAuts);
     }
 
@@ -1809,19 +1809,19 @@ PRIVATE VIRTUAL void Registration::DigestAka_OnMacFailed()
     }
 
     m_objActiveCredential = m_pRegParam->GetCredential();
-    m_objActiveSaKey.SetIK(ByteArray::ConstNull());
-    m_objActiveSaKey.SetCK(ByteArray::ConstNull());
+    m_objActiveSaKey.SetIk(ByteArray::ConstNull());
+    m_objActiveSaKey.SetCk(ByteArray::ConstNull());
 
     IMS_SINT32 nType = m_objActiveCredential.GetType();
 
     if (nType == Credential::TYPE_AKAv1_MD5)
     {
-        m_objActiveCredential.SetAKAResponse(
-                IMS_AKA::RESULT_NOK_MAC_INVALID, ByteArray::ConstNull());
+        m_objActiveCredential.SetAkaResponse(
+                ImsAkaParam::RESULT_NOK_MAC_INVALID, ByteArray::ConstNull());
     }
     else if (nType == Credential::TYPE_AKAv2_MD5)
     {
-        m_objActiveCredential.SetAKAResponse(IMS_AKA::RESULT_NOK_MAC_INVALID,
+        m_objActiveCredential.SetAkaResponse(ImsAkaParam::RESULT_NOK_MAC_INVALID,
                 ByteArray::ConstNull(), ByteArray::ConstNull(), ByteArray::ConstNull());
     }
 
@@ -2106,7 +2106,7 @@ IDigestAka* Registration::CreateDigestAka(IN const SubscriberConfig* pSubsConfig
 }
 
 PRIVATE
-IMS_BOOL Registration::CreateSa(IN const Credential& objCredential, IN const IMS_SA_KEY& objSaKey)
+IMS_BOOL Registration::CreateSa(IN const Credential& objCredential, IN const ImsSaKey& objSaKey)
 {
     IMS_SINT32 nAlgorithm = objCredential.GetType();
 
@@ -2138,11 +2138,11 @@ IMS_BOOL Registration::CreateSa(IN const Credential& objCredential, IN const IMS
         m_pRegParam->SetSecurityVerifys(objSecurityVerifys);
 
         // Notifies the information which IK & CK will be used for this authentication.
-        m_piListener->Registration_NotifyAkaResponse(objCredential.GetAKAResponse().nStatus,
-                objSaKey.GetIK(), objSaKey.GetCK(), bResultOfSa);
+        m_piListener->Registration_NotifyAkaResponse(objCredential.GetAkaResponse().m_nStatus,
+                objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSa);
 
         // If the result of AKA is not OK, clear the Security-Server headers
-        if (!bResultOfSa || (objCredential.GetAKAResponse().nStatus != IMS_AKA::RESULT_OK))
+        if (!bResultOfSa || (objCredential.GetAkaResponse().m_nStatus != ImsAkaParam::RESULT_OK))
         {
             RestoreSecurityHeaders();
         }
@@ -2153,8 +2153,8 @@ IMS_BOOL Registration::CreateSa(IN const Credential& objCredential, IN const IMS
     else
     {
         // Notifies the information which IK & CK will be used for this authentication.
-        m_piListener->Registration_NotifyAkaResponse(objCredential.GetAKAResponse().nStatus,
-                objSaKey.GetIK(), objSaKey.GetCK(), bResultOfSa);
+        m_piListener->Registration_NotifyAkaResponse(objCredential.GetAkaResponse().m_nStatus,
+                objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSa);
     }
 
     return bResultOfSa;
@@ -2738,7 +2738,7 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN const Credential& objCredent
         else
         {
             if ((nPrevState == STATE_INIT) &&
-                    (objCredential.GetAKAResponse().nStatus != IMS_AKA::RESULT_OK))
+                    (objCredential.GetAkaResponse().m_nStatus != ImsAkaParam::RESULT_OK))
             {
                 // Do not add P-Access-Network-Info header since the authentication is failed...
             }
@@ -3365,7 +3365,7 @@ IMS_RESULT Registration::UpdateBindings(IN const ISipMessage* piSipMsg)
             if (piHeader->GetValue().Contains(TextParser::CHAR_DQUOT))
             {
                 IMS_BOOL bOk = IMS_FALSE;
-                AString strValue = TextParser::TrimDQUOT(piHeader->GetValue());
+                AString strValue = TextParser::TrimDquot(piHeader->GetValue());
 
                 nExpiresValue = strValue.ToInt32(&bOk);
 

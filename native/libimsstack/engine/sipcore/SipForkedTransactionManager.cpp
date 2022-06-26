@@ -28,7 +28,7 @@ IMS_BOOL SipForkedTransactionManager::Add(IN SipClientTransactionState* pCtState
 {
     for (IMS_UINT32 i = 0; i < m_objTxnStates.GetSize(); ++i)
     {
-        const RCPtr<SipClientTransactionState>& pTmpCtState = m_objTxnStates.GetAt(i);
+        const RcPtr<SipClientTransactionState>& pTmpCtState = m_objTxnStates.GetAt(i);
 
         if (pTmpCtState.Get() == pCtState)
         {
@@ -61,7 +61,7 @@ SipClientTransactionState* SipForkedTransactionManager::Lookup(IN ::SipMessage* 
     // Not forked case
     if (m_objTxnStates.GetSize() == 1)
     {
-        const RCPtr<SipClientTransactionState>& pCtState = m_objTxnStates.GetAt(0);
+        const RcPtr<SipClientTransactionState>& pCtState = m_objTxnStates.GetAt(0);
 
         return pCtState.Get();
     }
@@ -107,7 +107,7 @@ SipClientTransactionState* SipForkedTransactionManager::Lookup(IN ::SipMessage* 
 
     for (IMS_UINT32 i = 0; i < m_objTxnStates.GetSize(); ++i)
     {
-        const RCPtr<SipClientTransactionState>& pCtState = m_objTxnStates.GetAt(i);
+        const RcPtr<SipClientTransactionState>& pCtState = m_objTxnStates.GetAt(i);
         SipDialogState* pDState = pCtState->GetDialog()->GetDialogState();
 
         AString strLocalTag = pDState->GetLocalTag();
@@ -124,7 +124,7 @@ SipClientTransactionState* SipForkedTransactionManager::Lookup(IN ::SipMessage* 
         }
     }
 
-    const RCPtr<SipClientTransactionState>& pCtState =
+    const RcPtr<SipClientTransactionState>& pCtState =
             m_objTxnStates.GetAt(m_objTxnStates.GetSize() - 1);
 
     return pCtState.Get();
@@ -135,7 +135,7 @@ void SipForkedTransactionManager::Remove(IN SipClientTransactionState* pCtState)
 {
     for (IMS_UINT32 i = 0; i < m_objTxnStates.GetSize(); ++i)
     {
-        const RCPtr<SipClientTransactionState>& pTmpCtState = m_objTxnStates.GetAt(i);
+        const RcPtr<SipClientTransactionState>& pTmpCtState = m_objTxnStates.GetAt(i);
 
         if (pTmpCtState.Get() == pCtState)
         {

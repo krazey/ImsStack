@@ -1,15 +1,18 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090303  toastops@                 Porting (From Aricent SIP stack)
-    </table>
-
-    Description
-     This file implements an MD5 operations.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ImsMd5.h"
 
 #define S11               7
@@ -81,98 +84,58 @@ LOCAL const IMS_UCHAR MD5_PADDING[64] = {
 };
 // clang-format on
 
-LOCAL void imsMD5_CopyMemory(
-        OUT IMS_UCHAR* pucDest, IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen);
-LOCAL void imsMD5_Decode(IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest);
-LOCAL void imsMD5_Encode(
-        IN CONST IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest);
-LOCAL void imsMD5_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount);
-LOCAL void imsMD5_Transform(IN IMS_UINT32 anState[4], OUT IMS_UCHAR aucBlock[64]);
+LOCAL void imsMd5_CopyMemory(
+        OUT IMS_UCHAR* pucDest, IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen);
+LOCAL void imsMd5_Decode(IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest);
+LOCAL void imsMd5_Encode(
+        IN const IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest);
+LOCAL void imsMd5_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount);
+LOCAL void imsMd5_Transform(IN IMS_UINT32 anState[4], OUT IMS_UCHAR aucBlock[64]);
 
-/*
-This function initializes MD5 context structure.
-It begins an MD5 operation, writing a new context.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-pstContext              Pointer to MD5 context to be initialized
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
-GLOBAL void IMSMD5_Initialize(OUT MD5Context* pstContext)
+GLOBAL void ImsMd5_Initialize(OUT ImsMd5Context* pContext)
 {
-    if (pstContext != IMS_NULL)
+    if (pContext != IMS_NULL)
     {
-        pstContext->anCount[0] = pstContext->anCount[1] = 0;
+        pContext->anCount[0] = pContext->anCount[1] = 0;
 
         // Load magic initialization constants
-        pstContext->anState[0] = 0x67452301;
-        pstContext->anState[1] = 0xefcdab89;
-        pstContext->anState[2] = 0x98badcfe;
-        pstContext->anState[3] = 0x10325476;
+        pContext->anState[0] = 0x67452301;
+        pContext->anState[1] = 0xefcdab89;
+        pContext->anState[2] = 0x98badcfe;
+        pContext->anState[3] = 0x10325476;
     }
 }
 
-/*
-This function updates an MD5 block. It continues an MD5 message-digest operation,
-processing another message block, and updating the context.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-pucSrc                  Pointer to the source data to be updated
-nSrcLen                 Length of the source data (pucSrc)
-pstContext              Pointer to MD5 context to be updated
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
-GLOBAL void IMSMD5_Update(
-        IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, IN_OUT MD5Context* pstContext)
+GLOBAL void ImsMd5_Update(
+        IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, IN_OUT ImsMd5Context* pContext)
 {
     IMS_UINT32 nProcIndex;
     IMS_UINT32 nIndex;
     IMS_UINT32 nPartLen;
 
     // Computes the number of bytes mod 64
-    nIndex = static_cast<IMS_UINT32>((pstContext->anCount[0] >> 3) & 0x3F);
+    nIndex = static_cast<IMS_UINT32>((pContext->anCount[0] >> 3) & 0x3F);
 
     // Updates the number of bits
-    if ((pstContext->anCount[0] += static_cast<IMS_UINT32>(nSrcLen << 3)) <
+    if ((pContext->anCount[0] += static_cast<IMS_UINT32>(nSrcLen << 3)) <
             (static_cast<IMS_UINT32>(nSrcLen << 3)))
     {
-        (pstContext->anCount[1])++;
+        (pContext->anCount[1])++;
     }
 
-    pstContext->anCount[1] += static_cast<IMS_UINT32>(nSrcLen >> 29);
+    pContext->anCount[1] += static_cast<IMS_UINT32>(nSrcLen >> 29);
 
     nPartLen = 64 - nIndex;
 
     // Transforms as many times as possible.
     if (nSrcLen >= nPartLen)
     {
-        imsMD5_CopyMemory(&(pstContext->aucBuffer[nIndex]), pucSrc, nPartLen);
-        imsMD5_Transform(pstContext->anState, pstContext->aucBuffer);
+        imsMd5_CopyMemory(&(pContext->aucBuffer[nIndex]), pucSrc, nPartLen);
+        imsMd5_Transform(pContext->anState, pContext->aucBuffer);
 
         for (nProcIndex = nPartLen; nProcIndex + 63 < nSrcLen; nProcIndex += 64)
         {
-            imsMD5_Transform(pstContext->anState, const_cast<IMS_UCHAR*>(&pucSrc[nProcIndex]));
+            imsMd5_Transform(pContext->anState, const_cast<IMS_UCHAR*>(&pucSrc[nProcIndex]));
         }
 
         nIndex = 0;
@@ -183,56 +146,37 @@ GLOBAL void IMSMD5_Update(
     }
 
     // Process the remaining input buffer
-    imsMD5_CopyMemory(&(pstContext->aucBuffer[nIndex]), &pucSrc[nProcIndex], nSrcLen - nProcIndex);
+    imsMd5_CopyMemory(&(pContext->aucBuffer[nIndex]), &pucSrc[nProcIndex], nSrcLen - nProcIndex);
 }
 
-/*
-This function finalizes an MD5 operation. It ends an MD5 message-digest operation,
-writing the message digest and zeroing the context.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-pstContext              Pointer to MD5 context to be finalized
-aucDigest               Array of the MD5 result
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
-GLOBAL void IMSMD5_Finalize(IN_OUT MD5Context* pstContext, OUT IMS_UCHAR aucDigest[16])
+GLOBAL void ImsMd5_Finalize(
+        IN_OUT ImsMd5Context* pContext, OUT IMS_UCHAR aucDigest[IMS_MD5_DIGEST_SIZE])
 {
     IMS_UCHAR aucBits[8];
     IMS_UINT32 nIndex;
     IMS_UINT32 nPadLen;
 
     // Save the number of bits
-    imsMD5_Encode(pstContext->anCount, 8, aucBits);
+    imsMd5_Encode(pContext->anCount, 8, aucBits);
 
     // Pad out to 56 mod 64
-    nIndex = static_cast<IMS_UINT32>((pstContext->anCount[0] >> 3) & 0x3F);
+    nIndex = static_cast<IMS_UINT32>((pContext->anCount[0] >> 3) & 0x3F);
     nPadLen = (nIndex < 56) ? (56 - nIndex) : (120 - nIndex);
 
-    IMSMD5_Update(MD5_PADDING, nPadLen, pstContext);
+    ImsMd5_Update(MD5_PADDING, nPadLen, pContext);
 
     // Append the length (before padding)
-    IMSMD5_Update(aucBits, 8, pstContext);
+    ImsMd5_Update(aucBits, 8, pContext);
 
     // Store state in digest
-    imsMD5_Encode(pstContext->anState, 16, aucDigest);
+    imsMd5_Encode(pContext->anState, IMS_MD5_DIGEST_SIZE, aucDigest);
 
     // Zeroize sensitive information
-    imsMD5_SetMemory(reinterpret_cast<IMS_UCHAR*>(pstContext), 0, sizeof(MD5Context));
+    imsMd5_SetMemory(reinterpret_cast<IMS_UCHAR*>(pContext), 0, sizeof(ImsMd5Context));
 }
 
-LOCAL void imsMD5_CopyMemory(
-        OUT IMS_UCHAR* pucDest, IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen)
+LOCAL void imsMd5_CopyMemory(
+        OUT IMS_UCHAR* pucDest, IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen)
 {
     for (IMS_UINT32 i = 0; i < nSrcLen; i++)
     {
@@ -241,7 +185,7 @@ LOCAL void imsMD5_CopyMemory(
 }
 
 // Decodes the input (IMS_UCHAR) into output (IMS_UINT32). Assumes nSrcLen is a multiple of 4.
-LOCAL void imsMD5_Decode(IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest)
+LOCAL void imsMd5_Decode(IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest)
 {
     for (IMS_UINT32 i = 0, j = 0; j < nSrcLen; i++, j += 4)
     {
@@ -253,7 +197,7 @@ LOCAL void imsMD5_Decode(IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT 
 }
 
 // Encodes input (IMS_UINT32) into output (IMS_UCHAR). Assumes nSrcLen is a multiple of 4.
-LOCAL void imsMD5_Encode(IN CONST IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest)
+LOCAL void imsMd5_Encode(IN const IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest)
 {
     for (IMS_UINT32 i = 0, j = 0; j < nDestLen; i++, j += 4)
     {
@@ -264,7 +208,7 @@ LOCAL void imsMD5_Encode(IN CONST IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT
     }
 }
 
-LOCAL void imsMD5_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount)
+LOCAL void imsMd5_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount)
 {
     for (IMS_SIZE_T i = 0; i < nCount; i++)
     {
@@ -272,7 +216,7 @@ LOCAL void imsMD5_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS
     }
 }
 
-LOCAL void imsMD5_Transform(IN IMS_UINT32 anState[4], OUT IMS_UCHAR aucBlock[64])
+LOCAL void imsMd5_Transform(IN IMS_UINT32 anState[4], OUT IMS_UCHAR aucBlock[64])
 {
     IMS_UINT32 a = anState[0];
     IMS_UINT32 b = anState[1];
@@ -280,7 +224,7 @@ LOCAL void imsMD5_Transform(IN IMS_UINT32 anState[4], OUT IMS_UCHAR aucBlock[64]
     IMS_UINT32 d = anState[3];
     IMS_UINT32 x[16];
 
-    imsMD5_Decode(aucBlock, 64, x);
+    imsMd5_Decode(aucBlock, 64, x);
 
     // Round 1
     FF(a, b, c, d, x[0], S11, 0xd76aa478);  /* 1 */
@@ -360,5 +304,5 @@ LOCAL void imsMD5_Transform(IN IMS_UINT32 anState[4], OUT IMS_UCHAR aucBlock[64]
     anState[3] += d;
 
     // Zeroize sensitive information
-    imsMD5_SetMemory(reinterpret_cast<IMS_UCHAR*>(x), 0, sizeof(x));
+    imsMd5_SetMemory(reinterpret_cast<IMS_UCHAR*>(x), 0, sizeof(x));
 }

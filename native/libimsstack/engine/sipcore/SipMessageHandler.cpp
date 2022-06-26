@@ -217,7 +217,7 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
         IMS_TRACE_D("Incoming SIP request on SIM%d ...", nSlotId, 0, 0);
     }
 
-    RCPtr<SipServerTransactionState> pStState =
+    RcPtr<SipServerTransactionState> pStState =
             new SipServerTransactionState(nSlotId, objNearEnd, objFarEnd);
 
     if (pStState.IsNull())
@@ -262,7 +262,7 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
             // To send failure response
             pStState->CheckMessageValidity();
 
-            RCPtr<SipDialogEx> pOrigDialogEx;
+            RcPtr<SipDialogEx> pOrigDialogEx;
             nResult = pStState->HandleRequest(pOrigDialogEx);
         }
 
@@ -297,7 +297,7 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
         // Send failure response
         pStState->CheckMessageValidity();
 
-        RCPtr<SipDialogEx> pOrigDialogEx;
+        RcPtr<SipDialogEx> pOrigDialogEx;
         IMS_SINT32 nResult = pStState->HandleRequest(pOrigDialogEx);
 
         if ((nResult == SipPrivate::MESSAGE_VALID) || (nResult == SipPrivate::MESSAGE_VALID_FORKED))
@@ -336,7 +336,7 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
 
     if (nValidity != SipPrivate::MESSAGE_VALID)
     {
-        RCPtr<SipDialogEx> pOrigDialogEx;
+        RcPtr<SipDialogEx> pOrigDialogEx;
         IMS_SINT32 nResult = pStState->HandleRequest(pOrigDialogEx);
 
         if ((nResult == SipPrivate::MESSAGE_VALID) || (nResult == SipPrivate::MESSAGE_VALID_FORKED))
@@ -376,7 +376,7 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
         return SipPrivate::MESSAGE_DISCARDED;
     }
 
-    RCPtr<SipDialogEx> pOrigDialogEx;
+    RcPtr<SipDialogEx> pOrigDialogEx;
 
     nValidity = pStState->HandleRequest(pOrigDialogEx);
 
@@ -402,7 +402,7 @@ PRIVATE
 IMS_SINT32 SipMessageHandler::NotifyResponse(IN IMS_SINT32 nSlotId, IN ::SipMessage* pSipMsg,
         IN const SipTransportAddress& objNearEnd, IN const SipTransportAddress& objFarEnd)
 {
-    RCPtr<SipClientTransactionState> pCtState;
+    RcPtr<SipClientTransactionState> pCtState;
 
     // If IPSec is applied, check the validity of source IP and port.
     if (!CheckIpSecValidityForResponse(nSlotId, pSipMsg, objNearEnd, objFarEnd))

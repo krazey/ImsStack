@@ -214,7 +214,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
     if (!IsExplicitTargetProtocolSelected() &&
             (objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_UDP))
     {
-        RCPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
+        RcPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
         IMS_SINT32 nBuffLen = pMessageBuffer->GetLength();
         IMS_BYTE* pBuffer = pMessageBuffer->GetBuffer(GetSlotId());
 

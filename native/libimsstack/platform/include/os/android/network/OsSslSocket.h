@@ -19,13 +19,13 @@
 #include "ITimer.h"
 #include "OsSocket.h"
 
-class SSLCertificate;
+class SslCertificate;
 class OsSsl;
 
 class OsSslSocket : public OsSocket, public ITimerListener
 {
 public:
-    explicit OsSslSocket(IN SSLCertificate* pCertificate);
+    explicit OsSslSocket(IN SslCertificate* pCertificate);
     virtual ~OsSslSocket();
 
     OsSslSocket(IN const OsSslSocket&) = delete;

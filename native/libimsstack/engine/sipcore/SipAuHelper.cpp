@@ -187,7 +187,7 @@ private:
     // Nonce count if QoP is desired
     AString m_strNonceCount;
     // Extensions for AKA authentication
-    IMS_AKA m_objAkaParam;
+    ImsAkaParam m_objAkaParam;
 };
 
 PUBLIC
@@ -559,10 +559,10 @@ IMS_BOOL SipAuHelperPrivate::CalculateResponse()
 
             if (pCredential->GetType() != Credential::TYPE_MD5)
             {
-                pResponse->m_objAkaParam = pCredential->GetAKAResponse();
+                pResponse->m_objAkaParam = pCredential->GetAkaResponse();
 
                 // Sets the auts field
-                // if (pResponse->m_objAkaParam.nStatus == IMS_AKA::RESULT_NOK_SQN_SYNC_FAILED)
+                // if (pResponse->m_objAkaParam.nStatus == ImsAkaParam::RESULT_NOK_SQN_SYNC_FAILED)
                 // pResponse->m_objAkaParam.strAuts = pResponse->m_objAkaParam.strAuts.ToBase64();
             }
 
@@ -683,15 +683,15 @@ IMS_BOOL SipAuHelperPrivate::FormCredentials(IN const SipMethod& objMethod,
         // If the MAC is invalid,
         // the value of "response" parameter in Authorization header field
         // will be set to an empty("") value.
-        if (objResponse.m_objAkaParam.nStatus == IMS_AKA::RESULT_NOK_MAC_INVALID)
+        if (objResponse.m_objAkaParam.m_nStatus == ImsAkaParam::RESULT_NOK_MAC_INVALID)
         {
             strDigestRes.Append(TextParser::CHAR_DQUOT);
             strDigestRes.Append(TextParser::CHAR_DQUOT);
         }
         else
         {
-            // IMS_AKA::AUTH_SUCCESS
-            // IMS_AKA::AUTH_SQN_SYNCHRONIZATION_FAILURE
+            // ImsAkaParam::AUTH_SUCCESS
+            // ImsAkaParam::AUTH_SQN_SYNCHRONIZATION_FAILURE
 
             // Server has requested Digest Authentication Scheme.
             HASHHEX hEntity = {
@@ -893,18 +893,18 @@ IMS_BOOL SipAuHelperPrivate::FormCredentials(IN const SipMethod& objMethod,
         ///// Additional parameters for IMS AKA authentication
 
         // "auts" field
-        if (objResponse.m_objAkaParam.nStatus == IMS_AKA::RESULT_NOK_SQN_SYNC_FAILED)
+        if (objResponse.m_objAkaParam.m_nStatus == ImsAkaParam::RESULT_NOK_SQN_SYNC_FAILED)
         {
             AString strQuotedValue;
 
-            if (objResponse.m_objAkaParam.strAUTS.GetIndexOf(TextParser::CHAR_DQUOT) == 0)
+            if (objResponse.m_objAkaParam.m_strAuts.GetIndexOf(TextParser::CHAR_DQUOT) == 0)
             {
-                strQuotedValue = objResponse.m_objAkaParam.strAUTS;
+                strQuotedValue = objResponse.m_objAkaParam.m_strAuts;
             }
             else
             {
                 strQuotedValue += TextParser::CHAR_DQUOT;
-                strQuotedValue += objResponse.m_objAkaParam.strAUTS;
+                strQuotedValue += objResponse.m_objAkaParam.m_strAuts;
                 strQuotedValue += TextParser::CHAR_DQUOT;
             }
 

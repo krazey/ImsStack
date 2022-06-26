@@ -419,7 +419,7 @@ private:
     // For cached reg-bindings to handle the existing dialog after IMS de-registration
     CachedRegBinding m_objCachedRegBinding;
     // MULTI_REG_SIP_PROFILE
-    RCPtr<SipProfile> m_pSipProfile;
+    RcPtr<SipProfile> m_pSipProfile;
 
     // AOR; Public User Identity
     // P-Preferred-Identity, From, AOR for registration

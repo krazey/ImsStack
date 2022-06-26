@@ -26,17 +26,17 @@ class SocketAddress
 public:
     inline SocketAddress() :
             m_nPort(0),
-            m_objIpAddress(IPAddress::IPv6NONE)
+            m_objIpAddress(IpAddress::IPv6NONE)
     {
     }
-    inline SocketAddress(IN const IPAddress& objIpAddress, IN IMS_SINT32 nPort) :
+    inline SocketAddress(IN const IpAddress& objIpAddress, IN IMS_SINT32 nPort) :
             m_nPort(nPort),
             m_objIpAddress(objIpAddress)
     {
     }
     inline SocketAddress(IN const AString& strIpAddress, IN IMS_SINT32 nPort) :
             m_nPort(nPort),
-            m_objIpAddress(IPAddress(strIpAddress))
+            m_objIpAddress(IpAddress(strIpAddress))
     {
     }
     inline SocketAddress(IN const SocketAddress& other) :
@@ -75,7 +75,7 @@ public:
      *
      * @return IPAddress object
      */
-    inline const IPAddress& GetAddress() const { return m_objIpAddress; }
+    inline const IpAddress& GetAddress() const { return m_objIpAddress; }
 
     /**
      * @brief Returns a port number of this SocketAddress.
@@ -89,7 +89,7 @@ public:
      *
      * @param objIpAddress an IP address to be set
      */
-    inline void SetAddress(IN const IPAddress& objIpAddress) { m_objIpAddress = objIpAddress; }
+    inline void SetAddress(IN const IpAddress& objIpAddress) { m_objIpAddress = objIpAddress; }
 
     /**
      * @brief Sets a port number of this SocketAddress.
@@ -123,7 +123,7 @@ private:
     // Port number
     IMS_SINT32 m_nPort;
     // IP address (null-terminating dotted numeric IP address)
-    IPAddress m_objIpAddress;
+    IpAddress m_objIpAddress;
 };
 
 #endif

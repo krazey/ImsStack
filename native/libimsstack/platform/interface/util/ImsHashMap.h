@@ -1,56 +1,60 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090302  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_HASH_MAP_H_
+#define IMS_HASH_MAP_H_
 
-    Description
-    This file implements a container class using hash table internally.
-*/
+#include "ImsTypeDef.h"
 
-#ifndef _IMS_HASH_MAP_H_
-#define _IMS_HASH_MAP_H_
-
-#include "IMSTypeDef.h"
-
-#define ImsHashMap IMSHashMap
-
-struct __IMSIterator
+struct __ImsIterator
 {
     IMS_UINT32 nDummy;
 };
 
-typedef struct __IMSIterator* IMSIterator;
+typedef struct __ImsIterator* ImsIterator;
 
-class IMSHashMap
+/**
+ * @brief This class implements a container class using hash table internally.
+ */
+class ImsHashMap
 {
 protected:
     class Element
     {
     public:
-        Element(IN void* pvKey_, IN void* pvValue_) :
-                pvKey(pvKey_),
-                pvValue(pvValue_),
-                pNext(IMS_NULL)
+        Element(IN void* pvKey, IN void* pvValue) :
+                m_pvKey(pvKey),
+                m_pvValue(pvValue),
+                m_pNext(IMS_NULL)
         {
         }
         ~Element() {}
 
     public:
-        void* pvKey;
-        void* pvValue;
-        Element* pNext;
+        void* m_pvKey;
+        void* m_pvValue;
+        Element* m_pNext;
     };
 
 public:
-    IMSHashMap(IN IMS_UINT32 nHashTableSize_ = DEFAULT_SIZE);
-    virtual ~IMSHashMap();
+    ImsHashMap(IN IMS_UINT32 nHashTableSize = DEFAULT_SIZE);
+    virtual ~ImsHashMap();
 
 public:
     void InitHashTable(IN IMS_UINT32 nHashTableSize, IN IMS_BOOL bAlloc = IMS_TRUE);
-    inline IMS_UINT32 GetHashTableSize() const { return nHashTableSize; }
+    inline IMS_UINT32 GetHashTableSize() const { return m_nHashTableSize; }
 
     // Add new (key, value) pair or modify value
     void SetAt(IN void* pvKey, IN void* pvNewValue);
@@ -64,19 +68,19 @@ public:
     IMS_BOOL RemoveKey(IN void* pvKey);
     void RemoveAll();
 
-    inline IMS_BOOL IsEmpty() const { return (nCount == 0); }
-    inline IMS_UINT32 GetSize() const { return nCount; }
+    inline IMS_BOOL IsEmpty() const { return (m_nCount == 0); }
+    inline IMS_UINT32 GetSize() const { return m_nCount; }
 
-    IMSIterator GetStartPosition();
-    void GetNext(IN_OUT IMSIterator& stIterator, OUT void*& pvKey, OUT void*& pvValue);
+    ImsIterator GetStartPosition();
+    void GetNext(IN_OUT ImsIterator& iterator, OUT void*& pvKey, OUT void*& pvValue);
 
 protected:
     virtual IMS_UINTP GetHashKey(IN void* pvKey);
     virtual Element* GetElementAt(IN void* pvKey, OUT IMS_UINT32& nBucket);
 
 protected:
-    IMS_UINT32 nHashTableSize;
-    Element** ppHashTable;
+    IMS_UINT32 m_nHashTableSize;
+    Element** m_ppHashTable;
 
 private:
     enum
@@ -84,7 +88,7 @@ private:
         DEFAULT_SIZE = 5
     };
 
-    IMS_UINT32 nCount;
+    IMS_UINT32 m_nCount;
 };
 
-#endif  // _IMS_HASH_MAP_H_
+#endif

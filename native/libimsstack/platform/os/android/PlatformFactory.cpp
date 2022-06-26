@@ -243,7 +243,7 @@ PUBLIC GLOBAL ImsSocket* PlatformFactory::CreateSocket()
     return new OsSocket();
 }
 
-PUBLIC GLOBAL ImsSocket* PlatformFactory::CreateSslSocket(IN SSLCertificate* pCertificate)
+PUBLIC GLOBAL ImsSocket* PlatformFactory::CreateSslSocket(IN SslCertificate* pCertificate)
 {
     return new OsSslSocket(pCertificate);
 }

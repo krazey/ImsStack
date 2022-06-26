@@ -138,7 +138,7 @@ PUBLIC GLOBAL IMS_SINT32 SubState::ExtractExpiresParameter(IN const ISipHeader* 
     // 4 Make up for test equipment's fault (e.g. Anite)
     if (pParameter->GetValue().Contains(TextParser::CHAR_DQUOT))
     {
-        AString strValue = TextParser::TrimDQUOT(pParameter->GetValue());
+        AString strValue = TextParser::TrimDquot(pParameter->GetValue());
         nExpires = strValue.ToInt32(&bOk);
     }
     else

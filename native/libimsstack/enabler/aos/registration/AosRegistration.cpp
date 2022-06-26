@@ -4065,7 +4065,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_NotifyAkaResponse(IN IMS_SI
         return;
     }
 
-    if (nResult != IMS_AKA::RESULT_OK)
+    if (nResult != ImsAkaParam::RESULT_OK)
     {
         A_IMS_TRACE_I(REGID, "Aka response is failed , wait next 401 message", 0, 0, 0);
         bResultOfSA = IMS_TRUE;

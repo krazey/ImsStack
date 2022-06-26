@@ -154,7 +154,7 @@ private:
     // Registration key
     RegKey m_objRegKey;
     // Registration State Tracker
-    RCPtr<RegStateTracker> m_pRegStateTracker;
+    RcPtr<RegStateTracker> m_pRegStateTracker;
     // Subscription information for subscriber behavior
     SubState* m_pSubState;
     // Subscription refresh timer
