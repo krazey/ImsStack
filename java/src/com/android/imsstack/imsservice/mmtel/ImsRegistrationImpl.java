@@ -68,11 +68,11 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
         if (reason == DataFailCause.IWLAN_IKEV2_AUTH_FAILURE) {
             return new ImsReasonInfo(
                     ImsReasonInfo.CODE_EPDG_TUNNEL_ESTABLISH_FAILURE,
-                    ImsReasonInfo.CODE_IKEV2_AUTH_FAILURE);
+                    ImsReasonInfo.CODE_IKEV2_AUTH_FAILURE, null);
         } else {
             return new ImsReasonInfo(
                     ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                    ImsReasonInfo.CODE_UNSPECIFIED);
+                    ImsReasonInfo.CODE_UNSPECIFIED, null);
         }
     }
     /**
