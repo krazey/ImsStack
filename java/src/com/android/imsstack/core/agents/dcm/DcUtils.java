@@ -33,7 +33,7 @@ import android.util.SparseArray;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.ITelephonyState;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
@@ -230,7 +230,7 @@ public class DcUtils implements IDcUtils {
             return true;
         }
 
-        IDCApn dcapn = (IDCApn) DCFactory.getDC(DCFactory.APN, mSlotId);
+        IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
         if (dcapn == null) {
             return true;
         }

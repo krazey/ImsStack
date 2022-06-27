@@ -43,8 +43,8 @@ import com.android.imsstack.core.agents.agentif.ITelephonyState;
 import com.android.imsstack.core.agents.agentif.ImsPhoneStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.core.agents.dcmif.IDCSettings;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.system.IJNIUpCallEvt;
@@ -55,7 +55,7 @@ import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
 
 /** This class is for providing the network information */
-public class DCNetWatcher implements IDCNetWatcher {
+public class DcNetWatcher implements IDcNetWatcher {
     // Constants--------------------------------------------------
     // RAT for IMS adaptation layer
     public static final int RAT_EHRPD = 1;
@@ -84,7 +84,7 @@ public class DCNetWatcher implements IDCNetWatcher {
     // Variables--------------------------------------------------
     private Context mContext;
 
-    private IDCSettings mDcSettings;
+    private IDcSettings mDcSettings;
 
     private DcNetWatcherReceiver mDcNetWatcherReceiver = null;
     private Handler mDcNetWatcherHandler;
@@ -143,7 +143,7 @@ public class DCNetWatcher implements IDCNetWatcher {
 
     // Static loading materials ----------------------------------
     // Public methods --------------------------------------------
-    public DCNetWatcher(int slotId) {
+    public DcNetWatcher(int slotId) {
         mSlotId = slotId;
     }
 
@@ -157,9 +157,9 @@ public class DCNetWatcher implements IDCNetWatcher {
 
         mContext = context;
 
-        mDcSettings = (IDCSettings) DCFactory.getDC(DCFactory.SETTING, mSlotId);
+        mDcSettings = (IDcSettings) DcFactory.getDc(DcFactory.SETTING, mSlotId);
         if (mDcSettings == null) {
-            ImsLog.w(mSlotId, "IDCSettings is null");
+            ImsLog.w(mSlotId, "IDcSettings is null");
         }
 
         setRatPolicy();
@@ -487,7 +487,7 @@ public class DCNetWatcher implements IDCNetWatcher {
 
     @Override
     public boolean isVops() {
-        IDCSettings dcst = (IDCSettings) DCFactory.getDC(DCFactory.SETTING, mSlotId);
+        IDcSettings dcst = (IDcSettings) DcFactory.getDc(DcFactory.SETTING, mSlotId);
         if ((dcst != null) && dcst.isVopsRequired()) {
             return mImsVops;
         } else {
@@ -532,7 +532,7 @@ public class DCNetWatcher implements IDCNetWatcher {
     // Public methods --------------------------------------------
     /** Only subject class can invoke this API. DO NOT allow to accessed by observer class */
     public void notifyResult(EApnType eApnType, EDataState nDataState) {
-        mStateDataConnectionState.notifyResult(new IDCNetWatcher.NotiObj(eApnType, nDataState));
+        mStateDataConnectionState.notifyResult(new IDcNetWatcher.NotiObj(eApnType, nDataState));
     }
 
     /** notify pdn connection failure */

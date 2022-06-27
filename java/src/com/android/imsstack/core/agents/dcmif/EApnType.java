@@ -1,22 +1,30 @@
 package com.android.imsstack.core.agents.dcmif;
 
-import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.telephony.data.ApnSetting;
 
 import com.android.imsstack.util.ImsLog;
-import com.android.internal.telephony.PhoneConstants;
 
 public enum EApnType {
     /**
      * WIFI type is only for IMS internal usage. (16/05/09)
      * It's defined to synchronize the constant value in Native Layer.
      */
-    IMS (DCConstants.TYPE_IMS,              "mobile_ims",        NetworkCapabilities.NET_CAPABILITY_IMS),
-    INTERNET (DCConstants.TYPE_INTERNET,    "mobile_internet",   NetworkCapabilities.NET_CAPABILITY_INTERNET),
-    XCAP (DCConstants.TYPE_XCAP,            "mobile_xcap",       NetworkCapabilities.NET_CAPABILITY_XCAP),
-    EMERGENCY (DCConstants.TYPE_EMERGENCY,  "mobile_emergency",  NetworkCapabilities.NET_CAPABILITY_EIMS),
-    WIFI (DCConstants.TYPE_WIFI,            "wifi",              NetworkCapabilities.NET_CAPABILITY_INTERNET);
+    IMS(DcConstants.TYPE_IMS,
+            "mobile_ims",
+            NetworkCapabilities.NET_CAPABILITY_IMS),
+    INTERNET(DcConstants.TYPE_INTERNET,
+            "mobile_internet",
+            NetworkCapabilities.NET_CAPABILITY_INTERNET),
+    XCAP(DcConstants.TYPE_XCAP,
+            "mobile_xcap",
+            NetworkCapabilities.NET_CAPABILITY_XCAP),
+    EMERGENCY(DcConstants.TYPE_EMERGENCY,
+            "mobile_emergency",
+            NetworkCapabilities.NET_CAPABILITY_EIMS),
+    WIFI(DcConstants.TYPE_WIFI,
+            "wifi",
+            NetworkCapabilities.NET_CAPABILITY_INTERNET);
 
     private final int mType;
     private final String mStrType;
@@ -41,7 +49,7 @@ public enum EApnType {
 
         ImsLog.w("Not-Exist-ApnType=" + type);
 
-        return DCConstants.TYPE_NONE;
+        return DcConstants.TYPE_NONE;
     }
 
     public static String getApnSettingTypeFromType(int type) {
@@ -75,7 +83,7 @@ public enum EApnType {
 
         ImsLog.w("Not-Exist-Type=" + type);
 
-        return DCConstants.CAPABILITY_NONE;
+        return DcConstants.CAPABILITY_NONE;
     }
 
     public int getType() {

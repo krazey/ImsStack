@@ -16,8 +16,8 @@ import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
-import com.android.imsstack.core.agents.dcm.DCFactory;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPIIMSPhone;
@@ -697,8 +697,8 @@ public final class IIMSPhoneGov {
         // Checks if the emergency bearer service is supported on the LTE network
         @Override
         public boolean isEmergencyBearerServiceSupported() {
-            IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(
-                DCFactory.NETWORK_WATCHER, mSlotId);
+            IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(
+                    DcFactory.NETWORK_WATCHER, mSlotId);
 
             if (dcnw == null) {
                 return false;
@@ -710,8 +710,8 @@ public final class IIMSPhoneGov {
         // Checks if the voice call is supported on the LTE network
         @Override
         public boolean isImsVoiceCallSupported() {
-            IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(
-                DCFactory.NETWORK_WATCHER, mSlotId);
+            IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(
+                    DcFactory.NETWORK_WATCHER, mSlotId);
 
             if (dcnw == null) {
                 return false;
@@ -967,8 +967,8 @@ public final class IIMSPhoneGov {
             imsConfig[5] = 1;
 
             if (isRoamingConditionCheckedForImsConfig()) {
-                IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(
-                        DCFactory.NETWORK_WATCHER, mSlotId);
+                IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(
+                        DcFactory.NETWORK_WATCHER, mSlotId);
 
                 if (dcnw != null && mContext != null && dcnw.isRoaming()) {
                     if (!CapabilityConfigs.isVoLteRoamingEnabled(mSlotId)) {

@@ -13,11 +13,11 @@ import com.android.imsstack.core.agents.ImsPhoneProxyApi;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.core.agents.agentif.ICallInfoService;
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
-import com.android.imsstack.core.agents.dcm.DCFactory;
+import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.service.serviceif.IService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
@@ -911,7 +911,7 @@ public class CallInfoService implements IService, ICallInfoService {
             return;
         }
 
-        IDCApn dcApn = (IDCApn)DCFactory.getDC(DCFactory.APN, getSlotId());
+        IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, getSlotId());
         IApn apn = (dcApn != null) ? dcApn.getApnControl(EApnType.IMS.getType()) : null;
 
         if (apn != null) {
@@ -927,7 +927,7 @@ public class CallInfoService implements IService, ICallInfoService {
             return;
         }
 
-        IDCApn dcApn = (IDCApn)DCFactory.getDC(DCFactory.APN, getSlotId());
+        IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, getSlotId());
         IApn apn = (dcApn != null) ? dcApn.getApnControl(EApnType.IMS.getType()) : null;
 
         if (apn != null) {
@@ -938,7 +938,7 @@ public class CallInfoService implements IService, ICallInfoService {
 
     private int getIpcanCategory() {
         // More consideration: Emergency PDN
-        IDCApn dcApn = (IDCApn)DCFactory.getDC(DCFactory.APN, getSlotId());
+        IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, getSlotId());
         IApn apn = (dcApn != null) ? dcApn.getApnControl(EApnType.IMS.getType()) : null;
         return (apn != null) ? apn.getIpcanCategory() : IApn.IPCAN_CATEGORY_MOBILE;
     }

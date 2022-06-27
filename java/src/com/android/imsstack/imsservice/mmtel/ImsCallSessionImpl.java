@@ -34,7 +34,7 @@ import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.enabler.mtc.Call;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.CallInfo;
@@ -1253,7 +1253,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return;
         }
 
-        IDCApn dcApn = callContext.getDCApn();
+        IDcApn dcApn = callContext.getDcApn();
 
         if (dcApn != null) {
             int ipcanCategory = dcApn.getIpcanCategory(EApnType.IMS.getType());
@@ -3163,7 +3163,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return;
         }
 
-        IDCApn dcApn = mCallContext.getDCApn();
+        IDcApn dcApn = mCallContext.getDcApn();
         IApn apn = (dcApn != null) ? dcApn.getApnControl(getApnType(mCallProfile)) : null;
 
         if (apn != null) {
@@ -3178,7 +3178,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return;
         }
 
-        IDCApn dcApn = mCallContext.getDCApn();
+        IDcApn dcApn = mCallContext.getDcApn();
         IApn apn = (dcApn != null) ? dcApn.getApnControl(getApnType(mCallProfile)) : null;
 
         if (apn != null) {
@@ -3205,7 +3205,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             // if there is no flag to indicate Wi-Fi calling.
             ratType = TelephonyManager.NETWORK_TYPE_LTE;
         } else {
-            IDCApn dcApn = mCallContext.getDCApn();
+            IDcApn dcApn = mCallContext.getDcApn();
 
             if (dcApn != null) {
                 int ipcanCategory = dcApn.getIpcanCategory(getApnType(profile));

@@ -5,7 +5,7 @@ import android.content.Context;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ImsPhoneProxyApi;
-import com.android.imsstack.core.agents.dcm.DCFactory;
+import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.config.ConfigurationFactory;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.core.config.IConfigDBLoader;
@@ -193,8 +193,8 @@ public class CommonStarter {
         AgentFactory.createAgents(context, slotId);
         AgentFactory.initAgentsForMIms(context, slotId);
 
-        DCFactory.createDC(context, slotId);
-        DCFactory.initDC(context, slotId);
+        DcFactory.createDc(context, slotId);
+        DcFactory.initDc(context, slotId);
 
         ConfigLoader.updateCarrierConfig(slotId);
 
@@ -216,7 +216,7 @@ public class CommonStarter {
 
         Context context = AppContext.get();
 
-        DCFactory.cleanUpDC(slotId);
+        DcFactory.cleanUpDc(slotId);
 
         AgentFactory.cleanUpAgents(slotId);
 

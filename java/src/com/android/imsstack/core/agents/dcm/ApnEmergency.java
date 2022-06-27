@@ -119,7 +119,7 @@ public class ApnEmergency extends Apn {
             }
 
             if (mDataState != curDataState) {
-                IDcUtils dcutil = (IDcUtils) DCFactory.getDC(DCFactory.UTIL, getSlotId());
+                IDcUtils dcutil = (IDcUtils) DcFactory.getDc(DcFactory.UTIL, getSlotId());
 
                 if (dcutil != null) {
                     dcutil.updateAllCellInfoForcinglyOnLimitedServiceState();

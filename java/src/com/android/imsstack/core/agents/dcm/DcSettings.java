@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.imsstack.core.agents.dcm;
 
 import android.content.Context;
@@ -6,13 +22,16 @@ import android.telephony.CarrierConfigManager;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.core.agents.dcmif.IDCSettings;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
-public class DCSettings implements IDCSettings {
+/**
+ * This class provide interface to get carrier configurations
+ */
+public class DcSettings implements IDcSettings {
     // Constants--------------------------------------------------
 
     // Variables--------------------------------------------------
@@ -22,7 +41,7 @@ public class DCSettings implements IDCSettings {
 
     // Static loading materials ----------------------------------
     // Public methods --------------------------------------------
-    public DCSettings(int slotId) {
+    public DcSettings(int slotId) {
         mSlotId = slotId;
     }
 
@@ -81,7 +100,7 @@ public class DCSettings implements IDCSettings {
 
         int[] noVopsRequired = mCarrierConfig.getIntArray(
                 CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY);
-        IDCNetWatcher dcnw = getDcNetWatcher(mSlotId);
+        IDcNetWatcher dcnw = getDcNetWatcher(mSlotId);
 
         if ((noVopsRequired != null) && (dcnw != null)) {
             for (int i = 0; i < noVopsRequired.length; i++) {
@@ -150,7 +169,7 @@ public class DCSettings implements IDCSettings {
             }
 
             if (permanentFailure != null) {
-                for (int i = 0; i < permanentFailure.length ; i++) {
+                for (int i = 0; i < permanentFailure.length; i++) {
                     if (permanentFailure[i] == causeCode) {
                         ImsLog.w(mSlotId, "permanent failure cause " + causeCode);
                         return true;
@@ -168,8 +187,8 @@ public class DCSettings implements IDCSettings {
     }
 
     @VisibleForTesting
-    protected IDCNetWatcher getDcNetWatcher(int slotId) {
-        return (IDCNetWatcher) DCFactory.getDC(DCFactory.NETWORK_WATCHER, slotId);
+    protected IDcNetWatcher getDcNetWatcher(int slotId) {
+        return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, slotId);
     }
     //----------------------------------------------------------------------------------------------
 }

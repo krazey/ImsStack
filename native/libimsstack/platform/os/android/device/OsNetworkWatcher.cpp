@@ -388,23 +388,23 @@ void OsNetworkWatcher::UpdateRadioTechChanged(IN IMS_SINT32 nState)
 
     switch (nState)
     {
-        case RADIO_TECH_EHRPD:  // DCNetWatcher.RAT_EHRPD
+        case RADIO_TECH_EHRPD:  // DcNetWatcher.RAT_EHRPD
             m_eNetStatusType = NW_REPORT_RADIO_EHRPD;
             break;
 
-        case RADIO_TECH_LTE:  // DCNetWatcher.RAT_4G
+        case RADIO_TECH_LTE:  // DcNetWatcher.RAT_4G
             m_eNetStatusType = NW_REPORT_RADIO_LTE;
             break;
 
-        case RADIO_TECH_WCDMA:  // DCNetWatcher.RAT_3G
+        case RADIO_TECH_WCDMA:  // DcNetWatcher.RAT_3G
             m_eNetStatusType = NW_REPORT_RADIO_WCDMA;
             break;
 
-        case RADIO_TECH_GSM:  // DCNetWatcher.RAT_2G
+        case RADIO_TECH_GSM:  // DcNetWatcher.RAT_2G
             m_eNetStatusType = NW_REPORT_RADIO_GSM;
             break;
 
-        case RADIO_TECH_NR:  // DCNetWatcher.RAT_5G
+        case RADIO_TECH_NR:  // DcNetWatcher.RAT_5G
             m_eNetStatusType = NW_REPORT_RADIO_NR;
             break;
 

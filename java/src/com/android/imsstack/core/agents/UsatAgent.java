@@ -24,7 +24,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.SparseArray;
 
-import com.android.imsstack.core.agents.dcm.DCFactory;
+import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
@@ -732,7 +732,7 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @return A byte array containing the location information.
      */
     private byte[] getLocationInfo(int networkType) {
-        IDcUtils dcUtils = (IDcUtils) DCFactory.getDC(DCFactory.UTIL, getSlotId());
+        IDcUtils dcUtils = (IDcUtils) DcFactory.getDc(DcFactory.UTIL, getSlotId());
 
         if (dcUtils == null) {
             return null;

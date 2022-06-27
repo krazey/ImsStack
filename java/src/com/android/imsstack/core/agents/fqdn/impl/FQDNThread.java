@@ -2,7 +2,7 @@ package com.android.imsstack.core.agents.fqdn.impl;
 
 import android.text.TextUtils;
 
-import com.android.imsstack.core.agents.dcmif.DCConstants;
+import com.android.imsstack.core.agents.dcmif.DcConstants;
 import com.android.imsstack.core.agents.fqdn.Address;
 import com.android.imsstack.core.agents.fqdn.FQDNListener;
 import com.android.imsstack.util.ImsLog;
@@ -17,7 +17,7 @@ import java.util.List;
 public class FQDNThread extends Thread {
 
     private int mSlotId = 0;
-    private int mApnType = DCConstants.TYPE_NONE;
+    private int mApnType = DcConstants.TYPE_NONE;
     private FQDNListener objFQDNListener;
     private String strAddrType;
     private String strAddress;

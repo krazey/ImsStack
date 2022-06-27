@@ -24,8 +24,8 @@ import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.core.agents.agentif.LocationPolicy;
-import com.android.imsstack.core.agents.dcm.DCFactory;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
@@ -591,8 +591,8 @@ public final class LocationAgent implements ILocationAgent {
                     cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI) : null;*/
 
             if (wifiInfo != null) {
-                IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(
-                        DCFactory.NETWORK_WATCHER, mSlotId);
+                IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(
+                        DcFactory.NETWORK_WATCHER, mSlotId);
 
                 if ((dcnw != null)
                         && (dcnw.getDataServiceState() != ServiceState.STATE_IN_SERVICE)

@@ -31,8 +31,8 @@ import android.text.TextUtils;
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.dcm.DCFactory;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.ImsDbController;
 import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.core.service.serviceif.ICallSettingService;
@@ -1207,8 +1207,8 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private boolean isRoaming() {
-        IDCNetWatcher dcnw = (IDCNetWatcher) DCFactory.getDC(
-                DCFactory.NETWORK_WATCHER, getSlotId());
+        IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(
+                DcFactory.NETWORK_WATCHER, getSlotId());
         return (dcnw != null) ? dcnw.isRoaming() : false;
     }
 

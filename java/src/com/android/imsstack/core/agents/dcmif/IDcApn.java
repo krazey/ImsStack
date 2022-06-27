@@ -1,10 +1,29 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.imsstack.core.agents.dcmif;
 
 import android.net.Network;
 
 import java.io.FileDescriptor;
 
-public interface IDCApn extends IDC {
+/**
+ * This provides interface related with operations for APN.
+ */
+public interface IDcApn extends IDc {
     /**
      * Try to connect the given type of apn. Scenario 1. Usually, always on type
      * of APN such as "ims" automatically is opened/connected by android data
@@ -40,7 +59,7 @@ public interface IDCApn extends IDC {
      *                 > 0 : re-connect APN after millisecond
      *                 == 0 : re-connect APN after 1000 millisecond
      *                 < 0 : disconnect && DO NOT Recover this PDN before call connect EXPLICITLY.
-     * @param nIpcanType
+     * @param ipcanType
      *                 IApn.IPCAN_CATEGORY_MOBILE or IApn.IPCAN_CATEGORY_WLAN
      * @return
      */
@@ -298,16 +317,4 @@ public interface IDCApn extends IDC {
      * @return
      */
     void changeApnEmployState(EApnType apnType, boolean enable);
-
-    /*
-    * notifyIPCanChange
-    *
-    * This API notifies APN modules about IPCan Change
-    *
-    * @param
-    *         EApnType apnType
-    *         IApn IPCAN_CATEGORY_MOBILE/IPCAN_CATEGORY_WLAN
-    * @return
-    */
-    void notifyIPCanChange(int apnType, int ipcanType);
 }

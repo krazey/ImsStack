@@ -20,9 +20,9 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.text.TextUtils;
 
-import com.android.imsstack.core.agents.dcm.DCFactory;
+import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.util.ImsLog;
 
 import org.w3c.dom.Document;
@@ -96,7 +96,7 @@ public class SscHttpConnection implements ISscHttpConnection {
         int responseCode = REQUEST_FAILED;
         try {
             Network nw = null;
-            IDCApn dcGovApnCtrl = (IDCApn)DCFactory.getDC(DCFactory.APN, mSlotId);
+            IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
             if (dcGovApnCtrl != null) {
                 if (mApnType.equals(EApnType.INTERNET)) {
                     nw = dcGovApnCtrl.getNetworkByCapabilityWithTransportType(mApnType.getType(),

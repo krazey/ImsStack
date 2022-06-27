@@ -93,7 +93,7 @@ public abstract class SystemNotifier {
     /**
      * Notifies the voice network type which the device is attached.
      *
-     * @param voice networkType defined in DCNetWatcher
+     * @param networkType defined in DcNetWatcher
      *          {@link RAT_NONET} (0)
      *          {@link RAT_EHRPD} (1)
      *          {@link RAT_4G} (2)
