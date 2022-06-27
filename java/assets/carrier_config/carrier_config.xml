@@ -120,6 +120,7 @@
     <int name="imsemergency.emergency_cellular_scan_timer_millis_int" value="5000"/>
     <int name="imsemergency.emergency_invite_18x_timer_millis_int" value="15000"/>
     <int name="imsemergency.emergency_provisional_to_final_response_timer_millis_int" value="15000"/>
+    <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
 
     <!-- Media -->
     <boolean name="imsvoice.media_anbr_capability_in_modem_bool" value="false"/>
