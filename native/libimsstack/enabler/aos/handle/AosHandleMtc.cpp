@@ -330,9 +330,13 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::ProcessImsSuspended(IN IMS_UINT32 nReas
     if (IsImsSuspended() == IMS_TRUE)
     {
         m_nReason = nReason;
-        m_piListener->ImsAos_Suspended(GetImsAosReasonForSuspend(m_nReason));
 
-        return IMS_TRUE;
+        if (m_piListener != IMS_NULL)
+        {
+            m_piListener->ImsAos_Suspended(GetImsAosReasonForSuspend(m_nReason));
+
+            return IMS_TRUE;
+        }
     }
 
     return IMS_FALSE;
@@ -388,9 +392,13 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::ProcessImsResumed(IN IMS_UINT32 nReason
     if (IsImsSuspended() == IMS_FALSE)
     {
         m_nReason = nReason;
-        m_piListener->ImsAos_Resumed();
 
-        return IMS_TRUE;
+        if (m_piListener != IMS_NULL)
+        {
+            m_piListener->ImsAos_Resumed();
+
+            return IMS_TRUE;
+        }
     }
 
     return IMS_FALSE;
