@@ -204,6 +204,24 @@ public:
         return *this;
     }
 
+    IMS_BOOL operator==(const CallInfo& objRhs) const
+    {
+        if (this == &objRhs)
+        {
+            return IMS_TRUE;
+        }
+
+        return ePeerType == objRhs.ePeerType && eInitialCallType == objRhs.eInitialCallType &&
+                bWifi == objRhs.bWifi && bEmergency == objRhs.bEmergency &&
+                bOffline == objRhs.bOffline && bUssi == objRhs.bUssi &&
+                bConference == objRhs.bConference;
+    }
+
+    IMS_BOOL operator!=(const CallInfo& objRhs) const
+    {
+        return !(*this == objRhs);
+    }
+
 public:
     PeerType ePeerType;
     CallType eInitialCallType;
