@@ -22,6 +22,7 @@ import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.imsservice.mmtel.sms.SmsTransferLayer;
 import com.android.imsstack.imsservice.mmtel.sms.SmsUtils;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.telephony.Rlog;
 
 /**
@@ -38,6 +39,20 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
     public ImsSmsImpl(ImsCallContext callContext) {
         mCallContext = callContext;
         init();
+    }
+
+    @VisibleForTesting
+    public ImsSmsImpl(ImsCallContext callContext, SmsTransferLayer smsTransferLayer) {
+        mCallContext = callContext;
+        if (smsTransferLayer == null) {
+            mSmsTL = new SmsTransferLayer(mCallContext);
+        } else {
+            mSmsTL = smsTransferLayer;
+        }
+
+        if (mSmsTL != null) {
+            mSmsTL.setListener(mSmsTLListener);
+        }
     }
 
     /**
