@@ -276,7 +276,7 @@ PUBLIC VIRTUAL RegParameter::~RegParameter()
 
 PUBLIC
 IMS_RESULT RegParameter::FormHeaders(
-        IN_OUT ISipClientConnection*& piScc, IN const RCPtr<RegStateTracker> pStateTracker)
+        IN_OUT ISipClientConnection*& piScc, IN const RcPtr<RegStateTracker> pStateTracker)
 {
     ISipMessage* piSipMsg = piScc->GetMessage();
 
@@ -449,7 +449,7 @@ IMS_RESULT RegParameter::FormHeaders(
 
 PUBLIC
 IMS_RESULT RegParameter::FormRouteHeaders(
-        IN_OUT ISipClientConnection*& piScc, IN const RCPtr<RegStateTracker> pStateTracker)
+        IN_OUT ISipClientConnection*& piScc, IN const RcPtr<RegStateTracker> pStateTracker)
 {
     if (piScc == IMS_NULL)
     {

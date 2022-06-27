@@ -1,23 +1,28 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _IP_ADDRESS_H_
-#define _IP_ADDRESS_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IP_ADDRESS_H_
+#define IP_ADDRESS_H_
 
 #include "ByteArray.h"
 
-class IPAddressPrivate;
+#define IPAddress IpAddress
 
-class IPv6Address
+class IpAddressPrivate;
+
+class Ipv6Address
 {
 public:
     IMS_BYTE& operator[](IN IMS_SINT32 i);
@@ -32,37 +37,41 @@ public:
     };
 
 private:
-    IMS_BYTE aIP6[MAX_SIZE];
+    IMS_BYTE aIp6[MAX_SIZE];
 };
 
-class IPAddress
+class IpAddress
 {
 public:
-    IPAddress();
-    explicit IPAddress(IN IMS_UINT32 nIP_);
-    explicit IPAddress(IN CONST IMS_BYTE* pIP_);
-    explicit IPAddress(IN CONST IPv6Address& objIP_);
-    explicit IPAddress(IN CONST AString& strIP_);
-    IPAddress(IN CONST IPAddress& objRHS);
-    ~IPAddress();
+    IpAddress();
+    explicit IpAddress(IN IMS_UINT32 nAddress);
+    explicit IpAddress(IN const IMS_BYTE* pAddress);
+    explicit IpAddress(IN const Ipv6Address& objAddress);
+    explicit IpAddress(IN const AString& strAddress);
+    IpAddress(IN const IpAddress& other);
+    ~IpAddress();
 
 public:
-    IPAddress& operator=(IN CONST IPAddress& objRHS);
+    IpAddress& operator=(IN const IpAddress& other);
 
 public:
-    IMS_BOOL Equals(IN CONST IPAddress& objIPA) const;
+    IMS_BOOL Equals(IN const IpAddress& other) const;
     IMS_SINT32 GetVersion() const;
-    IMS_BOOL IsIPv4Address() const;
-    IMS_BOOL IsIPv6Address() const;
+    inline IMS_BOOL IsIPv4Address() const { return IsIpv4Address(); }
+    inline IMS_BOOL IsIPv6Address() const { return IsIpv6Address(); }
+    IMS_BOOL IsIpv4Address() const;
+    IMS_BOOL IsIpv6Address() const;
     IMS_BOOL IsUnknownAddress() const;
     IMS_BOOL IsAnyAddress() const;
     IMS_BOOL IsLoopbackAddress() const;
     IMS_BOOL IsMulticastAddress() const;
     IMS_BOOL IsNoneAddress() const;
-    IMS_BOOL Parse(IN CONST AString& strIP_);
+    IMS_BOOL Parse(IN const AString& strAddress);
 
-    IMS_UINT32 ToIPv4Address() const;
-    IPv6Address ToIPv6Address() const;
+    inline IMS_UINT32 ToIPv4Address() const { return ToIpv4Address(); }
+    inline Ipv6Address ToIPv6Address() const { return ToIpv6Address(); }
+    IMS_UINT32 ToIpv4Address() const;
+    Ipv6Address ToIpv6Address() const;
     AString ToString() const;
     const IMS_CHAR* ToCharString() const;
 
@@ -79,27 +88,27 @@ public:
         IPV6 = 6
     };
 
-    static const IPAddress ANY;
-    static const IPAddress BROADCAST;
-    static const IPAddress LOOPBACK;
-    static const IPAddress NONE;
+    static const IpAddress ANY;
+    static const IpAddress BROADCAST;
+    static const IpAddress LOOPBACK;
+    static const IpAddress NONE;
 
-    static const IPAddress IPv6ANY;
-    static const IPAddress IPv6LOOPBACK;
-    static const IPAddress IPv6NONE;
+    static const IpAddress IPv6ANY;
+    static const IpAddress IPv6LOOPBACK;
+    static const IpAddress IPv6NONE;
 
 private:
-    IPAddressPrivate* pIPA;
+    IpAddressPrivate* m_pIpaPrivate;
 };
 
-inline IMS_BOOL operator==(IN CONST IPAddress& objA1, IN CONST IPAddress& objA2)
+inline IMS_BOOL operator==(IN const IpAddress& objA1, IN const IpAddress& objA2)
 {
     return objA1.Equals(objA2);
 }
 
-inline IMS_BOOL operator!=(IN CONST IPAddress& objA1, IN CONST IPAddress& objA2)
+inline IMS_BOOL operator!=(IN const IpAddress& objA1, IN const IpAddress& objA2)
 {
     return !objA1.Equals(objA2);
 }
 
-#endif  // _IP_ADDRESS_H_
+#endif

@@ -1,96 +1,95 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20070306  yhrhee@                   Initial Creation
-    20070416  yhrhee@                   Re-design to Template class
-    20090302  hsyun@                    Porting
-    20100302  hwangoo.park@             Change the method from IMSVector class
-    </table>
-
-Description
-Queue Library
-
-*/
-
-#ifndef _IMS_QUEUE_H_
-#define _IMS_QUEUE_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_QUEUE_H_
+#define IMS_QUEUE_H_
 
 #include "ImsVector.h"
 
-#define ImsQueue IMSQueue
-
 template <class T>
-class IMSQueue : private IMSVector<T>
+class ImsQueue : private ImsVector<T>
 {
 public:
-    inline IMSQueue() :
-            IMSVector<T>()
+    inline ImsQueue() :
+            ImsVector<T>()
     {
     }
-    inline IMSQueue(IN CONST IMSQueue<T>& objRHS) :
-            IMSVector<T>(objRHS)
+    inline ImsQueue(IN const ImsQueue<T>& other) :
+            ImsVector<T>(other)
     {
     }
-    inline virtual ~IMSQueue() {}
+    inline virtual ~ImsQueue() {}
 
 public:
-    inline IMSQueue<T>& operator=(IN CONST IMSQueue<T>& objRHS)
+    inline ImsQueue<T>& operator=(IN const ImsQueue<T>& other)
     {
-        IMSVector<T>::operator=(objRHS);
+        ImsVector<T>::operator=(other);
         return (*this);
     }
 
 public:
     // Empty the queue
-    inline void Clear() { IMSVector<T>::Clear(); }
+    inline void Clear() { ImsVector<T>::Clear(); }
 
     //
     // Queue stats
     //
 
     // Returns the number of elements in the queue
-    inline IMS_UINT32 GetSize() const { return IMSVector<T>::GetSize(); }
+    inline IMS_UINT32 GetSize() const { return ImsVector<T>::GetSize(); }
     // Returns whether or not the queue is empty
-    inline IMS_BOOL IsEmpty() const { return IMSVector<T>::IsEmpty(); }
+    inline IMS_BOOL IsEmpty() const { return ImsVector<T>::IsEmpty(); }
 
     // Returns a reference to the last and most recently added element at the back of the queue
     inline T& GetBack()
     {
         IMS_ASSERT(!IsEmpty());
-        return IMSVector<T>::GetAt(GetSize());
+        return ImsVector<T>::GetAt(GetSize());
     }
     inline const T& GetBack() const
     {
         IMS_ASSERT(!IsEmpty());
-        return IMSVector<T>::GetAt(GetSize());
+        return ImsVector<T>::GetAt(GetSize());
     }
 
     // Returns a reference to the first element at the front of the queue
     inline T& GetFront()
     {
         IMS_ASSERT(!IsEmpty());
-        return IMSVector<T>::GetAt(0);
+        return ImsVector<T>::GetAt(0);
     }
     inline const T& GetFront() const
     {
         IMS_ASSERT(!IsEmpty());
-        return IMSVector<T>::GetAt(0);
+        return ImsVector<T>::GetAt(0);
     }
 
     // Removes an element from the front of the queue
     inline void Pop()
     {
         if (!IsEmpty())
-            IMSVector<T>::RemoveAt(0);
+        {
+            ImsVector<T>::RemoveAt(0);
+        }
     }
 
     // Adds an element to the back of the queue
-    inline void Push(IN CONST T& element) { IMSVector<T>::Push(element); }
+    inline void Push(IN const T& element) { ImsVector<T>::Push(element); }
 
     // TODO:: Temporary; DO NOT USE THIS METHOD!!!IT WILL BE REMOVED LATER.
-    inline void Prepend(IN CONST T& element) { IMSVector<T>::InsertAt(element, 0); }
+    inline void Prepend(IN const T& element) { ImsVector<T>::InsertAt(element, 0); }
 };
 
-#endif  // _IMS_QUEUE_H_
+#endif

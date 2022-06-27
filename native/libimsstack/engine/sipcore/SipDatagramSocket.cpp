@@ -85,7 +85,7 @@ PUBLIC VIRTUAL IMS_SINT32 SipDatagramSocket::Send(IN const IMS_BYTE* pBuffer,
 
 PROTECTED VIRTUAL void SipDatagramSocket::Socket_OnDataReceived(IN ISocket* piSocket)
 {
-    RCPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
+    RcPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
     IMS_BYTE* pRecvBuffer = pMessageBuffer->GetBuffer(GetSlotId());
 
     IMS_MEM_Memset(pRecvBuffer, 0x00, pMessageBuffer->GetLength());

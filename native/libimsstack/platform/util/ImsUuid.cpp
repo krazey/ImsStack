@@ -1,25 +1,29 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20120214  hwangoo.park@             Created
-    </table>
-
-    Description
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "AStringBuffer.h"
+#include "ImsMd5.h"
+#include "ImsSha1.h"
+#include "ImsUuid.h"
+#include "IpAddress.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
 #include "ServiceUtil.h"
-#include "ImsMd5.h"
-#include "ImsSha1.h"
-#include "AStringBuffer.h"
-#include "IpAddress.h"
-#include "ImsUuid.h"
 
-struct UUID
+struct Uuid
 {
     IMS_UINT32 nTimeLow;
     IMS_UINT16 nTimeMid;
@@ -30,185 +34,162 @@ struct UUID
 };
 
 // 6ba7b817-9dad-11d1-80b4-00c04fd430c8
-static const UUID NAMESPACE_IMS = {
+static const Uuid NAMESPACE_IMS = {
         0x6ba7b817, 0x9dad, 0x11d1, 0x80, 0xb4, {0x00, 0xc0, 0x4f, 0xd4, 0x30, 0xc8}
 };
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL AString IMSUUID::GetUUID(IN IMS_SINT32 nVersion /* = VERSION_4 */,
-        IN CONST AString& strName /* = AString::ConstNull() */)
+PUBLIC GLOBAL AString ImsUuid::GetUuid(IN IMS_SINT32 nVersion /*= VERSION_4*/,
+        IN const AString& strName /*= AString::ConstNull()*/)
 {
     // UUID = time-low "-" time-mid "-" time-hi-and-version "-"
     // clock-seq-hi-and-reserved clock-seq-low "-" node
     // 00000000-0000-0000-0000-000000000000
-    AStringBuffer objUUID(64);
+    AStringBuffer objUuid(64);
 
     switch (nVersion)
     {
-        case IMSUUID::VERSION_1:
+        case ImsUuid::VERSION_1:
         {
             // TODO: need to be adapted.
             // objUUID = UtilService::GetUtilService()->GetSystemUtil()->GetUuid();
             IMS_UINT32 nMicroSecs = IMS_SYS_GetTimeInMicroSeconds();
             AString strRandom;
             strRandom.SetNumber(nMicroSecs);
-            GetUUIDv4(strRandom, objUUID);
+            GetUuidv4(strRandom, objUuid);
             break;
         }
-        case IMSUUID::VERSION_3:
-            GetUUIDv3(strName, objUUID);
+        case ImsUuid::VERSION_3:
+            GetUuidv3(strName, objUuid);
             break;
-
-        case IMSUUID::VERSION_4:
-            GetUUIDv4(strName, objUUID);
+        case ImsUuid::VERSION_4:
+            GetUuidv4(strName, objUuid);
             break;
-
-        case IMSUUID::VERSION_5:
-            GetUUIDv5(strName, objUUID);
+        case ImsUuid::VERSION_5:
+            GetUuidv5(strName, objUuid);
             break;
-
         default:
             break;
     }
 
-    return static_cast<const AStringBuffer&>(objUUID).GetString();
+    return static_cast<const AStringBuffer&>(objUuid).GetString();
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE GLOBAL void IMSUUID::GetUUIDv3(IN CONST AString& strName, OUT AStringBuffer& objUUID)
+PRIVATE GLOBAL void ImsUuid::GetUuidv3(IN const AString& strName, OUT AStringBuffer& objUuidStr)
 {
-    UUID stNSID = NAMESPACE_IMS;
+    Uuid objNsId = NAMESPACE_IMS;
 
     // Put the namespace id in the network byte order
-    stNSID.nTimeLow = IPAddress::HToNL(stNSID.nTimeLow);
-    stNSID.nTimeMid = IPAddress::HToNS(stNSID.nTimeMid);
-    stNSID.nTimeHiAndVersion = IPAddress::HToNS(stNSID.nTimeHiAndVersion);
+    objNsId.nTimeLow = IpAddress::HToNL(objNsId.nTimeLow);
+    objNsId.nTimeMid = IpAddress::HToNS(objNsId.nTimeMid);
+    objNsId.nTimeHiAndVersion = IpAddress::HToNS(objNsId.nTimeHiAndVersion);
 
     // MD5 hash
-    MD5Context stMD5;
-    IMS_UCHAR uacHash[16];
+    ImsMd5Context objMd5;
+    IMS_UCHAR uacHash[IMS_MD5_DIGEST_SIZE];
 
-    IMSMD5_Initialize(&stMD5);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(&stNSID), sizeof(UUID), &stMD5);
-    IMSMD5_Update(
-            reinterpret_cast<const IMS_UCHAR*>(strName.GetStr()), strName.GetLength(), &stMD5);
-    IMSMD5_Finalize(&stMD5, uacHash);
+    ImsMd5_Initialize(&objMd5);
+    ImsMd5_Update(reinterpret_cast<const IMS_UCHAR*>(&objNsId), sizeof(Uuid), &objMd5);
+    ImsMd5_Update(
+            reinterpret_cast<const IMS_UCHAR*>(strName.GetStr()), strName.GetLength(), &objMd5);
+    ImsMd5_Finalize(&objMd5, uacHash);
 
     // Convert UUID to the host byte order
-    UUID stUUID;
+    Uuid objUuid;
 
-    IMS_MEM_Memcpy(&stUUID, uacHash, sizeof(UUID));
+    IMS_MEM_Memcpy(&objUuid, uacHash, sizeof(Uuid));
 
-    stUUID.nTimeLow = IPAddress::NToHL(stUUID.nTimeLow);
-    stUUID.nTimeMid = IPAddress::NToHS(stUUID.nTimeMid);
-    stUUID.nTimeHiAndVersion = IPAddress::NToHS(stUUID.nTimeHiAndVersion);
+    objUuid.nTimeLow = IpAddress::NToHL(objUuid.nTimeLow);
+    objUuid.nTimeMid = IpAddress::NToHS(objUuid.nTimeMid);
+    objUuid.nTimeHiAndVersion = IpAddress::NToHS(objUuid.nTimeHiAndVersion);
 
     // Set the variant & version bits
-    stUUID.nTimeHiAndVersion &= 0x0FFF;
-    stUUID.nTimeHiAndVersion |= (3 << 12);
-    stUUID.nClockSeqHiAndReserved &= 0x3F;
-    stUUID.nClockSeqHiAndReserved |= 0x80;
+    objUuid.nTimeHiAndVersion &= 0x0FFF;
+    objUuid.nTimeHiAndVersion |= (3 << 12);
+    objUuid.nClockSeqHiAndReserved &= 0x3F;
+    objUuid.nClockSeqHiAndReserved |= 0x80;
 
-    objUUID.Sprintf("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", stUUID.nTimeLow,
-            stUUID.nTimeMid, stUUID.nTimeHiAndVersion, stUUID.nClockSeqHiAndReserved,
-            stUUID.nClockSeqLow, stUUID.abyNode[0], stUUID.abyNode[1], stUUID.abyNode[2],
-            stUUID.abyNode[3], stUUID.abyNode[4], stUUID.abyNode[5]);
+    objUuidStr.Sprintf("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", objUuid.nTimeLow,
+            objUuid.nTimeMid, objUuid.nTimeHiAndVersion, objUuid.nClockSeqHiAndReserved,
+            objUuid.nClockSeqLow, objUuid.abyNode[0], objUuid.abyNode[1], objUuid.abyNode[2],
+            objUuid.abyNode[3], objUuid.abyNode[4], objUuid.abyNode[5]);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE GLOBAL void IMSUUID::GetUUIDv4(IN CONST AString& strRandom, OUT AStringBuffer& objUUID)
+PRIVATE GLOBAL void ImsUuid::GetUuidv4(IN const AString& strRandom, OUT AStringBuffer& objUuidStr)
 {
-    UUID stNSID = NAMESPACE_IMS;
+    Uuid objNsId = NAMESPACE_IMS;
 
     // Put the namespace id in the network byte order
-    stNSID.nTimeLow = IPAddress::HToNL(stNSID.nTimeLow);
-    stNSID.nTimeMid = IPAddress::HToNS(stNSID.nTimeMid);
-    stNSID.nTimeHiAndVersion = IPAddress::HToNS(stNSID.nTimeHiAndVersion);
+    objNsId.nTimeLow = IpAddress::HToNL(objNsId.nTimeLow);
+    objNsId.nTimeMid = IpAddress::HToNS(objNsId.nTimeMid);
+    objNsId.nTimeHiAndVersion = IpAddress::HToNS(objNsId.nTimeHiAndVersion);
 
     // SHA1 hash
-    SHA1Context stSHA1;
-    IMS_UCHAR uacHash[20];
+    ImsSha1Context objSha1;
+    IMS_UCHAR uacHash[IMS_SHA1_HASH_SIZE];
 
-    IMSSHA1_Initialize(&stSHA1);
-    IMSSHA1_Update(reinterpret_cast<const IMS_UCHAR*>(&stNSID), sizeof(UUID), &stSHA1);
-    IMSSHA1_Update(
-            reinterpret_cast<const IMS_UCHAR*>(strRandom.GetStr()), strRandom.GetLength(), &stSHA1);
-    IMSSHA1_Finalize(&stSHA1, uacHash);
+    ImsSha1_Initialize(&objSha1);
+    ImsSha1_Update(reinterpret_cast<const IMS_UCHAR*>(&objNsId), sizeof(Uuid), &objSha1);
+    ImsSha1_Update(reinterpret_cast<const IMS_UCHAR*>(strRandom.GetStr()), strRandom.GetLength(),
+            &objSha1);
+    ImsSha1_Finalize(&objSha1, uacHash);
 
     // Convert UUID to the host byte order
-    UUID stUUID;
+    Uuid objUuid;
 
-    IMS_MEM_Memcpy(&stUUID, uacHash, sizeof(UUID));
+    IMS_MEM_Memcpy(&objUuid, uacHash, sizeof(Uuid));
 
-    stUUID.nTimeLow = IPAddress::NToHL(stUUID.nTimeLow);
-    stUUID.nTimeMid = IPAddress::NToHS(stUUID.nTimeMid);
-    stUUID.nTimeHiAndVersion = IPAddress::NToHS(stUUID.nTimeHiAndVersion);
+    objUuid.nTimeLow = IpAddress::NToHL(objUuid.nTimeLow);
+    objUuid.nTimeMid = IpAddress::NToHS(objUuid.nTimeMid);
+    objUuid.nTimeHiAndVersion = IpAddress::NToHS(objUuid.nTimeHiAndVersion);
 
     // Set the variant & version bits
-    stUUID.nTimeHiAndVersion &= 0x0FFF;
-    stUUID.nTimeHiAndVersion |= (4 << 12);
-    stUUID.nClockSeqHiAndReserved &= 0x3F;
-    stUUID.nClockSeqHiAndReserved |= 0x80;
+    objUuid.nTimeHiAndVersion &= 0x0FFF;
+    objUuid.nTimeHiAndVersion |= (4 << 12);
+    objUuid.nClockSeqHiAndReserved &= 0x3F;
+    objUuid.nClockSeqHiAndReserved |= 0x80;
 
-    objUUID.Sprintf("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", stUUID.nTimeLow,
-            stUUID.nTimeMid, stUUID.nTimeHiAndVersion, stUUID.nClockSeqHiAndReserved,
-            stUUID.nClockSeqLow, stUUID.abyNode[0], stUUID.abyNode[1], stUUID.abyNode[2],
-            stUUID.abyNode[3], stUUID.abyNode[4], stUUID.abyNode[5]);
+    objUuidStr.Sprintf("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", objUuid.nTimeLow,
+            objUuid.nTimeMid, objUuid.nTimeHiAndVersion, objUuid.nClockSeqHiAndReserved,
+            objUuid.nClockSeqLow, objUuid.abyNode[0], objUuid.abyNode[1], objUuid.abyNode[2],
+            objUuid.abyNode[3], objUuid.abyNode[4], objUuid.abyNode[5]);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE GLOBAL void IMSUUID::GetUUIDv5(IN CONST AString& strName, OUT AStringBuffer& objUUID)
+PRIVATE GLOBAL void ImsUuid::GetUuidv5(IN const AString& strName, OUT AStringBuffer& objUuidStr)
 {
-    UUID stNSID = NAMESPACE_IMS;
+    Uuid objNsId = NAMESPACE_IMS;
 
     // Put the namespace id in the network byte order
-    stNSID.nTimeLow = IPAddress::HToNL(stNSID.nTimeLow);
-    stNSID.nTimeMid = IPAddress::HToNS(stNSID.nTimeMid);
-    stNSID.nTimeHiAndVersion = IPAddress::HToNS(stNSID.nTimeHiAndVersion);
+    objNsId.nTimeLow = IpAddress::HToNL(objNsId.nTimeLow);
+    objNsId.nTimeMid = IpAddress::HToNS(objNsId.nTimeMid);
+    objNsId.nTimeHiAndVersion = IpAddress::HToNS(objNsId.nTimeHiAndVersion);
 
     // SHA1 hash
-    SHA1Context stSHA1;
-    IMS_UCHAR uacHash[20];
+    ImsSha1Context objSha1;
+    IMS_UCHAR uacHash[IMS_SHA1_HASH_SIZE];
 
-    IMSSHA1_Initialize(&stSHA1);
-    IMSSHA1_Update(reinterpret_cast<const IMS_UCHAR*>(&stNSID), sizeof(UUID), &stSHA1);
-    IMSSHA1_Update(
-            reinterpret_cast<const IMS_UCHAR*>(strName.GetStr()), strName.GetLength(), &stSHA1);
-    IMSSHA1_Finalize(&stSHA1, uacHash);
+    ImsSha1_Initialize(&objSha1);
+    ImsSha1_Update(reinterpret_cast<const IMS_UCHAR*>(&objNsId), sizeof(Uuid), &objSha1);
+    ImsSha1_Update(
+            reinterpret_cast<const IMS_UCHAR*>(strName.GetStr()), strName.GetLength(), &objSha1);
+    ImsSha1_Finalize(&objSha1, uacHash);
 
     // Convert UUID to the host byte order
-    UUID stUUID;
+    Uuid objUuid;
 
-    IMS_MEM_Memcpy(&stUUID, uacHash, sizeof(UUID));
+    IMS_MEM_Memcpy(&objUuid, uacHash, sizeof(Uuid));
 
-    stUUID.nTimeLow = IPAddress::NToHL(stUUID.nTimeLow);
-    stUUID.nTimeMid = IPAddress::NToHS(stUUID.nTimeMid);
-    stUUID.nTimeHiAndVersion = IPAddress::NToHS(stUUID.nTimeHiAndVersion);
+    objUuid.nTimeLow = IpAddress::NToHL(objUuid.nTimeLow);
+    objUuid.nTimeMid = IpAddress::NToHS(objUuid.nTimeMid);
+    objUuid.nTimeHiAndVersion = IpAddress::NToHS(objUuid.nTimeHiAndVersion);
 
     // Set the variant & version bits
-    stUUID.nTimeHiAndVersion &= 0x0FFF;
-    stUUID.nTimeHiAndVersion |= (5 << 12);
-    stUUID.nClockSeqHiAndReserved &= 0x3F;
-    stUUID.nClockSeqHiAndReserved |= 0x80;
+    objUuid.nTimeHiAndVersion &= 0x0FFF;
+    objUuid.nTimeHiAndVersion |= (5 << 12);
+    objUuid.nClockSeqHiAndReserved &= 0x3F;
+    objUuid.nClockSeqHiAndReserved |= 0x80;
 
-    objUUID.Sprintf("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", stUUID.nTimeLow,
-            stUUID.nTimeMid, stUUID.nTimeHiAndVersion, stUUID.nClockSeqHiAndReserved,
-            stUUID.nClockSeqLow, stUUID.abyNode[0], stUUID.abyNode[1], stUUID.abyNode[2],
-            stUUID.abyNode[3], stUUID.abyNode[4], stUUID.abyNode[5]);
+    objUuidStr.Sprintf("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", objUuid.nTimeLow,
+            objUuid.nTimeMid, objUuid.nTimeHiAndVersion, objUuid.nClockSeqHiAndReserved,
+            objUuid.nClockSeqLow, objUuid.abyNode[0], objUuid.abyNode[1], objUuid.abyNode[2],
+            objUuid.abyNode[3], objUuid.abyNode[4], objUuid.abyNode[5]);
 }

@@ -1,110 +1,111 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20150210  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _NAT_HELPER_H_
-#define _NAT_HELPER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef NAT_HELPER_H_
+#define NAT_HELPER_H_
 
 #include "IpAddress.h"
 
-#define NatHelper             NATHelper
-#define IsNatResolverRequired IsNATResolverRequired
-
-class NATHelper
+class NatHelper
 {
 private:
-    NATHelper();
-    ~NATHelper();
+    NatHelper();
+    ~NatHelper();
 
-    NATHelper(IN const NATHelper& objRHS);
-    NATHelper& operator=(IN const NATHelper& objRHS);
+public:
+    NatHelper(IN const NatHelper&) = delete;
+    NatHelper& operator=(IN const NatHelper&) = delete;
 
 public:
     void Clear(IN IMS_SINT32 nSlotId);
     // Argument: device's public IP address
-    IPAddress GetPrivateAddress(IN IMS_SINT32 nSlotId, IN const IPAddress& objPublicIP) const;
+    IpAddress GetPrivateAddress(IN IMS_SINT32 nSlotId, IN const IpAddress& objPublicIp) const;
     // Argument: device's IP address
-    IPAddress GetPublicAddress(IN IMS_SINT32 nSlotId, IN const IPAddress& objPrivateIP) const;
-    IMS_BOOL IsBehindNAT(
-            IN IMS_SINT32 nSlotId, IN const IPAddress& objPrivateIP = IPAddress::NONE) const;
+    IpAddress GetPublicAddress(IN IMS_SINT32 nSlotId, IN const IpAddress& objPrivateIp) const;
+    IMS_BOOL IsBehindNat(
+            IN IMS_SINT32 nSlotId, IN const IpAddress& objPrivateIp = IpAddress::NONE) const;
     void RemovePublicAddress(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId);
     // Argument: device's IP address
-    void RemovePublicAddress(IN IMS_SINT32 nSlotId, IN const IPAddress& objPrivateIP);
+    void RemovePublicAddress(IN IMS_SINT32 nSlotId, IN const IpAddress& objPrivateIp);
     void SetPublicAddress(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId,
-            IN const IPAddress& objPrivateIP, IN const IPAddress& objPublicIP);
+            IN const IpAddress& objPrivateIp, IN const IpAddress& objPublicIp);
 
-    static NATHelper* GetInstance();
-    static IMS_BOOL IsNATResolverRequired();
-
-private:
-    void RemoveIPBinding(
-            IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId, IN const IPAddress& objPrivateIP);
+    static NatHelper* GetInstance();
+    static IMS_BOOL IsNatResolverRequired();
 
 private:
-    class IPBinding
+    void RemoveIpBinding(
+            IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId, IN const IpAddress& objPrivateIp);
+
+private:
+    class IpBinding
     {
     public:
-        inline IPBinding() :
-                nId(0),
-                objIP(IPAddress::NONE),
-                objPublicIP(IPAddress::NONE)
+        inline IpBinding() :
+                m_nId(0),
+                m_objIp(IpAddress::NONE),
+                m_objPublicIp(IpAddress::NONE)
         {
         }
 
-        inline IPBinding(
-                IN IMS_SINT32 nId_, IN const IPAddress& objIP_, IN const IPAddress& objPublicIP_) :
-                nId(nId_),
-                objIP(objIP_),
-                objPublicIP(objPublicIP_)
+        inline IpBinding(
+                IN IMS_SINT32 nId, IN const IpAddress& objIp, IN const IpAddress& objPublicIp) :
+                m_nId(nId),
+                m_objIp(objIp),
+                m_objPublicIp(objPublicIp)
         {
         }
 
-        inline IPBinding(IN const IPBinding& objRHS) :
-                nId(objRHS.nId),
-                objIP(objRHS.objIP),
-                objPublicIP(objRHS.objPublicIP)
+        inline IpBinding(IN const IpBinding& other) :
+                m_nId(other.m_nId),
+                m_objIp(other.m_objIp),
+                m_objPublicIp(other.m_objPublicIp)
         {
         }
 
-        inline ~IPBinding() {}
+        inline ~IpBinding() {}
 
     public:
-        inline IPBinding& operator=(IN const IPBinding& objRHS)
+        inline IpBinding& operator=(IN const IpBinding& other)
         {
-            if (this != &objRHS)
+            if (this != &other)
             {
-                nId = objRHS.nId;
-                objIP = objRHS.objIP;
-                objPublicIP = objRHS.objPublicIP;
+                m_nId = other.m_nId;
+                m_objIp = other.m_objIp;
+                m_objPublicIp = other.m_objPublicIp;
             }
 
             return (*this);
         }
 
     public:
-        inline IMS_SINT32 GetId() const { return nId; }
-        inline const IPAddress& GetPrivateIP() const { return objIP; }
-        inline const IPAddress& GetPublicIP() const { return objPublicIP; }
-        inline void SetPublicIP(IN const IPAddress& objIP) { objPublicIP = objIP; }
+        inline IMS_SINT32 GetId() const { return m_nId; }
+        inline const IpAddress& GetPrivateIp() const { return m_objIp; }
+        inline const IpAddress& GetPublicIp() const { return m_objPublicIp; }
+        inline void SetPublicIp(IN const IpAddress& objIp) { m_objPublicIp = objIp; }
 
     private:
-        IMS_SINT32 nId;
-        IPAddress objIP;
-        IPAddress objPublicIP;
+        IMS_SINT32 m_nId;
+        IpAddress m_objIp;
+        IpAddress m_objPublicIp;
     };
 
-    IMSList<IPBinding>* GetIPBindings(IN IMS_SINT32 nSlotId) const;
+    ImsList<IpBinding>* GetIpBindings(IN IMS_SINT32 nSlotId) const;
 
 private:
-    IMSList<IPBinding>** ppBindings;
+    ImsList<IpBinding>** m_ppBindings;
 };
 
-#endif  // _NAT_HELPER_H_
+#endif

@@ -143,7 +143,7 @@ ISipServerConnection* SipConnectionNotifier::AcceptAndOpen()
         return IMS_NULL;
     }
 
-    RCPtr<SipServerTransactionState> pStState = m_objTxnStates.GetAt(0);
+    RcPtr<SipServerTransactionState> pStState = m_objTxnStates.GetAt(0);
 
     if (pStState.IsNull())
     {
@@ -201,8 +201,8 @@ ISipServerConnection* SipConnectionNotifier::AcceptAndOpen(OUT ISipDialog*& piOr
         return IMS_NULL;
     }
 
-    RCPtr<SipDialogEx> pDialogEx = pForkedTxnState->pDialogEx;
-    RCPtr<SipServerTransactionState> pStState = pForkedTxnState->pStState;
+    RcPtr<SipDialogEx> pDialogEx = pForkedTxnState->pDialogEx;
+    RcPtr<SipServerTransactionState> pStState = pForkedTxnState->pStState;
 
     m_objForkedTxnStates.RemoveAt(0);
     delete pForkedTxnState;

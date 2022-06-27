@@ -48,7 +48,7 @@ class ImsThread;
 class ImsTimer;
 class ImsTrace;
 class ImsCarrierConfig;
-class SSLCertificate;
+class SslCertificate;
 
 class PlatformFactory
 {
@@ -90,7 +90,7 @@ public:
 
     static ImsFdSet* CreateFdSet(IN IMS_SINT32 nType = ImsFdSet::TYPE_SELECT);
     static ImsSocket* CreateSocket();
-    static ImsSocket* CreateSslSocket(IN SSLCertificate* pCertificate);
+    static ImsSocket* CreateSslSocket(IN SslCertificate* pCertificate);
 
     // Platform: utilities
     static ISystemUtil* GetSystemUtil();

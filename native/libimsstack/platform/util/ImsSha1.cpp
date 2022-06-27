@@ -1,15 +1,18 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20120217  hwangoo.park@             Created
-    </table>
-
-    Description
-     This file implements the secure hash algorithm.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ImsSha1.h"
 
 // Fxx are a basic SHA1 functions
@@ -49,101 +52,61 @@ LOCAL const IMS_UCHAR SHA1_PADDING[64] = {
 };
 // clang-format on
 
-LOCAL void imsSHA1_CopyMemory(
-        OUT IMS_UCHAR* pucDest, IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen);
-LOCAL void imsSHA1_Decode(
-        IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest);
-LOCAL void imsSHA1_Encode(
-        IN CONST IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest);
-LOCAL void imsSHA1_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount);
-LOCAL void imsSHA1_Transform(IN IMS_UINT32 anH[5], IN IMS_UCHAR aucMessageBlock[64]);
+LOCAL void imsSha1_CopyMemory(
+        OUT IMS_UCHAR* pucDest, IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen);
+LOCAL void imsSha1_Decode(
+        IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest);
+LOCAL void imsSha1_Encode(
+        IN const IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest);
+LOCAL void imsSha1_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount);
+LOCAL void imsSha1_Transform(IN IMS_UINT32 anH[5], IN IMS_UCHAR aucMessageBlock[64]);
 
-/*
-This function initializes MD5 context structure.
-It begins an MD5 operation, writing a new context.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-pstContext              Pointer to MD5 context to be initialized
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
-GLOBAL void IMSSHA1_Initialize(OUT SHA1Context* pstContext)
+GLOBAL void ImsSha1_Initialize(OUT ImsSha1Context* pContext)
 {
-    if (pstContext != IMS_NULL)
+    if (pContext != IMS_NULL)
     {
-        pstContext->nLengthLow = 0;
-        pstContext->nLengthHigh = 0;
+        pContext->nLengthLow = 0;
+        pContext->nLengthHigh = 0;
 
         // Load magic initialization constants
-        pstContext->anH[0] = 0x67452301;
-        pstContext->anH[1] = 0xefcdab89;
-        pstContext->anH[2] = 0x98badcfe;
-        pstContext->anH[3] = 0x10325476;
-        pstContext->anH[4] = 0xc3d2e1f0;
+        pContext->anH[0] = 0x67452301;
+        pContext->anH[1] = 0xefcdab89;
+        pContext->anH[2] = 0x98badcfe;
+        pContext->anH[3] = 0x10325476;
+        pContext->anH[4] = 0xc3d2e1f0;
     }
 }
 
-/*
-This function updates an MD5 block. It continues an MD5 message-digest operation,
-processing another message block, and updating the context.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-pucSrc                  Pointer to the source data to be updated
-nSrcLen                 Length of the source data (pucSrc)
-pstContext              Pointer to MD5 context to be updated
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
-GLOBAL void IMSSHA1_Update(
-        IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, IN_OUT SHA1Context* pstContext)
+GLOBAL void ImsSha1_Update(
+        IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, IN_OUT ImsSha1Context* pContext)
 {
     IMS_UINT32 nProcIndex;
     IMS_UINT32 nIndex;
     IMS_UINT32 nPartLen;
 
     // Computes the number of bytes mod 64
-    nIndex = static_cast<IMS_UINT32>((pstContext->nLengthLow >> 3) & 0x3F);
+    nIndex = static_cast<IMS_UINT32>((pContext->nLengthLow >> 3) & 0x3F);
 
     // Updates the number of bits
-    if ((pstContext->nLengthLow += static_cast<IMS_UINT32>(nSrcLen << 3)) <
+    if ((pContext->nLengthLow += static_cast<IMS_UINT32>(nSrcLen << 3)) <
             (static_cast<IMS_UINT32>(nSrcLen << 3)))
     {
-        (pstContext->nLengthHigh)++;
+        (pContext->nLengthHigh)++;
     }
 
-    pstContext->nLengthHigh += static_cast<IMS_UINT32>(nSrcLen >> 29);
+    pContext->nLengthHigh += static_cast<IMS_UINT32>(nSrcLen >> 29);
 
     nPartLen = 64 - nIndex;
 
     // Transforms as many times as possible.
     if (nSrcLen >= nPartLen)
     {
-        imsSHA1_CopyMemory(&(pstContext->aucMessageBlock[nIndex]), pucSrc, nPartLen);
-        imsSHA1_Transform(pstContext->anH, pstContext->aucMessageBlock);
+        imsSha1_CopyMemory(&(pContext->aucMessageBlock[nIndex]), pucSrc, nPartLen);
+        imsSha1_Transform(pContext->anH, pContext->aucMessageBlock);
 
         for (nProcIndex = nPartLen; nProcIndex + 63 < nSrcLen; nProcIndex += 64)
         {
-            imsSHA1_Transform(pstContext->anH, const_cast<IMS_UCHAR*>(&pucSrc[nProcIndex]));
+            imsSha1_Transform(pContext->anH, const_cast<IMS_UCHAR*>(&pucSrc[nProcIndex]));
         }
 
         nIndex = 0;
@@ -154,58 +117,39 @@ GLOBAL void IMSSHA1_Update(
     }
 
     // Process the remaining input buffer
-    imsSHA1_CopyMemory(
-            &(pstContext->aucMessageBlock[nIndex]), &pucSrc[nProcIndex], nSrcLen - nProcIndex);
+    imsSha1_CopyMemory(
+            &(pContext->aucMessageBlock[nIndex]), &pucSrc[nProcIndex], nSrcLen - nProcIndex);
 }
 
-/*
-This function finalizes an MD5 operation. It ends an MD5 message-digest operation,
-writing the message digest and zeroing the context.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-pstContext              Pointer to MD5 context to be finalized
-aucDigest               Array of the MD5 result
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
-GLOBAL void IMSSHA1_Finalize(IN_OUT SHA1Context* pstContext, OUT IMS_UCHAR aucHash[20])
+GLOBAL void ImsSha1_Finalize(
+        IN_OUT ImsSha1Context* pContext, OUT IMS_UCHAR aucHash[IMS_SHA1_HASH_SIZE])
 {
     IMS_UCHAR aucBits[8];
     IMS_UINT32 nIndex;
     IMS_UINT32 nPadLen;
 
     // Save the number of bits
-    imsSHA1_Encode(&pstContext->nLengthHigh, 4, aucBits);
-    imsSHA1_Encode(&pstContext->nLengthLow, 4, &aucBits[4]);
+    imsSha1_Encode(&pContext->nLengthHigh, 4, aucBits);
+    imsSha1_Encode(&pContext->nLengthLow, 4, &aucBits[4]);
 
     // Pad out to 56 mod 64
-    nIndex = static_cast<IMS_UINT32>((pstContext->nLengthLow >> 3) & 0x3F);
+    nIndex = static_cast<IMS_UINT32>((pContext->nLengthLow >> 3) & 0x3F);
     nPadLen = (nIndex < 56) ? (56 - nIndex) : (120 - nIndex);
 
-    IMSSHA1_Update(SHA1_PADDING, nPadLen, pstContext);
+    ImsSha1_Update(SHA1_PADDING, nPadLen, pContext);
 
     // Append the length (before padding)
-    IMSSHA1_Update(aucBits, 8, pstContext);
+    ImsSha1_Update(aucBits, 8, pContext);
 
     // Store state in digest
-    imsSHA1_Encode(pstContext->anH, 20, aucHash);
+    imsSha1_Encode(pContext->anH, IMS_SHA1_HASH_SIZE, aucHash);
 
     // Zeroize sensitive information
-    imsSHA1_SetMemory(reinterpret_cast<IMS_UCHAR*>(pstContext), 0, sizeof(SHA1Context));
+    imsSha1_SetMemory(reinterpret_cast<IMS_UCHAR*>(pContext), 0, sizeof(ImsSha1Context));
 }
 
-LOCAL void imsSHA1_CopyMemory(
-        OUT IMS_UCHAR* pucDest, IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen)
+LOCAL void imsSha1_CopyMemory(
+        OUT IMS_UCHAR* pucDest, IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen)
 {
     for (IMS_UINT32 i = 0; i < nSrcLen; i++)
     {
@@ -214,7 +158,7 @@ LOCAL void imsSHA1_CopyMemory(
 }
 
 // Decodes the input (IMS_UCHAR) into output (IMS_UINT32). Assumes nSrcLen is a multiple of 4.
-LOCAL void imsSHA1_Decode(IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest)
+LOCAL void imsSha1_Decode(IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest)
 {
     for (IMS_UINT32 i = 0, j = 0; j < nSrcLen; i++, j += 4)
     {
@@ -226,8 +170,8 @@ LOCAL void imsSHA1_Decode(IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT
 }
 
 // Encodes input (IMS_UINT32) into output (IMS_UCHAR). Assumes nSrcLen is a multiple of 4.
-LOCAL void imsSHA1_Encode(
-        IN CONST IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest)
+LOCAL void imsSha1_Encode(
+        IN const IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest)
 {
     for (IMS_UINT32 i = 0, j = 0; j < nDestLen; i++, j += 4)
     {
@@ -238,7 +182,7 @@ LOCAL void imsSHA1_Encode(
     }
 }
 
-LOCAL void imsSHA1_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount)
+LOCAL void imsSha1_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount)
 {
     for (IMS_SIZE_T i = 0; i < nCount; i++)
     {
@@ -246,7 +190,7 @@ LOCAL void imsSHA1_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IM
     }
 }
 
-LOCAL void imsSHA1_Transform(IN_OUT IMS_UINT32 anH[5], IN IMS_UCHAR aucMessageBlock[64])
+LOCAL void imsSha1_Transform(IN_OUT IMS_UINT32 anH[5], IN IMS_UCHAR aucMessageBlock[64])
 {
     IMS_UINT32 A = anH[0];
     IMS_UINT32 B = anH[1];
@@ -257,7 +201,7 @@ LOCAL void imsSHA1_Transform(IN_OUT IMS_UINT32 anH[5], IN IMS_UCHAR aucMessageBl
     IMS_UINT32 TEMP;
     IMS_SINT32 t;
 
-    imsSHA1_Decode(aucMessageBlock, 64, W);
+    imsSha1_Decode(aucMessageBlock, 64, W);
 
     for (t = 16; t < 80; ++t)
     {

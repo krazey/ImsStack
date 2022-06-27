@@ -59,7 +59,7 @@ public:
     IMS_SINT32 HandleResponse(IN ::SipMessage* pSipMsg);
     static IMS_SINT32 MatchTransaction(IN ::SipMessage* pSipMsg,
             IN const SipTransportAddress& objFarEnd,
-            OUT RCPtr<SipClientTransactionState>& pCtState);
+            OUT RcPtr<SipClientTransactionState>& pCtState);
 
 private:
     SipTransactionState* Clone() override;
@@ -93,9 +93,9 @@ private:
     SipAddrSpec* m_pImplicitRoute;
     ISipClientTransactionStateListener* m_piListener;
     // FORKED_RESPONSE
-    RCPtr<SipForkedTransactionManager> m_pForkedTxnMngr;
+    RcPtr<SipForkedTransactionManager> m_pForkedTxnMngr;
     // FORKED_RESPONSE_TO_SUPPORT_EARLY_DIALOG_TERMINATION
-    RCPtr<SipForkedTransactionManager> m_pPersistentForkedTxnMngr;
+    RcPtr<SipForkedTransactionManager> m_pPersistentForkedTxnMngr;
 };
 
 #endif

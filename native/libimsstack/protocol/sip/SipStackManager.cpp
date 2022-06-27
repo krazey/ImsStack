@@ -524,7 +524,7 @@ stack user must process this request and can decide whether to ignore or not
             (objTxnInfo.m_pUserData != SIP_NULL))
     {
         SipTransportInfo* pTranspInfo = SIP_NULL;
-        RCPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
+        RcPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
         SIP_UINT32 nSipBufferLen = pMessageBuffer->GetLength();
         SIP_CHAR* pSipBuffer = reinterpret_cast<SIP_CHAR*>(pMessageBuffer->GetBuffer());
 

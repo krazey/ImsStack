@@ -105,7 +105,7 @@ public:
     };
 
 private:
-    RCPtr<SipDialogEx> m_pDialogEx;
+    RcPtr<SipDialogEx> m_pDialogEx;
 };
 
 #endif

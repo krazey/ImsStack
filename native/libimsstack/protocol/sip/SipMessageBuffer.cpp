@@ -115,7 +115,7 @@ IMS_BYTE* SipMessageBuffer::GetBuffer(IN IMS_SINT32 nSlotId)
 /**
  * @brief Returns a message buffer to form a SIP message (serialization).
  */
-PUBLIC GLOBAL RCPtr<SipMessageBuffer> SipMessageBuffer::GetInstance()
+PUBLIC GLOBAL RcPtr<SipMessageBuffer> SipMessageBuffer::GetInstance()
 {
     static SipMessageBuffer* s_pMessageBuffer = IMS_NULL;
 

@@ -554,7 +554,7 @@ protected:
     AosNetworkType m_eImsRegNetwork;
 
     /// this is used to set SIP Profile on run-time
-    RCPtr<SipProfile> m_pSipProfile;
+    RcPtr<SipProfile> m_pSipProfile;
 
     AString m_strTag;
 

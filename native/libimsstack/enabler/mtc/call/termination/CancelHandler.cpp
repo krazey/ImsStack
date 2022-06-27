@@ -49,7 +49,7 @@ PRIVATE
 CallReasonInfo CancelHandler::GetCallReasonInfoFromReasonHeader(
         IN IMS_SINT32 nCause, IN const AString& strText) const
 {
-    AString strNormalizedText = strText.SimplifyWSP().MakeLower();
+    AString strNormalizedText = strText.SimplifyWsp().MakeLower();
 
     if (nCause == SipStatusCode::SC_200 && strNormalizedText.Contains(REASON_TEXT_CALL_COMPLETED))
     {

@@ -502,9 +502,9 @@ private:
     // CALLER_PREFERENCE_MANAGER
     IMSList<AString> m_objPreviousCallerPreference;
     // Management of forked session to handle PRACK
-    RCPtr<MethodManager> m_pForkedSessions;
+    RcPtr<MethodManager> m_pForkedSessions;
     // EARLY_SESSION_MODEL
-    RCPtr<VirtualSession> m_pVirtualEarlySession;
+    RcPtr<VirtualSession> m_pVirtualEarlySession;
 };
 
 #endif

@@ -1,86 +1,87 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100128  hwangoo.park@             From LibList & Android
-    </table>
-
-    Description
-
-*/
-
-#ifndef _IMS_LIST_H_
-#define _IMS_LIST_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_LIST_H_
+#define IMS_LIST_H_
 
 #include "ImsVector.h"
 
-//
-// The main templated list class ensuring type safety while making use of IMSVectorImpl.
-// This is the class users want to use it.
+#define IMSList ImsList
 
 template <class T>
-class IMSList : private IMSVector<T>
+class ImsList : private ImsVector<T>
 {
 public:
-    inline IMSList() :
-            IMSVector<T>()
+    inline ImsList() :
+            ImsVector<T>()
     {
     }
-    inline IMSList(IN CONST IMSList<T>& objRHS) :
-            IMSVector<T>(objRHS)
+    inline ImsList(IN const ImsList<T>& other) :
+            ImsVector<T>(other)
     {
     }
-    inline virtual ~IMSList() {}
+    inline virtual ~ImsList() {}
 
 public:
-    inline IMSList<T>& operator=(IN CONST IMSList<T>& objRHS)
+    inline ImsList<T>& operator=(IN const ImsList<T>& other)
     {
-        IMSVector<T>::operator=(objRHS);
+        ImsVector<T>::operator=(other);
         return (*this);
     }
 
 public:
     // Empty the list
-    inline void Clear() { IMSVector<T>::Clear(); }
+    inline void Clear() { ImsVector<T>::Clear(); }
 
     //
     // List stats
     //
 
     // Returns the number of elements in the list
-    inline IMS_UINT32 GetSize() const { return IMSVector<T>::GetSize(); }
+    inline IMS_UINT32 GetSize() const { return ImsVector<T>::GetSize(); }
     // Returns whether or not the list is empty
-    inline IMS_BOOL IsEmpty() const { return IMSVector<T>::IsEmpty(); }
+    inline IMS_BOOL IsEmpty() const { return ImsVector<T>::IsEmpty(); }
 
     //
     // Accessors
     //
 
     // Gets an element at the given index with read-only property
-    inline const T& GetAt(IN IMS_UINT32 nIndex) const { return IMSVector<T>::GetAt(nIndex); }
-    inline T GetValueAt(IN IMS_UINT32 nIndex) const { return IMSVector<T>::GetValueAt(nIndex); }
+    inline const T& GetAt(IN IMS_UINT32 nIndex) const { return ImsVector<T>::GetAt(nIndex); }
+    inline T GetValueAt(IN IMS_UINT32 nIndex) const { return ImsVector<T>::GetValueAt(nIndex); }
 
     //
     // Modifying the array
     //
 
     // Copy-on write support, grants write access to an element
-    inline T& GetAt(IN IMS_UINT32 nIndex) { return IMSVector<T>::GetAt(nIndex); }
+    inline T& GetAt(IN IMS_UINT32 nIndex) { return ImsVector<T>::GetAt(nIndex); }
 
     //
     // Append / Insert another list
     //
 
     // Insert another list at a given index
-    inline IMS_BOOL InsertListAt(IN CONST IMSList<T>& objList, IN IMS_UINT32 nIndex)
+    inline IMS_BOOL InsertListAt(IN const ImsList<T>& objList, IN IMS_UINT32 nIndex)
     {
-        return (IMSVector<T>::InsertVectorAt(objList, nIndex) >= 0) ? IMS_TRUE : IMS_FALSE;
+        return (ImsVector<T>::InsertVectorAt(objList, nIndex) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
     // Append another list at the end of this one
-    inline IMS_BOOL AppendList(IN CONST IMSList<T>& objList)
+    inline IMS_BOOL AppendList(IN const ImsList<T>& objList)
     {
-        return (IMSVector<T>::AppendVector(objList) >= 0) ? IMS_TRUE : IMS_FALSE;
+        return (ImsVector<T>::AppendVector(objList) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
 
     //
@@ -88,26 +89,26 @@ public:
     //
 
     // Append / Prepend the given element in the last / in the first position
-    inline IMS_BOOL Append(IN CONST T& element)
+    inline IMS_BOOL Append(IN const T& element)
     {
-        return (IMSVector<T>::Add(element) >= 0) ? IMS_TRUE : IMS_FALSE;
+        return (ImsVector<T>::Add(element) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
 
-    inline IMS_BOOL Prepend(IN CONST T& element)
+    inline IMS_BOOL Prepend(IN const T& element)
     {
-        return (IMSVector<T>::InsertAt(element, 0) >= 0) ? IMS_TRUE : IMS_FALSE;
+        return (ImsVector<T>::InsertAt(element, 0) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
 
     // Insert one or several elements initialized from a prototype element
-    inline IMS_BOOL InsertAt(IN CONST T& element, IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount_ = 1)
+    inline IMS_BOOL InsertAt(IN const T& element, IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1)
     {
-        return (IMSVector<T>::InsertAt(element, nIndex, nCount_) >= 0) ? IMS_TRUE : IMS_FALSE;
+        return (ImsVector<T>::InsertAt(element, nIndex, nCount) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
 
     // Replaces an element with a new prototype-element
-    inline IMS_BOOL SetAt(IN CONST T& element, IN IMS_UINT32 nIndex)
+    inline IMS_BOOL SetAt(IN const T& element, IN IMS_UINT32 nIndex)
     {
-        return (IMSVector<T>::ReplaceAt(element, nIndex) >= 0) ? IMS_TRUE : IMS_FALSE;
+        return (ImsVector<T>::ReplaceAt(element, nIndex) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
 
     //
@@ -115,15 +116,15 @@ public:
     //
 
     // Remove several elements
-    inline IMS_BOOL RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount_ = 1)
+    inline IMS_BOOL RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1)
     {
-        return (IMSVector<T>::RemoveElementsAt(nIndex, nCount_) >= 0) ? IMS_TRUE : IMS_FALSE;
+        return (ImsVector<T>::RemoveElementsAt(nIndex, nCount) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
     // Remove one element
     inline IMS_BOOL RemoveAt(IN IMS_UINT32 nIndex)
     {
-        return (IMSVector<T>::RemoveAt(nIndex) >= 0) ? IMS_TRUE : IMS_FALSE;
+        return (ImsVector<T>::RemoveAt(nIndex) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
 };
 
-#endif  // _IMS_LIST_H_
+#endif

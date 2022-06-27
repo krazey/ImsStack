@@ -139,7 +139,7 @@ private:
     // Request-URI should be equal to the INVITE request
     //    : CANCEL & ACK to non-2xx response
     AString m_strTargetUri;
-    RCPtr<SipClientTransactionState> m_pCtState;
+    RcPtr<SipClientTransactionState> m_pCtState;
     IMSList<sipcore::SipMessage*> m_objResponseMessages;
     SipAuHelper* m_pAuHelper;
     IOnSipClientConnectionListener* m_piListener;

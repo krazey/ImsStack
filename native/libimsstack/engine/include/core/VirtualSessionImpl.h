@@ -121,7 +121,7 @@ private:
 
 private:
     ISession* m_piOwnerSession;
-    RCPtr<VirtualSession> m_pSession;
+    RcPtr<VirtualSession> m_pSession;
     IMSList<MediaImpl*> m_objMediaImpls;
 };
 

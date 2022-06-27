@@ -1,207 +1,67 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20111207  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "SslCertificate.h"
 
 PUBLIC
-SSLCertificate::SSLCertificate() :
-        nKeyFileType(FILETYPE_PEM),
-        strKeyFile(AString::ConstNull()),
-        strPassword(AString::ConstNull()),
-        strCAFile(AString::ConstNull()),
-        strCAPath(AString::ConstNull()),
-        strCiphers(AString::ConstNull())
+SslCertificate::SslCertificate() :
+        m_nKeyFileType(FILETYPE_PEM),
+        m_strKeyFile(AString::ConstNull()),
+        m_strPassword(AString::ConstNull()),
+        m_strCaFile(AString::ConstNull()),
+        m_strCaPath(AString::ConstNull()),
+        m_strCiphers(AString::ConstNull())
 {
 }
 
 PUBLIC
-SSLCertificate::SSLCertificate(
-        IN CONST AString& strKeyFile_, IN IMS_SINT32 nKeyFileType_ /* = FILETYPE_PEM */) :
-        nKeyFileType(nKeyFileType_),
-        strKeyFile(strKeyFile_),
-        strPassword(AString::ConstNull()),
-        strCAFile(AString::ConstNull()),
-        strCAPath(AString::ConstNull()),
-        strCiphers(AString::ConstNull())
+SslCertificate::SslCertificate(
+        IN const AString& strKeyFile, IN IMS_SINT32 nKeyFileType /*= FILETYPE_PEM*/) :
+        m_nKeyFileType(nKeyFileType),
+        m_strKeyFile(strKeyFile),
+        m_strPassword(AString::ConstNull()),
+        m_strCaFile(AString::ConstNull()),
+        m_strCaPath(AString::ConstNull()),
+        m_strCiphers(AString::ConstNull())
 {
 }
 
 PUBLIC
-SSLCertificate::SSLCertificate(IN CONST SSLCertificate& objRHS) :
-        nKeyFileType(objRHS.nKeyFileType),
-        strKeyFile(objRHS.strKeyFile),
-        strPassword(objRHS.strPassword),
-        strCAFile(objRHS.strCAFile),
-        strCAPath(objRHS.strCAPath),
-        strCiphers(objRHS.strCiphers)
+SslCertificate::SslCertificate(IN const SslCertificate& other) :
+        m_nKeyFileType(other.m_nKeyFileType),
+        m_strKeyFile(other.m_strKeyFile),
+        m_strPassword(other.m_strPassword),
+        m_strCaFile(other.m_strCaFile),
+        m_strCaPath(other.m_strCaPath),
+        m_strCiphers(other.m_strCiphers)
 {
 }
 
 PUBLIC
-SSLCertificate::~SSLCertificate() {}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-SSLCertificate& SSLCertificate::operator=(IN CONST SSLCertificate& objRHS)
+SslCertificate& SslCertificate::operator=(IN const SslCertificate& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        nKeyFileType = objRHS.nKeyFileType;
-        strKeyFile = objRHS.strKeyFile;
-
-        strPassword = objRHS.strPassword;
-
-        strCAFile = objRHS.strCAFile;
-        strCAPath = objRHS.strCAPath;
-
-        strCiphers = objRHS.strCiphers;
+        m_nKeyFileType = other.m_nKeyFileType;
+        m_strKeyFile = other.m_strKeyFile;
+        m_strPassword = other.m_strPassword;
+        m_strCaFile = other.m_strCaFile;
+        m_strCaPath = other.m_strCaPath;
+        m_strCiphers = other.m_strCiphers;
     }
 
     return (*this);
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& SSLCertificate::GetCAFile() const
-{
-    return strCAFile;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& SSLCertificate::GetCAPath() const
-{
-    return strCAPath;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& SSLCertificate::GetCiphers() const
-{
-    return strCiphers;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& SSLCertificate::GetKeyFile() const
-{
-    return strKeyFile;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_SINT32 SSLCertificate::GetKeyFileType() const
-{
-    return nKeyFileType;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& SSLCertificate::GetPassword() const
-{
-    return strPassword;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SSLCertificate::SetCAFile(IN CONST AString& strCAFile)
-{
-    this->strCAFile = strCAFile;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SSLCertificate::SetCAPath(IN CONST AString& strCAPath)
-{
-    this->strCAPath = strCAPath;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SSLCertificate::SetCiphers(IN CONST AString& strCiphers)
-{
-    this->strCiphers = strCiphers;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SSLCertificate::SetKeyFile(IN CONST AString& strKeyFile)
-{
-    this->strKeyFile = strKeyFile;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SSLCertificate::SetKeyFileType(IN IMS_SINT32 nKeyFileType)
-{
-    this->nKeyFileType = nKeyFileType;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SSLCertificate::SetPassword(IN CONST AString& strPassword)
-{
-    this->strPassword = strPassword;
 }

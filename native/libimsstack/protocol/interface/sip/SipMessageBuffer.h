@@ -36,7 +36,7 @@ public:
     */
     inline IMS_SINT32 GetLength() const { return MAX_MSG_SIZE; }
 
-    static RCPtr<SipMessageBuffer> GetInstance();
+    static RcPtr<SipMessageBuffer> GetInstance();
 
 public:
     // Max buffer size for raw SIP message

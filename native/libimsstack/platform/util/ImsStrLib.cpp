@@ -1,23 +1,24 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20060102  yhrhee@                   Initial creation
-    20070711  JHS                       move file and modify function name
-    20080102  yhrhee@                   LH2000 Adaptation
-    20090302  bluable@                  Porting
-    </table>
-
-Description
-String      */
-
-#include <string.h>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include <stdio.h>
+#include <string.h>
 
-#include "ServiceMemory.h"
 #include "ImsLib.h"
 #include "ImsStrLib.h"
+#include "ServiceMemory.h"
 
 #define SU_ZEROPAD  1  /* pad with zero */
 #define SU_SIGN     2  /* unsigned/signed long */
@@ -289,25 +290,27 @@ const IMS_WCHAR stJohapTable[2350] = {0x8861, 0x8862, 0x8865, 0x8868, 0x8869, 0x
         0xD375, 0xD377, 0xD37B, 0xD381, 0xD385, 0xD389, 0xD391, 0xD393, 0xD397, 0xD3A1, 0xD3A2,
         0xD3A5, 0xD3A9, 0xD3B1, 0xD3B3, 0xD3B5, 0xD3B7};
 
-LOCAL IMS_SINT32 str_SkipAtoI(IN CONST IMS_WCHAR** ppwszS);
+LOCAL IMS_SINT32 str_SkipAtoI(IN const IMS_WCHAR** ppwszS);
 LOCAL IMS_WCHAR* str_ParseNumber(OUT IMS_WCHAR* pwStr, IN IMS_SLONG nNum, IN IMS_SINT32 nBase,
         IN IMS_SINT32 nSize, IN IMS_SINT32 nPrecision, IN IMS_SINT32 nType);
 LOCAL IMS_SINT32 str_UniVsprintf(
-        OUT IMS_WCHAR* pwszBuf, IN CONST IMS_WCHAR* pwszFmt, IN va_list args);
+        OUT IMS_WCHAR* pwszBuf, IN const IMS_WCHAR* pwszFmt, IN va_list args);
 LOCAL IMS_WCHAR* str_MakeFloat(OUT IMS_WCHAR* pwszStr, IN IMS_DOUBLE dValue,
         IN IMS_SINT32 nFieldWidth, IN IMS_SINT32 nPrecision, IN IMS_SINT32 nFlags);
 LOCAL IMS_DOUBLE str_Round(IN IMS_DOUBLE dValue);
 LOCAL IMS_DOUBLE str_Pow10(IN IMS_SINT32 nExp);
 LOCAL IMS_DOUBLE str_Modf(IN IMS_DOUBLE dFrac, OUT IMS_DOUBLE* pdPtr);
-LOCAL IMS_UINT32 str_Utf8ToUcs(OUT IMS_WCHAR* pwszUcs, IN CONST IMS_CHAR* pszUtf8);
+LOCAL IMS_UINT32 str_Utf8ToUcs(OUT IMS_WCHAR* pwszUcs, IN const IMS_CHAR* pszUtf8);
 LOCAL IMS_UINT32 str_UcsToUtf8(OUT IMS_CHAR* pszUtf8, IN IMS_WCHAR wcUcs);
 LOCAL IMS_WCHAR str_JohapToWansung(IN IMS_WCHAR wcJohap);
 LOCAL IMS_WCHAR str_WansungToJohap(IN IMS_WCHAR wcWansung);
 LOCAL IMS_WCHAR str_JohapToUcs(IN IMS_WCHAR wcJohap);
 LOCAL IMS_WCHAR str_UcsToJohap(IN IMS_WCHAR wcUcs2);
 
-/* return string length */
-GLOBAL IMS_UINT32 IMS_StrLen(IN CONST IMS_CHAR* pszStr)
+/**
+ * @brief Returns a length of the given string length.
+ */
+GLOBAL IMS_UINT32 IMS_StrLen(IN const IMS_CHAR* pszStr)
 {
     if (pszStr == IMS_NULL)
     {
@@ -325,13 +328,13 @@ GLOBAL IMS_UINT32 IMS_StrLen(IN CONST IMS_CHAR* pszStr)
     return nCount;
 }
 
-/* safe string copy
-
-Remarks
-nDestSize : buffer size including null('\0') character
-*/
+/**
+ * @brief Safe string copy.
+ *
+ * @param nDestSize The buffer size including null('\0') character
+ */
 GLOBAL IMS_UINT32 IMS_StrCpy(
-        OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestSize, IN CONST IMS_CHAR* pszSrc)
+        OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestSize, IN const IMS_CHAR* pszSrc)
 {
     if ((pszSrc == IMS_NULL) || (pszDest == IMS_NULL))
     {
@@ -353,14 +356,14 @@ GLOBAL IMS_UINT32 IMS_StrCpy(
     return nSrcLen;
 }
 
-/* safe string n copy
-
-Remarks
-nSrcSize : buffer size excluding null('\0') character
-nDestSize : buffer size including null('\0') character
-*/
+/**
+ * @brief Safe string n copy.
+ *
+ * @param nSrcSize The buffer size excluding null('\0') character
+ * @param nDestSize The buffer size including null('\0') character
+ */
 GLOBAL IMS_UINT32 IMS_StrNCpy(OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestSize,
-        IN CONST IMS_CHAR* pszSrc, IN IMS_SIZE_T nSrcSize)
+        IN const IMS_CHAR* pszSrc, IN IMS_SIZE_T nSrcSize)
 {
     if ((pszSrc == IMS_NULL) || (pszDest == IMS_NULL))
     {
@@ -387,13 +390,13 @@ GLOBAL IMS_UINT32 IMS_StrNCpy(OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestSize,
     return nSrcLen;
 }
 
-/* safe string cat
-
-Remarks
-nDestSize : buffer size including null('\0') character
-*/
+/**
+ * @brief Safe string cat.
+ *
+ * @param nDestSize The buffer size including null('\0') character
+ */
 GLOBAL IMS_UINT32 IMS_StrCat(
-        OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestSize, IN CONST IMS_CHAR* pszSrc)
+        OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestSize, IN const IMS_CHAR* pszSrc)
 {
     if ((pszSrc == IMS_NULL) || (pszDest == IMS_NULL))
     {
@@ -414,14 +417,14 @@ GLOBAL IMS_UINT32 IMS_StrCat(
     return nDestLen + nSrcLen;
 }
 
-/* safe string n cat
-
-Remarks
-nSrcSize : buffer size excluding null('\0') character
-nDestSize : buffer size including null('\0') character
-*/
+/**
+ * @brief Safe string n cat.
+ *
+ * @param nSrcSize The buffer size excluding null('\0') character
+ * @param nDestSize The buffer size including null('\0') character
+ */
 GLOBAL IMS_UINT32 IMS_StrNCat(OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestSize,
-        IN CONST IMS_CHAR* pszSrc, IN IMS_SIZE_T nSrcSize)
+        IN const IMS_CHAR* pszSrc, IN IMS_SIZE_T nSrcSize)
 {
     if ((pszSrc == IMS_NULL) || (pszDest == IMS_NULL))
     {
@@ -447,20 +450,14 @@ GLOBAL IMS_UINT32 IMS_StrNCat(OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestSize,
     return nDestLen + nSrcLen;
 }
 
-/* safe string printf
-
-Remarks
-nBufSize : buffer size excluding null('\0') character
-
-Returns
-<table>
-return             description
-----------         ----------
-positive, 0        the number of characters written
--1                 if an output error occurs
-</table> */
+/**
+ * @brief Safe string printf.
+ *
+ * @param nBufSize The buffer size excluding null('\0') character
+ * @return The number of characters written (>= 0) if operation was successful, -1 otherwise.
+ */
 GLOBAL IMS_SINT32 IMS_Sprintf(
-        OUT IMS_CHAR* pszBuf, IN IMS_SIZE_T nBufSize, IN CONST IMS_CHAR* pszFormat, ...)
+        OUT IMS_CHAR* pszBuf, IN IMS_SIZE_T nBufSize, IN const IMS_CHAR* pszFormat, ...)
 {
     (void)nBufSize;
 
@@ -481,7 +478,7 @@ GLOBAL IMS_SINT32 IMS_Sprintf(
     return nSize;
 }
 
-GLOBAL IMS_CHAR* IMS_StrDup(IN CONST IMS_CHAR* pszSrc)
+GLOBAL IMS_CHAR* IMS_StrDup(IN const IMS_CHAR* pszSrc)
 {
     if (pszSrc == IMS_NULL)
     {
@@ -529,7 +526,7 @@ GLOBAL IMS_UINT32 IMS_Itoa(OUT IMS_CHAR* pszStr, IN IMS_SINT32 nNum, IN IMS_UINT
     return IMS_StrLen(pszStr);
 }
 
-GLOBAL IMS_SINT32 IMS_Atoi(IN CONST IMS_CHAR* pszStr)
+GLOBAL IMS_SINT32 IMS_Atoi(IN const IMS_CHAR* pszStr)
 {
     if (pszStr == IMS_NULL)
     {
@@ -569,22 +566,22 @@ GLOBAL IMS_SINT32 IMS_Atoi(IN CONST IMS_CHAR* pszStr)
     return nValue;
 }
 
-GLOBAL IMS_CHAR* IMS_StrChr(IN CONST IMS_CHAR* pszStr, IN IMS_CHAR cChar)
+GLOBAL IMS_CHAR* IMS_StrChr(IN const IMS_CHAR* pszStr, IN IMS_CHAR cChar)
 {
     return (IMS_CHAR*)strchr(pszStr, cChar);
 }
 
-GLOBAL IMS_CHAR* IMS_StrRChr(IN CONST IMS_CHAR* pszStr, IN IMS_CHAR cChar)
+GLOBAL IMS_CHAR* IMS_StrRChr(IN const IMS_CHAR* pszStr, IN IMS_CHAR cChar)
 {
     return (IMS_CHAR*)strrchr(pszStr, cChar);
 }
 
-GLOBAL IMS_CHAR* IMS_StrStr(IN CONST IMS_CHAR* pszA, IN CONST IMS_CHAR* pszB)
+GLOBAL IMS_CHAR* IMS_StrStr(IN const IMS_CHAR* pszA, IN const IMS_CHAR* pszB)
 {
     return (IMS_CHAR*)strstr(pszA, pszB);
 }
 
-GLOBAL IMS_SINT32 IMS_StrCmp(IN CONST IMS_CHAR* pszStrA, IN CONST IMS_CHAR* pszStrB)
+GLOBAL IMS_SINT32 IMS_StrCmp(IN const IMS_CHAR* pszStrA, IN const IMS_CHAR* pszStrB)
 {
     if ((pszStrA == IMS_NULL) && (pszStrB == IMS_NULL))
     {
@@ -623,7 +620,7 @@ GLOBAL IMS_SINT32 IMS_StrCmp(IN CONST IMS_CHAR* pszStrA, IN CONST IMS_CHAR* pszS
 }
 
 GLOBAL IMS_SINT32 IMS_StrNCmp(
-        IN CONST IMS_CHAR* pszStrA, IN CONST IMS_CHAR* pszStrB, IN IMS_SIZE_T nSize)
+        IN const IMS_CHAR* pszStrA, IN const IMS_CHAR* pszStrB, IN IMS_SIZE_T nSize)
 {
     // 3 Please, modify this function according to the standard string manipulation
     IMS_SIZE_T nCount = nSize;
@@ -648,7 +645,7 @@ GLOBAL IMS_SINT32 IMS_StrNCmp(
     return (nCount != 0) ? -1 : 0;
 }
 
-GLOBAL IMS_SINT32 IMS_StrICmp(IN CONST IMS_CHAR* pszStrA, IN CONST IMS_CHAR* pszStrB)
+GLOBAL IMS_SINT32 IMS_StrICmp(IN const IMS_CHAR* pszStrA, IN const IMS_CHAR* pszStrB)
 {
     IMS_CHAR ch1;
     IMS_CHAR ch2;
@@ -693,7 +690,7 @@ GLOBAL IMS_SINT32 IMS_StrICmp(IN CONST IMS_CHAR* pszStrA, IN CONST IMS_CHAR* psz
 }
 
 GLOBAL IMS_SINT32 IMS_StrNICmp(
-        IN CONST IMS_CHAR* pszStrA, IN CONST IMS_CHAR* pszStrB, IN IMS_SIZE_T nSize)
+        IN const IMS_CHAR* pszStrA, IN const IMS_CHAR* pszStrB, IN IMS_SIZE_T nSize)
 {
     // 3 Please, modify this function according to the standard string manipulation
     IMS_SIZE_T nCount = nSize;
@@ -721,7 +718,7 @@ GLOBAL IMS_SINT32 IMS_StrNICmp(
     return (nCount != 0) ? -1 : 0;
 }
 
-GLOBAL IMS_SINT32 IMS_StrCmpUppercase(IN CONST IMS_CHAR* pszStrA, IN CONST IMS_CHAR* pszStrB)
+GLOBAL IMS_SINT32 IMS_StrCmpUppercase(IN const IMS_CHAR* pszStrA, IN const IMS_CHAR* pszStrB)
 {
     IMS_CHAR ch1;
     IMS_CHAR ch2;
@@ -765,7 +762,7 @@ GLOBAL IMS_SINT32 IMS_StrCmpUppercase(IN CONST IMS_CHAR* pszStrA, IN CONST IMS_C
     return 0;
 }
 
-GLOBAL IMS_BOOL IMS_StrToLowerCase(OUT IMS_CHAR* pszOutStr, IN CONST IMS_CHAR* pszInStr)
+GLOBAL IMS_BOOL IMS_StrToLowerCase(OUT IMS_CHAR* pszOutStr, IN const IMS_CHAR* pszInStr)
 {
     if (pszInStr == IMS_NULL || pszOutStr == IMS_NULL || IMS_StrLen(pszInStr) == 0)
     {
@@ -786,7 +783,7 @@ GLOBAL IMS_BOOL IMS_StrToLowerCase(OUT IMS_CHAR* pszOutStr, IN CONST IMS_CHAR* p
     return IMS_TRUE;
 }
 
-GLOBAL IMS_BOOL IMS_StrToUpperCase(OUT IMS_CHAR* pszOutStr, IN CONST IMS_CHAR* pszInStr)
+GLOBAL IMS_BOOL IMS_StrToUpperCase(OUT IMS_CHAR* pszOutStr, IN const IMS_CHAR* pszInStr)
 {
     if (pszInStr == IMS_NULL || pszOutStr == IMS_NULL || IMS_StrLen(pszInStr) == 0)
     {
@@ -807,7 +804,7 @@ GLOBAL IMS_BOOL IMS_StrToUpperCase(OUT IMS_CHAR* pszOutStr, IN CONST IMS_CHAR* p
     return IMS_TRUE;
 }
 
-GLOBAL IMS_UINT32 IMS_UcStrLen(IN CONST IMS_WCHAR* pwszStr)
+GLOBAL IMS_UINT32 IMS_UcStrLen(IN const IMS_WCHAR* pwszStr)
 {
     if (pwszStr == IMS_NULL)
     {
@@ -825,13 +822,13 @@ GLOBAL IMS_UINT32 IMS_UcStrLen(IN CONST IMS_WCHAR* pwszStr)
     return nCount;
 }
 
-/* safe Convert Ascii string to UCS2 string
-
-Remarks
-nDestSize : buffer size excluding null('\0') character
-*/
+/**
+ * @brief Safe Convert Ascii string to UCS2 string.
+ *
+ * @param nDestSize The buffer size excluding null('\0') character
+ */
 GLOBAL IMS_UINT32 IMS_StrToUcStr(
-        OUT IMS_WCHAR* pwszDest, IN IMS_SIZE_T nDestSize, IN CONST IMS_CHAR* pszSrc)
+        OUT IMS_WCHAR* pwszDest, IN IMS_SIZE_T nDestSize, IN const IMS_CHAR* pszSrc)
 {
     if ((pszSrc == IMS_NULL) || (pwszDest == IMS_NULL))
     {
@@ -860,13 +857,13 @@ GLOBAL IMS_UINT32 IMS_StrToUcStr(
     return nIndex;
 }
 
-/* safe Convert UCS2 string to Ascii string
-
-Remarks
-nDestSize : buffer size excluding null('\0') character
-*/
+/**
+ * @brief Safe Convert UCS2 string to Ascii string.
+ *
+ * @param nDestSize The buffer size excluding null('\0') character
+ */
 GLOBAL IMS_UINT32 IMS_UcStrToStr(OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestSize,
-        IN CONST IMS_WCHAR* pwszSrc, IN IMS_CHAR cDefaultChar)
+        IN const IMS_WCHAR* pwszSrc, IN IMS_CHAR cDefaultChar)
 {
     if ((pwszSrc == IMS_NULL) || (pszDest == IMS_NULL))
     {
@@ -908,13 +905,13 @@ GLOBAL IMS_UINT32 IMS_UcStrToStr(OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestSize,
     return nIndex;
 }
 
-/* safe UCS2 string copy
-
-Remarks
-nDestSize : buffer size excluding null('\0') character
-*/
+/**
+ * @brief Safe UCS2 string copy.
+ *
+ * @param nDestSize The buffer size excluding null('\0') character
+ */
 GLOBAL IMS_UINT32 IMS_UcStrCpy(
-        OUT IMS_WCHAR* pwszDest, IN IMS_SIZE_T nDestSize, IN CONST IMS_WCHAR* pwszSrc)
+        OUT IMS_WCHAR* pwszDest, IN IMS_SIZE_T nDestSize, IN const IMS_WCHAR* pwszSrc)
 {
     if ((pwszDest == IMS_NULL) || (pwszSrc == IMS_NULL))
     {
@@ -936,14 +933,14 @@ GLOBAL IMS_UINT32 IMS_UcStrCpy(
     return nSrcLen;
 }
 
-/* safe UCS2 string n copy
-
-Remarks
-nSrcSize : buffer size excluding null('\0') character
-nDestSize : buffer size excluding null('\0') character
-*/
+/**
+ * @brief Safe UCS2 string n copy.
+ *
+ * @param nSrcSize The buffer size excluding null('\0') character
+ * @param nDestSize The buffer size excluding null('\0') character
+ */
 GLOBAL IMS_UINT32 IMS_UcStrNCpy(OUT IMS_WCHAR* pwszDest, IN IMS_SIZE_T nDestSize,
-        IN CONST IMS_WCHAR* pwszSrc, IN IMS_SIZE_T nSrcSize)
+        IN const IMS_WCHAR* pwszSrc, IN IMS_SIZE_T nSrcSize)
 {
     if ((pwszDest == IMS_NULL) || (pwszSrc == IMS_NULL))
     {
@@ -970,13 +967,13 @@ GLOBAL IMS_UINT32 IMS_UcStrNCpy(OUT IMS_WCHAR* pwszDest, IN IMS_SIZE_T nDestSize
     return nSrcLen;
 }
 
-/* safe UCS2 string cat
-
-Remarks
-nDestSize : buffer size excluding null('\0') character
-*/
+/**
+ * @brief Safe UCS2 string cat.
+ *
+ * @param nDestSize The buffer size excluding null('\0') character
+ */
 GLOBAL IMS_UINT32 IMS_UcStrCat(
-        OUT IMS_WCHAR* pwszDest, IN IMS_SIZE_T nDestSize, IN CONST IMS_WCHAR* pwszSrc)
+        OUT IMS_WCHAR* pwszDest, IN IMS_SIZE_T nDestSize, IN const IMS_WCHAR* pwszSrc)
 {
     if ((pwszSrc == IMS_NULL) || (pwszDest == IMS_NULL))
     {
@@ -997,14 +994,14 @@ GLOBAL IMS_UINT32 IMS_UcStrCat(
     return nDestLen + nSrcLen;
 }
 
-/* safe UCS2 string n cat
-
-Remarks
-nSrcSize : buffer size excluding null('\0') character
-nDestSize : buffer size excluding null('\0') character
-*/
+/**
+ * @brief Safe UCS2 string n cat.
+ *
+ * @param nSrcSize The buffer size excluding null('\0') character
+ * @param nDestSize The buffer size excluding null('\0') character
+ */
 GLOBAL IMS_UINT32 IMS_UcStrNCat(OUT IMS_WCHAR* pwszDest, IN IMS_SIZE_T nDestSize,
-        IN CONST IMS_WCHAR* pwszSrc, IN IMS_SIZE_T nSrcSize)
+        IN const IMS_WCHAR* pwszSrc, IN IMS_SIZE_T nSrcSize)
 {
     if ((pwszSrc == IMS_NULL) || (pwszDest == IMS_NULL))
     {
@@ -1031,7 +1028,7 @@ GLOBAL IMS_UINT32 IMS_UcStrNCat(OUT IMS_WCHAR* pwszDest, IN IMS_SIZE_T nDestSize
 }
 
 GLOBAL IMS_SINT32 IMS_UcSprintf(OUT IMS_WCHAR* pwszBuf, IN IMS_SIZE_T nBufSize,
-        IN CONST IMS_WCHAR* pwszFormat, IN va_list args)
+        IN const IMS_WCHAR* pwszFormat, IN va_list args)
 {
     (void)nBufSize;
 
@@ -1079,7 +1076,7 @@ GLOBAL IMS_UINT32 IMS_UcItoa(
     return IMS_StrToUcStr(pwszBuf, nBufSize, acNumber);
 }
 
-GLOBAL IMS_SINT32 IMS_UcAtoi(IN CONST IMS_WCHAR* pwszStr)
+GLOBAL IMS_SINT32 IMS_UcAtoi(IN const IMS_WCHAR* pwszStr)
 {
     if (pwszStr == IMS_NULL)
     {
@@ -1119,7 +1116,7 @@ GLOBAL IMS_SINT32 IMS_UcAtoi(IN CONST IMS_WCHAR* pwszStr)
     return nValue;
 }
 
-GLOBAL IMS_WCHAR* IMS_UcStrStr(IN CONST IMS_WCHAR* pwszA, IN CONST IMS_WCHAR* pwszB)
+GLOBAL IMS_WCHAR* IMS_UcStrStr(IN const IMS_WCHAR* pwszA, IN const IMS_WCHAR* pwszB)
 {
     if (*pwszB == 0)
     {
@@ -1158,7 +1155,7 @@ GLOBAL IMS_WCHAR* IMS_UcStrStr(IN CONST IMS_WCHAR* pwszA, IN CONST IMS_WCHAR* pw
     return (IMS_WCHAR*)IMS_NULL;
 }
 
-GLOBAL IMS_SINT32 IMS_UcStrCmp(IN CONST IMS_WCHAR* pwszStrA, IN CONST IMS_WCHAR* pwszStrB)
+GLOBAL IMS_SINT32 IMS_UcStrCmp(IN const IMS_WCHAR* pwszStrA, IN const IMS_WCHAR* pwszStrB)
 {
     // 3 Please, modify this function according to the standard string manipulation
 
@@ -1182,7 +1179,7 @@ GLOBAL IMS_SINT32 IMS_UcStrCmp(IN CONST IMS_WCHAR* pwszStrA, IN CONST IMS_WCHAR*
 }
 
 GLOBAL IMS_SINT32 IMS_UcStrNCmp(
-        IN CONST IMS_WCHAR* pwszStrA, IN CONST IMS_WCHAR* pwszStrB, IN IMS_SIZE_T nSize)
+        IN const IMS_WCHAR* pwszStrA, IN const IMS_WCHAR* pwszStrB, IN IMS_SIZE_T nSize)
 {
     // 3 Please, modify this function according to the standard string manipulation
 
@@ -1206,7 +1203,7 @@ GLOBAL IMS_SINT32 IMS_UcStrNCmp(
     return (nSize != 0) ? -1 : 0;
 }
 
-GLOBAL IMS_BOOL IMS_UcStrToLowerCase(OUT IMS_WCHAR* pwszOutStr, IN CONST IMS_WCHAR* pwszInStr)
+GLOBAL IMS_BOOL IMS_UcStrToLowerCase(OUT IMS_WCHAR* pwszOutStr, IN const IMS_WCHAR* pwszInStr)
 {
     if (pwszInStr == IMS_NULL || pwszOutStr == IMS_NULL || IMS_UcStrLen(pwszInStr) == 0)
     {
@@ -1227,7 +1224,7 @@ GLOBAL IMS_BOOL IMS_UcStrToLowerCase(OUT IMS_WCHAR* pwszOutStr, IN CONST IMS_WCH
     return IMS_TRUE;
 }
 
-GLOBAL IMS_BOOL IMS_UcStrToUpperCase(OUT IMS_WCHAR* pwszOutStr, IN CONST IMS_WCHAR* pwszInStr)
+GLOBAL IMS_BOOL IMS_UcStrToUpperCase(OUT IMS_WCHAR* pwszOutStr, IN const IMS_WCHAR* pwszInStr)
 {
     if (pwszInStr == IMS_NULL || pwszOutStr == IMS_NULL || IMS_UcStrLen(pwszInStr) == 0)
     {
@@ -1248,7 +1245,7 @@ GLOBAL IMS_BOOL IMS_UcStrToUpperCase(OUT IMS_WCHAR* pwszOutStr, IN CONST IMS_WCH
     return IMS_TRUE;
 }
 
-GLOBAL IMS_SINT32 IMS_UcStrCmpUppercase(IN CONST IMS_WCHAR* pwszStrA, IN CONST IMS_WCHAR* pwszStrB)
+GLOBAL IMS_SINT32 IMS_UcStrCmpUppercase(IN const IMS_WCHAR* pwszStrA, IN const IMS_WCHAR* pwszStrB)
 {
     // 3 Please, modify this function according to the standard string manipulation
 
@@ -1277,8 +1274,7 @@ GLOBAL IMS_SINT32 IMS_UcStrCmpUppercase(IN CONST IMS_WCHAR* pwszStrA, IN CONST I
     return (*pwszStrA == 0 && *pwszStrB == 0) ? 0 : -1;
 }
 
-/* UTF8 String�� UCS-2 String���� ��ȯ�Ѵ�. Return Value: ������ UCS-2 ���� �� */
-GLOBAL IMS_UINT32 IMS_Utf8ToUcs(OUT IMS_WCHAR* pwszUcs, IN CONST IMS_CHAR* pszUtf8)
+GLOBAL IMS_UINT32 IMS_Utf8ToUcs(OUT IMS_WCHAR* pwszUcs, IN const IMS_CHAR* pszUtf8)
 {
     IMS_UINT32 nUtf8Len = IMS_StrLen(pszUtf8);
     IMS_UINT32 nUcsLen = 0;
@@ -1304,10 +1300,11 @@ GLOBAL IMS_UINT32 IMS_Utf8ToUcs(OUT IMS_WCHAR* pwszUcs, IN CONST IMS_CHAR* pszUt
     return nUcsLen;
 }
 
-/* Convert UCS-2 string to UTF-8 string.
- The method returns the value as byte array of UTF-8 string.
+/**
+ * @brief Convert UCS-2 string to UTF-8 string.
+ *        The method returns the value as byte array of UTF-8 string.
  */
-GLOBAL IMS_UINT32 IMS_UcsToUtf8(OUT IMS_CHAR* pszUtf8, IN CONST IMS_WCHAR* pwszUcs)
+GLOBAL IMS_UINT32 IMS_UcsToUtf8(OUT IMS_CHAR* pszUtf8, IN const IMS_WCHAR* pwszUcs)
 {
     IMS_UINT32 nUcsLen = IMS_UcStrLen(pwszUcs) + 1;
     IMS_UINT32 nUtf8Len = 0;
@@ -1334,7 +1331,7 @@ GLOBAL IMS_UINT32 IMS_UcsToUtf8(OUT IMS_CHAR* pszUtf8, IN CONST IMS_WCHAR* pwszU
     return (nUtf8Len - 1);
 }
 
-GLOBAL IMS_UINT32 IMS_Utf8ToEuckr(OUT IMS_CHAR* pszEuckr, IN CONST IMS_CHAR* pszUtf8)
+GLOBAL IMS_UINT32 IMS_Utf8ToEuckr(OUT IMS_CHAR* pszEuckr, IN const IMS_CHAR* pszUtf8)
 {
     pszEuckr[0] = 0;
 
@@ -1371,7 +1368,7 @@ GLOBAL IMS_UINT32 IMS_Utf8ToEuckr(OUT IMS_CHAR* pszEuckr, IN CONST IMS_CHAR* psz
     return nEuckr;
 }
 
-GLOBAL IMS_UINT32 IMS_EuckrToUtf8(OUT IMS_CHAR* pszUtf8, IN CONST IMS_CHAR* pszEuckr)
+GLOBAL IMS_UINT32 IMS_EuckrToUtf8(OUT IMS_CHAR* pszUtf8, IN const IMS_CHAR* pszEuckr)
 {
     pszUtf8[0] = 0;
 
@@ -1414,7 +1411,7 @@ GLOBAL IMS_UINT32 IMS_EuckrToUtf8(OUT IMS_CHAR* pszUtf8, IN CONST IMS_CHAR* pszE
 }
 
 GLOBAL IMS_UINT32 IMS_UcsToEuckr(
-        OUT IMS_CHAR* pszEuckr, IN IMS_SIZE_T nEuckrSize, IN CONST IMS_WCHAR* pwszUcs)
+        OUT IMS_CHAR* pszEuckr, IN IMS_SIZE_T nEuckrSize, IN const IMS_WCHAR* pwszUcs)
 {
     if (pszEuckr == IMS_NULL)
     {
@@ -1464,7 +1461,7 @@ GLOBAL IMS_UINT32 IMS_UcsToEuckr(
 }
 
 GLOBAL IMS_UINT32 IMS_EuckrToUcs(
-        OUT IMS_WCHAR* pwszUcs, IN IMS_SIZE_T nUcsSize, IN CONST IMS_CHAR* pszEuckr)
+        OUT IMS_WCHAR* pwszUcs, IN IMS_SIZE_T nUcsSize, IN const IMS_CHAR* pszEuckr)
 {
     if (pwszUcs == IMS_NULL)
     {
@@ -1504,7 +1501,7 @@ GLOBAL IMS_UINT32 IMS_EuckrToUcs(
     return nUcs;
 }
 
-LOCAL IMS_SINT32 str_SkipAtoI(CONST IMS_WCHAR** ppwszS)
+LOCAL IMS_SINT32 str_SkipAtoI(const IMS_WCHAR** ppwszS)
 {
     IMS_SINT32 nNumber = 0;
 
@@ -1650,7 +1647,7 @@ LOCAL IMS_WCHAR* str_ParseNumber(OUT IMS_WCHAR* pwszStr, IN IMS_SLONG nNum, IN I
 }
 
 LOCAL IMS_SINT32 str_UniVsprintf(
-        OUT IMS_WCHAR* pwszBuf, IN CONST IMS_WCHAR* pwszFmt, IN va_list args)
+        OUT IMS_WCHAR* pwszBuf, IN const IMS_WCHAR* pwszFmt, IN va_list args)
 {
     IMS_SINT32 nLen;
     IMS_ULONG nNum;
@@ -1832,7 +1829,7 @@ LOCAL IMS_SINT32 str_UniVsprintf(
                 nBase = 16;
                 break;
 
-            case 'd':
+            case 'd':  // FALL-THROUGH
             case 'i':
                 nFlags |= SU_SIGN;
                 __IMS_FALLTHROUGH__
@@ -2109,10 +2106,11 @@ LOCAL IMS_DOUBLE str_Modf(IN IMS_DOUBLE dFrac, OUT IMS_DOUBLE* pdPtr)
     return xIdx - (*pdPtr);
 }
 
-/* Convert a character from UTF-8 string to UCS-2 word.
-The method returns UTF-8's byte size to make an UCS-2 character.
-*/
-LOCAL IMS_UINT32 str_Utf8ToUcs(OUT IMS_WCHAR* pwszUcs, IN CONST IMS_CHAR* pszUtf8)
+/**
+ * @brief Convert a character from UTF-8 string to UCS-2 word.
+ *        The method returns UTF-8's byte size to make an UCS-2 character.
+ */
+LOCAL IMS_UINT32 str_Utf8ToUcs(OUT IMS_WCHAR* pwszUcs, IN const IMS_CHAR* pszUtf8)
 {
     IMS_UINT32 nLen;
 
@@ -2164,9 +2162,10 @@ LOCAL IMS_UINT32 str_Utf8ToUcs(OUT IMS_WCHAR* pwszUcs, IN CONST IMS_CHAR* pszUtf
     return nLen;
 }
 
-/* Converts a character from UCS-2 word to UTF-8 string.
-The method returns the length of UTF-8 srtring.
-*/
+/**
+ * @brief Converts a character from UCS-2 word to UTF-8 string.
+ *        The method returns the length of UTF-8 srtring.
+ */
 LOCAL IMS_UINT32 str_UcsToUtf8(OUT IMS_CHAR* pszUtf8, IN IMS_WCHAR wcUcs)
 {
     IMS_UINT32 nLen;
@@ -2220,7 +2219,8 @@ LOCAL IMS_UINT32 str_UcsToUtf8(OUT IMS_CHAR* pszUtf8, IN IMS_WCHAR wcUcs)
     return nLen;
 }
 
-/* Convert string from JoHap to Wansung type.
+/**
+ * @brief Convert string from JoHap to Wansung type.
  */
 LOCAL IMS_WCHAR str_JohapToWansung(IN IMS_WCHAR wcJohap)
 {
@@ -2351,7 +2351,9 @@ LOCAL IMS_WCHAR str_JohapToWansung(IN IMS_WCHAR wcJohap)
     return nCode;
 }
 
-/* Convert string from Wansung to JoHap type. */
+/**
+ * @brief Convert string from Wansung to JoHap type.
+ */
 LOCAL IMS_WCHAR str_WansungToJohap(IN IMS_WCHAR wcWansung)
 {
     switch (wcWansung)

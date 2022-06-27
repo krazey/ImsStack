@@ -176,7 +176,7 @@ PUBLIC GLOBAL SslCertificate OsSsl::CreateDefaultCertificate()
 {
     SslCertificate objCertificate(DEFAULT_CERTIFICATE);
 
-    objCertificate.SetCAFile(DEFAULT_CA_FILE);
+    objCertificate.SetCaFile(DEFAULT_CA_FILE);
     objCertificate.SetPassword(DEFAULT_PASSWORD);
 
     return objCertificate;
@@ -234,14 +234,14 @@ IMS_BOOL OsSsl::Initialize()
     const IMS_CHAR* pszCaFile = IMS_NULL;
     const IMS_CHAR* pszCaPath = IMS_NULL;
 
-    if (m_objCertificate.GetCAFile().GetLength() > 0)
+    if (m_objCertificate.GetCaFile().GetLength() > 0)
     {
-        pszCaFile = m_objCertificate.GetCAFile().GetStr();
+        pszCaFile = m_objCertificate.GetCaFile().GetStr();
     }
 
-    if (m_objCertificate.GetCAPath().GetLength() > 0)
+    if (m_objCertificate.GetCaPath().GetLength() > 0)
     {
-        pszCaPath = m_objCertificate.GetCAPath().GetStr();
+        pszCaPath = m_objCertificate.GetCaPath().GetStr();
     }
 
     if ((pszCaFile != IMS_NULL) || (pszCaPath != IMS_NULL))

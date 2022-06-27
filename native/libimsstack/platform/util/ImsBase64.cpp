@@ -1,21 +1,18 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20050920  LEE.D.C                   Created
-    20060417  LEE.D.C                   Moved to upgraded Fwk
-    20090303  toastops@                 Porting
-    </table>
-
-    Description
-    This file implements the base64 encoding. It is designed to represent arbitrary sequences of
-    octets in a form that allows the use of both upper- and lowercase letters but that need not be
-    human readable.
-    A 65-character subset of US-ASCII is used, enabling 6 bits to be represented per printable
-    character. (The extra 65th character, "=" is used to signify a special processing function.)
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ImsBase64.h"
 
 #define ADD_CRLF(p, n)           \
@@ -75,39 +72,15 @@ static const IMS_UCHAR BASE64_DECODING_TABLE[] = {
         NP, NP, NP, NP, NP, NP                   // 250 ~ 256
 };
 
-/*
-This function encodes an arbitrary source data as base64 encoded data.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-pSrcData                Pointer to source data to be encoded
-nSrcLen                 Length in bytes of source data to be encoded
-pszDest                 Caller-allocated buffer to receive the encoded data
-nDestLen                Length in characters of pszDest
-bAddCRLF                Flag to indicate if the CRLF is inserted or not
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-Nonzero                 Length in characters of the encoded data
-Zero                    Encoding failed
-</table>
-*/
-GLOBAL IMS_SINT32 IMSBase64_Encode(IN IMS_BYTE* pSrcData, IN IMS_SIZE_T nSrcLen,
-        IN_OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestLen, IN IMS_BOOL bAddCRLF /* = IMS_TRUE */)
+GLOBAL IMS_SINT32 ImsBase64_Encode(IN IMS_BYTE* pSrcData, IN IMS_SIZE_T nSrcLen,
+        IN_OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestLen, IN IMS_BOOL bAddCrlf /*= IMS_TRUE*/)
 {
     IMS_CHAR c6bit;
     IMS_CHAR* pEncBuffer = pszDest;
 
     (void)nDestLen;
 
-    if (bAddCRLF == IMS_TRUE)
+    if (bAddCrlf == IMS_TRUE)
     {
         IMS_SINT32 nLineCount = 0;
 
@@ -227,30 +200,7 @@ GLOBAL IMS_SINT32 IMSBase64_Encode(IN IMS_BYTE* pSrcData, IN IMS_SIZE_T nSrcLen,
     return (IMS_SINT32)LONG_TO_INT(pEncBuffer - pszDest);
 }
 
-/*
-This function decodes a base64 encoded data as a binary data.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-pszSrcData              Pointer to string containing the data to be decoded
-nSrcLen                 Length in characters of pszSrcData
-pDest                   Caller-allocated buffer to receive the decoded data
-nDestLen                Length in bytes of pucDest
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-Nonzero                 Length in bytes of the decoded data
-Zero                    Decoding failed
-</table>
-*/
-GLOBAL IMS_SINT32 IMSBase64_Decode(
+GLOBAL IMS_SINT32 ImsBase64_Decode(
         IN IMS_CHAR* pszSrcData, IN IMS_SIZE_T nSrcLen, OUT IMS_BYTE* pDest, IN IMS_SIZE_T nDestLen)
 {
     IMS_CHAR c8bit;

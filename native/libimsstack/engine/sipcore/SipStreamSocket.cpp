@@ -438,7 +438,7 @@ PROTECTED VIRTUAL void SipStreamSocket::Timer_TimerExpired(IN ITimer* piTimer)
 PROTECTED VIRTUAL void SipStreamSocket::Socket_OnDataReceived(IN ISocket* piSocket)
 {
     IMS_SINT32 nReadBytes;
-    RCPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
+    RcPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
     IMS_BYTE* pRecvBuffer = pMessageBuffer->GetBuffer(GetSlotId());
 
     IMS_MEM_Memset(pRecvBuffer, 0x00, pMessageBuffer->GetLength());

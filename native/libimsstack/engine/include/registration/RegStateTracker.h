@@ -114,7 +114,7 @@ private:
     // Security related headers
     AStringArray m_objSecurityClients;
     AStringArray m_objSecurityVerifys;
-    RCPtr<SipProfile> m_pSipProfile;
+    RcPtr<SipProfile> m_pSipProfile;
 };
 
 #endif

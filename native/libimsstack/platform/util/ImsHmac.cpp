@@ -1,25 +1,22 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100727  hwangoo.park@             Created (RFC 2104)
-    </table>
-
-    Description
-     This file implements HMAC, a mechanism for message authentication using cryptographic hash
-    functions. HMAC can be used with any iterative cryptographic hash function, e.g., MD5, SHA-1,
-    in combination with a secret shared key.
-    The cryptographic strength of HMAC depends on the properties of the underlying hash function.
-    HMAC can be used in combination with any iterated cryptographic hash function.
-    MD5 and SHA-1 are examples of such hash functions. HMAC also uses a secret key for calculation
-    and verification of the message authentication values.
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "ImsHmac.h"
 #include "ImsMd5.h"
 #include "ImsSha1.h"
-#include "ImsHmac.h"
+#include "ServiceMemory.h"
 
 // The byte-length of data blocks
 #define HMAC_B      64
@@ -28,50 +25,30 @@
 // The byte-length of hash outputs for SHA-1
 #define HMAC_L_SHA1 20
 
-/*
-This function generates HMAC-MD5.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-pucText                 Pointer to the input data stream
-nTextLen                Length of the input data stream
-pucKey                  Pointer to the authentication key
-nKeyLen                 Length of the authentication key
-aucDigest               Digest value to be filled in
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
-GLOBAL void IMSHMAC_MD5(IN CONST IMS_UCHAR* pucText, IN IMS_SINT32 nTextLen,
-        IN CONST IMS_UCHAR* pucKey, IN IMS_SINT32 nKeyLen, OUT IMS_UCHAR aucDigest[16])
+GLOBAL void ImsHmac_Md5(IN const IMS_UCHAR* pucText, IN IMS_SINT32 nTextLen,
+        IN const IMS_UCHAR* pucKey, IN IMS_SINT32 nKeyLen,
+        OUT IMS_UCHAR aucDigest[IMS_HMAC_MD5_SIZE])
 {
-    MD5Context stContext;
-    // Inner padding - key XORd with ipad
-    IMS_UCHAR aucKey_IPad[HMAC_B + 1];
-    // Outer padding - key XORd with opad
-    IMS_UCHAR aucKey_OPad[HMAC_B + 1];
     IMS_UCHAR aucKey_Temp[HMAC_L_MD5];
 
     // If key is longer than 64 bytes, reset it to key = MD5(key)
     if (nKeyLen > HMAC_B)
     {
-        MD5Context stContext;
+        ImsMd5Context objContext;
 
-        IMSMD5_Initialize(&stContext);
-        IMSMD5_Update(pucKey, nKeyLen, &stContext);
-        IMSMD5_Finalize(&stContext, aucKey_Temp);
+        ImsMd5_Initialize(&objContext);
+        ImsMd5_Update(pucKey, nKeyLen, &objContext);
+        ImsMd5_Finalize(&objContext, aucKey_Temp);
 
         pucKey = aucKey_Temp;
         nKeyLen = HMAC_L_MD5;
     }
+
+    ImsMd5Context objContext;
+    // Inner padding - key XORd with ipad
+    IMS_UCHAR aucKey_IPad[HMAC_B + 1];
+    // Outer padding - key XORd with opad
+    IMS_UCHAR aucKey_OPad[HMAC_B + 1];
 
     // The HMAC_MD5 transform looks like:
     //    MD5 (K XOR opad, MD5 (K XOR ipad, text))
@@ -98,70 +75,50 @@ GLOBAL void IMSHMAC_MD5(IN CONST IMS_UCHAR* pucText, IN IMS_SINT32 nTextLen,
     //// Performs inner MD5
 
     // Init context for 1st pass
-    IMSMD5_Initialize(&stContext);
+    ImsMd5_Initialize(&objContext);
     // Starts with inner pad
-    IMSMD5_Update(aucKey_IPad, HMAC_B, &stContext);
+    ImsMd5_Update(aucKey_IPad, HMAC_B, &objContext);
     // then text of datagram
-    IMSMD5_Update(pucText, nTextLen, &stContext);
+    ImsMd5_Update(pucText, nTextLen, &objContext);
     // Finish up 1st pass
-    IMSMD5_Finalize(&stContext, aucDigest);
+    ImsMd5_Finalize(&objContext, aucDigest);
 
     //// Performs outer MD5
 
     // Init context for 2nd pass
-    IMSMD5_Initialize(&stContext);
+    ImsMd5_Initialize(&objContext);
     // Starts with outer pad
-    IMSMD5_Update(aucKey_OPad, HMAC_B, &stContext);
+    ImsMd5_Update(aucKey_OPad, HMAC_B, &objContext);
     // then results of 1st hash
-    IMSMD5_Update(aucDigest, HMAC_L_MD5, &stContext);
+    ImsMd5_Update(aucDigest, HMAC_L_MD5, &objContext);
     // Finish up 2nd pass
-    IMSMD5_Finalize(&stContext, aucDigest);
+    ImsMd5_Finalize(&objContext, aucDigest);
 }
 
-/*
-This function generates HMAC-SHA-1.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-pucText                 Pointer to the input data stream
-nTextLen                Length of the input data stream
-pucKey                  Pointer to the authentication key
-nKeyLen                 Length of the authentication key
-aucHash                 Hash value to be filled in
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
-GLOBAL void IMSHMAC_SHA1(IN CONST IMS_UCHAR* pucText, IN IMS_SINT32 nTextLen,
-        IN CONST IMS_UCHAR* pucKey, IN IMS_SINT32 nKeyLen, OUT IMS_UCHAR aucHash[20])
+GLOBAL void ImsHmac_Sha1(IN const IMS_UCHAR* pucText, IN IMS_SINT32 nTextLen,
+        IN const IMS_UCHAR* pucKey, IN IMS_SINT32 nKeyLen,
+        OUT IMS_UCHAR aucHash[IMS_HMAC_SHA1_SIZE])
 {
-    SHA1Context stContext;
-    // Inner padding - key XORd with ipad
-    IMS_UCHAR aucKey_IPad[HMAC_B + 1];
-    // Outer padding - key XORd with opad
-    IMS_UCHAR aucKey_OPad[HMAC_B + 1];
     IMS_UCHAR aucKey_Temp[HMAC_L_SHA1];
 
     // If key is longer than 64 bytes, reset it to key = SHA-1(key)
     if (nKeyLen > HMAC_B)
     {
-        SHA1Context stContext;
+        ImsSha1Context objContext;
 
-        IMSSHA1_Initialize(&stContext);
-        IMSSHA1_Update(pucKey, nKeyLen, &stContext);
-        IMSSHA1_Finalize(&stContext, aucKey_Temp);
+        ImsSha1_Initialize(&objContext);
+        ImsSha1_Update(pucKey, nKeyLen, &objContext);
+        ImsSha1_Finalize(&objContext, aucKey_Temp);
 
         pucKey = aucKey_Temp;
         nKeyLen = HMAC_L_SHA1;
     }
+
+    ImsSha1Context objContext;
+    // Inner padding - key XORd with ipad
+    IMS_UCHAR aucKey_IPad[HMAC_B + 1];
+    // Outer padding - key XORd with opad
+    IMS_UCHAR aucKey_OPad[HMAC_B + 1];
 
     // The HMAC-SHA-1 transform looks like:
     //    SHA-1 (K XOR opad, SHA-1 (K XOR ipad, text))
@@ -188,22 +145,22 @@ GLOBAL void IMSHMAC_SHA1(IN CONST IMS_UCHAR* pucText, IN IMS_SINT32 nTextLen,
     //// Performs inner SHA-1
 
     // Init context for 1st pass
-    IMSSHA1_Initialize(&stContext);
+    ImsSha1_Initialize(&objContext);
     // Starts with inner pad
-    IMSSHA1_Update(aucKey_IPad, HMAC_B, &stContext);
+    ImsSha1_Update(aucKey_IPad, HMAC_B, &objContext);
     // then text of datagram
-    IMSSHA1_Update(pucText, nTextLen, &stContext);
+    ImsSha1_Update(pucText, nTextLen, &objContext);
     // Finish up 1st pass
-    IMSSHA1_Finalize(&stContext, aucHash);
+    ImsSha1_Finalize(&objContext, aucHash);
 
     //// Performs outer SHA-1
 
     // Init context for 2nd pass
-    IMSSHA1_Initialize(&stContext);
+    ImsSha1_Initialize(&objContext);
     // Starts with outer pad
-    IMSSHA1_Update(aucKey_OPad, HMAC_B, &stContext);
+    ImsSha1_Update(aucKey_OPad, HMAC_B, &objContext);
     // then results of 1st hash
-    IMSSHA1_Update(aucHash, HMAC_L_SHA1, &stContext);
+    ImsSha1_Update(aucHash, HMAC_L_SHA1, &objContext);
     // Finish up 2nd pass
-    IMSSHA1_Finalize(&stContext, aucHash);
+    ImsSha1_Finalize(&objContext, aucHash);
 }

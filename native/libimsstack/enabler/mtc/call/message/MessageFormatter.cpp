@@ -454,7 +454,7 @@ void MessageFormatter::SetKeepAliveProfile()
     }
 
     IMS_UINT32 eSipFeatures = ISipConfig::SIP_FEATURE_CAPS_KEEP;
-    RCPtr<SipProfile> pProfile = new SipProfile();
+    RcPtr<SipProfile> pProfile = new SipProfile();
 
     pProfile->SetSipFeatures(eSipFeatures);
     piCoreService->SetSipProfile(pProfile.Get());

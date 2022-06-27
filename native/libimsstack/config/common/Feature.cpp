@@ -342,7 +342,7 @@ void Feature::ExtractProperties(IN const AString& strFeature)
         // feature-param := enc-feature-tag [EQUAL LDQUOT (tag-value-list/string-value) RDQUOT]
 
         // If the value has a DQUOT, then remove it.
-        m_strValue = TextParser::TrimDQUOT(m_strValue);
+        m_strValue = TextParser::TrimDquot(m_strValue);
 
         m_nType = TOKEN_NOBANG;
 
@@ -546,7 +546,7 @@ FeatureSet::~FeatureSet()
 PUBLIC
 IMS_SINT32 FeatureSet::Add(IN const AString& strTag)
 {
-    RCPtr<Feature> rcpFeature = new Feature(strTag);
+    RcPtr<Feature> rcpFeature = new Feature(strTag);
 
     return Add(rcpFeature.Get());
 }
@@ -554,7 +554,7 @@ IMS_SINT32 FeatureSet::Add(IN const AString& strTag)
 PUBLIC
 IMS_SINT32 FeatureSet::Add(IN const AString& strTag, IN const AString& strValue)
 {
-    RCPtr<Feature> rcpFeature = new Feature(strTag, strValue);
+    RcPtr<Feature> rcpFeature = new Feature(strTag, strValue);
 
     return Add(rcpFeature.Get());
 }
@@ -623,7 +623,7 @@ Feature* FeatureSet::Lookup(IN const Feature* pFeature, IN IMS_BOOL bDetach /*= 
 PUBLIC
 IMS_SINT32 FeatureSet::Remove(IN const AString& strTag)
 {
-    RCPtr<Feature> rcpFeature = new Feature(strTag);
+    RcPtr<Feature> rcpFeature = new Feature(strTag);
 
     return Remove(rcpFeature.Get());
 }
@@ -631,7 +631,7 @@ IMS_SINT32 FeatureSet::Remove(IN const AString& strTag)
 PUBLIC
 IMS_SINT32 FeatureSet::Remove(IN const AString& strTag, IN const AString& strValue)
 {
-    RCPtr<Feature> rcpFeature = new Feature(strTag, strValue);
+    RcPtr<Feature> rcpFeature = new Feature(strTag, strValue);
 
     return Remove(rcpFeature.Get());
 }
@@ -700,7 +700,7 @@ PUBLIC GLOBAL FeatureSet* FeatureSet::FromServiceIdentifier(
 
         pFeatureSet = new FeatureSet(strTag);
 
-        strValue = TextParser::TrimDQUOT(strValue);
+        strValue = TextParser::TrimDquot(strValue);
 
         if (strValue.Contains(TextParser::CHAR_COMMA))
         {
@@ -754,7 +754,7 @@ void FeatureSet::AddFeatures(IN const AString& strValues)
 
     if (strValues.StartsWith(TextParser::CHAR_DQUOT) && strValues.EndsWith(TextParser::CHAR_DQUOT))
     {
-        AString strUnquotedValues = TextParser::TrimDQUOT(strValues);
+        AString strUnquotedValues = TextParser::TrimDquot(strValues);
 
         objTokens = strUnquotedValues.Split(TextParser::CHAR_COMMA);
     }

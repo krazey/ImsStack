@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090603  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _ANSI_STRING_ARRAY_H_
-#define _ANSI_STRING_ARRAY_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef ANSI_STRING_ARRAY_H_
+#define ANSI_STRING_ARRAY_H_
 
 #include "AString.h"
 
@@ -19,37 +22,46 @@ class AStringArray
 {
 public:
     AStringArray();
-    AStringArray(IN CONST IMSList<AString>& objElements_);
-    AStringArray(IN CONST AStringArray& objRHS);
+    AStringArray(IN const ImsList<AString>& objElements);
+    AStringArray(IN const AStringArray& other);
     ~AStringArray();
 
 public:
-    AStringArray& operator=(IN CONST AStringArray& objRHS);
-    AStringArray& operator=(IN CONST IMSList<AString>& objElements);
+    AStringArray& operator=(IN const AStringArray& other);
+    AStringArray& operator=(IN const ImsList<AString>& objElements);
 
 public:
-    void AddElement(IN CONST AString& strElem);
-    IMS_BOOL Contains(IN CONST AString& strElem, IN IMS_BOOL bCaseSensitive = IMS_TRUE) const;
-    IMS_SINT32 GetCount() const;
-    const AString& GetElementAt(IN IMS_SINT32 nIndex) const;
-    const IMSList<AString>& GetElements() const;
+    inline void AddElement(IN const AString& strElem) { m_objElements.Append(strElem); }
+    IMS_BOOL Contains(IN const AString& strElem, IN IMS_BOOL bCaseSensitive = IMS_TRUE) const;
+    inline IMS_SINT32 GetCount() const { return static_cast<IMS_SINT32>(m_objElements.GetSize()); }
+    inline const AString& GetElementAt(IN IMS_SINT32 nIndex) const
+    {
+        return m_objElements.GetAt(nIndex);
+    }
+    inline const ImsList<AString>& GetElements() const { return m_objElements; }
     const AString& GetFirstElement() const;
-    IMS_SINT32 GetIndexOf(IN CONST AString& strElem, IN IMS_SINT32 nOffset = 0,
+    IMS_SINT32 GetIndexOf(IN const AString& strElem, IN IMS_SINT32 nOffset = 0,
             IN IMS_BOOL bCaseSensitive = IMS_TRUE) const;
     const AString& GetLastElement() const;
-    IMS_SINT32 GetLastIndexOf(IN CONST AString& strElem, IN IMS_SINT32 nOffset = 0,
+    IMS_SINT32 GetLastIndexOf(IN const AString& strElem, IN IMS_SINT32 nOffset = 0,
             IN IMS_BOOL bCaseSensitive = IMS_TRUE) const;
-    void InsertElementAt(IN CONST AString& strElem, IN IMS_SINT32 nIndex);
-    IMS_BOOL IsEmpty() const;
-    void RemoveAllElements();
-    IMS_BOOL RemoveElement(IN CONST AString& strElem, IN IMS_BOOL bCaseSensitive = IMS_TRUE);
-    void RemoveElementAt(IN IMS_SINT32 nIndex);
-    void SetElementAt(IN CONST AString& strElem, IN IMS_SINT32 nIndex);
+    inline void InsertElementAt(IN const AString& strElem, IN IMS_SINT32 nIndex)
+    {
+        m_objElements.InsertAt(strElem, nIndex);
+    }
+    inline IMS_BOOL IsEmpty() const { return (m_objElements.GetSize() == 0); }
+    inline void RemoveAllElements() { m_objElements.Clear(); }
+    IMS_BOOL RemoveElement(IN const AString& strElem, IN IMS_BOOL bCaseSensitive = IMS_TRUE);
+    inline void RemoveElementAt(IN IMS_SINT32 nIndex) { m_objElements.RemoveAt(nIndex); }
+    inline void SetElementAt(IN const AString& strElem, IN IMS_SINT32 nIndex)
+    {
+        m_objElements.SetAt(strElem, nIndex);
+    }
 
     static const AStringArray& ConstNull();
 
 private:
-    IMSList<AString> objElements;
+    ImsList<AString> m_objElements;
 };
 
-#endif  // _ANSI_STRING_ARRAY_H_
+#endif

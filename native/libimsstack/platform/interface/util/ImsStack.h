@@ -1,68 +1,66 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20060822  eastsky@                  Initial Creation
-    20070529  yhrhee@                   IMSFnLibStack.c -> convert to CPP.
-    20090302  hsyun@                    Porting
-    20100302  hwangoo.park@             Change the method from IMSVector class
-    </table>
-
-Description
-Stack Library
-*/
-
-#ifndef _IMS_STACK_H_
-#define _IMS_STACK_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_STACK_H_
+#define IMS_STACK_H_
 
 #include "ImsVector.h"
 
-#define ImsStack IMSStack
-
 template <class T>
-class IMSStack : private IMSVector<T>
+class ImsStack : private ImsVector<T>
 {
 public:
-    inline IMSStack() :
-            IMSVector<T>()
+    inline ImsStack() :
+            ImsVector<T>()
     {
     }
-    inline IMSStack(IN CONST IMSStack<T>& objRHS) :
-            IMSVector<T>(objRHS)
+    inline ImsStack(IN const ImsStack<T>& other) :
+            ImsVector<T>(other)
     {
     }
-    inline virtual ~IMSStack() {}
+    inline virtual ~ImsStack() {}
 
 public:
-    inline IMSStack<T>& operator=(IN CONST IMSStack<T>& objRHS)
+    inline ImsStack<T>& operator=(IN const ImsStack<T>& other)
     {
-        IMSVector<T>::operator=(objRHS);
+        ImsVector<T>::operator=(other);
         return (*this);
     }
 
 public:
     // Empty the stack
-    inline void Clear() { IMSVector<T>::Clear(); }
+    inline void Clear() { ImsVector<T>::Clear(); }
 
     //
     // Stack stats
     //
 
     // Returns the number of elements in the stack
-    inline IMS_UINT32 GetSize() const { return IMSVector<T>::GetSize(); }
+    inline IMS_UINT32 GetSize() const { return ImsVector<T>::GetSize(); }
     // Returns whether or not the stack is empty
-    inline IMS_BOOL IsEmpty() const { return IMSVector<T>::IsEmpty(); }
+    inline IMS_BOOL IsEmpty() const { return ImsVector<T>::IsEmpty(); }
 
     // Removes an element from the top of the stack
-    inline void Pop() { IMSVector<T>::Pop(); }
+    inline void Pop() { ImsVector<T>::Pop(); }
 
     // Adds an element to the top of the stack
-    inline void Push(IN CONST T& element) { IMSVector<T>::Push(element); }
+    inline void Push(IN const T& element) { ImsVector<T>::Push(element); }
 
     // Returns a reference to an element at the top of the stack
-    inline T& Top() { return IMSVector<T>::Top(); }
-    inline const T& Top() const { return IMSVector<T>::Top(); }
+    inline T& Top() { return ImsVector<T>::Top(); }
+    inline const T& Top() const { return ImsVector<T>::Top(); }
 };
 
-#endif  // _IMS_STACK_H_
+#endif

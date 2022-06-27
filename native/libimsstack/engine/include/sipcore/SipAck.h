@@ -39,7 +39,7 @@ private:
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
 private:
-    RCPtr<SipClientTransactionState> m_pCtState;
+    RcPtr<SipClientTransactionState> m_pCtState;
     ITimer* m_piTimer;
 };
 

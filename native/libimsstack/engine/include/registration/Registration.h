@@ -214,7 +214,7 @@ private:
     void ChoosePreferredContact();
     void ClearNextRequest();
     IDigestAka* CreateDigestAka(IN const SubscriberConfig* pSubsConfig);
-    IMS_BOOL CreateSa(IN const Credential& objCredential, IN const IMS_SA_KEY& objSaKey);
+    IMS_BOOL CreateSa(IN const Credential& objCredential, IN const ImsSaKey& objSaKey);
     void DestroyAllContacts();
     IMS_SINT32 GetPortUc() const;
     IMS_SINT32 GetPortUs() const;
@@ -323,7 +323,7 @@ private:
     // IMPU & Network authorized IMPU (topmost one in P-Associated-URI)
     // Persistent information (P-Associated-URI, Service-Routes) which MUST be kept
     // while the registration is active
-    RCPtr<RegStateTracker> m_pStateTracker;
+    RcPtr<RegStateTracker> m_pStateTracker;
     // Listener to notify the registration state
     IRegistrationListener* m_piListener;
     // Listener to monitor the changes of the service's state
@@ -336,7 +336,7 @@ private:
 
     // Digest AKA interface
     IDigestAka* m_piDigestAka;
-    IMS_SA_KEY m_objActiveSaKey;
+    ImsSaKey m_objActiveSaKey;
     Credential m_objActiveCredential;
     // IMS_AUTH_NONCE_REUSE {
     ISipGenericChallenge* m_piGenericChallenge;

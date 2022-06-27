@@ -557,7 +557,7 @@ void SipServerTransactionState::RejectRequest(
 }
 
 PUBLIC
-IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RCPtr<SipDialogEx>& pOrigDialogEx)
+IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOrigDialogEx)
 {
     // Store the last request message
     SipStack::FreeMessage(m_pLastSipMsg);
@@ -565,7 +565,7 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RCPtr<SipDialogEx>& pOri
 
     // Check the address type of Contact header for the response message (TLS)
 
-    RCPtr<SipDialogState> pTempDState = new SipDialogState(IMS_FALSE);
+    RcPtr<SipDialogState> pTempDState = new SipDialogState(IMS_FALSE);
 
     if (!pTempDState->InitDialogDetails(m_pSipMsg))
     {
@@ -580,7 +580,7 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RCPtr<SipDialogEx>& pOri
             GetSlotId(), objMethod, m_pSipMsg, SipMessageInfo::DIRECTION_INCOMING);
 
     // Look up to identify if the dialog-state already exists or not
-    RCPtr<SipDialogState> pOrigDState = pSIPMngr->LookupDialogState(pTempDState.Get(), m_pSipMsg);
+    RcPtr<SipDialogState> pOrigDState = pSIPMngr->LookupDialogState(pTempDState.Get(), m_pSipMsg);
 
     // Checking for the case where the 2xx to SUBSCRIBE is received after NOTIFY
     // to the subscription, each of them being from different users i.e. SUBSCRIBE was forked.

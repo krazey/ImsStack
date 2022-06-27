@@ -1,30 +1,33 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100726  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "IRetryTaskHelperListener.h"
 #include "RetryTaskHelper.h"
+#include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_BASE__;
 
 PUBLIC
-RetryTaskHelper::RetryTaskHelper(IN IMS_BOOL bTimerOnCmdCompleted /* = IMS_FALSE */) :
-        nState(STATE_INACTIVE),
-        bFlag_TimerOnCmdCompleted(bTimerOnCmdCompleted),
-        pCmd(IMS_NULL),
-        pCondition(IMS_NULL),
-        pTimer(IMS_NULL),
-        piListener(IMS_NULL)
+RetryTaskHelper::RetryTaskHelper(IN IMS_BOOL bTimerOnCmdCompleted /*= IMS_FALSE*/) :
+        m_nState(STATE_INACTIVE),
+        m_bTimerOnCmdCompleted(bTimerOnCmdCompleted),
+        m_pCmd(IMS_NULL),
+        m_pCondition(IMS_NULL),
+        m_pTimer(IMS_NULL),
+        m_piListener(IMS_NULL)
 {
 }
 
@@ -33,257 +36,213 @@ PUBLIC VIRTUAL RetryTaskHelper::~RetryTaskHelper()
     IMS_TRACE_D("Destructor :: RetryTaskHelper", 0, 0, 0);
 }
 
-/*
- Returns the state of current retry task.
-
-Remarks
-
-*/
-PUBLIC
-IMS_SINT32 RetryTaskHelper::GetState() const
-{
-    return nState;
-}
-
-/*
- Sets the retry command of this task and returns the previous retry command if present.
-
-Remarks
-
-*/
+/**
+ * @brief Sets the retry command of this task and returns the previous retry command if present.
+ */
 PUBLIC
 RetryCmd* RetryTaskHelper::SetCommand(IN RetryCmd* pCmd)
 {
-    if (nState == STATE_ACTIVE)
+    if (m_nState == STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "Retry Command can not be set in the ACTIVE state", 0, 0, 0);
         return IMS_NULL;
     }
 
-    RetryCmd* pPrevCmd = this->pCmd;
+    RetryCmd* pPrevCmd = m_pCmd;
 
-    this->pCmd = pCmd;
+    m_pCmd = pCmd;
 
     return pPrevCmd;
 }
 
-/*
- Sets the retry condition of this task and returns the previous retry condition if present.
-
-Remarks
-
-*/
+/**
+ * @brief Sets the retry condition of this task and returns the previous retry condition if present.
+ */
 PUBLIC
 RetryCondition* RetryTaskHelper::SetCondition(IN RetryCondition* pCondition)
 {
-    if (nState == STATE_ACTIVE)
+    if (m_nState == STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "Retry Condition can not be set in the ACTIVE state", 0, 0, 0);
         return IMS_NULL;
     }
 
-    RetryCondition* pPrevCondition = this->pCondition;
+    RetryCondition* pPrevCondition = m_pCondition;
 
-    this->pCondition = pCondition;
+    m_pCondition = pCondition;
 
     return pPrevCondition;
 }
 
-/*
- Sets the retry timer of this task and returns the previous retry timer if present.
-
-Remarks
-
-*/
+/**
+ * @brief Sets the retry timer of this task and returns the previous retry timer if present.
+ */
 PUBLIC
 RetryTimer* RetryTaskHelper::SetTimer(IN RetryTimer* pTimer)
 {
-    if (nState == STATE_ACTIVE)
+    if (m_nState == STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "Retry Timer can not be set in the ACTIVE state", 0, 0, 0);
         return IMS_NULL;
     }
 
-    RetryTimer* pPrevTimer = this->pTimer;
+    RetryTimer* pPrevTimer = m_pTimer;
 
-    this->pTimer = pTimer;
+    m_pTimer = pTimer;
 
     return pPrevTimer;
 }
 
-/*
- Sets the listener of this retry task.
-
-Remarks
-
-*/
+/**
+ * @brief Starts the retry task.
+ *
+ * Before calling this method, the application MUST set the command & condition at least.
+ * If the application runs the retry timer, then it also sets the timer.
+ */
 PUBLIC
-void RetryTaskHelper::SetListener(IN IRetryTaskHelperListener* piListener)
+IMS_BOOL RetryTaskHelper::Start(IN IMS_SINT32 nParam /*= START_COMMAND*/)
 {
-    this->piListener = piListener;
-}
-
-/*
- Starts the retry task.
-Before calling this method, the application MUST set the command & condition at least.
-If the application runs the retry timer, then it also sets the timer.
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL RetryTaskHelper::Start(IN IMS_SINT32 nParam /* = START_COMMAND */)
-{
-    if (nState == STATE_ACTIVE)
+    if (m_nState == STATE_ACTIVE)
     {
         IMS_TRACE_D("Retry Task is already in ACTIVE state", 0, 0, 0);
         return IMS_TRUE;
     }
 
-    if (pCmd == IMS_NULL)
+    if (m_pCmd == IMS_NULL)
     {
         IMS_TRACE_E(0, "Retry Command MUST be set before calling this method", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    pCmd->SetCmdListener(this);
+    m_pCmd->SetCmdListener(this);
 
-    if (pTimer != IMS_NULL)
+    if (m_pTimer != IMS_NULL)
     {
-        pTimer->SetListener(this);
+        m_pTimer->SetListener(this);
     }
 
     switch (nParam)
     {
         case START_COMMAND_N_TIMER:
-            if (pTimer == IMS_NULL)
+            if (m_pTimer == IMS_NULL)
             {
                 IMS_TRACE_E(0, "Invalid parameter (%d) - No retry timer", nParam, 0, 0);
                 return IMS_FALSE;
             }
 
-            if (pCmd->ExecuteCmd() != IMS_SUCCESS)
+            if (m_pCmd->ExecuteCmd() != IMS_SUCCESS)
             {
                 return IMS_FALSE;
             }
 
-            if (!pTimer->Start())
+            if (!m_pTimer->Start())
             {
                 return IMS_FALSE;
             }
             break;
-
         case START_TIMER:
-            if (pTimer == IMS_NULL)
+            if (m_pTimer == IMS_NULL)
             {
                 IMS_TRACE_E(0, "Invalid parameter (%d) - No retry timer", nParam, 0, 0);
                 return IMS_FALSE;
             }
 
-            if (!pTimer->Start())
+            if (!m_pTimer->Start())
             {
                 return IMS_FALSE;
             }
             break;
-
         case START_TIMER_N_COMMAND:
-            if (pTimer == IMS_NULL)
+            if (m_pTimer == IMS_NULL)
             {
                 IMS_TRACE_E(0, "Invalid parameter (%d) - No retry timer", nParam, 0, 0);
                 return IMS_FALSE;
             }
 
-            if (!pTimer->Start())
+            if (!m_pTimer->Start())
             {
                 return IMS_FALSE;
             }
 
-            if (pCmd->ExecuteCmd() != IMS_SUCCESS)
+            if (m_pCmd->ExecuteCmd() != IMS_SUCCESS)
             {
                 return IMS_FALSE;
             }
             break;
-
-        case START_COMMAND:
+        case START_COMMAND:  // FALL-THROUGH
         default:
-            if (pCmd->ExecuteCmd() != IMS_SUCCESS)
+            if (m_pCmd->ExecuteCmd() != IMS_SUCCESS)
             {
                 return IMS_FALSE;
             }
             break;
     }
 
-    nState = STATE_ACTIVE;
+    m_nState = STATE_ACTIVE;
 
     return IMS_TRUE;
 }
 
-/*
- Terminates the retry task.
-
-Remarks
-
-*/
+/**
+ * @brief Terminates the retry task.
+ */
 PUBLIC
 void RetryTaskHelper::Terminate()
 {
-    if (nState == STATE_INACTIVE)
+    if (m_nState == STATE_INACTIVE)
     {
         return;
     }
 
-    pCmd->SetCmdListener(IMS_NULL);
+    m_pCmd->SetCmdListener(IMS_NULL);
 
-    if (pTimer != IMS_NULL)
+    if (m_pTimer != IMS_NULL)
     {
-        pTimer->SetListener(IMS_NULL);
-        pTimer->Terminate();
+        m_pTimer->SetListener(IMS_NULL);
+        m_pTimer->Terminate();
     }
 
-    nState = STATE_INACTIVE;
+    m_nState = STATE_INACTIVE;
 }
 
-/*
- Notify the result of the command execution to the command's executor.
-
-Remarks
-
-*/
+/**
+ * @brief Notify the result of the command execution to the command's executor.
+ */
 PROTECTED VIRTUAL void RetryTaskHelper::RetryCmd_OnCompleted(
-        IN RetryCmd* pCmd, IN IMS_SINT32 nResultCode, IN IMS_SINT32 nRetryAfter /* = 0 */)
+        IN RetryCmd* pCmd, IN IMS_SINT32 nResultCode, IN IMS_SINT32 nRetryAfter /*= 0*/)
 {
-    if (nState == STATE_INACTIVE)
+    if (m_nState == STATE_INACTIVE)
     {
         return;
     }
 
-    if (pCmd != this->pCmd)
+    if (pCmd != m_pCmd)
     {
         return;
     }
 
     (void)nRetryAfter;
 
-    if ((pCondition != IMS_NULL) && (pCondition->Verify(nResultCode)))
+    if ((m_pCondition != IMS_NULL) && (m_pCondition->Verify(nResultCode)))
     {
-        if (pTimer == IMS_NULL)
+        if (m_pTimer == IMS_NULL)
         {
             CallListener(RESULT_NOK_COMMAND_FAILED);
         }
         else
         {
-            IMS_SINT32 nTimerState = pTimer->GetState();
+            IMS_SINT32 nTimerState = m_pTimer->GetState();
 
             if (nTimerState == RetryTimer::STATE_INACTIVE)
             {
-                if (!pTimer->Start())
+                if (!m_pTimer->Start())
                 {
                     CallListener(RESULT_NOK_INTERNAL_OPERATION);
                 }
             }
             else if (nTimerState == RetryTimer::STATE_PENDING)
             {
-                if (!pTimer->Resume())
+                if (!m_pTimer->Resume())
                 {
                     CallListener(RESULT_NOK_INTERNAL_OPERATION);
                 }
@@ -297,35 +256,32 @@ PROTECTED VIRTUAL void RetryTaskHelper::RetryCmd_OnCompleted(
     }
 }
 
-/*
- Notify the timer expiration of the interim retry timer.
-
-Remarks
-
-*/
+/**
+ * @brief Notify the timer expiration of the interim retry timer.
+ */
 PROTECTED VIRTUAL IMS_SINT32 RetryTaskHelper::RetryTimer_OnInterimExpired(IN RetryTimer* pTimer)
 {
     (void)pTimer;
 
-    if (nState == STATE_INACTIVE)
+    if (m_nState == STATE_INACTIVE)
     {
         return RetryTimer::RESULT_STOP;
     }
 
     // TODO:: retry-after handling
 
-    if (pCmd->ExecuteCmd() != IMS_SUCCESS)
+    if (m_pCmd->ExecuteCmd() != IMS_SUCCESS)
     {
         CallListener(RESULT_NOK_INTERNAL_OPERATION);
         return RetryTimer::RESULT_STOP;
     }
 
-    if (nState == STATE_INACTIVE)
+    if (m_nState == STATE_INACTIVE)
     {
         return RetryTimer::RESULT_STOP;
     }
 
-    if (bFlag_TimerOnCmdCompleted)
+    if (m_bTimerOnCmdCompleted)
     {
         // Timer will be re-started after completing the command
         return RetryTimer::RESULT_PENDING;
@@ -334,17 +290,14 @@ PROTECTED VIRTUAL IMS_SINT32 RetryTaskHelper::RetryTimer_OnInterimExpired(IN Ret
     return RetryTimer::RESULT_CONTINUE;
 }
 
-/*
- Notify the timer expiration of the final retry timer.
-
-Remarks
-
-*/
+/**
+ * @brief Notify the timer expiration of the final retry timer.
+ */
 PROTECTED VIRTUAL void RetryTaskHelper::RetryTimer_OnFinalExpired(IN RetryTimer* pTimer)
 {
     (void)pTimer;
 
-    if (nState == STATE_INACTIVE)
+    if (m_nState == STATE_INACTIVE)
     {
         return;
     }
@@ -352,20 +305,17 @@ PROTECTED VIRTUAL void RetryTaskHelper::RetryTimer_OnFinalExpired(IN RetryTimer*
     CallListener(RESULT_NOK_TIMER_EXPIRED);
 }
 
-/*
- Notify the result of the retry task.
-
-Remarks
-
-*/
+/**
+ * @brief Notify the result of the retry task.
+ */
 PRIVATE
 void RetryTaskHelper::CallListener(IN IMS_SINT32 nResultCode)
 {
-    if (piListener == IMS_NULL)
+    if (m_piListener == IMS_NULL)
     {
         IMS_TRACE_E(0, "No retry task helper listener", 0, 0, 0);
         return;
     }
 
-    piListener->RetryTaskHelper_OnCompleted(this, pCmd, nResultCode);
+    m_piListener->RetryTaskHelper_OnCompleted(this, m_pCmd, nResultCode);
 }

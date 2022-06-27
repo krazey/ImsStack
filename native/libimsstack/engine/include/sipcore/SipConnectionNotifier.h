@@ -165,8 +165,8 @@ private:
         ~ForkedTxnState() {}
 
     public:
-        RCPtr<SipDialogEx> pDialogEx;
-        RCPtr<SipServerTransactionState> pStState;
+        RcPtr<SipDialogEx> pDialogEx;
+        RcPtr<SipServerTransactionState> pStState;
     };
 
     static IMS_SINT32* s_pGlobalSystemPort;
@@ -198,9 +198,9 @@ private:
     // For client initiated connection (TCP_ONLY / FLOW_CONTROL)
     SipSocket* m_pSocketTcpClient;
     SipSocketAddress* m_pSockAddrFarEnd;
-    RCPtr<SipProfile> m_pSipProfile;
+    RcPtr<SipProfile> m_pSipProfile;
     // Queue for incoming request messages
-    IMSList<RCPtr<SipServerTransactionState>> m_objTxnStates;
+    IMSList<RcPtr<SipServerTransactionState>> m_objTxnStates;
     IMSList<ForkedTxnState*> m_objForkedTxnStates;
     IOnSipServerConnectionListener* m_piListener;
     IOnSipConnectionNotifierErrorListener* m_piErrorListener;

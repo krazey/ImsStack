@@ -48,7 +48,7 @@ public:
      *
      * This method is invoked only and only if the algorithm is AKAv1-MD5.
      *
-     * @param nResult Result of AKA authentication; refer to IMS_AKA class in Credential.h
+     * @param nResult Result of AKA authentication; refer to ImsAkaParam class in Credential.h
      * @param objIk Integrity key value; it is valid if nResult is only RESULT_OK
      * @param objCk Ciphering key value; it is valid if nResult is only RESULT_OK
      * @param bResultOfSa Result of security association

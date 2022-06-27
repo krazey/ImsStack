@@ -1,68 +1,71 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "RcObject.h"
 
 PUBLIC
-RCObject::RCObject() :
-        nRefCount(0),
-        bShareable(IMS_TRUE)
+RcObject::RcObject() :
+        m_nRefCount(0),
+        m_bShareable(IMS_TRUE)
 {
 }
 
 PUBLIC
-RCObject::RCObject(IN CONST RCObject& /* objRHS */) :
-        nRefCount(0),
-        bShareable(IMS_TRUE)
+RcObject::RcObject(IN const RcObject& /*other*/) :
+        m_nRefCount(0),
+        m_bShareable(IMS_TRUE)
 {
 }
 
-PUBLIC VIRTUAL RCObject::~RCObject() {}
+PUBLIC VIRTUAL RcObject::~RcObject() {}
 
 PUBLIC
-RCObject& RCObject::operator=(IN CONST RCObject& /* objRHS */)
+RcObject& RcObject::operator=(IN const RcObject& /*other*/)
 {
     return (*this);
 }
 
 PUBLIC
-void RCObject::AddReference()
+void RcObject::AddReference()
 {
-    ++nRefCount;
+    ++m_nRefCount;
 }
 
 PUBLIC
-void RCObject::RemoveReference()
+void RcObject::RemoveReference()
 {
-    if (--nRefCount == 0)
+    if (--m_nRefCount == 0)
     {
         delete this;
     }
 }
 
 PUBLIC
-void RCObject::MarkUnshareable()
+void RcObject::MarkUnshareable()
 {
-    bShareable = IMS_FALSE;
+    m_bShareable = IMS_FALSE;
 }
 
 PUBLIC
-IMS_BOOL RCObject::IsShareable() const
+IMS_BOOL RcObject::IsShareable() const
 {
-    return bShareable;
+    return m_bShareable;
 }
 
 PUBLIC
-IMS_BOOL RCObject::IsShared() const
+IMS_BOOL RcObject::IsShared() const
 {
-    return nRefCount > 1;
+    return m_nRefCount > 1;
 }

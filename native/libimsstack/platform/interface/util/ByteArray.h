@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _BYTE_ARRAY_H_
-#define _BYTE_ARRAY_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef BYTE_ARRAY_H_
+#define BYTE_ARRAY_H_
 
 #include "AString.h"
 
@@ -21,37 +24,37 @@ public:
     class ByteRef
     {
     public:
-        ByteRef(IN ByteArray& objBA_, IN IMS_SINT32 nIndex_);
+        ByteRef(IN ByteArray& objBa, IN IMS_SINT32 nIndex);
 
     public:
         // lvalue operation
-        ByteRef& operator=(IN CONST ByteRef& objRHS);
+        ByteRef& operator=(IN const ByteRef& other);
         ByteRef& operator=(IN IMS_BYTE byte);
         // rvalue operation
         inline operator IMS_BYTE() const
         {
-            return (nIndex < objBA.pData->nSize) ? objBA.pData->pValue[nIndex] : 0;
+            return (m_nIndex < m_objBa.m_pData->nSize) ? m_objBa.m_pData->pValue[m_nIndex] : 0;
         }
 
     private:
-        ByteArray& objBA;
-        IMS_SINT32 nIndex;
+        ByteArray& m_objBa;
+        IMS_SINT32 m_nIndex;
     };
 
 public:
     ByteArray();
     ByteArray(IN IMS_BYTE byte);
-    ByteArray(IN CONST IMS_CHAR* pValue_);
-    ByteArray(IN CONST AString& strValue);
-    ByteArray(IN CONST IMS_BYTE* pValue_, IN IMS_SINT32 nSize_);
-    ByteArray(IN CONST ByteArray& objBA);
+    ByteArray(IN const IMS_CHAR* pValue);
+    ByteArray(IN const AString& strValue);
+    ByteArray(IN const IMS_BYTE* pValue, IN IMS_SINT32 nSize);
+    ByteArray(IN const ByteArray& other);
     ~ByteArray();
 
 public:
-    ByteArray& operator=(IN CONST ByteArray& objBA);
+    ByteArray& operator=(IN const ByteArray& other);
     ByteArray& operator=(IN IMS_BYTE byte);
-    ByteArray& operator+=(IN CONST ByteArray& objBA);
-    ByteArray& operator+=(IN IMS_BYTE byte);
+    inline ByteArray& operator+=(IN const ByteArray& objBa) { return Append(objBa); }
+    inline ByteArray& operator+=(IN IMS_BYTE byte) { return Append(byte); }
     IMS_BYTE operator[](IN IMS_SINT32 nIndex) const;
     ByteRef operator[](IN IMS_SINT32 nIndex);
     IMS_BYTE operator[](IN IMS_UINT32 nIndex) const;
@@ -59,27 +62,28 @@ public:
 
 public:
     ByteArray& Append(IN IMS_BYTE byte);
-    ByteArray& Append(IN CONST IMS_BYTE* pValue_, IN IMS_SINT32 nSize_);
-    ByteArray& Append(IN CONST ByteArray& objBA);
+    ByteArray& Append(IN const IMS_BYTE* pValue, IN IMS_SINT32 nSize);
+    ByteArray& Append(IN const ByteArray& objBa);
     ByteArray& Erase(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount);
     ByteArray& Prepend(IN IMS_BYTE byte);
-    ByteArray& Prepend(IN CONST IMS_BYTE* pValue_, IN IMS_SINT32 nSize_);
-    ByteArray& Prepend(IN CONST ByteArray& objBA);
+    ByteArray& Prepend(IN const IMS_BYTE* pValue, IN IMS_SINT32 nSize);
+    ByteArray& Prepend(IN const ByteArray& objBa);
 
-    void Attach(IN CONST IMS_BYTE* pValue_, IN IMS_SINT32 nSize_);
+    void Attach(IN const IMS_BYTE* pValue, IN IMS_SINT32 nSize);
     void Detach();
     void Resize(IN IMS_SINT32 nSize);
 
-    inline const IMS_BYTE* GetData() const { return pData->pValue; }
+    inline const IMS_BYTE* GetData() const { return m_pData->pValue; }
     inline IMS_BYTE* GetData()
     {
         Detach();
-        return pData->pValue;
+        return m_pData->pValue;
     }
-    inline IMS_SINT32 GetLength() const { return pData->nSize; }
+    inline IMS_SINT32 GetLength() const { return m_pData->nSize; }
     ByteArray GetSubData(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount = -1) const;
 
-    inline IMS_BOOL IsNULL() const { return (pData == &SHARED_NULL); }
+    inline IMS_BOOL IsNull() const { return (m_pData == &SHARED_NULL); }
+    inline IMS_BOOL IsNULL() const { return IsNull(); }
     AString ToString() const;
     AString ToHexString() const;
 
@@ -102,22 +106,22 @@ private:
 
     static Data SHARED_NULL;
 
-    Data* pData;
+    Data* m_pData;
 };
 
-inline const ByteArray operator+(IN CONST ByteArray& objBA1, IN CONST ByteArray& objBA2)
+inline const ByteArray operator+(IN const ByteArray& objBa1, IN const ByteArray& objBa2)
 {
-    return ByteArray(objBA1) += objBA2;
+    return ByteArray(objBa1) += objBa2;
 }
 
-inline const ByteArray operator+(IN CONST ByteArray& objBA1, IN IMS_BYTE byte)
+inline const ByteArray operator+(IN const ByteArray& objBa1, IN IMS_BYTE byte)
 {
-    return ByteArray(objBA1) += byte;
+    return ByteArray(objBa1) += byte;
 }
 
-inline const ByteArray operator+(IN IMS_BYTE byte, IN CONST ByteArray& objBA1)
+inline const ByteArray operator+(IN IMS_BYTE byte, IN const ByteArray& objBa1)
 {
-    return ByteArray(byte) += objBA1;
+    return ByteArray(byte) += objBa1;
 }
 
-#endif  // _BYTE_ARRAY_H_
+#endif

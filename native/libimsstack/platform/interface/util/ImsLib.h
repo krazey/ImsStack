@@ -1,19 +1,22 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090518  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_LIB_H_
+#define IMS_LIB_H_
 
-    Description
-
-*/
-
-#ifndef _IMS_LIB_H_
-#define _IMS_LIB_H_
-
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 #if defined(__IMS_LP64__)
 #define IMS_LONG_MAX  (0x7FFFFFFFFFFFFFFFL)
@@ -34,13 +37,13 @@
 #define IMS_USHORT_MAX (0xFFFF)
 
 template <typename T>
-inline const T& IMS_MIN(IN CONST T& a, IN CONST T& b)
+inline const T& IMS_MIN(IN const T& a, IN const T& b)
 {
     return (a < b) ? a : b;
 }
 
 template <typename T>
-inline const T& IMS_MAX(IN CONST T& a, IN CONST T& b)
+inline const T& IMS_MAX(IN const T& a, IN const T& b)
 {
     return (a < b) ? b : a;
 }
@@ -92,4 +95,4 @@ inline IMS_BOOL IMS_ISUPPER(IN IMS_CHAR c)
     return ((c >= 'A') && (c <= 'Z')) ? IMS_TRUE : IMS_FALSE;
 }
 
-#endif  // _IMS_LIB_H_
+#endif

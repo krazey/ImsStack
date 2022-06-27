@@ -1,19 +1,22 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090302  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "AString.h"
 #include "ImsLib.h"
 #include "ImsStrLib.h"
-#include "AString.h"
+#include "ServiceMemory.h"
 
 // Format specification flag types for Vsprintf(...)
 enum FLAG_ENTYPE
@@ -44,10 +47,10 @@ PRIVATE GLOBAL AString::Data AString::SHARED_EMPTY =
 };
 
 LOCAL
-IMS_SINT32 astring_CharToWideChar(IN CONST IMS_CHAR* pszSrc, IN IMS_SINT32 nSrcLen,
-        OUT IMS_WCHAR* pwszDest, IN IMS_SINT32 nDestLen)
+IMS_SINT32 astring_CharToWideChar(IN const IMS_CHAR* pszSrc, IN IMS_SINT32 nSrcLen,
+        OUT IMS_WCHAR* pwszDst, IN IMS_SINT32 nDstLen)
 {
-    if (nDestLen == 0)
+    if (nDstLen == 0)
     {
         if (nSrcLen == (-1))
         {
@@ -66,23 +69,23 @@ IMS_SINT32 astring_CharToWideChar(IN CONST IMS_CHAR* pszSrc, IN IMS_SINT32 nSrcL
 
     for (IMS_SINT32 i = 0; i < nSrcLen; ++i)
     {
-        if (i < nDestLen)
+        if (i < nDstLen)
         {
-            pwszDest[i] = (IMS_WCHAR)((IMS_UCHAR)pszSrc[i]);
+            pwszDst[i] = (IMS_WCHAR)((IMS_UCHAR)pszSrc[i]);
             nCountOfWChar++;
         }
     }
 
-    pwszDest[nDestLen - 1] = (IMS_WCHAR)0;
+    pwszDst[nDstLen - 1] = (IMS_WCHAR)0;
 
     return nCountOfWChar;
 }
 
 LOCAL
-IMS_SINT32 astring_WideCharToChar(IN CONST IMS_WCHAR* pwszSrc, IN IMS_SINT32 nSrcLen,
-        OUT IMS_CHAR* pszDest, IN IMS_SINT32 nDestLen)
+IMS_SINT32 astring_WideCharToChar(IN const IMS_WCHAR* pwszSrc, IN IMS_SINT32 nSrcLen,
+        OUT IMS_CHAR* pszDst, IN IMS_SINT32 nDstLen)
 {
-    if (nDestLen == 0)
+    if (nDstLen == 0)
     {
         if (nSrcLen == (-1))
         {
@@ -101,34 +104,32 @@ IMS_SINT32 astring_WideCharToChar(IN CONST IMS_WCHAR* pwszSrc, IN IMS_SINT32 nSr
 
     for (IMS_SINT32 i = 0; i < nSrcLen; ++i)
     {
-        if (i < nDestLen)
+        if (i < nDstLen)
         {
             // Truncate
-            // pszDest[i] = (IMS_CHAR)(pwszSrc[i]);
-            pszDest[i] = (pwszSrc[i] > 0xFF) ? '?' : (IMS_CHAR)pwszSrc[i];
+            // pszDst[i] = (IMS_CHAR)(pwszSrc[i]);
+            pszDst[i] = (pwszSrc[i] > 0xFF) ? '?' : (IMS_CHAR)pwszSrc[i];
 
             nCountOfChar++;
         }
     }
 
-    pszDest[nDestLen - 1] = '\0';
+    pszDst[nDstLen - 1] = '\0';
 
     return nCountOfChar;
 }
 
 LOCAL
-IMS_SINT64 astring_AToLL(IN CONST IMS_CHAR* pszLL, IN IMS_SINT32 nBase, OUT IMS_BOOL* pbOK,
-        OUT CONST IMS_CHAR** ppEndPtr)
+IMS_SINT64 astring_AToLL(IN const IMS_CHAR* pszLL, IN IMS_SINT32 nBase, OUT IMS_BOOL* pbOk,
+        OUT const IMS_CHAR** ppEndPtr)
 {
     const IMS_CHAR* p;
     IMS_UCHAR ch;
-    IMS_ULONG nAcc;
-    IMS_ULONG nBase2, nCutOff;
-    IMS_SINT32 nNegative, nAny, nCutLim;
+    IMS_SINT32 nNegative;
 
-    if (pbOK)
+    if (pbOk)
     {
-        (*pbOK) = IMS_TRUE;
+        (*pbOk) = IMS_TRUE;
     }
 
     // Skip white space and pick up leading +/- sign if present.
@@ -168,11 +169,15 @@ IMS_SINT64 astring_AToLL(IN CONST IMS_CHAR* pszLL, IN IMS_SINT32 nBase, OUT IMS_
         nBase = (ch == '0') ? 8 : 10;
     }
 
-    nBase2 = unsigned(nBase);
-    nCutOff =
+    IMS_ULONG nBase2 = unsigned(nBase);
+    IMS_ULONG nCutOff =
             nNegative ? IMS_ULONG(0 - (IMS_LONG_MIN + IMS_LONG_MAX)) + IMS_LONG_MAX : IMS_LONG_MAX;
-    nCutLim = nCutOff % nBase2;
+    IMS_SINT32 nCutLim = nCutOff % nBase2;
+
     nCutOff /= nBase2;
+
+    IMS_ULONG nAcc;
+    IMS_SINT32 nAny;
 
     for (nAcc = 0, nAny = 0;; ch = *p++)
     {
@@ -215,9 +220,9 @@ IMS_SINT64 astring_AToLL(IN CONST IMS_CHAR* pszLL, IN IMS_SINT32 nBase, OUT IMS_
     {
         nAcc = nNegative ? IMS_LONG_MIN : IMS_LONG_MAX;
 
-        if (pbOK != IMS_NULL)
+        if (pbOk != IMS_NULL)
         {
-            (*pbOK) = IMS_FALSE;
+            (*pbOk) = IMS_FALSE;
         }
     }
     else if (nNegative)
@@ -234,18 +239,16 @@ IMS_SINT64 astring_AToLL(IN CONST IMS_CHAR* pszLL, IN IMS_SINT32 nBase, OUT IMS_
 }
 
 LOCAL
-IMS_UINT64 astring_AToULL(IN CONST IMS_CHAR* pszULL, IN IMS_SINT32 nBase, OUT IMS_BOOL* pbOK,
-        OUT CONST IMS_CHAR** ppEndPtr)
+IMS_UINT64 astring_AToULL(IN const IMS_CHAR* pszULL, IN IMS_SINT32 nBase, OUT IMS_BOOL* pbOk,
+        OUT const IMS_CHAR** ppEndPtr)
 {
     const IMS_CHAR* p;
     IMS_UCHAR ch;
-    IMS_ULONG nAcc;
-    IMS_ULONG nBase2, nCutOff;
-    IMS_SINT32 nNegative, nAny, nCutLim;
+    IMS_SINT32 nNegative;
 
-    if (pbOK)
+    if (pbOk)
     {
-        (*pbOK) = IMS_TRUE;
+        (*pbOk) = IMS_TRUE;
     }
 
     // Skip white space and pick up leading +/- sign if present.
@@ -260,9 +263,9 @@ IMS_UINT64 astring_AToULL(IN CONST IMS_CHAR* pszULL, IN IMS_SINT32 nBase, OUT IM
 
     if (ch == '-')
     {
-        if (pbOK != IMS_NULL)
+        if (pbOk != IMS_NULL)
         {
-            (*pbOK) = IMS_FALSE;
+            (*pbOk) = IMS_FALSE;
         }
 
         if (ppEndPtr != IMS_NULL)
@@ -294,9 +297,12 @@ IMS_UINT64 astring_AToULL(IN CONST IMS_CHAR* pszULL, IN IMS_SINT32 nBase, OUT IM
         nBase = (ch == '0') ? 8 : 10;
     }
 
-    nBase2 = unsigned(nBase);
-    nCutOff = IMS_ULONG(IMS_ULONG_MAX) / nBase2;
-    nCutLim = IMS_ULONG(IMS_ULONG_MAX) % nBase2;
+    IMS_ULONG nBase2 = unsigned(nBase);
+    IMS_ULONG nCutOff = IMS_ULONG(IMS_ULONG_MAX) / nBase2;
+    IMS_SINT32 nCutLim = IMS_ULONG(IMS_ULONG_MAX) % nBase2;
+
+    IMS_ULONG nAcc;
+    IMS_SINT32 nAny;
 
     for (nAcc = 0, nAny = 0;; ch = *p++)
     {
@@ -339,9 +345,9 @@ IMS_UINT64 astring_AToULL(IN CONST IMS_CHAR* pszULL, IN IMS_SINT32 nBase, OUT IM
     {
         nAcc = IMS_ULONG_MAX;
 
-        if (pbOK != IMS_NULL)
+        if (pbOk != IMS_NULL)
         {
-            (*pbOK) = IMS_FALSE;
+            (*pbOk) = IMS_FALSE;
         }
     }
     else if (nNegative)
@@ -445,18 +451,18 @@ IMS_SINT32 astring_AllocateMore(IN IMS_SIZE_T nAlloc, IN IMS_SIZE_T nExtra)
 
 LOCAL
 AString& astring_Insert(
-        IN AString* pAS, IN IMS_SINT32 nOffset, IN CONST IMS_CHAR* pszValue, IN IMS_SINT32 nCount)
+        IN AString* pStr, IN IMS_SINT32 nOffset, IN const IMS_CHAR* pszValue, IN IMS_SINT32 nCount)
 {
     if ((nOffset < 0) || (nCount <= 0) || (pszValue == IMS_NULL))
     {
-        return (*pAS);
+        return (*pStr);
     }
 
-    const IMS_SINT32 nOldLen = pAS->GetLength();
+    const IMS_SINT32 nOldLen = pStr->GetLength();
 
-    pAS->Resize(IMS_MAX(nOffset, nOldLen) + nCount);
+    pStr->Resize(IMS_MAX(nOffset, nOldLen) + nCount);
 
-    IMS_CHAR* pDest = pAS->GetStr();
+    IMS_CHAR* pDest = pStr->GetStr();
 
     if (nOffset > nOldLen)
     {
@@ -469,7 +475,7 @@ AString& astring_Insert(
 
     IMS_MEM_Memcpy(pDest + nOffset, pszValue, nCount);
 
-    return (*pAS);
+    return (*pStr);
 }
 
 LOCAL
@@ -654,175 +660,175 @@ AString astring_ULLToString(IN IMS_UINT64 nULL, IN IMS_SINT32 nPrecision = -1,
 }
 
 PUBLIC
-AString::CharRef::CharRef(IN AString& objStr_, IN IMS_SINT32 nIndex_) :
-        objStr(objStr_),
-        nIndex(nIndex_)
+AString::CharRef::CharRef(IN AString& objStr, IN IMS_SINT32 nIndex) :
+        m_objStr(objStr),
+        m_nIndex(nIndex)
 {
 }
 
 PUBLIC
-AString::CharRef& AString::CharRef::operator=(IN CONST CharRef& objRHS)
+AString::CharRef& AString::CharRef::operator=(IN const CharRef& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        objStr.pData->pValue[nIndex] = objRHS.objStr.pData->pValue[objRHS.nIndex];
+        m_objStr.m_pData->pValue[m_nIndex] = other.m_objStr.m_pData->pValue[other.m_nIndex];
     }
 
     return (*this);
 }
 
 PUBLIC
-AString::CharRef& AString::CharRef::operator=(IN IMS_CHAR ch)
+AString::CharRef& AString::CharRef::operator=(IN IMS_CHAR c)
 {
-    objStr.pData->pValue[nIndex] = ch;
+    m_objStr.m_pData->pValue[m_nIndex] = c;
     return (*this);
 }
 
 PUBLIC
 AString::AString() :
-        pData(&SHARED_NULL)
+        m_pData(&SHARED_NULL)
 {
 }
 
 PUBLIC
-AString::AString(IN CONST IMS_CHAR* pszValue)
+AString::AString(IN const IMS_CHAR* pszValue)
 {
     if (pszValue == IMS_NULL)
     {
-        pData = &SHARED_NULL;
+        m_pData = &SHARED_NULL;
     }
     else if ((*pszValue) == '\0')
     {
-        pData = &SHARED_EMPTY;
+        m_pData = &SHARED_EMPTY;
     }
     else
     {
         IMS_SINT32 nLen = IMS_StrLen(pszValue);
 
-        pData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + nLen));
+        m_pData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + nLen));
 
-        if (pData == IMS_NULL)
+        if (m_pData == IMS_NULL)
         {
-            pData = &SHARED_NULL;
+            m_pData = &SHARED_NULL;
         }
         else
         {
-            pData->nAlloc = pData->nSize = nLen;
-            pData->pValue = pData->acValue;
+            m_pData->nAlloc = m_pData->nSize = nLen;
+            m_pData->pValue = m_pData->acValue;
             // copy with null-terminated character
-            IMS_MEM_Memcpy(pData->acValue, pszValue, nLen + 1);
+            IMS_MEM_Memcpy(m_pData->acValue, pszValue, nLen + 1);
         }
     }
 }
 
 PUBLIC
-AString::AString(IN CONST IMS_CHAR* pszValue, IN IMS_SINT32 nSize)
+AString::AString(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nSize)
 {
     if (pszValue == IMS_NULL)
     {
-        pData = &SHARED_NULL;
+        m_pData = &SHARED_NULL;
     }
     else if (nSize <= 0)
     {
-        pData = &SHARED_EMPTY;
+        m_pData = &SHARED_EMPTY;
     }
     else
     {
-        pData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + nSize));
+        m_pData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + nSize));
 
-        if (pData == IMS_NULL)
+        if (m_pData == IMS_NULL)
         {
-            pData = &SHARED_NULL;
+            m_pData = &SHARED_NULL;
         }
         else
         {
-            pData->nAlloc = pData->nSize = nSize;
-            pData->pValue = pData->acValue;
-            IMS_MEM_Memcpy(pData->acValue, pszValue, nSize);
-            pData->acValue[nSize] = '\0';
+            m_pData->nAlloc = m_pData->nSize = nSize;
+            m_pData->pValue = m_pData->acValue;
+            IMS_MEM_Memcpy(m_pData->acValue, pszValue, nSize);
+            m_pData->acValue[nSize] = '\0';
         }
     }
 }
 
 PUBLIC
-AString::AString(IN CONST IMS_CHAR* pszValue, IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount)
+AString::AString(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount)
 {
     if (pszValue == IMS_NULL)
     {
-        pData = &SHARED_NULL;
+        m_pData = &SHARED_NULL;
     }
     else if ((nCount <= 0) || (nOffset <= 0))
     {
-        pData = &SHARED_EMPTY;
+        m_pData = &SHARED_EMPTY;
     }
     else
     {
-        pData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + nCount));
+        m_pData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + nCount));
 
-        if (pData == IMS_NULL)
+        if (m_pData == IMS_NULL)
         {
-            pData = &SHARED_NULL;
+            m_pData = &SHARED_NULL;
         }
         else
         {
-            pData->nAlloc = pData->nSize = nCount;
-            pData->pValue = pData->acValue;
-            IMS_MEM_Memcpy(pData->acValue, &(pszValue[nOffset]), nCount);
-            pData->acValue[nCount] = '\0';
+            m_pData->nAlloc = m_pData->nSize = nCount;
+            m_pData->pValue = m_pData->acValue;
+            IMS_MEM_Memcpy(m_pData->acValue, &(pszValue[nOffset]), nCount);
+            m_pData->acValue[nCount] = '\0';
         }
     }
 }
 
 PUBLIC
-AString::AString(IN IMS_SINT32 nSize, IN CONST IMS_CHAR ch)
+AString::AString(IN IMS_SINT32 nSize, IN const IMS_CHAR c)
 {
     if (nSize <= 0)
     {
-        pData = &SHARED_EMPTY;
+        m_pData = &SHARED_EMPTY;
     }
     else
     {
-        pData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + nSize));
+        m_pData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + nSize));
 
-        if (pData == IMS_NULL)
+        if (m_pData == IMS_NULL)
         {
-            pData = &SHARED_NULL;
+            m_pData = &SHARED_NULL;
         }
         else
         {
-            pData->nAlloc = pData->nSize = nSize;
-            pData->pValue = pData->acValue;
-            IMS_MEM_Memset(pData->acValue, ch, nSize);
-            pData->acValue[nSize] = '\0';
+            m_pData->nAlloc = m_pData->nSize = nSize;
+            m_pData->pValue = m_pData->acValue;
+            IMS_MEM_Memset(m_pData->acValue, c, nSize);
+            m_pData->acValue[nSize] = '\0';
         }
     }
 }
 
 PUBLIC
-AString::AString(IN CONST AString& objRHS)
+AString::AString(IN const AString& other)
 {
-    if (objRHS.pData == &SHARED_EMPTY)
+    if (other.m_pData == &SHARED_EMPTY)
     {
-        pData = &SHARED_EMPTY;
+        m_pData = &SHARED_EMPTY;
     }
-    else if (objRHS.pData == &SHARED_NULL)
+    else if (other.m_pData == &SHARED_NULL)
     {
-        pData = &SHARED_NULL;
+        m_pData = &SHARED_NULL;
     }
     else
     {
-        pData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + objRHS.pData->nAlloc));
+        m_pData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + other.m_pData->nAlloc));
 
-        if (pData == IMS_NULL)
+        if (m_pData == IMS_NULL)
         {
-            pData = &SHARED_NULL;
+            m_pData = &SHARED_NULL;
         }
         else
         {
-            pData->nAlloc = objRHS.pData->nAlloc;
-            pData->nSize = objRHS.pData->nSize;
-            pData->pValue = pData->acValue;
-            IMS_MEM_Memcpy(pData->acValue, objRHS.pData->pValue, pData->nSize + 1);
+            m_pData->nAlloc = other.m_pData->nAlloc;
+            m_pData->nSize = other.m_pData->nSize;
+            m_pData->pValue = m_pData->acValue;
+            IMS_MEM_Memcpy(m_pData->acValue, other.m_pData->pValue, m_pData->nSize + 1);
         }
     }
 }
@@ -838,60 +844,61 @@ AString::AString(IN IMS_SINT32 nSize)
 {
     if (nSize <= 0)
     {
-        pData = &SHARED_EMPTY;
+        m_pData = &SHARED_EMPTY;
     }
     else
     {
-        pData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + nSize));
+        m_pData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + nSize));
 
-        if (pData == IMS_NULL)
+        if (m_pData == IMS_NULL)
         {
-            pData = &SHARED_NULL;
+            m_pData = &SHARED_NULL;
         }
         else
         {
-            pData->nAlloc = nSize;
-            pData->nSize = 0;
-            pData->pValue = pData->acValue;
-            IMS_MEM_Memset(pData->acValue, 0x00, nSize);
-            pData->acValue[nSize] = '\0';
+            m_pData->nAlloc = nSize;
+            m_pData->nSize = 0;
+            m_pData->pValue = m_pData->acValue;
+            IMS_MEM_Memset(m_pData->acValue, 0x00, nSize);
+            m_pData->acValue[nSize] = '\0';
         }
     }
 }
 
 PRIVATE
-AString::AString(IN Data* pData_) :
-        pData(pData_)
+AString::AString(IN Data* pData) :
+        m_pData(pData)
 {
 }
 
 PUBLIC
-AString& AString::operator=(IN CONST AString& objRHS)
+AString& AString::operator=(IN const AString& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        if (objRHS.IsEmpty())
+        if (other.IsEmpty())
         {
             Clear();
-            pData = &SHARED_EMPTY;
+            m_pData = &SHARED_EMPTY;
         }
-        else if (objRHS.IsNULL())
+        else if (other.IsNull())
         {
             Clear();
-            pData = &SHARED_NULL;
+            m_pData = &SHARED_NULL;
         }
         else
         {
-            IMS_SINT32 nLen = objRHS.pData->nSize;
+            IMS_SINT32 nLen = other.m_pData->nSize;
 
-            if ((nLen > pData->nAlloc) || ((nLen < pData->nSize) && (nLen < (pData->nAlloc >> 1))))
+            if ((nLen > m_pData->nAlloc) ||
+                    ((nLen < m_pData->nSize) && (nLen < (m_pData->nAlloc >> 1))))
             {
                 Realloc(nLen);
             }
 
             // include NULL character
-            IMS_MEM_Memcpy(pData->pValue, objRHS.pData->pValue, nLen + 1);
-            pData->nSize = nLen;
+            IMS_MEM_Memcpy(m_pData->pValue, other.m_pData->pValue, nLen + 1);
+            m_pData->nSize = nLen;
         }
     }
 
@@ -899,50 +906,51 @@ AString& AString::operator=(IN CONST AString& objRHS)
 }
 
 PUBLIC
-AString& AString::operator=(IN CONST IMS_CHAR ch)
+AString& AString::operator=(IN const IMS_CHAR c)
 {
-    const IMS_CHAR acValue[2] = {ch, '\0'};
+    const IMS_CHAR acValue[2] = {c, '\0'};
 
     return operator=(acValue);
 }
 
 PUBLIC
-AString& AString::operator=(IN CONST IMS_CHAR* pszValue)
+AString& AString::operator=(IN const IMS_CHAR* pszValue)
 {
     if (pszValue == IMS_NULL)
     {
         Clear();
-        pData = &SHARED_NULL;
+        m_pData = &SHARED_NULL;
     }
     else if ((*pszValue) == '\0')
     {
         Clear();
-        pData = &SHARED_EMPTY;
+        m_pData = &SHARED_EMPTY;
     }
     else
     {
         IMS_SINT32 nLen = IMS_StrLen(pszValue);
 
-        if ((nLen > pData->nAlloc) || ((nLen < pData->nSize) && (nLen < (pData->nAlloc >> 1))))
+        if ((nLen > m_pData->nAlloc) ||
+                ((nLen < m_pData->nSize) && (nLen < (m_pData->nAlloc >> 1))))
         {
             Realloc(nLen);
         }
 
         // include NULL character
-        IMS_MEM_Memcpy(pData->pValue, pszValue, nLen + 1);
-        pData->nSize = nLen;
+        IMS_MEM_Memcpy(m_pData->pValue, pszValue, nLen + 1);
+        m_pData->nSize = nLen;
     }
 
     return (*this);
 }
 
 PUBLIC
-AString& AString::operator=(IN CONST IMS_WCHAR* pwszValue)
+AString& AString::operator=(IN const IMS_WCHAR* pwszValue)
 {
     if (pwszValue == IMS_NULL)
     {
         Clear();
-        pData = &SHARED_NULL;
+        m_pData = &SHARED_NULL;
     }
 
     IMS_SINT32 nLen = astring_WideCharToChar(pwszValue, -1, IMS_NULL, 0);
@@ -950,17 +958,18 @@ AString& AString::operator=(IN CONST IMS_WCHAR* pwszValue)
     if (nLen == 0)
     {
         Clear();
-        pData = &SHARED_EMPTY;
+        m_pData = &SHARED_EMPTY;
     }
     else
     {
-        if ((nLen > pData->nAlloc) || ((nLen < pData->nSize) && (nLen < (pData->nAlloc >> 1))))
+        if ((nLen > m_pData->nAlloc) ||
+                ((nLen < m_pData->nSize) && (nLen < (m_pData->nAlloc >> 1))))
         {
             Realloc(nLen);
         }
 
-        astring_WideCharToChar(pwszValue, nLen, pData->pValue, nLen + 1);
-        pData->nSize = nLen;
+        astring_WideCharToChar(pwszValue, nLen, m_pData->pValue, nLen + 1);
+        m_pData->nSize = nLen;
     }
 
     return (*this);
@@ -971,7 +980,7 @@ IMS_CHAR AString::operator[](IN IMS_SINT32 nIndex) const
 {
     IMS_ASSERT(nIndex >= 0 && nIndex < GetLength());
 
-    return pData->pValue[nIndex];
+    return m_pData->pValue[nIndex];
 }
 
 PUBLIC
@@ -987,7 +996,7 @@ IMS_CHAR AString::operator[](IN IMS_UINT32 nIndex) const
 {
     IMS_ASSERT(nIndex < IMS_UINT32(GetLength()));
 
-    return pData->pValue[nIndex];
+    return m_pData->pValue[nIndex];
 }
 
 PUBLIC
@@ -999,37 +1008,37 @@ AString::CharRef AString::operator[](IN IMS_UINT32 nIndex)
 }
 
 PUBLIC
-IMS_BOOL AString::operator<(IN CONST AString& objRHS)
+IMS_BOOL AString::operator<(IN const AString& other)
 {
-    if (pData == objRHS.pData)
+    if (m_pData == other.m_pData)
     {
         return IMS_FALSE;
     }
 
-    if (!IsNULL() && objRHS.IsNULL())
+    if (!IsNull() && other.IsNull())
     {
         return IMS_FALSE;
     }
 
-    if (IsNULL() && !objRHS.IsNULL())
+    if (IsNull() && !other.IsNull())
     {
         return IMS_TRUE;
     }
 
-    return (Compare(pData->pValue, objRHS.pData->pValue) < 0);
+    return (Compare(m_pData->pValue, other.m_pData->pValue) < 0);
 }
 
 PUBLIC
-AString AString::GetSubStr(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount /* = -1 */) const
+AString AString::GetSubStr(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount /*= -1*/) const
 {
-    if ((pData == &SHARED_NULL) || (pData == &SHARED_EMPTY) || (nOffset >= pData->nSize))
+    if ((m_pData == &SHARED_NULL) || (m_pData == &SHARED_EMPTY) || (nOffset >= m_pData->nSize))
     {
         return AString(&SHARED_NULL);
     }
 
     if (nCount < 0)
     {
-        nCount = pData->nSize - nOffset;
+        nCount = m_pData->nSize - nOffset;
     }
 
     if (nOffset < 0)
@@ -1038,17 +1047,17 @@ AString AString::GetSubStr(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount /* = -1 *
         nOffset = 0;
     }
 
-    if ((nCount + nOffset) > pData->nSize)
+    if ((nCount + nOffset) > m_pData->nSize)
     {
-        nCount = pData->nSize - nOffset;
+        nCount = m_pData->nSize - nOffset;
     }
 
-    if ((nOffset == 0) && (nCount == pData->nSize))
+    if ((nOffset == 0) && (nCount == m_pData->nSize))
     {
         return (*this);
     }
 
-    return AString(pData->pValue + nOffset, nCount);
+    return AString(m_pData->pValue + nOffset, nCount);
 }
 
 PUBLIC
@@ -1056,21 +1065,21 @@ void AString::Chop(IN IMS_SINT32 nCount)
 {
     if (nCount > 0)
     {
-        Resize(pData->nSize - nCount);
+        Resize(m_pData->nSize - nCount);
     }
 }
 
 PUBLIC
 void AString::Truncate(IN IMS_SINT32 nOffset)
 {
-    if (nOffset < pData->nSize)
+    if (nOffset < m_pData->nSize)
     {
         Resize(nOffset);
     }
 }
 
 PUBLIC
-void AString::Attach(IN CONST IMS_CHAR* pValue, IN IMS_SINT32 nSize)
+void AString::Attach(IN const IMS_CHAR* pValue, IN IMS_SINT32 nSize)
 {
     Data* pNewData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data)));
 
@@ -1089,15 +1098,15 @@ void AString::Attach(IN CONST IMS_CHAR* pValue, IN IMS_SINT32 nSize)
 
     Clear();
 
-    pData = pNewData;
+    m_pData = pNewData;
 }
 
 PUBLIC
 void AString::Detach()
 {
-    if (pData->pValue != pData->acValue)
+    if (m_pData->pValue != m_pData->acValue)
     {
-        Realloc(pData->nSize);
+        Realloc(m_pData->nSize);
     }
 }
 
@@ -1106,48 +1115,49 @@ void AString::Resize(IN IMS_SINT32 nSize)
 {
     if (nSize <= 0)
     {
-        if (pData == &SHARED_NULL)
+        if (m_pData == &SHARED_NULL)
         {
             return;
         }
 
         Clear();
-        pData = &SHARED_EMPTY;
+        m_pData = &SHARED_EMPTY;
     }
     else
     {
-        if ((nSize > pData->nAlloc) || ((nSize < pData->nSize) && (nSize < (pData->nAlloc >> 1))))
+        if ((nSize > m_pData->nAlloc) ||
+                ((nSize < m_pData->nSize) && (nSize < (m_pData->nAlloc >> 1))))
         {
             Realloc(astring_AllocateMore(nSize, sizeof(Data)));
         }
 
-        if (pData->nAlloc >= nSize)
+        if (m_pData->nAlloc >= nSize)
         {
-            pData->nSize = nSize;
-            pData->pValue = pData->acValue;
-            pData->acValue[nSize] = '\0';
+            m_pData->nSize = nSize;
+            m_pData->pValue = m_pData->acValue;
+            m_pData->acValue[nSize] = '\0';
         }
     }
 }
 
 PUBLIC
-IMS_SINT32 AString::GetIndexOf(IN CONST IMS_CHAR ch, IN IMS_SINT32 nOffset /* = 0 */) const
+IMS_SINT32 AString::GetIndexOf(IN const IMS_CHAR c, IN IMS_SINT32 nOffset /*= 0*/) const
 {
     if (nOffset < 0)
     {
-        nOffset = IMS_MAX(nOffset + pData->nSize, 0);
+        nOffset = IMS_MAX(nOffset + m_pData->nSize, 0);
     }
 
-    if (nOffset < pData->nSize)
+    if (nOffset < m_pData->nSize)
     {
-        const IMS_CHAR* pStart = pData->pValue + nOffset - 1;
-        const IMS_CHAR* pEnd = pData->pValue + pData->nSize;
+        const IMS_CHAR* pStart = m_pData->pValue + nOffset - 1;
+        const IMS_CHAR* pEnd = m_pData->pValue + m_pData->nSize;
 
         while (++pStart != pEnd)
         {
-            if (*pStart == ch)
+            if (*pStart == c)
             {
-                return (pStart - pData->pValue);
+                return (pStart - m_pData->pValue);
             }
         }
     }
@@ -1156,18 +1166,18 @@ IMS_SINT32 AString::GetIndexOf(IN CONST IMS_CHAR ch, IN IMS_SINT32 nOffset /* = 
 }
 
 PUBLIC
-IMS_SINT32 AString::GetIndexOf(IN CONST IMS_CHAR* pszValue, IN IMS_SINT32 nOffset /* = 0 */) const
+IMS_SINT32 AString::GetIndexOf(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nOffset /*= 0*/) const
 {
     return GetIndexOf(FromRawData(pszValue, IMS_StrLen(pszValue)), nOffset);
 }
 
 PUBLIC
-IMS_SINT32 AString::GetIndexOf(IN CONST AString& objStr, IN IMS_SINT32 nOffset /* = 0 */) const
+IMS_SINT32 AString::GetIndexOf(IN const AString& objStr, IN IMS_SINT32 nOffset /*= 0*/) const
 {
-    const IMS_SINT32 nLen = pData->nSize;
-    const IMS_SINT32 nOtherLen = objStr.pData->nSize;
+    const IMS_SINT32 nLen = m_pData->nSize;
+    const IMS_SINT32 nOtherLen = objStr.m_pData->nSize;
 
-    if ((nOffset > pData->nSize) || (nOtherLen + nOffset > nLen))
+    if ((nOffset > m_pData->nSize) || (nOtherLen + nOffset > nLen))
     {
         return NPOS;
     }
@@ -1179,15 +1189,16 @@ IMS_SINT32 AString::GetIndexOf(IN CONST AString& objStr, IN IMS_SINT32 nOffset /
 
     if (nOtherLen == 1)
     {
-        return GetIndexOf(*(objStr.pData->pValue), nOffset);
+        return GetIndexOf(*(objStr.m_pData->pValue), nOffset);
     }
 
-    const IMS_CHAR* pNeedle = objStr.pData->pValue;
-    const IMS_CHAR* pHayStack = pData->pValue + nOffset;
-    const IMS_CHAR* pEnd = pData->pValue + (nLen - nOtherLen);
+    const IMS_CHAR* pNeedle = objStr.m_pData->pValue;
+    const IMS_CHAR* pHayStack = m_pData->pValue + nOffset;
+    const IMS_CHAR* pEnd = m_pData->pValue + (nLen - nOtherLen);
     // FIXME: __IMS_LP64__
     const IMS_UINT32 OL_MINUS_1 = nOtherLen - 1;
-    IMS_UINT32 nHashNeedle = 0, nHashHayStack = 0;
+    IMS_UINT32 nHashNeedle = 0;
+    IMS_UINT32 nHashHayStack = 0;
     IMS_SINT32 nIndex;
 
     for (nIndex = 0; nIndex < nOtherLen; ++nIndex)
@@ -1205,10 +1216,10 @@ IMS_SINT32 AString::GetIndexOf(IN CONST AString& objStr, IN IMS_SINT32 nOffset /
         if ((nHashHayStack == nHashNeedle) && (*pNeedle == *pHayStack) &&
                 (IMS_StrNCmp(pNeedle, pHayStack, nOtherLen) == 0))
         {
-            return LONG_TO_INT(pHayStack - pData->pValue);
+            return LONG_TO_INT(pHayStack - m_pData->pValue);
         }
 
-        if (OL_MINUS_1 < sizeof(IMS_UINT32) * 8 /* number of char bits */)
+        if (OL_MINUS_1 < sizeof(IMS_UINT32) * 8 /*number of char bits*/)
         {
             nHashHayStack -= (*pHayStack) << OL_MINUS_1;
         }
@@ -1222,25 +1233,25 @@ IMS_SINT32 AString::GetIndexOf(IN CONST AString& objStr, IN IMS_SINT32 nOffset /
 }
 
 PUBLIC
-IMS_SINT32 AString::GetLastIndexOf(IN CONST IMS_CHAR ch, IN IMS_SINT32 nOffset /* = -1 */) const
+IMS_SINT32 AString::GetLastIndexOf(IN const IMS_CHAR c, IN IMS_SINT32 nOffset /*= -1*/) const
 {
     if (nOffset < 0)
     {
-        nOffset += pData->nSize;
+        nOffset += m_pData->nSize;
     }
-    else if (nOffset > pData->nSize)
+    else if (nOffset > m_pData->nSize)
     {
-        nOffset = pData->nSize - 1;
+        nOffset = m_pData->nSize - 1;
     }
 
     if (nOffset >= 0)
     {
-        const IMS_CHAR* pStart = pData->pValue;
-        const IMS_CHAR* pEnd = pData->pValue + nOffset + 1;
+        const IMS_CHAR* pStart = m_pData->pValue;
+        const IMS_CHAR* pEnd = m_pData->pValue + nOffset + 1;
 
         while (pEnd-- != pStart)
         {
-            if (*pEnd == ch)
+            if (*pEnd == c)
             {
                 return (pEnd - pStart);
             }
@@ -1252,16 +1263,16 @@ IMS_SINT32 AString::GetLastIndexOf(IN CONST IMS_CHAR ch, IN IMS_SINT32 nOffset /
 
 PUBLIC
 IMS_SINT32 AString::GetLastIndexOf(
-        IN CONST IMS_CHAR* pszValue, IN IMS_SINT32 nOffset /* = -1 */) const
+        IN const IMS_CHAR* pszValue, IN IMS_SINT32 nOffset /*= -1*/) const
 {
     return GetLastIndexOf(FromRawData(pszValue, IMS_StrLen(pszValue)), nOffset);
 }
 
 PUBLIC
-IMS_SINT32 AString::GetLastIndexOf(IN CONST AString& objStr, IN IMS_SINT32 nOffset /* = -1 */) const
+IMS_SINT32 AString::GetLastIndexOf(IN const AString& objStr, IN IMS_SINT32 nOffset /*= -1*/) const
 {
-    const IMS_SINT32 nLen = pData->nSize;
-    const IMS_SINT32 nOtherLen = objStr.pData->nSize;
+    const IMS_SINT32 nLen = m_pData->nSize;
+    const IMS_SINT32 nOtherLen = objStr.m_pData->nSize;
     IMS_SINT32 nDelta = nLen - nOtherLen;
 
     if (nOffset < 0)
@@ -1281,18 +1292,19 @@ IMS_SINT32 AString::GetLastIndexOf(IN CONST AString& objStr, IN IMS_SINT32 nOffs
 
     if (nOtherLen == 1)
     {
-        return GetLastIndexOf(*(objStr.pData->pValue), nOffset);
+        return GetLastIndexOf(*(objStr.m_pData->pValue), nOffset);
     }
 
-    const IMS_CHAR* pNeedle = objStr.pData->pValue;
-    const IMS_CHAR* pHayStack = pData->pValue + nOffset;
-    const IMS_CHAR* pEnd = pData->pValue;
+    const IMS_CHAR* pNeedle = objStr.m_pData->pValue;
+    const IMS_CHAR* pHayStack = m_pData->pValue + nOffset;
+    const IMS_CHAR* pEnd = m_pData->pValue;
     // FIXME: __IMS_LP64__
     const IMS_UINT32 OL_MINUS_1 = nOtherLen - 1;
     const IMS_CHAR* pEndOfNeedle = pNeedle + OL_MINUS_1;
     const IMS_CHAR* pEndOfHayStack = pHayStack + OL_MINUS_1;
 
-    IMS_UINT32 nHashNeedle = 0, nHashHayStack = 0;
+    IMS_UINT32 nHashNeedle = 0;
+    IMS_UINT32 nHashHayStack = 0;
     IMS_SINT32 nIndex;
 
     for (nIndex = 0; nIndex < nOtherLen; ++nIndex)
@@ -1309,12 +1321,12 @@ IMS_SINT32 AString::GetLastIndexOf(IN CONST AString& objStr, IN IMS_SINT32 nOffs
 
         if ((nHashHayStack == nHashNeedle) && (IMS_StrNCmp(pNeedle, pHayStack, nOtherLen) == 0))
         {
-            return (pHayStack - pData->pValue);
+            return (pHayStack - m_pData->pValue);
         }
 
         --pHayStack;
 
-        if (OL_MINUS_1 < sizeof(IMS_UINT32) * 8 /* number of char bits */)
+        if (OL_MINUS_1 < sizeof(IMS_UINT32) * 8 /*number of char bits*/)
         {
             nHashHayStack -= *(pHayStack + nOtherLen) << OL_MINUS_1;
         }
@@ -1326,36 +1338,36 @@ IMS_SINT32 AString::GetLastIndexOf(IN CONST AString& objStr, IN IMS_SINT32 nOffs
 }
 
 PUBLIC
-IMS_BOOL AString::Contains(IN CONST IMS_CHAR ch) const
+IMS_BOOL AString::Contains(IN const IMS_CHAR c) const
 {
-    return (GetIndexOf(ch) != NPOS);
+    return (GetIndexOf(c) != NPOS);
 }
 
 PUBLIC
-IMS_BOOL AString::Contains(IN CONST IMS_CHAR* pszValue) const
+IMS_BOOL AString::Contains(IN const IMS_CHAR* pszValue) const
 {
     return (GetIndexOf(pszValue) != NPOS);
 }
 
 PUBLIC
-IMS_BOOL AString::Contains(IN CONST AString& objStr) const
+IMS_BOOL AString::Contains(IN const AString& objStr) const
 {
     return (GetIndexOf(objStr) != NPOS);
 }
 
 PUBLIC
-IMS_BOOL AString::EndsWith(IN CONST IMS_CHAR ch) const
+IMS_BOOL AString::EndsWith(IN const IMS_CHAR c) const
 {
-    if (pData->nSize == 0)
+    if (m_pData->nSize == 0)
     {
         return IMS_FALSE;
     }
 
-    return (pData->pValue[pData->nSize - 1] == ch);
+    return (m_pData->pValue[m_pData->nSize - 1] == c);
 }
 
 PUBLIC
-IMS_BOOL AString::EndsWith(IN CONST IMS_CHAR* pszValue) const
+IMS_BOOL AString::EndsWith(IN const IMS_CHAR* pszValue) const
 {
     if (pszValue == IMS_NULL)
     {
@@ -1369,44 +1381,44 @@ IMS_BOOL AString::EndsWith(IN CONST IMS_CHAR* pszValue) const
 
     IMS_SINT32 nLen = IMS_StrLen(pszValue);
 
-    if (pData->nSize < nLen)
+    if (m_pData->nSize < nLen)
     {
         return IMS_FALSE;
     }
 
-    return (IMS_StrNCmp(pData->pValue + pData->nSize - nLen, pszValue, nLen) == 0);
+    return (IMS_StrNCmp(m_pData->pValue + m_pData->nSize - nLen, pszValue, nLen) == 0);
 }
 
 PUBLIC
-IMS_BOOL AString::EndsWith(IN CONST AString& objStr) const
+IMS_BOOL AString::EndsWith(IN const AString& objStr) const
 {
-    if ((pData == objStr.pData) || (objStr.pData->nSize == 0))
+    if ((m_pData == objStr.m_pData) || (objStr.m_pData->nSize == 0))
     {
         return IMS_TRUE;
     }
 
-    if (pData->nSize < objStr.pData->nSize)
+    if (m_pData->nSize < objStr.m_pData->nSize)
     {
         return IMS_FALSE;
     }
 
-    return (IMS_MEM_Memcmp(pData->pValue + pData->nSize - objStr.pData->nSize, objStr.pData->pValue,
-                    objStr.pData->nSize) == 0);
+    return (IMS_MEM_Memcmp(m_pData->pValue + m_pData->nSize - objStr.m_pData->nSize,
+                    objStr.m_pData->pValue, objStr.m_pData->nSize) == 0);
 }
 
 PUBLIC
-IMS_BOOL AString::StartsWith(IN CONST IMS_CHAR ch) const
+IMS_BOOL AString::StartsWith(IN const IMS_CHAR c) const
 {
-    if (pData->nSize == 0)
+    if (m_pData->nSize == 0)
     {
         return IMS_FALSE;
     }
 
-    return (pData->pValue[0] == ch);
+    return (m_pData->pValue[0] == c);
 }
 
 PUBLIC
-IMS_BOOL AString::StartsWith(IN CONST IMS_CHAR* pszValue) const
+IMS_BOOL AString::StartsWith(IN const IMS_CHAR* pszValue) const
 {
     if (pszValue == IMS_NULL)
     {
@@ -1420,155 +1432,156 @@ IMS_BOOL AString::StartsWith(IN CONST IMS_CHAR* pszValue) const
 
     IMS_SINT32 nLen = IMS_StrLen(pszValue);
 
-    if (pData->nSize < nLen)
+    if (m_pData->nSize < nLen)
     {
         return IMS_FALSE;
     }
 
-    return (IMS_StrNCmp(pData->pValue, pszValue, nLen) == 0);
+    return (IMS_StrNCmp(m_pData->pValue, pszValue, nLen) == 0);
 }
 
 PUBLIC
-IMS_BOOL AString::StartsWith(IN CONST AString& objStr) const
+IMS_BOOL AString::StartsWith(IN const AString& objStr) const
 {
-    if ((pData == objStr.pData) || (objStr.pData->nSize == 0))
+    if ((m_pData == objStr.m_pData) || (objStr.m_pData->nSize == 0))
     {
         return IMS_TRUE;
     }
 
-    if (pData->nSize < objStr.pData->nSize)
+    if (m_pData->nSize < objStr.m_pData->nSize)
     {
         return IMS_FALSE;
     }
 
-    return (IMS_MEM_Memcmp(pData->pValue, objStr.pData->pValue, objStr.pData->nSize) == 0);
+    return (IMS_MEM_Memcmp(m_pData->pValue, objStr.m_pData->pValue, objStr.m_pData->nSize) == 0);
 }
 
 PUBLIC
-IMS_BOOL AString::Equals(IN CONST IMS_CHAR ch) const
+IMS_BOOL AString::Equals(IN const IMS_CHAR c) const
 {
-    if (pData->nSize != 1)
+    if (m_pData->nSize != 1)
     {
         return IMS_FALSE;
     }
 
-    return (pData->pValue[0] == ch);
+    return (m_pData->pValue[0] == c);
 }
 
 PUBLIC
-IMS_BOOL AString::Equals(IN CONST IMS_CHAR* pszValue) const
+IMS_BOOL AString::Equals(IN const IMS_CHAR* pszValue) const
 {
-    return (Compare(pData->pValue, pszValue) == 0);
+    return (Compare(m_pData->pValue, pszValue) == 0);
 }
 
 PUBLIC
-IMS_BOOL AString::Equals(IN CONST AString& objStr) const
+IMS_BOOL AString::Equals(IN const AString& objStr) const
 {
-    if (pData == objStr.pData)
+    if (m_pData == objStr.m_pData)
     {
         return IMS_TRUE;
     }
 
-    if (pData->nSize != objStr.pData->nSize)
+    if (m_pData->nSize != objStr.m_pData->nSize)
     {
         return IMS_FALSE;
     }
 
-    if ((IsNULL() && !objStr.IsNULL()) || (!IsNULL() && objStr.IsNULL()))
+    if ((IsNull() && !objStr.IsNull()) || (!IsNull() && objStr.IsNull()))
     {
         return IMS_FALSE;
     }
 
-    return (Compare(pData->pValue, objStr.pData->pValue) == 0);
+    return (Compare(m_pData->pValue, objStr.m_pData->pValue) == 0);
 }
 
 PUBLIC
-IMS_BOOL AString::EqualsIgnoreCase(IN CONST IMS_CHAR ch) const
+IMS_BOOL AString::EqualsIgnoreCase(IN const IMS_CHAR c) const
 {
-    if (pData->nSize != 1)
+    if (m_pData->nSize != 1)
     {
         return IMS_FALSE;
     }
 
-    IMS_CHAR ch1 = IMS_TOLOWER(pData->pValue[0]);
-    IMS_CHAR ch2 = IMS_TOLOWER(ch);
+    IMS_CHAR c1 = IMS_TOLOWER(m_pData->pValue[0]);
+    IMS_CHAR c2 = IMS_TOLOWER(c);
 
-    return (ch1 == ch2);
+    return (c1 == c2);
 }
 
 PUBLIC
-IMS_BOOL AString::EqualsIgnoreCase(IN CONST IMS_CHAR* pszValue) const
+IMS_BOOL AString::EqualsIgnoreCase(IN const IMS_CHAR* pszValue) const
 {
-    return (CompareIgnoreCase(pData->pValue, pszValue) == 0);
+    return (CompareIgnoreCase(m_pData->pValue, pszValue) == 0);
 }
 
 PUBLIC
-IMS_BOOL AString::EqualsIgnoreCase(IN CONST AString& objStr) const
+IMS_BOOL AString::EqualsIgnoreCase(IN const AString& objStr) const
 {
-    if (pData->nSize != objStr.pData->nSize)
+    if (m_pData->nSize != objStr.m_pData->nSize)
     {
         return IMS_FALSE;
     }
 
-    if ((IsNULL() && !objStr.IsNULL()) || (!IsNULL() && objStr.IsNULL()))
+    if ((IsNull() && !objStr.IsNull()) || (!IsNull() && objStr.IsNull()))
     {
         return IMS_FALSE;
     }
 
-    return (CompareIgnoreCase(pData->pValue, objStr.pData->pValue) == 0);
+    return (CompareIgnoreCase(m_pData->pValue, objStr.m_pData->pValue) == 0);
 }
 
 PUBLIC
-AString& AString::Append(IN CONST IMS_CHAR ch)
+AString& AString::Append(IN const IMS_CHAR c)
 {
-    if (pData->nSize + 1 > pData->nAlloc)
+    if (m_pData->nSize + 1 > m_pData->nAlloc)
     {
-        Realloc(astring_AllocateMore(pData->nSize + 1, sizeof(Data)));
+        Realloc(astring_AllocateMore(m_pData->nSize + 1, sizeof(Data)));
     }
 
-    pData->pValue[pData->nSize++] = ch;
-    pData->pValue[pData->nSize] = '\0';
+    m_pData->pValue[m_pData->nSize++] = c;
+    m_pData->pValue[m_pData->nSize] = '\0';
 
     return (*this);
 }
 
 PUBLIC
-AString& AString::Append(IN CONST IMS_CHAR* pszValue)
+AString& AString::Append(IN const IMS_CHAR* pszValue)
 {
     if (pszValue != IMS_NULL)
     {
         IMS_SINT32 nLen = IMS_StrLen(pszValue);
 
-        if (pData->nSize + nLen > pData->nAlloc)
+        if (m_pData->nSize + nLen > m_pData->nAlloc)
         {
-            Realloc(astring_AllocateMore(pData->nSize + nLen, sizeof(Data)));
+            Realloc(astring_AllocateMore(m_pData->nSize + nLen, sizeof(Data)));
         }
 
         // include NULL character
-        IMS_MEM_Memcpy(pData->pValue + pData->nSize, pszValue, nLen + 1);
-        pData->nSize += nLen;
+        IMS_MEM_Memcpy(m_pData->pValue + m_pData->nSize, pszValue, nLen + 1);
+        m_pData->nSize += nLen;
     }
 
     return (*this);
 }
 
 PUBLIC
-AString& AString::Append(IN CONST AString& objStr)
+AString& AString::Append(IN const AString& objStr)
 {
-    if ((pData == &SHARED_NULL) || (pData == &SHARED_EMPTY))
+    if ((m_pData == &SHARED_NULL) || (m_pData == &SHARED_EMPTY))
     {
         (*this) = objStr;
     }
-    else if (objStr.pData != &SHARED_NULL)
+    else if (objStr.m_pData != &SHARED_NULL)
     {
-        if (pData->nSize + objStr.pData->nSize > pData->nAlloc)
+        if (m_pData->nSize + objStr.m_pData->nSize > m_pData->nAlloc)
         {
-            Realloc(astring_AllocateMore(pData->nSize + objStr.pData->nSize, sizeof(Data)));
+            Realloc(astring_AllocateMore(m_pData->nSize + objStr.m_pData->nSize, sizeof(Data)));
         }
 
-        IMS_MEM_Memcpy(pData->pValue + pData->nSize, objStr.pData->pValue, objStr.pData->nSize);
-        pData->nSize += objStr.pData->nSize;
-        pData->pValue[pData->nSize] = '\0';
+        IMS_MEM_Memcpy(
+                m_pData->pValue + m_pData->nSize, objStr.m_pData->pValue, objStr.m_pData->nSize);
+        m_pData->nSize += objStr.m_pData->nSize;
+        m_pData->pValue[m_pData->nSize] = '\0';
     }
 
     return (*this);
@@ -1577,101 +1590,101 @@ AString& AString::Append(IN CONST AString& objStr)
 PUBLIC
 AString& AString::Erase(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount)
 {
-    if ((nCount <= 0) || (nOffset >= pData->nSize) || (nOffset < 0))
+    if ((nCount <= 0) || (nOffset >= m_pData->nSize) || (nOffset < 0))
     {
         return (*this);
     }
 
-    if ((nOffset + nCount) >= pData->nSize)
+    if ((nOffset + nCount) >= m_pData->nSize)
     {
         Resize(nOffset);
     }
     else
     {
-        IMS_MEM_Memmove(pData->pValue + nOffset, pData->pValue + nOffset + nCount,
-                pData->nSize - nOffset - nCount);
-        Resize(pData->nSize - nCount);
+        IMS_MEM_Memmove(m_pData->pValue + nOffset, m_pData->pValue + nOffset + nCount,
+                m_pData->nSize - nOffset - nCount);
+        Resize(m_pData->nSize - nCount);
     }
 
     return (*this);
 }
 
 PUBLIC
-AString& AString::Fill(IN IMS_CHAR ch, IN IMS_SINT32 nSize /* = -1 */)
+AString& AString::Fill(IN IMS_CHAR c, IN IMS_SINT32 nSize /*= -1*/)
 {
-    Resize((nSize < 0) ? pData->nSize : nSize);
+    Resize((nSize < 0) ? m_pData->nSize : nSize);
 
-    if (pData->nSize != 0)
+    if (m_pData->nSize != 0)
     {
-        IMS_MEM_Memset(pData->pValue, ch, pData->nSize);
+        IMS_MEM_Memset(m_pData->pValue, c, m_pData->nSize);
     }
 
     return (*this);
 }
 
 PUBLIC
-AString& AString::Insert(IN IMS_SINT32 i, IN CONST IMS_CHAR ch)
+AString& AString::Insert(IN IMS_SINT32 i, IN const IMS_CHAR c)
 {
-    return astring_Insert(this, i, &ch, 1);
+    return astring_Insert(this, i, &c, 1);
 }
 
 PUBLIC
-AString& AString::Insert(IN IMS_SINT32 i, IN CONST IMS_CHAR* pszValue)
+AString& AString::Insert(IN IMS_SINT32 i, IN const IMS_CHAR* pszValue)
 {
     return astring_Insert(this, i, pszValue, IMS_StrLen(pszValue));
 }
 
 PUBLIC
-AString& AString::Insert(IN IMS_SINT32 i, IN CONST AString& objStr)
+AString& AString::Insert(IN IMS_SINT32 i, IN const AString& objStr)
 {
-    return astring_Insert(this, i, objStr.pData->pValue, objStr.pData->nSize);
+    return astring_Insert(this, i, objStr.m_pData->pValue, objStr.m_pData->nSize);
 }
 
 PUBLIC
-AString& AString::Prepend(IN CONST IMS_CHAR ch)
+AString& AString::Prepend(IN const IMS_CHAR c)
 {
-    if (pData->nSize + 1 > pData->nAlloc)
+    if (m_pData->nSize + 1 > m_pData->nAlloc)
     {
-        Realloc(astring_AllocateMore(pData->nSize + 1, sizeof(Data)));
+        Realloc(astring_AllocateMore(m_pData->nSize + 1, sizeof(Data)));
     }
 
-    IMS_MEM_Memmove(pData->pValue + 1, pData->pValue, pData->nSize);
-    pData->pValue[0] = ch;
-    ++(pData->nSize);
-    pData->pValue[pData->nSize] = '\0';
+    IMS_MEM_Memmove(m_pData->pValue + 1, m_pData->pValue, m_pData->nSize);
+    m_pData->pValue[0] = c;
+    ++(m_pData->nSize);
+    m_pData->pValue[m_pData->nSize] = '\0';
 
     return (*this);
 }
 
 PUBLIC
-AString& AString::Prepend(IN CONST IMS_CHAR* pszValue)
+AString& AString::Prepend(IN const IMS_CHAR* pszValue)
 {
     if (pszValue != IMS_NULL)
     {
         IMS_SINT32 nLen = IMS_StrLen(pszValue);
 
-        if (pData->nSize + nLen > pData->nAlloc)
+        if (m_pData->nSize + nLen > m_pData->nAlloc)
         {
-            Realloc(astring_AllocateMore(pData->nSize + nLen, sizeof(Data)));
+            Realloc(astring_AllocateMore(m_pData->nSize + nLen, sizeof(Data)));
         }
 
-        IMS_MEM_Memmove(pData->pValue + nLen, pData->pValue, pData->nSize);
-        IMS_MEM_Memcpy(pData->pValue, pszValue, nLen);
-        pData->nSize += nLen;
-        pData->pValue[pData->nSize] = '\0';
+        IMS_MEM_Memmove(m_pData->pValue + nLen, m_pData->pValue, m_pData->nSize);
+        IMS_MEM_Memcpy(m_pData->pValue, pszValue, nLen);
+        m_pData->nSize += nLen;
+        m_pData->pValue[m_pData->nSize] = '\0';
     }
 
     return (*this);
 }
 
 PUBLIC
-AString& AString::Prepend(IN CONST AString& objStr)
+AString& AString::Prepend(IN const AString& objStr)
 {
-    if ((pData == &SHARED_NULL) || (pData == &SHARED_EMPTY))
+    if ((m_pData == &SHARED_NULL) || (m_pData == &SHARED_EMPTY))
     {
         (*this) = objStr;
     }
-    else if (objStr.pData != &SHARED_NULL)
+    else if (objStr.m_pData != &SHARED_NULL)
     {
         AString strTmp = (*this);
 
@@ -1683,26 +1696,26 @@ AString& AString::Prepend(IN CONST AString& objStr)
 }
 
 PUBLIC
-AString& AString::Replace(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount, IN CONST IMS_CHAR* pszNew)
+AString& AString::Replace(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount, IN const IMS_CHAR* pszNew)
 {
     Erase(nOffset, nCount);
     return Insert(nOffset, pszNew);
 }
 
 PUBLIC
-AString& AString::Replace(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount, IN CONST AString& strNew)
+AString& AString::Replace(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount, IN const AString& strNew)
 {
     Erase(nOffset, nCount);
     return Insert(nOffset, strNew);
 }
 
 PUBLIC
-AString& AString::Replace(IN CONST IMS_CHAR cOld, IN CONST IMS_CHAR cNew)
+AString& AString::Replace(IN const IMS_CHAR cOld, IN const IMS_CHAR cNew)
 {
-    if (pData->nSize != 0)
+    if (m_pData->nSize != 0)
     {
         IMS_CHAR* p = GetStr();
-        IMS_CHAR* pEnd = p + pData->nSize;
+        IMS_CHAR* pEnd = p + m_pData->nSize;
 
         while (p != pEnd)
         {
@@ -1719,7 +1732,7 @@ AString& AString::Replace(IN CONST IMS_CHAR cOld, IN CONST IMS_CHAR cNew)
 }
 
 PUBLIC
-AString& AString::Replace(IN CONST IMS_CHAR cOld, IN CONST IMS_CHAR* pszNew)
+AString& AString::Replace(IN const IMS_CHAR cOld, IN const IMS_CHAR* pszNew)
 {
     IMS_CHAR acOld[2] = {cOld, '\0'};
 
@@ -1727,7 +1740,7 @@ AString& AString::Replace(IN CONST IMS_CHAR cOld, IN CONST IMS_CHAR* pszNew)
 }
 
 PUBLIC
-AString& AString::Replace(IN CONST IMS_CHAR cOld, IN CONST AString& strNew)
+AString& AString::Replace(IN const IMS_CHAR cOld, IN const AString& strNew)
 {
     IMS_CHAR acOld[2] = {cOld, '\0'};
 
@@ -1735,37 +1748,37 @@ AString& AString::Replace(IN CONST IMS_CHAR cOld, IN CONST AString& strNew)
 }
 
 PUBLIC
-AString& AString::Replace(IN CONST IMS_CHAR* pszOld, IN CONST IMS_CHAR* pszNew)
+AString& AString::Replace(IN const IMS_CHAR* pszOld, IN const IMS_CHAR* pszNew)
 {
     return Replace(
             FromRawData(pszOld, IMS_StrLen(pszOld)), FromRawData(pszNew, IMS_StrLen(pszNew)));
 }
 
 PUBLIC
-AString& AString::Replace(IN CONST IMS_CHAR* pszOld, IN CONST AString& strNew)
+AString& AString::Replace(IN const IMS_CHAR* pszOld, IN const AString& strNew)
 {
     return Replace(FromRawData(pszOld, IMS_StrLen(pszOld)), strNew);
 }
 
 PUBLIC
-AString& AString::Replace(IN CONST AString& strOld, IN CONST IMS_CHAR* pszNew)
+AString& AString::Replace(IN const AString& strOld, IN const IMS_CHAR* pszNew)
 {
     return Replace(strOld, FromRawData(pszNew, IMS_StrLen(pszNew)));
 }
 
 PUBLIC
-AString& AString::Replace(IN CONST AString& strOld, IN CONST AString& strNew)
+AString& AString::Replace(IN const AString& strOld, IN const AString& strNew)
 {
-    if (IsNULL() || (strOld == strNew))
+    if (IsNull() || (strOld == strNew))
     {
         return (*this);
     }
 
     IMS_SINT32 nIndex = 0;
-    const IMS_SINT32 nOldSize = strOld.pData->nSize;
-    const IMS_SINT32 nNewSize = strNew.pData->nSize;
+    const IMS_SINT32 nOldSize = strOld.m_pData->nSize;
+    const IMS_SINT32 nNewSize = strNew.m_pData->nSize;
 
-    IMS_SINT32 nDataSize = pData->nSize;
+    IMS_SINT32 nDataSize = m_pData->nSize;
     IMS_CHAR* p = GetStr();
 
     if (nOldSize == nNewSize)
@@ -1877,7 +1890,7 @@ AString& AString::Replace(IN CONST AString& strOld, IN CONST AString& strNew)
                 nDataSize = nNewDataSize;
             }
 
-            p = pData->pValue;
+            p = m_pData->pValue;
 
             while (nNumOfMatch > 0)
             {
@@ -1940,21 +1953,21 @@ AString AString::MakeUpper() const
 }
 
 PUBLIC
-AString AString::SimplifyWSP() const
+AString AString::SimplifyWsp() const
 {
-    if (pData->nSize == 0)
+    if (m_pData->nSize == 0)
     {
         return (*this);
     }
 
     AString strResult;
 
-    strResult.Resize(pData->nSize);
+    strResult.Resize(m_pData->nSize);
 
-    const IMS_CHAR* pStart = pData->pValue;
-    const IMS_CHAR* pEnd = pStart + pData->nSize;
+    const IMS_CHAR* pStart = m_pData->pValue;
+    const IMS_CHAR* pEnd = pStart + m_pData->nSize;
     IMS_SINT32 nCount = 0;
-    IMS_CHAR* pResult = strResult.pData->pValue;
+    IMS_CHAR* pResult = strResult.m_pData->pValue;
 
     for (;;)
     {
@@ -1990,20 +2003,20 @@ AString AString::SimplifyWSP() const
 PUBLIC
 AString AString::Trim() const
 {
-    if (pData->nSize == 0)
+    if (m_pData->nSize == 0)
     {
         return (*this);
     }
 
-    const IMS_CHAR* pStart = pData->pValue;
+    const IMS_CHAR* pStart = m_pData->pValue;
 
-    if (!IMS_ISSPACE(*pStart) && !IMS_ISSPACE(pStart[pData->nSize - 1]))
+    if (!IMS_ISSPACE(*pStart) && !IMS_ISSPACE(pStart[m_pData->nSize - 1]))
     {
         return (*this);
     }
 
     IMS_SINT32 nStart = 0;
-    IMS_SINT32 nEnd = pData->nSize - 1;
+    IMS_SINT32 nEnd = m_pData->nSize - 1;
 
     while ((nStart <= nEnd) && IMS_ISSPACE(pStart[nStart]))
     {
@@ -2031,12 +2044,12 @@ AString AString::Trim() const
 PUBLIC
 AString AString::TrimLeft() const
 {
-    if (pData->nSize == 0)
+    if (m_pData->nSize == 0)
     {
         return (*this);
     }
 
-    const IMS_CHAR* pStart = pData->pValue;
+    const IMS_CHAR* pStart = m_pData->pValue;
 
     if (!IMS_ISSPACE(*pStart))
     {
@@ -2044,7 +2057,7 @@ AString AString::TrimLeft() const
     }
 
     IMS_SINT32 nStart = 0;
-    IMS_SINT32 nEnd = pData->nSize - 1;
+    IMS_SINT32 nEnd = m_pData->nSize - 1;
 
     while ((nStart <= nEnd) && IMS_ISSPACE(pStart[nStart]))
     {
@@ -2064,19 +2077,19 @@ AString AString::TrimLeft() const
 PUBLIC
 AString AString::TrimRight() const
 {
-    if (pData->nSize == 0)
+    if (m_pData->nSize == 0)
     {
         return (*this);
     }
 
-    const IMS_CHAR* pStart = pData->pValue;
+    const IMS_CHAR* pStart = m_pData->pValue;
 
-    if (!IMS_ISSPACE(pStart[pData->nSize - 1]))
+    if (!IMS_ISSPACE(pStart[m_pData->nSize - 1]))
     {
         return (*this);
     }
 
-    IMS_SINT32 nEnd = pData->nSize - 1;
+    IMS_SINT32 nEnd = m_pData->nSize - 1;
 
     while ((nEnd >= 0) && IMS_ISSPACE(pStart[nEnd]))
     {
@@ -2089,7 +2102,7 @@ AString AString::TrimRight() const
 PUBLIC
 AString AString::Left(IN IMS_SINT32 nCount) const
 {
-    if (nCount >= pData->nSize)
+    if (nCount >= m_pData->nSize)
     {
         return (*this);
     }
@@ -2099,20 +2112,20 @@ AString AString::Left(IN IMS_SINT32 nCount) const
         nCount = 0;
     }
 
-    return AString(pData->pValue, nCount);
+    return AString(m_pData->pValue, nCount);
 }
 
 PUBLIC
-AString AString::Mid(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount /* = -1 */) const
+AString AString::Mid(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount /*= -1*/) const
 {
-    if ((pData == &SHARED_NULL) || (pData == &SHARED_EMPTY) || (nOffset >= pData->nSize))
+    if ((m_pData == &SHARED_NULL) || (m_pData == &SHARED_EMPTY) || (nOffset >= m_pData->nSize))
     {
         return AString();
     }
 
     if (nCount < 0)
     {
-        nCount = pData->nSize - nCount;
+        nCount = m_pData->nSize - nCount;
     }
 
     if (nOffset < 0)
@@ -2121,23 +2134,23 @@ AString AString::Mid(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount /* = -1 */) con
         nOffset = 0;
     }
 
-    if (nCount + nOffset > pData->nSize)
+    if (nCount + nOffset > m_pData->nSize)
     {
-        nCount = pData->nSize - nOffset;
+        nCount = m_pData->nSize - nOffset;
     }
 
-    if ((nOffset == 0) && (nCount == pData->nSize))
+    if ((nOffset == 0) && (nCount == m_pData->nSize))
     {
         return (*this);
     }
 
-    return AString(pData->pValue + nOffset, nCount);
+    return AString(m_pData->pValue + nOffset, nCount);
 }
 
 PUBLIC
 AString AString::Right(IN IMS_SINT32 nCount) const
 {
-    if (nCount >= pData->nSize)
+    if (nCount >= m_pData->nSize)
     {
         return (*this);
     }
@@ -2147,15 +2160,15 @@ AString AString::Right(IN IMS_SINT32 nCount) const
         nCount = 0;
     }
 
-    return AString(pData->pValue + pData->nSize - nCount, nCount);
+    return AString(m_pData->pValue + m_pData->nSize - nCount, nCount);
 }
 
 PUBLIC
-AString AString::AlignLeft(IN IMS_SINT32 nWidth, IN IMS_CHAR cFill /* = ' ' */,
-        IN IMS_BOOL bTruncate /* = IMS_FALSE */) const
+AString AString::AlignLeft(IN IMS_SINT32 nWidth, IN IMS_CHAR cFill /*= ' '*/,
+        IN IMS_BOOL bTruncate /*= IMS_FALSE*/) const
 {
     AString strResult;
-    IMS_SINT32 nLen = IMS_StrLen(pData->pValue);
+    IMS_SINT32 nLen = IMS_StrLen(m_pData->pValue);
     IMS_SINT32 nPadLen = nWidth - nLen;
 
     if (nPadLen > 0)
@@ -2164,10 +2177,10 @@ AString AString::AlignLeft(IN IMS_SINT32 nWidth, IN IMS_CHAR cFill /* = ' ' */,
 
         if (nLen != 0)
         {
-            IMS_MEM_Memcpy(strResult.pData->pValue, pData->pValue, nLen);
+            IMS_MEM_Memcpy(strResult.m_pData->pValue, m_pData->pValue, nLen);
         }
 
-        IMS_MEM_Memset(strResult.pData->pValue + nLen, cFill, nPadLen);
+        IMS_MEM_Memset(strResult.m_pData->pValue + nLen, cFill, nPadLen);
     }
     else
     {
@@ -2185,11 +2198,11 @@ AString AString::AlignLeft(IN IMS_SINT32 nWidth, IN IMS_CHAR cFill /* = ' ' */,
 }
 
 PUBLIC
-AString AString::AlignRight(IN IMS_SINT32 nWidth, IN IMS_CHAR cFill /* = ' ' */,
-        IN IMS_BOOL bTruncate /* = IMS_FALSE */) const
+AString AString::AlignRight(IN IMS_SINT32 nWidth, IN IMS_CHAR cFill /*= ' '*/,
+        IN IMS_BOOL bTruncate /*= IMS_FALSE*/) const
 {
     AString strResult;
-    IMS_SINT32 nLen = IMS_StrLen(pData->pValue);
+    IMS_SINT32 nLen = IMS_StrLen(m_pData->pValue);
     IMS_SINT32 nPadLen = nWidth - nLen;
 
     if (nPadLen > 0)
@@ -2198,10 +2211,10 @@ AString AString::AlignRight(IN IMS_SINT32 nWidth, IN IMS_CHAR cFill /* = ' ' */,
 
         if (nLen != 0)
         {
-            IMS_MEM_Memcpy(strResult.pData->pValue + nPadLen, pData->pValue, nLen);
+            IMS_MEM_Memcpy(strResult.m_pData->pValue + nPadLen, m_pData->pValue, nLen);
         }
 
-        IMS_MEM_Memset(strResult.pData->pValue, cFill, nPadLen);
+        IMS_MEM_Memset(strResult.m_pData->pValue, cFill, nPadLen);
     }
     else
     {
@@ -2219,31 +2232,31 @@ AString AString::AlignRight(IN IMS_SINT32 nWidth, IN IMS_CHAR cFill /* = ' ' */,
 }
 
 PUBLIC
-AString& AString::SetNumber(IN IMS_SINT16 n, IN IMS_SINT32 nBase /* = 10 */)
+AString& AString::SetNumber(IN IMS_SINT16 n, IN IMS_SINT32 nBase /*= 10*/)
 {
     return SetNumber(IMS_SINT32(n), nBase);
 }
 
 PUBLIC
-AString& AString::SetNumber(IN IMS_UINT16 n, IN IMS_SINT32 nBase /* = 10 */)
+AString& AString::SetNumber(IN IMS_UINT16 n, IN IMS_SINT32 nBase /*= 10*/)
 {
     return SetNumber(IMS_UINT32(n), nBase);
 }
 
 PUBLIC
-AString& AString::SetNumber(IN IMS_SINT32 n, IN IMS_SINT32 nBase /* = 10 */)
+AString& AString::SetNumber(IN IMS_SINT32 n, IN IMS_SINT32 nBase /*= 10*/)
 {
     return SetNumber(IMS_SINT64(n), nBase);
 }
 
 PUBLIC
-AString& AString::SetNumber(IN IMS_UINT32 n, IN IMS_SINT32 nBase /* = 10 */)
+AString& AString::SetNumber(IN IMS_UINT32 n, IN IMS_SINT32 nBase /*= 10*/)
 {
     return SetNumber(IMS_UINT64(n), nBase);
 }
 
 PUBLIC
-AString& AString::SetNumber(IN IMS_SINT64 n, IN IMS_SINT32 nBase /* = 10 */)
+AString& AString::SetNumber(IN IMS_SINT64 n, IN IMS_SINT32 nBase /*= 10*/)
 {
     if ((nBase < 2) || (nBase > 16))
     {
@@ -2263,7 +2276,7 @@ AString& AString::SetNumber(IN IMS_SINT64 n, IN IMS_SINT32 nBase /* = 10 */)
 }
 
 PUBLIC
-AString& AString::SetNumber(IN IMS_UINT64 n, IN IMS_SINT32 nBase /* = 10 */)
+AString& AString::SetNumber(IN IMS_UINT64 n, IN IMS_SINT32 nBase /*= 10*/)
 {
     if ((nBase < 2) || (nBase > 16))
     {
@@ -2276,10 +2289,9 @@ AString& AString::SetNumber(IN IMS_UINT64 n, IN IMS_SINT32 nBase /* = 10 */)
 }
 
 PUBLIC
-IMS_SINT16 AString::ToInt16(
-        OUT IMS_BOOL* pbOK /* = IMS_NULL */, IN IMS_SINT32 nBase /* = 10 */) const
+IMS_SINT16 AString::ToInt16(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBase /*= 10*/) const
 {
-    IMS_BOOL bOK = IMS_FALSE;
+    IMS_BOOL bOk = IMS_FALSE;
     const IMS_CHAR* pEndPtr;
 
     if ((nBase < 2) || (nBase > 16))
@@ -2287,27 +2299,27 @@ IMS_SINT16 AString::ToInt16(
         nBase = 10;
     }
 
-    IMS_SLONG nL = astring_AToLL(GetStr(), nBase, &bOK, &pEndPtr);
+    IMS_SLONG nL = astring_AToLL(GetStr(), nBase, &bOk, &pEndPtr);
 
-    if (!bOK || ((*pEndPtr) != '\0'))
+    if (!bOk || ((*pEndPtr) != '\0'))
     {
-        if (pbOK)
+        if (pbOk)
         {
-            *pbOK = IMS_FALSE;
+            *pbOk = IMS_FALSE;
         }
         return 0;
     }
 
-    if (pbOK)
+    if (pbOk)
     {
-        *pbOK = IMS_TRUE;
+        *pbOk = IMS_TRUE;
     }
 
     if ((nL < IMS_SHORT_MIN) || (nL > IMS_SHORT_MAX))
     {
-        if (pbOK)
+        if (pbOk)
         {
-            *pbOK = IMS_FALSE;
+            *pbOk = IMS_FALSE;
         }
 
         nL = 0;
@@ -2317,10 +2329,9 @@ IMS_SINT16 AString::ToInt16(
 }
 
 PUBLIC
-IMS_UINT16 AString::ToUInt16(
-        OUT IMS_BOOL* pbOK /* = IMS_NULL */, IN IMS_SINT32 nBase /* = 10 */) const
+IMS_UINT16 AString::ToUInt16(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBase /*= 10*/) const
 {
-    IMS_BOOL bOK = IMS_FALSE;
+    IMS_BOOL bOk = IMS_FALSE;
     const IMS_CHAR* pEndPtr;
 
     if ((nBase < 2) || (nBase > 16))
@@ -2328,27 +2339,27 @@ IMS_UINT16 AString::ToUInt16(
         nBase = 10;
     }
 
-    IMS_SLONG nUL = astring_AToULL(GetStr(), nBase, &bOK, &pEndPtr);
+    IMS_SLONG nUL = astring_AToULL(GetStr(), nBase, &bOk, &pEndPtr);
 
-    if (!bOK || ((*pEndPtr) != '\0'))
+    if (!bOk || ((*pEndPtr) != '\0'))
     {
-        if (pbOK)
+        if (pbOk)
         {
-            *pbOK = IMS_FALSE;
+            *pbOk = IMS_FALSE;
         }
         return 0;
     }
 
-    if (pbOK)
+    if (pbOk)
     {
-        *pbOK = IMS_TRUE;
+        *pbOk = IMS_TRUE;
     }
 
     if (nUL > IMS_USHORT_MAX)
     {
-        if (pbOK)
+        if (pbOk)
         {
-            *pbOK = IMS_FALSE;
+            *pbOk = IMS_FALSE;
         }
 
         nUL = 0;
@@ -2358,10 +2369,9 @@ IMS_UINT16 AString::ToUInt16(
 }
 
 PUBLIC
-IMS_SINT32 AString::ToInt32(
-        OUT IMS_BOOL* pbOK /* = IMS_NULL */, IN IMS_SINT32 nBase /* = 10 */) const
+IMS_SINT32 AString::ToInt32(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBase /*= 10*/) const
 {
-    IMS_BOOL bOK = IMS_FALSE;
+    IMS_BOOL bOk = IMS_FALSE;
     const IMS_CHAR* pEndPtr;
 
     if ((nBase < 2) || (nBase > 16))
@@ -2369,27 +2379,27 @@ IMS_SINT32 AString::ToInt32(
         nBase = 10;
     }
 
-    IMS_SLONG nL = astring_AToLL(GetStr(), nBase, &bOK, &pEndPtr);
+    IMS_SLONG nL = astring_AToLL(GetStr(), nBase, &bOk, &pEndPtr);
 
-    if (!bOK || ((*pEndPtr) != '\0'))
+    if (!bOk || ((*pEndPtr) != '\0'))
     {
-        if (pbOK)
+        if (pbOk)
         {
-            *pbOK = IMS_FALSE;
+            *pbOk = IMS_FALSE;
         }
         return 0;
     }
 
-    if (pbOK)
+    if (pbOk)
     {
-        *pbOK = IMS_TRUE;
+        *pbOk = IMS_TRUE;
     }
 
     if ((nL < IMS_INT_MIN) || (nL > IMS_INT_MAX))
     {
-        if (pbOK)
+        if (pbOk)
         {
-            *pbOK = IMS_FALSE;
+            *pbOk = IMS_FALSE;
         }
 
         nL = 0;
@@ -2399,10 +2409,9 @@ IMS_SINT32 AString::ToInt32(
 }
 
 PUBLIC
-IMS_UINT32 AString::ToUInt32(
-        OUT IMS_BOOL* pbOK /* = IMS_NULL */, IN IMS_SINT32 nBase /* = 10 */) const
+IMS_UINT32 AString::ToUInt32(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBase /*= 10*/) const
 {
-    IMS_BOOL bOK = IMS_FALSE;
+    IMS_BOOL bOk = IMS_FALSE;
     const IMS_CHAR* pEndPtr;
 
     if ((nBase < 2) || (nBase > 16))
@@ -2410,27 +2419,27 @@ IMS_UINT32 AString::ToUInt32(
         nBase = 10;
     }
 
-    IMS_ULONG nUL = astring_AToULL(GetStr(), nBase, &bOK, &pEndPtr);
+    IMS_ULONG nUL = astring_AToULL(GetStr(), nBase, &bOk, &pEndPtr);
 
-    if (!bOK || ((*pEndPtr) != '\0'))
+    if (!bOk || ((*pEndPtr) != '\0'))
     {
-        if (pbOK)
+        if (pbOk)
         {
-            *pbOK = IMS_FALSE;
+            *pbOk = IMS_FALSE;
         }
         return 0;
     }
 
-    if (pbOK)
+    if (pbOk)
     {
-        *pbOK = IMS_TRUE;
+        *pbOk = IMS_TRUE;
     }
 
     if (nUL > IMS_UINT_MAX)
     {
-        if (pbOK)
+        if (pbOk)
         {
-            *pbOK = IMS_FALSE;
+            *pbOk = IMS_FALSE;
         }
 
         nUL = 0;
@@ -2440,10 +2449,9 @@ IMS_UINT32 AString::ToUInt32(
 }
 
 PUBLIC
-IMS_SINT64 AString::ToInt64(
-        OUT IMS_BOOL* pbOK /* = IMS_NULL */, IN IMS_SINT32 nBase /* = 10 */) const
+IMS_SINT64 AString::ToInt64(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBase /*= 10*/) const
 {
-    IMS_BOOL bOK = IMS_FALSE;
+    IMS_BOOL bOk = IMS_FALSE;
     const IMS_CHAR* pEndPtr;
 
     if ((nBase < 2) || (nBase > 16))
@@ -2451,27 +2459,27 @@ IMS_SINT64 AString::ToInt64(
         nBase = 10;
     }
 
-    IMS_SLONG nL = astring_AToLL(GetStr(), nBase, &bOK, &pEndPtr);
+    IMS_SLONG nL = astring_AToLL(GetStr(), nBase, &bOk, &pEndPtr);
 
-    if (!bOK || ((*pEndPtr) != '\0'))
+    if (!bOk || ((*pEndPtr) != '\0'))
     {
-        if (pbOK)
+        if (pbOk)
         {
-            *pbOK = IMS_FALSE;
+            *pbOk = IMS_FALSE;
         }
         return 0;
     }
 
-    if (pbOK)
+    if (pbOk)
     {
-        *pbOK = IMS_TRUE;
+        *pbOk = IMS_TRUE;
     }
 
     if ((nL < IMS_LONG_MIN) || (nL > IMS_LONG_MAX))
     {
-        if (pbOK)
+        if (pbOk)
         {
-            *pbOK = IMS_FALSE;
+            *pbOk = IMS_FALSE;
         }
 
         nL = 0;
@@ -2481,10 +2489,9 @@ IMS_SINT64 AString::ToInt64(
 }
 
 PUBLIC
-IMS_UINT64 AString::ToUInt64(
-        OUT IMS_BOOL* pbOK /* = IMS_NULL */, IN IMS_SINT32 nBase /* = 10 */) const
+IMS_UINT64 AString::ToUInt64(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBase /*= 10*/) const
 {
-    IMS_BOOL bOK = IMS_FALSE;
+    IMS_BOOL bOk = IMS_FALSE;
     const IMS_CHAR* pEndPtr;
 
     if ((nBase < 2) || (nBase > 16))
@@ -2492,27 +2499,27 @@ IMS_UINT64 AString::ToUInt64(
         nBase = 10;
     }
 
-    IMS_ULONG nUL = astring_AToULL(GetStr(), nBase, &bOK, &pEndPtr);
+    IMS_ULONG nUL = astring_AToULL(GetStr(), nBase, &bOk, &pEndPtr);
 
-    if (!bOK || ((*pEndPtr) != '\0'))
+    if (!bOk || ((*pEndPtr) != '\0'))
     {
-        if (pbOK)
+        if (pbOk)
         {
-            *pbOK = IMS_FALSE;
+            *pbOk = IMS_FALSE;
         }
         return 0;
     }
 
-    if (pbOK)
+    if (pbOk)
     {
-        *pbOK = IMS_TRUE;
+        *pbOk = IMS_TRUE;
     }
 
     if (nUL > IMS_ULONG_MAX)
     {
-        if (pbOK)
+        if (pbOk)
         {
-            *pbOK = IMS_FALSE;
+            *pbOk = IMS_FALSE;
         }
 
         nUL = 0;
@@ -2536,32 +2543,32 @@ AString AString::ToBase64() const
     IMS_SINT32 nPadLen = 0;
     AString strTmp;
 
-    strTmp.Resize(((pData->nSize * 4) / 3) + 3);
+    strTmp.Resize(((m_pData->nSize * 4) / 3) + 3);
 
     IMS_SINT32 i = 0;
     IMS_CHAR* pOut = strTmp.GetStr();
 
-    while (i < pData->nSize)
+    while (i < m_pData->nSize)
     {
         IMS_SINT32 nChunk = 0;
 
-        nChunk |= IMS_SINT32(IMS_UCHAR(pData->pValue[i++])) << 16;
+        nChunk |= IMS_SINT32(IMS_UCHAR(m_pData->pValue[i++])) << 16;
 
-        if (i == pData->nSize)
+        if (i == m_pData->nSize)
         {
             nPadLen = 2;
         }
         else
         {
-            nChunk |= IMS_SINT32(IMS_UCHAR(pData->pValue[i++])) << 8;
+            nChunk |= IMS_SINT32(IMS_UCHAR(m_pData->pValue[i++])) << 8;
 
-            if (i == pData->nSize)
+            if (i == m_pData->nSize)
             {
                 nPadLen = 1;
             }
             else
             {
-                nChunk |= IMS_SINT32(IMS_UCHAR(pData->pValue[i++]));
+                nChunk |= IMS_SINT32(IMS_UCHAR(m_pData->pValue[i++]));
             }
         }
 
@@ -2600,11 +2607,11 @@ AString AString::ToBase64() const
 PUBLIC
 AString AString::ToHexString() const
 {
-    if (pData == &SHARED_NULL)
+    if (m_pData == &SHARED_NULL)
     {
         return AString::ConstNull();
     }
-    else if (pData == &SHARED_EMPTY)
+    else if (m_pData == &SHARED_EMPTY)
     {
         return AString::ConstEmpty();
     }
@@ -2613,9 +2620,9 @@ AString AString::ToHexString() const
         AString strTemp;
         AString strHexString;
 
-        for (IMS_SINT32 i = 0; i < pData->nSize; ++i)
+        for (IMS_SINT32 i = 0; i < m_pData->nSize; ++i)
         {
-            strTemp.Sprintf("%02x", pData->pValue[i]);
+            strTemp.Sprintf("%02x", m_pData->pValue[i]);
             strHexString.Append(strTemp);
         }
 
@@ -2624,24 +2631,24 @@ AString AString::ToHexString() const
 }
 
 PUBLIC
-AString AString::ToUTF8() const
+AString AString::ToUtf8() const
 {
-    if (pData == &SHARED_NULL)
+    if (m_pData == &SHARED_NULL)
     {
         return AString::ConstNull();
     }
-    else if (pData == &SHARED_EMPTY)
+    else if (m_pData == &SHARED_EMPTY)
     {
         return AString::ConstEmpty();
     }
     else
     {
         IMS_CHAR cOut[3];
-        AString strUTF8(pData->nSize * 2);
+        AString strUtf8(m_pData->nSize * 2);
 
-        for (IMS_SINT32 i = 0; i < pData->nSize; ++i)
+        for (IMS_SINT32 i = 0; i < m_pData->nSize; ++i)
         {
-            IMS_UCHAR c = static_cast<IMS_UCHAR>(pData->pValue[i]);
+            IMS_UCHAR c = static_cast<IMS_UCHAR>(m_pData->pValue[i]);
 
             if (c < 0x80)
             {
@@ -2657,15 +2664,15 @@ AString AString::ToUTF8() const
                 cOut[2] = '\0';
             }
 
-            strUTF8.Append(cOut);
+            strUtf8.Append(cOut);
         }
 
-        return strUTF8;
+        return strUtf8;
     }
 }
 
 PUBLIC
-AString& AString::Sprintf(IN CONST IMS_CHAR* pszFormat, ...)
+AString& AString::Sprintf(IN const IMS_CHAR* pszFormat, ...)
 {
     va_list ap;
 
@@ -2677,7 +2684,7 @@ AString& AString::Sprintf(IN CONST IMS_CHAR* pszFormat, ...)
 }
 
 PUBLIC
-AString& AString::Vsprintf(IN CONST IMS_CHAR* pszFormat, va_list ap)
+AString& AString::Vsprintf(IN const IMS_CHAR* pszFormat, va_list ap)
 {
     if (pszFormat == IMS_NULL)
     {
@@ -2872,7 +2879,6 @@ AString& AString::Vsprintf(IN CONST IMS_CHAR* pszFormat, va_list ap)
                     enLengthMod = LM_h;
                 }
                 break;
-
             case 'l':
                 ++pc;
                 if (*pc == 'l')
@@ -2885,28 +2891,23 @@ AString& AString::Vsprintf(IN CONST IMS_CHAR* pszFormat, va_list ap)
                     enLengthMod = LM_l;
                 }
                 break;
-
             case 'L':
                 ++pc;
                 enLengthMod = LM_L;
                 break;
-
             case 'j':
                 ++pc;
                 enLengthMod = LM_j;
                 break;
-
             case 'z':
             case 'Z':
                 ++pc;
                 enLengthMod = LM_z;
                 break;
-
             case 't':
                 ++pc;
                 enLengthMod = LM_t;
                 break;
-
             default:
                 break;
         }
@@ -2922,21 +2923,21 @@ AString& AString::Vsprintf(IN CONST IMS_CHAR* pszFormat, va_list ap)
 
         switch (*pc)
         {
-            case 'd':
+            case 'd':  // FALL-THROUGH
             case 'i':
             {
                 IMS_SINT64 i;
 
                 switch (enLengthMod)
                 {
-                    case LM_NONE:
-                    case LM_hh:
-                    case LM_h:
+                    case LM_NONE:  // FALL-THROUGH
+                    case LM_hh:    // FALL-THROUGH
+                    case LM_h:     // FALL-THROUGH
                     case LM_t:
                         i = va_arg(ap, IMS_SINT32);
                         break;
-                    case LM_l:
-                    case LM_j:
+                    case LM_l:  // FALL-THROUGH
+                    case LM_j:  // FALL-THROUGH
                     case LM_z:  // size_t type
                         i = va_arg(ap, IMS_SLONG);
                         break;
@@ -2952,17 +2953,17 @@ AString& AString::Vsprintf(IN CONST IMS_CHAR* pszFormat, va_list ap)
                 ++pc;
                 break;
             }
-            case 'o':
-            case 'u':
-            case 'x':
+            case 'o':  // FALL-THROUGH
+            case 'u':  // FALL-THROUGH
+            case 'x':  // FALL-THROUGH
             case 'X':
             {
                 IMS_UINT64 u;
 
                 switch (enLengthMod)
                 {
-                    case LM_NONE:
-                    case LM_hh:
+                    case LM_NONE:  // FALL-THROUGH
+                    case LM_hh:    // FALL-THROUGH
                     case LM_h:
                         u = va_arg(ap, IMS_UINT32);
                         break;
@@ -3000,13 +3001,13 @@ AString& AString::Vsprintf(IN CONST IMS_CHAR* pszFormat, va_list ap)
                 ++pc;
                 break;
             }
-            case 'E':
-            case 'e':
-            case 'F':
-            case 'f':
-            case 'G':
-            case 'g':
-            case 'A':
+            case 'E':  // FALL-THROUGH
+            case 'e':  // FALL-THROUGH
+            case 'F':  // FALL-THROUGH
+            case 'f':  // FALL-THROUGH
+            case 'G':  // FALL-THROUGH
+            case 'g':  // FALL-THROUGH
+            case 'A':  // FALL-THROUGH
             case 'a':
             {
                 // CURRENTLY, NOT SUPPORTED
@@ -3108,12 +3109,12 @@ AString& AString::Vsprintf(IN CONST IMS_CHAR* pszFormat, va_list ap)
 PUBLIC
 IMS_CHAR* AString::Duplicate() const
 {
-    if (pData == &SHARED_NULL)
+    if (m_pData == &SHARED_NULL)
     {
         return IMS_NULL;
     }
 
-    IMS_CHAR* pTmpVal = static_cast<IMS_CHAR*>(IMS_MEM_Malloc(pData->nSize + 1));
+    IMS_CHAR* pTmpVal = static_cast<IMS_CHAR*>(IMS_MEM_Malloc(m_pData->nSize + 1));
 
     if (pTmpVal == IMS_NULL)
     {
@@ -3121,28 +3122,28 @@ IMS_CHAR* AString::Duplicate() const
     }
 
     // include NULL character
-    IMS_MEM_Memcpy(pTmpVal, pData->pValue, pData->nSize + 1);
+    IMS_MEM_Memcpy(pTmpVal, m_pData->pValue, m_pData->nSize + 1);
 
     return pTmpVal;
 }
 
 PUBLIC
-IMSList<AString> AString::Split(IN IMS_CHAR cSep, IN IMS_BOOL bTrim /* = IMS_TRUE */) const
+ImsList<AString> AString::Split(IN IMS_CHAR cSep, IN IMS_BOOL bTrim /*= IMS_TRUE*/) const
 {
-    if (pData == &SHARED_NULL)
+    if (m_pData == &SHARED_NULL)
     {
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
-    if (pData == &SHARED_EMPTY)
+    if (m_pData == &SHARED_EMPTY)
     {
-        IMSList<AString> objTokens;
+        ImsList<AString> objTokens;
         objTokens.Append(ConstEmpty());
 
         return objTokens;
     }
 
-    IMSList<AString> objTokens;
+    ImsList<AString> objTokens;
     IMS_SINT32 nStart = 0;
     IMS_SINT32 nEnd;
 
@@ -3171,15 +3172,15 @@ IMSList<AString> AString::Split(IN IMS_CHAR cSep, IN IMS_BOOL bTrim /* = IMS_TRU
 }
 
 PUBLIC
-IMS_SINT32 AString::SplitF(IN IMS_CHAR cSep, OUT AString& strLHS, OUT AString& strRHS,
-        IN IMS_BOOL bTrim /* = IMS_TRUE */) const
+IMS_SINT32 AString::SplitF(IN IMS_CHAR cSep, OUT AString& strLhs, OUT AString& strRhs,
+        IN IMS_BOOL bTrim /*= IMS_TRUE*/) const
 {
-    if (pData == &SHARED_NULL)
+    if (m_pData == &SHARED_NULL)
     {
         return 0;
     }
 
-    if (pData == &SHARED_EMPTY)
+    if (m_pData == &SHARED_EMPTY)
     {
         return 0;
     }
@@ -3190,11 +3191,11 @@ IMS_SINT32 AString::SplitF(IN IMS_CHAR cSep, OUT AString& strLHS, OUT AString& s
     {
         if (bTrim)
         {
-            strLHS = Trim();
+            strLhs = Trim();
         }
         else
         {
-            strLHS = (*this);
+            strLhs = (*this);
         }
 
         return 1;
@@ -3203,13 +3204,13 @@ IMS_SINT32 AString::SplitF(IN IMS_CHAR cSep, OUT AString& strLHS, OUT AString& s
     {
         if (bTrim)
         {
-            strLHS = Mid(0, nIndex).Trim();
-            strRHS = Mid(nIndex + 1).Trim();
+            strLhs = Mid(0, nIndex).Trim();
+            strRhs = Mid(nIndex + 1).Trim();
         }
         else
         {
-            strLHS = Mid(0, nIndex);
-            strRHS = Mid(nIndex + 1);
+            strLhs = Mid(0, nIndex);
+            strRhs = Mid(nIndex + 1);
         }
 
         return 2;
@@ -3217,15 +3218,15 @@ IMS_SINT32 AString::SplitF(IN IMS_CHAR cSep, OUT AString& strLHS, OUT AString& s
 }
 
 PUBLIC
-IMS_SINT32 AString::SplitB(IN IMS_CHAR cSep, OUT AString& strLHS, OUT AString& strRHS,
-        IN IMS_BOOL bTrim /* = IMS_TRUE */) const
+IMS_SINT32 AString::SplitB(IN IMS_CHAR cSep, OUT AString& strLhs, OUT AString& strRhs,
+        IN IMS_BOOL bTrim /*= IMS_TRUE*/) const
 {
-    if (pData == &SHARED_NULL)
+    if (m_pData == &SHARED_NULL)
     {
         return 0;
     }
 
-    if (pData == &SHARED_EMPTY)
+    if (m_pData == &SHARED_EMPTY)
     {
         return 0;
     }
@@ -3236,11 +3237,11 @@ IMS_SINT32 AString::SplitB(IN IMS_CHAR cSep, OUT AString& strLHS, OUT AString& s
     {
         if (bTrim)
         {
-            strLHS = Trim();
+            strLhs = Trim();
         }
         else
         {
-            strLHS = (*this);
+            strLhs = (*this);
         }
 
         return 1;
@@ -3249,13 +3250,13 @@ IMS_SINT32 AString::SplitB(IN IMS_CHAR cSep, OUT AString& strLHS, OUT AString& s
     {
         if (bTrim)
         {
-            strLHS = Mid(0, nIndex).Trim();
-            strRHS = Mid(nIndex + 1).Trim();
+            strLhs = Mid(0, nIndex).Trim();
+            strRhs = Mid(nIndex + 1).Trim();
         }
         else
         {
-            strLHS = Mid(0, nIndex);
-            strRHS = Mid(nIndex + 1);
+            strLhs = Mid(0, nIndex);
+            strRhs = Mid(nIndex + 1);
         }
 
         return 2;
@@ -3265,16 +3266,16 @@ IMS_SINT32 AString::SplitB(IN IMS_CHAR cSep, OUT AString& strLHS, OUT AString& s
 PUBLIC
 IMS_UINT32 AString::GetHashCode() const
 {
-    if ((pData == &SHARED_NULL) || (pData == &SHARED_EMPTY))
+    if ((m_pData == &SHARED_NULL) || (m_pData == &SHARED_EMPTY))
     {
         return 0;
     }
 
-    return GetHashCode(pData->pValue);
+    return GetHashCode(m_pData->pValue);
 }
 
 PUBLIC
-RCPtr<WCharPtr> AString::GetWCharPtr() const
+RcPtr<WCharPtr> AString::GetWCharPtr() const
 {
     return (new WCharPtr(*this));
 }
@@ -3282,30 +3283,28 @@ RCPtr<WCharPtr> AString::GetWCharPtr() const
 PUBLIC GLOBAL const AString& AString::ConstEmpty()
 {
     static const AString CONST_EMPTY("");
-
     return CONST_EMPTY;
 }
 
 PUBLIC GLOBAL const AString& AString::ConstNull()
 {
     static const AString CONST_NULL;
-
     return CONST_NULL;
 }
 
-PUBLIC GLOBAL IMS_SINT32 AString::Compare(IN CONST IMS_CHAR* pszStr1, IN CONST IMS_CHAR* pszStr2)
+PUBLIC GLOBAL IMS_SINT32 AString::Compare(IN const IMS_CHAR* pszStr1, IN const IMS_CHAR* pszStr2)
 {
     return (pszStr1 && pszStr2) ? IMS_StrCmp(pszStr1, pszStr2) : (pszStr1 ? 1 : (pszStr2 ? -1 : 0));
 }
 
 PUBLIC GLOBAL IMS_SINT32 AString::CompareIgnoreCase(
-        IN CONST IMS_CHAR* pszStr1, IN CONST IMS_CHAR* pszStr2)
+        IN const IMS_CHAR* pszStr1, IN const IMS_CHAR* pszStr2)
 {
     return (pszStr1 && pszStr2) ? IMS_StrICmp(pszStr1, pszStr2)
                                 : (pszStr1 ? 1 : (pszStr2 ? -1 : 0));
 }
 
-PUBLIC GLOBAL AString AString::FromBase64(IN CONST AString& strBase64)
+PUBLIC GLOBAL AString AString::FromBase64(IN const AString& strBase64)
 {
     IMS_UINT32 nBuf = 0;
     IMS_SINT32 nBits = 0;
@@ -3364,7 +3363,7 @@ PUBLIC GLOBAL AString AString::FromBase64(IN CONST AString& strBase64)
     return strTmp;
 }
 
-PUBLIC GLOBAL AString AString::FromRawData(IN CONST IMS_CHAR* pValue, IN IMS_SINT32 nSize)
+PUBLIC GLOBAL AString AString::FromRawData(IN const IMS_CHAR* pValue, IN IMS_SINT32 nSize)
 {
     Data* pNewData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data)));
 
@@ -3384,7 +3383,7 @@ PUBLIC GLOBAL AString AString::FromRawData(IN CONST IMS_CHAR* pValue, IN IMS_SIN
     return AString(pNewData);
 }
 
-PUBLIC GLOBAL IMS_UINT32 AString::GetHashCode(IN CONST IMS_CHAR* pszValue)
+PUBLIC GLOBAL IMS_UINT32 AString::GetHashCode(IN const IMS_CHAR* pszValue)
 {
     if (pszValue == IMS_NULL)
     {
@@ -3412,18 +3411,18 @@ PUBLIC GLOBAL IMS_UINT32 AString::GetHashCode(IN CONST IMS_CHAR* pszValue)
 PRIVATE
 void AString::Clear()
 {
-    if (pData == &SHARED_NULL)
+    if (m_pData == &SHARED_NULL)
     {
         return;
     }
 
-    if (pData == &SHARED_EMPTY)
+    if (m_pData == &SHARED_EMPTY)
     {
         return;
     }
 
-    IMS_MEM_Free(pData);
-    pData = &SHARED_NULL;
+    IMS_MEM_Free(m_pData);
+    m_pData = &SHARED_NULL;
 }
 
 PRIVATE
@@ -3431,7 +3430,8 @@ void AString::Realloc(IN IMS_SINT32 nAlloc)
 {
     Data* pNewData;
 
-    if ((pData == &SHARED_NULL) || (pData == &SHARED_EMPTY) || (pData->pValue != pData->acValue))
+    if ((m_pData == &SHARED_NULL) || (m_pData == &SHARED_EMPTY) ||
+            (m_pData->pValue != m_pData->acValue))
     {
         pNewData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + nAlloc));
 
@@ -3440,8 +3440,8 @@ void AString::Realloc(IN IMS_SINT32 nAlloc)
             return;
         }
 
-        pNewData->nSize = IMS_MIN(nAlloc, pData->nSize);
-        IMS_MEM_Memcpy(pNewData->acValue, pData->pValue, pNewData->nSize);
+        pNewData->nSize = IMS_MIN(nAlloc, m_pData->nSize);
+        IMS_MEM_Memcpy(pNewData->acValue, m_pData->pValue, pNewData->nSize);
         pNewData->acValue[pNewData->nSize] = '\0';
         pNewData->nAlloc = nAlloc;
         pNewData->pValue = pNewData->acValue;
@@ -3451,7 +3451,7 @@ void AString::Realloc(IN IMS_SINT32 nAlloc)
     }
     else
     {
-        pNewData = static_cast<Data*>(IMS_MEM_Realloc(pData, sizeof(Data) + nAlloc));
+        pNewData = static_cast<Data*>(IMS_MEM_Realloc(m_pData, sizeof(Data) + nAlloc));
 
         if (pNewData == IMS_NULL)
         {
@@ -3462,52 +3462,52 @@ void AString::Realloc(IN IMS_SINT32 nAlloc)
         pNewData->pValue = pNewData->acValue;
     }
 
-    pData = pNewData;
+    m_pData = pNewData;
 }
 
 PUBLIC
-WCharPtr::WCharPtr(IN CONST AString& str) :
-        RCObject(),
-        nSize(0),
-        pwszData(IMS_NULL)
+WCharPtr::WCharPtr(IN const AString& str) :
+        RcObject(),
+        m_nSize(0),
+        m_pwszData(IMS_NULL)
 {
-    nSize = astring_CharToWideChar(str.GetStr(), str.GetLength(), pwszData, 0);
+    m_nSize = astring_CharToWideChar(str.GetStr(), str.GetLength(), m_pwszData, 0);
 
-    pwszData = static_cast<IMS_WCHAR*>(IMS_MEM_Malloc((nSize + 1) * sizeof(IMS_WCHAR)));
+    m_pwszData = static_cast<IMS_WCHAR*>(IMS_MEM_Malloc((m_nSize + 1) * sizeof(IMS_WCHAR)));
 
-    astring_CharToWideChar(str.GetStr(), str.GetLength(), pwszData, nSize + 1);
+    astring_CharToWideChar(str.GetStr(), str.GetLength(), m_pwszData, m_nSize + 1);
 }
 
 PUBLIC
-WCharPtr::WCharPtr(IN CONST WCharPtr& objRHS) :
-        RCObject(objRHS),
-        nSize(objRHS.nSize),
-        pwszData(IMS_NULL)
+WCharPtr::WCharPtr(IN const WCharPtr& other) :
+        RcObject(other),
+        m_nSize(other.m_nSize),
+        m_pwszData(IMS_NULL)
 {
-    pwszData = static_cast<IMS_WCHAR*>(IMS_MEM_Malloc((nSize + 1) * sizeof(IMS_WCHAR)));
-    IMS_UcStrCpy(pwszData, nSize, objRHS.pwszData);
+    m_pwszData = static_cast<IMS_WCHAR*>(IMS_MEM_Malloc((m_nSize + 1) * sizeof(IMS_WCHAR)));
+    IMS_UcStrCpy(m_pwszData, m_nSize, other.m_pwszData);
 }
 
 PUBLIC VIRTUAL WCharPtr::~WCharPtr()
 {
-    IMS_MEM_Free(pwszData);
+    IMS_MEM_Free(m_pwszData);
 }
 
 PUBLIC
-WCharPtr& WCharPtr::operator=(IN CONST WCharPtr& objRHS)
+WCharPtr& WCharPtr::operator=(IN const WCharPtr& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        RCObject::operator=(objRHS);
-        nSize = objRHS.nSize;
+        RcObject::operator=(other);
+        m_nSize = other.m_nSize;
 
-        if (pwszData != IMS_NULL)
+        if (m_pwszData != IMS_NULL)
         {
-            IMS_MEM_Free(pwszData);
+            IMS_MEM_Free(m_pwszData);
         }
 
-        pwszData = static_cast<IMS_WCHAR*>(IMS_MEM_Malloc((nSize + 1) * sizeof(IMS_WCHAR)));
-        IMS_UcStrCpy(pwszData, nSize, objRHS.pwszData);
+        m_pwszData = static_cast<IMS_WCHAR*>(IMS_MEM_Malloc((m_nSize + 1) * sizeof(IMS_WCHAR)));
+        IMS_UcStrCpy(m_pwszData, m_nSize, other.m_pwszData);
     }
 
     return (*this);

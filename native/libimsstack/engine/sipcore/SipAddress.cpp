@@ -1478,7 +1478,7 @@ IMS_BOOL SipAddress::Decode(IN const AString& strAddress, IN IMS_BOOL bParsePara
             if (m_strDisplayName.StartsWith(TextParser::CHAR_DQUOT) &&
                     m_strDisplayName.EndsWith(TextParser::CHAR_DQUOT))
             {
-                m_strDisplayName = TextParser::TrimDQUOT(m_strDisplayName);
+                m_strDisplayName = TextParser::TrimDquot(m_strDisplayName);
 
                 // Restore the original characters if it is escaped for DQUOT and backslash
                 m_strDisplayName.Replace("\\\"", "\"");

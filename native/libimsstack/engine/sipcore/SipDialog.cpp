@@ -89,7 +89,7 @@ SipClientConnection* SipDialog::CreateClientConnection(IN const AString& strMeth
     }
 
     // Get or create a proper dialog
-    RCPtr<SipDialogEx> pNewDialogEx = GetOptimumDialog(objMethod);
+    RcPtr<SipDialogEx> pNewDialogEx = GetOptimumDialog(objMethod);
 
     if (pNewDialogEx.IsNull())
     {
