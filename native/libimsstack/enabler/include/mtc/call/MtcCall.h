@@ -114,6 +114,7 @@ public:
     void HandleIpcanChanged() override;
 
     inline CallKey GetKey() const override { return m_nKey; }
+    CallType GetCallType() const override;
     inline CallStateName GetState() const override { return m_objStateMachine.GetState(); }
     // TODO: TEMP for conference.
     inline IMtcCallContext& GetCallContext() const override { return *(IMtcCallContext*)this; }
@@ -123,8 +124,8 @@ public:
     inline IMS_BOOL IsUssi() const override { return m_objCallInfo.bUssi; }
     inline CallInfo& GetCallInfo() override { return m_objCallInfo; }
     inline ParticipantInfo& GetParticipantInfo() override { return m_objParticipantInfo; }
-    MtcSession* GetSession(IN const ISession* piSession) override;
-    MtcSession* GetSession() override;
+    MtcSession* GetSession(IN const ISession* piSession) const override;
+    MtcSession* GetSession() const override;
     inline IMtcService& GetService() override { return m_objService; }
     inline MtcUiNotifier& GetUiNotifier() override { return m_objUiNotifier; }
     inline IMtcMediaManager& GetMediaManager() override { return m_objMediaManager; }

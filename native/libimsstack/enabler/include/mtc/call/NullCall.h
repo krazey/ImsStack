@@ -73,6 +73,7 @@ public:
     inline void HandleIpcanChanged() override {}
 
     inline CallKey GetKey() const override { return -1; }
+    inline CallType GetCallType() const override { return CallType::UNKNOWN; }
     inline State GetState() const override { return State::IDLE; }
     inline IMtcCallContext& GetCallContext() const override { return *(IMtcCallContext*)this; }
 };

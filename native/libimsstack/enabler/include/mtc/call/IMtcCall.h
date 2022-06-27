@@ -146,6 +146,13 @@ public:
     virtual CallKey GetKey() const = 0;
 
     /**
+     * Returns the current call type.
+     *
+     * @return Current call type.
+     */
+    virtual CallType GetCallType() const = 0;
+
+    /**
      * Returns the current call state.
      *
      * @return Current state.

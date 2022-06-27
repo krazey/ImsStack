@@ -49,8 +49,8 @@ public:
 
     virtual CallInfo& GetCallInfo() = 0;
     virtual ParticipantInfo& GetParticipantInfo() = 0;
-    virtual MtcSession* GetSession(IN const ISession* piSession) = 0;
-    virtual MtcSession* GetSession() = 0;
+    virtual MtcSession* GetSession(IN const ISession* piSession) const = 0;
+    virtual MtcSession* GetSession() const = 0;
     virtual IMtcService& GetService() = 0;
     virtual MtcUiNotifier& GetUiNotifier() = 0;
     virtual IMtcMediaManager& GetMediaManager() = 0;

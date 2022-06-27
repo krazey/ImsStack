@@ -49,8 +49,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsUssi, (), (const, override));
     MOCK_METHOD(CallInfo&, GetCallInfo, (), (override));
     MOCK_METHOD(ParticipantInfo&, GetParticipantInfo, (), (override));
-    MOCK_METHOD(MtcSession*, GetSession, (IN const ISession* piSession), (override));
-    MOCK_METHOD(MtcSession*, GetSession, (), (override));
+    MOCK_METHOD(MtcSession*, GetSession, (IN const ISession* piSession), (const, override));
+    MOCK_METHOD(MtcSession*, GetSession, (), (const, override));
     MOCK_METHOD(IMtcService&, GetService, (), (override));
     MOCK_METHOD(MtcUiNotifier&, GetUiNotifier, (), (override));
     MOCK_METHOD(IMtcMediaManager&, GetMediaManager, (), (override));

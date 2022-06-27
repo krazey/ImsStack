@@ -450,7 +450,17 @@ PUBLIC VIRTUAL void MtcCall::HandleIpcanChanged()
             });
 }
 
-PUBLIC VIRTUAL MtcSession* MtcCall::GetSession(IN const ISession* piSession)
+PUBLIC VIRTUAL CallType MtcCall::GetCallType() const
+{
+    MtcSession* pSession = GetSession();
+    if (!pSession)
+    {
+        return m_objCallInfo.eInitialCallType;
+    }
+    return pSession->GetCallType();
+}
+
+PUBLIC VIRTUAL MtcSession* MtcCall::GetSession(IN const ISession* piSession) const
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
     {
@@ -465,7 +475,7 @@ PUBLIC VIRTUAL MtcSession* MtcCall::GetSession(IN const ISession* piSession)
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL MtcSession* MtcCall::GetSession()
+PUBLIC VIRTUAL MtcSession* MtcCall::GetSession() const
 {
     if (m_lstSessions.IsEmpty())
     {
@@ -530,7 +540,7 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
 {
     JniCallInfo objJniCallInfo;
     objJniCallInfo.eServiceType = GetService().GetServiceType();
-    objJniCallInfo.eCallType = GetSession() ? GetSession()->GetCallType() : CallType::UNKNOWN;
+    objJniCallInfo.eCallType = GetCallType();
     objJniCallInfo.bWifi = m_objCallInfo.bWifi;
     objJniCallInfo.bEmergency = m_objCallInfo.bEmergency;
     objJniCallInfo.bOffline = m_objCallInfo.bOffline;
@@ -1111,9 +1121,7 @@ PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
     IMS_TRACE_I(
             "OnStateTransition : key[%d] state[%d]", m_nKey, static_cast<IMS_SINT32>(eState), 0);
 
-    GetCallStateProxy().UpdateCallState(m_nKey, eState,
-            GetSession() ? GetSession()->GetCallType() : CallType::UNKNOWN,
-            m_objCallInfo.bEmergency);
+    GetCallStateProxy().UpdateCallState(m_nKey, eState, GetCallType(), m_objCallInfo.bEmergency);
 }
 
 PUBLIC VIRTUAL void MtcCall::ClientConnection_NotifyResponse(
