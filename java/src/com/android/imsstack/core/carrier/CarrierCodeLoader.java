@@ -4,6 +4,9 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.Sim;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.ImsProperties;
@@ -11,7 +14,6 @@ import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SODConfig;
 import com.android.imsstack.util.SimCarrierId;
-import com.android.internal.telephony.IccCardConstants;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -146,7 +148,9 @@ public final class CarrierCodeLoader {
     public static SimCarrierId getCarrierIdFromSim(int slotId) {
         boolean simLocked = false;
 
-        if (IccCardConstants.INTENT_VALUE_ICC_LOCKED.equals(MSimUtils.getSimState(slotId))) {
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
+
+        if (sim != null && sim.getSimState() == Sim.STATE_LOCKED) {
             simLocked = true;
         }
 
