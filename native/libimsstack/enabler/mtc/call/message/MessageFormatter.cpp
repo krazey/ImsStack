@@ -780,7 +780,7 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
         case CODE_MEDIA_NOT_ACCEPTABLE:
             eStatusCode = SipStatusCode::SC_415;
             break;
-        case CODE_MEDIA_NO_DATA:
+        case CODE_TIMEOUT_NO_ANSWER:
             eStatusCode = m_objContext.GetConfigurationProxy().GetInt(
                     Feature::INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER);
             break;
@@ -819,7 +819,7 @@ void MessageFormatter::GetRejectPhrase(IN const CallReasonInfo& objReason, OUT A
         case CODE_REJECT_MAX_CALL_LIMIT_REACHED:
             strPhrase = GetRejectPhrase(RejectType::EXCEEDS_MAX_CALL);
             break;
-        case CODE_MEDIA_NO_DATA:
+        case CODE_TIMEOUT_NO_ANSWER:
             strPhrase = GetRejectPhrase(RejectType::NO_ANSWER_BY_USER);
             break;
         case CODE_REJECT_ONGOING_CALL_UPDATE:

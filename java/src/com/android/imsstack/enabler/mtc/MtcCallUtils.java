@@ -177,8 +177,14 @@ public class MtcCallUtils {
                 || (audioQuality == MediaInfo.AUDIO_QUALITY_EVS_FB);
     }
 
-    public static boolean isCallTerminatedByCallForward(int reason) {
-        return reason == CallReasonInfo.CODE_USER_TERMINATED;
+    /**
+    * Checks if the call is disconnected because of the transfer.
+    *
+    * @param reasonInfo checks based on this information
+    */
+    public static boolean isCallTerminatedByCallForward(CallReasonInfo reasonInfo) {
+        return (reasonInfo.mCode == CallReasonInfo.CODE_USER_TERMINATED)
+                && (reasonInfo.mExtraCode == CallReasonInfo.EXTRA_USER_TERMINATED_ECT);
     }
 
     public static boolean isCallTerminatedByCSRetry(int reason) {
