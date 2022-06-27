@@ -206,7 +206,7 @@ PUBLIC VIRTUAL void SubscriberConfig::Refresh()
 
     SetState(STATE_INIT);
 
-    UpdateAllConfigs();
+    UpdateAllConfigs(IMS_TRUE);
 
     if (IsIsimSupported())
     {
@@ -373,7 +373,7 @@ PROTECTED VIRTUAL void SubscriberConfig::HandleMessage(
             NotifyRefreshStarted();
 
             // Read all the subscriber configuration...
-            UpdateAllConfigs();
+            UpdateAllConfigs(IMS_FALSE);
 
             if (!IsIsimSupported())
             {
@@ -445,7 +445,7 @@ PROTECTED VIRTUAL void SubscriberConfig::HandleMessage(
         }
         case ACMSG_REFRESH_ISIM_PROVISIONING:
         {
-            RefreshIsimProvisioning();
+            RefreshIsimProvisioning((nParam1 == 1) ? IMS_TRUE : IMS_FALSE);
             break;
         }
         default:
@@ -1329,7 +1329,7 @@ PROTECTED VIRTUAL void SubscriberConfig::CarrierConfig_NotifyConfigChanged(IN IM
 
     IMS_SINT32 nOldState = GetState();
 
-    UpdateAllConfigs();
+    UpdateAllConfigs(IMS_FALSE);
 
     if (!IsIsimSupported())
     {
@@ -2347,7 +2347,7 @@ void SubscriberConfig::RecoverIsimProvisioning(IN IMS_SINT32 nErrorCode)
 }
 
 PRIVATE
-void SubscriberConfig::RefreshIsimProvisioning()
+void SubscriberConfig::RefreshIsimProvisioning(IN IMS_BOOL bEnforceIsimRefresh)
 {
     IMS_TRACE_I("RefreshIsimProvisioning :: isim=%s", _TRACE_B_(IsIsimSupported()), 0, 0);
 
@@ -2359,8 +2359,17 @@ void SubscriberConfig::RefreshIsimProvisioning()
         }
         else
         {
-            if (m_piIsim->IsReady())
+            if (m_piIsim->IsReady() && (IsIsimProvisioningDone() || bEnforceIsimRefresh))
             {
+                if (bEnforceIsimRefresh)
+                {
+                    m_bFlagRequestPending = IMS_FALSE;
+                    m_nConfiguredIsimRecords = ISIM_DONE;
+                    m_nIsimRecords = ISIM_NONE;
+                    m_byIst1 = IST_1_NONE;
+                    m_nIsimErrorCode = ISIM_NO_ERROR;
+                }
+
                 // Clears all the EF records
                 m_piIsim->ClearRecords();
 
@@ -2370,7 +2379,9 @@ void SubscriberConfig::RefreshIsimProvisioning()
             }
             else
             {
-                // Waits for ISIM ready
+                // Waits for ISIM ready or do nothing.
+                IMS_TRACE_D("RefreshIsimProvisioning: ready=%s, isimProvisioning=%s",
+                        _TRACE_B_(m_piIsim->IsReady()), _TRACE_B_(IsIsimProvisioningDone()), 0);
             }
         }
     }
@@ -2465,7 +2476,7 @@ void SubscriberConfig::SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nParam1, IN 
 }
 
 PRIVATE
-void SubscriberConfig::UpdateAllConfigs()
+void SubscriberConfig::UpdateAllConfigs(IN IMS_BOOL bEnforceIsimRefresh)
 {
     CallSubscriberInfoListener(SUBSCRIBER_INFO_REMOVE_ALL);
     ClearPcscfAddressAndSubscriberInfo();
@@ -2478,7 +2489,7 @@ void SubscriberConfig::UpdateAllConfigs()
     // Read ISIM records
     if (IsIsimSupported())
     {
-        SendMessage(ACMSG_REFRESH_ISIM_PROVISIONING, 0, 0);
+        SendMessage(ACMSG_REFRESH_ISIM_PROVISIONING, bEnforceIsimRefresh ? 1 : 0, 0);
     }
 }
 
