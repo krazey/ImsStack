@@ -33,9 +33,9 @@ SipConfiguration::SipConfiguration()
     bPANIHeaderForACK = SIP_FALSE;
 
     /* Normal form, Single Line and loose parsing */
-    m_nParseStyle = ~ESIPMSGOPT_ENCMULTILINE;
-    m_nParseStyle &= ~ESIPMSGOPT_ENCSHORTFORM;
-    m_nParseStyle &= ~ESIPMSGOPT_DECSTRICT;
+    m_nParseStyle = ~SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE;
+    m_nParseStyle &= ~SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM;
+    m_nParseStyle &= ~SipConfiguration::MSG_OPT_DECODE_STRICT;
 
     m_nT1                  = DEFAULT_T1;
     m_nT2                  = DEFAULT_T2;
@@ -59,11 +59,11 @@ SIP_VOID SipConfiguration::SetMultiLineEncoding(SIP_BOOL bEnableMultiLine)
 {
     if (bEnableMultiLine == SIP_TRUE)
     {
-        m_nParseStyle = m_nParseStyle | ESIPMSGOPT_ENCMULTILINE;
+        m_nParseStyle = m_nParseStyle | SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE;
     }
     else
     {
-        m_nParseStyle = m_nParseStyle & ESIPMSGOPT_ENCMULTILINE;
+        m_nParseStyle = m_nParseStyle & ~SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE;
     }
 }
 
@@ -71,11 +71,11 @@ SIP_VOID SipConfiguration::SetShortFormEncoding(SIP_BOOL bEncInShortForm)
 {
     if (bEncInShortForm == SIP_TRUE)
     {
-        m_nParseStyle = m_nParseStyle | ESIPMSGOPT_ENCSHORTFORM;
+        m_nParseStyle = m_nParseStyle | SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM;
     }
     else
     {
-        m_nParseStyle = m_nParseStyle & ESIPMSGOPT_ENCSHORTFORM;
+        m_nParseStyle = m_nParseStyle & ~SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM;
     }
 }
 
@@ -83,11 +83,11 @@ SIP_VOID SipConfiguration::SetDecodeStrictness(SIP_BOOL bEnableStrictDecode)
 {
     if (bEnableStrictDecode == SIP_TRUE)
     {
-        m_nParseStyle = m_nParseStyle & ESIPMSGOPT_DECSTRICT;
+        m_nParseStyle = m_nParseStyle | SipConfiguration::MSG_OPT_DECODE_STRICT;
     }
     else
     {
-        m_nParseStyle = m_nParseStyle & ~ESIPMSGOPT_DECSTRICT;
+        m_nParseStyle = m_nParseStyle & ~SipConfiguration::MSG_OPT_DECODE_STRICT;
     }
 }
 
@@ -99,4 +99,13 @@ SipConfiguration* SipConfiguration::GetInstance()
     }
 
     return pSipConfig;
+}
+
+SIP_VOID SipConfiguration::DestroyInstance()
+{
+    if (pSipConfig != SIP_NULL)
+    {
+        delete pSipConfig;
+        pSipConfig = SIP_NULL;
+    }
 }

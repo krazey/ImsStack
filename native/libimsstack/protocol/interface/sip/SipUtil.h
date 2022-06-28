@@ -27,8 +27,6 @@ public:
     SipUtil();
     virtual ~SipUtil();
 
-    SIP_VOID RegisterTimer(ISipTimerUtil* pTimerUtil);
-    SIP_VOID RegisterLogger(ISipLoggerUtil* pLoggerUtil);
     SIP_VOID RegisterNetwork(ISipNetworkUtil* pNwUtil);
     SIP_VOID RegisterTxnListener(ISipTxnListener* pTxnListener);
     ISipTimerUtil* GetTimer();

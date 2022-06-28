@@ -30,14 +30,14 @@ private:
 
 public:
     inline ISipUserData() :
-            m_nMsgOptions(ESIPMSGOPT_NONE),
+            m_nMsgOptions(SipConfiguration::MSG_OPT_ENCODE_NONE),
             m_bDeleteFlag(SIP_FALSE),
             m_pvUserData(SIP_NULL)
     {
     }
 
     inline ISipUserData(SIP_VOID* pvUserData) :
-            m_nMsgOptions(ESIPMSGOPT_NONE),
+            m_nMsgOptions(SipConfiguration::MSG_OPT_ENCODE_NONE),
             m_bDeleteFlag(SIP_FALSE),
             m_pvUserData(pvUserData)
     {

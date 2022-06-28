@@ -103,7 +103,6 @@ SIP_BOOL sipFindLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
     SIP_CHAR* pNext1Pt = pStartPt + SIP_ONE;
     SIP_CHAR* pNext2Pt = pStartPt + SIP_TWO;
 
-    //added for case aplphanum+space+alphanum+CRLF by Ajay Bukan on 17-jan-2013
     while (((pNext2Pt <= pEndPt) || (IS_WSP(*pStartPt))))
     {
         if ((IS_WSP(*pStartPt) ||

@@ -18,20 +18,17 @@
 
 #include "sip_pf_datatypes.h"
 
-typedef enum _SipEn_MsgOption
-{
-    ESIPMSGOPT_NONE = 0,
-    ESIPMSGOPT_ENCMULTILINE = (1 << 0),
-    ESIPMSGOPT_ENCSHORTFORM = (1 << 1),
-    ESIPMSGOPT_DECSTRICT = (1 << 2),
-    ESIPMSGOPT_END,
-    ESIPMSGOPT_INVALID = SIP_INVALID
-} SipEn_MsgOption;
-
-
 class SipConfiguration
 {
 public:
+    enum
+    {
+        MSG_OPT_ENCODE_NONE = 0,
+        MSG_OPT_ENCODE_MULTI_LINE = (1 << 0),
+        MSG_OPT_ENCODE_SHORT_FORM = (1 << 1),
+        MSG_OPT_DECODE_STRICT = (1 << 2)
+    };
+
     SipConfiguration();
     virtual ~SipConfiguration();
 
@@ -98,6 +95,9 @@ public:
     inline SIP_UINT32 GetTimerK() const { return m_nTimerK_T4; }
 
     static SipConfiguration* GetInstance();
+
+    // Only for testing
+    static SIP_VOID DestroyInstance();
 
 private:
     static SipConfiguration* pSipConfig;

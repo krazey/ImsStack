@@ -287,7 +287,8 @@ SIP_BOOL SipMIMEHdrs::EncodeMIMEHdrs(SIP_CHAR** ppCurrPos)
         {
             if (pTemp->GetHdrType() != SipHeaderBase::UNKNOWN)
             {
-                sipEncodeHdrName(pTemp->GetHdrType(), ppCurrPos, ESIPMSGOPT_NONE);
+                sipEncodeHdrName(
+                        pTemp->GetHdrType(), ppCurrPos, SipConfiguration::MSG_OPT_ENCODE_NONE);
             }
 
             if (pTemp->EncodeHdr(ppCurrPos) == SIP_FALSE)

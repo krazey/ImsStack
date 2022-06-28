@@ -1448,8 +1448,8 @@ SIP_VOID SipMessage::SetContentLengthHdr(SIP_UINT32 nLen, SIP_UINT32 nMsgOptions
         SIP_CHAR szLen[SIP_CONTLEN_LEN] = {0};
         SipPf_Sprintf(szLen, (SIP_CHAR*)"%u", nLen);
 
-        const SIP_CHAR* pszHdrName =
-                ((nMsgOptions & ESIPMSGOPT_ENCSHORTFORM) == ESIPMSGOPT_ENCSHORTFORM)
+        const SIP_CHAR* pszHdrName = ((nMsgOptions & SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM) ==
+                                             SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM)
                 ? "l"
                 : "Content-Length";
 

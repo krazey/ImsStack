@@ -607,7 +607,7 @@ TEST_F(SipHeadersTest, EncodeHdrs)
     char* pBuff = &(aBuffer[0]);
 
     /* Empty buffer */
-    EXPECT_EQ(SIP_FALSE, pHdrs->EncodeHdrs(&pBuff, ESIPMSGOPT_NONE));
+    EXPECT_EQ(SIP_FALSE, pHdrs->EncodeHdrs(&pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
 
     SipUnknownHeader* pUnknownHdr = reinterpret_cast<SipUnknownHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::UNKNOWN));
@@ -678,7 +678,7 @@ TEST_F(SipHeadersTest, EncodeHdrs)
     memset(pBuff, 0, BUFFER_SIZE);
 
     /* Encode headers */
-    EXPECT_EQ(SIP_TRUE, pHdrs->EncodeHdrs(&pBuff, ESIPMSGOPT_NONE));
+    EXPECT_EQ(SIP_TRUE, pHdrs->EncodeHdrs(&pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
 
     SIP_UINT32 uiLength = pBuff - &(aBuffer[0]);
 
@@ -955,17 +955,24 @@ TEST_F(SipHeadersTest, sipEncodeHdrName)
 
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_FALSE, sipEncodeHdrName(SipHeaderBase::TYPE_INVALID, &pBuff, ESIPMSGOPT_NONE));
-    EXPECT_EQ(SIP_FALSE, sipEncodeHdrName(SipHeaderBase::TYPE_END, &pBuff, ESIPMSGOPT_NONE));
+    EXPECT_EQ(SIP_FALSE,
+            sipEncodeHdrName(
+                    SipHeaderBase::TYPE_INVALID, &pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
+    EXPECT_EQ(SIP_FALSE,
+            sipEncodeHdrName(
+                    SipHeaderBase::TYPE_END, &pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeHdrName(SipHeaderBase::ALLOW, &pBuff, ESIPMSGOPT_NONE));
+    EXPECT_EQ(SIP_TRUE,
+            sipEncodeHdrName(SipHeaderBase::ALLOW, &pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
     EXPECT_STREQ("Allow: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeHdrName(SipHeaderBase::EVENT, &pBuff, ESIPMSGOPT_ENCSHORTFORM));
+    EXPECT_EQ(SIP_TRUE,
+            sipEncodeHdrName(
+                    SipHeaderBase::EVENT, &pBuff, SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM));
     EXPECT_STREQ("o: ", &aBuff[0]);
     pBuff = &aBuff[0];
 }
