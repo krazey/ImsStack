@@ -16,14 +16,11 @@
 
 package com.android.imsstack.enabler.acs.impl;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.telephony.CarrierConfigManager;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyRegistryManager;
 
+import com.android.imsstack.IStateInfoChangedObserver;
+import com.android.imsstack.StateInfoChangedReceiver;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -41,7 +38,7 @@ public class EventReceiver {
         /**
          * Notify intent received
          */
-        void onReceivedIntent();
+        void onReceivedIntent(Intent intent);
 
         /**
          * Notify subscription changed
@@ -50,34 +47,24 @@ public class EventReceiver {
     }
 
     private static EventReceiver sInstance;
-    private final ArrayList<EventReceiverCallback> mCallbackList =
-            new ArrayList<EventReceiverCallback>();
-    private final Object mLock = new Object();
-    private final Context mContext;
-    private final TelephonyRegistryManager mTelephonyRegistryManager;
 
-    private final SubscriptionManager.OnSubscriptionsChangedListener mSubChangedListener =
-            new SubscriptionManager.OnSubscriptionsChangedListener() {
+    private final IStateInfoChangedObserver mIStateInfoChangedObserver =
+            new IStateInfoChangedObserver() {
                 @Override
-                public void onSubscriptionsChanged() {
+                public void notifyStateInfoChanged(Intent intent) {
                     synchronized (mLock) {
                         for (EventReceiverCallback cb : mCallbackList) {
-                            cb.onSubscriptionChanged();
+                            cb.onReceivedIntent(intent);
                         }
                     }
                 }
             };
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            synchronized (mLock) {
-                for (EventReceiverCallback cb : mCallbackList) {
-                    cb.onReceivedIntent();
-                }
-            }
-        }
-    };
+    private final ArrayList<EventReceiverCallback> mCallbackList =
+            new ArrayList<EventReceiverCallback>();
+    private final Object mLock = new Object();
+    private final Context mContext;
+    private final StateInfoChangedReceiver mStateInfoChangedReceiver;
 
     private boolean mRegistered;
 
@@ -89,7 +76,7 @@ public class EventReceiver {
     public static EventReceiver getInstance(Context context) {
         synchronized (sInstance) {
             if (sInstance == null) {
-                sInstance = new EventReceiver(context);
+                sInstance = new EventReceiver(context, new StateInfoChangedReceiver());
             }
         }
 
@@ -130,17 +117,11 @@ public class EventReceiver {
         checkEvent();
     }
 
-    private EventReceiver(Context context) {
-        mRegistered = false;
-        mContext = context;
-        mTelephonyRegistryManager = context.getSystemService(TelephonyRegistryManager.class);
-    }
-
     @VisibleForTesting
-    public EventReceiver(Context context, TelephonyRegistryManager telephonyRegistryManager) {
+    public EventReceiver(Context context, StateInfoChangedReceiver stateInfoChangedReceiver) {
         mRegistered = false;
         mContext = context;
-        mTelephonyRegistryManager = telephonyRegistryManager;
+        mStateInfoChangedReceiver = stateInfoChangedReceiver;
     }
 
     private void checkEvent() {
@@ -150,17 +131,16 @@ public class EventReceiver {
         }
 
         if (size == 1 && !mRegistered) {
-            IntentFilter filter = new IntentFilter();
+            // TODO : need to register IntentReceiver to retrieve OTP
+/*            IntentFilter filter = new IntentFilter();
             filter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
-            mContext.registerReceiver(mReceiver, filter);
+            mContext.registerReceiver(mReceiver, filter);*/
 
-            mTelephonyRegistryManager.addOnSubscriptionsChangedListener(
-                    mSubChangedListener, mSubChangedListener.getHandlerExecutor());
+            mStateInfoChangedReceiver.init(mContext, mIStateInfoChangedObserver);
+
             mRegistered = true;
         } else if (size == 0) {
-            mTelephonyRegistryManager.removeOnSubscriptionsChangedListener(mSubChangedListener);
-
-            mContext.unregisterReceiver(mReceiver);
+//            mContext.unregisterReceiver(mReceiver);
 
             mRegistered = false;
         }
