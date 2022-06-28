@@ -7,7 +7,7 @@ import android.telephony.ims.feature.MmTelFeature;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.IWifiState;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtServiceStateListener;
@@ -211,7 +211,7 @@ public class ImsFeatureManager {
         }
 
         public void clear() {
-            IDCNetWatcher idnw = mContext.getDCNetWatcher();
+            IDcNetWatcher idnw = mContext.getDcNetWatcher();
 
             if (idnw != null) {
                 idnw.unregisterForRatChanged(this);
@@ -225,7 +225,7 @@ public class ImsFeatureManager {
         }
 
         public void init() {
-            IDCNetWatcher idnw = mContext.getDCNetWatcher();
+            IDcNetWatcher idnw = mContext.getDcNetWatcher();
 
             if (idnw != null) {
                 idnw.registerForRatChanged(this, EVENT_RAT_CHANGED, null);

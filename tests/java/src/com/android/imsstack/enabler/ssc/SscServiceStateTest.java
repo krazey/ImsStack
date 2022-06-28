@@ -31,10 +31,10 @@ import com.android.imsstack.core.agents.AlarmTimerAgent;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.core.agents.dcm.Apn;
-import com.android.imsstack.core.agents.dcm.DCNetWatcher;
+import com.android.imsstack.core.agents.dcm.DcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 
 import org.junit.After;
@@ -57,7 +57,7 @@ public class SscServiceStateTest {
     @Mock private Apn mMockApn;
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigAgent mMockConfigAgent;
-    @Mock private DCNetWatcher mMockDcNetWatcher;
+    @Mock private DcNetWatcher mMockDcNetWatcher;
 
     @Before
     public void setup() {
@@ -248,7 +248,7 @@ public class SscServiceStateTest {
         }
 
         @Override
-        protected IDCNetWatcher getDcNetWatcher() {
+        protected IDcNetWatcher getDcNetWatcher() {
             return mMockDcNetWatcher;
         }
     }

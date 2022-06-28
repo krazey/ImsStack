@@ -5,10 +5,10 @@ import android.text.TextUtils;
 
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.agentif.IAgent;
-import com.android.imsstack.core.agents.dcm.DCFactory;
+import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPIVoNR;
 import com.android.imsstack.system.SystemInterface;
@@ -135,7 +135,7 @@ public class VoNRAgent implements IAgent, ISystemAPIVoNR {
 
         String ifaceName = null;
         if (type == CALL_TYPE_VOLTE) {
-            IDCApn dcapn = (IDCApn)DCFactory.getDC(DCFactory.APN, mSlotId);
+            IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
             if (dcapn != null) {
                 ifaceName = dcapn.getIfaceName(EApnType.IMS.getType());
             }
@@ -244,8 +244,8 @@ public class VoNRAgent implements IAgent, ISystemAPIVoNR {
                 return;
             }
 
-            IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(
-                    DCFactory.NETWORK_WATCHER, mSlotId);
+            IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(
+                    DcFactory.NETWORK_WATCHER, mSlotId);
             if (dcnw != null) {
                 dcnw.setNrRegistrationInfo(status, reason);
             }

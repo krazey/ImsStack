@@ -29,7 +29,7 @@ import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 
 import org.junit.After;
@@ -41,14 +41,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
-public class DCSettingsTest {
+public class DcSettingsTest {
     private static final int SLOT_0 = 0;
-    private DCSettings mDCSettingsUT;
+    private DcSettings mDcSettingsUT;
 
     @Mock private Context mMockContext;
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigInterface mMockConfigInterface;
-    @Mock private IDCNetWatcher mMockIDCNetWatcher;
+    @Mock private IDcNetWatcher mMockIDcNetWatcher;
 
     @Before
     public void setUp() throws Exception {
@@ -56,14 +56,14 @@ public class DCSettingsTest {
 
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
 
-        mDCSettingsUT = new FakeDCSettings(SLOT_0);
-        mDCSettingsUT.init(mMockContext);
+        mDcSettingsUT = new FakeDcSettings(SLOT_0);
+        mDcSettingsUT.init(mMockContext);
     }
 
     @After
     public void tearDown() throws Exception {
-        mDCSettingsUT.cleanup();
-        mDCSettingsUT = null;
+        mDcSettingsUT.cleanup();
+        mDcSettingsUT = null;
     }
 
     @Test
@@ -74,8 +74,8 @@ public class DCSettingsTest {
                 .thenReturn(true)
                 .thenReturn(false);
 
-        assertTrue(mDCSettingsUT.isRoamingAllowed());
-        assertFalse(mDCSettingsUT.isRoamingAllowed());
+        assertTrue(mDcSettingsUT.isRoamingAllowed());
+        assertFalse(mDcSettingsUT.isRoamingAllowed());
     }
 
     @Test
@@ -88,7 +88,7 @@ public class DCSettingsTest {
                 .thenReturn(false)
                 .thenReturn(true)
                 .thenReturn(true);
-        when(mMockIDCNetWatcher.isRoaming())
+        when(mMockIDcNetWatcher.isRoaming())
                 .thenReturn(true)
                 .thenReturn(false);
         when(mMockCarrierConfig.getIntArray(
@@ -97,16 +97,16 @@ public class DCSettingsTest {
                 .thenReturn(supportWithoutVopsAtHome);
 
         // configured to not ignore VoPS and VoPS is not required for PDN
-        assertTrue(mDCSettingsUT.isVopsRequired());
+        assertTrue(mDcSettingsUT.isVopsRequired());
 
         // configured to not ignore VoPS and VoPS is required for PDN
-        assertTrue(mDCSettingsUT.isVopsRequired());
+        assertTrue(mDcSettingsUT.isVopsRequired());
 
         // configured to ignore VoPS and VoPS is required for PDN
-        assertTrue(mDCSettingsUT.isVopsRequired());
+        assertTrue(mDcSettingsUT.isVopsRequired());
 
         // configured to ignore VoPS and VoPS is not required for PDN
-        assertFalse(mDCSettingsUT.isVopsRequired());
+        assertFalse(mDcSettingsUT.isVopsRequired());
     }
 
     @Test
@@ -115,7 +115,7 @@ public class DCSettingsTest {
         int[] all = {CarrierConfigManager.Ims.NETWORK_TYPE_HOME,
                 CarrierConfigManager.Ims.NETWORK_TYPE_ROAMING};
 
-        when(mMockIDCNetWatcher.isRoaming())
+        when(mMockIDcNetWatcher.isRoaming())
                 .thenReturn(false)
                 .thenReturn(false)
                 .thenReturn(true)
@@ -128,16 +128,16 @@ public class DCSettingsTest {
                 .thenReturn(all);
 
         // Home Network and configured to not support without VoPS
-        assertTrue(mDCSettingsUT.isVopsRequiredForPdn());
+        assertTrue(mDcSettingsUT.isVopsRequiredForPdn());
 
         // Home Network and configured to support without VoPS
-        assertFalse(mDCSettingsUT.isVopsRequiredForPdn());
+        assertFalse(mDcSettingsUT.isVopsRequiredForPdn());
 
         // Roaming Network and configured to not support without VoPS
-        assertTrue(mDCSettingsUT.isVopsRequiredForPdn());
+        assertTrue(mDcSettingsUT.isVopsRequiredForPdn());
 
         // Roaming Network and configured to support without VoPS
-        assertFalse(mDCSettingsUT.isVopsRequiredForPdn());
+        assertFalse(mDcSettingsUT.isVopsRequiredForPdn());
     }
 
     @Test
@@ -149,10 +149,10 @@ public class DCSettingsTest {
                 .thenReturn(emptyList)
                 .thenReturn(availableList);
 
-        int[] unAvailableRats = mDCSettingsUT.getImsSupportedRats();
+        int[] unAvailableRats = mDcSettingsUT.getImsSupportedRats();
         assertEquals(unAvailableRats.length, emptyList.length);
 
-        int[] availableRats = mDCSettingsUT.getImsSupportedRats();
+        int[] availableRats = mDcSettingsUT.getImsSupportedRats();
         assertEquals(availableRats.length, availableList.length);
     }
 
@@ -163,8 +163,8 @@ public class DCSettingsTest {
                 .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED)
                 .thenReturn(CarrierConfig.Assets.IPV6_PREFERRED);
 
-        assertEquals(mDCSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV4_PREFERRED);
-        assertEquals(mDCSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV6_PREFERRED);
+        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV4_PREFERRED);
+        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV6_PREFERRED);
     }
 
     @Test
@@ -174,9 +174,9 @@ public class DCSettingsTest {
                 .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED)
                 .thenReturn(CarrierConfig.Assets.IPV6_PREFERRED);
 
-        assertEquals(mDCSettingsUT.getEmergencyPreferredIpVersion(),
+        assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),
                 CarrierConfig.Assets.IPV4_PREFERRED);
-        assertEquals(mDCSettingsUT.getEmergencyPreferredIpVersion(),
+        assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),
                 CarrierConfig.Assets.IPV6_PREFERRED);
     }
 
@@ -194,14 +194,14 @@ public class DCSettingsTest {
                 .thenReturn(emptyList)
                 .thenReturn(availableList);
 
-        assertFalse(mDCSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
-        assertTrue(mDCSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
+        assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
+        assertTrue(mDcSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
 
-        assertFalse(mDCSettingsUT.isPermanentFailure(EApnType.XCAP, permanentFailureCause));
-        assertTrue(mDCSettingsUT.isPermanentFailure(EApnType.XCAP, permanentFailureCause));
+        assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.XCAP, permanentFailureCause));
+        assertTrue(mDcSettingsUT.isPermanentFailure(EApnType.XCAP, permanentFailureCause));
 
-        assertFalse(mDCSettingsUT.isPermanentFailure(EApnType.INTERNET, permanentFailureCause));
-        assertFalse(mDCSettingsUT.isPermanentFailure(EApnType.EMERGENCY, permanentFailureCause));
+        assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.INTERNET, permanentFailureCause));
+        assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.EMERGENCY, permanentFailureCause));
     }
 
     @Test
@@ -209,21 +209,21 @@ public class DCSettingsTest {
         int permanentFailureCause = 33;
 
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(null);
-        mDCSettingsUT.init(mMockContext);
+        mDcSettingsUT.init(mMockContext);
 
-        assertTrue(mDCSettingsUT.isRoamingAllowed());
-        assertTrue(mDCSettingsUT.isVopsRequired());
-        assertTrue(mDCSettingsUT.isVopsRequiredForPdn());
-        int[] availableRats = mDCSettingsUT.getImsSupportedRats();
+        assertTrue(mDcSettingsUT.isRoamingAllowed());
+        assertTrue(mDcSettingsUT.isVopsRequired());
+        assertTrue(mDcSettingsUT.isVopsRequiredForPdn());
+        int[] availableRats = mDcSettingsUT.getImsSupportedRats();
         assertEquals(availableRats.length, 0);
-        assertEquals(mDCSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV6_PREFERRED);
-        assertEquals(mDCSettingsUT.getEmergencyPreferredIpVersion(),
+        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV6_PREFERRED);
+        assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),
                 CarrierConfig.Assets.IPV6_PREFERRED);
-        assertFalse(mDCSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
+        assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
     }
 
-    private class FakeDCSettings extends DCSettings {
-        private FakeDCSettings(int slotId) {
+    private class FakeDcSettings extends DcSettings {
+        private FakeDcSettings(int slotId) {
             super(slotId);
         }
 
@@ -233,8 +233,8 @@ public class DCSettingsTest {
         }
 
         @Override
-        protected IDCNetWatcher getDcNetWatcher(int slotId) {
-            return mMockIDCNetWatcher;
+        protected IDcNetWatcher getDcNetWatcher(int slotId) {
+            return mMockIDcNetWatcher;
         }
     }
 }

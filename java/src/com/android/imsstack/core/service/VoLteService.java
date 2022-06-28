@@ -22,12 +22,12 @@ import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.LocationPolicy;
 import com.android.imsstack.core.agents.agentif.SubscriptionListener;
-import com.android.imsstack.core.agents.dcm.DCFactory;
-import com.android.imsstack.core.agents.dcm.DCGov;
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcm.DcGov;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.ImsDbController;
 import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.core.service.CallInfoService;
@@ -233,7 +233,7 @@ public class VoLteService implements IVoLteService {
     }
 
     protected void dcGov_SetApnEnable(boolean enable) {
-        IDCApn dcapn = (IDCApn)DCFactory.getDC(DCFactory.APN, mSlotID);
+        IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotID);
         if (dcapn != null) {
             dcapn.changeApnEmployState(EApnType.IMS, enable);
             dcapn.changeApnEmployState(EApnType.EMERGENCY, enable);
@@ -457,7 +457,7 @@ public class VoLteService implements IVoLteService {
             }
 
             // Request to connect IMS PDN
-            DCGov dcgov = (DCGov)DCFactory.getDC(DCFactory.GOVERNOR, mSlotID);
+            DcGov dcgov = (DcGov) DcFactory.getDc(DcFactory.GOVERNOR, mSlotID);
             if (dcgov != null) {
                 dcgov.activateDataConnection4Sys(EApnType.IMS.getType(),
                         IApn.IPCAN_CATEGORY_MOBILE);
@@ -470,7 +470,7 @@ public class VoLteService implements IVoLteService {
                 initServiceProvisioningInfo(IUIMS.M_APP_UC | IUIMS.M_APP_VT);
             }
 
-            DCGov dcGov = (DCGov) DCFactory.getDC(DCFactory.GOVERNOR, mSlotID);
+            DcGov dcGov = (DcGov) DcFactory.getDc(DcFactory.GOVERNOR, mSlotID);
             if (dcGov != null) {
                 dcGov.activateDataConnection4Sys(EApnType.IMS.getType(),
                         IApn.IPCAN_CATEGORY_MOBILE);
@@ -526,8 +526,8 @@ public class VoLteService implements IVoLteService {
                     ImsEventDef.IMS_POWER_LOW_BATTERY, 0);
         }
 
-        IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(
-                DCFactory.NETWORK_WATCHER, mSlotID);
+        IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(
+                DcFactory.NETWORK_WATCHER, mSlotID);
         if (dcnw != null) {
             notifyVopsState(dcnw.isVops());
         }

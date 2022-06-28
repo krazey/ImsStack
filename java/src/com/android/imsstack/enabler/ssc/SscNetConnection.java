@@ -25,12 +25,12 @@ import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
-import com.android.imsstack.core.agents.dcm.DCFactory;
+import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 
@@ -71,7 +71,7 @@ public class SscNetConnection implements ISscNetConnection {
         handlerThread.start();
         mSscNetConnectionHandler = new SscNetConnectionHandler(handlerThread.getLooper());
 
-        IDCNetWatcher dnw = (IDCNetWatcher) DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+        IDcNetWatcher dnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         if (dnw != null) {
             dnw.registerForDataStateChanged(mSscNetConnectionHandler,
                     EVENT_PDN_DATA_STATE_CHANGED, null);
@@ -86,8 +86,8 @@ public class SscNetConnection implements ISscNetConnection {
     public void cleanup() {
         disconnect();
 
-        IDCNetWatcher dnw
-                = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+        IDcNetWatcher dnw =
+                (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         if (dnw != null) {
             dnw.unregisterForDataServiceStateChanged(mSscNetConnectionHandler);
             dnw.unregisterForPdnConnectionFailed(mSscNetConnectionHandler);
@@ -109,7 +109,7 @@ public class SscNetConnection implements ISscNetConnection {
         }
 
         int dataState;
-        IDCApn dcGovApnCtrl = (IDCApn)DCFactory.getDC(DCFactory.APN, mSlotId);
+        IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
         if (dcGovApnCtrl != null) {
             dataState = dcGovApnCtrl.getDataState(mApnType.getType());
         } else {
@@ -141,7 +141,7 @@ public class SscNetConnection implements ISscNetConnection {
             return true;
         }
 
-        IDCApn dcGovApnCtrl = (IDCApn)DCFactory.getDC(DCFactory.APN, mSlotId);
+        IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
         if (dcGovApnCtrl == null) {
             ImsLog.e("dcGovApnCtrl is null");
             return false;
@@ -168,7 +168,7 @@ public class SscNetConnection implements ISscNetConnection {
         }
 
         int otherSlotId = mSlotId == 0 ? 1 : 0;
-        IDCApn dcGovApnCtrl = (IDCApn)DCFactory.getDC(DCFactory.APN, otherSlotId);
+        IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, otherSlotId);
         if (dcGovApnCtrl == null) {
             ImsLog.e(mSlotId, "dcGovApnCtrl for other slot is null, PDN available");
             return true;
@@ -202,7 +202,7 @@ public class SscNetConnection implements ISscNetConnection {
             return;
         }
 
-        IDCApn dcGovApnCtrl = (IDCApn)DCFactory.getDC(DCFactory.APN, mSlotId);
+        IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
         if (dcGovApnCtrl != null) {
             dcGovApnCtrl.disconnect(mApnType.getType(), IApn.DEFAULT_TIME_FOR_RECOVERY,
                 IApn.IPCAN_CATEGORY_MOBILE);
@@ -316,7 +316,7 @@ public class SscNetConnection implements ISscNetConnection {
                 return;
             }
 
-            IDCNetWatcher.NotiObj res = (IDCNetWatcher.NotiObj) ar.result;
+            IDcNetWatcher.NotiObj res = (IDcNetWatcher.NotiObj) ar.result;
             if (res == null) {
                 return;
             }
@@ -357,7 +357,7 @@ public class SscNetConnection implements ISscNetConnection {
             ImsLog.d("ApnType : " + apnType.toString());
             // Change only for XCAP apn type.
             if (apnType == EApnType.XCAP) {
-                IDCApn dcapn = (IDCApn) DCFactory.getDC(DCFactory.APN, mSlotId);
+                IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
                 IApn apn = (dcapn != null) ? dcapn.getApnControl(apnType.getType()) : null;
                 boolean isPermanentFailure = (apn != null)
                         ? apn.isESMCausePermanentFailure() : false;

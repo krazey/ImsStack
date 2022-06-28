@@ -1,17 +1,13 @@
 package com.android.imsstack.core.agents;
 
 import android.content.Context;
-import android.telephony.CellLocation;
-import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
 import com.android.imsstack.core.agents.agentif.IPhoneState;
-import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.ITelephonyState;
-import com.android.imsstack.core.agents.dcm.DCFactory;
-import com.android.imsstack.core.agents.dcm.DCNetWatcher;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPITelephonyState;
 import com.android.imsstack.system.SystemInterface;
@@ -112,7 +108,7 @@ public class TelephonyStateAgent implements ITelephonyState,ISystemAPITelephonyS
             networkType = getCellularNetworkType();
         }
 
-        IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+        IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         if (dcnw != null) {
             if (is5G(networkType) && !dcnw.is5GRequired()) {
                 networkType = TelephonyManager.NETWORK_TYPE_LTE;
@@ -134,7 +130,7 @@ public class TelephonyStateAgent implements ITelephonyState,ISystemAPITelephonyS
 
         int voiceNetworkType = tm.getVoiceNetworkType();
 
-        IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+        IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         if (dcnw != null) {
             if (is5G(voiceNetworkType) && !dcnw.is5GRequired()) {
                 voiceNetworkType = TelephonyManager.NETWORK_TYPE_LTE;

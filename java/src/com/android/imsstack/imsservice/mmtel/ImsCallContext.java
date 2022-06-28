@@ -17,9 +17,9 @@ import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgentManager;
 import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.core.agents.dcm.DCFactory;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
 import com.android.imsstack.enabler.mtc.IServiceStateTracker;
@@ -167,13 +167,13 @@ public class ImsCallContext implements ICallContext {
     }
 
     @Override
-    public IDCApn getDCApn() {
-        return (IDCApn)DCFactory.getDC(DCFactory.APN, getSlotId());
+    public IDcApn getDcApn() {
+        return (IDcApn) DcFactory.getDc(DcFactory.APN, getSlotId());
     }
 
     @Override
-    public IDCNetWatcher getDCNetWatcher() {
-        return (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, getSlotId());
+    public IDcNetWatcher getDcNetWatcher() {
+        return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, getSlotId());
     }
 
     @Override
@@ -309,7 +309,7 @@ public class ImsCallContext implements ICallContext {
     }
 
     public boolean hasAccessBearerCapabilitiesForHDCall() {
-        IDCNetWatcher dcnw = getDCNetWatcher();
+        IDcNetWatcher dcnw = getDcNetWatcher();
         IImsTestMode itm = getTestMode();
         // __TEST_MODE__ :: call over WiFi
         return ((dcnw != null) && (dcnw.is4G() || dcnw.is5G()))

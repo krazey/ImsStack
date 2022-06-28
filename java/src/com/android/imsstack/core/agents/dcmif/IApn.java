@@ -18,28 +18,28 @@ public interface IApn {
     void cleanup();
 
     /**
-     * Set reference of DCSettings object in each apn object.
-     * If Apn object refer to DCSettings object directly, it cause Circular reference.
-     * So, when DCApn set reference of DCSettings to Apn to prevent circular reference.
+     * Set reference of DcSettings object in each apn object.
+     * If Apn object refer to DcSettings object directly, it cause Circular reference.
+     * So, when DcApn set reference of DcSettings to Apn to prevent circular reference.
      */
-    void setSettings(IDCSettings settings);
+    void setSettings(IDcSettings settings);
 
     /**
-     * Return DCSettings object.
+     * Return DcSettings object.
      */
-    IDCSettings getSettings();
+    IDcSettings getSettings();
 
     /**
-     * Set reference of DCNetWatcher object in each apn object.
-     * If Apn object refer to DCSettings object directly, it cause Circular reference.
-     * So, when DCApn set reference of DCNetWatcher to Apn to prevent circular reference.
+     * Set reference of DcNetWatcher object in each apn object.
+     * If Apn object refer to DcSettings object directly, it cause Circular reference.
+     * So, when DcApn set reference of DcNetWatcher to Apn to prevent circular reference.
      */
-    void setNetWatcher(IDCNetWatcher netWatcher);
+    void setNetWatcher(IDcNetWatcher netWatcher);
 
     /**
-     * Return DCNetWatcher object.
+     * Return DcNetWatcher object.
      */
-    IDCNetWatcher getNetWatcher();
+    IDcNetWatcher getNetWatcher();
 
     /**
      * Add/Remove Listener to receive ip category chaged event
@@ -147,11 +147,6 @@ public interface IApn {
      * Return cached network of APN
      */
     Network getCachedNetwork();
-
-    /**
-     * Notifies IPCAN change (CELLULAR/IWLAN)
-     */
-    void notifyIPCanChange(int ipcanType);
 
     /**
      * Set Manual Detach triggered value when User turn on airplane, LTE menu

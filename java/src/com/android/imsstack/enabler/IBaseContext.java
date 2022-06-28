@@ -8,8 +8,8 @@ import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.mtc.IServiceStateTracker;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.test.IImsTestMode;
@@ -29,8 +29,16 @@ public interface IBaseContext extends IContext {
     /**
      * Platform interface's wrappers.
      */
-    public IDCApn getDCApn();
-    public IDCNetWatcher getDCNetWatcher();
+
+    /**
+     * wrapper to get the object of DcApn.
+     */
+    IDcApn getDcApn();
+
+    /**
+     * wrapper to get the object of DcNetWatcher.
+     */
+    IDcNetWatcher getDcNetWatcher();
     public ISharedState getSharedState();
     public ISubscription getSubscription();
     public ISystem getSystem();

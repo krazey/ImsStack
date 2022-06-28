@@ -1,15 +1,22 @@
-/**
+/*
+ * Copyright (C) 2022 The Android Open Source Project
  *
- *    Role
- *        1. Factory of Apn objects which inherit IApn type.
- *        2. Apn object invoker according to the "apn type"
- *        3. Logical APN core logic of data connection package.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.android.imsstack.core.agents.dcm;
 
 import android.content.Context;
-import android.os.Message;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -18,6 +25,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkSpecifier;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.wifi.WifiManager;
+import android.os.Message;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
@@ -27,14 +35,14 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.SubscriptionListener;
-import com.android.imsstack.core.agents.dcmif.DCConstants;
+import com.android.imsstack.core.agents.dcmif.DcConstants;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
 import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.core.agents.dcmif.IDCSettings;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
@@ -50,22 +58,27 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
-public class DCApn implements IDCApn {
+/**
+ * This class provides followings.
+ *  1. Factory of Apn objects which inherit IApn type.
+ *  2. Apn object invoker according to the "apn type"
+ *  3. Logical APN core logic of data connection package.
+ */
+public class DcApn implements IDcApn {
 
     // Variables--------------------------------------------------
     private final Object mLock = new Object();
-    IDCSettings   mDcSettings;
-    IDCNetWatcher mDcNetWatcher;
+    IDcSettings   mDcSettings;
+    IDcNetWatcher mDcNetWatcher;
     private Context mContext;
 
     // APN controllers
-    private Hashtable<Integer, IApn> mapApn = new Hashtable<Integer, IApn>();
+    private Hashtable<Integer, IApn> mMapApn = new Hashtable<Integer, IApn>();
 
     // Local IP addresses
-    private Hashtable<Integer, String> mapLocalIP = new Hashtable<Integer, String>();
+    private Hashtable<Integer, String> mMapLocalIP = new Hashtable<Integer, String>();
 
     private int mSlotId = 0;
     private int mSubId = MSimUtils.INVALID_SUB_ID;
@@ -73,7 +86,7 @@ public class DCApn implements IDCApn {
     private SubscriptionListenerProxy mSubscriptionListener;
 
     // Public methods --------------------------------------------
-    public DCApn(int slotId) {
+    public DcApn(int slotId) {
         ImsLog.d(slotId, "");
         mSlotId = slotId;
     }
@@ -88,20 +101,20 @@ public class DCApn implements IDCApn {
 
         mContext = context;
 
-        mDcSettings = (IDCSettings)DCFactory.getDC(DCFactory.SETTING, mSlotId);
+        mDcSettings = (IDcSettings) DcFactory.getDc(DcFactory.SETTING, mSlotId);
         if (mDcSettings == null) {
-            ImsLog.w(mSlotId, "IDCSettings is null");
+            ImsLog.w(mSlotId, "IDcSettings is null");
         }
 
-        mDcNetWatcher = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+        mDcNetWatcher = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         if (mDcNetWatcher == null) {
-            ImsLog.w(mSlotId, "IDCNetWatcher is null");
+            ImsLog.w(mSlotId, "IDcNetWatcher is null");
         }
 
         apnFactory();
 
         mSubscriptionListener = new SubscriptionListenerProxy();
-        ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
+        ISubscription isub = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
         if (isub != null) {
             isub.addListener(mSubscriptionListener);
         }
@@ -119,7 +132,7 @@ public class DCApn implements IDCApn {
         ImsLog.d(mSlotId, "");
 
         if (mSubscriptionListener != null) {
-            ISubscription subs = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
+            ISubscription subs = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
             if (subs != null) {
                 subs.removeListener(mSubscriptionListener);
             }
@@ -136,18 +149,18 @@ public class DCApn implements IDCApn {
         mDcNetWatcher = null;
         mDcSettings = null;
 
-        mapLocalIP.clear();
+        mMapLocalIP.clear();
     }
 
     @Override
     public boolean connect(int apnType, int ipcanType) {
-        ISharedState ss = (ISharedState)AgentFactory.getAgent(AgentFactory.SHARED_STATE, mSlotId);
+        ISharedState ss = (ISharedState) AgentFactory.getAgent(AgentFactory.SHARED_STATE, mSlotId);
 
         if (ss == null) {
             return false;
         }
 
-        if (ss.isNativeBootCompleted() == false) {
+        if (!ss.isNativeBootCompleted()) {
             ImsLog.w(mSlotId, "native is not ready, apnType = " + apnType);
             return true;
         }
@@ -346,13 +359,13 @@ public class DCApn implements IDCApn {
 
         ImsLog.i(mSlotId, "LinkAddress :: apnType=" + apnType + ", size=" + linkAddresses.size());
 
-        String ip = getIPAddress(linkAddresses, ipVersion);
+        String ip = getIpAddress(linkAddresses, ipVersion);
 
         if (ipCacheRequired) {
             if (ip == null) {
-                mapLocalIP.remove(apnType);
+                mMapLocalIP.remove(apnType);
             } else {
-                mapLocalIP.put(apnType, ip);
+                mMapLocalIP.put(apnType, ip);
             }
         }
 
@@ -361,7 +374,7 @@ public class DCApn implements IDCApn {
 
     @Override
     public String getCachedLocalAddress(int apnType) {
-        return mapLocalIP.get(apnType);
+        return mMapLocalIP.get(apnType);
     }
 
     @Override
@@ -441,12 +454,12 @@ public class DCApn implements IDCApn {
             return;
         }
 
-        mapApn.put(apnType, apn);
+        mMapApn.put(apnType, apn);
     }
 
     @Override
     public IApn getApnControl(int apnType) {
-        IApn apn = mapApn.get(apnType);
+        IApn apn = mMapApn.get(apnType);
 
         if (apn == null) {
             ImsLog.w(mSlotId, "IApn is null; type=" + apnType);
@@ -486,7 +499,7 @@ public class DCApn implements IDCApn {
 
         int netCapaType = EApnType.getNetCapabilityFromType(apnType);
 
-        if (netCapaType == DCConstants.CAPABILITY_NONE) {
+        if (netCapaType == DcConstants.CAPABILITY_NONE) {
             ImsLog.w(mSlotId, "no network capability type for the apn = " + apnType);
             return null;
         }
@@ -501,7 +514,8 @@ public class DCApn implements IDCApn {
             NetworkCapabilities networkCapability = cm.getNetworkCapabilities(nw);
 
             if (networkCapability != null) {
-                if (MSimUtils.isMultiSimEnabled() && transportType != NetworkCapabilities.TRANSPORT_WIFI) {
+                if (MSimUtils.isMultiSimEnabled()
+                        && transportType != NetworkCapabilities.TRANSPORT_WIFI) {
                     NetworkSpecifier ns = networkCapability.getNetworkSpecifier();
 
                     if (ns == null) {
@@ -510,7 +524,7 @@ public class DCApn implements IDCApn {
 
                     if (ns instanceof TelephonyNetworkSpecifier) {
                         TelephonyNetworkSpecifier tns = new TelephonyNetworkSpecifier.Builder()
-                               .setSubscriptionId(MSimUtils.getSubId(mSlotId)).build();
+                                .setSubscriptionId(MSimUtils.getSubId(mSlotId)).build();
 
                         if (!tns.equals(ns)) {
                             continue;
@@ -545,20 +559,11 @@ public class DCApn implements IDCApn {
             return;
         }
 
-        if (enable == true) {
+        if (enable) {
             apn.employApn();
         } else {
             apn.dismissApn();
         }
-    }
-
-    @Override
-    public void notifyIPCanChange(int apnType, int ipcanType) {
-        // get proper apn controller
-        IApn iApn = getApnControl(apnType);
-        if (iApn == null) { return; }
-
-        iApn.notifyIPCanChange(ipcanType);
     }
 
     // Interface implementation methods --------------------------
@@ -568,14 +573,14 @@ public class DCApn implements IDCApn {
             return;
         }
 
-        mapApn.put(EApnType.IMS.getType(), new ApnIms(mContext, mSlotId));
-        mapApn.put(EApnType.EMERGENCY.getType(), new ApnEmergency(mContext, mSlotId));
-        mapApn.put(EApnType.XCAP.getType(), new ApnXcap(mContext, mSlotId));
-        mapApn.put(EApnType.INTERNET.getType(), new ApnInternet(mContext, mSlotId));
+        mMapApn.put(EApnType.IMS.getType(), new ApnIms(mContext, mSlotId));
+        mMapApn.put(EApnType.EMERGENCY.getType(), new ApnEmergency(mContext, mSlotId));
+        mMapApn.put(EApnType.XCAP.getType(), new ApnXcap(mContext, mSlotId));
+        mMapApn.put(EApnType.INTERNET.getType(), new ApnInternet(mContext, mSlotId));
     }
 
     private void cleanUpApns() {
-        Set<Integer> apnList = mapApn.keySet();
+        Set<Integer> apnList = mMapApn.keySet();
         Iterator<Integer> iterator = apnList.iterator();
 
         while (iterator.hasNext()) {
@@ -583,19 +588,18 @@ public class DCApn implements IDCApn {
             try {
                 key = iterator.next();
             } catch (ConcurrentModificationException e) {
-                mapApn.clear();
+                mMapApn.clear();
                 return;
             }
 
-            IApn apn = mapApn.get(key);
-            if (apn != null)
-            {
+            IApn apn = mMapApn.get(key);
+            if (apn != null) {
                 apn.disconnect(0);
                 apn.cleanup();
             }
         }
 
-        mapApn.clear();
+        mMapApn.clear();
     }
 
     private LinkProperties getLinkProperties(int apnType) {
@@ -618,7 +622,7 @@ public class DCApn implements IDCApn {
         }
     }
 
-    private String getIPAddress(Collection<LinkAddress> linkAddresses, int ipVersion) {
+    private String getIpAddress(Collection<LinkAddress> linkAddresses, int ipVersion) {
         if (linkAddresses == null) {
             return null;
         }
@@ -780,7 +784,7 @@ public class DCApn implements IDCApn {
         synchronized (mLock) {
             int slotId = MSimUtils.getSlotId(subId);
             if (mSlotId != slotId) {
-                ISubscription isub = (ISubscription)AgentFactory.getAgent(
+                ISubscription isub = (ISubscription) AgentFactory.getAgent(
                         AgentFactory.SUBSCRIPTION);
 
                 if (isub == null) {
@@ -808,7 +812,7 @@ public class DCApn implements IDCApn {
             implements TelephonyCallback.PreciseDataConnectionStateListener {
         private TelephonyManager mTelephonyManager = null;
 
-        public PreciseDcStateListener() {
+        PreciseDcStateListener() {
         }
 
         public void register(TelephonyManager tm) {
@@ -853,7 +857,7 @@ public class DCApn implements IDCApn {
     }
 
     private class SubscriptionListenerProxy extends SubscriptionListener {
-        public SubscriptionListenerProxy() {
+        SubscriptionListenerProxy() {
         }
 
         @Override

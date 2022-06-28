@@ -110,7 +110,7 @@ enum
     WIFI_STATE_UNKNOWN = 4
 };
 
-// Synced with DCNetWatcher.java
+// Synced with DcNetWatcher.java
 enum
 {
     RADIO_TECH_UNKNOWN = 0,

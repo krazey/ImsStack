@@ -1,11 +1,11 @@
 package com.android.imsstack.core.service;
 
-import com.android.imsstack.core.agents.dcm.DCFactory;
+import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.util.ImsLog;
 
 public class CallSysModeTracker {
@@ -48,7 +48,7 @@ public class CallSysModeTracker {
             return RIL_SYS_MODE_WIFI;
         }
 
-        IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+        IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         if (dcnw == null) {
             return RIL_SYS_MODE_LTE;
         }
@@ -64,7 +64,7 @@ public class CallSysModeTracker {
 
     private int getIpcanCategory(int apnType) {
 
-        IDCApn dcApn = (IDCApn)DCFactory.getDC(DCFactory.APN, mSlotId);
+        IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
 
         if (dcApn != null && dcApn.isConnected(apnType)) {
             return dcApn.getIpcanCategory(apnType);
@@ -78,7 +78,7 @@ public class CallSysModeTracker {
             return;
         }
 
-        IDCApn dcApn = (IDCApn)DCFactory.getDC(DCFactory.APN, mSlotId);
+        IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
 
         IApn apnIms = (dcApn != null) ? dcApn.getApnControl(APN_TYPE_IMS) : null;
         if (apnIms != null) {
@@ -94,7 +94,7 @@ public class CallSysModeTracker {
     }
 
     private void setApnStateListener() {
-        IDCApn dcApn = (IDCApn)DCFactory.getDC(DCFactory.APN, mSlotId);
+        IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
 
         IApn apnIms = (dcApn != null) ? dcApn.getApnControl(APN_TYPE_IMS) : null;
         if (apnIms != null) {

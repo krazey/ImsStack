@@ -38,15 +38,15 @@ import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.MsgProcInterface;
 import com.android.imsstack.core.agents.agentif.SubscriptionListener;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
-import com.android.imsstack.core.agents.dcmif.DCConstants;
+import com.android.imsstack.core.agents.dcmif.DcConstants;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
 import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.core.agents.dcmif.IDCSettings;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistration;
@@ -143,18 +143,18 @@ public abstract class Apn extends Handler implements IApn {
                 "VOWIFI_ROAMING_PREF_CHANGED");
     }
 
-    protected Context        mContext;
-    protected IDCSettings    mDcSettings;
-    protected IDCNetWatcher  mDcNetWatcher;
-    protected int            mSlotId = 0;
-    protected EApnType       mType;
-    protected EApnReqState   mAPNState = EApnReqState.APN_REQUEST_IDLE;
-    protected int            mDataState = TelephonyManager.DATA_DISCONNECTED;
-    protected String         mApnString = null;
-    protected int            mApnProtocol = ApnSetting.PROTOCOL_IPV4V6;
-    protected int            mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-    protected int            mPreciseDcState = TelephonyManager.DATA_UNKNOWN;
-    protected int            mIpcanCategory = IPCAN_CATEGORY_MOBILE;
+    protected Context mContext;
+    protected IDcSettings mDcSettings;
+    protected IDcNetWatcher mDcNetWatcher;
+    protected int mSlotId = 0;
+    protected EApnType mType;
+    protected EApnReqState mAPNState = EApnReqState.APN_REQUEST_IDLE;
+    protected int mDataState = TelephonyManager.DATA_DISCONNECTED;
+    protected String mApnString = null;
+    protected int mApnProtocol = ApnSetting.PROTOCOL_IPV4V6;
+    protected int mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    protected int mPreciseDcState = TelephonyManager.DATA_UNKNOWN;
+    protected int mIpcanCategory = IPCAN_CATEGORY_MOBILE;
     protected Hashtable<Integer, MsgProcInterface> mMapMsgHandler =
             new Hashtable<Integer, MsgProcInterface>();
     protected ImsNetworkCallback mNetworkCallback = null;
@@ -170,8 +170,8 @@ public abstract class Apn extends Handler implements IApn {
     protected Apn(Context context, int slotId) {
         mContext = context;
         mSlotId = slotId;
-        mDcSettings = (IDCSettings) DCFactory.getDC(DCFactory.SETTING, mSlotId);
-        mDcNetWatcher = (IDCNetWatcher) DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+        mDcSettings = (IDcSettings) DcFactory.getDc(DcFactory.SETTING, mSlotId);
+        mDcNetWatcher = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
 
         registerEvent();
     }
@@ -202,7 +202,7 @@ public abstract class Apn extends Handler implements IApn {
 
         Message msg = Message.obtain();
         msg.what = EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDCNetWatcher.NotiObj(mType, EDataState.DATA_STATE_DISCONNECTED);
+        msg.obj = new IDcNetWatcher.NotiObj(mType, EDataState.DATA_STATE_DISCONNECTED);
         handleMessage(msg);
     }
 
@@ -226,22 +226,22 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     @Override
-    public IDCSettings getSettings() {
+    public IDcSettings getSettings() {
         return mDcSettings;
     }
 
     @Override
-    public void setSettings(IDCSettings dcSettings) {
+    public void setSettings(IDcSettings dcSettings) {
         this.mDcSettings = dcSettings;
     }
 
     @Override
-    public IDCNetWatcher getNetWatcher() {
+    public IDcNetWatcher getNetWatcher() {
         return mDcNetWatcher;
     }
 
     @Override
-    public void setNetWatcher(IDCNetWatcher dcNetWatcher) {
+    public void setNetWatcher(IDcNetWatcher dcNetWatcher) {
         this.mDcNetWatcher = dcNetWatcher;
     }
 
@@ -318,12 +318,12 @@ public abstract class Apn extends Handler implements IApn {
     public int getIpVersion() {
         int ipVersion = EIpVersion.IPV6V4.getInt();
         if (mDcSettings != null) {
-            if (mType.getType() == DCConstants.TYPE_EMERGENCY) {
+            if (mType.getType() == DcConstants.TYPE_EMERGENCY) {
                 if (mDcSettings.getEmergencyPreferredIpVersion()
                         == CarrierConfig.Assets.IPV4_PREFERRED) {
                     ipVersion = EIpVersion.IPV4V6.getInt();
                 }
-            } else if (mType.getType() == DCConstants.TYPE_IMS) {
+            } else if (mType.getType() == DcConstants.TYPE_IMS) {
                 if (mDcSettings.getPreferredIpVersion() == CarrierConfig.Assets.IPV4_PREFERRED) {
                     ipVersion = EIpVersion.IPV4V6.getInt();
                 }
@@ -375,11 +375,6 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     @Override
-    public void notifyIPCanChange(int ipcanType) {
-        // Child Class Need to Implement
-    }
-
-    @Override
     public void setManualDetachedTriggered(boolean value) {
         // Child Class Need to Implement
     }
@@ -422,13 +417,13 @@ public abstract class Apn extends Handler implements IApn {
                     .setSubscriptionId(MSimUtils.getSubId(mSlotId)).build());
         }
 
-        if (mType.getType() == DCConstants.TYPE_IMS) {
+        if (mType.getType() == DcConstants.TYPE_IMS) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
-        } else if (mType.getType() == DCConstants.TYPE_INTERNET) {
+        } else if (mType.getType() == DcConstants.TYPE_INTERNET) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build();
-        } else if (mType.getType() == DCConstants.TYPE_XCAP) {
+        } else if (mType.getType() == DcConstants.TYPE_XCAP) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_XCAP).build();
-        } else if (mType.getType() == DCConstants.TYPE_EMERGENCY) {
+        } else if (mType.getType() == DcConstants.TYPE_EMERGENCY) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_EIMS).build();
         }
 
@@ -484,7 +479,7 @@ public abstract class Apn extends Handler implements IApn {
         if (MSimUtils.isMultiSimEnabled()) {
             boolean setSubId = true;
 
-            if (mType.getType() == DCConstants.TYPE_EMERGENCY) {
+            if (mType.getType() == DcConstants.TYPE_EMERGENCY) {
                 ISubscription isub = (ISubscription) AgentFactory.getAgent(
                         AgentFactory.SUBSCRIPTION);
                 int subId = MSimUtils.getSubId(mSlotId);
@@ -501,18 +496,18 @@ public abstract class Apn extends Handler implements IApn {
             }
         }
 
-        if (mType.getType() == DCConstants.TYPE_IMS) {
+        if (mType.getType() == DcConstants.TYPE_IMS) {
             if (mDcSettings != null) {
                 if (mDcSettings.isVopsRequiredForPdn()) {
                     nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_MMTEL);
                 }
             }
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
-        } else if (mType.getType() == DCConstants.TYPE_INTERNET) {
+        } else if (mType.getType() == DcConstants.TYPE_INTERNET) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build();
-        } else if (mType.getType() == DCConstants.TYPE_XCAP) {
+        } else if (mType.getType() == DcConstants.TYPE_XCAP) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_XCAP).build();
-        } else if (mType.getType() == DCConstants.TYPE_EMERGENCY) {
+        } else if (mType.getType() == DcConstants.TYPE_EMERGENCY) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_EIMS).build();
         }
 
@@ -630,7 +625,7 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         NetworkInfo netInfo = null;
-        IDCApn dcapn = (IDCApn) DCFactory.getDC(DCFactory.APN, mSlotId);
+        IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
 
         if (dcapn != null) {
             netInfo = cm.getNetworkInfo(dcapn.getNetworkByCapability(mType.getType()));
@@ -654,7 +649,7 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected boolean hasLocalAddress(int version) {
-        IDCApn dcapn = (IDCApn) DCFactory.getDC(DCFactory.APN, mSlotId);
+        IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
 
         if (dcapn != null) {
             String ip = dcapn.getLocalAddress(mType.getType(), version);
@@ -668,7 +663,7 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected boolean isIPChanged() {
-        IDCApn dcapn = (IDCApn) DCFactory.getDC(DCFactory.APN, mSlotId);
+        IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
 
         if (dcapn != null) {
             String cachedIP = dcapn.getCachedLocalAddress(mType.getType());
@@ -740,14 +735,14 @@ public abstract class Apn extends Handler implements IApn {
         //notify to apn
         Message msg = Message.obtain();
         msg.what = EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDCNetWatcher.NotiObj(apnType, dataState);
+        msg.obj = new IDcNetWatcher.NotiObj(apnType, dataState);
 
         sendMessage(msg);
     }
 
     protected boolean handleIpcanCategory(int networkType) {
-        if ((mType.getType() != DCConstants.TYPE_IMS)
-                && (mType.getType() != DCConstants.TYPE_EMERGENCY)) {
+        if ((mType.getType() != DcConstants.TYPE_IMS)
+                && (mType.getType() != DcConstants.TYPE_EMERGENCY)) {
             return false;
         }
 
@@ -810,7 +805,7 @@ public abstract class Apn extends Handler implements IApn {
         public static final int EVENT_ALL = 0x0000FFFF;
 
         private final Context mContext;
-        // DCConstants.TYPE_XXX
+        // DcConstants.TYPE_XXX
         private final int mType;
         private Network mNetwork = null;
         private Handler mTarget;
@@ -844,7 +839,7 @@ public abstract class Apn extends Handler implements IApn {
             }
         }
 
-        // DCConstants.TYPE_XXX
+        // DcConstants.TYPE_XXX
         public int getType() {
             return mType;
         }
@@ -1047,7 +1042,7 @@ public abstract class Apn extends Handler implements IApn {
                         return false;
                     }
 
-                    cachedAddress = getIPAddress(cachedlinkAddresses);
+                    cachedAddress = getIpAddress(cachedlinkAddresses);
                 }
 
                 if (newLinkProperties != null) {
@@ -1058,7 +1053,7 @@ public abstract class Apn extends Handler implements IApn {
                         return false;
                     }
 
-                    newAddress = getIPAddress(newlinkAddresses);
+                    newAddress = getIpAddress(newlinkAddresses);
                 }
 
                 if ((cachedAddress == null) || (newAddress == null)) {
@@ -1095,7 +1090,7 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         protected boolean isPcscfChanged(LinkProperties newLinkProperties) {
-            if (getType() != DCConstants.TYPE_IMS) {
+            if (getType() != DcConstants.TYPE_IMS) {
                 return false;
             }
 
@@ -1145,7 +1140,7 @@ public abstract class Apn extends Handler implements IApn {
             return false;
         }
 
-        private String[] getIPAddress(Collection<LinkAddress> linkAddresses) {
+        private String[] getIpAddress(Collection<LinkAddress> linkAddresses) {
             if (linkAddresses == null) {
                 return null;
             }
@@ -1346,7 +1341,7 @@ public abstract class Apn extends Handler implements IApn {
                 return;
             }
 
-            IDCNetWatcher.NotiObj res = (IDCNetWatcher.NotiObj) msg.obj;
+            IDcNetWatcher.NotiObj res = (IDcNetWatcher.NotiObj) msg.obj;
             if (res == null) {
                 return;
             }
@@ -1431,7 +1426,7 @@ public abstract class Apn extends Handler implements IApn {
                     handleHandoverStart(networkType);
                     break;
                 case TelephonyManager.DATA_DISCONNECTING:
-                    if (mType.getType() == DCConstants.TYPE_IMS) {
+                    if (mType.getType() == DcConstants.TYPE_IMS) {
                         IAosRegistration aosReg =
                                 AosFactory.getInstance().getAosRegistration(mSlotId);
                         if (aosReg != null) {

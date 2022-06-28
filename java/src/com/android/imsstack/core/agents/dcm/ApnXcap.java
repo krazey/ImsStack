@@ -118,7 +118,7 @@ public class ApnXcap extends Apn {
         registerHandler(EVENT_DATA_CONNECTION_FAILED,
                 new Handle_EVENT_DATA_CONNECTION_FAILED());
 
-        //register message handler to DCNetWatcher
+        //register message handler to DcNetWatcher
         if (mDcNetWatcher != null) {
             mDcNetWatcher.registerForAirplaneModeChanged(this, EVENT_AIRPLANE_MODE_CHANGED, null);
         }

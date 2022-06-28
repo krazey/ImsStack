@@ -32,8 +32,8 @@ import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.agentif.ICellInfo;
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
-import com.android.imsstack.core.agents.dcm.DCFactory;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -183,7 +183,8 @@ public class CellInfoAgent implements ICellInfo {
             mCellInfoListener = new CellInfoListener(subId);
             setListener(mCellInfoListener);
 
-            IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+            IDcNetWatcher dcnw =
+                    (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
             if (dcnw != null) {
                 dcnw.registerForRatChanged(mCellInfoHandler, EVENT_RAT_CHANGED, null);
                 dcnw.registerForVoiceRatChanged(mCellInfoHandler, EVENT_VOICE_RAT_CHANGED, null);
@@ -202,7 +203,8 @@ public class CellInfoAgent implements ICellInfo {
             removeListener(mCellInfoListener);
             mCellInfoListener = null;
 
-            IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+            IDcNetWatcher dcnw =
+                    (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
             if (dcnw != null) {
                 dcnw.unregisterForRatChanged(mCellInfoHandler);
                 dcnw.unregisterForVoiceRatChanged(mCellInfoHandler);
@@ -931,8 +933,8 @@ public class CellInfoAgent implements ICellInfo {
                 case EVENT_READ_ON_BOOTUP: //FALL-THROUGH
                 case EVENT_RAT_CHANGED:    //FALL-THROUGH
                 case EVENT_VOICE_RAT_CHANGED:
-                    IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(
-                        DCFactory.NETWORK_WATCHER, mSlotId);
+                    IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(
+                            DcFactory.NETWORK_WATCHER, mSlotId);
 
                     if (dcnw == null) {
                         break;

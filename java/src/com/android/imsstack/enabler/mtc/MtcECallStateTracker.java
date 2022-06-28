@@ -26,7 +26,7 @@ import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgentManager;
 import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
 import com.android.imsstack.system.ISystem;
@@ -210,7 +210,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
                 return false;
             }
 
-            IDCApn dcapn = mContext.getDCApn();
+            IDcApn dcapn = mContext.getDcApn();
             if ((dcapn != null) && (dcapn.isConnected(EApnType.EMERGENCY.getType()))) {
                 log("Ecbm exit is delayed and e-pdn is released");
                 dcapn.disconnect(EApnType.EMERGENCY.getType(), 0, 0);

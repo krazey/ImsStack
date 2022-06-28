@@ -16,7 +16,7 @@ import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
 
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.mtc.MtcStateUtils;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
@@ -420,12 +420,12 @@ public class ImsCallApp extends ImsApp {
     }
 
     private boolean hasAccessBearerCapabilitiesForNonHDCall() {
-        IDCNetWatcher dcnw = mCallContext.getDCNetWatcher();
+        IDcNetWatcher dcnw = mCallContext.getDcNetWatcher();
         return (dcnw != null) && dcnw.is3G();
     }
 
     private boolean isAccessBearerUnknown() {
-        IDCNetWatcher dcnw = mCallContext.getDCNetWatcher();
+        IDcNetWatcher dcnw = mCallContext.getDcNetWatcher();
         return (dcnw != null)
                 && (dcnw.getNetworkType() == TelephonyManager.NETWORK_TYPE_UNKNOWN);
     }

@@ -21,7 +21,7 @@ import android.os.Handler;
 /**
  * this class is the inferface about data connection watcher
  */
-public interface IDCNetWatcher extends IDC {
+public interface IDcNetWatcher extends IDc {
 
     /**
      * this class is data object to notify
@@ -56,57 +56,57 @@ public interface IDCNetWatcher extends IDC {
     boolean isRatPolicyAvailable();
 
     /**
-     * Return call state stored in DCNetWatcher object
+     * Return call state stored in DcNetWatcher object
      */
     int getCallState();
 
     /**
-     * Return call state stored in DCNetWatcher object
+     * Return call state stored in DcNetWatcher object
      */
     int getPreciseCallState();
 
     /**
-     * Return data service state stored in DCNetWatcher object
+     * Return data service state stored in DcNetWatcher object
      */
     int getDataServiceState();
 
     /**
-     * Return network type stored in DCNetWatcher object
+     * Return network type stored in DcNetWatcher object
      */
     int getNetworkType();
 
     /**
-     * Return voice network type stored in DCNetWatcher object
+     * Return voice network type stored in DcNetWatcher object
      */
     int getVoiceNetworkType();
 
     /**
-     * Return voice service state stored in DCNetWatcher object
+     * Return voice service state stored in DcNetWatcher object
      */
     int getVoiceServiceState();
 
     /**
-     * Return LTE Detach reason code stored in DCNetWatcher object
+     * Return LTE Detach reason code stored in DcNetWatcher object
      */
     int getLteStateDetachReasonCause();
 
     /**
-     * Return NR registration info stored in DCNetWatcher object
+     * Return NR registration info stored in DcNetWatcher object
      */
     int getNrRegistrationInfo();
 
     /**
-     * Return MOCNPLMN info stored in DCNetWatcher object
+     * Return MOCNPLMN info stored in DcNetWatcher object
      */
     int getMocnPlmnInfo();
 
     /**
-     * Return operator info (numeric type) stored in DCNetWatcher object
+     * Return operator info (numeric type) stored in DcNetWatcher object
      */
     String getOperatorNumeric();
 
     /**
-     * Return airplane mode availability stored in DCNetWatcher object
+     * Return airplane mode availability stored in DcNetWatcher object
      */
     boolean isAirplaneMode();
 
@@ -141,7 +141,7 @@ public interface IDCNetWatcher extends IDC {
     int getDataRoamingType();
 
     /**
-     * Return VoPS value stored in DCNetWatcher object
+     * Return VoPS value stored in DcNetWatcher object
      */
     boolean isVops();
 
@@ -233,7 +233,7 @@ public interface IDCNetWatcher extends IDC {
      *
      *        Register "h" of Handler
      *        The "h" will get message with "what" of event
-     *        and "obj" of IDCNetWatcher.NotiObj
+     *        and "obj" of IDcNetWatcher.NotiObj
      *
      *        Typical usage.
      *        class Example extends Handler{
@@ -245,7 +245,7 @@ public interface IDCNetWatcher extends IDC {
      *            public void handleMessage(Message msg) {
      *                AsyncResult ar = (AsyncResult)msg.obj;
 
-     *                IDCNetWatcher.NotiObj res = (IDCNetWatcher.NotiObj) ar.result;
+     *                IDcNetWatcher.NotiObj res = (IDcNetWatcher.NotiObj) ar.result;
      *                EApnType apnType = res.eApnType;
      *                EDataState state = res.eDataState;
             }

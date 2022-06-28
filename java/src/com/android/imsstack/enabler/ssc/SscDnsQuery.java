@@ -18,8 +18,7 @@ package com.android.imsstack.enabler.ssc;
 
 import android.text.TextUtils;
 
-import com.android.imsstack.core.agents.dcmif.DCConstants;
-import com.android.imsstack.core.agents.fqdn.Address;
+import com.android.imsstack.core.agents.dcmif.DcConstants;
 import com.android.imsstack.util.ImsLog;
 
 import java.net.InetAddress;
@@ -113,10 +112,10 @@ public final class SscDnsQuery {
 
         String pdntype = SscConfig.getUtPdnType(slotId);
         if (!TextUtils.isEmpty(pdntype) && pdntype.equals("mobile_xcap")) {
-            resolveUtXcapFqdn(slotId, fqdn, DCConstants.TYPE_XCAP, isBsfAddress);
+            resolveUtXcapFqdn(slotId, fqdn, DcConstants.TYPE_XCAP, isBsfAddress);
         }
         else {
-            resolveUtXcapFqdn(slotId, fqdn, DCConstants.TYPE_INTERNET, isBsfAddress);
+            resolveUtXcapFqdn(slotId, fqdn, DcConstants.TYPE_INTERNET, isBsfAddress);
         }
 
         if (isBsfAddress == false) {

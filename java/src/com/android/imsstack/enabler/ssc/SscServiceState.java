@@ -23,11 +23,11 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
-import com.android.imsstack.core.agents.dcm.DCFactory;
+import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDCApn;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
 import com.android.imsstack.util.ImsLog;
@@ -57,11 +57,11 @@ public class SscServiceState {
         mHandler = new SscServiceStateHandler();
         SscXmlFormat.init(mSlotId);
 
-        IDCNetWatcher dnw = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+        IDcNetWatcher dnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         if (dnw != null) {
             dnw.registerForAirplaneModeChanged(mHandler, EVENT_AIRPLANE_MODE_CHANGED, null);
         } else {
-            ImsLog.e("DCNetWatcher is null");
+            ImsLog.e("DcNetWatcher is null");
         }
 
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
@@ -76,7 +76,7 @@ public class SscServiceState {
     protected void deInit() {
         resetAllUtStatus();
 
-        IDCNetWatcher dnw = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+        IDcNetWatcher dnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         if (dnw != null) {
             dnw.unregisterForRatChanged(mHandler);
             dnw.unregisterForAirplaneModeChanged(mHandler);
@@ -328,13 +328,13 @@ public class SscServiceState {
             return null;
         }
 
-        IDCApn dcapn = (IDCApn) DCFactory.getDC(DCFactory.APN, mSlotId);
+        IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
         return (dcapn != null) ? dcapn.getApnControl(apnType.getType()) : null;
     }
 
     @VisibleForTesting
-    protected IDCNetWatcher getDcNetWatcher() {
-        return (IDCNetWatcher) DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+    protected IDcNetWatcher getDcNetWatcher() {
+        return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
     }
 
     private void updateUtServiceFeature() {
@@ -374,7 +374,7 @@ public class SscServiceState {
                     resetUtBlock(allTempBlockReasons);
                     break;
                 case EVENT_AIRPLANE_MODE_CHANGED:
-                    IDCNetWatcher dcnw = getDcNetWatcher();
+                    IDcNetWatcher dcnw = getDcNetWatcher();
                     if (dcnw != null) {
                         if (dcnw.isAirplaneMode()) {
                             IApn apn = getApn(EApnType.XCAP);

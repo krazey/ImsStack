@@ -18,7 +18,7 @@ package com.android.imsstack.core.agents.dcmif;
 /**
  * This provides the utility interfaces that are related to the data network.
  */
-public interface IDcUtils extends IDC {
+public interface IDcUtils extends IDc {
     /**
      * The data structure that contains the network type and its access network information.
      */
