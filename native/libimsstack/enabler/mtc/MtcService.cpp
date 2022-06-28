@@ -106,6 +106,8 @@ PUBLIC VIRTUAL void MtcService::SetJniService(IN JniMtcService* pJniService)
 {
     IMS_TRACE_I("SetJniService", 0, 0, 0);
     m_pJniService = pJniService;
+
+    m_objContext.GetEmergencyServiceManager()->SetJniServiceThread(m_pJniService->GetThread());
 }
 
 PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(
@@ -128,8 +130,7 @@ PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(
 
 PUBLIC VIRTUAL void MtcService::OpenEmergencyService()
 {
-    m_objContext.GetEmergencyServiceManager()->OpenEmergencyService(
-            m_pJniService ? m_pJniService->GetThread() : IMS_NULL);
+    m_objContext.GetEmergencyServiceManager()->OpenEmergencyService();
 }
 
 PUBLIC VIRTUAL void MtcService::CoreService_PageMessageReceived(

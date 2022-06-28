@@ -48,7 +48,7 @@ MtcAosEventHandler::~MtcAosEventHandler()
 PUBLIC
 void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
         IN JniMtcServiceThread* pServiceThread,
-        IN MtcEmergencyServiceManager* /* pEmergencyServiceManager */,
+        IN MtcEmergencyServiceManager* pEmergencyServiceManager,
         IN IMtcCallController& objCallController)
 {
     IMS_TRACE_I("OnConnected emergency[%s] nIpcan[%d]", _TRACE_B_(m_objService.IsEmergency()),
@@ -61,8 +61,7 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
 
     if (m_objService.IsEmergency())
     {
-        // pEmergencyServiceManager->ProcessServiceStatus(ServiceStatus::SERVICE_ACTIVE,
-        //         pServiceThread);
+        pEmergencyServiceManager->HandleServiceStatus(ServiceStatus::SERVICE_ACTIVE);
     }
     else
     {
@@ -103,7 +102,7 @@ void MtcAosEventHandler::OnDisconnecting(
 PUBLIC
 void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
         IN IMtcCallController& objCallController, IN JniMtcServiceThread* pServiceThread,
-        IN MtcEmergencyServiceManager* /* pEmergencyServiceManager */)
+        IN MtcEmergencyServiceManager* pEmergencyServiceManager)
 {
     IMS_TRACE_I("OnDisconnected emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
             nReason, 0);
@@ -118,8 +117,7 @@ void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
 
     if (m_objService.IsEmergency())
     {
-        // pEmergencyServiceManager->ProcessServiceStatus(ServiceStatus::SERVICE_IDLE,
-        //         pServiceThread);
+        pEmergencyServiceManager->HandleServiceStatus(ServiceStatus::SERVICE_IDLE);
     }
     else
     {

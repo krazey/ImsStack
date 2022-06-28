@@ -45,6 +45,10 @@ public:
     // The list is sorted in the order in which the calls were created.
     virtual IMSList<IMtcCall*> GetCalls() = 0;
 
+    // Returns a list of all calls excluding a given one.
+    // The list is sorted in the order in which the calls were created.
+    virtual IMSList<IMtcCall*> GetCallsExcluding(IN CallKey nExcludingCallKey) = 0;
+
     // Returns a list of calls matching the given session type.
     // The list is sorted in the order in which the calls were created.
     virtual IMSList<IMtcCall*> GetCallsByType(IN CallType eCallType) = 0;

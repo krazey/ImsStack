@@ -283,11 +283,6 @@ public class Call implements Closeable {
         // no-op
     }
 
-    public void updateNativeCallObject(long nativeCallObject) {
-        mNativeCallObject = nativeCallObject;
-        mCallId = createCallId();
-    }
-
     public static String callStateToString(int state) {
         switch (state) {
         case CallTracker.CALL_STATE_IDLE:
@@ -348,6 +343,11 @@ public class Call implements Closeable {
         return (name.equalsIgnoreCase(EXTRA_OIR)
                 || name.equalsIgnoreCase(EXTRA_CNAP)
                 || name.equalsIgnoreCase(EXTRA_CDIV_CAUSE));
+    }
+
+    protected void updateNativeCallObject(long nativeCallObject) {
+        mNativeCallObject = nativeCallObject;
+        mCallId = createCallId();
     }
 
     protected String createCallId() {

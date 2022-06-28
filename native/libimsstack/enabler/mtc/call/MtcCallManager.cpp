@@ -116,6 +116,15 @@ PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCalls()
             });
 }
 
+PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsExcluding(IN CallKey nExcludingCallKey)
+{
+    return GetCallsByFilter(
+            [nExcludingCallKey](MtcCall* pCall)
+            {
+                return pCall->GetCallKey() != nExcludingCallKey;
+            });
+}
+
 PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsByType(IN CallType eCallType)
 {
     return GetCallsByFilter(

@@ -41,10 +41,9 @@ private:
     IMS_BOOL IsOtherIdleCallExists(IN const IMSList<IMtcCall*>& lstCalls);
     IMS_BOOL IsIncomingCallExists(IN const IMSList<IMtcCall*>& lstCalls);
     IMS_BOOL IsOutgoingCallExists(IN const IMSList<IMtcCall*>& lstCalls);
-    IMS_BOOL IsEmergencyCallExists(IN IMtcCallManager& objCallManager);
+    IMS_BOOL IsEmergencyCallExists(IN const IMSList<IMtcCall*>& lstCalls);
 
-    IMtcCallManager& m_objCallManager;
-    const PeerType m_ePeerType;
+    IMtcCallContext& m_objContext;
 };
 
 #endif

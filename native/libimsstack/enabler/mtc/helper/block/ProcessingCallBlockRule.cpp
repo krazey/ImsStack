@@ -23,8 +23,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 ProcessingCallBlockRule::ProcessingCallBlockRule(IN IMtcCallContext& objContext) :
-        m_objCallManager(objContext.GetCallManager()),
-        m_ePeerType(objContext.GetCallInfo().ePeerType)
+        m_objContext(objContext)
 {
 }
 
@@ -33,9 +32,9 @@ PUBLIC VIRTUAL ProcessingCallBlockRule::~ProcessingCallBlockRule() {}
 PUBLIC VIRTUAL ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-    IMSList<IMtcCall*> lstCalls = m_objCallManager.GetCalls();
+    IMSList<IMtcCall*> lstCalls = m_objContext.GetOtherCalls();
 
-    if (m_ePeerType == PeerType::MO)
+    if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
     {
         return CheckForOutgoingCall(lstCalls);
     }
@@ -55,7 +54,7 @@ ProcessingCallBlockRule::Result ProcessingCallBlockRule::CheckForOutgoingCall(
         return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CALL_SETUP));
     }
 
-    if (IsEmergencyCallExists(m_objCallManager))
+    if (IsEmergencyCallExists(lstCalls))
     {
         return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
     }
@@ -77,7 +76,7 @@ ProcessingCallBlockRule::Result ProcessingCallBlockRule::CheckForIncomingCall(
         return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CALL_SETUP));
     }
 
-    if (IsEmergencyCallExists(m_objCallManager))
+    if (IsEmergencyCallExists(lstCalls))
     {
         return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_E911_CALL));
     }
@@ -88,20 +87,13 @@ ProcessingCallBlockRule::Result ProcessingCallBlockRule::CheckForIncomingCall(
 PRIVATE
 IMS_BOOL ProcessingCallBlockRule::IsOtherIdleCallExists(IN const IMSList<IMtcCall*>& lstCalls)
 {
-    IMS_UINT32 nCount = 0;
-
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
         IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
         if (eState == IMtcCall::State::IDLE)
         {
-            nCount += 1;
-
-            if (nCount >= 2)  // 1 for current (checking) call, 1 for existing call
-            {
-                IMS_TRACE_I("IsOtherIdleCallExists : Idle call exists", 0, 0, 0);
-                return IMS_TRUE;
-            }
+            IMS_TRACE_I("IsOtherIdleCallExists : Idle call exists", 0, 0, 0);
+            return IMS_TRUE;
         }
     }
     return IMS_FALSE;
@@ -138,12 +130,15 @@ IMS_BOOL ProcessingCallBlockRule::IsOutgoingCallExists(IN const IMSList<IMtcCall
 }
 
 PRIVATE
-IMS_BOOL ProcessingCallBlockRule::IsEmergencyCallExists(IN IMtcCallManager& objCallManager)
+IMS_BOOL ProcessingCallBlockRule::IsEmergencyCallExists(IN const IMSList<IMtcCall*>& lstCalls)
 {
-    if (objCallManager.GetCallsByServiceType(ServiceType::EMERGENCY).GetSize() > 0)
+    for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
-        IMS_TRACE_I("IsEmergencyCallExists : Emergency call exists", 0, 0, 0);
-        return IMS_TRUE;
+        if (lstCalls.GetAt(nIndex)->GetCallContext().GetCallInfo().bEmergency)
+        {
+            IMS_TRACE_I("IsEmergencyCallExists : Emergency call exists", 0, 0, 0);
+            return IMS_TRUE;
+        }
     }
     return IMS_FALSE;
 }

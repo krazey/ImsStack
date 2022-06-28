@@ -36,6 +36,11 @@ PUBLIC GLOBAL CallType JniMtcUtils::ReadCallType(IN const android::Parcel& objPa
     return static_cast<CallType>(objParcel.readInt32());
 }
 
+PUBLIC GLOBAL ServiceType JniMtcUtils::ReadServiceType(IN const android::Parcel& objParcel)
+{
+    return static_cast<ServiceType>(objParcel.readInt32());
+}
+
 PUBLIC GLOBAL JniCallInfo JniMtcUtils::ReadCallInfo(IN const Parcel& objParcel)
 {
     JniCallInfo objCallInfo;

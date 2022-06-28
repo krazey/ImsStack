@@ -18,9 +18,8 @@ public class MtcEmergencyServiceManager {
     private static final int MSG_SEND_REQUEST = 101;
 
     private final IBaseContext mContext;
-    private MessageHandler mMessageHandler;
-    private MtcCall mCall;
-    private int mCallAttributes = 0;
+    private MessageHandler mMessageHandler = null;
+    private MtcCall mCall = null;
     private long mNativeObject = 0;
 
     public MtcEmergencyServiceManager(IBaseContext context) {
@@ -37,6 +36,8 @@ public class MtcEmergencyServiceManager {
         log("init");
 
         mMessageHandler = new MessageHandler(mContext.getCallLooper());
+        mCall = null;
+        mNativeObject = 0;
     }
 
     public void clear() {
@@ -44,40 +45,82 @@ public class MtcEmergencyServiceManager {
 
         mMessageHandler = null;
         mCall = null;
+        mNativeObject = 0;
     }
 
     public void setNativeObject(long nativeObject) {
         mNativeObject = nativeObject;
     }
 
-    public void setCallAndAttributes(MtcCall call, int callAttributes) {
-        log("setCallAndAttributes");
+    public void setCall(MtcCall call) {
+        log("setCall");
 
         mCall = call;
-        mCallAttributes = callAttributes;
     }
 
-    public void openEmergencyService(long nativeObject) {
+    public void openEmergencyService() {
         log("openEmergencyService");
-
-        setNativeObject(nativeObject);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.OPEN_EMERGENCY_SERVICE);
         sendRequest(parcel);
     }
 
-    public void onEmergencyServiceStateChanged(int state, int reason) {
-        logi("onEmergencyServiceStateChanged :: state=" + state + ", reason=" + reason);
+    public void onEmergencyServiceStateChanged(int state, int reason, int serviceType) {
+        logi("onEmergencyServiceStateChanged :: state=" + state + ", reason=" + reason +
+                ", serviceType=" + serviceType);
 
-        if (state == IUMtcService.ES_OPENED) {
-            long nativeCallObject = JNIIms.getInterface(IUIMS.MTC_CALL, mContext.getSlotId());
-            boolean wifi = ((mCallAttributes & MtcCall.FLAG_WIFI_EMERGENCY) ==
-                    MtcCall.FLAG_WIFI_EMERGENCY);
-
-            mCall.updateNativeCallObject(nativeCallObject);
-            mCall.open(wifi, true, false, false);
+        switch (state) {
+            case IUMtcService.ES_IDLE:
+                onEsIdle();
+                break;
+            case IUMtcService.ES_OPENING:
+                onEsOpening();
+                break;
+            case IUMtcService.ES_OPENED:
+                onEsOpened(serviceType);
+                break;
+            case IUMtcService.ES_UNAVAILABLE:
+                onEsUnavailable();
+                break;
+            case IUMtcService.ES_IN_CALL:
+                onEsInCall();
+                break;
+            default:
+                break;
         }
+    }
+
+    private void onEsIdle() {
+        log("onEsIdle");
+        mCall = null;
+    }
+
+    private void onEsOpening() {
+        log("onEsOpening");
+    }
+
+    private void onEsOpened(int serviceType) {
+        log("onEsOpened :: serviceType=" + serviceType);
+
+        if (mCall == null) {
+            return;
+        }
+
+        long nativeCallObject = JNIIms.getInterface(IUIMS.MTC_CALL, mContext.getSlotId());
+        boolean wifi = mCall.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false);
+
+        mCall.updateNativeCallObject(nativeCallObject);
+        mCall.open(serviceType, wifi, true, false, false);
+    }
+
+    private void onEsUnavailable() {
+        log("onEsUnavailable");
+        mCall = null;
+    }
+
+    private void onEsInCall() {
+        log("onEsInCall");
     }
 
     private void sendRequest(Parcel parcel) {

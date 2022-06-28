@@ -21,6 +21,7 @@ import com.android.imsstack.core.agents.ImsWakeLock;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.ConferenceInfoHelper;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
+import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.enabler.mtc.IncomingCallInfo;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
@@ -160,10 +161,9 @@ public class ImsCallManager {
         callSession.setCallConnectionId(ccId);
         ImsCallConnectionIds.add(mCallContext.getSlotId(), ccId);
 
-        call.open(wifi, emergency, offline, ussi);
-        // if (call.getNativeCallId() != 0) {
-        //     call.open(wifi, emergency, offline, ussi);
-        // }
+        if (call.getNativeCallId() != 0) {
+            call.open(IUMtcCall.SERVICETYPE_NORMAL, wifi, emergency, offline, ussi);
+        }
 
         return callSession;
     }

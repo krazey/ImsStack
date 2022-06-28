@@ -33,7 +33,8 @@ public:
     // void SetCallback(IN IMS_SINTP nNativeObj, IN Jni_SendDataToJava pfnSendDataToJava);
 
     void OnServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason);  // enum class
-    void OnEmergencyServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason); // enum class
+    void OnEmergencyServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason,
+            IN IMS_SINT32 eServiceType); // enum class
     void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey);
 
 private:

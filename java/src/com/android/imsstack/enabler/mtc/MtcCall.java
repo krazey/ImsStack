@@ -612,6 +612,12 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
     }
 
+    public void updateNativeCallObject(long nativeCallObject) {
+        JNIIms.removeListener(getNativeCallId(), mNativeListener);
+        super.updateNativeCallObject(nativeCallObject);
+        JNIIms.setListener(getNativeCallId(), mNativeListener);
+    }
+
     public void detach() {
         if (!isCallValid()) {
             return;
@@ -694,12 +700,13 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
     }
 
-    public void open(boolean wifi, boolean emergency, boolean offline, boolean ussi) {
+    public void open(int serviceType, boolean wifi, boolean emergency, boolean offline,
+            boolean ussi) {
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IUMtcCall.OPEN);
+        parcel.writeInt(serviceType);
         parcel.writeInt(getCallType());
-
         parcel.writeInt(wifi ? 1 : 0);
         parcel.writeInt(emergency ? 1 : 0);
         parcel.writeInt(offline ? 1 : 0);
