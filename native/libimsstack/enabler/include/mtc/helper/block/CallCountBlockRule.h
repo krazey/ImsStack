@@ -37,8 +37,6 @@ public:
 
 private:
     IMS_UINT32 GetActiveCallCount();
-    IMS_BOOL IsOtherCallExists();
-    IMS_BOOL IsVideoCallExists();
 
     MtcConfigurationProxy& m_objConfiguration;
     IMtcCallManager& m_objCallManager;

@@ -40,23 +40,6 @@ PUBLIC VIRTUAL CallCountBlockRule::Result CallCountBlockRule::Check(
         return Result(Result::Status::UNBLOCKED);
     }
 
-    if (!m_objConfiguration.Is(Feature::ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL))
-    {
-        if (IsOtherCallExists() && IsVideoCallExists())
-        {
-            IMS_TRACE_I("Check : Video call cannot be placed with another call", 0, 0, 0);
-            if (m_objCallInfo.ePeerType == PeerType::MO)
-            {
-                return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_CALL_EXCEEDED));
-            }
-            else
-            {
-                return Result(Result::Status::BLOCKED,
-                        CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED));
-            }
-        }
-    }
-
     const IMS_SINT32 nMaxCallCount = m_objConfiguration.GetInt(Feature::CALL_MAX_COUNT);
     if (GetActiveCallCount() > nMaxCallCount)
     {
@@ -92,23 +75,4 @@ IMS_UINT32 CallCountBlockRule::GetActiveCallCount()
     }
 
     return nCount;
-}
-
-PRIVATE IMS_BOOL CallCountBlockRule::IsOtherCallExists()
-{
-    return m_objCallManager.GetCalls().GetSize() > 1;
-}
-
-PRIVATE IMS_BOOL CallCountBlockRule::IsVideoCallExists()
-{
-    if (!m_objCallManager.GetCallsByType(CallType::VT).IsEmpty())
-    {
-        return IMS_TRUE;
-    }
-    if (!m_objCallManager.GetCallsByType(CallType::VIDEO_RTT).IsEmpty())
-    {
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
 }
