@@ -32,7 +32,7 @@ public:
     virtual ~IMtcCallManager(){};
 
     // Creates a new call and starts to manage it. Returns the created call.
-    virtual IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& pCallInfo) = 0;
+    virtual IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& objCallInfo) = 0;
 
     // Deletes the call matching the given call key. Does nothing if the call doesn't exist.
     virtual void RemoveCall(IN CallKey nCallKey) = 0;

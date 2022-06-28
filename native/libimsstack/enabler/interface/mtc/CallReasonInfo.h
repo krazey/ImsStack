@@ -59,6 +59,19 @@ public:
         return *this;
     }
 
+    IMS_BOOL operator==(const CallReasonInfo& objRhs) const
+    {
+        if (this == &objRhs)
+        {
+            return IMS_TRUE;
+        }
+
+        return nCode == objRhs.nCode && nExtraCode == objRhs.nExtraCode &&
+                strExtraMessage.Equals(objRhs.strExtraMessage);
+    }
+
+    IMS_BOOL operator!=(const CallReasonInfo& objRhs) const { return !(*this == objRhs); }
+
     IMS_SINT32 nCode;
     IMS_SINT32 nExtraCode;
     AString strExtraMessage;
