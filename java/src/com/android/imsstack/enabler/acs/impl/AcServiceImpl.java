@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.acs.impl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -70,7 +71,7 @@ public class AcServiceImpl {
 
     private final class EventCallback implements EventReceiver.EventReceiverCallback {
         @Override
-        public void onReceivedIntent() {
+        public void onReceivedIntent(Intent intent) {
             // TODO : check slot or sub ID
             // TODO : send message
             sendMessage(MSG_INTENT, 0, 0, null);
