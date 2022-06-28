@@ -41,7 +41,7 @@ public final class MSimUtils {
     // 0x7FFFFFFB
     private static final int DUMMY_SUB_ID_BASE =
             (SubscriptionManager.MAX_SUBSCRIPTION_ID_VALUE - MAX_PHONE_COUNT_TRI_SIM);
-    private static final boolean MULTI_IMS = false;
+    private static final boolean MULTI_IMS = true;
     private static final boolean MULTI_LTE = false;
     private static boolean sSingleImsEnabledOnDsdv = false;
     private static int sMultiSim = (-1);

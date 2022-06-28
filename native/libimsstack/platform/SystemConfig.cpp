@@ -265,6 +265,6 @@ PRIVATE GLOBAL void SystemConfig::CacheGlobalConfigs()
 
 PRIVATE GLOBAL void SystemConfig::UpdateGlobalConfigsOnFeatureChanged()
 {
-    // DSDV-SV
-    // s_nGlobalConfigs |= CONFIG_MULTI_IMS;
+    // DSDV
+    s_nGlobalConfigs |= CONFIG_MULTI_IMS;
 }
