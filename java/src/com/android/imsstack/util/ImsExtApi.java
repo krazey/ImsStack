@@ -1,21 +1,10 @@
 package com.android.imsstack.util;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.os.DeadObjectException;
-import android.os.Handler;
-import android.os.RemoteException;
 import android.telephony.CellSignalStrengthGsm;
 import android.telephony.SignalStrength;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
-
-import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.uicc.IccUtils;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * This class provides the IMS extended APIs to control VoLTE / VoWiFi / ViLTE.
@@ -62,28 +51,47 @@ public final class ImsExtApi {
         }
 
         public static String getSimState(int slotId) {
-            int simState = SubscriptionManager.getSimStateForSlotIndex(slotId);
+            TelephonyManager tm = AppContext.getTelephonyManager();
+
+            if (tm == null) {
+                return "UNKNOWN";
+            }
+
+            int simState = tm.getSimState(slotId);
+
+            if (simState == TelephonyManager.SIM_STATE_READY) {
+                int subId = MSimUtils.getSubId(slotId);
+                tm = AppContext.getTelephonyManager(subId);
+
+                if (tm != null) {
+                    int simAppState = tm.getSimApplicationState();
+
+                    if (simAppState == TelephonyManager.SIM_STATE_LOADED) {
+                        simState = TelephonyManager.SIM_STATE_LOADED;
+                    }
+                }
+            }
 
             switch (simState) {
-            case TelephonyManager.SIM_STATE_ABSENT:
-                return IccCardConstants.INTENT_VALUE_ICC_ABSENT;
-            case TelephonyManager.SIM_STATE_NOT_READY:
-                return IccCardConstants.INTENT_VALUE_ICC_NOT_READY;
-            case TelephonyManager.SIM_STATE_LOADED:
-                return IccCardConstants.INTENT_VALUE_ICC_LOADED;
-            case TelephonyManager.SIM_STATE_READY:
-                return IccCardConstants.INTENT_VALUE_ICC_READY;
-            case TelephonyManager.SIM_STATE_PIN_REQUIRED: // FALL-THROUGH
-            case TelephonyManager.SIM_STATE_PUK_REQUIRED: // FALL-THROUGH
-            case TelephonyManager.SIM_STATE_NETWORK_LOCKED: // FALL-THROUGH
-            case TelephonyManager.SIM_STATE_PERM_DISABLED:
-                return IccCardConstants.INTENT_VALUE_ICC_LOCKED;
-            case TelephonyManager.SIM_STATE_CARD_IO_ERROR:
-                return IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR;
-            case TelephonyManager.SIM_STATE_CARD_RESTRICTED:
-                return IccCardConstants.INTENT_VALUE_ICC_CARD_RESTRICTED;
-            default:
-                return IccCardConstants.INTENT_VALUE_ICC_UNKNOWN;
+                case TelephonyManager.SIM_STATE_ABSENT:
+                    return "ABSENT";
+                case TelephonyManager.SIM_STATE_NOT_READY:
+                    return "NOT_READY";
+                case TelephonyManager.SIM_STATE_LOADED:
+                    return "LOADED";
+                case TelephonyManager.SIM_STATE_READY:
+                    return "READY";
+                case TelephonyManager.SIM_STATE_PIN_REQUIRED: // FALL-THROUGH
+                case TelephonyManager.SIM_STATE_PUK_REQUIRED: // FALL-THROUGH
+                case TelephonyManager.SIM_STATE_NETWORK_LOCKED: // FALL-THROUGH
+                case TelephonyManager.SIM_STATE_PERM_DISABLED:
+                    return "LOCKED";
+                case TelephonyManager.SIM_STATE_CARD_IO_ERROR:
+                    return "CARD_IO_ERROR";
+                case TelephonyManager.SIM_STATE_CARD_RESTRICTED:
+                    return "CARD_RESTRICTED";
+                default:
+                    return "UNKNOWN";
             }
         }
 
