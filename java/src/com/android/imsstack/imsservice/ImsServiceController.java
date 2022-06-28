@@ -105,6 +105,12 @@ public class ImsServiceController {
             }
 
             sImsServiceController.startMmTelServices();
+        } else {
+            ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
+
+            if (isr != null) {
+                isr.broadcastServiceUp();
+            }
         }
     }
 
