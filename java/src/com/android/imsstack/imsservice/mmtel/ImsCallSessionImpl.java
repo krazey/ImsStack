@@ -3267,8 +3267,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             ImsCallProfile profile = ImsCallUtils.cloneCallProfile(mCallProfile);
 
             setCallInfo(profile);
-
-            mCallback.invokeInitiating(ImsCallSessionImpl.this, profile);
+            //To-Do:- Handle callSessionInitiating for Silent Redial case
+            //mCallback.invokeInitiating(ImsCallSessionImpl.this, profile);
         }
 
         @Override
