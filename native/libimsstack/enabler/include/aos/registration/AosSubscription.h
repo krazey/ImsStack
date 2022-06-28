@@ -47,6 +47,7 @@ public:
     virtual void Destroy();
 
     virtual void SetListener(IN IAosSubscriptionListener* piListener);
+    virtual void SetRetryTimer(IN IMS_BOOL bCheckRetryAfter);
 
     virtual IMS_UINT32 GetState();
     virtual IMS_BOOL IsSubHolded();
@@ -56,7 +57,6 @@ public:
 protected:
     void ClearThrottlingCount();
 
-    const SipAddress& GetContactAddress();
     ITrm* GetTrmPhoneInfoService();
     IVoNr* GetVonrService();
 
@@ -77,14 +77,17 @@ protected:
 
     virtual IMS_BOOL SendSubscribe();
     virtual IMS_BOOL ProcessFailureResponse_423(IN IMS_BOOL bIsRefreshed);
-    virtual IMS_BOOL ProcessFailureResponse_504();
-    virtual IMS_BOOL IsRetryActionDueToRetrycounter();
+    virtual IMS_BOOL ProcessFailureResponse_504(IN IMS_BOOL bIsRefreshed);
 
 public:
+    virtual IMS_BOOL IsRetryActionDueToRetrycounter(IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode);
-    virtual IMS_BOOL IsInitialRegistrationRequired(IN IMS_SINT32 nStatusCode);
-    virtual IMS_BOOL IsInitialRegistrationWithNextPcscfRequired(IN IMS_SINT32 nStatusCode);
-    virtual IMS_BOOL IsInitialRegistrationRequiredInWifi(IN IMS_SINT32 nStatusCode);
+    virtual IMS_BOOL IsInitialRegistrationRequired(
+            IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
+    virtual IMS_BOOL IsInitialRegistrationWithNextPcscfRequired(
+            IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
+    virtual IMS_BOOL IsInitialRegistrationRequiredInWifi(
+            IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL IsResubscriptionStopped(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL ProcessFailed_StatusCode(IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
 
@@ -104,10 +107,6 @@ protected:
     virtual void ProcessTimerExpired();
     virtual void SetRefreshPolicy();
 
-public:
-    virtual void SetRetryTimer(IN IMS_BOOL bCheckRetryAfter);
-
-protected:
     virtual IRegInfoContact* GetRegInfoContact(IN const IMSList<IRegInfoContact*> objContact);
     virtual IMS_BOOL CompareUriAssociatedWithContact(IN const SipAddress& objUri);
 
@@ -127,6 +126,7 @@ protected:
     virtual void RegSubscription_Removed();
     virtual void RegSubscription_Terminated(IN IMS_SINT32 nReason);
 
+public:
     // ITimerListener Interface
     virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
