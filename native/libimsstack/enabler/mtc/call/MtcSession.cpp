@@ -202,6 +202,7 @@ void MtcSession::UpdateCallTypeFromMessage(IN const IMessage& objMessage)
         m_eCallType = eNewCallType;
     }
 
+    CheckCallTypeWithRegisteredFeature();
     IMS_TRACE_D("UpdateCallTypeFromMessage : CallType[%d]", m_eCallType, 0, 0);
 }
 
@@ -258,6 +259,21 @@ void MtcSession::SetInConference(IN const IMessage& objMessage)
         return;
     }
     m_objContext.GetCallInfo().bConference = MessageUtil::IsFocusConf(&objMessage);
+}
+
+PRIVATE
+void MtcSession::CheckCallTypeWithRegisteredFeature()
+{
+    IMS_BOOL bVideoFeature =
+            IsRegisteredFeature(ImsAosFeature::MMTEL) && IsRegisteredFeature(ImsAosFeature::VIDEO);
+    IMS_BOOL bTextFeature =
+            IsRegisteredFeature(ImsAosFeature::MMTEL) && IsRegisteredFeature(ImsAosFeature::TEXT);
+
+    if ((m_eCallType == CallType::VT && !bVideoFeature) ||
+            (m_eCallType == CallType::RTT && !bTextFeature))
+    {
+        m_eCallType = CallType::VOIP;
+    }
 }
 
 PRIVATE

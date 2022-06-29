@@ -167,6 +167,7 @@ private:
     void UpdateCapabilityFromMessage(IN const IMessage& objMessage);
     void UpdateSessionIdFromMessage(IN const IMessage& objMessage);
     void SetInConference(IN const IMessage& objMessage);
+    void CheckCallTypeWithRegisteredFeature();
 
     AString GenerateSessionId() const;
     IMS_BOOL IsRegisteredFeature(IMS_UINT32 nFeature);
