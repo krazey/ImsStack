@@ -25,8 +25,6 @@ public:
     AosStaticConfig();
     virtual ~AosStaticConfig();
 
-    static AosStaticConfig* GetInstance();
-
     IMS_BOOL Create();
     void Destroy();
     AosStaticProfile* GetProfile(IN const AString& strAppId, IN const AString& strServiceId);

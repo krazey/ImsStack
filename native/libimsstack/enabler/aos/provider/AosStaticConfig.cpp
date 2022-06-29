@@ -31,18 +31,6 @@ AosStaticConfig::AosStaticConfig() :
 
 PUBLIC VIRTUAL AosStaticConfig::~AosStaticConfig() {}
 
-PUBLIC VIRTUAL AosStaticConfig* AosStaticConfig::GetInstance()
-{
-    static AosStaticConfig* s_pConfig = IMS_NULL;
-
-    if (s_pConfig == IMS_NULL)
-    {
-        s_pConfig = new AosStaticConfig();
-    }
-
-    return s_pConfig;
-}
-
 PUBLIC
 IMS_BOOL AosStaticConfig::Create()
 {

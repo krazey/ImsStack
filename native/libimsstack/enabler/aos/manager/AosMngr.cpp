@@ -33,7 +33,8 @@ AosMngr::AosMngr(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
         m_objAppId(IMSList<AString>()),
         m_objAppContext(IMSMap<AString, IAosAppContext*>()),
-        m_pBuildDirector(IMS_NULL)
+        m_pBuildDirector(IMS_NULL),
+        m_pStaticConfig(IMS_NULL)
 {
     CreateStaticConfig();
 
@@ -56,15 +57,25 @@ PUBLIC VIRTUAL AosMngr::~AosMngr()
 PUBLIC
 IAosHandle* AosMngr::GetAosHandle(IN const AString& strAppId, IN const AString& strSrvId)
 {
-    AosStaticProfile* pProfile = AosStaticConfig::GetInstance()->GetProfile(strAppId, strSrvId);
-    if (pProfile == IMS_NULL)
+    if (m_pStaticConfig == IMS_NULL)
+    {
         return IMS_NULL;
+    }
+
+    AosStaticProfile* pProfile = m_pStaticConfig->GetProfile(strAppId, strSrvId);
+
+    if (pProfile == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
 
     AString& strId = pProfile->GetId();
-
     IAosAppContext* piContext = m_objAppContext.GetValue(strId);
+
     if (piContext == IMS_NULL)
+    {
         return IMS_NULL;
+    }
 
     IMS_TRACE_D("GetAosHandle ::  [%s/%s] >> PID[%s]", strAppId.GetStr(), strSrvId.GetStr(),
             strId.GetStr());
@@ -76,8 +87,14 @@ PUBLIC
 IMSList<IAosHandle*> AosMngr::GetAllAosHandles(
         IN const AString& strAppId, IN const AString& strSrvId)
 {
-    const IMSList<AosStaticProfile*> objProfiles = AosStaticConfig::GetInstance()->GetProfiles();
     IMSList<IAosHandle*> objHandles;
+
+    if (m_pStaticConfig == IMS_NULL)
+    {
+        return objHandles;
+    }
+
+    const IMSList<AosStaticProfile*> objProfiles = m_pStaticConfig->GetProfiles();
 
     for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
     {
@@ -85,12 +102,16 @@ IMSList<IAosHandle*> AosMngr::GetAllAosHandles(
         IAosAppContext* piContext = m_objAppContext.GetValue(strId);
 
         if (piContext == IMS_NULL)
+        {
             continue;
+        }
 
         IAosHandle* piHandle = piContext->GetHandle(strSrvId);
 
         if (piHandle == IMS_NULL)
+        {
             continue;
+        }
 
         IMS_TRACE_D("GetAllAosHandles :: [%s/%s] >> PID[%s]", strAppId.GetStr(), strSrvId.GetStr(),
                 strId.GetStr());
@@ -104,34 +125,52 @@ IMSList<IAosHandle*> AosMngr::GetAllAosHandles(
 PUBLIC
 IMSList<IAosHandle*> AosMngr::GetAllAosHandles(IN const AString& strAppId)
 {
-    const IMSList<AosStaticProfile*> objProfiles = AosStaticConfig::GetInstance()->GetProfiles();
     IMSList<IAosHandle*> objHandles;
+
+    if (m_pStaticConfig == IMS_NULL)
+    {
+        return objHandles;
+    }
+
+    const IMSList<AosStaticProfile*> objProfiles = m_pStaticConfig->GetProfiles();
 
     for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
     {
         AosStaticProfile* pProfile = objProfiles.GetAt(i);
+
         if (pProfile == IMS_NULL)
+        {
             continue;
+        }
 
         const IMSList<AosServiceProfile*> objServices = pProfile->GetServiceProfiles();
 
         for (IMS_UINT32 j = 0; j < objServices.GetSize(); j++)
         {
             AosServiceProfile* pService = objServices.GetAt(j);
-            if (pService == IMS_NULL)
-                continue;
 
-            if (!pService->GetAppId().Equals(strAppId))
+            if (pService == IMS_NULL)
+            {
                 continue;
+            }
+            if (!pService->GetAppId().Equals(strAppId))
+            {
+                continue;
+            }
 
             IAosAppContext* piAppContext = m_objAppContext.GetValue(pProfile->GetId());
+
             if (piAppContext == IMS_NULL)
+            {
                 continue;
+            }
 
             IAosHandle* piHandle = piAppContext->GetHandle(pService->GetServiceId());
-            if (piHandle == IMS_NULL)
-                continue;
 
+            if (piHandle == IMS_NULL)
+            {
+                continue;
+            }
             objHandles.Append(piHandle);
         }
     }
@@ -156,18 +195,22 @@ IAosAppContext* AosMngr::GetAosAppContext(IN const AString& strProfileId)
 PRIVATE
 void AosMngr::CreateStaticConfig()
 {
-    AosStaticConfig* pConfig = AosStaticConfig::GetInstance();
-    pConfig->Create();
-    const IMSList<AosStaticProfile*>& objProfiles = pConfig->GetProfiles();
+    m_pStaticConfig = new AosStaticConfig();
+    m_pStaticConfig->Create();
+
+    const IMSList<AosStaticProfile*>& objProfiles = m_pStaticConfig->GetProfiles();
 
     for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
     {
         AosStaticProfile* pProfile = objProfiles.GetAt(i);
 
         if (pProfile == IMS_NULL)
+        {
             continue;
+        }
 
         const AString& strId = pProfile->GetId();
+
         m_objAppId.Append(AString(strId));
     }
 
@@ -187,22 +230,29 @@ PRIVATE
 void AosMngr::CreateAoS()
 {
     IAosBuilder* piAosBuilder = AosBuilderFactory();
+
     m_pBuildDirector = new AosBuildDirector(piAosBuilder, m_nSlotId);
-
     m_pBuildDirector->ConstructProvider();
+    if (m_pStaticConfig == IMS_NULL)
+    {
+        return;
+    }
 
-    const IMSList<AosStaticProfile*>& objProfiles = AosStaticConfig::GetInstance()->GetProfiles();
+    const IMSList<AosStaticProfile*>& objProfiles = m_pStaticConfig->GetProfiles();
     AString strLog;
+
     for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
     {
         AosStaticProfile* pProfile = objProfiles.GetAt(i);
 
         if (pProfile == IMS_NULL)
+        {
             continue;
+        }
 
         AString& strAosAppId = pProfile->GetId();
-        m_objAppContext.Add(AString(strAosAppId), m_pBuildDirector->ConstructAos(pProfile));
 
+        m_objAppContext.Add(AString(strAosAppId), m_pBuildDirector->ConstructAos(pProfile));
         strLog.Append("[");
         strLog.Append(strAosAppId.GetStr());
         strLog.Append("]");
@@ -215,8 +265,11 @@ void AosMngr::CreateAoS()
 PRIVATE
 void AosMngr::DestroyStaticConfig()
 {
-    AosStaticConfig* pConfig = AosStaticConfig::GetInstance();
-    pConfig->Destroy();
+    if (m_pStaticConfig != IMS_NULL)
+    {
+        m_pStaticConfig->Destroy();
+        m_pStaticConfig = IMS_NULL;
+    }
 }
 
 PRIVATE

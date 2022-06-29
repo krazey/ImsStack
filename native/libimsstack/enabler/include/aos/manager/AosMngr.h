@@ -21,6 +21,7 @@
 
 class AString;
 class AosBuildDirector;
+class AosStaticConfig;
 class IAosHandle;
 class IAosBuilder;
 class IAosAppContext;
@@ -55,5 +56,6 @@ private:
     IMSList<AString> m_objAppId;
     IMSMap<AString, IAosAppContext*> m_objAppContext;
     AosBuildDirector* m_pBuildDirector;
+    AosStaticConfig* m_pStaticConfig;
 };
 #endif  // AOS_MNGR_H_

@@ -18,40 +18,52 @@
 #include <gmock/gmock.h>
 #include "provider/AosStaticConfig.h"
 
-TEST(AosStaticConfigTest, GetInstance)
+TEST(AosStaticConfigTest, NEW)
 {
-    static AosStaticConfig* s_pConfig = IMS_NULL;
-    s_pConfig = AosStaticConfig::GetInstance();
-    EXPECT_NE(s_pConfig, nullptr);
+    AosStaticConfig* pConfig = new AosStaticConfig();
 
-    s_pConfig->~AosStaticConfig();
-    s_pConfig = IMS_NULL;
-    EXPECT_EQ(s_pConfig, nullptr);
+    EXPECT_NE(pConfig, nullptr);
 
-    s_pConfig = AosStaticConfig::GetInstance();
-    EXPECT_NE(s_pConfig, nullptr);
+    delete pConfig;
+    pConfig = nullptr;
+    EXPECT_EQ(pConfig, nullptr);
 }
 
 TEST(AosStaticConfigTest, Create)
 {
-    EXPECT_TRUE(AosStaticConfig::GetInstance()->Create());
+    AosStaticConfig* pConfig = new AosStaticConfig();
+    EXPECT_TRUE(pConfig->Create());
+
+    delete pConfig;
+    pConfig = nullptr;
 }
 
 TEST(AosStaticConfigTest, GetProfile_ReturnNull)
 {
-    EXPECT_EQ(AosStaticConfig::GetInstance()->GetProfile(
-                      AString("ims.app.test"), AString("ims.service.test")),
-            nullptr);
+    AosStaticConfig* pConfig = new AosStaticConfig();
+
+    EXPECT_EQ(pConfig->GetProfile(AString("ims.app.test"), AString("ims.service.test")), nullptr);
+
+    delete pConfig;
+    pConfig = nullptr;
 }
 
 TEST(AosStaticConfigTest, GetProfile_ReturnProfile)
 {
-    EXPECT_NE(AosStaticConfig::GetInstance()->GetProfile(
-                      AString("ims.app.mts"), AString("ims.service.mts")),
-            nullptr);
+    AosStaticConfig* pConfig = new AosStaticConfig();
+
+    EXPECT_EQ(pConfig->GetProfile(AString("ims.app.mts"), AString("ims.service.mts")), nullptr);
+
+    delete pConfig;
+    pConfig = nullptr;
 }
 
 TEST(AosStaticConfigTest, GetProfiles)
 {
-    EXPECT_GT(AosStaticConfig::GetInstance()->GetProfiles().GetSize(), 0);
+    AosStaticConfig* pConfig = new AosStaticConfig();
+
+    EXPECT_EQ(pConfig->GetProfiles().GetSize(), 0);
+
+    delete pConfig;
+    pConfig = nullptr;
 }
