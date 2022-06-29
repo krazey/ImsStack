@@ -72,7 +72,7 @@ static const IMS_UCHAR BASE64_DECODING_TABLE[] = {
         NP, NP, NP, NP, NP, NP                   // 250 ~ 256
 };
 
-GLOBAL IMS_SINT32 ImsBase64_Encode(IN IMS_BYTE* pSrcData, IN IMS_SIZE_T nSrcLen,
+GLOBAL IMS_SINT32 ImsBase64_Encode(IN const IMS_BYTE* pSrcData, IN IMS_SIZE_T nSrcLen,
         IN_OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestLen, IN IMS_BOOL bAddCrlf /*= IMS_TRUE*/)
 {
     IMS_CHAR c6bit;
@@ -200,8 +200,8 @@ GLOBAL IMS_SINT32 ImsBase64_Encode(IN IMS_BYTE* pSrcData, IN IMS_SIZE_T nSrcLen,
     return (IMS_SINT32)LONG_TO_INT(pEncBuffer - pszDest);
 }
 
-GLOBAL IMS_SINT32 ImsBase64_Decode(
-        IN IMS_CHAR* pszSrcData, IN IMS_SIZE_T nSrcLen, OUT IMS_BYTE* pDest, IN IMS_SIZE_T nDestLen)
+GLOBAL IMS_SINT32 ImsBase64_Decode(IN const IMS_CHAR* pszSrcData, IN IMS_SIZE_T nSrcLen,
+        OUT IMS_BYTE* pDest, IN IMS_SIZE_T nDestLen)
 {
     IMS_CHAR c8bit;
     IMS_CHAR c8bit1;

@@ -39,7 +39,7 @@ extern "C"
      * @param bAddCrlf The flag specifying if the CRLF can be inserted or not
      * @return A length in characters of the encoded data if encoding was successful, 0 otherwise.
      */
-    GLOBAL IMS_SINT32 ImsBase64_Encode(IN IMS_BYTE* pSrcData, IN IMS_SIZE_T nSrcLen,
+    GLOBAL IMS_SINT32 ImsBase64_Encode(IN const IMS_BYTE* pSrcData, IN IMS_SIZE_T nSrcLen,
             IN_OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestLen, IN IMS_BOOL bAddCrlf = IMS_TRUE);
 
     /**
@@ -51,7 +51,7 @@ extern "C"
      * @param nDestLen The length in bytes of pDest
      * @return A length in bytes of the decoded data if decoding was successful, 0 otherwise.
      */
-    GLOBAL IMS_SINT32 ImsBase64_Decode(IN IMS_CHAR* pszSrcData, IN IMS_SIZE_T nSrcLen,
+    GLOBAL IMS_SINT32 ImsBase64_Decode(IN const IMS_CHAR* pszSrcData, IN IMS_SIZE_T nSrcLen,
             IN_OUT IMS_BYTE* pDest, IN IMS_SIZE_T nDestLen);
 }
 #endif
