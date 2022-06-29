@@ -748,6 +748,7 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
             eStatusCode = SipStatusCode::SC_486;
             break;
         case CODE_REJECT_MAX_CALL_LIMIT_REACHED:
+        case CODE_LOCAL_CALL_EXCEEDED:
             eStatusCode = SipStatusCode::SC_486;
             break;
         case CODE_LOCAL_CALL_BUSY:

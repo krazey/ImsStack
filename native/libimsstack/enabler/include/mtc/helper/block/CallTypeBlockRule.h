@@ -35,8 +35,13 @@ public:
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
+    IMtcCallContext& m_objContext;
     MtcConfigurationProxy& m_objConfiguration;
     CallType m_eCallTypeToCheck;
+
+    IMS_BOOL IsOtherCallExists();
+    IMS_BOOL HasVideoCall(IN const IMSList<IMtcCall*>& lstCalls);
+    IMS_BOOL IsVideoCall(IN CallType eCallType);
 };
 
 #endif
