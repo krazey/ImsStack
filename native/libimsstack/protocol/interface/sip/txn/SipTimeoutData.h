@@ -40,10 +40,8 @@ public:
 
     SipTxnKey* GetTxnKey() const;
     SIP_INT32 GetTimerType() const;
-    SIP_INT32 GetTxnType() const;
     SIP_BOOL SetTxnKey(SipTxnKey* pTxnKey);
     SIP_BOOL SetTimerType(SIP_INT32 eTimerType);
-    SIP_BOOL SetTxnType(SIP_INT32 eTxnType);
 };
 
 #endif
