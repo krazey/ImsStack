@@ -220,7 +220,7 @@ public class ImsMmTelService extends MmTelFeature
     @Override
     public ImsMultiEndpointImplBase getMultiEndpoint() {
         logi("ImsMultiEndpoint is not supported yet for slot " + mIContext.getSlotId());
-        return null; // super.getMultiEndpoint();
+        return super.getMultiEndpoint();
     }
 
     @Override
