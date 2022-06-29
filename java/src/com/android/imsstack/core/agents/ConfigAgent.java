@@ -37,8 +37,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -171,12 +171,12 @@ public class ConfigAgent implements ConfigInterface {
     private void overrideTestConfigs(PersistableBundle config) {
         ImsLog.i(mSlotId, "overrideTestConfigs...");
 
-        boolean usePredefinedUserAgent = ImsPrivateProperties.Persistent.getBoolean(
-                ImsPrivateProperties.Persistent.KEY_USE_PREDEFINED_USER_AGENT, false, mSlotId);
+        boolean usePredefinedUaString = ImsPrivateProperties.Persistent.getBoolean(
+                ImsPrivateProperties.Persistent.KEY_USE_PREDEFINED_UA_STRING, false, mSlotId);
 
-        if (usePredefinedUserAgent) {
+        if (usePredefinedUaString) {
             String uaString = ImsPrivateProperties.Persistent.get(
-                    ImsPrivateProperties.Persistent.KEY_CONFIG_USER_AGENT, mSlotId);
+                    ImsPrivateProperties.Persistent.KEY_CONFIG_UA_STRING, mSlotId);
 
             if (!TextUtils.isEmpty(uaString)) {
                 ImsLog.d(mSlotId, "Use predefined UA string: " + uaString);

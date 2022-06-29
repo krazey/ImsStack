@@ -703,14 +703,6 @@ public class OperatorInfo {
                 extraInfo |= SystemConfig.EXTRA_INFO_NR_NSA_MODE;
             }
 
-            int features = 0;
-            List<FeatureTable.Feature> featureList = FeatureTable.getFeatures();
-
-            for (FeatureTable.Feature feature : featureList) {
-                features = setOrClearFeature(currentSlotId,
-                        feature.getFeature(), feature.getFeatureMask(), features);
-            }
-
             int serviceFeatures = 0;
             if (getSupportServices(currentSlotId) > 0) {
                 List<FeatureTable.Feature> serviceFeatureList = FeatureTable.getServiceFeatures();
@@ -726,7 +718,7 @@ public class OperatorInfo {
 
             sc[i] = new SystemConfig(currentSlotId,
                     opInfo.getOperator(), opInfo.getCountry(), opInfo.getEnablerType(),
-                    extraInfo, features, serviceFeatures);
+                    extraInfo, 0, serviceFeatures);
         }
 
         SystemConfig.setConfiguration(event, sc);

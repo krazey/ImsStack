@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
  * Copyright (C) 2022 The Android Open Source Project
  *
@@ -13,21 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:paddingLeft="28dp"
-    android:paddingRight="28dp">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="ims_config_menu"
+    android:title="ImsConfig Editor">
 
-    <TextView
-        android:id="@+id/multi_slot_text"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-
-    <ListView
-        android:id="@+id/multi_slot_listview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-</LinearLayout>
+    <PreferenceScreen android:title="CarrierConfig"
+        android:key="carrier_config_menu">
+        <intent android:action="com.android.imsstack.action.CARRIER_CONFIG_MENU"/>
+    </PreferenceScreen>
+    <PreferenceScreen android:title="TestConfig"
+        android:key="test_config_menu">
+        <intent android:action="com.android.imsstack.action.TEST_CONFIG_MENU"/>
+    </PreferenceScreen>
+</PreferenceScreen>

@@ -3,13 +3,14 @@ package com.android.imsstack.core.service;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.text.TextUtils;
+import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.IIMSPhoneGov;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IBatteryState;
@@ -28,8 +29,7 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
-import com.android.imsstack.core.config.ImsDbController;
-import com.android.imsstack.core.config.ProviderInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.service.CallInfoService;
 import com.android.imsstack.core.service.CallSettingService;
 import com.android.imsstack.core.service.CallStateNotificationService;
@@ -45,7 +45,6 @@ import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestMode;
-import com.android.imsstack.util.DBUtils;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.SettingsUtils;
@@ -652,18 +651,16 @@ public class VoLteService implements IVoLteService {
                 ImsStateStore.getMmTelState(getSlotID()).setVoLteProvisioned(
                         ImsStateStore.STATE_ACTIVE);
 
-                String soipEnableFromDB = DBUtils.CP.getString(mContext.getContentResolver()
-                                            , ProviderInterface.SMS.CONTENT_URI
-                                            , ImsDbController.selectForSlot(mSlotID)
-                                            , ProviderInterface.SMS.SMS_OVER_IP_NETWORK
-                                            , null);
+                ConfigInterface config = AgentFactory.getInstance().getAgent(
+                        ConfigInterface.class, getSlotID());
+                CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
 
-                if (TextUtils.isEmpty(soipEnableFromDB)) {
-                    soipEnableFromDB = "false";
-                }
+                boolean smsOverImsSupported = (cc != null)
+                        ? cc.getBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL)
+                        : false;
 
-                if ("true".equalsIgnoreCase(soipEnableFromDB)) {
-                    ImsLog.i("add the SMS Service according to DB");
+                if (smsOverImsSupported) {
+                    ImsLog.i("SMS over IMS supported.");
                     availableServices |= IUIMS.M_APP_SMS;
                 }
             }

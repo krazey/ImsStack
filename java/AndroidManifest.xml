@@ -65,26 +65,16 @@
         android:defaultToDeviceProtectedStorage="true"
         android:usesCleartextTraffic="true">
 
-        <!-- Operator required hidden menu -->
+        <!-- Engineering hidden menu -->
         <activity
             android:permission="com.android.imsstack.permission.IMS"
-            android:name=".test.menu.IMSSettings"
-            android:process="com.android.imsstack"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.android.imsstack.action.IMS_SETTINGS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <!-- IMS engineering hidden menu -->
-        <activity
-            android:permission="com.android.imsstack.permission.IMS"
-            android:name=".test.menu.IMSProvisioning"
+            android:name=".test.menu.ImsConfigMenu"
             android:resizeableActivity="true"
             android:process="com.android.imsstack"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.android.imsstack.action.IMS_PROVISIONING" />
+                <action android:name="com.android.imsstack.action.IMS_CONFIG_MENU" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -100,23 +90,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".test.menu.MediaSetting"
+            android:permission="com.android.imsstack.permission.IMS"
+            android:name=".test.menu.TestConfigMenu"
+            android:resizeableActivity="true"
             android:process="com.android.imsstack"
-            android:exported="false" >
+            android:exported="true">
             <intent-filter>
-                <action android:name="com.android.imsstack.action.IMS_MEDIA_SETTING" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <!-- Activity for IMS miscellaneous information -->
-        <activity
-            android:name=".test.menu.MiscInfo"
-            android:process="com.android.imsstack"
-            android:exported="false"
-            android:configChanges="orientation|screenSize"
-            android:resizeableActivity="true" >
-            <intent-filter>
-                <action android:name="com.android.imsstack.action.MISC_INFO" />
+                <action android:name="com.android.imsstack.action.TEST_CONFIG_MENU" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -151,13 +131,6 @@
         </service>
 
         <!-- Provider -->
-        <provider
-            android:name=".provider.ConfigurationProvider"
-            android:authorities="com.android.imsstack.provider.gims"
-            android:exported="true"
-            android:singleUser="true"
-            android:writePermission="com.android.imsstack.permission.WRITE_IMS">
-        </provider>
         <provider
             android:name=".provider.SmartConfigProvider"
             android:authorities="com.android.imsstack.provider.smart_configuration"

@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.util;
 
 import android.content.Context;
@@ -184,13 +199,6 @@ public final class ImsPrivateProperties {
          */
         public static final String KEY_LAST_BOOT_COUNT = "last_boot_count";
         /**
-         * keep the old DB(gims.db) version
-         * Value : int
-         * SlotId : always 0
-         */
-        public static final String KEY_DB_IMS_OLD_VERSION
-                = "db_ims_old_version";
-        /**
          * keep the old DB(smart_configuration.db) version
          * Value : int
          * SlotId : always 0
@@ -199,15 +207,39 @@ public final class ImsPrivateProperties {
                 = "db_smart_configuration_old_version";
 
         /**
+         * A flag specifying whether IMS is disabled or not.
+         * Value : boolean (true / false)
+         */
+        public static final String KEY_TEST_IMS_DISABLED = "test_ims_disabled";
+
+        /**
+         * A flag specifying whether a debug mode is enabled or not.
+         * Value : boolean (true / false)
+         */
+        public static final String KEY_TEST_DEBUG_ENABLED = "test_debug_enabled";
+
+        /**
+         * A flag specifying whether test-mode is enabled or not.
+         * Value : boolean (true / false)
+         */
+        public static final String KEY_TEST_TESTMODE_ENABLED = "test_testmode_enabled";
+
+        /**
          * Keeps the flag to indicate whether the pre-defined User-Agent string is used.
          * Value : boolean (true / false)
          */
-        public static final String KEY_USE_PREDEFINED_USER_AGENT = "use_predefined_user_agent";
+        public static final String KEY_USE_PREDEFINED_UA_STRING = "use_predefined_ua_string";
         /**
          * Keeps the pre-defined User-Agent string.
          * Value : string
          */
-        public static final String KEY_CONFIG_USER_AGENT = "config_user_agent";
+        public static final String KEY_CONFIG_UA_STRING = "config_ua_string";
+
+        /**
+         * Keeps the log options for the ImsStack's logging.
+         * Value : string (e.g. 0x0001000F)
+         */
+        public static final String KEY_TEST_LOG_OPTIONS = "test_log_options";
 
         /**
          * Stores VoWiFi's entitlement identifier(AT&T: E911 AID).
@@ -279,8 +311,12 @@ public final class ImsPrivateProperties {
                 KEY_PREF_COUNTRY,
                 KEY_PREF_KR_ENABLER,
                 KEY_WIFI_TEST,
-                KEY_USE_PREDEFINED_USER_AGENT,
-                KEY_TEST_CARRIER_ID
+                KEY_TEST_IMS_DISABLED,
+                KEY_TEST_DEBUG_ENABLED,
+                KEY_TEST_TESTMODE_ENABLED,
+                KEY_USE_PREDEFINED_UA_STRING,
+                KEY_TEST_CARRIER_ID,
+                KEY_TEST_LOG_OPTIONS
             };
 
         public static String get(String key, int slotId) {
