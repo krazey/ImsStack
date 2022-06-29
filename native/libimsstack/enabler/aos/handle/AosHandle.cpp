@@ -405,7 +405,8 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::App_Notify()
             m_piListener->ImsAos_Disconnected(GetImsAosReason(m_nReason));
             break;
         case STATE_CONNECTED:
-            m_piListener->ImsAos_Connected(GetFeatures(), 0);
+            m_piListener->ImsAos_Connected(
+                    GetFeatures(), m_piAppContext->GetConnection()->GetIpcanCategory());
             break;
         case STATE_DISCONNECTING:
             m_piListener->ImsAos_Disconnecting(GetImsAosReason(m_nReason));
@@ -1268,7 +1269,8 @@ void AosHandle::ProcessUnavailableFeatureChanged()
 
     if (nState == STATE_CONNECTED && m_piListener != IMS_NULL)
     {
-        m_piListener->ImsAos_Connected(GetFeatures(), 0);
+        m_piListener->ImsAos_Connected(
+                GetFeatures(), m_piAppContext->GetConnection()->GetIpcanCategory());
     }
 }
 

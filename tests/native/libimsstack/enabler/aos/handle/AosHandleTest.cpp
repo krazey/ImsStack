@@ -22,6 +22,7 @@
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
 #include "ImsEventDef.h"
+#include "IIpcan.h"
 #include "INetworkWatcher.h"
 
 #include "handle/AosHandle.h"
@@ -70,6 +71,8 @@ public:
     IAosRegStateManager* m_piAosRegStateManager;
     MockIAosRegStateManager m_objMockIAosRegStateManager;
 
+    MockIAosConnection m_objMockIAosConnection;
+
     const AString m_strAppId = AString("ims.app.test");
     const AString m_strServiceId = AString("ims.service.test");
     const IMS_UINT32 m_nServiceType = -1;
@@ -93,6 +96,10 @@ protected:
         EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(&m_objMockIAosNetTracker));
+
+        EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(&m_objMockIAosConnection));
 
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(
@@ -776,8 +783,15 @@ TEST_F(AosHandleTest, App_Notify_STATE_CONNECTED)
     SetNotify(IMS_TRUE);
     ASSERT_TRUE(GetNotify());
 
+    EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .Times(2)
+            .WillOnce(Return(IIpcan::CATEGORY_MOBILE))
+            .WillOnce(Return(IIpcan::CATEGORY_WLAN));
+
     SetState(AosHandle::STATE_CONNECTED);
-    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(1);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, IIpcan::CATEGORY_MOBILE)).Times(1);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, IIpcan::CATEGORY_WLAN)).Times(1);
+    EXPECT_TRUE(m_pAosHandle->App_Notify());
     EXPECT_TRUE(m_pAosHandle->App_Notify());
 }
 
@@ -961,11 +975,7 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test)
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
 
-    MockIAosConnection objMockIAosConnection;
-    EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
-    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
@@ -1654,11 +1664,7 @@ TEST_F(AosHandleTest, ReevaluateBlocks_Test8)
 
 TEST_F(AosHandleTest, UpdateIpcan_Test)
 {
-    MockIAosConnection objMockIAosConnection;
-    EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
-    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .Times(4)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_TRUE))
@@ -2222,7 +2228,11 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test3)
             objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
             .Times(1);
 
-    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, 0)).Times(1);
+    EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IIpcan::CATEGORY_MOBILE));
+
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(1);
 
     ProcessUnavailableFeatureChanged();
 
