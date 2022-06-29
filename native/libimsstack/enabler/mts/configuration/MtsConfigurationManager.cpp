@@ -56,6 +56,8 @@ void MtsConfigurationManager::UpdateMtsCarrierConfig(IN const ICarrierConfig* pi
 
     m_objCarrierConfig.nRequestUriType =
             piCc->GetInt(CarrierConfig::Ims::KEY_REQUEST_URI_TYPE_INT);
+    m_objCarrierConfig.nPolicyOfLocalNumbers =
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_POLICY_OF_LOCAL_NUMBERS_INT);
     m_objCarrierConfig.bSmsCsfbRetryOnFailure =
             piCc->GetInt(CarrierConfig::ImsSms::KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL);
     m_objCarrierConfig.nSmsOverImsFormat =
@@ -97,6 +99,12 @@ IMS_SINT32 MtsConfigurationManager::GetRequestUriType() const
     {
         return m_objAsset.nSmsRequestUriType;
     }
+}
+
+PUBLIC
+IMS_SINT32 MtsConfigurationManager::GetPolicyOfLocalNumbers() const
+{
+    return m_objCarrierConfig.nPolicyOfLocalNumbers;
 }
 
 // Carrier Config

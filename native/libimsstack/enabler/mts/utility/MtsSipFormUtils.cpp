@@ -55,7 +55,7 @@ MtsSipFormUtils::MtsSipFormUtils(IN IMS_SINT32 nSlotId) :
     }
 
     m_pMtsDialingPlan = new MtsDialingPlan(
-            nSlotId, MtsDialingPlan::NUMBER_FORMAT_GLOBAL, strUriScheme);
+            nSlotId, strUriScheme, pMtsConfigurationManager->GetPolicyOfLocalNumbers());
 }
 
 PUBLIC
@@ -107,34 +107,22 @@ PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::FormDestination(IN const AString& strTa
     }
     else
     {
-        if (strTargetAddress.IsEmpty())
+        if (strTargetAddress.GetLength() == 0)
         {
             IMS_TRACE_E(0, "FormDestination : Target address is not valid", 0, 0, 0);
             return IMS_FALSE;
         }
 
-        // Update the format
-        UpdateFormatFromDb();
+        strDest = m_pMtsDialingPlan->Translate(strTargetAddress, IMS_TRUE);
 
-        if (MtsSipFormUtils::UpdatePsiFromDb() == IMS_FALSE)
-        {
-            IMS_TRACE_I(
-                    "FormDestination - PSI from SIM is wrong, so we wil make PSI by SMSC", 0, 0, 0);
-            // TODO: AT&T Operator needs tel URI when PSI is not available
-            strDest = m_pMtsDialingPlan->Translate(strTargetAddress, IMS_TRUE);
-        }
-        else
-        {
-            IMS_TRACE_I("FormDestination - Use PSI from SIM", 0, 0, 0);
-            /*
-             * TODO:
-             * LGU, KT, KDDI only use SIP URI and KT also needs home domain name.
-             * The depreciated method(ValidateAndUpdatePsi) can be referred.
-             */
-            strDest = ValidateAndUpdatePsi();
-        }
+        /*
+         * TODO:
+         * PSI or SMSC addresses are received from AP SMS Stack
+         * These values can be configured to make SIP Request-URI for a specific operator
+         */
+        // strDest = ValidateAndUpdatePsi();
 
-        if (!strDest.IsEmpty())
+        if (strDest.GetLength() != 0)
         {
             IMS_TRACE_D("Destination address = %s", strDest.GetStr(), 0, 0);
             return IMS_TRUE;
@@ -193,44 +181,6 @@ IMS_UINT32 MtsSipFormUtils::FormContentTypeStrToEnum(IN const AString& strConten
     IMS_TRACE_D("FormContentTypeStrToEnum (%s) to (%d)", strContentType.GetStr(), nType, 0);
 
     return nType;
-}
-
-PUBLIC VIRTUAL void MtsSipFormUtils::UpdateFormatFromDb()
-{
-    // TODO: this method is deprecated. It will be removed.
-    IMS_TRACE_I("UpdateFormatFromDb", 0, 0, 0);
-
-    if (m_nMtsFormat == MtsApp::SMSFORMAT_3GPP ||
-            m_nMtsFormat == MtsApp::SMSFORMAT_3GPP2)
-    {
-        IMS_TRACE_I("UpdateFormatFromDb : m_nMtsFormat is already set", 0, 0, 0);
-        return;
-    }
-
-    // TODO: configurable
-    AString strFormat = "3gpp";
-
-    if (strFormat == "3gpp")
-    {
-        m_nMtsFormat = MtsApp::SMSFORMAT_3GPP;
-    }
-    else if (strFormat == "3gpp2")
-    {
-        m_nMtsFormat = MtsApp::SMSFORMAT_3GPP2;
-    }
-    else
-    {
-        m_nMtsFormat = MtsApp::SMSFORMAT_INVALID;
-    }
-
-    IMS_TRACE_D("MtsSipFormUtils::UpdateFormatFromDb: Format value (%d)", m_nMtsFormat, 0, 0);
-}
-
-PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::UpdatePsiFromDb()
-{
-    // TODO: This is a deprecated method. There will be new implementation for getting PSI value
-    IMS_TRACE_I("UpdatePsiFromDb slot ID [%d]", m_nSlotId, 0, 0);
-    return IMS_FALSE;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 MtsSipFormUtils::GetSlotId()
@@ -417,7 +367,7 @@ IMS_SINT32 MtsSipFormUtils::CheckScheme(IN const AString& strNumber) const
     return SCHEME_UNKNOWN;
 }
 
-PROTECTED VIRTUAL MtsDialingPlan* MtsSipFormUtils::GetDialingPlan(IN IMS_SINT32 nSlotId)
+PRIVATE VIRTUAL MtsDialingPlan* MtsSipFormUtils::GetDialingPlan(IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_E(0, "MtsSipFormUtils::GetDialingPlan : nSlotId[%d]", nSlotId, 0, 0);
     return m_pMtsDialingPlan;

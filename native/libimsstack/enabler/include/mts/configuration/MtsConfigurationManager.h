@@ -40,6 +40,7 @@ public:
 
     // ims public carrier-config
     IMS_SINT32 GetRequestUriType() const;    // tel = 0, sip = 1
+    IMS_SINT32 GetPolicyOfLocalNumbers() const;
 
     // sms carrier configurations
     IMS_BOOL IsSmsCsfbRetryOnFailure() const;

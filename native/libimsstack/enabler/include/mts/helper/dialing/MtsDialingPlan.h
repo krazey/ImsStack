@@ -23,7 +23,8 @@
 class MtsDialingPlan final
 {
 public:
-    MtsDialingPlan(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nNumberFormat, IN const AString& strScheme);
+    MtsDialingPlan(
+            IN IMS_SINT32 nSlotId, IN const AString& strScheme, IN IMS_SINT32 nDialingPolicy);
     ~MtsDialingPlan();
 
 private:
@@ -44,28 +45,23 @@ public:
             IN IMS_SINT32 nFlags = FLAG_NONE, IN IMS_BOOL bAquot = IMS_TRUE);
 
     IMS_SINT32 GetDialingPolicy() const;
-    IMS_SINT32 GetNumberFormat() const;
     const AString& GetNetworkProfile() const;
     const AString& GetScheme() const;
 
     void SetDialingPolicy(IN IMS_SINT32 nPolicy);
-    void SetNumberFormat(IN IMS_SINT32 nNumberFormat);
     void SetNetworkProfile(IN const AString& strNetworkProfile);
     void SetScheme(IN const AString& strScheme);
 
-protected:
+private:
     // For geo-local number format
     AccessNetworkInfo* GetAccessNetworkInfo(IN_OUT AccessNetworkInfo& objANI);
-    IMS_BOOL TranslateAsGlobal(IN const AString& strNumber, OUT AStringBuffer& objURI);
-    IMS_BOOL TranslateAsLocal(IN const AString& strNumber, OUT AStringBuffer& objURI);
-
     IMS_BOOL FormNonTelUri(IN const AString& strNumber, IN IMS_BOOL bAquot,
             OUT AStringBuffer& objURI, IN const AString& strScheme = AString::ConstNull());
+    IMS_BOOL FormTelUri(IN const AString& strNumber, OUT AStringBuffer& objURI);
     IMS_BOOL FormUssiNonTelUri(IN const AString& strNumber, OUT AStringBuffer& objURI,
             IN const AString& strScheme = AString::ConstNull());
 
-    IMS_BOOL TranslateAsServiceUrn(IN const AString& strNumber, OUT AStringBuffer& objURI);
-    IMS_SINT32 TranslateScheme(IN const AString& strNumber) const;
+    IMS_SINT32 TranslateScheme() const;
 
     static IMS_SINT32 GetDialedNumberFormat(IN const AString& strDial);
     static IMS_BOOL IsVisualSeparator(IN IMS_CHAR ch);
@@ -87,12 +83,9 @@ public:
         NUMBER_FORMAT_NON_TEL = 10
     };
 
-protected:
-    IMS_SINT32 m_nSlotId;
-
 private:
+    IMS_SINT32 m_nSlotId;
     // local / global
-    IMS_SINT32 m_nNumberFormat;
     AString m_strScheme;
 
     // For policy to consist of phone-context URI parameter;

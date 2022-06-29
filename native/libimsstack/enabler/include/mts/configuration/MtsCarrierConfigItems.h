@@ -17,6 +17,7 @@
 #ifndef MTS_CARRIER_CONFIG_ITEMS_H_
 #define MTS_CARRIER_CONFIG_ITEMS_H_
 
+#include "CarrierConfig.h"
 #include "IMSTypeDef.h"
 #include "ImsVector.h"
 
@@ -25,6 +26,7 @@ struct MtsCarrierConfigItems
 public:
     MtsCarrierConfigItems() :
             nRequestUriType(0),
+            nPolicyOfLocalNumbers(CarrierConfig::ImsVoice::NUMBER_FORMAT_GEO_LOCAL_ONLY_IN_ROAMING),
             bSmsCsfbRetryOnFailure(IMS_FALSE),
             nSmsOverImsFormat(0)
     {
@@ -36,6 +38,7 @@ public:
 public:
     // ims configurations
     IMS_SINT32 nRequestUriType;
+    IMS_SINT32 nPolicyOfLocalNumbers;
     // sms configurations
     IMS_BOOL bSmsCsfbRetryOnFailure;
     IMS_SINT32 nSmsOverImsFormat;

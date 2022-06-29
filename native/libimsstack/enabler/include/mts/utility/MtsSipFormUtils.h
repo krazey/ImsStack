@@ -32,8 +32,6 @@ public:
             IN const AString& strLastIpSmgw, OUT AString& strDest);
     AString FormContentTypeEnumToStr(IN IMS_UINT32 nType);
     IMS_UINT32 FormContentTypeStrToEnum(IN const AString& strContentType);
-    void UpdateFormatFromDb();
-    IMS_BOOL UpdatePsiFromDb();
     IMS_SINT32 GetSlotId();
     AString ValidateAndUpdatePsi();
     IMS_BOOL IsTelUrlParam(IN const AString& strParam) const;
@@ -41,10 +39,8 @@ public:
     IMS_BOOL IsIpAddress(IN const AString& strIp) const;
     IMS_SINT32 CheckScheme(IN const AString& strScheme) const;
 
-protected:
-    MtsDialingPlan* GetDialingPlan(IN IMS_SINT32 nSlotId);
-
 private:
+    MtsDialingPlan* GetDialingPlan(IN IMS_SINT32 nSlotId);
     static IMS_BOOL IsVisualSeparator(IN IMS_CHAR ch);
 
 public:
@@ -59,7 +55,7 @@ public:
 public:
     IMS_UINT32 m_nMtsFormat;
 
-protected:
+private:
     MtsDialingPlan* m_pMtsDialingPlan;
     AString m_strPsi;
     IMS_SINT32 m_nSlotId;
