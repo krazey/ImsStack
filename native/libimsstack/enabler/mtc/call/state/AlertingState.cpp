@@ -25,6 +25,8 @@
 #include "helper/MtcTimerWrapper.h"
 #include "IMessage.h"
 #include "ISession.h"
+#include "sipcore/ISipHeader.h"
+#include "sipcore/SipHeaderName.h"
 #include "SipStatusCode.h"
 #include "utility/MessageUtil.h"
 #include "helper/MtcSupplementaryService.h"
@@ -67,13 +69,15 @@ PUBLIC VIRTUAL CallStateName AlertingState::Accept(IN CallType eCallType, IN Med
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     objMediaManager.SetMediaInfo(*pMediaInfo);
 
+    m_objContext.GetTimer().StopAll();
     if (bCallTypeChanged)
     {
-        // TODO: Send early update
+        if (SendEarlyUpdate(m_objContext.GetSession()) == IMS_FAILURE)
+        {
+            return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
+        }
         return GetStateName();
     }
-
-    m_objContext.GetTimer().StopAll();
 
     if (SendAccept() == IMS_FAILURE)
     {
@@ -187,9 +191,13 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
-    if (SendAccept() == IMS_FAILURE)
+    if (IsUpdateBySrvcc(piSession) == IMS_FALSE)
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
+        // if there is another case sending early UPDATE other than SRVCC, need to be checked.
+        if (SendAccept() == IMS_FAILURE)
+        {
+            return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
+        }
     }
 
     RunMedia(piSession, piMessage);
@@ -332,4 +340,29 @@ IMS_RESULT AlertingState::SendAccept()
     }
 
     return m_objContext.GetSession()->GetMessageSender().Accept();
+}
+
+PRIVATE
+IMS_BOOL AlertingState::IsUpdateBySrvcc(IN ISession* piSession) const
+{
+    IMessage* piUpdateMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
+    if (piUpdateMessage == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    if (piUpdateMessage->GetState() != IMessage::STATE_SENT)
+    {
+        // TODO: glare condition
+        return IMS_FALSE;
+    }
+
+    AString strReason;
+    MessageUtil::GetHeader(piUpdateMessage, ISipHeader::UNKNOWN, strReason, SipHeaderName::REASON);
+    if (strReason.Equals(MessageUtil::STR_REASON_HANDOVER_CANCELLED) ||
+            strReason.Equals(MessageUtil::STR_REASON_FAILURE_TO_TRANSITION))
+    {
+        return IMS_TRUE;
+    }
+    return IMS_FALSE;
 }

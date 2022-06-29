@@ -66,6 +66,7 @@ public:
 
 private:
     IMS_RESULT SendAccept();
+    IMS_BOOL IsUpdateBySrvcc(IN ISession* piSession) const;
 };
 
 #endif
