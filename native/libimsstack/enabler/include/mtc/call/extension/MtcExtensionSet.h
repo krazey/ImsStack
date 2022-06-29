@@ -40,7 +40,7 @@ public:
     static const AString OPTION_TAG_TARGET_DIALOG;
     static const AString OPTION_TAG_TIMER;
 
-    explicit MtcExtensionSet(IN const IMSList<AString>& lstOptionTags);
+    explicit MtcExtensionSet(IN const ImsList<IMtcExtension*>& lstExtensions);
     explicit MtcExtensionSet(IN const MtcExtensionSet& objRhs);
     virtual ~MtcExtensionSet();
     MtcExtensionSet& operator=(IN const MtcExtensionSet& objRhs);

@@ -1,101 +1,69 @@
-#include "IMessage.h"
-#include "ISipMessage.h"
-#include "ImsList.h"
-#include "call/extension/MtcExtensionSet.h"
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "IMessage.h"
+#include "ImsList.h"
+#include "ISipMessage.h"
+#include "../../../../engine/interface/core/MockIMessage.h"
+#include "../../../../engine/interface/sipcore/MockISipMessage.h"
+#include "call/extension/IMtcExtension.h"
+#include "call/extension/MockIMtcExtension.h"
+#include "call/extension/MtcExtension.h"
+#include "call/extension/MtcExtensionSet.h"
+#include "call/extension/RprExtension.h"
+
+using ::testing::_;
+using ::testing::Eq;
+using ::testing::Ref;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 MtcExtensionSet CreateExtensionSetSupportsRprOnly()
 {
-    IMSList<AString> lstOptionTags;
-    lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_RPR);
+    ImsList<IMtcExtension*> lstExtensions;
+    lstExtensions.Append(new RprExtension());
 
-    return MtcExtensionSet(lstOptionTags);
+    return MtcExtensionSet(lstExtensions);
 }
 
 MtcExtensionSet CreateExtensionSetSupportsTimerOnly()
 {
-    IMSList<AString> lstOptionTags;
-    lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_TIMER);
+    ImsList<IMtcExtension*> lstExtensions;
+    lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_TIMER));
 
-    return MtcExtensionSet(lstOptionTags);
+    return MtcExtensionSet(lstExtensions);
 }
 
-// FIXME: ISipMessage and IMessage cannot be used for test now because they don't have
-//        virtual destructor. I commented related tests below too.
-#if 0
-class FakeSipMessage :
-        public ISipMessage
+TEST(MtcExtensionSetTest, ConstructorWithEmptyOptionTags)
 {
-public:
-    FakeSipMessage(IN const IMSList<AString>& lstRequiredHeaders) :
-            m_lstRequiredHeaders(lstRequiredHeaders) {}
-    virtual ~FakeSipMessage() {}
+    ImsList<IMtcExtension*> lstEmptyExtensions;
+    MtcExtensionSet objExtensionSet(lstEmptyExtensions);
 
-    MOCK_METHOD(void, Destroy, ());
-    MOCK_METHOD(ISipMessage*, Clone, (), (const));
-    MOCK_METHOD(IMS_RESULT, AddHeader, (IMS_SINT32, const AString&, const AString&));
-    MOCK_METHOD(IMS_UINT32, GetCSeqNumber, (), (const));
-    MOCK_METHOD(AString, GetHeader, (IMS_SINT32, IMS_SINT32, const AString&), (const));
-    MOCK_METHOD(IMS_SINT32, GetHeaderCount, (IMS_SINT32, const AString&), (const));
-    MOCK_METHOD(const SipMethod&, GetMethod, (), (const));
-    MOCK_METHOD(const AString&, GetReasonPhrase, (), (const));
-    MOCK_METHOD(const AString&, GetRequestUri, (), (const));
-    MOCK_METHOD(IMS_SINT32, GetStatusCode, (), (const));
-    MOCK_METHOD(IMS_SINT32, GetType, (), (const));
-    MOCK_METHOD(IMS_RESULT, PrependHeader, (IMS_SINT32, const AString&, const AString&));
-    MOCK_METHOD(void, RemoveHeader, (IMS_SINT32, const AString&));
-    MOCK_METHOD(IMS_RESULT, SetHeader, (IMS_SINT32, const AString&, const AString&));
-    MOCK_METHOD(ISipMessageBodyPart*, CreateBodyPart, ());
-    MOCK_METHOD(ISipMessageBodyPart*, CreateSdpBodyPart,  ());
-    MOCK_METHOD(IMSList<ISipMessageBodyPart*>, GetBodyParts, (), (const));
-    MOCK_METHOD(ISipMessageBodyPart*, GetSdpBodyPart, (), (const));
-    MOCK_METHOD(IMSList<ISipMessageBodyPart*>, GetSdpBodyParts, (), (const));
-    MOCK_METHOD(IMS_RESULT, CopyHeadersAndBodyParts, (const ISipMessage*));
-    MOCK_METHOD(IMS_BOOL, IsHeaderPresent, (IMS_SINT32, const AString&), (const));
-    MOCK_METHOD(IMS_BOOL, IsMessageRpr, (), (const));
-    MOCK_METHOD(IMS_BOOL, IsOptionRequired, (const AString&), (const));
-    MOCK_METHOD(IMS_BOOL, IsOptionSupported, (const AString&), (const));
-    MOCK_METHOD(void, RemoveBodyParts, ());
-    MOCK_METHOD(ByteArray, ToByteArray, (IMS_SINT32), (const));
-
-    IMSList<AString> GetHeaders(IMS_SINT32 /* nType */, const AString& /* strName */) const override
-    {
-        return m_lstRequiredHeaders;
-    }
-
-    IMSList<AString> m_lstRequiredHeaders;
-};
-
-class FakeMessage :
-        public IMessage
-{
-public:
-    explicit FakeMessage(FakeSipMessage* pSipMessage) :
-            m_pSipMessage(pSipMessage) {}
-
-    virtual ~FakeMessage()
-    {
-        delete m_pSipMessage;
-    }
-
-    MOCK_METHOD(IMS_RESULT, AddHeader, (const AString&, const AString&));
-    MOCK_METHOD(IMessageBodyPart*, CreateBodyPart, ());
-    MOCK_METHOD(IMSList<IMessageBodyPart*>, GetBodyParts, (), (const));
-    MOCK_METHOD(IMSList<AString>, GetHeaders, (const AString&), (const));
-    MOCK_METHOD(const SipMethod&, GetMethod, (), (const));
-    MOCK_METHOD(const AString&, GetReasonPhrase, (), (const));
-    MOCK_METHOD(IMS_SINT32, GetState, (), (const));
-    MOCK_METHOD(IMS_SINT32, GetStatusCode, (), (const));
-
-    ISipMessage* GetMessage() const override
-    {
-        return m_pSipMessage;
-    }
-
-    FakeSipMessage* m_pSipMessage;
-};
-#endif
+    EXPECT_FALSE(objExtensionSet.IsAvailableOnLocal(
+            MtcExtensionSet::OPTION_TAG_EARLY_DIALOG_TERMINATED));
+    EXPECT_FALSE(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_FROM_CHANGE));
+    EXPECT_FALSE(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_HISTORY_INFO));
+    EXPECT_FALSE(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_PRECONDITION));
+    EXPECT_FALSE(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_REPLACES));
+    EXPECT_FALSE(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_RPR));
+    EXPECT_FALSE(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_TARGET_DIALOG));
+    EXPECT_FALSE(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_TIMER));
+}
 
 TEST(MtcExtensionSetTest, CopyConstructor)
 {
@@ -137,30 +105,113 @@ TEST(MtcExtensionSetTest, IsAvailableOnLocalInitiallyReturnsInitialValue)
     EXPECT_FALSE(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_TIMER));
 }
 
-/*
+TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsTrueForNotAvailableExtension)
+{
+    MtcExtensionSet objExtensionSet = CreateExtensionSetSupportsRprOnly();
+
+    ImsList<AString> lstRequiredHeaders;
+    lstRequiredHeaders.Append(MtcExtensionSet::OPTION_TAG_RPR);
+
+    MockISipMessage objSipMessageRequiresRpr;
+    ON_CALL(objSipMessageRequiresRpr, GetHeaders(_, _))
+            .WillByDefault(Return(lstRequiredHeaders));
+
+    MockIMessage objMessageRequiresRpr;
+    ON_CALL(objMessageRequiresRpr, GetMessage)
+            .WillByDefault(Return(&objSipMessageRequiresRpr));
+
+    EXPECT_TRUE(objExtensionSet.IsSupportRequiredExtensions(objMessageRequiresRpr));
+}
+
 TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsFalseForNotAvailableExtension)
 {
     MtcExtensionSet objExtensionSet = CreateExtensionSetSupportsRprOnly();
 
-    IMSList<AString> lstRequiredHeaders;
-    lstRequiredHeaders.Append(MtcExtensionSet::OPTION_TAG_RPR);
-    IMessage* pMessageRequiresRpr = new FakeMessage(new FakeSipMessage(lstRequiredHeaders));
-
-    EXPECT_TRUE(objExtensionSet.IsSupportRequiredExtensions(*pMessageRequiresRpr));
-
-    delete pMessageRequiresRpr;
-}
-
-TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsTrueForAvailableExtension)
-{
-    MtcExtensionSet objExtensionSet = CreateExtensionSetSupportsRprOnly();
-
-    IMSList<AString> lstRequiredHeaders;
+    ImsList<AString> lstRequiredHeaders;
     lstRequiredHeaders.Append(MtcExtensionSet::OPTION_TAG_TIMER);
-    IMessage* pMessageRequiresTimer = new FakeMessage(new FakeSipMessage(lstRequiredHeaders));
 
-    EXPECT_FALSE(objExtensionSet.IsSupportRequiredExtensions(*pMessageRequiresTimer));
+    MockISipMessage objSipMessageRequiresTimer;
+    ON_CALL(objSipMessageRequiresTimer, GetHeaders(_, _))
+            .WillByDefault(Return(lstRequiredHeaders));
 
-    delete pMessageRequiresTimer;
+    MockIMessage objMessageRequiresTimer;
+    ON_CALL(objMessageRequiresTimer, GetMessage)
+            .WillByDefault(Return(&objSipMessageRequiresTimer));
+
+    EXPECT_FALSE(objExtensionSet.IsSupportRequiredExtensions(objMessageRequiresTimer));
 }
-*/
+
+MockIMtcExtension* CreateMockIMtcExtension(IN const IMS_CHAR* pszOptionTag)
+{
+    MockIMtcExtension* pExtension = new MockIMtcExtension();
+
+    AString strOptionTag(pszOptionTag);
+    ON_CALL(*pExtension, GetOptionTag)
+            .WillByDefault(ReturnRef(strOptionTag));
+
+    return pExtension;
+}
+
+TEST(MtcExtensionSetTest, FormatRequestCallsEachExtensions)
+{
+    IMS_UINT32 nMethod = IMessage::SESSION_START;
+    MockIMessage objMessage;
+
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension("any");
+    EXPECT_CALL(*pExtension, FormatRequest(nMethod, Ref(objMessage)))
+            .Times(1);
+
+    ImsList<IMtcExtension*> lstExtensions;
+    lstExtensions.Append(pExtension);
+
+    MtcExtensionSet objExtensionSet(lstExtensions);
+    objExtensionSet.FormatRequest(nMethod, objMessage);
+}
+
+TEST(MtcExtensionSetTest, FormatResponseCallsEachExtensions)
+{
+    IMS_UINT32 nMethod = IMessage::SESSION_START;
+    MockIMessage objMessage;
+
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension("any");
+    EXPECT_CALL(*pExtension, FormatResponse(nMethod, Ref(objMessage)))
+            .Times(1);
+
+    ImsList<IMtcExtension*> lstExtensions;
+    lstExtensions.Append(pExtension);
+
+    MtcExtensionSet objExtensionSet(lstExtensions);
+    objExtensionSet.FormatResponse(nMethod, objMessage);
+}
+
+TEST(MtcExtensionSetTest, HandleRequestCallsEachExtensions)
+{
+    IMS_UINT32 nMethod = IMessage::SESSION_START;
+    MockIMessage objMessage;
+
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension("any");
+    EXPECT_CALL(*pExtension, HandleRequest(nMethod, Ref(objMessage)))
+            .Times(1);
+
+    ImsList<IMtcExtension*> lstExtensions;
+    lstExtensions.Append(pExtension);
+
+    MtcExtensionSet objExtensionSet(lstExtensions);
+    objExtensionSet.HandleRequest(nMethod, objMessage);
+}
+
+TEST(MtcExtensionSetTest, HandleResponseCallsEachExtensions)
+{
+    IMS_UINT32 nMethod = IMessage::SESSION_START;
+    MockIMessage objMessage;
+
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension("any");
+    EXPECT_CALL(*pExtension, HandleResponse(nMethod, Ref(objMessage)))
+            .Times(1);
+
+    ImsList<IMtcExtension*> lstExtensions;
+    lstExtensions.Append(pExtension);
+
+    MtcExtensionSet objExtensionSet(lstExtensions);
+    objExtensionSet.HandleResponse(nMethod, objMessage);
+}
