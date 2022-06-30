@@ -20,6 +20,7 @@ import android.content.Context;
 
 import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,16 +36,12 @@ public final class DcFactory {
     public static final int SETTING = 3;
     public static final int NETWORK_WATCHER = 4;
     public static final int APN = 5;
-    /** NOT_USED
-    private static final int START = 0;
-    */
-    private static final int END = (APN + 1);
-    private static final int MAX = END;
+    public static final int MAX = (APN + 1);
 
     private static Map<Integer, HashMap<Integer, IDc>> sDcSlots =
             new HashMap<Integer, HashMap<Integer, IDc>>(MSimUtils.getMaxSimSlot());
 
-    private DcFactory() {
+    public DcFactory() {
     }
 
     /**
@@ -146,11 +143,19 @@ public final class DcFactory {
         }
     }
 
-    private static synchronized HashMap<Integer, IDc> getObjects(int slotId) {
+    /**
+     * Get the object include Data Connection Agents for each slot id
+     */
+    @VisibleForTesting
+    public static synchronized HashMap<Integer, IDc> getObjects(int slotId) {
         return sDcSlots.get(slotId);
     }
 
-    private static synchronized void setObjects(int slotId, HashMap<Integer, IDc> objects) {
+    /**
+     * Set the object include Data Connection Agents for each slot id
+     */
+    @VisibleForTesting
+    public static synchronized void setObjects(int slotId, HashMap<Integer, IDc> objects) {
         sDcSlots.put(slotId, objects);
     }
 }
