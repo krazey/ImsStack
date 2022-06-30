@@ -160,7 +160,8 @@ public:
     inline void SetHeldByMe(IN IMS_BOOL bHeldByMe) override { m_objContext.SetHeldByMe(bHeldByMe); }
 
 private:
-    IMSList<AString> GetSupportedOptionTags() const;
+    ImsList<IMtcExtension*> GetSupportedExtensions() const;
+
     void UpdateSessionProperty();
     void UpdateCallTypeFromMessage(IN const IMessage& objMessage);
     void UpdateCapabilityFromMessage(IN const IMessage& objMessage);

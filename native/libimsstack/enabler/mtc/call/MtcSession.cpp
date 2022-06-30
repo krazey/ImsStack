@@ -23,6 +23,9 @@
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"
 #include "call/MtcSession.h"
+#include "call/extension/MtcExtension.h"
+#include "call/extension/PreconditionExtension.h"
+#include "call/extension/RprExtension.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
@@ -40,7 +43,7 @@ MtcSession::MtcSession(
         m_objContext(objContext),
         m_objSession(objSession),
         m_objMessageSender(MessageSender(*this)),
-        m_objExtensionSet(GetSupportedOptionTags()),
+        m_objExtensionSet(GetSupportedExtensions()),
         m_eCallType(eCallType),
         m_bVideoCapable(IMS_FALSE),
         m_bRttCapable(IMS_FALSE),
@@ -145,26 +148,26 @@ void MtcSession::HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objRes
 }
 
 PRIVATE
-IMSList<AString> MtcSession::GetSupportedOptionTags() const
+ImsList<IMtcExtension*> MtcSession::GetSupportedExtensions() const
 {
-    IMSList<AString> lstOptionTags;
+    ImsList<IMtcExtension*> lstExtensions;
 
-    lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_EARLY_DIALOG_TERMINATED);
-    lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_FROM_CHANGE);
-    lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_HISTORY_INFO);
-    lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_REPLACES);
-    lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_RPR);
-    lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_TARGET_DIALOG);
-    lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_TIMER);
+    lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_EARLY_DIALOG_TERMINATED));
+    lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_FROM_CHANGE));
+    lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_HISTORY_INFO));
+    lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_REPLACES));
+    lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_TARGET_DIALOG));
+    lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_TIMER));
+    lstExtensions.Append(new RprExtension());
 
     // TODO: check CallType.
     if (!m_objContext.GetCallInfo().bUssi &&
             m_objContext.GetConfigurationProxy().Is(Feature::VOICE_QOS_PRECONDITION_SUPPORTED))
     {
-        lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_PRECONDITION);
+        lstExtensions.Append(new PreconditionExtension());
     }
 
-    return lstOptionTags;
+    return lstExtensions;
 }
 
 PRIVATE

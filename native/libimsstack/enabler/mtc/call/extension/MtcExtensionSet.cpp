@@ -18,10 +18,7 @@
 #include "ISipHeader.h"
 #include "ServiceTrace.h"
 #include "call/extension/IMtcExtension.h"
-#include "call/extension/MtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
-#include "call/extension/PreconditionExtension.h"
-#include "call/extension/RprExtension.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -36,15 +33,14 @@ const AString MtcExtensionSet::OPTION_TAG_TARGET_DIALOG = "tdialog";
 const AString MtcExtensionSet::OPTION_TAG_TIMER = "timer";
 
 PUBLIC
-MtcExtensionSet::MtcExtensionSet(IN const IMSList<AString>& lstOptionTags)
+MtcExtensionSet::MtcExtensionSet(IN const ImsList<IMtcExtension*>& lstExtensions)
 {
-    for (IMS_UINT32 nIndex = 0; nIndex < lstOptionTags.GetSize(); nIndex++)
+    for (IMS_UINT32 nIndex = 0; nIndex < lstExtensions.GetSize(); nIndex++)
     {
-        const AString& strOptionTag = lstOptionTags.GetAt(nIndex);
-        IMtcExtension* pExtension = CreateExtension(strOptionTag);
+        IMtcExtension* pExtension = lstExtensions.GetAt(nIndex);
         if (pExtension)
         {
-            m_objExtensions.Add(strOptionTag, pExtension);
+            m_objExtensions.Add(pExtension->GetOptionTag(), pExtension);
         }
     }
 }
@@ -94,7 +90,7 @@ IMS_BOOL MtcExtensionSet::IsRequiredOnRemote(IN const AString& strOptionTag) con
 PUBLIC
 IMS_BOOL MtcExtensionSet::IsSupportRequiredExtensions(IN const IMessage& pMessage) const
 {
-    IMSList<AString> lstRequiredExtensions;
+    ImsList<AString> lstRequiredExtensions;
     MessageUtil::GetHeaders(&pMessage, ISipHeader::REQUIRE, lstRequiredExtensions);
 
     for (IMS_UINT32 nIndex = 0; nIndex < lstRequiredExtensions.GetSize(); nIndex++)
@@ -166,19 +162,4 @@ void MtcExtensionSet::Clear()
         delete m_objExtensions.GetValueAt(nIndex);
     }
     m_objExtensions.Clear();
-}
-
-PRIVATE
-IMtcExtension* MtcExtensionSet::CreateExtension(IN const AString& strOptionTag) const
-{
-    if (strOptionTag.EqualsIgnoreCase(OPTION_TAG_PRECONDITION))
-    {
-        return new PreconditionExtension();
-    }
-    else if (strOptionTag.EqualsIgnoreCase(OPTION_TAG_RPR))
-    {
-        return new RprExtension();
-    }
-
-    return new MtcExtension(strOptionTag);
 }
