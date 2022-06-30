@@ -15,17 +15,51 @@
  */
 
 #include <gtest/gtest.h>
+#include "IMtcService.h"
 #include "MtcService.h"
+#include "MockIMtcContext.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "MtcEmergencyServiceManager.h"
+
+LOCAL IMS_SINT32 SLOT_ID = 0;
+
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace android
 {
 
 class MtcServiceTest : public ::testing::Test
 {
+public:
+    MockIMtcContext objMockContext;
+    MockIMtcConfigurationManager objMockConfigurationManager;
+    MtcConfigurationProxy* pConfigurationProxy;
+
 protected:
-    virtual void SetUp() override {}
+    virtual void SetUp() override
+    {
+        pConfigurationProxy = new MtcConfigurationProxy(&objMockConfigurationManager);
+        ON_CALL(objMockContext, GetConfigurationProxy)
+                .WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        ON_CALL(objMockContext, GetSlotId).WillByDefault(Return(SLOT_ID));
+
+        MtcEmergencyServiceManager* pEmergencyManager =
+                new MtcEmergencyServiceManager(objMockContext);
+        ON_CALL(objMockContext, GetEmergencyServiceManager)
+                .WillByDefault(Return(pEmergencyManager));
+    }
 
     virtual void TearDown() override {}
 };
+
+TEST_F(MtcServiceTest, NoCrashOnSetJniServiceWithNull)
+{
+    MtcService* pMtcService = new MtcService(objMockContext, ServiceType::NORMAL);
+    pMtcService->SetJniService(IMS_NULL);
+    delete pMtcService;
+}
 
 }  // namespace android

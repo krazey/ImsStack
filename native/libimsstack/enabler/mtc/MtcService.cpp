@@ -65,15 +65,29 @@ PUBLIC VIRTUAL MtcService::~MtcService()
     if (m_pJniService)
     {
         m_pJniService->SetMtcService(IMS_NULL);
+        m_pJniService = IMS_NULL;
     }
 
     if (m_piCoreService)
     {
+        m_piCoreService->SetListener(this);
         m_piCoreService->Close();
+        m_piCoreService = IMS_NULL;
     }
 
     SetAosReady(IMS_FALSE);
     delete m_pAosConnector;
+    m_pAosConnector = IMS_NULL;
+
+    IImsAos* piImsAos = ImsAos::GetImsAos(ImsServiceConfig::GetAppName(ImsAppId::MTC),
+            m_strServiceName, m_objContext.GetSlotId());
+
+    if (piImsAos == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "piImsAos is NULL", 0, 0, 0);
+        return;
+    }
+    piImsAos->SetListener(IMS_NULL);
 }
 
 PUBLIC VIRTUAL void MtcService::AddSrvccStateListener(IN ISrvccStateListener* piListener)
@@ -106,8 +120,14 @@ PUBLIC VIRTUAL void MtcService::SetJniService(IN JniMtcService* pJniService)
 {
     IMS_TRACE_I("SetJniService", 0, 0, 0);
     m_pJniService = pJniService;
-
-    m_objContext.GetEmergencyServiceManager()->SetJniServiceThread(m_pJniService->GetThread());
+    if (pJniService)
+    {
+        m_objContext.GetEmergencyServiceManager()->SetJniServiceThread(m_pJniService->GetThread());
+    }
+    else
+    {
+        m_objContext.GetEmergencyServiceManager()->SetJniServiceThread(IMS_NULL);
+    }
 }
 
 PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(
