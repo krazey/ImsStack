@@ -33,6 +33,8 @@ using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 
+const IMS_SINT32 SLOT_ID = 0;
+
 class AosUtilTest : public ::testing::Test
 {
 public:
@@ -319,6 +321,11 @@ TEST_F(AosUtilTest, IsParameterIncluded4)
     EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, strName)).WillOnce(Return(objHeaders));
     EXPECT_TRUE(pAosUtil->IsParameterIncluded(
             static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strName, strParameter));
+}
+
+TEST_F(AosUtilTest, GetLocalPort)
+{
+    EXPECT_EQ(-1, pAosUtil->GetLocalPort(SLOT_ID));
 }
 
 TEST_F(AosUtilTest, CheckFeature)

@@ -225,6 +225,9 @@ private:
     IMS_BOOL m_bIgnorePolicyExpired;
     IMS_SINT32 m_nSlotId;
     AString m_strTag;
+
+private:
+    friend class AosIpsecTest;
 };
 
 /**
