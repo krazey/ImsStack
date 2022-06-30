@@ -19,6 +19,12 @@
 
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
+#define DEFAULT_AVC_SPROP_PARAMS "Z0LAFukDwKMg,aM4G4g=="
+#define DEFAULT_AVC_PROFILE_ID   "42C00C"
+#define DEFAULT_AVC_IMAGE_ATTR \
+    "send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]"
+#define DEFAULT_AVC_FRAME_SIZE "NEED_TO_CHECK"
+
 /*
 
 Remarks
@@ -234,12 +240,14 @@ IMS_SINT32 CodecAvcConfig::GetPacketizationMode() const
 PUBLIC
 IMS_BOOL CodecAvcConfig::GetIncludeSpropParameterSets() const
 {
+    // TODO - need to check later
     return m_bIncludeSpropParameterSets;
 }
 
 PUBLIC
 const AString& CodecAvcConfig::GetSpropParameterSets() const
 {
+    // TODO - need to check later
     return m_strSpropParameterSets;
 }
 

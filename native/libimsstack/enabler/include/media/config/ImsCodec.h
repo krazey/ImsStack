@@ -22,39 +22,61 @@
 class ImsCodec
 {
 public:
-    // Convert codec enum to string
+    /**
+     * @brief Convert codec enum to string
+     *
+     * @param nType Enum index of the codec
+     * @return const IMS_CHAR* Return the string format of codec
+     */
     static const IMS_CHAR* CodecToString(IN IMS_SINT32 nType);
 
 public:
-    // Audio Codecs
+    /** Audio Codecs */
     enum
     {
+        /** Enum for the audio codec default */
         AUDIO_NONE = 0,
+        /** Enum for the audio codec AMR */
         AUDIO_AMR = 1,
+        /** Enum for the audio codec AMR_WB */
         AUDIO_AMR_WB,
+        /** Enum for the audio codec PCMA */
         AUDIO_PCMA,
+        /** Enum for the audio codec PCMU */
         AUDIO_PCMU,
+        /** Enum for the audio codec TELEPHONE_EVENT */
         AUDIO_TELEPHONE_EVENT,
+        /** Enum for the audio codec TELEPHONE_EVENT_WB */
         AUDIO_TELEPHONE_EVENT_WB,
+        /** Enum for the audio codec EVS */
         AUDIO_EVS,
+        /** Enum for max */
         AUDIO_MAX = 99
     };
 
-    // Video Codecs
+    /** Video Codecs */
     enum
     {
+        /** Enum for the video codec default */
         VIDEO_NONE = 100,
+        /** Enum for the video codec AVC (H.264) */
         VIDEO_AVC = 101,
+        /** Enum for the video codec HEVC (H.265) */
         VIDEO_HEVC,
+        /** Enum for max */
         VIDEO_MAX = 199
     };
 
-    // Text Codecs
+    /** Text Codecs */
     enum
     {
+        /** Enum for the text codec default */
         TEXT_NONE = 200,
+        /** Enum for the text codec T140 */
         TEXT_T140 = 201,
+        /** Enum for the text codec Redundancy */
         TEXT_RED = 202,
+        /** Enum for max */
         TEXT_MAX = 299
     };
 };

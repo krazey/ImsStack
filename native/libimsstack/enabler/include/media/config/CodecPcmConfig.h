@@ -22,12 +22,30 @@
 class CodecPcmConfig : public CodecConfig
 {
 public:
+    /**
+     * @brief Construct a new codec pcm config
+     *
+     * @param nType_ codec type
+     * @param nPayloadTypeNum_ payload type number
+     */
     CodecPcmConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
+    /**
+     * @brief Destroy the codec pcm config
+     *
+     */
     virtual ~CodecPcmConfig();
-
-public:
-    // CodecConfig class
+    /**
+     * @brief Create codec using the configuration
+     *
+     * @param piCc configuration object
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    /**
+     * @brief Print debug string
+     *
+     */
     virtual void ToDebugString() const;
 };
 #endif  // _CODEC_PCM_CONFIG_H_

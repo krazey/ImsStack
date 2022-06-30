@@ -27,13 +27,11 @@
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
 
-// == DEFINES =========================================================
 __IMS_TRACE_TAG_USER_DECL__("MED.SS");
 
 using namespace android::telephony::imsmedia;
 
-// == Constructor, Destructor, Operator Overloading ========================================
-PROTECTED
+PUBLIC
 MediaSession::MediaSession(
         IN MEDIA_SERVICE_TYPE eServiceType, IMS_SINTP nCallKey, IN IMS_UINT32 nSlotId) :
         m_nSlotId(nSlotId),

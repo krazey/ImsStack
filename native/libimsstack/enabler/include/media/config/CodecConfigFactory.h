@@ -33,10 +33,34 @@ private:
     CodecConfigFactory();
 
 public:
+    /**
+     * @brief Create an audio payload config
+     *
+     * @param piCc configuration
+     * @param nCodec codec type
+     * @param nPayloadTypeNum payload type number
+     * @return CodecConfig* Return the codec config
+     */
     static CodecConfig* CreateAudioPayloadConfig(
             ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum);
+    /**
+     * @brief Create a video payload config
+     *
+     * @param piCc configuration
+     * @param nCodec codec type
+     * @param nPayloadTypeNum payload type number
+     * @return CodecConfig* Return the codec config
+     */
     static CodecConfig* CreateVideoPayloadConfig(
             ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum);
+    /**
+     * @brief Create a text payload config
+     *
+     * @param piCc configuration
+     * @param nCodec codec type
+     * @param nPayloadTypeNum payload type number
+     * @return CodecConfig* Return the codec config
+     */
     static CodecConfig* CreateTextPayloadConfig(
             ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum);
 };

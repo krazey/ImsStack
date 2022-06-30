@@ -298,7 +298,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileConfigurer::CreateAudioProfile(OUT AudioProfi
             AudioProfile::EvsFmtp* pEvsFmtp = new AudioProfile::EvsFmtp();
 
             // Mode set list
-            pEvsFmtp->nModeSetList = pEvsConfig->GetModeSetList();
+            pEvsFmtp->nModeSetList = pEvsConfig->GetAmrWbIoModeSetList();
             pEvsFmtp->nBrList = pEvsConfig->GetBrList();
             pEvsFmtp->nBwList = pEvsConfig->GetBwList();
 

@@ -16,7 +16,9 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <config/CodecT140Config.h>
+
+#include "config/CodecT140Config.h"
+
 using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_TYPE = ImsCodec::AUDIO_AMR;
@@ -28,18 +30,22 @@ static const IMS_SINT32 DEFAULT_TEXT_SAMPLING_RATE = CodecT140Config::DEFAULT_TE
 class CodecT140ConfigTest : public ::testing::Test {
 
 public :
-    CodecT140Config* pConfig;
+    CodecT140Config* m_pConfig;
 
 protected:
     virtual void SetUp() override {
-        pConfig = new CodecT140Config(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+        m_pConfig = new CodecT140Config(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
     }
     virtual void TearDown() override {
-        delete pConfig;
+        if (m_pConfig)
+        {
+            delete m_pConfig;
+        }
     }
 };
 
-TEST_F(CodecT140ConfigTest, GET_DEFAULT) {
-    EXPECT_EQ(pConfig->GetRedLevel(), DEFAULT_RED_LEVEL);
-    EXPECT_EQ(pConfig->GetSamplingRate(), DEFAULT_TEXT_SAMPLING_RATE);
+TEST_F(CodecT140ConfigTest, GetConfigDefault)
+{
+    EXPECT_EQ(m_pConfig->GetRedLevel(), DEFAULT_RED_LEVEL);
+    EXPECT_EQ(m_pConfig->GetSamplingRate(), DEFAULT_TEXT_SAMPLING_RATE);
 }

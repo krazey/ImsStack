@@ -22,15 +22,42 @@
 class CodecT140Config : public CodecConfig
 {
 public:
+    /**
+     * @brief Construct a new codec T140 config
+     *
+     * @param nType_ codec type
+     * @param nPayloadTypeNum_ payload type number
+     */
     CodecT140Config(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
+    /**
+     * @brief Destroy the codec T140 config
+     *
+     */
     virtual ~CodecT140Config();
-
-public:
-    // CodecConfig class
+    /**
+     * @brief Create codec using the configuration
+     *
+     * @param piCc configuration
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    /**
+     * @brief Print debug string
+     *
+     */
     virtual void ToDebugString() const;
-
+    /**
+     * @brief Get the red level
+     *
+     * @return IMS_SINT32 Return the red-level
+     */
     IMS_SINT32 GetRedLevel() const;
+    /**
+     * @brief Get the sampling rate
+     *
+     * @return IMS_SINT32 Return the sampling rate for T140
+     */
     IMS_SINT32 GetSamplingRate() const;
 
     static const IMS_SINT32 DEFAULT_RED_LEVEL = 3;

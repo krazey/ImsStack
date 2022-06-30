@@ -208,7 +208,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
                     pAvcPayload->objRtcpFbAttr.nTrrInt = pConfig->GetRtcpInterval() * 1000;
                 }
 
-                if (pConfig->IsbVideoAvpfNackEnabled() == IMS_TRUE)
+                if (pConfig->IsVideoAvpfNackEnabled() == IMS_TRUE)
                 {
                     pAvcPayload->objRtcpFbAttr.bNackSupported = IMS_TRUE;
                 }
@@ -260,7 +260,8 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
         }
         else if (pCodecConfig->GetCodec() == ImsCodec::VIDEO_HEVC)
         {
-            /* TODO_MEDIA later
+            // TODO - need to update later for HEVC
+            /*
             CodecHevcConfig* pHevcConfig = reinterpret_cast<CodecHevcConfig*>(pCodecConfig);
 
             VideoProfile::HevcFmtp* pHevcFmtp = new VideoProfile::HevcFmtp();
@@ -321,7 +322,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
 
             if (pConfig->IsVideoAvpfEnabled() == IMS_TRUE)
             {
-                if (pConfig->IsbVideoAvpfNackEnabled() == IMS_TRUE)
+                if (pConfig->IsVideoAvpfNackEnabled() == IMS_TRUE)
                 {
                     pHevcPayload->objRtcpFbAttr.bNackSupported = IMS_TRUE;
                 }
@@ -407,7 +408,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
                 pVideoProfile->objCapaNego.mapAttributeCapa.SetValue(nAcap, strTemp);
             }
 
-            if (pConfig->IsbVideoAvpfNackEnabled() == IMS_TRUE)
+            if (pConfig->IsVideoAvpfNackEnabled() == IMS_TRUE)
             {
                 nAcap++;
                 strTemp = "rtcp-fb:* nack";

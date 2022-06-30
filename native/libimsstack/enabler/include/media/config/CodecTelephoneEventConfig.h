@@ -23,19 +23,50 @@
 class CodecTelephoneEventConfig : public CodecConfig
 {
 public:
+    /**
+     * @brief Construct a new codec telephone event config
+     *
+     * @param nType_ codec type
+     * @param nPayloadTypeNum_ payload type number
+     */
     CodecTelephoneEventConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
+    /**
+     * @brief Destroy the codec telephone cvent config
+     *
+     */
     virtual ~CodecTelephoneEventConfig();
-
-public:
-    // CodecConfig class
+    /**
+     * @brief Create codec using the configuration
+     *
+     * @param piCc configuration
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    /**
+     * @brief Print debug string
+     *
+     */
     virtual void ToDebugString() const;
-
+    /**
+     * @brief Get the events (such as ringing or busy tone)
+     *
+     * @return const AString& Return the events string - default: "0-15"
+     */
     const AString& GetEvents() const;
+    /**
+     * @brief Get the redundancy count
+     *
+     * @return IMS_SINT32 Return the redundancy count
+     */
     IMS_SINT32 GetRedundancyCount() const;
+    /**
+     * @brief Get the sampling rate
+     *
+     * @return IMS_SINT32 Return the sample rate for telephoneEvent
+     */
     IMS_SINT32 GetSamplingRate() const;
 
-#define DEFAULT_EVENT "0-15"
     static const IMS_SINT32 DEFAULT_REDUNDANT_COUNT = 3;
     static const IMS_SINT32 DEFAULT_SAMPLING_RATE = 8000;
     static const IMS_SINT32 DEFAULT_SAMPLING_RATE_WB = 16000;

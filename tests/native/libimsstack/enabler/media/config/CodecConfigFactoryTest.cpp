@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,23 +16,24 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include "ServiceConfig.h"
+
+#include "config/CodecConfigFactory.h"
 
 using ::testing::Return;
 
-class MediaSessionTest : public ::testing::Test {
+static const IMS_SINT32 DEFAULT_CODEC = ImsCodec::AUDIO_AMR_WB;
+static const IMS_SINT32 DEFAULT_PAYLOAD_NUM = 99;
+
+class CodecConfigFactoryTest : public ::testing::Test
+{
+public:
+    CodecConfig* m_pConfig;
 
 protected:
-    virtual void SetUp() override {
-
-  // Set up as needed for every TEST_F(MediaSessionTest, ...)
-  // A new XxxTest fixture is created and SetUp() is called before executing each TEST_F.
-
+    virtual void SetUp() override
+    {
+        m_pConfig = new CodecConfig(DEFAULT_CODEC, DEFAULT_PAYLOAD_NUM);
     }
-    virtual void TearDown() override {
-    // cleans up after each test finishes. Called after executing each TEST_F.
-    }
+    virtual void TearDown() override { delete m_pConfig; }
 };
-
-TEST_F(MediaSessionTest, TestName) {
-    //.. test body..
-}
