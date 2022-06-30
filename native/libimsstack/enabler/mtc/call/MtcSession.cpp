@@ -128,6 +128,11 @@ void MtcSession::HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequ
 
         UpdateCapabilityFromMessage(objRequest);
     }
+
+    if (nMethod == IMessage::SESSION_START || nMethod == IMessage::SESSION_UPDATE)
+    {
+        SetInConference(objRequest);
+    }
 }
 
 PUBLIC
@@ -144,6 +149,11 @@ void MtcSession::HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objRes
     if (objResponse.GetStatusCode() == SipStatusCode::SC_199)
     {
         m_bTerminated = IMS_TRUE;
+    }
+
+    if (nMethod == IMessage::SESSION_START || nMethod == IMessage::SESSION_UPDATE)
+    {
+        SetInConference(objResponse);
     }
 }
 
@@ -238,6 +248,16 @@ void MtcSession::UpdateSessionIdFromMessage(IN const IMessage& objMessage)
 
     IMS_TRACE_D("UpdateSessionIdFromMessage : [%s]", m_strSessionIdHeader.GetStr(), 0, 0);
     m_strSessionIdHeader = strSessionIdHeader;
+}
+
+PRIVATE
+void MtcSession::SetInConference(IN const IMessage& objMessage)
+{
+    if (m_objContext.GetCallInfo().bConference == IMS_TRUE)
+    {
+        return;
+    }
+    m_objContext.GetCallInfo().bConference = MessageUtil::IsFocusConf(&objMessage);
 }
 
 PRIVATE

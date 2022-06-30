@@ -164,9 +164,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
     m_objContext.GetSession(piSession)->HandleResponse(IMessage::SESSION_START, *piMessage);
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
 
-    if (MessageUtil::IsFocusConf(piMessage))
+    if (m_objContext.GetCallInfo().bConference)
     {
-        m_objContext.GetCallInfo().bConference = IMS_TRUE;
         m_objContext.GetMediaManager().SetConferenceCall(IMS_TRUE);
     }
 

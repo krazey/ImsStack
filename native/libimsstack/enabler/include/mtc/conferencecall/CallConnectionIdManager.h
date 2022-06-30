@@ -52,6 +52,7 @@ private:
     void AddKeyConnectionId(IN CallKey nCallKey);
     void RemoveKeyConnectionId(IN IMS_SINT32 nIndex);
     IMS_BOOL IsConferenceParticipant(IN CallKey nCallKey);
+    IMS_BOOL IsConferenceHost(IN CallKey nCallKey);
     AString GetIds();
 
 private:

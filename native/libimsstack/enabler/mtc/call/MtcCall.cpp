@@ -546,7 +546,9 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     objJniCallInfo.bOffline = m_objCallInfo.bOffline;
     objJniCallInfo.bUssi = m_objCallInfo.bUssi;
     objJniCallInfo.bConference = m_objCallInfo.bConference;
-    objJniCallInfo.bConferenceEnabled = IMS_TRUE;  // TODO: Any meaning to use this?
+    // TODO: conference extension for SKT
+    objJniCallInfo.bConferenceEnabled = IMS_FALSE;
+    // TODO: check host or participant
     objJniCallInfo.bConferenceSubscriptionRequired =
             m_objContext.GetConfigurationProxy().GetInt(Feature::CONFERENCE_SUBSCRIBE_TYPE) > -1;
     objJniCallInfo.bRttCapable = GetSession() ? GetSession()->IsRttCapable() : IMS_FALSE;

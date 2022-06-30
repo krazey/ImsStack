@@ -64,14 +64,6 @@ public:
     CallStateName OnUssiAttached() override;
 
 private:
-    enum class ConferenceType
-    {
-        NOT_CONFERENCE,
-        START_CONFERENCE,
-        EXPAND,
-        MERGE,
-    };
-
     CallStateName ContinueStart(IN MediaInfo* pMediaInfo);
     CallStateName ContinueConference(IN MediaInfo* pMediaInfo, IN IMSList<ConfUser*> lstUsers);
     CallStateName ContinueHandleIncoming();
@@ -85,7 +77,6 @@ private:
     IMSList<IMtcBlockRule*> GetOutgoingCallBlockRules();
     void SetAcceptContact(IN ISipMessage* piSipMessage);
 
-    ConferenceType m_eConferenceStartType;  // TODO: usage?
     std::unique_ptr<IMtcBlockChecker> m_pBlockChecker;
     std::function<CallStateName()> m_objOperationAfterBlockCheck;
 };

@@ -309,6 +309,12 @@ PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConferen
     IMS_TRACE_D("GetCallStatusInConference", 0, 0, 0);
 
     IMtcCall* piConfCall = GetConferenceCall();
+    if (piConfCall->GetKey() == nKey)
+    {
+        IMS_TRACE_D("GetCallStatusInConference : Host Call", 0, 0, 0);
+        return IndividualCallState::HOST;
+    }
+
     if (piConfCall->GetState() == State::TERMINATING)
     {
         return IndividualCallState::IDLE;
@@ -321,7 +327,7 @@ PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConferen
         {
             if (nKey == m_objConnectionIdManager.GetCallKey(objUsers.GetAt(i)->nConnectionId))
             {
-                IMS_TRACE_I("GetCallStatusInConference : Joining Call", 0, 0, 0);
+                IMS_TRACE_D("GetCallStatusInConference : Joining Call", 0, 0, 0);
                 return IndividualCallState::JOINING;
             }
         }
@@ -333,7 +339,7 @@ PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConferen
                 m_objConnectionIdManager.GetCallKey(
                         m_objOperationQueue.GetCurrentOperation()->GetConnectionId()))
         {
-            IMS_TRACE_I("GetCallStatusInConference : Joined and Terminating Call", 0, 0, 0);
+            IMS_TRACE_D("GetCallStatusInConference : Joined and Terminating Call", 0, 0, 0);
             return IndividualCallState::JOINED;
         }
     }
@@ -344,7 +350,7 @@ PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConferen
 
         if (nKey == m_objConnectionIdManager.GetCallKey(pConfUser->nConnectionId))
         {
-            IMS_TRACE_I("GetCallStatusInConference invited Call", 0, 0, 0);
+            IMS_TRACE_D("GetCallStatusInConference invited Call", 0, 0, 0);
             return IndividualCallState::INVITED;
         }
     }

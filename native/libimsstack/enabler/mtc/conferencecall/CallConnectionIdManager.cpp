@@ -54,11 +54,7 @@ PUBLIC VIRTUAL void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCall
         return;
     }
 
-    if (m_objContext.GetCallManager()
-                    .GetCallByCallKey(nCallKey)
-                    ->GetCallContext()
-                    .GetCallInfo()
-                    .bConference == IMS_TRUE)
+    if (IsConferenceHost(nCallKey))
     {
         IMS_TRACE_D("OnCallStateChanged conference call. ignored.", 0, 0, 0);
         return;
@@ -263,6 +259,20 @@ IMS_BOOL CallConnectionIdManager::IsConferenceParticipant(IN CallKey nCallKey)
     {
         if (m_objControllers.GetAt(i)->GetCallStatusInConference(nCallKey) !=
                 IndividualCallState::IDLE)
+        {
+            return IMS_TRUE;
+        }
+    }
+    return IMS_FALSE;
+}
+
+PRIVATE
+IMS_BOOL CallConnectionIdManager::IsConferenceHost(IN CallKey nCallKey)
+{
+    for (IMS_UINT32 i = 0; i < m_objControllers.GetSize(); i++)
+    {
+        if (m_objControllers.GetAt(i)->GetCallStatusInConference(nCallKey) ==
+                IndividualCallState::HOST)
         {
             return IMS_TRUE;
         }

@@ -58,7 +58,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 IdleState::IdleState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::IDLE, objContext),
-        m_pBlockChecker(nullptr)
+        m_pBlockChecker(nullptr),
+        m_objOperationAfterBlockCheck(nullptr)
 {
 }
 
@@ -68,7 +69,6 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
         IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_D("Start", 0, 0, 0);
-    m_eConferenceStartType = ConferenceType::NOT_CONFERENCE;
 
     m_objContext.GetCallInfo().eInitialCallType = eCallType;
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
@@ -100,7 +100,6 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IMSList<ConfUser*> lstUsers)
 {
     IMS_TRACE_D("StartConference", 0, 0, 0);
-    m_eConferenceStartType = ConferenceType::START_CONFERENCE;  // TODO: deprecated.
 
     m_objContext.GetCallInfo().eInitialCallType = eCallType;
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
@@ -121,7 +120,6 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(
         IN CallType eCallType, IN const AString& strTarget, IN IMSList<ConfUser*> lstUsers)
 {
     IMS_TRACE_D("StartConference", 0, 0, 0);
-    m_eConferenceStartType = ConferenceType::START_CONFERENCE;
 
     m_objContext.GetCallInfo().eInitialCallType = eCallType;
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
@@ -156,10 +154,6 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
     pSession->HandleRequest(IMessage::SESSION_START, *piMessage);
-
-    m_eConferenceStartType = ConferenceType::NOT_CONFERENCE;
-
-    m_objContext.GetCallInfo().bConference = MessageUtil::IsFocusConf(piMessage);
     m_objContext.GetParticipantInfo().HandleRequest(IMessage::SESSION_START, *piMessage);
     m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
 
@@ -260,7 +254,6 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(
         IN ISession* piSession, IN JniMtcServiceThread* pServiceThread)
 {
     IMS_TRACE_D("HandleIncomingUssi", 0, 0, 0);
-    m_eConferenceStartType = ConferenceType::NOT_CONFERENCE;
 
     m_objContext.GetCallInfo().ePeerType = PeerType::MT;
     m_objContext.GetCallInfo().bUssi = IMS_TRUE;

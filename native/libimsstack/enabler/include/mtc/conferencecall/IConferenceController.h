@@ -24,6 +24,7 @@ class ConferenceParticipantList;
 enum class IndividualCallState
 {
     IDLE,
+    HOST,
     JOINING,
     JOINED,
     INVITED
