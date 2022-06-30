@@ -1555,7 +1555,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnected(IN IMSMSG& objMSG)
     switch (objMSG.nMSG)
     {
         case HANDLE_MSG_BLOCK_STATUS:
-        {
             if (IsBlocked())
             {
                 // Don't care - already blocked
@@ -1570,17 +1569,15 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnected(IN IMSMSG& objMSG)
                 m_bNotify = IMS_TRUE;
             }
             break;
-        }
+
         case HANDLE_MSG_APP_STATUS:
-        {
             // Don't care
             break;
-        }
+
         default:
-        {
             break;
-        }
     }
+
     return IMS_TRUE;
 }
 
@@ -1599,7 +1596,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
     switch (objMSG.nMSG)
     {
         case HANDLE_MSG_BLOCK_STATUS:
-        {
             if (IsBlocked())
             {
                 SetHandleState(STATE_DISCONNECTED);
@@ -1615,7 +1611,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
                 // Don't care - already connecting
             }
             break;
-        }
 
         case HANDLE_MSG_APP_STATUS:
         {
@@ -1648,11 +1643,11 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
             }
             break;
         }
+
         default:
-        {
             break;
-        }
     }
+
     return IMS_TRUE;
 }
 
@@ -1671,7 +1666,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
     switch (objMSG.nMSG)
     {
         case HANDLE_MSG_BLOCK_STATUS:
-        {
             if (IsBlocked())
             {
                 SetHandleState(STATE_DISCONNECTING);
@@ -1693,7 +1687,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
                 // Don't care
             }
             break;
-        }
 
         case HANDLE_MSG_APP_STATUS:
         {
@@ -1724,10 +1717,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
                     m_bNotify = IMS_TRUE;
                     break;
 
-                case IAosApplication::APP_UPDATING:
-                    m_bNotify = IMS_FALSE;
-                    break;
-
                 case IAosApplication::APP_DISCONNECTING:
                     // Enabler will release the resource as sending BYE
                     SetHandleState(STATE_DISCONNECTING);
@@ -1739,11 +1728,11 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
             }
             break;
         }
+
         default:
-        {
             break;
-        }
     }
+
     return IMS_TRUE;
 }
 
@@ -1762,7 +1751,7 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
     switch (objMSG.nMSG)
     {
         case HANDLE_MSG_BLOCK_STATUS:
-        {
+
             if (IsBlocked())
             {
                 SetRequestType(DETACH);
@@ -1777,7 +1766,7 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
                 App_Notify();
             }
             break;
-        }
+
         case HANDLE_MSG_APP_STATUS:
         {
             IMS_UINT32 nState = LONG_TO_INT(objMSG.nWparam);
@@ -1823,6 +1812,7 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
                         m_bNotify = IMS_TRUE;
                     }
                     break;
+
                 case IAosApplication::APP_UPDATING:
                     if (IsRegBinded())
                     {
@@ -1854,14 +1844,13 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
                 default:
                     break;
             }
-
             break;
         }
         default:
-        {
+
             break;
-        }
     }
+
     return IMS_TRUE;
 }
 
