@@ -1340,6 +1340,7 @@ TEST_F(AosSubscriptionTest, Print)
         pAosSubscription->StateToString(nState);
         nState++;
     }
+    pAosSubscription->StateToString(nState);
 
     int nReason = IRegSubscription::REASON_NONE;
     while (nReason <= IRegSubscription::REASON_NOTIFY_TERMINATED)
@@ -1347,6 +1348,7 @@ TEST_F(AosSubscriptionTest, Print)
         pAosSubscription->RegSubReasonToString(nReason);
         nReason++;
     }
+    pAosSubscription->RegSubReasonToString(nReason);
     nReason = IRegSubscription::REASON_NONE;
 
     int nNotifyState = IRegInfoContact::STATE_CREATED;
@@ -1355,14 +1357,16 @@ TEST_F(AosSubscriptionTest, Print)
         pAosSubscription->RegInfoStateToString(nNotifyState);
         nNotifyState++;
     }
+    pAosSubscription->RegInfoStateToString(nNotifyState);
     nNotifyState = IRegInfoContact::STATE_CREATED;
 
     int nEvent = IRegInfoContact::EVENT_REGISTERED;
     while (nEvent <= IRegInfoContact::EVENT_REJECTED)
     {
-        pAosSubscription->RegInfoStateToString(nEvent);
+        pAosSubscription->RegInfoEventToString(nEvent);
         nEvent++;
     }
+    pAosSubscription->RegInfoEventToString(nEvent);
     nEvent = IRegInfoContact::EVENT_REGISTERED;
 
     SetState(AosSubscription::STATE_OFFLINE);
