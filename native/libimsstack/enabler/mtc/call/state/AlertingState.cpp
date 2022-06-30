@@ -275,6 +275,15 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionRPRDeliveryFailed(IN ISession
     return RejectIncomingAndToTerminating(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT));
 }
 
+PUBLIC VIRTUAL CallStateName AlertingState::SessionStartFailed(IN ISession* /* piSession */)
+{
+    IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
+    m_objContext.GetMediaManager().Terminate();
+    m_objContext.GetUiNotifier().SendTerminated(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT));
+
+    return CallStateName::TERMINATING;
+}
+
 PUBLIC VIRTUAL CallStateName AlertingState::AcceptUssi(
         IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
@@ -326,6 +335,16 @@ PUBLIC VIRTUAL CallStateName AlertingState::OnMediaFailed(IN CallReasonInfo objR
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
     }
     return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName AlertingState::Terminate(IN const CallReasonInfo& objReason)
+{
+    IMS_TRACE_D("Terminate", 0, 0, 0);
+
+    HandleTerminate(objReason);
+    m_objContext.GetUiNotifier().SendTerminated(objReason);
+
+    return CallStateName::TERMINATING;
 }
 
 PRIVATE
