@@ -22,7 +22,6 @@ import android.telephony.ims.ImsStreamMediaProfile;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
@@ -818,13 +817,8 @@ public class ImsCallUtils {
     }
 
     public static boolean isEmergencyPdnUsedForEmergencyCallViaWfc(ICallContext context) {
-        int callViaEPdn = com.android.imsstack.util.DBUtils.CP.getInt(
-                context.getSlotId(),
-                context.getContext().getContentResolver(),
-                ProviderInterface.UCEmergency.CONTENT_URI,
-                ProviderInterface.UCEmergency.USINGEPDN_WIFI, 1);
-
-        return (callViaEPdn == 1);
+        // TODO: need to add a carrier configuration.
+        return false;
     }
 
     private static String getCallExtra(ImsCallProfile profile, Bundle oemExtras,

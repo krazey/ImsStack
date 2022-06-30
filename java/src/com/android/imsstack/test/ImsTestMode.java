@@ -1,17 +1,28 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.test;
 
 import android.content.Context;
-import android.net.Uri;
 
-import com.android.imsstack.core.config.ImsDbController;
-import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.DBUtils;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.MSimUtils;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -37,13 +48,9 @@ public final class ImsTestMode {
     public static final int TEST_MASK_ROAMING_CONDITION = 0x0002;
     public static final int TEST_MASK_IMS_STATUS_TO_UICC_OFF = 0x0008;
 
-    private static final Uri SETTING_CONTENT_URI
-            = Uri.parse("content://" + ProviderInterface.AUTHORITY + "/gims_setting");
-    private static final String SETTING_TEST_MASK = "setting_test_mask";
-
     private static ImsTestMode sImsTestMode = new ImsTestMode();
 
-    private static Map<Integer, IImsTestMode> mTM
+    private static Map<Integer, IImsTestMode> sTestModes
             = new HashMap<Integer, IImsTestMode>(MSimUtils.getMaxSimSlot());
 
 
@@ -57,44 +64,38 @@ public final class ImsTestMode {
     public synchronized void init(Context context, int slotId) {
         ImsLog.d("SLOT = " + slotId);
 
-        IImsTestMode itm = mTM.get(slotId);
+        IImsTestMode itm = sTestModes.get(slotId);
         if (itm != null) {
             return;
         }
 
         TestMode tm = new TestMode(slotId, context);
         tm.init();
-        mTM.put(slotId, tm);
+        sTestModes.put(slotId, tm);
     }
 
     public synchronized void cleanUp(int slotId) {
         ImsLog.d("SLOT = " + slotId);
 
-        TestMode tm = (TestMode)mTM.get(slotId);
+        TestMode tm = (TestMode) sTestModes.get(slotId);
         if (tm == null) {
             return;
         }
 
         tm.cleanup();
-        mTM.remove(slotId);
+        sTestModes.remove(slotId);
     }
 
     public synchronized IImsTestMode getTestMode(int slotId) {
-        IImsTestMode itm = mTM.get(slotId);
+        IImsTestMode itm = sTestModes.get(slotId);
         if (itm != null) {
             return itm;
         }
 
         TestMode tm = new TestMode(slotId, AppContext.get());
         tm.init();
-        mTM.put(slotId, tm);
+        sTestModes.put(slotId, tm);
         return tm;
-    }
-
-    private static String getConfigValue(Context context, Uri contentUri, String selection,
-            String columnName) {
-        return DBUtils.CP.getString(context.getContentResolver(),
-                contentUri, selection, columnName, null);
     }
 
     private class TestMode implements IImsTestMode {
@@ -163,47 +164,21 @@ public final class ImsTestMode {
                 return;
             }
 
-            int adminFeatures = ImsDbController.Subscriber.getAdminFeatures(mSlotId);
+            ImsLog.i("ImsTestMode(" + mSlotId + ") : init");
 
-            ImsLog.i("ImsTestMode(" + mSlotId + ") : adminFeatures=" +
-                String.format("%08X", adminFeatures));
-
-            if (!ImsDbController.isImsEnabled(adminFeatures)) {
+            if (ImsPrivateProperties.Persistent.getBoolean(
+                    ImsPrivateProperties.Persistent.KEY_TEST_IMS_DISABLED, mSlotId)) {
                 enableTestmode(CONFIG_IMS_OFF);
             }
 
-            if (ImsDbController.isTestModeEnabled(adminFeatures)) {
+            if (ImsPrivateProperties.Persistent.getBoolean(
+                    ImsPrivateProperties.Persistent.KEY_TEST_TESTMODE_ENABLED, mSlotId)) {
                 enableTestmode(CONFIG_GENERIC_TEST_MODE);
             }
 
-            if (ImsDbController.isDebugEnabled(adminFeatures)) {
+            if (ImsPrivateProperties.Persistent.getBoolean(
+                    ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_ENABLED, mSlotId)) {
                 enableTestmode(CONFIG_DEBUG);
-            }
-
-            String selection = String.format(Locale.US, "%s='%d'", ProviderInterface.ID, mSlotId);
-            String config = getConfigValue(mContext,
-                    ProviderInterface.AoSConnection.CONTENT_URI,
-                    selection,
-                    ProviderInterface.AoSConnection.PROFILE_NAME_0);
-
-            // Local hold tone generation if call is held by the remote party
-            if ((config != null) && config.equalsIgnoreCase("wifi")) {
-                enableTestmode(CONFIG_CALL_OVER_WIFI);
-            }
-
-            // Carrier specific test mask
-            config = getConfigValue(mContext, SETTING_CONTENT_URI, selection, SETTING_TEST_MASK);
-
-            if (config != null) {
-                int testmask = 0;
-
-                try {
-                    testmask = Integer.parseInt(config);
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-
-                setExtraTestmask(testmask);
             }
         }
 

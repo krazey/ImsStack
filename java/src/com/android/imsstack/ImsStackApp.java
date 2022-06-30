@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack;
 
 import android.app.Application;
@@ -314,8 +329,6 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
                 stopServices(slotId);
 
                 deliverUpdateServiceInfo(slotId);
-                updateIMSDB(slotId);
-                updateVoLteConfigurationForOperatorSpecificOnSimLoaded(slotId);
 
                 if (voLteEnabled) {
                     deliverDDSInfo(slotId, true);
@@ -326,14 +339,6 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
             } else {
                 if (voLteEnabled) {
                     sSOD.deliverSimInfo(slotId);
-                }
-
-                if (voLteEnabled) {
-                    if (updateVoLteConfigurationForOperatorSpecificOnSimLoaded(slotId)) {
-                        // If system-config needs to be updated for synchronization with native,
-                        // system-config update will be triggered.
-                        updateSystemConfigOnServiceChanged(slotId);
-                    }
                 }
             }
 
@@ -361,7 +366,6 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
                 if (sSOD.isSIMBasedOn()) {
                     if(sSOD.isDelivered(slotId) != true) {
                         deliverOperatorInfo(slotId);
-                        updateIMSDB(slotId);
                     }
                     stopServices(slotId);
 
@@ -534,7 +538,6 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
                 if (sSOD.isSIMBasedOn()) {
                     if (sSOD.isDelivered(slotId) != true) {
                         deliverOperatorInfo(slotId);
-                        updateIMSDB(slotId);
                     }
                     stopServices(slotId);
 
@@ -865,11 +868,6 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
         // Deliver operator information if it's not delivered
         if (!sSOD.isDelivered(slotId)) {
             deliverOperatorInfo(slotId);
-            updateIMSDB(slotId);
-        }
-
-        if (voLteEnabled) {
-            updateVoLteConfigurationForOperatorSpecific(slotId);
         }
 
         if (!isCommonAgentReady()) {
@@ -1023,26 +1021,6 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
         }
     }
 
-    private void updateIMSDB(int slotId) {
-        CommonStarter cs = CommonStarter.getInstance();
-
-        cs.updateIMSDBByConfig(this, slotId);
-        updateServiceAvailability(slotId);
-    }
-
-    private void updateServiceAvailability(int slotId) {
-        com.android.imsstack.core.config.IConfigDBLoader dbLoader
-                = CommonStarter.getInstance().getDBLoader(slotId);
-
-        if (dbLoader != null) {
-            com.android.imsstack.core.config.ProviderDBUpdateHelper dbHelper
-                    = new com.android.imsstack.core.config.ProviderDBUpdateHelper(
-                            slotId, dbLoader.getXmlLoader());
-
-            dbHelper.updateServiceAvailability(this);
-        }
-    }
-
     private void updateSystemConfigOnServiceChanged(int slotId) {
         CommonStarter cs = CommonStarter.getInstance();
         cs.updateSystemConfigOnServiceChanged(slotId);
@@ -1055,41 +1033,6 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
         } else {
             Log.i(TAG, "updateSystemConfigOnSimLoaded(" + slotId + "): ignored...");
         }
-    }
-
-    private void updateVoLteConfigurationForOperatorSpecific(int slotId) {
-        Log.i(TAG, "updateVoLteConfigurationForOperatorSpecific(" + slotId + ")");
-
-        com.android.imsstack.core.config.IConfigDBLoader dbLoader
-                = CommonStarter.getInstance().getDBLoader(slotId);
-
-        if (dbLoader != null) {
-            com.android.imsstack.core.config.ProviderDBUpdateHelper dbHelper
-                    = new com.android.imsstack.core.config.ProviderDBUpdateHelper(
-                            slotId, dbLoader.getXmlLoader());
-
-            dbHelper.updateDBForOperatorSpecific(this);
-        }
-    }
-
-    private boolean updateVoLteConfigurationForOperatorSpecificOnSimLoaded(int slotId) {
-        if (com.android.imsstack.core.config.ProviderDBUpdateHelper
-                .isDBUpdateRequiredForOperatorSpecificOnSimLoaded(slotId)) {
-            Log.i(TAG, "updateVoLteConfigurationForOperatorSpecificOnSimLoaded :: slotId=" + slotId);
-
-            com.android.imsstack.core.config.IConfigDBLoader dbLoader
-                    = CommonStarter.getInstance().getDBLoader(slotId);
-
-            if (dbLoader != null) {
-                com.android.imsstack.core.config.ProviderDBUpdateHelper dbHelper
-                        = new com.android.imsstack.core.config.ProviderDBUpdateHelper(
-                                slotId, dbLoader.getXmlLoader());
-
-                return dbHelper.updateDBForOperatorSpecificOnSimLoaded(this);
-            }
-        }
-
-        return false;
     }
 
     private void initOnDeviceBootUp() {

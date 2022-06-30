@@ -1,8 +1,22 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.core.config;
 
-import com.android.imsstack.system.SystemConfig;
-
 import com.android.imsstack.core.config.FeatureConfig;
+import com.android.imsstack.system.SystemConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,47 +46,13 @@ public final class FeatureTable {
         }
     }
 
-    private static List<Feature> sFeatureList;
     private static List<Feature> sServiceFeatureList;
-
-    public static List<Feature> getFeatures() {
-        return sFeatureList;
-    }
 
     public static List<Feature> getServiceFeatures() {
         return sServiceFeatureList;
     }
 
     static {
-        /** Functional feature list */
-        sFeatureList = new ArrayList<Feature>();
-
-        sFeatureList.add(new Feature(FeatureConfig.IPSEC,
-                SystemConfig.FEATURE_IPSEC));
-        sFeatureList.add(new Feature(FeatureConfig.TLS,
-                SystemConfig.FEATURE_TLS));
-        sFeatureList.add(new Feature(FeatureConfig.AUTH_SIP_DIGEST,
-                SystemConfig.FEATURE_AUTH_SIP_DIGEST));
-        sFeatureList.add(new Feature(FeatureConfig.SDP_PRECONDITION,
-                SystemConfig.FEATURE_SDP_PRECONDITION));
-        sFeatureList.add(new Feature(FeatureConfig.GRUU, SystemConfig.FEATURE_GRUU));
-        sFeatureList.add(new Feature(FeatureConfig.MULTIPLE_REGISTRATION,
-                SystemConfig.FEATURE_MULTIPLE_REGISTRATION));
-        sFeatureList.add(new Feature(FeatureConfig.REQUEST_URI_VALIDATION_IN_MID_DIALOG,
-                SystemConfig.FEATURE_REQUEST_URI_VALIDATION_IN_MID_DIALOG));
-        sFeatureList.add(new Feature(FeatureConfig.NO_SESSION_REFRESH_BY_REINVITE,
-                SystemConfig.FEATURE_NO_SESSION_REFRESH_BY_REINVITE));
-        sFeatureList.add(new Feature(FeatureConfig.INVITE_TXN_HANDLING_CORRECTION,
-                SystemConfig.FEATURE_INVITE_TXN_HANDLING_CORRECTION));
-        sFeatureList.add(new Feature(FeatureConfig.GEOLOCATION,
-                SystemConfig.FEATURE_GEOLOCATION));
-
-        /** Roaming **/
-        sFeatureList.add(new Feature(
-                FeatureConfig.VOLTE_IN_ROAMING, SystemConfig.FEATURE_VOLTE_IN_ROAMING));
-        sFeatureList.add(new Feature(
-                FeatureConfig.VT_IN_ROAMING, SystemConfig.FEATURE_VT_IN_ROAMING));
-
         /** Service feature list */
         sServiceFeatureList = new ArrayList<Feature>();
 

@@ -9,14 +9,11 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ImsPhoneProxyApi;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.core.agents.agentif.ICallStateNotificationService;
-import com.android.imsstack.core.config.ImsDbController;
-import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.core.service.serviceif.IService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.JNIUpCallEvtManager;
-import com.android.imsstack.util.DBUtils;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.HashMap;
@@ -455,19 +452,13 @@ public class CallStateNotificationService implements
             return false;
         }
 
-        int callViaEPdn = DBUtils.CP.getInt(
-                getSlotId(),
-                context.getContentResolver(),
-                ProviderInterface.UCEmergency.CONTENT_URI,
-                ProviderInterface.UCEmergency.USINGEPDN_WIFI, 1);
+        int callViaEPdn = 0; // TODO: IMS_E_CALL
 
         return (callViaEPdn == 1);
     }
 
     private boolean isTestModeEnabled() {
-
-        int adminFeatures = ImsDbController.Subscriber.getAdminFeatures(getSlotId());
-        return ImsDbController.isTestModeEnabled(adminFeatures);
+        return false;
     }
 
     // VoNR: 5G_NR_SA_MODE_CONTROL {

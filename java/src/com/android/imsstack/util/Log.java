@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.util;
 
 public final class Log {
@@ -5,7 +20,7 @@ public final class Log {
     public static final int DEBUG = android.util.Log.DEBUG;
 
     private static int sDebug = -1;
-    private static int sAdminDebug = -1;
+    private static int sImsDebug = -1;
 
     static {
         if (!"user".equals(android.os.Build.TYPE)) {
@@ -14,7 +29,7 @@ public final class Log {
     }
 
     public static boolean isDebuggable() {
-        if (sDebug == 1 || sAdminDebug == 1) {
+        if (sDebug == 1 || sImsDebug == 1) {
             return true;
         } else if (sDebug == -1) {
             return isLoggable(DEBUG);
@@ -82,8 +97,8 @@ public final class Log {
         sDebug = isLoggable(DEBUG) ? 1 : 0;
     }
 
-    public static void setAdminDebug(boolean adminDebug) {
-        sAdminDebug = adminDebug ? 1 : 0;
+    public static void setImsDebug(boolean imsDebug) {
+        sImsDebug = imsDebug ? 1 : 0;
     }
 
     public static String firstSubString(String s, String delimiter, boolean leftToken) {

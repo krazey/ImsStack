@@ -174,7 +174,7 @@
         </PreferenceCategory>
     </PreferenceScreen>
     <ListPreference android:title="Clear Test Config"
-        android:entryValues="@array/ims_yes_no" android:entries="@array/ims_yes_no"
+        android:entryValues="@array/two_state_value" android:entries="@array/two_state_entry"
         android:key="clear_test_config" android:defaultValue="no" android:enabled="true"
         android:selectable="true">
     </ListPreference>

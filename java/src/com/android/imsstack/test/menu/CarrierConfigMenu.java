@@ -264,10 +264,10 @@ public class CarrierConfigMenu extends PreferenceActivity {
             implements Preference.OnPreferenceChangeListener {
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {
-            if (KEY_CLEAR_TEST_CONFIG.equals(preference.getKey())) {
-                String result = newValue.toString();
+            String value = newValue.toString();
 
-                if ("YES".equalsIgnoreCase(result)) {
+            if (KEY_CLEAR_TEST_CONFIG.equals(preference.getKey())) {
+                if ("1".equals(value)) {
                     mConfigChanged = false;
 
                     if (mTestConfig != null) {
@@ -284,8 +284,6 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     ImsLog.d(mSlotId, "CarrierConfig: test config cleared.");
                 }
             } else if (KEY_TEST_CARRIER_ID.equals(preference.getKey())) {
-                String value = newValue.toString();
-
                 mTestCarrierId.setValue(value);
                 mTestCarrierId.setSummary(mTestCarrierId.getEntry());
 
@@ -300,8 +298,6 @@ public class CarrierConfigMenu extends PreferenceActivity {
                             newCarrierId, mSlotId);
                 }
             } else if (KEY_VOLTE_PROVISIONING.equals(preference.getKey())) {
-                String value = newValue.toString();
-
                 mVoLteProvisioning.setValue(value);
                 mVoLteProvisioning.setSummary(mVoLteProvisioning.getEntry());
 

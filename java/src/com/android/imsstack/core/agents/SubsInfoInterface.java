@@ -19,15 +19,24 @@ package com.android.imsstack.core.agents;
 import com.android.imsstack.core.agents.agentif.IAgent;
 
 public interface SubsInfoInterface extends IAgent {
+    /** Returns the primary IMPU string. */
     String getPrimaryImpu();
+    /** Checks if IMS is enabled or not. */
     boolean isImsEnabled();
+    /** Checks if ISIM is enabled for IMS service or not. */
     boolean isIsimEnabled();
+    /** Checks if USIM is enabled for IMS service or not. */
     boolean isUsimEnabled();
+    /** Checks if the debug mode is enabled or not. */
     boolean isDebugEnabled();
+    /** Checks if the testmode is enabled or not. */
     boolean isTestModeEnabled();
-    boolean isTestModeEnabledForGcf();
+    /** Checks if VoLte service is available or not */
     boolean isVoLteServiceOn();
+    /** Checks if ViLte service is available or not */
     boolean isViLteServiceOn();
+    /** Checks if VoWifi service is available or not */
     boolean isVoWiFiServiceOn();
+    /** Checks if ViWifi service is available or not */
     boolean isViWiFiServiceOn();
 }

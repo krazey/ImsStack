@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.core;
 
 import android.content.Context;
@@ -6,9 +21,7 @@ import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ImsPhoneProxyApi;
 import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.config.ConfigurationFactory;
 import com.android.imsstack.core.config.FeatureConfig;
-import com.android.imsstack.core.config.IConfigDBLoader;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.jni.JNIIms;
 import com.android.imsstack.system.JNIUpCallEvtManager;
@@ -23,10 +36,8 @@ import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SODConfig;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 public class CommonStarter {
@@ -45,8 +56,6 @@ public class CommonStarter {
             = new HashSet<ICommonPackageListener>();
     private Set<IVoltePackageListener> mVolteListeners
             = new HashSet<IVoltePackageListener>();
-
-    private List<IConfigDBLoader> mDBLoader = null;
 
     private CommonStarter() {
     }
@@ -271,34 +280,6 @@ public class CommonStarter {
                 ImsUtils.setUeCapabilityVoNr(slotId, ueCapabilityVoNr);
             }
         }
-    }
-
-    public void updateIMSDBByConfig(Context context, int slotId) {
-        Log.i(TAG, "updateIMSDBByConfig(" + slotId + ")");
-
-        IConfigDBLoader dbLoader = getDBLoader(slotId);
-
-        if (dbLoader != null) {
-            dbLoader.dbUpdate(context);
-        }
-
-    }
-
-    public IConfigDBLoader getDBLoader(int slotId) {
-        if (!isSlotIdValid(slotId)) {
-            return null;
-        }
-
-        if (mDBLoader == null) {
-            Log.i(TAG, "Create :: ConfigDBLoaderImpl");
-            int simCount = MSimUtils.getMaxSimSlot();
-            mDBLoader = new ArrayList<IConfigDBLoader>(simCount);
-            for (int i = 0; i < simCount; i++) {
-                mDBLoader.add(i, ConfigurationFactory.newConfigDBLoader(i));
-            }
-        }
-
-        return mDBLoader.get(slotId);
     }
 
     public void updateSystemConfigForBootup() {

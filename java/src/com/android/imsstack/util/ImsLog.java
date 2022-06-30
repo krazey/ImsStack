@@ -1,4 +1,18 @@
-
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.util;
 
 import android.text.TextUtils;
@@ -134,40 +148,15 @@ public final class ImsLog {
 
     // Initialize the trace option from the configuration
     public static final void init() {
-        int option = LogUtils.getLogOption(0);
-        boolean debugOn = LogUtils.isAdminDebugOn(0);
+        int option = LogUtils.getLogOptions(0);
+        boolean debugOn = LogUtils.isDebugOn(0);
 
         Log.d(Log.TAG, "ImsLog :: option=0x" + Integer.toHexString(option) + ", debug=" + debugOn);
 
         setLogOption(option);
         setDebugOn(debugOn);
 
-        Log.setAdminDebug(debugOn);
-    }
-
-    // Update the trace option into the configuration
-    public static final void updateConfig(String logOption) {
-        Log.d(Log.TAG, "ImsLog :: option=" + logOption);
-
-        int option = LogUtils.updateLogOption(logOption, 0);
-
-        for (int i = 1; i < MSimUtils.getMaxSimSlot(); i++) {
-            LogUtils.updateLogOption(logOption, i);
-        }
-
-        if (option >= 0) {
-            setLogOption(option);
-        }
-    }
-
-    public static final void updateConfig(String logOption, int slotId) {
-        Log.d(Log.TAG, "ImsLog :: option=" + logOption + ", slotId=" + slotId);
-
-        int option = LogUtils.updateLogOption(logOption, slotId);
-
-        if (option >= 0) {
-            setLogOption(option);
-        }
+        Log.setImsDebug(debugOn);
     }
 
     public static void setDebugOn(boolean debugOn) {

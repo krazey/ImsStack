@@ -19,10 +19,6 @@ package com.android.imsstack.core.agents;
 import android.content.Context;
 
 import com.android.imsstack.core.agents.SubsInfoInterface;
-import com.android.imsstack.core.config.ImsDbController;
-import com.android.imsstack.core.config.ProviderInterface;
-import com.android.imsstack.util.DBUtils;
-import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.ImsUtils;
 
@@ -46,42 +42,37 @@ public class SubsInfoAgent implements SubsInfoInterface {
     @Override
     public String getPrimaryImpu() {
         return ImsPrivateProperties.Persistent.get(
-                ImsPrivateProperties.Persistent.KEY_PRIMARY_IMPU,
-                mSlotId);
+                ImsPrivateProperties.Persistent.KEY_PRIMARY_IMPU, mSlotId);
     }
 
     @Override
     public boolean isImsEnabled() {
-        return true;
+        return !ImsPrivateProperties.Persistent.getBoolean(
+                ImsPrivateProperties.Persistent.KEY_TEST_IMS_DISABLED, mSlotId);
     }
 
     @Override
     public boolean isIsimEnabled() {
         return ImsPrivateProperties.Persistent.getBoolean(
-                ImsPrivateProperties.Persistent.KEY_ISIM_ENABLED,
-                mSlotId);
+                ImsPrivateProperties.Persistent.KEY_ISIM_ENABLED, mSlotId);
     }
 
     @Override
     public boolean isUsimEnabled() {
         return ImsPrivateProperties.Persistent.getBoolean(
-                ImsPrivateProperties.Persistent.KEY_USIM_ENABLED,
-                mSlotId);
+                ImsPrivateProperties.Persistent.KEY_USIM_ENABLED, mSlotId);
     }
 
     @Override
     public boolean isDebugEnabled() {
-        return isFeatureEnabled(ProviderInterface.Subscriber.AdminFeatures.DEBUG);
+        return ImsPrivateProperties.Persistent.getBoolean(
+                ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_ENABLED, mSlotId);
     }
 
     @Override
     public boolean isTestModeEnabled() {
-        return isFeatureEnabled(ProviderInterface.Subscriber.AdminFeatures.TESTMODE);
-    }
-
-    @Override
-    public boolean isTestModeEnabledForGcf() {
-        return isFeatureEnabled(ProviderInterface.Subscriber.AdminFeatures.TESTMODE_GCF);
+        return ImsPrivateProperties.Persistent.getBoolean(
+                ImsPrivateProperties.Persistent.KEY_TEST_TESTMODE_ENABLED, mSlotId);
     }
 
     @Override
@@ -111,10 +102,5 @@ public class SubsInfoAgent implements SubsInfoInterface {
         }
 
         return false;
-    }
-
-    private boolean isFeatureEnabled(int feature) {
-        int adminFeatures = ImsDbController.Subscriber.getAdminFeatures(mSlotId);
-        return ImsDbController.isAdminFeatureEnabled(adminFeatures, feature);
     }
 }

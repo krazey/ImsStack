@@ -33,8 +33,6 @@ import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
-import com.android.imsstack.core.config.ImsDbController;
-import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.core.service.serviceif.ICallSettingService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
 import com.android.imsstack.system.ISystem;
@@ -1138,12 +1136,6 @@ public class CallSettingService implements ICallSettingService {
 
         mMobileDataSettingRegistrants.notifyResult(Boolean.valueOf(enabled));
 
-        DBUtils.CP.putString(getContext().getContentResolver(),
-                ProviderInterface.Setting.CONTENT_URI,
-                ProviderInterface.Setting.MOBILE_DATA_SETTING,
-                enabled ? "true" : "false",
-                ImsDbController.selectForSlot(getSlotId()));
-
         notifySystemEventForMobileData();
     }
 
@@ -1166,12 +1158,6 @@ public class CallSettingService implements ICallSettingService {
         mVideoCallSet = setValue;
 
         mVideoCallSettingRegistrants.notifyResult(mVideoCallSet);
-
-        DBUtils.CP.putString(getContext().getContentResolver(),
-                ProviderInterface.Setting.CONTENT_URI,
-                ProviderInterface.Setting.VIDEO_SETTING,
-                mVideoCallSet ? "true" : "false",
-                ImsDbController.selectForSlot(getSlotId()));
 
         notifySystemEventForVideoCall();
     }
@@ -1196,12 +1182,6 @@ public class CallSettingService implements ICallSettingService {
         mVideoCallRoamingSet = setValue;
 
         mVideoCallRoamingSettingRegistrants.notifyResult(mVideoCallRoamingSet);
-
-        DBUtils.CP.putString(getContext().getContentResolver(),
-                ProviderInterface.Setting.CONTENT_URI,
-                ProviderInterface.Setting.VIDEO_SETTING,
-                mVideoCallRoamingSet ? "true" : "false",
-                ImsDbController.selectForSlot(getSlotId()));
 
         notifySystemEventForVideoCallRoaming();
     }
@@ -1252,14 +1232,6 @@ public class CallSettingService implements ICallSettingService {
         mVoLTESet = bValue;
 
         mVoLTESettingRegistrants.notifyResult(mVoLTESet);
-
-        if (ImsGlobal.isOperator(getSlotId(), "VZW")) {
-            DBUtils.CP.putString(getContext().getContentResolver(),
-                    ProviderInterface.Setting.CONTENT_URI,
-                    ProviderInterface.Setting.VOIP_SETTING,
-                    mVoLTESet ? "true" : "false",
-                    ImsDbController.selectForSlot(getSlotId()));
-        }
 
         ISystem system = SystemInterface.getInstance().getSystem(getSlotId());
 
