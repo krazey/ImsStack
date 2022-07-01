@@ -21,7 +21,6 @@ import static org.mockito.Mockito.doReturn;
 
 import android.content.Context;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -33,9 +32,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.nio.charset.StandardCharsets;
-
 public class DataContainerTest {
+    private static final String TAG = DataContainerTest.class.getSimpleName();
     private static final String AC_DATA =
             "<?xml version=\"1.0\"?>"
             + "<wap-provisioningdoc version=\"1.1\">"
@@ -138,7 +136,7 @@ public class DataContainerTest {
 
     @Test
     @SmallTest
-    public void readDataFromFile_withSubId() throws Exception {
+    public void getFileName_withSubId() throws Exception {
         int subId = 1234;
         String expectedFileName = "rcs_provisioning_data_" + subId + ".xml";
         String fileName;
@@ -157,19 +155,14 @@ public class DataContainerTest {
 
     @Test
     @SmallTest
-    public void getProvisioningData_withData() throws Exception {
+    public void getUpdateValue_withProvisioningDataVersionValidityToken() throws Exception {
         String data = mDataContainer.getProvisioningData();
         assertEquals(null, data);
 
         boolean isValid = mDataContainer.isValidProvisioning();
         assertEquals(false, isValid);
 
-        byte[] d = AC_DATA.getBytes(StandardCharsets.UTF_8);
-        Log.i("ImsStack", "size " + d.length);
-        Log.i("ImsStack", "dir " + InstrumentationRegistry.getContext().getFilesDir());
-
         mDataContainer.setProvisioningData(AC_DATA);
-
         data = mDataContainer.getProvisioningData();
         assertEquals(AC_DATA, data);
 
@@ -177,12 +170,89 @@ public class DataContainerTest {
         assertEquals(true, isValid);
 
         int version = mDataContainer.getVersion();
-        assertEquals(1, version);
-
         long validity = mDataContainer.getValidity();
-        assertEquals(2160000L, validity);
+        assertEquals(DataContainer.VERSION_UNKNOWN, version);
+        assertEquals(DataContainer.VALIDITY_UNKNOWN, validity);
+
+        int expectedVersion = 11;
+        long expectedValidity = 360000L;
+        mDataContainer.updateVersionValidity(expectedVersion, expectedValidity);
+
+        version = mDataContainer.getVersion();
+        validity = mDataContainer.getValidity();
+        assertEquals(expectedVersion, version);
+        assertEquals(expectedValidity, validity);
 
         String token = mDataContainer.getToken();
-        assertEquals("qawsedrftg", token);
+        assertEquals(DataContainer.TOKEN_UNKNOWN, token);
+
+        String expectedToken = "ABC123";
+        mDataContainer.updateToken(expectedToken);
+
+        token = mDataContainer.getToken();
+        assertEquals(expectedToken, token);
+    }
+
+    @Test
+    @SmallTest
+    public void getValue_fromFile() throws Exception {
+        int subId = 1234;
+        int expectedVersion = 11;
+        long expectedValidity = 360000L;
+        String expectedToken = "ABC123";
+
+        mDataContainer = new DataContainer(mContext, mSlotId, subId);
+        mDataContainer.setProvisioningData(AC_DATA);
+        mDataContainer.updateVersionValidity(expectedVersion, expectedValidity);
+        mDataContainer.updateToken(expectedToken);
+        mDataContainer = null;
+
+        DataContainer newDataContainer = new DataContainer(mContext, mSlotId, subId);
+
+        int version = newDataContainer.getVersion();
+        long validity = newDataContainer.getValidity();
+        String token = newDataContainer.getToken();
+
+        assertEquals(expectedVersion, version);
+        assertEquals(expectedValidity, validity);
+        assertEquals(expectedToken, token);
+    }
+
+    @Test
+    @SmallTest
+    public void getValue_afterReset() throws Exception {
+        int subId = 1234;
+        int expectedVersion = 11;
+        long expectedValidity = 360000L;
+        String expectedToken = "ABC123";
+
+        mDataContainer = new DataContainer(mContext, mSlotId, subId);
+        mDataContainer.setProvisioningData(AC_DATA);
+        mDataContainer.updateVersionValidity(expectedVersion, expectedValidity);
+        mDataContainer.updateToken(expectedToken);
+
+        mDataContainer.resetProvisioningData();
+
+        int version = mDataContainer.getVersion();
+        long validity = mDataContainer.getValidity();
+        String token = mDataContainer.getToken();
+
+        // verify that cached values are reset
+        assertEquals(DataContainer.VERSION_UNKNOWN, version);
+        assertEquals(DataContainer.VALIDITY_UNKNOWN, validity);
+        assertEquals(DataContainer.TOKEN_UNKNOWN, token);
+
+        mDataContainer = null;
+
+        // verify that values in file are reset
+        DataContainer newDataContainer = new DataContainer(mContext, mSlotId, subId);
+
+        version = newDataContainer.getVersion();
+        validity = newDataContainer.getValidity();
+        token = newDataContainer.getToken();
+
+        assertEquals(DataContainer.VERSION_UNKNOWN, version);
+        assertEquals(DataContainer.VALIDITY_UNKNOWN, validity);
+        assertEquals(DataContainer.TOKEN_UNKNOWN, token);
     }
 }
