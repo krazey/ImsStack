@@ -43,8 +43,6 @@ public final class SscConfig {
     public static final int GBA_U = CarrierConfigManager.GBA_U;
     public static final int GBA_DIGEST = CarrierConfigManager.GBA_DIGEST;
 
-    private static int mTid = 1;
-    private static final Object mLock = new Object();
     private static HashMap<Integer, ConfigAgent> mConfigAgent = new HashMap<>();
 
     public static void init(int slotId) {
@@ -341,16 +339,6 @@ public final class SscConfig {
     public static String getUtPdnType(int slotId) {
         // TODO: could be removed?
         return "mobile_xcap";
-    }
-
-    public static int getNewTid() {
-        synchronized (mLock) {
-            if (mTid == 0x7FFFFFFF) {
-                mTid = 1;
-            }
-
-            return mTid++;
-        }
     }
 
     /* TODO: If there is an error, this method will be used.

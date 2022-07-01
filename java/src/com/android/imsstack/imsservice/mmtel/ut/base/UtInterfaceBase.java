@@ -18,7 +18,6 @@ package com.android.imsstack.imsservice.mmtel.ut.base;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.telephony.ims.ImsReasonInfo;
 
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtServiceStateListener;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtListener;
@@ -54,104 +53,101 @@ public class UtInterfaceBase implements UtInterface {
         }
     }
 
-    /**
-     * Implementation of IImsUt.
-     */
     @Override
     public void close() {
         // no-op
     }
 
     @Override
-    public int queryCallBarring(int condition) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void queryCallBarring(int tId, int condition) {
+        // no-op
     }
 
     @Override
-    public int queryCallBarringForServiceClass(int condition, int serviceClass) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void queryCallBarringForServiceClass(int tId, int condition, int serviceClass) {
+        // no-op
     }
 
     @Override
-    public int queryCallForward(int condition, String number) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void queryCallForward(int tId, int condition, String number) {
+        // no-op
     }
 
     @Override
-    public int queryCallWaiting() {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void queryCallWaiting(int tId) {
+        // no-op
     }
 
     @Override
-    public int queryCLIR() {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void queryCLIR(int tId) {
+        // no-op
     }
 
     @Override
-    public int queryCLIP() {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void queryCLIP(int tId) {
+        // no-op
     }
 
     @Override
-    public int queryCOLR() {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void queryCOLR(int tId) {
+        // no-op
     }
 
     @Override
-    public int queryCOLP() {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void queryCOLP(int tId) {
+        // no-op
     }
 
     @Override
-    public int transact(Bundle ssInfo) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void transact(int tId, Bundle ssInfo) {
+        // no-op
     }
 
     @Override
-    public int updateCallBarring(int condition, int action, String[] barringList) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void updateCallBarring(int tId, int condition, int action, String[] barringList) {
+        // no-op
     }
 
     @Override
-    public int updateCallBarringForServiceClass(int cbType, int action, String[] barringList,
-            int serviceClass) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void updateCallBarringForServiceClass(int tId, int cbType, int action,
+            String[] barringList, int serviceClass) {
+        // no-op
     }
 
     @Override
-    public int updateCallBarringWithPassword(int condition, int action, String[] barringList,
-            int serviceClass, String password) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void updateCallBarringWithPassword(int tId, int condition, int action,
+            String[] barringList, int serviceClass, String password) {
+        // no-op
     }
 
     @Override
-    public int updateCallForward(int action, int condition, String number, int serviceClass,
-            int timeSeconds) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void updateCallForward(int tId, int action, int condition, String number,
+            int serviceClass, int timeSeconds) {
+        // no-op
     }
 
     @Override
-    public int updateCallWaiting(boolean enable, int serviceClass) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void updateCallWaiting(int tId, boolean enable, int serviceClass) {
+        // no-op
     }
 
     @Override
-    public int updateCLIR(int clirMode) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void updateCLIR(int tId, int clirMode) {
+        // no-op
     }
 
     @Override
-    public int updateCLIP(boolean enable) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void updateCLIP(int tId, boolean enable) {
+        // no-op
     }
 
     @Override
-    public int updateCOLR(int presentation) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void updateCOLR(int tId, int presentation) {
+        // no-op
     }
 
     @Override
-    public int updateCOLP(boolean enable) {
-        return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+    public void updateCOLP(int tId, boolean enable) {
+        // no-op
     }
 }

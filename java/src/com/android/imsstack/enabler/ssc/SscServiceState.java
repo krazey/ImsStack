@@ -145,9 +145,9 @@ public class SscServiceState {
 
     protected void setPdnConnectionTimeout(boolean input) {
         if (input) {
-            setUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEROUT);
+            setUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT);
         } else {
-            resetUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEROUT);
+            resetUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT);
         }
     }
 
@@ -177,7 +177,7 @@ public class SscServiceState {
     }
 
     protected boolean getPdnConnectionTimeout() {
-        return isUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEROUT);
+        return isUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT);
     }
 
     protected boolean getAllSrvAddrTried() {
@@ -225,7 +225,7 @@ public class SscServiceState {
             case SscConstant.BLOCK_REASON_GBA_FAILURE : // fall-through
             case SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE : // fall-through
             case SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT : // fall-through
-            case SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEROUT : // fall-through
+            case SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT : // fall-through
                 blockTimeMilliSeconds = SscConfig.getTimerForTempBlockWithAnyReason(mSlotId);
                 if (blockTimeMilliSeconds > 0) {
                     startUtBlockTimer(blockTimeMilliSeconds);
@@ -366,7 +366,7 @@ public class SscServiceState {
             switch(msg.what) {
                 case EVENT_UT_BLOCK_TIMER_EXPIRED:
                     int allTempBlockReasons = SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE
-                            | SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEROUT
+                            | SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT
                             | SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT
                             | SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP
                             | SscConstant.BLOCK_REASON_GBA_FAILURE
@@ -407,8 +407,8 @@ public class SscServiceState {
         if ((utBlockReason & SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT) > 0) {
             reasons += " BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT";
         }
-        if ((utBlockReason & SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEROUT) > 0) {
-            reasons += " BLOCK_REASON_PDN_CONNECTION_TIMEROUT";
+        if ((utBlockReason & SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT) > 0) {
+            reasons += " BLOCK_REASON_PDN_CONNECTION_TIMEOUT";
         }
         if ((utBlockReason & SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP) > 0) {
             reasons += " BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP";

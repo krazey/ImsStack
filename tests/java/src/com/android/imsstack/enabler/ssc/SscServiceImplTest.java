@@ -19,6 +19,7 @@ package com.android.imsstack.enabler.ssc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -67,7 +68,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 @TestableLooper.RunWithLooper
 public class SscServiceImplTest {
     private final static int SLOT_0 = 0;
-    //private static final int SLOT_1 = 1;
 
     private SscServiceImpl mSscServiceImpl;
 
@@ -154,8 +154,9 @@ public class SscServiceImplTest {
     @Test
     public void testBasicOperation_utNotAvailable() {
         when(mockSscServiceState.isUtAvailable()).thenReturn(false);
+        int tId = 1;
 
-        int tId = mSscServiceImpl.queryCallForward(SscConstant.CONDITION_CFU, "");
+        mSscServiceImpl.queryCallForward(tId, SscConstant.CONDITION_CFU, "");
 
         mLooper.processAllMessages();
         verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
@@ -163,14 +164,15 @@ public class SscServiceImplTest {
     }
 
     @Test
-    public void testBasicOperation_informmErrorPhrase() {
+    public void testBasicOperation_informErrorPhrase() {
         when(mockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL)))
                 .thenReturn(true);
         mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
         mErrorPhrase = "check error phrase";
+        int tId = 1;
 
-        int tId = mSscServiceImpl.queryCallForward(SscConstant.CONDITION_CFU, "");
+        mSscServiceImpl.queryCallForward(tId, SscConstant.CONDITION_CFU, "");
         processEntireXmlDocQueryAsFailure();
 
         mLooper.processAllMessages();
@@ -186,14 +188,15 @@ public class SscServiceImplTest {
     }
 
     @Test
-    public void testBasicOperation_notInformmErrorPhrase() {
+    public void testBasicOperation_ignoreErrorPhrase() {
         when(mockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL)))
                 .thenReturn(false);
         mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
         mErrorPhrase = "check error phrase";
+        int tId = 1;
 
-        int tId = mSscServiceImpl.queryCallForward(SscConstant.CONDITION_CFU, "");
+        mSscServiceImpl.queryCallForward(tId, SscConstant.CONDITION_CFU, "");
         processEntireXmlDocQueryAsFailure();
 
         mLooper.processAllMessages();
@@ -201,7 +204,7 @@ public class SscServiceImplTest {
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
-        assertNotEquals(reasonInfo.getExtraMessage(), mErrorPhrase);
+        assertNull(reasonInfo.getExtraMessage());
 
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
@@ -213,8 +216,9 @@ public class SscServiceImplTest {
                 eq(CarrierConfigManager.ImsSs.KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL)))
                 .thenReturn(true);
         mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
+        int tId = 1;
 
-        int tId = mSscServiceImpl.queryCallForward(SscConstant.CONDITION_CFU, "");
+        mSscServiceImpl.queryCallForward(tId, SscConstant.CONDITION_CFU, "");
         processEntireXmlDocQueryAsFailure();
 
         mLooper.processAllMessages();
@@ -233,8 +237,9 @@ public class SscServiceImplTest {
     public void testQueryCallBarringForServiceClass_singleRequestIcb() {
         mIsCbRuleActivated = false;
         int queryCondition = SscConstant.CONDITION_BIC_WR;
+        int tId = 1;
 
-        int tId = mSscServiceImpl.queryCallBarringForServiceClass(queryCondition,
+        mSscServiceImpl.queryCallBarringForServiceClass(tId, queryCondition,
                 SscServiceClassUtil.SERVICE_CLASS_VOICE);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsSuccess(ESsType.ICB, SscConstant.EVENT_SSC_QUERY_CB,
@@ -257,8 +262,9 @@ public class SscServiceImplTest {
     public void testQueryCallBarringForServiceClass_singleRequestOcb() {
         mIsCbRuleActivated = true;
         int queryCondition = SscConstant.CONDITION_BAOC;
+        int tId = 1;
 
-        int tId = mSscServiceImpl.queryCallBarringForServiceClass(queryCondition,
+        mSscServiceImpl.queryCallBarringForServiceClass(tId, queryCondition,
                 SscServiceClassUtil.SERVICE_CLASS_VOICE);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsSuccess(ESsType.OCB, SscConstant.EVENT_SSC_QUERY_CB,
@@ -279,7 +285,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryCallBarringForServiceClass_entireDocumentQueryFailure() {
-        int tId = mSscServiceImpl.queryCallBarringForServiceClass(SscConstant.CONDITION_BIC_WR,
+        int tId = 1;
+
+        mSscServiceImpl.queryCallBarringForServiceClass(tId, SscConstant.CONDITION_BIC_WR,
                 SscServiceClassUtil.SERVICE_CLASS_VOICE);
         processEntireXmlDocQueryAsFailure();
 
@@ -291,7 +299,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryCallBarringForServiceClass_queryFailure() {
-        int tId = mSscServiceImpl.queryCallBarringForServiceClass(SscConstant.CONDITION_BOIC,
+        int tId = 1;
+
+        mSscServiceImpl.queryCallBarringForServiceClass(tId, SscConstant.CONDITION_BOIC,
                 SscServiceClassUtil.SERVICE_CLASS_VOICE);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsFailure(ESsType.OCB, SscConstant.EVENT_SSC_QUERY_CB,
@@ -304,10 +314,45 @@ public class SscServiceImplTest {
     }
 
     @Test
+    public void testQueryCallBarringForServiceClass_invalidServiceClass() {
+        int tId = 1;
+        int invalidServiceClass = SscServiceClassUtil.SERVICE_CLASS_SMS;
+
+        mSscServiceImpl.queryCallBarringForServiceClass(tId, SscConstant.CONDITION_BOIC,
+                invalidServiceClass);
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    public void testQueryCallBarringForServiceClass_invalidCondition() {
+        int tId = 1;
+        int invalidCondition = SscConstant.CONDITION_BSIC + 10;
+
+        mSscServiceImpl.queryCallBarringForServiceClass(tId, invalidCondition,
+                SscServiceClassUtil.SERVICE_CLASS_NONE);
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
     public void testQueryCallForward_singleRequest() {
         int queryCondition = SscConstant.CONDITION_CFU;
+        int tId = 1;
 
-        int tId = mSscServiceImpl.queryCallForward(queryCondition, "");
+        mSscServiceImpl.queryCallForward(tId, queryCondition, "");
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_QUERY_CF,
                 queryCondition);
@@ -336,8 +381,10 @@ public class SscServiceImplTest {
                 .thenReturn(true);
 
         int responseCount = 1;
+        int tId = 1;
         for (int c = SscConstant.CONDITION_CFU; c <= SscConstant.CONDITION_CFNL; c++) {
-            int tId = mSscServiceImpl.queryCallForward(c, "");
+            tId++;
+            mSscServiceImpl.queryCallForward(tId, c, "");
 
             if (SscXmlGov.getInstance(SLOT_0).isXmlDataPresent() == false) {
                 processEntireXmlDocQueryAsSuccess();
@@ -357,7 +404,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryCallForward_entireDocumentQueryFailure() {
-        int tId = mSscServiceImpl.queryCallForward(SscConstant.CONDITION_CFU, "");
+        int tId = 1;
+
+        mSscServiceImpl.queryCallForward(tId, SscConstant.CONDITION_CFU, "");
         processEntireXmlDocQueryAsFailure();
 
         mLooper.processAllMessages();
@@ -368,7 +417,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryCallForward_queryFailure() {
-        int tId = mSscServiceImpl.queryCallForward(SscConstant.CONDITION_CFU, "");
+        int tId = 1;
+
+        mSscServiceImpl.queryCallForward(tId, SscConstant.CONDITION_CFU, "");
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_QUERY_CF,
                 SscConstant.CONDITION_CFU);
@@ -380,22 +431,41 @@ public class SscServiceImplTest {
     }
 
     @Test
-    public void testQueryCallForward_invalidParameter() {
+    public void testQueryCallForward_queryCfaAndCfacNotSupported() {
         when(mockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL)))
                 .thenReturn(false);
 
-        int invalidParameter = SscConstant.CONDITION_CFA;
-        int tId = mSscServiceImpl.queryCallForward(invalidParameter, "");
+        int tId = 1;
+
+        mSscServiceImpl.queryCallForward(tId, SscConstant.CONDITION_CFA, "");
 
         mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
         verifyNoMoreInteractions(mockSscTransaction);
-        verifyNoMoreInteractions(mockUtListener);
+    }
+
+    @Test
+    public void testQueryCallForward_invalidCondition() {
+        int invalidCondition = SscConstant.CONDITION_CFNL + 1;
+        int tId = 1;
+
+        mSscServiceImpl.queryCallForward(tId, invalidCondition, "");
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
     }
 
     @Test
     public void testQueryCallWaiting_success() {
-        int tId = mSscServiceImpl.queryCallWaiting();
+        int tId = 1;
+
+        mSscServiceImpl.queryCallWaiting(tId);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsSuccess(ESsType.CW, SscConstant.EVENT_SSC_QUERY_CW, -1);
 
@@ -413,7 +483,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryCallWaiting_failure() {
-        int tId = mSscServiceImpl.queryCallWaiting();
+        int tId = 1;
+
+        mSscServiceImpl.queryCallWaiting(tId);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsFailure(ESsType.CW, SscConstant.EVENT_SSC_QUERY_CW, -1);
 
@@ -424,7 +496,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryClir_success() {
-        int tId = mSscServiceImpl.queryCLIR();
+        int tId = 1;
+
+        mSscServiceImpl.queryCLIR(tId);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsSuccess(ESsType.OIR, SscConstant.EVENT_SSC_QUERY_OIR, -1);
 
@@ -444,7 +518,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryClir_failure() {
-        int tId = mSscServiceImpl.queryCLIR();
+        int tId = 1;
+
+        mSscServiceImpl.queryCLIR(tId);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsFailure(ESsType.OIR, SscConstant.EVENT_SSC_QUERY_OIR, -1);
 
@@ -455,7 +531,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryClip_success() {
-        int tId = mSscServiceImpl.queryCLIP();
+        int tId = 1;
+
+        mSscServiceImpl.queryCLIP(tId);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsSuccess(ESsType.OIP, SscConstant.EVENT_SSC_QUERY_OIP, -1);
 
@@ -474,7 +552,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryClip_failure() {
-        int tId = mSscServiceImpl.queryCLIP();
+        int tId = 1;
+
+        mSscServiceImpl.queryCLIP(tId);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsFailure(ESsType.OIP, SscConstant.EVENT_SSC_QUERY_OIP, -1);
 
@@ -486,8 +566,9 @@ public class SscServiceImplTest {
     @Test
     public void testQueryColr_success() {
         mDefaultBehaviour = SscXmlFormat.PRESENTATION_RESTRICTED;
+        int tId = 1;
 
-        int tId = mSscServiceImpl.queryCOLR();
+        mSscServiceImpl.queryCOLR(tId);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsSuccess(ESsType.TIR, SscConstant.EVENT_SSC_QUERY_TIR, -1);
 
@@ -507,7 +588,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testQueryColr_failure() {
-        int tId = mSscServiceImpl.queryCOLR();
+        int tId = 1;
+
+        mSscServiceImpl.queryCOLR(tId);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsFailure(ESsType.TIR, SscConstant.EVENT_SSC_QUERY_TIR, -1);
 
@@ -518,7 +601,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testqueryColp_success() {
-        int tId = mSscServiceImpl.queryCOLP();
+        int tId = 1;
+
+        mSscServiceImpl.queryCOLP(tId);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsSuccess(ESsType.TIP, SscConstant.EVENT_SSC_QUERY_TIP, -1);
 
@@ -537,7 +622,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testqueryColp_failure() {
-        int tId = mSscServiceImpl.queryCOLP();
+        int tId = 1;
+
+        mSscServiceImpl.queryCOLP(tId);
         processEntireXmlDocQueryAsSuccess();
         processGetTransactionAsFailure(ESsType.TIP, SscConstant.EVENT_SSC_QUERY_TIP, -1);
 
@@ -548,7 +635,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateCallBarringWithPassword_singleRequestIcb() {
-        int tId = mSscServiceImpl.updateCallBarringWithPassword(SscConstant.CONDITION_BIC_WR,
+        int tId = 1;
+
+        mSscServiceImpl.updateCallBarringWithPassword(tId, SscConstant.CONDITION_BIC_WR,
                 SscConstant.STATUS_ENABLE, null, SscServiceClassUtil.SERVICE_CLASS_VOICE, null);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.ICB, SscConstant.EVENT_SSC_UPDATE_CB,
@@ -566,8 +655,9 @@ public class SscServiceImplTest {
 
         when(mockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
+        int tId = 1;
 
-        int tId = mSscServiceImpl.updateCallBarringWithPassword(SscConstant.CONDITION_BAIC,
+        mSscServiceImpl.updateCallBarringWithPassword(tId, SscConstant.CONDITION_BAIC,
                 SscConstant.STATUS_ENABLE, null, SscServiceClassUtil.SERVICE_CLASS_VOICE, null);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.ICB, SscConstant.EVENT_SSC_INSERT_CB,
@@ -581,7 +671,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateCallBarringWithPassword_entireDocumentQueryFailure() {
-        int tId = mSscServiceImpl.updateCallBarringWithPassword(SscConstant.CONDITION_BIC_WR,
+        int tId = 1;
+
+        mSscServiceImpl.updateCallBarringWithPassword(tId, SscConstant.CONDITION_BIC_WR,
                 SscConstant.STATUS_ENABLE, null, SscServiceClassUtil.SERVICE_CLASS_VOICE, null);
         processEntireXmlDocQueryAsFailure();
 
@@ -593,7 +685,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateCallBarringWithPassword_updateFailure() {
-        int tId = mSscServiceImpl.updateCallBarringWithPassword(SscConstant.CONDITION_BIC_WR,
+        int tId = 1;
+
+        mSscServiceImpl.updateCallBarringWithPassword(tId, SscConstant.CONDITION_BIC_WR,
                 SscConstant.STATUS_ENABLE, null, SscServiceClassUtil.SERVICE_CLASS_VOICE, null);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsFailure(ESsType.ICB, SscConstant.EVENT_SSC_UPDATE_CB,
@@ -606,10 +700,62 @@ public class SscServiceImplTest {
     }
 
     @Test
+    public void testUpdateCallBarringWithPassword_invalidAction() {
+        int tId = 1;
+        int invalidAction = SscConstant.STATUS_ENABLE + 1;
+
+        mSscServiceImpl.updateCallBarringWithPassword(tId, SscConstant.CONDITION_BIC_WR,
+                invalidAction, null, SscServiceClassUtil.SERVICE_CLASS_NONE, null);
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    public void testUpdateCallBarringWithPassword_invalidServiceClass() {
+        int tId = 1;
+        int invalidServiceClass = SscServiceClassUtil.SERVICE_CLASS_SMS;
+
+        mSscServiceImpl.updateCallBarringWithPassword(tId, SscConstant.CONDITION_BIC_WR,
+                SscConstant.STATUS_ENABLE, null, invalidServiceClass, null);
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    public void testUpdateCallBarringWithPassword_invalidCondition() {
+        int tId = 1;
+        int invalidCondition = SscConstant.CONDITION_BSIC + 1;
+
+        mSscServiceImpl.updateCallBarringWithPassword(tId, invalidCondition,
+                SscConstant.STATUS_ENABLE, null, SscServiceClassUtil.SERVICE_CLASS_NONE, null);
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
     public void testUpdateCallForward_singleRequest() {
         mIsCfnlRuleExist = false;
+        int tId = 1;
 
-        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_REGISTRATION,
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_REGISTRATION,
                 SscConstant.CONDITION_CFNRC, "+1234567890", 0, 0);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
@@ -627,8 +773,9 @@ public class SscServiceImplTest {
 
         when(mockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
+        int tId = 1;
 
-        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_REGISTRATION,
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_REGISTRATION,
                 SscConstant.CONDITION_CFNR, "+1234567890", 0, 0);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_INSERT_CF,
@@ -647,8 +794,9 @@ public class SscServiceImplTest {
 
         when(mockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
+        int tId = 1;
 
-        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_ACTIVATION,
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ACTIVATION,
                 SscConstant.CONDITION_CFB, null, 0, 0);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_INSERT_CF,
@@ -666,8 +814,9 @@ public class SscServiceImplTest {
 
         when(mockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
+        int tId = 1;
 
-        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_REGISTRATION,
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_REGISTRATION,
                 SscConstant.CONDITION_CFNR, "+1234567890", 0, 25);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_INSERT_CF,
@@ -687,8 +836,9 @@ public class SscServiceImplTest {
 
         when(mockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL))).thenReturn(true);
+        int tId = 1;
 
-        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_ERASURE,
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ERASURE,
                 SscConstant.CONDITION_CFNRC, null, 0, 0);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
@@ -705,8 +855,9 @@ public class SscServiceImplTest {
     @Test
     public void testUpdateCallForward_CfnrAndTimer() {
         mIsTimerInCfnr = false;
+        int tId = 1;
 
-        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_ACTIVATION,
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ACTIVATION,
                 SscConstant.CONDITION_CFNR, null, 0, 20);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
@@ -723,8 +874,9 @@ public class SscServiceImplTest {
     @Test
     public void testUpdateCallForward_CfnrWithTimer() {
         mIsTimerInCfnr = true;
+        int tId = 1;
 
-        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_ACTIVATION,
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ACTIVATION,
                 SscConstant.CONDITION_CFNR, null, 0, 20);
         processEntireXmlDocQueryAsSuccess();
 
@@ -741,8 +893,9 @@ public class SscServiceImplTest {
     public void testUpdateCallForward_CfAll() {
         mIsTimerInCfnr = true;
         mIsCfnlRuleExist = false;
+        int tId = 1;
 
-        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_DEACTIVATION,
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_DEACTIVATION,
                 SscConstant.CONDITION_CFA, null, 0, 20);
 
         for (int c = SscConstant.CONDITION_CFNRC; c >= SscConstant.CONDITION_CFU; c--) {
@@ -762,7 +915,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateCallForward_entireDocumentQueryFailure() {
-        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_DEACTIVATION,
+        int tId = 1;
+
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_DEACTIVATION,
                 SscConstant.CONDITION_CFA, null, 0, 20);
         processEntireXmlDocQueryAsFailure();
 
@@ -774,7 +929,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateCallForward_updateFailure() {
-        int tId = mSscServiceImpl.updateCallForward(SscConstant.ACTION_ACTIVATION,
+        int tId = 1;
+
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ACTIVATION,
                 SscConstant.CONDITION_CFB, null, 0, 20);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
@@ -787,22 +944,76 @@ public class SscServiceImplTest {
     }
 
     @Test
-    public void testUpdateCallForward_invalidParameter() {
+    public void testUpdateCallForward_erasureNotSupported() {
         when(mockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL))).thenReturn(false);
 
-        int invalidParameter = SscConstant.ACTION_ERASURE;
-        int tId = mSscServiceImpl.updateCallForward(invalidParameter, SscConstant.CONDITION_CFB,
-                null, 0, 20);
+        int tId = 1;
+
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ERASURE,
+                SscConstant.CONDITION_CFB, null, 0, 20);
 
         mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), any());
         verifyNoMoreInteractions(mockSscTransaction);
-        verifyNoMoreInteractions(mockUtListener);
+    }
+
+    @Test
+    public void testUpdateCallForward_invalidAction() {
+        int tId = 1;
+        int invalidAction = SscConstant.ACTION_ERASURE + 1;
+
+        mSscServiceImpl.updateCallForward(tId, invalidAction,
+                SscConstant.CONDITION_CFB, null, 0, 20);
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    public void testUpdateCallForward_invalidTimer() {
+        int tId = 1;
+        int invalidTimer = SscConstant.CFNR_TIMER_MAX + 1;
+
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ERASURE,
+                SscConstant.CONDITION_CFB, null, 0, invalidTimer);
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    public void testUpdateCallForward_invalidCondition() {
+        int tId = 1;
+        int invalidCondition = SscConstant.CONDITION_CFNL + 1;
+
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ERASURE, invalidCondition, null,
+                0, 20);
+
+        mLooper.processAllMessages();
+        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
     }
 
     @Test
     public void testUpdateCallWaiting_success() {
-        int tId = mSscServiceImpl.updateCallWaiting(true, SscServiceClassUtil.SERVICE_CLASS_VOICE);
+        int tId = 1;
+
+        mSscServiceImpl.updateCallWaiting(tId, true, SscServiceClassUtil.SERVICE_CLASS_VOICE);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.CW, SscConstant.EVENT_SSC_UPDATE_CW, -1);
 
@@ -813,7 +1024,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateCallWaiting_failure() {
-        int tId = mSscServiceImpl.updateCallWaiting(true, SscServiceClassUtil.SERVICE_CLASS_VOICE);
+        int tId = 1;
+
+        mSscServiceImpl.updateCallWaiting(tId, true, SscServiceClassUtil.SERVICE_CLASS_VOICE);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsFailure(ESsType.CW, SscConstant.EVENT_SSC_UPDATE_CW, -1);
 
@@ -824,7 +1037,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateClir_success() {
-        int tId = mSscServiceImpl.updateCLIR(SscConstant.OIR_INVOCATION);
+        int tId = 1;
+
+        mSscServiceImpl.updateCLIR(tId, SscConstant.OIR_INVOCATION);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.OIR, SscConstant.EVENT_SSC_UPDATE_OIR, -1);
 
@@ -835,7 +1050,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateClir_failure() {
-        int tId = mSscServiceImpl.updateCLIR(SscConstant.OIR_INVOCATION);
+        int tId = 1;
+
+        mSscServiceImpl.updateCLIR(tId, SscConstant.OIR_INVOCATION);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsFailure(ESsType.OIR, SscConstant.EVENT_SSC_UPDATE_OIR, -1);
 
@@ -846,7 +1063,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateClip_success() {
-        int tId = mSscServiceImpl.updateCLIP(true);
+        int tId = 1;
+
+        mSscServiceImpl.updateCLIP(tId, true);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.OIP, SscConstant.EVENT_SSC_UPDATE_OIP, -1);
 
@@ -857,7 +1076,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateClip_failure() {
-        int tId = mSscServiceImpl.updateCLIP(true);
+        int tId = 1;
+
+        mSscServiceImpl.updateCLIP(tId, true);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsFailure(ESsType.OIP, SscConstant.EVENT_SSC_UPDATE_OIP, -1);
 
@@ -868,7 +1089,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateColr_success() {
-        int tId = mSscServiceImpl.updateCOLR(SscConstant.TIR_PROVISIONED);
+        int tId = 1;
+
+        mSscServiceImpl.updateCOLR(tId, SscConstant.TIR_PROVISIONED);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.TIR, SscConstant.EVENT_SSC_UPDATE_TIR, -1);
 
@@ -879,7 +1102,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateColr_failure() {
-        int tId = mSscServiceImpl.updateCOLR(SscConstant.TIR_PROVISIONED);
+        int tId = 1;
+
+        mSscServiceImpl.updateCOLR(tId, SscConstant.TIR_PROVISIONED);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsFailure(ESsType.TIR, SscConstant.EVENT_SSC_UPDATE_TIR, -1);
 
@@ -890,7 +1115,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateColp_success() {
-        int tId = mSscServiceImpl.updateCOLP(true);
+        int tId = 1;
+
+        mSscServiceImpl.updateCOLP(tId, true);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.TIP, SscConstant.EVENT_SSC_UPDATE_TIP, -1);
 
@@ -901,7 +1128,9 @@ public class SscServiceImplTest {
 
     @Test
     public void testUpdateColp_failure() {
-        int tId = mSscServiceImpl.updateCOLP(true);
+        int tId = 1;
+
+        mSscServiceImpl.updateCOLP(tId, true);
         processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsFailure(ESsType.TIP, SscConstant.EVENT_SSC_UPDATE_TIP, -1);
 

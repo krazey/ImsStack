@@ -19,6 +19,7 @@ package com.android.imsstack.imsservice.mmtel.ut;
 import com.android.imsstack.enabler.ssc.SscServiceImpl;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 public final class UtFactory {
     private static UtFactory sUtFactory = new UtFactory();
@@ -40,7 +41,7 @@ public final class UtFactory {
         }
 
         if (mUtInterface[slotId] == null) {
-            mUtInterface[slotId] = new SscServiceImpl(slotId);
+            setUtInterfaceForSlot(slotId, new SscServiceImpl(slotId));
         }
 
         return mUtInterface[slotId];
@@ -55,7 +56,15 @@ public final class UtFactory {
             return;
         }
 
-        mUtInterface[slotId].close();
-        mUtInterface[slotId] = null;
+        setUtInterfaceForSlot(slotId, null);
+    }
+
+    @VisibleForTesting
+    protected void setUtInterfaceForSlot(int slotId, UtInterface sscServiceImpl) {
+        if (mUtInterface[slotId] != null) {
+            mUtInterface[slotId].close();
+        }
+
+        mUtInterface[slotId] = sscServiceImpl;
     }
 }
