@@ -123,15 +123,14 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
             android::String8(pDestProfile->objIpAddr.ToString().GetStr()));
     m_objVideoConfig.setRemotePort(pDestProfile->nDataPort);
     m_objVideoConfig.setDscp(m_pConfig->GetVideoDscp());
-    m_objVideoConfig.setMaxMtuBytes(1500);  // TODO_MEDIA NEXT_ITEM
-
+    m_objVideoConfig.setMaxMtuBytes(1500);
+    m_objVideoConfig.setRxPayloadTypeNumber(pDestPayload->objRtpMap.nPayloadNum);
     MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlodId);
     if (pMediaManager != IMS_NULL)
     {
         m_objVideoConfig.setMaxMtuBytes(
                 pMediaManager->GetResourceManager()->GetRtpFragmentSize(m_objLocalAddress));
     }
-    m_objVideoConfig.setRxPayloadTypeNumber(pDestPayload->objRtpMap.nPayloadNum);
 
     IMS_SINT32 nVideoDerection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
     switch (pNegoProfile->eDirection)
@@ -140,12 +139,14 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
             nVideoDerection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
             break;
         case MEDIA_DIRECTION_SEND:
-            nVideoDerection = RtpConfig::MEDIA_DIRECTION_TRANSMIT_ONLY;
+            nVideoDerection = RtpConfig::MEDIA_DIRECTION_SEND_ONLY;
             break;
         case MEDIA_DIRECTION_SEND_RECEIVE:
-            nVideoDerection = RtpConfig::MEDIA_DIRECTION_TRANSMIT_RECEIVE;
+            nVideoDerection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
             break;
         case MEDIA_DIRECTION_INACTIVE:
+            nVideoDerection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
+            break;
         default:
             nVideoDerection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
             break;
@@ -164,7 +165,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
     IMS_TRACE_D("UpdateRtpConfig() - RemoteAddress[%s], RemotePort[%d]",
             m_objVideoConfig.getRemoteAddress().c_str(), m_objVideoConfig.getRemotePort(), 0);
     IMS_TRACE_D("UpdateRtpConfig() - Dscp[%d], MaxMtuBytes[%d], MediaDirection[%d]",
-            m_objVideoConfig.getDscp(), m_objVideoConfig.getmaxMtuBytes(),
+            m_objVideoConfig.getDscp(), m_objVideoConfig.getMaxMtuBytes(),
             m_objVideoConfig.getMediaDirection());
 
     RtcpConfig* pRtcpConfig = new RtcpConfig();

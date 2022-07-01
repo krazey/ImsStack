@@ -44,11 +44,11 @@ public class MediaTestUtils {
     // AudioConfig
     private static final String REMOTE_RTP_ADDRESS = "2401:4900:4b88:94fd:2:2:666c:7803";
     private static final int REMOTE_RTP_PORT = 26468;
-    private static final int MAX_MTU_BYTES = 1300;
     private static final byte DSCP = 46;
     private static final byte RX_PAYLOAD = 99;
     private static final byte TX_PAYLOAD = 97;
     private static final byte SAMPLING_RATE = 16;
+    private static final int MAX_MTU_BYTES = 1500;
     private static final byte PTIME = 20;
     private static final int MAX_PTIME = 240;
     private static final byte CMR = 100;
@@ -122,20 +122,19 @@ public class MediaTestUtils {
 
     static AudioConfig createAudioConfig() {
         return new AudioConfig.Builder()
-                .setMediaDirection(RtpConfig.MEDIA_DIRECTION_TRANSMIT_RECEIVE)
+                .setMediaDirection(RtpConfig.MEDIA_DIRECTION_SEND_RECEIVE)
                 .setAccessNetwork(AccessNetworkType.EUTRAN)
                 .setRemoteRtpAddress(new InetSocketAddress(
                      InetAddresses.parseNumericAddress(REMOTE_RTP_ADDRESS), REMOTE_RTP_PORT))
                 .setRtcpConfig(createRtcpConfig())
-                .setMaxMtuBytes(MAX_MTU_BYTES)
                 .setDscp(DSCP)
                 .setRxPayloadTypeNumber(RX_PAYLOAD)
                 .setTxPayloadTypeNumber(TX_PAYLOAD)
                 .setSamplingRateKHz(SAMPLING_RATE)
                 .setPtimeMillis(PTIME)
                 .setMaxPtimeMillis(MAX_PTIME)
-                .setTxCodecModeRequest(CMR)
                 .setDtxEnabled(DTX_ENABLED)
+                .setCodecModeRequest(CMR)
                 .setCodecType(AudioConfig.CODEC_EVS)
                 .setDtmfPayloadTypeNumber(DTMF_PAYLOAD)
                 .setDtmfSamplingRateKHz(DTMF_SAMPLING_RATE)
@@ -207,18 +206,18 @@ public class MediaTestUtils {
 
     static VideoConfig createVideoConfig() {
         return new VideoConfig.Builder()
-                .setMediaDirection(RtpConfig.MEDIA_DIRECTION_TRANSMIT_RECEIVE)
+                .setMediaDirection(RtpConfig.MEDIA_DIRECTION_SEND_RECEIVE)
                 .setAccessNetwork(AccessNetworkType.EUTRAN)
                 .setRemoteRtpAddress(
                         new InetSocketAddress(
                                 InetAddresses.parseNumericAddress(REMOTE_RTP_ADDRESS),
                                 REMOTE_RTP_PORT))
                 .setRtcpConfig(createRtcpConfig())
-                .setMaxMtuBytes(MAX_MTU_BYTES)
                 .setDscp(DSCP)
                 .setRxPayloadTypeNumber(RX_PAYLOAD)
                 .setTxPayloadTypeNumber(TX_PAYLOAD)
                 .setSamplingRateKHz(SAMPLING_RATE)
+                .setMaxMtuBytes(MAX_MTU_BYTES)
                 .setVideoMode(VideoConfig.VIDEO_MODE_RECORDING)
                 .setCodecType(VideoConfig.VIDEO_CODEC_AVC)
                 .setFramerate(VIDEO_FRAMERATE)

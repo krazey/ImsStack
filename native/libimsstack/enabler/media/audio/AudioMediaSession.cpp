@@ -148,14 +148,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
             android::String8(pDestProfile->objIpAddr.ToString().GetStr()));
     m_objAudioConfig.setRemotePort(pDestProfile->nDataPort);
     m_objAudioConfig.setDscp(m_pConfig->GetRtpDscp());
-    m_objAudioConfig.setMaxMtuBytes(1500);  // TODO_MEDIA NEXT_ITEM
 
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlodId);
-    if (pMediaManager != IMS_NULL)
-    {
-        m_objAudioConfig.setMaxMtuBytes(
-                pMediaManager->GetResourceManager()->GetRtpFragmentSize(pNegoProfile->objIpAddr));
-    }
     m_objAudioConfig.setRxPayloadTypeNumber(pDestPayload->objRtpMap.nPayloadNum);
 
     switch (pNegoProfile->eDirection)
@@ -167,8 +160,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
             m_objAudioConfig.setMediaDirection((int32_t)RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
             break;
         case MEDIA_DIRECTION_SEND_RECEIVE:
-            m_objAudioConfig.setMediaDirection(
-                    (int32_t)RtpConfig::MEDIA_DIRECTION_TRANSMIT_RECEIVE);
+            m_objAudioConfig.setMediaDirection((int32_t)RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
             break;
     }
 
@@ -177,9 +169,8 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
             0);
     IMS_TRACE_D("UpdateRtpConfig() - RemoteAddress[%s], RemotePort[%d]",
             m_objAudioConfig.getRemoteAddress().c_str(), m_objAudioConfig.getRemotePort(), 0);
-    IMS_TRACE_D("UpdateRtpConfig() - Dscp[%d], MaxMtuBytes[%d], MediaDirection[%d]",
-            m_objAudioConfig.getDscp(), m_objAudioConfig.getmaxMtuBytes(),
-            m_objAudioConfig.getMediaDirection());
+    IMS_TRACE_D("UpdateRtpConfig() - Dscp[%d], , MediaDirection[%d]", m_objAudioConfig.getDscp(),
+            m_objAudioConfig.getMediaDirection(), 0);
 
     // RTCP
     RtcpConfig* pRtcpConfig = new RtcpConfig();
@@ -340,7 +331,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
         pEvsParams->setEvsBandwidth(nEvsBandwidth);
 
         m_objAudioConfig.setEvsParams(*pEvsParams);
-        m_objAudioConfig.setTxCodecModeRequest((int8_t)pFmtp->bSendCmr);
+        m_objAudioConfig.setCodecModeRequest((int8_t)pFmtp->bSendCmr);
 
         delete pEvsParams;
 
@@ -350,8 +341,8 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
         IMS_TRACE_D("UpdateRtpConfig() - UseHeaderFullOnlyOnTx[%d], setUseHeaderFullOnlyOnRx[%d]",
                 objEvsParams.getUseHeaderFullOnlyOnTx(), objEvsParams.getUseHeaderFullOnlyOnRx(),
                 0);
-        IMS_TRACE_D("UpdateRtpConfig() - EVS nBandwidth[0x%08x], TxCodecModeRequest[0x%08x]",
-                objEvsParams.getEvsBandwidth(), m_objAudioConfig.getTxCodecModeRequest(), 0);
+        IMS_TRACE_D("UpdateRtpConfig() - EVS nBandwidth[0x%08x], CodecModeRequest[0x%08x]",
+                objEvsParams.getEvsBandwidth(), m_objAudioConfig.getCodecModeRequest(), 0);
     }
     else if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMU") ||
             pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMA"))
@@ -423,8 +414,8 @@ IMS_BOOL AudioMediaSession::IsDirectionHold()
 {
     IMS_UINT32 nDirection = m_objAudioConfig.getMediaDirection();
     IMS_TRACE_D("IsDirectionHold() - m_objAudioConfig direction[%d]", nDirection, 0, 0);
-    return (nDirection == (IMS_UINT32)RtpConfig::MEDIA_DIRECTION_TRANSMIT_RECEIVE) ? IMS_FALSE
-                                                                                   : IMS_TRUE;
+    return (nDirection == (IMS_UINT32)RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE) ? IMS_FALSE
+                                                                               : IMS_TRUE;
 }
 
 PUBLIC
