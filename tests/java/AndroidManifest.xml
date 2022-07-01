@@ -20,6 +20,7 @@
     <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="30"/>
     <uses-permission android:name="android.permission.BIND_IMS_SERVICE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application android:label="ImsStackJavaTests" android:debuggable="true">
         <uses-library android:name="android.test.runner" />
