@@ -330,11 +330,6 @@ PROTECTED VIRTUAL void AosCondition::AddEventListener()
         return;
     }
 
-    if (!GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled())
-    {
-        IMS_EVENT_AddListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
-    }
-
     if (GET_N_CONFIG(m_nSlotId)->IsVoLteRoamingAvailable() == IMS_FALSE ||
             GET_N_CONFIG(m_nSlotId)->IsWfcRoamingEnabled() == IMS_FALSE)
     {
@@ -345,7 +340,6 @@ PROTECTED VIRTUAL void AosCondition::AddEventListener()
 PROTECTED VIRTUAL void AosCondition::RemoveEventListener()
 {
     IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_LTE_INFO, this, m_nSlotId);
-    IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
     IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
 }
 
@@ -509,11 +503,6 @@ PROTECTED VIRTUAL void AosCondition::NConfiguration_NotifyConfigChanged()
     }
 
     m_eServiceType = GetServiceType();
-
-    if (!piNConfig->IsVopsIgnoredForVolteEnabled())
-    {
-        IMS_EVENT_AddListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
-    }
 
     if (!piNConfig->IsVoLteRoamingAvailable() || !piNConfig->IsWfcRoamingEnabled())
     {

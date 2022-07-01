@@ -248,34 +248,8 @@ TEST_F(AosServiceAvailableCellurTest, HandleVolteSettingChanged_VolteSettingFals
     HandleVolteSettingChanged(0);
 }
 
-TEST_F(AosServiceAvailableCellurTest, HandleVopsChange_ReturnByConfig)
-{
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    MockIAosBlock objMockIAosBlock;
-    EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
-
-    HandleVopsChanged(0);
-    HandleVopsChanged(1);
-}
-
 TEST_F(AosServiceAvailableCellurTest, HandleVopsChange_VopsSupport)
 {
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
-            .WillRepeatedly(Return(IMS_FALSE));
-
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
@@ -286,13 +260,6 @@ TEST_F(AosServiceAvailableCellurTest, HandleVopsChange_VopsSupport)
 
 TEST_F(AosServiceAvailableCellurTest, HandleVopsChange_VopsNotSupport)
 {
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
-            .WillRepeatedly(Return(IMS_FALSE));
-
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);

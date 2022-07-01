@@ -136,11 +136,6 @@ void AosServiceAvailableCellular::HandleVopsChanged(IN IMS_UINT32 nState)
 {
     m_bVopsState = (nState == IMS_VOICE_OVER_PS_SUPPORTED) ? IMS_TRUE : IMS_FALSE;
 
-    if (GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled())
-    {
-        return;
-    }
-
     if (m_bVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
         RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AoSReason::NOT_SPECIFIED);
