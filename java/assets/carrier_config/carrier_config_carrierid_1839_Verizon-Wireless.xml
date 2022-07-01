@@ -180,7 +180,6 @@
     <boolean name="imsvt.allow_text_with_video_bool" value="false"/>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
-    <boolean name="enable_voicemail_service_by_paid_header_bool" value="true"/>
     <boolean name="imsvoice.reject_offerless_invite_bool" value="false"/>
     <boolean name="imsvoice.allow_multiple_call_including_video_call_bool" value="true"/>
     <int name="maximum_wait_timer_for_geolocation_pidf_info_millis_int" value="2000"/>

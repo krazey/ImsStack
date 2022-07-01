@@ -164,7 +164,6 @@ public:
     MOCK_METHOD(IMS_SINT32, GetMaximumWaitTimerForGeolocationPidfInfo, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsMaintainMultipleEarlySessionsByForking, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsStopRingbackTimerBy183WithSdpBody, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsEnableVoiceMailServiceByPaidHeader, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetInformationLevelOfGeolocationPidf,
             (IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi), (const, override));
     MOCK_METHOD(IMS_BOOL, IsInitializePemWhenNoHeader, (), (const, override));
