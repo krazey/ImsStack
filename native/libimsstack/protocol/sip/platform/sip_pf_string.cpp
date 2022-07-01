@@ -534,21 +534,22 @@ SIP_INT32 SipPf_Atoi(const SIP_CHAR* pszStr)
     return nValue;
 }
 
-SIP_UINT32 SipPf_Atoi_Unsigned(const SIP_CHAR* pszStr)
+SIP_BOOL SipPf_Atoi_Unsigned(const SIP_CHAR* pszStr, SIP_UINT32& nValue)
 {
+    nValue = SIP_ZERO;
+
     if (pszStr == SIP_NULL)
     {
-        return SIP_ZERO;
+        return SIP_FALSE;
     }
 
     SIP_UINT32 nStrLen = SipPf_Strlen(pszStr);
 
     if (nStrLen > 10) /*2^32 = 4294967296*/
     {
-        return SIP_ZERO;
+        return SIP_FALSE;
     }
 
-    SIP_UINT32 nValue = SIP_ZERO;
     for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nStrLen; ++nIndex)
     {
         if (pszStr[nIndex] >= '0' && pszStr[nIndex] <= '9')
@@ -561,7 +562,7 @@ SIP_UINT32 SipPf_Atoi_Unsigned(const SIP_CHAR* pszStr)
         }
     }
 
-    return nValue;
+    return SIP_TRUE;
 }
 
 SIP_BOOL SipPf_Atoi_IsZero(const SIP_CHAR* pszStr)

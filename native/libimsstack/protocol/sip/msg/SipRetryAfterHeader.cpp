@@ -176,8 +176,7 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     if (SipPf_Atoi_IsZero(pszValue) == SIP_FALSE)
     {
-        m_nDeltaSec = SipPf_Atoi_Unsigned(pszValue);
-        if ((m_nDeltaSec > MAX_CSEQ) || (m_nDeltaSec == SIP_ZERO))
+        if (SipPf_Atoi_Unsigned(pszValue, m_nDeltaSec) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr:Retry After value is not valid",
                     SIP_ZERO, SIP_ZERO);

@@ -38,7 +38,7 @@ TEST_F(SipCSeqHeaderTest, IsValidHeader)
 
     EXPECT_EQ(SIP_TRUE, pHeader->SetMethod("REGISTER"));
 
-    EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
+    EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
     pHeader->SetSeq(99);
 
@@ -67,7 +67,7 @@ TEST_F(SipCSeqHeaderTest, EncodeHdrAndDecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"INVITE", 6));
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)" INVITE", 7));
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"0 INVITE", 8));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"0 INVITE", 8));
 
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"1 INVITE", 8));
 

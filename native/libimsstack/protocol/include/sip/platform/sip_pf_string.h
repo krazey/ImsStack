@@ -299,7 +299,7 @@ SIP_CHAR* SipPf_Strdup(const SIP_CHAR* pszSource);
  ************************************************************/
 SIP_INT32 SipPf_Atoi(const SIP_CHAR* pszSource);
 
-SIP_UINT32 SipPf_Atoi_Unsigned(const SIP_CHAR* pszStr);
+SIP_BOOL SipPf_Atoi_Unsigned(const SIP_CHAR* pszStr, SIP_UINT32& nValue);
 
 SIP_BOOL SipPf_Atoi_IsZero(const SIP_CHAR* pszStr);
 /************************************************************

@@ -72,7 +72,7 @@ SipCSeqHeader::~SipCSeqHeader()
 
 SIP_BOOL SipCSeqHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
 {
-    if (m_pszMethod == SIP_NULL)
+    if (IsValidHeader() == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing CSeq method", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -96,7 +96,7 @@ SIP_BOOL SipCSeqHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) c
  *****************************************************************************/
 SIP_BOOL SipCSeqHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
-    if (m_pszMethod == SIP_NULL)
+    if (IsValidHeader() == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing CSeq Method", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -163,8 +163,7 @@ SIP_BOOL SipCSeqHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    m_nSeq = SipPf_Atoi_Unsigned(pszSeq);
-    if ((m_nSeq > MAX_CSEQ) || (m_nSeq == SIP_ZERO))
+    if (SipPf_Atoi_Unsigned(pszSeq, m_nSeq) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid CSeq Value", SIP_ZERO, SIP_ZERO);
         delete[] pszSeq;
@@ -188,7 +187,7 @@ SIP_BOOL SipCSeqHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
 SIP_BOOL SipCSeqHeader::IsValidHeader() const
 {
-    if ((m_pszMethod == SIP_NULL) || ((m_nSeq > MAX_CSEQ) || (m_nSeq == SIP_ZERO)))
+    if (m_pszMethod == SIP_NULL)
     {
         return SIP_FALSE;
     }
