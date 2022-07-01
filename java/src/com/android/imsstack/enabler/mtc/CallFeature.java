@@ -31,8 +31,14 @@ public final class CallFeature {
     }
 
     public static boolean isAudioEvsSupported(int slotId) {
-        return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean("evs_support_bool");
+        int[] evsCodecs = getConfigInterface(slotId).getCarrierConfig()
+                .getIntArray(CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY);
+
+        if (evsCodecs != null) {
+            return (evsCodecs.length > 0) ? true : false;
+        }
+
+        return false;
     }
 
     /**
@@ -42,8 +48,7 @@ public final class CallFeature {
      * @return true if the carrier supports HEVC, false otherwise.
      */
     public static boolean isVideoHevcSupported(int slotId) {
-        return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean("hevc_support_bool");
+        return false;
     }
 
     public static boolean isCallHoldUsingInactive(int slotId) {
