@@ -279,7 +279,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStartFailed(IN ISession* /* p
 {
     IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
     m_objContext.GetMediaManager().Terminate();
-    m_objContext.GetUiNotifier().SendTerminated(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT));
+    m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT));
 
     return CallStateName::TERMINATING;
 }
