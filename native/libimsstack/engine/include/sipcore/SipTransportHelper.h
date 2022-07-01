@@ -27,7 +27,7 @@
 
 class ISipLocalDnsQueryListener;
 class ISipSocketListener;
-class ISipTransportListener;
+class ISipTransportMessageListener;
 
 /**
  * TCP active connection MUST be created at the start time of raw SIP message transmission.
@@ -60,7 +60,10 @@ public:
     SipSocket* Open(IN const SipSocketAddress& objSockAddr);
     SipSocket* OpenStreamSocket(
             IN const SipSocketAddress& objSockAddr, IN const SipSocketAddress& objFarEnd);
-    void SetListener(IN ISipTransportListener* piListener);
+    inline void SetMessageListener(IN ISipTransportMessageListener* piListener)
+    {
+        m_piMessageListener = piListener;
+    }
 
     // MULTI_REG_TRANSPORT
     IMS_SINT32 AttachClientInitiatedConnection(IN SipSocket* pSocket);
@@ -156,7 +159,7 @@ private:
 
     IMSList<SipSocket*> m_objSockets;
     IMSList<TransportBuffer*> m_objBuffers;
-    ISipTransportListener* m_piListener;
+    ISipTransportMessageListener* m_piMessageListener;
     // MULTI_REG_TRANSPORT :: <Socket object's pointer, count>
     IMSMap<IMS_UINTP, IMS_SINT32> m_objClientInitiatedConnections;
     // LOCAL_DNS_QUERY

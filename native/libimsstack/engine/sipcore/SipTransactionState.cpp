@@ -317,7 +317,7 @@ IMS_BOOL SipTransactionState::IsIpSecRequired() const
 }
 
 PUBLIC
-void SipTransactionState::SetTransportListener(IN ISipTransportErrorListener* piListener)
+void SipTransactionState::SetTransportListener(IN ISipTransportListener* piListener)
 {
     m_pTransport->SetListener(piListener);
 }

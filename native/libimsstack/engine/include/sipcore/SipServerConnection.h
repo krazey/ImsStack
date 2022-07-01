@@ -16,11 +16,13 @@
 #ifndef SIP_SERVER_CONNECTION_H_
 #define SIP_SERVER_CONNECTION_H_
 
+#include "ITimer.h"
+
 #include "SipConnection.h"
 
 class SipServerTransactionState;
 
-class SipServerConnection : public SipConnection
+class SipServerConnection : public SipConnection, public ITimerListener
 {
 public:
     explicit SipServerConnection(IN SipServerTransactionState* pStState);
@@ -49,15 +51,27 @@ public:
     IMS_SINT32 GetHeaderCount(IN const AString& strName) const override;
     void SetSipProfile(IN SipProfile* pProfile) override;
 
-    // ISIPServerTransaction interface
+    // ISipServerConnection interface
     IMS_RESULT InitResponse(IN IMS_SINT32 nStatusCode);
     IMS_RESULT SetReasonPhrase(IN const AString& strReasonPhrase);
     IMS_BOOL IsSameTransaction(IN const SipServerConnection* pOngoingSsc) const;
     IMS_RESULT InitRequest();
 
+protected:
+    // ISipTransportListener interface
+    void Transport_NotifyPendingMessageSent() override;
+    void Transport_NotifyError(IN IMS_SINT32 nCode, IN const AString& strMessage) override;
+
+    // ITimerListener interface
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
+
 private:
     void AdjustTimerHFor2xx();
     void SetState(IN IMS_SINT32 nState);
+
+    void ClosePendingConnection();
+    void StartClosePendingTimer();
+    IMS_BOOL WaitForMessageSent();
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
@@ -75,6 +89,8 @@ public:
 private:
     IMS_SINT32 m_nState;
     RcPtr<SipServerTransactionState> m_pStState;
+    IMS_BOOL m_bClosePending;
+    ITimer* m_piClosePendingTimer;
 };
 
 #endif

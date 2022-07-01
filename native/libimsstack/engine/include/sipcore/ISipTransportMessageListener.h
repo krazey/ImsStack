@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef INTERFACE_SIP_TRANSPORT_ERROR_LISTENER_H_
-#define INTERFACE_SIP_TRANSPORT_ERROR_LISTENER_H_
+#ifndef INTERFACE_SIP_TRANSPORT_MESSAGE_LISTENER_H_
+#define INTERFACE_SIP_TRANSPORT_MESSAGE_LISTENER_H_
 
-#include "AString.h"
+#include "SipTransportAddress.h"
 
-class ISipTransportErrorListener
+class ISipTransportMessageListener
 {
 public:
-    virtual void TransportError_NotifyError(IN IMS_SINT32 nCode, IN const AString& strMessage) = 0;
+    virtual void TransportMessage_PacketReceived(IN IMS_SINT32 nSlotId,
+            IN const ByteArray& objBuffer, IN const SipTransportAddress& objNearEnd,
+            IN const SipTransportAddress& objFarEnd) = 0;
 };
 
 #endif

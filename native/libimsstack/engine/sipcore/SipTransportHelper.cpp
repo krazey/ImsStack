@@ -19,7 +19,7 @@
 #include "ServiceTrace.h"
 
 #include "ISipLocalDnsQueryListener.h"
-#include "ISipTransportListener.h"
+#include "ISipTransportMessageListener.h"
 #include "SipDatagramSocket.h"
 #include "SipDebug.h"
 #include "SipPrivate.h"
@@ -35,7 +35,7 @@ __IMS_TRACE_TAG_SIP__;
 PUBLIC
 SipTransportHelper::SipTransportHelper() :
         EngineActivity(),
-        m_piListener(IMS_NULL),
+        m_piMessageListener(IMS_NULL),
         m_objClientInitiatedConnections(IMSMap<IMS_UINTP, IMS_SINT32>()),
         m_piDnsQueryListener(IMS_NULL)
 {
@@ -82,10 +82,10 @@ PUBLIC VIRTUAL IMS_BOOL SipTransportHelper::DispatchMessage(IN ImsMessage& objMs
 
                 if (pBuffer != IMS_NULL)
                 {
-                    if (m_piListener != IMS_NULL)
+                    if (m_piMessageListener != IMS_NULL)
                     {
-                        m_piListener->Transport_PacketReceived(GetSlotId(), pBuffer->m_objData,
-                                pBuffer->m_objNearEnd, pBuffer->m_objFarEnd);
+                        m_piMessageListener->TransportMessage_PacketReceived(GetSlotId(),
+                                pBuffer->m_objData, pBuffer->m_objNearEnd, pBuffer->m_objFarEnd);
                     }
 
                     m_objBuffers.RemoveAt(0);
@@ -432,12 +432,6 @@ SipSocket* SipTransportHelper::OpenStreamSocket(
     }
 
     return pSocket;
-}
-
-PUBLIC
-void SipTransportHelper::SetListener(IN ISipTransportListener* piListener)
-{
-    m_piListener = piListener;
 }
 
 PUBLIC

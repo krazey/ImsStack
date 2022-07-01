@@ -54,7 +54,7 @@ PUBLIC GLOBAL SipMessageHandler* SipMessageHandler::GetInstance()
     return s_pMessageHandler;
 }
 
-PRIVATE VIRTUAL void SipMessageHandler::Transport_PacketReceived(IN IMS_SINT32 nSlotId,
+PRIVATE VIRTUAL void SipMessageHandler::TransportMessage_PacketReceived(IN IMS_SINT32 nSlotId,
         IN const ByteArray& objBuffer, IN const SipTransportAddress& objNearEnd,
         IN const SipTransportAddress& objFarEnd)
 {

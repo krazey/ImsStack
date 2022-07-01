@@ -16,11 +16,11 @@
 #ifndef SIP_MESSAGE_HANDLER_H_
 #define SIP_MESSAGE_HANDLER_H_
 
-#include "ISipTransportListener.h"
+#include "ISipTransportMessageListener.h"
 
 class SipTransactionState;
 
-class SipMessageHandler : public ISipTransportListener
+class SipMessageHandler : public ISipTransportMessageListener
 {
 private:
     SipMessageHandler();
@@ -35,8 +35,8 @@ public:
     static SipMessageHandler* GetInstance();
 
 private:
-    // ISipTransportListener interface
-    void Transport_PacketReceived(IN IMS_SINT32 nSlotId, IN const ByteArray& objBuffer,
+    // ISipTransportMessageListener interface
+    void TransportMessage_PacketReceived(IN IMS_SINT32 nSlotId, IN const ByteArray& objBuffer,
             IN const SipTransportAddress& objNearEnd,
             IN const SipTransportAddress& objFarEnd) override;
 

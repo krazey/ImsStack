@@ -16,13 +16,13 @@
 #ifndef INTERFACE_SIP_TRANSPORT_LISTENER_H_
 #define INTERFACE_SIP_TRANSPORT_LISTENER_H_
 
-#include "SipTransportAddress.h"
+#include "AString.h"
 
 class ISipTransportListener
 {
 public:
-    virtual void Transport_PacketReceived(IN IMS_SINT32 nSlotId, IN const ByteArray& objBuffer,
-            IN const SipTransportAddress& objNearEnd, IN const SipTransportAddress& objFarEnd) = 0;
+    virtual void Transport_NotifyPendingMessageSent() = 0;
+    virtual void Transport_NotifyError(IN IMS_SINT32 nCode, IN const AString& strMessage) = 0;
 };
 
 #endif
