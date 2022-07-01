@@ -3,6 +3,7 @@ package com.android.imsstack.imsservice.mmtel;
 import android.os.Bundle;
 import android.os.Message;
 import android.telephony.ims.ImsCallProfile;
+import android.telephony.ims.ImsExternalCallState;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
 import android.telephony.ims.feature.ImsFeature;
@@ -16,7 +17,6 @@ import android.telephony.ims.stub.ImsUtImplBase;
 
 import com.android.ims.ImsManager;
 import com.android.imsstack.enabler.IContext;
-import com.android.imsstack.external.ims.ImsDialogState;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.util.ImsLog;
@@ -383,7 +383,7 @@ public class ImsMmTelService extends MmTelFeature
         }
 
         @Override
-        public void onImsDialogStateChanged(ImsDialogState dialogState) {
+        public void onImsDialogStateChanged(List<ImsExternalCallState> externalCallDialogs) {
             ImsCallApp callApp = getCallApp();
             //FIXME: updateDialogState to multiendpoint
         }
