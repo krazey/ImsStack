@@ -191,6 +191,7 @@
         <item value="2"/>
         <item value="4"/>
     </int-array>
+    <boolean name="use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="true"/>
 
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">USER;text=&quot;User Triggered&quot;</string>

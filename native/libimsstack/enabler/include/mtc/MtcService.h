@@ -17,15 +17,17 @@
 #ifndef MTC_SERVICE_H_
 #define MTC_SERVICE_H_
 
+#include <memory>
 #include "AString.h"
 #include "ICoreService.h"
 #include "ICoreServiceListener.h"
 #include "IImsAosListener.h"
 #include "IImsAosMonitor.h"
 #include "ImsService.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "IMtcContext.h"
 #include "IMtcService.h"
+#include "MtcRoutingRejectHandler.h"
 #include "helper/SrvccEventHandler.h"
 #include "helper/MtcAosEventHandler.h"
 #include "helper/MtcAosConnector.h"
@@ -40,7 +42,6 @@ class MtcService :
         public ICoreServiceListener,
         public IImsAosListener,
         public IImsAosMonitor
-// public ISipRoutingRejectListener
 {
 public:
     MtcService(IN IMtcContext& objContext, IN ServiceType eType);
@@ -94,14 +95,6 @@ public:
     void ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpcan) override;
     void ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
 
-    // ISipRoutingRejectListener
-    /*
-    IMS_BOOL RoutingReject_NotifyRequest(IN ISipMessage* piSIPMsg,
-            IN_OUT SipStatusCode& objStatusCode);
-    IMS_BOOL RoutingReject_NotifyRequest(IN ISipServerConnection* piSSC,
-            IN_OUT SipStatusCode& objStatusCode);
-    */
-
 private:
     void Init();
     AString GetServiceName(IN ServiceType eType) const;
@@ -120,6 +113,7 @@ private:
     MtcAosEventHandler m_objAosEventHandler;
     SrvccEventHandler m_objSrvccEventHandler;
     JniMtcService* m_pJniService;
+    std::unique_ptr<MtcRoutingRejectHandler> m_pRoutingRejectHandler;
     IMS_BOOL m_bTerminalBasedCallWaitingEnabled;
 };
 

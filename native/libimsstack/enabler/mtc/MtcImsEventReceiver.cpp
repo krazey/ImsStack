@@ -135,6 +135,8 @@ void MtcImsEventReceiver::RegisterSupportedEvents()
     RegisterEvent(IMS_EVENT_REG_CONTROL);
     RegisterEvent(IMS_EVENT_ROAMING_STATE);
     RegisterEvent(IMS_EVENT_RTT_SETTING);
+    RegisterEvent(IMS_EVENT_VOLTE_SETTING);
+    RegisterEvent(IMS_EVENT_WFC_SETTING_CHANGED);
 }
 
 PRIVATE

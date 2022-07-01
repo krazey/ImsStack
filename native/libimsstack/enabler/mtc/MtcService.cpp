@@ -16,27 +16,29 @@
 
 #include "AString.h"
 #include "Connector.h"
-#include "ServiceTrace.h"
-#include "IIpcan.h"
-#include "ImsCore.h"
-#include "ImsServiceConfig.h"
-#include "IImsAos.h"
-#include "ImsAos.h"
-#include "ImsAosParameter.h"
 #include "ICapabilities.h"
 #include "ICoreService.h"
-#include "IServiceFilterCriteria.h"
+#include "IImsAos.h"
+#include "IIpcan.h"
+#include "ImsAos.h"
+#include "ImsAosParameter.h"
+#include "ImsCore.h"
+#include "ImsServiceConfig.h"
+#include "IMtcCallController.h"
 #include "IMtcService.h"
+#include "IServiceFilterCriteria.h"
+#include "ISipRoutingRejectNotifier.h"
 #include "JniConnectorFactory.h"
 #include "JniMtcService.h"
 #include "JniMtcServiceThread.h"
-#include "helper/MtcCapabilityQueryHandler.h"
-#include "MtcService.h"
-#include "helper/MtcAosConnector.h"
-#include "configuration/MtcConfigurationProxy.h"
-#include "IMtcCallController.h"
-#include "helper/SrvccEventHandler.h"
 #include "MtcEmergencyServiceManager.h"
+#include "MtcService.h"
+#include "ServiceTrace.h"
+#include "SipFactory.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "helper/MtcAosConnector.h"
+#include "helper/MtcCapabilityQueryHandler.h"
+#include "helper/SrvccEventHandler.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -52,6 +54,7 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_objAosEventHandler(MtcAosEventHandler(*this, objContext.GetConfigurationProxy())),
         m_objSrvccEventHandler(SrvccEventHandler(objContext)),
         m_pJniService(IMS_NULL),
+        m_pRoutingRejectHandler(nullptr),
         m_bTerminalBasedCallWaitingEnabled(IMS_TRUE/*m_objContext.GetConfigurationProxy().Is(
                 Feature::TERMINAL_BASED_CALL_WAIT_DEFAULT_ENABLED)*/)
 {
@@ -81,13 +84,17 @@ PUBLIC VIRTUAL MtcService::~MtcService()
 
     IImsAos* piImsAos = ImsAos::GetImsAos(ImsServiceConfig::GetAppName(ImsAppId::MTC),
             m_strServiceName, m_objContext.GetSlotId());
-
-    if (piImsAos == IMS_NULL)
+    if (piImsAos != IMS_NULL)
     {
-        IMS_TRACE_E(0, "piImsAos is NULL", 0, 0, 0);
-        return;
+        piImsAos->SetListener(IMS_NULL);
     }
-    piImsAos->SetListener(IMS_NULL);
+
+    if (m_pRoutingRejectHandler)
+    {
+        ISipRoutingRejectNotifier* piRoutingRejectNotifier =
+                SipFactory::GetRoutingRejectNotifier(m_objContext.GetSlotId());
+        piRoutingRejectNotifier->RemoveListener(m_pRoutingRejectHandler.get());
+    }
 }
 
 PUBLIC VIRTUAL void MtcService::AddSrvccStateListener(IN ISrvccStateListener* piListener)
@@ -257,6 +264,16 @@ void MtcService::Init()
     }
     AttachCoreServiceInterface();
     AttachAosInterface();
+
+    if (m_objContext.GetConfigurationProxy().Is(Feature::
+            USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION))
+    {
+        m_pRoutingRejectHandler = std::make_unique<MtcRoutingRejectHandler>(m_objContext);
+
+        ISipRoutingRejectNotifier* piRoutingRejectNotifier =
+                SipFactory::GetRoutingRejectNotifier(m_objContext.GetSlotId());
+        piRoutingRejectNotifier->AddListener(m_pRoutingRejectHandler.get());
+    }
 }
 
 PRIVATE
