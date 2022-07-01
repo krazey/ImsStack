@@ -330,8 +330,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByAsset(
             CarrierConfig::Assets::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL);
     objItems.bStopRingbackTimerBy183WithSdpBody = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL);
-    objItems.bEnableVoiceMailServiceByPaidHeader = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_ENABLE_VOICEMAIL_SERVICE_BY_PAID_HEADER_BOOL);
     objItems.objInformationLevelOfGeolocationPidfs = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY);
     objItems.bInitializePemWhenNoHeader = piCc->GetBoolean(

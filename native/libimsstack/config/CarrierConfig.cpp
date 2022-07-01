@@ -1009,8 +1009,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FO
         "maintain_multiple_early_sessions_by_forking_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL[] =
         "stop_ringback_timer_by_183_with_sdp_body_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_ENABLE_VOICEMAIL_SERVICE_BY_PAID_HEADER_BOOL[] =
-        "enable_voicemail_service_by_paid_header_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY[] =
         "information_level_of_geolocation_pidf_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[] =

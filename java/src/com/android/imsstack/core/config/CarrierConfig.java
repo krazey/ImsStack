@@ -731,8 +731,6 @@ public class CarrierConfig {
                 "maintain_multiple_early_sessions_by_forking_bool";
         public static final String KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL =
                 "stop_ringback_timer_by_183_with_sdp_body_bool";
-        public static final String KEY_ENABLE_VOICEMAIL_SERVICE_BY_PAID_HEADER_BOOL =
-                "enable_voicemail_service_by_paid_header_bool";
         public static final String KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY =
                 "information_level_of_geolocation_pidf_int_array";
         public static final String KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL =

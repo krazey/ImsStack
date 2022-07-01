@@ -178,7 +178,6 @@ public:
     virtual IMS_SINT32 GetMaximumWaitTimerForGeolocationPidfInfo() const = 0;
     virtual IMS_BOOL IsMaintainMultipleEarlySessionsByForking() const = 0;
     virtual IMS_BOOL IsStopRingbackTimerBy183WithSdpBody() const = 0;
-    virtual IMS_BOOL IsEnableVoiceMailServiceByPaidHeader() const = 0;
     virtual IMS_SINT32 GetInformationLevelOfGeolocationPidf(
             IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) const = 0;
     virtual IMS_BOOL IsInitializePemWhenNoHeader() const = 0;

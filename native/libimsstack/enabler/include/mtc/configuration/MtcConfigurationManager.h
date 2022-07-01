@@ -164,7 +164,6 @@ public:
     IMS_SINT32 GetMaximumWaitTimerForGeolocationPidfInfo() const override;
     IMS_BOOL IsMaintainMultipleEarlySessionsByForking() const override;
     IMS_BOOL IsStopRingbackTimerBy183WithSdpBody() const override;
-    IMS_BOOL IsEnableVoiceMailServiceByPaidHeader() const override;
     IMS_SINT32 GetInformationLevelOfGeolocationPidf(
             IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) const override;
     IMS_BOOL IsInitializePemWhenNoHeader() const override;

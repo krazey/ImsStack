@@ -788,12 +788,6 @@ IMS_BOOL MtcConfigurationManager::IsStopRingbackTimerBy183WithSdpBody() const
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::IsEnableVoiceMailServiceByPaidHeader() const
-{
-    return m_objAsset.bEnableVoiceMailServiceByPaidHeader;
-}
-
-PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetInformationLevelOfGeolocationPidf(
         IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) const
 {

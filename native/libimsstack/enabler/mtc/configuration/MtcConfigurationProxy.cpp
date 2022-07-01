@@ -164,8 +164,6 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_pManager->IsMaintainMultipleEarlySessionsByForking();
         case Feature::STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY:
             return m_pManager->IsStopRingbackTimerBy183WithSdpBody();
-        case Feature::ENABLE_VOICE_MAIL_SERVICE_BY_PAID_HEADER:
-            return m_pManager->IsEnableVoiceMailServiceByPaidHeader();
         case Feature::INITIALIZE_PEM_WHEN_NO_HEADER:
             return m_pManager->IsInitializePemWhenNoHeader();
         case Feature::SEND_180_FOR_INITIAL_INVITE:
