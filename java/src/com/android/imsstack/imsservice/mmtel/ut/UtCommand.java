@@ -21,8 +21,8 @@ import android.telephony.ims.ImsReasonInfo;
 
 import com.android.imsstack.core.agents.Usat;
 import com.android.imsstack.core.agents.UsatInterface;
-import com.android.imsstack.core.agents.dcm.DCFactory;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.ssc.SscConstant;
 import com.android.imsstack.enabler.ssc.SscServiceClassUtil;
@@ -283,7 +283,7 @@ public final class UtCommand {
     }
 
     private int getNetworkTypeForUsat() {
-        IDCNetWatcher dcnw = (IDCNetWatcher) DCFactory.getDC(DCFactory.NETWORK_WATCHER,
+        IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER,
                 mContext.getSlotId());
         int networkType = (dcnw != null)
                 ? dcnw.getNetworkType() : TelephonyManager.NETWORK_TYPE_UNKNOWN;
