@@ -27,11 +27,11 @@ class ICoreService;
 class IReference;
 class IInterfaceHolderListener;
 
-class ReferenceInterfaceHolder final : public IReferenceListener, public ITimerListener
+class ReferenceInterfaceHolder : public IReferenceListener, public ITimerListener
 {
 public:
     explicit ReferenceInterfaceHolder(IN IInterfaceHolderListener& objListener);
-    ~ReferenceInterfaceHolder();
+    virtual ~ReferenceInterfaceHolder();
     ReferenceInterfaceHolder(IN const ReferenceInterfaceHolder&) = delete;
     ReferenceInterfaceHolder& operator=(IN const ReferenceInterfaceHolder&) = delete;
 
@@ -45,10 +45,10 @@ public:
     // ITimerListener interfaces implementation.
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-    IReference* GetIReference(
+    virtual IReference* GetIReference(
             IN ISession* piSession, IN const AString& strReferTo, IN const AString& strMethod);
 
-    void ReleaseIReference(IN IReference* piReference, IN IMS_BOOL bTerminated = IMS_FALSE);
+    virtual void ReleaseIReference(IN IReference* piReference, IN IMS_BOOL bTerminated = IMS_FALSE);
 
 private:
     IMS_BOOL IsReadyToDestroy(IN IReference* piReference);

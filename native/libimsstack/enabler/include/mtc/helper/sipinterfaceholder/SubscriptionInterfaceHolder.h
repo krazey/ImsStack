@@ -27,11 +27,11 @@ class ICoreService;
 class ISubscription;
 class IInterfaceHolderListener;
 
-class SubscriptionInterfaceHolder final : public ISubscriptionListener, public ITimerListener
+class SubscriptionInterfaceHolder : public ISubscriptionListener, public ITimerListener
 {
 public:
     explicit SubscriptionInterfaceHolder(IN IInterfaceHolderListener& objListener);
-    ~SubscriptionInterfaceHolder();
+    virtual ~SubscriptionInterfaceHolder();
     SubscriptionInterfaceHolder(IN const SubscriptionInterfaceHolder&) = delete;
     SubscriptionInterfaceHolder& operator=(IN const SubscriptionInterfaceHolder&) = delete;
 
@@ -46,11 +46,11 @@ public:
     // ITimerListener interfaces implementation.
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-    ISubscription* GetISubscription(IN ISession* piSession, IN const AString& strEvent);
-    ISubscription* GetISubscription(IN ICoreService* piCoreService, IN const AString& strFrom,
-            IN const AString& strTo, IN const AString& strEvent);
+    virtual ISubscription* GetISubscription(IN ISession* piSession, IN const AString& strEvent);
+    virtual ISubscription* GetISubscription(IN ICoreService* piCoreService,
+            IN const AString& strFrom, IN const AString& strTo, IN const AString& strEvent);
 
-    void ReleaseISubscription(
+    virtual void ReleaseISubscription(
             IN ISubscription* piSubscription, IN IMS_BOOL bTerminated = IMS_FALSE);
 
 private:
