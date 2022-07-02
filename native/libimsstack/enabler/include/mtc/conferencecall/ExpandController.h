@@ -31,7 +31,7 @@ class ExpandController final : public ConferenceController
 {
 public:
     explicit ExpandController(IN CallKey nConfCallKey, IMtcContext& objContext,
-            IN CallConnectionIdManager& objConnectionIdManager);
+            IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory);
     virtual ~ExpandController();
     ExpandController(IN const ExpandController&) = delete;
     ExpandController& operator=(IN const ExpandController&) = delete;

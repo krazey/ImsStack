@@ -18,6 +18,7 @@
 
 #include "IMtcContext.h"
 #include "conferencecall/ConferenceManager.h"
+#include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceController.h"
 #include "conferencecall/MergeController.h"
 #include "conferencecall/GroupCallController.h"
@@ -29,6 +30,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 ConferenceManager::ConferenceManager(IN IMtcContext& objContext) :
         m_objContext(objContext),
+        m_objConferenceFactory(ConferenceFactory(objContext)),
         m_objControllers(IMSMap<CallKey, ConferenceController*>()),
         m_objDestroyer(ObjectAsyncDestroyer<ConferenceController>()),
         m_objCallConnectionIdManager(CallConnectionIdManager(objContext))
@@ -68,24 +70,26 @@ IConferenceController& ConferenceManager::CreateController(
     switch (eType)
     {
         case ConferenceType::PARTICIPANT:
-            pController =
-                    new ConferenceController(nCallKey, m_objContext, m_objCallConnectionIdManager);
+            pController = new ConferenceController(
+                    nCallKey, m_objContext, m_objCallConnectionIdManager, m_objConferenceFactory);
             break;
         case ConferenceType::GROUP_CALL:
-            pController =
-                    new GroupCallController(nCallKey, m_objContext, m_objCallConnectionIdManager);
+            pController = new GroupCallController(
+                    nCallKey, m_objContext, m_objCallConnectionIdManager, m_objConferenceFactory);
             break;
         case ConferenceType::MERGE_CALL:
-            pController = new MergeController(nCallKey, m_objContext, m_objCallConnectionIdManager);
+            pController = new MergeController(
+                    nCallKey, m_objContext, m_objCallConnectionIdManager, m_objConferenceFactory);
             break;
         case ConferenceType::EXPAND_CALL:
-            pController =
-                    new ExpandController(nCallKey, m_objContext, m_objCallConnectionIdManager);
+            pController = new ExpandController(
+                    nCallKey, m_objContext, m_objCallConnectionIdManager, m_objConferenceFactory);
             break;
 
         default:
             IMS_TRACE_E(0, "invalid conference manager type. Create MergeController", 0, 0, 0);
-            pController = new MergeController(nCallKey, m_objContext, m_objCallConnectionIdManager);
+            pController = new MergeController(
+                    nCallKey, m_objContext, m_objCallConnectionIdManager, m_objConferenceFactory);
             break;
     }
 

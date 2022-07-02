@@ -25,8 +25,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 GroupCallController::GroupCallController(IN CallKey nConfCallKey, IMtcContext& objContext,
-        IN CallConnectionIdManager& objConnectionIdManager) :
-        ConferenceController(nConfCallKey, objContext, objConnectionIdManager)
+        IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory) :
+        ConferenceController(nConfCallKey, objContext, objConnectionIdManager, objFactory)
 {
     IMS_TRACE_I("+GroupCallController", 0, 0, 0);
 }
