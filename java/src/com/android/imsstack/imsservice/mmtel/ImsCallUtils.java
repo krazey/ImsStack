@@ -11,7 +11,6 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
@@ -32,13 +31,9 @@ import com.android.imsstack.enabler.mtc.MtcCallInfo;
 import com.android.imsstack.enabler.mtc.MtcCallUtils;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
-import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
-import com.android.imsstack.external.ims.ImsDialog;
-import com.android.imsstack.external.ims.ImsDialogState;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.ImsConstants;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -273,41 +268,6 @@ public class ImsCallUtils {
         participant.putInt(ImsCallUtils.DISCONNECTED_CAUSE, disconnectedCause);
 
         return participant;
-    }
-
-    public static ImsDialogState createDialogState(DialogsInfo di) {
-        ArrayList<DialogsInfo.Dialog> dialogs = di.dialogs;
-        ArrayList<ImsDialog> imsDialogs = new ArrayList<ImsDialog>();
-
-        if (dialogs.isEmpty()) {
-            return new ImsDialogState(imsDialogs);
-        }
-
-        for (int i = 0; i < dialogs.size(); ++i) {
-            imsDialogs.add(createImsDialog(dialogs.get(i)));
-        }
-
-        return new ImsDialogState(imsDialogs);
-    }
-
-    public static ImsDialog createImsDialog(DialogsInfo.Dialog d) {
-        int direction = d.initiator ?
-                ImsDialog.DIRECTION_INITIATOR : ImsDialog.DIRECTION_RECIPIENT;
-
-        ImsDialog.State state = new ImsDialog.State(
-                getDialogStateFromDialogsInfo(d.state), d.reason, d.code);
-
-        String number = (d.localNumber == null) ? "" : d.localNumber;
-        ImsDialog.Participant local = new ImsDialog.Participant(
-                d.localName, Uri.parse(number), d.isConf, null);
-
-        number = (d.remoteNumber == null) ? "" : d.remoteNumber;
-        ImsDialog.Participant remote = new ImsDialog.Participant(
-                d.remoteName, Uri.parse(number), d.isConf, null);
-
-        return new ImsDialog(d.id, direction,
-                state, local, remote,
-                d.enablePull, ImsCallMediaUtils.createMediaProfileFromMediaInfo(d.mediaInfo));
     }
 
     /**
@@ -885,26 +845,6 @@ public class ImsCallUtils {
         }
 
         return ImsSuppInfoUtils.getCallExtraNameForString(context, suppInfo);
-    }
-
-    private static int getDialogStateFromDialogsInfo(int state) {
-        switch (state) {
-            case DialogsInfo.DIALOG_STATE_TRYING:
-                return ImsDialog.State.STATE_TRYING;
-            case DialogsInfo.DIALOG_STATE_PROCEEDING:
-                return ImsDialog.State.STATE_PROCEEDING;
-            case DialogsInfo.DIALOG_STATE_EARLY:
-                return ImsDialog.State.STATE_EARLY;
-            case DialogsInfo.DIALOG_STATE_CONFIRMED:
-                return ImsDialog.State.STATE_CONFIRMED;
-            case DialogsInfo.DIALOG_STATE_TERMINATED:
-                return ImsDialog.State.STATE_TERMINATED;
-            case DialogsInfo.DIALOG_STATE_ONHOLD:
-                return ImsDialog.State.STATE_ON_HOLD;
-            case DialogsInfo.DIALOG_STATE_IDLE: // FALL-THROUGH
-            default:
-                return ImsDialog.State.STATE_IDLE;
-        }
     }
 
     private static int getEmergencyServiceCode(int code) {

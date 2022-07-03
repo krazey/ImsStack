@@ -26,7 +26,6 @@ import com.android.imsstack.enabler.mtc.IncomingCallInfo;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
-import com.android.imsstack.external.ims.ImsDialogState;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.internal.SrvccStateTracker;
@@ -786,18 +785,7 @@ public class ImsCallManager {
     private class MtcAppCallListenerProxy extends MtcApp.CallListener {
         @Override
         public void onDialogStateChanged(MtcApp app, DialogsInfo dialogsInfo) {
-            final ImsDialogState dialogState = ImsCallUtils.createDialogState(dialogsInfo);
-
-            postAndRunTask(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mMmTelCallListener.onImsDialogStateChanged(dialogState);
-                    } catch (Throwable t) {
-                        loge("Exception: " + t.toString(), t);
-                    }
-                }
-            });
+            //To-Do: Once MultiEndPoint implementation done will call its method.
         }
 
         @Override
