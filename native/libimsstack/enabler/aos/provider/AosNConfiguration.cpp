@@ -349,6 +349,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencySmsOverImsSupported() cons
     return m_objCarrierConfig.bSupportEmergencySmsOverIms;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsContactUriValidationChecked() const
+{
+    return m_objAsset.bRegistrationContactValidation;
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);

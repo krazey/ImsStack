@@ -57,6 +57,7 @@
         <item value="5"/>
         <item value="6"/>
     </int-array>
+    <boolean name="registration_contact_validation_bool" value="true"/>
     <!-- KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
     <int-array name="event_for_initial_registration_on_terminated_state_of_reg_event_int_array" num="4">
         <item value="1"/>

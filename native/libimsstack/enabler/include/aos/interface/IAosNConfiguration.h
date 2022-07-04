@@ -361,6 +361,15 @@ public:
     virtual IMS_BOOL IsEmergencySmsOverImsSupported() const = 0;
 
     /**
+     * @brief Returns flag indicating whether the Contact URI validation is checked
+     *        when the 200 OK response for SIP REGISTER is received.
+     *        If the Contact URI is not matched, the 200 OK response is disregarded.
+     *
+     * @return IMS_BOOL Return whether to be checked or not
+     */
+    virtual IMS_BOOL IsContactUriValidationChecked() const = 0;
+
+    /**WW
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5

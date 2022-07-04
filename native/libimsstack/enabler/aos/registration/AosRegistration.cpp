@@ -308,6 +308,8 @@ PUBLIC VIRTUAL void AosRegistration::Reconfig()
 
 PUBLIC VIRTUAL void AosRegistration::Destroy()
 {
+    SetContactAddressConfiguration(IMS_FALSE);
+
     ClearRegParameters();
 
     DestroyRegistration();
@@ -1150,6 +1152,8 @@ PROTECTED VIRTUAL void AosRegistration::CleanUp()
 
 PROTECTED VIRTUAL void AosRegistration::DestroyEx()
 {
+    SetContactAddressConfiguration(IMS_FALSE);
+
     ClearRegParameters(IMS_FALSE);
 
     DestroyRegistration();
@@ -1698,6 +1702,8 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SendRegister(
         return IMS_FALSE;
     }
 
+    SetContactAddressConfiguration(IMS_FALSE);
+
     if (bRestore)
     {
         m_piRegistration->Restore();
@@ -1723,6 +1729,8 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SendRegister(
         A_IMS_TRACE_I(REGID, "register is failed", 0, 0, 0);
         return IMS_FALSE;
     }
+
+    SetContactAddressConfiguration(IMS_TRUE);
 
     return IMS_TRUE;
 }
@@ -5197,6 +5205,47 @@ void AosRegistration::ProcessImsiBasedSubscriber()
     {
         Destroy();
         ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_FORBIDDEN);
+    }
+}
+
+PRIVATE
+void AosRegistration::SetContactAddressConfiguration(IN IMS_BOOL bAdd)
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsContactUriValidationChecked())
+    {
+        return;
+    }
+
+    ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(m_nSlotId);
+
+    if (piRtConfigHelper == IMS_NULL)
+    {
+        return;
+    }
+
+    if (bAdd)
+    {
+        if (m_piRegistration == IMS_NULL)
+        {
+            return;
+        }
+
+        ISipMessage* piMessage = m_piRegistration->GetPreviousRequest();
+
+        if (piMessage == IMS_NULL)
+        {
+            return;
+        }
+
+        SipRtConfig::RegContactAddress objContactAddress;
+
+        objContactAddress.objUri = m_piRegistration->GetPreferredContact()->GetContactAddress();
+        objContactAddress.strCallId = piMessage->GetHeader(ISipHeader::CALL_ID);
+        piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_REG_CONTACT_ADDRESS, &objContactAddress);
+    }
+    else
+    {
+        piRtConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_REG_CONTACT_ADDRESS, IMS_NULL);
     }
 }
 

@@ -381,6 +381,7 @@ private:
     void ControlPrivateHeader();
     IMS_UINT32 GetSpecificErrWaitTime();
     void ProcessImsiBasedSubscriber();
+    void SetContactAddressConfiguration(IN IMS_BOOL bAdd);
     void SetPlaniHeader();
     void UpdateUserInfoInContact();
     void UpdateRegIpcanCategory();
