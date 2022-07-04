@@ -54,6 +54,7 @@ cc_test {
     local_include_dirs: [
         "enabler/include/aos",
         "enabler/include/mtc",
+        "engine/interface",
     ],
     header_libs: [
         "libimsstack_config_headers",

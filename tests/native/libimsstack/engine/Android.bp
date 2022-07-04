@@ -12,6 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Do not add additional include paths with three depths.
+cc_library_headers {
+    name: "libimsstack_test_engine_headers",
+    export_include_dirs: [
+        "interface",
+        "interface/core",
+        "interface/registration",
+        "interface/sipcore",
+    ],
+}
+
 cc_defaults {
     name: "imsstack_native_test_engine_defaults",
     defaults: [
