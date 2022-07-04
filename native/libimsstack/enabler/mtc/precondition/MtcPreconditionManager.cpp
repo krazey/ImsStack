@@ -876,8 +876,11 @@ void MtcPreconditionManager::HandleQosTimer(
 
     if (eCurrStatus == QosStatus::IDLE && eNewStatus == QosStatus::AVAILABLE)
     {
-        StopQosTimer(piSession);
-        StopQosTimer(piSession, QosTimerType::FORCE_AVAILABLE);
+        if (IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS))
+        {
+            StopQosTimer(piSession);
+            StopQosTimer(piSession, QosTimerType::FORCE_AVAILABLE);
+        }
     }
     else if (eCurrStatus == QosStatus::AVAILABLE && eNewStatus == QosStatus::LOST)
     {
