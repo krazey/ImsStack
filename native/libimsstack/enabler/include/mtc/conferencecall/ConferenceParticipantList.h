@@ -26,7 +26,7 @@
 class CallConnectionIdManager;
 class IMtcCallManager;
 
-class ConferenceParticipantList final
+class ConferenceParticipantList
 {
 public:
     struct ConferenceParticipant
@@ -126,36 +126,36 @@ public:
 
     void AddUser(IN const ConfUser* pConfUser);
     void RemoveUser(IN const ConfUser* pConfUser);
-    ConfUser* GetConfUser(IN IConferenceReference* piConfReference) const;
+    virtual ConfUser* GetConfUser(IN IConferenceReference* piConfReference) const;
 
-    IMS_BOOL IsConnectedUser(
+    virtual IMS_BOOL IsConnectedUser(
             IN const ConfUser* pConfUser, IN IMS_BOOL bIncludingConnecting = IMS_FALSE) const;
 
     // the order of this ConfUser is same with the order of REFER sent.
-    IMSList<ConfUser*> GetConfUsers(IN IMS_BOOL bCopy = IMS_FALSE) const;
+    virtual IMSList<ConfUser*> GetConfUsers(IN IMS_BOOL bCopy = IMS_FALSE) const;
 
     void SetReference(IN IConferenceReference* piReference, IN const ConfUser* pConfUser);
-    IConferenceReference* GetReference(IN const ConfUser* pConfUser) const;
+    virtual IConferenceReference* GetReference(IN const ConfUser* pConfUser) const;
     void ResetReference(IN IConferenceReference* piConfReference);
 
     void SetReferInviteUri(IN AString strReferInviteUri, IN const ConfUser* pConfUser);
     AString GetReferInviteUri(IN const ConfUser* pConfUser);
 
-    IMS_SINT32 FindParticipant(IN IMS_UINT32 nConnectionId);
+    virtual IMS_SINT32 FindParticipant(IN IMS_UINT32 nConnectionId);
     void ReOrder(
             IN IMtcCallManager& objCallManager, IN CallConnectionIdManager& objConnectionIdManager);
     void Login();
 
-    inline IMS_UINT32 GetSize() const { return m_objParticipants.GetSize(); }
+    virtual inline IMS_UINT32 GetSize() const { return m_objParticipants.GetSize(); }
 
-    inline ConferenceParticipant* GetAt(IN IMS_UINT32 nAt)  // t.t
+    virtual inline ConferenceParticipant* GetAt(IN IMS_UINT32 nAt)
     {
         return m_objParticipants.GetAt(nAt);
     }
 
-    ConfUser* GetConfUser(IN IMS_UINT32 nIndex) const;
+    virtual ConfUser* GetConfUser(IN IMS_UINT32 nIndex) const;
 
-    IMS_UINT32 GetConnectedParticipantSize(IN IMS_BOOL bIncludingConnecting = IMS_FALSE);
+    virtual IMS_UINT32 GetConnectedParticipantSize(IN IMS_BOOL bIncludingConnecting = IMS_FALSE);
 
 private:
     IMS_SINT32 FindParticipant(IN const ConfUser* pConfUser) const;

@@ -24,11 +24,11 @@
 class IMtcContext;
 class IConferenceController;
 
-class CallConnectionIdManager final : public IMtcCallStateListener
+class CallConnectionIdManager : public IMtcCallStateListener
 {
 public:
     explicit CallConnectionIdManager(IN IMtcContext& objContext);
-    ~CallConnectionIdManager();
+    virtual ~CallConnectionIdManager();
     CallConnectionIdManager(IN const CallConnectionIdManager&) = delete;
     CallConnectionIdManager& operator=(IN const CallConnectionIdManager&) = delete;
 
@@ -42,7 +42,7 @@ public:
     void OnConferenceParticipantDisconnected(IN IMS_UINT32 nConnectionId);
 
     IMS_SINT32 GetIndex(IN CallKey nKey);
-    CallKey GetCallKey(IN IMS_UINT32 nConnectionId);
+    virtual CallKey GetCallKey(IN IMS_UINT32 nConnectionId);
 
 private:
     // TODO: GetNewConnectionId?

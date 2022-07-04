@@ -42,7 +42,7 @@ ConferenceController::ConferenceController(IN CallKey nConfCallKey, IMtcContext&
         m_objCallManager(objContext.GetCallManager()),
         m_objConnectionIdManager(objConnectionIdManager),
         m_objFactory(objFactory),
-        m_objParticipantList(*objFactory.CreateParcitipantList()),
+        m_objParticipantList(*objFactory.CreateParticipantList()),
         m_objNotifier(*objFactory.CreateEventNotifier(
                 GetConferenceCall()->GetCallContext(), objConnectionIdManager)),
         m_objOperationQueue(*objFactory.CreateOperatrionQueue()),

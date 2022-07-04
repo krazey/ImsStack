@@ -49,7 +49,7 @@ public:
     IMSMap<SuppType, SuppService*>& objSuppServices;
 };
 
-class ConferenceOperationQueue final : public ITimerListener
+class ConferenceOperationQueue : public ITimerListener
 {
 public:
     struct ConferenceOperation
@@ -114,7 +114,7 @@ public:
 
 public:
     explicit ConferenceOperationQueue();
-    ~ConferenceOperationQueue();
+    virtual ~ConferenceOperationQueue();
     ConferenceOperationQueue(IN const ConferenceOperationQueue&) = delete;
     ConferenceOperationQueue& operator=(IN const ConferenceOperationQueue&) = delete;
 
@@ -124,28 +124,28 @@ public:
     void SetListener(IN IConferenceOperationQueueListener* piListener);
     void AddDelay(IN IMS_UINT32 nDelayMillisec);
 
-    void CreateNPut(IN IMS_UINT32 nType, IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
-    void CreateNPut(IN IMS_UINT32 nType, IN IMSList<ConfUser*> objUsers,
+    virtual void CreateNPut(IN IMS_UINT32 nType, IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
+    virtual void CreateNPut(IN IMS_UINT32 nType, IN IMSList<ConfUser*> objUsers,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
-    void CreateNPut(IN IMS_UINT32 nType, IN ConfUser* pConfUser,
+    virtual void CreateNPut(IN IMS_UINT32 nType, IN ConfUser* pConfUser,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
-    void CreateNPut(IN IMS_UINT32 nType, IN CallStartOperationParams* pParams,
+    virtual void CreateNPut(IN IMS_UINT32 nType, IN CallStartOperationParams* pParams,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
-    void CreateNPut(IN IMS_UINT32 nType, IN IMS_UINT32 nConnectionId,
+    virtual void CreateNPut(IN IMS_UINT32 nType, IN IMS_UINT32 nConnectionId,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
-    void CreateNPut(IN IMS_UINT32 nType, IN IMS_SINT32 nTerminateReason,
+    virtual void CreateNPut(IN IMS_UINT32 nType, IN IMS_SINT32 nTerminateReason,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
 
     void SetAddingOperationSetCompleted();
 
-    ConferenceOperationQueue::ConferenceOperation* GetNextOperation();
-    IMS_BOOL CompleteCurrentOperation(
+    virtual ConferenceOperationQueue::ConferenceOperation* GetNextOperation();
+    virtual IMS_BOOL CompleteCurrentOperation(
             IN IMS_UINT32 nOperationType, IN ConfUser* pConfUser = IMS_NULL);
-    ConferenceOperationQueue::ConferenceOperation* GetCurrentOperation() const;
-    IMS_UINT32 GetTypeOfCurrentOperation() const;
-    const IMSList<ConfUser*>& GetUsersOfCurrentOperation() const;
+    virtual ConferenceOperationQueue::ConferenceOperation* GetCurrentOperation() const;
+    virtual IMS_UINT32 GetTypeOfCurrentOperation() const;
+    virtual const IMSList<ConfUser*>& GetUsersOfCurrentOperation() const;
 
-    IMS_BOOL HasPendingOperation() const;
+    virtual IMS_BOOL HasPendingOperation() const;
 
     void Remove(IN ConferenceOperation* pOperation);
     void Clear();

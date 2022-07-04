@@ -22,16 +22,16 @@
 
 class ConferenceParticipantList;
 
-class ConferenceInfoUpdater final
+class ConferenceInfoUpdater
 {
 public:
     explicit ConferenceInfoUpdater();
-    ~ConferenceInfoUpdater();
+    virtual ~ConferenceInfoUpdater();
     ConferenceInfoUpdater(IN const ConferenceInfoUpdater&) = delete;
     ConferenceInfoUpdater& operator=(IN const ConferenceInfoUpdater&) = delete;
 
 public:
-    IMS_UINT32 Update(
+    virtual IMS_UINT32 Update(
             IN ConferenceParticipantList* pParticipantList, IN const AString& strEventPackage);
 
 protected:

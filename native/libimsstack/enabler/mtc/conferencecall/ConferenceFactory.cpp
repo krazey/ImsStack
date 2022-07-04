@@ -58,7 +58,7 @@ PUBLIC VIRTUAL IConferenceReference* ConferenceFactory::CreateReference(IN CallK
     return new ConferenceReference(m_objContext, nConfCallKey, objConfUsers, objListener);
 }
 
-PUBLIC VIRTUAL ConferenceParticipantList* ConferenceFactory::CreateParcitipantList()
+PUBLIC VIRTUAL ConferenceParticipantList* ConferenceFactory::CreateParticipantList()
 {
     return new ConferenceParticipantList();
 }
