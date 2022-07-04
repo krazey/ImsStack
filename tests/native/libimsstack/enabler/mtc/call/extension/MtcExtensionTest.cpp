@@ -1,232 +1,172 @@
-#include "IMessage.h"
-#include "ISipMessage.h"
-#include "ImsList.h"
-#include "call/extension/MtcExtension.h"
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "ImsList.h"
+#include "ISipHeader.h"
+#include "../../../../engine/interface/core/MockIMessage.h"
+#include "../../../../engine/interface/sipcore/MockISipMessage.h"
+#include "call/extension/MtcExtension.h"
 
-AString strOptionTag = "some_tag";
+using ::testing::_;
+using ::testing::Return;
 
-// FIXME: ISipMessage and IMessage cannot be used for test now because they don't have
-//        virtual destructor. I commented related tests below too.
-#if 0
-class FakeSipMessage :
-        public ISipMessage
+const AString strSomeOptionTag = "some_tag";
+
+class MtcExtensionTest : public ::testing::Test
 {
 public:
-    FakeSipMessage(IMS_BOOL bContainsOptionTag) :
-            m_bContainsOptionTag(bContainsOptionTag) {}
-    virtual ~FakeSipMessage() {}
+    MtcExtension* pExtension;
 
-    MOCK_METHOD(void, Destroy, ());
-    MOCK_METHOD(ISipMessage*, Clone, (), (const));
-    MOCK_METHOD(IMS_RESULT, AddHeader, (IN IMS_SINT32, const AString&, const AString&));
-    MOCK_METHOD(IMS_UINT32, GetCSeqNumber, (), (const));
-    MOCK_METHOD(AString, GetHeader, (IN IMS_SINT32, IN IMS_SINT32, const AString&), (const));
-    MOCK_METHOD(IMS_SINT32, GetHeaderCount, (IN IMS_SINT32, const AString&), (const));
-    MOCK_METHOD(const SipMethod&, GetMethod, (), (const));
-    MOCK_METHOD(const AString&, GetReasonPhrase, (), (const));
-    MOCK_METHOD(const AString&, GetRequestUri, (), (const));
-    MOCK_METHOD(IMS_SINT32, GetStatusCode, (), (const));
-    MOCK_METHOD(IMS_SINT32, GetType, (), (const));
-    MOCK_METHOD(IMS_RESULT, PrependHeader, (IN IMS_SINT32, const AString&, const AString&));
-    MOCK_METHOD(void, RemoveHeader, (IN IMS_SINT32, const AString&));
-    MOCK_METHOD(IMS_RESULT, SetHeader, (IN IMS_SINT32, const AString&, const AString&));
-    MOCK_METHOD(ISipMessageBodyPart*, CreateBodyPart, ());
-    MOCK_METHOD(ISipMessageBodyPart*, CreateSdpBodyPart,  ());
-    MOCK_METHOD(IMSList<ISipMessageBodyPart*>, GetBodyParts, (), (const));
-    MOCK_METHOD(ISipMessageBodyPart*, GetSdpBodyPart, (), (const));
-    MOCK_METHOD(IMSList<ISipMessageBodyPart*>, GetSdpBodyParts, (), (const));
-    MOCK_METHOD(IMS_RESULT, CopyHeadersAndBodyParts, (const ISipMessage*));
-    MOCK_METHOD(IMS_BOOL, IsHeaderPresent, (IN IMS_SINT32, const AString&), (const));
-    MOCK_METHOD(IMS_BOOL, IsMessageRpr, (), (const));
-    MOCK_METHOD(IMS_BOOL, IsOptionRequired, (const AString&), (const));
-    MOCK_METHOD(IMS_BOOL, IsOptionSupported, (const AString&), (const));
-    MOCK_METHOD(void, RemoveBodyParts, ());
-    MOCK_METHOD(ByteArray, ToByteArray, (IMS_SINT32), (const));
+    MockISipMessage objSipMessageRequiresSomeOptionTag;
+    MockISipMessage objSipMessageSupportsSomeOptionTag;
+    MockIMessage objMessageRequiresSomeOptionTag;
+    MockIMessage objMessageSupportsSomeOptionTag;
 
-    IMSList<AString> GetHeaders(
-            IN IMS_SINT32 /* nType */, const AString& /* strName */) const override
+protected:
+    virtual void SetUp() override
     {
-        IMSList<AString> lstHeaders;
-        if (m_bContainsOptionTag)
-        {
-            lstHeaders.Append(strOptionTag);
-        }
-        return lstHeaders;
+        pExtension = new MtcExtension(strSomeOptionTag);
+
+        InitMessageRequiresOptionTag(strSomeOptionTag);
+        InitMessageSupportsOptionTag(strSomeOptionTag);
     }
 
-    IMS_BOOL m_bContainsOptionTag;
+    virtual void TearDown() override
+    {
+        delete pExtension;
+    }
+
+    void InitMessageRequiresOptionTag(IN const AString& strOptionTag)
+    {
+        ImsList<AString> lstEmptyHeaders;
+        ImsList<AString> lstRequiredHeaders;
+        lstRequiredHeaders.Append(strOptionTag);
+
+        ON_CALL(objSipMessageRequiresSomeOptionTag, GetHeaders(_, _))
+                .WillByDefault(Return(lstEmptyHeaders));
+        ON_CALL(objSipMessageRequiresSomeOptionTag, GetHeaders(ISipHeader::REQUIRE, _))
+                .WillByDefault(Return(lstRequiredHeaders));
+
+        ON_CALL(objMessageRequiresSomeOptionTag, GetMessage)
+                .WillByDefault(Return(&objSipMessageRequiresSomeOptionTag));
+    }
+
+    void InitMessageSupportsOptionTag(IN const AString& strOptionTag)
+    {
+        ImsList<AString> lstEmptyHeaders;
+        ImsList<AString> lstSupportedHeaders;
+        lstSupportedHeaders.Append(strOptionTag);
+
+        ON_CALL(objSipMessageSupportsSomeOptionTag, GetHeaders(_, _))
+                .WillByDefault(Return(lstEmptyHeaders));
+        ON_CALL(objSipMessageSupportsSomeOptionTag, GetHeaders(ISipHeader::SUPPORTED, _))
+                .WillByDefault(Return(lstSupportedHeaders));
+
+        ON_CALL(objMessageSupportsSomeOptionTag, GetMessage)
+                .WillByDefault(Return(&objSipMessageSupportsSomeOptionTag));
+    }
 };
 
-class FakeMessage :
-        public IMessage
+TEST_F(MtcExtensionTest, CopyConstructor)
 {
-public:
-    explicit FakeMessage(FakeSipMessage* pSipMessage) :
-            m_pSipMessage(pSipMessage) {}
-
-    virtual ~FakeMessage()
-    {
-        delete m_pSipMessage;
-    }
-
-    MOCK_METHOD(IMS_RESULT, AddHeader, (const AString&, const AString&));
-    MOCK_METHOD(IMessageBodyPart*, CreateBodyPart, ());
-    MOCK_METHOD(IMSList<IMessageBodyPart*>, GetBodyParts, (), (const));
-    MOCK_METHOD(IMSList<AString>, GetHeaders, (const AString&), (const));
-    MOCK_METHOD(const SipMethod&, GetMethod, (), (const));
-    MOCK_METHOD(const AString&, GetReasonPhrase, (), (const));
-    MOCK_METHOD(IMS_SINT32, GetState, (), (const));
-    MOCK_METHOD(IMS_SINT32, GetStatusCode, (), (const));
-
-    ISipMessage* GetMessage() const override
-    {
-        return m_pSipMessage;
-    }
-
-    FakeSipMessage* m_pSipMessage;
-};
-#endif
-
-TEST(MtcExtensionTest, CopyConstructorTest)
-{
-    MtcExtension objExtension(strOptionTag);
-    MtcExtension objCopiedExtension(objExtension);
+    MtcExtension objCopiedExtension(*pExtension);
 
     EXPECT_STREQ(
-            objExtension.GetOptionTag().GetStr(),
+            pExtension->GetOptionTag().GetStr(),
             objCopiedExtension.GetOptionTag().GetStr());
     EXPECT_EQ(
-            objExtension.IsAvailableOnRemote(),
+            pExtension->IsAvailableOnRemote(),
             objCopiedExtension.IsAvailableOnRemote());
 }
 
-TEST(MtcExtensionTest, CloneTest)
+TEST_F(MtcExtensionTest, Clone)
 {
-    MtcExtension objExtension(strOptionTag);
-    IMtcExtension* pCopiedExtension = objExtension.Clone();
+    IMtcExtension* pCopiedExtension = pExtension->Clone();
 
     EXPECT_STREQ(
-            objExtension.GetOptionTag().GetStr(),
+            pExtension->GetOptionTag().GetStr(),
             pCopiedExtension->GetOptionTag().GetStr());
     EXPECT_EQ(
-            objExtension.IsAvailableOnRemote(),
+            pExtension->IsAvailableOnRemote(),
             pCopiedExtension->IsAvailableOnRemote());
 
     delete pCopiedExtension;
 }
 
-TEST(MtcExtensionTest, InitialAvailabilityFalest)
+TEST_F(MtcExtensionTest, IsAvailableOnRemoteReturnsFalseInitially)
 {
-    MtcExtension objExtension(strOptionTag);
-
-    EXPECT_FALSE(objExtension.IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 }
 
-TEST(MtcExtensionTest, GetOptionTagTest)
+TEST_F(MtcExtensionTest, IsRequiredOnRemoteReturnsFalseInitially)
 {
-    MtcExtension objExtension(strOptionTag);
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+}
 
+TEST_F(MtcExtensionTest, GetOptionTag)
+{
     EXPECT_STREQ(
-            strOptionTag.GetStr(),
-            objExtension.GetOptionTag().GetStr());
+            strSomeOptionTag.GetStr(),
+            pExtension->GetOptionTag().GetStr());
 }
 
-/*
-TEST(MtcExtensionTest, FormatRequestDoNothingTest)
+TEST_F(MtcExtensionTest, FormatRequestDoNothing)
 {
-    MtcExtension objExtension(strOptionTag);
-    IMessage* pMessageContainsTag = new FakeMessage(new FakeSipMessage(IMS_TRUE));
-    IMessage* pMessageNotContainsTag = new FakeMessage(new FakeSipMessage(IMS_FALSE));
+    pExtension->FormatRequest(IMessage::SESSION_START, objMessageRequiresSomeOptionTag);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 
-    objExtension.FormatRequest(IMessage::SESSION_START, *pMessageContainsTag);
-    EXPECT_FALSE(objExtension.IsAvailableOnRemote());
-
-    objExtension.FormatRequest(IMessage::SESSION_START, *pMessageNotContainsTag);
-    EXPECT_FALSE(objExtension.IsAvailableOnRemote());
-
-    delete pMessageContainsTag;
-    delete pMessageNotContainsTag;
+    pExtension->FormatRequest(IMessage::SESSION_START, objMessageSupportsSomeOptionTag);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 }
 
-TEST(MtcExtensionTest, FormatResponseDoNothingTest)
+TEST_F(MtcExtensionTest, FormatResponseDoNothing)
 {
-    MtcExtension objExtension(strOptionTag);
-    IMessage* pMessageContainsTag = new FakeMessage(new FakeSipMessage(IMS_TRUE));
-    IMessage* pMessageNotContainsTag = new FakeMessage(new FakeSipMessage(IMS_FALSE));
+    pExtension->FormatResponse(IMessage::SESSION_START, objMessageRequiresSomeOptionTag);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 
-    objExtension.FormatResponse(IMessage::SESSION_START, *pMessageContainsTag);
-    EXPECT_FALSE(objExtension.IsAvailableOnRemote());
-
-    objExtension.FormatResponse(IMessage::SESSION_START, *pMessageNotContainsTag);
-    EXPECT_FALSE(objExtension.IsAvailableOnRemote());
-
-    delete pMessageContainsTag;
-    delete pMessageNotContainsTag;
+    pExtension->FormatResponse(IMessage::SESSION_START, objMessageSupportsSomeOptionTag);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 }
 
-TEST(MtcExtensionTest, HandlePrackRequestDoNothingTest)
+TEST_F(MtcExtensionTest, HandleRequestForRequiringMessageUpdatesAvailability)
 {
-    MtcExtension objExtension(strOptionTag);
-    IMessage* pMessageContainsTag = new FakeMessage(new FakeSipMessage(IMS_TRUE));
-    IMessage* pMessageNotContainsTag = new FakeMessage(new FakeSipMessage(IMS_FALSE));
-
-    objExtension.HandleRequest(IMessage::SESSION_PRACK, *pMessageContainsTag);
-    EXPECT_FALSE(objExtension.IsAvailableOnRemote());
-
-    objExtension.HandleRequest(IMessage::SESSION_PRACK, *pMessageNotContainsTag);
-    EXPECT_FALSE(objExtension.IsAvailableOnRemote());
-
-    delete pMessageContainsTag;
-    delete pMessageNotContainsTag;
+    pExtension->HandleRequest(IMessage::SESSION_START, objMessageRequiresSomeOptionTag);
+    EXPECT_TRUE(pExtension->IsAvailableOnRemote());
+    EXPECT_TRUE(pExtension->IsRequiredOnRemote());
 }
 
-TEST(MtcExtensionTest, HandlePrackResponseDoNothingTest)
+TEST_F(MtcExtensionTest, HandleRequestForSupportingMessageUpdatesAvailability)
 {
-    MtcExtension objExtension(strOptionTag);
-    IMessage* pMessageContainsTag = new FakeMessage(new FakeSipMessage(IMS_TRUE));
-    IMessage* pMessageNotContainsTag = new FakeMessage(new FakeSipMessage(IMS_FALSE));
-
-    objExtension.HandleResponse(IMessage::SESSION_PRACK, *pMessageContainsTag);
-    EXPECT_FALSE(objExtension.IsAvailableOnRemote());
-
-    objExtension.HandleResponse(IMessage::SESSION_PRACK, *pMessageNotContainsTag);
-    EXPECT_FALSE(objExtension.IsAvailableOnRemote());
-
-    delete pMessageContainsTag;
-    delete pMessageNotContainsTag;
+    pExtension->HandleRequest(IMessage::SESSION_START, objMessageSupportsSomeOptionTag);
+    EXPECT_TRUE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
 
-TEST(MtcExtensionTest, HandleRequestUpdateAvailabilityTest)
+TEST_F(MtcExtensionTest, HandleResponseForRequiringMessageUpdatesAvailability)
 {
-    MtcExtension objExtension(strOptionTag);
-    IMessage* pMessageContainsTag = new FakeMessage(new FakeSipMessage(IMS_TRUE));
-    IMessage* pMessageNotContainsTag = new FakeMessage(new FakeSipMessage(IMS_FALSE));
-
-    objExtension.HandleRequest(IMessage::SESSION_START, *pMessageContainsTag);
-    EXPECT_TRUE(objExtension.IsAvailableOnRemote());
-
-    objExtension.HandleRequest(IMessage::SESSION_START, *pMessageNotContainsTag);
-    EXPECT_FALSE(objExtension.IsAvailableOnRemote());
-
-    delete pMessageContainsTag;
-    delete pMessageNotContainsTag;
+    pExtension->HandleResponse(IMessage::SESSION_START, objMessageRequiresSomeOptionTag);
+    EXPECT_TRUE(pExtension->IsAvailableOnRemote());
+    EXPECT_TRUE(pExtension->IsRequiredOnRemote());
 }
 
-TEST(MtcExtensionTest, HandleResponseUpdateAvailabilityTest)
+TEST_F(MtcExtensionTest, HandleResponseForSupportingMessageUpdatesAvailability)
 {
-    MtcExtension objExtension(strOptionTag);
-    IMessage* pMessageContainsTag = new FakeMessage(new FakeSipMessage(IMS_TRUE));
-    IMessage* pMessageNotContainsTag = new FakeMessage(new FakeSipMessage(IMS_FALSE));
-
-    objExtension.HandleResponse(IMessage::SESSION_START, *pMessageContainsTag);
-    EXPECT_TRUE(objExtension.IsAvailableOnRemote());
-
-    objExtension.HandleResponse(IMessage::SESSION_START, *pMessageNotContainsTag);
-    EXPECT_FALSE(objExtension.IsAvailableOnRemote());
-
-    delete pMessageContainsTag;
-    delete pMessageNotContainsTag;
+    pExtension->HandleResponse(IMessage::SESSION_START, objMessageSupportsSomeOptionTag);
+    EXPECT_TRUE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
-*/
