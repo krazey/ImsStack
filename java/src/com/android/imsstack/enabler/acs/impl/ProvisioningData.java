@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.acs.impl;
 
+import android.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Xml;
 
@@ -84,6 +85,10 @@ public class ProvisioningData {
         private boolean containsKey(String key) {
             return mParms.containsKey(key);
         }
+
+        private void updateParmValue(String key, String value) {
+            mParms.replace(key, value);
+        }
     }
 
     private final Characteristic mRoot = new Characteristic(null, "root");
@@ -136,12 +141,13 @@ public class ProvisioningData {
     }
 
     /**
-     * Update element ant attribute
-     * @param provisioningData xml parser has updated data
+     * Update element ant attribute. Before call this function, caller should check version value.
+     * Only version is same with exist, this function is available.
+     * @param newProvisioningData xml parser has updated data
      * @return true if the operation is success, otherwise return false
      */
-    public boolean updateData(ProvisioningData provisioningData) {
-        return true;
+    public void updateData(@NonNull ProvisioningData newProvisioningData) {
+        updateAttribute(newProvisioningData.mRoot);
     }
 
     /**
@@ -412,6 +418,47 @@ public class ProvisioningData {
         // write characteristic end tag
         line = "</characteristic>";
         out.write(line.getBytes());
+    }
+
+    private void updateAttribute(@NonNull Characteristic srcCharacteristic) {
+        // if parameter has child, check parm of child first
+        for (Characteristic c : srcCharacteristic.mChilds) {
+            updateAttribute(c);
+        }
+
+        String key;
+        String value;
+
+        // parameter is leaf Characteristic or even if parameter has child, attribute checking was
+        // completed already
+        for (Map.Entry<String, String> entry : srcCharacteristic.mParms.entrySet()) {
+            key = entry.getKey();
+            value = entry.getValue();
+
+            // try to update attribute on target
+            boolean ret = updateAttributeOnTarget(mRoot, key, value);
+            ImsLog.i("Key : " + key + " value : " + value + " updated : " + ret);
+        }
+    }
+
+    private boolean updateAttributeOnTarget(Characteristic target, String key, String value) {
+        // find key from parm of target first
+        if (target.containsKey(key)) {
+            target.updateParmValue(key, value);
+
+            // if updating is completed, further inspection not required
+            return true;
+        }
+
+        // find key from child of target
+        for (Characteristic c: target.mChilds) {
+            if (updateAttributeOnTarget(c, key, value)) {
+                // if updating is success, further inspection not required
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

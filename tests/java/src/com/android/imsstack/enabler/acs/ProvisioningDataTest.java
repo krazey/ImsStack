@@ -122,6 +122,27 @@ public class ProvisioningDataTest {
                     + "</characteristic>"
                     + "</wap-provisioningdoc>";
 
+    private static final String AC_DATA_PARTIAL = "<?xml version=\"1.0\"?>"
+            + "<wap-provisioningdoc version=\"1.1\">"
+            + "<characteristic type=\"VERS\">"
+            + "<parm name=\"version\" value=\"3\"/>"
+            + "<parm name=\"validity\" value=\"3600000\"/>"
+            + "</characteristic>"
+            + "<characteristic type=\"TOKEN\">"
+            + "<parm name=\"token\" value=\"qazwsxedc12345\"/>"
+            + "</characteristic>"
+            + "<characteristic type=\"APPLICATION\">"
+            + "<characteristic type=\"CPM\">"
+            + "<characteristic type=\"StandaloneMsg\">"
+            + "<parm name=\"MaxSizeStandalone\" value=\"204800\"/>"
+            + "</characteristic>"
+            + "</characteristic>"
+            + "<characteristic type=\"CAPDISCOVERY\">"
+            + "<parm name=\"capInfoExpiry\" value=\"3600\"/>"
+            + "<parm name=\"nonRCScapInfoExpiry\" value=\"123456789\"/>"
+            + "</characteristic>"
+            + "</characteristic>"
+            + "</wap-provisioningdoc>";
     @Mock
     Context mContext;
 
@@ -150,7 +171,7 @@ public class ProvisioningDataTest {
         mProvisioningData.saveXmlFile(FILE_DESCRIPTOR, FILE_NAME);
         assertEquals(true, isExistTestFile(FILE_NAME));
 
-        copyFile();
+        copyFile(FILE_NAME);
     }
 
     @Test
@@ -194,17 +215,55 @@ public class ProvisioningDataTest {
         assertEquals("vcnms-c2s.enc.att.net", stringValue);
     }
 
+    @Test
+    @SmallTest
+    public void updateProvisioningData_withPartialData() throws Exception {
+        // write data to xml file
+        mProvisioningData = new ProvisioningData(AC_DATA.getBytes(StandardCharsets.UTF_8));
+        assertEquals(true, mProvisioningData.isComplete());
+
+        ProvisioningData newProvisioningData =
+                new ProvisioningData(AC_DATA_PARTIAL.getBytes(StandardCharsets.UTF_8));
+        assertEquals(true, newProvisioningData.isComplete());
+
+        mProvisioningData.updateData(newProvisioningData);
+
+        mProvisioningData.dumpLog();
+
+        int intValue = mProvisioningData.getIntValue("version", 0);
+        assertEquals(3, intValue);
+
+        long longValue = mProvisioningData.getLongValue("validity", 0L);
+        assertEquals(3600000L, longValue);
+
+        String stringValue = mProvisioningData.getStringValue("token", "");
+        assertEquals("qazwsxedc12345", stringValue);
+
+        longValue = mProvisioningData.getLongValue("MaxSizeStandalone", 0L);
+        assertEquals(204800L, longValue);
+
+        longValue = mProvisioningData.getLongValue("capInfoExpiry", 0L);
+        assertEquals(3600L, longValue);
+
+        longValue = mProvisioningData.getLongValue("nonRCScapInfoExpiry", 0L);
+        assertEquals(123456789L, longValue);
+
+        String fileName = "provisionindData_partialupdate.xml";
+        mProvisioningData.saveXmlFile(FILE_DESCRIPTOR, fileName);
+        copyFile(fileName);
+    }
+
     private boolean isExistTestFile(String fileName) {
         File srcFile = new File(FILE_DESCRIPTOR, fileName);
         return srcFile.exists();
     }
 
-    private void copyFile() {
+    private void copyFile(String fileName) {
         // path : /storage/emulated/0/Download
         String targetPath = Environment.getExternalStorageDirectory() + "/Download";
 
-        File desFile = new File(targetPath, FILE_NAME);
-        File srcFile = new File(FILE_DESCRIPTOR, FILE_NAME);
+        File desFile = new File(targetPath, fileName);
+        File srcFile = new File(FILE_DESCRIPTOR, fileName);
         try {
             Files.copy(srcFile, desFile);
         } catch (IOException e) {
