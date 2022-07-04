@@ -514,7 +514,6 @@ protected:
     IMS_UINT32 m_nPcscfPort;  /// current Pcscf Port
 
     /// throttling
-    IMS_UINT32 m_nPcscfIndex;
     IMS_UINT32 m_nRetryBaseTime;       /// base-time for flow recovery in RFC 5626
     IMS_UINT32 m_nRetryMaxTime;        /// max-time for flow recovery in RFC 5626
     IMS_UINT32 m_nUpperBoundWaitTime;  /// used for flow recovery in RFC 5626

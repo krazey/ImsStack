@@ -715,6 +715,24 @@ public:
     virtual IMS_SINT32 GetReregRetryMaxCountKeptRegistration() const = 0;
 
     /**
+     * @brief Indicate which the PCSCF address  to use when the PCSCF address are changed
+     *        with address and order.
+     *
+     *        Possible values are,
+     *        CarrierConfig::Assets::REGISTRATION_PCSCF_UPDATE_POLICY_DEFAULT
+     *            Indicate that registration is tried with new PCSCF address
+     *            only when the current PCSCF address that is used for registration
+     *            is not contained in the new PCSCF list.
+     *        CarrierConfig::Assets::REGISTRATION_PCSCF_UPDATE_POLICY_ALL_THE_TIME
+     *            Indicate that registration or reregistration is always tried
+     *            when the PCSCF addresses are changed regardless of the existence
+     *            of the current PCSCF address in the new PCSCF list.
+     *
+     * @return IMS_SINT32 Return the policy for which the pcscf address to use
+     */
+    virtual IMS_SINT32 GetRegistrationPcscfUpdatePolicy() const = 0;
+
+    /**
      * @brief Get the registration retry intervals for using when registration is failed
      *        as general codes.
      *

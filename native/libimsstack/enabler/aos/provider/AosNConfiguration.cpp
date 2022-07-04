@@ -489,6 +489,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetReregRetryMaxCountKeptRegistrati
     return m_objReregRetry.nReregistrationRetryMaxCountKeptRegistration;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPcscfUpdatePolicy() const
+{
+    return m_objAsset.nRegistrationPcscfUpdatePolicy;
+}
+
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegistrationRetryIntervals()
 {
     return m_objRegRetryInterval.objRegistrationRetryIntervalSec;
@@ -1299,6 +1304,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT);
     m_objAsset.bUpdateRegistrationWithCountryChange = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL);
+    m_objAsset.nRegistrationPcscfUpdatePolicy =
+            piCc->GetInt(CarrierConfig::Assets::KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT);
 }
 
 PRIVATE

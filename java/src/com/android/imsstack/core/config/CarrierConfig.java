@@ -519,6 +519,8 @@ public class CarrierConfig {
                 "registration_timer_for_emergency_call_millis_int";
         public static final String KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL =
                 "update_registration_with_country_change_bool";
+        public static final String KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT =
+                "registration_pcscf_update_policy_int";
         // Bundle {
         public static final String KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE =
                 "specific_registration_error_bundle";

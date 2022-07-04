@@ -801,6 +801,7 @@ public:
         static const IMS_CHAR KEY_DISABLE_T3482_FOR_EMERGENCY_BOOL[];
         static const IMS_CHAR KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT[];
         static const IMS_CHAR KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL[];
+        static const IMS_CHAR KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT[];
         // Bundle {
         static const IMS_CHAR KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[];
         static const IMS_CHAR KEY_SPECIFIC_REGISTRATION_ERROR_FINAL_TYPE_INT[];
@@ -1107,6 +1108,13 @@ public:
             UNAVAILABLE_FEATURE_POLICY_VOPS = 1,
             UNAVAILABLE_FEATURE_POLICY_CAPABILITY = 2,
             UNAVAILABLE_FEATURE_POLICY_3G = 3
+        };
+
+        // Update Pcscf Policy for registration
+        enum
+        {
+            REGISTRATION_PCSCF_UPDATE_POLICY_DEFAULT = 0,
+            REGISTRATION_PCSCF_UPDATE_POLICY_ALL_THE_TIME = 1
         };
     };
 

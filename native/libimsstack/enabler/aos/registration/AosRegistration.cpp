@@ -113,7 +113,6 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_bFakeReg(IMS_FALSE),
         m_nRegMode(MODE_NORMAL),
         m_nPcscfPort(0),
-        m_nPcscfIndex(0),
         m_nRetryBaseTime(30),
         m_nRetryMaxTime(1800),
         m_nUpperBoundWaitTime(0),
@@ -336,7 +335,7 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
         case CMD_INIT_PCSCF:
             if (nReason == REASON_INIT_PCSCF_CLEAR)
             {
-                m_nPcscfIndex = 0;
+                m_piContext->GetPcscf()->SetFirstPcscfIndex();
             }
             break;
 
@@ -2099,12 +2098,13 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetPcscf()
 {
     IAosPcscf* piPcscf = m_piContext->GetPcscf();
+    IMS_SINT32 nPcscfIndex = piPcscf->GetCurrentIndex();
 
-    // TODO : remove m_nPcscfIndex and use from AosPcscf class
-    if (!piPcscf->HasPcscf(m_nPcscfIndex))
+    if (!piPcscf->HasPcscf(nPcscfIndex))
     {
         ClearPcscf();
-        if (!piPcscf->HasPcscf(m_nPcscfIndex))
+        nPcscfIndex = piPcscf->GetCurrentIndex();
+        if (!piPcscf->HasPcscf(nPcscfIndex))
         {
             A_IMS_TRACE_I(REGID, "SetPcscf :: invalid index", 0, 0, 0);
             return IMS_FALSE;
@@ -2114,8 +2114,8 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetPcscf()
     const AStringArray& objPcscfs = piPcscf->GetPcscfs();
     const IMSList<IMS_SINT32>& objPcscfPorts = piPcscf->GetPcscfsPorts();
 
-    m_strPcscf = objPcscfs.GetElementAt(m_nPcscfIndex);
-    m_nPcscfPort = objPcscfPorts.GetAt(m_nPcscfIndex);
+    m_strPcscf = objPcscfs.GetElementAt(nPcscfIndex);
+    m_nPcscfPort = objPcscfPorts.GetAt(nPcscfIndex);
 
     return IMS_TRUE;
 }
@@ -2380,8 +2380,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetFirstPcscf(
     m_strPcscf = strPcscf;
     m_nPcscfPort = nPort;
 
-    m_nPcscfIndex = 0;
-
     if (!bUpdateParameter)
     {
         return IMS_TRUE;
@@ -2400,8 +2398,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetNextPcscf(
     {
         return IMS_FALSE;
     }
-
-    m_nPcscfIndex = m_piContext->GetPcscf()->GetCurrentIndex();
 
     m_strPcscf = strPcscf;
     m_nPcscfPort = nPort;
@@ -2511,8 +2507,6 @@ PROTECTED VIRTUAL void AosRegistration::ClearRegParameters(IN IMS_BOOL bClearPcs
 
 PROTECTED VIRTUAL void AosRegistration::ClearPcscf()
 {
-    m_nPcscfIndex = 0;
-
     IAosPcscf* piPcscf = m_piContext->GetPcscf();
     if (piPcscf != IMS_NULL)
     {

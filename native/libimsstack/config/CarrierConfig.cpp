@@ -763,6 +763,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_
         "registration_timer_for_emergency_call_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL[] =
         "update_registration_with_country_change_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT[] =
+        "registration_pcscf_update_policy_int";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[] =
         "specific_registration_error_bundle";

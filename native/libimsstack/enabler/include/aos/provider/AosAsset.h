@@ -63,7 +63,8 @@ public:
             nRegistrationActualWaitTimePolicy(CarrierConfig::Assets::AWT_POLICY_RFC_RULE),
             bDisableT3482ForEmergency(IMS_FALSE),
             nRegistrationTimerForEmergencyCallMillis(0),
-            bUpdateRegistrationWithCountryChange(IMS_FALSE)
+            bUpdateRegistrationWithCountryChange(IMS_FALSE),
+            nRegistrationPcscfUpdatePolicy(0)
     {
     }
 
@@ -109,5 +110,6 @@ public:
     IMS_BOOL bDisableT3482ForEmergency;
     IMS_SINT32 nRegistrationTimerForEmergencyCallMillis;
     IMS_BOOL bUpdateRegistrationWithCountryChange;
+    IMS_SINT32 nRegistrationPcscfUpdatePolicy;
 };
 #endif  // AOS_ASSET_H_
