@@ -776,10 +776,10 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
             eStatusCode = SipStatusCode::SC_480;
             break;
         case CODE_MEDIA_INIT_FAILED:
-            eStatusCode = SipStatusCode::SC_415;
+            eStatusCode = SipStatusCode::SC_480;
             break;
         case CODE_MEDIA_NOT_ACCEPTABLE:
-            eStatusCode = SipStatusCode::SC_415;
+            eStatusCode = SipStatusCode::SC_488;
             break;
         case CODE_TIMEOUT_NO_ANSWER:
             eStatusCode = m_objContext.GetConfigurationProxy().GetInt(
