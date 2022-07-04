@@ -129,13 +129,20 @@ ByteArray MtcLocationObject::CreateLocationBody() const
     GeolocationPidfCreator& objPidfCreator =
             *GeolocationHelper::GetInstance()->GetPidfCreator(m_objContext.GetSlotId());
 
-    if (GetInformationLevel() == CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG)
+    IMS_SINT32 nInformationLevel = GetInformationLevel();
+    if (nInformationLevel == CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG)
     {
         objPidfCreator.CreateWithoutCivic(AString::ConstNull(), objContent);
     }
-    else  // CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC)
+    else if (nInformationLevel ==
+            CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC)
     {
         objPidfCreator.CreateWithPosition(AString::ConstNull(), objContent);
+    }
+    else  // GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY
+    {
+        objPidfCreator.CreateWithoutPosition(
+                AString::ConstNull(), IMS_FALSE, IMS_FALSE, objContent);
     }
 
     return objContent;

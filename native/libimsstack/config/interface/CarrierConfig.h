@@ -674,7 +674,8 @@ public:
         enum
         {
             GEOLOCATION_PIDF_INFO_LAT_AND_LONG = 0,
-            GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC = 1
+            GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC = 1,
+            GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY = 2,
         };
     };
 

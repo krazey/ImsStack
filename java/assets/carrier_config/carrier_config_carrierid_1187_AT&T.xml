@@ -287,7 +287,7 @@
         <item value="0"/> <!-- EMERGENCY_LTE-->
         <item value="1"/> <!-- EMERGENCY_WIFI -->
         <item value="0"/> <!-- NORMAL_LTE -->
-        <item value="0"/> <!-- NORMAL_WIFI -->
+        <item value="2"/> <!-- NORMAL_WIFI -->
     </int-array>
     <boolean name="initialize_p_early_media_when_no_header_bool" value="false"/>
     <int name="policy_for_local_ringback_tone_with_180_response_int" value="1"/>
