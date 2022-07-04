@@ -33,21 +33,6 @@ SIP_UINT32 SipNPower(SIP_UINT16 nBase, SIP_UINT16 nIndex)
     return nRes;
 }
 
-SIP_BOOL SipMemCheck(SIP_VOID* pvData, SIP_UINT16* pnError)
-{
-    if (pvData == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "New fails", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-    if (*pnError == E_ERR_PF_MALLOCFAILED)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "Malloc fails", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-    return SIP_TRUE;
-}
-
 /******************************************************************************
  * Function name    : CheckTxnMadatoryParams
  * Description    : Check Key Parameter to Start a Txn [Friend Function]

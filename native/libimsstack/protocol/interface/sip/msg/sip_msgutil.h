@@ -370,9 +370,9 @@ SIP_INT32 sipGetUriType(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 SIP_INT32 sipGetHdrType(const SIP_CHAR* pszHdrName);
 
 SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType);
-
+#ifdef SIP_STRICT_PARSING
 SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
-
+#endif
 SIP_BOOL sipFindCrlf(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc);
 
 SIP_CHAR* sipFindBodyEnd(

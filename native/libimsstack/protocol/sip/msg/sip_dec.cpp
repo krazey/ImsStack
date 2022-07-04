@@ -142,9 +142,7 @@ SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType)
     return nType;
 }
 
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
+#ifdef SIP_STRICT_PARSING
 SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     SIP_CHAR* pTempLoc = SIP_NULL;
@@ -165,3 +163,4 @@ SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
     return SIP_FALSE;
 }
+#endif
