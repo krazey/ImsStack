@@ -28,8 +28,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 ExpandController::ExpandController(IN CallKey nConfCallKey, IMtcContext& objContext,
-        IN CallConnectionIdManager& objConnectionIdManager) :
-        ConferenceController(nConfCallKey, objContext, objConnectionIdManager)
+        IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory) :
+        ConferenceController(nConfCallKey, objContext, objConnectionIdManager, objFactory)
 {
     IMS_TRACE_I("+ExpandController", 0, 0, 0);
 }

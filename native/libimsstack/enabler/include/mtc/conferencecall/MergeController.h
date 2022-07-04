@@ -31,7 +31,7 @@ class MergeController final : public ConferenceController
 {
 public:
     explicit MergeController(IN CallKey nConfCallKey, IMtcContext& objContext,
-            IN CallConnectionIdManager& objConnectionIdManager);
+            IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory);
     virtual ~MergeController();
     MergeController(IN const MergeController&) = delete;
     MergeController& operator=(IN const MergeController&) = delete;

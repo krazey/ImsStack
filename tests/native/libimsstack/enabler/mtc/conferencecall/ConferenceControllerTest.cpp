@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 #include "conferencecall/ConferenceController.h"
+#include "conferencecall/ConferenceFactory.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/IMtcCall.h"
 #include "conferencecall/CallConnectionIdManager.h"
@@ -65,6 +66,7 @@ protected:
     ConferenceController* CreateController(IN MockIMtcCall* piConferenceCall)
     {
         CallConnectionIdManager objConnectionManager(objMockContext);
+        ConferenceFactory objFactory(objMockContext);
 
         MockIMtcCallContext objMockCallContext;
         ON_CALL(*piConferenceCall, GetCallContext()).WillByDefault(ReturnRef(objMockCallContext));
@@ -73,7 +75,7 @@ protected:
                 .WillByDefault(Return(piConferenceCall));
 
         return new ConferenceController(
-                piConferenceCall->GetKey(), objMockContext, objConnectionManager);
+                piConferenceCall->GetKey(), objMockContext, objConnectionManager, objFactory);
     }
 };
 

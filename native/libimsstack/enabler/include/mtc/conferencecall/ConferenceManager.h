@@ -24,6 +24,7 @@
 #include "call/IMtcCallManager.h"
 #include "helper/ObjectAsyncDestroyer.h"
 #include "conferencecall/ConferenceDef.h"
+#include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/CallConnectionIdManager.h"
 
 class IMtcContext;
@@ -48,6 +49,7 @@ private:
 
 private:
     IMtcContext& m_objContext;
+    ConferenceFactory m_objConferenceFactory;
     IMSMap<CallKey, ConferenceController*> m_objControllers;
     ObjectAsyncDestroyer<ConferenceController> m_objDestroyer;
     CallConnectionIdManager m_objCallConnectionIdManager;

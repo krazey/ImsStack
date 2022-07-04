@@ -37,6 +37,7 @@ class ConfUser;
 class MediaInfo;
 class SuppService;
 class CallConnectionIdManager;
+class ConferenceFactory;
 struct CallInfo;
 struct CallStartOperationParams;
 
@@ -50,7 +51,7 @@ class ConferenceController :
 {
 public:
     explicit ConferenceController(IN CallKey nConfCallKey, IMtcContext& objContext,
-            IN CallConnectionIdManager& objConnectionIdManager);
+            IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory);
     virtual ~ConferenceController();
     ConferenceController(IN const ConferenceController&) = delete;
     ConferenceController& operator=(IN const ConferenceController&) = delete;
@@ -202,9 +203,10 @@ protected:
     IMtcContext& m_objContext;
     IMtcCallManager& m_objCallManager;
     CallConnectionIdManager& m_objConnectionIdManager;
-    ConferenceParticipantList m_objParticipantList;
-    ConferenceEventNotifier m_objNotifier;
-    ConferenceOperationQueue m_objOperationQueue;
+    ConferenceFactory& m_objFactory;
+    ConferenceParticipantList& m_objParticipantList;
+    ConferenceEventNotifier& m_objNotifier;
+    ConferenceOperationQueue& m_objOperationQueue;
     ConferenceSubscription* m_pSubscription;
     IMSList<IConferenceReference*> m_objIConfReferences;
     ITimer* m_piTimer;

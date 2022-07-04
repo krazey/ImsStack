@@ -16,6 +16,7 @@
 
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "conferencecall/ConferenceController.h"
+#include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceReference.h"
 #include "conferencecall/CallConnectionIdManager.h"
 #include "IMessage.h"
@@ -35,15 +36,16 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 ConferenceController::ConferenceController(IN CallKey nConfCallKey, IMtcContext& objContext,
-        IN CallConnectionIdManager& objConnectionIdManager) :
+        IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory) :
         m_nConfCallKey(nConfCallKey),
         m_objContext(objContext),
         m_objCallManager(objContext.GetCallManager()),
         m_objConnectionIdManager(objConnectionIdManager),
-        m_objParticipantList(ConferenceParticipantList()),
-        m_objNotifier(ConferenceEventNotifier(
+        m_objFactory(objFactory),
+        m_objParticipantList(*objFactory.CreateParcitipantList()),
+        m_objNotifier(*objFactory.CreateEventNotifier(
                 GetConferenceCall()->GetCallContext(), objConnectionIdManager)),
-        m_objOperationQueue(ConferenceOperationQueue()),
+        m_objOperationQueue(*objFactory.CreateOperatrionQueue()),
         m_pSubscription(IMS_NULL),
         m_objIConfReferences(IMSList<IConferenceReference*>()),
         m_piTimer(IMS_NULL),
@@ -74,6 +76,11 @@ PUBLIC VIRTUAL ConferenceController::~ConferenceController()
         m_piTimer->KillTimer();
         TimerService::GetTimerService()->DestroyTimer(m_piTimer);
     }
+
+    // ParticipantList must be deleted after ConferenceSubscription is deleted.
+    delete &m_objParticipantList;
+    delete &m_objOperationQueue;
+    delete &m_objNotifier;
 }
 
 PUBLIC VIRTUAL void ConferenceController::OnCallStateChanged(
@@ -496,8 +503,7 @@ PROTECTED VIRTUAL IMS_BOOL ConferenceController::CreateSubscription()
         return IMS_FALSE;
     }
 
-    m_pSubscription =
-            new ConferenceSubscription(m_objContext, m_nConfCallKey, m_objParticipantList, *this);
+    m_pSubscription = m_objFactory.CreateSubscription(m_nConfCallKey, m_objParticipantList, *this);
 
     return IMS_TRUE;
 }
@@ -542,8 +548,7 @@ PROTECTED VIRTUAL IConferenceReference* ConferenceController::CreateReference(IN
 {
     IMS_TRACE_D("CreateReference", 0, 0, 0);
 
-    IConferenceReference* piConfRefer =
-            new ConferenceReference(m_objContext, m_nConfCallKey, pUser, *this);
+    IConferenceReference* piConfRefer = m_objFactory.CreateReference(m_nConfCallKey, pUser, *this);
     m_objParticipantList.SetReference(piConfRefer, pUser);
 
     return piConfRefer;
@@ -555,7 +560,7 @@ PROTECTED VIRTUAL IConferenceReference* ConferenceController::CreateReference(
     IMS_TRACE_D("CreateReference", 0, 0, 0);
 
     IConferenceReference* piConfRefer =
-            new ConferenceReference(m_objContext, m_nConfCallKey, objUsers, *this);
+            m_objFactory.CreateReference(m_nConfCallKey, objUsers, *this);
 
     for (IMS_UINT32 index = 0; index < objUsers.GetSize(); index++)
     {
