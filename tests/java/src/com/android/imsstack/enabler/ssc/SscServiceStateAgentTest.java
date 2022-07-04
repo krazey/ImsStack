@@ -55,21 +55,11 @@ public class SscServiceStateAgentTest {
     @After
     public void tearDown() {
         mSscServiceStateAgent.deInit(SLOT_0);
-
-        Looper.myLooper().quit();
     }
 
     @Test
     public void testInit() {
         assertEquals(mockSscServiceState, mSscServiceStateAgent.getSscServiceState(SLOT_0));
-    }
-
-    @Test
-    public void testInit_invalidParam() {
-        final int invalidSlotId = -1;
-        mSscServiceStateAgent.init(invalidSlotId);
-
-        assertNull(mSscServiceStateAgent.getSscServiceState(invalidSlotId));
     }
 
     @Test

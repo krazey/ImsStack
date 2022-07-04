@@ -18,7 +18,6 @@ package com.android.imsstack.enabler.ssc;
 
 import android.os.Handler;
 
-import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -122,11 +121,6 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
     }
 
     private ISscNetConnection get(int slotId) {
-        if (!OperatorInfo.isSlotIdValid(slotId)) {
-            ImsLog.w("Invalid SlotId(" + slotId + ")");
-            return null;
-        }
-
         if (!mSscNetConnection.containsKey(slotId)) {
             ImsLog.w("SscNetConnection for #" + slotId + "is not set...");
             return null;

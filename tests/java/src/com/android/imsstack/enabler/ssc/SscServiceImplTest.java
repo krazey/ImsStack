@@ -1497,7 +1497,7 @@ public class SscServiceImplTest {
         InputSource is;
         Document document;
         try {
-            factory.setNamespaceAware(true);
+            factory.setNamespaceAware(false);
             builder = factory.newDocumentBuilder();
             is = new InputSource(new StringReader(xml));
             document = builder.parse(is);

@@ -18,7 +18,6 @@ package com.android.imsstack.enabler.ssc;
 
 import android.text.TextUtils;
 
-import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.HashMap;
@@ -232,11 +231,6 @@ public class SscXmlFormat {
 
     public static void init(int slotId) {
         ImsLog.d("init (" + slotId + ")");
-
-        if (OperatorInfo.isSlotIdValid(slotId) != true) {
-            ImsLog.w("init() - Invalid SlotId(" + slotId + ")");
-            return;
-        }
 
         setUtXmlData(slotId, new UtXmlData());
     }

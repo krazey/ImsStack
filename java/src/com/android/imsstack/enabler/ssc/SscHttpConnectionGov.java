@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.util.ImsLog;
 
@@ -90,11 +89,6 @@ public class SscHttpConnectionGov implements ISscHttpConnectionGov {
     }
 
     private ISscHttpConnection get(int slotId) {
-        if (!OperatorInfo.isSlotIdValid(slotId)) {
-            ImsLog.w("Invalid SlotId(" + slotId + ")");
-            return null;
-        }
-
         if (!mSscHttpConnection.containsKey(slotId)) {
             ImsLog.w("");
             return null;
