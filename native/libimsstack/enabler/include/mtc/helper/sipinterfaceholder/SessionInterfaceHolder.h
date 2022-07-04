@@ -26,11 +26,11 @@ class ISession;
 class ICoreService;
 class IInterfaceHolderListener;
 
-class SessionInterfaceHolder final : public ISessionListener, public ITimerListener
+class SessionInterfaceHolder : public ISessionListener, public ITimerListener
 {
 public:
     explicit SessionInterfaceHolder(IN IInterfaceHolderListener& objListener);
-    ~SessionInterfaceHolder();
+    virtual ~SessionInterfaceHolder();
     SessionInterfaceHolder(IN const SessionInterfaceHolder&) = delete;
     SessionInterfaceHolder& operator=(IN const SessionInterfaceHolder&) = delete;
 
@@ -61,10 +61,10 @@ public:
     // ITimerListener interface implementation.
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-    ISession* GetISession(
+    virtual ISession* GetISession(
             IN ICoreService* pICoreService, IN const AString& strFrom, IN const AString& strTo);
-    void AddISession(IN ISession* piSession);
-    void ReleaseISession(IN ISession* piSession, IN IMS_BOOL bTerminated = IMS_FALSE);
+    virtual void AddISession(IN ISession* piSession);
+    virtual void ReleaseISession(IN ISession* piSession, IN IMS_BOOL bTerminated = IMS_FALSE);
 
 private:
     IMS_BOOL IsReadyToDestroy(IN ISession* piSession);
