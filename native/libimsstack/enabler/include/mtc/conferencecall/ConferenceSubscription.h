@@ -28,12 +28,12 @@ class ISubscription;
 class IMtcContext;
 enum class SubscriptionState;
 
-class ConferenceSubscription final : public ISubscriptionListener
+class ConferenceSubscription : public ISubscriptionListener
 {
 public:
     explicit ConferenceSubscription(IN IMtcContext& objContext, IN CallKey nConfCallKey,
             IN ConferenceParticipantList& objList, IN IConferenceSubscriptionListener& objListener);
-    ~ConferenceSubscription();
+    virtual ~ConferenceSubscription();
     ConferenceSubscription(IN const ConferenceSubscription&) = delete;
     ConferenceSubscription& operator=(IN const ConferenceSubscription&) = delete;
 
@@ -45,9 +45,9 @@ public:
     void SubscriptionStartFailed(IN ISubscription* piSubscription) override;
     void SubscriptionTerminated(IN ISubscription* piSubscription) override;
 
-    IMS_RESULT Subscribe(IN const AString& strTo);
-    void UnSubscribe();
-    SubscriptionState GetState();
+    virtual IMS_RESULT Subscribe(IN const AString& strTo);
+    virtual void UnSubscribe();
+    virtual SubscriptionState GetState();
 
 private:
     void SetState(IN SubscriptionState nState);

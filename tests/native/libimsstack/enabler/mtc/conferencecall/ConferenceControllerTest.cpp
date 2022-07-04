@@ -27,11 +27,21 @@
 #include "MockIMtcService.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "MtcContextRepository.h"
 #include "conferencecall/MockConferenceOperationQueue.h"
 #include "conferencecall/MockCallConnectionIdManager.h"
 #include "conferencecall/MockConferenceFactory.h"
 #include "conferencecall/MockConferenceParticipantList.h"
+#include "conferencecall/MockConferenceEventNotifier.h"
 #include "conferencecall/MockIConferenceControllerListener.h"
+#include "conferencecall/MockIConferenceReference.h"
+#include "conferencecall/MockIConferenceSubscriptionListener.h"
+#include "conferencecall/MockConferenceSubscription.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/MockSubscriptionInterfaceHolder.h"
+#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/MockICallStateProxy.h"
 #include "../../../engine/interface/core/MockICoreService.h"
 
@@ -43,6 +53,7 @@ namespace android
 {
 
 LOCAL CallKey CONFERENCE_CALL_KEY = 100;
+LOCAL IMS_SINT32 SLOT_ID = 0;
 
 class ConferenceControllerTest : public ::testing::Test
 {
@@ -56,13 +67,23 @@ public:
     MockConferenceOperationQueue* pMockQueue;
     MockConferenceFactory* pMockFactory;
     MockConferenceParticipantList* pMockParticipantList;
+    MockConferenceEventNotifier* pMockNotifier;
+    MockIMtcConfigurationManager objMockConfigurationManager;
 
     MockIMtcCall* piMockConferenceCall;
+    MockIMtcCallContext objMockCallContext;
     ConferenceController* pController;
+    MtcConfigurationProxy* pConfigurationProxy;
+
+    MockIMtcSipInterfaceFactory* pMockInterfaceFactory;
+    MockSubscriptionInterfaceHolder* pMockSubsHolder;
+    MockIInterfaceHolderListener* pMockHolderListener;
 
 protected:
     virtual void SetUp() override
     {
+        MtcContextRepository::GetInstance()->AddContext(SLOT_ID, &objMockContext);
+
         ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
         ON_CALL(objMockContext, GetCallStateProxy).WillByDefault(ReturnRef(objMockCallStateProxy));
 
@@ -71,8 +92,13 @@ protected:
         pMockFactory = new MockConferenceFactory(objMockContext);
         pMockQueue = new MockConferenceOperationQueue();
         pMockParticipantList = new MockConferenceParticipantList();
-        ON_CALL(*pMockFactory, CreateOperatrionQueue).WillByDefault(Return(pMockQueue));
+
+        ON_CALL(*pMockFactory, CreateOperationQueue).WillByDefault(Return(pMockQueue));
         ON_CALL(*pMockFactory, CreateParticipantList).WillByDefault(Return(pMockParticipantList));
+
+        pConfigurationProxy = new MtcConfigurationProxy(&objMockConfigurationManager);
+        ON_CALL(objMockContext, GetConfigurationProxy)
+                .WillByDefault(ReturnRef(*pConfigurationProxy));
 
         piMockConferenceCall = CreateMockIMtcCall(CONFERENCE_CALL_KEY);
         pController = CreateController(piMockConferenceCall);
@@ -86,6 +112,9 @@ protected:
 
         delete piMockConferenceCall;
         delete pController;
+
+        delete pMockInterfaceFactory;
+        delete pMockSubsHolder;
     }
 
     MockIMtcCall* CreateMockIMtcCall(IN CallKey nKey)
@@ -99,14 +128,37 @@ protected:
     {
         pMockIdManager = new MockCallConnectionIdManager(objMockContext);
 
-        MockIMtcCallContext objMockCallContext;
+        pMockNotifier = new MockConferenceEventNotifier(objMockCallContext, *pMockIdManager);
+        ON_CALL(*pMockFactory, CreateEventNotifier(_, _)).WillByDefault(Return(pMockNotifier));
         ON_CALL(*piConferenceCall, GetCallContext()).WillByDefault(ReturnRef(objMockCallContext));
         ON_CALL(objMockCallContext, GetService()).WillByDefault(ReturnRef(objMtcService));
+        MtcSession* pMtcSession = IMS_NULL;
+        ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(pMtcSession));
         ON_CALL(objMockCallManager, GetCallByCallKey(piConferenceCall->GetKey()))
                 .WillByDefault(Return(piConferenceCall));
 
         return new ConferenceController(
                 piConferenceCall->GetKey(), objMockContext, *pMockIdManager, *pMockFactory);
+    }
+
+    MockConferenceSubscription* CreateSubscription(MockIConferenceSubscriptionListener& objListener)
+    {
+        MockConferenceSubscription* pSubscription = new MockConferenceSubscription(
+                objMockContext, CONFERENCE_CALL_KEY, *pMockParticipantList, objListener);
+        ON_CALL(*pMockFactory, CreateSubscription(_, _, _)).WillByDefault(Return(pSubscription));
+        ON_CALL(*pSubscription, GetState).WillByDefault(Return(SubscriptionState::ACTIVE));
+
+        pMockInterfaceFactory = new MockIMtcSipInterfaceFactory();
+        pMockHolderListener = new MockIInterfaceHolderListener();
+        pMockSubsHolder = new MockSubscriptionInterfaceHolder(*pMockHolderListener);
+
+        ON_CALL(*pMockSubsHolder, ReleaseISubscription).WillByDefault(Return());
+        ON_CALL(*pMockInterfaceFactory, GetISubscriptionHolder)
+                .WillByDefault(Return(pMockSubsHolder));
+        ON_CALL(objMockContext, GetSipInterfaceFactory)
+                .WillByDefault(ReturnRef(*pMockInterfaceFactory));
+
+        return pSubscription;
     }
 };
 
@@ -213,7 +265,275 @@ TEST_F(ConferenceControllerTest, OnSubscriptionStateTerminated)
 {
     EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_UNSUBSCRIBE, _)).Times(1);
 
+    // TODO: ambiguous call of CreateNPut(int, int, bool)
+    // EXPECT_CALL(*pMockQueue, CreateNPut(
+    //        CONTROL_OPERATION_TERMINATE_CONFERENCE, _, _)).Times(1);
+
     pController->OnSubscriptionUpdated(SubscriptionUpdateType::TERMINATED);
+}
+
+TEST_F(ConferenceControllerTest, OnSubscriptionStateNotifyReceivedNoUsers)
+{
+    ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(1));
+    ON_CALL(*pMockParticipantList, GetConnectedParticipantSize(_)).WillByDefault(Return(0));
+
+    // EXPECT_CALL(*pMockQueue, CreateNPut(
+    //         CONTROL_OPERATION_TERMINATE_CONFERENCE, _, _)).Times(1);
+
+    pController->OnSubscriptionUpdated(SubscriptionUpdateType::NOTIFY_RECEIVED);
+}
+
+TEST_F(ConferenceControllerTest, OnSubscriptionStateNotifyReceived)
+{
+    ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(1));
+    ON_CALL(*pMockParticipantList, GetConnectedParticipantSize(_)).WillByDefault(Return(2));
+
+    EXPECT_CALL(*pMockNotifier, NotifyConferenceInfo(_)).Times(1);
+    EXPECT_CALL(*pMockNotifier, NotifyUsersInfo(_)).Times(1);
+    // EXPECT_CALL(*pMockQueue, CreateNPut(
+    //         CONTROL_OPERATION_TERMINATE_CONFERENCE, _, _)).Times(1);
+    EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_CHECK_CONNECTED, _))
+            .Times(1);
+
+    pController->OnSubscriptionUpdated(SubscriptionUpdateType::NOTIFY_RECEIVED);
+}
+
+TEST_F(ConferenceControllerTest, OnInviteReferenceStarted)
+{
+    // TODO: ConferenceConfigurationWrapper
+}
+
+TEST_F(ConferenceControllerTest, OnByeReferenceStarted)
+{
+    MockIConferenceReference objReference;
+    ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_BYE));
+    ConfUser objUser;
+    ON_CALL(*pMockParticipantList, GetConfUser(&objReference)).WillByDefault(Return(&objUser));
+
+    EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_REFER_BYE, &objUser))
+            .Times(1);
+
+    pController->OnReferenceStarted(&objReference);
+
+    EXPECT_EQ(objUser.eStatus, CONFINFO_STATUS_DISCONNECTED);
+    EXPECT_EQ(objUser.eStatusCode, SipStatusCode::SC_200);
+}
+
+TEST_F(ConferenceControllerTest, OnByeReferenceStartFailed)
+{
+    MockIConferenceReference objReference;
+    ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_BYE));
+
+    EXPECT_CALL(*pMockNotifier, NotifyDropFailed(_, _)).Times(1);
+
+    pController->OnReferenceStartFailed(&objReference);
+
+    EXPECT_EQ(pController->GetState(), ConferenceController::STATE_IDLE);
+}
+
+TEST_F(ConferenceControllerTest, OnInviteReferenceUpdatedSipFrag200)
+{
+    const SipStatusCode SIPFRAG = SipStatusCode::SC_200;
+    MockIConferenceReference objReference;
+    ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
+    ConfUser objUser;
+    ON_CALL(*pMockParticipantList, GetConfUser(&objReference)).WillByDefault(Return(&objUser));
+
+    EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_REFER_INVITE, &objUser))
+            .Times(1);
+
+    pController->OnReferenceUpdated(&objReference, SIPFRAG, ReferSubscriptionState::ACTIVE);
+
+    EXPECT_EQ(objUser.eStatus, CONFINFO_STATUS_CONNECTED);
+    EXPECT_EQ(objUser.eStatusCode, SIPFRAG);
+}
+
+TEST_F(ConferenceControllerTest, OnInviteReferenceUpdatedSipFrag100)
+{
+    const SipStatusCode SIPFRAG = SipStatusCode::SC_100;
+    MockIConferenceReference objReference;
+    ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
+    ConfUser objUser;
+    ON_CALL(*pMockParticipantList, GetConfUser(&objReference)).WillByDefault(Return(&objUser));
+
+    pController->OnReferenceUpdated(&objReference, SIPFRAG, ReferSubscriptionState::ACTIVE);
+
+    EXPECT_EQ(objUser.eStatus, CONFINFO_STATUS_DIALING_OUT);
+    EXPECT_EQ(objUser.eStatusCode, SIPFRAG);
+}
+
+TEST_F(ConferenceControllerTest, OnInviteReferenceUpdatedSipFragError)
+{
+    const SipStatusCode SIPFRAG = SipStatusCode::SC_486;
+    MockIConferenceReference objReference;
+    ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
+    ConfUser objUser;
+    ON_CALL(*pMockParticipantList, GetConfUser(&objReference)).WillByDefault(Return(&objUser));
+
+    pController->OnReferenceUpdated(&objReference, SIPFRAG, ReferSubscriptionState::ACTIVE);
+
+    EXPECT_EQ(objUser.eStatus, CONFINFO_STATUS_IDLE);
+    EXPECT_EQ(objUser.eStatusCode, SIPFRAG);
+}
+
+TEST_F(ConferenceControllerTest, OnOperationReadyWhenNextIsCreateConferenceCall)
+{
+    ConferenceOperationQueue::ConferenceOperation* pOperation =
+            new ConferenceOperationQueue::ConferenceOperation(
+                    CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, 0);
+
+    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
+
+    // ConferenceController(base class) does nothing. Check this in MergeController
+    EXPECT_CALL(*piMockConferenceCall, StartConference(_, _, _)).Times(0);
+
+    pController->OnOperationReady();
+    delete pOperation;
+}
+
+TEST_F(ConferenceControllerTest, OnOperationReadyWhenNextIsSubscribe)
+{
+    ConferenceOperationQueue::ConferenceOperation* pOperation =
+            new ConferenceOperationQueue::ConferenceOperation(CONTROL_OPERATION_SUBSCRIBE, 0);
+    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
+
+    MockIConferenceSubscriptionListener objSubsListener;
+    MockConferenceSubscription* pSubscription = CreateSubscription(objSubsListener);
+
+    // TODO: ConferenceConfigurationWrapper
+    EXPECT_CALL(*pSubscription, Subscribe(_)).Times(1);
+
+    pController->OnOperationReady();
+    delete pOperation;
+    delete pMockHolderListener;
+}
+
+TEST_F(ConferenceControllerTest, OnOperationReadyWhenNextIsUnsubscribe)
+{
+    // to create subscription, SUBSCRIBE should be done first.
+    ConferenceOperationQueue::ConferenceOperation* pSubscribeOperation =
+            new ConferenceOperationQueue::ConferenceOperation(CONTROL_OPERATION_SUBSCRIBE, 0);
+    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pSubscribeOperation));
+
+    MockIConferenceSubscriptionListener objSubsListener;
+    MockConferenceSubscription* pSubscription = CreateSubscription(objSubsListener);
+
+    pController->OnOperationReady();
+    delete pSubscribeOperation;
+
+    ConferenceOperationQueue::ConferenceOperation* pUnsubscribeOperation =
+            new ConferenceOperationQueue::ConferenceOperation(CONTROL_OPERATION_UNSUBSCRIBE, 0);
+    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pUnsubscribeOperation));
+
+    EXPECT_CALL(*pSubscription, UnSubscribe).Times(1);
+
+    pController->OnOperationReady();
+    delete pSubscribeOperation;
+
+    delete pMockHolderListener;
+}
+
+TEST_F(ConferenceControllerTest, OnOperationReadyWhenNextIsReferInvite)
+{
+    ConferenceOperationQueue::ConferenceOperation* pOperation =
+            new ConferenceOperationQueue::ConferenceOperation(CONTROL_OPERATION_REFER_INVITE, 0);
+    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
+
+    ConfUser objUser;
+    pOperation->SetConfUser(&objUser);
+
+    ON_CALL(*pMockParticipantList, SetReference).WillByDefault(Return());
+
+    MockIConferenceReference* pReference = new MockIConferenceReference();
+    ON_CALL(*pMockFactory, CreateReference(CONFERENCE_CALL_KEY, &objUser, _))
+            .WillByDefault(Return(pReference));
+
+    EXPECT_CALL(*pReference, SendInvite(_, _)).Times(1);
+
+    pController->OnOperationReady();
+    delete pOperation;
+    // pReference is deleted in ~ConferenceController
+}
+
+TEST_F(ConferenceControllerTest, OnOperationReadyWhenNextIsReferBye)
+{
+    ConferenceOperationQueue::ConferenceOperation* pOperation =
+            new ConferenceOperationQueue::ConferenceOperation(CONTROL_OPERATION_REFER_BYE, 0);
+    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
+
+    ConfUser objUser;
+    pOperation->SetConfUser(&objUser);
+
+    ON_CALL(*pMockParticipantList, SetReference).WillByDefault(Return());
+    ON_CALL(*pMockParticipantList, SetReferInviteUri).WillByDefault(Return());
+
+    MockIConferenceReference* pReference = new MockIConferenceReference();
+    ON_CALL(*pMockFactory, CreateReference(CONFERENCE_CALL_KEY, &objUser, _))
+            .WillByDefault(Return(pReference));
+
+    EXPECT_CALL(*pReference, SendBye(_)).Times(1);
+
+    pController->OnOperationReady();
+    delete pOperation;
+}
+
+TEST_F(ConferenceControllerTest, SetListenerAndListenerCalledWhenClosed)
+{
+    ON_CALL(*pMockQueue, HasPendingOperation).WillByDefault(Return(IMS_FALSE));
+    MockIConferenceControllerListener* pListener = new MockIConferenceControllerListener();
+    pController->SetListener(pListener);
+    EXPECT_CALL(*pListener, OnClosed(_)).Times(1);
+
+    pController->OnCallStateChanged(
+            CONFERENCE_CALL_KEY, IMtcCall::State::TERMINATING, CallType::VOIP, IMS_TRUE, 0);
+}
+
+TEST_F(ConferenceControllerTest, ProcessJoinCommand)
+{
+    ConfUser* pUser = new ConfUser();
+    ImsList<ConfUser*> objUsers;
+    objUsers.Append(pUser);
+
+    ON_CALL(objMockConfigurationManager, GetConferenceInvitingReferType).WillByDefault(Return(1));
+    ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(1));
+
+    EXPECT_CALL(*pMockParticipantList, AddUser(pUser)).Times(1);
+
+    pController->ProcessCommand(IConferenceController::ADD, objUsers);
+
+    EXPECT_EQ(pController->GetState(), ConferenceController::STATE_JOINING);
+}
+
+TEST_F(ConferenceControllerTest, ProcessDropCommand)
+{
+    ConfUser* pUser = new ConfUser();
+    ImsList<ConfUser*> objUsers;
+    objUsers.Append(pUser);
+
+    ON_CALL(objMockConfigurationManager, GetConferenceInvitingReferType).WillByDefault(Return(1));
+    ON_CALL(*pMockParticipantList, FindParticipant(_)).WillByDefault(Return(0));
+    ON_CALL(*pMockParticipantList, GetConfUsers(_)).WillByDefault(Return(objUsers));
+
+    // EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_REFER_BYE, _)).Times(1);
+    EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, _)).Times(1);
+
+    pController->ProcessCommand(IConferenceController::REMOVE, objUsers);
+
+    EXPECT_EQ(pController->GetState(), ConferenceController::STATE_DROPPING);
+    delete pUser;
+}
+
+TEST_F(ConferenceControllerTest, ProcessJoinedCommand)
+{
+    ON_CALL(objMockConfigurationManager, IsEnableConferenceSubscribeByParticipant)
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_SUBSCRIBE, IMS_TRUE)).Times(1);
+
+    ImsList<ConfUser*> objUsers;
+    pController->ProcessCommand(IConferenceController::JOINED, objUsers);
+
+    EXPECT_EQ(pController->GetState(), ConferenceController::STATE_CREATED);
 }
 
 }  // namespace android

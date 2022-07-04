@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_INTERFACE_HOLDER_LISTENER_H_
-#define INTERFACE_INTERFACE_HOLDER_LISTENER_H_
+#ifndef MOCK_I_INTERFACE_HOLDER_LISTENER_H_
+#define MOCK_I_INTERFACE_HOLDER_LISTENER_H_
 
-class IInterfaceHolderListener
+#include <gmock/gmock.h>
+
+#include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
+
+class MockIInterfaceHolderListener : public IInterfaceHolderListener
 {
 public:
-    virtual ~IInterfaceHolderListener(){};
-    virtual void OnSessionInterfaceCleared() = 0;
-    virtual void OnReferenceInterfaceCleared() = 0;
-    virtual void OnSubscriptionInterfaceCleared() = 0;
+    ~MockIInterfaceHolderListener() {}
+    MOCK_METHOD(void, OnSessionInterfaceCleared, (), (override));
+    MOCK_METHOD(void, OnReferenceInterfaceCleared, (), (override));
+    MOCK_METHOD(void, OnSubscriptionInterfaceCleared, (), (override));
 };
 
 #endif

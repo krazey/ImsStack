@@ -37,7 +37,7 @@ public:
     }
     ~MockConferenceEventNotifier() {}
     MOCK_METHOD(
-            void, NotifyMerged, (IN ConferenceParticipantList & objParticipantList), (override));
+            void, NotifyMerged, (IN ConferenceParticipantList& objParticipantList), (override));
     MOCK_METHOD(void, NotifyMergeFailed, (IN CallReasonInfo objReason), (override));
     MOCK_METHOD(void, NotifyGroupCallStarted, (), (override));
     MOCK_METHOD(void, NotifyGroupCallFailed, (IN CallReasonInfo objReason), (override));
@@ -55,10 +55,10 @@ public:
     MOCK_METHOD(void, NotifyJoinFailed,
             (IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList),
             (override));
-    MOCK_METHOD(void, NotifyConferenceInfo, (IN ConferenceParticipantList & objParticipantList),
+    MOCK_METHOD(void, NotifyConferenceInfo, (IN ConferenceParticipantList& objParticipantList),
             (override));
     MOCK_METHOD(
-            void, NotifyUsersInfo, (IN ConferenceParticipantList & objParticipantList), (override));
+            void, NotifyUsersInfo, (IN ConferenceParticipantList& objParticipantList), (override));
     MOCK_METHOD(void, NotifyIndividualCallTerminated, (IN CallKey nKey), (override));
 };
 

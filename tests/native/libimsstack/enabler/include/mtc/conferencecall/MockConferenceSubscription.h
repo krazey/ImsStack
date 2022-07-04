@@ -27,7 +27,7 @@ class ISession;
 class ICoreService;
 class ISubscription;
 class IMtcContext;
-class SubscriptionState;
+enum class SubscriptionState;
 
 class MockConferenceSubscription : public ConferenceSubscription
 {
@@ -45,9 +45,9 @@ public:
     MOCK_METHOD(void, SubscriptionStarted, (IN ISubscription * piSubscription), (override));
     MOCK_METHOD(void, SubscriptionStartFailed, (IN ISubscription * piSubscription), (override));
     MOCK_METHOD(void, SubscriptionTerminated, (IN ISubscription * piSubscription), (override));
-    MOCK_METHOD(IMS_RESULT, Subscribe, (IN const AString& strTo), ());
-    MOCK_METHOD(void, UnSubscribe, (), ());
-    MOCK_METHOD(SubscriptionState, GetState, (), ());
+    MOCK_METHOD(IMS_RESULT, Subscribe, (IN const AString& strTo), (override));
+    MOCK_METHOD(void, UnSubscribe, (), (override));
+    MOCK_METHOD(SubscriptionState, GetState, (), (override));
     MOCK_METHOD(void, SetState, (IN SubscriptionState nState), ());
     MOCK_METHOD(void, CreateSubscription, (), ());
     MOCK_METHOD(IMS_RESULT, Subscribe, (), ());

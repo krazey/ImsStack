@@ -124,8 +124,8 @@ public:
 
     inline IMS_SINT32 GetMaxUserCount() const { return m_nMaxUserCount; }
 
-    void AddUser(IN const ConfUser* pConfUser);
-    void RemoveUser(IN const ConfUser* pConfUser);
+    virtual void AddUser(IN const ConfUser* pConfUser);
+    virtual void RemoveUser(IN const ConfUser* pConfUser);
     virtual ConfUser* GetConfUser(IN IConferenceReference* piConfReference) const;
 
     virtual IMS_BOOL IsConnectedUser(
@@ -134,12 +134,12 @@ public:
     // the order of this ConfUser is same with the order of REFER sent.
     virtual IMSList<ConfUser*> GetConfUsers(IN IMS_BOOL bCopy = IMS_FALSE) const;
 
-    void SetReference(IN IConferenceReference* piReference, IN const ConfUser* pConfUser);
+    virtual void SetReference(IN IConferenceReference* piReference, IN const ConfUser* pConfUser);
     virtual IConferenceReference* GetReference(IN const ConfUser* pConfUser) const;
-    void ResetReference(IN IConferenceReference* piConfReference);
+    virtual void ResetReference(IN IConferenceReference* piConfReference);
 
-    void SetReferInviteUri(IN AString strReferInviteUri, IN const ConfUser* pConfUser);
-    AString GetReferInviteUri(IN const ConfUser* pConfUser);
+    virtual void SetReferInviteUri(IN AString strReferInviteUri, IN const ConfUser* pConfUser);
+    virtual AString GetReferInviteUri(IN const ConfUser* pConfUser);
 
     virtual IMS_SINT32 FindParticipant(IN IMS_UINT32 nConnectionId);
     void ReOrder(

@@ -21,7 +21,7 @@
 
 #include "AString.h"
 #include "ImsTypeDef.h"
-#include "IConferenceReference.h"
+#include "conferencecall/IConferenceReference.h"
 
 class CallConnectionIdManager;
 

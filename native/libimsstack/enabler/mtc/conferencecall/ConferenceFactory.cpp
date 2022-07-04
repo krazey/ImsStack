@@ -63,7 +63,7 @@ PUBLIC VIRTUAL ConferenceParticipantList* ConferenceFactory::CreateParticipantLi
     return new ConferenceParticipantList();
 }
 
-PUBLIC VIRTUAL ConferenceOperationQueue* ConferenceFactory::CreateOperatrionQueue()
+PUBLIC VIRTUAL ConferenceOperationQueue* ConferenceFactory::CreateOperationQueue()
 {
     return new ConferenceOperationQueue();
 }

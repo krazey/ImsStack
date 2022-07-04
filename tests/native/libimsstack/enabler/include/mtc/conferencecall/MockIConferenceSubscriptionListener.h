@@ -18,7 +18,7 @@
 #define MOCK_I_CONFERENCE_SUBSCRIPTION_LISTENER_H_
 
 #include <gmock/gmock.h>
-#include "IConferenceSubscriptionListener.h"
+#include "conferencecall/IConferenceSubscriptionListener.h"
 
 class MockIConferenceSubscriptionListener : public IConferenceSubscriptionListener
 {

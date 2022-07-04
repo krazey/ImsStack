@@ -45,7 +45,7 @@ ConferenceController::ConferenceController(IN CallKey nConfCallKey, IMtcContext&
         m_objParticipantList(*objFactory.CreateParticipantList()),
         m_objNotifier(*objFactory.CreateEventNotifier(
                 GetConferenceCall()->GetCallContext(), objConnectionIdManager)),
-        m_objOperationQueue(*objFactory.CreateOperatrionQueue()),
+        m_objOperationQueue(*objFactory.CreateOperationQueue()),
         m_pSubscription(IMS_NULL),
         m_objIConfReferences(IMSList<IConferenceReference*>()),
         m_piTimer(IMS_NULL),
@@ -1041,7 +1041,16 @@ void ConferenceController::NotifyResultToConferenceCall()
 PROTECTED
 void ConferenceController::GetFocusAddress(OUT AString& strAddress) const
 {
-    ISession& objSession = GetConferenceCall()->GetCallContext().GetSession()->GetISession();
+    MtcSession* pMtcSession = GetConferenceCall()->GetCallContext().GetSession();
+
+    if (pMtcSession == IMS_NULL)
+    {
+        // for unit test case.
+        IMS_TRACE_E(0, "GetFocusAddress empty", 0, 0, 0);
+        return;
+    }
+
+    ISession& objSession = pMtcSession->GetISession();
     IMessage* piMessage = IMS_NULL;
 
     if (GetConferenceCall()->GetCallContext().GetCallInfo().ePeerType == PeerType::MO)

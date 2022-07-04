@@ -26,12 +26,11 @@
 class MockIConferenceReferenceListener : public IConferenceReferenceListener
 {
 public:
-    MOCK_METHOD(void, OnReferenceStarted, (IN IConferenceReference * piConfRef), (override));
-    MOCK_METHOD(void, OnReferenceStartFailed, (IN IConferenceReference * pConfRef), (override));
+    MOCK_METHOD(void, OnReferenceStarted, (IN IConferenceReference* piConfRef), (override));
+    MOCK_METHOD(void, OnReferenceStartFailed, (IN IConferenceReference* pConfRef), (override));
     MOCK_METHOD(void, OnReferenceUpdated,
-            (IN IConferenceReference * piConfRef, IN SipStatusCode nSipFragCode,
-                    IN ReferSubscriptionState eState),
-            (override));
+            (IN IConferenceReference* piConfRef, IN SipStatusCode nSipFragCode,
+                    IN ReferSubscriptionState eState), (override));
 };
 
 #endif

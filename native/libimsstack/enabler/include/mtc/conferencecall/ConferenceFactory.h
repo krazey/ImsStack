@@ -46,7 +46,7 @@ public:
     virtual IConferenceReference* CreateReference(IN CallKey nConfCallKey,
             IN IMSList<ConfUser*>& objConfUsers, IN IConferenceReferenceListener& objListener);
     virtual ConferenceParticipantList* CreateParticipantList();
-    virtual ConferenceOperationQueue* CreateOperatrionQueue();
+    virtual ConferenceOperationQueue* CreateOperationQueue();
     virtual ConferenceEventNotifier* CreateEventNotifier(IN IMtcCallContext& objConfCallContext,
             IN CallConnectionIdManager& objConnectionIdManager);
 

@@ -44,7 +44,7 @@ PUBLIC GLOBAL IMtcContext* MtcContextRepository::GetContext(
 {
     if (nSlotId == INVALID_SLOT_ID)
     {
-        nSlotId = ThreadService::GetCurrentSlotId();
+        nSlotId = ThreadService::GetCurrentSlotId(IMS_SLOT_0);
     }
 
     return MtcContextRepository::GetInstance()->GetContextBySlot(nSlotId);

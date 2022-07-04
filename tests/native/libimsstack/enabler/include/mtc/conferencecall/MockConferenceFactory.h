@@ -53,7 +53,7 @@ public:
                     IN IConferenceReferenceListener& objListener),
             (override));
     MOCK_METHOD(ConferenceParticipantList*, CreateParticipantList, (), (override));
-    MOCK_METHOD(ConferenceOperationQueue*, CreateOperatrionQueue, (), (override));
+    MOCK_METHOD(ConferenceOperationQueue*, CreateOperationQueue, (), (override));
     MOCK_METHOD(ConferenceEventNotifier*, CreateEventNotifier,
             (IN IMtcCallContext & objConfCallContext,
                     IN CallConnectionIdManager& objConnectionIdManager),
