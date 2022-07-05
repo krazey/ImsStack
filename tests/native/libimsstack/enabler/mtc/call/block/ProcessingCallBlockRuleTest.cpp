@@ -15,12 +15,12 @@
  */
 
 #include <gtest/gtest.h>
-#include "helper/block/CallCountBlockRule.h"
+#include "call/block/ProcessingCallBlockRule.h"
 
 namespace android
 {
 
-class CallCountBlockRuleTest : public ::testing::Test
+class ProcessingCallBlockRuleTest : public ::testing::Test
 {
 protected:
     virtual void SetUp() override {}

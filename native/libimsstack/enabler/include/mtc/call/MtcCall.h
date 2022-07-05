@@ -18,7 +18,7 @@
 #define MTC_CALL_H_
 
 #include "ImsList.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "IMtcContext.h"
 #include "ISessionListener.h"
 #include "ISipClientConnectionListener.h"
@@ -30,6 +30,7 @@
 #include "call/MtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
+#include "call/block/IMtcBlockChecker.h"
 #include "call/message/MtcMessageMediator.h"
 #include "call/state/MtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
@@ -37,7 +38,6 @@
 #include "helper/IMtcTimerListener.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
-#include "helper/block/IMtcBlockChecker.h"
 #include "media/IMediaReportEventListener.h"
 #include "media/MtcMediaManager.h"
 #include "precondition/MtcPreconditionManager.h"

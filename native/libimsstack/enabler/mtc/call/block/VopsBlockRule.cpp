@@ -15,38 +15,37 @@
  */
 
 #include "ImsEventDef.h"
+#include "IMtcService.h"
 #include "IMtcImsEventReceiver.h"
 #include "call/IMtcCallContext.h"
-#include "helper/block/CsCallBlockRule.h"
+#include "call/block/VopsBlockRule.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-CsCallBlockRule::CsCallBlockRule(IN IMtcCallContext& objContext) :
+VopsBlockRule::VopsBlockRule(IN IMtcCallContext& objContext) :
         m_objService(objContext.GetService()),
         m_objEventReceiver(objContext.GetImsEventReceiver()),
         m_ePeerType(objContext.GetCallInfo().ePeerType)
 {
 }
 
-PUBLIC VIRTUAL CsCallBlockRule::~CsCallBlockRule() {}
+PUBLIC VIRTUAL VopsBlockRule::~VopsBlockRule() {}
 
-PUBLIC VIRTUAL CsCallBlockRule::Result CsCallBlockRule::Check(
+PUBLIC VIRTUAL VopsBlockRule::Result VopsBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-    if (m_objService.GetServiceType() == ServiceType::EMERGENCY)
+    if (m_objService.IsWlanIpCanType())
     {
         return Result(Result::Status::UNBLOCKED);
     }
 
-    IMS_UINT32 nCsCallState = m_objEventReceiver.GetWParam(IMS_EVENT_CSCALL_STATE);
-    if (nCsCallState == IMS_CSCALL_STATE_IDLE ||
-            nCsCallState == IMtcImsEventReceiver::UNKNOWN_VALUE)
+    if (m_objEventReceiver.GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE) ==
+            IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
-        return Result(Result::Status::UNBLOCKED);
+        IMS_TRACE_I("Check : VoPS is not supported", 0, 0, 0);
+        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE));
     }
 
-    IMS_TRACE_I("Check : CS call exists", 0, 0, 0);
-
-    return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CS_CALL));
+    return Result(Result::Status::UNBLOCKED);
 }

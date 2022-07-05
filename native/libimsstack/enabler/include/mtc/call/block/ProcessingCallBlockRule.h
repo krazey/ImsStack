@@ -17,9 +17,9 @@
 #ifndef PROCESSING_CALL_BLOCK_RULE_H_
 #define PROCESSING_CALL_BLOCK_RULE_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
-#include "helper/block/IMtcBlockRule.h"
+#include "call/block/IMtcBlockRule.h"
 
 class IMtcCallContext;
 class IMtcCallManager;

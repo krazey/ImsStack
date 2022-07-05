@@ -18,7 +18,7 @@
 #define INTERFACE_MTC_BLOCK_RULE_H_
 
 #include "CallReasonInfo.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
 
 class IMtcBlockRuleCheckListener;

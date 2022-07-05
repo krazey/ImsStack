@@ -15,7 +15,7 @@
  */
 
 #include "IMessage.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "IReference.h"
 #include "ISession.h"
 #include "ISipClientConnection.h"
@@ -26,6 +26,7 @@
 #include "SipStatusCode.h"
 #include "call/MtcCall.h"
 #include "call/MtcSession.h"
+#include "call/block/MtcBlockChecker.h"
 #include "call/state/AlertingState.h"
 #include "call/state/EstablishedState.h"
 #include "call/state/IdleState.h"
@@ -35,7 +36,6 @@
 #include "call/state/UpdatingState.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/ICallStateProxy.h"
-#include "helper/block/MtcBlockChecker.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 

@@ -15,7 +15,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "helper/block/TerminalBasedCallWaitingBlockRule.h"
+#include "call/block/TerminalBasedCallWaitingBlockRule.h"
 
 namespace android
 {

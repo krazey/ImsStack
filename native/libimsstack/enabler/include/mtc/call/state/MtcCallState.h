@@ -18,12 +18,12 @@
 #define MTC_CALL_STATE_H_
 
 #include "ImsList.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "ISessionListener.h"
 #include "MtcDef.h"
 #include "base/IMessageMediator.h"
 #include "call/IMtcCall.h"
-#include "helper/block/IMtcBlockChecker.h"
+#include "call/block/IMtcBlockChecker.h"
 #include "ussi/UssiDef.h"
 
 class AString;

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
-#include "helper/block/MtcBlockChecker.h"
+#include "call/block/MtcBlockChecker.h"
 #include "define/MtcStringDef.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

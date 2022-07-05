@@ -17,7 +17,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "helper/block/ProcessingCallBlockRule.h"
+#include "call/block/ProcessingCallBlockRule.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

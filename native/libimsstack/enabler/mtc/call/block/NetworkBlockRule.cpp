@@ -17,8 +17,8 @@
 #include "INetworkWatcher.h"
 #include "ServicePhoneInfo.h"
 #include "call/IMtcCallContext.h"
+#include "call/block/NetworkBlockRule.h"
 #include "helper/IMtcAosConnector.h"
-#include "helper/block/NetworkBlockRule.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

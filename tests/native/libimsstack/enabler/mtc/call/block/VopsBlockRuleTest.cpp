@@ -15,7 +15,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "helper/block/VopsBlockRule.h"
+#include "call/block/VopsBlockRule.h"
 
 namespace android
 {
