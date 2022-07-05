@@ -15,7 +15,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "helper/block/CsCallBlockRule.h"
+#include "call/block/CsCallBlockRule.h"
 
 namespace android
 {

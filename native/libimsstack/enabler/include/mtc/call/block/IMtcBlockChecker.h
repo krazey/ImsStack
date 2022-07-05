@@ -17,8 +17,8 @@
 #ifndef INTERFACE_MTC_BLOCK_CHECKER_H_
 #define INTERFACE_MTC_BLOCK_CHECKER_H_
 
-#include "helper/block/IMtcBlockRule.h"
 #include "MtcDef.h"
+#include "call/block/IMtcBlockRule.h"
 
 /*
  * This is the interface to check if some operation is blocked for some reason or not.

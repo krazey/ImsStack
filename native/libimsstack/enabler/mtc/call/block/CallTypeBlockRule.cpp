@@ -15,8 +15,8 @@
  */
 
 #include "call/IMtcCallContext.h"
+#include "call/block/CallTypeBlockRule.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "helper/block/CallTypeBlockRule.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

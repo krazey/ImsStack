@@ -17,7 +17,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "helper/block/TerminalBasedCallWaitingBlockRule.h"
+#include "call/block/TerminalBasedCallWaitingBlockRule.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

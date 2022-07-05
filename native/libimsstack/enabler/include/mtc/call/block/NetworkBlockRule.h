@@ -14,34 +14,35 @@
  * limitations under the License.
  */
 
-#ifndef CALL_TYPE_BLOCK_RULE_H_
-#define CALL_TYPE_BLOCK_RULE_H_
+#ifndef NETWORK_BLOCK_RULE_H_
+#define NETWORK_BLOCK_RULE_H_
 
-#include "IMSTypeDef.h"
-#include "helper/block/IMtcBlockRule.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
+#include "call/block/IMtcBlockRule.h"
 
 class IMtcCallContext;
-class MtcConfigurationProxy;
+class INetworkWatcher;
 
-class CallTypeBlockRule final : public IMtcBlockRule
+class NetworkBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit CallTypeBlockRule(IN IMtcCallContext& objContext, CallType eCallTypeToCheck);
-    virtual ~CallTypeBlockRule();
-    CallTypeBlockRule(IN const CallTypeBlockRule&) = delete;
-    CallTypeBlockRule& operator=(IN const CallTypeBlockRule&) = delete;
+    explicit NetworkBlockRule(IN IMtcCallContext& objContext);
+    virtual ~NetworkBlockRule();
+    NetworkBlockRule(IN const NetworkBlockRule&) = delete;
+    NetworkBlockRule& operator=(IN const NetworkBlockRule&) = delete;
 
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    IMtcCallContext& m_objContext;
-    MtcConfigurationProxy& m_objConfiguration;
-    CallType m_eCallTypeToCheck;
+    IMS_BOOL IsInEpdg(IN const IMtcService& objService);
+    IMS_BOOL IsWifiRegistered(IN IMtcAosConnector* pAosConnector);
 
-    IMS_BOOL IsOtherCallExists();
-    IMS_BOOL HasVideoCall(IN const IMSList<IMtcCall*>& lstCalls);
-    IMS_BOOL IsVideoCall(IN CallType eCallType);
+    INetworkWatcher& GetNetWatcherInfo(IN IMS_SINT32 nSlotId);
+
+    const IMtcService& m_objService;
+    INetworkWatcher& m_objNetWatcherInfo;
+    const PeerType m_ePeerType;
 };
 
 #endif

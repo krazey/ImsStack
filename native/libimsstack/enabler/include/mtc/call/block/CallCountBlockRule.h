@@ -14,30 +14,33 @@
  * limitations under the License.
  */
 
-#ifndef VOPS_BLOCK_RULE_H_
-#define VOPS_BLOCK_RULE_H_
+#ifndef CALL_COUNT_BLOCK_RULE_H_
+#define CALL_COUNT_BLOCK_RULE_H_
 
-#include "call/IMtcCall.h"
-#include "helper/block/IMtcBlockRule.h"
+#include "ImsTypeDef.h"
+#include "call/block/IMtcBlockRule.h"
 
 class IMtcCallContext;
-class IMtcService;
-class IMtcImsEventReceiver;
+class IMtcCallManager;
+class MtcConfigurationProxy;
+struct CallInfo;
 
-class VopsBlockRule final : public IMtcBlockRule
+class CallCountBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit VopsBlockRule(IN IMtcCallContext& objContext);
-    virtual ~VopsBlockRule();
-    VopsBlockRule(IN const VopsBlockRule&) = delete;
-    VopsBlockRule& operator=(IN const VopsBlockRule&) = delete;
+    explicit CallCountBlockRule(IN IMtcCallContext& objContext);
+    virtual ~CallCountBlockRule();
+    CallCountBlockRule(IN const CallCountBlockRule&) = delete;
+    CallCountBlockRule& operator=(IN const CallCountBlockRule&) = delete;
 
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    IMtcService& m_objService;
-    IMtcImsEventReceiver& m_objEventReceiver;
-    const PeerType m_ePeerType;
+    IMS_UINT32 GetActiveCallCount();
+
+    MtcConfigurationProxy& m_objConfiguration;
+    IMtcCallManager& m_objCallManager;
+    const CallInfo& m_objCallInfo;
 };
 
 #endif

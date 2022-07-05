@@ -14,34 +14,28 @@
  * limitations under the License.
  */
 
-#ifndef NETWORK_BLOCK_RULE_H_
-#define NETWORK_BLOCK_RULE_H_
+#ifndef CS_CALL_BLOCK_RULE_H_
+#define CS_CALL_BLOCK_RULE_H_
 
-#include "IMSTypeDef.h"
 #include "call/IMtcCall.h"
-#include "helper/block/IMtcBlockRule.h"
+#include "call/block/IMtcBlockRule.h"
 
 class IMtcCallContext;
-class INetworkWatcher;
+class IMtcImsEventReceiver;
 
-class NetworkBlockRule final : public IMtcBlockRule
+class CsCallBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit NetworkBlockRule(IN IMtcCallContext& objContext);
-    virtual ~NetworkBlockRule();
-    NetworkBlockRule(IN const NetworkBlockRule&) = delete;
-    NetworkBlockRule& operator=(IN const NetworkBlockRule&) = delete;
+    explicit CsCallBlockRule(IN IMtcCallContext& objContext);
+    virtual ~CsCallBlockRule();
+    CsCallBlockRule(IN const CsCallBlockRule&) = delete;
+    CsCallBlockRule& operator=(IN const CsCallBlockRule&) = delete;
 
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    IMS_BOOL IsInEpdg(IN const IMtcService& objService);
-    IMS_BOOL IsWifiRegistered(IN IMtcAosConnector* pAosConnector);
-
-    INetworkWatcher& GetNetWatcherInfo(IN IMS_SINT32 nSlotId);
-
     const IMtcService& m_objService;
-    INetworkWatcher& m_objNetWatcherInfo;
+    IMtcImsEventReceiver& m_objEventReceiver;
     const PeerType m_ePeerType;
 };
 

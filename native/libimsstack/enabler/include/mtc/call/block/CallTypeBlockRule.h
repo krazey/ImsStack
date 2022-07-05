@@ -14,33 +14,34 @@
  * limitations under the License.
  */
 
-#ifndef CALL_COUNT_BLOCK_RULE_H_
-#define CALL_COUNT_BLOCK_RULE_H_
+#ifndef CALL_TYPE_BLOCK_RULE_H_
+#define CALL_TYPE_BLOCK_RULE_H_
 
-#include "IMSTypeDef.h"
-#include "helper/block/IMtcBlockRule.h"
+#include "ImsTypeDef.h"
+#include "call/IMtcCall.h"
+#include "call/block/IMtcBlockRule.h"
 
 class IMtcCallContext;
-class IMtcCallManager;
 class MtcConfigurationProxy;
-struct CallInfo;
 
-class CallCountBlockRule final : public IMtcBlockRule
+class CallTypeBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit CallCountBlockRule(IN IMtcCallContext& objContext);
-    virtual ~CallCountBlockRule();
-    CallCountBlockRule(IN const CallCountBlockRule&) = delete;
-    CallCountBlockRule& operator=(IN const CallCountBlockRule&) = delete;
+    explicit CallTypeBlockRule(IN IMtcCallContext& objContext, CallType eCallTypeToCheck);
+    virtual ~CallTypeBlockRule();
+    CallTypeBlockRule(IN const CallTypeBlockRule&) = delete;
+    CallTypeBlockRule& operator=(IN const CallTypeBlockRule&) = delete;
 
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    IMS_UINT32 GetActiveCallCount();
-
+    IMtcCallContext& m_objContext;
     MtcConfigurationProxy& m_objConfiguration;
-    IMtcCallManager& m_objCallManager;
-    const CallInfo& m_objCallInfo;
+    CallType m_eCallTypeToCheck;
+
+    IMS_BOOL IsOtherCallExists();
+    IMS_BOOL HasVideoCall(IN const IMSList<IMtcCall*>& lstCalls);
+    IMS_BOOL IsVideoCall(IN CallType eCallType);
 };
 
 #endif

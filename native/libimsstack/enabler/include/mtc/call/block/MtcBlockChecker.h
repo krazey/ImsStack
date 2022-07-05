@@ -18,10 +18,10 @@
 #define MTC_BLOCK_CHECKER_H_
 
 #include "ImsList.h"
-#include "IMSTypeDef.h"
-#include "helper/block/IMtcBlockChecker.h"
-#include "helper/block/IMtcBlockRule.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
+#include "call/block/IMtcBlockChecker.h"
+#include "call/block/IMtcBlockRule.h"
 
 class IMtcCallContext;
 
