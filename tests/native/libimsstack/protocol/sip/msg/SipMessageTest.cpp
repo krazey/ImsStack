@@ -414,7 +414,7 @@ To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Type: application/simple-message-example\r\n\
-Content-Length: 21\r\n\
+Content-Length: 23\r\n\
 \r\n\
 Messages-Waiting: yes\r\n";
 
@@ -442,6 +442,53 @@ Messages-Waiting: yes\r\n";
     ASSERT_TRUE(pMsgBuffer != nullptr);
 
     EXPECT_STREQ("Messages-Waiting: yes\r\n", pMsgBuffer);
+
+    delete[] pMsgBuffer;
+    pMessageBody->SipDelete();
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    EXPECT_EQ(SIP_TRUE, pCopyMessage->EncodeMsg(&pBuff, &sipMsgLength, 0));
+
+    pCopyMessage->SipDelete();
+
+    /* With gzip message body and mandatory headers, success */
+    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/TCP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Type: application/pidf+xml\r\n\
+Content-Encoding: gzip\r\n\
+Content-Length: 19\r\n\
+\r\n\
+gzip message body\r\n";
+
+    pDecodeMessage = new SipMessage();
+    ASSERT_TRUE(pDecodeMessage != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->HasMandatoryHdrs());
+
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecCompleteMsg(pMsg, strlen(pMsg)));
+
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->HasMandatoryHdrs());
+
+    pCopyMessage = new SipMessage(*pDecodeMessage);
+    ASSERT_TRUE(pCopyMessage != nullptr);
+
+    pDecodeMessage->SipDelete();
+
+    pMessageBody = pCopyMessage->GetMsgBody(0);
+    ASSERT_TRUE(pMessageBody != nullptr);
+
+    EXPECT_EQ(SipMsgBody::SINGLE_BODY, pMessageBody->GetBodyType());
+
+    EXPECT_EQ(SIP_TRUE, pMessageBody->GetMsgBuffer(&pMsgBuffer));
+    ASSERT_TRUE(pMsgBuffer != nullptr);
+
+    EXPECT_STREQ("gzip message body\r\n", pMsgBuffer);
 
     delete[] pMsgBuffer;
     pMessageBody->SipDelete();

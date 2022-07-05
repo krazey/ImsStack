@@ -1336,8 +1336,9 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
                             "DecCompleteMsg, GZIP Decoding single body failed", SIP_ZERO, SIP_ZERO);
                     m_pMsgBodyList->SipDelete();
                     m_pMsgBodyList = SIP_NULL;
+                    return SIP_FALSE;
                 }
-                return SIP_FALSE;
+                return SIP_TRUE;
             }
         }
     }
