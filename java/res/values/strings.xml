@@ -21,7 +21,6 @@
 <string name="label_enabled">Enabled</string>
 <string name="label_disabled">Disabled</string>
 
-<string name="ims_label_location_debug_screen">Location Debug Screen</string>
 <!-- video-call: popup statements -->
 <string name="turning_off_camera_not_supported">Turning off a camera is not supported.</string>
 

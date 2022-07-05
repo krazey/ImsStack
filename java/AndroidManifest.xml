@@ -100,17 +100,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <!-- Activity for Location debug screen -->
-        <activity
-            android:name=".test.menu.LocationDebugScreen"
-            android:process="com.android.imsstack"
-            android:exported="false" >
-            <intent-filter>
-                <action android:name="com.android.imsstack.action.LOCATION_DEBUG_SCREEN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
         <!-- Service -->
         <service
             android:name=".imsservice.ImsService"
