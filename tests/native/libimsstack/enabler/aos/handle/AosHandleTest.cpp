@@ -112,6 +112,8 @@ protected:
         AosProvider::GetInstance()->SetRegStateManager(
                 static_cast<IAosRegStateManager*>(&m_objMockIAosRegStateManager));
 
+        EXPECT_CALL(m_objMockIAosNConfiguration, SetListener(_)).Times(1);
+
         m_pAosHandle = new AosHandle(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
                 m_strAppId, m_strServiceId, m_nServiceType);
 
@@ -120,14 +122,15 @@ protected:
 
     virtual void TearDown() override
     {
+        if (m_pAosHandle != nullptr)
+        {
+            delete m_pAosHandle;
+            m_pAosHandle = nullptr;
+        }
+
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration);
         AosProvider::GetInstance()->SetService(m_piAosService);
         AosProvider::GetInstance()->SetRegStateManager(m_piAosRegStateManager);
-
-        if (m_pAosHandle)
-        {
-            delete m_pAosHandle;
-        }
     }
 
     void SetState(IN IMS_UINT32 nState) { m_pAosHandle->SetState(nState); }
@@ -198,11 +201,6 @@ protected:
     }
 
     void AddUnavailableFeature(IN IMS_UINT32 nFeature)
-    {
-        m_pAosHandle->m_objBindedFeatureTagList.AddUnavailableFeature(nFeature);
-    }
-
-    void RemovUnavailableFeature(IN IMS_UINT32 nFeature)
     {
         m_pAosHandle->m_objBindedFeatureTagList.AddUnavailableFeature(nFeature);
     }
@@ -424,11 +422,56 @@ protected:
     }
 
     void ReportRegState() { m_pAosHandle->ReportRegState(); }
+
+    void ProcessIpcanChanged() { m_pAosHandle->ProcessIpcanChanged(); }
+
+    void ProcessCapabilitiesChanged(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
+    {
+        m_pAosHandle->ProcessCapabilitiesChanged(objNewCapabilities);
+    }
+
+    void ProcessNetworkChanged() { m_pAosHandle->ProcessNetworkChanged(); }
+
+    void ProcessVopsStateChanged(IN IMS_UINT32 nState)
+    {
+        m_pAosHandle->ProcessVopsStateChanged(nState);
+    }
+
+    IMS_BOOL ProcessUnavailableFeatureForVops(IN IMS_UINT32 nState)
+    {
+        return m_pAosHandle->ProcessUnavailableFeatureForVops(nState);
+    }
+
+    IMS_BOOL IsSupportedNetworkType(IN IMS_UINT32 nType) const
+    {
+        return m_pAosHandle->IsSupportedNetworkType(nType);
+    }
+
+    IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const
+    {
+        return m_pAosHandle->IsSupportedNetworkTypeForCellular(nType);
+    }
+
+    const IMS_CHAR* MsgToString(IN IMS_UINT32 nMsg) { return m_pAosHandle->MsgToString(nMsg); }
+
+    const IMS_CHAR* RadioTypeToString(IN IMS_UINT32 nType)
+    {
+        return m_pAosHandle->RadioTypeToString(nType);
+    }
+
+    const IMS_CHAR* ServiceTypeToString() { return m_pAosHandle->ServiceTypeToString(); }
+
+    void SetServiceType(IN IMS_UINT32 nType) { m_pAosHandle->m_nServiceType = nType; }
 };
 
 TEST_F(AosHandleTest, Constructor)
 {
     EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
+}
+
+TEST_F(AosHandleTest, Destructor)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, RemoveListener(m_pAosHandle)).Times(1);
 }
 
 TEST_F(AosHandleTest, AddBlock_IsHandleBlocked_Normal)
@@ -977,7 +1020,7 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test)
 
     EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+            .WillRepeatedly(Return(IMS_TRUE));
 
     m_pAosHandle->NetTracker_StatusChanged();
     EXPECT_FALSE(m_pAosHandle->IsImsSuspended());
@@ -2315,9 +2358,9 @@ TEST_F(AosHandleTest, IsUnavailableFeaturePolicy_Test)
             CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY));
 }
 
-TEST_F(AosHandleTest, StateDisconnected_Test)
+TEST_F(AosHandleTest, StateDisconnected_Test1)
 {
-    // Test: HANDLE_MSG_BLOCK_STATUS, Handle not blocked
+    // Test1: HANDLE_MSG_BLOCK_STATUS, Handle not blocked
     // Expectation: state-connecting, request type-attach, call reconfig(), need to notify.
 
     SetHandleState(AosHandle::STATE_DISCONNECTED);
@@ -2332,6 +2375,62 @@ TEST_F(AosHandleTest, StateDisconnected_Test)
     EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
     EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::ATTACH);
     EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnected_Test2)
+{
+    // Test2: HANDLE_MSG_BLOCK_STATUS, Handle blocked
+    // Expectation: state-disconnected, request type-detach, no call reconfig(), no need to notify.
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    SetBlocked(IMS_TRUE);
+    SetNotify(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
+
+    IMSMSG objMSG(0 /*AosHandle::HANDLE_MSG_BLOCK_STATUS*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::DETACH);
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnected_Test3)
+{
+    // Test3: HANDLE_MSG_APP_STATUS, Handle blocked
+    // Expectation: state-disconnected, request type-detach, no call reconfig(), no need to notify.
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    SetBlocked(IMS_TRUE);
+    SetNotify(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
+
+    IMSMSG objMSG(1 /*AosHandle::HANDLE_MSG_APP_STATUS*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::DETACH);
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnected_Test4)
+{
+    // Test4: HANDLE_MSG_INVALID
+    // Expectation: state-disconnected, request type-detach, no call reconfig(), no need to notify.
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    SetNotify(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
+
+    IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_INVALID*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::DETACH);
+    EXPECT_FALSE(GetNotify());
 }
 
 TEST_F(AosHandleTest, StateConnecting_Test1)
@@ -2355,7 +2454,27 @@ TEST_F(AosHandleTest, StateConnecting_Test1)
 
 TEST_F(AosHandleTest, StateConnecting_Test2)
 {
-    // Test2: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg binded
+    // Test2: HANDLE_MSG_BLOCK_STATUS, Handle not blocked
+    // Expectation: state-connecting, request type-attach, no call reconfig(), no need to notify.
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
+
+    IMSMSG objMSG(0 /*HANDLE_MSG_BLOCK_STATUS*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::ATTACH);
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnecting_Test3)
+{
+    // Test3: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg binded
     // Expectation: clear suspended reason, state-connected, need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTING);
@@ -2373,9 +2492,9 @@ TEST_F(AosHandleTest, StateConnecting_Test2)
     EXPECT_TRUE(GetNotify());
 }
 
-TEST_F(AosHandleTest, StateConnecting_Test3)
+TEST_F(AosHandleTest, StateConnecting_Test4)
 {
-    // Test3: HANDLE_MSG_APP_STATUS, APP_DISCONNECTED
+    // Test4: HANDLE_MSG_APP_STATUS, APP_DISCONNECTED
     // Expectation: need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTING);
@@ -2386,12 +2505,45 @@ TEST_F(AosHandleTest, StateConnecting_Test3)
     EXPECT_TRUE(GetNotify());
 }
 
+TEST_F(AosHandleTest, StateConnecting_Test5)
+{
+    // Test5: HANDLE_MSG_APP_STATUS, APP_DISCONNECTING
+    // Expectation: no need to notify
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0);
+
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnecting_Test6)
+{
+    // Test6: HANDLE_MSG_INVALID
+    // Expectation: state-connecting, request type-attach, no call reconfig(), no need to notify.
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
+    SetNotify(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
+
+    IMSMSG objMSG(2 /*HANDLE_MSG_INVALID*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::ATTACH);
+    EXPECT_FALSE(GetNotify());
+}
+
 TEST_F(AosHandleTest, StateConnected_Test1)
 {
-    // Test1: HANDLE_MSG_BLOCK_STATUS, Handle blocked
+    // Test1: HANDLE_MSG_BLOCK_STATUS, Handle blocked, reason == 0
     // Expectation: state-disconnecting, request type-detach, call reconfig(), need to notify.
 
     SetHandleState(AosHandle::STATE_CONNECTED);
+    m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
     SetBlocked(IMS_TRUE);
     SetNotify(IMS_FALSE);
 
@@ -2407,7 +2559,49 @@ TEST_F(AosHandleTest, StateConnected_Test1)
 
 TEST_F(AosHandleTest, StateConnected_Test2)
 {
-    // Test2: HANDLE_MSG_APP_STATUS, APP_DISCONNECTED
+    // Test2: HANDLE_MSG_BLOCK_STATUS, Handle blocked, reason > 0
+    // Expectation: state-disconnecting, request type-detach, call reconfig(), need to notify,
+    //              set reason
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
+    SetBlocked(IMS_TRUE);
+    SetNotify(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
+
+    IMSMSG objMSG(0 /*AosHandle::HANDLE_MSG_BLOCK_STATUS*/, 1, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTING);
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::DETACH);
+    EXPECT_TRUE(GetNotify());
+    EXPECT_EQ(GetReason(), 1);
+}
+
+TEST_F(AosHandleTest, StateConnected_Test3)
+{
+    // Test3: HANDLE_MSG_BLOCK_STATUS, Handle not blocked
+    // Expectation: state-connected, request type-attach, no call reconfig(), no need to notify.
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
+
+    IMSMSG objMSG(0 /*AosHandle::HANDLE_MSG_BLOCK_STATUS*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTED);
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::ATTACH);
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnected_Test4)
+{
+    // Test4: HANDLE_MSG_APP_STATUS, APP_DISCONNECTED
     // Expectation: state-connecting, need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTED);
@@ -2419,9 +2613,9 @@ TEST_F(AosHandleTest, StateConnected_Test2)
     EXPECT_TRUE(GetNotify());
 }
 
-TEST_F(AosHandleTest, StateConnected_Test3)
+TEST_F(AosHandleTest, StateConnected_Test5)
 {
-    // Test3: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg not binded, handle blocked
+    // Test5: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg not binded, handle blocked
     // Expectation: state-disconnected, need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTED);
@@ -2435,9 +2629,9 @@ TEST_F(AosHandleTest, StateConnected_Test3)
     EXPECT_TRUE(GetNotify());
 }
 
-TEST_F(AosHandleTest, StateConnected_Test4)
+TEST_F(AosHandleTest, StateConnected_Test6)
 {
-    // Test4: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg not binded, handle not blocked
+    // Test6: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg not binded, handle not blocked
     // Expectation: state-connecting, need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTED);
@@ -2451,9 +2645,22 @@ TEST_F(AosHandleTest, StateConnected_Test4)
     EXPECT_TRUE(GetNotify());
 }
 
-TEST_F(AosHandleTest, StateConnected_Test5)
+TEST_F(AosHandleTest, StateConnected_Test7)
 {
-    // Test5: HANDLE_MSG_APP_STATUS, APP_UPDATING
+    // Test7: HANDLE_MSG_APP_STATUS, APP_DISCONNECTING
+    // Expectation: state-disconnecting, need to notify
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+
+    m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTING);
+    EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnected_Test8)
+{
+    // Test8: HANDLE_MSG_APP_STATUS, APP_UPDATING
     // Expectation: no need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTED);
@@ -2463,17 +2670,17 @@ TEST_F(AosHandleTest, StateConnected_Test5)
     EXPECT_FALSE(GetNotify());
 }
 
-TEST_F(AosHandleTest, StateConnected_Test6)
+TEST_F(AosHandleTest, StateConnected_Test9)
 {
-    // Test6: HANDLE_MSG_APP_STATUS, APP_DISCONNECTING
-    // Expectation: state-disconnecting, need to notify
+    // Test9: HANDLE_MSG_INVALID
+    // Expectation: no need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTED);
 
-    m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0);
+    IMSMSG objMSG(2 /*HANDLE_MSG_INVALID*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
 
-    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTING);
-    EXPECT_TRUE(GetNotify());
+    EXPECT_FALSE(GetNotify());
 }
 
 TEST_F(AosHandleTest, StateDisconnecting_Test1)
@@ -2652,6 +2859,33 @@ TEST_F(AosHandleTest, StateDisconnecting_Test11)
     m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0);
 
     EXPECT_TRUE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test12)
+{
+    // Test12: HANDLE_MSG_APP_STATUS, invalid app state
+    // Expectation: no need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    SetNotify(IMS_FALSE);
+
+    m_pAosHandle->App_StateChanged(4, 0);
+
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test13)
+{
+    // Test13: HANDLE_MSG_INVALID
+    // Expectation: no need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    SetNotify(IMS_FALSE);
+
+    IMSMSG objMSG(2 /*HANDLE_MSG_INVALID*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_FALSE(GetNotify());
 }
 
 TEST_F(AosHandleTest, IsBlocked_Test)
@@ -2923,4 +3157,155 @@ TEST_F(AosHandleTest, ReportRegState_Test4)
     EXPECT_CALL(m_objMockIAosRegStateManager, SetRegState(_, _)).Times(0);
 
     ReportRegState();
+}
+
+TEST_F(AosHandleTest, NConfiguration_NotifyConfigChanged_Test1)
+{
+    // Test1: NConfig is null
+    // Expectation: do nothing
+
+    AosProvider::GetInstance()->SetNConfiguration(IMS_NULL);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired()).Times(0);
+
+    m_pAosHandle->NConfiguration_NotifyConfigChanged();
+}
+
+TEST_F(AosHandleTest, NConfiguration_NotifyConfigChanged_Test2)
+{
+    // Test2: NConfig is not null
+    // Expectation: initialize handle
+
+    AosProvider::GetInstance()->SetNConfiguration(
+            static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired()).Times(1);
+
+    m_pAosHandle->NConfiguration_NotifyConfigChanged();
+}
+
+TEST_F(AosHandleTest, Request_Test)
+{
+    m_pAosHandle->Request(0);
+}
+
+TEST_F(AosHandleTest, Handle_Notify_Test)
+{
+    m_pAosHandle->Handle_Notify(0, IMS_FALSE);
+}
+
+TEST_F(AosHandleTest, UpdateFeature_Test)
+{
+    m_pAosHandle->UpdateFeature(0);
+}
+
+TEST_F(AosHandleTest, UpdateFeature_2_Test)
+{
+    m_pAosHandle->UpdateFeature(IMS_NULL);
+}
+
+TEST_F(AosHandleTest, CallTracker_StateChanged_Test)
+{
+    m_pAosHandle->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
+}
+
+TEST_F(AosHandleTest, ProcessIpcanChanged_Test)
+{
+    ProcessIpcanChanged();
+}
+
+TEST_F(AosHandleTest, ProcessCapabilitiesChanged_Test)
+{
+    ProcessCapabilitiesChanged(IMSMap<IMS_UINT32, IMS_UINT32>());
+}
+
+TEST_F(AosHandleTest, ProcessNetworkChanged_Test)
+{
+    ProcessNetworkChanged();
+}
+
+TEST_F(AosHandleTest, ProcessVopsStateChanged_Test)
+{
+    ProcessVopsStateChanged(00);
+}
+
+TEST_F(AosHandleTest, ProcessUnavailableFeatureForVops_Test)
+{
+    ProcessUnavailableFeatureForVops(0);
+}
+
+TEST_F(AosHandleTest, IsSupportedNetworkType_Test)
+{
+    EXPECT_TRUE(IsSupportedNetworkType(NW_REPORT_RADIO_LTE));
+    EXPECT_TRUE(IsSupportedNetworkType(NW_REPORT_RADIO_NR));
+    EXPECT_TRUE(IsSupportedNetworkType(NW_REPORT_RADIO_WLAN));
+    EXPECT_FALSE(IsSupportedNetworkType(NW_REPORT_RADIO_CDMA));
+}
+
+TEST_F(AosHandleTest, IsSupportedNetworkTypeForCellular_Test)
+{
+    EXPECT_TRUE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_LTE));
+    EXPECT_TRUE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_NR));
+    EXPECT_FALSE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_WLAN));
+    EXPECT_FALSE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_CDMA));
+}
+
+TEST_F(AosHandleTest, Event_NotifyEvent_Test)
+{
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, 1, 0);
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_OMADM_UPDATED, 1, 0);
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_ROAMING_STATE, 1, 0);
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_ROAMING_PREFERRED_VOICE_CALL_NETWORK, 1, 0);
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_CONFIG_UPDATE, 1, 0);
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_PHONE_RESTARTED, 1, 0);
+}
+
+TEST_F(AosHandleTest, RegistrationControl_NotifyCapabilitiesChanged_Test)
+{
+    m_pAosHandle->RegistrationControl_NotifyCapabilitiesChanged(IMSMap<IMS_UINT32, IMS_UINT32>());
+}
+
+TEST_F(AosHandleTest, ServiceSetting_RoamingPreferredVoiceNetworkChanged_Test)
+{
+    m_pAosHandle->ServiceSetting_RoamingPreferredVoiceNetworkChanged(
+            RoamingPreferredVoiceNetwork::CELLULAR);
+}
+
+TEST_F(AosHandleTest, MsgToString_Test)
+{
+    EXPECT_STREQ(MsgToString(0 /*HANDLE_MSG_BLOCK_STATUS*/), "HANDLE_MSG_BLOCK_STATUS");
+    EXPECT_STREQ(MsgToString(1 /*HANDLE_MSG_APP_STATUS*/), "HANDLE_MSG_APP_STATUS");
+    EXPECT_STREQ(MsgToString(2 /*HANDLE_MSG_INVALID*/), "__INVALID__");
+}
+
+TEST_F(AosHandleTest, RadioTypeToString_Test)
+{
+    EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_WLAN), "WLAN");
+    EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_LTE), "LTE");
+    EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_NR), "NR");
+    EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_CDMA), "__INVALID__");
+}
+
+TEST_F(AosHandleTest, ServiceTypeToString_Test)
+{
+    SetServiceType(ImsAosService::MTC);
+    EXPECT_STREQ(ServiceTypeToString(), "SERVICE_MTC");
+
+    SetServiceType(ImsAosService::MTS);
+    EXPECT_STREQ(ServiceTypeToString(), "SERVICE_MTS");
+
+    SetServiceType(ImsAosService::EMERGENCY_MTC);
+    EXPECT_STREQ(ServiceTypeToString(), "SERVICE_EMERGENCY_MTC");
+
+    SetServiceType(ImsAosService::EMERGENCY_MTS);
+    EXPECT_STREQ(ServiceTypeToString(), "SERVICE_EMERGENCY_MTS");
+
+    SetServiceType(ImsAosService::UCE);
+    EXPECT_STREQ(ServiceTypeToString(), "SERVICE_UCE");
+
+    SetServiceType(ImsAosService::SIP_CONTROLLER);
+    EXPECT_STREQ(ServiceTypeToString(), "SERVICE_SIP_CONTROLLER");
+
+    SetServiceType(ImsAosService::NONE);
+    EXPECT_STREQ(ServiceTypeToString(), "__INVALID__");
 }
