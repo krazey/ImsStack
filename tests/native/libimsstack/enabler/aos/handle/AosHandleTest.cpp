@@ -423,8 +423,6 @@ protected:
 
     void ReportRegState() { m_pAosHandle->ReportRegState(); }
 
-    void ProcessIpcanChanged() { m_pAosHandle->ProcessIpcanChanged(); }
-
     void ProcessCapabilitiesChanged(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
     {
         m_pAosHandle->ProcessCapabilitiesChanged(objNewCapabilities);
@@ -3207,11 +3205,6 @@ TEST_F(AosHandleTest, UpdateFeature_2_Test)
 TEST_F(AosHandleTest, CallTracker_StateChanged_Test)
 {
     m_pAosHandle->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
-}
-
-TEST_F(AosHandleTest, ProcessIpcanChanged_Test)
-{
-    ProcessIpcanChanged();
 }
 
 TEST_F(AosHandleTest, ProcessCapabilitiesChanged_Test)

@@ -207,6 +207,8 @@ PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceFeature()
 {
     IAosNConfiguration* objConfig = GET_N_CONFIG(m_nSlotId);
 
+    m_objFeatureTagList.Clear();
+
     if (!IsHandleBlocked())
     {
         m_objFeatureTagList.AddFeature(ImsAosFeature::MMTEL);

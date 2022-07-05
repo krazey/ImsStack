@@ -188,6 +188,8 @@ protected:
     IMS_BOOL IsCapabilityExisted(IN IMS_UINT32 nCapabilities, IN AosCapability eCapability) const;
     IMS_BOOL IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat) const;
     IMS_BOOL IsServiceFeature(IN IMS_UINT32 nFeature) const;
+    IMS_BOOL IsWifiConnected();
+    IMS_BOOL IsDataConnected();
 
     IMS_UINT32 GetNetworkType() const;
     IMS_UINT32 GetMobileNetworkType() const;
@@ -198,6 +200,7 @@ protected:
 
     void AddBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks);
     void RemoveBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks);
+    void SetBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks, IN IMS_BOOL bAdd);
 
     IMS_BOOL PreProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded);
     void ProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded, IN IMS_BOOL bPreProcess = IMS_TRUE);
@@ -206,8 +209,13 @@ protected:
     void ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bAdd);
     void ProcessUnavailableFeatureChanged();
 
+    void BackupAllBlocks();
+    void BackupBlocksForMobile();
+    void BackupBlocksForWifi();
+    void RestoreBlocksForMobile();
+    void RestoreBlocksForWifi();
+    IMS_BOOL HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded);
     void ReevaluateBlocks();
-    void ProcessIpcanChanged();
     IMS_BOOL UpdateIpcan();
 
     IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nType) const;
@@ -311,6 +319,7 @@ protected:
     IMSList<IMS_UINT32> m_objHoldingBlocksPolicyForWifi;
 
     IMS_BOOL m_bEpdgEnabled;
+    IMS_BOOL m_bDataConnected;
 
     IMS_BOOL m_bNetSrvIn;
     IMS_UINT32 m_nNetworkType;

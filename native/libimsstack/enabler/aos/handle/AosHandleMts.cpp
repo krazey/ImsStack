@@ -15,6 +15,8 @@
  */
 #include "ServiceEvent.h"
 #include "ServiceTrace.h"
+#include "CarrierConfig.h"
+#include "INetworkWatcher.h"
 
 #include "interface/IAosAppContext.h"
 #include "interface/IAosNConfiguration.h"
@@ -35,7 +37,8 @@ PUBLIC
 AosHandleMts::AosHandleMts(IN IAosAppContext* piAppContext, IN const AString& strAppId,
         IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
         AosHandle(piAppContext, strAppId, strServiceId, nServiceType),
-        m_bMtcBlocked(IMS_FALSE)
+        m_bMtcBlocked(IMS_FALSE),
+        m_nSupportedRats(NW_REPORT_RADIO_INVALID)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleMts = %" PFLS_u "/%" PFLS_x, strAppId.GetStr(),
             sizeof(AosHandleMts), this);
@@ -66,11 +69,57 @@ PUBLIC VIRTUAL AosHandleMts::~AosHandleMts()
 Remarks
 
 */
+PUBLIC VIRTUAL void AosHandleMts::NConfiguration_NotifyConfigChanged()
+{
+    A_IMS_TRACE_D(APPPROFILE, "NConfiguration_NotifyConfigChanged", 0, 0, 0);
+
+    if (GET_N_CONFIG(m_nSlotId) != IMS_NULL)
+    {
+        InitializeSupportedRats();
+    }
+
+    AosHandle::NConfiguration_NotifyConfigChanged();
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED
+void AosHandleMts::InitializeSupportedRats()
+{
+    IMSVector<IMS_SINT32> objRats = GET_N_CONFIG(m_nSlotId)->GetSmsOverImsSupportedRats();
+
+    for (int i = 0; i < objRats.GetSize(); i++)
+    {
+        if (objRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN)
+        {
+            m_nSupportedRats |= NW_REPORT_RADIO_LTE;
+        }
+        else if (objRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_UTRAN)
+        {
+            m_nSupportedRats |= NW_REPORT_RADIO_WCDMA | NW_REPORT_RADIO_HSPA;
+        }
+        else if (objRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_GERAN)
+        {
+            m_nSupportedRats |= NW_REPORT_RADIO_GSM | NW_REPORT_RADIO_EDGE;
+        }
+    }
+}
+
+/*
+
+Remarks
+
+*/
 PROTECTED VIRTUAL void AosHandleMts::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 
     AosHandle::Init();
+
+    InitializeSupportedRats();
 
     IMS_EVENT_AddListenerForSlotId(IMS_EVENT_CONFIG_UPDATE, this, m_nSlotId);
 }
@@ -146,6 +195,11 @@ PROTECTED VIRTUAL void AosHandleMts::InitializeServiceBlock()
         AddBlock(BLOCK_SMS_OVER_IP_NETWORK_INDICATION, m_nBlocks);
         m_bBlocked = IMS_TRUE;
     }
+    else
+    {
+        RemoveBlock(BLOCK_SMS_OVER_IP_NETWORK_INDICATION, m_nBlocks);
+        m_bBlocked = IMS_FALSE;
+    }
 }
 
 /*
@@ -155,6 +209,8 @@ Remarks
 */
 PROTECTED VIRTUAL void AosHandleMts::InitializeServiceFeature()
 {
+    m_objFeatureTagList.Clear();
+
     if (!m_bBlocked)
     {
         m_objFeatureTagList.AddFeature(ImsAosFeature::SMSIP);
@@ -208,6 +264,17 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMts::IsHandleBlocked() const
             AosHandle::IsHandleBlocked(BLOCK_SMS_OVER_IP_NETWORK_INDICATION);
 
     return (bBlocked || m_bMtcBlocked);
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL IMS_BOOL AosHandleMts::IsSupportedNetworkTypeForCellular(
+        IN IMS_UINT32 nType) const
+{
+    return (m_nSupportedRats & nType);
 }
 
 /*

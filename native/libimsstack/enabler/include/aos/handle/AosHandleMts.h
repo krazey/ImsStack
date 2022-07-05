@@ -26,7 +26,12 @@ public:
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
     virtual ~AosHandleMts();
 
+    // IAosNConfigurationListener
+    virtual void NConfiguration_NotifyConfigChanged();
+
 protected:
+    void InitializeSupportedRats();
+
     virtual void Init();
     virtual void CleanUp();
 
@@ -37,9 +42,11 @@ protected:
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities);
 
     virtual IMS_BOOL IsHandleBlocked() const;
+    virtual IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const;
     virtual void Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked);
 
 private:
     IMS_BOOL m_bMtcBlocked;
+    IMS_UINT32 m_nSupportedRats;
 };
 #endif  // AOS_HANDLE_MTS_H_
