@@ -24,7 +24,7 @@
 #include "SipStackHeaders.h"
 #include "SipTransportAddress.h"
 
-class ISipTransportErrorListener;
+class ISipTransportListener;
 class SipProfile;
 class SipTransportHelper;
 
@@ -49,6 +49,7 @@ public:
     IMS_SINT32 GetPort(IN IMS_SINT32 nTaType = TA_NEAR) const;
     IMS_SINT32 GetProtocol(IN IMS_SINT32 nTaType = TA_NEAR) const;
     inline IMS_SINT32 GetTransportExt() const { return m_nTransportExt; }
+    inline IMS_BOOL HasPendingMessage() const { return m_pSendBuffer != IMS_NULL; }
     inline void InitRetransmissionFlag() { m_bIsRetransmission = IMS_FALSE; }
     IMS_BOOL InitTransportDetails(
             IN const SipTransport* pTransport, IN const SipProfile* pProfile = IMS_NULL);
@@ -71,10 +72,7 @@ public:
         m_bExplicitTargetProtocol = bExplicitTargetProtocol;
     }
     void SetIpAddress(IN const IPAddress& objIp, IN IMS_SINT32 nTaType = TA_NEAR);
-    inline void SetListener(IN ISipTransportErrorListener* piListener)
-    {
-        m_piErrorListener = piListener;
-    }
+    inline void SetListener(IN ISipTransportListener* piListener) { m_piListener = piListener; }
     void SetPort(IN IMS_SINT32 nPort, IN IMS_SINT32 nTaType = TA_NEAR);
     void SetProtocol(IN IMS_SINT32 nProtocol, IN IMS_SINT32 nTaType = TA_NEAR);
     inline void SetTransactionFlowControlRequired(IN IMS_BOOL bFlowControlRequired)
@@ -193,7 +191,7 @@ private:
     IMS_SINT32 m_nPortFlowControl;
     // Socket for message transmission
     SipSocket* m_pSocket;
-    ISipTransportErrorListener* m_piErrorListener;
+    ISipTransportListener* m_piListener;
 };
 
 #endif

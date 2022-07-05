@@ -1296,7 +1296,7 @@ PRIVATE VIRTUAL void SipClientConnection::ClientTransmission_NotifyError(
         return;
     }
 
-    TransportError_NotifyError(nCode, strMessage);
+    Transport_NotifyError(nCode, strMessage);
 }
 
 PRIVATE VIRTUAL void SipClientConnection::ClientTransmission_TransmissionCompleted()

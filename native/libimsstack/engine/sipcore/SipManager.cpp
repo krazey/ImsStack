@@ -348,7 +348,7 @@ PUBLIC GLOBAL void StaticSip::InitializeForSlot(IN IMS_SINT32 nSlotId)
             SipFactoryProxy::GetInstance()->GetTransportHelper(nSlotId);
 
     // Attach the message handler from the network
-    pTransportHelper->SetListener(SipMessageHandler::GetInstance());
+    pTransportHelper->SetMessageListener(SipMessageHandler::GetInstance());
 }
 
 PUBLIC GLOBAL void StaticSip::UninitializeForSlot(IN IMS_SINT32 nSlotId)

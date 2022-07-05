@@ -18,7 +18,7 @@
 
 #include "Connection.h"
 #include "ISipTransactionStateListener.h"
-#include "ISipTransportErrorListener.h"
+#include "ISipTransportListener.h"
 #include "SipDialog.h"
 #include "SipMessage.h"
 #include "SipTimerValues.h"
@@ -29,7 +29,7 @@ class SipProfile;
 class SipConnection :
         public Connection,
         public ISipTransactionStateListener,
-        public ISipTransportErrorListener
+        public ISipTransportListener
 {
 protected:
     SipConnection();
@@ -69,8 +69,9 @@ protected:
     // ISipTransactionStateListener interface
     void TransactionState_TimerExpired() override;
 
-    // ISipTransportErrorListener interface
-    void TransportError_NotifyError(IN IMS_SINT32 nCode, IN const AString& strMessage) override;
+    // ISipTransportListener interface
+    void Transport_NotifyPendingMessageSent() override;
+    void Transport_NotifyError(IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
     // SIP_TRANSPORT_ERROR_REPORT_ON_TXN
     virtual IMS_BOOL IsTransportErrorReportRequired(

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTimer.h"
 
 #include "private/ConfigurationManager.h"
 #include "private/SipConfig.h"
@@ -24,6 +25,7 @@
 #include "SipPrivate.h"
 #include "SipServerConnection.h"
 #include "SipServerTransactionState.h"
+#include "SipTransport.h"
 
 __IMS_TRACE_TAG_SIP__;
 
@@ -31,7 +33,9 @@ PUBLIC
 SipServerConnection::SipServerConnection(IN SipServerTransactionState* pStState) :
         SipConnection(),
         m_nState(STATE_CREATED),
-        m_pStState(pStState)
+        m_pStState(pStState),
+        m_bClosePending(IMS_FALSE),
+        m_piClosePendingTimer(IMS_NULL)
 {
     m_pStState->SetTransactionListener(this);
     m_pStState->SetTransportListener(this);
@@ -47,6 +51,12 @@ PUBLIC VIRTUAL SipServerConnection::~SipServerConnection()
 
     m_pStState->SetTransactionListener(IMS_NULL);
     m_pStState->SetTransportListener(IMS_NULL);
+
+    if (m_piClosePendingTimer != IMS_NULL)
+    {
+        m_piClosePendingTimer->KillTimer();
+        TimerService::GetTimerService()->DestroyTimer(m_piClosePendingTimer);
+    }
 }
 
 PUBLIC VIRTUAL void SipServerConnection::Close()
@@ -64,8 +74,16 @@ PUBLIC VIRTUAL void SipServerConnection::Close()
         m_pStState->Terminate();
     }
 
-    SetState(STATE_TERMINATED);
+    // Grab the server connection until the response is not completely sent to the network,
+    // the transmission failed, or the timer is expired.
+    if (WaitForMessageSent())
+    {
+        StartClosePendingTimer();
+        IMS_TRACE_I("SSC close pending: %s", m_pMessage->GetMethod().ToString().GetStr(), 0, 0);
+        return;
+    }
 
+    SetState(STATE_TERMINATED);
     SipConnection::Close();
 }
 
@@ -461,6 +479,42 @@ IMS_RESULT SipServerConnection::InitRequest()
     return IMS_SUCCESS;
 }
 
+PROTECTED VIRTUAL void SipServerConnection::Transport_NotifyPendingMessageSent()
+{
+    SipConnection::Transport_NotifyPendingMessageSent();
+
+    if (m_bClosePending)
+    {
+        ClosePendingConnection();
+    }
+}
+
+PROTECTED VIRTUAL void SipServerConnection::Transport_NotifyError(
+        IN IMS_SINT32 nCode, IN const AString& strMessage)
+{
+    SipConnection::Transport_NotifyError(nCode, strMessage);
+
+    if (m_bClosePending)
+    {
+        ClosePendingConnection();
+    }
+}
+
+PROTECTED VIRTUAL void SipServerConnection::Timer_TimerExpired(IN ITimer* piTimer)
+{
+    if (piTimer == IMS_NULL)
+    {
+        return;
+    }
+
+    if (m_piClosePendingTimer != piTimer)
+    {
+        return;
+    }
+
+    ClosePendingConnection();
+}
+
 PRIVATE
 void SipServerConnection::AdjustTimerHFor2xx()
 {
@@ -504,6 +558,88 @@ void SipServerConnection::SetState(IN IMS_SINT32 nState)
     IMS_TRACE_I("SSC :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
+}
+
+PRIVATE
+void SipServerConnection::ClosePendingConnection()
+{
+    IMS_TRACE_I("SSC: ClosePendingConnection", 0, 0, 0);
+
+    if (m_piClosePendingTimer != IMS_NULL)
+    {
+        m_piClosePendingTimer->KillTimer();
+        TimerService::GetTimerService()->DestroyTimer(m_piClosePendingTimer);
+        m_piClosePendingTimer = IMS_NULL;
+    }
+
+    if (m_nState != STATE_TERMINATED)
+    {
+        SetState(STATE_TERMINATED);
+        SipConnection::Close();
+    }
+}
+
+PRIVATE
+void SipServerConnection::StartClosePendingTimer()
+{
+    if (m_piClosePendingTimer != IMS_NULL)
+    {
+        m_piClosePendingTimer->KillTimer();
+        TimerService::GetTimerService()->DestroyTimer(m_piClosePendingTimer);
+    }
+
+    IMS_UINT32 nTimerDuration = 2 * 64 * 1000;  // 128s
+    SipTimerValues* pTimerValues = GetTransactionTimerValues();
+
+    if (pTimerValues != IMS_NULL)
+    {
+        // This case can be happened in non-INVITE transaction.
+        IMS_SINT32 nTimerF = pTimerValues->GetValue(SipTimerValues::TIMER_F);
+
+        if (nTimerF <= 0)
+        {
+            IMS_SINT32 nT1 = pTimerValues->GetValue(SipTimerValues::TIMER_T1);
+
+            if (nT1 > 0)
+            {
+                nTimerF = nT1 * 64;
+            }
+        }
+
+        if (nTimerF > 0)
+        {
+            nTimerDuration = nTimerF;
+        }
+    }
+
+    m_piClosePendingTimer = TimerService::GetTimerService()->CreateTimer();
+
+    if (m_piClosePendingTimer != IMS_NULL)
+    {
+        IMS_TRACE_D("SSC: starts a close pending timer...", 0, 0, 0);
+        m_piClosePendingTimer->SetTimer(nTimerDuration, this);
+    }
+    else
+    {
+        ClosePendingConnection();
+    }
+}
+
+PRIVATE
+IMS_BOOL SipServerConnection::WaitForMessageSent()
+{
+    if (m_nState == STATE_COMPLETED)
+    {
+        SipTransport* pTransport = m_pStState->GetSipTransport();
+
+        if ((pTransport != IMS_NULL) && pTransport->HasPendingMessage())
+        {
+            m_bClosePending = IMS_TRUE;
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }
 
 PRIVATE GLOBAL const IMS_CHAR* SipServerConnection::StateToString(IN IMS_SINT32 nState)
