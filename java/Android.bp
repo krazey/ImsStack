@@ -64,8 +64,6 @@ android_app {
     static_libs:[
         // TODO: move this to libs after API review
         "android.telephony.imsmedia",
-    ] + [
-        "imsstack-common",
     ],
     libs: [
         "ims-common",
@@ -75,8 +73,6 @@ android_app {
         "libimsstack",
         "privapp_permissions_com.android.imsstack",
         "allowlist_com.android.imsstack",
-    ] + [
-        "imsstack-common",
     ],
     optimize: {
         proguard_flags_files: [

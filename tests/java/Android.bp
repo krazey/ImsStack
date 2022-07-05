@@ -43,8 +43,6 @@ android_test {
         "testables",
         // TODO: move this to libs after API review
         "android.telephony.imsmedia",
-    ] + [
-        "imsstack-common",
     ],
 
     platform_apis: true,
