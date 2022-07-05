@@ -33,6 +33,8 @@ class NullCall;
 class MtcCallManager final : public IMtcCallManager, public IMtcCallStateListener
 {
 public:
+    static NullCall* const s_pNullCall;
+
     MtcCallManager(IN IMtcContext& objContext);
     virtual ~MtcCallManager();
     MtcCallManager(IN const MtcCallManager&) = delete;
@@ -59,8 +61,6 @@ public:
 private:
     IMS_SINT32 GetFirstIndexByFilter(IN std::function<IMS_BOOL(MtcCall*)> objFilter);
     IMSList<IMtcCall*> GetCallsByFilter(IN std::function<IMS_BOOL(MtcCall*)> objFilter);
-
-    static NullCall* const s_pNullCall;
 
     IMtcContext& m_objContext;
     IMSList<MtcCall*> m_lstCalls;
