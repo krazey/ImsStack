@@ -37,10 +37,22 @@ TEST_F(SipHeadersTest, createCoreHdrObject)
     SipHeaderBase* pInvalid = SipHeaders::CreateCoreHdrObj(SipHeaderBase::TYPE_END);
     EXPECT_TRUE(pInvalid == nullptr);
 
+    SipHeaderBase* pExpiresHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::EXPIRES_ANY);
+    ASSERT_TRUE(pExpiresHdr != nullptr);
+
+    SipHeaderBase* pContactHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::CONTACT_ANY);
+    ASSERT_TRUE(pContactHdr != nullptr);
+
+    SipHeaderBase* pRetryHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RETRY_AFTER_ANY);
+    ASSERT_TRUE(pRetryHdr != nullptr);
+
     pInvalid = SipHeaders::CreateCoreHdrObj(SipHeaderBase::TYPE_INVALID);
     EXPECT_TRUE(pInvalid == nullptr);
 
     pAllowHdr->SipDelete();
+    pExpiresHdr->SipDelete();
+    pContactHdr->SipDelete();
+    pRetryHdr->SipDelete();
 }
 
 TEST_F(SipHeadersTest, CopyHdrs)

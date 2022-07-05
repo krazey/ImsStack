@@ -68,7 +68,8 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec((char*)"sip:192.168.2.2:9090", 22));
+    char* pUri = (char*)"sip:192.168.2.2:9090;user=phone";
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(pUri, strlen(pUri)));
 
     EXPECT_EQ(SipUri::SCHEME_SIP, pSipAddrSpec->GetUriScheme());
 
@@ -79,7 +80,7 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->EncodeAddrSpec(&pBuff));
-    EXPECT_STREQ("sip:192.168.2.2:9090", &(aBuffer[0]));
+    EXPECT_STREQ(pUri, &(aBuffer[0]));
 
     pSipUri->SipDelete();
     pSipAddrSpec->SipDelete();
@@ -100,6 +101,36 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->EncodeAddrSpec(&pBuff));
     EXPECT_STREQ("sips:192.168.2.8:9091", &(aBuffer[0]));
 
+    pSipUri->SipDelete();
+    pSipAddrSpec->SipDelete();
+
+    pSipAddrSpec = new SipAddrSpec();
+    ASSERT_TRUE(pSipAddrSpec != nullptr);
+    pUri = (char*)"sip:alice@atlanta.com;maddr=239.255.255.1;ttl=15";
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(pUri, strlen(pUri)));
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->EncodeAddrSpec(&pBuff));
+    EXPECT_STREQ("sip:alice@atlanta.com;maddr=239.255.255.1;ttl=15", &(aBuffer[0]));
+
+    pSipAddrSpec->SipDelete();
+
+    pSipAddrSpec = new SipAddrSpec();
+    ASSERT_TRUE(pSipAddrSpec != nullptr);
+    pUri = (char*)"sip:AAuser:$=+,%3AB@host;method=REGISTER?to=proxy";
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(pUri, strlen(pUri)));
+
+    pSipUri = pSipAddrSpec->GetSipUri();
+    ASSERT_TRUE(pSipUri != nullptr);
+
+    pSipUri->SetUser("%AAuser");
+    pSipUri->SetPassword("$=+,%3AB");
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->EncodeAddrSpec(&pBuff));
+    EXPECT_STREQ("sip:%AAuser:$=+,%3AB@host;method=REGISTER?to=proxy", &(aBuffer[0]));
     pSipUri->SipDelete();
     pSipAddrSpec->SipDelete();
 }

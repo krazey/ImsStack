@@ -144,6 +144,13 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_IdleState)
     EXPECT_EQ(SIP_TRUE, pReqLine->SetMethod("PRACK"));
     pReqLine->SipDelete();
 
+    SipHeaderBase* pRAckHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RACK);
+    ASSERT_TRUE(pRAckHdr != nullptr);
+    EXPECT_EQ(SIP_TRUE, pRAckHdr->DecodeHdr((SIP_CHAR*)"2 1 INVITE", strlen("2 1 INVITE")));
+
+    EXPECT_EQ(SIP_TRUE, pSipMsg->SetHeader(pRAckHdr));
+    pRAckHdr->SipDelete();
+
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     pTxn = new SipTxn(SipTxn::NON_INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
