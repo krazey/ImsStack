@@ -1713,13 +1713,19 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
      * To avoid the timing issue when incoming call is immediately terminated by the remote end.
      */
     private void notifyCallStartFailedWithDelay(final ImsReasonInfo reasonInfo, long delay) {
-        boolean callbackReplacementRequired = true;
+        boolean callbackReplacementRequired = false;
 
         if (mCallDetails.is(CallDetails.MO)) {
+            if (mCallDetails.is(CallDetails.MO_PROGRESSING)) {
+                callbackReplacementRequired = true;
+            }
+
             if (ImsCallUtils.isCsSilentRedialRequired(reasonInfo)) {
                 // Call StarFailed callback to re-dial the call via CS
                 callbackReplacementRequired = false;
             }
+        } else {
+            callbackReplacementRequired = true;
         }
 
         if (callbackReplacementRequired) {
@@ -3262,7 +3268,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             setCallInfo(profile);
 
-            mCallback.invokeInitiating(ImsCallSessionImpl.this, profile);
+            // TODO : need to sync this with 100 Trying
+            //mCallback.invokeInitiating(ImsCallSessionImpl.this, profile);
         }
 
         @Override
@@ -3376,7 +3383,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             ImsCallUtils.refineCallReasonInfoForCode(mCallContext, mCallProfile, callReasonInfo);
-            ImsCallUtils.refineCallReasonInfoForExtraCode(mCallProfile, callReasonInfo);
 
             if (checkAndSetImmediateCallEndReason(call, callReasonInfo)) {
                 setState(ImsCallSessionImplBase.State.TERMINATED);

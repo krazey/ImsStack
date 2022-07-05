@@ -622,21 +622,6 @@ public class ImsCallUtils {
     }
 
     /**
-    * converts the {@code mExtraCode} of {@code CallReasonInfo} with specific case.
-    *
-    * @param profile used for this operation
-    * @param callReasonInfo the target to be converted
-    */
-    public static void refineCallReasonInfoForExtraCode(ImsCallProfile profile,
-            CallReasonInfo callReasonInfo) {
-        if (MtcCallUtils.isCallTerminatedByCSRetry(callReasonInfo.mCode)
-                && ImsCallUtils.isVoiceCall(profile.getCallType())
-                && (callReasonInfo.mExtraCode == -1)) {
-            callReasonInfo.mExtraCode = CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
-        }
-    }
-
-    /**
     * converts the {@code mCode} of {@code CallReasonInfo} with specific case.
     *
     * @param profile used for this operation

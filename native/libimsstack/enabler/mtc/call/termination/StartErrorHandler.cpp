@@ -50,7 +50,8 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 
     if (!m_objContext.GetCallInfo().bEmergency && IsRetry1xRequiredForNormalCall(*piMessage))
     {
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+        return CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
 
     return HandleResponse(*piMessage);
