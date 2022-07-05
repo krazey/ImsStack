@@ -19,19 +19,21 @@
 #include "IMessage.h"
 #include "ImsList.h"
 #include "ISipMessage.h"
-#include "../../../../engine/interface/core/MockIMessage.h"
-#include "../../../../engine/interface/sipcore/MockISipMessage.h"
 #include "call/extension/IMtcExtension.h"
 #include "call/extension/MockIMtcExtension.h"
 #include "call/extension/MtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/RprExtension.h"
+#include "core/MockIMessage.h"
+#include "sipcore/MockISipMessage.h"
 
 using ::testing::_;
 using ::testing::Eq;
 using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+const AString strSomeOptionTag("some_tag");
 
 MtcExtensionSet CreateExtensionSetSupportsRprOnly()
 {
@@ -47,6 +49,16 @@ MtcExtensionSet CreateExtensionSetSupportsTimerOnly()
     lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_TIMER));
 
     return MtcExtensionSet(lstExtensions);
+}
+
+MockIMtcExtension* CreateMockIMtcExtension(IN const AString& strOptionTag)
+{
+    MockIMtcExtension* pExtension = new MockIMtcExtension();
+
+    ON_CALL(*pExtension, GetOptionTag)
+            .WillByDefault(ReturnRef(strOptionTag));
+
+    return pExtension;
 }
 
 TEST(MtcExtensionSetTest, ConstructorWithEmptyOptionTags)
@@ -141,23 +153,12 @@ TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsFalseForNotAvailable
     EXPECT_FALSE(objExtensionSet.IsSupportRequiredExtensions(objMessageRequiresTimer));
 }
 
-MockIMtcExtension* CreateMockIMtcExtension(IN const IMS_CHAR* pszOptionTag)
-{
-    MockIMtcExtension* pExtension = new MockIMtcExtension();
-
-    AString strOptionTag(pszOptionTag);
-    ON_CALL(*pExtension, GetOptionTag)
-            .WillByDefault(ReturnRef(strOptionTag));
-
-    return pExtension;
-}
-
 TEST(MtcExtensionSetTest, FormatRequestCallsEachExtensions)
 {
     IMS_UINT32 nMethod = IMessage::SESSION_START;
     MockIMessage objMessage;
 
-    MockIMtcExtension* pExtension = CreateMockIMtcExtension("any");
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension(strSomeOptionTag);
     EXPECT_CALL(*pExtension, FormatRequest(nMethod, Ref(objMessage)))
             .Times(1);
 
@@ -173,7 +174,7 @@ TEST(MtcExtensionSetTest, FormatResponseCallsEachExtensions)
     IMS_UINT32 nMethod = IMessage::SESSION_START;
     MockIMessage objMessage;
 
-    MockIMtcExtension* pExtension = CreateMockIMtcExtension("any");
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension(strSomeOptionTag);
     EXPECT_CALL(*pExtension, FormatResponse(nMethod, Ref(objMessage)))
             .Times(1);
 
@@ -189,7 +190,7 @@ TEST(MtcExtensionSetTest, HandleRequestCallsEachExtensions)
     IMS_UINT32 nMethod = IMessage::SESSION_START;
     MockIMessage objMessage;
 
-    MockIMtcExtension* pExtension = CreateMockIMtcExtension("any");
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension(strSomeOptionTag);
     EXPECT_CALL(*pExtension, HandleRequest(nMethod, Ref(objMessage)))
             .Times(1);
 
@@ -205,7 +206,7 @@ TEST(MtcExtensionSetTest, HandleResponseCallsEachExtensions)
     IMS_UINT32 nMethod = IMessage::SESSION_START;
     MockIMessage objMessage;
 
-    MockIMtcExtension* pExtension = CreateMockIMtcExtension("any");
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension(strSomeOptionTag);
     EXPECT_CALL(*pExtension, HandleResponse(nMethod, Ref(objMessage)))
             .Times(1);
 
