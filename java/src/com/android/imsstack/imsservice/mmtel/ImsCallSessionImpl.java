@@ -2964,12 +2964,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (dialString == ImsCallProfile.DIALSTRING_USSD) {
                 ccType = Usat.CALL_CONTROL_TYPE_USSD;
-
-                if (SimUtils.contains12KeysOnly(callee)) {
-                    // TODO: check "USSD string data object supported in Call Control".
-                    log("Usat: cc-type is changed from USSD to SS.");
-                    ccType = Usat.CALL_CONTROL_TYPE_SS;
-                }
             }
 
             mCcCmd = usat.createCallControlCommand(
