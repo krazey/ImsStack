@@ -18,7 +18,6 @@ package com.android.imsstack.enabler.ssc;
 
 import android.telephony.CarrierConfigManager;
 
-import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -48,11 +47,6 @@ public final class SscConfig {
     public static void init(int slotId) {
         ImsLog.d("init(" + slotId + ")");
 
-        if (OperatorInfo.isSlotIdValid(slotId) != true) {
-            ImsLog.w("init() - Invalid SlotId(" + slotId + ")");
-            return;
-        }
-
         ConfigAgent ca = (ConfigAgent)AgentFactory.getInstance().getAgent(ConfigInterface.class,
                 slotId);
         setConfigAgent(slotId, ca);
@@ -69,11 +63,6 @@ public final class SscConfig {
 
     public static void clear(int slotId) {
         ImsLog.d("clear (" + slotId + ")");
-
-        if (OperatorInfo.isSlotIdValid(slotId) != true) {
-            ImsLog.w("clear() - Invalid SlotId(" + slotId + ")");
-            return;
-        }
 
         mConfigAgent.remove(slotId);
     }

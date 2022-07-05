@@ -18,7 +18,6 @@ package com.android.imsstack.enabler.ssc;
 
 import android.text.TextUtils;
 
-import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.SystemUtils;
 
@@ -43,11 +42,6 @@ public class SscAuthAgent implements ISscAuthAgent {
     }
 
     public static ISscAuthAgent getInstance(int slotId) {
-        if (OperatorInfo.isSlotIdValid(slotId) != true) {
-            ImsLog.w("SscAuthAgent :: Invalid SlotId(" + slotId + ")");
-            slotId = 0;
-        }
-
         if (!sSscAuthAgent.containsKey(slotId)) {
             sSscAuthAgent.put(slotId, new SscAuthAgent(slotId));
         }

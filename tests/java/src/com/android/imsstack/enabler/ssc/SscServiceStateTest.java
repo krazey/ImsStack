@@ -90,7 +90,6 @@ public class SscServiceStateTest {
     @After
     public void tearDown() {
         mSscServiceState.deInit();
-        Looper.myLooper().quit();
     }
 
     @Test

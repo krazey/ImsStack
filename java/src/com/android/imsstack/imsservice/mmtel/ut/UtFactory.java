@@ -22,10 +22,12 @@ import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 public final class UtFactory {
-    private static UtFactory sUtFactory = new UtFactory();
+    @VisibleForTesting
+    protected static UtFactory sUtFactory = new UtFactory();
     private final UtInterface[] mUtInterface = new UtInterface[MSimUtils.getMaxSimSlot()];
 
-    private UtFactory() {
+    @VisibleForTesting
+    protected UtFactory() {
         for (int i = 0; i < mUtInterface.length; i++) {
             mUtInterface[i] = null;
         }

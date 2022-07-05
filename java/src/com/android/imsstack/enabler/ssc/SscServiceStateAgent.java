@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -31,11 +30,6 @@ public class SscServiceStateAgent {
     }
 
     protected void init(int slotId) {
-        if (OperatorInfo.isSlotIdValid(slotId) != true) {
-            ImsLog.w("Invalid SlotId(" + slotId + ")");
-            return;
-        }
-
         setSscServiceState(slotId, new SscServiceState());
     }
 
@@ -48,12 +42,7 @@ public class SscServiceStateAgent {
     }
 
     @VisibleForTesting
-    public SscServiceState getSscServiceState(int slotId) {
-        if (OperatorInfo.isSlotIdValid(slotId) != true) {
-            ImsLog.w("Invalid SlotId(" + slotId + ")");
-            return null;
-        }
-
+    protected SscServiceState getSscServiceState(int slotId) {
         if (mSscServiceState.containsKey(slotId) != true) {
             ImsLog.w("SscServiceState for#" + slotId + " is not set...");
             return null;
