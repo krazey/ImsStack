@@ -214,6 +214,9 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature, IN IMS_SINT32 nAdditiona
         case Feature::REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL:
             return m_pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
                     nAdditionalInfo);
+        case Feature::MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF:
+            return m_pManager->IsMessageTypeSupportGeolocationPidf(
+                    static_cast<MessageTypeForGeolocationPidf>(nAdditionalInfo));
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
             return IMS_FALSE;

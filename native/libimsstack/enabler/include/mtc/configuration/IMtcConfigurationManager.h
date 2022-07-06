@@ -113,7 +113,7 @@ public:
 
     // wfc configurations
     virtual IMS_BOOL IsPidfShortCode(
-            const AString& strCode) const = 0;  // KEY_PIDF_SHORT_CODE_STRING_ARRAY
+            IN const AString& strCode) const = 0;  // KEY_PIDF_SHORT_CODE_STRING_ARRAY
     virtual IMS_BOOL IsEmergencyCallOverEmergencyPdn()
             const = 0;  // KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL
     virtual IMS_SINT32 GetCountryCode() const = 0;
@@ -180,6 +180,8 @@ public:
     virtual IMS_BOOL IsStopRingbackTimerBy183WithSdpBody() const = 0;
     virtual IMS_SINT32 GetInformationLevelOfGeolocationPidf(
             IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) const = 0;
+    virtual IMS_BOOL IsMessageTypeSupportGeolocationPidf(
+            IN MessageTypeForGeolocationPidf eType) const = 0;
     virtual IMS_BOOL IsInitializePemWhenNoHeader() const = 0;
     virtual IMS_SINT32 GetPolicyForLocalRingbackToneWith180Response() const = 0;
     virtual IMS_BOOL IsSend180ForInitialInvite() const = 0;

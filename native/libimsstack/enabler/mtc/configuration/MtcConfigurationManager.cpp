@@ -447,7 +447,7 @@ IMS_SINT32 MtcConfigurationManager::GetPolicyOnTextQosDeactivation() const
 
 // wfc configurations
 PUBLIC
-IMS_BOOL MtcConfigurationManager::IsPidfShortCode(const AString& strCode) const
+IMS_BOOL MtcConfigurationManager::IsPidfShortCode(IN const AString& strCode) const
 {
     return ContainsValue(m_objCarrierConfig.objPidfShortCodes, strCode);
 }
@@ -807,6 +807,14 @@ IMS_SINT32 MtcConfigurationManager::GetInformationLevelOfGeolocationPidf(
     {
         return m_objAsset.objInformationLevelOfGeolocationPidfs.GetAt(3);
     }
+}
+
+PUBLIC
+IMS_BOOL MtcConfigurationManager::IsMessageTypeSupportGeolocationPidf(
+        IN MessageTypeForGeolocationPidf eType) const
+{
+    IMS_UINT32 nType = static_cast<IMS_UINT32>(eType);
+    return ContainsValue(m_objAsset.objMessageTypesSupportGeolocationPidf, nType);
 }
 
 PUBLIC

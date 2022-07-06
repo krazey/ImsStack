@@ -166,6 +166,8 @@ public:
     IMS_BOOL IsStopRingbackTimerBy183WithSdpBody() const override;
     IMS_SINT32 GetInformationLevelOfGeolocationPidf(
             IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) const override;
+    IMS_BOOL IsMessageTypeSupportGeolocationPidf(
+            IN MessageTypeForGeolocationPidf eType) const override;
     IMS_BOOL IsInitializePemWhenNoHeader() const override;
     IMS_SINT32 GetPolicyForLocalRingbackToneWith180Response() const override;
     IMS_BOOL IsSend180ForInitialInvite() const override;

@@ -69,6 +69,7 @@ public:
             bMaintainMultipleEarlySessionsByForking(IMS_TRUE),
             bStopRingbackTimerBy183WithSdpBody(IMS_FALSE),
             objInformationLevelOfGeolocationPidfs(IMSVector<IMS_SINT32>()),
+            objMessageTypesSupportGeolocationPidf(IMSVector<IMS_SINT32>()),
             bInitializePemWhenNoHeader(IMS_FALSE),
             nPolicyForLocalRingbackToneWith180Response(0),
             bSend180ForInitialInvite(IMS_FALSE)
@@ -132,6 +133,7 @@ public:
     IMS_BOOL bMaintainMultipleEarlySessionsByForking;
     IMS_BOOL bStopRingbackTimerBy183WithSdpBody;
     IMSVector<IMS_SINT32> objInformationLevelOfGeolocationPidfs;
+    IMSVector<IMS_SINT32> objMessageTypesSupportGeolocationPidf;
     IMS_BOOL bInitializePemWhenNoHeader;
     IMS_SINT32 nPolicyForLocalRingbackToneWith180Response;
     IMS_BOOL bSend180ForInitialInvite;

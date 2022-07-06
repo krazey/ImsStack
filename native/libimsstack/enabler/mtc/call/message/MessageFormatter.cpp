@@ -81,8 +81,13 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormStartMessage()
     SetSupportedHeader();
     SetPreconditionHeader();
     SetPEarlyMediaHeader();
-    SetLocation();
     SetCarrierSpecificHeaders();
+
+    if (m_objContext.GetConfigurationProxy().Is(Feature::MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF,
+                static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::INVITE)))
+    {
+        SetLocation();
+    }
 
     return IMS_SUCCESS;
 }
@@ -101,6 +106,12 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormProvisionalResponseMessage(
     SetPreconditionHeader();
     AddSrvccFeature();
     SetTipHeader();
+
+    if (m_objContext.GetConfigurationProxy().Is(Feature::MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF,
+                static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::PROVISIONAL_RESPONSE)))
+    {
+        SetLocation();
+    }
 
     return IMS_SUCCESS;
 }
@@ -176,6 +187,12 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAcceptMessage()
     SetTipHeader();
     SetCarrierSpecificHeaders();
 
+    if (m_objContext.GetConfigurationProxy().Is(Feature::MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF,
+                static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::FINAL_SUCCESS_RESPONSE)))
+    {
+        SetLocation();
+    }
+
     return IMS_SUCCESS;
 }
 
@@ -191,6 +208,13 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormRejectMessage(
 
     eStatusCode = GetRejectStatusCode(objReason);
     GetRejectPhrase(objReason, strPhrase);
+
+    // If PIDF-LO shouldn't be added to reject messages for re-INVITE, need a fix
+    if (m_objContext.GetConfigurationProxy().Is(Feature::MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF,
+                static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::FINAL_FAILURE_RESPONSE)))
+    {
+        SetLocation();
+    }
 
     return IMS_SUCCESS;
 }

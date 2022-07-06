@@ -97,7 +97,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsTextOnDefaultBearerSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsTextQosPreconditionSupported, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPolicyOnTextQosDeactivation, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsPidfShortCode, (const AString& strCode), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsPidfShortCode, (IN const AString& strCode), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallOverEmergencyPdn, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetCountryCode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRetryEmergencyOnImsPdnBool, (), (const, override));
@@ -166,6 +166,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsStopRingbackTimerBy183WithSdpBody, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetInformationLevelOfGeolocationPidf,
             (IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsMessageTypeSupportGeolocationPidf,
+            (IN MessageTypeForGeolocationPidf eType), (const, override));
     MOCK_METHOD(IMS_BOOL, IsInitializePemWhenNoHeader, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPolicyForLocalRingbackToneWith180Response, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSend180ForInitialInvite, (), (const, override));
