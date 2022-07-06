@@ -74,7 +74,8 @@ PUBLIC VIRTUAL void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCall
 
         RemoveKeyConnectionId(GetListIndexByCallKey(nCallKey));
     }
-    else if (eState == State::OUTGOING || eState == State::INCOMING)  // TODO: all?
+    else if (eState == State::OUTGOING || eState == State::INCOMING ||
+            eState == State::ALERTING)  // TODO: all?
     {
         AddKeyConnectionId(nCallKey);
     }
