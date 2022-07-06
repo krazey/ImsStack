@@ -41,6 +41,7 @@ public:
 
 private:
     MtsDialingPlan* GetDialingPlan(IN IMS_SINT32 nSlotId);
+    IMS_SINT32 GetRequestUriType();
     static IMS_BOOL IsVisualSeparator(IN IMS_CHAR ch);
 
 public:

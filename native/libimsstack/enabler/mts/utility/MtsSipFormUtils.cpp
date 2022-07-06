@@ -15,16 +15,15 @@
  */
 
 #include "AString.h"
-#include "CarrierConfig.h"
 #include "Configuration.h"
 #include "ImsLib.h"
 #include "ImsStrLib.h"
 #include "IpAddress.h"
 #include "MtsApp.h"
+#include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "SipParameter.h"
-#include "configuration/MtsConfigurationManager.h"
 #include "helper/dialing/MtsDialingPlan.h"
 #include "utility/MtsSipFormUtils.h"
 #include "utility/MtsSmUtils.h"
@@ -40,22 +39,21 @@ MtsSipFormUtils::MtsSipFormUtils(IN IMS_SINT32 nSlotId) :
 {
     IMS_TRACE_I("+MtsSipFormUtils", 0, 0, 0);
 
-    MtsConfigurationManager* pMtsConfigurationManager = new MtsConfigurationManager();
-    pMtsConfigurationManager->Init();
+    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    IMS_SINT32 nRequestUriType = GetRequestUriType();
     AString strUriScheme;
-    if (pMtsConfigurationManager->GetRequestUriType() ==
-            CarrierConfig::Ims::REQUEST_URI_FORMAT_TEL)
+
+    if (nRequestUriType == CarrierConfig::Ims::REQUEST_URI_FORMAT_TEL)
     {
         strUriScheme = "tel";
     }
-    else if (pMtsConfigurationManager->GetRequestUriType() ==
-            CarrierConfig::Ims::REQUEST_URI_FORMAT_SIP)
+    else if (nRequestUriType == CarrierConfig::Ims::REQUEST_URI_FORMAT_SIP)
     {
         strUriScheme = "sip";
     }
 
     m_pMtsDialingPlan = new MtsDialingPlan(
-            nSlotId, strUriScheme, pMtsConfigurationManager->GetPolicyOfLocalNumbers());
+            nSlotId, strUriScheme, piCc->GetInt(CarrierConfig::Ims::KEY_REQUEST_URI_TYPE_INT));
 }
 
 PUBLIC
@@ -292,10 +290,12 @@ PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::IsTelUrlParam(IN const AString& strPara
 
 PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::IsNumberFormat(IN const AString& strDial) const
 {
-    // global-number-digits := "+" *phonedigit DIGIT *phonedigit
-    // local-number-digits := *phonedigit-hex (HEXDIG / "*" / "#") *phonedigit-hex
-    // phonedigit := DIGIT / [visual-separator]
-    // phonedigit-hex := HEXDIG / "*" / "#" / [visual-separator]
+    /*
+     * global-number-digits := "+" *phonedigit DIGIT *phonedigit
+     * local-number-digits := *phonedigit-hex (HEXDIG / "*" / "#") *phonedigit-hex
+     * phonedigit := DIGIT / [visual-separator]
+     * phonedigit-hex := HEXDIG / "*" / "#" / [visual-separator]
+     */
 
     if (strDial.Equals('+'))
     {
@@ -371,6 +371,22 @@ PRIVATE VIRTUAL MtsDialingPlan* MtsSipFormUtils::GetDialingPlan(IN IMS_SINT32 nS
 {
     IMS_TRACE_E(0, "MtsSipFormUtils::GetDialingPlan : nSlotId[%d]", nSlotId, 0, 0);
     return m_pMtsDialingPlan;
+}
+
+PRIVATE
+IMS_SINT32 MtsSipFormUtils::GetRequestUriType()
+{
+    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    IMS_SINT32 nValue = piCc->GetInt(CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT);
+
+    if (nValue == MtsSipFormUtils::SCHEME_UNKNOWN)
+    {
+        return piCc->GetInt(CarrierConfig::Ims::KEY_REQUEST_URI_TYPE_INT);
+    }
+    else
+    {
+        return nValue;
+    }
 }
 
 PRIVATE GLOBAL IMS_BOOL MtsSipFormUtils::IsVisualSeparator(IN IMS_CHAR ch)

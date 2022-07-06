@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,9 @@
 package com.android.imsstack.enabler.mtc.telephony;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
-import android.util.Log;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.android.imsstack.enabler.mtc.telephony.TelephonyCallState;
 

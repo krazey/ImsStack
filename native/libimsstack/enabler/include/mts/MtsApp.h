@@ -43,7 +43,6 @@ public:
     virtual ~MtsApp();
 
     void AddService(IN MtsService* pService);
-    MtsServiceState* GetMtsServiceState();
     void RemoveMtsServices();
 
     // IMtsApp
@@ -56,6 +55,12 @@ public:
     // IMtsCallTrackerListener
     virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
 
+    inline MtsService* GetMtsService() { return m_pMtsService; }
+    inline MtsMessageController* GetMtsMessageController() { return m_pMtsMessageController; }
+    inline MtsDynamicLoader* GetMtsDynamicLoader() { return m_pMtsDynamicLoader; }
+    inline MtsServiceState* GetMtsServiceState() { return m_pMtsServiceState; }
+    inline MtsCallTracker* GetMtsCallTracker() { return m_pCallTracker; }
+
 private:
     void CreateMtsService(IN IMS_SINT32 nSlotId);
     void CreateMtsMessageController(
@@ -63,7 +68,6 @@ private:
     void CreateMtsUtils(IN IMS_SINT32 nSlotId);
     void DestroyMtsUtils();
     void GetSmOverIpConfigInfo(IN IMS_SINT32 nSlotId);
-    void SetSlotId(IN IMS_SINT32 nSlotId);
 
 public:
     // SDM item definitions

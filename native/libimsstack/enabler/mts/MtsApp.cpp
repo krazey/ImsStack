@@ -39,6 +39,7 @@ LOCAL const IMS_CHAR MTS_APP_NAME[] = "MtsApp";
 PUBLIC
 MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
         ImsApp(MTS_APP_NAME),
+        m_nSlotId(nSlotId),
         m_pMtsService(IMS_NULL),
         m_pMtsMessageController(IMS_NULL),
         m_pMtsDynamicLoader(IMS_NULL),
@@ -46,7 +47,6 @@ MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
         m_pCallTracker(IMS_NULL)
 {
     IMS_TRACE_I("+MtsApp [slot_%d]", nSlotId, 0, 0);
-    SetSlotId(nSlotId);
 
     Configuration::GetInstance()->SetAppConfig(
             ImsServiceConfig::GetAppName(ImsAppId::MTS), nSlotId);
@@ -87,11 +87,6 @@ PUBLIC void MtsApp::AddService(IN MtsService* pService)
 
     IMS_TRACE_I("AddService : ID[%s] Size[%d]", pService->GetId().GetStr(),
             m_lstMtsServices.GetSize(), 0);
-}
-
-PUBLIC MtsServiceState* MtsApp::GetMtsServiceState()
-{
-    return m_pMtsServiceState;
 }
 
 PUBLIC void MtsApp::RemoveMtsServices()
@@ -275,27 +270,4 @@ PRIVATE void MtsApp::GetSmOverIpConfigInfo(IN IMS_SINT32 nSlotId)
     {
         pMtsServiceState->SetSmsOverIpState(IMS_FALSE);
     }
-}
-
-PRIVATE void MtsApp::SetSlotId(IN IMS_SINT32 nSlotId)
-{
-    if (nSlotId < 0)
-    {
-        char byData[94] = {0x30, 0x00};
-
-        if (IMS_StrICmp(byData, "1") == 0)
-        {
-            m_nSlotId = 1;
-        }
-        else
-        {
-            m_nSlotId = 0;
-        }
-    }
-    else
-    {
-        m_nSlotId = nSlotId;
-    }
-
-    IMS_TRACE_I("SetSlotId : [%d]", m_nSlotId, 0, 0);
 }
