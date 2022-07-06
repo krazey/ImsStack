@@ -145,6 +145,18 @@ public:
     virtual void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) = 0;
 
     /**
+     * @brief Notify the Sms Callback Mode state for emergency.
+     *
+     * @param nState Indicated the SCBM state.
+     *               Possible values are,
+     *               IImsAosInfo::SCBM_STARTED
+     *               IImsAosInfo::SCMB_TERMINATED
+     *               IImsAosInfo::SCMB_TERMINATED_BY_ECALL
+     *               IImsAosInfo::SCMB_TERMINATED_BY_ESMS
+     */
+    virtual void NotifyScbmState(IN IMS_UINT32 nState) = 0;
+
+    /**
      * @brief Set the publish state for waiting the un-publish procedure when IMS is de-registering.
      *
      * @param bIsStarted Indicated whether publish is started or terminated.
@@ -185,6 +197,14 @@ public:
         IMS_STATE_FORBIDDEN,
         /// registration is blocked with the unsubscribed cause
         IMS_STATE_UNSUBSCRIBED
+    };
+
+    enum
+    {
+        SCBM_STARTED = 1,
+        SCMB_TERMINATED = 2,
+        SCMB_TERMINATED_BY_ECALL = 3,
+        SCMB_TERMINATED_BY_ESMS = 4
     };
 };
 

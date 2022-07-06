@@ -45,6 +45,7 @@ private:
     virtual AString GetSupportedHeaderValue();
     virtual AString GetServiceRouteHeaderValue();
     virtual void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized);
+    virtual void NotifyScbmState(IN IMS_UINT32 nState);
     virtual void NotifyPublishState(IN IMS_BOOL bIsStarted);
     virtual void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized);
 

@@ -235,6 +235,31 @@ PRIVATE VIRTUAL void AosInfo::NotifyEmergencyCallState(IN IMS_BOOL bIsInitialize
     }
 }
 
+PRIVATE VIRTUAL void AosInfo::NotifyScbmState(IN IMS_UINT32 nState)
+{
+    IMS_UINT32 nCommand = 0;
+
+    switch (nState)
+    {
+        case SCBM_STARTED:
+            nCommand = IAosRegistration::CMD_SCBM_STARTED;
+            break;
+        case SCMB_TERMINATED:
+            nCommand = IAosRegistration::CMD_SCBM_TERMINATED;
+            break;
+        case SCMB_TERMINATED_BY_ECALL:
+            nCommand = IAosRegistration::CMD_SCBM_TERMINATED_ECALL;
+            break;
+        case SCMB_TERMINATED_BY_ESMS:
+            nCommand = IAosRegistration::CMD_SCBM_TERMINATED_ESMS;
+            break;
+        default:
+            return;
+    }
+
+    m_piContext->GetRegistration()->RequestCmd(nCommand);
+}
+
 PRIVATE VIRTUAL void AosInfo::NotifyPublishState(IN IMS_BOOL bIsStarted)
 {
     m_piContext->GetApp()->NotifyPublishState(bIsStarted);
