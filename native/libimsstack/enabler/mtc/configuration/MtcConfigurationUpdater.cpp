@@ -332,6 +332,8 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByAsset(
             CarrierConfig::Assets::KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL);
     objItems.objInformationLevelOfGeolocationPidfs = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY);
+    objItems.objMessageTypesSupportGeolocationPidf = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY);
     objItems.bInitializePemWhenNoHeader = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL);
     objItems.nPolicyForLocalRingbackToneWith180Response = piCc->GetInt(

@@ -289,6 +289,10 @@
         <item value="0"/> <!-- NORMAL_LTE -->
         <item value="0"/> <!-- NORMAL_WIFI -->
     </int-array>
+    <int-array name="message_type_support_geolocation_pidf_int_array" num="2">
+        <item value="0"/> <!-- INVITE -->
+        <item value="1"/> <!-- PROVISIONAL_RESPONSE -->
+    </int-array>
     <boolean name="initialize_p_early_media_when_no_header_bool" value="false"/>
     <int name="policy_for_local_ringback_tone_with_180_response_int" value="1"/>
 
