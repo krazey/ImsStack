@@ -313,20 +313,20 @@ PUBLIC VIRTUAL IMS_SINT32 ConferenceController::GetState() const
 PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConference(
         IN CallKey nKey) const
 {
-    IMS_TRACE_D("GetCallStatusInConference", 0, 0, 0);
-
     IMtcCall* piConfCall = GetConferenceCall();
     if (piConfCall->GetKey() == nKey)
     {
         IMS_TRACE_D("GetCallStatusInConference : Host Call", 0, 0, 0);
         return IndividualCallState::HOST;
     }
-
-    if (piConfCall->GetState() == State::TERMINATING)
-    {
-        return IndividualCallState::IDLE;
-    }
-
+    /*
+        // TODO: remove after checking if not required.
+        if (piConfCall->GetState() == State::TERMINATING)
+        {
+            IMS_TRACE_D("GetCallStatusInConference : Idle", 0, 0, 0);
+            return IndividualCallState::IDLE;
+        }
+    */
     if (m_objOperationQueue.GetTypeOfCurrentOperation() == CONTROL_OPERATION_REFER_INVITE)
     {
         const IMSList<ConfUser*> objUsers = m_objOperationQueue.GetCurrentOperation()->GetUsers();
@@ -354,14 +354,22 @@ PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConferen
     for (IMS_UINT32 i = 0; i < m_objParticipantList.GetSize(); i++)
     {
         ConfUser* pConfUser = m_objParticipantList.GetConfUser(i);
+        if (pConfUser->eStatus == STATUS_DISCONNECTED)
+        {
+            // TODO: check if removing ConfUser when it's disconnected is okay.
+            // Otherwise, just update the connection id of the disconnected ConfUser
+            continue;
+        }
 
         if (nKey == m_objConnectionIdManager.GetCallKey(pConfUser->nConnectionId))
         {
-            IMS_TRACE_D("GetCallStatusInConference invited Call", 0, 0, 0);
+            IMS_TRACE_D("GetCallStatusInConference Invited Call key[%d] connectionid[%d]", nKey,
+                    pConfUser->nConnectionId, 0);
             return IndividualCallState::INVITED;
         }
     }
 
+    IMS_TRACE_D("GetCallStatusInConference : Idle", 0, 0, 0);
     return IndividualCallState::IDLE;
 }
 
