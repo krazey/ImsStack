@@ -500,12 +500,12 @@ public class SscTransaction {
                 ImsLog.d("PDN Disconnected");
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 break;
-            case SscNetConnection.EVENT_PDN_CONNECTION_FAILED:
-                ImsLog.d("Connection Failed");
+            case SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT:
+                ImsLog.d("Connection Timeout");
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 break;
-            case SscNetConnection.EVENT_PDN_CONNECTION_TIMEOUT:
-                ImsLog.d("Connection Timeout");
+            case SscNetConnection.EVENT_PDN_CONNECTION_FAILED:
+                ImsLog.d("Connection Failed");
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 break;
             /* TODO: check when implementing NAPTR/SRV
