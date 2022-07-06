@@ -1938,7 +1938,6 @@ PROTECTED VIRTUAL void AosApplication::ProcessReconfigTimerExpired()
             Report_StateChanged();
             PostMessage(MSG_REG_STOP, 0, 0);
             m_pCondition->SetBlock(BLOCK_ENABLER_DETACHED);
-            ResetBlock(BLOCK_SERVICE_CONNECTING);
         }
         else
         {
@@ -1948,6 +1947,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessReconfigTimerExpired()
             Report_StateChanged();
         }
 
+        ResetBlock(BLOCK_SERVICE_CONNECTING);
         return;
     }
 
