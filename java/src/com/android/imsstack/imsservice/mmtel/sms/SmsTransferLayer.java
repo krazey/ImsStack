@@ -25,6 +25,7 @@ import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.uicc.IccUtils;
 import com.android.telephony.Rlog;
 
 import java.io.ByteArrayOutputStream;
@@ -44,11 +45,13 @@ public class SmsTransferLayer {
     private SmsTransferLayer.Listener mListener = null;
     public Map<Integer, TpduParam> mTokenMessageMap = new ConcurrentHashMap<>();
     private static final int MAX_MESSAGE_COUNT = 255;
+    private static final int MAX_CDMA_PDU_LENGTH = 255;
     public final ConcurrentLinkedQueue<Integer> mSendSmsQueue =
                  new ConcurrentLinkedQueue<Integer>();
     private MessageHandler mSmsHandler = null;
     private HandlerThread mSmsHandlerThread = new HandlerThread("ImsSmsHandlerThread");
     public static final int REQUEST_SEND_NEXT_SMS_TO_RL = 1;
+    private static final boolean VDBG = true;
 
     /**
      * This class contains parameters related to each SMS sent and is required for
@@ -228,18 +231,88 @@ public class SmsTransferLayer {
         }
     }
 
+    /**
+     * generates CDMA TPDU to be sent to framework
+     * @param pdu CDMA PDU received from network
+     *
+     * @return returns the 3GPP2 TPDU that has to be sent to framework
+     */
+    protected byte[] generateCdmaPdu(byte[] pdu) {
+        com.android.internal.telephony.cdma.SmsMessage cdmaMsg = null;
+
+        if (pdu == null) {
+            Rlog.e(TAG, "pdu is null");
+            return new byte[0];
+        }
+
+        int pduLength = pdu.length;
+        Rlog.i(TAG, "original pdu length = " + pduLength);
+        if (pduLength <= 0 || pduLength > MAX_CDMA_PDU_LENGTH) {
+            Rlog.e(TAG, "Invalid pdu length");
+            return new byte[0];
+        }
+
+        byte[] cdmaPdu = new byte[pduLength + 2];
+        //TODO: BugId: b/240369384, Need to check the behaviour at modem side
+        /* The first byte should be interpreted as per 3GPP2 C.S0023 3.4.27
+         * It is a status field, we have hardcoded as
+         * ‘001’ Message received by MS from network,
+         * which means message read
+         */
+        cdmaPdu[0] = 0x01;
+        cdmaPdu[1] = (byte) pduLength;
+        System.arraycopy(pdu, 0, cdmaPdu, 2, pduLength);
+
+        Rlog.i(TAG, "EfRecord Pdu = " + IccUtils.bytesToHexString(cdmaPdu));
+
+        if (cdmaPdu != null && cdmaPdu.length > 0) {
+            cdmaMsg =  com.android.internal.telephony.cdma.SmsMessage
+                                            .createFromEfRecord(0, cdmaPdu);
+
+            if (cdmaMsg != null) {
+                if (VDBG) {
+                    Rlog.d(TAG, "Originating Address = " + cdmaMsg.getOriginatingAddress());
+                    Rlog.d(TAG, "Message Body = " + cdmaMsg.getMessageBody());
+                }
+                /* generates framework compatible CDMA PDU */
+                cdmaMsg.createPdu();
+                Rlog.i(TAG, "cdmaMsg.mPdu = " + IccUtils.bytesToHexString(cdmaMsg.getPdu()));
+            } else {
+                Rlog.e(TAG, "cdmaMsg is null");
+            }
+        }
+
+        return ((cdmaMsg != null) ? cdmaMsg.getPdu() : new byte[0]);
+
+    }
+
     class SmsRLListenerProxy implements SmsRelayLayer.Listener {
 
         public int notifyRLDataIndication(
                 int token, int smsFormat, int rpMessageType, byte[] pdu) {
-            Rlog.d(TAG, "notifyRLDataIndication");
+            Rlog.d(TAG, "notifyRLDataIndication: token = " + token
+                                         + " smsFormat = " + smsFormat
+                                         + " rpMessageType = " + rpMessageType);
             int result = SmsUtils.SMSTL_RESULT_FAILURE;
             try {
                 SmsTransferLayer.Listener listener = mListener;
                 int newToken = token;
+                byte[] cdmaPdu = null;
                 if (listener == null) {
                     Rlog.d(TAG, "Listener is null");
                     return result;
+                }
+                if (smsFormat == SmsUtils.FORMAT_INT_3GPP2) {
+                    cdmaPdu = generateCdmaPdu(pdu);
+                    if (cdmaPdu == null || cdmaPdu.length == 0) {
+                        Rlog.i(TAG, "getCdmaPdu returned error");
+                        return SmsUtils.SMSTL_RESULT_GENERATE_CDMA_PDU_FAILED;
+                    }
+                    synchronized (mLock) {
+                        Rlog.d(TAG, "notifyRLDataIndication: calling notifySmsReceived");
+                        return listener.notifySmsReceived(token, smsFormat,
+                                                SmsUtils.TP_SMS_DELIVER, cdmaPdu);
+                    }
                 }
                 int tpMessageType = SmsUtils.TP_SMS_DELIVER;
                 int originAddressLength = pdu[SmsUtils.MODIFIED_TPDU_ORIGIN_ADDR_LENGTH_INDEX];
