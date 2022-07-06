@@ -40,10 +40,11 @@ public class SmsRelayLayer {
             new MtsControllerListenerProxy();
     private final Object mLock = new Object();
     //token-RPMessageReference synchronisation
-    public AtomicInteger mRPMR = new AtomicInteger();
-    public AtomicInteger mToken = new AtomicInteger();
+    private AtomicInteger mRPMR = new AtomicInteger();
+    private AtomicInteger mToken = new AtomicInteger();
     public Map<Integer, Integer> mMoMRTokenMap = new ConcurrentHashMap<>();
     public Map<Integer, Integer> mMTTokenMRMap = new ConcurrentHashMap<>();
+
     /**
      * Listener to handle the events sent from SmsRelayLayer
      */

@@ -35,12 +35,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Provides the functionality of SMS Transfer Layer as per 3GPP TS 23.040
  **/
-public final class SmsTransferLayer {
+public class SmsTransferLayer {
     private final Object mLock = new Object();
     private static final String TAG = "[GII-SmsTL] ";
     private final ImsCallContext mCallContext;
     private SmsRelayLayer mSmsRL = null;
-    private final SmsRLListenerProxy mSmsRLListener = new SmsRLListenerProxy();
+    protected SmsRLListenerProxy mSmsRLListener = new SmsRLListenerProxy();
     private SmsTransferLayer.Listener mListener = null;
     public Map<Integer, TpduParam> mTokenMessageMap = new ConcurrentHashMap<>();
     private static final int MAX_MESSAGE_COUNT = 255;
@@ -104,12 +104,13 @@ public final class SmsTransferLayer {
     @VisibleForTesting
     public SmsTransferLayer(ImsCallContext callContext, SmsRelayLayer smsRL) {
         mCallContext = callContext;
+        mSmsHandlerThread.start();
+        mSmsHandler = new MessageHandler(mSmsHandlerThread.getLooper());
         if (smsRL == null) {
             mSmsRL = new SmsRelayLayer(mCallContext);
         } else {
             mSmsRL = smsRL;
         }
-
         if (mSmsRL != null) {
             mSmsRL.setListener(mSmsRLListener);
         }
@@ -160,7 +161,7 @@ public final class SmsTransferLayer {
                 } else {
                     if (mTokenMessageMap.containsKey(token)) {
                         Rlog.e(TAG, "sendMoTpdu: duplicate token - discarding the request");
-                        return SmsUtils.SMSTL_RESULT_FAILURE;
+                        return SmsUtils.SMSTL_RESULT_DUPLICATE_TOKEN;
                     }
                     Rlog.i(TAG, "sendMoTpdu:queue is not  empty  adding token " + token);
                     mTokenMessageMap.put(token, tpduParameters);
@@ -227,7 +228,7 @@ public final class SmsTransferLayer {
         }
     }
 
-    private class SmsRLListenerProxy implements SmsRelayLayer.Listener {
+    class SmsRLListenerProxy implements SmsRelayLayer.Listener {
 
         public int notifyRLDataIndication(
                 int token, int smsFormat, int rpMessageType, byte[] pdu) {
