@@ -24,8 +24,6 @@ import android.util.Pair;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.GbaInterface;
-import com.android.imsstack.core.agents.TRMAgent;
-import com.android.imsstack.core.agents.agentif.ITRM;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.CfServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.SscData;
@@ -386,16 +384,13 @@ public class SscTransaction {
     }
 
     private boolean isTrmAvailable() {
-        return getTrmAgent().isServiceAvailable(mSlotId, TRMAgent.SERVICE_UT);
+        // TODO: add TRM related operations
+        return true;
     }
 
     private boolean isTrmSupported() {
-        return getTrmAgent().isTRMSupported();
-    }
-
-    @VisibleForTesting
-    protected ITRM getTrmAgent() {
-        return TRMAgent.getInstance();
+        // TODO: add TRM support or not
+        return false;
     }
 
     @VisibleForTesting

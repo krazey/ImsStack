@@ -16,6 +16,8 @@
 
 package com.android.imsstack.core.agents;
 
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.IpSecSaParameter;
@@ -204,5 +206,14 @@ public class SystemCallAgent implements SystemCallInterface {
         }
 
         return 0;
+    }
+
+    /**
+     * Returns the flag specifying whether the IMS voice call is supported on the LTE network.
+     */
+    @Override
+    public boolean isImsVoiceCallSupported() {
+        IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
+        return (dcnw != null) ? dcnw.isVops() : false;
     }
 }

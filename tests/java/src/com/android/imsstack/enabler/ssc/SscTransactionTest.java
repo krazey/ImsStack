@@ -36,8 +36,6 @@ import android.util.Pair;
 
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.GbaInterface;
-import com.android.imsstack.core.agents.TRMAgent;
-import com.android.imsstack.core.agents.agentif.ITRM;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.CfServiceUpdateData;
@@ -88,15 +86,11 @@ public class SscTransactionTest {
     @Mock private SscUtils mMockSscUtils;
     @Mock private SscXmlGov mMockSscXmlGov;
     @Mock private SscXui mMockSscXui;
-    @Mock private TRMAgent mMockTrmAgent;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockTrmAgent.isServiceAvailable(eq(SLOT_0), eq(TRMAgent.SERVICE_UT)))
-                .thenReturn(true);
-        when(mMockTrmAgent.isTRMSupported()).thenReturn(true);
         when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(false);
         when(mMockSscXui.getXui(eq(SLOT_0), eq(null))).thenReturn(mDefaultXui);
         when(mMockSscUrl.getQueryUri(any(), eq(mDefaultXui))).thenReturn(mDefaultRequestUri);
@@ -118,15 +112,12 @@ public class SscTransactionTest {
         mSscTransaction.close();
     }
 
+    /*
     @Test
     public void startTransaction_blockedByTrmAgent() {
-        when(mMockTrmAgent.isTRMSupported()).thenReturn(false);
-
-        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
-        sleepToWaitThreadRun();
-
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        // TODO: TRM
     }
+    */
 
     @Test
     public void startTransaction_requestToConnectFailure() {
@@ -577,11 +568,6 @@ public class SscTransactionTest {
     private class FakeSscTransaction extends SscTransaction {
         private FakeSscTransaction(int slotId, Handler handler) {
             super(slotId, handler);
-        }
-
-        @Override
-        protected ITRM getTrmAgent() {
-            return mMockTrmAgent;
         }
 
         @Override

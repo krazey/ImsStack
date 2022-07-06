@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.core.agents;
 
 import android.content.Context;
@@ -24,7 +39,6 @@ public final class AgentFactory {
     public static final int WAKE_LOCK = 5;
     public static final int WIFI_STATE = 6;
     public static final int DEVICE = 7;
-    public static final int TRM = 8;
 
     // agents with slot id
     public static final int SHARED_STATE = 10;
@@ -35,9 +49,8 @@ public final class AgentFactory {
     public static final int PHONE_CALL_DB = 18;
     public static final int IMS_PHONE = 19;
     public static final int CALL_SETTING = 20;
-    public static final int VONR = 21;
 
-    private static final int AGENT_END = (VONR + 1);
+    private static final int AGENT_END = (CALL_SETTING + 1);
     private static final int AGENT_MAX = AGENT_END;
 
     private static Map<Integer, IAgent> sAgents
@@ -115,7 +128,6 @@ public final class AgentFactory {
 
         // below types should be initialized and cleaned up from VoLTE package
         agents.put(CELL_INFO, new CellInfoAgent(slotId));
-        agents.put(VONR, new VoNRAgent(slotId));
 
         sAgentSlots.put(slotId, agents);
 
@@ -135,7 +147,6 @@ public final class AgentFactory {
         agentList.add(agents.get(TELEPHONY_SUBSCRIBER));
         agentList.add(agents.get(PHONE_CALL_DB));
         agentList.add(agents.get(SHARED_STATE));
-        agentList.add(agents.get(VONR));
 
         for (int i = 0; i < agentList.size(); i++) {
             IAgent agent = agentList.get(i);
@@ -155,7 +166,6 @@ public final class AgentFactory {
         sAgents.put(WAKE_LOCK, WakeLockAgent.getInstance());
         sAgents.put(WIFI_STATE, WifiStateAgent.getInstance());
         sAgents.put(DEVICE, DeviceAgent.getInstance());
-        sAgents.put(TRM, TRMAgent.getInstance());
     }
 
     public static void initAgentsForMIms(Context context, int slotId) {
@@ -171,7 +181,6 @@ public final class AgentFactory {
         agentList.add(agents.get(TELEPHONY_SUBSCRIBER));
         agentList.add(agents.get(PHONE_CALL_DB));
         agentList.add(agents.get(SHARED_STATE));
-        agentList.add(agents.get(VONR));
 
         for (int i = 0; i < agentList.size(); i++) {
             IAgent agent = agentList.get(i);
@@ -191,7 +200,6 @@ public final class AgentFactory {
         WakeLockAgent.getInstance().init(context);
         WifiStateAgent.getInstance().init(context);
         DeviceAgent.getInstance().init(context);
-        TRMAgent.getInstance().init(context);
     }
 
     public static void setAgentForMIms(IAgent agent, int agentType, int slotId) {

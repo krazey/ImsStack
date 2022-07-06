@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.core.service;
 
 import android.content.Context;
@@ -11,12 +26,10 @@ import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
-import com.android.imsstack.core.agents.IIMSPhoneGov;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IBatteryState;
 import com.android.imsstack.core.agents.agentif.ICallSetting;
 import com.android.imsstack.core.agents.agentif.ICellInfo;
-import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgentManager;
 import com.android.imsstack.core.agents.agentif.ISharedState;
@@ -30,10 +43,7 @@ import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.core.service.CallInfoService;
 import com.android.imsstack.core.service.CallSettingService;
-import com.android.imsstack.core.service.CallStateNotificationService;
-import com.android.imsstack.core.service.SCMService;
 import com.android.imsstack.core.service.serviceif.ICallSettingService;
 import com.android.imsstack.core.service.serviceif.IService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
@@ -188,9 +198,6 @@ public class VoLteService implements IVoLteService {
         ImsLog.i("");
 
         mServics.put(TYPE_CALLSETTING, new CallSettingService());
-        mServics.put(TYPE_ACBSKIP, new SCMService());
-        mServics.put(TYPE_CALLINFO, new CallInfoService());
-        mServics.put(TYPE_CALLSTATENOTIFICATION, new CallStateNotificationService());
 
         for (int type = TYPE_DEFAULT; type < TYPE_MAX; type++) {
             IService service = mServics.get(type);
@@ -529,12 +536,6 @@ public class VoLteService implements IVoLteService {
                 DcFactory.NETWORK_WATCHER, mSlotID);
         if (dcnw != null) {
             notifyVopsState(dcnw.isVops());
-        }
-
-        // sync up ssac information
-        IIMSPhoneAgent ipa = IIMSPhoneGov.getInstance(mSlotID);
-        if (ipa != null) {
-            ipa.requestNetworkInfo();
         }
 
         // notify system events for setting
