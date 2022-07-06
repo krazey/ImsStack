@@ -24,9 +24,7 @@ import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.LocationPolicy;
 import com.android.imsstack.core.agents.agentif.SubscriptionListener;
 import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.agents.dcm.DcGov;
 import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -454,25 +452,12 @@ public class VoLteService implements IVoLteService {
                         ImsTestMode.TEST_MASK_ROAMING_CONDITION) > 0) {
                 ImsLog.d("IMS roaming is supported or allowed by test mode");
             }
-
-            // Request to connect IMS PDN
-            DcGov dcgov = (DcGov) DcFactory.getDc(DcFactory.GOVERNOR, mSlotID);
-            if (dcgov != null) {
-                dcgov.activateDataConnection4Sys(EApnType.IMS.getType(),
-                        IApn.IPCAN_CATEGORY_MOBILE);
-            }
         } else if (ImsGlobal.equalsCountry(mCountry, "KR")) {
             if (ImsGlobal.equalsOperator(mOperator, "LGU")) {
                 initServiceProvisioningInfo(IUIMS.M_APP_UC | IUIMS.M_APP_SMS);
             } else {
                 // APP_MTS is enable if sms_over_network_id is true from DM configuration
                 initServiceProvisioningInfo(IUIMS.M_APP_UC | IUIMS.M_APP_VT);
-            }
-
-            DcGov dcGov = (DcGov) DcFactory.getDc(DcFactory.GOVERNOR, mSlotID);
-            if (dcGov != null) {
-                dcGov.activateDataConnection4Sys(EApnType.IMS.getType(),
-                        IApn.IPCAN_CATEGORY_MOBILE);
             }
         } else if (OperatorInfo.isEnablerTypeForNonOperator(mSlotID)
                 && ImsGlobal.isWfcEnabled(mContext, mSlotID)) {
