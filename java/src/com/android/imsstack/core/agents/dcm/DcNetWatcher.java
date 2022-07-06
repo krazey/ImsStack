@@ -378,16 +378,6 @@ public class DcNetWatcher implements IDcNetWatcher {
 
         // TODO : update MOCN PLMN info
         return 0;
-        /*
-        IIMSPhoneAgent ipa = (IIMSPhoneAgent)AgentFactory.getAgent(
-                AgentFactory.IMS_PHONE, mSlotId);
-
-        if (ipa == null) {
-            return 0;
-        }
-
-        return ipa.getPlmn2FromSIB1();
-        */
     }
 
     @Override

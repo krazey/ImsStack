@@ -1,4 +1,18 @@
-
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.system;
 
 import android.os.Parcel;
@@ -44,7 +58,6 @@ public class SystemInterface implements JNIImsListenerEx {
     private ISystemAPIDevice mISystemAPIDevice;
     private ISystemAPIPreference mISystemAPIPreference;
     private ISystemAPIWifi mISystemAPIWifi;
-    private ISystemAPITRM mISystemAPITRM;
     private ISystemAPIWakeLock mWakeLock;
 
     // Static loading materials ----------------------------------
@@ -128,10 +141,6 @@ public class SystemInterface implements JNIImsListenerEx {
         mISystemAPIWifi = api;
     }
 
-    public void setISystemAPITRM(ISystemAPITRM api) {
-        mISystemAPITRM = api;
-    }
-
     public void setWakeLock(ISystemAPIWakeLock wakeLock) {
         mWakeLock = wakeLock;
     }
@@ -185,36 +194,6 @@ public class SystemInterface implements JNIImsListenerEx {
             }
         });
     }
-
-    /**
-     * Notifies the changes of the service state.
-     *
-     * @param type service type
-     * @param mode start/end
-     * @param slotId service slot
-     */
-    public void notifyTRMServiceChanged(final int type, final int mode, final int slotId) {
-        mDefaultExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                Parcel parcel = Parcel.obtain();
-
-                if (parcel == null) {
-                    ImsLog.d("Parcel is null");
-                    return;
-                }
-
-                parcel.writeInt(MSimUtils.DEFAULT_SLOT_ID);
-                parcel.writeInt(SystemConstants.NOTIFY_TRM_SERVICE_STATE_CHANGED);
-                parcel.writeInt(type);
-                parcel.writeInt(mode);
-                parcel.writeInt(slotId);
-
-                sendData2Native(mNativeObject, parcel);
-            }
-        });
-    }
-
 
     /**
      * Notifies the state of the WiFi module.
@@ -313,11 +292,6 @@ public class SystemInterface implements JNIImsListenerEx {
         case SystemConstants.GET_EXTERNAL_STORAGE_PATH:
             result = handleSystemAPIDevice(method, parcel);
             break;
-
-        case SystemConstants.SET_TRM:
-            result = handleSystemAPITRM(method, parcel);
-            break;
-
         case SystemConstants.GET_PRIVATE_PROPERTY: // FALL-THROUGH
         case SystemConstants.SET_PRIVATE_PROPERTY:
             result = handleSystemAPIConfiguration(method, parcel);
@@ -631,24 +605,6 @@ public class SystemInterface implements JNIImsListenerEx {
         return result;
     }
 
-    public Parcel handleSystemAPITRM(int method, Parcel parcel) {
-        if (mISystemAPITRM == null) {
-            return null;
-        }
-
-        Parcel result = Parcel.obtain();
-        switch (method) {
-        case SystemConstants.SET_TRM:
-            result.writeInt(mISystemAPITRM.setTRM(parcel.readInt(), parcel.readInt()));
-            break;
-        default:
-            result.recycle();
-            return null;
-        }
-
-        return result;
-    }
-
     private boolean isActiveSlotIdRequired(int method) {
         switch (method) {
         case SystemConstants.GET_DIGEST_SHA1:
@@ -686,7 +642,6 @@ public class SystemInterface implements JNIImsListenerEx {
         case SystemConstants.GET_BATTERY_LEVEL: //FALL-THROUGH
         case SystemConstants.GET_EXTERNAL_STORAGE_PATH: //FALL-THROUGH
         case SystemConstants.GET_DEVICE_NAME: //FALL-THROUGH
-        case SystemConstants.SET_TRM: //FALL-THROUGH
         case SystemConstants.GET_PRIVATE_PROPERTY: // FALL-THROUGH
         case SystemConstants.SET_PRIVATE_PROPERTY:
             return true;
@@ -840,24 +795,8 @@ public class SystemInterface implements JNIImsListenerEx {
                 "SET_EVENT");
         sMethodToString.put(SystemConstants.RESET_EVENT,
                 "RESET_EVENT");
-        sMethodToString.put(SystemConstants.SET_TRM,
-                "SET_TRM");
         sMethodToString.put(SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT,
                 "GET_CALL_STATE_IN_OTHER_SLOT");
-        sMethodToString.put(SystemConstants.NOTIFY_CALL_STATE,
-                "NOTIFY_CALL_STATE");
-        sMethodToString.put(SystemConstants.REQUEST_CALL_PREPERENCE,
-                "REQUEST_CALL_PREPERENCE");
-        sMethodToString.put(SystemConstants.SET_IMS_SESSION,
-                "SET_IMS_SESSION");
-        sMethodToString.put(SystemConstants.SET_IMS_SIGNALING,
-                "SET_IMS_SIGNALING");
-        sMethodToString.put(SystemConstants.SET_IMS_VOICE,
-                "SET_IMS_VOICE");
-        sMethodToString.put(SystemConstants.SET_UAC_CHECK,
-                "SET_UAC_CHECK");
-        sMethodToString.put(SystemConstants.SET_VOICE,
-                "SET_VOICE");
         sMethodToString.put(SystemConstants.ADD_IPSEC_SA_PARAMETER,
                 "ADD_IPSEC_SA_PARAMETER");
         sMethodToString.put(SystemConstants.REMOVE_IPSEC_SA_PARAMETER,
@@ -893,14 +832,12 @@ public class SystemInterface implements JNIImsListenerEx {
 
     private class System implements ISystem {
         private ISystemAPICallInfo mISystemAPICallInfo;
-        private ISystemAPIIMSPhone mISystemAPIIMSPhone;
         private ISystemAPINetwork mISystemAPINetwork;
         private ISystemAPISendEvent mISystemAPISendEvent;
         private ISystemAPITelephonyState mISystemAPITelephonyState;
         private ISystemAPITelephonySubscriber mISystemAPITelephonySubscriber;
         private ISystemAPIWifiCalling mISystemAPIWifiCalling;
         private ISystemAPILocation mISystemAPILocation;
-        private ISystemAPIVoNR mISystemAPIVoNR;
 
         private ThreadMessageExecutor mExecutor =
                 new ThreadMessageExecutor(SystemInterface.class.getSimpleName());
@@ -937,13 +874,6 @@ public class SystemInterface implements JNIImsListenerEx {
         public void setISystemAPICallInfo(ISystemAPICallInfo api) {
             synchronized (mLockObj) {
                 mISystemAPICallInfo = api;
-            }
-        }
-
-        @Override
-        public void setISystemAPIIMSPhone(ISystemAPIIMSPhone api) {
-            synchronized (mLockObj) {
-                mISystemAPIIMSPhone = api;
             }
         }
 
@@ -986,13 +916,6 @@ public class SystemInterface implements JNIImsListenerEx {
         public void setISystemAPILocation(ISystemAPILocation api) {
             synchronized (mLockObj) {
                 mISystemAPILocation = api;
-            }
-        }
-
-        @Override
-        public void setISystemAPIVoNR(ISystemAPIVoNR api) {
-            synchronized (mLockObj) {
-                mISystemAPIVoNR = api;
             }
         }
 
@@ -1419,79 +1342,6 @@ public class SystemInterface implements JNIImsListenerEx {
             });
         }
 
-        @Override
-        public void notifyCallReady(int event, int sysMode) {
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    Parcel parcel = Parcel.obtain();
-
-                    if (parcel == null) {
-                        ImsLog.d("Parcel is null");
-                        return;
-                    }
-
-                    parcel.writeInt(mSlotId);
-                    parcel.writeInt(SystemConstants.NOTIFY_VONR_EVENT);
-                    parcel.writeInt(event);
-                    parcel.writeInt(sysMode);
-                    sendData2Native(mNativeObject, parcel);
-                }
-            });
-        }
-
-        @Override
-        public void notifyHandoffInformation(int event, int status, int sRat, int tRat,
-            int reasonType, int reason) {
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    Parcel parcel = Parcel.obtain();
-
-                    if (parcel == null) {
-                        ImsLog.d("Parcel is null");
-                        return;
-                    }
-
-                    parcel.writeInt(mSlotId);
-                    parcel.writeInt(SystemConstants.NOTIFY_VONR_EVENT);
-                    parcel.writeInt(event);
-                    parcel.writeInt(status);
-                    parcel.writeInt(sRat);
-                    parcel.writeInt(tRat);
-                    parcel.writeInt(reasonType);
-                    parcel.writeInt(reason);
-                    sendData2Native(mNativeObject, parcel);
-                }
-            });
-        }
-
-        @Override
-        public void notifyUacResponse(int event, int callType, int sysMode, int result,
-            int barringTime) {
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    Parcel parcel = Parcel.obtain();
-
-                    if (parcel == null) {
-                        ImsLog.d("Parcel is null");
-                        return;
-                    }
-
-                    parcel.writeInt(mSlotId);
-                    parcel.writeInt(SystemConstants.NOTIFY_VONR_EVENT);
-                    parcel.writeInt(event);
-                    parcel.writeInt(callType);
-                    parcel.writeInt(sysMode);
-                    parcel.writeInt(result);
-                    parcel.writeInt(barringTime);
-
-                    sendData2Native(mNativeObject, parcel);
-                }
-            });
-        }
-
         // Private/Protected methods ---------------------------------
         public boolean isEventRegistered(final int event) {
             synchronized (mLockObj) {
@@ -1527,10 +1377,6 @@ public class SystemInterface implements JNIImsListenerEx {
                     case SystemConstants.GET_RTT_MODE: //FALL-THROUGH
                     case SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT:
                         result = handleSystemAPICallInfo(method, parcel);
-                        break;
-                    //mISystemAPIIMSPhone
-                    case SystemConstants.IS_IMS_VOICE_CALL_SUPPORTED:
-                        result = handleSystemAPIIMSPhone(method, parcel);
                         break;
                     //mISystemAPINetwork 1 ~ 10
                     case SystemConstants.ACTIVATE_DATA_CONNECTION: //FALL-THROUGH
@@ -1603,16 +1449,6 @@ public class SystemInterface implements JNIImsListenerEx {
                     case SystemConstants.MAKE_INSTATNT_LOCATION_INFO:
                         result = handleSystemAPILocation(method, parcel);
                         break;
-                    // mISystemAPIVoNR
-                    case SystemConstants.NOTIFY_CALL_STATE: //FALL-THROUGH
-                    case SystemConstants.REQUEST_CALL_PREPERENCE: //FALL-THROUGH
-                    case SystemConstants.SET_IMS_SESSION: //FALL-THROUGH
-                    case SystemConstants.SET_IMS_SIGNALING: //FALL-THROUGH
-                    case SystemConstants.SET_IMS_VOICE: //FALL-THROUGH
-                    case SystemConstants.SET_UAC_CHECK: //FALL-THROUGH
-                    case SystemConstants.SET_VOICE:
-                        result = handleSystemAPIVoNR(method, parcel);
-                        break;
                     case SystemConstants.ADD_IPSEC_SA_PARAMETER: // FALL-THROUGH
                     case SystemConstants.REMOVE_IPSEC_SA_PARAMETER: // FALL-THROUGH
                     case SystemConstants.APPLY_IPSEC_SA: // FALL-THROUGH
@@ -1674,24 +1510,6 @@ public class SystemInterface implements JNIImsListenerEx {
 
             return result;
 
-        }
-
-        private Parcel handleSystemAPIIMSPhone(int method, Parcel parcel) {
-            if (mISystemAPIIMSPhone == null) {
-                return null;
-            }
-
-            Parcel result = Parcel.obtain();
-            switch (method) {
-            case SystemConstants.IS_IMS_VOICE_CALL_SUPPORTED:
-                result.writeInt(mISystemAPIIMSPhone.isImsVoiceCallSupported4Sys());
-                break;
-            default:
-                result.recycle();
-                return null;
-            }
-
-            return result;
         }
 
         private Parcel handleSystemAPINetwork(ISystemAPINetwork network,
@@ -2110,47 +1928,6 @@ public class SystemInterface implements JNIImsListenerEx {
             return result;
         }
 
-        // VoNR
-        private Parcel handleSystemAPIVoNR(int method, Parcel parcel) {
-            if (mISystemAPIVoNR == null) {
-                return null;
-            }
-
-            Parcel result = Parcel.obtain();
-            switch (method) {
-            case SystemConstants.NOTIFY_CALL_STATE:
-                result.writeInt(mISystemAPIVoNR.notifyCallState(parcel.readInt(), parcel.readInt(),
-                    parcel.readInt(), parcel.readInt()));
-                break;
-            case SystemConstants.REQUEST_CALL_PREPERENCE:
-                result.writeInt(mISystemAPIVoNR.requestCallPreference(parcel.readInt(),
-                    parcel.readInt()));
-                break;
-            case SystemConstants.SET_IMS_SESSION:
-                result.writeInt(mISystemAPIVoNR.setImsSession(parcel.readInt(),
-                    parcel.readInt()));
-                break;
-            case SystemConstants.SET_IMS_SIGNALING:
-                result.writeInt(mISystemAPIVoNR.setImsSignalingForUAC(parcel.readInt()));
-                break;
-            case SystemConstants.SET_IMS_VOICE:
-                result.writeInt(mISystemAPIVoNR.setImsVoice(parcel.readInt(), parcel.readInt()));
-                break;
-            case SystemConstants.SET_UAC_CHECK:
-                result.writeInt(mISystemAPIVoNR.setUacCheck(parcel.readInt(),
-                    parcel.readInt()));
-                break;
-            case SystemConstants.SET_VOICE:
-                result.writeInt(mISystemAPIVoNR.setVoice(parcel.readInt(), parcel.readInt()));
-                break;
-             default:
-                result.recycle();
-                return null;
-            }
-
-            return result;
-        }
-
         // IpSec
         private Parcel handleSystemApiIpSec(int method, Parcel parcel, FileDescriptor fd) {
             if (mSystemCall == null) {
@@ -2200,16 +1977,22 @@ public class SystemInterface implements JNIImsListenerEx {
                 return null;
             }
 
+            Parcel result = null;
+
             switch (method) {
                 case SystemConstants.GET_CARRIER_CONFIG: {
                     CarrierConfig cc = mSystemCall.getCarrierConfig();
 
                     if (cc != null) {
-                        Parcel result = Parcel.obtain();
+                        result = Parcel.obtain();
                         result.writeInt(1);
                         cc.writeToParcel(result);
-                        return result;
                     }
+                    break;
+                }
+                case SystemConstants.IS_IMS_VOICE_CALL_SUPPORTED: {
+                    result = Parcel.obtain();
+                    result.writeInt(mSystemCall.isImsVoiceCallSupported() ? 1 : 0);
                     break;
                 }
                 default: {
@@ -2217,8 +2000,7 @@ public class SystemInterface implements JNIImsListenerEx {
                 }
             }
 
-            return null;
+            return result;
         }
     }
-    // -----------------------------------------------------------
 }

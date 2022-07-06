@@ -112,4 +112,11 @@ public interface SystemCallInterface {
      */
     int requestUsimAuthentication(String nonce, long owner);
     ////}
+
+    /**
+     * Returns the flag specifying whether the IMS voice call(vops) is supported on the LTE network.
+     *
+     * @return true if the IMS voice call is supported, false otherwise.
+     */
+    boolean isImsVoiceCallSupported();
 }

@@ -1,6 +1,20 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.system;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
@@ -9,8 +23,6 @@ import android.os.RegistrantList;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.IBatteryState;
-import com.android.imsstack.core.agents.agentif.ICallInfoService;
-import com.android.imsstack.core.agents.agentif.ICallStateNotificationService;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
@@ -68,9 +80,6 @@ public class JNIUpCallEvtManager {
 
     private class JNIUpCallEvt implements IJNIUpCallEvt, ISystemAPISendEvent {
         private Hashtable<Integer, EventProc> mapEventProc = new Hashtable <Integer, EventProc>();
-
-        private ICallInfoService mCallInfoService;
-        private ICallStateNotificationService mCallStateNotificationService;
 
         private RegistrantList mNativeBootCompleteRegistrants = new RegistrantList();
         private RegistrantList mRegiStateChangedRegistrants = new RegistrantList();
@@ -133,17 +142,6 @@ public class JNIUpCallEvtManager {
         @Override
         public int getSlotId() {
             return mSlotId;
-        }
-
-        @Override
-        public void setInterfaceForCallInfoService(ICallInfoService iface) {
-            mCallInfoService = iface;
-        }
-
-        @Override
-        public void setInterfaceForCallStateNotificationService(
-                ICallStateNotificationService iface) {
-            mCallStateNotificationService = iface;
         }
 
         @Override
@@ -920,15 +918,7 @@ public class JNIUpCallEvtManager {
 
             @Override
             public void procEvt(int nEvent, int nWParam, int nLParam) {
-                ImsLog.d(mSlotId, "");
-
-                if (mCallInfoService != null) {
-                    mCallInfoService.setCallState(nWParam, nLParam);
-                }
-
-                if (mCallStateNotificationService != null) {
-                    mCallStateNotificationService.setCallState(nWParam, nLParam);
-                }
+                ImsLog.d(mSlotId, "not-handled: event=" + nEvent);
             }
         }
 

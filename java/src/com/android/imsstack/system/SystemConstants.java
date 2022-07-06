@@ -1,14 +1,18 @@
 /*
-    Author
-    <table>
-    date      author                      description
-    --------  --------------              ----------
-    20130222  joonhun.shin@        Created
-    </table>
-
-    Description
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.system;
 
 public class SystemConstants {
@@ -30,8 +34,6 @@ public class SystemConstants {
     public static final int CATEGORY_EVENT = 0x00400000;
     public static final int CATEGORY_ISIM_EVENT = 0x00800000;
     public static final int CATEGORY_USIM_EVENT = 0x01000000;
-    public static final int CATEGORY_TRM = 0x02000000;
-    public static final int CATEGORY_VONR = 0x04000000;
 
     /**
      * Methods for the system information's notification (Java to Native)
@@ -52,8 +54,6 @@ public class SystemConstants {
     public static final int NOTIFY_USIM_EVENT = CATEGORY_USIM_EVENT + 14;
     public static final int NOTIFY_DATA_CONNECTION_IPCAN_CHANGED = CATEGORY_NETWORK + 15;
     public static final int NOTIFY_VOICE_NETWORK_TYPE_CHANGED = CATEGORY_NETWORK + 16;
-    public static final int NOTIFY_TRM_SERVICE_STATE_CHANGED = CATEGORY_TRM + 17;
-    public static final int NOTIFY_VONR_EVENT = CATEGORY_VONR + 18;
 
     /**
      * Methods for the system access (Native to Java)
@@ -179,22 +179,6 @@ public class SystemConstants {
     public static final int STOP_LOCATION_INFO = CATEGORY_BASE + 1202;
     public static final int GET_LOCATION_INFO = CATEGORY_BASE + 1203;
     public static final int MAKE_INSTATNT_LOCATION_INFO = CATEGORY_BASE + 1204;
-
-    ////
-    // TRM
-    ////
-    public static final int SET_TRM = CATEGORY_BASE + 1301;
-
-    ////
-    // VONR
-    ////
-    public static final int NOTIFY_CALL_STATE = CATEGORY_BASE + 1401;
-    public static final int REQUEST_CALL_PREPERENCE = CATEGORY_BASE + 1402;
-    public static final int SET_IMS_SESSION = CATEGORY_BASE + 1403;
-    public static final int SET_IMS_SIGNALING = CATEGORY_BASE + 1404;
-    public static final int SET_IMS_VOICE = CATEGORY_BASE + 1405;
-    public static final int SET_UAC_CHECK = CATEGORY_BASE + 1406;
-    public static final int SET_VOICE = CATEGORY_BASE + 1407;
 
     ////
     // IpSec

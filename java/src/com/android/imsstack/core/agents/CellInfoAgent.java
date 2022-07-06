@@ -1,14 +1,18 @@
-/**
- * CellInfoAgent
- * Role
- *    This class monitors all the cell information of the mobile network
- *    and it manages the last attached cell information for each radio access technology.
- *    It also manages the time when the last valid access information is detected
- *    as the UTC date/time format.
- *    To start/stop using this component, the application SHALL invoke
- *    CellInfoTrackter#startTrackingCellInfo / CellInfoAgent#stopTrackingCellInfo.
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package com.android.imsstack.core.agents;
 
 import android.content.Context;
@@ -31,7 +35,6 @@ import android.text.TextUtils;
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.agentif.ICellInfo;
-import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.util.AppContext;
@@ -47,6 +50,14 @@ import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
+/**
+ * This class monitors all the cell information of the mobile network and it manages
+ * the last attached cell information for each radio access technology.
+ * It also manages the time when the last valid access information is detected
+ * as the UTC date/time format.
+ * To start/stop using this component, the application SHALL invoke
+ * CellInfoTrackter#startTrackingCellInfo / CellInfoAgent#stopTrackingCellInfo.
+ */
 public class CellInfoAgent implements ICellInfo {
     private static final int FEATURE_NONE = 0x00000000;
     private static final int FEATURE_STORE_LANI = 0x00000001;
@@ -379,17 +390,7 @@ public class CellInfoAgent implements ICellInfo {
     }
 
     private List<CellInfo> getAllCellInfo() {
-        if (MSimUtils.isMultiImsEnabled() || MSimUtils.isMultiImsEnabledOnDssv()) {
-            IIMSPhoneAgent ipa = (IIMSPhoneAgent)AgentFactory.getAgent(
-                    AgentFactory.IMS_PHONE, mSlotId);
-
-            if (ipa != null) {
-                return ipa.getAllCellInfo();
-            }
-
-            return null;
-        }
-
+        // TODO: need to be improved
         TelephonyManager tm = null;
 
         if (MSimUtils.isMultiSimEnabled()) {

@@ -3,7 +3,6 @@ package com.android.imsstack.core;
 import android.content.Context;
 import android.content.Intent;
 
-import com.android.imsstack.core.agents.IIMSPhoneGov;
 import com.android.imsstack.core.agents.LocationAgentManager;
 import com.android.imsstack.core.agents.PhoneNumberAgent;
 import com.android.imsstack.core.agents.agentif.IVoLteAgent;
@@ -64,9 +63,6 @@ public class VoLteFactory {
 
         init(context);
 
-        IIMSPhoneGov.getGov().start(slotID);
-        startAgents(slotID);
-
         if (ImsTestMode.getInstance().getTestMode(slotID).isGenericTestMode()) {
             ImsTestHelper.getInstance();
         }
@@ -95,7 +91,6 @@ public class VoLteFactory {
         }
 
         stopAgents(slotID);
-        IIMSPhoneGov.getGov().stop(slotID);
 
         ImsLog.d("size[" + sVoLteServices.size() + "] " + "slotID[" + slotID + "]");
     }
@@ -140,8 +135,6 @@ public class VoLteFactory {
 
         initAgents();
 
-        IIMSPhoneGov.getGov().init(mContext);
-
         sendVoLteStarted();
     }
 
@@ -151,8 +144,6 @@ public class VoLteFactory {
         }
 
         clearAgents();
-
-        IIMSPhoneGov.getGov().cleanup();
     }
 
     private void initAgents() {

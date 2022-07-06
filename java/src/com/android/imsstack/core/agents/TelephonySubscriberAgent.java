@@ -1,17 +1,25 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.core.agents;
 
 import android.content.Context;
-import android.os.AsyncResult;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
-import com.android.imsstack.core.CommonStarter;
-import com.android.imsstack.core.IVoltePackageListener;
-import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
 import com.android.imsstack.core.agents.agentif.ITelephonyState;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.system.ISystem;
@@ -42,18 +50,11 @@ public class TelephonySubscriberAgent implements ITelephonySubscriber,
     private static final int ECC_PRIORITY_UICC = 0;
     private static final int ECC_PRIORITY_NETWORK = 1;
 
-    // Internal Event
-    private static final int EVENT_ECC_PRIORITY_UPDATED = 1001;
-    private static final int EVENT_VOLTE_PACKAGE_READY = 1002;
-
     // <MCC, Country-ISO>
     private Hashtable<String, String> mCountryIsoTable = new Hashtable<String, String>();
 
     // Variables--------------------------------------------------
     private int mModemEccPriority = ECC_PRIORITY_NETWORK;
-
-    private Handler mTelephonySubscriberHandler;
-    private VoltePackageListener mVoltePackageListener;
 
     private final int mSlotId;
 
@@ -74,32 +75,10 @@ public class TelephonySubscriberAgent implements ITelephonySubscriber,
         if (system != null) {
             system.setISystemAPITelephonySubscriber(this);
         }
-
-        // to query priority configuration from modem
-        mTelephonySubscriberHandler = new TelephonySubscriberHandler();
-
-        mVoltePackageListener = new VoltePackageListener();
-        CommonStarter.getInstance().addVolteListener(mVoltePackageListener);
     }
 
     @Override
     public void cleanup() {
-        IIMSPhoneAgent ipa = (IIMSPhoneAgent)AgentFactory.getAgent(
-            AgentFactory.IMS_PHONE, mSlotId);
-        if (ipa != null && mTelephonySubscriberHandler != null) {
-            ipa.unregisterForModemECCPriority(mTelephonySubscriberHandler);
-        }
-
-        if (mVoltePackageListener != null) {
-            CommonStarter.getInstance().removeVolteListener(mVoltePackageListener);
-            mVoltePackageListener = null;
-        }
-
-        if (mTelephonySubscriberHandler != null) {
-            mTelephonySubscriberHandler.removeCallbacksAndMessages(null);
-            mTelephonySubscriberHandler = null;
-        }
-
         ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
         if (system != null) {
             system.setISystemAPITelephonySubscriber(null);
@@ -384,74 +363,5 @@ public class TelephonySubscriberAgent implements ITelephonySubscriber,
         mCountryIsoTable.put("450", "KR");
         mCountryIsoTable.put("001", "ZZ");
         mCountryIsoTable.put("000", "ZZ");
-    }
-
-    // -----------------------------------------------------------
-    private class TelephonySubscriberHandler extends Handler {
-        public void handleMessage(Message msg) {
-            if (msg == null) {
-                return;
-            }
-
-            switch (msg.what) {
-                case EVENT_ECC_PRIORITY_UPDATED:
-                    handleEccPriorityUpdated(msg);
-                    break;
-                case EVENT_VOLTE_PACKAGE_READY:
-                    handleVoltePackageReady();
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        private void handleEccPriorityUpdated(Message msg) {
-            AsyncResult ar = (AsyncResult)msg.obj;
-
-            Bundle bundle = (Bundle)ar.result;
-            int param1 = bundle.getInt("param1", ECC_PRIORITY_NETWORK);
-
-            // 0 : UICC, 1 : Network
-            if (param1 == 0) {
-                mModemEccPriority = ECC_PRIORITY_UICC;
-            } else {
-                mModemEccPriority = ECC_PRIORITY_NETWORK;
-            }
-
-            ImsLog.i(mSlotId, "ECC Priority is updated : " + mModemEccPriority);
-        }
-
-        private void handleVoltePackageReady() {
-            IIMSPhoneAgent ipa = (IIMSPhoneAgent)AgentFactory.getAgent(
-                AgentFactory.IMS_PHONE, mSlotId);
-
-            if (ipa != null && mTelephonySubscriberHandler != null) {
-                ipa.registerForModemECCPriority(mTelephonySubscriberHandler,
-                        EVENT_ECC_PRIORITY_UPDATED, null);
-
-                ipa.getEccPriority();
-            } else {
-                ImsLog.w(mSlotId, "ipa is null");
-            }
-        }
-    }
-
-    private class VoltePackageListener implements IVoltePackageListener {
-        public VoltePackageListener() {
-        }
-
-        @Override
-        public void onVoltePackageReady(int slotId) {
-            ImsLog.i(mSlotId, "");
-
-            if (mSlotId != slotId) {
-                return;
-            }
-
-            if (mTelephonySubscriberHandler != null) {
-                mTelephonySubscriberHandler.sendEmptyMessage(EVENT_VOLTE_PACKAGE_READY);
-            }
-        }
     }
 }
