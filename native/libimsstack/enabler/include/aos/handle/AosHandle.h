@@ -327,6 +327,7 @@ protected:
     IMS_UINT32 m_nAppState;
 
     AString m_strTag;
+    AString m_strTagWithServiceType;
 
 private:
     friend class AosHandleTest;

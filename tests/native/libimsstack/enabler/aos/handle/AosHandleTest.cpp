@@ -3282,23 +3282,23 @@ TEST_F(AosHandleTest, RadioTypeToString_Test)
 TEST_F(AosHandleTest, ServiceTypeToString_Test)
 {
     SetServiceType(ImsAosService::MTC);
-    EXPECT_STREQ(ServiceTypeToString(), "SERVICE_MTC");
+    EXPECT_STREQ(ServiceTypeToString(), "mtc");
 
     SetServiceType(ImsAosService::MTS);
-    EXPECT_STREQ(ServiceTypeToString(), "SERVICE_MTS");
+    EXPECT_STREQ(ServiceTypeToString(), "mts");
 
     SetServiceType(ImsAosService::EMERGENCY_MTC);
-    EXPECT_STREQ(ServiceTypeToString(), "SERVICE_EMERGENCY_MTC");
+    EXPECT_STREQ(ServiceTypeToString(), "mtc");
 
     SetServiceType(ImsAosService::EMERGENCY_MTS);
-    EXPECT_STREQ(ServiceTypeToString(), "SERVICE_EMERGENCY_MTS");
+    EXPECT_STREQ(ServiceTypeToString(), "mts");
 
     SetServiceType(ImsAosService::UCE);
-    EXPECT_STREQ(ServiceTypeToString(), "SERVICE_UCE");
+    EXPECT_STREQ(ServiceTypeToString(), "uce");
 
     SetServiceType(ImsAosService::SIP_CONTROLLER);
-    EXPECT_STREQ(ServiceTypeToString(), "SERVICE_SIP_CONTROLLER");
+    EXPECT_STREQ(ServiceTypeToString(), "sip_controller");
 
     SetServiceType(ImsAosService::NONE);
-    EXPECT_STREQ(ServiceTypeToString(), "__INVALID__");
+    EXPECT_STREQ(ServiceTypeToString(), "invalid");
 }

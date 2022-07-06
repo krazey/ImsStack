@@ -47,7 +47,7 @@
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
-#define APPPROFILE m_strTag.GetStr()
+#define APPPROFILE m_strTagWithServiceType.GetStr()
 
 BEGIN_STATE_MAP(AosHandle)
 STATE_ENTRY(STATE_DISCONNECTED)
@@ -120,6 +120,8 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
             sizeof(AosHandle), this);
 
     m_strTag.Sprintf("%d:%s", m_nSlotId, m_piAppContext->GetProfileId().GetStr());
+    m_strTagWithServiceType.Sprintf(
+            "%d:%s:%s", m_nSlotId, m_piAppContext->GetProfileId().GetStr(), ServiceTypeToString());
 
     SetHandleState(STATE_DISCONNECTED);
 
@@ -212,8 +214,8 @@ Remarks
 */
 PUBLIC VIRTUAL void AosHandle::SetRequestType(IN IMS_SINT32 nReqType)
 {
-    A_IMS_TRACE_I(APPPROFILE, "SetRequestType :: [%s/%s] [%s]", m_strAppId.GetStr(),
-            m_strServiceId.GetStr(), (nReqType == ATTACH) ? "ATTACH" : "DETACH");
+    A_IMS_TRACE_I(
+            APPPROFILE, "SetRequestType :: [%s]", (nReqType == ATTACH) ? "ATTACH" : "DETACH", 0, 0);
 
     m_nReqType = nReqType;
 }
@@ -235,8 +237,7 @@ Remarks
 */
 PUBLIC VIRTUAL void AosHandle::SetRegBinded(IN IMS_BOOL bBind)
 {
-    A_IMS_TRACE_I(APPPROFILE, "SetRegBinded :: [%s/%s] [%s]", m_strAppId.GetStr(),
-            m_strServiceId.GetStr(), (bBind) ? "ATTACHED" : "DETACHED");
+    A_IMS_TRACE_I(APPPROFILE, "SetRegBinded :: [%s]", (bBind) ? "ATTACHED" : "DETACHED", 0, 0);
 
     m_bBind = bBind;
 }
@@ -263,8 +264,8 @@ PUBLIC VIRTUAL void AosHandle::SetNetworkRegBinded(IN IMS_BOOL bNetworkBind)
         return;
     }
 
-    A_IMS_TRACE_I(APPPROFILE, "SetNetworkRegBinded :: [%s/%s] [%s]", m_strAppId.GetStr(),
-            m_strServiceId.GetStr(), (bNetworkBind) ? "ATTACHED" : "DETACHED");
+    A_IMS_TRACE_I(APPPROFILE, "SetNetworkRegBinded :: [%s]",
+            (bNetworkBind) ? "ATTACHED" : "DETACHED", 0, 0);
 
     m_bNetworkBind = bNetworkBind;
 }
@@ -306,9 +307,6 @@ Remarks
 */
 PUBLIC VIRTUAL void AosHandle::ProcessFeatureTagChange()
 {
-    A_IMS_TRACE_I(APPPROFILE, "ProcessFeatureTagChange :: [%s/%s]", m_strAppId.GetStr(),
-            m_strServiceId.GetStr(), 0);
-
     if (m_objFeatureTagList.Equals(m_objBindedFeatureTagList) == IMS_FALSE)
     {
         IMS_UINT32 nState = GetState();
@@ -349,8 +347,7 @@ Remarks
 */
 PUBLIC VIRTUAL IMS_BOOL AosHandle::App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam)
 {
-    A_IMS_TRACE_I(APPPROFILE, "App_StateChanged :: [%s/%s] [state(%d)]", m_strAppId.GetStr(),
-            m_strServiceId.GetStr(), nState);
+    A_IMS_TRACE_I(APPPROFILE, "App_StateChanged :: [state(%d)]", nState, 0, 0);
 
     switch (nState)
     {
@@ -377,15 +374,13 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::App_Notify()
 {
     if (m_piListener == IMS_NULL)
     {
-        A_IMS_TRACE_D(APPPROFILE, "App_Notify :: [%s/%s] no listener", m_strAppId.GetStr(),
-                m_strServiceId.GetStr(), 0);
+        A_IMS_TRACE_D(APPPROFILE, "App_Notify :: no listener", 0, 0, 0);
         return IMS_FALSE;
     }
 
     if (m_bNotify == IMS_FALSE)
     {
-        A_IMS_TRACE_D(APPPROFILE, "App_Notify :: [%s/%s] no notification", m_strAppId.GetStr(),
-                m_strServiceId.GetStr(), 0);
+        A_IMS_TRACE_D(APPPROFILE, "App_Notify :: no notification", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -393,9 +388,6 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::App_Notify()
     {
         return IMS_FALSE;
     }
-
-    A_IMS_TRACE_I(
-            APPPROFILE, "App_Notify :: [%s/%s]", m_strAppId.GetStr(), m_strServiceId.GetStr(), 0);
 
     // notify the state to Enabler
     switch (GetState())
@@ -500,8 +492,8 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsConnected()
 {
     IMS_UINT32 nState = GetState();
 
-    A_IMS_TRACE_D(APPPROFILE, "IsImsConnected :: [%s] connected(%s)", m_strServiceId.GetStr(),
-            _TRACE_B_(nState == STATE_CONNECTED), 0);
+    A_IMS_TRACE_D(APPPROFILE, "IsImsConnected :: connected(%s)",
+            _TRACE_B_(nState == STATE_CONNECTED), 0, 0);
 
     return (nState == STATE_CONNECTED);
 }
@@ -513,8 +505,7 @@ Remarks
 */
 PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsSuspended()
 {
-    A_IMS_TRACE_D(APPPROFILE, "IsImsSuspended :: [%s] reason(%x)", m_strServiceId.GetStr(),
-            m_nSuspendedReason, 0);
+    A_IMS_TRACE_D(APPPROFILE, "IsImsSuspended :: reason(%x)", m_nSuspendedReason, 0, 0);
 
     return (m_nSuspendedReason != AoSReason::SUSPEND_NONE);
 }
@@ -1164,7 +1155,7 @@ IMS_BOOL AosHandle::PreProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded)
 
         SetBlock(nBlock, m_nHoldingBlocksForMobile, bAdded);
 
-        A_IMS_TRACE_D(ServiceTypeToString(), "PreProcessBlock :: HoldingBlocksForMobile (%x)",
+        A_IMS_TRACE_D(APPPROFILE, "PreProcessBlock :: HoldingBlocksForMobile (%x)",
                 m_nHoldingBlocksForMobile, 0, 0);
 
         return IMS_TRUE;
@@ -1177,7 +1168,7 @@ IMS_BOOL AosHandle::PreProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded)
 
     SetBlock(nBlock, m_nHoldingBlocksForWifi, bAdded);
 
-    A_IMS_TRACE_D(ServiceTypeToString(), "PreProcessBlock :: HoldingBlocksForWifi (%x)",
+    A_IMS_TRACE_D(APPPROFILE, "PreProcessBlock :: HoldingBlocksForWifi (%x)",
             m_nHoldingBlocksForWifi, 0, 0);
 
     return IMS_TRUE;
@@ -1238,8 +1229,8 @@ void AosHandle::ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked
         m_objFeatureTagList.AddFeature(nFeature);
     }
 
-    A_IMS_TRACE_D(APPPROFILE, "ProcessFeatureBlock :: [%s/%s] Updated feature = [%x]",
-            m_strAppId.GetStr(), m_strServiceId.GetStr(), m_objFeatureTagList.GetFeatures());
+    A_IMS_TRACE_D(APPPROFILE, "ProcessFeatureBlock :: Updated feature = [%x]",
+            m_objFeatureTagList.GetFeatures(), 0, 0);
 
     UpdateFeatureTags();
 }
@@ -1363,7 +1354,7 @@ void AosHandle::BackupBlocksForMobile()
         nBlock = m_objHoldingBlocksPolicyForMobile.GetAt(i);
         if (IsHandleBlocked(nBlock))
         {
-            A_IMS_TRACE_D(ServiceTypeToString(),
+            A_IMS_TRACE_D(APPPROFILE,
                     "BackupBlocksForMobile :: Reset block[%x] and set to HoldingBlocksForMobile",
                     nBlock, 0, 0);
             AddBlock(nBlock, m_nHoldingBlocksForMobile);
@@ -1387,7 +1378,7 @@ void AosHandle::BackupBlocksForWifi()
         nBlock = m_objHoldingBlocksPolicyForWifi.GetAt(i);
         if (IsHandleBlocked(nBlock))
         {
-            A_IMS_TRACE_D(ServiceTypeToString(),
+            A_IMS_TRACE_D(APPPROFILE,
                     "BackupBlocksForWifi :: Reset block[%x] and set to HoldingBlocksForWifi",
                     nBlock, 0, 0);
             AddBlock(nBlock, m_nHoldingBlocksForWifi);
@@ -1411,7 +1402,7 @@ void AosHandle::RestoreBlocksForMobile()
         nBlock = m_objHoldingBlocksPolicyForMobile.GetAt(i);
         if (IsHandleBlocked(m_nHoldingBlocksForMobile, nBlock))
         {
-            A_IMS_TRACE_D(ServiceTypeToString(),
+            A_IMS_TRACE_D(APPPROFILE,
                     "RestoreBlocksForMobile :: Set block[%x] and reset from HoldingBlocksForMobile",
                     nBlock, 0, 0);
             RemoveBlock(nBlock, m_nHoldingBlocksForMobile);
@@ -1435,7 +1426,7 @@ void AosHandle::RestoreBlocksForWifi()
         nBlock = m_objHoldingBlocksPolicyForWifi.GetAt(i);
         if (IsHandleBlocked(m_nHoldingBlocksForWifi, nBlock))
         {
-            A_IMS_TRACE_D(ServiceTypeToString(),
+            A_IMS_TRACE_D(APPPROFILE,
                     "RestoreBlocksForWifi :: Set block[%x] and reset from HoldingBlocksForWifi",
                     nBlock, 0, 0);
             RemoveBlock(nBlock, m_nHoldingBlocksForWifi);
@@ -1461,8 +1452,7 @@ IMS_BOOL AosHandle::HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL
 
         SetBlock(nBlock, m_nHoldingBlocksForMobile, bAdded);
 
-        A_IMS_TRACE_D(ServiceTypeToString(),
-                "HoldBlockForInvalidNetwork :: HoldingBlocksForMobile (%x)",
+        A_IMS_TRACE_D(APPPROFILE, "HoldBlockForInvalidNetwork :: HoldingBlocksForMobile (%x)",
                 m_nHoldingBlocksForMobile, 0, 0);
 
         return IMS_TRUE;
@@ -1482,9 +1472,8 @@ IMS_BOOL AosHandle::HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL
 
         SetBlock(nBlock, m_nHoldingBlocksForWifi, bAdded);
 
-        A_IMS_TRACE_D(ServiceTypeToString(),
-                "HoldBlockForInvalidNetwork :: HoldingBlocksForWifi (%x)", m_nHoldingBlocksForWifi,
-                0, 0);
+        A_IMS_TRACE_D(APPPROFILE, "HoldBlockForInvalidNetwork :: HoldingBlocksForWifi (%x)",
+                m_nHoldingBlocksForWifi, 0, 0);
 
         return IMS_TRUE;
     }
@@ -1706,8 +1695,7 @@ Remarks
 */
 PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnected(IN IMSMSG& objMSG)
 {
-    A_IMS_TRACE_I(APPPROFILE, "[%s] StateDisconnected :: (%s)", m_strServiceId.GetStr(),
-            MsgToString(objMSG.nMSG), 0);
+    A_IMS_TRACE_I(APPPROFILE, "StateDisconnected :: (%s)", MsgToString(objMSG.nMSG), 0, 0);
 
     m_bNotify = IMS_FALSE;
 
@@ -1747,8 +1735,7 @@ Remarks
 */
 PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
 {
-    A_IMS_TRACE_I(APPPROFILE, "[%s] StateConnecting :: (%s)", m_strServiceId.GetStr(),
-            MsgToString(objMSG.nMSG), 0);
+    A_IMS_TRACE_I(APPPROFILE, "StateConnecting :: (%s)", MsgToString(objMSG.nMSG), 0, 0);
 
     m_bNotify = IMS_FALSE;
 
@@ -1776,7 +1763,8 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
             IMS_UINT32 nState = LONG_TO_INT(objMSG.nWparam);
             SetReason(LONG_TO_INT(objMSG.nLparam));
 
-            IMS_TRACE_I("HANDLE_MSG_APP_STATUS :: State(%d) , m_nReason(%d)", nState, m_nReason, 0);
+            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d), m_nReason(%d)", nState,
+                    m_nReason, 0);
 
             switch (nState)
             {
@@ -1817,8 +1805,7 @@ Remarks
 */
 PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
 {
-    A_IMS_TRACE_I(APPPROFILE, "[%s] StateConnected :: (%s)", m_strServiceId.GetStr(),
-            MsgToString(objMSG.nMSG), 0);
+    A_IMS_TRACE_I(APPPROFILE, "StateConnected :: (%s)", MsgToString(objMSG.nMSG), 0, 0);
 
     m_bNotify = IMS_FALSE;
 
@@ -1852,7 +1839,8 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
             IMS_UINT32 nState = LONG_TO_INT(objMSG.nWparam);
             SetReason(LONG_TO_INT(objMSG.nLparam));
 
-            IMS_TRACE_I("HANDLE_MSG_APP_STATUS :: State(%d) , m_nReason(%d)", nState, m_nReason, 0);
+            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d) , m_nReason(%d)", nState,
+                    m_nReason, 0);
 
             switch (nState)
             {
@@ -1902,8 +1890,7 @@ Remarks
 */
 PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
 {
-    A_IMS_TRACE_I(APPPROFILE, "[%s] StateDisconnecting :: (%s)", m_strServiceId.GetStr(),
-            MsgToString(objMSG.nMSG), 0);
+    A_IMS_TRACE_I(APPPROFILE, "StateDisconnecting :: (%s)", MsgToString(objMSG.nMSG), 0, 0);
 
     m_bNotify = IMS_FALSE;
 
@@ -1931,7 +1918,8 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
             IMS_UINT32 nState = LONG_TO_INT(objMSG.nWparam);
             SetReason(LONG_TO_INT(objMSG.nLparam));
 
-            IMS_TRACE_I("HANDLE_MSG_APP_STATUS :: State(%d) , m_nReason(%d)", nState, m_nReason, 0);
+            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d) , m_nReason(%d)", nState,
+                    m_nReason, 0);
 
             switch (nState)
             {
@@ -2399,25 +2387,21 @@ const IMS_CHAR* AosHandle::ServiceTypeToString()
 {
     switch (m_nServiceType)
     {
-        case ImsAosService::MTC:
-            return "SERVICE_MTC";
-
-        case ImsAosService::MTS:
-            return "SERVICE_MTS";
-
+        case ImsAosService::MTC:  // FALL-THROUGH
         case ImsAosService::EMERGENCY_MTC:
-            return "SERVICE_EMERGENCY_MTC";
+            return "mtc";
 
+        case ImsAosService::MTS:  // FALL-THROUGH
         case ImsAosService::EMERGENCY_MTS:
-            return "SERVICE_EMERGENCY_MTS";
+            return "mts";
 
         case ImsAosService::UCE:
-            return "SERVICE_UCE";
+            return "uce";
 
         case ImsAosService::SIP_CONTROLLER:
-            return "SERVICE_SIP_CONTROLLER";
+            return "sip_controller";
 
         default:
-            return "__INVALID__";
+            return "invalid";
     }
 }
