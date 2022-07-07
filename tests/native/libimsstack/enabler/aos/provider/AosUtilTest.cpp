@@ -44,10 +44,7 @@ public:
     {
         FEATURE_NONE = 0x0,
         FEATURE_SUBSCRIPTION = 0x01,
-        FEATURE_IPSEC = 0x02,
-        FEATURE_TRM = 0x04,
-        FEATURE_TRM_BLOCK = 0x08,
-        FEATURE_VONR = 0x10
+        FEATURE_IPSEC = 0x02
     };
 
 protected:
@@ -341,7 +338,6 @@ TEST_F(AosUtilTest, CheckFeature)
     EXPECT_FALSE(pAosUtil->IsFeatureOn(FEATURE_IPSEC, nFeatures));
     EXPECT_FALSE(pAosUtil->IsFeatureCleared(nFeatures));
 
-    pAosUtil->AddFeature(FEATURE_VONR, nFeatures);
     pAosUtil->ClearFeature(nFeatures);
     EXPECT_TRUE(pAosUtil->IsFeatureCleared(nFeatures));
 }

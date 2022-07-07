@@ -21,7 +21,6 @@
 
 #include "interface/IAosAppContext.h"
 #include "interface/IAosConnectionListener.h"
-#include "interface/IAosTrm.h"
 
 #include "provider/AosProvider.h"
 #include "connection/AosConnection.h"
@@ -414,36 +413,7 @@ Remarks
 
 */
 PROTECTED
-void AosConnection::UpdateIpcanForTrm()
-{
-    if (m_nCnxType != NetworkPolicy::APN_IMS)
-    {
-        return;
-    }
-
-    static IMS_BOOL bIsUpdated = IMS_FALSE;
-    static IMS_BOOL bIsTrmSupported = IMS_FALSE;
-
-    if (!bIsUpdated)
-    {
-        ITrm* piPhoneTRM = PhoneInfoService::GetPhoneInfoService()->GetTrm();
-        if (piPhoneTRM != IMS_NULL)
-        {
-            bIsTrmSupported = piPhoneTRM->IsTrmSupported();
-        }
-
-        bIsUpdated = IMS_TRUE;
-    }
-
-    if (bIsTrmSupported)
-    {
-        IAosTrm* piTrm = AosProvider::GetInstance()->GetTrm(m_nSlotId);
-        if (piTrm != IMS_NULL)
-        {
-            piTrm->SetIPCAN(static_cast<IMS_UINT32>(GetIpcanCategory()));
-        }
-    }
-}
+void AosConnection::UpdateIpcanForTrm() {}
 
 /*
 

@@ -17,10 +17,8 @@
 #include "ServiceEvent.h"
 #include "ServiceTimer.h"
 #include "ServiceUtil.h"
-#include "ServiceVoNr.h"
 #include "IIpcan.h"
 #include "INetworkWatcher.h"
-#include "IVoNr.h"
 #include "CarrierConfig.h"
 #include "AoSAppRequestType.h"
 #include "IImsAosMonitor.h"
@@ -126,8 +124,7 @@ AosApplication::AosApplication(IN IAosAppContext* piAppContext, IN AString& strA
         m_bRegRecoveryHeld(IMS_FALSE),
         m_bIsImsCall(IMS_FALSE),
         m_bIsPublished(IMS_FALSE),
-        m_bIsActivated(IMS_TRUE),
-        m_bIsVonrSupported(IMS_FALSE)
+        m_bIsActivated(IMS_TRUE)
 {
     m_strTag.Sprintf("%d:%s", m_nSlotId, strAppId.GetStr());
 
@@ -459,12 +456,6 @@ PROTECTED
 IMS_BOOL AosApplication::IsRegTypeNormal() const
 {
     return (m_eRegType == AosRegistrationType::NORMAL);
-}
-
-PROTECTED
-IMS_BOOL AosApplication::IsVonrSupported() const
-{
-    return m_bIsVonrSupported;
 }
 
 PROTECTED
@@ -2708,10 +2699,6 @@ PROTECTED VIRTUAL void AosApplication::Init()
     piNConfig->SetListener(this);
     A_IMS_TRACE_D(APPID, "Init", 0, 0, 0);
 
-    IVoNr* piServiceVonr = VoNrService::GetVoNrService()->GetVoNr(m_nSlotId);
-
-    m_bIsVonrSupported =
-            (piServiceVonr != IMS_NULL && piServiceVonr->IsVoNrSupported()) ? IMS_TRUE : IMS_FALSE;
     m_piRegistration = m_piContext->GetRegistration();
     m_piRegistration->SetListener(this);
     SetAppType(m_piRegistration->GetRegType());

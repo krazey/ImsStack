@@ -19,12 +19,10 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
-#include "ServiceVoNr.h"
 
 #include "IIpcan.h"
 #include "ISipConfig.h"
 #include "ISubscriberConfig.h"
-#include "IVoNr.h"
 
 #include "CarrierConfig.h"
 
@@ -69,9 +67,7 @@
 #include "provider/AosStaticProfile.h"
 #include "provider/AosRetryRepository.h"
 #include "provider/AosString.h"
-#include "provider/AosTrm.h"
 #include "provider/AosUtil.h"
-#include "provider/AosVonr.h"
 #include "registration/AosRegistration.h"
 #include "registration/AosIpsecHelper.h"
 #include "registration/AosSubscription.h"
@@ -96,15 +92,12 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_bIsIpsecInit(IMS_FALSE),
         m_pKeepAlive(IMS_NULL),
         m_pUtil(IMS_NULL),
-        m_piTrm(IMS_NULL),
-        m_piVonr(IMS_NULL),
         m_nFeature(FEATURE_NONE),
         m_nState(STATE_OFFLINE),
         m_nTxnPending(PENDING_NONE),
         m_bIsTransactionStarted(IMS_TRUE),
         m_bIsImsCall(IMS_FALSE),
         m_bIsBlocked(IMS_FALSE),
-        m_bIsTrmBlocked(IMS_FALSE),
         m_bIsHeldByCall(IMS_FALSE),
         m_bIsAppReady(IMS_FALSE),
         m_strRegId(strRegId),
@@ -196,9 +189,9 @@ PUBLIC VIRTUAL void AosRegistration::Start()
 
     StopTimer(TIMER_OFFLINE_RECOVER);
 
-    if (!CheckTrmReadyAndSetTxnPending())
+    if (!CheckRadioReadyAndSetTxnPending())
     {
-        A_IMS_TRACE_I(REGID, "Start :: txn is pending due to TRM", 0, 0, 0);
+        A_IMS_TRACE_I(REGID, "Start :: txn is pending due to radio", 0, 0, 0);
         return;
     }
 
@@ -576,27 +569,6 @@ void AosRegistration::SetState(IN IMS_UINT32 nState)
         UpdateReason();
         UpdateDetailState(m_nState);
     }
-
-    if (m_pUtil->IsFeatureOn(FEATURE_TRM, m_nFeature))
-    {
-        if (IsRegTypeEqual(AosRegistrationType::NORMAL))
-        {
-            m_piTrm->Set(IAosTrm::TYPE_REG, IsRegTrying());
-        }
-        else if (IsRegTypeEqual(AosRegistrationType::EMERGENCY))
-        {
-            IAosTrm* piAosTrm = AosProvider::GetInstance()->GetTrm(m_nSlotId);
-            if (piAosTrm != IMS_NULL)
-            {
-                piAosTrm->SetEmegency(IAosTrm::TYPE_REG, IsRegTrying());
-            }
-        }
-    }
-
-    if (m_pUtil->IsFeatureOn(FEATURE_VONR, m_nFeature) && m_piVonr != IMS_NULL)
-    {
-        m_piVonr->Set(IAosVonr::MODULE_REG, IsRegTrying());
-    }
 }
 
 PROTECTED
@@ -632,13 +604,6 @@ void AosRegistration::SetBlocked(IN IMS_BOOL bBlocked)
 {
     A_IMS_TRACE_I(REGID, "SetBlocked :: (%s)", (bBlocked) ? "BLOCK" : "NOT BLOCK", 0, 0);
     m_bIsBlocked = bBlocked;
-}
-
-PROTECTED
-void AosRegistration::SetTrmBlocked(IN IMS_BOOL bTrmBlocked)
-{
-    A_IMS_TRACE_I(REGID, "SetTrmBlocked :: (%s)", (bTrmBlocked) ? "BLOCK" : "NOT BLOCK", 0, 0);
-    m_bIsTrmBlocked = bTrmBlocked;
 }
 
 PROTECTED
@@ -722,12 +687,6 @@ PROTECTED
 IMS_BOOL AosRegistration::IsBlocked() const
 {
     return m_bIsBlocked;
-}
-
-PROTECTED
-IMS_BOOL AosRegistration::IsTrmBlocked() const
-{
-    return m_bIsTrmBlocked;
 }
 
 PROTECTED
@@ -863,21 +822,6 @@ AString AosRegistration::FeatureToString()
     if (m_nFeature & FEATURE_IPSEC)
     {
         strFeature += "FEATURE_IPSEC | ";
-    }
-
-    if (m_nFeature & FEATURE_TRM)
-    {
-        strFeature += "FEATURE_TRM | ";
-    }
-
-    if (m_nFeature & FEATURE_TRM_BLOCK)
-    {
-        strFeature += "FEATURE_TRM_BLOCK | ";
-    }
-
-    if (m_nFeature & FEATURE_VONR)
-    {
-        strFeature += "FEATURE_VONR | ";
     }
 
     return strFeature;
@@ -1061,19 +1005,6 @@ PROTECTED VIRTUAL void AosRegistration::Init()
             piCt->SetListener(this);
         }
     }
-
-    if (m_pUtil->IsFeatureOn(FEATURE_TRM_BLOCK, m_nFeature))
-    {
-        m_piTrm = new AosTrm(m_nSlotId);
-        AosProvider::GetInstance()->SetTrm(m_piTrm, m_nSlotId);
-        m_piTrm->SetListener(this);
-    }
-
-    if (m_pUtil->IsFeatureOn(FEATURE_VONR, m_nFeature))
-    {
-        m_piVonr = new AosVonr(m_piContext);
-        AosProvider::GetInstance()->SetVonr(m_piVonr, m_nSlotId);
-    }
 }
 
 PROTECTED VIRTUAL void AosRegistration::InitFeatures()
@@ -1092,26 +1023,6 @@ PROTECTED VIRTUAL void AosRegistration::InitFeatures()
         m_pUtil->AddFeature(FEATURE_IPSEC, m_nFeature);
     }
 
-    ITrm* piPhoneTrm = PhoneInfoService::GetPhoneInfoService()->GetTrm();
-    if (piPhoneTrm != IMS_NULL && piPhoneTrm->IsTrmSupported())
-    {
-        m_pUtil->AddFeature(FEATURE_TRM, m_nFeature);
-
-        if (IsRegTypeEqual(AosRegistrationType::NORMAL))
-        {
-            m_pUtil->AddFeature(FEATURE_TRM_BLOCK, m_nFeature);
-        }
-    }
-
-    if (IsRegTypeEqual(AosRegistrationType::NORMAL))
-    {
-        IVoNr* piServiceVonr = VoNrService::GetVoNrService()->GetVoNr(m_nSlotId);
-        if (piServiceVonr != IMS_NULL && piServiceVonr->IsVoNrSupported())
-        {
-            m_pUtil->AddFeature(FEATURE_VONR, m_nFeature);
-        }
-    }
-
     A_IMS_TRACE_I(REGID, "InitFeature :: features (%s)", FeatureToString().GetStr(), 0, 0);
 }
 
@@ -1122,19 +1033,6 @@ PROTECTED VIRTUAL void AosRegistration::CleanUp()
     Destroy();
 
     StopTimer(TIMER_OFFLINE_RECOVER);
-
-    if (m_piVonr != IMS_NULL)
-    {
-        AosProvider::GetInstance()->SetVonr(IMS_NULL, m_nSlotId);
-        delete DYNAMIC_CAST(AosVonr*, m_piVonr);
-    }
-
-    if (m_piTrm != IMS_NULL)
-    {
-        m_piTrm->RemoveListener(this);
-        AosProvider::GetInstance()->SetTrm(IMS_NULL, m_nSlotId);
-        delete DYNAMIC_CAST(AosTrm*, m_piTrm);
-    }
 
     IAosCallTracker* piCt = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCt != IMS_NULL)
@@ -2310,7 +2208,7 @@ PROTECTED VIRTUAL void AosRegistration::UpdateTransactionStarted()
     }
     else
     {
-        m_bIsTransactionStarted = !(IsBlocked() || IsHeldByCall() || IsTrmBlocked());
+        m_bIsTransactionStarted = !(IsBlocked() || IsHeldByCall());
     }
 
     A_IMS_TRACE_I(REGID, "UpdateTransactionStarted :: (%s)",
@@ -2570,19 +2468,8 @@ PROTECTED VIRTUAL void AosRegistration::CheckPending()
     }
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosRegistration::CheckTrmReadyAndSetTxnPending()
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::CheckRadioReadyAndSetTxnPending()
 {
-    if (m_pUtil->IsFeatureOn(FEATURE_TRM_BLOCK, m_nFeature))
-    {
-        if (!m_piTrm->IsReady())
-        {
-            SetTrmBlocked(IMS_TRUE);
-            UpdateTransactionStarted();
-            m_pUtil->AddFeature(PENDING_TRANSACTION, m_nTxnPending);
-            return IMS_FALSE;
-        }
-    }
-
     return IMS_TRUE;
 }
 
@@ -2748,9 +2635,9 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRetryInRegStopped(
 
     ClearRetryTimers();
 
-    if (!CheckTrmReadyAndSetTxnPending())
+    if (!CheckRadioReadyAndSetTxnPending())
     {
-        A_IMS_TRACE_I(REGID, "ProcessRetryInRegStopped :: txn is pending due to TRM", 0, 0, 0);
+        A_IMS_TRACE_I(REGID, "ProcessRetryInRegStopped :: txn is pending due to radio", 0, 0, 0);
         return;
     }
 
@@ -2771,9 +2658,9 @@ PROTECTED VIRTUAL void AosRegistration::ProcessReregister()
         return;
     }
 
-    if (!CheckTrmReadyAndSetTxnPending())
+    if (!CheckRadioReadyAndSetTxnPending())
     {
-        A_IMS_TRACE_I(REGID, "ProcessReregister :: txn is pending due to TRM", 0, 0, 0);
+        A_IMS_TRACE_I(REGID, "ProcessReregister :: txn is pending due to radio", 0, 0, 0);
         SetState(STATE_REFRESHSTOP);
         return;
     }
@@ -4122,7 +4009,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_RefreshTimerExpired(
         return;
     }
 
-    CheckTrmReadyAndSetTxnPending();
+    CheckRadioReadyAndSetTxnPending();
 
     if (!IsTransactionStarted())
     {
@@ -4402,7 +4289,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessOfflineRecoverTimerExpired()
         UpdateTransactionStarted();
     }
 
-    CheckTrmReadyAndSetTxnPending();
+    CheckRadioReadyAndSetTxnPending();
 
     if (IsTransactionStarted())
     {
@@ -4439,7 +4326,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStopRetryTimerExpired()
         UpdateTransactionStarted();
     }
 
-    CheckTrmReadyAndSetTxnPending();
+    CheckRadioReadyAndSetTxnPending();
 
     if (IsTransactionStarted())
     {
@@ -4752,17 +4639,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::StartSubscription()
         return IMS_FALSE;
     }
 
-    if (m_pUtil->IsFeatureOn(FEATURE_TRM_BLOCK, m_nFeature))
-    {
-        if (!m_piTrm->IsReady())
-        {
-            A_IMS_TRACE_I(REGID, "StartSubscription :: txn is pending due to TRM", 0, 0, 0);
-            SetTrmBlocked(IMS_TRUE);
-            m_pUtil->AddFeature(PENDING_SUBSCRIPTION, m_nTxnPending);
-            return IMS_FALSE;
-        }
-    }
-
     A_IMS_TRACE_I(REGID, "StartSubscription", 0, 0, 0);
 
     m_pSubscription->Start();
@@ -5048,23 +4924,6 @@ PROTECTED VIRTUAL void AosRegistration::NConfiguration_NotifyConfigChanged()
         {
             SetIsIpsecSupported(IMS_TRUE);
             m_pUtil->AddFeature(FEATURE_IPSEC, m_nFeature);
-        }
-    }
-}
-
-PROTECTED VIRTUAL void AosRegistration::Trm_PriorityChanged()
-{
-    if (IsTrmBlocked())
-    {
-        if (m_piTrm->IsReady())
-        {
-            SetTrmBlocked(IMS_FALSE);
-            UpdateTransactionStarted();
-
-            if (IsTransactionStarted())
-            {
-                ProcessPendingTransaction();
-            }
         }
     }
 }

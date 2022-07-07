@@ -31,8 +31,6 @@
 #include "interface/IAosNetTrackerListener.h"
 #include "interface/IAosRegistration.h"
 #include "interface/IAosSubscriptionListener.h"
-#include "interface/IAosTrm.h"
-#include "interface/IAosVonr.h"
 
 #include "provider/AosKeepAlive.h"
 #include "provider/AosUtil.h"
@@ -64,7 +62,6 @@ class AosRegistration :
         public IAosCallTrackerListener,
         public IAosNConfigurationListener,
         public IAosNetTrackerListener,
-        public IAosTrmListener,
         public ITimerListener,
         public IAosKeepAliveListener,
         public IMessageMediator
@@ -107,7 +104,6 @@ protected:
     void SetIsIpsecSupported(IN IMS_BOOL bSupported);
     void SetIsIpsecInit(IN IMS_BOOL bInit);
     void SetBlocked(IN IMS_BOOL bBlocked);
-    void SetTrmBlocked(IN IMS_BOOL bTrmBlocked);
     void SetHeldByCall(IN IMS_BOOL bHeld);
     void SetImsCall(IN IMS_BOOL bStarted);
     void SetRetryTime();
@@ -122,7 +118,6 @@ protected:
     IMS_BOOL IsAuthChallengeMoreAllowed();
     IMS_BOOL IsTransactionStarted() const;
     IMS_BOOL IsBlocked() const;
-    IMS_BOOL IsTrmBlocked() const;
     IMS_BOOL IsHeldByCall() const;
     IMS_BOOL IsImsCall() const;
     IMS_BOOL IsAppReady() const;
@@ -236,7 +231,7 @@ protected:
     virtual void ReportRegState();
 
     virtual void CheckPending();
-    virtual IMS_BOOL CheckTrmReadyAndSetTxnPending();
+    virtual IMS_BOOL CheckRadioReadyAndSetTxnPending();
     virtual void ProcessSetIpsec(IN IMS_UINT32 nReason);
     virtual void ProcessRefreshRegInfo();
     virtual void ProcessIpcanChanged();
@@ -368,9 +363,6 @@ protected:
     /// IAosNetTrackerListener
     virtual void NetTracker_StatusChanged(){};
 
-    /// IAosTrmListener
-    virtual void Trm_PriorityChanged();
-
     virtual IMS_RESULT MessageMediator_AdjustMessage(
             IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL);
 
@@ -428,10 +420,7 @@ protected:
     {
         FEATURE_NONE = 0x0,
         FEATURE_SUBSCRIPTION = 0x01,
-        FEATURE_IPSEC = 0x02,
-        FEATURE_TRM = 0x04,
-        FEATURE_TRM_BLOCK = 0x08,
-        FEATURE_VONR = 0x10
+        FEATURE_IPSEC = 0x02
     };
 
     enum
@@ -479,12 +468,6 @@ protected:
     /// object
     AosUtil* m_pUtil;
 
-    // Trm
-    IAosTrm* m_piTrm;
-
-    /// Vonr
-    IAosVonr* m_piVonr;
-
     /// feature
     IMS_UINT32 m_nFeature;
 
@@ -496,7 +479,6 @@ protected:
     IMS_BOOL m_bIsTransactionStarted;
     IMS_BOOL m_bIsImsCall;
     IMS_BOOL m_bIsBlocked;
-    IMS_BOOL m_bIsTrmBlocked;
     IMS_BOOL m_bIsHeldByCall;
     IMS_BOOL m_bIsAppReady;
 

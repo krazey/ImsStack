@@ -24,15 +24,11 @@
 #include "interface/MockIAosRetryRepository.h"
 #include "interface/MockIAosService.h"
 #include "interface/MockIAosSubscriptionListener.h"
-#include "interface/MockIAosTrm.h"
-#include "interface/MockIAosVonr.h"
 #include "../../../engine/interface/registration/MockIRegInfo.h"
 #include "../../../engine/interface/registration/MockIRegInfoContact.h"
 #include "../../../engine/interface/registration/MockIRegInfoRegistration.h"
 #include "../../../engine/interface/registration/MockIRegSubscription.h"
 #include "../../../engine/interface/sipcore/MockISipMessage.h"
-#include "../../../platform/interface/MockITrm.h"
-#include "../../../platform/interface/MockIVoNr.h"
 
 #include "IRegContact.h"
 #include "IRegSubscription.h"
@@ -72,12 +68,6 @@ public:
 
     IAosService* pOriginAosService;
     MockIAosService objMockAosService;
-
-    IAosTrm* pOriginAosTrm;
-    MockIAosTrm objMockAosTrm;
-
-    IAosVonr* pOriginAosVonr;
-    MockIAosVonr objMockAosVonr;
 
     IAosRetryRepository* pOriginAosRetryRepository;
     MockIAosRetryRepository objMockAosRetryRepository;
@@ -125,12 +115,6 @@ protected:
         AosProvider::GetInstance()->SetService(
                 static_cast<IAosService*>(&objMockAosService), SLOT_ID);
 
-        pOriginAosTrm = AosProvider::GetInstance()->GetTrm(SLOT_ID);
-        AosProvider::GetInstance()->SetTrm(static_cast<IAosTrm*>(&objMockAosTrm), SLOT_ID);
-
-        pOriginAosVonr = AosProvider::GetInstance()->GetVonr(SLOT_ID);
-        AosProvider::GetInstance()->SetVonr(static_cast<IAosVonr*>(&objMockAosVonr), SLOT_ID);
-
         pOriginAosRetryRepository = AosProvider::GetInstance()->GetRetryRepository(SLOT_ID);
         AosProvider::GetInstance()->SetRetryRepository(
                 static_cast<IAosRetryRepository*>(&objMockAosRetryRepository), SLOT_ID);
@@ -140,8 +124,6 @@ protected:
     {
         AosProvider::GetInstance()->SetNConfiguration(pOriginAosNConfiguration, SLOT_ID);
         AosProvider::GetInstance()->SetService(pOriginAosService, SLOT_ID);
-        AosProvider::GetInstance()->SetTrm(pOriginAosTrm, SLOT_ID);
-        AosProvider::GetInstance()->SetVonr(pOriginAosVonr, SLOT_ID);
         AosProvider::GetInstance()->SetRetryRepository(pOriginAosRetryRepository, SLOT_ID);
 
         if (pAor)
@@ -199,17 +181,6 @@ protected:
     }
 
     IMS_SINT32 GetAorState() { return pAosSubscription->m_nAorState; }
-
-    void SetPhonInfoService(IN ITrm* piTrm) { pAosSubscription->m_piPhoneTrm = piTrm; }
-
-    void SetVonrService(IN IVoNr* piVonr) { pAosSubscription->m_piServiceVonr = piVonr; }
-
-    void SetTrmSupported(IN IMS_BOOL bIsTrmSupported)
-    {
-        pAosSubscription->m_bIsTrmSupported = bIsTrmSupported;
-    }
-
-    void SetVonrSupported(IN IAosVonr* piVonr) { pAosSubscription->m_piVonr = piVonr; }
 
     IAosSubscriptionListener* GetAosSubscriptionListener()
     {
@@ -269,46 +240,7 @@ protected:
     }
 };
 
-TEST_F(AosSubscriptionTest, Initialize)
-{
-    SetPhonInfoService(IMS_NULL);
-    SetVonrService(IMS_NULL);
-
-    EXPECT_CALL(objMockIRegSubscription, SetRefreshPolicy(0, 1200, 50, 600)).Times(3);
-    EXPECT_CALL(objMockIRegSubscription, SetListener(pAosSubscription)).Times(3);
-
-    pAosSubscription->Initialize();
-    EXPECT_EQ(GetAosSubscriptionListener(),
-            static_cast<IAosSubscriptionListener*>(&objMockIAosSubscriptionListener));
-    EXPECT_FALSE(pAosSubscription->IsTrmSupported());
-    EXPECT_FALSE(pAosSubscription->IsVonrSupported());
-
-    MockITrm objMockTrm;
-    SetPhonInfoService(&objMockTrm);
-    EXPECT_CALL(objMockTrm, IsTrmSupported()).Times(2).WillRepeatedly(Return(IMS_TRUE));
-
-    MockIVoNr objMockVonr;
-    SetVonrService(&objMockVonr);
-    EXPECT_CALL(objMockVonr, IsVoNrSupported()).Times(2).WillRepeatedly(Return(IMS_TRUE));
-
-    MockIAosRegistration objAosRegistration;
-    EXPECT_CALL(*pMockAosAppContext, GetRegistration())
-            .Times(2)
-            .WillRepeatedly(Return(&objAosRegistration));
-
-    // AosRegistrationType::NORMAL = 0;
-    EXPECT_CALL(objAosRegistration, GetRegType())
-            .WillOnce(Return(AosRegistrationType::NORMAL))
-            .WillOnce(Return(AosRegistrationType::EMERGENCY));
-
-    pAosSubscription->Initialize();
-    EXPECT_TRUE(pAosSubscription->IsTrmSupported());
-    EXPECT_TRUE(pAosSubscription->IsVonrSupported());
-
-    pAosSubscription->Initialize();
-    EXPECT_TRUE(pAosSubscription->IsTrmSupported());
-    EXPECT_FALSE(pAosSubscription->IsVonrSupported());
-}
+TEST_F(AosSubscriptionTest, Initialize) {}
 
 TEST_F(AosSubscriptionTest, Stop)
 {
@@ -320,10 +252,6 @@ TEST_F(AosSubscriptionTest, Stop)
     pAosSubscription->Stop();
 
     EXPECT_CALL(objMockIRegSubscription, Unsubscribe()).Times(1);
-    SetTrmSupported(IMS_TRUE);
-    SetVonrSupported(static_cast<IAosVonr*>(&objMockAosVonr));
-
-    EXPECT_CALL(objMockAosVonr, Set(IAosVonr::MODULE_SUB, IMS_FALSE)).Times(1);
 
     pAosSubscription->Stop();
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_UNSUBSCRIBING);
@@ -1061,8 +989,6 @@ TEST_F(AosSubscriptionTest, RegSubscription_RefreshTimerExpired)
 
 TEST_F(AosSubscriptionTest, CheckRegSubscriptionStarted)
 {
-    SetVonrService(IMS_NULL);
-    SetTrmSupported(IMS_FALSE);
     EXPECT_CALL(objMockIAosSubscriptionListener,
             Subscription_StateChanged(
                     AosSubscription::STATE_SUBSCRIBED, AosSubscription::REASON_SUB_ESTABLISHED))
@@ -1081,9 +1007,6 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdated)
     EXPECT_CALL(objMockAosConfig, GetRegistrationRetryMaxTime()).Times(1).WillOnce(Return(1800));
 
     pAosSubscription->SetRetryTimer(IMS_FALSE);
-
-    SetVonrService(IMS_NULL);
-    SetTrmSupported(IMS_FALSE);
 
     EXPECT_CALL(objMockIAosSubscriptionListener,
             Subscription_StateChanged(

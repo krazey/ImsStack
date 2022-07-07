@@ -26,8 +26,6 @@
 #include "interface/IAosRetryRepository.h"
 #include "interface/IAosService.h"
 #include "interface/IAosSubscriberManager.h"
-#include "interface/IAosTrm.h"
-#include "interface/IAosVonr.h"
 #include "provider/AosDnsQuery.h"
 #include "provider/AosKeepAlive.h"
 #include "provider/AosLog.h"
@@ -40,8 +38,6 @@
 #include "interface/MockIAosRetryRepository.h"
 #include "interface/MockIAosService.h"
 #include "interface/MockIAosSubscriberManager.h"
-#include "interface/MockIAosTrm.h"
-#include "interface/MockIAosVonr.h"
 
 using ::testing::TypedEq;
 
@@ -158,28 +154,6 @@ TEST_F(AosProviderTest, SetSubscriberManager)
 
     EXPECT_TRUE(piAosSubscriberManager != nullptr);
     EXPECT_THAT(piAosSubscriberManager, TypedEq<IAosSubscriberManager*>(piAosSubscriberManager));
-}
-
-TEST_F(AosProviderTest, SetTrm)
-{
-    MockIAosTrm objMockIAosTrm;
-    m_pAosProvider->SetTrm(static_cast<IAosTrm*>(&objMockIAosTrm));
-
-    IAosTrm* piAosTrm = m_pAosProvider->GetTrm();
-
-    EXPECT_TRUE(piAosTrm != nullptr);
-    EXPECT_THAT(piAosTrm, TypedEq<IAosTrm*>(piAosTrm));
-}
-
-TEST_F(AosProviderTest, SetVonr)
-{
-    MockIAosVonr objMockIAosVonr;
-    m_pAosProvider->SetVonr(static_cast<IAosVonr*>(&objMockIAosVonr));
-
-    IAosVonr* piAosVonr = m_pAosProvider->GetVonr();
-
-    EXPECT_TRUE(piAosVonr != nullptr);
-    EXPECT_THAT(piAosVonr, TypedEq<IAosVonr*>(piAosVonr));
 }
 
 TEST_F(AosProviderTest, SetRetryRepository)
