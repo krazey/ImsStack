@@ -205,9 +205,10 @@ void ExpandController::ProcessExpand(IN IMSList<ConfUser*>& objUsers)
 
     if (nReferType == REFER_INVITE_SINGLE)  // SKT
     {
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
+        m_objOperationQueue.CreateNPutWithUsers(
+                CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_REFER_INVITE,
+        m_objOperationQueue.CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE,
                 m_objParticipantList.GetConfUsers().GetAt(nStartIndex));
 
         // Terminate the exist 1-to-1 session : it is triggered by GII operation.
@@ -215,7 +216,7 @@ void ExpandController::ProcessExpand(IN IMSList<ConfUser*>& objUsers)
     }
     else if (nReferType == REFER_INVITE_MULTIPLE)  // LGU+
     {
-        m_objOperationQueue.CreateNPut(
+        m_objOperationQueue.CreateNPutWithUsers(
                 CONTROL_OPERATION_REFER_INVITE, m_objParticipantList.GetConfUsers());
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
     }
@@ -413,7 +414,7 @@ void ExpandController::ProcessJoinAfterExpand()
     {
         ConfUser* pConfUser = m_objParticipantList.GetConfUsers().GetAt(i);
         IMS_TRACE_D("ProcessJoinAfterExpand : user [%s]", pConfUser->strTarget.GetStr(), 0, 0);
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_REFER_INVITE, pConfUser);
+        m_objOperationQueue.CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE, pConfUser);
     }
 
     m_objOperationQueue.SetAddingOperationSetCompleted();

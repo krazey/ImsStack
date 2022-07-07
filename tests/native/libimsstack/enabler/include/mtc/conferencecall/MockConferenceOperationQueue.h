@@ -36,20 +36,20 @@ public:
     MOCK_METHOD(void, AddDelay, (IN IMS_UINT32 nDelayMillisec), ());
     MOCK_METHOD(
             void, CreateNPut, (IN IMS_UINT32 nType, IN IMS_BOOL bStandAloneOperation), (override));
-    MOCK_METHOD(void, CreateNPut,
+    MOCK_METHOD(void, CreateNPutWithUsers,
             (IN IMS_UINT32 nType, IN IMSList<ConfUser*> objUsers, IN IMS_BOOL bStandAloneOperation),
             (override));
-    MOCK_METHOD(void, CreateNPut,
+    MOCK_METHOD(void, CreateNPutWithUser,
             (IN IMS_UINT32 nType, IN ConfUser* pConfUser, IN IMS_BOOL bStandAloneOperation),
             (override));
-    MOCK_METHOD(void, CreateNPut,
+    MOCK_METHOD(void, CreateNPutWithStartParam,
             (IN IMS_UINT32 nType, IN CallStartOperationParams* pParams,
                     IN IMS_BOOL bStandAloneOperation),
             (override));
-    MOCK_METHOD(void, CreateNPut,
+    MOCK_METHOD(void, CreateNPutWithId,
             (IN IMS_UINT32 nType, IN IMS_UINT32 nConnectionId, IN IMS_BOOL bStandAloneOperation),
             (override));
-    MOCK_METHOD(void, CreateNPut,
+    MOCK_METHOD(void, CreateNPutWithReason,
             (IN IMS_UINT32 nType, IN IMS_SINT32 nTerminateReason, IN IMS_BOOL bStandAloneOperation),
             (override));
     MOCK_METHOD(void, SetAddingOperationSetCompleted, (), ());

@@ -129,7 +129,7 @@ PUBLIC VIRTUAL void ConferenceController::OnSubscriptionUpdated(IN SubscriptionU
             break;
         case SubscriptionUpdateType::TERMINATED:
             CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_UNSUBSCRIBE);  // to stop timer
-            m_objOperationQueue.CreateNPut(
+            m_objOperationQueue.CreateNPutWithReason(
                     CONTROL_OPERATION_TERMINATE_CONFERENCE, CODE_UNSPECIFIED, IMS_TRUE);
             break;
         case SubscriptionUpdateType::NOTIFY_RECEIVED:
@@ -140,7 +140,7 @@ PUBLIC VIRTUAL void ConferenceController::OnSubscriptionUpdated(IN SubscriptionU
             else if (m_objParticipantList.GetConnectedParticipantSize(IMS_TRUE) == 0)
             {
                 IMS_TRACE_D("OnSubscriptionUpdated terminate conference by alone", 0, 0, 0);
-                m_objOperationQueue.CreateNPut(
+                m_objOperationQueue.CreateNPutWithReason(
                         CONTROL_OPERATION_TERMINATE_CONFERENCE, CODE_USER_TERMINATED, IMS_TRUE);
             }
 
@@ -320,8 +320,7 @@ PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConferen
     }
 
     IMtcCall* piConfCall = GetConferenceCall();
-    if (/*piConfCall->GetState() == State::TERMINATING ||*/
-            piConfCall->GetKey() == -1)
+    if (piConfCall->GetKey() == -1)
     {
         IMS_TRACE_D("GetCallStatusInConference - Destroyed Host call", 0, 0, 0);
         return IndividualCallState::IDLE;
@@ -399,7 +398,7 @@ PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN IMSList<ConfUser*>& 
     {
         for (IMS_UINT32 i = nStartIndex; i < m_objParticipantList.GetSize(); i++)
         {
-            m_objOperationQueue.CreateNPut(
+            m_objOperationQueue.CreateNPutWithUser(
                     CONTROL_OPERATION_REFER_INVITE, m_objParticipantList.GetConfUsers().GetAt(i));
         }
     }
@@ -410,7 +409,7 @@ PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN IMSList<ConfUser*>& 
         {
             objJoinList.Append(m_objParticipantList.GetConfUsers().GetAt(i));
         }
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_REFER_INVITE, objJoinList);
+        m_objOperationQueue.CreateNPutWithUsers(CONTROL_OPERATION_REFER_INVITE, objJoinList);
     }
 
     if (ConferenceConfigurationWrapper::IsReferSubscriptionRequired() == IMS_FALSE)
@@ -443,7 +442,7 @@ PROTECTED VIRTUAL void ConferenceController::ProcessDrop(IN IMSList<ConfUser*>& 
 
     SetState(STATE_DROPPING);
 
-    m_objOperationQueue.CreateNPut(CONTROL_OPERATION_REFER_BYE,
+    m_objOperationQueue.CreateNPutWithUser(CONTROL_OPERATION_REFER_BYE,
             m_objParticipantList.GetConfUsers().GetAt((IMS_UINT32)nIndex));
     m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
     m_objOperationQueue.SetAddingOperationSetCompleted();
