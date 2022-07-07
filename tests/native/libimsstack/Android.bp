@@ -55,6 +55,7 @@ cc_test {
         "enabler/include/aos",
         "enabler/include/mtc",
         "engine/interface",
+        "platform/interface",
     ],
     header_libs: [
         "libimsstack_config_headers",

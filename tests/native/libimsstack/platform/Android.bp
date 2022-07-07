@@ -12,6 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Do not add additional include paths with three depths.
+cc_library_headers {
+    name: "libimsstack_test_platform_headers",
+    export_include_dirs: [
+        "interface",
+    ],
+}
+
 cc_test {
     name: "ImsStackNativePlatformTests",
     defaults: [
