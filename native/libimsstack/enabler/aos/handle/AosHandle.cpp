@@ -97,6 +97,7 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
         m_piListener(IMS_NULL),
         m_piMonitor(IMS_NULL),
         m_piInfo(IMS_NULL),
+        m_piWifiWatcher(IMS_NULL),
         m_nReason(AoSReason::NONE),
         m_nSuspendedReason(AoSReason::SUSPEND_NONE),
         m_bBlocked(IMS_FALSE),
@@ -685,6 +686,7 @@ PROTECTED VIRTUAL void AosHandle::Init()
     }
 
     m_piInfo = new AosInfo(m_piAppContext);
+    m_piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
 
     InitializeServiceBlock();
     InitializeServiceFeature();
@@ -979,9 +981,7 @@ Remarks
 PROTECTED
 IMS_BOOL AosHandle::IsWifiConnected()
 {
-    IWifiWatcher* piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
-
-    return (piWifiWatcher->GetState() == IWifiWatcher::STATE_CONNECTED);
+    return (m_piWifiWatcher->GetState() == IWifiWatcher::STATE_CONNECTED);
 }
 
 /*
@@ -1363,12 +1363,12 @@ void AosHandle::BackupAllBlocks()
 {
     if (!IsSupportedNetworkTypeForCellular(GetMobileNetworkType()))
     {
-        BackupBlocksForMobile();
+        BackupBlocks(m_objHoldingBlocksPolicyForMobile, m_nHoldingBlocksForMobile);
     }
 
     if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable() && !IsWifiConnected())
     {
-        BackupBlocksForWifi();
+        BackupBlocks(m_objHoldingBlocksPolicyForWifi, m_nHoldingBlocksForWifi);
     }
 }
 
@@ -1378,19 +1378,19 @@ Remarks
 
 */
 PROTECTED
-void AosHandle::BackupBlocksForMobile()
+void AosHandle::BackupBlocks(
+        IN IMSList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks)
 {
     IMS_UINT32 nBlock = BLOCK_NONE;
 
-    for (IMS_UINT32 i = 0; i < m_objHoldingBlocksPolicyForMobile.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < objHoldingBlocksPolicy.GetSize(); i++)
     {
-        nBlock = m_objHoldingBlocksPolicyForMobile.GetAt(i);
+        nBlock = objHoldingBlocksPolicy.GetAt(i);
         if (IsHandleBlocked(nBlock))
         {
-            A_IMS_TRACE_D(APPPROFILE,
-                    "BackupBlocksForMobile :: Reset block[%x] and set to HoldingBlocksForMobile",
+            A_IMS_TRACE_D(APPPROFILE, "BackupBlocks :: Reset block[%x] and set to HoldingBlocks",
                     nBlock, 0, 0);
-            AddBlock(nBlock, m_nHoldingBlocksForMobile);
+            AddBlock(nBlock, nHoldingBlocks);
             ProcessBlock(nBlock, IMS_FALSE, IMS_FALSE);
         }
     }
@@ -1402,67 +1402,19 @@ Remarks
 
 */
 PROTECTED
-void AosHandle::BackupBlocksForWifi()
+void AosHandle::RestoreBlocks(
+        IN IMSList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks)
 {
     IMS_UINT32 nBlock = BLOCK_NONE;
 
-    for (IMS_UINT32 i = 0; i < m_objHoldingBlocksPolicyForWifi.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < objHoldingBlocksPolicy.GetSize(); i++)
     {
-        nBlock = m_objHoldingBlocksPolicyForWifi.GetAt(i);
-        if (IsHandleBlocked(nBlock))
+        nBlock = objHoldingBlocksPolicy.GetAt(i);
+        if (IsHandleBlocked(nHoldingBlocks, nBlock))
         {
-            A_IMS_TRACE_D(APPPROFILE,
-                    "BackupBlocksForWifi :: Reset block[%x] and set to HoldingBlocksForWifi",
+            A_IMS_TRACE_D(APPPROFILE, "RestoreBlocks :: Set block[%x] and reset from HoldingBlocks",
                     nBlock, 0, 0);
-            AddBlock(nBlock, m_nHoldingBlocksForWifi);
-            ProcessBlock(nBlock, IMS_FALSE, IMS_FALSE);
-        }
-    }
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED
-void AosHandle::RestoreBlocksForMobile()
-{
-    IMS_UINT32 nBlock = BLOCK_NONE;
-
-    for (IMS_UINT32 i = 0; i < m_objHoldingBlocksPolicyForMobile.GetSize(); i++)
-    {
-        nBlock = m_objHoldingBlocksPolicyForMobile.GetAt(i);
-        if (IsHandleBlocked(m_nHoldingBlocksForMobile, nBlock))
-        {
-            A_IMS_TRACE_D(APPPROFILE,
-                    "RestoreBlocksForMobile :: Set block[%x] and reset from HoldingBlocksForMobile",
-                    nBlock, 0, 0);
-            RemoveBlock(nBlock, m_nHoldingBlocksForMobile);
-            ProcessBlock(nBlock, IMS_TRUE, IMS_FALSE);
-        }
-    }
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED
-void AosHandle::RestoreBlocksForWifi()
-{
-    IMS_UINT32 nBlock = BLOCK_NONE;
-
-    for (IMS_UINT32 i = 0; i < m_objHoldingBlocksPolicyForWifi.GetSize(); i++)
-    {
-        nBlock = m_objHoldingBlocksPolicyForWifi.GetAt(i);
-        if (IsHandleBlocked(m_nHoldingBlocksForWifi, nBlock))
-        {
-            A_IMS_TRACE_D(APPPROFILE,
-                    "RestoreBlocksForWifi :: Set block[%x] and reset from HoldingBlocksForWifi",
-                    nBlock, 0, 0);
-            RemoveBlock(nBlock, m_nHoldingBlocksForWifi);
+            RemoveBlock(nBlock, nHoldingBlocks);
             ProcessBlock(nBlock, IMS_TRUE, IMS_FALSE);
         }
     }
@@ -1534,13 +1486,13 @@ void AosHandle::ReevaluateBlocks()
 {
     if (m_bEpdgEnabled)
     {
-        BackupBlocksForMobile();
-        RestoreBlocksForWifi();
+        BackupBlocks(m_objHoldingBlocksPolicyForMobile, m_nHoldingBlocksForMobile);
+        RestoreBlocks(m_objHoldingBlocksPolicyForWifi, m_nHoldingBlocksForWifi);
     }
     else
     {
-        BackupBlocksForWifi();
-        RestoreBlocksForMobile();
+        BackupBlocks(m_objHoldingBlocksPolicyForWifi, m_nHoldingBlocksForWifi);
+        RestoreBlocks(m_objHoldingBlocksPolicyForMobile, m_nHoldingBlocksForMobile);
     }
 }
 

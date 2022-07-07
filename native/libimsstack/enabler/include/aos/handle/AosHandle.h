@@ -21,6 +21,7 @@
 #include "IImsAosInfo.h"
 #include "ImsStateMachine.h"
 #include "IEventListener.h"
+#include "IWifiWatcher.h"
 #include "interface/IAosCallTrackerListener.h"
 #include "interface/IAosNConfigurationListener.h"
 #include "interface/IAosNetTrackerListener.h"
@@ -210,10 +211,10 @@ protected:
     void ProcessUnavailableFeatureChanged();
 
     void BackupAllBlocks();
-    void BackupBlocksForMobile();
-    void BackupBlocksForWifi();
-    void RestoreBlocksForMobile();
-    void RestoreBlocksForWifi();
+    void BackupBlocks(
+            IN IMSList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks);
+    void RestoreBlocks(
+            IN IMSList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks);
     IMS_BOOL HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded);
     void ReevaluateBlocks();
     IMS_BOOL UpdateIpcan();
@@ -302,6 +303,8 @@ protected:
     IImsAosListener* m_piListener;
     IImsAosMonitor* m_piMonitor;
     IImsAosInfo* m_piInfo;
+
+    IWifiWatcher* m_piWifiWatcher;
 
     IMS_SINT32 m_nReason;
     IMS_SINT32 m_nSuspendedReason;
