@@ -21,7 +21,6 @@
 #include "ICoreService.h"
 #include "IuMts.h"
 #include "MtsService.h"
-#include "../utility/MtsTrm.h"
 
 class IMtsMessage;
 class IMtsMessageControllerListener;
@@ -29,10 +28,7 @@ class IPageMessage;
 class MtsDynamicLoader;
 class MtsSmUtils;
 
-class MtsMessageController final :
-        public ImsActivityEx,
-        public IMtsServiceListener,
-        public MtsTrmListener
+class MtsMessageController final : public ImsActivityEx, public IMtsServiceListener
 {
 public:
     MtsMessageController(IN IMS_SINT32 nSlotID, IN MtsService* pMtsService,
@@ -78,9 +74,6 @@ public:
     virtual void NotifyMoSms(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId) override;
     virtual void NotifyMtSms(IN IPageMessage* piMessage) override;
-
-    // MtsTrmListener
-    virtual void Trm_PriorityChanged();
 
 protected:
     // ImsActivityEx
@@ -159,8 +152,6 @@ private:
     IMtsMessageControllerListener* m_piMtsMessageControllerListener;
     IMSList<IMtsMessage*> m_objRPAckedMsgs;
     MtsService* m_pMtsService;
-    MtsTrm* m_pMtsTrm;
-    IMS_BOOL m_bTrmBlock;
 
 protected:
     MtsSmUtils* m_pMtsSmUtils;

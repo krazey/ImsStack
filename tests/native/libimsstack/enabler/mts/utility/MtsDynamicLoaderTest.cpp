@@ -17,15 +17,43 @@
 #include <gtest/gtest.h>
 #include "utility/MtsDynamicLoader.h"
 
+LOCAL IMS_SINT32 SLOT_ID = 0;
+
 namespace android
 {
 
 class MtsDynamicLoaderTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MtsDynamicLoader* pMtsDynamicLoader;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override { pMtsDynamicLoader = new MtsDynamicLoader(SLOT_ID); }
+
+    virtual void TearDown() override { delete pMtsDynamicLoader; }
 };
+
+TEST_F(MtsDynamicLoaderTest, Constructor)
+{
+    ASSERT_NE(pMtsDynamicLoader, nullptr);
+}
+
+TEST_F(MtsDynamicLoaderTest, CreateMtsServiceStateAfterInitialize)
+{
+    pMtsDynamicLoader->Initialize();
+    ASSERT_NE(pMtsDynamicLoader->GetMtsServiceState(), nullptr);
+}
+
+TEST_F(MtsDynamicLoaderTest, CreateMtsSipFormUtilsAfterInitialize)
+{
+    pMtsDynamicLoader->Initialize();
+    ASSERT_NE(pMtsDynamicLoader->GetMtsSipFormUtils(), nullptr);
+}
+
+TEST_F(MtsDynamicLoaderTest, CreateMtsStrNameAfterInitialize)
+{
+    pMtsDynamicLoader->Initialize();
+    ASSERT_NE(pMtsDynamicLoader->GetMtsStrName(), nullptr);
+}
 
 }  // namespace android

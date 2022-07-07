@@ -47,18 +47,10 @@ MtsMessageController::MtsMessageController(
         m_piMtsMessageControllerListener(IMS_NULL),
         m_objRPAckedMsgs(IMSList<IMtsMessage*>()),
         m_pMtsService(pMtsService),
-        m_pMtsTrm(IMS_NULL),
-        m_bTrmBlock(IMS_FALSE),
         m_pMtsSmUtils(IMS_NULL),
         m_pMtsDynamicLoader(pMtsDynamicLoader)
 {
     IMS_TRACE_I("+MtsMessageController nSlotId[%d]", nSlotId, 0, 0);
-
-    m_pMtsTrm = MtsTrm::GetInstance(m_nSlotId);
-    if (m_pMtsTrm != IMS_NULL)
-    {
-        m_pMtsTrm->AddListener(this);
-    }
 
     m_pMtsService->SetListener(this);
 }
@@ -66,14 +58,6 @@ MtsMessageController::MtsMessageController(
 PUBLIC MtsMessageController::~MtsMessageController()
 {
     IMS_TRACE_I("~MtsMessageController nSlotId[%d]", m_nSlotId, 0, 0);
-
-    if (m_pMtsTrm != IMS_NULL)
-    {
-        m_pMtsTrm->RemoveListener(this);
-        MtsTrm::DestroyMtsTrm(m_nSlotId);
-        m_bTrmBlock = IMS_FALSE;
-        m_pMtsTrm = IMS_NULL;
-    }
 
     DestroyMtsMessage();
 }
@@ -554,18 +538,6 @@ PUBLIC VIRTUAL void MtsMessageController::NotifyMoSms(IN IMS_UINT32 nSmsFormat, 
 {
     IMS_TRACE_I("NotifyMoSms()", 0, 0, 0);
 
-    if (m_pMtsTrm != IMS_NULL)
-    {
-        if (!m_pMtsTrm->IsReady())
-        {
-            m_bTrmBlock = IMS_TRUE;
-        }
-    }
-    else
-    {
-        m_bTrmBlock = IMS_FALSE;
-    }
-
     SendMtsMessage(nSmsFormat, objData, strAddress, nSeqId, IMS_FALSE);
 }
 
@@ -573,34 +545,7 @@ PUBLIC VIRTUAL void MtsMessageController::NotifyMtSms(IN IPageMessage* piMessage
 {
     IMS_TRACE_I("NotifyMtSms()", 0, 0, 0);
 
-    if (m_pMtsTrm != IMS_NULL)
-    {
-        if (!m_pMtsTrm->IsReady())
-        {
-            m_bTrmBlock = IMS_TRUE;
-        }
-        else
-        {
-            m_bTrmBlock = IMS_FALSE;
-        }
-    }
-    else
-    {
-        m_bTrmBlock = IMS_FALSE;
-    }
-
     ReceiveMtsMessage(piMessage, IMS_FALSE);
-}
-
-PUBLIC VIRTUAL void MtsMessageController::Trm_PriorityChanged()
-{
-    if (m_pMtsTrm->IsReady())
-    {
-        if (m_bTrmBlock == IMS_TRUE)
-        {
-            m_bTrmBlock = IMS_FALSE;
-        }
-    }
 }
 
 PROTECTED IMS_BOOL MtsMessageController::OnMessage(IN IMSMSG& /*objMSG*/)

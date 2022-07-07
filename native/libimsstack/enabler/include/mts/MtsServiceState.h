@@ -26,7 +26,6 @@ public:
     MtsServiceState(IN IMS_SINT32 nSlotId);
     ~MtsServiceState();
 
-    static MtsServiceState* GetInstance(IN IMS_SINT32 nSlotId);
     void SetImsRegConnected(IN IMS_BOOL bConnected);
     void SetImsRegConnected(IN IMS_BOOL bConnected, IMS_BOOL bIsEmergencyType);
     void SetImsSuspendState(IN IMS_BOOL bState);
