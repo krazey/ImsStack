@@ -52,8 +52,9 @@ private:
     void AddKeyConnectionId(IN CallKey nCallKey);
     void RemoveKeyConnectionId(IN IMS_SINT32 nIndex);
     IMS_BOOL IsConferenceParticipant(IN CallKey nCallKey);
-    IMS_BOOL IsConferenceHost(IN CallKey nCallKey);
+    IMS_BOOL IsConferenceHost(IN CallKey nCallKey, OUT IMS_UINT32& nControllerIndex);
     AString GetIds();
+    void ClearConnectionIdsInConference(IN IMS_UINT32 nControllerIndex);
 
 private:
     struct CallKeyConnection
