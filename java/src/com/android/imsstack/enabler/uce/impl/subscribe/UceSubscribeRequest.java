@@ -16,20 +16,18 @@
 
 package com.android.imsstack.enabler.uce.impl.subscribe;
 
-import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.enabler.uce.impl.define.UceMessage;
-import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
-import com.android.imsstack.enabler.uce.interf.UceApiConstant;
-import com.android.imsstack.enabler.uce.interf.SubscribeResponse;
-import com.android.internal.annotations.VisibleForTesting;
-
-import android.os.Parcel;
-import android.text.TextUtils;
 import android.net.Uri;
+import android.os.Parcel;
 import android.util.Pair;
 
+import com.android.imsstack.enabler.uce.impl.define.UceMessage;
+import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
+import com.android.imsstack.enabler.uce.interf.SubscribeResponse;
+import com.android.imsstack.enabler.uce.interf.UceApiConstant;
+import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -44,6 +42,7 @@ public class UceSubscribeRequest {
         callback = cb;
         mSlotId = slotId;
         mUceJNI = UceJNI.getInstance();
+        ImsLog.d("key:" + mKey);
     }
 
     @VisibleForTesting
@@ -52,6 +51,7 @@ public class UceSubscribeRequest {
         callback = cb;
         mSlotId = slotId;
         mUceJNI = jni;
+        ImsLog.d("key:" + mKey);
     }
 
     /**
@@ -125,6 +125,7 @@ public class UceSubscribeRequest {
      *                AOSP Framework.
      */
     public void informCapabilitiesUpdate(List<String> pidfXmls) {
+        ImsLog.d("informCapabilitiesUpdate");
         try {
             callback.onNotifyCapabilitiesUpdate(pidfXmls);
         } catch (Exception e) {
@@ -139,6 +140,7 @@ public class UceSubscribeRequest {
      * wait before retrying, if non-zero.
      */
     public void informTerminate(String reason, int retryAfterSecond) {
+        ImsLog.d("informTerminate:reason=" + reason + ",retryAfterSecond=" + retryAfterSecond);
         try {
             callback.onTerminated(reason, TimeUnit.SECONDS.toMillis(retryAfterSecond));
         } catch (Exception e) {

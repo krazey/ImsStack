@@ -557,13 +557,12 @@ IMS_BOOL UceSubscribe::StateON_SingleSubscribeRequested(IN IMSMSG& objMsg)
         return IMS_TRUE;
     }
     IMS_TRACE_I("StateON_SingleSubscribeRequested:remote user[%s]", m_strRemoteUser.GetStr(), 0, 0);
+
     if (m_strRemoteUser.StartsWith("sip:") != IMS_TRUE &&
             m_strRemoteUser.StartsWith("tel:") != IMS_TRUE)
     {
-        IMS_TRACE_I("StateON_SingleSubscribeRequested:user uri is wrong", 0, 0, 0);
-        SendSubscribeCommandErrorInd(IUUceService::COMMAND_CODE_INVALID_PARAM);
-        SubscribeTerminated();
-        return IMS_TRUE;
+        IMS_TRACE_I("StateON_SingleSubscribeRequested:uri is not SIP or TEL URI type", 0, 0, 0);
+        m_strRemoteUser = "tel:" + m_strRemoteUser;
     }
     if (CreateSubscription(m_strRemoteUser) != IMS_TRUE)
     {
@@ -984,7 +983,7 @@ void UceSubscribe::DestroySubscription()
 
 void UceSubscribe::SubscribeTerminated()
 {
-    IMS_TRACE_I("SubscribeTerminated:send UCE_SUBSCRIBE_DELETED_IND to manager", 0, 0, 0);
+    IMS_TRACE_D("SubscribeTerminated", 0, 0, 0);
     DestroySubscription();
     StopWaitingNotifyMessageTimer();
     m_eQueryType = QUERY_CAPABILITY_TYPE_NONE;

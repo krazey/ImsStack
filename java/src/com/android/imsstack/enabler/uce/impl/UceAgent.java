@@ -109,6 +109,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
         if (mImsRegistered && mUceEventListener != null) {
             int mCapaTriggerType = getCapabilityUpdateTriggerType(mRegistrationTech);
             try {
+                ImsLog.d("call onRequestPublishCapabilities() with " + mCapaTriggerType);
                 mUceEventListener.onRequestPublishCapabilities(mCapaTriggerType);
             } catch (Exception e) {
                 ImsLog.e("Exception:" + e.toString());
@@ -333,6 +334,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
                 ImsLog.d("handle : UCE_MSG_NETWORK_CHANGED");
                 int mCapaTriggerType = getCapabilityUpdateTriggerType(networkType);
                 try {
+                    ImsLog.d("call onRequestPublishCapabilities() with " + mCapaTriggerType);
                     mUceEventListener.onRequestPublishCapabilities(mCapaTriggerType);
                 } catch (Exception e) {
                     ImsLog.e("Exception:" + e.toString());
@@ -362,6 +364,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
                     ImsLog.d("responseCode:" + responseCode + ", reason:" + reason +
                         "reasonHeaderCause" + reasonHdrCause + "reasonHeaderText:" + reasonHdrText);
                     try {
+                        ImsLog.d("call onPublishUpdated() with " + responseCode);
                         mUceEventListener.onPublishUpdated(responseCode, reason, reasonHdrCause,
                             reasonHdrText);
                     } catch (Exception e) {
@@ -378,6 +381,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
                     ImsLog.d("handle : UCE_UNPUBLISHED_IND");
                     mUcePublishRequestController.deletePendingRequest();
                     try {
+                        ImsLog.d("call onUnPublish()");
                         mUceEventListener.onUnPublish();
                     } catch (Exception e) {
                         ImsLog.e("Exception:" + e.toString());
@@ -405,6 +409,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
                 UceOptionsResponseCallback callback = new UceOptionsResponseCallback(requestKey,
                         mSlotId);
                 try {
+                    ImsLog.d("call onRemoteCapabilityRequest()");
                     mUceEventListener.onRemoteCapabilityRequest(contactUri, remoteCapabilities,
                             callback);
                 } catch (Exception e) {
@@ -427,6 +432,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
         mConnectedServices = connectedServices;
         if (mUceEventListener != null) {
             try {
+                ImsLog.d("call onRequestPublishCapabilities() with " + mCapaTriggerType);
                 mUceEventListener.onRequestPublishCapabilities(mCapaTriggerType);
             } catch (Exception e) {
                 ImsLog.e("Exception:" + e.toString());

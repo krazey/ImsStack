@@ -16,7 +16,14 @@
 
 package com.android.imsstack.enabler.uce.impl.subscribe;
 
-import com.android.imsstack.util.ImsLog;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Parcel;
+import android.text.TextUtils;
+
 import com.android.imsstack.enabler.uce.impl.define.UceConstant;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
 import com.android.imsstack.enabler.uce.impl.define.UceResponseData;
@@ -25,15 +32,8 @@ import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
 import com.android.imsstack.enabler.uce.impl.utils.UceUtils;
 import com.android.imsstack.enabler.uce.interf.SubscribeResponse;
 import com.android.imsstack.enabler.uce.interf.UceApiConstant;
+import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
-
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Parcel;
-import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -115,6 +115,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
         });
         if (request.sendRequest(queryingUri)) {
             mUceSubscribeRequestMap.put(key, request);
+            ImsLog.d("add key:" + key);
         }
     }
 
@@ -137,6 +138,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
         });
         if (request.sendRequest(queryingUri)) {
             mUceSubscribeRequestMap.put(key, request);
+            ImsLog.d("add key:" + key);
         }
     }
 
@@ -330,6 +332,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                 List<String> pidfXmls = new ArrayList<>();
                 for (int i = 0; i < count; i++) {
                     String pidfXml = parcel.readString();
+                    ImsLog.d("order:" + i + ", pidf:" + pidfXml);
                     pidfXmls.add(pidfXml);
                 }
                 msg.arg1 = requestKey;
