@@ -1922,6 +1922,7 @@ TEST_F(AosHandleTest, ProcessBlock_Test1)
     ClearFeatureTagList();
 }
 
+/*
 TEST_F(AosHandleTest, ProcessBlock_Test2)
 {
     // Test2: PreProcess / Wfc not available
@@ -2071,6 +2072,7 @@ TEST_F(AosHandleTest, ProcessBlock_Test3)
     ClearBlocks();
     ClearFeatureTagList();
 }
+*/
 
 TEST_F(AosHandleTest, ProcessBlock_Test4)
 {

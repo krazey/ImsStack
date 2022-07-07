@@ -1158,6 +1158,11 @@ IMS_BOOL AosHandle::PreProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded)
         A_IMS_TRACE_D(APPPROFILE, "PreProcessBlock :: HoldingBlocksForMobile (%x)",
                 m_nHoldingBlocksForMobile, 0, 0);
 
+        if (!bAdded && IsHandleBlocked(nBlock))
+        {
+            return IMS_FALSE;
+        }
+
         return IMS_TRUE;
     }
 
@@ -1170,6 +1175,11 @@ IMS_BOOL AosHandle::PreProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded)
 
     A_IMS_TRACE_D(APPPROFILE, "PreProcessBlock :: HoldingBlocksForWifi (%x)",
             m_nHoldingBlocksForWifi, 0, 0);
+
+    if (!bAdded && IsHandleBlocked(nBlock))
+    {
+        return IMS_FALSE;
+    }
 
     return IMS_TRUE;
 }
@@ -1455,6 +1465,11 @@ IMS_BOOL AosHandle::HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL
         A_IMS_TRACE_D(APPPROFILE, "HoldBlockForInvalidNetwork :: HoldingBlocksForMobile (%x)",
                 m_nHoldingBlocksForMobile, 0, 0);
 
+        if (!bAdded && IsHandleBlocked(nBlock))
+        {
+            return IMS_FALSE;
+        }
+
         return IMS_TRUE;
     }
 
@@ -1474,6 +1489,11 @@ IMS_BOOL AosHandle::HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL
 
         A_IMS_TRACE_D(APPPROFILE, "HoldBlockForInvalidNetwork :: HoldingBlocksForWifi (%x)",
                 m_nHoldingBlocksForWifi, 0, 0);
+
+        if (!bAdded && IsHandleBlocked(nBlock))
+        {
+            return IMS_FALSE;
+        }
 
         return IMS_TRUE;
     }
