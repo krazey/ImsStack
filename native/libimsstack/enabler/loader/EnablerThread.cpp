@@ -176,6 +176,7 @@ void EnablerThread::ControlEnablersInternal(IN IMS_SINT32 nCtrlFlags)
             SystemConfigManager::CacheSystemFeatures();
         }
 
+        ConfigService::GetConfigService()->LoadCarrierConfig(GetSlotId());
         Configuration::GetInstance()->RefreshConfigs(GetSlotId());
         EngineLoader::Initialize(GetSlotId());
         InitializeGlobals();

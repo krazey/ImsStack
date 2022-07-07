@@ -81,6 +81,7 @@ private:
 
 private:
     IMS_BOOL m_bCreated;
+    IMS_BOOL m_bInitialized;
     AsyncConfigHelper* m_pConfigHelper;
 
     // List of IMS application configuration
@@ -102,6 +103,7 @@ private:
 PUBLIC
 ConfigurationHolder::ConfigurationHolder() :
         m_bCreated(IMS_FALSE),
+        m_bInitialized(IMS_FALSE),
         m_pConfigHelper(IMS_NULL),
         m_objAppConfigs(IMSList<AppConfig*>()),
         m_objSubscriberConfigs(IMSList<SubscriberConfig*>()),
@@ -309,6 +311,8 @@ void ConfigurationHolder::InitConfigs(IN IMS_SINT32 nId)
                     IAsyncConfig::ACMSG_START, reinterpret_cast<IMS_SINTP>(m_pConfigHelper), 0);
         }
     }
+
+    m_bInitialized = IMS_TRUE;
 }
 
 PUBLIC
@@ -320,6 +324,12 @@ void ConfigurationHolder::RefreshConfigs(IN IMS_SINT32 nId)
         {
             InitConfigs(nId);
         }
+        return;
+    }
+
+    if (!m_bInitialized)
+    {
+        InitConfigs(nId);
         return;
     }
 
