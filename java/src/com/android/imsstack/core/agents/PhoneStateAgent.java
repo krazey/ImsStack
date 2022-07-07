@@ -229,7 +229,7 @@ public final class PhoneStateAgent implements IPhoneState,
             return;
         }
 
-        if ((events & PhoneStateEvents.LISTEN_SERVICE_STATE) != 0) {
+        if (isEventSet(events, PhoneStateEvents.LISTEN_SERVICE_STATE)) {
             ServiceState serviceState = (mPhoneStateListener != null)
                     ? mPhoneStateListener.getServiceState() : null;
 
@@ -239,7 +239,7 @@ public final class PhoneStateAgent implements IPhoneState,
             }
         }
 
-        if ((events & PhoneStateEvents.LISTEN_CALL_STATE) != 0) {
+        if (isEventSet(events, PhoneStateEvents.LISTEN_CALL_STATE)) {
             PhoneCallState callState = (mPhoneStateListener != null)
                     ? mPhoneStateListener.getCallState() : null;
 
@@ -256,7 +256,7 @@ public final class PhoneStateAgent implements IPhoneState,
             return;
         }
 
-        if ((events & PhoneStateEvents.LISTEN_PCSCF_ADDRESS_INFO) != 0) {
+        if (isEventSet(events, PhoneStateEvents.LISTEN_PCSCF_ADDRESS_INFO)) {
             List<String> pcscf = mHandler.getPcscf();
 
             if (pcscf != null) {
@@ -300,12 +300,11 @@ public final class PhoneStateAgent implements IPhoneState,
                 subId = isub.getSubId(mSlotId);
             }
 
-            PhoneStateListener oldListener = mPhoneStateListener;
-
             if (mPhoneStateListener == null) {
                 mPhoneStateListener = createPhoneStateListener(subId);
             } else {
                 if (subId != mPhoneStateListener.getSubId()) {
+                    mPhoneStateListener.removeListener();
                     mPhoneStateListener.dispose();
                     mPhoneStateListener = null;
                     mPhoneStateListener = createPhoneStateListener(subId);
@@ -317,7 +316,6 @@ public final class PhoneStateAgent implements IPhoneState,
             }
 
             ImsLog.i(mSlotId, "listenForSubscriptionChanged :: subId=" + subId);
-            oldListener.removeListener();
             setActivePhoneStateListener();
         }
     }
@@ -460,6 +458,10 @@ public final class PhoneStateAgent implements IPhoneState,
             // Store the most recent pcscf
             mPcscf = pcscf;
         }
+    }
+
+    private static boolean isEventSet(int events, int event) {
+        return (events & event) != 0;
     }
 
     private final class PhoneStateListener {
@@ -627,38 +629,66 @@ public final class PhoneStateAgent implements IPhoneState,
                 return;
             }
 
-            if ((events & PhoneStateEvents.LISTEN_SERVICE_STATE) != 0) {
-                mServiceStateListener = new ServiceStateListener();
+            if (isEventSet(events, PhoneStateEvents.LISTEN_SERVICE_STATE)) {
+                if (mServiceStateListener == null) {
+                    mServiceStateListener = new ServiceStateListener();
+                } else {
+                    tm.unregisterTelephonyCallback(mServiceStateListener);
+                }
                 tm.registerTelephonyCallback(mHandler, mServiceStateListener);
             }
 
-            if ((events & PhoneStateEvents.LISTEN_CALL_STATE) != 0) {
-                mCallStateListener = new CallStateListener();
+            if (isEventSet(events, PhoneStateEvents.LISTEN_CALL_STATE)) {
+                if (mCallStateListener == null) {
+                    mCallStateListener = new CallStateListener();
+                } else {
+                    tm.unregisterTelephonyCallback(mCallStateListener);
+                }
                 tm.registerTelephonyCallback(mHandler, mCallStateListener);
             }
 
-            if ((events & PhoneStateEvents.LISTEN_PRECISE_CALL_STATE) != 0) {
-                mPreciseCallStateListener = new PreciseCallStateListener();
+            if (isEventSet(events, PhoneStateEvents.LISTEN_PRECISE_CALL_STATE)) {
+                if (mPreciseCallStateListener == null) {
+                    mPreciseCallStateListener = new PreciseCallStateListener();
+                } else {
+                    tm.unregisterTelephonyCallback(mPreciseCallStateListener);
+                }
                 tm.registerTelephonyCallback(mHandler, mPreciseCallStateListener);
             }
 
-            if ((events & PhoneStateEvents.LISTEN_SRVCC_STATE_CHANGED) != 0) {
-                mSrvccStateListener = new SrvccStateListener();
+            if (isEventSet(events, PhoneStateEvents.LISTEN_SRVCC_STATE_CHANGED)) {
+                if (mSrvccStateListener == null) {
+                    mSrvccStateListener = new SrvccStateListener();
+                } else {
+                    tm.unregisterTelephonyCallback(mSrvccStateListener);
+                }
                 tm.registerTelephonyCallback(mHandler, mSrvccStateListener);
             }
 
-            if ((events & PhoneStateEvents.LISTEN_CELL_INFO) != 0) {
-                mCellInfoListener = new CellInfoListener();
+            if (isEventSet(events, PhoneStateEvents.LISTEN_CELL_INFO)) {
+                if (mCellInfoListener == null) {
+                    mCellInfoListener = new CellInfoListener();
+                } else {
+                    tm.unregisterTelephonyCallback(mCellInfoListener);
+                }
                 tm.registerTelephonyCallback(mHandler, mCellInfoListener);
             }
 
-            if ((events & PhoneStateEvents.LISTEN_SIGNAL_STRENGTHS) != 0) {
-                mSignalStrengthsListener = new SignalStrengthsListener();
+            if (isEventSet(events, PhoneStateEvents.LISTEN_SIGNAL_STRENGTHS)) {
+                if (mSignalStrengthsListener == null) {
+                    mSignalStrengthsListener = new SignalStrengthsListener();
+                } else {
+                    tm.unregisterTelephonyCallback(mSignalStrengthsListener);
+                }
                 tm.registerTelephonyCallback(mHandler, mSignalStrengthsListener);
             }
 
-            if ((events & PhoneStateEvents.LISTEN_PRECISE_DATA_CONNECTION_STATE) != 0) {
-                mPreciseDataConnectionStateListener = new PreciseDataConnectionStateListener();
+            if (isEventSet(events, PhoneStateEvents.LISTEN_PRECISE_DATA_CONNECTION_STATE)) {
+                if (mPreciseDataConnectionStateListener == null) {
+                    mPreciseDataConnectionStateListener = new PreciseDataConnectionStateListener();
+                } else {
+                    tm.unregisterTelephonyCallback(mPreciseDataConnectionStateListener);
+                }
                 tm.registerTelephonyCallback(mHandler, mPreciseDataConnectionStateListener);
             }
         }
