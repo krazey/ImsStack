@@ -399,6 +399,10 @@ public class ConfigProxy {
 
             item = provisioningItems.get(ProvisioningManager.KEY_REGISTRATION_DOMAIN_NAME);
             editor.putString(item.getName(), "vzims.com");
+
+            /* Set default to ENABLED for EAB */
+            item = provisioningItems.get(ProvisioningManager.KEY_EAB_PROVISIONING_STATUS);
+            editor.putInt(item.getName(), ProvisioningManager.PROVISIONING_VALUE_ENABLED);
         } else if (carrierId == 1890) {//KT
             ProvisioningItem item = provisioningItems.get(
                     ProvisioningManager.KEY_LOCAL_BREAKOUT_PCSCF_ADDRESS);
