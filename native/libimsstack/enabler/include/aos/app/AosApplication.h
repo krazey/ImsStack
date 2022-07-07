@@ -105,7 +105,6 @@ protected:
     IMS_BOOL IsAllDetached() const;
     IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
     IMS_BOOL IsRegTypeNormal() const;
-    IMS_BOOL IsVonrSupported() const;
     IMS_BOOL IsRegStateUpdatedByNrLteRatChange() const;
 
     // Create
@@ -397,7 +396,6 @@ protected:
     IMS_BOOL m_bIsImsCall;
     IMS_BOOL m_bIsPublished;
     IMS_BOOL m_bIsActivated;
-    IMS_BOOL m_bIsVonrSupported;
 
     AString m_strTag;
 

@@ -36,8 +36,6 @@ public:
     virtual void GetProperty(IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue);
 
 protected:
-    void SetTrm(IN IMS_BOOL bStart);
-
     // Clean
     virtual void ClearConnection();
     virtual void ProcessCleanAll(IN IMS_UINT32 nReason = 0);

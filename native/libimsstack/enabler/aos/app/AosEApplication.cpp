@@ -26,7 +26,6 @@
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosRegistration.h"
 #include "interface/IAosRegStateManager.h"
-#include "interface/IAosTrm.h"
 #include "condition/AosCondition.h"
 #include "connection/AosConnector.h"
 #include "provider/AosProvider.h"
@@ -104,20 +103,9 @@ PUBLIC VIRTUAL void AosEApplication::GetProperty(
     strValue = AString::ConstNull();
 }
 
-PROTECTED
-void AosEApplication::SetTrm(IN IMS_BOOL bStart)
-{
-    IAosTrm* piTrm = AosProvider::GetInstance()->GetTrm(m_nSlotId);
-    if (piTrm != IMS_NULL)
-    {
-        piTrm->SetEmegency(IAosTrm::TYPE_PDN, bStart);
-    }
-}
-
 PROTECTED VIRTUAL void AosEApplication::ClearConnection()
 {
     m_pConnector->Stop();
-    SetTrm(IMS_FALSE);
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessCleanAll(IN IMS_UINT32 nReason /* = 0 */)
@@ -198,7 +186,6 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
         }
         else
         {
-            SetTrm(IMS_TRUE);
             m_pConnector->Start();
         }
     }

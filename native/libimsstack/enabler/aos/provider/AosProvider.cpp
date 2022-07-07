@@ -22,8 +22,6 @@
 #include "interface/IAosLocationStarter.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosRegStateManager.h"
-#include "interface/IAosTrm.h"
-#include "interface/IAosVonr.h"
 
 #include "provider/AosDnsQuery.h"
 #include "provider/AosKeepAlive.h"
@@ -135,18 +133,6 @@ IAosSubscriberManager* AosProvider::GetSubscriberManager(IN IMS_SINT32 nSlotId /
 }
 
 PUBLIC
-IAosTrm* AosProvider::GetTrm(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
-{
-    return m_objParam.GetValue(nSlotId)->m_piTrm;
-}
-
-PUBLIC
-IAosVonr* AosProvider::GetVonr(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
-{
-    return m_objParam.GetValue(nSlotId)->m_piVonr;
-}
-
-PUBLIC
 IAosRetryRepository* AosProvider::GetRetryRepository(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     return m_objParam.GetValue(nSlotId)->m_piRetryRepository;
@@ -245,30 +231,6 @@ void AosProvider::SetSubscriberManager(
     if (pParam != IMS_NULL)
     {
         pParam->m_piSubscriberManager = piSubscriberManager;
-    }
-}
-
-PUBLIC
-void AosProvider::SetTrm(IN IAosTrm* piTrm, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
-{
-    LockGuard objLock(m_piLock);
-
-    ProviderParam* pParam = m_objParam.GetValue(nSlotId);
-    if (pParam != IMS_NULL)
-    {
-        pParam->m_piTrm = piTrm;
-    }
-}
-
-PUBLIC
-void AosProvider::SetVonr(IN IAosVonr* piVonr, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
-{
-    LockGuard objLock(m_piLock);
-
-    ProviderParam* pParam = m_objParam.GetValue(nSlotId);
-    if (pParam != IMS_NULL)
-    {
-        pParam->m_piVonr = piVonr;
     }
 }
 

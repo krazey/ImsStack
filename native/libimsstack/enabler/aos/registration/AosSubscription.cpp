@@ -20,9 +20,7 @@
 #include "ServiceUtil.h"
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
-#include "ServiceVoNr.h"
 #include "CarrierConfig.h"
-#include "IVoNr.h"
 #include "IRegInfoContact.h"
 #include "IRegSubscription.h"
 #include "IRegistration.h"
@@ -37,7 +35,6 @@
 #include "provider/AosStaticProfile.h"
 #include "provider/AosRetryRepository.h"
 #include "registration/AosRegistration.h"
-#include "provider/AosTrm.h"
 #include "provider/AosUtil.h"
 #include "registration/AosSubscription.h"
 
@@ -52,10 +49,6 @@ AosSubscription::AosSubscription(IN IAosAppContext* piContext,
         m_piRegSubscription(piRegSubscription),
         m_piContext(piContext),
         m_piRetryTimer(IMS_NULL),
-        m_piTrm(IMS_NULL),
-        m_piVonr(IMS_NULL),
-        m_piPhoneTrm(IMS_NULL),
-        m_piServiceVonr(IMS_NULL),
         m_nThrottlingCount(0),
         m_objContactAddress(objContactAddress),
         m_strAor(strAor),
@@ -63,7 +56,6 @@ AosSubscription::AosSubscription(IN IAosAppContext* piContext,
         m_piListener(IMS_NULL),
         m_nState(STATE_OFFLINE),
         m_bIsTerminated(IMS_FALSE),
-        m_bIsTrmSupported(IMS_FALSE),
         m_bIsErrChecked(IMS_FALSE),
         m_nRetryCountSubTerminated(0),
         m_nRetryCountRegRequired(0)
@@ -96,26 +88,6 @@ PUBLIC VIRTUAL void AosSubscription::Initialize()
 
     SetRefreshPolicy();
     m_piRegSubscription->SetListener(this);
-
-    ITrm* piPhoneTrm = GetTrmPhoneInfoService();
-    if (piPhoneTrm != IMS_NULL && piPhoneTrm->IsTrmSupported())
-    {
-        m_bIsTrmSupported = IMS_TRUE;
-        m_piTrm = AosProvider::GetInstance()->GetTrm(m_piContext->GetSlotId());
-    }
-
-    IVoNr* piServiceVonr = GetVonrService();
-    if (piServiceVonr != IMS_NULL && piServiceVonr->IsVoNrSupported())
-    {
-        m_piVonr = AosProvider::GetInstance()->GetVonr(m_piContext->GetSlotId());
-        if (IsVonrSupported())
-        {
-            if (m_piContext->GetRegistration()->GetRegType() != AosRegistrationType::NORMAL)
-            {
-                m_piVonr = IMS_NULL;
-            }
-        }
-    }
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosSubscription::Start()
@@ -219,40 +191,10 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubHolded()
     return bResult;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsTrmSupported() const
-{
-    return m_bIsTrmSupported;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsVonrSupported() const
-{
-    return (m_piVonr != IMS_NULL);
-}
-
 PROTECTED
 void AosSubscription::ClearThrottlingCount()
 {
     m_nThrottlingCount = 0;
-}
-
-PROTECTED
-ITrm* AosSubscription::GetTrmPhoneInfoService()
-{
-    if (m_piPhoneTrm == IMS_NULL)
-    {
-        m_piPhoneTrm = PhoneInfoService::GetPhoneInfoService()->GetTrm();
-    }
-    return m_piPhoneTrm;
-}
-
-PROTECTED
-IVoNr* AosSubscription::GetVonrService()
-{
-    if (m_piServiceVonr == IMS_NULL)
-    {
-        m_piServiceVonr = VoNrService::GetVoNrService()->GetVoNr(m_piContext->GetSlotId());
-    }
-    return m_piServiceVonr;
 }
 
 PROTECTED
@@ -359,16 +301,6 @@ void AosSubscription::SetState(IN IMS_UINT32 nState)
             StateToString(nState), 0);
 
     this->m_nState = nState;
-
-    if (IsTrmSupported() && m_piTrm != IMS_NULL)
-    {
-        m_piTrm->Set(IAosTrm::TYPE_SUB, IsSubTrying());
-    }
-
-    if (IsVonrSupported())
-    {
-        m_piVonr->Set(IAosVonr::MODULE_SUB, IsSubTrying());
-    }
 }
 
 PROTECTED

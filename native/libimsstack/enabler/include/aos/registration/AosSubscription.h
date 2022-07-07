@@ -19,15 +19,12 @@
 #include "AString.h"
 #include "ServicePhoneInfo.h"
 #include "ITimer.h"
-#include "IVoNr.h"
-#include "interface/IAosVonr.h"
 #include "IRegSubscriptionListener.h"
 
 class IAosSubscriptionListener;
 class IRegSubscription;
 class IRegInfoContact;
 class IAosAppContext;
-class IAosTrm;
 
 /**
  * @brief This class provides a IMS subscription for reg event package.
@@ -51,14 +48,9 @@ public:
 
     virtual IMS_UINT32 GetState();
     virtual IMS_BOOL IsSubHolded();
-    virtual IMS_BOOL IsTrmSupported() const;
-    virtual IMS_BOOL IsVonrSupported() const;
 
 protected:
     void ClearThrottlingCount();
-
-    ITrm* GetTrmPhoneInfoService();
-    IVoNr* GetVonrService();
 
     IMS_BOOL IsSubTrying() const;
     IMS_BOOL IsTerminated() const;
@@ -183,10 +175,6 @@ protected:
 
     IAosAppContext* m_piContext;
     ITimer* m_piRetryTimer;
-    IAosTrm* m_piTrm;
-    IAosVonr* m_piVonr;
-    ITrm* m_piPhoneTrm;
-    IVoNr* m_piServiceVonr;
 
     IMS_UINT32 m_nThrottlingCount;
 
@@ -204,7 +192,6 @@ private:
     IAosSubscriptionListener* m_piListener;
     IMS_SINT32 m_nState;
     IMS_BOOL m_bIsTerminated;
-    IMS_BOOL m_bIsTrmSupported;
     IMS_BOOL m_bIsErrChecked;
 
     IMS_UINT32 m_nRetryCountSubTerminated;

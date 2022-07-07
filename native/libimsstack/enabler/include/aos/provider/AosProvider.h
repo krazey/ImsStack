@@ -26,8 +26,6 @@ class IAosNConfiguration;
 class IAosRegStateManager;
 class IAosService;
 class IAosSubscriberManager;
-class IAosTrm;
-class IAosVonr;
 class IAosRetryRepository;
 
 class AosDnsQuery;
@@ -58,8 +56,6 @@ public:
     IAosRegStateManager* GetRegStateManager(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosService* GetService(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosSubscriberManager* GetSubscriberManager(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IAosTrm* GetTrm(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IAosVonr* GetVonr(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosRetryRepository* GetRetryRepository(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
     void SetCallTracker(IN IAosCallTracker* piCt, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
@@ -70,8 +66,6 @@ public:
     void SetService(IN IAosService* piService, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetSubscriberManager(
             IN IAosSubscriberManager* piSubscriberManager, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    void SetTrm(IN IAosTrm* piTrm, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    void SetVonr(IN IAosVonr* piVonr, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetRetryRepository(
             IN IAosRetryRepository* piRetryRepository, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
@@ -87,8 +81,6 @@ private:
                 m_piRegStateManager(IMS_NULL),
                 m_piService(IMS_NULL),
                 m_piSubscriberManager(IMS_NULL),
-                m_piTrm(IMS_NULL),
-                m_piVonr(IMS_NULL),
                 m_piRetryRepository(IMS_NULL)
         {
         }
@@ -102,8 +94,6 @@ private:
         IAosRegStateManager* m_piRegStateManager;
         IAosService* m_piService;
         IAosSubscriberManager* m_piSubscriberManager;
-        IAosTrm* m_piTrm;
-        IAosVonr* m_piVonr;
         IAosRetryRepository* m_piRetryRepository;
     };
 
