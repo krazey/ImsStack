@@ -68,7 +68,7 @@ PUBLIC VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32 nType, IN IMS_
     ConfUser* p1to1User = new ConfUser();
     SipAddress objSIPAddress(
             GetConferenceCall()->GetCallContext().GetParticipantInfo().GetRemoteUri());
-    p1to1User->aStrTarget = objSIPAddress.GetUserInfoPart()->GetUser();
+    p1to1User->strTarget = objSIPAddress.GetUserInfoPart()->GetUser();
 
     m_objParticipantList.AddUser(p1to1User);
     m_objParticipantList.Login();
@@ -106,7 +106,7 @@ PUBLIC VIRTUAL void ExpandController::OnReferenceStartFailed(IN IConferenceRefer
     ConfUser* pTempUser = m_objParticipantList.GetConfUser(piConfRef);
     if (pTempUser != IMS_NULL)
     {
-        pTempUser->eStatus = CONFINFO_STATUS_FAIL;
+        pTempUser->eStatus = STATUS_FAIL;
     }
 
     Recover();
@@ -294,39 +294,39 @@ PROTECTED VIRTUAL void ExpandController::UpdateUserStatusByReferResult(IN ConfUs
         {
             case SipStatusCode::SC_400:
             case SipStatusCode::SC_503:
-                pUser->eStatus = CONFINFO_STATUS_SERVERERROR;
+                pUser->eStatus = STATUS_SERVERERROR;
                 break;
             case SipStatusCode::SC_403:
-                pUser->eStatus = CONFINFO_STATUS_FORBIDDEN;
+                pUser->eStatus = STATUS_FORBIDDEN;
                 break;
             case SipStatusCode::SC_404:
             case SipStatusCode::SC_415:
-                pUser->eStatus = CONFINFO_STATUS_NOTSUPPORTED;
+                pUser->eStatus = STATUS_NOTSUPPORTED;
                 break;
             case SipStatusCode::SC_408:
-                pUser->eStatus = CONFINFO_STATUS_NOANSWER;
+                pUser->eStatus = STATUS_NOANSWER;
                 break;
             case SipStatusCode::SC_480:
-                pUser->eStatus = CONFINFO_STATUS_LOWBATTERY;
+                pUser->eStatus = STATUS_LOWBATTERY;
                 break;
             case SipStatusCode::SC_486:
-                pUser->eStatus = CONFINFO_STATUS_BUSY;
+                pUser->eStatus = STATUS_BUSY;
                 break;
             case SipStatusCode::SC_499:
-                pUser->eStatus = CONFINFO_STATUS_NOTREACHABLE;
+                pUser->eStatus = STATUS_NOTREACHABLE;
                 break;
             case SipStatusCode::SC_500:
-                pUser->eStatus = CONFINFO_STATUS_INTSERVERERROR;
+                pUser->eStatus = STATUS_INTSERVERERROR;
                 break;
             case SipStatusCode::SC_603:
-                pUser->eStatus = CONFINFO_STATUS_REJECT;
+                pUser->eStatus = STATUS_REJECT;
                 break;
             case SipStatusCode::SC_606:
-                pUser->eStatus = CONFINFO_STATUS_NOTACCEPTABLE;
+                pUser->eStatus = STATUS_NOTACCEPTABLE;
                 break;
 
             default:
-                pUser->eStatus = CONFINFO_STATUS_FAIL;
+                pUser->eStatus = STATUS_FAIL;
                 break;
         }
 
@@ -337,7 +337,7 @@ PROTECTED VIRTUAL void ExpandController::UpdateUserStatusByReferResult(IN ConfUs
         return ConferenceController::UpdateUserStatusByReferResult(pUser, piConfRef, nStatusCode);
     }
 
-    IMS_TRACE_D("UpdateUserStatusByReferResult : [%s][%d]", pUser->aStrTarget.GetStr(),
+    IMS_TRACE_D("UpdateUserStatusByReferResult : [%s][%d]", pUser->strTarget.GetStr(),
             pUser->eStatusCode, 0);
 }
 
@@ -402,7 +402,7 @@ void ExpandController::ProcessJoinAfterExpand()
     for (IMS_UINT32 i = 0; i < m_objParticipantList.GetSize(); i++)
     {
         ConfUser* pConfUser = m_objParticipantList.GetConfUsers().GetAt(i);
-        if (pConfUser->eStatus == CONFINFO_STATUS_IDLE)
+        if (pConfUser->eStatus == STATUS_IDLE)
         {
             nStartIndex = i;
             break;
@@ -412,7 +412,7 @@ void ExpandController::ProcessJoinAfterExpand()
     for (IMS_UINT32 i = nStartIndex; i < m_objParticipantList.GetSize(); i++)
     {
         ConfUser* pConfUser = m_objParticipantList.GetConfUsers().GetAt(i);
-        IMS_TRACE_D("ProcessJoinAfterExpand : user [%s]", pConfUser->aStrTarget.GetStr(), 0, 0);
+        IMS_TRACE_D("ProcessJoinAfterExpand : user [%s]", pConfUser->strTarget.GetStr(), 0, 0);
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_REFER_INVITE, pConfUser);
     }
 
@@ -462,7 +462,7 @@ void ExpandController::RecoverOnReferring()
     for (IMS_UINT32 nIndex = 0; nIndex < objConfUsers.GetSize(); nIndex++)
     {
         ConfUser* pConfUser = objConfUsers.GetAt(nIndex);
-        pConfUser->eStatus = CONFINFO_STATUS_FAIL;
+        pConfUser->eStatus = STATUS_FAIL;
     }
 
     NotifyUsersInfo();

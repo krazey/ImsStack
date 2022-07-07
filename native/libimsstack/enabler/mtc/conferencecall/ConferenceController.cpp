@@ -633,18 +633,18 @@ PROTECTED VIRTUAL void ConferenceController::UpdateUserStatusByReferResult(IN Co
     {
         if (piConfRef->GetType() == REFERENCE_TYPE_INVITE)
         {
-            pUser->eStatus = CONFINFO_STATUS_DIALING_OUT;
+            pUser->eStatus = STATUS_DIALING_OUT;
         }
     }
     else if (nStatusCode == SipStatusCode::SC_200)
     {
         if (piConfRef->GetType() == REFERENCE_TYPE_INVITE)
         {
-            pUser->eStatus = CONFINFO_STATUS_CONNECTED;
+            pUser->eStatus = STATUS_CONNECTED;
         }
         else if (piConfRef->GetType() == REFERENCE_TYPE_BYE)
         {
-            pUser->eStatus = CONFINFO_STATUS_DISCONNECTED;
+            pUser->eStatus = STATUS_DISCONNECTED;
         }
     }
 
@@ -744,7 +744,7 @@ PROTECTED VIRTUAL void ConferenceController::InviteParticipants(IN IMSList<ConfU
         {
             ConfUser* pConfUser = objUsers.GetAt(i);
             strReferInviteUri =
-                    (pConfUser != IMS_NULL) ? pConfUser->aStrTarget : AString::ConstNull();
+                    (pConfUser != IMS_NULL) ? pConfUser->strTarget : AString::ConstNull();
             m_objParticipantList.SetReferInviteUri(strReferInviteUri, pConfUser);
         }
 

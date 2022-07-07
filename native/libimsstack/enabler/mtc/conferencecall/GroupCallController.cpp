@@ -50,7 +50,7 @@ PUBLIC VIRTUAL void GroupCallController::OnReferenceStartFailed(IN IConferenceRe
 
     if (pTempUser != IMS_NULL)
     {
-        pTempUser->eStatus = CONFINFO_STATUS_FAIL;
+        pTempUser->eStatus = STATUS_FAIL;
     }
 
     Recover();

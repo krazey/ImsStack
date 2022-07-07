@@ -1245,16 +1245,7 @@ PROTECTED VIRTUAL void DEMngr::SendTerminatedToListn(IN CallReasonInfo terminate
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL void DEMngr::SendNotifyInfoToUI(IN IMSList<DialogInfo*> lstDialogInfos)
-{
-    IUUCServiceDialogsNotifyInfoParam* pParam = new IUUCServiceDialogsNotifyInfoParam();
-    pParam->lstDialogInfos = lstDialogInfos;
-
-    IMS_TRACE_I("SendNotifyInfoToUI", 0, 0, 0);
-
-    IMS_MSG_CreateNPostThreadMessageByName(
-            m_aStrJNIServiceName, IuMtcService::DIALOGS_NOTIFY_INFO, 0, (IMS_UINTP)pParam);
-}
+PROTECTED VIRTUAL void DEMngr::SendNotifyInfoToUI(IN IMSList<DialogInfo*> /*lstDialogInfos*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */

@@ -17,6 +17,7 @@
 #include "ImsTrace.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ServiceTrace.h"
 #include "SipParsingHelper.h"
 #include "TextParser.h"
 #include "call/IMtcCall.h"

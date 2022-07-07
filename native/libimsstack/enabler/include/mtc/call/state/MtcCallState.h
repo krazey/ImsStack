@@ -40,6 +40,7 @@ class MediaInfo;
 class MtcSession;
 enum class QosLossPolicy;
 struct CallReasonInfo;
+struct ConfUser;
 
 using CallStateName = IMtcCall::State;
 

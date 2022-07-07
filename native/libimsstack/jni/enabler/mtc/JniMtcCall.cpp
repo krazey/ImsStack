@@ -26,6 +26,7 @@
 #include "JniConnectorFactory.h"
 #include "JniMtcCall.h"
 #include "JniMtcUtils.h"
+#include "conferencecall/ConferenceDef.h"
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
 

@@ -34,6 +34,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "MtcDef.h"
+#include "ServiceTrace.h"
 #include "Sip.h"
 #include "SipAddress.h"
 #include "SipHeaderName.h"

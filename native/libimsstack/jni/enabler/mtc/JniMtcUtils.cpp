@@ -21,6 +21,7 @@
 #include "JniCallInfo.h"
 #include "JniMtcUtils.h"
 #include "MtcDef.h"
+#include "conferencecall/ConferenceDef.h"
 #include <binder/Parcel.h>
 
 using namespace android;
@@ -96,13 +97,13 @@ PUBLIC GLOBAL IMSList<ConfUser*> JniMtcUtils::ReadConferenceParticipants(IN cons
         ConfUser* pUser = new ConfUser();
 
         pUser->nConnectionId = objParcel.readInt64();  // TODO: how to ... call key!!!!!???
-        ConvertString(objParcel.readString16(), pUser->aStrTarget);
-        ConvertString(objParcel.readString16(), pUser->aStrUserEntity);
-        ConvertString(objParcel.readString16(), pUser->aStrEPEntity);
-        ConvertString(objParcel.readString16(), pUser->aStrDisplayName);
+        ConvertString(objParcel.readString16(), pUser->strTarget);
+        ConvertString(objParcel.readString16(), pUser->strUserEntity);
+        ConvertString(objParcel.readString16(), pUser->strEpEntity);
+        ConvertString(objParcel.readString16(), pUser->strDisplayName);
         pUser->eStatus = objParcel.readInt32();
         pUser->eStatusCode = objParcel.readInt32();
-        pUser->eCCType = objParcel.readInt32();
+        pUser->eCcType = objParcel.readInt32();
         pUser->bAnonymize = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
 
         objUsers.Append(pUser);
@@ -175,13 +176,13 @@ PUBLIC GLOBAL void JniMtcUtils::WriteConfUsersToParcel(
         ConfUser* pUser = objUsers.GetAt(i);
 
         objParcel.writeInt64(static_cast<IMS_SINTP>(pUser->nConnectionId));  // TODO: Int32.
-        objParcel.writeString16(android::String16(pUser->aStrTarget.GetStr()));
-        objParcel.writeString16(android::String16(pUser->aStrUserEntity.GetStr()));
-        objParcel.writeString16(android::String16(pUser->aStrEPEntity.GetStr()));
-        objParcel.writeString16(android::String16(pUser->aStrDisplayName.GetStr()));
+        objParcel.writeString16(android::String16(pUser->strTarget.GetStr()));
+        objParcel.writeString16(android::String16(pUser->strUserEntity.GetStr()));
+        objParcel.writeString16(android::String16(pUser->strEpEntity.GetStr()));
+        objParcel.writeString16(android::String16(pUser->strDisplayName.GetStr()));
         objParcel.writeInt32(pUser->eStatus);
         objParcel.writeInt32(pUser->eStatusCode);
-        objParcel.writeInt32(pUser->eCCType);
+        objParcel.writeInt32(pUser->eCcType);
         objParcel.writeInt32(pUser->bAnonymize);
     }
 }

@@ -29,6 +29,7 @@
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "utility/MessageUtil.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

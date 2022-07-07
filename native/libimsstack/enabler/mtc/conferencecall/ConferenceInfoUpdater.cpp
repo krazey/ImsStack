@@ -287,9 +287,9 @@ IMS_BOOL ConferenceInfoUpdater::UpdateParticipant(
 
     AString strUserEntity;
     ConferenceUtils::GetUserPart(pUser->GetEntity(), strUserEntity);
-    pConfUser->aStrTarget = strUserEntity;
-    pConfUser->aStrUserEntity = pUser->GetEntity();
-    pConfUser->aStrEPEntity = pUser->GetEndPoints().GetAt(0)->GetEntity();
+    pConfUser->strTarget = strUserEntity;
+    pConfUser->strUserEntity = pUser->GetEntity();
+    pConfUser->strEpEntity = pUser->GetEndPoints().GetAt(0)->GetEntity();
     pConfUser->eStatus = pUser->GetEndPoints().GetAt(0)->GetStatus();
 
     if (pConfUser->eStatus == STATUS_DISCONNECTED)
@@ -882,7 +882,7 @@ IMS_BOOL ConferenceInfoUpdater::IsConnectedStatusCategory(IN IMS_UINT32 nStatus)
 {
     switch (nStatus)
     {
-        case STATUS_INVALID:
+        case STATUS_IDLE:
         case STATUS_PROGRESSING:
         case STATUS_CONNECTED:
         case STATUS_ON_HOLD:
@@ -946,7 +946,7 @@ const IMS_CHAR* ConferenceInfoUpdater::ConvertStatusToString(IN IMS_SINT32 nStat
             return ConferenceConst::STR_STATUS_CONNECT_FAIL;
 
         default:
-            return "__STATUS_INVALID__";
+            return "__STATUS_IDLE__";
     }
 }
 

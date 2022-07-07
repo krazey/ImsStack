@@ -292,8 +292,8 @@ void MtcUiNotifier::SendNotifyInfo(IN IMS_UINT32 eType,
 }
 
 PUBLIC
-void MtcUiNotifier::SendExpanded(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+void MtcUiNotifier::SendExpanded(IN CallInfo* /*pCallInfo*/, IN MediaInfo* /*pMediaInfo*/,
+        IN const IMSMap<SuppType, SuppService*>& /*objSuppServices*/)
 {
     IMS_TRACE_I("SendExpanded", 0, 0, 0);
 
@@ -301,11 +301,6 @@ void MtcUiNotifier::SendExpanded(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInf
     {
         return;
     }
-
-    IUUCSessionConfExpandedParam* pParam = new IUUCSessionConfExpandedParam();
-    pParam->pCallInfo = pCallInfo;
-    pParam->pMediaInfo = pMediaInfo;
-    pParam->objSuppServices = objSuppServices;
 }
 
 PUBLIC
@@ -317,14 +312,12 @@ void MtcUiNotifier::SendExpandFailed(IN const CallReasonInfo& objReason)
     {
         return;
     }
-
-    IUUCSessionConfExpandFailedParam* pParam = new IUUCSessionConfExpandFailedParam();
-    pParam->objReason = objReason;
 }
 
 PUBLIC
-void MtcUiNotifier::SendExpandedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IMS_SINTP nReplaceKey /*= 0 */)
+void MtcUiNotifier::SendExpandedBy(IN CallInfo* /*pCallInfo*/, IN MediaInfo* /*pMediaInfo*/,
+        IN const IMSMap<SuppType, SuppService*>& /*objSuppServices*/,
+        IN IMS_SINTP /*nReplaceKey = 0 */)
 {
     IMS_TRACE_I("SendExpandedBy", 0, 0, 0);
 
@@ -332,12 +325,6 @@ void MtcUiNotifier::SendExpandedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaI
     {
         return;
     }
-
-    IUUCSessionConfExpandedByParam* pParam = new IUUCSessionConfExpandedByParam();
-    pParam->pCallInfo = pCallInfo;
-    pParam->pMediaInfo = pMediaInfo;
-    pParam->objSuppServices = objSuppServices;
-    pParam->nReplaceKey = nReplaceKey;
 }
 
 PUBLIC
@@ -439,9 +426,9 @@ void MtcUiNotifier::SendNotifyConfInfo(IN AString strDisplayText, IN AString str
 }
 
 PUBLIC
-void MtcUiNotifier::SendReplacedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IMS_SINTP nKey,
-        IN IMS_UINTP nType)
+void MtcUiNotifier::SendReplacedBy(IN CallInfo* /*pCallInfo*/, IN MediaInfo* /*pMediaInfo*/,
+        IN const IMSMap<SuppType, SuppService*>& /*objSuppServices*/, IN IMS_SINTP nKey,
+        IN IMS_UINTP /*nType*/)
 {
     IMS_TRACE_I("SendReplacedBy : Key[%" PFLS_u "]", nKey, 0, 0);
 
@@ -449,14 +436,6 @@ void MtcUiNotifier::SendReplacedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaI
     {
         return;
     }
-
-    IUUCSessionECTStartedParam* pParam = new IUUCSessionECTStartedParam();
-
-    pParam->pCallInfo = pCallInfo;
-    pParam->pMediaInfo = pMediaInfo;
-    pParam->objSuppServices = objSuppServices;
-    pParam->nReplaceKey = nKey;
-    pParam->nType = nType;
 }
 
 PUBLIC
@@ -480,10 +459,6 @@ void MtcUiNotifier::SendCallPushCompleted(IN IMS_BOOL bResult, IN const CallReas
     {
         return;
     }
-
-    IUUCSessionCallPushCompletedParam* pParam = new IUUCSessionCallPushCompletedParam();
-    pParam->bResult = bResult;
-    pParam->objReason = objReason;
 }
 
 PRIVATE

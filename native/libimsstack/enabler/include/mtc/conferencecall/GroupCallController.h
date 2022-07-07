@@ -22,11 +22,11 @@
 
 class IMtcCallContext;
 class IConferenceReference;
-class ConfUser;
 class MediaInfo;
 class SuppService;
 struct CallStartOperationParams;
 struct CallInfo;
+struct ConfUser;
 
 class GroupCallController final : public ConferenceController
 {

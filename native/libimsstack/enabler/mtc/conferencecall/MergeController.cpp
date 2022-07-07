@@ -201,7 +201,7 @@ void MergeController::UpdateUserStateBySessionTerminated(IN IMS_UINTP nCallKey)
         if (m_objConnectionIdManager.GetCallKey(
                     m_objParticipantList.GetConfUser(i)->nConnectionId) == nCallKey)
         {
-            pUser->eStatus = CONFINFO_STATUS_DISCONNECTED;
+            pUser->eStatus = STATUS_DISCONNECTED;
             NotifyUsersInfo();
             break;
         }
@@ -230,7 +230,7 @@ void MergeController::RecoverOnReferring()
     }
 
     ConfUser* pConfUser = m_objOperationQueue.GetUsersOfCurrentOperation().GetAt(0);
-    if (pConfUser && pConfUser->eStatus == CONFINFO_STATUS_CONNECTED)
+    if (pConfUser && pConfUser->eStatus == STATUS_CONNECTED)
     {
         // abnormal case. network doesn't send R-NOTIFY 200 but C-NOTIFY connected is received
         // the timer must be stopped.
@@ -252,7 +252,7 @@ void MergeController::RecoverOnReferring()
     {
         IMS_TRACE_I("RecoverOnReferring : failure after at least one member added.", 0, 0, 0);
 
-        pConfUser->eStatus = CONFINFO_STATUS_DISCONNECTED;
+        pConfUser->eStatus = STATUS_DISCONNECTED;
         CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_REFER_INVITE, pConfUser);
     }
     else
@@ -329,7 +329,7 @@ void MergeController::ClearIndividualCallOnMergeFailed()
             continue;
         }
 
-        if (pTempUser->eStatus != CONFINFO_STATUS_IDLE)
+        if (pTempUser->eStatus != STATUS_IDLE)
         {
             // state is updated already
             IMS_TRACE_I("ClearIndividualCallOnMergeFailed : user state changed", 0, 0, 0);

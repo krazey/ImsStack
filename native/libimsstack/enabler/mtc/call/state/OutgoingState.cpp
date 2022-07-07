@@ -30,6 +30,7 @@
 #include "call/message/MessageSender.h"
 #include "utility/MessageUtil.h"
 #include "MtcDef.h"
+#include "ServiceTrace.h"
 #include "call/MtcSession.h"
 #include "helper/MtcTimerWrapper.h"
 #include "call/MtcUiNotifier.h"

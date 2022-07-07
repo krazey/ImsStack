@@ -19,6 +19,7 @@
 #include "call/IMtcCallManager.h"
 #include "call/block/CallCountBlockRule.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

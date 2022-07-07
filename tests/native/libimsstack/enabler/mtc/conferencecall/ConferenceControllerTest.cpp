@@ -315,7 +315,7 @@ TEST_F(ConferenceControllerTest, OnByeReferenceStarted)
 
     pController->OnReferenceStarted(&objReference);
 
-    EXPECT_EQ(objUser.eStatus, CONFINFO_STATUS_DISCONNECTED);
+    EXPECT_EQ(objUser.eStatus, STATUS_DISCONNECTED);
     EXPECT_EQ(objUser.eStatusCode, SipStatusCode::SC_200);
 }
 
@@ -344,7 +344,7 @@ TEST_F(ConferenceControllerTest, OnInviteReferenceUpdatedSipFrag200)
 
     pController->OnReferenceUpdated(&objReference, SIPFRAG, ReferSubscriptionState::ACTIVE);
 
-    EXPECT_EQ(objUser.eStatus, CONFINFO_STATUS_CONNECTED);
+    EXPECT_EQ(objUser.eStatus, STATUS_CONNECTED);
     EXPECT_EQ(objUser.eStatusCode, SIPFRAG);
 }
 
@@ -358,7 +358,7 @@ TEST_F(ConferenceControllerTest, OnInviteReferenceUpdatedSipFrag100)
 
     pController->OnReferenceUpdated(&objReference, SIPFRAG, ReferSubscriptionState::ACTIVE);
 
-    EXPECT_EQ(objUser.eStatus, CONFINFO_STATUS_DIALING_OUT);
+    EXPECT_EQ(objUser.eStatus, STATUS_DIALING_OUT);
     EXPECT_EQ(objUser.eStatusCode, SIPFRAG);
 }
 
@@ -372,7 +372,7 @@ TEST_F(ConferenceControllerTest, OnInviteReferenceUpdatedSipFragError)
 
     pController->OnReferenceUpdated(&objReference, SIPFRAG, ReferSubscriptionState::ACTIVE);
 
-    EXPECT_EQ(objUser.eStatus, CONFINFO_STATUS_IDLE);
+    EXPECT_EQ(objUser.eStatus, STATUS_IDLE);
     EXPECT_EQ(objUser.eStatusCode, SIPFRAG);
 }
 

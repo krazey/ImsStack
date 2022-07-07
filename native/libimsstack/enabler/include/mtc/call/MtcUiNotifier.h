@@ -33,6 +33,7 @@ class MediaInfo;
 class SuppService;
 struct CallInfo;
 struct CallReasonInfo;
+struct ConfUser;
 
 // TODO: remove unused parameter
 // TODO: get SuppService from the context

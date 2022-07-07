@@ -18,10 +18,10 @@
 #define URI_FORMATTER_H_
 
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 
 class AString;
 class IMtcCallContext;
+struct ConfUser;
 
 class UriFormatter
 {

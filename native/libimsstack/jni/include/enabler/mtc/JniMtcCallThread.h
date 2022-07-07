@@ -28,7 +28,7 @@ struct JniCallInfo;
 struct CallReasonInfo;
 class MediaInfo;
 class SuppService;
-class ConfUser;
+struct ConfUser;
 
 class JniMtcCallThread final : public BaseServiceThread
 {

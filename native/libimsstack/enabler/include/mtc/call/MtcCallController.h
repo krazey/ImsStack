@@ -31,6 +31,7 @@ class JniMediaSessionThread;
 class JniMtcCallThread;
 class JniMtcServiceThread;
 enum class KeyType;
+struct ConfUser;
 union Key;
 
 /**

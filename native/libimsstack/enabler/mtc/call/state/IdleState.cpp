@@ -22,6 +22,7 @@
 #include "JniMtcServiceThread.h"
 #include "MediaDef.h"
 #include "MtcDef.h"
+#include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"

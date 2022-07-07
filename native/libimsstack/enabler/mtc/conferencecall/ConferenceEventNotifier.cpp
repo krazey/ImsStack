@@ -69,20 +69,12 @@ void ConferenceEventNotifier::NotifyGroupCallStarted()
     IMS_TRACE_I("NotifyGroupCallStarted", 0, 0, 0);
 
     // piCall->SetStartedToUI();
-
-    IUUCSessionStartedParam* pParam = new IUUCSessionStartedParam();
-    pParam->pCallInfo = CloneCallInfo();
-    pParam->pMediaInfo = CloneMediaInfo();
-    pParam->objSuppServices = m_objConfCallContext.GetSupplementaryService().GetServices();
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyGroupCallFailed(IN CallReasonInfo objReason)
+void ConferenceEventNotifier::NotifyGroupCallFailed(IN CallReasonInfo /*objReason*/)
 {
     IMS_TRACE_I("NotifyGroupCallFailed", 0, 0, 0);
-
-    IUUCSessionStartFailedParam* pParam = new IUUCSessionStartFailedParam();
-    pParam->objReason = objReason;
 }
 
 PUBLIC
@@ -91,20 +83,12 @@ void ConferenceEventNotifier::NotifyExpanded()
     IMS_TRACE_I("NotifyExpanded", 0, 0, 0);
 
     // piCall->SetStartedToUI();
-
-    IUUCSessionConfExpandedParam* pParam = new IUUCSessionConfExpandedParam();
-    pParam->pCallInfo = CloneCallInfo();
-    pParam->pMediaInfo = CloneMediaInfo();
-    pParam->objSuppServices = m_objConfCallContext.GetSupplementaryService().GetServices();
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyExpandFailed(IN CallReasonInfo objReason)
+void ConferenceEventNotifier::NotifyExpandFailed(IN CallReasonInfo /*objReason*/)
 {
     IMS_TRACE_I("NotifyExpandFailed", 0, 0, 0);
-
-    IUUCSessionConfExpandFailedParam* pParam = new IUUCSessionConfExpandFailedParam();
-    pParam->objReason = objReason;
 }
 
 PUBLIC
@@ -223,15 +207,15 @@ void ConferenceEventNotifier::CheckDisconnectedConfUsersInfo(
         }
 
         IMS_UINT32 nStatus = pParticipant->GetConfUser()->eStatus;
-        if (nStatus == CONFINFO_STATUS_DISCONNECTED || nStatus == CONFINFO_STATUS_DISCONNECTING ||
-                (nStatus >= CONFINFO_STATUS_FAIL && nStatus <= CONFINFO_STATUS_INTSERVERERROR))
+        if (nStatus == STATUS_DISCONNECTED || nStatus == STATUS_DISCONNECTING ||
+                (nStatus >= STATUS_FAIL && nStatus <= STATUS_INTSERVERERROR))
         // TODO: list up all the status names, not range.
         {
             if (pParticipant->IsDisconnectionNotified())
             {
                 ConfUser* pConfUser = objUsers.GetAt(i);
                 IMS_TRACE_D("CheckDisconnectedConfUsersInfo : target[%s] status[%d]",
-                        pConfUser->aStrTarget.GetStr(), pConfUser->eStatus, 0);
+                        pConfUser->strTarget.GetStr(), pConfUser->eStatus, 0);
 
                 delete pConfUser;
                 objUsers.RemoveAt(i);

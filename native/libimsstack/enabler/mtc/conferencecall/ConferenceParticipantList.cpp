@@ -63,13 +63,13 @@ void ConferenceParticipantList::ConferenceParticipant::Login()
     objBuffer.Append("ConnectionId=");
     objBuffer.Append(m_pConfUser->nConnectionId);
     objBuffer.Append(" Target=");
-    objBuffer.Append(m_pConfUser->aStrTarget);
+    objBuffer.Append(m_pConfUser->strTarget);
     objBuffer.Append(" UserEntity=");
-    objBuffer.Append(m_pConfUser->aStrUserEntity);
+    objBuffer.Append(m_pConfUser->strUserEntity);
     objBuffer.Append(" EPEntity=");
-    objBuffer.Append(m_pConfUser->aStrEPEntity);
+    objBuffer.Append(m_pConfUser->strEpEntity);
     objBuffer.Append(" DisplayName=");
-    objBuffer.Append(m_pConfUser->aStrDisplayName);
+    objBuffer.Append(m_pConfUser->strDisplayName);
     objBuffer.Append(" Status=");
     objBuffer.Append(m_pConfUser->eStatus);
 
@@ -122,19 +122,16 @@ IMS_BOOL ConferenceParticipantList::IsConnectedUser(
         return IMS_FALSE;
     }
 
-    if (pConfUser->eStatus == CONFINFO_STATUS_CONNECTED ||
-            pConfUser->eStatus == CONFINFO_STATUS_ONHOLD)
+    if (pConfUser->eStatus == STATUS_CONNECTED || pConfUser->eStatus == STATUS_ON_HOLD)
     {
         return IMS_TRUE;
     }
 
     if (bIncludingConnecting)
     {
-        if (pConfUser->eStatus == CONFINFO_STATUS_IDLE ||
-                pConfUser->eStatus == CONFINFO_STATUS_PENDING ||
-                pConfUser->eStatus == CONFINFO_STATUS_ALERTING ||
-                pConfUser->eStatus == CONFINFO_STATUS_DIALING_IN ||
-                pConfUser->eStatus == CONFINFO_STATUS_DIALING_OUT)
+        if (pConfUser->eStatus == STATUS_IDLE || pConfUser->eStatus == STATUS_PENDING ||
+                pConfUser->eStatus == STATUS_ALERTING || pConfUser->eStatus == STATUS_DIALING_IN ||
+                pConfUser->eStatus == STATUS_DIALING_OUT)
         {
             return IMS_TRUE;
         }

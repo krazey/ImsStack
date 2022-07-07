@@ -23,9 +23,9 @@
 class IMtcCallContext;
 class MediaInfo;
 class SuppService;
-class ConfUser;
 struct CallInfo;
 struct CallStartOperationParams;
+struct ConfUser;
 
 class MergeController final : public ConferenceController
 {

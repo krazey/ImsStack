@@ -27,12 +27,12 @@
 #include <functional>
 
 class AString;
-class ConfUser;
 class IMessage;
 class IMtcCallContext;
 class JniMtcServiceThread;
 class MediaInfo;
 class SuppService;
+struct ConfUser;
 
 /**
  * Represents the state that any messages have not been sent to the remote.

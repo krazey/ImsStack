@@ -23,7 +23,6 @@
 #include "call/IMtcCall.h"
 
 class AStringBuffer;
-class ConfUser;
 class IMessage;
 class IMessageBodyPart;
 class Ims3gpp;
@@ -33,6 +32,7 @@ class ISipMessage;
 class IMtcCall;
 class SipAddress;
 class SipParameter;
+struct ConfUser;
 
 class MessageUtil
 {

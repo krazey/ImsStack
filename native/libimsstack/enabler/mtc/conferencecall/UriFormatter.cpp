@@ -67,12 +67,12 @@ PUBLIC GLOBAL AString& UriFormatter::GetReferToForInvite(
         return strUri;
     }
 
-    if ((pConfUser != IMS_NULL) && (pConfUser->aStrTarget.GetLength() <= 0))
+    if ((pConfUser != IMS_NULL) && (pConfUser->strTarget.GetLength() <= 0))
     {
         return strUri;
     }
 
-    strUri = pConfUser->aStrTarget;
+    strUri = pConfUser->strTarget;
     ConvertToValidSipUri(strUri, objContext);
 
     IMS_TRACE_I("GetReferToForInvite [%s]", strUri.GetStr(), 0, 0);
@@ -82,7 +82,7 @@ PUBLIC GLOBAL AString& UriFormatter::GetReferToForInvite(
 PUBLIC GLOBAL AString& UriFormatter::GetReferToForBye(
         OUT AString& strUri, IN const ConfUser* pConfUser, IN const AString& strInvitedUri)
 {
-    AString strUserEntity = pConfUser ? pConfUser->aStrUserEntity : AString::ConstNull();
+    AString strUserEntity = pConfUser ? pConfUser->strUserEntity : AString::ConstNull();
     if (strUserEntity.GetLength() == 0)
     {
         strUri = strInvitedUri;
@@ -116,7 +116,7 @@ PUBLIC GLOBAL AString& UriFormatter::GetReferToForBye(
         return strUri;
     }
 
-    strUri = pConfUser->aStrUserEntity;
+    strUri = pConfUser->strUserEntity;
 
     // sip Uri from 'user entity' && no 'anonymous' case only.
     if (strUri.GetLength() > 0 && !strUri.Contains(STR_USER_PHONE))

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/termination/CancelHandler.h"
 #include "utility/MessageUtil.h"

@@ -17,6 +17,8 @@
 #ifndef CONFERENCE_DEF_H_
 #define CONFERENCE_DEF_H_
 
+#include "MtcDef.h"
+
 //
 enum
 {
@@ -41,10 +43,9 @@ enum
     CONTROL_OPERATION_NOTIFY_RESULT_TO_UCSESSION = 11
 };
 
-// TODO: align with CONFINFO_STATUS....?
 enum
 {
-    STATUS_INVALID = 0,
+    STATUS_IDLE = 0,
     STATUS_PROGRESSING = 1,
     STATUS_CONNECTED = 2,
     STATUS_DISCONNECTED = 3,
@@ -69,21 +70,6 @@ enum
     STATUS_INTSERVERERROR = 30
 };
 
-/*
-UCSessDef::CONFINFO_STATUS
-
-    CONFINFO_STATUS_PROGRESSING             = 1, //ByConfMngr, Intrtnal information for UX
-    CONFINFO_STATUS_CONNECTED               = 2,
-    CONFINFO_STATUS_DISCONNECTED            = 3,
-    CONFINFO_STATUS_ONHOLD                  = 4,
-    CONFINFO_STATUS_MUTEDVIAFOCUS           = 5,
-    CONFINFO_STATUS_PENDING                 = 6,
-    CONFINFO_STATUS_ALERTING                = 7,
-    CONFINFO_STATUS_DIALING_IN              = 8,
-    CONFINFO_STATUS_DIALING_OUT             = 9,
-    CONFINFO_STATUS_DISCONNECTING           = 10,
-*/
-
 enum
 {
     CONF_MEDIA_TYPE_AUDIO = 0,
@@ -104,6 +90,59 @@ enum
     CONF_SUBSCRIPTION_DIALOG_TYPE_IN = 0,
     CONF_SUBSCRIPTION_DIALOG_TYPE_OUT = 1,
     CONF_SUBSCRIPTION_DIALOG_TYPE_FALLBACK = 2  // IN failed, so OUT is being used.
+};
+
+struct ConfUser
+{
+public:
+    inline ConfUser() :
+            nConnectionId(0),
+            strTarget(AString::ConstNull()),
+            strUserEntity(AString::ConstNull()),
+            strEpEntity(AString::ConstNull()),
+            strDisplayName(AString::ConstNull()),
+            eStatus(STATUS_IDLE),
+            eStatusCode(-1),
+            eCcType(COPYCONTROLTYPE_TO),
+            bAnonymize(IMS_FALSE)
+    {
+    }
+    inline ConfUser(IN const ConfUser& objRhs) :
+
+            nConnectionId(objRhs.nConnectionId),
+            strTarget(objRhs.strTarget),
+            strUserEntity(objRhs.strUserEntity),
+            strEpEntity(objRhs.strEpEntity),
+            strDisplayName(objRhs.strDisplayName),
+            eStatus(objRhs.eStatus),
+            eStatusCode(objRhs.eStatusCode),
+            eCcType(objRhs.eCcType),
+            bAnonymize(objRhs.bAnonymize)
+    {
+    }
+    inline ~ConfUser() {}
+
+    ConfUser& operator=(IN const ConfUser&) = delete;
+
+public:
+    // connection id for a specific MtcCall
+    IMS_UINT32 nConnectionId;
+    // Phone Number for User Paricinpant - ex) Join
+    AString strTarget;
+    // Main Key after subscription for confernece from NOTIFY
+    AString strUserEntity;
+    // from NOTIFY about Conference Event package
+    AString strEpEntity;
+    // from NOTIFY about Conference Event package, by converting the operator's requirement
+    AString strDisplayName;
+    // Main Information from NOTIFY about Conference Event package
+    IMS_UINT32 eStatus;
+    // the detail code for eStatus
+    IMS_SINT32 eStatusCode;
+    // from NOTIFY about Conference Event package
+    IMS_UINT32 eCcType;
+    // from NOTIFY about Conference Event package
+    IMS_BOOL bAnonymize;
 };
 
 #endif

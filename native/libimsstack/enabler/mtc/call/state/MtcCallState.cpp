@@ -21,6 +21,7 @@
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "MtcDef.h"
+#include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "ISipServerConnection.h"
 #include "call/IMtcCallContext.h"

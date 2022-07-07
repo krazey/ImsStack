@@ -26,6 +26,7 @@
 #include "ISipMessage.h"
 #include "utility/MessageUtil.h"
 #include "ServiceSystemTime.h"
+#include "ServiceTrace.h"
 #include "Sip.h"
 #include "SipAddress.h"
 #include "SipHeaderName.h"
@@ -33,6 +34,7 @@
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "TextParser.h"
+#include "conferencecall/ConferenceDef.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -1304,20 +1306,20 @@ PUBLIC GLOBAL IMS_RESULT MessageUtil::SetResourceListByConfUser(IN_OUT IMessage*
         }
 
         objXml += "<entry uri=\"";
-        if (pConfUser->aStrUserEntity.GetLength() < 1)
+        if (pConfUser->strUserEntity.GetLength() < 1)
         {
-            objXml += pConfUser->aStrTarget;
+            objXml += pConfUser->strTarget;
         }
         else
         {
-            objXml += pConfUser->aStrUserEntity;
+            objXml += pConfUser->strUserEntity;
         }
         objXml += "\"";
 
         if (bCopyControl)
         {
             objXml += " cp:copyControl=";
-            switch (pConfUser->eCCType)
+            switch (pConfUser->eCcType)
             {
                 case COPYCONTROLTYPE_TO:
                     objXml += "\"to\"";

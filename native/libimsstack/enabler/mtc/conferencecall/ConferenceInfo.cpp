@@ -547,6 +547,6 @@ IMS_UINT32 ConferenceInfo::ConvertStatus(IN const AString& strStatus)
     else
     {
         // default value
-        return STATUS_INVALID;
+        return STATUS_IDLE;
     }
 }

@@ -22,6 +22,7 @@
 #include "helper/MtcTimerWrapper.h"
 #include "IMessage.h"
 #include "ISession.h"
+#include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "utility/MessageUtil.h"
 #include "helper/MtcSupplementaryService.h"

@@ -16,6 +16,7 @@
 
 #include "ImsEventDef.h"
 #include "IMtcImsEventReceiver.h"
+#include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/block/CsCallBlockRule.h"
 

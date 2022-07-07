@@ -21,11 +21,11 @@
 
 class IMtcCallContext;
 class IConferenceReference;
-class ConfUser;
 class MediaInfo;
 class SuppService;
 struct CallInfo;
 struct CallStartOperationParams;
+struct ConfUser;
 
 class ExpandController final : public ConferenceController
 {

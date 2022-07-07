@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ServiceTrace.h"
 #include "call/MtcSession.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"

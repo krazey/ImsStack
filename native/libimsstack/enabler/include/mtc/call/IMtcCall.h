@@ -25,7 +25,6 @@
 #include "IMtcService.h"
 
 class CallContext;
-class ConfUser;
 class ISession;
 class IDialogEvent;
 class JniMediaSessionThread;
@@ -36,6 +35,7 @@ class SuppService;
 class IMtcCallContext;
 enum class UpdateType;
 struct CallReasonInfo;
+struct ConfUser;
 
 using CallKey = IMS_ULONG;
 

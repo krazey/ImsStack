@@ -107,7 +107,7 @@ public:
                     strEntity(AString::ConstNull()),
                     nState(STATE_INVALID),
                     strDisplayText(AString::ConstNull()),
-                    nStatus(STATUS_INVALID)
+                    nStatus(STATUS_IDLE)
             {
             }
             inline ~EndPoint() {}

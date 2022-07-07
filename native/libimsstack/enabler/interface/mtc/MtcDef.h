@@ -18,9 +18,8 @@
 #define MTC_DEF_H_
 
 #include "AString.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "IMtcService.h"
-#include "ServiceTrace.h"
 
 // TODO, MTC BUILD
 #ifndef UNUSED_PARAM
@@ -429,37 +428,6 @@ enum
     CONF_CREATE_EXPANDED_BY = 5,
 };
 
-enum CONFINFO_STATUS
-{
-    CONFINFO_STATUS_IDLE = 0,
-
-    CONFINFO_STATUS_PROGRESSING = 1,  // ByConfMngr, Intrtnal information for UX
-    CONFINFO_STATUS_CONNECTED = 2,
-    CONFINFO_STATUS_DISCONNECTED = 3,
-    CONFINFO_STATUS_ONHOLD = 4,
-    CONFINFO_STATUS_MUTEDVIAFOCUS = 5,
-    CONFINFO_STATUS_PENDING = 6,
-    CONFINFO_STATUS_ALERTING = 7,
-    CONFINFO_STATUS_DIALING_IN = 8,
-    CONFINFO_STATUS_DIALING_OUT = 9,
-    CONFINFO_STATUS_DISCONNECTING = 10,
-
-    CONFINFO_STATUS_FAIL = 20,  // ByConfMngr, Intrtnal information for UX
-    CONFINFO_STATUS_REJECT = 21,
-    CONFINFO_STATUS_BUSY = 22,
-    CONFINFO_STATUS_SERVERERROR = 23,
-    CONFINFO_STATUS_NOTSUPPORTED = 24,
-    CONFINFO_STATUS_NOTACCEPTABLE = 25,
-    CONFINFO_STATUS_NOANSWER = 26,
-    CONFINFO_STATUS_NOTREACHABLE = 27,
-    CONFINFO_STATUS_LOWBATTERY = 28,
-    CONFINFO_STATUS_FORBIDDEN = 29,
-    CONFINFO_STATUS_INTSERVERERROR = 30,
-
-    CONFINFO_STATUS_IDLING = 98,
-    CONFINFO_STATUS_UNKNOWN = 99,
-};
-
 enum
 {
     REPALCED_BY_TYPE_ECT = 0,
@@ -670,8 +638,6 @@ public:
             eVQuality(0),
             eGTTMode(-1)
     {
-        IMS_TRACE_MEM(
-                "uc", "uc_M : MediaInfo[%" PFLS_u "][%" PFLS_x "]", sizeof(MediaInfo), this, 0);
     }
     inline MediaInfo(IN const MediaInfo& objRHS) :
             eADir(objRHS.eADir),
@@ -681,8 +647,6 @@ public:
             eVQuality(objRHS.eVQuality),
             eGTTMode(objRHS.eGTTMode)
     {
-        IMS_TRACE_MEM(
-                "uc", "uc_M : MediaInfo[%" PFLS_u "][%" PFLS_x "]", sizeof(MediaInfo), this, 0);
     }
     inline MediaInfo(IN IMS_SINT32 eInitADir, IN IMS_SINT32 eInitVDir, IN IMS_SINT32 eInitTDir,
             IN IMS_UINT32 eInitAQuality, IN IMS_UINT32 eInitVQuality, IN IMS_SINT32 eInitGTTMode) :
@@ -693,14 +657,8 @@ public:
             eVQuality(eInitVQuality),
             eGTTMode(eInitGTTMode)
     {
-        IMS_TRACE_MEM(
-                "uc", "uc_M : MediaInfo[%" PFLS_u "][%" PFLS_x "]", sizeof(MediaInfo), this, 0);
     }
-    inline ~MediaInfo()
-    {
-        IMS_TRACE_MEM(
-                "uc", "uc_F : MediaInfo[%" PFLS_u "][%" PFLS_x "]", sizeof(MediaInfo), this, 0);
-    }
+    inline ~MediaInfo() {}
 
 public:
     inline MediaInfo& operator=(IN const MediaInfo& objRHS)
@@ -737,31 +695,23 @@ public:
             nValue(0),
             bValue(IMS_FALSE)
     {
-        IMS_TRACE_MEM(
-                "uc", "uc_M : SuppService[%" PFLS_u "][%" PFLS_x "]", sizeof(SuppService), this, 0);
     }
     inline SuppService(IN const SuppService& objRHS) :
             strValue(objRHS.strValue),
             nValue(objRHS.nValue),
             bValue(objRHS.bValue)
     {
-        IMS_TRACE_MEM(
-                "uc", "uc_M : SuppService[%" PFLS_u "][%" PFLS_x "]", sizeof(SuppService), this, 0);
     }
-    inline ~SuppService()
-    {
-        IMS_TRACE_MEM(
-                "uc", "uc_F : SuppService[%" PFLS_u "][%" PFLS_x "]", sizeof(SuppService), this, 0);
-    }
+    inline ~SuppService() {}
 
 public:
-    inline SuppService& operator=(IN const SuppService& objRHS)
+    inline SuppService& operator=(IN const SuppService& objRhs)
     {
-        if (this != &objRHS)
+        if (this != &objRhs)
         {
-            strValue = objRHS.strValue;
-            nValue = objRHS.nValue;
-            bValue = objRHS.bValue;
+            strValue = objRhs.strValue;
+            nValue = objRhs.nValue;
+            bValue = objRhs.bValue;
         }
 
         return (*this);
@@ -781,22 +731,14 @@ public:
             eCCType(COPYCONTROLTYPE_TO),
             bAnonymize(IMS_FALSE)
     {
-        IMS_TRACE_MEM(
-                "uc", "uc_M : Recipient[%" PFLS_u "][%" PFLS_x "]", sizeof(Recipient), this, 0);
     }
     inline Recipient(IN const Recipient& objRHS) :
             strTarget(objRHS.strTarget),
             eCCType(objRHS.eCCType),
             bAnonymize(objRHS.bAnonymize)
     {
-        IMS_TRACE_MEM(
-                "uc", "uc_M : Recipient[%" PFLS_u "][%" PFLS_x "]", sizeof(Recipient), this, 0);
     }
-    inline ~Recipient()
-    {
-        IMS_TRACE_MEM(
-                "uc", "uc_F : Recipient[%" PFLS_u "][%" PFLS_x "]", sizeof(Recipient), this, 0);
-    }
+    inline ~Recipient() {}
 
 public:
     inline Recipient& operator=(IN const Recipient& objRHS)
@@ -814,60 +756,6 @@ public:
 public:
     AString strTarget;
     IMS_UINT32 eCCType;
-    IMS_BOOL bAnonymize;
-};
-
-// TODO: move to conference header / struct / ConferenceUser / aStr to str / remove unused.
-class ConfUser
-{
-public:
-    inline ConfUser() :
-            nConnectionId(0),
-            aStrTarget(AString::ConstNull()),
-            aStrUserEntity(AString::ConstNull()),
-            aStrEPEntity(AString::ConstNull()),
-            aStrDisplayName(AString::ConstNull()),
-            eStatus(CONFINFO_STATUS_IDLE),
-            eStatusCode(-1),
-            eCCType(COPYCONTROLTYPE_TO),
-            bAnonymize(IMS_FALSE)
-    {
-    }
-    inline ConfUser(IN const ConfUser& objRHS) :
-
-            nConnectionId(objRHS.nConnectionId),
-            aStrTarget(objRHS.aStrTarget),
-            aStrUserEntity(objRHS.aStrUserEntity),
-            aStrEPEntity(objRHS.aStrEPEntity),
-            aStrDisplayName(objRHS.aStrDisplayName),
-            eStatus(objRHS.eStatus),
-            eStatusCode(objRHS.eStatusCode),
-            eCCType(objRHS.eCCType),
-            bAnonymize(objRHS.bAnonymize)
-    {
-    }
-    inline ~ConfUser() {}
-
-    ConfUser& operator=(IN const ConfUser&) = delete;
-
-public:
-    // connection id for a specific MtcCall
-    IMS_UINT32 nConnectionId;
-    // Phone Number for User Paricinpant - ex) Join
-    AString aStrTarget;
-    // Main Key after subscription for confernece from NOTIFY
-    AString aStrUserEntity;
-    // from NOTIFY about Conference Event package
-    AString aStrEPEntity;
-    // from NOTIFY about Conference Event package, by converting the operator's requirement
-    AString aStrDisplayName;
-    // Main Information from NOTIFY about Conference Event package
-    IMS_UINT32 eStatus;
-    // the detail code for eStatus
-    IMS_SINT32 eStatusCode;
-    // from NOTIFY about Conference Event package
-    IMS_UINT32 eCCType;
-    // from NOTIFY about Conference Event package
     IMS_BOOL bAnonymize;
 };
 
@@ -891,8 +779,6 @@ public:
             bConference(IMS_FALSE),
             pMediaInfo(IMS_NULL)
     {
-        IMS_TRACE_MEM(
-                "uc", "uc_M : DialogInfo[%" PFLS_u "][%" PFLS_x "]", sizeof(DialogInfo), this, 0);
     }
     inline DialogInfo(IN const DialogInfo& objRHS) :
             aStrID(objRHS.aStrID),
@@ -911,45 +797,34 @@ public:
             bConference(objRHS.bConference),
             pMediaInfo(new MediaInfo(*(objRHS.pMediaInfo)))
     {
-        IMS_TRACE_MEM(
-                "uc", "uc_M : DialogInfo[%" PFLS_u "][%" PFLS_x "]", sizeof(DialogInfo), this, 0);
     }
-    inline ~DialogInfo()
-    {
-        IMS_TRACE_MEM(
-                "uc", "uc_F : DialogInfo[%" PFLS_u "][%" PFLS_x "]", sizeof(DialogInfo), this, 0);
-
-        if (pMediaInfo != IMS_NULL)
-        {
-            delete pMediaInfo;
-        }
-    }
+    inline ~DialogInfo() { delete pMediaInfo; }
 
 public:
-    inline DialogInfo& operator=(IN const DialogInfo& objRHS)
+    inline DialogInfo& operator=(IN const DialogInfo& objRhs)
     {
-        if (this != &objRHS)
+        if (this != &objRhs)
         {
-            aStrID = objRHS.aStrID;
-            aStrCallID = objRHS.aStrCallID;
-            aStrLocalTag = objRHS.aStrLocalTag;
-            aStrRemoteTag = objRHS.aStrRemoteTag;
-            eState = objRHS.eState;
-            eReason = objRHS.eReason;
-            eCode = objRHS.eCode;
-            aStrLocalName = objRHS.aStrLocalName;
-            aStrLocalNumber = objRHS.aStrRemoteNumber;
-            aStrRemoteName = objRHS.aStrLocalNumber;
-            aStrRemoteNumber = objRHS.aStrRemoteNumber;
-            bInitiator = objRHS.bInitiator;
-            bEnablePull = objRHS.bEnablePull;
-            bConference = objRHS.bConference;
-            pMediaInfo->eADir = objRHS.pMediaInfo->eADir;
-            pMediaInfo->eVDir = objRHS.pMediaInfo->eVDir;
-            pMediaInfo->eTDir = objRHS.pMediaInfo->eTDir;
-            pMediaInfo->eAQuality = objRHS.pMediaInfo->eAQuality;
-            pMediaInfo->eVQuality = objRHS.pMediaInfo->eVQuality;
-            pMediaInfo->eGTTMode = objRHS.pMediaInfo->eGTTMode;
+            aStrID = objRhs.aStrID;
+            aStrCallID = objRhs.aStrCallID;
+            aStrLocalTag = objRhs.aStrLocalTag;
+            aStrRemoteTag = objRhs.aStrRemoteTag;
+            eState = objRhs.eState;
+            eReason = objRhs.eReason;
+            eCode = objRhs.eCode;
+            aStrLocalName = objRhs.aStrLocalName;
+            aStrLocalNumber = objRhs.aStrRemoteNumber;
+            aStrRemoteName = objRhs.aStrLocalNumber;
+            aStrRemoteNumber = objRhs.aStrRemoteNumber;
+            bInitiator = objRhs.bInitiator;
+            bEnablePull = objRhs.bEnablePull;
+            bConference = objRhs.bConference;
+            pMediaInfo->eADir = objRhs.pMediaInfo->eADir;
+            pMediaInfo->eVDir = objRhs.pMediaInfo->eVDir;
+            pMediaInfo->eTDir = objRhs.pMediaInfo->eTDir;
+            pMediaInfo->eAQuality = objRhs.pMediaInfo->eAQuality;
+            pMediaInfo->eVQuality = objRhs.pMediaInfo->eVQuality;
+            pMediaInfo->eGTTMode = objRhs.pMediaInfo->eGTTMode;
         }
 
         return (*this);

@@ -26,7 +26,6 @@
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 
-class ConfUser;
 class IDialogEvent;
 class IMtcCallContext;
 class ISession;
@@ -37,6 +36,7 @@ class MediaInfo;
 class SuppService;
 enum class UpdateType;
 struct CallReasonInfo;
+struct ConfUser;
 
 class MockIMtcCall : public IMtcCall
 {

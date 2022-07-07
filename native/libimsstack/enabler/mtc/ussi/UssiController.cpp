@@ -21,6 +21,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
+#include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "SipMethod.h"
 

@@ -23,7 +23,6 @@
 #include "MtcDef.h"
 
 class AString;
-class ConfUser;
 class IDialogEvent;
 class IMessage;
 class IMtcCallContext;

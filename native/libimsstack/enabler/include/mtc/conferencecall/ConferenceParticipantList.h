@@ -54,7 +54,7 @@ public:
         }
         inline ConfUser* GetConfUser() { return m_pConfUser; }
 
-        inline const AString& GetUserEntity() const { return m_pConfUser->aStrUserEntity; }
+        inline const AString& GetUserEntity() const { return m_pConfUser->strUserEntity; }
 
         inline void SetReference(IN IConferenceReference* piReference)
         {

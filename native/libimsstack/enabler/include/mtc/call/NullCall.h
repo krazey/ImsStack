@@ -28,6 +28,7 @@ class JniMtcServiceThread;
 class MediaInfo;
 class SuppService;
 struct CallReasonInfo;
+struct ConfUser;
 
 /**
  * This class represents the call that doesn't exist. It has no states and basically does nothing.

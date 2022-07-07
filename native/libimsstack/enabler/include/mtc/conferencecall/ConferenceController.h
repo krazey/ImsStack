@@ -33,13 +33,13 @@
 
 class IMtcContext;
 class IConferenceReference;
-class ConfUser;
 class MediaInfo;
 class SuppService;
 class CallConnectionIdManager;
 class ConferenceFactory;
 struct CallInfo;
 struct CallStartOperationParams;
+struct ConfUser;
 
 class ConferenceController :
         public IMtcCallStateListener,

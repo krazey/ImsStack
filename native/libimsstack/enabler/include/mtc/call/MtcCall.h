@@ -63,6 +63,7 @@ class MessageSender;
 class MtcConfigurationProxy;
 class UssiController;
 struct CallReasonInfo;
+struct ConfUser;
 
 class MtcCall final :
         public IMtcCall,
