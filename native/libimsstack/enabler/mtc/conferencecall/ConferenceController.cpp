@@ -313,20 +313,20 @@ PUBLIC VIRTUAL IMS_SINT32 ConferenceController::GetState() const
 PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConference(
         IN CallKey nKey) const
 {
-    IMtcCall* piConfCall = GetConferenceCall();
-    if (piConfCall->GetKey() == nKey)
+    if (m_nConfCallKey == nKey)
     {
         IMS_TRACE_D("GetCallStatusInConference : Host Call", 0, 0, 0);
         return IndividualCallState::HOST;
     }
-    /*
-        // TODO: remove after checking if not required.
-        if (piConfCall->GetState() == State::TERMINATING)
-        {
-            IMS_TRACE_D("GetCallStatusInConference : Idle", 0, 0, 0);
-            return IndividualCallState::IDLE;
-        }
-    */
+
+    IMtcCall* piConfCall = GetConferenceCall();
+    if (/*piConfCall->GetState() == State::TERMINATING ||*/
+            piConfCall->GetKey() == -1)
+    {
+        IMS_TRACE_D("GetCallStatusInConference - Destroyed Host call", 0, 0, 0);
+        return IndividualCallState::IDLE;
+    }
+
     if (m_objOperationQueue.GetTypeOfCurrentOperation() == CONTROL_OPERATION_REFER_INVITE)
     {
         const IMSList<ConfUser*> objUsers = m_objOperationQueue.GetCurrentOperation()->GetUsers();
