@@ -31,7 +31,7 @@ public interface ISipTransportRemote {
      * @param configVersion configuration version used by client
      * @param subId subscription Id.
      */
-    public void sendMessage(@NonNull SipMessage message, long configVersion, int subId);
+    void sendMessage(@NonNull SipMessage message, long configVersion, int subId);
     /**
      * Close the ongoing session
      * @param callId id for which session to be closed
@@ -49,21 +49,14 @@ public interface ISipTransportRemote {
      * @param listener object used to notify the events
      * @param subId subscription Id.
      */
-    public void addSipTransportListener(@NonNull SipTransportRemoteListener listener ,
+    void setSipTransportListener(@NonNull SipTransportRemoteListener listener ,
             int subId);
-    /**
-     * Remove sip transport remote listener
-     * @param listener to listen to the transport event of this object
-     * @param subId subscription Id.
-     * @throws IllegalArgumentException If the listener is null.
-     */
-    public void removeSipTransportListener(@NonNull SipTransportRemoteListener listener,
-            int subId);
+
      /**
      * Called by the framework to request that the ImsService perform the network
      * registration of all SIP delegates associated with this ImsService.
      * @param featureTags The RCS FeatureTags for Registration
      * @param subId subscription Id.
      */
-    public void updateSipDelegateRegistration(@NonNull Set<String> featureTags, int subId);
+    void updateSipDelegateRegistration(@NonNull Set<String> featureTags, int subId);
 }
