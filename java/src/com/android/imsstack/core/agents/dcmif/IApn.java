@@ -7,8 +7,6 @@ import android.os.Message;
 public interface IApn {
     public static final int IPCAN_CATEGORY_MOBILE = 0;
     public static final int IPCAN_CATEGORY_WLAN = 1;
-    public static final int DEFAULT_TIME_FOR_RECOVERY = 1000;
-    public static final int TIME_FOR_WATING_LOST_EVENT = 10000;
 
     public static final int HANDOVER_UNKNOWN = 10;
     public static final int HANDOVER_START = 11;
@@ -55,23 +53,9 @@ public interface IApn {
     boolean connect();
 
     /**
-     * request apn connection to use target apn with category type.
-     * For now, API works same as connect() API and ignore ipcanType param.
-     * Additional implementation is needed if there is requirement and this API should be used.
+     * request apn disconnection to stop use of target apn.
      */
-    boolean connect(int ipcanType);
-
-    /**
-     * request apn disconnection stop to use target apn with recovery timer.
-     */
-    void disconnect(int timeAfterRecover);
-
-    /**
-     * request apn disconnection stop to use target apn with recovery timer.
-     * For now, API works same as disconnect(int timeAfterRecover) API and ignore ipcanType param.
-     * Additional implementation is needed if there is requirement and this API should be used.
-     */
-    void disconnect(int ipcanType, int timeAfterRecover);
+    boolean disconnect();
 
     /**
      * Return Apn name value of target apn

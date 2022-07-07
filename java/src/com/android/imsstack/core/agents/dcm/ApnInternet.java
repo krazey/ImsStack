@@ -66,8 +66,9 @@ public class ApnInternet extends Apn {
     }
 
     @Override
-    public void disconnect(int nTimeAfterRecover) {
+    public boolean disconnect() {
         //Do nothing for Internet PDN
+        return true;
     }
 
     // Private/Protected methods ---------------------------------

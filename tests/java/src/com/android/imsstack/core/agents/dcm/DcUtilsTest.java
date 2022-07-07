@@ -64,7 +64,11 @@ public class DcUtilsTest {
     @BeforeClass
     public static void initial() {
         sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
+        try {
+            AppContext.init(sContext.getTestDouble());
+        } catch (java.lang.IllegalThreadStateException e) {
+            // AppContext thread is already started by others.
+        }
         ImsLog.init();
     }
 

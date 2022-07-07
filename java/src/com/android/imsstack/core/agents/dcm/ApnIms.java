@@ -83,11 +83,11 @@ public class ApnIms extends Apn {
     }
 
     @Override
-    public void disconnect(int nTimeAfterRecover) {
+    public boolean disconnect() {
         synchronized (this) {
             if (mAPNState != EApnReqState.APN_REQUEST_DONE) {
                 ImsLog.w(mSlotId, "apn request is not done");
-                return;
+                return false;
             }
 
             releaseNetwork();
@@ -102,6 +102,8 @@ public class ApnIms extends Apn {
             }
 
             sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
+
+            return true;
         }
     }
 

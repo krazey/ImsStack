@@ -80,10 +80,10 @@ public class ApnXcap extends Apn {
     }
 
     @Override
-    public void disconnect(int nTimeAfterRecover) {
+    public boolean disconnect() {
         if (mAPNState != EApnReqState.APN_REQUEST_DONE) {
             ImsLog.w(mSlotId, "apn request is not done");
-            return;
+            return false;
         }
 
         if (hasMessages(EVENT_WAITING_LOCAL_ADDRESS_IPV6)) {
@@ -99,6 +99,8 @@ public class ApnXcap extends Apn {
         }
 
         sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
+
+        return true;
     }
 
     // Private/Protected methods ---------------------------------
@@ -183,7 +185,7 @@ public class ApnXcap extends Apn {
 
                 sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
 
-                disconnect(0);
+                disconnect();
             }
         }
     }
@@ -243,7 +245,7 @@ public class ApnXcap extends Apn {
             ImsLog.i(mSlotId, "airplane mode = " + radiooff.booleanValue());
 
             if (radiooff.booleanValue()) {
-                disconnect(0);
+                disconnect();
             }
         }
     }

@@ -153,7 +153,7 @@ public class DcApn implements IDcApn {
     }
 
     @Override
-    public boolean connect(int apnType, int ipcanType) {
+    public boolean connect(int apnType) {
         ISharedState ss = (ISharedState) AgentFactory.getAgent(AgentFactory.SHARED_STATE, mSlotId);
 
         if (ss == null) {
@@ -173,19 +173,20 @@ public class DcApn implements IDcApn {
             return false;
         }
 
-        return iApn.connect(ipcanType);
+        return iApn.connect();
     }
 
     @Override
-    public void disconnect(int apnType, int nTimeAfterRecover, int ipcanType) {
+    public boolean disconnect(int apnType) {
         // get proper apn controller
         IApn iApn = getApnControl(apnType);
 
         if (iApn == null) {
-            return;
+            ImsLog.w(mSlotId, "apn is null, apnType = " + apnType);
+            return false;
         }
 
-        iApn.disconnect(ipcanType, nTimeAfterRecover);
+        return iApn.disconnect();
     }
 
     @Override
@@ -594,7 +595,7 @@ public class DcApn implements IDcApn {
 
             IApn apn = mMapApn.get(key);
             if (apn != null) {
-                apn.disconnect(0);
+                apn.disconnect();
                 apn.cleanup();
             }
         }

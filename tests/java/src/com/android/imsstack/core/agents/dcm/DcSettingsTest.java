@@ -43,7 +43,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(JUnit4.class)
 public class DcSettingsTest {
     private static final int SLOT_0 = 0;
-    private DcSettings mDcSettingsUT;
+    private FakeDcSettings mDcSettingsUT;
 
     @Mock private Context mMockContext;
     @Mock private CarrierConfig mMockCarrierConfig;

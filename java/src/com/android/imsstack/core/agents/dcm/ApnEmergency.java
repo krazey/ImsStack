@@ -31,6 +31,7 @@ import com.android.imsstack.util.ImsLog;
  * this is data connection class for emergency
  */
 public class ApnEmergency extends Apn {
+    protected IDcUtils mDcUtils;
 
     // Public methods --------------------------------------------
     public ApnEmergency(Context context, int slotId) {
@@ -67,10 +68,10 @@ public class ApnEmergency extends Apn {
     }
 
     @Override
-    public void disconnect(int nTimeAfterRecover) {
+    public boolean disconnect() {
         if (mAPNState != EApnReqState.APN_REQUEST_DONE) {
             ImsLog.w(mSlotId, "request is not done");
-            return;
+            return false;
         }
 
         boolean isPdnConnected = isConnected();
@@ -82,6 +83,8 @@ public class ApnEmergency extends Apn {
         if (isPdnConnected) {
             sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
         }
+
+        return true;
     }
 
     @Override
@@ -96,6 +99,7 @@ public class ApnEmergency extends Apn {
     // Private/Protected methods ---------------------------------
     protected void initializeApn() {
         mType = EApnType.EMERGENCY;
+        mDcUtils = (IDcUtils) DcFactory.getDc(DcFactory.UTIL, getSlotId());
 
         registerHandler(EVENT_NETWORK_AVAILABLE,
                 new Handle_EVENT_NETWORK_AVAILABLE());
@@ -119,10 +123,8 @@ public class ApnEmergency extends Apn {
             }
 
             if (mDataState != curDataState) {
-                IDcUtils dcutil = (IDcUtils) DcFactory.getDc(DcFactory.UTIL, getSlotId());
-
-                if (dcutil != null) {
-                    dcutil.updateAllCellInfoForcinglyOnLimitedServiceState();
+                if (mDcUtils != null) {
+                    mDcUtils.updateAllCellInfoForcinglyOnLimitedServiceState();
                 }
             }
 

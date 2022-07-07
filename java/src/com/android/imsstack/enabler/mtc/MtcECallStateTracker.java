@@ -213,7 +213,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
             IDcApn dcapn = mContext.getDcApn();
             if ((dcapn != null) && (dcapn.isConnected(EApnType.EMERGENCY.getType()))) {
                 log("Ecbm exit is delayed and e-pdn is released");
-                dcapn.disconnect(EApnType.EMERGENCY.getType(), 0, 0);
+                dcapn.disconnect(EApnType.EMERGENCY.getType());
                 return true;
             }
         }

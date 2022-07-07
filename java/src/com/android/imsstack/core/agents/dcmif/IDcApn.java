@@ -25,27 +25,22 @@ import java.io.FileDescriptor;
  */
 public interface IDcApn extends IDc {
     /**
-     * Try to connect the given type of apn. Scenario 1. Usually, always on type
-     * of APN such as "ims" automatically is opened/connected by android data
-     * kennel layer. However in certain case(abnormally) ; eg. when IMS process
-     * crashed by another apps, the specific APN probably remains the zombie and
-     * Android system may disconnect the apn. Under this kind of situation, we
-     * need to re-establish APN asap. Scenario 2. In case of
-     * "on demand type of APN" such as "emergency", we have to open/connect apn
-     * before use it.
+     * Try to connect the given type of apn.
+     * Scenario 1. Basically, IMS type APN is requested to connect
+     * as a always on concept if IMS service is enabled.
+     * Scenario 2. In case of "on demand type of APN" such as "emergency",
+     * we have to open/connect apn before use it.
      *
-     * @param apnType EApnType.IMS.getType()
-     *             EApnType.EMERGENCY.getType()
-     *             EApnType.INTERNET.getType()
-     * @param ipcanType IApn.IPCAN_CATEGORY_MOBILE
-     *             IApn.IPCAN_CATEGORY_WLAN
-     * @return true: No need to open. It already opened or we called
-     *         "startUsingNetworkFeature" (android api) regardless of result to
-     *         connect apn. false: we cannot call "startUsingNetworkFeature". It
-     *         is expected current apn type to be disconnected at this moment.
-     *         false:
+     * @param apnType DcConstants.TYPE_IMS
+     *                DcConstants.TYPE_EMERGENCY
+     *                DcConstants.TYPE_INTERNET
+     *                DcConstants.TYPE_XCAP
+     * @return true: It already opened or we called "requestNetwork" (android api)
+     *               regardless of result to connect apn.
+     *         false: we cannot call "requestNetwork".
+     *                It is expected current apn type to be disconnected at this moment.
      */
-    boolean connect(int apnType, int ipcanType);
+    boolean connect(int apnType);
 
     /**
      * disconnect
@@ -54,16 +49,14 @@ public interface IDcApn extends IDc {
      * @see EApnType#EMERGENCY
      * @see EApnType#INTERNET
      *
-     * @param apnType EApnType.IMS...
-     * @param nTimeAfterRecover
-     *                 > 0 : re-connect APN after millisecond
-     *                 == 0 : re-connect APN after 1000 millisecond
-     *                 < 0 : disconnect && DO NOT Recover this PDN before call connect EXPLICITLY.
-     * @param ipcanType
-     *                 IApn.IPCAN_CATEGORY_MOBILE or IApn.IPCAN_CATEGORY_WLAN
-     * @return
+     * @param apnType DcConstants.TYPE_IMS
+     *                DcConstants.TYPE_EMERGENCY
+     *                DcConstants.TYPE_INTERNET
+     *                DcConstants.TYPE_XCAP
+     * @return true: we called "releaseNetwork" (android api) to disconnect.
+     *         false: This type of apn has never been requested to connect.
      */
-    void disconnect(int apnType, int nTimeAfterRecover, int ipcanType);
+    boolean disconnect(int apnType);
 
     /**
      * get data state of APN
