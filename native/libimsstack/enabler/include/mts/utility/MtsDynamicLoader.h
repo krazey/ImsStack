@@ -27,16 +27,17 @@ public:
     MtsDynamicLoader(IN IMS_SINT32 nSlotId);
     ~MtsDynamicLoader();
 
-    void Initialize(IN IMS_SINT32 nSlotId);
+    void Initialize();
 
-    MtsServiceState* GetMtsServiceState();
-    MtsSipFormUtils* GetMtsSipFormUtils();
-    MtsStrName* GetMtsStrName();
+    inline MtsServiceState* GetMtsServiceState() { return m_pMtsServiceState; }
+    inline MtsSipFormUtils* GetMtsSipFormUtils() { return m_pMtsSipFormUtils; }
+    inline MtsStrName* GetMtsStrName() { return m_pMtsStrName; }
 
 private:
     void DestroyAll();
 
-protected:
+private:
+    IMS_SINT32 m_nSlotId;
     MtsServiceState* m_pMtsServiceState;
     MtsSipFormUtils* m_pMtsSipFormUtils;
     MtsStrName* m_pMtsStrName;

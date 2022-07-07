@@ -27,7 +27,6 @@ public:
     MtsSipFormUtils(IN IMS_SINT32 nSlotId);
     ~MtsSipFormUtils();
 
-    static MtsSipFormUtils* GetInstance(IN IMS_SINT32 nSlotId);
     IMS_BOOL FormDestination(IN const AString& strTargetAddress, IN const IMS_BOOL bIsAckorError,
             IN const AString& strLastIpSmgw, OUT AString& strDest);
     AString FormContentTypeEnumToStr(IN IMS_UINT32 nType);

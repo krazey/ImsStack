@@ -50,19 +50,6 @@ MtsServiceState::~MtsServiceState()
 }
 
 PUBLIC
-MtsServiceState* MtsServiceState::GetInstance(IN IMS_SINT32 nSlotId)
-{
-    static MtsServiceState* s_pMtsServiceState = IMS_NULL;
-
-    if (s_pMtsServiceState == IMS_NULL)
-    {
-        s_pMtsServiceState = new MtsServiceState(nSlotId);
-    }
-
-    return s_pMtsServiceState;
-}
-
-PUBLIC
 void MtsServiceState::SetImsRegConnected(IN IMS_BOOL bConnected)
 {
     IMS_UINT32 nType = IImsAosInfo::REG_MODE_UNKNOWN;

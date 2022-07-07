@@ -25,6 +25,7 @@ __IMS_TRACE_TAG_COM_SMS__;
 
 PUBLIC
 MtsDynamicLoader::MtsDynamicLoader(IN IMS_SINT32 nSlotId) :
+        m_nSlotId(nSlotId),
         m_pMtsServiceState(IMS_NULL),
         m_pMtsSipFormUtils(IMS_NULL),
         m_pMtsStrName(IMS_NULL)
@@ -39,31 +40,13 @@ MtsDynamicLoader::~MtsDynamicLoader()
 }
 
 PUBLIC
-void MtsDynamicLoader::Initialize(IN IMS_SINT32 nSlotId)
+void MtsDynamicLoader::Initialize()
 {
-    IMS_TRACE_D("Initialize nSlotId : [%d]", nSlotId, 0, 0);
+    IMS_TRACE_D("Initialize nSlotId : [%d]", m_nSlotId, 0, 0);
 
-    m_pMtsServiceState = new MtsServiceState(nSlotId);
-    m_pMtsSipFormUtils = new MtsSipFormUtils(nSlotId);
+    m_pMtsServiceState = new MtsServiceState(m_nSlotId);
+    m_pMtsSipFormUtils = new MtsSipFormUtils(m_nSlotId);
     m_pMtsStrName = new MtsStrName();
-}
-
-PUBLIC
-MtsServiceState* MtsDynamicLoader::GetMtsServiceState()
-{
-    return m_pMtsServiceState;
-}
-
-PUBLIC
-MtsSipFormUtils* MtsDynamicLoader::GetMtsSipFormUtils()
-{
-    return m_pMtsSipFormUtils;
-}
-
-PUBLIC
-MtsStrName* MtsDynamicLoader::GetMtsStrName()
-{
-    return m_pMtsStrName;
 }
 
 PRIVATE

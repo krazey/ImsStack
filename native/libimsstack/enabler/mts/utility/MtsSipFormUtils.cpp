@@ -66,19 +66,6 @@ MtsSipFormUtils::~MtsSipFormUtils()
     }
 }
 
-PUBLIC
-MtsSipFormUtils* MtsSipFormUtils::GetInstance(IN IMS_SINT32 nSlotId)
-{
-    static MtsSipFormUtils* s_pMtsSipFormUtils = IMS_NULL;
-
-    if (s_pMtsSipFormUtils == IMS_NULL)
-    {
-        s_pMtsSipFormUtils = new MtsSipFormUtils(nSlotId);
-    }
-
-    return s_pMtsSipFormUtils;
-}
-
 PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::FormDestination(IN const AString& strTargetAddress,
         IN const IMS_BOOL bIsAckorError, IN const AString& strLastIpSmgw, OUT AString& strDest)
 {

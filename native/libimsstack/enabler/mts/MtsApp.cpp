@@ -216,7 +216,7 @@ PRIVATE void MtsApp::CreateMtsUtils(IN IMS_SINT32 nSlotId)
 
     if (m_pMtsDynamicLoader != IMS_NULL)
     {
-        m_pMtsDynamicLoader->Initialize(nSlotId);
+        m_pMtsDynamicLoader->Initialize();
         MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
         m_pMtsServiceState = pMtsServiceState;
     }

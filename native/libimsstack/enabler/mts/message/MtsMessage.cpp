@@ -37,7 +37,6 @@
 #include "utility/MtsDynamicLoader.h"
 #include "utility/MtsSmUtils.h"
 #include "utility/MtsSipFormUtils.h"
-#include "utility/MtsTrm.h"
 
 __IMS_TRACE_TAG_COM_SMS__;
 
@@ -58,7 +57,6 @@ MtsMessage::MtsMessage(IN IMS_SINT32 nSlotId, IN MtsMessageController* pMtsMessa
         m_pMtsMessageController(pMtsMessageController)
 {
     IMS_TRACE_I("+MtsMessage", 0, 0, 0);
-    SetTrmInfo(nSlotId, IMS_TRUE);
 }
 
 PUBLIC
@@ -75,8 +73,6 @@ MtsMessage::~MtsMessage()
     {
         IMS_TRACE_E(0, "IPageMessage is null", 0, 0, 0);
     }
-
-    SetTrmInfo(m_nSlotId, IMS_FALSE);
 }
 
 PUBLIC
@@ -953,15 +949,4 @@ void MtsMessage::ReportTransmissionResultToMessageController(
         IN IMS_UINT32 nResponse, IN IMS_UINT32 nSmsType)
 {
     m_pMtsMessageController->ReportTransmissionResult(nResponse, nSmsType, m_nSeqId);
-}
-
-PRIVATE
-void MtsMessage::SetTrmInfo(IN IMS_SINT32 nSlotId, IN IMS_BOOL bSmsState)
-{
-    MtsTrm* piTrm = MtsTrm::GetInstance(nSlotId);
-    IMS_TRACE_I("SetTrmInfo nSlotId : [%d], bSmsState[%d]", nSlotId, bSmsState, 0);
-    if (piTrm->IsTRMSupported())
-    {
-        piTrm->Set(bSmsState);
-    }
 }
