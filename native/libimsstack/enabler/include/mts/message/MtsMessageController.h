@@ -17,8 +17,8 @@
 #ifndef MTS_MESSAGE_CONTROLLER_H_
 #define MTS_MESSAGE_CONTROLLER_H_
 
-#include "ImsActivityEx.h"
 #include "ICoreService.h"
+#include "ImsActivityEx.h"
 #include "IuMts.h"
 #include "MtsService.h"
 

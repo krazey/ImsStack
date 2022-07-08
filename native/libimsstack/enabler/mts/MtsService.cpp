@@ -63,6 +63,9 @@ MtsService::~MtsService()
     }
 
     DeInit();
+
+    JniConnectorFactory::GetInstance()->GetMtsServiceConnector(m_nSlotId)->SetEnablerService(
+            IMS_NULL);
 }
 
 PUBLIC
@@ -87,7 +90,15 @@ PUBLIC VIRTUAL
 void MtsService::SetJniMtsService(IN JniMtsService* pJniMtsService)
 {
     IMS_TRACE_I("SetJniMtsService", 0, 0, 0);
+
+    JniMtsService* pOldJniMtsService = m_pJniMtsService;
+
     m_pJniMtsService = pJniMtsService;
+
+    if (pOldJniMtsService == IMS_NULL)
+    {
+        m_pJniMtsService->SetMtsService(this);
+    }
 }
 
 PUBLIC VIRTUAL

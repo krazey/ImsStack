@@ -27,7 +27,6 @@ import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.util.ImsLog;
-
 import com.android.internal.annotations.VisibleForTesting;
 
 public class MtsController {
@@ -125,6 +124,8 @@ public class MtsController {
 
     public void cleanup() {
         ImsLog.d("");
+
+        mMtsJni.release();
 
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);

@@ -24,6 +24,18 @@ private:
     void TriggerSendMoSms(IN const android::Parcel& objParcel);
     void NotifyMtResult(IN const android::Parcel& objParcel);
 
+public:
+    enum
+    {
+        MO_INVALID = 0,
+        MO_SUCCESS = 1,
+        MO_IMS_TEMP_FAILURE = 2,
+        MO_IMS_PERM_FAILURE = 3,
+        MO_IMS_LIMITEDSMSSVCREGI = 4,
+        MO_RETRY_CS = 5,
+        MO_RETRY_CS_OR_SGS = 6
+    };
+
 private:
     IMS_SINT32 m_nSlotId;
     AString m_strThreadName;

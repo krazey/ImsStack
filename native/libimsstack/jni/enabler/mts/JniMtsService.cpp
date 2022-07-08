@@ -162,6 +162,19 @@ void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
             static_cast<IMS_SINT32>(strData.GetLength()));
     AString strAddress = strAddress_.string();
 
+    if (m_piMtsService == IMS_NULL)
+    {
+        Attach();
+
+        if (m_piMtsService == IMS_NULL)
+        {
+            IMS_TRACE_D("MtsEnabler is not bound.", 0, 0, 0);
+            m_pJniMtsServiceThread->ReportMoStatus(
+                    MO_IMS_TEMP_FAILURE, nSmsFormat, 0, nSeqId, m_nSlotId);
+            return;
+        }
+    }
+
     m_piMtsService->SendMoSms(nSmsFormat, objData, strAddress, nSeqId);
 }
 
@@ -170,5 +183,18 @@ void JniMtsService::NotifyMtResult(IN const Parcel& objParcel)
 {
     IMS_SINT32 nMtResult = objParcel.readInt32();
     IMS_TRACE_I("MT result = (%d)", nMtResult, 0, 0);
+
+    if (m_piMtsService == IMS_NULL)
+    {
+        Attach();
+
+        if (m_piMtsService == IMS_NULL)
+        {
+            // TODO: error handling is needed when call back is added
+            IMS_TRACE_D("MtsEnabler is not bound.", 0, 0, 0);
+            return;
+        }
+    }
+
     m_piMtsService->SendMtResult(nMtResult);
 }
