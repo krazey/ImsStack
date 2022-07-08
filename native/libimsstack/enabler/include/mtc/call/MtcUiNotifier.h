@@ -91,11 +91,11 @@ public:
             IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IMS_SINTP nReplaceKey = 0);
     void SendMerged(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN IMSList<ConfUser*> lstConfUser);
+            IN IMSList<ConfUser*>& lstConfUser);
     void SendMergeFailed(IN const CallReasonInfo& objReason);
     void SendJoined(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason);
     void SendDropped(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason);
-    void SendNotifyUsersInfo(IN IMSList<ConfUser*> lstConfUser);
+    void SendNotifyUsersInfo(IN IMSList<ConfUser*>& lstConfUser);
     void SendNotifyConfInfo(IN AString strDisplayText, IN AString strSubject,
             IN IMS_SINT32 nMaxUserCount, IN IMS_UINT32 nUserCount, IN AString strHostEntity);
     void SendReplacedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,

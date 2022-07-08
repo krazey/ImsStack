@@ -329,7 +329,8 @@ void MtcUiNotifier::SendExpandedBy(IN CallInfo* /*pCallInfo*/, IN MediaInfo* /*p
 
 PUBLIC
 void MtcUiNotifier::SendMerged(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IMSList<ConfUser*> lstConfUser)
+        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+        IN IMSList<ConfUser*>& lstConfUser)
 {
     IMS_TRACE_I("SendMerged", 0, 0, 0);
 
@@ -396,7 +397,7 @@ void MtcUiNotifier::SendDropped(IN IMS_BOOL bResult, IN const CallReasonInfo& ob
 }
 
 PUBLIC
-void MtcUiNotifier::SendNotifyUsersInfo(IN IMSList<ConfUser*> lstConfUser)
+void MtcUiNotifier::SendNotifyUsersInfo(IN IMSList<ConfUser*>& lstConfUser)
 {
     IMS_TRACE_I("SendNotifyUsersInfo : Size[%d]", lstConfUser.GetSize(), 0, 0);
 

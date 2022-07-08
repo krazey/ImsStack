@@ -126,6 +126,7 @@ public:
 
     virtual void AddUser(IN const ConfUser* pConfUser);
     virtual void RemoveUser(IN const ConfUser* pConfUser);
+    virtual void RemoveUser(IN IMS_UINT32 nIndex);
     virtual ConfUser* GetConfUser(IN IConferenceReference* piConfReference) const;
 
     virtual IMS_BOOL IsConnectedUser(

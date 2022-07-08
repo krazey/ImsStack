@@ -92,8 +92,17 @@ void ConferenceParticipantList::RemoveUser(IN const ConfUser* pConfUser)
     IMS_SINT32 nIndex = FindParticipant(pConfUser);
     if (nIndex >= 0)
     {
+        delete m_objParticipants.GetAt(nIndex);
         m_objParticipants.RemoveAt(nIndex);
     }
+}
+
+PUBLIC
+void ConferenceParticipantList::RemoveUser(IN IMS_UINT32 nIndex)
+{
+    IMS_TRACE_I("RemoveUser", 0, 0, 0);
+    delete m_objParticipants.GetAt(nIndex);
+    m_objParticipants.RemoveAt(nIndex);
 }
 
 PUBLIC

@@ -520,7 +520,6 @@ TEST_F(ConferenceControllerTest, ProcessDropCommand)
     pController->ProcessCommand(IConferenceController::REMOVE, objUsers);
 
     EXPECT_EQ(pController->GetState(), ConferenceController::STATE_DROPPING);
-    delete pUser;
 }
 
 TEST_F(ConferenceControllerTest, ProcessJoinedCommand)
