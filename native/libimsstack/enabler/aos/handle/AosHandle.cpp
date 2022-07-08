@@ -1193,13 +1193,19 @@ PROTECTED
 void AosHandle::ProcessBlock(
         IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded, IN IMS_BOOL bPreProcess /* = IMS_TRUE */)
 {
+    A_IMS_TRACE_D(APPPROFILE, "ProcessBlock :: nBlock[%d], bAdded[%s], bPreProcess[%s]", nBlock,
+            _TRACE_B_(bAdded), _TRACE_B_(bPreProcess));
+
     if (bPreProcess)
     {
+        A_IMS_TRACE_D(APPPROFILE, "ProcessBlock :: Data connection [%s]",
+                _TRACE_B_(m_bDataConnected), 0, 0);
+
         if (!m_bDataConnected)
         {
             if (HoldBlockForInvalidNetwork(nBlock, bAdded))
             {
-                A_IMS_TRACE_D(APPPROFILE, "ProcessBlock :: No data connection. Not handled(%x)",
+                A_IMS_TRACE_D(APPPROFILE, "ProcessBlock :: No data connection. Not handled (%x)",
                         m_nBlocks, 0, 0);
                 return;
             }
@@ -1209,8 +1215,25 @@ void AosHandle::ProcessBlock(
         {
             if (PreProcessBlock(nBlock, bAdded))
             {
-                A_IMS_TRACE_D(APPPROFILE, "ProcessBlock :: Not handled(%x)", m_nBlocks, 0, 0);
+                A_IMS_TRACE_D(APPPROFILE, "ProcessBlock :: Not handled. (%x)", m_nBlocks, 0, 0);
                 return;
+            }
+        }
+
+        if (!bAdded)
+        {
+            if (IsHandleBlocked(nBlock, m_nHoldingBlocksForMobile))
+            {
+                A_IMS_TRACE_D(APPPROFILE,
+                        "ProcessBlock :: Remove block from m_nHoldingBlocksForMobile", 0, 0, 0);
+                RemoveBlock(nBlock, m_nHoldingBlocksForMobile);
+            }
+
+            if (IsHandleBlocked(nBlock, m_nHoldingBlocksForWifi))
+            {
+                A_IMS_TRACE_D(APPPROFILE,
+                        "ProcessBlock :: Remove block from m_nHoldingBlocksForWifi", 0, 0, 0);
+                RemoveBlock(nBlock, m_nHoldingBlocksForWifi);
             }
         }
     }
