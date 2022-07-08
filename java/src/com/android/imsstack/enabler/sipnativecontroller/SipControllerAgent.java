@@ -36,6 +36,7 @@ import java.util.Set;
  * Start SipNativeController service through JNI
  */
 public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
+
     private long mNativeObj = 0;
     private SipTransportRemoteListener mListener = null;
     private static final SparseArray<SipControllerAgent> sAgentArray = new SparseArray<>();
@@ -49,6 +50,7 @@ public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
      * @return To deliver the object for each sim to the sipcontroller
      */
     public static SipControllerAgent getInstance(int slotId) {
+
         synchronized (sAgentArray) {
             if (sAgentArray.indexOfKey(slotId) < 0) {
                 sAgentArray.put(slotId, SipControllerAgent.createSipControllerAgent(slotId));
@@ -58,13 +60,13 @@ public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
     }
 
     private static SipControllerAgent createSipControllerAgent(int slotId) {
+
         return new SipControllerAgent(slotId);
     }
 
     private void initService(int slotId) {
 
         long nativeObj = JNIIms.getInterface(IUIMS.APP_SIP_DELEGATE, slotId);
-
         mNativeObj = nativeObj;
         if (nativeObj != 0) {
             JNIIms.setListener(nativeObj, this);
@@ -77,7 +79,6 @@ public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
      * Release from SipController(Java) if delegate is terminated or Jni is not used.
      */
     public void release(int slotId) {
-        ImsLog.d("slotId : " + slotId);
 
         JNIIms.removeListener(mNativeObj, this);
         JNIIms.releaseInterface(mNativeObj);
@@ -103,6 +104,7 @@ public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
 
     @Override
     public void notifyMessageReceiveError(@NonNull String viaTransactionId, int subId) {
+
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(SipControllerInternalMsgDef.NOTIFYMESSAGERECEIVEERROR_CMD);
         parcel.writeString(viaTransactionId);
@@ -110,8 +112,12 @@ public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
     }
 
     @Override
-    public void setSipTransportListener(SipTransportRemoteListener listener, int subId) {
+    public void setSipTransportListener(SipTransportRemoteListener listener, int slotId) {
+
         mListener = listener;
+        if (listener != null && mNativeObj == 0) {
+            initService(slotId);
+        }
     }
 
     @Override
@@ -121,6 +127,7 @@ public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
     }
 
     private void sendMessageToJNI(Parcel parcel) {
+
         if (parcel == null) {
             return;
         }
@@ -147,15 +154,15 @@ public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
         try {
             switch (msg) {
                 case SipControllerInternalMsgDef.MESSAGERECEIVED_IND: {
-                    MessageReceived(parcel);
+                    messageReceived(parcel);
                     break;
                 }
                 case SipControllerInternalMsgDef.MESSAGESENT_IND: {
-                    MessageSent(parcel);
+                    messageSent(parcel);
                     break;
                 }
                 case SipControllerInternalMsgDef.SENDMESSAGEFAILURE_IND: {
-                    MessageSendFailure(parcel);
+                    messageSendFailure(parcel);
                     break;
                 }
                 default:
