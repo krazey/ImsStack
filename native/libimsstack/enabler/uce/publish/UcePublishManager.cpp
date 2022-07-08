@@ -1625,7 +1625,11 @@ IMS_BOOL UcePublishManager::ProcessRetryAfterHeader()
 
     IMS_SINT32 nValue = piHeader->GetValueInt();
     piHeader->Destroy();
-    IMS_TRACE_I("ProcessRetryAfterHeader:Retry After Header value[%d]", nValue, 0, 0);
+    IMS_TRACE_I("ProcessRetryAfterHeader:Retry After Header value is [%d]", nValue, 0, 0);
+    if (nValue <= 0)
+    {
+        return IMS_FALSE;
+    }
     return StartTimer(TIMER_RETRYAFTER, nValue);
 }
 
