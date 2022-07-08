@@ -15,7 +15,6 @@
  */
 
 #include "INetworkWatcher.h"
-#include "ServicePhoneInfo.h"
 #include "call/IMtcCallContext.h"
 #include "call/block/NetworkBlockRule.h"
 #include "helper/IMtcAosConnector.h"
@@ -23,10 +22,10 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-NetworkBlockRule::NetworkBlockRule(IN IMtcCallContext& objContext) :
+NetworkBlockRule::NetworkBlockRule(
+        IN IMtcCallContext& objContext, IN INetworkWatcher& objNetworkWatcher) :
         m_objService(objContext.GetService()),
-        m_objNetWatcherInfo(GetNetWatcherInfo(objContext.GetSlotId())),
-        m_ePeerType(objContext.GetCallInfo().ePeerType)
+        m_objNetworkWatcher(objNetworkWatcher)
 {
 }
 
@@ -40,7 +39,7 @@ PUBLIC VIRTUAL NetworkBlockRule::Result NetworkBlockRule::Check(
         return Result(Result::Status::UNBLOCKED);
     }
 
-    IMS_UINT32 nNetworkType = m_objNetWatcherInfo.GetNetRadioTechType();
+    IMS_UINT32 nNetworkType = m_objNetworkWatcher.GetNetRadioTechType();
     if (nNetworkType == NW_REPORT_RADIO_LTE || nNetworkType == NW_REPORT_RADIO_NR)
     {
         return Result(Result::Status::UNBLOCKED);
@@ -64,11 +63,4 @@ IMS_BOOL NetworkBlockRule::IsWifiRegistered(IN IMtcAosConnector* pAosConnector)
             pAosConnector ? pAosConnector->GetRegisteredNetworkType() : NW_REPORT_RADIO_INVALID;
 
     return nAosRegisteredNetworkType == NW_REPORT_RADIO_WLAN;
-}
-
-PRIVATE
-INetworkWatcher& NetworkBlockRule::GetNetWatcherInfo(IN IMS_SINT32 nSlotId)
-{
-    // Not null
-    return *PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(nSlotId);
 }

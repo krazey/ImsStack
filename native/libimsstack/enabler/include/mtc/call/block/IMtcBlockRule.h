@@ -50,6 +50,16 @@ public:
         {
         }
 
+        IMS_BOOL operator==(const Result& objRhs) const
+        {
+            if (this == &objRhs)
+            {
+                return IMS_TRUE;
+            }
+
+            return eStatus == objRhs.eStatus && objReason == objRhs.objReason;
+        }
+
         Status eStatus;
         CallReasonInfo objReason;
     };

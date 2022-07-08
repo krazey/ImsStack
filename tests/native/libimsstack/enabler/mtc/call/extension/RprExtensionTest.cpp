@@ -18,10 +18,10 @@
 #include <gtest/gtest.h>
 #include "ImsList.h"
 #include "ISipHeader.h"
-#include "../../../../engine/interface/core/MockIMessage.h"
-#include "../../../../engine/interface/sipcore/MockISipMessage.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/RprExtension.h"
+#include "core/MockIMessage.h"
+#include "sipcore/MockISipMessage.h"
 
 using ::testing::_;
 using ::testing::Return;

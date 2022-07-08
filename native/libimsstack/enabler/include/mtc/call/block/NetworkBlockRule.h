@@ -27,7 +27,8 @@ class INetworkWatcher;
 class NetworkBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit NetworkBlockRule(IN IMtcCallContext& objContext);
+    explicit NetworkBlockRule(
+            IN IMtcCallContext& objContext, IN INetworkWatcher& objNetworkWatcher);
     virtual ~NetworkBlockRule();
     NetworkBlockRule(IN const NetworkBlockRule&) = delete;
     NetworkBlockRule& operator=(IN const NetworkBlockRule&) = delete;
@@ -38,11 +39,8 @@ private:
     IMS_BOOL IsInEpdg(IN const IMtcService& objService);
     IMS_BOOL IsWifiRegistered(IN IMtcAosConnector* pAosConnector);
 
-    INetworkWatcher& GetNetWatcherInfo(IN IMS_SINT32 nSlotId);
-
     const IMtcService& m_objService;
-    INetworkWatcher& m_objNetWatcherInfo;
-    const PeerType m_ePeerType;
+    INetworkWatcher& m_objNetworkWatcher;
 };
 
 #endif

@@ -22,6 +22,7 @@
 #include "JniMtcServiceThread.h"
 #include "MediaDef.h"
 #include "MtcDef.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "SipHeaderName.h"
@@ -450,7 +451,8 @@ IMSList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
     IMSList<IMtcBlockRule*> lstRules;
 
     lstRules.Append(new VopsBlockRule(m_objContext));
-    lstRules.Append(new NetworkBlockRule(m_objContext));
+    lstRules.Append(new NetworkBlockRule(m_objContext,
+            *PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId())));
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));

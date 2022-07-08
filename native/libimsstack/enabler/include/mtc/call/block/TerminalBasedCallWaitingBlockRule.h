@@ -36,10 +36,10 @@ public:
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    IMS_UINT32 GetActiveCallCount(IN const IMSList<IMtcCall*> lstCalls);
+    IMS_BOOL IsActiveCallExists(IN const IMSList<IMtcCall*> lstCalls) const;
 
+    IMtcCallContext& m_objContext;
     IMtcService& m_objService;
-    IMtcCallManager& m_objCallManager;
 };
 
 #endif

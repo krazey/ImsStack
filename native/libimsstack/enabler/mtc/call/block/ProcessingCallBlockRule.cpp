@@ -16,7 +16,6 @@
 
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
-#include "call/IMtcCallManager.h"
 #include "call/block/ProcessingCallBlockRule.h"
 #include "ServiceTrace.h"
 
@@ -35,65 +34,41 @@ PUBLIC VIRTUAL ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
 {
     IMSList<IMtcCall*> lstCalls = m_objContext.GetOtherCalls();
 
-    if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
+    if (IsEmergencyCallExists(lstCalls))
     {
-        return CheckForOutgoingCall(lstCalls);
+        if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
+        {
+            return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
+        }
+        else
+        {
+            return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_E911_CALL));
+        }
     }
-    else
-    {
-        return CheckForIncomingCall(lstCalls);
-    }
-}
 
-PRIVATE
-ProcessingCallBlockRule::Result ProcessingCallBlockRule::CheckForOutgoingCall(
-        IN const IMSList<IMtcCall*>& lstCalls)
-{
-    if (IsOtherIdleCallExists(lstCalls) || IsIncomingCallExists(lstCalls) ||
-            IsOutgoingCallExists(lstCalls))
+    if (IsCallSetupProcessing(lstCalls))
     {
         return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CALL_SETUP));
     }
 
-    if (IsEmergencyCallExists(lstCalls))
-    {
-        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
-    }
-
-    return Result(Result::Status::UNBLOCKED);
-}
-
-PRIVATE
-ProcessingCallBlockRule::Result ProcessingCallBlockRule::CheckForIncomingCall(
-        IN const IMSList<IMtcCall*>& lstCalls)
-{
-    if (IsOtherIdleCallExists(lstCalls))
+    if (IsCallUpdating(lstCalls))
     {
         return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_CALL_BUSY));
     }
 
-    if (IsIncomingCallExists(lstCalls) || IsOutgoingCallExists(lstCalls))
-    {
-        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CALL_SETUP));
-    }
-
-    if (IsEmergencyCallExists(lstCalls))
-    {
-        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_E911_CALL));
-    }
-
     return Result(Result::Status::UNBLOCKED);
 }
 
 PRIVATE
-IMS_BOOL ProcessingCallBlockRule::IsOtherIdleCallExists(IN const IMSList<IMtcCall*>& lstCalls)
+IMS_BOOL ProcessingCallBlockRule::IsCallSetupProcessing(IN const IMSList<IMtcCall*>& lstCalls) const
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
         IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
-        if (eState == IMtcCall::State::IDLE)
+        if (eState == IMtcCall::State::IDLE || eState == IMtcCall::State::OUTGOING ||
+                eState == IMtcCall::State::INCOMING || eState == IMtcCall::State::ALERTING)
         {
-            IMS_TRACE_I("IsOtherIdleCallExists : Idle call exists", 0, 0, 0);
+            IMS_TRACE_I("IsCallSetupProcessing : Call in [%d] state exists", eState, 0, 0);
             return IMS_TRUE;
         }
     }
@@ -101,14 +76,14 @@ IMS_BOOL ProcessingCallBlockRule::IsOtherIdleCallExists(IN const IMSList<IMtcCal
 }
 
 PRIVATE
-IMS_BOOL ProcessingCallBlockRule::IsIncomingCallExists(IN const IMSList<IMtcCall*>& lstCalls)
+IMS_BOOL ProcessingCallBlockRule::IsCallUpdating(IN const IMSList<IMtcCall*>& lstCalls) const
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
         IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
-        if (eState == IMtcCall::State::INCOMING || eState == IMtcCall::State::ALERTING)
+        if (eState == IMtcCall::State::UPDATING)
         {
-            IMS_TRACE_I("IsIncomingCallExists : Incoming call exists", 0, 0, 0);
+            IMS_TRACE_I("IsCallUpdating : Updating call exists", eState, 0, 0);
             return IMS_TRUE;
         }
     }
@@ -116,22 +91,7 @@ IMS_BOOL ProcessingCallBlockRule::IsIncomingCallExists(IN const IMSList<IMtcCall
 }
 
 PRIVATE
-IMS_BOOL ProcessingCallBlockRule::IsOutgoingCallExists(IN const IMSList<IMtcCall*>& lstCalls)
-{
-    for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
-    {
-        IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
-        if (eState == IMtcCall::State::OUTGOING)
-        {
-            IMS_TRACE_I("IsOutgoingCallExists : Outgoing call exists", 0, 0, 0);
-            return IMS_TRUE;
-        }
-    }
-    return IMS_FALSE;
-}
-
-PRIVATE
-IMS_BOOL ProcessingCallBlockRule::IsEmergencyCallExists(IN const IMSList<IMtcCall*>& lstCalls)
+IMS_BOOL ProcessingCallBlockRule::IsEmergencyCallExists(IN const IMSList<IMtcCall*>& lstCalls) const
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {

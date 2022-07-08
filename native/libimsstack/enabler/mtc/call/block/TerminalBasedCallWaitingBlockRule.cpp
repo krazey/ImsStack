@@ -16,7 +16,6 @@
 
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
-#include "call/IMtcCallManager.h"
 #include "call/block/TerminalBasedCallWaitingBlockRule.h"
 #include "ServiceTrace.h"
 
@@ -25,8 +24,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 TerminalBasedCallWaitingBlockRule::TerminalBasedCallWaitingBlockRule(
         IN IMtcCallContext& objContext) :
-        m_objService(objContext.GetService()),
-        m_objCallManager(objContext.GetCallManager())
+        m_objContext(objContext),
+        m_objService(objContext.GetService())
 {
     IMS_ASSERT(objContext.GetCallInfo().ePeerType == PeerType::MT);
 }
@@ -36,7 +35,7 @@ PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::~TerminalBasedCallWaitingBlock
 PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::Result TerminalBasedCallWaitingBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-    if (GetActiveCallCount(m_objCallManager.GetCalls()) <= 0)
+    if (!IsActiveCallExists(m_objContext.GetOtherCalls()))
     {
         return Result(Result::Status::UNBLOCKED);
     }
@@ -53,19 +52,16 @@ PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::Result TerminalBasedCallWaitin
 }
 
 PRIVATE
-IMS_UINT32 TerminalBasedCallWaitingBlockRule::GetActiveCallCount(
-        IN const IMSList<IMtcCall*> lstCalls)
+IMS_BOOL TerminalBasedCallWaitingBlockRule::IsActiveCallExists(
+        IN const IMSList<IMtcCall*> lstCalls) const
 {
-    IMS_UINT32 nCount = 0;
-
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
-        IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
-        if (eState == IMtcCall::State::ESTABLISHED || eState == IMtcCall::State::UPDATING)
+        if (lstCalls.GetAt(nIndex)->GetState() != IMtcCall::State::TERMINATING)
         {
-            nCount += 1;
+            return IMS_TRUE;
         }
     }
 
-    return nCount;
+    return IMS_FALSE;
 }

@@ -1,157 +1,151 @@
-#include "call/block/MtcBlockChecker.h"
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "call/block/MockIMtcBlockChecker.h"
+#include "call/block/MockIMtcBlockRule.h"
+#include "call/block/MtcBlockChecker.h"
 
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
 using Result = IMtcBlockChecker::Result;
 
 const CallReasonInfo objDefaultReason(CODE_NONE);
 const CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
 
-class TestListener :
-        public IMtcBlockCheckListener
+MockIMtcBlockRule* CreateMockIMtcBlockRule(Result objResult)
 {
-public:
-    TestListener() :
-            m_eStatus(Result::Status::BLOCKED),
-            m_objReason(objDefaultReason) {}
-    virtual ~TestListener() {}
+    MockIMtcBlockRule* pRule = new MockIMtcBlockRule();
 
-    void OnBlockChecked(IN Result objResult) override
-    {
-        m_eStatus = objResult.eStatus;
-        m_objReason = objResult.objReason;
-    }
+    ON_CALL(*pRule, Check)
+            .WillByDefault(Return(objResult));
 
-    Result::Status m_eStatus;
-    CallReasonInfo m_objReason;
-};
+    return pRule;
+}
 
-class TestRule :
-        public IMtcBlockRule
-{
-public:
-    TestRule(IN Result::Status eStatus, IN CallReasonInfo objReason) :
-            m_eStatus(eStatus),
-            m_objReason(objReason)
-    {
-    }
-    TestRule(IN Result::Status eStatus) :
-            TestRule(eStatus, objDefaultReason) {}
-    virtual ~TestRule() {}
-
-    Result Check(IN IMtcBlockRuleCheckListener& /* objListener */) override
-    {
-        return Result(m_eStatus, m_objReason);
-    }
-
-private:
-    Result::Status m_eStatus;
-    CallReasonInfo m_objReason;
-};
-
-TEST(MtcBlockCheckerTest, CheckEmptyRuleReturnsUnblocked)
+TEST(MtcBlockCheckerTest, CheckReturnsUnblockedForEmptyRule)
 {
     IMSList<IMtcBlockRule*> lstRules;
-    MtcBlockChecker objChecker(lstRules, nullptr);
 
+    MtcBlockChecker objChecker(lstRules, nullptr);
     Result objResult = objChecker.Check();
 
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
-TEST(MtcBlockCheckerTest, CheckAllUnblockedRuleReturnsUnblocked)
+TEST(MtcBlockCheckerTest, CheckReturnsUnblockedIfAllRulesUnblocked)
 {
     IMSList<IMtcBlockRule*> lstRules;
-    lstRules.Append(new TestRule(Result::Status::UNBLOCKED));
-    lstRules.Append(new TestRule(Result::Status::UNBLOCKED));
-    MtcBlockChecker objChecker(lstRules, nullptr);
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::UNBLOCKED)));
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::UNBLOCKED)));
 
+    MtcBlockChecker objChecker(lstRules, nullptr);
     Result objResult = objChecker.Check();
 
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
-TEST(MtcBlockCheckerTest, CheckSomeBlockedRuleReturnsBlocked)
+TEST(MtcBlockCheckerTest, CheckReturnsBlockedIfSomeRulesBlocked)
 {
     IMSList<IMtcBlockRule*> lstRules;
-    lstRules.Append(new TestRule(Result::Status::UNBLOCKED));
-    lstRules.Append(new TestRule(Result::Status::PENDING));
-    lstRules.Append(new TestRule(Result::Status::BLOCKED, objReason));
-    MtcBlockChecker objChecker(lstRules, nullptr);
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::UNBLOCKED)));
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::BLOCKED, objReason)));
 
+    MtcBlockChecker objChecker(lstRules, nullptr);
     Result objResult = objChecker.Check();
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
 }
 
-TEST(MtcBlockCheckerTest, CheckSomePendingRuleReturnsPending)
+TEST(MtcBlockCheckerTest, CheckReturnsPendingIfSomeRulesPending)
 {
     IMSList<IMtcBlockRule*> lstRules;
-    lstRules.Append(new TestRule(Result::Status::UNBLOCKED));
-    lstRules.Append(new TestRule(Result::Status::PENDING));
-    MtcBlockChecker objChecker(lstRules, nullptr);
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::UNBLOCKED)));
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
 
+    MtcBlockChecker objChecker(lstRules, nullptr);
     Result objResult = objChecker.Check();
 
     EXPECT_EQ(Result::Status::PENDING, objResult.eStatus);
 }
 
-TEST(MtcBlockCheckerTest, AllPendingRuleUnblockedNotifiesListener)
+TEST(MtcBlockCheckerTest, ListenerNotifiedWhenAllPendingRulesUnblocked)
 {
     IMSList<IMtcBlockRule*> lstRules;
-    lstRules.Append(new TestRule(Result::Status::PENDING));
-    lstRules.Append(new TestRule(Result::Status::PENDING));
-    TestListener objListener;
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
+
+    MockIMtcBlockCheckListener objListener;
+    EXPECT_CALL(objListener, OnBlockChecked(Result(Result::Status::UNBLOCKED, objDefaultReason)))
+            .Times(1);
+
     MtcBlockChecker objChecker(lstRules, &objListener);
-
     Result objResult = objChecker.Check();
-    objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
-    objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
 
-    EXPECT_EQ(Result::Status::UNBLOCKED, objListener.m_eStatus);
+    objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
+    objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
 }
 
-TEST(MtcBlockCheckerTest, SomePendingRuleUnblockedNotNotifiesListener)
+TEST(MtcBlockCheckerTest, ListenerNotNotifiedWhenSomePendingRulesUnblocked)
 {
     IMSList<IMtcBlockRule*> lstRules;
-    lstRules.Append(new TestRule(Result::Status::PENDING));
-    lstRules.Append(new TestRule(Result::Status::PENDING));
-    TestListener objListener;
-    MtcBlockChecker objChecker(lstRules, &objListener);
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
 
+    MockIMtcBlockCheckListener objListener;
+    EXPECT_CALL(objListener, OnBlockChecked(_))
+            .Times(0);
+
+    MtcBlockChecker objChecker(lstRules, &objListener);
     Result objResult = objChecker.Check();
     objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
-
-    EXPECT_NE(Result::Status::UNBLOCKED, objListener.m_eStatus);
 }
 
-TEST(MtcBlockCheckerTest, SomePendingRuleBlockedNotifiesListener)
+TEST(MtcBlockCheckerTest, ListenerNotifiedWhenSomePendingRulesBlocked)
 {
     IMSList<IMtcBlockRule*> lstRules;
-    lstRules.Append(new TestRule(Result::Status::PENDING));
-    lstRules.Append(new TestRule(Result::Status::PENDING));
-    TestListener objListener;
-    MtcBlockChecker objChecker(lstRules, &objListener);
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
 
+    MockIMtcBlockCheckListener objListener;
+    EXPECT_CALL(objListener, OnBlockChecked(Result(Result::Status::BLOCKED, objReason)))
+            .Times(1);
+
+    MtcBlockChecker objChecker(lstRules, &objListener);
     Result objResult = objChecker.Check();
     objChecker.OnBlockRuleChecked(Result(Result::Status::BLOCKED, objReason));
-
-    EXPECT_EQ(Result::Status::BLOCKED, objListener.m_eStatus);
-    EXPECT_EQ(objReason.nCode, objListener.m_objReason.nCode);
-    EXPECT_EQ(objReason.nExtraCode, objListener.m_objReason.nExtraCode);
 }
 
 TEST(MtcBlockCheckerTest, ListenerNotNotifiedAfterNotifiedOnce)
 {
     IMSList<IMtcBlockRule*> lstRules;
-    lstRules.Append(new TestRule(Result::Status::PENDING));
-    lstRules.Append(new TestRule(Result::Status::PENDING));
-    TestListener objListener;
-    MtcBlockChecker objChecker(lstRules, &objListener);
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
+    lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
 
+    MockIMtcBlockCheckListener objListener;
+    EXPECT_CALL(objListener, OnBlockChecked(_))
+            .Times(0);
+    EXPECT_CALL(objListener, OnBlockChecked(Result(Result::Status::BLOCKED, objReason)))
+            .Times(1);
+
+    MtcBlockChecker objChecker(lstRules, &objListener);
     Result objResult = objChecker.Check();
     objChecker.OnBlockRuleChecked(Result(Result::Status::BLOCKED, objReason));
     objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
-
-    EXPECT_EQ(Result::Status::BLOCKED, objListener.m_eStatus);
 }

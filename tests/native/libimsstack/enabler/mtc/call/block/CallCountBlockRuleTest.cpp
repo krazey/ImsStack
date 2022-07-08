@@ -14,18 +14,137 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "call/MockIMtcCall.h"
+#include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/block/CallCountBlockRule.h"
+#include "call/block/MockIMtcBlockRule.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
 
-namespace android
-{
+using ::testing::Return;
+using ::testing::ReturnRef;
+using Result = IMtcBlockRule::Result;
 
 class CallCountBlockRuleTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MockIMtcCallContext objContext;
+    MockIMtcCallManager objCallManager;
+    MockIMtcBlockRuleCheckListener objListener;
+    CallInfo objCallInfo;
+    MockIMtcConfigurationManager* pConfigurationManager;
+    MtcConfigurationProxy* pConfigurationProxy;
+    CallCountBlockRule* pBlockRule;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override
+    {
+        pConfigurationManager = new MockIMtcConfigurationManager();
+        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+
+        ON_CALL(objContext, GetConfigurationProxy)
+                .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetCallManager)
+                .WillByDefault(ReturnRef(objCallManager));
+        ON_CALL(objContext, GetCallInfo)
+                .WillByDefault(ReturnRef(objCallInfo));
+
+        pBlockRule = new CallCountBlockRule(objContext);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pBlockRule;
+    }
+
+    MockIMtcCall* CreateMockIMtcCall(IMtcCall::State eState)
+    {
+        MockIMtcCall* pCall = new MockIMtcCall();
+
+        ON_CALL(*pCall, GetState)
+                .WillByDefault(Return(eState));
+
+        return pCall;
+    }
 };
 
-}  // namespace android
+TEST_F(CallCountBlockRuleTest, CheckReturnsUnblockedForMoConference)
+{
+    objCallInfo.bConference = IMS_TRUE;
+    objCallInfo.ePeerType = PeerType::MO;
+
+    EXPECT_CALL(objCallManager, GetCalls)
+            .Times(0);
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+}
+
+TEST_F(CallCountBlockRuleTest, CheckReturnsUnblockedIfNoCallExists)
+{
+    objCallInfo.bConference = IMS_FALSE;
+
+    IMSList<IMtcCall*> lstCalls;
+    ON_CALL(objCallManager, GetCalls)
+            .WillByDefault(Return(lstCalls));
+
+    ON_CALL(*pConfigurationManager, GetCallMaxCount)
+            .WillByDefault(Return(1));
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+}
+
+TEST_F(CallCountBlockRuleTest, CheckReturnsUnblockedIfMaxTerminatingCallExists)
+{
+    objCallInfo.bConference = IMS_FALSE;
+
+    IMSList<IMtcCall*> lstCalls;
+    lstCalls.Append(CreateMockIMtcCall(IMtcCall::State::IDLE));         // Call to check
+    lstCalls.Append(CreateMockIMtcCall(IMtcCall::State::TERMINATING));  // Ongoing call
+    ON_CALL(objCallManager, GetCalls)
+            .WillByDefault(Return(lstCalls));
+
+    ON_CALL(*pConfigurationManager, GetCallMaxCount)
+            .WillByDefault(Return(1));
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+}
+
+TEST_F(CallCountBlockRuleTest, CheckReturnsBlockedIfMaxCallExists)
+{
+    objCallInfo.bConference = IMS_FALSE;
+
+    IMSList<IMtcCall*> lstCalls;
+    lstCalls.Append(CreateMockIMtcCall(IMtcCall::State::IDLE));         // Call to check
+    lstCalls.Append(CreateMockIMtcCall(IMtcCall::State::ESTABLISHED));  // Ongoing call
+    ON_CALL(objCallManager, GetCalls)
+            .WillByDefault(Return(lstCalls));
+
+    ON_CALL(*pConfigurationManager, GetCallMaxCount)
+            .WillByDefault(Return(1));
+
+    {
+        objCallInfo.ePeerType = PeerType::MO;
+
+        Result objResult = pBlockRule->Check(objListener);
+
+        EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+        EXPECT_EQ(CallReasonInfo(CODE_LOCAL_CALL_EXCEEDED), objResult.objReason);
+    }
+    {
+        objCallInfo.ePeerType = PeerType::MT;
+
+        Result objResult = pBlockRule->Check(objListener);
+
+        EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+        EXPECT_EQ(CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED), objResult.objReason);
+    }
+}

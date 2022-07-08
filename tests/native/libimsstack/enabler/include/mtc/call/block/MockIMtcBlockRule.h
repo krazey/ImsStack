@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef CS_CALL_BLOCK_RULE_H_
-#define CS_CALL_BLOCK_RULE_H_
+#ifndef MOCK_I_MTC_BLOCK_RULE_H_
+#define MOCK_I_MTC_BLOCK_RULE_H_
 
-#include "call/IMtcCall.h"
+#include <gmock/gmock.h>
 #include "call/block/IMtcBlockRule.h"
 
-class IMtcCallContext;
-class IMtcImsEventReceiver;
-
-class CsCallBlockRule final : public IMtcBlockRule
+class MockIMtcBlockRule : public IMtcBlockRule
 {
 public:
-    explicit CsCallBlockRule(IN IMtcCallContext& objContext);
-    virtual ~CsCallBlockRule();
-    CsCallBlockRule(IN const CsCallBlockRule&) = delete;
-    CsCallBlockRule& operator=(IN const CsCallBlockRule&) = delete;
+    MOCK_METHOD(Result, Check, (IN IMtcBlockRuleCheckListener& objListener), (override));
+};
 
-    Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
-
-private:
-    const IMtcService& m_objService;
-    IMtcImsEventReceiver& m_objEventReceiver;
+class MockIMtcBlockRuleCheckListener : public IMtcBlockRuleCheckListener
+{
+public:
+    MOCK_METHOD(void, OnBlockRuleChecked, (IN IMtcBlockRule::Result objResult), (override));
 };
 
 #endif

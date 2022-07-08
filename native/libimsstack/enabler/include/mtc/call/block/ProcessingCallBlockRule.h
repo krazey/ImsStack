@@ -22,7 +22,6 @@
 #include "call/block/IMtcBlockRule.h"
 
 class IMtcCallContext;
-class IMtcCallManager;
 
 class ProcessingCallBlockRule final : public IMtcBlockRule
 {
@@ -35,13 +34,9 @@ public:
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    Result CheckForOutgoingCall(IN const IMSList<IMtcCall*>& lstCalls);
-    Result CheckForIncomingCall(IN const IMSList<IMtcCall*>& lstCalls);
-
-    IMS_BOOL IsOtherIdleCallExists(IN const IMSList<IMtcCall*>& lstCalls);
-    IMS_BOOL IsIncomingCallExists(IN const IMSList<IMtcCall*>& lstCalls);
-    IMS_BOOL IsOutgoingCallExists(IN const IMSList<IMtcCall*>& lstCalls);
-    IMS_BOOL IsEmergencyCallExists(IN const IMSList<IMtcCall*>& lstCalls);
+    IMS_BOOL IsCallSetupProcessing(IN const IMSList<IMtcCall*>& lstCalls) const;
+    IMS_BOOL IsCallUpdating(IN const IMSList<IMtcCall*>& lstCalls) const;
+    IMS_BOOL IsEmergencyCallExists(IN const IMSList<IMtcCall*>& lstCalls) const;
 
     IMtcCallContext& m_objContext;
 };

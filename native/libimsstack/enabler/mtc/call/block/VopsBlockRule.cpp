@@ -26,8 +26,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 VopsBlockRule::VopsBlockRule(IN IMtcCallContext& objContext) :
         m_objService(objContext.GetService()),
-        m_objEventReceiver(objContext.GetImsEventReceiver()),
-        m_ePeerType(objContext.GetCallInfo().ePeerType)
+        m_objEventReceiver(objContext.GetImsEventReceiver())
 {
 }
 

@@ -37,7 +37,6 @@ public:
 private:
     IMtcService& m_objService;
     IMtcImsEventReceiver& m_objEventReceiver;
-    const PeerType m_ePeerType;
 };
 
 #endif

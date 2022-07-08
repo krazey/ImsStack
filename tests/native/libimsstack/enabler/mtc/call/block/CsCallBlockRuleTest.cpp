@@ -14,18 +14,123 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "ImsEventDef.h"
+#include "IMtcImsEventReceiver.h"
+#include "MockIMtcImsEventReceiver.h"
+#include "MockIMtcService.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/block/CsCallBlockRule.h"
+#include "call/block/MockIMtcBlockRule.h"
 
-namespace android
-{
+using ::testing::Return;
+using ::testing::ReturnRef;
+using Result = IMtcBlockRule::Result;
 
 class CsCallBlockRuleTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MockIMtcService objService;
+    MockIMtcImsEventReceiver objImsEventReceiver;
+    MockIMtcCallContext objContext;
+    MockIMtcBlockRuleCheckListener objListener;
+    CsCallBlockRule* pBlockRule;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override
+    {
+        ON_CALL(objContext, GetService)
+                .WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetImsEventReceiver)
+                .WillByDefault(ReturnRef(objImsEventReceiver));
+
+        pBlockRule = new CsCallBlockRule(objContext);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pBlockRule;
+    }
 };
 
-}  // namespace android
+TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedForEmergencyCall)
+{
+    ON_CALL(objService, GetServiceType)
+            .WillByDefault(Return(ServiceType::EMERGENCY));
+
+    EXPECT_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
+            .Times(0);
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+}
+
+TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedIfCsCallStateIdle)
+{
+    ON_CALL(objService, GetServiceType)
+            .WillByDefault(Return(ServiceType::NORMAL));
+
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
+            .WillByDefault(Return(IMS_CSCALL_STATE_IDLE));
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+}
+
+TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedIfCsCallStateUnknown)
+{
+    ON_CALL(objService, GetServiceType)
+            .WillByDefault(Return(ServiceType::NORMAL));
+
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
+            .WillByDefault(Return(IMtcImsEventReceiver::UNKNOWN_VALUE));
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+}
+
+TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallIncoming)
+{
+    ON_CALL(objService, GetServiceType)
+            .WillByDefault(Return(ServiceType::NORMAL));
+
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
+            .WillByDefault(Return(IMS_CSCALL_STATE_INCOMING));
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_CS_CALL), objResult.objReason);
+}
+
+TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallActive)
+{
+    ON_CALL(objService, GetServiceType)
+            .WillByDefault(Return(ServiceType::NORMAL));
+
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
+            .WillByDefault(Return(IMS_CSCALL_STATE_ACTIVE));
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_CS_CALL), objResult.objReason);
+}
+
+TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallActiveE911)
+{
+    ON_CALL(objService, GetServiceType)
+            .WillByDefault(Return(ServiceType::NORMAL));
+
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
+            .WillByDefault(Return(IMS_CSCALL_STATE_ACTIVE_E911));
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_CS_CALL), objResult.objReason);
+}
