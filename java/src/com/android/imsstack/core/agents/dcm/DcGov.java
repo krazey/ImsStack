@@ -20,7 +20,6 @@ import android.content.Context;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.ICellInfo;
-import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
@@ -74,7 +73,7 @@ public class DcGov implements IDc, ISystemAPINetwork {
     public int activateDataConnection4Sys(int apnType, int ipcanType) {
         ImsLog.i(mSlotId, "apnType = " + apnType + " , ipcanType = " + ipcanType);
         IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-        return ((dcapn != null) && dcapn.connect(apnType, ipcanType)) ? 1 : 0;
+        return ((dcapn != null) && dcapn.connect(apnType)) ? 1 : 0;
     }
 
     @Override
@@ -85,11 +84,7 @@ public class DcGov implements IDc, ISystemAPINetwork {
             return 0;
         }
 
-        if (apnType == EApnType.IMS.getType()) {
-            dcapn.disconnect(apnType, IApn.DEFAULT_TIME_FOR_RECOVERY, ipcanType);
-        } else {
-            dcapn.disconnect(apnType, 0, ipcanType);
-        }
+        dcapn.disconnect(apnType);
 
         return 1;
     }

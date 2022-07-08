@@ -147,7 +147,7 @@ public class SscNetConnection implements ISscNetConnection {
             return false;
         }
 
-        if (!dcGovApnCtrl.connect(mApnType.getType(), IApn.IPCAN_CATEGORY_MOBILE)) {
+        if (!dcGovApnCtrl.connect(mApnType.getType())) {
             return false;
         }
 
@@ -204,8 +204,7 @@ public class SscNetConnection implements ISscNetConnection {
 
         IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
         if (dcGovApnCtrl != null) {
-            dcGovApnCtrl.disconnect(mApnType.getType(), IApn.DEFAULT_TIME_FOR_RECOVERY,
-                IApn.IPCAN_CATEGORY_MOBILE);
+            dcGovApnCtrl.disconnect(mApnType.getType());
         }
     }
 

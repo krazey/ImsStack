@@ -144,8 +144,10 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected Context mContext;
+    protected IDcApn mDcApn;
     protected IDcSettings mDcSettings;
     protected IDcNetWatcher mDcNetWatcher;
+    protected ISystem mSystem;
     protected int mSlotId = 0;
     protected EApnType mType;
     protected EApnReqState mAPNState = EApnReqState.APN_REQUEST_IDLE;
@@ -170,8 +172,10 @@ public abstract class Apn extends Handler implements IApn {
     protected Apn(Context context, int slotId) {
         mContext = context;
         mSlotId = slotId;
+        mDcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
         mDcSettings = (IDcSettings) DcFactory.getDc(DcFactory.SETTING, mSlotId);
         mDcNetWatcher = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
+        mSystem = SystemInterface.getInstance().getSystem(mSlotId);
 
         registerEvent();
     }
@@ -261,19 +265,15 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     @Override
-    public abstract boolean connect();
-
-    @Override
-    public boolean connect(int ipcanType) {
-        return connect();
+    public boolean connect() {
+        // Child Class Need to Implement
+        return false;
     }
 
     @Override
-    public abstract void disconnect(int nTimeAfterRecover);
-
-    @Override
-    public void disconnect(int ipcanType, int timeAfterRecover) {
-        disconnect(timeAfterRecover);
+    public boolean disconnect() {
+        // Child Class Need to Implement
+        return false;
     }
 
     @Override
@@ -598,10 +598,8 @@ public abstract class Apn extends Handler implements IApn {
 
         mIpcanCategory = category;
 
-        ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
-
-        if (system != null) {
-            system.notifyDataConnectionIpcanChanged(mType.getType(), mIpcanCategory);
+        if (mSystem != null) {
+            mSystem.notifyDataConnectionIpcanChanged(mType.getType(), mIpcanCategory);
         }
 
         return true;
@@ -625,10 +623,8 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         NetworkInfo netInfo = null;
-        IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-
-        if (dcapn != null) {
-            netInfo = cm.getNetworkInfo(dcapn.getNetworkByCapability(mType.getType()));
+        if (mDcApn != null) {
+            netInfo = cm.getNetworkInfo(mDcApn.getNetworkByCapability(mType.getType()));
         }
 
         if (netInfo == null) {
@@ -649,10 +645,8 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected boolean hasLocalAddress(int version) {
-        IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-
-        if (dcapn != null) {
-            String ip = dcapn.getLocalAddress(mType.getType(), version);
+        if (mDcApn != null) {
+            String ip = mDcApn.getLocalAddress(mType.getType(), version);
 
             if (ip != null) {
                 return true;
@@ -663,11 +657,9 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected boolean isIPChanged() {
-        IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-
-        if (dcapn != null) {
-            String cachedIP = dcapn.getCachedLocalAddress(mType.getType());
-            String ip = dcapn.getLocalAddress(mType.getType(), 0);
+        if (mDcApn != null) {
+            String cachedIP = mDcApn.getCachedLocalAddress(mType.getType());
+            String ip = mDcApn.getLocalAddress(mType.getType(), 0);
 
             if (cachedIP == null || ip == null) {
                 return true;
@@ -1350,21 +1342,20 @@ public abstract class Apn extends Handler implements IApn {
             EApnType apnType = res.eApnType;
             EDataState dataState = res.eDataState;
 
-            ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
-            if (system == null) {
+            if (mSystem == null) {
                 return;
             }
 
             if (dataState == EDataState.DATA_STATE_CONNECT_FAILED) {
                 ImsLog.w(mSlotId, "Data Connection failed : apnType=" + apnType);
-                system.notifyDataConnectionFailed(apnType.getType());
+                mSystem.notifyDataConnectionFailed(apnType.getType());
                 return;
             }
 
             ImsLog.i(mSlotId, "apnType=" + apnType
                     + " : " + apnType.getString() + ", dataState=" + dataState);
 
-            system.notifyDataConnectionStateChanged(
+            mSystem.notifyDataConnectionStateChanged(
                     apnType.getType(), dataState.getState());
         }
     }
