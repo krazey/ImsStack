@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
+#include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "ServiceNetwork.h"
 #include "ServiceNetworkPolicy.h"
@@ -46,10 +48,10 @@ PUBLIC
 MtsDialingPlan::~MtsDialingPlan() {}
 
 PUBLIC
-AString MtsDialingPlan::Translate(IN const AString& strNumber, IN IMS_BOOL bAquot /* = IMS_TRUE */,
-        IN IMS_BOOL bUssi /* = IMS_FALSE*/)
+AString MtsDialingPlan::Translate(IN const AString& strTargetAddress,
+        IN IMS_BOOL bAquot /* = IMS_TRUE */, IN IMS_BOOL bUssi /* = IMS_FALSE*/)
 {
-    if (strNumber.GetLength() == 0)
+    if (strTargetAddress.GetLength() == 0)
     {
         IMS_TRACE_E(0, "Number is null or empty", 0, 0, 0);
         return AString::ConstNull();
@@ -57,34 +59,34 @@ AString MtsDialingPlan::Translate(IN const AString& strNumber, IN IMS_BOOL bAquo
 
     AString strLog;
 
-    IMS_TRACE_D(
-            "Dialed number :: %s", UtilService::GetLogString(strNumber, strLog, 3).GetStr(), 0, 0);
+    IMS_TRACE_D("Dialed number :: %s",
+            UtilService::GetLogString(strTargetAddress, strLog, 3).GetStr(), 0, 0);
 
     AStringBuffer objUri(128);
 
     // name-addr format
-    if (strNumber.Contains('<') && strNumber.Contains('>'))
+    if (strTargetAddress.Contains('<') && strTargetAddress.Contains('>'))
     {
-        return strNumber;
+        return strTargetAddress;
     }
     // addr-spec format
-    else if (strNumber.StartsWith('s') || strNumber.StartsWith('t') || strNumber.StartsWith('S') ||
-            strNumber.StartsWith('T'))
+    else if (strTargetAddress.StartsWith('s') || strTargetAddress.StartsWith('t') ||
+            strTargetAddress.StartsWith('S') || strTargetAddress.StartsWith('T'))
     {
-        AString strTmp = strNumber.GetSubStr(0, 5).MakeLower();
+        AString strTmp = strTargetAddress.GetSubStr(0, 5).MakeLower();
 
         if (strTmp.StartsWith("sip:") || strTmp.StartsWith("sips:") || strTmp.StartsWith("tel:"))
         {
-            if (bAquot && strNumber.Contains(';'))
+            if (bAquot && strTargetAddress.Contains(';'))
             {
                 objUri.Append('<');
-                objUri.Append(strNumber);
+                objUri.Append(strTargetAddress);
                 objUri.Append('>');
 
                 return static_cast<const AStringBuffer&>(objUri).GetString();
             }
 
-            return strNumber;
+            return strTargetAddress;
         }
     }
 
@@ -94,14 +96,14 @@ AString MtsDialingPlan::Translate(IN const AString& strNumber, IN IMS_BOOL bAquo
     {
         if (bUssi)
         {
-            if (!FormUssiNonTelUri(strNumber, objUri, m_strScheme))
+            if (!FormUssiNonTelUri(strTargetAddress, objUri, m_strScheme))
             {
                 return AString::ConstNull();
             }
         }
         else
         {
-            if (!FormNonTelUri(strNumber, bAquot, objUri))
+            if (!FormNonTelUri(strTargetAddress, bAquot, objUri))
             {
                 return AString::ConstNull();
             }
@@ -109,7 +111,7 @@ AString MtsDialingPlan::Translate(IN const AString& strNumber, IN IMS_BOOL bAquo
     }
     else
     {
-        IMS_BOOL bOK = FormTelUri(strNumber, objUri);
+        IMS_BOOL bOK = FormTelUri(strTargetAddress, objUri);
 
         if (!bOK)
         {
@@ -135,15 +137,15 @@ AString MtsDialingPlan::Translate(IN const AString& strNumber, IN IMS_BOOL bAquo
 }
 
 PUBLIC
-AString MtsDialingPlan::Translate(IN const AString& strNumber, IN const AString& strScheme,
+AString MtsDialingPlan::Translate(IN const AString& strTargetAddress, IN const AString& strScheme,
         IN IMS_BOOL bAquot /* = IMS_TRUE */)
 {
     if (strScheme.GetLength() == 0)
     {
-        return Translate(strNumber, bAquot);
+        return Translate(strTargetAddress, bAquot);
     }
 
-    if (strNumber.GetLength() == 0)
+    if (strTargetAddress.GetLength() == 0)
     {
         IMS_TRACE_E(0, "Number is null or empty", 0, 0, 0);
         return AString::ConstNull();
@@ -153,47 +155,47 @@ AString MtsDialingPlan::Translate(IN const AString& strNumber, IN const AString&
 
     (void)strLog;
 
-    IMS_TRACE_D(
-            "Dialed number :: %s", UtilService::GetLogString(strNumber, strLog, 3).GetStr(), 0, 0);
+    IMS_TRACE_D("Dialed number :: %s",
+            UtilService::GetLogString(strTargetAddress, strLog, 3).GetStr(), 0, 0);
 
     AStringBuffer objUri(128);
 
     // name-addr format
-    if (strNumber.Contains('<') && strNumber.Contains('>'))
+    if (strTargetAddress.Contains('<') && strTargetAddress.Contains('>'))
     {
-        return strNumber;
+        return strTargetAddress;
     }
     // addr-spec format
-    else if (strNumber.StartsWith('s') || strNumber.StartsWith('t') || strNumber.StartsWith('S') ||
-            strNumber.StartsWith('T'))
+    else if (strTargetAddress.StartsWith('s') || strTargetAddress.StartsWith('t') ||
+            strTargetAddress.StartsWith('S') || strTargetAddress.StartsWith('T'))
     {
-        AString strTmp = strNumber.GetSubStr(0, 5).MakeLower();
+        AString strTmp = strTargetAddress.GetSubStr(0, 5).MakeLower();
 
         if (strTmp.StartsWith("sip:") || strTmp.StartsWith("sips:") || strTmp.StartsWith("tel:"))
         {
-            if (bAquot && strNumber.Contains(';'))
+            if (bAquot && strTargetAddress.Contains(';'))
             {
                 objUri.Append('<');
-                objUri.Append(strNumber);
+                objUri.Append(strTargetAddress);
                 objUri.Append('>');
 
                 return static_cast<const AStringBuffer&>(objUri).GetString();
             }
 
-            return strNumber;
+            return strTargetAddress;
         }
     }
 
     if (!m_strScheme.EqualsIgnoreCase("tel"))
     {
-        if (!FormNonTelUri(strNumber, bAquot, objUri, m_strScheme))
+        if (!FormNonTelUri(strTargetAddress, bAquot, objUri, m_strScheme))
         {
             return AString::ConstNull();
         }
     }
     else
     {
-        IMS_BOOL bOK = FormTelUri(strNumber, objUri);
+        IMS_BOOL bOK = FormTelUri(strTargetAddress, objUri);
 
         if (!bOK)
         {
@@ -219,20 +221,20 @@ AString MtsDialingPlan::Translate(IN const AString& strNumber, IN const AString&
 }
 
 PUBLIC
-AString MtsDialingPlan::TranslateEx(IN const AString& strNumber,
+AString MtsDialingPlan::TranslateEx(IN const AString& strTargetAddress,
         IN IMS_SINT32 nFlags /*= FLAG_NONE */, IN IMS_BOOL bAquot /*= IMS_TRUE*/,
         IN IMS_BOOL bUssi /*= IMS_FALSE*/)
 {
     (void)nFlags;
-    return Translate(strNumber, bAquot, bUssi);
+    return Translate(strTargetAddress, bAquot, bUssi);
 }
 
 PUBLIC
-AString MtsDialingPlan::TranslateEx(IN const AString& strNumber, IN const AString& strScheme,
+AString MtsDialingPlan::TranslateEx(IN const AString& strTargetAddress, IN const AString& strScheme,
         IN IMS_SINT32 nFlags /*= FLAG_NONE*/, IN IMS_BOOL bAquot /*= IMS_TRUE*/)
 {
     (void)nFlags;
-    return Translate(strNumber, strScheme, bAquot);
+    return Translate(strTargetAddress, strScheme, bAquot);
 }
 
 PUBLIC
@@ -289,7 +291,7 @@ AccessNetworkInfo* MtsDialingPlan::GetAccessNetworkInfo(IN_OUT AccessNetworkInfo
 }
 
 PRIVATE
-IMS_BOOL MtsDialingPlan::FormNonTelUri(IN const AString& strNumber, IN IMS_BOOL bAquot,
+IMS_BOOL MtsDialingPlan::FormNonTelUri(IN const AString& strTargetAddress, IN IMS_BOOL bAquot,
         OUT AStringBuffer& objUri, IN const AString& strScheme /* = AString::ConstNull() */)
 {
     if (strScheme.GetLength() != 0)
@@ -309,26 +311,32 @@ IMS_BOOL MtsDialingPlan::FormNonTelUri(IN const AString& strNumber, IN IMS_BOOL 
     }
 
     objUri.Append(':');
-    objUri.Append(strNumber);
+    objUri.Append(strTargetAddress);
 
-    IMS_SINT32 nDialedNumberFormat = GetDialedNumberFormat(strNumber);
+    IMS_SINT32 nNumberFormat = GetNumberFormat(strTargetAddress);
 
-    if (strNumber.Contains('#'))
+    if (strTargetAddress.Contains('#'))
     {
         /*
          * The rule for "telephone-subscriber" and RFC2396 is overridden by RFC3261.
          * '#' MUST be escaped in userinfo part of SIP address.
          * if ((nDialingPolicy == ImsIdentity::DIALING_POLICY_OTHER)
-         *        || (nDialedNumberFormat == NUMBER_FORMAT_NON_TEL))
+         *        || (nNumberFormat == NUMBER_FORMAT_NON_TEL))
          */
         {
             objUri.Replace('#', "%23");
         }
     }
 
+    if (nNumberFormat == NUMBER_FORMAT_NON_TEL)
+    {
+        // do not add "phone-context" and "user" parameters when the context is not number format
+        return IMS_TRUE;
+    }
+
     // "phone-context" parameter
     if ((m_nDialingPolicy != ImsIdentity::DIALING_POLICY_OTHER) &&
-            (nDialedNumberFormat != NUMBER_FORMAT_GLOBAL))
+            (nNumberFormat == NUMBER_FORMAT_LOCAL))
     {
         objUri.Append(";phone-context=");
 
@@ -342,8 +350,11 @@ IMS_BOOL MtsDialingPlan::FormNonTelUri(IN const AString& strNumber, IN IMS_BOOL 
     objUri.Append('@');
     objUri.Append(ImsIdentity::GetHomeDomainName(m_nSlotId));
 
-    if ((m_nDialingPolicy != ImsIdentity::DIALING_POLICY_OTHER) &&
-            (nDialedNumberFormat == NUMBER_FORMAT_NON_TEL))
+    // "user" parameter
+    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    if (piCc->GetBoolean(CarrierConfig::Assets::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL))
+    // if ((m_nDialingPolicy != ImsIdentity::DIALING_POLICY_OTHER) &&
+    //         (nNumberFormat == NUMBER_FORMAT_NON_TEL))
     {
         objUri.Append(";user=dialstring");
     }
@@ -362,15 +373,15 @@ IMS_BOOL MtsDialingPlan::FormNonTelUri(IN const AString& strNumber, IN IMS_BOOL 
 }
 
 PRIVATE
-IMS_BOOL MtsDialingPlan::FormTelUri(IN const AString& strNumber, OUT AStringBuffer& objUri)
+IMS_BOOL MtsDialingPlan::FormTelUri(IN const AString& strTargetAddress, OUT AStringBuffer& objUri)
 {
-    if (strNumber.StartsWith('+'))
+    if (strTargetAddress.StartsWith('+'))
     {
-        objUri.Append(strNumber);
+        objUri.Append(strTargetAddress);
         return IMS_TRUE;
     }
 
-    objUri.Append(strNumber);
+    objUri.Append(strTargetAddress);
     objUri.Append(";phone-context=");
     objUri.Append(ImsIdentity::GetPhoneContext(GetDialingPolicy(), m_nSlotId));
 
@@ -378,8 +389,8 @@ IMS_BOOL MtsDialingPlan::FormTelUri(IN const AString& strNumber, OUT AStringBuff
 }
 
 PRIVATE
-IMS_BOOL MtsDialingPlan::FormUssiNonTelUri(IN const AString& strNumber, OUT AStringBuffer& objUri,
-        IN const AString& strScheme /* = AString::ConstNull() */)
+IMS_BOOL MtsDialingPlan::FormUssiNonTelUri(IN const AString& strTargetAddress,
+        OUT AStringBuffer& objUri, IN const AString& strScheme /* = AString::ConstNull() */)
 {
     IMS_TRACE_I("FormUssiNonTelUri", 0, 0, 0);
 
@@ -400,9 +411,9 @@ IMS_BOOL MtsDialingPlan::FormUssiNonTelUri(IN const AString& strNumber, OUT AStr
     }
 
     objUri.Append(':');
-    objUri.Append(strNumber);
+    objUri.Append(strTargetAddress);
 
-    if (strNumber.Contains('#'))
+    if (strTargetAddress.Contains('#'))
     {
         objUri.Replace('#', "%23");
     }
@@ -439,7 +450,7 @@ IMS_SINT32 MtsDialingPlan::TranslateScheme() const
     return MtsSipFormUtils::SCHEME_UNKNOWN;
 }
 
-PRIVATE GLOBAL IMS_SINT32 MtsDialingPlan::GetDialedNumberFormat(IN const AString& strDial)
+PRIVATE GLOBAL IMS_SINT32 MtsDialingPlan::GetNumberFormat(IN const AString& strTargetAddress)
 {
     /*
      * global-number-digits := "+" *phonedigit DIGIT *phonedigit
@@ -448,16 +459,16 @@ PRIVATE GLOBAL IMS_SINT32 MtsDialingPlan::GetDialedNumberFormat(IN const AString
      * phonedigit-hex := HEXDIG / "*" / "#" / [visual-separator]
      */
 
-    if (strDial.Equals('+'))
+    if (strTargetAddress.Equals('+'))
     {
         return NUMBER_FORMAT_NON_TEL;
     }
 
-    if (strDial.StartsWith('+'))
+    if (strTargetAddress.StartsWith('+'))
     {
-        for (IMS_SINT32 nIndex = 1; nIndex < strDial.GetLength(); ++nIndex)
+        for (IMS_SINT32 nIndex = 1; nIndex < strTargetAddress.GetLength(); ++nIndex)
         {
-            const IMS_CHAR szCh = strDial[nIndex];
+            const IMS_CHAR szCh = strTargetAddress[nIndex];
 
             if (!IMS_ISDIGIT(szCh) && !IsVisualSeparator(szCh))
             {
@@ -469,9 +480,9 @@ PRIVATE GLOBAL IMS_SINT32 MtsDialingPlan::GetDialedNumberFormat(IN const AString
     }
     else
     {
-        for (IMS_SINT32 nIndex = 0; nIndex < strDial.GetLength(); ++nIndex)
+        for (IMS_SINT32 nIndex = 0; nIndex < strTargetAddress.GetLength(); ++nIndex)
         {
-            const IMS_CHAR szCh = strDial[nIndex];
+            const IMS_CHAR szCh = strTargetAddress[nIndex];
 
             if (!IMS_ISDIGIT(szCh) && !IsVisualSeparator(szCh) && (szCh != '*') && (szCh != '#') &&
                     !((szCh >= 'A') && (szCh <= 'F')))

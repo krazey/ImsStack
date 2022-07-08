@@ -33,15 +33,15 @@ private:
     MtsDialingPlan& operator=(IN const MtsDialingPlan& objRHS);
 
 public:
-    AString Translate(IN const AString& strNumber, IN IMS_BOOL bAquot = IMS_TRUE,
+    AString Translate(IN const AString& strTargetAddress, IN IMS_BOOL bAquot = IMS_TRUE,
             IN IMS_BOOL bUssi = IMS_FALSE);
-    AString Translate(IN const AString& strNumber, IN const AString& strScheme,
+    AString Translate(IN const AString& strTargetAddress, IN const AString& strScheme,
             IN IMS_BOOL bAquot = IMS_TRUE);
 
     // To translate the dialed number based on the emergency flag
-    AString TranslateEx(IN const AString& strNumber, IN IMS_SINT32 nFlags = FLAG_NONE,
+    AString TranslateEx(IN const AString& strTargetAddress, IN IMS_SINT32 nFlags = FLAG_NONE,
             IN IMS_BOOL bAquot = IMS_TRUE, IN IMS_BOOL bUssi = IMS_FALSE);
-    AString TranslateEx(IN const AString& strNumber, IN const AString& strScheme,
+    AString TranslateEx(IN const AString& strTargetAddress, IN const AString& strScheme,
             IN IMS_SINT32 nFlags = FLAG_NONE, IN IMS_BOOL bAquot = IMS_TRUE);
 
     IMS_SINT32 GetDialingPolicy() const;
@@ -55,15 +55,15 @@ public:
 private:
     // For geo-local number format
     AccessNetworkInfo* GetAccessNetworkInfo(IN_OUT AccessNetworkInfo& objANI);
-    IMS_BOOL FormNonTelUri(IN const AString& strNumber, IN IMS_BOOL bAquot,
+    IMS_BOOL FormNonTelUri(IN const AString& strTargetAddress, IN IMS_BOOL bAquot,
             OUT AStringBuffer& objURI, IN const AString& strScheme = AString::ConstNull());
-    IMS_BOOL FormTelUri(IN const AString& strNumber, OUT AStringBuffer& objURI);
-    IMS_BOOL FormUssiNonTelUri(IN const AString& strNumber, OUT AStringBuffer& objURI,
+    IMS_BOOL FormTelUri(IN const AString& strTargetAddress, OUT AStringBuffer& objURI);
+    IMS_BOOL FormUssiNonTelUri(IN const AString& strTargetAddress, OUT AStringBuffer& objURI,
             IN const AString& strScheme = AString::ConstNull());
 
     IMS_SINT32 TranslateScheme() const;
 
-    static IMS_SINT32 GetDialedNumberFormat(IN const AString& strDial);
+    static IMS_SINT32 GetNumberFormat(IN const AString& strTargetAddress);
     static IMS_BOOL IsVisualSeparator(IN IMS_CHAR ch);
 
 public:

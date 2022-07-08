@@ -52,8 +52,8 @@ MtsSipFormUtils::MtsSipFormUtils(IN IMS_SINT32 nSlotId) :
         strUriScheme = "sip";
     }
 
-    m_pMtsDialingPlan = new MtsDialingPlan(
-            nSlotId, strUriScheme, piCc->GetInt(CarrierConfig::Ims::KEY_REQUEST_URI_TYPE_INT));
+    m_pMtsDialingPlan = new MtsDialingPlan(nSlotId, strUriScheme,
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_POLICY_OF_LOCAL_NUMBERS_INT));
 }
 
 PUBLIC
