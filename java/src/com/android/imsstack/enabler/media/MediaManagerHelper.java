@@ -49,7 +49,7 @@ public class MediaManagerHelper {
     public MediaManagerHelper(IMediaConnectionObserver mediaObserver) {
 
         mMediaObserver = mediaObserver;
-        mContext = AppContext.get();
+        mContext = AppContext.getInstance();
         createImsMediaManagerInstance();
     }
 

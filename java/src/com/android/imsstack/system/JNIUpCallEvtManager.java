@@ -503,7 +503,7 @@ public class JNIUpCallEvtManager {
             intent.putExtra(name1, value1);
             intent.putExtra(name2, value2);
 
-            AppContext.get().sendBroadcast(intent);
+            AppContext.getInstance().sendBroadcast(intent);
         }
 
         private void sendIntent(String action, String[] name, int[] value) {
@@ -523,7 +523,7 @@ public class JNIUpCallEvtManager {
                 intent.putExtra(name[i], value[i]);
             }
 
-            AppContext.get().sendBroadcast(intent);
+            AppContext.getInstance().sendBroadcast(intent);
         }
 
         private void sendIntent(String action, String name1, int value1, String name2, String value2) {
@@ -534,7 +534,7 @@ public class JNIUpCallEvtManager {
             intent.putExtra(name1, value1);
             intent.putExtra(name2, value2);
 
-            AppContext.get().sendBroadcast(intent);
+            AppContext.getInstance().sendBroadcast(intent);
         }
 
         //--------------------------------------------------------------------------------------------------------------

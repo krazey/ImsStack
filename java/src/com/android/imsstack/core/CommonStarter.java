@@ -148,7 +148,7 @@ public class CommonStarter {
 
         Log.i(TAG, "createAgents");
 
-        Context context = AppContext.get();
+        Context context = AppContext.getInstance();
 
         ImsLog.init();
 
@@ -187,7 +187,7 @@ public class CommonStarter {
     public void startAgents(int slotId) {
         Log.i(TAG, "startAgents(" + slotId + ")");
 
-        Context context = AppContext.get();
+        Context context = AppContext.getInstance();
 
         ImsTestMode.getInstance().init(context, slotId);
 
@@ -223,7 +223,7 @@ public class CommonStarter {
 
         AosFactory.getInstance().cleanup(slotId);
 
-        Context context = AppContext.get();
+        Context context = AppContext.getInstance();
 
         DcFactory.cleanUpDc(slotId);
 

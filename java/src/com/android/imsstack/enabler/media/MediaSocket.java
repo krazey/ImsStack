@@ -20,8 +20,10 @@ import android.annotation.NonNull;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
+
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
+
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -98,7 +100,8 @@ public class MediaSocket {
     }
 
     private static Network getNetworkForIpAddress(InetAddress addr) {
-        ConnectivityManager cm = AppContext.getSystemService(ConnectivityManager.class);
+        ConnectivityManager cm =
+                AppContext.getInstance().getSystemService(ConnectivityManager.class);
 
         if (cm == null) {
             return null;

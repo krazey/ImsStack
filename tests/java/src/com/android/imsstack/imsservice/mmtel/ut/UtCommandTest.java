@@ -25,10 +25,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsReasonInfo;
 
+import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.Usat;
 import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.enabler.IBaseContext;
@@ -40,6 +40,7 @@ import com.android.imsstack.imsservice.mmtel.ut.base.UtListener;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,23 +49,21 @@ import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class UtCommandTest {
     private final int mSlotId = 0;
-    private final int mNumberOfSlot = 1;
+    private static final int ACTIVE_MODEM_COUNT = 1;
 
+    private static ContextFixture sContext;
     private ImsUtImpl mImsUtImpl;
 
-    @Mock private static final Context MOCK_CONTEXT = Mockito.mock(Context.class);
     @Mock private IBaseContext mMockBaseContext;
     @Mock private UsatInterface mMockUsatInterface;
     @Mock private Usat.CallControlCommandResponse mMockUsatCmdRes;
     @Mock private UtListener mMockUtListener;
     @Mock private UtInterface mMockUtInterface;
-    @Mock private TelephonyManager mMockTelephonyManager;
 
     @Captor ArgumentCaptor<ImsReasonInfo> mReasonInfoCaptor;
     @Captor ArgumentCaptor<String> mStringCaptor;
@@ -72,12 +71,12 @@ public class UtCommandTest {
 
     @BeforeClass
     public static void setupOnce() {
-        try {
-            // This is to get one when MSimUtils.getMaxSimSlot() is called in UtFactory
-            AppContext.init(MOCK_CONTEXT);
-        } catch (java.lang.IllegalThreadStateException e) {
-            // AppContext thread is already started by others. Don't care, just set MOCK_CONTEXT
-        }
+        // This is to get one when MSimUtils.getMaxSimSlot() is called in UtFactory
+        sContext = new ContextFixture();
+        AppContext.init(sContext.getTestDouble());
+
+        TelephonyManager tm = sContext.getTestDouble().getSystemService(TelephonyManager.class);
+        when(tm.getActiveModemCount()).thenReturn(ACTIVE_MODEM_COUNT);
 
         UtFactory.sUtFactory = new UtFactory();
     }
@@ -93,13 +92,6 @@ public class UtCommandTest {
                 any())).thenReturn(null);
         when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_ALLOWED);
 
-        // This is to get one when MSimUtils.getMaxSimSlot() is called in UtFactory
-        when(mMockTelephonyManager.getActiveModemCount()).thenReturn(mNumberOfSlot);
-        when(MOCK_CONTEXT.getSystemService(Context.TELEPHONY_SERVICE))
-                .thenReturn(mMockTelephonyManager);
-        when(MOCK_CONTEXT.getSystemServiceName(TelephonyManager.class))
-                .thenReturn(Context.TELEPHONY_SERVICE);
-
         mImsUtImpl = new ImsUtImpl(mMockBaseContext);
         UtFactory.getInstance().setUtInterfaceForSlot(mSlotId, mMockUtInterface);
         mImsUtImpl.init();
@@ -108,6 +100,12 @@ public class UtCommandTest {
     @After
     public void tearDown() {
         mImsUtImpl.clear();
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        AppContext.deinit();
+        sContext = null;
     }
 
     @Test

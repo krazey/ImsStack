@@ -164,7 +164,7 @@ public class DcUtils implements IDcUtils {
     */
     @Override
     public boolean isMobileDataEnabled() {
-        return SettingsUtils.isMobileDataEnabled(AppContext.get().getContentResolver());
+        return SettingsUtils.isMobileDataEnabled(AppContext.getInstance().getContentResolver());
     }
 
     @Override

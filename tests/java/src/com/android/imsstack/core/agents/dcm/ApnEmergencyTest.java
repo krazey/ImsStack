@@ -42,6 +42,7 @@ import com.android.imsstack.system.ISystem;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -69,13 +70,9 @@ public class ApnEmergencyTest {
     private ConnectivityManager mConnectivityManager;
 
     @BeforeClass
-    public static void initial() {
+    public static void setUpOnce() {
         sContext = new ContextFixture();
-        try {
-            AppContext.init(sContext.getTestDouble());
-        } catch (java.lang.IllegalThreadStateException e) {
-            // AppContext thread is already started by others.
-        }
+        AppContext.init(sContext.getTestDouble());
     }
 
     @Before
@@ -83,10 +80,10 @@ public class ApnEmergencyTest {
         MockitoAnnotations.initMocks(this);
 
         // create the instance to test
-        mApnEmergency = new ApnEmergency(AppContext.get(), SLOT_0);
-        mTelephonyManager = AppContext.get().getSystemService(TelephonyManager.class);
-        mSubscriptionManager = AppContext.get().getSystemService(SubscriptionManager.class);
-        mConnectivityManager = AppContext.get().getSystemService(ConnectivityManager.class);
+        mApnEmergency = new ApnEmergency(AppContext.getInstance(), SLOT_0);
+        mTelephonyManager = AppContext.getInstance().getSystemService(TelephonyManager.class);
+        mSubscriptionManager = AppContext.getInstance().getSystemService(SubscriptionManager.class);
+        mConnectivityManager = AppContext.getInstance().getSystemService(ConnectivityManager.class);
 
         mTestableLooper = TestableLooper.get(ApnEmergencyTest.this);
         mTestableLooper.processAllMessages();
@@ -101,6 +98,12 @@ public class ApnEmergencyTest {
             mApnEmergency = null;
         }
         mTestableLooper = null;
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        AppContext.deinit();
+        sContext = null;
     }
 
     @Test

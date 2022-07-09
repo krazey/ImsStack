@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.imsstack.core.agents.dcm;
 
 import static org.junit.Assert.assertEquals;
@@ -21,7 +20,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CellIdentity;
 import android.telephony.CellIdentityGsm;
@@ -36,9 +34,10 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.Log;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,31 +55,25 @@ public class DcUtilsTest {
 
     static ContextFixture sContext;
 
-    @Mock TelephonyManager mTelephonyManager;
     @Mock ServiceState mServiceState;
 
     DcUtils mDcUtils;
 
     @BeforeClass
-    public static void initial() {
+    public static void setUpOnce() {
         sContext = new ContextFixture();
-        try {
-            AppContext.init(sContext.getTestDouble());
-        } catch (java.lang.IllegalThreadStateException e) {
-            // AppContext thread is already started by others.
-        }
-        ImsLog.init();
+        AppContext.init(sContext.getTestDouble());
     }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        sContext.setSystemService(Context.TELEPHONY_SERVICE, mTelephonyManager);
-        when(mTelephonyManager.getServiceState()).thenReturn(mServiceState);
+        TelephonyManager tm = sContext.getTestDouble().getSystemService(TelephonyManager.class);
+        when(tm.getServiceState()).thenReturn(mServiceState);
 
         mDcUtils = new DcUtils(SLOT_ID);
-        mDcUtils.init(AppContext.get());
+        mDcUtils.init(AppContext.getInstance());
     }
 
     @After
@@ -89,6 +82,12 @@ public class DcUtilsTest {
             mDcUtils.cleanup();
             mDcUtils = null;
         }
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        AppContext.deinit();
+        sContext = null;
     }
 
     @Test
@@ -252,7 +251,7 @@ public class DcUtilsTest {
         try {
             return (T) nri.getCellIdentity();
         } catch (ClassCastException e) {
-            ImsLog.d("getCellIdentity: " + e);
+            Log.d(TAG, "getCellIdentity: " + e);
             return null;
         }
     }

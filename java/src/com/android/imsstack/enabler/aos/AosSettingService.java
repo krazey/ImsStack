@@ -15,15 +15,6 @@
  */
 package com.android.imsstack.enabler.aos;
 
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.core.agents.agentif.SubscriptionListener;
-import com.android.imsstack.system.IJNIUpCallEvt;
-import com.android.imsstack.system.JNIUpCallEvtManager;
-import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +24,15 @@ import android.os.Handler;
 import android.os.Message;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
+
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.agentif.ISubscription;
+import com.android.imsstack.core.agents.agentif.SubscriptionListener;
+import com.android.imsstack.system.IJNIUpCallEvt;
+import com.android.imsstack.system.JNIUpCallEvtManager;
+import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.MSimUtils;
 
 public class AosSettingService {
 
@@ -67,7 +67,7 @@ public class AosSettingService {
         }
 
         mIntentReceiverListener = new IntentReceiverListener();
-        AppContext.get().registerReceiver(mIntentReceiverListener,
+        AppContext.getInstance().registerReceiver(mIntentReceiverListener,
                 mIntentReceiverListener.getFilter(), Context.RECEIVER_EXPORTED);
 
         mSubscriptionListener = new SubscriptionListenerProxy();
@@ -102,7 +102,7 @@ public class AosSettingService {
         }
 
         if (mIntentReceiverListener != null) {
-            AppContext.get().unregisterReceiver(mIntentReceiverListener);
+            AppContext.getInstance().unregisterReceiver(mIntentReceiverListener);
             mIntentReceiverListener = null;
         }
 
@@ -122,7 +122,7 @@ public class AosSettingService {
 
         TelephonyManager tm = AppContext.getTelephonyManager(listener.getSubId());
         if (tm != null) {
-            tm.registerTelephonyCallback(AppContext.getMainExecutor(), listener);
+            tm.registerTelephonyCallback(AppContext.getInstance().getMainExecutor(), listener);
         }
     }
 

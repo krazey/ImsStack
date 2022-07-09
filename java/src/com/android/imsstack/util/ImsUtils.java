@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.util;
 
 import android.app.admin.DevicePolicyManager;
@@ -101,7 +116,7 @@ public final class ImsUtils {
             sImsManagers = new ImsManager[MSimUtils.getMaxSimSlot()];
 
             for (int i = 0; i < sImsManagers.length; i++) {
-                sImsManagers[i] = ImsManager.getInstance(AppContext.get(), i);
+                sImsManagers[i] = ImsManager.getInstance(AppContext.getInstance(), i);
             }
         }
 
@@ -156,7 +171,7 @@ public final class ImsUtils {
     }
 
     public static boolean isDeviceEncryptionModeEnabled() {
-        DevicePolicyManager dpm = AppContext.getSystemService(
+        DevicePolicyManager dpm = AppContext.getInstance().getSystemService(
                 DevicePolicyManager.class);
         int status = (dpm != null) ? dpm.getStorageEncryptionStatus()
                 : DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
@@ -171,7 +186,7 @@ public final class ImsUtils {
 
     /** Full-Disk Encryption mode */
     public static boolean isDeviceEncryptionModeEnabledAsFDE() {
-        DevicePolicyManager dpm = AppContext.getSystemService(
+        DevicePolicyManager dpm = AppContext.getInstance().getSystemService(
                 DevicePolicyManager.class);
         int status = (dpm != null) ? dpm.getStorageEncryptionStatus()
                 : DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
@@ -182,15 +197,15 @@ public final class ImsUtils {
     /** APIs for ImsManager - starts */
     public static synchronized ImsManager getImsManager(int phoneId) {
         if (sImsManagers == null) {
-            return ImsManager.getInstance(AppContext.get(), phoneId);
+            return ImsManager.getInstance(AppContext.getInstance(), phoneId);
         }
 
         if (phoneId < 0 || phoneId >= sImsManagers.length) {
-            return ImsManager.getInstance(AppContext.get(), phoneId);
+            return ImsManager.getInstance(AppContext.getInstance(), phoneId);
         }
 
         if (sImsManagers[phoneId] == null) {
-            return ImsManager.getInstance(AppContext.get(), phoneId);
+            return ImsManager.getInstance(AppContext.getInstance(), phoneId);
         }
 
         return sImsManagers[phoneId];
@@ -198,7 +213,7 @@ public final class ImsUtils {
 
     public static synchronized void updateImsManager() {
         for (int i = 0; i < sImsManagers.length; i++) {
-            sImsManagers[i] = ImsManager.getInstance(AppContext.get(), i);
+            sImsManagers[i] = ImsManager.getInstance(AppContext.getInstance(), i);
         }
     }
 
@@ -415,7 +430,7 @@ public final class ImsUtils {
         if (millis <= 0) {
             Process.killProcess(Process.myPid());
         } else {
-            Handler h = AppContext.getMainHandler();
+            Handler h = AppContext.getInstance().getMainHandler();
 
             if (h != null) {
                 h.postDelayed(

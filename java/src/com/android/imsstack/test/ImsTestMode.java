@@ -92,7 +92,7 @@ public final class ImsTestMode {
             return itm;
         }
 
-        TestMode tm = new TestMode(slotId, AppContext.get());
+        TestMode tm = new TestMode(slotId, AppContext.getInstance());
         tm.init();
         sTestModes.put(slotId, tm);
         return tm;
