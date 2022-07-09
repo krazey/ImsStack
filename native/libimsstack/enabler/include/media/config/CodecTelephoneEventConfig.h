@@ -39,10 +39,11 @@ public:
      * @brief Create codec using the configuration
      *
      * @param piCc configuration
+     * @param nCodecIdx codec index within each codec type
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx);
     /**
      * @brief Print debug string
      *

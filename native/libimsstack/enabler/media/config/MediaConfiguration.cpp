@@ -100,29 +100,34 @@ PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeEachCodecs(IN ICarrierConfi
 
     for (IMS_SINT32 nIndex = 0; nIndex < objPayloadTypeArray.GetSize(); nIndex++)
     {
-        nCodecIndex = MakeCodec(piCc, nCodec, nCodecIndex, objPayloadTypeArray.GetAt(nIndex));
+        nCodecIndex =
+                MakeCodec(piCc, nCodec, nCodecIndex, objPayloadTypeArray.GetAt(nIndex), nIndex);
     }
 
     return nCodecIndex;
 }
 
 PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeCodec(IN ICarrierConfig* piCc,
-        IN IMS_UINT32 nCodec, IN IMS_UINT32 nCodecIndex, IN IMS_SINT32 nPayloadTypeNum)
+        IN IMS_UINT32 nCodec, IN IMS_UINT32 nCodecIndex, IN IMS_SINT32 nPayloadTypeNum,
+        IMS_SINT32 nCodecIdx)
 {
     IMS_UINT32 nCodecType = GetCodecType(nCodec);
     CodecConfig* pCodecConfig = IMS_NULL;
 
     if (nCodecType == ImsCodec::AUDIO_MAX)
     {
-        pCodecConfig = CodecConfigFactory::CreateAudioPayloadConfig(piCc, nCodec, nPayloadTypeNum);
+        pCodecConfig = CodecConfigFactory::CreateAudioPayloadConfig(
+                piCc, nCodec, nPayloadTypeNum, nCodecIdx);
     }
     else if (nCodecType == ImsCodec::VIDEO_MAX)
     {
-        pCodecConfig = CodecConfigFactory::CreateVideoPayloadConfig(piCc, nCodec, nPayloadTypeNum);
+        pCodecConfig = CodecConfigFactory::CreateVideoPayloadConfig(
+                piCc, nCodec, nPayloadTypeNum, nCodecIdx);
     }
     else if (nCodecType == ImsCodec::TEXT_MAX)
     {
-        pCodecConfig = CodecConfigFactory::CreateTextPayloadConfig(piCc, nCodec, nPayloadTypeNum);
+        pCodecConfig = CodecConfigFactory::CreateTextPayloadConfig(
+                piCc, nCodec, nPayloadTypeNum, nCodecIdx);
     }
 
     if (pCodecConfig == IMS_NULL)
@@ -131,7 +136,7 @@ PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeCodec(IN ICarrierConfig* pi
         return nCodecIndex;
     }
 
-    /*// TODO_MEDIA - For hevc // Chipset Feature
+    /** TODO_MEDIA - For hevc // Chipset Feature
     if (nHEVCCodecEnable == IMS_FALSE)
     {
         IMS_SINT32 nCodec = ImsCodec::VtoType(pCodecConfig->GetCodecName());

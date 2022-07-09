@@ -99,12 +99,12 @@ IMS_BOOL MediaSession::GetDTMFEnabled(IN IMS_UINTP nNegoId)
 
 PUBLIC VIRTUAL void MediaSession::SendImsMediaRequest()
 {
-    // TODO_MEDIA later
+    /** TODO_MEDIA later */
 }
 
 PUBLIC VIRTUAL void MediaSession::OnMediaResponse()
 {
-    // TODO_MEDIA later
+    /** TODO_MEDIA later */
 }
 
 PUBLIC VIRTUAL void MediaSession::OnNotify(
@@ -441,7 +441,7 @@ PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaSession::GetNegotiatedMediaType(IN IMS_UI
     {
         eMedia = (MEDIA_CONTENT_TYPE)(eMedia | MEDIA_TYPE_VIDEO);
     }
-    // TODO_MEDIA: add implementation for TEXT
+    /** TODO_MEDIA: add implementation for TEXT */
 
     return eMedia;
 }
@@ -462,7 +462,7 @@ PUBLIC VIRTUAL IMS_SINT32 MediaSession::GetNegotiatedQuality(
             return (IMS_SINT32)(pMediaNego->GetNegotiatedAudioQuality());
         case MEDIA_TYPE_VIDEO:
             return (IMS_SINT32)(pMediaNego->GetNegotiatedVideoQuality());
-        // TODO_MEDIA: add implementation for text
+        /** TODO_MEDIA: add implementation for text */
         default:
             break;
     }
@@ -496,7 +496,7 @@ PUBLIC VIRTUAL IMS_SINT32 MediaSession::GetNegotiatedCodecBitrate(
     }
     else if (MEDIA_IS_CONTAINED_THIS_TYPE(type, MEDIA_TYPE_TEXT))
     {
-        // TODO_MEDIA: add implementation for TEXT
+        /** TODO_MEDIA: add implementation for TEXT */
     }
 
     return 0;
@@ -553,7 +553,7 @@ PUBLIC VIRTUAL MEDIA_DIRECTION MediaSession::GetNegotiatedDirection(
             }
         }
         break;
-        // TODO_MEDIA text
+        /** TODO_MEDIA text */
         // case MEDIA_TYPE_TEXT:
         // {
         //     TextNego* pTextNego = pMediaNego->GetTextNego();
@@ -604,12 +604,12 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
                 }
                 else if (param1 == (IMS_SINT32)MEDIA_CONTENT_TYPE::MEDIA_TYPE_TEXT)
                 {
-                    // TODO_MEDIA: add implementation for text
+                    /** TODO_MEDIA: add implementation for text */
                 }
             }
             break;
         case SET_DIRECTION:
-            // TODO_MEDIA: add implementation
+            /** TODO_MEDIA: add implementation */
             // if (param1 == (IMS_SINT32)MEDIA_CONTENT_TYPE::MEDIA_TYPE_AUDIO)
             // {
             //     pAudioNego = pMediaNego->GetAudioNego();
@@ -627,7 +627,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
             m_objAudioController.SetConfirmSession(param1);
             break;
         case SET_DRA_REPORT_OPTION:  // for Q3 (Analyzer)
-        case SET_CONFERENCE_ENABLE:  // TODO: for video conference
+        case SET_CONFERENCE_ENABLE:  /** TODO: for video conference */
         case SET_CVO_SUPPORT:
         case SEND_FAST_VIDEO_UPDATE:  // for video
             break;
@@ -639,7 +639,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
 PUBLIC VIRTUAL void MediaSession::SetNetworkToneRTPTimer(
         MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer)
 {
-    (void)eMediaType;  // do it later
+    (void)eMediaType; /** TODO do it later */
     IMS_TRACE_I("SetNetworkToneRTPTimer() - CallKey[%d], eMediaType[%d], nRtpTimer[%d]", m_nCallKey,
             eMediaType, nRtpTimer);
 
@@ -704,7 +704,7 @@ IMS_BOOL MediaSession::CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType)
         return IMS_FALSE;
     }
 
-    if (!pMediaSessionConfig->Create(m_nSlotId))  // todo
+    if (!pMediaSessionConfig->Create(m_nSlotId)) /** TODO */
     {
         return IMS_FALSE;
     }

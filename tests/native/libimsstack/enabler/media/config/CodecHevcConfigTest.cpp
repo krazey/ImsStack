@@ -86,17 +86,17 @@ TEST_F(CodecHevcConfigTest, GetConfigDefault)
 
 TEST_F(CodecHevcConfigTest, GetConfigTest)
 {
-    m_pConfig->Create(m_piCc);
+    m_pConfig->Create(m_piCc, 0);
 
     EXPECT_GE(m_pConfig->GetFramerate(), 0);
     EXPECT_GE(m_pConfig->GetPacketizationMode(), 0);
 
     // EXPECT_EQ(m_pConfig->GetProfileLevelId(), GetString(
     //         CarrierConfig::ImsVt::KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING));
-    // EXPECT_EQ(m_pConfig->GetFrameSize(), DEFAULT_FRAME_SIZE);   // TODO - need to check later
+    // EXPECT_EQ(m_pConfig->GetFrameSize(), DEFAULT_FRAME_SIZE);   /** TODO - need to check later */
 }
 
-// TODO - need to check Bundel configuration later
+/** TODO - need to check Bundel configuration later */
 /*TEST_F(CodecHevcConfigTest, GetConfigVideoResolution)
 {
     IMSVector<IMS_SINT32> objVideoCodecResolution;
@@ -108,10 +108,12 @@ TEST_F(CodecHevcConfigTest, GetConfigTest)
             GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY))
             .WillByDefault(Return(objVideoCodecResolution));
 
-    m_pConfig->Create(pMockICarrierConfig);
+    m_pConfig->Create(pMockICarrierConfig, 0);
 
     EXPECT_EQ(m_pConfig->GetResolutionWidth(), 480);
     EXPECT_EQ(m_pConfig->GetResolutionHeight(), 640);
+
+    delete pMockICarrierConfig;
 }
 
 TEST_F(CodecHevcConfigTest, GetConfigVideoBitrate)
@@ -124,7 +126,9 @@ TEST_F(CodecHevcConfigTest, GetConfigVideoBitrate)
             GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_BITRATE_INT_ARRAY))
             .WillByDefault(Return(objVideoBitrate));
 
-    m_pConfig->Create(pMockICarrierConfig);
+    m_pConfig->Create(pMockICarrierConfig, 0);
 
     EXPECT_EQ(m_pConfig->GetBitrate(), 512);
+
+    delete pMockICarrierConfig;
 }*/

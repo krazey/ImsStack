@@ -86,7 +86,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
     bVideoAvpfPliEnabled = (nVideoAvpfFeature >> 3) & 0x01 ? IMS_TRUE : IMS_FALSE;
     bVideoAvpfFirEnabled = (nVideoAvpfFeature >> 4) & 0x01 ? IMS_TRUE : IMS_FALSE;
 
-    // TODO_MEDIA need to check if it is needed for KR
+    /** TODO_MEDIA need to check if it is needed for KR */
     nSdpOfferCapNegoForAvpf =
             piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT);
 
@@ -143,7 +143,7 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
     IMSVector<IMS_SINT32> objAvcPayloadType =
             piCcBundle->GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
 
-    // TODO_MEDIA need to add after creating HEVC in CarrierConfig
+    /** TODO_MEDIA need to add after creating HEVC in CarrierConfig */
 
     // IMSVector<IMS_SINT32> objHevcPayloadType = piCcBundle->GetIntArray(
     //         CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
@@ -154,7 +154,7 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
         nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_AVC, nCodecCnt, objAvcPayloadType);
     }
 
-    // TODO_MEDIA need to add after creating HEVC in CarrierConfig
+    /** TODO_MEDIA need to add after creating HEVC in CarrierConfig */
 
     // if (objHevcPayloadType.GetSize() > 0)
     // {

@@ -3134,7 +3134,7 @@ PROTECTED VIDEO_RESOLUTION VideoNego::GetResolutionFromSdp(IN VIDEO_CODEC codecT
         return GetResolutionFromWidthHeight(nWidth, nHeight);
     }
 
-    // TODO_MEDIA video sprop
+    /** TODO_MEDIA video sprop */
     (void)codecType;
     (void)strSpropParam;
     // // 2. - Get nWidth, nHeight From SpropParam
@@ -3429,7 +3429,7 @@ PROTECTED IMS_BOOL VideoNego::GetWidthHeightFromSdp_ImageAttr(
     return IMS_FALSE;
 }
 
-/* // TODO_MEDIA video sprop
+/** TODO_MEDIA video sprop
 PROTECTED IMS_BOOL VideoNego::GetWidthHeightFromSdp_SpropParam(IN VIDEO_CODEC codecType,
         IN IMS_CHAR* szSprop, OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight)
 {

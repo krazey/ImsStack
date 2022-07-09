@@ -335,7 +335,7 @@ IMS_BOOL MediaSessionConfig::UpdateTextConfiguration(IN ICarrierConfig* piCc)
 PRIVATE
 void MediaSessionConfig::MakeAnalyzerList(IN CONST AString& strList)
 {
-    // TODO_MEDIA later Analyzer
+    /** TODO_MEDIA later Analyzer */
     if (strList == IMS_NULL)
     {
         return;
@@ -345,7 +345,7 @@ void MediaSessionConfig::MakeAnalyzerList(IN CONST AString& strList)
 PRIVATE
 void MediaSessionConfig::MakeAnalyzerOptionList(IN CONST AString& strList)
 {
-    // TODO_MEDIA later Analyzer
+    /** TODO_MEDIA later Analyzer */
     if (strList == IMS_NULL)
     {
         return;

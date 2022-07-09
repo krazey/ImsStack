@@ -20,20 +20,38 @@
 
 #include "config/CodecConfigFactory.h"
 
-using ::testing::Return;
+using ::testing::TypedEq;
 
-static const IMS_SINT32 DEFAULT_CODEC = ImsCodec::AUDIO_AMR_WB;
-static const IMS_SINT32 DEFAULT_PAYLOAD_NUM = 99;
+static const IMS_SINT32 DEFAULT_SLOT_ID = 0;
 
 class CodecConfigFactoryTest : public ::testing::Test
 {
 public:
-    CodecConfig* m_pConfig;
+    ICarrierConfig* m_piCc;
 
 protected:
     virtual void SetUp() override
     {
-        m_pConfig = new CodecConfig(DEFAULT_CODEC, DEFAULT_PAYLOAD_NUM);
+        m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
     }
-    virtual void TearDown() override { delete m_pConfig; }
+    virtual void TearDown() override {}
 };
+
+TEST_F(CodecConfigFactoryTest, CreateAudioPayloadConfigTest)
+{
+    CodecConfig* m_pConfig =
+            CodecConfigFactory::CreateAudioPayloadConfig(m_piCc, ImsCodec::AUDIO_AMR_WB, 99, 0);
+
+    EXPECT_TRUE(m_pConfig != nullptr);
+    EXPECT_THAT(m_pConfig, TypedEq<CodecConfig*>(m_pConfig));
+
+    m_pConfig = CodecConfigFactory::CreateVideoPayloadConfig(m_piCc, ImsCodec::VIDEO_AVC, 100, 0);
+
+    EXPECT_TRUE(m_pConfig != nullptr);
+    EXPECT_THAT(m_pConfig, TypedEq<CodecConfig*>(m_pConfig));
+
+    m_pConfig = CodecConfigFactory::CreateTextPayloadConfig(m_piCc, ImsCodec::TEXT_T140, 105, 0);
+
+    EXPECT_TRUE(m_pConfig != nullptr);
+    EXPECT_THAT(m_pConfig, TypedEq<CodecConfig*>(m_pConfig));
+}

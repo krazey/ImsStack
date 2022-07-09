@@ -31,9 +31,10 @@ PUBLIC VIRTUAL CodecPcmConfig::~CodecPcmConfig()
     IMS_TRACE_D("~CodecPcmConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecPcmConfig::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL CodecPcmConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
 {
     (void)piCc;
+    (void)nCodecIdx;
     return IMS_TRUE;
 }
 

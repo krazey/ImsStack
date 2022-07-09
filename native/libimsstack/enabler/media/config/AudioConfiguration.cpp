@@ -124,13 +124,25 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL);
 
     // DTMF Duration Parameter
-    m_nDtmfDuration = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_INT);
+    m_nDtmfDuration =
+            piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT);
+    /** TODO - use Asset temporarily - need to change bundle code later
     m_nModeChangeCapability =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT);
     m_nModeChangePeriod =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT);
     m_nModeChangeNeighbor =
-            piCc->GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT);
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT);*/
+    m_nModeChangeCapability = piCc->GetInt(
+            CarrierConfig::Assets::KEY_ASSET_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT);
+    m_nModeChangePeriod =
+            piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT);
+    m_nModeChangeNeighbor =
+            piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT);
+
+    IMS_TRACE_D("Create - m_nModeChangeCapability: %d m_nModeChangePeriod: %d "
+                "m_nModeChangeNeighbor: %d",
+            m_nModeChangeCapability, m_nModeChangePeriod, m_nModeChangeNeighbor);
 
     // Creates a codec configuration
     if (!CreateCodecConfigs(piCc))
@@ -194,13 +206,27 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
     piCcBundle->ReleaseBundle();
     piCcBundle = IMS_NULL;
 
+    /** TODO - Need to change to carrier configuration bundle later */
+    IMS_TRACE_D("CreateCodecConfigs - Update the values with Assets", 0, 0, 0);
+    objEvsPayloadType =
+            piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_EVS_PAYLOAD_TYPE_INT_ARRAY);
+    objAmrwbPayloadType =
+            piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_AMRWB_PAYLOAD_TYPE_INT_ARRAY);
+    objAmrnbPayloadType =
+            piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_AMRNB_PAYLOAD_TYPE_INT_ARRAY);
+    objDtmfwbPayloadType =
+            piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_DTMFWB_PAYLOAD_TYPE_INT_ARRAY);
+    objDtmfnbPayloadType =
+            piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_DTMFNB_PAYLOAD_TYPE_INT_ARRAY);
+    /** TODO - END - Need to change to carrier configuration bundle later */
+
     IMS_UINT32 nCodecCnt = 0;
     AString strTemp;
 
     if (objEvsPayloadType.GetSize() > 0)
     {
         // nCodecCnt = MakeEachCodecs(piCc, ImsCodec::AUDIO_EVS, nCodecCnt, objEvsPayloadType);
-        // TODO_MEDIA evs is not supported for now
+        /**  TODO_MEDIA evs is not supported for now */
     }
     if (objAmrwbPayloadType.GetSize() > 0)
     {

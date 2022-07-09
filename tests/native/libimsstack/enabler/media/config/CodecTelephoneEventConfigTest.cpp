@@ -15,53 +15,53 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
+#include "ICarrierConfig.h"
+#include "CarrierConfig.h"
+#include "ServiceConfig.h"
 #include "config/CodecTelephoneEventConfig.h"
 
-using ::testing::Return;
-
-static const IMS_SINT32 DEFAULT_TYPE = ImsCodec::AUDIO_TELEPHONE_EVENT_WB;
-static const IMS_SINT32 DEFAULT_PAYLOAD_NUM = 3;
+static const IMS_SINT32 DEFAULT_SLOT_ID = 0;
 static const IMS_CHAR* DEFAULT_EVENT = "0-15";
-static const IMS_SINT32 DEFAULT_REDUNDANT_COUNT_TEST =
-        CodecTelephoneEventConfig::DEFAULT_REDUNDANT_COUNT;
-// static const IMS_SINT32 DEFAULT_SAMPLING_RATE_TEST =
-// CodecTelephoneEventConfig::DEFAULT_SAMPLING_RATE;
-static const IMS_SINT32 DEFAULT_SAMPLING_RATE_WB_TEST =
-        CodecTelephoneEventConfig::DEFAULT_SAMPLING_RATE_WB;
+static const IMS_SINT32 DEFAULT_REDUNDANT_COUNT_TEST = 3;
+static const IMS_SINT32 DEFAULT_SAMPLING_RATE_TEST = 8000;
+static const IMS_SINT32 DEFAULT_SAMPLING_RATE_WB_TEST = 16000;
 
 class CodecTelephoneEventConfigTest : public ::testing::Test {
 
 public :
-    CodecTelephoneEventConfig* m_pConfig;
+    ICarrierConfig* m_piCc;
 
 protected:
     virtual void SetUp() override {
-        m_pConfig = new CodecTelephoneEventConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+        m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
     }
-    virtual void TearDown() override {
-        if (m_pConfig)
-        {
-            delete m_pConfig;
-        }
-    }
+    virtual void TearDown() override {}
 };
 
-TEST_F(CodecTelephoneEventConfigTest, GetConfigDefault)
+TEST_F(CodecTelephoneEventConfigTest, GetConfigAMRWB)
 {
+    CodecTelephoneEventConfig* m_pConfig =
+            new CodecTelephoneEventConfig(ImsCodec::AUDIO_TELEPHONE_EVENT_WB, 99);
+
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
+
     EXPECT_EQ(m_pConfig->GetEvents(), DEFAULT_EVENT);
     EXPECT_EQ(m_pConfig->GetRedundancyCount(), DEFAULT_REDUNDANT_COUNT_TEST);
     EXPECT_EQ(m_pConfig->GetSamplingRate(), DEFAULT_SAMPLING_RATE_WB_TEST);
+
+    delete m_pConfig;
 }
 
-/*TEST_F(CodecTelephoneEventConfigTest, GetConfigAMR)
+TEST_F(CodecTelephoneEventConfigTest, GetConfigAMR)
 {
-    m_pConfig = new CodecTelephoneEventConfig(ImsCodec::AUDIO_TELEPHONE_EVENT, DEFAULT_PAYLOAD_NUM);
+    CodecTelephoneEventConfig* m_pConfig =
+            new CodecTelephoneEventConfig(ImsCodec::AUDIO_TELEPHONE_EVENT, 100);
 
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfig->GetEvents(), DEFAULT_EVENT);
     EXPECT_EQ(m_pConfig->GetRedundancyCount(), DEFAULT_REDUNDANT_COUNT_TEST);
     EXPECT_EQ(m_pConfig->GetSamplingRate(), DEFAULT_SAMPLING_RATE_TEST);
 
     delete m_pConfig;
-}*/
+}

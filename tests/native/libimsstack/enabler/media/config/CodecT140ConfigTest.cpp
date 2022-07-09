@@ -15,12 +15,13 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
+#include "ICarrierConfig.h"
+#include "CarrierConfig.h"
+#include "ServiceConfig.h"
 #include "config/CodecT140Config.h"
 
-using ::testing::Return;
-
+static const IMS_SINT32 DEFAULT_SLOT_ID = 0;
 static const IMS_SINT32 DEFAULT_TYPE = ImsCodec::AUDIO_AMR;
 static const IMS_SINT32 DEFAULT_PAYLOAD_NUM = 3;
 
@@ -31,10 +32,12 @@ class CodecT140ConfigTest : public ::testing::Test {
 
 public :
     CodecT140Config* m_pConfig;
+    ICarrierConfig* m_piCc;
 
 protected:
     virtual void SetUp() override {
         m_pConfig = new CodecT140Config(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+        m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
     }
     virtual void TearDown() override {
         if (m_pConfig)
@@ -46,6 +49,7 @@ protected:
 
 TEST_F(CodecT140ConfigTest, GetConfigDefault)
 {
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfig->GetRedLevel(), DEFAULT_RED_LEVEL);
     EXPECT_EQ(m_pConfig->GetSamplingRate(), DEFAULT_TEXT_SAMPLING_RATE);
 }

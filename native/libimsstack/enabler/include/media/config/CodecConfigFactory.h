@@ -39,30 +39,33 @@ public:
      * @param piCc configuration
      * @param nCodec codec type
      * @param nPayloadTypeNum payload type number
+     * @param nCodecIdx codec index within each codec type
      * @return CodecConfig* Return the codec config
      */
-    static CodecConfig* CreateAudioPayloadConfig(
-            ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum);
+    static CodecConfig* CreateAudioPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
+            IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx);
     /**
      * @brief Create a video payload config
      *
      * @param piCc configuration
      * @param nCodec codec type
      * @param nPayloadTypeNum payload type number
+     * @param nCodecIdx codec index within each codec type
      * @return CodecConfig* Return the codec config
      */
-    static CodecConfig* CreateVideoPayloadConfig(
-            ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum);
+    static CodecConfig* CreateVideoPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
+            IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx);
     /**
      * @brief Create a text payload config
      *
      * @param piCc configuration
      * @param nCodec codec type
      * @param nPayloadTypeNum payload type number
+     * @param nCodecIdx codec index within each codec type
      * @return CodecConfig* Return the codec config
      */
-    static CodecConfig* CreateTextPayloadConfig(
-            ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum);
+    static CodecConfig* CreateTextPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
+            IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx);
 };
 #endif
 // _CODEC_CONFIG_FACTORY_H_

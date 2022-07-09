@@ -34,24 +34,18 @@ static const IMS_SINT32 DEFAULT_CHANNEL = CodecAmrConfig::DEFAULT_CHANNEL;
 static const IMS_SINT32 DEFAULT_OCTET_ALIGN = CodecAmrConfig::DEFAULT_OCTET_ALIGN;
 static const IMS_SINT32 DEFAULT_MODESET_AMR_WB = CodecAmrConfig::DEFAULT_MODESET_AMR_WB;
 static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMRWB = CodecAmrConfig::DEFAULT_SAMPLING_RATE_AMRWB;
+static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMR = CodecAmrConfig::DEFAULT_SAMPLING_RATE_AMR;
 
 class CodecAmrConfigTest : public ::testing::Test {
-
-public :
-    CodecAmrConfig* m_pConfig;
+public:
     ICarrierConfig* m_piCc;
 
 protected:
-    virtual void SetUp() override {
-        m_pConfig = new CodecAmrConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+    virtual void SetUp() override
+    {
         m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
     }
-    virtual void TearDown() override {
-        if (m_pConfig)
-        {
-            delete m_pConfig;
-        }
-    }
+    virtual void TearDown() override {}
     IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
     IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
     {
@@ -61,37 +55,117 @@ protected:
 
 TEST_F(CodecAmrConfigTest, GetConfigDefault)
 {
+    CodecAmrConfig* m_pConfig = new CodecAmrConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+
     EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);
     EXPECT_EQ(m_pConfig->GetModeSetList(), DEFAULT_MODESET_AMR_WB);
     EXPECT_EQ(m_pConfig->GetOctetAlign(), DEFAULT_OCTET_ALIGN);
     EXPECT_EQ(m_pConfig->GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMRWB);
     EXPECT_EQ(m_pConfig->GetDtx(), IMS_TRUE);
+
+    delete m_pConfig;
 }
 
-// TODO - it is better to change the bundle structure
-TEST_F(CodecAmrConfigTest, GetConfigOctetAlign)
+TEST_F(CodecAmrConfigTest, GetConfigOctetAlignAsset)
 {
-    m_pConfig->Create(m_piCc);
+    CodecAmrConfig* m_pConfig_amrwb;
+    CodecAmrConfig* m_pConfig_amrnb;
 
-    EXPECT_GE(m_pConfig->GetOctetAlign(), 0);
-    EXPECT_GE(m_pConfig->GetModeSetList(), 0);
-    EXPECT_GE(m_pConfig->GetModeSet(), 0);
-}
-
-/*TEST_F(CodecAmrConfigTest, GetConfigModeSetList)
-{
-    IMSVector<IMS_SINT32> objCodecAttributeModeset;
-    objCodecAttributeModeset.Push(0);
-    objCodecAttributeModeset.Push(1);
-    objCodecAttributeModeset.Push(2);
+    IMSVector<IMS_SINT32> objOctetAlign;
+    objOctetAlign.Push(1);
+    objOctetAlign.Push(0);
 
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
     ON_CALL(*pMockICarrierConfig,
-            GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY))
-            .WillByDefault(Return(objCodecAttributeModeset));
+            GetIntArray(CarrierConfig::Assets::
+                            KEY_ASSET_AMRWB_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT_ARRAY))
+            .WillByDefault(Return(objOctetAlign));
 
-    m_pConfig->Create(pMockICarrierConfig);
+    m_pConfig_amrwb = new CodecAmrConfig(ImsCodec::AUDIO_AMR_WB, 99);
 
-    EXPECT_EQ(m_pConfig->GetModeSetList(), 7);
-    EXPECT_EQ(m_pConfig->GetModeSet(), 2);
-}*/
+    EXPECT_TRUE(m_pConfig_amrwb->Create(pMockICarrierConfig, 0));
+    EXPECT_EQ(m_pConfig_amrwb->GetOctetAlign(), 1);
+    delete m_pConfig_amrwb;
+
+    m_pConfig_amrwb = new CodecAmrConfig(ImsCodec::AUDIO_AMR_WB, 100);
+
+    EXPECT_TRUE(m_pConfig_amrwb->Create(pMockICarrierConfig, 1));
+    EXPECT_EQ(m_pConfig_amrwb->GetOctetAlign(), 0);
+    delete m_pConfig_amrwb;
+
+    ON_CALL(*pMockICarrierConfig,
+            GetIntArray(CarrierConfig::Assets::
+                            KEY_ASSET_AMRNB_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT_ARRAY))
+            .WillByDefault(Return(objOctetAlign));
+
+    m_pConfig_amrnb = new CodecAmrConfig(ImsCodec::AUDIO_AMR, 96);
+
+    EXPECT_TRUE(m_pConfig_amrnb->Create(pMockICarrierConfig, 0));
+    EXPECT_EQ(m_pConfig_amrnb->GetOctetAlign(), 1);
+    delete m_pConfig_amrnb;
+
+    m_pConfig_amrnb = new CodecAmrConfig(ImsCodec::AUDIO_AMR, 97);
+
+    EXPECT_TRUE(m_pConfig_amrnb->Create(pMockICarrierConfig, 1));
+    EXPECT_EQ(m_pConfig_amrnb->GetOctetAlign(), 0);
+    delete m_pConfig_amrnb;
+
+    delete pMockICarrierConfig;
+}
+
+TEST_F(CodecAmrConfigTest, GetConfigModeSetListAsset)
+{
+    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
+    CodecAmrConfig* m_pConfig_amrwb = new CodecAmrConfig(ImsCodec::AUDIO_AMR_WB, 99);
+    IMSVector<IMS_SINT32> objCodecAttributeModesetWb;
+    objCodecAttributeModesetWb.Push(0);
+    objCodecAttributeModesetWb.Push(1);
+    objCodecAttributeModesetWb.Push(2);
+
+    ON_CALL(*pMockICarrierConfig,
+            GetIntArray(
+                    CarrierConfig::Assets::KEY_ASSET_AMR_AMRWB_CODEC_ATTRIBUTE_MODESET_INT_ARRAY))
+            .WillByDefault(Return(objCodecAttributeModesetWb));
+
+    EXPECT_TRUE(m_pConfig_amrwb->Create(pMockICarrierConfig, 0));
+
+    EXPECT_EQ(m_pConfig_amrwb->GetModeSetList(), 7);
+    EXPECT_EQ(m_pConfig_amrwb->GetModeSet(), 2);
+    delete m_pConfig_amrwb;
+
+    CodecAmrConfig* m_pConfig_amrnb = new CodecAmrConfig(ImsCodec::AUDIO_AMR, 100);
+    IMSVector<IMS_SINT32> objCodecAttributeModesetNb;
+    objCodecAttributeModesetNb.Push(0);
+    objCodecAttributeModesetNb.Push(2);
+    objCodecAttributeModesetNb.Push(4);
+    objCodecAttributeModesetNb.Push(7);
+
+    ON_CALL(*pMockICarrierConfig,
+            GetIntArray(
+                    CarrierConfig::Assets::KEY_ASSET_AMR_AMRNB_CODEC_ATTRIBUTE_MODESET_INT_ARRAY))
+            .WillByDefault(Return(objCodecAttributeModesetNb));
+
+    EXPECT_TRUE(m_pConfig_amrnb->Create(pMockICarrierConfig, 0));
+
+    EXPECT_EQ(m_pConfig_amrnb->GetModeSetList(), 149);
+    EXPECT_EQ(m_pConfig_amrnb->GetModeSet(), 7);
+    delete m_pConfig_amrnb;
+
+    delete pMockICarrierConfig;
+}
+
+TEST_F(CodecAmrConfigTest, GetConfigSamplingRate)
+{
+    CodecAmrConfig* m_pConfig_amrwb = new CodecAmrConfig(ImsCodec::AUDIO_AMR_WB, 99);
+
+    EXPECT_TRUE(m_pConfig_amrwb->Create(m_piCc, 0));
+    EXPECT_EQ(m_pConfig_amrwb->GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMRWB);
+
+    CodecAmrConfig* m_pConfig_amrnb = new CodecAmrConfig(ImsCodec::AUDIO_AMR, 100);
+
+    EXPECT_TRUE(m_pConfig_amrnb->Create(m_piCc, 0));
+    EXPECT_EQ(m_pConfig_amrnb->GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMR);
+
+    delete m_pConfig_amrwb;
+    delete m_pConfig_amrnb;
+}

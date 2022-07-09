@@ -260,7 +260,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
         }
         else if (pCodecConfig->GetCodec() == ImsCodec::VIDEO_HEVC)
         {
-            // TODO - need to update later for HEVC
+            /** TODO - need to update later for HEVC */
             /*
             CodecHevcConfig* pHevcConfig = reinterpret_cast<CodecHevcConfig*>(pCodecConfig);
 
@@ -273,7 +273,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
             pHevcFmtp->nBitrate = pHevcConfig->GetBitrate();
 
             pHevcFmtp->nAs = pConfig->GetAsBandwidthKbps();
-            // TODO_MEDIA video sprop
+            // video sprop
             // const IMS_CHAR* pHevcSpropParameterSets =
             //         GetHevcSpropParameterSets(pHevcFmtp->eResolution, pHevcFmtp->nProfile);
 
@@ -654,7 +654,7 @@ PUBLIC GLOBAL VIDEO_RESOLUTION VideoProfileConfigurer::GetResolutionFromWidthHei
     }
 }
 
-/* TODO_MEDIA later sprop
+/** TODO_MEDIA later sprop
 PRIVATE
 const IMS_CHAR* VideoProfileConfigurer::GetAvcSpropParameterSets(
         IN VIDEO_RESOLUTION eResolution, IN VIDEO_PROFILE_AVC eProfileId, IN IMS_SINT32 nLevel)
@@ -834,7 +834,7 @@ PUBLIC GLOBAL IMS_UINT32 VideoProfileConfigurer::GetAvcLevelFromProfileLevelId(
 
     return nLevel;
 }
-/* // TODO_MEDIA video sprop
+/** TODO_MEDIA video sprop
 PUBLIC GLOBAL const IMS_CHAR* VideoProfileConfigurer::GetHevcSpropParameterSets(
         IN VIDEO_RESOLUTION eResolution, IN VIDEO_PROFILE_HEVC eProfileId, IN IMS_SINT32 nLevel)
 {

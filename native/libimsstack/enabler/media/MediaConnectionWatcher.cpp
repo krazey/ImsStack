@@ -500,7 +500,7 @@ PUBLIC GLOBAL IMS_SINT32 MediaConnectionWatcher::CalculateRtpFragmentSize(
 
     nIPV6orV4 = IPAddress(piNetConnection->GetLocalAddress()).GetVersion();
 
-    // TODO - 20220415 - Need to implement this requirement later
+    /** TODO - 20220415 - Need to implement this requirement later */
     /*if (IMS_OPERATOR(DCM, nSlotId))
     {
         nRtpFragmentSize = piNetConnection->GetMtu() - SIZE_OF_GUARD;
@@ -564,7 +564,7 @@ IN IMS_SINT32 nSlotId*/)
 
     nIPV6orV4 = IPAddress(pNetConnectionWatcher->m_piNetConnection->GetLocalAddress()).GetVersion();
 
-    // TODO - 20220415 - Need to implement this requirement later
+    /** TODO - 20220415 - Need to implement this requirement later */
     /*if (IMS_OPERATOR(DCM, nSlotId))
     {
         nRtpFragmentSize = pNetConnectionWatcher->GetMtuSize() - SIZE_OF_GUARD;

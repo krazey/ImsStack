@@ -169,7 +169,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
             m_objVideoConfig.getMediaDirection());
 
     RtcpConfig* pRtcpConfig = new RtcpConfig();
-    pRtcpConfig->setCanonicalName(android::String8("Canonical_Name"));  // TODO_MEDIA
+    pRtcpConfig->setCanonicalName(android::String8("Canonical_Name")); /** TODO_MEDIA */
     pRtcpConfig->setTransmitPort(pNegoProfile->nControlPort);
     if (pNegoProfile->nBandwidthRs == 0 && pNegoProfile->nBandwidthRr == 0)
     {
@@ -196,7 +196,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
         // VideoProfile::AvcFmtp* pDestFmtp =
         //         reinterpret_cast<VideoProfile::AvcFmtp*>(pDestPayload->pFmtp);
 
-        // TODO_MEDIA later
+        /** TODO_MEDIA later */
         m_objVideoConfig.setVideoMode(VideoConfig::VIDEO_MODE_RECORDING);
         // public static final int VIDEO_MODE_PREVIEW = 0;
         // public static final int VIDEO_MODE_RECORDING = 1;
@@ -229,7 +229,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
             default:
                 break;
         }
-        // TODO_MEDIA no case for setting AVC_PROFILE_CONSTRAINED_HIGH
+        /** TODO_MEDIA no case for setting AVC_PROFILE_CONSTRAINED_HIGH */
         m_objVideoConfig.setCodecProfile(nTempAvcProfile);
 
         IMS_UINT32 nTempAvcLevel = VideoConfig::AVC_LEVEL_1;
@@ -264,7 +264,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
                 nTempAvcLevel = VideoConfig::AVC_LEVEL_1;
                 break;
         }
-        // TODO_MEDIA no case for setting AVC_LEVEL_1B
+        /** TODO_MEDIA no case for setting AVC_LEVEL_1B */
         m_objVideoConfig.setCodecLevel(nTempAvcLevel);
 
         m_objVideoConfig.setIntraFrameInterval(m_pConfig->GetVideoIframeIntervalSec());
@@ -273,7 +273,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
         // MODE_NON_INTERLEAVED,
         // MODE_INTERLEAVED,
 
-        // TODO_MEDIA later
+        /** TODO_MEDIA later */
         m_objVideoConfig.setCameraId(m_nCameraId);
         m_objVideoConfig.setCameraZoom(m_nCameraZoom);
 
@@ -283,7 +283,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
         m_objVideoConfig.setResolutionWidth(nWidth);
         m_objVideoConfig.setResolutionHeight(nHeight);
 
-        // TODO_MEDIA later
+        /** TODO_MEDIA later */
         m_objVideoConfig.setPauseImagePath(android::String8("/image/path"));
         m_objVideoConfig.setDeviceOrientationDegree(0);
         m_objVideoConfig.setCvoValue(pNegoProfile->nCvoId);
@@ -297,7 +297,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
         {
             nRtcpFbAttr += VideoConfig::RTP_FB_TMMBR;
         }
-        // TODO_MEDIA no case for TMMBN
+        /** TODO_MEDIA no case for TMMBN */
         if (pNegoPayload->objRtcpFbAttr.bTmmbrSupported == IMS_TRUE)
         {
             nRtcpFbAttr += VideoConfig::RTP_FB_TMMBN;
@@ -333,7 +333,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
     }
     else if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
     {
-        // TODO_MEDIA
+        /** TODO_MEDIA */
 
         // CODEC_LEVEL_NONE,
         // HEVC_HIGHTIER_LEVEL_1,
@@ -372,7 +372,7 @@ PUBLIC
 IMS_BOOL VideoMediaSession::UpdateMediaQualityThreshold(
         IN IMS_BOOL bIsHold, IN VideoProfile* pVideoProfile)
 {
-    // TODO_MEDIA need to get real value when it's ready.
+    /** TODO_MEDIA need to get real value when it's ready. */
     if (bIsHold)
     {
         m_objMediaQualityThreshold.setRtpInactivityTimerMillis(0);
@@ -673,7 +673,7 @@ IMS_BOOL VideoMediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
             }
             else
             {
-                // TODO: go to pause Image mode
+                /** TODO: go to pause Image mode */
             }
         }
 

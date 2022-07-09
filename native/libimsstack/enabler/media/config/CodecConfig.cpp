@@ -39,9 +39,10 @@ PUBLIC VIRTUAL CodecConfig::~CodecConfig()
     IMS_TRACE_D("~CodecConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecConfig::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL CodecConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
 {
     (void)piCc;
+    (void)nCodecIdx;
     return IMS_TRUE;
 }
 

@@ -25,11 +25,6 @@ __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
     "send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]"
 #define DEFAULT_AVC_FRAME_SIZE "NEED_TO_CHECK"
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 CodecAvcConfig::CodecAvcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
         CodecConfig(nType_, nPayloadTypeNum_),
@@ -49,29 +44,19 @@ CodecAvcConfig::CodecAvcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeN
     IMS_TRACE_D("+CodecAvcConfig Type[%d]", nType_, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL CodecAvcConfig::~CodecAvcConfig()
 {
     IMS_TRACE_D("~CodecAvcConfig", 0, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
 {
-    if (piCc == IMS_NULL)
+    if (piCc == IMS_NULL || nCodecIdx < 0)
     {
         IMS_TRACE_E(0, "Create - piBuffer is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
-#if 0  // TODO_MEDIA need to check bundle
+#if 0 /** TODO_MEDIA need to check bundle */
     ICarrierConfig* piCcBundle =
             piCc->GetBundle(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
 
@@ -113,13 +98,13 @@ PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc)
     m_strProfileLevelId = piCcSubBundle->GetString(
             CarrierConfig::ImsVt::KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING);
 
-    // TODO_MEDIA need to add after creating items in CarrierConfig
+    /** TODO_MEDIA need to add after creating items in CarrierConfig */
     // m_strImageAttr = piCcSubBundle->GetString(
     //         CarrierConfig::ImsVt::KEY_VIDEO_CODEC_AVC_IMAGE_ATTR_STRING);
     // m_strFrameSize = piCcSubBundle->GetString(
     //         CarrierConfig::ImsVt::KEY_VIDEO_CODEC_AVC_FRAME_SIZE_STRING);
 
-    // TODO_MEDIA - need to implement
+    /** TODO_MEDIA - need to implement */
     // objVideoCodecBitrate =
     //         piCc->GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_BITRATE_INT_ARRAY);
     // objVideoCodecImageAttr =
@@ -183,11 +168,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void CodecAvcConfig::ToDebugString() const
 {
     CodecConfig::ToDebugString();
@@ -240,14 +220,14 @@ IMS_SINT32 CodecAvcConfig::GetPacketizationMode() const
 PUBLIC
 IMS_BOOL CodecAvcConfig::GetIncludeSpropParameterSets() const
 {
-    // TODO - need to check later
+    /** TODO - need to check later */
     return m_bIncludeSpropParameterSets;
 }
 
 PUBLIC
 const AString& CodecAvcConfig::GetSpropParameterSets() const
 {
-    // TODO - need to check later
+    /** TODO - need to check later */
     return m_strSpropParameterSets;
 }
 

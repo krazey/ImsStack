@@ -88,7 +88,7 @@ TEST_F(CodecAvcConfigTest, GetConfigDefault)
 
 TEST_F(CodecAvcConfigTest, GetConfigTest)
 {
-    m_pConfig->Create(m_piCc);
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
 
     EXPECT_EQ(m_pConfig->GetFramerate(),
             GetInt(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT));
@@ -111,7 +111,7 @@ TEST_F(CodecAvcConfigTest, GetConfigVideoResolution)
             GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY))
             .WillByDefault(Return(objVideoCodecResolution));
 
-    m_pConfig->Create(pMockICarrierConfig);
+    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig, 0));
 
     EXPECT_EQ(m_pConfig->GetResolutionWidth(), 480);
     EXPECT_EQ(m_pConfig->GetResolutionHeight(), 640);
@@ -129,7 +129,7 @@ TEST_F(CodecAvcConfigTest, GetConfigVideoBitrate)
             GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_BITRATE_INT_ARRAY))
             .WillByDefault(Return(objVideoBitrate));
 
-    m_pConfig->Create(pMockICarrierConfig);
+    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig, 0));
 
     EXPECT_EQ(m_pConfig->GetBitrate(), 512);
 
@@ -146,7 +146,7 @@ TEST_F(CodecAvcConfigTest, GetConfigVideoImageAttr)
             GetStringArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_IMAGE_ATTR_STRING_ARRAY))
             .WillByDefault(Return(objImageAttr));
 
-    m_pConfig->Create(pMockICarrierConfig);
+    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig, 0));
 
     EXPECT_EQ(m_pConfig->GetImageAttr(), "send [x=640,y=480] recv [x=640,y=480]");
 

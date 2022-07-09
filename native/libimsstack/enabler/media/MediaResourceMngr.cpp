@@ -423,7 +423,7 @@ IMS_SINT32 MediaResourceMngr::GetSupportedNetworkTypeFlag()
     if (m_nSupportedNetworkTypeFlag == 0)  // initial check..
     {
         m_nSupportedNetworkTypeFlag |= (IMS_UINT32)MEDIA_NETWORK_LTE;
-    }  // TODO_MEDIA Need to be updated later for NR
+    } /** TODO_MEDIA Need to be updated later for NR */
 
     IMS_TRACE_D("GetSupportedNetworkTypeFlag() - nSupportedNetworkTypeFlag[%d]",
             m_nSupportedNetworkTypeFlag, 0, 0);

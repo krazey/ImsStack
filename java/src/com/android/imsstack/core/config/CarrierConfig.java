@@ -782,8 +782,8 @@ public class CarrierConfig {
                 "audio_maxred_int";
         public static final String KEY_AUDIO_RTP_DSCP_INT =
                 "audio_rtp_dscp_int";
-        public static final String KEY_AUDIO_TELEPHONE_EVENT_DURATION_INT =
-                "audio_telephone_event_duration_int";
+        public static final String KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT =
+                "audio_telephone_event_duration_millis_int";
         public static final String KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY =
                 "audio_candidate_attribute_string_array";
         public static final String KEY_AUDIO_RTCPXR_ENABLE_BOOL =
@@ -821,6 +821,60 @@ public class CarrierConfig {
                 "sdp_answer_full_capability_bool";
         public static final String KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL =
                 "sdp_reoffer_full_capability_bool";
+
+        // TODO - Media Codec for Test
+        public static final String KEY_ASSET_EVS_PAYLOAD_TYPE_INT_ARRAY =
+                "asset_evs_payload_type_intarray";
+        public static final String KEY_ASSET_AMRWB_PAYLOAD_TYPE_INT_ARRAY =
+                "asset_amrwb_payload_type_intarray";
+        public static final String KEY_ASSET_AMRNB_PAYLOAD_TYPE_INT_ARRAY =
+                "asset_amrnb_payload_type_intarray";
+        public static final String KEY_ASSET_DTMFWB_PAYLOAD_TYPE_INT_ARRAY =
+                "asset_dtmfwb_payload_type_intarray";
+        public static final String KEY_ASSET_DTMFNB_PAYLOAD_TYPE_INT_ARRAY =
+                "asset_dtmfnb_payload_type_intarray";
+
+        public static final String KEY_ASSET_AMRWB_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT_ARRAY =
+                "asset_amrwb_codec_attribute_payload_format_int_array";
+        public static final String KEY_ASSET_AMRNB_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT_ARRAY =
+                "asset_amrnb_codec_attribute_payload_format_int_array";
+
+        public static final String KEY_ASSET_AMR_AMRWB_CODEC_ATTRIBUTE_MODESET_INT_ARRAY =
+                "asset_amr_amrwb_codec_attribute_modeset_int_array";
+        public static final String KEY_ASSET_AMR_AMRNB_CODEC_ATTRIBUTE_MODESET_INT_ARRAY =
+                "asset_amr_amrnb_codec_attribute_modeset_int_array";
+
+        public static final String KEY_ASSET_EVS_CODEC_ATTRIBUTE_CHANNELS_INT =
+                "asset_evs_codec_attribute_channels_int";
+        public static final String KEY_ASSET_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT =
+                "asset_evs_codec_attribute_hf_only_int";
+        public static final String KEY_ASSET_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT =
+                "asset_evs_codec_attribute_mode_switch_int";
+        public static final String KEY_ASSET_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT =
+                "asset_evs_codec_attribute_bandwidth_int";
+        public static final String KEY_ASSET_EVS_CODEC_ATTRIBUTE_CMR_INT =
+                "asset_evs_codec_attribute_cmr_int";
+        public static final String KEY_ASSET_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT =
+                "asset_evs_codec_attribute_ch_aw_recv_int";
+        public static final String KEY_ASSET_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT =
+                "asset_amr_codec_attribute_payload_format_int";
+        public static final String KEY_ASSET_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT =
+                "asset_codec_attribute_mode_change_period_int";
+        public static final String KEY_ASSET_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT =
+                "asset_codec_attribute_mode_change_capability_int";
+        public static final String KEY_ASSET_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT =
+                "asset_codec_attribute_mode_change_neighbor_int";
+        public static final String KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_BOOL =
+                "asset_evs_codec_attribute_dtx_bool";
+        public static final String KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL =
+                "asset_evs_codec_attribute_dtx_recv_bool";
+        public static final String KEY_ASSET_EVS_AMRWB_IO_MODE_SET_INT =
+                "asset_evs_amrwb_io_mode_set_int";
+        public static final String KEY_ASSET_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY =
+                "asset_evs_codec_attribute_bitrate_int_array";
+        public static final String KEY_ASSET_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY =
+                "asset_amr_codec_attribute_modeset_int_array";
+
 
         // TODO Media additional for CallFeature
         public static final String KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL =

@@ -129,7 +129,7 @@ TEST_F(AudioConfigurationTest, GetConfigTest)
     EXPECT_EQ(m_pConfig->IsRtcpXrPdrEnabled(),
             GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL));
     EXPECT_EQ(m_pConfig->GetDTMFDuration(),
-            GetInt(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_INT));
+            GetInt(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT));
     EXPECT_EQ(m_pConfig->GetModeChangeCapability(),
             GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT));
     EXPECT_EQ(m_pConfig->GetModeChangePeriod(),

@@ -15,12 +15,9 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include <ServiceConfig.h>
 
 #include "config/ImsCodec.h"
-
-using ::testing::Return;
 
 static const IMS_SINT32 CODEC_AMR = ImsCodec::AUDIO_AMR;
 static const IMS_SINT32 CODEC_AMR_WB = ImsCodec::AUDIO_AMR_WB;

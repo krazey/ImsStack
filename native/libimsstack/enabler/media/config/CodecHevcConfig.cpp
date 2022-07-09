@@ -19,11 +19,6 @@
 
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 CodecHevcConfig::CodecHevcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
         CodecConfig(nType_, nPayloadTypeNum_),
@@ -42,24 +37,14 @@ CodecHevcConfig::CodecHevcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTyp
     IMS_TRACE_D("+CodecHevcConfig Type[%d]", nType_, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL CodecHevcConfig::~CodecHevcConfig()
 {
     IMS_TRACE_D("~CodecHevcConfig", 0, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
 {
-    if (piCc == IMS_NULL)
+    if (piCc == IMS_NULL || nCodecIdx < 0)
     {
         IMS_TRACE_E(0, "Create - piBuffer is NULL", 0, 0, 0);
         return IMS_FALSE;
@@ -103,11 +88,11 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
     m_nPacketizationMode = piCcSubBundle->GetInt(
             CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT);
 
-    // TODO Media need to check this item
+    /** TODO Media need to check this item */
     // m_bIncludeSpropParameterSets = piCcSubBundle->GetBoolean(
     //        CarrierConfig::Assets::KEY_VIDEO_CODEC_HEVC_SPROP_PARAMETER_SETS_BOOL);
 
-    // TODO_MEDIA need to add after creating items in CarrierConfig
+    /** TODO_MEDIA need to add after creating items in CarrierConfig */
     // m_nHevcProfile = piCcSubBundle->GetInt(
     //         CarrierConfig::ImsVt::KEY_VIDEO_CODEC_HEVC_PROFILE_INT);
     // m_nHevcLevel = piCcSubBundle->GetInt(
@@ -127,11 +112,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void CodecHevcConfig::ToDebugString() const
 {
     CodecConfig::ToDebugString();

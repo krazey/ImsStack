@@ -33,15 +33,10 @@ PUBLIC VIRTUAL CodecT140Config::~CodecT140Config()
     IMS_TRACE_D("~CodecT140Config", 0, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL CodecT140Config::Create(IN ICarrierConfig* piCc)
+IMS_BOOL CodecT140Config::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
 {
-    if (piCc == IMS_NULL)
+    if (piCc == IMS_NULL || nCodecIdx < 0)
     {
         return IMS_FALSE;
     }
@@ -49,12 +44,12 @@ IMS_BOOL CodecT140Config::Create(IN ICarrierConfig* piCc)
     // T140/RED parameters
     if (GetCodec() == ImsCodec::TEXT_RED)
     {
-        // TODO_MEDIA need to add after creating HEVC in CarrierConfig
+        /** TODO_MEDIA need to add after creating HEVC in CarrierConfig later */
         // m_nRedLevel = piCc->GetBundle(
         //         CarrierConfig::ImsRtt::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT);
     }
     m_nTextSamplingRate = DEFAULT_TEXT_SAMPLING_RATE;
-    // TODO_MEDIA need to set members
+    /** TODO_MEDIA need to set members */
 
     if (GetCodec() == ImsCodec::TEXT_RED && m_nRedLevel <= 1)
     {
@@ -69,11 +64,6 @@ IMS_BOOL CodecT140Config::Create(IN ICarrierConfig* piCc)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void CodecT140Config::ToDebugString() const
 {
     CodecConfig::ToDebugString();
@@ -81,11 +71,6 @@ PUBLIC VIRTUAL void CodecT140Config::ToDebugString() const
     IMS_TRACE_D("RedLevel (%d), SamplingRate (%d)", m_nRedLevel, m_nTextSamplingRate, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_SINT32 CodecT140Config::GetRedLevel() const
 {

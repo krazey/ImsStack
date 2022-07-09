@@ -37,9 +37,11 @@ PUBLIC VIRTUAL CodecAmrConfig::~CodecAmrConfig()
     IMS_TRACE_D("~CodecAmrConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
 {
     IMS_TRACE_D("Create - nCodec[%d %s]", m_nCodec, ImsCodec::CodecToString(m_nCodec), 0);
+
+    IMSVector<IMS_SINT32> objCodecAttributeModeset;
 
     if (piCc == IMS_NULL)
     {
@@ -47,63 +49,73 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
         return IMS_FALSE;
     }
 
-    // m_nChannel = DEFAULT_CHANNEL;    // already set by default at creator
-
-    ICarrierConfig* piCcBundle = IMS_NULL;
+    /** TODO Media - Start - Need to change to carrier configuration bundle later */
     if (m_nCodec == ImsCodec::AUDIO_AMR)
     {
         m_nSamplingRate = DEFAULT_SAMPLING_RATE_AMR;
-        piCcBundle = piCc->GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE);
+        IMSVector<IMS_SINT32> objOctetAlign = piCc->GetIntArray(
+                CarrierConfig::Assets::KEY_ASSET_AMRNB_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT_ARRAY);
+
+        IMS_TRACE_D("Create - Codec[%d] nCodecIdx[%d] octet size[%d]", m_nCodec, nCodecIdx,
+                objOctetAlign.GetSize());
+        if (objOctetAlign.GetSize() == 0)
+        {
+            m_nOctetAlign = 0;
+        }
+        else if (nCodecIdx < objOctetAlign.GetSize())
+        {
+            m_nOctetAlign = objOctetAlign.GetAt(nCodecIdx);
+        }
+        else
+        {
+            m_nOctetAlign = objOctetAlign.GetAt(objOctetAlign.GetAt(0));
+        }
+        IMS_TRACE_D("AMR OctetAlign: %d", m_nOctetAlign, 0, 0);
+
+        objCodecAttributeModeset = piCc->GetIntArray(
+                CarrierConfig::Assets::KEY_ASSET_AMR_AMRNB_CODEC_ATTRIBUTE_MODESET_INT_ARRAY);
     }
     else if (m_nCodec == ImsCodec::AUDIO_AMR_WB)
     {
         m_nSamplingRate = DEFAULT_SAMPLING_RATE_AMRWB;
-        piCcBundle = piCc->GetBundle(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE);
+        IMSVector<IMS_SINT32> objOctetAlign = piCc->GetIntArray(
+                CarrierConfig::Assets::KEY_ASSET_AMRWB_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT_ARRAY);
+
+        IMS_TRACE_D("Create - Codec[%d] nCodecIdx[%d] octet size[%d]", m_nCodec, nCodecIdx,
+                objOctetAlign.GetSize());
+        if (objOctetAlign.GetSize() == 0)
+        {
+            m_nOctetAlign = 0;
+        }
+        else if (nCodecIdx < objOctetAlign.GetSize())
+        {
+            m_nOctetAlign = objOctetAlign.GetAt(nCodecIdx);
+        }
+        else
+        {
+            m_nOctetAlign = objOctetAlign.GetAt(objOctetAlign.GetAt(0));
+        }
+        IMS_TRACE_D("AMRWB OctetAlign: %d", m_nOctetAlign, 0, 0);
+
+        objCodecAttributeModeset = piCc->GetIntArray(
+                CarrierConfig::Assets::KEY_ASSET_AMR_AMRWB_CODEC_ATTRIBUTE_MODESET_INT_ARRAY);
     }
 
-    if (piCcBundle == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "Create - piCcBundle is NULL", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    AString strPayloadTypeNumber;
-    strPayloadTypeNumber.SetNumber(m_nPayloadType);
-    ICarrierConfig* piCcSubBundle = piCcBundle->GetBundle(strPayloadTypeNumber.GetStr());
-
-    if (piCcSubBundle == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "Create - piCcSubBundle is NULL", 0, 0, 0);
-        piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
-        return IMS_FALSE;
-    }
-
-    m_nOctetAlign = piCcSubBundle->GetInt(
-            CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT);
-
-    IMSVector<IMS_SINT32> objCodecAttributeModeset = piCcSubBundle->GetIntArray(
-            CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY);
     m_nModeSetList = 0;
     IMS_SINT32 nModeSetNum = objCodecAttributeModeset.GetSize();
+    IMS_TRACE_D("nModeSetNum: %d", nModeSetNum, 0, 0);
 
-    for (IMS_UINT32 i = 0; i < nModeSetNum; i++)
+    for (IMS_SINT32 i = 0; i < nModeSetNum; i++)
     {
         IMS_SINT32 nModeSet = objCodecAttributeModeset.GetAt(i);
         if (nModeSet < 0)
         {
+            IMS_TRACE_D("Invalid ModeSet value", 0, 0, 0);
             break;
         }
         m_nModeSetList = (m_nModeSetList | (1 << nModeSet));
     }
-
-    // m_bDtx = DEFAULT_AMR_DTX;    // already set by default at creator
-
-    piCcSubBundle->ReleaseBundle();
-    piCcSubBundle = IMS_NULL;
-
-    piCcBundle->ReleaseBundle();
-    piCcBundle = IMS_NULL;
+    /** TODO Media - End - Need to change to carrier configuration bundle later */
 
     if (m_nCodec == ImsCodec::AUDIO_AMR && m_nSamplingRate == 16000)
     {

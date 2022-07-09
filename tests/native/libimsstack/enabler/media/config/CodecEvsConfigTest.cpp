@@ -27,8 +27,6 @@
 using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_SLOT_ID = 0;
-static const IMS_SINT32 DEFAULT_TYPE = ImsCodec::AUDIO_EVS;
-static const IMS_SINT32 DEFAULT_PAYLOAD_NUM = 10;
 static const IMS_SINT32 DEFAULT_CHANNEL = CodecEvsConfig::DEFAULT_CHANNEL;
 static const IMS_BOOL DEFAULT_DTX = CodecEvsConfig::DEFAULT_DTX;
 static const IMS_BOOL DEFAULT_DTX_RECV = CodecEvsConfig::DEFAULT_DTX_RECV;
@@ -49,7 +47,7 @@ public :
 
 protected:
     virtual void SetUp() override {
-        m_pConfig = new CodecEvsConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+        m_pConfig = new CodecEvsConfig(ImsCodec::AUDIO_EVS, 125);
         m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
     }
     virtual void TearDown() override {
@@ -58,11 +56,17 @@ protected:
             delete m_pConfig;
         }
     }
-    IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
-    IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey) { return m_piCc->GetBoolean(pszKey); }
-    IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
+    IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey)
     {
-        return m_piCc->GetIntArray(pszKey);
+        ICarrierConfig* m_piCc =
+                ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
+        return m_piCc->GetInt(pszKey);
+    }
+    IMS_BOOL GetBool(IN const IMS_CHAR* pszKey)
+    {
+        ICarrierConfig* m_piCc =
+                ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
+        return m_piCc->GetBoolean(pszKey, IMS_TRUE);
     }
 };
 
@@ -83,28 +87,67 @@ TEST_F(CodecEvsConfigTest, GetConfigDefault)
 }
 
 // TODO - need to check Bundel configuration later
-/*TEST_F(CodecEvsConfigTest, GetConfigTest)
+TEST_F(CodecEvsConfigTest, GetEvsChannelId)
 {
-    m_pConfig->Create(m_piCc);
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
+    EXPECT_EQ(m_pConfig->GetChannel(),
+            GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CHANNELS_INT));
+}
 
+TEST_F(CodecEvsConfigTest, GetEvsDtx)
+{
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfig->GetDtx(),
-            GetBoolean(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL));
+            GetBool(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_BOOL));
+}
+
+TEST_F(CodecEvsConfigTest, GetEvsDtxRecv)
+{
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfig->GetDtxRecv(),
-            GetBoolean(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL));
+            GetBool(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL));
+}
+
+TEST_F(CodecEvsConfigTest, GetEvsHfOnly)
+{
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfig->GetHfOnly(),
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT));
+            GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT));
+}
+
+TEST_F(CodecEvsConfigTest, GetEvsModeSwitch)
+{
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfig->GetEvsModeSwitch(),
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT));
-    EXPECT_EQ(m_pConfig->GetBwList(), GetInt(
-            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT));
-    // EXPECT_EQ(m_pConfig->GetBw(), CodecEvsConfig::EVS_BANDWIDTH_WB);
-    // TODO - need to check later
+            GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT));
+}
+
+TEST_F(CodecEvsConfigTest, GetBwList)
+{
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
+    EXPECT_EQ(m_pConfig->GetBwList(),
+            GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT));
+}
+
+TEST_F(CodecEvsConfigTest, GetCmr)
+{
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfig->GetCmr(),
-GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CMR_INT));
+            GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CMR_INT));
+}
+
+TEST_F(CodecEvsConfigTest, GetChAwareRecv)
+{
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfig->GetChAwareRecv(),
-GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT));
+            GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT));
+}
+
+TEST_F(CodecEvsConfigTest, GetAmrWbIoModeSetList)
+{
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfig->GetAmrWbIoModeSetList(),
-GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT));
+            GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_AMRWB_IO_MODE_SET_INT));
 }
 
 TEST_F(CodecEvsConfigTest, GetConfigEvsBitrateList)
@@ -115,13 +158,15 @@ TEST_F(CodecEvsConfigTest, GetConfigEvsBitrateList)
 
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
     ON_CALL(*pMockICarrierConfig,
-            GetIntArray(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY))
+            GetIntArray(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY))
             .WillByDefault(Return(objBitrateList));
 
-    m_pConfig->Create(pMockICarrierConfig);
+    m_pConfig->Create(pMockICarrierConfig, 0);
 
     EXPECT_EQ(m_pConfig->GetBrList(), 31);
     EXPECT_EQ(m_pConfig->GetBr(), 4);
+
+    delete pMockICarrierConfig;
 }
 
 TEST_F(CodecEvsConfigTest, GetConfigEvsAmrWbIoModeSet)
@@ -130,12 +175,13 @@ TEST_F(CodecEvsConfigTest, GetConfigEvsAmrWbIoModeSet)
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
 
     ON_CALL(*pMockICarrierConfig,
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT, -1))
+            GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_AMRWB_IO_MODE_SET_INT, -1))
             .WillByDefault(Return(nMockAmrWbIoModeSetList));
 
-    m_pConfig->Create(pMockICarrierConfig);
+    m_pConfig->Create(pMockICarrierConfig, 0);
 
     EXPECT_EQ(m_pConfig->GetAmrWbIoModeSetList(), 7);
     EXPECT_EQ(m_pConfig->GetAmrWbIoModeSet(), 2);
+
+    delete pMockICarrierConfig;
 }
-*/

@@ -37,9 +37,11 @@ PUBLIC VIRTUAL CodecTelephoneEventConfig::~CodecTelephoneEventConfig()
     IMS_TRACE_D("~CodecTelephoneEventConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecTelephoneEventConfig::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL CodecTelephoneEventConfig::Create(
+        IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
 {
     (void)piCc;
+    (void)nCodecIdx;
 
     m_strEvents = DEFAULT_EVENT;
     m_nRedundancyCount = DEFAULT_REDUNDANT_COUNT;

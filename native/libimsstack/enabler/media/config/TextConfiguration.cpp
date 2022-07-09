@@ -134,11 +134,11 @@ PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConf
     IMS_UINT32 nCodecCnt = 0;
     if (nT140PayloadType > 0)
     {
-        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_T140, nCodecCnt, nT140PayloadType);
+        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_T140, nCodecCnt, nT140PayloadType, 0);
     }
     if (nRedPayloadType > 0)
     {
-        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_RED, nCodecCnt, nRedPayloadType);
+        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_RED, nCodecCnt, nRedPayloadType, 0);
     }
 
     return IMS_TRUE;
