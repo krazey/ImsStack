@@ -36,11 +36,15 @@ __IMS_TRACE_TAG_COM_MTC__;
 EmergencyMessageFormatter::EmergencyMessageFormatter(IN IMtcSessionContext& objContext) :
         MessageFormatter(objContext)
 {
+    IMS_TRACE_I("+EmergencyMessageFormatter", 0, 0, 0);
 }
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL EmergencyMessageFormatter::~EmergencyMessageFormatter() {}
+PUBLIC VIRTUAL EmergencyMessageFormatter::~EmergencyMessageFormatter()
+{
+    IMS_TRACE_I("~EmergencyMessageFormatter", 0, 0, 0);
+}
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
