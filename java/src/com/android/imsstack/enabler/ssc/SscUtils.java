@@ -115,12 +115,10 @@ public class SscUtils {
     protected String getSscUserAgent(int slotId) {
         final String gbaString = "3gpp-gba";
         String userAgent = SscConfig.getImsUserAgent(slotId);
-        if (!TextUtils.isEmpty(gbaString)) {
-            if (!TextUtils.isEmpty(userAgent)) {
-                userAgent += " " + gbaString;
-            } else {
-                userAgent = gbaString;
-            }
+        if (!TextUtils.isEmpty(userAgent)) {
+            userAgent += " " + gbaString;
+        } else {
+            userAgent = gbaString;
         }
 
         return userAgent;

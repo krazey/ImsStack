@@ -33,17 +33,11 @@ public interface ISscHttpConnection {
      *
      * @param requestType The request type, any one of HTTP PUT or HTTP GET
      * @param requestUri The URI used for HTTP request
+     * @param xui The URI getting from P-Associated-Uri of IMS registration
      * @param body The XML body that is set in HTTP PUT request
      * @return The HTTP response code from HTTP server. If it fails to send HTTP request, return -1
      */
-    int sendRequest(int requestType, String requestUri, String body);
-
-    /**
-     * Set XUI value to add in X-3GPP-Intended-Identity header
-     *
-     * @param xui The identity value getting from P-Asserted-URI of IMS registration
-     */
-    void setXuiValue(String xui);
+    int sendRequest(int requestType, String requestUri, String xui, String body);
 
     /**
      * Returns XML data received from HTTP server

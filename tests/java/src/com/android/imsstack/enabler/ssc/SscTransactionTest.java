@@ -19,6 +19,7 @@ package com.android.imsstack.enabler.ssc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -65,12 +66,12 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class SscTransactionTest {
     private static final int SLOT_0 = 0;
 
-    private SscTransaction mSscTransaction;
+    private FakeSscTransaction mSscTransaction;
     private int mGbaMode = SscConfig.GBA_ME;
     private int mTransactionId = 1;
     private String mDefaultXui = "tel:+1234567890";
     private String mDefaultRequestUri = "/simservs.ngn.etsi.org/users/" + mDefaultXui
-            + "simservs.xml";
+            + "/simservs.xml";
 
     @Captor ArgumentCaptor<Message> mMessageCaptor;
 
@@ -131,6 +132,32 @@ public class SscTransactionTest {
     }
 
     @Test
+    public void startTransaction_pdnDisconnected() {
+        when(mMockSscConnection.isConnected()).thenReturn(false);
+        when(mMockSscConnection.connect()).thenReturn(true);
+
+        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
+        sleepToWaitThreadRun();
+
+        triggerCallbackMessage(SscNetConnection.EVENT_PDN_DISCONNECTED);
+
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+    }
+
+    @Test
+    public void startTransaction_pdnRequestTimeout() {
+        when(mMockSscConnection.isConnected()).thenReturn(false);
+        when(mMockSscConnection.connect()).thenReturn(true);
+
+        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
+        sleepToWaitThreadRun();
+
+        triggerCallbackMessage(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT);
+
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+    }
+
+    @Test
     public void startTransaction_pdnConnectionFailure() {
         when(mMockSscConnection.isConnected()).thenReturn(false);
         when(mMockSscConnection.connect()).thenReturn(true);
@@ -139,19 +166,6 @@ public class SscTransactionTest {
         sleepToWaitThreadRun();
 
         triggerCallbackMessage(SscNetConnection.EVENT_PDN_CONNECTION_FAILED);
-
-        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
-    }
-
-    @Test
-    public void startTransaction_pdnConnectionTimeout() {
-        when(mMockSscConnection.isConnected()).thenReturn(false);
-        when(mMockSscConnection.connect()).thenReturn(true);
-
-        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
-        sleepToWaitThreadRun();
-
-        triggerCallbackMessage(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT);
 
         processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
@@ -188,8 +202,8 @@ public class SscTransactionTest {
 
         when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(false, true);
         when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq("")))
-                .thenReturn(SscConstant.HTTP_UNAUTHORIZED);
+                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq(mDefaultXui),
+                eq(""))).thenReturn(SscConstant.HTTP_UNAUTHORIZED);
         when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
         when(mMockSscAuthAgent.getNafFqdnFromRealm()).thenReturn(nafFqdn);
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
@@ -201,7 +215,8 @@ public class SscTransactionTest {
 
         verify(mMockSscAuthAgent, atLeast(1)).isCredentialInfoUpdated();
         verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq(""));
+                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq(mDefaultXui),
+                eq(""));
         verify(mMockSscAuthAgent, atLeast(2)).isCredentialInfoUpdated();
         verify(mMockSscAuthAgent).getNafFqdnFromRealm();
         verify(mMockSscAuthAgent).getCipherSuite();
@@ -220,9 +235,8 @@ public class SscTransactionTest {
         int appType = SscConstant.APPTYPE_USIM;
 
         when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(false, true);
-        when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq("")))
-                .thenReturn(SscConstant.HTTP_UNAUTHORIZED);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, "")).thenReturn(SscConstant.HTTP_UNAUTHORIZED);
         when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
         when(mMockSscAuthAgent.getNafFqdnFromRealm()).thenReturn(nafFqdn);
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
@@ -234,13 +248,13 @@ public class SscTransactionTest {
         sleepToWaitThreadRun();
 
         verify(mMockSscAuthAgent, atLeast(1)).isCredentialInfoUpdated();
-        verify(mMockSscHttpConnectionGov, atLeast(1)).sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq(""));
+        verify(mMockSscHttpConnectionGov, atLeast(1)).sendRequest(SLOT_0,
+                SscHttpConnection.HTTP_GET_REQUEST, mDefaultRequestUri, mDefaultXui, "");
         verify(mMockSscAuthAgent, atLeast(2)).isCredentialInfoUpdated();
         verify(mMockGbaAgent).getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
                 eq(securityProtocol), eq(true));
-        verify(mMockSscHttpConnectionGov, atLeast(2)).sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq(""));
+        verify(mMockSscHttpConnectionGov, atLeast(2)).sendRequest(SLOT_0,
+                SscHttpConnection.HTTP_GET_REQUEST, mDefaultRequestUri, mDefaultXui, "");
         verify(mMockSscAuthAgent).setIsCredentialInfoUpdated(eq(false));
 
         processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
@@ -248,16 +262,31 @@ public class SscTransactionTest {
 
     @Test
     public void startGetTransaction_requestFailure() {
-        when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq("")))
-                .thenReturn(SscHttpConnection.REQUEST_FAILED);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, "")).thenReturn(SscHttpConnection.REQUEST_FAILED);
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
 
-        verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq(""));
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, "");
         verify(mMockSscServiceStateAgent).setSocketConnectionExpired(eq(SLOT_0), eq(true));
+
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+    }
+
+    @Test
+    public void startGetTransaction_requestFailureByDns() {
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, ""))
+                .thenReturn(SscHttpConnection.REQUEST_FAILED_BY_DNS);
+
+        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
+        sleepToWaitThreadRun();
+
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, "");
+        verify(mMockSscServiceStateAgent).setDnsQueryFailed(eq(SLOT_0), eq(true));
 
         processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
@@ -267,9 +296,8 @@ public class SscTransactionTest {
         int httpErrorResponse = SscConstant.HTTP_CONFLICT;
         SscServiceQueryData queryData = getQueryData(SscConstant.CONDITION_CFU);
 
-        when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq("")))
-                .thenReturn(httpErrorResponse);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                        mDefaultRequestUri, mDefaultXui, "")).thenReturn(httpErrorResponse);
         when(mMockSscHttpConnectionGov.getInputStream(eq(SLOT_0))).thenReturn(getInputStream());
         when(mMockSscXmlGov.parseXmlStream(eq(queryData), any()))
                 .thenReturn(parseXmlStream(queryData));
@@ -277,8 +305,8 @@ public class SscTransactionTest {
         mSscTransaction.startGetTransaction(queryData);
         sleepToWaitThreadRun();
 
-        verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq(""));
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, "");
         verify(mMockSscServiceStateAgent).setErrorResponseCode(eq(SLOT_0), eq(httpErrorResponse));
         verify(mMockSscHttpConnectionGov).getInputStream(eq(SLOT_0));
         verify(mMockSscXmlGov).parseXmlStream(eq(queryData), any());
@@ -289,18 +317,34 @@ public class SscTransactionTest {
     @Test
     public void startGetTransaction_httpErrorResponseWithoutErrorPhrase() {
         int httpErrorResponse = SscConstant.HTTP_CONFLICT;
-        when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq("")))
-                .thenReturn(httpErrorResponse);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, "")).thenReturn(httpErrorResponse);
         when(mMockSscHttpConnectionGov.getInputStream(eq(SLOT_0))).thenReturn(null);
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
 
-        verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq(""));
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, "");
         verify(mMockSscServiceStateAgent).setErrorResponseCode(eq(SLOT_0), eq(httpErrorResponse));
         verify(mMockSscHttpConnectionGov).getInputStream(eq(SLOT_0));
+
+        processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+    }
+
+    @Test
+    public void startGetTransaction_httpErrorResponseForbidden() {
+        int httpErrorResponse = SscConstant.HTTP_FORBIDDEN;
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, "")).thenReturn(httpErrorResponse);
+
+        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
+        sleepToWaitThreadRun();
+
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, "");
+        verify(mMockSscAuthAgent).setIsCredentialInfoUpdated(eq(false));
+        verify(mMockSscServiceStateAgent).setErrorResponseCode(eq(SLOT_0), eq(httpErrorResponse));
 
         processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
@@ -310,9 +354,8 @@ public class SscTransactionTest {
         int httpSuccessResponse = SscConstant.HTTP_OK;
         SscServiceQueryData queryData = getQueryData(SscConstant.CONDITION_CFU);
 
-        when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq("")))
-                .thenReturn(httpSuccessResponse);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, "")).thenReturn(httpSuccessResponse);
         when(mMockSscHttpConnectionGov.getInputStream(eq(SLOT_0))).thenReturn(getInputStream());
         when(mMockSscXmlGov.parseXmlStream(eq(queryData), any())).thenReturn(null);
 
@@ -329,9 +372,8 @@ public class SscTransactionTest {
 
         when(mMockSscConnection.isConnected()).thenReturn(false, true);
         when(mMockSscConnection.connect()).thenReturn(true);
-        when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq("")))
-                .thenReturn(httpSuccessResponse);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, "")).thenReturn(httpSuccessResponse);
         when(mMockSscHttpConnectionGov.getInputStream(eq(SLOT_0))).thenReturn(getInputStream());
         when(mMockSscXmlGov.parseXmlStream(eq(queryData), any()))
                 .thenReturn(parseXmlStream(queryData));
@@ -341,8 +383,8 @@ public class SscTransactionTest {
 
         triggerCallbackMessage(SscNetConnection.EVENT_PDN_CONNECTED);
 
-        verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_GET_REQUEST), eq(mDefaultRequestUri), eq(""));
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, SscHttpConnection.HTTP_GET_REQUEST,
+                mDefaultRequestUri, mDefaultXui, "");
         verify(mMockSscXmlGov).parseXmlStream(eq(queryData), any());
 
         processTransactionSuccess(SscConstant.EVENT_SSC_QUERY_CF,
@@ -372,9 +414,8 @@ public class SscTransactionTest {
                 SscConstant.ACTION_ACTIVATION, "+1234567890", 0);
 
         when(mMockSscXmlGov.createXmlStream(eq(updateData))).thenReturn(xmlBody);
-        when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_PUT_REQUEST), eq(mDefaultRequestUri), eq(xmlBody)))
-                .thenReturn(httpErrorResponse);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_PUT_REQUEST,
+                mDefaultRequestUri, mDefaultXui, xmlBody)).thenReturn(httpErrorResponse);
         when(mMockSscHttpConnectionGov.getInputStream(eq(SLOT_0))).thenReturn(getInputStream());
         when(mMockSscXmlGov.parseXmlStream(eq(updateData), any()))
                 .thenReturn(parseXmlStream(updateData));
@@ -382,8 +423,8 @@ public class SscTransactionTest {
         mSscTransaction.startPutTransaction(updateData);
         sleepToWaitThreadRun();
 
-        verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_PUT_REQUEST), eq(mDefaultRequestUri), eq(xmlBody));
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, SscHttpConnection.HTTP_PUT_REQUEST,
+                mDefaultRequestUri, mDefaultXui, xmlBody);
         verify(mMockSscServiceStateAgent).setErrorResponseCode(eq(SLOT_0), eq(httpErrorResponse));
         verify(mMockSscHttpConnectionGov).getInputStream(eq(SLOT_0));
         verify(mMockSscXmlGov).parseXmlStream(eq(updateData), any());
@@ -399,16 +440,15 @@ public class SscTransactionTest {
                 SscConstant.ACTION_ACTIVATION, "+1234567890", 0);
 
         when(mMockSscXmlGov.createXmlStream(eq(updateData))).thenReturn(xmlBody);
-        when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_PUT_REQUEST), eq(mDefaultRequestUri), eq(xmlBody)))
-                .thenReturn(httpSuccessResponse);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_PUT_REQUEST,
+                mDefaultRequestUri, mDefaultXui, xmlBody)).thenReturn(httpSuccessResponse);
         when(mMockSscHttpConnectionGov.getInputStream(eq(SLOT_0))).thenReturn(null);
 
         mSscTransaction.startPutTransaction(updateData);
         sleepToWaitThreadRun();
 
-        verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_PUT_REQUEST), eq(mDefaultRequestUri), eq(xmlBody));
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, SscHttpConnection.HTTP_PUT_REQUEST,
+                mDefaultRequestUri, mDefaultXui, xmlBody);
 
         processTransactionSuccess(SscConstant.EVENT_SSC_UPDATE_CF,
                 SscHttpConnection.HTTP_PUT_REQUEST);
@@ -421,19 +461,43 @@ public class SscTransactionTest {
         SscServiceData insertData = getInsertData(ESsType.CF);
 
         when(mMockSscXmlGov.createXmlStream(eq(insertData))).thenReturn(xmlBody);
-        when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_PUT_REQUEST), eq(mDefaultRequestUri), eq(xmlBody)))
-                .thenReturn(httpSuccessResponse);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_PUT_REQUEST,
+                mDefaultRequestUri, mDefaultXui, xmlBody)).thenReturn(httpSuccessResponse);
         when(mMockSscHttpConnectionGov.getInputStream(eq(SLOT_0))).thenReturn(null);
 
         mSscTransaction.startPutTransaction(insertData);
         sleepToWaitThreadRun();
 
-        verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_PUT_REQUEST), eq(mDefaultRequestUri), eq(xmlBody));
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, SscHttpConnection.HTTP_PUT_REQUEST,
+                mDefaultRequestUri, mDefaultXui, xmlBody);
         verify(mMockSscXmlGov).updateTagsAndRules();
 
         processTransactionSuccess(SscConstant.EVENT_SSC_INSERT_CF,
+                SscHttpConnection.HTTP_PUT_REQUEST);
+    }
+
+    @Test
+    public void startPutTransaction_successForCfnrTimer() {
+        int httpSuccessResponse = SscConstant.HTTP_OK;
+        String xmlBody = createXmlStream();
+        SscServiceData updateData = getUpdateData(SscConstant.CONDITION_CFNR_TIMER,
+                SscConstant.ACTION_ACTIVATION, null, 25);
+        SscXmlFormat.init(SLOT_0);
+        SscXmlFormat.setIsNoReplyTimerOmitted(SLOT_0, true);
+
+        when(mMockSscXmlGov.createXmlStream(eq(updateData))).thenReturn(xmlBody);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_PUT_REQUEST,
+                mDefaultRequestUri, mDefaultXui, xmlBody)).thenReturn(httpSuccessResponse);
+        when(mMockSscHttpConnectionGov.getInputStream(eq(SLOT_0))).thenReturn(null);
+
+        mSscTransaction.startPutTransaction(updateData);
+        sleepToWaitThreadRun();
+
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, SscHttpConnection.HTTP_PUT_REQUEST,
+                mDefaultRequestUri, mDefaultXui, xmlBody);
+        assertEquals(false, SscXmlFormat.getIsNoReplyTimerOmitted(SLOT_0));
+
+        processTransactionSuccess(SscConstant.EVENT_SSC_UPDATE_CF,
                 SscHttpConnection.HTTP_PUT_REQUEST);
     }
 
@@ -442,7 +506,7 @@ public class SscTransactionTest {
         int httpSuccessResponse = SscConstant.HTTP_OK;
         String cbPassword = "1234";
         String sipXui = "sip:+1234567890@test.3gpp.com";
-        String requestUri = "/simservs.ngn.etsi.org/users/" + sipXui + "simservs.xml";
+        String requestUri = "/simservs.ngn.etsi.org/users/" + sipXui + "/simservs.xml";
         String xmlBody = createXmlStream();
         SscServiceData updateData = new CbServiceUpdateData(SLOT_0, ESsType.OCB,
                 SscConstant.EVENT_SSC_UPDATE_CB, mTransactionId,
@@ -452,16 +516,15 @@ public class SscTransactionTest {
         when(mMockSscXui.getXui(eq(SLOT_0), eq(cbPassword))).thenReturn(sipXui);
         when(mMockSscUrl.getUpdateUri(any(), eq(sipXui))).thenReturn(requestUri);
         when(mMockSscXmlGov.createXmlStream(eq(updateData))).thenReturn(xmlBody);
-        when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_PUT_REQUEST), eq(requestUri), eq(xmlBody)))
-                .thenReturn(httpSuccessResponse);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, SscHttpConnection.HTTP_PUT_REQUEST,
+                requestUri, sipXui, xmlBody)).thenReturn(httpSuccessResponse);
         when(mMockSscHttpConnectionGov.getInputStream(eq(SLOT_0))).thenReturn(null);
 
         mSscTransaction.startPutTransaction(updateData);
         sleepToWaitThreadRun();
 
-        verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
-                eq(SscHttpConnection.HTTP_PUT_REQUEST), eq(requestUri), eq(xmlBody));
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, SscHttpConnection.HTTP_PUT_REQUEST,
+                requestUri, sipXui, xmlBody);
 
         processTransactionSuccess(SscConstant.EVENT_SSC_UPDATE_CB,
                 SscHttpConnection.HTTP_PUT_REQUEST);
@@ -572,36 +635,57 @@ public class SscTransactionTest {
 
         @Override
         protected SscXmlGov getSscXmlGov() {
+            if (super.getSscXmlGov() == null) {
+                fail();
+            }
             return mMockSscXmlGov;
         }
 
         @Override
         protected SscXui getSscXui() {
+            if (super.getSscXui() == null) {
+                fail();
+            }
             return mMockSscXui;
         }
 
         @Override
         protected SscUrl getSscUrl() {
+            if (super.getSscUrl() == null) {
+                fail();
+            }
             return mMockSscUrl;
         }
 
         @Override
         protected SscServiceStateAgent getSscServiceStateAgent() {
+            if (super.getSscServiceStateAgent() == null) {
+                fail();
+            }
             return mMockSscServiceStateAgent;
         }
 
         @Override
         protected SscUtils getSscUtils() {
+            if (super.getSscUtils() == null) {
+                fail();
+            }
             return mMockSscUtils;
         }
 
         @Override
         protected ISscHttpConnectionGov getSscHttpConnectionGov() {
+            if (super.getSscHttpConnectionGov() == null) {
+                fail();
+            }
             return mMockSscHttpConnectionGov;
         }
 
         @Override
         protected ISscAuthAgent getSscAuthAgent() {
+            if (super.getSscAuthAgent() == null) {
+                fail();
+            }
             return mMockSscAuthAgent;
         }
 

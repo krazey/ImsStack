@@ -163,7 +163,7 @@ public class SscTransaction {
 
         public void startTransaction() {
             ImsLog.d(mSlotId, "");
-
+/*
             if (isTrmSupported()) {
                 if (!isTrmAvailable()) {
                     ImsLog.e(mSlotId, "TRM is not available");
@@ -171,7 +171,7 @@ public class SscTransaction {
                     return;
                 }
             }
-
+*/
             ISscNetConnectionGov netConnectionGov = SscNetConnectionGov.getInstance();
             if (netConnectionGov.isConnected(mSlotId)) {
                 netConnectionGov.refreshConnectionTimer(mSlotId);
@@ -215,9 +215,8 @@ public class SscTransaction {
             }
 
             ISscHttpConnectionGov httpConnection = getSscHttpConnectionGov();
-            httpConnection.setXuiValue(mSlotId, xui);
             int responseCode = httpConnection.sendRequest(mSlotId, getRequestType(), requestUri,
-                    body);
+                    xui, body);
             ImsLog.i(mSlotId, "response Code : " + responseCode);
 
             if (responseCode == SscConstant.HTTP_UNAUTHORIZED) {
@@ -229,15 +228,10 @@ public class SscTransaction {
                     }
 
                     responseCode = httpConnection.sendRequest(mSlotId, getRequestType(), requestUri,
-                            body);
-                    if (responseCode == SscConstant.HTTP_UNAUTHORIZED) { // 401 again
-                        ISscAuthAgent authAgent = getSscAuthAgent();
-                        authAgent.setIsCredentialInfoUpdated(false);
-                        sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
-                        return;
-                    }
+                            xui, body);
                 }
             }
+
             /* TODO: TODO: check when implementing NAPTR/SRV
             if (isSrvRetryRequired(responseCode)) {
                 ImsLog.d(mSlotId, "SRV Retry Needed");
@@ -255,6 +249,14 @@ public class SscTransaction {
                 getSscServiceStateAgent().setSocketConnectionExpired(mSlotId, true);
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 return;
+            } else if (responseCode == SscHttpConnection.REQUEST_FAILED_BY_DNS) {
+                ImsLog.e(mSlotId, "DNS failed");
+                getSscServiceStateAgent().setDnsQueryFailed(mSlotId, true);
+                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                return;
+            } else if (responseCode == SscConstant.HTTP_UNAUTHORIZED // 401 again
+                    || responseCode == SscConstant.HTTP_FORBIDDEN) {
+                getSscAuthAgent().setIsCredentialInfoUpdated(false);
             }
 
             processResponse(httpConnection, responseCode);
@@ -382,7 +384,7 @@ public class SscTransaction {
                     dataFromServer);
         }
     }
-
+/*
     private boolean isTrmAvailable() {
         // TODO: add TRM related operations
         return true;
@@ -392,7 +394,7 @@ public class SscTransaction {
         // TODO: add TRM support or not
         return false;
     }
-
+*/
     @VisibleForTesting
     protected Handler getTransactionHandler() {
         return mTransactionHandler;
@@ -490,11 +492,9 @@ public class SscTransaction {
         switch (msg.what) {
             case SscNetConnection.EVENT_PDN_CONNECTED:
                 ImsLog.d("PDN Connected");
-                if (mSscTransactionThread == null) {
-                    ImsLog.e("mSscTransactionThread is null");
-                    return;
+                if (mSscTransactionThread != null) {
+                    mTransaction.startTransaction();
                 }
-                mTransaction.startTransaction();
                 break;
             case SscNetConnection.EVENT_PDN_DISCONNECTED:
                 ImsLog.d("PDN Disconnected");
@@ -519,7 +519,7 @@ public class SscTransaction {
                 break;
             */
             default:
-                ImsLog.e("Unhanddled Message :" + msg.what);
+                // do nothing
                 break;
         }
     }

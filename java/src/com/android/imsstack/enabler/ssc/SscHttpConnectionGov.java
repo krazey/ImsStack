@@ -59,23 +59,14 @@ public class SscHttpConnectionGov implements ISscHttpConnectionGov {
     }
 
     @Override
-    public int sendRequest(int slotId, int requestType, String requestUri, String body) {
+    public int sendRequest(int slotId, int requestType, String requestUri, String xui,
+            String body) {
         ISscHttpConnection httpConnection = get(slotId);
         if (httpConnection == null) {
             ImsLog.i("sendRequest()");
             return -1;
         }
-        return httpConnection.sendRequest(requestType, requestUri, body);
-    }
-
-    @Override
-    public void setXuiValue(int slotId, String xui) {
-        ISscHttpConnection httpConnection = get(slotId);
-        if (httpConnection == null) {
-            ImsLog.i("setXuiValue()");
-            return;
-        }
-        httpConnection.setXuiValue(xui);
+        return httpConnection.sendRequest(requestType, requestUri, xui, body);
     }
 
     @Override
