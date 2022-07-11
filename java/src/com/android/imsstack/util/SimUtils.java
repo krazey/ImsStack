@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.util;
 
+import android.annotation.NonNull;
 import android.telephony.PhoneNumberUtils;
 
 /**
@@ -39,7 +40,7 @@ public final class SimUtils {
      * @param bytes The byte array.
      * @return A hexadecimal string format of the specified byte array.
      */
-    public static String bytesToHexString(byte[] bytes) {
+    public static String bytesToHexString(@NonNull byte[] bytes) {
         StringBuilder hexString = new StringBuilder(2 * bytes.length);
 
         for (int i = 0; i < bytes.length; i++) {

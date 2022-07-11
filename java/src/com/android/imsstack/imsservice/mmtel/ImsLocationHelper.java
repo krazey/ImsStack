@@ -1,18 +1,21 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20151125    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.imsservice.mmtel;
 
 import android.content.Context;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationProvider;
 import android.location.LocationRequest;
@@ -247,9 +250,9 @@ public class ImsLocationHelper {
             if (ImsLog.isDebuggable()) {
                 logi("Location information :: timeLag=" + timeLag
                         + "; " + locationUpdateTime
-                        + "(" + SystemUtils.getUTCTimeFormat(locationUpdateTime / 1000000) + ")"
+                        + "(" + SystemUtils.getUtcTimeFormat(locationUpdateTime / 1000000) + ")"
                         + " >> " + currentTime
-                        + "(" + SystemUtils.getUTCTimeFormat(currentTime / 1000000) + ")");
+                        + "(" + SystemUtils.getUtcTimeFormat(currentTime / 1000000) + ")");
             } else {
                 logi("Location information :: timeLag=" + timeLag
                         + "; " + locationUpdateTime + " >> " + currentTime);

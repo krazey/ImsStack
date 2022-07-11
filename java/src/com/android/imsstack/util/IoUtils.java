@@ -15,7 +15,6 @@
  */
 package com.android.imsstack.util;
 
-
 /**
  * This class provides the helper APIs for input/output streams.
  */

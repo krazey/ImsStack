@@ -1,14 +1,18 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20141027    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.util;
 
 import java.util.Hashtable;
@@ -21,10 +25,9 @@ public final class MapIntLong {
     public final static long INVALID_VALUE = (-1);
 
     private final static boolean DBG = false;
+    private static int sNextKey = 1;
     private final Object mLock = new Object();
     private Hashtable<Integer, Long> mIntLong = new Hashtable<Integer, Long>();
-
-    private static int mNextKey = 1;
 
     public MapIntLong() {
     }
@@ -52,12 +55,12 @@ public final class MapIntLong {
     public int getNewKey() {
         synchronized(mLock) {
             do {
-                Integer key = Integer.valueOf(mNextKey);
+                Integer key = Integer.valueOf(sNextKey);
 
-                mNextKey++;
+                sNextKey++;
 
-                if (mNextKey == Integer.MAX_VALUE) {
-                    mNextKey = 1;
+                if (sNextKey == Integer.MAX_VALUE) {
+                    sNextKey = 1;
                 }
 
                 if (mIntLong.get(key) == null) {

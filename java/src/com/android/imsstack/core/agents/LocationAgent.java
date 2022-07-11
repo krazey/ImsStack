@@ -680,7 +680,7 @@ public final class LocationAgent implements ILocationAgent {
         locationInfo[2] = Float.toString(location.getAccuracy());
         locationInfo[3] = mPolicy.getShape();
         locationInfo[4] = Integer.toString(confidence);
-        locationInfo[5] = SystemUtils.getUTCTimeFormat(location.getTime());
+        locationInfo[5] = SystemUtils.getUtcTimeFormat(location.getTime());
         locationInfo[6] = method;
         locationInfo[11] = Double.toString(location.getAltitude());
         locationInfo[12] = Float.toString(location.getVerticalAccuracyMeters());
@@ -792,9 +792,9 @@ public final class LocationAgent implements ILocationAgent {
             if (ImsLog.isDebuggable()) {
                 ImsLog.d(mSlotId, "Location :: timeLag=" + timeLag
                         + "; " + cachedTime
-                        + "(" + SystemUtils.getUTCTimeFormat(cachedTime / 1000000) + ")"
+                        + "(" + SystemUtils.getUtcTimeFormat(cachedTime / 1000000) + ")"
                         + " >> " + currentTime
-                        + "(" + SystemUtils.getUTCTimeFormat(currentTime / 1000000) + ")");
+                        + "(" + SystemUtils.getUtcTimeFormat(currentTime / 1000000) + ")");
             } else {
                 ImsLog.d(mSlotId, "Location :: timeLag=" + timeLag
                         + "; " + cachedTime + " >> " + currentTime);
@@ -866,9 +866,9 @@ public final class LocationAgent implements ILocationAgent {
         if (ImsLog.isDebuggable()) {
             ImsLog.d(mSlotId, "Location :: timeLag=" + timeLag
                     + "; " + locationUpdateTime
-                    + "(" + SystemUtils.getUTCTimeFormat(locationUpdateTime / 1000000) + ")"
+                    + "(" + SystemUtils.getUtcTimeFormat(locationUpdateTime / 1000000) + ")"
                     + " >> " + currentTime
-                    + "(" + SystemUtils.getUTCTimeFormat(currentTime / 1000000) + ")");
+                    + "(" + SystemUtils.getUtcTimeFormat(currentTime / 1000000) + ")");
         } else {
             ImsLog.d(mSlotId, "Location :: timeLag=" + timeLag
                     + "; " + locationUpdateTime + " >> " + currentTime);
@@ -1257,7 +1257,7 @@ public final class LocationAgent implements ILocationAgent {
             sb.append(location.getAccuracy());
             sb.append(", ");
             sb.append("68, ");
-            sb.append(SystemUtils.getUTCTimeFormat(location.getTime()));
+            sb.append(SystemUtils.getUtcTimeFormat(location.getTime()));
             sb.append(", ");
             sb.append("NA, ");
             sb.append(location.getAltitude());
