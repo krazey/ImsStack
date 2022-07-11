@@ -35,12 +35,14 @@ public:
     void SetMtsServiceState(IN IMS_SINT32 nServiceState);
     void SetConnectedServices(IN IMS_UINT32 nServices);
 
-    IMS_BOOL GetImsRegState() const;
-    IMS_BOOL GetImsRegMod() const;
-    IMS_BOOL GetImsSuspendState() const;
-    IMS_BOOL GetSmsOverIpState() const;
-    IMS_SINT32 GetMtsServiceState() const;
-    IMS_UINT32 GetConnectedServices() const;
+    inline IMS_UINT32 GetConnectedServices() const { return m_nConnectedServices; }
+    inline IMS_BOOL GetImsRegState() const { return m_bIsImsConnected; }
+    inline IMS_BOOL GetImsRegMod() const { return m_bIsAosRegModAdmin; }
+    inline IMS_BOOL GetImsSuspendState() const { return m_bIsImsSuspend; }
+    inline IMS_SINT32 GetMtsServiceState() const { return m_nMtsServiceState; }
+    inline IMS_SINT32 GetSlotId() const { return m_nSlotId; }
+    inline IMS_BOOL GetSmsOverIpState() const { return m_bIsSmsOverIpConf; }
+
     IMS_BOOL IsServiceConnected(IN IMS_UINT32 nService);
 
     void OnImsConnected();
@@ -55,9 +57,8 @@ public:
     IMS_BOOL IsMoServiceBlocked();
     IMS_BOOL IsMtServiceBlocked();
     IMS_BOOL IsTemporaryServiceBlocked();
-    IMS_SINT32 GetSlotId() const;
 
-protected:
+private:
     IMS_SINT32 m_nMtsServiceState;
 
     // Check Condition for SMS SERVICE MODE

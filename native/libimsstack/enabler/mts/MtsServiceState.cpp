@@ -40,7 +40,7 @@ MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
         m_pMtsMessageController(IMS_NULL)
 {
-    IMS_TRACE_I("+MtsServiceState", 0, 0, 0);
+    IMS_TRACE_I("+MtsServiceState [slot_%d]", m_nSlotId, 0, 0);
 }
 
 PUBLIC
@@ -152,52 +152,9 @@ void MtsServiceState::SetMtsMessageController(IN MtsMessageController* pMtsMessa
 }
 
 PUBLIC
-IMS_SINT32 MtsServiceState::GetSlotId() const
-{
-    IMS_TRACE_D("GetSlotId[%d]", m_nSlotId, 0, 0);
-    return m_nSlotId;
-}
-
-PUBLIC
-IMS_BOOL MtsServiceState::GetImsRegState() const
-{
-    return m_bIsImsConnected;
-}
-
-PUBLIC
-IMS_BOOL MtsServiceState::GetImsRegMod() const
-{
-    return m_bIsAosRegModAdmin;
-}
-
-PUBLIC
-IMS_BOOL MtsServiceState::GetImsSuspendState() const
-{
-    return m_bIsImsSuspend;
-}
-
-PUBLIC
-IMS_BOOL MtsServiceState::GetSmsOverIpState() const
-{
-    return m_bIsSmsOverIpConf;
-}
-
-PUBLIC
-IMS_SINT32 MtsServiceState::GetMtsServiceState() const
-{
-    return m_nMtsServiceState;
-}
-
-PUBLIC
 void MtsServiceState::SetMtsServiceState(IN IMS_SINT32 nServiceState)
 {
     m_nMtsServiceState = nServiceState;
-}
-
-PUBLIC
-IMS_UINT32 MtsServiceState::GetConnectedServices() const
-{
-    return m_nConnectedServices;
 }
 
 PUBLIC

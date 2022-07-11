@@ -34,10 +34,9 @@ PUBLIC
 MtsSipFormUtils::MtsSipFormUtils(IN IMS_SINT32 nSlotId) :
         m_nMtsFormat(MtsApp::SMSFORMAT_INVALID),
         m_pMtsDialingPlan(IMS_NULL),
-        m_strPsi(AString::ConstNull()),
         m_nSlotId(nSlotId)
 {
-    IMS_TRACE_I("+MtsSipFormUtils", 0, 0, 0);
+    IMS_TRACE_I("+MtsSipFormUtils [slot_%d]", m_nSlotId, 0, 0);
 
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
     IMS_SINT32 nRequestUriType = GetRequestUriType();
@@ -100,13 +99,6 @@ PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::FormDestination(IN const AString& strTa
 
         strDest = m_pMtsDialingPlan->Translate(strTargetAddress, IMS_TRUE);
 
-        /*
-         * TODO:
-         * PSI or SMSC addresses are received from AP SMS Stack
-         * These values can be configured to make SIP Request-URI for a specific operator
-         */
-        // strDest = ValidateAndUpdatePsi();
-
         if (strDest.GetLength() != 0)
         {
             IMS_TRACE_D("Destination address = %s", strDest.GetStr(), 0, 0);
@@ -160,109 +152,12 @@ IMS_UINT32 MtsSipFormUtils::FormContentTypeStrToEnum(IN const AString& strConten
     }
     else
     {
-        IMS_TRACE_E(0, "This ContentType Str (%s) is not supported", 0, 0, 0);
+        IMS_TRACE_E(0, "This ContentType Str (%s) is not supported", strContentType.GetStr(), 0, 0);
     }
 
     IMS_TRACE_D("FormContentTypeStrToEnum (%s) to (%d)", strContentType.GetStr(), nType, 0);
 
     return nType;
-}
-
-PUBLIC VIRTUAL IMS_SINT32 MtsSipFormUtils::GetSlotId()
-{
-    IMS_TRACE_D("GetSlotId[%d]", m_nSlotId, 0, 0);
-    return m_nSlotId;
-}
-
-PUBLIC VIRTUAL AString MtsSipFormUtils::ValidateAndUpdatePsi()
-{
-    AStringBuffer objURI(128);
-    IMS_SINT32 strSheme = CheckScheme(m_strPsi);
-
-    IMS_TRACE_I("MtsSipFormUtils::ValidateAndUpdatePsi", 0, 0, 0);
-
-    if (strSheme == SCHEME_UNKNOWN)
-    {
-        objURI.Append(m_strPsi);
-
-        if (!IsIpAddress(m_strPsi) && IsNumberFormat(m_strPsi))
-        {
-            objURI.Prepend("tel:");
-        }
-        else
-        {
-            objURI.Prepend("sip:");
-        }
-    }
-    else if (strSheme == SCHEME_SIP || strSheme == SCHEME_SIPS)
-    {
-        // General form - sip:user:password@host:port;uri-parameters
-        SipAddress* pTempDest = new SipAddress(m_strPsi);
-
-        if (pTempDest == IMS_NULL)
-        {
-            IMS_TRACE_E(0,
-                    "MtsSipFormUtils::ValidateAndUpdatePsi: Fail to get Host. "
-                    "PSI is not updated",
-                    0, 0, 0);
-            objURI.Append(m_strPsi);
-            return static_cast<const AStringBuffer&>(objURI).GetString();
-        }
-
-        if ((pTempDest->GetHost() != IMS_NULL) && !IsIpAddress(pTempDest->GetHost().GetStr()) &&
-                IsNumberFormat(pTempDest->GetHost().GetStr()))
-        {
-            // Host which is number format means that user info is empty, so try to re-form
-            const ISubscriberConfig* piSubsConfig =
-                    Configuration::GetInstance()->GetSubscriberConfig(m_nSlotId);
-            IMSList<SipParameter*> objParameters = pTempDest->GetParameters();
-
-            if (piSubsConfig != IMS_NULL)
-            {
-                if (objParameters.IsEmpty())
-                {
-                    // Add HomeDomain to existing PSI
-                    objURI.Sprintf(
-                            "%s@%s", m_strPsi.GetStr(), piSubsConfig->GetHomeDomainName().GetStr());
-                }
-                else
-                {
-                    // Re-form. Add scheme & user
-                    objURI.Sprintf("%s:%s", pTempDest->GetScheme().GetStr(),
-                            pTempDest->GetHost().GetStr());
-
-                    for (IMS_UINT32 i = 0; i < objParameters.GetSize(); ++i)
-                    {
-                        SipParameter* pParameter = objParameters.GetAt(i);
-
-                        if (pParameter == IMS_NULL)
-                            continue;
-
-                        if (IsTelUrlParam(pParameter->GetName()))
-                        {
-                            // Add tel url parameter in user part. phone-context, postd, isub, tsp
-                            objURI.Sprintf("%s;%s", objURI.GetString().GetStr(),
-                                    pParameter->ToString().GetStr());
-                        }
-                    }
-                    // Add HomeDomain
-                    objURI.Sprintf("%s@%s", objURI.GetString().GetStr(),
-                            piSubsConfig->GetHomeDomainName().GetStr());
-                }
-                // Add user param because user part is number format
-                objURI.Append(";user=phone");
-            }
-        }
-        delete pTempDest;
-    }
-
-    if (objURI.IsEmpty())
-    {
-        IMS_TRACE_I("PSI is not updated", 0, 0, 0);
-        objURI.Append(m_strPsi);
-    }
-
-    return static_cast<const AStringBuffer&>(objURI).GetString();
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::IsTelUrlParam(IN const AString& strParam) const
@@ -342,22 +237,16 @@ IMS_SINT32 MtsSipFormUtils::CheckScheme(IN const AString& strNumber) const
         {
             return SCHEME_TEL;
         }
-        else if (strTmp.StartsWith("sip"))
-        {
-            return SCHEME_SIP;
-        }
         else if (strTmp.StartsWith("sips"))
         {
             return SCHEME_SIPS;
         }
+        else if (strTmp.StartsWith("sip"))
+        {
+            return SCHEME_SIP;
+        }
     }
     return SCHEME_UNKNOWN;
-}
-
-PRIVATE VIRTUAL MtsDialingPlan* MtsSipFormUtils::GetDialingPlan(IN IMS_SINT32 nSlotId)
-{
-    IMS_TRACE_E(0, "MtsSipFormUtils::GetDialingPlan : nSlotId[%d]", nSlotId, 0, 0);
-    return m_pMtsDialingPlan;
 }
 
 PRIVATE
@@ -376,7 +265,8 @@ IMS_SINT32 MtsSipFormUtils::GetRequestUriType()
     }
 }
 
-PRIVATE GLOBAL IMS_BOOL MtsSipFormUtils::IsVisualSeparator(IN IMS_CHAR ch)
+PRIVATE
+IMS_BOOL MtsSipFormUtils::IsVisualSeparator(IN const IMS_CHAR ch) const
 {
     // "-", ".", "(", ")"
     if ((ch == '-') || (ch == '.') || (ch == '(') || (ch == ')'))
