@@ -196,7 +196,6 @@ ConferenceOperationQueue::ConferenceOperation* ConferenceOperationQueue::GetCurr
 PUBLIC
 IMS_UINT32 ConferenceOperationQueue::GetTypeOfCurrentOperation() const
 {
-    IMS_TRACE_D("GetTypeOfCurrentOperation", 0, 0, 0);
     if (m_objOperationQueue.GetSize() > 0)
     {
         return m_objOperationQueue.GetAt(ACTIVE_OPERATION_NUMBER)->GetType();

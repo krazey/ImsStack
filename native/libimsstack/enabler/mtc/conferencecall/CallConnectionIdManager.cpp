@@ -90,17 +90,19 @@ PUBLIC VIRTUAL void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCall
 
 PUBLIC VIRTUAL void CallConnectionIdManager::OnTotalCallStateChanged(IN State eState)
 {
-    if (eState == State::IDLE)
+    if (eState != State::IDLE)
     {
-        IMS_SINT32 nSize = (IMS_SINT32)(m_objCallKeyConnections.GetSize());
-        IMS_TRACE_D("OnTotalCallStateChanged IDLE - size[%d]", nSize, 0, 0);
-        for (IMS_SINT32 i = nSize - 1; i >= 0; i--)
-        {
-            RemoveKeyConnectionId(i);
-        }
-        m_objCallKeyConnections.Clear();
-        m_objControllers.Clear();
+        return;
     }
+
+    IMS_SINT32 nSize = (IMS_SINT32)(m_objCallKeyConnections.GetSize());
+    IMS_TRACE_D("OnTotalCallStateChanged IDLE - size[%d]", nSize, 0, 0);
+    for (IMS_SINT32 i = nSize - 1; i >= 0; i--)
+    {
+        RemoveKeyConnectionId(i);
+    }
+    m_objCallKeyConnections.Clear();
+    m_objControllers.Clear();
 }
 
 PUBLIC
@@ -141,7 +143,6 @@ IMS_SINT32 CallConnectionIdManager::GetIndex(IN CallKey nKey)
         CallKeyConnection* pTemp = m_objCallKeyConnections.GetAt(i);
         if (pTemp->nKey == nKey)
         {
-            IMS_TRACE_D("GetIndex [%d]", pTemp->nConnectionId, 0, 0);
             return pTemp->nConnectionId;
         }
     }
@@ -294,7 +295,7 @@ IMS_BOOL CallConnectionIdManager::IsConferenceHost(
 PRIVATE
 AString CallConnectionIdManager::GetIds()
 {
-    AString strIds = "";
+    AString strIds;
     for (IMS_UINT32 i = 0; i < m_objCallKeyConnections.GetSize(); i++)
     {
         AString temp;
@@ -315,16 +316,17 @@ void CallConnectionIdManager::ClearConnectionIdsInConference(IN IMS_UINT32 nCont
     // no null check
     IConferenceController* piController = m_objControllers.GetAt(nControllerIndex);
     IMS_SINT32 nSize = m_objCallKeyConnections.GetSize();
-    IMS_TRACE_D("ClearConnectionIds total size=[%d]", nSize, 0, 0);
+    IMS_TRACE_D("ClearConnectionIdsInConference total size=[%d]", nSize, 0, 0);
 
     for (IMS_SINT32 i = nSize - 1; i >= 0; i--)
     {
-        IMS_TRACE_D("ClearConnectionIds index[%d]", i, 0, 0);
-        CallKeyConnection* pConnection = m_objCallKeyConnections.GetAt(i);
-        if (piController->GetCallStatusInConference(pConnection->nKey) != IndividualCallState::IDLE)
+        IMS_TRACE_D("ClearConnectionIdsInConference index[%d]", i, 0, 0);
+        if (piController->GetCallStatusInConference(m_objCallKeyConnections.GetAt(i)->nKey) ==
+                IndividualCallState::IDLE)
         {
-            RemoveKeyConnectionId(i);
+            continue;
         }
+        RemoveKeyConnectionId(i);
     }
     return;
 }
