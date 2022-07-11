@@ -79,6 +79,7 @@ PROTECTED VIRTUAL void GroupCallController::ProcessGroupCall(IN IMSList<ConfUser
 
     SetState(STATE_GROUPCALLING);
     AddUserToParticipantList(objUsers);
+    ClearListForConfUsers(objUsers);
 
     CallStartOperationParams* pParams = new CallStartOperationParams(
             CONF_CREATE_START, objCallInfo, objMediaInfo, objUsers, objSuppServices);

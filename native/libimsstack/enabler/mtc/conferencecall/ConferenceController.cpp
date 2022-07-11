@@ -426,6 +426,7 @@ PROTECTED VIRTUAL void ConferenceController::ProcessDrop(IN IMSList<ConfUser*>& 
     IMS_TRACE_I("ProcessDrop", 0, 0, 0);
 
     IMS_SINT32 nIndex = m_objParticipantList.FindParticipant(objUsers.GetAt(0)->nConnectionId);
+    ClearListForConfUsers(objUsers);
 
     if (nIndex < 0)
     {
@@ -629,6 +630,12 @@ PROTECTED VIRTUAL void ConferenceController::UpdateUserStatusByReferResult(IN Co
         IN SipStatusCode nStatusCode /* = SipStatusCode::SC_200*/)
 {
     IMS_TRACE_D("UpdateUserStatusByReferResult", 0, 0, 0);
+
+    if (pUser == IMS_NULL)
+    {
+        return;
+    }
+
     if (nStatusCode == SipStatusCode::SC_100)
     {
         if (piConfRef->GetType() == REFERENCE_TYPE_INVITE)

@@ -69,7 +69,6 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objU
     IMS_SINT32 nOldState = GetState();
     SetState(STATE_MERGING);
 
-    // clear ConfUser list for not use in resource list in UCSession.
     ClearListForConfUsers(objUsers);
 
     if (nOldState == STATE_CREATED)

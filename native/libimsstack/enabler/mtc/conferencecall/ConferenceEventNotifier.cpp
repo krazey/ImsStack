@@ -49,10 +49,9 @@ void ConferenceEventNotifier::NotifyMerged(IN ConferenceParticipantList& objPart
     IMS_TRACE_I("NotifyMerged", 0, 0, 0);
 
     objParticipantList.Login();
-
+    IMSList<ConfUser*> objUsers = objParticipantList.GetConfUsers();
     m_objConfCallContext.GetUiNotifier().SendMerged(CloneCallInfo(), CloneMediaInfo(),
-            m_objConfCallContext.GetSupplementaryService().GetServices(),
-            objParticipantList.GetConfUsers(IMS_TRUE));
+            m_objConfCallContext.GetSupplementaryService().GetServices(), objUsers);
 }
 
 PUBLIC
@@ -151,9 +150,9 @@ void ConferenceEventNotifier::NotifyUsersInfo(IN ConferenceParticipantList& objP
     IMS_TRACE_I("NotifyUsersInfo", 0, 0, 0);
     objParticipantList.Login();
 
-    IMSList<ConfUser*> objUsers = objParticipantList.GetConfUsers(IMS_TRUE);
-    CheckDisconnectedConfUsersInfo(objParticipantList, objUsers);
+    IMSList<ConfUser*> objUsers = objParticipantList.GetConfUsers();
     m_objConfCallContext.GetUiNotifier().SendNotifyUsersInfo(objUsers);
+    CheckDisconnectedConfUsersInfo(objParticipantList, objUsers);
 }
 
 PUBLIC
@@ -194,7 +193,7 @@ MediaInfo* ConferenceEventNotifier::CloneMediaInfo()
 
 PRIVATE
 void ConferenceEventNotifier::CheckDisconnectedConfUsersInfo(
-        IN ConferenceParticipantList& objParticipantList, IN_OUT IMSList<ConfUser*>& objUsers)
+        IN ConferenceParticipantList& objParticipantList, IN_OUT IMSList<ConfUser*>& /*objUsers*/)
 {
     for (IMS_SINT32 i = (objParticipantList.GetSize() - 1); i >= 0; i--)
     {
@@ -209,23 +208,10 @@ void ConferenceEventNotifier::CheckDisconnectedConfUsersInfo(
         IMS_UINT32 nStatus = pParticipant->GetConfUser()->eStatus;
         if (nStatus == STATUS_DISCONNECTED || nStatus == STATUS_DISCONNECTING ||
                 (nStatus >= STATUS_FAIL && nStatus <= STATUS_INTSERVERERROR))
-        // TODO: list up all the status names, not range.
         {
-            if (pParticipant->IsDisconnectionNotified())
-            {
-                ConfUser* pConfUser = objUsers.GetAt(i);
-                IMS_TRACE_D("CheckDisconnectedConfUsersInfo : target[%s] status[%d]",
-                        pConfUser->strTarget.GetStr(), pConfUser->eStatus, 0);
-
-                delete pConfUser;
-                objUsers.RemoveAt(i);
-            }
-            else
-            {
-                pParticipant->SetDisconnectionNotified(IMS_TRUE);
-                m_objConnectionIdManager.OnConferenceParticipantDisconnected(
-                        pParticipant->GetConfUser()->nConnectionId);
-            }
+            m_objConnectionIdManager.OnConferenceParticipantDisconnected(
+                    pParticipant->GetConfUser()->nConnectionId);
+            objParticipantList.RemoveUser(i);
         }
         else
         {
