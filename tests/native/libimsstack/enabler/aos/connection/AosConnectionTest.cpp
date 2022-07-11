@@ -143,7 +143,7 @@ TEST_F(AosConnectionTest, Constructor)
 TEST_F(AosConnectionTest, Activate)
 {
     SetNetworkConnection(&objMockINetworkConnection);
-    EXPECT_CALL(objMockINetworkConnection, Activate(_, _))
+    EXPECT_CALL(objMockINetworkConnection, Activate(_))
             .Times(2)
             .WillOnce(Return(INetworkConnection::RESULT_DONE))
             .WillOnce(Return(INetworkConnection::RESULT_DOING));
@@ -167,7 +167,7 @@ TEST_F(AosConnectionTest, Activate)
 TEST_F(AosConnectionTest, Deactivate)
 {
     SetNetworkConnection(&objMockINetworkConnection);
-    EXPECT_CALL(objMockINetworkConnection, Deactivate(_, _))
+    EXPECT_CALL(objMockINetworkConnection, Deactivate(_))
             .Times(1)
             .WillOnce(Return(INetworkConnection::RESULT_DONE));
 
@@ -329,14 +329,4 @@ TEST_F(AosConnectionTest, GetIpcanCategory)
 
     EXPECT_EQ(pAosConnection->GetIpcanCategory(), IIpcan::CATEGORY_WLAN);
     EXPECT_EQ(pAosConnection->GetIpcanCategory(), IIpcan::CATEGORY_MOBILE);
-}
-
-TEST_F(AosConnectionTest, SendPingToHostAddress)
-{
-    SetNetworkConnection(&objMockINetworkConnection);
-    EXPECT_CALL(objMockINetworkConnection, SendPingToHostAddress(_))
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
-
-    EXPECT_EQ(pAosConnection->SendPingToHostAddress(IPAddress::NONE), IMS_TRUE);
 }

@@ -33,7 +33,6 @@ import android.util.SparseArray;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.ITelephonyState;
-import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
@@ -41,14 +40,6 @@ import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SettingsUtils;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -205,150 +196,8 @@ public class DcUtils implements IDcUtils {
     }
 
     @Override
-    public boolean sendPingToHostAddress(int apnType, String hostAddress) {
-        ImsLog.d(mSlotId, "");
-
-        String pingCmd;
-        String tempPing4Cmd = "ping -c 5 -i 0.2 -w 1 ";
-        String tempping6Cmd = "ping6 -c 5 -i 0.2 -w 1 ";
-
-        try {
-            InetAddress address = InetAddress.getByName(hostAddress);
-
-            if (address instanceof Inet6Address) {
-                ImsLog.d(mSlotId, "use ping6 command");
-                pingCmd = tempping6Cmd;
-            } else if (address instanceof Inet4Address) {
-                ImsLog.d(mSlotId, "use ping command");
-                pingCmd = tempPing4Cmd;
-            } else {
-                ImsLog.e(mSlotId, "host address is invalid.");
-                return true;
-            }
-        } catch (UnknownHostException e) {
-            ImsLog.e(mSlotId, "UnknownHostException :: " + e);
-            return true;
-        }
-
-        IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-        if (dcapn == null) {
-            return true;
-        }
-
-        String iface = dcapn.getIfaceName(apnType);
-        String pingIface = "-I " + iface + " ";
-
-        ImsLog.d(mSlotId, "apnType = " + apnType + " interfaceName = " + iface
-                + " pingIface = " + pingIface);
-
-        try {
-            ArrayList<String> cmdResult = getPingCmdResult(pingCmd + pingIface + hostAddress);
-            if (cmdResult == null) {
-                return true;
-            }
-
-            for (String line : cmdResult) {
-                ImsLog.d(mSlotId, "line : " + line);
-
-                if (line != null && line.contains("bytes from " + hostAddress)) {
-                    ImsLog.i(mSlotId, "ping response is successfully received from the server.");
-                    return true;
-                }
-
-                if (line != null && line.contains("100% packet loss")) {
-                    ImsLog.i(mSlotId, "ping to the server fail");
-                    return false;
-                }
-            }
-        } catch (Exception e) {
-            ImsLog.e(mSlotId, "Exception :: " + e);
-        }
-
-        return true;
-    }
-
-    @Override
     public void updateAllCellInfoForcinglyOnLimitedServiceState() {
         ImsLog.w(mSlotId, "Not implemented");
-    }
-
-    private ArrayList<String> getPingCmdResult(String cmd) {
-        ArrayList<String> list = new ArrayList<String>();
-        Runtime runtime = Runtime.getRuntime();
-        Process process;
-
-        InputStream inStream = null;
-        InputStreamReader inStreamReader = null;
-        BufferedReader buffReader = null;
-
-        ImsLog.i(mSlotId, "getshelllog: " + cmd);
-
-        String[] listCmd = null;
-        listCmd = cmd.split(" ");
-
-        try {
-            process = runtime.exec(listCmd);
-
-            if (process == null) {
-                ImsLog.e(mSlotId, "Process is null.");
-                return null;
-            }
-
-            inStream = process.getInputStream();
-
-            if (inStream == null) {
-                ImsLog.e(mSlotId, "InputStream is null.");
-                return null;
-            }
-
-            inStreamReader = new InputStreamReader(inStream);
-
-            if (inStreamReader == null) {
-                ImsLog.e(mSlotId, "InputStreamReader is null.");
-                return null;
-            }
-
-            buffReader = new BufferedReader(inStreamReader);
-
-            if (buffReader == null) {
-                ImsLog.e(mSlotId, "BufferedReader is null.");
-                return null;
-            }
-
-            String line;
-
-            while ((line = buffReader.readLine()) != null) {
-                list.add(line);
-            }
-        } catch (Exception e) {
-            ImsLog.i(mSlotId, "Error getting i/o stream. " + e);
-        } finally {
-            if (buffReader != null) {
-                try {
-                    buffReader.close();
-                } catch (Exception e) {
-                    ImsLog.e(mSlotId, "exception occrurred");
-                }
-            }
-
-            if (inStreamReader != null) {
-                try {
-                    inStreamReader.close();
-                } catch (Exception e) {
-                    ImsLog.e(mSlotId, "exception occrurred");
-                }
-            }
-
-            if (inStream != null) {
-                try {
-                    inStream.close();
-                } catch (Exception e) {
-                    ImsLog.e(mSlotId, "exception occrurred");
-                }
-            }
-        }
-
-        return list;
     }
 
     private ServiceState getServiceState() {

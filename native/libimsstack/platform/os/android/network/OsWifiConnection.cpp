@@ -103,11 +103,8 @@ PUBLIC VIRTUAL const IPAddress& OsWifiConnection::GetLocalAddress(
 }
 
 PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsWifiConnection::Activate(
-        IN IMS_BOOL /*bEnableApn = IMS_FALSE*/,
-        IN IMS_SINT32 nIpcanCategory /*= IIpcan::CATEGORY_MOBILE*/)
+        IN IMS_BOOL /*bEnableApn = IMS_FALSE*/)
 {
-    (void)nIpcanCategory;
-
     // If the connection with WiFi network is already established,
     // then it sends an event to the application.
     if (IsConnectedInternal())
@@ -166,11 +163,8 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsWifiConnection::Activate(
 }
 
 PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsWifiConnection::Deactivate(
-        IN IMS_BOOL /*bDisableApn = IMS_FALSE*/,
-        IN IMS_SINT32 nIpcanCategory /*= IIpcan::CATEGORY_MOBILE*/)
+        IN IMS_BOOL /*bDisableApn = IMS_FALSE*/)
 {
-    (void)nIpcanCategory;
-
     if (m_nState == STATE_TERMINATED)
     {
         IMS_TRACE_D("WiFi :: Deactivate() in TERMINATED state", 0, 0, 0);
@@ -378,12 +372,6 @@ PRIVATE VIRTUAL IMS_BOOL OsWifiConnection::IsConnected(
         IN IMS_SINT32 /*nCategory = IIpcan::CATEGORY_ANY*/) const
 {
     return (m_nState == STATE_ACTIVE);
-}
-
-PUBLIC VIRTUAL IMS_BOOL OsWifiConnection::SendPingToHostAddress(IN const IPAddress& objHostAddress)
-{
-    (void)objHostAddress;
-    return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsWifiConnection::IsePDGEnabled() const

@@ -699,8 +699,6 @@ public class SystemInterface implements JNIImsListenerEx {
                 "IS_LTE_EMERGENCY_ONLY");
         sMethodToString.put(SystemConstants.IS_MOBILE_DATA_ENABLED,
                 "IS_MOBILE_DATA_ENABLED");
-        sMethodToString.put(SystemConstants.SEND_PING_TO_HOST_ADDRESS,
-                "SEND_PING_TO_HOST_ADDRESS");
         sMethodToString.put(SystemConstants.GET_MOCN_PLMN_INFO,
                 "GET_MOCN_PLMN_INFO");
         sMethodToString.put(SystemConstants.GET_VOICE_SERVICE_STATE,
@@ -1399,7 +1397,6 @@ public class SystemInterface implements JNIImsListenerEx {
                     case SystemConstants.GET_SERVICE_STATE: //FALL-THROUGH
                     case SystemConstants.IS_LTE_EMERGENCY_ONLY: //FALL-THROUGH
                     case SystemConstants.IS_MOBILE_DATA_ENABLED://FALL-THROUGH
-                    case SystemConstants.SEND_PING_TO_HOST_ADDRESS: //FALL-THROUGH
                     case SystemConstants.GET_MOCN_PLMN_INFO: //FALL-THROUGH
                     case SystemConstants.GET_VOICE_SERVICE_STATE: //FALL-THROUGH
                     case SystemConstants.GET_MTU: //FALL-THROUGH
@@ -1552,11 +1549,11 @@ public class SystemInterface implements JNIImsListenerEx {
             switch (method) {
                 case SystemConstants.ACTIVATE_DATA_CONNECTION:
                     result.writeInt(mISystemAPINetwork.activateDataConnection4Sys(
-                            parcel.readInt(), parcel.readInt()));
+                            parcel.readInt()));
                     break;
                 case SystemConstants.DEACTIVATE_DATA_CONNECTION:
                     result.writeInt(mISystemAPINetwork.deactivateDataConnection4Sys(
-                            parcel.readInt(), parcel.readInt()));
+                            parcel.readInt()));
                     break;
                 case SystemConstants.GET_ACCESS_NETWORK_INFO:
                     int defaultNetworkType = parcel.readInt();
@@ -1694,10 +1691,6 @@ public class SystemInterface implements JNIImsListenerEx {
                 break;
             case SystemConstants.IS_MOBILE_DATA_ENABLED:
                 result.writeInt(mISystemAPINetwork.isMobileDataEnabled() ? 1 : 0);
-                break;
-            case SystemConstants.SEND_PING_TO_HOST_ADDRESS:
-                result.writeInt(mISystemAPINetwork.sendPingToHostAddress4Sys(
-                        parcel.readInt(), parcel.readString()));
                 break;
             case SystemConstants.GET_MOCN_PLMN_INFO:
                 result.writeInt(mISystemAPINetwork.getMocnPlmnInfo4Sys());

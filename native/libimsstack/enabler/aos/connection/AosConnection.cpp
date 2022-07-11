@@ -285,19 +285,6 @@ PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetIpcanCategory()
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_BOOL AosConnection::SendPingToHostAddress(IN const IPAddress& objHostAddress)
-{
-    A_IMS_TRACE_D(CNXID, "SendPingToHostAddress :: host address (%s)",
-            objHostAddress.ToString().GetStr(), 0, 0);
-
-    return m_piConnection->SendPingToHostAddress(objHostAddress);
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosConnection::StateToString(IN IMS_UINT32 nState)
 {
     switch (nState)

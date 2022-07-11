@@ -870,8 +870,7 @@ IMS_SINT32 System::GetLteRsrpStrength(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::ActivateDataConnection(
-        IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpcanCategory, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::ActivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -884,7 +883,6 @@ IMS_SINT32 System::ActivateDataConnection(
     in.writeInt32(nSlotId);
     in.writeInt32(SystemConstants::ACTIVATE_DATA_CONNECTION);
     in.writeInt32(nApnType);
-    in.writeInt32(nIpcanCategory);
 
     if (m_pCallback->SendDataToJava(in, out) == 1)
     {
@@ -895,8 +893,7 @@ IMS_SINT32 System::ActivateDataConnection(
 }
 
 PUBLIC
-IMS_SINT32 System::DeactivateDataConnection(
-        IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpcanCategory, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::DeactivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -909,7 +906,6 @@ IMS_SINT32 System::DeactivateDataConnection(
     in.writeInt32(nSlotId);
     in.writeInt32(SystemConstants::DEACTIVATE_DATA_CONNECTION);
     in.writeInt32(nApnType);
-    in.writeInt32(nIpcanCategory);
 
     if (m_pCallback->SendDataToJava(in, out) == 1)
     {
@@ -1091,34 +1087,6 @@ AStringArray System::GetPcscfAddresses(
     }
 
     return AStringArray::ConstNull();
-}
-
-PUBLIC
-IMS_BOOL System::SendPingToHostAddress(
-        IN IMS_SINT32 nApnType, IN const AString& strHostAddress, IN IMS_SINT32 nSlotId)
-{
-    if (m_pCallback == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    android::Parcel in;
-    android::Parcel out;
-
-    in.writeInt32(nSlotId);
-    in.writeInt32(SystemConstants::SEND_PING_TO_HOST_ADDRESS);
-
-    in.writeInt32(nApnType);
-    String16 str16Address(strHostAddress.GetStr());
-    in.writeString16(str16Address);
-
-    if (m_pCallback->SendDataToJava(in, out) == 1)
-    {
-        IMS_SINT32 nResult = out.readInt32();
-        return (nResult == 1) ? IMS_TRUE : IMS_FALSE;
-    }
-
-    return IMS_FALSE;
 }
 
 PUBLIC

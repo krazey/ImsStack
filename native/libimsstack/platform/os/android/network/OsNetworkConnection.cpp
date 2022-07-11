@@ -115,8 +115,7 @@ PUBLIC VIRTUAL const IPAddress& OsNetworkConnection::GetLocalAddress(
 }
 
 PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
-        IN IMS_BOOL bEnableApn /*= IMS_FALSE*/,
-        IN IMS_SINT32 nIpcanCategory /*= IIpcan::CATEGORY_MOBILE*/)
+        IN IMS_BOOL bEnableApn /*= IMS_FALSE*/)
 {
     // If the connection with IMS APN is already established,
     // then it sends an event to the application.
@@ -140,8 +139,7 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
             (bEnableApn && (nApnType == NetworkPolicy::APN_IMS)) ||
             (bEnableApn && (nApnType == NetworkPolicy::APN_INTERNET)))
     {
-        if (System::GetInstance()->ActivateDataConnection(nApnType, nIpcanCategory, GetSlotId()) ==
-                0)
+        if (System::GetInstance()->ActivateDataConnection(nApnType, GetSlotId()) == 0)
         {
             IMS_TRACE_E(
                     0, "Enabling data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
@@ -158,12 +156,11 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
 }
 
 PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Deactivate(
-        IN IMS_BOOL bDisableApn /*= IMS_FALSE*/,
-        IN IMS_SINT32 nIpcanCategory /*= IIpcan::CATEGORY_MOBILE*/)
+        IN IMS_BOOL bDisableApn /*= IMS_FALSE*/)
 {
     IMS_TRACE_D("Mobile :: Deactivate() - apnType=%d, state=%d", GetApnType(), m_nDataState, 0);
 
-    if (!Release(bDisableApn, nIpcanCategory))
+    if (!Release(bDisableApn))
     {
         SetState(STATE_TERMINATED);
         return RESULT_DONE;
@@ -406,17 +403,6 @@ PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::IsConnected(
     }
 
     return IMS_FALSE;
-}
-
-PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::SendPingToHostAddress(
-        IN const IPAddress& objHostAddress)
-{
-    IMS_BOOL bResult = System::GetInstance()->SendPingToHostAddress(
-            GetApnType(), objHostAddress.ToString(), GetSlotId());
-
-    IMS_TRACE_D("SendPingToHostAddress :: result=%s", bResult ? "true" : "false", 0, 0);
-
-    return bResult;
 }
 
 PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::IsePDGEnabled() const
@@ -1238,13 +1224,11 @@ void OsNetworkConnection::PostEvent(IN IMS_UINT32 nEvent)
 }
 
 PRIVATE
-IMS_BOOL OsNetworkConnection::Release(IN IMS_BOOL bDisableApn /*= IMS_FALSE*/,
-        IN IMS_SINT32 nIpcanCategory /*= IIpcan::CATEGORY_MOBILE*/)
+IMS_BOOL OsNetworkConnection::Release(IN IMS_BOOL bDisableApn /*= IMS_FALSE*/)
 {
     if (GetApnType() == NetworkPolicy::APN_EMERGENCY)
     {
-        if (System::GetInstance()->DeactivateDataConnection(
-                    GetApnType(), nIpcanCategory, GetSlotId()) == 0)
+        if (System::GetInstance()->DeactivateDataConnection(GetApnType(), GetSlotId()) == 0)
         {
             IMS_TRACE_E(0, "Disable data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
             return IMS_FALSE;
@@ -1257,8 +1241,7 @@ IMS_BOOL OsNetworkConnection::Release(IN IMS_BOOL bDisableApn /*= IMS_FALSE*/,
             IMS_TRACE_D("APN (%s) will be explicitly disabled by the application",
                     GetProfileName().GetStr(), 0, 0);
 
-            if (System::GetInstance()->DeactivateDataConnection(
-                        GetApnType(), nIpcanCategory, GetSlotId()) == 0)
+            if (System::GetInstance()->DeactivateDataConnection(GetApnType(), GetSlotId()) == 0)
             {
                 IMS_TRACE_E(
                         0, "Disable data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
