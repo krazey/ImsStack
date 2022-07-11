@@ -32,6 +32,7 @@
 #include "call/ParticipantInfo.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/message/MtcMessageMediator.h"
+#include "call/state/CallStateFactory.h"
 #include "call/state/MtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
 #include "call/UpdatingInfo.h"
@@ -72,7 +73,6 @@ class MtcCall final :
         public IMtcTimerListener,
         public IMtcBlockCheckListener,
         public IMtcPreconditionListener,
-        public IMtcCallStateFactory<MtcCallState, CallStateName>,
         public IMtcCallStateWatcher<CallStateName>,
         public ISipClientConnectionListener,
         public ISipErrorListener,
@@ -92,9 +92,9 @@ public:
             IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN IMSList<ConfUser*> lstUsers) override;
+            IN ImsList<ConfUser*> lstUsers) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN const IMSList<ConfUser*> objUsers) override;
+            IN const ImsList<ConfUser*> objUsers) override;
     void HandleIncoming(IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
     void HandleUserAlert() override;
     void Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
@@ -135,14 +135,14 @@ public:
         return m_objPreconditionManager;
     }
     inline UssiController* GetUssiController() override { return m_pUssiController; }
-    inline IMSList<IMtcCall*> GetOtherCalls() override
+    inline ImsList<IMtcCall*> GetOtherCalls() override
     {
         return GetCallManager().GetCallsExcluding(GetKey());
     }
     UpdatingInfo& GetUpdatingInfo() override;
     MtcSession* CreateSession(IN ISession* piSession) override;
     MtcSession* CreateSession() override;
-    IMtcBlockChecker* CreateBlockChecker(IN const IMSList<IMtcBlockRule*>& lstRules) override;
+    IMtcBlockChecker* CreateBlockChecker(IN const ImsList<IMtcBlockRule*>& lstRules) override;
     JniCallInfo CreateJniCallInfo() override;
     ISipClientConnection* CreateClientConnection(IN IMS_SINT32 nMethod) override;
     void RemoveSession(IN const ISession* piSession) override;
@@ -228,7 +228,6 @@ public:
     void QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
     void QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
 
-    MtcCallState* CreateState(IN CallStateName eState) override;
     void OnStateTransition(IN CallStateName eState) override;
 
     virtual void ClientConnection_NotifyResponse(IN ISipClientConnection* piScc,
@@ -260,8 +259,9 @@ private:
     CallInfo m_objCallInfo;
     ParticipantInfo m_objParticipantInfo;
     UpdatingInfo* m_pUpdatingInfo;
-    IMSList<MtcSession*> m_lstSessions;
+    ImsList<MtcSession*> m_lstSessions;
 
+    std::unique_ptr<IMtcCallStateFactory<MtcCallState, CallStateName>> m_pStateFactory;
     MtcCallStateMachine<MtcCallState, CallStateName> m_objStateMachine;
     MtcTimerWrapper m_objTimer;
     MtcUiNotifier m_objUiNotifier;

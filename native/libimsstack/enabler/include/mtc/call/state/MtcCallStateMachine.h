@@ -29,7 +29,7 @@ template <typename StateName>
 class IMtcCallStateWatcher;
 
 template <typename State, typename StateName>
-class MtcCallStateMachine
+class MtcCallStateMachine final
 {
 public:
     explicit MtcCallStateMachine(IN StateName eInitialState,
@@ -68,7 +68,7 @@ template <typename State, typename StateName>
 class IMtcCallStateFactory
 {
 public:
-    ~IMtcCallStateFactory(){};
+    virtual ~IMtcCallStateFactory(){};
 
     /**
      * Creates new state instance corresponding to given `eState`.
@@ -83,7 +83,7 @@ template <typename StateName>
 class IMtcCallStateWatcher
 {
 public:
-    ~IMtcCallStateWatcher(){};
+    virtual ~IMtcCallStateWatcher(){};
 
     /**
      * Notifies when transition to another state happens.
