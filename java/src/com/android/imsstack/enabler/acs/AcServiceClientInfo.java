@@ -17,6 +17,7 @@
 package com.android.imsstack.enabler.acs;
 
 import android.annotation.NonNull;
+import android.text.TextUtils;
 
 /**
  * The container of RCS application related configs.
@@ -50,6 +51,18 @@ public class AcServiceClientInfo {
         mClientVendor = clientVendor;
         mClientVersion = clientVersion;
         mRcsEnabledByUser = isRcsEnabledByUser;
+    }
+
+    /**
+     * Create instance based source object
+     * @param acServiceClientInfo source AcServiceClientInfo
+     */
+    public AcServiceClientInfo(@NonNull AcServiceClientInfo acServiceClientInfo) {
+        mRcsVersion = acServiceClientInfo.getRcsVersion();
+        mRcsProfile = acServiceClientInfo.getRcsProfile();
+        mClientVendor = acServiceClientInfo.getClientVendor();
+        mClientVersion = acServiceClientInfo.getClientVersion();
+        mRcsEnabledByUser = acServiceClientInfo.isRcsEnabledByUser();
     }
 
     /**
@@ -87,6 +100,15 @@ public class AcServiceClientInfo {
      */
     public boolean isRcsEnabledByUser() {
         return mRcsEnabledByUser;
+    }
+
+    /**
+     * To check all attributes are initialized.
+     * @return true if all attributes have valid value, false if one of them is not initialized.
+     */
+    public boolean isValid() {
+        return (!TextUtils.isEmpty(mRcsVersion) && !TextUtils.isEmpty(mRcsProfile)
+                && !TextUtils.isEmpty(mClientVendor) && !TextUtils.isEmpty(mClientVersion));
     }
 
     /**

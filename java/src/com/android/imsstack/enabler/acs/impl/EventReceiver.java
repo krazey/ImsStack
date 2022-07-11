@@ -54,6 +54,7 @@ public class EventReceiver {
                 public void notifyStateInfoChanged(Intent intent) {
                     synchronized (mLock) {
                         for (EventReceiverCallback cb : mCallbackList) {
+                            // TODO : check slotId
                             cb.onReceivedIntent(intent);
                         }
                     }
