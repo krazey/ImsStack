@@ -37,7 +37,7 @@ import java.util.HashMap;
 /**
  * Main module for AC client. Caller can access this by AcService interface.
  * AC client sends HTTP/HTTPs request service provider's server and handles response. When client
- * received provisioning data in HTTPS 200 OK, stores it into DataContainer and notifies by
+ * received provisioning data in HTTPS 200 OK, stores it into ProvisioningData and notifies by
  * IAcServiceImplCallback. This class will be created and worked base on SIM.
  */
 public class AcServiceImpl {
@@ -60,13 +60,28 @@ public class AcServiceImpl {
     // received HTTP/HTTPS final response
     private static final int MSG_HTTP_RESPONSE = 6;
 
-    private static final int MSG_MAX = 7;
+    // received HTTP/HTTPS internal error response
+    private static final int MSG_HTTP_INTERNAL_EROR = 8;
+
+    private static final int MSG_MAX = 9;
 
     private static final SparseArray<AcServiceImpl> INSTANCES = new SparseArray<AcServiceImpl>();
 
     private interface MessageFunction {
         // return 0 means handled message complete
         int handleMessage(Message msg);
+    }
+
+    private class TxzResponse {
+        private final int mResponseCode;
+        private final String mResponseString;
+        private final byte[] mProvisioningData;
+
+        TxzResponse(int responseCode, String responseString, byte[] provisioningData) {
+            mResponseCode = responseCode;
+            mResponseString = responseString;
+            mProvisioningData = provisioningData.clone();
+        }
     }
 
     private final class EventCallback implements EventReceiver.EventReceiverCallback {
@@ -94,7 +109,7 @@ public class AcServiceImpl {
             if (MSG_MIN < what && what < MSG_MAX) {
                 mMessageFunctionMap.get(what).handleMessage(msg);
             } else {
-                ImsLog.e("unknown message : " + what);
+                ImsLog.e(mSlotId, "unknown message : " + what);
             }
         }
     }
@@ -102,9 +117,11 @@ public class AcServiceImpl {
     private final MessageFunction mMessageFunctionStart = new MessageFunction() {
         @Override
         public int handleMessage(Message msg) {
-            mRequestInfo = createRequestInfo(mAcServiceClientInfo, mDataContainer);
+            mRequestInfo = createRequestInfo(mAcServiceClientInfo, mConfigContainer);
 
+            // TODO : HTTP request
             setState(AcService.STATE_TYPE_PROGRESS);
+
             return 0;
         }
     };
@@ -112,16 +129,15 @@ public class AcServiceImpl {
     private final MessageFunction mMessageFunctionStop = new MessageFunction() {
         @Override
         public int handleMessage(Message msg) {
-
-/*
             if (getState() == AcService.STATE_TYPE_PROGRESS) {
+                // TODO : de-init if we need, for example de-register http callback
 
+                mHandler.removeCallbacksAndMessages(null);
+                setState(AcService.STATE_TYPE_READY);
+                return 0;
             }
-*/
 
-            mHandler.removeCallbacksAndMessages(null);
-
-            setState(AcService.STATE_TYPE_READY);
+            ImsLog.i(mSubId, "already stopped " + getState());
             return 0;
         }
     };
@@ -143,6 +159,25 @@ public class AcServiceImpl {
     private final MessageFunction mMessageFunctionHttpResponse = new MessageFunction() {
         @Override
         public int handleMessage(Message msg) {
+            if (msg.obj == null) {
+                ImsLog.i(mSlotId, "message object is null");
+                return 0;
+            }
+
+            TxzResponse txzResponse = (TxzResponse) msg.obj;
+            if (txzResponse.mResponseCode >= 200 && txzResponse.mResponseCode < 300) {
+                handleHttpSuccessResponse(txzResponse);
+            } else {
+                handleHttpFailResponse(txzResponse);
+            }
+
+            return 0;
+        }
+    };
+
+    private final MessageFunction mMessageFunctionHttpInternalError = new MessageFunction() {
+        @Override
+        public int handleMessage(Message msg) {
             return 0;
         }
     };
@@ -155,6 +190,7 @@ public class AcServiceImpl {
                 put(MSG_INTENT, mMessageFunctionIntent);
                 put(MSG_SUBSCRIPTION_CHANGED, mMessageFunctionSubscriptionChanged);
                 put(MSG_HTTP_RESPONSE, mMessageFunctionHttpResponse);
+                put(MSG_HTTP_INTERNAL_EROR, mMessageFunctionHttpInternalError);
             }
     };
 
@@ -166,17 +202,16 @@ public class AcServiceImpl {
     private final ConfigContainer mConfigContainer;
     private final int mSlotId;
 
+    private final Object mObject = new Object();
     private AcServiceClientInfo mAcServiceClientInfo;
     private RequestInfo mRequestInfo;
-    private DataContainer mDataContainer;
 
     private int mSubId;
     private int mState;
 
     @VisibleForTesting
     public AcServiceImpl(int slotId, int subId, Context context, Looper looper,
-            EventReceiver eventReceiver, ConfigContainer configContainer,
-            DataContainer dataContainer) {
+            EventReceiver eventReceiver, ConfigContainer configContainer) {
         mSlotId = slotId;
         mSubId = subId;
         mCallbackManager = new CallbackManager(slotId);
@@ -189,7 +224,6 @@ public class AcServiceImpl {
         mEventReceiver.registerCallback(mCallback);
 
         mConfigContainer = configContainer;
-        mDataContainer = dataContainer;
 
         mState = AcService.STATE_TYPE_NONE;
     }
@@ -219,8 +253,7 @@ public class AcServiceImpl {
         mEventReceiver = EventReceiver.getInstance(context);
         mEventReceiver.registerCallback(mCallback);
 
-        mConfigContainer = ConfigContainer.getInstance(context);
-        mDataContainer = new DataContainer(context, slotId, mSubId);
+        mConfigContainer = new ConfigContainer(context, mSlotId, mSubId);
 
         mState = AcService.STATE_TYPE_NONE;
     }
@@ -270,32 +303,44 @@ public class AcServiceImpl {
      * @return true if the operation is success, or false otherwise.
      */
     public boolean setClientInfo(AcServiceClientInfo clientInfo) {
-        ImsLog.i("update clientInfo old : " + mAcServiceClientInfo.toString()
+        if (clientInfo.isValid()) {
+            ImsLog.i(mSlotId, "parameter is not valid");
+            return false;
+        }
+
+        ImsLog.i(mSlotId, "update clientInfo old : " + mAcServiceClientInfo.toString()
                 + " new : " + clientInfo.toString());
 
-        synchronized (mAcServiceClientInfo) {
-            mAcServiceClientInfo = new AcServiceClientInfo(clientInfo.getRcsVersion(),
-                    clientInfo.getRcsProfile(), clientInfo.getClientVendor(),
-                    clientInfo.getClientVersion(), clientInfo.isRcsEnabledByUser());
+        synchronized (mObject) {
+            mAcServiceClientInfo = new AcServiceClientInfo(clientInfo);
         }
-        mConfigContainer.updateClientInfo(mSubId, clientInfo);
+
+        mConfigContainer.updateClientInfo(clientInfo);
 
         return true;
     }
 
     /**
      * Reconfiguration triggered by the caller
+     * @param reason Description of reason.
      * @return true if the AcService module can to request provisioning and the result will be
      * notified by callback, or false otherwise.
      */
-    public boolean start() {
-        // TODO : check clientInfo
-        if (mAcServiceClientInfo == null) {
-            ImsLog.i("clientInfo is not available");
-            return false;
+    public boolean start(int reason) {
+        ImsLog.i(mSlotId, "start background reason : " + reason);
+
+        // check clientInfo
+        synchronized (mObject) {
+            if (mAcServiceClientInfo == null) {
+                mAcServiceClientInfo = mConfigContainer.getClientInfo();
+                if (mAcServiceClientInfo == null) {
+                    ImsLog.i(mSlotId, "AcServiceClientInfo is not available");
+                    return false;
+                }
+            }
         }
 
-        // TODO : send message to start
+        // send message to start
         return sendMessage(MSG_START, 0, 0, null);
     }
 
@@ -305,12 +350,12 @@ public class AcServiceImpl {
      */
     public void stop() {
         if (getState() == AcService.STATE_TYPE_NONE) {
-            ImsLog.i("State is None");
+            ImsLog.i(mSlotId, "State is None");
             return;
         }
 
         if (mHandler == null) {
-            ImsLog.i("handler is not ready");
+            ImsLog.i(mSlotId, "handler is not ready");
             return;
         }
 
@@ -342,29 +387,9 @@ public class AcServiceImpl {
         return mState;
     }
 
-    /**
-     * Start background operation and will be called when boot completed, mmtel feature created,
-     * validation expired and so on.
-     * @param reason Description of reason.
-     */
-    public void readyForService(int reason) {
-        ImsLog.i("start background reason : " + reason);
-
-        synchronized (mAcServiceClientInfo) {
-            mAcServiceClientInfo = mConfigContainer.getClientInfo(mSubId);
-        }
-
-        if (mAcServiceClientInfo == null) {
-            ImsLog.i("AcServiceClientInfo is invalid");
-            return;
-        }
-
-        sendMessage(MSG_START, 0, 0, null);
-    }
-
     private boolean sendMessage(int what, int arg1, int arg2, Object obj) {
         if (mHandler == null) {
-            ImsLog.e("handler is not ready, msg : " + what + " could not be handled");
+            ImsLog.e(mSlotId, "handler is not ready, msg : " + what + " could not be handled");
             return false;
         }
         Message msg = mHandler.obtainMessage(what, arg1, arg2, obj);
@@ -374,10 +399,10 @@ public class AcServiceImpl {
     }
 
     private RequestInfo createRequestInfo(@NonNull AcServiceClientInfo acServiceClientInfo,
-            DataContainer dataContainer) {
+            ConfigContainer configContainer) {
         String version = "0";
-        if (dataContainer != null) {
-            version = Integer.toString(dataContainer.getVersion());
+        if (configContainer != null) {
+            version = Integer.toString(configContainer.getAcVersion(0));
         }
         RequestInfo requestInfo = new RequestInfo.RequestInfoBuilder(
                 mSlotId, mSubId, acServiceClientInfo)
@@ -388,7 +413,22 @@ public class AcServiceImpl {
     }
 
     private void setState(int state) {
-        ImsLog.d("old : " + mState + " new : " + state);
+        ImsLog.d(mSlotId, "old : " + mState + " new : " + state);
         mState = state;
+    }
+
+    private void handleHttpSuccessResponse(TxzResponse txzResponse) {
+        if (txzResponse.mProvisioningData == null) {
+            ImsLog.i(mSlotId, "provisioning data is null");
+        }
+        // TODO : check pre-provisioning?
+        // TODO : partial provisioning
+        // TODO : full provisioning
+
+    }
+
+    private void handleHttpFailResponse(TxzResponse txzResponse) {
+
+
     }
 }

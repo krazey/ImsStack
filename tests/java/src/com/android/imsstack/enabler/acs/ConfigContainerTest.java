@@ -45,14 +45,16 @@ public class ConfigContainerTest {
     @Mock Context mContext;
 
     private TestConfigContainer mConfigContainer;
+    private int mSlotId0 = 0;
+    private int mSlotId1 = 1;
     private int mSubId0 = 1234;
     private int mSubId1 = 5678;
 
     private class TestConfigContainer extends ConfigContainer {
         private long mCurrentTime;
 
-        TestConfigContainer(Context context) {
-            super(context);
+        TestConfigContainer(Context context, int slotId, int subId) {
+            super(context, slotId, subId);
             mCurrentTime = 0L;
         }
         protected long getCurrentTimeMillis() {
@@ -69,8 +71,6 @@ public class ConfigContainerTest {
         MockitoAnnotations.initMocks(this);
 
         doReturn(InstrumentationRegistry.getContext().getFilesDir()).when(mContext).getFilesDir();
-
-        mConfigContainer = new TestConfigContainer(mContext);
     }
 
     @After
@@ -78,36 +78,141 @@ public class ConfigContainerTest {
         mConfigContainer = null;
     }
 
+
+    @Test
+    @SmallTest
+    public void getFileName_withSubId() throws Exception {
+        // for SubId 0
+        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+
+        String expectedFileName = "rcs_provisioning_config_" + mSubId0 + ".xml";
+        String fileName = mConfigContainer.getFileName();
+        assertEquals(expectedFileName, fileName);
+
+        // for SubId 1
+        mConfigContainer = new TestConfigContainer(mContext, mSlotId1, mSubId1);
+        expectedFileName = "rcs_provisioning_config_" + mSubId1 + ".xml";
+        fileName = mConfigContainer.getFileName();
+        assertEquals(expectedFileName, fileName);
+    }
+
+    @Test
+    @SmallTest
+    public void acVersionValidityToken_ReadWrite() throws Exception {
+        // for SubId 0
+        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+        int expectedAcVersion = 0;
+        long expectedAcValidity = 0;
+        String expectedAcToken = null;
+
+        int acVersion = mConfigContainer.getAcVersion(0);
+        long acValidity = mConfigContainer.getAcValidity();
+        String acToken = mConfigContainer.getAcToken();
+
+        assertEquals(expectedAcVersion, acVersion);
+        assertEquals(expectedAcValidity, acValidity);
+        assertEquals(expectedAcToken, acToken);
+
+        expectedAcVersion = 2;
+        expectedAcValidity = 36000L;
+        expectedAcToken = "qwert12345";
+
+        mConfigContainer.updateAcVersionValidity(expectedAcVersion, expectedAcValidity);
+        mConfigContainer.updateAcToken(expectedAcToken);
+
+        // verify data from cached
+        acVersion = mConfigContainer.getAcVersion(0);
+        acValidity = mConfigContainer.getAcValidity();
+        acToken = mConfigContainer.getAcToken();
+
+        assertEquals(expectedAcVersion, acVersion);
+        assertEquals(expectedAcValidity, acValidity);
+        assertEquals(expectedAcToken, acToken);
+
+        // verify data from stored file
+        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+        acVersion = mConfigContainer.getAcVersion(0);
+        acValidity = mConfigContainer.getAcValidity();
+        acToken = mConfigContainer.getAcToken();
+
+        assertEquals(expectedAcVersion, acVersion);
+        assertEquals(expectedAcValidity, acValidity);
+        assertEquals(expectedAcToken, acToken);
+    }
+
+    @Test
+    @SmallTest
+    public void acVersionValidityToken_afterReset() throws Exception {
+        // for SubId 0
+        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+        int expectedAcVersion = 2;
+        long expectedAcValidity = 36000L;
+        String expectedAcToken = "zxcvb67890";
+
+        mConfigContainer.updateAcVersionValidity(expectedAcVersion, expectedAcValidity);
+        mConfigContainer.updateAcToken(expectedAcToken);
+
+        // verify data from cached
+        int acVersion = mConfigContainer.getAcVersion(0);
+        long acValidity = mConfigContainer.getAcValidity();
+        String acToken = mConfigContainer.getAcToken();
+
+        assertEquals(expectedAcVersion, acVersion);
+        assertEquals(expectedAcValidity, acValidity);
+        assertEquals(expectedAcToken, acToken);
+
+        // reset
+        mConfigContainer.resetAcValue();
+        expectedAcVersion = 0;
+        expectedAcValidity = 0L;
+        expectedAcToken = "";
+
+        // verify data from cached
+        acVersion = mConfigContainer.getAcVersion(0);
+        acValidity = mConfigContainer.getAcValidity();
+        acToken = mConfigContainer.getAcToken();
+
+        assertEquals(expectedAcVersion, acVersion);
+        assertEquals(expectedAcValidity, acValidity);
+        assertEquals(expectedAcToken, acToken);
+
+        // verify data from stored file
+        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+        acVersion = mConfigContainer.getAcVersion(0);
+        acValidity = mConfigContainer.getAcValidity();
+        acToken = mConfigContainer.getAcToken();
+
+        assertEquals(expectedAcVersion, acVersion);
+        assertEquals(expectedAcValidity, acValidity);
+        assertEquals(expectedAcToken, acToken);
+    }
+
     @Test
     @SmallTest
     public void clientInfo_ReadWrite() throws Exception {
         // for SubId 0
+        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+
+        AcServiceClientInfo clientInfo0 = mConfigContainer.getClientInfo();
+        checkEquals(null, clientInfo0);
+
         AcServiceClientInfo expected = new AcServiceClientInfo(
-                null, null, null, null, false);
-        AcServiceClientInfo clientInfo0;
-        clientInfo0 = mConfigContainer.getClientInfo(mSubId0);
-
-        checkEquals(expected, clientInfo0);
-
-        expected = new AcServiceClientInfo(
                 VERSION, PROFILE, CLIENT_VENDOR, CLIENT_VERSION, ENABLED_BY_USER);
-        mConfigContainer.updateClientInfo(mSubId0, expected);
-
-        clientInfo0 = mConfigContainer.getClientInfo(mSubId0);
+        mConfigContainer.updateClientInfo(expected);
+        clientInfo0 = mConfigContainer.getClientInfo();
         checkEquals(expected, clientInfo0);
 
         // for SubId 1
-        expected = new AcServiceClientInfo(
-                null, null, null, null, false);
-        AcServiceClientInfo clientInfo1 = mConfigContainer.getClientInfo(mSubId1);
+        mConfigContainer = new TestConfigContainer(mContext, mSlotId1, mSubId1);
 
-        checkEquals(expected, clientInfo1);
+        AcServiceClientInfo clientInfo1 = mConfigContainer.getClientInfo();
+        checkEquals(null, clientInfo1);
 
         expected = new AcServiceClientInfo(VERSION + "_1", PROFILE + "_1",
                 CLIENT_VENDOR + "_1", CLIENT_VERSION + "_1", !ENABLED_BY_USER);
-        mConfigContainer.updateClientInfo(mSubId1, expected);
+        mConfigContainer.updateClientInfo(expected);
 
-        clientInfo1 = mConfigContainer.getClientInfo(mSubId1);
+        clientInfo1 = mConfigContainer.getClientInfo();
         checkEquals(expected, clientInfo1);
 
         // check different client info for SubId 0 and SubId 1
@@ -118,29 +223,33 @@ public class ConfigContainerTest {
     @SmallTest
     public void validationTime_ReadWrite() throws Exception {
         // for SubId 0
+        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+
         long expected = 0L;
-        long validationTime0 = mConfigContainer.getValidationTime(mSubId0);
+        long validationTime0 = mConfigContainer.getValidationTime(expected);
 
         assertEquals(expected, validationTime0);
 
         // sec for a week
         expected = 604800L;
-        mConfigContainer.updateValidationTime(mSubId0, expected);
+        mConfigContainer.updateValidationTime(expected);
 
-        validationTime0 = mConfigContainer.getValidationTime(mSubId0);
+        validationTime0 = mConfigContainer.getValidationTime(0L);
         assertEquals(expected, validationTime0);
 
         // for SubId 1
+        mConfigContainer = new TestConfigContainer(mContext, mSlotId1, mSubId1);
+
         expected = 0L;
-        long validationTime1 = mConfigContainer.getValidationTime(mSubId1);
+        long validationTime1 = mConfigContainer.getValidationTime(expected);
 
         assertEquals(expected, validationTime1);
 
         // sec for 3 days
         expected = 10800L;
-        mConfigContainer.updateValidationTime(mSubId1, expected);
+        mConfigContainer.updateValidationTime(expected);
 
-        validationTime1 = mConfigContainer.getValidationTime(mSubId1);
+        validationTime1 = mConfigContainer.getValidationTime(0L);
         assertEquals(expected, validationTime1);
 
         // check different validation time for SubId 0 and SubId 1
@@ -151,29 +260,33 @@ public class ConfigContainerTest {
     @SmallTest
     public void lastUpdatedTime_ReadWrite() throws Exception {
         // for SubId 0
+        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+
         long expected = 0L;
-        long lastUpdatedTime0 = mConfigContainer.getLastUpdatedTime(mSubId0);
+        long lastUpdatedTime0 = mConfigContainer.getLastUpdatedTime(expected);
 
         assertEquals(expected, lastUpdatedTime0);
 
         expected = System.currentTimeMillis();
         mConfigContainer.setCurrentTime(expected);
-        mConfigContainer.updateLastUpdatedTime(mSubId0);
+        mConfigContainer.updateLastUpdatedTime();
 
-        lastUpdatedTime0 = mConfigContainer.getLastUpdatedTime(mSubId0);
+        lastUpdatedTime0 = mConfigContainer.getLastUpdatedTime(0L);
         assertEquals(expected, lastUpdatedTime0);
 
         // for SubId 1
+        mConfigContainer = new TestConfigContainer(mContext, mSlotId1, mSubId1);
+
         expected = 0L;
-        long lastUpdatedTime1 = mConfigContainer.getLastUpdatedTime(mSubId1);
+        long lastUpdatedTime1 = mConfigContainer.getLastUpdatedTime(expected);
 
         assertEquals(expected, lastUpdatedTime1);
 
         expected = System.currentTimeMillis();
         mConfigContainer.setCurrentTime(expected);
-        mConfigContainer.updateLastUpdatedTime(mSubId1);
+        mConfigContainer.updateLastUpdatedTime();
 
-        lastUpdatedTime1 = mConfigContainer.getLastUpdatedTime(mSubId1);
+        lastUpdatedTime1 = mConfigContainer.getLastUpdatedTime(0L);
         assertEquals(expected, lastUpdatedTime1);
 
         // check different validation time for SubId 0 and SubId 1
@@ -182,7 +295,9 @@ public class ConfigContainerTest {
 
     private void checkEquals(AcServiceClientInfo expected, AcServiceClientInfo result)
             throws Exception {
-        if (expected == null || result == null) {
+        if (expected == result) {
+            return;
+        } else if (expected == null || result == null) {
             throw new AssertionError("object is null", new Exception());
         }
 
