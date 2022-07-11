@@ -27,13 +27,6 @@
 #include "call/MtcCall.h"
 #include "call/MtcSession.h"
 #include "call/block/MtcBlockChecker.h"
-#include "call/state/AlertingState.h"
-#include "call/state/EstablishedState.h"
-#include "call/state/IdleState.h"
-#include "call/state/IncomingState.h"
-#include "call/state/OutgoingState.h"
-#include "call/state/TerminatingState.h"
-#include "call/state/UpdatingState.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/ICallStateProxy.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
@@ -53,9 +46,10 @@ MtcCall::MtcCall(
         m_objCallInfo(objCallInfo),
         m_objParticipantInfo(ParticipantInfo(*this)),
         m_pUpdatingInfo(IMS_NULL),
-        m_lstSessions(IMSList<MtcSession*>()),
-        m_objStateMachine(
-                MtcCallStateMachine<MtcCallState, CallStateName>(CallStateName::IDLE, *this, this)),
+        m_lstSessions(ImsList<MtcSession*>()),
+        m_pStateFactory(new CallStateFactory(*this)),
+        m_objStateMachine(MtcCallStateMachine<MtcCallState, CallStateName>(
+                CallStateName::IDLE, *m_pStateFactory, this)),
         m_objTimer(MtcTimerWrapper()),
         m_objUiNotifier(MtcUiNotifier(*this)),
         m_objMediaManager(MtcMediaManager(*this)),
@@ -387,7 +381,7 @@ PUBLIC VIRTUAL void MtcCall::SendUssd(IN const AString& strUssd)
 
 PUBLIC VIRTUAL void MtcCall::StartConference(IN CallType eCallType, IN const AString& strTarget,
         IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-        IN IMSList<ConfUser*> lstUsers)
+        IN ImsList<ConfUser*> lstUsers)
 {
     IMS_TRACE_I("StartConference : key[%d]", m_nKey, 0, 0);
 
@@ -406,7 +400,7 @@ PUBLIC VIRTUAL void MtcCall::StartConference(IN CallType eCallType, IN const ASt
 }
 
 PUBLIC VIRTUAL void MtcCall::StartConference(
-        IN CallType eCallType, IN const AString& strTarget, IN IMSList<ConfUser*> lstUsers)
+        IN CallType eCallType, IN const AString& strTarget, IN ImsList<ConfUser*> lstUsers)
 {
     IMS_TRACE_I("StartConference : key[%d]", m_nKey, 0, 0);
 
@@ -531,7 +525,7 @@ PUBLIC VIRTUAL MtcSession* MtcCall::CreateSession()
 }
 
 PUBLIC VIRTUAL IMtcBlockChecker* MtcCall::CreateBlockChecker(
-        IN const IMSList<IMtcBlockRule*>& lstRules)
+        IN const ImsList<IMtcBlockRule*>& lstRules)
 {
     return new MtcBlockChecker(lstRules, this);
 }
@@ -1095,27 +1089,6 @@ PUBLIC VIRTUAL void MtcCall::QosReserveFailed(IN ISession* piSession, IN QosLoss
             {
                 return pState->QosReserveFailed(piSession, eNextAction);
             });
-}
-
-PUBLIC VIRTUAL MtcCallState* MtcCall::CreateState(IN CallStateName eState)
-{
-    switch (eState)
-    {
-        case CallStateName::IDLE:
-            return new IdleState(*this);
-        case CallStateName::OUTGOING:
-            return new OutgoingState(*this);
-        case CallStateName::INCOMING:
-            return new IncomingState(*this);
-        case CallStateName::ALERTING:
-            return new AlertingState(*this);
-        case CallStateName::ESTABLISHED:
-            return new EstablishedState(*this);
-        case CallStateName::UPDATING:
-            return new UpdatingState(*this);
-        case CallStateName::TERMINATING:
-            return new TerminatingState(*this);
-    }
 }
 
 PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
