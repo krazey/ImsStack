@@ -40,7 +40,7 @@ class IMtcSipInterfaceFactory;
 class IMtcVonrManager;
 class ISession;
 
-class MtcSession final : public IMtcSessionContext
+class MtcSession : public IMtcSessionContext
 {
 public:
     explicit MtcSession(
