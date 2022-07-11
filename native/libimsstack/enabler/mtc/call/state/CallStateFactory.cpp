@@ -14,7 +14,7 @@ PUBLIC CallStateFactory::CallStateFactory(IN IMtcCallContext& objContext) :
 
 PUBLIC VIRTUAL CallStateFactory::~CallStateFactory() {}
 
-PUBLIC VIRTUAL MtcCallState* CallStateFactory::CreateState(IN CallStateName eState)
+PUBLIC VIRTUAL IMtcCallState* CallStateFactory::CreateState(IN CallStateName eState)
 {
     switch (eState)
     {

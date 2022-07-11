@@ -20,12 +20,12 @@
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/MtcCall.h"
-#include "call/state/MtcCallState.h"
+#include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
 
 class IMtcCallContext;
 
-class CallStateFactory : public IMtcCallStateFactory<MtcCallState, CallStateName>
+class CallStateFactory : public IMtcCallStateFactory<IMtcCallState, CallStateName>
 {
 public:
     explicit CallStateFactory(IN IMtcCallContext& objContext);
@@ -33,7 +33,7 @@ public:
     CallStateFactory(IN const CallStateFactory&) = delete;
     CallStateFactory& operator=(IN const CallStateFactory&) = delete;
 
-    MtcCallState* CreateState(IN CallStateName eState) override;
+    IMtcCallState* CreateState(IN CallStateName eState) override;
 
 private:
     IMtcCallContext& m_objContext;

@@ -38,7 +38,7 @@ protected:
 
 TEST_F(CallStateFactoryTest, CreateStateReturnsNotNull)
 {
-    MtcCallState* pState = nullptr;
+    IMtcCallState* pState = nullptr;
 
     pState = pStateFactory->CreateState(CallStateName::IDLE);
     EXPECT_NE(nullptr, pState);
@@ -71,7 +71,7 @@ TEST_F(CallStateFactoryTest, CreateStateReturnsNotNull)
 
 TEST_F(CallStateFactoryTest, CreateStateReturnsCorrespondingState)
 {
-    MtcCallState* pState = nullptr;
+    IMtcCallState* pState = nullptr;
 
     pState = pStateFactory->CreateState(CallStateName::IDLE);
     EXPECT_EQ(CallStateName::IDLE, pState->GetStateName());

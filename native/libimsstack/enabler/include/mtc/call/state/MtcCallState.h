@@ -24,6 +24,7 @@
 #include "base/IMessageMediator.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
+#include "call/state/IMtcCallState.h"
 #include "ussi/UssiDef.h"
 
 class AString;
@@ -42,8 +43,6 @@ enum class QosLossPolicy;
 struct CallReasonInfo;
 struct ConfUser;
 
-using CallStateName = IMtcCall::State;
-
 enum class ResultSetSdp
 {
     NO_SDP,
@@ -51,7 +50,7 @@ enum class ResultSetSdp
     SUCCESS
 };
 
-class MtcCallState
+class MtcCallState : public IMtcCallState
 {
 public:
     MtcCallState(IN CallStateName eStateName, IN IMtcCallContext& objContext);
@@ -59,98 +58,99 @@ public:
     MtcCallState(IN const MtcCallState&) = delete;
     MtcCallState& operator=(IN const MtcCallState&) = delete;
 
-    virtual void OnEnter();
-    virtual void OnExit();
-    inline CallStateName GetStateName() const { return m_eStateName; }
+    void OnEnter() override;
+    void OnExit() override;
+    inline CallStateName GetStateName() const override { return m_eStateName; }
 
-    virtual CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    virtual CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
+    CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
+            IN MediaInfo* pMediaInfo,
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
+    CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN IMSList<ConfUser*> lstUsers);
-    virtual CallStateName StartConference(
-            IN CallType eCallType, IN const AString& strTarget, IN IMSList<ConfUser*> lstUsers);
-    virtual CallStateName HandleIncoming(
-            IN ISession* piSession, IN JniMtcServiceThread* pServiceThread);
-    virtual CallStateName HandleUserAlert();
-    virtual CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo);
-    virtual CallStateName Reject(IN const CallReasonInfo& objReason);
-    virtual CallStateName Hold(IN MediaInfo* pMediaInfo);
-    virtual CallStateName Resume(IN MediaInfo* pMediaInfo);
-    virtual CallStateName AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo);
-    virtual CallStateName RejectResume(IN const CallReasonInfo& objReason);
-    virtual CallStateName Update(IN CallType eCallType, IN MediaInfo* pMediaInfo);
-    virtual CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo);
-    virtual CallStateName RejectUpdate(IN const CallReasonInfo& objReason);
-    virtual CallStateName CancelUpdate(IN const CallReasonInfo& objReason);
-    virtual CallStateName Terminate(IN const CallReasonInfo& objReason);
-    virtual CallStateName SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration);
-    virtual CallStateName HandleSrvccSuccess();
-    virtual CallStateName HandleSrvccFailure(IN UpdateType eUpdateType);
-    virtual CallStateName HandleIpcanChanged();
+            IN IMSList<ConfUser*> lstUsers) override;
+    CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
+            IN IMSList<ConfUser*> lstUsers) override;
+    CallStateName HandleIncoming(
+            IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
+    CallStateName HandleUserAlert() override;
+    CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName Reject(IN const CallReasonInfo& objReason) override;
+    CallStateName Hold(IN MediaInfo* pMediaInfo) override;
+    CallStateName Resume(IN MediaInfo* pMediaInfo) override;
+    CallStateName AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName RejectResume(IN const CallReasonInfo& objReason) override;
+    CallStateName Update(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName RejectUpdate(IN const CallReasonInfo& objReason) override;
+    CallStateName CancelUpdate(IN const CallReasonInfo& objReason) override;
+    CallStateName Terminate(IN const CallReasonInfo& objReason) override;
+    CallStateName SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) override;
+    CallStateName HandleSrvccSuccess() override;
+    CallStateName HandleSrvccFailure(IN UpdateType eUpdateType) override;
+    CallStateName HandleIpcanChanged() override;
 
-    virtual CallStateName HandleIncomingUssi(
-            IN ISession* piSession, IN JniMtcServiceThread* pServiceThread);
-    virtual CallStateName OnUssiAttached();
-    virtual CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo);
-    virtual CallStateName UssiStarted(IN ISession* piSession);
-    virtual CallStateName TerminateUssi(IN const CallReasonInfo& objReason);
-    virtual CallStateName UssiTerminated(IN ISession* piSession);
+    CallStateName HandleIncomingUssi(
+            IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
+    CallStateName OnUssiAttached() override;
+    CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName UssiStarted(IN ISession* piSession) override;
+    CallStateName TerminateUssi(IN const CallReasonInfo& objReason) override;
+    CallStateName UssiTerminated(IN ISession* piSession) override;
 
-    virtual CallStateName SendUssd(IN const AString& strUssd);
-    virtual CallStateName UssiInfoReceived(
-            IN ISession* piSession, IN ISipServerConnection* piSipServerConnection);
-    virtual CallStateName NotifyResponseToUssiInfo(
-            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc);
-    virtual CallStateName NotifyErrorToUssiInfo(
-            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage);
+    CallStateName SendUssd(IN const AString& strUssd) override;
+    CallStateName UssiInfoReceived(
+            IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) override;
+    CallStateName NotifyResponseToUssiInfo(
+            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc) override;
+    CallStateName NotifyErrorToUssiInfo(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
-    virtual CallStateName SessionAlerting(IN ISession* piSession);
-    virtual CallStateName SessionReferenceReceived(
-            IN ISession* piSession, IN IReference* piReference);
-    virtual CallStateName SessionStarted(IN ISession* piSession);
-    virtual CallStateName SessionStartFailed(IN ISession* piSession);
-    virtual CallStateName SessionTerminated(IN ISession* piSession);
-    virtual CallStateName SessionUpdated(IN ISession* piSession);
-    virtual CallStateName SessionUpdateFailed(IN ISession* piSession);
-    virtual CallStateName SessionUpdateReceived(IN ISession* piSession);
-    virtual CallStateName SessionCancelDelivered(IN ISession* piSession);
-    virtual CallStateName SessionCancelDeliveryFailed(IN ISession* piSession);
-    virtual CallStateName SessionEarlyMediaUpdated(IN ISession* piSession);
-    virtual CallStateName SessionEarlyMediaUpdateFailed(IN ISession* piSession);
-    virtual CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession);
-    virtual CallStateName SessionForkedResponseReceived(
-            IN ISession* piSession, IN ISession* piForkedSession);
-    virtual CallStateName SessionPRAckDelivered(IN ISession* piSession);
-    virtual CallStateName SessionPRAckDeliveryFailed(IN ISession* piSession);
-    virtual CallStateName SessionPRAckReceived(IN ISession* piSession);
-    virtual CallStateName SessionProvisionalResponseReceived(
-            IN ISession* piSession, IN IMS_UINT32 nIndex);
-    virtual CallStateName SessionRPRDeliveryFailed(IN ISession* piSession);
-    virtual CallStateName SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex);
-    virtual CallStateName SessionTransactionReceived(
-            IN ISession* piSession, IN ISipServerConnection* piSipServerConnection);
-    virtual CallStateName OnTimerExpired(IN IMS_SINT32 nType);
+    CallStateName SessionAlerting(IN ISession* piSession) override;
+    CallStateName SessionReferenceReceived(
+            IN ISession* piSession, IN IReference* piReference) override;
+    CallStateName SessionStarted(IN ISession* piSession) override;
+    CallStateName SessionStartFailed(IN ISession* piSession) override;
+    CallStateName SessionTerminated(IN ISession* piSession) override;
+    CallStateName SessionUpdated(IN ISession* piSession) override;
+    CallStateName SessionUpdateFailed(IN ISession* piSession) override;
+    CallStateName SessionUpdateReceived(IN ISession* piSession) override;
+    CallStateName SessionCancelDelivered(IN ISession* piSession) override;
+    CallStateName SessionCancelDeliveryFailed(IN ISession* piSession) override;
+    CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) override;
+    CallStateName SessionEarlyMediaUpdateFailed(IN ISession* piSession) override;
+    CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession) override;
+    CallStateName SessionForkedResponseReceived(
+            IN ISession* piSession, IN ISession* piForkedSession) override;
+    CallStateName SessionPRAckDelivered(IN ISession* piSession) override;
+    CallStateName SessionPRAckDeliveryFailed(IN ISession* piSession) override;
+    CallStateName SessionPRAckReceived(IN ISession* piSession) override;
+    CallStateName SessionProvisionalResponseReceived(
+            IN ISession* piSession, IN IMS_UINT32 nIndex) override;
+    CallStateName SessionRPRDeliveryFailed(IN ISession* piSession) override;
+    CallStateName SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) override;
+    CallStateName SessionTransactionReceived(
+            IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) override;
+    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
 
-    virtual CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult);
+    CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult) override;
 
-    virtual CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType);
-    virtual CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction);
+    CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
+    CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
 
-    virtual CallStateName OnInternalFailure();
-    virtual CallStateName OnAttached();
+    CallStateName OnInternalFailure() override;
+    CallStateName OnAttached() override;
 
-    virtual CallStateName ClientConnection_NotifyResponse(
-            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc);
-    virtual CallStateName Error_NotifyError(
-            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage);
+    CallStateName ClientConnection_NotifyResponse(
+            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc) override;
+    CallStateName Error_NotifyError(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
-    virtual CallStateName OnReceivingMediaDataFailed(
-            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType);
-    virtual CallStateName OnVideoLowestBitRate();
-    virtual CallStateName OnReceivingNetworkToneStarted();
-    virtual CallStateName OnReceivingNetworkToneFailed();
-    virtual CallStateName OnMediaFailed(IN CallReasonInfo objReason);
+    CallStateName OnReceivingMediaDataFailed(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
+    CallStateName OnVideoLowestBitRate() override;
+    CallStateName OnReceivingNetworkToneStarted() override;
+    CallStateName OnReceivingNetworkToneFailed() override;
+    CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
 
 protected:
     enum TimerType

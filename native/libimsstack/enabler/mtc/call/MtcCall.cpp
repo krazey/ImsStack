@@ -48,7 +48,7 @@ MtcCall::MtcCall(
         m_pUpdatingInfo(IMS_NULL),
         m_lstSessions(ImsList<MtcSession*>()),
         m_pStateFactory(new CallStateFactory(*this)),
-        m_objStateMachine(MtcCallStateMachine<MtcCallState, CallStateName>(
+        m_objStateMachine(MtcCallStateMachine<IMtcCallState, CallStateName>(
                 CallStateName::IDLE, *m_pStateFactory, this)),
         m_objTimer(MtcTimerWrapper()),
         m_objUiNotifier(MtcUiNotifier(*this)),
@@ -102,7 +102,7 @@ PUBLIC VIRTUAL void MtcCall::HandleIncoming(
     {
         m_pUssiController = new UssiController(*this);
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->HandleIncomingUssi(piSession, pServiceThread);
                 });
@@ -110,7 +110,7 @@ PUBLIC VIRTUAL void MtcCall::HandleIncoming(
     else
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->HandleIncoming(piSession, pServiceThread);
                 });
@@ -162,7 +162,7 @@ PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strT
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
             });
@@ -178,7 +178,7 @@ PUBLIC VIRTUAL void MtcCall::HandleUserAlert()
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->HandleUserAlert();
             });
@@ -191,7 +191,7 @@ PUBLIC VIRTUAL void MtcCall::Accept(IN CallType eCallType, IN MediaInfo* pMediaI
     if (IsUssi())
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->AcceptUssi(eCallType, pMediaInfo);
                 });
@@ -199,7 +199,7 @@ PUBLIC VIRTUAL void MtcCall::Accept(IN CallType eCallType, IN MediaInfo* pMediaI
     else
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->Accept(eCallType, pMediaInfo);
                 });
@@ -211,7 +211,7 @@ PUBLIC VIRTUAL void MtcCall::Reject(IN const CallReasonInfo& objReason)
     IMS_TRACE_I("Reject : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->Reject(objReason);
             });
@@ -228,7 +228,7 @@ PUBLIC VIRTUAL void MtcCall::Hold(IN MediaInfo* pMediaInfo)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->Hold(pMediaInfo);
             });
@@ -245,7 +245,7 @@ PUBLIC VIRTUAL void MtcCall::Resume(IN MediaInfo* pMediaInfo)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->Resume(pMediaInfo);
             });
@@ -262,7 +262,7 @@ PUBLIC VIRTUAL void MtcCall::AcceptResume(IN CallType eCallType, IN MediaInfo* p
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->AcceptResume(eCallType, pMediaInfo);
             });
@@ -273,7 +273,7 @@ PUBLIC VIRTUAL void MtcCall::RejectResume(IN const CallReasonInfo& objReason)
     IMS_TRACE_I("RejectResume : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->RejectResume(objReason);
             });
@@ -290,7 +290,7 @@ PUBLIC VIRTUAL void MtcCall::Update(IN CallType eCallType, IN MediaInfo* pMediaI
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->Update(eCallType, pMediaInfo);
             });
@@ -307,7 +307,7 @@ PUBLIC VIRTUAL void MtcCall::AcceptUpdate(IN CallType eCallType, IN MediaInfo* p
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->AcceptUpdate(eCallType, pMediaInfo);
             });
@@ -318,7 +318,7 @@ PUBLIC VIRTUAL void MtcCall::RejectUpdate(IN const CallReasonInfo& objReason)
     IMS_TRACE_I("RejectUpdate : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->RejectUpdate(objReason);
             });
@@ -329,7 +329,7 @@ PUBLIC VIRTUAL void MtcCall::CancelUpdate(IN const CallReasonInfo& objReason)
     IMS_TRACE_I("CancelUpdate : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->CancelUpdate(objReason);
             });
@@ -342,7 +342,7 @@ PUBLIC VIRTUAL void MtcCall::Terminate(IN const CallReasonInfo& objReason)
     if (IsUssi())
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->TerminateUssi(objReason);
                 });
@@ -350,7 +350,7 @@ PUBLIC VIRTUAL void MtcCall::Terminate(IN const CallReasonInfo& objReason)
     else
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->Terminate(objReason);
                 });
@@ -362,7 +362,7 @@ PUBLIC VIRTUAL void MtcCall::SendDtmf(IN const AString& strSignal, IN IMS_SINT32
     IMS_TRACE_I("SendDtmf : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SendDtmf(strSignal, nDuration);
             });
@@ -373,7 +373,7 @@ PUBLIC VIRTUAL void MtcCall::SendUssd(IN const AString& strUssd)
     IMS_TRACE_I("SendUssd : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SendUssd(strUssd);
             });
@@ -392,7 +392,7 @@ PUBLIC VIRTUAL void MtcCall::StartConference(IN CallType eCallType, IN const ASt
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->StartConference(
                         eCallType, strTarget, pMediaInfo, objSuppServices, lstUsers);
@@ -405,7 +405,7 @@ PUBLIC VIRTUAL void MtcCall::StartConference(
     IMS_TRACE_I("StartConference : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->StartConference(eCallType, strTarget, lstUsers);
             });
@@ -416,7 +416,7 @@ PUBLIC VIRTUAL void MtcCall::HandleSrvccSuccess()
     IMS_TRACE_I("HandleSrvccSuccess : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->HandleSrvccSuccess();
             });
@@ -427,7 +427,7 @@ PUBLIC VIRTUAL void MtcCall::HandleSrvccFailure(IN UpdateType eUpdateType)
     IMS_TRACE_I("HandleSrvccFailure : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->HandleSrvccFailure(eUpdateType);
             });
@@ -438,7 +438,7 @@ PUBLIC VIRTUAL void MtcCall::HandleIpcanChanged()
     IMS_TRACE_I("HandleIpcanChanged", 0, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->HandleIpcanChanged();
             });
@@ -628,7 +628,7 @@ PUBLIC VIRTUAL void MtcCall::SessionAlerting(IN ISession* piSession)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionAlerting(piSession);
             });
@@ -657,7 +657,7 @@ PUBLIC VIRTUAL void MtcCall::SessionReferenceReceived(
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionReferenceReceived(piSession, piReference);
             });
@@ -676,7 +676,7 @@ PUBLIC VIRTUAL void MtcCall::SessionStarted(IN ISession* piSession)
     if (IsUssi())
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->UssiStarted(piSession);
                 });
@@ -684,7 +684,7 @@ PUBLIC VIRTUAL void MtcCall::SessionStarted(IN ISession* piSession)
     else
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->SessionStarted(piSession);
                 });
@@ -702,7 +702,7 @@ PUBLIC VIRTUAL void MtcCall::SessionStartFailed(IN ISession* piSession)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionStartFailed(piSession);
             });
@@ -721,7 +721,7 @@ PUBLIC VIRTUAL void MtcCall::SessionTerminated(IN ISession* piSession)
     if (IsUssi())
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->UssiTerminated(piSession);
                 });
@@ -729,7 +729,7 @@ PUBLIC VIRTUAL void MtcCall::SessionTerminated(IN ISession* piSession)
     else
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->SessionTerminated(piSession);
                 });
@@ -747,7 +747,7 @@ PUBLIC VIRTUAL void MtcCall::SessionUpdated(IN ISession* piSession)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionUpdated(piSession);
             });
@@ -764,7 +764,7 @@ PUBLIC VIRTUAL void MtcCall::SessionUpdateFailed(IN ISession* piSession)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionUpdateFailed(piSession);
             });
@@ -781,7 +781,7 @@ PUBLIC VIRTUAL void MtcCall::SessionUpdateReceived(IN ISession* piSession)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionUpdateReceived(piSession);
             });
@@ -798,7 +798,7 @@ PUBLIC VIRTUAL void MtcCall::SessionCancelDelivered(IN ISession* piSession)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionCancelDelivered(piSession);
             });
@@ -815,7 +815,7 @@ PUBLIC VIRTUAL void MtcCall::SessionCancelDeliveryFailed(IN ISession* piSession)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionCancelDeliveryFailed(piSession);
             });
@@ -832,7 +832,7 @@ PUBLIC VIRTUAL void MtcCall::SessionEarlyMediaUpdated(IN ISession* piSession)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionEarlyMediaUpdated(piSession);
             });
@@ -849,7 +849,7 @@ PUBLIC VIRTUAL void MtcCall::SessionEarlyMediaUpdateFailed(IN ISession* piSessio
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionEarlyMediaUpdateFailed(piSession);
             });
@@ -866,7 +866,7 @@ PUBLIC VIRTUAL void MtcCall::SessionEarlyMediaUpdateReceived(IN ISession* piSess
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionEarlyMediaUpdateReceived(piSession);
             });
@@ -896,7 +896,7 @@ PUBLIC VIRTUAL void MtcCall::SessionForkedResponseReceived(
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionForkedResponseReceived(piSession, piForkedSession);
             });
@@ -913,7 +913,7 @@ PUBLIC VIRTUAL void MtcCall::SessionPrackDelivered(IN ISession* piSession)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionPRAckDelivered(piSession);
             });
@@ -930,7 +930,7 @@ PUBLIC VIRTUAL void MtcCall::SessionPrackDeliveryFailed(IN ISession* piSession)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionPRAckDeliveryFailed(piSession);
             });
@@ -947,7 +947,7 @@ PUBLIC VIRTUAL void MtcCall::SessionPrackReceived(IN ISession* piSession)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionPRAckReceived(piSession);
             });
@@ -965,7 +965,7 @@ PUBLIC VIRTUAL void MtcCall::SessionProvisionalResponseReceived(
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionProvisionalResponseReceived(piSession, nIndex);
             });
@@ -982,7 +982,7 @@ PUBLIC VIRTUAL void MtcCall::SessionRprDeliveryFailed(IN ISession* piSession)
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionRPRDeliveryFailed(piSession);
             });
@@ -999,7 +999,7 @@ PUBLIC VIRTUAL void MtcCall::SessionRprReceived(IN ISession* piSession, IN IMS_U
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->SessionRPRReceived(piSession, nIndex);
             });
@@ -1019,7 +1019,7 @@ PUBLIC VIRTUAL void MtcCall::SessionTransactionReceived(
     if (IsUssi())
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->UssiInfoReceived(piSession, piSipServerConnection);
                 });
@@ -1027,7 +1027,7 @@ PUBLIC VIRTUAL void MtcCall::SessionTransactionReceived(
     else
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->SessionTransactionReceived(piSession, piSipServerConnection);
                 });
@@ -1039,7 +1039,7 @@ PUBLIC VIRTUAL void MtcCall::OnTimerExpired(IN IMS_SINT32 nType)
     IMS_TRACE_I("OnTimerExpired : key[%d] type[%d]", m_nKey, nType, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->OnTimerExpired(nType);
             });
@@ -1051,7 +1051,7 @@ PUBLIC VIRTUAL void MtcCall::OnBlockChecked(IN IMtcBlockChecker::Result objResul
             static_cast<IMS_SINT32>(objResult.eStatus), 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->OnBlockChecked(objResult);
             });
@@ -1068,7 +1068,7 @@ PUBLIC VIRTUAL void MtcCall::QosReserved(IN ISession* piSession, IN IMS_UINT32 e
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->QosReserved(piSession, eMediaType);
             });
@@ -1085,7 +1085,7 @@ PUBLIC VIRTUAL void MtcCall::QosReserveFailed(IN ISession* piSession, IN QosLoss
     }
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->QosReserveFailed(piSession, eNextAction);
             });
@@ -1112,7 +1112,7 @@ PUBLIC VIRTUAL void MtcCall::ClientConnection_NotifyResponse(
     if (IsUssi())
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->NotifyResponseToUssiInfo(piScc, piForkedScc);
                 });
@@ -1120,7 +1120,7 @@ PUBLIC VIRTUAL void MtcCall::ClientConnection_NotifyResponse(
     else
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->ClientConnection_NotifyResponse(piScc, piForkedScc);
                 });
@@ -1140,7 +1140,7 @@ PUBLIC VIRTUAL void MtcCall::Error_NotifyError(
     if (IsUssi())
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->NotifyErrorToUssiInfo(piSc, nCode, strMessage);
                 });
@@ -1148,7 +1148,7 @@ PUBLIC VIRTUAL void MtcCall::Error_NotifyError(
     else
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->Error_NotifyError(piSc, nCode, strMessage);
                 });
@@ -1161,7 +1161,7 @@ PUBLIC VIRTUAL void MtcCall::OnReceivingMediaDataFailed(
     IMS_TRACE_I("OnReceivingMediaDataFailed : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->OnReceivingMediaDataFailed(eMediaType, eProtocolType);
             });
@@ -1172,7 +1172,7 @@ PUBLIC VIRTUAL void MtcCall::OnVideoLowestBitRate()
     IMS_TRACE_I("OnVideoLowestBitRate : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->OnVideoLowestBitRate();
             });
@@ -1183,7 +1183,7 @@ PUBLIC VIRTUAL void MtcCall::OnReceivingNetworkToneStarted()
     IMS_TRACE_I("OnReceivingNetworkToneStarted : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->OnReceivingNetworkToneStarted();
             });
@@ -1194,7 +1194,7 @@ PUBLIC VIRTUAL void MtcCall::OnReceivingNetworkToneFailed()
     IMS_TRACE_I("OnReceivingNetworkToneFailed : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->OnReceivingNetworkToneFailed();
             });
@@ -1205,7 +1205,7 @@ PUBLIC VIRTUAL void MtcCall::OnMediaFailed(IN CallReasonInfo objReason)
     IMS_TRACE_I("OnMediaFailed : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->OnMediaFailed(objReason);
             });
@@ -1226,7 +1226,7 @@ void MtcCall::OnInternalFailure()
     IMS_TRACE_I("OnInternalFailure : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
+            [&](IMtcCallState* pState)
             {
                 return pState->OnInternalFailure();
             });
@@ -1240,7 +1240,7 @@ void MtcCall::OnAttached()
     if (IsUssi())
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->OnUssiAttached();
                 });
@@ -1248,7 +1248,7 @@ void MtcCall::OnAttached()
     else
     {
         m_objStateMachine.RunStateOperation(
-                [&](MtcCallState* pState)
+                [&](IMtcCallState* pState)
                 {
                     return pState->OnAttached();
                 });
