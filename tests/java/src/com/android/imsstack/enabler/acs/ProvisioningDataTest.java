@@ -17,6 +17,9 @@
 package com.android.imsstack.enabler.acs;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
 import android.content.Context;
@@ -39,6 +42,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class ProvisioningDataTest {
     private static final String TAG = ProvisioningData.class.getSimpleName();
@@ -251,6 +255,19 @@ public class ProvisioningDataTest {
         String fileName = "provisionindData_partialupdate.xml";
         mProvisioningData.saveXmlFile(FILE_DESCRIPTOR, fileName);
         copyFile(fileName);
+    }
+
+    @Test
+    @SmallTest
+    public void compressAndDecompress_withData() {
+        byte[] compressedData = ProvisioningData.compressGzip(AC_DATA.getBytes());
+        assertFalse(Arrays.equals(compressedData, AC_DATA.getBytes()));
+
+        byte[] decompressedData = ProvisioningData.decompressGzip(compressedData);
+        assertTrue(Arrays.equals(decompressedData, AC_DATA.getBytes()));
+
+        assertNull(ProvisioningData.compressGzip(null));
+        assertNull(ProvisioningData.decompressGzip(null));
     }
 
     private boolean isExistTestFile(String fileName) {

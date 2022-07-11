@@ -17,6 +17,7 @@
 package com.android.imsstack.enabler.acs.impl;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Xml;
 
@@ -36,6 +37,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This class parse provisioning xml data and generate xml from parsed data
@@ -459,6 +462,63 @@ public class ProvisioningData {
         }
 
         return false;
+    }
+
+
+    /**
+     * compress the gzip format data
+     * @param data byte array has data to compress
+     */
+    @VisibleForTesting
+    public static @Nullable byte[] compressGzip(@NonNull byte[] data) {
+        if (data == null || data.length == 0) {
+            return data;
+        }
+        byte[] out = null;
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
+            gzipOutputStream.write(data);
+            gzipOutputStream.close();
+
+            out = outputStream.toByteArray();
+            outputStream.close();
+        } catch (IOException e) {
+            ImsLog.i("Error to compressGzip due to " + e);
+        }
+
+        return out;
+    }
+
+    /**
+     * decompress the gzip format data
+     * @param data byte array has data to decompress
+     */
+    public static @Nullable byte[] decompressGzip(@NonNull byte[] data) {
+        if (data == null || data.length == 0) {
+            return data;
+        }
+        byte[] out = null;
+        try {
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
+            byte[] buf = new byte[1024];
+            int size = gzipInputStream.read(buf);
+            while (size >= 0) {
+                outputStream.write(buf, 0, size);
+                size = gzipInputStream.read(buf);
+            }
+            gzipInputStream.close();
+            inputStream.close();
+
+            out = outputStream.toByteArray();
+            outputStream.close();
+        } catch (IOException e) {
+            ImsLog.i("Error to decompressGzip due to " + e);
+        }
+
+        return out;
     }
 
     /**
