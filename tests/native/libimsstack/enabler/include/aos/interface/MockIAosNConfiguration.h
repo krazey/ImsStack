@@ -77,6 +77,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallbackModeSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencySmsOverImsSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsContactUriValidationChecked, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsUserInfoInContactSupported, (), (const, override));
 
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryBaseTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryMaxTime, (), (override));

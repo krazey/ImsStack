@@ -86,6 +86,7 @@ public:
     virtual IMS_BOOL IsEmergencyCallbackModeSupported() const;
     virtual IMS_BOOL IsEmergencySmsOverImsSupported() const;
     virtual IMS_BOOL IsContactUriValidationChecked() const;
+    virtual IMS_BOOL IsUserInfoInContactSupported() const;
 
     virtual IMS_UINT32 GetRegistrationRetryBaseTime();
     virtual IMS_UINT32 GetRegistrationRetryMaxTime();

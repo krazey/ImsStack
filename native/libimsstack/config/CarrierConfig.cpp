@@ -765,6 +765,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANG
         "update_registration_with_country_change_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT[] =
         "registration_pcscf_update_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_CONTACT_USER_INFO_BOOL[] =
+        "support_contact_user_info_bool";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[] =
         "specific_registration_error_bundle";

@@ -354,6 +354,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsContactUriValidationChecked() const
     return m_objAsset.bRegistrationContactValidation;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUserInfoInContactSupported() const
+{
+    return m_objAsset.bSupportContactUserInfo;
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);
@@ -1306,6 +1311,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL);
     m_objAsset.nRegistrationPcscfUpdatePolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT);
+    m_objAsset.bSupportContactUserInfo =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_CONTACT_USER_INFO_BOOL);
 }
 
 PRIVATE

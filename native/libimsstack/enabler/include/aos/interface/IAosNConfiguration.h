@@ -369,7 +369,14 @@ public:
      */
     virtual IMS_BOOL IsContactUriValidationChecked() const = 0;
 
-    /**WW
+    /**
+     * @brief Flag indicating whether the User Info is included or not in contact
+     *
+     * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     */
+    virtual IMS_BOOL IsUserInfoInContactSupported() const = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5

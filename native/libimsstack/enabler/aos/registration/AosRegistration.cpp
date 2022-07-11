@@ -1734,7 +1734,10 @@ PROTECTED VIRTUAL void AosRegistration::CreateContact()
 {
     m_piRegContact = m_piRegistration->CreateContact(m_objIpa, m_pUtil->GetLocalPort(m_nSlotId));
 
-    // the child class will set contact parameter
+    if (m_piRegContact != IMS_NULL && !GET_N_CONFIG(m_nSlotId)->IsUserInfoInContactSupported())
+    {
+        m_piRegContact->SetUserInfo(IRegContact::POLICY_USER_INFO_NONE);
+    }
 }
 
 PROTECTED VIRTUAL void AosRegistration::AddSpecificOperation()

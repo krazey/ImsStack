@@ -64,7 +64,8 @@ public:
             bDisableT3482ForEmergency(IMS_FALSE),
             nRegistrationTimerForEmergencyCallMillis(0),
             bUpdateRegistrationWithCountryChange(IMS_FALSE),
-            nRegistrationPcscfUpdatePolicy(0)
+            nRegistrationPcscfUpdatePolicy(0),
+            bSupportContactUserInfo(IMS_TRUE)
     {
     }
 
@@ -111,5 +112,6 @@ public:
     IMS_SINT32 nRegistrationTimerForEmergencyCallMillis;
     IMS_BOOL bUpdateRegistrationWithCountryChange;
     IMS_SINT32 nRegistrationPcscfUpdatePolicy;
+    IMS_BOOL bSupportContactUserInfo;
 };
 #endif  // AOS_ASSET_H_

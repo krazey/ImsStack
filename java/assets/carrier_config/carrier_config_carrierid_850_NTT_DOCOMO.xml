@@ -36,4 +36,7 @@
     <!-- Ims General -->
     <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
     <int name="sip_timer_100_trying_millis_int" value="0"/>
+
+    <!-- Aos -->
+    <boolean name="support_contact_user_info_bool" value="false"/>
 </carrier_config>

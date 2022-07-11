@@ -521,6 +521,8 @@ public class CarrierConfig {
                 "update_registration_with_country_change_bool";
         public static final String KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT =
                 "registration_pcscf_update_policy_int";
+        public static final String KEY_SUPPORT_CONTACT_USER_INFO_BOOL =
+                "support_contact_user_info_bool";
         // Bundle {
         public static final String KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE =
                 "specific_registration_error_bundle";
