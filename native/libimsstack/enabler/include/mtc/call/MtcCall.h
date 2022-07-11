@@ -33,7 +33,7 @@
 #include "call/block/IMtcBlockChecker.h"
 #include "call/message/MtcMessageMediator.h"
 #include "call/state/CallStateFactory.h"
-#include "call/state/MtcCallState.h"
+#include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
 #include "call/UpdatingInfo.h"
 #include "helper/IMtcTimerListener.h"
@@ -261,8 +261,8 @@ private:
     UpdatingInfo* m_pUpdatingInfo;
     ImsList<MtcSession*> m_lstSessions;
 
-    std::unique_ptr<IMtcCallStateFactory<MtcCallState, CallStateName>> m_pStateFactory;
-    MtcCallStateMachine<MtcCallState, CallStateName> m_objStateMachine;
+    std::unique_ptr<IMtcCallStateFactory<IMtcCallState, CallStateName>> m_pStateFactory;
+    MtcCallStateMachine<IMtcCallState, CallStateName> m_objStateMachine;
     MtcTimerWrapper m_objTimer;
     MtcUiNotifier m_objUiNotifier;
     MtcMediaManager m_objMediaManager;
