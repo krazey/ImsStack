@@ -22,10 +22,34 @@ namespace android
 
 class MtsStrNameTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MtsStrName* pMtsStrName;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override { pMtsStrName = new MtsStrName(); }
+
+    virtual void TearDown() override { delete pMtsStrName; }
 };
+
+TEST_F(MtsStrNameTest, Constructor)
+{
+    ASSERT_NE(pMtsStrName, nullptr);
+}
+
+TEST_F(MtsStrNameTest, CheckMtsAppId)
+{
+    EXPECT_STREQ(pMtsStrName->GetMtsAppId().GetStr(), "ims.app.mts");
+}
+
+TEST_F(MtsStrNameTest, CheckMtsServiceId)
+{
+    EXPECT_STREQ(pMtsStrName->GetMtsServiceId().GetStr(), "ims.service.mts");
+}
+
+TEST_F(MtsStrNameTest, CheckMtsConnectorName)
+{
+    EXPECT_STREQ(pMtsStrName->GetMtsConnectorName().GetStr(),
+            "imscore://ims.app.mts;serviceId=ims.service.mts");
+}
 
 }  // namespace android

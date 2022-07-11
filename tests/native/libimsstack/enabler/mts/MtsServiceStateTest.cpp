@@ -17,15 +17,45 @@
 #include <gtest/gtest.h>
 #include "MtsServiceState.h"
 
+LOCAL IMS_SINT32 SLOT_ID = 0;
+
 namespace android
 {
 
 class MtsServiceStateTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MtsServiceState* pMtsServiceState;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override { pMtsServiceState = new MtsServiceState(SLOT_ID); }
+
+    virtual void TearDown() override { delete pMtsServiceState; }
 };
+
+TEST_F(MtsServiceStateTest, Constructor)
+{
+    ASSERT_NE(pMtsServiceState, nullptr);
+}
+
+TEST_F(MtsServiceStateTest, TestMtsServiceStateAfterAosConnected)
+{
+    pMtsServiceState->SetSmsOverIpState(IMS_TRUE);
+    pMtsServiceState->OnImsConnected();
+    pMtsServiceState->UpdateServiceState();
+
+    EXPECT_TRUE(pMtsServiceState->GetImsRegState());
+    EXPECT_EQ(pMtsServiceState->GetServiceState(), MtsMessageController::STATE_READY);
+}
+
+TEST_F(MtsServiceStateTest, TestIsServiceBlocked)
+{
+    pMtsServiceState->SetSmsOverIpState(IMS_TRUE);
+    pMtsServiceState->OnImsConnected();
+    pMtsServiceState->UpdateServiceState();
+
+    EXPECT_FALSE(pMtsServiceState->IsMoServiceBlocked());
+    EXPECT_FALSE(pMtsServiceState->IsMtServiceBlocked());
+}
 
 }  // namespace android

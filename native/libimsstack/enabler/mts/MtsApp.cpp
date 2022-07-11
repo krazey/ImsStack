@@ -46,10 +46,10 @@ MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
         m_pMtsServiceState(IMS_NULL),
         m_pCallTracker(IMS_NULL)
 {
-    IMS_TRACE_I("+MtsApp [slot_%d]", nSlotId, 0, 0);
+    IMS_TRACE_I("+MtsApp [slot_%d]", m_nSlotId, 0, 0);
 
     Configuration::GetInstance()->SetAppConfig(
-            ImsServiceConfig::GetAppName(ImsAppId::MTS), nSlotId);
+            ImsServiceConfig::GetAppName(ImsAppId::MTS), m_nSlotId);
 }
 
 PUBLIC MtsApp::~MtsApp()
