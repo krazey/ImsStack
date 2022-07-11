@@ -462,11 +462,21 @@ public class UtCommandTest {
     }
 
     @Test
+    public void startTransaction_usatNotSupported() {
+        boolean enable = true;
+
+        when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_CALL_CONTROL)).thenReturn(false);
+
+        int transactionId = mImsUtImpl.updateCOLP(enable);
+
+        verify(mMockUtInterface).updateCOLP(eq(transactionId), eq(enable));
+    }
+
+    @Test
     public void startTransaction_usatNotAllowedForQuery() {
         int transactionId = 1;
         int condition = SscConstant.CONDITION_BAIC;
 
-        when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_CALL_CONTROL)).thenReturn(true);
         when(mMockUsatInterface.createCallControlCommand(anyInt(), anyString(), anyInt(), anyInt(),
                 any())).thenReturn(null);
         when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_NOT_ALLOWED);
@@ -497,7 +507,6 @@ public class UtCommandTest {
         int condition = SscConstant.CONDITION_BAIC;
         int action = SscConstant.ACTION_ACTIVATION;
 
-        when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_CALL_CONTROL)).thenReturn(true);
         when(mMockUsatInterface.createCallControlCommand(anyInt(), anyString(), anyInt(), anyInt(),
                 any())).thenReturn(null);
         when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_NOT_ALLOWED);
@@ -528,7 +537,6 @@ public class UtCommandTest {
         int condition = SscConstant.CONDITION_BAIC;
         String modifiedDialString = "12345678901N";
 
-        when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_CALL_CONTROL)).thenReturn(true);
         when(mMockUsatInterface.createCallControlCommand(anyInt(), anyString(), anyInt(), anyInt(),
                 any())).thenReturn(null);
         when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_ALLOWED_WITH_MODIFICATION);

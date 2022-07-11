@@ -54,10 +54,6 @@ public final class UtFactory {
             return;
         }
 
-        if (mUtInterface[slotId] == null) {
-            return;
-        }
-
         setUtInterfaceForSlot(slotId, null);
     }
 

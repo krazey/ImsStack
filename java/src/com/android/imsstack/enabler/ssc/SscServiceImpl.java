@@ -198,19 +198,9 @@ public class SscServiceImpl extends UtInterfaceBase {
             ImsReasonInfo ri = new ImsReasonInfo(ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED,
                     ImsReasonInfo.CODE_UNSPECIFIED, null);
             if (requestType == REQUEST_TYPE_QUERY) {
-                postAndRunTask(new Runnable() {
-                        @Override
-                        public void run() {
-                            mUtListener.utConfigurationQueryFailed(tId, ri);
-                        }
-                });
+                postAndRunTask(() -> mUtListener.utConfigurationQueryFailed(tId, ri));
             } else if (requestType == REQUEST_TYPE_UPDATE) {
-                postAndRunTask(new Runnable() {
-                        @Override
-                        public void run() {
-                            mUtListener.utConfigurationUpdateFailed(tId, ri);
-                        }
-                });
+                postAndRunTask(() -> mUtListener.utConfigurationUpdateFailed(tId, ri));
             }
         }
     }

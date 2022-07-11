@@ -151,7 +151,7 @@ public class SscTransactionTest {
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
 
-        triggerCallbackMessage(SscNetConnection.EVENT_PDN_CONNECTION_TIMEOUT);
+        triggerCallbackMessage(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT);
 
         processTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
     }
