@@ -188,6 +188,9 @@ protected:
     }
 
     void SetTerminated(IN IMS_BOOL bTerminated) { pAosSubscription->SetTerminated(bTerminated); }
+
+    IMS_BOOL IsSubtrying() { return pAosSubscription->IsSubTrying(); }
+
     void StartTimer(IN IMS_UINT32 nDuration) { pAosSubscription->StartTimer(nDuration); }
 
     ITimer* GetTimer() { return pAosSubscription->m_piRetryTimer; }
@@ -240,7 +243,25 @@ protected:
     }
 };
 
-TEST_F(AosSubscriptionTest, Initialize) {}
+TEST_F(AosSubscriptionTest, Initialize)
+{
+    EXPECT_CALL(objMockIRegSubscription, SetRefreshPolicy(0, 1200, 50, 600)).Times(1);
+    EXPECT_CALL(objMockIRegSubscription, SetListener(pAosSubscription)).Times(1);
+
+    pAosSubscription->Initialize();
+}
+
+TEST_F(AosSubscriptionTest, IsSubtrying)
+{
+    SetState(AosSubscription::STATE_SUBSCRIBING);
+    EXPECT_TRUE(IsSubtrying());
+
+    SetState(AosSubscription::STATE_SUBSCRIBING);
+    EXPECT_TRUE(IsSubtrying());
+
+    SetState(AosSubscription::STATE_OFFLINE);
+    EXPECT_FALSE(IsSubtrying());
+}
 
 TEST_F(AosSubscriptionTest, Stop)
 {
