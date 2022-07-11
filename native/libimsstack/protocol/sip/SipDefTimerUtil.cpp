@@ -61,10 +61,3 @@ SIP_VOID* SipDefTimerUtil::StopTimerEx(SIP_VOID* pvTimerId)
 {
     return StopTimer(pvTimerId);
 }
-
-SIP_BOOL SipDefTimerUtil::ResetTimer(SIP_VOID* pvTimerId, SIP_UINT32 nNewDuration)
-{
-    (void)pvTimerId;
-    (void)nNewDuration;
-    return SIP_FALSE;
-}

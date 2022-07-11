@@ -33,8 +33,6 @@ public:
 
     SIP_VOID* StopTimer(SIP_VOID* pvTimerId);
 
-    SIP_BOOL ResetTimer(SIP_VOID* pvTimerId, SIP_UINT32 nNewDuration);
-
     SIP_VOID* StopTimerEx(SIP_VOID* pvTimerId);
 };
 
