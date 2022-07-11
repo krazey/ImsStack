@@ -73,7 +73,8 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objU
 
     if (nOldState == STATE_CREATED)
     {
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
+        m_objOperationQueue.CreateNPutWithUsers(
+                CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
 
         if (bSubFirstAndRefer == IMS_TRUE &&
                 ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired())
@@ -85,9 +86,9 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objU
     IMS_TRACE_I("ProcessMerge [%d]", m_objParticipantList.GetSize(), 0, 0);
     for (IMS_UINT32 i = nStartIndex; i < m_objParticipantList.GetSize(); i++)
     {
-        m_objOperationQueue.CreateNPut(
+        m_objOperationQueue.CreateNPutWithUser(
                 CONTROL_OPERATION_REFER_INVITE, m_objParticipantList.GetConfUsers().GetAt(i));
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_TERMINATE_1TO1_SESSION,
+        m_objOperationQueue.CreateNPutWithId(CONTROL_OPERATION_TERMINATE_1TO1_SESSION,
                 m_objParticipantList.GetConfUsers().GetAt(i)->nConnectionId);
     }
 
@@ -105,7 +106,7 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objU
     m_objOperationQueue.SetAddingOperationSetCompleted();
 }
 
-PUBLIC VIRTUAL void MergeController::StartConferenceCall(
+PROTECTED VIRTUAL void MergeController::StartConferenceCall(
         IN ConferenceOperationQueue::ConferenceOperation* /*pOperation*/)
 {
     // TODO: CallType?
@@ -182,7 +183,8 @@ void MergeController::ProcessMergeWithoutRefer(IN IMSList<ConfUser*>& objUsers)
 
     if (nOldState == STATE_CREATED)
     {
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
+        m_objOperationQueue.CreateNPutWithUsers(
+                CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
         m_objOperationQueue.SetAddingOperationSetCompleted();
     }
@@ -209,7 +211,7 @@ void MergeController::UpdateUserStateBySessionTerminated(IN IMS_UINTP nCallKey)
     if (m_objParticipantList.GetConnectedParticipantSize(IMS_TRUE) == 0)
     {
         IMS_TRACE_D("UpdateUserStateBySessionTerminated : terminate conference by alone", 0, 0, 0);
-        m_objOperationQueue.CreateNPut(
+        m_objOperationQueue.CreateNPutWithReason(
                 CONTROL_OPERATION_TERMINATE_CONFERENCE, CODE_USER_TERMINATED, IMS_TRUE);
     }
 }

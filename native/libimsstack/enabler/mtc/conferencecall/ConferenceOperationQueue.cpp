@@ -75,8 +75,8 @@ void ConferenceOperationQueue::CreateNPut(
 }
 
 PUBLIC
-void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN IMSList<ConfUser*> objUsers,
-        IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
+void ConferenceOperationQueue::CreateNPutWithUsers(IN IMS_UINT32 nType,
+        IN IMSList<ConfUser*> objUsers, IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
     ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetConfUsers(objUsers);
@@ -84,7 +84,7 @@ void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN IMSList<ConfUs
 }
 
 PUBLIC
-void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN ConfUser* pConfUser,
+void ConferenceOperationQueue::CreateNPutWithUser(IN IMS_UINT32 nType, IN ConfUser* pConfUser,
         IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
     ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
@@ -93,8 +93,8 @@ void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN ConfUser* pCon
 }
 
 PUBLIC
-void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN CallStartOperationParams* pParams,
-        IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
+void ConferenceOperationQueue::CreateNPutWithStartParam(IN IMS_UINT32 nType,
+        IN CallStartOperationParams* pParams, IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
     ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetParam(pParams);
@@ -102,7 +102,7 @@ void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN CallStartOpera
 }
 
 PUBLIC
-void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN IMS_UINT32 nConnectionId,
+void ConferenceOperationQueue::CreateNPutWithId(IN IMS_UINT32 nType, IN IMS_UINT32 nConnectionId,
         IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
     // IMS_TRACE_D("CreateNPut : nConnectionId [%d]", nType, 0, 0);
@@ -113,8 +113,8 @@ void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN IMS_UINT32 nCo
 }
 
 PUBLIC
-void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN IMS_SINT32 nTerminateReason,
-        IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
+void ConferenceOperationQueue::CreateNPutWithReason(IN IMS_UINT32 nType,
+        IN IMS_SINT32 nTerminateReason, IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
     // IMS_TRACE_D("CreateNPut : nTerminateReason [%d]", nType, 0, 0);
 

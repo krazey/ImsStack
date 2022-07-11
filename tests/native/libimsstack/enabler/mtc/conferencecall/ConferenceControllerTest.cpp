@@ -43,7 +43,8 @@
 #include "helper/sipinterfaceholder/MockSubscriptionInterfaceHolder.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/MockICallStateProxy.h"
-#include "../../../engine/interface/core/MockICoreService.h"
+#include "core/MockICoreService.h"
+#include "MockITimer.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -221,6 +222,33 @@ TEST_F(ConferenceControllerTest, OnConferenceCallStateTerminatingWithoutPendingO
             CONFERENCE_CALL_KEY, IMtcCall::State::TERMINATING, CallType::VOIP, IMS_TRUE, 0);
 }
 
+TEST_F(ConferenceControllerTest, OnTotalCallStateChangedDoNothing)
+{
+    pController->OnTotalCallStateChanged(IMtcCall::State::TERMINATING);
+    EXPECT_CALL(*pMockQueue, GetNextOperation).Times(0);
+    EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(_, _)).Times(0);
+}
+
+TEST_F(ConferenceControllerTest, IsSynchronousCallRequiredReturnsTrue)
+{
+    EXPECT_TRUE(pController->IsSynchronousCallRequired());
+}
+
+TEST_F(ConferenceControllerTest, NullTimerExpiresDoNothing)
+{
+    pController->Timer_TimerExpired(IMS_NULL);
+    EXPECT_CALL(*pMockQueue, GetNextOperation).Times(0);
+    EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(_, _)).Times(0);
+}
+
+TEST_F(ConferenceControllerTest, DifferentTimerExpiresDoNothing)
+{
+    MockITimer objMockTimer;
+    pController->Timer_TimerExpired(&objMockTimer);
+    EXPECT_CALL(*pMockQueue, GetNextOperation).Times(0);
+    EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(_, _)).Times(0);
+}
+
 TEST_F(ConferenceControllerTest, OnIndividualCallStateTerminating)
 {
     const CallKey PARTICIPANT_CALL_KEY = 1000;
@@ -265,9 +293,8 @@ TEST_F(ConferenceControllerTest, OnSubscriptionStateTerminated)
 {
     EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_UNSUBSCRIBE, _)).Times(1);
 
-    // TODO: ambiguous call of CreateNPut(int, int, bool)
-    // EXPECT_CALL(*pMockQueue, CreateNPut(
-    //        CONTROL_OPERATION_TERMINATE_CONFERENCE, _, _)).Times(1);
+    EXPECT_CALL(*pMockQueue, CreateNPutWithReason(CONTROL_OPERATION_TERMINATE_CONFERENCE, _, _))
+            .Times(1);
 
     pController->OnSubscriptionUpdated(SubscriptionUpdateType::TERMINATED);
 }
@@ -277,21 +304,36 @@ TEST_F(ConferenceControllerTest, OnSubscriptionStateNotifyReceivedNoUsers)
     ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(1));
     ON_CALL(*pMockParticipantList, GetConnectedParticipantSize(_)).WillByDefault(Return(0));
 
-    // EXPECT_CALL(*pMockQueue, CreateNPut(
-    //         CONTROL_OPERATION_TERMINATE_CONFERENCE, _, _)).Times(1);
+    EXPECT_CALL(*pMockQueue, CreateNPutWithReason(CONTROL_OPERATION_TERMINATE_CONFERENCE, _, _))
+            .Times(1);
 
     pController->OnSubscriptionUpdated(SubscriptionUpdateType::NOTIFY_RECEIVED);
 }
 
-TEST_F(ConferenceControllerTest, OnSubscriptionStateNotifyReceived)
+TEST_F(ConferenceControllerTest, OnSubscriptionStateNotifyReceivedWithTwoUsers)
 {
     ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(1));
     ON_CALL(*pMockParticipantList, GetConnectedParticipantSize(_)).WillByDefault(Return(2));
 
     EXPECT_CALL(*pMockNotifier, NotifyConferenceInfo(_)).Times(1);
     EXPECT_CALL(*pMockNotifier, NotifyUsersInfo(_)).Times(1);
-    // EXPECT_CALL(*pMockQueue, CreateNPut(
-    //         CONTROL_OPERATION_TERMINATE_CONFERENCE, _, _)).Times(1);
+    EXPECT_CALL(*pMockQueue, CreateNPutWithReason(CONTROL_OPERATION_TERMINATE_CONFERENCE, _, _))
+            .Times(0);
+    EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_CHECK_CONNECTED, _))
+            .Times(1);
+
+    pController->OnSubscriptionUpdated(SubscriptionUpdateType::NOTIFY_RECEIVED);
+}
+
+TEST_F(ConferenceControllerTest, OnSubscriptionStateNotifyReceivedWithoutUsers)
+{
+    ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(1));
+    ON_CALL(*pMockParticipantList, GetConnectedParticipantSize(_)).WillByDefault(Return(0));
+
+    EXPECT_CALL(*pMockNotifier, NotifyConferenceInfo(_)).Times(1);
+    EXPECT_CALL(*pMockNotifier, NotifyUsersInfo(_)).Times(1);
+    EXPECT_CALL(*pMockQueue, CreateNPutWithReason(CONTROL_OPERATION_TERMINATE_CONFERENCE, _, _))
+            .Times(1);
     EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_CHECK_CONNECTED, _))
             .Times(1);
 
@@ -514,7 +556,7 @@ TEST_F(ConferenceControllerTest, ProcessDropCommand)
     ON_CALL(*pMockParticipantList, FindParticipant(_)).WillByDefault(Return(0));
     ON_CALL(*pMockParticipantList, GetConfUsers(_)).WillByDefault(Return(objUsers));
 
-    // EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_REFER_BYE, _)).Times(1);
+    EXPECT_CALL(*pMockQueue, CreateNPutWithUser(CONTROL_OPERATION_REFER_BYE, _, _)).Times(1);
     EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, _)).Times(1);
 
     pController->ProcessCommand(IConferenceController::REMOVE, objUsers);

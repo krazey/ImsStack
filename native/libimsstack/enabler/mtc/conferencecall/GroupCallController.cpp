@@ -84,7 +84,8 @@ PROTECTED VIRTUAL void GroupCallController::ProcessGroupCall(IN IMSList<ConfUser
     CallStartOperationParams* pParams = new CallStartOperationParams(
             CONF_CREATE_START, objCallInfo, objMediaInfo, objUsers, objSuppServices);
 
-    m_objOperationQueue.CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, pParams);
+    m_objOperationQueue.CreateNPutWithStartParam(
+            CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, pParams);
     m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
     m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
 

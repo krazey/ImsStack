@@ -125,15 +125,15 @@ public:
     void AddDelay(IN IMS_UINT32 nDelayMillisec);
 
     virtual void CreateNPut(IN IMS_UINT32 nType, IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
-    virtual void CreateNPut(IN IMS_UINT32 nType, IN IMSList<ConfUser*> objUsers,
+    virtual void CreateNPutWithUsers(IN IMS_UINT32 nType, IN IMSList<ConfUser*> objUsers,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
-    virtual void CreateNPut(IN IMS_UINT32 nType, IN ConfUser* pConfUser,
+    virtual void CreateNPutWithUser(IN IMS_UINT32 nType, IN ConfUser* pConfUser,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
-    virtual void CreateNPut(IN IMS_UINT32 nType, IN CallStartOperationParams* pParams,
+    virtual void CreateNPutWithStartParam(IN IMS_UINT32 nType, IN CallStartOperationParams* pParams,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
-    virtual void CreateNPut(IN IMS_UINT32 nType, IN IMS_UINT32 nConnectionId,
+    virtual void CreateNPutWithId(IN IMS_UINT32 nType, IN IMS_UINT32 nConnectionId,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
-    virtual void CreateNPut(IN IMS_UINT32 nType, IN IMS_SINT32 nTerminateReason,
+    virtual void CreateNPutWithReason(IN IMS_UINT32 nType, IN IMS_SINT32 nTerminateReason,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
 
     void SetAddingOperationSetCompleted();
