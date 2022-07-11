@@ -60,10 +60,8 @@ public:
 
 private:
     // INetworkConnection class
-    RESULT_ENTYPE Activate(IN IMS_BOOL bEnableApn = IMS_FALSE,
-            IN IMS_SINT32 nIpcanCategory = IIpcan::CATEGORY_MOBILE) override;
-    RESULT_ENTYPE Deactivate(IN IMS_BOOL bDisableApn = IMS_FALSE,
-            IN IMS_SINT32 nIpcanCategory = IIpcan::CATEGORY_MOBILE) override;
+    RESULT_ENTYPE Activate(IN IMS_BOOL bEnableApn = IMS_FALSE) override;
+    RESULT_ENTYPE Deactivate(IN IMS_BOOL bDisableApn = IMS_FALSE) override;
     void GetAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo) override;
     void GetLastAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo,
             OUT AString& strTimeStamp, OUT AString& strCellInfoAge) override;
@@ -76,7 +74,6 @@ private:
             IN IMS_SINT32 nIpVersion = 0 /*configuration-based*/) override;
     STATE_ENTYPE GetState() const override;
     IMS_BOOL IsConnected(IN IMS_SINT32 nCategory = IIpcan::CATEGORY_ANY) const override;
-    IMS_BOOL SendPingToHostAddress(IN const IPAddress& objHostAddress) override;
     IMS_BOOL IsePDGEnabled() const override;
     IMS_BOOL IsMobileDataEnabled() const override;
     IMS_SINT32 GetMtu() const override;

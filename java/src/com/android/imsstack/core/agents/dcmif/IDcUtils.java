@@ -53,11 +53,6 @@ public interface IDcUtils extends IDc {
     int getLteRsrpStrength();
 
     /**
-     * Sends a ping to the given host address to check the aliveness.
-     */
-    boolean sendPingToHostAddress(int apnType, String hostAddress);
-
-    /**
      * Update all cell-info forcingly if the device doesn't have SIM card
      * or is in limited service state (emergency only).
      */

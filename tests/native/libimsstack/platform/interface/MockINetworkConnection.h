@@ -13,10 +13,8 @@
 class MockINetworkConnection : public INetworkConnection
 {
 public:
-    MOCK_METHOD(RESULT_ENTYPE, Activate, (IN IMS_BOOL bEnableApn, IN IMS_SINT32 nIpcanCategory),
-            (override));
-    MOCK_METHOD(RESULT_ENTYPE, Deactivate, (IN IMS_BOOL bDisableApn, IN IMS_SINT32 nIpcanCategory),
-            (override));
+    MOCK_METHOD(RESULT_ENTYPE, Activate, (IN IMS_BOOL bEnableApn), (override));
+    MOCK_METHOD(RESULT_ENTYPE, Deactivate, (IN IMS_BOOL bDisableApn), (override));
     MOCK_METHOD(void, GetAccessNetworkInfo, (OUT AccessNetworkInfo & objAccessNetInfo), (override));
     MOCK_METHOD(void, GetLastAccessNetworkInfo,
             (OUT AccessNetworkInfo & objAccessNetInfo, OUT AString& strTimestamp,
@@ -34,7 +32,6 @@ public:
     MOCK_METHOD(const AStringArray&, GetPcscfAddress, (IN IMS_SINT32 nIpVersion), (override));
     MOCK_METHOD(STATE_ENTYPE, GetState, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsConnected, (IN IMS_SINT32 nCategory), (const, override));
-    MOCK_METHOD(IMS_BOOL, SendPingToHostAddress, (IN const IPAddress& objHostAddress), (override));
     MOCK_METHOD(IMS_BOOL, IsePDGEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsMobileDataEnabled, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetMtu, (), (const, override));

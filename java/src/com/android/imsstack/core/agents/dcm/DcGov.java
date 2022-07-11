@@ -70,23 +70,17 @@ public class DcGov implements IDc, ISystemAPINetwork {
 
     // Interface implementation methods --------------------------
     @Override
-    public int activateDataConnection4Sys(int apnType, int ipcanType) {
-        ImsLog.i(mSlotId, "apnType = " + apnType + " , ipcanType = " + ipcanType);
+    public int activateDataConnection4Sys(int apnType) {
+        ImsLog.i(mSlotId, "apnType = " + apnType);
         IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
         return ((dcapn != null) && dcapn.connect(apnType)) ? 1 : 0;
     }
 
     @Override
-    public int deactivateDataConnection4Sys(int apnType, int ipcanType) {
-        ImsLog.i(mSlotId, "apnType = " + apnType + " , ipcanType = " + ipcanType);
+    public int deactivateDataConnection4Sys(int apnType) {
+        ImsLog.i(mSlotId, "apnType = " + apnType);
         IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-        if (dcapn == null) {
-            return 0;
-        }
-
-        dcapn.disconnect(apnType);
-
-        return 1;
+        return ((dcapn != null) && dcapn.disconnect(apnType)) ? 1 : 0;
     }
 
     @Override
@@ -236,14 +230,6 @@ public class DcGov implements IDc, ISystemAPINetwork {
     public int getMocnPlmnInfo4Sys() {
         IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         return (dcnw != null) ? dcnw.getMocnPlmnInfo() : 0;
-    }
-
-    @Override
-    public int sendPingToHostAddress4Sys(int apnType, String hostAddress) {
-        ImsLog.d(mSlotId, "");
-        IDcUtils dcutil = (IDcUtils) DcFactory.getDc(DcFactory.UTIL, mSlotId);
-
-        return ((dcutil != null) && dcutil.sendPingToHostAddress(apnType, hostAddress)) ? 1 : 0;
     }
 
     @Override

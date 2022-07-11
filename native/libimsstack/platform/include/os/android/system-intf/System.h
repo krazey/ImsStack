@@ -108,10 +108,8 @@ public:
     IMS_SINT32 GetAccessNetworkInfo(IN IMS_SINT32 nDefaultNetworkType, OUT IMS_SINT32& nNetworkType,
             OUT AStringArray& objAccessNetInfo, IN IMS_SINT32 nSlotId);
     AStringArray GetLastAccessNetworkInfo(IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nSlotId);
-    IMS_SINT32 ActivateDataConnection(
-            IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpcanCategory, IN IMS_SINT32 nSlotId);
-    IMS_SINT32 DeactivateDataConnection(
-            IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpcanCategory, IN IMS_SINT32 nSlotId);
+    IMS_SINT32 ActivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
+    IMS_SINT32 DeactivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
     AString GetApnName(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetDataConnectionState(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
     AStringArray GetHostByName(IN const AString& strHost, IN IMS_SINT32 nIpVersion,
@@ -123,8 +121,6 @@ public:
             IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId);
     AStringArray GetPcscfAddresses(
             IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId);
-    IMS_BOOL SendPingToHostAddress(
-            IN IMS_SINT32 nApnType, IN const AString& strHostAddress, IN IMS_SINT32 nSlotId);
     IMS_BOOL IsImsEmergencyCallSupported(IN IMS_SINT32 nSlotId);
     IMS_BOOL IsImsVoiceCallSupported(IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetLteRsrpStrength(IN IMS_SINT32 nSlotId);

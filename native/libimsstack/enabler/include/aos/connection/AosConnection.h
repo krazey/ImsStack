@@ -47,7 +47,6 @@ public:
     virtual const AString& GetIfaceName();
     virtual IMS_BOOL IsEpdgEnabled();
     virtual IMS_SINT32 GetIpcanCategory();
-    virtual IMS_BOOL SendPingToHostAddress(IN const IPAddress& objHostAddress);
 
     // Log
     static const IMS_CHAR* StateToString(IN IMS_UINT32 nState);

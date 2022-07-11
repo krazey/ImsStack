@@ -40,7 +40,6 @@ public:
     MOCK_METHOD(const AString&, GetIfaceName, (), (override));
     MOCK_METHOD(IMS_BOOL, IsEpdgEnabled, (), (override));
     MOCK_METHOD(IMS_SINT32, GetIpcanCategory, (), (override));
-    MOCK_METHOD(IMS_BOOL, SendPingToHostAddress, (IN const IPAddress& objHostAddress), (override));
 };
 
 #endif // MOCK_I_AOS_CONNECTION_H_

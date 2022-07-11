@@ -50,11 +50,9 @@ public:
 
 public:
     // bEnableApn (true) : Applied for ims / internet APN; other APNs behave as on-demand.
-    virtual RESULT_ENTYPE Activate(IN IMS_BOOL bEnableApn = IMS_FALSE,
-            IN IMS_SINT32 nIpcanCategory = IIpcan::CATEGORY_MOBILE) = 0;
+    virtual RESULT_ENTYPE Activate(IN IMS_BOOL bEnableApn = IMS_FALSE) = 0;
     // bDisableApn (true) : Applied for ims / internet APN; other APNs behave as on-demand.
-    virtual RESULT_ENTYPE Deactivate(IN IMS_BOOL bDisableApn = IMS_FALSE,
-            IN IMS_SINT32 nIpcanCategory = IIpcan::CATEGORY_MOBILE) = 0;
+    virtual RESULT_ENTYPE Deactivate(IN IMS_BOOL bDisableApn = IMS_FALSE) = 0;
     virtual void GetAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo) = 0;
     virtual void GetLastAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo,
             OUT AString& strTimestamp, OUT AString& strCellInfoAge) = 0;
@@ -87,7 +85,6 @@ public:
             IN IMS_SINT32 nIpVersion = 0 /* configuration-based */) = 0;
     virtual STATE_ENTYPE GetState() const = 0;
     virtual IMS_BOOL IsConnected(IN IMS_SINT32 nCategory = IIpcan::CATEGORY_ANY) const = 0;
-    virtual IMS_BOOL SendPingToHostAddress(IN const IPAddress& objHostAddress) = 0;
     virtual IMS_BOOL IsePDGEnabled() const = 0;
     virtual IMS_BOOL IsMobileDataEnabled() const = 0;
     virtual IMS_SINT32 GetMtu() const = 0;

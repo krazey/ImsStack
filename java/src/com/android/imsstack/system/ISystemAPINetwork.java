@@ -6,8 +6,21 @@ import java.io.FileDescriptor;
 
 public interface ISystemAPINetwork {
 
-    int activateDataConnection4Sys(int apnType, int ipcanType);
-    int deactivateDataConnection4Sys(int apnType, int ipcanType);
+    /**
+     * Try to activate data connection for the given type of apn
+     *
+     * @param apnType apn type to connect
+     * @return 1 if it requested to framework
+     */
+    int activateDataConnection4Sys(int apnType);
+
+    /**
+     * Try to deactivate data connection for the given type of apn
+     *
+     * @param apnType apn type to connect
+     * @return 1 if it requested to framework
+     */
+    int deactivateDataConnection4Sys(int apnType);
 
     /**
      * Returns the access network information of the network that the IMS is registering
@@ -34,7 +47,6 @@ public interface ISystemAPINetwork {
     int getVoiceServiceState4Sys();
     int isLteEmergencyOnly4Sys();
     int isEmergencyAttachSupported4Sys();
-    int sendPingToHostAddress4Sys(int apnType, String hostAddress);
     int getMocnPlmnInfo4Sys();
     boolean isMobileDataEnabled();
     int getMtu4Sys(int apnType);

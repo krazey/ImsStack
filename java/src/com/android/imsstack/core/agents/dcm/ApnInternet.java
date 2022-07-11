@@ -45,32 +45,6 @@ public class ApnInternet extends Apn {
         super.cleanup();
     }
 
-    @Override
-    public boolean connect() {
-        ImsLog.i("apn is connected");
-
-        // Internet apn is handled by system. So it doesn't check employment state when connect
-        // Using Internet pdn registration, send the data connected msg to native
-        int dataState = getDataStateFromCM();
-
-        if (mDataState != dataState) {
-            ImsLog.w("data state :: " + mDataState + " >> " + dataState);
-
-            setDataState(dataState);
-            sendDataStateUpdateMessage(EApnType.INTERNET,
-                    EDataState.convertIntTypeToEnum(EDataState.convertFromTMtoImsType(
-                    (mDataState))));
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean disconnect() {
-        //Do nothing for Internet PDN
-        return true;
-    }
-
     // Private/Protected methods ---------------------------------
     protected void initializeApn() {
         mType = EApnType.INTERNET;
