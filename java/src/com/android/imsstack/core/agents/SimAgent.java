@@ -697,12 +697,12 @@ public class SimAgent implements SimInterface {
 
             intentFilter.addAction(TelephonyManager.ACTION_SIM_CARD_STATE_CHANGED);
 
-            AppContext.get().registerReceiver(this, intentFilter, null,
+            AppContext.getInstance().registerReceiver(this, intentFilter, null,
                     mSimHandler, Context.RECEIVER_EXPORTED);
         }
 
         public void unregister() {
-            AppContext.get().unregisterReceiver(this);
+            AppContext.getInstance().unregisterReceiver(this);
         }
 
         @Override
@@ -726,7 +726,7 @@ public class SimAgent implements SimInterface {
 
     private final class SimHandler extends Handler {
         SimHandler() {
-            super(AppContext.getMainLooper());
+            super(AppContext.getInstance().getMainLooper());
         }
 
         @Override
@@ -832,7 +832,7 @@ public class SimAgent implements SimInterface {
             subId = MSimUtils.getSubId(slotId);
         }
 
-        SmsManager sm = AppContext.getSystemService(SmsManager.class);
+        SmsManager sm = AppContext.getInstance().getSystemService(SmsManager.class);
 
         if (sm != null) {
             if (!MSimUtils.isValidSubId(subId)) {

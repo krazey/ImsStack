@@ -134,7 +134,7 @@ public class UsatAgent extends Handler implements UsatInterface {
     private int mGlobalCommandId = 1;
 
     UsatAgent(SimInterface sim) {
-        super(AppContext.getMainLooper());
+        super(AppContext.getInstance().getMainLooper());
         mSim = sim;
         mCommands = new SparseArray<>();
     }

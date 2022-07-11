@@ -96,7 +96,7 @@ public class ConfigAgent implements ConfigInterface {
         InputStream is = null;
 
         try {
-            is = AppContext.get().openFileInput(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
+            is = AppContext.getInstance().openFileInput(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
             mTestConfig = PersistableBundle.readFromStream(is);
         } catch (FileNotFoundException e) {
             ImsLog.d(mSlotId, "readTestConfig: not found");
@@ -117,13 +117,13 @@ public class ConfigAgent implements ConfigInterface {
             return false;
         }
 
-        AppContext.get().deleteFile(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
+        AppContext.getInstance().deleteFile(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
 
         if (!config.isEmpty()) {
             OutputStream os = null;
 
             try {
-                os = AppContext.get().openFileOutput(
+                os = AppContext.getInstance().openFileOutput(
                         CarrierConfig.TEST_CARRIER_CONFIG_FILE,
                         Context.MODE_APPEND);
                 config.writeToStream(os);
@@ -193,7 +193,8 @@ public class ConfigAgent implements ConfigInterface {
     }
 
     private PersistableBundle getCarrierConfig(int subId) {
-        CarrierConfigManager ccm = AppContext.getSystemService(CarrierConfigManager.class);
+        CarrierConfigManager ccm =
+                AppContext.getInstance().getSystemService(CarrierConfigManager.class);
         PersistableBundle configs = new PersistableBundle();
 
         if (ccm != null) {
@@ -235,7 +236,7 @@ public class ConfigAgent implements ConfigInterface {
         InputStream is = null;
 
         try {
-            is = AppContext.get().getAssets().open(fileName);
+            is = AppContext.getInstance().getAssets().open(fileName);
 
             synchronized (this) {
                 if (mFactory == null) {
@@ -269,7 +270,7 @@ public class ConfigAgent implements ConfigInterface {
             String[] files = null;
 
             try {
-                files = AppContext.get().getAssets().list(CarrierConfig.CARRIER_CONFIG);
+                files = AppContext.getInstance().getAssets().list(CarrierConfig.CARRIER_CONFIG);
             } catch (IOException e) {
                 ImsLog.e(mSlotId, "getCarrierConfigFile: " + e);
                 return null;
@@ -457,12 +458,12 @@ public class ConfigAgent implements ConfigInterface {
             filter.addAction(ACTION_TEST_CARRIER_CONFIG_PUT);
             filter.addAction(ACTION_TEST_CARRIER_CONFIG_APPLY);
 
-            AppContext.get().registerReceiver(this, filter, null,
-                    AppContext.getMainHandler(), Context.RECEIVER_EXPORTED);
+            AppContext.getInstance().registerReceiver(this, filter, null,
+                    AppContext.getInstance().getMainHandler(), Context.RECEIVER_EXPORTED);
         }
 
         public void unregister() {
-            AppContext.get().unregisterReceiver(this);
+            AppContext.getInstance().unregisterReceiver(this);
         }
 
         @Override

@@ -230,7 +230,8 @@ public class TelephonySubscriberAgent implements ITelephonySubscriber,
         // CarrierConfigManager#KEY_USE_USIM_BOOL may need to be enabled
         // to read the phone number from USIM application.
         int subId = MSimUtils.getSubId(mSlotId);
-        SubscriptionManager sm = AppContext.getSystemService(SubscriptionManager.class);
+        SubscriptionManager sm =
+                AppContext.getInstance().getSystemService(SubscriptionManager.class);
 
         return (sm != null)
                 ? sm.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_UICC)

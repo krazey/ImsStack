@@ -124,7 +124,7 @@ public final class ImsPrivateProperties {
 
         private static SharedPreferences getSharedPreferences(int slotId) {
             String name = String.format(Locale.US, "%s_%d", NAME, slotId);
-            return AppContext.get().getSharedPreferences(name, Context.MODE_PRIVATE);
+            return AppContext.getInstance().getSharedPreferences(name, Context.MODE_PRIVATE);
         }
     }
 
@@ -332,7 +332,7 @@ public final class ImsPrivateProperties {
         }
 
         public static String get(String key, String defValue, int slotId) {
-            return get(AppContext.get(), key, defValue, slotId);
+            return get(AppContext.getInstance(), key, defValue, slotId);
         }
 
         public static String get(Context c, String key, String defValue, int slotId) {
@@ -349,7 +349,7 @@ public final class ImsPrivateProperties {
         }
 
         public static void set(String key, String value, int slotId) {
-            set(AppContext.get(), key, value, slotId);
+            set(AppContext.getInstance(), key, value, slotId);
         }
 
         public static void set(Context c, String key, String value, int slotId) {
@@ -376,7 +376,7 @@ public final class ImsPrivateProperties {
 
         public static void removeTestProperties(int slotId) {
             SharedPreferences.Editor editor = getSharedPreferences(
-                    AppContext.get(), slotId).edit();
+                    AppContext.getInstance(), slotId).edit();
 
             for (String prop : TEST_PROPERTIES) {
                 editor.remove(prop);

@@ -820,7 +820,8 @@ public class DcApn implements IDcApn {
             mTelephonyManager = tm;
 
             if (mTelephonyManager != null) {
-                mTelephonyManager.registerTelephonyCallback(AppContext.getMainExecutor(), this);
+                mTelephonyManager.registerTelephonyCallback(
+                        AppContext.getInstance().getMainExecutor(), this);
             }
         }
 

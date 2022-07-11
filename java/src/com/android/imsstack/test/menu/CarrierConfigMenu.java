@@ -310,7 +310,8 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     ImsLog.d(mSlotId, "VoLte-Provisioning-Required: subId="
                             + subId + ", status=" + provisioningStatus);
 
-                    ImsManager imsMngr = AppContext.getSystemService(ImsManager.class);
+                    ImsManager imsMngr =
+                            AppContext.getInstance().getSystemService(ImsManager.class);
 
                     if (imsMngr != null) {
                         try {
@@ -449,7 +450,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
             ImsLog.d(mSlotId, "onConfigValueChanged: value=" + newConfigValue + ", key=" + key);
 
             if (key == null) {
-                Toast.makeText(AppContext.get(), "CarrierConfig: key is invalid",
+                Toast.makeText(AppContext.getInstance(), "CarrierConfig: key is invalid",
                         Toast.LENGTH_LONG).show();
                 return false;
             }
@@ -574,7 +575,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
         InputStream is = null;
 
         try {
-            is = AppContext.get().getAssets().open(fileName);
+            is = AppContext.getInstance().getAssets().open(fileName);
 
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             XmlPullParser parser = factory.newPullParser();

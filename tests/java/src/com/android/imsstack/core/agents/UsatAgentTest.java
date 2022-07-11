@@ -25,6 +25,7 @@ import android.telephony.TelephonyManager;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -89,7 +90,7 @@ public class UsatAgentTest {
     }
 
     @BeforeClass
-    public static void initial() {
+    public static void setUpOnce() {
         sApplicationContext = Mockito.mock(Context.class);
         AppContext.init(sApplicationContext);
     }
@@ -109,6 +110,11 @@ public class UsatAgentTest {
                 }
             }
         };
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        AppContext.deinit();
     }
 
     @Test

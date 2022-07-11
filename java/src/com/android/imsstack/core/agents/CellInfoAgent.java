@@ -131,7 +131,7 @@ public class CellInfoAgent implements ICellInfo {
         ImsLog.d(slotId, "");
 
         mSlotId = slotId;
-        mCellInfoHandler = new CellInfoHandler(AppContext.getMainLooper());
+        mCellInfoHandler = new CellInfoHandler(AppContext.getInstance().getMainLooper());
     }
 
     @Override

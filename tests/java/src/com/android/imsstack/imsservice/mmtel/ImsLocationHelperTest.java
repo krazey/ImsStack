@@ -25,8 +25,13 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
+import com.android.imsstack.ContextFixture;
+import com.android.imsstack.util.AppContext;
+
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -38,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(JUnit4.class)
 public class ImsLocationHelperTest {
-
+    private static ContextFixture sContext;
     private ImsLocationHelper mLocHelper = null;
     private static final String TAG = ImsLocationHelperTest.class.getName();
 
@@ -66,6 +71,12 @@ public class ImsLocationHelperTest {
             Log.i(TAG, "Location update received in LocationBasedCallTest");
             mLatch.countDown();
         }
+    }
+
+    @BeforeClass
+    public static void setUpOnce() {
+        sContext = new ContextFixture();
+        AppContext.init(sContext.getTestDouble());
     }
 
     @Before
@@ -103,6 +114,12 @@ public class ImsLocationHelperTest {
         }
 
         mTestHandler = null;
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        AppContext.deinit();
+        sContext = null;
     }
 
     @Test

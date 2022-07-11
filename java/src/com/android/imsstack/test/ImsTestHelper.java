@@ -44,7 +44,7 @@ public final class ImsTestHelper {
     public ImsTestHelper () {
         ImsLog.d("ImsTestHelper is loaded");
 
-        mContext = AppContext.get();
+        mContext = AppContext.getInstance();
         if (mContext == null) {
             return;
         }

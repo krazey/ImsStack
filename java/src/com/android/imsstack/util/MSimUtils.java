@@ -123,7 +123,8 @@ public final class MSimUtils {
 
     /** sub id */
     public static int getSubId(int phoneId) {
-        SubscriptionManager sm = AppContext.get().getSystemService(SubscriptionManager.class);
+        SubscriptionManager sm =
+                AppContext.getInstance().getSystemService(SubscriptionManager.class);
         int[] subIds = (sm != null) ? sm.getSubscriptionIds(phoneId) : null;
         if ((subIds != null) && (subIds.length > 0)) {
             return subIds[0];
