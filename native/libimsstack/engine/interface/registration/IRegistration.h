@@ -379,7 +379,7 @@ public:
     /**
      * @brief Sets the user-info field for Contact header in this registration.
      *
-     * It will be applied in all the outgoint SIP request and response.\n
+     * It will be applied in all the outgoing SIP request and response.\n
      * If user-info is null string, the UE will use the Contact header which is used
      * in IMS registration.\n
      * If user-info is empty string, the UE will not contain the user-info field in
