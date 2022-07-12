@@ -522,6 +522,28 @@ public class ProvisioningData {
     }
 
     /**
+     * Store xml parsed data into xml file
+     * @param parent file descriptor include path information
+     * @param child file name
+     * @param data data will be stored in file
+     * @return true if the operation is success, otherwise return false
+     */
+    public static boolean createXmlFileFromBytes(@NonNull File parent, @NonNull String child,
+            @NonNull byte[] data) {
+        try {
+            File file = new File(parent, child);
+            FileOutputStream outputStream = new FileOutputStream(file);
+            outputStream.write(data);
+            outputStream.close();
+        } catch (IOException e) {
+            ImsLog.i(e.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * print whole parsed data
      */
     @VisibleForTesting

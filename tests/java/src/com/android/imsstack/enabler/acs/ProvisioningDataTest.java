@@ -47,6 +47,9 @@ import java.util.Arrays;
 public class ProvisioningDataTest {
     private static final String TAG = ProvisioningData.class.getSimpleName();
     private static final File FILE_DESCRIPTOR = InstrumentationRegistry.getContext().getFilesDir();
+    // path : /storage/emulated/0/Download
+    private static final String FILE_DESCRIPTOR_EXTERNAL =
+            Environment.getExternalStorageDirectory() + "/Download";
     private static final String FILE_NAME = "provisionindData.xml";
     private static final String AC_DATA = "<?xml version=\"1.0\"?>"
                     + "<wap-provisioningdoc version=\"1.1\">"
@@ -270,16 +273,29 @@ public class ProvisioningDataTest {
         assertNull(ProvisioningData.decompressGzip(null));
     }
 
+    @Test
+    @SmallTest
+    public void createXmlFile_withData() {
+        String fileName = "temp_provisioning.xml";
+        boolean result = ProvisioningData.createXmlFileFromBytes(
+                FILE_DESCRIPTOR, fileName, AC_DATA.getBytes());
+        assertTrue(result);
+
+        copyFile(fileName);
+    }
+
     private boolean isExistTestFile(String fileName) {
         File srcFile = new File(FILE_DESCRIPTOR, fileName);
         return srcFile.exists();
     }
 
-    private void copyFile(String fileName) {
-        // path : /storage/emulated/0/Download
-        String targetPath = Environment.getExternalStorageDirectory() + "/Download";
+    private boolean isExistTestFileInExternalStorage(String fileName) {
+        File srcFile = new File(FILE_DESCRIPTOR_EXTERNAL, fileName);
+        return srcFile.exists();
+    }
 
-        File desFile = new File(targetPath, fileName);
+    private void copyFile(String fileName) {
+        File desFile = new File(FILE_DESCRIPTOR_EXTERNAL, fileName);
         File srcFile = new File(FILE_DESCRIPTOR, fileName);
         try {
             Files.copy(srcFile, desFile);
@@ -287,6 +303,6 @@ public class ProvisioningDataTest {
             Log.i(TAG, e.getMessage());
         }
 
-        Log.i(TAG, "test result file copied : " + targetPath + "/" + FILE_NAME);
+        Log.i(TAG, "test result file copied : " + desFile + "/" + FILE_NAME);
     }
 }
