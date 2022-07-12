@@ -54,13 +54,15 @@ AString UceRlmiComposer::ComposeRLMIList(IN IMSList<AString>& pContactInfoList)
         for (IMS_UINT32 n = 0; n < pContactInfoList.GetSize(); n++)
         {
             AString szUserID = pContactInfoList.GetAt(n);
-            if (szUserID.StartsWith("sip:") == IMS_TRUE || szUserID.StartsWith("tel:") == IMS_TRUE)
+            piWriter->WriteStartElement("entry");
+            if (szUserID.StartsWith("sip:") == IMS_FALSE &&
+                    szUserID.StartsWith("tel:") == IMS_FALSE)
             {
-                piWriter->WriteStartElement("entry");
-                piWriter->WriteAttribute("uri", szUserID);
-                piWriter->WriteEndElement();
-                piWriter->WriteCharacters(TextParser::STR_LF);
+                szUserID = "tel:" + szUserID;
             }
+            piWriter->WriteAttribute("uri", szUserID);
+            piWriter->WriteEndElement();
+            piWriter->WriteCharacters(TextParser::STR_LF);
         }
         /*End of list element*/
         piWriter->WriteEndElement();
