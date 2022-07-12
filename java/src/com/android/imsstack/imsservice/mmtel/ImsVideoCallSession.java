@@ -27,6 +27,7 @@ import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 public final class ImsVideoCallSession implements IVideoCallSession {
     private static final int UPDATE_STATE_IDLE = 0;
@@ -364,6 +365,21 @@ public final class ImsVideoCallSession implements IVideoCallSession {
 
         mVideoCallProvider.receiveSessionModifyResponse(
                 status, requestedProfile, responseProfile);
+    }
+
+    @VisibleForTesting
+    public void setStateAndType(int updateState, int modificationType) {
+        mUpdateState = updateState;
+        mModificationType = modificationType;
+    }
+
+    @VisibleForTesting
+    public boolean isClearedSessionModificationInfo() {
+        if ((mProfileBeforeRequest == null) && (mProposalProfile == null)
+                && (mProposalMediaProfile == null) && (mModificationType == MODIFICATION_NONE)) {
+            return true;
+        }
+        return false;
     }
 
     private void sendSessionModifyRejectCompleted() {
