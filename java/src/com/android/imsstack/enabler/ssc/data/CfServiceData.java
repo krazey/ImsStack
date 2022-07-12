@@ -36,10 +36,6 @@ public class CfServiceData extends SscServiceData {
         return mNoReplyTimer;
     }
 
-    public void setNoReplyTimer(int timer) {
-        this.mNoReplyTimer = timer;
-    }
-
     public ArrayList<SscRuleData> getRuleSet() {
         return mRuleSet;
     }
@@ -48,9 +44,6 @@ public class CfServiceData extends SscServiceData {
         StringBuffer sb = new StringBuffer();
         if (mRuleSet != null) {
             for(SscRuleData ruleData : mRuleSet) {
-                if ((ruleData.getRuleId() == null) || ruleData.getRuleId().isEmpty()) {
-                    continue;
-                }
                 sb.append(ruleData.toString());
             }
         }

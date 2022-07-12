@@ -509,7 +509,8 @@ public class SscXmlCreatorTest {
     }
 
     private SscServiceData getUpdateData(ESsType ssType, int action, int condition) {
-        return SscXmlGovTest.createUpdateData(ssType, 0, action, condition);
+        return SscXmlGovTest.createUpdateData(ssType, 0, action, condition,
+                SscServiceClassUtil.SERVICE_CLASS_NONE);
     }
 
     private SscServiceData getInsertCfData(ESsType ssType, int action, int condition,

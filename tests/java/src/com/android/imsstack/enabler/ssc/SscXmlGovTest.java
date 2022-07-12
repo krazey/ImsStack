@@ -22,8 +22,13 @@ import com.android.imsstack.enabler.ssc.data.CbServiceQueryData;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.CfServiceQueryData;
 import com.android.imsstack.enabler.ssc.data.CfServiceUpdateData;
+import com.android.imsstack.enabler.ssc.data.CwServiceData;
+import com.android.imsstack.enabler.ssc.data.OipServiceData;
+import com.android.imsstack.enabler.ssc.data.OirServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
+import com.android.imsstack.enabler.ssc.data.TipServiceData;
+import com.android.imsstack.enabler.ssc.data.TirServiceData;
 
 import org.junit.After;
 import org.junit.Before;
@@ -76,22 +81,52 @@ public class SscXmlGovTest {
         } else if (ssType == ESsType.ICB || ssType == ESsType.OCB) {
             return new CbServiceQueryData(SLOT_0, ssType, SscConstant.EVENT_SSC_QUERY_CB,
                     transactionId, condition, SscServiceClassUtil.SERVICE_CLASS_NONE);
+        } else if (ssType == ESsType.CW) {
+            return new SscServiceQueryData(SLOT_0, ssType, SscConstant.EVENT_SSC_QUERY_CW,
+                    transactionId, -1);
+        } else if (ssType == ESsType.OIR) {
+            return new SscServiceQueryData(SLOT_0, ssType, SscConstant.EVENT_SSC_QUERY_OIR,
+                    transactionId, -1);
+        } else if (ssType == ESsType.OIP) {
+            return new SscServiceQueryData(SLOT_0, ssType, SscConstant.EVENT_SSC_QUERY_OIP,
+                    transactionId, -1);
+        } else if (ssType == ESsType.TIR) {
+            return new SscServiceQueryData(SLOT_0, ssType, SscConstant.EVENT_SSC_QUERY_TIR,
+                    transactionId, -1);
+        } else if (ssType == ESsType.TIP) {
+            return new SscServiceQueryData(SLOT_0, ssType, SscConstant.EVENT_SSC_QUERY_TIP,
+                    transactionId, -1);
         }
 
         return createDocumentQueryData();
     }
 
     protected static SscServiceData createUpdateData(ESsType ssType, int transactionId, int action,
-            int condition) {
+            int condition, int serviceClass) {
         if (ssType == ESsType.CF) {
             return new CfServiceUpdateData(SLOT_0, ssType, SscConstant.EVENT_SSC_UPDATE_CF,
-                    transactionId, action, condition, null, 0,
-                    SscServiceClassUtil.SERVICE_CLASS_VOICE);
+                    transactionId, action, condition, null, 0, serviceClass);
+        } else if (ssType == ESsType.ICB || ssType == ESsType.OCB) {
+            return new CbServiceUpdateData(SLOT_0, ssType, SscConstant.EVENT_SSC_UPDATE_CB,
+                    transactionId, action, condition, null, serviceClass, null);
+        } else if (ssType == ESsType.CW) {
+            return new CwServiceData(SLOT_0, ssType, SscConstant.EVENT_SSC_UPDATE_CW,
+                    transactionId, action);
+        } else if (ssType == ESsType.OIR) {
+            return new OirServiceData(SLOT_0, ssType, SscConstant.EVENT_SSC_UPDATE_OIR,
+                    transactionId, action, 0, 0);
+        } else if (ssType == ESsType.OIP) {
+            return new OipServiceData(SLOT_0, ssType, SscConstant.EVENT_SSC_UPDATE_OIP,
+                    transactionId, action);
+        } else if (ssType == ESsType.TIR) {
+            return new TirServiceData(SLOT_0, ssType, SscConstant.EVENT_SSC_UPDATE_TIR,
+                    transactionId, action, 0);
+        } else if (ssType == ESsType.TIP) {
+            return new TipServiceData(SLOT_0, ssType, SscConstant.EVENT_SSC_UPDATE_TIP,
+                    transactionId, action);
         }
 
-        return new CbServiceUpdateData(SLOT_0, ssType, SscConstant.EVENT_SSC_UPDATE_CB,
-                transactionId, action, condition, null, SscServiceClassUtil.SERVICE_CLASS_VOICE,
-                null);
+        return null;
     }
 
     protected static SscServiceData createInsertData(ESsType ssType, int transactionId, int action,

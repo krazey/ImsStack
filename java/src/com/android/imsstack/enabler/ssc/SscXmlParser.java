@@ -698,12 +698,11 @@ public class SscXmlParser {
             Element ruleElement = (Element) ruleList.item(i);
             String id = ruleElement.getAttribute(SscXmlFormat.ID);
             ImsLog.d(slotId, "RuleId : " + id);
-
-            SscRuleData ruleData = getRuleData(queryData, ruleElement);
-            if (!TextUtils.isEmpty(id)) {
-                ruleData.setRuleId(id);
+            if (TextUtils.isEmpty(id)) {
+                continue;
             }
 
+            SscRuleData ruleData = getRuleData(queryData, ruleElement);
             if (ruleData == null || ruleData.getSsCondition() == SscConstant.CONDITION_INVALID) {
                 continue;
             }
@@ -711,6 +710,8 @@ public class SscXmlParser {
             if (!isRequestedData(queryData, ruleData)) {
                 continue;
             }
+
+            ruleData.setRuleId(id);
 
             /*
             if (ruleData.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_NONE) {

@@ -587,6 +587,24 @@ public class SscXmlFormat {
         }
     }
 
+    protected static boolean isNamespaceSsSupported(int slotId) {
+        UtXmlData xmlData = getXmlData(slotId);
+        if (xmlData == null) {
+            return false;
+        }
+
+        return NS_SS_PREFIX.equals(xmlData.mNsSsPrefix);
+    }
+
+    protected static boolean isNamespaceCpSupported(int slotId) {
+        UtXmlData xmlData = getXmlData(slotId);
+        if (xmlData == null) {
+            return false;
+        }
+
+        return NS_CP_PREFIX.equals(xmlData.mNsCpPrefix);
+    }
+
     protected static boolean getMediaCapability(int slotId, String serviceName,
             int mediaType) {
         UtXmlData xmlData = getXmlData(slotId);
