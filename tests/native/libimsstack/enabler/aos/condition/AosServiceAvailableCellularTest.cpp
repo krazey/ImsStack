@@ -157,7 +157,7 @@ TEST_F(AosServiceAvailableCellurTest, HandleAirplaneModeChanged_ReturnByConfig)
     HandleAirplaneModeChanged(1);
 }
 
-TEST_F(AosServiceAvailableCellurTest, HandleAirplaneModeChanged_AirplaneMddeTrue)
+TEST_F(AosServiceAvailableCellurTest, HandleAirplaneModeChanged_AirplaneModeTrue)
 {
     MockIAosNConfiguration objMockIAosNConfiguration;
     AosProvider::GetInstance()->SetNConfiguration(
@@ -175,7 +175,7 @@ TEST_F(AosServiceAvailableCellurTest, HandleAirplaneModeChanged_AirplaneMddeTrue
     HandleAirplaneModeChanged(1);
 }
 
-TEST_F(AosServiceAvailableCellurTest, HandleAirplaneModeChanged_AirplaneMddeFalse)
+TEST_F(AosServiceAvailableCellurTest, HandleAirplaneModeChanged_AirplaneModeFalse)
 {
     MockIAosNConfiguration objMockIAosNConfiguration;
     AosProvider::GetInstance()->SetNConfiguration(

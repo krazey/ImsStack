@@ -37,7 +37,8 @@ AosServiceAvailableWifi::AosServiceAvailableWifi() :
         m_nVoWiFiSetting(IMS_FALSE),
         m_nBadNetworkState(STATE_BAD_NETWORK_NONE),
         m_bWiFiState(IMS_FALSE),
-        m_piNetPing(IMS_NULL)
+        m_piNetPing(IMS_NULL),
+        m_piTestLocation(IMS_NULL)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosServiceAvailableWifi = %" PFLS_u "/%" PFLS_x,
             sizeof(AosServiceAvailableWifi), this, 0);
@@ -164,7 +165,10 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::NetworkPing_NotifyResult(
 {
     A_IMS_TRACE_D(AOSTAG, "NetPing_NotifyResult :: result=%s", PingResultToString(nResult), 0, 0);
 
-    piPing->Destroy();
+    if (piPing != IMS_NULL)
+    {
+        piPing->Destroy();
+    }
     m_piNetPing = IMS_NULL;
 
     if (m_nBadNetworkState != STATE_BAD_NETWORK_CHECKING)
@@ -278,17 +282,26 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleWiFiConnectionChanged()
 
 PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleLocationInfoChanged()
 {
-    ILocationProperties* piLocation =
-            PhoneInfoService::GetPhoneInfoService()
-                    ->GetLocationInfo(m_nSlotId)
-                    ->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);
+    AString strNewCountry;
 
-    if (piLocation == IMS_NULL)
+    if (m_piTestLocation == IMS_NULL)
     {
-        return;
-    }
+        ILocationProperties* piLocation =
+                PhoneInfoService::GetPhoneInfoService()
+                        ->GetLocationInfo(m_nSlotId)
+                        ->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);
 
-    AString strNewCountry = piLocation->GetCountry();
+        if (piLocation == IMS_NULL)
+        {
+            return;
+        }
+
+        strNewCountry = piLocation->GetCountry();
+    }
+    else
+    {
+        strNewCountry = m_piTestLocation->GetCountry();
+    }
 
     A_IMS_TRACE_I(AOSTAG, "HandleLocationInfoChanged :: FROM (%s) TO (%s)", m_strCountry.GetStr(),
             strNewCountry.GetStr(), 0);

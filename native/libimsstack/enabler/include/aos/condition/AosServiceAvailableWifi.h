@@ -20,6 +20,8 @@
 #include "IWifiWatcher.h"
 #include "condition/AosServiceAvailable.h"
 
+class ILocationProperties;
+
 class AosServiceAvailableWifi :
         public AosServiceAvailable,
         public INetworkPingListener,
@@ -74,6 +76,9 @@ private:
     static const IMS_UINT32 TIME_BAD_NETWORK_CHECK = 3000;
 
 private:
+    // Use only for Unit test
+    ILocationProperties* m_piTestLocation;
+
     friend class AosServiceAvailableWifiTest;
 };
 
