@@ -28,30 +28,38 @@ import java.util.TimeZone;
 public final class SystemUtils {
     public static final String UTC_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
+    /**
+     * Performs the message digest and converts it to the hexa-decimal string.
+     *
+     * @param algorithm The digest algorithm.
+     * @param input The input string.
+     * @return A hexa-decimal string as a result of message digest.
+     */
     public static String calculateMessageDigest(String algorithm, String input) {
         MessageDigest md = null;
+        byte[] digest = null;
 
         try {
             md = MessageDigest.getInstance(algorithm);
-            md.update(input.getBytes());
+            digest = md.digest(input.getBytes());
         } catch (NoSuchAlgorithmException e) {
             ImsLog.e(e.toString());
             e.printStackTrace();
-            md = null;
         } catch (Exception e) {
             ImsLog.e(e.toString());
             e.printStackTrace();
-            md = null;
         }
 
-        if (md == null) {
-            return null;
-        }
-
-        return toHexString(md.digest());
+        return (digest != null) ? toHexString(digest) : null;
     }
 
-    public static String getUTCTimeFormat(long millis) {
+    /**
+     * Generates the UTC time format string from the given milli-seconds.
+     *
+     * @param millis The time as milli-seconds to be converted.
+     * @return A UTC time format string.
+     */
+    public static String getUtcTimeFormat(long millis) {
         SimpleDateFormat sdf = new SimpleDateFormat(UTC_TIME_FORMAT, Locale.US);
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         return sdf.format(new Date(millis)) + "Z";
