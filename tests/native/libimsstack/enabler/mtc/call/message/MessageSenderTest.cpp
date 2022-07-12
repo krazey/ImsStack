@@ -15,17 +15,333 @@
  */
 
 #include <gtest/gtest.h>
+#include "call/extension/MtcExtensionSet.h"
 #include "call/message/MessageSender.h"
+#include "call/MockIMtcSessionContext.h"
+#include "CallReasonInfo.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "core/MockICoreService.h"
+#include "core/MockIMessage.h"
+#include "core/MockISession.h"
+#include "helper/MtcSupplementaryService.h"
+#include "MockIMtcService.h"
+#include "sipcore/MockISipMessage.h"
+#include "SipStatusCode.h"
+
+LOCAL IMS_SINT32 SLOT_ID = 0;
+
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace android
 {
 
 class MessageSenderTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MessageSender* pSender;
 
-    virtual void TearDown() override {}
+    CallInfo objCallInfo;
+    MockIMessage objMessage;
+    MockISipMessage objSipMessage;
+    MockIMtcSessionContext objContext;
+    MockIMtcService objService;
+    MockICoreService objCoreService;
+    MockISession objSession;
+    MtcExtensionSet* pExtensionSet;
+    MtcConfigurationProxy* pConfigurationProxy;
+    MtcSupplementaryService* pSupplementaryService;
+
+protected:
+    virtual void SetUp() override
+    {
+        pConfigurationProxy = new MtcConfigurationProxy(new MockIMtcConfigurationManager());
+        pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
+
+        ImsList<IMtcExtension*> lstExtensions;
+        pExtensionSet = new MtcExtensionSet(lstExtensions);
+
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetISession).WillByDefault(ReturnRef(objSession));
+        ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
+        ON_CALL(objContext, GetCallType).WillByDefault(Return(CallType::VOIP));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetSupplementaryService)
+                .WillByDefault(ReturnRef(*pSupplementaryService));
+        ON_CALL(objContext, GetExtensionSet).WillByDefault(ReturnRef(*pExtensionSet));
+        ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
+        ON_CALL(objSession, GetNextResponse).WillByDefault(Return(&objMessage));
+        ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+        ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
+
+        pSender = new MessageSender(objContext);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pSender;
+        delete pConfigurationProxy;
+        delete pSupplementaryService;
+        delete pExtensionSet;
+    }
 };
+
+TEST_F(MessageSenderTest, CreateSenderWithNormalFormatter)
+{
+    MessageSender* pSenderWithNormalFormatter = new MessageSender(objContext);
+
+    EXPECT_NE(pSenderWithNormalFormatter, nullptr);
+
+    delete pSenderWithNormalFormatter;
+}
+
+TEST_F(MessageSenderTest, CreateSenderWithEmergencyFormatter)
+{
+    CallInfo objEmergencyCallInfo;
+    objEmergencyCallInfo.bEmergency = IMS_TRUE;
+
+    ON_CALL(objContext, GetCallInfo)
+            .WillByDefault(ReturnRef(objEmergencyCallInfo));
+
+    MessageSender* pSenderWithEmergencyFormatter = new MessageSender(objContext);
+
+    EXPECT_NE(pSenderWithEmergencyFormatter, nullptr);
+
+    delete pSenderWithEmergencyFormatter;
+}
+
+TEST_F(MessageSenderTest, StartNormalCase)
+{
+    IMS_RESULT bResult = pSender->Start();
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, StartFormFailure)
+{
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
+
+    IMS_RESULT bResult = pSender->Start();
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(MessageSenderTest, SendProvisionalResponseWith183)
+{
+    IMS_RESULT bResult = pSender->SendProvisionalResponse(
+            SipStatusCode::SC_183, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, SendProvisionalResponseWith180)
+{
+    IMS_RESULT bResult = pSender->SendProvisionalResponse(
+            SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_TRUE);
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, SendProvisionalResponseFormFailure)
+{
+    ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
+
+    IMS_RESULT bResult = pSender->SendProvisionalResponse(
+            SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_TRUE);
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(MessageSenderTest, SendPrackNormalCase)
+{
+    IMS_RESULT bResult = pSender->SendPrack();
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, SendPrackFormFailure)
+{
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
+
+    IMS_RESULT bResult = pSender->SendPrack();
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(MessageSenderTest, RespondToPrackWith200)
+{
+    IMS_RESULT bResult = pSender->RespondToPrack(SipStatusCode::SC_200);
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, RespondToPrackFormFailure)
+{
+    ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
+
+    IMS_RESULT bResult = pSender->RespondToPrack(SipStatusCode::SC_200);
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(MessageSenderTest, SendEarlyUpdateNormalCase)
+{
+    IMS_RESULT bResult = pSender->SendEarlyUpdate(UpdateType::NORMAL);
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, SendEarlyUpdateFormFailure)
+{
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
+
+    IMS_RESULT bResult = pSender->SendEarlyUpdate(UpdateType::NORMAL);
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(MessageSenderTest, RespondToEarlyUpdateWith200)
+{
+    IMS_RESULT bResult = pSender->RespondToEarlyUpdate(SipStatusCode::SC_200);
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, RespondToEarlyUpdateFormFailure)
+{
+    ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
+
+    IMS_RESULT bResult = pSender->RespondToEarlyUpdate(SipStatusCode::SC_200);
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(MessageSenderTest, AcceptNormalCase)
+{
+    IMS_RESULT bResult = pSender->Accept();
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, AcceptFormFailure)
+{
+    ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
+
+    IMS_RESULT bResult = pSender->Accept();
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(MessageSenderTest, RejectWithCodeUserDecline)
+{
+    CallReasonInfo objReasonInfo(CODE_USER_DECLINE);
+    IMS_RESULT bResult = pSender->Reject(objReasonInfo);
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, RejectFormFailure)
+{
+    ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
+
+    CallReasonInfo objReasonInfo(CODE_USER_DECLINE);
+    IMS_RESULT bResult = pSender->Reject(objReasonInfo);
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(MessageSenderTest, SendAckNormalCase)
+{
+    IMS_RESULT bResult = pSender->SendAck();
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, SendAckFormFailure)
+{
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
+
+    IMS_RESULT bResult = pSender->SendAck();
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(MessageSenderTest, UpdateNormalCase)
+{
+    IMS_RESULT bResult = pSender->Update(UpdateType::NORMAL, IMS_TRUE);
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, UpdateFormFailure)
+{
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
+
+    IMS_RESULT bResult = pSender->Update(UpdateType::NORMAL, IMS_TRUE);
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(MessageSenderTest, AcceptUpdateNormalCase)
+{
+    IMS_RESULT bResult = pSender->AcceptUpdate();
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, AcceptUpdateFormFailure)
+{
+    ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
+
+    IMS_RESULT bResult = pSender->AcceptUpdate();
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(MessageSenderTest, CancelUpdateWithCodeNone)
+{
+    CallReasonInfo objReasonInfo(CODE_NONE);
+    IMS_RESULT bResult = pSender->CancelUpdate(objReasonInfo);
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, CancelUpdateFormFailure)
+{
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
+
+    CallReasonInfo objReasonInfo(CODE_NONE);
+    IMS_RESULT bResult = pSender->CancelUpdate(objReasonInfo);
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(MessageSenderTest, TerminateWithCodeUserTerminated)
+{
+    CallReasonInfo objReasonInfo(CODE_USER_TERMINATED);
+    IMS_RESULT bResult = pSender->Terminate(IMS_TRUE, objReasonInfo);
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, CancelWithCodeUserTerminated)
+{
+    CallReasonInfo objReasonInfo(CODE_USER_TERMINATED);
+    IMS_RESULT bResult = pSender->Terminate(IMS_FALSE, objReasonInfo);
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageSenderTest, TerminateFormFailure)
+{
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
+
+    CallReasonInfo objReasonInfo(CODE_USER_TERMINATED);
+    IMS_RESULT bResult = pSender->Terminate(IMS_TRUE, objReasonInfo);
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
 
 }  // namespace android
