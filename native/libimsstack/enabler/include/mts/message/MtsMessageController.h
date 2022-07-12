@@ -26,7 +26,6 @@ class IMtsMessage;
 class IMtsMessageControllerListener;
 class IPageMessage;
 class MtsDynamicLoader;
-class MtsSmUtils;
 
 class MtsMessageController final : public ImsActivityEx, public IMtsServiceListener
 {
@@ -154,7 +153,6 @@ private:
     MtsService* m_pMtsService;
 
 protected:
-    MtsSmUtils* m_pMtsSmUtils;
     MtsDynamicLoader* m_pMtsDynamicLoader;
 };
 

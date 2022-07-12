@@ -46,7 +46,7 @@ MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :
 PUBLIC
 MtsServiceState::~MtsServiceState()
 {
-    IMS_TRACE_I("~MtsServiceState", 0, 0, 0);
+    IMS_TRACE_I("~MtsServiceState [slot_%d]", m_nSlotId, 0, 0);
 }
 
 PUBLIC

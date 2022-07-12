@@ -27,26 +27,12 @@ public:
             IN IMS_SINT32 nSlotId, IN const AString& strScheme, IN IMS_SINT32 nDialingPolicy);
     ~MtsDialingPlan();
 
-private:
-    MtsDialingPlan();
-    MtsDialingPlan(IN const MtsDialingPlan& objRHS);
-    MtsDialingPlan& operator=(IN const MtsDialingPlan& objRHS);
-
-public:
     AString Translate(IN const AString& strTargetAddress, IN IMS_BOOL bAquot = IMS_TRUE,
             IN IMS_BOOL bUssi = IMS_FALSE);
-    AString Translate(IN const AString& strTargetAddress, IN const AString& strScheme,
-            IN IMS_BOOL bAquot = IMS_TRUE);
 
-    // To translate the dialed number based on the emergency flag
-    AString TranslateEx(IN const AString& strTargetAddress, IN IMS_SINT32 nFlags = FLAG_NONE,
-            IN IMS_BOOL bAquot = IMS_TRUE, IN IMS_BOOL bUssi = IMS_FALSE);
-    AString TranslateEx(IN const AString& strTargetAddress, IN const AString& strScheme,
-            IN IMS_SINT32 nFlags = FLAG_NONE, IN IMS_BOOL bAquot = IMS_TRUE);
-
-    IMS_SINT32 GetDialingPolicy() const;
-    const AString& GetNetworkProfile() const;
-    const AString& GetScheme() const;
+    inline IMS_SINT32 GetDialingPolicy() const { return m_nDialingPolicy; }
+    inline const AString& GetNetworkProfile() const { return m_strNetworkProfile; }
+    inline const AString& GetScheme() const { return m_strScheme; }
 
     void SetDialingPolicy(IN IMS_SINT32 nPolicy);
     void SetNetworkProfile(IN const AString& strNetworkProfile);

@@ -26,7 +26,6 @@
 #include "SipParameter.h"
 #include "helper/dialing/MtsDialingPlan.h"
 #include "utility/MtsSipFormUtils.h"
-#include "utility/MtsSmUtils.h"
 
 __IMS_TRACE_TAG_COM_SMS__;
 

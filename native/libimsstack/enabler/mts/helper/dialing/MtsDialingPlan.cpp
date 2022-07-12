@@ -40,8 +40,8 @@ MtsDialingPlan::MtsDialingPlan(
         // As a default URI scheme, "tel" will be used
         m_strScheme = "tel";
     }
-    IMS_TRACE_D("+MtsDialingPlan [scheme:%s][dialogPolicy:%d]", m_strScheme.GetStr(),
-            m_nDialingPolicy, 0);
+    IMS_TRACE_D("+MtsDialingPlan [slot_%d][scheme:%s][dialogPolicy:%d]", m_nSlotId,
+            m_strScheme.GetStr(), m_nDialingPolicy);
 }
 
 PUBLIC
@@ -134,125 +134,6 @@ AString MtsDialingPlan::Translate(IN const AString& strTargetAddress,
     IMS_TRACE_D("Dialed URI :: %s", UtilService::GetLogString(strURI, strLog, 7).GetStr(), 0, 0);
 
     return strURI;
-}
-
-PUBLIC
-AString MtsDialingPlan::Translate(IN const AString& strTargetAddress, IN const AString& strScheme,
-        IN IMS_BOOL bAquot /* = IMS_TRUE */)
-{
-    if (strScheme.GetLength() == 0)
-    {
-        return Translate(strTargetAddress, bAquot);
-    }
-
-    if (strTargetAddress.GetLength() == 0)
-    {
-        IMS_TRACE_E(0, "Number is null or empty", 0, 0, 0);
-        return AString::ConstNull();
-    }
-
-    AString strLog;
-
-    (void)strLog;
-
-    IMS_TRACE_D("Dialed number :: %s",
-            UtilService::GetLogString(strTargetAddress, strLog, 3).GetStr(), 0, 0);
-
-    AStringBuffer objUri(128);
-
-    // name-addr format
-    if (strTargetAddress.Contains('<') && strTargetAddress.Contains('>'))
-    {
-        return strTargetAddress;
-    }
-    // addr-spec format
-    else if (strTargetAddress.StartsWith('s') || strTargetAddress.StartsWith('t') ||
-            strTargetAddress.StartsWith('S') || strTargetAddress.StartsWith('T'))
-    {
-        AString strTmp = strTargetAddress.GetSubStr(0, 5).MakeLower();
-
-        if (strTmp.StartsWith("sip:") || strTmp.StartsWith("sips:") || strTmp.StartsWith("tel:"))
-        {
-            if (bAquot && strTargetAddress.Contains(';'))
-            {
-                objUri.Append('<');
-                objUri.Append(strTargetAddress);
-                objUri.Append('>');
-
-                return static_cast<const AStringBuffer&>(objUri).GetString();
-            }
-
-            return strTargetAddress;
-        }
-    }
-
-    if (!m_strScheme.EqualsIgnoreCase("tel"))
-    {
-        if (!FormNonTelUri(strTargetAddress, bAquot, objUri, m_strScheme))
-        {
-            return AString::ConstNull();
-        }
-    }
-    else
-    {
-        IMS_BOOL bOK = FormTelUri(strTargetAddress, objUri);
-
-        if (!bOK)
-        {
-            return AString::ConstNull();
-        }
-
-        // Adds the URI scheme
-        objUri.Prepend(':');
-        objUri.Prepend(m_strScheme);
-
-        if (bAquot && static_cast<const AStringBuffer&>(objUri).GetString().Contains(';'))
-        {
-            objUri.Prepend('<');
-            objUri.Append('>');
-        }
-    }
-
-    const AString& strURI = static_cast<const AStringBuffer&>(objUri).GetString();
-
-    IMS_TRACE_D("Dialed URI :: %s", UtilService::GetLogString(strURI, strLog, 7).GetStr(), 0, 0);
-
-    return strURI;
-}
-
-PUBLIC
-AString MtsDialingPlan::TranslateEx(IN const AString& strTargetAddress,
-        IN IMS_SINT32 nFlags /*= FLAG_NONE */, IN IMS_BOOL bAquot /*= IMS_TRUE*/,
-        IN IMS_BOOL bUssi /*= IMS_FALSE*/)
-{
-    (void)nFlags;
-    return Translate(strTargetAddress, bAquot, bUssi);
-}
-
-PUBLIC
-AString MtsDialingPlan::TranslateEx(IN const AString& strTargetAddress, IN const AString& strScheme,
-        IN IMS_SINT32 nFlags /*= FLAG_NONE*/, IN IMS_BOOL bAquot /*= IMS_TRUE*/)
-{
-    (void)nFlags;
-    return Translate(strTargetAddress, strScheme, bAquot);
-}
-
-PUBLIC
-IMS_SINT32 MtsDialingPlan::GetDialingPolicy() const
-{
-    return m_nDialingPolicy;
-}
-
-PUBLIC
-const AString& MtsDialingPlan::GetNetworkProfile() const
-{
-    return m_strNetworkProfile;
-}
-
-PUBLIC
-const AString& MtsDialingPlan::GetScheme() const
-{
-    return m_strScheme;
 }
 
 PUBLIC

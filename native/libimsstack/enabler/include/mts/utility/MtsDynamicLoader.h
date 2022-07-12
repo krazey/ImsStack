@@ -19,6 +19,7 @@
 
 #include "MtsServiceState.h"
 #include "utility/MtsSipFormUtils.h"
+#include "utility/MtsSmUtils.h"
 #include "utility/MtsStrName.h"
 
 class MtsDynamicLoader final
@@ -31,6 +32,7 @@ public:
 
     inline MtsServiceState* GetMtsServiceState() { return m_pMtsServiceState; }
     inline MtsSipFormUtils* GetMtsSipFormUtils() { return m_pMtsSipFormUtils; }
+    inline MtsSmUtils* GetMtsSmUtils() { return m_pMtsSmUtils; }
     inline MtsStrName* GetMtsStrName() { return m_pMtsStrName; }
 
 private:
@@ -40,6 +42,7 @@ private:
     IMS_SINT32 m_nSlotId;
     MtsServiceState* m_pMtsServiceState;
     MtsSipFormUtils* m_pMtsSipFormUtils;
+    MtsSmUtils* m_pMtsSmUtils;
     MtsStrName* m_pMtsStrName;
 };
 

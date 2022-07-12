@@ -17,10 +17,10 @@
 #include <gtest/gtest.h>
 #include "utility/MtsDynamicLoader.h"
 
-LOCAL IMS_SINT32 SLOT_ID = 0;
-
 namespace android
 {
+
+const IMS_SINT32 SLOT_ID = 0;
 
 class MtsDynamicLoaderTest : public ::testing::Test
 {

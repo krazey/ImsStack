@@ -34,20 +34,6 @@ MtsSmUtils::~MtsSmUtils()
     IMS_TRACE_I("~MtsSmUtils", 0, 0, 0);
 }
 
-PUBLIC GLOBAL MtsSmUtils* MtsSmUtils::GetInstance(IN IMS_SINT32 nSlotId)
-{
-    static MtsSmUtils* m_pMtsSmUtil = IMS_NULL;
-
-    IMS_TRACE_I("+GetInstance : Slot [%d]", nSlotId, 0, 0);
-
-    if (m_pMtsSmUtil == IMS_NULL)
-    {
-        m_pMtsSmUtil = new MtsSmUtils();
-    }
-
-    return m_pMtsSmUtil;
-}
-
 PUBLIC
 IMS_SINT32 MtsSmUtils::GetRpMr(IN const IMS_BYTE* pbySmsData)
 {
@@ -123,7 +109,7 @@ void MtsSmUtils::PrintSmsDataBurst(IN const ByteArray& objSmsData)
             strSmsMsg.GetStr(), 0);
 }
 
-PUBLIC GLOBAL const IMS_CHAR* MtsSmUtils::GetMtiStringFrom3gpp(IN const IMS_SINT32 nMti)
+PUBLIC const IMS_CHAR* MtsSmUtils::GetMtiStringFrom3gpp(IN const IMS_SINT32 nMti)
 {
     switch (nMti)
     {
@@ -146,7 +132,7 @@ PUBLIC GLOBAL const IMS_CHAR* MtsSmUtils::GetMtiStringFrom3gpp(IN const IMS_SINT
     }
 }
 
-PUBLIC GLOBAL const IMS_CHAR* MtsSmUtils::GetMtiStringFrom3gpp2(IN const IMS_SINT32 nMti)
+PUBLIC const IMS_CHAR* MtsSmUtils::GetMtiStringFrom3gpp2(IN const IMS_SINT32 nMti)
 {
     switch (nMti)
     {
