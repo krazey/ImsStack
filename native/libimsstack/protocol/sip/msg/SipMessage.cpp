@@ -391,14 +391,12 @@ const SIP_CHAR* SipMessage::GetMethod()
 
     if (m_pStatusLine == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "status line is NULL", SIP_ZERO, SIP_ZERO);
         return SIP_NULL;
     }
 
     SipCSeqHeader* pCseqHdr = (SipCSeqHeader*)GetHdrObj(SipHeaderBase::CSEQ);
     if (pCseqHdr == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "CSEQ header is NULL", SIP_ZERO, SIP_ZERO);
         return SIP_NULL;
     }
 
