@@ -232,17 +232,16 @@ public:
 
     void OnStateTransition(IN CallStateName eState) override;
 
-    virtual void ClientConnection_NotifyResponse(IN ISipClientConnection* piScc,
+    void ClientConnection_NotifyResponse(IN ISipClientConnection* piScc,
             IN ISipClientConnection* piForkedScc = IMS_NULL) override;
-    virtual void Error_NotifyError(
+    void Error_NotifyError(
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
-    virtual void OnReceivingMediaDataFailed(
-            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
-    virtual void OnVideoLowestBitRate() override;
-    virtual void OnReceivingNetworkToneStarted() override;
-    virtual void OnReceivingNetworkToneFailed() override;
-    virtual void OnMediaFailed(IN CallReasonInfo objReason) override;
+    void OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
+    void OnVideoLowestBitRate() override;
+    void OnReceivingNetworkToneStarted() override;
+    void OnReceivingNetworkToneFailed() override;
+    void OnMediaFailed(IN CallReasonInfo objReason) override;
 
 private:
     static IMutex* s_pKeyCreationLock;

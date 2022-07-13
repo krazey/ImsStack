@@ -49,6 +49,7 @@ public:
     inline void SetJniCallThread(IN JniMtcCallThread* pThread) { m_pCallThread = pThread; }
     inline void SetJniServiceThread(IN JniMtcServiceThread* pThread) { m_pServiceThread = pThread; }
     inline void SetJniMediaThread(IN JniMediaSessionThread* pThread) { m_pMediaThread = pThread; }
+    inline JniMtcCallThread* GetJniCallThread() { return m_pCallThread; }
     inline JniMediaSessionThread* GetJniMediaThread() { return m_pMediaThread; }
 
     void SendPreIncomingCallReceived(IN CallKey nKey);
