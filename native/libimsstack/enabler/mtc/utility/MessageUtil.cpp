@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CallReasonInfo.h"
 #include "Const3GPP.h"
 #include "define/MtcStringDef.h"
 #include "AStringBuffer.h"
@@ -1805,7 +1806,7 @@ PUBLIC GLOBAL IMS_SINT32 MessageUtil::CheckRttUpdateRequest(
         }
     }
 
-    IMS_TRACE_D("CheckRttUpdateRequest :: [%s]", PS_GTTMode(eRttUpdateRequest), 0, 0);
+    IMS_TRACE_D("CheckRttUpdateRequest :: [%d]", eRttUpdateRequest, 0, 0);
     return eRttUpdateRequest;
 }
 

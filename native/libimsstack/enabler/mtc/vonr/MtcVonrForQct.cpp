@@ -234,11 +234,11 @@ IMS_UINT32 UCVoNRForQct::GetConvertedCallState(IN IMS_UINT32 nState, IN IMS_UINT
     {
         if (nDirection == 0/*IVoNr::DIRECTION_MO*/)
         {
-            return VOLTE_CALL_STATE_RINGBACK;
+            return 0 /*VOLTE_CALL_STATE_RINGBACK*/;
         }
-        return VOLTE_CALL_STATE_RINGING;
+        return 0 /*VOLTE_CALL_STATE_RINGING*/;
     }
 
-    // call state is defined by UCSession state.
-    return VOLTE_CALL_STATE_UNDEFINED;
+    // call state is defined by MtcCall state.
+    return 0 /*VOLTE_CALL_STATE_UNDEFINED*/;
 }

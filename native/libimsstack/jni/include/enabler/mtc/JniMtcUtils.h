@@ -18,7 +18,7 @@
 #define JNI_MTC_UTILS_H_
 
 #include "AString.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "JniCallInfo.h"
 #include "MtcDef.h"
 #include <binder/Parcel.h>
@@ -43,7 +43,7 @@ public:
             IN_OUT android::Parcel& objParcel);
     static void WriteConfUsersToParcel(
             IN const IMSList<ConfUser*>& objUsers, IN_OUT android::Parcel& objParcel);
-    static void WriteDialogInfoToParcel(IN DialogInfo* pInfo, IN_OUT android::Parcel& objParcel);
+    // static void WriteDialogInfoToParcel(IN DialogInfo* pInfo, IN_OUT android::Parcel& objParcel);
     static void WriteCallReasonInfoToParcel(
             IN const CallReasonInfo& objReason, IN_OUT android::Parcel& objParcel);
 };

@@ -26,24 +26,6 @@
 #define UNUSED_PARAM(A) (A == 0)
 #endif
 
-enum
-{
-    SIDETYPE_LOCAL = 0,
-    SIDETYPE_REMOTE = 1,
-};
-
-enum
-{
-    OATYPE_OFFER = 0,
-    OATYPE_ANSWER = 1,
-};
-
-enum
-{
-    MSGTYPE_REQUEST = 0,
-    MSGTYPE_RESPONSE = 1,
-};
-
 enum class UpdateType
 {
     NONE = 0,
@@ -56,28 +38,12 @@ enum class UpdateType
     SRVCC_RECOVERED_FAILURE = 7,
 };
 
-enum REFER_TYPE
-{
-    REFER_TYPE_NONE = 0,
-    REFER_TYPE_CONF_JOIN = 1,
-    REFER_TYPE_CONF_DROP = 2,
-};
-
 enum
 {
     COPYCONTROLTYPE_TO = 0,
     COPYCONTROLTYPE_CC = 1,
     COPYCONTROLTYPE_BCC = 2,
-
-}; /*COPYCONTROLTYPE */
-
-enum
-{
-    DTMFTYPE_INBAND_2833 = 0,
-    DTMFTYPE_INBAND_BYPASS = 1,
-    DTMFTYPE_OUTBAND_INFO = 2,
-
-}; /* DTMFTYPE */
+};
 
 enum
 {
@@ -108,46 +74,6 @@ enum
     MEDIATYPE_AUDIO = (0x00000001),
     MEDIATYPE_VIDEO = (0x00000002),
     MEDIATYPE_TEXT = (0x00000004),
-};
-
-enum
-{
-    MEDIAPROTOCOL_INVALID = -1,
-    MEDIAPROTOCOL_NONE = 0,
-    MEDIAPROTOCOL_RTP = (0x00000001),
-    MEDIAPROTOCOL_RTCP = (0x00000002),
-};
-
-enum
-{
-    MEDIAINFO_DIRECTION = 0,
-    MEDIAINFO_QUALITY = 1,
-};
-
-enum
-{
-    NEGOSTATE_INVALID = -1,
-    NEGOSTATE_IDLE = 0,
-    NEGOSTATE_OFFER_RECEIVED = 1,
-    NEGOSTATE_OFFER_SENT = 2,
-    NEGOSTATE_NEGOTIATED = 3,
-};
-
-enum
-{
-    FORM_RESULT_NONE = 0,
-    FORM_RESULT_NOTEXPECTED = 1,
-    FORM_RESULT_UPDATED = 2,
-    FORM_RESULT_FAILED = 3,
-};
-
-enum NEGO_RESULT
-{
-    NEGO_RESULT_NONE = 0,
-    NEGO_RESULT_NOSDP = 1,
-    NEGO_RESULT_NOTEXPECTED = 2,
-    NEGO_RESULT_UPDATED = 3,
-    NEGO_RESULT_FAILED = 4,
 };
 
 enum
@@ -216,28 +142,6 @@ enum
     GTT_MODE_VCO = 3,
 };
 
-enum MEDIA_REPORT_TYPE
-{
-    MEDIA_REPORT_INVALID = -1,
-    MEDIA_REPORT_NOTUSED = 0,
-
-    MEDIA_REPORT_SUCCESS = 1,
-    MEDIA_REPORT_DATA_RECEIVE_FAILED,
-    MEDIA_REPORT_INTERNAL_ERROR,
-
-    MEDIA_REPORT_VIDEO_LOWEST_BIT_RATE,
-    MEDIA_REPORT_CHECK_RADIO_CONNECTION,
-    MEDIA_REPORT_DATA_RECEIVE_STARTED,
-    MEDIA_REPORT_RE_NEGOTIATION_NEEDED,
-
-    MEDIA_REPORT_NW_TONE_RTP_RECEIVE_STARTED,
-    MEDIA_REPORT_NW_TONE_RTP_RECEIVE_FAILED,
-
-    MEDIA_REPORT_RECEIVED_DTMF_EVENT,
-
-    MEDIA_REPORT_UC_TERMINATED = 100,
-};
-
 enum class SuppType
 {
     NONE = -1,
@@ -287,23 +191,6 @@ enum class CdivCause
 
 enum
 {
-    INFO_TYPE_NONE = 0,
-    INFO_TYPE_MYNUMBER = 1,   // String
-    INFO_TYPE_BALANCE = 2,    // String
-    INFO_TYPE_MINUTES = 3,    // String
-    INFO_TYPE_TEXTUSAGE = 4,  // String
-    INFO_TYPE_PREPAID = 5,    // String
-    INFO_TYPE_SRVCC = 6,
-
-    INFO_TYPE_MEDIA_LOWEST_BIT_RATE = 12,
-    INFO_TYPE_MEDIA_NO_DATA = 13,
-    INFO_TYPE_MEDIA_DTMF_RECEIVED = 14,
-
-    INFO_TYPE_MEDIA_CVO_CAPABILITY = 112,
-};
-
-enum
-{
     CW_TYPE_NONE = 0,
     CW_TYPE_TERMINAL = 1, /* CW NOTIFICATION */
     CW_TYPE_NETWORK = 2,  /* CW INDICATION */
@@ -340,85 +227,6 @@ enum
 
 enum
 {
-    SRVCC_STATUS_NONE = 0,
-    SRVCC_STATUS_START,
-    SRVCC_STATUS_SUCCESS,
-    SRVCC_STATUS_FAILURE,
-    SRVCC_STATUS_CANCEL,
-};
-
-enum
-{
-    SRVCC_TYPE_NOTSUPPORTED = 0,
-    SRVCC_TYPE_NORMAL = (0x00000001),
-    SRVCC_TYPE_MIDCALL = (0x00000002),
-    SRVCC_TYPE_ALERTING = (0x00000004),
-    SRVCC_TYPE_REVERSE = (0x00000008),
-    SRVCC_TYPE_BEFOREALERTING = (0x00000010),
-};
-
-enum
-{
-    VOLTE_CALL_STATE_IDLE = 0,
-    VOLTE_CALL_STATE_TERMINATING = 1,
-    VOLTE_CALL_STATE_RINGBACK = 2,
-    VOLTE_CALL_STATE_RINGING = 3,
-    VOLTE_CALL_STATE_ALERTING = 4,
-    VOLTE_CALL_STATE_OFFHOOK = 5,
-    VOLTE_CALL_STATE_UNDEFINED = 10
-};
-
-enum
-{
-    BLOCK_FEATURE_NONE = 0,
-    BLOCK_FEATURE_START = (0x00000001),
-    BLOCK_FEATURE_STARTCONF = (0x00000002),
-    BLOCK_FEATURE_ACCEPT = (0x00000004),
-    BLOCK_FEATURE_REJECT = (0x00000008),
-    BLOCK_FEATURE_HOLD = (0x00000010),
-    BLOCK_FEATURE_RESUME = (0x00000020),
-    BLOCK_FEATURE_SEND_DTMF = (0x00000040),
-    BLOCK_FEATURE_TERMINATE = (0x00000080),
-    BLOCK_FEATURE_UPDATE = (0x00000100),
-    BLOCK_FEATURE_CONF_EXPAND = (0x00000200),
-    BLOCK_FEATURE_CONF_MERGE = (0x00000400),
-    BLOCK_FEATURE_CONF_JOIN = (0x00000800),
-    BLOCK_FEATURE_CONF_DROP = (0x00001000),
-}; /* BLOCK_FEATURE_ */
-
-enum
-{
-    SESSTIMER_MO_1XX_WAIT = 0,
-    SESSTIMER_MO_NOANSWER = 1,
-    SESSTIMER_MT_ALERTING = 2,
-    SESSTIMER_MT_PRACK_WAIT = 3,
-    SESSTIMER_MO_UPDATE = 4,
-    SESSTIMER_MT_UPDATE = 5,
-
-    SESSTIMER_GLARECONDITION = 6,
-    SESSTIMER_SRVCC_TERMINATED = 7,
-    SESSTIMER_CONV_SRVCC = 8,
-    SESSTIMER_QOS_WAIT = 9,
-    SESSTIMER_QOS_FORCE_FAKE = 10,
-
-    SESSTIMER_UDP_KEEP_ALIVE = 11,
-
-    SESSTIMER_CONF_SUB_WAIT_NOTIFY = 12,
-    SESSTIMER_QOS_INACTIVE_GUARD = 13,
-    SESSTIMER_WAIT_NETWORK_RBT = 14,
-    SESSTIMER_WAIT_NETWORK_HOLDTONE = 15,
-    SESSTIMER_E911_LTE_OPEN = 16,
-    SESSTIMER_E911_LTE_START = 17,
-    SESSTIMER_E911_LTE_RINGBACK = 18,
-    SESSTIMER_E911_WIFI_OPEN = 19,
-    SESSTIMER_E911_WIFI_START = 20,
-    SESSTIMER_E911_WIFI_RINGBACK = 21,
-    SESSTIMER_SESS_WAIT_TERMINATED = 22,
-    SESSTIMER_QOS_NOTI_PARTIAL = 23,
-};
-
-enum
-{
     CONF_CREATE_NONE = 0,
 
     CONF_CREATE_START = 1,
@@ -426,205 +234,6 @@ enum
     CONF_CREATE_MERGE = 3,
     CONF_CREATE_EXPAND = 4,
     CONF_CREATE_EXPANDED_BY = 5,
-};
-
-enum
-{
-    REPALCED_BY_TYPE_ECT = 0,
-};
-
-enum
-{
-    MEDIATHRESHOLD_TYPE_NONE = 0,
-    MEDIATHRESHOLD_TYPE_ACTIVE = 1,
-    MEDIATHRESHOLD_TYPE_HOLD = 2,
-};
-
-enum
-{
-    MULTIPLE_REEFER_SENDTYPE_SIMULTANEITY = 0,
-    MULTIPLE_REEFER_SENDTYPE_DELIVERIED = 1,
-    MULTIPLE_REEFER_SENDTYPE_TERMINATED = 2,
-    MULTIPLE_REEFER_SENDTYPE_SUBSCRIBED = 3,
-    MULTIPLE_REEFER_SENDTYPE_SUB_AFTER_REFER = 4
-};
-
-enum
-{
-    QOS_TYPE_AUDIO = 0,
-    QOS_TYPE_VIDEO,
-    QOS_TYPE_TEXT,
-};  // QoS Type for dedicated bearer
-
-enum
-{
-    QOS_STATUS_NONE = -1,
-    QOS_STATUS_ENABLED = 0,
-    QOS_STATUS_ACTIVED,
-    QOS_STATUS_INACTIVE,
-    QOS_STATUS_SUSPENDED,
-    QOS_STATUS_DISABLED,
-    QOS_STATUS_PARAM_INVALID,
-};  // QoS status for dedicated bearer
-
-enum
-{
-    SEGMENT_LOCALSEND = 0,
-    SEGMENT_LOCALRECV,
-    SEGMENT_REMOTESEND,
-    SEGMENT_REMOTERECV,
-
-    E2E_SEND,
-    E2E_RECV,
-};  // DIRECTION For Table
-
-enum
-{
-    TIMER_BASE_DEFAULT = 0,
-    TIMER_FORCE_QOS_ENABLED = 1,
-    TIMER_WAIT_QOS_ENABLED = 2,
-    TIMER_QOS_INACTIVE_GUARD = 3,
-    TIMER_QOS_NOTI_PARTIAL = 4,
-    TIMER_COM_DEFAULT = 10,
-}; /*TIMERTYPE */
-
-#define UC_SLOT_0 0
-#define UC_SLOT_1 1
-
-/* ------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------- */
-inline const IMS_CHAR* Str_MediaType(IN IMS_UINT32 eType)
-{
-    switch (eType)
-    {
-        case MEDIATYPE_AUDIO:
-            return "MEDIATYPE_AUDIO";
-        case MEDIATYPE_VIDEO:
-            return "MEDIATYPE_VIDEO";
-        case MEDIATYPE_TEXT:
-            return "MEDIATYPE_TEXT";
-        default:
-            return "__INVALID__";
-    }
-}
-
-/* ------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------- */
-inline const IMS_CHAR* Str_SuppType(IN SuppType eType)
-{
-    switch (eType)
-    {
-        case SuppType::CALLER_ID:
-            return "SuppType::CALLER_ID";
-        case SuppType::CNAP:
-            return "SuppType::CNAP";
-        case SuppType::MMC:
-            return "SuppType::MMC";
-        case SuppType::GTT:
-            return "SuppType::GTT";
-        case SuppType::CDIV_CAUSE:
-            return "SuppType::CDIV_CAUSE";
-        case SuppType::CDIV_HISTORY:
-            return "SuppType::CDIV_HISTORY";
-        case SuppType::CW:
-            return "SuppType::CW";
-        case SuppType::VM:
-            return "SuppType::VM";
-        default:
-            return "__INVALID__";
-    }
-}
-
-/* ------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------- */
-inline const IMS_CHAR* Str_CW(IN IMS_UINT32 eType)
-{
-    switch (eType)
-    {
-        case CW_TYPE_NONE:
-            return "CW_TYPE_NONE";
-        case CW_TYPE_TERMINAL:
-            return "CW_TYPE_TERMINAL";
-        case CW_TYPE_NETWORK:
-            return "CW_TYPE_NETWORK";
-        default:
-            return "__INVALID__";
-    }
-}
-
-/* ------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------- */
-inline const IMS_CHAR* Str_VoLTE_Call_State(IN IMS_UINT32 eState)
-{
-    switch (eState)
-    {
-        case VOLTE_CALL_STATE_IDLE:
-            return "VOLTE_CALL_STATE_IDLE";
-        case VOLTE_CALL_STATE_TERMINATING:
-            return "VOLTE_CALL_STATE_TERMINATING";
-        case VOLTE_CALL_STATE_RINGBACK:
-            return "VOLTE_CALL_STATE_RINGBACK";
-        case VOLTE_CALL_STATE_RINGING:
-            return "VOLTE_CALL_STATE_RINGING";
-        case VOLTE_CALL_STATE_ALERTING:
-            return "VOLTE_CALL_STATE_ALERTING";
-        case VOLTE_CALL_STATE_OFFHOOK:
-            return "VOLTE_CALL_STATE_OFFHOOK";
-        default:
-            return "__INVALID__";
-    }
-}
-
-class MediaThreshold
-{
-public:
-    inline MediaThreshold() :
-            nProtocol(MEDIAPROTOCOL_INVALID),
-            nType(MEDIATYPE_NONE),
-            nTime(-1)
-    {
-    }
-    inline MediaThreshold(IN IMS_SINT32 _nProtocol, IN IMS_SINT32 _nType, IN IMS_SINT32 _nTime) :
-            nProtocol(_nProtocol),
-            nType(_nType),
-            nTime(_nTime)
-    {
-    }
-    inline MediaThreshold(IN const MediaThreshold& objRHS) :
-            nProtocol(objRHS.nProtocol),
-            nType(objRHS.nType),
-            nTime(objRHS.nTime)
-    {
-    }
-
-public:
-    IMS_SINT32 nProtocol;
-    IMS_SINT32 nType;
-    IMS_SINT32 nTime;
-};
-
-class UCKey
-{
-public:
-    inline UCKey() :
-            aStrUIKey(AString::ConstNull()),
-            nIMSKey(0)
-    {
-    }
-    inline UCKey(IN AString _aStrUIKey, IN IMS_UINTP _nIMSKey) :
-            aStrUIKey(_aStrUIKey),
-            nIMSKey(_nIMSKey)
-    {
-    }
-    inline UCKey(IN const UCKey& objRHS) :
-            aStrUIKey(objRHS.aStrUIKey),
-            nIMSKey(objRHS.nIMSKey)
-    {
-    }
-
-public:
-    AString aStrUIKey;
-    IMS_UINTP nIMSKey;
 };
 
 class MediaInfo
@@ -721,136 +330,6 @@ public:
     AString strValue;
     IMS_SINT32 nValue;
     IMS_BOOL bValue;
-};
-
-class Recipient
-{
-public:
-    inline Recipient() :
-            strTarget(AString::ConstNull()),
-            eCCType(COPYCONTROLTYPE_TO),
-            bAnonymize(IMS_FALSE)
-    {
-    }
-    inline Recipient(IN const Recipient& objRHS) :
-            strTarget(objRHS.strTarget),
-            eCCType(objRHS.eCCType),
-            bAnonymize(objRHS.bAnonymize)
-    {
-    }
-    inline ~Recipient() {}
-
-public:
-    inline Recipient& operator=(IN const Recipient& objRHS)
-    {
-        if (this != &objRHS)
-        {
-            strTarget = objRHS.strTarget;
-            eCCType = objRHS.eCCType;
-            bAnonymize = objRHS.bAnonymize;
-        }
-
-        return (*this);
-    }
-
-public:
-    AString strTarget;
-    IMS_UINT32 eCCType;
-    IMS_BOOL bAnonymize;
-};
-
-class DialogInfo
-{
-public:
-    inline DialogInfo() :
-            aStrID(AString::ConstNull()),
-            aStrCallID(AString::ConstNull()),
-            aStrLocalTag(AString::ConstNull()),
-            aStrRemoteTag(AString::ConstNull()),
-            eState(0),
-            eReason(0),
-            eCode(0),
-            aStrLocalName(AString::ConstNull()),
-            aStrLocalNumber(AString::ConstNull()),
-            aStrRemoteName(AString::ConstNull()),
-            aStrRemoteNumber(AString::ConstNull()),
-            bInitiator(IMS_FALSE),
-            bEnablePull(IMS_FALSE),
-            bConference(IMS_FALSE),
-            pMediaInfo(IMS_NULL)
-    {
-    }
-    inline DialogInfo(IN const DialogInfo& objRHS) :
-            aStrID(objRHS.aStrID),
-            aStrCallID(objRHS.aStrCallID),
-            aStrLocalTag(objRHS.aStrLocalTag),
-            aStrRemoteTag(objRHS.aStrRemoteTag),
-            eState(objRHS.eState),
-            eReason(objRHS.eReason),
-            eCode(objRHS.eCode),
-            aStrLocalName(objRHS.aStrLocalName),
-            aStrLocalNumber(objRHS.aStrLocalNumber),
-            aStrRemoteName(objRHS.aStrRemoteName),
-            aStrRemoteNumber(objRHS.aStrRemoteNumber),
-            bInitiator(objRHS.bInitiator),
-            bEnablePull(objRHS.bEnablePull),
-            bConference(objRHS.bConference),
-            pMediaInfo(new MediaInfo(*(objRHS.pMediaInfo)))
-    {
-    }
-    inline ~DialogInfo() { delete pMediaInfo; }
-
-public:
-    inline DialogInfo& operator=(IN const DialogInfo& objRhs)
-    {
-        if (this != &objRhs)
-        {
-            aStrID = objRhs.aStrID;
-            aStrCallID = objRhs.aStrCallID;
-            aStrLocalTag = objRhs.aStrLocalTag;
-            aStrRemoteTag = objRhs.aStrRemoteTag;
-            eState = objRhs.eState;
-            eReason = objRhs.eReason;
-            eCode = objRhs.eCode;
-            aStrLocalName = objRhs.aStrLocalName;
-            aStrLocalNumber = objRhs.aStrRemoteNumber;
-            aStrRemoteName = objRhs.aStrLocalNumber;
-            aStrRemoteNumber = objRhs.aStrRemoteNumber;
-            bInitiator = objRhs.bInitiator;
-            bEnablePull = objRhs.bEnablePull;
-            bConference = objRhs.bConference;
-            pMediaInfo->eADir = objRhs.pMediaInfo->eADir;
-            pMediaInfo->eVDir = objRhs.pMediaInfo->eVDir;
-            pMediaInfo->eTDir = objRhs.pMediaInfo->eTDir;
-            pMediaInfo->eAQuality = objRhs.pMediaInfo->eAQuality;
-            pMediaInfo->eVQuality = objRhs.pMediaInfo->eVQuality;
-            pMediaInfo->eGTTMode = objRhs.pMediaInfo->eGTTMode;
-        }
-
-        return (*this);
-    }
-
-public:
-    AString aStrID;
-    AString aStrCallID;
-    AString aStrLocalTag;
-    AString aStrRemoteTag;
-
-    IMS_UINT32 eState;
-    IMS_SINT32 eReason;
-    IMS_SINT32 eCode;
-
-    AString aStrLocalName;
-    AString aStrLocalNumber;
-
-    AString aStrRemoteName;
-    AString aStrRemoteNumber;
-
-    IMS_BOOL bInitiator;
-    IMS_BOOL bEnablePull;
-    IMS_BOOL bConference;
-
-    MediaInfo* pMediaInfo;
 };
 
 #endif

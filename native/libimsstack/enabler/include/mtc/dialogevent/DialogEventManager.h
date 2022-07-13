@@ -36,7 +36,6 @@
 
 #include "dialogevent/IDialogEventManagerListener.h"
 #include "dialogevent/DialogEvent.h"
-#include "define/MtcInternalMsgDef.h"
 
 #include "CallReasonInfo.h"
 
@@ -106,7 +105,7 @@ protected:
     virtual void HandleChangedCallState(IN IMSMSG& objMsg);
     virtual void HandleChangedTotalCallState(IN IMSMSG& objMsg);
 
-    virtual IMSList<DialogInfo*> GetDialogInfos();
+    // virtual IMSList<DialogInfo*> GetDialogInfos();
     virtual IMS_SINT32 GetStateReason(IN IMS_UINT32 eState, IN IDialogEvent* pDialog);
     virtual IMS_SINT32 GetStateCode(IN IMS_UINT32 eState, IN IDialogEvent* pDialog);
     virtual IMS_BOOL IsInitiator(IN IDialogEvent* pDialog);
@@ -116,7 +115,7 @@ protected:
     virtual AString ConvertNumber(IN AString aStrIdentity);
 
     virtual void SendTerminatedToListn(IN CallReasonInfo terminatedReason);
-    virtual void SendNotifyInfoToUI(IN IMSList<DialogInfo*> lstDialogInfos);
+    // virtual void SendNotifyInfoToUI(IN IMSList<DialogInfo*> lstDialogInfos);
 
     IMS_UINT32 GetCallState();
     IMS_UINT32 ConvertInfoState(IN AString aStrState);
@@ -129,7 +128,7 @@ protected:
 public:
     enum
     {
-        DEMNGR_BASE_DEFAULT = MTC_INTERNAL_MSG::DIALOG_MSG_BASE,
+        DEMNGR_BASE_DEFAULT = 0,
 
         DEMNGR_S_FORKEDNOTIFY,
         DEMNGR_S_NOTIFY,

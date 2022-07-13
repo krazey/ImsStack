@@ -187,6 +187,7 @@ PUBLIC GLOBAL void JniMtcUtils::WriteConfUsersToParcel(
     }
 }
 
+/*
 PUBLIC GLOBAL void JniMtcUtils::WriteDialogInfoToParcel(
         IN DialogInfo* pInfo, IN_OUT Parcel& objParcel)
 {
@@ -209,6 +210,7 @@ PUBLIC GLOBAL void JniMtcUtils::WriteDialogInfoToParcel(
     IMS_SINT32 bEnablePull = (pInfo->bEnablePull) ? 1 : 0;
     objParcel.writeInt32(bEnablePull);
 }
+*/
 
 PUBLIC GLOBAL void JniMtcUtils::WriteCallReasonInfoToParcel(
         IN const CallReasonInfo& objReason, IN_OUT Parcel& objParcel)

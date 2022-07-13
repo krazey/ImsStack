@@ -676,7 +676,7 @@ PROTECTED VIRTUAL void DEMngr::HandleNotify(IN IMSMSG& objMSG)
 
     IMS_TRACE_I("HandleNotify :: SubscriptionState[%d]", pISubscription->GetState(), 0, 0);
 
-    SendNotifyInfoToUI(GetDialogInfos());
+    // SendNotifyInfoToUI(GetDialogInfos());
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -1075,6 +1075,7 @@ PROTECTED VIRTUAL void DEMngr::HandleChangedTotalCallState(IN IMSMSG& /*objMsg*/
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
+/*
 PROTECTED VIRTUAL IMSList<DialogInfo*> DEMngr::GetDialogInfos()
 {
     IMSList<DialogInfo*> lstDialogInfos = IMSList<DialogInfo*>();
@@ -1117,7 +1118,7 @@ PROTECTED VIRTUAL IMSList<DialogInfo*> DEMngr::GetDialogInfos()
     IMS_TRACE_I("GetDialogInfos : [%d]", lstDialogInfos.GetSize(), 0, 0);
     return lstDialogInfos;
 }
-
+*/
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PROTECTED VIRTUAL IMS_SINT32 DEMngr::GetStateReason(IN IMS_UINT32 eState, IN IDialogEvent* pDialog)
@@ -1245,7 +1246,7 @@ PROTECTED VIRTUAL void DEMngr::SendTerminatedToListn(IN CallReasonInfo terminate
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL void DEMngr::SendNotifyInfoToUI(IN IMSList<DialogInfo*> /*lstDialogInfos*/) {}
+// PROTECTED VIRTUAL void DEMngr::SendNotifyInfoToUI(IN IMSList<DialogInfo*> /*lstDialogInfos*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
