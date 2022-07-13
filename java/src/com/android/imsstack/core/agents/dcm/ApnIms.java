@@ -35,6 +35,7 @@ import com.android.imsstack.util.ImsLog;
  * this is data connection class for ims
  */
 public class ApnIms extends Apn {
+    protected IAosInfo mAosInfo;
 
     // Public methods --------------------------------------------
     public ApnIms(Context context, int slotId) {
@@ -119,6 +120,7 @@ public class ApnIms extends Apn {
     // Private/Protected methods ---------------------------------
     protected void initializeApn() {
         mType = EApnType.IMS;
+        mAosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
 
         registerHandler(EVENT_NETWORK_AVAILABLE,
                 new Handle_EVENT_NETWORK_AVAILABLE());
@@ -143,11 +145,10 @@ public class ApnIms extends Apn {
             ImsLog.d(mSlotId, "notifyIpcanHandoverFailure :: networkType=" + networkType
                     + ", failCause=" + failCause);
 
-            IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
-            if (aosInfo != null) {
+            if (mAosInfo != null) {
                 int targetNetwork = (networkType == TelephonyManager.NETWORK_TYPE_IWLAN)
                         ? IApn.IPCAN_CATEGORY_MOBILE : IApn.IPCAN_CATEGORY_WLAN;
-                aosInfo.notifyIpcanHandoverFailure(targetNetwork, failCause);
+                mAosInfo.notifyIpcanHandoverFailure(targetNetwork, failCause);
             }
         }
     }

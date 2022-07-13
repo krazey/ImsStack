@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
+import android.os.Message;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
@@ -38,6 +39,9 @@ import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IApn;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcSettings;
+import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.util.AppContext;
 
@@ -54,14 +58,15 @@ import java.lang.reflect.Field;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class ApnEmergencyTest {
+public class ApnImsTest {
     private static final int SLOT_0 = 0;
     static ContextFixture sContext;
-    ApnEmergency mApnEmergency;
+    ApnIms mApnIms;
 
     @Mock private Apn.ImsNetworkCallback mMockNetworkCallback;
-    @Mock private DcApn mMockDcApn;
-    @Mock private DcUtils mMockDcUtils;
+    @Mock private IDcApn mMockIDcApn;
+    @Mock private IDcSettings mMockIDcSettings;
+    @Mock private IAosInfo mMockIAosInfo;
     @Mock private ISystem mMockISystem;
 
     private TestableLooper mTestableLooper;
@@ -80,22 +85,22 @@ public class ApnEmergencyTest {
         MockitoAnnotations.initMocks(this);
 
         // create the instance to test
-        mApnEmergency = new ApnEmergency(AppContext.getInstance(), SLOT_0);
+        mApnIms = new ApnIms(AppContext.getInstance(), SLOT_0);
         mTelephonyManager = AppContext.getInstance().getSystemService(TelephonyManager.class);
         mSubscriptionManager = AppContext.getInstance().getSystemService(SubscriptionManager.class);
         mConnectivityManager = AppContext.getInstance().getSystemService(ConnectivityManager.class);
 
-        mTestableLooper = TestableLooper.get(ApnEmergencyTest.this);
+        mTestableLooper = TestableLooper.get(ApnImsTest.this);
         mTestableLooper.processAllMessages();
 
-        replaceInstance(Apn.class, "mSystem", mApnEmergency, mMockISystem);
+        replaceInstance(Apn.class, "mSystem", mApnIms, mMockISystem);
     }
 
     @After
     public void tearDown() throws Exception {
-        if (mApnEmergency != null) {
-            mApnEmergency.cleanup();
-            mApnEmergency = null;
+        if (mApnIms != null) {
+            mApnIms.cleanup();
+            mApnIms = null;
         }
         mTestableLooper = null;
     }
@@ -109,147 +114,166 @@ public class ApnEmergencyTest {
     @Test
     public void testConnect() throws Exception {
         // do not handle request to connect because ApnIms is not enabled
-        assertFalse(mApnEmergency.connect());
+        assertFalse(mApnIms.connect());
 
         // handle request to connect if ApnIms is enabled
-        mApnEmergency.employApn();
-        assertTrue(mApnEmergency.connect());
-        assertEquals(mApnEmergency.getAPNReqState(), EApnReqState.APN_REQUEST_DONE);
-        assertEquals(mApnEmergency.getDataState(), TelephonyManager.DATA_CONNECTING);
-        verify(mConnectivityManager).requestNetwork(
+        mApnIms.employApn();
+        assertTrue(mApnIms.connect());
+        assertEquals(mApnIms.getAPNReqState(), EApnReqState.APN_REQUEST_DONE);
+        assertEquals(mApnIms.getDataState(), TelephonyManager.DATA_CONNECTING);
+        verify(mConnectivityManager, times(1)).requestNetwork(
                 any(NetworkRequest.class), any(ConnectivityManager.NetworkCallback.class));
 
         // return true without request to connect because request is already done
-        assertTrue(mApnEmergency.connect());
+        assertTrue(mApnIms.connect());
     }
 
     @Test
     public void testDisconnect() throws Exception {
-        replaceInstance(Apn.class, "mNetworkCallback", mApnEmergency, mMockNetworkCallback);
-        when(mMockNetworkCallback.isNetworkConnected()).thenReturn(true);
+        replaceInstance(Apn.class, "mNetworkCallback", mApnIms, mMockNetworkCallback);
 
         // do not handle request to disconnect because apn has never been requested to connect
-        assertEquals(mApnEmergency.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
-        assertFalse(mApnEmergency.disconnect());
+        assertEquals(mApnIms.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        assertFalse(mApnIms.disconnect());
 
         // handle request to disconnect if request to connect is done
-        mApnEmergency.employApn();
-        mApnEmergency.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnIms.employApn();
+        mApnIms.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
 
-        assertTrue(mApnEmergency.disconnect());
-        verify(mConnectivityManager).unregisterNetworkCallback(
-                any(ConnectivityManager.NetworkCallback.class));
-        assertEquals(mApnEmergency.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
-        assertEquals(mApnEmergency.getDataState(), TelephonyManager.DATA_DISCONNECTED);
+        assertTrue(mApnIms.disconnect());
+        verify(mConnectivityManager, times(1)).unregisterNetworkCallback(mMockNetworkCallback);
+        assertEquals(mApnIms.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        assertEquals(mApnIms.getDataState(), TelephonyManager.DATA_DISCONNECTED);
         mTestableLooper.processAllMessages();
-        verify(mMockISystem).notifyDataConnectionStateChanged(
-                EApnType.EMERGENCY.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
+        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+                EApnType.IMS.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
     }
 
     @Test
     public void testGetApn() throws Exception {
-        assertEquals(mApnEmergency.getApn(), EApnType.EMERGENCY.getString());
+        assertEquals(mApnIms.getApn(), EApnType.IMS.getString());
+    }
+
+    @Test
+    public void testNotifyHandoverInfoChanged() throws Exception {
+        int failureCause = 33;
+        replaceInstance(ApnIms.class, "mAosInfo", mApnIms, mMockIAosInfo);
+        mApnIms.notifyHandoverInfoChanged(
+                IApn.HANDOVER_FAILURE, TelephonyManager.NETWORK_TYPE_IWLAN, failureCause);
+
+        verify(mMockIAosInfo, times(1)).notifyIpcanHandoverFailure(
+                IApn.IPCAN_CATEGORY_MOBILE, failureCause);
     }
 
     @Test
     public void testHandleNetworkAvailable() throws Exception {
-        replaceInstance(ApnEmergency.class, "mDcUtils", mApnEmergency, mMockDcUtils);
         when(mSubscriptionManager.getSubscriptionIds(anyInt())).thenReturn(null);
         when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
         when(mTelephonyManager.getDataNetworkType())
                 .thenReturn(TelephonyManager.NETWORK_TYPE_IWLAN);
 
         // if apn is not requested, ignore event
-        mApnEmergency.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
+        mApnIms.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
         mTestableLooper.processAllMessages();
-        assertEquals(mApnEmergency.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
-        assertEquals(mApnEmergency.getDataState(), TelephonyManager.DATA_DISCONNECTED);
-        assertEquals(mApnEmergency.mNetworkType, TelephonyManager.NETWORK_TYPE_UNKNOWN);
+        assertEquals(mApnIms.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
 
         // if apn has been requested before, notify data connection state change
-        mApnEmergency.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
-        mApnEmergency.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
+        mApnIms.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnIms.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
         mTestableLooper.processAllMessages();
 
-        verify(mMockDcUtils).updateAllCellInfoForcinglyOnLimitedServiceState();
-        assertEquals(mApnEmergency.mNetworkType, TelephonyManager.NETWORK_TYPE_IWLAN);
-        assertEquals(mApnEmergency.getDataState(), TelephonyManager.DATA_CONNECTED);
+        assertEquals(mApnIms.getDataState(), TelephonyManager.DATA_CONNECTED);
+        assertEquals(mApnIms.mNetworkType, TelephonyManager.NETWORK_TYPE_IWLAN);
         verify(mMockISystem, times(1)).notifyDataConnectionIpcanChanged(
-                EApnType.EMERGENCY.getType(), IApn.IPCAN_CATEGORY_WLAN);
+                EApnType.IMS.getType(), IApn.IPCAN_CATEGORY_WLAN);
         verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
-                EApnType.EMERGENCY.getType(), EDataState.DATA_STATE_CONNECTED.getState());
+                EApnType.IMS.getType(), EDataState.DATA_STATE_CONNECTED.getState());
     }
 
     @Test
     public void testHandleNetworkLost() throws Exception {
-        // if apn is not requested, ignore event
-        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
-        assertEquals(mApnEmergency.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
-        mApnEmergency.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
+        // if data state is not DATA_CONNECTED, ignore event
+        assertEquals(mApnIms.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        assertEquals(mApnIms.getDataState(), TelephonyManager.DATA_DISCONNECTED);
+        mApnIms.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
         mTestableLooper.processAllMessages();
 
-        // if apn has been requested before, notify data connection state change
-        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
-        mApnEmergency.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
-        mApnEmergency.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
+        // if data state is DATA_CONNECTED, notify data connection state change
+        mApnIms.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnIms.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnIms.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
         mTestableLooper.processAllMessages();
 
-        assertEquals(mApnEmergency.getDataState(), TelephonyManager.DATA_DISCONNECTED);
+        assertEquals(mApnIms.getDataState(), TelephonyManager.DATA_DISCONNECTED);
         verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
-                EApnType.EMERGENCY.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
+                EApnType.IMS.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
     }
 
     @Test
     public void testHandleIpChanged_differentIp() throws Exception {
-        replaceInstance(Apn.class, "mDcApn", mApnEmergency, mMockDcApn);
-        when(mMockDcApn.getCachedLocalAddress(EApnType.EMERGENCY.getType())).thenReturn("1.2.3.4");
-        when(mMockDcApn.getLocalAddress(EApnType.EMERGENCY.getType(), 0)).thenReturn("0.0.0.0");
+        replaceInstance(Apn.class, "mDcApn", mApnIms, mMockIDcApn);
+        when(mMockIDcApn.getCachedLocalAddress(EApnType.IMS.getType())).thenReturn("1.2.3.4");
+        when(mMockIDcApn.getLocalAddress(EApnType.IMS.getType(), 0)).thenReturn("0.0.0.0");
 
         // if data state is not connected, ignore event
-        assertEquals(mApnEmergency.getDataState(), TelephonyManager.DATA_DISCONNECTED);
-        mApnEmergency.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
+        assertEquals(mApnIms.getDataState(), TelephonyManager.DATA_DISCONNECTED);
+        mApnIms.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
         // if data state is connected and receive different IP address, notify changed IP address
-        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
-        mApnEmergency.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
+        mApnIms.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnIms.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
         verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
-                EApnType.EMERGENCY.getType(), EDataState.DATA_STATE_IP_CHANGED.getState());
+                EApnType.IMS.getType(), EDataState.DATA_STATE_IP_CHANGED.getState());
     }
 
     @Test
     public void testHandleIpChanged_sameIp() throws Exception {
-        replaceInstance(Apn.class, "mDcApn", mApnEmergency, mMockDcApn);
-        when(mMockDcApn.getCachedLocalAddress(EApnType.EMERGENCY.getType())).thenReturn("0.0.0.0");
-        when(mMockDcApn.getLocalAddress(EApnType.EMERGENCY.getType(), 0)).thenReturn("0.0.0.0");
+        replaceInstance(Apn.class, "mDcApn", mApnIms, mMockIDcApn);
+        when(mMockIDcApn.getCachedLocalAddress(EApnType.IMS.getType())).thenReturn("0.0.0.0");
+        when(mMockIDcApn.getLocalAddress(EApnType.IMS.getType(), 0)).thenReturn("0.0.0.0");
 
         // if data state is connected but receive same IP address, ignore event
-        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
-        mApnEmergency.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
+        mApnIms.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnIms.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
         verify(mMockISystem, times(0)).notifyDataConnectionStateChanged(
-                EApnType.EMERGENCY.getType(), EDataState.DATA_STATE_IP_CHANGED.getState());
+                EApnType.IMS.getType(), EDataState.DATA_STATE_IP_CHANGED.getState());
+    }
+
+    @Test
+    public void testHandlePcscfChanged() throws Exception {
+        mApnIms.sendEmptyMessage(Apn.EVENT_PCSCF_CHANGED);
+        mTestableLooper.processAllMessages();
+        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+                EApnType.IMS.getType(), EDataState.DATA_STATE_PCSCF_CHANGED.getState());
     }
 
     @Test
     public void testHandleDataConnectionFailed() throws Exception {
+        int failureCause = 33;
+        replaceInstance(Apn.class, "mDcSettings", mApnIms, mMockIDcSettings);
+        when(mMockIDcSettings.isPermanentFailure(EApnType.IMS, failureCause)).thenReturn(true);
+
         // if apn is not requested, ignore event
-        assertEquals(mApnEmergency.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
-        mApnEmergency.sendEmptyMessage(Apn.EVENT_DATA_CONNECTION_FAILED);
+        assertEquals(mApnIms.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        mApnIms.sendEmptyMessage(Apn.EVENT_DATA_CONNECTION_FAILED);
         mTestableLooper.processAllMessages();
 
         // if apn has been requested before, notify data connection state change
-        mApnEmergency.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
-        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTING);
-        mApnEmergency.sendEmptyMessage(Apn.EVENT_DATA_CONNECTION_FAILED);
+        mApnIms.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnIms.setDataState(TelephonyManager.DATA_CONNECTING);
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_DATA_CONNECTION_FAILED;
+        msg.obj = failureCause;
+        mApnIms.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        assertEquals(mApnEmergency.getDataState(), TelephonyManager.DATA_DISCONNECTED);
-        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
-                EApnType.EMERGENCY.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
+        verify(mMockISystem, times(1)).notifyDataConnectionFailed(EApnType.IMS.getType());
     }
 
     private synchronized void replaceInstance(final Class c, final String instanceName,

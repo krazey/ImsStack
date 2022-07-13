@@ -164,9 +164,9 @@ public abstract class Apn extends Handler implements IApn {
     protected int mApnEmployCount = 0;
     protected boolean mESMCausePermanentFailure = false;
     protected boolean mIsMonitoringCallbackRegistered = false;
-    private int mSubId = MSimUtils.INVALID_SUB_ID;
-    private ApnSubscriptionListener mSubscriptionListener = null;
-    private Set<ApnStateListener> mApnStateListeners =
+    protected int mSubId = MSimUtils.INVALID_SUB_ID;
+    protected ApnSubscriptionListener mSubscriptionListener = null;
+    protected Set<ApnStateListener> mApnStateListeners =
             new CopyOnWriteArraySet<ApnStateListener>();
 
     protected Apn(Context context, int slotId) {
@@ -614,36 +614,6 @@ public abstract class Apn extends Handler implements IApn {
         }
     }
 
-    protected int getDataStateFromCM() {
-        ConnectivityManager cm = (mContext == null) ? null :
-                mContext.getSystemService(ConnectivityManager.class);
-
-        if (cm == null) {
-            return TelephonyManager.DATA_DISCONNECTED;
-        }
-
-        NetworkInfo netInfo = null;
-        if (mDcApn != null) {
-            netInfo = cm.getNetworkInfo(mDcApn.getNetworkByCapability(mType.getType()));
-        }
-
-        if (netInfo == null) {
-            ImsLog.w(mSlotId, "NetworkInfo is null");
-            return TelephonyManager.DATA_DISCONNECTED;
-        }
-
-        NetworkInfo.State niState = netInfo.getState();
-
-        int dataState = TelephonyManager.DATA_DISCONNECTED;
-
-        if ((niState == NetworkInfo.State.CONNECTED)
-                || (niState == NetworkInfo.State.SUSPENDED)) {
-            dataState = TelephonyManager.DATA_CONNECTED;
-        }
-
-        return dataState;
-    }
-
     protected boolean hasLocalAddress(int version) {
         if (mDcApn != null) {
             String ip = mDcApn.getLocalAddress(mType.getType(), version);
@@ -672,7 +642,14 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected void updateDataState() {
-        int dataState = getDataStateFromCM();
+        int dataState;
+        if (mPreciseDcState == TelephonyManager.DATA_UNKNOWN
+                || mPreciseDcState == TelephonyManager.DATA_DISCONNECTED
+                || mPreciseDcState == TelephonyManager.DATA_CONNECTING) {
+            dataState = TelephonyManager.DATA_DISCONNECTED;
+        } else {
+            dataState = TelephonyManager.DATA_CONNECTED;
+        }
 
         if (mDataState != dataState) {
             ImsLog.i(mSlotId, "data state :: " + mDataState + " >> " + dataState);
