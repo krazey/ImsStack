@@ -30,10 +30,6 @@ public class CbServiceData extends SscServiceData {
         mRuleSet = ruleSet;
     }
 
-    public void setRuleSet(ArrayList<SscRuleData> ruleSet) {
-        this.mRuleSet = ruleSet;
-    }
-
     public ArrayList<SscRuleData> getRuleSet() {
         return this.mRuleSet;
     }
@@ -42,9 +38,6 @@ public class CbServiceData extends SscServiceData {
         StringBuffer sb = new StringBuffer();
         if (mRuleSet != null) {
             for (SscRuleData ruleData : mRuleSet) {
-                if ((ruleData.getRuleId() == null) || ruleData.getRuleId().isEmpty()) {
-                    continue;
-                }
                 sb.append(ruleData.toString());
             }
         }

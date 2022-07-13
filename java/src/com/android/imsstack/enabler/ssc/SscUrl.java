@@ -25,6 +25,7 @@ import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -46,7 +47,7 @@ public class SscUrl {
     }
 
     protected URL getConnectionUrl(int slotId, String query) {
-        String urlAddr = generateUrlAddress(slotId);
+        String urlAddr = generateXcapRootUri(slotId);
         if (TextUtils.isEmpty(urlAddr)) {
             ImsLog.e(slotId, "urlAddr is null");
             return null;
@@ -57,20 +58,10 @@ public class SscUrl {
             url = new URL(urlAddr + query);
         } catch (MalformedURLException e) {
             ImsLog.e(e.toString());
-            e.printStackTrace();
             return null;
         }
 
         return url;
-    }
-
-    private String getDocumentQueryUri(SscServiceQueryData data, String xui) {
-        int slotId = data.getSlotId();
-        String urlQuery = getUriPrefixFromConfig(slotId);
-        urlQuery += URI_AUID + URI_USERS + "/" + xui + URI_DOC;
-
-        ImsLog.d("urlQuery : " + urlQuery);
-        return urlQuery;
     }
 
     protected String getQueryUri(SscServiceQueryData data, String xui) {
@@ -84,13 +75,13 @@ public class SscUrl {
                     + "/" + SscXmlFormat.getSsElement(slotId, data.getSsType().getSsName());
         }
 
-        if (queryUri.contains(SscXmlFormat.NS_SS_PREFIX)
-                || queryUri.contains(SscXmlFormat.NS_CP_PREFIX)) {
+        if (SscXmlFormat.isNamespaceSsSupported(slotId)
+                || SscXmlFormat.isNamespaceCpSupported(slotId)) {
             queryUri += "?";
-            if (queryUri.contains(SscXmlFormat.NS_SS_PREFIX)) {
+            if (SscXmlFormat.isNamespaceSsSupported(slotId)) {
                 queryUri += SscXmlFormat.NS_SS_URI;
             }
-            if (queryUri.contains(SscXmlFormat.NS_CP_PREFIX)) {
+            if (SscXmlFormat.isNamespaceCpSupported(slotId)) {
                 queryUri += SscXmlFormat.NS_CP_URI;
             }
         }
@@ -144,13 +135,13 @@ public class SscUrl {
                 break;
         }
 
-        if (updateUri.contains(SscXmlFormat.NS_SS_PREFIX)
-                || updateUri.contains(SscXmlFormat.NS_CP_PREFIX)) {
+        if (SscXmlFormat.isNamespaceSsSupported(slotId)
+                || SscXmlFormat.isNamespaceCpSupported(slotId)) {
             updateUri += "?";
-            if (updateUri.contains(SscXmlFormat.NS_SS_PREFIX)) {
+            if (SscXmlFormat.isNamespaceSsSupported(slotId)) {
                 updateUri += SscXmlFormat.NS_SS_URI;
             }
-            if (updateUri.contains(SscXmlFormat.NS_CP_PREFIX)) {
+            if (SscXmlFormat.isNamespaceCpSupported(slotId)) {
                 updateUri += SscXmlFormat.NS_CP_URI;
             }
         }
@@ -165,8 +156,8 @@ public class SscUrl {
     }
 
     private String getRuleUri(SscServiceData data) {
-        int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_DATA) ?
-                SscXmlFormat.MEDIA_TYPE_VIDEO : SscXmlFormat.MEDIA_TYPE_AUDIO;
+        int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VIDEO)
+                ? SscXmlFormat.MEDIA_TYPE_VIDEO : SscXmlFormat.MEDIA_TYPE_AUDIO;
         String ruleId = SscXmlFormat.getRuleId(
                 data.getSlotId(), mediaType, data.getSsType().getSsName(), data.getCondition());
 
@@ -192,9 +183,9 @@ public class SscUrl {
         return uri;
     }
 
-    private String makeDNSQuery(int slotId, String fqdn) {
-        // TODO: SRV query will be refactored
-        /*
+    /* TODO: SRV query will be refactored
+    private String queryNaptrSrv(int slotId, String fqdn) {
+
         ImsLog.d("");
         String urlAddr = null;
         SscDnsQuery.IQueryObject queryObject = SscDnsQuery.getInstance().makeDnsQuery(slotId, fqdn);
@@ -225,14 +216,13 @@ public class SscUrl {
 
         ImsLog.d("urlAddr : " + urlAddr);
         return urlAddr;
-         */
+
         return null;
     }
+    */
 
-    private String generateUrlAddress(int slotId) {
-        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
-                SubsInfoInterface.class, slotId);
-
+    private String generateXcapRootUri(int slotId) {
+        SubsInfoInterface subsInfo = getSubsInfoInterface(slotId);
         if (subsInfo == null) {
             return null;
         }
@@ -241,8 +231,8 @@ public class SscUrl {
         if (TextUtils.isEmpty(uriAddr)) {
             uriAddr = "xcap.";
 
-            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
-            String impi = sim != null ? sim.getIsimImpi() : null;
+            SimInterface sim = getSimInterface(slotId);
+            String impi = (sim != null) ? sim.getIsimImpi() : null;
 
             if (subsInfo.isIsimEnabled() && !TextUtils.isEmpty(impi)) {
                 String substringImpi = impi.substring(impi.lastIndexOf("@") + 1, impi.length());
@@ -254,23 +244,21 @@ public class SscUrl {
                     uriAddr += substringImpi;
                 }
             } else {
-                int mnc = -1;
-                int mcc = -1;
-                try {
-                    ITelephonySubscriber ts = (ITelephonySubscriber) AgentFactory.getAgent(
-                            AgentFactory.TELEPHONY_SUBSCRIBER, slotId);
-                    if (ts != null) {
-                        mnc = Integer.parseInt(ts.getMnc(true));
-                        mcc = Integer.parseInt(ts.getMcc(true));
-                    }
+                ITelephonySubscriber ts = getTelephonySubscriber(slotId);
+                if (ts == null) {
+                    return null;
+                }
 
-                    if (mnc != -1 && mcc != -1) {
-                        uriAddr += String.format(Locale.US,
-                                "ims.mnc%03d.mcc%03d.pub.3gppnetwork.org", mnc, mcc);
-                    } else {
-                        ImsLog.e("Invalid mnc & mcc value");
-                        return null;
-                    }
+                String strMnc = ts.getMnc(true);
+                String strMcc = ts.getMcc(true);
+                if (TextUtils.isEmpty(strMnc) || TextUtils.isEmpty(strMcc)) {
+                    ImsLog.e("Wrong MNC : " + strMnc + " or MCC : " + strMcc);
+                    return null;
+                }
+
+                try {
+                    uriAddr += String.format(Locale.US, "ims.mnc%03d.mcc%03d.pub.3gppnetwork.org",
+                        Integer.parseInt(strMnc), Integer.parseInt(strMcc));
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                     ImsLog.e(e.toString());
@@ -301,5 +289,21 @@ public class SscUrl {
         String uriPrefix = SscConfig.getAuidPrefix(slotId);
         return (TextUtils.isEmpty(uriPrefix)) ? "" :
                 (uriPrefix.startsWith("/") ? uriPrefix : "/" + uriPrefix);
+    }
+
+    @VisibleForTesting
+    protected SimInterface getSimInterface(int slotId) {
+        return AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
+    }
+
+    @VisibleForTesting
+    protected SubsInfoInterface getSubsInfoInterface(int slotId) {
+        return AgentFactory.getInstance().getAgent(SubsInfoInterface.class, slotId);
+    }
+
+    @VisibleForTesting
+    protected ITelephonySubscriber getTelephonySubscriber(int slotId) {
+        return (ITelephonySubscriber) AgentFactory.getInstance()
+                .getAgent(AgentFactory.TELEPHONY_SUBSCRIBER, slotId);
     }
 }

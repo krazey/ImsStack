@@ -21,57 +21,57 @@ public enum ESsType {
     /**
      * NONE
      */
-    NONE (null , null),
+    NONE(null , null),
     /**
      * Originating Identification Presentation
      */
-    OIP ("originating-identity-presentation", "oip_oir.xsd"),
+    OIP(SscXmlFormat.OIP, "oip_oir.xsd"),
     /**
      * Originating Identification Restriction
      */
-    OIR ("originating-identity-presentation-restriction", "oip_oir.xsd"),
+    OIR(SscXmlFormat.OIR, "oip_oir.xsd"),
     /**
      * Terminating Identification Presentation
      */
-    TIP ("terminating-identity-presentation", "tip_tir.xsd"),
+    TIP(SscXmlFormat.TIP, "tip_tir.xsd"),
     /**
      * Termination Identification Restriction
      */
-    TIR ("terminating-identity-presentation-restriction", "tip_tir.xsd"),
+    TIR(SscXmlFormat.TIR, "tip_tir.xsd"),
 
     /**
-     * Communication Forwarding Default
+     * Communication Diversion
      */
-    CF ("communication-diversion", "cf.xsd"),
+    CF(SscXmlFormat.CD, "cf.xsd"),
     /**
-     * Communication Forwarding - Service Capability
+     * Communication Diversion - Service Capability
      */
-    CFSC ("communication-diversion-serv-cap", "cf_serv_cap.xsd"),
+    CFSC(SscXmlFormat.SC_CD, "cf_serv_cap.xsd"),
 
     /**
      * Communication Barring
      */
-    OCB ("outgoing-communication-barring", "cb.xsd"),
-    ICB ("incoming-communication-barring", "cb.xsd"),
+    OCB(SscXmlFormat.OCB, "cb.xsd"),
+    ICB(SscXmlFormat.ICB, "cb.xsd"),
     /**
      * FIXME :: To Handle icb for KDDI
      * Rename : ICB --> ICBA
      */
-    ICBA ("incoming-communication-barring", "cb.xsd"),
+    ICBA(SscXmlFormat.ICB, "cb.xsd"),
     /**
      * Communication Barring - Service Capability
      */
-    CBSC ("communication-barring-serv-cap", "cb_serv_cap.xsd"),
+    CBSC(SscXmlFormat.SC_CB, "cb_serv_cap.xsd"),
 
     /**
      * Communication Waiting
      */
-    CW ("communication-waiting", "cw.xsd"),
+    CW(SscXmlFormat.CW, "cw.xsd"),
 
     /**
      * xcap error
      */
-    XE ("xcap-error", "xe.xsd");
+    XE(SscXmlFormat.XCAPERROR, "xe.xsd");
 
 
     private String mSSName = null;

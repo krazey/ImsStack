@@ -58,10 +58,6 @@ public abstract class SscData {
         return mServiceClass;
     }
 
-    public void setServiceClass(int serviceClass) {
-        mServiceClass = serviceClass;
-    }
-
     public int getResponseCode() {
         return mResponseCode;
     }

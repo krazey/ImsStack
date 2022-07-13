@@ -173,7 +173,7 @@ public class SscXmlCreator {
         Element ruleElement = doc.createElement(ruleTag);
         ruleSetElement.appendChild(ruleElement);
 
-        int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_DATA)
+        int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VIDEO)
                 ? SscXmlFormat.MEDIA_TYPE_VIDEO : SscXmlFormat.MEDIA_TYPE_AUDIO;
         String defaultRuleId = SscXmlFormat.getDefaultRuleId(slotId, mediaType, serviceName,
                 data.getCondition());
@@ -410,8 +410,8 @@ public class SscXmlCreator {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
 
-            int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_DATA) ?
-                    SscXmlFormat.MEDIA_TYPE_VIDEO : SscXmlFormat.MEDIA_TYPE_AUDIO;
+            int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VIDEO)
+                    ? SscXmlFormat.MEDIA_TYPE_VIDEO : SscXmlFormat.MEDIA_TYPE_AUDIO;
             String ruleId = null;
             if (data.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CF) {
                 ruleId = SscXmlFormat.getDefaultRuleId(slotId, mediaType,
@@ -577,7 +577,7 @@ public class SscXmlCreator {
         private Element updateCbRule(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
-            int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_DATA)
+            int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VIDEO)
                     ? SscXmlFormat.MEDIA_TYPE_VIDEO : SscXmlFormat.MEDIA_TYPE_AUDIO;
             String ruleId = null;
             if (data.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CB) {

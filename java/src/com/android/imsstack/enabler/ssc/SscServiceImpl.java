@@ -581,7 +581,7 @@ public class SscServiceImpl extends UtInterfaceBase {
         }
 
         requestData.offerSscData(new OirServiceData(mSlotId, ESsType.OIR,
-                SscConstant.EVENT_SSC_UPDATE_OIR, tId, clirMode, clirMode, clirMode));
+                SscConstant.EVENT_SSC_UPDATE_OIR, tId, clirMode, 0, 0));
 
         postRequestMessage(requestData);
     }
@@ -611,7 +611,7 @@ public class SscServiceImpl extends UtInterfaceBase {
         }
 
         requestData.offerSscData(new TirServiceData(mSlotId, ESsType.TIR,
-                SscConstant.EVENT_SSC_UPDATE_TIR, tId, presentation, presentation));
+                SscConstant.EVENT_SSC_UPDATE_TIR, tId, presentation, 0));
 
         postRequestMessage(requestData);
     }
@@ -719,7 +719,7 @@ public class SscServiceImpl extends UtInterfaceBase {
             return;
         }
 
-        int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_DATA)
+        int mediaType = (data.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VIDEO)
                 ? SscXmlFormat.MEDIA_TYPE_VIDEO : SscXmlFormat.MEDIA_TYPE_AUDIO;
         String ruleId = SscXmlFormat.getRuleId(data.getSlotId(), mediaType,
                 data.getSsType().getSsName(), data.getCondition());
