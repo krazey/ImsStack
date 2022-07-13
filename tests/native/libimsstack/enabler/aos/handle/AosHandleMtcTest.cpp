@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "AoSReason.h"
 #include "CarrierConfig.h"
 #include "ImsAosParameter.h"
 #include "ImsEventDef.h"
@@ -33,6 +34,8 @@
 #include "interface/MockIAosNConfiguration.h"
 #include "interface/MockIAosNetTracker.h"
 
+#include "../../interface/aos/MockIImsAosListener.h"
+
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Return;
@@ -45,6 +48,7 @@ public:
 
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosNetTracker m_objMockIAosNetTracker;
+    MockIImsAosListener m_objMockIImsAosListener;
 
     IAosNConfiguration* m_piAosNConfiguration;
     MockIAosNConfiguration m_objMockIAosNConfiguration;
@@ -137,6 +141,11 @@ protected:
         m_pAosHandleMtc->m_objFeatureTagList.AddFeature(nFeature);
     }
 
+    void RemoveFeature(IN IMS_UINT32 nFeature)
+    {
+        m_pAosHandleMtc->m_objFeatureTagList.RemoveFeature(nFeature);
+    }
+
     void AddBindedFeature(IN IMS_UINT32 nFeature)
     {
         m_pAosHandleMtc->m_objBindedFeatureTagList.AddFeature(nFeature);
@@ -172,6 +181,31 @@ protected:
     void InitializeFeatureTags() { m_pAosHandleMtc->InitializeFeatureTags(); }
 
     void UpdateFeatureTags() { m_pAosHandleMtc->UpdateFeatureTags(); }
+
+    IMS_BOOL ProcessImsSuspended(IN IMS_UINT32 nReason)
+    {
+        return m_pAosHandleMtc->ProcessImsSuspended(nReason);
+    };
+
+    IMS_BOOL ProcessImsResumed(IN IMS_UINT32 nReason)
+    {
+        return m_pAosHandleMtc->ProcessImsResumed(nReason);
+    }
+
+    void SetHandleState(IN IMS_UINT32 nState) { m_pAosHandleMtc->SetHandleState(nState); }
+
+    void SetSuspendedReason(IN IMS_UINT32 nReason) { m_pAosHandleMtc->SetSuspendedReason(nReason); }
+
+    void ResetSuspendedReason(IN IMS_UINT32 nReason)
+    {
+        m_pAosHandleMtc->ResetSuspendedReason(nReason);
+    }
+
+    void CheckSuspended() { m_pAosHandleMtc->CheckSuspended(); }
+
+    IMS_BOOL GetNetSrvIn() { return m_pAosHandleMtc->m_bNetSrvIn; }
+
+    IMS_UINT32 GetNetworkType() { return m_pAosHandleMtc->m_nNetworkType; }
 };
 
 TEST_F(AosHandleMtcTest, Constructor)
@@ -449,4 +483,442 @@ TEST_F(AosHandleMtcTest, InitializeFeatureTags_Test)
     InitializeFeatureTags();
 
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagList));
+}
+
+TEST_F(AosHandleMtcTest, UpdateFeatureTags_Test1)
+{
+    // Test1: No use +g.gsma.rcs.telephony as available voice call type
+    // Expectation: Do nothing. No change in feature tag list.
+
+    AddFeature(ImsAosFeature::MMTEL);
+    AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+    AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+
+    AosFeatureTagList objExpectedFeatureTagList;
+    objExpectedFeatureTagList.AddFeature(ImsAosFeature::MMTEL);
+    objExpectedFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+    objExpectedFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    UpdateFeatureTags();
+
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagList));
+}
+
+TEST_F(AosHandleMtcTest, UpdateFeatureTags_Test2)
+{
+    // Test2: vzw vowifi "cs" feature tag for call test. Idle -> Offhook -> Idle
+    // Expectation: "cs" in idle, "cs,volte" in offhook
+
+    AddFeature(ImsAosFeature::VIDEO);
+    AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+    AddBindedFeature(ImsAosFeature::VIDEO);
+    AddBindedFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+
+    SetEpdgEnabled(IMS_TRUE);
+
+    AosFeatureTagList objExpectedFeatureTagListIdle;
+    objExpectedFeatureTagListIdle.AddFeature(ImsAosFeature::VIDEO);
+    objExpectedFeatureTagListIdle.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+
+    AosFeatureTagList objExpectedFeatureTagListOffhook;
+    objExpectedFeatureTagListOffhook.AddFeature(ImsAosFeature::VIDEO);
+    objExpectedFeatureTagListOffhook.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+    objExpectedFeatureTagListOffhook.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosCallTracker, IsNormalCallActive())
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
+
+    UpdateFeatureTags();
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListOffhook));
+
+    UpdateFeatureTags();
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListIdle));
+}
+
+TEST_F(AosHandleMtcTest, UpdateFeatureTags_Test3)
+{
+    // Test3: VZW VoWiFi IMS Registration Table Test - Wifi Only.
+    // Expectation: "cs,volte" if mmtel / "cs" if no mmtel but video / none if no mmtel and video
+
+    AddFeature(ImsAosFeature::MMTEL);
+    AddFeature(ImsAosFeature::VIDEO);
+    AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+    AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+
+    SetEpdgEnabled(IMS_TRUE);
+
+    AosFeatureTagList objExpectedFeatureTagListMmtel;
+    objExpectedFeatureTagListMmtel.AddFeature(ImsAosFeature::MMTEL);
+    objExpectedFeatureTagListMmtel.AddFeature(ImsAosFeature::VIDEO);
+    objExpectedFeatureTagListMmtel.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+    objExpectedFeatureTagListMmtel.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+
+    AosFeatureTagList objExpectedFeatureTagListVideo;
+    objExpectedFeatureTagListVideo.AddFeature(ImsAosFeature::VIDEO);
+    objExpectedFeatureTagListVideo.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+
+    AosFeatureTagList objExpectedFeatureTagListNoFeature;
+    objExpectedFeatureTagListNoFeature.Clear();
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosCallTracker, IsNormalCallActive())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_INVALID));
+
+    // Video
+    RemoveFeature(ImsAosFeature::MMTEL);
+    UpdateFeatureTags();
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListVideo));
+
+    // Mmtel
+    AddFeature(ImsAosFeature::MMTEL);
+    UpdateFeatureTags();
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListMmtel));
+
+    // No mmtel and video
+    RemoveFeature(ImsAosFeature::MMTEL);
+    RemoveFeature(ImsAosFeature::VIDEO);
+    UpdateFeatureTags();
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoFeature));
+}
+
+TEST_F(AosHandleMtcTest, UpdateFeatureTags_Test4)
+{
+    // Test4: VZW VoWiFi IMS Registration Table Test - CS Roam + Wifi
+    // Expectation: "cs,volte" if mmtel / "cs" if no mmtel but video / none if no mmtel and video
+
+    AddFeature(ImsAosFeature::MMTEL);
+    AddFeature(ImsAosFeature::VIDEO);
+    AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+    AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+
+    SetEpdgEnabled(IMS_TRUE);
+
+    AosFeatureTagList objExpectedFeatureTagListMmtel;
+    objExpectedFeatureTagListMmtel.AddFeature(ImsAosFeature::MMTEL);
+    objExpectedFeatureTagListMmtel.AddFeature(ImsAosFeature::VIDEO);
+    objExpectedFeatureTagListMmtel.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+    objExpectedFeatureTagListMmtel.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+
+    AosFeatureTagList objExpectedFeatureTagListVideo;
+    objExpectedFeatureTagListVideo.AddFeature(ImsAosFeature::VIDEO);
+    objExpectedFeatureTagListVideo.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+
+    AosFeatureTagList objExpectedFeatureTagListNoFeature;
+    objExpectedFeatureTagListNoFeature.Clear();
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosCallTracker, IsNormalCallActive())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
+
+    // Video
+    RemoveFeature(ImsAosFeature::MMTEL);
+    UpdateFeatureTags();
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListVideo));
+
+    // Mmtel
+    AddFeature(ImsAosFeature::MMTEL);
+    UpdateFeatureTags();
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListMmtel));
+
+    // No mmtel and video
+    RemoveFeature(ImsAosFeature::MMTEL);
+    RemoveFeature(ImsAosFeature::VIDEO);
+    UpdateFeatureTags();
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoFeature));
+}
+
+TEST_F(AosHandleMtcTest, ProcessImsSuspended_Test1)
+{
+    // Test1: ims not connected
+    // Expectation: no suspended reason is set, return false
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    EXPECT_FALSE(ProcessImsSuspended(0));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+}
+
+TEST_F(AosHandleMtcTest, ProcessImsSuspended_Test2)
+{
+    // Test2: ims connected, invalid reason
+    // Expectation: no suspended reason is set, return false
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    EXPECT_FALSE(ProcessImsSuspended(0));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+}
+
+TEST_F(AosHandleMtcTest, ProcessImsSuspended_Test3)
+{
+    // Test3: ims connected, valid reason, no listener
+    // Expectation: The suspended reason is set, no callback, return false
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+
+    m_pAosHandleMtc->SetListener(IMS_NULL);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(_)).Times(0);
+
+    EXPECT_FALSE(ProcessImsSuspended(AoSReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+
+    EXPECT_FALSE(ProcessImsSuspended(AoSReason::SUSPEND_NO_LTE_COVERAGE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(),
+            (AoSReason::SUSPEND_NO_SERVICE | AoSReason::SUSPEND_NO_LTE_COVERAGE));
+}
+
+TEST_F(AosHandleMtcTest, ProcessImsSuspended_Test4)
+{
+    // Test4: ims connected, valid reason, valid listener
+    // Expectation: The suspended reason is set, callback, return true
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+
+    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(_)).Times(2);
+
+    EXPECT_TRUE(ProcessImsSuspended(AoSReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+
+    EXPECT_TRUE(ProcessImsSuspended(AoSReason::SUSPEND_NO_LTE_COVERAGE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(),
+            (AoSReason::SUSPEND_NO_SERVICE | AoSReason::SUSPEND_NO_LTE_COVERAGE));
+}
+
+TEST_F(AosHandleMtcTest, ProcessImsResumed_Test1)
+{
+    // Test1: ims not connected
+    // Expectation: suspended reason is not reset, return false
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+
+    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+}
+
+TEST_F(AosHandleMtcTest, ProcessImsResumed_Test2)
+{
+    // Test2: ims connected, ims not suspended
+    // Expectation: return false
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+
+    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
+}
+
+TEST_F(AosHandleMtcTest, ProcessImsResumed_Test3)
+{
+    // Test3: ims connected, ims suspended, call with invalid reason
+    // Expectation: still suspended, return false
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+
+    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_CS_CALL));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+}
+
+TEST_F(AosHandleMtcTest, ProcessImsResumed_Test4)
+{
+    // Test4: ims connected, ims suspended, multiple reasons set, call with valid reason
+    // Expectation: still suspended, no callback, return false
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+    SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+
+    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(0);
+
+    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+}
+
+TEST_F(AosHandleMtcTest, ProcessImsResumed_Test5)
+{
+    // Test5: ims connected, ims suspended, no listener, call with SUSPEND_NO_LTE_COVERAGE
+    // Expectation: no suspended reason, no callback, return false
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(0);
+
+    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_LTE_COVERAGE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::NONE);
+}
+
+TEST_F(AosHandleMtcTest, ProcessImsResumed_Test6)
+{
+    // Test6: ims connected, ims suspended, valid listener, call with SUSPEND_NO_SERVICE, LTE
+    // Expectation: no suspended reason, callback, return true
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(1);
+
+    EXPECT_TRUE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::NONE);
+}
+
+TEST_F(AosHandleMtcTest, ProcessImsResumed_Test7)
+{
+    // Test7: ims connected, ims suspended, valid listener, call with SUSPEND_NO_SERVICE, GSM
+    // Expectation: suspended reason changed to SUSPEND_NO_LTE_COVERAGE, no callback, return false
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
+
+    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(0);
+
+    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+}
+
+TEST_F(AosHandleMtcTest, CheckSuspended_Test1)
+{
+    // Test1: suspended, valid network(LTE)
+    // Expectation: set SUSPEND_NO_SERVICE
+
+    EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(&m_objMockIAosNetTracker));
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    CheckSuspended();
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+
+    EXPECT_FALSE(GetNetSrvIn());
+    EXPECT_EQ(GetNetworkType(), NW_REPORT_RADIO_LTE);
+}
+
+TEST_F(AosHandleMtcTest, CheckSuspended_Test2)
+{
+    // Test2: suspended, invalid network(GSM)
+    // Expectation: set SUSPEND_NO_SERVICE
+
+    EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(&m_objMockIAosNetTracker));
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
+
+    CheckSuspended();
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(),
+            (AoSReason::SUSPEND_NO_SERVICE | AoSReason::SUSPEND_NO_LTE_COVERAGE));
+
+    EXPECT_FALSE(GetNetSrvIn());
+    EXPECT_EQ(GetNetworkType(), NW_REPORT_RADIO_GSM);
+}
+
+TEST_F(AosHandleMtcTest, CheckSuspended_Test3)
+{
+    // Test3: not suspended, valid network(LTE)
+    // Expectation: no suspended reason
+
+    EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(&m_objMockIAosNetTracker));
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    CheckSuspended();
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::NONE);
+
+    EXPECT_TRUE(GetNetSrvIn());
+    EXPECT_EQ(GetNetworkType(), NW_REPORT_RADIO_LTE);
+}
+
+TEST_F(AosHandleMtcTest, SetSuspendedReason_ResetSuspendedReason_Test)
+{
+    // Expectation: Only SUSPEND_NO_SERVICE and SUSPEND_NO_LTE_COVERAGE are allowed to be set/reset.
+
+    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+
+    SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(),
+            (AoSReason::SUSPEND_NO_SERVICE | AoSReason::SUSPEND_NO_LTE_COVERAGE));
+
+    SetSuspendedReason(AoSReason::SUSPEND_CS_CALL);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(),
+            (AoSReason::SUSPEND_NO_SERVICE | AoSReason::SUSPEND_NO_LTE_COVERAGE));
+
+    ResetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+
+    ResetSuspendedReason(AoSReason::SUSPEND_CS_CALL);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+
+    ResetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::NONE);
 }
