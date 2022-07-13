@@ -236,6 +236,7 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Suspended(IN IMS_UINT32 nReason)
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Resumed()
 {
+    m_eStatus = ServiceStatus::SERVICE_ACTIVE;
     m_objAosEventHandler.OnResumed();
 }
 

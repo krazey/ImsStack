@@ -23,18 +23,18 @@
 
 class IMtcContext;
 
-class SrvccEventHandler final
+class SrvccEventHandler
 {
 public:
     SrvccEventHandler(IN IMtcContext& objContext);
-    ~SrvccEventHandler();
+    virtual ~SrvccEventHandler();
     SrvccEventHandler(IN const SrvccEventHandler&) = delete;
     SrvccEventHandler& operator=(IN const SrvccEventHandler&) = delete;
 
-    void AddListener(IN ISrvccStateListener* piListener);
-    void RemoveListener(IN ISrvccStateListener* piListener);
+    virtual void AddListener(IN ISrvccStateListener* piListener);
+    virtual void RemoveListener(IN ISrvccStateListener* piListener);
 
-    void UpdateSrvccState(IN SrvccState eState);
+    virtual void UpdateSrvccState(IN SrvccState eState);
 
 private:
     void NotifyListeners();

@@ -25,14 +25,17 @@ class JniMtcServiceThread;
 class MtcEmergencyServiceManager
 {
 public:
-    MtcEmergencyServiceManager(IN IMtcContext& objContext);
+    explicit MtcEmergencyServiceManager(IN IMtcContext& objContext);
     virtual ~MtcEmergencyServiceManager();
     MtcEmergencyServiceManager(IN const MtcEmergencyServiceManager&) = delete;
     MtcEmergencyServiceManager& operator=(IN const MtcEmergencyServiceManager&) = delete;
 
-    inline void SetJniServiceThread(IN JniMtcServiceThread* pThread) { m_pServiceThread = pThread; }
-    void OpenEmergencyService();
-    void HandleServiceStatus(IN ServiceStatus eStatus);
+    virtual inline void SetJniServiceThread(IN JniMtcServiceThread* pThread)
+    {
+        m_pServiceThread = pThread;
+    }
+    virtual void OpenEmergencyService();
+    virtual void HandleServiceStatus(IN ServiceStatus eStatus);
 
 private:
     void HandleServiceIdle();
