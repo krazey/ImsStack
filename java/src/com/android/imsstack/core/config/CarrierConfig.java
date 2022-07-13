@@ -523,6 +523,8 @@ public class CarrierConfig {
                 "registration_pcscf_update_policy_int";
         public static final String KEY_SUPPORT_CONTACT_USER_INFO_BOOL =
                 "support_contact_user_info_bool";
+        public static final String KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT =
+                "contact_user_info_policy_for_non_register_message_int";
         // Bundle {
         public static final String KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE =
                 "specific_registration_error_bundle";

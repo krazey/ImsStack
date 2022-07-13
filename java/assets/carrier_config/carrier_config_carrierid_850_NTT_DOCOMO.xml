@@ -38,5 +38,5 @@
     <int name="sip_timer_100_trying_millis_int" value="0"/>
 
     <!-- Aos -->
-    <boolean name="support_contact_user_info_bool" value="false"/>
+    <int name="contact_user_info_policy_for_non_register_message_int" value="2"/>
 </carrier_config>

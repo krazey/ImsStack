@@ -740,6 +740,20 @@ public:
     virtual IMS_SINT32 GetRegistrationPcscfUpdatePolicy() const = 0;
 
     /**
+     * @brief Indicate which policy is applied to set user info for none register message.
+     *        It will be applied in all the outgoing SIP request adn response
+     *        except for register request.
+     *
+     *        Possible values are,
+     *        CarrierConfig::Assets::USER_INFO_POLICY_DEFAULT
+     *        CarrierConfig::Assets::USER_INFO_POLICY_NONE
+     *        CarrierConfig::Assets::USER_INFO_POLICY_NO_IMSI
+     *
+     * @return IMS_SINT32 Return the policy of setting the user info
+     */
+    virtual IMS_SINT32 GetUserInfoPolicyForNonRegisterMessage() const = 0;
+
+    /**
      * @brief Get the registration retry intervals for using when registration is failed
      *        as general codes.
      *

@@ -65,7 +65,9 @@ public:
             nRegistrationTimerForEmergencyCallMillis(0),
             bUpdateRegistrationWithCountryChange(IMS_FALSE),
             nRegistrationPcscfUpdatePolicy(0),
-            bSupportContactUserInfo(IMS_TRUE)
+            bSupportContactUserInfo(IMS_TRUE),
+            nContactUserInfoPolicyForNonRegisterMessage(
+                    CarrierConfig::Assets::USER_INFO_POLICY_DEFAULT)
     {
     }
 
@@ -113,5 +115,6 @@ public:
     IMS_BOOL bUpdateRegistrationWithCountryChange;
     IMS_SINT32 nRegistrationPcscfUpdatePolicy;
     IMS_BOOL bSupportContactUserInfo;
+    IMS_SINT32 nContactUserInfoPolicyForNonRegisterMessage;
 };
 #endif  // AOS_ASSET_H_

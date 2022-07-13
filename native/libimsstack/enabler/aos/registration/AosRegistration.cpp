@@ -5151,6 +5151,18 @@ void AosRegistration::SetPlaniHeader()
 PRIVATE
 void AosRegistration::UpdateUserInfoInContact()
 {
+    if (m_piRegistration == IMS_NULL)
+    {
+        return;
+    }
+
+    if (GET_N_CONFIG(m_nSlotId)->GetUserInfoPolicyForNonRegisterMessage() ==
+            CarrierConfig::Assets::USER_INFO_POLICY_NONE)
+    {
+        A_IMS_TRACE_D(REGID, "UpdateUserInfoInContact :: apply none policy", 0, 0, 0);
+        m_piRegistration->SetUserInfoForContactHeader(AString::ConstEmpty());
+    }
+
     // TODO_CONFIG : check ATT
 #if 0
     if (m_piContext->GetConfig()->IsRequiredToUpdateContact() == IMS_FALSE)

@@ -499,6 +499,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPcscfUpdatePolicy() 
     return m_objAsset.nRegistrationPcscfUpdatePolicy;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetUserInfoPolicyForNonRegisterMessage() const
+{
+    return m_objAsset.nContactUserInfoPolicyForNonRegisterMessage;
+}
+
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegistrationRetryIntervals()
 {
     return m_objRegRetryInterval.objRegistrationRetryIntervalSec;
@@ -1313,6 +1318,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT);
     m_objAsset.bSupportContactUserInfo =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_CONTACT_USER_INFO_BOOL);
+    m_objAsset.nContactUserInfoPolicyForNonRegisterMessage = piCc->GetInt(
+            CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT);
 }
 
 PRIVATE
