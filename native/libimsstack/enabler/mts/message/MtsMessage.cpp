@@ -35,7 +35,6 @@
 #include "message/MtsMessage.h"
 #include "message/MtsMessageController.h"
 #include "utility/MtsDynamicLoader.h"
-#include "utility/MtsSmUtils.h"
 #include "utility/MtsSipFormUtils.h"
 
 __IMS_TRACE_TAG_COM_SMS__;
@@ -56,13 +55,13 @@ MtsMessage::MtsMessage(IN IMS_SINT32 nSlotId, IN MtsMessageController* pMtsMessa
         m_nSlotId(nSlotId),
         m_pMtsMessageController(pMtsMessageController)
 {
-    IMS_TRACE_I("+MtsMessage", 0, 0, 0);
+    IMS_TRACE_I("+MtsMessage [slot_%d]", m_nSlotId, 0, 0);
 }
 
 PUBLIC
 MtsMessage::~MtsMessage()
 {
-    IMS_TRACE_I("~MtsMessage", 0, 0, 0);
+    IMS_TRACE_I("~MtsMessage [slot_%d]", m_nSlotId, 0, 0);
 
     if (m_piPageMessage != IMS_NULL)
     {
@@ -152,7 +151,8 @@ void MtsMessage::ReceiveMessage(IN IPageMessage* piPageMessage, IN const AString
         return;
     }
 
-    m_nMti = MtsSmUtils::GetInstance(m_nSlotId)->GetMti(MtsApp::SMSFORMAT_3GPP, objSms);
+    m_nMti = m_pMtsMessageController->GetMtsUtils()->GetMtsSmUtils()->GetMti(
+            MtsApp::SMSFORMAT_3GPP, objSms);
     if (m_nMti == MtsSmUtils::MTS_3GPP_MTI_RP_DATA_From_N && IsProcessingMtsMessage())
     {
         IMS_TRACE_E(0, "Prev SMS_DELIVER is not processed yet Hence Adding to the List", 0, 0, 0);
@@ -304,15 +304,17 @@ void MtsMessage::SetSeqId(IN IMS_SINT32 nSeqId)
 PUBLIC
 void MtsMessage::PrintMsgInfo()
 {
+    MtsSmUtils* pMtsSmUtils = m_pMtsMessageController->GetMtsUtils()->GetMtsSmUtils();
+
     if (m_nSmsFormat == MtsApp::SMSFORMAT_3GPP)
     {
         IMS_TRACE_I("[PrintMsgInfo] 3GPP :: (%s), RP_MR(%d), DataSize(%d)",
-                MtsSmUtils::GetMtiStringFrom3gpp(m_nMti), m_nMrOfRp, m_nSmSize);
+                pMtsSmUtils->GetMtiStringFrom3gpp(m_nMti), m_nMrOfRp, m_nSmSize);
     }
     else if (m_nSmsFormat == MtsApp::SMSFORMAT_3GPP2)
     {
         IMS_TRACE_I("[PrintMsgInfo] 3GPP2 :: (%s), DataSize(%d)",
-                MtsSmUtils::GetMtiStringFrom3gpp2(m_nMti), m_nSmSize, 0);
+                pMtsSmUtils->GetMtiStringFrom3gpp2(m_nMti), m_nSmSize, 0);
     }
     else
     {
@@ -467,8 +469,8 @@ IMS_BOOL MtsMessage::ConstructSendMessage(
 
     if (nSmsType == MtsApp::SMSFORMAT_3GPP)
     {
-        MtsSmUtils* pMtsSmUtils = MtsSmUtils::GetInstance(MtsMessage::GetSlotId());
-        m_nMti = pMtsSmUtils->GetMti(MtsApp::SMSFORMAT_3GPP, objSms);
+        m_nMti = m_pMtsMessageController->GetMtsUtils()->GetMtsSmUtils()->GetMti(
+                MtsApp::SMSFORMAT_3GPP, objSms);
         if (m_nMti == MtsSmUtils::MTS_3GPP_MTI_RP_ACK_From_MS ||
                 m_nMti == MtsSmUtils::MTS_3GPP_MTI_RP_ERROR_From_MS)
         {
@@ -488,7 +490,7 @@ PUBLIC
 AString MtsMessage::GetPreviousCallId(IN const ByteArray& objSms)
 {
     AString strCallId;
-    MtsSmUtils* pMtsSmUtils = MtsSmUtils::GetInstance(MtsMessage::GetSlotId());
+    MtsSmUtils* pMtsSmUtils = m_pMtsMessageController->GetMtsUtils()->GetMtsSmUtils();
 
     // Get an IMtsMessage object with the message reference
     IMtsMessage* piMtsMessage = m_pMtsMessageController->Search(pMtsSmUtils->GetRpMr(objSms));
@@ -519,7 +521,7 @@ void MtsMessage::SetSendMsgInfo(IN const ByteArray& objSms, IN const IMS_UINT32 
     m_nSmsTrxType = MtsSmUtils::MTS_SMS_TRX_TYPE_SEND;
     m_nSmSize = objSms.GetLength();
 
-    MtsSmUtils* pMtsSmUtils = MtsSmUtils::GetInstance(MtsMessage::GetSlotId());
+    MtsSmUtils* pMtsSmUtils = m_pMtsMessageController->GetMtsUtils()->GetMtsSmUtils();
     if (nSmsType == MtsApp::SMSFORMAT_3GPP)
     {
         m_nSmsFormat = MtsApp::SMSFORMAT_3GPP;
@@ -646,7 +648,7 @@ IMS_BOOL MtsMessage::Processing_ReceiveMessage(
         return IMS_FALSE;
     }
 
-    MtsSmUtils* pMtsSmUtils = MtsSmUtils::GetInstance(MtsMessage::GetSlotId());
+    MtsSmUtils* pMtsSmUtils = m_pMtsMessageController->GetMtsUtils()->GetMtsSmUtils();
 
     if (IMS_NULL == piPageMessage)
     {

@@ -18,10 +18,10 @@
 #include "MtsApp.h"
 #include "utility/MtsSipFormUtils.h"
 
-LOCAL IMS_SINT32 SLOT_ID = 0;
-
 namespace android
 {
+
+const IMS_SINT32 SLOT_ID = 0;
 
 class MtsSipFormUtilsTest : public ::testing::Test
 {
@@ -39,7 +39,7 @@ TEST_F(MtsSipFormUtilsTest, Constructor)
     ASSERT_NE(pMtsSipFormUtils, nullptr);
 }
 
-TEST_F(MtsSipFormUtilsTest, TestFormDestination)
+TEST_F(MtsSipFormUtilsTest, FormDestination)
 {
     AString strTargetAddress = "tel:+12345678901";
     AString strLastIpSmgw = "tel:+12345678902";
@@ -52,7 +52,7 @@ TEST_F(MtsSipFormUtilsTest, TestFormDestination)
     EXPECT_STREQ(strLastIpSmgw.GetStr(), strResultAddress.GetStr());
 }
 
-TEST_F(MtsSipFormUtilsTest, TestFormContentTypeEnumToStr)
+TEST_F(MtsSipFormUtilsTest, FormContentTypeEnumToStr)
 {
     EXPECT_STREQ(pMtsSipFormUtils->FormContentTypeEnumToStr(MtsApp::SMSFORMAT_3GPP).GetStr(),
             "application/vnd.3gpp.sms");
@@ -60,7 +60,7 @@ TEST_F(MtsSipFormUtilsTest, TestFormContentTypeEnumToStr)
             "application/vnd.3gpp2.sms");
 }
 
-TEST_F(MtsSipFormUtilsTest, TestFormContentTypeStrToEnum)
+TEST_F(MtsSipFormUtilsTest, FormContentTypeStrToEnum)
 {
     AString strTestContentType = "application/vnd.3gpp.sms";
     EXPECT_EQ(
@@ -75,7 +75,7 @@ TEST_F(MtsSipFormUtilsTest, TestFormContentTypeStrToEnum)
             MtsApp::SMSFORMAT_INVALID);
 }
 
-TEST_F(MtsSipFormUtilsTest, TestIsTelUrlParam)
+TEST_F(MtsSipFormUtilsTest, IsTelUrlParam)
 {
     AString strTestUrl = "phone-context";
     EXPECT_TRUE(pMtsSipFormUtils->IsTelUrlParam(strTestUrl) == IMS_TRUE);
@@ -84,7 +84,7 @@ TEST_F(MtsSipFormUtilsTest, TestIsTelUrlParam)
     EXPECT_TRUE(pMtsSipFormUtils->IsTelUrlParam(strTestUrl) == IMS_FALSE);
 }
 
-TEST_F(MtsSipFormUtilsTest, TestIsNumberFormat)
+TEST_F(MtsSipFormUtilsTest, IsNumberFormat)
 {
     AString strTestDial = "+";
     EXPECT_TRUE(pMtsSipFormUtils->IsNumberFormat(strTestDial) == IMS_FALSE);
@@ -99,13 +99,13 @@ TEST_F(MtsSipFormUtilsTest, TestIsNumberFormat)
     EXPECT_TRUE(pMtsSipFormUtils->IsNumberFormat(strTestDial) == IMS_TRUE);
 }
 
-TEST_F(MtsSipFormUtilsTest, TestIsIpAddress)
+TEST_F(MtsSipFormUtilsTest, IsIpAddress)
 {
     AString strTestIpAddress = "168.0.0.1";
     EXPECT_TRUE(pMtsSipFormUtils->IsIpAddress(strTestIpAddress) == IMS_TRUE);
 }
 
-TEST_F(MtsSipFormUtilsTest, TestCheckScheme)
+TEST_F(MtsSipFormUtilsTest, CheckScheme)
 {
     AString strTestScheme = "sip:";
     EXPECT_TRUE(pMtsSipFormUtils->CheckScheme(strTestScheme) == MtsSipFormUtils::SCHEME_SIP);

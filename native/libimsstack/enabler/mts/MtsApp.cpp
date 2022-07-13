@@ -54,7 +54,7 @@ MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
 
 PUBLIC MtsApp::~MtsApp()
 {
-    IMS_TRACE_I("~MtsApp", 0, 0, 0);
+    IMS_TRACE_I("~MtsApp [slot_%d]", m_nSlotId, 0, 0);
 
     // Remove MtsUtils
     DestroyMtsUtils();

@@ -15,17 +15,64 @@
  */
 
 #include <gtest/gtest.h>
+#include "AString.h"
+#include "ImsIdentity.h"
 #include "helper/dialing/MtsDialingPlan.h"
 
 namespace android
 {
 
+const IMS_SINT32 SLOT_ID = 0;
+const AString TEL_URI_SCHEME("tel");
+const AString SIP_URI_SCHEME("sip");
+const AString SIPS_URI_SCHEME("sips");
+
 class MtsDialingPlanTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MtsDialingPlan* pMtsDialingPlan;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override
+    {
+        pMtsDialingPlan =
+                new MtsDialingPlan(SLOT_ID, TEL_URI_SCHEME, ImsIdentity::DIALING_POLICY_HOME_LOCAL);
+    }
+
+    virtual void TearDown() override { delete pMtsDialingPlan; }
 };
+
+TEST_F(MtsDialingPlanTest, Constructor)
+{
+    ASSERT_NE(pMtsDialingPlan, nullptr);
+}
+
+TEST_F(MtsDialingPlanTest, Translate)
+{
+    AString strTargetAddress = "tel:+12345678901";
+    AString strResult;
+
+    strResult = pMtsDialingPlan->Translate(strTargetAddress);
+    EXPECT_STREQ(strResult.GetStr(), strTargetAddress.GetStr());
+
+    strTargetAddress = "sip:+12063130004@msg.pc.t-mobile.com;user=phone";
+    strResult = pMtsDialingPlan->Translate(strTargetAddress);
+    strTargetAddress.Prepend("<");
+    strTargetAddress.Append(">");
+    EXPECT_STREQ(strResult.GetStr(), strTargetAddress.GetStr());
+
+    strTargetAddress = "+12345678901";
+    strResult = pMtsDialingPlan->Translate(strTargetAddress);
+    EXPECT_TRUE(strResult.Contains(TEL_URI_SCHEME));
+
+    strTargetAddress = "2345678901";
+    strResult = pMtsDialingPlan->Translate(strTargetAddress);
+    EXPECT_TRUE(strResult.Contains(";phone-context="));
+
+    strTargetAddress = "ipsmgw.lte-lguplus.co.kr";
+    pMtsDialingPlan->SetScheme(SIP_URI_SCHEME.GetStr());
+    strResult = pMtsDialingPlan->Translate(strTargetAddress);
+    EXPECT_TRUE(strResult.Contains(SIP_URI_SCHEME));
+}
 
 }  // namespace android

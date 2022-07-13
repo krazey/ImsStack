@@ -17,10 +17,10 @@
 #include <gtest/gtest.h>
 #include "MtsServiceState.h"
 
-LOCAL IMS_SINT32 SLOT_ID = 0;
-
 namespace android
 {
+
+const IMS_SINT32 SLOT_ID = 0;
 
 class MtsServiceStateTest : public ::testing::Test
 {
@@ -38,7 +38,7 @@ TEST_F(MtsServiceStateTest, Constructor)
     ASSERT_NE(pMtsServiceState, nullptr);
 }
 
-TEST_F(MtsServiceStateTest, TestMtsServiceStateAfterAosConnected)
+TEST_F(MtsServiceStateTest, ServiceStateAfterAosConnected)
 {
     pMtsServiceState->SetSmsOverIpState(IMS_TRUE);
     pMtsServiceState->OnImsConnected();
@@ -48,7 +48,7 @@ TEST_F(MtsServiceStateTest, TestMtsServiceStateAfterAosConnected)
     EXPECT_EQ(pMtsServiceState->GetServiceState(), MtsMessageController::STATE_READY);
 }
 
-TEST_F(MtsServiceStateTest, TestIsServiceBlocked)
+TEST_F(MtsServiceStateTest, IsServiceBlocked)
 {
     pMtsServiceState->SetSmsOverIpState(IMS_TRUE);
     pMtsServiceState->OnImsConnected();

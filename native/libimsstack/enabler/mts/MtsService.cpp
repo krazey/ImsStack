@@ -50,13 +50,14 @@ MtsService::MtsService(IN const AString& strMtsAppId, IN const AString& strServi
         m_pJniMtsService(IMS_NULL),
         m_pMtsDynamicLoader(pMtsDynamicLoader)
 {
+    IMS_TRACE_I("+MtsService [slot_%d]", m_nSlotId, 0, 0);
     Init(strMtsAppId, strServiceId, nSlotId);
 }
 
 PUBLIC
 MtsService::~MtsService()
 {
-    IMS_TRACE_I("~MtsService", 0, 0, 0);
+    IMS_TRACE_I("~MtsService [slot_%d]", m_nSlotId, 0, 0);
 
     if (m_pJniMtsService != IMS_NULL) {
         m_pJniMtsService->SetMtsService(IMS_NULL);

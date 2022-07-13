@@ -36,17 +36,17 @@ TEST_F(MtsStrNameTest, Constructor)
     ASSERT_NE(pMtsStrName, nullptr);
 }
 
-TEST_F(MtsStrNameTest, CheckMtsAppId)
+TEST_F(MtsStrNameTest, GetMtsAppId)
 {
     EXPECT_STREQ(pMtsStrName->GetMtsAppId().GetStr(), "ims.app.mts");
 }
 
-TEST_F(MtsStrNameTest, CheckMtsServiceId)
+TEST_F(MtsStrNameTest, GetMtsServiceId)
 {
     EXPECT_STREQ(pMtsStrName->GetMtsServiceId().GetStr(), "ims.service.mts");
 }
 
-TEST_F(MtsStrNameTest, CheckMtsConnectorName)
+TEST_F(MtsStrNameTest, GetMtsConnectorName)
 {
     EXPECT_STREQ(pMtsStrName->GetMtsConnectorName().GetStr(),
             "imscore://ims.app.mts;serviceId=ims.service.mts");
