@@ -320,7 +320,7 @@ PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConferen
     }
 
     IMtcCall* piConfCall = GetConferenceCall();
-    if (piConfCall->GetKey() == -1)
+    if (piConfCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
     {
         IMS_TRACE_D("GetCallStatusInConference - Destroyed Host call", 0, 0, 0);
         return IndividualCallState::IDLE;

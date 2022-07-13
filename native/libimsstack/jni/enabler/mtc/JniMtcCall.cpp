@@ -30,8 +30,7 @@
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
 
-JniMtcCall::JniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINTP nCallKey /* = -1*/,
-        IN IMS_SINT32 nSlotId /* = 0*/) :
+JniMtcCall::JniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId /* = 0*/) :
         m_pThread(IMS_NULL),
         m_pfnSendDataToJava(pfnSendDataToJava),
         m_strThreadName(AString::ConstNull()),
@@ -39,7 +38,7 @@ JniMtcCall::JniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINTP nCa
         m_objCallController(*(JniConnectorFactory::GetInstance()
                                       ->GetMtcCallConnector(m_nSlotId)
                                       ->GetEnablerService())),
-        m_nCallKey(nCallKey),
+        m_nCallKey(IMtcCall::CALL_KEY_INVALID),
         m_pJniMediaSession(IMS_NULL)
 {
     IMS_TRACE_D("+JniMtcCall SlotId[%d]", m_nSlotId, 0, 0);

@@ -1214,9 +1214,14 @@ PRIVATE
 CallKey MtcCall::CreateCallKey()
 {
     LockGuard objLock(s_pKeyCreationLock);
-
     static CallKey nKey = 0;
-    return nKey++;
+
+    nKey += 1;
+    if (nKey == CALL_KEY_INVALID)
+    {
+        nKey += 1;
+    }
+    return nKey;
 }
 
 PRIVATE

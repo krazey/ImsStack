@@ -31,7 +31,7 @@ PUBLIC
 ConsultativeTransferController::ConsultativeTransferController(
         IN IMtcContext& objContext, IN CallKey nCallKey, IN IEctControllerListener& objListener) :
         EctController(objContext, nCallKey, objListener),
-        m_nTransferTargetKey(-1)  // NullCall
+        m_nTransferTargetKey(IMtcCall::CALL_KEY_INVALID)
 {
     IMS_TRACE_D("+ConsultativeTransferController", 0, 0, 0);
 }

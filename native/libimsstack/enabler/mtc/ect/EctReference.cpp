@@ -175,7 +175,7 @@ IMS_RESULT EctReference::SendRefer(
     }
 
     IMtcCall* piTransfereeCall = m_objContext.GetCallManager().GetCallByCallKey(m_nTransfereeKey);
-    if (piTransfereeCall->GetKey() == -1)
+    if (piTransfereeCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
     {
         IMS_TRACE_E(0, "transferee call is NullCall", 0, 0, 0);
         return IMS_FAILURE;

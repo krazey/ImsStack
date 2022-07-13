@@ -161,7 +161,7 @@ void ConferenceEventNotifier::NotifyIndividualCallTerminated(IN CallKey nKey)
     IMS_TRACE_I("NotifyIndividualCallTerminated ", 0, 0, 0);
 
     IMtcCall* piCall = m_objConfCallContext.GetCallManager().GetCallByCallKey(nKey);
-    if (piCall->GetKey() == -1)
+    if (piCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
     {
         IMS_TRACE_I("NotifyIndividualCallTerminated - call is already deleted.", 0, 0, 0);
         return;

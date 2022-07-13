@@ -171,7 +171,7 @@ TEST_F(ConferenceControllerTest, GetIndividualCallStateReturnsHost)
 
 TEST_F(ConferenceControllerTest, GetIndividualCallStateReturnsIdle)
 {
-    const CallKey IDLE_CALL_KEY = 0;
+    const CallKey IDLE_CALL_KEY = 1;
     EXPECT_EQ(pController->GetCallStatusInConference(IDLE_CALL_KEY), IndividualCallState::IDLE);
 }
 

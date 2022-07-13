@@ -242,7 +242,7 @@ IMS_RESULT ConferenceReference::SendInviteForSingleUser(
         OUT AString& strReferToUri, IN CallKey n1To1Key)
 {
     IMtcCall* pi1To1Call = m_objContext.GetCallManager().GetCallByCallKey(n1To1Key);
-    if (pi1To1Call->GetKey() == -1)
+    if (pi1To1Call->GetKey() == IMtcCall::CALL_KEY_INVALID)
     {
         pi1To1Call = IMS_NULL;
     }
@@ -385,7 +385,7 @@ PRIVATE
 IMtcCall* ConferenceReference::GetConferenceCall()
 {
     IMtcCall* piCall = m_objContext.GetCallManager().GetCallByCallKey(m_nConfCallKey);
-    if (piCall->GetKey() == -1)
+    if (piCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
     {
         return IMS_NULL;
     }

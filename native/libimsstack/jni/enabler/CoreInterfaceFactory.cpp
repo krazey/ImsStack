@@ -42,7 +42,7 @@ PUBLIC GLOBAL BaseService* CoreInterfaceFactory::GetInterface(IN IMS_SINT32 nInt
             break;
 
         case IUIMS::MTC_CALL:
-            pService = new JniMtcCall(pfnSendDataToJava, -1, nSlotId);
+            pService = new JniMtcCall(pfnSendDataToJava, nSlotId);
             break;
 
         case IUIMS::APP_UCE:

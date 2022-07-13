@@ -68,6 +68,8 @@ public:
         TERMINATING,
     };
 
+    static const CallKey CALL_KEY_INVALID = 0;
+
     virtual ~IMtcCall(){};
 
     // Sets thread to interact with the Java layer. Nothing happens if the thread is null.
