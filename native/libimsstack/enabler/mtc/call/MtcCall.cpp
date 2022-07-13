@@ -37,8 +37,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 PRIVATE GLOBAL IMutex* MtcCall::s_pKeyCreationLock = MutexService::GetMutexService()->CreateMutex();
 
 PUBLIC
-MtcCall::MtcCall(
-        IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo) :
+MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
+        IN const CallInfo& objCallInfo, IN std::unique_ptr<IMtcCallStateFactory> pStateFactory) :
         m_objContext(objContext),
         m_objService(objService),
         m_nKey(CreateCallKey()),
@@ -47,9 +47,8 @@ MtcCall::MtcCall(
         m_objParticipantInfo(ParticipantInfo(*this)),
         m_pUpdatingInfo(IMS_NULL),
         m_lstSessions(ImsList<MtcSession*>()),
-        m_pStateFactory(new CallStateFactory(*this)),
-        m_objStateMachine(MtcCallStateMachine<IMtcCallState, CallStateName>(
-                CallStateName::IDLE, *m_pStateFactory, this)),
+        m_objStateMachine(
+                MtcCallStateMachine(*this, CallStateName::IDLE, std::move(pStateFactory), this)),
         m_objTimer(MtcTimerWrapper()),
         m_objUiNotifier(MtcUiNotifier(*this)),
         m_objMediaManager(MtcMediaManager(*this)),

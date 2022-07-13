@@ -43,6 +43,7 @@
 #include "media/MtcMediaManager.h"
 #include "precondition/MtcPreconditionManager.h"
 #include "ussi/UssiController.h"
+#include <memory>
 
 class IConferenceManager;
 class IEctManager;
@@ -73,13 +74,14 @@ class MtcCall final :
         public IMtcTimerListener,
         public IMtcBlockCheckListener,
         public IMtcPreconditionListener,
-        public IMtcCallStateWatcher<CallStateName>,
+        public IMtcCallStateWatcher,
         public ISipClientConnectionListener,
         public ISipErrorListener,
         public IMediaReportEventListener
 {
 public:
-    MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo);
+    MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo,
+            IN std::unique_ptr<IMtcCallStateFactory> pStateFactory);
     virtual ~MtcCall();
     MtcCall(IN const MtcCall&) = delete;
     MtcCall& operator=(IN const MtcCall&) = delete;
@@ -261,8 +263,7 @@ private:
     UpdatingInfo* m_pUpdatingInfo;
     ImsList<MtcSession*> m_lstSessions;
 
-    std::unique_ptr<IMtcCallStateFactory<IMtcCallState, CallStateName>> m_pStateFactory;
-    MtcCallStateMachine<IMtcCallState, CallStateName> m_objStateMachine;
+    MtcCallStateMachine m_objStateMachine;
     MtcTimerWrapper m_objTimer;
     MtcUiNotifier m_objUiNotifier;
     MtcMediaManager m_objMediaManager;

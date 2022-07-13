@@ -18,25 +18,21 @@
 #define CALL_STATE_FACTORY_H_
 
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/MtcCall.h"
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
 
 class IMtcCallContext;
 
-class CallStateFactory : public IMtcCallStateFactory<IMtcCallState, CallStateName>
+class CallStateFactory final : public IMtcCallStateFactory
 {
 public:
-    explicit CallStateFactory(IN IMtcCallContext& objContext);
+    explicit CallStateFactory();
     virtual ~CallStateFactory();
     CallStateFactory(IN const CallStateFactory&) = delete;
     CallStateFactory& operator=(IN const CallStateFactory&) = delete;
 
-    IMtcCallState* CreateState(IN CallStateName eState) override;
-
-private:
-    IMtcCallContext& m_objContext;
+    IMtcCallState* CreateState(IN CallStateName eState, IN IMtcCallContext& objContext) override;
 };
 
 #endif

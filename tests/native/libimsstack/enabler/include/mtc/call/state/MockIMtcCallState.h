@@ -25,17 +25,13 @@
 #include "call/state/IMtcCallState.h"
 
 class AString;
-class IMessage;
-class IMtcCallContext;
 class IReference;
 class ISession;
 class ISipClientConnection;
 class ISipConnection;
 class ISipServerConnection;
-class JniMediaSessionThread;
 class JniMtcServiceThread;
 class MediaInfo;
-class MtcSession;
 enum class QosLossPolicy;
 struct CallReasonInfo;
 struct ConfUser;

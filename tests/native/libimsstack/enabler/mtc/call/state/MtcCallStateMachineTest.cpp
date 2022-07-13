@@ -1,145 +1,165 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "call/MockIMtcCallContext.h"
+#include "call/state/MockIMtcCallState.h"
+#include "call/state/MockMtcCallStateMachine.h"
 #include "call/state/MtcCallStateMachine.h"
+#include <memory>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <string>
 
-class TestState
+using ::testing::Return;
+using State = IMtcCall::State;
+
+class TestCallStateFactory : public IMtcCallStateFactory
 {
 public:
-    enum class StateName
-    {
-        FIRST = '1',
-        SECOND = '2',
-    };
+    virtual ~TestCallStateFactory() {}
 
-    TestState(StateName eState, std::string& strLog) :
-            m_eState(eState),
-            m_strLog(strLog) {}
-
-    void OnEnter()
+    IMtcCallState* CreateState(
+            IN IMtcCall::State eState, IN IMtcCallContext& /* objContext */) override
     {
-        m_strLog.append(1, static_cast<char>(m_eState));
-        m_strLog.append("enter ");
+        MockIMtcCallState* pState = new MockIMtcCallState();
+
+        ON_CALL(*pState, GetStateName)
+                .WillByDefault(Return(eState));
+        EXPECT_CALL(*pState, OnEnter)
+                .Times(1);
+
+        return pState;
     }
-
-    void OnExit()
-    {
-        m_strLog.append(1, static_cast<char>(m_eState));
-        m_strLog.append("exit ");
-    }
-
-    StateName GetStateName() const { return m_eState; }
-
-    StateName m_eState;
-    std::string& m_strLog;
 };
 
-class TestStateFactory :
-        public IMtcCallStateFactory<TestState, TestState::StateName>
+class MtcCallStateMachineTest : public ::testing::Test
 {
 public:
-    TestState* CreateState(TestState::StateName eState) override
+    MockIMtcCallContext objContext;
+    std::unique_ptr<IMtcCallStateFactory> pStateFactory;
+
+protected:
+    virtual void SetUp() override
     {
-        return new TestState(eState, m_strLog);
+        pStateFactory = std::make_unique<TestCallStateFactory>();
     }
 
-    std::string m_strLog;
+    virtual void TearDown() override {}
 };
 
-class TestStateWatcher :
-        public IMtcCallStateWatcher<TestState::StateName>
+TEST_F(MtcCallStateMachineTest, GetStateReturnsInitialStateName)
 {
-public:
-    void OnStateTransition(IN TestState::StateName eState) override
-    {
-        m_strLog.append(1, static_cast<char>(eState));
-    }
+    const State eInitialState = State::TERMINATING;
+    MtcCallStateMachine objStateMachine(objContext, eInitialState, std::move(pStateFactory));
 
-    std::string m_strLog;
-};
-
-TEST(MtcCallStateMachineTest, GetStateReturnsCurrentStateName)
-{
-    TestStateFactory objFactory;
-    MtcCallStateMachine<TestState, TestState::StateName> objStateMachine(
-            TestState::StateName::FIRST, objFactory);
-
-    EXPECT_EQ(TestState::StateName::FIRST, objStateMachine.GetState());
+    EXPECT_EQ(eInitialState, objStateMachine.GetState());
 }
 
-TEST(MtcCallStateMachineTest, InitialStateCallsOnEnter)
+TEST_F(MtcCallStateMachineTest, GetStateReturnsChangedStateName)
 {
-    TestStateFactory objFactory;
-    MtcCallStateMachine<TestState, TestState::StateName> objStateMachine(
-            TestState::StateName::FIRST, objFactory);
+    const State eInitialState = State::TERMINATING;
+    const State eChangedState = State::ESTABLISHED;
 
-    EXPECT_STREQ("1enter ", objFactory.m_strLog.c_str());
+    MtcCallStateMachine objStateMachine(objContext, eInitialState, std::move(pStateFactory));
+    objStateMachine.RunStateOperation(
+            [](IMtcCallState* /* pState */)
+            {
+                return eChangedState;
+            });
+
+    EXPECT_EQ(eChangedState, objStateMachine.GetState());
 }
 
-TEST(MtcCallStateMachineTest, InitialStateNotifiesWatcher)
+TEST_F(MtcCallStateMachineTest, RunStateOperationRunsOnInitialState)
 {
-    TestStateFactory objFactory;
-    TestStateWatcher objWatcher;
-    MtcCallStateMachine<TestState, TestState::StateName> objStateMachine(
-            TestState::StateName::FIRST, objFactory, &objWatcher);
+    const State eInitialState = State::TERMINATING;
 
-    EXPECT_STREQ("1", objWatcher.m_strLog.c_str());
+    MtcCallStateMachine objStateMachine(objContext, eInitialState, std::move(pStateFactory));
+    objStateMachine.RunStateOperation(
+            [&](IMtcCallState* pState)
+            {
+                EXPECT_EQ(eInitialState, pState->GetStateName());
+                return eInitialState;
+            });
 }
 
-TEST(MtcCallStateMachineTest, TransitionToSameStateCallsOnEnter)
+TEST_F(MtcCallStateMachineTest, RunStateOperationRunsOnChangedState)
 {
-    TestStateFactory objFactory;
-    MtcCallStateMachine<TestState, TestState::StateName> objStateMachine(
-            TestState::StateName::FIRST, objFactory);
+    const State eInitialState = State::TERMINATING;
+    const State eChangedState = State::ESTABLISHED;
 
-    objStateMachine.RunStateOperation([](TestState* /* pState */)
-    {
-        return TestState::StateName::FIRST;
-    });
+    MtcCallStateMachine objStateMachine(objContext, eInitialState, std::move(pStateFactory));
+    objStateMachine.RunStateOperation(
+            [&](IMtcCallState* /* pState */)
+            {
+                return eChangedState;
+            });
 
-    EXPECT_STREQ("1enter ", objFactory.m_strLog.c_str());
+    objStateMachine.RunStateOperation(
+            [&](IMtcCallState* pState)
+            {
+                EXPECT_EQ(eChangedState, pState->GetStateName());
+                return eChangedState;
+            });
 }
 
-TEST(MtcCallStateMachineTest, TransitionToSameStateNotNotifiesWatcher)
+TEST_F(MtcCallStateMachineTest, NotifiesWatcherInitially)
 {
-    TestStateFactory objFactory;
-    TestStateWatcher objWatcher;
-    MtcCallStateMachine<TestState, TestState::StateName> objStateMachine(
-            TestState::StateName::FIRST, objFactory, &objWatcher);
+    const State eInitialState = State::TERMINATING;
 
-    objStateMachine.RunStateOperation([](TestState* /* pState */)
-    {
-        return TestState::StateName::FIRST;
-    });
+    MockIMtcCallStateWatcher objWatcher;
+    EXPECT_CALL(objWatcher, OnStateTransition(eInitialState))
+            .Times(1);
 
-    EXPECT_STREQ("1", objWatcher.m_strLog.c_str());
+    MtcCallStateMachine objStateMachine(
+            objContext, eInitialState, std::move(pStateFactory), &objWatcher);
 }
 
-TEST(MtcCallStateMachineTest, TransitionToAnotherStateCallsOnExitAndOnEnter)
+TEST_F(MtcCallStateMachineTest, NotNotifiesWatcherWhenTransitionToSameState)
 {
-    TestStateFactory objFactory;
-    MtcCallStateMachine<TestState, TestState::StateName> objStateMachine(
-            TestState::StateName::FIRST, objFactory);
+    const State eInitialState = State::TERMINATING;
 
-    objStateMachine.RunStateOperation([](TestState* /* pState */)
-    {
-        return TestState::StateName::SECOND;
-    });
+    MockIMtcCallStateWatcher objWatcher;
+    EXPECT_CALL(objWatcher, OnStateTransition(eInitialState))
+            .Times(1);
 
-    EXPECT_STREQ("1enter 1exit 2enter ", objFactory.m_strLog.c_str());
+    MtcCallStateMachine objStateMachine(
+            objContext, eInitialState, std::move(pStateFactory), &objWatcher);
+    objStateMachine.RunStateOperation(
+            [&](IMtcCallState* /* pState */)
+            {
+                return eInitialState;
+            });
 }
 
-TEST(MtcCallStateMachineTest, TransitionToAnotherStateNotifiesWatcher)
+TEST_F(MtcCallStateMachineTest, NotifiesWatcherWhenTransitionToAnotherState)
 {
-    TestStateFactory objFactory;
-    TestStateWatcher objWatcher;
-    MtcCallStateMachine<TestState, TestState::StateName> objStateMachine(
-            TestState::StateName::FIRST, objFactory, &objWatcher);
+    const State eInitialState = State::TERMINATING;
+    const State eChangedState = State::ESTABLISHED;
 
-    objStateMachine.RunStateOperation([](TestState* /* pState */)
-    {
-        return TestState::StateName::SECOND;
-    });
+    MockIMtcCallStateWatcher objWatcher;
+    EXPECT_CALL(objWatcher, OnStateTransition(eInitialState))
+            .Times(1);
+    EXPECT_CALL(objWatcher, OnStateTransition(eChangedState))
+            .Times(1);
 
-    EXPECT_STREQ("12", objWatcher.m_strLog.c_str());
+    MtcCallStateMachine objStateMachine(
+            objContext, eInitialState, std::move(pStateFactory), &objWatcher);
+    objStateMachine.RunStateOperation(
+            [&](IMtcCallState* /* pState */)
+            {
+                return eChangedState;
+            });
 }

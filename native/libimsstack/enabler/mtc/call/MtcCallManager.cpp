@@ -23,6 +23,7 @@
 #include "interface/mtc/IMtcCallStateListener.h"
 #include "ServiceTrace.h"
 #include <functional>
+#include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -63,7 +64,8 @@ PUBLIC VIRTUAL IMtcCall* MtcCallManager::CreateCall(
         return s_pNullCall;
     }
 
-    MtcCall* pCall = new MtcCall(m_objContext, *pService, objCallInfo);
+    MtcCall* pCall =
+            new MtcCall(m_objContext, *pService, objCallInfo, std::make_unique<CallStateFactory>());
     m_lstCalls.Append(pCall);
     IMS_TRACE_D("CreateCall : call count[%d]", m_lstCalls.GetSize(), 0, 0);
 
