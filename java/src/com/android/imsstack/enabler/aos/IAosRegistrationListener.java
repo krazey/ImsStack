@@ -172,6 +172,43 @@ public interface IAosRegistrationListener {
          * IMS Registration error code
          */
         public static final int CODE_REGISTRATION_ERROR = 3;
+        /**
+         * IMS Registration error code due to missing 911 address
+         */
+        public static final int CODE_REGISTRATION_ERROR_BY_MISSING_911_ADDRESS = 4;
+        /**
+         * Service unavailable; radio power off
+         */
+        public static final int CODE_LOCAL_POWER_OFF = 5;
+        /**
+         * Service unavailable; low battery
+         */
+        public static final int CODE_LOCAL_LOW_BATTERY = 6;
+        /**
+         * Service unavailable; out of service (data service state)
+         */
+        public static final int CODE_LOCAL_NETWORK_NO_SERVICE = 7;
+        /**
+         * Service unavailable; no LTE coverage
+         * (VoLTE is not supported even though IMS is registered)
+         */
+        public static final int CODE_LOCAL_NETWORK_NO_LTE_COVERAGE = 8;
+        /**
+         * Service unavailable; located in roaming area
+         */
+        public static final int CODE_LOCAL_NETWORK_ROAMING = 9;
+        /**
+         * Service unavailable; IP changed
+         */
+        public static final int CODE_LOCAL_NETWORK_IP_CHANGED = 10;
+        /**
+         * Service unavailable; for an unspecified reason
+         */
+        public static final int CODE_LOCAL_SERVICE_UNAVAILABLE = 11;
+        /**
+         * Service unavailable; IMS is not registered
+         */
+        public static final int CODE_LOCAL_NOT_REGISTERED = 12;
     }
 
     /**
