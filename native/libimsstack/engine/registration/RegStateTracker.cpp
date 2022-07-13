@@ -196,7 +196,7 @@ void RegStateTracker::SetUserInfoForContactHeader(IN const AString& strUserInfo)
         m_pContactAddressForOutgoingMessage = IMS_NULL;
     }
 
-    if (strUserInfo.IsNULL())
+    if (strUserInfo.IsNull())
     {
         return;
     }
@@ -205,6 +205,7 @@ void RegStateTracker::SetUserInfoForContactHeader(IN const AString& strUserInfo)
 
     if (m_pContactAddressForOutgoingMessage != IMS_NULL)
     {
-        m_pContactAddressForOutgoingMessage->SetUser(strUserInfo);
+        m_pContactAddressForOutgoingMessage->SetUser(
+                strUserInfo.IsEmpty() ? AString::ConstNull() : strUserInfo);
     }
 }
