@@ -804,6 +804,7 @@ public:
         static const IMS_CHAR KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL[];
         static const IMS_CHAR KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT[];
         static const IMS_CHAR KEY_SUPPORT_CONTACT_USER_INFO_BOOL[];
+        static const IMS_CHAR KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT[];
         // Bundle {
         static const IMS_CHAR KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[];
         static const IMS_CHAR KEY_SPECIFIC_REGISTRATION_ERROR_FINAL_TYPE_INT[];
@@ -1118,6 +1119,14 @@ public:
         {
             REGISTRATION_PCSCF_UPDATE_POLICY_DEFAULT = 0,
             REGISTRATION_PCSCF_UPDATE_POLICY_ALL_THE_TIME = 1
+        };
+
+        // User Info Policy for non register message
+        enum
+        {
+            USER_INFO_POLICY_DEFAULT = 1,
+            USER_INFO_POLICY_NONE = 2,
+            USER_INFO_POLICY_NO_IMSI = 3
         };
     };
 

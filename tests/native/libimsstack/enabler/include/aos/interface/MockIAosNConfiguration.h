@@ -107,6 +107,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetRegRetryCountResetPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetReregRetryMaxCountKeptRegistration, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPcscfUpdatePolicy, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetUserInfoPolicyForNonRegisterMessage, (), (const, override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegistrationRetryIntervals, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegistrationRandomRetryIntervals, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetIpsecAuthenticationAlgorithms, (), (override));
