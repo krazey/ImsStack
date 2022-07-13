@@ -228,6 +228,7 @@ private:
 
 private:
     friend class AosIpsecTest;
+    friend class AosIpsecHelperTest;
 };
 
 /**
