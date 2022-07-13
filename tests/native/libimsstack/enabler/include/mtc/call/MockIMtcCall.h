@@ -49,16 +49,16 @@ public:
     MOCK_METHOD(void, Detach, (), (override));
     MOCK_METHOD(void, Start,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
-                    (IN const IMSMap<SuppType, SuppService*>& objSuppServices)),
+                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices)),
             (override));
     MOCK_METHOD(void, StartConference,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
-                    (IN const IMSMap<SuppType, SuppService*>& objSuppServices),
-                    IN const IMSList<ConfUser*> objUsers),
+                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices),
+                    IN const ImsList<ConfUser*>& objUsers),
             (override));
     MOCK_METHOD(void, StartConference,
             (IN CallType eCallType, IN const AString& strTarget,
-                    IN const IMSList<ConfUser*> objUsers),
+                    IN const ImsList<ConfUser*>& objUsers),
             (override));
     MOCK_METHOD(void, HandleIncoming,
             (IN ISession * piSession, IN JniMtcServiceThread* pServiceThread), (override));

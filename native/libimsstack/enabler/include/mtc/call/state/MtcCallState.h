@@ -64,12 +64,12 @@ public:
 
     CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN IMSList<ConfUser*> lstUsers) override;
+            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN const ImsList<ConfUser*>& lstUsers) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN IMSList<ConfUser*> lstUsers) override;
+            IN const ImsList<ConfUser*>& lstUsers) override;
     CallStateName HandleIncoming(
             IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
     CallStateName HandleUserAlert() override;

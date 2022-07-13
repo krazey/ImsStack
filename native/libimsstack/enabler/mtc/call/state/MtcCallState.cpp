@@ -145,14 +145,14 @@ PUBLIC VIRTUAL CallStateName MtcCallState::SendDtmf(
 
 PUBLIC VIRTUAL CallStateName MtcCallState::StartConference(IN CallType /* eCallType */,
         IN const AString&, IN MediaInfo* /* pMediaInfo */,
-        IN const IMSMap<SuppType, SuppService*>& /* lstSuppServices */,
-        IN IMSList<ConfUser*> /* lstUsers */)
+        IN const ImsMap<SuppType, SuppService*>& /* lstSuppServices */,
+        IN const ImsList<ConfUser*>& /* lstUsers */)
 {
     return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::StartConference(IN CallType /* eCallType */,
-        IN const AString& /* strTarget */, IN IMSList<ConfUser*> /* lstUsers */)
+        IN const AString& /* strTarget */, IN const ImsList<ConfUser*>& /* lstUsers */)
 {
     return GetStateName();
 }

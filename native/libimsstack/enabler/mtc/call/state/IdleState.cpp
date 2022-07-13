@@ -68,7 +68,7 @@ IdleState::IdleState(IN IMtcCallContext& objContext) :
 PUBLIC VIRTUAL IdleState::~IdleState() {}
 
 PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AString& strTarget,
-        IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+        IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_D("Start", 0, 0, 0);
 
@@ -99,7 +99,8 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
 
 PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
         IN const AString& strTarget, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IMSList<ConfUser*> lstUsers)
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+        IN const ImsList<ConfUser*>& lstUsers)
 {
     IMS_TRACE_D("StartConference", 0, 0, 0);
 
@@ -119,7 +120,7 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
 }
 
 PUBLIC VIRTUAL CallStateName IdleState::StartConference(
-        IN CallType eCallType, IN const AString& strTarget, IN IMSList<ConfUser*> lstUsers)
+        IN CallType eCallType, IN const AString& strTarget, IN const ImsList<ConfUser*>& lstUsers)
 {
     IMS_TRACE_D("StartConference", 0, 0, 0);
 

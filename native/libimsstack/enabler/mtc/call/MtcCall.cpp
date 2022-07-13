@@ -144,7 +144,7 @@ PUBLIC VIRTUAL void MtcCall::Detach()
 }
 
 PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strTarget,
-        IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+        IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("Start : key[%d]", m_nKey, 0, 0);
 
@@ -164,6 +164,38 @@ PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strT
             [&](IMtcCallState* pState)
             {
                 return pState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+            });
+}
+
+PUBLIC VIRTUAL void MtcCall::StartConference(IN CallType eCallType, IN const AString& strTarget,
+        IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+        IN const ImsList<ConfUser*>& lstUsers)
+{
+    IMS_TRACE_I("StartConference : key[%d]", m_nKey, 0, 0);
+
+    if (pMediaInfo == IMS_NULL)
+    {
+        OnInternalFailure();
+        return;
+    }
+
+    m_objStateMachine.RunStateOperation(
+            [&](IMtcCallState* pState)
+            {
+                return pState->StartConference(
+                        eCallType, strTarget, pMediaInfo, objSuppServices, lstUsers);
+            });
+}
+
+PUBLIC VIRTUAL void MtcCall::StartConference(
+        IN CallType eCallType, IN const AString& strTarget, IN const ImsList<ConfUser*>& lstUsers)
+{
+    IMS_TRACE_I("StartConference : key[%d]", m_nKey, 0, 0);
+
+    m_objStateMachine.RunStateOperation(
+            [&](IMtcCallState* pState)
+            {
+                return pState->StartConference(eCallType, strTarget, lstUsers);
             });
 }
 
@@ -375,38 +407,6 @@ PUBLIC VIRTUAL void MtcCall::SendUssd(IN const AString& strUssd)
             [&](IMtcCallState* pState)
             {
                 return pState->SendUssd(strUssd);
-            });
-}
-
-PUBLIC VIRTUAL void MtcCall::StartConference(IN CallType eCallType, IN const AString& strTarget,
-        IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-        IN ImsList<ConfUser*> lstUsers)
-{
-    IMS_TRACE_I("StartConference : key[%d]", m_nKey, 0, 0);
-
-    if (pMediaInfo == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
-
-    m_objStateMachine.RunStateOperation(
-            [&](IMtcCallState* pState)
-            {
-                return pState->StartConference(
-                        eCallType, strTarget, pMediaInfo, objSuppServices, lstUsers);
-            });
-}
-
-PUBLIC VIRTUAL void MtcCall::StartConference(
-        IN CallType eCallType, IN const AString& strTarget, IN ImsList<ConfUser*> lstUsers)
-{
-    IMS_TRACE_I("StartConference : key[%d]", m_nKey, 0, 0);
-
-    m_objStateMachine.RunStateOperation(
-            [&](IMtcCallState* pState)
-            {
-                return pState->StartConference(eCallType, strTarget, lstUsers);
             });
 }
 

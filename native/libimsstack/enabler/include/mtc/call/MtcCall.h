@@ -91,12 +91,12 @@ public:
     void Detach() override;
 
     void Start(IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN ImsList<ConfUser*> lstUsers) override;
+            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN const ImsList<ConfUser*>& lstUsers) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN const ImsList<ConfUser*> objUsers) override;
+            IN const ImsList<ConfUser*>& objUsers) override;
     void HandleIncoming(IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
     void HandleUserAlert() override;
     void Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;

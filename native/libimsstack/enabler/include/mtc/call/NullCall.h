@@ -45,15 +45,18 @@ public:
     inline void Detach() override {}
 
     inline void Start(IN CallType, IN const AString&, IN MediaInfo*,
-            IN const IMSMap<SuppType, SuppService*>&) override
+            IN const ImsMap<SuppType, SuppService*>&) override
     {
     }
 
     inline void StartConference(IN CallType, IN const AString&, IN MediaInfo*,
-            IN const IMSMap<SuppType, SuppService*>&, IN IMSList<ConfUser*>) override
+            IN const ImsMap<SuppType, SuppService*>&, IN const ImsList<ConfUser*>&) override
     {
     }
-    inline void StartConference(IN CallType, IN const AString&, IN IMSList<ConfUser*>) override {}
+    inline void StartConference(
+            IN CallType, IN const AString&, IN const ImsList<ConfUser*>&) override
+    {
+    }
     inline void HandleIncoming(IN ISession*, IN JniMtcServiceThread*) override {}
     inline void HandleUserAlert() override {}
     inline void Accept(IN CallType, IN MediaInfo*) override {}

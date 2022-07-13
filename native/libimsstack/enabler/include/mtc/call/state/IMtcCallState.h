@@ -50,12 +50,12 @@ public:
     virtual CallStateName GetStateName() const = 0;
 
     virtual CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
     virtual CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN IMSList<ConfUser*> lstUsers) = 0;
-    virtual CallStateName StartConference(
-            IN CallType eCallType, IN const AString& strTarget, IN IMSList<ConfUser*> lstUsers) = 0;
+            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN const ImsList<ConfUser*>& lstUsers) = 0;
+    virtual CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
+            IN const ImsList<ConfUser*>& lstUsers) = 0;
     virtual CallStateName HandleIncoming(
             IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) = 0;
     virtual CallStateName HandleUserAlert() = 0;

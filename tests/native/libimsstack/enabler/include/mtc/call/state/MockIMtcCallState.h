@@ -44,15 +44,16 @@ public:
     MOCK_METHOD(CallStateName, GetStateName, (), (const, override));
     MOCK_METHOD(CallStateName, Start,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
-                    (IN const IMSMap<SuppType, SuppService*>& objSuppServices)),
+                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices)),
             (override));
     MOCK_METHOD(CallStateName, StartConference,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
-                    (IN const IMSMap<SuppType, SuppService*>& objSuppServices),
-                    IN IMSList<ConfUser*> lstUsers),
+                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices),
+                    IN const ImsList<ConfUser*>& lstUsers),
             (override));
     MOCK_METHOD(CallStateName, StartConference,
-            (IN CallType eCallType, IN const AString& strTarget, IN IMSList<ConfUser*> lstUsers),
+            (IN CallType eCallType, IN const AString& strTarget,
+                    IN const ImsList<ConfUser*>& lstUsers),
             (override));
     MOCK_METHOD(CallStateName, HandleIncoming,
             (IN ISession* piSession, IN JniMtcServiceThread* pServiceThread), (override));

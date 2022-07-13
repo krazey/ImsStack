@@ -81,14 +81,14 @@ public:
 
     // Starts an outgoing call.
     virtual void Start(IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     virtual void StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN const IMSList<ConfUser*> objUsers) = 0;
+            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN const ImsList<ConfUser*>& objUsers) = 0;
 
     virtual void StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN const IMSList<ConfUser*> objUsers) = 0;
+            IN const ImsList<ConfUser*>& objUsers) = 0;
 
     // Handles an incoming call.
     virtual void HandleIncoming(IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) = 0;
