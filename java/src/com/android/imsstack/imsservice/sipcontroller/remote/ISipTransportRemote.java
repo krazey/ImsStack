@@ -59,4 +59,9 @@ public interface ISipTransportRemote {
      * @param subId subscription Id.
      */
     void updateSipDelegateRegistration(@NonNull Set<String> featureTags, int subId);
+
+    /**
+     * Release from SipController(Java) if the delegate is terminated or Jni is not used.
+     */
+    void release();
 }

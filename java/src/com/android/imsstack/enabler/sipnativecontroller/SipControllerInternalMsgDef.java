@@ -22,19 +22,23 @@ package com.android.imsstack.enabler.sipnativecontroller;
  */
 public class SipControllerInternalMsgDef {
 
-    //temp value
-    private static final int IMS_INTERNAL_MSG = 10000;
+    //Base Event
+    private static final int IMS_MSG_APP_INTERNAL = 10000;
+    private static final int IMS_MSG_SIP_DELEGATE = (IMS_MSG_APP_INTERNAL + 6000);
 
+    /*
+     * Commands from SipController(Java) and Jni
+     */
     // Send Message
-    public static final int SENDMESSAGE_CMD                 = (IMS_INTERNAL_MSG + 51);
+    public static final int SENDMESSAGE_CMD                 = (IMS_MSG_SIP_DELEGATE + 11);
     // Colse Ongoing Session
-    public static final int CLOSEONGOINGSESSION_CMD         = (IMS_INTERNAL_MSG + 52);
+    public static final int CLOSEONGOINGSESSION_CMD         = (IMS_MSG_SIP_DELEGATE + 12);
     // Notify Error that Received Message from Native
-    public static final int NOTIFYMESSAGERECEIVEERROR_CMD   = (IMS_INTERNAL_MSG + 53);
+    public static final int NOTIFYMESSAGERECEIVEERROR_CMD   = (IMS_MSG_SIP_DELEGATE + 13);
     // Received Message
-    public static final int MESSAGERECEIVED_IND             = (IMS_INTERNAL_MSG + 54);
+    public static final int MESSAGERECEIVED_IND             = (IMS_MSG_SIP_DELEGATE + 21);
     // Message Sent
-    public static final int MESSAGESENT_IND                 = (IMS_INTERNAL_MSG + 55);
+    public static final int MESSAGESENT_IND                 = (IMS_MSG_SIP_DELEGATE + 22);
     // Receive that Send Message Failure
-    public static final int SENDMESSAGEFAILURE_IND          = (IMS_INTERNAL_MSG + 56);
+    public static final int SENDMESSAGEFAILURE_IND          = (IMS_MSG_SIP_DELEGATE + 23);
 }

@@ -76,9 +76,10 @@ public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
     }
 
     /**
-     * Release from SipController(Java) if delegate is terminated or Jni is not used.
+     * Release from SipController(Java) if the delegate is terminated or Jni is not used.
      */
-    public void release(int slotId) {
+    @Override
+    public void release() {
 
         JNIIms.removeListener(mNativeObj, this);
         JNIIms.releaseInterface(mNativeObj);
