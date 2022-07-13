@@ -18,7 +18,6 @@
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/block/MtcBlockChecker.h"
-#include "define/MtcStringDef.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -54,7 +53,7 @@ MtcBlockChecker::Result MtcBlockChecker::Check()
 
         if (objResult.eStatus == Result::Status::BLOCKED)
         {
-            IMS_TRACE_I("Check : blocked by [%s]", PS_FR(objResult.objReason), 0, 0);
+            IMS_TRACE_I("Check : blocked by [%s]", _TRACE_CR_(objResult.objReason), 0, 0);
             return objResult;
         }
 
@@ -91,7 +90,7 @@ void MtcBlockChecker::OnBlockRuleChecked(IN IMtcBlockChecker::Result objResult)
             break;
 
         case Result::Status::BLOCKED:
-            IMS_TRACE_I("OnBlockChecked : blocked by [%s]", PS_FR(objResult.objReason), 0, 0);
+            IMS_TRACE_I("OnBlockChecked : blocked by [%s]", _TRACE_CR_(objResult.objReason), 0, 0);
             m_nPendingCount = 0;
             break;
 

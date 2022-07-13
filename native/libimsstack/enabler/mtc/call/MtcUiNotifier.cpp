@@ -82,7 +82,7 @@ void MtcUiNotifier::SendStarted(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMed
 PUBLIC
 void MtcUiNotifier::SendStartFailed(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("SendStartFailed : %s", PS_FR(objReason), 0, 0);
+    IMS_TRACE_I("SendStartFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
     if (!IsAvailableToSend())
     {
@@ -125,7 +125,7 @@ void MtcUiNotifier::SendHeld(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaI
 PUBLIC
 void MtcUiNotifier::SendHoldFailed(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("SendHoldFailed : %s", PS_FR(objReason), 0, 0);
+    IMS_TRACE_I("SendHoldFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
     if (!IsAvailableToSend())
     {
@@ -152,7 +152,7 @@ void MtcUiNotifier::SendResumed(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMed
 PUBLIC
 void MtcUiNotifier::SendResumeFailed(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("SendResumeFailed : %s", PS_FR(objReason), 0, 0);
+    IMS_TRACE_I("SendResumeFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
     if (!IsAvailableToSend())
     {
@@ -193,7 +193,7 @@ void MtcUiNotifier::SendResumedBy(IN CallInfo* /* pCallInfo */, IN MediaInfo* pM
 PUBLIC
 void MtcUiNotifier::SendTerminated(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("SendTerminated : %s", PS_FR(objReason), 0, 0);
+    IMS_TRACE_I("SendTerminated : %s", _TRACE_CR_(objReason), 0, 0);
 
     if (!IsAvailableToSend())
     {
@@ -251,7 +251,7 @@ void MtcUiNotifier::SendUpdated(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMed
 PUBLIC
 void MtcUiNotifier::SendUpdateFailed(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("SendUpdateFailed : %s", PS_FR(objReason), 0, 0);
+    IMS_TRACE_I("SendUpdateFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
     if (!IsAvailableToSend())
     {
@@ -281,7 +281,7 @@ void MtcUiNotifier::SendNotifyInfo(IN IMS_UINT32 eType,
         IN IMS_BOOL bValue /*= IMS_FALSE */)
 {
     IMS_TRACE_I("SendNotifyInfo : Type[%d]", eType, 0, 0);
-    IMS_TRACE_D("SendNotifyInfo : [%s][%d][%s]", strValue.GetStr(), nValue, PS_BOOL(bValue));
+    IMS_TRACE_D("SendNotifyInfo : [%s][%d][%s]", strValue.GetStr(), nValue, _TRACE_B_(bValue));
 
     if (!IsAvailableToSend())
     {
@@ -306,7 +306,7 @@ void MtcUiNotifier::SendExpanded(IN CallInfo* /*pCallInfo*/, IN MediaInfo* /*pMe
 PUBLIC
 void MtcUiNotifier::SendExpandFailed(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("SendExpandFailed : %s", PS_FR(objReason), 0, 0);
+    IMS_TRACE_I("SendExpandFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
     if (!IsAvailableToSend())
     {
@@ -346,7 +346,7 @@ void MtcUiNotifier::SendMerged(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMedi
 PUBLIC
 void MtcUiNotifier::SendMergeFailed(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("SendMergeFailed : %s", PS_FR(objReason), 0, 0);
+    IMS_TRACE_I("SendMergeFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
     if (!IsAvailableToSend())
     {
@@ -359,7 +359,7 @@ void MtcUiNotifier::SendMergeFailed(IN const CallReasonInfo& objReason)
 PUBLIC
 void MtcUiNotifier::SendJoined(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("SendJoined : Result[%s] %s", PS_BOOL(bResult), PS_FR(objReason), 0);
+    IMS_TRACE_I("SendJoined : Result[%s] %s", _TRACE_B_(bResult), _TRACE_CR_(objReason), 0);
 
     if (!IsAvailableToSend())
     {
@@ -379,7 +379,7 @@ void MtcUiNotifier::SendJoined(IN IMS_BOOL bResult, IN const CallReasonInfo& obj
 PUBLIC
 void MtcUiNotifier::SendDropped(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("SendDropped : Result[%s] %s", PS_BOOL(bResult), PS_FR(objReason), 0);
+    IMS_TRACE_I("SendDropped : Result[%s] %s", _TRACE_B_(bResult), _TRACE_CR_(objReason), 0);
 
     if (!IsAvailableToSend())
     {
@@ -454,7 +454,8 @@ void MtcUiNotifier::SendEctCompleted(IN IMS_RESULT nResult, IN const CallReasonI
 PUBLIC
 void MtcUiNotifier::SendCallPushCompleted(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("SendCallPushCompleted : Result[%s] %s", PS_BOOL(bResult), PS_FR(objReason), 0);
+    IMS_TRACE_I(
+            "SendCallPushCompleted : Result[%s] %s", _TRACE_B_(bResult), _TRACE_CR_(objReason), 0);
 
     if (!IsAvailableToSend())
     {

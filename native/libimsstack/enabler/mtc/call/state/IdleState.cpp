@@ -182,7 +182,7 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
 
 PUBLIC VIRTUAL CallStateName IdleState::Terminate(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("Terminate : reason[%s]", PS_FR(objReason), 0, 0);
+    IMS_TRACE_I("Terminate : reason[%s]", _TRACE_CR_(objReason), 0, 0);
     m_objContext.GetMediaManager().Terminate();
     m_objContext.GetUiNotifier().SendStartFailed(objReason);
 
