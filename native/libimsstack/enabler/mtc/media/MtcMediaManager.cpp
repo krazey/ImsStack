@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
+#include "CallReasonInfo.h"
+#include "ISipHeader.h"
+#include "MediaManager.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
+#include "SipStatusCode.h"
+
 #include "call/MtcSession.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
-#include "ISipHeader.h"
 #include "media/IMediaQosEventListener.h"
 #include "media/IMtcMediaManager.h"
-#include "media/MediaManager.h"
+#include "media/MtcMediaManager.h"
 #include "media/MtcMediaUtil.h"
-#include "mtc/media/MtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
-#include "SipStatusCode.h"
 #include "utility/MessageUtil.h"
-#include "CallReasonInfo.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -244,17 +246,7 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession(IN JniMediaSessionThread
     }
 
     ServiceType eServiceType = m_objContext.GetService().GetServiceType();
-    MEDIA_SERVICE_TYPE eMediaServiceType = MEDIA_SERVICE_NONE;
-
-    if (eServiceType == ServiceType::NORMAL)
-    {
-        eMediaServiceType = MEDIA_SERVICE_DEFAULT;
-    }
-    else if (eServiceType == ServiceType::EMERGENCY)
-    {
-        eMediaServiceType = MEDIA_SERVICE_EMERGENCY;
-    }
-
+    MEDIA_SERVICE_TYPE eMediaServiceType = MtcMediaUtil::GetMediaServiceType(eServiceType);
     IMS_TRACE_D("CreateMediaSession", 0, 0, 0);
 
     m_piMediaSession = pMediaManager->CreateSession(
@@ -269,8 +261,13 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession(IN JniMediaSessionThread
     m_piMediaSession->SetMtcListener(this);
 
     MediaEnvironment* pEnvironment = new MediaEnvironment();
+
+    IMS_SINT32 eRadioType = PhoneInfoService::GetPhoneInfoService()
+                                    ->GetNetworkWatcher(m_objContext.GetSlotId())
+                                    ->GetNetworkType();
+
     pEnvironment->eNetworkType =
-            MtcMediaUtil::GetMediaNetworkType(&m_objContext.GetService(), m_objContext.GetSlotId());
+            MtcMediaUtil::GetMediaNetworkType(&m_objContext.GetService(), eRadioType);
     pEnvironment->eServiceType = eMediaServiceType;
     pEnvironment->pIService = (IService*)m_objContext.GetService().GetICoreService();
 

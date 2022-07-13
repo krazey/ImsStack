@@ -14,27 +14,10 @@
  * limitations under the License.
  */
 
-#include "mtc/media/MtcMediaUtil.h"
-#include "CallReasonInfo.h"
 #include "MtcDef.h"
-#include "ServicePhoneInfo.h"
+#include "media/MtcMediaUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
-
-PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetMediaDirectionFromSdp()
-{
-    return DIRECTION_INVALID;
-}
-
-PUBLIC GLOBAL IMS_UINT32 MtcMediaUtil::GetMediaTypesFromSdp()
-{
-    return MEDIATYPE_NONE;
-}
-
-PUBLIC GLOBAL IMS_BOOL MtcMediaUtil::IsMediaPortValid()
-{
-    return IMS_TRUE;
-}
 
 PUBLIC GLOBAL CallType MtcMediaUtil::GetCallTypeFromMediaTypes(IN IMS_UINT32 eMediaTypes)
 {
@@ -211,8 +194,8 @@ PUBLIC GLOBAL MEDIA_SERVICE_TYPE MtcMediaUtil::GetMediaServiceType(IN ServiceTyp
     return MEDIA_SERVICE_DEFAULT;
 }
 
-PUBLIC GLOBAL MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(
-        IN IMtcService* piMtcService, IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(IN IMtcService* piMtcService,
+        IN IMS_SINT32 eRadioType /* = INetworkWatcher::RADIOTECH_TYPE_INVALID */)
 {
     if (piMtcService->IsWlanIpCanType())
     {
@@ -220,9 +203,6 @@ PUBLIC GLOBAL MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(
     }
 
     MEDIA_NETWORK_TYPE eMediaNetworkType = MEDIA_NETWORK_NONE;
-    IMS_SINT32 eRadioType =
-            PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(nSlotId)->GetNetworkType();
-
     switch (eRadioType)
     {
         case INetworkWatcher::RADIOTECH_TYPE_LTE:
@@ -247,27 +227,6 @@ PUBLIC GLOBAL MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(
     }
 
     return eMediaNetworkType;
-}
-
-PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetCallReasonInfoFromReportType(IN IMS_UINT32 eReportType)
-{
-    IMS_SINT32 eReason = CODE_MEDIA_UNSPECIFIED;
-    UNUSED_PARAM(eReportType);
-    /*switch (eReportType)
-    {
-        case REPORT_CODEC_ERROR:
-        case REPORT_INTERNAL_ERROR:
-        case REPORT_OPERATION_FAILURE:
-            eReason = CODE_MEDIA_INIT_FAILED;
-            break;
-        case REPORT_VIDEO_LOWEST_BIT_RATE:
-            eReason = CODE_MEDIA_NOT_ACCEPTABLE;
-            break;
-        default:
-            break;
-    }*/
-
-    return eReason;
 }
 
 PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetGttModeFromTextQuality(IN IMS_UINT32 eTextQuality)

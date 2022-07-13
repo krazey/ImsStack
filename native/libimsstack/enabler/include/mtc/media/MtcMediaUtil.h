@@ -17,21 +17,15 @@
 #ifndef MTC_MEDIA_UTIL_H_
 #define MTC_MEDIA_UTIL_H_
 
-#include "IMSTypeDef.h"
-#include "IMessage.h"
-#include "MediaDef.h"
+#include "ImsTypeDef.h"
 #include "IMtcService.h"
-#include "MtcDef.h"
-#include "MediaNego.h"
+#include "INetworkWatcher.h"
+#include "MediaDef.h"
 #include "call/IMtcCall.h"
 
 class MtcMediaUtil
 {
 public:
-    static IMS_SINT32 GetMediaDirectionFromSdp();
-    static IMS_UINT32 GetMediaTypesFromSdp();
-    static IMS_BOOL IsMediaPortValid();
-
     static CallType GetCallTypeFromMediaTypes(IN IMS_UINT32 eMediaTypes);
     static CallType GetCallTypeFromMediaContents(IN MEDIA_CONTENT_TYPE eMediaContents);
 
@@ -42,9 +36,8 @@ public:
     static MEDIA_CONTENT_TYPE GetMediaContentsFromCallType(IN CallType eCallType);
 
     static MEDIA_SERVICE_TYPE GetMediaServiceType(IN ServiceType eServiceType);
-    static MEDIA_NETWORK_TYPE GetMediaNetworkType(
-            IN IMtcService* piMtcService, IN IMS_SINT32 nSlotId);
-    static IMS_SINT32 GetCallReasonInfoFromReportType(IN IMS_UINT32 eReportType);
+    static MEDIA_NETWORK_TYPE GetMediaNetworkType(IN IMtcService* piMtcService,
+            IN IMS_SINT32 eRadioType = INetworkWatcher::RADIOTECH_TYPE_INVALID);
     static IMS_SINT32 GetGttModeFromTextQuality(IN IMS_UINT32 eTextQuality);
 };
 
