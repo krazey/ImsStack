@@ -58,10 +58,14 @@ public:
     }
 
 private:
+    IMS_RESULT SendInviteForSingleUser(OUT AString& strReferToUri, IN CallKey n1To1Key);
+    IMS_RESULT SendInviteForMultipleUser(OUT AString& strReferToUri);
     void GetReferToUri(OUT AString& strUri, IN IMtcCall* pi1To1Call) const;
     void SetReplaces(IN IMtcCall* pi1To1Call);
     void SetReferredByHeader();
     void SetHeadersForReferTo(OUT AString& strHeadersForReferTo);
+    IMtcCall* GetConferenceCall();
+    IReference* GetIReference(IN const AString& strInvitedUri, IN const AString& strMethod);
 
 private:
     static const IMS_CHAR METHOD_INVITE[];
