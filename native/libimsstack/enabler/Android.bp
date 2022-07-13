@@ -21,7 +21,7 @@ cc_library_headers {
         "interface/media",
         "interface/mtc",
         "interface/mts",
-        "interface/sipdelegate",
+        "interface/sipcontroller",
         "interface/uce",
     ],
 }
@@ -55,6 +55,13 @@ cc_library_headers {
     export_include_dirs: [
         "include/aos",
         "include/aos/interface",
+    ],
+}
+
+cc_library_headers {
+    name: "libimsstack_enabler_sipcontroller_headers",
+    export_include_dirs: [
+        "include/sipcontroller",
     ],
 }
 
@@ -92,7 +99,7 @@ cc_library_static {
         "include/media",
         "include/mtc",
         "include/mts",
-        "include/sipdelegate",
+        "include/sipcontroller",
         "include/uce",
     ],
     // For unit-test
@@ -105,7 +112,7 @@ cc_library_static {
         "include/media",
         "include/mtc",
         "include/mts",
-        "include/sipdelegate",
+        "include/sipcontroller",
         "include/uce",
     ],
 }

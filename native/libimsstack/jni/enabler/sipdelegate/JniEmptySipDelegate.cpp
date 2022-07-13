@@ -1,1 +1,0 @@
-#include "JniEmptySipDelegate.h"

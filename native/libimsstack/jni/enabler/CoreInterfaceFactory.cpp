@@ -24,6 +24,7 @@
 #include "JniMtcService.h"
 #include "JniMtsService.h"
 #include "JniUceService.h"
+#include "JniSipControllerService.h"
 
 __IMS_TRACE_TAG_USER_DECL__("CoreInterfaceFactory");
 
@@ -50,6 +51,10 @@ PUBLIC GLOBAL BaseService* CoreInterfaceFactory::GetInterface(IN IMS_SINT32 nInt
 
         case IUIMS::APP_MTS:
             pService = new JniMtsService(pfnSendDataToJava, nSlotId);
+            break;
+
+        case IUIMS::APP_SIP_DELEGATE:
+            pService = new JniSipControllerService(pfnSendDataToJava, nSlotId);
             break;
 
         case IUIMS::MTS_EMERGENCY_SERVICE:

@@ -45,6 +45,14 @@ cc_library_headers {
     ],
 }
 
+cc_library_headers {
+    name: "libimsstack_jni_sipcontroller_headers",
+    export_include_dirs: [
+        "include",
+        "include/enabler/sipcontroller",
+    ],
+}
+
 cc_library_static {
     name:"libimsstack-jni",
     defaults: [
@@ -81,7 +89,7 @@ cc_library_static {
         "include/enabler/media",
         "include/enabler/mtc",
         "include/enabler/mts",
-        "include/enabler/sipdelegate",
+        "include/enabler/sipcontroller",
         "include/enabler/uce",
         "include/system",
     ],
@@ -92,7 +100,7 @@ cc_library_static {
         "include/enabler/aos",
         "include/enabler/mtc",
         "include/enabler/mts",
-        "include/enabler/sipdelegate",
+        "include/enabler/sipcontroller",
         "include/enabler/uce",
         "include/system",
     ],
