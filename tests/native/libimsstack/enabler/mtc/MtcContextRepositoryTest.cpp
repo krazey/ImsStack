@@ -16,6 +16,8 @@
 
 #include <gtest/gtest.h>
 #include "MtcContextRepository.h"
+#include "MockIMtcContext.h"
+#include "IMtcContext.h"
 
 namespace android
 {
@@ -27,5 +29,74 @@ protected:
 
     virtual void TearDown() override {}
 };
+
+TEST_F(MtcContextRepositoryTest, GetInstanceCreateInstanceOnlyOnce)
+{
+    MtcContextRepository* pContextRepository1 = MtcContextRepository::GetInstance();
+    MtcContextRepository* pContextRepository2 = MtcContextRepository::GetInstance();
+
+    EXPECT_EQ(pContextRepository1, pContextRepository2);
+}
+
+TEST_F(MtcContextRepositoryTest, AddContextToSlotId0AndGetContextWithInvalidSlotId)
+{
+    const IMS_SINT32 SLOT_ID_0 = 0;
+    MockIMtcContext* pContext = new MockIMtcContext();
+    MtcContextRepository::GetInstance()->AddContext(SLOT_ID_0, pContext);
+    IMtcContext* pContextByGetter = MtcContextRepository::GetContext();
+
+    EXPECT_EQ(pContext, pContextByGetter);
+}
+
+TEST_F(MtcContextRepositoryTest, AddContextToSlotId0AndGetContextWithSlotId0)
+{
+    const IMS_SINT32 SLOT_ID_0 = 0;
+    MockIMtcContext* pContext = new MockIMtcContext();
+    MtcContextRepository::GetInstance()->AddContext(SLOT_ID_0, pContext);
+    IMtcContext* pContextByGetter = MtcContextRepository::GetContext(SLOT_ID_0);
+
+    EXPECT_EQ(pContext, pContextByGetter);
+}
+
+TEST_F(MtcContextRepositoryTest, AddContextToSlotId0AndGetContextBySlot)
+{
+    const IMS_SINT32 SLOT_ID_0 = 0;
+    MockIMtcContext* pContext = new MockIMtcContext();
+    MtcContextRepository::GetInstance()->AddContext(SLOT_ID_0, pContext);
+    IMtcContext* pContextByGetter =
+            MtcContextRepository::GetInstance()->GetContextBySlot(SLOT_ID_0);
+
+    EXPECT_EQ(pContext, pContextByGetter);
+}
+
+TEST_F(MtcContextRepositoryTest, AddContextsWithDifferentSlot)
+{
+    const IMS_SINT32 SLOT_ID_0 = 0;
+    const IMS_SINT32 SLOT_ID_1 = 1;
+    MockIMtcContext* pContextSlot0 = new MockIMtcContext();
+    MockIMtcContext* pContextSlot1 = new MockIMtcContext();
+    MtcContextRepository::GetInstance()->AddContext(SLOT_ID_0, pContextSlot0);
+    MtcContextRepository::GetInstance()->AddContext(SLOT_ID_1, pContextSlot1);
+
+    IMtcContext* pContextByGetterSlot0 =
+            MtcContextRepository::GetInstance()->GetContextBySlot(SLOT_ID_0);
+    IMtcContext* pContextByGetterSlot1 =
+            MtcContextRepository::GetInstance()->GetContextBySlot(SLOT_ID_1);
+
+    EXPECT_NE(pContextByGetterSlot0, pContextByGetterSlot1);
+}
+
+TEST_F(MtcContextRepositoryTest, AddContextAndRemove)
+{
+    const IMS_SINT32 SLOT_ID_0 = 0;
+    MockIMtcContext* pContextSlot0 = new MockIMtcContext();
+    MtcContextRepository::GetInstance()->AddContext(SLOT_ID_0, pContextSlot0);
+    MtcContextRepository::GetInstance()->RemoveContext(SLOT_ID_0);
+
+    IMtcContext* pContextByGetterSlot0 =
+            MtcContextRepository::GetInstance()->GetContextBySlot(SLOT_ID_0);
+
+    EXPECT_EQ(pContextByGetterSlot0, nullptr);
+}
 
 }  // namespace android
