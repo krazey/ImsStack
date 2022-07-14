@@ -30,7 +30,9 @@
 #include "provider/AosProvider.h"
 
 #include "interface/MockIAosAppContext.h"
+#include "interface/MockIAosApplication.h"
 #include "interface/MockIAosCallTracker.h"
+#include "interface/MockIAosHandle.h"
 #include "interface/MockIAosNConfiguration.h"
 #include "interface/MockIAosNetTracker.h"
 
@@ -47,6 +49,8 @@ public:
     AosHandleMtc* m_pAosHandleMtc;
 
     MockIAosAppContext m_objMockIAosAppContext;
+    MockIAosApplication m_objMockIAosApplication;
+    MockIAosHandle m_objMockIAosHandle;
     MockIAosNetTracker m_objMockIAosNetTracker;
     MockIImsAosListener m_objMockIImsAosListener;
 
@@ -75,6 +79,10 @@ protected:
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(
                 static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration));
+
+        EXPECT_CALL(m_objMockIAosAppContext, GetApp())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(&m_objMockIAosApplication));
 
         EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
                 .Times(AnyNumber())
@@ -164,6 +172,8 @@ protected:
 
     void SetBlocked(IMS_BOOL bBlocked) { m_pAosHandleMtc->m_bBlocked = bBlocked; }
 
+    IMS_BOOL IsBlocked() { return m_pAosHandleMtc->IsBlocked(); }
+
     void AddBlock(IN IMS_UINT32 nBlock)
     {
         m_pAosHandleMtc->AddBlock(nBlock, m_pAosHandleMtc->m_nBlocks);
@@ -206,6 +216,12 @@ protected:
     IMS_BOOL GetNetSrvIn() { return m_pAosHandleMtc->m_bNetSrvIn; }
 
     IMS_UINT32 GetNetworkType() { return m_pAosHandleMtc->m_nNetworkType; }
+
+    void Init() { m_pAosHandleMtc->Init(); }
+
+    void CleanUp() { m_pAosHandleMtc->CleanUp(); }
+
+    void ProcessBlockChanged() { m_pAosHandleMtc->ProcessBlockChanged(); }
 };
 
 TEST_F(AosHandleMtcTest, Constructor)
@@ -921,4 +937,360 @@ TEST_F(AosHandleMtcTest, SetSuspendedReason_ResetSuspendedReason_Test)
 
     ResetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
     EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::NONE);
+}
+
+TEST_F(AosHandleMtcTest, Init_CleanUp_Test)
+{
+    // Expectation: Set/Remove AosCallTracker listneners.
+
+    // Base
+    EXPECT_CALL(m_objMockIAosNetTracker, SetListener(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosNetTracker, RemoveListener(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    // Mtc
+    EXPECT_CALL(m_objMockIAosCallTracker, SetListener(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosCallTracker, RemoveListener(_)).Times(1);
+
+    IMSVector<IMS_SINT32> objTestVector;
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objTestVector));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVerstatForRegistrationSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetUssdMethod())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(CarrierConfig::USSD_OVER_CS_ONLY));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    Init();
+    CleanUp();
+}
+
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test1)
+{
+    // Test1: Epdg enabled, BLOCK_VOWIFI_CAPABILITY, ViWiFi without Voice NOT supported
+    // Expectation: return true
+
+    SetEpdgEnabled(IMS_TRUE);
+    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_TRUE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test2)
+{
+    // Test2: Epdg enabled, BLOCK_VOWIFI_CAPABILITY, BLOCK_VIWIFI_CAPABILITY
+    //        ViWiFi without Voice supported
+    // Expectation: return true
+
+    SetEpdgEnabled(IMS_TRUE);
+    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_TRUE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test3)
+{
+    // Test3: Epdg enabled, BLOCK_VOWIFI_CAPABILITY
+    //        ViWiFi without Voice supported, valid network
+    // Expectation: return true
+
+    SetEpdgEnabled(IMS_TRUE);
+    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_TRUE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test4)
+{
+    // Test4: Epdg enabled, BLOCK_VOWIFI_CAPABILITY
+    //        ViWiFi without Voice supported, invalid network
+    // Expectation: return true
+
+    SetEpdgEnabled(IMS_TRUE);
+    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
+
+    EXPECT_FALSE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test5)
+{
+    // Test5: Epdg not enabled, BLOCK_NONE, BLOCK_VOPS or BLOCK_VOLTE_CAPABILITY
+    //        no unavailable feature tag
+    // Expectation: return true if BLOCK_VOPS or BLOCK_VOLTE_CAPABILITY else return false
+
+    IMSVector<IMS_SINT32> objTestVector;
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objTestVector));
+
+    AddBlock(AosHandle::BLOCK_VOPS);
+    EXPECT_TRUE(IsHandleBlocked());
+
+    RemoveBlock(AosHandle::BLOCK_VOPS);
+    EXPECT_FALSE(IsHandleBlocked());
+
+    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+    EXPECT_TRUE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test6)
+{
+    // Test6: Epdg not enabled, BLOCK_VOPS & BLOCK_VOLTE_CAPABILITY,
+    //        No unavailable feature tag,
+    // Expectation: return true
+
+    AddBlock(AosHandle::BLOCK_VOPS);
+    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+
+    IMSVector<IMS_SINT32> objFeature;
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objFeature));
+
+    EXPECT_TRUE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test7)
+{
+    // Test7: Epdg not enabled, BLOCK_VOPS & BLOCK_VOLTE_CAPABILITY,
+    //        unavailable feature tag = MMTEL,
+    //        unavailable feature tag policy = other than vops and capability
+    // Expectation: return true
+
+    AddBlock(AosHandle::BLOCK_VOPS);
+    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+
+    IMSVector<IMS_SINT32> objPolicy;
+    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_3G);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objPolicy));
+
+    IMSVector<IMS_SINT32> objFeature;
+    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objFeature));
+
+    EXPECT_TRUE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test8)
+{
+    // Test8: Epdg not enabled, BLOCK_VOPS
+    //        unavailable feature tag = MMTEL,
+    //        unavailable feature tag policy = vops
+    // Expectation: return false
+
+    AddBlock(AosHandle::BLOCK_VOPS);
+
+    IMSVector<IMS_SINT32> objPolicy;
+    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objPolicy));
+
+    IMSVector<IMS_SINT32> objFeature;
+    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objFeature));
+
+    EXPECT_FALSE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test9)
+{
+    // Test9: Epdg not enabled, BLOCK_VOLTE_CAPABILITY
+    //        unavailable feature tag = MMTEL,
+    //        unavailable feature tag policy = capability
+    // Expectation: return false
+
+    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+
+    IMSVector<IMS_SINT32> objPolicy;
+    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objPolicy));
+
+    IMSVector<IMS_SINT32> objFeature;
+    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objFeature));
+
+    EXPECT_FALSE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test10)
+{
+    // Test10: Epdg not enabled, BLOCK_VOPS & BLOCK_VOLTE_CAPABILITY,
+    //        unavailable feature tag = MMTEL,
+    //        unavailable feature tag policy = vops
+    // Expectation: return true
+
+    AddBlock(AosHandle::BLOCK_VOPS);
+    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+
+    IMSVector<IMS_SINT32> objPolicy;
+    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objPolicy));
+
+    IMSVector<IMS_SINT32> objFeature;
+    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objFeature));
+
+    EXPECT_TRUE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test11)
+{
+    // Test11: Epdg not enabled, BLOCK_VOPS & BLOCK_VOLTE_CAPABILITY,
+    //        unavailable feature tag = MMTEL,
+    //        unavailable feature tag policy = capability
+    // Expectation: return true
+
+    AddBlock(AosHandle::BLOCK_VOPS);
+    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+
+    IMSVector<IMS_SINT32> objPolicy;
+    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objPolicy));
+
+    IMSVector<IMS_SINT32> objFeature;
+    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objFeature));
+
+    EXPECT_TRUE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test12)
+{
+    // Test12: Epdg not enabled, BLOCK_VOPS & BLOCK_VOLTE_CAPABILITY,
+    //        unavailable feature tag = MMTEL,
+    //        unavailable feature tag policy = vops & capability
+    // Expectation: return false
+
+    AddBlock(AosHandle::BLOCK_VOPS);
+    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+
+    IMSVector<IMS_SINT32> objPolicy;
+    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS);
+    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objPolicy));
+
+    IMSVector<IMS_SINT32> objFeature;
+    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objFeature));
+
+    EXPECT_FALSE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, ProcessBlockChanged_Test1)
+{
+    // Test1: sms over ims is available without voice capability
+    // Expectation: do nothing
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsAvailableWithoutVoiceCapability())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosHandle, Handle_Notify(ImsAosService::MTC, IsBlocked())).Times(0);
+
+    ProcessBlockChanged();
+}
+
+TEST_F(AosHandleMtcTest, ProcessBlockChanged_Test2)
+{
+    // Test2: sms over ims is NOT available without voice capability. HandleMts is null.
+    // Expectation: do nothing
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsAvailableWithoutVoiceCapability())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosAppContext, GetHandle(ImsAosService::MTS))
+            .Times(1)
+            .WillOnce(Return(static_cast<IAosHandle*>(IMS_NULL)));
+
+    EXPECT_CALL(m_objMockIAosHandle, Handle_Notify(ImsAosService::MTC, IsBlocked())).Times(0);
+
+    ProcessBlockChanged();
+}
+
+TEST_F(AosHandleMtcTest, ProcessBlockChanged_Test3)
+{
+    // Test3: sms over ims is NOT available without voice capability. HandleMts is existed.
+    // Expectation: call Handle_Notify
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsAvailableWithoutVoiceCapability())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosAppContext, GetHandle(ImsAosService::MTS))
+            .Times(1)
+            .WillOnce(Return(static_cast<IAosHandle*>(&m_objMockIAosHandle)));
+
+    EXPECT_CALL(m_objMockIAosHandle, Handle_Notify(ImsAosService::MTC, IsBlocked())).Times(1);
+
+    ProcessBlockChanged();
 }
