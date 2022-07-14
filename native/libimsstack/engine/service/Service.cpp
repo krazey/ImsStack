@@ -1466,9 +1466,7 @@ IMS_BOOL Service::ValidateRequestUri(IN const SipAddress& objRequestUri,
 
         if (pContact == IMS_NULL)
         {
-            IMS_TRACE_D("Contact header is not present in the dialog; "
-                        "use the default contact address...",
-                    0, 0, 0);
+            IMS_TRACE_D("No contacts in the dialog; use the default contact address...", 0, 0, 0);
 
             if (IsRegBindingOnActive())
             {
@@ -1491,6 +1489,17 @@ IMS_BOOL Service::ValidateRequestUri(IN const SipAddress& objRequestUri,
 
         if (objContact.Equals(objRequestUri))
         {
+            return IMS_TRUE;
+        }
+
+        // Checks if the contact address for outgoing message matches or not.
+        pContact = IsRegBindingOnActive()
+                ? GetContactAddressForOutgoingMessage()
+                : m_objCachedRegBinding.GetContactAddressForOutgoingMessage();
+
+        if ((pContact != IMS_NULL) && pContact->Equals(objRequestUri))
+        {
+            IMS_TRACE_D("Request-URI matches the contact address for outgoing message", 0, 0, 0);
             return IMS_TRUE;
         }
     }
