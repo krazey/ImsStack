@@ -1,14 +1,18 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20150624    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.imsservice.mmtel;
 
 import android.content.Context;
@@ -17,7 +21,6 @@ import android.text.TextUtils;
 import com.android.imsstack.core.CommonStarter;
 import com.android.imsstack.core.ICommonPackageListener;
 import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.SubscriptionListener;
@@ -33,7 +36,6 @@ import com.android.imsstack.util.MSimUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
@@ -54,7 +56,6 @@ public final class ImsServiceManager {
     private String[] mOperator = new String[MSimUtils.getMaxSimSlot()];
     private String[] mCountry = new String[MSimUtils.getMaxSimSlot()];
     private int[] mServiceFeatures = new int[MSimUtils.getMaxSimSlot()];
-    private int[] mSimMobility = new int[MSimUtils.getMaxSimSlot()];
     private int[] mVoLteServiceFeatures = new int[MSimUtils.getMaxSimSlot()];
 
     public ImsServiceManager(Context context, Executor executor) {
@@ -66,7 +67,6 @@ public final class ImsServiceManager {
             mOperator[i] = null;
             mCountry[i] = null;
             mServiceFeatures[i] = 0;
-            mSimMobility[i] = 0;
             mVoLteServiceFeatures[i] = 0;
         }
 
@@ -133,7 +133,6 @@ public final class ImsServiceManager {
                 mOperator[phoneId] = new String(ImsGlobal.getOperator(phoneId));
                 mCountry[phoneId] = new String(ImsGlobal.getCountry(phoneId));
                 mServiceFeatures[phoneId] = getServiceFeatures(phoneId);
-                mSimMobility[phoneId] = getSimMobility(phoneId);
                 mVoLteServiceFeatures[phoneId] = getVoLteServiceFeatures(phoneId);
             }
 
@@ -466,7 +465,6 @@ public final class ImsServiceManager {
             mOperator[phoneId] = new String(newOperator);
             mCountry[phoneId] = new String(ImsGlobal.getCountry(phoneId));
             mServiceFeatures[phoneId] = getServiceFeatures(phoneId);
-            mSimMobility[phoneId] = getSimMobility(phoneId);
             mVoLteServiceFeatures[phoneId] = getVoLteServiceFeatures(phoneId);
 
             checkImsServiceAvailabilityAndBroadcastServiceUpDown(phoneId);
@@ -491,7 +489,6 @@ public final class ImsServiceManager {
             mOperator[phoneId] = new String(newOperator);
             mCountry[phoneId] = new String(ImsGlobal.getCountry(phoneId));
             mServiceFeatures[phoneId] = serviceFeatures;
-            mSimMobility[phoneId] = getSimMobility(phoneId);
             mVoLteServiceFeatures[phoneId] = getVoLteServiceFeatures(phoneId);
 
             operatorChanged = true;
@@ -504,19 +501,8 @@ public final class ImsServiceManager {
                         + " >> 0x" + Integer.toHexString(serviceFeatures));
 
                 mServiceFeatures[phoneId] = serviceFeatures;
-                mSimMobility[phoneId] = getSimMobility(phoneId);
 
                 operatorOrServiceFeaturesChanged = true;
-            } else {
-                int simMobility = getSimMobility(phoneId);
-
-                if (simMobility != mSimMobility[phoneId]) {
-                    logi("simMobilityChanged :: " + mSimMobility[phoneId] + " >> " + simMobility);
-
-                    mSimMobility[phoneId] = simMobility;
-
-                    operatorOrServiceFeaturesChanged = true;
-                }
             }
 
             if (ImsUtils.isEmergencyCallEnabledOnServiceRestricted()) {
@@ -533,20 +519,6 @@ public final class ImsServiceManager {
                     if (!"KR".equals(ImsGlobal.getCountry(phoneId))) {
                         operatorOrServiceFeaturesChanged = true;
                     }
-                }
-            }
-
-            if (OperatorInfo.isEnablerTypeGlobal(phoneId)) {
-                String country = ImsGlobal.getCountry(phoneId);
-
-                if (operatorOrServiceFeaturesChanged) {
-                    mCountry[phoneId] = new String(country);
-                } else if (!Objects.equals(mCountry[phoneId], country)) {
-                    logi("countryChanged :: " + mCountry[phoneId] + " >> " + country);
-
-                    mCountry[phoneId] = new String(country);
-
-                    operatorOrServiceFeaturesChanged = true;
                 }
             }
         }
@@ -638,14 +610,6 @@ public final class ImsServiceManager {
     private static int getActivePhoneId() {
         ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
         return (isub != null) ? isub.getPhoneId() : MSimUtils.DEFAULT_PHONE_ID;
-    }
-
-    private static int getSimMobility(int phoneId) {
-        return OperatorInfo.isSimMoved(phoneId) ? 1 : 0;
-    }
-
-    private static int getSupportedServices(int phoneId) {
-        return OperatorInfo.getSupportServices(phoneId);
     }
 
     private static int getServiceFeatures(int phoneId) {
@@ -747,11 +711,6 @@ public final class ImsServiceManager {
 
             if (slotId < MSimUtils.DEFAULT_PHONE_ID || slotId >= MSimUtils.getMaxSimSlot()) {
                 return;
-            }
-
-            if (getSupportedServices(slotId) == 0) {
-                logi("No supported services");
-                mServiceFeatures[slotId] = 0;
             }
 
             if (ImsConstants.USE_CARRIER_CONFIG) {

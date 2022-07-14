@@ -33,10 +33,11 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.CapabilityConfigs;
-import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.agentif.ICellInfo;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.carrier.CarrierInfo;
+import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -873,8 +874,12 @@ public class CellInfoAgent implements ICellInfo {
         return (mFeatures & feature) == feature;
     }
 
+    // TODO_CONFIG
     private boolean isNumOffset() {
-        if ("MTS".equals(OperatorInfo.getOperator(mSlotId))) {
+        SimCarrierId cid = CarrierInfo.getInstance().getCarrierId(mSlotId);
+
+        // MTS: Legacy, MTC: carrier-id
+        if (cid.getCarrierId() == 1678) {
             return true;
         }
 

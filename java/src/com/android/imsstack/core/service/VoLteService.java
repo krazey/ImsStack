@@ -22,7 +22,6 @@ import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -317,8 +316,7 @@ public class VoLteService implements IVoLteService {
 
                 lp.setAddressTolerableDistance(3000);
                 lp.setDefaultUpdateInterval(3600);
-            } else if (OperatorInfo.isEnablerTypeForNonOperator(mSlotID)
-                    && ImsGlobal.isWfcEnabled(mContext, mSlotID)) {
+            } else if (ImsGlobal.isWfcEnabled(mContext, mSlotID)) {
                 lp = locAgent.getLocationPolicy();
 
                 policy = LocationPolicy.POLICY_INIT_REQUIRED_ON_GETTING_LAST_LOCATION;
@@ -417,15 +415,6 @@ public class VoLteService implements IVoLteService {
                 }
             }
         } else if (ImsGlobal.equalsOperatorCountry(mOperator, mCountry, "TMO", "US")) {
-            if (OperatorInfo.getSysSimOperator(mSlotID).equals("CCA")) {
-                if (SettingsUtils.isDataNetworkEnhanced4GLteMode(mContext, getSlotID()) == true) {
-                    system.notifyEvent(ImsEventDef.IMS_EVENT_VOLTE_SETTING,
-                            ImsEventDef.IMS_VOLTE_SETTING_ON, 0);
-                } else {
-                    system.notifyEvent(ImsEventDef.IMS_EVENT_VOLTE_SETTING,
-                            ImsEventDef.IMS_VOLTE_SETTING_OFF, 0);
-                }
-            }
             system.notifyEvent(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED,
                 SettingsUtils.isWFCImsEnabled(mContext, getSlotID()) ? 1 : 0,
                 SettingsUtils.getWFCImsMode(mContext, getSlotID()));
@@ -466,8 +455,7 @@ public class VoLteService implements IVoLteService {
                 // APP_MTS is enable if sms_over_network_id is true from DM configuration
                 initServiceProvisioningInfo(IUIMS.M_APP_UC | IUIMS.M_APP_VT);
             }
-        } else if (OperatorInfo.isEnablerTypeForNonOperator(mSlotID)
-                && ImsGlobal.isWfcEnabled(mContext, mSlotID)) {
+        } else if (ImsGlobal.isWfcEnabled(mContext, mSlotID)) {
             ICellInfo ci = (ICellInfo)AgentFactory.getAgent(AgentFactory.CELL_INFO, mSlotID);
             if (ci != null) {
                 ci.init(mContext);

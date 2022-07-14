@@ -85,9 +85,6 @@ public interface ICallSetting {
     /** Register rtt mode setting */
     void registerForRttModeSettingChanged(Handler h, int what, Object obj);
 
-    /** Register vowifi network preference setting */
-    void registerForVoWIFINetworkPreferenceChanged(Handler h, int what, Object obj);
-
     /** Unregister mobile data setting */
     void unregisterForMobileDataSettingChanged(Handler h);
 
@@ -117,9 +114,6 @@ public interface ICallSetting {
 
     /** Unregister rtt mode setting */
     void unregisterForRttModeSettingChanged(Handler h);
-
-    /** Unregister vowifi network preference setting */
-    void unregisterForVoWIFINetworkPreferenceChanged(Handler h);
 
     /** REMOVE */
     boolean isNetworkMode3GOnly();

@@ -30,10 +30,10 @@ import android.telephony.ims.ImsVideoCallProvider;
 import android.text.TextUtils;
 import android.view.Surface;
 
-import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
 import com.android.imsstack.imsservice.mmtel.util.VideoDimension;
+import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 
@@ -382,7 +382,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
     }
 
     protected static String getDefaultDialerPackage() {
-        TelecomManager tm = ImsGlobal.getInstance().getSystemService(
+        TelecomManager tm = AppContext.getInstance().getSystemService(
                 TelecomManager.class);
         return (tm != null) ? tm.getDefaultDialerPackage() : null;
     }
@@ -400,7 +400,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
             return false;
         }
 
-        PackageManager pm = ImsGlobal.getInstance().getPackageManager();
+        PackageManager pm = AppContext.getInstance().getPackageManager();
 
         if (pm == null) {
             return true;

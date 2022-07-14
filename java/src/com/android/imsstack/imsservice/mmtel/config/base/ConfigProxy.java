@@ -26,12 +26,12 @@ import android.util.SparseArray;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.core.carrier.CarrierCodeLoader;
+import com.android.imsstack.core.carrier.CarrierInfo;
+import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
-import com.android.imsstack.util.SimCarrierId;
 
 import java.util.Queue;
 import java.util.Set;
@@ -63,7 +63,7 @@ public class ConfigProxy {
     }
 
     public boolean isOperatorOrSimChanged() {
-        SimCarrierId id = CarrierCodeLoader.getCarrierIdFromSim(mContext.getSlotId());
+        SimCarrierId id = CarrierInfo.getCarrierIdFromSim(mContext.getSlotId());
 
         if (id.getCarrierId() == SimCarrierId.UNKNOWN_ID) {
             return true;
@@ -108,7 +108,7 @@ public class ConfigProxy {
             editor.clear();
             editor.commit();
 
-            SimCarrierId id = CarrierCodeLoader.getCarrierIdFromSim(mContext.getSlotId());
+            SimCarrierId id = CarrierInfo.getCarrierIdFromSim(mContext.getSlotId());
             int carrierId = id.getCarrierId();
 
             editor.putInt(KEY_CARRIER_ID, carrierId);
@@ -376,7 +376,7 @@ public class ConfigProxy {
             return;
         }
 
-        SimCarrierId id = CarrierCodeLoader.getCarrierIdFromSim(mContext.getSlotId());
+        SimCarrierId id = CarrierInfo.getCarrierIdFromSim(mContext.getSlotId());
 
         if (id.getCarrierId() == SimCarrierId.UNKNOWN_ID) {
             return;

@@ -1,9 +1,23 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.util;
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
-import android.net.Uri;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
@@ -467,57 +481,4 @@ public final class SettingsUtils {
             }
         }
     }
-
-    // Call settings {
-    public static class CallSettings {
-        public final static Uri CONTENT_URI = Uri.parse(
-                "content://com.android.phone.CallSettingsProvider/callsettings");
-        public final static String KEY_KT_HD_VOICE_SETTING = "KT_hd_voice_setting";
-        public final static String KEY_SHOW_INDICATOR_VOLTE_ICON = "show_indicator_volte_icon";
-        public final static String KEY_CALL_ORDER_PRIORITY = "call_order_priority";
-        public final static String KEY_IMS_ADMIN_TESTMODE = "ims_admin_testmode";
-
-        public static final String KEY_NAME = "name";
-        public static final String KEY_VALUE_INT = "value_int";
-        public static final String KEY_VALUE_STR = "value_str";
-
-        public static int getInt(Context c, String key, int def) {
-            String selection = KEY_NAME + "=" + "'" + key + "'";
-            return DBUtils.CP.getInt(c.getContentResolver(),
-                    CONTENT_URI, selection, KEY_VALUE_INT, def);
-        }
-
-        public static String getString(Context c, String key, String def) {
-            String selection = KEY_NAME + "=" + "'" + key + "'";
-            return DBUtils.CP.getString(c.getContentResolver(),
-                    CONTENT_URI, selection, KEY_VALUE_STR, def);
-        }
-
-        public static void registerObserver(Context c, ContentObserver observer) {
-            if (ImsConstants.USE_GOOGLE_NATIVE_APPS) {
-                // Call settings is not supported.
-                return;
-            }
-
-            if (c == null || observer == null) {
-                return;
-            }
-
-            c.getContentResolver().registerContentObserver(CONTENT_URI, false, observer);
-        }
-
-        public static void unregisterObserver(Context c, ContentObserver observer) {
-            if (ImsConstants.USE_GOOGLE_NATIVE_APPS) {
-                // Call settings is not supported.
-                return;
-            }
-
-            if (c == null || observer == null) {
-                return;
-            }
-
-            c.getContentResolver().unregisterContentObserver(observer);
-        }
-    }
-    // Call settings }
 }

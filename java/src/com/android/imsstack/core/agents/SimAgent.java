@@ -24,7 +24,6 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.SmsManager;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.agentif.ISharedState;
@@ -415,15 +414,15 @@ public class SimAgent implements SimInterface {
 
     private void handleSimApplicationStateChanged(int slotId, int subId, int state) {
         ImsLog.i(getSlotId(), "[SIM] handleSimApplicationStateChanged - slotId=" + slotId
-                + ", subId=" + subId + ", newState=" + simStateToString(state)
-                + ", state=" + simStateToString(getSimState())
+                + ", subId=" + subId + ", newState=" + Sim.stateToString(state)
+                + ", state=" + Sim.stateToString(getSimState())
                 + ", isimState=" + isimStateToString(getIsimState()));
 
         if (mSlotId != slotId) {
             return;
         }
 
-        int simState = getSimStateFromTelephonySimState(state);
+        int simState = Sim.getSimStateFromTelephonySimState(state);
 
         if (simState == Sim.STATE_INVALID) {
             return;
@@ -440,14 +439,14 @@ public class SimAgent implements SimInterface {
 
     private void handleSimCardStateChanged(int slotId, int subId, int state) {
         ImsLog.i(getSlotId(), "[SIM] handleSimCardStateChanged - slotId=" + slotId
-                + ", subId=" + subId + ", newState=" + simStateToString(state)
-                + ", state=" + simStateToString(getSimCardState()));
+                + ", subId=" + subId + ", newState=" + Sim.stateToString(state)
+                + ", state=" + Sim.stateToString(getSimCardState()));
 
         if (mSlotId != slotId) {
             return;
         }
 
-        int simCardState = getSimCardStateFromTelephonySimState(state);
+        int simCardState = Sim.getSimCardStateFromTelephonySimState(state);
 
         if (simCardState == Sim.STATE_INVALID) {
             return;
@@ -473,7 +472,7 @@ public class SimAgent implements SimInterface {
     private void setSimCardState(int state) {
         if (mSimCardState != state) {
             ImsLog.i(getSlotId(), "[SIM] SimCardState: "
-                    + simStateToString(mSimCardState) + " >> " + simStateToString(state));
+                    + Sim.stateToString(mSimCardState) + " >> " + Sim.stateToString(state));
 
             mSimCardState = state;
 
@@ -517,7 +516,7 @@ public class SimAgent implements SimInterface {
     private void setSimState(int state) {
         if (mSimState != state) {
             ImsLog.i(getSlotId(), "[SIM] SimState: "
-                    + simStateToString(mSimState) + " >> " + simStateToString(state));
+                    + Sim.stateToString(mSimState) + " >> " + Sim.stateToString(state));
 
             mSimState = state;
 
@@ -538,14 +537,14 @@ public class SimAgent implements SimInterface {
         }
 
         int cardState = tm.getSimCardState();
-        int simCardState = getSimCardStateFromTelephonySimState(cardState);
+        int simCardState = Sim.getSimCardStateFromTelephonySimState(cardState);
 
         if (simCardState != Sim.STATE_INVALID) {
             setSimCardState(simCardState);
         }
 
         int state = tm.getSimApplicationState();
-        int simState = getSimStateFromTelephonySimState(state);
+        int simState = Sim.getSimStateFromTelephonySimState(state);
 
         if (simState == Sim.STATE_INVALID) {
             ImsLog.d(getSlotId(), "[SIM] Invalid state");
@@ -562,7 +561,7 @@ public class SimAgent implements SimInterface {
         int newSimState = getSimState();
 
         ImsLog.d(getSlotId(), "[SIM] updateSimState: "
-                + simStateToString(oldSimState) + " >> " + simStateToString(newSimState));
+                + Sim.stateToString(oldSimState) + " >> " + Sim.stateToString(newSimState));
 
         if (oldSimState != newSimState) {
             updateIsimStateOnSimStateChanged(oldSimLoaded, isSimLoaded());
@@ -712,14 +711,14 @@ public class SimAgent implements SimInterface {
 
             if (TelephonyManager.ACTION_SIM_APPLICATION_STATE_CHANGED.equals(action)) {
                 handleSimApplicationStateChanged(
-                        getExtraSlotIndex(intent),
-                        getExtraSubscriptionIndex(intent),
-                        getExtraSimState(intent));
+                        Sim.getExtraSlotIndex(intent),
+                        Sim.getExtraSubscriptionIndex(intent),
+                        Sim.getExtraSimState(intent));
             } else if (TelephonyManager.ACTION_SIM_CARD_STATE_CHANGED.equals(action)) {
                 handleSimCardStateChanged(
-                        getExtraSlotIndex(intent),
-                        getExtraSubscriptionIndex(intent),
-                        getExtraSimState(intent));
+                        Sim.getExtraSlotIndex(intent),
+                        Sim.getExtraSubscriptionIndex(intent),
+                        Sim.getExtraSimState(intent));
             }
         }
     }
@@ -771,60 +770,6 @@ public class SimAgent implements SimInterface {
             default:
                 return Sim.ISIM_STATE_UNKNOWN;
         }
-    }
-
-    private static @Sim.State int getSimCardStateFromTelephonySimState(int cardState) {
-        int simCardState = getSimStateFromTelephonySimState(cardState);
-
-        switch (simCardState) {
-            case Sim.STATE_UNKNOWN:
-                // If the card state is unknown, it is handled as an ABSENT.
-                return Sim.STATE_ABSENT;
-            case Sim.STATE_ABSENT: // FALL-THROUGH
-            case Sim.STATE_PRESENT:
-                return simCardState;
-            default:
-                return Sim.STATE_INVALID;
-        }
-    }
-
-    private static @Sim.State int getSimStateFromTelephonySimState(int state) {
-        switch (state) {
-            case TelephonyManager.SIM_STATE_UNKNOWN: // FALL-THROUGH
-            case TelephonyManager.SIM_STATE_CARD_IO_ERROR: // FALL-THROUGH
-            case TelephonyManager.SIM_STATE_CARD_RESTRICTED:
-                return Sim.STATE_UNKNOWN;
-            case TelephonyManager.SIM_STATE_ABSENT:
-                return Sim.STATE_ABSENT;
-            case TelephonyManager.SIM_STATE_PRESENT:
-                return Sim.STATE_PRESENT;
-            case TelephonyManager.SIM_STATE_NOT_READY: // FALL-THROUGH
-            case TelephonyManager.SIM_STATE_READY:
-                return Sim.STATE_NOT_READY;
-            case TelephonyManager.SIM_STATE_PIN_REQUIRED: // FALL-THROUGH
-            case TelephonyManager.SIM_STATE_PUK_REQUIRED: // FALL-THROUGH
-            case TelephonyManager.SIM_STATE_NETWORK_LOCKED: // FALL-THROUGH
-            case TelephonyManager.SIM_STATE_PERM_DISABLED:
-                return Sim.STATE_LOCKED;
-            case TelephonyManager.SIM_STATE_LOADED:
-                return Sim.STATE_LOADED;
-            default:
-                return Sim.STATE_INVALID;
-        }
-    }
-
-    private static int getExtraSimState(Intent intent) {
-        return intent.getIntExtra(TelephonyManager.EXTRA_SIM_STATE, Sim.STATE_INVALID);
-    }
-
-    private static int getExtraSlotIndex(Intent intent) {
-        return intent.getIntExtra(
-                SubscriptionManager.EXTRA_SLOT_INDEX, MSimUtils.INVALID_SLOT_ID);
-    }
-
-    private static int getExtraSubscriptionIndex(Intent intent) {
-        return intent.getIntExtra(
-                SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, MSimUtils.INVALID_SUB_ID);
     }
 
     private static SmsManager getSmsManager(int slotId, int subId) {
@@ -902,39 +847,6 @@ public class SimAgent implements SimInterface {
                 return "REFRESH_COMPLETED";
             case Sim.ISIM_STATE_REMOVED:
                 return "SIM_REMOVED";
-            default:
-                return "INVALID";
-        }
-    }
-
-    private static String simStateToString(@Sim.State int state) {
-        switch (state) {
-            case Sim.STATE_UNKNOWN:
-                return "UNKNOWN";
-            case Sim.STATE_ABSENT:
-                return "ABSENT";
-            case Sim.STATE_PIN_REQUIRED:
-                return "PIN_REQUIRED";
-            case Sim.STATE_PUK_REQUIRED:
-                return "PUK_REQUIRED";
-            case Sim.STATE_NETWORK_LOCKED:
-                return "NETWORK_LOCKED";
-            case Sim.STATE_PERM_DISABLED:
-                return "PERM_DISABLED";
-            case Sim.STATE_READY:
-                return "READY";
-            case Sim.STATE_NOT_READY:
-                return "NOT_READY";
-            case Sim.STATE_CARD_IO_ERROR:
-                return "CARD_IO_ERROR";
-            case Sim.STATE_CARD_RESTRICTED:
-                return "CARD_RESTRICTED";
-            case Sim.STATE_LOCKED:
-                return "LOCKED";
-            case Sim.STATE_LOADED:
-                return "LOADED";
-            case Sim.STATE_PRESENT:
-                return "PRESENT";
             default:
                 return "INVALID";
         }

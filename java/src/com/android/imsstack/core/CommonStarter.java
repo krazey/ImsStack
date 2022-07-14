@@ -17,9 +17,7 @@ package com.android.imsstack.core;
 
 import android.content.Context;
 
-import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ImsPhoneProxyApi;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.enabler.aos.AosFactory;
@@ -30,11 +28,9 @@ import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
-import com.android.imsstack.util.SODConfig;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -116,29 +112,6 @@ public class CommonStarter {
 
     public boolean isJNIReady() {
         return mJNIReady;
-    }
-
-    public void deliverOperatorInfo(int slotId,
-            SODConfig.Operator operator, SODConfig.Sim sim, SODConfig.Device device,
-            SODConfig.SimProperties simProp) {
-        OperatorInfo.updateOperatorInfo(slotId, operator, sim, device, simProp);
-
-        OperatorInfo.showOperator(slotId);
-        OperatorInfo.showDevice();
-    }
-
-    public void deliverUpdateServiceInfo(int slotId,
-            SODConfig.Operator operator, SODConfig.Sim sim, SODConfig.Device device) {
-        OperatorInfo.updateServiceInfo(slotId, operator, sim, device);
-        OperatorInfo.showOperator(slotId);
-    }
-
-    public void deliverSimInfo(int slotId, SODConfig.Sim sim) {
-        OperatorInfo.updateSimInfo(slotId, sim);
-    }
-
-    public void deliverDDSInfo(int slotId, boolean dds) {
-        OperatorInfo.setDDSChanged(slotId, dds);
     }
 
     public void createAgents() {
@@ -260,52 +233,14 @@ public class CommonStarter {
         mCommonAgentReady = true;
     }
 
-    public void updateImsFeatures(Context context, int slotId, boolean notifyFeatureChanged) {
-        if (CapabilityConfigs.isVoNrEnabled(slotId)) {
-            if ("KR".equals(ImsProperties.TARGET_COUNTRY)) {
-                int nrUeCapability = ImsPhoneProxyApi.getNrUeCapability(slotId, 0/*use default*/);
-                Log.d(TAG, "NrUeCapability: 0x" + Integer.toHexString(nrUeCapability));
-                ImsUtils.setNrUeCapability(slotId, nrUeCapability);
-            } else {
-                if ("CN".equals(ImsProperties.TARGET_COUNTRY)) {
-                    int nrNetworkMode = ImsPhoneProxyApi.getNrNetworkMode(slotId,
-                            0 /*use default*/);
-                    Log.d(TAG, "NrNetworkMode: " + nrNetworkMode);
-                    ImsUtils.setNrNetworkMode(slotId, nrNetworkMode);
-                }
-
-                int ueCapabilityVoNr = ImsPhoneProxyApi.getUeCapabilityVoNr(slotId,
-                        0 /*use default*/);
-                Log.d(TAG, "UeCapabilityVoNr: " + ueCapabilityVoNr);
-                ImsUtils.setUeCapabilityVoNr(slotId, ueCapabilityVoNr);
-            }
-        }
-    }
-
     public void updateSystemConfigForBootup() {
         Log.i(TAG, "updateSystemConfigForBootup");
-        OperatorInfo.setSystemConfigForBootup();
-    }
-
-    public void updateSystemConfigOnServiceChanged(int slotId) {
-        Log.i(TAG, "updateSystemConfigOnServiceChanged(" + slotId + ")");
-        OperatorInfo.setSystemConfigForServiceFeature(slotId);
+        NativeLoader.setSystemConfigForBootup();
     }
 
     public void updateSystemConfigOnSimLoaded(int slotId) {
         Log.i(TAG, "updateSystemConfigOnSimLoaded(" + slotId + ")");
-        OperatorInfo.setSystemConfigForAllConfigurationChanged(slotId, false);
-    }
-
-    public void updateSystemConfigOnSimRemoved(int slotId) {
-        Log.i(TAG, "updateSystemConfigOnSimRemoved(" + slotId + ")");
-        OperatorInfo.setSystemConfigForAllConfigurationChanged(slotId, true);
-    }
-
-    public void updateSystemConfigOnDDSChanged(int slotId, boolean ddsChanged) {
-        Log.i(TAG, "updateSystemConfigOnDDSChanged(" + slotId + "/" + ddsChanged + ")");
-        OperatorInfo.setDDSChanged(slotId, ddsChanged);
-        OperatorInfo.setSystemConfigForDDSChanged(slotId, ddsChanged);
+        NativeLoader.setSystemConfigForAllConfigurationChanged(slotId, false);
     }
 
     private void notifyPackageReady(int slotId) {

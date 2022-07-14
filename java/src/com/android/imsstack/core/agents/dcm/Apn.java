@@ -208,6 +208,8 @@ public abstract class Apn extends Handler implements IApn {
         msg.what = EVENT_NOTIFY_DATA_STATE_CHANGED;
         msg.obj = new IDcNetWatcher.NotiObj(mType, EDataState.DATA_STATE_DISCONNECTED);
         handleMessage(msg);
+
+        removeCallbacksAndMessages(null);
     }
 
     @Override

@@ -1,19 +1,23 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20150614    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.imsservice.mmtel.base;
 
 import android.telecom.TelecomManager;
 
-import com.android.imsstack.core.ImsGlobal;
+import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Set;
@@ -54,12 +58,12 @@ public final class TtyModeTracker {
             logi("setTtyMode :: " + mTtyMode + " >> " + ttyMode);
             mTtyMode = ttyMode;
 
-            ImsGlobal.postAndRunTask(new Runnable() {
+            AppContext.runTask(new Runnable() {
                 @Override
                 public void run() {
                     onTtyModeChanged();
                 }
-            });
+            }, 0);
         }
     }
 

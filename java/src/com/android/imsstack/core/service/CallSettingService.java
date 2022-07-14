@@ -29,7 +29,6 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
@@ -39,7 +38,6 @@ import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.DBUtils;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -61,7 +59,6 @@ public class CallSettingService implements ICallSettingService {
     private ContentObserver mVoWIFIRoamingSetObserver = null;
     private ContentObserver mDataRoamingSettingObserver = null;
     private ContentObserver mRttModeSettingObserver = null;
-    private ContentObserver mVoWIFINetworkPreferenceObserver = null;
     private RegistrantList mVoLTESettingRegistrants = new RegistrantList();
     private RegistrantList mVoWIFISettingRegistrants = new RegistrantList();
     private RegistrantList mVideoCallSettingRegistrants = new RegistrantList();
@@ -72,7 +69,6 @@ public class CallSettingService implements ICallSettingService {
     private RegistrantList mMobileDataSettingRegistrants = new RegistrantList();
     private RegistrantList mDataRoamingSettingRegistrants = new RegistrantList();
     private RegistrantList mRttModeSettingRegistrants = new RegistrantList();
-    private RegistrantList mVoWIFINetworkPreferenceRegistrants = new RegistrantList();
     private IVoLteService mVoLteService = null;
     private boolean mVoLTESet = false;
     private boolean mVoWIFISet = false;
@@ -83,7 +79,6 @@ public class CallSettingService implements ICallSettingService {
     private boolean mMobileDataEnabled = false;
     private boolean mDataRoamingEnabled = false;
     private int mVoWIFIPreference = -1; // 0: wifi only /1: cellular pref. /2: wifi pref.
-    private int mVoWIFINetworkPreference = -1; // 0: wifi only /1: cellular pref. /2: wifi pref.
     private int mNetworkMode = -1;
     private int mRttMode = -1;
     public CallSettingService() {
@@ -126,8 +121,6 @@ public class CallSettingService implements ICallSettingService {
         mDataRoamingSettingObserver = null;
         unregisterObserver(mRttModeSettingObserver);
         mRttModeSettingObserver = null;
-        unregisterObserver(mVoWIFINetworkPreferenceObserver);
-        mVoWIFINetworkPreferenceObserver = null;
     }
 
     @Override
@@ -308,16 +301,6 @@ public class CallSettingService implements ICallSettingService {
     }
 
     @Override
-    public void registerForVoWIFINetworkPreferenceChanged(Handler h, int what, Object obj) {
-        if (h != null) {
-            mVoWIFINetworkPreferenceRegistrants.add(new Registrant(h, what, obj));
-        }
-
-        mVoWIFINetworkPreference = getVoWIFINetworkPreference();
-        registerVoWIFINetworkPreferenceObserver();
-    }
-
-    @Override
     public void unregisterForMobileDataSettingChanged(Handler h) {
         if (h != null) {
             mMobileDataSettingRegistrants.remove(h);
@@ -434,18 +417,6 @@ public class CallSettingService implements ICallSettingService {
         if (mRttModeSettingRegistrants.size() == 0) {
             unregisterObserver(mRttModeSettingObserver);
             mRttModeSettingObserver = null;
-        }
-    }
-
-    @Override
-    public void unregisterForVoWIFINetworkPreferenceChanged(Handler h) {
-        if (h != null) {
-            mVoWIFINetworkPreferenceRegistrants.remove(h);
-        }
-
-        if (mVoWIFINetworkPreferenceRegistrants.size() == 0) {
-            unregisterObserver(mVoWIFINetworkPreferenceObserver);
-            mVoWIFINetworkPreferenceObserver = null;
         }
     }
 
@@ -718,35 +689,6 @@ public class CallSettingService implements ICallSettingService {
         onRttModeSettingChanged();
     }
 
-    private void registerVoWIFINetworkPreferenceObserver() {
-        ImsLog.d(getSlotId(), "");
-
-        if (mVoWIFINetworkPreferenceObserver != null) {
-            return;
-        }
-
-        mVoWIFINetworkPreferenceObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean bChange) {
-                super.onChange(bChange);
-                onVoWIFINetworkPreferenceChanged();
-            }
-        };
-
-        Uri uri = getCarrierDBUriForVoWIFI();
-
-        if (uri != null) {
-            try {
-                getContext().getContentResolver().registerContentObserver(uri, true,
-                        mVoWIFINetworkPreferenceObserver);
-            } catch (Exception e) {
-                ImsLog.e(getSlotId(), e.toString());
-            }
-        }
-
-        onVoWIFINetworkPreferenceChanged();
-    }
-
     private void unregisterObserver(ContentObserver co) {
         SettingsUtils.unregisterObserver(getContext().getContentResolver(), co);
     }
@@ -754,10 +696,6 @@ public class CallSettingService implements ICallSettingService {
     private boolean getVoLTERoamingSetForKR() {
         if (ImsConstants.USE_GOOGLE_NATIVE_APPS) {
             return isVoLTEEnabled();
-        }
-
-        if (OperatorInfo.isKrOpen()) {
-            return true;
         }
 
         ContentResolver cr = getContext().getContentResolver();
@@ -788,9 +726,7 @@ public class CallSettingService implements ICallSettingService {
         }
 
         boolean bVolteEnable = false;
-        int hdVoiceSetting = SettingsUtils.CallSettings.getInt(getContext(),
-                SettingsUtils.CallSettings.KEY_KT_HD_VOICE_SETTING,
-                SettingsUtils.VALUE_NOT_INITIALIZED);
+        int hdVoiceSetting = SettingsUtils.VALUE_NOT_INITIALIZED;
         boolean bVolteSet = (hdVoiceSetting == 1
                 || hdVoiceSetting == SettingsUtils.VALUE_NOT_INITIALIZED);
 
@@ -810,29 +746,6 @@ public class CallSettingService implements ICallSettingService {
         }
 
         return SettingsUtils.getWFCImsMode(getContext(), getSlotId());
-    }
-
-    private Uri getCarrierDBUriForVoWIFI() {
-        if (ImsGlobal.isOperator(getSlotId(), "SPR")) {
-            return Uri.parse("content://com.android.imsstack.node/ims_node");
-        }
-
-        return null;
-    }
-
-    private int getVoWIFINetworkPreference() {
-        Uri uri = getCarrierDBUriForVoWIFI();
-
-        if (uri != null) {
-            String selection = "key = \"MobileNetworks_NetworkPreference_Home\"";
-            String networkPreference = DBUtils.CP.getString(getContext().getContentResolver(),
-                                    uri, selection, "value", "WIFI");
-
-            return ("CELL".equalsIgnoreCase(networkPreference)
-                    ? ImsEventDef.MODE_CELLULAR_PREFERRED : ImsEventDef.MODE_WFC_PREFERRED);
-        }
-
-        return ImsEventDef.MODE_WFC_PREFERRED;
     }
 
     private String getVoWIFIAddressID() {
@@ -1109,19 +1022,6 @@ public class CallSettingService implements ICallSettingService {
         }
     }
 
-    private void notifySystemEventForVoWIFINetworkPreferenceChanged() {
-        if (mVoWIFINetworkPreferenceObserver == null) {
-            return;
-        }
-
-        ISystem system = SystemInterface.getInstance().getSystem(getSlotId());
-
-        if (system != null) {
-            system.notifyEvent(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED,
-                    isVoWIFIEnabled() ? 1 : 0, mVoWIFINetworkPreference);
-        }
-    }
-
     private void onMobileDataSettingChanged() {
         boolean enabled = isMobileDataEnabled();
 
@@ -1305,18 +1205,6 @@ public class CallSettingService implements ICallSettingService {
         }
     }
 
-    private void onVoWIFINetworkPreferenceChanged() {
-        int voWifiPreference = getVoWIFINetworkPreference();
-
-        ImsLog.d(getSlotId(), "VoWIFINetworkPreference: "
-                + mVoWIFINetworkPreference + " >> " + voWifiPreference);
-
-        if (mVoWIFINetworkPreference != voWifiPreference) {
-            mVoWIFINetworkPreference = voWifiPreference;
-            notifySystemEventForVoWIFINetworkPreferenceChanged();
-        }
-    }
-
     private void updateForVoLTESetting() {
         if (ImsGlobal.isOperator(getSlotId(), "KT") || ImsGlobal.isOperator(getSlotId(), "SKT")) {
             boolean voLteSet = false;
@@ -1382,10 +1270,7 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private boolean isVoWIFIRoamingRequired() {
-        if (ImsGlobal.isOperator(getSlotId(), "DTAG")
-                || ImsGlobal.isRegion(getSlotId(), "SCA")) {
-            return true;
-        }
+        // TODO_CONFIG
         return false;
     }
 
@@ -1404,11 +1289,7 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private boolean isKTRoamingUISpec_v1_3_6_applied() {
-        if (OperatorInfo.isKrOpen()) {
-            return false;
-        }
-
-        return true;
+        return false;
     }
 
     private Context getContext() {

@@ -1,8 +1,21 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.core.carrier;
 
 import android.text.TextUtils;
-
-import com.android.imsstack.util.ImsProperties;
 
 /**
  * This class provides the carrier identifier conversion from AOSP carrier-id to IMS operators.
@@ -87,12 +100,42 @@ public final class ImsCarrierResolver {
         }
     }
 
+    /**
+     * Returns the Carrier object that contains the operator/country information as string
+     * from the given SimCarrierId.
+     */
+    public static Carrier getCarrierFromCarrierId(SimCarrierId scid) {
+        Carrier carrier = new Carrier(scid.getCarrierId(), scid.getSpecificCarrierId());
+
+        if (setTestSim(carrier, scid.getCarrierId())) {
+            carrier.setCountry("COM");
+        } else if (setOperatorForKR(carrier, scid.getCarrierId())) {
+            carrier.setCountry("KR");
+        } else if (setOperatorForJP(carrier, scid.getCarrierId())) {
+            carrier.setCountry("JP");
+        } else if (setOperatorForCA(carrier, scid.getCarrierId())) {
+            carrier.setCountry("CA");
+        } else if (setOperatorForUS(carrier, scid.getCarrierId(), scid.getSpecificCarrierId())) {
+            carrier.setCountry("US");
+        } else if (setOperator(carrier, scid.getCarrierId(), scid.getSpecificCarrierId())) {
+            // no-op
+        } else {
+            carrier.setCountry("COM");
+        }
+
+        return carrier;
+    }
+
+    /**
+     * Returns the Carrier object that contains the operator/country information as string
+     * from the given information.
+     */
     public static Carrier getCarrierFromCarrierId(int slotId, int subId,
             int carrierId, int specificCarrierId) {
         Carrier carrier = new Carrier(carrierId, specificCarrierId);
 
         if (setTestSim(carrier, carrierId)) {
-            carrier.setCountry("US");
+            carrier.setCountry("COM");
         } else if (setOperatorForKR(carrier, carrierId)) {
             carrier.setCountry("KR");
         } else if (setOperatorForJP(carrier, carrierId)) {
@@ -104,7 +147,7 @@ public final class ImsCarrierResolver {
         } else if (setOperator(carrier, carrierId, specificCarrierId)) {
             // no-op
         } else {
-            carrier.setCountry(ImsProperties.TARGET_COUNTRY);
+            carrier.setCountry("COM");
         }
 
         return carrier;
@@ -576,8 +619,13 @@ public final class ImsCarrierResolver {
     }
 
     private static boolean setOperator(Carrier carrier, int carrierId, int specificCarrierId) {
-        carrier.setOperator("OPEN");
-        carrier.setCountry("US");
+        if (carrierId == SimCarrierId.UNKNOWN_ID) {
+            carrier.setOperator("OPEN");
+            carrier.setCountry("COM");
+        } else {
+            carrier.setOperator(String.valueOf(carrierId));
+            carrier.setCountry(String.valueOf(specificCarrierId));
+        }
         return true;
     }
 
@@ -585,7 +633,7 @@ public final class ImsCarrierResolver {
         switch (carrierId) {
             case 1911: // Test Network, Used by GSM test equipment - 00101
                 carrier.setTestSim(true);
-                carrier.setOperator("OPEN");
+                carrier.setOperator("TEST");
                 break;
             default:
                 return false;

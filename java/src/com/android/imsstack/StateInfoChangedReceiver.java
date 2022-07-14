@@ -20,11 +20,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.telephony.CarrierConfigManager;
-import android.telephony.TelephonyManager;
 
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.Log;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.telephony.TelephonyIntents;
 
 public class StateInfoChangedReceiver {
@@ -44,11 +42,6 @@ public class StateInfoChangedReceiver {
         public void register(Context c) {
             IntentFilter filter = new IntentFilter();
             filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-
-            if (MSimUtils.isMultiSimEnabled()) {
-                filter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
-            }
-
             filter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
 
             c.registerReceiver(this, filter, null,
@@ -66,8 +59,6 @@ public class StateInfoChangedReceiver {
             String action = intent.getAction();
 
             if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
-                mObserver.notifyStateInfoChanged(intent);
-            } else if (TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED.equals(action)) {
                 mObserver.notifyStateInfoChanged(intent);
             } else if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED.equals(action)) {
                 mObserver.notifyStateInfoChanged(intent);

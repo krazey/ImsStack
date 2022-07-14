@@ -11,9 +11,6 @@
 
 package com.android.imsstack.enabler.uce.impl.configuration;
 
-import android.telephony.CarrierConfigManager;
-
-import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -28,10 +25,6 @@ public final class UceConfiguration {
     }
 
     public void init() {
-        if (OperatorInfo.isSlotIdValid(mSlotId) != true) {
-            ImsLog.w("init() - Invalid SlotId(" + mSlotId + ")");
-            return;
-        }
         ConfigInterface config = AgentFactory.getInstance().getAgent(
                 ConfigInterface.class, mSlotId);
 
