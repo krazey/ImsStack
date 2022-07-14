@@ -19,11 +19,11 @@ package com.android.imsstack.core;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.ConfigInterface;
-import com.android.imsstack.core.carrier.CarrierCodeLoader;
+import com.android.imsstack.core.carrier.CarrierInfo;
+import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.MSimUtils;
-import com.android.imsstack.util.SimCarrierId;
 
 public final class ConfigLoader {
 
@@ -33,7 +33,7 @@ public final class ConfigLoader {
 
         if (ca != null) {
             int subId = MSimUtils.getSubId(slotId);
-            SimCarrierId id = CarrierCodeLoader.getCarrierIdFromSim(slotId);
+            SimCarrierId id = CarrierInfo.getCarrierIdFromSim(slotId);
 
             ca.updateCarrierConfig(subId, id);
 

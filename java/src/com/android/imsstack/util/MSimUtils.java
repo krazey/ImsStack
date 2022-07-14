@@ -113,7 +113,48 @@ public final class MSimUtils {
 
     /** sim state */
     public static String getSimState(int slotId) {
-        return ImsExtApi.Uicc.getSimState(slotId);
+        TelephonyManager tm = AppContext.getTelephonyManager();
+
+        if (tm == null) {
+            return "UNKNOWN";
+        }
+
+        int simState = tm.getSimState(slotId);
+
+        if (simState == TelephonyManager.SIM_STATE_READY) {
+            int subId = MSimUtils.getSubId(slotId);
+            tm = AppContext.getTelephonyManager(subId);
+
+            if (tm != null) {
+                int simAppState = tm.getSimApplicationState();
+
+                if (simAppState == TelephonyManager.SIM_STATE_LOADED) {
+                    simState = TelephonyManager.SIM_STATE_LOADED;
+                }
+            }
+        }
+
+        switch (simState) {
+            case TelephonyManager.SIM_STATE_ABSENT:
+                return "ABSENT";
+            case TelephonyManager.SIM_STATE_NOT_READY:
+                return "NOT_READY";
+            case TelephonyManager.SIM_STATE_LOADED:
+                return "LOADED";
+            case TelephonyManager.SIM_STATE_READY:
+                return "READY";
+            case TelephonyManager.SIM_STATE_PIN_REQUIRED: // FALL-THROUGH
+            case TelephonyManager.SIM_STATE_PUK_REQUIRED: // FALL-THROUGH
+            case TelephonyManager.SIM_STATE_NETWORK_LOCKED: // FALL-THROUGH
+            case TelephonyManager.SIM_STATE_PERM_DISABLED:
+                return "LOCKED";
+            case TelephonyManager.SIM_STATE_CARD_IO_ERROR:
+                return "CARD_IO_ERROR";
+            case TelephonyManager.SIM_STATE_CARD_RESTRICTED:
+                return "CARD_RESTRICTED";
+            default:
+                return "UNKNOWN";
+        }
     }
 
     /** slot id */

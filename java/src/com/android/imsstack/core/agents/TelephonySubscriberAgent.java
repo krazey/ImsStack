@@ -26,7 +26,6 @@ import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPITelephonySubscriber;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.ImsExtApi;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 
@@ -325,7 +324,7 @@ public class TelephonySubscriberAgent implements ITelephonySubscriber,
 
     @Override
     public String getEmergencyNumberListFromSIM4Sys() {
-        return ImsExtApi.Uicc.getEccList(mSlotId);
+        return "";
     }
 
     @Override

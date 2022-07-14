@@ -22,10 +22,6 @@
     android:versionName="1.0.01">
 
     <!-- ims permission -->
-    <permission android:name="com.android.imsstack.permission.READ_IMS"
-        android:protectionLevel="signatureOrSystem" />
-    <permission android:name="com.android.imsstack.permission.WRITE_IMS"
-        android:protectionLevel="signatureOrSystem" />
     <permission android:name="com.android.imsstack.permission.IMS"
         android:protectionLevel="signatureOrSystem" />
 
@@ -50,9 +46,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-
-    <uses-permission android:name="com.android.imsstack.permission.READ_IMS"/>
-    <uses-permission android:name="com.android.imsstack.permission.WRITE_IMS"/>
 
     <!--  Application -->
     <application
@@ -118,16 +111,6 @@
                 <action android:name="android.telephony.ims.ImsService"/>
             </intent-filter>
         </service>
-
-        <!-- Provider -->
-        <provider
-            android:name=".provider.SmartConfigProvider"
-            android:authorities="com.android.imsstack.provider.smart_configuration"
-            android:multiprocess="false"
-            android:readPermission="com.android.imsstack.permission.READ_IMS"
-            android:syncable="false"
-            android:writePermission="com.android.imsstack.permission.WRITE_IMS"
-            android:singleUser="true" />
     </application>
 
     <uses-sdk android:minSdkVersion="31" />

@@ -17,7 +17,11 @@
 package com.android.imsstack.core.agents;
 
 import android.annotation.IntDef;
+import android.content.Intent;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+
+import com.android.imsstack.util.MSimUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -148,6 +152,119 @@ public interface Sim {
          * Notifies the application that ISIM state is changed.
          */
         default void onIsimStateChanged() {
+        }
+    }
+
+    /**
+     * Returns the SIM state of this interface represented by
+     * the given telephony SIM card state.
+     *
+     * @param cardState The telephony SIM card state.
+     * @return A SIM state.
+     */
+    static @Sim.State int getSimCardStateFromTelephonySimState(int cardState) {
+        int simCardState = getSimStateFromTelephonySimState(cardState);
+
+        switch (simCardState) {
+            case Sim.STATE_UNKNOWN:
+                // If the card state is unknown, it is handled as an ABSENT.
+                return Sim.STATE_ABSENT;
+            case Sim.STATE_ABSENT: // FALL-THROUGH
+            case Sim.STATE_PRESENT:
+                return simCardState;
+            default:
+                return Sim.STATE_INVALID;
+        }
+    }
+
+    /**
+     * Returns the SIM state of this interface represented by
+     * the given telephony SIM application state.
+     *
+     * @param state The telephony SIM application state.
+     * @return A SIM state.
+     */
+    static @Sim.State int getSimStateFromTelephonySimState(int state) {
+        switch (state) {
+            case TelephonyManager.SIM_STATE_UNKNOWN: // FALL-THROUGH
+            case TelephonyManager.SIM_STATE_CARD_IO_ERROR: // FALL-THROUGH
+            case TelephonyManager.SIM_STATE_CARD_RESTRICTED:
+                return Sim.STATE_UNKNOWN;
+            case TelephonyManager.SIM_STATE_ABSENT:
+                return Sim.STATE_ABSENT;
+            case TelephonyManager.SIM_STATE_PRESENT:
+                return Sim.STATE_PRESENT;
+            case TelephonyManager.SIM_STATE_NOT_READY: // FALL-THROUGH
+            case TelephonyManager.SIM_STATE_READY:
+                return Sim.STATE_NOT_READY;
+            case TelephonyManager.SIM_STATE_PIN_REQUIRED: // FALL-THROUGH
+            case TelephonyManager.SIM_STATE_PUK_REQUIRED: // FALL-THROUGH
+            case TelephonyManager.SIM_STATE_NETWORK_LOCKED: // FALL-THROUGH
+            case TelephonyManager.SIM_STATE_PERM_DISABLED:
+                return Sim.STATE_LOCKED;
+            case TelephonyManager.SIM_STATE_LOADED:
+                return Sim.STATE_LOADED;
+            default:
+                return Sim.STATE_INVALID;
+        }
+    }
+
+    /** Gets the SIM state from the given intent. */
+    static int getExtraSimState(Intent intent) {
+        return intent.getIntExtra(TelephonyManager.EXTRA_SIM_STATE, Sim.STATE_INVALID);
+    }
+
+    /** Gets the slot index from the given intent. */
+    static int getExtraSlotIndex(Intent intent) {
+        return getExtraSlotIndex(intent, MSimUtils.INVALID_SLOT_ID);
+    }
+
+    /** Gets the slot index from the given intent. */
+    static int getExtraSlotIndex(Intent intent, int defaultValue) {
+        return intent.getIntExtra(SubscriptionManager.EXTRA_SLOT_INDEX, defaultValue);
+    }
+
+    /** Gets the subscription index from the given intent. */
+    static int getExtraSubscriptionIndex(Intent intent) {
+        return getExtraSubscriptionIndex(intent, MSimUtils.INVALID_SUB_ID);
+    }
+
+    /** Gets the subscription index from the given intent. */
+    static int getExtraSubscriptionIndex(Intent intent, int defaultValue) {
+        return intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, defaultValue);
+    }
+
+    /** Returns a string represented by the given SIM state. */
+    static String stateToString(@Sim.State int state) {
+        switch (state) {
+            case Sim.STATE_UNKNOWN:
+                return "UNKNOWN";
+            case Sim.STATE_ABSENT:
+                return "ABSENT";
+            case Sim.STATE_PIN_REQUIRED:
+                return "PIN_REQUIRED";
+            case Sim.STATE_PUK_REQUIRED:
+                return "PUK_REQUIRED";
+            case Sim.STATE_NETWORK_LOCKED:
+                return "NETWORK_LOCKED";
+            case Sim.STATE_PERM_DISABLED:
+                return "PERM_DISABLED";
+            case Sim.STATE_READY:
+                return "READY";
+            case Sim.STATE_NOT_READY:
+                return "NOT_READY";
+            case Sim.STATE_CARD_IO_ERROR:
+                return "CARD_IO_ERROR";
+            case Sim.STATE_CARD_RESTRICTED:
+                return "CARD_RESTRICTED";
+            case Sim.STATE_LOCKED:
+                return "LOCKED";
+            case Sim.STATE_LOADED:
+                return "LOADED";
+            case Sim.STATE_PRESENT:
+                return "PRESENT";
+            default:
+                return "INVALID";
         }
     }
 }

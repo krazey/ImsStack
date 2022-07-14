@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.core;
 
 import android.content.Context;
@@ -11,10 +26,11 @@ import com.android.ims.ImsManager;
 import com.android.imsstack.test.IImsTestMode;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.CarrierConfigUtils;
+import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.ImsUtils;
-import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
-import com.android.imsstack.util.SODConfig;
+
+import java.util.Objects;
 
 public class ImsGlobal extends ContextWrapper {
     private static ImsGlobal sImsGlobal = null;
@@ -77,8 +93,6 @@ public class ImsGlobal extends ContextWrapper {
 
         if ((itm != null) && (itm.isCallOverWifiEnabled() || itm.isGenericTestMode())) {
             return true;
-        } else if (OperatorInfo.isEnablerTypeForNonOperator(slotId) || MSimUtils.isMultiImsEnabled()) {
-            return (OperatorInfo.isSupportVolte(slotId));
         }
 
         return (context == null) ? false : ImsUtils.isVoLteEnabledByPlatform(context, slotId);
@@ -89,8 +103,6 @@ public class ImsGlobal extends ContextWrapper {
 
         if ((itm != null) && (itm.isCallOverWifiEnabled() || itm.isGenericTestMode())) {
             return true;
-        } else if (OperatorInfo.isEnablerTypeForNonOperator(slotId) || MSimUtils.isMultiImsEnabled()) {
-            return (OperatorInfo.isSupportVt(slotId));
         }
 
         return (context == null) ? false : ImsUtils.isVtEnabledByPlatform(context, slotId);
@@ -101,8 +113,6 @@ public class ImsGlobal extends ContextWrapper {
 
         if ((itm != null) && (itm.isCallOverWifiEnabled() || itm.isGenericTestMode())) {
             return true;
-        } else if (OperatorInfo.isEnablerTypeForNonOperator(slotId) || MSimUtils.isMultiImsEnabled()) {
-            return (OperatorInfo.isSupportVowifi(slotId));
         }
 
         return (context == null) ? false : ImsUtils.isWfcEnabledByPlatform(context, slotId);
@@ -114,27 +124,23 @@ public class ImsGlobal extends ContextWrapper {
 
     // OPERATOR_COUNTRY {
     public static boolean equalsOperator(String op1, String op2) {
-        return SODConfig.equalsOperator(op1, op2);
+        return Objects.equals(op1, op2);
     }
 
     public static boolean equalsCountry(String co1, String co2) {
-        return SODConfig.equalsCountry(co1, co2);
+        return Objects.equals(co1, co2);
     }
 
     public static boolean equalsOperatorCountry(String op1, String co1, String op2, String co2) {
-        return SODConfig.equalsOperatorCountry(op1, co1, op2, co2);
+        return equalsOperator(op1, op2) && equalsCountry(co1, co2);
     }
 
     public static String getOperator(int slotId) {
-        return OperatorInfo.getOperator(slotId);
+        return ImsProperties.getSysSimOperator(slotId);
     }
 
     public static String getCountry(int slotId) {
-        return OperatorInfo.getCountry(slotId);
-    }
-
-    public static String getRegion(int slotId) {
-        return OperatorInfo.getRegion(slotId);
+        return ImsProperties.getSysSimCountry(slotId);
     }
 
     public static boolean isOperator(int slotId, String operator) {
@@ -143,10 +149,6 @@ public class ImsGlobal extends ContextWrapper {
 
     public static boolean isCountry(int slotId, String country) {
         return getCountry(slotId).equals(country);
-    }
-
-    public static boolean isRegion(int slotId, String region) {
-        return getRegion(slotId).equals(region);
     }
 
     public static boolean isOperatorCountry(int slotId, String operator, String country) {

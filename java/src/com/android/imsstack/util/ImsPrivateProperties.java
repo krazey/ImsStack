@@ -193,20 +193,6 @@ public final class ImsPrivateProperties {
          */
         public static final String KEY_DEVICE_SW_VERSION = "device_sw_version";
         /**
-         * Keep the last boot count to identify whether IMS is started by boot-up.
-         * Value: int
-         * SlotId: always 0
-         */
-        public static final String KEY_LAST_BOOT_COUNT = "last_boot_count";
-        /**
-         * keep the old DB(smart_configuration.db) version
-         * Value : int
-         * SlotId : always 0
-         */
-        public static final String KEY_DB_SMART_CONFIGURATION_OLD_VERSION
-                = "db_smart_configuration_old_version";
-
-        /**
          * A flag specifying whether IMS is disabled or not.
          * Value : boolean (true / false)
          */

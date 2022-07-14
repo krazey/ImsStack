@@ -25,7 +25,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.android.imsstack.R;
-import com.android.imsstack.core.OperatorInfo;
+import com.android.imsstack.core.carrier.CarrierInfo;
+import com.android.imsstack.core.carrier.ImsCarrierResolver;
+import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 
@@ -109,11 +111,12 @@ public class ImsConfigMenu extends PreferenceActivity {
         int maxSimSlot = MSimUtils.getMaxSimSlot();
 
         for (int i = 0; i < maxSimSlot; i++) {
-            String operator = OperatorInfo.getOperator(i);
+            SimCarrierId cid = CarrierInfo.getInstance().getCarrierId(i);
 
-            if (!operator.isEmpty()) {
-                mSimList.add("SIM" + (i + 1) + " - "
-                        + operator + " / " + OperatorInfo.getCountry(i));
+            if (cid != null) {
+                ImsCarrierResolver.Carrier c = ImsCarrierResolver.getCarrierFromCarrierId(cid);
+
+                mSimList.add("SIM" + (i + 1) + " - " + c.getOperator() + " / " + c.getCountry());
             } else {
                 mSimList.add("SIM" + (i + 1));
             }
