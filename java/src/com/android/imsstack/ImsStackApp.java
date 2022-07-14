@@ -33,7 +33,6 @@ import com.android.imsstack.core.carrier.ImsCarrierResolver;
 import com.android.imsstack.imsservice.ImsServiceController;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
@@ -194,8 +193,8 @@ public class ImsStackApp extends Application {
             }
 
             //// Test-Purpose {
-            String simOp = ImsProperties.getSysSimOperator(slotId);
-            String simCo = ImsProperties.getSysSimCountry(slotId);
+            String simOp = ImsPrivateProperties.getSimOperator(slotId);
+            String simCo = ImsPrivateProperties.getSimCountry(slotId);
 
             if (simOp.isEmpty() || simCo.isEmpty()) {
                 CarrierInfo.setSimOperatorCountry("OPEN", "", "COM", slotId);

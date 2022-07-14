@@ -1,27 +1,27 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20150531    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.enabler.mtc.telephony;
 
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.ICallStateTracker;
-import com.android.imsstack.test.IImsTestMode;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsProperties;
 
 public final class TelephonyCallStateRegistry {
     /**
@@ -45,11 +45,6 @@ public final class TelephonyCallStateRegistry {
 
         if (ImsGlobal.isOperator(slotId, "VZW") || ImsGlobal.isOperator(slotId, "SPR")) {
             mNotifications |= CALL_STATE_FOR_RIL;
-        }
-
-        if (ImsGlobal.isOperator(slotId, "VZW")
-            && ImsProperties.isChipVendorMtk()) {
-            mNotifications |= CALL_STATE_IGNORE_CS_RETRY_FOR_RIL;
         }
 
         // Initialize the call state for RIL(modem)

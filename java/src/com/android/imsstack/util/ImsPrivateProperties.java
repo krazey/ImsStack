@@ -25,6 +25,38 @@ import java.util.Locale;
  * It's generally used by hidden menu.
  */
 public final class ImsPrivateProperties {
+    /** Returns the SIM country string. */
+    public static String getSimCountry(int slotId) {
+        try {
+            return Persistent.get(AppContext.getInstance(),
+                    Persistent.KEY_SIM_COUNTRY, "", slotId);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return "";
+        }
+    }
+
+    /** Returns the SIM operator string. */
+    public static String getSimOperator(int slotId) {
+        try {
+            return Persistent.get(AppContext.getInstance(),
+                    Persistent.KEY_SIM_OPERATOR, "", slotId);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return "";
+        }
+    }
+
+    /** Returns the SIM operator-sub string. */
+    public static String getSimOperatorSub(int slotId) {
+        try {
+            return Persistent.get(AppContext.getInstance(),
+                    Persistent.KEY_SIM_OPERATOR_SUB, "", slotId);
+        } catch (Throwable t) {
+            return "";
+        }
+    }
+
     public static class Ephemeral {
         /**
          * Codec information during IMS call.

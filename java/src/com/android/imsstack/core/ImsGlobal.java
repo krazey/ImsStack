@@ -23,10 +23,12 @@ import android.os.Looper;
 import android.telephony.CarrierConfigManager;
 
 import com.android.ims.ImsManager;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.test.IImsTestMode;
 import com.android.imsstack.test.ImsTestMode;
-import com.android.imsstack.util.CarrierConfigUtils;
-import com.android.imsstack.util.ImsProperties;
+import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MessageExecutor;
 
@@ -66,8 +68,11 @@ public class ImsGlobal extends ContextWrapper {
     }
 
     public static boolean isVoLteProvisioningRequired(Context context, int slotId) {
-        return CarrierConfigUtils.getBooleanForSlot(
-                CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, slotId);
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, slotId);
+        CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+        return cc != null && cc.getBoolean(
+                CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL);
     }
 
     public static boolean isVtProvisioningRequired(Context context, int slotId) {
@@ -136,11 +141,11 @@ public class ImsGlobal extends ContextWrapper {
     }
 
     public static String getOperator(int slotId) {
-        return ImsProperties.getSysSimOperator(slotId);
+        return ImsPrivateProperties.getSimOperator(slotId);
     }
 
     public static String getCountry(int slotId) {
-        return ImsProperties.getSysSimCountry(slotId);
+        return ImsPrivateProperties.getSimCountry(slotId);
     }
 
     public static boolean isOperator(int slotId, String operator) {

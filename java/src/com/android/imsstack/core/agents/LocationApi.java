@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.util;
+package com.android.imsstack.core.agents;
 
 import android.content.ContentResolver;
 import android.location.Criteria;
@@ -24,6 +24,8 @@ import android.location.LocationRequest;
 import android.os.Looper;
 import android.util.ArraySet;
 
+import com.android.imsstack.core.SettingsUtils;
+import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Set;
@@ -35,8 +37,8 @@ public final class LocationApi {
     public static final String GPS_PROVIDER = LocationManager.GPS_PROVIDER;
     public static final String NETWORK_PROVIDER = LocationManager.NETWORK_PROVIDER;
     public static final String FUSED_PROVIDER = LocationManager.FUSED_PROVIDER;
-    public static final String PROVIDERS_CHANGED_ACTION
-            = LocationManager.PROVIDERS_CHANGED_ACTION;
+    public static final String PROVIDERS_CHANGED_ACTION =
+            LocationManager.PROVIDERS_CHANGED_ACTION;
 
     public static final int FLAG_NONE = 0x00000000;
     // The location information will be obtained by IMS Service (Location Service).
@@ -45,9 +47,10 @@ public final class LocationApi {
     // then it will obtain the location information from LocationManager directly.
     public static final int FLAG_SELECT_LOCATION_SCHEME_BY_CURRENT_USER = 0x00000002;
 
-    public static interface Listener extends LocationListener {
-        // Wrapper interface for LocationListener
-        public void onServiceDisconnected();
+    /** Wrapper interface for LocationListener */
+    public interface Listener extends LocationListener {
+        /** Notifies the application that the service is disconnected. */
+        void onServiceDisconnected();
     }
 
     // It indicates that Location API is ready to use.
@@ -64,6 +67,7 @@ public final class LocationApi {
     /* package */ LocationApi() {
     }
 
+    /** Returns the LocationApi instance. */
     public static LocationApi getInstance() {
         if (sLocationApi == null) {
             sLocationApi = new LocationApi();
@@ -320,10 +324,9 @@ public final class LocationApi {
     }
 
     private class ListenerPool {
-        private Set<LocationApi.Listener> mListeners
-                = new ArraySet<LocationApi.Listener>();
+        private Set<LocationApi.Listener> mListeners = new ArraySet<LocationApi.Listener>();
 
-        public ListenerPool() {
+        ListenerPool() {
         }
 
         public void add(LocationApi.Listener listener) {

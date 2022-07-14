@@ -40,7 +40,6 @@ import com.android.imsstack.core.agents.internal.PhoneStateEvents;
 import com.android.imsstack.core.agents.internal.PhoneStateNotifier;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.MSimUtils;
 
 import java.util.List;
@@ -328,17 +327,6 @@ public final class PhoneStateAgent implements IPhoneState,
         int subId = MSimUtils.getSubId(slotId);
 
         listenForSubscriptionChanged(subId);
-
-        if (ImsProperties.isChipVendorMtk()) {
-            ImsLog.i(mSlotId, "Notify again ServiceState after SIM loaded");
-
-            setServiceStateAfterSimLoad(subId);
-
-            ServiceState serviceState = mPhoneStateListener.getServiceState();
-            if (serviceState != null) {
-                notifyServiceState(serviceState);
-            }
-        }
     }
 
     private void setServiceStateAfterSimLoad(int subId) {

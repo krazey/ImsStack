@@ -19,6 +19,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Process;
+import android.os.SystemProperties;
 
 import com.android.ims.ImsManager;
 
@@ -47,8 +48,6 @@ public final class ImsUtils {
     private static final String KEY_VT_AVAIL_OVR = "persist.dbg.vt_avail_ovr";
     private static final String KEY_WFC_AVAIL_OVR = "persist.dbg.wfc_avail_ovr";
 
-    /** Service capabilities from device configuration. */
-    private static ServiceCaps sServiceCapsByDeviceConfig = null;
     /**
      * CACHE_FOR_SERVICE_CAPS
      * Service capabilities from the previous (SIM's) carrier configuration.
@@ -148,28 +147,6 @@ public final class ImsUtils {
         return true;
     }
 
-    /**
-     * In operator branded device, if VoLTE service SHOULD be always enabled,
-     * (It means that re-start (stop/start) of VoLTE service is not supported)
-     * this method SHOULD return false. Otherwise, return true.
-     */
-    public static boolean isVoLteHotswapSupported() {
-        String op = ImsProperties.TARGET_OPERATOR;
-        String co = ImsProperties.TARGET_COUNTRY;
-
-        if ("US".equals(co)) {
-            if ("VZW".equals(op) || "CCT".equals(op) || "CHT".equals(op) || "VSB".equals(op)) {
-                return false;
-            }
-
-            if ("TMO".equals(op) || "MPCS".equals(op) || "DISH".equals(op)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     public static boolean isDeviceEncryptionModeEnabled() {
         DevicePolicyManager dpm = AppContext.getInstance().getSystemService(
                 DevicePolicyManager.class);
@@ -222,8 +199,8 @@ public final class ImsUtils {
                 com.android.internal.R.bool.config_device_volte_available);
 
         if (!voLteEnabled) {
-            return ImsProperties.System.getInt(KEY_VOLTE_AVAIL_OVR, -1) == 1
-                    || ImsProperties.System.getInt(
+            return SystemProperties.getInt(KEY_VOLTE_AVAIL_OVR, -1) == 1
+                    || SystemProperties.getInt(
                             KEY_VOLTE_AVAIL_OVR + Integer.toString(phoneId),
                             -1) == 1;
         }
@@ -236,8 +213,8 @@ public final class ImsUtils {
                 com.android.internal.R.bool.config_device_vt_available);
 
         if (!vtEnabled) {
-            return ImsProperties.System.getInt(KEY_VT_AVAIL_OVR, -1) == 1
-                    || ImsProperties.System.getInt(
+            return SystemProperties.getInt(KEY_VT_AVAIL_OVR, -1) == 1
+                    || SystemProperties.getInt(
                             KEY_VT_AVAIL_OVR + Integer.toString(phoneId),
                             -1) == 1;
         }
@@ -250,8 +227,8 @@ public final class ImsUtils {
                 com.android.internal.R.bool.config_device_wfc_ims_available);
 
         if (!wfcEnabled) {
-            return ImsProperties.System.getInt(KEY_WFC_AVAIL_OVR, -1) == 1
-                    || ImsProperties.System.getInt(
+            return SystemProperties.getInt(KEY_WFC_AVAIL_OVR, -1) == 1
+                    || SystemProperties.getInt(
                             KEY_WFC_AVAIL_OVR + Integer.toString(phoneId),
                             -1) == 1;
         }
@@ -260,14 +237,6 @@ public final class ImsUtils {
     }
 
     public static ServiceCaps getServiceCapsByPlatform(Context c, int phoneId) {
-        if (!isVoLteHotswapSupported()) {
-            ServiceCaps serviceCaps = getServiceCapsByDeviceConfig(c);
-
-            if (serviceCaps != null) {
-                return serviceCaps;
-            }
-        }
-
         boolean voLteEnabled = false;
         boolean vtEnabled = false;
         boolean wfcEnabled = false;
@@ -283,40 +252,16 @@ public final class ImsUtils {
     }
 
     public static boolean isVoLteEnabledByPlatform(Context c, int phoneId) {
-        if (!isVoLteHotswapSupported()) {
-            ServiceCaps serviceCaps = getServiceCapsByDeviceConfig(c);
-
-            if (serviceCaps != null) {
-                return serviceCaps.isVoLteEnabled();
-            }
-        }
-
         ImsManager imsMgr = getImsManager(phoneId);
         return (imsMgr != null) ? imsMgr.isVolteEnabledByPlatform() : false;
     }
 
     public static boolean isVtEnabledByPlatform(Context c, int phoneId) {
-        if (!isVoLteHotswapSupported()) {
-            ServiceCaps serviceCaps = getServiceCapsByDeviceConfig(c);
-
-            if (serviceCaps != null) {
-                return serviceCaps.isVtEnabled();
-            }
-        }
-
         ImsManager imsMgr = getImsManager(phoneId);
         return (imsMgr != null) ? imsMgr.isVtEnabledByPlatform() : false;
     }
 
     public static boolean isWfcEnabledByPlatform(Context c, int phoneId) {
-        if (!isVoLteHotswapSupported()) {
-            ServiceCaps serviceCaps = getServiceCapsByDeviceConfig(c);
-
-            if (serviceCaps != null) {
-                return serviceCaps.isWfcEnabled();
-            }
-        }
-
         ImsManager imsMgr = getImsManager(phoneId);
         return (imsMgr != null) ? imsMgr.isWfcEnabledByPlatform() : false;
     }
@@ -353,13 +298,7 @@ public final class ImsUtils {
     // CACHE_FOR_SERVICE_CAPS }
 
     public static int getDefaultNrUeCapability() {
-        int nrUeCapability = 0;
-
-        if (!"CN".equals(ImsProperties.TARGET_COUNTRY)) {
-            nrUeCapability |= NR_UE_CAPABILITY_I_SA;
-        }
-
-        return nrUeCapability;
+        return NR_UE_CAPABILITY_I_SA;
     }
 
     public static int getNrUeCapability(int slotId) {
@@ -387,10 +326,6 @@ public final class ImsUtils {
     }
 
     public static int getDefaultNrNetworkMode() {
-        if ("CN".equals(ImsProperties.TARGET_COUNTRY)) {
-            return NR_NETWORK_MODE_NSA;
-        }
-
         return NR_NETWORK_MODE_SA;
     }
 
@@ -444,21 +379,5 @@ public final class ImsUtils {
                 Process.killProcess(Process.myPid());
             }
         }
-    }
-
-    private static synchronized ServiceCaps getServiceCapsByDeviceConfig(Context c) {
-        if (sServiceCapsByDeviceConfig == null) {
-            String op = ImsProperties.getSysSimOperator(0);
-            String co = ImsProperties.getSysSimCountry(0);
-
-            if ("US".equals(co)) {
-                if ("VZW".equals(op) || "CCT".equals(op) || "CHT".equals(op) || "VSB".equals(op)
-                       || "TMO".equals(op) || "MPCS".equals(op) || "DISH".equals(op)) {
-                    sServiceCapsByDeviceConfig = new ServiceCaps(true, true, true);
-                }
-            }
-        }
-
-        return sServiceCapsByDeviceConfig;
     }
 }

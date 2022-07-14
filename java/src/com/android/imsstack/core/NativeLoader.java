@@ -18,7 +18,7 @@ package com.android.imsstack.core;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.core.config.FeatureTable;
 import com.android.imsstack.system.SystemConfig;
-import com.android.imsstack.util.ImsProperties;
+import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.MSimUtils;
 
 import java.util.List;
@@ -45,8 +45,8 @@ public final class NativeLoader {
         for (int i = 0; i < simCount; ++i) {
             int currentSlotId = (slotId < 0) ? i : slotId;
 
-            String operator = ImsProperties.getSysSimOperator(currentSlotId);
-            String country = ImsProperties.getSysSimCountry(currentSlotId);
+            String operator = ImsPrivateProperties.getSimOperator(currentSlotId);
+            String country = ImsPrivateProperties.getSimCountry(currentSlotId);
 
             int extraInfo = 0;
 

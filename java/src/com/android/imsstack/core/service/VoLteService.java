@@ -22,6 +22,7 @@ import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.ImsGlobal;
+import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -54,7 +55,6 @@ import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.SettingsUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentHashMap;

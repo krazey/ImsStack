@@ -636,7 +636,7 @@ public final class ImsServiceManager {
     }
 
     private static boolean isMultiImsEnabled() {
-        return MSimUtils.isMultiImsEnabled() || MSimUtils.isMultiImsEnabledOnDssv();
+        return MSimUtils.isMultiImsEnabled();
     }
 
     private static void log(String s) {

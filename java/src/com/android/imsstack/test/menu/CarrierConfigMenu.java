@@ -37,7 +37,6 @@ import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.CarrierConfigUtils;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.IoUtils;
@@ -304,9 +303,12 @@ public class CarrierConfigMenu extends PreferenceActivity {
                 int provisioningStatus = parseInt(value, 0);
                 int subId = MSimUtils.getSubId(mSlotId);
 
-                if (CarrierConfigUtils.getBoolean(
-                        CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL,
-                        subId)) {
+                ConfigInterface config = AgentFactory.getInstance().getAgent(
+                        ConfigInterface.class, mSlotId);
+                CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+
+                if (cc != null && cc.getBoolean(
+                        CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL)) {
                     ImsLog.d(mSlotId, "VoLte-Provisioning-Required: subId="
                             + subId + ", status=" + provisioningStatus);
 

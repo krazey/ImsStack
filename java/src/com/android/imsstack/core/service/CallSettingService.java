@@ -25,10 +25,12 @@ import android.os.Handler;
 import android.os.Registrant;
 import android.os.RegistrantList;
 import android.provider.Settings;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.ImsGlobal;
+import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
@@ -42,7 +44,6 @@ import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.MSimUtils;
-import com.android.imsstack.util.SettingsUtils;
 
 /** this class is the interface for the call setting */
 public class CallSettingService implements ICallSettingService {
@@ -156,21 +157,6 @@ public class CallSettingService implements ICallSettingService {
                 ImsPrivateProperties.Persistent.KEY_VOWIFI_ENTITLEMENT_ID,
                 "",
                 getSlotId());
-    }
-
-    @Override
-    public boolean isVoLTEUsedForHDVoice() {
-        if (ImsGlobal.isCountry(getSlotId(), "KR")) {
-            if (isRoaming()) {
-                return getVoLTERoamingSetForKR();
-            } else {
-                if (ImsGlobal.isOperator(getSlotId(), "KT")) {
-                    return getVoLTESetForKT();
-                }
-            }
-        }
-
-        return isVoLTEEnabled();
     }
 
     @Override
@@ -462,7 +448,7 @@ public class CallSettingService implements ICallSettingService {
         };
 
         SettingsUtils.registerObserverForCallSettings(getContext(),
-                SettingsUtils.getKeyForVtImsEnabled(getSlotId()),
+                SubscriptionManager.VT_IMS_ENABLED,
                 mVideoCallSettingObserver, getSlotId());
 
         onVideoCallSetChanged();
@@ -507,7 +493,7 @@ public class CallSettingService implements ICallSettingService {
         };
 
         SettingsUtils.registerObserverForCallSettings(getContext(),
-                SettingsUtils.getKeyForDataNetworkEnhanced4GLteMode(getSlotId()),
+                SubscriptionManager.ENHANCED_4G_MODE_ENABLED,
                 mVoLTESettingObserver, getSlotId());
 
         onVoLTESetChanged();
@@ -561,7 +547,7 @@ public class CallSettingService implements ICallSettingService {
         };
 
         SettingsUtils.registerObserverForCallSettings(getContext(),
-                SettingsUtils.getKeyForWFCImsEnabled(getSlotId()),
+                SubscriptionManager.WFC_IMS_ENABLED,
                 mVoWIFISettingObserver, getSlotId());
 
         onVoWIFISetChanged();
@@ -596,7 +582,7 @@ public class CallSettingService implements ICallSettingService {
         };
 
         SettingsUtils.registerObserverForCallSettings(getContext(),
-                SettingsUtils.getKeyForWFCImsMode(getSlotId()),
+                SubscriptionManager.WFC_IMS_MODE,
                 mVoWIFIPreferenceObserver, getSlotId());
 
         mVoWIFIPreference = getVoWIFIPreference();
@@ -632,7 +618,7 @@ public class CallSettingService implements ICallSettingService {
         };
 
         SettingsUtils.registerObserverForCallSettings(getContext(),
-                SettingsUtils.getKeyForWFCImsRoamingEnabled(getSlotId()),
+                SubscriptionManager.WFC_IMS_ROAMING_ENABLED,
                 mVoWIFIRoamingSetObserver, getSlotId());
 
         mVoWIFIRoamingSet = isVoWIFIRoamingEnabled();
@@ -694,28 +680,7 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private boolean getVoLTERoamingSetForKR() {
-        if (ImsConstants.USE_GOOGLE_NATIVE_APPS) {
-            return isVoLTEEnabled();
-        }
-
-        ContentResolver cr = getContext().getContentResolver();
-        boolean bVolteRoamingEnabled = SettingsUtils.isRoamingHDVoiceEnabled(cr);
-        boolean bLTERoamingEnabled = SettingsUtils.isDataLteRoaming(cr);
-
-        ImsLog.d(getSlotId(), "HDVoiceRoamingSetting - HDVoiceEnabled : "
-                + bVolteRoamingEnabled);
-
-        if (ImsGlobal.isOperator(getSlotId(), "SKT")) {
-            return bVolteRoamingEnabled;
-        }
-
-        if (ImsGlobal.isOperator(getSlotId(), "KT")) {
-            if (!isKTRoamingUISpec_v1_3_6_applied()) {
-                return (bLTERoamingEnabled && bVolteRoamingEnabled);
-            }
-            return true;
-        }
-        return bLTERoamingEnabled;
+        return isVoLTEEnabled();
     }
 
     private boolean getVoLTESetForKT() {
@@ -777,12 +742,12 @@ public class CallSettingService implements ICallSettingService {
 
     private int getRttMode() {
         ContentResolver cr = getContext().getContentResolver();
-        int option = SettingsUtils.getRttOption(cr);
+        int option = -1;
 
         if (option == 0) {
             return ImsEventDef.IMS_RTT_CAPABLE_OFF;
         } else if (option == 1) {
-            int mode = SettingsUtils.getRttOperationMode(cr);
+            int mode = -1;
 
             if (mode == 0) {
                 return ImsEventDef.IMS_RTT_VISIBLE_DURING_CALLS;
@@ -807,11 +772,11 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private boolean isVoLTEEnabled() {
-        return SettingsUtils.isDataNetworkEnhanced4GLteMode(getContext(), getSlotId());
+        return false;
     }
 
     private boolean isVoLTERoamingEnabled() {
-        return SettingsUtils.isRoamingHDVoiceEnabled(getContext().getContentResolver());
+        return false;
     }
 
     private boolean isVoWIFIEnabled() {
@@ -819,7 +784,7 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private boolean isVoWIFIProvisioned() {
-        String vwfMDN = SettingsUtils.getVoWIFIMDN(getContext().getContentResolver());
+        String vwfMDN = "";
 
         if (TextUtils.isEmpty(vwfMDN)) {
             ImsLog.d(getSlotId(), "VoWIFI MDN is invalid");
@@ -847,12 +812,11 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private boolean isVideoCallSetEnabled() {
-        return SettingsUtils.isDataNetworkVideoCallingStatus(getContext(), getSlotId());
+        return SettingsUtils.isVtImsEnabled(getContext(), getSlotId());
     }
 
     private boolean isVideoCallRoamingSetEnabled() {
-        return SettingsUtils.isDataNetworkVideoCallingStatusRoaming(
-                getContext().getContentResolver());
+        return false;
     }
 
     private boolean isDataRoamingSettingEnabled() {
