@@ -805,6 +805,7 @@ public:
         static const IMS_CHAR KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT[];
         static const IMS_CHAR KEY_SUPPORT_CONTACT_USER_INFO_BOOL[];
         static const IMS_CHAR KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT[];
+        static const IMS_CHAR KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[];
         // Bundle {
         static const IMS_CHAR KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[];
         static const IMS_CHAR KEY_SPECIFIC_REGISTRATION_ERROR_FINAL_TYPE_INT[];
@@ -1124,9 +1125,18 @@ public:
         // User Info Policy for non register message
         enum
         {
-            USER_INFO_POLICY_DEFAULT = 1,
-            USER_INFO_POLICY_NONE = 2,
-            USER_INFO_POLICY_NO_IMSI = 3
+            CONTACT_USER_INFO_POLICY_DEFAULT = 1,
+            CONTACT_USER_INFO_POLICY_NONE = 2,
+            CONTACT_USER_INFO_POLICY_NO_IMSI = 3
+        };
+
+        // Geolocation pidf Forming policy
+        enum
+        {
+            GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION = 1,
+            GEOLOCATION_FORMING_POLICY_WITH_POSITION = 2,
+            GEOLOCATION_FORMING_POLICY_WITH_POSITION_AND_COUNTRY = 3,
+            GEOLOCATION_FORMING_POLICY_WITHOUT_CIVIC = 4
         };
     };
 

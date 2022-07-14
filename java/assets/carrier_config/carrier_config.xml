@@ -309,6 +309,7 @@
     <int name="registration_pcscf_update_policy_int" value="0"/>
     <boolean name="support_contact_user_info_bool" value="true"/>
     <int name="contact_user_info_policy_for_non_register_message_int" value="1"/>
+    <int name="geolocation_pidf_forming_policy_int" value="1"/>
     <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
     <int name="specific_registration_error_final_type_int" value="0"/>
     <int name="specific_registration_error_policy_int" value="0"/>

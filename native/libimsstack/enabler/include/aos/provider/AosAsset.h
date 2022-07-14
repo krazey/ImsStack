@@ -67,7 +67,9 @@ public:
             nRegistrationPcscfUpdatePolicy(0),
             bSupportContactUserInfo(IMS_TRUE),
             nContactUserInfoPolicyForNonRegisterMessage(
-                    CarrierConfig::Assets::USER_INFO_POLICY_DEFAULT)
+                    CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_DEFAULT),
+            nGeolocationPidfFormingPolicy(
+                    CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION)
     {
     }
 
@@ -116,5 +118,6 @@ public:
     IMS_SINT32 nRegistrationPcscfUpdatePolicy;
     IMS_BOOL bSupportContactUserInfo;
     IMS_SINT32 nContactUserInfoPolicyForNonRegisterMessage;
+    IMS_SINT32 nGeolocationPidfFormingPolicy;
 };
 #endif  // AOS_ASSET_H_

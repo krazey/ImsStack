@@ -769,6 +769,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_CONTACT_USER_INFO_BOOL[] =
         "support_contact_user_info_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT[] =
         "contact_user_info_policy_for_non_register_message_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[] =
+        "geolocation_pidf_forming_policy_int";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[] =
         "specific_registration_error_bundle";
