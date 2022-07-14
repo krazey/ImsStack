@@ -25,7 +25,6 @@ import com.android.imsstack.enabler.media.IMediaListener;
 import com.android.imsstack.enabler.media.MediaConstants;
 import com.android.imsstack.enabler.media.MediaFactory;
 import com.android.imsstack.enabler.media.MediaSession;
-import com.android.imsstack.jni.JNIIms;
 import com.android.imsstack.util.ImsLog;
 
 /**
@@ -458,11 +457,7 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
             return;
         }
 
-        byte[] data = parcel.marshall();
-        parcel.recycle();
-        parcel = null;
-
-        JNIIms.sendData(sessionId, data);
+        MtcJniProxy.getInstance().sendDataToNative(sessionId, parcel);
     }
 
     private static void log(String s) {

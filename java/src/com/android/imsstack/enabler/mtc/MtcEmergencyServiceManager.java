@@ -1,16 +1,11 @@
 package com.android.imsstack.enabler.mtc;
 
-import android.content.Context;
-import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.IUIMS;
-import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
-import com.android.imsstack.jni.JNIIms;
 import com.android.imsstack.util.ImsLog;
 
 public class MtcEmergencyServiceManager {
@@ -107,10 +102,9 @@ public class MtcEmergencyServiceManager {
             return;
         }
 
-        long nativeCallObject = JNIIms.getInterface(IUIMS.MTC_CALL, mContext.getSlotId());
         boolean wifi = mCall.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false);
 
-        mCall.updateNativeCallObject(nativeCallObject);
+        mCall.createNativeCallObject();
         mCall.open(serviceType, wifi, true, false, false);
     }
 
@@ -151,13 +145,8 @@ public class MtcEmergencyServiceManager {
                     log("MtcEmergencyServiceManager :: sendRequest");
 
                     Parcel parcel = (Parcel)msg.obj;
-                    if (parcel == null) {
-                        break;
-                    }
 
-                    byte[] data = parcel.marshall();
-                    JNIIms.sendData(getNativeObject(), data);
-                    parcel.recycle();
+                    MtcJniProxy.getInstance().sendDataToNative(getNativeObject(), parcel);
                     break;
                 }
                 default:

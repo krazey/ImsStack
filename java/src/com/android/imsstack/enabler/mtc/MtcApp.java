@@ -1,13 +1,18 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20131015    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.imsstack.enabler.mtc;
 
@@ -22,9 +27,9 @@ import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
 import com.android.imsstack.enabler.mtc.dialogs.IUDialogs;
-import com.android.imsstack.jni.JNIIms;
 import com.android.imsstack.jni.JNIImsListener;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.Closeable;
 
@@ -77,13 +82,14 @@ public class MtcApp implements Closeable {
     private static final int MSG_SEND_NOTIFICATION = 3;
 
     private final IBaseContext mContext;
-    private final MtcCallManager mCM;
+    private final IMtcCallManager mCM;
     private final MtcAppHandler mHandler;
     private final MtcEmergencyServiceManager mEmergencyServiceManager;
     private long mNativeObject = 0;
     private JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
     private ServiceStateListener mServiceStateListener = null;
     private CallListener mCallListener = null;
+    private MtcJniProxy mMtcJniProxy;
 
     public MtcApp(IBaseContext context) {
         mContext = context;
@@ -91,14 +97,30 @@ public class MtcApp implements Closeable {
         mCM = new MtcCallManager(mContext);
         mHandler = new MtcAppHandler(mContext.getCallLooper());
         mEmergencyServiceManager = new MtcEmergencyServiceManager(mContext);
+        mMtcJniProxy = MtcJniProxy.getInstance();
 
         init();
+    }
+
+    @VisibleForTesting
+    public MtcApp(IBaseContext context, IMtcCallManager mtcCallManager, Looper looper,
+            MtcEmergencyServiceManager mtcEmergencyServiceManager,
+            ServiceStateListener serviceStateListener, CallListener callListener,
+            MtcJniProxy mtcJniProxy) {
+        mContext = context;
+
+        mCM = mtcCallManager;
+        mHandler = new MtcAppHandler(looper);
+        mEmergencyServiceManager = mtcEmergencyServiceManager;
+        mServiceStateListener = serviceStateListener;
+        mCallListener = callListener;
+        mMtcJniProxy = mtcJniProxy;
     }
 
     public void init() {
         log("init");
 
-        MtcStateUtils.initializeState(mContext.getContext(), mContext.getSlotId());
+        initializeState();
 
         mCM.init();
         mContext.addCommonPackageListener(mHandler);
@@ -116,10 +138,10 @@ public class MtcApp implements Closeable {
         mContext.removeCommonPackageListener(mHandler);
         mCM.clear();
 
-        MtcStateUtils.initializeState(mContext.getContext(), mContext.getSlotId());
+        initializeState();
     }
 
-    public MtcCallManager getCallManager() {
+    public IMtcCallManager getCallManager() {
         return mCM;
     }
 
@@ -133,14 +155,7 @@ public class MtcApp implements Closeable {
             }
         }
 
-        long nativeCallObject = 0;
-        if (!isEmergencyCall(callAttributes)) {
-            nativeCallObject = JNIIms.getInterface(IUIMS.MTC_CALL, mContext.getSlotId());
-        }
-
-        MtcCall call = new MtcCall(
-                mContext, mCM.getCallTracker(), nativeCallObject, callAttributes,
-                mCM.getVacantCallIndex(), "");
+        MtcCall call = createMtcCall(callAttributes);
 
         if (call.isMO()) {
             mCM.attachCall(call);
@@ -162,6 +177,17 @@ public class MtcApp implements Closeable {
         if (call != null) {
             call.close();
         }
+    }
+
+    /**
+     * Makes a new object of {@code MtcCall}.
+     *
+     * @param callAttributes attrubutes that this call will have.
+     * @return new {@code MtcCall}.
+     */
+    public MtcCall createMtcCall(int callAttributes) {
+        return new MtcCall(mContext, mCM.getCallTracker(), callAttributes,
+                mCM.getVacantCallIndex(), "");
     }
 
     /**
@@ -203,7 +229,7 @@ public class MtcApp implements Closeable {
 
         mCM.dispose();
 
-        MtcStateUtils.initializeState(mContext.getContext(), mContext.getSlotId());
+        initializeState();
     }
 
     public void notifySrvccStateChanged(int state) {
@@ -233,6 +259,38 @@ public class MtcApp implements Closeable {
         return mNativeObject != 0;
     }
 
+    /**
+     * Initializes {@code ImsStateStore}.
+     */
+    public void initializeState() {
+        MtcStateUtils.initializeState(mContext.getContext(), mContext.getSlotId());
+    }
+
+    @VisibleForTesting
+    public MtcAppHandler getHandler() {
+        return mHandler;
+    }
+
+    @VisibleForTesting
+    public JNIImsListener getNativeListener() {
+        return mNativeListener;
+    }
+
+    @VisibleForTesting
+    public MtcApp.CallListener getCallListener() {
+        return mCallListener;
+    }
+
+    @VisibleForTesting
+    public MtcApp.ServiceStateListener getServiceStateListener() {
+        return mServiceStateListener;
+    }
+
+    @VisibleForTesting
+    public void setNativeObj(long natieObj) {
+        mNativeObject = natieObj;
+    }
+
     private long getJNIService() {
         return mNativeObject;
     }
@@ -258,12 +316,10 @@ public class MtcApp implements Closeable {
                 return;
             }
         }
-
-        mNativeObject = JNIIms.getInterface(IUIMS.APP_MTC, mContext.getSlotId());
+        mNativeObject = mMtcJniProxy.getJniInterfaceAndSetListener(
+                mContext.getSlotId(), IUIMS.APP_MTC, mNativeListener);
 
         if (mNativeObject != 0) {
-            JNIIms.setListener(mNativeObject, mNativeListener);
-
             if (ss != null) {
                 ss.unregisterForNativeBootComplete(mHandler);
             }
@@ -274,8 +330,8 @@ public class MtcApp implements Closeable {
 
     private void unbindJNIService() {
         if (mNativeObject != 0) {
-            JNIIms.removeListener(mNativeObject, mNativeListener);
-            JNIIms.releaseInterface(mNativeObject);
+            mMtcJniProxy.releaseJniInterfaceAndrRemoveListener(
+                    mNativeObject, mNativeListener);
             mNativeObject = 0;
 
             mEmergencyServiceManager.setNativeObject(mNativeObject);
@@ -453,15 +509,7 @@ public class MtcApp implements Closeable {
                     log("MtcApp :: sendNotification");
                     Parcel parcel = (Parcel)msg.obj;
 
-                    if (parcel == null) {
-                        break;
-                    }
-
-                    byte[] data = parcel.marshall();
-
-                    JNIIms.sendData(getJNIService(), data);
-
-                    parcel.recycle();
+                    mMtcJniProxy.sendDataToNative(getJNIService(), parcel);
                     break;
                 }
 
