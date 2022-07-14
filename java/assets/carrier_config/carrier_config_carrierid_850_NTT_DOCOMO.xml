@@ -18,6 +18,7 @@
     <!-- Carrier configurations -->
     <!-- Ims General -->
     <boolean name="ims.allow_sip_udp_fallback_on_tcp_connection_setup_failed_bool" value="true"/>
+    <boolean name="request_uri_validation_required_in_mid_dialog_bool" value="false"/>
 
     <!-- Aos -->
     <int-array name="ims.ims_identity_priority_int_array" num="1">

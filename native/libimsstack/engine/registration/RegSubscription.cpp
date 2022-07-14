@@ -1682,9 +1682,7 @@ IMS_BOOL RegSubscription::ValidateRequestUri(
 
     if (pContact == IMS_NULL)
     {
-        IMS_TRACE_D("Contact header is not present in the dialog; "
-                    "use the default contact address...",
-                0, 0, 0);
+        IMS_TRACE_D("No contacts in the dialog; use the default contact address...", 0, 0, 0);
 
         pContact = m_pRegStateTracker->GetContactAddressForOutgoingMessage();
 
@@ -1697,6 +1695,23 @@ IMS_BOOL RegSubscription::ValidateRequestUri(
 
     if (pContact->Equals(objRequestUri))
     {
+        return IMS_TRUE;
+    }
+
+    const SipAddress& objContact = m_pRegStateTracker->GetContactAddress();
+
+    if (objContact.Equals(objRequestUri))
+    {
+        IMS_TRACE_D("Request-URI matches the contact address for REGISTER", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    // Checks if the contact address for outgoing message matches or not.
+    pContact = m_pRegStateTracker->GetContactAddressForOutgoingMessage();
+
+    if ((pContact != IMS_NULL) && pContact->Equals(objRequestUri))
+    {
+        IMS_TRACE_D("Request-URI matches the contact address for outgoing message", 0, 0, 0);
         return IMS_TRUE;
     }
 
