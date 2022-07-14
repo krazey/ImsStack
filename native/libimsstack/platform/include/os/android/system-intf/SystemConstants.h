@@ -47,8 +47,6 @@ enum IMS_SYSTEM_ENTYPE
 
     IMS_SYSTEM_VOICE_RADIOTECH_STATE_CHANGED,
 
-    IMS_SYSTEM_TRM_SERVICE_CHANGED,
-
     IMS_SYSTEM_MAX
 };
 
@@ -76,8 +74,6 @@ public:
     static const IMS_UINT32 CATEGORY_EVENT = 0x00400000;
     static const IMS_UINT32 CATEGORY_ISIM = 0x00800000;
     static const IMS_UINT32 CATEGORY_USIM = 0x01000000;
-    static const IMS_UINT32 CATEGORY_TRM = 0x02000000;
-    static const IMS_UINT32 CATEGORY_VONR = 0x04000000;
     ////
     // Methods for the system information's notification (Java to Native)
     ////
@@ -97,8 +93,6 @@ public:
     static const IMS_UINT32 NOTIFY_USIM_EVENT = CATEGORY_USIM + 14;
     static const IMS_UINT32 NOTIFY_DATA_CONNECTION_IPCAN_CHANGED = CATEGORY_NETWORK + 15;
     static const IMS_UINT32 NOTIFY_VOICE_NETWORK_TYPE_CHANGED = CATEGORY_NETWORK + 16;
-    static const IMS_UINT32 NOTIFY_TRM_SERVICE_STATE_CHANGED = CATEGORY_TRM + 17;
-    static const IMS_UINT32 NOTIFY_VONR_EVENT = CATEGORY_VONR + 18;
 
     ////
     // Methods for the system access (Native to Java)
@@ -222,22 +216,6 @@ public:
     static const IMS_UINT32 STOP_LOCATION_INFO = CATEGORY_BASE + 1202;
     static const IMS_UINT32 GET_LOCATION_INFO = CATEGORY_BASE + 1203;
     static const IMS_UINT32 MAKE_INSTATNT_LOCATION_INFO = CATEGORY_BASE + 1204;
-
-    ////
-    // TRM
-    ////
-    static const IMS_UINT32 SET_TRM = CATEGORY_BASE + 1301;
-
-    ////
-    // VoNR
-    ////
-    static const IMS_UINT32 NOTIFY_CALL_STATE = CATEGORY_BASE + 1401;
-    static const IMS_UINT32 REQUEST_CALL_PREPERENCE = CATEGORY_BASE + 1402;
-    static const IMS_UINT32 SET_IMS_SESSION = CATEGORY_BASE + 1403;
-    static const IMS_UINT32 SET_IMS_SIGNALING = CATEGORY_BASE + 1404;
-    static const IMS_UINT32 SET_IMS_VOICE = CATEGORY_BASE + 1405;
-    static const IMS_UINT32 SET_UAC_CHECK = CATEGORY_BASE + 1406;
-    static const IMS_UINT32 SET_VOICE = CATEGORY_BASE + 1407;
 
     ////
     // IpSec

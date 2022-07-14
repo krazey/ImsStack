@@ -36,9 +36,7 @@
 #include "device/OsPowerInfo.h"
 #include "device/OsNetworkWatcher.h"
 #include "device/OsSubscriberInfo.h"
-#include "device/OsTrm.h"
 #include "device/OsUsim.h"
-#include "device/OsVoNr.h"
 #include "device/OsWifiWatcher.h"
 #include "network/OsIpcan.h"
 #include "network/OsNetworkConnection.h"
@@ -416,40 +414,6 @@ PUBLIC GLOBAL void PlatformFactory::DestroyUsim(IN IUsim*& piUsim)
     }
 
     piUsim = IMS_NULL;
-}
-
-PUBLIC GLOBAL ITrm* PlatformFactory::CreateTrm()
-{
-    return new OsTrm();
-}
-
-PUBLIC GLOBAL void PlatformFactory::DestroyTrm(IN ITrm*& piTrm)
-{
-    OsTrm* pTrm = DYNAMIC_CAST(OsTrm*, piTrm);
-
-    if (pTrm != IMS_NULL)
-    {
-        delete pTrm;
-    }
-
-    piTrm = IMS_NULL;
-}
-
-PUBLIC GLOBAL IVoNr* PlatformFactory::CreateVoNr(IN IMS_SINT32 nSlotId)
-{
-    return new OsVoNr(nSlotId);
-}
-
-PUBLIC GLOBAL void PlatformFactory::DestroyVoNr(IN IVoNr*& piVoNr)
-{
-    OsVoNr* pVoNr = DYNAMIC_CAST(OsVoNr*, piVoNr);
-
-    if (pVoNr != IMS_NULL)
-    {
-        delete pVoNr;
-    }
-
-    piVoNr = IMS_NULL;
 }
 
 PUBLIC GLOBAL ImsCarrierConfig* PlatformFactory::CreateCarrierConfig(IN IMS_SINT32 nSlotId)

@@ -29,7 +29,6 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
-#include "ServiceVoNr.h"
 
 #define WAIT_TIMEOUT_FOR_IPC 1      // ms
 #define WAIT_TIMEOUT_FOR_RUN 10000  // us
@@ -505,7 +504,6 @@ PROTECTED VIRTUAL void OsThread::OnSystemMessage(IN ImsMessage& objMsg)
         case IMS_MSG_WIFI_STATUS:
         case IMS_MSG_ISIM:
         case IMS_MSG_USIM:
-        case IMS_MSG_TRM_PRIORITY_STATUS:
             PhoneInfoService::GetPhoneInfoService()->DispatchServiceMessage(objMsg);
             break;
 
@@ -514,9 +512,6 @@ PROTECTED VIRTUAL void OsThread::OnSystemMessage(IN ImsMessage& objMsg)
             break;
         case IMS_MSG_CONFIGURATION:
             ConfigService::GetConfigService()->DispatchServiceMessage(objMsg);
-            break;
-        case IMS_MSG_VONR:
-            VoNrService::GetVoNrService()->DispatchServiceMessage(objMsg);
             break;
     }
 }
@@ -549,6 +544,5 @@ PROTECTED GLOBAL IMS_BOOL OsThread::IsSystemMessage(IN IMS_SINT32 nMsg)
     return ((nMsg == IMS_MSG_NETWORK) || (nMsg == IMS_MSG_SOCKET) || (nMsg == IMS_MSG_BATTERY) ||
             (nMsg == IMS_MSG_NETWORK_STATUS) || (nMsg == IMS_MSG_TIMER) ||
             (nMsg == IMS_MSG_CONFIGURATION) || (nMsg == IMS_MSG_WIFI_STATUS) ||
-            (nMsg == IMS_MSG_ISIM) || (nMsg == IMS_MSG_USIM) ||
-            (nMsg == IMS_MSG_TRM_PRIORITY_STATUS) || (nMsg == IMS_MSG_VONR));
+            (nMsg == IMS_MSG_ISIM) || (nMsg == IMS_MSG_USIM));
 }

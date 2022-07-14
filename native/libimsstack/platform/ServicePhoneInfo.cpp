@@ -158,13 +158,11 @@ public:
     IDeviceInfo* GetDeviceInfo();
     IPowerInfo* GetPowerInfo();
     IWifiWatcher* GetWifiWatcher();
-    ITrm* GetTrm();
 
 private:
     IDeviceInfo* m_piDeviceInfo;
     IPowerInfo* m_piPowerInfo;
     IWifiWatcher* m_piWifiWatcher;
-    ITrm* m_piTrm;
 
     PhoneInfoHolder** m_ppHolder;
 };
@@ -174,7 +172,6 @@ PhoneInfoServicePrivate::PhoneInfoServicePrivate() :
         m_piDeviceInfo(IMS_NULL),
         m_piPowerInfo(IMS_NULL),
         m_piWifiWatcher(IMS_NULL),
-        m_piTrm(IMS_NULL),
         m_ppHolder(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
@@ -193,7 +190,6 @@ PhoneInfoServicePrivate::~PhoneInfoServicePrivate()
     PlatformFactory::DestroyDeviceInfo(m_piDeviceInfo);
     PlatformFactory::DestroyPowerInfo(m_piPowerInfo);
     PlatformFactory::DestroyWifiWatcher(m_piWifiWatcher);
-    PlatformFactory::DestroyTrm(m_piTrm);
 
     if (m_ppHolder != IMS_NULL)
     {
@@ -242,17 +238,6 @@ IWifiWatcher* PhoneInfoServicePrivate::GetWifiWatcher()
     }
 
     return m_piWifiWatcher;
-}
-
-PUBLIC
-ITrm* PhoneInfoServicePrivate::GetTrm()
-{
-    if (m_piTrm == IMS_NULL)
-    {
-        m_piTrm = PlatformFactory::CreateTrm();
-    }
-
-    return m_piTrm;
 }
 
 PRIVATE
@@ -315,15 +300,6 @@ void PhoneInfoService::DispatchServiceMessage(IN ImsMessage& objMsg)
             pUsim->DispatchServiceMessage(objMsg.nWparam, objMsg.nLparam);
         }
     }
-    else if (nMessage == IMS_MSG_TRM_PRIORITY_STATUS)
-    {
-        ITrm* piTrm = GetTrm();
-
-        if (piTrm != IMS_NULL)
-        {
-            piTrm->ProcessNotify(objMsg);
-        }
-    }
 }
 
 PUBLIC
@@ -384,12 +360,6 @@ PUBLIC
 IWifiWatcher* PhoneInfoService::GetWifiWatcher()
 {
     return m_pPrivate->GetWifiWatcher();
-}
-
-PUBLIC
-ITrm* PhoneInfoService::GetTrm()
-{
-    return m_pPrivate->GetTrm();
 }
 
 PUBLIC GLOBAL PhoneInfoService* PhoneInfoService::GetPhoneInfoService()

@@ -53,10 +53,6 @@
 #define IMS_MSG_USIM                 (IMS_MSG_SYSTEM_BASE + 8)
 // Event for Configuration
 #define IMS_MSG_CONFIGURATION        (IMS_MSG_SYSTEM_BASE + 9)
-// Event for TRM service priority status
-#define IMS_MSG_TRM_PRIORITY_STATUS  (IMS_MSG_SYSTEM_BASE + 10)
-// Event for VoNR
-#define IMS_MSG_VONR                 (IMS_MSG_SYSTEM_BASE + 11)
 
 #define IMS_MSG_SYSTEM_MAX           (IMS_MSG_SYSTEM_BASE + 100)
 

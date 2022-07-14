@@ -36,9 +36,7 @@ class ISystemProperty;
 class ISystemTime;
 class ISystemUtil;
 class IThread;
-class ITrm;
 class IUsim;
-class IVoNr;
 class IWifiWatcher;
 class IZLib;
 class ImsFile;
@@ -124,12 +122,6 @@ public:
 
     static IUsim* CreateUsim(IN IMS_SINT32 nSlotId);
     static void DestroyUsim(IN IUsim*& piUsim);
-
-    static ITrm* CreateTrm();
-    static void DestroyTrm(IN ITrm*& piTrm);
-
-    static IVoNr* CreateVoNr(IN IMS_SINT32 nSlotId);
-    static void DestroyVoNr(IN IVoNr*& piVoNr);
 
     static ImsCarrierConfig* CreateCarrierConfig(IN IMS_SINT32 nSlotId);
     static void DestroyCarrierConfig(IN ImsCarrierConfig*& pCarrierConfig);
