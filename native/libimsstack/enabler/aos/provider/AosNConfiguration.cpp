@@ -504,6 +504,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetUserInfoPolicyForNonRegisterMess
     return m_objAsset.nContactUserInfoPolicyForNonRegisterMessage;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetGeolocationPidfFormingPolicy() const
+{
+    return m_objAsset.nGeolocationPidfFormingPolicy;
+}
+
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegistrationRetryIntervals()
 {
     return m_objRegRetryInterval.objRegistrationRetryIntervalSec;
@@ -1320,6 +1325,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_CONTACT_USER_INFO_BOOL);
     m_objAsset.nContactUserInfoPolicyForNonRegisterMessage = piCc->GetInt(
             CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT);
+    m_objAsset.nGeolocationPidfFormingPolicy =
+            piCc->GetInt(CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT);
 }
 
 PRIVATE

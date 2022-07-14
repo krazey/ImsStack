@@ -51,6 +51,7 @@
     </int-array>
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
     <int name="registration_retry_count_reset_policy_int" value="1"/>
+    <int name="geolocation_pidf_forming_policy_int" value="3"/>
     <!-- KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
     <int-array name="event_for_initial_registration_on_terminated_state_of_reg_event_int_array" num="5">
         <item value="1"/>

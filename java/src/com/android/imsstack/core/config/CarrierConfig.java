@@ -525,7 +525,8 @@ public class CarrierConfig {
                 "support_contact_user_info_bool";
         public static final String KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT =
                 "contact_user_info_policy_for_non_register_message_int";
-        // Bundle {
+        public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
+                "geolocation_pidf_forming_policy_int";
         public static final String KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE =
                 "specific_registration_error_bundle";
         public static final String KEY_SPECIFIC_REGISTRATION_ERROR_FINAL_TYPE_INT =

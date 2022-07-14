@@ -745,13 +745,26 @@ public:
      *        except for register request.
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::USER_INFO_POLICY_DEFAULT
-     *        CarrierConfig::Assets::USER_INFO_POLICY_NONE
-     *        CarrierConfig::Assets::USER_INFO_POLICY_NO_IMSI
+     *        CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_DEFAULT
+     *        CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_NONE
+     *        CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_NO_IMSI
      *
      * @return IMS_SINT32 Return the policy of setting the user info
      */
     virtual IMS_SINT32 GetUserInfoPolicyForNonRegisterMessage() const = 0;
+
+    /**
+     * @brief Indicate which policy is applied for creating geolocation pidf.
+     *
+     *        Possible values are,
+     *        CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION
+     *        CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITH_POSITION
+     *        CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITH_POSITION_AND_COUNTRY
+     *        CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_CIVIC
+     *
+     * @return IMS_SINT32 Return the policy of setting the user info
+     */
+    virtual IMS_SINT32 GetGeolocationPidfFormingPolicy() const = 0;
 
     /**
      * @brief Get the registration retry intervals for using when registration is failed

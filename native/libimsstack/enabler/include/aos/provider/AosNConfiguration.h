@@ -117,6 +117,7 @@ public:
     virtual IMS_SINT32 GetReregRetryMaxCountKeptRegistration() const;
     virtual IMS_SINT32 GetRegistrationPcscfUpdatePolicy() const;
     virtual IMS_SINT32 GetUserInfoPolicyForNonRegisterMessage() const;
+    virtual IMS_SINT32 GetGeolocationPidfFormingPolicy() const;
 
     virtual IMSVector<IMS_SINT32>& GetRegistrationRetryIntervals();
     virtual IMSVector<IMS_SINT32>& GetRegistrationRandomRetryIntervals();

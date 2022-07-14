@@ -4974,19 +4974,41 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddLocationHeaderBody(
     }
 
     ByteArray objContent;
+    IMS_SINT32 nPolicy = GET_N_CONFIG(m_nSlotId)->GetGeolocationPidfFormingPolicy();
 
-    if (!pPidfCreator->CreateWithoutPosition(
-                AString::ConstNull(), IMS_FALSE, IMS_FALSE, objContent))
+    if (nPolicy == CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION)
+    {
+        if (!pPidfCreator->CreateWithoutPosition(
+                    AString::ConstNull(), IMS_FALSE, IMS_FALSE, objContent))
+        {
+            return IMS_FALSE;
+        }
+    }
+    else if (nPolicy == CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITH_POSITION)
+    {
+        if (!pPidfCreator->CreateWithPosition(AString::ConstNull(), objContent))
+        {
+            return IMS_FALSE;
+        }
+    }
+    else if (nPolicy == CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITH_POSITION_AND_COUNTRY)
+    {
+        if (!pPidfCreator->CreateWithPositionAndCountry(AString::ConstNull(), objContent))
+        {
+            return IMS_FALSE;
+        }
+    }
+    else if (nPolicy == CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_CIVIC)
+    {
+        if (!pPidfCreator->CreateWithoutCivic(AString::ConstNull(), objContent))
+        {
+            return IMS_FALSE;
+        }
+    }
+    else
     {
         return IMS_FALSE;
     }
-
-    /* if needed, asset will be added
-    if (!pPidfCreator->CreateWithPosition(AString::ConstNull(), objContent))
-    {
-        return IMS_FALSE;
-    }
-    */
 
     ISipMessageBodyPart* piBodyPart = piSipMsg->CreateBodyPart();
 
@@ -5157,74 +5179,11 @@ void AosRegistration::UpdateUserInfoInContact()
     }
 
     if (GET_N_CONFIG(m_nSlotId)->GetUserInfoPolicyForNonRegisterMessage() ==
-            CarrierConfig::Assets::USER_INFO_POLICY_NONE)
+            CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_NONE)
     {
         A_IMS_TRACE_D(REGID, "UpdateUserInfoInContact :: apply none policy", 0, 0, 0);
         m_piRegistration->SetUserInfoForContactHeader(AString::ConstEmpty());
     }
-
-    // TODO_CONFIG : check ATT
-#if 0
-    if (m_piContext->GetConfig()->IsRequiredToUpdateContact() == IMS_FALSE)
-    {
-        return;
-    }
-
-    if (m_piRegistration == IMS_NULL)
-    {
-        return;
-    }
-
-    const AStringArray& objAssociatedUris = m_piRegistration->GetAssociatedUris();
-
-    if (objAssociatedUris.IsEmpty())
-    {
-        IMS_TRACE_I("No P-Associated-URI found", 0, 0, 0);
-        return;
-    }
-
-    AString objMsisdn = AString::ConstNull();
-    AosUtil::GetInstance()->GetMsisdn(objMsisdn, m_nSlotId);
-
-    AString strDefaultUserInfo;
-
-    for (IMS_SINT32 nIndex = 0; nIndex < objAssociatedUris.GetCount(); nIndex++)
-    {
-        const AString& objAssociatedUri = objAssociatedUris.GetElementAt(nIndex);
-
-        IMS_TRACE_D("P-Associated-URI: %s", objAssociatedUri.GetStr(), 0, 0);
-
-        AString strUserInfo;
-        AosUtil::GetInstance()->GetUserInfoFromSipAddress(objAssociatedUri, strUserInfo);
-
-        if (strUserInfo.IsNULL())
-        {
-            return;
-        }
-
-        if (nIndex == 0)
-        {
-            strDefaultUserInfo = strUserInfo;
-        }
-
-        if (objMsisdn.IsNULL())
-        {
-            break;
-        }
-
-        if (objAssociatedUri.Contains(objMsisdn))
-        {
-            IMS_TRACE_I("MSISDN based URI found, Update Contact header", 0, 0, 0);
-            m_piRegistration->SetUserInfoForContactHeader(strUserInfo);
-            return;
-        }
-    }
-
-    if (!strDefaultUserInfo.IsNULL()) {
-        IMS_TRACE_I("Update with the default one", 0, 0, 0);
-        m_piRegistration->SetUserInfoForContactHeader(strDefaultUserInfo);
-    }
-#endif
 }
 
 PRIVATE
