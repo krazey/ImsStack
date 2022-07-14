@@ -28,7 +28,7 @@ class AosDnsQueryPrivate;
 class AosDnsQuery : public ImsActivityEx
 {
 public:
-    AosDnsQuery();
+    AosDnsQuery(IN IMS_BOOL bIsTest = IMS_FALSE);
     virtual ~AosDnsQuery();
 
 private:
@@ -59,11 +59,6 @@ private:
         MSG_TERMINATED
     };
 
-private:
-    // Use only for Unit test
-    IMS_BOOL ResetEvent(IN IMS_UINT32 nEvent);
-    IMS_BOOL SetEvent(IN IMS_UINT32 nEvent);
-
 public:
     static IMS_UINT32 m_nIdentity;
 
@@ -75,6 +70,8 @@ private:
     IMSList<IPAddress> m_objIps;
 
 private:
+    // Use only for Unit test
+    IMS_BOOL m_bIsTest;
     friend class AosDnsQueryTest;
 };
 

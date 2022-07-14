@@ -71,9 +71,6 @@ private:
     INetworkConnection* m_piConnection;
     AosDnsQuery* m_pQueryer;
     IMS_BOOL m_bSignaled;
-
-private:
-    friend class AosDnsQuery;
 };
 
 PUBLIC
@@ -303,14 +300,20 @@ IMS_BOOL AosDnsQueryPrivate::Terminate()
 }
 
 PUBLIC
-AosDnsQuery::AosDnsQuery() :
+AosDnsQuery::AosDnsQuery(IN IMS_BOOL bIsTest /*= IMS_FALSE*/) :
         ImsActivityEx(),
         m_pPrivate(IMS_NULL),
         m_piListener(IMS_NULL),
-        m_piConnection(IMS_NULL)
+        m_piConnection(IMS_NULL),
+        m_bIsTest(bIsTest)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosDnsQuery = %" PFLS_u "/%" PFLS_x, GetName().GetStr(),
             sizeof(AosDnsQuery), this);
+
+    if (m_bIsTest)
+    {
+        return;
+    }
 
     m_pPrivate = new AosDnsQueryPrivate(this);
 
@@ -343,32 +346,32 @@ IMS_BOOL AosDnsQuery::Request(IN AString& strDomainName, IN INetworkConnection* 
     m_strDomainName = strDomainName;
     m_piConnection = piConnection;
 
-    return PostMessage(MSG_REQUEST, 0, 0);
+    return (m_bIsTest) ? IMS_TRUE : PostMessage(MSG_REQUEST, 0, 0);
 }
 
 PUBLIC
 IMS_BOOL AosDnsQuery::Destroy()
 {
-    return PostMessage(MSG_DESTROY, 0, 0);
+    return (m_bIsTest) ? IMS_TRUE : PostMessage(MSG_DESTROY, 0, 0);
 }
 
 PUBLIC
 IMS_BOOL AosDnsQuery::DnsQueryPrivate_Ready()
 {
-    return PostMessage(MSG_READY, 0, 0);
+    return (m_bIsTest) ? IMS_TRUE : PostMessage(MSG_READY, 0, 0);
 }
 
 PUBLIC
 IMS_BOOL AosDnsQuery::DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN IMSList<IPAddress> objIps)
 {
     m_objIps = objIps;
-    return PostMessage(MSG_DONE, (bResult) ? 1 : 0, 0);
+    return (m_bIsTest) ? IMS_TRUE : PostMessage(MSG_DONE, (bResult) ? 1 : 0, 0);
 }
 
 PUBLIC
 IMS_BOOL AosDnsQuery::DnsQueryPrivate_Terminated()
 {
-    return PostMessage(MSG_TERMINATED, 0, 0);
+    return (m_bIsTest) ? IMS_TRUE : PostMessage(MSG_TERMINATED, 0, 0);
 }
 
 PRIVATE
@@ -388,7 +391,10 @@ IMS_BOOL AosDnsQuery::OnMessage(IN IMSMSG& objMsg)
             break;
 
         case MSG_REQUEST:
-            m_pPrivate->DoDnsQuery(m_strDomainName, m_piConnection);
+            if (m_pPrivate != IMS_NULL)
+            {
+                m_pPrivate->DoDnsQuery(m_strDomainName, m_piConnection);
+            }
             break;
 
         case MSG_DONE:
@@ -399,7 +405,7 @@ IMS_BOOL AosDnsQuery::OnMessage(IN IMSMSG& objMsg)
         break;
 
         case MSG_DESTROY:
-            if (!m_pPrivate->Terminate())
+            if (m_pPrivate != IMS_NULL && !m_pPrivate->Terminate())
             {
                 delete this;
             }
@@ -414,18 +420,4 @@ IMS_BOOL AosDnsQuery::OnMessage(IN IMSMSG& objMsg)
     }
 
     return IMS_TRUE;
-}
-
-// Use only for Unit test
-PRIVATE
-IMS_BOOL AosDnsQuery::ResetEvent(IN IMS_UINT32 nEvent)
-{
-    return m_pPrivate->ResetEvent(nEvent);
-}
-
-// Use only for Unit test
-PRIVATE
-IMS_BOOL AosDnsQuery::SetEvent(IN IMS_UINT32 nEvent)
-{
-    return m_pPrivate->SetEvent(nEvent);
 }
