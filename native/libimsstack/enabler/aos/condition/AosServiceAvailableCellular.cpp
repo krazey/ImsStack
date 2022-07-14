@@ -75,7 +75,7 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UI
 {
     AosServiceAvailable::HandleRoamingChanged(nState);
 
-    if (GET_N_CONFIG(m_nSlotId)->IsVoLteRoamingAvailable())
+    if (GET_N_CONFIG(m_nSlotId) == IMS_NULL || GET_N_CONFIG(m_nSlotId)->IsVoLteRoamingAvailable())
     {
         return;
     }
@@ -83,11 +83,18 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UI
     if (m_bRoamingState)
     {
         RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AoSReason::NOT_SPECIFIED);
-        m_piBlock->SetBlockReason(BLOCK_CELLULAR_ROAMING);
+
+        if (m_piBlock != IMS_NULL)
+        {
+            m_piBlock->SetBlockReason(BLOCK_CELLULAR_ROAMING);
+        }
     }
     else
     {
-        m_piBlock->ResetBlockReason(BLOCK_CELLULAR_ROAMING);
+        if (m_piBlock != IMS_NULL)
+        {
+            m_piBlock->ResetBlockReason(BLOCK_CELLULAR_ROAMING);
+        }
     }
 }
 
@@ -102,11 +109,17 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN I
 
     if (m_bAirplaneMode)
     {
-        m_piBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+        if (m_piBlock != IMS_NULL)
+        {
+            m_piBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+        }
     }
     else
     {
-        m_piBlock->ResetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+        if (m_piBlock != IMS_NULL)
+        {
+            m_piBlock->ResetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+        }
     }
 }
 
@@ -123,11 +136,17 @@ void AosServiceAvailableCellular::HandleVolteSettingChanged(IN IMS_UINT32 nState
     if (m_bVolteSetting == IMS_FALSE)
     {
         RequestCommand(AosCondition::REQUEST_STOP, AoSReason::NOT_SPECIFIED);
-        m_piBlock->SetBlockReason(BLOCK_CELLULAR_VOLTE_OFF);
+        if (m_piBlock != IMS_NULL)
+        {
+            m_piBlock->SetBlockReason(BLOCK_CELLULAR_VOLTE_OFF);
+        }
     }
     else
     {
-        m_piBlock->ResetBlockReason(BLOCK_CELLULAR_VOLTE_OFF);
+        if (m_piBlock != IMS_NULL)
+        {
+            m_piBlock->ResetBlockReason(BLOCK_CELLULAR_VOLTE_OFF);
+        }
     }
 }
 
@@ -139,11 +158,17 @@ void AosServiceAvailableCellular::HandleVopsChanged(IN IMS_UINT32 nState)
     if (m_bVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
         RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AoSReason::NOT_SPECIFIED);
-        m_piBlock->SetBlockReason(BLOCK_CELLULAR_VOPS_OFF);
+        if (m_piBlock != IMS_NULL)
+        {
+            m_piBlock->SetBlockReason(BLOCK_CELLULAR_VOPS_OFF);
+        }
     }
     else
     {
-        m_piBlock->ResetBlockReason(BLOCK_CELLULAR_VOPS_OFF);
+        if (m_piBlock != IMS_NULL)
+        {
+            m_piBlock->ResetBlockReason(BLOCK_CELLULAR_VOPS_OFF);
+        }
     }
 }
 
@@ -158,6 +183,11 @@ PRIVATE VIRTUAL IMS_BOOL AosServiceAvailableCellular::CheckServiceAvailable()
     {
         A_IMS_TRACE_I(AOSTAG, "CheckServiceAvailable :: Cellular service config is not available",
                 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    if (m_piBlock == IMS_NULL)
+    {
         return IMS_FALSE;
     }
 

@@ -104,6 +104,7 @@ private:
 
 private:
     friend class AosServiceAvailableTest;
+    friend class AosConditionTest;
 };
 
 #endif  // AOS_SERVICE_AVAILABLE_H_

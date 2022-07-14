@@ -205,7 +205,8 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleRoamingChanged(IN IMS_UINT32
 {
     AosServiceAvailable::HandleRoamingChanged(nState);
 
-    if (GET_N_CONFIG(m_nSlotId)->IsWfcRoamingEnabled() == IMS_FALSE)
+    if (GET_N_CONFIG(m_nSlotId) != IMS_NULL &&
+            GET_N_CONFIG(m_nSlotId)->IsWfcRoamingEnabled() == IMS_FALSE)
     {
         if (m_bRoamingState)
         {

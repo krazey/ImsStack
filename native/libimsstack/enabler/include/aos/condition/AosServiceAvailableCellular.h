@@ -39,6 +39,7 @@ private:
 
 private:
     friend class AosServiceAvailableCellurTest;
+    friend class AosConditionTest;
 };
 
 #endif  // AOS_SERVICE_AVAILABLE_CELLULAR_H_
