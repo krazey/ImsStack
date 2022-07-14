@@ -18,6 +18,7 @@
 #define MTC_MEDIA_MANAGER_H_
 
 #include "IMediaSession.h"
+#include "IMessage.h"
 #include "IMSTypeDef.h"
 #include "IUMedia.h"
 #include "MediaDef.h"
