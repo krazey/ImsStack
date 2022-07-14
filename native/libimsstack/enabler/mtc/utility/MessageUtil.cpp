@@ -16,7 +16,6 @@
 
 #include "CallReasonInfo.h"
 #include "Const3GPP.h"
-#include "define/MtcStringDef.h"
 #include "AStringBuffer.h"
 #include "media/IMedia.h"
 #include "IMessage.h"
@@ -1844,7 +1843,7 @@ PUBLIC GLOBAL IMS_BOOL MessageUtil::IsSessionRefresh(IN ISession* piSession)
 
 Exit_IsSessRefresh:
 
-    IMS_TRACE_I("IsSessRefresh [%s]", PS_BOOL(bIs), 0, 0);
+    IMS_TRACE_I("IsSessRefresh [%s]", _TRACE_B_(bIs), 0, 0);
     return bIs;
 }
 

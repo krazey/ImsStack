@@ -18,7 +18,6 @@
 #include "call/MtcUiNotifier.h"
 #include "call/state/TerminatingState.h"
 #include "helper/MtcTimerWrapper.h"
-#include "define/MtcStringDef.h"
 #include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

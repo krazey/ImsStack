@@ -157,7 +157,7 @@ PUBLIC VIRTUAL IMS_BOOL UCDialog::Update(IN IElement* pDialogElement)
     bUpdated |= UpdateOnHold(pDialogElement);
     bUpdated |= UpdateEnablePulled(pDialogElement);
 
-    IMS_TRACE_I("Update : [%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("Update : [%s]", _TRACE_B_(bUpdated), 0, 0);
     return bUpdated;
 }
 
@@ -181,7 +181,7 @@ PUBLIC VIRTUAL IMS_BOOL UCDialog::IsDialog(IN IElement* pDialogElement)
         bIs = IMS_TRUE;
     }
 
-    IMS_TRACE_D("IsDialog : [%s][%s] [%s]", m_aStrID.GetStr(), aStrID.GetStr(), PS_BOOL(bIs));
+    IMS_TRACE_D("IsDialog : [%s][%s] [%s]", m_aStrID.GetStr(), aStrID.GetStr(), _TRACE_B_(bIs));
     return bIs;
 }
 
@@ -385,7 +385,7 @@ PUBLIC VIRTUAL AString UCDialog::GetRemotepVal(IN AString aStrpName)
 ------------------------------------------------------------------------------------------------ */
 PUBLIC VIRTUAL IMS_BOOL UCDialog::EnablePulled()
 {
-    IMS_TRACE_I("EnablePulled : [%s]", PS_BOOL(m_bEnablePulled), 0, 0);
+    IMS_TRACE_I("EnablePulled : [%s]", _TRACE_B_(m_bEnablePulled), 0, 0);
     return m_bEnablePulled;
 }
 
@@ -451,7 +451,7 @@ PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialog(IN IElement* pDialogElement)
         bUpdated = IMS_TRUE;
     }
 
-    IMS_TRACE_I("UpdateDialog : [%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("UpdateDialog : [%s]", _TRACE_B_(bUpdated), 0, 0);
     return bUpdated;
 }
 
@@ -503,7 +503,7 @@ PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogState(IN IElement* pStateElemen
         }
     }
 
-    IMS_TRACE_I("UpdateDialogState : [%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("UpdateDialogState : [%s]", _TRACE_B_(bUpdated), 0, 0);
     return bUpdated;
 }
 
@@ -532,7 +532,7 @@ PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogDuration(IN IElement* pDuration
         }
     }
 
-    IMS_TRACE_I("UpdateDialogDuration : [%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("UpdateDialogDuration : [%s]", _TRACE_B_(bUpdated), 0, 0);
     return IMS_FALSE;
 }
 
@@ -584,7 +584,7 @@ PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogReplaces(IN IElement* pReplaces
         }
     }
 
-    IMS_TRACE_I("UpdateDialogReplaces : [%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("UpdateDialogReplaces : [%s]", _TRACE_B_(bUpdated), 0, 0);
     return bUpdated;
 }
 
@@ -624,7 +624,7 @@ PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogReferredBy(IN IElement* pReferr
         }
     }
 
-    IMS_TRACE_I("UpdateDialogReferredBy : [%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("UpdateDialogReferredBy : [%s]", _TRACE_B_(bUpdated), 0, 0);
     return bUpdated;
 }
 
@@ -653,7 +653,7 @@ PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogLR(
         bUpdated |= UpdateDialogLRTarget(pTergetElement, pstDialogLR);
     }
 
-    IMS_TRACE_I("UpdateDialogLR : [%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("UpdateDialogLR : [%s]", _TRACE_B_(bUpdated), 0, 0);
     return bUpdated;
 }
 
@@ -699,7 +699,7 @@ PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogLRIdentity(
         }
     }
 
-    IMS_TRACE_I("UpdateDialogLRIdentity : [%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("UpdateDialogLRIdentity : [%s]", _TRACE_B_(bUpdated), 0, 0);
     return bUpdated;
 }
 
@@ -734,7 +734,7 @@ PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogLRTarget(
 
     bUpdated |= UpdateDialogLRTarget_Param(pTargetElement, pstDialogLR);
 
-    IMS_TRACE_I("UpdateDialogLRTarget : [%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("UpdateDialogLRTarget : [%s]", _TRACE_B_(bUpdated), 0, 0);
     return bUpdated;
 }
 
@@ -802,7 +802,7 @@ PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogLRTarget_Param(
 
     pTargetElement->DestroyNodeList(pINodeList);
 
-    IMS_TRACE_I("UpdateDialogLRTarget_Param : [%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("UpdateDialogLRTarget_Param : [%s]", _TRACE_B_(bUpdated), 0, 0);
     return bUpdated;
 }
 
@@ -818,7 +818,7 @@ PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateEnablePulled(IN IElement* pDialogElem
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("UpdateEnablePulled : [%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("UpdateEnablePulled : [%s]", _TRACE_B_(bUpdated), 0, 0);
     return bUpdated;
 }
 
@@ -844,7 +844,7 @@ PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateOnHold(IN IElement* pDialogElement)
         m_eState = DIALOG_STATE_ONHOLD;
     }
 
-    IMS_TRACE_I("UpdateOnHold : State[%d] [%s]", m_eState, PS_BOOL(bIs), 0);
+    IMS_TRACE_I("UpdateOnHold : State[%d] [%s]", m_eState, _TRACE_B_(bIs), 0);
     return bIs;
 }
 
@@ -860,7 +860,7 @@ PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogExtraInfo(IN IElement* pDialogE
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("UpdateDialogExtraInfo : [%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("UpdateDialogExtraInfo : [%s]", _TRACE_B_(bUpdated), 0, 0);
     return bUpdated;
 }
 

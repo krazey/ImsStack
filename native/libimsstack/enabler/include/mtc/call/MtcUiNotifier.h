@@ -21,7 +21,6 @@
 #include "ImsList.h"
 #include "IMSTypeDef.h"
 #include "MtcDef.h"
-#include "define/MtcStringDef.h"
 #include "call/IMtcCall.h"
 
 class IMtcCallContext;

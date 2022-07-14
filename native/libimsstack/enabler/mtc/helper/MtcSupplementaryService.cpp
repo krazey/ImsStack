@@ -28,7 +28,6 @@
 
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "define/MtcStringDef.h"
 #include "helper/MtcSupplementaryService.h"
 #include "ussi/UssiController.h"
 #include "utility/MessageUtil.h"
@@ -129,7 +128,7 @@ IMS_BOOL MtcSupplementaryService::UpdateIncomingServices(IN IMessage* piMessage)
     bUpdate |= UpdateDualNumber(piMessage);
     bUpdate |= UpdateCallingNumVerification(piMessage);
 
-    IMS_TRACE_I("UpdateService : [%s]", PS_BOOL(bUpdate), 0, 0);
+    IMS_TRACE_I("UpdateService : [%s]", _TRACE_B_(bUpdate), 0, 0);
     return bUpdate;
 }
 

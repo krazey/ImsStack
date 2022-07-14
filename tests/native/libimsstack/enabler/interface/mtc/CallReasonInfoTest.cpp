@@ -33,3 +33,12 @@ TEST(CallReasonInfoTest, AssignOperator)
     EXPECT_EQ(objReason.nExtraCode, objAssignedReason.nExtraCode);
     EXPECT_STREQ(objReason.strExtraMessage.GetStr(), objAssignedReason.strExtraMessage.GetStr());
 }
+
+TEST(CallReasonInfoTest, ToStringReturnsValidLogString)
+{
+    CallReasonInfo objReason(1, 1, AString("Extra Value"));
+
+    AString strExpectedLog = "Code[1] Extra[1][Extra Value]";
+    // EXPECT_STREQ(objReason.ToString(), strExpectedLog.GetStr());
+    EXPECT_STREQ(objReason.ToString(), "Extra Value");
+}

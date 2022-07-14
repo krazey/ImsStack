@@ -671,7 +671,7 @@ void ConferenceController::NotifyUsersInfo()
 
 PROTECTED VIRTUAL void ConferenceController::SubscribeConference(IN IMS_BOOL bUnsub /*= IMS_FALSE*/)
 {
-    IMS_TRACE_D("SubscribeConference [%s]", PS_BOOL(bUnsub), 0, 0);
+    IMS_TRACE_D("SubscribeConference [%s]", _TRACE_B_(bUnsub), 0, 0);
 
     if (bUnsub)
     {

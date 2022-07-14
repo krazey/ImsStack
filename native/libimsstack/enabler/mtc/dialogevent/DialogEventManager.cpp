@@ -188,8 +188,8 @@ PUBLIC VIRTUAL IMS_BOOL DEMngr::Stop(IN IMS_BOOL bDestroy /*= IMS_FALSE*/)
     // CallStateProxy::GetInstance()->RemoveListener(m_nSlotID, this);
     DeleteEventListn();
 
-    IMS_TRACE_I("Stop : Destroy[%s][%s] [%s]", PS_BOOL(m_bDestroy), PS_BOOL(bDestroy),
-            PS_BOOL(bReturn));
+    IMS_TRACE_I("Stop : Destroy[%s][%s] [%s]", _TRACE_B_(m_bDestroy), _TRACE_B_(bDestroy),
+            _TRACE_B_(bReturn));
 
     m_bDestroy = bDestroy;
     return bReturn;
@@ -259,7 +259,7 @@ PUBLIC VIRTUAL void DEMngr::SubscriptionNotify(
         }
     }
 
-    IMS_TRACE_I("SubscriptionNotify : Update[%s]", PS_BOOL(bUpdated), 0, 0);
+    IMS_TRACE_I("SubscriptionNotify : Update[%s]", _TRACE_B_(bUpdated), 0, 0);
 
     if (bUpdated)
     {
@@ -752,7 +752,7 @@ PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleFailureRes(
         bHandle = HandleFailureRes_423(pISubscription);
     }
 
-    IMS_TRACE_I("HandleFailureRes [%d] Handle[%s]", nStatusCode, PS_BOOL(bHandle), 0);
+    IMS_TRACE_I("HandleFailureRes [%d] Handle[%s]", nStatusCode, _TRACE_B_(bHandle), 0);
     return bHandle;
 }
 
@@ -783,7 +783,7 @@ PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleFailureRes_423(IN ISubscription* pISubs
     Subscribe(m_pService->GetICoreService());
     bHandle = IMS_TRUE;
 
-    IMS_TRACE_I("HandleFailureRes_423 : [%d][%d][%s]", nMins, m_nExpireTime, PS_BOOL(bHandle));
+    IMS_TRACE_I("HandleFailureRes_423 : [%d][%d][%s]", nMins, m_nExpireTime, _TRACE_B_(bHandle));
     return bHandle;
 }
 
@@ -905,7 +905,7 @@ PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleRetryByTerminated()
     }
 
     IMS_TRACE_I("HandleRetryByTerminated : Handle[%s], Reason[%u], RetryAfter[%u]",
-            PS_BOOL(bHandle), m_eTerminatedReason, m_nRetryAfter);
+            _TRACE_B_(bHandle), m_eTerminatedReason, m_nRetryAfter);
 
     if (bReAttemptNeeded)
     {
@@ -954,7 +954,7 @@ PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleUnSubCompleted(IN ISubscription* pISubs
     }
 
     bHandle = IMS_TRUE;
-    IMS_TRACE_I("HandleUnSubCompleted : [%s]", PS_BOOL(bHandle), 0, 0);
+    IMS_TRACE_I("HandleUnSubCompleted : [%s]", _TRACE_B_(bHandle), 0, 0);
 
     SendTerminatedToListn(CallReasonInfo(CODE_UNSPECIFIED, -1));
     return bHandle;
@@ -1031,7 +1031,7 @@ PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleDialogInfo(IN const AString& aStrDialog
     }
 
     IMS_TRACE_I("HandleDialogInfo : Dialogs[%d] Updated[%s]", pINodeListDialog->GetLength(),
-            PS_BOOL(bUpdated), 0);
+            _TRACE_B_(bUpdated), 0);
 
     pIElement->DestroyNodeList(pINodeListDialog);
     piDocument->DestroyDocument();
@@ -1154,7 +1154,7 @@ PROTECTED VIRTUAL IMS_BOOL DEMngr::IsInitiator(IN IDialogEvent* pDialog)
         bIs = IMS_TRUE;
     }
 
-    IMS_TRACE_I("IsInitiator : [%s]", PS_BOOL(bIs), 0, 0);
+    IMS_TRACE_I("IsInitiator : [%s]", _TRACE_B_(bIs), 0, 0);
     return bIs;
 }
 
@@ -1164,7 +1164,7 @@ PROTECTED VIRTUAL IMS_BOOL DEMngr::IsConf(IN IDialogEvent* /*pDialog*/)
 {
     IMS_BOOL bIs = IMS_FALSE;
 
-    IMS_TRACE_I("IsConf : [%s]", PS_BOOL(bIs), 0, 0);
+    IMS_TRACE_I("IsConf : [%s]", _TRACE_B_(bIs), 0, 0);
     return bIs;
 }
 
@@ -1176,7 +1176,7 @@ PROTECTED VIRTUAL IMS_BOOL DEMngr::IsCallPull(IN IDialogEvent* pDialog)
 
     bIs = pDialog->EnablePulled();
 
-    IMS_TRACE_I("IsCallPull : [%s]", PS_BOOL(bIs), 0, 0);
+    IMS_TRACE_I("IsCallPull : [%s]", _TRACE_B_(bIs), 0, 0);
     return bIs;
 }
 
@@ -1238,8 +1238,8 @@ PROTECTED VIRTUAL void DEMngr::SendTerminatedToListn(IN CallReasonInfo terminate
     pParam->terminatedReason = terminatedReason;
     pParam->bDestroy = m_bDestroy;
 
-    IMS_TRACE_I("SendTerminatedToListn : %s Destroy[%s]", PS_FR(terminatedReason),
-            PS_BOOL(m_bDestroy), 0);
+    IMS_TRACE_I("SendTerminatedToListn : %s Destroy[%s]", _TRACE_CR_(terminatedReason),
+            _TRACE_B_(m_bDestroy), 0);
 
     m_pListener->DEMngr_Terminated((IMS_UINTP)pParam);
 }

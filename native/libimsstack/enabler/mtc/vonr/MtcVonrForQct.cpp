@@ -22,6 +22,7 @@
 #include "MtcDef.h"
 #include "vonr/MtcVonrForQct.h"
 #include "vonr/IMtcVonrListener.h"
+#include "CallReasonInfo.h"
 
 __IMS_TRACE_TAG_COM_UC__;
 
