@@ -18,10 +18,6 @@ package com.android.imsstack.enabler.ssc;
 
 import android.text.TextUtils;
 
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.SimInterface;
-import com.android.imsstack.core.agents.SubsInfoInterface;
-import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
 import com.android.imsstack.util.ImsLog;
@@ -29,7 +25,6 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Locale;
 
 public class SscUrl {
     private final String URI_HTTP = "http://";
@@ -47,7 +42,7 @@ public class SscUrl {
     }
 
     protected URL getConnectionUrl(int slotId, String query) {
-        String urlAddr = generateXcapRootUri(slotId);
+        String urlAddr = getXcapRootUri(slotId);
         if (TextUtils.isEmpty(urlAddr)) {
             ImsLog.e(slotId, "urlAddr is null");
             return null;
@@ -183,7 +178,7 @@ public class SscUrl {
         return uri;
     }
 
-    /* TODO: SRV query will be refactored
+    /* TODO: NAPTR/SRV query will be refactored
     private String queryNaptrSrv(int slotId, String fqdn) {
 
         ImsLog.d("");
@@ -221,55 +216,19 @@ public class SscUrl {
     }
     */
 
-    private String generateXcapRootUri(int slotId) {
-        SubsInfoInterface subsInfo = getSubsInfoInterface(slotId);
-        if (subsInfo == null) {
-            return null;
-        }
-
+    private String getXcapRootUri(int slotId) {
         String uriAddr = SscConfig.getUtServerFqdn(slotId);
         if (TextUtils.isEmpty(uriAddr)) {
-            uriAddr = "xcap.";
-
-            SimInterface sim = getSimInterface(slotId);
-            String impi = (sim != null) ? sim.getIsimImpi() : null;
-
-            if (subsInfo.isIsimEnabled() && !TextUtils.isEmpty(impi)) {
-                String substringImpi = impi.substring(impi.lastIndexOf("@") + 1, impi.length());
-                ImsLog.d("substring of IMPI : " + substringImpi);
-
-                if (substringImpi.contains("3gppnetwork.org")) {
-                    uriAddr += substringImpi.replace("3gppnetwork.org", "pub.3gppnetwork.org");
-                } else {
-                    uriAddr += substringImpi;
-                }
-            } else {
-                ITelephonySubscriber ts = getTelephonySubscriber(slotId);
-                if (ts == null) {
-                    return null;
-                }
-
-                String strMnc = ts.getMnc(true);
-                String strMcc = ts.getMcc(true);
-                if (TextUtils.isEmpty(strMnc) || TextUtils.isEmpty(strMcc)) {
-                    ImsLog.e("Wrong MNC : " + strMnc + " or MCC : " + strMcc);
-                    return null;
-                }
-
-                try {
-                    uriAddr += String.format(Locale.US, "ims.mnc%03d.mcc%03d.pub.3gppnetwork.org",
-                        Integer.parseInt(strMnc), Integer.parseInt(strMcc));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                    ImsLog.e(e.toString());
-                    return null;
-                }
+            uriAddr = getSscUtils().getDomain(slotId, true);
+            if (TextUtils.isEmpty(uriAddr)) {
+                ImsLog.e("uriAddr is null");
+                return null;
             }
         }
 
+        /* TODO: will be used after implementation NAPTR/SRV query
         if (SscConfig.isSrvRecordsRequired(slotId)) {
-            // TODO: will be used after implementation NAPTR/SRV query
-            // uriAddr = queryNaptrSrv(slotId, uriAddr);
+            uriAddr = queryNaptrSrv(slotId, uriAddr);
         } else {
             int uriPort = SscConfig.getUtServerPort(slotId);
             if (uriPort <= 0) {
@@ -279,9 +238,17 @@ public class SscUrl {
             String uriHttp = SscConfig.isTls(slotId) ? URI_HTTPS : URI_HTTP;
             uriAddr = uriHttp + uriAddr + ":" + Integer.toString(uriPort);
         }
+        */
+
+        int uriPort = SscConfig.getUtServerPort(slotId);
+        if (uriPort <= 0) {
+            uriPort = SscConfig.isTls(slotId) ? 443 : 80;
+        }
+
+        String uriHttp = SscConfig.isTls(slotId) ? URI_HTTPS : URI_HTTP;
+        uriAddr = uriHttp + uriAddr + ":" + Integer.toString(uriPort);
 
         ImsLog.d("uriAddr : " + uriAddr);
-
         return uriAddr;
     }
 
@@ -292,18 +259,11 @@ public class SscUrl {
     }
 
     @VisibleForTesting
-    protected SimInterface getSimInterface(int slotId) {
-        return AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
+    protected SscUrl() {
     }
 
     @VisibleForTesting
-    protected SubsInfoInterface getSubsInfoInterface(int slotId) {
-        return AgentFactory.getInstance().getAgent(SubsInfoInterface.class, slotId);
-    }
-
-    @VisibleForTesting
-    protected ITelephonySubscriber getTelephonySubscriber(int slotId) {
-        return (ITelephonySubscriber) AgentFactory.getInstance()
-                .getAgent(AgentFactory.TELEPHONY_SUBSCRIBER, slotId);
+    protected SscUtils getSscUtils() {
+        return SscUtils.getInstance();
     }
 }

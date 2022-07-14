@@ -18,16 +18,12 @@ package com.android.imsstack.enabler.ssc;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.ConfigAgent;
-import com.android.imsstack.core.agents.SimInterface;
-import com.android.imsstack.core.agents.SubsInfoInterface;
-import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
@@ -52,9 +48,7 @@ public class SscUrlTest {
 
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigAgent mMockConfigAgent;
-    @Mock private SimInterface mMockSimInterface;
-    @Mock private SubsInfoInterface mMockSubsInfoInterface;
-    @Mock private ITelephonySubscriber mMockTelephonySubscriber;
+    @Mock private SscUtils mMockSscUtils;
 
     @Before
     public void setup() {
@@ -64,37 +58,13 @@ public class SscUrlTest {
         SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
         SscXmlFormat.init(SLOT_0);
-        mSscUrl = new FakeSscUrl(); // SscUrl.getInstance();
+        mSscUrl = new FakeSscUrl();
     }
 
     @After
     public void tearDown() {
         SscXmlFormat.reset(SLOT_0);
         SscConfig.clear(SLOT_0);
-    }
-
-    @Test
-    public void getConnectionUrl_failWhenSubsInfoIsNull() {
-        mMockSubsInfoInterface = null;
-
-        URL url = mSscUrl.getConnectionUrl(SLOT_0, mRequestUri);
-
-        assertNull(url);
-    }
-
-    @Test
-    public void getConnectionUrl_failWhenSimInterfaceAndTelephonySubsAreNull() {
-        mMockSimInterface = null;
-        mMockTelephonySubscriber = null;
-
-        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
-        when(mMockCarrierConfig.getString(CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_FQDN_STRING))
-            .thenReturn(null);
-
-        URL url = mSscUrl.getConnectionUrl(SLOT_0, mRequestUri);
-
-        verify(mMockSubsInfoInterface).isIsimEnabled();
-        assertNull(url);
     }
 
     @Test
@@ -119,13 +89,12 @@ public class SscUrlTest {
     }
 
     @Test
-    public void getConnectionUrl_generatedFromIsim() {
-        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
+    public void getConnectionUrl_generatedFromUicc() {
         when(mMockCarrierConfig.getString(CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_FQDN_STRING))
             .thenReturn(null);
         when(mMockCarrierConfig.getInt(CarrierConfigManager.ImsSs.KEY_UT_TRANSPORT_TYPE_INT))
             .thenReturn(CarrierConfigManager.Ims.PREFERRED_TRANSPORT_TLS);
-        when(mMockSimInterface.getIsimImpi()).thenReturn("impi.operator.com");
+        when(mMockSscUtils.getDomain(SLOT_0, true)).thenReturn("xcap.impi.operator.com");
 
         URL url = mSscUrl.getConnectionUrl(SLOT_0, mRequestUri);
 
@@ -136,75 +105,17 @@ public class SscUrlTest {
     }
 
     @Test
-    public void getConnectionUrl_generatedFromIsimIncludingPostfix() {
-        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
+    public void getConnectionUrl_generatedFromUiccIncludingPostfix() {
         when(mMockCarrierConfig.getString(CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_FQDN_STRING))
             .thenReturn(null);
         when(mMockCarrierConfig.getInt(CarrierConfigManager.ImsSs.KEY_UT_TRANSPORT_TYPE_INT))
             .thenReturn(CarrierConfigManager.Ims.PREFERRED_TRANSPORT_TCP);
-        when(mMockSimInterface.getIsimImpi()).thenReturn("impi.3gppnetwork.org");
+        when(mMockSscUtils.getDomain(SLOT_0, true)).thenReturn("xcap.impi.pub.3gppnetwork.org");
 
         URL url = mSscUrl.getConnectionUrl(SLOT_0, mRequestUri);
 
         assertNotNull(url);
         assertEquals("xcap.impi.pub.3gppnetwork.org", url.getHost());
-        assertEquals(80, url.getPort()); // It's because transport type isn't TLS
-        assertEquals(mRequestUri, url.getPath());
-    }
-
-    @Test
-    public void getConnectionUrl_generatedFromUsimWhenMncIsNull() {
-        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
-        when(mMockCarrierConfig.getString(CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_FQDN_STRING))
-            .thenReturn(null);
-        when(mMockTelephonySubscriber.getMnc(true)).thenReturn(null);
-        when(mMockTelephonySubscriber.getMcc(true)).thenReturn("001");
-
-        URL url = mSscUrl.getConnectionUrl(SLOT_0, mRequestUri);
-
-        assertNull(url);
-    }
-
-    @Test
-    public void getConnectionUrl_generatedFromUsimWhenMccIsNull() {
-        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
-        when(mMockCarrierConfig.getString(CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_FQDN_STRING))
-            .thenReturn(null);
-        when(mMockTelephonySubscriber.getMnc(true)).thenReturn("01");
-        when(mMockTelephonySubscriber.getMcc(true)).thenReturn(null);
-
-        URL url = mSscUrl.getConnectionUrl(SLOT_0, mRequestUri);
-
-        assertNull(url);
-    }
-
-    @Test
-    public void getConnectionUrl_generatedFromUsimWhenNumberFormatException() {
-        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
-        when(mMockCarrierConfig.getString(CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_FQDN_STRING))
-            .thenReturn(null);
-        when(mMockTelephonySubscriber.getMnc(true)).thenReturn("abc");
-        when(mMockTelephonySubscriber.getMcc(true)).thenReturn("def");
-
-        URL url = mSscUrl.getConnectionUrl(SLOT_0, mRequestUri);
-
-        assertNull(url);
-    }
-
-    @Test
-    public void getConnectionUrl_generatedFromUsim() {
-        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
-        when(mMockCarrierConfig.getString(CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_FQDN_STRING))
-            .thenReturn(null);
-        when(mMockCarrierConfig.getInt(CarrierConfigManager.ImsSs.KEY_UT_TRANSPORT_TYPE_INT))
-            .thenReturn(CarrierConfigManager.Ims.PREFERRED_TRANSPORT_TCP);
-        when(mMockTelephonySubscriber.getMnc(true)).thenReturn("01");
-        when(mMockTelephonySubscriber.getMcc(true)).thenReturn("001");
-
-        URL url = mSscUrl.getConnectionUrl(SLOT_0, mRequestUri);
-
-        assertNotNull(url);
-        assertEquals("xcap.ims.mnc001.mcc001.pub.3gppnetwork.org", url.getHost());
         assertEquals(80, url.getPort()); // It's because transport type isn't TLS
         assertEquals(mRequestUri, url.getPath());
     }
@@ -571,21 +482,12 @@ public class SscUrlTest {
 
     private class FakeSscUrl extends SscUrl {
         @Override
-        protected SimInterface getSimInterface(int slotId) {
-            super.getSimInterface(slotId);
-            return mMockSimInterface;
-        }
+        protected SscUtils getSscUtils() {
+            if (super.getSscUtils() == null) {
+                fail();
+            }
 
-        @Override
-        protected SubsInfoInterface getSubsInfoInterface(int slotId) {
-            super.getSubsInfoInterface(slotId);
-            return mMockSubsInfoInterface;
-        }
-
-        @Override
-        protected ITelephonySubscriber getTelephonySubscriber(int slotId) {
-            super.getTelephonySubscriber(slotId);
-            return mMockTelephonySubscriber;
+            return mMockSscUtils;
         }
     }
 }

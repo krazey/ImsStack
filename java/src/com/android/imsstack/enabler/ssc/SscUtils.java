@@ -23,6 +23,7 @@ import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 import java.util.Locale;
@@ -32,17 +33,12 @@ import java.util.Locale;
  */
 public class SscUtils {
     private static SscUtils sSscUtils = new SscUtils();
-
-    private SscUtils() {
-    }
-
     protected static SscUtils getInstance() {
         return sSscUtils;
     }
 
     protected int getTelephonySimType(int slotId) {
-        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
-                SubsInfoInterface.class, slotId);
+        SubsInfoInterface subsInfo = getSubsInfoInterface(slotId);
         if (subsInfo == null) {
             return SscConstant.APPTYPE_ISIM;
         }
@@ -54,59 +50,67 @@ public class SscUtils {
         return SscConstant.APPTYPE_USIM;
     }
 
+    protected String getImpi(int slotId) {
+        SimInterface sim = getSimInterface(slotId);
+        String impi = (sim != null) ? sim.getIsimImpi() : null;
+        if (TextUtils.isEmpty(impi)) {
+            ImsLog.w("wrong IMPI");
+            return null;
+        }
+
+        return impi;
+    }
+
     protected String getImpu(int slotId) {
         // TODO: Get IMPU from UICC value that provided by IMS platform regardless of USIM or ISIM
-        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
-        List<String> impuList = sim != null ? sim.getIsimImpu() : null;
-
-        if (impuList.isEmpty()) {
-            ImsLog.w("IMPU is empty!!!");
+        SimInterface sim = getSimInterface(slotId);
+        List<String> impuList = (sim != null) ? sim.getIsimImpu() : null;
+        if (impuList == null || impuList.isEmpty()) {
+            ImsLog.w("wrong IMPU");
             return null;
         }
 
         return impuList.get(0);
     }
 
-    protected String getDomain(int slotId) {
-        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
-                SubsInfoInterface.class, slotId);
+    protected String getDomain(int slotId, boolean forXcapRootUri) {
+        SubsInfoInterface subsInfo = getSubsInfoInterface(slotId);
         if (subsInfo == null) {
             return null;
         }
 
         String domain = null;
-        if (subsInfo.isIsimEnabled() == true) {
-            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
-            String impi = sim != null ? sim.getIsimImpi() : null;
-            if (impi == null || impi.isEmpty()) {
-                ImsLog.w("IMPI is invalid !!!");
-                return null;
-            }
-            domain = impi.substring(impi.lastIndexOf("@") + 1 , impi.length());
-        } else if (subsInfo.isUsimEnabled() == true) {
-            ITelephonySubscriber ts = (ITelephonySubscriber)AgentFactory.getAgent(
-                    AgentFactory.TELEPHONY_SUBSCRIBER, slotId);
+        String impi = getImpi(slotId);
+        if (subsInfo.isIsimEnabled() && !TextUtils.isEmpty(impi)) { // ISIM
+            domain = impi.substring(impi.lastIndexOf("@") + 1, impi.length());
+        } else { // USIM
+            ITelephonySubscriber ts = getTelephonySubscriber(slotId);
             if (ts == null) {
                 return null;
             }
 
-            int mnc, mcc;
+            String strMnc = ts.getMnc(true);
+            String strMcc = ts.getMcc(true);
+            if (TextUtils.isEmpty(strMnc) || TextUtils.isEmpty(strMcc)) {
+                ImsLog.e("Wrong MNC : " + strMnc + " or MCC : " + strMcc);
+                return null;
+            }
+
             try {
-                mnc = Integer.parseInt(ts.getMnc(true));
-                mcc = Integer.parseInt(ts.getMcc(true));
-            } catch (final NumberFormatException e) {
+                domain = String.format(Locale.US, "ims.mnc%03d.mcc%03d.3gppnetwork.org",
+                        Integer.parseInt(strMnc), Integer.parseInt(strMcc));
+            } catch (NumberFormatException e) {
                 e.printStackTrace();
-                ImsLog.e("Invalid MNC/MCC");
+                ImsLog.e(e.toString());
                 return null;
             }
-            domain = String.format(Locale.US, "ims.mnc%03d.mcc%03d.3gppnetwork.org", mnc, mcc);
-        } else {
-            String impu = getImpu(slotId);
-            if (TextUtils.isEmpty(impu)) {
-                ImsLog.w("IMPU is invalid !!!");
-                return null;
+        }
+
+        if (forXcapRootUri) {
+            domain = "xcap." + domain;
+            if (domain.contains("3gppnetwork.org")) {
+                domain = domain.replace("3gppnetwork.org", "pub.3gppnetwork.org");
             }
-            domain = impu.substring(impu.lastIndexOf("@") + 1 , impu.length());
         }
 
         return domain;
@@ -124,43 +128,42 @@ public class SscUtils {
         return userAgent;
     }
 
-    protected String getNumberFromUri(final String targetUri) {
-        if (TextUtils.isEmpty(targetUri)) {
+    protected String getNumberFromUri(final String uri) {
+        if (TextUtils.isEmpty(uri)) {
             return null;
         }
 
         String number = "";
-        if (targetUri.startsWith("tel:")) {
+        if (uri.startsWith("tel:")) {
             // tel:+4477009900123 -> +4477009900123
             // tel:004477009900123;phone-context=exampl.com -> 004477009900123
             int beginIndex = 4;
-            int endIndex = targetUri.indexOf(";phone-context");
-            if (endIndex == -1 || beginIndex > endIndex || beginIndex >= targetUri.length()) {
-                number = targetUri.substring(beginIndex);
+            int endIndex = uri.indexOf(";phone-context");
+            if (endIndex == -1 || beginIndex > endIndex || beginIndex >= uri.length()) {
+                number = uri.substring(beginIndex);
             } else {
-                number = targetUri.substring(beginIndex, endIndex);
+                number = uri.substring(beginIndex, endIndex);
             }
-        } else if (targetUri.startsWith("sip:")) {
+        } else if (uri.startsWith("sip:")) {
             // sip:+4477009900123@example.com;user=phone -> +4477009900123
             // sip:004477009900123;phone-context=example.com@example.com;user=phone
             // -> 004477009900123
             int beginIndex = 4;
-            int endIndex = targetUri.indexOf(";phone-context");
+            int endIndex = uri.indexOf(";phone-context");
             if (endIndex == -1) {
-                endIndex = targetUri.indexOf("@");
+                endIndex = uri.indexOf("@");
             }
 
-            if (endIndex == -1 || beginIndex > endIndex || beginIndex >= targetUri.length()) {
-                number = targetUri.substring(beginIndex);
+            if (endIndex == -1 || beginIndex > endIndex || beginIndex >= uri.length()) {
+                number = uri.substring(beginIndex);
             } else {
-                number = targetUri.substring(beginIndex, endIndex);
+                number = uri.substring(beginIndex, endIndex);
             }
         } else {
-            number = targetUri;
+            number = uri;
         }
 
         ImsLog.d("number is " + number);
-
         return number;
     }
 
@@ -175,18 +178,17 @@ public class SscUtils {
         if (!TextUtils.isEmpty(phoneContext)) {
             domain = phoneContext;
         } else {
-            domain = getDomain(slotId);
+            domain = getDomain(slotId, false);
         }
 
         if (domain == null) {
             ImsLog.w("Domain is null !!!");
-            return null;
+            return number;
         }
 
-        final String strZero = "0";
         final String ccToAdd = SscConfig.getCountryCodeToReplaceZeroWithCountryCode(slotId);
         if (!TextUtils.isEmpty(ccToAdd) && !number.startsWith("+")) {
-            if (number.startsWith(strZero)) {
+            if (number.startsWith("0")) {
                 number = number.substring(1);
             }
             number = ccToAdd + number;
@@ -194,31 +196,52 @@ public class SscUtils {
 
         final String ccToRemove = SscConfig.getCountryCodeToReplaceCountryCodeWithZero(slotId);
         if (!TextUtils.isEmpty(ccToRemove) && number.startsWith(ccToRemove)) {
-            number = number.replaceFirst(ccToRemove, strZero);
+            number =  "0" + number.substring(ccToRemove.length());
         }
 
         final String format = SscConfig.getTargetAddrScheme(slotId);
         ImsLog.d("number : " + number + ", format : " + format + ", domain : " + domain);
 
         // IR92 2.2.3 Addressing
-        String addressing = null;
+        String uri = null;
         if ("sip".equalsIgnoreCase(format)) {
-            addressing = "sip:" + number;
+            uri = "sip:" + number;
             // local numbering
             if (!number.startsWith("+")) {
-                addressing += ";phone-context=" + domain;
+                uri += ";phone-context=" + domain;
             }
-            addressing += "@" + domain + ";user=phone";
+            uri += "@" + domain + ";user=phone";
         } else if ("tel".equalsIgnoreCase(format)) {
-            addressing = "tel:" + number;
+            uri = "tel:" + number;
             // local numbering
             if (!number.startsWith("+")) {
-                addressing += ";phone-context=" + domain;
+                uri += ";phone-context=" + domain;
             }
         } else {
-            addressing = number;
+            uri = number;
         }
 
-        return addressing;
+        ImsLog.d("uri is " + uri);
+        return uri;
+    }
+
+    @VisibleForTesting
+    protected SscUtils() {
+    }
+
+    @VisibleForTesting
+    protected SimInterface getSimInterface(int slotId) {
+        return AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
+    }
+
+    @VisibleForTesting
+    protected SubsInfoInterface getSubsInfoInterface(int slotId) {
+        return AgentFactory.getInstance().getAgent(SubsInfoInterface.class, slotId);
+    }
+
+    @VisibleForTesting
+    protected ITelephonySubscriber getTelephonySubscriber(int slotId) {
+        return (ITelephonySubscriber) AgentFactory.getAgent(AgentFactory.TELEPHONY_SUBSCRIBER,
+                slotId);
     }
 }
