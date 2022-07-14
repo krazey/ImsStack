@@ -1,13 +1,18 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20131015    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.imsstack.enabler.mtc;
 
@@ -26,7 +31,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-public final class MtcCallManager implements ICallStateTracker {
+/**
+ * Provides APIs for keeping, tracking calls.
+ */
+public final class MtcCallManager implements ICallStateTracker, IMtcCallManager {
     private final IBaseContext mContext;
     private CallStateNotifier mCallStateNotifier = new CallStateNotifier();
     private List<CallNode> mCallNodes = new ArrayList<CallNode>();
@@ -42,6 +50,7 @@ public final class MtcCallManager implements ICallStateTracker {
         mContext = context;
     }
 
+    @Override
     public void dispose() {
         log("dispose");
 
@@ -51,6 +60,7 @@ public final class MtcCallManager implements ICallStateTracker {
         mCT = null;
     }
 
+    @Override
     public void init() {
         log("init");
 
@@ -62,6 +72,7 @@ public final class MtcCallManager implements ICallStateTracker {
         mTelephonyCsRegistry = new TelephonyCallStateRegistry(mContext, this);
     }
 
+    @Override
     public void clear() {
         log("clear");
 
@@ -99,11 +110,13 @@ public final class MtcCallManager implements ICallStateTracker {
         return hasAtLeastOneEstablishedCall();
     }
 
+    @Override
     public MtcECallStateTracker getECallStateTracker() {
         return mECallStateTracker;
     }
 
     // For originating call
+    @Override
     public synchronized void attachCall(Call call) {
         if (call == null) {
             return;
@@ -117,6 +130,7 @@ public final class MtcCallManager implements ICallStateTracker {
     /**
      * Adds pending call for incoming call.
      */
+    @Override
     public synchronized void attachPreIncomingCall(Call call) {
         if (call == null) {
             return;
@@ -141,10 +155,12 @@ public final class MtcCallManager implements ICallStateTracker {
         }
     }
 
+    @Override
     public CallTracker getCallTracker() {
         return mCT;
     }
 
+    @Override
     public synchronized Call getCall(long callId) {
         CallNode node = getCallNode(callId);
 
@@ -158,6 +174,7 @@ public final class MtcCallManager implements ICallStateTracker {
     /**
      * Gets pending call for incoming call.
      */
+    @Override
     public synchronized Call getPendingCall(long callId) {
         CallNode node = getPendingCallNode(callId);
 
@@ -198,6 +215,7 @@ public final class MtcCallManager implements ICallStateTracker {
         }
     }
 
+    @Override
     public synchronized int getVacantCallIndex() {
         List<Call> allCalls = getAllCalls();
 

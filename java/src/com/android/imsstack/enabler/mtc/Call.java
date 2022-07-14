@@ -124,11 +124,9 @@ public class Call implements Closeable {
     private int mCallState = CallTracker.CALL_STATE_IDLE;
     private int mUpdateState = UPDATE_STATE_IDLE;
 
-    public Call(IBaseContext context, long nativeCallObject, int index, String logTag) {
+    public Call(IBaseContext context, int index, String logTag) {
         mContext = context;
-        mNativeCallObject = nativeCallObject;
-
-        mCallId = createCallId();
+        mNativeCallObject = 0;
 
         mCallIndex = index;
 

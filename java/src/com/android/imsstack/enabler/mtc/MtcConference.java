@@ -18,7 +18,6 @@ import android.os.Parcel;
 
 import com.android.imsstack.enabler.mtc.conf.IUConf;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
-import com.android.imsstack.jni.JNIIms;
 import com.android.imsstack.util.ImsArgs;
 import com.android.imsstack.util.ImsLog;
 
@@ -500,15 +499,7 @@ public class MtcConference {
 
                     Parcel parcel = (Parcel)msg.obj;
 
-                    if (parcel == null) {
-                        break;
-                    }
-
-                    byte[] data = parcel.marshall();
-
-                    JNIIms.sendData(mParent.getNativeCallId(), data);
-
-                    parcel.recycle();
+                    MtcJniProxy.getInstance().sendDataToNative(mParent.getNativeCallId(), parcel);
                     break;
                 }
                 default:

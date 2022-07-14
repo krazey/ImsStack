@@ -18,8 +18,8 @@ import android.os.Parcel;
 import android.text.TextUtils;
 
 import com.android.imsstack.enabler.IBaseContext;
+import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
-import com.android.imsstack.jni.JNIIms;
 import com.android.imsstack.jni.JNIImsListener;
 import com.android.imsstack.util.ImsArgs;
 import com.android.imsstack.util.ImsLog;
@@ -280,7 +280,7 @@ public class MtcCall extends Call implements ConferenceTracker {
     /** Args: MtcCall */
     private static final int MSG_CLOSE = 102;
     /** Args: Long(nativeCallId) */
-    private static final int MSG_RELEASE_INTERFACE = 103;
+    private static final int MSG_CLEAR_INTERFACE = 103;
 
     /** Args: Parcel */
     private static final int MSG_MESSAGE_RECEIVED = 201;
@@ -307,9 +307,9 @@ public class MtcCall extends Call implements ConferenceTracker {
     /** It will be controlled when audio is in sendrecv & video direction is only changed */
     private int mVideoState = ONE_WAY_VIDEO_NONE;
 
-    public MtcCall(IBaseContext context, CallTracker ct, long nativeCallObject, int callAttributes,
+    public MtcCall(IBaseContext context, CallTracker ct, int callAttributes,
             int index, String logTag) {
-        super(context, nativeCallObject, index, logTag);
+        super(context, index, logTag);
 
         mCT = ct;
         mHandler = new MessageHandler(mContext.getCallLooper());
@@ -322,6 +322,10 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         if ((callAttributes & FLAG_EMERGENCY) != 0) {
             setCallExtraBoolean(EXTRA_E_CALL, true);
+        } else {
+            long nativeCallObject = MtcJniProxy.getInstance().getJniInterfaceAndSetListener(
+                        mContext.getSlotId(), IUIMS.MTC_CALL, mNativeListener);
+            super.updateNativeCallObject(nativeCallObject);
         }
 
         if ((callAttributes & FLAG_CONFERENCE) != 0) {
@@ -352,8 +356,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                     MediaInfo.DIRECTION_INVALID,
                     MediaInfo.DIRECTION_INVALID,
                     MediaInfo.GTTMODE_INVALID);
-
-        JNIIms.setListener(getNativeCallId(), mNativeListener);
 
         mConference = new MtcConference(mContext.getCallLooper(), this, this);
         mMediaSession = new MtcMediaSession(mContext, this);
@@ -403,9 +405,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         mMediaSession.setRttListener(null);
         mMediaSession.dispose();
 
-        JNIIms.removeListener(nativeCallId, mNativeListener);
-
-        Message.obtain(mHandler, MSG_RELEASE_INTERFACE,
+        Message.obtain(mHandler, MSG_CLEAR_INTERFACE,
                 Long.valueOf(nativeCallId)).sendToTarget();
 
         if (!hasDetails(Details.DETACHED)) {
@@ -510,67 +510,65 @@ public class MtcCall extends Call implements ConferenceTracker {
             break;
 
         case EVENT_EXTENDED: {
-            CallInfo callInfo = (CallInfo)args.mArg1;
-            MediaInfo mediaInfo = (MediaInfo)args.mArg2;
-            SuppInfo suppInfo = (SuppInfo)args.mArg3;
-            long jniConfCallId = args.mLongArg;
+                CallInfo callInfo = (CallInfo) args.mArg1;
+                MediaInfo mediaInfo = (MediaInfo) args.mArg2;
+                SuppInfo suppInfo = (SuppInfo) args.mArg3;
+                long jniConfCallId = args.mLongArg;
 
-            logi("EVENT_EXTENDED :: call="
-                    + Long.toHexString(getNativeCallId()));
+                logi("EVENT_EXTENDED :: call="
+                        + Long.toHexString(getNativeCallId()));
 
-            setCallState(CallTracker.CALL_STATE_OFFHOOK);
+                setCallState(CallTracker.CALL_STATE_OFFHOOK);
 
-            // Update the call/media info.
-            updateCallParameters(callInfo, mediaInfo, suppInfo);
+                // Update the call/media info.
+                updateCallParameters(callInfo, mediaInfo, suppInfo);
 
-            if (jniConfCallId == 0) {
-                setAdhocGroup();
-                // ConferenceInfo: to manage the participants in the conference call
-                ConferenceInfoHelper.createConferenceInfo(getCallId(), mContext.getSlotId());
-            } else {
-                MtcCall confCall = new MtcCall(mContext,
-                        mCT, jniConfCallId,
-                        isEmergencyCall() ?
-                            (FLAG_EMERGENCY | FLAG_CONFERENCE) : FLAG_CONFERENCE, -1, "EX");
+                if (jniConfCallId == 0) {
+                    setAdhocGroup();
+                    // ConferenceInfo: to manage the participants in the conference call
+                    ConferenceInfoHelper.createConferenceInfo(getCallId(), mContext.getSlotId());
+                } else {
+                    MtcCall confCall = new MtcCall(mContext, mCT, isEmergencyCall()
+                            ? (FLAG_EMERGENCY | FLAG_CONFERENCE) : FLAG_CONFERENCE, -1, "EX");
 
-                confCall.setAdhocGroup();
-                confCall.setCallType(getCallType());
-                confCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
-                // FIXME: Is it a correct information for the new call?
-                confCall.updateCallParameters(callInfo, mediaInfo, suppInfo);
-                mCT.updateCallState(confCall, CallTracker.CALL_EVENT_CREATE, null);
-            }
-            break;
+                    confCall.updateNativeCallObject(jniConfCallId);
+                    confCall.setAdhocGroup();
+                    confCall.setCallType(getCallType());
+                    confCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
+                    // FIXME: Is it a correct information for the new call?
+                    confCall.updateCallParameters(callInfo, mediaInfo, suppInfo);
+                    mCT.updateCallState(confCall, CallTracker.CALL_EVENT_CREATE, null);
+                }
+                break;
         }
 
         case EVENT_EXTEND_RECEIVED: {
-            CallInfo callInfo = (CallInfo)args.mArg1;
-            MediaInfo mediaInfo = (MediaInfo)args.mArg2;
-            SuppInfo suppInfo = (SuppInfo)args.mArg3;
-            long jniConfCallId = args.mLongArg;
+                CallInfo callInfo = (CallInfo) args.mArg1;
+                MediaInfo mediaInfo = (MediaInfo) args.mArg2;
+                SuppInfo suppInfo = (SuppInfo) args.mArg3;
+                long jniConfCallId = args.mLongArg;
 
-            logi("EVENT_EXTEND_RECEIVED :: call="
-                    + Long.toHexString(getNativeCallId()));
+                logi("EVENT_EXTEND_RECEIVED :: call="
+                        + Long.toHexString(getNativeCallId()));
 
-            // Update the call/media info.
-            updateCallParameters(callInfo, mediaInfo, suppInfo);
+                // Update the call/media info.
+                updateCallParameters(callInfo, mediaInfo, suppInfo);
 
-            if (jniConfCallId == 0) {
-                // ConferenceInfo: to manage the participants in the conference call
-                ConferenceInfoHelper.createConferenceInfo(getCallId(), mContext.getSlotId());
-            } else {
-                MtcCall confCall = new MtcCall(mContext,
-                        mCT, jniConfCallId,
-                        isEmergencyCall() ?
-                            (FLAG_EMERGENCY | FLAG_CONFERENCE) : FLAG_CONFERENCE, -1, "ER");
+                if (jniConfCallId == 0) {
+                    // ConferenceInfo: to manage the participants in the conference call
+                    ConferenceInfoHelper.createConferenceInfo(getCallId(), mContext.getSlotId());
+                } else {
+                    MtcCall confCall = new MtcCall(mContext, mCT, isEmergencyCall()
+                            ? (FLAG_EMERGENCY | FLAG_CONFERENCE) : FLAG_CONFERENCE, -1, "ER");
 
-                            confCall.setCallType(getCallType());
-                            confCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
-                // FIXME: Is it a correct information for the new call?
-                confCall.updateCallParameters(callInfo, mediaInfo, suppInfo);
-                mCT.updateCallState(confCall, CallTracker.CALL_EVENT_CREATE, null);
-            }
-            break;
+                    confCall.updateNativeCallObject(jniConfCallId);
+                    confCall.setCallType(getCallType());
+                    confCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
+                    // FIXME: Is it a correct information for the new call?
+                    confCall.updateCallParameters(callInfo, mediaInfo, suppInfo);
+                    mCT.updateCallState(confCall, CallTracker.CALL_EVENT_CREATE, null);
+                }
+                break;
         }
 
         case EVENT_MERGED: {
@@ -612,10 +610,17 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
     }
 
-    public void updateNativeCallObject(long nativeCallObject) {
-        JNIIms.removeListener(getNativeCallId(), mNativeListener);
+    /**
+     * Creates interface between Java and Native for call.
+     */
+    public void createNativeCallObject() {
+        long nativeCallObject = MtcJniProxy.getInstance().getJniInterfaceAndSetListener(
+                mContext.getSlotId(), IUIMS.MTC_CALL, mNativeListener);
         super.updateNativeCallObject(nativeCallObject);
-        JNIIms.setListener(getNativeCallId(), mNativeListener);
+    }
+
+    public void updateNativeCallObject(long nativeCallObject) {
+        super.updateNativeCallObject(nativeCallObject);
     }
 
     public void detach() {
@@ -1466,15 +1471,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
                     Parcel parcel = (Parcel)msg.obj;
 
-                    if (parcel == null) {
-                        break;
-                    }
-
-                    byte[] data = parcel.marshall();
-
-                    JNIIms.sendData(getNativeCallId(), data);
-
-                    parcel.recycle();
+                    MtcJniProxy.getInstance().sendDataToNative(getNativeCallId(), parcel);
                     break;
                 }
                 case MSG_CLOSE: {
@@ -1485,12 +1482,13 @@ public class MtcCall extends Call implements ConferenceTracker {
                     }
                     break;
                 }
-                case MSG_RELEASE_INTERFACE: {
+                case MSG_CLEAR_INTERFACE: {
                     Long nativeCallId = (Long)msg.obj;
 
                     if (nativeCallId != null) {
-                        logi("releaseInterface=" + nativeCallId);
-                        JNIIms.releaseInterface(nativeCallId.longValue());
+                        logi("clearInterface=" + nativeCallId);
+                        MtcJniProxy.getInstance().releaseJniInterfaceAndrRemoveListener(
+                                nativeCallId.longValue(), mNativeListener);
                     }
                     break;
                 }
@@ -2148,8 +2146,9 @@ public class MtcCall extends Call implements ConferenceTracker {
             if (newNativeCallId == 0) {
                 updateCallParameters(callInfo, mediaInfo, suppInfo);
             } else {
-                newCall = new MtcCall(mContext, mCT, newNativeCallId, 0, -1, "RB");
+                newCall = new MtcCall(mContext, mCT, 0, -1, "RB");
 
+                newCall.updateNativeCallObject(newNativeCallId);
                 newCall.setCallType(MtcCallInfo.getCallType(callInfo));
                 newCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
                 // FIXME: Is it a correct information for the new call?
