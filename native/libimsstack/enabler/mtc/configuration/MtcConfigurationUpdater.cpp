@@ -30,8 +30,16 @@ PUBLIC GLOBAL void MtcConfigurationUpdater::Update(IN ICarrierConfig* piCc,
         IN CarrierConfigItems& objCarrierConfigItems, IN AssetItems& objAssetItems)
 {
     IMS_TRACE_I("Update", 0, 0, 0);
+    ClearArrays(objCarrierConfigItems, objAssetItems);
     UpdateByCarrierConfig(piCc, objCarrierConfigItems);
     UpdateByAsset(piCc, objAssetItems);
+}
+
+PRIVATE GLOBAL void MtcConfigurationUpdater::ClearArrays(
+        IN CarrierConfigItems& objCarrierConfigItems, IN AssetItems& /*objAssetItems*/)
+{
+    objCarrierConfigItems.objCallRejectReasonPhrases.Clear();
+    objCarrierConfigItems.objCallTerminateReasonHeaders.Clear();
 }
 
 PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
