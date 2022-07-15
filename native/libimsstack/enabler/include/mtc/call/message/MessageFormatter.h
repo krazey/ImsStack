@@ -83,9 +83,9 @@ private:
     void SetAcceptHeader();
     void AddSrvccFeature();
     void SetSrvccContactParameter();
-    void SetKeepAliveProfile();
+    // void SetKeepAliveProfile();
     void SetCallerIdHeader();
-    void SetTipHeader();
+    // void SetTipHeader();
     void SetSupportedHeader();
     void SetPreconditionHeader();
     void SetPEarlyMediaHeader();

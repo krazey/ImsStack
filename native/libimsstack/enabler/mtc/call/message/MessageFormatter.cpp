@@ -76,9 +76,9 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormStartMessage()
     SetAcceptHeader();
     SetPPreferredServiceHeader();
     AddSrvccFeature();
-    SetKeepAliveProfile();
+    // SetKeepAliveProfile();
     SetCallerIdHeader();
-    SetTipHeader();
+    // SetTipHeader();
     SetSupportedHeader();
     SetPreconditionHeader();
     SetPEarlyMediaHeader();
@@ -106,7 +106,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormProvisionalResponseMessage(
     SetAlertInfoHeader(bIncludeAlertInfo);
     SetPreconditionHeader();
     AddSrvccFeature();
-    SetTipHeader();
+    // SetTipHeader();
 
     if (m_objContext.GetConfigurationProxy().Is(Feature::MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF,
                 static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::PROVISIONAL_RESPONSE)))
@@ -185,7 +185,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAcceptMessage()
 
     SetPreconditionHeader();
     SetSrvccContactParameter();
-    SetTipHeader();
+    // SetTipHeader();
     SetCarrierSpecificHeaders();
 
     if (m_objContext.GetConfigurationProxy().Is(Feature::MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF,
@@ -307,6 +307,7 @@ PROTECTED VIRTUAL void MessageFormatter::SetLocation()
 {
     if (!MtcLocationObject::IsGeolocationInfoRequired(m_objContext))
     {
+        IMS_TRACE_D("Geolocation Info is not required", 0, 0, 0);
         return;
     }
 
@@ -462,28 +463,28 @@ void MessageFormatter::SetSrvccContactParameter()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PRIVATE
-void MessageFormatter::SetKeepAliveProfile()
-{
-    IMS_BOOL bKeepAlive = IMS_FALSE;  // TODO, SESSION_SP_KEEP_ALIVE
+// PRIVATE
+// void MessageFormatter::SetKeepAliveProfile()
+// {
+//     IMS_BOOL bKeepAlive = IMS_FALSE;  // TODO, SESSION_SP_KEEP_ALIVE
 
-    if (!bKeepAlive)
-    {
-        return;
-    }
+//     if (!bKeepAlive)
+//     {
+//         return;
+//     }
 
-    ICoreService* piCoreService = GetICoreService();
-    if (piCoreService == IMS_NULL)
-    {
-        return;
-    }
+//     ICoreService* piCoreService = GetICoreService();
+//     if (piCoreService == IMS_NULL)
+//     {
+//         return;
+//     }
 
-    IMS_UINT32 eSipFeatures = ISipConfig::SIP_FEATURE_CAPS_KEEP;
-    RcPtr<SipProfile> pProfile = new SipProfile();
+//     IMS_UINT32 eSipFeatures = ISipConfig::SIP_FEATURE_CAPS_KEEP;
+//     RcPtr<SipProfile> pProfile = new SipProfile();
 
-    pProfile->SetSipFeatures(eSipFeatures);
-    piCoreService->SetSipProfile(pProfile.Get());
-}
+//     pProfile->SetSipFeatures(eSipFeatures);
+//     piCoreService->SetSipProfile(pProfile.Get());
+// }
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
@@ -513,14 +514,7 @@ void MessageFormatter::SetCallerIdHeader()
 
         SipAddress objSIPAddress(ImsIdentity::GetAnonymousUserId());
         objSIPAddress.SetDisplayName(MessageUtil::STR_ANONYMOUS);
-
-        AString strSipAddress = objSIPAddress.ToString();
-        if (strSipAddress.GetLength() < 1)
-        {
-            return;
-        }
-
-        MessageUtil::SetHeader(m_piNextMessage, strSipAddress, ISipHeader::FROM);
+        MessageUtil::SetHeader(m_piNextMessage, objSIPAddress.ToString(), ISipHeader::FROM);
     }
     else if (pSuppService->nValue == CALLERID_IDENTITY)
     {
@@ -530,56 +524,58 @@ void MessageFormatter::SetCallerIdHeader()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PRIVATE
-void MessageFormatter::SetTipHeader()
-{
-    IMS_BOOL bTip = IMS_FALSE;  // TODO, SESSION_SP_TIP
-    if (!bTip)
-    {
-        return;
-    }
+// PRIVATE
+// void MessageFormatter::SetTipHeader()
+// {
+//     IMS_BOOL bTip = IMS_FALSE;  // TODO, SESSION_SP_TIP
+//     if (!bTip)
+//     {
+//         return;
+//     }
 
-    IMS_BOOL bAddTagToSupported = IMS_FALSE;
-    if (m_eFormType == FormType::START)
-    {
-        bAddTagToSupported = IMS_TRUE;
-    }
-    else if ((m_eFormType == FormType::PROVISIONAL_RESPONSE) || (m_eFormType == FormType::ACCEPT))
-    {
-        IMessage* piPreviousMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_START);
-        if (MessageUtil::HasValue(piPreviousMessage, Sip::STR_FROM_CHANGE, ISipHeader::SUPPORTED))
-        {
-            bAddTagToSupported = IMS_TRUE;
-        }
-    }
+//     IMS_BOOL bAddTagToSupported = IMS_FALSE;
+//     if (m_eFormType == FormType::START)
+//     {
+//         bAddTagToSupported = IMS_TRUE;
+//     }
+//     else if ((m_eFormType == FormType::PROVISIONAL_RESPONSE) ||
+//             (m_eFormType == FormType::ACCEPT))
+//     {
+//         IMessage* piPreviousMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_START);
+//         if (MessageUtil::HasValue(piPreviousMessage, Sip::STR_FROM_CHANGE,
+//                 ISipHeader::SUPPORTED))
+//         {
+//             bAddTagToSupported = IMS_TRUE;
+//         }
+//     }
 
-    if (bAddTagToSupported)
-    {
-        MessageUtil::AddValueIfNotExists(
-                m_piNextMessage, Sip::STR_FROM_CHANGE, ISipHeader::SUPPORTED);
-    }
+//     if (bAddTagToSupported)
+//     {
+//         MessageUtil::AddValueIfNotExists(
+//                 m_piNextMessage, Sip::STR_FROM_CHANGE, ISipHeader::SUPPORTED);
+//     }
 
-    if (m_eFormType != FormType::PROVISIONAL_RESPONSE)
-    {
-        return;
-    }
+//     if (m_eFormType != FormType::PROVISIONAL_RESPONSE)
+//     {
+//         return;
+//     }
 
-    IMS_SINT32 eTipMode = TIP_MODE_TEMPORARY;  // TODO, SESSION_SP_TIP_MODE
-    if (eTipMode != TIP_MODE_TEMPORARY)
-    {
-        return;
-    }
+//     IMS_SINT32 eTipMode = TIP_MODE_TEMPORARY;  // TODO, SESSION_SP_TIP_MODE
+//     if (eTipMode != TIP_MODE_TEMPORARY)
+//     {
+//         return;
+//     }
 
-    IMS_SINT32 eTipType = TIP_TYPE_IDENTITY;  // TODO, from user settings
-    if (eTipType == TIP_TYPE_RESTRICTED)
-    {
-        MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_ID, ISipHeader::PRIVACY);
-    }
-    else if (eTipType == TIP_TYPE_IDENTITY)
-    {
-        MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_NONE, ISipHeader::PRIVACY);
-    }
-}
+//     IMS_SINT32 eTipType = TIP_TYPE_IDENTITY;  // TODO, from user settings
+//     if (eTipType == TIP_TYPE_RESTRICTED)
+//     {
+//         MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_ID, ISipHeader::PRIVACY);
+//     }
+//     else if (eTipType == TIP_TYPE_IDENTITY)
+//     {
+//         MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_NONE, ISipHeader::PRIVACY);
+//     }
+// }
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
@@ -595,12 +591,12 @@ void MessageFormatter::SetSupportedHeader()
 
     MessageUtil::AddValueIfNotExists(m_piNextMessage, MessageUtil::STR_199, ISipHeader::SUPPORTED);
 
-    IMS_BOOL bHistoryInfo = IMS_FALSE;  // TODO
-    if (bHistoryInfo)
-    {
-        MessageUtil::AddValueIfNotExists(
-                m_piNextMessage, MessageUtil::STR_HISTINFO, ISipHeader::SUPPORTED);
-    }
+    // IMS_BOOL bHistoryInfo = IMS_FALSE;  // TODO
+    // if (bHistoryInfo)
+    // {
+    //     MessageUtil::AddValueIfNotExists(
+    //             m_piNextMessage, MessageUtil::STR_HISTINFO, ISipHeader::SUPPORTED);
+    // }
 }
 
 /* -------------------------------------------------------------------------------------------------
