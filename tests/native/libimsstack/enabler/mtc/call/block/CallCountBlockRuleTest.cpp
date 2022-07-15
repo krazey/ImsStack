@@ -58,6 +58,7 @@ protected:
     virtual void TearDown() override
     {
         delete pBlockRule;
+        delete pConfigurationProxy;
     }
 
     MockIMtcCall* CreateMockIMtcCall(IMtcCall::State eState)

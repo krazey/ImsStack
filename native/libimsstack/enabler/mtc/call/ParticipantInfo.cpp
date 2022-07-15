@@ -18,15 +18,16 @@
 #include "IImsAosInfo.h"
 #include "IMessage.h"
 #include "ImsIdentity.h"
+#include "IPhoneInfoSubscriber.h"
 #include "ISipHeader.h"
-#include "ServicePhoneInfo.h"
+#include "MtcDef.h"
+#include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "call/IMtcCallContext.h"
 #include "call/MtcSession.h"
 #include "call/ParticipantInfo.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "helper/IMtcAosConnector.h"
-#include "helper/MtcSupplementaryService.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "utility/MessageUtil.h"
@@ -38,8 +39,10 @@ const AString ParticipantInfo::ANONYMOUS_ADDRESS = "sip:anonymous@anonymous.inva
 const AString ParticipantInfo::ANONYMOUS_DISPLAY_NAME = "Anonymous";
 
 PUBLIC
-ParticipantInfo::ParticipantInfo(IN IMtcCallContext& objContext) :
+ParticipantInfo::ParticipantInfo(
+        IN IMtcCallContext& objContext, IN ISubscriberInfo& objSubscriberInfo) :
         m_objContext(objContext),
+        m_objSubscriberInfo(objSubscriberInfo),
         m_strRemoteNumber(AString::ConstNull()),
         m_strRemoteUri(AString::ConstNull())
 {
@@ -225,9 +228,7 @@ PRIVATE
 AString ParticipantInfo::GetMcc() const
 {
     AString strMcc;
-    PhoneInfoService::GetPhoneInfoService()
-            ->GetSubscriberInfo(m_objContext.GetSlotId())
-            ->GetMcc(strMcc);
+    m_objSubscriberInfo.GetMcc(strMcc);
     return strMcc;
 }
 
@@ -235,9 +236,7 @@ PRIVATE
 AString ParticipantInfo::GetMnc(IN IMS_UINT32 nLength) const
 {
     AString strMnc;
-    PhoneInfoService::GetPhoneInfoService()
-            ->GetSubscriberInfo(m_objContext.GetSlotId())
-            ->GetMnc(strMnc);
+    m_objSubscriberInfo.GetMnc(strMnc);
     if (nLength == 3 && strMnc.GetLength() == 2)
     {
         strMnc.Prepend("0");
