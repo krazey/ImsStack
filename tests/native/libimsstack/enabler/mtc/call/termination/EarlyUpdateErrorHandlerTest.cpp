@@ -15,17 +15,53 @@
  */
 
 #include <gtest/gtest.h>
+#include "ImsTypeDef.h"
 #include "call/termination/EarlyUpdateErrorHandler.h"
+#include "core/MockIMessage.h"
+#include "sipcore/MockISipMessage.h"
+#include "sipcore/SipStatusCode.h"
 
-namespace android
-{
+using ::testing::Return;
 
 class EarlyUpdateErrorHandlerTest : public ::testing::Test
 {
+public:
+    MockISipMessage objSipMessage;
+    MockIMessage objMessage;
+    EarlyUpdateErrorHandler objHandler;
+
 protected:
-    virtual void SetUp() override {}
+    virtual void SetUp() override
+    {
+        ON_CALL(objMessage, GetMessage)
+                .WillByDefault(Return(&objSipMessage));
+    }
 
     virtual void TearDown() override {}
 };
 
-}  // namespace android
+TEST_F(EarlyUpdateErrorHandlerTest, HandleNullMessageReturnsTimeout)
+{
+    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT), objHandler.Handle(IMS_NULL));
+}
+
+TEST_F(EarlyUpdateErrorHandlerTest, HandleMessageWithInvalidStatusCodeReturnsTimeout)
+{
+    ON_CALL(objSipMessage, GetStatusCode)
+            .WillByDefault(Return(SipStatusCode::SC_INVALID));
+
+    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT), objHandler.Handle(&objMessage));
+}
+
+TEST_F(EarlyUpdateErrorHandlerTest, Handle3xx4xx5xx6xxMessageReturnsInternalErrorWithCode)
+{
+    for (IMS_SINT32 nStatusCode = SipStatusCode::SC_300; nStatusCode <= SipStatusCode::SC_699;
+            nStatusCode++)
+    {
+        ON_CALL(objMessage, GetStatusCode)
+                .WillByDefault(Return(nStatusCode));
+
+        EXPECT_EQ(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR, nStatusCode),
+                objHandler.Handle(&objMessage));
+    }
+}

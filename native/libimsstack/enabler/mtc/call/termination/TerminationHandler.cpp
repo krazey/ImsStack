@@ -61,9 +61,6 @@ CallReasonInfo TerminationHandler::GetCallReasonInfoFromSessionTerminationReason
 
         case ISession::TERMINATION_REASON_SERVICE_CLOSED:
             return CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE, nTerminationReason);
-
-        case ISession::TERMINATION_REASON_MAX:
-            return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nTerminationReason);
     }
 
     return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nTerminationReason);

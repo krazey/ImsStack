@@ -37,7 +37,8 @@ CallReasonInfo CancelHandler::Handle(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nReasonCause = 0;
     AString strReasonText;
-    if (!MessageUtil::GetCauseAndTextFromReasonHeader(&objMessage, nReasonCause, strReasonText))
+    if (MessageUtil::GetCauseAndTextFromReasonHeader(&objMessage, nReasonCause, strReasonText) ==
+            IMS_FAILURE)
     {
         IMS_TRACE_D("Handle : No Reason header", 0, 0, 0);
         return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE);
