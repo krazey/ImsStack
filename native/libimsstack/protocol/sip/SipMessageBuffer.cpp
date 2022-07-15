@@ -42,16 +42,6 @@ SipMessageBuffer::SipMessageBuffer() :
     }
 }
 
-PUBLIC
-SipMessageBuffer::SipMessageBuffer(IN const SipMessageBuffer& other) :
-        RcObject(other),
-        m_ppBuffer(IMS_NULL)
-{
-    IMS_MEM_Memset(m_baBuffer, 0x00, MAX_MSG_SIZE);
-
-    // NOTE: If reference count is not used, you MUST implement this copy constructor
-}
-
 PUBLIC VIRTUAL SipMessageBuffer::~SipMessageBuffer()
 {
     if (m_ppBuffer != IMS_NULL)

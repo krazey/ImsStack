@@ -232,6 +232,16 @@ SIP_BOOL SipTxnTimerValues::UpdateSipTimers(
         SetTimerValue(SipTxn::TIMER2, ptrTxnSipTxnTimers->m_nT2Value);
     }
 
+    if (IsTimerSet(nTimerOptions, TV_T4) == SIP_TRUE)
+    {
+        SetTimerValue(SipTxn::TIMER4, ptrTxnSipTxnTimers->m_nT4Value);
+    }
+
+    if (IsTimerSet(nTimerOptions, TV_TIMER_A) == SIP_TRUE)
+    {
+        SetTimerValue(SipTxn::TIMERA, ptrTxnSipTxnTimers->m_nTimerA_Value);
+    }
+
     if (IsTimerSet(nTimerOptions, TV_TIMER_B) == SIP_TRUE)
     {
         SetTimerValue(SipTxn::TIMERB, ptrTxnSipTxnTimers->m_nTimerB_Value);
@@ -242,9 +252,19 @@ SIP_BOOL SipTxnTimerValues::UpdateSipTimers(
         SetTimerValue(SipTxn::TIMERD, ptrTxnSipTxnTimers->m_nTimerD_Value);
     }
 
+    if (IsTimerSet(nTimerOptions, TV_TIMER_E) == SIP_TRUE)
+    {
+        SetTimerValue(SipTxn::TIMERE, ptrTxnSipTxnTimers->m_nTimerE_Value);
+    }
+
     if (IsTimerSet(nTimerOptions, TV_TIMER_F) == SIP_TRUE)
     {
         SetTimerValue(SipTxn::TIMERF, ptrTxnSipTxnTimers->m_nTimerF_Value);
+    }
+
+    if (IsTimerSet(nTimerOptions, TV_TIMER_G) == SIP_TRUE)
+    {
+        SetTimerValue(SipTxn::TIMERG, ptrTxnSipTxnTimers->m_nTimerG_Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_TIMER_H) == SIP_TRUE)

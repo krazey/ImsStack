@@ -57,14 +57,18 @@ private:
     {
         TV_T1 = 0x0001,
         TV_T2 = 0x0002,
-        TV_TIMER_B = 0x0004,
-        TV_TIMER_D = 0x0008,
-        TV_TIMER_F = 0x0010,
-        TV_TIMER_H = 0x0020,
-        TV_TIMER_I = 0x0040,
-        TV_TIMER_J = 0x0080,
-        TV_TIMER_K = 0x0100,
-        TV_ALL = 0x01FF
+        TV_T4 = 0x0004,
+        TV_TIMER_A = 0x0008,
+        TV_TIMER_B = 0x0010,
+        TV_TIMER_D = 0x0020,
+        TV_TIMER_E = 0x0040,
+        TV_TIMER_F = 0x0080,
+        TV_TIMER_G = 0x0100,
+        TV_TIMER_H = 0x0200,
+        TV_TIMER_I = 0x0400,
+        TV_TIMER_J = 0x0800,
+        TV_TIMER_K = 0x1000,
+        TV_ALL = 0x1FFF
     };
 };
 
