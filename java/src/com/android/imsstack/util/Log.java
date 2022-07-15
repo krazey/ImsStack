@@ -15,9 +15,16 @@
  */
 package com.android.imsstack.util;
 
+/**
+ * This class provides the logging interface and utility methods
+ * that will be helpful when adding the log statement.
+ */
 public final class Log {
     public static final String TAG = "ImsStack";
     public static final int DEBUG = android.util.Log.DEBUG;
+    public static final String HIDDEN = "****";
+    public static final String EMPTY = "(empty)";
+    public static final String NULL = "(null)";
 
     private static int sDebug = -1;
     private static int sImsDebug = -1;
@@ -80,32 +87,52 @@ public final class Log {
     }
     // }
 
-    // PII : Personally Identifiable Information
+    /**
+     * Returns a logging string depending on whether it's debuggable or not.
+     *
+     * PII : Personally Identifiable Information
+     */
     public static String pii(String s) {
         if (s == null) {
-            return "(null)";
+            return NULL;
         } else if (s.isEmpty()) {
-            return "(empty)";
+            return EMPTY;
         } else if (isDebuggable()) {
             return s;
         }
 
-        return "****";
+        return HIDDEN;
     }
 
+    /** Sets the debuggable value after checking this tag is enabled in the debug mode. */
     public static void setDebuggable() {
         sDebug = isLoggable(DEBUG) ? 1 : 0;
     }
 
+    /** Sets the debuggable value from the specified flag. */
     public static void setImsDebug(boolean imsDebug) {
         sImsDebug = imsDebug ? 1 : 0;
     }
 
+    /**
+     * Returns a string that is a substring of this string.
+     * The substring begins at the start of this string and
+     * extends to the previous position of specified delimiter. Or,
+     * the substring begins at the next poistion of the specified delimiter and
+     * extends to the end of this string.
+     *
+     * @param s The string to be evaluated.
+     * @param delimiter The delimiter to find a start position.
+     * @param leftToken The flag specifying which token will be taken.
+     *                  Returns the string on the left by delimiter if true,
+     *                  otherwise the string on the right.
+     * @return A substring.
+     */
     public static String firstSubString(String s, String delimiter, boolean leftToken) {
         if (s == null) {
-            return "(null)";
+            return NULL;
         } else if (s.isEmpty()) {
-            return "(empty)";
+            return EMPTY;
         } else {
             int index = (delimiter == null) ? (-1) : s.indexOf(delimiter);
             if (index < 0) {
@@ -115,11 +142,20 @@ public final class Log {
         }
     }
 
+    /**
+     * Returns a string that is a substring of this string.
+     * The substring begins at the specified number {@code count} of characters
+     * from the end and extends to the end of this string.
+     *
+     * @param s The string to be evaluated.
+     * @param count The number of characters from the end.
+     * @return A substring.
+     */
     public static String lastSubString(String s, int count) {
         if (s == null) {
-            return "(null)";
+            return NULL;
         } else if (s.isEmpty()) {
-            return "(empty)";
+            return EMPTY;
         } else {
             if (s.length() < count) {
                 return s;
@@ -129,28 +165,47 @@ public final class Log {
         }
     }
 
+    /**
+     * Returns a string that is a substring of this string.
+     * The substring begins at the next position of the last occurrence of
+     * the specified delimiter {@code delimiter} and extends to the end of this string.
+     *
+     * @param s The string to be evaluated.
+     * @param delimiter The delimiter to find a start position.
+     * @return A substring.
+     */
     public static String lastSubString(String s, String delimiter) {
         if (s == null) {
-            return "(null)";
+            return NULL;
         } else if (s.isEmpty()) {
-            return "(empty)";
+            return EMPTY;
         } else {
             int index = (delimiter == null) ? (-1) : s.lastIndexOf(delimiter);
             return (index < 0) ? s : s.substring(index + 1, s.length());
         }
     }
 
+    /**
+     * Returns a string that is a substring of this string.
+     * The substring begins at the specified {@code start} and
+     * extends to the character at index {@code end -1}.
+     *
+     * @param s The string to be evaluated.
+     * @param start The start index, inclusive.
+     * @param end The end index, exclusive.
+     * @return A substring.
+     */
     public static String subString(String s, int start, int end) {
         if (s == null) {
-            return "(null)";
+            return NULL;
         } else if (s.isEmpty()) {
-            return "(empty)";
+            return EMPTY;
         } else {
             start = ((start < 0) || (start > s.length())) ? 0 : start;
             end = ((end < 0) || (end > s.length())) ? s.length() : end;
 
             if (start > end) {
-                return "(empty)";
+                return EMPTY;
             }
 
             return s.substring(start, end);

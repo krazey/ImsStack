@@ -32,19 +32,24 @@ public class LogTest {
     private static final String TEST = "Test";
     private static final String DELIMITER = ".";
     private static final String TEST_LOG_MESSAGE = TEST + DELIMITER + LOG_MESSAGE;
-    private static final String NULL_STRING = "(null)";
-    private static final String EMPTY_STRING = "(empty)";
-    private static final String HIDDEN_STRING = "****";
 
     @Test
     @SmallTest
     public void logOperations() throws Exception {
         Log.setImsDebug(true);
 
+        Exception throwable = null;
+
+        try {
+            throw new Exception();
+        } catch (Exception e) {
+            throwable = e;
+        }
+
         // Checks the logs in the logcat.
         Log.d(TAG, LOG_MESSAGE + ": d");
         Log.e(TAG, LOG_MESSAGE + ": e");
-        Log.e(TAG, LOG_MESSAGE + ": e w/ exception", new Throwable());
+        Log.e(TAG, LOG_MESSAGE + ": e w/ exception", throwable);
         Log.i(TAG, LOG_MESSAGE + ": i");
         Log.v(TAG, LOG_MESSAGE + ": v");
         Log.w(TAG, LOG_MESSAGE + ": w");
@@ -82,15 +87,15 @@ public class LogTest {
         String refinedLogMessage;
 
         refinedLogMessage = Log.pii(null);
-        assertEquals(NULL_STRING, refinedLogMessage);
+        assertEquals(Log.NULL, refinedLogMessage);
 
         refinedLogMessage = Log.pii("");
-        assertEquals(EMPTY_STRING, refinedLogMessage);
+        assertEquals(Log.EMPTY, refinedLogMessage);
 
         // When the debug is not enabled.
         Log.setImsDebug(false);
         refinedLogMessage = Log.pii(LOG_MESSAGE);
-        assertEquals(HIDDEN_STRING, refinedLogMessage);
+        assertEquals(Log.HIDDEN, refinedLogMessage);
 
         // When the debug is enabled.
         Log.setImsDebug(true);
@@ -130,10 +135,10 @@ public class LogTest {
         String token;
 
         token = Log.firstSubString(null, DELIMITER, true);
-        assertEquals(token, NULL_STRING);
+        assertEquals(token, Log.NULL);
 
         token = Log.firstSubString("", DELIMITER, true);
-        assertEquals(token, EMPTY_STRING);
+        assertEquals(token, Log.EMPTY);
 
         token = Log.firstSubString(TEST_LOG_MESSAGE, DELIMITER, true);
         assertEquals(token, TEST);
@@ -153,14 +158,14 @@ public class LogTest {
 
     @Test
     @SmallTest
-    public void lastSubString() throws Exception {
+    public void lastSubString_count() throws Exception {
         String token;
 
         token = Log.lastSubString(null, 0);
-        assertEquals(token, NULL_STRING);
+        assertEquals(token, Log.NULL);
 
         token = Log.lastSubString("", 0);
-        assertEquals(token, EMPTY_STRING);
+        assertEquals(token, Log.EMPTY);
 
         token = Log.lastSubString(TEST, 0);
         assertEquals(token, "");
@@ -180,17 +185,38 @@ public class LogTest {
 
     @Test
     @SmallTest
+    public void lastSubString_delimiter() throws Exception {
+        String token;
+
+        token = Log.lastSubString(null, DELIMITER);
+        assertEquals(token, Log.NULL);
+
+        token = Log.lastSubString("", DELIMITER);
+        assertEquals(token, Log.EMPTY);
+
+        token = Log.lastSubString(TEST_LOG_MESSAGE, DELIMITER);
+        assertEquals(token, LOG_MESSAGE);
+
+        token = Log.lastSubString(TEST_LOG_MESSAGE, null);
+        assertEquals(token, TEST_LOG_MESSAGE);
+
+        token = Log.lastSubString(TEST, DELIMITER);
+        assertEquals(token, TEST);
+    }
+
+    @Test
+    @SmallTest
     public void subString() throws Exception {
         String token;
 
         token = Log.subString(null, 0, 0);
-        assertEquals(token, NULL_STRING);
+        assertEquals(token, Log.NULL);
 
         token = Log.subString("", 0, 0);
-        assertEquals(token, EMPTY_STRING);
+        assertEquals(token, Log.EMPTY);
 
         token = Log.subString(TEST, 2, 1);
-        assertEquals(token, EMPTY_STRING);
+        assertEquals(token, Log.EMPTY);
 
         token = Log.subString(TEST, 0, 1);
         assertEquals(token, "T");
