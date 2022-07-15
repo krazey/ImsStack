@@ -31,6 +31,8 @@ public:
             IN AssetItems& objAssetItems);
 
 private:
+    static void ClearArrays(
+            IN CarrierConfigItems& objCarrierConfigItems, IN AssetItems& objAssetItems);
     static void UpdateByCarrierConfig(IN ICarrierConfig* piCc, IN CarrierConfigItems& objItems);
     static void UpdateByAsset(IN ICarrierConfig* piCc, IN AssetItems& objItems);
 };
