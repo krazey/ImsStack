@@ -165,7 +165,7 @@ public class ConfigContainerTest {
         mConfigContainer.resetAcValue();
         expectedAcVersion = 0;
         expectedAcValidity = 0L;
-        expectedAcToken = "";
+        expectedAcToken = null;
 
         // verify data from cached
         acVersion = mConfigContainer.getAcVersion(0);
