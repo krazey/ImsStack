@@ -19,12 +19,13 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.telephony.SubscriptionManager;
 
 import com.android.ims.ImsConfig;
 import com.android.imsstack.core.ImsGlobal;
+import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.SettingsUtils;
 
 public class WfcSettingTracker {
     /** 0 : Wi-Fi only, 1 : Cellular preferred, 2 : Wi-Fi preferred */
@@ -71,9 +72,9 @@ public class WfcSettingTracker {
             mWfcMode = SettingsUtils.getWFCImsMode(context, slotId);
 
             SettingsUtils.registerObserverForGlobal(cr,
-                    SettingsUtils.getKeyForWFCImsEnabled(slotId), mSettingObserver);
+                    SubscriptionManager.WFC_IMS_ENABLED, mSettingObserver);
             SettingsUtils.registerObserverForGlobal(cr,
-                    SettingsUtils.getKeyForWFCImsMode(slotId), mModeObserver);
+                    SubscriptionManager.WFC_IMS_MODE, mModeObserver);
         } else {
             mSettingObserver = null;
             mModeObserver = null;

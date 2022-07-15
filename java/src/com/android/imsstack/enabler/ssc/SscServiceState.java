@@ -31,7 +31,6 @@ import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 public class SscServiceState {
@@ -93,13 +92,6 @@ public class SscServiceState {
         if (!SscConfig.isUtSupported(mSlotId)) {
             ImsLog.i("Ut not supported");
             return false;
-        }
-
-        if ((MSimUtils.isMultiImsEnabled() == false) && MSimUtils.isMultiImsEnabledOnDssv()) {
-            if (MSimUtils.getDefaultDataSubId() != MSimUtils.getSubId(mSlotId)) {
-                ImsLog.w(mSlotId, "DSSV-DV :: Ut blocked for non-DDS slot");
-                return false;
-            }
         }
 
         if (mUtBlockReason != SscConstant.BLOCK_REASON_NONE) {

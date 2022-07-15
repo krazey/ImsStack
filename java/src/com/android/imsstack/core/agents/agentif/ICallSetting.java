@@ -22,10 +22,6 @@ import android.os.Handler;
  * this file is for providing the call setting information
  */
 public interface ICallSetting {
-
-    /** Return VoLTE setting is enabled or not in call setting menu */
-    boolean isVoLTEUsedForHDVoice();
-
     /** Return VoWifi setting is enabled or not in call setting menu */
     boolean isWfcEnabled();
 

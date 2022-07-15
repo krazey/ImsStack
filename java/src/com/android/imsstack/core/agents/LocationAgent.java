@@ -48,7 +48,6 @@ import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.GeocoderProxy;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.LocationApi;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.imsstack.util.SystemUtils;
 

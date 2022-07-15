@@ -31,6 +31,7 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.SparseArray;
 
+import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.ITelephonyState;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
@@ -38,7 +39,6 @@ import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
-import com.android.imsstack.util.SettingsUtils;
 
 import java.util.Arrays;
 import java.util.List;

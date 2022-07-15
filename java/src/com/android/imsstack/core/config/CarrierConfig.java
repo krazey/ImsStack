@@ -81,6 +81,14 @@ public class CarrierConfig {
             CarrierConfigManager.KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL,
             CarrierConfigManager.KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL,
             CarrierConfigManager.KEY_GBA_MODE_INT,
+
+            // Internal usage temporarily
+            CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL,
+            CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ENABLED_BOOL,
+            CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT,
+            CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL,
+            CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT,
+            CarrierConfigManager.KEY_EDITABLE_WFC_MODE_BOOL
         };
 
     public static class Ims {

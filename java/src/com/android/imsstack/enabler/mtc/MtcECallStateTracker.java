@@ -29,15 +29,12 @@ import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgentManager;
-import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.MSimUtils;
 
 import java.util.Set;
@@ -208,19 +205,6 @@ public class MtcECallStateTracker implements IECallStateTracker {
     }
 
     private boolean checkEcbmExitedDelayAndDisconnectEApn() {
-        if (ImsProperties.isChipVendorMtk()) {
-            if (mECBMExitedByNewCall) {
-                return false;
-            }
-
-            IDcApn dcapn = mContext.getDcApn();
-            if ((dcapn != null) && (dcapn.isConnected(EApnType.EMERGENCY.getType()))) {
-                log("Ecbm exit is delayed and e-pdn is released");
-                dcapn.disconnect(EApnType.EMERGENCY.getType());
-                return true;
-            }
-        }
-
         return false;
     }
 

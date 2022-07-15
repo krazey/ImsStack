@@ -1,14 +1,18 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20131015    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.enabler.mtc;
 
 import android.content.Context;
@@ -20,7 +24,6 @@ import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
-import com.android.imsstack.util.SettingsUtils;
 
 public class MtcStateUtils {
     public static final int INIT_REG_STATE = 0x01;
@@ -219,13 +222,6 @@ public class MtcStateUtils {
         logi("updateVoLteProvisioned :: provisioned=" + provisioned + ", slotId=" + slotId);
 
         ImsStateStore.getMmTelState(slotId).setVoLteProvisioned(provisioned);
-
-        if (ImsGlobal.isOperator(slotId, "VZW")) {
-            if (context != null) {
-                SettingsUtils.putAllowVoLteProvisioning(
-                        context.getContentResolver(), provisioned);
-            }
-        }
     }
 
     public static void updateVtProvisioned(Context context, int slotId, int provisioned) {

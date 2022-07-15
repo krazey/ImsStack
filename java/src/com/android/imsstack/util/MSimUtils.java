@@ -211,10 +211,4 @@ public final class MSimUtils {
     public static boolean isValidSubId(int subId) {
         return SubscriptionManager.isUsableSubscriptionId(subId);
     }
-
-    // DSSV-DV (Dual SIM Single VoLTE - Dual VoLTE for emergency {
-    public static boolean isMultiImsEnabledOnDssv() {
-        return isMultiSimEnabled() && ImsProperties.TARGET_COUNTRY.equals("AU");
-    }
-    // }
 }
