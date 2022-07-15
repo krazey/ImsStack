@@ -15,17 +15,43 @@
  */
 
 #include <gtest/gtest.h>
+#include "MtsService.h"
+#include "core/IPageMessage.h"
 #include "message/MtsMessageController.h"
+#include "utility/MtsDynamicLoader.h"
 
 namespace android
 {
 
+const IMS_SINT32 SLOT_ID = 0;
+
 class MtsMessageControllerTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MtsMessageController* pMtsMessageController;
+    MtsDynamicLoader* pMtsDynamicLoader;
+    MtsService* pMtsService;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override
+    {
+        pMtsDynamicLoader = new MtsDynamicLoader(SLOT_ID);
+        pMtsDynamicLoader->Initialize();
+        pMtsService = new MtsService(SLOT_ID, pMtsDynamicLoader);
+        pMtsMessageController = new MtsMessageController(SLOT_ID, pMtsService, pMtsDynamicLoader);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pMtsDynamicLoader;
+        delete pMtsService;
+        delete pMtsMessageController;
+    }
 };
+
+TEST_F(MtsMessageControllerTest, Constructor)
+{
+    ASSERT_NE(pMtsMessageController, nullptr);
+}
 
 }  // namespace android

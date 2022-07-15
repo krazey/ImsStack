@@ -17,10 +17,10 @@
 #include <gtest/gtest.h>
 #include "MtsApp.h"
 
-LOCAL IMS_SINT32 SLOT_ID = 0;
-
 namespace android
 {
+
+const IMS_SINT32 SLOT_ID = 0;
 
 class MtsAppTest : public ::testing::Test
 {

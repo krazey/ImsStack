@@ -85,8 +85,7 @@ PUBLIC void MtsApp::AddService(IN MtsService* pService)
     m_lstMtsServices.Append(pService);
     AttachService(pService);
 
-    IMS_TRACE_I("AddService : ID[%s] Size[%d]", pService->GetId().GetStr(),
-            m_lstMtsServices.GetSize(), 0);
+    IMS_TRACE_I("AddService : Size[%d]", m_lstMtsServices.GetSize(), 0, 0);
 }
 
 PUBLIC void MtsApp::RemoveMtsServices()
@@ -108,15 +107,15 @@ PUBLIC void MtsApp::RemoveMtsServices()
 
 PUBLIC VIRTUAL void MtsApp::Start()
 {
-    IMS_TRACE_I("SMS Start : m_nSlotId : [%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_I("SMS Start [slot_%d]", m_nSlotId, 0, 0);
 
     // MtsUtils
     /*===================*/
-    CreateMtsUtils(m_nSlotId);
+    CreateMtsUtils();
 
     // MtsService
     /*===================*/
-    CreateMtsService(m_nSlotId);
+    CreateMtsService();
 
     // MtsMessageController
     /*===================*/
@@ -181,26 +180,20 @@ PUBLIC VIRTUAL void MtsApp::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS
     IMS_TRACE_I("MtsApp::CallTracker_StateChanged, nType = [%d], nState = [%d]", nType, nState, 0);
 }
 
-PRIVATE void MtsApp::CreateMtsService(IN IMS_SINT32 nSlotId)
+PRIVATE void MtsApp::CreateMtsService()
 {
-    IMS_TRACE_I("CreateMtsService nSlotId : [%d]", nSlotId, 0, 0);
+    IMS_TRACE_I("CreateMtsService [slot_%d]", m_nSlotId, 0, 0);
 
     if (m_pMtsDynamicLoader == IMS_NULL)
     {
         IMS_TRACE_E(0, "can't make CreateMtsService", 0, 0, 0);
     }
 
-    m_pMtsService = new MtsService(m_pMtsDynamicLoader->GetMtsStrName()->GetMtsAppId(),
-            m_pMtsDynamicLoader->GetMtsStrName()->GetMtsServiceId(), m_nSlotId,
-            m_pMtsDynamicLoader);
+    m_pMtsService = new MtsService(m_nSlotId, m_pMtsDynamicLoader);
 
     if (m_pMtsService != IMS_NULL)
     {
         AddService(m_pMtsService);
-    }
-    else
-    {
-        IMS_TRACE_E(0, "m_pMtsService is NULL", 0, 0, 0);
     }
 }
 
@@ -210,9 +203,11 @@ PRIVATE void MtsApp::CreateMtsMessageController(
     m_pMtsMessageController = new MtsMessageController(nSlotId, m_pMtsService, pMtsDynamicLoader);
 }
 
-PRIVATE void MtsApp::CreateMtsUtils(IN IMS_SINT32 nSlotId)
+PRIVATE void MtsApp::CreateMtsUtils()
 {
-    m_pMtsDynamicLoader = new MtsDynamicLoader(nSlotId);
+    IMS_TRACE_I("CreateMtsUtils [slot_%d]", m_nSlotId, 0, 0);
+
+    m_pMtsDynamicLoader = new MtsDynamicLoader(m_nSlotId);
 
     if (m_pMtsDynamicLoader != IMS_NULL)
     {

@@ -17,13 +17,12 @@
 #ifndef MTS_SERVICE_H_
 #define MTS_SERVICE_H_
 
-#include "ImsService.h"
 #include "ICoreServiceListener.h"
 #include "IImsAosListener.h"
 #include "IImsAosMonitor.h"
 #include "IMtsService.h"
 #include "IMtsServiceListener.h"
-
+#include "ImsService.h"
 #include "IuMts.h"
 #include "IuMtsService.h"
 
@@ -33,22 +32,15 @@ class JniMtsServiceThread;
 class MtsDynamicLoader;
 
 class MtsService final :
-        public ImsService,
         public ICoreServiceListener,
         public IImsAosListener,
         public IImsAosMonitor,
-        public IMtsService
+        public IMtsService,
+        public ImsService
 {
 public:
-    MtsService(IN const AString& strMtsAppId, IN const AString& strServiceId, IN IMS_SINT32 nSlotId,
-            IN MtsDynamicLoader* pMtsDynamicLoader);
+    MtsService(IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader);
     ~MtsService();
-
-protected:
-    // ImsService
-    inline IMS_BOOL OnPreprocess(IN IMSMSG& /*objMSG*/) { return IMS_TRUE; }
-    inline IMS_BOOL OnMessage(IN IMSMSG& /*objMSG*/) { return IMS_TRUE; }
-    inline IMS_BOOL OnPostprocess(IN IMSMSG& /*objMSG*/) { return IMS_TRUE; }
 
 public:
     // ICoreServiceListener
@@ -86,23 +78,28 @@ public:
     void IMSAoSApp_NotifySpecificMessage(
             IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam);
     IMS_BOOL IsEpdgConnected();
-
-    const AString& GetId() const;
     ICoreService* GetICoreService() const;
+    inline MtsDynamicLoader* GetMtsUtils() { return m_pMtsDynamicLoader; }
     void SetListener(IN IMtsServiceListener* piMtsServiceListener);
 
 protected:
+    // ImsService
+    inline IMS_BOOL OnPreprocess(IN IMSMSG& /*objMSG*/) { return IMS_TRUE; }
+    inline IMS_BOOL OnMessage(IN IMSMSG& /*objMSG*/) { return IMS_TRUE; }
+    inline IMS_BOOL OnPostprocess(IN IMSMSG& /*objMSG*/) { return IMS_TRUE; }
+
     const AString& GetAppId() const;
 
 private:
-    void Init(IN const AString& strMtsAppId, IN const AString& strServiceId, IN IMS_SINT32 nSlotId);
-    void DeInit();
     IMS_BOOL Attach();
+    void AttachAosInterface();
+    void AttachCoreServiceInterface();
+    void Init();
+    void DeInit();
 
-protected:
+private:
     IImsAos* m_piImsAos;
     AString m_strAppId;
-    AString m_strServiceId;
     IMS_UINT32 m_nSlotId;
     ICoreService* m_piCoreService;
     IMtsServiceListener* m_piMtsServiceListener;

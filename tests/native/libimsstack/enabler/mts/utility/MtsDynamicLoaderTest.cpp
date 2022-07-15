@@ -50,6 +50,12 @@ TEST_F(MtsDynamicLoaderTest, CreateMtsSipFormUtilsAfterInitialize)
     ASSERT_NE(pMtsDynamicLoader->GetMtsSipFormUtils(), nullptr);
 }
 
+TEST_F(MtsDynamicLoaderTest, CreateMtsSmUtilsAfterInitialize)
+{
+    pMtsDynamicLoader->Initialize();
+    ASSERT_NE(pMtsDynamicLoader->GetMtsSmUtils(), nullptr);
+}
+
 TEST_F(MtsDynamicLoaderTest, CreateMtsStrNameAfterInitialize)
 {
     pMtsDynamicLoader->Initialize();
