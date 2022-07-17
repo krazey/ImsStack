@@ -62,10 +62,10 @@ public:
     inline MtsCallTracker* GetMtsCallTracker() { return m_pCallTracker; }
 
 private:
-    void CreateMtsService(IN IMS_SINT32 nSlotId);
+    void CreateMtsService();
     void CreateMtsMessageController(
             IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader);
-    void CreateMtsUtils(IN IMS_SINT32 nSlotId);
+    void CreateMtsUtils();
     void DestroyMtsUtils();
     void GetSmOverIpConfigInfo(IN IMS_SINT32 nSlotId);
 

@@ -15,17 +15,94 @@
  */
 
 #include <gtest/gtest.h>
+#include "IIpcan.h"
+#include "ImsAosParameter.h"
+#include "MockIMtsServiceListener.h"
 #include "MtsService.h"
+#include "core/MockICoreService.h"
+#include "core/MockIReference.h"
+#include "core/IPageMessage.h"
+#include "utility/MtsDynamicLoader.h"
 
 namespace android
 {
 
+const IMS_SINT32 SLOT_ID = 0;
+const IMS_UINTP FAKE_ADDRESS = 1;
+
 class MtsServiceTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MockICoreService objMockCoreService;
+    MtsDynamicLoader* pMtsDynamicLoader;
+    MtsService* pMtsService;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override
+    {
+        pMtsDynamicLoader = new MtsDynamicLoader(SLOT_ID);
+        pMtsDynamicLoader->Initialize();
+        pMtsService = new MtsService(SLOT_ID, pMtsDynamicLoader);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pMtsDynamicLoader;
+        delete pMtsService;
+    }
 };
+
+TEST_F(MtsServiceTest, GetICoreServiceReturnsNotNull)
+{
+    EXPECT_NE(pMtsService->GetICoreService(), nullptr);
+}
+
+TEST_F(MtsServiceTest, CoreServicePageMessageReceived)
+{
+    MockIMtsServiceListener* piMtsServiceListener = new MockIMtsServiceListener();
+    pMtsService->SetListener(piMtsServiceListener);
+    IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
+
+    EXPECT_CALL(*piMtsServiceListener, NotifyMtSms(piMessage)).Times(1);
+
+    pMtsService->CoreService_PageMessageReceived(&objMockCoreService, piMessage);
+}
+
+TEST_F(MtsServiceTest, CoreServiceReferenceReceivedDoesNothing)
+{
+    IReference* piReference = reinterpret_cast<IReference*>(FAKE_ADDRESS);
+    pMtsService->CoreService_ReferenceReceived(&objMockCoreService, piReference);
+}
+
+TEST_F(MtsServiceTest, CoreServiceServiceClosedDoesNothing)
+{
+    IReasonInfo* piReasonInfo = reinterpret_cast<IReasonInfo*>(FAKE_ADDRESS);
+    pMtsService->CoreService_ServiceClosed(&objMockCoreService, piReasonInfo);
+}
+
+TEST_F(MtsServiceTest, CoreServiceSessionInvitationReceivedDoesNothing)
+{
+    ISession* piSession = reinterpret_cast<ISession*>(FAKE_ADDRESS);
+    pMtsService->CoreService_SessionInvitationReceived(&objMockCoreService, piSession);
+}
+
+TEST_F(MtsServiceTest, CoreServiceUnsolicitedNotifyReceivedDoesNothing)
+{
+    IMessage* piNotify = reinterpret_cast<IMessage*>(FAKE_ADDRESS);
+    pMtsService->CoreService_UnsolicitedNotifyReceived(&objMockCoreService, piNotify);
+}
+
+TEST_F(MtsServiceTest, CoreServiceCapabilityQueryReceivedDoesNothing)
+{
+    ICapabilities* piCapabilities = reinterpret_cast<ICapabilities*>(FAKE_ADDRESS);
+    pMtsService->CoreService_CapabilityQueryReceived(&objMockCoreService, piCapabilities);
+}
+
+TEST_F(MtsServiceTest, ImsAosMonitorConnected)
+{
+    pMtsService->ImsAosMonitor_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
+    EXPECT_TRUE(pMtsService->GetMtsUtils()->GetMtsServiceState()->IsServiceConnected(
+            ImsAosFeature::SMSIP));
+}
 
 }  // namespace android

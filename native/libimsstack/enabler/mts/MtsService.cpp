@@ -25,6 +25,7 @@
 #include "IImsAosInfo.h"
 #include "IIpcan.h"
 #include "ImsAos.h"
+#include "ImsServiceConfig.h"
 #include "IuMts.h"
 #include "JniConnectorFactory.h"
 #include "JniMtsService.h"
@@ -38,12 +39,10 @@
 
 __IMS_TRACE_TAG_COM_SMS__;
 
-MtsService::MtsService(IN const AString& strMtsAppId, IN const AString& strServiceId,
-        IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader) :
+MtsService::MtsService(IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader) :
         ImsService(AString::ConstNull()),
         m_piImsAos(IMS_NULL),
-        m_strAppId(strMtsAppId),
-        m_strServiceId(strServiceId),
+        m_strAppId(ImsServiceConfig::GetAppName(ImsAppId::MTS)),
         m_nSlotId(nSlotId),
         m_piCoreService(IMS_NULL),
         m_piMtsServiceListener(IMS_NULL),
@@ -51,7 +50,7 @@ MtsService::MtsService(IN const AString& strMtsAppId, IN const AString& strServi
         m_pMtsDynamicLoader(pMtsDynamicLoader)
 {
     IMS_TRACE_I("+MtsService [slot_%d]", m_nSlotId, 0, 0);
-    Init(strMtsAppId, strServiceId, nSlotId);
+    Init();
 }
 
 PUBLIC
@@ -67,12 +66,6 @@ MtsService::~MtsService()
 
     JniConnectorFactory::GetInstance()->GetMtsServiceConnector(m_nSlotId)->SetEnablerService(
             IMS_NULL);
-}
-
-PUBLIC
-const AString& MtsService::GetId() const
-{
-    return m_strServiceId;
 }
 
 PUBLIC
@@ -414,59 +407,13 @@ const AString& MtsService::GetAppId() const
 }
 
 PRIVATE
-void MtsService::Init(
-        IN const AString& strMtsAppId, IN const AString& strServiceId, IN IMS_SINT32 nSlotId)
+void MtsService::Init()
 {
     IMS_TRACE_I("Init", 0, 0, 0);
 
     Attach();
-
-    // Get the interface of AoS and register as the listener.
-    m_piImsAos = ImsAos::GetImsAos(strMtsAppId, strServiceId, nSlotId);
-
-    if (m_piImsAos == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "Init() - m_piImsAos is null", 0, 0, 0);
-        return;
-    }
-
-    // Get an ICoreService and register as the listener.
-    AString aStrParams;
-    aStrParams.Sprintf("%s=%s", "serviceId", GetId().GetStr());
-
-    m_piCoreService = DYNAMIC_CAST(
-            ICoreService*, (Connector::Open(ImsCore::CONNECTION_SCHEME, GetAppId(), aStrParams)));
-
-    if (m_piCoreService == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "Init() - m_piCoreService is null", 0, 0, 0);
-        return;
-    }
-
-    m_piCoreService->SetListener(this);
-
-    //// iFC -- starts
-    // It MUST be applied if the feature-tag property is not supported (no Accept-Contact).
-    IServiceFilterCriteria* piSfc = m_piCoreService->GetFilterCriteria();
-
-    if (piSfc != IMS_NULL)
-    {
-        SipMethod objMethod(SipMethod::MESSAGE);
-        TriggerPoint objTp(objMethod);
-
-        // Add iFC for 3GPP2 SMS format (Content-Type: application/vnd.3gpp2.sms)
-        objTp.AddHeader(ISipHeader::CONTENT_TYPE, "application/vnd.3gpp2.sms");
-        piSfc->AddTriggerPoint(objTp);
-
-        // Add iFC for 3GPP SMS format (Content-Type: application/vnd.3gpp.sms)
-        objTp.RemoveAllHeaders();
-        objTp.AddHeader(ISipHeader::CONTENT_TYPE, "application/vnd.3gpp.sms");
-        piSfc->AddTriggerPoint(objTp);
-    }
-    //// iFC -- ends
-
-    m_piImsAos->SetListener(this);
-    m_piImsAos->SetMonitor(this);
+    AttachAosInterface();
+    AttachCoreServiceInterface();
 }
 
 PRIVATE
@@ -512,4 +459,60 @@ IMS_BOOL MtsService::Attach()
 
     IMS_TRACE_I("Attach() - %s", _TRACE_B_(bIsAttached), 0, 0);
     return bIsAttached;
+}
+
+PRIVATE
+void MtsService::AttachAosInterface()
+{
+    // Get the interface of AoS and register as the listener.
+    m_piImsAos = ImsAos::GetImsAos(
+            m_strAppId, ImsServiceConfig::GetServiceName(ImsServiceId::MTS), m_nSlotId);
+
+    if (m_piImsAos == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "AttachAosInterface() - m_piImsAos is null", 0, 0, 0);
+        return;
+    }
+
+    m_piImsAos->SetListener(this);
+    m_piImsAos->SetMonitor(this);
+}
+
+PRIVATE
+void MtsService::AttachCoreServiceInterface()
+{
+    // Get an ICoreService and register as the listener.
+    AString strServiceId("serviceId=");
+    strServiceId += ImsServiceConfig::GetServiceName(ImsServiceId::MTS);
+
+    m_piCoreService = DYNAMIC_CAST(
+            ICoreService*, (Connector::Open(ImsCore::CONNECTION_SCHEME, m_strAppId, strServiceId)));
+
+    if (m_piCoreService == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "AttachCoreServiceInterface() - m_piCoreService is null", 0, 0, 0);
+        return;
+    }
+
+    m_piCoreService->SetListener(this);
+
+    //// iFC -- starts
+    // It MUST be applied if the feature-tag property is not supported (no Accept-Contact).
+    IServiceFilterCriteria* piSfc = m_piCoreService->GetFilterCriteria();
+
+    if (piSfc != IMS_NULL)
+    {
+        SipMethod objMethod(SipMethod::MESSAGE);
+        TriggerPoint objTp(objMethod);
+
+        // Add iFC for 3GPP2 SMS format (Content-Type: application/vnd.3gpp2.sms)
+        objTp.AddHeader(ISipHeader::CONTENT_TYPE, "application/vnd.3gpp2.sms");
+        piSfc->AddTriggerPoint(objTp);
+
+        // Add iFC for 3GPP SMS format (Content-Type: application/vnd.3gpp.sms)
+        objTp.RemoveAllHeaders();
+        objTp.AddHeader(ISipHeader::CONTENT_TYPE, "application/vnd.3gpp.sms");
+        piSfc->AddTriggerPoint(objTp);
+    }
+    //// iFC -- ends
 }
