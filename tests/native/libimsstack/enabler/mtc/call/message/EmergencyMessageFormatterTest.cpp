@@ -15,17 +15,259 @@
  */
 
 #include <gtest/gtest.h>
+#include "call/extension/MockIMtcExtension.h"
+#include "call/extension/MtcExtensionSet.h"
 #include "call/message/EmergencyMessageFormatter.h"
+#include "call/MockIMtcSessionContext.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "core/MockICoreService.h"
+#include "core/MockIMessage.h"
+#include "core/MockISession.h"
+#include "FeatureCaps.h"
+#include "helper/MockIMtcAosConnector.h"
+#include "helper/MtcSupplementaryService.h"
+#include "IImsAosInfo.h"
+#include "MockIMtcService.h"
+#include "sipcore/MockISipMessage.h"
+#include "sipcore/SipParameter.h"
+
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace android
 {
 
 class EmergencyMessageFormatterTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    EmergencyMessageFormatter* pFormatter;
 
-    virtual void TearDown() override {}
+    CallInfo objCallInfo;
+    MockIMessage objMessage;
+    MockISipMessage objSipMessage;
+    MockIMtcSessionContext objContext;
+    MockIMtcService objService;
+    MockISession objSession;
+    MockICoreService objCoreService;
+    MockIMtcConfigurationManager* pConfigurationManager;
+    MockIMtcAosConnector objAosConnector;
+    MtcExtensionSet* pExtensionSet;
+    MtcConfigurationProxy* pConfigurationProxy;
+    MtcSupplementaryService* pSupplementaryService;
+    FeatureCaps* pFeatureCaps;
+
+protected:
+    virtual void SetUp() override
+    {
+        pConfigurationManager = new MockIMtcConfigurationManager();
+        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
+        pFeatureCaps = new FeatureCaps();
+        ImsList<IMtcExtension*> lstExtensions;
+        pExtensionSet = new MtcExtensionSet(lstExtensions);
+
+        ON_CALL(objContext, GetISession).WillByDefault(ReturnRef(objSession));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetSupplementaryService)
+                .WillByDefault(ReturnRef(*pSupplementaryService));
+        ON_CALL(objContext, GetExtensionSet).WillByDefault(ReturnRef(*pExtensionSet));
+        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetAosConnector).WillByDefault(Return(&objAosConnector));
+        ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
+        ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(pFeatureCaps));
+        ON_CALL(objCoreService, GetUserIdentities)
+                .WillByDefault(ReturnRef(AStringArray::ConstNull()));
+        ON_CALL(objAosConnector, GetRegistrationMode)
+                .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+        ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
+        ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+
+        pFormatter = new EmergencyMessageFormatter(objContext);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pFormatter;
+        delete pConfigurationProxy;
+        delete pSupplementaryService;
+        delete pExtensionSet;
+        delete pFeatureCaps;
+    }
 };
+
+TEST_F(EmergencyMessageFormatterTest, FormStartMessageNormalCase)
+{
+    IMS_RESULT bResult = pFormatter->FormStartMessage();
+
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest, FormStartMessageFailureCase)
+{
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
+
+    IMS_RESULT bResult = pFormatter->FormStartMessage();
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(EmergencyMessageFormatterTest, GetAoSRegMode)
+{
+    ON_CALL(objContext, GetAosConnector).WillByDefault(Return(nullptr));
+
+    IMS_RESULT bResult = pFormatter->FormStartMessage();
+
+    EXPECT_EQ(bResult, IMS_FAILURE);
+}
+
+TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeader)
+{
+    ON_CALL(objSipMessage, IsHeaderPresent).WillByDefault(Return(IMS_TRUE));
+    IMS_RESULT bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+
+    ON_CALL(objSipMessage, IsHeaderPresent).WillByDefault(Return(IMS_FALSE));
+    bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderByDeviceId)
+{
+    const AString strLocalIpv6 = "::1";
+    const AString strLocalIpv4 = "127.0.0.1";
+    const IMS_UINT32 nLocalPort = 5060;
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_INTERNAL));
+    ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIpv6));
+    ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(nLocalPort));
+
+    IMS_RESULT bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+
+    ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIpv4));
+
+    bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest, GetLocalIpAddress)
+{
+    const AString strLocalIp = "::1";
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_INTERNAL));
+
+    EXPECT_CALL(objContext, GetAosConnector)
+            .WillOnce(Return(&objAosConnector))
+            .WillOnce(Return(&objAosConnector))
+            .WillOnce(Return(nullptr))
+            .WillRepeatedly(Return(&objAosConnector));
+
+    IMS_RESULT bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+
+    ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(AString::ConstEmpty()));
+
+    bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+
+    ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIp));
+
+    bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest, GetLocalPort)
+{
+    const AString strLocalIp = "::1";
+    const IMS_UINT32 nLocalPort = 5060;
+    const IMS_UINT32 nLocalPortZero = 0;
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_INTERNAL));
+    ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIp));
+
+    EXPECT_CALL(objContext, GetAosConnector)
+            .WillOnce(Return(&objAosConnector))
+            .WillOnce(Return(&objAosConnector))
+            .WillOnce(Return(&objAosConnector))
+            .WillOnce(Return(nullptr))
+            .WillRepeatedly(Return(&objAosConnector));
+
+    IMS_RESULT bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+
+    ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(nLocalPortZero));
+
+    bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+
+    ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(nLocalPort));
+
+    bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderByUserId)
+{
+    const AString strUserIdentity = "sip:user@google.com";
+
+    EXPECT_CALL(objService, GetICoreService)
+            .WillOnce(Return(&objCoreService))
+            .WillOnce(Return(nullptr))
+            .WillRepeatedly(Return(&objCoreService));
+
+    IMS_RESULT bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+
+    AStringArray objUserIdentities;
+    objUserIdentities.AddElement(AString::ConstEmpty());
+    objUserIdentities.AddElement(strUserIdentity);
+    ON_CALL(objCoreService, GetUserIdentities).WillByDefault(ReturnRef(objUserIdentities));
+
+    bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest, SetSipInstanceFeature)
+{
+    ON_CALL(objSipMessage, IsHeaderPresent).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objService, GetICoreService)
+            .WillOnce(Return(&objCoreService))
+            .WillOnce(Return(&objCoreService))
+            .WillOnce(Return(nullptr))
+            .WillRepeatedly(Return(&objCoreService));
+
+    IMS_RESULT bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_INTERNAL));
+
+    bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+
+    ON_CALL(objCoreService, GetInstanceParameter).WillByDefault(Return(nullptr));
+
+    bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+
+    SipParameter objParameter;
+    ON_CALL(objCoreService, GetInstanceParameter).WillByDefault(Return(&objParameter));
+
+    ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(nullptr));
+
+    bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+
+    ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(pFeatureCaps));
+
+    bResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(bResult, IMS_SUCCESS);
+}
 
 }  // namespace android
