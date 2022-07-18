@@ -162,6 +162,8 @@ public class ProvisioningDataTest {
 
     @After
     public void tearDown() throws Exception {
+        // delete test file
+        ProvisioningData.deleteXmlFile(mContext, mSubId);
         mProvisioningData = null;
 /*
         String fileName = LOCAL_FILE_NAME_PREFIX + mSubId + LOCAL_FILE_NAME_POSTFIX;
