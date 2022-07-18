@@ -71,6 +71,14 @@ PUBLIC VIRTUAL MtcService::~MtcService()
         m_pJniService = IMS_NULL;
     }
 
+    if (m_eType == ServiceType::NORMAL)
+    {
+        // TODO: temp to fix crash issue
+        JniConnectorFactory::GetInstance()
+                ->GetMtcServiceConnector(m_objContext.GetSlotId())
+                ->SetEnablerService(IMS_NULL);
+    }
+
     if (m_piCoreService)
     {
         m_piCoreService->SetListener(this);
@@ -125,15 +133,21 @@ PUBLIC VIRTUAL void MtcService::UpdateSrvccState(IN SrvccState eState)
 
 PUBLIC VIRTUAL void MtcService::SetJniService(IN JniMtcService* pJniService)
 {
-    IMS_TRACE_I("SetJniService", 0, 0, 0);
     m_pJniService = pJniService;
     if (pJniService)
     {
+        IMS_TRACE_I("SetJniService [slot_%d]", m_objContext.GetSlotId(), 0, 0);
         m_objContext.GetEmergencyServiceManager()->SetJniServiceThread(m_pJniService->GetThread());
     }
     else
     {
+        IMS_TRACE_I("SetJniService Null [slot_%d]", m_objContext.GetSlotId(), 0, 0);
         m_objContext.GetEmergencyServiceManager()->SetJniServiceThread(IMS_NULL);
+
+        // TODO: temp to fix crash issue
+        JniConnectorFactory::GetInstance()
+                ->GetMtcServiceConnector(m_objContext.GetSlotId())
+                ->SetEnablerService(IMS_NULL);
     }
 }
 
