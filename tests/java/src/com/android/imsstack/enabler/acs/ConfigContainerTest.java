@@ -34,6 +34,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.File;
+
 public class ConfigContainerTest {
     private static final String TAG = ConfigContainerTest.class.getSimpleName();
     private static final String VERSION = "6.0";
@@ -42,13 +44,18 @@ public class ConfigContainerTest {
     private static final String CLIENT_VERSION = "1.0";
     private static final boolean ENABLED_BY_USER = true;
 
+    private static final int SLOT_ID_0 = 0;
+    private static final int SLOT_ID_1 = 1;
+    private static final int SUB_ID_0 = 1234;
+    private static final int SUB_ID_1 = 5678;
+
+    private static final String FILE_NAME_0 = "rcs_provisioning_config_" + SUB_ID_0 + ".xml";
+    private static final String FILE_NAME_1 = "rcs_provisioning_config_" + SUB_ID_1 + ".xml";
+
     @Mock Context mContext;
 
     private TestConfigContainer mConfigContainer;
-    private int mSlotId0 = 0;
-    private int mSlotId1 = 1;
-    private int mSubId0 = 1234;
-    private int mSubId1 = 5678;
+
 
     private class TestConfigContainer extends ConfigContainer {
         private long mCurrentTime;
@@ -75,32 +82,31 @@ public class ConfigContainerTest {
 
     @After
     public void tearDown() throws Exception {
-        mConfigContainer = null;
+        // delete test file
+        deleteXmlFile(mContext, FILE_NAME_0);
+        deleteXmlFile(mContext, FILE_NAME_1);
     }
-
 
     @Test
     @SmallTest
     public void getFileName_withSubId() throws Exception {
         // for SubId 0
-        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+        mConfigContainer = new TestConfigContainer(mContext, SLOT_ID_0, SUB_ID_0);
 
-        String expectedFileName = "rcs_provisioning_config_" + mSubId0 + ".xml";
         String fileName = mConfigContainer.getFileName();
-        assertEquals(expectedFileName, fileName);
+        assertEquals(FILE_NAME_0, fileName);
 
         // for SubId 1
-        mConfigContainer = new TestConfigContainer(mContext, mSlotId1, mSubId1);
-        expectedFileName = "rcs_provisioning_config_" + mSubId1 + ".xml";
+        mConfigContainer = new TestConfigContainer(mContext, SLOT_ID_1, SUB_ID_1);
         fileName = mConfigContainer.getFileName();
-        assertEquals(expectedFileName, fileName);
+        assertEquals(FILE_NAME_1, fileName);
     }
 
     @Test
     @SmallTest
     public void acVersionValidityToken_ReadWrite() throws Exception {
         // for SubId 0
-        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+        mConfigContainer = new TestConfigContainer(mContext, SLOT_ID_0, SUB_ID_0);
         int expectedAcVersion = 0;
         long expectedAcValidity = 0;
         String expectedAcToken = null;
@@ -130,7 +136,7 @@ public class ConfigContainerTest {
         assertEquals(expectedAcToken, acToken);
 
         // verify data from stored file
-        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+        mConfigContainer = new TestConfigContainer(mContext, SLOT_ID_0, SUB_ID_0);
         acVersion = mConfigContainer.getAcVersion(0);
         acValidity = mConfigContainer.getAcValidity();
         acToken = mConfigContainer.getAcToken();
@@ -144,7 +150,7 @@ public class ConfigContainerTest {
     @SmallTest
     public void acVersionValidityToken_afterReset() throws Exception {
         // for SubId 0
-        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+        mConfigContainer = new TestConfigContainer(mContext, SLOT_ID_0, SUB_ID_0);
         int expectedAcVersion = 2;
         long expectedAcValidity = 36000L;
         String expectedAcToken = "zxcvb67890";
@@ -177,7 +183,7 @@ public class ConfigContainerTest {
         assertEquals(expectedAcToken, acToken);
 
         // verify data from stored file
-        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+        mConfigContainer = new TestConfigContainer(mContext, SLOT_ID_0, SUB_ID_0);
         acVersion = mConfigContainer.getAcVersion(0);
         acValidity = mConfigContainer.getAcValidity();
         acToken = mConfigContainer.getAcToken();
@@ -191,7 +197,7 @@ public class ConfigContainerTest {
     @SmallTest
     public void clientInfo_ReadWrite() throws Exception {
         // for SubId 0
-        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+        mConfigContainer = new TestConfigContainer(mContext, SLOT_ID_0, SUB_ID_0);
 
         AcServiceClientInfo clientInfo0 = mConfigContainer.getClientInfo();
         checkEquals(null, clientInfo0);
@@ -203,7 +209,7 @@ public class ConfigContainerTest {
         checkEquals(expected, clientInfo0);
 
         // for SubId 1
-        mConfigContainer = new TestConfigContainer(mContext, mSlotId1, mSubId1);
+        mConfigContainer = new TestConfigContainer(mContext, SLOT_ID_1, SUB_ID_1);
 
         AcServiceClientInfo clientInfo1 = mConfigContainer.getClientInfo();
         checkEquals(null, clientInfo1);
@@ -227,7 +233,7 @@ public class ConfigContainerTest {
     @SmallTest
     public void validationTime_ReadWrite() throws Exception {
         // for SubId 0
-        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+        mConfigContainer = new TestConfigContainer(mContext, SLOT_ID_0, SUB_ID_0);
 
         long expected = 0L;
         long validationTime0 = mConfigContainer.getValidationTime(expected);
@@ -242,7 +248,7 @@ public class ConfigContainerTest {
         assertEquals(expected, validationTime0);
 
         // for SubId 1
-        mConfigContainer = new TestConfigContainer(mContext, mSlotId1, mSubId1);
+        mConfigContainer = new TestConfigContainer(mContext, SLOT_ID_1, SUB_ID_1);
 
         expected = 0L;
         long validationTime1 = mConfigContainer.getValidationTime(expected);
@@ -264,7 +270,7 @@ public class ConfigContainerTest {
     @SmallTest
     public void lastUpdatedTime_ReadWrite() throws Exception {
         // for SubId 0
-        mConfigContainer = new TestConfigContainer(mContext, mSlotId0, mSubId0);
+        mConfigContainer = new TestConfigContainer(mContext, SLOT_ID_0, SUB_ID_0);
 
         long expected = 0L;
         long lastUpdatedTime0 = mConfigContainer.getLastUpdatedTime(expected);
@@ -279,14 +285,14 @@ public class ConfigContainerTest {
         assertEquals(expected, lastUpdatedTime0);
 
         // for SubId 1
-        mConfigContainer = new TestConfigContainer(mContext, mSlotId1, mSubId1);
+        mConfigContainer = new TestConfigContainer(mContext, SLOT_ID_1, SUB_ID_1);
 
         expected = 0L;
         long lastUpdatedTime1 = mConfigContainer.getLastUpdatedTime(expected);
 
         assertEquals(expected, lastUpdatedTime1);
 
-        expected = System.currentTimeMillis();
+        expected = System.currentTimeMillis() + 1000L;
         mConfigContainer.setCurrentTime(expected);
         mConfigContainer.updateLastUpdatedTime();
 
@@ -329,5 +335,13 @@ public class ConfigContainerTest {
         assertNotEquals(expected.getRcsProfile(), result.getRcsProfile());
         assertNotEquals(expected.getRcsVersion(), result.getRcsVersion());
         assertNotEquals(expected.isRcsEnabledByUser(), result.isRcsEnabledByUser());
+    }
+
+    private void deleteXmlFile(Context context, String fileName) {
+        File file = new File(context.getFilesDir(), fileName);
+        if (file != null && file.exists()) {
+            file.delete();
+            Log.i(TAG, "deleted file name is " + fileName);
+        }
     }
 }

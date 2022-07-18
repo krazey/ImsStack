@@ -131,6 +131,7 @@ public class ConfigContainer {
         mConfig.putInt(LOCAL_KEY_AC_VERSION, 0);
         mConfig.putLong(LOCAL_KEY_AC_VALIDITY, 0L);
         mConfig.putString(LOCAL_KEY_AC_TOKEN, null);
+        mConfig.putLong(LOCAL_KEY_LAST_UPDATE_TIME, 0L);
 
         saveDataToFile();
     }
