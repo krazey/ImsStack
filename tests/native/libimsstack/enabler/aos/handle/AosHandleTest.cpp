@@ -2270,7 +2270,7 @@ TEST_F(AosHandleTest, ProcessBlock_Test5)
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+            .WillRepeatedly(Return(IMS_TRUE));
 
     SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
@@ -3130,24 +3130,6 @@ TEST_F(AosHandleTest, StateDisconnected_Test3)
     EXPECT_FALSE(GetNotify());
 }
 
-TEST_F(AosHandleTest, StateDisconnected_Test4)
-{
-    // Test4: HANDLE_MSG_INVALID
-    // Expectation: state-disconnected, request type-detach, no call reconfig(), no need to notify.
-
-    SetHandleState(AosHandle::STATE_DISCONNECTED);
-    SetNotify(IMS_FALSE);
-
-    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
-
-    IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_INVALID*/, 0, 0);
-    m_pAosHandle->OnStateMessage(objMSG);
-
-    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
-    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::DETACH);
-    EXPECT_FALSE(GetNotify());
-}
-
 TEST_F(AosHandleTest, StateConnecting_Test1)
 {
     // Test1: HANDLE_MSG_BLOCK_STATUS, Handle blocked
@@ -3230,25 +3212,6 @@ TEST_F(AosHandleTest, StateConnecting_Test5)
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0);
 
-    EXPECT_FALSE(GetNotify());
-}
-
-TEST_F(AosHandleTest, StateConnecting_Test6)
-{
-    // Test6: HANDLE_MSG_INVALID
-    // Expectation: state-connecting, request type-attach, no call reconfig(), no need to notify.
-
-    SetHandleState(AosHandle::STATE_CONNECTING);
-    m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
-    SetNotify(IMS_FALSE);
-
-    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
-
-    IMSMSG objMSG(2 /*HANDLE_MSG_INVALID*/, 0, 0);
-    m_pAosHandle->OnStateMessage(objMSG);
-
-    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
-    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::ATTACH);
     EXPECT_FALSE(GetNotify());
 }
 
@@ -3381,19 +3344,6 @@ TEST_F(AosHandleTest, StateConnected_Test8)
     SetHandleState(AosHandle::STATE_CONNECTED);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_UPDATING, 0);
-
-    EXPECT_FALSE(GetNotify());
-}
-
-TEST_F(AosHandleTest, StateConnected_Test9)
-{
-    // Test9: HANDLE_MSG_INVALID
-    // Expectation: no need to notify
-
-    SetHandleState(AosHandle::STATE_CONNECTED);
-
-    IMSMSG objMSG(2 /*HANDLE_MSG_INVALID*/, 0, 0);
-    m_pAosHandle->OnStateMessage(objMSG);
 
     EXPECT_FALSE(GetNotify());
 }
@@ -3574,33 +3524,6 @@ TEST_F(AosHandleTest, StateDisconnecting_Test11)
     m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0);
 
     EXPECT_TRUE(GetNotify());
-}
-
-TEST_F(AosHandleTest, StateDisconnecting_Test12)
-{
-    // Test12: HANDLE_MSG_APP_STATUS, invalid app state
-    // Expectation: no need to notify
-
-    SetHandleState(AosHandle::STATE_DISCONNECTING);
-    SetNotify(IMS_FALSE);
-
-    m_pAosHandle->App_StateChanged(4, 0);
-
-    EXPECT_FALSE(GetNotify());
-}
-
-TEST_F(AosHandleTest, StateDisconnecting_Test13)
-{
-    // Test13: HANDLE_MSG_INVALID
-    // Expectation: no need to notify
-
-    SetHandleState(AosHandle::STATE_DISCONNECTING);
-    SetNotify(IMS_FALSE);
-
-    IMSMSG objMSG(2 /*HANDLE_MSG_INVALID*/, 0, 0);
-    m_pAosHandle->OnStateMessage(objMSG);
-
-    EXPECT_FALSE(GetNotify());
 }
 
 TEST_F(AosHandleTest, IsBlocked_Test)
@@ -3914,9 +3837,10 @@ TEST_F(AosHandleTest, UpdateFeature_Test)
     m_pAosHandle->UpdateFeature(0);
 }
 
-TEST_F(AosHandleTest, UpdateFeature_2_Test)
+TEST_F(AosHandleTest, UpdateFeature_for_ImsAosFeatureTag_Test)
 {
-    m_pAosHandle->UpdateFeature(IMS_NULL);
+    IMSList<ImsAosFeatureTag*> objFeatureTag;
+    m_pAosHandle->UpdateFeature(objFeatureTag);
 }
 
 TEST_F(AosHandleTest, CallTracker_StateChanged_Test)
