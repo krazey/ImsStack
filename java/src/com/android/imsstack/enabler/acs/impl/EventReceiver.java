@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-import com.android.imsstack.IStateInfoChangedObserver;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -48,18 +47,6 @@ public class EventReceiver {
     }
 
     private static EventReceiver sInstance;
-
-    private final IStateInfoChangedObserver mIStateInfoChangedObserver =
-            new IStateInfoChangedObserver() {
-                @Override
-                public void notifyStateInfoChanged(Intent intent) {
-                    synchronized (mLock) {
-                        for (EventReceiverCallback cb : mCallbackList) {
-                            cb.onSubscriptionChanged(intent);
-                        }
-                    }
-                }
-            };
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
