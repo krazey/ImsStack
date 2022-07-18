@@ -88,11 +88,8 @@ public class MtcAppTest extends ImsStackTest {
 
     private class TestMtcApp extends MtcApp {
         TestMtcApp(IBaseContext context, IMtcCallManager mtcCallManager, Looper looper,
-                MtcEmergencyServiceManager mtcEmergencyServiceManager,
-                ServiceStateListener serviceStateListener, CallListener callListener,
-                MtcJniProxy mtcJniProxy) {
-            super(context, mtcCallManager, looper, mtcEmergencyServiceManager, serviceStateListener,
-                    callListener, mtcJniProxy);
+                MtcEmergencyServiceManager mtcEmergencyServiceManager, MtcJniProxy mtcJniProxy) {
+            super(context, mtcCallManager, looper, mtcEmergencyServiceManager, mtcJniProxy);
         }
 
         @Override
@@ -113,7 +110,9 @@ public class MtcAppTest extends ImsStackTest {
 
         mTestMtcJniProxy = new TestMtcJniProxy();
         mTestMtcApp = new TestMtcApp(mContext, mCM, Looper.myLooper(),
-                mEmergencyServiceManager, mServiceStateListener, mCallListener, mTestMtcJniProxy);
+                mEmergencyServiceManager, mTestMtcJniProxy);
+        mTestMtcApp.setCallListener(mCallListener);
+        mTestMtcApp.setServiceStateListener(mServiceStateListener);
     }
 
     @After
@@ -267,15 +266,6 @@ public class MtcAppTest extends ImsStackTest {
 
         verify(mMtcCall, times(1)).close();
         assertEquals(null, mtcCall);
-    }
-
-    @Test
-    public void testsetCallListenerSetServiceStateListener() {
-        mTestMtcApp.setCallListener(null);
-        mTestMtcApp.setServiceStateListener(null);
-
-        assertEquals(null, mTestMtcApp.getCallListener());
-        assertEquals(null, mTestMtcApp.getServiceStateListener());
     }
 
     @Test

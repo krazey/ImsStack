@@ -1,13 +1,18 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20131015    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.imsstack.enabler.mtc;
 
@@ -23,6 +28,7 @@ import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.jni.JNIImsListener;
 import com.android.imsstack.util.ImsArgs;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 public class MtcCall extends Call implements ConferenceTracker {
     /**
@@ -306,11 +312,13 @@ public class MtcCall extends Call implements ConferenceTracker {
     private int mOldCallTypeOnUpdateAccept = IUMtcCall.CALLTYPE_VOIP;
     /** It will be controlled when audio is in sendrecv & video direction is only changed */
     private int mVideoState = ONE_WAY_VIDEO_NONE;
+    private MtcJniProxy mMtcJniProxy;
 
     public MtcCall(IBaseContext context, CallTracker ct, int callAttributes,
             int index, String logTag) {
         super(context, index, logTag);
 
+        mMtcJniProxy = MtcJniProxy.getInstance();
         mCT = ct;
         mHandler = new MessageHandler(mContext.getCallLooper());
 
@@ -323,7 +331,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         if ((callAttributes & FLAG_EMERGENCY) != 0) {
             setCallExtraBoolean(EXTRA_E_CALL, true);
         } else {
-            long nativeCallObject = MtcJniProxy.getInstance().getJniInterfaceAndSetListener(
+            long nativeCallObject = mMtcJniProxy.getJniInterfaceAndSetListener(
                         mContext.getSlotId(), IUIMS.MTC_CALL, mNativeListener);
             super.updateNativeCallObject(nativeCallObject);
         }
@@ -371,6 +379,22 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         logi(toString());
+    }
+
+    @VisibleForTesting
+    public MtcCall(IBaseContext context, CallTracker ct,
+            int index, String logTag, Looper looper, MtcConference mtcConference,
+            MtcMediaSession mtcMediaSession, MtcJniProxy mtcJniProxy, CallInfo callInfo,
+            MediaInfo mediaInfo) {
+        super(context, index, logTag);
+
+        mCT = ct;
+        mHandler = new MessageHandler(looper);
+        mConference = mtcConference;
+        mMediaSession = mtcMediaSession;
+        mMtcJniProxy = mtcJniProxy;
+        mCallInfo = new MtcCallInfo(callInfo);
+        mMediaInfo = mediaInfo;
     }
 
     @Override
@@ -528,15 +552,9 @@ public class MtcCall extends Call implements ConferenceTracker {
                     // ConferenceInfo: to manage the participants in the conference call
                     ConferenceInfoHelper.createConferenceInfo(getCallId(), mContext.getSlotId());
                 } else {
-                    MtcCall confCall = new MtcCall(mContext, mCT, isEmergencyCall()
-                            ? (FLAG_EMERGENCY | FLAG_CONFERENCE) : FLAG_CONFERENCE, -1, "EX");
+                    MtcCall confCall = createAndSetMtcCallForConference(
+                            jniConfCallId, callInfo, mediaInfo, suppInfo);
 
-                    confCall.updateNativeCallObject(jniConfCallId);
-                    confCall.setAdhocGroup();
-                    confCall.setCallType(getCallType());
-                    confCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
-                    // FIXME: Is it a correct information for the new call?
-                    confCall.updateCallParameters(callInfo, mediaInfo, suppInfo);
                     mCT.updateCallState(confCall, CallTracker.CALL_EVENT_CREATE, null);
                 }
                 break;
@@ -558,14 +576,9 @@ public class MtcCall extends Call implements ConferenceTracker {
                     // ConferenceInfo: to manage the participants in the conference call
                     ConferenceInfoHelper.createConferenceInfo(getCallId(), mContext.getSlotId());
                 } else {
-                    MtcCall confCall = new MtcCall(mContext, mCT, isEmergencyCall()
-                            ? (FLAG_EMERGENCY | FLAG_CONFERENCE) : FLAG_CONFERENCE, -1, "ER");
+                    MtcCall confCall = createAndSetMtcCallForConference(
+                            jniConfCallId, callInfo, mediaInfo, suppInfo);
 
-                    confCall.updateNativeCallObject(jniConfCallId);
-                    confCall.setCallType(getCallType());
-                    confCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
-                    // FIXME: Is it a correct information for the new call?
-                    confCall.updateCallParameters(callInfo, mediaInfo, suppInfo);
                     mCT.updateCallState(confCall, CallTracker.CALL_EVENT_CREATE, null);
                 }
                 break;
@@ -614,7 +627,7 @@ public class MtcCall extends Call implements ConferenceTracker {
      * Creates interface between Java and Native for call.
      */
     public void createNativeCallObject() {
-        long nativeCallObject = MtcJniProxy.getInstance().getJniInterfaceAndSetListener(
+        long nativeCallObject = mMtcJniProxy.getJniInterfaceAndSetListener(
                 mContext.getSlotId(), IUIMS.MTC_CALL, mNativeListener);
         super.updateNativeCallObject(nativeCallObject);
     }
@@ -1137,6 +1150,21 @@ public class MtcCall extends Call implements ConferenceTracker {
         return false;
     }
 
+    protected MtcCall createAndSetMtcCallForConference(
+            long jniConfCallId, CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
+        MtcCall confCall = new MtcCall(mContext, mCT, isEmergencyCall()
+                ? (FLAG_EMERGENCY | FLAG_CONFERENCE) : FLAG_CONFERENCE, -1, "EX");
+
+        confCall.updateNativeCallObject(jniConfCallId);
+        confCall.setAdhocGroup();
+        confCall.setCallType(getCallType());
+        confCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
+        // FIXME: Is it a correct information for the new call?
+        confCall.updateCallParameters(callInfo, mediaInfo, suppInfo);
+
+        return confCall;
+    }
+
     private boolean checkAndSetCallType(int callType) {
         if (getCallType() != callType) {
             logi("CallTypeChanged :: " +
@@ -1471,7 +1499,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
                     Parcel parcel = (Parcel)msg.obj;
 
-                    MtcJniProxy.getInstance().sendDataToNative(getNativeCallId(), parcel);
+                    mMtcJniProxy.sendDataToNative(getNativeCallId(), parcel);
                     break;
                 }
                 case MSG_CLOSE: {
@@ -1487,7 +1515,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
                     if (nativeCallId != null) {
                         logi("clearInterface=" + nativeCallId);
-                        MtcJniProxy.getInstance().releaseJniInterfaceAndrRemoveListener(
+                        mMtcJniProxy.releaseJniInterfaceAndrRemoveListener(
                                 nativeCallId.longValue(), mNativeListener);
                     }
                     break;
