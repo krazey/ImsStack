@@ -139,22 +139,24 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_IdleState)
     pSipTranspParam = new SipTransportParameter(
             (SIP_CHAR*)"192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
 
-    pReqLine = pSipMsg->GetReqLine();
-    ASSERT_TRUE(pReqLine != nullptr);
-    EXPECT_EQ(SIP_TRUE, pReqLine->SetMethod("PRACK"));
-    pReqLine->SipDelete();
+    SipMessage* pTempSipMsg = new SipMessage();
+    pTempSipMsg->SetMessageType(SipMessage::RESP_TYPE);
 
-    SipHeaderBase* pRAckHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RACK);
-    ASSERT_TRUE(pRAckHdr != nullptr);
-    EXPECT_EQ(SIP_TRUE, pRAckHdr->DecodeHdr((SIP_CHAR*)"2 1 INVITE", strlen("2 1 INVITE")));
+    char* pMsg = (char*)"PRACK sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: 1332\r\n\
+CSeq: 2 PRACK\r\n\
+RAck: 209 2 INVITE\r\n\
+\r\n";
 
-    EXPECT_EQ(SIP_TRUE, pSipMsg->SetHeader(pRAckHdr));
-    pRAckHdr->SipDelete();
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
 
-    pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
-    pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    pTxn = new SipTxn(SipTxn::NON_INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
-
+    pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
+    pTxnKey = new SipTxnKey(pTempSipMsg, &nError);
+    pTxn = new SipTxn(SipTxn::NON_INV_SER_TXN, pTxnKey, pTempSipMsg, SIP_NULL, &nError);
+    /* Calling fsm with PRACK msg on idle state */
     EXPECT_EQ(SIP_TRUE,
             gpfSipNonInvSerTxnFsm[SipTxn::NON_INV_SER_IDLE_ST]
                                  [SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT](
@@ -165,6 +167,7 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_IdleState)
     delete pSipTranspParam;
     delete pTxnFsmData;
     delete pTxnKey;
+    delete pTempSipMsg;
 }
 
 TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_TryingState)

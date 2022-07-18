@@ -31,8 +31,6 @@ public:
 
     virtual SIP_VOID* StopTimer(SIP_VOID* pvTimerId) = 0;
 
-    virtual SIP_BOOL ResetTimer(SIP_VOID* pvTimerId, SIP_UINT32 nNewDuration) = 0;
-
     virtual SIP_VOID* StopTimerEx(SIP_VOID* pvTimerId) = 0;
 };
 #endif  //__ISIPTIMERUTIL_H__

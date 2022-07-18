@@ -56,8 +56,14 @@ CSeq: 1 INVITE\r\n\
         pRespSipMsg = new SipMessage();
         pRespSipMsg->SetMessageType(SipMessage::RESP_TYPE);
 
-        SipStatusLine* pStatusLine = new SipStatusLine("SIP/2.0", "180", "Ringing");
-        pRespSipMsg->SetStatusLine(pStatusLine);
+        pMsg = (char*)"SIP/2.0 183 Ringing\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>;tag=too\r\n\
+Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
+CSeq: 1 INVITE\r\n\
+\r\n";
+        EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
 
         SipHeaderBase* pRespRSeqHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RSEQ);
         ASSERT_TRUE(pRespRSeqHdr != nullptr);
@@ -283,6 +289,97 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_ProceedingState)
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
 
+    /*Calling the retransmission 183 with different callID */
+    SipMessage* pTempSipMsg = new SipMessage();
+    pTempSipMsg->SetMessageType(SipMessage::RESP_TYPE);
+
+    char* pMsg = (char*)"SIP/2.0 183 Ringing\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>;tag=too\r\n\
+Call-ID: 1332\r\n\
+CSeq: 1 INVITE\r\n\
+RSeq: 2\r\n\
+\r\n";
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    delete pTxnFsmData;
+    pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
+
+    /*Calling the 183 msg in proceeding state*/
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+
+    /*Calling the 183 retransmission with different from tag */
+    SipHeaderBase* pFromHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::FROM);
+    ASSERT_TRUE(pFromHdr != nullptr);
+    SipHeaderBase* pCallIDHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::CALL_ID);
+    ASSERT_TRUE(pCallIDHdr != nullptr);
+
+    SIP_CHAR* pCallIdValue = (SIP_CHAR*)"1332a-3c0d31@2409:192.168.35.156";
+    SIP_CHAR* pFromValue = (SIP_CHAR*)"<sip:user@host>;tag=a89";
+
+    EXPECT_EQ(SIP_TRUE, pFromHdr->DecodeHdr(pFromValue, strlen(pFromValue)));
+    EXPECT_EQ(SIP_TRUE, pCallIDHdr->DecodeHdr(pCallIdValue, strlen(pCallIdValue)));
+
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pFromHdr));
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pCallIDHdr));
+
+    pFromHdr->SipDelete();
+    pCallIDHdr->SipDelete();
+
+    delete pTxnFsmData;
+    pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+
+    /*Calling the 183 retransmission msg with different to tag */
+    pFromHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::FROM);
+    ASSERT_TRUE(pFromHdr != nullptr);
+    SipHeaderBase* pToHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::TO);
+    ASSERT_TRUE(pToHdr != nullptr);
+
+    SIP_CHAR* pToValue = (SIP_CHAR*)"<sip:userA@host>;tag=one";
+    pFromValue = (SIP_CHAR*)"<sip:user@host>;tag=abcd";
+
+    EXPECT_EQ(SIP_TRUE, pFromHdr->DecodeHdr(pFromValue, strlen(pFromValue)));
+    EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, strlen(pToValue)));
+
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pFromHdr));
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pToHdr));
+
+    pFromHdr->SipDelete();
+    pToHdr->SipDelete();
+
+    delete pTxnFsmData;
+    pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+
+    /*Calling the retransmission 183 with different Rseq num */
+    pToHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::TO);
+    ASSERT_TRUE(pToHdr != nullptr);
+    SipHeaderBase* pRSeqHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RSEQ);
+    ASSERT_TRUE(pRSeqHdr != nullptr);
+
+    pToValue = (SIP_CHAR*)"<sip:userA@host>;tag=too";
+    EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, strlen(pToValue)));
+    EXPECT_EQ(SIP_TRUE, pRSeqHdr->DecodeHdr((SIP_CHAR*)"90", 1));
+
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pToHdr));
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pRSeqHdr));
+
+    pRSeqHdr->SipDelete();
+    pToHdr->SipDelete();
+
+    delete pTxnFsmData;
+    pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_RECV_2XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
@@ -320,6 +417,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_ProceedingState)
     delete pTxnFsmData;
     delete pSipUserData;
     delete pSipTranspParam;
+    delete pTempSipMsg;
 }
 
 TEST_F(Sip_txn_InvCliFsmTest, InvCli_CompletedState)

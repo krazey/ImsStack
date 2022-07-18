@@ -91,13 +91,7 @@ public:
     inline SIP_UINT16 GetRespCode() const { return m_nRespCode; }
     inline SIP_INT32 GetTxnType() const { return m_eTxnType; }
 
-    SIP_VOID SetCallId(const SIP_CHAR* pszCallId);
-    SIP_VOID SetFromTag(const SIP_CHAR* pszFromTag);
     SIP_VOID SetMethod(const SIP_CHAR* pszMethod);
-    SIP_VOID SetRequestUri(SipAddrSpec* pRequestUri);
-    SIP_VOID SetToTag(const SIP_CHAR* pszToTag);
-    SIP_VOID SetViaBranchParam(const SIP_CHAR* pszViaBranchParam);
-    SIP_VOID SetViaHost(const SIP_CHAR* pszViaHost);
     inline SIP_VOID SetCseqNum(SIP_UINT32 nCseqNum) { m_nCseqNum = nCseqNum; }
     inline SIP_VOID SetMsgType(SIP_INT32 eMsgType) { m_eMsgType = eMsgType; }
     inline SIP_VOID SetViaHostPort(SIP_UINT16 nViaHostPort) { m_nViaHostPort = nViaHostPort; }
