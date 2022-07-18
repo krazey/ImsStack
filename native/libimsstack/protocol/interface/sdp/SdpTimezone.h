@@ -29,7 +29,7 @@ public:
                 m_nOffset(0)
         {
         }
-        inline ZoneAdjustment(IN IMS_UINT32 nAdjustmentTime, IN IMS_UINT32& nOffset) :
+        inline ZoneAdjustment(IN IMS_UINT32 nAdjustmentTime, IN IMS_SINT32 nOffset) :
                 m_nAdjustmentTime(nAdjustmentTime),
                 m_nOffset(nOffset)
         {
@@ -52,13 +52,18 @@ public:
             return (*this);
         }
 
+        inline IMS_BOOL Equals(IN const ZoneAdjustment& other) const
+        {
+            return m_nAdjustmentTime == other.m_nAdjustmentTime && m_nOffset == other.m_nOffset;
+        }
+
     public:
         inline IMS_UINT32 GetAdjustmentTime() const { return m_nAdjustmentTime; }
-        inline IMS_UINT32 GetOffset() const { return m_nOffset; }
+        inline IMS_SINT32 GetOffset() const { return m_nOffset; }
 
     private:
         IMS_UINT32 m_nAdjustmentTime;
-        IMS_UINT32 m_nOffset;
+        IMS_SINT32 m_nOffset;
     };
 
 public:
@@ -91,19 +96,25 @@ public:
     /**
      * @brief Adds the adjustment time & offset to the timezone line.
      */
-    IMS_BOOL AddAdjustment(IN IMS_UINT32 nAdjustmentTime, IN IMS_UINT32 nOffset);
+    IMS_BOOL AddAdjustment(IN IMS_UINT32 nAdjustmentTime, IN IMS_SINT32 nOffset);
 
     /**
      * @brief Returns the ZoneAdjustment objects from the timezone line.
      */
-    inline const IMSList<SdpTimezone::ZoneAdjustment>& GetAdjustments() const
+    inline const ImsList<SdpTimezone::ZoneAdjustment>& GetAdjustments() const
     {
         return m_objZoneAdjustments;
     }
 
 private:
     // z=<adjustment time> <offset> <adjustment time> <offset> ...
-    IMSList<ZoneAdjustment> m_objZoneAdjustments;
+    ImsList<ZoneAdjustment> m_objZoneAdjustments;
 };
+
+inline IMS_BOOL operator==(
+        IN const SdpTimezone::ZoneAdjustment& objZa1, IN const SdpTimezone::ZoneAdjustment& objZa2)
+{
+    return objZa1.Equals(objZa2);
+}
 
 #endif

@@ -343,7 +343,7 @@ const SdpAttribute* SdpDescription::GetAttribute(IN const AString& strAttribute)
     {
         const SdpAttribute& objAttribute = m_objAttributes.GetAt(i);
 
-        if (objAttribute.GetAttributeEx().Equals(strAttribute))
+        if (objAttribute.GetAttributeName().Equals(strAttribute))
         {
             return &objAttribute;
         }
@@ -379,7 +379,7 @@ IMSList<SdpAttribute> SdpDescription::GetAttributes(IN const AString& strAttribu
     {
         const SdpAttribute& objAttribute = m_objAttributes.GetAt(i);
 
-        if (objAttribute.GetAttributeEx().Equals(strAttribute))
+        if (objAttribute.GetAttributeName().Equals(strAttribute))
         {
             objCollectedAttributes.Append(objAttribute);
         }

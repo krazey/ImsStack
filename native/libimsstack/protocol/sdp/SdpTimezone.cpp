@@ -53,7 +53,7 @@ SdpTimezone& SdpTimezone::operator=(IN const SdpTimezone& other)
 PUBLIC VIRTUAL IMS_BOOL SdpTimezone::Decode(IN const AString& strValue)
 {
     // z=<adjustment time> <offset> <adjustment time> <offset> ...
-    IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_SP);
+    ImsList<AString> objTokens = strValue.Split(TextParser::CHAR_SP);
 
     if (objTokens.GetSize() < 2)
     {
@@ -67,15 +67,24 @@ PUBLIC VIRTUAL IMS_BOOL SdpTimezone::Decode(IN const AString& strValue)
         return IMS_FALSE;
     }
 
+    m_objZoneAdjustments.Clear();
+
     for (IMS_UINT32 i = 0; i < objTokens.GetSize(); i += 2)
     {
+        IMS_BOOL bNegative = IMS_FALSE;
         const AString& strAdjustment = objTokens.GetAt(i);
-        const AString& strOffset = objTokens.GetAt(i + 1);
+        AString strOffset = objTokens.GetAt(i + 1);
 
         if ((strAdjustment.GetLength() != 10) || !Sdp::IsDigitString(strAdjustment))
         {
             // Invalid adjustment field
             return IMS_FALSE;
+        }
+
+        if (strOffset.StartsWith('-'))
+        {
+            bNegative = IMS_TRUE;
+            strOffset = strOffset.GetSubStr(1);
         }
 
         if (!Sdp::IsTypedTimeString(strOffset))
@@ -85,7 +94,12 @@ PUBLIC VIRTUAL IMS_BOOL SdpTimezone::Decode(IN const AString& strValue)
         }
 
         IMS_UINT32 nAdjustment = strAdjustment.ToUInt32();
-        IMS_UINT32 nOffset = Sdp::ConvertTypedTimeToSeconds(strOffset);
+        IMS_SINT32 nOffset = Sdp::ConvertTypedTimeToSeconds(strOffset);
+
+        if (bNegative)
+        {
+            nOffset *= -1;
+        }
 
         if (!m_objZoneAdjustments.Append(ZoneAdjustment(nAdjustment, nOffset)))
         {
@@ -98,6 +112,11 @@ PUBLIC VIRTUAL IMS_BOOL SdpTimezone::Decode(IN const AString& strValue)
 
 PUBLIC VIRTUAL AString SdpTimezone::Encode() const
 {
+    if (m_objZoneAdjustments.IsEmpty())
+    {
+        return AString::ConstNull();
+    }
+
     // z=<adjustment time> <offset> <adjustment time> <offset> ...
     AString strLine(1, Sdp::LINE_Z);
 
@@ -111,12 +130,17 @@ PUBLIC VIRTUAL AString SdpTimezone::Encode() const
 
 PUBLIC VIRTUAL AString SdpTimezone::GetValue() const
 {
+    if (m_objZoneAdjustments.IsEmpty())
+    {
+        return AString::ConstNull();
+    }
+
     AString strValue;
     AString strAdjustment;
 
     for (IMS_UINT32 i = 0; i < m_objZoneAdjustments.GetSize(); ++i)
     {
-        strAdjustment.Sprintf("%u %u ", m_objZoneAdjustments.GetAt(i).GetAdjustmentTime(),
+        strAdjustment.Sprintf("%u %d ", m_objZoneAdjustments.GetAt(i).GetAdjustmentTime(),
                 m_objZoneAdjustments.GetAt(i).GetOffset());
 
         strValue.Append(strAdjustment);
@@ -129,7 +153,7 @@ PUBLIC VIRTUAL AString SdpTimezone::GetValue() const
 }
 
 PUBLIC
-IMS_BOOL SdpTimezone::AddAdjustment(IN IMS_UINT32 nAdjustmentTime, IN IMS_UINT32 nOffset)
+IMS_BOOL SdpTimezone::AddAdjustment(IN IMS_UINT32 nAdjustmentTime, IN IMS_SINT32 nOffset)
 {
     if (nAdjustmentTime == 0)
     {

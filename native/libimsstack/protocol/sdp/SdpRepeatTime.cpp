@@ -97,18 +97,42 @@ PUBLIC VIRTUAL IMS_BOOL SdpRepeatTime::Decode(IN const AString& strValue)
 
     m_nActiveDuration = Sdp::ConvertTypedTimeToSeconds(objTokens.GetElementAt(1));
 
+    const AString& strOffsets = objTokens.GetElementAt(2);
+    ImsList<AString> objOffsets = strOffsets.Split(TextParser::CHAR_SP);
+
+    if (objOffsets.IsEmpty())
+    {
+        IMS_TRACE_E(0, "Offset is not present in r-line: %s", strValue.GetStr(), 0, 0);
+        return IMS_FALSE;
+    }
+
+    const AString& strFirstOffset = objOffsets.GetAt(0);
+
     // offsets from start time field
-    if (!Sdp::IsTypedTimeString(objTokens.GetElementAt(2)))
+    if (!Sdp::IsTypedTimeString(strFirstOffset))
     {
         IMS_TRACE_E(0, "Invalid first offset in r-line: %s", strValue.GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
-    m_nFirstOffset = Sdp::ConvertTypedTimeToSeconds(objTokens.GetElementAt(2));
+    m_nFirstOffset = Sdp::ConvertTypedTimeToSeconds(strFirstOffset);
 
-    for (IMS_SINT32 i = 3; i < objTokens.GetCount(); ++i)
+    m_objAdditionalOffsets.Clear();
+
+    if (objOffsets.GetSize() > 1)
     {
-        m_objAdditionalOffsets.Append(Sdp::ConvertTypedTimeToSeconds(objTokens.GetElementAt(i)));
+        for (IMS_UINT32 i = 1; i < objOffsets.GetSize(); ++i)
+        {
+            const AString& strExtraOffset = objOffsets.GetAt(i);
+
+            if (!Sdp::IsTypedTimeString(strExtraOffset))
+            {
+                IMS_TRACE_E(0, "Invalid extra offset in r-line: %s", strValue.GetStr(), 0, 0);
+                return IMS_FALSE;
+            }
+
+            m_objAdditionalOffsets.Append(Sdp::ConvertTypedTimeToSeconds(strExtraOffset));
+        }
     }
 
     return IMS_TRUE;
@@ -116,6 +140,11 @@ PUBLIC VIRTUAL IMS_BOOL SdpRepeatTime::Decode(IN const AString& strValue)
 
 PUBLIC VIRTUAL AString SdpRepeatTime::Encode() const
 {
+    if (!IsValid())
+    {
+        return AString::ConstNull();
+    }
+
     // r=<repeat interval> <active duration> <offsets from start-time>
     AString strLine(1, Sdp::LINE_R);
 
@@ -129,6 +158,11 @@ PUBLIC VIRTUAL AString SdpRepeatTime::Encode() const
 
 PUBLIC VIRTUAL AString SdpRepeatTime::GetValue() const
 {
+    if (!IsValid())
+    {
+        return AString::ConstNull();
+    }
+
     AString strValue;
     AString strOffset;
 
@@ -147,7 +181,7 @@ PUBLIC VIRTUAL AString SdpRepeatTime::GetValue() const
 
 PUBLIC
 IMS_BOOL SdpRepeatTime::SetValue(IN IMS_UINT32 nInterval, IN IMS_UINT32 nActiveDuration,
-        IN IMS_UINT32 nFirstOffset, IN IMSList<IMS_UINT32>& objOffsets)
+        IN IMS_UINT32 nFirstOffset, IN ImsList<IMS_UINT32>& objOffsets)
 {
     if (nInterval == 0)
     {
@@ -160,4 +194,10 @@ IMS_BOOL SdpRepeatTime::SetValue(IN IMS_UINT32 nInterval, IN IMS_UINT32 nActiveD
     m_objAdditionalOffsets = objOffsets;
 
     return IMS_TRUE;
+}
+
+PRIVATE
+IMS_BOOL SdpRepeatTime::IsValid() const
+{
+    return m_nRepeatInterval != 0 && m_nActiveDuration != 0;
 }

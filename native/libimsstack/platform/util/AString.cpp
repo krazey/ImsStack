@@ -2291,6 +2291,15 @@ AString& AString::SetNumber(IN IMS_UINT64 n, IN IMS_SINT32 nBase /*= 10*/)
 PUBLIC
 IMS_SINT16 AString::ToInt16(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBase /*= 10*/) const
 {
+    if (GetLength() == 0)
+    {
+        if (pbOk != IMS_NULL)
+        {
+            *pbOk = IMS_FALSE;
+        }
+        return 0;
+    }
+
     IMS_BOOL bOk = IMS_FALSE;
     const IMS_CHAR* pEndPtr;
 
@@ -2331,6 +2340,15 @@ IMS_SINT16 AString::ToInt16(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBa
 PUBLIC
 IMS_UINT16 AString::ToUInt16(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBase /*= 10*/) const
 {
+    if (GetLength() == 0)
+    {
+        if (pbOk != IMS_NULL)
+        {
+            *pbOk = IMS_FALSE;
+        }
+        return 0;
+    }
+
     IMS_BOOL bOk = IMS_FALSE;
     const IMS_CHAR* pEndPtr;
 
@@ -2371,6 +2389,15 @@ IMS_UINT16 AString::ToUInt16(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nB
 PUBLIC
 IMS_SINT32 AString::ToInt32(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBase /*= 10*/) const
 {
+    if (GetLength() == 0)
+    {
+        if (pbOk != IMS_NULL)
+        {
+            *pbOk = IMS_FALSE;
+        }
+        return 0;
+    }
+
     IMS_BOOL bOk = IMS_FALSE;
     const IMS_CHAR* pEndPtr;
 
@@ -2411,6 +2438,15 @@ IMS_SINT32 AString::ToInt32(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBa
 PUBLIC
 IMS_UINT32 AString::ToUInt32(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBase /*= 10*/) const
 {
+    if (GetLength() == 0)
+    {
+        if (pbOk != IMS_NULL)
+        {
+            *pbOk = IMS_FALSE;
+        }
+        return 0;
+    }
+
     IMS_BOOL bOk = IMS_FALSE;
     const IMS_CHAR* pEndPtr;
 
@@ -2451,6 +2487,15 @@ IMS_UINT32 AString::ToUInt32(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nB
 PUBLIC
 IMS_SINT64 AString::ToInt64(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBase /*= 10*/) const
 {
+    if (GetLength() == 0)
+    {
+        if (pbOk != IMS_NULL)
+        {
+            *pbOk = IMS_FALSE;
+        }
+        return 0;
+    }
+
     IMS_BOOL bOk = IMS_FALSE;
     const IMS_CHAR* pEndPtr;
 
@@ -2491,6 +2536,15 @@ IMS_SINT64 AString::ToInt64(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBa
 PUBLIC
 IMS_UINT64 AString::ToUInt64(OUT IMS_BOOL* pbOk /*= IMS_NULL*/, IN IMS_SINT32 nBase /*= 10*/) const
 {
+    if (GetLength() == 0)
+    {
+        if (pbOk != IMS_NULL)
+        {
+            *pbOk = IMS_FALSE;
+        }
+        return 0;
+    }
+
     IMS_BOOL bOk = IMS_FALSE;
     const IMS_CHAR* pEndPtr;
 

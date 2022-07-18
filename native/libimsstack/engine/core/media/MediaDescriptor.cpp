@@ -123,7 +123,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN const AString& strAt
     }
 
     // Check if it is a reserved or not
-    if (IsAttributeReserved(pMediaParam, objAttribute.GetAttributeEx()))
+    if (IsAttributeReserved(pMediaParam, objAttribute.GetAttributeName()))
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
@@ -286,7 +286,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN const AString& st
     }
 
     // Check if it is a reserved or not
-    if (IsAttributeReserved(pMediaParam, objAttribute.GetAttributeEx()))
+    if (IsAttributeReserved(pMediaParam, objAttribute.GetAttributeName()))
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
@@ -703,7 +703,7 @@ PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes(
         {
             const SdpAttribute& objAttribute = objAttributes.GetAt(i);
 
-            if (objAttribute.GetAttributeEx().Equals(strType))
+            if (objAttribute.GetAttributeName().Equals(strType))
             {
                 objAttributeValues.Append(objAttribute.GetAttributeValue());
             }

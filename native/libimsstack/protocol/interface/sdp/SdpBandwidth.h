@@ -60,7 +60,7 @@ public:
     /**
      * @brief Returns the bandwidth type as a string value.
      */
-    inline const AString& GetTypeEx() const { return m_strType; }
+    inline const AString& GetTypeName() const { return m_strType; }
 
     /**
      * @brief Returns the bandwidth value (in integer value).
@@ -74,6 +74,11 @@ public:
             IN const AString& strType = AString::ConstNull());
 
 public:
+    enum
+    {
+        INVALID_BANDWIDTH = -1
+    };
+
     enum
     {
         TYPE_AS,

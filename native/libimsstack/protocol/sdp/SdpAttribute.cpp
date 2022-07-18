@@ -77,7 +77,7 @@ PRIVATE GLOBAL const IMS_CHAR* SdpAttribute::ATTRIBUTE[SdpAttribute::ATTRIBUTE_M
 PUBLIC
 SdpAttribute::SdpAttribute() :
         SdpLine(),
-        m_nFormat(FORMAT_VALUE_ATTRIBUTE),
+        m_nFormat(FORMAT_PROPERTY_ATTRIBUTE),
         m_nAttribute(ATTRIBUTE_INVALID),
         m_strAttribute(AString::ConstNull()),
         m_strAttrValue(AString::ConstEmpty())
@@ -449,6 +449,11 @@ PUBLIC VIRTUAL IMS_BOOL SdpAttribute::Decode(IN const AString& strValue)
 
 PUBLIC VIRTUAL AString SdpAttribute::Encode() const
 {
+    if (m_strAttribute.GetLength() == 0)
+    {
+        return AString::ConstNull();
+    }
+
     // a=<attribute>
     // a=<attribute>:<value>
     AString strLine(1, Sdp::LINE_A);

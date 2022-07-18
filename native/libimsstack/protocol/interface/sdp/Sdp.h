@@ -25,7 +25,7 @@ public:
     static IMS_BOOL IsDigitString(IN const AString& strValue);
     static IMS_BOOL IsFqdnString(IN const AString& strValue);
     static IMS_BOOL IsTextString(IN const AString& strValue);
-    static IMS_BOOL IsTokenString(IN const AString& strValue, IN IMS_BOOL bAllowSP = IMS_FALSE);
+    static IMS_BOOL IsTokenString(IN const AString& strValue, IN IMS_BOOL bAllowSpace = IMS_FALSE);
     static IMS_BOOL IsTypedTimeString(IN const AString& strValue);
     static IMS_BOOL IsNonWsString(IN const AString& strValue);
     static IMS_BOOL IsUriString(IN const AString& strValue);
@@ -34,21 +34,21 @@ public:
     static IMS_UINT32 ConvertTypedTimeToSeconds(IN const AString& strValue);
     static IMS_SINT32 GetPayloadTypeFromAttribute(IN const AString& strValue);
     static AString IncreaseSessionVersion(IN const AString& strValue);
-    static IMS_BOOL ParseAttributeRtpmap(IN const AString& strValue, OUT IMS_SINT32& nPT,
+    static IMS_BOOL ParseAttributeRtpmap(IN const AString& strValue, OUT IMS_SINT32& nPayloadType,
             OUT AString& strEncodingName, OUT IMS_UINT32& nClockRate,
             OUT AString& strEncodingParameters);
     static IMS_BOOL ParseAttributeFmtp(
-            IN const AString& strValue, OUT IMS_SINT32& nPT, OUT AString& strParameters);
+            IN const AString& strValue, OUT IMS_SINT32& nPayloadType, OUT AString& strParameters);
     static IMS_BOOL ParseAttributeRtcp(IN const AString& strValue, OUT IMS_SINT32& nPort);
-    static IMS_BOOL ParseAttributeSetup(IN const AString& strValue, OUT IMS_SINT32& nTypeOfSetup);
-    static IMS_BOOL ParseAttributeConnection(
+    static void ParseAttributeSetup(IN const AString& strValue, OUT IMS_SINT32& nTypeOfSetup);
+    static void ParseAttributeConnection(
             IN const AString& strValue, OUT IMS_SINT32& nTypeOfConnection);
-    static IMS_BOOL ParseAttributeFramesize(IN const AString& strValue, OUT IMS_SINT32& nPT,
-            OUT IMS_SINT32& nWidth, OUT IMS_SINT32& nHeight);
+    static IMS_BOOL ParseAttributeFramesize(IN const AString& strValue,
+            OUT IMS_SINT32& nPayloadType, OUT IMS_SINT32& nWidth, OUT IMS_SINT32& nHeight);
 
 private:
-    static IMS_BOOL IsByteCharacter(IN const IMS_CHAR ch);
-    static IMS_BOOL IsVisibleCharacter(IN const IMS_CHAR ch);
+    static IMS_BOOL IsByteCharacter(IN const IMS_CHAR c);
+    static IMS_BOOL IsVisibleCharacter(IN const IMS_CHAR c);
 
 public:
     // Type definitions for each SDP lines

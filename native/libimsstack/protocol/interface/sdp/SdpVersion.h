@@ -50,12 +50,13 @@ public:
     inline IMS_SINT32 GetVersion() const { return m_nVersion; }
     IMS_BOOL SetVersion(IN IMS_SINT32 nVersion = SDP_VERSION);
 
-private:
+public:
     enum
     {
         SDP_VERSION = 0
     };
 
+private:
     // v=<version>
     IMS_SINT32 m_nVersion;
 };

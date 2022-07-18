@@ -33,8 +33,8 @@ SdpOrigin::SdpOrigin() :
         m_strSessionVersion(AString::ConstNull()),
         m_nNetType(Sdp::NET_TYPE_IN),
         m_strNetType(Sdp::STR_NET_TYPE_IN),
-        m_nAddrType(Sdp::ADDR_TYPE_IP4),
-        m_strAddrType(Sdp::STR_ADDR_TYPE_IP4),
+        m_nAddrType(Sdp::ADDR_TYPE_IP6),
+        m_strAddrType(Sdp::STR_ADDR_TYPE_IP6),
         m_strUnicastAddress(AString::ConstNull())
 {
 }
@@ -169,6 +169,11 @@ PUBLIC VIRTUAL IMS_BOOL SdpOrigin::Decode(IN const AString& strValue)
 
 PUBLIC VIRTUAL AString SdpOrigin::Encode() const
 {
+    if (!IsValid())
+    {
+        return AString::ConstNull();
+    }
+
     // o=<username> <sess-id> <sess-version> <nettype> <addrtype> <unicast-address>
     AString strLine(1, Sdp::LINE_O);
 
@@ -182,6 +187,11 @@ PUBLIC VIRTUAL AString SdpOrigin::Encode() const
 
 PUBLIC VIRTUAL AString SdpOrigin::GetValue() const
 {
+    if (!IsValid())
+    {
+        return AString::ConstNull();
+    }
+
     AString strValue;
 
     // username field
@@ -229,8 +239,8 @@ IMS_BOOL SdpOrigin::SetAddress(IN const AString& strAddress)
             return IMS_FALSE;
         }
 
-        m_nAddrType = Sdp::ADDR_TYPE_IP4;
-        m_strAddrType = Sdp::STR_ADDR_TYPE_IP4;
+        m_nAddrType = Sdp::ADDR_TYPE_IP6;
+        m_strAddrType = Sdp::STR_ADDR_TYPE_IP6;
     }
     else
     {
@@ -240,15 +250,10 @@ IMS_BOOL SdpOrigin::SetAddress(IN const AString& strAddress)
             m_nAddrType = Sdp::ADDR_TYPE_IP4;
             m_strAddrType = Sdp::STR_ADDR_TYPE_IP4;
         }
-        else if (objAddress.IsIPv6Address())
+        else
         {
             m_nAddrType = Sdp::ADDR_TYPE_IP6;
             m_strAddrType = Sdp::STR_ADDR_TYPE_IP6;
-        }
-        else
-        {
-            m_nAddrType = Sdp::ADDR_TYPE_IP4;
-            m_strAddrType = Sdp::STR_ADDR_TYPE_IP4;
         }
     }
 
@@ -277,8 +282,8 @@ IMS_BOOL SdpOrigin::SetValue(IN const AString& strUsername, IN const AString& st
             return IMS_FALSE;
         }
 
-        m_nAddrType = Sdp::ADDR_TYPE_IP4;
-        m_strAddrType = Sdp::STR_ADDR_TYPE_IP4;
+        m_nAddrType = Sdp::ADDR_TYPE_IP6;
+        m_strAddrType = Sdp::STR_ADDR_TYPE_IP6;
     }
     else
     {
@@ -288,15 +293,10 @@ IMS_BOOL SdpOrigin::SetValue(IN const AString& strUsername, IN const AString& st
             m_nAddrType = Sdp::ADDR_TYPE_IP4;
             m_strAddrType = Sdp::STR_ADDR_TYPE_IP4;
         }
-        else if (objAddress.IsIPv6Address())
+        else
         {
             m_nAddrType = Sdp::ADDR_TYPE_IP6;
             m_strAddrType = Sdp::STR_ADDR_TYPE_IP6;
-        }
-        else
-        {
-            m_nAddrType = Sdp::ADDR_TYPE_IP4;
-            m_strAddrType = Sdp::STR_ADDR_TYPE_IP4;
         }
     }
 
@@ -393,6 +393,13 @@ IMS_BOOL SdpOrigin::SetValue(IN const AString& strUsername, IN const AString& st
     m_strUnicastAddress = strAddress;
 
     return IMS_TRUE;
+}
+
+PRIVATE IMS_BOOL SdpOrigin::IsValid() const
+{
+    return m_strUsername.GetLength() != 0 && m_strSessionId.GetLength() != 0 &&
+            m_strSessionVersion.GetLength() != 0 && m_strNetType.GetLength() != 0 &&
+            m_strAddrType.GetLength() != 0 && m_strUnicastAddress.GetLength() != 0;
 }
 
 PRIVATE GLOBAL IMS_UINT32 SdpOrigin::GetNtpTime()
