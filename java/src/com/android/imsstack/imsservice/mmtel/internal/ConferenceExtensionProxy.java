@@ -20,6 +20,7 @@ import com.android.imsstack.enabler.mtc.MtcConference;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 
@@ -88,6 +89,16 @@ public class ConferenceExtensionProxy extends ConferenceProxy {
         }
 
         return true;
+    }
+
+    @VisibleForTesting
+    public MtcCallListenerProxy getMtcCallListener() {
+        return mListenerProxy;
+    }
+
+    @VisibleForTesting
+    public MtcConferenceListenerProxy getMtcConferenceListener() {
+        return mConferenceListenerProxy;
     }
 
     private UsersInfo createUsersInfo() {
