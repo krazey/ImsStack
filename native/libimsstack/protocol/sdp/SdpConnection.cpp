@@ -26,8 +26,8 @@ SdpConnection::SdpConnection() :
         SdpLine(),
         m_nNetType(Sdp::NET_TYPE_IN),
         m_strNetType(Sdp::STR_NET_TYPE_IN),
-        m_nAddrType(Sdp::ADDR_TYPE_IP4),
-        m_strAddrType(Sdp::STR_ADDR_TYPE_IP4),
+        m_nAddrType(Sdp::ADDR_TYPE_IP6),
+        m_strAddrType(Sdp::STR_ADDR_TYPE_IP6),
         m_strAddress(AString::ConstNull()),
         m_nTtl(0),
         m_nNumOfAddress(0)
@@ -169,6 +169,11 @@ PUBLIC VIRTUAL IMS_BOOL SdpConnection::Decode(IN const AString& strValue)
 
 PUBLIC VIRTUAL AString SdpConnection::Encode() const
 {
+    if (!IsValid())
+    {
+        return AString::ConstNull();
+    }
+
     // c=<nettype> <addrtype> <connection-address>
     AString strLine(1, Sdp::LINE_C);
 
@@ -182,6 +187,11 @@ PUBLIC VIRTUAL AString SdpConnection::Encode() const
 
 PUBLIC VIRTUAL AString SdpConnection::GetValue() const
 {
+    if (!IsValid())
+    {
+        return AString::ConstNull();
+    }
+
     AString strValue;
 
     // nettype
@@ -253,4 +263,10 @@ IMS_BOOL SdpConnection::SetValue(IN IMS_SINT32 nAddrType, IN const AString& strA
     m_strAddress = strAddress;
 
     return IMS_TRUE;
+}
+
+PRIVATE IMS_BOOL SdpConnection::IsValid() const
+{
+    return m_strNetType.GetLength() != 0 && m_strAddrType.GetLength() != 0 &&
+            m_strAddress.GetLength() != 0;
 }

@@ -65,7 +65,7 @@ public:
     /**
      * @brief Returns the additional offsets from the repeat-time line.
      */
-    inline const IMSList<IMS_UINT32>& GetAdditionalOffsets() const
+    inline const ImsList<IMS_UINT32>& GetAdditionalOffsets() const
     {
         return m_objAdditionalOffsets;
     }
@@ -74,14 +74,17 @@ public:
      * @brief Sets all the parameters for the repeat-time line.
      */
     IMS_BOOL SetValue(IN IMS_UINT32 nInterval, IN IMS_UINT32 nActiveDuration,
-            IN IMS_UINT32 nFirstOffset, IN IMSList<IMS_UINT32>& objAdditionalOffsets);
+            IN IMS_UINT32 nFirstOffset, IN ImsList<IMS_UINT32>& objAdditionalOffsets);
+
+private:
+    IMS_BOOL IsValid() const;
 
 private:
     // r=<repeat interval> <active duration> <offsets from start-time>
     IMS_UINT32 m_nRepeatInterval;
     IMS_UINT32 m_nActiveDuration;
     IMS_UINT32 m_nFirstOffset;
-    IMSList<IMS_UINT32> m_objAdditionalOffsets;
+    ImsList<IMS_UINT32> m_objAdditionalOffsets;
 };
 
 #endif

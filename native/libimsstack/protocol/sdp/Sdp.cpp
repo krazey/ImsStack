@@ -90,7 +90,7 @@ PUBLIC GLOBAL IMS_BOOL Sdp::IsTextString(IN const AString& strValue)
 }
 
 PUBLIC GLOBAL IMS_BOOL Sdp::IsTokenString(
-        IN const AString& strValue, IN IMS_BOOL bAllowSP /*= IMS_FALSE*/)
+        IN const AString& strValue, IN IMS_BOOL bAllowSpace /*= IMS_FALSE*/)
 {
     if (strValue.GetLength() == 0)
     {
@@ -101,7 +101,7 @@ PUBLIC GLOBAL IMS_BOOL Sdp::IsTokenString(
     {
         if (!TextParser::IsTokenCharacter(strValue[i]))
         {
-            if (bAllowSP && (strValue[i] == 0x20))
+            if (bAllowSpace && (strValue[i] == 0x20))
             {
                 continue;
             }
@@ -153,9 +153,12 @@ PUBLIC GLOBAL IMS_BOOL Sdp::IsNonWsString(IN const AString& strValue)
 
 PUBLIC GLOBAL IMS_BOOL Sdp::IsUriString(IN const AString& strValue)
 {
-    // FIXME:
+    if (strValue.GetLength() == 0)
+    {
+        return IMS_FALSE;
+    }
 
-    (void)strValue;
+    // TODO: validation check
 
     return IMS_TRUE;
 }
@@ -163,6 +166,13 @@ PUBLIC GLOBAL IMS_BOOL Sdp::IsUriString(IN const AString& strValue)
 PUBLIC GLOBAL IMS_BOOL Sdp::SplitLine(
         IN const AString& strValue, IN IMS_SINT32 nNumOfParts, OUT AStringArray& objTokens)
 {
+    if (nNumOfParts <= 1)
+    {
+        // No need to split the specified value and returns the original value.
+        objTokens.AddElement(strValue);
+        return IMS_TRUE;
+    }
+
     IMS_SINT32 nStartOffset = 0;
     IMS_SINT32 nEndOffset = 0;
 
@@ -227,14 +237,14 @@ PUBLIC GLOBAL IMS_UINT32 Sdp::ConvertTypedTimeToSeconds(IN const AString& strVal
 
 PUBLIC GLOBAL IMS_SINT32 Sdp::GetPayloadTypeFromAttribute(IN const AString& strValue)
 {
-    IMS_SINT32 nSPIndex = strValue.GetIndexOf(TextParser::CHAR_SP);
+    IMS_SINT32 nSpIndex = strValue.GetIndexOf(TextParser::CHAR_SP);
 
-    if (nSPIndex == AString::NPOS)
+    if (nSpIndex == AString::NPOS)
     {
         return (-1);
     }
 
-    AString strPayloadType = strValue.GetSubStr(0, nSPIndex);
+    AString strPayloadType = strValue.GetSubStr(0, nSpIndex);
     IMS_BOOL bOk = IMS_FALSE;
     IMS_SINT32 nPayloadType = strPayloadType.ToInt32(&bOk);
 
@@ -318,8 +328,8 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeRtpmap(IN const AString& strValue,
 PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeFmtp(
         IN const AString& strValue, OUT IMS_SINT32& nPayloadType, OUT AString& strParameters)
 {
-    IMS_SINT32 nIndexOfSP = strValue.GetIndexOf(TextParser::CHAR_SP);
-    AString strPayloadType = strValue.GetSubStr(0, nIndexOfSP);
+    IMS_SINT32 nSpIndex = strValue.GetIndexOf(TextParser::CHAR_SP);
+    AString strPayloadType = strValue.GetSubStr(0, nSpIndex);
     IMS_BOOL bOk = IMS_FALSE;
 
     // Payload type
@@ -331,11 +341,14 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeFmtp(
     }
 
     // Format specific parameters
-    strParameters = strValue.GetSubStr(nIndexOfSP + 1);
-
-    if (strParameters.GetLength() == 0)
+    if (nSpIndex != AString::NPOS)
     {
-        strParameters = AString::ConstEmpty();
+        strParameters = strValue.GetSubStr(nSpIndex + 1);
+
+        if (strParameters.GetLength() == 0)
+        {
+            strParameters = AString::ConstEmpty();
+        }
     }
 
     return IMS_TRUE;
@@ -344,6 +357,11 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeFmtp(
 PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeRtcp(IN const AString& strValue, OUT IMS_SINT32& nPort)
 {
     // a=rtcp:<port>SP<nettype>SP<addrtype>SP<connection-address>
+    if (strValue.GetLength() == 0)
+    {
+        return IMS_FALSE;
+    }
+
     IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_SP);
 
     if (objTokens.GetSize() < 1)
@@ -352,14 +370,22 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeRtcp(IN const AString& strValue, OUT I
     }
 
     // Port number
-    nPort = objTokens.GetAt(0).ToInt32();
+    IMS_BOOL bOk = IMS_FALSE;
+    IMS_SINT32 nRtcpPort = objTokens.GetAt(0).ToInt32(&bOk);
+
+    if (!bOk)
+    {
+        return IMS_FALSE;
+    }
+
+    nPort = nRtcpPort;
 
     // nettype, addrtype, connection-address is not parsed in this moment
 
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeSetup(
+PUBLIC GLOBAL void Sdp::ParseAttributeSetup(
         IN const AString& strValue, OUT IMS_SINT32& nTypeOfSetup)
 {
     // a=setup:<type>
@@ -369,16 +395,14 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeSetup(
         if (strValue.EqualsIgnoreCase(STR_A_SETUP[i]))
         {
             nTypeOfSetup = i;
-            return IMS_TRUE;
+            return;
         }
     }
 
     nTypeOfSetup = SETUP_NONE;
-
-    return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeConnection(
+PUBLIC GLOBAL void Sdp::ParseAttributeConnection(
         IN const AString& strValue, OUT IMS_SINT32& nTypeOfConnection)
 {
     // a=connection:<type>
@@ -388,13 +412,11 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeConnection(
         if (strValue.EqualsIgnoreCase(STR_A_CONNECTION[i]))
         {
             nTypeOfConnection = i;
-            return IMS_TRUE;
+            return;
         }
     }
 
     nTypeOfConnection = CONNECTION_NONE;
-
-    return IMS_TRUE;
 }
 
 PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeFramesize(IN const AString& strValue,
@@ -402,19 +424,19 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeFramesize(IN const AString& strValue,
 {
     // a=framesize:<payload type>SP<width>-<height>
 
-    IMS_SINT32 nSPIndex = strValue.GetIndexOf(TextParser::CHAR_SP);
+    IMS_SINT32 nSpIndex = strValue.GetIndexOf(TextParser::CHAR_SP);
 
     nPayloadType = (-1);
     nWidth = 0;
     nHeight = 0;
 
-    if (nSPIndex == AString::NPOS)
+    if (nSpIndex == AString::NPOS)
     {
         return IMS_FALSE;
     }
 
     IMS_BOOL bOk = IMS_FALSE;
-    AString strTmp = strValue.GetSubStr(0, nSPIndex);
+    AString strTmp = strValue.GetSubStr(0, nSpIndex);
 
     nPayloadType = strTmp.ToInt32(&bOk);
 
@@ -424,7 +446,7 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeFramesize(IN const AString& strValue,
         return IMS_FALSE;
     }
 
-    IMS_SINT32 nHyphenIndex = strValue.GetIndexOf(TextParser::CHAR_HYPHEN, nSPIndex + 1);
+    IMS_SINT32 nHyphenIndex = strValue.GetIndexOf(TextParser::CHAR_HYPHEN, nSpIndex + 1);
 
     if (nHyphenIndex == AString::NPOS)
     {
@@ -433,7 +455,7 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeFramesize(IN const AString& strValue,
     }
 
     // <width>
-    strTmp = strValue.GetSubStr(nSPIndex + 1, nHyphenIndex - nSPIndex - 1);
+    strTmp = strValue.GetSubStr(nSpIndex + 1, nHyphenIndex - nSpIndex - 1);
     nWidth = strTmp.ToInt32(&bOk);
 
     if (!bOk)
@@ -455,11 +477,11 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeFramesize(IN const AString& strValue,
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL IMS_BOOL Sdp::IsByteCharacter(IN const IMS_CHAR ch)
+PRIVATE GLOBAL IMS_BOOL Sdp::IsByteCharacter(IN const IMS_CHAR c)
 {
     // Any byte except NUL, CR or LF
 
-    if ((ch == 0x00) || (ch == 0x0A) || (ch == 0x0D))
+    if ((c == 0x00) || (c == 0x0A) || (c == 0x0D))
     {
         return IMS_FALSE;
     }
@@ -467,10 +489,10 @@ PRIVATE GLOBAL IMS_BOOL Sdp::IsByteCharacter(IN const IMS_CHAR ch)
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL IMS_BOOL Sdp::IsVisibleCharacter(IN const IMS_CHAR ch)
+PRIVATE GLOBAL IMS_BOOL Sdp::IsVisibleCharacter(IN const IMS_CHAR c)
 {
     // 0x21 ~ 0x7E, 0x80 ~ 0xFF
-    IMS_SINT32 nValue = ch;
+    IMS_SINT32 nValue = c;
 
     if ((nValue >= 0x21) && (nValue <= 0x7E))
     {

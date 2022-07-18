@@ -349,7 +349,7 @@ const SdpAttribute* SdpParameter::GetAttribute(IN const AString& strAttribute) c
     {
         const SdpAttribute& objAttribute = m_objAttributes.GetAt(i);
 
-        if (objAttribute.GetAttributeEx().Equals(strAttribute))
+        if (objAttribute.GetAttributeName().Equals(strAttribute))
         {
             return &objAttribute;
         }
@@ -385,7 +385,7 @@ IMSList<SdpAttribute> SdpParameter::GetAttributes(IN const AString& strAttribute
     {
         const SdpAttribute& objAttribute = m_objAttributes.GetAt(i);
 
-        if (objAttribute.GetAttributeEx().Equals(strAttribute))
+        if (objAttribute.GetAttributeName().Equals(strAttribute))
         {
             objCollectedAttributes.Append(objAttribute);
         }
@@ -427,7 +427,7 @@ const SdpBandwidth* SdpParameter::GetBandwidth(IN const AString& strType) const
             continue;
         }
 
-        if (strType.EqualsIgnoreCase(objBandwidth.GetTypeEx()))
+        if (strType.EqualsIgnoreCase(objBandwidth.GetTypeName()))
         {
             return &objBandwidth;
         }

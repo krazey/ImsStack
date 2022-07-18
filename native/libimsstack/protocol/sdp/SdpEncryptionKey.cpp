@@ -61,17 +61,21 @@ PUBLIC VIRTUAL IMS_BOOL SdpEncryptionKey::Decode(IN const AString& strValue)
 {
     // k=<method>
     // k=<method>:<encryption key>
-    IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_COLON);
+    AString strMethod;
+    IMS_SINT32 nIndex = strValue.GetIndexOf(TextParser::CHAR_COLON);
 
-    if (objTokens.GetSize() == 0)
+    if (nIndex != AString::NPOS)
     {
-        // Invalid encryption line
-        return IMS_FALSE;
+        strMethod = strValue.GetSubStr(0, nIndex);
+        m_strKey = strValue.GetSubStr(nIndex + 1);
+    }
+    else
+    {
+        strMethod = strValue;
+        m_strKey = AString::ConstNull();
     }
 
     m_nMethod = METHOD_INVALID;
-
-    const AString& strMethod = objTokens.GetAt(0);
 
     for (IMS_UINT32 i = 0; i < METHOD_MAX; ++i)
     {
@@ -88,26 +92,28 @@ PUBLIC VIRTUAL IMS_BOOL SdpEncryptionKey::Decode(IN const AString& strValue)
         return IMS_FALSE;
     }
 
-    if ((m_nMethod == METHOD_PROMPT) && (objTokens.GetSize() != 1))
+    if ((m_nMethod == METHOD_PROMPT) && (m_strKey.GetLength() > 0))
     {
         // Invalid encryption line
         return IMS_FALSE;
     }
 
-    if ((m_nMethod != METHOD_PROMPT) && (objTokens.GetSize() != 2))
+    if ((m_nMethod != METHOD_PROMPT) && (m_strKey.GetLength() == 0))
     {
         // Invalid encryption line
         return IMS_FALSE;
     }
-
-    // encryption key field
-    m_strKey = objTokens.GetAt(1);
 
     return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL AString SdpEncryptionKey::Encode() const
 {
+    if (m_nMethod == METHOD_INVALID)
+    {
+        return AString::ConstNull();
+    }
+
     // k=<method>
     // k=<method>:<encryption key>
     AString strLine(1, Sdp::LINE_K);
@@ -122,6 +128,11 @@ PUBLIC VIRTUAL AString SdpEncryptionKey::Encode() const
 
 PUBLIC VIRTUAL AString SdpEncryptionKey::GetValue() const
 {
+    if (m_nMethod == METHOD_INVALID)
+    {
+        return AString::ConstNull();
+    }
+
     AString strValue;
 
     strValue.Append(METHOD[m_nMethod]);
@@ -140,6 +151,18 @@ IMS_BOOL SdpEncryptionKey::SetValue(
         IN IMS_SINT32 nMethod, IN const AString& strKey /*= AString::ConstNull()*/)
 {
     if ((nMethod <= METHOD_INVALID) || (nMethod >= METHOD_MAX))
+    {
+        return IMS_FALSE;
+    }
+
+    if (nMethod == METHOD_PROMPT)
+    {
+        if (strKey.GetLength() != 0)
+        {
+            return IMS_FALSE;
+        }
+    }
+    else if (strKey.GetLength() == 0)
     {
         return IMS_FALSE;
     }

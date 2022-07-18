@@ -73,6 +73,9 @@ public:
             IN IMS_SINT32 nNumOfAddress = 0);
 
 private:
+    IMS_BOOL IsValid() const;
+
+private:
     // c=<nettype> <addrtype> <connection-address>
     IMS_SINT32 m_nNetType;
     AString m_strNetType;  // For IMS service, "IN" only

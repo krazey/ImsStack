@@ -109,6 +109,8 @@ public:
             IN const AString& strOtherAddrType = AString::ConstNull());
 
 private:
+    IMS_BOOL IsValid() const;
+
     /**
      * @brief Returns a NTP time value.
      */

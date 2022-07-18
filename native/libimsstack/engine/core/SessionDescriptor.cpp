@@ -97,7 +97,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN const AString& str
     // Check if it is a reserved or not
     for (IMS_SINT32 i = 0; i < MAX_RESERVED_ATTRIBUTE; ++i)
     {
-        if (objAttribute.GetAttributeEx().Equals(RESERVED_ATTRIBUTE[i]))
+        if (objAttribute.GetAttributeName().Equals(RESERVED_ATTRIBUTE[i]))
         {
             Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
@@ -272,7 +272,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAttribute(IN const AString& 
     // Check if it is a reserved or not
     for (IMS_SINT32 i = 0; i < MAX_RESERVED_ATTRIBUTE; ++i)
     {
-        if (objAttribute.GetAttributeEx().EqualsIgnoreCase(RESERVED_ATTRIBUTE[i]))
+        if (objAttribute.GetAttributeName().EqualsIgnoreCase(RESERVED_ATTRIBUTE[i]))
         {
             Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 

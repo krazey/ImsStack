@@ -29,7 +29,7 @@ SdpBandwidth::SdpBandwidth() :
         SdpLine(),
         m_nType(TYPE_OTHER),
         m_strType(AString::ConstNull()),
-        m_nBandwidth(0)
+        m_nBandwidth(INVALID_BANDWIDTH)
 {
 }
 
@@ -119,6 +119,11 @@ PUBLIC VIRTUAL IMS_BOOL SdpBandwidth::Decode(IN const AString& strValue)
 
 PUBLIC VIRTUAL AString SdpBandwidth::Encode() const
 {
+    if (m_strType.GetLength() == 0)
+    {
+        return AString::ConstNull();
+    }
+
     // b=<bwtype>:<bandwidth>
     AString strLine(1, Sdp::LINE_B);
 
@@ -172,6 +177,11 @@ PUBLIC
 IMS_BOOL SdpBandwidth::SetValue(IN IMS_SINT32 nType, IN IMS_SINT32 nBandwidth,
         IN const AString& strType /*= AString::ConstNull()*/)
 {
+    if (nBandwidth <= INVALID_BANDWIDTH)
+    {
+        return IMS_FALSE;
+    }
+
     m_nType = nType;
 
     switch (m_nType)

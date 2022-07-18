@@ -64,6 +64,11 @@ PUBLIC VIRTUAL IMS_BOOL SdpInformation::Decode(IN const AString& strValue)
 
 PUBLIC VIRTUAL AString SdpInformation::Encode() const
 {
+    if (m_strInformation.GetLength() == 0)
+    {
+        return AString::ConstNull();
+    }
+
     // i=<session description>
     AString strLine(1, Sdp::LINE_I);
 

@@ -68,6 +68,11 @@ PUBLIC VIRTUAL IMS_BOOL SdpUri::Decode(IN const AString& strValue)
 
 PUBLIC VIRTUAL AString SdpUri::Encode() const
 {
+    if (m_strUri.GetLength() == 0)
+    {
+        return AString::ConstNull();
+    }
+
     // u=<uri>
     AString strLine(1, Sdp::LINE_U);
 

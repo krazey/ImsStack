@@ -46,6 +46,9 @@
 
         // protocol
         {
+            "name": "ImsStackNativeProtocolSdpTests"
+        },
+        {
             "name": "ImsStackNativeProtocolSipTests"
         },
 

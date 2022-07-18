@@ -60,7 +60,7 @@ public:
     /**
      * @brief Returns the type of the current attribute as a string.
      */
-    inline const AString& GetAttributeEx() const { return m_strAttribute; }
+    inline const AString& GetAttributeName() const { return m_strAttribute; }
 
     /**
      * @brief Returns the value of the current attribute.
