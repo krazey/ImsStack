@@ -94,13 +94,6 @@ public:
      */
     SIP_BOOL TerminateTxn(SipTxnKey* pTxnKey);
 
-    /* Any ongoing transaction can be terminated by the application using this function with
-       the help of the SIP Message
-
-       @param pSipMsg        : Received SIP Msg (Req/Resp)
-     */
-    SIP_BOOL TerminateTxn(SipMessage* pSipMsg);
-
 private:
     PRIVATE SIP_BOOL SendToNetwork(IN SipTransportInfo* pTranspInfo, IN ISipUserData* pUserData);
 };

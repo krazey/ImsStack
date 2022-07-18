@@ -25,12 +25,12 @@
 #include "SipUtil.h"
 #include "SipMessageBuffer.h"
 
-extern SIP_VOID sip_cbk_preProcessMessageSentByStack(IN SIP_VOID* pSipMsg,
-        IN ISipUserData* pUserData);
-extern SIP_VOID sip_cbk_postProcessMessageSentByStack(IN SIP_VOID* pSipMsg,
-        IN SIP_CHAR* pBuffer, IN SIP_UINT32 nBufferLen, IN ISipUserData* pUserData);
+extern SIP_VOID sip_cbk_preProcessMessageSentByStack(
+        IN SIP_VOID* pSipMsg, IN ISipUserData* pUserData);
+extern SIP_VOID sip_cbk_postProcessMessageSentByStack(IN SIP_VOID* pSipMsg, IN SIP_CHAR* pBuffer,
+        IN SIP_UINT32 nBufferLen, IN ISipUserData* pUserData);
 
-static SipStackManager* gpStackMngr =  SIP_NULL;
+static SipStackManager* gpStackMngr = SIP_NULL;
 
 /******************************************************************************
  * Function name        : SipStackManager
@@ -43,8 +43,8 @@ static SipStackManager* gpStackMngr =  SIP_NULL;
  *****************************************************************************/
 SipStackManager::SipStackManager()
 {
-    SipTrace_Construct();    /* Singleton Tracel Obj, maintained by Trace module*/
-    SipUtil_Construct();    /* Singleton Util Obj, maintained by Util module*/
+    SipTrace_Construct(); /* Singleton Tracel Obj, maintained by Trace module*/
+    SipUtil_Construct();  /* Singleton Util Obj, maintained by Util module*/
 }
 
 /******************************************************************************
@@ -77,7 +77,6 @@ SipStackManager* SipStackManager::GetInstance()
         gpStackMngr = new SipStackManager();
     }
     return gpStackMngr;
-
 }
 
 /******************************************************************************
@@ -96,7 +95,6 @@ void SipStackManager::Destruct()
         delete gpStackMngr;
     }
     return;
-
 }
 
 /******************************************************************************
@@ -129,7 +127,8 @@ SipTrace* SipStackManager::GetTrace()
 
 /*!
  * @brief This API is called by stack user to send SIP message(request/response) to other end.
- *    This function handle transaction, transport and issue callback for sending sip message to network
+ *    This function handle transaction, transport and issue callback for sending sip message to
+ * network
  *
  * @param[in,out] pSipMsg        : SIP message object used for forming raw SIP message
  * @param[in]     pTranspParam   : For Request message it contains transport information where
@@ -156,8 +155,8 @@ SIP_BOOL SipStackManager::SendMsg(SipMessage* pSipMsg, IN_OUT SipTransportParame
         IN SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError)
 {
     /* Input parameter validation */
-    if ((pSipMsg == SIP_NULL) || (pTranspParam == SIP_NULL)
-            || (ppTxnKey == SIP_NULL) || (pnError == SIP_NULL))
+    if ((pSipMsg == SIP_NULL) || (pTranspParam == SIP_NULL) || (ppTxnKey == SIP_NULL) ||
+            (pnError == SIP_NULL))
     {
         return SIP_FALSE;
     }
@@ -172,14 +171,12 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
     SipTxnHandler objTxnHandler;
     SipTxnKey* pTxnKey = SIP_NULL;
 
-    if (objTxnHandler.OnSendTxn(pSipMsg, pTranspParam, pUserData,
-            &pTxnKey, &objTxnInfo, pnError) == SIP_FALSE)
+    if (objTxnHandler.OnSendTxn(pSipMsg, pTranspParam, pUserData, &pTxnKey, &objTxnInfo, pnError) ==
+            SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxnHandler::OnSendTxn:Failed", 0, 0);
         return SIP_FALSE;
     }
-
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SipStackManager::SendMsg, OnSendTxn Processed", 0, 0);
 
     /* Transport layer processing
        pTranspInfo contains the encoded SIP message and remote transport information
@@ -187,8 +184,8 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
     SipTransportHandler objTranspHandler;
     SipTransportInfo* pTranspInfo = SIP_NULL;
 
-    if (objTranspHandler.OnSendTransp(pSipMsg, pTranspParam, pSipBuffer,
-            nSipBufferLen, &pTranspInfo, pnError) == SIP_FALSE)
+    if (objTranspHandler.OnSendTransp(pSipMsg, pTranspParam, pSipBuffer, nSipBufferLen,
+                &pTranspInfo, pnError) == SIP_FALSE)
     {
         /* Inform txn about transport error, this terminates Txn */
         objTxnHandler.OnSendTranspError(pTxnKey);
@@ -204,8 +201,6 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnSendTransp: Failed", 0, 0);
         return SIP_FALSE;
     }
-
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SipStackManager::SendMsg, OnSendTransp Processed", 0, 0);
 
     /* NOTE: All param passed in callback are read only parameters and callback
        implementor shall not deleted any parameters*/
@@ -227,8 +222,6 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
         return SIP_FALSE;
     }
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,"SipStackManager::SendMsg, SendToNetwork Processed", 0, 0);
-
     if (objTxnInfo.bTxnTerminated == SIP_TRUE)
     {
         pUserData->SetUserData(objTxnInfo.m_pUserData->GetUserData());
@@ -242,34 +235,31 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
         delete pTxnKey;
         delete pTranspInfo;
 
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                "SendMsg: TxnTerminated", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SendMsg: TxnTerminated", SIP_ZERO, SIP_ZERO);
     }
     else if (pTxnKey != SIP_NULL)
     {
-        SIP_BOOL bStatus = objTxnHandler.UpdateTxnDetails(pTxnKey, pTranspInfo, pnError);
-
-        if (bStatus == SIP_FALSE)
+        if (objTxnHandler.UpdateTxnDetails(pTxnKey, pTranspInfo, pnError) == SIP_FALSE)
         {
             delete pTranspInfo;
-        }
 
-        //if ACK no need to maintain transaction
-        if ((bStatus == SIP_FALSE) && (pSipMsg->GetMethodType() != SipMessage::METHOD_ACK))
-        {
-            if (objTxnInfo.bTxnCreated == SIP_TRUE)
+            // if ACK no need to maintain transaction
+            if (pSipMsg->GetMethodType() != SipMessage::METHOD_ACK)
             {
-                // It will be destroyed by the caller.
-                objTxnInfo.m_pUserData->SetUserData(SIP_NULL);
+                if (objTxnInfo.bTxnCreated == SIP_TRUE)
+                {
+                    // It will be destroyed by the caller.
+                    objTxnInfo.m_pUserData->SetUserData(SIP_NULL);
+                }
+
+                delete pTxnKey;
+
+                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "UpdateTxnDetails: Failed", SIP_ZERO, SIP_ZERO);
+                return SIP_FALSE;
             }
-
-            delete pTxnKey;
-
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                    "UpdateTxnDetails: Failed", SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
         }
-        else if (objTxnInfo.bTxnCreated == SIP_TRUE)
+
+        if (objTxnInfo.bTxnCreated == SIP_TRUE)
         {
             /* return Key of newly created txn */
             *ppTxnKey = pTxnKey;
@@ -285,9 +275,6 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
     {
         pUserData->SetUserData(SIP_NULL);
     }
-
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-            "SipStackManager::SendMsg Processed successfully", 0, 0);
 
     return SIP_TRUE;
 }
@@ -311,12 +298,12 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
  * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
  *
  * 2XX and successful ACK for which INVITE transaction is not existing is valid message and shall be
- * handled by stack user. These messages are not handled by the transaction and is directly passed to user.
- * This function check the validity of incoming message and identify re-transmission, stray message.
- * Re-transmission is handled by this function and any stray and unexpected messages are ignored and
- * and function return failure in such cases.
- * Caller shall take action if function return Transport Status as SipTxn::STATUS_NEW_REQ_RECVD or
- * SipTxn::STATUS_VALID_MESSAGE. For all other status caller no need to take any action.
+ * handled by stack user. These messages are not handled by the transaction and is directly passed
+ * to user. This function check the validity of incoming message and identify re-transmission, stray
+ * message. Re-transmission is handled by this function and any stray and unexpected messages are
+ * ignored and function return failure in such cases. Caller shall take action if function
+ * return Transport Status as SipTxn::STATUS_NEW_REQ_RECVD or SipTxn::STATUS_VALID_MESSAGE. For all
+ * other status caller no need to take any action.
  *
  */
 SIP_BOOL SipStackManager::OnRecvMessage(IN SipMessage* pSipMsg,
@@ -324,11 +311,10 @@ SIP_BOOL SipStackManager::OnRecvMessage(IN SipMessage* pSipMsg,
         OUT SIP_INT32* peTxnStatus, OUT SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError)
 {
     /* Input parameter validation */
-    if ((pSipMsg == SIP_NULL) || (pTranspParam == SIP_NULL)
-            || (peTxnStatus == SIP_NULL) || (ppTxnKey == SIP_NULL)
-            || (pnError == SIP_NULL))
+    if ((pSipMsg == SIP_NULL) || (pTranspParam == SIP_NULL) || (peTxnStatus == SIP_NULL) ||
+            (ppTxnKey == SIP_NULL) || (pnError == SIP_NULL))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,"OnRecvMessage, invalid params", 0, 0);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage, invalid params", 0, 0);
         return SIP_FALSE;
     }
 
@@ -346,42 +332,22 @@ send to network
     SipTxnKey* pTxnKey = SIP_NULL;
     SIP_BOOL bTxnExist = SIP_FALSE;
 
-    if (objTranspHandler.OnRecvTransp(pSipMsg, pTranspParam,
-            peTxnStatus, &bTxnExist, &pTxnKey, pnError) == SIP_FALSE)
+    if (objTranspHandler.OnRecvTransp(
+                pSipMsg, pTranspParam, peTxnStatus, &bTxnExist, &pTxnKey, pnError) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,"OnRecvMessage returned failure", 0, 0);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage returned failure", 0, 0);
         return SIP_FALSE;
     }
 
-    /*
-       CASE-1 :: Ignore request, ignore response and stray response
-       In case of ignore req, ignore resp and stray resp --> simply return
-       stack user can simply ignore these cases
-     */
-    switch (*peTxnStatus)
+    if (*peTxnStatus == SipTxn::STATUS_STRAY_RESP)
     {
-        case SipTxn::STATUS_IGNORE_REQ:
-        case SipTxn::STATUS_IGNORE_RESP:
-        case SipTxn::STATUS_STRAY_RESP:
-            {
-                delete pTxnKey;
-                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                        "OnRecvTransp, Drop Message, TxnStatus[%d]", *peTxnStatus, 0);
-                return SIP_TRUE;
-            }
-        case SipTxn::STATUS_INVALID_MESSAGE:
-        case SipTxn::STATUS_INVALID:
-            {
-                delete pTxnKey;
-                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,"OnRecvTransp, TxnStatus-->Invalid", 0, 0);
-                return SIP_FALSE;
-            }
-        default:
-            {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,"OnRecvTransp, TxnStatus[%d]", *peTxnStatus, 0);
-                break;
-            }
+        delete pTxnKey;
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTXN, "OnRecvTransp, Drop Message, TxnStatus[%d]", *peTxnStatus, 0);
+        return SIP_TRUE;
     }
+
+    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTransp, TxnStatus[%d]", *peTxnStatus, 0);
 
     /*
 CASE:2: Handling ACK for INVITE (txn not existing)
@@ -393,12 +359,13 @@ stack user must process this request and can decide whether to ignore or not
     {
         if (objTranspHandler.IsInviteTxnPresentForAckTxn(pTxnKey) != SIP_TRUE)
         {
-           *peTxnStatus = SipTxn::STATUS_RETRANSMISSION;
+            *peTxnStatus = SipTxn::STATUS_RETRANSMISSION;
         }
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage :: ACK - %s",
-                (*peTxnStatus == SipTxn::STATUS_NEW_REQ_RECVD) ?
-                        "new request" : "retransmission or stray", 0);
+                (*peTxnStatus == SipTxn::STATUS_NEW_REQ_RECVD) ? "new request"
+                                                               : "retransmission or stray",
+                0);
 
         pTxnKey->SetTxnType(SipTxn::INV_SER_TXN);
         pTxnKey->SetRespCode(200);
@@ -412,8 +379,7 @@ stack user must process this request and can decide whether to ignore or not
        stack user must process this request and can decide whether to ignore or not, in case user
        process this response, user must re-transmit successful ACK
      */
-    if ((bTxnExist == SIP_FALSE) &&
-            (pSipMsg->GetMsgType() == SipMessage::RESP_TYPE))
+    if ((bTxnExist == SIP_FALSE) && (pSipMsg->GetMsgType() == SipMessage::RESP_TYPE))
     {
         if (pSipMsg->GetMethodType() == SipMessage::METHOD_INVITE)
         {
@@ -432,8 +398,6 @@ stack user must process this request and can decide whether to ignore or not
         }
     }
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "OnRecvMessage: OnRecvTxn processing...", 0, 0);
-
     /* Invoke Txn layer handling
        pSipMsg2Send --> contains either 100 Trying when new INVITE request is received or
        failure ACK when failure response for INVITE is received
@@ -442,8 +406,7 @@ stack user must process this request and can decide whether to ignore or not
     SipTxnInfo objTxnInfo;
     SipTxnHandler objTxnHandler;
 
-    if (objTxnHandler.OnRecvTxn(pSipMsg, pTxnKey, pUserData,
-            &objTxnInfo, pnError) == SIP_FALSE)
+    if (objTxnHandler.OnRecvTxn(pSipMsg, pTxnKey, pUserData, &objTxnInfo, pnError) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage: OnRecvTxn Failed", 0, 0);
 
@@ -481,53 +444,42 @@ stack user must process this request and can decide whether to ignore or not
         case SipTxn::STATUS_IGNORE_REQ:
         case SipTxn::STATUS_IGNORE_RESP:
         case SipTxn::STATUS_STRAY_RESP:
-            {
-                delete pTxnKey;
-                return SIP_TRUE;
-            }
-        case SipTxn::STATUS_INVALID_MESSAGE:
-        case SipTxn::STATUS_INVALID:
-            {
-                delete pTxnKey;
-                return SIP_FALSE;
-            }
         case SipTxn::STATUS_STRAY_PRACK:
-            {
-                delete pTxnKey;
-                return SIP_TRUE;
-            }
+        {
+            delete pTxnKey;
+            return SIP_TRUE;
+        }
         case SipTxn::STATUS_NEW_REQ_RECVD:
         case SipTxn::STATUS_RETRANSMISSION:
         case SipTxn::STATUS_VALID_MESSAGE:
-            {
-                break;
-            }
+        {
+            break;
+        }
         default:
-            {
-                delete pTxnKey;
-                return SIP_FALSE;
-            }
+        {
+            delete pTxnKey;
+            return SIP_FALSE;
+        }
     }
 
     /*
        CASE-2 :: Handling of Re-Transmitted request/response received in valid txn states
        INV Req--> Re-Transmitted INVITE request recv in proceeding state and completed state,
        re-transmit the last response.
-       Non-INV Req --> Re-Transmitted Non-INVITE request recv in proceeding state and completed state,
-       re-transmit the last response.
-       INV Failure Resp --> Failure response recv is completed state, re-transmit the failure ACK
+       Non-INV Req --> Re-Transmitted Non-INVITE request recv in proceeding state and completed
+       state, re-transmit the last response. INV Failure Resp --> Failure response recv is completed
+       state, re-transmit the failure ACK
      */
     if (objTxnInfo.eTxnStatus == SipTxn::STATUS_RETRANSMISSION)
     {
         if (SendToNetwork(objTxnInfo.m_pTranspInfo, objTxnInfo.m_pUserData) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                    "SendToNetwork Failed in retransmitted case", 0, 0);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SendToNetwork Failed in retransmitted case", 0, 0);
         }
 
         delete pTxnKey;
 
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,"OnRecvMessage: Re-Transmitted Msg received", 0, 0);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage: Re-Transmitted Msg received", 0, 0);
         return SIP_TRUE;
     }
 
@@ -535,8 +487,7 @@ stack user must process this request and can decide whether to ignore or not
        Case of Sending of Failure ACK when failure response is received for INVITE
        Case of Sending 100 Trying response, on receive of INVITE
      */
-    if ((objTxnInfo.m_pSendSipMsg != SIP_NULL) &&
-            (objTxnInfo.m_pUserData != SIP_NULL))
+    if ((objTxnInfo.m_pSendSipMsg != SIP_NULL) && (objTxnInfo.m_pUserData != SIP_NULL))
     {
         SipTransportInfo* pTranspInfo = SIP_NULL;
         RcPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
@@ -545,11 +496,10 @@ stack user must process this request and can decide whether to ignore or not
 
         SipPf_Memset(pSipBuffer, 0x00, nSipBufferLen);
 
-        if (objTxnInfo.m_pSendSipMsg->EncodeMsg(&pSipBuffer,
-                &nSipBufferLen, pUserData->GetMsgOptions()) == SIP_FALSE)
+        if (objTxnInfo.m_pSendSipMsg->EncodeMsg(
+                    &pSipBuffer, &nSipBufferLen, pUserData->GetMsgOptions()) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage:EncodeMsg Fail",
-                    SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage:EncodeMsg Fail", SIP_ZERO, SIP_ZERO);
             objTxnHandler.OnSendTranspError(pTxnKey);
             delete pTxnKey;
             return SIP_TRUE;
@@ -557,13 +507,13 @@ stack user must process this request and can decide whether to ignore or not
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage: Invoking OnSendTransp... ", 0, 0);
 
-        if (objTranspHandler.OnSendTransp(objTxnInfo.m_pSendSipMsg, pTranspParam,
-                pSipBuffer, nSipBufferLen, &pTranspInfo, pnError) == SIP_FALSE)
+        if (objTranspHandler.OnSendTransp(objTxnInfo.m_pSendSipMsg, pTranspParam, pSipBuffer,
+                    nSipBufferLen, &pTranspInfo, pnError) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,"OnRecvMessage: OnSendTransp fail", 0, 0);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage: OnSendTransp fail", 0, 0);
 
             /* Inform txn about transport error, this terminates Txn */
-            objTxnHandler.OnSendTranspError( pTxnKey );
+            objTxnHandler.OnSendTranspError(pTxnKey);
 
             delete pTxnKey;
             return SIP_TRUE;
@@ -571,16 +521,14 @@ stack user must process this request and can decide whether to ignore or not
 
         // Notify SIP message sent by stack to the application for a proper handling
         sip_cbk_preProcessMessageSentByStack(
-                reinterpret_cast<SIP_VOID*>(objTxnInfo.m_pSendSipMsg),
-                objTxnInfo.m_pUserData);
+                reinterpret_cast<SIP_VOID*>(objTxnInfo.m_pSendSipMsg), objTxnInfo.m_pUserData);
 
         /* BSP_TODO:
            In case of 100 Trying, Txn Obj may not have user date, better to use user passed data
            For failure ACK, better to user Txn stored data */
         if (SendToNetwork(pTranspInfo, objTxnInfo.m_pUserData) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                    "OnRecvMessage: SendToNetwork Failed", 0, 0);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage: SendToNetwork Failed", 0, 0);
             delete pTxnKey;
             delete pTranspInfo;
             return SIP_TRUE;
@@ -588,8 +536,7 @@ stack user must process this request and can decide whether to ignore or not
 
         SipTransportBuffer* pTransBuffer = pTranspInfo->GetTranspSipBuffer();
 
-        sip_cbk_postProcessMessageSentByStack(
-                reinterpret_cast<SIP_VOID*>(objTxnInfo.m_pSendSipMsg),
+        sip_cbk_postProcessMessageSentByStack(reinterpret_cast<SIP_VOID*>(objTxnInfo.m_pSendSipMsg),
                 (pTransBuffer != SIP_NULL) ? pTransBuffer->GetSipBuffer() : SIP_NULL,
                 (pTransBuffer != SIP_NULL) ? pTransBuffer->GetSipBufferLen() : 0,
                 objTxnInfo.m_pUserData);
@@ -600,9 +547,7 @@ stack user must process this request and can decide whether to ignore or not
         if (objTxnHandler.UpdateTxnDetails(pTxnKey, pTranspInfo, pnError) == SIP_FALSE)
         {
             /* BSP_TODO: oops what to doooooooooo???*/
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                    "OnRecvMessage: UpdateTxnDetails Failed", 0, 0);
-
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage: UpdateTxnDetails Failed", 0, 0);
         }
     }
 
@@ -623,11 +568,10 @@ stack user must process this request and can decide whether to ignore or not
 
         delete pTxnKey;
 
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                "OnRecvTxn: Txn Terminated", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTxn: Txn Terminated", SIP_ZERO, SIP_ZERO);
     }
-    else if ((objTxnInfo.bTxnCreated == SIP_TRUE)
-            || (pSipMsg->GetMethodType() == SipMessage::METHOD_ACK))
+    else if ((objTxnInfo.bTxnCreated == SIP_TRUE) ||
+            (pSipMsg->GetMethodType() == SipMessage::METHOD_ACK))
     {
         /* return Key of newly created txn */
         *ppTxnKey = pTxnKey;
@@ -655,8 +599,8 @@ stack user must process this request and can decide whether to ignore or not
  * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
  *
  */
-SIP_BOOL SipStackManager::OnRecvTanspError(IN SIP_INT32 eTranspError, IN SipTxnKey* pTxnKey,
-        OUT SIP_UINT16* pnError)
+SIP_BOOL SipStackManager::OnRecvTanspError(
+        IN SIP_INT32 eTranspError, IN SipTxnKey* pTxnKey, OUT SIP_UINT16* pnError)
 {
     SipTransportHandler objTranspHandler;
     SIP_INT32 eTxnStatus = SipTxn::STATUS_INVALID;
@@ -665,8 +609,8 @@ SIP_BOOL SipStackManager::OnRecvTanspError(IN SIP_INT32 eTranspError, IN SipTxnK
 
     /* If error is occurred due to Msg Constraint , switch back to UDP and transport */
 
-    if (objTranspHandler.OnRecvTanspError(eTranspError, pTxnKey,
-            &eTxnStatus, &pTranspInfo, &objUserData, pnError) == SIP_FALSE)
+    if (objTranspHandler.OnRecvTanspError(eTranspError, pTxnKey, &eTxnStatus, &pTranspInfo,
+                &objUserData, pnError) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -706,37 +650,6 @@ SIP_BOOL SipStackManager::TerminateTxn(SipTxnKey* pTxnKey)
 }
 
 /*!
- * @brief This API is called by stack user in order to terminated the existing transaction, this
- * fxn is used when transaction key is not available with the user
- *
- * @param[in]     pTxnKey    : Key for the transaction that needs to be terminated
- * @param[out]     pnError       : Appropriate error code as defined in SipEn_ErrorTypes in case
- * of failure
- *
- * @return Status indicator
- * @retval SIP_TRUE If successful
- * @retval SIP_FALSE If function processing failed.
- * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
- *
- */
-SIP_BOOL SipStackManager::TerminateTxn(IN SipMessage* pSipMsg)
-{
-    SIP_UINT16 nError;
-
-    SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    if (pTxnKey == SIP_NULL)
-    {
-        return SIP_FALSE;
-    }
-
-    SipTxnHandler objTxnHandler;
-    SIP_BOOL bStatus = objTxnHandler.TerminateTxn(pTxnKey);
-
-    delete pTxnKey;
-    return bStatus;
-}
-
-/*!
  * @brief This API is invoked by the stack while sending SIP message to the network
  *
  * @param[in]     pTranspInfo : Contains Raw SIP message with transport details
@@ -751,15 +664,13 @@ SIP_BOOL SipStackManager::TerminateTxn(IN SipMessage* pSipMsg)
  * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
  *
  */
-PRIVATE SIP_BOOL SipStackManager::SendToNetwork(IN SipTransportInfo* pTranspInfo,
-        IN ISipUserData* pUserData)
+PRIVATE SIP_BOOL SipStackManager::SendToNetwork(
+        IN SipTransportInfo* pTranspInfo, IN ISipUserData* pUserData)
 {
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,"SendToNetwork: Processing..", 0, 0);
-
     if (pTranspInfo == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SendToNetwork Failed transpinfo is NULL", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTXN, "SendToNetwork Failed transpinfo is NULL", SIP_ZERO, SIP_ZERO);
 
         return SIP_FALSE;
     }
@@ -770,11 +681,10 @@ PRIVATE SIP_BOOL SipStackManager::SendToNetwork(IN SipTransportInfo* pTranspInfo
     SipTransportBuffer* pTransSipBuffer = pTranspInfo->GetTranspSipBuffer();
     SipTransportParameter* pActualDestParam = pTranspInfo->GetMsgSentTranspParam();
 
-    if (pNetworkUtil->SendToNetwork(pTransSipBuffer, pActualDestParam, pUserData)
-            == SIP_FALSE)
+    if (pNetworkUtil->SendToNetwork(pTransSipBuffer, pActualDestParam, pUserData) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "pNetworkUtil->SendToNetwork utility fxn failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "pNetworkUtil->SendToNetwork utility fxn failed",
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
