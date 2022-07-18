@@ -21,6 +21,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.util.Log;
 
 import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
@@ -29,6 +34,7 @@ import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.MtcConference;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
+import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.internal.ConferenceProxy;
 import com.android.imsstack.imsservice.mmtel.internal.MergeProxy;
 import com.android.imsstack.util.MessageExecutor;
@@ -45,11 +51,15 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class MergeProxyTest {
-
-    private MergeProxy mMergeProxy = null;
     private static final String TAG = "MergeProxyTest";
+    private TestMergeProxy mMergeProxy = null;
     private MtcCall mFgCall = null;
     private MtcCall mBgCall = null;
+    private MtcCall mMockMtcCall = null;
+    private boolean mIsHoldCalled = false;
+    private ImsCallContext mCallContext = null;
+    private MtcCall.Listener mMtcCallListenerProxy = null;
+    private MtcConference.Listener mMtcConferencelistenerProxy = null;
 
     public static final int STATE_IDLE = 0;
     public static final int STATE_HOLDING = 1;
@@ -62,17 +72,18 @@ public class MergeProxyTest {
 
     @Before
     public void setUp() {
-
         MockitoAnnotations.initMocks(this);
-        ImsCallContext mCallContext = Mockito.mock(ImsCallContext.class);
-        ImsCallApp callApp = Mockito.mock(ImsCallApp.class);
+        mCallContext = Mockito.mock(ImsCallContext.class);
         mFgCall = Mockito.mock(MtcCall.class);
         mBgCall = Mockito.mock(MtcCall.class);
+        mMockMtcCall = Mockito.mock(MtcCall.class);
 
         MessageExecutor mExecutor = new MessageExecutor(ImsCallUtils.class.getSimpleName());
         when(mCallContext.getExecutor()).thenReturn(mExecutor);
 
-        mMergeProxy = new MergeProxy(mCallContext, mFgCall, mBgCall);
+        mMergeProxy = new TestMergeProxy(mCallContext, mFgCall, mBgCall);
+        mMtcCallListenerProxy = mMergeProxy.getMtcCallListener();
+        mMtcConferencelistenerProxy = mMergeProxy.getMtcConferenceListener();
     }
 
     @After
@@ -80,58 +91,56 @@ public class MergeProxyTest {
         mMergeProxy = null;
         mFgCall = null;
         mBgCall = null;
+        mMockMtcCall = null;
     }
 
     @Test
     public void testMtcCallListenerCallbacks() {
-
         MtcCall mtcCall = Mockito.mock(MtcCall.class);
         CallInfo callInfo = Mockito.mock(CallInfo.class);
         MediaInfo mediaInfo = Mockito.mock(MediaInfo.class);
         SuppInfo suppInfo = Mockito.mock(SuppInfo.class);
-
         CallReasonInfo failInfo = new CallReasonInfo();
 
         assertNotNull(mMergeProxy);
 
         /* MTC listener object */
-        MtcCall.Listener mtcCallListenerProxy = mMergeProxy.getMtcCallListener();
-        assertNotNull(mtcCallListenerProxy);
+        assertNotNull(mMtcCallListenerProxy);
 
         ConferenceProxy confProxy = mMergeProxy;
 
         /* callbacks */
-        mtcCallListenerProxy.onCallTerminated(mtcCall, failInfo);
+        mMtcCallListenerProxy.onCallTerminated(mtcCall, failInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcCallListenerProxy.onCallHeld(mtcCall, callInfo, mediaInfo, suppInfo);
+        mMtcCallListenerProxy.onCallHeld(mtcCall, callInfo, mediaInfo, suppInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcCallListenerProxy.onCallHeld(mtcCall, callInfo, mediaInfo, suppInfo);
+        mMtcCallListenerProxy.onCallHeld(mtcCall, callInfo, mediaInfo, suppInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcCallListenerProxy.onCallHoldFailed(mtcCall, failInfo);
+        mMtcCallListenerProxy.onCallHoldFailed(mtcCall, failInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcCallListenerProxy.onCallHoldReceived(mtcCall, callInfo, mediaInfo, suppInfo);
+        mMtcCallListenerProxy.onCallHoldReceived(mtcCall, callInfo, mediaInfo, suppInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcCallListenerProxy.onCallResumed(mtcCall, callInfo, mediaInfo, suppInfo);
+        mMtcCallListenerProxy.onCallResumed(mtcCall, callInfo, mediaInfo, suppInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcCallListenerProxy.onCallResumeFailed(mtcCall, failInfo);
+        mMtcCallListenerProxy.onCallResumeFailed(mtcCall, failInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcCallListenerProxy.onCallResumeReceived(mtcCall, callInfo, mediaInfo, suppInfo);
+        mMtcCallListenerProxy.onCallResumeReceived(mtcCall, callInfo, mediaInfo, suppInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcCallListenerProxy.onCallAutoUpdated(mtcCall, callInfo, mediaInfo, suppInfo);
+        mMtcCallListenerProxy.onCallAutoUpdated(mtcCall, callInfo, mediaInfo, suppInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcCallListenerProxy.onCallUpdateReceived(mtcCall, callInfo, mediaInfo, suppInfo);
+        mMtcCallListenerProxy.onCallUpdateReceived(mtcCall, callInfo, mediaInfo, suppInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcCallListenerProxy.onCallInfoUpdated(mtcCall, 0, "", 0, false);
+        mMtcCallListenerProxy.onCallInfoUpdated(mtcCall, 0, "", 0, false);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
         mtcCall = null;
@@ -139,13 +148,11 @@ public class MergeProxyTest {
         mediaInfo = null;
         suppInfo = null;
         failInfo = null;
-        mtcCallListenerProxy = null;
-
+        mMtcCallListenerProxy = null;
     }
 
     @Test
     public void testMtcConferenceListenerCallbacks() {
-
         MtcConference mtcConference = Mockito.mock(MtcConference.class);
         CallInfo callInfo = Mockito.mock(CallInfo.class);
         MediaInfo mediaInfo = Mockito.mock(MediaInfo.class);
@@ -153,21 +160,19 @@ public class MergeProxyTest {
         UsersInfo usersInfo = Mockito.mock(UsersInfo.class);
 
         CallReasonInfo failInfo = new CallReasonInfo();
-
         ConferenceProxy confProxy = mMergeProxy;
 
         /* MTC listener object */
-        MtcConference.Listener mtcConferencelistenerProxy = mMergeProxy.getMtcConferenceListener();
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcConferencelistenerProxy.onCallMerged(mtcConference, callInfo, mediaInfo, suppInfo,
+        mMtcConferencelistenerProxy.onCallMerged(mtcConference, callInfo, mediaInfo, suppInfo,
                 usersInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcConferencelistenerProxy.onCallMergeFailed(mtcConference, failInfo);
+        mMtcConferencelistenerProxy.onCallMergeFailed(mtcConference, failInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
-        mtcConferencelistenerProxy.onCallConferenceStateUpdated(mtcConference, usersInfo);
+        mMtcConferencelistenerProxy.onCallConferenceStateUpdated(mtcConference, usersInfo);
         assertEquals(confProxy.getState(), STATE_IDLE);
 
         mtcConference = null;
@@ -175,7 +180,6 @@ public class MergeProxyTest {
         mediaInfo = null;
         suppInfo = null;
         usersInfo = null;
-
         failInfo = null;
     }
 
@@ -184,9 +188,7 @@ public class MergeProxyTest {
         MtcCall mtcCall = Mockito.mock(MtcCall.class);
 
         assertTrue(mMergeProxy.isConferenceForCallMerge());
-
         assertFalse(mMergeProxy.isConferenceExtensionRequestor(mtcCall));
-
         assertTrue(mMergeProxy.isConferenceExtensionRequestor(mFgCall));
 
         mtcCall = null;
@@ -194,12 +196,64 @@ public class MergeProxyTest {
 
     @Test
     public void testMergeProxyCleanup() {
-
         ConferenceProxy confProxy = mMergeProxy;
         mMergeProxy.abort();
-
         mMergeProxy.dispose();
-
+        mMockMtcCall = null;
         assertNull(confProxy.getConferenceCall());
+    }
+
+    @Test
+    public void testStartInternal() {
+        mMockMtcCall = null;
+        mMergeProxy.startInternal(true);
+
+        mMockMtcCall = Mockito.mock(MtcCall.class);
+        mMergeProxy.setInitialConferenceExtensionForTest(true);
+        mMergeProxy.startInternal(true);
+        verify(mMockMtcCall).setListener(mMtcCallListenerProxy);
+        verify(mFgCall, times(1)).setListener(mMtcCallListenerProxy);
+        verify(mBgCall, times(1)).setListener(mMtcCallListenerProxy);
+
+        when(mCallContext.getSlotId()).thenReturn(0);
+        assertTrue(mIsHoldCalled);
+        mIsHoldCalled = false;
+
+        mMergeProxy.setInitialConferenceExtensionForTest(false);
+        when(mCallContext.getSlotId()).thenReturn(0);
+        when(mMockMtcCall.isOnHold()).thenReturn(true);
+        mMergeProxy.startInternal(false);
+
+        verify(mFgCall, times(2)).setListener(mMtcCallListenerProxy);
+        verify(mBgCall, times(2)).setListener(mMtcCallListenerProxy);
+        assertTrue(mIsHoldCalled);
+    }
+
+    private class TestMergeProxy extends MergeProxy {
+        TestMergeProxy(ICallContext callContext, MtcCall fgCall, MtcCall bgCall) {
+            super(callContext, fgCall, bgCall);
+        }
+
+        public MtcCall getConferenceCall() {
+            Log.d(TAG, "getConferenceCall");
+            return mMockMtcCall;
+        }
+
+        protected boolean startInternal(boolean holdRequired) {
+            return super.startInternal(holdRequired);
+        }
+
+        protected void executeHold(final MtcCall call) {
+            Log.d(TAG, "executeHold");
+            mIsHoldCalled = true;
+        }
+
+        public void setInitialConferenceExtensionForTest(boolean initialConfExt) {
+            setInitialConferenceExtension(initialConfExt);
+        }
+
+        public void setStateForTest(int state) {
+            setState(state);
+        }
     }
 }
