@@ -323,7 +323,8 @@ public final class ImsPrivateProperties {
         }
 
         private static final String NAME = "persistent_prop";
-        private static final String[] TEST_PROPERTIES =
+
+        public static final String[] TEST_PROPERTIES =
             {
                 KEY_PREF_OPERATOR,
                 KEY_PREF_COUNTRY,

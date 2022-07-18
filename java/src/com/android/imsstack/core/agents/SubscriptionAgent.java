@@ -91,13 +91,7 @@ public final class SubscriptionAgent implements ISubscription {
 
         mContext.registerReceiver(mReceiver, mReceiver.getFilter(), Context.RECEIVER_EXPORTED);
 
-        int subId = MSimUtils.INVALID_SUB_ID;
-
-        if (MSimUtils.isMultiSimEnabled()) {
-            subId = MSimUtils.getDefaultDataSubId();
-        } else {
-            subId = MSimUtils.getDefaultSubId();
-        }
+        int subId = MSimUtils.getImsDefaultSubId();
 
         if (subId != MSimUtils.INVALID_SUB_ID) {
             setSubIdAndPhoneId(subId);
@@ -144,8 +138,7 @@ public final class SubscriptionAgent implements ISubscription {
 
         if (!MSimUtils.isValidSubId(subId)) {
             return MSimUtils.getImsDefaultSubId();
-        } else if ((subId == MSimUtils.DEFAULT_SUB_ID)
-                || MSimUtils.isDummySubId(subId)) {
+        } else if (subId == MSimUtils.DEFAULT_SUB_ID) {
             int defaultSubId = MSimUtils.getImsDefaultSubId();
 
             if (MSimUtils.isValidSubId(defaultSubId)) {
@@ -154,11 +147,6 @@ public final class SubscriptionAgent implements ISubscription {
         }
 
         return subId;
-    }
-
-    @Override
-    public String getImsi() {
-        return MSimUtils.getImsi(getSubId());
     }
 
     @Override

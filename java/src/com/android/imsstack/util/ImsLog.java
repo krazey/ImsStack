@@ -15,21 +15,24 @@
  */
 package com.android.imsstack.util;
 
-import android.text.TextUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 
+/**
+ * This class provides an interface to output the logs.
+ */
 public final class ImsLog {
     public static final boolean DBG = !"user".equals(android.os.Build.TYPE);
 
     private static final int OPT_MEDIUM_SERIAL = 0x00010000;
     private static final int OPT_HIDE_PRIVACY = 0x00000100;
-    private static final int OPT_DEFAULT = 0x0001000F;
     private static final int OPT_CONFIGURABLE_ALL = 0x000FFFFF;
     private static final int OPT_DEBUG_ON = 0x10000000;
 
     private static int sOption = 0;
 
+    /** Sends a {@link Log#VERBOSE} log message. */
     public static final void v(String log) {
         if (isLogEnabled() && isOptionEnabled(LogUtils.TRACE_OPTION_D)
                 && isOptionEnabled(OPT_HIDE_PRIVACY) == false) {
@@ -37,6 +40,7 @@ public final class ImsLog {
         }
     }
 
+    /** Sends a {@link Log#VERBOSE} log message with a slot id. */
     public static final void v(int slotId, String log) {
         if (isLogEnabled() && isOptionEnabled(LogUtils.TRACE_OPTION_D)
                 && isOptionEnabled(OPT_HIDE_PRIVACY) == false) {
@@ -44,6 +48,7 @@ public final class ImsLog {
         }
     }
 
+    /** Sends a {@link Log#DEBUG} log message. */
     public static final void d(String log) {
         if (isLogEnabled() && isOptionEnabled(LogUtils.TRACE_OPTION_D)
                 && isOptionEnabled(OPT_HIDE_PRIVACY) == false) {
@@ -51,6 +56,7 @@ public final class ImsLog {
         }
     }
 
+    /** Sends a {@link Log#DEBUG} log message with a slot id. */
     public static final void d(int slotId, String log) {
         if (isLogEnabled() && isOptionEnabled(LogUtils.TRACE_OPTION_D)
                 && isOptionEnabled(OPT_HIDE_PRIVACY) == false) {
@@ -58,6 +64,7 @@ public final class ImsLog {
         }
     }
 
+    /** Sends a {@link Log#INFO} log message. */
     public static final void i(String log) {
         if (isLogEnabled() && isOptionEnabled(LogUtils.TRACE_OPTION_I)
                 && isOptionEnabled(OPT_HIDE_PRIVACY) == false) {
@@ -65,6 +72,7 @@ public final class ImsLog {
         }
     }
 
+    /** Sends a {@link Log#INFO} log message with a slot id. */
     public static final void i(int slotId, String log) {
         if (isLogEnabled() && isOptionEnabled(LogUtils.TRACE_OPTION_I)
                 && isOptionEnabled(OPT_HIDE_PRIVACY) == false) {
@@ -72,81 +80,64 @@ public final class ImsLog {
         }
     }
 
+    /** Sends a {@link Log#WARN} log message. */
     public static final void w(String log) {
         if (isLogEnabled() && isOptionEnabled(LogUtils.TRACE_OPTION_E)) {
             Log.w(Log.TAG, getMessage(log));
         }
     }
 
+    /** Sends a {@link Log#WARN} log message with a slot id. */
     public static final void w(int slotId, String log) {
         if (isLogEnabled() && isOptionEnabled(LogUtils.TRACE_OPTION_E)) {
             Log.w(Log.TAG, getMessage("[" + slotId + "] " + log));
         }
     }
 
+    /** Sends a {@link Log#ERROR} log message. */
     public static final void e(String log) {
         if (isLogEnabled() && isOptionEnabled(LogUtils.TRACE_OPTION_E)) {
             Log.e(Log.TAG, getMessage(log));
         }
     }
 
+    /** Sends a {@link Log#ERROR} log message with a slot id. */
     public static final void e(int slotId, String log) {
         if (isLogEnabled() && isOptionEnabled(LogUtils.TRACE_OPTION_E)) {
             Log.e(Log.TAG, getMessage("[" + slotId + "] " + log));
         }
     }
 
+    /** Sends a {@link Log#ERROR} log message with an exception. */
     public static final void e(String log, Throwable t) {
         if (isLogEnabled() && isOptionEnabled(LogUtils.TRACE_OPTION_E)) {
             Log.e(Log.TAG, getMessage(log), t);
         }
     }
 
+    /** Sends a {@link Log#ERROR} log message with an exception and a slot id. */
     public static final void e(int slotId, String log, Throwable t) {
         if (isLogEnabled() && isOptionEnabled(LogUtils.TRACE_OPTION_E)) {
             Log.e(Log.TAG, getMessage("[" + slotId + "] " + log), t);
         }
     }
 
-    public static final void p(String format, String ... args) {
-        if (args == null) {
-            return;
-        }
-
-        if (args.length <= 0) {
-            return;
-        }
-
-        if (isLogEnabled() == false
-                || isOptionEnabled(LogUtils.TRACE_OPTION_D) == false
-                || isOptionEnabled(OPT_HIDE_PRIVACY) == true) {
-            return;
-        }
-
-        for (int i = 0 ; i < args.length ; i++) {
-
-            if (TextUtils.isEmpty(args[i]) == true) {
-                continue;
-            }
-
-            format = format.replaceFirst("%[sS]", args[i]);
-        }
-        Log.d(Log.TAG, getMessage(format));
-    }
-
+    /** Checks if the debug mode is enabled. */
     public static boolean isDebuggable() {
-        return DBG || isOptionEnabled(OPT_DEBUG_ON);
+        return isOptionEnabled(OPT_DEBUG_ON);
     }
 
+    /** Checks if the log is enabled or not. */
     public static boolean isLogEnabled() {
         return (sOption & OPT_MEDIUM_SERIAL) != 0;
     }
 
+    /** Check if the level of logging is enabled or not. */
     public static boolean isOptionEnabled(int option) {
         return (sOption & option) != 0;
     }
 
-    // Initialize the trace option from the configuration
+    /** Initializes the logging options from the configuration. */
     public static final void init() {
         int option = LogUtils.getLogOptions(0);
         boolean debugOn = LogUtils.isDebugOn(0);
@@ -154,45 +145,103 @@ public final class ImsLog {
         Log.d(Log.TAG, "ImsLog :: option=0x" + Integer.toHexString(option) + ", debug=" + debugOn);
 
         setLogOption(option);
-        setDebugOn(debugOn);
 
-        Log.setImsDebug(debugOn);
+        if (!debugOn) {
+            debugOn = DBG;
+        }
+
+        setDebugOn(debugOn);
     }
 
+    /** Sets the log enabled. */
+    @VisibleForTesting
+    public static void setLogEnabled(boolean enabled) {
+        if (enabled) {
+            setOption(OPT_MEDIUM_SERIAL);
+        } else {
+            clearOption(OPT_MEDIUM_SERIAL);
+        }
+    }
+
+    /** Sets the debug mode. */
     public static void setDebugOn(boolean debugOn) {
         if (debugOn) {
             setOption(OPT_DEBUG_ON);
         } else {
             clearOption(OPT_DEBUG_ON);
         }
+
+        Log.setImsDebug(debugOn);
     }
 
+    /**
+     * Returns a string that is a substring of this string.
+     * The substring begins at the specified number {@code count} of characters
+     * from the end and extends to the end of this string.
+     *
+     * @param s The string to be evaluated.
+     * @param count The number of characters from the end.
+     * @return A substring.
+     */
     public static String lastSubString(String s, int count) {
         return Log.lastSubString(s, count);
     }
 
+    /**
+     * Returns a string that is a substring of this string.
+     * The substring begins at the next position of the last occurrence of
+     * the specified delimiter {@code delimiter} and extends to the end of this string.
+     *
+     * @param s The string to be evaluated.
+     * @param delimiter The delimiter to find a start position.
+     * @return A substring.
+     */
     public static String lastSubString(String s, String delimiter) {
         return Log.lastSubString(s, delimiter);
     }
 
+    /**
+     * Returns a string that is a substring of this string.
+     * The substring begins at the specified {@code start} and
+     * extends to the character at index {@code end -1}.
+     *
+     * @param s The string to be evaluated.
+     * @param start The start index, inclusive.
+     * @param end The end index, exclusive.
+     * @return A substring.
+     */
     public static String subString(String s, int start, int end) {
         return Log.subString(s, start, end);
     }
 
-    // If string is hidden, then it returns "xxx"
+    /**
+     * Returns the log string based on the conditions:
+     * If the input argument is
+     *     - null: returns {@link Log#NULL}
+     *     - empty: returns {@link Log#EMPTY}
+     *     - non-debug mode: returns {@link Log#HIDDEN}
+     *     - debug mode: returns the input argument
+     */
     public static String hiddenString(String s) {
         if (s == null) {
-            return "(null)";
+            return Log.NULL;
         } else if (s.isEmpty()) {
-            return "(empty)";
+            return Log.EMPTY;
         }
 
-        return isDebuggable() ? s : "xxx";
+        return isDebuggable() ? s : Log.HIDDEN;
     }
 
+    /**
+     * Returns the log string based on the conditions:
+     * If the input argument is
+     *     - null: returns {@link Log#NULL}
+     *     - non-debug mode: returns the length of this array
+     *     - debug mode: returns the formatted string for this array
+     */
     public static String hiddenString(String[] s) {
         return isDebuggable() ?
-                Arrays.toString(s) : ((s != null) ? String.valueOf(s.length) : "(null)");
+                Arrays.toString(s) : ((s != null) ? String.valueOf(s.length) : Log.NULL);
     }
 
     private static String getMessage(String log) {
@@ -222,44 +271,5 @@ public final class ImsLog {
             + ", E=" + isOptionEnabled(LogUtils.TRACE_OPTION_E)
             + ", I=" + isOptionEnabled(LogUtils.TRACE_OPTION_I)
             + ", HidePrivacy=" + isOptionEnabled(OPT_HIDE_PRIVACY));
-    }
-
-    /**
-     * Ims privileged logging utilities
-     */
-    public static class Priv {
-        public static final void v(String log) {
-            Log.v(Log.TAG, getPrefix(log));
-        }
-
-        public static final void d(String log) {
-            Log.d(Log.TAG, getPrefix(log));
-        }
-
-        public static final void i(String log) {
-            Log.i(Log.TAG, getPrefix(log));
-        }
-
-        public static final void w(String log) {
-            Log.w(Log.TAG, getPrefix(log));
-        }
-
-        public static final void e(String log) {
-            Log.e(Log.TAG, getPrefix(log));
-        }
-
-        public static final void e(String log, Throwable t) {
-            Log.e(Log.TAG, getPrefix(log), t);
-        }
-
-        private static String getPrefix(String log) {
-            StackTraceElement[] elements = (new Throwable()).getStackTrace();
-            StackTraceElement ste = elements[2];
-
-            return "[" + lastSubString(ste.getClassName(), ".")
-                    + "::" + ste.getMethodName()
-                    + ":" + ste.getLineNumber()
-                    + "] " + log;
-        }
     }
 }

@@ -682,7 +682,7 @@ public class JNIUpCallEvtManager {
             public void procEvt(int nEvent, int nWParam, int nLParam) {
                 ImsLog.d(mSlotId, "");
 
-                String[] name = {"change", "param", MSimUtils.PHONE_KEY};
+                String[] name = {"change", "param", "phone" };
                 int[] value = new int[3];
                 value[0] = nWParam;
                 value[1] = nLParam;
