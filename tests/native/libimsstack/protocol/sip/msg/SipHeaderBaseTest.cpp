@@ -170,7 +170,7 @@ TEST_F(SipHeaderBaseTest, SetValue)
     pHeader->SipDelete();
 }
 
-TEST_F(SipHeaderBaseTest, EncodeHdr)
+TEST_F(SipHeaderBaseTest, EncodeAndEncodeHdr)
 {
     SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ALLOW, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
@@ -181,34 +181,44 @@ TEST_F(SipHeaderBaseTest, EncodeHdr)
     };
     char* pBuff = &(aBuffer[0]);
 
+    AStringBuffer objBuffer(256);
+
     /* Encode empty ALLOW allowed */
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_FALSE));
 
     pHeader->SetValue("INVITE");
 
     /* Encode ALLOW with value */
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("INVITE", &(aBuffer[0]));
+    EXPECT_STREQ("INVITE", objBuffer.GetCharString());
     pHeader->SipDelete();
     pHeader = SIP_NULL;
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
+    objBuffer = AString::ConstNull();
 
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Encode empty content-disposition not allowed */
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
 
     pHeader->SetValue("session");
 
     /* Encode content-disposition with only value */
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("session", &(aBuffer[0]));
+    EXPECT_STREQ("session", objBuffer.GetCharString());
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
+    objBuffer = AString::ConstNull();
 
     /* Encode content-disposition with value and parameters */
     pHeader->InitParameters(SIP_NULL);
@@ -216,7 +226,9 @@ TEST_F(SipHeaderBaseTest, EncodeHdr)
     pParameters->AddParam("handling", "required");
 
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("session;handling=required", &(aBuffer[0]));
+    EXPECT_STREQ("session;handling=required", objBuffer.GetCharString());
 
     pHeader->SipDelete();
     pHeader = SIP_NULL;
