@@ -104,16 +104,12 @@ public class MtcApp implements Closeable {
 
     @VisibleForTesting
     public MtcApp(IBaseContext context, IMtcCallManager mtcCallManager, Looper looper,
-            MtcEmergencyServiceManager mtcEmergencyServiceManager,
-            ServiceStateListener serviceStateListener, CallListener callListener,
-            MtcJniProxy mtcJniProxy) {
+            MtcEmergencyServiceManager mtcEmergencyServiceManager, MtcJniProxy mtcJniProxy) {
         mContext = context;
 
         mCM = mtcCallManager;
         mHandler = new MtcAppHandler(looper);
         mEmergencyServiceManager = mtcEmergencyServiceManager;
-        mServiceStateListener = serviceStateListener;
-        mCallListener = callListener;
         mMtcJniProxy = mtcJniProxy;
     }
 
@@ -274,16 +270,6 @@ public class MtcApp implements Closeable {
     @VisibleForTesting
     public JNIImsListener getNativeListener() {
         return mNativeListener;
-    }
-
-    @VisibleForTesting
-    public MtcApp.CallListener getCallListener() {
-        return mCallListener;
-    }
-
-    @VisibleForTesting
-    public MtcApp.ServiceStateListener getServiceStateListener() {
-        return mServiceStateListener;
     }
 
     @VisibleForTesting
