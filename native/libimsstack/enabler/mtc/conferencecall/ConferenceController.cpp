@@ -527,9 +527,9 @@ PROTECTED VIRTUAL void ConferenceController::StartSubscription()
     // dialog type is set in subscription.
     AString strTo;
     GetFocusAddress(strTo);
-    IMS_RESULT bResult = m_pSubscription->Subscribe(strTo);
+    IMS_RESULT nResult = m_pSubscription->Subscribe(strTo);
 
-    if (bResult == IMS_FAILURE)
+    if (nResult == IMS_FAILURE)
     {
         Recover();
     }

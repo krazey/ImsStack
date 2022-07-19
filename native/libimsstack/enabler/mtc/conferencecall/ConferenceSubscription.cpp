@@ -254,13 +254,13 @@ void ConferenceSubscription::ReSubscribe()
 {
     IMS_TRACE_I("ReSubscribe : [%d]th", ++m_nReSubsCount, 0, 0);
 
-    IMS_RESULT bResult = IMS_FAILURE;
+    IMS_RESULT nResult = IMS_FAILURE;
     if (m_nReSubsCount <= MAX_RESUBS_COUNT)
     {
-        bResult = Subscribe();
+        nResult = Subscribe();
     }
 
-    if (bResult == IMS_FAILURE)
+    if (nResult == IMS_FAILURE)
     {
         ReleaseISubscription();
         m_objListener.OnSubscriptionUpdated(SubscriptionUpdateType::FAILED);

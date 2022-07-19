@@ -99,38 +99,38 @@ protected:
 
 TEST_F(EmergencyMessageFormatterTest, FormStartMessageNormalCase)
 {
-    IMS_RESULT bResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(EmergencyMessageFormatterTest, FormStartMessageFailureCase)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(EmergencyMessageFormatterTest, GetAoSRegMode)
 {
     ON_CALL(objContext, GetAosConnector).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeader)
 {
     ON_CALL(objSipMessage, IsHeaderPresent).WillByDefault(Return(IMS_TRUE));
-    IMS_RESULT bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objSipMessage, IsHeaderPresent).WillByDefault(Return(IMS_FALSE));
-    bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderByDeviceId)
@@ -144,13 +144,13 @@ TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderByDeviceId)
     ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIpv6));
     ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(nLocalPort));
 
-    IMS_RESULT bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIpv4));
 
-    bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(EmergencyMessageFormatterTest, GetLocalIpAddress)
@@ -166,18 +166,18 @@ TEST_F(EmergencyMessageFormatterTest, GetLocalIpAddress)
             .WillOnce(Return(nullptr))
             .WillRepeatedly(Return(&objAosConnector));
 
-    IMS_RESULT bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(AString::ConstEmpty()));
 
-    bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIp));
 
-    bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(EmergencyMessageFormatterTest, GetLocalPort)
@@ -197,18 +197,18 @@ TEST_F(EmergencyMessageFormatterTest, GetLocalPort)
             .WillOnce(Return(nullptr))
             .WillRepeatedly(Return(&objAosConnector));
 
-    IMS_RESULT bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(nLocalPortZero));
 
-    bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(nLocalPort));
 
-    bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderByUserId)
@@ -220,16 +220,16 @@ TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderByUserId)
             .WillOnce(Return(nullptr))
             .WillRepeatedly(Return(&objCoreService));
 
-    IMS_RESULT bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     AStringArray objUserIdentities;
     objUserIdentities.AddElement(AString::ConstEmpty());
     objUserIdentities.AddElement(strUserIdentity);
     ON_CALL(objCoreService, GetUserIdentities).WillByDefault(ReturnRef(objUserIdentities));
 
-    bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(EmergencyMessageFormatterTest, SetSipInstanceFeature)
@@ -242,32 +242,32 @@ TEST_F(EmergencyMessageFormatterTest, SetSipInstanceFeature)
             .WillOnce(Return(nullptr))
             .WillRepeatedly(Return(&objCoreService));
 
-    IMS_RESULT bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objAosConnector, GetRegistrationMode)
             .WillByDefault(Return(IImsAosInfo::REG_MODE_INTERNAL));
 
-    bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objCoreService, GetInstanceParameter).WillByDefault(Return(nullptr));
 
-    bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     SipParameter objParameter;
     ON_CALL(objCoreService, GetInstanceParameter).WillByDefault(Return(&objParameter));
 
     ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(nullptr));
 
-    bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(pFeatureCaps));
 
-    bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 }  // namespace android
