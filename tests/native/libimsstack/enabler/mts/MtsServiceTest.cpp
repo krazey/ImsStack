@@ -54,7 +54,7 @@ protected:
 
 TEST_F(MtsServiceTest, GetICoreServiceReturnsNotNull)
 {
-    EXPECT_NE(pMtsService->GetICoreService(), nullptr);
+    EXPECT_NE(pMtsService->GetICoreService(IMS_FALSE), nullptr);
 }
 
 TEST_F(MtsServiceTest, CoreServicePageMessageReceived)

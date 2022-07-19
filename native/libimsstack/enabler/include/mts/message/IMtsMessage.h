@@ -25,7 +25,7 @@ class IMtsMessage
 {
 public:
     virtual void SendMessage(IN IPageMessage* piPageMessage, IN const AString& strDestination,
-            IN const IMS_UINT32 nSmsType, IN const ByteArray& objSMS) = 0;
+            IN SmsFormatType eSmsFormat, IN const ByteArray& objSMS) = 0;
     virtual void ReceiveMessage(IN IPageMessage* piPageMessage, IN const AString& strIMPU) = 0;
     virtual void Retry_MtsMessageInPending() = 0;
     virtual IMS_BOOL IsReceivedMessage() = 0;

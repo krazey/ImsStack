@@ -20,6 +20,7 @@
 #include "ICoreService.h"
 #include "ImsActivityEx.h"
 #include "IuMts.h"
+#include "MtsDef.h"
 #include "MtsService.h"
 
 class IMtsMessage;
@@ -53,25 +54,26 @@ public:
     void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
 
     IMS_BOOL IsDeliverMessage(IN IPageMessage* piPageMessage);
-    ICoreService* GetICoreService();
+    ICoreService* GetICoreService(IN IMS_BOOL bIsSmsEServiceType);
     MtsDynamicLoader* GetMtsUtils();
 
     void SetCallStateType(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
     IMS_BOOL IsEmergencyCalling();
 
-    IMS_RESULT ReportMoStatus(IN IMS_UINT32 nReason, IN IMS_UINT32 nSmsFormat,
+    IMS_RESULT ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsFormat,
             IN IMS_UINT8 nRetryAfter = 0, IN IMS_SINT32 nSeqId = -1);
-    IMS_UINT32 ReportMtSms(IN IMS_UINT32 nSmsFormat, IN IMS_UINT32 nSmsLength,
-            IN const IMS_BYTE* pbySmsData);
+    IMS_UINT32 ReportMtSms(
+            IN SmsFormatType eSmsFormat, IN IMS_UINT32 nSmsLength, IN const IMS_BYTE* pbySmsData);
 
-    void ReportTransmissionResult(IN IMS_UINT32 nResponse, IN IMS_UINT32 nSmsType,
-            IN IMS_SINT32 nSeqId = -1);
-    void ReportTransmissionFailureWithRetryTime(IN const IMS_UINT32 nSmsType,
-            IN const IMS_UINT8 nRetryTime, IN IMS_SINT32 nSeqId = -1);
+    void ReportTransmissionResult(
+            IN IMS_UINT32 nResponse, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
+    void ReportTransmissionFailureWithRetryTime(
+            IN SmsFormatType eSmsFormat, IN const IMS_UINT8 nRetryTime, IN IMS_SINT32 nSeqId = -1);
 
     // IMtsServiceListener
-    virtual void NotifyMoSms(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId) override;
+    virtual void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId,
+            IN IMS_BOOL bIsSmsEServiceType) override;
     virtual void NotifyMtSms(IN IPageMessage* piMessage) override;
 
 protected:
@@ -80,7 +82,7 @@ protected:
 
 private:
     void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bIsSmsEServiceType);
-    void SendMtsMessage(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData,
+    void SendMtsMessage(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bIsSmsEServiceType);
     void UpdateRPAckMap(IN IPageMessage* piPageMessage);
 

@@ -33,7 +33,7 @@ public:
             IN AString strLog /* = AString("") */);
     void StopTimer(IN ITimer*& piTimer, IN AString strLog /* = AString("") */);
 
-    IMS_BOOL IsEccNumber(IN const IMS_CHAR* strDstAddr, IMS_SINT32 nSlotId);
+    IMS_BOOL IsEccNumber(IN const AString& strDstAddr, IMS_SINT32 nSlotId);
     IMS_BOOL IsEpdgConnected(IN MtsService* pMtsService);
     IMS_BOOL IsSupportFeature(IN const IMS_CHAR* pszProperty);
 

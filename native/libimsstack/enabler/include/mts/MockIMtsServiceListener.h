@@ -27,8 +27,8 @@ public:
     virtual ~MockIMtsServiceListener() {}
 
     MOCK_METHOD(void, NotifyMoSms,
-            (IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData, IN const AString& strAddress,
-                    IN IMS_SINT32 nSeqId),
+            (IN SmsFormatType eSmsFormat, IN const ByteArray& objData, IN const AString& strAddress,
+                    IN IMS_SINT32 nSeqId, IN IMS_BOOL bIsSmsEServiceType),
             (override));
     MOCK_METHOD(void, NotifyMtSms, (IN IPageMessage* piMessage), (override));
 };

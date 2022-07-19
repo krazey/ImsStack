@@ -18,7 +18,7 @@
 #include "ServiceTrace.h"
 #include "ImsStrLib.h"
 #include "utility/MtsSmUtils.h"
-#include "MtsApp.h"
+#include "MtsDef.h"
 
 __IMS_TRACE_TAG_COM_SMS__;
 
@@ -57,15 +57,15 @@ IMS_SINT32 MtsSmUtils::GetRpMr(IN const ByteArray& objSmsData)
 }
 
 PUBLIC
-IMS_SINT32 MtsSmUtils::GetMti(IN const IMS_UINT32 nSmsType, IN const IMS_BYTE* pbySmsData)
+IMS_SINT32 MtsSmUtils::GetMti(IN SmsFormatType eSmsFormat, IN const IMS_BYTE* pbySmsData)
 {
     if (pbySmsData != IMS_NULL)
     {
-        if (nSmsType == MtsApp::SMSFORMAT_3GPP)
+        if (eSmsFormat == SmsFormatType::SMSFORMAT_3GPP)
         {
             return static_cast<IMS_SINT32>(pbySmsData[0] & 0x07);
         }
-        else if (nSmsType == MtsApp::SMSFORMAT_3GPP2)
+        else if (eSmsFormat == SmsFormatType::SMSFORMAT_3GPP2)
         {
             return static_cast<IMS_SINT32>(pbySmsData[0]);
         }
@@ -75,14 +75,14 @@ IMS_SINT32 MtsSmUtils::GetMti(IN const IMS_UINT32 nSmsType, IN const IMS_BYTE* p
 }
 
 PUBLIC
-IMS_SINT32 MtsSmUtils::GetMti(IN const IMS_UINT32 nSmsType, IN const ByteArray& objSmsData)
+IMS_SINT32 MtsSmUtils::GetMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objSmsData)
 {
     if (objSmsData.GetLength() == 0)
     {
         return (-1);
     }
 
-    return GetMti(nSmsType, objSmsData.GetData());
+    return GetMti(eSmsFormat, objSmsData.GetData());
 }
 
 PUBLIC

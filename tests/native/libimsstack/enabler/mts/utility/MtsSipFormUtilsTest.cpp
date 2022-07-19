@@ -15,7 +15,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "MtsApp.h"
+#include "MtsDef.h"
 #include "utility/MtsSipFormUtils.h"
 
 namespace android
@@ -54,25 +54,26 @@ TEST_F(MtsSipFormUtilsTest, FormDestination)
 
 TEST_F(MtsSipFormUtilsTest, FormContentTypeEnumToStr)
 {
-    EXPECT_STREQ(pMtsSipFormUtils->FormContentTypeEnumToStr(MtsApp::SMSFORMAT_3GPP).GetStr(),
+    EXPECT_STREQ(pMtsSipFormUtils->FormContentTypeEnumToStr(SmsFormatType::SMSFORMAT_3GPP).GetStr(),
             "application/vnd.3gpp.sms");
-    EXPECT_STREQ(pMtsSipFormUtils->FormContentTypeEnumToStr(MtsApp::SMSFORMAT_3GPP2).GetStr(),
+    EXPECT_STREQ(
+            pMtsSipFormUtils->FormContentTypeEnumToStr(SmsFormatType::SMSFORMAT_3GPP2).GetStr(),
             "application/vnd.3gpp2.sms");
 }
 
 TEST_F(MtsSipFormUtilsTest, FormContentTypeStrToEnum)
 {
     AString strTestContentType = "application/vnd.3gpp.sms";
-    EXPECT_EQ(
-            pMtsSipFormUtils->FormContentTypeStrToEnum(strTestContentType), MtsApp::SMSFORMAT_3GPP);
+    EXPECT_EQ(pMtsSipFormUtils->FormContentTypeStrToEnum(strTestContentType),
+            SmsFormatType::SMSFORMAT_3GPP);
 
     strTestContentType = "application/vnd.3gpp2.sms";
     EXPECT_EQ(pMtsSipFormUtils->FormContentTypeStrToEnum(strTestContentType),
-            MtsApp::SMSFORMAT_3GPP2);
+            SmsFormatType::SMSFORMAT_3GPP2);
 
     strTestContentType = "application/reginfo+xml";
     EXPECT_EQ(pMtsSipFormUtils->FormContentTypeStrToEnum(strTestContentType),
-            MtsApp::SMSFORMAT_INVALID);
+            SmsFormatType::SMSFORMAT_INVALID);
 }
 
 TEST_F(MtsSipFormUtilsTest, IsTelUrlParam)

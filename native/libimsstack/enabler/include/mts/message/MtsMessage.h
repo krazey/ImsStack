@@ -17,11 +17,12 @@
 #ifndef MTS_MESSAGE_H_
 #define MTS_MESSAGE_H_
 
-#include "message/IMtsMessage.h"
-#include "IPageMessageListener.h"
 #include "IMessage.h"
-#include "message/MtsMessageController.h"
+#include "IPageMessageListener.h"
+#include "MtsDef.h"
 #include "base/IMessageMediator.h"
+#include "message/IMtsMessage.h"
+#include "message/MtsMessageController.h"
 
 class MtsMessage final : public IMtsMessage, public IPageMessageListener, public IMessageMediator
 {
@@ -32,7 +33,7 @@ public:
 
     // IMtsMessage
     void SendMessage(IN IPageMessage* piPageMessage, IN const AString& strDestination,
-            IN const IMS_UINT32 nSmsType, IN const ByteArray& objSms) override;
+            IN SmsFormatType eSmsFormat, IN const ByteArray& objSms) override;
     void ReceiveMessage(IN IPageMessage* piPageMessage, IN const AString& strImpu) override;
     void Retry_MtsMessageInPending() override;
     IMS_BOOL IsReceivedMessage() override;
@@ -57,9 +58,9 @@ public:
             IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage) override;
 
     IMS_BOOL ConstructSendMessage(
-            IN IMessage* piMessage, IN const ByteArray& objSms, IN const IMS_UINT32 nSmsType);
+            IN IMessage* piMessage, IN const ByteArray& objSms, IN SmsFormatType eSmsFormat);
     AString GetPreviousCallId(IN const ByteArray& objSms);
-    void SetSendMsgInfo(IN const ByteArray& objSms, IN const IMS_UINT32 nSmsType);
+    void SetSendMsgInfo(IN const ByteArray& objSms, IN SmsFormatType eSmsFormat);
     IMS_BOOL HandleDeliveryResponse(IN IMessage* piMessage);
     void DeliveryFailed_PageMessageNull();
     void DeliveryFailed_TimerF();
@@ -76,7 +77,7 @@ public:
 
 protected:
     void SetDestination(IN const AString& strDestination);
-    IMS_UINT32 GetContentType() const;
+    SmsFormatType GetContentType() const;
     void GetUserPartFromUris(IN const AString& strUri, OUT AString& strUserPart) const;
     IMS_BOOL GetSmsgwFromReceivedMessage(
             IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
@@ -85,7 +86,7 @@ protected:
 
 private:
     void ReportTransmissionResultToMessageController(
-            IN IMS_UINT32 nResponse, IN IMS_UINT32 nSmsType);
+            IN IMS_UINT32 nResponse, IN SmsFormatType eSmsFormat);
     void SetTrmInfo(IN IMS_SINT32 nSlotId, IN IMS_BOOL bSmsState);
 
 public:
@@ -101,7 +102,7 @@ protected:
     IMS_BOOL m_bIsSmsEServiceType;
 
     // SMS Msg Info
-    IMS_UINT32 m_nSmsFormat;
+    SmsFormatType m_nSmsFormat;
     IMS_SINT32 m_nMrOfRp;
     IMS_SINT32 m_nSmsTrxType;
     IMS_SINT32 m_nMti;

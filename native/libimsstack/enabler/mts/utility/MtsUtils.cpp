@@ -96,16 +96,15 @@ void MtsUtils::StopTimer(IN ITimer*& piTimer, IN AString strLog /* = AString("")
 }
 
 PUBLIC
-IMS_BOOL MtsUtils::IsEccNumber(IN const IMS_CHAR* strDstAddr, IMS_SINT32 nSlotId)
+IMS_BOOL MtsUtils::IsEccNumber(IN const AString& strDstAddr, IMS_SINT32 nSlotId)
 {
     IMS_BOOL bIsEccNumber = IMS_FALSE;
-    AString strDestAddr(strDstAddr);
 
-    if (PhoneInfoService::GetPhoneInfoService()->GetCallInfo(nSlotId)
-            ->IsEmergencyNumber(strDestAddr))
+    if (PhoneInfoService::GetPhoneInfoService()->GetCallInfo(nSlotId)->IsEmergencyNumber(
+                strDstAddr))
     {
         IMS_TRACE_I("IsEccNumber:This Number( %s ) is a ECC Number from PhoneInfoService",
-                strDestAddr.GetStr(), 0, 0);
+                strDstAddr.GetStr(), 0, 0);
         return IMS_TRUE;
     }
 
@@ -114,7 +113,7 @@ IMS_BOOL MtsUtils::IsEccNumber(IN const IMS_CHAR* strDstAddr, IMS_SINT32 nSlotId
 
     for (IMS_UINT32 i = 0; i < eccList.GetSize(); i++)
     {
-        if (eccList.GetAt(i).Equals(strDestAddr))
+        if (eccList.GetAt(i).Equals(strDstAddr))
         {
             bIsEccNumber = IMS_TRUE;
             break;

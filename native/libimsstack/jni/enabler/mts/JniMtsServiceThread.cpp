@@ -23,7 +23,7 @@ PUBLIC VIRTUAL JniMtsServiceThread::~JniMtsServiceThread()
 }
 
 PUBLIC
-void JniMtsServiceThread::ReportMoStatus(IN IMS_UINT32 nReason, IN IMS_UINT32 nSmsFormat,
+void JniMtsServiceThread::ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsFormat,
         IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId, IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_D("ReportMoStatus", 0, 0, 0);
@@ -31,7 +31,7 @@ void JniMtsServiceThread::ReportMoStatus(IN IMS_UINT32 nReason, IN IMS_UINT32 nS
     Parcel objParcel;
     objParcel.writeInt32(IuMtsService::REPORT_MTS_MO_STATUS);
     objParcel.writeInt32(nReason);
-    objParcel.writeInt32(nSmsFormat);
+    objParcel.writeInt32((IMS_UINT32)eSmsFormat);
     objParcel.writeInt32(nRetryAfter);
     objParcel.writeInt32(nSeqId);
     objParcel.writeInt32(nSlotId);
@@ -41,13 +41,13 @@ void JniMtsServiceThread::ReportMoStatus(IN IMS_UINT32 nReason, IN IMS_UINT32 nS
 
 PUBLIC
 void JniMtsServiceThread::ReportMtSms(
-        IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData, IN IMS_SINT32 nSlotId)
+        IN SmsFormatType eSmsFormat, IN const ByteArray& objData, IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_D("ReportMtSms", 0, 0, 0);
 
     Parcel objParcel;
     objParcel.writeInt32(IuMtsService::REPORT_MTS_MT_SMS);
-    objParcel.writeInt32(nSmsFormat);
+    objParcel.writeInt32((IMS_UINT32)eSmsFormat);
     objParcel.writeString16(android::String16(objData.ToString().GetStr()));
     objParcel.writeInt32(nSlotId);
 

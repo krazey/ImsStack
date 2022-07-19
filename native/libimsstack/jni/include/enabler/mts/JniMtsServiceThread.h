@@ -3,6 +3,7 @@
 
 #include "BaseServiceThread.h"
 #include "IuMtsService.h"
+#include "MtsDef.h"
 
 class JniMtsServiceThread : public BaseServiceThread
 {
@@ -10,9 +11,10 @@ public:
     JniMtsServiceThread();
     virtual ~JniMtsServiceThread();
 
-    void ReportMoStatus(IN IMS_UINT32 nReason, IN IMS_UINT32 nSmsFormat, IN IMS_UINT8 nRetryAfter,
-            IN IMS_SINT32 nSeqId, IN IMS_SINT32 nSlotId);
-    void ReportMtSms(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData, IN IMS_SINT32 nSlotId);
+    void ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsFormat,
+            IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId, IN IMS_SINT32 nSlotId);
+    void ReportMtSms(
+            IN SmsFormatType eSmsFormat, IN const ByteArray& objData, IN IMS_SINT32 nSlotId);
 };
 
 #endif

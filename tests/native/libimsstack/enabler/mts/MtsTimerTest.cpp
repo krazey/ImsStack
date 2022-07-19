@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_MTS_SERVICE_LISTENER_H_
-#define INTERFACE_MTS_SERVICE_LISTENER_H_
+#include <gtest/gtest.h>
+#include "utility/MtsTimer.h"
 
-#include "IPageMessage.h"
-#include "MtsDef.h"
+namespace android
+{
 
-class IMtsServiceListener
+class MtsTimerTest : public ::testing::Test
 {
 public:
-    virtual void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bIsSmsEServiceType) = 0;
-    virtual void NotifyMtSms(IN IPageMessage* piMessage) = 0;
+    MtsTimer* pMtsTimer;
+
+protected:
+    virtual void SetUp() override { pMtsTimer = new MtsTimer(); }
+
+    virtual void TearDown() override { delete pMtsTimer; }
 };
 
-#endif
+TEST_F(MtsTimerTest, Constructor)
+{
+    ASSERT_NE(pMtsTimer, nullptr);
+}
+
+}  // namespace android

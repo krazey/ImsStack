@@ -14,18 +14,31 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_MTS_SERVICE_LISTENER_H_
-#define INTERFACE_MTS_SERVICE_LISTENER_H_
+#ifndef MTS_STRING_DEF_H_
+#define MTS_STRING_DEF_H_
 
-#include "IPageMessage.h"
+#include "IMSTypeDef.h"
 #include "MtsDef.h"
 
-class IMtsServiceListener
+class MtsStringDef
 {
 public:
-    virtual void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bIsSmsEServiceType) = 0;
-    virtual void NotifyMtSms(IN IPageMessage* piMessage) = 0;
+    inline static const IMS_CHAR* PS_SmsFormatType(IN SmsFormatType eSmsFormat)
+    {
+        switch (eSmsFormat)
+        {
+            case SmsFormatType::SMSFORMAT_3GPP:
+                return "3GPP";
+            case SmsFormatType::SMSFORMAT_3GPP2:
+                return "3GPP2";
+            default:
+                return "invalid";
+        }
+    }
 };
+
+#ifndef PS_SmsFormatType
+#define PS_SmsFormatType(A) MtsStringDef::PS_SmsFormatType(A)
+#endif
 
 #endif
