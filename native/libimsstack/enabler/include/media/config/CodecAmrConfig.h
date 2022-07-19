@@ -22,25 +22,75 @@
 class CodecAmrConfig : public CodecConfig
 {
 public:
+    /**
+     * @brief Construct a new codec amr config
+     *
+     * @param nType_ audio codec type (ex: amr, amr_wb, evs, telephone_event, telephone_event_wb)
+     * @param nPayloadTypeNum_ payload type number
+     */
     CodecAmrConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
+    /**
+     * @brief Destroy the codec amr config object
+     *
+     */
     virtual ~CodecAmrConfig();
-
-public:
-    // CodecConfig class
+    /**
+     * @brief Create codec using the configuration
+     *
+     * @param piCc configuration
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    /**
+     * @brief Print debug string
+     *
+     */
     virtual void ToDebugString() const;
-
+    /**
+     * @brief Get the channel
+     *
+     * @return IMS_SINT32 Return the channel id - default : 1
+     */
     IMS_SINT32 GetChannel() const;
+    /**
+     * @brief Get the mode-set
+     *
+     * @return IMS_SINT32 Return the audio codec mode-set
+     */
     IMS_SINT32 GetModeSet() const;
+    /**
+     * @brief Get the mode-set list
+     *
+     * @return IMS_UINT32 Return the audio codec mode-set list
+     */
     IMS_UINT32 GetModeSetList() const;
+    /**
+     * @brief Get the payload format
+     *
+     * @return IMS_SINT32 Return bandwidth-efficient or octet-align
+     */
     IMS_SINT32 GetOctetAlign() const;
+    /**
+     * @brief Get the sampling rate
+     *
+     * @return IMS_SINT32 Return the audio codec sampling rate
+     */
     IMS_SINT32 GetSamplingRate() const;
+    /**
+     * @brief Get the dtx
+     *
+     * @return IMS_BOOL Return true if dtx is supported
+     * Return false if drx is not supported
+     */
     IMS_BOOL GetDtx() const;
 
 public:
     enum
     {
+        /** Full payload is octet aligned */
         BANDWIDTH_EFFICIENT = 0,
+        /** All the fields are individually aligned to octet boundaries */
         OCTET_ALIGN = 1
     };
 

@@ -16,35 +16,52 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <config/CodecTelephoneEventConfig.h>
+
+#include "config/CodecTelephoneEventConfig.h"
+
 using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_TYPE = ImsCodec::AUDIO_TELEPHONE_EVENT_WB;
 static const IMS_SINT32 DEFAULT_PAYLOAD_NUM = 3;
-// static const IMS_SINT32 DEFAULT_CHANNEL = 16;
-
-#define DEFAULT_EVENT "0-15"
-static const IMS_SINT32 DEFAULT_REDUNDANT_COUNT =
+static const IMS_CHAR* DEFAULT_EVENT = "0-15";
+static const IMS_SINT32 DEFAULT_REDUNDANT_COUNT_TEST =
         CodecTelephoneEventConfig::DEFAULT_REDUNDANT_COUNT;
-static const IMS_SINT32 DEFAULT_SAMPLING_RATE_WB =
+// static const IMS_SINT32 DEFAULT_SAMPLING_RATE_TEST =
+// CodecTelephoneEventConfig::DEFAULT_SAMPLING_RATE;
+static const IMS_SINT32 DEFAULT_SAMPLING_RATE_WB_TEST =
         CodecTelephoneEventConfig::DEFAULT_SAMPLING_RATE_WB;
 
 class CodecTelephoneEventConfigTest : public ::testing::Test {
 
 public :
-    CodecTelephoneEventConfig* pConfig;
+    CodecTelephoneEventConfig* m_pConfig;
 
 protected:
     virtual void SetUp() override {
-        pConfig = new CodecTelephoneEventConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+        m_pConfig = new CodecTelephoneEventConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
     }
     virtual void TearDown() override {
-        delete pConfig;
+        if (m_pConfig)
+        {
+            delete m_pConfig;
+        }
     }
 };
 
-TEST_F(CodecTelephoneEventConfigTest, GET_DEFAULT) {
-    EXPECT_EQ(pConfig->GetEvents(), DEFAULT_EVENT);
-    EXPECT_EQ(pConfig->GetRedundancyCount(), DEFAULT_REDUNDANT_COUNT);
-    EXPECT_EQ(pConfig->GetSamplingRate(), DEFAULT_SAMPLING_RATE_WB);
+TEST_F(CodecTelephoneEventConfigTest, GetConfigDefault)
+{
+    EXPECT_EQ(m_pConfig->GetEvents(), DEFAULT_EVENT);
+    EXPECT_EQ(m_pConfig->GetRedundancyCount(), DEFAULT_REDUNDANT_COUNT_TEST);
+    EXPECT_EQ(m_pConfig->GetSamplingRate(), DEFAULT_SAMPLING_RATE_WB_TEST);
 }
+
+/*TEST_F(CodecTelephoneEventConfigTest, GetConfigAMR)
+{
+    m_pConfig = new CodecTelephoneEventConfig(ImsCodec::AUDIO_TELEPHONE_EVENT, DEFAULT_PAYLOAD_NUM);
+
+    EXPECT_EQ(m_pConfig->GetEvents(), DEFAULT_EVENT);
+    EXPECT_EQ(m_pConfig->GetRedundancyCount(), DEFAULT_REDUNDANT_COUNT_TEST);
+    EXPECT_EQ(m_pConfig->GetSamplingRate(), DEFAULT_SAMPLING_RATE_TEST);
+
+    delete m_pConfig;
+}*/

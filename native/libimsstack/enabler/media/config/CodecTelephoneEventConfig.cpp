@@ -19,6 +19,8 @@
 
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
+#define DEFAULT_EVENT "0-15"
+
 PUBLIC
 CodecTelephoneEventConfig::CodecTelephoneEventConfig(
         IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :

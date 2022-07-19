@@ -16,7 +16,8 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <config/MediaConfiguration.h>
+
+#include "config/MediaConfiguration.h"
 
 using ::testing::Return;
 
@@ -34,25 +35,45 @@ static const IMS_SINT32 DEFAULT_RTCP_INACTIVITY = MediaConfiguration::DEFAULT_RT
 class MediaConfigurationTest : public ::testing::Test {
 
 public:
-    MediaConfiguration* pConfig;
+    MediaConfiguration* m_pConfig;
+
 protected:
-    virtual void SetUp() override {
-        pConfig = new MediaConfiguration();
-    }
-    virtual void TearDown() override {
-        delete pConfig;
-    }
+    virtual void SetUp() override {}
+    virtual void TearDown() override {}
 };
 
-TEST_F(MediaConfigurationTest, GET_DEFAULT) {
-    EXPECT_EQ(pConfig->GetPortRtp(), DEFAULT_RTP_PORT);
-    EXPECT_EQ(pConfig->GetPortRtpEnd(), DEFAULT_RTP_PORT_END);
-    EXPECT_EQ(pConfig->GetPortRtcp(), DEFAULT_RTCP_PORT);
-    EXPECT_EQ(pConfig->GetRtcpLiveInterval(), DEFAULT_RTCP_INVERVAL_LIVE);
-    EXPECT_EQ(pConfig->GetRtcpInterval(), DEFAULT_RTCP_INVERVAL);
-    EXPECT_EQ(pConfig->GetAsBandwidthKbps(), DEFAULT_AS);
-    EXPECT_EQ(pConfig->GetRsBandwidthBps(), DEFAULT_RS);
-    EXPECT_EQ(pConfig->GetRrBandwidthBps(), DEFAULT_RR);
-    EXPECT_EQ(pConfig->GetRtpInactivityTimerMillis(), DEFAULT_RTP_INACTIVITY);
-    EXPECT_EQ(pConfig->GetRtcpInactivityTimerMillis(), DEFAULT_RTCP_INACTIVITY);
+TEST_F(MediaConfigurationTest, GetConfigAudio)
+{
+    m_pConfig = new MediaConfiguration(MEDIA_TYPE_AUDIO);
+
+    EXPECT_EQ(m_pConfig->GetSessionType(), MEDIA_TYPE_AUDIO);
+    EXPECT_EQ(m_pConfig->GetPortRtp(), DEFAULT_RTP_PORT);
+    EXPECT_EQ(m_pConfig->GetPortRtpEnd(), DEFAULT_RTP_PORT_END);
+    EXPECT_EQ(m_pConfig->GetPortRtcp(), DEFAULT_RTCP_PORT);
+    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), DEFAULT_RTCP_INVERVAL_LIVE);
+    EXPECT_EQ(m_pConfig->GetRtcpInterval(), DEFAULT_RTCP_INVERVAL);
+    EXPECT_EQ(m_pConfig->GetAsBandwidthKbps(), DEFAULT_AS);
+    EXPECT_EQ(m_pConfig->GetRsBandwidthBps(), DEFAULT_RS);
+    EXPECT_EQ(m_pConfig->GetRrBandwidthBps(), DEFAULT_RR);
+    EXPECT_EQ(m_pConfig->GetRtpInactivityTimerMillis(), DEFAULT_RTP_INACTIVITY);
+    EXPECT_EQ(m_pConfig->GetRtcpInactivityTimerMillis(), DEFAULT_RTCP_INACTIVITY);
+    delete m_pConfig;
+}
+
+TEST_F(MediaConfigurationTest, GetConfigVideo)
+{
+    m_pConfig = new MediaConfiguration(MEDIA_TYPE_VIDEO);
+
+    EXPECT_EQ(m_pConfig->GetSessionType(), MEDIA_TYPE_VIDEO);
+    EXPECT_EQ(m_pConfig->GetPortRtp(), DEFAULT_RTP_PORT);
+    EXPECT_EQ(m_pConfig->GetPortRtpEnd(), DEFAULT_RTP_PORT_END);
+    EXPECT_EQ(m_pConfig->GetPortRtcp(), DEFAULT_RTCP_PORT);
+    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), DEFAULT_RTCP_INVERVAL_LIVE);
+    EXPECT_EQ(m_pConfig->GetRtcpInterval(), DEFAULT_RTCP_INVERVAL);
+    EXPECT_EQ(m_pConfig->GetAsBandwidthKbps(), DEFAULT_AS);
+    EXPECT_EQ(m_pConfig->GetRsBandwidthBps(), DEFAULT_RS);
+    EXPECT_EQ(m_pConfig->GetRrBandwidthBps(), DEFAULT_RR);
+    EXPECT_EQ(m_pConfig->GetRtpInactivityTimerMillis(), DEFAULT_RTP_INACTIVITY);
+    EXPECT_EQ(m_pConfig->GetRtcpInactivityTimerMillis(), DEFAULT_RTCP_INACTIVITY);
+    delete m_pConfig;
 }

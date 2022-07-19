@@ -20,6 +20,5 @@ cc_test {
     srcs: [
         "**/*.cpp",
     ],
-
     test_config: "ImsStackNativeEnablerMediaTests.xml",
 }

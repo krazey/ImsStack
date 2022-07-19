@@ -25,66 +25,187 @@ class ICarrierConfig;
 class AudioConfiguration : public MediaConfiguration
 {
 public:
+    /**
+     * @brief Construct a new audio configuration
+     *
+     * @param eSessionType the Media type
+     */
     AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_AUDIO);
+    /**
+     * @brief Destroy the Audio Configuration
+     *
+     */
     virtual ~AudioConfiguration();
-
-public:
+    /**
+     * @brief Read the carrier configuration items
+     *
+     * @param piCc configuration
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    /**
+     * @brief Update the carrier configuration items
+     *
+     * @param piCc configuration
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Update(IN ICarrierConfig* piCc);
-
-protected:
-    virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
-    virtual void ToDebugString() const;
-
-public:
+    /**
+     * @brief Get the ptime (recommended length of time in milliseconds represented by the media in
+     * a packet)
+     *
+     * @return IMS_SINT32 Return ptime
+     */
     IMS_SINT32 GetPtime() const;
+    /**
+     * @brief Get the maxptime (maximum amount of media that can be encapsulated in each packet)
+     *
+     * @return IMS_SINT32 Return maxptime
+     */
     IMS_SINT32 GetMaxPtime() const;
+    /**
+     * @brief Get the maxredundancy (The maximum duration in milliseconds between the primary and
+     * redundant transmission)
+     *
+     * @return IMS_SINT32 Return max-red
+     */
     IMS_SINT32 GetMaxRed() const;
+    /**
+     * @brief Get the bandwidthnegooption
+     *
+     * @return IMS_BOOL Return true if the audio bandwidth nego option is enabled
+     * Return false if the audio bandwidth nego option is disabled
+     */
     IMS_BOOL GetBandwidthNegoOption() const;
+    /**
+     * @brief Get the dscp (Differentiated Services Code Point) for rtp
+     *
+     * @return IMS_SINT32 Return dscp value
+     */
     IMS_SINT32 GetRtpDscp() const;
+    /**
+     * @brief Get the min jitter buffer size
+     *
+     * @return IMS_SINT32 min jitterbuffer size
+     */
     IMS_SINT32 GetJitterBufferMinSize() const;
+    /**
+     * @brief Get the max jitter buffer size
+     *
+     * @return IMS_SINT32 Return max jitterbuffer size
+     */
     IMS_SINT32 GetJitterBufferMaxSize() const;
+    /**
+     * @brief Get the adjust time for jitter buffer
+     *
+     * @return IMS_SINT32 Return adjust time for jitter buffer
+     */
     IMS_SINT32 GetJitterBufferAdjustTime() const;
+    /**
+     * @brief Get the jitterbuffer size change unit
+     *
+     * @return IMS_SINT32 Return jitterbuffer size change unit
+     */
     IMS_SINT32 GetJitterBufferStepSize() const;
+    /**
+     * @brief Get whether rtcp-xr feature is enabled
+     *
+     * @return IMS_BOOL Return true if rtcp-xr is enabled
+     * Return false if rtcp-xr is disabled
+     */
     IMS_BOOL IsRtcpXrEnabled() const;
+    /**
+     * @brief Get whether rtcp-xr statistics feature is enabled
+     *
+     * @return IMS_BOOL Return true if rtcp-xr statistics is enabled
+     * Return false if rtcp-xr statistics is disabled
+     */
     IMS_BOOL IsRtcpXrStatisticsEnabled() const;
+    /**
+     * @brief Get whether rtcp-xr voip feature is enabled
+     *
+     * @return IMS_BOOL Return true if rtcp-xr voip is enabled
+     * Return false if rtcp-xr voip is disabled
+     */
     IMS_BOOL IsRtcpXrVoipEnabled() const;
+    /**
+     * @brief Get whether rtcp-xr plr feature is enabled
+     *
+     * @return IMS_BOOL Return true if rtcp-xr plr is enabled
+     * Return false if rtcp-xr plr is disabled
+     */
     IMS_BOOL IsRtcpXrPlrEnabled() const;
+    /**
+     * @brief Get whether rtcp-xr pdr feature is enabled
+     *
+     * @return IMS_BOOL Return true if rtcp-xr pdr is enabled
+     * Return false if rtcp-xr pdr is disabled
+     */
     IMS_BOOL IsRtcpXrPdrEnabled() const;
+    /**
+     * @brief Get dtmf playing duration in milliseconds unit
+     *
+     * @return IMS_SINT32 Return dtmf duration value
+     */
     IMS_SINT32 GetDTMFDuration() const;
+    /**
+     * @brief Get mode-change-capability
+     *
+     * @return IMS_SINT32 Return mode-change-capability
+     */
     IMS_SINT32 GetModeChangeCapability() const;
+    /**
+     * @brief Get mode-change-period
+     *
+     * @return IMS_SINT32 Return mode-change-period
+     */
     IMS_SINT32 GetModeChangePeriod() const;
+    /**
+     * @brief Get the mode-change-neighbor
+     *
+     * @return IMS_SINT32 Return mode-change-neighbor
+     */
     IMS_SINT32 GetModeChangeNeighbor() const;
+    /**
+     * @brief Get the audio candidate attribute
+     *
+     * @return const IMSVector<AString>& Return audio-candidate-attribute
+     */
     const IMSVector<AString>& GetAudioCandidateAttribute() const;
 
 public:
     enum
     {
+        /** setting at "dm_operation_preferred_mode" Media DB table */
         AUDIO_HALFRATE_SETTING = 10
-    };  // setting at "dm_operation_preferred_mode" Media DB table.
+    };
 
     enum
     {
+        /** BW nego with local value */
         BW_OPTION_LOCAL_VALUE = 0,
+        /** BW nego with remote value */
         BW_OPTION_REMOTE_VALUE = 1
     };
 
     enum
     {
+        /** [VOCODER_INTERFACE] DEFAULT_VOCODER_INTERFACE is CVD */
         DEFAULT_VOCODER_INTERFACE = 2
-    };  //[VOCODER_INTERFACE] DEFAULT_VOCODER_INTERFACE is CVD.
+    };
 
     static const IMS_SINT32 NEED_TO_CHECK_I = 0;
-
     static const IMS_SINT32 DEFAULT_PTIME = 20;
     static const IMS_SINT32 DEFAULT_MAX_PTIME = 240;
     static const IMS_SINT32 DEFAULT_MAX_RED = DEFAULT_MAX_PTIME - DEFAULT_PTIME;
     static const IMS_BOOL DEFAULT_BW_NEGO_OPERION = BW_OPTION_LOCAL_VALUE;
     static const IMS_SINT32 DEFAULT_AUDIO_DSCP = 184;  // TODO_MEDIA check default value
-    static const IMS_SINT32 DEFAULT_JITTER_MIN = 4;
-    static const IMS_SINT32 DEFAULT_JITTER_MAX = 9;
-    static const IMS_SINT32 DEFAULT_JITTER_ADJUST = 4;
-    static const IMS_SINT32 DEFAULT_JITTER_STEP = 4;
+    static const IMS_SINT32 DEFAULT_JITTER_MIN = 0;
+    static const IMS_SINT32 DEFAULT_JITTER_MAX = 0;
+    static const IMS_SINT32 DEFAULT_JITTER_ADJUST = 0;
+    static const IMS_SINT32 DEFAULT_JITTER_STEP = 0;
     static const IMS_BOOL DEFAULT_RTCPXR = IMS_FALSE;
     static const IMS_BOOL DEFAULT_RTCPXR_STATISTICS = IMS_FALSE;
     static const IMS_BOOL DEFAULT_RTCPXR_VOIP_METRICS = IMS_FALSE;
@@ -94,7 +215,10 @@ public:
     static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY = 1;
     static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = 1;
     static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = 0;
-#define DEFAULT_CANDIDATE_ATTRIBUTE "1, UDP, 1119400811, 10.3.210.77, 7010, typ, host"
+
+protected:
+    virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
+    virtual void ToDebugString() const;
 
 private:
     IMS_SINT32 m_nAudioPtime;

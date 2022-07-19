@@ -23,47 +23,74 @@
 class CodecEvsConfig : public CodecConfig
 {
 private:
-    // EVS FrameType
+    /** Specifies the range of source codec bit-rate for EVS Primary mode in the session. */
     enum
     {
+        /** EVS bitrate 5.9 kbps */
         EVS_PRIMARY_MODE_BITRATE_5_9_KBPS = 0,
+        /** EVS bitrate 7.2 kbps */
         EVS_PRIMARY_MODE_BITRATE_7_2_KBPS = 1,
+        /** EVS bitrate 8.0 kbps */
         EVS_PRIMARY_MODE_BITRATE_8_0_KBPS = 2,
+        /** EVS bitrate 9.6 kbps */
         EVS_PRIMARY_MODE_BITRATE_9_6_KBPS = 3,
+        /** EVS bitrate 13.2 kbps */
         EVS_PRIMARY_MODE_BITRATE_13_2_KBPS = 4,
+        /** EVS bitrate 16.4 kbps */
         EVS_PRIMARY_MODE_BITRATE_16_4_KBPS = 5,
+        /** EVS bitrate 24.4 kbps */
         EVS_PRIMARY_MODE_BITRATE_24_4_KBPS = 6,
+        /** EVS bitrate 32 kbps */
         EVS_PRIMARY_MODE_BITRATE_32_0_KBPS = 7,
+        /** EVS bitrate 48 kbps */
         EVS_PRIMARY_MODE_BITRATE_48_0_KBPS = 8,
+        /** EVS bitrate 64 kbps */
         EVS_PRIMARY_MODE_BITRATE_64_0_KBPS = 9,
+        /** EVS bitrate 96 kbps */
         EVS_PRIMARY_MODE_BITRATE_96_0_KBPS = 10,
+        /** EVS bitrate 128 kbps */
         EVS_PRIMARY_MODE_BITRATE_128_0_KBPS = 11,
+        /** EVS bitrate MAX */
         EVS_PRIMARY_MODE_BITRATE_MAX = EVS_PRIMARY_MODE_BITRATE_128_0_KBPS
     };
 
 public:
+    /** Specifies the EVS codec encoding bandwidth options */
     enum
     {
+        /** EVS narrow band only */
         EVS_ENCODED_BW_TYPE_NB = 0,
+        /** EVS wide band only */
         EVS_ENCODED_BW_TYPE_WB = 1,
+        /** EVS super wide band only */
         EVS_ENCODED_BW_TYPE_SWB = 2,
+        /** EVS full band only */
         EVS_ENCODED_BW_TYPE_FB = 3,
+        /** EVS nb and wb */
         EVS_ENCODED_BW_TYPE_NB_WB = 4,
+        /** EVS nb, wb and swb */
         EVS_ENCODED_BW_TYPE_NB_WB_SWB = 5,
+        /** EVS nb, wb, swb and fb */
         EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB = 6,
+        /** EVS wb and swb */
         EVS_ENCODED_BW_TYPE_WB_SWB = 7,
+        /** EVS wb, swb and fb */
         EVS_ENCODED_BW_TYPE_WB_SWB_FB = 8
     };
+    /** Enum EVS Bandwidth Type*/
     enum
     {
+        /** EVS narrow band */
         EVS_BANDWIDTH_NB = 0,
+        /** EVS wide band */
         EVS_BANDWIDTH_WB = 1,
+        /** EVS super wide band */
         EVS_BANDWIDTH_SWB = 2,
+        /** EVS full band */
         EVS_BANDWIDTH_FB = 3,
         EVS_BANDWIDTH_MAX = EVS_BANDWIDTH_FB
     };
 
-public:
     static const IMS_SINT32 DEFAULT_CHANNEL = 1;  // 1 == mono
     static const IMS_BOOL DEFAULT_DTX = IMS_TRUE;
     static const IMS_BOOL DEFAULT_DTX_RECV = IMS_TRUE;
@@ -78,12 +105,111 @@ public:
     static const IMS_SINT32 CMR_NOT_PRESENT = -2;
 
 public:
+    /**
+     * @brief Construct a new codec evs config
+     *
+     * @param nType_ audio codec type (ex: evs)
+     * @param nPayloadTypeNum_ payload type number
+     */
     CodecEvsConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
+    /**
+     * @brief Destroy the codec evs config
+     *
+     */
     virtual ~CodecEvsConfig();
-
-public:
+    /**
+     * @brief Create codec using the configuration
+     *
+     * @param piCc configuration
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    /**
+     * @brief Print debug string
+     *
+     */
     virtual void ToDebugString() const;
+    /**
+     * @brief Get the channel
+     *
+     * @return IMS_SINT32 Return the channel-id - default : 1
+     */
+    IMS_SINT32 GetChannel() const;
+    /**
+     * @brief Get the dtx
+     *
+     * @return IMS_BOOL Return true if dtx is supported
+     * Return false if dtx is not supported
+     */
+    IMS_BOOL GetDtx() const;
+    /**
+     * @brief Get the dtx recv
+     *
+     * @return IMS_BOOL Return true if dtx-recv is supported
+     * Return false if dtx-recv is not supported
+     */
+    IMS_BOOL GetDtxRecv() const;
+    /**
+     * @brief Get the header-full only mode
+     *
+     * @return IMS_SINT32 Return the HFonly mode
+     */
+    IMS_SINT32 GetHfOnly() const;
+    /**
+     * @brief Get the evs mode switch
+     *
+     * @return IMS_SINT32 Return the evs-mode-switch
+     */
+    IMS_SINT32 GetEvsModeSwitch() const;
+    /**
+     * @brief Get the bitrate list
+     *
+     * @return IMS_UINT32 Return the bitrate list
+     */
+    IMS_UINT32 GetBrList() const;
+    /**
+     * @brief Get the bitrate
+     *
+     * @return IMS_SINT32 Return the bitrate
+     */
+    IMS_SINT32 GetBr() const;
+    /**
+     * @brief Get the bandwidth list
+     *
+     * @return IMS_UINT32 Return the bandwidth list
+     */
+    IMS_UINT32 GetBwList() const;
+    /**
+     * @brief Get the bandwidth
+     *
+     * @return IMS_SINT32 Return the bandwidth
+     */
+    IMS_SINT32 GetBw() const;
+    /**
+     * @brief Get the cmr
+     *
+     * @return IMS_SINT32 Return cmr (code-mode_request) value
+     */
+    IMS_SINT32 GetCmr() const;
+    /**
+     * @brief Get the channel-aware recv
+     *
+     * @return IMS_SINT32 Return the channel-aware recv value
+     */
+    IMS_SINT32 GetChAwareRecv() const;
+    /**
+     * @brief Get the amr-wb io mode set list
+     *
+     * @return IMS_UINT32 Return the amr-wb io modeset list
+     */
+    IMS_UINT32 GetAmrWbIoModeSetList() const;
+    /**
+     * @brief Get the amr-wb io mode set
+     *
+     * @return IMS_SINT32 Return the amr-wb io modeset
+     */
+    IMS_SINT32 GetAmrWbIoModeSet() const;
 
 private:
     IMS_UINT32 ConvertEvsBitrateToList(IN IMS_SINT32 nBrStart, IN IMS_SINT32 nBrEnd) const;
@@ -93,38 +219,16 @@ private:
     IMS_SINT32 GetAmrIoModeSetFromList(IN IMS_UINT32 nAmrIoModeSet) const;
     IMS_UINT32 CheckEvsBandwidthWithBitrate(IN IMS_UINT32 m_nBwList, IN IMS_UINT32 m_nBrList) const;
 
-public:
-    IMS_SINT32 GetChannel() const;
-    IMS_BOOL GetDtx() const;
-    IMS_BOOL GetDtxRecv() const;
-    IMS_SINT32 GetHfOnly() const;
-    IMS_SINT32 GetEvsModeSwitch() const;
-    IMS_UINT32 GetBrList() const;
-    IMS_SINT32 GetBr() const;
-    IMS_UINT32 GetBwList() const;
-    IMS_SINT32 GetBw() const;
-    IMS_SINT32 GetCmr() const;
-    IMS_SINT32 GetChAwareRecv() const;
-    IMS_UINT32 GetModeSetList() const;
-    IMS_SINT32 GetModeSet() const;
-
 private:
     IMS_SINT32 m_nChannel;
-
     IMS_BOOL m_bDtx;              // 1(default) is turn on DTX
     IMS_BOOL m_bDtxRecv;          // 1(default) is turn on DTX
-    IMS_SINT32 m_nHfOnly;         // 0(default) is compact and hf format used,
-                                  //  other is only hf format used
+    IMS_SINT32 m_nHfOnly;         // 0(default) is both used, other is only hf format used
     IMS_SINT32 m_nEvsModeSwitch;  // 0(default) is "primary mode start"
-
     IMS_UINT32 m_nBrList;  // EVS primary mode bitrate range (kbps)
-    IMS_UINT32 m_nBwList;  // bw has a value from the set:
-                           // nb, wb, swb, fb, nb-wb, nb-swb, and nb-fb. nb, wb, swb, fb
+    IMS_UINT32 m_nBwList;  // bw has a value from the set: nb, wb, swb, fb, nb-wb, nb-swb, and nb-fb
     IMS_SINT32 m_nCmr;
-    IMS_SINT32 m_nChAwRecv;  // -1 is channel aware mode disable,
-                             // 0(default) is not used at the start of the session,
-                             // but it'll be changed using CMR or RTCP app.
-    // AMR-WB IO parameter
-    IMS_UINT32 m_nModeSetList;
+    IMS_SINT32 m_nChAwRecv;            // -1: disabled / 0(default)
+    IMS_UINT32 m_nAmrWbIoModeSetList;  // AMR-WB IO parameter
 };
 #endif  // _CODEC_EVS_CONFIG_H_

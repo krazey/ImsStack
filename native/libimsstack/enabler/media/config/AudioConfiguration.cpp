@@ -21,6 +21,8 @@
 
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
+#define DEFAULT_CANDIDATE_ATTRIBUTE "1, UDP, 1119400811, 10.3.210.77, 7010, typ, host"
+
 PUBLIC
 AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         MediaConfiguration(eSessionType),
@@ -78,14 +80,15 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
     nRtcpInactivityTimerMillis =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT);
 
-    // Audio Configuration attributes
+    m_bAudioBwNegoOptionEnabled =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL);
 
-    // m_nAudioPtime = DEFAULT_PTIME;    // already set by default at creator
+    // Audio Configuration attributes
     m_nAudioMaxPtime = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT);
     m_nAudioMaxRed = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT);
 
-    m_bAudioBwNegoOptionEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL);
+    // m_bAudioBwNegoOptionEnabled =
+    //       piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL);
     // m_nAudioRtpDscp = DEFAULT_AUDIO_DSCP;      // already set by default at creator
     IMSVector<IMS_SINT32> objAudioJitterBufferSize =
             piCc->GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY);

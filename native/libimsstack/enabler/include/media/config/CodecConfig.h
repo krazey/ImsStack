@@ -24,17 +24,44 @@
 class CodecConfig
 {
 public:
+    /**
+     * @brief Construct a new codec config object
+     *
+     * @param nCodec_ codec type
+     * @param nPayloadTypeNum_ payload type number
+     */
     CodecConfig(IN IMS_SINT32 nCodec_, IN IMS_SINT32 nPayloadTypeNum_);
+    /**
+     * @brief Destroy the codec config object
+     *
+     */
     virtual ~CodecConfig();
-
-public:
+    /**
+     * @brief Create codec using the configuration
+     *
+     * @param piCc configuration
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    /**
+     * @brief Print debug string
+     *
+     */
     virtual void ToDebugString() const;
+    /**
+     * @brief Get the current codec type
+     *
+     * @return IMS_SINT32 Return codec type
+     */
+    virtual IMS_SINT32 GetCodec() const;
+    /**
+     * @brief Get the payload type
+     *
+     * @return IMS_SINT32 Return the payload type number
+     */
+    virtual IMS_SINT32 GetPayloadType() const;
 
-    IMS_SINT32 GetCodec() const;
-    IMS_SINT32 GetPayloadType() const;
-
-public:
 protected:
     IMS_SINT32 m_nCodec;
     IMS_SINT32 m_nPayloadType;

@@ -61,10 +61,8 @@ IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
         return IMS_FALSE;
     }
 
-    // TODO_MEDIA Phase 2 - Need to make this on asset
-    // m_bIsSessLevelBW = piCc->GetBoolean(
-    //     CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL);
-
+    m_bIsSessLevelBW =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL);
     m_bAnbrSupported =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL);
     m_bSupportMultiConfigInEarlySession =

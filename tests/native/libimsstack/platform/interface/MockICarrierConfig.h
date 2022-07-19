@@ -25,6 +25,9 @@
 class MockICarrierConfig : public ICarrierConfig
 {
 public:
+    MockICarrierConfig() {}
+    virtual ~MockICarrierConfig() {}
+
     MOCK_METHOD(IMS_BOOL, GetBoolean, (IN const IMS_CHAR*, IN IMS_BOOL), (const, override));
     MOCK_METHOD(IMS_SINT32, GetInt, (IN const IMS_CHAR*, IN IMS_SINT32), (const, override));
     MOCK_METHOD(IMS_SLONG, GetLong, (IN const IMS_CHAR*, IN IMS_SLONG), (const, override));

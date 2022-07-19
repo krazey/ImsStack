@@ -22,28 +22,95 @@
 class CodecHevcConfig : public CodecConfig
 {
 public:
+    /**
+     * @brief Construct a new codec hevc config
+     *
+     * @param nType_ video codec type - hevc (H.265)
+     * @param nPayloadTypeNum_ payload type number
+     */
     CodecHevcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
+    /**
+     * @brief Destroy the codec hevc config
+     *
+     */
     virtual ~CodecHevcConfig();
-
-public:
-    // CodecConfig class
+    /**
+     * @brief Create codec using the configuration
+     *
+     * @param piCc configuration
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    /**
+     * @brief Print debug string
+     *
+     */
     virtual void ToDebugString() const;
-
+    /**
+     * @brief Get the resolution width
+     *
+     * @return IMS_SINT32 Return the resolution configuration - width for hevc
+     */
     IMS_SINT32 GetResolutionWidth() const;
+    /**
+     * @brief Get the resolution height
+     *
+     * @return IMS_SINT32 Return the resolution configuration - height for hevc
+     */
     IMS_SINT32 GetResolutionHeight() const;
+    /**
+     * @brief Get the framerate for hevc
+     *
+     * @return IMS_SINT32 Return hevc framerate
+     */
     IMS_SINT32 GetFramerate() const;
+    /**
+     * @brief Get the bitrate for hevc
+     *
+     * @return IMS_SINT32 Return hevc bitrate
+     */
     IMS_SINT32 GetBitrate() const;
+    /**
+     * @brief Get the packetization mode
+     *
+     * @return IMS_SINT32 Return the packetization mode
+     */
     IMS_SINT32 GetPacketizationMode() const;
+    /**
+     * @brief Get the include sprop parameter sets
+     *
+     * @return IMS_BOOL Return true if the setting that includes sprop-parameter-sets in sdp is
+     * enabled Return false if the setting that includes sprop-parameter-sets in sdp is disabled
+     */
     IMS_BOOL GetIncludeSpropParameterSets() const;
+    /**
+     * @brief Get the hevc profile
+     *
+     * @return IMS_SINT32 Return hevc profile
+     */
     IMS_SINT32 GetHevcProfile() const;
+    /**
+     * @brief Get the hevc level
+     *
+     * @return IMS_SINT32 Return hevc level
+     */
     IMS_SINT32 GetHevcLevel() const;
+    /**
+     * @brief Get the image attribute
+     *
+     * @return const AString& Return image-attribute
+     */
     const AString& GetImageAttr() const;
+    /**
+     * @brief Get the frame size
+     *
+     * @return const AString& Return framesize
+     */
     const AString& GetFrameSize() const;
 
 public:
     static const IMS_SINT32 NEED_TO_CHECK_I = 0;
-
     static const IMS_SINT32 DEFAULT_RESOLUTION_WIDTH = NEED_TO_CHECK_I;
     static const IMS_SINT32 DEFAULT_RESOLUTION_HEIGHT = NEED_TO_CHECK_I;
     static const IMS_SINT32 DEFAULT_FRAMERATE = NEED_TO_CHECK_I;

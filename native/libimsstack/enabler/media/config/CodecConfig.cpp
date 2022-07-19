@@ -51,14 +51,12 @@ PUBLIC VIRTUAL void CodecConfig::ToDebugString() const
             m_nPayloadType);
 }
 
-PUBLIC
-IMS_SINT32 CodecConfig::GetCodec() const
+PUBLIC VIRTUAL IMS_SINT32 CodecConfig::GetCodec() const
 {
     return m_nCodec;
 }
 
-PUBLIC
-IMS_SINT32 CodecConfig::GetPayloadType() const
+PUBLIC VIRTUAL IMS_SINT32 CodecConfig::GetPayloadType() const
 {
     return m_nPayloadType;
 }

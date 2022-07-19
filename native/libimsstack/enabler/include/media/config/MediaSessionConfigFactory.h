@@ -26,20 +26,71 @@
 class MediaSessionConfigFactory
 {
 private:
+    /**
+     * @brief Construct a new media session config factory
+     *
+     */
     MediaSessionConfigFactory();
 
 public:
+    /**
+     * @brief Destroy the media session config factory
+     *
+     */
     virtual ~MediaSessionConfigFactory();
-
+    /**
+     * @brief Create a media session config
+     *
+     * @param nSlotId SIM slot id - default : 0
+     * @param eServiceType service type (ex: default, emergency)
+     */
     void CreateMediaSessionConfig(IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_TYPE eServiceType);
+    /**
+     * @brief Add a media session config
+     *
+     * @param nSlotId SIM sloit id - default : 0
+     * @param mediaSessionConfig media session config
+     */
     void AddMediaSessionConfig(IN IMS_SINT32 nSlotId, IN MediaSessionConfig* mediaSessionConfig);
+    /**
+     * @brief Distroy the list session config
+     *
+     * @param nSlotId SIM sloit id - default : 0
+     */
     void DestroyListSessionConfig(IN IMS_SINT32 nSlotId);
+    /**
+     * @brief Get the list session config
+     *
+     * @param nSlotId SIM sloit id - default : 0
+     * @return IMSList<MediaSessionConfig*>* mediasession config list
+     */
     IMSList<MediaSessionConfig*>* GetListSessionConfig(IN IMS_SINT32 nSlotId);
+    /**
+     * @brief Find a media session config
+     *
+     * @param nSlotId SIM sloit id - default : 0
+     * @param eServiceType service type (ex: default, emergency)
+     * @return MediaSessionConfig* mediasession config
+     */
     MediaSessionConfig* FindMediaSessionConfig(
             IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_TYPE eServiceType);
+    /**
+     * @brief Destroy a media session config
+     *
+     * @param pMediaSessionConfig set mediasession config
+     */
     void DestroySessionConfig(IN MediaSessionConfig* pMediaSessionConfig);
-
+    /**
+     * @brief Get the instance of the mediasession config
+     *
+     * @return MediaSessionConfigFactory* Return the mediasession config instance
+     */
     static MediaSessionConfigFactory* GetInstance();
+    /**
+     * @brief Release the instance of the mediasession config
+     *
+     * @param pSessionConfigFactory mediasession config factory instance
+     */
     static void ReleaseInstance(MediaSessionConfigFactory* pSessionConfigFactory);
 
 private:

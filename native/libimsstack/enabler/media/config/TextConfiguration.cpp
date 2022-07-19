@@ -68,9 +68,8 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
                                                                                    // audio
 
     // Text Configuration attributes
-    // TODO_MEDIA need to add after creating HEVC in CarrierConfig
-    // bTextCodecEmptyRedundantEnabled = piCc->GetBoolean(
-    //     CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL);
+    bTextCodecEmptyRedundantEnabled =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL);
 
     if (!CreateCodecConfigs(piCc))
     {

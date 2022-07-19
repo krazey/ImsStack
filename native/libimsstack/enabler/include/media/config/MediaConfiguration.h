@@ -31,14 +31,113 @@ class CodecConfig;
 class MediaConfiguration
 {
 public:
+    /**
+     * @brief Construct a new media configuration
+     *
+     * @param _eSessionType Set media ssession_type (ex: audio, video etc)
+     */
     MediaConfiguration(MEDIA_CONTENT_TYPE _eSessionType = MEDIA_TYPE_AUDIO);
+    /**
+     * @brief Destroy the media configuration
+     *
+     */
     virtual ~MediaConfiguration();
-
-public:
+    /**
+     * @brief Create codec using the configuration
+     *
+     * @param piCc configuration
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    /**
+     * @brief Update codec using the configuration
+     *
+     * @param piCc configuration
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Update(IN ICarrierConfig* piCc);
+    /**
+     * @brief Get the codec config
+     *
+     * @param nCodec codec type
+     * @return CodecConfig* Return the current codec config
+     */
     virtual CodecConfig* GetCodecConfig(IN IMS_UINT32 nCodec) const;
+    /**
+     * @brief Get the codec configs
+     *
+     * @return const IMSList<CodecConfig*>& Return the codec config
+     */
     virtual const IMSList<CodecConfig*>& GetCodecConfigs() const;
+
+    /**
+     * @brief Get media session type
+     *
+     * @return MEDIA_CONTENT_TYPE Return media session type
+     */
+    MEDIA_CONTENT_TYPE GetSessionType() const;
+    /**
+     * @brief Get the start index of the rtp port range
+     *
+     * @return IMS_SINT32 Return port index
+     */
+    IMS_SINT32 GetPortRtp() const;
+    /**
+     * @brief Get the end index of the rtp port range
+     *
+     * @return IMS_SINT32 Return the end index
+     */
+    IMS_SINT32 GetPortRtpEnd() const;
+    /**
+     * @brief Get the rtcp port number (rtp port number + 1)
+     *
+     * @return IMS_SINT32 Return the rtcp port number
+     */
+    IMS_SINT32 GetPortRtcp() const;
+    /**
+     * @brief Get the rtcp interval in live state
+     *
+     * @return IMS_SINT32 Return the rtcp interval
+     */
+    IMS_SINT32 GetRtcpLiveInterval() const;
+    /**
+     * @brief Get the rtcp interval in hold state
+     *
+     * @return IMS_SINT32 Return the rtcp interval
+     */
+    IMS_SINT32 GetRtcpInterval() const;
+    /**
+     * @brief Get the as bandwidth kbps
+     *
+     * @return IMS_SINT32 Return as value
+     */
+    IMS_SINT32 GetAsBandwidthKbps() const;
+    /**
+     * @brief Get the rs bandwidth bps value
+     *
+     * @return IMS_SINT32 Return rs value
+     */
+    IMS_SINT32 GetRsBandwidthBps() const;
+    /**
+     * @brief Get the Rr Bandwidth bps value
+     *
+     * @return IMS_SINT32 Return rr value
+     */
+    IMS_SINT32 GetRrBandwidthBps() const;
+    /**
+     * @brief Get the rtp inactivity timer in milli seconds unit
+     *
+     * @return IMS_SINT32 Return the rtp inactivitity timer
+     */
+    IMS_SINT32 GetRtpInactivityTimerMillis() const;
+    /**
+     * @brief Get the rtcp inactivity timer in milli seconds unit
+     *
+     * @return IMS_SINT32  Return the rtp inactivitity timer
+     */
+    IMS_SINT32 GetRtcpInactivityTimerMillis() const;
 
 protected:
     virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
@@ -54,25 +153,14 @@ protected:
     void SetRtcpIntervals(IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey);
 
 public:
-    MEDIA_CONTENT_TYPE GetSessionType() const;
-
-    IMS_SINT32 GetPortRtp() const;
-    IMS_SINT32 GetPortRtpEnd() const;
-    IMS_SINT32 GetPortRtcp() const;
-    IMS_SINT32 GetRtcpLiveInterval() const;
-    IMS_SINT32 GetRtcpInterval() const;
-    IMS_SINT32 GetAsBandwidthKbps() const;
-    IMS_SINT32 GetRsBandwidthBps() const;
-    IMS_SINT32 GetRrBandwidthBps() const;
-    IMS_SINT32 GetRtpInactivityTimerMillis() const;
-    IMS_SINT32 GetRtcpInactivityTimerMillis() const;
-
-public:
-    // Bandwidth type
+    /** Bandwidth type */
     enum
     {
+        /** Application Specific Maximum Bandwidth */
         BW_AS = 1,
+        /** RTCP bandwidth allocated to active data senders */
         BW_RR = 2,
+        /** RTCP bandwidth allocated to other participants in the RTP session */
         BW_RS = 3
     };
 
@@ -88,26 +176,18 @@ public:
         BW_OPTION_NEGOTIATED_VALUE = 1
     };
 
+    /** check SDPOfferCapNegForAVPF option
+     *  acap (Attribute Capability Attribute)
+     *  tcap (Transport Protocol Capability Attribute)
+     */
     enum
     {
-        SOCKET_POS_DEFAULT = 0,
-        SOCKET_POS_CP = 1,
-        SOCKET_POS_AP = 2
-    };
-
-    // check SDPOfferCapNegForAVPF option
-    enum
-    {
+        /** No capability attribute */
         CAPNEG_OFFER_NONE = 0,
+        /** No acap, tcap only */
         CAPNEG_OFFER_WITHOUT_ACAP = 1,
+        /** Acap and tcap */
         CAPNEG_OFFER_WITH_ACAP = 2
-    };
-    // Video Resolution Loose Check mode
-    enum
-    {
-        USE_SELF_RESOLUTION_STRICTLY = 0,
-        USE_PEER_RESOLUTION_RX_ONLY = 1,
-        USE_PEER_RESOLUTION_TRX = 2,
     };
 
     static const IMS_SINT32 DEFAULT_RTP_PORT = 50010;
@@ -123,7 +203,6 @@ public:
 
 protected:
     MEDIA_CONTENT_TYPE eSessionType;
-
     IMS_SINT32 nPortRtp;
     IMS_SINT32 nPortRtpEnd;
     IMS_SINT32 nPortRtcp;

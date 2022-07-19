@@ -24,38 +24,61 @@ class ICarrierConfig;
 class TextConfiguration : public MediaConfiguration
 {
 public:
+    /**
+     * @brief Construct a new text configuration
+     *
+     * @param _eSessionType mediasession type (as: text)
+     */
     TextConfiguration(MEDIA_CONTENT_TYPE _eSessionType = MEDIA_TYPE_TEXT);
+    /**
+     * @brief Destroy the text configuration
+     *
+     */
     virtual ~TextConfiguration();
-
-public:
+    /**
+     * @brief Create codec using the configuration
+     *
+     * @param piCc configuration
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    /**
+     * @brief Update codec using the configuration
+     *
+     * @param piCc configuration
+     * @return IMS_BOOL Return true if the create function is executed without error
+     * Return false if the create function is failed
+     */
     virtual IMS_BOOL Update(IN ICarrierConfig* piCc);
+    /**
+     * @brief Get the T140 payload type number
+     *
+     * @return IMS_SINT32 Return T140 payload type number
+     */
+    IMS_SINT32 GetT140PayloadType() const;
+    /**
+     * @brief Get the Red Payload Type value
+     *
+     * @return IMS_SINT32 Return redendancy payload type number
+     */
+    IMS_SINT32 GetRedPayloadType() const;
+    /**
+     * @brief Return whether textxodec emptyredundant is enabled
+     *
+     * @return IMS_BOOL Return true if textxodec emptyredundant is enabled
+     * Return false if  textxodec emptyredundant is disabled
+     */
+    IMS_BOOL IsTextCodecEmptyRedundantEnabled() const;
+
+    static const IMS_SINT32 NEED_TO_CHECK_I = 0;
+    static const IMS_SINT32 DEFAULT_PAYLOAD_T140 = NEED_TO_CHECK_I;
+    static const IMS_SINT32 DEFAULT_PAYLOAD_RED = NEED_TO_CHECK_I;
+    static const IMS_BOOL DEFAULT_EMPTY_REDUNDANT = IMS_FALSE;
 
 protected:
     virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
     virtual void ToDebugString() const;
-
-public:
-    IMS_SINT32 GetT140PayloadType() const;
-    IMS_SINT32 GetRedPayloadType() const;
-    IMS_BOOL IsTextCodecEmptyRedundantEnabled() const;
-
-    static const IMS_SINT32 NEED_TO_CHECK_I = 0;
-
-    static const IMS_SINT32 DEFAULT_RTP_PORT = 50010;
-    static const IMS_SINT32 DEFAULT_RTP_PORT_END = 50060;
-    static const IMS_SINT32 DEFAULT_RTCP_PORT = 50011;
-    static const IMS_SINT32 DEFAULT_RTCP_INVERVAL_LIVE = 5;
-    static const IMS_SINT32 DEFAULT_RTCP_INVERVAL = 5;
-    static const IMS_SINT32 DEFAULT_AS = 4;
-    static const IMS_SINT32 DEFAULT_RS = 300;
-    static const IMS_SINT32 DEFAULT_RR = 100;
-    static const IMS_SINT32 DEFAULT_RTP_INACTIVITY = 20000;
-    static const IMS_SINT32 DEFAULT_RTCP_INACTIVITY = 200000;
-
-    static const IMS_SINT32 DEFAULT_PAYLOAD_T140 = NEED_TO_CHECK_I;
-    static const IMS_SINT32 DEFAULT_PAYLOAD_RED = NEED_TO_CHECK_I;
-    static const IMS_BOOL DEFAULT_EMPTY_REDUNDANT = IMS_FALSE;
 
 private:
     IMS_SINT32 nT140PayloadType;
