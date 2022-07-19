@@ -291,51 +291,81 @@ public class SscUtilsTest {
 
     @Test
     public void getNumberFromUri_targetUriIsNull() {
-        String number = mSscUtils.getNumberFromUri(null);
+        String number = mSscUtils.getNumberFromUri(SLOT_0, null);
 
         assertNull(number);
     }
 
     @Test
     public void getNumberFromUri_fromNumber() {
-        String number = mSscUtils.getNumberFromUri("+1234567890");
+        String number = mSscUtils.getNumberFromUri(SLOT_0, "+1234567890");
 
         assertEquals("+1234567890", number);
     }
 
     @Test
     public void getNumberFromUri_fromTelUri() {
-        String number = mSscUtils.getNumberFromUri("tel:+1234567890");
+        String number = mSscUtils.getNumberFromUri(SLOT_0, "tel:+1234567890");
 
         assertEquals("+1234567890", number);
     }
 
     @Test
     public void getNumberFromUri_fromTelUriIncludingPhoneContext() {
-        String number = mSscUtils.getNumberFromUri("tel:+1234567890;phone-context:oprator.com");
+        String number = mSscUtils.getNumberFromUri(SLOT_0,
+                "tel:1234567890;phone-context:operator.com");
 
-        assertEquals("+1234567890", number);
+        assertEquals("1234567890", number);
     }
 
     @Test
     public void getNumberFromUri_fromSipUri() {
-        String number = mSscUtils.getNumberFromUri("sip:+1234567890@operator.com");
+        String number = mSscUtils.getNumberFromUri(SLOT_0, "sip:+1234567890@operator.com");
 
         assertEquals("+1234567890", number);
     }
 
     @Test
     public void getNumberFromUri_fromSipUriWithoutDomain() {
-        String number = mSscUtils.getNumberFromUri("sip:+1234567890");
+        // this is a wrong URI, just used for testing
+        String number = mSscUtils.getNumberFromUri(SLOT_0, "sip:+1234567890");
 
         assertEquals("+1234567890", number);
     }
 
     @Test
     public void getNumberFromUri_fromSipUriIncludingPhoneContext() {
-        String number = mSscUtils.getNumberFromUri("sip:+1234567890;phone-context:oprator.com");
+        String number = mSscUtils.getNumberFromUri(SLOT_0,
+                "sip:1234567890;phone-context:operator.com");
 
-        assertEquals("+1234567890", number);
+        assertEquals("1234567890", number);
+    }
+
+    @Test
+    public void getNumberFromUri_replaceZeroWithCountrycode() {
+        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        when(mMockCarrierConfig.getString(
+                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING))
+                .thenReturn("+81");
+        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+
+        String number = mSscUtils.getNumberFromUri(SLOT_0,
+                "sip:0234567890;phone-context:operator.com");
+
+        assertEquals("+81234567890", number);
+    }
+
+    @Test
+    public void getNumberFromUri_replaceCountryCodeWithZero() {
+        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        when(mMockCarrierConfig.getString(
+                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING))
+                .thenReturn("+81");
+        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+
+        String number = mSscUtils.getNumberFromUri(SLOT_0, "tel:+81234567890");
+
+        assertEquals("0234567890", number);
     }
 
     @Test

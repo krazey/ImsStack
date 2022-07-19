@@ -128,7 +128,7 @@ public class SscUtils {
         return userAgent;
     }
 
-    protected String getNumberFromUri(final String uri) {
+    protected String getNumberFromUri(int slotId, final String uri) {
         if (TextUtils.isEmpty(uri)) {
             return null;
         }
@@ -163,6 +163,18 @@ public class SscUtils {
             number = uri;
         }
 
+        final String ccToAdd = SscConfig.getCountryCodeToReplaceZeroWithCountryCode(slotId);
+        if (!TextUtils.isEmpty(ccToAdd) && !number.startsWith("+")) {
+            if (number.startsWith("0")) {
+                number = ccToAdd + number.substring(1);
+            }
+        }
+
+        final String ccToRemove = SscConfig.getCountryCodeToReplaceCountryCodeWithZero(slotId);
+        if (!TextUtils.isEmpty(ccToRemove) && number.startsWith(ccToRemove)) {
+            number =  "0" + number.substring(ccToRemove.length());
+        }
+
         ImsLog.d("number is " + number);
         return number;
     }
@@ -189,9 +201,8 @@ public class SscUtils {
         final String ccToAdd = SscConfig.getCountryCodeToReplaceZeroWithCountryCode(slotId);
         if (!TextUtils.isEmpty(ccToAdd) && !number.startsWith("+")) {
             if (number.startsWith("0")) {
-                number = number.substring(1);
+                number = ccToAdd + number.substring(1);
             }
-            number = ccToAdd + number;
         }
 
         final String ccToRemove = SscConfig.getCountryCodeToReplaceCountryCodeWithZero(slotId);

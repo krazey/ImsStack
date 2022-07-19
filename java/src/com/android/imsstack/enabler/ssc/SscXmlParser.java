@@ -930,7 +930,7 @@ public class SscXmlParser {
         NodeList targetNodes = forwardToElement.getElementsByTagName(
                 SscXmlFormat.getSsElement(slotId, SscXmlFormat.TARGET));
         if (targetNodes.getLength() > 0) {
-            return SscUtils.getInstance().getNumberFromUri(
+            return SscUtils.getInstance().getNumberFromUri(slotId,
                     targetNodes.item(0).getTextContent().trim());
         }
 
