@@ -106,7 +106,6 @@ public class ImsCallManager {
     }
 
     public ImsCallSessionImpl createSession(ImsCallProfile profile) {
-        boolean wifi = false;
         boolean emergency = false;
         boolean offline = false;
         boolean ussi = false;
@@ -126,10 +125,6 @@ public class ImsCallManager {
             if (profile.getCallExtraInt(ImsCallProfile.EXTRA_DIALSTRING, -1)
                     == ImsCallProfile.DIALSTRING_USSD) {
                 ussi = true;
-            }
-
-            if (ImsRegUtils.isImsRegisteredOnWifi(mCallContext)) {
-                wifi = true;
             }
         }
 
@@ -161,7 +156,7 @@ public class ImsCallManager {
         ImsCallConnectionIds.add(mCallContext.getSlotId(), ccId);
 
         if (call.getNativeCallId() != 0) {
-            call.open(IUMtcCall.SERVICETYPE_NORMAL, wifi, emergency, offline, ussi);
+            call.open(IUMtcCall.SERVICETYPE_NORMAL, emergency, offline, ussi);
         }
 
         return callSession;

@@ -337,13 +337,13 @@ public class MtcCallTest extends ImsStackTest {
 
     @Test
     public void testOpen() {
-        mTestMtcCall.open(IUMtcCall.SERVICETYPE_EMERGENCY, true, true, true, true);
+        mTestMtcCall.open(IUMtcCall.SERVICETYPE_EMERGENCY, true, true, true);
         processAllMessages();
         assertEquals(mInvalidCommand, mCommand);
 
         mTestMtcCall.createNativeCallObject();
 
-        mTestMtcCall.open(IUMtcCall.SERVICETYPE_EMERGENCY, true, true, true, true);
+        mTestMtcCall.open(IUMtcCall.SERVICETYPE_EMERGENCY, true, true, true);
         processAllMessages();
 
         assertEquals(IUMtcCall.OPEN, mCommand);

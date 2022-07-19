@@ -32,7 +32,6 @@ public final class MtcCallInfo {
     public void copyFrom(CallInfo ci) {
         mCallInfo.serviceType = ci.serviceType;
         mCallInfo.callType = ci.callType;
-        mCallInfo.wifi = ci.wifi;
         mCallInfo.emergency = ci.emergency;
         mCallInfo.offline = ci.offline;
         mCallInfo.ussi = ci.ussi;
@@ -53,10 +52,6 @@ public final class MtcCallInfo {
 
     public int getCallType() {
         return getCallType(mCallInfo);
-    }
-
-    public boolean isWifi() {
-        return isWifi(mCallInfo);
     }
 
     public boolean isEmergency() {
@@ -99,10 +94,6 @@ public final class MtcCallInfo {
         setCallType(mCallInfo, callType);
     }
 
-    public void setWifi(boolean enabled) {
-        setWifi(mCallInfo, enabled);
-    }
-
     public void setEmergency(boolean enabled) {
         setEmergency(mCallInfo, enabled);
     }
@@ -138,7 +129,6 @@ public final class MtcCallInfo {
     public static void copy(CallInfo src, CallInfo dest) {
         dest.serviceType = src.serviceType;
         dest.callType = src.callType;
-        dest.wifi = src.wifi;
         dest.emergency = src.emergency;
         dest.offline = src.offline;
         dest.ussi = src.ussi;
@@ -155,10 +145,6 @@ public final class MtcCallInfo {
 
     public static int getCallType(CallInfo ci) {
         return ci.callType;
-    }
-
-    public static boolean isWifi(CallInfo ci) {
-        return ci.wifi;
     }
 
     public static boolean isEmergency(CallInfo ci) {
@@ -199,10 +185,6 @@ public final class MtcCallInfo {
 
     public static void setCallType(CallInfo ci, int callType) {
         ci.callType = callType;
-    }
-
-    public static void setWifi(CallInfo ci, boolean enabled) {
-        ci.wifi = enabled;
     }
 
     public static void setEmergency(CallInfo ci, boolean enabled) {
