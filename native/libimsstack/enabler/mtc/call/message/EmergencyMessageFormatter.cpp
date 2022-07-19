@@ -133,9 +133,9 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByDeviceId()
         return;
     }
 
-    IMS_SINT32 nSlotId = 0;  // TODO
     AString strImei;
-    PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo()->GetDeviceId(nSlotId, strImei);
+    PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo()->GetDeviceId(
+            m_objContext.GetSlotId(), strImei);
 
     LOCAL CONST IMS_UINT32 LEN_IMEI_TAC = 8;
     LOCAL CONST IMS_UINT32 LEN_IMEI_SNR = 6;
@@ -244,7 +244,7 @@ IMS_UINT32 EmergencyMessageFormatter::GetLocalPort()
     IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector == IMS_NULL)
     {
-        return IMS_FAILURE;
+        return 0;
     }
 
     return pAosConnector->GetLocalPort();
