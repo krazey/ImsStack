@@ -21,6 +21,7 @@
     <boolean name="request_uri_validation_required_in_mid_dialog_bool" value="false"/>
 
     <!-- Aos -->
+    <int name="ims.sip_preferred_transport_int" value="2"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
