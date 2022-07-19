@@ -74,13 +74,13 @@ public class SscXmlGovTest {
     }
 
     protected static SscServiceQueryData createQueryData(ESsType ssType, int transactionId,
-            int condition) {
+            int condition, int serviceClass) {
         if (ssType == ESsType.CF) {
             return new CfServiceQueryData(SLOT_0, ssType, SscConstant.EVENT_SSC_QUERY_CF,
-                    transactionId, condition, "", SscServiceClassUtil.SERVICE_CLASS_NONE);
+                    transactionId, condition, "", serviceClass);
         } else if (ssType == ESsType.ICB || ssType == ESsType.OCB) {
             return new CbServiceQueryData(SLOT_0, ssType, SscConstant.EVENT_SSC_QUERY_CB,
-                    transactionId, condition, SscServiceClassUtil.SERVICE_CLASS_NONE);
+                    transactionId, condition, serviceClass);
         } else if (ssType == ESsType.CW) {
             return new SscServiceQueryData(SLOT_0, ssType, SscConstant.EVENT_SSC_QUERY_CW,
                     transactionId, -1);
@@ -156,7 +156,66 @@ public class SscXmlGovTest {
         return doc;
     }
 
-    protected static Document createEntireXmlDoc(boolean timerInCfnr) {
+    protected static Document createDocumentFromString(String xml) {
+        Document document;
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(false);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            InputSource is = new InputSource(new StringReader(xml));
+            document = builder.parse(is);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return document;
+    }
+
+    protected static Document createErrorXmlDoc(boolean includingErrorPhrase) {
+        String xml;
+        if (includingErrorPhrase) {
+            xml = "<xe:xcap-error><xe:constraint-failure "
+                    + "phrase=\"Service setting could not be updated.\"></xe:constraint-failure>"
+                    + "</xe:xcap-error>";
+        } else {
+            xml = "<xe:xcap-error></xe:xcap-error>";
+        }
+
+        Document document;
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(false);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            InputSource is = new InputSource(new StringReader(xml));
+            document = builder.parse(is);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return document;
+    }
+
+    protected static Document createEmptyXmlDoc() {
+        String xml = "<ss:simservs />";
+
+        Document document;
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(false);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            InputSource is = new InputSource(new StringReader(xml));
+            document = builder.parse(is);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return document;
+    }
+
+    protected static Document createEntireXmlDoc() {
         String xml = "<ss:simservs xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\""
                 + "xmlns:SOAP-ENC=\"http://schemas.xmlsoap.org/soap/encoding/\""
                 + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
@@ -183,6 +242,15 @@ public class SscXmlGovTest {
                 + "<cp:conditions>"
                 + "<ss:rule-deactivated/>"
                 + "<ss:roaming/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:allow>false</ss:allow>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-barring-anonymous-incoming\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:anonymous/>"
                 + "</cp:conditions>"
                 + "<cp:actions>"
                 + "<ss:allow>false</ss:allow>"
@@ -225,7 +293,7 @@ public class SscXmlGovTest {
                 + "<ss:communication-waiting active=\"true\"/>"
                 // CD
                 + "<ss:communication-diversion active=\"true\">"
-                + (timerInCfnr ? "" : "<ss:NoReplyTimer>25</ss:NoReplyTimer>")
+                + "<ss:NoReplyTimer>25</ss:NoReplyTimer>"
                 + "<cp:ruleset>"
                 + "<cp:rule id=\"call-diversion-unconditional\">"
                 + "<cp:conditions>"
@@ -269,7 +337,6 @@ public class SscXmlGovTest {
                 + "<cp:actions>"
                 + "<ss:forward-to>"
                 + "<ss:target>tel:+1234567890</ss:target>"
-                + (timerInCfnr ? "<ss:NoReplyTimer>25</ss:NoReplyTimer>" : "")
                 + "<ss:notify-caller>true</ss:notify-caller>"
                 + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
                 + "<ss:reveal-served-user-identity-to-caller>false"
@@ -298,6 +365,93 @@ public class SscXmlGovTest {
                 + "<cp:conditions>"
                 + "<ss:rule-deactivated/>"
                 + "<ss:not-registered/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
+                + "<ss:reveal-served-user-identity-to-caller>false"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                // CD video
+                + "<cp:rule id=\"call-diversion-unconditional-video\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:media>video</ss:media>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
+                + "<ss:reveal-served-user-identity-to-caller>false"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:notify-served-user>false</ss:notify-served-user>"
+                + "<ss:notify-served-user-on-outbound-call>false"
+                + "</ss:notify-served-user-on-outbound-call>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-diversion-busy-video\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:busy/>"
+                + "<ss:media>video</ss:media>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
+                + "<ss:reveal-served-user-identity-to-caller>false"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-diversion-no-reply-video\">"
+                + "<cp:conditions>"
+                + "<ss:media>video</ss:media>"
+                + "<ss:no-answer/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
+                + "<ss:reveal-served-user-identity-to-caller>false"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-diversion-not-reachable-video\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:not-reachable/>"
+                + "<ss:media>video</ss:media>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
+                + "<ss:reveal-served-user-identity-to-caller>false"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-diversion-not-loggedin-video\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:not-registered/>"
+                + "<ss:media>video</ss:media>"
                 + "</cp:conditions>"
                 + "<cp:actions>"
                 + "<ss:forward-to>"
@@ -344,6 +498,7 @@ public class SscXmlGovTest {
                 + "<ss:serv-cap-identity provisioned=\"false\"/>"
                 + "<ss:serv-cap-media>"
                 + "<ss:media>audio</ss:media>"
+                + "<ss:media>video</ss:media>"
                 + "</ss:serv-cap-media>"
                 + "<ss:serv-cap-not-registered provisioned=\"false\"/>"
                 + "<ss:serv-cap-no-answer provisioned=\"false\"/>"
@@ -369,13 +524,13 @@ public class SscXmlGovTest {
                 // OIP
                 + "<ss:originating-identity-presentation active=\"true\"/>"
                 // OIR
-                + "<ss:originating-identity-presentation-restriction active=\"true\">"
+                + "<ss:originating-identity-presentation-restriction active=\"false\">"
                 + "<ss:default-behaviour>presentation-not-restricted</ss:default-behaviour>"
                 + "</ss:originating-identity-presentation-restriction>"
                 // TIP
-                + "<ss:terminating-identity-presentation active=\"true\"/>"
+                + "<ss:terminating-identity-presentation active=\"false\"/>"
                 // TIR
-                + "<ss:terminating-identity-presentation-restriction active=\"true\">"
+                + "<ss:terminating-identity-presentation-restriction>"
                 + "<ss:default-behaviour>presentation-not-restricted</ss:default-behaviour>"
                 + "</ss:terminating-identity-presentation-restriction>"
                 + "</ss:simservs>";

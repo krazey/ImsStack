@@ -468,7 +468,7 @@ public class SscUrlTest {
     }
 
     private SscServiceQueryData getQueryData(ESsType ssType) {
-        return SscXmlGovTest.createQueryData(ssType, 0, 0);
+        return SscXmlGovTest.createQueryData(ssType, 0, 0, SscServiceClassUtil.SERVICE_CLASS_NONE);
     }
 
     private SscServiceData getUpdateData(ESsType ssType, int action, int condition,

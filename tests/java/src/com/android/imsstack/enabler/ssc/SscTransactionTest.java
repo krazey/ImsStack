@@ -581,7 +581,8 @@ public class SscTransactionTest {
     }
 
     private SscServiceQueryData getQueryData(int condition) {
-        return SscXmlGovTest.createQueryData(ESsType.CF, mTransactionId, condition);
+        return SscXmlGovTest.createQueryData(ESsType.CF, mTransactionId, condition,
+                SscServiceClassUtil.SERVICE_CLASS_NONE);
     }
 
     private SscServiceData getUpdateData(int condition, int action, String number,

@@ -501,7 +501,7 @@ public class SscXmlCreatorTest {
     }
 
     private Document getEntireXmlDoc() {
-        return SscXmlGovTest.createEntireXmlDoc(false);
+        return SscXmlGovTest.createEntireXmlDoc();
     }
 
     private Document removeRule(Document doc, String ruleId) {

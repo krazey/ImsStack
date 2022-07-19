@@ -224,7 +224,7 @@ public class SscXmlFormat {
     public static final String RULE_ID_BOIC = "call-barring-outgoing-international";
     public static final String RULE_ID_BOIC_EXHC = "call-barring-outgoing-internationalExHC";
     public static final String RULE_ID_BIC_WR = "call-barring-incoming-in-roaming";
-    public static final String RULE_ID_ACR = "call-barring-anonymous";
+    public static final String RULE_ID_ACR = "call-barring-anonymous-incoming";
 
     public static final int MEDIA_TYPE_AUDIO = 0;
     public static final int MEDIA_TYPE_VIDEO = 1;

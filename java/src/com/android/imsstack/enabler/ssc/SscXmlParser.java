@@ -58,7 +58,7 @@ public class SscXmlParser {
 
         int responseCode = queryData.getResponseCode();
         if (responseCode < 200 || responseCode >= 300) {
-            return getErrorPhrase(queryData, doc);
+            return getErrorData(queryData, doc);
         }
 
         SscServiceData data = null;
@@ -239,49 +239,23 @@ public class SscXmlParser {
         }
     }
 
-    private SscServiceData getErrorPhrase(SscServiceQueryData queryData, Document doc) {
+    private SscServiceData getErrorData(SscServiceQueryData queryData, Document doc) {
         int slotId = queryData.getSlotId();
-        NodeList xeNodeList =
-                doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId, SscXmlFormat.XCAPERROR));
-        if (xeNodeList.getLength() == 0) {
-            String xeTag = SscXmlFormat.NS_XE_PREFIX + SscXmlFormat.XCAPERROR;
-            xeNodeList = doc.getElementsByTagName(xeTag);
-            if (xeNodeList.getLength() == 0) {
-                xeNodeList = doc.getElementsByTagName(SscXmlFormat.XCAPERROR);
-                if (xeNodeList.getLength() == 0) {
-                    ImsLog.e(slotId, "target node is null");
-                    return null;
-                }
-            }
-        }
 
-        if (xeNodeList.item(0).hasChildNodes() == false) {
-            ImsLog.e(slotId, "target node is null");
+        Element rootElement = doc.getDocumentElement();
+        if (rootElement == null) {
             return null;
         }
 
-        NodeList childNodeList = xeNodeList.item(0).getChildNodes();
-        for (int i = 0; i < childNodeList.getLength(); i++) {
-            if (childNodeList.item(i).getNodeType() != Node.ELEMENT_NODE) {
-                continue;
-            }
+        String errorPhrase = getErrorPhrase(rootElement);
+        ErrorResponseData data = new ErrorResponseData(slotId,
+                queryData.getSsType(), queryData.getEventNumber(),
+                queryData.getTransactionId(), SscConstant.STATUS_DISABLE,
+                queryData.getResponseCode(), errorPhrase);
 
-            Element element = (Element) childNodeList.item(i);
-            Node phraseNode = element.getAttributes().getNamedItem(SscXmlFormat.PHRASE);
-            String errorPhrase = (phraseNode != null) ? phraseNode.getTextContent() : null;
-            if (TextUtils.isEmpty(errorPhrase) == false) {
-                ErrorResponseData data = new ErrorResponseData(slotId,
-                        queryData.getSsType(), queryData.getEventNumber(),
-                        queryData.getTransactionId(), SscConstant.STATUS_DISABLE,
-                        queryData.getResponseCode(), errorPhrase);
+        ImsLog.d(data.toString());
 
-                ImsLog.d(data.toString());
-
-                return data;
-            }
-        }
-
-        return null;
+        return data;
     }
 
     private OipServiceData getOipServiceData(SscServiceQueryData queryData, Document doc) {
@@ -403,7 +377,7 @@ public class SscXmlParser {
                 SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
 
         TirServiceData data = new TirServiceData(slotId, queryData.getSsType(),
-                queryData.getEventNumber(), queryData.getTransactionId(), active, provisionStatus);
+                queryData.getEventNumber(), queryData.getTransactionId(), state, provisionStatus);
 
         ImsLog.d(slotId, data.toString());
 
@@ -684,6 +658,28 @@ public class SscXmlParser {
 
     }
 */
+
+    private String getErrorPhrase(Node node) {
+        if (node.getNodeType() == Node.ELEMENT_NODE) {
+            Element element = (Element) node;
+            String errorPhrase = element.getAttribute(SscXmlFormat.PHRASE);
+            if (!TextUtils.isEmpty(errorPhrase)) {
+                return errorPhrase;
+            }
+
+            if (element.hasChildNodes()) {
+                for (int i = 0; i < element.getChildNodes().getLength(); i++) {
+                    errorPhrase = getErrorPhrase(element.getChildNodes().item(i));
+                    if (!TextUtils.isEmpty(errorPhrase)) {
+                        return errorPhrase;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     private ArrayList<SscRuleData> getRuleSetData(SscServiceQueryData queryData, Element element) {
         int slotId = queryData.getSlotId();
         NodeList ruleList =
@@ -786,7 +782,9 @@ public class SscXmlParser {
                     } else if (SscXmlFormat.VIDEO.equals(mediaValue)) {
                         ruleData.addServiceClass(SscServiceClassUtil.SERVICE_CLASS_VIDEO);
                     }
-                } else if (nodeName.endsWith(SscXmlFormat.IDENTITY)) {
+                }
+                /* TODO: This is for call-barring specific number that is not listed in IR92
+                 else if (nodeName.endsWith(SscXmlFormat.IDENTITY)) {
                     String identity = getIdentityInCondition(childNode);
                     if (!TextUtils.isEmpty(identity)) {
                         conditions.add(new SscRuleElement(SscXmlFormat.IDENTITY, identity));
@@ -794,6 +792,7 @@ public class SscXmlParser {
                 } else if (childNode.getTextContent() != null) {
                     conditions.add(new SscRuleElement(nodeName, childNode.getTextContent()));
                 }
+                 */
             }
         }
 
@@ -821,7 +820,7 @@ public class SscXmlParser {
                 ImsLog.d(slotId, "actionName : " + nodeName);
 
                 if (nodeName.endsWith(SscXmlFormat.FORWARD_TO)) {
-                    String targetNumber = getTargetNumberInForwardTo(slotId, (Element)childNode);
+                    String targetNumber = getTargetNumberInForwardTo(slotId, (Element) childNode);
                     if (!TextUtils.isEmpty(targetNumber)) {
                         ruleData.setForwardToNumber(targetNumber);
                     }
@@ -902,7 +901,7 @@ public class SscXmlParser {
         }
 
         if (queryData.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VIDEO
-                && responseData.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VOICE) {
+                && !SscServiceClassUtil.hasVideo(responseData.getServiceClass())) {
             return false;
         }
 
@@ -937,6 +936,7 @@ public class SscXmlParser {
         return null;
     }
 
+    /* TODO: This is for call-barring specific number that is not listed in IR92
     private String getIdentityInCondition(Node identityElement) {
         if (identityElement.hasChildNodes() == false) {
             return null;
@@ -970,6 +970,7 @@ public class SscXmlParser {
 
         return null;
     }
+     */
 
     private int getActiveAttribute(Element element) {
         String active = element.getAttribute(SscXmlFormat.ACTIVE);
