@@ -3466,21 +3466,12 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_423()
 
 PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_503()
 {
-    /* legacy impl
-    if (!m_piContext->GetConfig()->IsStandardSpecificationSupported())
-    {
-        ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_503);
-        return;
-    }
-    */
-
     IncreaseConsecutiveFailCount();
     IMS_UINT32 nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
 
     if (nRetryAfter == 0)
     {
-        m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
-        ProcessStandardPcscfSelection();
+        ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_503);
     }
     else
     {
@@ -3494,7 +3485,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_503()
             if (nRetryAfter > static_cast<IMS_UINT32>(nTimerF))
             {
                 m_piContext->GetPcscf()->SetCurrentPcscfInvalid(IMS_TRUE, nRetryAfter);
-                ProcessStandardPcscfSelection();
+                ProcessStandardPcscfSelection(nRetryAfter);
             }
             else
             {
@@ -3583,6 +3574,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
 {
     A_IMS_TRACE_I(REGID, "ProcessStartFailed_StatusCode :: Code(%d) ", nStatusCode, 0, 0);
 
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeWithPcscfDiscovery(), nStatusCode))
+    {
+        m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
+        ProcessStandardPcscfSelection();
+        return;
+    }
+
     if (ProcessForbiddenFailed(nStatusCode) || ProcessSubscriberFailed(nStatusCode))
     {
         return;
@@ -3645,6 +3643,14 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
 
 PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_TxnTimeout()
 {
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeWithPcscfDiscovery(),
+                CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F))
+    {
+        m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
+        ProcessStandardPcscfSelection();
+        return;
+    }
+
     if (GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorPolicy() ==
             CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
     {
@@ -3733,6 +3739,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
         }
     }
 
+    if (IsErrorCodeExisted(
+                GET_N_CONFIG(m_nSlotId)->GetReregErrCodeWithImsPdnReactivation(), nStatusCode))
+    {
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+        return;
+    }
+
     if (ProcessForbiddenFailed(nStatusCode) || ProcessSubscriberFailed(nStatusCode))
     {
         return;
@@ -3791,6 +3804,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_TxnTimeout()
         return;
     }
 
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregErrCodeWithInitRegWithAvailablePcscf(),
+                CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F))
+    {
+        ProcessRegRequiredWithAvailableNextPcscf(IMS_TRUE);
+        return;
+    }
+
     ProcessDefaultFlowRecovery_Update();
 }
 
@@ -3829,7 +3849,8 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_Others(IN IMS_SINT32
     ProcessAwtRecovery();
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessStandardPcscfSelection()
+PROTECTED VIRTUAL void AosRegistration::ProcessStandardPcscfSelection(
+        IN IMS_UINT32 nRetryAfter /* = 0 */)
 {
     if (TryNextPcscf())
     {
@@ -3838,7 +3859,15 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStandardPcscfSelection()
         return;
     }
 
-    ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+    if (nRetryAfter > 0)
+    {
+        m_nPdnReactivateWaitTime = nRetryAfter;
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
+    }
+    else
+    {
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+    }
 }
 
 PROTECTED VIRTUAL void AosRegistration::RecordImpu()

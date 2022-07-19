@@ -310,6 +310,12 @@
     <boolean name="support_contact_user_info_bool" value="true"/>
     <int name="contact_user_info_policy_for_non_register_message_int" value="1"/>
     <int name="geolocation_pidf_forming_policy_int" value="1"/>
+    <int-array name="reg_error_codes_with_pcscf_discovery_int_array" num="0">
+    </int-array>
+    <int-array name="rereg_error_codes_with_init_reg_with_available_pcscf_int_array" num="0">
+    </int-array>
+    <int-array name="rereg_error_codes_with_ims_pdn_reactivation_int_array" num="0">
+    </int-array>
     <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
     <int name="specific_registration_error_final_type_int" value="0"/>
     <int name="specific_registration_error_policy_int" value="0"/>

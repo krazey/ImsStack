@@ -535,6 +535,14 @@ public class CarrierConfig {
                 "contact_user_info_policy_for_non_register_message_int";
         public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
                 "geolocation_pidf_forming_policy_int";
+        public static final String KEY_REG_ERROR_CODES_WITH_PCSCF_DISCOVERY_INT_ARRAY =
+                "reg_error_codes_with_pcscf_discovery_int_array";
+        public static final String
+                KEY_REREG_ERROR_CODES_WITH_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY =
+                        "rereg_error_codes_with_init_reg_with_available_pcscf_int_array";
+        public static final String KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIVATION_INT_ARRAY =
+                "rereg_error_codes_with_ims_pdn_reactivation_int_array";
+        // Bundle {
         public static final String KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE =
                 "specific_registration_error_bundle";
         public static final String KEY_SPECIFIC_REGISTRATION_ERROR_FINAL_TYPE_INT =

@@ -69,7 +69,10 @@ public:
             nContactUserInfoPolicyForNonRegisterMessage(
                     CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_DEFAULT),
             nGeolocationPidfFormingPolicy(
-                    CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION)
+                    CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION),
+            objRegErrorCodesWithPcscfDiscovery(IMSVector<IMS_SINT32>()),
+            objReregErrorCodesWithInitRegWithAvailablePcscf(IMSVector<IMS_SINT32>()),
+            objReregErrorCodesWithImsPdnReactivation(IMSVector<IMS_SINT32>())
     {
     }
 
@@ -119,5 +122,8 @@ public:
     IMS_BOOL bSupportContactUserInfo;
     IMS_SINT32 nContactUserInfoPolicyForNonRegisterMessage;
     IMS_SINT32 nGeolocationPidfFormingPolicy;
+    IMSVector<IMS_SINT32> objRegErrorCodesWithPcscfDiscovery;
+    IMSVector<IMS_SINT32> objReregErrorCodesWithInitRegWithAvailablePcscf;
+    IMSVector<IMS_SINT32> objReregErrorCodesWithImsPdnReactivation;
 };
 #endif  // AOS_ASSET_H_

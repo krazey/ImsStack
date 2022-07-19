@@ -1105,6 +1105,27 @@ public:
      */
     virtual IMSVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime() = 0;
 
+    /**
+     * @brief Indicate the error codes of the registration followed by PCSCF discovery
+     *        when PCSCF is unavailable.
+     * @return vector error code
+     */
+    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithPcscfDiscovery() = 0;
+
+    /**
+     * @brief Indicate the error codes of the reregistration followed by intital registration
+     *        with available PCSCF. If no available PCSCF, IMS PDN is re-activated.
+     * @return vector error code
+     */
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithInitRegWithAvailablePcscf() = 0;
+
+    /**
+     * @brief Indicate the error codes of the reregistration followed by IMS PDN reactivation
+     *
+     * @return vector error code
+     */
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithImsPdnReactivation() = 0;
+
     enum
     {
         NOTIFY_TERMINATED_EXPIRED = 0x01,

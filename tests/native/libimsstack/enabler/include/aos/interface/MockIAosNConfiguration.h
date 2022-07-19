@@ -144,6 +144,10 @@ public:
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegWithFeatureTagUnavailable, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegWithFeatureTagUnavailablePolicy, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetEmergencyPcscfRetryWaitTime, (), (override));
+    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithPcscfDiscovery, (), (override));
+    MOCK_METHOD(
+            IMSVector<IMS_SINT32>&, GetReregErrCodeWithInitRegWithAvailablePcscf, (), (override));
+    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeWithImsPdnReactivation, (), (override));
 
     MOCK_METHOD(void, Init, (IN IMS_SINT32 nSlotId), (override));
 };

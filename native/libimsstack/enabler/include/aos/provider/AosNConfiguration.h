@@ -155,6 +155,9 @@ public:
     virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailable();
     virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailablePolicy();
     virtual IMSVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime();
+    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithPcscfDiscovery();
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithInitRegWithAvailablePcscf();
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithImsPdnReactivation();
 
 private:
     friend class AosBuildDirector;

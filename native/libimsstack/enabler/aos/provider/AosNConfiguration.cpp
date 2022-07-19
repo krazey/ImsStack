@@ -680,6 +680,22 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetEmergencyPcscfRetryW
     return m_objAsset.objEmergencyPcscfRetryWaitTimeSec;
 }
 
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithPcscfDiscovery()
+{
+    return m_objAsset.objRegErrorCodesWithPcscfDiscovery;
+}
+
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
+AosNConfiguration::GetReregErrCodeWithInitRegWithAvailablePcscf()
+{
+    return m_objAsset.objReregErrorCodesWithInitRegWithAvailablePcscf;
+}
+
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeWithImsPdnReactivation()
+{
+    return m_objAsset.objReregErrorCodesWithImsPdnReactivation;
+}
+
 PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
     if (m_nSlotId != nSlotId)
@@ -1327,6 +1343,12 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT);
     m_objAsset.nGeolocationPidfFormingPolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT);
+    m_objAsset.objRegErrorCodesWithPcscfDiscovery = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_REG_ERROR_CODES_WITH_PCSCF_DISCOVERY_INT_ARRAY);
+    m_objAsset.objReregErrorCodesWithInitRegWithAvailablePcscf = piCc->GetIntArray(CarrierConfig::
+                    Assets::KEY_REREG_ERROR_CODES_WITH_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY);
+    m_objAsset.objReregErrorCodesWithImsPdnReactivation = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIVATION_INT_ARRAY);
 }
 
 PRIVATE
