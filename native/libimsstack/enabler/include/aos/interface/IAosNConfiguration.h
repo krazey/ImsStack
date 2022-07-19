@@ -865,6 +865,16 @@ public:
     virtual IMSVector<IMS_SINT32>& GetSubErrorRegRequiredWithNextPcscf() = 0;
 
     /**
+     * @brief Get error codes of reg event package by missing 911 Address
+     *
+     *        This function called when it comes to the below defined situation.
+     *        WFC_NO_ADDRESSS_ERROR_CODE_NOTIFY_TERMINATED = 1,
+     *        WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403 = 2
+     *
+     * @return IMSVector<IMS_SINT32>&  return array list for error codes
+     */
+    virtual IMSVector<IMS_SINT32>& GetWfcRegEventErrorByMissing911Address() = 0;
+    /**
      * @brief Get error response information against SUBSCRIBE msg that is condition to terminate
      *        its subscription
      *

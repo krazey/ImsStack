@@ -119,6 +119,7 @@ public:
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSubErrorRegRequired, (), (override));
     MOCK_METHOD(IMS_SINT32, GetRetryCountSubErrorRegRequired, (), (const, override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSubErrorRegRequiredWithNextPcscf, (), (override));
+    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetWfcRegEventErrorByMissing911Address, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSubErrorSubTerminated, (), (override));
     MOCK_METHOD(IMS_SINT32, GetRetryCountSubErrorSubTerminated, (), (const, override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSubErrorStoppingResub, (), (override));

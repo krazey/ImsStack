@@ -131,6 +131,7 @@ public:
     virtual IMSVector<IMS_SINT32>& GetSubErrorRegRequired();
     virtual IMS_SINT32 GetRetryCountSubErrorRegRequired() const;
     virtual IMSVector<IMS_SINT32>& GetSubErrorRegRequiredWithNextPcscf();
+    virtual IMSVector<IMS_SINT32>& GetWfcRegEventErrorByMissing911Address();
     virtual IMSVector<IMS_SINT32>& GetSubErrorSubTerminated();
     virtual IMS_SINT32 GetRetryCountSubErrorSubTerminated() const;
     virtual IMSVector<IMS_SINT32>& GetSubErrorStoppingResub();
