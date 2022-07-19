@@ -113,18 +113,18 @@ protected:
 
 TEST_F(MessageFormatterTest, FormStartMessageNormalCase)
 {
-    IMS_RESULT bResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormStartMessageFailureCase)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, FormStartMessageWithGeolocation)
@@ -134,125 +134,125 @@ TEST_F(MessageFormatterTest, FormStartMessageWithGeolocation)
     ON_CALL(*pConfigurationManager, IsSupportGeolocationPidfInSipInvite)
             .WillByDefault(Return(IMS_FALSE));
 
-    IMS_RESULT bResult = pFormatter->FormStartMessage();
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(*pConfigurationManager, IsSupportGeolocationPidfInSipInvite)
             .WillByDefault(Return(IMS_TRUE));
 
-    bResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormProvisionalResponseMessageNormalCase)
 {
-    IMS_RESULT bResult = pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
+    IMS_RESULT nResult = pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(*pConfigurationManager, IsMessageTypeSupportGeolocationPidf)
             .WillByDefault(Return(IMS_TRUE));
 
-    bResult = pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
+    nResult = pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormProvisionalResponseMessageFailureCase)
 {
     ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
+    IMS_RESULT nResult = pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, FormPrackMessageNormalCase)
 {
-    IMS_RESULT bResult = pFormatter->FormPrackMessage();
+    IMS_RESULT nResult = pFormatter->FormPrackMessage();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormPrackMessageFailureCase)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pFormatter->FormPrackMessage();
+    IMS_RESULT nResult = pFormatter->FormPrackMessage();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, FormPrackResponseMessageNormalCase)
 {
-    IMS_RESULT bResult = pFormatter->FormPrackResponseMessage();
+    IMS_RESULT nResult = pFormatter->FormPrackResponseMessage();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormPrackResponseMessageFailureCase)
 {
     ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pFormatter->FormPrackResponseMessage();
+    IMS_RESULT nResult = pFormatter->FormPrackResponseMessage();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, FormEarlyUpdateMessageNormalCase)
 {
-    IMS_RESULT bResult = pFormatter->FormEarlyUpdateMessage(UpdateType::NORMAL);
+    IMS_RESULT nResult = pFormatter->FormEarlyUpdateMessage(UpdateType::NORMAL);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormEarlyUpdateMessageFailureCase)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pFormatter->FormEarlyUpdateMessage(UpdateType::NORMAL);
+    IMS_RESULT nResult = pFormatter->FormEarlyUpdateMessage(UpdateType::NORMAL);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, FormEarlyUpdateResponseMessageNormalCase)
 {
-    IMS_RESULT bResult = pFormatter->FormEarlyUpdateResponseMessage();
+    IMS_RESULT nResult = pFormatter->FormEarlyUpdateResponseMessage();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormEarlyUpdateResponseMessageFailureCase)
 {
     ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pFormatter->FormEarlyUpdateResponseMessage();
+    IMS_RESULT nResult = pFormatter->FormEarlyUpdateResponseMessage();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, FormAcceptMessageNormalCase)
 {
-    IMS_RESULT bResult = pFormatter->FormAcceptMessage();
+    IMS_RESULT nResult = pFormatter->FormAcceptMessage();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(*pConfigurationManager, IsMessageTypeSupportGeolocationPidf)
             .WillByDefault(Return(IMS_TRUE));
 
-    bResult = pFormatter->FormAcceptMessage();
+    nResult = pFormatter->FormAcceptMessage();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormAcceptMessageFailureCase)
 {
     ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pFormatter->FormAcceptMessage();
+    IMS_RESULT nResult = pFormatter->FormAcceptMessage();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, FormRejectMessageWithCodeUserDecline)
@@ -261,16 +261,16 @@ TEST_F(MessageFormatterTest, FormRejectMessageWithCodeUserDecline)
     IMS_SINT32 eStatusCode;
     AString strPhrase;
 
-    IMS_RESULT bResult = pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+    IMS_RESULT nResult = pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(*pConfigurationManager, IsMessageTypeSupportGeolocationPidf)
             .WillByDefault(Return(IMS_TRUE));
 
-    bResult = pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+    nResult = pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormRejectMessageFailureCase)
@@ -281,65 +281,65 @@ TEST_F(MessageFormatterTest, FormRejectMessageFailureCase)
     IMS_SINT32 eStatusCode;
     AString strPhrase;
 
-    IMS_RESULT bResult = pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+    IMS_RESULT nResult = pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, FormAckMessageNormalCase)
 {
-    IMS_RESULT bResult = pFormatter->FormAckMessage();
+    IMS_RESULT nResult = pFormatter->FormAckMessage();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormAckMessageFailureCase)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pFormatter->FormAckMessage();
+    IMS_RESULT nResult = pFormatter->FormAckMessage();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, FormUpdateMessageNormalCase)
 {
-    IMS_RESULT bResult = pFormatter->FormUpdateMessage(UpdateType::NORMAL, IMS_TRUE);
+    IMS_RESULT nResult = pFormatter->FormUpdateMessage(UpdateType::NORMAL, IMS_TRUE);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormUpdateMessageFailureCase)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pFormatter->FormUpdateMessage(UpdateType::NORMAL, IMS_TRUE);
+    IMS_RESULT nResult = pFormatter->FormUpdateMessage(UpdateType::NORMAL, IMS_TRUE);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, FormAcceptUpdateMessageNormalCase)
 {
-    IMS_RESULT bResult = pFormatter->FormAcceptUpdateMessage();
+    IMS_RESULT nResult = pFormatter->FormAcceptUpdateMessage();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormAcceptUpdateMessageFailureCase)
 {
     ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pFormatter->FormAcceptUpdateMessage();
+    IMS_RESULT nResult = pFormatter->FormAcceptUpdateMessage();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, FormCancelUpdateMessageWithCodeNone)
 {
     CallReasonInfo objReasonInfo(CODE_NONE);
-    IMS_RESULT bResult = pFormatter->FormCancelUpdateMessage(objReasonInfo);
+    IMS_RESULT nResult = pFormatter->FormCancelUpdateMessage(objReasonInfo);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormCancelUpdateMessageFailureCase)
@@ -347,17 +347,17 @@ TEST_F(MessageFormatterTest, FormCancelUpdateMessageFailureCase)
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
     CallReasonInfo objReasonInfo(CODE_NONE);
-    IMS_RESULT bResult = pFormatter->FormCancelUpdateMessage(objReasonInfo);
+    IMS_RESULT nResult = pFormatter->FormCancelUpdateMessage(objReasonInfo);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, FormTerminateMessageWithCodeUserTerminated)
 {
     CallReasonInfo objReasonInfo(CODE_USER_TERMINATED);
-    IMS_RESULT bResult = pFormatter->FormTerminateMessage(objReasonInfo);
+    IMS_RESULT nResult = pFormatter->FormTerminateMessage(objReasonInfo);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormTerminateMessageFailureCase)
@@ -365,9 +365,9 @@ TEST_F(MessageFormatterTest, FormTerminateMessageFailureCase)
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
     CallReasonInfo objReasonInfo(CODE_USER_TERMINATED);
-    IMS_RESULT bResult = pFormatter->FormTerminateMessage(objReasonInfo);
+    IMS_RESULT nResult = pFormatter->FormTerminateMessage(objReasonInfo);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageFormatterTest, SetAcceptContactHeader)

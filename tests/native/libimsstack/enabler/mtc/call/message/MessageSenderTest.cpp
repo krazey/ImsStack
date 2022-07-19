@@ -114,132 +114,132 @@ TEST_F(MessageSenderTest, CreateSenderWithEmergencyFormatter)
 
 TEST_F(MessageSenderTest, StartNormalCase)
 {
-    IMS_RESULT bResult = pSender->Start();
+    IMS_RESULT nResult = pSender->Start();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, StartFormFailure)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pSender->Start();
+    IMS_RESULT nResult = pSender->Start();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageSenderTest, SendProvisionalResponseWith183)
 {
-    IMS_RESULT bResult = pSender->SendProvisionalResponse(
+    IMS_RESULT nResult = pSender->SendProvisionalResponse(
             SipStatusCode::SC_183, IMS_TRUE, IMS_TRUE, IMS_TRUE);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, SendProvisionalResponseWith180)
 {
-    IMS_RESULT bResult = pSender->SendProvisionalResponse(
+    IMS_RESULT nResult = pSender->SendProvisionalResponse(
             SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_TRUE);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, SendProvisionalResponseFormFailure)
 {
     ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pSender->SendProvisionalResponse(
+    IMS_RESULT nResult = pSender->SendProvisionalResponse(
             SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_TRUE);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageSenderTest, SendPrackNormalCase)
 {
-    IMS_RESULT bResult = pSender->SendPrack();
+    IMS_RESULT nResult = pSender->SendPrack();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, SendPrackFormFailure)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pSender->SendPrack();
+    IMS_RESULT nResult = pSender->SendPrack();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageSenderTest, RespondToPrackWith200)
 {
-    IMS_RESULT bResult = pSender->RespondToPrack(SipStatusCode::SC_200);
+    IMS_RESULT nResult = pSender->RespondToPrack(SipStatusCode::SC_200);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, RespondToPrackFormFailure)
 {
     ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pSender->RespondToPrack(SipStatusCode::SC_200);
+    IMS_RESULT nResult = pSender->RespondToPrack(SipStatusCode::SC_200);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageSenderTest, SendEarlyUpdateNormalCase)
 {
-    IMS_RESULT bResult = pSender->SendEarlyUpdate(UpdateType::NORMAL);
+    IMS_RESULT nResult = pSender->SendEarlyUpdate(UpdateType::NORMAL);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, SendEarlyUpdateFormFailure)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pSender->SendEarlyUpdate(UpdateType::NORMAL);
+    IMS_RESULT nResult = pSender->SendEarlyUpdate(UpdateType::NORMAL);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageSenderTest, RespondToEarlyUpdateWith200)
 {
-    IMS_RESULT bResult = pSender->RespondToEarlyUpdate(SipStatusCode::SC_200);
+    IMS_RESULT nResult = pSender->RespondToEarlyUpdate(SipStatusCode::SC_200);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, RespondToEarlyUpdateFormFailure)
 {
     ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pSender->RespondToEarlyUpdate(SipStatusCode::SC_200);
+    IMS_RESULT nResult = pSender->RespondToEarlyUpdate(SipStatusCode::SC_200);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageSenderTest, AcceptNormalCase)
 {
-    IMS_RESULT bResult = pSender->Accept();
+    IMS_RESULT nResult = pSender->Accept();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, AcceptFormFailure)
 {
     ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pSender->Accept();
+    IMS_RESULT nResult = pSender->Accept();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageSenderTest, RejectWithCodeUserDecline)
 {
     CallReasonInfo objReasonInfo(CODE_USER_DECLINE);
-    IMS_RESULT bResult = pSender->Reject(objReasonInfo);
+    IMS_RESULT nResult = pSender->Reject(objReasonInfo);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, RejectFormFailure)
@@ -247,65 +247,65 @@ TEST_F(MessageSenderTest, RejectFormFailure)
     ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
 
     CallReasonInfo objReasonInfo(CODE_USER_DECLINE);
-    IMS_RESULT bResult = pSender->Reject(objReasonInfo);
+    IMS_RESULT nResult = pSender->Reject(objReasonInfo);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageSenderTest, SendAckNormalCase)
 {
-    IMS_RESULT bResult = pSender->SendAck();
+    IMS_RESULT nResult = pSender->SendAck();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, SendAckFormFailure)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pSender->SendAck();
+    IMS_RESULT nResult = pSender->SendAck();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageSenderTest, UpdateNormalCase)
 {
-    IMS_RESULT bResult = pSender->Update(UpdateType::NORMAL, IMS_TRUE);
+    IMS_RESULT nResult = pSender->Update(UpdateType::NORMAL, IMS_TRUE);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, UpdateFormFailure)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pSender->Update(UpdateType::NORMAL, IMS_TRUE);
+    IMS_RESULT nResult = pSender->Update(UpdateType::NORMAL, IMS_TRUE);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageSenderTest, AcceptUpdateNormalCase)
 {
-    IMS_RESULT bResult = pSender->AcceptUpdate();
+    IMS_RESULT nResult = pSender->AcceptUpdate();
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, AcceptUpdateFormFailure)
 {
     ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
 
-    IMS_RESULT bResult = pSender->AcceptUpdate();
+    IMS_RESULT nResult = pSender->AcceptUpdate();
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageSenderTest, CancelUpdateWithCodeNone)
 {
     CallReasonInfo objReasonInfo(CODE_NONE);
-    IMS_RESULT bResult = pSender->CancelUpdate(objReasonInfo);
+    IMS_RESULT nResult = pSender->CancelUpdate(objReasonInfo);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, CancelUpdateFormFailure)
@@ -313,25 +313,25 @@ TEST_F(MessageSenderTest, CancelUpdateFormFailure)
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
     CallReasonInfo objReasonInfo(CODE_NONE);
-    IMS_RESULT bResult = pSender->CancelUpdate(objReasonInfo);
+    IMS_RESULT nResult = pSender->CancelUpdate(objReasonInfo);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 TEST_F(MessageSenderTest, TerminateWithCodeUserTerminated)
 {
     CallReasonInfo objReasonInfo(CODE_USER_TERMINATED);
-    IMS_RESULT bResult = pSender->Terminate(IMS_TRUE, objReasonInfo);
+    IMS_RESULT nResult = pSender->Terminate(IMS_TRUE, objReasonInfo);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, CancelWithCodeUserTerminated)
 {
     CallReasonInfo objReasonInfo(CODE_USER_TERMINATED);
-    IMS_RESULT bResult = pSender->Terminate(IMS_FALSE, objReasonInfo);
+    IMS_RESULT nResult = pSender->Terminate(IMS_FALSE, objReasonInfo);
 
-    EXPECT_EQ(bResult, IMS_SUCCESS);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, TerminateFormFailure)
@@ -339,9 +339,9 @@ TEST_F(MessageSenderTest, TerminateFormFailure)
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
     CallReasonInfo objReasonInfo(CODE_USER_TERMINATED);
-    IMS_RESULT bResult = pSender->Terminate(IMS_TRUE, objReasonInfo);
+    IMS_RESULT nResult = pSender->Terminate(IMS_TRUE, objReasonInfo);
 
-    EXPECT_EQ(bResult, IMS_FAILURE);
+    EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
 }  // namespace android
