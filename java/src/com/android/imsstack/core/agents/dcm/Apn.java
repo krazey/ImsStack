@@ -23,7 +23,6 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
@@ -56,6 +55,7 @@ import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -148,6 +148,8 @@ public abstract class Apn extends Handler implements IApn {
     protected IDcSettings mDcSettings;
     protected IDcNetWatcher mDcNetWatcher;
     protected ISystem mSystem;
+    protected ISubscription mSubscription;
+    protected IAosRegistration mAosReg;
     protected int mSlotId = 0;
     protected EApnType mType;
     protected EApnReqState mAPNState = EApnReqState.APN_REQUEST_IDLE;
@@ -176,6 +178,8 @@ public abstract class Apn extends Handler implements IApn {
         mDcSettings = (IDcSettings) DcFactory.getDc(DcFactory.SETTING, mSlotId);
         mDcNetWatcher = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         mSystem = SystemInterface.getInstance().getSystem(mSlotId);
+        mSubscription = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
+        mAosReg = AosFactory.getInstance().getAosRegistration(mSlotId);
 
         registerEvent();
     }
@@ -286,16 +290,9 @@ public abstract class Apn extends Handler implements IApn {
 
     @Override
     public boolean isConnected() {
-        if (mNetworkCallback != null) {
-            return mNetworkCallback.isNetworkConnected();
-        }
-
-        if (mNetworkMonitoringCallback != null) {
-            ImsLog.i(mSlotId, "mNetworkMonitoringCallback not null");
-            return mNetworkMonitoringCallback.isNetworkConnected();
-        }
-
-        return false;
+        return (mPreciseDcState != TelephonyManager.DATA_UNKNOWN
+                && mPreciseDcState != TelephonyManager.DATA_DISCONNECTED
+                && mPreciseDcState != TelephonyManager.DATA_CONNECTING);
     }
 
     @Override
@@ -369,20 +366,9 @@ public abstract class Apn extends Handler implements IApn {
         if (mNetworkCallback != null) {
             return mNetworkCallback.getCachedNetwork();
         } else if (mNetworkMonitoringCallback != null) {
-            mNetworkMonitoringCallback.getCachedNetwork();
+            return mNetworkMonitoringCallback.getCachedNetwork();
         }
         return null;
-    }
-
-    @Override
-    public void setManualDetachedTriggered(boolean value) {
-        // Child Class Need to Implement
-    }
-
-    @Override
-    public int getWlanPreference() {
-        // Child Class Need to Implement
-        return -1;
     }
 
     @Override
@@ -480,11 +466,9 @@ public abstract class Apn extends Handler implements IApn {
             boolean setSubId = true;
 
             if (mType.getType() == DcConstants.TYPE_EMERGENCY) {
-                ISubscription isub = (ISubscription) AgentFactory.getAgent(
-                        AgentFactory.SUBSCRIPTION);
                 int subId = MSimUtils.getSubId(mSlotId);
 
-                if ((isub != null) && isub.isAllSimAbsentOrLocked()
+                if ((mSubscription != null) && mSubscription.isAllSimAbsentOrLocked()
                         && !MSimUtils.isValidSubId(subId)) {
                     setSubId = false;
                 }
@@ -553,29 +537,27 @@ public abstract class Apn extends Handler implements IApn {
                 new Handle_EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED());
     }
 
-    protected EApnReqState getAPNReqState() {
+    protected EApnReqState getApnReqState() {
         return mAPNState;
     }
 
-    protected void setAPNReqState(EApnReqState s) {
+    protected void setApnReqState(EApnReqState s) {
         mAPNState = s;
     }
 
     protected void registerSubscription() {
         if (mSubscriptionListener == null) {
             mSubscriptionListener = new ApnSubscriptionListener();
-            ISubscription subs = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-            if (subs != null) {
-                subs.addListener(mSubscriptionListener);
+            if (mSubscription != null) {
+                mSubscription.addListener(mSubscriptionListener);
             }
         }
     }
 
     protected void unregisterSubscription() {
         if (mSubscriptionListener != null) {
-            ISubscription subs = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-            if (subs != null) {
-                subs.removeListener(mSubscriptionListener);
+            if (mSubscription != null) {
+                mSubscription.removeListener(mSubscriptionListener);
             }
             mSubscriptionListener = null;
         }
@@ -626,7 +608,7 @@ public abstract class Apn extends Handler implements IApn {
         return false;
     }
 
-    protected boolean isIPChanged() {
+    protected boolean isIpChanged() {
         if (mDcApn != null) {
             String cachedIP = mDcApn.getCachedLocalAddress(mType.getType());
             String ip = mDcApn.getLocalAddress(mType.getType(), 0);
@@ -642,14 +624,8 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected void updateDataState() {
-        int dataState;
-        if (mPreciseDcState == TelephonyManager.DATA_UNKNOWN
-                || mPreciseDcState == TelephonyManager.DATA_DISCONNECTED
-                || mPreciseDcState == TelephonyManager.DATA_CONNECTING) {
-            dataState = TelephonyManager.DATA_DISCONNECTED;
-        } else {
-            dataState = TelephonyManager.DATA_CONNECTED;
-        }
+        int dataState = isConnected() ? TelephonyManager.DATA_CONNECTED
+                : TelephonyManager.DATA_DISCONNECTED;
 
         if (mDataState != dataState) {
             ImsLog.i(mSlotId, "data state :: " + mDataState + " >> " + dataState);
@@ -776,12 +752,16 @@ public abstract class Apn extends Handler implements IApn {
         private final Context mContext;
         // DcConstants.TYPE_XXX
         private final int mType;
-        private Network mNetwork = null;
         private Handler mTarget;
         private int mEvents = 0;
         private int mSlotId = 0;
-        private LinkProperties mCachedLinkProperties = null;
-        private boolean mIsPendingOnAvailable = false;
+
+        @VisibleForTesting
+        protected Network mNetwork = null;
+        @VisibleForTesting
+        protected LinkProperties mCachedLinkProperties = null;
+        @VisibleForTesting
+        protected boolean mIsPendingOnAvailable = false;
 
         ImsNetworkCallback(Context context, int type, Handler target) {
             mContext = context;
@@ -842,14 +822,14 @@ public abstract class Apn extends Handler implements IApn {
 
             ImsLog.i(mSlotId, "network=" + network + ", type=" + mType);
 
-            if ((mCachedLinkProperties == null) || !isNetworkConnected()) {
+            if (mCachedLinkProperties == null) {
                 ImsLog.w(mSlotId, "no LinkProperties");
                 mIsPendingOnAvailable = true;
                 return;
             }
 
             if (mTarget != null) {
-                Message.obtain(mTarget, EVENT_NETWORK_AVAILABLE, this).sendToTarget();
+                Message.obtain(mTarget, EVENT_NETWORK_AVAILABLE).sendToTarget();
             }
         }
 
@@ -863,8 +843,7 @@ public abstract class Apn extends Handler implements IApn {
             ImsLog.i(mSlotId, "network=" + network + ", maxMsToLive=" + maxMsToLive);
 
             if (mTarget != null) {
-                Message.obtain(mTarget, EVENT_NETWORK_LOSING, maxMsToLive, 0, this)
-                        .sendToTarget();
+                Message.obtain(mTarget, EVENT_NETWORK_LOSING, maxMsToLive, 0).sendToTarget();
             }
         }
 
@@ -882,7 +861,7 @@ public abstract class Apn extends Handler implements IApn {
             ImsLog.i(mSlotId, "ImsNetworkCallback :: onLost=" + network + ", Type=" + mType);
 
             if (mTarget != null) {
-                Message.obtain(mTarget, EVENT_NETWORK_LOST, this).sendToTarget();
+                Message.obtain(mTarget, EVENT_NETWORK_LOST).sendToTarget();
             }
         }
 
@@ -898,7 +877,7 @@ public abstract class Apn extends Handler implements IApn {
             ImsLog.i(mSlotId, "network is unavailable");
 
             if (mTarget != null) {
-                Message.obtain(mTarget, EVENT_NETWORK_UNAVAILABLE, this).sendToTarget();
+                Message.obtain(mTarget, EVENT_NETWORK_UNAVAILABLE).sendToTarget();
             }
         }
 
@@ -906,11 +885,9 @@ public abstract class Apn extends Handler implements IApn {
         public void onCapabilitiesChanged(Network network,
                 NetworkCapabilities networkCapabilities) {
             if (mIsPendingOnAvailable) {
-                if (isNetworkConnected()) {
-                    ImsLog.w(mSlotId, "network is connected");
-                    mIsPendingOnAvailable = false;
-                    onAvailable(network);
-                }
+                ImsLog.w(mSlotId, "network is connected");
+                mIsPendingOnAvailable = false;
+                onAvailable(network);
             }
 
             if (!isEventSet(EVENT_CAPABILITIES_CHANGED)) {
@@ -925,14 +902,12 @@ public abstract class Apn extends Handler implements IApn {
             }
 
             if (mTarget != null) {
-                Message.obtain(mTarget, EVENT_NETWORK_CAPABILITIES_CHANGED, this)
-                        .sendToTarget();
+                Message.obtain(mTarget, EVENT_NETWORK_CAPABILITIES_CHANGED).sendToTarget();
             }
         }
 
         @Override
-        public void onLinkPropertiesChanged(Network network,
-                LinkProperties linkProperties) {
+        public void onLinkPropertiesChanged(Network network, LinkProperties linkProperties) {
             boolean ipChanged = isIpChanged(linkProperties);
             boolean pcscfChanged = isPcscfChanged(linkProperties);
 
@@ -940,7 +915,7 @@ public abstract class Apn extends Handler implements IApn {
                 cacheLinkProperties(network);
             }
 
-            if (!isEventSet(EVENT_LINK_PROPERTIES_CHANGED)
+            if (!isEventSet(EVENT_NET_PCSCF_CHANGED)
                     && !isEventSet(EVENT_LOCAL_IP_CHANGED)) {
                 // no-op
                 return;
@@ -958,12 +933,11 @@ public abstract class Apn extends Handler implements IApn {
             }
 
             if (isEventSet(EVENT_LOCAL_IP_CHANGED) && ipChanged) {
-                Message.obtain(mTarget, EVENT_IP_CHANGED, this).sendToTarget();
+                Message.obtain(mTarget, EVENT_IP_CHANGED).sendToTarget();
             }
 
             if (isEventSet(EVENT_NET_PCSCF_CHANGED) && pcscfChanged) {
-                Message.obtain(mTarget, EVENT_PCSCF_CHANGED, this)
-                        .sendToTarget();
+                Message.obtain(mTarget, EVENT_PCSCF_CHANGED).sendToTarget();
             }
         }
 
@@ -985,77 +959,71 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         protected boolean isIpChanged(LinkProperties newLinkProperties) {
-            boolean bChanged = false;
-
-            bChanged = ((mCachedLinkProperties != null) && (newLinkProperties != null)
-                    && !isIdenticalAddresses(mCachedLinkProperties, newLinkProperties));
-
-            if (bChanged) {
-                String[] cachedAddress = null;
-                String[] newAddress = null;
-
-                if (mCachedLinkProperties != null) {
-                    Collection<LinkAddress> cachedlinkAddresses =
-                            mCachedLinkProperties.getLinkAddresses();
-                    if (cachedlinkAddresses.isEmpty()) {
-                        ImsLog.w(mSlotId, "cached LinkAddresses is empty, ");
-
-                        if (newLinkProperties != null) {
-                            Collection<LinkAddress> newAddr = newLinkProperties.getLinkAddresses();
-                            if (!newAddr.isEmpty()) {
-                                ImsLog.w(mSlotId, "new LinkAddresses is not empty");
-                                return true;
-                            }
-                        }
-
-                        return false;
-                    }
-
-                    cachedAddress = getIpAddress(cachedlinkAddresses);
-                }
-
-                if (newLinkProperties != null) {
-                    Collection<LinkAddress> newlinkAddresses =
-                            newLinkProperties.getLinkAddresses();
-                    if (newlinkAddresses.isEmpty()) {
-                        ImsLog.w(mSlotId, "new LinkAddresses is empty, ");
-                        return false;
-                    }
-
-                    newAddress = getIpAddress(newlinkAddresses);
-                }
-
-                if ((cachedAddress == null) || (newAddress == null)) {
-                    return false;
-                }
-
-                printAddress("cached ip address", cachedAddress);
-                printAddress("new ip address", newAddress);
-
-                int nSize = 0;
-                if (cachedAddress.length != newAddress.length) {
-                    return true;
-                } else {
-                    nSize = newAddress.length;
-                }
-
-                for (int i = 0; i < nSize; i++) {
-                    boolean bIsSame = false;
-                    for (int ii = 0; ii < nSize; ii++) {
-                        if (cachedAddress[i].equals(newAddress[ii])) {
-                            bIsSame = true;
-                        }
-                    }
-
-                    if (!bIsSame) {
-                        return true;
-                    }
-                }
-
+            if (mCachedLinkProperties == null || newLinkProperties == null) {
                 return false;
             }
 
-            return bChanged;
+            if (isIdenticalAddresses(mCachedLinkProperties, newLinkProperties)) {
+                return false;
+            }
+
+            String[] cachedAddress = null;
+            String[] newAddress = null;
+
+            if (mCachedLinkProperties != null) {
+                Collection<LinkAddress> cachedlinkAddresses =
+                        mCachedLinkProperties.getLinkAddresses();
+                if (cachedlinkAddresses.isEmpty()) {
+                    ImsLog.w(mSlotId, "cached LinkAddresses is empty, ");
+
+                    Collection<LinkAddress> newAddr = newLinkProperties.getLinkAddresses();
+                    if (!newAddr.isEmpty()) {
+                        ImsLog.w(mSlotId, "new LinkAddresses is not empty");
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                cachedAddress = getIpAddress(cachedlinkAddresses);
+            }
+
+            Collection<LinkAddress> newlinkAddresses = newLinkProperties.getLinkAddresses();
+            if (newlinkAddresses.isEmpty()) {
+                ImsLog.w(mSlotId, "new LinkAddresses is empty, ");
+                return false;
+            }
+
+            newAddress = getIpAddress(newlinkAddresses);
+
+            if ((cachedAddress == null) || (newAddress == null)) {
+                return false;
+            }
+
+            printAddress("cached ip address", cachedAddress);
+            printAddress("new ip address", newAddress);
+
+            int nSize = 0;
+            if (cachedAddress.length != newAddress.length) {
+                return true;
+            } else {
+                nSize = newAddress.length;
+            }
+
+            for (int i = 0; i < nSize; i++) {
+                boolean bIsSame = false;
+                for (int ii = 0; ii < nSize; ii++) {
+                    if (cachedAddress[i].equals(newAddress[ii])) {
+                        bIsSame = true;
+                    }
+                }
+
+                if (!bIsSame) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         protected boolean isPcscfChanged(LinkProperties newLinkProperties) {
@@ -1072,7 +1040,14 @@ public abstract class Apn extends Handler implements IApn {
 
             Collection<InetAddress> cachedInetAddresses = mCachedLinkProperties.getPcscfServers();
             if (cachedInetAddresses.isEmpty()) {
-                ImsLog.d(mSlotId, "cached InetAddress is empty");
+                ImsLog.d(mSlotId, "cached Pcscf Server is empty");
+
+                Collection<InetAddress> newAddr = newLinkProperties.getPcscfServers();
+                if (!newAddr.isEmpty()) {
+                    ImsLog.d(mSlotId, "new Pcscf Server is not empty");
+                    return true;
+                }
+
                 return false;
             }
 
@@ -1080,7 +1055,7 @@ public abstract class Apn extends Handler implements IApn {
 
             Collection<InetAddress> newInetAddresses = newLinkProperties.getPcscfServers();
             if (newInetAddresses.isEmpty()) {
-                ImsLog.d(mSlotId, "new InetAddress is empty");
+                ImsLog.d(mSlotId, "new Pcscf Server is empty");
                 return false;
             }
 
@@ -1270,25 +1245,6 @@ public abstract class Apn extends Handler implements IApn {
 
             ImsLog.d(mSlotId, sb.toString());
         }
-
-        protected boolean isNetworkConnected() {
-            ConnectivityManager cm = (mContext == null) ? null :
-                    mContext.getSystemService(ConnectivityManager.class);
-
-            if (cm != null) {
-                if (mNetwork == null) {
-                    return false;
-                }
-
-                NetworkInfo netInfo = cm.getNetworkInfo(mNetwork);
-
-                if (netInfo != null) {
-                    return netInfo.isConnected()
-                            || netInfo.getState() == NetworkInfo.State.SUSPENDED;
-                }
-            }
-            return false;
-        }
     }
 
     /**
@@ -1395,12 +1351,10 @@ public abstract class Apn extends Handler implements IApn {
                     break;
                 case TelephonyManager.DATA_DISCONNECTING:
                     if (mType.getType() == DcConstants.TYPE_IMS) {
-                        IAosRegistration aosReg =
-                                AosFactory.getInstance().getAosRegistration(mSlotId);
-                        if (aosReg != null) {
-                            if (aosReg.getRegisteredNetworkType()
+                        if (mAosReg != null) {
+                            if (mAosReg.getRegisteredNetworkType()
                                     != IAosRegistrationListener.NetworkType.NONE) {
-                                aosReg.controlRegistration(IAosRegistration.RequestType.STOP,
+                                mAosReg.controlRegistration(IAosRegistration.RequestType.STOP,
                                         IAosRegistration.Pcscf.CURRENT,
                                         IAosRegistration.Cause.DATA);
                             }
@@ -1462,7 +1416,8 @@ public abstract class Apn extends Handler implements IApn {
     /* ---------------------------------------------------------------------------------------------
         Listener class - SubscriptionListener
     --------------------------------------------------------------------------------------------- */
-    private final class ApnSubscriptionListener extends SubscriptionListener {
+    @VisibleForTesting
+    protected final class ApnSubscriptionListener extends SubscriptionListener {
         ApnSubscriptionListener() {
             ImsLog.d("ApnSubscriptionListener");
         }

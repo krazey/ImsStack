@@ -1,0 +1,1109 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.imsstack.core.agents.dcm;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.InetAddresses;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
+import android.os.Message;
+import android.telephony.DataFailCause;
+import android.telephony.PreciseDataConnectionState;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
+import android.telephony.data.ApnSetting;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+
+import com.android.imsstack.ContextFixture;
+import com.android.imsstack.core.agents.agentif.ISubscription;
+import com.android.imsstack.core.agents.agentif.MsgProcInterface;
+import com.android.imsstack.core.agents.agentif.SubscriptionListener;
+import com.android.imsstack.core.agents.dcmif.ApnStateListener;
+import com.android.imsstack.core.agents.dcmif.EApnReqState;
+import com.android.imsstack.core.agents.dcmif.EApnType;
+import com.android.imsstack.core.agents.dcmif.EDataState;
+import com.android.imsstack.core.agents.dcmif.EIpVersion;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcSettings;
+import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.enabler.aos.IAosRegistration;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.system.ISystem;
+import com.android.imsstack.util.AppContext;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import java.lang.reflect.Field;
+
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
+public class ApnTest {
+    private static final int SLOT_0 = 0;
+    static ContextFixture sContext;
+    Apn mApn;
+
+    @Mock private Apn.ImsNetworkCallback mMockNetworkCallback;
+    @Mock private Apn.ImsNetworkCallback mMockNetworkMonitoringCallback;
+    @Mock private ApnStateListener mMockApnStateListener;
+    @Mock private IDcApn mMockIDcApn;
+    @Mock private IDcSettings mMockIDcSettings;
+    @Mock private IDcNetWatcher mMockIDcNetWatcher;
+    @Mock private ISystem mMockISystem;
+    @Mock private ISubscription mMockISubscription;
+    @Mock private IAosRegistration mMockIAosReg;
+    @Mock private Network mMockNetwork;
+    @Mock private MsgProcInterface mMockMsgProc;
+
+    private TestableLooper mTestableLooper;
+    private TelephonyManager mTelephonyManager;
+    private SubscriptionManager mSubscriptionManager;
+    private ConnectivityManager mConnectivityManager;
+    private SubscriptionListener mSubscriptionListener;
+    private PreciseDataConnectionState mPreciseDataConnectionState;
+
+    @BeforeClass
+    public static void setUpOnce() {
+        sContext = new ContextFixture();
+        AppContext.init(sContext.getTestDouble());
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        // create the instance to test
+        mApn = new FakeApn(AppContext.getInstance(), SLOT_0);
+        mApn.mType = EApnType.IMS;
+        mTelephonyManager = AppContext.getInstance().getSystemService(TelephonyManager.class);
+        mSubscriptionManager = AppContext.getInstance().getSystemService(SubscriptionManager.class);
+        mConnectivityManager = AppContext.getInstance().getSystemService(ConnectivityManager.class);
+
+        mTestableLooper = TestableLooper.get(ApnTest.this);
+        mTestableLooper.processAllMessages();
+
+        replaceInstance(Apn.class, "mSystem", mApn, mMockISystem);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        if (mApn != null) {
+            mApn.cleanup();
+            mApn = null;
+        }
+        if (mPreciseDataConnectionState != null) {
+            mPreciseDataConnectionState = null;
+        }
+        mTestableLooper = null;
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        AppContext.deinit();
+        sContext = null;
+    }
+
+    @Test
+    public void testCelanup() throws Exception {
+        replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
+        replaceInstance(Apn.class, "mNetworkMonitoringCallback", mApn,
+                mMockNetworkMonitoringCallback);
+        mApn.registerSubscription();
+        mApn.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+
+        mApn.cleanup();
+        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkMonitoringCallback);
+        verify(mMockNetworkMonitoringCallback).cleanUp();
+        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
+        verify(mMockNetworkCallback).cleanUp();
+
+        assertNull(mApn.mSubscriptionListener);
+        assertNull(mApn.mNetworkMonitoringCallback);
+        assertNull(mApn.mNetworkCallback);
+        assertEquals(EApnReqState.APN_REQUEST_IDLE, mApn.getApnReqState());
+        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+                mApn.mType.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
+    }
+
+    @Test
+    public void testSettingsInterface() throws Exception {
+        mApn.setSettings(mMockIDcSettings);
+        assertEquals(mMockIDcSettings, mApn.getSettings());
+    }
+
+    @Test
+    public void testNetWatcherInterface() throws Exception {
+        mApn.setNetWatcher(mMockIDcNetWatcher);
+        assertEquals(mMockIDcNetWatcher, mApn.getNetWatcher());
+    }
+
+    @Test
+    public void testGetContext() throws Exception {
+        assertEquals(AppContext.getInstance(), mApn.getContext());
+    }
+
+    @Test
+    public void testApnStateListener() throws Exception {
+        int ipcanCategory = 0;
+        int handoverState = 0;
+        int networkType = 0;
+        int failCause = 0;
+
+        mApn.addListener(mMockApnStateListener);
+        mApn.notifyIpcanCategoryChanged(ipcanCategory);
+        mApn.notifyHandoverInfoChanged(handoverState, networkType, failCause);
+
+        mApn.removeListener(mMockApnStateListener);
+        mApn.notifyIpcanCategoryChanged(ipcanCategory);
+        mApn.notifyHandoverInfoChanged(handoverState, networkType, failCause);
+
+        verify(mMockApnStateListener, times(1))
+                .onIpcanCategoryChanged(mApn.mType.getType(), ipcanCategory);
+        verify(mMockApnStateListener, times(1))
+                .onHandoverInfoChanged(handoverState, networkType, failCause);
+    }
+
+    @Test
+    public void testConnect() throws Exception {
+        assertFalse(mApn.connect());
+    }
+
+    @Test
+    public void testDisconnect() throws Exception {
+        assertFalse(mApn.disconnect());
+    }
+
+    @Test
+    public void testGetApn_BeforeUpdate() throws Exception {
+        assertEquals(EApnType.IMS.getString(), mApn.getApn());
+    }
+
+    @Test
+    public void testGetApn_AfterUpdate() throws Exception {
+        String testApnString = "TestApn";
+
+        mApn.mApnString = testApnString;
+        assertEquals(testApnString, mApn.getApn());
+    }
+
+    @Test
+    public void testDataStateInterface() throws Exception {
+        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.getDataState());
+        mApn.setDataState(TelephonyManager.DATA_CONNECTED);
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.getDataState());
+    }
+
+    @Test
+    public void testGetIpcanCategory() throws Exception {
+        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.getIpcanCategory());
+        mApn.notifyDataConnectionIpcanChanged(TelephonyManager.NETWORK_TYPE_IWLAN);
+        assertEquals(Apn.IPCAN_CATEGORY_WLAN, mApn.getIpcanCategory());
+    }
+
+    @Test
+    public void testGetIpVersion_ImsApn() throws Exception {
+        replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
+        when(mMockIDcSettings.getPreferredIpVersion())
+                .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED)
+                .thenReturn(CarrierConfig.Assets.IPV6_PREFERRED);
+
+        assertEquals(EIpVersion.IPV4V6.getInt(), mApn.getIpVersion());
+        assertEquals(EIpVersion.IPV6V4.getInt(), mApn.getIpVersion());
+    }
+
+    @Test
+    public void testGetIpVersion_EmergencyApn() throws Exception {
+        mApn.mType = EApnType.EMERGENCY;
+        replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
+        when(mMockIDcSettings.getEmergencyPreferredIpVersion())
+                .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED)
+                .thenReturn(CarrierConfig.Assets.IPV6_PREFERRED);
+
+        assertEquals(EIpVersion.IPV4V6.getInt(), mApn.getIpVersion());
+        assertEquals(EIpVersion.IPV6V4.getInt(), mApn.getIpVersion());
+    }
+
+    @Test
+    public void testGetSlotId() throws Exception {
+        assertEquals(SLOT_0, mApn.getSlotId());
+    }
+
+    @Test
+    public void testEmployApn() throws Exception {
+        int apnNum = 5;
+        for (int i = 1; i <= apnNum; i++) {
+            mApn.employApn();
+            assertEquals(i, mApn.getApnEmployCount());
+        }
+        assertTrue(mApn.isApnEmployed());
+
+        for (int i = apnNum; i > 0; i--) {
+            mApn.dismissApn();
+            assertEquals(i - 1, mApn.getApnEmployCount());
+        }
+        assertFalse(mApn.isApnEmployed());
+    }
+
+    @Test
+    public void testEsmCausePermanentFailure() throws Exception {
+        assertFalse(mApn.isESMCausePermanentFailure());
+
+        mApn.mESMCausePermanentFailure = true;
+        assertTrue(mApn.isESMCausePermanentFailure());
+
+        mApn.resetESMCausePermanentFailure();
+        assertFalse(mApn.isESMCausePermanentFailure());
+    }
+
+    @Test
+    public void testGetCachedNetwork_AllCallbackNull() throws Exception {
+        // return null when both NetworkCallback and NetworkMonitoringCallback is null
+        assertNull(mApn.mNetworkCallback);
+        assertNull(mApn.mNetworkMonitoringCallback);
+        assertNull(mApn.getCachedNetwork());
+    }
+
+    @Test
+    public void testGetCachedNetwork_NullNetworkCallback() throws Exception {
+        // get from NetworkMonitoringCallback when NetworkCallback is null
+        replaceInstance(Apn.class, "mNetworkMonitoringCallback", mApn,
+                mMockNetworkMonitoringCallback);
+        when(mMockNetworkMonitoringCallback.getCachedNetwork()).thenReturn(mMockNetwork);
+        assertEquals(mMockNetwork, mApn.getCachedNetwork());
+    }
+
+    @Test
+    public void testGetCachedNetwork_NotNullNetworkCallback() throws Exception {
+        // get from NetworkCallback when NetworkCallback is not null
+        replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
+        when(mMockNetworkCallback.getCachedNetwork()).thenReturn(mMockNetwork);
+        assertEquals(mMockNetwork, mApn.getCachedNetwork());
+    }
+
+    @Test
+    public void testRegisterCallback() throws Exception {
+        replaceInstance(Apn.class, "mNetworkMonitoringCallback", mApn,
+                mMockNetworkMonitoringCallback);
+
+        NetworkRequest.Builder nrb = new NetworkRequest.Builder();
+        nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+        NetworkRequest nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
+
+        mApn.registerCallback(Apn.ImsNetworkCallback.EVENT_LOST);
+
+        verify(mConnectivityManager).registerNetworkCallback(
+                eq(nr), eq(mMockNetworkMonitoringCallback));
+        verify(mMockNetworkMonitoringCallback).setEvents(Apn.ImsNetworkCallback.EVENT_LOST);
+        assertTrue(mApn.mIsMonitoringCallbackRegistered);
+    }
+
+    @Test
+    public void testUnregisterCallback() throws Exception {
+        replaceInstance(Apn.class, "mNetworkMonitoringCallback", mApn,
+                mMockNetworkMonitoringCallback);
+        mApn.unregisterCallback();
+
+        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkMonitoringCallback);
+        assertFalse(mApn.mIsMonitoringCallbackRegistered);
+    }
+
+    @Test
+    public void testRequestNetwork_vopsRequiredForPdn() throws Exception {
+        replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
+        replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
+        when(mMockIDcSettings.isVopsRequiredForPdn()).thenReturn(true);
+
+        NetworkRequest.Builder nrb = new NetworkRequest.Builder();
+        nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+        nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_MMTEL);
+        NetworkRequest nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
+
+        mApn.requestNetwork();
+        verify(mConnectivityManager).requestNetwork(eq(nr), eq(mMockNetworkCallback));
+    }
+
+    @Test
+    public void testRequestNetwork_noVopsRequiredForPdn() throws Exception {
+        replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
+        replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
+        when(mMockIDcSettings.isVopsRequiredForPdn()).thenReturn(false);
+
+        NetworkRequest.Builder nrb = new NetworkRequest.Builder();
+        nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+        NetworkRequest nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
+
+        mApn.requestNetwork();
+        verify(mConnectivityManager).requestNetwork(eq(nr), eq(mMockNetworkCallback));
+    }
+
+    @Test
+    public void testReleaseNetwork() throws Exception {
+        replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
+
+        mApn.releaseNetwork();
+        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
+        verify(mMockNetworkCallback).cleanUp();
+    }
+
+    @Test
+    public void testRegisterHandler() throws Exception {
+        int testEvent = 1000;
+        Message testMsg = Message.obtain();
+        testMsg.what = testEvent;
+
+        mApn.registerHandler(testEvent, mMockMsgProc);
+        mApn.handleMessage(testMsg);
+        verify(mMockMsgProc).procMsg(eq(testMsg));
+    }
+
+    @Test
+    public void testApnRequestState() throws Exception {
+        assertEquals(EApnReqState.APN_REQUEST_IDLE, mApn.getApnReqState());
+        mApn.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        assertEquals(EApnReqState.APN_REQUEST_DONE, mApn.getApnReqState());
+    }
+
+    @Test
+    public void testRegisterSubscription() throws Exception {
+        replaceInstance(Apn.class, "mSubscription", mApn, mMockISubscription);
+
+        mApn.registerSubscription();
+        verify(mMockISubscription).addListener(any(Apn.ApnSubscriptionListener.class));
+        mApn.unregisterSubscription();
+        verify(mMockISubscription).removeListener(any(Apn.ApnSubscriptionListener.class));
+    }
+
+    @Test
+    public void testSubscriptionListener() throws Exception {
+        int subId = 1;
+        replaceInstance(Apn.class, "mSubscription", mApn, mMockISubscription);
+        replaceInstance(Apn.class, "mNetworkMonitoringCallback", mApn,
+                mMockNetworkMonitoringCallback);
+        when(mMockNetworkMonitoringCallback.getEvents())
+                .thenReturn(Apn.ImsNetworkCallback.EVENT_LOST);
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                mSubscriptionListener = (SubscriptionListener) invocation.getArguments()[0];
+                return null;
+            }
+        }).when(mMockISubscription).addListener(any(SubscriptionListener.class));
+        mApn.mIsMonitoringCallbackRegistered = true;
+
+        mApn.registerSubscription();
+        mSubscriptionListener.onCarrierConfigChanged(SLOT_0, subId);
+
+        // perform unregisterCallback()
+        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkMonitoringCallback);
+
+        // perform registerCallback() again
+        NetworkRequest.Builder nrb = new NetworkRequest.Builder();
+        nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+        NetworkRequest nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
+
+        verify(mConnectivityManager).registerNetworkCallback(
+                eq(nr), eq(mMockNetworkMonitoringCallback));
+        verify(mMockNetworkMonitoringCallback).setEvents(Apn.ImsNetworkCallback.EVENT_LOST);
+        assertTrue(mApn.mIsMonitoringCallbackRegistered);
+    }
+
+    @Test
+    public void testNotifyDataConnectionIpcanChanged_NotChanged() throws Exception {
+        // IPCAN category is not changed
+        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
+        assertFalse(mApn.notifyDataConnectionIpcanChanged(TelephonyManager.NETWORK_TYPE_LTE));
+    }
+
+    @Test
+    public void testNotifyDataConnectionIpcanChanged_Changed() throws Exception {
+        // IPCAN category is changed
+        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
+        assertTrue(mApn.notifyDataConnectionIpcanChanged(TelephonyManager.NETWORK_TYPE_IWLAN));
+        verify(mMockISystem, times(1)).notifyDataConnectionIpcanChanged(
+                mApn.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
+        assertEquals(Apn.IPCAN_CATEGORY_WLAN, mApn.mIpcanCategory);
+    }
+
+    @Test
+    public void testNotifyPdnConnectionFailed() throws Exception {
+        replaceInstance(Apn.class, "mDcNetWatcher", mApn, mMockIDcNetWatcher);
+
+        mApn.notifyPdnConnectionFailed(mApn.mType);
+        verify(mMockIDcNetWatcher).notifyPdnConnectionFailed(mApn.mType);
+    }
+
+    @Test
+    public void testHasLocalAddress() throws Exception {
+        replaceInstance(Apn.class, "mDcApn", mApn, mMockIDcApn);
+        when(mMockIDcApn.getLocalAddress(mApn.mType.getType(), eq(anyInt())))
+                .thenReturn(null)
+                .thenReturn("0.0.0.0");
+        assertFalse(mApn.hasLocalAddress(eq(anyInt())));
+        assertTrue(mApn.hasLocalAddress(eq(anyInt())));
+    }
+
+    @Test
+    public void testIsIpChanged() throws Exception {
+        replaceInstance(Apn.class, "mDcApn", mApn, mMockIDcApn);
+        when(mMockIDcApn.getCachedLocalAddress(mApn.mType.getType()))
+                .thenReturn(null)
+                .thenReturn("0.0.0.0")
+                .thenReturn("0.0.0.0");
+        when(mMockIDcApn.getLocalAddress(mApn.mType.getType(), eq(anyInt())))
+                .thenReturn(null)
+                .thenReturn("0.0.0.0")
+                .thenReturn("1.1.1.1");
+
+        // both cached ip and current ip is null
+        assertTrue(mApn.isIpChanged());
+
+        // cached ip and current ip is same
+        assertFalse(mApn.isIpChanged());
+
+        // cached ip and current ip is different
+        assertTrue(mApn.isIpChanged());
+    }
+
+    @Test
+    public void testUpdateDataState() throws Exception {
+        // update to DATA_CONNECTED when mPreciseDcState is DATA_CONNECTED
+        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
+        mApn.updateDataState();
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
+
+        // update to DATA_DISCONNECTED when mPreciseDcState is DATA_DISCONNECTED
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
+        mApn.mPreciseDcState = TelephonyManager.DATA_DISCONNECTED;
+        mApn.updateDataState();
+        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
+
+        // update to DATA_CONNECTED when mPreciseDcState is DATA_SUSPENDED
+        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
+        mApn.mPreciseDcState = TelephonyManager.DATA_SUSPENDED;
+        mApn.updateDataState();
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
+
+        // update to DATA_DISCONNECTED when mPreciseDcState is DATA_UNKNOWN
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
+        mApn.mPreciseDcState = TelephonyManager.DATA_UNKNOWN;
+        mApn.updateDataState();
+        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
+
+        // update to DATA_CONNECTED when mPreciseDcState is DATA_DISCONNECTING
+        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
+        mApn.mPreciseDcState = TelephonyManager.DATA_DISCONNECTING;
+        mApn.updateDataState();
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
+
+        // update to DATA_DISCONNECTED when mPreciseDcState is DATA_CONNECTING
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTING;
+        mApn.updateDataState();
+        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
+
+        // update to DATA_CONNECTED when mPreciseDcState is DATA_HANDOVER_IN_PROGRESS
+        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mDataState);
+        mApn.mPreciseDcState = TelephonyManager.DATA_HANDOVER_IN_PROGRESS;
+        mApn.updateDataState();
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
+
+        // Not update when mPreciseDcState is same with current data state
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
+        mApn.updateDataState();
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
+    }
+
+    @Test
+    public void testUpdateNetworkType() throws Exception {
+        when(mSubscriptionManager.getSubscriptionIds(anyInt())).thenReturn(null);
+        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
+        when(mTelephonyManager.getDataNetworkType())
+                .thenReturn(TelephonyManager.NETWORK_TYPE_IWLAN);
+
+        assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mApn.mNetworkType);
+        mApn.updateNetworkType();
+        assertEquals(TelephonyManager.NETWORK_TYPE_IWLAN, mApn.mNetworkType);
+    }
+
+    @Test
+    public void testSendDataStateUpdateMessage() throws Exception {
+        replaceInstance(Apn.class, "mDcNetWatcher", mApn, mMockIDcNetWatcher);
+
+        mApn.sendDataStateUpdateMessage(mApn.mType, EDataState.DATA_STATE_CONNECTED);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockIDcNetWatcher).notifyResult(mApn.mType, EDataState.DATA_STATE_CONNECTED);
+        verify(mMockISystem).notifyDataConnectionStateChanged(
+                mApn.mType.getType(), EDataState.DATA_STATE_CONNECTED.getState());
+    }
+
+    @Test
+    public void testHandleIpcanCategory_NotChanged() throws Exception {
+        // IPCAN category is not changed
+        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
+        assertFalse(mApn.handleIpcanCategory(TelephonyManager.NETWORK_TYPE_LTE));
+        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
+    }
+
+    @Test
+    public void testHandleIpcanCategory_Changed() throws Exception {
+        // IPCAN category is changed
+        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
+        assertTrue(mApn.handleIpcanCategory(TelephonyManager.NETWORK_TYPE_IWLAN));
+        verify(mMockISystem, times(1)).notifyDataConnectionIpcanChanged(
+                mApn.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
+        assertEquals(Apn.IPCAN_CATEGORY_WLAN, mApn.mIpcanCategory);
+    }
+
+    @Test
+    public void testHandleIpcanCategory_NotHandledApnType() throws Exception {
+        // Do no handle IPCAN cagegory change when apn type is not ims or emergency
+        mApn.mType = EApnType.XCAP;
+        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
+        assertFalse(mApn.handleIpcanCategory(TelephonyManager.NETWORK_TYPE_IWLAN));
+        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
+    }
+
+    @Test
+    public void testHandleNotifyDataStateChanged_Connected() throws Exception {
+        // handle DATA_STATE_CONNECTED
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
+        msg.obj = new IDcNetWatcher.NotiObj(mApn.mType, EDataState.DATA_STATE_CONNECTED);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+                mApn.mType.getType(), EDataState.DATA_STATE_CONNECTED.getState());
+    }
+
+    @Test
+    public void testHandleNotifyDataStateChanged_ConnectFailed() throws Exception {
+        // handle DATA_STATE_CONNECT_FAILED
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
+        msg.obj = new IDcNetWatcher.NotiObj(mApn.mType, EDataState.DATA_STATE_CONNECT_FAILED);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockISystem, times(1)).notifyDataConnectionFailed(mApn.mType.getType());
+    }
+
+    @Test
+    public void testHandleNotifyDataStateChanged_IgnoreNullObj() throws Exception {
+        // ignore if msg.obj is null
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
+        msg.obj = null;
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockISystem, times(0)).notifyDataConnectionStateChanged(
+                mApn.mType.getType(), eq(anyInt()));
+    }
+
+    @Test
+    public void testHandleNotifyDataStateChanged_IgnoreRadioOff() throws Exception {
+        replaceInstance(Apn.class, "mDcNetWatcher", mApn, mMockIDcNetWatcher);
+        when(mMockIDcNetWatcher.isDoingOffRadio()).thenReturn(true);
+
+        // ignore if radio off is ongoing
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
+        msg.obj = new IDcNetWatcher.NotiObj(mApn.mType, EDataState.DATA_STATE_CONNECTED);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockISystem, times(0)).notifyDataConnectionStateChanged(
+                mApn.mType.getType(), eq(anyInt()));
+    }
+
+    @Test
+    public void testHandlePreciseDataConnectionStateChanged_ignoreNullState() throws Exception {
+        // ignore if PreciseDataConnectionState is null
+        assertEquals(TelephonyManager.DATA_UNKNOWN, mApn.mPreciseDcState);
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = null;
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        assertEquals(TelephonyManager.DATA_UNKNOWN, mApn.mPreciseDcState);
+    }
+
+    @Test
+    public void testHandlePreciseDataConnectionStateChanged_ignoreUnknown() throws Exception {
+        // ignore if network type is NETWORK_TYPE_UNKNOWN
+        assertEquals(TelephonyManager.DATA_UNKNOWN, mApn.mPreciseDcState);
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, DataFailCause.NONE);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        assertEquals(TelephonyManager.DATA_UNKNOWN, mApn.mPreciseDcState);
+    }
+
+    @Test
+    public void testHandlePreciseDataConnectionStateChanged_handoverIgnore() throws Exception {
+        // ignore if handover to unknown network type
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_LTE;
+        mApn.mPreciseDcState = TelephonyManager.DATA_HANDOVER_IN_PROGRESS;
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, DataFailCause.NONE);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mApn.mNetworkType);
+    }
+
+    @Test
+    public void testHandlePreciseDataConnectionStateChanged_handoverFail() throws Exception {
+        mApn.addListener(mMockApnStateListener);
+
+        // fail to handover
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_LTE;
+        mApn.mPreciseDcState = TelephonyManager.DATA_HANDOVER_IN_PROGRESS;
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE, DataFailCause.OPERATOR_BARRED);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockApnStateListener, times(1)).onHandoverInfoChanged(Apn.HANDOVER_FAILURE,
+                TelephonyManager.NETWORK_TYPE_LTE, DataFailCause.OPERATOR_BARRED);
+        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mApn.mNetworkType);
+    }
+
+    @Test
+    public void testHandlePreciseDataConnectionStateChanged_handoverSucceed() throws Exception {
+        mApn.addListener(mMockApnStateListener);
+
+        // success to handover
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_LTE;
+        mApn.mPreciseDcState = TelephonyManager.DATA_HANDOVER_IN_PROGRESS;
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_IWLAN, DataFailCause.NONE);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockApnStateListener, times(1)).onHandoverInfoChanged(Apn.HANDOVER_SUCCESS,
+                TelephonyManager.NETWORK_TYPE_IWLAN, DataFailCause.NONE);
+        verify(mMockISystem, times(1)).notifyDataConnectionIpcanChanged(
+                mApn.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
+        verify(mMockApnStateListener, times(1)).onIpcanCategoryChanged(
+                mApn.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
+        assertEquals(Apn.IPCAN_CATEGORY_WLAN, mApn.mIpcanCategory);
+        assertEquals(TelephonyManager.NETWORK_TYPE_IWLAN, mApn.mNetworkType);
+    }
+
+    @Test
+    public void testHandlePreciseDataConnectionStateChanged_initialConnect() throws Exception {
+        // initially connected
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTING;
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_IWLAN, DataFailCause.NONE);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        assertEquals("TestApn", mApn.mApnString);
+        assertEquals(ApnSetting.PROTOCOL_IPV6, mApn.mApnProtocol);
+        assertEquals(TelephonyManager.NETWORK_TYPE_IWLAN, mApn.mNetworkType);
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mPreciseDcState);
+    }
+
+    @Test
+    public void testHandlePreciseDataConnectionStateChanged_handoverInProgress() throws Exception {
+        mApn.addListener(mMockApnStateListener);
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_HANDOVER_IN_PROGRESS,
+                TelephonyManager.NETWORK_TYPE_LTE, DataFailCause.NONE);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockApnStateListener, times(1)).onHandoverInfoChanged(
+                Apn.HANDOVER_START, TelephonyManager.NETWORK_TYPE_LTE, DataFailCause.NONE);
+        assertEquals(TelephonyManager.DATA_HANDOVER_IN_PROGRESS, mApn.mPreciseDcState);
+    }
+
+    @Test
+    public void testHandlePreciseDataConnectionStateChanged_disconnecting() throws Exception {
+        replaceInstance(Apn.class, "mAosReg", mApn, mMockIAosReg);
+        when(mMockIAosReg.getRegisteredNetworkType())
+                .thenReturn(IAosRegistrationListener.NetworkType.LTE);
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_DISCONNECTING,
+                TelephonyManager.NETWORK_TYPE_LTE, DataFailCause.NONE);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockIAosReg).controlRegistration(IAosRegistration.RequestType.STOP,
+                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.DATA);
+        assertEquals(TelephonyManager.DATA_DISCONNECTING, mApn.mPreciseDcState);
+    }
+
+    @Test
+    public void testHandlePreciseDataConnectionStateChanged_disconnected() throws Exception {
+        mApn.registerHandler(Apn.EVENT_DATA_CONNECTION_FAILED, mMockMsgProc);
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_LTE;
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTING;
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_DISCONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE, DataFailCause.OPERATOR_BARRED);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockMsgProc).procMsg(any(Message.class));
+        assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mApn.mNetworkType);
+        assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mPreciseDcState);
+    }
+
+    @Test
+    public void testImsNetworkCallback_create() throws Exception {
+        Apn.ImsNetworkCallback callback1 = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), mApn);
+        assertNotNull(callback1);
+        assertEquals(mApn.mType.getType(), callback1.getType());
+        assertEquals(Apn.ImsNetworkCallback.EVENT_ALL, callback1.getEvents());
+
+        Apn.ImsNetworkCallback callback2 = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
+        assertNotNull(callback2);
+        assertEquals(mApn.mType.getType(), callback2.getType());
+        assertEquals(Apn.ImsNetworkCallback.EVENT_LOST, callback2.getEvents());
+
+        callback1.cleanUp();
+        callback2.cleanUp();
+
+        assertEquals(0, callback1.getEvents());
+        assertEquals(0, callback2.getEvents());
+        callback1 = null;
+        callback2 = null;
+    }
+
+    @Test
+    public void testImsNetworkCallback_onAvailable_ignore() throws Exception {
+        mApn.registerHandler(Apn.EVENT_NETWORK_AVAILABLE, mMockMsgProc);
+        LinkProperties linkProperties = new LinkProperties();
+        when(mConnectivityManager.getLinkProperties(any(Network.class)))
+                .thenReturn(linkProperties);
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
+
+        // ignore if EVENT_AVAILABLE is not set
+        callback.onAvailable(mMockNetwork);
+        assertEquals(linkProperties, callback.mCachedLinkProperties);
+        assertEquals(mMockNetwork, callback.getCachedNetwork());
+
+        // check whether send EVENT_NETWORK_AVAILABLE
+        callback.setEvents(Apn.ImsNetworkCallback.EVENT_ALL);
+        callback.onAvailable(mMockNetwork);
+        mTestableLooper.processAllMessages();
+
+        assertFalse(callback.mIsPendingOnAvailable);
+        verify(mMockMsgProc, times(1)).procMsg(any(Message.class));
+    }
+
+    @Test
+    public void testImsNetworkCallback_onAvailablePending() throws Exception {
+        mApn.registerHandler(Apn.EVENT_NETWORK_AVAILABLE, mMockMsgProc);
+        LinkProperties linkProperties = null;
+        when(mConnectivityManager.getLinkProperties(any(Network.class)))
+                .thenReturn(linkProperties);
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_ALL, mApn);
+
+        // do not sent EVENT_NETWORK_AVAILABLE when LinkProperties is not updated yet
+        callback.onAvailable(mMockNetwork);
+        mTestableLooper.processAllMessages();
+
+        assertTrue(callback.mIsPendingOnAvailable);
+        verify(mMockMsgProc, times(0)).procMsg(any(Message.class));
+    }
+
+    @Test
+    public void testImsNetworkCallback_onLosing() throws Exception {
+        int maxMsToLive = 500;
+        mApn.registerHandler(Apn.EVENT_NETWORK_LOSING, mMockMsgProc);
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
+
+        // ignore if EVENT_LOSING is not set
+        callback.onLosing(mMockNetwork, maxMsToLive);
+
+        // check whether send EVENT_NETWORK_LOSING
+        callback.setEvents(Apn.ImsNetworkCallback.EVENT_ALL);
+        callback.onLosing(mMockNetwork, maxMsToLive);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockMsgProc, times(1)).procMsg(any(Message.class));
+    }
+
+    @Test
+    public void testImsNetworkCallback_onLost() throws Exception {
+        mApn.registerHandler(Apn.EVENT_NETWORK_LOST, mMockMsgProc);
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_AVAILABLE, mApn);
+        callback.mCachedLinkProperties = new LinkProperties();
+        callback.mNetwork = mMockNetwork;
+        assertNotNull(callback.mCachedLinkProperties);
+        assertNotNull(callback.mNetwork);
+
+        // ignore if EVENT_LOST is not set
+        callback.onLost(mMockNetwork);
+        assertEquals(null, callback.mCachedLinkProperties);
+        assertEquals(null, callback.getCachedNetwork());
+
+        // check whether send EVENT_NETWORK_LOST
+        callback.setEvents(Apn.ImsNetworkCallback.EVENT_ALL);
+        callback.onLost(mMockNetwork);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockMsgProc, times(1)).procMsg(any(Message.class));
+    }
+
+    @Test
+    public void testImsNetworkCallback_onUnavailable() throws Exception {
+        mApn.registerHandler(Apn.EVENT_NETWORK_UNAVAILABLE, mMockMsgProc);
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
+        callback.mCachedLinkProperties = new LinkProperties();
+        assertNotNull(callback.mCachedLinkProperties);
+
+        // ignore if EVENT_UNAVAILABLE is not set
+        callback.onUnavailable();
+        assertEquals(null, callback.mCachedLinkProperties);
+
+        // check whether send EVENT_NETWORK_UNAVAILABLE
+        callback.setEvents(Apn.ImsNetworkCallback.EVENT_ALL);
+        callback.onUnavailable();
+        mTestableLooper.processAllMessages();
+
+        verify(mMockMsgProc, times(1)).procMsg(any(Message.class));
+    }
+
+    @Test
+    public void testImsNetworkCallback_onCapabilitiesChanged() throws Exception {
+        mApn.registerHandler(Apn.EVENT_NETWORK_CAPABILITIES_CHANGED, mMockMsgProc);
+        NetworkCapabilities networkCapabilities = new NetworkCapabilities();
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
+
+        // ignore if EVENT_CAPABILITIES_CHANGED is not set
+        callback.onCapabilitiesChanged(mMockNetwork, networkCapabilities);
+
+        // check whether send EVENT_NETWORK_CAPABILITIES_CHANGED
+        callback.setEvents(Apn.ImsNetworkCallback.EVENT_ALL);
+        callback.onCapabilitiesChanged(mMockNetwork, networkCapabilities);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockMsgProc, times(1)).procMsg(any(Message.class));
+    }
+
+    @Test
+    public void testImsNetworkCallback_onCapabilitiesChangedAfterPending() throws Exception {
+        mApn.registerHandler(Apn.EVENT_NETWORK_AVAILABLE, mMockMsgProc);
+        mApn.registerHandler(Apn.EVENT_NETWORK_CAPABILITIES_CHANGED, mMockMsgProc);
+        NetworkCapabilities networkCapabilities = new NetworkCapabilities();
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
+
+        // check whether send EVENT_NETWORK_AVAILABLE and EVENT_NETWORK_CAPABILITIES_CHANGED
+        callback.mIsPendingOnAvailable = true;
+        callback.setEvents(Apn.ImsNetworkCallback.EVENT_ALL);
+        callback.onCapabilitiesChanged(mMockNetwork, networkCapabilities);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockMsgProc, times(2)).procMsg(any(Message.class));
+        assertFalse(callback.mIsPendingOnAvailable);
+    }
+
+    @Test
+    public void testImsNetworkCallback_IpChanged_first() throws Exception {
+        mApn.registerHandler(Apn.EVENT_IP_CHANGED, mMockMsgProc);
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOCAL_IP_CHANGED, mApn);
+        callback.mCachedLinkProperties = new LinkProperties();
+        LinkProperties newLinkProperties = new LinkProperties();
+        newLinkProperties.addLinkAddress(new LinkAddress("11.11.11.11/8"));
+        when(mConnectivityManager.getLinkProperties(any(Network.class)))
+                .thenReturn(newLinkProperties);
+
+        callback.onLinkPropertiesChanged(mMockNetwork, newLinkProperties);
+        assertEquals(newLinkProperties, callback.mCachedLinkProperties);
+
+        // check whether send EVENT_IP_CHANGED
+        mTestableLooper.processAllMessages();
+        verify(mMockMsgProc, times(1)).procMsg(any(Message.class));
+    }
+
+    @Test
+    public void testImsNetworkCallback_IpChanged_update() throws Exception {
+        mApn.registerHandler(Apn.EVENT_IP_CHANGED, mMockMsgProc);
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOCAL_IP_CHANGED, mApn);
+
+        callback.mCachedLinkProperties = new LinkProperties();
+        LinkProperties newLinkProperties = new LinkProperties();
+        callback.mCachedLinkProperties.addLinkAddress(new LinkAddress("11.11.11.11/8"));
+        newLinkProperties.addLinkAddress(new LinkAddress("22.22.22.22/8"));
+        when(mConnectivityManager.getLinkProperties(any(Network.class)))
+                .thenReturn(newLinkProperties);
+
+        callback.onLinkPropertiesChanged(mMockNetwork, newLinkProperties);
+        assertEquals(newLinkProperties, callback.mCachedLinkProperties);
+
+        // check whether send EVENT_IP_CHANGED
+        mTestableLooper.processAllMessages();
+        verify(mMockMsgProc, times(1)).procMsg(any(Message.class));
+    }
+
+    @Test
+    public void testImsNetworkCallback_PcscfChanged_first() throws Exception {
+        mApn.registerHandler(Apn.EVENT_PCSCF_CHANGED, mMockMsgProc);
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_NET_PCSCF_CHANGED, mApn);
+
+        callback.mCachedLinkProperties = new LinkProperties();
+        LinkProperties newLinkProperties = new LinkProperties();
+        newLinkProperties.addPcscfServer(InetAddresses.parseNumericAddress("11.11.11.11"));
+        when(mConnectivityManager.getLinkProperties(any(Network.class)))
+                .thenReturn(newLinkProperties);
+        callback.onLinkPropertiesChanged(mMockNetwork, newLinkProperties);
+        assertEquals(newLinkProperties, callback.mCachedLinkProperties);
+
+        // check whether send EVENT_PCSCF_CHANGED
+        mTestableLooper.processAllMessages();
+        verify(mMockMsgProc, times(1)).procMsg(any(Message.class));
+    }
+
+    @Test
+    public void testImsNetworkCallback_PcscfChanged_update() throws Exception {
+        mApn.registerHandler(Apn.EVENT_PCSCF_CHANGED, mMockMsgProc);
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_NET_PCSCF_CHANGED, mApn);
+
+        callback.mCachedLinkProperties = new LinkProperties();
+        LinkProperties newLinkProperties = new LinkProperties();
+        callback.mCachedLinkProperties.addPcscfServer(
+                InetAddresses.parseNumericAddress("11.11.11.11"));
+        newLinkProperties.addPcscfServer(InetAddresses.parseNumericAddress("22.22.22.22"));
+        when(mConnectivityManager.getLinkProperties(any(Network.class)))
+                .thenReturn(newLinkProperties);
+        callback.onLinkPropertiesChanged(mMockNetwork, newLinkProperties);
+        assertEquals(newLinkProperties, callback.mCachedLinkProperties);
+
+        // check whether send EVENT_PCSCF_CHANGED
+        mTestableLooper.processAllMessages();
+        verify(mMockMsgProc, times(1)).procMsg(any(Message.class));
+    }
+
+    @Test
+    public void testImsNetworkCallback_onLinkPropertiesChangedWithoutChange() throws Exception {
+        mApn.registerHandler(Apn.EVENT_IP_CHANGED, mMockMsgProc);
+        mApn.registerHandler(Apn.EVENT_PCSCF_CHANGED, mMockMsgProc);
+        LinkProperties linkProperties = new LinkProperties();
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
+
+        // ignore if EVENT_LOCAL_IP_CHANGED and EVENT_NET_PCSCF_CHANGED is not set
+        callback.onLinkPropertiesChanged(mMockNetwork, linkProperties);
+
+        // check whether not send EVENT_IP_CHANGED or EVENT_PCSCF_CHANGED
+        callback.setEvents(Apn.ImsNetworkCallback.EVENT_ALL);
+        callback.onLinkPropertiesChanged(mMockNetwork, linkProperties);
+        mTestableLooper.processAllMessages();
+        verify(mMockMsgProc, times(0)).procMsg(any(Message.class));
+    }
+
+    private class FakeApn extends Apn {
+        private FakeApn(Context context, int slotId) {
+            super(context, slotId);
+        }
+    }
+
+    private PreciseDataConnectionState getPreciseDataConnectionState(
+            int state, int networkType, int causeCode) {
+        mPreciseDataConnectionState = new PreciseDataConnectionState.Builder()
+                .setState(state)
+                .setNetworkType(networkType)
+                .setApnSetting(new ApnSetting.Builder()
+                        .setApnTypeBitmask(ApnSetting.TYPE_IMS)
+                        .setApnName("TestApn")
+                        .setEntryName("Test")
+                        .setProtocol(ApnSetting.PROTOCOL_IPV6)
+                        .build())
+                .setFailCause(causeCode)
+                .build();
+
+        assertNotNull(mPreciseDataConnectionState);
+
+        return mPreciseDataConnectionState;
+    }
+
+    private synchronized void replaceInstance(final Class c, final String instanceName,
+            final Object obj, final Object newValue) throws Exception {
+        Field field = c.getDeclaredField(instanceName);
+        field.setAccessible(true);
+        field.set(obj, newValue);
+    }
+}

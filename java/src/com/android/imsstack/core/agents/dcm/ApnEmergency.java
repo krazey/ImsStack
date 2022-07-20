@@ -58,7 +58,7 @@ public class ApnEmergency extends Apn {
             return true;
         }
 
-        setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        setApnReqState(EApnReqState.APN_REQUEST_DONE);
 
         requestNetwork();
 
@@ -78,7 +78,7 @@ public class ApnEmergency extends Apn {
         releaseNetwork();
 
         setDataState(TelephonyManager.DATA_DISCONNECTED);
-        setAPNReqState(EApnReqState.APN_REQUEST_IDLE);
+        setApnReqState(EApnReqState.APN_REQUEST_IDLE);
 
         if (isPdnConnected) {
             sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
@@ -172,7 +172,7 @@ public class ApnEmergency extends Apn {
                 return;
             }
 
-            if (!isIPChanged()) {
+            if (!isIpChanged()) {
                 ImsLog.i(mSlotId, "ip is changed but ip address is same");
                 return;
             }

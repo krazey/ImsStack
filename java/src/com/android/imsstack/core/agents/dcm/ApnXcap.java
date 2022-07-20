@@ -73,7 +73,7 @@ public class ApnXcap extends Apn {
         }
 
         requestNetwork();
-        setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        setApnReqState(EApnReqState.APN_REQUEST_DONE);
         setDataState(TelephonyManager.DATA_CONNECTING);
 
         return true;
@@ -91,7 +91,7 @@ public class ApnXcap extends Apn {
         }
 
         releaseNetwork();
-        setAPNReqState(EApnReqState.APN_REQUEST_IDLE);
+        setApnReqState(EApnReqState.APN_REQUEST_IDLE);
 
         int dataState = TelephonyManager.DATA_DISCONNECTED;
         if (mDataState != dataState) {
@@ -197,7 +197,7 @@ public class ApnXcap extends Apn {
 
             if (getDataState() == TelephonyManager.DATA_CONNECTED) {
 
-                if (!isIPChanged()) {
+                if (!isIpChanged()) {
                     ImsLog.i(mSlotId, "ip is changed but ip address is same");
                     return;
                 }

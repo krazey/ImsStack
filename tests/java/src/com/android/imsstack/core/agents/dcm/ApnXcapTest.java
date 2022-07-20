@@ -119,7 +119,7 @@ public class ApnXcapTest {
         mApnXcap.employApn();
         mApnXcap.mESMCausePermanentFailure = false;
         assertTrue(mApnXcap.connect());
-        assertEquals(mApnXcap.getAPNReqState(), EApnReqState.APN_REQUEST_DONE);
+        assertEquals(mApnXcap.getApnReqState(), EApnReqState.APN_REQUEST_DONE);
         assertEquals(mApnXcap.getDataState(), TelephonyManager.DATA_CONNECTING);
         verify(mConnectivityManager, times(1)).requestNetwork(
                 any(NetworkRequest.class), any(ConnectivityManager.NetworkCallback.class));
@@ -133,17 +133,17 @@ public class ApnXcapTest {
         replaceInstance(Apn.class, "mNetworkCallback", mApnXcap, mMockNetworkCallback);
 
         // do not handle request to disconnect because apn has never been requested to connect
-        assertEquals(mApnXcap.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        assertEquals(mApnXcap.getApnReqState(), EApnReqState.APN_REQUEST_IDLE);
         assertFalse(mApnXcap.disconnect());
 
         // handle request to disconnect if request to connect is done
-        mApnXcap.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
         mApnXcap.sendEmptyMessageDelayed(Apn.EVENT_WAITING_LOCAL_ADDRESS_IPV6,
                 mApnXcap.OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL);
 
         assertTrue(mApnXcap.disconnect());
         verify(mConnectivityManager, times(1)).unregisterNetworkCallback(mMockNetworkCallback);
-        assertEquals(mApnXcap.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        assertEquals(mApnXcap.getApnReqState(), EApnReqState.APN_REQUEST_IDLE);
         assertEquals(mApnXcap.getDataState(), TelephonyManager.DATA_DISCONNECTED);
         assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_LOCAL_ADDRESS_IPV6));
 
@@ -160,10 +160,10 @@ public class ApnXcapTest {
         // if apn is not requested, ignore event
         mApnXcap.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
         mTestableLooper.processAllMessages();
-        assertEquals(mApnXcap.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        assertEquals(mApnXcap.getApnReqState(), EApnReqState.APN_REQUEST_IDLE);
 
         // wait for obtaining IPv6 address
-        mApnXcap.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
         mApnXcap.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
         mTestableLooper.processAllMessages();
 
@@ -190,7 +190,7 @@ public class ApnXcapTest {
     @Test
     public void testHandleNetworkLost() throws Exception {
         replaceInstance(Apn.class, "mNetworkCallback", mApnXcap, mMockNetworkCallback);
-        mApnXcap.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
 
         // if data state is already DATA_DISCONNECTED, ignore event
         assertEquals(mApnXcap.getDataState(), TelephonyManager.DATA_DISCONNECTED);
@@ -283,7 +283,7 @@ public class ApnXcapTest {
     @Test
     public void testAirplaneModeChanged() throws Exception {
         replaceInstance(Apn.class, "mNetworkCallback", mApnXcap, mMockNetworkCallback);
-        mApnXcap.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
 
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_AIRPLANE_MODE_CHANGED;
@@ -302,12 +302,12 @@ public class ApnXcapTest {
         when(mMockIDcSettings.isPermanentFailure(EApnType.XCAP, failureCause)).thenReturn(true);
 
         // if apn is not requested, ignore event
-        assertEquals(mApnXcap.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        assertEquals(mApnXcap.getApnReqState(), EApnReqState.APN_REQUEST_IDLE);
         mApnXcap.sendEmptyMessage(Apn.EVENT_DATA_CONNECTION_FAILED);
         mTestableLooper.processAllMessages();
 
         // if apn has been requested before, notify data connection state change
-        mApnXcap.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
         mApnXcap.setDataState(TelephonyManager.DATA_CONNECTING);
 
         Message msg = Message.obtain();
