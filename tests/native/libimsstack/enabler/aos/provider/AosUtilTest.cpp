@@ -133,12 +133,7 @@ TEST_F(AosUtilTest, GetKeepAliveValue)
             .WillOnce(Return(strHeader));
     EXPECT_EQ(-1, pAosUtil->GetKeepAliveValue(static_cast<ISipMessage*>(&objMockSipMsg)));
 
-    strHeader.Append(";keep");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::VIA, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_EQ(0, pAosUtil->GetKeepAliveValue(static_cast<ISipMessage*>(&objMockSipMsg)));
-
-    strHeader.Append("=30");
+    strHeader.Append(";keep=30");
     EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::VIA, 0, AString::ConstNull()))
             .WillOnce(Return(strHeader));
     EXPECT_EQ(30000, pAosUtil->GetKeepAliveValue(static_cast<ISipMessage*>(&objMockSipMsg)));
