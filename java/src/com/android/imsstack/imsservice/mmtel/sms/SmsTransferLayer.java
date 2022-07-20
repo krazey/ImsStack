@@ -16,6 +16,10 @@
 
 package com.android.imsstack.imsservice.mmtel.sms;
 
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.telephony.SmsMessage;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
@@ -26,18 +30,42 @@ import com.android.telephony.Rlog;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Provides the functionality of SMS Transfer Layer as per 3GPP TS 23.040
  **/
-public final class SmsTransferLayer {
+public class SmsTransferLayer {
     private final Object mLock = new Object();
     private static final String TAG = "[GII-SmsTL] ";
     private final ImsCallContext mCallContext;
     private SmsRelayLayer mSmsRL = null;
-    private final SmsRLListenerProxy mSmsRLListener = new SmsRLListenerProxy();
+    protected SmsRLListenerProxy mSmsRLListener = new SmsRLListenerProxy();
     private SmsTransferLayer.Listener mListener = null;
-    public Map<Integer, Integer> mTpMrTracker = new ConcurrentHashMap<>();
+    public Map<Integer, TpduParam> mTokenMessageMap = new ConcurrentHashMap<>();
+    private static final int MAX_MESSAGE_COUNT = 255;
+    public final ConcurrentLinkedQueue<Integer> mSendSmsQueue =
+                 new ConcurrentLinkedQueue<Integer>();
+    private MessageHandler mSmsHandler = null;
+    private HandlerThread mSmsHandlerThread = new HandlerThread("ImsSmsHandlerThread");
+    public static final int REQUEST_SEND_NEXT_SMS_TO_RL = 1;
+
+    /**
+     * This class contains parameters related to each SMS sent and is required for
+     * maintaining the Message details in queue when there are simultaneous SMS requests
+     */
+    private class TpduParam{
+        int mToken;
+        byte[] mTpdu;
+        String mSmsc;
+        String mDestinationAddress;
+        TpduParam(int token, byte[] pdu, String scAddress, String destinationAddr) {
+            mToken = token;
+            mTpdu = pdu;
+            mSmsc = scAddress;
+            mDestinationAddress = destinationAddr;
+        }
+    }
 
     /**
      * Listener to handle the events sent from SmsTransferLayer
@@ -65,6 +93,8 @@ public final class SmsTransferLayer {
 
     public SmsTransferLayer(ImsCallContext callContext) {
         mCallContext = callContext;
+        mSmsHandlerThread.start();
+        mSmsHandler = new MessageHandler(mSmsHandlerThread.getLooper());
         mSmsRL = new SmsRelayLayer(mCallContext);
         if (mSmsRL != null) {
             mSmsRL.setListener(mSmsRLListener);
@@ -74,12 +104,13 @@ public final class SmsTransferLayer {
     @VisibleForTesting
     public SmsTransferLayer(ImsCallContext callContext, SmsRelayLayer smsRL) {
         mCallContext = callContext;
+        mSmsHandlerThread.start();
+        mSmsHandler = new MessageHandler(mSmsHandlerThread.getLooper());
         if (smsRL == null) {
             mSmsRL = new SmsRelayLayer(mCallContext);
         } else {
             mSmsRL = smsRL;
         }
-
         if (mSmsRL != null) {
             mSmsRL.setListener(mSmsRLListener);
         }
@@ -103,9 +134,6 @@ public final class SmsTransferLayer {
         Rlog.d(TAG, "sendMoTPdu");
         try {
             int result;
-            synchronized (mLock) {
-                mTpMrTracker.put(tpMessageRef, token);
-            }
             /* Framework's TPdu Parser expects the TPdu be prepended with SC-Address.
              * else the parser will throw exception. So prepending TPdu with 0,
              * which indicates that there is no SC address and its length is 0.
@@ -117,7 +145,30 @@ public final class SmsTransferLayer {
             byte[] frameworkPdu = bo.toByteArray();
             SmsMessage message = SmsMessage.createFromPdu(frameworkPdu, SmsMessage.FORMAT_3GPP);
             String address = message.getRecipientAddress();
-            return mSmsRL.sendRPMessage(token, SmsUtils.RP_DATA, smsc, address, pdu);
+            TpduParam tpduParameters = new TpduParam(token, pdu, smsc, address);
+
+            synchronized (mLock) {
+                if (mTokenMessageMap.size() > MAX_MESSAGE_COUNT) {
+                    Rlog.e(TAG, "sendMoTpdu:Too many messages in queue");
+                    return SmsUtils.SMSTL_RESULT_QUEUE_SIZE_EXCEEDED;
+                }
+                if (mSendSmsQueue.isEmpty()) {
+                    Rlog.i(TAG, "sendMoTpdu:queue is empty  adding token " + token);
+                    mSendSmsQueue.add(token);
+                    mTokenMessageMap.put(token, tpduParameters);
+                    return mSmsRL.sendRPMessage(token, SmsUtils.RP_DATA,
+                            smsc, address, pdu);
+                } else {
+                    if (mTokenMessageMap.containsKey(token)) {
+                        Rlog.e(TAG, "sendMoTpdu: duplicate token - discarding the request");
+                        return SmsUtils.SMSTL_RESULT_DUPLICATE_TOKEN;
+                    }
+                    Rlog.i(TAG, "sendMoTpdu:queue is not  empty  adding token " + token);
+                    mTokenMessageMap.put(token, tpduParameters);
+                    mSendSmsQueue.add(token);
+                    return SmsUtils.RESULT_SUCCESS;
+                }
+            }
         } catch (RuntimeException e) {
             Rlog.e(TAG, "SendSms Failed at SmsTransferLayer: " + e.getMessage());
             return SmsUtils.SMSTL_RESULT_EXCEPTION;
@@ -137,15 +188,9 @@ public final class SmsTransferLayer {
         Rlog.d(TAG, "sendReportTPdu");
         try {
             int messageType = SmsUtils.RP_ERROR;
+            //int smsSubmitToken;
             if (result == ImsSmsImplBase.DELIVER_STATUS_OK) {
                 messageType = SmsUtils.RP_ACK;
-            }
-            synchronized (mLock) {
-                if (tlMessageType == SmsUtils.TP_SMS_STATUS_REPORT) {
-                    if (mTpMrTracker.containsKey(messageRef)) {
-                        mTpMrTracker.remove(messageRef);
-                    }
-                }
             }
             return mSmsRL.sendRPMessage(token, messageType, null, null, null);
         } catch (RuntimeException e) {
@@ -154,7 +199,36 @@ public final class SmsTransferLayer {
         }
     }
 
-    private class SmsRLListenerProxy implements SmsRelayLayer.Listener {
+    private class MessageHandler extends Handler {
+        MessageHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            Rlog.i(TAG, "MessageHandler - what=" + msg.what);
+
+            if (mListener == null) {
+                Rlog.e(TAG, "mListener is null");
+                return;
+            }
+
+            switch (msg.what) {
+                case REQUEST_SEND_NEXT_SMS_TO_RL:
+                    TpduParam tpduParameters = (TpduParam) msg.obj;
+                    Rlog.i(TAG, "sending token " + tpduParameters.mToken);
+                    mSmsRL.sendRPMessage(tpduParameters.mToken, SmsUtils.RP_DATA,
+                                         tpduParameters.mSmsc, tpduParameters.mDestinationAddress,
+                                         tpduParameters.mTpdu);
+                    break;
+
+                default :
+                    Rlog.e(TAG, "Inavlid message to handler");
+            }
+        }
+    }
+
+    class SmsRLListenerProxy implements SmsRelayLayer.Listener {
 
         public int notifyRLDataIndication(
                 int token, int smsFormat, int rpMessageType, byte[] pdu) {
@@ -162,6 +236,7 @@ public final class SmsTransferLayer {
             int result = SmsUtils.SMSTL_RESULT_FAILURE;
             try {
                 SmsTransferLayer.Listener listener = mListener;
+                int newToken = token;
                 if (listener == null) {
                     Rlog.d(TAG, "Listener is null");
                     return result;
@@ -169,19 +244,10 @@ public final class SmsTransferLayer {
                 int tpMessageType = SmsUtils.TP_SMS_DELIVER;
                 int originAddressLength = pdu[SmsUtils.MODIFIED_TPDU_ORIGIN_ADDR_LENGTH_INDEX];
                 int modifiedTpduStartIndex = 1 + originAddressLength; //length byte + Value length
-                int tpMr = pdu[modifiedTpduStartIndex + SmsUtils.TPDU_MR_INDEX] & 0xff;
                 int tpMti = pdu[modifiedTpduStartIndex + SmsUtils.TPDU_MTI_INDEX] & 0x3;
                 if (tpMti == SmsUtils.TPDU_MTI_SMS_STATUS_REPORT) {
                     Rlog.i(TAG, "notifyRLDataIndication: received SMS_STATUS_REPORT");
                     tpMessageType = SmsUtils.TP_SMS_STATUS_REPORT;
-                    synchronized (mLock) {
-                        if (mTpMrTracker.containsKey(tpMr)) {
-                            token = mTpMrTracker.get(tpMr);
-                        } else {
-                            Rlog.e(TAG, "No matching TpMR ");
-                            return result;
-                        }
-                    }
                 }
                 synchronized (mLock) {
                     return listener.notifySmsReceived(token, smsFormat, tpMessageType, pdu);
@@ -195,6 +261,8 @@ public final class SmsTransferLayer {
         public void notifyRLReportIndication(int token, int result, int reason) {
             try {
                 Rlog.d(TAG, "notifyRLReportIndication");
+                TpduParam tpduParameters;
+                int nextToken;
                 SmsTransferLayer.Listener listener = mListener;
                 // TODO: map result and reason
                 if (listener == null) {
@@ -202,6 +270,22 @@ public final class SmsTransferLayer {
                 }
                 synchronized (mLock) {
                     listener.notifySmsResult(token, result, reason);
+                    if (mTokenMessageMap.containsKey(token)) {
+                        mSendSmsQueue.remove(token);
+                        mTokenMessageMap.remove(token);
+                    }
+                    if (!mSendSmsQueue.isEmpty()) {
+                        nextToken = mSendSmsQueue.peek();
+                        if (!mTokenMessageMap.containsKey(nextToken)) {
+                            Rlog.d(TAG, "notifyRLReportIndication: next token not in Map");
+                            return;
+                        }
+                        tpduParameters = mTokenMessageMap.get(nextToken);
+                        Message msg = Message.obtain();
+                        msg.what = REQUEST_SEND_NEXT_SMS_TO_RL;
+                        msg.obj = tpduParameters;
+                        mSmsHandler.sendMessage(msg);
+                    }
                 }
             } catch (RuntimeException e) {
                 Rlog.e(TAG, "notifyRLReportIndication Failed: " + e.getMessage());
