@@ -24,7 +24,6 @@ import static org.mockito.Mockito.doReturn;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 import com.android.imsstack.enabler.acs.impl.RequestInfo;
 
@@ -53,6 +52,8 @@ public class RequestInfoTest {
     private int mSlotId = 0;
     private int mSubId = 1234;
 
+    private AcServiceClientInfo mAcServiceClientInfo;
+    private RequestInfo.RequestInfoBuilder mRequestInfoBuilder;
     private RequestInfo mRequestInfo;
 
     @Mock
@@ -66,18 +67,22 @@ public class RequestInfoTest {
         doReturn(IMSI).when(mTelephonyManager).getSubscriberId();
         doReturn(IMEI).when(mTelephonyManager).getImei(anyInt());
 
+        mAcServiceClientInfo = new AcServiceClientInfo(
+                VERSION, PROFILE, CLIENT_VENDOR, CLIENT_VERSION, ENABLED_BY_USER);
+        mRequestInfoBuilder = new RequestInfo.RequestInfoBuilder(mSlotId, mSubId,
+                mAcServiceClientInfo, mTelephonyManager);
+        mRequestInfo = mRequestInfoBuilder.build();
     }
 
     @After
     public void tearDown() throws Exception {
+        mAcServiceClientInfo = null;
         mRequestInfo = null;
     }
 
     @Test
     @SmallTest
     public void userAgent_test() throws Exception {
-        mRequestInfo = createRequestInfo();
-
         String expectedUserAgent = "IM-client/OMA1.0 " + Build.MANUFACTURER + "/"
                 + Build.MODEL + "-" + Build.DISPLAY + " " + CLIENT_VENDOR + "/" + CLIENT_VERSION;
 
@@ -95,8 +100,6 @@ public class RequestInfoTest {
     @Test
     @SmallTest
     public void getHttpUrl_test() throws Exception {
-        mRequestInfo = createRequestInfo();
-
         String expectedHost = "config.rcs.mnc" + MNC + ".mcc" + MCC + ".pub.3gppnetwork.org";
 
         URL httpUrl = mRequestInfo.getHttpUrl();
@@ -108,8 +111,6 @@ public class RequestInfoTest {
     @Test
     @SmallTest
     public void getHttpsUrl_test() throws Exception {
-        mRequestInfo = createRequestInfo();
-
         String expectedHost = "config.rcs.mnc" + MNC + ".mcc" + MCC + ".pub.3gppnetwork.org";
 
         URL httpsUrl = mRequestInfo.getHttpsUrl();
@@ -132,126 +133,5 @@ public class RequestInfoTest {
         assertTrue(query.contains("rcs_state="));
         assertTrue(query.contains("provisioning_version="));
         assertTrue(query.contains("SMS_port="));
-    }
-
-    @Test
-    @SmallTest
-    public void requestInfoBuilder_withValidValue() throws Exception {
-        AcServiceClientInfo acServiceClientInfo = new AcServiceClientInfo(
-                VERSION, PROFILE, CLIENT_VENDOR, CLIENT_VERSION, ENABLED_BY_USER);
-        RequestInfo.RequestInfoBuilder requestInfoBuilder = new RequestInfo.RequestInfoBuilder(
-                mSlotId, mSubId, acServiceClientInfo, mTelephonyManager);
-
-        String acVersion = "100";
-        String rcsProfile = "UP_1.0";
-        String rcsVersion = "7.0";
-        String smsPort = "9898";
-
-        requestInfoBuilder.setAcVersion(acVersion)
-                .setRcsProfile(rcsProfile)
-                .setRcsVersion(rcsVersion)
-                .setSmsPort(smsPort);
-        mRequestInfo = requestInfoBuilder.build();
-        String query = mRequestInfo.getHttpsUrl().getQuery();
-
-        assertTrue(query.contains(acVersion));
-        assertTrue(query.contains(rcsVersion));
-        assertTrue(query.contains(rcsProfile));
-        assertTrue(query.contains(smsPort));
-
-        acVersion = "200";
-        rcsProfile = "UP_2.0";
-        rcsVersion = "6.0";
-
-        requestInfoBuilder.setAcVersion(acVersion)
-                .setRcsProfile(rcsProfile)
-                .setRcsVersion(rcsVersion);
-        mRequestInfo = requestInfoBuilder.build();
-        query = mRequestInfo.getHttpsUrl().getQuery();
-
-        assertTrue(query.contains(acVersion));
-        assertTrue(query.contains(rcsVersion));
-        assertTrue(query.contains(rcsProfile));
-
-        Log.i(TAG, requestInfoBuilder.toString());
-    }
-
-    @Test
-    @SmallTest
-    public void requestInfoBuilder_withEmptyValue() throws Exception {
-        AcServiceClientInfo acServiceClientInfo = new AcServiceClientInfo(
-                VERSION, PROFILE, CLIENT_VENDOR, CLIENT_VERSION, ENABLED_BY_USER);
-        RequestInfo.RequestInfoBuilder requestInfoBuilder = new RequestInfo.RequestInfoBuilder(
-                mSlotId, mSubId, acServiceClientInfo, mTelephonyManager);
-
-        String acVersion = "300";
-        // default value
-        String rcsProfile = "UP_1.0";
-        // default value
-        String rcsVersion = "6.0";
-
-        requestInfoBuilder.setAcVersion(acVersion)
-                .setRcsProfile("")
-                .setRcsVersion("");
-        mRequestInfo = requestInfoBuilder.build();
-        String query = mRequestInfo.getHttpsUrl().getQuery();
-
-        assertTrue(query.contains(acVersion));
-        assertTrue(query.contains(rcsVersion));
-        assertTrue(query.contains(rcsProfile));
-
-        requestInfoBuilder.setTerminalName("")
-                .setTerminalVersion("");
-        try {
-            mRequestInfo = requestInfoBuilder.build();
-            throw new AssertionError("not expected");
-        } catch (IllegalArgumentException e) {
-            // expected result
-        }
-    }
-
-    @Test
-    @SmallTest
-    public void requestInfo_withEmptyValue() throws Exception {
-        AcServiceClientInfo acServiceClientInfo = new AcServiceClientInfo(
-                VERSION, PROFILE, CLIENT_VENDOR, CLIENT_VERSION, ENABLED_BY_USER);
-        RequestInfo.RequestInfoBuilder requestInfoBuilder = new RequestInfo.RequestInfoBuilder(
-                mSlotId, mSubId, acServiceClientInfo, mTelephonyManager);
-
-        mRequestInfo = requestInfoBuilder.build();
-
-        String otp = "13579";
-        String token = "abcdefghij";
-        String defaultSmsApp = "google_sms";
-        String defaultVvmApp = "google_vvm";
-        String smsPort = "9898";
-        String rcsState = "-4";
-        String acVersion = "85";
-
-        mRequestInfo.setOtp(otp);
-        mRequestInfo.setToken(token);
-        mRequestInfo.setDefaultSmsApp(defaultSmsApp);
-        mRequestInfo.setDefaultVvmApp(defaultVvmApp);
-        mRequestInfo.updateSmsPort(smsPort);
-        mRequestInfo.updateRcsState(rcsState);
-        mRequestInfo.updateAcVersion(acVersion);
-
-        String query = mRequestInfo.getHttpsUrl().getQuery();
-
-        assertTrue(query.contains(otp));
-        assertTrue(query.contains(token));
-        assertTrue(query.contains(defaultSmsApp));
-        assertTrue(query.contains(defaultVvmApp));
-        assertTrue(query.contains(smsPort));
-        assertTrue(query.contains(rcsState));
-        assertTrue(query.contains(acVersion));
-    }
-
-    private RequestInfo createRequestInfo() {
-        AcServiceClientInfo acServiceClientInfo = new AcServiceClientInfo(
-                VERSION, PROFILE, CLIENT_VENDOR, CLIENT_VERSION, ENABLED_BY_USER);
-        RequestInfo.RequestInfoBuilder requestInfoBuilder = new RequestInfo.RequestInfoBuilder(
-                mSlotId, mSubId, acServiceClientInfo, mTelephonyManager);
-        return requestInfoBuilder.build();
     }
 }
