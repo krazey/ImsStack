@@ -15,6 +15,14 @@
  */
 package com.android.imsstack.enabler.uce.subscribe;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -40,13 +48,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -57,8 +58,11 @@ import java.util.concurrent.TimeUnit;
 public class UceSubscribeRequestControllerTest {
     private static final int MAX_WAIT_TIME = 1000;
     private static final int SLOT_ID = 0;
+    private static final int KEY = 100;
     @Mock SubscribeResponse subscribeCb;
     @Mock UceSubscribeRequest request;
+
+    private UceSubscribeRequestController mController;
 
     private final TestUceJni mUceJni = new TestUceJni();
 
@@ -87,8 +91,36 @@ public class UceSubscribeRequestControllerTest {
     }
 
     @After
-    public void cleanUp(){}
+    public void cleanUp() {
+        mController = null;
+    }
 
+    @Test
+    @SmallTest
+    public void test_subscribeCapabilitiesWithoutImsRegister() throws Exception {
+        Collection<Uri> contacts = new ArrayList<>();
+
+        mController = createUceSubscribeRequestController();
+
+        mController.setImsRegistrationStatus(false);
+        mController.subscribeCapabilities(KEY, contacts, subscribeCb, request);
+
+        verify(subscribeCb).onCommandError(eq(UceApiConstant.COMMAND_CODE_SERVICE_UNAVAILABLE));
+        verifyNoMoreInteractions(request);
+    }
+
+    @Test
+    @SmallTest
+    public void test_subscribeCapabilitiesWithEmptyUri() throws Exception {
+        Collection<Uri> contacts = new ArrayList<>();
+
+        mController = createUceSubscribeRequestController();
+
+        mController.setImsRegistrationStatus(true);
+        mController.subscribeCapabilities(KEY, contacts, subscribeCb, request);
+
+        verify(subscribeCb).onCommandError(eq(UceApiConstant.COMMAND_CODE_INVALID_PARAM));
+    }
 
     @Test
     @SmallTest
@@ -96,21 +128,12 @@ public class UceSubscribeRequestControllerTest {
         Uri uri = Uri.parse("123456");
         Collection<Uri> contacts = new ArrayList<>();
 
-        UceSubscribeRequestController controller = createUceSubscribeRequestController();
+        mController = createUceSubscribeRequestController();
 
-        controller.setImsRegistrationStatus(false);
-        controller.subscribeCapabilities(contacts, subscribeCb, request);
-
-        verify(subscribeCb).onCommandError(eq(UceApiConstant.COMMAND_CODE_SERVICE_UNAVAILABLE));
-
-        controller.setImsRegistrationStatus(true);
-        controller.subscribeCapabilities(contacts, subscribeCb, request);
-
-        verify(subscribeCb).onCommandError(eq(UceApiConstant.COMMAND_CODE_INVALID_PARAM));
-
-
+        mController.setImsRegistrationStatus(true);
+        doReturn(true).when(request).sendRequest(any());
         contacts.add(uri);
-        controller.subscribeCapabilities(contacts, subscribeCb, request);
+        mController.subscribeCapabilities(KEY, contacts, subscribeCb, request);
 
         ArgumentCaptor<ArrayList> captor = ArgumentCaptor.forClass(ArrayList.class);
 
@@ -118,6 +141,9 @@ public class UceSubscribeRequestControllerTest {
         List<String> data = captor.getValue();
         assertEquals(data.size(), 1);
         assertEquals(data.get(0), uri.toString());
+
+        assertEquals(mController.getRequestWithKey(KEY), request);
+
         verifyNoMoreInteractions(request);
     }
 
@@ -130,8 +156,8 @@ public class UceSubscribeRequestControllerTest {
         int reasonCause = 10;
         String reasonCauseText = "reason text";
 
-        UceSubscribeRequestController controller = createUceSubscribeRequestController();
-        controller.setRequestWithKey(key, request);
+        mController = createUceSubscribeRequestController();
+        mController.setRequestWithKey(key, request);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_SUBSCRIBE_RESPONSE_IND);
@@ -144,7 +170,7 @@ public class UceSubscribeRequestControllerTest {
 
         mUceJni.mUceJniListener.onSubscribeResponseMessage(parcel);
 
-        Handler handler = controller.getHandler();
+        Handler handler = mController.getHandler();
         waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         verify(request, timeout(MAX_WAIT_TIME)).informNetworkResponse(eq(responseCode),
@@ -159,8 +185,8 @@ public class UceSubscribeRequestControllerTest {
         int count = 1;
         String pidfxml = getPidfxml();
 
-        UceSubscribeRequestController controller = createUceSubscribeRequestController();
-        controller.setRequestWithKey(key, request);
+        mController = createUceSubscribeRequestController();
+        mController.setRequestWithKey(key, request);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_PRESENCE_NOTIFY_IND);
@@ -171,7 +197,7 @@ public class UceSubscribeRequestControllerTest {
 
         mUceJni.mUceJniListener.onSubscribeResponseMessage(parcel);
 
-        Handler handler = controller.getHandler();
+        Handler handler = mController.getHandler();
         waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
@@ -191,8 +217,8 @@ public class UceSubscribeRequestControllerTest {
         int key = 10;
         int commandCode = 100;
 
-        UceSubscribeRequestController controller = createUceSubscribeRequestController();
-        controller.setRequestWithKey(key, request);
+        mController = createUceSubscribeRequestController();
+        mController.setRequestWithKey(key, request);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_SUBSCRIBE_CMD_ERROR_IND);
@@ -202,7 +228,7 @@ public class UceSubscribeRequestControllerTest {
 
         mUceJni.mUceJniListener.onSubscribeResponseMessage(parcel);
 
-        Handler handler = controller.getHandler();
+        Handler handler = mController.getHandler();
         waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         verify(request, timeout(MAX_WAIT_TIME)).informCommandError(eq(commandCode));
@@ -216,8 +242,8 @@ public class UceSubscribeRequestControllerTest {
         String reason = "test";
         int retryAfter = 100;
 
-        UceSubscribeRequestController controller = createUceSubscribeRequestController();
-        controller.setRequestWithKey(key, request);
+        mController = createUceSubscribeRequestController();
+        mController.setRequestWithKey(key, request);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_SUBSCRIBE_TERMINATED_IND);
@@ -228,7 +254,7 @@ public class UceSubscribeRequestControllerTest {
 
         mUceJni.mUceJniListener.onSubscribeResponseMessage(parcel);
 
-        Handler handler = controller.getHandler();
+        Handler handler = mController.getHandler();
         waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         verify(request, timeout(MAX_WAIT_TIME)).informTerminate(eq(reason), eq(retryAfter));
@@ -243,8 +269,8 @@ public class UceSubscribeRequestControllerTest {
         String[] reason = {"test reason", "test reason2"};
         int count = id.length;
 
-        UceSubscribeRequestController controller = createUceSubscribeRequestController();
-        controller.setRequestWithKey(key, request);
+        mController = createUceSubscribeRequestController();
+        mController.setRequestWithKey(key, request);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND);
@@ -258,7 +284,7 @@ public class UceSubscribeRequestControllerTest {
 
         mUceJni.mUceJniListener.onSubscribeResponseMessage(parcel);
 
-        Handler handler = controller.getHandler();
+        Handler handler = mController.getHandler();
         waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         ArgumentCaptor<ArrayList> captor = ArgumentCaptor.forClass(ArrayList.class);

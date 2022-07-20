@@ -38,11 +38,7 @@ public class UceSubscribeRequest {
     private final UceJNI mUceJNI;
 
     public UceSubscribeRequest(SubscribeResponse cb, int slotId, int key) {
-        mKey = key;
-        callback = cb;
-        mSlotId = slotId;
-        mUceJNI = UceJNI.getInstance();
-        ImsLog.d("key:" + mKey);
+        this(cb, slotId, key, UceJNI.getInstance());
     }
 
     @VisibleForTesting

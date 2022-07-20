@@ -96,6 +96,8 @@ public class UceSubscribeRequestController implements IUceJNIListener {
 
     /**
      * The user capabilities of one or multiple contacts have been requested by the framework.
+     * @param uris A list of numbers that the capabilities are being requested for.
+     * @param cb A callback for when the request for capabilities completes.
      */
     public void subscribeCapabilities(Collection<Uri> uris, SubscribeResponse cb) {
         if (!mIsImsRegistered) {
@@ -109,29 +111,24 @@ public class UceSubscribeRequestController implements IUceJNIListener {
 
         int key = UceUtils.generateKey();
         UceSubscribeRequest request = new UceSubscribeRequest(cb, mSlotId, key);
-        ArrayList<String> queryingUri = new ArrayList<>();
-        uris.forEach(uri -> {
-            queryingUri.add(uri.toString());
-        });
-        if (request.sendRequest(queryingUri)) {
-            mUceSubscribeRequestMap.put(key, request);
-            ImsLog.d("add key:" + key);
-        }
+
+        subscribeCapabilities(key, uris, cb, request);
     }
 
     @VisibleForTesting
-    public void subscribeCapabilities(Collection<Uri> uris, SubscribeResponse cb,
+    public void subscribeCapabilities(int key, Collection<Uri> uris, SubscribeResponse cb,
             UceSubscribeRequest request) {
         if (!mIsImsRegistered) {
             sendCommandError(cb, UceApiConstant.COMMAND_CODE_SERVICE_UNAVAILABLE);
+            request = null;
             return;
         }
         if (uris.isEmpty()) {
             sendCommandError(cb, UceApiConstant.COMMAND_CODE_INVALID_PARAM);
+            request = null;
             return;
         }
 
-        int key = UceUtils.generateKey();
         ArrayList<String> queryingUri = new ArrayList<>();
         uris.forEach(uri -> {
             queryingUri.add(uri.toString());
@@ -150,6 +147,16 @@ public class UceSubscribeRequestController implements IUceJNIListener {
     @VisibleForTesting
     public void setRequestWithKey(int key, UceSubscribeRequest request) {
         mUceSubscribeRequestMap.put(key, request);
+    }
+
+    /**
+     * Get the UceSubscribeRequest associate with the input key
+     * @param key The key to get the request.
+     * @return Request stored as key in the MAP.
+     */
+    @VisibleForTesting
+    public UceSubscribeRequest getRequestWithKey(int key) {
+        return mUceSubscribeRequestMap.get(key);
     }
 
     class UceSubscribeControllerHandler extends Handler {
