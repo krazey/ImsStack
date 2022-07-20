@@ -10,7 +10,6 @@ public class CallInfo implements Parcelable
     public int            serviceType;
     public int            callType;
 
-    public boolean        wifi;
     public boolean        emergency;
     public boolean        offline;
     public boolean        ussi;
@@ -25,7 +24,6 @@ public class CallInfo implements Parcelable
     public CallInfo() {
         serviceType = IUMtcCall.SERVICETYPE_NORMAL;
         callType = IUMtcCall.CALLTYPE_VOIP;
-        wifi = false;
         emergency = false;
         offline = false;
         ussi = false;
@@ -41,7 +39,6 @@ public class CallInfo implements Parcelable
     public CallInfo(CallInfo callInfo) {
         serviceType = callInfo.serviceType;
         callType = callInfo.callType;
-        wifi = callInfo.wifi;
         emergency = callInfo.emergency;
         offline = callInfo.offline;
         ussi = callInfo.ussi;
@@ -61,7 +58,6 @@ public class CallInfo implements Parcelable
     public CallInfo(int _serviceType, int _callType) {
         serviceType = _serviceType;
         callType = _callType;
-        wifi = false;
         emergency = false;
         offline = false;
         ussi = false;
@@ -77,7 +73,6 @@ public class CallInfo implements Parcelable
     public CallInfo(int _serviceType, int _callType, boolean _isConf) {
         serviceType = _serviceType;
         callType = _callType;
-        wifi = false;
         emergency = false;
         offline = false;
         ussi = false;
@@ -93,7 +88,6 @@ public class CallInfo implements Parcelable
     public void update(CallInfo callInfo) {
         serviceType = callInfo.serviceType;
         callType = callInfo.callType;
-        wifi = callInfo.wifi;
         emergency = callInfo.emergency;
         offline = callInfo.offline;
         ussi = callInfo.ussi;
@@ -113,7 +107,6 @@ public class CallInfo implements Parcelable
                 + " enabledConf : " + enabledConf
                 + " confSub : " + confSub
                 + " rttCapable : " + rttCapable
-                + " wifi : " + wifi
                 + " emergency : " + emergency
                 + " offline : " + offline
                 + " ussi : " + ussi
@@ -124,7 +117,6 @@ public class CallInfo implements Parcelable
         serviceType = source.readInt();
         callType = source.readInt();
 
-        wifi = (source.readInt() == 1) ? true : false;
         emergency = (source.readInt() == 1) ? true : false;
         offline = (source.readInt() == 1) ? true : false;
         ussi = (source.readInt() == 1) ? true : false;
@@ -143,7 +135,6 @@ public class CallInfo implements Parcelable
         dest.writeInt(serviceType);
         dest.writeInt(callType);
 
-        dest.writeInt(wifi ? 1 : 0);
         dest.writeInt(emergency ? 1 : 0);
         dest.writeInt(offline ? 1 : 0);
         dest.writeInt(ussi ? 1 : 0);

@@ -27,7 +27,6 @@ public:
     JniCallInfo() :
             eServiceType(ServiceType::NORMAL),
             eCallType(CallType::VOIP),
-            bWifi(IMS_FALSE),
             bEmergency(IMS_FALSE),
             bOffline(IMS_FALSE),
             bUssi(IMS_FALSE),
@@ -42,7 +41,6 @@ public:
     JniCallInfo(IN const JniCallInfo& objRhs) :
             eServiceType(objRhs.eServiceType),
             eCallType(objRhs.eCallType),
-            bWifi(objRhs.bWifi),
             bEmergency(objRhs.bEmergency),
             bOffline(objRhs.bOffline),
             bUssi(objRhs.bUssi),
@@ -60,7 +58,6 @@ public:
         {
             eServiceType = objRhs.eServiceType;
             eCallType = objRhs.eCallType;
-            bWifi = objRhs.bWifi;
             bEmergency = objRhs.bEmergency;
             bOffline = objRhs.bOffline;
             bUssi = objRhs.bUssi;
@@ -78,7 +75,6 @@ public:
     ServiceType eServiceType;
     CallType eCallType;
 
-    IMS_BOOL bWifi;
     IMS_BOOL bEmergency;
     IMS_BOOL bOffline;
     IMS_BOOL bUssi;

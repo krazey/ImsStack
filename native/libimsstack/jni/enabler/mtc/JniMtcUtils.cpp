@@ -47,7 +47,6 @@ PUBLIC GLOBAL JniCallInfo JniMtcUtils::ReadCallInfo(IN const Parcel& objParcel)
     JniCallInfo objCallInfo;
 
     objCallInfo.eCallType = ReadCallType(objParcel);
-    objCallInfo.bWifi = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
     objCallInfo.bEmergency = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
     objCallInfo.bOffline = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
     objCallInfo.bUssi = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
@@ -117,8 +116,6 @@ PUBLIC GLOBAL void JniMtcUtils::WriteCallInfoToParcel(
 {
     objParcel.writeInt32(static_cast<IMS_SINT32>(objCallInfo.eServiceType));
     objParcel.writeInt32(static_cast<IMS_SINT32>(objCallInfo.eCallType));
-    IMS_SINT32 bWifi = (objCallInfo.bWifi) ? 1 : 0;
-    objParcel.writeInt32(bWifi);
     IMS_SINT32 bEmergency = (objCallInfo.bEmergency) ? 1 : 0;
     objParcel.writeInt32(bEmergency);
     IMS_SINT32 bOffline = (objCallInfo.bOffline) ? 1 : 0;

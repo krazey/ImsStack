@@ -536,7 +536,6 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     JniCallInfo objJniCallInfo;
     objJniCallInfo.eServiceType = GetService().GetServiceType();
     objJniCallInfo.eCallType = GetCallType();
-    objJniCallInfo.bWifi = m_objCallInfo.bWifi;
     objJniCallInfo.bEmergency = m_objCallInfo.bEmergency;
     objJniCallInfo.bOffline = m_objCallInfo.bOffline;
     objJniCallInfo.bUssi = m_objCallInfo.bUssi;

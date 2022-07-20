@@ -102,10 +102,8 @@ public class MtcEmergencyServiceManager {
             return;
         }
 
-        boolean wifi = mCall.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false);
-
         mCall.createNativeCallObject();
-        mCall.open(serviceType, wifi, true, false, false);
+        mCall.open(serviceType, true, false, false);
     }
 
     private void onEsUnavailable() {

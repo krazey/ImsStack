@@ -718,14 +718,16 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
     }
 
-    public void open(int serviceType, boolean wifi, boolean emergency, boolean offline,
+    /**
+     * Creates an outgoing call before it starts.
+     */
+    public void open(int serviceType, boolean emergency, boolean offline,
             boolean ussi) {
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IUMtcCall.OPEN);
         parcel.writeInt(serviceType);
         parcel.writeInt(getCallType());
-        parcel.writeInt(wifi ? 1 : 0);
         parcel.writeInt(emergency ? 1 : 0);
         parcel.writeInt(offline ? 1 : 0);
         parcel.writeInt(ussi ? 1 : 0);

@@ -239,7 +239,6 @@ void JniMtcCall::Open(IN const android::Parcel& objParcel)
     JniCallInfo objJniCallInfo = JniMtcUtils::ReadCallInfo(objParcel);
 
     CallInfo objCallInfo;
-    objCallInfo.bWifi = objJniCallInfo.bWifi;
     objCallInfo.bEmergency = objJniCallInfo.bEmergency;
     objCallInfo.bOffline = objJniCallInfo.bOffline;
     objCallInfo.bUssi = objJniCallInfo.bUssi;

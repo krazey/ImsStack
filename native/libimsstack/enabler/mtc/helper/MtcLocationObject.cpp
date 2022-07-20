@@ -20,12 +20,14 @@
 #include "GeolocationPidfCreator.h"
 #include "IMessage.h"
 #include "IMessageBodyPart.h"
+#include "INetworkWatcher.h"
 #include "ISipMessage.h"
 #include "ISubscriberConfig.h"
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "call/IMtcCallContext.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "helper/MtcAosConnector.h"
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
 #include "utility/MessageUtil.h"
@@ -38,11 +40,11 @@ LOCAL const IMS_CHAR GEOLOCATION_ROUTING_YES[] = "yes";
 LOCAL const IMS_CHAR CONTENT_DISPOSITION_RENDER[] = "render";
 LOCAL const IMS_CHAR CONTENT_DISPOSITION_HANDLING_OPTIONAL[] = "handling=optional";
 
-LOCAL IMS_SINT32 GetGeolocationPidfAllowedType(IN const CallInfo& objCallInfo)
+LOCAL IMS_SINT32 GetGeolocationPidfAllowedType(IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi)
 {
-    if (objCallInfo.bWifi)
+    if (bWifi)
     {
-        if (objCallInfo.bEmergency)
+        if (bEmergency)
         {
             return CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI;
         }
@@ -53,7 +55,7 @@ LOCAL IMS_SINT32 GetGeolocationPidfAllowedType(IN const CallInfo& objCallInfo)
     }
     else
     {
-        if (objCallInfo.bEmergency)
+        if (bEmergency)
         {
             return CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR;
         }
@@ -62,6 +64,15 @@ LOCAL IMS_SINT32 GetGeolocationPidfAllowedType(IN const CallInfo& objCallInfo)
             return CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR;
         }
     }
+}
+
+LOCAL
+IMS_BOOL IsWifiRegistered(IN IMtcAosConnector* pAosConnector)
+{
+    IMS_UINT32 nAosRegisteredNetworkType =
+            pAosConnector ? pAosConnector->GetRegisteredNetworkType() : NW_REPORT_RADIO_INVALID;
+
+    return nAosRegisteredNetworkType == NW_REPORT_RADIO_WLAN;
 }
 
 PUBLIC
@@ -74,14 +85,12 @@ PUBLIC MtcLocationObject::~MtcLocationObject() {}
 
 PUBLIC GLOBAL IMS_BOOL MtcLocationObject::IsGeolocationInfoRequired(IN IMtcCallContext& objContext)
 {
-    IMS_SINT32 nType = GetGeolocationPidfAllowedType(objContext.GetCallInfo());
-    if (!objContext.GetConfigurationProxy().Is(
-            Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE, nType))
-    {
-        return IMS_FALSE;
-    }
+    IMS_SINT32 nType = GetGeolocationPidfAllowedType(objContext.GetCallInfo().bEmergency,
+            IsWifiRegistered(objContext.GetService().GetAosConnector()));
 
-    return IMS_TRUE;
+    return objContext.GetConfigurationProxy().Is(
+            Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE, nType);
+
     // TODO: Check if we can remove this SuppType
     // return objContext.GetSupplementaryService().Get(SuppType::GEOLOCATION)->bValue;
 }
@@ -155,10 +164,9 @@ ByteArray MtcLocationObject::CreateLocationBody() const
 PRIVATE
 IMS_SINT32 MtcLocationObject::GetInformationLevel() const
 {
-    const CallInfo& objCallInfo = m_objContext.GetCallInfo();
     return m_objContext.GetConfigurationProxy().GetInt(
-            Feature::INFORMATION_LEVEL_OF_GEOLOCATION_PIDF, objCallInfo.bEmergency,
-            objCallInfo.bWifi);
+            Feature::INFORMATION_LEVEL_OF_GEOLOCATION_PIDF, m_objContext.GetCallInfo().bEmergency,
+            IsWifiRegistered(m_objContext.GetService().GetAosConnector()));
 }
 
 PRIVATE

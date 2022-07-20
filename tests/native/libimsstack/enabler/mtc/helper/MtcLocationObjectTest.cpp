@@ -15,17 +15,126 @@
  */
 
 #include <gtest/gtest.h>
+#include "CarrierConfig.h"
+#include "INetworkWatcher.h"
+#include "MockIMtcService.h"
+#include "call/IMtcCall.h"
+#include "call/MockIMtcCallContext.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "helper/MockIMtcAosConnector.h"
 #include "helper/MtcLocationObject.h"
 
-namespace android
-{
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 class MtcLocationObjectTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MockIMtcCallContext objContext;
+    MockIMtcService objService;
+    MockIMtcAosConnector objAosConnector;
+    MockIMtcConfigurationManager* pConfigurationManager;
+    MtcConfigurationProxy* pConfigurationProxy;
+    CallInfo objCallInfo;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override
+    {
+        ON_CALL(objContext, GetCallInfo)
+                .WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetService)
+                .WillByDefault(ReturnRef(objService));
+
+        pConfigurationManager = new MockIMtcConfigurationManager();
+        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        ON_CALL(objContext, GetConfigurationProxy)
+                .WillByDefault(ReturnRef(*pConfigurationProxy));
+    }
+
+    virtual void TearDown() override
+    {
+        delete pConfigurationProxy;
+    }
 };
 
-}  // namespace android
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfAosConnectorIsNull)
+{
+    ON_CALL(objService, GetAosConnector())
+            .WillByDefault(Return(nullptr));
+
+    EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiNormal)
+{
+    const IMS_BOOL bConfig = IMS_TRUE;
+
+    ON_CALL(*pConfigurationManager,
+            IsSupportGeolocationPidfInSipInvite(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
+            .WillByDefault(Return(bConfig));
+
+    objCallInfo.bEmergency = IMS_FALSE;
+
+    ON_CALL(objAosConnector, GetRegisteredNetworkType)
+            .WillByDefault(Return(NW_REPORT_RADIO_WLAN));
+    ON_CALL(objService, GetAosConnector())
+            .WillByDefault(Return(&objAosConnector));
+
+    EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiEmergency)
+{
+    const IMS_BOOL bConfig = IMS_TRUE;
+    ON_CALL(*pConfigurationManager,
+            IsSupportGeolocationPidfInSipInvite(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI))
+            .WillByDefault(Return(bConfig));
+
+    objCallInfo.bEmergency = IMS_TRUE;
+
+    ON_CALL(objAosConnector, GetRegisteredNetworkType)
+            .WillByDefault(Return(NW_REPORT_RADIO_WLAN));
+    ON_CALL(objService, GetAosConnector())
+            .WillByDefault(Return(&objAosConnector));
+
+    EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularNormal)
+{
+    const IMS_BOOL bConfig = IMS_TRUE;
+    ON_CALL(*pConfigurationManager,
+            IsSupportGeolocationPidfInSipInvite(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(bConfig));
+
+    objCallInfo.bEmergency = IMS_FALSE;
+
+    ON_CALL(objAosConnector, GetRegisteredNetworkType)
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objService, GetAosConnector())
+            .WillByDefault(Return(&objAosConnector));
+
+    EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularEmergency)
+{
+    const IMS_BOOL bConfig = IMS_TRUE;
+    ON_CALL(*pConfigurationManager,
+            IsSupportGeolocationPidfInSipInvite(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(bConfig));
+
+    objCallInfo.bEmergency = IMS_TRUE;
+
+    ON_CALL(objAosConnector, GetRegisteredNetworkType)
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objService, GetAosConnector())
+            .WillByDefault(Return(&objAosConnector));
+
+    EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}

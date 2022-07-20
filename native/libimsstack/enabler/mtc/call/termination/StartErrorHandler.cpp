@@ -18,6 +18,7 @@
 #include "IMessage.h"
 #include "Ims3gpp.h"
 #include "ImsAosParameter.h"
+#include "INetworkWatcher.h"
 #include "ISipHeader.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"
@@ -66,9 +67,8 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
         return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 
-    Feature eFeature = m_objContext.GetCallInfo().bWifi
-            ? Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL
-            : Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL;
+    Feature eFeature = IsWifiRegistered() ? Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL
+                                          : Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL;
 
     const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(eFeature);
     IMS_SINT32 nReason = CODE_NETWORK_RESP_TIMEOUT;
@@ -434,6 +434,16 @@ IMS_BOOL StartErrorHandler::HasEmergencyServiceTypeInBody(IN const IMessage& obj
 
     return objIms3gpp.GetAlternativeService().GetType() ==
             Ims3gpp::AlternativeService::TYPE_EMERGENCY;
+}
+
+PRIVATE
+IMS_BOOL StartErrorHandler::IsWifiRegistered() const
+{
+    IMtcAosConnector* pAosConnector = GetAosConnector();
+    IMS_UINT32 nAosRegisteredNetworkType =
+            pAosConnector ? pAosConnector->GetRegisteredNetworkType() : NW_REPORT_RADIO_INVALID;
+
+    return nAosRegisteredNetworkType == NW_REPORT_RADIO_WLAN;
 }
 
 PRIVATE

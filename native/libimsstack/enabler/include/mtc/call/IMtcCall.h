@@ -171,7 +171,6 @@ public:
     explicit CallInfo() :
             ePeerType(PeerType::MO),
             eInitialCallType(CallType::VOIP),
-            bWifi(IMS_FALSE),
             bEmergency(IMS_FALSE),
             bOffline(IMS_FALSE),
             bUssi(IMS_FALSE),
@@ -182,7 +181,6 @@ public:
     explicit CallInfo(IN const CallInfo& objRhs) :
             ePeerType(objRhs.ePeerType),
             eInitialCallType(objRhs.eInitialCallType),
-            bWifi(objRhs.bWifi),
             bEmergency(objRhs.bEmergency),
             bOffline(objRhs.bOffline),
             bUssi(objRhs.bUssi),
@@ -196,7 +194,6 @@ public:
         {
             ePeerType = objRhs.ePeerType;
             eInitialCallType = objRhs.eInitialCallType;
-            bWifi = objRhs.bWifi;
             bEmergency = objRhs.bEmergency;
             bOffline = objRhs.bOffline;
             bUssi = objRhs.bUssi;
@@ -214,9 +211,8 @@ public:
         }
 
         return ePeerType == objRhs.ePeerType && eInitialCallType == objRhs.eInitialCallType &&
-                bWifi == objRhs.bWifi && bEmergency == objRhs.bEmergency &&
-                bOffline == objRhs.bOffline && bUssi == objRhs.bUssi &&
-                bConference == objRhs.bConference;
+                bEmergency == objRhs.bEmergency && bOffline == objRhs.bOffline &&
+                bUssi == objRhs.bUssi && bConference == objRhs.bConference;
     }
 
     IMS_BOOL operator!=(const CallInfo& objRhs) const
@@ -227,7 +223,6 @@ public:
 public:
     PeerType ePeerType;
     CallType eInitialCallType;
-    IMS_BOOL bWifi;
     IMS_BOOL bEmergency;
     IMS_BOOL bOffline;
     IMS_BOOL bUssi;
