@@ -17,7 +17,6 @@
 #ifndef _MEDIA_MANAGER_H_
 #define _MEDIA_MANAGER_H_
 
-// == INCLUDES =========================================================
 #include "IUMedia.h"
 #include "ServiceEvent.h"
 #include "IEventListener.h"
@@ -57,32 +56,61 @@ public:
     static AString GetThreadName(IN IMS_SINT32 nSlotId);
     MediaMsgHandler* GetHandler(IN IMS_SINTP nCallKey);
     virtual void SetJniMediaSessionThread(IN IMS_SINTP nCallKey, IN JniMediaSessionThread* pThread);
+    virtual void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
 
     /**
+     * @brief Creates a MediaSession instacne with the service type and assign the jni thread
+     * instance to communicate with jni thread to send and receive a message from java layer
      *
+     * @param nService service type, normal or emergency
+     * @param callKey The key to identify the call session, each MediaSession has a unique key to
+     * match with the call session
+     * @param pThread jni thread instance for message communication
+     * @return MediaSession* created MediaSession instance
      */
     MediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP callKey,
             IN JniMediaSessionThread* pThread);
 
     /**
+     * @brief Destroys the MediaSession instance
      *
+     * @param pSession The instance to destroy
      */
     void DestroySession(IN MediaSession* pSession);
 
     /**
+     * @brief Gets MediaSession instance
      *
+     * @param nCallKey The key to identify the session instance
+     * @return MediaSession* The instance matched with the key, NULL if there is not matched session
      */
     MediaSession* GetSession(IN IMS_SINTP nCallKey);
 
     /**
+     * @brief Gets the MediaResourceMngr instance
      *
+     * @return MediaResourceMngr*
      */
     MediaResourceMngr* GetResourceManager();
 
-    void OnResponse(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
-    void OnVideoMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
+    /**
+     * @brief Sends a request message from native to java layer
+     *
+     * @param eEvent enum of message event. It is define in IMMedia.h
+     * @param nCallKey The key to identify the call session
+     * @param param additional message parameters
+     * @return IMS_BOOL
+     */
     IMS_BOOL handleRequestMsg(
             IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param);
+
+    /**
+     * @brief Hold the session not mached with the call key
+     *
+     * @param nCallKey The key identification of the session
+     * @return IMS_BOOL Returns IMS_FALSE when the hold session operation has any error. Returns
+     * IMS_TRUE when there is no error during the operation
+     */
     IMS_BOOL OtherSessionHold(IN IMS_SINTP nCallKey);
 
 private:
@@ -97,25 +125,24 @@ private:
     void DeleteMediaSessionNode(IN MediaSessionNode* pSessionNode, IMS_UINT32 nIndex);
 
     /**
+     * @brief Finds MediaSessionNode with the parameter
      *
+     * @param nCallKey session node identification
+     * @return MediaSessionNode*
      */
     virtual MediaSessionNode* FindSessionNode(IN IMS_SINTP nCallKey);
 
     /**
+     * @brief Sends message to repective session
      *
+     * @param nMsg enum of message
+     * @param nCallKey session identification
+     * @param pParam message parameter
+     * @return IMS_BOOL IMS_TRUE when the message is deliverd successfully, IMS_FALSE when it fails
      */
     virtual IMS_BOOL SendMessageToSessions(
             IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
 
-    // == PROTECTED METHOD ==========================================================
-protected:
-
-    /**
-     *
-     */
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
-
-    // == PRIVATE VARIABLE ============================================================
 protected:
     static IMSMap<IMS_SINT32, MediaManager*> m_objMapMediaManager;
     IMS_SINT32 m_nSlotId;

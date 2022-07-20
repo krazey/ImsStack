@@ -24,29 +24,43 @@
 class MediaMsgHandler
 {
 public:
-    MediaMsgHandler(IMS_SINT32 _nAppId);
+    MediaMsgHandler();
     virtual ~MediaMsgHandler();
 
-    // == PUBLIC METHOD ==============================================================
-public:
-    void SetListener(IN const AString& strName);
-    void SetJniMediaSessionThread(IN JniMediaSessionThread* pThread);
-    IMS_BOOL IsAvailableToSend();
-    IMS_BOOL SendMessageToMediaService(IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam);
-    /*
-        void SendMessageToUi(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
-            IN IMS_UINT32 eResult);
-        void OnRttReceivedInd(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
-            IN IUMediaRttDataParam* pParam);
-        void OnRttAudioIndicator(IN IMS_UINTP nCallKey, IN IMS_SINT32 eEvent,
-            IN IMS_UINT32 eRttAudioInd);
-        void OnDataUsageChanged(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
-            IN IUMediaDataUsageInfoParam* pParam);
-    */
-    // == PRIVATE VARIABLE ============================================================
+    /**
+     * @brief Set the JniMediaSesson thread name
+     *
+     * @param strName The thread name of JniMediaSession is using in this call
+     */
+    virtual void SetListener(IN const AString& strName);
+
+    /**
+     * @brief Set the JniMediaSessionThread instance to get the message from the jni layer
+     *
+     * @param pThread
+     */
+    virtual void SetJniMediaSessionThread(IN JniMediaSessionThread* pThread);
+
+    /**
+     * @brief
+     *
+     * @return IMS_BOOL
+     */
+    virtual IMS_BOOL IsAvailableToSend();
+
+    /**
+     * @brief Send jni request message to media service
+     *
+     * @param eEvent The message event enum
+     * @param pParam The event parameters to send
+     * @return IMS_BOOL Returns IMS_TRUE when the message deliverd without error, IMS_FALSE when it
+     * is failed to send
+     */
+    virtual IMS_BOOL SendMessageToMediaService(
+            IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam);
+
 private:
-    IMS_SINT32 nAppId;
-    AString strListenerThread;
+    AString m_strListenerThread;
     JniMediaSessionThread* m_pThread;
 };
 #endif /* _MEDIA_MSG_HANDLER_H_ */

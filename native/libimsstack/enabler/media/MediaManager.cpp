@@ -46,6 +46,7 @@ MediaManager::MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId) :
 PRIVATE VIRTUAL MediaManager::~MediaManager()
 {
     IMS_SLONG nIndex = m_objMapMediaManager.GetIndexOfKey(m_nSlotId);
+
     if (nIndex >= 0)
     {
         m_objMapMediaManager.RemoveAt(nIndex);
@@ -75,6 +76,7 @@ MediaManager* MediaManager::GetInstance(IN IMS_SINT32 nSlotId)
 {
     IMS_SLONG nIndex = m_objMapMediaManager.GetIndexOfKey(nSlotId);
     MediaManager* pMediaManager = IMS_NULL;
+
     if (nIndex < 0)
     {
         pMediaManager = new MediaManager("MediaManager", nSlotId);
@@ -84,6 +86,7 @@ MediaManager* MediaManager::GetInstance(IN IMS_SINT32 nSlotId)
     {
         pMediaManager = m_objMapMediaManager.GetValueAt(nIndex);
     }
+
     return pMediaManager;
 }
 
@@ -99,10 +102,12 @@ PUBLIC
 MediaMsgHandler* MediaManager::GetHandler(IN IMS_SINTP nCallKey)
 {
     MediaSessionNode* pSessionNode = FindSessionNode(nCallKey);
+
     if (pSessionNode == IMS_NULL)
     {
         return IMS_NULL;
     }
+
     return pSessionNode->pMessageHandler;
 }
 
@@ -110,6 +115,7 @@ PUBLIC VIRTUAL void MediaManager::SetJniMediaSessionThread(
         IN IMS_SINTP nCallKey, IN JniMediaSessionThread* pThread)
 {
     MediaMsgHandler* pHandler = GetHandler(nCallKey);
+
     if (pHandler != IMS_NULL)
     {
         pHandler->SetJniMediaSessionThread(pThread);
@@ -123,12 +129,13 @@ MediaSession* MediaManager::CreateSession(
     IMS_TRACE_D("CreateSession() - CallKey[%d], nService[%d]", nCallKey, nService, 0);
 
     MediaSession* pSession = new MediaSession(nService, nCallKey, m_nSlotId);
+
     if (pSession == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    MediaMsgHandler* pHandler = new MediaMsgHandler(IUIMS::APP_MTC);
+    MediaMsgHandler* pHandler = new MediaMsgHandler();
 
     if (pHandler != IMS_NULL && pThread != IMS_NULL)
     {
@@ -179,25 +186,16 @@ MediaResourceMngr* MediaManager::GetResourceManager()
     return m_pResourceMngr;
 }
 
-PUBLIC VIRTUAL void MediaManager::OnResponse(
-        IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam)
-{
-    IMS_TRACE_I("OnResponse() - MSG[%d, %s], CallKey[%d]", nMsg, IMMedia::PrintMsg(nMsg), nCallKey);
-    if (SendMessageToSessions(nMsg, nCallKey, pParam) != IMS_TRUE)
-    {
-        IMS_TRACE_E(0, "OnResponse() - Fail to process nMsg", 0, 0, 0);
-        return;
-    }
-}
-
-PUBLIC VIRTUAL void MediaManager::OnVideoMessage(
+PUBLIC VIRTUAL void MediaManager::SendMessage(
         IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam)
 {
     IMS_TRACE_I(
-            "OnVideoMessage() - MSG[%d, %s], CallKey[%d]", nMsg, IMMedia::PrintMsg(nMsg), nCallKey);
+            "SendMessage() - MSG[%d, %s], CallKey[%d]", nMsg, IMMedia::PrintMsg(nMsg), nCallKey);
+
     if (SendMessageToSessions(nMsg, nCallKey, pParam) != IMS_TRUE)
     {
-        IMS_TRACE_E(0, "OnVideoMessage() - Fail to process nMsg", 0, 0, 0);
+        IMS_TRACE_E(0, "SendMessage() - Fail to process nMsg", 0, 0, 0);
+        return;
     }
 }
 
@@ -328,11 +326,5 @@ PRIVATE VIRTUAL IMS_BOOL MediaManager::SendMessageToSessions(
         }
     }
 
-    return IMS_TRUE;
-}
-
-PROTECTED VIRTUAL IMS_BOOL MediaManager::OnMessage(IN IMSMSG& objMsg)
-{
-    (void)objMsg;
     return IMS_TRUE;
 }

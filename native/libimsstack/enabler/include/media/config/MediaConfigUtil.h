@@ -14,23 +14,29 @@
  * limitations under the License.
  */
 
-#ifndef _INTERFACE_MEDIA_SESSION_LISTENER_H_
-#define _INTERFACE_MEDIA_SESSION_LISTENER_H_
+#ifndef _IMS_MEDIA_CONFIG_UTIL_H_
+#define _IMS_MEDIA_CONFIG_UTIL_H_
 
 #include "MediaDef.h"
-#include "IMMedia.h"
+#include "MediaSessionConfigFactory.h"
+#include "AudioConfiguration.h"
 
-class IMediaSessionListener
+class MediaConfigUtil
 {
 public:
     /**
-     * @brief Send request message to java
+     * @brief Get the AudioConfiguration object with given parameter
      *
-     * @param eEvent The event defined in IMMedia.h
-     * @param pParam The parameter of the event
-     * @return IMS_BOOL Return IMS_TRUE if the event sent without error
+     * @param nSlotId The UICC slot id
+     * @param type MEDIA_SERVICE_TYPE defined in MediaDef.h
+     * @return AudioConfiguration*
      */
-    virtual IMS_BOOL MediaSession_SendMsgToMediaManager(
-            IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam) = 0;
+    static AudioConfiguration* GetAudioConfig(IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE type)
+    {
+        return MediaSessionConfigFactory::GetInstance()
+                ->FindMediaSessionConfig(nSlotId, type)
+                ->GetAudioConfiguration();
+    }
 };
-#endif /* _INTERFACE_MEDIA_SESSION_LISTENER_H_ */
+
+#endif

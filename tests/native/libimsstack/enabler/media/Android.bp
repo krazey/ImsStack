@@ -20,5 +20,8 @@ cc_test {
     srcs: [
         "**/*.cpp",
     ],
+    include_dirs: [
+        "packages/modules/ImsStack/tests/native/libimsstack/enabler/include/media",
+    ],
     test_config: "ImsStackNativeEnablerMediaTests.xml",
 }

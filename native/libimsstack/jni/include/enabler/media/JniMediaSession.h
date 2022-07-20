@@ -51,10 +51,7 @@ private:
     void OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnNotifyMediaDetach(IN IMS_SINT32 nMsg);
-    void OnCmdSetSurface(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-    void OnCmdSelectCamera(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-    void OnCmdChangeCameraZoom(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-    void OnCmdOrientationChanged(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
+    void OnVideoMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
 
 private:

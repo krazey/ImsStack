@@ -26,17 +26,52 @@ class BaseSession
 public:
     BaseSession(IN IMS_SINT32 nSlodId = 0);
     virtual ~BaseSession();
+
+    /**
+     * @brief Set the media service type of the sesison
+     *
+     * @param eServiceType Defined MEDIA_SERVICE_TYPE in MediaDef.h
+     */
     virtual void SetServiceType(MEDIA_SERVICE_TYPE eServiceType);
+
+    /**
+     * @brief Set the listener to MediaSession
+     *
+     * @param pListener The listener instance to set
+     */
     virtual void SetMediaSessionListener(IN IMediaSessionListener* pListener);
+
+    /**
+     * @brief Set the MediaEnvironment instance to get the common parameters of the call
+     *
+     * @param pEnvironment The instance to set
+     */
     virtual void SetMediaEnvironment(MediaEnvironment* pEnvironment);
+
+    /**
+     * @brief Set the media direction
+     *
+     * @param eDir the media direction to set
+     */
     virtual void SetDirection(MEDIA_DIRECTION eDir);
+
+    /**
+     * @brief Get the session state
+     *
+     * @return IMS_SINT32 The state
+     */
     virtual IMS_SINT32 GetState();
-    //    virtual IMS_BOOL IsSameRemoteNetwork(IPAddress address, IMS_UINT32 port);
-    // do it later : IsSameRemoteNetwork is currently not used
+
+    /**
+     * @brief Set the session state
+     *
+     * @param state The state to set
+     */
+    virtual void SetState(IMS_SINT32 state);
 
 protected:
     IMS_SINT32 m_nSlodId;
-    IMediaSessionListener* m_piMediaSessionListener;  // to MediaSession
+    IMediaSessionListener* m_piMediaSessionListener;
     MediaEnvironment* m_pEnvironment;
     MEDIA_DIRECTION m_eEnforcedDirection;
     IMS_SINT32 m_nState;

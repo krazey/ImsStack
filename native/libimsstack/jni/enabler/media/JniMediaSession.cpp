@@ -153,19 +153,16 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
         return;
     }
 
-    IMS_BOOL bNeedConfig = IMS_FALSE;
     switch (nMsg)
     {
         case IMMedia::RESPONSE_OPEN_SESSION:
-            bNeedConfig = IMS_FALSE;
-            OnResponses(nMsg, bNeedConfig, objParcel);
+            OnResponses(nMsg, IMS_FALSE, objParcel);
             break;
         case IMMedia::RESPONSE_MODIFY_SESSION:
         case IMMedia::RESPONSE_ADD_CONFIG:
         case IMMedia::RESPONSE_CONFIRM_CONFIG:
         case IMMedia::NOTIFY_FIRST_PACKET:
-            bNeedConfig = IMS_TRUE;
-            OnResponses(nMsg, bNeedConfig, objParcel);
+            OnResponses(nMsg, IMS_TRUE, objParcel);
             break;
         case IMMedia::NOTIFY_MEDIA_INACTIVITY:
             OnNofityMediaInactitivy(nMsg, objParcel);
@@ -192,16 +189,10 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
             OnNotifyMediaDetach(nMsg);
             break;
         case IMMedia::SETSURFACE_CMD:
-            OnCmdSetSurface(nMsg, objParcel);
-            break;
         case IMMedia::SELECT_CAMERA_CMD:
-            OnCmdSelectCamera(nMsg, objParcel);
-            break;
         case IMMedia::CHANGE_CAMERA_ZOOM_CMD:
-            OnCmdChangeCameraZoom(nMsg, objParcel);
-            break;
         case IMMedia::CHANGE_ORIENTATION_CMD:
-            OnCmdOrientationChanged(nMsg, objParcel);
+            OnVideoMessage(nMsg, objParcel);
             break;
         default:
             IMS_TRACE_E(0, "HandleMessage() unhandled message", 0, 0, 0);
@@ -237,22 +228,36 @@ PRIVATE
 void JniMediaSession::OnResponses(
         IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig, IN const android::Parcel& objParcel)
 {
-    ImsMediaResponseConfigParam* pParam = new ImsMediaResponseConfigParam();
+    MEDIA_CONTENT_TYPE eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
 
-    pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
-    IMS_TRACE_D("OnResponses() m_eMediaType[%d], bNeedConfig[%d], m_nCallKey[%d]",
+    ImsMediaResponseConfigParam* pParam = new ImsMediaResponseConfigParam();
+    pParam->m_eMediaType = eMediaType;
+
+    IMS_TRACE_D("OnResponses() - eMediaType[%d], bNeedConfig[%d], nCallKey[%d]",
             pParam->m_eMediaType, bNeedConfig, m_nCallKey);
 
     if (bNeedConfig == IMS_TRUE)
     {
-        pParam->m_objAudioConfig.readFromParcel(&objParcel);
-    }
-    if (nMsg != IMMedia::NOTIFY_FIRST_PACKET)
-    {
-        pParam->m_eResult = (RtpError)(objParcel.readInt32());
+        if (pParam->m_eMediaType == MEDIA_TYPE_AUDIO)
+        {
+            AudioConfig* pConfig = new AudioConfig();
+            pConfig->readFromParcel(&objParcel);
+            pParam->m_pConfig = pConfig;
+        }
+        else if (pParam->m_eMediaType == MEDIA_TYPE_VIDEO)
+        {
+            VideoConfig* pConfig = new VideoConfig();
+            pConfig->readFromParcel(&objParcel);
+            pParam->m_pConfig = pConfig;
+        }
     }
 
-    m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    if (nMsg != IMMedia::NOTIFY_FIRST_PACKET)
+    {
+        pParam->m_eResult = objParcel.readInt32();
+    }
+
+    m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
 PRIVATE
@@ -264,7 +269,7 @@ void JniMediaSession::OnNofityMediaInactitivy(
     pParam->m_eMediaType = ConvertToMediaType(static_cast<SessionType>(objParcel.readInt32()));
     pParam->m_eMediaProtocolType = static_cast<ProtocolType>(objParcel.readInt32());
 
-    m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
 PRIVATE
@@ -275,7 +280,7 @@ void JniMediaSession::OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const android:
     pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
     pParam->m_nResponse = objParcel.readInt32();
 
-    m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
 PRIVATE
@@ -284,14 +289,6 @@ void JniMediaSession::OnNofityCallQualityChange(
 {
     (void)nMsg;
     (void)objParcel;
-    /*
-        ImsMediaNotifyQualityParam* pParam = new ImsMediaNotifyQualityParam();
-
-        pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
-        // to do later :: CallQuality -> Param
-
-        m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
-    */
 }
 
 PRIVATE
@@ -300,13 +297,6 @@ void JniMediaSession::OnResponseSessionChanged(
 {
     (void)nMsg;
     (void)objParcel;
-    /*
-        ImsMediaSessionChangedParam* pParam = new ImsMediaSessionChangedParam();
-
-        pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
-
-        m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
-    */ // NEXT_ITEM :: OnSessionChanged
 }
 
 PRIVATE
@@ -315,13 +305,19 @@ void JniMediaSession::OnNofityHeaderExtension(
 {
     (void)nMsg;
     (void)objParcel;
-    /*
+    /** TODO: add implementation later
         ImsMediaHeaderExtensionParam* pParam = new ImsMediaHeaderExtensionParam();
 
         pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
 
-        m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
-    */ // NEXT_ITEM :: OnNofityHeaderExtension
+        m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    */
+}
+
+PRIVATE
+void JniMediaSession::OnNotifyMediaDetach(IN IMS_SINT32 nMsg)
+{
+    m_piMediaManager->SendMessage(nMsg, m_nCallKey, IMS_NULL);
 }
 
 PRIVATE
@@ -336,46 +332,15 @@ void JniMediaSession::OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const android::Parc
     pParam->m_nPort = objParcel.readInt32();
     pParam->m_bResult = (IMS_BOOL)objParcel.readBool();
 
-    m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
 PRIVATE
-void JniMediaSession::OnNotifyMediaDetach(IN IMS_SINT32 nMsg)
-{
-    m_piMediaManager->OnResponse(nMsg, m_nCallKey, IMS_NULL);
-}
-
-PRIVATE
-void JniMediaSession::OnCmdSetSurface(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+void JniMediaSession::OnVideoMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
     ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
     pParam->nValue = objParcel.readInt32();
-    m_piMediaManager->OnVideoMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
-}
-
-PRIVATE
-void JniMediaSession::OnCmdSelectCamera(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
-{
-    ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
-    pParam->nValue = objParcel.readInt32();
-    m_piMediaManager->OnVideoMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
-}
-
-PRIVATE
-void JniMediaSession::OnCmdChangeCameraZoom(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
-{
-    ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
-    pParam->nValue = objParcel.readInt32();
-    m_piMediaManager->OnVideoMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
-}
-
-PRIVATE
-void JniMediaSession::OnCmdOrientationChanged(
-        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
-{
-    ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
-    pParam->nValue = objParcel.readInt32();
-    m_piMediaManager->OnVideoMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
 PRIVATE

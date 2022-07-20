@@ -32,32 +32,83 @@ class AudioMediaSession : public BaseSession
 public:
     enum
     {
+        /** The default state when the instance is just created*/
         STATE_NONE = 0,
+        /** The state that the openSession is done */
         STATE_IDLE,
+        /** The state that the rtp/rtcp stream is running */
         STATE_LIVE,
+        /** The state that the rtp stream is stopped but the rtcp stream is running */
         STATE_PAUSED,
     };
 
     AudioMediaSession(IN IMS_SINT32 nSlodId = 0);
     virtual ~AudioMediaSession();
+
+    /**
+     * @brief Set the negotiation id
+     *
+     * @param nNegoId The unique identification of the AudioMediaSession instance
+     */
     void SetNegoId(IMS_UINTP nNegoId);
+
+    /**
+     * @brief Check the negotiation id is same with given parameter
+     *
+     * @param nNegoId The id to check
+     * @return IMS_BOOL Returns IMS_TRUE when it is same, IMS_FALSE when it is different with
+     * parameters
+     */
     IMS_BOOL IsSameNegoId(IMS_UINTP nNegoId);
+
+    /**
+     * @brief Set the audio configuration
+     *
+     * @param pConfig The AudioConfiguration instance to set
+     */
     void SetConfig(IN AudioConfiguration* pConfig);
 
-    /*
-     * Set AudioConfig for libimsmedia from src/dest/negotiated profile
-     * @param pSrcProfile : local profile of the SDP negotiation
-     * @param pDestProfile : peer profile of the SDP negotiation
+    /**
+     * @brief Set AudioConfig for libimsmedia from src/dest/negotiated profile
+     * @param pLocalProfile : local profile of the SDP negotiation
+     * @param pPeerProfile : peer profile of the SDP negotiation
      * @param pNegoProfile : negotiated profile of the SDP negotiation
      * return IMS_BOOL : false for error, true for successful
      */
-    IMS_BOOL UpdateRtpConfig(IN AudioProfile* pSrcProfile, IN AudioProfile* pDestProfile,
+    IMS_BOOL UpdateRtpConfig(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
             IN AudioProfile* pNegoProfile);
+
+    /**
+     * @brief Check the media direction is a hold type
+     *
+     * @return IMS_BOOL Returns IMS_TRUE when is it hold type, IMS_FALSE if it is not
+     */
     IMS_BOOL IsDirectionHold();
+
+    /**
+     * @brief Set the RtpConfig parameters for hold state
+     *
+     */
     void HoldRtpConfig();
-    IMS_BOOL UpdateMediaQualityThreshold(IN IMS_BOOL bIsHold, IN AudioProfile* audioProfile);
-    IMS_BOOL UpdateLocalEndPoint(IN AudioProfile* pNegoProfile);
-    void UpdateLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort);
+
+    /**
+     * @brief Update MediaQualityThreshold parameters and send it to the java
+     *
+     * @param bIsHold If it is IMS_TRUE, it has to set for the hold state
+     * @param bEnableRtcp Set IMS_TRUE to enable monitoring Rtcp inacitivity, IMS_FALSE to disable
+     * rtcp monitoring
+     * @return IMS_BOOL Returns IMS_TRUE when the sending MediaQualityThreshold is done
+     * successfully, IMS_FALSE when it is failed with invalid arguments
+     */
+    IMS_BOOL UpdateMediaQualityThreshold(IN IMS_BOOL bIsHold, IN IMS_BOOL bEnableRtcp);
+
+    /**
+     * @brief Set the local ip address and port number
+     *
+     * @param objLocalAddr The local ip address
+     * @param nPort The local port number
+     */
+    void SetLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort);
 
     /*
      * request OPEN_SESSION with updated AudioConfig
@@ -93,12 +144,15 @@ public:
      * request SET_MEDIA_QUALITY with Audio Media qualityThreshold
      */
     IMS_BOOL SetMediaQuality();
-    IMS_BOOL SendDtmf(IN IMS_CHAR cDtmfCode, IN IMS_SINT32 nDuration);
-    // notification - do it later
-    //    virtual void SendNotifyToListener(IN IMS_SINT32 nNotify);
-    //    virtual void SendNotifyInfoToListener(IMS_SINT32 nEvent, AString strNotifyInfo = IMS_NULL,
-    //        IMS_SINT32 nNotifyInfo = -1, IMS_BOOL bNotifyInfo = IMS_FALSE);
-    virtual void SendEventToUi(IN IMS_SINT32 nEvent, IN IMS_SINT32 nResult);
+
+    /**
+     * @brief Send a dtmf digit to the ImsMedia
+     *
+     * @param cDtmfCode The digit to send
+     * @return IMS_BOOL Return IMS_TRUE, when the send dtmf is done successfully, IMS_FALSE when it
+     * is failed
+     */
+    IMS_BOOL SendDtmf(IN IMS_CHAR cDtmfCode);
 
 protected:
     AudioConfiguration* m_pConfig;

@@ -487,11 +487,10 @@ IMS_BOOL VideoMediaSession::Open()
 
     if (m_piMediaSessionListener != IMS_NULL)
     {
-        ImsMediaMsgVideoOpenConfigParam* pParam = new ImsMediaMsgVideoOpenConfigParam();
-        pParam->m_eMediaType = MEDIA_TYPE_VIDEO;
+        ImsMediaMsgOpenConfigParam* pParam = new ImsMediaMsgOpenConfigParam(MEDIA_TYPE_VIDEO);
         pParam->m_objLocalAddress = m_objLocalAddress;
         pParam->m_nLocalPort = m_nLocalPort;
-        pParam->m_objVideoConfig = m_objVideoConfig;
+        pParam->m_pConfig = new VideoConfig(m_objVideoConfig);
         m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IMMedia::REQUEST_OPEN_SESSION, pParam);
 
@@ -520,9 +519,8 @@ IMS_BOOL VideoMediaSession::Modify()
 
     if (m_piMediaSessionListener != IMS_NULL && m_nState != STATE_IDLE)
     {
-        ImsMediaMsgVideoConfigParam* pParam = new ImsMediaMsgVideoConfigParam();
-        pParam->m_eMediaType = MEDIA_TYPE_VIDEO;
-        pParam->m_objVideoConfig = m_objVideoConfig;
+        ImsMediaMsgConfigParam* pParam = new ImsMediaMsgConfigParam(MEDIA_TYPE_VIDEO);
+        pParam->m_pConfig = new VideoConfig(m_objVideoConfig);
         m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IMMedia::REQUEST_MODIFY_SESSION, pParam);
 
@@ -545,8 +543,7 @@ IMS_BOOL VideoMediaSession::Close()
 
     if (m_piMediaSessionListener != IMS_NULL)
     {
-        ImsMediaMsgParamBase* pParam = new ImsMediaMsgParamBase();
-        pParam->m_eMediaType = MEDIA_TYPE_VIDEO;
+        ImsMediaMsgParamBase* pParam = new ImsMediaMsgParamBase(MEDIA_TYPE_VIDEO);
         m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IMMedia::REQUEST_CLOSE_SESSION, pParam);
 
@@ -564,25 +561,14 @@ IMS_BOOL VideoMediaSession::SetMediaQuality()
 
     if (m_piMediaSessionListener != IMS_NULL && m_nState != STATE_IDLE)
     {
-        ImsMediaMsgSetMediaQualityParam* pParam = new ImsMediaMsgSetMediaQualityParam();
-        pParam->m_eMediaType = MEDIA_TYPE_VIDEO;
+        ImsMediaMsgSetMediaQualityParam* pParam =
+                new ImsMediaMsgSetMediaQualityParam(MEDIA_TYPE_VIDEO);
         pParam->m_objMediaQualityThreshold = m_objMediaQualityThreshold;
 
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IMMedia::REQUEST_SET_MEDIA_QUALITY, pParam);
     }
     return bResult;
-}
-
-PUBLIC
-void VideoMediaSession::SendEventToUi(IMS_SINT32 nEvent, IMS_SINT32 nResult)
-{
-    IMS_TRACE_I("SendEventToUi() - nEvent[%d], nResult[%d]", nEvent, 0, 0);
-
-    if (nEvent != -1 && m_piMediaSessionListener != IMS_NULL)
-    {
-        m_piMediaSessionListener->MediaSession_SendEventToUi(nEvent, nResult);
-    }
 }
 
 PUBLIC

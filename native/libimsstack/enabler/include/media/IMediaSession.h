@@ -28,127 +28,194 @@
 #include "MediaNego.h"
 #include "audio/AudioDef.h"
 #include "video/VideoDef.h"
-// #include "text/TextDef.h"
+// #include "text/TextDef.h" TODO: add implementation later
 
 class IMediaSession
 {
 public:
     enum OptionType
     {
+        /** Set the port number of the media session directly from the mtc module */
         SET_RTP_PORT = 0,
-        SET_DIRECTION,
+        /** Set the session state is confirmed or not */
         SET_CONFIRMED_SESSION,
-        SET_DRA_REPORT_OPTION,
+        /** Set the media direction to update the SDP */
+        SET_DIRECTION,
+        /** Set the condition that video conference call is enabled */
         SET_CONFERENCE_ENABLE,
-        SET_CVO_SUPPORT,
+        /** Set the video fast update required */
         SEND_FAST_VIDEO_UPDATE,
+        SET_DRA_REPORT_OPTION,  // TODO : remove
     };
 
-    // -- Set Callback ----------------------------------------------------------------------------
-    virtual void SetMtcListener(IN IMediaSessionClientListener* pISessionListener);
+    /**
+     * @brief Set the mtc session listener
+     *
+     * @param pISessionListener The listener instance
+     */
+    virtual void SetMtcListener(IN IMediaSessionClientListener* pISessionListener) = 0;
 
-    // -- Environment Setting ---------------------------------------------------------------------
-    virtual IMS_BOOL SetEnvironment(IN MediaEnvironment* pEnvironment);
+    /**
+     * @brief Set the MediaEnvironment instance for getting common parameter
+     *
+     * @param pEnvironment The instance to set
+     * @return IMS_BOOL Returns IMS_TRUE when parameter is valid, IMS_FALSE when it is invalid
+     */
+    virtual IMS_BOOL SetEnvironment(IN MediaEnvironment* pEnvironment) = 0;
 
-    // -- Negotiation APIs ------------------------------------------------------------------------
+    /**
+     * @brief Create a session instance of the Audio/Video/TextMediaSession. If the argument nego id
+     * is not zero, session will be created as a forking session from the session of the negotiated
+     * id
+     *
+     * @param nNegoID The identification of the session
+     * @param eMediaType The type of session
+     * @return IMS_UINTP Returns identification of the Audio/Video/TextMediaSession instance
+     * represents call dialog
+     */
     virtual IMS_UINTP CreateProfile(
             IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) = 0;
+
+    /**
+     * @brief Destroy a session instance of the Audio/Video/TextMediaSession with the given
+     * negotiation id
+     *
+     * @param nNegoID The identification of the session
+     * @return IMS_BOOL Returns IMS_TRUE when the destroy the profile successfully
+     */
     virtual IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID) = 0;
+
+    /**
+     * @brief Form the SDP to the target dialog with the direction parameters for each
+     * Audio/Video/TestMediaSession
+     *
+     * @param nNegoID The identification of the session
+     * @param pSession The SDP module to put the formed SDP
+     * @param eMediaType The type of media
+     * @param eAudioDir The direction of audio m-line in SDP to form
+     * @param eVideoDir The direction of video m-line in SDP to form
+     * @param eTextDir The direction of text m-line in SDP to form
+     * @return IMS_BOOL Returns IMS_TRUE when form SDP successfully, IMS_FALSE when it is failed
+     */
     virtual IMS_BOOL FormSDP(IN IMS_UINTP nNegoID, OUT ISession* pSession,
             IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 eAudioDir, IN IMS_SINT32 eVideoDir,
             IN IMS_SINT32 eTextDir = -1) = 0;
+
+    /**
+     * @brief Negotiate the SDP to the target dialog with the direction parameters for each
+     * Audio/Video/TestMediaSession
+     *
+     * @param nNegoID The identification of the session
+     * @param pSession The SDP module to get the SDP parameter to negotiated
+     * @param eMediaType The type of media
+     * @param eAudioDir The direction of audio m-line in SDP to negotiate
+     * @param eVideoDir The direction of video m-line in SDP to negotiate
+     * @param eTextDir The direction of text m-line in SDP to negotiate
+     * @param errorReason The error reason when the negotiation is failed
+     * @return IMS_BOOL Returns IMS_TRUE when negotiate SDP successfully
+     */
     virtual IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID, IN ISession* pSession,
             OUT IMS_SINT32* eAudioDir, OUT IMS_SINT32* eVideoDir, OUT IMS_SINT32* eTextDir,
             OUT MediaNego::MediaNegoResult& errorReason) = 0;
+
+    /**
+     * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
+     *
+     * @param nNegoID The negotiation id to clean the SDP set
+     * @param pSession SDP module to remove when it is necessary
+     */
     virtual void FinalizeSDP(IN IMS_UINTP nNegoID, IN ISession* pSession) = 0;
 
-    //-- Additional Negotiation APIs --------------------------------------------------------------
-
-    // -- Operation APIs --------------------------------------------------------------------------
+    /**
+     * @brief Runs target dialog to operate open/update/close session
+     *
+     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @return IMS_BOOL Returns IMS_TRUE when the opeation is done successfully, IMS_FALSE when it
+     * is failed
+     */
     virtual IMS_BOOL Run(IN IMS_UINTP nNegoID) = 0;
+
+    /**
+     * @brief Terminate the all media session in the call dialogs
+     *
+     * @return IMS_BOOL Returns IMS_TRUE when the termination is done successfully, IMS_FALSE when
+     * it is failed
+     */
     virtual IMS_BOOL Terminate() = 0;
 
-    //-- Additional Operation APIs-----------------------------------------------------------------
-
-    // -- Condition checking APIs
-    // -------------------------------------------------------------------------
+    /**
+     * @brief Get the negotiation state
+     *
+     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @return NEGO_STATE The nego state
+     */
     virtual NEGO_STATE GetNegoState(IN IMS_UINTP nNegoID) = 0;
-    virtual MEDIA_CONTENT_TYPE GetNegotiatedMediaType(IN IMS_UINTP nNegoId);
-    // virtual AString GetNegotiatedCodec(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type);
-    virtual IMS_SINT32 GetNegotiatedQuality(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type);
-    virtual IMS_SINT32 GetNegotiatedCodecBitrate(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type);
-    // virtual IMS_SINT32 GetNegotiatedCodecBandwidth(IN IMS_UINTP nNegoId,
-    //         IN MEDIA_CONTENT_TYPE type);
-    virtual MEDIA_DIRECTION GetNegotiatedDirection(
-            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
 
-    // -- Additional function APIs
-    // -------------------------------------------------------------------------
-    virtual void SetOptions(
-            IN IMS_UINTP nNegoId, IN OptionType type, IN IMS_SINT32 param1, IN IMS_SINT32 param2);
+    /**
+     * @brief Get the negotiated media type
+     *
+     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @return MEDIA_CONTENT_TYPE The media type
+     */
+    virtual MEDIA_CONTENT_TYPE GetNegotiatedMediaType(IN IMS_UINTP nNegoId) = 0;
+
+    /**
+     * @brief Get the negotiated media quality
+     *
+     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @param type The negotiated media type
+     * @return IMS_SINT32 Returns the quality of the target media type
+     */
+    virtual IMS_SINT32 GetNegotiatedQuality(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type) = 0;
+
+    /**
+     * @brief Get the negotiated codec bitrate
+     *
+     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @param type The negotiated media type
+     * @return IMS_SINT32 Returns the bitrate of the negotiated codec
+     */
+    virtual IMS_SINT32 GetNegotiatedCodecBitrate(
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type) = 0;
+
+    /**
+     * @brief Get the negotiated direction
+     *
+     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @param type The negotiated media type
+     * @return MEDIA_DIRECTION Returns media direction
+     */
+    virtual MEDIA_DIRECTION GetNegotiatedDirection(
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type) = 0;
+
+    /**
+     * @brief Set the additional update for the MediaSession
+     *
+     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @param type The additional option type
+     * @param param1 The optional parameter to set, if there is no optional parameter, it is zero
+     * @param param1 The optional parameter to set, if there is no optional parameter, it is zero
+     */
+    virtual void SetOptions(IN IMS_UINTP nNegoId, IN OptionType type, IN IMS_SINT32 param1,
+            IN IMS_SINT32 param2) = 0;
+
+    /**
+     * @brief Set the timer of waiting to check the rtp stream is received from the network
+     *
+     * @param eMediaType The media type to set the wait timer
+     * @param nRtpTimer The time in sec units to set
+     */
     virtual void SetNetworkToneRTPTimer(
             IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer) = 0;
-    virtual IMS_BOOL SendMessage(IN IMSMSG& objMSG) = 0;
-    virtual IMS_BOOL SendDtmf(
-            IN IMS_UINTP nNegoId, IN IMS_CHAR cDtmfCode, IN IMS_SINT32 nDuration) = 0;
 
-    // -- WILL BE DELETED -------------------------------------------------------------------------
-    // virtual MEDIA_SERVICE_TYPE GetMediaServiceType() = 0;
-    // virtual void SetMediaServiceType(IN MEDIA_SERVICE_TYPE nService) = 0;
-    // virtual void SetSessionId(IMS_UINTP nSessionID) = 0;
-    // virtual IMS_UINTP GetSessionID() = 0;
-    // virtual void SetHandlerListener(IN IMediaSessionHandlerListener*
-    // pIMediaSessionHandlerListener) = 0; virtual IMS_BOOL    UpdateServiceType(IN
-    // MEDIA_SERVICE_TYPE eServiceType) = 0; virtual void        SetAnalyzer(IN
-    // IAnalyzerCallSession* pAnalyzer) = 0; virtual IMS_BOOL SetCvoSupportValue(IN IMS_UINTP
-    // nNegoID, IN IMS_BOOL bIsSupportCvoMode) = 0; virtual IMS_BOOL    PauseVT() = 0; virtual
-    // IMS_BOOL    PreviewStart(IN IMS_UINTP nNegoID, IN IMS_UINTP nSurface, IN IMS_UINT32
-    // nCameraId) = 0; virtual IMS_BOOL    PreviewStop(IN IMS_UINTP nNegoID) = 0; virtual IMS_BOOL
-    // IsRunning(IMS_UINTP nNegoID) = 0;
-
-    // virtual IMS_BOOL    IsTerminated(IMS_UINTP nNegoID) = 0;
-    // virtual IMS_BOOL                HasNegotiatedDTMF(IN IMS_UINTP nNegoID) = 0;
-    // virtual IMS_BOOL                CheckOneWayVideoCall(IN IMS_UINTP nNegoID) = 0;
-    // virtual AUDIO_CODEC             GetNegotiatedAudioQuaility(IN IMS_UINTP nNegoID) = 0;
-    // virtual VIDEO_RESOLUTION        GetNegotiatedVideoQuaility(IN IMS_UINTP nNegoID) = 0;
-    // virtual TEXT_CODEC              GetNegotiatedTextQuaility(IN IMS_UINTP nNegoID) = 0;
-    // virtual MEDIA_DIRECTION         GetNegotiatedAudioDirection(IN IMS_UINTP nNegoID) = 0;
-    // virtual MEDIA_DIRECTION         GetNegotiatedVideoDirection(IN IMS_UINTP nNegoID) = 0;
-    // virtual MEDIA_DIRECTION         GetNegotiatedTextDirection(IN IMS_UINTP nNegoID) = 0;
-    // virtual AUDIO_CODEC_BITRATE     GetNegotiatedAudioCodecRate(IN IMS_UINTP nNegoID) = 0;
-    // virtual IMS_BOOL    SetRTPPort(IN IMS_UINTP nNegoID, IN IMS_UINT32 nAudioPort,
-    //         IN IMS_UINT32 nVideoPort,  IN IMS_UINT32 nTextPort = -1) = 0;
-    // virtual void        SetEnforcedDirection(IN MEDIA_DIRECTION eDir) = 0;
-    // virtual IMS_BOOL    Start(IN IMS_UINTP nNegoID, IN IMS_SINT32 eType = START_LIVE, IN IMS_BOOL
-    // bRTPMonitor = IMS_TRUE) = 0; virtual IMS_BOOL    Start(IN IMS_UINTP nNegoID, IN IMS_SINT32
-    // eType = START_LIVE, IN MEDIA_TRANSPORT_PROTOCOL eTimeoutCheckType = MEDIA_PROTOCOL_ANY,
-    //     IN IMS_SINT32 nMonitoringTimer = -1, IN MEDIA_CONTENT_TYPE eTimeoutCheckMedia =
-    //     MEDIA_TYPE_AUDIOVIDEOTEXT) = 0;
-    // virtual IMS_BOOL    Update(IN IMS_UINTP nNegoID, IN IMS_SINT32 eType = START_LIVE, IN
-    // IMS_BOOL bRTPMonitor = IMS_TRUE) = 0; virtual IMS_BOOL    Update(IN IMS_UINTP nNegoID, IN
-    // IMS_SINT32 eType = START_LIVE, IN MEDIA_TRANSPORT_PROTOCOL eTimeoutCheckType =
-    // MEDIA_PROTOCOL_ANY,
-    //    IN IMS_SINT32 nMonitoringTimer = -1, IN MEDIA_CONTENT_TYPE eTimeoutCheckMedia =
-    //    MEDIA_TYPE_AUDIOVIDEOTEXT) = 0;
-    // virtual IMS_BOOL    ResumeVT() = 0;
-    // virtual IMS_BOOL    SendFastVideoUpdate(void) = 0; //it need to only active video session.
-    // virtual IMS_BOOL    SendDTMF(IN IMS_CHAR* strSignal, IN IMS_SINT32 nDuration) = 0; //it need
-    // to only active audio session. virtual void        ResetRTPTimer(void) = 0; virtual void
-    // SetDRAStatsReportOption(IN IMS_UINT32 nAction) = 0; virtual void SetConfirmedSession(IN
-    // IMS_BOOL bIsConfirmed) = 0; // for RTCP-Bye packet at only Confirmed Session Stop virtual
-    // void SetIsConf(IN IMS_BOOL bIsConf = IMS_FALSE) = 0; // for LGU Video Confrence Call Surface
-    // Destroy Indication
-
-    // -- WOULD BE DELETED ------------------------------------------------------------------------
-    // virtual IMS_BOOL    IsPreview(void) = 0;
-    // virtual IMS_BOOL    SetGTTMode(IN IMS_SINT32 nGTTMode = -1) = 0;
-
-    // -- WILL Be Enabled on Phase2 ---------------------------------------------------------------
-
-    // -- WILL Be Enabled on Phase3 ---------------------------------------------------------------
-    // virtual IMS_BOOL GetNegotiatedCvoResult(IN IMS_UINTP nNegoID) = 0;
-
-    // -- WILL Be Enabled on Q3 -------------------------------------------------------------------
+    /**
+     * @brief Send the message event to the Audio/Video/TextMediaSession
+     *
+     * @param nMsg The message type
+     * @param pParam The message parameter
+     * @return IMS_BOOL Returns when the message is delivered to the target instance without error
+     */
+    virtual IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam) = 0;
 };
 
 #endif
