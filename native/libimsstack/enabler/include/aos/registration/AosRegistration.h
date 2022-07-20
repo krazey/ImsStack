@@ -52,6 +52,7 @@ class AosStaticProfile;
 class AosSubscription;
 
 enum class AosNetworkType;
+enum class AosReasonCode;
 
 class AosRegistration :
         public ImsActivityEx,
@@ -135,8 +136,9 @@ protected:
     IMS_BOOL UpdatePreloadedRoute(
             IN const AString& strPcscf = AString::ConstNull(), IN const IMS_UINT32 nPcscfPort = 0);
 
-    AosNetworkType GetNetworkTypeForImsRegState();
-    IMS_SINT32 GetRegIpcanCategory();
+    AosNetworkType GetNetworkTypeForImsRegState() const;
+    AosReasonCode GetReasonCode() const;
+    IMS_SINT32 GetRegIpcanCategory() const;
     IMS_UINT32 GetRegFeatures();
 
     /// Set Detail State
@@ -539,6 +541,9 @@ protected:
 
     /// the network that is notified with registration callback of telephony ims
     AosNetworkType m_eImsRegNetwork;
+
+    /// the reason code that is notified with registration callback of telephony ims
+    AosReasonCode m_eImsReasonCode;
 
     /// this is used to set SIP Profile on run-time
     RcPtr<SipProfile> m_pSipProfile;

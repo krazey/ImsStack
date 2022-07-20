@@ -126,6 +126,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_nImsRegState(IMS_REG_STATE_DEREGISTERED),
         m_nImsRegFeatures(ImsAosFeature::NONE),
         m_eImsRegNetwork(AosNetworkType::NONE),
+        m_eImsReasonCode(AosReasonCode::UNSPECIFIED),
         m_pSipProfile(IMS_NULL),
         m_nRegIpcanCategory(IIpcan::CATEGORY_MOBILE),
         m_nPdnReactivateWaitTime(30)
@@ -828,7 +829,7 @@ AString AosRegistration::FeatureToString()
 }
 
 PROTECTED
-AosNetworkType AosRegistration::GetNetworkTypeForImsRegState()
+AosNetworkType AosRegistration::GetNetworkTypeForImsRegState() const
 {
     if (m_pUtil->IsWifiTest())
     {
@@ -853,7 +854,13 @@ AosNetworkType AosRegistration::GetNetworkTypeForImsRegState()
 }
 
 PROTECTED
-IMS_SINT32 AosRegistration::GetRegIpcanCategory()
+AosReasonCode AosRegistration::GetReasonCode() const
+{
+    return m_eImsReasonCode;
+}
+
+PROTECTED
+IMS_SINT32 AosRegistration::GetRegIpcanCategory() const
 {
     return m_nRegIpcanCategory;
 }
@@ -924,7 +931,8 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
     {
         if (m_nImsRegState == IMS_REG_STATE_DEREGISTERED)
         {
-            piService->NotifyDeregistered(AosReasonCode::UNSPECIFIED);
+            piService->NotifyDeregistered(GetReasonCode());
+            m_eImsReasonCode = AosReasonCode::UNSPECIFIED;
         }
         else if (m_nImsRegState == IMS_REG_STATE_REGISTERING)
         {
@@ -4802,10 +4810,19 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(
         case AosSubscription::COMMAND_REG_REQUIRED:
             PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, nRetryAfter, 0);
             break;
+        case AosSubscription::COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR:
+            m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_BY_MISSING_911_ADDRESS;
+            PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, nRetryAfter, 0);
+            break;
         case AosSubscription::COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF:
             PostMessage(MSG_REG_REQUIRED_WITH_NEXT_PCSCF, 0, 0);
             break;
         case AosSubscription::COMMAND_REG_REQUIRED_WITH_REG_RETRY_TIME:
+            IncreaseConsecutiveFailCount();
+            PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, GetActualWaitTime(), 0);
+            break;
+        case AosSubscription::COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR_WITH_REG_RETRY_TIME:
+            m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_BY_MISSING_911_ADDRESS;
             IncreaseConsecutiveFailCount();
             PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, GetActualWaitTime(), 0);
             break;

@@ -230,26 +230,58 @@ enum class AosReasonCode
      */
     UNSPECIFIED = 0,
     /**
+     * Indicates that the IMS registration is failed with fatal error such as 403 or 404
+     * on all P-CSCF addresses. The radio shall block the current PLMN or disable
+     * the RAT
+     */
+    PLMN_BLOCK = 1,
+    /**
+     * Indicates that the IMS registration on current PLMN failed multiple times.
+     * The radio shall block the current PLMN or disable the RAT during the time
+     * based on carrier requirement
+     */
+    PLMN_BLOCK_WITH_TIMEOUT = 2,
+    /**
      * IMS Registration error code
      */
-    REGISTRATION_ERROR = 1000,
+    REGISTRATION_ERROR = 3,
     /**
-     * Indicates the registration attempt on IWLAN failed due to IKEv2 authetication failure
-     * during tunnel establishment.
+     * IMS Registration error code due to missing 911 address
      */
-    IKEV2_AUTH_FAILURE = 1408,
+    REGISTRATION_ERROR_BY_MISSING_911_ADDRESS = 4,
     /**
-     * Call/IMS registration failed/dropped because of a RLF
+     * Service unavailable; radio power off
      */
-    RADIO_LINK_FAILURE = 1506,
+    LOCAL_POWER_OFF = 5,
     /**
-     * Call/IMS registration failed/dropped because of radio link lost
+     * Service unavailable; low battery
      */
-    RADIO_LINK_LOST = 1507,
+    LOCAL_LOW_BATTERY = 6,
     /**
-     * The call Call/IMS registration failed because of a radio uplink issue
+     * Service unavailable; out of service (data service state)
      */
-    RADIO_UPLINK_FAILURE = 1508
+    LOCAL_NETWORK_NO_SERVICE = 7,
+    /**
+     * Service unavailable; no LTE coverage
+     * (VoLTE is not supported even though IMS is registered)
+     */
+    LOCAL_NETWORK_NO_LTE_COVERAGE = 8,
+    /**
+     * Service unavailable; located in roaming area
+     */
+    LOCAL_NETWORK_ROAMING = 9,
+    /**
+     * Service unavailable; IP changed
+     */
+    NETWORK_IP_CHANGED = 10,
+    /**
+     * Service unavailable; for an unspecified reason
+     */
+    LOCAL_SERVICE_UNAVAILABLE = 11,
+    /**
+     * Service unavailable; IMS is not registered
+     */
+    LOCAL_NOT_REGISTERED = 12
 };
 
 /**
