@@ -20,6 +20,7 @@
 #include "AoSReason.h"
 #include "CarrierConfig.h"
 #include "ImsAosParameter.h"
+#include "ImsAosReason.h"
 #include "ImsEventDef.h"
 #include "INetworkWatcher.h"
 
@@ -33,6 +34,7 @@
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosApplication.h"
 #include "interface/MockIAosCallTracker.h"
+#include "interface/MockIAosConnection.h"
 #include "interface/MockIAosHandle.h"
 #include "interface/MockIAosNConfiguration.h"
 #include "interface/MockIAosNetTracker.h"
@@ -52,6 +54,7 @@ public:
 
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosApplication m_objMockIAosApplication;
+    MockIAosConnection m_objMockIAosConnection;
     MockIAosHandle m_objMockIAosHandle;
     MockIAosNetTracker m_objMockIAosNetTracker;
     MockIAosRegistration m_objMockIAosRegistration;
@@ -100,6 +103,10 @@ protected:
         EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(static_cast<IAosRegistration*>(&m_objMockIAosRegistration)));
+
+        EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(&m_objMockIAosConnection));
 
         EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(_, _)).Times(AnyNumber());
 
@@ -233,7 +240,11 @@ protected:
 
     IMS_BOOL GetNetSrvIn() { return m_pAosHandleMtc->m_bNetSrvIn; }
 
+    void SetNetSrvIn(IMS_BOOL bNetSrvIn) { m_pAosHandleMtc->m_bNetSrvIn = bNetSrvIn; }
+
     IMS_UINT32 GetNetworkType() { return m_pAosHandleMtc->m_nNetworkType; }
+
+    void SetNetworkType(IMS_UINT32 nNetworkType) { m_pAosHandleMtc->m_nNetworkType = nNetworkType; }
 
     void Init() { m_pAosHandleMtc->Init(); }
 
@@ -283,6 +294,11 @@ protected:
     IMS_BOOL ProcessUnavailableFeatureForVops(IN IMS_UINT32 nState)
     {
         return m_pAosHandleMtc->ProcessUnavailableFeatureForVops(nState);
+    }
+
+    void SetDataConnected(IN IMS_BOOL bConnected)
+    {
+        m_pAosHandleMtc->m_bDataConnected = bConnected;
     }
 };
 
@@ -529,12 +545,134 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test7)
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListIdle));
 }
 
-/*
-TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test)
+TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test1)
 {
-    // To do after renewal
+    // Test1: Srv In, Network changed to LTE, Suspended with SUSPEND_NO_LTE_COVERAGE
+    //        Blocked BLOCK_VILTE_CAPABILITY
+    // Expectation: call ImsAos_Resumed(), unblock BLOCK_VILTE_CAPABILITY
+
+    SetNetSrvIn(IMS_TRUE);
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    SetDataConnected(IMS_TRUE);
+    AddBlock(AosHandle::BLOCK_VILTE_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_CALL(m_objMockIAosConnection, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IAosConnection::STATE_ACTIVE));
+
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(1);
+
+    IMSVector<IMS_SINT32> objTestVector;
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objTestVector));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objTestVector));
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();
+
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
 }
-*/
+
+TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test2)
+{
+    // Test2: Srv In, Network changed to GSM
+    // Expectation: Set SUSPEND_NO_LTE_COVERAGE, call ImsAos_Suspended()
+
+    SetNetSrvIn(IMS_TRUE);
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetDataConnected(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
+
+    EXPECT_CALL(m_objMockIAosConnection, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IAosConnection::STATE_ACTIVE));
+
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(ImsAosReason::SUSPEND_NO_RAT_COVERAGE))
+            .Times(1);
+
+    IMSVector<IMS_SINT32> objPolicy;
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objPolicy));
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();
+
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+}
+
+TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test3)
+{
+    // Test3: Srv In, Network not changed (LTE)
+    // Expectation: No suspended reason, no call ImsAos_Suspended() or ImsAos_Resumed()
+
+    SetNetSrvIn(IMS_TRUE);
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetDataConnected(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_CALL(m_objMockIAosConnection, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IAosConnection::STATE_ACTIVE));
+
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(_)).Times(0);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(0);
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();
+
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+}
 
 TEST_F(AosHandleMtcTest, InitializeServiceBlock_Test)
 {
