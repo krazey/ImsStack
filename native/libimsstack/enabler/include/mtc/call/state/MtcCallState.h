@@ -130,6 +130,11 @@ public:
     CallStateName SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) override;
     CallStateName SessionTransactionReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) override;
+
+    CallStateName Refresh_NotifyCompleted(IN ISipClientConnection* piScc) override;
+    CallStateName Refresh_NotifyTerminated() override;
+    CallStateName Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) override;
+
     CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
 
     CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult) override;

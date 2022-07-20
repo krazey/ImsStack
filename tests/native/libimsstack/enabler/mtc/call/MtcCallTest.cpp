@@ -1598,6 +1598,43 @@ TEST_F(MtcCallTest, SessionTransactionReceivedFailsIfSessionIsNull)
     objCall.SessionTransactionReceived(IMS_NULL, &objServerConnection);
 }
 
+TEST_F(MtcCallTest, OnRefreshCompletedCallsState)
+{
+    MockISipClientConnection objConnection;
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, Refresh_NotifyCompleted(&objConnection))
+            .Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.Refresh_NotifyCompleted(&objConnection);
+}
+
+TEST_F(MtcCallTest, OnRefreshTerminatedCallsState)
+{
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, Refresh_NotifyTerminated())
+            .Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.Refresh_NotifyTerminated();
+}
+
+TEST_F(MtcCallTest, OnRefreshTimerExpiredCallsState)
+{
+    IMS_BOOL bDoImplicitRefresh = IMS_FALSE;
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, Refresh_NotifyTimerExpired(bDoImplicitRefresh))
+            .Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.Refresh_NotifyTimerExpired(bDoImplicitRefresh);
+}
+
 TEST_F(MtcCallTest, OnTimerExpiredCallsState)
 {
     IMS_SINT32 nType = 0;

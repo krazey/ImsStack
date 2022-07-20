@@ -42,6 +42,8 @@ public:
     CallStateName SessionUpdateFailed(IN ISession* piSession) override;
     // TODO, PR
 
+    CallStateName Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) override;
+
     CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
 
     CallStateName OnReceivingMediaDataFailed(
