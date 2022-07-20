@@ -16,10 +16,10 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "call/MtcSession.h"
 #include "call/state/AlertingState.h"
 #include "call/MtcUiNotifier.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcSession.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "MockIMtcService.h"
@@ -86,8 +86,8 @@ TEST_F(AlertingStateTest, AcceptIsCalledWhenUpdateIsNotSentBySrvcc)
 
     ON_CALL(objMockIMessage, GetState).WillByDefault(Return(IMessage::STATE_SENT));
 
-    MtcSession* pMtcSession = new MtcSession(objMockCallContext, objMockISession, CallType::VOIP);
-    ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(pMtcSession));
+    MockIMtcSession objMtcSession;
+    ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
 
     ImsList<AString> objReasons;
     ON_CALL(objMockISipMessage, GetHeaders(_, _)).WillByDefault(Return(objReasons));
@@ -95,7 +95,7 @@ TEST_F(AlertingStateTest, AcceptIsCalledWhenUpdateIsNotSentBySrvcc)
     MockIMessage objMockNextMessage;
     ON_CALL(objMockISession, GetNextResponse).WillByDefault(Return(&objMockNextMessage));
 
-    EXPECT_CALL(objMockISession, Accept).Times(1);
+    EXPECT_CALL(objMtcSession, Accept).Times(1);
     pAlertingState->SessionEarlyMediaUpdated(&objMockISession);
 }
 
@@ -105,13 +105,13 @@ TEST_F(AlertingStateTest, NoAcceptIsCalledWhenUpdateIsSentBySrvcc)
 
     ON_CALL(objMockIMessage, GetState).WillByDefault(Return(IMessage::STATE_SENT));
 
-    MtcSession* pMtcSession = new MtcSession(objMockCallContext, objMockISession, CallType::VOIP);
-    ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(pMtcSession));
+    MockIMtcSession objMtcSession;
+    ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
 
     ImsList<AString> objReasons;
     objReasons.Append(MessageUtil::STR_REASON_HANDOVER_CANCELLED);
     ON_CALL(objMockISipMessage, GetHeaders(_, _)).WillByDefault(Return(objReasons));
 
-    EXPECT_CALL(objMockISession, Accept).Times(0);
+    EXPECT_CALL(objMtcSession, Accept).Times(0);
     pAlertingState->SessionEarlyMediaUpdated(&objMockISession);
 }

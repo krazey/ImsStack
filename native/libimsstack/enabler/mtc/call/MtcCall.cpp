@@ -25,6 +25,7 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
+#include "call/IMtcSession.h"
 #include "call/MtcCall.h"
 #include "call/MtcSession.h"
 #include "call/block/MtcBlockChecker.h"
@@ -49,7 +50,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objParticipantInfo(ParticipantInfo(
                 *this, *PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(GetSlotId()))),
         m_pUpdatingInfo(IMS_NULL),
-        m_lstSessions(ImsList<MtcSession*>()),
+        m_lstSessions(ImsList<IMtcSession*>()),
         m_objStateMachine(
                 MtcCallStateMachine(*this, CallStateName::IDLE, std::move(pStateFactory), this)),
         m_objTimer(MtcTimerWrapper()),
@@ -73,8 +74,7 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
     {
-        MtcSession* pSession = m_lstSessions.GetAt(nIndex);
-        pSession->Deinit();
+        IMtcSession* pSession = m_lstSessions.GetAt(nIndex);
         delete pSession;
     }
     m_lstSessions.Clear();
@@ -450,7 +450,7 @@ PUBLIC VIRTUAL void MtcCall::HandleIpcanChanged()
 
 PUBLIC VIRTUAL CallType MtcCall::GetCallType() const
 {
-    MtcSession* pSession = GetSession();
+    IMtcSession* pSession = GetSession();
     if (!pSession)
     {
         return m_objCallInfo.eInitialCallType;
@@ -458,11 +458,11 @@ PUBLIC VIRTUAL CallType MtcCall::GetCallType() const
     return pSession->GetCallType();
 }
 
-PUBLIC VIRTUAL MtcSession* MtcCall::GetSession(IN const ISession* piSession) const
+PUBLIC VIRTUAL IMtcSession* MtcCall::GetSession(IN const ISession* piSession) const
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
     {
-        MtcSession* pSession = m_lstSessions.GetAt(nIndex);
+        IMtcSession* pSession = m_lstSessions.GetAt(nIndex);
         if (&pSession->GetISession() == piSession)
         {
             return pSession;
@@ -473,7 +473,7 @@ PUBLIC VIRTUAL MtcSession* MtcCall::GetSession(IN const ISession* piSession) con
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL MtcSession* MtcCall::GetSession() const
+PUBLIC VIRTUAL IMtcSession* MtcCall::GetSession() const
 {
     if (m_lstSessions.IsEmpty())
     {
@@ -495,7 +495,7 @@ PUBLIC VIRTUAL UpdatingInfo& MtcCall::GetUpdatingInfo()
     return *m_pUpdatingInfo;
 }
 
-PUBLIC VIRTUAL MtcSession* MtcCall::CreateSession(IN ISession* piSession)
+PUBLIC VIRTUAL IMtcSession* MtcCall::CreateSession(IN ISession* piSession)
 {
     if (piSession == IMS_NULL)
     {
@@ -512,8 +512,7 @@ PUBLIC VIRTUAL MtcSession* MtcCall::CreateSession(IN ISession* piSession)
     piSession->SetMessageMediator(&m_objMessageMediator);
     piSession->SetRefreshListener(this);
 
-    MtcSession* pSession = new MtcSession(*this, *piSession, m_objCallInfo.eInitialCallType);
-    pSession->Init();
+    IMtcSession* pSession = new MtcSession(*this, *piSession, m_objCallInfo.eInitialCallType);
     m_lstSessions.Append(pSession);
 
     IMS_TRACE_D("CreateSession : Session count[%d]", m_lstSessions.GetSize(), 0, 0);
@@ -521,7 +520,7 @@ PUBLIC VIRTUAL MtcSession* MtcCall::CreateSession(IN ISession* piSession)
     return pSession;
 }
 
-PUBLIC VIRTUAL MtcSession* MtcCall::CreateSession()
+PUBLIC VIRTUAL IMtcSession* MtcCall::CreateSession()
 {
     ISession* piSession = GetSipInterfaceFactory().GetISessionHolder()->GetISession(
             GetService().GetICoreService(), GetParticipantInfo().GetLocalUri(),
@@ -558,7 +557,7 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
 
 PUBLIC VIRTUAL ISipClientConnection* MtcCall::CreateClientConnection(IN IMS_SINT32 nMethod)
 {
-    MtcSession* pSession = GetSession();
+    IMtcSession* pSession = GetSession();
     if (!pSession)
     {
         return IMS_NULL;
@@ -580,11 +579,10 @@ PUBLIC VIRTUAL void MtcCall::RemoveSession(IN const ISession* piSession)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
     {
-        MtcSession* pSession = m_lstSessions.GetAt(nIndex);
+        IMtcSession* pSession = m_lstSessions.GetAt(nIndex);
         if (&pSession->GetISession() == piSession)
         {
             m_lstSessions.RemoveAt(nIndex);
-            pSession->Deinit();
             delete pSession;
 
             IMS_TRACE_D("RemoveSession : Session count[%d]", m_lstSessions.GetSize(), 0, 0);
@@ -597,7 +595,7 @@ PUBLIC VIRTUAL void MtcCall::RemoveSession(IN const ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::RemoveInactiveSessions(IN const ISession* piActiveSession)
 {
-    MtcSession* pActiveSession = GetSession(piActiveSession);
+    IMtcSession* pActiveSession = GetSession(piActiveSession);
     if (pActiveSession == IMS_NULL)
     {
         return;
@@ -605,10 +603,9 @@ PUBLIC VIRTUAL void MtcCall::RemoveInactiveSessions(IN const ISession* piActiveS
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
     {
-        MtcSession* pSession = m_lstSessions.GetAt(nIndex);
+        IMtcSession* pSession = m_lstSessions.GetAt(nIndex);
         if (pSession != pActiveSession)
         {
-            pSession->Deinit();
             delete pSession;
         }
     }

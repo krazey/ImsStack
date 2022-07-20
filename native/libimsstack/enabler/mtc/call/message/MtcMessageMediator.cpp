@@ -22,7 +22,7 @@
 #include "TextParser.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "call/message/MtcMessageMediator.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "utility/MessageUtil.h"

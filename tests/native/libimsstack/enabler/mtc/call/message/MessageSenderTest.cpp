@@ -64,7 +64,6 @@ protected:
 
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
-        ON_CALL(objContext, GetISession).WillByDefault(ReturnRef(objSession));
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
         ON_CALL(objContext, GetCallType).WillByDefault(Return(CallType::VOIP));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
@@ -76,7 +75,7 @@ protected:
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
         ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
 
-        pSender = new MessageSender(objContext);
+        pSender = new MessageSender(objContext, objSession);
     }
 
     virtual void TearDown() override
@@ -90,7 +89,7 @@ protected:
 
 TEST_F(MessageSenderTest, CreateSenderWithNormalFormatter)
 {
-    MessageSender* pSenderWithNormalFormatter = new MessageSender(objContext);
+    MessageSender* pSenderWithNormalFormatter = new MessageSender(objContext, objSession);
 
     EXPECT_NE(pSenderWithNormalFormatter, nullptr);
 
@@ -105,7 +104,7 @@ TEST_F(MessageSenderTest, CreateSenderWithEmergencyFormatter)
     ON_CALL(objContext, GetCallInfo)
             .WillByDefault(ReturnRef(objEmergencyCallInfo));
 
-    MessageSender* pSenderWithEmergencyFormatter = new MessageSender(objContext);
+    MessageSender* pSenderWithEmergencyFormatter = new MessageSender(objContext, objSession);
 
     EXPECT_NE(pSenderWithEmergencyFormatter, nullptr);
 

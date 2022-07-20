@@ -20,7 +20,7 @@
 
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/UpdatingInfo.h"
 #include "call/block/CallTypeBlockRule.h"
@@ -153,7 +153,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
         }
         else
         {
-            m_objContext.GetSession()->GetMessageSender().Reject(objResult.objReason);
+            m_objContext.GetSession()->Reject(objResult.objReason);
             eStateName = CallStateName::ESTABLISHED;
         }
     }
@@ -384,7 +384,7 @@ IMS_RESULT EstablishedState::HandleUpdate(
     objMediaManager.GetMediaInfo(m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
     objMediaManager.SetMediaInfo(*pMediaInfo);
 
-    MtcSession* pSession = m_objContext.GetSession();
+    IMtcSession* pSession = m_objContext.GetSession();
 
     if (objMediaManager.FormSdp(&(pSession->GetISession()), eCallType) == IMS_FAILURE)
     {
@@ -396,7 +396,7 @@ IMS_RESULT EstablishedState::HandleUpdate(
 
     objMediaManager.GetMediaInfo(m_objContext.GetUpdatingInfo().GetModifyingInfo());
 
-    if (pSession->GetMessageSender().Update(eUpdateType, IMS_FALSE) == IMS_FAILURE)
+    if (pSession->Update(eUpdateType, IMS_FALSE, SipMethod::INVITE) == IMS_FAILURE)
     {
         // TODO
     }
@@ -438,7 +438,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
     }
 
     if (FormAutoAccept(IMS_FALSE) == IMS_FAILURE ||
-            m_objContext.GetSession()->GetMessageSender().AcceptUpdate() == IMS_FAILURE)
+            m_objContext.GetSession()->AcceptUpdate() == IMS_FAILURE)
     {
         // TODO
     }
@@ -465,7 +465,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateName&
         }
     }
 
-    if (m_objContext.GetSession()->GetMessageSender().AcceptUpdate() == IMS_FAILURE)
+    if (m_objContext.GetSession()->AcceptUpdate() == IMS_FAILURE)
     {
         // TODO
     }
@@ -477,7 +477,7 @@ PRIVATE
 IMS_RESULT EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
 {
     IMS_TRACE_D("FormAutoAccept", 0, 0, 0);
-    MtcSession* pSession = m_objContext.GetSession();
+    IMtcSession* pSession = m_objContext.GetSession();
 
     AdjustDirectionWithHeldByMe(bWithoutOffer);
 

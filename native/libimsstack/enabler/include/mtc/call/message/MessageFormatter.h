@@ -31,7 +31,7 @@ struct CallReasonInfo;
 class MessageFormatter
 {
 public:
-    MessageFormatter(IN IMtcSessionContext& objContext);
+    MessageFormatter(IN IMtcSessionContext& objContext, IN ISession& objSession);
     virtual ~MessageFormatter();
     MessageFormatter(IN CONST MessageFormatter&) = delete;
     MessageFormatter& operator=(IN CONST MessageFormatter&) = delete;

@@ -33,7 +33,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcCall.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceUtils.h"
 #include "conferencecall/ConferenceReference.h"
@@ -403,7 +403,7 @@ IReference* ConferenceReference::GetIReference(
         return IMS_NULL;
     }
 
-    MtcSession* pMtcSession = piCall->GetCallContext().GetSession();
+    IMtcSession* pMtcSession = piCall->GetCallContext().GetSession();
     if (pMtcSession == IMS_NULL)
     {
         IMS_TRACE_D("GetIReference null", 0, 0, 0);

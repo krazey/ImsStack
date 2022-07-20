@@ -29,7 +29,8 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "helper/ICallStateProxy.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
+#include "call/IMtcCallContext.h"
 #include "ICoreService.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -1055,7 +1056,7 @@ void ConferenceController::NotifyResultToConferenceCall()
 PROTECTED
 void ConferenceController::GetFocusAddress(OUT AString& strAddress) const
 {
-    MtcSession* pMtcSession = GetConferenceCall()->GetCallContext().GetSession();
+    IMtcSession* pMtcSession = GetConferenceCall()->GetCallContext().GetSession();
 
     if (pMtcSession == IMS_NULL)
     {

@@ -37,8 +37,8 @@
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
-#include "call/MtcSession.h"
-#include "call/MockMtcSession.h"
+#include "call/MockIMtcSession.h"
+#include "call/IMtcSession.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "media/MockIMtcMediaManager.h"
 #include "call/MtcUiNotifier.h"
@@ -76,11 +76,12 @@ public:
     MockIMtcService objMockService;
     MockIMtcMediaManager objMockMediaManager;
     MockIMtcPreconditionManager objMockPreconditionManager;
+    CallInfo objCallInfo;
 
     MockISession* pMockConfSession;
-    MockMtcSession* pMockConfMtcSession;
+    MockIMtcSession* pMockConfMtcSession;
     MockISession* pMockJoiningSession;
-    MockMtcSession* pMockJoiningMtcSession;
+    MockIMtcSession* pMockJoiningMtcSession;
 
 protected:
     virtual void SetUp() override
@@ -147,8 +148,8 @@ protected:
         SetUpCallContext(objMockConfCallContext);
 
         pMockConfSession = new MockISession();  // TODO: delete
-        pMockConfMtcSession =
-                new MockMtcSession(objMockConfCallContext, *pMockConfSession, CallType::VOIP);
+        pMockConfMtcSession = new MockIMtcSession();
+        ON_CALL(*pMockConfMtcSession, GetISession()).WillByDefault(ReturnRef(*pMockConfSession));
 
         ON_CALL(objMockConfCallContext, GetSession()).WillByDefault(Return(pMockConfMtcSession));
 
@@ -167,8 +168,9 @@ protected:
         SetUpCallContext(objMockJoiningCallContext);
 
         pMockJoiningSession = new MockISession();  // TODO: delete
-        pMockJoiningMtcSession =
-                new MockMtcSession(objMockJoiningCallContext, *pMockJoiningSession, CallType::VOIP);
+        pMockJoiningMtcSession = new MockIMtcSession();
+        ON_CALL(*pMockJoiningMtcSession, GetISession())
+                .WillByDefault(ReturnRef(*pMockJoiningSession));
 
         ON_CALL(objMockJoiningCallContext, GetSession())
                 .WillByDefault(Return(pMockJoiningMtcSession));
@@ -183,7 +185,6 @@ protected:
 
     void SetUpCallContext(IN MockIMtcCallContext& objMockCallContext)
     {
-        CallInfo objCallInfo;
         ON_CALL(objMockCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
         ON_CALL(objMockCallContext, GetService).WillByDefault(ReturnRef(objMockService));

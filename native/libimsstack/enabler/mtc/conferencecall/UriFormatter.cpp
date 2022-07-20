@@ -25,7 +25,7 @@
 #include "IMtcApp.h"
 
 #include "call/IMtcCallContext.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "call/ParticipantInfo.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceConst.h"
@@ -41,7 +41,7 @@ PUBLIC GLOBAL AString& UriFormatter::GetReferToForInvite(OUT AString& strUri,
 {
     if (bEnforcePaid || ConferenceConfigurationWrapper::IsPaidPreferred())
     {
-        MtcSession* pMtcSession = objContext.GetSession();
+        IMtcSession* pMtcSession = objContext.GetSession();
         if (pMtcSession != IMS_NULL)
         {
             MessageUtil::GetRemoteUri(

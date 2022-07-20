@@ -21,7 +21,7 @@
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"

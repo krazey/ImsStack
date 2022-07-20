@@ -24,7 +24,7 @@
 #include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "call/IMtcCallContext.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "call/ParticipantInfo.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "helper/IMtcAosConnector.h"

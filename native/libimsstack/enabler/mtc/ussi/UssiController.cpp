@@ -26,7 +26,7 @@
 #include "SipMethod.h"
 
 #include "call/IMtcCallManager.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "ussi/UssiConstants.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiDataCreator.h"

@@ -28,7 +28,6 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "call/MtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "call/block/IMtcBlockChecker.h"
@@ -55,6 +54,7 @@ class IMtcDialingPlan;
 class IMtcMediaManager;
 class IMtcPreconditionManager;
 class IMtcService;
+class IMtcSession;
 class IMtcSipInterfaceFactory;
 class IMtcVonrManager;
 class IMutex;
@@ -129,8 +129,8 @@ public:
     inline IMS_BOOL IsUssi() const override { return m_objCallInfo.bUssi; }
     inline CallInfo& GetCallInfo() override { return m_objCallInfo; }
     inline ParticipantInfo& GetParticipantInfo() override { return m_objParticipantInfo; }
-    MtcSession* GetSession(IN const ISession* piSession) const override;
-    MtcSession* GetSession() const override;
+    IMtcSession* GetSession(IN const ISession* piSession) const override;
+    IMtcSession* GetSession() const override;
     inline IMtcService& GetService() override { return m_objService; }
     inline MtcUiNotifier& GetUiNotifier() override { return m_objUiNotifier; }
     inline IMtcMediaManager& GetMediaManager() override { return m_objMediaManager; }
@@ -144,8 +144,8 @@ public:
         return GetCallManager().GetCallsExcluding(GetKey());
     }
     UpdatingInfo& GetUpdatingInfo() override;
-    MtcSession* CreateSession(IN ISession* piSession) override;
-    MtcSession* CreateSession() override;
+    IMtcSession* CreateSession(IN ISession* piSession) override;
+    IMtcSession* CreateSession() override;
     IMtcBlockChecker* CreateBlockChecker(IN const ImsList<IMtcBlockRule*>& lstRules) override;
     JniCallInfo CreateJniCallInfo() override;
     ISipClientConnection* CreateClientConnection(IN IMS_SINT32 nMethod) override;
@@ -266,7 +266,7 @@ private:
     CallInfo m_objCallInfo;
     ParticipantInfo m_objParticipantInfo;
     UpdatingInfo* m_pUpdatingInfo;
-    ImsList<MtcSession*> m_lstSessions;
+    ImsList<IMtcSession*> m_lstSessions;
 
     MtcCallStateMachine m_objStateMachine;
     MtcTimerWrapper m_objTimer;

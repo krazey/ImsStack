@@ -28,9 +28,9 @@ __IMS_TRACE_TAG_COM_MTC__;
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PUBLIC
-MessageSender::MessageSender(IN IMtcSessionContext& objContext) :
+MessageSender::MessageSender(IN IMtcSessionContext& objContext, IN ISession& objSession) :
         m_objContext(objContext),
-        m_objSession(objContext.GetISession()),
+        m_objSession(objSession),
         m_pFormatter(nullptr),
         m_objTimerUpdateHelper(TransactionTimerUpdateHelper(
                 objContext.GetSlotId(), objContext.GetConfigurationProxy()))
@@ -244,9 +244,9 @@ void MessageSender::CreateFormatter()
 {
     if (m_objContext.GetCallInfo().bEmergency)
     {
-        m_pFormatter = std::make_unique<EmergencyMessageFormatter>(m_objContext);
+        m_pFormatter = std::make_unique<EmergencyMessageFormatter>(m_objContext, m_objSession);
         return;
     }
 
-    m_pFormatter = std::make_unique<MessageFormatter>(m_objContext);
+    m_pFormatter = std::make_unique<MessageFormatter>(m_objContext, m_objSession);
 }

@@ -15,7 +15,7 @@
  */
 
 #include "call/IMtcCallContext.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/state/UpdatingState.h"
 #include "call/termination/TerminationHandler.h"
@@ -49,9 +49,7 @@ PUBLIC VIRTUAL void UpdatingState::OnExit()
 {
     if (m_objContext.GetUpdatingInfo().HasPendingUpdate())
     {
-        // TODO: remove UpdateType::NONE and add UpdateType::REFRESH?
-        m_objContext.GetSession()->GetMessageSender().Update(
-                UpdateType::NONE, IMS_FALSE, SipMethod::INVALID, IMS_TRUE);
+        m_objContext.GetSession()->Update(UpdateType::REFRESH, IMS_FALSE, SipMethod::INVALID);
     }
     m_objContext.DeleteUpdatingInfo();
 }
@@ -63,7 +61,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
 
     m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
 
-    MtcSession* pSession = m_objContext.GetSession();
+    IMtcSession* pSession = m_objContext.GetSession();
     ISession& objSession = pSession->GetISession();
     if (objSession.GetState() == ISession::STATE_ESTABLISHED)
     {
@@ -85,7 +83,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
 
     m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetModifiedInfo());
 
-    if (pSession->GetMessageSender().AcceptUpdate() == IMS_FAILURE)
+    if (pSession->AcceptUpdate() == IMS_FAILURE)
     {
         // TODO
     }
@@ -118,7 +116,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectUpdate(IN const CallReasonInfo
         return CallStateName::UPDATING;
     }
 
-    if (m_objContext.GetSession()->GetMessageSender().Reject(objReason) == IMS_FAILURE)
+    if (m_objContext.GetSession()->Reject(objReason) == IMS_FAILURE)
     {
         // TODO
     }
@@ -132,7 +130,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::CancelUpdate(IN const CallReasonInfo
 
     m_objContext.GetTimer().Stop(TIMER_CONVERT_REMOTE_RESPONSE);
 
-    if (m_objContext.GetSession()->GetMessageSender().CancelUpdate(objReason) == IMS_FAILURE)
+    if (m_objContext.GetSession()->CancelUpdate(objReason) == IMS_FAILURE)
     {
         // TODO
     }
@@ -323,7 +321,7 @@ IMS_RESULT UpdatingState::SendAck()
         return IMS_SUCCESS;
     }
 
-    return m_objContext.GetSession()->GetMessageSender().SendAck();
+    return m_objContext.GetSession()->SendAck();
 }
 
 PRIVATE
@@ -341,7 +339,7 @@ IMS_RESULT UpdatingState::SendUpdate()
     m_objContext.GetUpdatingInfo().SetModifier();
     m_objContext.GetMediaManager().SetMediaInfo(m_objContext.GetUpdatingInfo().GetModifyingInfo());
 
-    MtcSession* pSession = m_objContext.GetSession();
+    IMtcSession* pSession = m_objContext.GetSession();
     if (m_objContext.GetMediaManager().FormSdp(
             &pSession->GetISession(), pSession->GetCallType()) == IMS_FAILURE)
     {
@@ -351,7 +349,7 @@ IMS_RESULT UpdatingState::SendUpdate()
     m_objContext.GetPreconditionManager().FormPreconditionSdp(
             &(pSession->GetISession()), IMS_FALSE);
 
-    if (pSession->GetMessageSender().Update(UpdateType::SESSION, IMS_FALSE) == IMS_FAILURE)
+    if (pSession->Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE) == IMS_FAILURE)
     {
         // TODO
     }
@@ -494,7 +492,7 @@ void UpdatingState::StopTimer()
 PRIVATE
 void UpdatingState::UpdateCallType()
 {
-    MtcSession* pSession = m_objContext.GetSession();
+    IMtcSession* pSession = m_objContext.GetSession();
     CallType eOldCallType = pSession->GetCallType();
     CallType eNewCallType =
             m_objContext.GetMediaManager().GetNegotiatedCallType(&pSession->GetISession());

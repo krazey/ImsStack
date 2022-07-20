@@ -28,7 +28,7 @@
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "call/block/CallCountBlockRule.h"
@@ -39,7 +39,7 @@
 #include "call/block/ProcessingCallBlockRule.h"
 #include "call/block/TerminalBasedCallWaitingBlockRule.h"
 #include "call/block/VopsBlockRule.h"
-#include "call/message/MessageSender.h"
+#include "call/extension/MtcExtensionSet.h"
 #include "call/state/IdleState.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -149,7 +149,7 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
     m_objContext.GetCallInfo().eInitialCallType = CallType::UNKNOWN;
     m_objContext.GetCallInfo().ePeerType = PeerType::MT;
 
-    MtcSession* pSession = m_objContext.CreateSession(piSession);
+    IMtcSession* pSession = m_objContext.CreateSession(piSession);
     if (pSession == IMS_NULL)
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
@@ -202,7 +202,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
             m_objContext.GetMediaManager().Terminate();
             if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
             {
-                m_objContext.GetSession()->GetMessageSender().Reject(objResult.objReason);
+                m_objContext.GetSession()->Reject(objResult.objReason);
             }
             m_objContext.GetUiNotifier().SendStartFailed(objResult.objReason);
             return CallStateName::TERMINATING;
@@ -238,7 +238,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     if (IsRprSupported() &&
             !m_objContext.GetConfigurationProxy().Is(Feature::SEND_180_FOR_INITIAL_INVITE))
     {
-        if (SendProvisionalResponse(IMS_FALSE) == IMS_FAILURE)
+        if (m_objContext.GetSession()->SendProvisionalResponse(IMS_FALSE) == IMS_FAILURE)
         {
             return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
         }

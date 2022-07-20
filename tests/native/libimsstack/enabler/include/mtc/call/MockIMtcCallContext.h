@@ -30,7 +30,7 @@ class IMtcPreconditionManager;
 class IMtcService;
 class ISession;
 class ISipClientConnection;
-class MtcSession;
+class IMtcSession;
 class MtcSupplementaryService;
 class MtcTimerWrapper;
 class MtcUiNotifier;
@@ -49,8 +49,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsUssi, (), (const, override));
     MOCK_METHOD(CallInfo&, GetCallInfo, (), (override));
     MOCK_METHOD(ParticipantInfo&, GetParticipantInfo, (), (override));
-    MOCK_METHOD(MtcSession*, GetSession, (IN const ISession* piSession), (const, override));
-    MOCK_METHOD(MtcSession*, GetSession, (), (const, override));
+    MOCK_METHOD(IMtcSession*, GetSession, (IN const ISession* piSession), (const, override));
+    MOCK_METHOD(IMtcSession*, GetSession, (), (const, override));
     MOCK_METHOD(IMtcService&, GetService, (), (override));
     MOCK_METHOD(MtcUiNotifier&, GetUiNotifier, (), (override));
     MOCK_METHOD(IMtcMediaManager&, GetMediaManager, (), (override));
@@ -61,8 +61,8 @@ public:
     MOCK_METHOD(UssiController*, GetUssiController, (), (override));
     MOCK_METHOD(IMSList<IMtcCall*>, GetOtherCalls, (), (override));
     MOCK_METHOD(void, SetHeldByMe, (IMS_BOOL), (override));
-    MOCK_METHOD(MtcSession*, CreateSession, (IN ISession * piSession), (override));
-    MOCK_METHOD(MtcSession*, CreateSession, (), (override));
+    MOCK_METHOD(IMtcSession*, CreateSession, (IN ISession * piSession), (override));
+    MOCK_METHOD(IMtcSession*, CreateSession, (), (override));
     MOCK_METHOD(IMtcBlockChecker*, CreateBlockChecker, (IN const IMSList<IMtcBlockRule*>& lstRules),
             (override));
     MOCK_METHOD(JniCallInfo, CreateJniCallInfo, (), (override));

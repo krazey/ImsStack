@@ -31,10 +31,6 @@ public:
     virtual ~MockIMtcSessionContext() {}
 
     MOCK_METHOD(CallType, GetCallType, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsVideoCapable, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsRttCapable, (), (const, override));
-    MOCK_METHOD(ISession&, GetISession, (), (override));
-    MOCK_METHOD(MessageSender&, GetMessageSender, (), (override));
     MOCK_METHOD(MtcExtensionSet&, GetExtensionSet, (), (override));
 
     // IMtcCallContext
@@ -43,8 +39,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsUssi, (), (const, override));
     MOCK_METHOD(CallInfo&, GetCallInfo, (), (override));
     MOCK_METHOD(ParticipantInfo&, GetParticipantInfo, (), (override));
-    MOCK_METHOD(MtcSession*, GetSession, (IN const ISession* piSession), (const, override));
-    MOCK_METHOD(MtcSession*, GetSession, (), (const, override));
+    MOCK_METHOD(IMtcSession*, GetSession, (IN const ISession* piSession), (const, override));
+    MOCK_METHOD(IMtcSession*, GetSession, (), (const, override));
     MOCK_METHOD(IMtcService&, GetService, (), (override));
     MOCK_METHOD(MtcUiNotifier&, GetUiNotifier, (), (override));
     MOCK_METHOD(IMtcMediaManager&, GetMediaManager, (), (override));
@@ -55,8 +51,8 @@ public:
     MOCK_METHOD(UssiController*, GetUssiController, (), (override));
     MOCK_METHOD(IMSList<IMtcCall*>, GetOtherCalls, (), (override));
     MOCK_METHOD(void, SetHeldByMe, (IMS_BOOL), (override));
-    MOCK_METHOD(MtcSession*, CreateSession, (IN ISession * piSession), (override));
-    MOCK_METHOD(MtcSession*, CreateSession, (), (override));
+    MOCK_METHOD(IMtcSession*, CreateSession, (IN ISession * piSession), (override));
+    MOCK_METHOD(IMtcSession*, CreateSession, (), (override));
     MOCK_METHOD(IMtcBlockChecker*, CreateBlockChecker, (IN const IMSList<IMtcBlockRule*>& lstRules),
             (override));
     MOCK_METHOD(JniCallInfo, CreateJniCallInfo, (), (override));

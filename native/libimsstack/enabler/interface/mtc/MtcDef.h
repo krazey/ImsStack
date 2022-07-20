@@ -28,14 +28,14 @@
 
 enum class UpdateType
 {
-    NONE = 0,
-    NORMAL = 1,
-    HOLD = 2,
-    RESUME = 3,
-    SESSION = 4,
-    CONF = 5,
-    SRVCC_RECOVERED_CANCEL = 6,
-    SRVCC_RECOVERED_FAILURE = 7,
+    NORMAL,
+    HOLD,
+    RESUME,
+    SESSION,
+    CONF,
+    REFRESH,
+    SRVCC_RECOVERED_CANCEL,
+    SRVCC_RECOVERED_FAILURE,
 };
 
 enum

@@ -23,7 +23,7 @@
 class EmergencyMessageFormatter : public MessageFormatter
 {
 public:
-    EmergencyMessageFormatter(IN IMtcSessionContext& objContext);
+    EmergencyMessageFormatter(IN IMtcSessionContext& objContext, IN ISession& objSession);
     virtual ~EmergencyMessageFormatter();
     EmergencyMessageFormatter(IN CONST MessageFormatter&) = delete;
     EmergencyMessageFormatter& operator=(IN CONST MessageFormatter&) = delete;
