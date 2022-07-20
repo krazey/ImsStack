@@ -64,8 +64,6 @@ typedef enum
     BLOCK_CELLULAR_OUT_OF_SERVICE,
     /// a roming network. volte may be not allowed in roaming area.
     BLOCK_CELLULAR_ROAMING,
-    /// volte setting is turned off.
-    BLOCK_CELLULAR_VOLTE_OFF,
     /// IMS voice over PS Session Supported Indication is not configured during N/W attach.
     BLOCK_CELLULAR_VOPS_OFF,
     /// End cellular Block reason
@@ -85,10 +83,8 @@ typedef enum
     BLOCK_WIFI_ROAMING,
     /// wifi service is blocked temporarily
     BLOCK_WIFI_TEMPORARILY_BLOCKED,
-    /// VoWiFi setting is turned off.
-    BLOCK_WIFI_VOWIFI_OFF,
     /// End wifi Block reason
-    BLOCK_WIFI_END = BLOCK_WIFI_VOWIFI_OFF,
+    BLOCK_WIFI_END = BLOCK_WIFI_TEMPORARILY_BLOCKED,
 
     /// Max of block reason
     BLOCK_MAX

@@ -28,12 +28,10 @@ private:
     void HandleNetworkStateChanged() final;
     void HandleRoamingChanged(IN IMS_UINT32 nState) final;
     void HandleAirplaneModeChanged(IN IMS_UINT32 nState) final;
-    void HandleVolteSettingChanged(IN IMS_UINT32 nState) final;
     void HandleVopsChanged(IN IMS_UINT32 nState) final;
     IMS_BOOL CheckServiceAvailable() final;
 
 private:
-    IMS_BOOL m_bVolteSetting;
     IMS_BOOL m_bVopsState;
     IMS_BOOL m_bNetworkServiceIn;
 

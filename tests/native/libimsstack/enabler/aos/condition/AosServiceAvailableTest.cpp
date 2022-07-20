@@ -287,12 +287,8 @@ TEST_F(AosServiceAvailableTest, HandleEvent_Valid)
     EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_ROAMING, 0, 1),
             AosServiceAvailable::EVENT_ROAMING);
 
-    EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_VOLTE_SETTING, 1, 1),
-            AosServiceAvailable::EVENT_VOLTE_SETTING);
     EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_VOPS, 1, 1),
             AosServiceAvailable::EVENT_VOPS);
-    EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_WFC_SETTING, 1, 1),
-            AosServiceAvailable::EVENT_WFC_SETTING);
     EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_LOCATION, 1, 1),
             AosServiceAvailable::EVENT_LOCATION);
     EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_CALL, 1, 1),
@@ -301,8 +297,6 @@ TEST_F(AosServiceAvailableTest, HandleEvent_Valid)
             AosServiceAvailable::EVENT_NETWORK);
     EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_WIFI_STATE, 1, 1),
             AosServiceAvailable::EVENT_WIFI_STATE);
-    EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_BLOCK, 1, 1),
-            AosServiceAvailable::EVENT_BLOCK);
 }
 
 TEST_F(AosServiceAvailableTest, HandleEvent_Invalid)

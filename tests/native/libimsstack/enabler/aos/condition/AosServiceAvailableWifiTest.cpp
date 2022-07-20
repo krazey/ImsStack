@@ -133,11 +133,6 @@ protected:
         pAosServiceAvailableWifi->HandleAirplaneModeChanged(nState);
     }
 
-    void HandleWfcSettingChanged(IN IMS_UINT32 nState)
-    {
-        pAosServiceAvailableWifi->HandleWfcSettingChanged(nState);
-    }
-
     void ProcessBadConnectionReported()
     {
         pAosServiceAvailableWifi->ProcessBadConnectionReported();
@@ -468,28 +463,6 @@ TEST_F(AosServiceAvailableWifiTest, HandleAirplaneModeChanged_AirplaneModeFalse)
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
 
     HandleAirplaneModeChanged(0);
-}
-
-TEST_F(AosServiceAvailableWifiTest, HandleWfcSettingChanged_True)
-{
-    MockIAosBlock objMockIAosBlock;
-    EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
-
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
-
-    HandleWfcSettingChanged(1);
-}
-
-TEST_F(AosServiceAvailableWifiTest, HandleWfcSettingChanged_False)
-{
-    MockIAosBlock objMockIAosBlock;
-    EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
-    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
-
-    HandleWfcSettingChanged(0);
 }
 
 TEST_F(AosServiceAvailableWifiTest, HandleLocationInfoChanged_CountryNotSame)

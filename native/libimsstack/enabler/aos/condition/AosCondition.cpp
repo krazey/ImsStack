@@ -402,7 +402,8 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
 {
     (void)nParam;
 
-    if (GET_N_CONFIG(m_nSlotId)->IsSupportLimitedAdminSmsMode())
+    if (GET_N_CONFIG(m_nSlotId) != IMS_NULL &&
+            GET_N_CONFIG(m_nSlotId)->IsSupportLimitedAdminSmsMode())
     {
         UpdateRegistrationMode();
     }
@@ -412,7 +413,7 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
     switch (nState)
     {
         case IAosSubscriber::REFRESH_STARTED:
-            m_piListener->Condition_RequestCommand(REQUEST_STOP, AoSReason::NONE);
+            RequestCommand(REQUEST_STOP);
             ProcessBlockReason(IMS_TRUE, BLOCK_SUBSCRIBER_INCOMPLETED);
             m_bIsRefreshStarted = IMS_TRUE;
             break;
@@ -433,13 +434,16 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
             break;
 
         default:
-            ProcessBlockReason(
-                    (piSubscriber->IsReady()) ? IMS_FALSE : IMS_TRUE, BLOCK_SUBSCRIBER_INCOMPLETED);
-
-            if (IsRefreshStarted() && piSubscriber->IsReady())
+            if (piSubscriber != IMS_NULL)
             {
-                m_bIsRefreshStarted = IMS_FALSE;
-                ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
+                ProcessBlockReason((piSubscriber->IsReady()) ? IMS_FALSE : IMS_TRUE,
+                        BLOCK_SUBSCRIBER_INCOMPLETED);
+
+                if (IsRefreshStarted() && piSubscriber->IsReady())
+                {
+                    m_bIsRefreshStarted = IMS_FALSE;
+                    ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
+                }
             }
             break;
     }
@@ -451,12 +455,6 @@ PROTECTED VIRTUAL void AosCondition::Block_Changed(IN IMS_UINT32 nType, IN IMS_U
             AosBlock::BlockReasonToString(nType), nType, (nParam > 0) ? "BLOCK" : "NOT_BLOCK");
 
     SendConditionEvent(AosServiceAvailable::EVENT_BLOCK, nType, nParam);
-}
-
-// TODO : Delete it, if this is not used.
-PROTECTED VIRTUAL void AosCondition::Timer_TimerExpired(IN ITimer* piTimer)
-{
-    (void)piTimer;
 }
 
 PROTECTED VIRTUAL void AosCondition::ServiceAvailable_Changed()
@@ -485,10 +483,7 @@ PROTECTED VIRTUAL void AosCondition::ServiceAvailable_Changed()
 PROTECTED VIRTUAL void AosCondition::ServiceAvailable_RequestCommand(
         IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason)
 {
-    if (m_piListener != IMS_NULL)
-    {
-        m_piListener->Condition_RequestCommand(nCommand, nReason);
-    }
+    RequestCommand(nCommand, nReason);
 }
 
 PROTECTED VIRTUAL void AosCondition::NConfiguration_NotifyConfigChanged()
@@ -718,7 +713,7 @@ void AosCondition::ProcessAirPlaneEvent(IN IMS_BOOL bIsOn)
 
     if (bIsOn)
     {
-        m_piListener->Condition_RequestCommand(REQUEST_STOP, AoSReason::AIRPLANE_MODE);
+        RequestCommand(REQUEST_STOP, AoSReason::AIRPLANE_MODE);
 
         if (IsClearReason(IAosNConfiguration::ClearReason::AIRPLANE))
         {
@@ -731,7 +726,7 @@ void AosCondition::ProcessAirPlaneEvent(IN IMS_BOOL bIsOn)
 PRIVATE
 void AosCondition::ProcessPowerEvent()
 {
-    m_piListener->Condition_RequestCommand(REQUEST_STOP, AoSReason::POWER_OFF);
+    RequestCommand(REQUEST_STOP, AoSReason::POWER_OFF);
     ProcessBlockReason(IMS_TRUE, BLOCK_POWER_OFF);
 }
 
@@ -787,21 +782,8 @@ void AosCondition::ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT3
     }
     else if (eState == ServiceSetting::OFF)
     {
-        m_piListener->Condition_RequestCommand(REQUEST_PDN_DISCONNECT, AoSReason::IMS_DISABLED);
+        RequestCommand(REQUEST_PDN_DISCONNECT, AoSReason::IMS_DISABLED);
         ProcessBlockReason(IMS_TRUE, BLOCK_IMS_DISABLED);
-    }
-}
-
-// TODO : Remove it.
-PRIVATE
-void AosCondition::ProcessVolteCallSetting(IN IMS_UINT32 nState)
-{
-    SendConditionEvent(AosServiceAvailable::EVENT_VOLTE_SETTING, nState, SERVICE_CELLULAR);
-
-    if (nState == IMS_VOLTE_SETTING_OFF &&
-            IsClearReason(IAosNConfiguration::ClearReason::VOLTE_SETTING))
-    {
-        ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
     }
 }
 
@@ -815,7 +797,7 @@ void AosCondition::ProcessTtyEvent(IN IMS_BOOL bIsOn)
     {
         if (m_bIsTtyOn)
         {
-            m_piListener->Condition_RequestCommand(REQUEST_STOP, AoSReason::TTYMODEON);
+            RequestCommand(REQUEST_STOP, AoSReason::TTYMODEON);
             ProcessBlockReason(IMS_TRUE, BLOCK_TTY_MODE_ON);
         }
     }
@@ -823,30 +805,6 @@ void AosCondition::ProcessTtyEvent(IN IMS_BOOL bIsOn)
     if (!m_bIsTtyOn)
     {
         ProcessBlockReason(IMS_FALSE, BLOCK_TTY_MODE_ON);
-    }
-}
-
-// TODO : Remove it.
-PRIVATE
-void AosCondition::ProcessWfcSettingChanged(IN IMS_UINT32 nState)
-{
-    A_IMS_TRACE_I(APPPROFILE, "ProcessWfcSettingChanged(), nState(%d)", nState, 0, 0);
-
-    SendConditionEvent(AosServiceAvailable::EVENT_WFC_SETTING, nState, SERVICE_WIFI);
-
-    if (nState == IMS_WFC_OFF && IsClearReason(IAosNConfiguration::ClearReason::WFC_SETTING))
-    {
-        ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
-    }
-
-    // TODO : Need to check this.
-    // The legacy logic had the following behaviors.
-    // TMUS/Global : Unblock - PERMANENTREGIFAILED, AUTHENTICATIONFAILED, IMSDISABLED
-    // CA : Unblock - PERMANENTREGIFAILED
-    // ATT : Unblock none
-    if (nState == IMS_WFC_ON)
-    {
-        ResetImsDisableReason();
     }
 }
 
@@ -946,6 +904,20 @@ IMS_BOOL AosCondition::IsClearReason(IN IAosNConfiguration::ClearReason eReason)
 {
     return (GET_N_CONFIG(m_nSlotId)->GetClearReasonForPermanentPdnFailure() &
             static_cast<IMS_UINT32>(eReason));
+}
+
+PRIVATE
+IMS_BOOL AosCondition::RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason /* = 0*/) const
+{
+    if (m_piListener == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    A_IMS_TRACE_D(APPPROFILE, "RequestCommand :: Command(%d), Reason(%d)", nCommand, nReason, 0);
+
+    m_piListener->Condition_RequestCommand(nCommand, nReason);
+    return IMS_TRUE;
 }
 
 PRIVATE

@@ -187,19 +187,9 @@ IMS_UINT32 AosServiceAvailable::HandleEvent(
             eReturn = EVENT_ROAMING;
             break;
 
-        case EVENT_VOLTE_SETTING:
-            HandleVolteSettingChanged(nState);
-            eReturn = EVENT_VOLTE_SETTING;
-            break;
-
         case EVENT_VOPS:
             HandleVopsChanged(nState);
             eReturn = EVENT_VOPS;
-            break;
-
-        case EVENT_WFC_SETTING:
-            HandleWfcSettingChanged(nState);
-            eReturn = EVENT_WFC_SETTING;
             break;
 
         case EVENT_LOCATION:
@@ -259,19 +249,9 @@ PROTECTED VIRTUAL void AosServiceAvailable::HandleAirplaneModeChanged(IN IMS_UIN
     m_bAirplaneMode = (nState > 0) ? IMS_TRUE : IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void AosServiceAvailable::HandleVolteSettingChanged(IN IMS_UINT32 nState)
-{
-    A_IMS_TRACE_I(AOSTAG, "HandleVolteSettingChanged :: nState(%d)", nState, 0, 0);
-}
-
 PROTECTED VIRTUAL void AosServiceAvailable::HandleVopsChanged(IN IMS_UINT32 nState)
 {
     A_IMS_TRACE_I(AOSTAG, "HandleVopsChanged :: nState(%d)", nState, 0, 0);
-}
-
-PROTECTED VIRTUAL void AosServiceAvailable::HandleWfcSettingChanged(IN IMS_UINT32 nState)
-{
-    A_IMS_TRACE_I(AOSTAG, "HandleWfcSettingChanged :: nState(%d)", nState, 0, 0);
 }
 
 PROTECTED VIRTUAL void AosServiceAvailable::HandleWiFiConnectionChanged()
@@ -359,14 +339,8 @@ PROTECTED GLOBAL const IMS_CHAR* AosServiceAvailable::EventToString(IN IMS_UINT3
         case EVENT_ROAMING:
             return "EVENT_ROAMING";
 
-        case EVENT_VOLTE_SETTING:
-            return "EVENT_VOLTE_SETTING";
-
         case EVENT_VOPS:
             return "EVENT_VOPS";
-
-        case EVENT_WFC_SETTING:
-            return "EVENT_WFC_SETTING";
 
         case EVENT_LOCATION:
             return "EVENT_LOCATION";

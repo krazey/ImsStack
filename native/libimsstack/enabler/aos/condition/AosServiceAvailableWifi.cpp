@@ -34,7 +34,6 @@ PUBLIC
 AosServiceAvailableWifi::AosServiceAvailableWifi() :
         AosServiceAvailable("AosServiceAvailableWifi"),
         m_strCountry(AString::ConstEmpty()),
-        m_nVoWiFiSetting(IMS_FALSE),
         m_nBadNetworkState(STATE_BAD_NETWORK_NONE),
         m_bWiFiState(IMS_FALSE),
         m_piNetPing(IMS_NULL),
@@ -236,22 +235,6 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleAirplaneModeChanged(IN IMS_U
     else
     {
         m_piBlock->ResetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
-    }
-}
-
-PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleWfcSettingChanged(IN IMS_UINT32 nState)
-{
-    // TODO : How to set initial value for m_nVoWiFiSetting?
-    if (nState == IMS_WFC_ON)
-    {
-        m_nVoWiFiSetting = IMS_TRUE;
-        m_piBlock->ResetBlockReason(BLOCK_WIFI_VOWIFI_OFF);
-    }
-    else
-    {
-        m_nVoWiFiSetting = IMS_FALSE;
-        ClearBadNetworkState();
-        m_piBlock->SetBlockReason(BLOCK_WIFI_VOWIFI_OFF);
     }
 }
 

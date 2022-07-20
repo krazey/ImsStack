@@ -54,7 +54,6 @@ private:
     void HandleCallStateChanged(IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx) final;
     void HandleRoamingChanged(IN IMS_UINT32 nState) final;
     void HandleAirplaneModeChanged(IN IMS_UINT32 nState) final;
-    void HandleWfcSettingChanged(IN IMS_UINT32 nState) final;
     void HandleWiFiConnectionChanged() final;
     void HandleLocationInfoChanged() final;
 
@@ -68,7 +67,6 @@ private:
 
 private:
     AString m_strCountry;
-    IMS_UINT32 m_nVoWiFiSetting;
     IMS_UINT32 m_nBadNetworkState;
     IMS_BOOL m_bWiFiState;
     INetworkPing* m_piNetPing;
@@ -80,6 +78,7 @@ private:
     ILocationProperties* m_piTestLocation;
 
     friend class AosServiceAvailableWifiTest;
+    friend class AosConditionTest;
 };
 
 #endif  // AOS_SERVICE_AVAILABLE_WIFI_H_

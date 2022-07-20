@@ -31,7 +31,6 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 PUBLIC
 AosServiceAvailableCellular::AosServiceAvailableCellular() :
         AosServiceAvailable("AosServiceAvailableCellular"),
-        m_bVolteSetting(IMS_FALSE),
         m_bVopsState(IMS_FALSE),
         m_bNetworkServiceIn(IMS_FALSE)
 {
@@ -119,33 +118,6 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN I
         if (m_piBlock != IMS_NULL)
         {
             m_piBlock->ResetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-        }
-    }
-}
-
-PRIVATE
-void AosServiceAvailableCellular::HandleVolteSettingChanged(IN IMS_UINT32 nState)
-{
-    m_bVolteSetting = (nState == IMS_VOLTE_SETTING_ON) ? IMS_TRUE : IMS_FALSE;
-
-    if (!GET_N_CONFIG(m_nSlotId)->IsRequiredVolteBlockBySetting())
-    {
-        return;
-    }
-
-    if (m_bVolteSetting == IMS_FALSE)
-    {
-        RequestCommand(AosCondition::REQUEST_STOP, AoSReason::NOT_SPECIFIED);
-        if (m_piBlock != IMS_NULL)
-        {
-            m_piBlock->SetBlockReason(BLOCK_CELLULAR_VOLTE_OFF);
-        }
-    }
-    else
-    {
-        if (m_piBlock != IMS_NULL)
-        {
-            m_piBlock->ResetBlockReason(BLOCK_CELLULAR_VOLTE_OFF);
         }
     }
 }

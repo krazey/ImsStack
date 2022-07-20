@@ -38,7 +38,6 @@ class AosServiceSettingListener;
 
 class AosCondition :
         public IEventListener,
-        public ITimerListener,
         public IAosBlockListener,
         public IAosCallTrackerListener,
         public IAosNetTrackerListener,
@@ -122,9 +121,6 @@ protected:
     // IAosBlockListener
     void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam) override;
 
-    // ITimerListener
-    void Timer_TimerExpired(IN ITimer* piTimer) override;
-
     // IAosServiceAvailableListener
     void ServiceAvailable_Changed() override;
     void ServiceAvailable_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason) override;
@@ -167,9 +163,7 @@ private:
     void ProcessPlmnEvent();
     void ProcessPhoneNumberAvailableEvent(IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState);
     void ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT32 nServiceBits);
-    void ProcessVolteCallSetting(IN IMS_UINT32 nState);
     void ProcessTtyEvent(IN IMS_BOOL bIsOn);
-    void ProcessWfcSettingChanged(IN IMS_UINT32 nState);
     void ProcessImsVopsEvent(IN IMS_UINT32 nState);
     void ProcessLocationInfo(IN LocationInfo eState);
     void ProcessLteInfoEvent(IN IMS_UINT32 nState);
@@ -181,6 +175,7 @@ private:
             IN SERVICE_TYPE eServiceType = SERVICE_WHOLE);
 
     IMS_BOOL IsClearReason(IN IAosNConfiguration::ClearReason eReason) const;
+    IMS_BOOL RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0) const;
 
     void UpdateRegistrationMode() const;
 

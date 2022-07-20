@@ -524,8 +524,6 @@ TEST_F(AosBlockTest, BlockReasonToString_ParamValid) {
             "CELLULAR_OUT_OF_SERVICE");
     EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_ROAMING),
             "CELLULAR_ROAMING");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_VOLTE_OFF),
-            "CELLULAR_VOLTE_OFF");
     EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_VOPS_OFF),
             "CELLULAR_VOPS_OFF");
     EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_BAD_CONNECTION),
@@ -540,6 +538,4 @@ TEST_F(AosBlockTest, BlockReasonToString_ParamValid) {
             "WIFI_ROAMING");
     EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_TEMPORARILY_BLOCKED),
             "WIFI_TEMPORARILY_BLOCKED");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_VOWIFI_OFF),
-            "WIFI_VOWIFI_OFF");
 }

@@ -72,11 +72,6 @@ protected:
         m_pAosServiceAvailableCellular->HandleAirplaneModeChanged(nState);
     }
 
-    void HandleVolteSettingChanged(IN IMS_UINT32 nState)
-    {
-        m_pAosServiceAvailableCellular->HandleVolteSettingChanged(nState);
-    }
-
     void HandleVopsChanged(IN IMS_UINT32 nState)
     {
         m_pAosServiceAvailableCellular->HandleVopsChanged(nState);
@@ -191,61 +186,6 @@ TEST_F(AosServiceAvailableCellurTest, HandleAirplaneModeChanged_AirplaneModeFals
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
 
     HandleAirplaneModeChanged(0);
-}
-
-TEST_F(AosServiceAvailableCellurTest, HandleVolteSettingChanged_ReturnByConfig)
-{
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsRequiredVolteBlockBySetting())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    MockIAosBlock objMockIAosBlock;
-    EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
-
-    HandleVolteSettingChanged(0);
-    HandleVolteSettingChanged(1);
-}
-
-TEST_F(AosServiceAvailableCellurTest, HandleVolteSettingChanged_VolteSettingTrue)
-{
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsRequiredVolteBlockBySetting())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    MockIAosBlock objMockIAosBlock;
-    EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
-
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
-
-    HandleVolteSettingChanged(1);
-}
-
-TEST_F(AosServiceAvailableCellurTest, HandleVolteSettingChanged_VolteSettingFalse)
-{
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsRequiredVolteBlockBySetting())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    MockIAosBlock objMockIAosBlock;
-    EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
-    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
-
-    HandleVolteSettingChanged(0);
 }
 
 TEST_F(AosServiceAvailableCellurTest, HandleVopsChange_VopsSupport)
