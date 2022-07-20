@@ -265,7 +265,7 @@ public class AcServiceImpl {
             EventReceiver eventReceiver, ConfigContainer configContainer) {
         mSlotId = slotId;
         mSubId = subId;
-        mCallbackManager = new CallbackManager(slotId);
+        mCallbackManager = new CallbackManager(slotId, subId);
 
         mHandler = new MessageHandler(looper);
         mContext = context;
@@ -292,7 +292,7 @@ public class AcServiceImpl {
     private AcServiceImpl(Context context, int slotId) {
         mSlotId = slotId;
         mSubId = MSimUtils.getSubId(slotId);
-        mCallbackManager = new CallbackManager(slotId);
+        mCallbackManager = new CallbackManager(mSlotId, mSubId);
 
         HandlerThread handlerThread = new HandlerThread(AcServiceImpl.class.getName());
         handlerThread.start();
