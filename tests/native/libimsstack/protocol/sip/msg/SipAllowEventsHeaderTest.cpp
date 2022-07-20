@@ -39,7 +39,10 @@ TEST_F(SipAllowEventsHeaderTest, EncodeHdrAndDecodeHdr)
     };
     char* pBuff = &(aBuffer[0]);
 
+    AStringBuffer objBuffer(256);
+
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
 
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"event-package", 13));
@@ -51,7 +54,9 @@ TEST_F(SipAllowEventsHeaderTest, EncodeHdrAndDecodeHdr)
     pHeader->SipDelete();
 
     EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("event-package", &(aBuffer[0]));
+    EXPECT_STREQ("event-package", objBuffer.GetCharString());
 
     pCopyHeader->SipDelete();
 
@@ -67,9 +72,12 @@ TEST_F(SipAllowEventsHeaderTest, EncodeHdrAndDecodeHdr)
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
+    objBuffer = AString::ConstNull();
 
     EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("event-package.event-template", &(aBuffer[0]));
+    EXPECT_STREQ("event-package.event-template", objBuffer.GetCharString());
 
     pCopyHeader->SipDelete();
 }

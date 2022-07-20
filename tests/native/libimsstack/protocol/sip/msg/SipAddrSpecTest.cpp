@@ -51,7 +51,10 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     };
     char* pBuff = &(aBuffer[0]);
 
+    AStringBuffer objBuffer(256);
+
     EXPECT_EQ(SIP_FALSE, pSipAddrSpec->EncodeAddrSpec(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pSipAddrSpec->Encode(objBuffer, SIP_FALSE));
 
     EXPECT_EQ(SIP_FALSE, pSipAddrSpec->DecodeAddrSpec(nullptr, 0));
 
@@ -61,7 +64,9 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     EXPECT_STREQ("http://absoluteuri.addrspec", pSipAddrSpec->GetAbsUri());
 
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->EncodeAddrSpec(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("http://absoluteuri.addrspec", &(aBuffer[0]));
+    EXPECT_STREQ("http://absoluteuri.addrspec", objBuffer.GetCharString());
 
     pSipAddrSpec->SipDelete();
 
@@ -79,8 +84,12 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
+    objBuffer = AString::ConstNull();
+
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->EncodeAddrSpec(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ(pUri, &(aBuffer[0]));
+    EXPECT_STREQ(pUri, objBuffer.GetCharString());
 
     pSipUri->SipDelete();
     pSipAddrSpec->SipDelete();
@@ -98,8 +107,12 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
+    objBuffer = AString::ConstNull();
+
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->EncodeAddrSpec(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("sips:192.168.2.8:9091", &(aBuffer[0]));
+    EXPECT_STREQ("sips:192.168.2.8:9091", objBuffer.GetCharString());
 
     pSipUri->SipDelete();
     pSipAddrSpec->SipDelete();
@@ -111,8 +124,12 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
+    objBuffer = AString::ConstNull();
+
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->EncodeAddrSpec(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("sip:alice@atlanta.com;maddr=239.255.255.1;ttl=15", &(aBuffer[0]));
+    EXPECT_STREQ("sip:alice@atlanta.com;maddr=239.255.255.1;ttl=15", objBuffer.GetCharString());
 
     pSipAddrSpec->SipDelete();
 
@@ -129,8 +146,12 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
+    objBuffer = AString::ConstNull();
+
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->EncodeAddrSpec(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("sip:%AAuser:$=+,%3AB@host;method=REGISTER?to=proxy", &(aBuffer[0]));
+    EXPECT_STREQ("sip:%AAuser:$=+,%3AB@host;method=REGISTER?to=proxy", objBuffer.GetCharString());
     pSipUri->SipDelete();
     pSipAddrSpec->SipDelete();
 }

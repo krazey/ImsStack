@@ -109,7 +109,7 @@ TEST_F(SipAcceptHeaderTest, IsValidHeader)
     pHeader = nullptr;
 }
 
-TEST_F(SipAcceptHeaderTest, EncodeHdr)
+TEST_F(SipAcceptHeaderTest, EncodeAndEncodeHdr)
 {
     const int BUFFER_SIZE = 4096;
     char aBuffer[BUFFER_SIZE] = {
@@ -117,16 +117,20 @@ TEST_F(SipAcceptHeaderTest, EncodeHdr)
     };
     char* pBuff = &(aBuffer[0]);
 
+    AStringBuffer objBuffer(256);
+
     SipAcceptHeader* pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     /* No MediaType, media subType and parameters, empty accept allowed */
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_FALSE));
 
     /* Only mediaType present, fail */
     EXPECT_EQ(SIP_TRUE, pHeader->SetMediaType("mediaType"));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
     pHeader->SipDelete();
     pHeader = nullptr;
 
@@ -135,6 +139,7 @@ TEST_F(SipAcceptHeaderTest, EncodeHdr)
     /* Only media subType present, fail */
     EXPECT_EQ(SIP_TRUE, pHeader->SetMediaSubType("mediaSubType"));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
     pHeader->SipDelete();
     pHeader = nullptr;
 
@@ -144,10 +149,13 @@ TEST_F(SipAcceptHeaderTest, EncodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->SetMediaSubType("mediaSubType"));
     EXPECT_EQ(SIP_TRUE, pHeader->SetMediaType("mediaType"));
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("mediaType/mediaSubType", &(aBuffer[0]));
+    EXPECT_STREQ("mediaType/mediaSubType", objBuffer.GetCharString());
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
+    objBuffer = AString::ConstNull();
 
     /* Encode accept with value and parameters */
     pHeader->InitParameters(SIP_NULL);
@@ -156,7 +164,13 @@ TEST_F(SipAcceptHeaderTest, EncodeHdr)
     pParameters->AddParam("q", "0.1");
 
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("mediaType/mediaSubType;param-name=param-value;q=0.1", &(aBuffer[0]));
+    EXPECT_STREQ("mediaType/mediaSubType;param-name=param-value;q=0.1", objBuffer.GetCharString());
+
+    objBuffer = AString::ConstNull();
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_FALSE));
+    EXPECT_STREQ("mediaType/mediaSubType", objBuffer.GetCharString());
 
     pHeader->SipDelete();
     pHeader = nullptr;

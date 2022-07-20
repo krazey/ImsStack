@@ -62,7 +62,10 @@ TEST_F(SipNameAddrTest, EncodeAndDecodeNameAddr)
     };
     char* pBuff = &(aBuffer[0]);
 
+    AStringBuffer objBuffer(256);
+
     EXPECT_EQ(SIP_FALSE, pSipNameAddr->EncodeNameAddr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pSipNameAddr->Encode(objBuffer, SIP_FALSE));
 
     char* pNameAddress = (char*)"";
     char* pEnd = pNameAddress;
@@ -76,7 +79,9 @@ TEST_F(SipNameAddrTest, EncodeAndDecodeNameAddr)
     EXPECT_STREQ("DisplayName", pSipNameAddr->GetDisplayName());
 
     EXPECT_EQ(SIP_TRUE, pSipNameAddr->EncodeNameAddr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipNameAddr->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("DisplayName <http://absoluteuri.addrspec>", &(aBuffer[0]));
+    EXPECT_STREQ("DisplayName <http://absoluteuri.addrspec>", objBuffer.GetCharString());
 
     pSipNameAddr->SipDelete();
 
@@ -91,9 +96,12 @@ TEST_F(SipNameAddrTest, EncodeAndDecodeNameAddr)
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
+    objBuffer = AString::ConstNull();
 
     EXPECT_EQ(SIP_TRUE, pSipNameAddr->EncodeNameAddr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipNameAddr->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("<http://absoluteuri.addrspec>", &(aBuffer[0]));
+    EXPECT_STREQ("<http://absoluteuri.addrspec>", objBuffer.GetCharString());
 
     pSipNameAddr->SipDelete();
 
@@ -106,9 +114,12 @@ TEST_F(SipNameAddrTest, EncodeAndDecodeNameAddr)
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
+    objBuffer = AString::ConstNull();
 
     EXPECT_EQ(SIP_TRUE, pSipNameAddr->EncodeNameAddr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipNameAddr->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("\"QuotedDispName\" <http://absoluteuri.addrspec>", &(aBuffer[0]));
+    EXPECT_STREQ("\"QuotedDispName\" <http://absoluteuri.addrspec>", objBuffer.GetCharString());
 
     pSipNameAddr->SipDelete();
 }
