@@ -8,6 +8,7 @@ import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 
+import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.imsservice.mmtel.reg.IRegistrationNotifier;
 import com.android.imsstack.imsservice.sipcontroller.ISipTransportBaseRegistrationListener;
 import com.android.imsstack.util.ImsLog;
@@ -69,6 +70,11 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
             return new ImsReasonInfo(
                     ImsReasonInfo.CODE_EPDG_TUNNEL_ESTABLISH_FAILURE,
                     ImsReasonInfo.CODE_IKEV2_AUTH_FAILURE, null);
+        } else if (reason == IAosRegistrationListener.ReasonCode
+                .CODE_REGISTRATION_ERROR_BY_MISSING_911_ADDRESS) {
+            return new ImsReasonInfo(
+                    ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                    ImsReasonInfo.CODE_UNSPECIFIED, "REG09 - No 911 Address");
         } else {
             return new ImsReasonInfo(
                     ImsReasonInfo.CODE_REGISTRATION_ERROR,

@@ -16,7 +16,9 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
+import android.net.Uri;
 import android.os.Looper;
+import android.telephony.DataFailCause;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
 import android.telephony.ims.feature.MmTelFeature;
 import android.util.ArraySet;
@@ -181,6 +183,45 @@ public class ImsRegistrationTrackerTest {
         verify(mMockFeatureCapabilityListener).onFeatureCapabilityChanged(
                 eq(mMmTelCapabilities));
     }
+
+    @Test
+    public void testnotifyDeRegistered_WithError() {
+        mAosRegListener.notifyDeregistered(IAosRegistrationListener.ReasonCode
+                .CODE_REGISTRATION_ERROR_BY_MISSING_911_ADDRESS);
+        assertEquals(false, mRegTracker.isRegistered());
+        assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
+                mRegTracker.getRegisteredFeatures());
+        assertEquals(false, mRegTracker.isCallRegistered());
+        assertEquals(false, mRegTracker.isCallVideoRegistered());
+        assertEquals(false, mRegTracker.isSmsRegistered());
+        assertEquals(false, mRegTracker.isCallVoiceAndVideoRegistered());
+
+        int capabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE;
+        int removeCapabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
+
+        mMmTelCapabilities.addCapabilities(capabilities);
+        mMmTelCapabilities.removeCapabilities(removeCapabilities);
+        verify(mMockFeatureCapabilityListener).onFeatureCapabilityChanged(
+                eq(mMmTelCapabilities));
+    }
+
+    @Test
+    public void testnotifyTechnologyChangeFailed() {
+        mAosRegListener.notifyTechnologyChangeFailed(IAosRegistrationListener.NetworkType.LTE,
+                DataFailCause.IWLAN_IKEV2_AUTH_FAILURE);
+    }
+
+    @Test
+    public void testnotifyAssociatedUriChanged() {
+        Uri[] uris = new Uri[2];
+        uris[0] = Uri.parse("1111@vzw.com");
+        uris[1] = Uri.parse("2222@vzw.com");
+
+        mAosRegListener.notifyAssociatedUriChanged(uris);
+    }
+
     @Test
     public void testchangeCapabilities() {
         List<CapabilityPair> enableCapabilities = new ArrayList<>();
