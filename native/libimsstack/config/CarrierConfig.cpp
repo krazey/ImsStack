@@ -725,6 +725,9 @@ const IMS_CHAR CarrierConfig::Assets::
         KEY_SUB_ERR_CODE_FOR_REG_EVENT_WITH_INITIAL_REG_WITH_NEXT_PCSCF_INT_ARRAY[] =
                 "subscription_error_code_for_reg_event_with_initial_registration_with_next_"
                 "pcscf_int_array";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_WFC_REG_EVENT_ERROR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY[] =
+                "wfc_reg_event_error_code_by_missing_911_address_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[] =
         "ignore_vops_for_volte_enable_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL[] =

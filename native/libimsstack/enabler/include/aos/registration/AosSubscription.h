@@ -85,8 +85,10 @@ public:
 
     virtual IMS_BOOL IsRegRequiredByNotofy(IN IMS_UINT32 nFeature);
     virtual IMS_BOOL IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature);
+    virtual IMS_BOOL IsWfcErrorCodeByMissing911Address(IN IMS_SINT32 nErrorCode);
 
 protected:
+    virtual void SetRequestCommand(IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand);
     virtual void RequestCommand(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand);
 
     virtual void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode);
@@ -165,6 +167,8 @@ public:
         COMMAND_REG_REQUIRED,
         COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF,
         COMMAND_REG_REQUIRED_WITH_REG_RETRY_TIME,
+        COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR,
+        COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR_WITH_REG_RETRY_TIME,
         COMMAND_REG_TERMINATED,
         COMMAND_SUB_REQUIRED,
         COMMAND_SUB_TERMINATED

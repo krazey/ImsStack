@@ -782,6 +782,7 @@ public:
                 KEY_SUBSCRIPTION_ERROR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY[];
         static const IMS_CHAR
                 KEY_SUB_ERR_CODE_FOR_REG_EVENT_WITH_INITIAL_REG_WITH_NEXT_PCSCF_INT_ARRAY[];
+        static const IMS_CHAR KEY_WFC_REG_EVENT_ERROR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY[];
         static const IMS_CHAR KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[];
         static const IMS_CHAR KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL[];
         static const IMS_CHAR KEY_IMS_DEREGISTER_ON_3G_NETWORKS_BOOL[];
@@ -1055,6 +1056,13 @@ public:
             REG_RETRY_COUNT_RESET_POLICY_REGISTRATION = 0,
             REG_RETRY_COUNT_RESET_POLICY_SUBSCRIPTION = 1,
             REG_RETRY_COUNT_RESET_POLICY_NOTIFY = 2
+        };
+
+        // error codes for reg event package by missing 911 address in wifi
+        enum
+        {
+            WFC_NO_ADDRESSS_ERROR_CODE_NOTIFY_TERMINATED = 1,
+            WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403 = 2
         };
 
         // IP verion types

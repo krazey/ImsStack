@@ -30,6 +30,7 @@
 #include "../../../engine/interface/registration/MockIRegSubscription.h"
 #include "../../../engine/interface/sipcore/MockISipMessage.h"
 
+#include "CarrierConfig.h"
 #include "IRegContact.h"
 #include "IRegSubscription.h"
 #include "ISipHeader.h"
@@ -485,16 +486,17 @@ TEST_F(AosSubscriptionTest, CheckInitialRegRequiredInWifi)
     SetState(AosSubscription::STATE_SUBSTOP);
     MockIAosConnection objMockIAosConnection;
     EXPECT_CALL(*pMockAosAppContext, GetConnection())
-            .Times(4)
+            .Times(6)
             .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
 
     EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
-            .Times(4)
+            .Times(6)
             .WillOnce(Return(IMS_FALSE))
             .WillRepeatedly(Return(IMS_TRUE));
 
     EXPECT_FALSE(pAosSubscription->IsInitialRegistrationRequiredInWifi(403, IMS_FALSE));
 
+    // GetVowifiSubErrorRegRequired() - no info
     IMSVector<IMS_SINT32> objErrRegRequiredInWifi;
     objErrRegRequiredInWifi.Clear();
     EXPECT_CALL(objMockAosConfig, GetVowifiSubErrorRegRequired())
@@ -503,26 +505,36 @@ TEST_F(AosSubscriptionTest, CheckInitialRegRequiredInWifi)
 
     EXPECT_FALSE(pAosSubscription->IsInitialRegistrationRequiredInWifi(403, IMS_FALSE));
 
+    // GetVowifiSubErrorRegRequired() - 404, 403
     objErrRegRequiredInWifi.Add(404);
     objErrRegRequiredInWifi.Add(403);
     EXPECT_CALL(objMockAosConfig, GetVowifiSubErrorRegRequired())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objErrRegRequiredInWifi));
 
+    // bErrCodeByNo911Addr
+    IMSVector<IMS_SINT32> objErrCodeByNo911Addr;
+    objErrCodeByNo911Addr.Clear();
+    objErrCodeByNo911Addr.Add(2);
+    EXPECT_CALL(objMockAosConfig, GetWfcRegEventErrorByMissing911Address())
+            .Times(1)
+            .WillOnce(ReturnRef(objErrCodeByNo911Addr));
+
+    // RequestCommand
     EXPECT_CALL(objMockAosConfig, GetRegRetryCountResetPolicy())
-            .WillOnce(Return(0))
-            .WillOnce(Return(2));
+            .WillOnce(Return(2))
+            .WillOnce(Return(0));
 
     // ReportState() if result is true.
     EXPECT_CALL(objMockIAosSubscriptionListener,
             Subscription_StateChanged(
                     AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_FAILED))
             .Times(1);
+
     EXPECT_CALL(objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::COMMAND_REG_REQUIRED, 0))
-            .Times(1);
-    EXPECT_CALL(objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::COMMAND_REG_REQUIRED_WITH_REG_RETRY_TIME, 0))
+            Subscription_Request(
+                    AosSubscription::COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR_WITH_REG_RETRY_TIME,
+                    0))
             .Times(1);
 
     EXPECT_TRUE(pAosSubscription->IsInitialRegistrationRequiredInWifi(403, IMS_FALSE));
@@ -532,6 +544,9 @@ TEST_F(AosSubscriptionTest, CheckInitialRegRequiredInWifi)
     EXPECT_CALL(objMockIAosSubscriptionListener,
             Subscription_StateChanged(
                     AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_TERMINATED))
+            .Times(1);
+    EXPECT_CALL(objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::COMMAND_REG_REQUIRED, 0))
             .Times(1);
 
     objErrRegRequiredInWifi.Clear();
@@ -775,8 +790,49 @@ TEST_F(AosSubscriptionTest, IsRegAfterWaitRequiredByNotify)
     EXPECT_TRUE(pAosSubscription->IsRegAfterWaitRequiredByNotify(nFeature));
 }
 
+TEST_F(AosSubscriptionTest, IsWfcErrorCodeByMissing911Address)
+{
+    MockIAosConnection objMockIAosConnection;
+    EXPECT_CALL(*pMockAosAppContext, GetConnection())
+            .Times(5)
+            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
+
+    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
+            .Times(5)
+            .WillOnce(Return(IMS_FALSE))
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    SetState(AosSubscription::STATE_OFFLINE);
+    EXPECT_FALSE(pAosSubscription->IsWfcErrorCodeByMissing911Address(
+            CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403));
+
+    SetState(AosSubscription::STATE_OFFLINE);
+    EXPECT_FALSE(pAosSubscription->IsWfcErrorCodeByMissing911Address(
+            CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403));
+
+    SetState(AosSubscription::STATE_UNSUBSCRIBING);
+    EXPECT_FALSE(pAosSubscription->IsWfcErrorCodeByMissing911Address(
+            CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403));
+
+    IMSVector<IMS_SINT32> objErrDisplayRequired;
+    objErrDisplayRequired.Clear();
+    objErrDisplayRequired.Add(CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403);
+    EXPECT_CALL(objMockAosConfig, GetWfcRegEventErrorByMissing911Address())
+            .Times(2)
+            .WillRepeatedly(ReturnRef(objErrDisplayRequired));
+
+    SetState(AosSubscription::STATE_SUBSCRIBED);
+    EXPECT_TRUE(pAosSubscription->IsWfcErrorCodeByMissing911Address(
+            CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403));
+
+    SetState(AosSubscription::STATE_SUBSCRIBED);
+    EXPECT_FALSE(pAosSubscription->IsWfcErrorCodeByMissing911Address(
+            CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_NOTIFY_TERMINATED));
+}
+
 TEST_F(AosSubscriptionTest, CheckNotifyReceived)
 {
+    SetState(AosSubscription::STATE_SUBSCRIBED);
     NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_FALSE);
     EXPECT_EQ(GetAorState(), IRegInfoContact::STATE_TERMINATED);
 
@@ -889,6 +945,10 @@ TEST_F(AosSubscriptionTest, CheckNotifyReceived)
             .WillOnce(Return(5))
             .WillRepeatedly(Return(0));
 
+    EXPECT_CALL(objMockAosService, NotifyRegEventState(AosRegEvent::ACTIVE)).Times(1);
+
+    EXPECT_CALL(objMockAosRetryRepository, ResetRetryCount(0)).Times(1);
+
     SipAddress objContactAddr;
     objContactAddr.Create(ADDRESS2);
     SetObjContactAddress(objContactAddr);
@@ -971,10 +1031,39 @@ TEST_F(AosSubscriptionTest, CheckNotifyReceived)
             .WillOnce(Return(IAosNConfiguration::NOTIFY_TERMINATED_REJECTED))
             .WillOnce(Return(IAosNConfiguration::NOTIFY_TERMINATED_REJECTED));
 
+    EXPECT_CALL(objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::COMMAND_REG_TERMINATED, 0))
+            .Times(1);
+
     NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
     EXPECT_EQ(GetAorState(), IRegInfoContact::STATE_TERMINATED);
 
-    EXPECT_CALL(objMockAosConfig, GetNotifyWaitTime()).Times(2).WillOnce(Return(60));
+    // ReportNotifyEvent() - bRegRequired == TRUE
+    EXPECT_CALL(objMockAosConfig, GetNotifyWaitTime()).Times(2).WillRepeatedly(Return(60));
+
+    MockIAosConnection objMockIAosConnection;
+    EXPECT_CALL(*pMockAosAppContext, GetConnection())
+            .Times(5)
+            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
+
+    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
+            .Times(5)
+            .WillOnce(Return(IMS_TRUE))
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    IMSVector<IMS_SINT32> objErrDisplayRequired;
+    objErrDisplayRequired.Clear();
+    objErrDisplayRequired.Add(1);
+    EXPECT_CALL(objMockAosConfig, GetWfcRegEventErrorByMissing911Address())
+            .Times(1)
+            .WillOnce(ReturnRef(objErrDisplayRequired));
+    EXPECT_CALL(objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR, 0))
+            .Times(1);
+
+    EXPECT_CALL(objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::COMMAND_REG_REQUIRED, _))
+            .Times(4);
 
     NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
     EXPECT_EQ(GetAorState(), IRegInfoContact::STATE_TERMINATED);

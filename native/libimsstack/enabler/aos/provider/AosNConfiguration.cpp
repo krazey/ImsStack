@@ -559,6 +559,11 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSubErrorRegRequiredW
     return m_objAsset.objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf;
 }
 
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetWfcRegEventErrorByMissing911Address()
+{
+    return m_objAsset.objWfcRegEventErrorByMissing911Address;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRetryCountSubErrorSubTerminated() const
 {
     return m_objSubTerminatedErrCode.nSubTerminatedErrCodeRetryMaxCount;
@@ -1285,6 +1290,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
     m_objAsset.objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf =
             piCc->GetIntArray(CarrierConfig::Assets::
                             KEY_SUB_ERR_CODE_FOR_REG_EVENT_WITH_INITIAL_REG_WITH_NEXT_PCSCF_INT_ARRAY);
+    m_objAsset.objWfcRegEventErrorByMissing911Address = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_WFC_REG_EVENT_ERROR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY);
     m_objAsset.bIgnoreVopsForVolteEnable =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL);
     m_objAsset.bSmsOverImsAvailableWithoutVoiceCapability = piCc->GetBoolean(

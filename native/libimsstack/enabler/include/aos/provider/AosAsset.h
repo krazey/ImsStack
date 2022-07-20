@@ -41,6 +41,7 @@ public:
             objSubscriptionErrorCodeForStoppingByExpirationTime(IMSVector<IMS_SINT32>()),
             objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf(
                     IMSVector<IMS_SINT32>()),
+            objWfcRegEventErrorByMissing911Address(IMSVector<IMS_SINT32>()),
             bIgnoreVopsForVolteEnable(IMS_FALSE),
             bSmsOverImsAvailableWithoutVoiceCapability(IMS_FALSE),
             bImsDeregisterOn3gNetworks(IMS_FALSE),
@@ -95,6 +96,7 @@ public:
     IMSVector<IMS_SINT32> objVowifiSubscriptionErrorCodeWithInitialRegistration;
     IMSVector<IMS_SINT32> objSubscriptionErrorCodeForStoppingByExpirationTime;
     IMSVector<IMS_SINT32> objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf;
+    IMSVector<IMS_SINT32> objWfcRegEventErrorByMissing911Address;
     IMS_BOOL bIgnoreVopsForVolteEnable;
     IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapability;
     IMS_BOOL bImsDeregisterOn3gNetworks;

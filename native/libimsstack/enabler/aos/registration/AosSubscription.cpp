@@ -286,7 +286,15 @@ void AosSubscription::ReportNotifyEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nRet
 
     if (bRegRequired)
     {
-        m_piListener->Subscription_Request(COMMAND_REG_REQUIRED, nRetryAfter);
+        if (IsWfcErrorCodeByMissing911Address(
+                    CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_NOTIFY_TERMINATED))
+        {
+            m_piListener->Subscription_Request(COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR);
+        }
+        else
+        {
+            m_piListener->Subscription_Request(COMMAND_REG_REQUIRED, nRetryAfter);
+        }
     }
     else
     {
@@ -420,14 +428,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_504(IN IMS_BO
     if (AosUtil::GetInstance()->IsInitialRegistrationRequired(piMsg))
     {
         IMS_TRACE_I("Request initial registration", 0, 0, 0);
-        if (bIsRefreshed == IMS_TRUE)
-        {
-            RequestCommand(REASON_SUB_TERMINATED, COMMAND_REG_REQUIRED);
-        }
-        else
-        {
-            RequestCommand(REASON_SUB_FAILED, COMMAND_REG_REQUIRED);
-        }
+        SetRequestCommand(bIsRefreshed, COMMAND_REG_REQUIRED);
         return IMS_TRUE;
     }
 
@@ -449,14 +450,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetrycounter(IN IMS_B
         {
             m_bIsErrChecked = IMS_TRUE;
             IMS_TRACE_I("request initial registration with next pcscf", 0, 0, 0);
-            if (bIsRefreshed == IMS_TRUE)
-            {
-                RequestCommand(REASON_SUB_TERMINATED, COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF);
-            }
-            else
-            {
-                RequestCommand(REASON_SUB_FAILED, COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF);
-            }
+            SetRequestCommand(bIsRefreshed, COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF);
             return IMS_TRUE;
         }
     }
@@ -526,15 +520,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
                 {
                     m_nRetryCountRegRequired = 0;
                     IMS_TRACE_I("Request initial registration", 0, 0, 0);
-                    if (bIsRefreshed == IMS_TRUE)
-                    {
-                        RequestCommand(REASON_SUB_TERMINATED, COMMAND_REG_REQUIRED);
-                    }
-                    else
-                    {
-                        RequestCommand(REASON_SUB_FAILED, COMMAND_REG_REQUIRED);
-                    }
-
+                    SetRequestCommand(bIsRefreshed, COMMAND_REG_REQUIRED);
                     return IMS_TRUE;
                 }
             }
@@ -559,14 +545,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequi
             {
                 m_bIsErrChecked = IMS_TRUE;
                 IMS_TRACE_I("request initial registration with next pcscf", 0, 0, 0);
-                if (bIsRefreshed == IMS_TRUE)
-                {
-                    RequestCommand(REASON_SUB_FAILED, COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF);
-                }
-                else
-                {
-                    RequestCommand(REASON_SUB_TERMINATED, COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF);
-                }
+                SetRequestCommand(bIsRefreshed, COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF);
                 return IMS_TRUE;
             }
         }
@@ -595,13 +574,16 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
             {
                 m_bIsErrChecked = IMS_TRUE;
                 IMS_TRACE_I("Request initial registration", 0, 0, 0);
-                if (bIsRefreshed == IMS_TRUE)
+                IMS_BOOL bErrCodeByNo911Addr = IsWfcErrorCodeByMissing911Address(
+                        CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403);
+
+                if (bErrCodeByNo911Addr == IMS_TRUE)
                 {
-                    RequestCommand(REASON_SUB_TERMINATED, COMMAND_REG_REQUIRED);
+                    SetRequestCommand(bIsRefreshed, COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR);
                 }
                 else
                 {
-                    RequestCommand(REASON_SUB_FAILED, COMMAND_REG_REQUIRED);
+                    SetRequestCommand(bIsRefreshed, COMMAND_REG_REQUIRED);
                 }
                 return IMS_TRUE;
             }
@@ -710,19 +692,65 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRegAfterWaitRequiredByNotify(IN IMS_U
     return IMS_FALSE;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsWfcErrorCodeByMissing911Address(IN IMS_SINT32 nErrorCode)
+{
+    if (m_piContext->GetConnection()->IsEpdgEnabled() == IMS_FALSE)
+    {
+        return IMS_FALSE;
+    }
+
+    if (GetState() == STATE_UNSUBSCRIBING || GetState() == STATE_OFFLINE)
+    {
+        return IMS_FALSE;
+    }
+
+    IMSVector<IMS_SINT32>& objErrDisplayRequired =
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetWfcRegEventErrorByMissing911Address();
+    for (IMS_UINT32 i = 0; i < objErrDisplayRequired.GetSize(); i++)
+    {
+        if (nErrorCode == objErrDisplayRequired.GetAt(i))
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED VIRTUAL void AosSubscription::SetRequestCommand(
+        IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand)
+{
+    if (bIsRefreshed)
+    {
+        RequestCommand(REASON_SUB_TERMINATED, nCommand);
+    }
+    else
+    {
+        RequestCommand(REASON_SUB_FAILED, nCommand);
+    }
+}
+
 PROTECTED VIRTUAL void AosSubscription::RequestCommand(
         IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand)
 {
     IMS_TRACE_I("RequestCommand:: reason(%d), command(%d) ", nReason, nCommand, 0);
     SetState(STATE_OFFLINE);
-    if (nCommand == COMMAND_REG_REQUIRED)
+    if (nCommand == COMMAND_REG_REQUIRED || nCommand == COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR)
     {
         IMS_SINT32 nRegistrationRetryResetPolicy =
                 GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryCountResetPolicy();
         if (nRegistrationRetryResetPolicy !=
                 CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION)
         {
-            ReportState(nReason, COMMAND_REG_REQUIRED_WITH_REG_RETRY_TIME);
+            if (nCommand == COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR)
+            {
+                ReportState(
+                        nReason, COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR_WITH_REG_RETRY_TIME);
+            }
+            else
+            {
+                ReportState(nReason, COMMAND_REG_REQUIRED_WITH_REG_RETRY_TIME);
+            }
             return;
         }
     }
