@@ -28,12 +28,9 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.enabler.acs.impl.CallbackManager;
 
 import org.junit.After;
@@ -50,8 +47,6 @@ public class CallbackManagerTest {
     private static final int SLOT_ID = 0;
     private static final int SUB_ID = 1234;
 
-    @Mock
-    ISubscription mISubscription;
     @Mock
     IAcServiceImplCallback mIAcServiceImplCallback1;
     @Mock
@@ -72,15 +67,13 @@ public class CallbackManagerTest {
         mCallbackList.add(mIAcServiceImplCallback2);
         mCallbackList.add(mIAcServiceImplCallback3);
 
-        when(mISubscription.getSubId()).thenReturn(SUB_ID);
-
         for (IAcServiceImplCallback cb : mCallbackList) {
             doNothing().when(cb).onReceivedProvisioning(any(), anyBoolean());
             doNothing().when(cb).onReceivedPreProvisioning(any());
             doNothing().when(cb).onReceivedError(anyInt(), anyString());
         }
 
-        mCallbackManager = new CallbackManager(SLOT_ID, mISubscription);
+        mCallbackManager = new CallbackManager(SLOT_ID, SUB_ID);
     }
 
     @After

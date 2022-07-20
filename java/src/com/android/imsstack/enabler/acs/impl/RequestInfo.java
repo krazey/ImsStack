@@ -337,8 +337,7 @@ public class RequestInfo {
          */
         RequestInfoBuilder(int slotId, int subId,
                 @NonNull AcServiceClientInfo acServiceClientInfo) {
-            new RequestInfoBuilder(slotId, subId, acServiceClientInfo,
-                    AppContext.getTelephonyManager(subId));
+            this(slotId, subId, acServiceClientInfo, AppContext.getTelephonyManager(subId));
         }
 
         @VisibleForTesting
@@ -530,7 +529,7 @@ public class RequestInfo {
         }
 
         /**
-         * Return String value includes all attributes
+         * Return String value includes all attributes, and should be used for debugging only.
          * @return String includes all attributes
          */
         public String toString() {

@@ -16,11 +16,8 @@
 
 package com.android.imsstack.enabler.acs.impl;
 
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.enabler.acs.IAcServiceImplCallback;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
@@ -37,25 +34,13 @@ public class CallbackManager {
     private int mSlotId;
     private int mSubId;
 
-    @VisibleForTesting
-    public CallbackManager(int slotId, ISubscription iSubscription) {
-        mSlotId = slotId;
-        try {
-            mSubId = iSubscription.getSubId();
-        } catch (NullPointerException e) {
-            ImsLog.e(e.getMessage());
-            mSubId = MSimUtils.INVALID_SUB_ID;
-        }
-    }
-
     /**
      * create CallbackManager instance
      * @param slotId SIM slot ID which will be used for trace.
      */
-    public CallbackManager(int slotId) {
-        new CallbackManager(slotId,
-                (ISubscription) AgentFactory.getInstance().getAgent(AgentFactory.SUBSCRIPTION,
-                        slotId));
+    public CallbackManager(int slotId, int subId) {
+        mSlotId = slotId;
+        mSubId = subId;
     }
 
     /**

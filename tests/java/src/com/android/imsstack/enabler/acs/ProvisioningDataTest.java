@@ -49,6 +49,10 @@ public class ProvisioningDataTest {
     private static final String LOCAL_FILE_NAME_POSTFIX = ".xml";
     private static final String AC_DATA = "<?xml version=\"1.0\"?>"
                     + "<wap-provisioningdoc version=\"1.1\">"
+                    + "<unknowntag type=\"VERS\">"
+                    + "<parm name=\"version\" value=\"1\"/>"
+                    + "<parm name=\"validity\" value=\"2160000\"/>"
+                    + "</unknowntag>"
                     + "<characteristic type=\"VERS\">"
                     + "<parm name=\"version\" value=\"1\"/>"
                     + "<parm name=\"validity\" value=\"2160000\"/>"
@@ -185,6 +189,10 @@ public class ProvisioningDataTest {
         String fileName = mProvisioningData.getFileName();
 
         assertEquals(true, isExistTestFile(fileName));
+
+        mProvisioningData = new ProvisioningData(mContext, mSubId, new byte[0]);
+        assertFalse(mProvisioningData.isComplete());
+        assertFalse(mProvisioningData.saveXmlFile());
     }
 
     @Test
@@ -196,11 +204,31 @@ public class ProvisioningDataTest {
         int intValue = mProvisioningData.getIntValue("version", 0);
         assertEquals(1, intValue);
 
+        // not exist, return default
+        intValue = mProvisioningData.getIntValue("version2", 0);
+        assertEquals(0, intValue);
+
+        // can not convert int, return default
+        intValue = mProvisioningData.getIntValue("ftHTTPCSURI", 0);
+        assertEquals(0, intValue);
+
         long longValue = mProvisioningData.getLongValue("validity", 0L);
         assertEquals(2160000L, longValue);
 
+        // not exist, return default
+        longValue = mProvisioningData.getLongValue("validity2", 1000L);
+        assertEquals(1000L, longValue);
+
+        // can not convert long, return default
+        longValue = mProvisioningData.getLongValue("AppID", 0L);
+        assertEquals(0L, longValue);
+
         String stringValue = mProvisioningData.getStringValue("token", "");
         assertEquals("qawsedrftg", stringValue);
+
+        // not exist, return default
+        stringValue = mProvisioningData.getStringValue("token2", "abc");
+        assertEquals("abc", stringValue);
 
         longValue = mProvisioningData.getLongValue("MaxSizeStandalone", 0L);
         assertEquals(1048576, longValue);
@@ -282,6 +310,10 @@ public class ProvisioningDataTest {
 
         assertNull(ProvisioningData.compressGzip(null));
         assertNull(ProvisioningData.decompressGzip(null));
+
+        byte[] emptyData = new byte[0];
+        byte[] retData = ProvisioningData.compressGzip(emptyData);
+        assertEquals(emptyData, retData);
     }
 
     @Test
