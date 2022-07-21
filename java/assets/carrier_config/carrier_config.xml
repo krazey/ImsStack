@@ -251,6 +251,8 @@
     <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="true"/>
     <boolean name="set_sdp_direction_attribute_for_removed_media_bool" value="false"/>
     <boolean name="support_sdp_precondition_bool" value="true"/>
+    <boolean name="hide_mac_address_in_pani_header_bool" value="false"/>
+    <boolean name="support_country_param_in_pani_header_bool" value="false"/>
 
     <!-- Aos -->
     <boolean name="use_security_server_port_in_reg_contact_of_initial_registration_bool" value="false"/>

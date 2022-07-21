@@ -88,8 +88,8 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_INVALID_MAC_ADDRESS_REQUIRED_IN_PANI_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_LOCAL_TIME_ZONE_REQUIRED_IN_PANI_HEADER\n
+     *         #ISipConfig#SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER\n
+     *         #ISipConfig#SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB\n
      *         #ISipConfig#SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG\n
@@ -97,7 +97,7 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_ROUTE_HEADER_IN_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_NO_ACCEPT_CONTACT_HEADER_IN_BYE\n
      *         #ISipConfig#SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_COUNTRY_INFO_IN_PANI_HEADER\n
+     *         #ISipConfig#SIP_FEATURE_CAPS_COUNTRY_PARAM_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_AUTHENTICATION_ALGORITHM_PARAMETER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT\n
      *         #ISipConfig#SIP_FEATURE_CAPS_USER_AGENT\n
@@ -289,7 +289,7 @@ public:
     static IMS_BOOL IsContactInAll1xxRequired(
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
-     * @brief Checks if the country information in P-Access-Network-Info header
+     * @brief Checks if the country parameter in P-Access-Network-Info header
      *        should be added or not.
      *
      * SipProfile is preferred than a default SipConfig.
@@ -298,7 +298,7 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsCountryInfoRequiredInPaniHeader(
+    static IMS_BOOL IsCountryParameterSupportedInPaniHeader(
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the display name of SIP address should contain double quotation or not.
@@ -561,7 +561,7 @@ public:
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
-     * @brief Checks if the invalid MAC address is required in PANI header on Wi-Fi.
+     * @brief Checks if the MAC address should be hidden in PANI header on Wi-Fi.
      *
      * SipProfile is preferred than a default SipConfig.
      *
@@ -569,19 +569,19 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
-    static IMS_BOOL IsInvalidMacAddressRequiredInPaniHeader(
+    static IMS_BOOL IsMacAddressHiddenInPaniHeader(
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
-     * @brief Checks if Checks if the "local-time-zone" parameter is required in PANI header.
+     * @brief Checks if Checks if the "local-time-zone" parameter is supported in PANI header.
      *
      * SipProfile is preferred than a default SipConfig.
      *
      * @param nSlotId The current slot id
      * @param pProfile The dynamic SIP profile
-     * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
+     * @return IMS_TRUE if it's supported, IMS_FALSE otherwise.
      */
-    static IMS_BOOL IsLocalTimeZoneRequiredInPaniHeader(
+    static IMS_BOOL IsLocalTimezoneParameterSupportedInPaniHeader(
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     // "sip-timers"

@@ -1574,7 +1574,7 @@ void SipClientTransactionState::SetPaniHeader(
 {
     AString strPani;
 
-    if (PAccessNetworkInfoHeader::FormHeaderForOperatorSpecific(
+    if (PAccessNetworkInfoHeader::FormHeader(
                 GetSlotId(), m_pTransport->GetIpAddress(), objMethod, GetSipProfile(), strPani))
     {
         if (strPani.GetLength() > 0)

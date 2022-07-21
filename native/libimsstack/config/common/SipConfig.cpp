@@ -445,7 +445,6 @@ PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
     nSipFeatureCaps |= SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_SIP_INSTANCE_FOR_CALLER_PREFERENCE;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER;
-    nSipFeatureCaps |= SIP_FEATURE_CAPS_COUNTRY_INFO_IN_PANI_HEADER;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_USER_AGENT;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN;
@@ -488,6 +487,16 @@ PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
     {
         nSipFeatureCaps |=
                 SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST;
+    }
+
+    if (piCc->GetBoolean(CarrierConfig::Assets::KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_BOOL))
+    {
+        nSipFeatureCaps |= SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER;
+    }
+
+    if (piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_BOOL))
+    {
+        nSipFeatureCaps |= SIP_FEATURE_CAPS_COUNTRY_PARAM_IN_PANI_HEADER;
     }
 
     if (piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL))
