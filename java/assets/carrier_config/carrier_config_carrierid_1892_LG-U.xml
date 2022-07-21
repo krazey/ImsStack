@@ -68,6 +68,41 @@
         <item value="1230"/>
         <item value="1236"/>
     </int-array>
+
+    <int-array name="asset_evs_payload_type_int_array" num="1">
+        <item value="110"/>
+    </int-array>
+    <int-array name="asset_amrwb_payload_type_int_array" num="2">
+        <item value="100"/>
+        <item value="97"/>
+    </int-array>
+    <int-array name="asset_amrnb_payload_type_int_array" num="2">
+        <item value="96"/>
+        <item value="98"/>
+    </int-array>
+    <int-array name="asset_dtmfwb_payload_type_int_array" num="1">
+        <item value="107"/>
+    </int-array>
+    <int-array name="asset_dtmfnb_payload_type_int_array" num="1">
+        <item value="101"/>
+    </int-array>
+
+    <int-array name="asset_amrwb_codec_attribute_payload_format_int_array" num="2">
+        <item value="0"/>
+        <item value="1"/>
+    </int-array>
+    <int-array name="asset_amrnb_codec_attribute_payload_format_int_array" num="2">
+        <item value="0"/>
+        <item value="1"/>
+    </int-array>
+    <int-array name="asset_evs_codec_attribute_bitrate_int_array" num="2">
+        <item value="3"/>
+        <item value="6"/>
+    </int-array>
+    <int name="asset_evs_codec_attribute_bandwidth_int" value="5"/>
+    <int name="asset_evs_codec_attribute_cmr_int" value="-2"/>
+    <int name="asset_codec_attribute_mode_change_capability_int" value="2"/>
+
     <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
     <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
     <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
@@ -81,6 +116,7 @@
     <!-- <int name="imsvoice.codec_attribute_cmr_int" value="0"/> -->
     <!-- <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="1"/> -->
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
+
     <int-array name="imsvt.video_port_rtp_int_array" num="2">
         <item value="1254"/>
         <item value="1254"/>
