@@ -128,6 +128,12 @@ PUBLIC GLOBAL AString ImsIdentity::CreateSipUserIdWithPhone(IN const AString& st
 
     objUri.Append("sip:");
     objUri.Append(strDialString);
+
+    if (strDialString.Contains('#'))
+    {
+        objUri.Replace('#', "%23");
+    }
+
     objUri.Append(";phone-context=");
 
     if (strPhoneContext.GetLength() == 0)
