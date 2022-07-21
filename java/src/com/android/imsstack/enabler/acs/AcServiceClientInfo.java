@@ -19,6 +19,8 @@ package com.android.imsstack.enabler.acs;
 import android.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * The container of RCS application related configs.
  */
@@ -114,6 +116,7 @@ public class AcServiceClientInfo {
     /**
      * Return the String object includes all internal data
      */
+    @VisibleForTesting
     public @NonNull String toString() {
         return new String("ver : " + mRcsVersion
                 + " profile : " + mRcsProfile

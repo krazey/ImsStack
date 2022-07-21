@@ -17,9 +17,11 @@
 package com.android.imsstack.enabler.acs;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
 
 import org.junit.After;
 import org.junit.Before;
@@ -65,7 +67,12 @@ public class AcServiceClientInfoTest {
         assertEquals(CLIENT_VERSION, acServiceClientInfo1.getClientVersion());
         assertEquals(ENABLED_BY_USER, acServiceClientInfo1.isRcsEnabledByUser());
 
-        acServiceClientInfo.toString();
-        acServiceClientInfo1.toString();
+        AcServiceClientInfo acServiceClientInfo2 = new AcServiceClientInfo(
+                "", PROFILE, CLIENT_VENDOR, "", ENABLED_BY_USER);
+        assertFalse(acServiceClientInfo2.isValid());
+
+        Log.i(TAG, acServiceClientInfo.toString());
+        Log.i(TAG, acServiceClientInfo1.toString());
+        Log.i(TAG, acServiceClientInfo2.toString());
     }
 }

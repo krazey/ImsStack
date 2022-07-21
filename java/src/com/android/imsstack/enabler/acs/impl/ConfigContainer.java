@@ -225,20 +225,6 @@ public class ConfigContainer {
         return mFileName;
     }
 
-    /*
-     * Returns associated data
-     * if data is not exist, create, put and return
-     */
-    private PersistableBundle getDataForSubscription(String key) {
-        PersistableBundle pb = mConfig.getPersistableBundle(key);
-        if (pb == null) {
-            ImsLog.i("pb is null");
-            pb = new PersistableBundle();
-            mConfig.putPersistableBundle(key, pb);
-        }
-        return pb;
-    }
-
     @VisibleForTesting
     protected long getCurrentTimeMillis() {
         return System.currentTimeMillis();

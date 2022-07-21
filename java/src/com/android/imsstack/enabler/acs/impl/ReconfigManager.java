@@ -16,12 +16,11 @@
 
 package com.android.imsstack.enabler.acs.impl;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
+import android.os.SystemClock;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -30,81 +29,26 @@ import com.android.internal.annotations.VisibleForTesting;
  * timer. If the request failure is repeated the timer value increased exponentially.
  */
 public class ReconfigManager {
-    public static final String INTENT_ACTION = "com.android.imsstack.enabler.acs.ALARM";
-
-    @VisibleForTesting
-    public static final String ALARM_ID = "com.android.imsstack.enabler.acs.ALARM";
-    @VisibleForTesting
-    public static final String SUB_ID = "com.android.imsstack.enabler.acs.SUBID";
-    @VisibleForTesting
-    public static final int TIMER_ID_RETRY = 10246;
-    @VisibleForTesting
-    public static final int TIMER_ID_VALIDITY = 91306;
-
-
-    private final EventReceiver.EventReceiverCallback mEventReceiverCallback =
-            new EventReceiver.EventReceiverCallback() {
-                @Override
-                public void onReceivedIntent(Intent intent) {
-                    if (intent == null) {
-                        ImsLog.i(mSlotId, "parameter is not valid");
-                        return;
-                    }
-
-                    int subId = intent.getIntExtra(SUB_ID, 0);
-                    if (subId != mSubId) {
-                        ImsLog.d(mSlotId, "it is not for me");
-                        return;
-                    }
-
-                    int timerId = intent.getIntExtra(ALARM_ID, 0);
-                    switch (timerId) {
-                        case TIMER_ID_RETRY:
-                            sendEmptyMessage(mRetryExpiredMessage);
-                            break;
-                        case TIMER_ID_VALIDITY:
-                            sendEmptyMessage(mValidityExpiredMessage);
-                            break;
-                        default:
-                            ImsLog.i(mSlotId, "unknown timer id " + timerId);
-                            break;
-                    }
-                }
-
-                @Override
-                public void onSubscriptionChanged(Intent intent) {
-                    // ignore
-                }
-            };
-    private final Context mContext;
-    private final EventReceiver mEventReceiver;
-    private final AlarmManager mAlarmManager;
+    private final IAlarmTimer mIAlarmTimer;
     private final int mSlotId;
-    private final int mSubId;
 
     // default retry time value and count
     private long[] mRetryTimes = {60 * 20L, 60 * 60L, 60 * 60 * 2L, 60 * 60 * 4L, 60 * 60 * 8L};
     private int mMaxRetry = 5;
     private int mRetryCount = 0;
+    private int mRetryTimerId = 0;
 
     // Provisioning validity timer
-    private int mValidityTimer = 0;
+    private int mValidityTimerId = 0;
 
     private Handler mHandler;
-    private int mRetryExpiredMessage;
-    private int mValidityExpiredMessage;
 
     @VisibleForTesting
-    public ReconfigManager(Context context, int slotId, int subId, Handler handler,
-            EventReceiver eventReceiver,
-            AlarmManager alarmManager) {
-        mContext = context;
+    public ReconfigManager(int slotId, Handler handler,
+            IAlarmTimer iAlarmTimer) {
         mSlotId = slotId;
-        mSubId = subId;
         mHandler = handler;
-        mAlarmManager = alarmManager;
-        mEventReceiver = eventReceiver;
-        mEventReceiver.registerCallback(mEventReceiverCallback);
+        mIAlarmTimer = iAlarmTimer;
     }
 
     /**
@@ -113,19 +57,15 @@ public class ReconfigManager {
      * @param slotId SIM slot ID or Phone ID
      * @param handler Handler object
      */
-    public ReconfigManager(Context context, int slotId, int subId, Handler handler) {
-        this(context, slotId, subId, handler,
-                EventReceiver.getInstance(context),
-                (AlarmManager) context.getSystemService(Context.ALARM_SERVICE));
+    public ReconfigManager(int slotId, Handler handler) {
+        this(slotId, handler,
+                (IAlarmTimer) AgentFactory.getAgent(AgentFactory.ALARM_TIMER, slotId));
     }
 
     /**
      * release all resource, stop all timer and timer expired event not transfer.
      */
     public void release() {
-        mEventReceiver.unregisterCallback(mEventReceiverCallback);
-
-        // TODO : need to synchronized
         mHandler = null;
 
         stopValidityTimer();
@@ -140,28 +80,28 @@ public class ReconfigManager {
      * @param times array include timer values
      * @param maxRetry number of retries iterations
      */
-    public boolean setRetryTimer(long[] times, int maxRetry) {
+    public void setRetryTimer(long[] times, int maxRetry) {
         mRetryTimes = times.clone();
         mMaxRetry = maxRetry;
         mRetryCount = 0;
-
-        return true;
     }
 
     /**
      * start retry timer. If the times value is not set @link setRetryTimer(), the default value
      * will be used.
      * @param message message value want to receive for retry timer
+     * @param obj object want to receive with message
      * @return true will be return if the operation is success, but reach the max retry count
      * false will be return
      */
-    public boolean startRetryTimer(int message) {
-        mRetryExpiredMessage = message;
+    public boolean startRetryTimer(int message, Object obj) {
+        if (mRetryTimerId != 0) {
+            mIAlarmTimer.stopTimer(mRetryTimerId);
+        }
 
         long duration = mRetryTimes[mRetryTimes.length - 1];
-        long time = getCurrentTimeMillis();
 
-        // TODO : get time value associated retry count
+        // get time value associated retry count
         if (mRetryCount < mMaxRetry) {
             if (mRetryCount < mRetryTimes.length) {
                 duration = mRetryTimes[mRetryCount];
@@ -170,82 +110,108 @@ public class ReconfigManager {
             return false;
         }
 
-        ImsLog.i("retcount " + mRetryCount + " current " + time + " duration " + duration);
-        setTimer(INTENT_ACTION, TIMER_ID_RETRY, time + duration);
-
         mRetryCount++;
 
-        return true;
+        mRetryTimerId = mIAlarmTimer.getTimerId();
+        mIAlarmTimer.registerForTimerExpired(mRetryTimerId, mHandler, message, obj);
+        boolean retValue = mIAlarmTimer.startTimer(mRetryTimerId, duration);
+
+        ImsLog.d(mSlotId, "retry count : " + mRetryCount + " tid : " + mRetryTimerId
+                + " duration : " + duration + " return : " + retValue);
+        if (!retValue) {
+            mIAlarmTimer.unregisterForTimerExpired(mRetryTimerId, mHandler);
+            mRetryTimerId = 0;
+            mRetryCount = 0;
+        }
+
+        return retValue;
     }
 
     /**
      * stop retry timer.
      */
     public void stopRetryTimer() {
-        clearTimer(INTENT_ACTION, TIMER_ID_RETRY);
+        if (mRetryTimerId == 0) {
+            return;
+        }
+
+        mIAlarmTimer.stopTimer(mRetryTimerId);
+        mRetryTimerId = 0;
         mRetryCount = 0;
+    }
+
+    /**
+     * notified retry timer expired
+     */
+    public void expiredRetryTimer() {
+        mRetryTimerId = 0;
     }
 
     /**
      * start validity timer.
      * @param time timer should be ended
      * @param message message value want to receive for validity timer
+     * @param obj object want to receive with message
+     * @return true will be return if the operation is success, but reach the max retry count
      */
-    public void startValidityTimer(long time, int message) {
-        mValidityExpiredMessage = message;
+    public boolean startValidityTimer(long time, int message, Object obj) {
+        if (mValidityTimerId != 0) {
+            mIAlarmTimer.stopTimer(mValidityTimerId);
+        }
 
-        // TODO : cal time - current time
-        setTimer(INTENT_ACTION, TIMER_ID_VALIDITY, getCurrentTimeMillis() + time);
+        long duration = time - getCurrentTimeMillis();
+
+        mValidityTimerId = mIAlarmTimer.getTimerId();
+        mIAlarmTimer.registerForTimerExpired(mRetryTimerId, mHandler, message, obj);
+        boolean retValue = mIAlarmTimer.startTimer(mValidityTimerId, duration);
+
+        ImsLog.d(mSlotId, " tid : " + mValidityTimerId
+                + " duration : " + duration + " return : " + retValue);
+
+        if (!retValue) {
+            mIAlarmTimer.unregisterForTimerExpired(mValidityTimerId, mHandler);
+            mValidityTimerId = 0;
+        }
+
+        return retValue;
     }
 
     /**
      * stop validity timer.
      */
     public void stopValidityTimer() {
-        clearTimer(INTENT_ACTION, TIMER_ID_VALIDITY);
-    }
-
-    private void setTimer(String intentName, int timerId, long duration) {
-        // if timer exist, clear timer first and set with new duration
-        clearTimer(intentName, timerId);
-
-        Intent startIntent = new Intent(intentName);
-        startIntent.putExtra(ALARM_ID, timerId);
-        startIntent.putExtra(SUB_ID, mSubId);
-        startIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-
-        PendingIntent startPendingIntent =
-                getPendingIntent(mContext, timerId, startIntent, 0);
-        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, duration, startPendingIntent);
-    }
-
-    private void clearTimer(String intentName, int timerId) {
-        if (mAlarmManager == null) {
-            ImsLog.i(mSlotId, "can not access AlarmManager");
+        if (mValidityTimerId == 0) {
             return;
         }
 
-        Intent stopIntent = new Intent(intentName);
-        stopIntent.putExtra(ALARM_ID, timerId);
-        stopIntent.putExtra(SUB_ID, mSubId);
-        PendingIntent stopPendingIntent =
-                getPendingIntent(mContext, timerId, stopIntent, 0);
-        mAlarmManager.cancel(stopPendingIntent);
-        ImsLog.i("deleted " + timerId);
+        mIAlarmTimer.stopTimer(mValidityTimerId);
+        mValidityTimerId = 0;
     }
 
-    private void sendEmptyMessage(int message) {
-        // TODO : need to synchronized
-        if (mHandler != null) {
-            mHandler.sendEmptyMessage(message);
-        }
+    /**
+     * notified validity timer expired
+     */
+    public void expiredValidaityTimer() {
+        mValidityTimerId = 0;
     }
+
+    /**
+     * get retry timer Id
+     */
+    @VisibleForTesting
+    public long getRetryTimerId() {
+        return mRetryTimerId;
+    }
+
+    /**
+     * get validity timer Id
+     */
+    @VisibleForTesting
+    public long getValidityTimerId() {
+        return mValidityTimerId;
+    }
+
     protected long getCurrentTimeMillis() {
-        return System.currentTimeMillis();
-    }
-
-    protected PendingIntent getPendingIntent(Context context, int requestCode, Intent intent,
-            int flags) {
-        return PendingIntent.getBroadcast(context, requestCode, intent, flags);
+        return SystemClock.elapsedRealtime();
     }
 }

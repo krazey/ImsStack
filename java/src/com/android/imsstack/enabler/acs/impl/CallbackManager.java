@@ -37,7 +37,7 @@ public class CallbackManager {
     /**
      * create CallbackManager instance
      * @param slotId SIM slot ID which will be used for trace.
-     * @param subId subscription ID .
+     * @param subId Subscription ID
      */
     public CallbackManager(int slotId, int subId) {
         mSlotId = slotId;
