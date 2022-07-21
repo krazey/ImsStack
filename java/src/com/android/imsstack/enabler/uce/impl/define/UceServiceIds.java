@@ -9,7 +9,7 @@ public class UceServiceIds {
         SERVICE_ID_CHAT_SESSION("org.openmobilealliance:ChatSession", "2.0"),
         SERVICE_ID_IM_SESSION("org.openmobilealliance:IM-session", "1.0"),
         SERVICE_ID_FILE_TRANSFER("org.openmobilealliance:File-Transfer", "1.0"),
-        SERVICE_ID_FILE_TRANSFER_STORE_FORWARD("org.openmobilealliance:File-Transfer", "2.0"),
+        SERVICE_ID_FT_STORE_FORWARD("org.openmobilealliance:File-Transfer", "2.0"),
         SERVICE_ID_FULL_STORE_FORWARD_GROUP_CHAT(
                 "org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcs.fullsfgroupchat", "1.0"),
         SERVICE_ID_FILE_TRANSFER_THUMBNAIL("org.openmobilealliance:File-Transfer-thumb", "2.0"),

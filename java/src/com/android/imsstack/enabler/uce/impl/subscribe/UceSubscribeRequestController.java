@@ -45,9 +45,17 @@ interface UceSubscribeMessageHandler {
     public void onHandle(Message objMessage);
 }
 
+ /**
+ * The UceSubscribeRequestController manages the request associated with
+ * the UCE subscription requests.
+ * When the request receives from the caller, a UceSubscribeRequest instance is created
+ * for each request.
+ * And the request is complete, the created instance of the UceSubscribeRequest is deleted.
+ */
 public class UceSubscribeRequestController implements IUceJNIListener {
     private final int mSlotId;
-    private final Map<Integer, UceSubscribeRequest> mUceSubscribeRequestMap;
+    private final Map<Integer, UceSubscribeRequest> mUceSubscribeRequestMap =
+            new HashMap<Integer, UceSubscribeRequest>();
     private final UceSubscribeControllerHandler mUceSubscribeControllerHandler;
     private boolean mIsImsRegistered;
     private UceJNI mUceJNI;
@@ -56,24 +64,13 @@ public class UceSubscribeRequestController implements IUceJNIListener {
         new HashMap<Integer, UceSubscribeMessageHandler>();
 
     public UceSubscribeRequestController(int slotId, Looper looper) {
-        mSlotId = slotId;
-        mIsImsRegistered = false;
-        mUceSubscribeRequestMap = new HashMap<Integer, UceSubscribeRequest>();
-        mUceSubscribeControllerHandler = new UceSubscribeControllerHandler(looper);
-
-        mUceJNI = UceJNI.getInstance();
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_RESPONSE_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_PRESENCE_NOTIFY_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_CMD_ERROR_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_TERMINATED_IND);
+        this (slotId, UceJNI.getInstance(), looper);
     }
 
     @VisibleForTesting
     public UceSubscribeRequestController(int slotId, UceJNI jni, Looper looper) {
         mSlotId = slotId;
         mIsImsRegistered = false;
-        mUceSubscribeRequestMap = new HashMap<Integer, UceSubscribeRequest>();
         mUceSubscribeControllerHandler = new UceSubscribeControllerHandler(looper);
 
         mUceJNI = jni;
@@ -96,6 +93,8 @@ public class UceSubscribeRequestController implements IUceJNIListener {
 
     /**
      * The user capabilities of one or multiple contacts have been requested by the framework.
+     * @param uris A list of numbers that the capabilities are being requested for.
+     * @param cb A callback for when the request for capabilities completes.
      */
     public void subscribeCapabilities(Collection<Uri> uris, SubscribeResponse cb) {
         if (!mIsImsRegistered) {
@@ -109,29 +108,24 @@ public class UceSubscribeRequestController implements IUceJNIListener {
 
         int key = UceUtils.generateKey();
         UceSubscribeRequest request = new UceSubscribeRequest(cb, mSlotId, key);
-        ArrayList<String> queryingUri = new ArrayList<>();
-        uris.forEach(uri -> {
-            queryingUri.add(uri.toString());
-        });
-        if (request.sendRequest(queryingUri)) {
-            mUceSubscribeRequestMap.put(key, request);
-            ImsLog.d("add key:" + key);
-        }
+
+        subscribeCapabilities(key, uris, cb, request);
     }
 
     @VisibleForTesting
-    public void subscribeCapabilities(Collection<Uri> uris, SubscribeResponse cb,
+    public void subscribeCapabilities(int key, Collection<Uri> uris, SubscribeResponse cb,
             UceSubscribeRequest request) {
         if (!mIsImsRegistered) {
             sendCommandError(cb, UceApiConstant.COMMAND_CODE_SERVICE_UNAVAILABLE);
+            request = null;
             return;
         }
         if (uris.isEmpty()) {
             sendCommandError(cb, UceApiConstant.COMMAND_CODE_INVALID_PARAM);
+            request = null;
             return;
         }
 
-        int key = UceUtils.generateKey();
         ArrayList<String> queryingUri = new ArrayList<>();
         uris.forEach(uri -> {
             queryingUri.add(uri.toString());
@@ -150,6 +144,16 @@ public class UceSubscribeRequestController implements IUceJNIListener {
     @VisibleForTesting
     public void setRequestWithKey(int key, UceSubscribeRequest request) {
         mUceSubscribeRequestMap.put(key, request);
+    }
+
+    /**
+     * Get the UceSubscribeRequest associate with the input key
+     * @param key The key to get the request.
+     * @return Request stored as key in the MAP.
+     */
+    @VisibleForTesting
+    public UceSubscribeRequest getRequestWithKey(int key) {
+        return mUceSubscribeRequestMap.get(key);
     }
 
     class UceSubscribeControllerHandler extends Handler {

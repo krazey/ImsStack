@@ -28,7 +28,10 @@ import com.android.imsstack.enabler.uce.interf.PublishResponse;
 import com.android.imsstack.enabler.uce.interf.UceApiConstant;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
-
+ /**
+ * The UcePublishRequest will be handled the request related to the PUBLISH.
+ * This class will be created per each request related to the PUBLISH.
+ */
 public class UcePublishRequest {
     private final int mSlotId;
     private final int mKey;
@@ -39,23 +42,30 @@ public class UcePublishRequest {
     private int mExtended;
     private long mCapability;
     private UceJNI mUceJNI;
+    private String mEtag;
+
+    private final IPreference mPf;
 
     public UcePublishRequest(PublishResponse cb, int slotId, int key, boolean useExpiredEtag) {
-        mKey = key;
-        callback = cb;
-        mSlotId = slotId;
-        mIsUseExpiredEtag = useExpiredEtag;
-        mUceJNI = UceJNI.getInstance();
+        this(cb, slotId, key, useExpiredEtag, UceJNI.getInstance(), "",
+                (IPreference) AgentFactory.getAgent(AgentFactory.PREFERENCE, slotId));
     }
 
     @VisibleForTesting
     public UcePublishRequest(PublishResponse cb, int slotId, int key, boolean useExpiredEtag,
-            UceJNI jni) {
+            UceJNI jni, String eTag, IPreference pf) {
         mKey = key;
         callback = cb;
         mSlotId = slotId;
-        mIsUseExpiredEtag = useExpiredEtag;
         mUceJNI = jni;
+        mEtag = eTag;
+        mPf = pf;
+        mIsUseExpiredEtag = useExpiredEtag;
+        if (mIsUseExpiredEtag) {
+            if (mPf != null) {
+                mEtag = mPf.getPreferenceStrValue(UceConstant.PREFERENCE_ETAG, slotId);
+            }
+        }
     }
 
     /**
@@ -75,6 +85,7 @@ public class UcePublishRequest {
 
     /**
      * The capabilities of this device have been updated and should be published to the network.
+     * @return true if the request is successfully processed.
      */
     public boolean sendRequest() {
         if (TextUtils.isEmpty(mPidfXml)) {
@@ -82,13 +93,7 @@ public class UcePublishRequest {
             informCommandError(UceApiConstant.COMMAND_CODE_INVALID_PARAM);
             return false;
         }
-        String etag = "";
-        if (mIsUseExpiredEtag) {
-            IPreference pf = (IPreference)AgentFactory.getAgent(AgentFactory.PREFERENCE, mSlotId);
-            if (pf != null) {
-                etag = pf.getPreferenceStrValue(UceConstant.PREFERENCE_ETAG, mSlotId);
-            }
-        }
+
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(UceMessage.UCE_SEND_PUBLISH_CMD);
@@ -96,11 +101,11 @@ public class UcePublishRequest {
         parcel.writeString(mPidfXml);
         parcel.writeInt(mExtended);
         parcel.writeLong(mCapability);
-        if (etag.isEmpty()) {
+        if (TextUtils.isEmpty(mEtag)) {
             parcel.writeInt(0);
         } else {
             parcel.writeInt(1);
-            parcel.writeString(etag);
+            parcel.writeString(mEtag);
         }
 
         mUceJNI.sendMessage(mSlotId, parcel);
@@ -129,9 +134,8 @@ public class UcePublishRequest {
             ImsLog.e("Exception:" + e.toString());
         }
         if (!TextUtils.isEmpty(eTag)) {
-            IPreference pf = (IPreference)AgentFactory.getAgent(AgentFactory.PREFERENCE, mSlotId);
-            if (pf != null) {
-                pf.setPreferenceStrValue(UceConstant.PREFERENCE_ETAG, eTag, mSlotId);
+            if (mPf != null) {
+                mPf.setPreferenceStrValue(UceConstant.PREFERENCE_ETAG, eTag, mSlotId);
             }
         }
     }
@@ -155,5 +159,13 @@ public class UcePublishRequest {
      */
     public int getKey() {
         return mKey;
+    }
+
+     /**
+      * Get the current eTag
+      * @return the current etag value
+      */
+    public String getEtag() {
+        return mEtag;
     }
 }

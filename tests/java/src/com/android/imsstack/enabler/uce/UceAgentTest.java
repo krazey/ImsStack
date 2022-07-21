@@ -15,6 +15,17 @@
  */
 package com.android.imsstack.enabler.uce;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
@@ -33,7 +44,6 @@ import com.android.imsstack.enabler.uce.impl.options.UceOptionsResponseCallback;
 import com.android.imsstack.enabler.uce.impl.publish.UcePublishRequestController;
 import com.android.imsstack.enabler.uce.impl.subscribe.UceSubscribeRequestController;
 import com.android.imsstack.enabler.uce.interf.PublishResponse;
-import com.android.imsstack.enabler.uce.interf.RemoteOptionsCallback;
 import com.android.imsstack.enabler.uce.interf.SubscribeResponse;
 import com.android.imsstack.enabler.uce.interf.UceApiConstant;
 import com.android.imsstack.enabler.uce.interf.UceEventListener;
@@ -43,22 +53,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,6 +76,8 @@ public class UceAgentTest {
     @Mock SubscribeResponse subscribeCb;
     @Mock UcePublishRequestController publishController;
     @Mock UceSubscribeRequestController subscribeController;
+
+    private UceAgent mAgent;
 
     private TestUceJni mUceJni;
 
@@ -115,6 +115,10 @@ public class UceAgentTest {
     @After
     public void cleanUp(){
         mUceJni = null;
+        if (mAgent != null) {
+            mAgent.interrupt();
+            mAgent = null;
+        }
     }
 
 
@@ -122,15 +126,15 @@ public class UceAgentTest {
     @SmallTest
     public void test_publishCapabilities() throws Exception {
         String pidfXml = "pidfXmlForTest";
-        UceAgent agent = createUceAgent(listener);
+        mAgent = createUceAgent(listener);
 
-        agent.setPublishController(null);
-        agent.publishCapabilities(pidfXml, publihsCb);
+        mAgent.setPublishController(null);
+        mAgent.publishCapabilities(pidfXml, publihsCb);
         verify(publihsCb).onCommandError(eq(UceApiConstant.COMMAND_CODE_SERVICE_UNKNOWN));
         verifyNoMoreInteractions(publihsCb);
 
-        agent.setPublishController(publishController);
-        agent.publishCapabilities(pidfXml, publihsCb);
+        mAgent.setPublishController(publishController);
+        mAgent.publishCapabilities(pidfXml, publihsCb);
         verify(publishController).publishCapabilities(eq(pidfXml), eq(publihsCb));
         verifyNoMoreInteractions(publishController);
     }
@@ -142,15 +146,15 @@ public class UceAgentTest {
         Collection<Uri> uris = new ArrayList<>(1);
         uris.add(contact1);
 
-        UceAgent agent = createUceAgent(listener);
+        mAgent = createUceAgent(listener);
 
-        agent.setSubscribeController(null);
-        agent.subscribeCapabilities(uris, subscribeCb);
+        mAgent.setSubscribeController(null);
+        mAgent.subscribeCapabilities(uris, subscribeCb);
         verify(subscribeCb).onCommandError(eq(UceApiConstant.COMMAND_CODE_SERVICE_UNKNOWN));
         verifyNoMoreInteractions(subscribeCb);
 
-        agent.setSubscribeController(subscribeController);
-        agent.subscribeCapabilities(uris, subscribeCb);
+        mAgent.setSubscribeController(subscribeController);
+        mAgent.subscribeCapabilities(uris, subscribeCb);
         verify(subscribeController).subscribeCapabilities(any(), eq(subscribeCb));
         verifyNoMoreInteractions(subscribeController);
     }
@@ -158,16 +162,15 @@ public class UceAgentTest {
     @Test
     @SmallTest
     public void test_registered() throws Exception {
-        UceAgent agent = createUceAgent(listener);
-        agent.setUceJni(mUceJni);
-        agent.start();
+        mAgent = createUceAgent(listener);
+        mAgent.start();
 
         CountDownLatch lock = new CountDownLatch(1);
         mUceJni.setCountDownLatch(lock);
         lock.await(10, TimeUnit.SECONDS);
 
-        agent.setPublishController(publishController);
-        agent.setSubscribeController(subscribeController);
+        mAgent.setPublishController(publishController);
+        mAgent.setSubscribeController(subscribeController);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_IMS_AGENT_CONNECTED_IND);
@@ -177,7 +180,7 @@ public class UceAgentTest {
 
         mUceJni.mUceJniListener.onServiceStatusMessage(parcel);
 
-        Handler handler = agent.getHandler();
+        Handler handler = mAgent.getHandler();
         waitForHandlerActionDelayed(handler, 1000, 0);
 
         verify(publishController, timeout(MAX_WAIT_TIME)).setImsRegistrationStatus(eq(true));
@@ -191,22 +194,21 @@ public class UceAgentTest {
                 UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_ENABLED));
         verifyNoMoreInteractions(listener);
 
-        agent.interrupt();
+        mAgent.interrupt();
     }
 
     @Test
     @SmallTest
     public void test_deRegistered() throws Exception {
-        UceAgent agent = createUceAgent(listener);
-        agent.setUceJni(mUceJni);
-        agent.start();
+        mAgent = createUceAgent(listener);
+        mAgent.start();
 
         CountDownLatch lock = new CountDownLatch(1);
         mUceJni.setCountDownLatch(lock);
         lock.await(10, TimeUnit.SECONDS);
 
-        agent.setPublishController(publishController);
-        agent.setSubscribeController(subscribeController);
+        mAgent.setPublishController(publishController);
+        mAgent.setSubscribeController(subscribeController);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_IMS_AGENT_DISCONNECTED_IND);
@@ -214,14 +216,14 @@ public class UceAgentTest {
 
         mUceJni.mUceJniListener.onServiceStatusMessage(parcel);
 
-        Handler handler = agent.getHandler();
+        Handler handler = mAgent.getHandler();
         waitForHandlerActionDelayed(handler, 1000, 0);
 
         verify(publishController, timeout(MAX_WAIT_TIME)).setImsRegistrationStatus(eq(false));
         verify(subscribeController, timeout(MAX_WAIT_TIME)).setImsRegistrationStatus(eq(false));
         verifyNoMoreInteractions(publishController);
         verifyNoMoreInteractions(subscribeController);
-        agent.interrupt();
+        mAgent.interrupt();
     }
 
     @Test
@@ -234,16 +236,15 @@ public class UceAgentTest {
         String reasonHeaderText = "testWarning";
         int needToRetry = 0;
 
-        UceAgent agent = createUceAgent(listener);
-        agent.setUceJni(mUceJni);
-        agent.start();
+        mAgent = createUceAgent(listener);
+        mAgent.start();
 
         CountDownLatch lock = new CountDownLatch(1);
         mUceJni.setCountDownLatch(lock);
         lock.await(10, TimeUnit.SECONDS);
 
-        agent.setPublishController(publishController);
-        agent.setSubscribeController(subscribeController);
+        mAgent.setPublishController(publishController);
+        mAgent.setSubscribeController(subscribeController);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_PUBLISH_UPDATED_IND);
@@ -258,7 +259,7 @@ public class UceAgentTest {
 
         mUceJni.mUceJniListener.onPublishStatusMessage(parcel);
 
-        Handler handler = agent.getHandler();
+        Handler handler = mAgent.getHandler();
         waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         verify(publishController, timeout(MAX_WAIT_TIME)).setCapability(eq(capability));
@@ -280,22 +281,21 @@ public class UceAgentTest {
  */
        verify(listener, times(1)).onPublishUpdated(eq(responseCode), eq(reason),
                 eq(reasonHeaderCause), eq(reasonHeaderText));
-        agent.interrupt();
+        mAgent.interrupt();
     }
 
     @Test
     @SmallTest
     public void test_unpublished() throws Exception {
-        UceAgent agent = createUceAgent(listener);
-        agent.setUceJni(mUceJni);
-        agent.start();
+        mAgent = createUceAgent(listener);
+        mAgent.start();
 
         CountDownLatch lock = new CountDownLatch(1);
         mUceJni.setCountDownLatch(lock);
         lock.await(10, TimeUnit.SECONDS);
 
-        agent.setPublishController(publishController);
-        agent.setSubscribeController(subscribeController);
+        mAgent.setPublishController(publishController);
+        mAgent.setSubscribeController(subscribeController);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_UNPUBLISHED_IND);
@@ -303,29 +303,28 @@ public class UceAgentTest {
 
         mUceJni.mUceJniListener.onPublishStatusMessage(parcel);
 
-        Handler handler = agent.getHandler();
+        Handler handler = mAgent.getHandler();
         waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         verify(publishController, timeout(MAX_WAIT_TIME)).deletePendingRequest();
         verify(listener, timeout(MAX_WAIT_TIME)).onUnPublish();
         verifyNoMoreInteractions(publishController);
         verifyNoMoreInteractions(listener);
-        agent.interrupt();
+        mAgent.interrupt();
     }
 
     @Test
     @SmallTest
     public void test_receivedOptions() throws Exception {
-        UceAgent agent = createUceAgent(listener);
-        agent.setUceJni(mUceJni);
-        agent.start();
+        mAgent = createUceAgent(listener);
+        mAgent.start();
 
         CountDownLatch lock = new CountDownLatch(1);
         mUceJni.setCountDownLatch(lock);
         lock.await(10, TimeUnit.SECONDS);
 
-        agent.setPublishController(publishController);
-        agent.setSubscribeController(subscribeController);
+        mAgent.setPublishController(publishController);
+        mAgent.setSubscribeController(subscribeController);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_OPTIONS_RECEIVED_IND);
@@ -336,7 +335,7 @@ public class UceAgentTest {
 
         mUceJni.mUceJniListener.onReceivedRemoteOptionsMessage(parcel);
 
-        Handler handler = agent.getHandler();
+        Handler handler = mAgent.getHandler();
         waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         doAnswer(new Answer<Void>() {
@@ -355,11 +354,11 @@ public class UceAgentTest {
                 return null;
             }
         }).when(listener).onRemoteCapabilityRequest(any(), any(), any());
-        agent.interrupt();
+        mAgent.interrupt();
     }
 
     private UceAgent createUceAgent(UceEventListener listener) {
-        UceAgent uceAgent = new UceAgent(mContext, "UceTest", SLOT_ID);
+        UceAgent uceAgent = new UceAgent(mContext, "UceTest", SLOT_ID, mUceJni);
         uceAgent.setListener(listener);
         return uceAgent;
     }

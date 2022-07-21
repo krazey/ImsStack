@@ -15,6 +15,13 @@
  */
 package com.android.imsstack.enabler.uce.subscribe;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import android.net.Uri;
 import android.os.Parcel;
 import android.util.Pair;
@@ -37,13 +44,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -55,37 +55,51 @@ public class UceSubscribeRequestTest {
     @Mock SubscribeResponse subscribeCb;
     @Mock UceJNI jni;
 
+    UceSubscribeRequest mRequest;
+
     @Before
     public void setUp(){
         MockitoAnnotations.initMocks(this);
     }
 
     @After
-    public void cleanUp(){}
+    public void cleanUp() {
+        mRequest = null;
+    }
 
     @Test
     @SmallTest
-    public void test_sendRequestWithEmptyUri() throws Exception {
-        ArrayList<String> remoteUris = new ArrayList<>();
+    public void test_sendRequestWithNullUri() throws Exception {
+        mRequest = createUceSubscribeRequest();
 
-        UceSubscribeRequest request = createUceSubscribeRequest();
-
-        // verify that send command error if the remote uri is empty
-        request.sendRequest(remoteUris);
+        // verify that send command error if the remote uri is null
+        mRequest.sendRequest(null);
         verify(subscribeCb).onCommandError(eq(UceApiConstant.COMMAND_CODE_INVALID_PARAM));
         verifyNoMoreInteractions(subscribeCb);
     }
 
     @Test
     @SmallTest
-    public void test_normalSendRequest() throws Exception {
+    public void test_sendRequestWithEmptyUri() throws Exception {
+        mRequest = createUceSubscribeRequest();
+
+        ArrayList<String>  remoteUris = new ArrayList<>();
+        // verify that send command error if the remote uri is empty
+        mRequest.sendRequest(remoteUris);
+        verify(subscribeCb).onCommandError(eq(UceApiConstant.COMMAND_CODE_INVALID_PARAM));
+
+        verifyNoMoreInteractions(subscribeCb);
+    }
+
+    @Test
+    @SmallTest
+    public void test_sendSingleSubRequest() throws Exception {
         ArrayList<String> remoteUris = new ArrayList<>();
         String remoteUri = "test";
         remoteUris.add(remoteUri);
 
-        UceSubscribeRequest request = createUceSubscribeRequest();
-
-        request.sendRequest(remoteUris);
+        mRequest = createUceSubscribeRequest();
+        mRequest.sendRequest(remoteUris);
 
         ArgumentCaptor<Parcel> captor = ArgumentCaptor.forClass(Parcel.class);
 
@@ -93,11 +107,35 @@ public class UceSubscribeRequestTest {
 
         Parcel parcel = captor.getValue();
         parcel.setDataPosition(0);
-        assertEquals(parcel.readInt(), UceMessage.UCE_SEND_SINGLE_SUBSCRIBE_CMD);
-        assertEquals(parcel.readInt(), KEY);
-        assertEquals(parcel.readInt(), remoteUris.size());
-        assertEquals(parcel.readString(), remoteUri);
+        assertEquals(UceMessage.UCE_SEND_SINGLE_SUBSCRIBE_CMD, parcel.readInt());
+        assertEquals(KEY, parcel.readInt());
+        assertEquals(remoteUris.size(), parcel.readInt());
+        assertEquals(remoteUri, parcel.readString());
+        verifyNoMoreInteractions(jni);
+    }
 
+    @Test
+    @SmallTest
+    public void test_sendListSubRequest() throws Exception {
+        ArrayList<String> remoteUris = new ArrayList<>();
+        remoteUris.add("test");
+        remoteUris.add("test1");
+
+        mRequest = createUceSubscribeRequest();
+        mRequest.sendRequest(remoteUris);
+
+        ArgumentCaptor<Parcel> captor = ArgumentCaptor.forClass(Parcel.class);
+
+        verify(jni, times(1)).sendMessage(eq(SLOT_ID), captor.capture());
+
+        Parcel parcel = captor.getValue();
+        parcel.setDataPosition(0);
+        assertEquals(UceMessage.UCE_SEND_LIST_SUBSCRIBE_CMD, parcel.readInt());
+        assertEquals(KEY, parcel.readInt());
+        assertEquals(remoteUris.size(), parcel.readInt());
+        for (int i = 0; i < remoteUris.size(); i++) {
+            assertEquals(remoteUris.get(i), parcel.readString());
+        }
         verifyNoMoreInteractions(jni);
     }
 
@@ -109,10 +147,14 @@ public class UceSubscribeRequestTest {
         int reasonHdrCause = 0;
         String reasonHdrText = "reasonHdrText_TEST";
 
-        UceSubscribeRequest request = createUceSubscribeRequest();
-        request.informNetworkResponse(responseCode, reason, reasonHdrCause, reasonHdrText);
-
+        mRequest = createUceSubscribeRequest();
+        mRequest.informNetworkResponse(responseCode, reason, reasonHdrCause, reasonHdrText);
         verify(subscribeCb, times(1)).onNetworkResponse(eq(responseCode), eq(reason));
+
+        reasonHdrCause = 10;
+        mRequest.informNetworkResponse(responseCode, reason, reasonHdrCause, reasonHdrText);
+        verify(subscribeCb, times(1)).onNetworkResponse(eq(responseCode), eq(reason),
+                eq(reasonHdrCause), eq(reasonHdrText));
         verifyNoMoreInteractions(subscribeCb);
     }
 
@@ -121,8 +163,8 @@ public class UceSubscribeRequestTest {
     public void test_informCommandCode() throws Exception {
         int commandCode = 200;
 
-        UceSubscribeRequest request = createUceSubscribeRequest();
-        request.informCommandError(commandCode);
+        mRequest = createUceSubscribeRequest();
+        mRequest.informCommandError(commandCode);
 
         verify(subscribeCb, times(1)).onCommandError(eq(commandCode));
         verifyNoMoreInteractions(subscribeCb);
@@ -136,16 +178,16 @@ public class UceSubscribeRequestTest {
         pidfXmls.add(getPidfxml("234567"));
         pidfXmls.add(getPidfxml("345678"));
 
-        UceSubscribeRequest request = createUceSubscribeRequest();
-        request.informCapabilitiesUpdate(pidfXmls);
+        mRequest = createUceSubscribeRequest();
+        mRequest.informCapabilitiesUpdate(pidfXmls);
 
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         verify(subscribeCb, times(1)).onNotifyCapabilitiesUpdate(captor.capture());
         List<String> data = captor.getValue();
-        assertEquals(data.size(), pidfXmls.size());
-        assertEquals(data.get(0), pidfXmls.get(0));
-        assertEquals(data.get(1), pidfXmls.get(1));
-        assertEquals(data.get(2), pidfXmls.get(2));
+        assertEquals(pidfXmls.size(), data.size());
+        assertEquals(pidfXmls.get(0), data.get(0));
+        assertEquals(pidfXmls.get(1), data.get(1));
+        assertEquals(pidfXmls.get(2), data.get(2));
         verifyNoMoreInteractions(subscribeCb);
     }
 
@@ -155,8 +197,8 @@ public class UceSubscribeRequestTest {
         String reason = "test";
         int retryAfterSecond = 10;
 
-        UceSubscribeRequest request = createUceSubscribeRequest();
-        request.informTerminate(reason, retryAfterSecond);
+        mRequest = createUceSubscribeRequest();
+        mRequest.informTerminate(reason, retryAfterSecond);
 
         verify(subscribeCb, times(1)).onTerminated(eq(reason),
                 eq(TimeUnit.SECONDS.toMillis(retryAfterSecond)));
@@ -172,27 +214,26 @@ public class UceSubscribeRequestTest {
         resourceInfoList.add(info1);
         resourceInfoList.add(info2);
 
-        UceSubscribeRequest request = createUceSubscribeRequest();
-        request.informResourceTerminate(resourceInfoList);
+        mRequest = createUceSubscribeRequest();
+        mRequest.informResourceTerminate(resourceInfoList);
 
         ArgumentCaptor<ArrayList> captor = ArgumentCaptor.forClass(ArrayList.class);
         verify(subscribeCb, times(1)).onResourceTerminated(captor.capture());
         List<Pair<Uri, String>> data = captor.getValue();
-        assertEquals(data.size(), resourceInfoList.size());
+        assertEquals(resourceInfoList.size(), data.size());
         Pair<Uri, String> pairData = data.get(0);
         assertNotNull("first pair data should not be null",pairData);
-        assertEquals(pairData.first, Uri.parse(info1.getId()));
-        assertEquals(pairData.second, info1.getReason());
+        assertEquals(Uri.parse(info1.getId()), pairData.first);
+        assertEquals(info1.getReason(), pairData.second);
         pairData = data.get(1);
         assertNotNull("second pair data should not be null",pairData);
-        assertEquals(pairData.first, Uri.parse(info2.getId()));
-        assertEquals(pairData.second, info2.getReason());
+        assertEquals(Uri.parse(info2.getId()), pairData.first);
+        assertEquals(info2.getReason(), pairData.second);
         verifyNoMoreInteractions(subscribeCb);
     }
 
     private UceSubscribeRequest createUceSubscribeRequest() {
-        UceSubscribeRequest request = new UceSubscribeRequest(subscribeCb, SLOT_ID, KEY, jni);
-        return request;
+        return new UceSubscribeRequest(subscribeCb, SLOT_ID, KEY, jni);
     }
 
     private String getPidfxml(String contact) {

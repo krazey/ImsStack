@@ -31,6 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+ /**
+ * The UceSubscribeRequest will be handled the request related to the SUBSCRIBE.
+ * This class will be created per each request related to the SUBSCRIBE.
+ */
 public class UceSubscribeRequest {
     private final int mSlotId;
     private final int mKey;
@@ -38,11 +42,7 @@ public class UceSubscribeRequest {
     private final UceJNI mUceJNI;
 
     public UceSubscribeRequest(SubscribeResponse cb, int slotId, int key) {
-        mKey = key;
-        callback = cb;
-        mSlotId = slotId;
-        mUceJNI = UceJNI.getInstance();
-        ImsLog.d("key:" + mKey);
+        this(cb, slotId, key, UceJNI.getInstance());
     }
 
     @VisibleForTesting

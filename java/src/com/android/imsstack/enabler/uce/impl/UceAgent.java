@@ -87,6 +87,17 @@ public class UceAgent extends Thread implements IUceJNIListener {
         return;
     }
 
+    @VisibleForTesting
+    public UceAgent(Context context, String name, int nSimSlot, UceJNI jni) {
+        super(name);
+        mSlotId = nSimSlot;
+        mContext = context;
+        mUceEventListener = null;
+        mUceJNI = jni;
+        mUceJNI.init(mSlotId);
+        return;
+    }
+
     public void run() {
         ImsLog.i("run()");
         Looper.prepare();
@@ -207,12 +218,6 @@ public class UceAgent extends Thread implements IUceJNIListener {
     @VisibleForTesting
     public void setSubscribeController(UceSubscribeRequestController controller) {
         mUceSubscribeRequestController = controller;
-    }
-
-    @VisibleForTesting
-    public void setUceJni(UceJNI jni) {
-        mUceJNI = jni;
-        mUceJNI.init(mSlotId);
     }
 
     @VisibleForTesting

@@ -15,18 +15,22 @@
  */
 package com.android.imsstack.enabler.uce.publish;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import android.os.Parcel;
-import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.enabler.uce.impl.define.UceFeatureTags;
+import com.android.imsstack.core.agents.agentif.IPreference;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
 import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
-import com.android.imsstack.enabler.uce.impl.options.UceOptionsRequest;
 import com.android.imsstack.enabler.uce.impl.publish.UcePublishRequest;
-import com.android.imsstack.enabler.uce.impl.utils.UceUtils;
-import com.android.imsstack.enabler.uce.interf.OptionsResponse;
 import com.android.imsstack.enabler.uce.interf.PublishResponse;
 import com.android.imsstack.enabler.uce.interf.UceApiConstant;
 
@@ -39,60 +43,110 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
-import java.util.Set;
-
 @RunWith(JUnit4.class)
 public class UcePublishRequestTest {
     private static final int SLOT_ID = 0;
     private static final int KEY = 10;
-    private static final boolean EXPIRED_ETAG = false;
+    private static final boolean USED_EXPIRED_ETAG = true;
+    private static final boolean NOT_USED_EXPIRED_ETAG = false;
     @Mock PublishResponse publishCb;
     @Mock UceJNI jni;
+    @Mock IPreference mPf;
+
+    private UcePublishRequest mRequest;
+    private UcePublishRequest mResponseWithEtag;
+    private UcePublishRequest mResponseWithoutEtag;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
     @After
-    public void cleanUp(){}
+    public void cleanUp() {
+        mRequest = null;
+        mResponseWithEtag = null;
+        mResponseWithoutEtag = null;
+    }
 
     @Test
     @SmallTest
-    public void test_sendRequestWithEmptyUri() throws Exception {
-        String pidfXml = "";
-        boolean bAvailability = false;
-        long capability = 150;
-        UcePublishRequest request = createUcePublishRequest();
-        // verify that send command error if the pidfxml is empty
-        request.setRequestInfo(pidfXml, bAvailability, capability);
-        request.sendRequest();
-        verify(publishCb).onCommandError(eq(UceApiConstant.COMMAND_CODE_INVALID_PARAM));
+    public void test_create() throws Exception {
+        String eTag = "ABCDFEG";
+        mResponseWithoutEtag = createUcePublishRequestEmptyPf(eTag);
+        assertEquals(eTag, mResponseWithoutEtag.getEtag());
+        assertEquals(KEY, mResponseWithoutEtag.getKey());
 
+        String savedEtag = "savedEtag";
+        doReturn(savedEtag).when(mPf).getPreferenceStrValue(any(), eq(SLOT_ID));
+        mResponseWithEtag = createUcePublishRequestPf(eTag);
+        assertEquals(savedEtag, mResponseWithEtag.getEtag());
+    }
+
+    @Test
+    @SmallTest
+    public void test_sendRequestWithEmptyPidf() throws Exception {
+        String pidfXml = "";
+        long capability = 150;
+
+        mRequest = createUcePublishRequest("");
+        // verify that send command error if the pidfxml is empty
+        mRequest.setRequestInfo(pidfXml, false, capability);
+        mRequest.sendRequest();
+        verify(publishCb).onCommandError(eq(UceApiConstant.COMMAND_CODE_INVALID_PARAM));
+        verifyNoMoreInteractions(jni);
+    }
+
+    @Test
+    @SmallTest
+    public void test_sendRequestWithEmptyEtag() throws Exception {
+        String pidfXml = "test pidf";
+        long capability = 150;
 
         // verify that the input data be passed to the JNI
         ArgumentCaptor<Parcel> captor = ArgumentCaptor.forClass(Parcel.class);
 
-        pidfXml = "test pidf";
-        request.setRequestInfo(pidfXml, bAvailability, capability);
-        request.sendRequest();
+        mRequest = createUcePublishRequest("");
+        mRequest.setRequestInfo(pidfXml, false, capability);
+        mRequest.sendRequest();
         verify(jni, times(1)).sendMessage(eq(SLOT_ID), captor.capture());
 
         Parcel parcel = captor.getValue();
         parcel.setDataPosition(0);
-        assertEquals(parcel.readInt(), UceMessage.UCE_SEND_PUBLISH_CMD);
-        assertEquals(parcel.readInt(), KEY);
-        assertEquals(parcel.readInt(), 0); // extend
-        assertEquals(parcel.readLong(), capability); // capability
-        assertEquals(parcel.readString(), pidfXml); // pidf xml
-        assertEquals(parcel.readString(), ""); // etag
+        assertEquals(UceMessage.UCE_SEND_PUBLISH_CMD, parcel.readInt());
+        assertEquals(KEY, parcel.readInt());
+        assertEquals(pidfXml, parcel.readString()); // pidf xml
+        assertEquals(0, parcel.readInt()); // extend
+        assertEquals(capability, parcel.readLong()); // capability
+        assertEquals(0, parcel.readInt()); // no etag
+
+        verifyNoMoreInteractions(jni);
+    }
+
+    @Test
+    @SmallTest
+    public void test_sendRequest() throws Exception {
+        String pidfXml = "test pidf";
+        String eTag = "ABC123ADB";
+        long capability = 150;
+
+        // verify that the input data be passed to the JNI
+        ArgumentCaptor<Parcel> captor = ArgumentCaptor.forClass(Parcel.class);
+
+        mRequest = createUcePublishRequest(eTag);
+        mRequest.setRequestInfo(pidfXml, true, capability);
+        mRequest.sendRequest();
+        verify(jni, times(1)).sendMessage(eq(SLOT_ID), captor.capture());
+
+        Parcel parcel = captor.getValue();
+        parcel.setDataPosition(0);
+        assertEquals(UceMessage.UCE_SEND_PUBLISH_CMD, parcel.readInt());
+        assertEquals(KEY, parcel.readInt());
+        assertEquals(pidfXml, parcel.readString()); // pidf xml
+        assertEquals(1, parcel.readInt()); // extend
+        assertEquals(capability, parcel.readLong()); // capability
+        assertEquals(1, parcel.readInt()); // etag
+        assertEquals(eTag, parcel.readString()); // etag value
 
         verifyNoMoreInteractions(jni);
     }
@@ -106,14 +160,17 @@ public class UcePublishRequestTest {
         String reasonHdrText = "test reason text";
         String eTag = "";
 
-        UcePublishRequest request = createUcePublishRequest();
-        request.informNetworkResponse(responseCode, reason, reasonHdrCause, reasonHdrText, eTag);
+        mResponseWithEtag = createUcePublishRequest("");
+        mResponseWithEtag.informNetworkResponse(responseCode, reason, reasonHdrCause,
+                reasonHdrText, eTag);
 
         verify(publishCb, times(1)).onNetworkResponse(eq(responseCode), eq(reason));
 
         reasonHdrCause = 10;
-
-        request.informNetworkResponse(responseCode, reason, reasonHdrCause, reasonHdrText, eTag);
+        eTag = "ABC";
+        mResponseWithoutEtag = createUcePublishRequest(eTag);
+        mResponseWithoutEtag.informNetworkResponse(responseCode, reason, reasonHdrCause,
+                reasonHdrText, eTag);
         verify(publishCb, times(1)).onNetworkResponse(eq(responseCode), eq(reason),
                 eq(reasonHdrCause), eq(reasonHdrText));
     }
@@ -123,15 +180,24 @@ public class UcePublishRequestTest {
     public void test_informCommandCode() throws Exception {
         int commandCode = 200;
 
-        UcePublishRequest request = createUcePublishRequest();
-        request.informCommandError(commandCode);
+        mRequest = createUcePublishRequest("");
+        mRequest.informCommandError(commandCode);
 
         verify(publishCb, times(1)).onCommandError(eq(commandCode));
     }
 
-    private UcePublishRequest createUcePublishRequest() {
-        UcePublishRequest request = new UcePublishRequest(publishCb, SLOT_ID, KEY, EXPIRED_ETAG,
-                jni);
-        return request;
+    private UcePublishRequest createUcePublishRequest(String eTag) {
+        return new UcePublishRequest(publishCb, SLOT_ID, KEY,
+                NOT_USED_EXPIRED_ETAG, jni, eTag, mPf);
+    }
+
+    private UcePublishRequest createUcePublishRequestEmptyPf(String eTag) {
+        return new UcePublishRequest(publishCb, SLOT_ID, KEY,
+                USED_EXPIRED_ETAG, jni, eTag, null);
+    }
+
+    private UcePublishRequest createUcePublishRequestPf(String eTag) {
+        return new UcePublishRequest(publishCb, SLOT_ID, KEY,
+                USED_EXPIRED_ETAG, jni, eTag, mPf);
     }
 }
