@@ -18,7 +18,6 @@ package com.android.imsstack.enabler.acs.impl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -56,18 +55,14 @@ public class AcServiceImpl {
     private static final int MSG_PROVISIONING_DATA_RECEIVED = 4;
     // reset provisioning data from App
     private static final int MSG_PROVISIONING_DATA_RESET = 5;
-    // received intent
-    private static final int MSG_INTENT = 6;
-    // received subscription changed event
-    private static final int MSG_SUBSCRIPTION_CHANGED = 7;
 
     // received HTTP/HTTPS final response
-    private static final int MSG_HTTP_RESPONSE = 8;
+    private static final int MSG_HTTP_RESPONSE = 6;
 
     // received HTTP/HTTPS internal error response
-    private static final int MSG_HTTP_INTERNAL_ERROR = 9;
+    private static final int MSG_HTTP_INTERNAL_ERROR = 7;
 
-    private static final int MSG_MAX = 10;
+    private static final int MSG_MAX = 8;
 
     private static final SparseArray<AcServiceImpl> INSTANCES = new SparseArray<AcServiceImpl>();
 
@@ -85,20 +80,6 @@ public class AcServiceImpl {
             mResponseCode = responseCode;
             mResponseString = responseString;
             mProvisioningData = provisioningData.clone();
-        }
-    }
-
-    private final class EventCallback implements EventReceiver.EventReceiverCallback {
-        @Override
-        public void onReceivedIntent(Intent intent) {
-            // TODO : check slot or sub ID
-            // TODO : send message
-            sendMessage(MSG_INTENT, 0, 0, null);
-        }
-
-        @Override
-        public void onSubscriptionChanged(Intent intent) {
-            sendMessage(MSG_SUBSCRIPTION_CHANGED, 0, 0, null);
         }
     }
 
@@ -191,20 +172,6 @@ public class AcServiceImpl {
         }
     };
 
-    private final MessageFunction mMsgFuncIntent = new MessageFunction() {
-        @Override
-        public int handleMessage(Message msg) {
-            return 0;
-        }
-    };
-
-    private final MessageFunction mMsgFuncSubscriptionChanged = new MessageFunction() {
-        @Override
-        public int handleMessage(Message msg) {
-            return 0;
-        }
-    };
-
     private final MessageFunction mMsgFuncHttpResponse = new MessageFunction() {
         @Override
         public int handleMessage(Message msg) {
@@ -238,8 +205,6 @@ public class AcServiceImpl {
                 put(MSG_STOP, mMsgFuncStop);
                 put(MSG_PROVISIONING_DATA_RECEIVED, mMsgFuncProvisioningDataReceived);
                 put(MSG_PROVISIONING_DATA_RESET, mMsgFuncProvisioningDataReset);
-                put(MSG_INTENT, mMsgFuncIntent);
-                put(MSG_SUBSCRIPTION_CHANGED, mMsgFuncSubscriptionChanged);
                 put(MSG_HTTP_RESPONSE, mMsgFuncHttpResponse);
                 put(MSG_HTTP_INTERNAL_ERROR, mMsgFuncHttpInternalError);
             }
@@ -247,8 +212,6 @@ public class AcServiceImpl {
 
     private final CallbackManager mCallbackManager;
     private final Context mContext;
-    private final EventReceiver mEventReceiver;
-    private final EventReceiver.EventReceiverCallback mCallback;
     private final Handler mHandler;
     private final ConfigContainer mConfigContainer;
     private final int mSlotId;
@@ -262,17 +225,13 @@ public class AcServiceImpl {
 
     @VisibleForTesting
     public AcServiceImpl(int slotId, int subId, Context context, Looper looper,
-            EventReceiver eventReceiver, ConfigContainer configContainer) {
+            ConfigContainer configContainer) {
         mSlotId = slotId;
         mSubId = subId;
         mCallbackManager = new CallbackManager(slotId, subId);
 
         mHandler = new MessageHandler(looper);
         mContext = context;
-
-        mCallback = new EventCallback();
-        mEventReceiver = eventReceiver;
-        mEventReceiver.registerCallback(mCallback);
 
         mConfigContainer = configContainer;
 
@@ -286,7 +245,6 @@ public class AcServiceImpl {
     public void destroy() {
         mHandler.getLooper().quit();
         mCallbackManager.clear();
-        mEventReceiver.unregisterCallback(mCallback);
     }
 
     private AcServiceImpl(Context context, int slotId) {
@@ -299,10 +257,6 @@ public class AcServiceImpl {
 
         mHandler = new MessageHandler(handlerThread.getLooper());
         mContext = context;
-
-        mCallback = new EventCallback();
-        mEventReceiver = EventReceiver.getInstance(context);
-        mEventReceiver.registerCallback(mCallback);
 
         mConfigContainer = new ConfigContainer(context, mSlotId, mSubId);
 
