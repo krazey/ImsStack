@@ -2858,6 +2858,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithNextPcscf()
 
         SetState(STATE_REGISTERING);
         ReportTryingState();
+        return;
     }
 
     ClearPcscf();
@@ -2867,6 +2868,8 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithNextPcscf()
 PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithAvailableNextPcscf(
         IN IMS_BOOL bSetCurrentPcscfInvalid)
 {
+    IMS_UINT32 nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
+
     DestroyEx();
 
     if (bSetCurrentPcscfInvalid)
@@ -2876,6 +2879,15 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithAvailableNextPcscf
 
     if (SetNextPcscf(IMS_FALSE))
     {
+        if (nRetryAfter > 0 && m_piContext->GetPcscf()->GetPcscfCount() == 1)
+        {
+            A_IMS_TRACE_D(
+                    REGID, "ProcessRegRequiredWithAvailableNextPcscf :: RA(%d)", nRetryAfter, 0, 0);
+            ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
+            StartTimer(TIMER_OFFLINE_RECOVER, nRetryAfter * 1000);
+            return;
+        }
+
         if (!CreateRegistration())
         {
             ProcessUnpredictableFailure();
