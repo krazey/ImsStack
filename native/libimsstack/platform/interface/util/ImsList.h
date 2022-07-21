@@ -44,11 +44,12 @@ public:
 public:
     // Empty the list
     inline void Clear() { ImsVector<T>::Clear(); }
+    // Checks if both lists are same.
+    inline IMS_BOOL Equals(IN const ImsList<T>& other) const { return ImsVector<T>::Equals(other); }
 
     //
     // List stats
     //
-
     // Returns the number of elements in the list
     inline IMS_UINT32 GetSize() const { return ImsVector<T>::GetSize(); }
     // Returns whether or not the list is empty
@@ -57,7 +58,6 @@ public:
     //
     // Accessors
     //
-
     // Gets an element at the given index with read-only property
     inline const T& GetAt(IN IMS_UINT32 nIndex) const { return ImsVector<T>::GetAt(nIndex); }
     inline T GetValueAt(IN IMS_UINT32 nIndex) const { return ImsVector<T>::GetValueAt(nIndex); }
@@ -65,14 +65,12 @@ public:
     //
     // Modifying the array
     //
-
     // Copy-on write support, grants write access to an element
     inline T& GetAt(IN IMS_UINT32 nIndex) { return ImsVector<T>::GetAt(nIndex); }
 
     //
     // Append / Insert another list
     //
-
     // Insert another list at a given index
     inline IMS_BOOL InsertListAt(IN const ImsList<T>& objList, IN IMS_UINT32 nIndex)
     {
@@ -87,24 +85,20 @@ public:
     //
     // Add / Insert / Replace elements
     //
-
     // Append / Prepend the given element in the last / in the first position
     inline IMS_BOOL Append(IN const T& element)
     {
         return (ImsVector<T>::Add(element) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
-
     inline IMS_BOOL Prepend(IN const T& element)
     {
         return (ImsVector<T>::InsertAt(element, 0) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
-
     // Insert one or several elements initialized from a prototype element
     inline IMS_BOOL InsertAt(IN const T& element, IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1)
     {
         return (ImsVector<T>::InsertAt(element, nIndex, nCount) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
-
     // Replaces an element with a new prototype-element
     inline IMS_BOOL SetAt(IN const T& element, IN IMS_UINT32 nIndex)
     {
@@ -114,7 +108,6 @@ public:
     //
     // Remove elements
     //
-
     // Remove several elements
     inline IMS_BOOL RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1)
     {
@@ -126,5 +119,13 @@ public:
         return (ImsVector<T>::RemoveAt(nIndex) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
 };
+
+// Overrides operators
+PUBLIC
+template <class T>
+inline IMS_BOOL operator==(IN const ImsList<T>& objList1, IN const ImsList<T>& objList2)
+{
+    return objList1.Equals(objList2);
+}
 
 #endif

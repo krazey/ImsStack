@@ -43,22 +43,20 @@ public:
         m_objVector.clear();
         Shrink();
     }
+    // Checks if both vectors are same.
+    inline IMS_BOOL Equals(IN const ImsVector<T>& other) const;
 
     //
     // Vector stats
     //
-
     // Returns the number of elements in the vector
     inline IMS_UINT32 GetSize() const { return static_cast<IMS_UINT32>(m_objVector.size()); }
     // Returns whether or not the vector is empty
     inline IMS_BOOL IsEmpty() const { return m_objVector.empty() ? IMS_TRUE : IMS_FALSE; }
     // Returns how many elements can be stored without reallocating the backing store
-    inline IMS_UINT32 GetCapacity() const
-    {
-        return static_cast<IMS_UINT32>(m_objVector.capacity());
-    }
+    inline IMS_UINT32 GetCapacity() const { return m_objVector.capacity(); }
     // Sets the capacity. The capacity can never be reduced less than GetSize().
-    inline IMS_SLONG SetCapacity(IN IMS_UINT32 nNewCapacity)
+    inline IMS_UINT32 SetCapacity(IN IMS_UINT32 nNewCapacity)
     {
         m_objVector.reserve(nNewCapacity);
         return GetCapacity();
@@ -69,7 +67,6 @@ public:
     //
     // C-style array access
     //
-
     // Read-only C-style access
     inline const T* GetArrayConst() const;
     // Read-write C-style access
@@ -78,7 +75,6 @@ public:
     //
     // Accessors
     //
-
     // Read-only access to an element at a given index
     inline const T& operator[](IN IMS_UINT32 nIndex) const;
     // Alternate name for operator[]
@@ -86,16 +82,12 @@ public:
     // Stack-usage of the vector.
     // Returns the top of the stack (last element)
     inline const T& Top() const;
-
-    // Same as operator[], but allows to access the vector backward (from the end)
-    // with a negative index
-    inline const T& GetAtMirror(IN IMS_SLONG nIndex) const;
+    // Returns the value as copy.
     inline T GetValueAt(IN IMS_UINT32 nIndex) const { return m_objVector.at(nIndex); }
 
     //
     // Modifying the array
     //
-
     // Copy-on write support, grants write access to an element
     inline T& GetAt(IN IMS_UINT32 nIndex);
     // Grants right access to the top of the stack (last element)
@@ -104,7 +96,6 @@ public:
     //
     // Append / Insert another vector
     //
-
     // Insert another vector at a given index
     inline IMS_SLONG InsertVectorAt(IN const ImsVector<T>& other, IN IMS_UINT32 nIndex);
     // Append another vector at the end of this one
@@ -113,7 +104,6 @@ public:
     //
     // Add / Insert / Replace elements
     //
-
     // Pop the top of the stack (removes the last element). No-op if the stack's empty.
     inline void Pop();
     // Pushes an element initialized with its default constructor
@@ -139,7 +129,6 @@ public:
     //
     // Remove elements
     //
-
     // Remove several elements
     inline IMS_SLONG RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1);
     // Remove one element
@@ -186,6 +175,20 @@ inline ImsVector<T>& ImsVector<T>::operator=(IN const ImsVector<T>& other)
 
 PUBLIC
 template <class T>
+inline IMS_BOOL ImsVector<T>::Equals(IN const ImsVector<T>& other) const
+{
+    if (GetSize() != other.GetSize())
+    {
+        return IMS_FALSE;
+    }
+
+    return std::equal(m_objVector.begin(), m_objVector.end(), other.m_objVector.begin())
+            ? IMS_TRUE
+            : IMS_FALSE;
+}
+
+PUBLIC
+template <class T>
 inline const T* ImsVector<T>::GetArrayConst() const
 {
     return m_objVector.data();
@@ -217,20 +220,8 @@ PUBLIC
 template <class T>
 inline const T& ImsVector<T>::Top() const
 {
-    if (m_objVector.empty())
-    {
-        return null;
-    }
-
+    IMS_ASSERT(!m_objVector.empty());
     return m_objVector.back();
-}
-
-PUBLIC
-template <class T>
-inline const T& ImsVector<T>::GetAtMirror(IN IMS_SLONG nIndex) const
-{
-    IMS_ASSERT(((nIndex > 0) ? nIndex : -nIndex) < GetSize());
-    return GetAt((nIndex < 0) ? (GetSize() + nIndex) : nIndex);
 }
 
 PUBLIC
@@ -252,8 +243,8 @@ PUBLIC
 template <class T>
 inline IMS_SLONG ImsVector<T>::InsertVectorAt(IN const ImsVector<T>& other, IN IMS_UINT32 nIndex)
 {
-    const auto& it = m_objVector.begin();
-    m_objVector.insert(it + nIndex, other.m_objVector.begin(), other.m_objVector.end());
+    const auto& it = (nIndex >= GetSize()) ? m_objVector.end() : (m_objVector.begin() + nIndex);
+    m_objVector.insert(it, other.m_objVector.begin(), other.m_objVector.end());
     return nIndex;
 }
 
@@ -305,8 +296,8 @@ PUBLIC
 template <class T>
 inline IMS_SLONG ImsVector<T>::InsertAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount /*= 1*/)
 {
-    const auto& it = m_objVector.begin();
-    m_objVector.insert(it + nIndex, nCount, std::is_pointer<T>::value ? null : T());
+    const auto& it = (nIndex >= GetSize()) ? m_objVector.end() : (m_objVector.begin() + nIndex);
+    m_objVector.insert(it, nCount, std::is_pointer<T>::value ? null : T());
     return nIndex;
 }
 
@@ -315,8 +306,8 @@ template <class T>
 inline IMS_SLONG ImsVector<T>::InsertAt(
         IN const T& element, IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount /*= 1*/)
 {
-    const auto& it = m_objVector.begin();
-    m_objVector.insert(it + nIndex, nCount, element);
+    const auto& it = (nIndex >= GetSize()) ? m_objVector.end() : (m_objVector.begin() + nIndex);
+    m_objVector.insert(it, nCount, element);
     return nIndex;
 }
 
@@ -380,6 +371,14 @@ inline void ImsVector<T>::Shrink()
     {
         m_objVector.shrink_to_fit();
     }
+}
+
+// Overrides operators
+PUBLIC
+template <class T>
+inline IMS_BOOL operator==(IN const ImsVector<T>& objV1, IN const ImsVector<T>& objV2)
+{
+    return objV1.Equals(objV2);
 }
 
 #endif

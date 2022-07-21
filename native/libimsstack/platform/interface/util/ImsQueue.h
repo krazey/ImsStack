@@ -42,11 +42,15 @@ public:
 public:
     // Empty the queue
     inline void Clear() { ImsVector<T>::Clear(); }
+    // Checks if both queues are same.
+    inline IMS_BOOL Equals(IN const ImsQueue<T>& other) const
+    {
+        return ImsVector<T>::Equals(other);
+    }
 
     //
     // Queue stats
     //
-
     // Returns the number of elements in the queue
     inline IMS_UINT32 GetSize() const { return ImsVector<T>::GetSize(); }
     // Returns whether or not the queue is empty
@@ -56,12 +60,12 @@ public:
     inline T& GetBack()
     {
         IMS_ASSERT(!IsEmpty());
-        return ImsVector<T>::GetAt(GetSize());
+        return ImsVector<T>::GetAt(GetSize() - 1);
     }
     inline const T& GetBack() const
     {
         IMS_ASSERT(!IsEmpty());
-        return ImsVector<T>::GetAt(GetSize());
+        return ImsVector<T>::GetAt(GetSize() - 1);
     }
 
     // Returns a reference to the first element at the front of the queue
@@ -87,9 +91,14 @@ public:
 
     // Adds an element to the back of the queue
     inline void Push(IN const T& element) { ImsVector<T>::Push(element); }
-
-    // TODO:: Temporary; DO NOT USE THIS METHOD!!!IT WILL BE REMOVED LATER.
-    inline void Prepend(IN const T& element) { ImsVector<T>::InsertAt(element, 0); }
 };
+
+// Overrides operators
+PUBLIC
+template <class T>
+inline IMS_BOOL operator==(IN const ImsQueue<T>& objQueue1, IN const ImsQueue<T>& objQueue2)
+{
+    return objQueue1.Equals(objQueue2);
+}
 
 #endif

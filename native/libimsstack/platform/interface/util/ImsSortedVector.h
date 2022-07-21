@@ -47,7 +47,6 @@ public:
     //
     // Vector stats
     //
-
     // Returns the number of elements in the vector
     inline IMS_UINT32 GetSize() const { return static_cast<IMS_UINT32>(m_objVector.size()); }
     // Returns whether or not the vector is empty
@@ -67,7 +66,6 @@ public:
     //
     // C-style array access
     //
-
     // Read-only C-style access
     inline const T* GetArrayConst() const;
     // Read-write C-style access
@@ -76,7 +74,6 @@ public:
     //
     // Accessors
     //
-
     // Read-only access to an element at a given index
     inline const T& operator[](IN IMS_UINT32 nIndex) const;
     // Alternate name for operator[]
@@ -85,26 +82,19 @@ public:
     // Returns the top of the stack (last element)
     inline const T& Top() const;
 
-    // Same as operator[], but allows to access the vector backward (from the end)
-    // with a negative index
-    inline const T& GetAtMirror(IN IMS_SLONG nIndex) const;
-
     //
     // Modifying the array
     //
-
     // Copy-on write support, grants write access to an element
     inline T& GetAt(IN IMS_UINT32 nIndex);
     // Grants right access to the top of the stack (last element)
     inline T& Top();
-
     // Checks if the same element is present
     inline IMS_BOOL Contains(IN const T& element) const;
     // Finds the index of an element
     inline IMS_SLONG GetIndexOf(IN const T& element) const;
     // Finds where this element should be inserted
     inline IMS_UINT32 GetOrderOf(IN const T& element) const;
-
     // Merges a vector into this one
     inline IMS_BOOL Merge(IN const ImsVector<T>& other);
     inline IMS_BOOL Merge(IN const ImsSortedVector<T>& other);
@@ -113,12 +103,10 @@ public:
     // Add an element in the right place (or replaces it if there is one)
     //
     inline IMS_BOOL Add(IN const T& element);
-
     //
     // Remove an element
     //
     inline IMS_BOOL Remove(IN const T& element);
-
     // Remove several elements
     inline IMS_BOOL RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1);
     // Remove one element
@@ -198,14 +186,6 @@ inline const T& ImsSortedVector<T>::Top() const
 {
     IMS_ASSERT(!m_objVector.empty());
     return m_objVector.back();
-}
-
-PUBLIC
-template <class T>
-inline const T& ImsSortedVector<T>::GetAtMirror(IN IMS_SLONG nIndex) const
-{
-    IMS_ASSERT(((nIndex > 0) ? nIndex : -nIndex) < GetSize());
-    return GetAt((nIndex < 0) ? (GetSize() + nIndex) : nIndex);
 }
 
 PUBLIC

@@ -42,11 +42,15 @@ public:
 public:
     // Empty the stack
     inline void Clear() { ImsVector<T>::Clear(); }
+    // Checks if both stacks are same.
+    inline IMS_BOOL Equals(IN const ImsStack<T>& other) const
+    {
+        return ImsVector<T>::Equals(other);
+    }
 
     //
     // Stack stats
     //
-
     // Returns the number of elements in the stack
     inline IMS_UINT32 GetSize() const { return ImsVector<T>::GetSize(); }
     // Returns whether or not the stack is empty
@@ -62,5 +66,13 @@ public:
     inline T& Top() { return ImsVector<T>::Top(); }
     inline const T& Top() const { return ImsVector<T>::Top(); }
 };
+
+// Overrides operators
+PUBLIC
+template <class T>
+inline IMS_BOOL operator==(IN const ImsStack<T>& objStack1, IN const ImsStack<T>& objStack2)
+{
+    return objStack1.Equals(objStack2);
+}
 
 #endif
