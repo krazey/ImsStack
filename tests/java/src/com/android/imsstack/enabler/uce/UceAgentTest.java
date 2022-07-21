@@ -117,8 +117,8 @@ public class UceAgentTest {
         mUceJni = null;
         if (mAgent != null) {
             mAgent.interrupt();
+            mAgent = null;
         }
-        mAgent = null;
     }
 
 

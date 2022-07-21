@@ -45,9 +45,17 @@ interface UceSubscribeMessageHandler {
     public void onHandle(Message objMessage);
 }
 
+ /**
+ * The UceSubscribeRequestController manages the request associated with
+ * the UCE subscription requests.
+ * When the request receives from the caller, a UceSubscribeRequest instance is created
+ * for each request.
+ * And the request is complete, the created instance of the UceSubscribeRequest is deleted.
+ */
 public class UceSubscribeRequestController implements IUceJNIListener {
     private final int mSlotId;
-    private final Map<Integer, UceSubscribeRequest> mUceSubscribeRequestMap;
+    private final Map<Integer, UceSubscribeRequest> mUceSubscribeRequestMap =
+            new HashMap<Integer, UceSubscribeRequest>();
     private final UceSubscribeControllerHandler mUceSubscribeControllerHandler;
     private boolean mIsImsRegistered;
     private UceJNI mUceJNI;
@@ -56,24 +64,13 @@ public class UceSubscribeRequestController implements IUceJNIListener {
         new HashMap<Integer, UceSubscribeMessageHandler>();
 
     public UceSubscribeRequestController(int slotId, Looper looper) {
-        mSlotId = slotId;
-        mIsImsRegistered = false;
-        mUceSubscribeRequestMap = new HashMap<Integer, UceSubscribeRequest>();
-        mUceSubscribeControllerHandler = new UceSubscribeControllerHandler(looper);
-
-        mUceJNI = UceJNI.getInstance();
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_RESPONSE_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_PRESENCE_NOTIFY_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_CMD_ERROR_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_TERMINATED_IND);
+        this (slotId, UceJNI.getInstance(), looper);
     }
 
     @VisibleForTesting
     public UceSubscribeRequestController(int slotId, UceJNI jni, Looper looper) {
         mSlotId = slotId;
         mIsImsRegistered = false;
-        mUceSubscribeRequestMap = new HashMap<Integer, UceSubscribeRequest>();
         mUceSubscribeControllerHandler = new UceSubscribeControllerHandler(looper);
 
         mUceJNI = jni;

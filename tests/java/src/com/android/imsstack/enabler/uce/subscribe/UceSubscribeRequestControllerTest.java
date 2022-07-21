@@ -139,10 +139,10 @@ public class UceSubscribeRequestControllerTest {
 
         verify(request).sendRequest(captor.capture());
         List<String> data = captor.getValue();
-        assertEquals(data.size(), 1);
-        assertEquals(data.get(0), uri.toString());
+        assertEquals(1, data.size());
+        assertEquals(uri.toString(), data.get(0));
 
-        assertEquals(mController.getRequestWithKey(KEY), request);
+        assertEquals(request, mController.getRequestWithKey(KEY));
 
         verifyNoMoreInteractions(request);
     }
@@ -205,8 +205,8 @@ public class UceSubscribeRequestControllerTest {
         verify(request, timeout(MAX_WAIT_TIME)).informCapabilitiesUpdate(captor.capture());
         List<String> data = captor.getValue();
 
-        assertEquals(data.size(), 1);
-        assertEquals(data.get(0), pidfxml);
+        assertEquals(1, data.size());
+        assertEquals(pidfxml, data.get(0));
 
         verifyNoMoreInteractions(request);
     }
@@ -291,20 +291,18 @@ public class UceSubscribeRequestControllerTest {
 
         verify(request, timeout(MAX_WAIT_TIME)).informResourceTerminate(captor.capture());
         ArrayList<UceResourceInfo> data = captor.getValue();
-        assertEquals(data.size(), count);
+        assertEquals(count, data.size());
 
         for (int i = 0; i < data.size(); i++) {
             UceResourceInfo info = data.get(i);
-            assertEquals(info.getId(), id[i]);
-            assertEquals(info.getReason(), reason[i]);
+            assertEquals(id[i], info.getId());
+            assertEquals(reason[i], info.getReason());
         }
         verifyNoMoreInteractions(request);
     }
 
     private UceSubscribeRequestController createUceSubscribeRequestController() {
-        UceSubscribeRequestController controller = new UceSubscribeRequestController(SLOT_ID,
-                mUceJni, Looper.getMainLooper());
-        return controller;
+        return new UceSubscribeRequestController(SLOT_ID, mUceJni, Looper.getMainLooper());
     }
 
     private void waitForHandlerActionDelayed(Handler h, long timeoutMillis, long delayMs) {

@@ -155,12 +155,12 @@ public class UcePublishRequestControllerTest {
         mController = createUcePublishRequestController();
 
         doReturn(true).when(active).sendRequest();
-        mController.setCapability((long) 0);
+        mController.setCapability(0L);
         mController.publishCapabilities(pidfxml, publishCb, active);
         verify(active).setRequestInfo(eq(pidfxml), anyBoolean(),
                 eq(UceServiceIds.SERVICE_ID_PRESENCE));
         verify(active).sendRequest();
-        assertEquals(mController.getCapability(), (long) UceServiceIds.SERVICE_ID_PRESENCE);
+        assertEquals(UceServiceIds.SERVICE_ID_PRESENCE, mController.getCapability());
         verifyNoMoreInteractions(active);
     }
 
@@ -172,7 +172,7 @@ public class UcePublishRequestControllerTest {
         mController = createUcePublishRequestController();
 
         doReturn(false).when(active).sendRequest();
-        mController.setCapability((long) 0);
+        mController.setCapability(0L);
         mController.publishCapabilities(pidfxml, publishCb, active);
         verify(active).setRequestInfo(eq(pidfxml), anyBoolean(),
                 eq(UceServiceIds.SERVICE_ID_PRESENCE));
@@ -188,7 +188,7 @@ public class UcePublishRequestControllerTest {
 
         mController = createUcePublishRequestController();
 
-        mController.setCapability((long) 0);
+        mController.setCapability(0L);
         mController.setActiveRequest(active);
 
         mController.publishCapabilities(pidfxml, publishCb, active);
@@ -196,8 +196,8 @@ public class UcePublishRequestControllerTest {
                 eq(UceServiceIds.SERVICE_ID_PRESENCE));
 
         assertNotNull(mController.getActiveRequest());
-        assertEquals(mController.getPendingRequest(), active);
-        assertEquals(mController.getPendingCapability(), (long) UceServiceIds.SERVICE_ID_PRESENCE);
+        assertEquals(active, mController.getPendingRequest());
+        assertEquals(UceServiceIds.SERVICE_ID_PRESENCE, mController.getPendingCapability());
         verifyNoMoreInteractions(active);
     }
 
@@ -211,7 +211,7 @@ public class UcePublishRequestControllerTest {
 
         verify(pending).informCommandError(eq(UceApiConstant.COMMAND_CODE_SERVICE_UNAVAILABLE));
         assertNull(mController.getPendingRequest());
-        assertEquals(mController.getPendingCapability(), (long) 0);
+        assertEquals(0L, mController.getPendingCapability());
         verifyNoMoreInteractions(pending);
     }
 
@@ -256,67 +256,67 @@ public class UcePublishRequestControllerTest {
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_PRESENCE.getId();
         capability |= UceServiceIds.SERVICE_ID_PRESENCE;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_STANDALONE_MESSAGING.getId();
         capability |= UceServiceIds.SERVICE_ID_STANDALONE_MESSAGING;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_CHAT_SESSION.getId();
         capability |= UceServiceIds.SERVICE_ID_CHAT_SESSION;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_IM_SESSION.getId();
         capability |= UceServiceIds.SERVICE_ID_IM_SESSION;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_FULL_STORE_FORWARD_GROUP_CHAT.getId();
         capability |= UceServiceIds.SERVICE_ID_FULL_STORE_FORWARD_GROUP_CHAT;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_GEOLOCATION_PUSH.getId();
         capability |= UceServiceIds.SERVICE_ID_GEOLOCATION_PUSH;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_SHARED_MAP.getId();
         capability |= UceServiceIds.SERVICE_ID_SHARED_MAP;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_SHARED_SKETCH.getId();
         capability |= UceServiceIds.SERVICE_ID_SHARED_SKETCH;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_POST_CALL.getId();
         capability |= UceServiceIds.SERVICE_ID_POST_CALL;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_COMMUNICATION_SESSION.getId();
         capability |= UceServiceIds.SERVICE_ID_CHATBOT_COMMUNICATION_SESSION;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_STADNALONE_MESSAGING.getId();
         capability |= UceServiceIds.SERVICE_ID_CHATBOT_STADNALONE_MESSAGING;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_EXTEND_MESSAGE.getId();
         capability |= UceServiceIds.SERVICE_ID_CHATBOT_EXTEND_MESSAGE;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_EXTEND_MESSAGE.getId();
         capability |= UceServiceIds.SERVICE_ID_CHATBOT_EXTEND_MESSAGE;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_GEOLOCATION_PUSH_VIA_SMS.getId();
         capability |= UceServiceIds.SERVICE_ID_GEOLOCATION_PUSH_VIA_SMS;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER_VIA_SMS.getId();
         capability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_VIA_SMS;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
 
         pidfxml += UceServiceIds.ServiceIds.SERVICE_ID_CANCEL_MESSAGE.getId();
         capability |= UceServiceIds.SERVICE_ID_CANCEL_MESSAGE;
-        assertEquals(mController.getCapability(pidfxml), capability);
+        assertEquals(capability, mController.getCapability(pidfxml));
     }
 
     @Test
@@ -328,8 +328,8 @@ public class UcePublishRequestControllerTest {
         capability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_HTTP;
         capability |= UceServiceIds.SERVICE_ID_CALL_COMPOSER_V2;
         mController = createUcePublishRequestController();
-        assertEquals(mController.getCapability(getFileTransferAndCallComposerPidfxml()),
-                capability);
+        assertEquals(capability,
+                mController.getCapability(getFileTransferAndCallComposerPidfxml()));
     }
 
     @Test

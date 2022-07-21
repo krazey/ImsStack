@@ -28,7 +28,10 @@ import com.android.imsstack.enabler.uce.interf.PublishResponse;
 import com.android.imsstack.enabler.uce.interf.UceApiConstant;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
-
+ /**
+ * The UcePublishRequest will be handled the request related to the PUBLISH.
+ * This class will be created per each request related to the PUBLISH.
+ */
 public class UcePublishRequest {
     private final int mSlotId;
     private final int mKey;
@@ -39,11 +42,9 @@ public class UcePublishRequest {
     private int mExtended;
     private long mCapability;
     private UceJNI mUceJNI;
+    private String mEtag;
 
-    @VisibleForTesting
-    public String mEtag;
-
-    private IPreference mPf;
+    private final IPreference mPf;
 
     public UcePublishRequest(PublishResponse cb, int slotId, int key, boolean useExpiredEtag) {
         this(cb, slotId, key, useExpiredEtag, UceJNI.getInstance(), "",
@@ -84,6 +85,7 @@ public class UcePublishRequest {
 
     /**
      * The capabilities of this device have been updated and should be published to the network.
+     * @return true if the request is successfully processed.
      */
     public boolean sendRequest() {
         if (TextUtils.isEmpty(mPidfXml)) {
@@ -157,5 +159,13 @@ public class UcePublishRequest {
      */
     public int getKey() {
         return mKey;
+    }
+
+     /**
+      * Get the current eTag
+      * @return the current etag value
+      */
+    public String getEtag() {
+        return mEtag;
     }
 }

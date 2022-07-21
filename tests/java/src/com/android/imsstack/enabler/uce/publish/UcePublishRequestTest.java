@@ -74,13 +74,13 @@ public class UcePublishRequestTest {
     public void test_create() throws Exception {
         String eTag = "ABCDFEG";
         mResponseWithoutEtag = createUcePublishRequestEmptyPf(eTag);
-        assertEquals(mResponseWithoutEtag.mEtag, eTag);
-        assertEquals(mResponseWithoutEtag.getKey(), KEY);
+        assertEquals(eTag, mResponseWithoutEtag.getEtag());
+        assertEquals(KEY, mResponseWithoutEtag.getKey());
 
         String savedEtag = "savedEtag";
         doReturn(savedEtag).when(mPf).getPreferenceStrValue(any(), eq(SLOT_ID));
         mResponseWithEtag = createUcePublishRequestPf(eTag);
-        assertEquals(mResponseWithEtag.mEtag, savedEtag);
+        assertEquals(savedEtag, mResponseWithEtag.getEtag());
     }
 
     @Test
@@ -113,12 +113,12 @@ public class UcePublishRequestTest {
 
         Parcel parcel = captor.getValue();
         parcel.setDataPosition(0);
-        assertEquals(parcel.readInt(), UceMessage.UCE_SEND_PUBLISH_CMD);
-        assertEquals(parcel.readInt(), KEY);
-        assertEquals(parcel.readString(), pidfXml); // pidf xml
-        assertEquals(parcel.readInt(), 0); // extend
-        assertEquals(parcel.readLong(), capability); // capability
-        assertEquals(parcel.readInt(), 0); // no etag
+        assertEquals(UceMessage.UCE_SEND_PUBLISH_CMD, parcel.readInt());
+        assertEquals(KEY, parcel.readInt());
+        assertEquals(pidfXml, parcel.readString()); // pidf xml
+        assertEquals(0, parcel.readInt()); // extend
+        assertEquals(capability, parcel.readLong()); // capability
+        assertEquals(0, parcel.readInt()); // no etag
 
         verifyNoMoreInteractions(jni);
     }
@@ -140,13 +140,13 @@ public class UcePublishRequestTest {
 
         Parcel parcel = captor.getValue();
         parcel.setDataPosition(0);
-        assertEquals(parcel.readInt(), UceMessage.UCE_SEND_PUBLISH_CMD);
-        assertEquals(parcel.readInt(), KEY);
-        assertEquals(parcel.readString(), pidfXml); // pidf xml
-        assertEquals(parcel.readInt(), 1); // extend
-        assertEquals(parcel.readLong(), capability); // capability
-        assertEquals(parcel.readInt(), 1); // etag
-        assertEquals(parcel.readString(), eTag); // etag value
+        assertEquals(UceMessage.UCE_SEND_PUBLISH_CMD, parcel.readInt());
+        assertEquals(KEY, parcel.readInt());
+        assertEquals(pidfXml, parcel.readString()); // pidf xml
+        assertEquals(1, parcel.readInt()); // extend
+        assertEquals(capability, parcel.readLong()); // capability
+        assertEquals(1, parcel.readInt()); // etag
+        assertEquals(eTag, parcel.readString()); // etag value
 
         verifyNoMoreInteractions(jni);
     }
@@ -187,20 +187,17 @@ public class UcePublishRequestTest {
     }
 
     private UcePublishRequest createUcePublishRequest(String eTag) {
-        UcePublishRequest request = new UcePublishRequest(publishCb, SLOT_ID, KEY,
+        return new UcePublishRequest(publishCb, SLOT_ID, KEY,
                 NOT_USED_EXPIRED_ETAG, jni, eTag, mPf);
-        return request;
     }
 
     private UcePublishRequest createUcePublishRequestEmptyPf(String eTag) {
-        UcePublishRequest request = new UcePublishRequest(publishCb, SLOT_ID, KEY,
+        return new UcePublishRequest(publishCb, SLOT_ID, KEY,
                 USED_EXPIRED_ETAG, jni, eTag, null);
-        return request;
     }
 
     private UcePublishRequest createUcePublishRequestPf(String eTag) {
-        UcePublishRequest request = new UcePublishRequest(publishCb, SLOT_ID, KEY,
+        return new UcePublishRequest(publishCb, SLOT_ID, KEY,
                 USED_EXPIRED_ETAG, jni, eTag, mPf);
-        return request;
     }
 }

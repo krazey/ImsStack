@@ -31,6 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+ /**
+ * The UceSubscribeRequest will be handled the request related to the SUBSCRIBE.
+ * This class will be created per each request related to the SUBSCRIBE.
+ */
 public class UceSubscribeRequest {
     private final int mSlotId;
     private final int mKey;

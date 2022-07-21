@@ -107,10 +107,10 @@ public class UceSubscribeRequestTest {
 
         Parcel parcel = captor.getValue();
         parcel.setDataPosition(0);
-        assertEquals(parcel.readInt(), UceMessage.UCE_SEND_SINGLE_SUBSCRIBE_CMD);
-        assertEquals(parcel.readInt(), KEY);
-        assertEquals(parcel.readInt(), remoteUris.size());
-        assertEquals(parcel.readString(), remoteUri);
+        assertEquals(UceMessage.UCE_SEND_SINGLE_SUBSCRIBE_CMD, parcel.readInt());
+        assertEquals(KEY, parcel.readInt());
+        assertEquals(remoteUris.size(), parcel.readInt());
+        assertEquals(remoteUri, parcel.readString());
         verifyNoMoreInteractions(jni);
     }
 
@@ -130,11 +130,11 @@ public class UceSubscribeRequestTest {
 
         Parcel parcel = captor.getValue();
         parcel.setDataPosition(0);
-        assertEquals(parcel.readInt(), UceMessage.UCE_SEND_LIST_SUBSCRIBE_CMD);
-        assertEquals(parcel.readInt(), KEY);
-        assertEquals(parcel.readInt(), remoteUris.size());
+        assertEquals(UceMessage.UCE_SEND_LIST_SUBSCRIBE_CMD, parcel.readInt());
+        assertEquals(KEY, parcel.readInt());
+        assertEquals(remoteUris.size(), parcel.readInt());
         for (int i = 0; i < remoteUris.size(); i++) {
-            assertEquals(parcel.readString(), remoteUris.get(i));
+            assertEquals(remoteUris.get(i), parcel.readString());
         }
         verifyNoMoreInteractions(jni);
     }
@@ -184,10 +184,10 @@ public class UceSubscribeRequestTest {
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         verify(subscribeCb, times(1)).onNotifyCapabilitiesUpdate(captor.capture());
         List<String> data = captor.getValue();
-        assertEquals(data.size(), pidfXmls.size());
-        assertEquals(data.get(0), pidfXmls.get(0));
-        assertEquals(data.get(1), pidfXmls.get(1));
-        assertEquals(data.get(2), pidfXmls.get(2));
+        assertEquals(pidfXmls.size(), data.size());
+        assertEquals(pidfXmls.get(0), data.get(0));
+        assertEquals(pidfXmls.get(1), data.get(1));
+        assertEquals(pidfXmls.get(2), data.get(2));
         verifyNoMoreInteractions(subscribeCb);
     }
 
@@ -220,21 +220,20 @@ public class UceSubscribeRequestTest {
         ArgumentCaptor<ArrayList> captor = ArgumentCaptor.forClass(ArrayList.class);
         verify(subscribeCb, times(1)).onResourceTerminated(captor.capture());
         List<Pair<Uri, String>> data = captor.getValue();
-        assertEquals(data.size(), resourceInfoList.size());
+        assertEquals(resourceInfoList.size(), data.size());
         Pair<Uri, String> pairData = data.get(0);
         assertNotNull("first pair data should not be null",pairData);
-        assertEquals(pairData.first, Uri.parse(info1.getId()));
-        assertEquals(pairData.second, info1.getReason());
+        assertEquals(Uri.parse(info1.getId()), pairData.first);
+        assertEquals(info1.getReason(), pairData.second);
         pairData = data.get(1);
         assertNotNull("second pair data should not be null",pairData);
-        assertEquals(pairData.first, Uri.parse(info2.getId()));
-        assertEquals(pairData.second, info2.getReason());
+        assertEquals(Uri.parse(info2.getId()), pairData.first);
+        assertEquals(info2.getReason(), pairData.second);
         verifyNoMoreInteractions(subscribeCb);
     }
 
     private UceSubscribeRequest createUceSubscribeRequest() {
-        UceSubscribeRequest request = new UceSubscribeRequest(subscribeCb, SLOT_ID, KEY, jni);
-        return request;
+        return new UceSubscribeRequest(subscribeCb, SLOT_ID, KEY, jni);
     }
 
     private String getPidfxml(String contact) {

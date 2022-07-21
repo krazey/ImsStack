@@ -38,7 +38,13 @@ import java.util.HashMap;
 interface UcePublishMessageHandler {
     public void onHandle(Message objMessage, UcePublishRequestController controller);
 }
-
+ /**
+  *  The UcePublishRequestController manages the request associated with
+  * the UCE publish requests.
+  * When the request receives from the caller, a UcePublishRequest instance is created
+  * for each request.
+  * And the request is complete, the created instance of the UcePublishRequest is deleted.
+  */
 public class UcePublishRequestController implements IUceJNIListener {
     private final int mSlotId;
     private final UcePublishControllerHandler mUcePublishControllerHandler;
@@ -244,53 +250,11 @@ public class UcePublishRequestController implements IUceJNIListener {
                 }
             }
         }
-        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_STANDALONE_MESSAGING.getId())) {
-            newCapability |= UceServiceIds.SERVICE_ID_STANDALONE_MESSAGING;
-            ImsLog.d("standalone message");
-        }
-        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_CHAT_SESSION.getId())) {
-            newCapability |= UceServiceIds.SERVICE_ID_CHAT_SESSION;
-            ImsLog.d("chat session");
-        }
-        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_IM_SESSION.getId())) {
-            newCapability |= UceServiceIds.SERVICE_ID_IM_SESSION;
-            ImsLog.d("im session");
-        }
-        if (pidfXml.contains(
-                UceServiceIds.ServiceIds.SERVICE_ID_FULL_STORE_FORWARD_GROUP_CHAT.getId())) {
-            newCapability |= UceServiceIds.SERVICE_ID_FULL_STORE_FORWARD_GROUP_CHAT;
-            ImsLog.d("full store forward group chat");
-        }
-        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER_THUMBNAIL.getId())) {
-            newCapability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_THUMBNAIL;
-        }
-        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER_HTTP.getId())) {
-            newCapability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_HTTP;
-            ImsLog.d("file transfer HTTP");
-        }
-        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER.getId())) {
-            String fileTransfer = pidfXml.substring(pidfXml.indexOf(
-                    UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER.getId()));
-            String serviceId = fileTransfer.substring(0, fileTransfer.indexOf("</op:service-id>"));
-            if (serviceId.equalsIgnoreCase(
-                    UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER.getId())) {
-                String version = fileTransfer.substring(fileTransfer.indexOf("<op:version>"));
-                String versionValue = version.substring("<op:version>".length(),
-                        version.indexOf("</op:version>"));
+        newCapability |= getCapabilitiesAssociatedWithMessage(pidfXml);
+        newCapability |= getCapabilitiesAssociatedWithFT(pidfXml);
+        newCapability |= getCapabilitiesAssociatedWithChatbot(pidfXml);
+        newCapability |= getCapabilitiesAssociatedWithCallComposer(pidfXml);
 
-                if (versionValue.equals(
-                        UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER.getVersion())) {
-                    newCapability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER;
-                    ImsLog.d("file transfer");
-                }
-                String FileTransferStoreForwardVersion =
-                        UceServiceIds.ServiceIds.SERVICE_ID_FT_STORE_FORWARD.getVersion();
-                if (versionValue.equals(FileTransferStoreForwardVersion)) {
-                    newCapability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_STORE_FORWARD;
-                    ImsLog.d("file transfer store forward");
-                }
-            }
-        }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_GEOLOCATION_PUSH.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_GEOLOCATION_PUSH;
             ImsLog.d("geolocation push");
@@ -303,45 +267,12 @@ public class UcePublishRequestController implements IUceJNIListener {
             newCapability |= UceServiceIds.SERVICE_ID_SHARED_SKETCH;
             ImsLog.d("shared sketch");
         }
-        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_CALL_COMPOSER_V1.getId())) {
-            String callcomposer = pidfXml.substring(pidfXml.indexOf(
-                    UceServiceIds.ServiceIds.SERVICE_ID_CALL_COMPOSER_V1.getId()));
-
-            String version = callcomposer.substring(callcomposer.indexOf("<op:version>"));
-            String versionValue = version.substring("<op:version>".length(),
-                    version.indexOf("</op:version>"));
-
-            if (versionValue.equals(
-                    UceServiceIds.ServiceIds.SERVICE_ID_CALL_COMPOSER_V1.getVersion())) {
-                newCapability |= UceServiceIds.SERVICE_ID_CALL_COMPOSER_V1;
-                ImsLog.d("call composer V1");
-            }
-            if (versionValue.equals(
-                    UceServiceIds.ServiceIds.SERVICE_ID_CALL_COMPOSER_V2.getVersion())) {
-                newCapability |= UceServiceIds.SERVICE_ID_CALL_COMPOSER_V2;
-                ImsLog.d("call composer V2");
-            }
-        }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_POST_CALL.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_POST_CALL;
             ImsLog.d("post call");
         }
         if (pidfXml.contains(
-                UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_COMMUNICATION_SESSION.getId())) {
-            newCapability |= UceServiceIds.SERVICE_ID_CHATBOT_COMMUNICATION_SESSION;
-            ImsLog.d("chatbot communication session");
-        }
-        if (pidfXml.contains(
-                UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_STADNALONE_MESSAGING.getId())) {
-            newCapability |= UceServiceIds.SERVICE_ID_CHATBOT_STADNALONE_MESSAGING;
-            ImsLog.d("chatbot standalone message");
-        }
-        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_EXTEND_MESSAGE.getId())) {
-            newCapability |= UceServiceIds.SERVICE_ID_CHATBOT_EXTEND_MESSAGE;
-            ImsLog.d("chatbot extend message");
-        }
-        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_GEOLOCATION_PUSH_VIA_SMS.getId()))
-        {
+                UceServiceIds.ServiceIds.SERVICE_ID_GEOLOCATION_PUSH_VIA_SMS.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_GEOLOCATION_PUSH_VIA_SMS;
             ImsLog.d("geolocation push via SMS");
         }
@@ -384,6 +315,109 @@ public class UcePublishRequestController implements IUceJNIListener {
     @VisibleForTesting
     public Handler getHandler() {
         return mUcePublishControllerHandler;
+    }
+
+    private long getCapabilitiesAssociatedWithMessage(String pidfXml) {
+        long newCapability = UceServiceIds.SERVICE_ID_NONE;
+
+        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_STANDALONE_MESSAGING.getId())) {
+            newCapability |= UceServiceIds.SERVICE_ID_STANDALONE_MESSAGING;
+            ImsLog.d("standalone message");
+        }
+        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_CHAT_SESSION.getId())) {
+            newCapability |= UceServiceIds.SERVICE_ID_CHAT_SESSION;
+            ImsLog.d("chat session");
+        }
+        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_IM_SESSION.getId())) {
+            newCapability |= UceServiceIds.SERVICE_ID_IM_SESSION;
+            ImsLog.d("im session");
+        }
+        if (pidfXml.contains(
+                UceServiceIds.ServiceIds.SERVICE_ID_FULL_STORE_FORWARD_GROUP_CHAT.getId())) {
+            newCapability |= UceServiceIds.SERVICE_ID_FULL_STORE_FORWARD_GROUP_CHAT;
+            ImsLog.d("full store forward group chat");
+        }
+        return newCapability;
+    }
+
+    private long getCapabilitiesAssociatedWithFT(String pidfXml) {
+        long newCapability = UceServiceIds.SERVICE_ID_NONE;
+        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER_THUMBNAIL.getId())) {
+            newCapability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_THUMBNAIL;
+        }
+        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER_HTTP.getId())) {
+            newCapability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_HTTP;
+            ImsLog.d("file transfer HTTP");
+        }
+        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER.getId())) {
+            String fileTransfer = pidfXml.substring(pidfXml.indexOf(
+                    UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER.getId()));
+            String serviceId = fileTransfer.substring(0, fileTransfer.indexOf("</op:service-id>"));
+            if (serviceId.equalsIgnoreCase(
+                    UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER.getId())) {
+                String version = fileTransfer.substring(fileTransfer.indexOf("<op:version>"));
+                String versionValue = version.substring("<op:version>".length(),
+                        version.indexOf("</op:version>"));
+
+                if (versionValue.equals(
+                        UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER.getVersion())) {
+                    newCapability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER;
+                    ImsLog.d("file transfer");
+                }
+                String FileTransferStoreForwardVersion =
+                        UceServiceIds.ServiceIds.SERVICE_ID_FT_STORE_FORWARD.getVersion();
+                if (versionValue.equals(FileTransferStoreForwardVersion)) {
+                    newCapability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_STORE_FORWARD;
+                    ImsLog.d("file transfer store forward");
+                }
+            }
+        }
+        return newCapability;
+    }
+
+    private long getCapabilitiesAssociatedWithChatbot(String pidfXml) {
+        long newCapability = UceServiceIds.SERVICE_ID_NONE;
+
+        if (pidfXml.contains(
+                UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_COMMUNICATION_SESSION.getId())) {
+            newCapability |= UceServiceIds.SERVICE_ID_CHATBOT_COMMUNICATION_SESSION;
+            ImsLog.d("chatbot communication session");
+        }
+        if (pidfXml.contains(
+                UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_STADNALONE_MESSAGING.getId())) {
+            newCapability |= UceServiceIds.SERVICE_ID_CHATBOT_STADNALONE_MESSAGING;
+            ImsLog.d("chatbot standalone message");
+        }
+        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_EXTEND_MESSAGE.getId())) {
+            newCapability |= UceServiceIds.SERVICE_ID_CHATBOT_EXTEND_MESSAGE;
+            ImsLog.d("chatbot extend message");
+        }
+        return newCapability;
+    }
+
+    private long getCapabilitiesAssociatedWithCallComposer(String pidfXml) {
+        long newCapability = UceServiceIds.SERVICE_ID_NONE;
+
+        if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_CALL_COMPOSER_V1.getId())) {
+            String callcomposer = pidfXml.substring(pidfXml.indexOf(
+                    UceServiceIds.ServiceIds.SERVICE_ID_CALL_COMPOSER_V1.getId()));
+
+            String version = callcomposer.substring(callcomposer.indexOf("<op:version>"));
+            String versionValue = version.substring("<op:version>".length(),
+                    version.indexOf("</op:version>"));
+
+            if (versionValue.equals(
+                    UceServiceIds.ServiceIds.SERVICE_ID_CALL_COMPOSER_V1.getVersion())) {
+                newCapability |= UceServiceIds.SERVICE_ID_CALL_COMPOSER_V1;
+                ImsLog.d("call composer V1");
+            }
+            if (versionValue.equals(
+                    UceServiceIds.ServiceIds.SERVICE_ID_CALL_COMPOSER_V2.getVersion())) {
+                newCapability |= UceServiceIds.SERVICE_ID_CALL_COMPOSER_V2;
+                ImsLog.d("call composer V2");
+            }
+        }
+        return newCapability;
     }
 
     private void sendCommandError(PublishResponse cb, int code) {
