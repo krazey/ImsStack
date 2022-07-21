@@ -157,7 +157,6 @@ public:
     CallStateName OnReceivingNetworkToneFailed() override;
     CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
 
-protected:
     enum TimerType
     {
         // TODO: differentiate 100 and 183?
@@ -177,6 +176,7 @@ protected:
         TIMER_E911_WIFI_START,
     };
 
+protected:
     void HandleTerminate(IN const CallReasonInfo& objReason);
     void NotifyHoldResumeState();
 

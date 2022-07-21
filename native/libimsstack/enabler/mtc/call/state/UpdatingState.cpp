@@ -222,9 +222,9 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnTimerExpired(IN IMS_SINT32 nType)
     switch (nType)
     {
         case TIMER_CONVERT_USER_RESPONSE:
+            return RejectUpdate(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE));
         case TIMER_CONVERT_REMOTE_RESPONSE:
             return CancelUpdate(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE));
-            break;
         default:
             break;
     }
