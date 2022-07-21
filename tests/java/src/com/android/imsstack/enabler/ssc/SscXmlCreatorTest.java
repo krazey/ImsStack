@@ -115,6 +115,7 @@ public class SscXmlCreatorTest {
             Element element = (Element) ruleList.item(i);
             if (ruleId.equals(element.getAttribute(SscXmlFormat.ID))) {
                 createdRule = element;
+                break;
             }
         }
 
@@ -162,6 +163,7 @@ public class SscXmlCreatorTest {
             Element element = (Element) ruleList.item(i);
             if (ruleId.equals(element.getAttribute(SscXmlFormat.ID))) {
                 createdRule = element;
+                break;
             }
         }
 
@@ -211,6 +213,7 @@ public class SscXmlCreatorTest {
             Element element = (Element) ruleList.item(i);
             if (ruleId.equals(element.getAttribute(SscXmlFormat.ID))) {
                 createdRule = element;
+                break;
             }
         }
 
@@ -256,6 +259,7 @@ public class SscXmlCreatorTest {
             Element element = (Element) ruleList.item(i);
             if (ruleId.equals(element.getAttribute(SscXmlFormat.ID))) {
                 createdRule = element;
+                break;
             }
         }
 
@@ -302,6 +306,7 @@ public class SscXmlCreatorTest {
             Element element = (Element) ruleList.item(i);
             if (ruleId.equals(element.getAttribute(SscXmlFormat.ID))) {
                 createdRule = element;
+                break;
             }
         }
 
@@ -348,6 +353,7 @@ public class SscXmlCreatorTest {
             Element element = (Element) ruleList.item(i);
             if (ruleId.equals(element.getAttribute(SscXmlFormat.ID))) {
                 createdRule = element;
+                break;
             }
         }
 
@@ -403,6 +409,7 @@ public class SscXmlCreatorTest {
             Element element = (Element) ruleList.item(i);
             if (ruleId.equals(element.getAttribute(SscXmlFormat.ID))) {
                 createdRule = element;
+                break;
             }
         }
 
@@ -414,6 +421,15 @@ public class SscXmlCreatorTest {
         assertEquals(0, conditionElement.getChildNodes().getLength());
         assertEquals(0, createdRule.getElementsByTagName(
                 SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED)).getLength());
+
+        NodeList actionNodeList = createdRule.getElementsByTagName(
+                SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.ACTIONS));
+        assertEquals(1, actionNodeList.getLength());
+        Element actionElement = (Element) actionNodeList.item(0);
+        NodeList allowNodeList = actionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.ALLOW));
+        assertEquals(1, allowNodeList.getLength());
+        assertEquals("false", allowNodeList.item(0).getTextContent());
     }
 
     @Test
@@ -445,6 +461,7 @@ public class SscXmlCreatorTest {
             Element element = (Element) ruleList.item(i);
             if (ruleId.equals(element.getAttribute(SscXmlFormat.ID))) {
                 createdRule = element;
+                break;
             }
         }
 
@@ -454,6 +471,15 @@ public class SscXmlCreatorTest {
         assertEquals(1, createdRule.getElementsByTagName(ruleConditionTag).getLength());
         assertEquals(0, createdRule.getElementsByTagName(
                 SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED)).getLength());
+
+        NodeList actionNodeList = createdRule.getElementsByTagName(
+                SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.ACTIONS));
+        assertEquals(1, actionNodeList.getLength());
+        Element actionElement = (Element) actionNodeList.item(0);
+        NodeList allowNodeList = actionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.ALLOW));
+        assertEquals(1, allowNodeList.getLength());
+        assertEquals("false", allowNodeList.item(0).getTextContent());
     }
 
     @Test
@@ -485,6 +511,7 @@ public class SscXmlCreatorTest {
             Element element = (Element) ruleList.item(i);
             if (ruleId.equals(element.getAttribute(SscXmlFormat.ID))) {
                 createdRule = element;
+                break;
             }
         }
 
@@ -494,6 +521,15 @@ public class SscXmlCreatorTest {
         assertEquals(1, createdRule.getElementsByTagName(ruleConditionTag).getLength());
         assertEquals(1, createdRule.getElementsByTagName(
                 SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED)).getLength());
+
+        NodeList actionNodeList = createdRule.getElementsByTagName(
+                SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.ACTIONS));
+        assertEquals(1, actionNodeList.getLength());
+        Element actionElement = (Element) actionNodeList.item(0);
+        NodeList allowNodeList = actionElement.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.ALLOW));
+        assertEquals(1, allowNodeList.getLength());
+        assertEquals("false", allowNodeList.item(0).getTextContent());
     }
 
     private void updateTagsAndRules(Document doc) {

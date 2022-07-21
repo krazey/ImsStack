@@ -438,8 +438,8 @@ public class SscXmlCreator {
 
             // Set target
             CfServiceUpdateData cfData = (CfServiceUpdateData) data;
-            if (data.getState() == SscConstant.ACTION_REGISTRATION ||
-                    data.getState() == SscConstant.ACTION_ERASURE) {
+            if (data.getState() == SscConstant.ACTION_REGISTRATION
+                    || data.getState() == SscConstant.ACTION_ERASURE) {
                 String targetTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.TARGET);
                 Element targetElement = getElementByTagName(cfRuleElement, targetTag);
                 if (targetElement == null) {
@@ -611,6 +611,15 @@ public class SscXmlCreator {
             if (cbRuleElement == null) {
                 return null;
             }
+
+            String actionTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.ACTIONS);
+            Element actionElement = doc.createElement(actionTag);
+            cbRuleElement.appendChild(actionElement);
+
+            String allowTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.ALLOW);
+            Element allowElement = doc.createElement(allowTag);
+            allowElement.setTextContent("false");
+            actionElement.appendChild(allowElement);
 
             return cbServiceElement;
         }
