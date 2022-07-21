@@ -49,6 +49,10 @@ public:
     MtcSession(IN const MtcSession&) = delete;
     MtcSession& operator=(IN const MtcSession&) = delete;
 
+    // TODO: temp for Mock. Will be removed once IMtcSession is added.
+    void Init();
+    void Deinit();
+
     IMS_RESULT Start();
     IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason);
 

@@ -47,6 +47,12 @@ PUBLIC VIRTUAL UpdatingState::~UpdatingState()
 
 PUBLIC VIRTUAL void UpdatingState::OnExit()
 {
+    if (m_objContext.GetUpdatingInfo().HasPendingUpdate())
+    {
+        // TODO: remove UpdateType::NONE and add UpdateType::REFRESH?
+        m_objContext.GetSession()->GetMessageSender().Update(
+                UpdateType::NONE, IMS_FALSE, SipMethod::INVALID, IMS_TRUE);
+    }
     m_objContext.DeleteUpdatingInfo();
 }
 
@@ -199,6 +205,14 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piS
         RecoverModificationFailure();
         return CallStateName::ESTABLISHED;
     }
+}
+
+PUBLIC VIRTUAL CallStateName UpdatingState::Refresh_NotifyTimerExpired(
+        OUT IMS_BOOL& bDoImplicitRefresh)
+{
+    bDoImplicitRefresh = IMS_FALSE;
+    m_objContext.GetUpdatingInfo().SetPendingUpdate(IMS_TRUE);
+    return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName UpdatingState::OnTimerExpired(IN IMS_SINT32 nType)

@@ -24,6 +24,7 @@
 #include "ISipClientConnectionListener.h"
 #include "ISipErrorListener.h"
 #include "MtcDef.h"
+#include "base/IRefreshListener.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
@@ -71,6 +72,7 @@ class MtcCall final :
         public IMtcCall,
         public IMtcCallContext,
         public ISessionListener,
+        public IRefreshListener,
         public IMtcTimerListener,
         public IMtcBlockCheckListener,
         public IMtcPreconditionListener,
@@ -222,6 +224,10 @@ public:
     void SessionRprReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) override;
     void SessionTransactionReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) override;
+
+    void Refresh_NotifyCompleted(IN ISipClientConnection* piScc) override;
+    void Refresh_NotifyTerminated() override;
+    void Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh);
 
     void OnTimerExpired(IN IMS_SINT32 nType) override;
 

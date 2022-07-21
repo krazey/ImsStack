@@ -116,6 +116,11 @@ public:
     virtual CallStateName SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) = 0;
     virtual CallStateName SessionTransactionReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) = 0;
+
+    virtual CallStateName Refresh_NotifyCompleted(IN ISipClientConnection* piScc) = 0;
+    virtual CallStateName Refresh_NotifyTerminated() = 0;
+    virtual CallStateName Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) = 0;
+
     virtual CallStateName OnTimerExpired(IN IMS_SINT32 nType) = 0;
 
     virtual CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult) = 0;

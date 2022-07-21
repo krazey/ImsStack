@@ -32,6 +32,7 @@
 #include "helper/ICallStateProxy.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
+#include "sipcore/SipMethod.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -72,7 +73,9 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
     {
-        delete m_lstSessions.GetAt(nIndex);
+        MtcSession* pSession = m_lstSessions.GetAt(nIndex);
+        pSession->Deinit();
+        delete pSession;
     }
     m_lstSessions.Clear();
 
@@ -507,8 +510,10 @@ PUBLIC VIRTUAL MtcSession* MtcCall::CreateSession(IN ISession* piSession)
 
     piSession->SetListener(this);
     piSession->SetMessageMediator(&m_objMessageMediator);
+    piSession->SetRefreshListener(this);
 
     MtcSession* pSession = new MtcSession(*this, *piSession, m_objCallInfo.eInitialCallType);
+    pSession->Init();
     m_lstSessions.Append(pSession);
 
     IMS_TRACE_D("CreateSession : Session count[%d]", m_lstSessions.GetSize(), 0, 0);
@@ -579,6 +584,7 @@ PUBLIC VIRTUAL void MtcCall::RemoveSession(IN const ISession* piSession)
         if (&pSession->GetISession() == piSession)
         {
             m_lstSessions.RemoveAt(nIndex);
+            pSession->Deinit();
             delete pSession;
 
             IMS_TRACE_D("RemoveSession : Session count[%d]", m_lstSessions.GetSize(), 0, 0);
@@ -602,6 +608,7 @@ PUBLIC VIRTUAL void MtcCall::RemoveInactiveSessions(IN const ISession* piActiveS
         MtcSession* pSession = m_lstSessions.GetAt(nIndex);
         if (pSession != pActiveSession)
         {
+            pSession->Deinit();
             delete pSession;
         }
     }
@@ -1032,6 +1039,36 @@ PUBLIC VIRTUAL void MtcCall::SessionTransactionReceived(
                     return pState->SessionTransactionReceived(piSession, piSipServerConnection);
                 });
     }
+}
+
+PUBLIC VIRTUAL void MtcCall::Refresh_NotifyCompleted(IN ISipClientConnection* piScc)
+{
+    IMS_TRACE_D("Refresh_NotifyCompleted key[%d]", m_nKey, 0, 0);
+    m_objStateMachine.RunStateOperation(
+            [&](IMtcCallState* pState)
+            {
+                return pState->Refresh_NotifyCompleted(piScc);
+            });
+}
+
+PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTerminated()
+{
+    IMS_TRACE_D("Refresh_NotifyTerminated : key[%d]", m_nKey, 0, 0);
+    m_objStateMachine.RunStateOperation(
+            [&](IMtcCallState* pState)
+            {
+                return pState->Refresh_NotifyTerminated();
+            });
+}
+
+PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh)
+{
+    IMS_TRACE_D("Refresh_NotifyTimerExpired : key[%d]", m_nKey, 0, 0);
+    m_objStateMachine.RunStateOperation(
+            [&](IMtcCallState* pState)
+            {
+                return pState->Refresh_NotifyTimerExpired(bDoImplicitRefresh);
+            });
 }
 
 PUBLIC VIRTUAL void MtcCall::OnTimerExpired(IN IMS_SINT32 nType)

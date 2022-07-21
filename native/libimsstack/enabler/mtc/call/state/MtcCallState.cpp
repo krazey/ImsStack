@@ -357,6 +357,24 @@ PUBLIC VIRTUAL CallStateName MtcCallState::SessionTransactionReceived(
     return GetStateName();
 }
 
+PUBLIC VIRTUAL CallStateName MtcCallState::Refresh_NotifyCompleted(
+        IN ISipClientConnection* /* piScc */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::Refresh_NotifyTerminated()
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::Refresh_NotifyTimerExpired(
+        OUT IMS_BOOL& bDoImplicitRefresh)
+{
+    bDoImplicitRefresh = IMS_TRUE;
+    return GetStateName();
+}
+
 PUBLIC VIRTUAL CallStateName MtcCallState::OnTimerExpired(IN IMS_SINT32 /* nType */)
 {
     return GetStateName();

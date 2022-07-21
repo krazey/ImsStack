@@ -39,6 +39,11 @@ public:
     inline void SetTargetCallType(IN CallType eCallType) { m_eTargetCallType = eCallType; }
     inline void SetModifier() { m_bModifier = IMS_TRUE; }
     inline void SetAlerted() { m_bAlerted = IMS_TRUE; }
+    inline void SetPendingUpdate(IN IMS_BOOL bHasPendingUpdate)
+    {
+        // TODO: check if setting to false is required.
+        m_bHasPendingUpdate = bHasPendingUpdate;
+    }
 
     IMS_BOOL IsHeld();
     IMS_BOOL IsHeldBy();
@@ -48,6 +53,7 @@ public:
     IMS_BOOL IsRequestedHoldResume();
     IMS_BOOL IsRequestedModifying();
     IMS_BOOL IsModified();
+    inline IMS_BOOL HasPendingUpdate() { return m_bHasPendingUpdate; }
 
 private:
     CallType m_eTargetCallType;
@@ -57,6 +63,7 @@ private:
     MediaInfo m_objModifiedInfo;
     IMS_BOOL m_bModifier;
     IMS_BOOL m_bAlerted;
+    IMS_BOOL m_bHasPendingUpdate;
 };
 
 #endif

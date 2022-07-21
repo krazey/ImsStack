@@ -16,16 +16,83 @@
 
 #include <gtest/gtest.h>
 #include "call/state/UpdatingState.h"
+#include "call/MockIMtcCallContext.h"
+#include "call/UpdatingInfo.h"
+#include "call/MockMtcSession.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "core/MockIMessage.h"
+#include "core/MockISession.h"
+#include "sipcore/SipMethod.h"
 
-namespace android
-{
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 class UpdatingStateTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MockIMtcCallContext objContext;
+    MockIMtcConfigurationManager* pConfigurationManager;
+    MtcConfigurationProxy* pConfigurationProxy;
+    UpdatingInfo* pUpdatingInfo;
+    UpdatingState* pUpdatingState;
+    CallInfo objCallInfo;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override
+    {
+        pConfigurationManager = new MockIMtcConfigurationManager();
+        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        ON_CALL(objContext, GetConfigurationProxy)
+                .WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        ON_CALL(objContext, GetCallInfo)
+                .WillByDefault(ReturnRef(objCallInfo));
+
+        pUpdatingInfo = new UpdatingInfo();
+        ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
+
+        pUpdatingState = new UpdatingState(objContext);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pUpdatingState;
+        delete pUpdatingInfo;
+    }
 };
 
-}  // namespace android
+TEST_F(UpdatingStateTest, OnExitDoesntSendUpdateIfUpdatingInfoDoesntHavePendingUpdate)
+{
+    MockIMessage objMessage;
+    MockISession objSession;
+    ON_CALL(objSession, GetNextRequest())
+                .WillByDefault(Return(&objMessage));
+    MockMtcSession objMtcSession(objContext, objSession, CallType::VOIP);
+    ON_CALL(objContext, GetSession())
+                .WillByDefault(Return(&objMtcSession));
+
+    EXPECT_CALL(objSession, UpdateEx(_, _))
+            .Times(0);
+
+    pUpdatingInfo->SetPendingUpdate(IMS_FALSE);
+    pUpdatingState->OnExit();
+}
+
+TEST_F(UpdatingStateTest, OnExitSendsUpdateIfUpdatingInfoHasPendingUpdate)
+{
+    MockIMessage objMessage;
+    MockISession objSession;
+    ON_CALL(objSession, GetNextRequest())
+                .WillByDefault(Return(&objMessage));
+    MockMtcSession objMtcSession(objContext, objSession, CallType::VOIP);
+    ON_CALL(objContext, GetSession())
+                .WillByDefault(Return(&objMtcSession));
+
+    EXPECT_CALL(objSession, UpdateEx(SipMethod::INVALID, IMS_TRUE))
+            .Times(1);
+
+    pUpdatingInfo->SetPendingUpdate(IMS_TRUE);
+    pUpdatingState->OnExit();
+}

@@ -51,6 +51,15 @@ MtcSession::MtcSession(
         m_strSessionIdHeader(AString::ConstNull())
 {
     IMS_TRACE_I("+MtcSession", 0, 0, 0);
+}
+
+PUBLIC VIRTUAL MtcSession::~MtcSession()
+{
+    IMS_TRACE_I("~MtcSession", 0, 0, 0);
+}
+
+PUBLIC VIRTUAL void MtcSession::Init()
+{
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
     {
         GetSipInterfaceFactory().GetISessionHolder()->AddISession(&m_objSession);
@@ -70,11 +79,11 @@ MtcSession::MtcSession(
     }
 }
 
-PUBLIC VIRTUAL MtcSession::~MtcSession()
+PUBLIC VIRTUAL void MtcSession::Deinit()
 {
-    IMS_TRACE_I("~MtcSession", 0, 0, 0);
     m_objContext.GetPreconditionManager().DestroyQos(&m_objSession);
     m_objSession.SetMessageMediator(IMS_NULL);
+    m_objSession.SetRefreshListener(IMS_NULL);
     GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(&m_objSession);
 }
 

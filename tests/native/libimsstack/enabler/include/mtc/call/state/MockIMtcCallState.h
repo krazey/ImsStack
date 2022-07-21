@@ -122,6 +122,11 @@ public:
             (override));
     MOCK_METHOD(CallStateName, SessionTransactionReceived,
             (IN ISession* piSession, IN ISipServerConnection* piSipServerConnection), (override));
+    MOCK_METHOD(
+            CallStateName, Refresh_NotifyCompleted, (IN ISipClientConnection * piScc), (override));
+    MOCK_METHOD(CallStateName, Refresh_NotifyTerminated, (), (override));
+    MOCK_METHOD(CallStateName, Refresh_NotifyTimerExpired, (OUT IMS_BOOL & bDoImplicitRefresh),
+            (override));
     MOCK_METHOD(CallStateName, OnTimerExpired, (IN IMS_SINT32 nType), (override));
     MOCK_METHOD(CallStateName, OnBlockChecked, (IN IMtcBlockChecker::Result objResult), (override));
     MOCK_METHOD(CallStateName, QosReserved, (IN ISession* piSession, IN IMS_UINT32 eMediaType),
