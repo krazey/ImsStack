@@ -153,7 +153,7 @@ void JniMtsService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
 PRIVATE
 void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
 {
-    IMS_UINT32 nSmsFormat = objParcel.readInt32();
+    IMS_UINT32 nSmsFormat_ = objParcel.readInt32();
     android::String8 strEncodedData(objParcel.readString16());
     android::String8 strAddress_(objParcel.readString16());
     IMS_SINT32 nSeqId = objParcel.readInt32();
@@ -161,6 +161,20 @@ void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
     ByteArray objData(reinterpret_cast<const IMS_BYTE*>(strData.GetStr()),
             static_cast<IMS_SINT32>(strData.GetLength()));
     AString strAddress = strAddress_.string();
+
+    SmsFormatType eSmsFormat;
+    if (nSmsFormat_ == (IMS_UINT32)SmsFormatType::SMSFORMAT_3GPP)
+    {
+        eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    }
+    else if (nSmsFormat_ == (IMS_UINT32)SmsFormatType::SMSFORMAT_3GPP2)
+    {
+        eSmsFormat = SmsFormatType::SMSFORMAT_3GPP2;
+    }
+    else
+    {
+        eSmsFormat = SmsFormatType::SMSFORMAT_INVALID;
+    }
 
     if (m_piMtsService == IMS_NULL)
     {
@@ -170,12 +184,12 @@ void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
         {
             IMS_TRACE_D("MtsEnabler is not bound.", 0, 0, 0);
             m_pJniMtsServiceThread->ReportMoStatus(
-                    MO_IMS_TEMP_FAILURE, nSmsFormat, 0, nSeqId, m_nSlotId);
+                    MO_IMS_TEMP_FAILURE, eSmsFormat, 0, nSeqId, m_nSlotId);
             return;
         }
     }
 
-    m_piMtsService->SendMoSms(nSmsFormat, objData, strAddress, nSeqId);
+    m_piMtsService->SendMoSms(eSmsFormat, objData, strAddress, nSeqId);
 }
 
 PRIVATE

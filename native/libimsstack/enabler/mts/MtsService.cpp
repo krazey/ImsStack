@@ -25,6 +25,7 @@
 #include "IImsAosInfo.h"
 #include "IIpcan.h"
 #include "ImsAos.h"
+#include "ImsAosParameter.h"
 #include "ImsServiceConfig.h"
 #include "IuMts.h"
 #include "JniConnectorFactory.h"
@@ -36,18 +37,22 @@
 #include "ServiceTrace.h"
 #include "ServiceMessage.h"
 #include "utility/MtsDynamicLoader.h"
+#include "utility/MtsUtils.h"
 
 __IMS_TRACE_TAG_COM_SMS__;
 
 MtsService::MtsService(IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader) :
         ImsService(AString::ConstNull()),
         m_piImsAos(IMS_NULL),
+        m_piImsEmergencyAos(IMS_NULL),
         m_strAppId(ImsServiceConfig::GetAppName(ImsAppId::MTS)),
         m_nSlotId(nSlotId),
         m_piCoreService(IMS_NULL),
+        m_piEmergencyCoreService(IMS_NULL),
         m_piMtsServiceListener(IMS_NULL),
         m_pJniMtsService(IMS_NULL),
-        m_pMtsDynamicLoader(pMtsDynamicLoader)
+        m_pMtsDynamicLoader(pMtsDynamicLoader),
+        m_pE911SmsInfo(IMS_NULL)
 {
     IMS_TRACE_I("+MtsService [slot_%d]", m_nSlotId, 0, 0);
     Init();
@@ -69,9 +74,9 @@ MtsService::~MtsService()
 }
 
 PUBLIC
-ICoreService* MtsService::GetICoreService() const
+ICoreService* MtsService::GetICoreService(IN IMS_BOOL bIsSmsEServiceType) const
 {
-    return m_piCoreService;
+    return bIsSmsEServiceType ? m_piEmergencyCoreService : m_piCoreService;
 }
 
 PUBLIC VIRTUAL
@@ -95,12 +100,33 @@ void MtsService::SetJniMtsService(IN JniMtsService* pJniMtsService)
     }
 }
 
-PUBLIC VIRTUAL
-void MtsService::SendMoSms(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData,
+PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
         IN const AString& strAddress, IN IMS_SINT32 nSeqId)
 {
     IMS_TRACE_I("SendMoSms", 0, 0, 0);
-    m_piMtsServiceListener->NotifyMoSms(nSmsFormat, objData, strAddress, nSeqId);
+
+    if (MtsUtils::GetInstance()->IsEccNumber(strAddress, m_nSlotId) == IMS_TRUE)
+    {
+        // TODO: Request SMS RAT SELECTION
+        m_piImsEmergencyAos->Control(ImsAosControl::REGISTER_START);
+
+        if (m_pE911SmsInfo != IMS_NULL)
+        {
+            delete m_pE911SmsInfo;
+            m_pE911SmsInfo = IMS_NULL;
+        }
+
+        m_pE911SmsInfo = new EmergencySmsSendRequestInfo();
+
+        m_pE911SmsInfo->eSmsFormat = eSmsFormat;
+        m_pE911SmsInfo->strAddress = strAddress.GetStr();
+        m_pE911SmsInfo->objSmsData = objData;
+        m_pE911SmsInfo->nSeqId = nSeqId;
+    }
+    else
+    {
+        m_piMtsServiceListener->NotifyMoSms(eSmsFormat, objData, strAddress, nSeqId, IMS_FALSE);
+    }
 }
 
 PUBLIC VIRTUAL
@@ -112,7 +138,7 @@ void MtsService::SendMtResult(IN IMS_BOOL bMtResult)
 }
 
 PUBLIC
-void MtsService::ReportMoStatus(IN IMS_UINT32 nReason, IN IMS_UINT32 nSmsformat,
+void MtsService::ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsFormat,
         IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId)
 {
     IMS_TRACE_I("ReportMoStatus", 0, 0, 0);
@@ -120,18 +146,18 @@ void MtsService::ReportMoStatus(IN IMS_UINT32 nReason, IN IMS_UINT32 nSmsformat,
     if (Attach())
     {
         m_pJniMtsService->GetThread()->ReportMoStatus(
-                nReason, nSmsformat, nRetryAfter, nSeqId, m_nSlotId);
+                nReason, eSmsFormat, nRetryAfter, nSeqId, m_nSlotId);
     }
 }
 
 PUBLIC
-void MtsService::ReportMtSms(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData)
+void MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData)
 {
     IMS_TRACE_I("ReportMtSms", 0, 0, 0);
 
     if (Attach())
     {
-        m_pJniMtsService->GetThread()->ReportMtSms(nSmsFormat, objData, m_nSlotId);
+        m_pJniMtsService->GetThread()->ReportMtSms(eSmsFormat, objData, m_nSlotId);
     }
 }
 
@@ -141,7 +167,7 @@ void MtsService::CoreService_PageMessageReceived(
 {
     IMS_TRACE_I("CoreService_PageMessageReceived() - SMS message has been received", 0, 0, 0);
 
-    if (piService != m_piCoreService)
+    if (!((piService == m_piCoreService) || (piService == m_piEmergencyCoreService)))
     {
         IMS_TRACE_E(0, "CoreService_PageMessageReceived() - not my ICoreService", 0, 0, 0);
         return;
@@ -230,6 +256,13 @@ void MtsService::ImsAos_Connected(IN IMS_UINT32 /*nFeatures*/, IN IMS_UINT32 /*n
     else
     {
         IMS_TRACE_E(0, "pMtsServiceState is null", 0, 0, 0);
+    }
+
+    if (m_pE911SmsInfo != IMS_NULL)
+    {
+        m_piMtsServiceListener->NotifyMoSms(m_pE911SmsInfo->eSmsFormat, m_pE911SmsInfo->objSmsData,
+                m_pE911SmsInfo->strAddress, m_pE911SmsInfo->nSeqId, IMS_TRUE);
+        delete m_pE911SmsInfo;
     }
 }
 
@@ -400,12 +433,6 @@ IMS_BOOL MtsService::IsEpdgConnected()
     return bIsEpdg;
 }
 
-PROTECTED
-const AString& MtsService::GetAppId() const
-{
-    return m_strAppId;
-}
-
 PRIVATE
 void MtsService::Init()
 {
@@ -464,55 +491,108 @@ IMS_BOOL MtsService::Attach()
 PRIVATE
 void MtsService::AttachAosInterface()
 {
-    // Get the interface of AoS and register as the listener.
+    // Get the normal-type interface of AoS and register as the listener.
     m_piImsAos = ImsAos::GetImsAos(
             m_strAppId, ImsServiceConfig::GetServiceName(ImsServiceId::MTS), m_nSlotId);
 
-    if (m_piImsAos == IMS_NULL)
+    if (m_piImsAos != IMS_NULL)
     {
-        IMS_TRACE_E(0, "AttachAosInterface() - m_piImsAos is null", 0, 0, 0);
-        return;
+        m_piImsAos->SetListener(this);
+        m_piImsAos->SetMonitor(this);
     }
 
-    m_piImsAos->SetListener(this);
-    m_piImsAos->SetMonitor(this);
+    // Get the emergency-type interface of AoS and register as the listener.
+    m_piImsEmergencyAos = ImsAos::GetImsAos(
+            m_strAppId, ImsServiceConfig::GetServiceName(ImsServiceId::MTS_EMERGENCY), m_nSlotId);
+
+    if (m_piImsEmergencyAos != IMS_NULL)
+    {
+        m_piImsEmergencyAos->SetListener(this);
+        m_piImsEmergencyAos->SetMonitor(this);
+    }
+
+    if (m_piImsEmergencyAos == IMS_NULL || m_piImsAos == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "AttachAosInterface() - m_piImsAos or m_piImsEmergencyAos is null", 0, 0, 0);
+        return;
+    }
 }
 
 PRIVATE
 void MtsService::AttachCoreServiceInterface()
 {
-    // Get an ICoreService and register as the listener.
+    // Get the normal-type ICoreService and register as the listener.
     AString strServiceId("serviceId=");
     strServiceId += ImsServiceConfig::GetServiceName(ImsServiceId::MTS);
 
     m_piCoreService = DYNAMIC_CAST(
             ICoreService*, (Connector::Open(ImsCore::CONNECTION_SCHEME, m_strAppId, strServiceId)));
 
+    if (m_piCoreService != IMS_NULL)
+    {
+        m_piCoreService->SetListener(this);
+
+        //// iFC normal -- starts
+        // It MUST be applied if the feature-tag property is not supported (no Accept-Contact).
+        IServiceFilterCriteria* piSfc = m_piCoreService->GetFilterCriteria();
+
+        if (piSfc != IMS_NULL)
+        {
+            SipMethod objMethod(SipMethod::MESSAGE);
+            TriggerPoint objTp(objMethod);
+
+            // Add iFC for 3GPP2 SMS format (Content-Type: application/vnd.3gpp2.sms)
+            objTp.AddHeader(ISipHeader::CONTENT_TYPE, "application/vnd.3gpp2.sms");
+            piSfc->AddTriggerPoint(objTp);
+
+            // Add iFC for 3GPP SMS format (Content-Type: application/vnd.3gpp.sms)
+            objTp.RemoveAllHeaders();
+            objTp.AddHeader(ISipHeader::CONTENT_TYPE, "application/vnd.3gpp.sms");
+            piSfc->AddTriggerPoint(objTp);
+        }
+        //// iFC -- ends
+    }
+
+    // Get the emergency-type ICoreService and register as the listener.
+    AString strEmergencyServiceId("serviceId=");
+    strEmergencyServiceId += ImsServiceConfig::GetServiceName(ImsServiceId::MTS_EMERGENCY);
+
+    m_piEmergencyCoreService = DYNAMIC_CAST(ICoreService*,
+            (Connector::Open(ImsCore::CONNECTION_SCHEME, m_strAppId, strEmergencyServiceId)));
+
+    if (m_piEmergencyCoreService != IMS_NULL)
+    {
+        m_piEmergencyCoreService->SetListener(this);
+
+        //// iFC emergency -- starts
+        // It MUST be applied if the feature-tag property is not supported (no Accept-Contact).
+        IServiceFilterCriteria* piEmergencySfc = m_piEmergencyCoreService->GetFilterCriteria();
+
+        if (piEmergencySfc != IMS_NULL)
+        {
+            SipMethod objMethod(SipMethod::MESSAGE);
+            TriggerPoint objTp(objMethod);
+
+            // Add iFC for 3GPP2 SMS format (Content-Type: application/vnd.3gpp2.sms)
+            objTp.AddHeader(ISipHeader::CONTENT_TYPE, "application/vnd.3gpp2.sms");
+            piEmergencySfc->AddTriggerPoint(objTp);
+
+            // Add iFC for 3GPP SMS format (Content-Type: application/vnd.3gpp.sms)
+            objTp.RemoveAllHeaders();
+            objTp.AddHeader(ISipHeader::CONTENT_TYPE, "application/vnd.3gpp.sms");
+            piEmergencySfc->AddTriggerPoint(objTp);
+        }
+        //// iFC -- ends
+    }
+
     if (m_piCoreService == IMS_NULL)
     {
         IMS_TRACE_E(0, "AttachCoreServiceInterface() - m_piCoreService is null", 0, 0, 0);
         return;
     }
-
-    m_piCoreService->SetListener(this);
-
-    //// iFC -- starts
-    // It MUST be applied if the feature-tag property is not supported (no Accept-Contact).
-    IServiceFilterCriteria* piSfc = m_piCoreService->GetFilterCriteria();
-
-    if (piSfc != IMS_NULL)
+    else if (m_piEmergencyCoreService == IMS_NULL)
     {
-        SipMethod objMethod(SipMethod::MESSAGE);
-        TriggerPoint objTp(objMethod);
-
-        // Add iFC for 3GPP2 SMS format (Content-Type: application/vnd.3gpp2.sms)
-        objTp.AddHeader(ISipHeader::CONTENT_TYPE, "application/vnd.3gpp2.sms");
-        piSfc->AddTriggerPoint(objTp);
-
-        // Add iFC for 3GPP SMS format (Content-Type: application/vnd.3gpp.sms)
-        objTp.RemoveAllHeaders();
-        objTp.AddHeader(ISipHeader::CONTENT_TYPE, "application/vnd.3gpp.sms");
-        piSfc->AddTriggerPoint(objTp);
+        IMS_TRACE_E(0, "AttachCoreServiceInterface() - m_piEmergencyCoreService is null", 0, 0, 0);
+        return;
     }
-    //// iFC -- ends
 }

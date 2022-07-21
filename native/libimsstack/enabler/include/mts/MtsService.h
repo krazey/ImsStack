@@ -25,6 +25,7 @@
 #include "ImsService.h"
 #include "IuMts.h"
 #include "IuMtsService.h"
+#include "MtsDef.h"
 
 class IImsAos;
 class JniMtsService;
@@ -66,19 +67,19 @@ public:
 
     // IMtsService
     void SetJniMtsService(IN JniMtsService* pJniMtsService) override;
-    void SendMoSms(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData,
-                IN const AString& strAddress, IN IMS_SINT32 nSeqId) override;
+    void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId) override;
     void SendMtResult(IN IMS_BOOL bMtResult) override;
 
-    void ReportMoStatus(IN IMS_UINT32 nReason, IN IMS_UINT32 nSmsformat, IN IMS_UINT8 nRetryAfter,
-            IN IMS_SINT32 nSeqId);
-    void ReportMtSms(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData);
+    void ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsFormat,
+            IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId);
+    void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData);
 
     void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType);
     void IMSAoSApp_NotifySpecificMessage(
             IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam);
     IMS_BOOL IsEpdgConnected();
-    ICoreService* GetICoreService() const;
+    ICoreService* GetICoreService(IN IMS_BOOL bIsSmsEServiceType) const;
     inline MtsDynamicLoader* GetMtsUtils() { return m_pMtsDynamicLoader; }
     void SetListener(IN IMtsServiceListener* piMtsServiceListener);
 
@@ -87,8 +88,6 @@ protected:
     inline IMS_BOOL OnPreprocess(IN IMSMSG& /*objMSG*/) { return IMS_TRUE; }
     inline IMS_BOOL OnMessage(IN IMSMSG& /*objMSG*/) { return IMS_TRUE; }
     inline IMS_BOOL OnPostprocess(IN IMSMSG& /*objMSG*/) { return IMS_TRUE; }
-
-    const AString& GetAppId() const;
 
 private:
     IMS_BOOL Attach();
@@ -99,12 +98,15 @@ private:
 
 private:
     IImsAos* m_piImsAos;
+    IImsAos* m_piImsEmergencyAos;
     AString m_strAppId;
     IMS_UINT32 m_nSlotId;
     ICoreService* m_piCoreService;
+    ICoreService* m_piEmergencyCoreService;
     IMtsServiceListener* m_piMtsServiceListener;
     JniMtsService* m_pJniMtsService;
     MtsDynamicLoader* m_pMtsDynamicLoader;
+    EmergencySmsSendRequestInfo* m_pE911SmsInfo;
 };
 
 #endif

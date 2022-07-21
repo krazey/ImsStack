@@ -15,6 +15,7 @@
  */
 
 #include "Configuration.h"
+#include "ServiceConfig.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServicePhoneInfo.h"
@@ -59,8 +60,11 @@ PUBLIC MtsApp::~MtsApp()
     // Remove MtsUtils
     DestroyMtsUtils();
 
-    // Remove Mts Service
-    RemoveMtsServices();
+    if (m_pMtsService != IMS_NULL)
+    {
+        delete m_pMtsService;
+        m_pMtsService = IMS_NULL;
+    }
 
     if (m_pMtsMessageController != IMS_NULL)
     {
@@ -75,54 +79,24 @@ PUBLIC MtsApp::~MtsApp()
     }
 }
 
-PUBLIC void MtsApp::AddService(IN MtsService* pService)
-{
-    if (pService == IMS_NULL)
-    {
-        return;
-    }
-
-    m_lstMtsServices.Append(pService);
-    AttachService(pService);
-
-    IMS_TRACE_I("AddService : Size[%d]", m_lstMtsServices.GetSize(), 0, 0);
-}
-
-PUBLIC void MtsApp::RemoveMtsServices()
-{
-    IMS_UINT32 nSize = m_lstMtsServices.GetSize();
-
-    for (IMS_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
-    {
-        MtsService* pService = m_lstMtsServices.GetAt(nIndex);
-
-        if (pService != IMS_NULL)
-        {
-            DetachService(pService);
-            delete pService;
-        }
-    }
-    m_lstMtsServices.RemoveElementsAt(0, nSize);
-}
-
 PUBLIC VIRTUAL void MtsApp::Start()
 {
     IMS_TRACE_I("SMS Start [slot_%d]", m_nSlotId, 0, 0);
 
-    // MtsUtils
+    // 1. MtsUtils
     /*===================*/
     CreateMtsUtils();
 
-    // MtsService
+    // 2. MtsService
     /*===================*/
     CreateMtsService();
 
-    // MtsMessageController
+    // 3. MtsMessageController
     /*===================*/
-    CreateMtsMessageController(m_nSlotId, m_pMtsDynamicLoader);
+    CreateMtsMessageController();
 
-    // Update IP Config & Make MtsServiceState
-    GetSmOverIpConfigInfo(m_nSlotId);
+    // 4. Update IP Config & Make MtsServiceState
+    GetSmOverIpConfigInfo();
 
     m_pCallTracker = new MtsCallTracker(m_nSlotId);
     m_pCallTracker->AddListener(this);
@@ -190,17 +164,12 @@ PRIVATE void MtsApp::CreateMtsService()
     }
 
     m_pMtsService = new MtsService(m_nSlotId, m_pMtsDynamicLoader);
-
-    if (m_pMtsService != IMS_NULL)
-    {
-        AddService(m_pMtsService);
-    }
 }
 
-PRIVATE void MtsApp::CreateMtsMessageController(
-        IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader)
+PRIVATE void MtsApp::CreateMtsMessageController()
 {
-    m_pMtsMessageController = new MtsMessageController(nSlotId, m_pMtsService, pMtsDynamicLoader);
+    m_pMtsMessageController =
+            new MtsMessageController(m_nSlotId, m_pMtsService, m_pMtsDynamicLoader);
 }
 
 PRIVATE void MtsApp::CreateMtsUtils()
@@ -238,14 +207,9 @@ PRIVATE void MtsApp::DestroyMtsUtils()
     }
 }
 
-PRIVATE void MtsApp::GetSmOverIpConfigInfo(IN IMS_SINT32 nSlotId)
+PRIVATE void MtsApp::GetSmOverIpConfigInfo()
 {
-    /*
-     * TODO: check carrier configuration
-     * KEY_SMS_OVER_IMS_SUPPORTED_BOOL && KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY
-     */
-    (void)nSlotId;
-    IMS_BOOL bSmsOverIpNetwork = IMS_TRUE;
+    IMS_TRACE_I("GetSmOverIpConfigInfo", 0, 0, 0);
 
     MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
 
@@ -253,6 +217,22 @@ PRIVATE void MtsApp::GetSmOverIpConfigInfo(IN IMS_SINT32 nSlotId)
     {
         IMS_TRACE_E(0, "Fail to get MtsServiceState instance", 0, 0, 0);
         return;
+    }
+
+    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    IMS_BOOL bSmsOverIpNetwork =
+            piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL);
+
+    // TODO: need to check whether Mts should consider KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY
+    IMSVector<IMS_SINT32> objSupportedRats =
+            piCc->GetIntArray(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY);
+
+    IMS_TRACE_I("GetSmOverIpConfigInfo - bSmsOverIpNetwork[%d]", bSmsOverIpNetwork, 0, 0);
+
+    for (IMS_UINT32 i = 0; i < objSupportedRats.GetSize(); ++i)
+    {
+        IMS_SINT32 nValue = objSupportedRats.GetAt(i);
+        IMS_TRACE_I("GetSmOverIpConfigInfo - objSupportedRats[%d][%d]", i, nValue, 0);
     }
 
     pMtsServiceState->SetMtsMessageController(m_pMtsMessageController);

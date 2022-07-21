@@ -18,6 +18,7 @@
 #define MTS_SIP_FORM_UTILS_H_
 
 #include "AString.h"
+#include "MtsDef.h"
 
 class MtsDialingPlan;
 
@@ -29,8 +30,8 @@ public:
 
     IMS_BOOL FormDestination(IN const AString& strTargetAddress, IN const IMS_BOOL bIsAckorError,
             IN const AString& strLastIpSmgw, OUT AString& strDest);
-    AString FormContentTypeEnumToStr(IN IMS_UINT32 nType);
-    IMS_UINT32 FormContentTypeStrToEnum(IN const AString& strContentType);
+    AString FormContentTypeEnumToStr(IN SmsFormatType nType);
+    SmsFormatType FormContentTypeStrToEnum(IN const AString& strContentType);
     IMS_BOOL IsTelUrlParam(IN const AString& strParam) const;
     IMS_BOOL IsNumberFormat(IN const AString& strDial) const;
     IMS_BOOL IsIpAddress(IN const AString& strIp) const;
@@ -48,9 +49,6 @@ public:
         SCHEME_SIP,
         SCHEME_SIPS
     };
-
-public:
-    IMS_UINT32 m_nMtsFormat;
 
 private:
     MtsDialingPlan* m_pMtsDialingPlan;

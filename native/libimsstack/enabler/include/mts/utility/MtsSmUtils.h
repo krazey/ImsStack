@@ -18,6 +18,7 @@
 #define MTS_SM_UTIL_H_
 
 #include "ByteArray.h"
+#include "MtsDef.h"
 
 class MtsSmUtils final
 {
@@ -27,8 +28,8 @@ public:
 
     IMS_SINT32 GetRpMr(IN const IMS_BYTE* pbySmsData);
     IMS_SINT32 GetRpMr(IN const ByteArray& objSmsData);
-    IMS_SINT32 GetMti(IN const IMS_UINT32 nSmsType, IN const IMS_BYTE* objSms);
-    IMS_SINT32 GetMti(IN const IMS_UINT32 nSmsType, IN const ByteArray& objSmsData);
+    IMS_SINT32 GetMti(IN SmsFormatType eSmsFormat, IN const IMS_BYTE* objSms);
+    IMS_SINT32 GetMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objSmsData);
     void PrintSmsDataBurst(IN const ByteArray& objSmsData);
     const IMS_CHAR* GetMtiStringFrom3gpp(IN const IMS_SINT32 nMti);
     const IMS_CHAR* GetMtiStringFrom3gpp2(IN const IMS_SINT32 nMti);

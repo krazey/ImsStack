@@ -14,18 +14,38 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_MTS_SERVICE_LISTENER_H_
-#define INTERFACE_MTS_SERVICE_LISTENER_H_
+#ifndef MTS_DEF_H_
+#define MTS_DEF_H_
 
-#include "IPageMessage.h"
-#include "MtsDef.h"
+#include "ByteArray.h"
+#include "ImsTypeDef.h"
 
-class IMtsServiceListener
+enum class MtsTimerType
+{
+    TIMER_UNKNOWN = 0,
+    TIMER_SMS_CALLBACK_MODE = 1,
+    TIMER_RETRY_AFTER = 2,
+};
+
+enum class SmsFormatType
+{
+    SMSFORMAT_3GPP = 1,
+    SMSFORMAT_3GPP2,
+    SMSFORMAT_INVALID
+};
+
+class EmergencySmsSendRequestInfo
 {
 public:
-    virtual void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bIsSmsEServiceType) = 0;
-    virtual void NotifyMtSms(IN IPageMessage* piMessage) = 0;
+    SmsFormatType eSmsFormat;
+    AString strAddress;
+    ByteArray objSmsData;
+    IMS_SINT32 nSeqId;
+};
+
+enum
+{
+    EXPIRED_TIME_SCBM = 300000  // 5min, 300s, 300000ms
 };
 
 #endif

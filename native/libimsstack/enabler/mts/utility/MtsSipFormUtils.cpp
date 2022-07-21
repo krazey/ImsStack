@@ -19,7 +19,7 @@
 #include "ImsLib.h"
 #include "ImsStrLib.h"
 #include "IpAddress.h"
-#include "MtsApp.h"
+#include "MtsDef.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"
@@ -31,7 +31,6 @@ __IMS_TRACE_TAG_COM_SMS__;
 
 PUBLIC
 MtsSipFormUtils::MtsSipFormUtils(IN IMS_SINT32 nSlotId) :
-        m_nMtsFormat(MtsApp::SMSFORMAT_INVALID),
         m_pMtsDialingPlan(IMS_NULL),
         m_nSlotId(nSlotId)
 {
@@ -112,17 +111,17 @@ PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::FormDestination(IN const AString& strTa
 }
 
 PUBLIC
-AString MtsSipFormUtils::FormContentTypeEnumToStr(IN IMS_UINT32 nType)
+AString MtsSipFormUtils::FormContentTypeEnumToStr(IN SmsFormatType nType)
 {
     AString strContentType;
 
     switch (nType)
     {
-        case MtsApp::SMSFORMAT_3GPP:
+        case SmsFormatType::SMSFORMAT_3GPP:
             strContentType = AString("application/vnd.3gpp.sms");
             break;
 
-        case MtsApp::SMSFORMAT_3GPP2:
+        case SmsFormatType::SMSFORMAT_3GPP2:
             strContentType = AString("application/vnd.3gpp2.sms");
             break;
 
@@ -137,17 +136,17 @@ AString MtsSipFormUtils::FormContentTypeEnumToStr(IN IMS_UINT32 nType)
 }
 
 PUBLIC
-IMS_UINT32 MtsSipFormUtils::FormContentTypeStrToEnum(IN const AString& strContentType)
+SmsFormatType MtsSipFormUtils::FormContentTypeStrToEnum(IN const AString& strContentType)
 {
-    IMS_UINT32 nType = MtsApp::SMSFORMAT_INVALID;
+    SmsFormatType nType = SmsFormatType::SMSFORMAT_INVALID;
 
     if (IMS_TRUE == strContentType.MakeLower().Contains("application/vnd.3gpp.sms"))
     {
-        nType = MtsApp::SMSFORMAT_3GPP;
+        nType = SmsFormatType::SMSFORMAT_3GPP;
     }
     else if (IMS_TRUE == strContentType.MakeLower().Contains("application/vnd.3gpp2.sms"))
     {
-        nType = MtsApp::SMSFORMAT_3GPP2;
+        nType = SmsFormatType::SMSFORMAT_3GPP2;
     }
     else
     {
