@@ -51,6 +51,21 @@ public class HttpTransaction {
     // Unreachable error occurred during ACS request.
     public static final int RESULT_TYPE_HTTP_UNREACHABLE = 2;
 
+    /** @hide */
+    @IntDef(prefix = {"REQUEST_"}, value = {
+            REQUEST_HTTPS,
+            REQUEST_GBA,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RequestType {}
+
+    // send HTTPS request
+    public static final int REQUEST_HTTPS = 1;
+    // send GBA request.
+    public static final int REQUEST_GBA = 2;
+    // ACS is done.
+    public static final int REQUEST_DONE = 3;
+
     private static final int MSG_MIN = 0;
     private static final int MSG_START = 2;
     private static final int MSG_STOP = 3;
