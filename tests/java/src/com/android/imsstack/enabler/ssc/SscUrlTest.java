@@ -63,7 +63,7 @@ public class SscUrlTest {
 
     @After
     public void tearDown() {
-        SscXmlFormat.reset(SLOT_0);
+        SscXmlFormat.clear(SLOT_0);
         SscConfig.clear(SLOT_0);
     }
 
@@ -473,11 +473,12 @@ public class SscUrlTest {
 
     private SscServiceData getUpdateData(ESsType ssType, int action, int condition,
             int serviceClass) {
-        return SscXmlGovTest.createUpdateData(ssType, 0, action, condition, serviceClass);
+        return SscXmlGovTest.createUpdateData(ssType, 0, action, condition, null, serviceClass, 0);
     }
 
     private SscServiceData getInsertData(ESsType ssType, int action, int condition) {
-        return SscXmlGovTest.createInsertData(ssType, 0, action, condition, null);
+        return SscXmlGovTest.createInsertData(ssType, 0, action, condition, null,
+                SscServiceClassUtil.SERVICE_CLASS_NONE);
     }
 
     private class FakeSscUrl extends SscUrl {

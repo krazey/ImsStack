@@ -77,22 +77,6 @@ public class SscXmlCreator {
         return (Element) elementList.item(0);
     }
 
-    private Element getElementByTagNameWithId(Element rootElement, String tagName, String id) {
-        NodeList elementList = rootElement.getElementsByTagName(tagName);
-        if (elementList.getLength() == 0) {
-            return null;
-        }
-
-        for (int i = 0; i < elementList.getLength(); i++) {
-            Element rule = (Element) elementList.item(i);
-            if (rule.getAttribute(SscXmlFormat.ID).equals(id)) {
-                return rule;
-            }
-        }
-
-        return null;
-    }
-
     private Element updateServiceElement(Document doc, int slotId, String serviceName, int state) {
         Element rootElement = doc.getDocumentElement();
         if (rootElement == null) {
@@ -113,13 +97,7 @@ public class SscXmlCreator {
     }
 
     private Element updateRuleElement(Document doc, int slotId, String ruleId, int state) {
-        Element rootElement = doc.getDocumentElement();
-        if (rootElement == null) {
-            return null;
-        }
-
-        String ruleTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.RULE);
-        Element ruleElement = getElementByTagNameWithId(rootElement, ruleTag, ruleId);
+        Element ruleElement = doc.getElementById(ruleId);
         if (ruleElement == null) {
             ImsLog.d(ruleId + " is null");
             return null;
@@ -224,11 +202,11 @@ public class SscXmlCreator {
         return serviceElement;
     }
 
-    private interface IXmlCreator {
+    protected interface IXmlCreator {
         Element createXmlElement(Document doc, SscServiceData data);
     }
 
-    protected class XmlCreatorOip implements IXmlCreator {
+    private class XmlCreatorOip implements IXmlCreator {
         @Override
         public Element createXmlElement(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
@@ -237,25 +215,29 @@ public class SscXmlCreator {
         }
     }
 
-    protected class XmlCreatorOir implements IXmlCreator {
+    private class XmlCreatorOir implements IXmlCreator {
         @Override
         public Element createXmlElement(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
 
-            int state = SscConstant.STATUS_ENABLE;
+            int state = SscConstant.STATUS_DISABLE;
             int operation = data.getState();
             if (operation == SscConstant.OIR_DEFAULT) {
                 int defaultOperation = SscConfig.getOirNetworkDefaultOperation(slotId);
                 if (defaultOperation == SscConfig.OIR_NOT_PROVISIONED) {
-                    state = SscConstant.STATUS_DISABLE;
+                    operation = SscConstant.OIR_SUPPRESSION;
                 } else if (defaultOperation == SscConfig.OIR_TEMP_MODE_RESTRICTED) {
+                    state = SscConstant.STATUS_ENABLE;
                     operation = SscConstant.OIR_INVOCATION;
                 } else if (defaultOperation == SscConfig.OIR_TEMP_MODE_ALLOWED) {
+                    state = SscConstant.STATUS_ENABLE;
                     operation = SscConstant.OIR_SUPPRESSION;
                 } else if (defaultOperation == SscConfig.OIR_TEMP_MODE_WITHOUT_DEFAULT_BEHAVIOUR) {
-                    // do nothing
+                    state = SscConstant.STATUS_ENABLE;
                 }
+            } else if (operation == SscConstant.OIR_INVOCATION) {
+                state = SscConstant.STATUS_ENABLE;
             } else if (operation == SscConstant.OIR_SUPPRESSION) {
                 if (SscConfig.isOirTirAlwaysTemporaryMode(slotId)) {
                     state = SscConstant.STATUS_ENABLE;
@@ -270,22 +252,26 @@ public class SscXmlCreator {
                 return null;
             }
 
-            String defaultBehaviourValue = null;
+            String defaultBehaviour = null;
             if (operation == SscConstant.OIR_INVOCATION) {
-                defaultBehaviourValue = SscXmlFormat.PRESENTATION_RESTRICTED;
+                defaultBehaviour = SscXmlFormat.PRESENTATION_RESTRICTED;
             } else if (operation == SscConstant.OIR_SUPPRESSION) {
-                defaultBehaviourValue = SscXmlFormat.PRESENTATION_NOT_RESTRICTED;
+                defaultBehaviour = SscXmlFormat.PRESENTATION_NOT_RESTRICTED;
             }
 
-            if (defaultBehaviourValue != null) {
-                String dbTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.DEFAULT_BEHAVIOUR);
-                Element defaultBehaviour = getElementByTagName(oirServiceElement, dbTag);
-                if (defaultBehaviour != null) {
-                    defaultBehaviour.setTextContent(defaultBehaviourValue);
+            String dbTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.DEFAULT_BEHAVIOUR);
+            Element defaultBehaviourElement = getElementByTagName(oirServiceElement, dbTag);
+            if (defaultBehaviourElement != null) {
+                if (defaultBehaviour == null) {
+                    defaultBehaviourElement.getParentNode().removeChild(defaultBehaviourElement);
                 } else {
-                    defaultBehaviour = doc.createElement(dbTag);
-                    defaultBehaviour.setTextContent(defaultBehaviourValue);
-                    oirServiceElement.appendChild(defaultBehaviour);
+                    defaultBehaviourElement.setTextContent(defaultBehaviour);
+                }
+            } else {
+                if (defaultBehaviour != null) {
+                    defaultBehaviourElement = doc.createElement(dbTag);
+                    defaultBehaviourElement.setTextContent(defaultBehaviour);
+                    oirServiceElement.appendChild(defaultBehaviourElement);
                 }
             }
 
@@ -293,7 +279,7 @@ public class SscXmlCreator {
         }
     }
 
-    protected class XmlCreatorTip implements IXmlCreator {
+    private class XmlCreatorTip implements IXmlCreator {
         @Override
         public Element createXmlElement(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
@@ -302,19 +288,21 @@ public class SscXmlCreator {
         }
     }
 
-    protected class XmlCreatorTir implements IXmlCreator {
+    private class XmlCreatorTir implements IXmlCreator {
         @Override
         public Element createXmlElement(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
 
-            int state = SscConstant.STATUS_ENABLE;
+            int state = SscConstant.STATUS_DISABLE;
             if (data.getState() == SscConstant.TIR_NOT_PROVISIONED) {
                 if (SscConfig.isOirTirAlwaysTemporaryMode(slotId)) {
                     state = SscConstant.STATUS_ENABLE;
                 } else {
                     state = SscConstant.STATUS_DISABLE;
                 }
+            } else if (data.getState() == SscConstant.TIR_PROVISIONED) {
+                state = SscConstant.STATUS_ENABLE;
             }
 
             Element tirServiceElement = updateServiceElement(doc, slotId,
@@ -323,28 +311,28 @@ public class SscXmlCreator {
                 return null;
             }
 
-            String defaultBehaviourValue = null;
+            String defaultBehaviour = null;
             if (data.getState() == SscConstant.TIR_PROVISIONED) {
-                defaultBehaviourValue = SscXmlFormat.PRESENTATION_RESTRICTED;
+                defaultBehaviour = SscXmlFormat.PRESENTATION_RESTRICTED;
             } else {
-                defaultBehaviourValue = SscXmlFormat.PRESENTATION_NOT_RESTRICTED;
+                defaultBehaviour = SscXmlFormat.PRESENTATION_NOT_RESTRICTED;
             }
 
             String dbTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.DEFAULT_BEHAVIOUR);
-            Element defaultBehaviour = getElementByTagName(tirServiceElement, dbTag);
-            if (defaultBehaviour != null) {
-                defaultBehaviour.setTextContent(defaultBehaviourValue);
+            Element defaultBehaviourElement = getElementByTagName(tirServiceElement, dbTag);
+            if (defaultBehaviourElement != null) {
+                defaultBehaviourElement.setTextContent(defaultBehaviour);
             } else {
-                defaultBehaviour = doc.createElement(dbTag);
-                defaultBehaviour.setTextContent(defaultBehaviourValue);
-                tirServiceElement.appendChild(defaultBehaviour);
+                defaultBehaviourElement = doc.createElement(dbTag);
+                defaultBehaviourElement.setTextContent(defaultBehaviour);
+                tirServiceElement.appendChild(defaultBehaviourElement);
             }
 
             return tirServiceElement;
         }
     }
 
-    protected class XmlCreatorCf implements IXmlCreator {
+    private class XmlCreatorCf implements IXmlCreator {
         @Override
         public Element createXmlElement(Document doc, SscServiceData data) {
             if (data.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CF) {
@@ -366,46 +354,7 @@ public class SscXmlCreator {
 
             return updateCfRule(doc, data);
         }
-/*
-        private Element updateXmlCfService(Document doc, SscServiceData data) {
-            int slotId = data.getSlotId();
-            ImsLog.d(slotId, "");
 
-            Element cfServiceElement = updateServiceElement(
-                doc, slotId, data.getSsType().getSsName(), data.getState());
-            if (cfServiceElement == null) {
-                return null;
-            }
-
-            CfServiceUpdateData cfData = (CfServiceUpdateData) data;
-            for (int i = SscConstant.CONDITION_CFB; i <= SscConstant.CONDITION_CFNRC; i++) {
-                CfServiceUpdateData tempCfData = new CfServiceUpdateData(slotId, data.getSsType(),
-                        0, 0, data.getState(), i, cfData.getForwardToNumber(), -1,
-                        data.getServiceClass());
-                updateCfRule(doc, tempCfData);
-            }
-
-            if (data.getCondition() == SscConstant.CONDITION_CFA) {
-                CfServiceUpdateData tempCfData = new CfServiceUpdateData(slotId, data.getSsType(),
-                        0, 0, data.getState(), SscConstant.CONDITION_CFU,
-                        cfData.getForwardToNumber(), -1, data.getServiceClass());
-                updateCfRule(doc, tempCfData);
-            }
-
-            if (SscXmlFormat.getCfnlExist(slotId)) {
-                CfServiceUpdateData tempCfData = new CfServiceUpdateData(slotId, data.getSsType(),
-                        0, 0, data.getState(), SscConstant.CONDITION_CFNL,
-                        cfData.getForwardToNumber(), -1, data.getServiceClass());
-                updateCfRule(doc, tempCfData);
-            }
-
-            if (cfData.getReplyTimer() > 0) {
-                updateNoReplyTimer(doc, data);
-            }
-
-            return cfServiceElement;
-        }
-*/
         private Element updateCfRule(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();
             ImsLog.d(slotId, "");
@@ -564,7 +513,7 @@ public class SscXmlCreator {
         }
     }
 
-    protected class XmlCreatorCb implements IXmlCreator {
+    private class XmlCreatorCb implements IXmlCreator {
         @Override
         public Element createXmlElement(Document doc, SscServiceData data) {
             if (data.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CB) {
@@ -625,7 +574,7 @@ public class SscXmlCreator {
         }
     }
 
-    protected class XmlCreatorCw implements IXmlCreator {
+    private class XmlCreatorCw implements IXmlCreator {
         @Override
         public Element createXmlElement(Document doc, SscServiceData data) {
             int slotId = data.getSlotId();

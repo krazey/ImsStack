@@ -229,7 +229,7 @@ public class SscXmlFormat {
     public static final int MEDIA_TYPE_AUDIO = 0;
     public static final int MEDIA_TYPE_VIDEO = 1;
 
-    public static void init(int slotId) {
+    protected static void init(int slotId) {
         ImsLog.d("init (" + slotId + ")");
 
         setUtXmlData(slotId, new UtXmlData());
@@ -240,7 +240,7 @@ public class SscXmlFormat {
         mXmlDatas.put(slotId, data);
     }
 
-    public static void reset(int slotId) {
+    protected static void clear(int slotId) {
         UtXmlData xmlData  = getXmlData(slotId);
         if (xmlData != null) {
             xmlData.getTags().clear();

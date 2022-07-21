@@ -37,6 +37,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import java.io.StringReader;
@@ -102,10 +103,10 @@ public class SscXmlGovTest {
     }
 
     protected static SscServiceData createUpdateData(ESsType ssType, int transactionId, int action,
-            int condition, int serviceClass) {
+            int condition, String targetNumber, int serviceClass, int noReplyTimer) {
         if (ssType == ESsType.CF) {
             return new CfServiceUpdateData(SLOT_0, ssType, SscConstant.EVENT_SSC_UPDATE_CF,
-                    transactionId, action, condition, null, 0, serviceClass);
+                    transactionId, action, condition, targetNumber, noReplyTimer, serviceClass);
         } else if (ssType == ESsType.ICB || ssType == ESsType.OCB) {
             return new CbServiceUpdateData(SLOT_0, ssType, SscConstant.EVENT_SSC_UPDATE_CB,
                     transactionId, action, condition, null, serviceClass, null);
@@ -130,20 +131,21 @@ public class SscXmlGovTest {
     }
 
     protected static SscServiceData createInsertData(ESsType ssType, int transactionId, int action,
-            int condition, String targetNumber) {
+            int condition, String targetNumber, int serviceClass) {
         if (ssType == ESsType.CF) {
             return new CfServiceUpdateData(SLOT_0, ssType, SscConstant.EVENT_SSC_INSERT_CF,
-                    transactionId, action, condition, targetNumber, 0,
-                    SscServiceClassUtil.SERVICE_CLASS_VOICE);
+                    transactionId, action, condition, targetNumber, 0, serviceClass);
         }
 
         return new CbServiceUpdateData(SLOT_0, ssType, SscConstant.EVENT_SSC_INSERT_CB,
-                transactionId, action, condition, null, SscServiceClassUtil.SERVICE_CLASS_VOICE,
-                null);
+                transactionId, action, condition, null, serviceClass, null);
     }
 
-    protected static Document removeRuleSet(Document doc, String serviceName) {
-        //Element serviceElement = doc.getElementsByTagNameNS("*", serviceName);
+    protected static Document removeRuleSet(Document doc) {
+        NodeList ruleSetList = doc.getElementsByTagName("cp:ruleset");
+        for (int i = 0; i < ruleSetList.getLength(); i++) {
+            ruleSetList.item(i).getParentNode().removeChild(ruleSetList.item(i));
+        }
 
         return doc;
     }
@@ -251,6 +253,36 @@ public class SscXmlGovTest {
                 + "<cp:conditions>"
                 + "<ss:rule-deactivated/>"
                 + "<ss:anonymous/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:allow>false</ss:allow>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                // ICB Video
+                + "<cp:rule id=\"call-barring-all-incoming-video\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:media>video</ss:media>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:allow>false</ss:allow>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-barring-incoming-in-roaming-video\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:roaming/>"
+                + "<ss:media>video</ss:media>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:allow>false</ss:allow>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-barring-anonymous-incoming-video\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:anonymous/>"
+                + "<ss:media>video</ss:media>"
                 + "</cp:conditions>"
                 + "<cp:actions>"
                 + "<ss:allow>false</ss:allow>"

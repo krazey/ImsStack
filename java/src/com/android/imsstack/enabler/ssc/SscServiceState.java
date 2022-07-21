@@ -192,7 +192,7 @@ public class SscServiceState {
         stopUtBlockTimer(true);
         updateUtServiceFeature();
 
-        SscXmlFormat.reset(mSlotId);
+        SscXmlFormat.clear(mSlotId);
     }
 
     private void setUtBlock(int nBlockReason) {

@@ -133,6 +133,7 @@ public class SscXmlParser {
             return;
         }
 
+        // Always get service elements when query
         Node serviceElement = serviceElementList.item(0);
         if (serviceElement == null) {
             return;

@@ -372,7 +372,7 @@ public class SscUtilsTest {
     public void getUriFromNumer_numberIsNull() {
         String uri = mSscUtils.getUriFromNumber(SLOT_0, null);
 
-        assertNull(uri);
+        assertEquals("", uri);
     }
 
     @Test

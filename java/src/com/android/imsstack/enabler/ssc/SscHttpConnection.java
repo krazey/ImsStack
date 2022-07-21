@@ -197,7 +197,6 @@ public class SscHttpConnection implements ISscHttpConnection {
             return REQUEST_FAILED_BY_DNS;
         } catch (Exception e) {
             ImsLog.e(e.toString());
-            e.printStackTrace();
             return REQUEST_FAILED;
         } finally {
             if (mConnection != null) {
