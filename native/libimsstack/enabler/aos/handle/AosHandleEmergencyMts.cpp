@@ -21,6 +21,10 @@
 
 #include "handle/AosHandleEmergencyMts.h"
 
+__IMS_TRACE_TAG_USER_DECL__("AOS");
+
+#define APPPROFILE m_strTag.GetStr()
+
 /*
 
 Remarks
@@ -52,23 +56,12 @@ PUBLIC VIRTUAL AosHandleEmergencyMts::~AosHandleEmergencyMts()
 Remarks
 
 */
-PROTECTED VIRTUAL void AosHandleEmergencyMts::Init()
+PROTECTED VIRTUAL void AosHandleEmergencyMts::InitializeServiceBlock()
 {
-    if (GET_N_CONFIG(m_nSlotId)->IsEmergencySmsOverImsSupported())
+    if (!GET_N_CONFIG(m_nSlotId)->IsEmergencySmsOverImsSupported())
     {
-        AosHandle::Init();
+        m_bBlocked = IMS_TRUE;
     }
-}
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void AosHandleEmergencyMts::NConfiguration_NotifyConfigChanged()
-{
-    if (GetAosInfo() == IMS_NULL && GET_N_CONFIG(m_nSlotId) != IMS_NULL)
-    {
-        Init();
-    }
+    A_IMS_TRACE_I(APPPROFILE, "InitializeServiceBlock :: block(%s)", _TRACE_B_(m_bBlocked), 0, 0);
 }

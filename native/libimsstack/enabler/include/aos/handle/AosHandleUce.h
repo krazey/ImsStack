@@ -27,5 +27,6 @@ public:
     virtual ~AosHandleUce();
 
 private:
+    friend class AosHandleUceTest;
 };
 #endif  // AOS_HANDLE_UCE_H_

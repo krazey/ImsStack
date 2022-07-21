@@ -34,10 +34,6 @@ AosHandleUce::AosHandleUce(IN IAosAppContext* piAppContext, IN const AString& st
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleUce = %" PFLS_u "/%" PFLS_x, strAppId.GetStr(),
             sizeof(AosHandleUce), this);
 
-    /* @jryou: temp blocked. Defined in VZWAoSHandle.
-    AddConfig(CONFIG_LIMITED_MODE | CONFIG_SRLTE_MODE);
-    */
-
     m_bRegFeatureTagRequired = IMS_FALSE;
 }
 

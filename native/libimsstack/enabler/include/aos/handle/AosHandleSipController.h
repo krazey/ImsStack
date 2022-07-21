@@ -27,8 +27,9 @@ public:
     virtual ~AosHandleSipController();
 
 protected:
-    virtual void Init();
+    virtual void InitializeServiceBlock();
 
-    virtual void NConfiguration_NotifyConfigChanged();
+private:
+    friend class AosHandleSipControllerTest;
 };
 #endif  // AOS_HANDLE_SIP_CONTROLLER_H_

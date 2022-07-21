@@ -55,26 +55,12 @@ PUBLIC VIRTUAL AosHandleSipController::~AosHandleSipController()
 Remarks
 
 */
-PROTECTED VIRTUAL void AosHandleSipController::Init()
+PROTECTED VIRTUAL void AosHandleSipController::InitializeServiceBlock()
 {
-    A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
-
     if (!GET_N_CONFIG(m_nSlotId)->IsImsSingleRegistrationRequired())
     {
         m_bBlocked = IMS_TRUE;
     }
-}
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void AosHandleSipController::NConfiguration_NotifyConfigChanged()
-{
-    if (GET_N_CONFIG(m_nSlotId) != IMS_NULL)
-    {
-        m_bBlocked =
-                GET_N_CONFIG(m_nSlotId)->IsImsSingleRegistrationRequired() ? IMS_FALSE : IMS_TRUE;
-    }
+    A_IMS_TRACE_I(APPPROFILE, "InitializeServiceBlock :: block(%s)", _TRACE_B_(m_bBlocked), 0, 0);
 }

@@ -27,8 +27,9 @@ public:
     virtual ~AosHandleEmergencyMts();
 
 protected:
-    virtual void Init();
+    virtual void InitializeServiceBlock();
 
-    virtual void NConfiguration_NotifyConfigChanged();
+private:
+    friend class AosHandleEmergencyMtsTest;
 };
 #endif  // AOS_HANDLE_EMERGENCY_MTS_H_
