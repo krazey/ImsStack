@@ -92,9 +92,9 @@ protected:
         delete pExtensionSet;
     }
 
-    IMS_SINT32 GetRejectStatusCode(IMS_SINT32 nCode)
+    IMS_SINT32 GetRejectStatusCode(IMS_SINT32 nCode, IMS_SINT32 nExtraCode = -1)
     {
-        CallReasonInfo objReasonInfo(nCode);
+        CallReasonInfo objReasonInfo(nCode, nExtraCode);
         IMS_SINT32 eStatusCode;
         AString strPhrase;
         pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
@@ -524,6 +524,12 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
     EXPECT_EQ(GetRejectStatusCode(CODE_USER_IGNORE), SipStatusCode::SC_486);
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_UNSUPPORTED_SIP_HEADERS), SipStatusCode::SC_420);
     EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE), SipStatusCode::SC_406);
+    EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_406),
+            SipStatusCode::SC_406);
+    EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_488),
+            SipStatusCode::SC_488);
+    EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_606),
+            SipStatusCode::SC_606);
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_ONGOING_CALL_UPDATE), SipStatusCode::SC_491);
     EXPECT_EQ(GetRejectStatusCode(CODE_SESSION_INTERNAL_ERROR), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED),

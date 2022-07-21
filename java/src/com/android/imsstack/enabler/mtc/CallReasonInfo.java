@@ -125,6 +125,10 @@ public class CallReasonInfo implements Parcelable {
     public static final int EXTRA_CODE_EMERGENCYSERVICE_POISON = 8;
     public static final int EXTRA_CODE_EMERGENCYSERVICE_POLICE = 9;
 
+    public static final int EXTRA_CODE_NOT_ACCEPTABLE_SIP_406 = 1;
+    public static final int EXTRA_CODE_NOT_ACCEPTABLE_SIP_488 = 2;
+    public static final int EXTRA_CODE_NOT_ACCEPTABLE_SIP_606 = 3;
+
     public int mCode;
     public int mExtraCode;
     public String mExtraMessage;

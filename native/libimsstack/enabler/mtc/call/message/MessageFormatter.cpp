@@ -782,7 +782,18 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
             eStatusCode = SipStatusCode::SC_420;
             break;
         case CODE_SIP_NOT_ACCEPTABLE:
-            eStatusCode = SipStatusCode::SC_406;
+            if (objReason.nExtraCode == EXTRA_CODE_NOT_ACCEPTABLE_SIP_488)
+            {
+                eStatusCode = SipStatusCode::SC_488;
+            }
+            else if (objReason.nExtraCode == EXTRA_CODE_NOT_ACCEPTABLE_SIP_606)
+            {
+                eStatusCode = SipStatusCode::SC_606;
+            }
+            else
+            {
+                eStatusCode = SipStatusCode::SC_406;
+            }
             break;
         case CODE_REJECT_ONGOING_CALL_UPDATE:
             eStatusCode = SipStatusCode::SC_491;
