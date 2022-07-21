@@ -22,6 +22,7 @@ import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.sipcontroller.ImsSipTransport;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.Executor;
 
@@ -38,6 +39,7 @@ public final class ImsServiceRecord {
     private ImsRegistrationTracker mRegTracker = null;
     private ImsCallApp mCallApp = null;
     private boolean mServiceUp = false;
+    private ImsServiceRegistry mImsServiceRegistry;
 
     //This is an implementation of SipTransport required for single registration support.
     private ImsSipTransport mSipTransport = null;
@@ -51,6 +53,7 @@ public final class ImsServiceRecord {
         mContext = new ImsContext(context, executor, phoneId);
 
         mExecutor = executor;
+        mImsServiceRegistry = ImsServiceRegistry.getInstance(mContext.getSlotId());
         mSlotId = phoneId;//NOTE: Slot id is used at ImsService to get service records mapped
         // phone id.
 
@@ -58,6 +61,11 @@ public final class ImsServiceRecord {
         getRegistration();
         getRegistrationTracker();
      }
+
+    @VisibleForTesting
+    public void setImsService(ImsServiceRegistry imsServiceRegistry) {
+        mImsServiceRegistry = imsServiceRegistry;
+    }
 
     /**
      * Broadcasts the IMS service up.
@@ -189,13 +197,11 @@ public final class ImsServiceRecord {
     }
 
     public void disableIms() {
-        ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mContext.getSlotId());
-        isr.setImsEnabled(false);
+        mImsServiceRegistry.setImsEnabled(false);
     }
 
     public void enableIms() {
-        ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mContext.getSlotId());
-        isr.setImsEnabled(true);
+        mImsServiceRegistry.setImsEnabled(true);
     }
 
     private static void log(String s) {
