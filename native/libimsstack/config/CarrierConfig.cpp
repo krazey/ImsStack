@@ -1086,15 +1086,15 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL[] =
 
 // TODO - Need to change to carrier configuration bundle later
 const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_PAYLOAD_TYPE_INT_ARRAY[] =
-        "asset_evs_payload_type_intarray";
+        "asset_evs_payload_type_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_AMRWB_PAYLOAD_TYPE_INT_ARRAY[] =
-        "asset_amrwb_payload_type_intarray";
+        "asset_amrwb_payload_type_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_AMRNB_PAYLOAD_TYPE_INT_ARRAY[] =
-        "asset_amrnb_payload_type_intarray";
+        "asset_amrnb_payload_type_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_DTMFWB_PAYLOAD_TYPE_INT_ARRAY[] =
-        "asset_dtmfwb_payload_type_intarray";
+        "asset_dtmfwb_payload_type_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_DTMFNB_PAYLOAD_TYPE_INT_ARRAY[] =
-        "asset_dtmfnb_payload_type_intarray";
+        "asset_dtmfnb_payload_type_int_array";
 
 const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_AMRWB_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT_ARRAY[] =
         "asset_amrwb_codec_attribute_payload_format_int_array";

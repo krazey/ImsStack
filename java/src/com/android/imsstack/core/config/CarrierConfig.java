@@ -830,15 +830,15 @@ public class CarrierConfig {
 
         // TODO - Media Codec for Test
         public static final String KEY_ASSET_EVS_PAYLOAD_TYPE_INT_ARRAY =
-                "asset_evs_payload_type_intarray";
+                "asset_evs_payload_type_int_array";
         public static final String KEY_ASSET_AMRWB_PAYLOAD_TYPE_INT_ARRAY =
-                "asset_amrwb_payload_type_intarray";
+                "asset_amrwb_payload_type_int_array";
         public static final String KEY_ASSET_AMRNB_PAYLOAD_TYPE_INT_ARRAY =
-                "asset_amrnb_payload_type_intarray";
+                "asset_amrnb_payload_type_int_array";
         public static final String KEY_ASSET_DTMFWB_PAYLOAD_TYPE_INT_ARRAY =
-                "asset_dtmfwb_payload_type_intarray";
+                "asset_dtmfwb_payload_type_int_array";
         public static final String KEY_ASSET_DTMFNB_PAYLOAD_TYPE_INT_ARRAY =
-                "asset_dtmfnb_payload_type_intarray";
+                "asset_dtmfnb_payload_type_int_array";
 
         public static final String KEY_ASSET_AMRWB_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT_ARRAY =
                 "asset_amrwb_codec_attribute_payload_format_int_array";

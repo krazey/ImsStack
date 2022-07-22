@@ -128,35 +128,23 @@
     <!-- Media -->
     <int name="audio_maxred_int" value="0"/>
     <boolean name="audio_bw_nego_option_bool" value="true"/>
-    <int-array name="asset_evs_payload_type_intarray" num="1">
+    <int-array name="asset_evs_payload_type_int_array" num="1">
         <item value="127"/>
     </int-array>
-    <int-array name="asset_amrwb_payload_type_intarray" num="2">
+    <int-array name="asset_amrwb_payload_type_int_array" num="2">
         <item value="97"/>
         <item value="98"/>
     </int-array>
-    <int-array name="asset_amrnb_payload_type_intarray" num="2">
+    <int-array name="asset_amrnb_payload_type_int_array" num="2">
         <item value="100"/>
         <item value="101"/>
     </int-array>
-    <int-array name="asset_dtmfwb_payload_type_intarray" num="1">
+    <int-array name="asset_dtmfwb_payload_type_int_array" num="1">
         <item value="99"/>
     </int-array>
-    <int-array name="asset_dtmfwb_payload_type_intarray" num="1">
+    <int-array name="asset_dtmfnb_payload_type_int_array" num="1">
         <item value="102"/>
     </int-array>
-    <int-array name="asset_amr_amrwb_codec_attribute_modeset_int_array" num="3">
-        <item value="0"/>
-        <item value="1"/>
-        <item value="2"/>
-    </int-array>
-    <int-array name="asset_amr_amrnb_codec_attribute_modeset_int_array" num="4">
-        <item value="0"/>
-        <item value="2"/>
-        <item value="4"/>
-        <item value="7"/>
-    </int-array>
-
     <int-array name="asset_amrwb_codec_attribute_payload_format_int_array" num="2">
         <item value="0"/>
         <item value="1"/>
@@ -165,18 +153,11 @@
         <item value="0"/>
         <item value="1"/>
     </int-array>
-    <int name="asset_evs_codec_attribute_channels_int" value="1"/>
-    <boolean name="asset_evs_codec_attribute_dtx_bool" value="true"/>
-    <boolean name="asset_evs_codec_attribute_dtx_recv_bool" value="true"/>
-    <int name="asset_evs_codec_attribute_hf_only_int" value="0"/>
-    <!-- <int name="asset_evs_codec_attribute_mode_switch_int" value="0"/> -->
     <int-array name="asset_evs_codec_attribute_bitrate_int_array" num="2">
         <item value="0"/>
         <item value="4"/>
     </int-array>
     <int name="asset_evs_codec_attribute_bandwidth_int" value="5"/>
-    <!-- <int name="asset_codec_attribute_cmr_int" value="0"/> -->
-    <!-- <int name="asset_evs_codec_attribute_ch_aw_recv_int" value="2"/> -->
-    <int name="asset_evs_amrwb_io_mode_set_int" value="7"/>
+    <int name="asset_evs_codec_attribute_cmr_int" value="-2"/>
 
 </carrier_config>
