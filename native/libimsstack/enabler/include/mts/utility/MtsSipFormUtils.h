@@ -41,15 +41,6 @@ private:
     IMS_SINT32 GetRequestUriType();
     IMS_BOOL IsVisualSeparator(IN const IMS_CHAR ch) const;
 
-public:
-    enum
-    {
-        SCHEME_UNKNOWN = -1,
-        SCHEME_TEL,
-        SCHEME_SIP,
-        SCHEME_SIPS
-    };
-
 private:
     MtsDialingPlan* m_pMtsDialingPlan;
     IMS_SINT32 m_nSlotId;

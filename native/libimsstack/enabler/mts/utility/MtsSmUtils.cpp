@@ -18,7 +18,6 @@
 #include "ServiceTrace.h"
 #include "ImsStrLib.h"
 #include "utility/MtsSmUtils.h"
-#include "MtsDef.h"
 
 __IMS_TRACE_TAG_COM_SMS__;
 
@@ -107,42 +106,4 @@ void MtsSmUtils::PrintSmsDataBurst(IN const ByteArray& objSmsData)
 
     IMS_TRACE_D("<< Received SMS data burst >> (%d) >>  %s", objSmsData.GetLength(),
             strSmsMsg.GetStr(), 0);
-}
-
-PUBLIC const IMS_CHAR* MtsSmUtils::GetMtiStringFrom3gpp(IN const IMS_SINT32 nMti)
-{
-    switch (nMti)
-    {
-        case MtsSmUtils::MTS_3GPP_MTI_RP_DATA_From_MS:
-            return "MTS_3GPP_MTI_RP_DATA_From_MS";
-        case MtsSmUtils::MTS_3GPP_MTI_RP_DATA_From_N:
-            return "MTS_3GPP_MTI_RP_DATA_From_N";
-        case MtsSmUtils::MTS_3GPP_MTI_RP_ACK_From_MS:
-            return "MTS_3GPP_MTI_RP_ACK_From_MS";
-        case MtsSmUtils::MTS_3GPP_MTI_RP_ACK_From_N:
-            return "MTS_3GPP_MTI_RP_ACK_From_N";
-        case MtsSmUtils::MTS_3GPP_MTI_RP_ERROR_From_MS:
-            return "MTS_3GPP_MTI_RP_ERROR_From_MS";
-        case MtsSmUtils::MTS_3GPP_MTI_RP_ERROR_From_N:
-            return "MTS_3GPP_MTI_RP_ERROR_From_N";
-        case MtsSmUtils::MTS_3GPP_MTI_RP_SMMA:
-            return "MTS_3GPP_MTI_RP_SMMA";
-        default:
-            return "SMS 3GPP MTI INFO INVALID";
-    }
-}
-
-PUBLIC const IMS_CHAR* MtsSmUtils::GetMtiStringFrom3gpp2(IN const IMS_SINT32 nMti)
-{
-    switch (nMti)
-    {
-        case MtsSmUtils::MTS_3GPP2_MTI_SMS_POINT_TO_POINT:
-            return "MTS_3GPP2_MTI_SMS_POINT_TO_POINT";
-        case MtsSmUtils::MTS_3GPP2_MTI_SMS_BROADCAST:
-            return "MTS_3GPP2_MTI_SMS_BROADCAST";
-        case MtsSmUtils::MTS_3GPP2_MTI_SMS_ACKNOWLEDGE:
-            return "MTS_3GPP2_MTI_SMS_ACKNOWLEDGE";
-        default:
-            return "SMS 3GPP2 MTI INFO INVALID";
-    }
 }

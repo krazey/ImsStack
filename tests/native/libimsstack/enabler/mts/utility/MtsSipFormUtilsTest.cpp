@@ -109,16 +109,16 @@ TEST_F(MtsSipFormUtilsTest, IsIpAddress)
 TEST_F(MtsSipFormUtilsTest, CheckScheme)
 {
     AString strTestScheme = "sip:";
-    EXPECT_TRUE(pMtsSipFormUtils->CheckScheme(strTestScheme) == MtsSipFormUtils::SCHEME_SIP);
+    EXPECT_TRUE(pMtsSipFormUtils->CheckScheme(strTestScheme) == URI_SCHEME_SIP);
 
     strTestScheme = "tel:";
-    EXPECT_TRUE(pMtsSipFormUtils->CheckScheme(strTestScheme) == MtsSipFormUtils::SCHEME_TEL);
+    EXPECT_TRUE(pMtsSipFormUtils->CheckScheme(strTestScheme) == URI_SCHEME_TEL);
 
     strTestScheme = "sips:";
-    EXPECT_TRUE(pMtsSipFormUtils->CheckScheme(strTestScheme) == MtsSipFormUtils::SCHEME_SIPS);
+    EXPECT_TRUE(pMtsSipFormUtils->CheckScheme(strTestScheme) == URI_SCHEME_SIPS);
 
     strTestScheme = "+12345678901";
-    EXPECT_TRUE(pMtsSipFormUtils->CheckScheme(strTestScheme) == MtsSipFormUtils::SCHEME_UNKNOWN);
+    EXPECT_TRUE(pMtsSipFormUtils->CheckScheme(strTestScheme) == URI_SCHEME_UNKNOWN);
 }
 
 }  // namespace android

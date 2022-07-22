@@ -31,41 +31,6 @@ public:
     IMS_SINT32 GetMti(IN SmsFormatType eSmsFormat, IN const IMS_BYTE* objSms);
     IMS_SINT32 GetMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objSmsData);
     void PrintSmsDataBurst(IN const ByteArray& objSmsData);
-    const IMS_CHAR* GetMtiStringFrom3gpp(IN const IMS_SINT32 nMti);
-    const IMS_CHAR* GetMtiStringFrom3gpp2(IN const IMS_SINT32 nMti);
-
-public:
-    enum
-    {
-        MTS_SMS_TRX_TYPE_SEND = 1,
-        MTS_SMS_TRX_TYPE_RECEIVE,
-        MTS_SMS_TRX_TYPE_INVALID
-    };
-
-    enum
-    {
-        MTS_SMS_MTI_NONE = -1
-    };
-
-    // RP Data Unit type in 3GPP SMS
-    enum
-    {
-        MTS_3GPP_MTI_RP_DATA_From_MS = 0,
-        MTS_3GPP_MTI_RP_DATA_From_N = 1,
-        MTS_3GPP_MTI_RP_ACK_From_MS = 2,
-        MTS_3GPP_MTI_RP_ACK_From_N = 3,
-        MTS_3GPP_MTI_RP_ERROR_From_MS = 4,
-        MTS_3GPP_MTI_RP_ERROR_From_N = 5,
-        MTS_3GPP_MTI_RP_SMMA = 6
-    };
-
-    // Bearer Data Unit type in 3GPP2 SMS
-    enum
-    {
-        MTS_3GPP2_MTI_SMS_POINT_TO_POINT = 0,
-        MTS_3GPP2_MTI_SMS_BROADCAST = 1,
-        MTS_3GPP2_MTI_SMS_ACKNOWLEDGE = 2
-    };
 };
 
 #endif

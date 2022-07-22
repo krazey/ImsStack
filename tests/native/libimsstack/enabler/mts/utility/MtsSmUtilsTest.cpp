@@ -36,36 +36,4 @@ TEST_F(MtsSmUtilsTest, Constructor)
     ASSERT_NE(pMtsSmUtils, nullptr);
 }
 
-TEST_F(MtsSmUtilsTest, GetMtiStringFrom3gpp)
-{
-    EXPECT_STREQ(pMtsSmUtils->GetMtiStringFrom3gpp(MtsSmUtils::MTS_3GPP_MTI_RP_DATA_From_MS),
-            "MTS_3GPP_MTI_RP_DATA_From_MS");
-    EXPECT_STREQ(pMtsSmUtils->GetMtiStringFrom3gpp(MtsSmUtils::MTS_3GPP_MTI_RP_DATA_From_N),
-            "MTS_3GPP_MTI_RP_DATA_From_N");
-    EXPECT_STREQ(pMtsSmUtils->GetMtiStringFrom3gpp(MtsSmUtils::MTS_3GPP_MTI_RP_ACK_From_MS),
-            "MTS_3GPP_MTI_RP_ACK_From_MS");
-    EXPECT_STREQ(pMtsSmUtils->GetMtiStringFrom3gpp(MtsSmUtils::MTS_3GPP_MTI_RP_ACK_From_N),
-            "MTS_3GPP_MTI_RP_ACK_From_N");
-    EXPECT_STREQ(pMtsSmUtils->GetMtiStringFrom3gpp(MtsSmUtils::MTS_3GPP_MTI_RP_ERROR_From_MS),
-            "MTS_3GPP_MTI_RP_ERROR_From_MS");
-    EXPECT_STREQ(pMtsSmUtils->GetMtiStringFrom3gpp(MtsSmUtils::MTS_3GPP_MTI_RP_ERROR_From_N),
-            "MTS_3GPP_MTI_RP_ERROR_From_N");
-    EXPECT_STREQ(pMtsSmUtils->GetMtiStringFrom3gpp(MtsSmUtils::MTS_3GPP_MTI_RP_SMMA),
-            "MTS_3GPP_MTI_RP_SMMA");
-    EXPECT_STREQ(pMtsSmUtils->GetMtiStringFrom3gpp(MtsSmUtils::MTS_SMS_MTI_NONE),
-            "SMS 3GPP MTI INFO INVALID");
-}
-
-TEST_F(MtsSmUtilsTest, GetMtiStringFrom3gpp2)
-{
-    EXPECT_STREQ(pMtsSmUtils->GetMtiStringFrom3gpp2(MtsSmUtils::MTS_3GPP2_MTI_SMS_POINT_TO_POINT),
-            "MTS_3GPP2_MTI_SMS_POINT_TO_POINT");
-    EXPECT_STREQ(pMtsSmUtils->GetMtiStringFrom3gpp2(MtsSmUtils::MTS_3GPP2_MTI_SMS_BROADCAST),
-            "MTS_3GPP2_MTI_SMS_BROADCAST");
-    EXPECT_STREQ(pMtsSmUtils->GetMtiStringFrom3gpp2(MtsSmUtils::MTS_3GPP2_MTI_SMS_ACKNOWLEDGE),
-            "MTS_3GPP2_MTI_SMS_ACKNOWLEDGE");
-    EXPECT_STREQ(pMtsSmUtils->GetMtiStringFrom3gpp2(MtsSmUtils::MTS_SMS_MTI_NONE),
-            "SMS 3GPP2 MTI INFO INVALID");
-}
-
 }  // namespace android

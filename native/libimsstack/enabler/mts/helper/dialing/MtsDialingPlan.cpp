@@ -92,7 +92,7 @@ AString MtsDialingPlan::Translate(IN const AString& strTargetAddress,
 
     IMS_SINT32 nScheme = TranslateScheme();
 
-    if (nScheme != MtsSipFormUtils::SCHEME_TEL)
+    if (nScheme != URI_SCHEME_TEL)
     {
         if (bUssi)
         {
@@ -317,18 +317,18 @@ IMS_SINT32 MtsDialingPlan::TranslateScheme() const
 {
     if (m_strScheme.EqualsIgnoreCase("tel"))
     {
-        return MtsSipFormUtils::SCHEME_TEL;
+        return URI_SCHEME_TEL;
     }
     else if (m_strScheme.EqualsIgnoreCase("sip"))
     {
-        return MtsSipFormUtils::SCHEME_SIP;
+        return URI_SCHEME_SIP;
     }
     else if (m_strScheme.EqualsIgnoreCase("sips"))
     {
-        return MtsSipFormUtils::SCHEME_SIPS;
+        return URI_SCHEME_SIPS;
     }
 
-    return MtsSipFormUtils::SCHEME_UNKNOWN;
+    return URI_SCHEME_UNKNOWN;
 }
 
 PRIVATE GLOBAL IMS_SINT32 MtsDialingPlan::GetNumberFormat(IN const AString& strTargetAddress)

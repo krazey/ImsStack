@@ -19,92 +19,93 @@
 
 #include "IMtsCallTrackerListener.h"
 #include "MtsCallTracker.h"
+#include "MtsStringDef.h"
 
 __IMS_TRACE_TAG_COM_SMS__;
 
 PUBLIC
-MtsCallTracker::MtsCallTracker(IN IMS_SINT32 nSlotId_) :
-        nSlotId(nSlotId_),
-        nEmergencyState(STATE_IDLE),
-        objEmergencyCalls(IMSMap<IMS_SINTP, IMS_UINT32>()),
-        objListeners(IMSList<IMtsCallTrackerListener*>())
+MtsCallTracker::MtsCallTracker(IN IMS_SINT32 nSlotId) :
+        m_nSlotId(nSlotId),
+        m_nEmergencyState(CALL_STATE_IDLE),
+        m_objEmergencyCalls(IMSMap<IMS_SINTP, IMS_UINT32>()),
+        m_objListeners(IMSList<IMtsCallTrackerListener*>())
 {
-    IMS_TRACE_I("MtsCallTracker constructor: nSlotId : [%d]", nSlotId, 0, 0);
+    IMS_TRACE_I("MtsCallTracker [slot_%d]", m_nSlotId, 0, 0);
     // TO-DO: Listen the mtc call tracker
 }
 
 PUBLIC
 MtsCallTracker::~MtsCallTracker()
 {
-    IMS_TRACE_I("MtsCallTracker extinctor: nSlotId : [%d]", nSlotId, 0, 0);
-    objListeners.Clear();
+    IMS_TRACE_I("~MtsCallTracker [slot_%d]", m_nSlotId, 0, 0);
+    m_objListeners.Clear();
 }
 
 PUBLIC
 IMS_BOOL MtsCallTracker::IsEmergencyCallActive() const
 {
-    IMS_TRACE_I("IsEmergencyCallActive :: nEmergencyState : [%d]", nEmergencyState, 0, 0);
-    return (nEmergencyState > STATE_IDLE);
+    IMS_TRACE_I("IsEmergencyCallActive : m_nEmergencyState[%d]", m_nEmergencyState, 0, 0);
+    return (m_nEmergencyState > CALL_STATE_IDLE);
 }
 
 PUBLIC
 IMS_SINT32 MtsCallTracker::GetSlotId() const
 {
-    return nSlotId;
+    return m_nSlotId;
 }
 
 PUBLIC
 IMS_UINT32 MtsCallTracker::GetCallState(IN IMS_UINT32 nType) const
 {
-    if (nType == TYPE_EMERGENCY)
+    if (nType == CALL_TYPE_EMERGENCY)
     {
-        return nEmergencyState;
+        return m_nEmergencyState;
     }
 
-    return STATE_IDLE;
+    return CALL_STATE_IDLE;
 }
 
 PUBLIC
 IMS_UINT32 MtsCallTracker::GetSessionType(IN IMS_UINT32 nType) const
 {
-    IMS_TRACE_I("GetSessionType :: nType : [%d]", nType, 0, 0);
+    IMS_TRACE_I("GetSessionType: nType[%d]", nType, 0, 0);
     return SESSION_TYPE_NONE;
 }
 
 PUBLIC
 void MtsCallTracker::AddListener(IN IMtsCallTrackerListener* piListener)
 {
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IMtsCallTrackerListener* pTmpListener = objListeners.GetAt(i);
+        IMtsCallTrackerListener* pTmpListener = m_objListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
-            IMS_TRACE_I("AddListener:: Listener is already added", 0, 0, 0);
+            IMS_TRACE_I("AddListener : Listener is already added", 0, 0, 0);
             return;
         }
     }
 
-    objListeners.Append(piListener);
+    m_objListeners.Append(piListener);
 }
 
 PUBLIC
 void MtsCallTracker::RemoveListener(IN IMtsCallTrackerListener* piListener)
 {
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IMtsCallTrackerListener* pTmpListener = objListeners.GetAt(i);
+        IMtsCallTrackerListener* pTmpListener = m_objListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
-            objListeners.RemoveAt(i);
-            IMS_TRACE_I("RemoveListener:: Listener is removed", 0, 0, 0);
+            m_objListeners.RemoveAt(i);
+            IMS_TRACE_I("RemoveListener : Listener is removed", 0, 0, 0);
             return;
         }
     }
 }
 
-PROTECTED
+PRIVATE
 void MtsCallTracker::AddOrUpdateCall(
         IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls, IN IMS_SINTP nKey, IN IMS_UINT32 nState)
 {
@@ -118,11 +119,11 @@ void MtsCallTracker::AddOrUpdateCall(
 
     if (!objCalls.Add(nKey, nState))
     {
-        IMS_TRACE_E(0, "AddOrUpdateCall :: map error", 0, 0, 0);
+        IMS_TRACE_E(0, "AddOrUpdateCall : map error", 0, 0, 0);
     }
 }
 
-PROTECTED
+PRIVATE
 void MtsCallTracker::RemoveCall(IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls, IN IMS_SINTP nKey)
 {
     IMS_SINT32 nAt = objCalls.GetIndexOfKey(nKey);
@@ -135,71 +136,71 @@ void MtsCallTracker::RemoveCall(IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls, IN I
     objCalls.RemoveAt(nAt);
 }
 
-PROTECTED
+PRIVATE
 IMS_UINT32 MtsCallTracker::GetConvertedState(IN IMS_UINT32 nState)
 {
     switch (nState)
     {
             /* _UC_TO_MTC_
                     case IUCCallListener::UC_CALL_STATE_IDLE:
-                        return STATE_IDLE;
+                        return CALL_STATE_IDLE;
 
                     case IUCCallListener::UC_CALL_STATE_TERMINATING:
-                        return STATE_TERMINATING;
+                        return CALL_STATE_TERMINATING;
 
                     case IUCCallListener::UC_CALL_STATE_RINGBACK:
-                        return STATE_RINGBACK;
+                        return CALL_STATE_RINGBACK;
 
                     case IUCCallListener::UC_CALL_STATE_RINGING:
-                        return STATE_RINGING;
+                        return CALL_STATE_RINGING;
 
                     case IUCCallListener::UC_CALL_STATE_ALERTING:
-                        return STATE_ALERTING;
+                        return CALL_STATE_ALERTING;
 
                     case IUCCallListener::UC_CALL_STATE_OFFHOOK:
-                        return STATE_OFFHOOK;
+                        return CALL_STATE_OFFHOOK;
             */
         default:
             break;
     }
 
-    return STATE_IDLE;
+    return CALL_STATE_IDLE;
 }
 
-PROTECTED
+PRIVATE
 IMS_UINT32 MtsCallTracker::GetTotalState(IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls)
 {
     if (objCalls.IsEmpty())
     {
-        return STATE_IDLE;
+        return CALL_STATE_IDLE;
     }
 
     if (objCalls.GetSize() > 1)
     {
-        return STATE_OFFHOOK;
+        return CALL_STATE_OFFHOOK;
     }
 
     return objCalls.GetValueAt(0);
 }
 
-PROTECTED
+PRIVATE
 IMS_UINT32 MtsCallTracker::GetState(IN IMS_UINT32 nType) const
 {
-    if (nType == TYPE_EMERGENCY)
+    if (nType == CALL_TYPE_EMERGENCY)
     {
-        return nEmergencyState;
+        return m_nEmergencyState;
     }
 
-    return STATE_IDLE;
+    return CALL_STATE_IDLE;
 }
 
-PROTECTED
+PRIVATE
 void MtsCallTracker::SetState(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
     switch (nType)
     {
-        case TYPE_EMERGENCY:
-            nEmergencyState = nState;
+        case CALL_TYPE_EMERGENCY:
+            m_nEmergencyState = nState;
             break;
 
         default:
@@ -207,12 +208,12 @@ void MtsCallTracker::SetState(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
     }
 }
 
-PROTECTED
+PRIVATE
 void MtsCallTracker::Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
-    for (IMS_UINT32 nAt = 0; nAt < objListeners.GetSize(); nAt++)
+    for (IMS_UINT32 nAt = 0; nAt < m_objListeners.GetSize(); nAt++)
     {
-        IMtsCallTrackerListener* piListener = objListeners.GetAt(nAt);
+        IMtsCallTrackerListener* piListener = m_objListeners.GetAt(nAt);
 
         if (piListener != IMS_NULL)
         {
@@ -221,30 +222,30 @@ void MtsCallTracker::Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
     }
 }
 
-PROTECTED
+PRIVATE
 void MtsCallTracker::ProcessEmergencyChanged(IN IMS_SINTP nKey, IN IMS_UINT32 nState)
 {
-    if (nState == STATE_IDLE)
+    if (nState == CALL_STATE_IDLE)
     {
-        RemoveCall(objEmergencyCalls, nKey);
+        RemoveCall(m_objEmergencyCalls, nKey);
     }
     else
     {
-        AddOrUpdateCall(objEmergencyCalls, nKey, nState);
+        AddOrUpdateCall(m_objEmergencyCalls, nKey, nState);
     }
 
-    IMS_UINT32 nCurrState = GetTotalState(objEmergencyCalls);
-    IMS_TRACE_I("ProcessEmergencyChanged :: old (%s) -> curr (%s)", StateToString(nEmergencyState),
-            StateToString(nCurrState), 0);
+    IMS_UINT32 nCurrState = GetTotalState(m_objEmergencyCalls);
+    IMS_TRACE_I("ProcessEmergencyChanged : old [%s]->curr[%s]", PS_CallState(m_nEmergencyState),
+            PS_CallState(nCurrState), 0);
 
-    if (nEmergencyState != nCurrState)
+    if (m_nEmergencyState != nCurrState)
     {
-        SetState(TYPE_EMERGENCY, nCurrState);
-        Notify(TYPE_EMERGENCY, nCurrState);
+        SetState(CALL_TYPE_EMERGENCY, nCurrState);
+        Notify(CALL_TYPE_EMERGENCY, nCurrState);
     }
 }
 
-PROTECTED
+PRIVATE
 void MtsCallTracker::ChangedCallState(IN IMS_UINTP nParam)
 {
     if (nParam == IMS_NULL)
@@ -261,8 +262,8 @@ void MtsCallTracker::ChangedCallState(IN IMS_UINTP nParam)
             return;
         }
 
-        IMS_TRACE_I("ChangedCallState :: nKey (%p) , nService (%d) , nState (%d)", piState->nKey,
-       piState->eServiceType, piState->eState); switch (piState->eServiceType)
+        IMS_TRACE_I("ChangedCallState : nKey[%p], nService[%d], nState[%d]", piState->nKey,
+        piState->eServiceType, piState->eState); switch (piState->eServiceType)
         {
             case IUCCallListener::SERVICETYPE_EMERGENCY:
                 ProcessEmergencyChanged(piState->nKey, GetConvertedState(piState->eState));
@@ -275,7 +276,7 @@ void MtsCallTracker::ChangedCallState(IN IMS_UINTP nParam)
     */
 }
 
-PROTECTED
+PRIVATE
 void MtsCallTracker::ChangedCallTotalState(IN IMS_UINTP nParam)
 {
     if (nParam == IMS_NULL)
@@ -288,57 +289,18 @@ void MtsCallTracker::ChangedCallTotalState(IN IMS_UINTP nParam)
 
         if (piTotalState->eState == IUCCallListener::UC_CALL_STATE_IDLE)
         {
-            IMS_UINT32 nEmergencyCount = objEmergencyCalls.GetSize();
-            IMS_TRACE_I("ChangedCallTotalState :: Emergency(%d)", nEmergencyCount, 0, 0);
+            IMS_UINT32 nEmergencyCount = m_objEmergencyCalls.GetSize();
+            IMS_TRACE_I("ChangedCallTotalState : Emergency[%d]", nEmergencyCount, 0, 0);
 
             if (nEmergencyCount > 0)
             {
-                objEmergencyCalls.Clear();
+                m_objEmergencyCalls.Clear();
 
-                SetState(TYPE_EMERGENCY, STATE_IDLE);
-                Notify(TYPE_EMERGENCY, STATE_IDLE);
+                SetState(CALL_TYPE_EMERGENCY, CALL_STATE_IDLE);
+                Notify(CALL_TYPE_EMERGENCY, CALL_STATE_IDLE);
             }
         }
 
         delete piTotalState;
     */
-}
-
-PROTECTED GLOBAL const IMS_CHAR* MtsCallTracker::TypeToString(IN IMS_UINT32 nType)
-{
-    switch (nType)
-    {
-        case TYPE_EMERGENCY:
-            return "TYPE_EMERGENCY";
-
-        default:
-            return "__INVALID__";
-    }
-}
-
-PROTECTED GLOBAL const IMS_CHAR* MtsCallTracker::StateToString(IN IMS_UINT32 nState)
-{
-    switch (nState)
-    {
-        case STATE_IDLE:
-            return "STATE_IDLE";
-
-        case STATE_TERMINATING:
-            return "STATE_TERMINATING";
-
-        case STATE_RINGBACK:
-            return "STATE_RINGBACK";
-
-        case STATE_RINGING:
-            return "STATE_RINGING";
-
-        case STATE_ALERTING:
-            return "STATE_ALERTING";
-
-        case STATE_OFFHOOK:
-            return "STATE_OFFHOOK";
-
-        default:
-            return "__INVALID__";
-    }
 }
