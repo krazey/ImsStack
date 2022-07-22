@@ -119,7 +119,7 @@ public class ApnImsTest {
         // handle request to connect if ApnIms is enabled
         mApnIms.employApn();
         assertTrue(mApnIms.connect());
-        assertEquals(mApnIms.getAPNReqState(), EApnReqState.APN_REQUEST_DONE);
+        assertEquals(mApnIms.getApnReqState(), EApnReqState.APN_REQUEST_DONE);
         assertEquals(mApnIms.getDataState(), TelephonyManager.DATA_CONNECTING);
         verify(mConnectivityManager, times(1)).requestNetwork(
                 any(NetworkRequest.class), any(ConnectivityManager.NetworkCallback.class));
@@ -133,16 +133,16 @@ public class ApnImsTest {
         replaceInstance(Apn.class, "mNetworkCallback", mApnIms, mMockNetworkCallback);
 
         // do not handle request to disconnect because apn has never been requested to connect
-        assertEquals(mApnIms.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        assertEquals(mApnIms.getApnReqState(), EApnReqState.APN_REQUEST_IDLE);
         assertFalse(mApnIms.disconnect());
 
         // handle request to disconnect if request to connect is done
         mApnIms.employApn();
-        mApnIms.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
 
         assertTrue(mApnIms.disconnect());
         verify(mConnectivityManager, times(1)).unregisterNetworkCallback(mMockNetworkCallback);
-        assertEquals(mApnIms.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        assertEquals(mApnIms.getApnReqState(), EApnReqState.APN_REQUEST_IDLE);
         assertEquals(mApnIms.getDataState(), TelephonyManager.DATA_DISCONNECTED);
         mTestableLooper.processAllMessages();
         verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
@@ -175,10 +175,10 @@ public class ApnImsTest {
         // if apn is not requested, ignore event
         mApnIms.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
         mTestableLooper.processAllMessages();
-        assertEquals(mApnIms.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        assertEquals(mApnIms.getApnReqState(), EApnReqState.APN_REQUEST_IDLE);
 
         // if apn has been requested before, notify data connection state change
-        mApnIms.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
         mApnIms.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
         mTestableLooper.processAllMessages();
 
@@ -193,13 +193,13 @@ public class ApnImsTest {
     @Test
     public void testHandleNetworkLost() throws Exception {
         // if data state is not DATA_CONNECTED, ignore event
-        assertEquals(mApnIms.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        assertEquals(mApnIms.getApnReqState(), EApnReqState.APN_REQUEST_IDLE);
         assertEquals(mApnIms.getDataState(), TelephonyManager.DATA_DISCONNECTED);
         mApnIms.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
         mTestableLooper.processAllMessages();
 
         // if data state is DATA_CONNECTED, notify data connection state change
-        mApnIms.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
         mApnIms.setDataState(TelephonyManager.DATA_CONNECTED);
         mApnIms.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
         mTestableLooper.processAllMessages();
@@ -259,12 +259,12 @@ public class ApnImsTest {
         when(mMockIDcSettings.isPermanentFailure(EApnType.IMS, failureCause)).thenReturn(true);
 
         // if apn is not requested, ignore event
-        assertEquals(mApnIms.getAPNReqState(), EApnReqState.APN_REQUEST_IDLE);
+        assertEquals(mApnIms.getApnReqState(), EApnReqState.APN_REQUEST_IDLE);
         mApnIms.sendEmptyMessage(Apn.EVENT_DATA_CONNECTION_FAILED);
         mTestableLooper.processAllMessages();
 
         // if apn has been requested before, notify data connection state change
-        mApnIms.setAPNReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
         mApnIms.setDataState(TelephonyManager.DATA_CONNECTING);
 
         Message msg = Message.obtain();
