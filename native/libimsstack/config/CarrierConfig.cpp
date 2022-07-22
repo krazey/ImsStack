@@ -785,6 +785,8 @@ const IMS_CHAR CarrierConfig::Assets::
                 "rereg_error_codes_with_init_reg_with_available_pcscf_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIVATION_INT_ARRAY[] =
         "rereg_error_codes_with_ims_pdn_reactivation_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRE_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL[] =
+        "require_reg_after_ims_call_end_on_reg_held_bool";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[] =
         "specific_registration_error_bundle";

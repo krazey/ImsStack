@@ -359,6 +359,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUserInfoInContactSupported() const
     return m_objAsset.bSupportContactUserInfo;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRequiredAfterImsCallEndOnRegHeld() const
+{
+    return m_objAsset.bRequireRegAfterImsCallEndOnRegHeld;
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);
@@ -1356,6 +1361,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
                     Assets::KEY_REREG_ERROR_CODES_WITH_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY);
     m_objAsset.objReregErrorCodesWithImsPdnReactivation = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIVATION_INT_ARRAY);
+    m_objAsset.bRequireRegAfterImsCallEndOnRegHeld = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_REQUIRE_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL);
 }
 
 PRIVATE

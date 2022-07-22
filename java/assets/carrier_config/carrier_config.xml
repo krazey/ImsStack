@@ -320,6 +320,7 @@
     </int-array>
     <int-array name="rereg_error_codes_with_ims_pdn_reactivation_int_array" num="0">
     </int-array>
+    <boolean name="require_reg_after_ims_call_end_on_reg_held_bool" value="false"/>
     <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
     <int name="specific_registration_error_final_type_int" value="0"/>
     <int name="specific_registration_error_policy_int" value="0"/>

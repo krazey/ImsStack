@@ -4954,6 +4954,12 @@ PROTECTED VIRTUAL void AosRegistration::CallTracker_StateChanged(
         SetHeldByCall(IMS_FALSE);
         UpdateTransactionStarted();
 
+        if (GET_N_CONFIG(m_nSlotId)->IsRegRequiredAfterImsCallEndOnRegHeld())
+        {
+            ProcessReinitiate();
+            return;
+        }
+
         if (IsTransactionStarted())
         {
             ProcessPendingTransaction();

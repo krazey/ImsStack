@@ -73,7 +73,8 @@ public:
                     CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION),
             objRegErrorCodesWithPcscfDiscovery(IMSVector<IMS_SINT32>()),
             objReregErrorCodesWithInitRegWithAvailablePcscf(IMSVector<IMS_SINT32>()),
-            objReregErrorCodesWithImsPdnReactivation(IMSVector<IMS_SINT32>())
+            objReregErrorCodesWithImsPdnReactivation(IMSVector<IMS_SINT32>()),
+            bRequireRegAfterImsCallEndOnRegHeld(IMS_FALSE)
     {
     }
 
@@ -127,5 +128,6 @@ public:
     IMSVector<IMS_SINT32> objRegErrorCodesWithPcscfDiscovery;
     IMSVector<IMS_SINT32> objReregErrorCodesWithInitRegWithAvailablePcscf;
     IMSVector<IMS_SINT32> objReregErrorCodesWithImsPdnReactivation;
+    IMS_BOOL bRequireRegAfterImsCallEndOnRegHeld;
 };
 #endif  // AOS_ASSET_H_

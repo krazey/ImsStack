@@ -377,6 +377,15 @@ public:
     virtual IMS_BOOL IsUserInfoInContactSupported() const = 0;
 
     /**
+     * @brief Flag indicating the initial registration is tried on not
+     *        right after IMS call is ended while registration is held bacuase re-registration is
+     *        failed during active call.
+     *
+     * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     */
+    virtual IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5
