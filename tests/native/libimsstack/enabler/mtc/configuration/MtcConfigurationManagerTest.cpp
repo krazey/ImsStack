@@ -440,7 +440,7 @@ TEST_F(MtcConfigurationManagerTest, IsRejectOfferlessInviteReturnsValueInCarrier
 
 TEST_F(MtcConfigurationManagerTest, GetCallMaxCountReturnsValueInCarrierConfig)
 {
-    EXPECT_EQ(pManager->GetCallMaxCount(), GetInt(CarrierConfig::ImsVoice::KEY_CALL_MAX_COUNT));
+    EXPECT_EQ(pManager->GetCallMaxCount(), GetInt(CarrierConfig::ImsVoice::KEY_CALL_MAX_COUNT_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest, GetCallTerminateReasonHeaderReturnsValueInCarrierConfig)

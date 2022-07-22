@@ -130,7 +130,7 @@
     <int name="imsvoice.minimum_session_expires_timer_sec_int" value="90"/>
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="0"/>
     <int name="policy_for_local_ringback_tone_with_180_response_int" value="2"/>
-    <int name="imsvoice.call_max_count" value="2"/>
+    <int name="imsvoice.call_max_count_int" value="2"/>
 
     <!-- MTC conference call -->
     <string name="imsvoice.conference_factory_uri_string">sip:conference-factory@lguplus.co.kr</string>
