@@ -19,8 +19,11 @@ package com.android.imsstack.imsservice.mmtel;
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 
+import java.util.concurrent.CountDownLatch;
+
 class MockIAosRegistration implements IAosRegistration {
     private IAosRegistrationListener mAosRegListener;
+    private CountDownLatch mLatch;
 
     public IAosRegistrationListener getListener() {
         return mAosRegListener;
@@ -38,14 +41,17 @@ class MockIAosRegistration implements IAosRegistration {
 
     @Override
     public void updateSipDelegateRegistration() {
+        mLatch.countDown();
     }
 
     @Override
     public void triggerSipDelegateDeregistration() {
+        mLatch.countDown();
     }
 
     @Override
     public void triggerFullNetworkRegistration(int sipCode, String sipReason) {
+        mLatch.countDown();
     }
 
     @Override
@@ -59,5 +65,9 @@ class MockIAosRegistration implements IAosRegistration {
 
     @Override
     public void changeCapabilities(CapabilityPairs pairs) {
+    }
+
+    public void setCountDownLatch(CountDownLatch cl) {
+        mLatch = cl;
     }
 }

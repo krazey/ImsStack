@@ -20,16 +20,20 @@ import android.net.Uri;
 import android.os.Looper;
 import android.telephony.DataFailCause;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
+import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
 import android.util.ArraySet;
 
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.enabler.aos.IAosRegistration;
+import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,6 +48,9 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(JUnit4.class)
 public class ImsRegistrationTrackerTest {
@@ -85,8 +92,12 @@ public class ImsRegistrationTrackerTest {
         int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
                 | IAosRegistrationListener.FeatureTagMask.VIDEO);
 
+        Set<String> tags = new ArraySet<>();
+        tags.add("+g.3gpp.smsip");
+        tags.add("video");
+
         mAosRegListener.notifyRegistering(
-                IAosRegistrationListener.NetworkType.LTE, features, new ArraySet<String>());
+                IAosRegistrationListener.NetworkType.LTE, features, tags);
 
         assertEquals(IAosRegistrationListener.NetworkType.LTE,
                 mRegTracker.getRegisteredNetworkType());
@@ -138,8 +149,11 @@ public class ImsRegistrationTrackerTest {
         int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
                 | IAosRegistrationListener.FeatureTagMask.SMSIP);
 
+        Set<String> tags = new ArraySet<>();
+        tags.add("+g.3gpp.smsip");
+
         mAosRegListener.notifyRegistered(IAosRegistrationListener.NetworkType.IWLAN,
-                features, new ArraySet<String>());
+                features, tags);
 
         assertEquals(true, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.NetworkType.IWLAN,
@@ -209,6 +223,11 @@ public class ImsRegistrationTrackerTest {
 
     @Test
     public void testnotifyTechnologyChangeFailed() {
+        assertNotNull(mRegTracker.getRegistration());
+        mAosRegListener.notifyTechnologyChangeFailed(IAosRegistrationListener.NetworkType.NONE,
+                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+
+        assertNotNull(mRegTracker.getRegistration());
         mAosRegListener.notifyTechnologyChangeFailed(IAosRegistrationListener.NetworkType.LTE,
                 DataFailCause.IWLAN_IKEV2_AUTH_FAILURE);
     }
@@ -219,35 +238,214 @@ public class ImsRegistrationTrackerTest {
         uris[0] = Uri.parse("1111@vzw.com");
         uris[1] = Uri.parse("2222@vzw.com");
 
+        assertNotNull(mRegTracker.getRegistration());
         mAosRegListener.notifyAssociatedUriChanged(uris);
     }
 
     @Test
-    public void testchangeCapabilities() {
+    public void testnotifyCapabilitiesUpdateFailed_CrossSim() {
+        mAosRegListener.notifyCapabilitiesUpdateFailed(IAosRegistrationListener.Capability
+                .CALL_COMPOSER, IAosRegistrationListener.NetworkType.CROSS_SIM,
+                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+
+        verify(mMockCapabilityListener).onCapabilitiesUpdateFailed(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_CALL_COMPOSER,
+                ImsRegistrationImpl.REGISTRATION_TECH_CROSS_SIM,
+                ImsFeature.CAPABILITY_ERROR_GENERIC);
+    }
+
+    @Test
+    public void testnotifyCapabilitiesUpdateFailed_Nr() {
+        mAosRegListener.notifyCapabilitiesUpdateFailed(IAosRegistrationListener.Capability.SMS,
+                IAosRegistrationListener.NetworkType.NR,
+                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+
+        verify(mMockCapabilityListener).onCapabilitiesUpdateFailed(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS,
+                ImsRegistrationImpl.REGISTRATION_TECH_NR, ImsFeature.CAPABILITY_ERROR_GENERIC);
+    }
+
+    @Test
+    public void testnotifyCapabilitiesUpdateFailed_Lte() {
+        mAosRegListener.notifyCapabilitiesUpdateFailed(IAosRegistrationListener.Capability.UT,
+                IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+
+        verify(mMockCapabilityListener).onCapabilitiesUpdateFailed(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT,
+                ImsRegistrationImpl.REGISTRATION_TECH_LTE, ImsFeature.CAPABILITY_ERROR_GENERIC);
+    }
+
+    @Test
+    public void testnotifyCapabilitiesUpdateFailed_Voice() {
+        mAosRegListener.notifyCapabilitiesUpdateFailed(IAosRegistrationListener.Capability.VOICE,
+                IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+
+        verify(mMockCapabilityListener).onCapabilitiesUpdateFailed(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImpl.REGISTRATION_TECH_LTE, ImsFeature.CAPABILITY_ERROR_GENERIC);
+    }
+
+    @Test
+    public void testnotifyCapabilitiesUpdateFailed_Video() {
+        mAosRegListener.notifyCapabilitiesUpdateFailed(IAosRegistrationListener.Capability.VIDEO,
+                IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+
+        verify(mMockCapabilityListener).onCapabilitiesUpdateFailed(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
+                ImsRegistrationImpl.REGISTRATION_TECH_LTE, ImsFeature.CAPABILITY_ERROR_GENERIC);
+    }
+
+    @Test
+    public void testnotifyCapabilitiesUpdateFailed_None() {
+        mAosRegListener.notifyCapabilitiesUpdateFailed(IAosRegistrationListener.Capability.NONE,
+                IAosRegistrationListener.NetworkType.CROSS_SIM,
+                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+
+        verify(mMockCapabilityListener).onCapabilitiesUpdateFailed(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE,
+                ImsRegistrationImpl.REGISTRATION_TECH_CROSS_SIM,
+                ImsFeature.CAPABILITY_ERROR_GENERIC);
+    }
+
+    @Test
+    public void testchangeCapabilities_null() {
+        mRegTracker.changeCapabilities(new ArrayList<>(), new ArrayList<>());
+        assertEquals(null, mRegTracker.createCapabilityPairsFromCapabilities());
+    }
+
+    @Test
+    public void testchangeCapabilities_all() {
         List<CapabilityPair> enableCapabilities = new ArrayList<>();
-        enableCapabilities.add(new CapabilityPair(IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.Capability.VOICE));
-        enableCapabilities.add(new CapabilityPair(IAosRegistrationListener.NetworkType.IWLAN,
-                IAosRegistrationListener.Capability.VOICE));
-        enableCapabilities.add(new CapabilityPair(IAosRegistrationListener.NetworkType.NR,
-                IAosRegistrationListener.Capability.VOICE));
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS,
+                ImsRegistrationImpl.REGISTRATION_TECH_IWLAN));
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
+                ImsRegistrationImpl.REGISTRATION_TECH_NR));
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT,
+                ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_CALL_COMPOSER,
+                ImsRegistrationImpl.REGISTRATION_TECH_CROSS_SIM));
 
         List<CapabilityPair> disableCapabilities = new ArrayList<>();
-        disableCapabilities.add(new CapabilityPair(IAosRegistrationListener.NetworkType.NR,
-                IAosRegistrationListener.Capability.VIDEO));
-        disableCapabilities.add(new CapabilityPair(IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.Capability.VIDEO));
-        disableCapabilities.add(new CapabilityPair(IAosRegistrationListener.NetworkType.IWLAN,
-                IAosRegistrationListener.Capability.VIDEO));
+        disableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
+                ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+        disableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
+                ImsRegistrationImpl.REGISTRATION_TECH_IWLAN));
+
+        CapabilityPairs capabilityPairs = new CapabilityPairs();
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.Capability.VOICE);
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
+                IAosRegistrationListener.Capability.SMS
+                | IAosRegistrationListener.Capability.VIDEO);
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.NR,
+                IAosRegistrationListener.Capability.VIDEO);
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.Capability.UT);
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.CROSS_SIM,
+                IAosRegistrationListener.Capability.CALL_COMPOSER);
 
         mRegTracker.changeCapabilities(enableCapabilities, disableCapabilities);
-        mRegTracker.changeCapabilities(new ArrayList<>(), new ArrayList<>());
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
         mRegTracker.changeCapabilities(enableCapabilities, null);
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+    }
+
+    @Test
+    public void testchangeCapabilities_None() {
+        List<CapabilityPair> enableCapabilities = new ArrayList<>();
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS,
+                ImsRegistrationImpl.REGISTRATION_TECH_IWLAN));
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE,
+                ImsRegistrationImpl.REGISTRATION_TECH_NONE));
+
+        List<CapabilityPair> disableCapabilities = new ArrayList<>();
+        disableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT,
+                ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+        disableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_CALL_COMPOSER,
+                ImsRegistrationImpl.REGISTRATION_TECH_CROSS_SIM));
+        mRegTracker.changeCapabilities(enableCapabilities, disableCapabilities);
+
+
+        CapabilityPairs capabilityPairs = new CapabilityPairs();
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.Capability.VOICE);
+
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
+                IAosRegistrationListener.Capability.SMS);
+
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.NONE,
+                IAosRegistrationListener.Capability.NONE);
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
     }
 
     @Test
     public void testrefreshCallRegistrationState() {
+        int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.SMSIP);
+
+        Set<String> tags = new ArraySet<>();
+        tags.add("+g.3gpp.smsip");
+
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.NetworkType.IWLAN,
+                features, tags);
+        assertEquals(IAosRegistrationListener.NetworkType.IWLAN,
+                mRegTracker.getRegisteredNetworkType());
         mRegTracker.refreshCallRegistrationState();
+        assertEquals(IAosRegistrationListener.NetworkType.LTE,
+                mRegTracker.getRegisteredNetworkType());
+    }
+
+    @Test
+    public void testupdateSipDelegateRegistration() throws InterruptedException {
+        ImsRegistrationImpl regImpl = mRegTracker.getRegistration();
+        assertNotNull(regImpl);
+
+        CountDownLatch lock = new CountDownLatch(1);
+        mAosReg.setCountDownLatch(lock);
+        regImpl.updateSipDelegateRegistration();
+        assertTrue(lock.await(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testtriggerSipDelegateDeregistration() throws InterruptedException {
+        ImsRegistrationImpl regImpl = mRegTracker.getRegistration();
+        assertNotNull(regImpl);
+
+        CountDownLatch lock = new CountDownLatch(1);
+        mAosReg.setCountDownLatch(lock);
+        regImpl.triggerSipDelegateDeregistration();
+        assertTrue(lock.await(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testtriggerFullNetworkRegistration() throws InterruptedException {
+        ImsRegistrationImpl regImpl = mRegTracker.getRegistration();
+        assertNotNull(regImpl);
+
+        CountDownLatch lock = new CountDownLatch(1);
+        mAosReg.setCountDownLatch(lock);
+        regImpl.triggerFullNetworkRegistration(488, null);
+        assertTrue(lock.await(1, TimeUnit.SECONDS));
     }
 
     private class FakeImsRegistrationTracker extends ImsRegistrationTracker {
