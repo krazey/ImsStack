@@ -796,7 +796,7 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
             }
             break;
         case CODE_REJECT_ONGOING_CALL_UPDATE:
-            eStatusCode = SipStatusCode::SC_491;
+            eStatusCode = SipStatusCode::SC_486;
             break;
         case CODE_SESSION_INTERNAL_ERROR:
             eStatusCode = SipStatusCode::SC_480;

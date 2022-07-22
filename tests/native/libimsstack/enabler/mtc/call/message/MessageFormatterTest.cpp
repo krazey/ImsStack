@@ -510,8 +510,8 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
     EXPECT_EQ(GetRejectStatusCode(CODE_USER_NOANSWER), SipStatusCode::SC_603);
     EXPECT_EQ(GetRejectStatusCode(CODE_LOW_BATTERY), SipStatusCode::SC_603);
     EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_CALL_END_UNSPECIFIED), SipStatusCode::SC_603);
-    EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_ONGOING_CALL_WAITING_DISABLED),
-            SipStatusCode::SC_486);
+    EXPECT_EQ(
+            GetRejectStatusCode(CODE_REJECT_ONGOING_CALL_WAITING_DISABLED), SipStatusCode::SC_486);
     EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_SERVICE_UNAVAILABLE), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_VT_TTY_NOT_ALLOWED), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_ONGOING_CS_CALL), SipStatusCode::SC_486);
@@ -530,7 +530,7 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
             SipStatusCode::SC_488);
     EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_606),
             SipStatusCode::SC_606);
-    EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_ONGOING_CALL_UPDATE), SipStatusCode::SC_491);
+    EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_ONGOING_CALL_UPDATE), SipStatusCode::SC_486);
     EXPECT_EQ(GetRejectStatusCode(CODE_SESSION_INTERNAL_ERROR), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED),
             SipStatusCode::SC_580);

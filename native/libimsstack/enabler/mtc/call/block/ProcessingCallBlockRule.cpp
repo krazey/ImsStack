@@ -53,7 +53,7 @@ PUBLIC VIRTUAL ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
 
     if (IsCallUpdating(lstCalls))
     {
-        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_CALL_BUSY));
+        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CALL_UPDATE));
     }
 
     return Result(Result::Status::UNBLOCKED);

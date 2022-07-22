@@ -141,7 +141,7 @@ TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfUpdatingCallExists)
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
-    EXPECT_EQ(CallReasonInfo(CODE_LOCAL_CALL_BUSY), objResult.objReason);
+    EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_CALL_UPDATE), objResult.objReason);
 }
 
 TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedForMoIfEmergencyCallExists)
