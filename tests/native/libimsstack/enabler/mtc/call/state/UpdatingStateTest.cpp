@@ -67,6 +67,19 @@ protected:
     }
 };
 
+TEST_F(UpdatingStateTest, OnExitDoesntSendUpdateIfUpdatingInfoHasPendingUpdateAsDefaultValue)
+{
+    MockIMessage objMessage;
+    MockISession objSession;
+    ON_CALL(objSession, GetNextRequest()).WillByDefault(Return(&objMessage));
+    MockMtcSession objMtcSession(objContext, objSession, CallType::VOIP);
+    ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+
+    EXPECT_CALL(objSession, UpdateEx(_, _)).Times(0);
+
+    pUpdatingState->OnExit();
+}
+
 TEST_F(UpdatingStateTest, OnExitDoesntSendUpdateIfUpdatingInfoDoesntHavePendingUpdate)
 {
     MockIMessage objMessage;
