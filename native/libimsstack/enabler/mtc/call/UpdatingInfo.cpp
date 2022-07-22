@@ -27,7 +27,8 @@ UpdatingInfo::UpdatingInfo() :
         m_objAlertingInfo(MediaInfo()),
         m_objModifiedInfo(MediaInfo()),
         m_bModifier(IMS_FALSE),
-        m_bAlerted(IMS_FALSE)
+        m_bAlerted(IMS_FALSE),
+        m_bHasPendingUpdate(IMS_FALSE)
 {
     IMS_TRACE_D("+UpdatingInfo", 0, 0, 0);
 }
