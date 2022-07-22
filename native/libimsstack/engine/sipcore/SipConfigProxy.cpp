@@ -346,19 +346,19 @@ PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsContactInAll1xxRequired(
     return pSipConfig->IsContactInAll1xxRequired();
 }
 
-PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsCountryInfoRequiredInPaniHeader(
+PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsCountryParameterSupportedInPaniHeader(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
 {
     if (pProfile != IMS_NULL)
     {
         if (pProfile->IsSipFeatureProvisioned())
         {
-            return pProfile->IsCountryInfoRequiredInPaniHeader();
+            return pProfile->IsCountryParameterSupportedInPaniHeader();
         }
     }
 
     const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
-    return pSipConfig->HasFeature(ISipConfig::SIP_FEATURE_CAPS_COUNTRY_INFO_IN_PANI_HEADER);
+    return pSipConfig->HasFeature(ISipConfig::SIP_FEATURE_CAPS_COUNTRY_PARAM_IN_PANI_HEADER);
 }
 
 PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsDisplayNameDquotRequired(
@@ -702,36 +702,36 @@ PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsSessionIdHeaderSupported(
     return pSipConfig->IsSessionIdHeaderSupported();
 }
 
-PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsInvalidMacAddressRequiredInPaniHeader(
+PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsMacAddressHiddenInPaniHeader(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
 {
     if (pProfile != IMS_NULL)
     {
         if (pProfile->IsSipFeatureProvisioned())
         {
-            return pProfile->IsInvalidMacAddressRequiredInPaniHeader();
+            return pProfile->IsMacAddressHiddenInPaniHeader();
         }
     }
 
     const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
 
-    return pSipConfig->IsInvalidMacAddressRequiredInPaniHeader();
+    return pSipConfig->IsMacAddressHiddenInPaniHeader();
 }
 
-PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsLocalTimeZoneRequiredInPaniHeader(
+PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
 {
     if (pProfile != IMS_NULL)
     {
         if (pProfile->IsSipFeatureProvisioned())
         {
-            return pProfile->IsLocalTimeZoneRequiredInPaniHeader();
+            return pProfile->IsLocalTimezoneParameterSupportedInPaniHeader();
         }
     }
 
     const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
 
-    return pSipConfig->IsLocalTimeZoneRequiredInPaniHeader();
+    return pSipConfig->IsLocalTimezoneParameterSupportedInPaniHeader();
 }
 // SIP_FEATURES }
 

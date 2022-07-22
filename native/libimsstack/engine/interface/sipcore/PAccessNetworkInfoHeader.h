@@ -29,22 +29,12 @@ class SipProfile;
  */
 class PAccessNetworkInfoHeader
 {
-private:
-    PAccessNetworkInfoHeader();
+public:
+    PAccessNetworkInfoHeader() = delete;
 
 public:
     /**
      * @brief Forms P-Access-Network-Info header field.
-     *
-     * @param nSlotId Slot id for this header
-     * @param objAnInfo Current access network information which the device is attached
-     * @param strHeader Formed header string
-     * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
-     */
-    static IMS_BOOL FormHeader(
-            IN IMS_SINT32 nSlotId, IN const AccessNetworkInfo& objAnInfo, OUT AString& strHeader);
-    /**
-     * @brief Forms P-Access-Network-Info header field for a specific operator.
      *
      * @param nSlotId Slot id for this header
      * @param piConnection Current network connection which the device is attached
@@ -53,11 +43,11 @@ public:
      * @param strHeader Formed header string
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL FormHeaderForOperatorSpecific(IN IMS_SINT32 nSlotId,
-            IN INetworkConnection* piConnection, IN const SipMethod& objMethod,
-            IN const SipProfile* pSipProfile, OUT AString& strHeader);
+    static IMS_BOOL FormHeader(IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
+            IN const SipMethod& objMethod, IN const SipProfile* pSipProfile,
+            OUT AString& strHeader);
     /**
-     * @brief Forms P-Access-Network-Info header field for a specific operator.
+     * @brief Forms P-Access-Network-Info header field.
      *
      * @param nSlotId Slot id for this header
      * @param objIpAddr Local IP address
@@ -66,9 +56,9 @@ public:
      * @param strHeader Formed header string
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL FormHeaderForOperatorSpecific(IN IMS_SINT32 nSlotId,
-            IN const IPAddress& objIpAddr, IN const SipMethod& objMethod,
-            IN const SipProfile* pSipProfile, OUT AString& strHeader);
+    static IMS_BOOL FormHeader(IN IMS_SINT32 nSlotId, IN const IPAddress& objIpAddr,
+            IN const SipMethod& objMethod, IN const SipProfile* pSipProfile,
+            OUT AString& strHeader);
 
     /**
      * @brief Forms P-Access-Network-Info header and sets it to SIP message.
@@ -82,10 +72,19 @@ public:
             IN const SipProfile* pSipProfile, IN_OUT ISipMessage*& piSipMsg);
 
 private:
-    static void ReformPaniHeaderForInvalidMacAddress(
-            IN const AccessNetworkInfo& objAnInfo, IN_OUT AString& strPaniHeader);
-    static void ReformPaniHeaderForLocalTimeZone(IN_OUT AString& strHeader);
-    static void ReformPaniHeaderForCountryCode(
+    /**
+     * @brief Forms P-Access-Network-Info header field.
+     *
+     * @param nSlotId Slot id for this header
+     * @param objAnInfo Current access network information which the device is attached
+     * @param strHeader Formed header string
+     * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
+     */
+    static IMS_BOOL FormHeader(
+            IN IMS_SINT32 nSlotId, IN const AccessNetworkInfo& objAni, OUT AString& strHeader);
+    static void RefineMacAddressAsInvalid(IN_OUT AccessNetworkInfo& objAni);
+    static void AddLocalTimezone(IN_OUT AString& strHeader);
+    static void AddCountryParameter(
             IN IMS_SINT32 nSlotId, IN_OUT AString& strHeader, IN IMS_BOOL bUseUicc);
     static void SetPrivateHeaderForPlani(IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
             IN_OUT ISipMessage*& piSipMsg);
@@ -93,9 +92,7 @@ private:
             IN_OUT ISipMessage*& piSipMsg);
     static void SetCniHeader(IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
             IN const SipProfile* pSipProfile, IN_OUT ISipMessage*& piSipMsg);
-    static IMS_BOOL IsAccessNetworkTypeWiFi(IN const AccessNetworkInfo& objAnInfo);
-    static IMS_BOOL IsCountryInfoRequiredForVoWiFi(
-            IN IMS_SINT32 nSlotId, IN const SipProfile* pSipProfile);
+    static IMS_BOOL IsAccessNetworkTypeWiFi(IN const AccessNetworkInfo& objAni);
 };
 
 #endif

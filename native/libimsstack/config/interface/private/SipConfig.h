@@ -177,13 +177,13 @@ public:
     {
         return HasFeature(SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER);
     }
-    inline IMS_BOOL IsInvalidMacAddressRequiredInPaniHeader() const
+    inline IMS_BOOL IsMacAddressHiddenInPaniHeader() const
     {
-        return HasFeature(SIP_FEATURE_CAPS_INVALID_MAC_ADDRESS_REQUIRED_IN_PANI_HEADER);
+        return HasFeature(SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER);
     }
-    inline IMS_BOOL IsLocalTimeZoneRequiredInPaniHeader() const
+    inline IMS_BOOL IsLocalTimezoneParameterSupportedInPaniHeader() const
     {
-        return HasFeature(SIP_FEATURE_CAPS_LOCAL_TIME_ZONE_REQUIRED_IN_PANI_HEADER);
+        return HasFeature(SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER);
     }
 
     inline IMS_SINT32 GetRegExpiration() const

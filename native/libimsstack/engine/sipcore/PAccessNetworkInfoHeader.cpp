@@ -34,10 +34,106 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(
-        IN IMS_SINT32 nSlotId, IN const AccessNetworkInfo& objAnInfo, OUT AString& strHeader)
+PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
+        IN INetworkConnection* piConnection, IN const SipMethod& /*objMethod*/,
+        IN const SipProfile* pSipProfile, OUT AString& strHeader)
 {
-    if (!AccessNetworkInfoFormatter::Encode(objAnInfo, strHeader))
+    if (piConnection == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    AccessNetworkInfo objAni;
+
+    piConnection->GetAccessNetworkInfo(objAni);
+
+    if (SipConfigProxy::IsMacAddressHiddenInPaniHeader(nSlotId, pSipProfile))
+    {
+        RefineMacAddressAsInvalid(objAni);
+    }
+
+    if (!FormHeader(nSlotId, objAni, strHeader))
+    {
+        IMS_TRACE_D("Forming PANI header failed", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    if (SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(nSlotId, pSipProfile))
+    {
+        AddLocalTimezone(strHeader);
+    }
+
+    if (IsAccessNetworkTypeWiFi(objAni))
+    {
+        if (SipConfigProxy::IsCountryParameterSupportedInPaniHeader(nSlotId, pSipProfile))
+        {
+            AddCountryParameter(nSlotId, strHeader, IMS_FALSE);
+        }
+    }
+
+    return IMS_TRUE;
+}
+
+PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
+        IN const IPAddress& objIpAddr, IN const SipMethod& objMethod,
+        IN const SipProfile* pSipProfile, OUT AString& strHeader)
+{
+    INetworkConnection* piConnection =
+            NetworkService::GetNetworkService()->FindConnection(objIpAddr);
+
+    if (piConnection != IMS_NULL)
+    {
+        return FormHeader(nSlotId, piConnection, objMethod, pSipProfile, strHeader);
+    }
+
+    return IMS_FALSE;
+}
+
+PUBLIC GLOBAL void PAccessNetworkInfoHeader::SetHeader(IN IMS_SINT32 nSlotId,
+        IN const IPAddress& objIpAddr, IN const SipProfile* pSipProfile,
+        IN_OUT ISipMessage*& piSipMsg)
+{
+    if (piSipMsg == IMS_NULL)
+    {
+        return;
+    }
+
+    INetworkConnection* piConnection =
+            NetworkService::GetNetworkService()->FindConnection(objIpAddr);
+
+    if (piConnection == IMS_NULL)
+    {
+        return;
+    }
+
+    AString strHeader;
+
+    if (!FormHeader(nSlotId, piConnection, piSipMsg->GetMethod(), pSipProfile, strHeader))
+    {
+        return;
+    }
+
+    if (strHeader.GetLength() > 0)
+    {
+        if (piSipMsg->SetHeader(ISipHeader::P_ACCESS_NETWORK_INFO, strHeader) != IMS_SUCCESS)
+        {
+            IMS_TRACE_E(0, "Setting P-Access-Network-Info header failed", 0, 0, 0);
+        }
+    }
+
+    SetPrivateHeaderForPlani(nSlotId, piConnection, piSipMsg);
+
+    if (piConnection->IsePDGEnabled())
+    {
+        SetPrivateHeaderForPlci(nSlotId, piConnection, piSipMsg);
+        SetCniHeader(nSlotId, piConnection, pSipProfile, piSipMsg);
+    }
+}
+
+PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(
+        IN IMS_SINT32 nSlotId, IN const AccessNetworkInfo& objAni, OUT AString& strHeader)
+{
+    if (!AccessNetworkInfoFormatter::Encode(objAni, strHeader))
     {
         return IMS_FALSE;
     }
@@ -47,7 +143,7 @@ PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(
 
     if (pSipConfigV != IMS_NULL)
     {
-        switch (objAnInfo.nType)
+        switch (objAni.nType)
         {
             case AccessNetworkInfo::TYPE_3GPP_UTRAN_FDD:  // FALL-THROUGH
             case AccessNetworkInfo::TYPE_3GPP_UTRAN_TDD:
@@ -86,135 +182,25 @@ PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeaderForOperatorSpecific(
-        IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
-        IN const SipMethod& /*objMethod*/, IN const SipProfile* pSipProfile, OUT AString& strHeader)
+PRIVATE GLOBAL void PAccessNetworkInfoHeader::RefineMacAddressAsInvalid(
+        IN_OUT AccessNetworkInfo& objAni)
 {
-    if (piConnection == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    AccessNetworkInfo objAnInfo;
-
-    piConnection->GetAccessNetworkInfo(objAnInfo);
-
-    if (!FormHeader(nSlotId, objAnInfo, strHeader))
-    {
-        IMS_TRACE_D("Forming PANI header failed", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (SipConfigProxy::IsInvalidMacAddressRequiredInPaniHeader(nSlotId, pSipProfile))
-    {
-        ReformPaniHeaderForInvalidMacAddress(objAnInfo, strHeader);
-    }
-
-    if (strHeader.GetLength() == 0)
-    {
-        IMS_TRACE_D("PANInfo - length 0", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (SipConfigProxy::IsLocalTimeZoneRequiredInPaniHeader(nSlotId, pSipProfile))
-    {
-        ReformPaniHeaderForLocalTimeZone(strHeader);
-    }
-
-    if (IsAccessNetworkTypeWiFi(objAnInfo))
-    {
-        if (IsCountryInfoRequiredForVoWiFi(nSlotId, pSipProfile))
-        {
-            ReformPaniHeaderForCountryCode(nSlotId, strHeader, IMS_FALSE);
-        }
-    }
-
-    return IMS_TRUE;
-}
-
-PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeaderForOperatorSpecific(
-        IN IMS_SINT32 nSlotId, IN const IPAddress& objIpAddr, IN const SipMethod& objMethod,
-        IN const SipProfile* pSipProfile, OUT AString& strHeader)
-{
-    INetworkConnection* piConnection =
-            NetworkService::GetNetworkService()->FindConnection(objIpAddr);
-
-    if (piConnection != IMS_NULL)
-    {
-        return FormHeaderForOperatorSpecific(
-                nSlotId, piConnection, objMethod, pSipProfile, strHeader);
-    }
-
-    return IMS_FALSE;
-}
-
-PUBLIC GLOBAL void PAccessNetworkInfoHeader::SetHeader(IN IMS_SINT32 nSlotId,
-        IN const IPAddress& objIpAddr, IN const SipProfile* pSipProfile,
-        IN_OUT ISipMessage*& piSipMsg)
-{
-    if (piSipMsg == IMS_NULL)
-    {
-        return;
-    }
-
-    INetworkConnection* piConnection =
-            NetworkService::GetNetworkService()->FindConnection(objIpAddr);
-
-    if (piConnection == IMS_NULL)
-    {
-        return;
-    }
-
-    AString strHeader;
-
-    if (!FormHeaderForOperatorSpecific(
-                nSlotId, piConnection, piSipMsg->GetMethod(), pSipProfile, strHeader))
-    {
-        return;
-    }
-
-    if (strHeader.GetLength() > 0)
-    {
-        if (piSipMsg->SetHeader(ISipHeader::P_ACCESS_NETWORK_INFO, strHeader) != IMS_SUCCESS)
-        {
-            IMS_TRACE_E(0, "Setting P-Access-Network-Info header failed", 0, 0, 0);
-        }
-    }
-
-    SetPrivateHeaderForPlani(nSlotId, piConnection, piSipMsg);
-
-    if (piConnection->IsePDGEnabled())
-    {
-        SetPrivateHeaderForPlci(nSlotId, piConnection, piSipMsg);
-        SetCniHeader(nSlotId, piConnection, pSipProfile, piSipMsg);
-    }
-}
-
-PRIVATE GLOBAL void PAccessNetworkInfoHeader::ReformPaniHeaderForInvalidMacAddress(
-        IN const AccessNetworkInfo& objAnInfo, IN_OUT AString& strPaniHeader)
-{
-    switch (objAnInfo.nType)
+    switch (objAni.nType)
     {
         case AccessNetworkInfo::TYPE_IEEE_802_11:   // FALL-THROUGH
         case AccessNetworkInfo::TYPE_IEEE_802_11A:  // FALL-THROUGH
         case AccessNetworkInfo::TYPE_IEEE_802_11B:  // FALL-THROUGH
         case AccessNetworkInfo::TYPE_IEEE_802_11G:  // FALL-THROUGH
         case AccessNetworkInfo::TYPE_IEEE_802_11N:
-            strPaniHeader = "IEEE-802.11;i-wlan-node-id=000000000000";
+            IMS_MEM_Memset(&objAni.uniAI.i_wlan_node_id, 0x00, sizeof(I_WLAN_NODE_ID));
             break;
         default:
             break;
     }
 }
 
-PRIVATE GLOBAL void PAccessNetworkInfoHeader::ReformPaniHeaderForLocalTimeZone(
-        IN_OUT AString& strHeader)
+PRIVATE GLOBAL void PAccessNetworkInfoHeader::AddLocalTimezone(IN_OUT AString& strHeader)
 {
-    if (strHeader.GetLength() == 0)
-    {
-        return;
-    }
-
     ISystemTime* piSysTime = SystemTimeService::GetSystemTimeService()->GetSystemTime();
 
     if (piSysTime != IMS_NULL)
@@ -232,7 +218,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::ReformPaniHeaderForLocalTimeZone(
     }
 }
 
-PRIVATE GLOBAL void PAccessNetworkInfoHeader::ReformPaniHeaderForCountryCode(
+PRIVATE GLOBAL void PAccessNetworkInfoHeader::AddCountryParameter(
         IN IMS_SINT32 nSlotId, IN_OUT AString& strHeader, IN IMS_BOOL bUseUicc)
 {
     AString strCountry(AString::ConstEmpty());
@@ -248,7 +234,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::ReformPaniHeaderForCountryCode(
         strCountry = piLocation->GetCountry();
     }
 
-    if ((strCountry.GetLength() == 0) || (strCountry.Equals("ZZ")))
+    if ((strCountry.GetLength() == 0) || strCountry.Equals("ZZ"))
     {
         if (bUseUicc)
         {
@@ -264,7 +250,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::ReformPaniHeaderForCountryCode(
         }
     }
 
-    if ((strCountry.GetLength() > 0) && (!strCountry.Equals("ZZ")))
+    if ((strCountry.GetLength() > 0) && !strCountry.Equals("ZZ"))
     {
         strHeader.Append(";country=");
         strHeader.Append(strCountry);
@@ -504,9 +490,9 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetCniHeader(IN IMS_SINT32 nSlotId
 }
 
 PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::IsAccessNetworkTypeWiFi(
-        IN const AccessNetworkInfo& objAnInfo)
+        IN const AccessNetworkInfo& objAni)
 {
-    switch (objAnInfo.nType)
+    switch (objAni.nType)
     {
         case AccessNetworkInfo::TYPE_IEEE_802_11:   // FALL-THROUGH
         case AccessNetworkInfo::TYPE_IEEE_802_11A:  // FALL-THROUGH
@@ -519,16 +505,4 @@ PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::IsAccessNetworkTypeWiFi(
     }
 
     return IMS_FALSE;
-}
-
-PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::IsCountryInfoRequiredForVoWiFi(
-        IN IMS_SINT32 nSlotId, IN const SipProfile* pSipProfile)
-{
-    (void)pSipProfile;
-
-    // If runtime condition is required, then use SipProfile.
-    IMS_BOOL bCountryInfoRequired =
-            SipConfigProxy::IsCountryInfoRequiredInPaniHeader(nSlotId, IMS_NULL /*pSipProfile*/);
-
-    return bCountryInfoRequired;
 }

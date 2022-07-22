@@ -128,8 +128,8 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_INVALID_MAC_ADDRESS_REQUIRED_IN_PANI_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_LOCAL_TIME_ZONE_REQUIRED_IN_PANI_HEADER\n
+     *         #ISipConfig#SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER\n
+     *         #ISipConfig#SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB\n
      *         #ISipConfig#SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG\n
@@ -137,7 +137,7 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_ROUTE_HEADER_IN_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_NO_ACCEPT_CONTACT_HEADER_IN_BYE\n
      *         #ISipConfig#SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_COUNTRY_INFO_IN_PANI_HEADER\n
+     *         #ISipConfig#SIP_FEATURE_CAPS_COUNTRY_PARAM_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_AUTHENTICATION_ALGORITHM_PARAMETER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT\n
      *         #ISipConfig#SIP_FEATURE_CAPS_USER_AGENT\n
@@ -272,8 +272,8 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_INVALID_MAC_ADDRESS_REQUIRED_IN_PANI_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_LOCAL_TIME_ZONE_REQUIRED_IN_PANI_HEADER\n
+     *         #ISipConfig#SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER\n
+     *         #ISipConfig#SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB\n
      *         #ISipConfig#SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG\n
@@ -281,7 +281,7 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_ROUTE_HEADER_IN_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_NO_ACCEPT_CONTACT_HEADER_IN_BYE\n
      *         #ISipConfig#SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_COUNTRY_INFO_IN_PANI_HEADER\n
+     *         #ISipConfig#SIP_FEATURE_CAPS_COUNTRY_PARAM_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_AUTHENTICATION_ALGORITHM_PARAMETER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT\n
      *         #ISipConfig#SIP_FEATURE_CAPS_USER_AGENT\n
@@ -289,7 +289,7 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX\n
      *         #ISipConfig#SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN
      */
-    inline void SetSipFeatures(IN IMS_SINT32 nFeatures) { m_nSipFeatures = nFeatures; }
+    inline void SetSipFeatureCaps(IN IMS_SINT32 nFeatures) { m_nSipFeatures = nFeatures; }
 
     /**
      * @brief Sets the default SIP timer T1.
@@ -415,14 +415,14 @@ public:
     }
 
     /**
-     * @brief Checks if the country information in P-Access-Network-Info header
+     * @brief Checks if the country parameter in P-Access-Network-Info header
      *        should be added or not.
      *
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    inline IMS_BOOL IsCountryInfoRequiredInPaniHeader() const
+    inline IMS_BOOL IsCountryParameterSupportedInPaniHeader() const
     {
-        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_COUNTRY_INFO_IN_PANI_HEADER);
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_COUNTRY_PARAM_IN_PANI_HEADER);
     }
 
     /**
@@ -660,23 +660,23 @@ public:
     }
 
     /**
-     * @brief Checks if the invalid MAC address is required in PANI header on Wi-Fi.
+     * @brief Checks if the MAC address should be hidden in PANI header on Wi-Fi.
      *
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
-    inline IMS_BOOL IsInvalidMacAddressRequiredInPaniHeader() const
+    inline IMS_BOOL IsMacAddressHiddenInPaniHeader() const
     {
-        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_INVALID_MAC_ADDRESS_REQUIRED_IN_PANI_HEADER);
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER);
     }
 
     /**
-     * @brief Checks if the "local-time-zone" parameter is required in PANI header.
+     * @brief Checks if the "local-time-zone" parameter is supported in PANI header.
      *
-     * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
+     * @return IMS_TRUE if it's supported, IMS_FALSE otherwise.
      */
-    inline IMS_BOOL IsLocalTimeZoneRequiredInPaniHeader() const
+    inline IMS_BOOL IsLocalTimezoneParameterSupportedInPaniHeader() const
     {
-        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_LOCAL_TIME_ZONE_REQUIRED_IN_PANI_HEADER);
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER);
     }
 
     // Runtime-Configuration {

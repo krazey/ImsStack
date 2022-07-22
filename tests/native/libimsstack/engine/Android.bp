@@ -33,6 +33,7 @@ cc_defaults {
         "libimsstack_engine_headers",
         "libimsstack_platform_headers",
         "libimsstack_protocol_headers",
+        "libimsstack_test_platform_headers",
     ],
     static_libs: [
         "libimsstack-config",
