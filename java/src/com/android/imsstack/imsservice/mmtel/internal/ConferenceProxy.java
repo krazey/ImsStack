@@ -184,6 +184,24 @@ public class ConferenceProxy {
         }
     }
 
+    /**
+     * gets the video direction when video call is on hold
+     */
+    public boolean isVideoDirectionInactiveOnVideoCallHold() {
+        boolean videoDirection = CallFeature.isVideoDirectionInactiveOnVideoCallHold(
+                getCallContext().getSlotId());
+        return videoDirection;
+    }
+
+    /**
+     * gets the text direction when RTT call is on Hold
+     */
+    public boolean isTextDirectionInactiveOnRttCallHold() {
+        boolean textDirection = CallFeature.isTextDirectionInactiveOnRttCallHold(
+                getCallContext().getSlotId());
+        return textDirection;
+    }
+
     protected void executeHold(final MtcCall call) {
         if (call == null) {
             return;
@@ -195,10 +213,8 @@ public class ConferenceProxy {
                 call.hold(MtcCallUtils.createHoldMedia(
                         call.getCallInfo(),
                         call.getMediaInfo(),
-                        CallFeature.isVideoDirectionInactiveOnVideoCallHold(
-                            getCallContext().getSlotId()),
-                        CallFeature.isTextDirectionInactiveOnRttCallHold(
-                            getCallContext().getSlotId())));
+                        isVideoDirectionInactiveOnVideoCallHold(),
+                        isTextDirectionInactiveOnRttCallHold()));
 
                 for (ListenerWrapper lw : mListeners) {
                     if (lw.mListener != null) {
@@ -220,8 +236,7 @@ public class ConferenceProxy {
                 call.resume(MtcCallUtils.createUnholdMedia(
                         call.getCallInfo(),
                         call.getMediaInfo(),
-                        CallFeature.isVideoDirectionInactiveOnVideoCallHold(
-                            getCallContext().getSlotId())));
+                        isVideoDirectionInactiveOnVideoCallHold()));
 
                 for (ListenerWrapper lw : mListeners) {
                     if (lw.mListener != null) {
