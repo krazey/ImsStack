@@ -1,6 +1,7 @@
 package com.android.imsstack.imsservice;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
@@ -13,6 +14,7 @@ import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
 import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
 import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.Log;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -40,9 +42,27 @@ public class ImsService extends android.telephony.ims.ImsService {
         super.onDestroy();
     }
 
+    /** This method is added to retrieve Context
+     *  Override this method to get Context in testing class
+     *  @return  Context The Context used by the ImsService.
+     */
+    @VisibleForTesting
+    protected Context getAppContext() {
+        return getApplicationContext();
+    }
+
+    /** This method is added to read ImsController is ready or not
+     *  Override this method to get ImsController ready state in testing class
+     *  @return  True if ImsController is ready otherwise false
+     */
+    @VisibleForTesting
+    protected boolean isImsControllerReady() {
+        return ImsServiceController.isReady();
+    }
+
     @Override
     public ImsFeatureConfiguration querySupportedImsFeatures() {
-        if (!ImsServiceController.isReady()) {
+        if (!isImsControllerReady()) {
             logi("querySupportedImsFeatures :: not-ready");
             return super.querySupportedImsFeatures();
         }
@@ -52,7 +72,7 @@ public class ImsService extends android.telephony.ims.ImsService {
         // It will return the supported features by this ImsService.
         // Generally, the features are the same as defined in AndroidManifest.xml.
         ImsFeatureConfiguration.Builder fcBuilder = new ImsFeatureConfiguration.Builder();
-        int simCount = ImsServiceController.getSimCount(getApplicationContext());
+        int simCount = ImsServiceController.getSimCount(getAppContext());
 
         for (int i = 0; i < simCount; i++) {
             fcBuilder.addFeature(i, ImsFeature.FEATURE_MMTEL);

@@ -15,6 +15,7 @@
  */
 
 package com.android.imsstack.imsservice;
+
 import static org.mockito.Mockito.spy;
 
 import android.content.ComponentName;
@@ -23,17 +24,16 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.telephony.ims.ImsService;
+import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsServiceController;
-import android.telephony.ims.feature.ImsFeature;
+import android.telephony.ims.feature.MmTelFeature;
+import android.telephony.ims.feature.RcsFeature;
 import android.telephony.ims.stub.ImsFeatureConfiguration;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.android.ims.internal.IImsFeatureStatusCallback;
 import com.android.imsstack.enabler.IContext;
-import com.android.imsstack.util.Log;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -42,6 +42,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.TimeUnit;
@@ -49,11 +50,10 @@ import java.util.concurrent.TimeUnit;
 @RunWith(JUnit4.class)
 public class ImsServiceTest {
     IImsServiceController mImsServiceBinder;
-    @Mock
+    private TestImsService mImsService;
     private Context mContext;
     @Mock
     IContext mIContext;
-    private int mSlotId = 0;
     private static final String IMS_PACKAGE_NAME = "com.android.imsstack";
     private static final String CLASS_NAME = "com.android.imsstack.imsservice.ImsService";
 
@@ -68,52 +68,110 @@ public class ImsServiceTest {
     };
 
     @Before
-    public void setUp() {
+    public void setUp() throws InterruptedException {
         MockitoAnnotations.initMocks(this);
         mContext = spy(ApplicationProvider.getApplicationContext());
+        Mockito.when(mIContext.getSlotId()).thenReturn(0);
+        Mockito.when(mIContext.getSubId()).thenReturn(1);
+
         Intent intent = new Intent(ImsService.SERVICE_INTERFACE);
         intent.setClassName(IMS_PACKAGE_NAME, CLASS_NAME);
         mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+        mImsService = new TestImsService(mContext);
+        mImsService.setImsControllerReady(true);
+        //added delay for service binding
+        TimeUnit.MILLISECONDS.sleep(10);
     }
 
     @Test
     public void querySupportedImsFeaturesTest() throws Exception {
-        ImsFeatureConfiguration config = new ImsFeatureConfiguration.Builder()
-                .addFeature(mSlotId, ImsFeature.FEATURE_MMTEL)
-                .addFeature(mSlotId, ImsFeature.FEATURE_EMERGENCY_MMTEL)
-                .addFeature(mSlotId, ImsFeature.FEATURE_RCS)
-                .build();
-        //added delay for service binding
-        TimeUnit.MINUTES.sleep(1);
+        Assert.assertNotNull(mImsServiceBinder);
         ImsFeatureConfiguration resultConfig = mImsServiceBinder.querySupportedImsFeatures();
-        Assert.assertEquals(config, resultConfig);
+        Assert.assertNotNull(resultConfig);
     }
 
     @Test
-    public void createRcsFeatureTest() throws RemoteException {
-        IImsFeatureStatusCallback callback =  new IImsFeatureStatusCallback() {
-            @Override
-            public void notifyImsFeatureStatus(int featureStatus) throws RemoteException {
-                Log.i("service", "notifyImsFeatureStatus()");
-            }
-            @Override
-            public IBinder asBinder() {
-                Log.i("service", "binder()");
-                return null;
-            }
-        };
-        mImsServiceBinder.addFeatureStatusCallback(0, ImsFeature.FEATURE_RCS, callback);
-        IImsRcsFeature result = mImsServiceBinder.createRcsFeature(mSlotId, mIContext.getSubId());
+    public void querySupportedImsFeaturesWithoutBinderTest() {
+        //set ImsController ready state false
+        mImsService.setImsControllerReady(false);
+        ImsFeatureConfiguration result = mImsService.querySupportedImsFeatures();
+        Assert.assertEquals(0, result.getServiceFeatures().size());
+
+        ImsServiceController.create(mContext);
+        mImsService.setImsControllerReady(true);
+        ImsFeatureConfiguration resultConfig = mImsService.querySupportedImsFeatures();
+        Assert.assertTrue(ImsServiceController.isReady());
+        Assert.assertNotNull(resultConfig);
+        Assert.assertEquals(3, resultConfig.getServiceFeatures().size());
+    }
+
+    @Test
+    public void createRcsFeatureTest() throws RemoteException, InterruptedException {
+        Assert.assertNotNull(mImsServiceBinder);
+        //verify for invalid slot id
+        Mockito.when(mIContext.getSlotId()).thenReturn(-1);
+        IImsRcsFeature result = mImsServiceBinder.createRcsFeature(
+                mIContext.getSlotId(), mIContext.getSubId());
+        Assert.assertNull(result);
+
+        Mockito.when(mIContext.getSlotId()).thenReturn(0);
+        result = mImsServiceBinder.createRcsFeature(mIContext.getSlotId(),
+                mIContext.getSubId());
         Assert.assertNotNull(result);
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @Test
+    public void createRcsFeatureWithoutBinderTest() {
+        ImsServiceController.create(mContext);
+        RcsFeature rcs = mImsService.createRcsFeature(mIContext.getSlotId());
+        Assert.assertNotNull(rcs);
+    }
+
+    private class TestImsService extends ImsService {
+        Context mContext;
+        boolean mReady;
+        TestImsService(Context context) {
+            mContext = context;
+        }
+        public Context getAppContext() {
+            return mContext;
+        }
+        private void setImsControllerReady(boolean ready) {
+            mReady = ready;
+        }
+
+        public boolean isImsControllerReady() {
+            return mReady;
+        }
+    }
+
+    @Test
+    public void createMmTelFeatureTest() throws RemoteException {
+        Assert.assertNotNull(mImsServiceBinder);
+        Mockito.when(mIContext.getSlotId()).thenReturn(-1);
+        IImsMmTelFeature iImsMMTelFeature = mImsServiceBinder.createMmTelFeature(
+                mIContext.getSlotId(), mIContext.getSubId());
+        Assert.assertNull(iImsMMTelFeature);
+
+        Mockito.when(mIContext.getSlotId()).thenReturn(0);
+        iImsMMTelFeature = mImsServiceBinder.createMmTelFeature(
+                mIContext.getSlotId(), mIContext.getSubId());
+        Assert.assertNotNull(iImsMMTelFeature);
+    }
+
+    @Test
+    public void createMmTelFeatureWithOutBinderTest() throws RemoteException {
+        ImsServiceController.create(mContext);
+        MmTelFeature iImsMMTelFeature = mImsService.createMmTelFeature(mIContext.getSlotId());
+        Assert.assertNotNull(iImsMMTelFeature);
     }
 
     @After
     public void cleanUp() {
         mImsServiceBinder = null;
         mContext = null;
+        mConnection = null;
+        mIContext = null;
     }
 }
