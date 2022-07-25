@@ -74,9 +74,9 @@ MtsService::~MtsService()
 }
 
 PUBLIC
-ICoreService* MtsService::GetICoreService(IN IMS_BOOL bIsSmsEServiceType) const
+ICoreService* MtsService::GetICoreService(IN IMS_BOOL bEmergency) const
 {
-    return bIsSmsEServiceType ? m_piEmergencyCoreService : m_piCoreService;
+    return bEmergency ? m_piEmergencyCoreService : m_piCoreService;
 }
 
 PUBLIC VIRTUAL
@@ -143,7 +143,7 @@ void MtsService::ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsForm
 {
     IMS_TRACE_I("ReportMoStatus", 0, 0, 0);
 
-    if (Attach())
+    if (AttachJni())
     {
         m_pJniMtsService->GetThread()->ReportMoStatus(
                 nReason, eSmsFormat, nRetryAfter, nSeqId, m_nSlotId);
@@ -155,7 +155,7 @@ void MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& ob
 {
     IMS_TRACE_I("ReportMtSms", 0, 0, 0);
 
-    if (Attach())
+    if (AttachJni())
     {
         m_pJniMtsService->GetThread()->ReportMtSms(eSmsFormat, objData, m_nSlotId);
     }
@@ -165,17 +165,17 @@ PUBLIC
 void MtsService::CoreService_PageMessageReceived(
         IN ICoreService* piService, IN IPageMessage* piMessage)
 {
-    IMS_TRACE_I("CoreService_PageMessageReceived() - SMS message has been received", 0, 0, 0);
+    IMS_TRACE_I("CoreService_PageMessageReceived : SMS message has been received", 0, 0, 0);
 
     if (!((piService == m_piCoreService) || (piService == m_piEmergencyCoreService)))
     {
-        IMS_TRACE_E(0, "CoreService_PageMessageReceived() - not my ICoreService", 0, 0, 0);
+        IMS_TRACE_E(0, "CoreService_PageMessageReceived : not my ICoreService", 0, 0, 0);
         return;
     }
 
     if (piMessage == IMS_NULL)
     {
-        IMS_TRACE_E(0, "CoreService_PageMessageReceived() - no IPageMessage", 0, 0, 0);
+        IMS_TRACE_E(0, "CoreService_PageMessageReceived : no IPageMessage", 0, 0, 0);
         return;
     }
 
@@ -189,7 +189,7 @@ void MtsService::CoreService_ReferenceReceived(
     (void)piService;
     (void)piReference;
 
-    IMS_TRACE_I("CoreService_ReferenceReceived() - Service Name = %s", GetName().GetStr(), 0, 0);
+    IMS_TRACE_I("CoreService_ReferenceReceived : Service Name[%s]", GetName().GetStr(), 0, 0);
     return;
 }
 
@@ -199,7 +199,7 @@ void MtsService::CoreService_ServiceClosed(IN ICoreService* piService, IN IReaso
     (void)piService;
     (void)piReasonInfo;
 
-    IMS_TRACE_I("CoreService_ServiceClosed() - Service = %s", GetName().GetStr(), 0, 0);
+    IMS_TRACE_I("CoreService_ServiceClosed : Service Name[%s]", GetName().GetStr(), 0, 0);
     return;
 }
 
@@ -210,7 +210,8 @@ void MtsService::CoreService_SessionInvitationReceived(
     (void)piService;
     (void)piSession;
 
-    IMS_TRACE_I("CoreService_SessionInvitationReceived() - Service = %s", GetName().GetStr(), 0, 0);
+    IMS_TRACE_I(
+            "CoreService_SessionInvitationReceived : Service Name[%s]", GetName().GetStr(), 0, 0);
     return;
 }
 
@@ -221,7 +222,8 @@ void MtsService::CoreService_UnsolicitedNotifyReceived(
     (void)piService;
     (void)piNotify;
 
-    IMS_TRACE_I("CoreService_UnsolicitedNotifyReceived() - Service = %s", GetName().GetStr(), 0, 0);
+    IMS_TRACE_I(
+            "CoreService_UnsolicitedNotifyReceived : Service Name[%s]", GetName().GetStr(), 0, 0);
     return;
 }
 
@@ -232,14 +234,14 @@ void MtsService::CoreService_CapabilityQueryReceived(
     (void)piService;
     (void)piCapabilities;
 
-    IMS_TRACE_I("CoreService_CapabilityQueryReceived() - Service = %s", GetName().GetStr(), 0, 0);
+    IMS_TRACE_I("CoreService_CapabilityQueryReceived : Service Name[%s]", GetName().GetStr(), 0, 0);
     return;
 }
 
 PUBLIC
 void MtsService::ImsAos_Connected(IN IMS_UINT32 /*nFeatures*/, IN IMS_UINT32 /*nIpcan*/)
 {
-    IMS_TRACE_I("ImsAos_Connected() - m_nSlotId[%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_I("ImsAos_Connected : m_nSlotId[%d]", m_nSlotId, 0, 0);
 
     if (m_pMtsDynamicLoader == IMS_NULL)
     {
@@ -272,7 +274,7 @@ void MtsService::ImsAos_Connecting() {}
 PUBLIC
 void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 {
-    IMS_TRACE_I("ImsAos_Disconnected() - Reason is (%d)", nReason, 0, 0);
+    IMS_TRACE_I("ImsAos_Disconnected : Reason[%d]", nReason, 0, 0);
 
     if (m_pMtsDynamicLoader == IMS_NULL)
     {
@@ -291,7 +293,7 @@ void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 PUBLIC
 void MtsService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 {
-    IMS_TRACE_I("ImsAos_Disconnecting() - Reason is (%d)", nReason, 0, 0);
+    IMS_TRACE_I("ImsAos_Disconnecting : Reason[%d]", nReason, 0, 0);
 
     if (m_pMtsDynamicLoader == IMS_NULL)
     {
@@ -310,7 +312,7 @@ void MtsService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 PUBLIC
 void MtsService::ImsAos_Suspended(IN IMS_UINT32 nReason)
 {
-    IMS_TRACE_I("ImsAos_Suspended() - Reason is (%d)", nReason, 0, 0);
+    IMS_TRACE_I("ImsAos_Suspended : Reason[%d]", nReason, 0, 0);
 
     if (m_pMtsDynamicLoader == IMS_NULL)
     {
@@ -366,7 +368,7 @@ void MtsService::IMSAoSApp_NotifySpecificMessage(
 PUBLIC
 void MtsService::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 /*nIpcan*/)
 {
-    IMS_TRACE_I("ImsAosMonitor_Connected() - [%08x] ", nServices, 0, 0);
+    IMS_TRACE_I("ImsAosMonitor_Connected : nServices[%08x] ", nServices, 0, 0);
 
     if (m_pMtsDynamicLoader == IMS_NULL)
     {
@@ -388,7 +390,7 @@ void MtsService::ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
     (void)nType;
     (void)nState;
 
-    IMS_TRACE_I("IMSAoSAppMonitor_Notify() - nType [%d], nInfo [%d]", nType, nState, 0);
+    IMS_TRACE_I("IMSAoSAppMonitor_Notify : nType[%d], nInfo[%d]", nType, nState, 0);
 }
 
 PUBLIC
@@ -409,7 +411,7 @@ IMS_BOOL MtsService::IsEpdgConnected()
 {
     IMS_SINT32 nReportedIpcan = IIpcan::CATEGORY_MOBILE;
     IMS_BOOL bIsEpdg = IMS_FALSE;
-    IMS_TRACE_I("Start API IsEpdgConnected", 0, 0, 0);
+    IMS_TRACE_I("IsEpdgConnected", 0, 0, 0);
 
     if (m_piImsAos != IMS_NULL)
     {
@@ -422,12 +424,12 @@ IMS_BOOL MtsService::IsEpdgConnected()
 
     if (nReportedIpcan == IIpcan::CATEGORY_WLAN)
     {
-        IMS_TRACE_I("IsEpdgConnected:bIsEpdg is true", 0, 0, 0);
+        IMS_TRACE_I("IsEpdgConnected : bIsEpdg is true", 0, 0, 0);
         bIsEpdg = IMS_TRUE;
     }
     else
     {
-        IMS_TRACE_I("IsEpdgConnected:bIsEpdg is false (! IPCAN_WLAN)", 0, 0, 0);
+        IMS_TRACE_I("IsEpdgConnected : bIsEpdg is false (! IPCAN_WLAN)", 0, 0, 0);
     }
 
     return bIsEpdg;
@@ -438,9 +440,9 @@ void MtsService::Init()
 {
     IMS_TRACE_I("Init", 0, 0, 0);
 
-    Attach();
-    AttachAosInterface();
-    AttachCoreServiceInterface();
+    AttachJni();
+    AttachAos();
+    AttachCoreService();
 }
 
 PRIVATE
@@ -462,7 +464,7 @@ void MtsService::DeInit()
 }
 
 PRIVATE
-IMS_BOOL MtsService::Attach()
+IMS_BOOL MtsService::AttachJni()
 {
     if (m_pJniMtsService)
     {
@@ -484,12 +486,12 @@ IMS_BOOL MtsService::Attach()
                 ->GetMtsServiceConnector(m_nSlotId)->SetEnablerService(this);
     }
 
-    IMS_TRACE_I("Attach() - %s", _TRACE_B_(bIsAttached), 0, 0);
+    IMS_TRACE_I("AttachJni : bIsAttached[%s]", _TRACE_B_(bIsAttached), 0, 0);
     return bIsAttached;
 }
 
 PRIVATE
-void MtsService::AttachAosInterface()
+void MtsService::AttachAos()
 {
     // Get the normal-type interface of AoS and register as the listener.
     m_piImsAos = ImsAos::GetImsAos(
@@ -513,13 +515,13 @@ void MtsService::AttachAosInterface()
 
     if (m_piImsEmergencyAos == IMS_NULL || m_piImsAos == IMS_NULL)
     {
-        IMS_TRACE_E(0, "AttachAosInterface() - m_piImsAos or m_piImsEmergencyAos is null", 0, 0, 0);
+        IMS_TRACE_E(0, "AttachAos : m_piImsAos or m_piImsEmergencyAos is null", 0, 0, 0);
         return;
     }
 }
 
 PRIVATE
-void MtsService::AttachCoreServiceInterface()
+void MtsService::AttachCoreService()
 {
     // Get the normal-type ICoreService and register as the listener.
     AString strServiceId("serviceId=");
@@ -585,14 +587,10 @@ void MtsService::AttachCoreServiceInterface()
         //// iFC -- ends
     }
 
-    if (m_piCoreService == IMS_NULL)
+    if (m_piCoreService == IMS_NULL || m_piEmergencyCoreService == IMS_NULL)
     {
-        IMS_TRACE_E(0, "AttachCoreServiceInterface() - m_piCoreService is null", 0, 0, 0);
-        return;
-    }
-    else if (m_piEmergencyCoreService == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "AttachCoreServiceInterface() - m_piEmergencyCoreService is null", 0, 0, 0);
+        IMS_TRACE_E(0, "AttachCoreService : m_piCoreService or m_piEmergencyCoreService is null", 0,
+                0, 0);
         return;
     }
 }

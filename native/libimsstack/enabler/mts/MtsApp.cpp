@@ -104,11 +104,10 @@ PUBLIC VIRTUAL void MtsApp::Start()
 
 PUBLIC VIRTUAL void MtsApp::Stop()
 {
-    IMS_TRACE_I("SMS Stop : m_nSlotId : [%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_I("SMS Stop [slot_%d]", m_nSlotId, 0, 0);
 
     if (m_pMtsServiceState != IMS_NULL)
     {
-        IMS_TRACE_I("SetIMSRegState(IMS_FALSE)", 0, 0, 0);
         m_pMtsServiceState->SetImsRegConnected(IMS_FALSE);
     }
 
@@ -120,7 +119,7 @@ PUBLIC VIRTUAL void MtsApp::Stop()
 
 PUBLIC VIRTUAL void MtsApp::MtsMessageController_NoTransaction()
 {
-    IMS_TRACE_I("MtsApp::MtsMessageController_NoTransaction()", 0, 0, 0);
+    IMS_TRACE_I("MtsMessageController_NoTransaction", 0, 0, 0);
 
     if (m_pMtsServiceState == IMS_NULL)
     {
@@ -151,7 +150,7 @@ PUBLIC VIRTUAL void MtsApp::MtsMessageController_NoTransaction()
 
 PUBLIC VIRTUAL void MtsApp::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
-    IMS_TRACE_I("MtsApp::CallTracker_StateChanged, nType = [%d], nState = [%d]", nType, nState, 0);
+    IMS_TRACE_I("CallTracker_StateChanged : nType[%d], nState[%d]", nType, nState, 0);
 }
 
 PRIVATE void MtsApp::CreateMtsService()
@@ -227,12 +226,12 @@ PRIVATE void MtsApp::GetSmOverIpConfigInfo()
     IMSVector<IMS_SINT32> objSupportedRats =
             piCc->GetIntArray(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY);
 
-    IMS_TRACE_I("GetSmOverIpConfigInfo - bSmsOverIpNetwork[%d]", bSmsOverIpNetwork, 0, 0);
+    IMS_TRACE_I("GetSmOverIpConfigInfo : bSmsOverIpNetwork[%d]", bSmsOverIpNetwork, 0, 0);
 
     for (IMS_UINT32 i = 0; i < objSupportedRats.GetSize(); ++i)
     {
         IMS_SINT32 nValue = objSupportedRats.GetAt(i);
-        IMS_TRACE_I("GetSmOverIpConfigInfo - objSupportedRats[%d][%d]", i, nValue, 0);
+        IMS_TRACE_I("GetSmOverIpConfigInfo : objSupportedRats[%d][%d]", i, nValue, 0);
     }
 
     pMtsServiceState->SetMtsMessageController(m_pMtsMessageController);

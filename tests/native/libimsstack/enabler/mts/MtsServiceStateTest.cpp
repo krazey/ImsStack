@@ -45,7 +45,7 @@ TEST_F(MtsServiceStateTest, ServiceStateAfterAosConnected)
     pMtsServiceState->UpdateServiceState();
 
     EXPECT_TRUE(pMtsServiceState->GetImsRegState());
-    EXPECT_EQ(pMtsServiceState->GetServiceState(), MtsMessageController::STATE_READY);
+    EXPECT_EQ(pMtsServiceState->GetServiceState(), STATE_READY);
 }
 
 TEST_F(MtsServiceStateTest, IsServiceBlocked)

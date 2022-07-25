@@ -44,7 +44,7 @@ MtsDynamicLoader::~MtsDynamicLoader()
 PUBLIC
 void MtsDynamicLoader::Initialize()
 {
-    IMS_TRACE_D("Initialize nSlotId : [%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_D("Initialize : nSlotId[%d]", m_nSlotId, 0, 0);
 
     m_pMtsServiceState = new MtsServiceState(m_nSlotId);
     m_pMtsSipFormUtils = new MtsSipFormUtils(m_nSlotId);
@@ -56,7 +56,7 @@ void MtsDynamicLoader::Initialize()
 PRIVATE
 void MtsDynamicLoader::DestroyAll()
 {
-    IMS_TRACE_I("DestroyAll", 0, 0, 0);
+    IMS_TRACE_I("DestroyAll : nSlotId[%d]", m_nSlotId, 0, 0);
 
     if (m_pMtsServiceState != IMS_NULL)
     {

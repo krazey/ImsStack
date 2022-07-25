@@ -233,18 +233,18 @@ IMS_SINT32 MtsSipFormUtils::CheckScheme(IN const AString& strNumber) const
 
         if (strTmp.StartsWith("tel"))
         {
-            return SCHEME_TEL;
+            return URI_SCHEME_TEL;
         }
         else if (strTmp.StartsWith("sips"))
         {
-            return SCHEME_SIPS;
+            return URI_SCHEME_SIPS;
         }
         else if (strTmp.StartsWith("sip"))
         {
-            return SCHEME_SIP;
+            return URI_SCHEME_SIP;
         }
     }
-    return SCHEME_UNKNOWN;
+    return URI_SCHEME_UNKNOWN;
 }
 
 PRIVATE
@@ -253,7 +253,7 @@ IMS_SINT32 MtsSipFormUtils::GetRequestUriType()
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
     IMS_SINT32 nValue = piCc->GetInt(CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT);
 
-    if (nValue == MtsSipFormUtils::SCHEME_UNKNOWN)
+    if (nValue == URI_SCHEME_UNKNOWN)
     {
         return piCc->GetInt(CarrierConfig::Ims::KEY_REQUEST_URI_TYPE_INT);
     }

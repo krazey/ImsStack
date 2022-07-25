@@ -43,7 +43,6 @@ public:
     MtsService(IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader);
     ~MtsService();
 
-public:
     // ICoreServiceListener
     void CoreService_PageMessageReceived(IN ICoreService* piService, IN IPageMessage* piMessage);
     void CoreService_ReferenceReceived(IN ICoreService* piService, IN IReference* piReference);
@@ -79,24 +78,17 @@ public:
     void IMSAoSApp_NotifySpecificMessage(
             IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam);
     IMS_BOOL IsEpdgConnected();
-    ICoreService* GetICoreService(IN IMS_BOOL bIsSmsEServiceType) const;
+    ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const;
     inline MtsDynamicLoader* GetMtsUtils() { return m_pMtsDynamicLoader; }
     void SetListener(IN IMtsServiceListener* piMtsServiceListener);
 
-protected:
-    // ImsService
-    inline IMS_BOOL OnPreprocess(IN IMSMSG& /*objMSG*/) { return IMS_TRUE; }
-    inline IMS_BOOL OnMessage(IN IMSMSG& /*objMSG*/) { return IMS_TRUE; }
-    inline IMS_BOOL OnPostprocess(IN IMSMSG& /*objMSG*/) { return IMS_TRUE; }
-
 private:
-    IMS_BOOL Attach();
-    void AttachAosInterface();
-    void AttachCoreServiceInterface();
+    IMS_BOOL AttachJni();
+    void AttachAos();
+    void AttachCoreService();
     void Init();
     void DeInit();
 
-private:
     IImsAos* m_piImsAos;
     IImsAos* m_piImsEmergencyAos;
     AString m_strAppId;

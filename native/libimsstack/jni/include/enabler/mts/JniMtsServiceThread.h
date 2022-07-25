@@ -15,6 +15,9 @@ public:
             IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId, IN IMS_SINT32 nSlotId);
     void ReportMtSms(
             IN SmsFormatType eSmsFormat, IN const ByteArray& objData, IN IMS_SINT32 nSlotId);
+
+private:
+    IMS_UINT32 ConvertSmsFormatToInt(IN SmsFormatType eSmsFormat);
 };
 
 #endif

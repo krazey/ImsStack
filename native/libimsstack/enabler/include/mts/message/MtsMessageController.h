@@ -41,8 +41,8 @@ public:
     void Remove(IN IMtsMessage* piMtsMessage);
     IMtsMessage* Search(IN const AString& strDestination);
     IMtsMessage* Search(IN const AString& strDestination, IN IMS_SINT32 nMti);
-    IMtsMessage* Search(
-            IN IMS_SINT32 nMessageReference, IN IMS_SINT32 nMessageType = MESSAGE_TYPE_RECEIVE);
+    IMtsMessage* Search(IN IMS_SINT32 nMessageReference,
+            IN MtsTransactionType eMessageType = MtsTransactionType::MESSAGE_TYPE_RECEIVE);
 
     void RegisterNoTransactionListener(IN IMtsMessageControllerListener* piListener);
     void DeregisterNoTransactionListener(IN IMtsMessageControllerListener* piListener);
@@ -54,7 +54,7 @@ public:
     void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
 
     IMS_BOOL IsDeliverMessage(IN IPageMessage* piPageMessage);
-    ICoreService* GetICoreService(IN IMS_BOOL bIsSmsEServiceType);
+    ICoreService* GetICoreService(IN IMS_BOOL bEmergency);
     MtsDynamicLoader* GetMtsUtils();
 
     void SetCallStateType(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
@@ -72,75 +72,17 @@ public:
 
     // IMtsServiceListener
     virtual void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId,
-            IN IMS_BOOL bIsSmsEServiceType) override;
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
     virtual void NotifyMtSms(IN IPageMessage* piMessage) override;
 
-protected:
+private:
     // ImsActivityEx
     IMS_BOOL OnMessage(IN IMSMSG& objMSG);
 
-private:
-    void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bIsSmsEServiceType);
+    void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bEmergency);
     void SendMtsMessage(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bIsSmsEServiceType);
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency);
     void UpdateRPAckMap(IN IPageMessage* piPageMessage);
-
-public:
-    enum
-    {
-        MESSAGE_TYPE_RECEIVE = 0,
-        MESSAGE_TYPE_SEND = 1,
-    };
-
-    enum
-    {
-        TYPE_CS = 0,
-        TYPE_NORMAL,
-        TYPE_EMERGENCY
-    };
-
-    enum
-    {
-        STATE_IDLE = 0,
-        STATE_TERMINATING = 1,
-        STATE_RINGBACK = 2,
-        STATE_RINGING = 3,
-        STATE_ALERTING = 4,
-        STATE_OFFHOOK = 5
-    };
-
-    // State of Service
-    enum
-    {
-        STATE_INIT = 0,
-        STATE_READY,
-        STATE_LIMITED,
-        STATE_NOTREADY
-    };
-
-    enum
-    {
-        MO_INVALID = 0,
-        MO_SUCCESS = 1,
-        MO_IMS_TEMP_FAILURE = 2,
-        MO_IMS_PERM_FAILURE = 3,
-        MO_IMS_LIMITEDSMSSVCREGI = 4,
-        MO_RETRY_CS = 5,
-        MO_RETRY_CS_OR_SGS = 6
-    };
-
-    enum
-    {
-        MT_INVALID = 0,
-        MT_SUCCESS = 1,
-        MT_FAILURE = 2,
-        MT_SMS_FORMAT_FAILURE = 3,
-        MT_SMS_NODATA_FAILURE = 4
-    };
-
-protected:
-    IMS_SINT32 m_nSlotId;
 
 public:
     IMS_BOOL m_bProcessingMsg;
@@ -148,13 +90,12 @@ public:
     IMS_UINT32 m_nCallStateMsg;
 
 private:
+    IMS_SINT32 m_nSlotId;
     AString m_strLastRcvIpsmgwAddr;
     IMSList<IMtsMessage*> m_objMsgList;
-    IMtsMessageControllerListener* m_piMtsMessageControllerListener;
     IMSList<IMtsMessage*> m_objRPAckedMsgs;
+    IMtsMessageControllerListener* m_piMtsMessageControllerListener;
     MtsService* m_pMtsService;
-
-protected:
     MtsDynamicLoader* m_pMtsDynamicLoader;
 };
 

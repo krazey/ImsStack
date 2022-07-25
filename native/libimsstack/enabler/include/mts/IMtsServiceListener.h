@@ -24,7 +24,7 @@ class IMtsServiceListener
 {
 public:
     virtual void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bIsSmsEServiceType) = 0;
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) = 0;
     virtual void NotifyMtSms(IN IPageMessage* piMessage) = 0;
 };
 

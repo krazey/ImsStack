@@ -30,7 +30,7 @@ __IMS_TRACE_TAG_COM_SMS__;
 
 PUBLIC
 MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :
-        m_nMtsServiceState(MtsMessageController::STATE_INIT),
+        m_nMtsServiceState(STATE_INIT),
         m_bIsImsConnected(IMS_FALSE),
         m_bIsAosRegModAdmin(IMS_FALSE),
         m_bIsImsSuspend(IMS_FALSE),
@@ -227,17 +227,17 @@ void MtsServiceState::NotifySpecificMessage(
 PUBLIC
 IMS_SINT32 MtsServiceState::GetServiceState()
 {
-    IMS_SINT32 nState = MtsMessageController::STATE_NOTREADY;
+    IMS_SINT32 nState = STATE_NOTREADY;
 
     if (m_bIsImsConnected)
     {
         if (m_bIsImsSuspend || (!m_bIsSmsOverIpConf) || m_bIsAosRegModAdmin)
         {
-            nState = MtsMessageController::STATE_LIMITED;
+            nState = STATE_LIMITED;
         }
         else
         {
-            nState = MtsMessageController::STATE_READY;
+            nState = STATE_READY;
         }
     }
 
@@ -260,13 +260,13 @@ void MtsServiceState::UpdateServiceState()
 PUBLIC
 IMS_BOOL MtsServiceState::IsMoServiceBlocked()
 {
-    return (GetMtsServiceState() != MtsMessageController::STATE_READY);
+    return (GetMtsServiceState() != STATE_READY);
 }
 
 PUBLIC
 IMS_BOOL MtsServiceState::IsMtServiceBlocked()
 {
-    return (GetMtsServiceState() == MtsMessageController::STATE_NOTREADY);
+    return (GetMtsServiceState() == STATE_NOTREADY);
 }
 
 PUBLIC

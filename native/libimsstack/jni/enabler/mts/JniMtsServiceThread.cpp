@@ -31,7 +31,7 @@ void JniMtsServiceThread::ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType
     Parcel objParcel;
     objParcel.writeInt32(IuMtsService::REPORT_MTS_MO_STATUS);
     objParcel.writeInt32(nReason);
-    objParcel.writeInt32((IMS_UINT32)eSmsFormat);
+    objParcel.writeInt32(ConvertSmsFormatToInt(eSmsFormat));
     objParcel.writeInt32(nRetryAfter);
     objParcel.writeInt32(nSeqId);
     objParcel.writeInt32(nSlotId);
@@ -47,9 +47,24 @@ void JniMtsServiceThread::ReportMtSms(
 
     Parcel objParcel;
     objParcel.writeInt32(IuMtsService::REPORT_MTS_MT_SMS);
-    objParcel.writeInt32((IMS_UINT32)eSmsFormat);
+    objParcel.writeInt32(ConvertSmsFormatToInt(eSmsFormat));
     objParcel.writeString16(android::String16(objData.ToString().GetStr()));
     objParcel.writeInt32(nSlotId);
 
     SendData2Java(objParcel);
+}
+
+PRIVATE IMS_UINT32 JniMtsServiceThread::ConvertSmsFormatToInt(IN SmsFormatType eSmsFormat)
+{
+    switch (eSmsFormat)
+    {
+        case SmsFormatType::SMSFORMAT_3GPP:
+            return (IMS_UINT32)1;
+
+        case SmsFormatType::SMSFORMAT_3GPP2:
+            return (IMS_UINT32)2;
+
+        default:
+            return (IMS_UINT32)3;
+    }
 }

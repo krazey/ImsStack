@@ -20,19 +20,7 @@
 #include "ByteArray.h"
 #include "ImsTypeDef.h"
 
-enum class MtsTimerType
-{
-    TIMER_UNKNOWN = 0,
-    TIMER_SMS_CALLBACK_MODE = 1,
-    TIMER_RETRY_AFTER = 2,
-};
-
-enum class SmsFormatType
-{
-    SMSFORMAT_3GPP = 1,
-    SMSFORMAT_3GPP2,
-    SMSFORMAT_INVALID
-};
+enum class SmsFormatType;
 
 class EmergencySmsSendRequestInfo
 {
@@ -43,9 +31,120 @@ public:
     IMS_SINT32 nSeqId;
 };
 
+enum class MtsTimerType
+{
+    TIMER_UNKNOWN = 0,
+    TIMER_SMS_CALLBACK_MODE = 1,
+    TIMER_RETRY_AFTER = 2,
+};
+
+enum class MtsTransactionType
+{
+    MESSAGE_TYPE_SEND = 1,
+    MESSAGE_TYPE_RECEIVE = 2,
+    MESSAGE_TYPE_INVALID = 3,
+};
+
+enum class SmsFormatType
+{
+    SMSFORMAT_3GPP = 1,
+    SMSFORMAT_3GPP2 = 2,
+    SMSFORMAT_INVALID = 3,
+};
+
+enum
+{
+    MO_INVALID = 0,
+    MO_SUCCESS = 1,
+    MO_IMS_TEMP_FAILURE = 2,
+    MO_IMS_PERM_FAILURE = 3,
+    MO_IMS_LIMITEDSMSSVCREGI = 4,
+    MO_RETRY_CS = 5,
+    MO_RETRY_CS_OR_SGS = 6,
+};
+
+enum
+{
+    MT_INVALID = 0,
+    MT_SUCCESS = 1,
+    MT_FAILURE = 2,
+    MT_SMS_FORMAT_FAILURE = 3,
+    MT_SMS_NODATA_FAILURE = 4,
+};
+
+enum
+{
+    SMS_MTI_NONE = -1
+};
+
+// RP Data Unit type in 3GPP SMS
+enum
+{
+    SMS_3GPP_MTI_RP_DATA_FROM_MS = 0,
+    SMS_3GPP_MTI_RP_DATA_FROM_N = 1,
+    SMS_3GPP_MTI_RP_ACK_FROM_MS = 2,
+    SMS_3GPP_MTI_RP_ACK_FROM_N = 3,
+    SMS_3GPP_MTI_RP_ERROR_FROM_MS = 4,
+    SMS_3GPP_MTI_RP_ERROR_FROM_N = 5,
+    SMS_3GPP_MTI_RP_SMMA = 6
+};
+
+// Bearer Data Unit type in 3GPP2 SMS
+enum
+{
+    SMS_3GPP2_MTI_POINT_TO_POINT = 0,
+    SMS_3GPP2_MTI_BROADCAST = 1,
+    SMS_3GPP2_MTI_ACKNOWLEDGE = 2
+};
+
+enum
+{
+    URI_SCHEME_UNKNOWN = -1,
+    URI_SCHEME_TEL,
+    URI_SCHEME_SIP,
+    URI_SCHEME_SIPS
+};
+
 enum
 {
     EXPIRED_TIME_SCBM = 300000  // 5min, 300s, 300000ms
+};
+
+// Call type
+enum
+{
+    CALL_TYPE_CS = 0,
+    CALL_TYPE_NORMAL,
+    CALL_TYPE_EMERGENCY
+};
+
+// Call state
+enum
+{
+    CALL_STATE_UNKNOWN = -1,
+    CALL_STATE_IDLE = 0,
+    CALL_STATE_TERMINATING = 1,
+    CALL_STATE_RINGBACK = 2,
+    CALL_STATE_RINGING = 3,
+    CALL_STATE_ALERTING = 4,
+    CALL_STATE_OFFHOOK = 5
+};
+
+enum
+{
+    SESSION_TYPE_NONE = 0x00000000,
+    SESSION_TYPE_VOIP = 0x00000001,
+    SESSION_TYPE_VS = 0x00000002,
+    SESSION_TYPE_VT = 0x00000004
+};
+
+// State of Service
+enum
+{
+    STATE_INIT = 0,
+    STATE_READY,
+    STATE_LIMITED,
+    STATE_NOTREADY
 };
 
 #endif

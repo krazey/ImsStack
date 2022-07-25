@@ -55,12 +55,6 @@ private:
 public:
     enum
     {
-        FLAG_NONE = 0x0000,
-        FLAG_EMERGENCY = 0x0001
-    };
-
-    enum
-    {
         // Default format is local number format
         NUMBER_FORMAT_LOCAL = 1,
         NUMBER_FORMAT_GLOBAL = 2,

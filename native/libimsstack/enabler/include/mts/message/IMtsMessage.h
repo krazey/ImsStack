@@ -18,12 +18,15 @@
 #define INTERFACE_MTS_MESSAGE_H_
 
 #include "ByteArray.h"
+#include "MtsDef.h"
 
 class IPageMessage;
 
 class IMtsMessage
 {
 public:
+    virtual ~IMtsMessage(){};
+
     virtual void SendMessage(IN IPageMessage* piPageMessage, IN const AString& strDestination,
             IN SmsFormatType eSmsFormat, IN const ByteArray& objSMS) = 0;
     virtual void ReceiveMessage(IN IPageMessage* piPageMessage, IN const AString& strIMPU) = 0;

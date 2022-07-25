@@ -35,7 +35,7 @@ public:
     void AddListener(IN IMtsCallTrackerListener* piListener);
     void RemoveListener(IN IMtsCallTrackerListener* piListener);
 
-protected:
+private:
     void AddOrUpdateCall(
             IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls, IN IMS_SINTP nKey, IN IMS_UINT32 nState);
     void RemoveCall(IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls, IN IMS_SINTP nKey);
@@ -50,15 +50,10 @@ protected:
     void ChangedCallState(IN IMS_UINTP nParam);
     void ChangedCallTotalState(IN IMS_UINTP nParam);
 
-    // Log
-    static const IMS_CHAR* TypeToString(IN IMS_UINT32 nType);
-    static const IMS_CHAR* StateToString(IN IMS_UINT32 nState);
-
-protected:
-    IMS_SINT32 nSlotId;
-    IMS_UINT32 nEmergencyState;
-    IMSMap<IMS_SINTP, IMS_UINT32> objEmergencyCalls;
-    IMSList<IMtsCallTrackerListener*> objListeners;
+    IMS_SINT32 m_nSlotId;
+    IMS_UINT32 m_nEmergencyState;
+    IMSMap<IMS_SINTP, IMS_UINT32> m_objEmergencyCalls;
+    IMSList<IMtsCallTrackerListener*> m_objListeners;
 };
 
 #endif

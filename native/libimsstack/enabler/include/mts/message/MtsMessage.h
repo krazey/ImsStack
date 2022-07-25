@@ -19,7 +19,6 @@
 
 #include "IMessage.h"
 #include "IPageMessageListener.h"
-#include "MtsDef.h"
 #include "base/IMessageMediator.h"
 #include "message/IMtsMessage.h"
 #include "message/MtsMessageController.h"
@@ -28,8 +27,8 @@ class MtsMessage final : public IMtsMessage, public IPageMessageListener, public
 {
 public:
     MtsMessage(IN IMS_SINT32 nSlotId, IN MtsMessageController* pMtsMessageController,
-            IN IMS_BOOL bIsSmsEServiceType);
-    ~MtsMessage();
+            IN IMS_BOOL bEmergency);
+    virtual ~MtsMessage();
 
     // IMtsMessage
     void SendMessage(IN IPageMessage* piPageMessage, IN const AString& strDestination,
@@ -57,8 +56,8 @@ public:
     IMS_RESULT MessageMediator_AdjustMessage(
             IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage) override;
 
-    IMS_BOOL ConstructSendMessage(
-            IN IMessage* piMessage, IN const ByteArray& objSms, IN SmsFormatType eSmsFormat);
+    IMS_BOOL ConstructSendMessage(IN IMessage* piMessage, IN const ByteArray& objSms,
+            IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergency);
     AString GetPreviousCallId(IN const ByteArray& objSms);
     void SetSendMsgInfo(IN const ByteArray& objSms, IN SmsFormatType eSmsFormat);
     IMS_BOOL HandleDeliveryResponse(IN IMessage* piMessage);
@@ -75,36 +74,27 @@ public:
     void CleanMtsMessage();
     void CleanOperatorMtsMessage();
 
-protected:
+private:
     void SetDestination(IN const AString& strDestination);
     SmsFormatType GetContentType() const;
     void GetUserPartFromUris(IN const AString& strUri, OUT AString& strUserPart) const;
     IMS_BOOL GetSmsgwFromReceivedMessage(
             IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
     void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri) const;
-    IMS_SINT32 GetRetryAfterValue(IN IMessage* piMessage);
 
-private:
+    IMS_SINT32 GetRetryAfterValue(IN IMessage* piMessage);
     void ReportTransmissionResultToMessageController(
             IN IMS_UINT32 nResponse, IN SmsFormatType eSmsFormat);
-    void SetTrmInfo(IN IMS_SINT32 nSlotId, IN IMS_BOOL bSmsState);
 
-public:
-    enum
-    {
-        // mdn length for to header comparison according to verizon sms over ims.
-        MDNLENGTHFORCOMPARISON = 4,
-    };
-
-protected:
+private:
     IPageMessage* m_piPageMessage;
     AString m_strDestination;
-    IMS_BOOL m_bIsSmsEServiceType;
+    IMS_BOOL m_bEmergency;
 
     // SMS Msg Info
     SmsFormatType m_nSmsFormat;
     IMS_SINT32 m_nMrOfRp;
-    IMS_SINT32 m_nSmsTrxType;
+    MtsTransactionType m_eSmsTrxType;
     IMS_SINT32 m_nMti;
     IMS_SINT32 m_nSmSize;
 
