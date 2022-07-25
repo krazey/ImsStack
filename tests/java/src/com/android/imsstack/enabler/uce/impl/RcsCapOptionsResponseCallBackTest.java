@@ -50,15 +50,17 @@ public class RcsCapOptionsResponseCallBackTest {
         mOptionsResponseCallback = Mockito.mock(
                 RcsCapabilityExchangeImplBase.OptionsResponseCallback.class);
         mMessageExecutor = new MessageExecutor("ResponseCallBackTest");
-        mRcsCapOptionsResponseCallBack = new RcsCapOptionsResponseCallBack(
-                mOptionsResponseCallback, mMessageExecutor);
-        mRcsCapOptionsResponseCallBackNull = new RcsCapOptionsResponseCallBack(
-                null, mMessageExecutor);
+        mRcsCapOptionsResponseCallBack = new RcsCapOptionsResponseCallBack(mMessageExecutor);
+        mRcsCapOptionsResponseCallBack.setCallBack(mOptionsResponseCallback);
+        mRcsCapOptionsResponseCallBackNull = new RcsCapOptionsResponseCallBack(mMessageExecutor);
+        mRcsCapOptionsResponseCallBackNull.setCallBack(null);
     }
     @Test
     public void onCommandErrorOptionsTest() throws ImsException {
+        mRcsCapOptionsResponseCallBackNull.setCallBack(null);
         mRcsCapOptionsResponseCallBackNull.onCommandError(1);
         verify(mOptionsResponseCallback, Mockito.times(0)).onCommandError(1);
+        mRcsCapOptionsResponseCallBack.setCallBack(mOptionsResponseCallback);
         mRcsCapOptionsResponseCallBack.onCommandError(1);
         verify(mOptionsResponseCallback, Mockito.timeout(100).times(1)).onCommandError(1);
         doThrow(ImsException.class).when(mOptionsResponseCallback).onCommandError(1);
@@ -68,9 +70,11 @@ public class RcsCapOptionsResponseCallBackTest {
     @Test
     public void onNetworkResponseOptionsTest() throws ImsException {
         List<String> capa = readCapabilities();
+        mRcsCapOptionsResponseCallBackNull.setCallBack(null);
         mRcsCapOptionsResponseCallBackNull.onNetworkResponse(200, "OK", capa);
         verify(mOptionsResponseCallback, Mockito.times(0)).onNetworkResponse(
                 anyInt(), anyString(), any());
+        mRcsCapOptionsResponseCallBack.setCallBack(mOptionsResponseCallback);
         mRcsCapOptionsResponseCallBack.onNetworkResponse(200, "OK", capa);
         verify(mOptionsResponseCallback, Mockito.timeout(100).times(1)).onNetworkResponse(
                 anyInt(), anyString(), any());

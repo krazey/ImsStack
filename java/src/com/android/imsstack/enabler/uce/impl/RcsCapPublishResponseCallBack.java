@@ -30,12 +30,18 @@ public class RcsCapPublishResponseCallBack implements PublishResponse {
     private PublishResponseCallback mPublishResponseCallBack;
     private MessageExecutor mMessageExecutor;
 
-    public RcsCapPublishResponseCallBack(PublishResponseCallback cb,
-            MessageExecutor messageExecutor) {
-        mPublishResponseCallBack = cb;
+    public RcsCapPublishResponseCallBack(MessageExecutor messageExecutor) {
         mMessageExecutor = messageExecutor;
     }
 
+    /**
+     * set callback PublishResponseCallback of publish request
+     * to send the response from the network back to the framework.
+     * @param publishCallback The callback of publish request
+     */
+    public void setCallBack(PublishResponseCallback publishCallback) {
+        mPublishResponseCallBack = publishCallback;
+    }
     /**
      * Provide the framework with a subsequent network response update to
      * {@link IUceApi#publishCapabilities(String, PublishResponse)}.
@@ -52,7 +58,6 @@ public class RcsCapPublishResponseCallBack implements PublishResponse {
      */
     @Override
     public void onNetworkResponse(int sipCode, String reason) {
-        // TODO handle sending response in Executor thread
         if (mPublishResponseCallBack == null) {
             Log.d(LOG_TAG, "PublishResponseCallBack object is null");
             return;
@@ -84,7 +89,6 @@ public class RcsCapPublishResponseCallBack implements PublishResponse {
     @Override
     public void onNetworkResponse(int sipCode, String reasonPhrase, int reasonHeaderCause,
             String reasonHeaderText) {
-        // TODO handle sending response in Executor thread
         if (mPublishResponseCallBack == null) {
             Log.d(LOG_TAG, "PublishResponseCallBack object is null");
             return;
@@ -118,7 +122,6 @@ public class RcsCapPublishResponseCallBack implements PublishResponse {
      */
     @Override
     public void onCommandError(int code) {
-        // TODO handle sending response in Executor thread
         if (mPublishResponseCallBack == null) {
             Log.d(LOG_TAG, "PublishResponseCallBack object is null");
             return;

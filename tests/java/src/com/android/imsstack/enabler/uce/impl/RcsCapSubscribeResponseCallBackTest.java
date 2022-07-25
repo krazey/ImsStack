@@ -45,7 +45,7 @@ public class RcsCapSubscribeResponseCallBackTest {
     private RcsCapabilityExchangeImplBase.SubscribeResponseCallback mSubscribeResponseCallback;
     private MessageExecutor mMessageExecutor;
     private RcsCapSubscribeResponseCallBack mRcsCapSubscribeResponseCallBack,
-            mRcsCapSubscribeResponseCallBackNull;
+            mRcsSubscribeResponseCallBackNull;
     private static final String TEST_PHONE_NUMBER = "+123456789";
 
     @Before
@@ -53,16 +53,18 @@ public class RcsCapSubscribeResponseCallBackTest {
         mSubscribeResponseCallback = Mockito.mock(
                 RcsCapabilityExchangeImplBase.SubscribeResponseCallback.class);
         mMessageExecutor = new MessageExecutor("RcsUceCAllBack");
-        mRcsCapSubscribeResponseCallBack = new RcsCapSubscribeResponseCallBack(
-                mSubscribeResponseCallback, mMessageExecutor);
-        mRcsCapSubscribeResponseCallBackNull = new RcsCapSubscribeResponseCallBack(
-                null, mMessageExecutor);
+        mRcsCapSubscribeResponseCallBack = new RcsCapSubscribeResponseCallBack(mMessageExecutor);
+        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
+        mRcsSubscribeResponseCallBackNull = new RcsCapSubscribeResponseCallBack(mMessageExecutor);
+        mRcsSubscribeResponseCallBackNull.setCallBack(null);
     }
 
     @Test
     public void onCommandErrorSubscribeTest() throws ImsException {
-        mRcsCapSubscribeResponseCallBackNull.onCommandError(1);
+        mRcsSubscribeResponseCallBackNull.setCallBack(null);
+        mRcsSubscribeResponseCallBackNull.onCommandError(1);
         verify(mSubscribeResponseCallback, Mockito.times(0)).onCommandError(1);
+        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
         mRcsCapSubscribeResponseCallBack.onCommandError(1);
         verify(mSubscribeResponseCallback, Mockito.timeout(100).times(1)).onCommandError(1);
         doThrow(ImsException.class).when(mSubscribeResponseCallback).onCommandError(1);
@@ -72,9 +74,11 @@ public class RcsCapSubscribeResponseCallBackTest {
 
     @Test
     public void onNetworkResponseSubscribeTest() throws ImsException {
-        mRcsCapSubscribeResponseCallBackNull.onNetworkResponse(200, "OK");
+        mRcsSubscribeResponseCallBackNull.setCallBack(null);
+        mRcsSubscribeResponseCallBackNull.onNetworkResponse(200, "OK");
         verify(mSubscribeResponseCallback, Mockito.times(0)).onNetworkResponse(
                 anyInt(), anyString());
+        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
         mRcsCapSubscribeResponseCallBack.onNetworkResponse(200, "OK");
         verify(mSubscribeResponseCallback, Mockito.timeout(100).times(1)).onNetworkResponse(200,
                 "OK");
@@ -86,9 +90,11 @@ public class RcsCapSubscribeResponseCallBackTest {
 
     @Test
     public void onNetworkResponseTest() throws ImsException {
-        mRcsCapSubscribeResponseCallBackNull.onNetworkResponse(200, "OK", 0, null);
+        mRcsSubscribeResponseCallBackNull.setCallBack(null);
+        mRcsSubscribeResponseCallBackNull.onNetworkResponse(200, "OK", 0, null);
         verify(mSubscribeResponseCallback, Mockito.times(0))
                 .onNetworkResponse(anyInt(), anyString(), anyInt(), anyString());
+        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
         mRcsCapSubscribeResponseCallBack.onNetworkResponse(200, "OK",
                 400, "Bad Request");
         verify(mSubscribeResponseCallback, Mockito.timeout(100).times(1))
@@ -104,9 +110,11 @@ public class RcsCapSubscribeResponseCallBackTest {
     public void onNotifyCapabilitiesUpdateSubscribeTest() throws ImsException {
         List<String> pidfs = new ArrayList();
         pidfs.add(readpidf());
-        mRcsCapSubscribeResponseCallBackNull.onNotifyCapabilitiesUpdate(pidfs);
+        mRcsSubscribeResponseCallBackNull.setCallBack(null);
+        mRcsSubscribeResponseCallBackNull.onNotifyCapabilitiesUpdate(pidfs);
         verify(mSubscribeResponseCallback,
                 Mockito.times(0)).onNotifyCapabilitiesUpdate(pidfs);
+        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
         mRcsCapSubscribeResponseCallBack.onNotifyCapabilitiesUpdate(pidfs);
         verify(mSubscribeResponseCallback,
                 Mockito.timeout(100).times(1)).onNotifyCapabilitiesUpdate(pidfs);
@@ -121,9 +129,11 @@ public class RcsCapSubscribeResponseCallBackTest {
 
     @Test
     public void onTerminatedSubscribeTest() throws ImsException {
-        mRcsCapSubscribeResponseCallBackNull.onTerminated("terminatedReason", 1200);
+        mRcsSubscribeResponseCallBackNull.setCallBack(null);
+        mRcsSubscribeResponseCallBackNull.onTerminated("terminatedReason", 1200);
         verify(mSubscribeResponseCallback, Mockito.times(0))
                 .onTerminated("terminatedReason", 1200);
+        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
         mRcsCapSubscribeResponseCallBack.onTerminated("terminatedReason", 1200);
         verify(mSubscribeResponseCallback, Mockito.timeout(100)
                 .times(1)).onTerminated("terminatedReason", 1200);
@@ -138,9 +148,11 @@ public class RcsCapSubscribeResponseCallBackTest {
         List<Pair<Uri, String>> terminatedReasons = new ArrayList<Pair<Uri, String>>();
         Uri uri = Uri.parse(TEST_PHONE_NUMBER);
         terminatedReasons.add(new Pair<>(uri, "terminatedReason"));
-        mRcsCapSubscribeResponseCallBackNull.onResourceTerminated(terminatedReasons);
+        mRcsSubscribeResponseCallBackNull.setCallBack(null);
+        mRcsSubscribeResponseCallBackNull.onResourceTerminated(terminatedReasons);
         verify(mSubscribeResponseCallback, Mockito.times(0))
                 .onResourceTerminated(terminatedReasons);
+        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
         mRcsCapSubscribeResponseCallBack.onResourceTerminated(terminatedReasons);
         verify(mSubscribeResponseCallback, Mockito.timeout(100).times(1))
                 .onResourceTerminated(terminatedReasons);

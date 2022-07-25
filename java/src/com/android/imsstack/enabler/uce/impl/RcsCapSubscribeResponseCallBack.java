@@ -34,12 +34,18 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
     private SubscribeResponseCallback mSubscribeResponseCallBack;
     private MessageExecutor mMessageExecutor;
 
-    public RcsCapSubscribeResponseCallBack(SubscribeResponseCallback cb,
-            MessageExecutor messageExecutor) {
-        mSubscribeResponseCallBack = cb;
+    public RcsCapSubscribeResponseCallBack(MessageExecutor messageExecutor) {
         mMessageExecutor = messageExecutor;
     }
 
+    /**
+     * set callback SubscribeResponseCallback of subscribe request
+     * to send the response from the network back to the framework
+     * @param subscribeCallback The callback of the subscribe request
+     */
+    public void setCallBack(SubscribeResponseCallback subscribeCallback) {
+        mSubscribeResponseCallBack = subscribeCallback;
+    }
     /**
      * Notify the framework of the latest XML PIDF documents included in the network response
      * for the requested contacts' capabilities requested by the Framework.
@@ -53,7 +59,6 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
      */
     @Override
     public void onNotifyCapabilitiesUpdate(List<String> pidfXmls) {
-        // TODO handle sending response in Executor thread
         if (mSubscribeResponseCallBack == null) {
             Log.d(LOG_TAG, "SubscribeResponseCallBack  object is null");
             return;
@@ -61,7 +66,7 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
         postAndRunTask(() -> {
             try {
                 mSubscribeResponseCallBack.onNotifyCapabilitiesUpdate(pidfXmls);
-                Log.d(LOG_TAG, "onNotifyCapabilitiesUpdate SubscribeResponse sent to framework");
+                Log.d(LOG_TAG, "onNotifyCapabilitiesUpdate pidfXmls is sent to framework");
             } catch (ImsException e) {
                 e.printStackTrace();
             }
@@ -86,7 +91,6 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
      */
     @Override
     public void onCommandError(int code) {
-        // TODO handle sending response in Executor thread
         if (mSubscribeResponseCallBack == null) {
             Log.d(LOG_TAG, "SubscribeResponseCallBack  object is null");
             return;
@@ -119,7 +123,6 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
      */
     @Override
     public void onNetworkResponse(int sipCode, String reason) {
-        // TODO handle sending response in Executor thread
         if (mSubscribeResponseCallBack == null) {
             Log.d(LOG_TAG, "SubscribeResponseCallBack  object is null");
             return;
@@ -151,7 +154,6 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
     @Override
     public void onNetworkResponse(int sipCode, String reason, int reasonHeaderCause,
             String reasonHeaderText) {
-        // TODO handle sending response in Executor thread
         if (mSubscribeResponseCallBack == null) {
             Log.d(LOG_TAG, "SubscribeResponseCallBack  object is null");
             return;
@@ -179,7 +181,6 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
      */
     @Override
     public void onTerminated(String reason, long retryAfterMilliseconds) {
-        // TODO handle sending response in Executor thread
         if (mSubscribeResponseCallBack == null) {
             Log.d(LOG_TAG, "SubscribeResponseCallBack  object is null");
             return;
@@ -207,7 +208,6 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
      */
     @Override
     public void onResourceTerminated(List<Pair<Uri, String>> uriTerminatedReason) {
-        // TODO handle sending response in Executor thread
         if (mSubscribeResponseCallBack == null) {
             Log.d(LOG_TAG, "SubscribeResponseCallBack  object is null");
             return;

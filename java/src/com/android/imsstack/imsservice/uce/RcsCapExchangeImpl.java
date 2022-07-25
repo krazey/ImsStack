@@ -13,23 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.imsstack.imsservice.uce;
 
 import android.content.Context;
 import android.net.Uri;
 import android.telephony.ims.stub.CapabilityExchangeEventListener;
 import android.telephony.ims.stub.RcsCapabilityExchangeImplBase;
-import java.util.Collection;
-import java.util.Set;
+
 import com.android.imsstack.enabler.uce.impl.RcsCapEventListenerCallBack;
 import com.android.imsstack.enabler.uce.impl.RcsCapOptionsResponseCallBack;
 import com.android.imsstack.enabler.uce.impl.RcsCapPublishResponseCallBack;
 import com.android.imsstack.enabler.uce.impl.RcsCapSubscribeResponseCallBack;
-import com.android.imsstack.enabler.uce.impl.UceImpl;
 import com.android.imsstack.enabler.uce.interf.IUceApi;
 import com.android.imsstack.enabler.uce.interf.UceManager;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MessageExecutor;
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Collection;
+import java.util.Set;
 
 public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
     private CapabilityExchangeEventListener mCapabilityExchangeEventListener;
@@ -38,9 +41,12 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
         new MessageExecutor("RcsCapExchangeExecutor");
     private final MessageExecutor mCallBackExecutor =
             new MessageExecutor("CallBackExecutor");
-    private UceImpl mUceImpl = null;
     private IUceApi mUceApi = null;
     private Context mContext = null;
+    private RcsCapPublishResponseCallBack mRcsCapPublishResponseCallBack;
+    private RcsCapSubscribeResponseCallBack mRcsCapSubscribeResponseCallBack;
+    private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
+
     /**
      * Create a new RcsCapabilityExchangeImplBase instance.
      * @param listener used by the framework to listen to events from the vendor RCS stack
@@ -57,8 +63,25 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
                 mCapabilityExchangeEventListener, mCallBackExecutor, mCapExchangeExecutor);
         if (mUceApi != null)
             mUceApi.setListener(event);
+        mRcsCapPublishResponseCallBack = new RcsCapPublishResponseCallBack(mCallBackExecutor);
+        mRcsCapSubscribeResponseCallBack = new RcsCapSubscribeResponseCallBack(mCallBackExecutor);
+        mRcsCapOptionsResponseCallBack = new RcsCapOptionsResponseCallBack(mCallBackExecutor);
     }
 
+    @VisibleForTesting
+    public RcsCapExchangeImpl(CapabilityExchangeEventListener listener, int slotId,
+            Context context, IUceApi uceApi,
+            RcsCapSubscribeResponseCallBack capSubscribeResponseCallBack,
+            RcsCapOptionsResponseCallBack optionsResponse,
+            RcsCapPublishResponseCallBack rcsCapPublishResponseCallBack) {
+        mCapabilityExchangeEventListener = listener;
+        mSlotId = slotId;
+        mContext = context;
+        mUceApi = uceApi;
+        mRcsCapPublishResponseCallBack = rcsCapPublishResponseCallBack;
+        mRcsCapSubscribeResponseCallBack = capSubscribeResponseCallBack;
+        mRcsCapOptionsResponseCallBack = optionsResponse;
+    }
 
     /**
      * The user capabilities of one or multiple contacts have been requested by the framework.
@@ -79,18 +102,19 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
      *
      * @param uris A {@link Collection } of the {@link Uri}s that the framework is requesting the
      *             UCE capabilities for.
-     * @param cb   The callback of the subscribe request.
+     * @param subscribeCallback   The callback of the subscribe request.
      */
     @Override
-    public void subscribeForCapabilities(Collection<Uri> uris, SubscribeResponseCallback cb) {
+    public void subscribeForCapabilities(Collection<Uri> uris,
+            SubscribeResponseCallback subscribeCallback) {
         if (mUceApi != null) {
             postAndRunTask(() -> {
-                RcsCapSubscribeResponseCallBack callback =
-                        new RcsCapSubscribeResponseCallBack(cb, mCallBackExecutor);
-                mUceApi.subscribeCapabilities(uris, callback);
-                });
+                mRcsCapSubscribeResponseCallBack.setCallBack(subscribeCallback);
+                mUceApi.subscribeCapabilities(uris, mRcsCapSubscribeResponseCallBack);
+                ImsLog.d("subscribeForCapabilities request");
+            });
         } else {
-            ImsLog.i("mUceApi is null for slot "+ mSlotId);
+            ImsLog.i("mUceApi is null for slot " + mSlotId);
         }
     }
 
@@ -102,16 +126,15 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
      *
      * @param pidfXml The XML PIDF document containing the capabilities of this device to be sent
      *                to the carrier’s presence server.
-     * @param cb      The callback of the publish request
+     * @param publishCallback      The callback of the publish request
      */
     @Override
-    public void publishCapabilities(String pidfXml, PublishResponseCallback cb) {
+    public void publishCapabilities(String pidfXml, PublishResponseCallback publishCallback) {
         if(mUceApi != null) {
             postAndRunTask(()-> {
-            RcsCapPublishResponseCallBack rcsCapPublishResponseCallBack =
-                        new RcsCapPublishResponseCallBack(cb, mCallBackExecutor);
-            mUceApi.publishCapabilities(pidfXml, rcsCapPublishResponseCallBack);
-            ImsLog.d("publishCapabilities pidfXml:"+ pidfXml);
+                mRcsCapPublishResponseCallBack.setCallBack(publishCallback);
+                mUceApi.publishCapabilities(pidfXml, mRcsCapPublishResponseCallBack);
+                ImsLog.d("publishCapabilities request with pidfxml");
             });
         } else {
             ImsLog.i("mUceApi is null for slot "+ mSlotId);
@@ -127,17 +150,17 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
      *
      * @param contactUri     The URI of the remote user that we wish to get the capabilities of.
      * @param myCapabilities The capabilities of this device to send to the remote user.
-     * @param callback       The callback of this request which is sent from the remote user.
+     * @param optionsCallback       The callback of this request which is sent from the remote user.
      */
     @Override
     public void sendOptionsCapabilityRequest(Uri contactUri, Set<String> myCapabilities,
-            OptionsResponseCallback callback) {
+            OptionsResponseCallback optionsCallback) {
         if(mUceApi != null) {
             postAndRunTask(()-> {
-                RcsCapOptionsResponseCallBack rcsCapOptionsResponseCallBack =
-                        new RcsCapOptionsResponseCallBack(callback, mCallBackExecutor);
+                mRcsCapOptionsResponseCallBack.setCallBack(optionsCallback);
                 mUceApi.sendOptionsCapabilityRequest(contactUri, myCapabilities,
-                        rcsCapOptionsResponseCallBack);
+                        mRcsCapOptionsResponseCallBack);
+                ImsLog.d("sendOptionsCapabilityRequest request");
             });
         } else {
             ImsLog.i("mUceApi is null for slot "+ mSlotId);

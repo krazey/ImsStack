@@ -48,17 +48,19 @@ public class RcsCapPublishResponseCallBackTest {
         mPublishResponseCallback = Mockito.mock(
                 RcsCapabilityExchangeImplBase.PublishResponseCallback.class);
         mMessageExecutor = new MessageExecutor("ResponseCallBackTest");
-        mRcsCapPublishResponseCallBack = new RcsCapPublishResponseCallBack(
-                mPublishResponseCallback, mMessageExecutor);
-        mRcsCapPublishResponseCallBackNull = new RcsCapPublishResponseCallBack(
-                null, mMessageExecutor);
+        mRcsCapPublishResponseCallBack = new RcsCapPublishResponseCallBack(mMessageExecutor);
+        mRcsCapPublishResponseCallBack.setCallBack(mPublishResponseCallback);
+        mRcsCapPublishResponseCallBackNull = new RcsCapPublishResponseCallBack(mMessageExecutor);
+        mRcsCapPublishResponseCallBackNull.setCallBack(null);
     }
 
     @Test
     public void onCommandErrorPublishTest() throws ImsException {
+        mRcsCapPublishResponseCallBackNull.setCallBack(null);
         mRcsCapPublishResponseCallBackNull.onCommandError(1);
         verify(mPublishResponseCallback, Mockito.times(0)).onCommandError(1);
 
+        mRcsCapPublishResponseCallBack.setCallBack(mPublishResponseCallback);
         mRcsCapPublishResponseCallBack.onCommandError(1);
         verify(mPublishResponseCallback, Mockito.timeout(100).times(1)).onCommandError(1);
 
@@ -69,10 +71,11 @@ public class RcsCapPublishResponseCallBackTest {
 
     @Test
     public void onNetworkResponsePublishTest() throws ImsException {
+        mRcsCapPublishResponseCallBackNull.setCallBack(null);
         mRcsCapPublishResponseCallBackNull.onNetworkResponse(200, "OK");
         verify(mPublishResponseCallback, Mockito.times(0)).onNetworkResponse(
                 anyInt(), anyString());
-
+        mRcsCapPublishResponseCallBack.setCallBack(mPublishResponseCallback);
         mRcsCapPublishResponseCallBack.onNetworkResponse(200, "OK");
         verify(mPublishResponseCallback, Mockito.timeout(100).times(1)).onNetworkResponse(200,
                 "OK");
@@ -85,10 +88,11 @@ public class RcsCapPublishResponseCallBackTest {
 
     @Test
     public void onNetworkResponseReasonPublishTest() throws ImsException {
+        mRcsCapPublishResponseCallBackNull.setCallBack(null);
         mRcsCapPublishResponseCallBackNull.onNetworkResponse(200, "OK", 100, "Reason");
         verify(mPublishResponseCallback, Mockito.timeout(100).times(0))
                 .onNetworkResponse(anyInt(), anyString(), anyInt(), anyString());
-
+        mRcsCapPublishResponseCallBack.setCallBack(mPublishResponseCallback);
         mRcsCapPublishResponseCallBack.onNetworkResponse(200, "OK", 100, "Reason");
         verify(mPublishResponseCallback, Mockito.timeout(100).times(1))
                 .onNetworkResponse(200, "OK", 100, "Reason");

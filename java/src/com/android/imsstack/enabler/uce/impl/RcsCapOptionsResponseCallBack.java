@@ -32,12 +32,18 @@ public class RcsCapOptionsResponseCallBack implements OptionsResponse {
     private OptionsResponseCallback mOptionsResponseCallBack;
     private MessageExecutor mMessageExecutor;
 
-    public RcsCapOptionsResponseCallBack(OptionsResponseCallback cb,
-            MessageExecutor messageExecutor) {
-        mOptionsResponseCallBack = cb;
+    public RcsCapOptionsResponseCallBack(MessageExecutor messageExecutor) {
         mMessageExecutor = messageExecutor;
     }
 
+    /**
+     * set the callback OptionsResponseCallback of options requests
+     * to send the response from the network back to the framework.
+     * @param optionsCallback Tha callback of Options callback
+     */
+    public void setCallBack(OptionsResponseCallback optionsCallback) {
+        mOptionsResponseCallBack = optionsCallback;
+    }
     /**
      * Notify the framework that the command associated with this callback has failed.
      *
