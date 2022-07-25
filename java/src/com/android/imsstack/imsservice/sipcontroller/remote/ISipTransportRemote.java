@@ -62,6 +62,7 @@ public interface ISipTransportRemote {
 
     /**
      * Release from SipController(Java) if the delegate is terminated or Jni is not used.
+     * @param slotId The slot ID to be removed
      */
-    void release();
+    void release(int slotId);
 }

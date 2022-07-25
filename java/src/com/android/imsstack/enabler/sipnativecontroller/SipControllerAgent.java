@@ -27,6 +27,7 @@ import com.android.imsstack.imsservice.sipcontroller.remote.SipTransportRemoteLi
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.MSimUtils;
 
 import java.util.Set;
 
@@ -38,10 +39,12 @@ import java.util.Set;
 public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
     private long mNativeObj = 0;
+    private int mSlotId = MSimUtils.INVALID_SLOT_ID;
     private SipTransportRemoteListener mListener = null;
     private static final SparseArray<SipControllerAgent> sAgentArray = new SparseArray<>();
 
     SipControllerAgent(int slotId) {
+        mSlotId = slotId;
         initService(slotId);
     }
 
@@ -77,10 +80,11 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
     /**
      * Release from SipController(Java) if the delegate is terminated or Jni is not used.
+     * @param slotId The slot ID to be removed
      */
     @Override
-    public void release() {
-
+    public void release(int slotId) {
+        sAgentArray.remove(slotId);
         JniImsProxy.removeListener(mNativeObj);
         JniImsProxy.releaseInterface(mNativeObj);
     }
@@ -98,7 +102,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     public void closeOngoingSession(@NonNull String callId, int subId) {
 
         Parcel parcel = Parcel.obtain();
-        parcel.writeInt(SipControllerInternalMsgDef.CLOSEONGOINGSESSION_CMD);
+        parcel.writeInt(SipControllerInternalMsgDef.CLOSESESSION_CMD);
         parcel.writeString(callId);
         sendMessageToJNI(parcel);
     }
@@ -177,7 +181,11 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
     private void messageReceived(Parcel parcel) throws Exception {
 
-        int subId = parcel.readInt();
+        if (mSlotId == MSimUtils.INVALID_SLOT_ID) {
+            ImsLog.i("slotId is invalid");
+            return;
+        }
+        int subId = MSimUtils.getSubId(mSlotId);
         SipMessage message = SipMessage.CREATOR.createFromParcel(parcel);
 
         mListener.onMessageReceived(message, subId);
@@ -185,7 +193,11 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
     private void messageSent(Parcel parcel) throws Exception {
 
-        int subId = parcel.readInt();
+        if (mSlotId == MSimUtils.INVALID_SLOT_ID) {
+            ImsLog.i("slotId is invalid");
+            return;
+        }
+        int subId = MSimUtils.getSubId(mSlotId);
         String transactionId = parcel.readString();
 
         mListener.onMessageSent(transactionId, subId);
@@ -193,7 +205,11 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
     private void messageSendFailure(Parcel parcel) throws Exception {
 
-        int subId = parcel.readInt();
+        if (mSlotId == MSimUtils.INVALID_SLOT_ID) {
+            ImsLog.i("slotId is invalid");
+            return;
+        }
+        int subId = MSimUtils.getSubId(mSlotId);
         int sipReason = parcel.readInt();
         String transactionId = parcel.readString();
 
