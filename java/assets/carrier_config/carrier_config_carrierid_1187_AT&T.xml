@@ -176,7 +176,7 @@
     <int name="imsvoice.policy_for_403_response_for_invite_int" value="1"/>
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="0"/>
     <boolean name="imsvoice.reject_offerless_invite_bool" value="false"/>
-    <int name="imsvoice.call_max_count" value="3"/>
+    <int name="imsvoice.call_max_count_int" value="3"/>
     <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">RELEASE_CAUSE;cause=1;text=&quot;User ends call&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_rtp_timeout_string">RELEASE_CAUSE;cause=2;text=&quot;RTP/RTCP time-out&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_rtp_timeout_string"></string>
