@@ -21,52 +21,181 @@
 #include "MediaDef.h"
 #include "audio/AudioNego.h"
 #include "video/VideoNego.h"
-//#include "text/TextNego.h"
+//#include "text/TextNego.h"    TODO: add porting later
 
 class MediaNego : public ImsSlot
 {
 public:
     enum MediaNegoResult
     {
+        /** No error */
         NO_ERROR = 0,
+        /** error when the descriptor is invalid*/
         ERROR_INVALID_DESCRIPTOR,
+        /** error when there is no negotiated codec */
         ERROR_NO_CODEC_MATCHED,
+        /** error when the ip version is not matched between offer and answer */
         ERROR_IP_MISMATCH,
+        /** error when there is no audio m line in SDP*/
         ERROR_NO_AUDIO,
+        /** error when there is no video m line in SDP*/
         ERROR_NO_VIDEO,
+        /** error when there is no text m line in SDP*/
         ERROR_NO_TEXT,
     };
+
     MediaNego(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     ~MediaNego();
 
-private:
-    MediaNego(IN const MediaNego& obj);
-    MediaNego& operator=(IN const MediaNego& obj);
-
-public:
+    /**
+     * @brief Creates MediaNego instance with given service type
+     *
+     * @param eServiceType The service type defined in MEDIA_SERVICE_TYPE
+     */
     void Create(IN MEDIA_SERVICE_TYPE eServiceType);
-    void SetMediaEnvironment(IN MediaEnvironment* pMediaEnvironment);
+
+    /**
+     * @brief Updates the Media environment instance created from the client
+     *
+     * @param pMediaEnvironment The instance to set
+     */
+    IMS_BOOL UpdateMediaEnvironment(IN MediaEnvironment* pMediaEnvironment);
+
+    /**
+     * @brief Creates MediaNego object copied from the existing MediaNego instance
+     *
+     * @param pMediaNego the instance of existing MediaNego
+     * @return IMS_BOOL Return IMS_TRUE whent the forking success, IMS_FALSE when the arguments is
+     * invalid
+     */
     IMS_BOOL Forking(IN MediaNego* pMediaNego);
+
+    /**
+     * @brief Forms SDP with the profile created and send the offer or answer with the given
+     * arguments
+     *
+     * @param pSession ISession instance of SDP stack framework to set the formed SDP
+     * @param eMediaType The media type to form, it can be audio/video/text defined in
+     * MEDIA_CONTENT_TYPE
+     * @param eAudioDir The audio direction to set in the SDP
+     * @param eVideoDir The video direction to set in the SDP
+     * @param eTextDir The text direction to set in the SDP
+     * @return IMS_BOOL Returns IMS_TRUE when the form SDP is done successfully and IMS_FALSE when
+     * failed with invalid arguments
+     */
     IMS_BOOL FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
             IN IMS_SINT32 eAudioDir, IN IMS_SINT32 eVideoDir, IN IMS_SINT32 eTextDir);
+
+    /**
+     * @brief Create negotiate profile from the SDP received from the network by the given arguments
+     *
+     * @param pSession ISession instance to get the SDP received
+     * @param eAudioDir The audio direction negotiated
+     * @param eVideoDir The video direction negotiated
+     * @param eTextDir The text direction negotiated
+     * @param errorReason The error reason when the negotiation is failed
+     * @return IMS_BOOL Returns IMS_TRUE when the negotiation succeed and IMS_FALSE when failed.
+     * MediaNegoResult will be set when negotiation failed
+     */
     IMS_BOOL NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* eAudioDir,
             OUT IMS_SINT32* eVideoDir, OUT IMS_SINT32* eTextDir, OUT MediaNegoResult& errorReason);
+
+    /**
+     * @brief Deletes invalid negotiation result and unnecessary Audio/Video/TextNego object
+     *
+     * @param pSession ISession instance to get the SDP descriptor
+     */
     void FinalizeSDP(IN ISession* pSession);
+
+    /**
+     * @brief Set the negotiation state
+     *
+     * @param eNegoState The state defined in NEGO_STATE
+     */
     void SetNegoState(NEGO_STATE eNegoState) { m_eNegoState = eNegoState; }
+
+    /**
+     * @brief Get the negotiation state
+     *
+     * @return NEGO_STATE
+     */
     NEGO_STATE GetNegoState() { return m_eNegoState; }
+
+    /**
+     * @brief Set the AudioNego instance
+     */
     void SetAudioNego(AudioNego* pAudioNego) { m_pAudioNego = pAudioNego; }
+
+    /**
+     * @brief Get the AudioNego instance
+     */
     AudioNego* GetAudioNego() { return m_pAudioNego; }
+
+    /**
+     * @brief Set the VideoNego instance
+     */
     void SetVideoNego(VideoNego* pVideoNego) { m_pVideoNego = pVideoNego; }
+
+    /**
+     * @brief Get the VideoNego instance
+     */
     VideoNego* GetVideoNego() { return m_pVideoNego; }
-    // void SetTextNego(TextNego* pTextNego) { m_pTextNego = pTextNego; }
-    // TextNego* GetTextNego() { return m_pTextNego; }
+
+    /**
+     * @brief Get the negotiated audio direction
+     *
+     * @return MEDIA_DIRECTION
+     */
     MEDIA_DIRECTION GetNegotiatedAudioDirection(void);
+
+    /**
+     * @brief Get the media session type
+     *
+     * @return MEDIA_CONTENT_TYPE
+     */
+    MEDIA_CONTENT_TYPE GetSessionType() { return m_eSessionType; }
+
+    /**
+     * @brief Get the negotiated video direction
+     *
+     * @return MEDIA_DIRECTION
+     */
     MEDIA_DIRECTION GetNegotiatedVideoDirection(void);
+
+    /**
+     * @brief Get the negotiated text direction
+     *
+     * @return MEDIA_DIRECTION
+     */
     MEDIA_DIRECTION GetNegotiatedTextDirection(void);
+
+    /**
+     * @brief Get the negotiated audio codec
+     *
+     * @return AUDIO_CODEC
+     */
     AUDIO_CODEC GetNegotiatedAudioQuality(void);
+
+    /**
+     * @brief Get the negotiated video resolution
+     *
+     * @return VIDEO_RESOLUTION
+     */
     VIDEO_RESOLUTION GetNegotiatedVideoQuality(void);
-    // TEXT_CODEC GetNegotiatedTextQuality(void);    // TODO_MEDIA
+
+    /**
+     * @brief Get the media descriptor instance
+     *
+     * @param pIMedia
+     * @return IMediaDescriptor*
+     */
     IMediaDescriptor* GetMediaDescriptor(IN IMedia* pIMedia);
+
+    /**
+     * @brief Check this instance is crated from forking
+     *
+     * @return IMS_BOOL Returns IMS_TRUE when this instance is created from forking
+     */
     IMS_BOOL IsForking();
 
 private:
@@ -80,10 +209,9 @@ protected:
     NEGO_STATE m_eNegoState;
     AudioNego* m_pAudioNego;
     VideoNego* m_pVideoNego;
-    // TextNego*  m_pTextNego;  // TODO_MEDIA text
+    /** TODO: add implementation for text */
     MediaEnvironment* m_pMediaEnvironment;
     MEDIA_CONTENT_TYPE m_eSessionType;
-    IMS_BOOL m_bIsActive;
     IMS_BOOL m_bForking;
 };
 

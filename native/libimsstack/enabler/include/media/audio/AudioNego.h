@@ -17,50 +17,52 @@
 #ifndef _IMS_AUDIO_NEGO_H_
 #define _IMS_AUDIO_NEGO_H_
 
-// == INCLUDES =========================================================
 #include "ImsSlot.h"
-
 #include "media/IMedia.h"
 #include "ISession.h"
-
 #include "MediaDef.h"
 #include "audio/AudioDef.h"
-#include "MediaEnvironment.h"
-
 #include "audio/AudioProfile.h"
+#include "audio/AudioProfileUtil.h"
 #include "config/AudioConfiguration.h"
-#include "audio/AudioProfileConfigurer.h"
 
+/**
+ * @brief The class to negotiate and form the SDP attribute belong to the m=audio line
+ *
+ */
 class AudioNego : public ImsSlot
 {
-    // == INNER CLASS ================================================================
 public:
+    /**
+     * @brief The calss to store the negotiation attribute of the local and peer
+     *
+     */
     class OaModel
     {
     public:
-        AudioProfile* pSrcProfile;
-        AudioProfile* pDestProfile;
+        AudioProfile* pLocalProfile;
+        AudioProfile* pPeerProfile;
         AudioProfile* pNegotiatedProfile;
         IMS_SINTP nSessionDescriptorKey;
         IMS_BOOL bConfirmedSession;
 
     public:
         OaModel() :
-                pSrcProfile(IMS_NULL),
-                pDestProfile(IMS_NULL),
+                pLocalProfile(IMS_NULL),
+                pPeerProfile(IMS_NULL),
                 pNegotiatedProfile(IMS_NULL),
                 nSessionDescriptorKey(0),
                 bConfirmedSession(IMS_FALSE){};
 
         ~OaModel()
         {
-            if (pSrcProfile != IMS_NULL)
+            if (pLocalProfile != IMS_NULL)
             {
-                delete pSrcProfile;
+                delete pLocalProfile;
             }
-            if (pDestProfile != IMS_NULL)
+            if (pPeerProfile != IMS_NULL)
             {
-                delete pDestProfile;
+                delete pPeerProfile;
             }
             if (pNegotiatedProfile != IMS_NULL)
             {
@@ -75,7 +77,7 @@ public:
     public:
         IMS_BOOL IsAllProfileExist()
         {
-            if (pSrcProfile != IMS_NULL && pDestProfile != IMS_NULL &&
+            if (pLocalProfile != IMS_NULL && pPeerProfile != IMS_NULL &&
                     pNegotiatedProfile != IMS_NULL)
             {
                 return IMS_TRUE;
@@ -87,70 +89,153 @@ public:
         };
     };
 
-    // == Constructor, Destructor, Operator Overloading ========================================
-protected:
-    AudioNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
-
 public:
-    static AudioNego* Create(IN IMS_SINT32 nSlotId = IMS_SLOT_0,
-            IN MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT);
+    AudioNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
+    AudioNego(IN const AudioNego& pAudioNego);
     virtual ~AudioNego();
 
-private:
-    AudioNego(IN const AudioNego& obj);
-    AudioNego& operator=(IN const AudioNego& obj);
+    /**
+     * @brief Create a base local/peer/negotiate profile with given configuration
+     *
+     * @param pEnvironment The MediaEnvironment
+     * @param pConfig The configuration to create audio profile
+     */
+    virtual void CreateProfiles(IN MediaEnvironment* pEnvironment, IN AudioConfiguration* pConfig);
 
-    // == PUBLIC METHOD ==============================================================
-public:
-    virtual void CreateProfiles(IN MediaEnvironment* pEnvironment);
+    /**
+     * @brief Destroy a local/peer/negotiate profile
+     *
+     */
     virtual void DestroyProfiles();
-    virtual void SetMediaEnvironment(IN MediaEnvironment* pEnvironment);
-    virtual void SetSessionType(IN MEDIA_CONTENT_TYPE eSessionType);
-    AudioConfiguration* GetConfig();
-    void Copy(IN AudioNego* pAudioNego);
 
-    // -- Negotiation APIs -------------------------------------------------------------------------
+    /**
+     * @brief Form the SDP with the current profile based on the state
+     *
+     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
+     * list
+     * @param pSessionDescriptor The SDP descriptor instance to form the session level SDP
+     * @param pDescriptor The SDP descriptor instance to form the m=audio level SDP
+     * @param eDir The media direction of the SDP
+     * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
+     * it is failed to form
+     */
     virtual IMS_BOOL FormSDP(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
-            IN MEDIA_DIRECTION eDir);
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
+
+    /**
+     * @brief Negotiate the SDP and make the negotiate profile based on the nego state
+     *
+     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
+     * list
+     * @param bForking The parameter to decide to negotiate as a 1st answer of 2nd answer in forking
+     * session
+     * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
+     * @param pDescriptor The SDP descriptor instance to negotiate the m=audio level SDP
+     * @param eDir The media direction of the SDP
+     * @return IMS_BOOL Returns IMS_TRUE when there is no error during SDP negotiation, IMS_FALSE
+     * when it is failed to form
+     */
     virtual IMS_BOOL NegotiateSDP(IN NEGO_STATE eNegoState, IN IMS_BOOL bForking,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT MEDIA_DIRECTION* eDir);
-    virtual void FinalizeSDP(IN IMS_SINTP nSessionDescriptorKey, NEGO_STATE eNegoState);
 
-    // -- Additional function APIs
-    // -------------------------------------------------------------------------
-    IMS_BOOL SetPort(IN IMS_UINT32 nPort);
-    IPAddress GetLocalAddr() { return m_objBaseProfile.objIpAddr; };
-    IMS_UINT32 GetLocalPort() { return m_objBaseProfile.nDataPort; };
-    IPAddress GetNegotiatedRemoteAddr();
-    IMS_UINT32 GetNegotiatedRemotePort();
-    // -- Condition checking APIs
-    // -------------------------------------------------------------------------
-    OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
-    IMS_BOOL GetNegotiatedProfileSet(OUT AudioProfile*& pSrcProfile,
-            OUT AudioProfile*& pDestProfile, OUT AudioProfile*& pNegotiatedProfile);
-    AudioProfile* GetNegotiatedDestProfile();
+    /**
+     * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
+     *
+     * @param pSessionDescriptor The SDP descriptor instance to access session level SDP
+     * @param eNegoState The current negotiation state to decide to remove the OA model item
+     */
+    virtual void FinalizeSDP(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
 
-    IMS_UINT32 GetLatestRemotePort();
-    MEDIA_DIRECTION GetNegotiatedDirection(void);
-    AUDIO_CODEC GetNegotiatedCodec(void);
-    AUDIO_CODEC_BITRATE GetNegotiatedAudioCodecRate(void);
-    IMS_BOOL HasNegotiatedDtmf(void);
-    IMS_SINT32 GetNegotiatedRtpPort(void);
-    IMS_SINT32 GetMediaBandwidth(void);
+    /**
+     * @brief Set the local port number of the AudioProfile
+     *
+     * @param nPort The port number
+     * @return IMS_BOOL IMS_TRUE when the port number is unique and valid, IMS_FALSE when it is
+     * invalid port number which is already reserved
+     */
+    virtual IMS_BOOL SetPort(IN IMS_UINT32 nPort);
 
-    // == PROTECTED METHOD ==========================================================
+    /**
+     * @brief Get the local ip address
+     *
+     * @return const IPAddress& The local ip address
+     */
+    virtual const IPAddress& GetLocalAddress() { return m_objBaseProfile.objIpAddr; };
+
+    /**
+     * @brief Get the local port number
+     *
+     * @return IMS_UINT32 The local port number
+     */
+    virtual IMS_UINT32 GetLocalPort() { return m_objBaseProfile.nDataPort; };
+
+    /**
+     * @brief Get the negotiated remote ip address
+     *
+     * @return const IPAddress& The ip address
+     */
+    virtual const IPAddress& GetNegotiatedRemoteAddr();
+
+    /**
+     * @brief Get the negotiated remote port number
+     *
+     * @return IMS_UINT32 The port number
+     */
+    virtual IMS_UINT32 GetNegotiatedRemotePort();
+
+    /**
+     * @brief Get the negotiated local profile object
+     */
+    virtual AudioProfile* GetNegotiatedLocalProfile();
+
+    /**
+     * @brief Get the negotiated negotiated profile object
+     */
+    virtual AudioProfile* GetNegotiatedNegoProfile();
+
+    /**
+     * @brief Get the negotiated peer profile object
+     */
+    virtual AudioProfile* GetNegotiatedPeerProfile();
+
+    /**
+     * @brief Get the negotiated audio direction
+     */
+    virtual MEDIA_DIRECTION GetNegotiatedDirection(void);
+
+    /**
+     * @brief Get the negotiated audio codec
+     */
+    virtual AUDIO_CODEC GetNegotiatedCodec(void);
+
+    /**
+     * @brief Get the negotiated audio codec mode rate(bitrate)
+     */
+    virtual AUDIO_CODEC_BITRATE GetNegotiatedAudioCodecRate(void);
+
+    /**
+     * @brief Get if the telephony-event is negotiated
+     */
+    virtual IMS_BOOL HasNegotiatedDtmf(void);
+
+    /**
+     * @brief Get the port number from the negotiated profile
+     */
+    virtual IMS_SINT32 GetNegotiatedRtpPort(void);
+
+    /**
+     * @brief Get the negotiated audio bandwidth
+     */
+    virtual IMS_SINT32 GetMediaBandwidth(void);
+
 protected:
     virtual IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
-            IN MEDIA_DIRECTION eDir);
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
     virtual IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
-            IN MEDIA_DIRECTION eDir);
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
     virtual IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
-            IN MEDIA_DIRECTION eDir);
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
     virtual MEDIA_DIRECTION NegotiateOffer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
     virtual MEDIA_DIRECTION NegotiateAnswer(
@@ -161,7 +246,7 @@ protected:
             OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     IMS_BOOL MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor,
             IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile);
-    IMS_BOOL MakeNegotiatedProfile(IN AudioProfile* pSrcProfile, IN AudioProfile* pDestProfile,
+    IMS_BOOL MakeNegotiatedProfile(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
             IN IMS_BOOL bIsOfferReceived, OUT AudioProfile* pNegotiatedProfile);
     IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::EvsFmtp* pFmtp);
     IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
@@ -189,28 +274,19 @@ protected:
             OUT AudioProfile::Payload* pPayload, IMS_BOOL bIpV6, IN IMS_SINT32 nAs);
     MEDIA_DIRECTION UpdateDirectionToMine(
             IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir, IN IMS_BOOL bIsMtCase);
-    AString MakeCryptoAttributeFromSrtpProfile(IN AudioProfile* pProfile);
-    IMS_BOOL MakeSrtpProfileFromCapaNego(IN_OUT AudioProfile* pProfile);
-    IMS_BOOL MakeSrtpProfileFromCryptoAttr(OUT AudioProfile* pProfile, IN AString CryptoAttr);
     IMS_BOOL MakeCapaNegoProfileFromSdp(
             IN IMediaDescriptor* pDescriptor, OUT AudioProfile::CapaNego* pObjCapaNego);
     IMS_BOOL MakeNegotiatedCapaNegoProfile(IN AudioProfile::CapaNego* pSrcCapaNego,
             IN AudioProfile::CapaNego* pDestCapaNego,
             OUT AudioProfile::CapaNego* pNegotiatedCapaNego);
 
-protected:
+private:
+    OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
+
     IMSList<OaModel*> m_lstOaModel;
     AudioProfile m_objBaseProfile;
-    MediaEnvironment* m_pMediaEnvironment;
-
-private:
-    MEDIA_CONTENT_TYPE m_eSessionType;
-    static const AString EVS_BR[12];
-    static const AString EVS_BW[4];
-    static const AString EVS_BW_LIST[9];
-
-public:
-    static const AString AUDIO_CODEC_BANDWIDTH_STRING[4];
-    static const AString AUDIO_CODEC_BITRATE_STRING[3][9];
+    MediaEnvironment* m_pEnvironment;
+    AudioConfiguration* m_pConfig;
 };
+
 #endif /* _IMS_AUDIO_NEGO_H_ */

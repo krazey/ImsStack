@@ -25,31 +25,32 @@ class IMediaSessionClientListener
 {
 public:
     /**
-     * REPORT_SUCCESS
-     * REPORT_CLOSE_SESSION
-     * REPORT_DATA_RECEIVE_FAILED
-     * REPORT_DATA_RECEIVE_STARTED
-     * REPORT_VIDEO_LOWEST_BIT_RATE
-     * REPORT_CHECK_RADIO_CONNECTION
-     * REPORT_NW_TONE_RTP_RECEIVE_STARTED
-     * REPORT_NW_TONE_RTP_RECEIVE_FAILED
+     * @brief Sends notification to the client
+     *
+     * @param eReportType notification type definition of REPORT_TYPE in MediaDef.h.
+     * @param eMediaType The media type of notification
+     * @param eMediaProtocolType The protocol type of notification, it can be RTP or RTCP
      */
     virtual void MediaSession_Notify(IMS_UINT32 eReportType,
             MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID,
             MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType = MEDIA_PROTOCOL_ANY) = 0;
 
     /**
-     * REPORT_FAILURE
+     * @brief Notifys failure to the client
+     *
+     * @param eReportType The type of report, it should be REPORT_FAILURE.
+     * @param eError The failure reason
+     * @param eMediaType The media type of notification
      */
-    virtual void MediaSession_NotifyFailures(IMS_UINT32 eReportType, RtpError eError,
+    virtual void MediaSession_NotifyFailures(IMS_UINT32 eReportType, IMS_SINT32 eError,
             MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) = 0;
 
     /**
-     * @brief Notify QOS parameter
+     * @brief Notifys QOS parameter
      *
-     * @param nNegoId identifier of dialog to report
-     * @param bSuccess Qos callback result
-     * @param eMediaType media type of notify
+     * @param nNegoId The identifier of dialog to report
+     * @param bSuccess The qos callback result
+     * @param eMediaType The media type of notify
      */
     virtual void MediaSession_NotifyQos(IMS_UINTP nNegoId, IMS_BOOL bSuccess,
             MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) = 0;

@@ -46,8 +46,6 @@ PUBLIC VIRTUAL void BaseSession::SetMediaEnvironment(MediaEnvironment* pEnvironm
 
 PUBLIC VIRTUAL void BaseSession::SetDirection(MEDIA_DIRECTION eDir)
 {
-    //    IMS_TRACE_D("BaseSession::SetDirection() - [%d]->[%d]", m_eEnforcedDirection, eDir, 0);
-    /** To Do, Media build */
     m_eEnforcedDirection = eDir;
 }
 
@@ -56,11 +54,7 @@ PUBLIC VIRTUAL IMS_SINT32 BaseSession::GetState()
     return m_nState;
 }
 
-/** TODO do it later : IsSameRemoteNetwork is currently not used */
-/*
-PUBLIC VIRTUAL IMS_BOOL IsSameRemoteNetwork(IPAddress address, IMS_UINT32 port) {
-    (void)address;
-    (void)port;
-    return IMS_TRUE;
+PUBLIC VIRTUAL void BaseSession::SetState(IMS_SINT32 state)
+{
+    m_nState = state;
 }
-*/

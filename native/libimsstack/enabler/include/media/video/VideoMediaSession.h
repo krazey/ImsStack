@@ -81,12 +81,6 @@ public:
      * request SET_MEDIA_QUALITY with Video Media qualityThreshold
      */
     IMS_BOOL SetMediaQuality();
-    IMS_BOOL SendDtmf(IN IMS_CHAR cDtmfCode, IN IMS_SINT32 nDuration);
-    // notification - do it later
-    //    virtual void SendNotifyToListener(IN IMS_SINT32 nNotify);
-    //    virtual void SendNotifyInfoToListener(IMS_SINT32 nEvent, AString strNotifyInfo = IMS_NULL,
-    //        IMS_SINT32 nNotifyInfo = -1, IMS_BOOL bNotifyInfo = IMS_FALSE);
-    virtual void SendEventToUi(IN IMS_SINT32 nEvent, IN IMS_SINT32 nResult);
     IMS_SINT32 GetLocalPort();
     IMS_SINT32 GetRemotePort();
     IMS_SINT32 GetCameraId();

@@ -43,7 +43,7 @@ public: /* IMediaSessionClientListener */
             IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID,
             IN MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType = MEDIA_PROTOCOL_ANY) override;
 
-    virtual void MediaSession_NotifyFailures(IN IMS_UINT32 eReportType, IN RtpError eError,
+    virtual void MediaSession_NotifyFailures(IN IMS_UINT32 eReportType, IN IMS_SINT32 eError,
             IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) override;
 
     virtual void MediaSession_NotifyQos(IN IMS_UINTP nNegoId, IN IMS_BOOL bSuccess,
@@ -129,7 +129,7 @@ private:
     void SetState(IN MediaState eState);
     void FinalizeMediaInfo(IN IMS_UINTP nNegoId);
     void UpdateLocalTone(IN ISession* piSession);
-    void SetNetworkToneRtpTimer(IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nDuration);  // TBD
+    void SetNetworkToneRTPTimer(IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nDuration);  // TBD
     void SendAudioInfoToJava(IN ISession* piSession);
 
     IMS_BOOL IsNecessaryToRunMedia(IN ISession* piSession, IN IMessage* piMessage);

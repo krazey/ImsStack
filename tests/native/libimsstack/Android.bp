@@ -54,6 +54,7 @@ cc_test {
     local_include_dirs: [
         "enabler/include/aos",
         "enabler/include/mtc",
+        "enabler/include/media",
         "engine/interface",
         "platform/interface",
     ],

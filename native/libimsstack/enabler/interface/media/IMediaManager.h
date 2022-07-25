@@ -24,11 +24,23 @@ class IMediaManager
 {
 public:
     virtual ~IMediaManager() {};
+    /**
+     * @brief Set the JniMediaSessionThread instance for jni communication
+     *
+     * @param nCallKey The unique identification of call session
+     * @param pThread The instance of JniMediaSessionThread
+     */
     virtual void SetJniMediaSessionThread(IN IMS_SINTP nCallKey,
             IN JniMediaSessionThread* pThread) = 0;
 
-    virtual void OnResponse(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
-    virtual void OnVideoMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
+    /**
+     * @brief Sends a message from java layer through jni interface
+     *
+     * @param nMsg Enum of message defined in IMMedia.h
+     * @param nCallKey The key to identify the media session instance
+     * @param pParam The message parameter, it is defined in IMMedia.h
+     */
+    virtual void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam) = 0;
 };
 
 #endif

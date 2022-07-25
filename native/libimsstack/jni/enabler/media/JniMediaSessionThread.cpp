@@ -47,7 +47,7 @@ void JniMediaSessionThread::SetSlotId(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_BOOL JniMediaSessionThread::OnOpenSession(IN ImsMediaMsgParamBase* pParam)
+IMS_BOOL JniMediaSessionThread::OnOpenSession(IN ImsMediaMsgOpenConfigParam* pParam)
 {
     if (pParam == IMS_NULL)
     {
@@ -57,41 +57,19 @@ IMS_BOOL JniMediaSessionThread::OnOpenSession(IN ImsMediaMsgParamBase* pParam)
     IMS_TRACE_D("OnOpenSession type[%d]", pParam->m_eMediaType, 0, 0);
 
     Parcel objParcel;
-
     objParcel.writeInt32(IMMedia::REQUEST_OPEN_SESSION);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
-    if (pParam->m_eMediaType == MEDIA_TYPE_AUDIO)
-    {
-        ImsMediaMsgOpenConfigParam* pOpenParam =
-                reinterpret_cast<ImsMediaMsgOpenConfigParam*>(pParam);
-        objParcel.writeString16(
-                android::String16(pOpenParam->m_objLocalAddress.ToString().GetStr()));
-        objParcel.writeInt32(pOpenParam->m_nLocalPort);
-        delete pOpenParam;
-    }
-    else if (pParam->m_eMediaType == MEDIA_TYPE_VIDEO)
-    {
-        ImsMediaMsgVideoOpenConfigParam* pOpenParam =
-                reinterpret_cast<ImsMediaMsgVideoOpenConfigParam*>(pParam);
-        objParcel.writeString16(
-                android::String16(pOpenParam->m_objLocalAddress.ToString().GetStr()));
-        objParcel.writeInt32(pOpenParam->m_nLocalPort);
-        delete pOpenParam;
-    }
-    else
-    {
-        delete pParam;
-    }
-
+    objParcel.writeString16(android::String16(pParam->m_objLocalAddress.ToString().GetStr()));
+    objParcel.writeInt32(pParam->m_nLocalPort);
     SendData2Java(objParcel, IMS_TRUE);
-
+    delete pParam;
     return IMS_TRUE;
 }
 
 PUBLIC
-IMS_BOOL JniMediaSessionThread::OnModifySession(IN ImsMediaMsgParamBase* pParam)
+IMS_BOOL JniMediaSessionThread::OnModifySession(IN ImsMediaMsgConfigParam* pParam)
 {
-    if (pParam == IMS_NULL)
+    if (pParam == IMS_NULL || pParam->m_pConfig == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -101,27 +79,9 @@ IMS_BOOL JniMediaSessionThread::OnModifySession(IN ImsMediaMsgParamBase* pParam)
     Parcel objParcel;
     objParcel.writeInt32(IMMedia::REQUEST_MODIFY_SESSION);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
-
-    if (pParam->m_eMediaType == MEDIA_TYPE_AUDIO)
-    {
-        ImsMediaMsgConfigParam* pConfigParam = reinterpret_cast<ImsMediaMsgConfigParam*>(pParam);
-        pConfigParam->m_objAudioConfig.writeToParcel(&objParcel);
-        delete pConfigParam;
-    }
-    else if (pParam->m_eMediaType == MEDIA_TYPE_VIDEO)
-    {
-        ImsMediaMsgVideoConfigParam* pConfigParam =
-                reinterpret_cast<ImsMediaMsgVideoConfigParam*>(pParam);
-        pConfigParam->m_objVideoConfig.writeToParcel(&objParcel);
-        delete pConfigParam;
-    }
-    else
-    {
-        delete pParam;
-    }
-
+    pParam->m_pConfig->writeToParcel(&objParcel);
     SendData2Java(objParcel, IMS_TRUE);
-
+    delete pParam;
     return IMS_TRUE;
 }
 
@@ -138,18 +98,15 @@ IMS_BOOL JniMediaSessionThread::OnCloseSession(IN ImsMediaMsgParamBase* pParam)
     Parcel objParcel;
     objParcel.writeInt32(IMMedia::REQUEST_CLOSE_SESSION);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
-
-    delete pParam;
-
     SendData2Java(objParcel, IMS_TRUE);
-
+    delete pParam;
     return IMS_TRUE;
 }
 
 PUBLIC
 IMS_BOOL JniMediaSessionThread::OnAddConfig(IN ImsMediaMsgConfigParam* pParam)
 {
-    if (pParam == IMS_NULL)
+    if (pParam == IMS_NULL || pParam->m_pConfig == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -159,19 +116,16 @@ IMS_BOOL JniMediaSessionThread::OnAddConfig(IN ImsMediaMsgConfigParam* pParam)
     Parcel objParcel;
     objParcel.writeInt32(IMMedia::REQUEST_ADD_CONFIG);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
-    pParam->m_objAudioConfig.writeToParcel(&objParcel);
-
-    delete pParam;
-
+    pParam->m_pConfig->writeToParcel(&objParcel);
     SendData2Java(objParcel, IMS_TRUE);
-
+    delete pParam;
     return IMS_TRUE;
 }
 
 PUBLIC
 IMS_BOOL JniMediaSessionThread::OnDeleteConfig(IN ImsMediaMsgConfigParam* pParam)
 {
-    if (pParam == IMS_NULL)
+    if (pParam == IMS_NULL || pParam->m_pConfig == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -181,19 +135,16 @@ IMS_BOOL JniMediaSessionThread::OnDeleteConfig(IN ImsMediaMsgConfigParam* pParam
     Parcel objParcel;
     objParcel.writeInt32(IMMedia::REQUEST_DELETE_CONFIG);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
-    pParam->m_objAudioConfig.writeToParcel(&objParcel);
-
-    delete pParam;
-
+    pParam->m_pConfig->writeToParcel(&objParcel);
     SendData2Java(objParcel, IMS_TRUE);
-
+    delete pParam;
     return IMS_TRUE;
 }
 
 PUBLIC
 IMS_BOOL JniMediaSessionThread::OnConfirmConfig(IN ImsMediaMsgConfigParam* pParam)
 {
-    if (pParam == IMS_NULL)
+    if (pParam == IMS_NULL || pParam->m_pConfig == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -202,12 +153,9 @@ IMS_BOOL JniMediaSessionThread::OnConfirmConfig(IN ImsMediaMsgConfigParam* pPara
     Parcel objParcel;
     objParcel.writeInt32(IMMedia::REQUEST_CONFIRM_CONFIG);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
-    pParam->m_objAudioConfig.writeToParcel(&objParcel);
-
-    delete pParam;
-
+    pParam->m_pConfig->writeToParcel(&objParcel);
     SendData2Java(objParcel, IMS_TRUE);
-
+    delete pParam;
     return IMS_TRUE;
 }
 
@@ -225,11 +173,8 @@ IMS_BOOL JniMediaSessionThread::OnSendDtmf(IN ImsMediaMsgDtmfParam* pParam)
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     objParcel.writeByte(pParam->m_dtmfCode);
     objParcel.writeInt32(pParam->m_nDuration);
-
-    delete pParam;
-
     SendData2Java(objParcel, IMS_TRUE);
-
+    delete pParam;
     return IMS_TRUE;
 }
 
@@ -247,8 +192,8 @@ IMS_BOOL JniMediaSessionThread::OnSetMediaQualityThreshold(
     objParcel.writeInt32(IMMedia::REQUEST_SET_MEDIA_QUALITY);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_objMediaQualityThreshold.writeToParcel(&objParcel);
-    delete pParam;
     SendData2Java(objParcel, IMS_TRUE);
+    delete pParam;
     return IMS_TRUE;
 }
 

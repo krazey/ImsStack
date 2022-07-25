@@ -112,7 +112,7 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportTy
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyFailures(IN IMS_UINT32 eReportType,
-        IN RtpError eError, IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/)
+        IN IMS_SINT32 eError, IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/)
 {
     IMS_TRACE_D("MediaSession_NotifyFailures : Report[%d] Error[%d] Media[%d]", eReportType, eError,
             eMediaType);
@@ -483,7 +483,7 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(
     {
         if (IsLocalTone())
         {
-            SetNetworkToneRtpTimer(MEDIATYPE_AUDIO, nTimeWaitingNetworkTone);
+            SetNetworkToneRTPTimer(MEDIATYPE_AUDIO, nTimeWaitingNetworkTone);
         }
 
         return;
@@ -497,7 +497,7 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(
     }
 
     SetState(MediaState::STARTING);
-    SetNetworkToneRtpTimer(MEDIATYPE_AUDIO, nTimeWaitingNetworkTone);
+    SetNetworkToneRTPTimer(MEDIATYPE_AUDIO, nTimeWaitingNetworkTone);
     m_objProfileManager.UpdateProfileForMediaActivation(piSession);
 }
 
@@ -528,10 +528,7 @@ PUBLIC VIRTUAL void MtcMediaManager::SetRtpPort(
 PUBLIC VIRTUAL void MtcMediaManager::RequestVideoDataUsage()
 {
     IMS_TRACE_D("RequestVideoDataUsage", 0, 0, 0);
-
-    IMSMSG objMsg;
-    objMsg.nMSG = IUMedia::VIDEO_DATA_USAGE_CMD;
-    m_piMediaSession->SendMessage(objMsg);
+    m_piMediaSession->SendMessage(IMMedia::REQUEST_VIDEO_DATA_USAGE, 0);
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::SetEnforcedDirection(
@@ -766,11 +763,11 @@ void MtcMediaManager::UpdateLocalTone(IN ISession* piSession)
 }
 
 PRIVATE
-void MtcMediaManager::SetNetworkToneRtpTimer(IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nDuration)
+void MtcMediaManager::SetNetworkToneRTPTimer(IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nDuration)
 {
     MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaTypes);
 
-    IMS_TRACE_D("SetNetworkToneRtpTimer : MediaType[%d] Duration[%d]", eMediaTypes, nDuration, 0);
+    IMS_TRACE_D("SetNetworkToneRTPTimer : MediaType[%d] Duration[%d]", eMediaTypes, nDuration, 0);
 
     m_piMediaSession->SetNetworkToneRTPTimer(eContents, nDuration);
 }

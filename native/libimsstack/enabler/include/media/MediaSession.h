@@ -27,19 +27,51 @@
 class MediaSession : public IMediaSessionListener, public IMediaSession
 {
 public:
-    MediaSession();
-    MediaSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey, IN IMS_UINT32 nSlotId);
+    /**
+     * @brief Construct
+     *
+     * @param nService The service type of the call session defined as the MEDIA_SERVICE_TYPE
+     * @param nCallKey The identification of the call session
+     * @param nSlotId The UICC slot id
+     */
+    MediaSession(IN MEDIA_SERVICE_TYPE nService = MEDIA_SERVICE_DEFAULT, IN IMS_SINTP nCallKey = 0,
+            IN IMS_UINT32 nSlotId = 0);
     virtual ~MediaSession();
-    IMS_BOOL ProcessStop(IN IMS_UINTP nNegoId = 0);
+
+    /**
+     * @brief Get the environment instance
+     *
+     * @return MediaEnvironment*
+     */
     MediaEnvironment* GetEnvironment(void);
+
+    /**
+     * @brief Get the current connected network type
+     *
+     * @return MEDIA_NETWORK_TYPE
+     */
     MEDIA_NETWORK_TYPE GetNetworkType(void);
-    IMS_BOOL GetDTMFEnabled(IN IMS_UINTP nNegoId);
-    void SendImsMediaRequest();
-    virtual void OnMediaResponse();
-    void OnNotify(IN IMS_UINT32 eReportType, IN MEDIA_CONTENT_TYPE eMediaType);
+
+    /**
+     * @brief Check the MediaSession is in hold state
+     *
+     * @param nNegoId The target MediaSession instance
+     * @return IMS_BOOL Returns IMS_TRUE if the MediaSession is in hold state
+     */
     IMS_BOOL IsHoldSession(IN IMS_UINTP nNegoId);
+
+    /**
+     * @brief Change the MediaSession to hold
+     *
+     * @return IMS_BOOL Returns IMS_TRUE when the session updates successfully
+     */
     IMS_BOOL HoldSession();
-    void ReportToClient(IN RtpError eError, IN MEDIA_CONTENT_TYPE eMediaType);
+
+    /**
+     * @brief Get the call key to identify the call session
+     *
+     * @return IMS_SINTP The session key
+     */
     IMS_SINTP GetCallKey() { return m_nCallKey; };
 
 public:
@@ -59,24 +91,14 @@ public:
     virtual IMS_BOOL Terminate();
     virtual NEGO_STATE GetNegoState(IN IMS_UINTP nNegoID);
     virtual MEDIA_CONTENT_TYPE GetNegotiatedMediaType(IN IMS_UINTP nNegoId);
-    // virtual AString GetNegotiatedCodec(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type);
     virtual IMS_SINT32 GetNegotiatedQuality(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type);
     virtual IMS_SINT32 GetNegotiatedCodecBitrate(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type);
-    // virtual IMS_SINT32 GetNegotiatedCodecBandwidth(IN IMS_UINTP nNegoId,
-    //         IN MEDIA_CONTENT_TYPE type);
     virtual MEDIA_DIRECTION GetNegotiatedDirection(
             IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
     virtual void SetOptions(
             IN IMS_UINTP nNegoId, IN OptionType type, IN IMS_SINT32 param1, IN IMS_SINT32 param2);
     virtual void SetNetworkToneRTPTimer(IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer);
-    virtual IMS_BOOL SendMessage(IN IMSMSG& objMsg);
     virtual IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
-    virtual IMS_BOOL SendDtmf(IN IMS_UINTP nNegoId, IN IMS_CHAR cDtmfCode, IN IMS_SINT32 nDuration);
-
-private:
-    IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
-    void SetMediaQuality(IN AudioMediaSession* pAudioSession);
-    IMS_BOOL OnResponse(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
 
 protected:
     // for MediaNego
@@ -85,27 +107,18 @@ protected:
     void ConfirmMediaNego(IN IMS_UINTP nNegoId);
     IMS_BOOL DeleteMediaNego(IN IMS_UINTP nNegoId);
     void ClearMediaNego();
-
     // IMediaSessionListener
-    virtual void MediaSession_SendEventToUi(IMS_SINT32 nEvent, IMS_SINT32 nResult);
     virtual IMS_BOOL MediaSession_SendMsgToMediaManager(
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* param);
     IMS_BOOL IsExistingTypeNode(IN AString strIpAddr, IN IMS_UINT32 nPort);
-    IMS_BOOL OnResponseOpenSession(IN IMS_UINTP pParam);
-    IMS_BOOL OnResponseModifySession(IN IMS_UINTP pParam);
-    IMS_BOOL OnResponseAddConfig(IN IMS_UINTP pParam);
-    IMS_BOOL OnResponseConfirmConfig(IN IMS_UINTP pParam);
-    IMS_BOOL OnNotifyFirstPacket(IN IMS_UINTP pParam);
-    IMS_BOOL OnNotifyMediaInactivity(IN IMS_UINTP pParam);
-    IMS_BOOL OnNofityPacketLoss(IN IMS_UINTP pParam);
-    IMS_BOOL OnNofityJitter(IN IMS_UINTP pParam);
-    IMS_BOOL OnNofityCallQualityChange(IN IMS_UINTP pParam);
-    IMS_BOOL OnResponseSessionChanged(IN IMS_UINTP pParam);
-    IMS_BOOL OnNofityHeaderExtension(IN IMS_UINTP pParam);
-    IMS_BOOL OnNotifyQosInfo(IN IMS_UINTP pParam);
-    IMS_BOOL OnNotifyMediaDetach();
     ImsMediaBasicSessionInfoParam* GetBasicSessionInfofromRemoteArress(
             IN AString strIpAddr, IN IMS_SINT32 nPort);
+    IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
+    void SetMediaQuality(IN AudioMediaSession* pAudioSession);
+    IMS_BOOL OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
+    IMS_BOOL OnResponse(IN IMS_UINTP pParam);
+    IMS_BOOL OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
+    void ReportToClient(IN IMS_SINT32 eError, IN MEDIA_CONTENT_TYPE eMediaType);
 
 protected:
     IMS_UINT32 m_nSlotId;
