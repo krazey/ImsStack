@@ -501,6 +501,75 @@ TEST_F(MtcCallTest, HoldFailsIfMediaInfoIsNull)
     objCall.Hold(pMediaInfo);
 }
 
+TEST_F(MtcCallTest, HoldIsPendedInUpdatingState)
+{
+    MediaInfo* pMediaInfo = new MediaInfo();
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    ON_CALL(*pState, GetStateName).WillByDefault(Return(CallStateName::UPDATING));
+    EXPECT_CALL(*pState, Hold(_))
+            .Times(0);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.Hold(pMediaInfo);
+}
+
+TEST_F(MtcCallTest, HoldIsNotPendedInEstablishedState)
+{
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    ON_CALL(*pState, GetStateName)
+            .WillByDefault(Return(CallStateName::ESTABLISHED));
+
+    EXPECT_CALL(*pState, Hold(_))
+            .Times(1)
+            .WillRepeatedly(Return(CallStateName::ESTABLISHED));
+
+    MediaInfo objMediaInfo;
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+    objCall.Hold(&objMediaInfo);
+}
+
+TEST_F(MtcCallTest, HoldIsPendedIfSessionIsRefreshing)
+{
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    ON_CALL(*pState, GetStateName)
+            .WillByDefault(Return(CallStateName::ESTABLISHED));
+    ON_CALL(*pState, Refresh_NotifyTimerExpired(_))
+            .WillByDefault(Return(CallStateName::ESTABLISHED));
+
+    EXPECT_CALL(*pState, Hold(_))
+            .Times(0);
+
+    IMS_BOOL bDoImplicitRefresh = IMS_FALSE;
+    MediaInfo objMediaInfo;
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+    objCall.Refresh_NotifyTimerExpired(bDoImplicitRefresh);
+    objCall.Hold(&objMediaInfo);
+}
+
+TEST_F(MtcCallTest, RunPendingOperationByRefreshCompleted)
+{
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    ON_CALL(*pState, GetStateName)
+            .WillByDefault(Return(CallStateName::ESTABLISHED));
+    ON_CALL(*pState, Refresh_NotifyTimerExpired(_))
+            .WillByDefault(Return(CallStateName::ESTABLISHED));
+    ON_CALL(*pState, Refresh_NotifyCompleted(_))
+            .WillByDefault(Return(CallStateName::ESTABLISHED));
+
+    EXPECT_CALL(*pState, Hold(_))
+            .Times(1)
+            .WillRepeatedly(Return(CallStateName::ESTABLISHED));
+
+    IMS_BOOL bDoImplicitRefresh = IMS_FALSE;
+    MediaInfo objMediaInfo;
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+    objCall.Refresh_NotifyTimerExpired(bDoImplicitRefresh);
+    objCall.Hold(&objMediaInfo);
+    objCall.Refresh_NotifyCompleted(reinterpret_cast<ISipClientConnection*>(0x1));
+}
+
 TEST_F(MtcCallTest, ResumeCallsState)
 {
     MediaInfo* pMediaInfo = new MediaInfo();

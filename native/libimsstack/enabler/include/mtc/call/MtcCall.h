@@ -43,6 +43,7 @@
 #include "media/MtcMediaManager.h"
 #include "precondition/MtcPreconditionManager.h"
 #include "ussi/UssiController.h"
+#include <functional>
 #include <memory>
 
 class IConferenceManager;
@@ -237,7 +238,6 @@ public:
     void QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
 
     void OnStateTransition(IN CallStateName eState) override;
-
     void ClientConnection_NotifyResponse(IN ISipClientConnection* piScc,
             IN ISipClientConnection* piForkedScc = IMS_NULL) override;
     void Error_NotifyError(
@@ -255,6 +255,8 @@ private:
     CallKey CreateCallKey();
     void OnInternalFailure();
     void OnAttached();
+    IMS_BOOL IsInUpdating() const;
+    void RunPendingOperation();
 
     IMtcContext& m_objContext;
     IMtcService& m_objService;
@@ -267,7 +269,7 @@ private:
     ParticipantInfo m_objParticipantInfo;
     UpdatingInfo* m_pUpdatingInfo;
     ImsList<IMtcSession*> m_lstSessions;
-
+    std::function<IMtcCall::State(IMtcCallState*)> m_objPendingOperation;
     MtcCallStateMachine m_objStateMachine;
     MtcTimerWrapper m_objTimer;
     MtcUiNotifier m_objUiNotifier;
@@ -276,6 +278,8 @@ private:
     MtcSupplementaryService m_objSupplementaryService;
     MtcMessageMediator m_objMessageMediator;
     UssiController* m_pUssiController;
+
+    IMS_BOOL m_bRefreshing;
 };
 
 #endif

@@ -34,6 +34,7 @@
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "sipcore/SipMethod.h"
+#include <functional>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -51,6 +52,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
                 *this, *PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(GetSlotId()))),
         m_pUpdatingInfo(IMS_NULL),
         m_lstSessions(ImsList<IMtcSession*>()),
+        m_objPendingOperation(),
         m_objStateMachine(
                 MtcCallStateMachine(*this, CallStateName::IDLE, std::move(pStateFactory), this)),
         m_objTimer(MtcTimerWrapper()),
@@ -59,7 +61,8 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objPreconditionManager(MtcPreconditionManager(*this)),
         m_objSupplementaryService(MtcSupplementaryService(objContext.GetConfigurationProxy())),
         m_objMessageMediator(MtcMessageMediator(*this)),
-        m_pUssiController(IMS_NULL)
+        m_pUssiController(IMS_NULL),
+        m_bRefreshing(IMS_FALSE)
 {
     IMS_TRACE_D("+MtcCall key[%d]", m_nKey, 0, 0);
 
@@ -80,6 +83,7 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
     m_lstSessions.Clear();
 
     delete m_pUssiController;
+    m_objPendingOperation = {};
 }
 
 PUBLIC VIRTUAL void MtcCall::HandleIncoming(
@@ -155,7 +159,6 @@ PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strT
 
     if (pMediaInfo == IMS_NULL)
     {
-        delete pMediaInfo;
         OnInternalFailure();
         return;
     }
@@ -263,6 +266,15 @@ PUBLIC VIRTUAL void MtcCall::Hold(IN MediaInfo* pMediaInfo)
         return;
     }
 
+    if (IsInUpdating())
+    {
+        m_objPendingOperation = [pMediaInfo](IMtcCallState* pState)
+        {
+            return pState->Hold(pMediaInfo);
+        };
+        return;
+    }
+
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
@@ -277,6 +289,15 @@ PUBLIC VIRTUAL void MtcCall::Resume(IN MediaInfo* pMediaInfo)
     if (pMediaInfo == IMS_NULL)
     {
         OnInternalFailure();
+        return;
+    }
+
+    if (IsInUpdating())
+    {
+        m_objPendingOperation = [pMediaInfo](IMtcCallState* pState)
+        {
+            return pState->Resume(pMediaInfo);
+        };
         return;
     }
 
@@ -322,6 +343,15 @@ PUBLIC VIRTUAL void MtcCall::Update(IN CallType eCallType, IN MediaInfo* pMediaI
     if (pMediaInfo == IMS_NULL)
     {
         OnInternalFailure();
+        return;
+    }
+
+    if (IsInUpdating())
+    {
+        m_objPendingOperation = [eCallType, pMediaInfo](IMtcCallState* pState)
+        {
+            return pState->Update(eCallType, pMediaInfo);
+        };
         return;
     }
 
@@ -1041,11 +1071,15 @@ PUBLIC VIRTUAL void MtcCall::SessionTransactionReceived(
 PUBLIC VIRTUAL void MtcCall::Refresh_NotifyCompleted(IN ISipClientConnection* piScc)
 {
     IMS_TRACE_D("Refresh_NotifyCompleted key[%d]", m_nKey, 0, 0);
+
+    m_bRefreshing = IMS_FALSE;
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
                 return pState->Refresh_NotifyCompleted(piScc);
             });
+
+    RunPendingOperation();
 }
 
 PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTerminated()
@@ -1056,6 +1090,8 @@ PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTerminated()
             {
                 return pState->Refresh_NotifyTerminated();
             });
+
+    m_bRefreshing = IMS_FALSE;  // TODO: required?
 }
 
 PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh)
@@ -1066,6 +1102,8 @@ PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplici
             {
                 return pState->Refresh_NotifyTimerExpired(bDoImplicitRefresh);
             });
+
+    m_bRefreshing = IMS_TRUE;
 }
 
 PUBLIC VIRTUAL void MtcCall::OnTimerExpired(IN IMS_SINT32 nType)
@@ -1131,6 +1169,7 @@ PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
             "OnStateTransition : key[%d] state[%d]", m_nKey, static_cast<IMS_SINT32>(eState), 0);
 
     GetCallStateProxy().UpdateCallState(m_nKey, eState, GetCallType(), m_objCallInfo.bEmergency);
+    RunPendingOperation();
 }
 
 PUBLIC VIRTUAL void MtcCall::ClientConnection_NotifyResponse(
@@ -1292,4 +1331,49 @@ void MtcCall::OnAttached()
                     return pState->OnAttached();
                 });
     }
+}
+
+PRIVATE
+IMS_BOOL MtcCall::IsInUpdating() const
+{
+    CallStateName eState = GetState();
+
+    if (eState == CallStateName::UPDATING)
+    {
+        IMS_TRACE_D("IsInOperating :: updating", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    if (eState != CallStateName::ESTABLISHED)
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_bRefreshing)
+    {
+        // TODO: when a new api in ISession is added, use the interface.
+        IMS_TRACE_D("IsInOperating :: refreshing", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE
+void MtcCall::RunPendingOperation()
+{
+    if (IsInUpdating())
+    {
+        return;
+    }
+
+    if (!m_objPendingOperation)
+    {
+        return;
+    }
+
+    // TODO: if session_timer_update_required_in_session_update_by_reinvite_bool is true,
+    // message posting is required.
+    m_objStateMachine.RunStateOperation(m_objPendingOperation);
+    m_objPendingOperation = {};
 }
