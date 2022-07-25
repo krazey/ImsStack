@@ -15,7 +15,8 @@
  */
 
 #include <gtest/gtest.h>
-#include "common/ImsIdentity.h"
+
+#include "ImsIdentity.h"
 
 namespace android
 {

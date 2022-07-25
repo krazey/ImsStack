@@ -202,6 +202,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()
     m_nTransportType = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_PREFERRED_TRANSPORT_INT);
 
     m_nRegExpiration = piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT);
+    m_nRegExpiresMask = EXPIRES_NONE;
 
     if (m_nRegExpiration > 0)
     {
@@ -212,6 +213,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()
         m_nRegExpiration = DEFAULT_EXPIRATION;
     }
 
+    m_objAllowMethods.RemoveAllElements();
     m_objAllowMethods.AddElement("INVITE");
     m_objAllowMethods.AddElement("BYE");
     m_objAllowMethods.AddElement("CANCEL");
