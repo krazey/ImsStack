@@ -130,6 +130,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
         m_nTargetScheme = TARGET_SCHEME_TEL;
     }
 
+    m_objAllowMethods.RemoveAllElements();
     m_objAllowMethods.AddElement("INVITE");
     m_objAllowMethods.AddElement("BYE");
     m_objAllowMethods.AddElement("CANCEL");
