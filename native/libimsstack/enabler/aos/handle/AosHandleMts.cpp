@@ -91,6 +91,8 @@ void AosHandleMts::InitializeSupportedRats()
 {
     IMSVector<IMS_SINT32> objRats = GET_N_CONFIG(m_nSlotId)->GetSmsOverImsSupportedRats();
 
+    m_nSupportedRats = NW_REPORT_RADIO_INVALID;
+
     for (int i = 0; i < objRats.GetSize(); i++)
     {
         if (objRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN)
@@ -105,6 +107,14 @@ void AosHandleMts::InitializeSupportedRats()
         {
             m_nSupportedRats |= NW_REPORT_RADIO_GSM | NW_REPORT_RADIO_EDGE;
         }
+        else if (objRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN)
+        {
+            m_nSupportedRats |= NW_REPORT_RADIO_NR;
+        }
+        else if (objRats.GetAt(i) == CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN)
+        {
+            m_nSupportedRats |= NW_REPORT_RADIO_WLAN;
+        }
     }
 }
 
@@ -117,9 +127,8 @@ PROTECTED VIRTUAL void AosHandleMts::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 
-    AosHandle::Init();
-
     InitializeSupportedRats();
+    AosHandle::Init();
 
     IMS_EVENT_AddListenerForSlotId(IMS_EVENT_CONFIG_UPDATE, this, m_nSlotId);
 }
