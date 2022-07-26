@@ -22,8 +22,6 @@ import android.os.Message;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.util.ArrayUtils;
 
-import java.net.HttpURLConnection;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -31,15 +29,8 @@ import java.util.List;
  * Send the ACS result via message to HttpTransaction.
  */
 public class HttpResponseForCellular {
-    private interface IHttpResponseHandle {
-        void handle(HttpResponse httpResponse);
-    }
-
     private final Handler mHandler;
     private final int mSlotId;
-    private final HashMap<HttpResponse.HttpResponseType, IHttpResponseHandle> mHttpResultHandlers =
-            new HashMap<HttpResponse.HttpResponseType, IHttpResponseHandle>();
-    private final HttpURLConnection mHttpURLConnection;
 
     private List<String> mCookieList = null;
 
@@ -48,15 +39,10 @@ public class HttpResponseForCellular {
      *
      * @param handler Handler of HttpTransaction
      * @param slotId SIM slot ID
-     * @param httpURLConnection HttpURLConnection for ACS
      */
-    public HttpResponseForCellular(Handler handler, int slotId,
-            HttpURLConnection httpURLConnection) {
+    public HttpResponseForCellular(Handler handler, int slotId) {
         mHandler = handler;
         mSlotId = slotId;
-        mHttpURLConnection = httpURLConnection;
-
-        initHandlerMap();
     }
 
     /**
@@ -74,51 +60,30 @@ public class HttpResponseForCellular {
         int responseCode = httpResponse.getResponseCode();
         ImsLog.d(mSlotId, "http : " + responseCode);
 
-        IHttpResponseHandle httpResponseHandler = mHttpResultHandlers.get(
-                HttpResponse.HttpResponseType.getEnum(mSlotId, responseCode));
-
-        if (httpResponseHandler == null) {
-            httpResponseHandler = new IHttpResponseHandle() {
-
-                @Override
-                public void handle(HttpResponse httpResponse) {
-                    ImsLog.d(mSlotId, "Http " + httpResponse.getResponseCode());
-                    sendAcsResultMsg(HttpTransaction.RESULT_TYPE_INTERNAL_ERROR, null);
-                    return;
-                }
-            };
+        switch (responseCode) {
+            case 200:
+            case 201:
+            case 202:
+                handle200Response(httpResponse);
+                break;
+            case 401:
+                handle401Response(httpResponse);
+                break;
+            case 511:
+                handle511response(httpResponse);
+                break;
+            default:
+                handleSendResponseWithoutAction(httpResponse);
         }
-        httpResponseHandler.handle(httpResponse);
     }
 
     /**
      * return cookie header values
      *
-     * @return cookie list
+     * @return cookie list or null
      */
     public List<String> getCookies() {
         return mCookieList;
-    }
-
-    private void initHandlerMap() {
-        /*
-        httpResultHandlers.put(HttpResponse.HttpResponseType.CODE_UNDEFINED,
-                handle_Undefined);
-        httpResultHandlers.put(HttpResponse.HttpResponseType.CODE_INTERNAL_ERROR,
-                handle_InternalError);
-        httpResultHandlers.put(HttpResponse.HttpResponseType.CODE_UNREACHABLE_ERROR,
-                handle_UnreachableError);*/
-        mHttpResultHandlers.put(HttpResponse.HttpResponseType.CODE_200_OK, mHandle200OK);
-        /*
-        httpResultHandlers.put(HttpResponse.HttpResponseType.CODE_401_UNAUTHORIZED, handle_401);
-        httpResultHandlers.put(HttpResponse.HttpResponseType.CODE_403_FORBIDDEN, handle_403);
-        httpResultHandlers.put(HttpResponse.HttpResponseType.CODE_409_CONFLICT, handle_409);
-        httpResultHandlers.put(HttpResponse.HttpResponseType.CODE_500_INTERNAL_SERVER_ERROR,
-                handle_500);
-        httpResultHandlers.put(HttpResponse.HttpResponseType.CODE_503_RETRY_AFTER, handle_503);
-        httpResultHandlers.put(
-                HttpResponse.HttpResponseType.CODE_511_NETWORK_AUTHENTICATION_REQUIRED,
-                handle_511);*/
     }
 
     private boolean checkCookies(HttpResponse httpResponse) {
@@ -151,111 +116,45 @@ public class HttpResponseForCellular {
     }
 
     private void sendAcsResultMsg(int result, byte[] acData) {
-        // result == 200, obj == acData or null
-        sendNextProgressMsg(HttpTransaction.REQUEST_DONE, result, 0, (byte[]) acData, 0);
+        // arg1 == 200 or xxx ACS result, obj == acData or null
+        sendNextProgressMsg(HttpTransaction.REQUEST_DONE, result, 0, acData, 0);
     }
 
-    /*
-        private IHttpResponseHandle handle_Undefined = new IHttpResponseHandle() {
+    // just send HttpResponse's responseCode
+    private void handleSendResponseWithoutAction(HttpResponse httpResponse) {
+        ImsLog.d(mSlotId, "Http " + httpResponse.toString());
+        sendAcsResultMsg(httpResponse.getResponseCode(), null);
+    }
 
-            @Override
-            public void handle(HttpResponse httpResponse) {
-                sendACSResultMsg(httpResponse.getResponseCode(), null);
-            }
-        };
+    private void handle200Response(HttpResponse httpResponse) {
+        ImsLog.d(mSlotId, "Http " + httpResponse.toString());
 
-        private IHttpResponseHandle handle_InternalError = new IHttpResponseHandle() {
-
-            @Override
-            public void handle(HttpResponse httpResponse) {
-                sendACSResultMsg(HttpTransaction.RESULT_TYPE_INTERNAL_ERROR, null);
-            }
-        };
-
-        private IHttpResponseHandle handle_UnreachableError = new IHttpResponseHandle() {
-
-            @Override
-            public void handle(HttpResponse httpResponse) {
-                sendACSResultMsg(HttpTransaction.RESULT_TYPE_HTTP_UNREACHABLE, null);
-            }
-        };
-    */
-    private final IHttpResponseHandle mHandle200OK = new IHttpResponseHandle() {
-
-        @Override
-        public void handle(HttpResponse httpResponse) {
-            if (httpResponse == null) {
-                ImsLog.d(mSlotId, "HttpResponse is null ");
-                return;
-            }
-            ImsLog.d(mSlotId, "Http " + httpResponse.toString());
-
-            // check xml
-            byte[] acsBody = httpResponse.getBody();
-            if (!ArrayUtils.isEmpty(acsBody)) {
-                ImsLog.d(mSlotId, "XML exist");
-                sendAcsResultMsg(httpResponse.getResponseCode(), acsBody);
-                return;
-            }
-
-            // check cookies
-            if (checkCookies(httpResponse)) {
-//                httpResponse.setCookies(httpResponse.getCookies());
-                sendNextProgressMsg(HttpTransaction.REQUEST_HTTPS, 0, 0, null, 0);
-            } else {
-                ImsLog.d(mSlotId, "didn't receive cookie");
-                // TODO : send internal fail or 200 ok + no data ?
-                sendAcsResultMsg(httpResponse.getResponseCode(), null);
-            }
-
+        // check xml
+        byte[] acsBody = httpResponse.getBody();
+        if (!ArrayUtils.isEmpty(acsBody)) {
+            ImsLog.d(mSlotId, "XML exist");
+            sendAcsResultMsg(httpResponse.getResponseCode(), acsBody);
+            return;
         }
-    };
-/*
-    private IHttpResponseHandle handle_401 = new IHttpResponseHandle() {
 
-        @Override
-        public void handle(HttpResponse httpResponse) {
-            sendACSResultMsg(httpResponse.getResponseCode(), null);
+        // check cookies
+        if (checkCookies(httpResponse)) {
+            sendNextProgressMsg(HttpTransaction.REQUEST_HTTPS, 0, 0, null, 0);
+        } else {
+            ImsLog.d(mSlotId, "cookie or ac data is not exist");
+            sendAcsResultMsg(HttpTransaction.RESULT_TYPE_INTERNAL_ERROR, null);
         }
-    };
+    }
 
-    private IHttpResponseHandle handle_403 = new IHttpResponseHandle() {
+    private void handle401Response(HttpResponse httpResponse) {
+        ImsLog.d(mSlotId, "Http " + httpResponse.toString());
+        //TODO : handle 401 case
+    }
 
-        @Override
-        public void handle(HttpResponse httpResponse) {
-            sendACSResultMsg(httpResponse.getResponseCode(), null);
-        }
-    };
-
-    private IHttpResponseHandle handle_409 = new IHttpResponseHandle() {
-
-        @Override
-        public void handle(HttpResponse httpResponse) {
-            sendACSResultMsg(httpResponse.getResponseCode(), null);
-        }
-    };
-
-    private IHttpResponseHandle handle_500 = new IHttpResponseHandle() {
-
-        @Override
-        public void handle(HttpResponse httpResponse) {
-            sendACSResultMsg(httpResponse.getResponseCode(), null);
-        }
-    };
-
-    private IHttpResponseHandle handle_503 = new IHttpResponseHandle() {
-
-        @Override
-        public void handle(HttpResponse httpResponse) {
-            sendACSResultMsg(httpResponse.getResponseCode(), null);
-        }
-    };
-
-    private IHttpResponseHandle handle_511 = new IHttpResponseHandle() {
-
-        @Override
-        public void handle(HttpResponse httpResponse) {
-            sendACSResultMsg(httpResponse.getResponseCode(), null);
-        }
-    };*/
+    private void handle511response(HttpResponse httpResponse) {
+        ImsLog.d(mSlotId, "Http " + httpResponse.toString());
+        // set cookie if exist
+        checkCookies(httpResponse);
+        sendNextProgressMsg(HttpTransaction.REQUEST_NON_CELLULAR, 0, 0, null, 0);
+    }
 }
