@@ -49,15 +49,13 @@ public class ApnInternet extends Apn {
     protected void initializeApn() {
         mType = EApnType.INTERNET;
 
-        registerHandler(EVENT_NETWORK_AVAILABLE,
-                new Handle_EVENT_NETWORK_AVAILABLE());
-        registerHandler(EVENT_NETWORK_LOST,
-                new Handle_EVENT_NETWORK_LOST());
+        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
+        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
 
         registerCallback(ImsNetworkCallback.EVENT_ALL);
     }
 
-    private class Handle_EVENT_NETWORK_AVAILABLE implements MsgProcInterface {
+    private class HandleNetworkAvailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_CONNECTED;
@@ -72,7 +70,7 @@ public class ApnInternet extends Apn {
         }
     }
 
-    private class Handle_EVENT_NETWORK_LOST implements MsgProcInterface {
+    private class HandleNetworkLost implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_DISCONNECTED;

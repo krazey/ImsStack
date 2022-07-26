@@ -138,14 +138,14 @@ public class ApnXcapTest {
 
         // handle request to disconnect if request to connect is done
         mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
-        mApnXcap.sendEmptyMessageDelayed(Apn.EVENT_WAITING_LOCAL_ADDRESS_IPV6,
+        mApnXcap.sendEmptyMessageDelayed(Apn.EVENT_WAITING_IPV6_ADDRESS,
                 mApnXcap.OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL);
 
         assertTrue(mApnXcap.disconnect());
         verify(mConnectivityManager, times(1)).unregisterNetworkCallback(mMockNetworkCallback);
         assertEquals(mApnXcap.getApnReqState(), EApnReqState.APN_REQUEST_IDLE);
         assertEquals(mApnXcap.getDataState(), TelephonyManager.DATA_DISCONNECTED);
-        assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_LOCAL_ADDRESS_IPV6));
+        assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_IPV6_ADDRESS));
 
         mTestableLooper.processAllMessages();
         verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
@@ -167,14 +167,14 @@ public class ApnXcapTest {
         mApnXcap.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
         mTestableLooper.processAllMessages();
 
-        // if it already has EVENT_WAITING_LOCAL_ADDRESS_IPV6, ignore event
+        // if it already has EVENT_WAITING_IPV6_ADDRESS, ignore event
         mApnXcap.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
         mTestableLooper.processAllMessages();
 
         // if apn has been requested before and no need to wait IPv6 address,
         // notify data connection state change
-        if (mApnXcap.hasMessages(Apn.EVENT_WAITING_LOCAL_ADDRESS_IPV6)) {
-            mApnXcap.removeMessages(Apn.EVENT_WAITING_LOCAL_ADDRESS_IPV6);
+        if (mApnXcap.hasMessages(Apn.EVENT_WAITING_IPV6_ADDRESS)) {
+            mApnXcap.removeMessages(Apn.EVENT_WAITING_IPV6_ADDRESS);
         }
         mApnXcap.mApnProtocol = ApnSetting.PROTOCOL_IP;
         mApnXcap.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
@@ -199,12 +199,12 @@ public class ApnXcapTest {
 
         // if data state is not DATA_DISCONNECTED, notify data connection state change
         mApnXcap.setDataState(TelephonyManager.DATA_CONNECTED);
-        mApnXcap.sendEmptyMessageDelayed(Apn.EVENT_WAITING_LOCAL_ADDRESS_IPV6,
+        mApnXcap.sendEmptyMessageDelayed(Apn.EVENT_WAITING_IPV6_ADDRESS,
                 mApnXcap.OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL);
         mApnXcap.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
         mTestableLooper.processAllMessages();
 
-        assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_LOCAL_ADDRESS_IPV6));
+        assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_IPV6_ADDRESS));
         assertEquals(mApnXcap.getDataState(), TelephonyManager.DATA_DISCONNECTED);
         verify(mMockIDcNetWatcher, times(2)).notifyResult(
                 EApnType.XCAP, EDataState.DATA_STATE_DISCONNECTED);
@@ -221,13 +221,13 @@ public class ApnXcapTest {
         mTestableLooper.processAllMessages();
 
         // if data state is not connected and wait IPv6 address, update data state
-        mApnXcap.sendEmptyMessageDelayed(Apn.EVENT_WAITING_LOCAL_ADDRESS_IPV6,
+        mApnXcap.sendEmptyMessageDelayed(Apn.EVENT_WAITING_IPV6_ADDRESS,
                 mApnXcap.OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL);
         mApnXcap.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
         mApnXcap.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
-        assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_LOCAL_ADDRESS_IPV6));
+        assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_IPV6_ADDRESS));
         verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_CONNECTED.getState());
     }
@@ -268,12 +268,12 @@ public class ApnXcapTest {
     public void testHandleWaitingIpv6Address() throws Exception {
         // if updated data state is DATA_DISCONNECTED, ignore event
         mApnXcap.mPreciseDcState = TelephonyManager.DATA_DISCONNECTED;
-        mApnXcap.sendEmptyMessage(Apn.EVENT_WAITING_LOCAL_ADDRESS_IPV6);
+        mApnXcap.sendEmptyMessage(Apn.EVENT_WAITING_IPV6_ADDRESS);
         mTestableLooper.processAllMessages();
 
         // if updated data state is DATA_CONNECTED, notify data connection state change
         mApnXcap.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
-        mApnXcap.sendEmptyMessage(Apn.EVENT_WAITING_LOCAL_ADDRESS_IPV6);
+        mApnXcap.sendEmptyMessage(Apn.EVENT_WAITING_IPV6_ADDRESS);
         mTestableLooper.processAllMessages();
 
         verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(

@@ -82,16 +82,12 @@ public abstract class Apn extends Handler implements IApn {
 
     protected static final int EVENT_IP_CHANGED = 1001;
     protected static final int EVENT_PCSCF_CHANGED = 1002;
-    protected static final int EVENT_WAITING_LOCAL_ADDRESS_IPV6 = 1003;
+    protected static final int EVENT_WAITING_IPV6_ADDRESS = 1003;
     protected static final int EVENT_NOTIFY_DATA_STATE_CHANGED = 1004;
     protected static final int EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED = 1005;
     protected static final int EVENT_DATA_CONNECTION_FAILED = 1006;
 
     protected static final int EVENT_AIRPLANE_MODE_CHANGED = 2001;
-    protected static final int EVENT_WIFI_STATE_CHANGED = 2002;
-    protected static final int EVENT_VOWIFI_SETTING_CHANGED = 2003;
-    protected static final int EVENT_VOWIFI_PREF_CHANGED = 2004;
-    protected static final int EVENT_VOWIFI_ROAMING_PREF_CHANGED = 2005;
 
     protected static final int FEATURE_NONE = 0;
     protected static final int FEATURE_IPV6_DELAY = 0x00000001;
@@ -122,8 +118,8 @@ public abstract class Apn extends Handler implements IApn {
                 "IP_CHANGED");
         sEventToString.put(EVENT_PCSCF_CHANGED,
                 "PCSCF_CHANGED");
-        sEventToString.put(EVENT_WAITING_LOCAL_ADDRESS_IPV6,
-                "WAITING_LOCAL_ADDRESS_IPV6");
+        sEventToString.put(EVENT_WAITING_IPV6_ADDRESS,
+                "WAITING_IPV6_ADDRESS");
         sEventToString.put(EVENT_NOTIFY_DATA_STATE_CHANGED,
                 "NOTIFY_DATA_STATE_CHANGED");
         sEventToString.put(EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED,
@@ -133,14 +129,6 @@ public abstract class Apn extends Handler implements IApn {
 
         sEventToString.put(EVENT_AIRPLANE_MODE_CHANGED,
                 "AIRPLANE_MODE_CHANGED");
-        sEventToString.put(EVENT_WIFI_STATE_CHANGED,
-                "WIFI_STATE_CHANGED");
-        sEventToString.put(EVENT_VOWIFI_SETTING_CHANGED,
-                "VOWIFI_SETTING_CHANGED");
-        sEventToString.put(EVENT_VOWIFI_PREF_CHANGED,
-                "VOWIFI_PREF_CHANGED");
-        sEventToString.put(EVENT_VOWIFI_ROAMING_PREF_CHANGED,
-                "VOWIFI_ROAMING_PREF_CHANGED");
     }
 
     protected Context mContext;
@@ -533,10 +521,9 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected void registerEvent() {
-        registerHandler(EVENT_NOTIFY_DATA_STATE_CHANGED,
-                new Handle_EVENT_NOTIFY_DATA_STATE_CHANGED());
+        registerHandler(EVENT_NOTIFY_DATA_STATE_CHANGED, new HandleDataStateChanged());
         registerHandler(EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED,
-                new Handle_EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED());
+                new HandlePreciseDataConnectionStateChanged());
     }
 
     protected EApnReqState getApnReqState() {
@@ -665,7 +652,7 @@ public abstract class Apn extends Handler implements IApn {
      * Send message to oneself(Apn) to clean up call stack.
      * after sometime.. we will invoke JNI api to notify network data status.
      *
-     * @see handle_EVENT_NOTIFY_DATA_STATE_CHANGED
+     * @see HandleDataStateChanged
      *
      * @param apnType IMS,Emergency...
      * @param state Data state to be updated
@@ -1250,15 +1237,10 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     /**
-    *  Handle_EVENT_NOTIFY_DATA_STATE_CHANGED
-    *
-    *        common DATA_STATE_NOTIFICATION handling logic from android PhoneState
-    *        IMS / Emergency APN nothing different to handle current event.
-    *        if we need specific control, child class just need override this.
-    * @param
-    * @return
+    * This is common handler of each APN type to handle EVENT_NOTIFY_DATA_STATE_CHANGED event
+    * It notify the change of data connection state to IMS Native
     */
-    protected class Handle_EVENT_NOTIFY_DATA_STATE_CHANGED implements MsgProcInterface {
+    protected class HandleDataStateChanged implements MsgProcInterface {
 
         @Override
         public void procMsg(Message msg) {
@@ -1295,8 +1277,7 @@ public abstract class Apn extends Handler implements IApn {
         }
     }
 
-    protected class Handle_EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED
-            implements MsgProcInterface {
+    protected class HandlePreciseDataConnectionStateChanged implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             if (msg.obj == null) {

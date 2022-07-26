@@ -86,8 +86,8 @@ public class ApnXcap extends Apn {
             return false;
         }
 
-        if (hasMessages(EVENT_WAITING_LOCAL_ADDRESS_IPV6)) {
-            removeMessages(EVENT_WAITING_LOCAL_ADDRESS_IPV6);
+        if (hasMessages(EVENT_WAITING_IPV6_ADDRESS)) {
+            removeMessages(EVENT_WAITING_IPV6_ADDRESS);
         }
 
         releaseNetwork();
@@ -107,18 +107,12 @@ public class ApnXcap extends Apn {
     protected void initializeApn() {
         mType = EApnType.XCAP;
 
-        registerHandler(EVENT_NETWORK_AVAILABLE,
-                new Handle_EVENT_NETWORK_AVAILABLE());
-        registerHandler(EVENT_NETWORK_LOST,
-                new Handle_EVENT_NETWORK_LOST());
-        registerHandler(EVENT_IP_CHANGED,
-                new Handle_EVENT_IP_CHANGED());
-        registerHandler(EVENT_WAITING_LOCAL_ADDRESS_IPV6,
-                new Handle_EVENT_WAITING_LOCAL_ADDRESS_IPV6());
-        registerHandler(EVENT_AIRPLANE_MODE_CHANGED,
-                new Handle_EVENT_AIRPLANE_MODE_CHANGED());
-        registerHandler(EVENT_DATA_CONNECTION_FAILED,
-                new Handle_EVENT_DATA_CONNECTION_FAILED());
+        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
+        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
+        registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
+        registerHandler(EVENT_WAITING_IPV6_ADDRESS, new HandleWaitingIpv6Address());
+        registerHandler(EVENT_AIRPLANE_MODE_CHANGED, new HandleAirplanemodeChanged());
+        registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
 
         //register message handler to DcNetWatcher
         if (mDcNetWatcher != null) {
@@ -128,12 +122,12 @@ public class ApnXcap extends Apn {
 
     private boolean procWaitingLocalAddressForIpv6() {
         if (!hasLocalAddress(EIpVersion.IPV6.getInt())) {
-            if (hasMessages(EVENT_WAITING_LOCAL_ADDRESS_IPV6)) {
+            if (hasMessages(EVENT_WAITING_IPV6_ADDRESS)) {
                 ImsLog.i("ipv6 is waiting");
                 return true;
             }
 
-            sendEmptyMessageDelayed(EVENT_WAITING_LOCAL_ADDRESS_IPV6,
+            sendEmptyMessageDelayed(EVENT_WAITING_IPV6_ADDRESS,
                     OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL);
             return true;
         }
@@ -141,7 +135,7 @@ public class ApnXcap extends Apn {
         return false;
     }
 
-    private class Handle_EVENT_NETWORK_AVAILABLE implements MsgProcInterface {
+    private class HandleNetworkAvailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_CONNECTED;
@@ -169,13 +163,13 @@ public class ApnXcap extends Apn {
         }
     }
 
-    private class Handle_EVENT_NETWORK_LOST implements MsgProcInterface {
+    private class HandleNetworkLost implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_DISCONNECTED;
 
-            if (hasMessages(EVENT_WAITING_LOCAL_ADDRESS_IPV6)) {
-                removeMessages(EVENT_WAITING_LOCAL_ADDRESS_IPV6);
+            if (hasMessages(EVENT_WAITING_IPV6_ADDRESS)) {
+                removeMessages(EVENT_WAITING_IPV6_ADDRESS);
             }
 
             if (mDataState != curDataState) {
@@ -190,7 +184,7 @@ public class ApnXcap extends Apn {
         }
     }
 
-    private class Handle_EVENT_IP_CHANGED implements MsgProcInterface {
+    private class HandleIpChanged implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "ip is changed");
@@ -207,17 +201,17 @@ public class ApnXcap extends Apn {
             }
 
             // handle the waiting Ipv6
-            if (!hasMessages(EVENT_WAITING_LOCAL_ADDRESS_IPV6)) {
+            if (!hasMessages(EVENT_WAITING_IPV6_ADDRESS)) {
                 return;
             }
 
-            removeMessages(EVENT_WAITING_LOCAL_ADDRESS_IPV6);
+            removeMessages(EVENT_WAITING_IPV6_ADDRESS);
 
             updateDataState();
         }
     }
 
-    private class Handle_EVENT_WAITING_LOCAL_ADDRESS_IPV6 implements MsgProcInterface {
+    private class HandleWaitingIpv6Address implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "apn is delayed, data is updated");
@@ -225,7 +219,7 @@ public class ApnXcap extends Apn {
         }
     }
 
-    private class Handle_EVENT_AIRPLANE_MODE_CHANGED implements MsgProcInterface {
+    private class HandleAirplanemodeChanged implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             AsyncResult ar = (AsyncResult) msg.obj;
@@ -250,7 +244,7 @@ public class ApnXcap extends Apn {
         }
     }
 
-    private class Handle_EVENT_DATA_CONNECTION_FAILED implements MsgProcInterface {
+    private class HandleDataConnectionFailed implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.d(mSlotId, "");

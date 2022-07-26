@@ -609,7 +609,7 @@ public class ApnTest {
     }
 
     @Test
-    public void testHandleNotifyDataStateChanged_Connected() throws Exception {
+    public void testHandleDataStateChanged_Connected() throws Exception {
         // handle DATA_STATE_CONNECTED
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
@@ -622,7 +622,7 @@ public class ApnTest {
     }
 
     @Test
-    public void testHandleNotifyDataStateChanged_ConnectFailed() throws Exception {
+    public void testHandleDataStateChanged_ConnectFailed() throws Exception {
         // handle DATA_STATE_CONNECT_FAILED
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
@@ -634,7 +634,7 @@ public class ApnTest {
     }
 
     @Test
-    public void testHandleNotifyDataStateChanged_IgnoreNullObj() throws Exception {
+    public void testHandleDataStateChanged_IgnoreNullObj() throws Exception {
         // ignore if msg.obj is null
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
@@ -647,7 +647,7 @@ public class ApnTest {
     }
 
     @Test
-    public void testHandleNotifyDataStateChanged_IgnoreRadioOff() throws Exception {
+    public void testHandleDataStateChanged_IgnoreRadioOff() throws Exception {
         replaceInstance(Apn.class, "mDcNetWatcher", mApn, mMockIDcNetWatcher);
         when(mMockIDcNetWatcher.isDoingOffRadio()).thenReturn(true);
 

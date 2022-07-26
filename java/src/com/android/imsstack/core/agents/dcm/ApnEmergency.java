@@ -101,17 +101,13 @@ public class ApnEmergency extends Apn {
         mType = EApnType.EMERGENCY;
         mDcUtils = (IDcUtils) DcFactory.getDc(DcFactory.UTIL, getSlotId());
 
-        registerHandler(EVENT_NETWORK_AVAILABLE,
-                new Handle_EVENT_NETWORK_AVAILABLE());
-        registerHandler(EVENT_NETWORK_LOST,
-                new Handle_EVENT_NETWORK_LOST());
-        registerHandler(EVENT_IP_CHANGED,
-                new Handle_EVENT_IP_CHANGED());
-        registerHandler(EVENT_DATA_CONNECTION_FAILED,
-                new Handle_EVENT_DATA_CONNECTION_FAILED());
+        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
+        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
+        registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
+        registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
     }
 
-    private class Handle_EVENT_NETWORK_AVAILABLE implements MsgProcInterface {
+    private class HandleNetworkAvailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
 
@@ -144,7 +140,7 @@ public class ApnEmergency extends Apn {
         }
     }
 
-    private class Handle_EVENT_NETWORK_LOST implements MsgProcInterface {
+    private class HandleNetworkLost implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_DISCONNECTED;
@@ -163,7 +159,7 @@ public class ApnEmergency extends Apn {
         }
     }
 
-    private class Handle_EVENT_IP_CHANGED implements MsgProcInterface {
+    private class HandleIpChanged implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "ip is changed");
@@ -181,7 +177,7 @@ public class ApnEmergency extends Apn {
         }
     }
 
-    private class Handle_EVENT_DATA_CONNECTION_FAILED implements MsgProcInterface {
+    private class HandleDataConnectionFailed implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_DISCONNECTED;
