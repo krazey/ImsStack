@@ -95,6 +95,7 @@ public:
         IMS_BOOL bShowMaxRed;
         IMS_BOOL bShowPtime;
         IMS_BOOL bShowMaxPtime;
+        IMS_BOOL bShowModeSet;
 
     public:
         AmrFmtp() :

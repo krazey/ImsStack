@@ -355,7 +355,7 @@
     <int-array name="imsvt.h264_payload_type_int_array" num="1">
         <item value="121"/>
     </int-array>
-    <!-- <string-array name="imsvoice.audio_candidate_attribute_string_array" num="1">
-        <item value="1, UDP, 1119400811, 10.3.210.77, 7010, typ, host"/>
-    </string-array> -->
+    <int name="asset_t140_payload_type_int" value="111"/>
+    <int name="asset_red_payload_type_int" value="112"/>
+    <int name="text_codec_redundancy_level_int" value="3"/>
 </carrier_config>

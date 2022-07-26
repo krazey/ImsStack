@@ -84,12 +84,16 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL);
 
     // Audio Configuration attributes
+    m_nAudioPtime = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_PTIME_MILLIS_INT);
     m_nAudioMaxPtime = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT);
     m_nAudioMaxRed = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT);
 
-    // m_bAudioBwNegoOptionEnabled =
-    //       piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL);
-    // m_nAudioRtpDscp = DEFAULT_AUDIO_DSCP;      // already set by default at creator
+    /** According to RFC 2474, six bits of the DS field are used as a codepoint (DSCP),
+     * a two-bit currently unused (CU) field is reserved. So two left shift operations are required.
+     */
+    m_nAudioRtpDscp = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT);
+    m_nAudioRtpDscp = m_nAudioRtpDscp << 2;
+
     IMSVector<IMS_SINT32> objAudioJitterBufferSize =
             piCc->GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY);
     if (!objAudioJitterBufferSize.IsEmpty())
@@ -126,7 +130,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
     // DTMF Duration Parameter
     m_nDtmfDuration =
             piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT);
-    /** TODO - use Asset temporarily - need to change bundle code later
+    /** TODO: use Asset temporarily - need to change bundle code later
     m_nModeChangeCapability =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT);
     m_nModeChangePeriod =
@@ -183,6 +187,8 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
         return IMS_FALSE;
     }
 
+    /** TODO: Need to enable bundle logic later */
+    /**
     ICarrierConfig* piCcBundle = piCc->GetBundle(
             CarrierConfig::ImsVoice::KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
 
@@ -205,20 +211,21 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
 
     piCcBundle->ReleaseBundle();
     piCcBundle = IMS_NULL;
+    */
 
-    /** TODO - Need to change to carrier configuration bundle later */
+    /** TODO: Need to change to carrier configuration bundle later */
     IMS_TRACE_D("CreateCodecConfigs - Update the values with Assets", 0, 0, 0);
-    objEvsPayloadType =
+    IMSVector<IMS_SINT32> objEvsPayloadType =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_EVS_PAYLOAD_TYPE_INT_ARRAY);
-    objAmrwbPayloadType =
+    IMSVector<IMS_SINT32> objAmrwbPayloadType =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_AMRWB_PAYLOAD_TYPE_INT_ARRAY);
-    objAmrnbPayloadType =
+    IMSVector<IMS_SINT32> objAmrnbPayloadType =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_AMRNB_PAYLOAD_TYPE_INT_ARRAY);
-    objDtmfwbPayloadType =
+    IMSVector<IMS_SINT32> objDtmfwbPayloadType =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_DTMFWB_PAYLOAD_TYPE_INT_ARRAY);
-    objDtmfnbPayloadType =
+    IMSVector<IMS_SINT32> objDtmfnbPayloadType =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_DTMFNB_PAYLOAD_TYPE_INT_ARRAY);
-    /** TODO - END - Need to change to carrier configuration bundle later */
+    /** TODO: END - Need to change to carrier configuration bundle later */
 
     IMS_UINT32 nCodecCnt = 0;
     AString strTemp;
@@ -226,7 +233,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
     if (objEvsPayloadType.GetSize() > 0)
     {
         // nCodecCnt = MakeEachCodecs(piCc, ImsCodec::AUDIO_EVS, nCodecCnt, objEvsPayloadType);
-        /**  TODO_MEDIA evs is not supported for now */
+        /**  TODO: evs is not supported for now */
     }
     if (objAmrwbPayloadType.GetSize() > 0)
     {

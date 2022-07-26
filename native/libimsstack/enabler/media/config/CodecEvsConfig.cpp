@@ -51,7 +51,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
         return IMS_FALSE;
     }
 
-    /** TODO - to access bundle for EVS - later */
+    /** TODO: to access bundle for EVS - later */
     /*ICarrierConfig* piCcBundle =
             piCc->GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE);
 
@@ -74,10 +74,9 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     }*/
 
     m_nChannel = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CHANNELS_INT);
-    m_bDtx = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_BOOL, IMS_TRUE);
-    m_bDtxRecv = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL, IMS_TRUE);
+    m_bDtx = piCc->GetBoolean(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_BOOL);
+    m_bDtxRecv =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL);
 
     IMS_TRACE_D("Create - EvsCodecConfig - m_nChannel: %d m_bDtx: %d m_bDtxRecv: %d", m_nChannel,
             m_bDtx, m_bDtxRecv);

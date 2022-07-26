@@ -15,41 +15,76 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "ICarrierConfig.h"
 #include "CarrierConfig.h"
 #include "ServiceConfig.h"
+#include "MockICarrierConfig.h"
 #include "config/CodecT140Config.h"
+
+using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_SLOT_ID = 0;
 static const IMS_SINT32 DEFAULT_TYPE = ImsCodec::AUDIO_AMR;
 static const IMS_SINT32 DEFAULT_PAYLOAD_NUM = 3;
-
+static const IMS_SINT32 DEFAULT_RED_LEVEL_NONE = CodecT140Config::DEFAULT_RED_LEVEL_NONE;
 static const IMS_SINT32 DEFAULT_RED_LEVEL = CodecT140Config::DEFAULT_RED_LEVEL;
 static const IMS_SINT32 DEFAULT_TEXT_SAMPLING_RATE = CodecT140Config::DEFAULT_TEXT_SAMPLING_RATE;
 
 class CodecT140ConfigTest : public ::testing::Test {
-
-public :
-    CodecT140Config* m_pConfig;
+public:
     ICarrierConfig* m_piCc;
 
 protected:
-    virtual void SetUp() override {
-        m_pConfig = new CodecT140Config(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+    virtual void SetUp() override
+    {
         m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
     }
-    virtual void TearDown() override {
-        if (m_pConfig)
-        {
-            delete m_pConfig;
-        }
-    }
+    virtual void TearDown() override {}
+    IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
 };
 
 TEST_F(CodecT140ConfigTest, GetConfigDefault)
 {
-    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
+    CodecT140Config* m_pConfig = new CodecT140Config(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+
     EXPECT_EQ(m_pConfig->GetRedLevel(), DEFAULT_RED_LEVEL);
     EXPECT_EQ(m_pConfig->GetSamplingRate(), DEFAULT_TEXT_SAMPLING_RATE);
+    delete m_pConfig;
+}
+
+TEST_F(CodecT140ConfigTest, GetConfigTest)
+{
+    CodecT140Config* m_pConfig_redlevel = new CodecT140Config(ImsCodec::TEXT_RED, 120);
+
+    IMS_UINT32 nTextRedLevel = 5;
+    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
+    ON_CALL(*pMockICarrierConfig,
+            GetInt(CarrierConfig::Assets::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT, -1))
+            .WillByDefault(Return(nTextRedLevel));
+
+    EXPECT_TRUE(m_pConfig_redlevel->Create(pMockICarrierConfig, 0));
+    EXPECT_EQ(m_pConfig_redlevel->GetRedLevel(), 5);
+    EXPECT_EQ(m_pConfig_redlevel->GetSamplingRate(), DEFAULT_TEXT_SAMPLING_RATE);
+
+    delete pMockICarrierConfig;
+    delete m_pConfig_redlevel;
+}
+
+TEST_F(CodecT140ConfigTest, GetConfigTestT140)
+{
+    CodecT140Config* m_pConfig_redlevel = new CodecT140Config(ImsCodec::TEXT_T140, 121);
+    IMS_UINT32 nTextRedLevel = 5;
+    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
+    ON_CALL(*pMockICarrierConfig,
+            GetInt(CarrierConfig::Assets::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT, -1))
+            .WillByDefault(Return(nTextRedLevel));
+
+    EXPECT_TRUE(m_pConfig_redlevel->Create(pMockICarrierConfig, 0));
+    EXPECT_EQ(m_pConfig_redlevel->GetRedLevel(), DEFAULT_RED_LEVEL_NONE);
+    EXPECT_EQ(m_pConfig_redlevel->GetSamplingRate(), DEFAULT_TEXT_SAMPLING_RATE);
+
+    delete pMockICarrierConfig;
+    delete m_pConfig_redlevel;
 }

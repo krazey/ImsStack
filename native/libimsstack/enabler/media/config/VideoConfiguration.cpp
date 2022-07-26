@@ -24,19 +24,19 @@ __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 PUBLIC
 VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType) :
         MediaConfiguration(_nSessionType),
-        nVideoDscp(DEFAULT_VIDEO_DSCP),
-        nVideoSendPeriodicSpsPps(DEFAULT_SEND_PERIODIC_SPS_PPS),
-        nCvoId(DEFAULT_CVO_ID),
-        bVideoAvpfEnabled(DEFAULT_AVPF_ENABLED),
-        bVideoAvpfTrrEnabled(DEFAULT_AVPF_TRR),
-        bVideoAvpfNackEnabled(DEFAULT_AVPF_NACK),
-        bVideoAvpfTmmbrEnabled(DEFAULT_AVPF_TMMBR),
-        bVideoAvpfPliEnabled(DEFAULT_AVPF_PLI),
-        bVideoAvpfFirEnabled(DEFAULT_AVPF_FIR),
-        nSdpOfferCapNegoForAvpf(DEFAULT_AVPF_CAPA_NEGO),
-        nVideoIframeIntervalSec(DEFAULT_I_FRAME_INTERVAL),
-        nChannel(DEFAULT_CHANNEL),
-        nVideoSamplingRate(DEFAULT_VIDEO_SAMPLING_RATE)
+        m_nVideoDscp(DEFAULT_VIDEO_DSCP),
+        m_nVideoSendPeriodicSpsPps(DEFAULT_SEND_PERIODIC_SPS_PPS),
+        m_nCvoId(DEFAULT_CVO_ID),
+        m_bVideoAvpfEnabled(DEFAULT_AVPF_ENABLED),
+        m_bVideoAvpfTrrEnabled(DEFAULT_AVPF_TRR),
+        m_bVideoAvpfNackEnabled(DEFAULT_AVPF_NACK),
+        m_bVideoAvpfTmmbrEnabled(DEFAULT_AVPF_TMMBR),
+        m_bVideoAvpfPliEnabled(DEFAULT_AVPF_PLI),
+        m_bVideoAvpfFirEnabled(DEFAULT_AVPF_FIR),
+        m_nSdpOfferCapNegoForAvpf(DEFAULT_AVPF_CAPA_NEGO),
+        m_nVideoIframeIntervalSec(DEFAULT_I_FRAME_INTERVAL),
+        m_nChannel(DEFAULT_CHANNEL),
+        m_nVideoSamplingRate(DEFAULT_VIDEO_SAMPLING_RATE)
 {
     IMS_TRACE_D("+VideoConfiguration eSessionType(%d)", eSessionType, 0, 0);
     nAsBandwidthKbps = DEFAULT_AS;
@@ -72,29 +72,33 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
     nRtcpInactivityTimerMillis =
             piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT);
 
-    // Video Configuration attributes
-    nVideoDscp = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_DSCP_INT);
-    nVideoSendPeriodicSpsPps =
+    /** According to RFC 2474, six bits of the DS field are used as a codepoint (DSCP),
+     * a two-bit currently unused (CU) field is reserved. So two left shift operations are required.
+     */
+    m_nVideoDscp = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_DSCP_INT);
+    m_nVideoDscp = m_nVideoDscp << 2;
+
+    m_nVideoSendPeriodicSpsPps =
             piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT);
-    nCvoId = piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT);
-    bVideoAvpfEnabled = piCc->GetBoolean(CarrierConfig::Assets::KEY_VIDEO_AVPF_ENABLE_BOOL);
+    m_nCvoId = piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT);
+    m_bVideoAvpfEnabled = piCc->GetBoolean(CarrierConfig::Assets::KEY_VIDEO_AVPF_ENABLE_BOOL);
 
     IMS_SINT32 nVideoAvpfFeature = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FEATURE_INT);
-    bVideoAvpfTrrEnabled = nVideoAvpfFeature & 0x01 ? IMS_TRUE : IMS_FALSE;
-    bVideoAvpfNackEnabled = (nVideoAvpfFeature >> 1) & 0x01 ? IMS_TRUE : IMS_FALSE;
-    bVideoAvpfTmmbrEnabled = (nVideoAvpfFeature >> 2) & 0x01 ? IMS_TRUE : IMS_FALSE;
-    bVideoAvpfPliEnabled = (nVideoAvpfFeature >> 3) & 0x01 ? IMS_TRUE : IMS_FALSE;
-    bVideoAvpfFirEnabled = (nVideoAvpfFeature >> 4) & 0x01 ? IMS_TRUE : IMS_FALSE;
+    m_bVideoAvpfTrrEnabled = nVideoAvpfFeature & 0x01 ? IMS_TRUE : IMS_FALSE;
+    m_bVideoAvpfNackEnabled = (nVideoAvpfFeature >> 1) & 0x01 ? IMS_TRUE : IMS_FALSE;
+    m_bVideoAvpfTmmbrEnabled = (nVideoAvpfFeature >> 2) & 0x01 ? IMS_TRUE : IMS_FALSE;
+    m_bVideoAvpfPliEnabled = (nVideoAvpfFeature >> 3) & 0x01 ? IMS_TRUE : IMS_FALSE;
+    m_bVideoAvpfFirEnabled = (nVideoAvpfFeature >> 4) & 0x01 ? IMS_TRUE : IMS_FALSE;
 
     /** TODO_MEDIA need to check if it is needed for KR */
-    nSdpOfferCapNegoForAvpf =
+    m_nSdpOfferCapNegoForAvpf =
             piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT);
 
-    nVideoIframeIntervalSec =
+    m_nVideoIframeIntervalSec =
             piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT);
 
-    // nChannel = DEFAULT_CHANNEL; // already set by default at creator
-    // nVideoSamplingRate = DEFAULT_VIDEO_SAMPLING_RATE; // already set by default at creator
+    // m_nChannel = DEFAULT_CHANNEL; // already set by default at creator
+    // m_nVideoSamplingRate = DEFAULT_VIDEO_SAMPLING_RATE; // already set by default at creator
     if (!CreateCodecConfigs(piCc))
     {
         IMS_TRACE_E(0, "Create - CreateCodecConfigs failure ", 0, 0, 0);
@@ -132,7 +136,8 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
         return IMS_FALSE;
     }
 
-    ICarrierConfig* piCcBundle =
+    /** TODO: to access bundle for Video codec - later */
+    /* ICarrierConfig* piCcBundle =
             piCc->GetBundle(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
 
     if (piCcBundle == IMS_NULL)
@@ -141,12 +146,15 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
     }
 
     IMSVector<IMS_SINT32> objAvcPayloadType =
-            piCcBundle->GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
+            piCcBundle->GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY); */
 
-    /** TODO_MEDIA need to add after creating HEVC in CarrierConfig */
+    // TODO: read carrier_config xml instead of Bundle due to comment out above
+    IMSVector<IMS_SINT32> objAvcPayloadType =
+            piCc->GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
 
-    // IMSVector<IMS_SINT32> objHevcPayloadType = piCcBundle->GetIntArray(
-    //         CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
+    /** TODO: need to add after creating HEVC in CarrierConfig */
+    /* IMSVector<IMS_SINT32> objHevcPayloadType = piCcBundle->GetIntArray(
+            CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY); */
 
     IMS_UINT32 nCodecCnt = 0;
     if (objAvcPayloadType.GetSize() > 0)
@@ -154,15 +162,15 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
         nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_AVC, nCodecCnt, objAvcPayloadType);
     }
 
-    /** TODO_MEDIA need to add after creating HEVC in CarrierConfig */
+    /** TODO: need to add after creating HEVC in CarrierConfig */
+    /* if (objHevcPayloadType.GetSize() > 0)
+    {
+        nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_HEVC, nCodecCnt, objHevcPayloadType);
+    }*/
 
-    // if (objHevcPayloadType.GetSize() > 0)
-    // {
-    //     nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_HEVC, nCodecCnt, objHevcPayloadType);
-    // }
-
-    piCcBundle->ReleaseBundle();
-    piCcBundle = IMS_NULL;
+    /** TODO: to access bundle for Video codec - later */
+    /* piCcBundle->ReleaseBundle();
+    piCcBundle = IMS_NULL; */
 
     return IMS_TRUE;
 }
@@ -171,14 +179,15 @@ PROTECTED VIRTUAL void VideoConfiguration::ToDebugString() const
 {
     // MediaConfiguration::ToDebugString();
 
-    IMS_TRACE_D("nVideoDscp(%d), nVideoSendPeriodicSpsPps(%d), nCvoId(%d)", nVideoDscp,
-            nVideoSendPeriodicSpsPps, nCvoId);
-    IMS_TRACE_D("bVideoAvpfEnabled(%d), bVideoAvpfTrrEnabled(%d), bVideoAvpfNackEnabled(%d)",
-            bVideoAvpfEnabled, bVideoAvpfTrrEnabled, bVideoAvpfNackEnabled);
-    IMS_TRACE_D("bVideoAvpfTmmbrEnabled(%d), bVideoAvpfPliEnabled(%d), bVideoAvpfFirEnabled(%d)",
-            bVideoAvpfTmmbrEnabled, bVideoAvpfPliEnabled, bVideoAvpfFirEnabled);
-    IMS_TRACE_D("nVideoIframeIntervalSec(%d), nVideoSamplingRate(%d)", nVideoIframeIntervalSec,
-            nVideoSamplingRate, 0);
+    IMS_TRACE_D("m_nVideoDscp(%d), m_nVideoSendPeriodicSpsPps(%d), m_nCvoId(%d)", m_nVideoDscp,
+            m_nVideoSendPeriodicSpsPps, m_nCvoId);
+    IMS_TRACE_D("m_bVideoAvpfEnabled(%d), m_bVideoAvpfTrrEnabled(%d), m_bVideoAvpfNackEnabled(%d)",
+            m_bVideoAvpfEnabled, m_bVideoAvpfTrrEnabled, m_bVideoAvpfNackEnabled);
+    IMS_TRACE_D(
+            "m_bVideoAvpfTmmbrEnabled(%d), m_bVideoAvpfPliEnabled(%d), m_bVideoAvpfFirEnabled(%d)",
+            m_bVideoAvpfTmmbrEnabled, m_bVideoAvpfPliEnabled, m_bVideoAvpfFirEnabled);
+    IMS_TRACE_D("m_nVideoIframeIntervalSec(%d), m_nVideoSamplingRate(%d)",
+            m_nVideoIframeIntervalSec, m_nVideoSamplingRate, 0);
     for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
     {
         ToDebugStringCodecs(objCodecConfigs.GetAt(i));
@@ -188,77 +197,77 @@ PROTECTED VIRTUAL void VideoConfiguration::ToDebugString() const
 PUBLIC
 IMS_SINT32 VideoConfiguration::GetVideoDscp() const
 {
-    return nVideoDscp;
+    return m_nVideoDscp;
 }
 
 PUBLIC
 IMS_SINT32 VideoConfiguration::GetCvoId() const
 {
-    return nCvoId;
+    return m_nCvoId;
 }
 
 PUBLIC
 IMS_SINT32 VideoConfiguration::GetVideoSendPeriodicSpsPps() const
 {
-    return nVideoSendPeriodicSpsPps;
+    return m_nVideoSendPeriodicSpsPps;
 }
 
 PUBLIC
 IMS_BOOL VideoConfiguration::IsVideoAvpfEnabled() const
 {
-    return bVideoAvpfEnabled;
+    return m_bVideoAvpfEnabled;
 }
 
 PUBLIC
 IMS_BOOL VideoConfiguration::IsVideoAvpfTrrEnabled() const
 {
-    return bVideoAvpfTrrEnabled;
+    return m_bVideoAvpfTrrEnabled;
 }
 
 PUBLIC
 IMS_BOOL VideoConfiguration::IsVideoAvpfNackEnabled() const
 {
-    return bVideoAvpfNackEnabled;
+    return m_bVideoAvpfNackEnabled;
 }
 
 PUBLIC
 IMS_BOOL VideoConfiguration::IsVideoAvpfTmmbrEnabled() const
 {
-    return bVideoAvpfTmmbrEnabled;
+    return m_bVideoAvpfTmmbrEnabled;
 }
 
 PUBLIC
 IMS_BOOL VideoConfiguration::IsVideoAvpfPliEnabled() const
 {
-    return bVideoAvpfPliEnabled;
+    return m_bVideoAvpfPliEnabled;
 }
 
 PUBLIC
 IMS_BOOL VideoConfiguration::IsVideoAvpfFirEnabled() const
 {
-    return bVideoAvpfFirEnabled;
+    return m_bVideoAvpfFirEnabled;
 }
 
 PUBLIC
 IMS_SINT32 VideoConfiguration::GetSdpOfferCapNegoForAvpf() const
 {
-    return nSdpOfferCapNegoForAvpf;
+    return m_nSdpOfferCapNegoForAvpf;
 }
 
 PUBLIC
 IMS_SINT32 VideoConfiguration::GetVideoIframeIntervalSec() const
 {
-    return nVideoIframeIntervalSec;
+    return m_nVideoIframeIntervalSec;
 }
 
 PUBLIC
 IMS_SINT32 VideoConfiguration::GetChannel() const
 {
-    return nChannel;
+    return m_nChannel;
 }
 
 PUBLIC
 IMS_SINT32 VideoConfiguration::GetVideoSamplingRate() const
 {
-    return nVideoSamplingRate;
+    return m_nVideoSamplingRate;
 }

@@ -175,6 +175,9 @@
     <int name="imsvt.video_as_bandwidth_kbps_int" value="639"/>
     <int name="imsvt.video_rs_bandwidth_bps_int" value="0"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="2500"/>
+    <int name="imsrtt.text_as_bandwidth_kbps_int" value="4"/>
+    <int name="imsrtt.text_rs_bandwidth_bps_int" value="100"/>
+    <int name="imsrtt.text_rr_bandwidth_bps_int" value="300"/>
 
     <!-- Ut/Xcap -->
     <boolean name="imsss.xcap_root_uri_requires_srv_query_bool" value="false"/>
@@ -486,9 +489,11 @@
         <item value="50060"/>
     </int-array>
     <boolean name="audio_bw_nego_option_bool" value="false"/>
-    <int name="audio_maxptime_millis_int" value="240"/>
+    <int name="audio_ptime_millis_int" value="-1"/>
+    <int name="audio_maxptime_millis_int" value="-1"/>
     <int name="audio_maxred_int" value="220"/>
-    <int name="audio_rtp_dscp_int" value="0"/>
+    <int name="audio_rtp_dscp_int" value="46"/>
+    <boolean name="audio_show_codec_attribute_modeset_bool" value="false"/>
     <int name="audio_telephone_event_duration_millis_int" value="200"/>
     <int-array name="video_rtp_port_range_int_array" num="2">
         <item value="50010"/>
@@ -504,10 +509,12 @@
         <item value="50060"/>
     </int-array>
     <boolean name="text_codec_empty_redundant_bool" value="false"/>
+    <int name="text_rtp_dscp_int" value="46"/>
     <boolean name="support_multi_config_in_early_session_bool" value="false"/>
     <boolean name="media_session_level_bandwidth_bool" value="false"/>
     <boolean name="sdp_answer_full_capability_bool" value="false"/>
     <boolean name="sdp_reoffer_full_capability_bool" value="true"/>
+    <int name="text_codec_redundancy_level_int" value="-1"/>
 
     <!-- TODO Media - to testcases-->
     <int-array name="asset_amrwb_payload_type_int_array" num="2">

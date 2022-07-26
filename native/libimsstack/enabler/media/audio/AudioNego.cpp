@@ -1137,7 +1137,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             }
 
             // set mode-set
-            if (pAmrFmtp->nModeSetList != 0)
+            if (pAmrFmtp->nModeSetList != 0 && pAmrFmtp->bShowModeSet == IMS_TRUE)
             {
                 AString strTemp, strMode;
                 IMS_UINT32 nModeSet;
@@ -1226,9 +1226,6 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
 
-            /** TODO: 26.114 mentioned it is needed, but no carrier wants this. so block these for
-             now*/
-            /*
             // ptime
             if (pAmrFmtp->nPtime != AudioProfile::AmrFmtp::DEFAULT_PTIME ||
                     pAmrFmtp->bShowPtime == IMS_TRUE)
@@ -1256,7 +1253,6 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strTemp.Sprintf("maxptime=%d", pAmrFmtp->nMaxPtime);
                 strFmtp.Append(strTemp);
             }
-            */
         }
         else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
         {
@@ -3040,6 +3036,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::AmrF
             {
                 IMS_UINT32 nModeSet = (IMS_UINT32)objSplitComma.GetAt(j).ToInt32();
                 pFmtp->nModeSetList = (pFmtp->nModeSetList | (1 << nModeSet));
+                pFmtp->bShowModeSet = IMS_TRUE;
             }
         }
         else if (objSplitEqual.GetAt(0).Equals("octet-align") == IMS_TRUE)

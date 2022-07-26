@@ -782,12 +782,16 @@ public class CarrierConfig {
                 "audio_rtp_port_range_int_array";
         public static final String KEY_AUDIO_BW_NEGO_OPTION_BOOL =
                 "audio_bw_nego_option_bool";
+        public static final String KEY_AUDIO_PTIME_MILLIS_INT =
+                "audio_ptime_millis_int";
         public static final String KEY_AUDIO_MAXPTIME_MILLIS_INT =
                 "audio_maxptime_millis_int";
         public static final String KEY_AUDIO_MAXRED_INT =
                 "audio_maxred_int";
         public static final String KEY_AUDIO_RTP_DSCP_INT =
                 "audio_rtp_dscp_int";
+        public static final String KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL =
+                "audio_show_codec_attribute_modeset_bool";
         public static final String KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT =
                 "audio_telephone_event_duration_millis_int";
         public static final String KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY =
@@ -819,6 +823,8 @@ public class CarrierConfig {
                 "text_rtp_port_range_int_array";
         public static final String KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL =
                 "text_codec_empty_redundant_bool";
+        public static final String KEY_TEXT_RTP_DSCP_INT =
+                "text_rtp_dscp_int";
         public static final String KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL =
                 "support_multi_config_in_early_session_bool";
         public static final String KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL =
@@ -827,6 +833,8 @@ public class CarrierConfig {
                 "sdp_answer_full_capability_bool";
         public static final String KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL =
                 "sdp_reoffer_full_capability_bool";
+        public static final String KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT =
+                "text_codec_redundancy_level_int";
 
         // TODO - Media Codec for Test
         public static final String KEY_ASSET_EVS_PAYLOAD_TYPE_INT_ARRAY =
@@ -880,7 +888,12 @@ public class CarrierConfig {
                 "asset_evs_codec_attribute_bitrate_int_array";
         public static final String KEY_ASSET_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY =
                 "asset_amr_codec_attribute_modeset_int_array";
-
+        public static final String KEY_ASSET_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPE_INT_ARRAY =
+                "asset_text_codec_capability_payload_type_int_array";
+        public static final String KEY_ASSET_T140_PAYLOAD_TYPE_INT =
+                "asset_t140_payload_type_int";
+        public static final String KEY_ASSET_RED_PAYLOAD_TYPE_INT =
+                "asset_red_payload_type_int";
 
         // TODO Media additional for CallFeature
         public static final String KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL =

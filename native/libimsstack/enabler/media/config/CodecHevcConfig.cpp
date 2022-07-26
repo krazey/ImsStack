@@ -88,11 +88,11 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc, IN IMS_
     m_nPacketizationMode = piCcSubBundle->GetInt(
             CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT);
 
-    /** TODO Media need to check this item */
+    /** TODO: Media need to check this item */
     // m_bIncludeSpropParameterSets = piCcSubBundle->GetBoolean(
     //        CarrierConfig::Assets::KEY_VIDEO_CODEC_HEVC_SPROP_PARAMETER_SETS_BOOL);
 
-    /** TODO_MEDIA need to add after creating items in CarrierConfig */
+    /** TODO: MEDIA need to add after creating items in CarrierConfig */
     // m_nHevcProfile = piCcSubBundle->GetInt(
     //         CarrierConfig::ImsVt::KEY_VIDEO_CODEC_HEVC_PROFILE_INT);
     // m_nHevcLevel = piCcSubBundle->GetInt(

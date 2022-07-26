@@ -23,9 +23,10 @@ __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 PUBLIC
 TextConfiguration::TextConfiguration(MEDIA_CONTENT_TYPE _eSessionType) :
         MediaConfiguration(_eSessionType),
-        nT140PayloadType(DEFAULT_PAYLOAD_T140),
-        nRedPayloadType(DEFAULT_PAYLOAD_RED),
-        bTextCodecEmptyRedundantEnabled(DEFAULT_EMPTY_REDUNDANT)
+        m_nT140PayloadType(DEFAULT_PAYLOAD_T140),
+        m_nRedPayloadType(DEFAULT_PAYLOAD_RED),
+        m_nTextDscp(DEFAULT_TEXT_DSCP),
+        m_bTextCodecEmptyRedundantEnabled(DEFAULT_EMPTY_REDUNDANT)
 {
     IMS_TRACE_I("+TextConfiguration sessiontype[%d]", _eSessionType, 0, 0);
     nAsBandwidthKbps = DEFAULT_AS;
@@ -40,11 +41,6 @@ TextConfiguration::~TextConfiguration()
     Clear();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
@@ -54,12 +50,12 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
     }
 
     // Media Configuration attributes
-    SetPorts(piCc, CarrierConfig::ImsRtt::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY);
+    SetPorts(piCc, CarrierConfig::Assets::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY);
     SetRtcpIntervals(piCc, CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY);
 
-    nAsBandwidthKbps = piCc->GetBoolean(CarrierConfig::ImsRtt::KEY_TEXT_AS_BANDWIDTH_KBPS_INT);
-    nRrBandwidthBps = piCc->GetBoolean(CarrierConfig::ImsRtt::KEY_TEXT_RR_BANDWIDTH_BPS_INT);
-    nRsBandwidthBps = piCc->GetBoolean(CarrierConfig::ImsRtt::KEY_TEXT_RS_BANDWIDTH_BPS_INT);
+    nAsBandwidthKbps = piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_AS_BANDWIDTH_KBPS_INT);
+    nRrBandwidthBps = piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RR_BANDWIDTH_BPS_INT);
+    nRsBandwidthBps = piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RS_BANDWIDTH_BPS_INT);
 
     nRtpInactivityTimerMillis = piCc->GetInt(
             CarrierConfig::ImsVoice::KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT);  // same with audio
@@ -67,8 +63,13 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
             CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT);  // same with
                                                                                    // audio
 
-    // Text Configuration attributes
-    bTextCodecEmptyRedundantEnabled =
+    /** According to RFC 2474, six bits of the DS field are used as a codepoint (DSCP),
+     * a two-bit currently unused (CU) field is reserved. So two left shift operations are required.
+     */
+    m_nTextDscp = piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_DSCP_INT);
+    m_nTextDscp = m_nTextDscp << 2;
+
+    m_bTextCodecEmptyRedundantEnabled =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL);
 
     if (!CreateCodecConfigs(piCc))
@@ -77,14 +78,10 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
         return IMS_FALSE;
     }
 
+    ToDebugString();
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL TextConfiguration::Update(IN ICarrierConfig* piCc)
 {
@@ -103,11 +100,6 @@ IMS_BOOL TextConfiguration::Update(IN ICarrierConfig* piCc)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
@@ -116,6 +108,8 @@ PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConf
         return IMS_FALSE;
     }
 
+    /** TODO: Bundle implementation - Need to enable later */
+    /*
     // MediaTextCodecCapabilityPayloadTypesBundle
     ICarrierConfig* piCcBundle =
             piCc->GetBundle(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
@@ -125,20 +119,28 @@ PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConf
         return IMS_FALSE;
     }
 
-    nT140PayloadType = piCcBundle->GetInt(CarrierConfig::ImsRtt::KEY_T140_PAYLOAD_TYPE_INT);
-    nRedPayloadType = piCcBundle->GetInt(CarrierConfig::ImsRtt::KEY_RED_PAYLOAD_TYPE_INT);
+    m_nT140PayloadType = piCcBundle->GetInt(CarrierConfig::ImsRtt::KEY_T140_PAYLOAD_TYPE_INT);
+    m_nRedPayloadType = piCcBundle->GetInt(CarrierConfig::ImsRtt::KEY_RED_PAYLOAD_TYPE_INT);
 
     piCcBundle->ReleaseBundle();
     piCcBundle = IMS_NULL;
+    */
+
+    /** TODO: Need to remove later - read Asset value temporarily */
+    m_nT140PayloadType = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_T140_PAYLOAD_TYPE_INT);
+    m_nRedPayloadType = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_RED_PAYLOAD_TYPE_INT);
+
+    IMS_TRACE_D("m_nT140PayloadType[%d], m_nRedPayloadType[%d]", m_nT140PayloadType,
+            m_nRedPayloadType, 0);
 
     IMS_UINT32 nCodecCnt = 0;
-    if (nT140PayloadType > 0)
+    if (m_nT140PayloadType > 0)
     {
-        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_T140, nCodecCnt, nT140PayloadType, 0);
+        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_T140, nCodecCnt, m_nT140PayloadType, 0);
     }
-    if (nRedPayloadType > 0)
+    if (m_nRedPayloadType > 0)
     {
-        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_RED, nCodecCnt, nRedPayloadType, 0);
+        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_RED, nCodecCnt, m_nRedPayloadType, 0);
     }
 
     return IMS_TRUE;
@@ -148,8 +150,13 @@ PROTECTED VIRTUAL void TextConfiguration::ToDebugString() const
 {
     MediaConfiguration::ToDebugString();
 
-    IMS_TRACE_D("nT140PayloadType[%d], nRedPayloadType[%d], bTextCodecEmptyRedundantEnabled(%d)",
-            nT140PayloadType, nRedPayloadType, bTextCodecEmptyRedundantEnabled);
+    IMS_TRACE_D(
+            "m_nT140PayloadType[%d], m_nRedPayloadType[%d], m_bTextCodecEmptyRedundantEnabled(%d)",
+            m_nT140PayloadType, m_nRedPayloadType, m_bTextCodecEmptyRedundantEnabled);
+    IMS_TRACE_D("nAsBandwidthKbps[%d], nRsBandwidthBps[%d], nRrBandwidthBps(%d)", nAsBandwidthKbps,
+            nRsBandwidthBps, nRrBandwidthBps);
+    IMS_TRACE_D("m_nTextDscp[%d], nRtpInactivityTimerMillis[%d], nRtcpInactivityTimerMillis[%d]",
+            m_nTextDscp, nRtpInactivityTimerMillis, nRtcpInactivityTimerMillis);
 
     for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
     {
@@ -160,17 +167,23 @@ PROTECTED VIRTUAL void TextConfiguration::ToDebugString() const
 PUBLIC
 IMS_SINT32 TextConfiguration::GetT140PayloadType() const
 {
-    return nT140PayloadType;
+    return m_nT140PayloadType;
 }
 
 PUBLIC
 IMS_SINT32 TextConfiguration::GetRedPayloadType() const
 {
-    return nRedPayloadType;
+    return m_nRedPayloadType;
+}
+
+PUBLIC
+IMS_SINT32 TextConfiguration::GetTextDscp() const
+{
+    return m_nTextDscp;
 }
 
 PUBLIC
 IMS_BOOL TextConfiguration::IsTextCodecEmptyRedundantEnabled() const
 {
-    return bTextCodecEmptyRedundantEnabled;
+    return m_bTextCodecEmptyRedundantEnabled;
 }

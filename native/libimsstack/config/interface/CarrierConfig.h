@@ -295,7 +295,6 @@ public:
         // }
         // Public carrier-config - ends
         static const IMS_CHAR KEY_POLICY_ON_TEXT_QOS_DEACTIVATION_INT[];
-        static const IMS_CHAR KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY[];
         static const IMS_CHAR KEY_TEXT_RTCP_INTERVAL_INT_ARRAY[];
     };
 
@@ -958,9 +957,11 @@ public:
         // Media
         static const IMS_CHAR KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[];
         static const IMS_CHAR KEY_AUDIO_BW_NEGO_OPTION_BOOL[];
+        static const IMS_CHAR KEY_AUDIO_PTIME_MILLIS_INT[];
         static const IMS_CHAR KEY_AUDIO_MAXPTIME_MILLIS_INT[];
         static const IMS_CHAR KEY_AUDIO_MAXRED_INT[];
         static const IMS_CHAR KEY_AUDIO_RTP_DSCP_INT[];
+        static const IMS_CHAR KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL[];
         static const IMS_CHAR KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT[];
         static const IMS_CHAR KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY[];
         static const IMS_CHAR KEY_AUDIO_RTCPXR_ENABLE_BOOL[];
@@ -972,14 +973,16 @@ public:
         static const IMS_CHAR KEY_VIDEO_CVO_VALUE_INT[];
         static const IMS_CHAR KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT[];
         static const IMS_CHAR KEY_VIDEO_AVPF_ENABLE_BOOL[];
-
         static const IMS_CHAR KEY_VIDEO_IFRAME_INTERVAL_SEC_INT[];
         static const IMS_CHAR KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT[];
+        static const IMS_CHAR KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY[];
         static const IMS_CHAR KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL[];
+        static const IMS_CHAR KEY_TEXT_RTP_DSCP_INT[];
         static const IMS_CHAR KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL[];
         static const IMS_CHAR KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL[];
         static const IMS_CHAR KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL[];
         static const IMS_CHAR KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL[];
+        static const IMS_CHAR KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT[];
 
         // TODO Media - Need to change to carrier configuration bundle later
         static const IMS_CHAR KEY_ASSET_EVS_PAYLOAD_TYPE_INT_ARRAY[];
@@ -1009,6 +1012,9 @@ public:
         static const IMS_CHAR KEY_ASSET_EVS_AMRWB_IO_MODE_SET_INT[];
         static const IMS_CHAR KEY_ASSET_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY[];
         static const IMS_CHAR KEY_ASSET_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY[];
+        static const IMS_CHAR KEY_ASSET_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPE_INT_ARRAY[];
+        static const IMS_CHAR KEY_ASSET_T140_PAYLOAD_TYPE_INT[];
+        static const IMS_CHAR KEY_ASSET_RED_PAYLOAD_TYPE_INT[];
 
         // Mts
         static const IMS_CHAR KEY_SMS_REQUEST_URI_TYPE_INT[];

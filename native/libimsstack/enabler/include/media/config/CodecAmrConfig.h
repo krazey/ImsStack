@@ -67,6 +67,13 @@ public:
      */
     IMS_UINT32 GetModeSetList() const;
     /**
+     * @brief Get the information whether to include AMR codec modeset in sdp
+     *
+     * @return IMS_BOOL Return IMS_TRUE Include modeset attribute to sdp
+     * IMS_FALSE Not include modeset attribute to sdp
+     */
+    IMS_BOOL GetShowModeSet() const;
+    /**
      * @brief Get the payload format
      *
      * @return IMS_SINT32 Return bandwidth-efficient or octet-align
@@ -141,6 +148,7 @@ private:
      */
 
     IMS_SINT32 m_nChannel;
+    IMS_BOOL m_bShowModeSet;
     IMS_UINT32 m_nModeSetList;  // 0 means support all mode set
     IMS_SINT32 m_nOctetAlign;
     IMS_SINT32 m_nSamplingRate;

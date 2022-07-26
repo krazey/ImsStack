@@ -52,9 +52,9 @@ public:
     static const IMS_SINT32 DEFAULT_RTP_INACTIVITY = 20000;
     static const IMS_SINT32 DEFAULT_RTCP_INACTIVITY = 200000;
 
-    static const IMS_SINT32 DEFAULT_VIDEO_DSCP = 40;
+    static const IMS_SINT32 DEFAULT_VIDEO_DSCP = 160;  // converted value from 40
     static const IMS_SINT32 DEFAULT_SEND_PERIODIC_SPS_PPS = SEND_EVERY_TIME;
-    static const IMS_SINT32 DEFAULT_CVO_ID = -1;  // TODO_MEDIA need to check.
+    static const IMS_SINT32 DEFAULT_CVO_ID = -1;  // TODO: need to check.
     static const IMS_BOOL DEFAULT_AVPF_ENABLED = IMS_FALSE;
     static const IMS_BOOL DEFAULT_AVPF_TRR = IMS_FALSE;
     static const IMS_BOOL DEFAULT_AVPF_NACK = IMS_TRUE;
@@ -209,18 +209,18 @@ protected:
     virtual void ToDebugString() const;
 
 private:
-    IMS_SINT32 nVideoDscp;
-    IMS_SINT32 nVideoSendPeriodicSpsPps;
-    IMS_SINT32 nCvoId;
-    IMS_BOOL bVideoAvpfEnabled;
-    IMS_BOOL bVideoAvpfTrrEnabled;
-    IMS_BOOL bVideoAvpfNackEnabled;
-    IMS_BOOL bVideoAvpfTmmbrEnabled;
-    IMS_BOOL bVideoAvpfPliEnabled;
-    IMS_BOOL bVideoAvpfFirEnabled;
-    IMS_SINT32 nSdpOfferCapNegoForAvpf;
-    IMS_SINT32 nVideoIframeIntervalSec;
-    IMS_SINT32 nChannel;
-    IMS_SINT32 nVideoSamplingRate;
+    IMS_SINT32 m_nVideoDscp;
+    IMS_SINT32 m_nVideoSendPeriodicSpsPps;
+    IMS_SINT32 m_nCvoId;
+    IMS_BOOL m_bVideoAvpfEnabled;
+    IMS_BOOL m_bVideoAvpfTrrEnabled;
+    IMS_BOOL m_bVideoAvpfNackEnabled;
+    IMS_BOOL m_bVideoAvpfTmmbrEnabled;
+    IMS_BOOL m_bVideoAvpfPliEnabled;
+    IMS_BOOL m_bVideoAvpfFirEnabled;
+    IMS_SINT32 m_nSdpOfferCapNegoForAvpf;
+    IMS_SINT32 m_nVideoIframeIntervalSec;
+    IMS_SINT32 m_nChannel;
+    IMS_SINT32 m_nVideoSamplingRate;
 };
 #endif  // _VIDEO_CONFIGURATION_H_

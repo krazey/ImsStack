@@ -268,8 +268,6 @@ const IMS_CHAR CarrierConfig::ImsRtt::KEY_RED_PAYLOAD_TYPE_INT[] =
 // Public carrier-config - ends
 const IMS_CHAR CarrierConfig::ImsRtt::KEY_POLICY_ON_TEXT_QOS_DEACTIVATION_INT[] =
         KEY_IMS_RTT_PREFIX "policy_on_text_qos_deactivation_int";
-const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY[] =
-        KEY_IMS_RTT_PREFIX "text_rtp_port_range_int_array";
 const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY[] =
         KEY_IMS_RTT_PREFIX "text_rtcp_interval_int_array";
 
@@ -1047,9 +1045,12 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SEND_180_FOR_INITIAL_INVITE_BOOL[] =
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =
         "audio_rtp_port_range_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL[] = "audio_bw_nego_option_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_PTIME_MILLIS_INT[] = "audio_ptime_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT[] = "audio_maxptime_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT[] = "audio_maxred_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT[] = "audio_rtp_dscp_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL[] =
+        "audio_show_codec_attribute_modeset_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT[] =
         "audio_telephone_event_duration_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY[] =
@@ -1073,8 +1074,11 @@ const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT[] =
         "video_iframe_interval_sec_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT[] =
         "video_send_periodic_sps_pps_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY[] =
+        "text_rtp_port_range_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL[] =
         "text_codec_empty_redundant_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_RTP_DSCP_INT[] = "text_rtp_dscp_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL[] =
         "support_multi_config_in_early_session_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL[] =
@@ -1083,6 +1087,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL[] =
         "sdp_answer_full_capability_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL[] =
         "sdp_reoffer_full_capability_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT[] =
+        "text_codec_redundancy_level_int";
 
 // TODO - Need to change to carrier configuration bundle later
 const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_PAYLOAD_TYPE_INT_ARRAY[] =
@@ -1136,6 +1142,12 @@ const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_BITRATE_INT_
         "asset_evs_codec_attribute_bitrate_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY[] =
         "asset_amr_codec_attribute_modeset_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPE_INT_ARRAY[] =
+        "asset_text_codec_capability_payload_type_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_T140_PAYLOAD_TYPE_INT[] =
+        "asset_t140_payload_type_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_RED_PAYLOAD_TYPE_INT[] =
+        "asset_red_payload_type_int";
 
 // Mts
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT[] =

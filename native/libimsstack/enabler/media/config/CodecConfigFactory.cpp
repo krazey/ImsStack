@@ -153,9 +153,13 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(
 
     CodecConfig* pCodecConfig = IMS_NULL;
 
+    IMS_TRACE_D("pT140Config codec config: codectype: %d, nPayloadTypeNum: %d, nCodecIdx: %d",
+            nCodec, nPayloadTypeNum, nCodecIdx);
+
     switch (nCodec)
     {
         case ImsCodec::TEXT_T140:
+        case ImsCodec::TEXT_RED:
         {
             CodecT140Config* pT140Config = IMS_NULL;
             pT140Config = new CodecT140Config(nCodec, nPayloadTypeNum);
@@ -171,9 +175,6 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(
             pCodecConfig = pT140Config;
         }
         break;
-        case ImsCodec::TEXT_RED:
-            // Need to add later
-            break;
     }
     return pCodecConfig;
 }

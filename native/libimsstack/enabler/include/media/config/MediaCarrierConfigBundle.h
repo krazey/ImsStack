@@ -139,8 +139,8 @@ struct MediaTextCodecCapabilityPayloadTypesBundle
 public:
     MediaTextCodecCapabilityPayloadTypesBundle() :
             // KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE
-            nT140PayloadType(111),  // KEY_T140_PAYLOAD_TYPE_INT
-            nRedPayloadType(112)    // KEY_RED_PAYLOAD_TYPE_INT
+            m_nT140PayloadType(111),  // KEY_T140_PAYLOAD_TYPE_INT
+            m_nRedPayloadType(112)    // KEY_RED_PAYLOAD_TYPE_INT
     {
     }
 
@@ -150,8 +150,8 @@ public:
             IN const MediaTextCodecCapabilityPayloadTypesBundle&) = delete;
 
 public:
-    IMS_SINT32 nT140PayloadType;
-    IMS_SINT32 nRedPayloadType;
+    IMS_SINT32 m_nT140PayloadType;
+    IMS_SINT32 m_nRedPayloadType;
 };
 
 // AOSP VT

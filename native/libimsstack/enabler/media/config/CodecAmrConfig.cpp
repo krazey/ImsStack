@@ -24,6 +24,7 @@ PUBLIC
 CodecAmrConfig::CodecAmrConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum) :
         CodecConfig(nType_, nPayloadTypeNum),
         m_nChannel(DEFAULT_CHANNEL),
+        m_bShowModeSet(IMS_FALSE),
         m_nModeSetList(DEFAULT_MODESET_AMR_WB),
         m_nOctetAlign(DEFAULT_OCTET_ALIGN),
         m_nSamplingRate(DEFAULT_SAMPLING_RATE_AMRWB),
@@ -48,6 +49,10 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
         IMS_TRACE_E(0, "Create - piCc is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
+
+    m_bShowModeSet =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL);
+    IMS_TRACE_D("Create - m_bShowModeSet[%d]", 0, 0, 0);
 
     /** TODO Media - Start - Need to change to carrier configuration bundle later */
     if (m_nCodec == ImsCodec::AUDIO_AMR)
@@ -131,7 +136,8 @@ PUBLIC VIRTUAL void CodecAmrConfig::ToDebugString() const
     CodecConfig::ToDebugString();
     IMS_TRACE_D("m_nChannel(%d), mode-set(0x%04x), m_nOctetAlign(%d)", m_nChannel, m_nModeSetList,
             m_nOctetAlign);
-    IMS_TRACE_D("m_nSamplingRate(%d), m_bDtx(%d)", m_nSamplingRate, m_bDtx, 0);
+    IMS_TRACE_D("m_nSamplingRate(%d), m_bDtx(%d), m_bShowModeSet(%d)", m_nSamplingRate, m_bDtx,
+            m_bShowModeSet);
 }
 
 PUBLIC
@@ -167,6 +173,12 @@ IMS_SINT32 CodecAmrConfig::GetModeSet() const
         }
     }
     return 0;
+}
+
+PUBLIC
+IMS_BOOL CodecAmrConfig::GetShowModeSet() const
+{
+    return m_bShowModeSet;
 }
 
 PUBLIC

@@ -59,6 +59,7 @@ TEST_F(CodecAmrConfigTest, GetConfigDefault)
 
     EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);
     EXPECT_EQ(m_pConfig->GetModeSetList(), DEFAULT_MODESET_AMR_WB);
+    EXPECT_EQ(m_pConfig->GetShowModeSet(), IMS_FALSE);
     EXPECT_EQ(m_pConfig->GetOctetAlign(), DEFAULT_OCTET_ALIGN);
     EXPECT_EQ(m_pConfig->GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMRWB);
     EXPECT_EQ(m_pConfig->GetDtx(), IMS_TRUE);
@@ -110,6 +111,24 @@ TEST_F(CodecAmrConfigTest, GetConfigOctetAlignAsset)
     EXPECT_EQ(m_pConfig_amrnb->GetOctetAlign(), 0);
     delete m_pConfig_amrnb;
 
+    delete pMockICarrierConfig;
+}
+
+TEST_F(CodecAmrConfigTest, GetConfigShowModeSetListAsset)
+{
+    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
+    CodecAmrConfig* m_pConfig_amrwb = new CodecAmrConfig(ImsCodec::AUDIO_AMR_WB, 99);
+    IMS_BOOL bMockShowModeSet = IMS_TRUE;
+
+    ON_CALL(*pMockICarrierConfig,
+            GetBoolean(
+                    CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL, IMS_FALSE))
+            .WillByDefault(Return(bMockShowModeSet));
+
+    EXPECT_TRUE(m_pConfig_amrwb->Create(pMockICarrierConfig, 0));
+    EXPECT_EQ(m_pConfig_amrwb->GetShowModeSet(), IMS_TRUE);
+
+    delete m_pConfig_amrwb;
     delete pMockICarrierConfig;
 }
 

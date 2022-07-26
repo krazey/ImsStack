@@ -43,22 +43,12 @@ static const IMS_BOOL DEFAULT_INCLUDE_SPROP = CodecAvcConfig::DEFAULT_INCLUDE_SP
 #define DEFAULT_FRAME_SIZE "NEED_TO_CHECK"
 
 class CodecAvcConfigTest : public ::testing::Test {
-
-public :
-    CodecAvcConfig* m_pConfig;
+public:
     ICarrierConfig* m_piCc;
 
 protected:
-    virtual void SetUp() override {
-        m_pConfig = new CodecAvcConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
-        m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
-    }
-    virtual void TearDown() override {
-        if (m_pConfig)
-        {
-            delete m_pConfig;
-        }
-    }
+    virtual void SetUp() override {}
+    virtual void TearDown() override {}
     IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
     AString GetString(IN const IMS_CHAR* pszKey) { return m_piCc->GetString(pszKey); }
     IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
@@ -73,6 +63,7 @@ protected:
 
 TEST_F(CodecAvcConfigTest, GetConfigDefault)
 {
+    CodecAvcConfig* m_pConfig = new CodecAvcConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
     EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);
     EXPECT_EQ(m_pConfig->GetResolutionWidth(), DEFAULT_RESOLUTION_WIDTH);
     EXPECT_EQ(m_pConfig->GetResolutionHeight(), DEFAULT_RESOLUTION_HEIGHT);
@@ -84,12 +75,15 @@ TEST_F(CodecAvcConfigTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->GetProfileLevelId(), DEFAULT_PROFILE_ID);
     EXPECT_EQ(m_pConfig->GetImageAttr(), DEFAULT_IMAGE_ATTR);
     EXPECT_EQ(m_pConfig->GetFrameSize(), DEFAULT_FRAME_SIZE);
+    delete m_pConfig;
 }
 
 TEST_F(CodecAvcConfigTest, GetConfigTest)
 {
-    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
+    CodecAvcConfig* m_pConfig = new CodecAvcConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
 
+    EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfig->GetFramerate(),
             GetInt(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT));
     EXPECT_EQ(m_pConfig->GetPacketizationMode(),
@@ -98,10 +92,13 @@ TEST_F(CodecAvcConfigTest, GetConfigTest)
             GetString(
                     CarrierConfig::ImsVt::KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING));
     // EXPECT_EQ(m_pConfig->GetFrameSize(), DEFAULT_FRAME_SIZE);   // TODO - need to check later
+    delete m_pConfig;
 }
 
 TEST_F(CodecAvcConfigTest, GetConfigVideoResolution)
 {
+    CodecAvcConfig* m_pConfig = new CodecAvcConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+
     IMSVector<IMS_SINT32> objVideoCodecResolution;
     objVideoCodecResolution.Push(480);
     objVideoCodecResolution.Push(640);
@@ -117,10 +114,13 @@ TEST_F(CodecAvcConfigTest, GetConfigVideoResolution)
     EXPECT_EQ(m_pConfig->GetResolutionHeight(), 640);
 
     delete pMockICarrierConfig;
+    delete m_pConfig;
 }
 
 TEST_F(CodecAvcConfigTest, GetConfigVideoBitrate)
 {
+    CodecAvcConfig* m_pConfig = new CodecAvcConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+
     IMSVector<IMS_SINT32> objVideoBitrate;
     objVideoBitrate.Push(512);
 
@@ -134,10 +134,13 @@ TEST_F(CodecAvcConfigTest, GetConfigVideoBitrate)
     EXPECT_EQ(m_pConfig->GetBitrate(), 512);
 
     delete pMockICarrierConfig;
+    delete m_pConfig;
 }
 
 TEST_F(CodecAvcConfigTest, GetConfigVideoImageAttr)
 {
+    CodecAvcConfig* m_pConfig = new CodecAvcConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
+
     IMSVector<AString> objImageAttr;
     objImageAttr.Push("send [x=640,y=480] recv [x=640,y=480]");
 
@@ -151,4 +154,5 @@ TEST_F(CodecAvcConfigTest, GetConfigVideoImageAttr)
     EXPECT_EQ(m_pConfig->GetImageAttr(), "send [x=640,y=480] recv [x=640,y=480]");
 
     delete pMockICarrierConfig;
+    delete m_pConfig;
 }

@@ -33,9 +33,7 @@ public :
     ICarrierConfig* m_piCc;
 
 protected:
-    virtual void SetUp() override {
-        m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
-    }
+    virtual void SetUp() override {}
     virtual void TearDown() override {}
 };
 
@@ -43,6 +41,7 @@ TEST_F(CodecTelephoneEventConfigTest, GetConfigAMRWB)
 {
     CodecTelephoneEventConfig* m_pConfig =
             new CodecTelephoneEventConfig(ImsCodec::AUDIO_TELEPHONE_EVENT_WB, 99);
+    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
 
     EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
 
@@ -57,6 +56,7 @@ TEST_F(CodecTelephoneEventConfigTest, GetConfigAMR)
 {
     CodecTelephoneEventConfig* m_pConfig =
             new CodecTelephoneEventConfig(ImsCodec::AUDIO_TELEPHONE_EVENT, 100);
+    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
 
     EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfig->GetEvents(), DEFAULT_EVENT);

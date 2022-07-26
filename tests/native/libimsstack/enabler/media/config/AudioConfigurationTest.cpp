@@ -52,23 +52,14 @@ static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR =
 static const IMS_CHAR* DEFAULT_CANDIDATE_ATTRIBUTE =
         "1, UDP, 1119400811, 10.3.210.77, 7010, typ, host";
 
-class AudioConfigurationTest : public ::testing::Test {
-
+class AudioConfigurationTest : public ::testing::Test
+{
 public:
-    AudioConfiguration* m_pConfig;
     ICarrierConfig* m_piCc;
 
 protected:
-    virtual void SetUp() override {
-        m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
-        m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
-    }
-    virtual void TearDown() override {
-        if (m_pConfig)
-        {
-            delete m_pConfig;
-        }
-    }
+    virtual void SetUp() override {}
+    virtual void TearDown() override {}
     IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
     IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey) { return m_piCc->GetBoolean(pszKey); }
     AString GetString(IN const IMS_CHAR* pszKey) { return m_piCc->GetString(pszKey); }
@@ -84,6 +75,7 @@ protected:
 
 TEST_F(AudioConfigurationTest, GetConfigDefault)
 {
+    AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
     EXPECT_EQ(m_pConfig->GetPtime(), DEFAULT_PTIME);
     EXPECT_EQ(m_pConfig->GetMaxPtime(), DEFAULT_MAX_PTIME);
     EXPECT_EQ(m_pConfig->GetMaxRed(), DEFAULT_MAX_RED);
@@ -105,19 +97,31 @@ TEST_F(AudioConfigurationTest, GetConfigDefault)
 
     IMSVector<AString> objCandidateAttr = m_pConfig->GetAudioCandidateAttribute();
     EXPECT_EQ(objCandidateAttr.GetAt(0), DEFAULT_CANDIDATE_ATTRIBUTE);
+
+    delete m_pConfig;
+}
+
+TEST_F(AudioConfigurationTest, CreateNullConfig)
+{
+    AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
+    ICarrierConfig* m_nullPicc = IMS_NULL;
+
+    EXPECT_FALSE(m_pConfig->Create(m_nullPicc));
+    delete m_pConfig;
 }
 
 TEST_F(AudioConfigurationTest, GetConfigTest)
 {
-    m_pConfig->Create(m_piCc);
+    AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
+    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
 
-    EXPECT_EQ(m_pConfig->GetPtime(), DEFAULT_PTIME);
+    EXPECT_TRUE(m_pConfig->Create(m_piCc));
+    EXPECT_EQ(m_pConfig->GetPtime(), GetInt(CarrierConfig::Assets::KEY_AUDIO_PTIME_MILLIS_INT));
     EXPECT_EQ(
             m_pConfig->GetMaxPtime(), GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT));
     EXPECT_EQ(m_pConfig->GetMaxRed(), GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT));
     EXPECT_EQ(m_pConfig->GetBandwidthNegoOption(),
             GetBoolean(CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL));
-    EXPECT_EQ(m_pConfig->GetRtpDscp(), DEFAULT_AUDIO_DSCP);
     EXPECT_EQ(m_pConfig->IsRtcpXrEnabled(),
             GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_ENABLE_BOOL));
     EXPECT_EQ(m_pConfig->IsRtcpXrStatisticsEnabled(),
@@ -136,10 +140,12 @@ TEST_F(AudioConfigurationTest, GetConfigTest)
             GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT));
     EXPECT_EQ(m_pConfig->GetModeChangeNeighbor(),
             GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT));
+    delete m_pConfig;
 }
 
 TEST_F(AudioConfigurationTest, GetConfigAudioPort)
 {
+    AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
     IMSVector<IMS_SINT32> objAudioPortRtp;
     objAudioPortRtp.Push(50000);
     objAudioPortRtp.Push(50500);
@@ -149,17 +155,19 @@ TEST_F(AudioConfigurationTest, GetConfigAudioPort)
             GetIntArray(CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY))
             .WillByDefault(Return(objAudioPortRtp));
 
-    m_pConfig->Create(pMockICarrierConfig);
+    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetPortRtp(), objAudioPortRtp.GetAt(0));
     EXPECT_EQ(m_pConfig->GetPortRtpEnd(), objAudioPortRtp.GetAt(1));
     EXPECT_EQ(m_pConfig->GetPortRtcp(), objAudioPortRtp.GetAt(0) + 1);
 
     delete pMockICarrierConfig;
+    delete m_pConfig;
 }
 
 TEST_F(AudioConfigurationTest, GetConfigAudioRtcpInterval)
 {
+    AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
     IMSVector<IMS_SINT32> objAudioRtcpInterval;
     objAudioRtcpInterval.Push(3);
     objAudioRtcpInterval.Push(10);
@@ -169,17 +177,20 @@ TEST_F(AudioConfigurationTest, GetConfigAudioRtcpInterval)
             GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY))
             .WillByDefault(Return(objAudioRtcpInterval));
 
-    m_pConfig->Create(pMockICarrierConfig);
+    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), objAudioRtcpInterval.GetAt(0));
     EXPECT_EQ(m_pConfig->GetRtcpInterval(), objAudioRtcpInterval.GetAt(1));
 
     delete pMockICarrierConfig;
+    delete m_pConfig;
 }
 
 TEST_F(AudioConfigurationTest, GetConfigAudioBandwidth)
 {
-    m_pConfig->Create(m_piCc);
+    AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
+    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
+    EXPECT_TRUE(m_pConfig->Create(m_piCc));
 
     EXPECT_EQ(m_pConfig->GetAsBandwidthKbps(),
             GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_AS_BANDWIDTH_KBPS_INT));
@@ -187,20 +198,44 @@ TEST_F(AudioConfigurationTest, GetConfigAudioBandwidth)
             GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RS_BANDWIDTH_BPS_INT));
     EXPECT_EQ(m_pConfig->GetRrBandwidthBps(),
             GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RR_BANDWIDTH_BPS_INT));
+    delete m_pConfig;
 }
 
 TEST_F(AudioConfigurationTest, GetConfigAudioInactivityTimer)
 {
-    m_pConfig->Create(m_piCc);
+    AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
+    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
+    EXPECT_TRUE(m_pConfig->Create(m_piCc));
 
     EXPECT_EQ(m_pConfig->GetRtpInactivityTimerMillis(),
             GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT));
     EXPECT_EQ(m_pConfig->GetRtcpInactivityTimerMillis(),
             GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT));
+    delete m_pConfig;
+}
+
+TEST_F(AudioConfigurationTest, GetConfigAudioDscp)
+{
+    AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
+
+    IMS_SINT32 nMockAudioDscp = 46;
+    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
+
+    ON_CALL(*pMockICarrierConfig, GetInt(CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT, -1))
+            .WillByDefault(Return(nMockAudioDscp));
+
+    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->GetRtpDscp(), nMockAudioDscp << 2);
+
+    delete pMockICarrierConfig;
+    delete m_pConfig;
 }
 
 TEST_F(AudioConfigurationTest, GetConfigJitterBuffer)
 {
+    AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
+
     IMSVector<IMS_SINT32> objJitterArray;
     objJitterArray.Push(5);
     objJitterArray.Push(10);
@@ -212,7 +247,7 @@ TEST_F(AudioConfigurationTest, GetConfigJitterBuffer)
             GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY))
             .WillByDefault(Return(objJitterArray));
 
-    m_pConfig->Create(pMockICarrierConfig);
+    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetJitterBufferMinSize(), objJitterArray.GetAt(0));
     EXPECT_EQ(m_pConfig->GetJitterBufferMaxSize(), objJitterArray.GetAt(1));
@@ -220,10 +255,13 @@ TEST_F(AudioConfigurationTest, GetConfigJitterBuffer)
     EXPECT_EQ(m_pConfig->GetJitterBufferStepSize(), objJitterArray.GetAt(3));
 
     delete pMockICarrierConfig;
+    delete m_pConfig;
 }
 
 TEST_F(AudioConfigurationTest, GetConfigCandidateAttr)
 {
+    AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
+
     IMSVector<AString> objAudioCandidateAttribute;
     objAudioCandidateAttribute.Push("2, UDP, 1119400811, 10.3.210.77, 7010, typ, host");
 
@@ -232,10 +270,11 @@ TEST_F(AudioConfigurationTest, GetConfigCandidateAttr)
             GetStringArray(CarrierConfig::Assets::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY))
             .WillByDefault(Return(objAudioCandidateAttribute));
 
-    m_pConfig->Create(pMockICarrierConfig);
+    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
 
     IMSVector<AString> objCandidateAttr = m_pConfig->GetAudioCandidateAttribute();
     EXPECT_EQ(objCandidateAttr.GetAt(0), "2, UDP, 1119400811, 10.3.210.77, 7010, typ, host");
 
     delete pMockICarrierConfig;
+    delete m_pConfig;
 }

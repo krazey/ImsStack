@@ -29,16 +29,14 @@ public:
     ICarrierConfig* m_piCc;
 
 protected:
-    virtual void SetUp() override
-    {
-        m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
-    }
+    virtual void SetUp() override {}
     virtual void TearDown() override {}
 };
 
 TEST_F(CodecConfigTest, GetConfigDefault)
 {
     CodecConfig* m_pConfig = new CodecConfig(DEFAULT_CODEC, DEFAULT_PAYLOAD_NUM);
+    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
 
     EXPECT_TRUE(m_pConfig->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfig->GetCodec(), DEFAULT_CODEC);
@@ -50,6 +48,7 @@ TEST_F(CodecConfigTest, GetConfigDefault)
 TEST_F(CodecConfigTest, GetConfigTest)
 {
     CodecConfig* m_pConfigNew = new CodecConfig(ImsCodec::AUDIO_AMR, 105);
+    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
 
     EXPECT_TRUE(m_pConfigNew->Create(m_piCc, 0));
     EXPECT_EQ(m_pConfigNew->GetCodec(), ImsCodec::AUDIO_AMR);

@@ -30,15 +30,14 @@ public:
     ICarrierConfig* m_piCc;
 
 protected:
-    virtual void SetUp() override
-    {
-        m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
-    }
+    virtual void SetUp() override {}
     virtual void TearDown() override {}
 };
 
 TEST_F(CodecConfigFactoryTest, CreateAudioPayloadConfigTest)
 {
+    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
+
     CodecConfig* m_pConfig =
             CodecConfigFactory::CreateAudioPayloadConfig(m_piCc, ImsCodec::AUDIO_AMR_WB, 99, 0);
 

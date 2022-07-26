@@ -213,6 +213,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             AUDIO_CODEC nCurrCodec;
             AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp();
             pAmrFmtp->nModeSetList = pAmrConfig->GetModeSetList();
+            pAmrFmtp->bShowModeSet = pAmrConfig->GetShowModeSet();
 
             if (pAmrConfig->GetOctetAlign() != -1)
             {
@@ -243,9 +244,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 pAmrFmtp->nMaxRed = pConfig->GetMaxRed();
                 pAmrFmtp->bShowMaxRed = IMS_TRUE;
             }
-            /** TODO: 26.114 mentioned it is needed, but no carrier wants this. so block these
-             for now
-            if (pAmrConfig->GetPtime() != -1)
+            if (pConfig->GetPtime() != -1)
             {
                 pAmrFmtp->nPtime = pConfig->GetPtime();
                 pAmrFmtp->bShowPtime = IMS_TRUE;
@@ -255,7 +254,6 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 pAmrFmtp->nMaxPtime = pConfig->GetMaxPtime();
                 pAmrFmtp->bShowMaxPtime = IMS_TRUE;
             }
-            */
             pAmrFmtp->bSCREnable = pAmrConfig->GetDtx();
 
             if (pAmrConfig->GetSamplingRate() == 8000)

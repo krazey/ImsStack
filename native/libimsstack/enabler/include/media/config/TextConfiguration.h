@@ -58,11 +58,17 @@ public:
      */
     IMS_SINT32 GetT140PayloadType() const;
     /**
-     * @brief Get the Red Payload Type value
+     * @brief Get the redundant payload type value
      *
      * @return IMS_SINT32 Return redendancy payload type number
      */
     IMS_SINT32 GetRedPayloadType() const;
+    /**
+     * @brief Get the Text dscp value
+     *
+     * @return IMS_SINT32 Return text dscp value
+     */
+    IMS_SINT32 GetTextDscp() const;
     /**
      * @brief Return whether textxodec emptyredundant is enabled
      *
@@ -74,6 +80,7 @@ public:
     static const IMS_SINT32 NEED_TO_CHECK_I = 0;
     static const IMS_SINT32 DEFAULT_PAYLOAD_T140 = NEED_TO_CHECK_I;
     static const IMS_SINT32 DEFAULT_PAYLOAD_RED = NEED_TO_CHECK_I;
+    static const IMS_SINT32 DEFAULT_TEXT_DSCP = 184;
     static const IMS_BOOL DEFAULT_EMPTY_REDUNDANT = IMS_FALSE;
 
 protected:
@@ -81,8 +88,9 @@ protected:
     virtual void ToDebugString() const;
 
 private:
-    IMS_SINT32 nT140PayloadType;
-    IMS_SINT32 nRedPayloadType;
-    IMS_BOOL bTextCodecEmptyRedundantEnabled;
+    IMS_SINT32 m_nT140PayloadType;
+    IMS_SINT32 m_nRedPayloadType;
+    IMS_SINT32 m_nTextDscp;
+    IMS_BOOL m_bTextCodecEmptyRedundantEnabled;
 };
 #endif  // _TEXT_CONFIGURATION_H_

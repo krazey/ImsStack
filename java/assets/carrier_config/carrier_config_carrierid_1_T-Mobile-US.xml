@@ -261,6 +261,7 @@
     <int name="asset_evs_codec_attribute_bandwidth_int" value="5"/>
     <int name="asset_evs_codec_attribute_cmr_int" value="-2"/>
     <int name="asset_evs_codec_attribute_ch_aw_recv_int" value="2"/>
+    <int name="asset_codec_attribute_mode_change_capability_int" value="2"/>
 
     <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
     <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
@@ -298,6 +299,9 @@
     <int name="imsvt.video_as_bandwidth_kbps_int" value="416"/>
     <int name="imsvt.video_rs_bandwidth_bps_int" value="5200"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="6000"/>
+    <int name="asset_t140_payload_type_int" value="111"/>
+    <int name="asset_red_payload_type_int" value="112"/>
+    <int name="text_codec_redundancy_level_int" value="3"/>
 
     <!-- Mts -->
     <int name="sms_request_uri_type_int" value="0"/>

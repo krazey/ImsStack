@@ -31,29 +31,24 @@ static const IMS_BOOL DEFAULT_SESSION_LEVEL_BW = MediaSessionConfig::DEFAULT_SES
 static const IMS_BOOL DEFAULT_ANBR_CAPABILITY = MediaSessionConfig::DEFAULT_ANBR_CAPABILITY;
 static const IMS_BOOL DEFAULT_SUPPORT_MULTICONFIG = MediaSessionConfig::DEFAULT_SUPPORT_MULTICONFIG;
 
-class MediaSessionConfigTest : public ::testing::Test {
-
+class MediaSessionConfigTest : public ::testing::Test
+{
 public:
-    MediaSessionConfig* m_pConfig;
     ICarrierConfig* m_piCc;
 
 protected:
-    virtual void SetUp() override {
-        m_pConfig = new MediaSessionConfig(DEFAULT_SLOT_ID, MEDIA_SERVICE_DEFAULT);
+    virtual void SetUp() override
+    {
         m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
     }
-    virtual void TearDown() override {
-        if (m_pConfig)
-        {
-            delete m_pConfig;
-        }
-    }
+    virtual void TearDown() override {}
 
     IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey) { return m_piCc->GetBoolean(pszKey); }
 };
 
 TEST_F(MediaSessionConfigTest, GetConfigDefault)
 {
+    MediaSessionConfig* m_pConfig = new MediaSessionConfig(DEFAULT_SLOT_ID, MEDIA_SERVICE_DEFAULT);
     EXPECT_EQ(m_pConfig->GetServiceType(), DEFAULT_SERVICE_TYPE);
     EXPECT_EQ(m_pConfig->IsSessionLevelBandwidth(), DEFAULT_SESSION_LEVEL_BW);
     EXPECT_EQ(m_pConfig->IsAnbrSupported(), DEFAULT_ANBR_CAPABILITY);
@@ -65,12 +60,13 @@ TEST_F(MediaSessionConfigTest, GetConfigDefault)
 
     m_pConfig->SetServiceType(DEFAULT_SERVICE_TYPE);
     EXPECT_EQ(m_pConfig->GetServiceType(), DEFAULT_SERVICE_TYPE);
+    delete m_pConfig;
 }
 
 TEST_F(MediaSessionConfigTest, GetConfigTest)
 {
-    m_pConfig->Create(DEFAULT_SLOT_ID);
-
+    MediaSessionConfig* m_pConfig = new MediaSessionConfig(DEFAULT_SLOT_ID, MEDIA_SERVICE_DEFAULT);
+    EXPECT_TRUE(m_pConfig->Create(DEFAULT_SLOT_ID));
     EXPECT_EQ(m_pConfig->IsSessionLevelBandwidth(),
             GetBoolean(CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL));
     EXPECT_EQ(m_pConfig->IsAnbrSupported(),
@@ -79,4 +75,5 @@ TEST_F(MediaSessionConfigTest, GetConfigTest)
             GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL));
     EXPECT_EQ(m_pConfig->IsSdpReofferFullCapability(),
             GetBoolean(CarrierConfig::Assets::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL));
+    delete m_pConfig;
 }
