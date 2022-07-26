@@ -35,6 +35,7 @@ public class MediaSession implements IMediaConnectionObserver {
     private final IBaseContext mContext;
     private AudioSessionHandler mAudioSessionHandler;
     private VideoSessionHandler mVideoSessionHandler;
+    private TextSessionHandler mTextSessionHandler;
     private final MediaListener mMediaListener;
     private final MediaManagerHelper mMediaManager;
 
@@ -103,6 +104,11 @@ public class MediaSession implements IMediaConnectionObserver {
         mVideoSessionHandler = videoSessionHandler;
     }
 
+    @VisibleForTesting
+    void setTextSessionHandler(TextSessionHandler textSessionHandler) {
+        mTextSessionHandler = textSessionHandler;
+    }
+
     private void createAudioSession() {
         if (mAudioSessionHandler == null) {
             mAudioSessionHandler = new AudioSessionHandler(mMediaManager, mMtcMediaSession);
@@ -113,6 +119,12 @@ public class MediaSession implements IMediaConnectionObserver {
         if (mVideoSessionHandler == null) {
             mVideoSessionHandler = new VideoSessionHandler(
                     mMediaManager, mMtcMediaSession, mMtcMediaSession);
+        }
+    }
+
+    private void createTextSession() {
+        if (mTextSessionHandler == null) {
+            mTextSessionHandler = new TextSessionHandler(mMediaManager, mMtcMediaSession);
         }
     }
 
@@ -153,7 +165,10 @@ public class MediaSession implements IMediaConnectionObserver {
                     break;
 
                 case ImsMediaSession.SESSION_TYPE_RTT: {
-                    ImsLog.v("SESSION_TYPE_RTT :: TODO");
+                    createTextSession();
+                    if (mTextSessionHandler != null) {
+                        mTextSessionHandler.onImsMediaTextMessage(requestType, parcel);
+                    }
                 }
                     break;
 

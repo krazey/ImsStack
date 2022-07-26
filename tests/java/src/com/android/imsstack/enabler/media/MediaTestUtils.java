@@ -29,6 +29,7 @@ import android.telephony.imsmedia.EvsParams;
 import android.telephony.imsmedia.MediaQualityThreshold;
 import android.telephony.imsmedia.RtcpConfig;
 import android.telephony.imsmedia.RtpConfig;
+import android.telephony.imsmedia.TextConfig;
 import android.telephony.imsmedia.VideoConfig;
 
 import java.net.InetSocketAddress;
@@ -109,6 +110,13 @@ public class MediaTestUtils {
     private static final int RTCP_FB_TYPES =
             VideoConfig.RTPFB_NACK | VideoConfig.RTPFB_TMMBR | VideoConfig.RTPFB_TMMBN;
     static final long DATA_BYTES = 200;
+
+    // TextConfig
+    public static final String RTT_MESSAGE = "Test Message";
+    private static final int BITRATE = 300;
+    private static final byte REDUNDANT_PAYLOAD = 111;
+    private static final byte REDUNDANT_LEVEL = 3;
+    private static final boolean KEEP_REDUNDANT_LEVEL = true;
 
     static void assertParcelEquals(Parcel testParcel, Parcel actualParcel) {
         byte[] testByte = testParcel.marshall();
@@ -235,5 +243,24 @@ public class MediaTestUtils {
                 .setCvoValue(CVO_VALUE)
                 .setRtcpFbTypes(RTCP_FB_TYPES)
                 .build();
+    }
+
+    static TextConfig createTextConfig() {
+        return new TextConfig.Builder()
+            .setMediaDirection(RtpConfig.MEDIA_DIRECTION_SEND_RECEIVE)
+            .setAccessNetwork(AccessNetworkType.EUTRAN)
+            .setRemoteRtpAddress(new InetSocketAddress(
+                InetAddresses.parseNumericAddress(REMOTE_RTP_ADDRESS), REMOTE_RTP_PORT))
+            .setRtcpConfig(createRtcpConfig())
+            .setDscp(DSCP)
+            .setRxPayloadTypeNumber(RX_PAYLOAD)
+            .setTxPayloadTypeNumber(TX_PAYLOAD)
+            .setSamplingRateKHz(SAMPLING_RATE)
+            .setCodecType(CODEC_TYPE)
+            .setBitrate(BITRATE)
+            .setRedundantPayload(REDUNDANT_PAYLOAD)
+            .setRedundantLevel(REDUNDANT_LEVEL)
+            .setKeepRedundantLevel(KEEP_REDUNDANT_LEVEL)
+            .build();
     }
 }
