@@ -189,10 +189,15 @@ PROTECTED VIRTUAL IMS_SINT32 ConfigFileBuffer::ReadKeyCount(IN const IMS_CHAR* p
 
     const AString& strKeyCount = m_pWorkSection->GetValue(strKey.GetStr());
 
-    IMS_BOOL bOK = IMS_FALSE;
-    IMS_SINT32 nKeyCount = strKeyCount.ToInt32(&bOK);
+    if (strKeyCount.GetLength() == 0)
+    {
+        return 0;
+    }
 
-    if (!bOK)
+    IMS_BOOL bOk = IMS_FALSE;
+    IMS_SINT32 nKeyCount = strKeyCount.ToInt32(&bOk);
+
+    if (!bOk)
     {
         IMS_TRACE_E(0, "Converting a numeric string (key: %s) failed", strKeyCount.GetStr(), 0, 0);
         return (-1);
