@@ -15,6 +15,12 @@
  */
 package com.android.imsstack.enabler.uce.options;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import android.os.Parcel;
 import android.util.ArraySet;
 
@@ -37,12 +43,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 import java.util.Set;
 
@@ -52,6 +52,7 @@ public class UceOptionsRequestTest {
     private static final int KEY = 10;
     @Mock OptionsResponse optionsCb;
     @Mock UceJNI jni;
+    private UceOptionsRequest mRequest;
 
     @Before
     public void setUp(){
@@ -59,7 +60,9 @@ public class UceOptionsRequestTest {
     }
 
     @After
-    public void cleanUp(){}
+    public void cleanUp() {
+        mRequest = null;
+    }
 
     @Test
     @SmallTest
@@ -67,10 +70,10 @@ public class UceOptionsRequestTest {
         String remoteUri = "";
         Set<String> myCapabilities = new ArraySet<>();
 
-        UceOptionsRequest request = createUceOptionsRequest();
+        mRequest = createUceOptionsRequest();
 
         // verify that send command error if the remote uri is empty
-        request.sendRequest(remoteUri, myCapabilities);
+        mRequest.sendRequest(remoteUri, myCapabilities);
         verify(optionsCb).onCommandError(eq(UceApiConstant.COMMAND_CODE_INVALID_PARAM));
         verifyNoMoreInteractions(optionsCb);
     }
@@ -81,10 +84,10 @@ public class UceOptionsRequestTest {
         String remoteUri = "test";
         Set<String> myCapabilities = new ArraySet<>();
 
-        UceOptionsRequest request = createUceOptionsRequest();
+        mRequest = createUceOptionsRequest();
 
         // verify that send command error if the myCapabilities is empty
-        request.sendRequest(remoteUri, myCapabilities);
+        mRequest.sendRequest(remoteUri, myCapabilities);
         verify(optionsCb).onCommandError(eq(UceApiConstant.COMMAND_CODE_INVALID_PARAM));
         verifyNoMoreInteractions(optionsCb);
     }
@@ -96,9 +99,9 @@ public class UceOptionsRequestTest {
         Set<String> myCapabilities = new ArraySet<>();
         myCapabilities.add(UceFeatureTags.Tags.FEATURE_TAG_PRESENCE.getTag());
 
-        UceOptionsRequest request = createUceOptionsRequest();
+        mRequest = createUceOptionsRequest();
 
-        request.sendRequest(remoteUri, myCapabilities);
+        mRequest.sendRequest(remoteUri, myCapabilities);
 
         ArgumentCaptor<Parcel> captor = ArgumentCaptor.forClass(Parcel.class);
 
@@ -124,8 +127,8 @@ public class UceOptionsRequestTest {
         capabilities.add(UceFeatureTags.Tags.FEATURE_TAG_CPM_CHAT.getTag());
         long capability = UceUtils.getCapabilities(capabilities);
 
-        UceOptionsRequest request = createUceOptionsRequest();
-        request.informNetworkResponse(responseCode, reason, capability);
+        mRequest = createUceOptionsRequest();
+        mRequest.informNetworkResponse(responseCode, reason, capability);
 
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
 
@@ -137,8 +140,20 @@ public class UceOptionsRequestTest {
         assertEquals(data.get(1), UceFeatureTags.Tags.FEATURE_TAG_CPM_CHAT.getTag());
     }
 
+    @Test
+    @SmallTest
+    public void informCommandError() throws Exception {
+        int commandError = 6;
+
+        mRequest = createUceOptionsRequest();
+        mRequest.informCommandError(commandError);
+
+        ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+
+        verify(optionsCb, times(1)).onCommandError(eq(commandError));
+    }
+
     private UceOptionsRequest createUceOptionsRequest() {
-        UceOptionsRequest request = new UceOptionsRequest(optionsCb, SLOT_ID, KEY, jni);
-        return request;
+        return new UceOptionsRequest(optionsCb, SLOT_ID, KEY, jni);
     }
 }

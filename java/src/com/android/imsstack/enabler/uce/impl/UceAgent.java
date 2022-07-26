@@ -71,20 +71,15 @@ public class UceAgent extends Thread implements IUceJNIListener {
     private UceOptionsRequestController mUceOptionsRequestController;
     private UceConfiguration mUceConfiguration;
 
-    private int mRegistrationTech;
+    private int mRegistrationTech = UceConstant.RADIO_TECHNOLOGY_TYPE_UNKNOWN;
 
     Looper mLoop = null;
 
     private UceJNI mUceJNI;
+    private IPreference mPf;
 
     public UceAgent(Context context, String name, int nSimSlot) {
-        super(name);
-        mSlotId = nSimSlot;
-        mContext = context;
-        mUceEventListener = null;
-        mUceJNI = UceJNI.getInstance();
-        mUceJNI.init(mSlotId);
-        return;
+        this(context, name, nSimSlot, UceJNI.getInstance());
     }
 
     @VisibleForTesting
@@ -95,18 +90,16 @@ public class UceAgent extends Thread implements IUceJNIListener {
         mUceEventListener = null;
         mUceJNI = jni;
         mUceJNI.init(mSlotId);
-        return;
     }
 
     public void run() {
-        ImsLog.i("run()");
+        ImsLog.i(mSlotId, "run()");
         Looper.prepare();
         mLoop = Looper.myLooper();
         mUceAgentHandler = new UceAgentHandler();
         initialize();
         Looper.loop();
         deInitialize();
-        return;
     }
 
     /**
@@ -118,12 +111,12 @@ public class UceAgent extends Thread implements IUceJNIListener {
     public void setListener(UceEventListener listener) {
         mUceEventListener = listener;
         if (mImsRegistered && mUceEventListener != null) {
-            int mCapaTriggerType = getCapabilityUpdateTriggerType(mRegistrationTech);
+            int capaTriggerType = getCapabilityUpdateTriggerType(mRegistrationTech);
             try {
-                ImsLog.d("call onRequestPublishCapabilities() with " + mCapaTriggerType);
-                mUceEventListener.onRequestPublishCapabilities(mCapaTriggerType);
+                ImsLog.d(mSlotId, "call onRequestPublishCapabilities() with " + capaTriggerType);
+                mUceEventListener.onRequestPublishCapabilities(capaTriggerType);
             } catch (Exception e) {
-                ImsLog.e("Exception:" + e.toString());
+                ImsLog.e(mSlotId, "Exception:" + e.toString());
             }
         }
     }
@@ -144,11 +137,11 @@ public class UceAgent extends Thread implements IUceJNIListener {
      */
     public void publishCapabilities(String pidfXml, PublishResponse cb) {
         if (mUcePublishRequestController == null) {
-            ImsLog.d("mUcePublishRequestController is null");
+            ImsLog.d(mSlotId, "mUcePublishRequestController is null");
             try {
                 cb.onCommandError(UceApiConstant.COMMAND_CODE_SERVICE_UNKNOWN);
             } catch(Exception e) {
-                ImsLog.e("Exception:" + e.toString());
+                ImsLog.e(mSlotId, "Exception:" + e.toString());
             }
             return;
         }
@@ -178,11 +171,11 @@ public class UceAgent extends Thread implements IUceJNIListener {
      */
     public void subscribeCapabilities(Collection<Uri> uris, SubscribeResponse cb) {
         if (mUceSubscribeRequestController == null) {
-            ImsLog.i("mUceSubscribeRequestController is null");
+            ImsLog.i(mSlotId, "mUceSubscribeRequestController is null");
             try {
                 cb.onCommandError(UceApiConstant.COMMAND_CODE_SERVICE_UNKNOWN);
             } catch(Exception e) {
-                ImsLog.e("Exception:" + e.toString());
+                ImsLog.e(mSlotId, "Exception:" + e.toString());
             }
             return;
         }
@@ -201,13 +194,29 @@ public class UceAgent extends Thread implements IUceJNIListener {
      */
     public void sendOptionsCapabilityRequest(Uri contactUri, Set<String> myCapabilities,
         OptionsResponse cb) {
-
+        /*
+        if (mUceOptionsRequestController == null) {
+            ImsLog.i(mSlotId, "mUceOptionsRequestController is null");
+            try {
+                cb.onCommandError(UceApiConstant.COMMAND_CODE_SERVICE_UNKNOWN);
+            } catch(Exception e) {
+                ImsLog.e(mSlotId, "Exception:" + e.toString());
+            }
+            return;
+        }
+        mUceOptionsRequestController.sendOptionsCapabilityRequest(contactUri, myCapabilities, cb);
+         */
     }
 
     public void release() {
         if (mLoop != null) {
             mLoop.quit();
         }
+    }
+
+    @VisibleForTesting
+    public void setImsRegistered(boolean imsRegistered) {
+        mImsRegistered = imsRegistered;
     }
 
     @VisibleForTesting
@@ -225,234 +234,13 @@ public class UceAgent extends Thread implements IUceJNIListener {
         return mUceAgentHandler;
     }
 
-    private void initialize() {
-        ImsLog.d("initialize");
-        mUcePublishRequestController = new UcePublishRequestController(mSlotId, mLoop);
-        mUceSubscribeRequestController = new UceSubscribeRequestController(mSlotId, mLoop);
-        mUceOptionsRequestController = new UceOptionsRequestController(mSlotId, mLoop);
-
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_IMS_AGENT_CONNECTED_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_IMS_AGENT_DISCONNECTED_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_IMS_AGENT_REFRESHED_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_NETWORK_CHANGED);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_UNPUBLISHED_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_PUBLISH_UPDATED_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_OPTIONS_RECEIVED_IND);
-
-        mRegistrationTech = UceConstant.RADIO_TECHNOLOGY_TYPE_UNKNOWN;
-        mImsRegistered = false;
-        mConnectedServices = 0;
-
-        mUceConfiguration = new UceConfiguration(mSlotId);
-        mUceConfiguration.init();
-        imsRegistrationStatusCheck();
-    }
-
-    private void deInitialize() {
-        ImsLog.d("deInitialize");
-        mUceConfiguration = null;
-        mUcePublishRequestController = null;
-        mUceSubscribeRequestController = null;
-        mImsRegistered = false;
-        mConnectedServices = 0;
-        UceJNI.getInstance().release(mSlotId);
-        IPreference pf = (IPreference)AgentFactory.getAgent(AgentFactory.PREFERENCE, mSlotId);
-        if (pf != null) {
-            pf.setPreferenceStrValue(UceConstant.PREFERENCE_ETAG, "", mSlotId);
-        }
-    }
-
-    class UceAgentHandler extends Handler {
-
-        public UceAgentHandler() {
-            super();
-            /* speicial Message handler */
-            // associated with Always on Service
-            mMessageHandler.put(UceMessage.UCE_MSG_IMS_AGENT_CONNECTED, mUceAgentMsgHandler);
-            mMessageHandler.put(UceMessage.UCE_MSG_IMS_AGENT_DISCONNECTED, mUceAgentMsgHandler);
-            mMessageHandler.put(UceMessage.UCE_MSG_IMS_AGENT_REFRESHED, mUceAgentMsgHandler);
-            // connectivity
-            mMessageHandler.put(UceMessage.UCE_MSG_NETWORK_CHANGED, mUceConnetivityMsgHandler);
-            // publish status
-            mMessageHandler.put(UceMessage.UCE_MSG_UNPUBLISHED, mUcePublishChangedMsgHandler);
-            mMessageHandler.put(UceMessage.UCE_MSG_PUBLISH_UPDATED, mUcePublishChangedMsgHandler);
-            // options status
-            mMessageHandler.put(UceMessage.UCE_MSG_OPTIONS_RECEIVED, mUceOptionsReceivedMsgHandler);
-        }
-
-        @Override
-        public void handleMessage(Message objMessage) {
-            if (objMessage == null) {
-                ImsLog.e("Message is null");
-                return;
-            }
-            ImsLog.d("slot id:" + mSlotId);
-            //ImsLog.i("Message[" + UceMessage.szInternalMessage[(
-            //    objMessage.what - UceMessage.UCE_MSG_IMS_AGENT_CONNECTED)] + "]");
-            UceAgentMessageHandler objMsgHandler = mMessageHandler.get(objMessage.what);
-            if (objMsgHandler == null) {
-                ImsLog.e("message can not be handled.");
-                return;
-            }
-            objMsgHandler.onHandle(objMessage);
-        }
-
-        private UceAgentMessageHandler mUceAgentMsgHandler = new UceAgentMessageHandler() {
-            @Override
-            public void onHandle(Message objMessage) {
-                switch (objMessage.what) {
-                    /* associated with Always on Service */
-                    case UceMessage.UCE_MSG_IMS_AGENT_CONNECTED: {
-                        ImsLog.d("handle : UCE_MSG_IMS_AGENT_CONNECTED");
-                        imsRegistered(objMessage.arg1, (long) objMessage.obj);
-                    }
-                    break;
-                    case UceMessage.UCE_MSG_IMS_AGENT_DISCONNECTED: {
-                        ImsLog.d("handle : UCE_MSG_IMS_AGENT_DISCONNECTED");
-                        imsDeregistered();
-                    }
-                    break;
-                    /*
-                    case UceMessage.UCE_MSG_IMS_AGENT_REFRESHED:
-                    {
-                        imsRegistered(objMessage.arg1, (long)objMessage.obj);
-                    }
-                    break;
-                     */
-                    default:
-                        break;
-                }
-            }
-        };
-        private UceAgentMessageHandler mUceConnetivityMsgHandler = new UceAgentMessageHandler() {
-            @Override
-            public void onHandle(Message objMessage) {
-                if (!mImsRegistered) {
-                    ImsLog.i("network changed but ims did not registered.");
-                    return;
-                }
-                int networkType = objMessage.arg1;
-                if (mRegistrationTech == networkType || mUceEventListener == null) {
-                    ImsLog.i("network type didn`t changed or listener is null");
-                    return;
-                }
-                ImsLog.d("handle : UCE_MSG_NETWORK_CHANGED");
-                int mCapaTriggerType = getCapabilityUpdateTriggerType(networkType);
-                try {
-                    ImsLog.d("call onRequestPublishCapabilities() with " + mCapaTriggerType);
-                    mUceEventListener.onRequestPublishCapabilities(mCapaTriggerType);
-                } catch (Exception e) {
-                    ImsLog.e("Exception:" + e.toString());
-                }
-            }
-        };
-        private UceAgentMessageHandler mUcePublishChangedMsgHandler = new UceAgentMessageHandler() {
-            @Override
-            public void onHandle(Message objMessage) {
-                if (mUceEventListener == null) {
-                    ImsLog.i("mUceEventListener is null");
-                    return;
-                }
-                if (objMessage.what == UceMessage.UCE_MSG_PUBLISH_UPDATED) {
-                    ImsLog.d("handle : UCE_MSG_PUBLISH_UPDATED");
-                    UceResponseData data = (UceResponseData)objMessage.obj;
-                    int responseCode = data.getResponseCode();
-                    String reason = data.getReason();
-                    int reasonHdrCause = data.getReasonHeaderCause();
-                    String reasonHdrText = data.getReasonHeaderText();
-                    String eTag = data.getEtag();
-                    int needToRetry = data.getNeedToRetry();
-                    if (needToRetry == 0) {
-                        mUcePublishRequestController.setCapability(data.getCapability());
-                        mUcePublishRequestController.handlePendingRequest();
-                    }
-                    ImsLog.d("responseCode:" + responseCode + ", reason:" + reason +
-                        "reasonHeaderCause" + reasonHdrCause + "reasonHeaderText:" + reasonHdrText);
-                    try {
-                        ImsLog.d("call onPublishUpdated() with " + responseCode);
-                        mUceEventListener.onPublishUpdated(responseCode, reason, reasonHdrCause,
-                            reasonHdrText);
-                    } catch (Exception e) {
-                        ImsLog.e("Exception:" + e.toString());
-                    }
-                    if (!TextUtils.isEmpty(eTag)) {
-                        IPreference pf = (IPreference)AgentFactory.getAgent(AgentFactory.PREFERENCE,
-                            mSlotId);
-                        if (pf != null) {
-                            pf.setPreferenceStrValue(UceConstant.PREFERENCE_ETAG, eTag, mSlotId);
-                        }
-                    }
-                } else { // UceMessage.UCE_UNPUBLISHED_IND
-                    ImsLog.d("handle : UCE_UNPUBLISHED_IND");
-                    mUcePublishRequestController.deletePendingRequest();
-                    try {
-                        ImsLog.d("call onUnPublish()");
-                        mUceEventListener.onUnPublish();
-                    } catch (Exception e) {
-                        ImsLog.e("Exception:" + e.toString());
-                    }
-                    IPreference pf = (IPreference)AgentFactory.getAgent(AgentFactory.PREFERENCE,
-                        mSlotId);
-                    if (pf != null) {
-                        pf.setPreferenceStrValue(UceConstant.PREFERENCE_ETAG, "", mSlotId);
-                    }
-                }
-            }
-        };
-        private UceAgentMessageHandler mUceOptionsReceivedMsgHandler = new UceAgentMessageHandler() {
-            @Override
-            public void onHandle(Message objMessage) {
-                if (mUceEventListener == null) {
-                    ImsLog.i("mUceEventListener is null");
-                    return;
-                }
-                ImsLog.d("handle : UCE_MSG_OPTIONS_RECEIVED");
-                int requestKey = objMessage.arg1;
-                UceOptionsReceivedData data = (UceOptionsReceivedData)objMessage.obj;
-                Uri contactUri = Uri.parse(data.getRemoteUri());
-                Set<String> remoteCapabilities = UceUtils.getFeatureTags(data.getRemoteCaps());
-                UceOptionsResponseCallback callback = new UceOptionsResponseCallback(requestKey,
-                        mSlotId);
-                try {
-                    ImsLog.d("call onRemoteCapabilityRequest()");
-                    mUceEventListener.onRemoteCapabilityRequest(contactUri, remoteCapabilities,
-                            callback);
-                } catch (Exception e) {
-                    ImsLog.e("Exception:" + e.toString());
-                }
-            }
-        };
-    }
-
-    private void imsRegistered(int registrationTech, long connectedServices) {
-        mUcePublishRequestController.setImsRegistrationStatus(mImsRegistered);
-        mUcePublishRequestController.setUseExpiredEtag(mUceConfiguration.isUseExpiredEtag());
-
-        mUceSubscribeRequestController.setImsRegistrationStatus(mImsRegistered);
-        if ((registrationTech == mRegistrationTech) && (mConnectedServices == connectedServices)) {
-            return;
-        }
-        int mCapaTriggerType = getCapabilityUpdateTriggerType(registrationTech);
-        mRegistrationTech = registrationTech;
-        mConnectedServices = connectedServices;
-        if (mUceEventListener != null) {
-            try {
-                ImsLog.d("call onRequestPublishCapabilities() with " + mCapaTriggerType);
-                mUceEventListener.onRequestPublishCapabilities(mCapaTriggerType);
-            } catch (Exception e) {
-                ImsLog.e("Exception:" + e.toString());
-            }
-        }
-    }
-
-    private void imsDeregistered() {
-        mRegistrationTech = UceConstant.RADIO_TECHNOLOGY_TYPE_UNKNOWN;
-        mConnectedServices = 0;
-        mUcePublishRequestController.setImsRegistrationStatus(mImsRegistered);
-        mUceSubscribeRequestController.setImsRegistrationStatus(mImsRegistered);
-    }
-
-    private int getCapabilityUpdateTriggerType(int currentRegiTech) {
+    /**
+     * Convert registration tech to the capability
+     * @param currentRegiTech current registered tech.
+     * @return the capability value that matches the tech value.
+     */
+    @VisibleForTesting
+    public int getCapabilityUpdateTriggerType(int currentRegiTech) {
         int type = UceApiConstant.CAPABILITY_UPDATE_TRIGGER_UNKNOWN;
         switch (currentRegiTech) {
             case UceConstant.RADIO_TECHNOLOGY_TYPE_GERAN:
@@ -486,8 +274,229 @@ public class UceAgent extends Thread implements IUceJNIListener {
         return type;
     }
 
+    private void initialize() {
+        ImsLog.d(mSlotId, "initialize");
+        mUcePublishRequestController = new UcePublishRequestController(mSlotId, mLoop);
+        mUceSubscribeRequestController = new UceSubscribeRequestController(mSlotId, mLoop);
+        mUceOptionsRequestController = new UceOptionsRequestController(mSlotId, mLoop);
+
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_IMS_AGENT_CONNECTED_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_IMS_AGENT_DISCONNECTED_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_IMS_AGENT_REFRESHED_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_NETWORK_CHANGED);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_UNPUBLISHED_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_PUBLISH_UPDATED_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_OPTIONS_RECEIVED_IND);
+
+        mRegistrationTech = UceConstant.RADIO_TECHNOLOGY_TYPE_UNKNOWN;
+        mImsRegistered = false;
+        mConnectedServices = 0;
+
+        mPf = (IPreference) AgentFactory.getAgent(AgentFactory.PREFERENCE, mSlotId);
+        mUceConfiguration = new UceConfiguration(mSlotId);
+        mUceConfiguration.init();
+        imsRegistrationStatusCheck();
+    }
+
+    private void deInitialize() {
+        ImsLog.d(mSlotId, "deInitialize");
+        mUceConfiguration = null;
+        mUcePublishRequestController = null;
+        mUceSubscribeRequestController = null;
+        mImsRegistered = false;
+        mConnectedServices = 0;
+        mUceJNI.release(mSlotId);
+    }
+
+    class UceAgentHandler extends Handler {
+
+        public UceAgentHandler() {
+            super();
+            /* speicial Message handler */
+            // associated with Always on Service
+            mMessageHandler.put(UceMessage.UCE_MSG_IMS_AGENT_CONNECTED, mUceAgentMsgHandler);
+            mMessageHandler.put(UceMessage.UCE_MSG_IMS_AGENT_DISCONNECTED, mUceAgentMsgHandler);
+            mMessageHandler.put(UceMessage.UCE_MSG_IMS_AGENT_REFRESHED, mUceAgentMsgHandler);
+            // connectivity
+            mMessageHandler.put(UceMessage.UCE_MSG_NETWORK_CHANGED, mUceConnetivityMsgHandler);
+            // publish status
+            mMessageHandler.put(UceMessage.UCE_MSG_UNPUBLISHED, mUcePublishChangedMsgHandler);
+            mMessageHandler.put(UceMessage.UCE_MSG_PUBLISH_UPDATED, mUcePublishChangedMsgHandler);
+            // options status
+            mMessageHandler.put(UceMessage.UCE_MSG_OPTIONS_RECEIVED, mUceOptionsReceivedMsgHandler);
+        }
+
+        @Override
+        public void handleMessage(Message objMessage) {
+            if (objMessage == null) {
+                ImsLog.e(mSlotId, "Message is null");
+                return;
+            }
+            ImsLog.d(mSlotId, "slot id:" + mSlotId);
+            UceAgentMessageHandler objMsgHandler = mMessageHandler.get(objMessage.what);
+            if (objMsgHandler == null) {
+                ImsLog.e(mSlotId, "message can not be handled.");
+                return;
+            }
+            objMsgHandler.onHandle(objMessage);
+        }
+
+        private UceAgentMessageHandler mUceAgentMsgHandler = new UceAgentMessageHandler() {
+            @Override
+            public void onHandle(Message objMessage) {
+                switch (objMessage.what) {
+                    /* associated with Always on Service */
+                    case UceMessage.UCE_MSG_IMS_AGENT_CONNECTED: {
+                        ImsLog.d(mSlotId, "handle : UCE_MSG_IMS_AGENT_CONNECTED");
+                        imsRegistered(objMessage.arg1, (long) objMessage.obj);
+                    }
+                    break;
+                    case UceMessage.UCE_MSG_IMS_AGENT_DISCONNECTED: {
+                        ImsLog.d(mSlotId, "handle : UCE_MSG_IMS_AGENT_DISCONNECTED");
+                        imsDeregistered();
+                    }
+                    break;
+                    /*
+                    case UceMessage.UCE_MSG_IMS_AGENT_REFRESHED:
+                    {
+                        imsRegistered(objMessage.arg1, (long)objMessage.obj);
+                    }
+                    break;
+                     */
+                    default:
+                        break;
+                }
+            }
+        };
+        private UceAgentMessageHandler mUceConnetivityMsgHandler = new UceAgentMessageHandler() {
+            @Override
+            public void onHandle(Message objMessage) {
+                if (!mImsRegistered) {
+                    ImsLog.i(mSlotId, "network changed but ims did not registered.");
+                    return;
+                }
+                int networkType = objMessage.arg1;
+                if (mRegistrationTech == networkType || mUceEventListener == null) {
+                    ImsLog.i(mSlotId, "network type didn`t changed or listener is null");
+                    return;
+                }
+                ImsLog.d(mSlotId, "handle : UCE_MSG_NETWORK_CHANGED");
+                int capaTriggerType = getCapabilityUpdateTriggerType(networkType);
+                try {
+                    ImsLog.d(mSlotId, "call onRequestPublishCapabilities() with "
+                            + capaTriggerType);
+                    mUceEventListener.onRequestPublishCapabilities(capaTriggerType);
+                } catch (Exception e) {
+                    ImsLog.e(mSlotId, "Exception:" + e.toString());
+                }
+            }
+        };
+        private UceAgentMessageHandler mUcePublishChangedMsgHandler = new UceAgentMessageHandler() {
+            @Override
+            public void onHandle(Message objMessage) {
+                if (mUceEventListener == null) {
+                    ImsLog.i(mSlotId, "mUceEventListener is null");
+                    return;
+                }
+                if (objMessage.what == UceMessage.UCE_MSG_PUBLISH_UPDATED) {
+                    ImsLog.d(mSlotId, "handle : UCE_MSG_PUBLISH_UPDATED");
+                    UceResponseData data = (UceResponseData)objMessage.obj;
+                    int responseCode = data.getResponseCode();
+                    String reason = data.getReason();
+                    int reasonHdrCause = data.getReasonHeaderCause();
+                    String reasonHdrText = data.getReasonHeaderText();
+                    String eTag = data.getEtag();
+                    int needToRetry = data.getNeedToRetry();
+                    if (needToRetry == 0) {
+                        mUcePublishRequestController.setCapability(data.getCapability());
+                        mUcePublishRequestController.handlePendingRequest();
+                    }
+                    ImsLog.d(mSlotId, "responseCode:" + responseCode + ", reason:" + reason
+                            + "reasonHeaderCause" + reasonHdrCause + "reasonHeaderText:"
+                            + reasonHdrText);
+                    try {
+                        ImsLog.d(mSlotId, "call onPublishUpdated() with " + responseCode);
+                        mUceEventListener.onPublishUpdated(responseCode, reason, reasonHdrCause,
+                            reasonHdrText);
+                    } catch (Exception e) {
+                        ImsLog.e(mSlotId, "Exception:" + e.toString());
+                    }
+                    if (!TextUtils.isEmpty(eTag)) {
+                        if (mPf != null) {
+                            mPf.setPreferenceStrValue(UceConstant.PREFERENCE_ETAG, eTag, mSlotId);
+                        }
+                    }
+                } else { // UceMessage.UCE_UNPUBLISHED_IND
+                    ImsLog.d(mSlotId, "handle : UCE_UNPUBLISHED_IND");
+                    mUcePublishRequestController.deletePendingRequest();
+                    try {
+                        ImsLog.d(mSlotId, "call onUnPublish()");
+                        mUceEventListener.onUnPublish();
+                    } catch (Exception e) {
+                        ImsLog.e(mSlotId, "Exception:" + e.toString());
+                    }
+                    if (mPf != null) {
+                        mPf.setPreferenceStrValue(UceConstant.PREFERENCE_ETAG, "", mSlotId);
+                    }
+                }
+            }
+        };
+        private UceAgentMessageHandler mUceOptionsReceivedMsgHandler =
+                new UceAgentMessageHandler() {
+            @Override
+            public void onHandle(Message objMessage) {
+                if (mUceEventListener == null) {
+                    ImsLog.i(mSlotId, "mUceEventListener is null");
+                    return;
+                }
+                ImsLog.d(mSlotId, "handle : UCE_MSG_OPTIONS_RECEIVED");
+                int requestKey = objMessage.arg1;
+                UceOptionsReceivedData data = (UceOptionsReceivedData)objMessage.obj;
+                Uri contactUri = Uri.parse(data.getRemoteUri());
+                Set<String> remoteCapabilities = UceUtils.getFeatureTags(data.getRemoteCaps());
+                UceOptionsResponseCallback callback = new UceOptionsResponseCallback(requestKey,
+                        mSlotId);
+                try {
+                    ImsLog.d(mSlotId, "call onRemoteCapabilityRequest()");
+                    mUceEventListener.onRemoteCapabilityRequest(contactUri, remoteCapabilities,
+                            callback);
+                } catch (Exception e) {
+                    ImsLog.e(mSlotId, "Exception:" + e.toString());
+                }
+            }
+        };
+    }
+
+    private void imsRegistered(int registrationTech, long connectedServices) {
+        mUcePublishRequestController.setImsRegistrationStatus(mImsRegistered);
+        mUcePublishRequestController.setUseExpiredEtag(mUceConfiguration.isUseExpiredEtag());
+
+        mUceSubscribeRequestController.setImsRegistrationStatus(mImsRegistered);
+        if ((registrationTech == mRegistrationTech) && (mConnectedServices == connectedServices)) {
+            return;
+        }
+        int capaTriggerType = getCapabilityUpdateTriggerType(registrationTech);
+        mRegistrationTech = registrationTech;
+        mConnectedServices = connectedServices;
+        if (mUceEventListener != null) {
+            try {
+                ImsLog.d(mSlotId, "call onRequestPublishCapabilities() with " + capaTriggerType);
+                mUceEventListener.onRequestPublishCapabilities(capaTriggerType);
+            } catch (Exception e) {
+                ImsLog.e(mSlotId, "Exception:" + e.toString());
+            }
+        }
+    }
+
+    private void imsDeregistered() {
+        mRegistrationTech = UceConstant.RADIO_TECHNOLOGY_TYPE_UNKNOWN;
+        mConnectedServices = 0;
+        mUcePublishRequestController.setImsRegistrationStatus(mImsRegistered);
+        mUceSubscribeRequestController.setImsRegistrationStatus(mImsRegistered);
+    }
+
     private void imsRegistrationStatusCheck() {
-        ImsLog.d("imsRegistrationStatusCheck");
+        ImsLog.d(mSlotId, "imsRegistrationStatusCheck");
         if (mImsRegistered) {
             return;
         }
@@ -501,7 +510,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
     public void onServiceStatusMessage(Parcel parcel) {
         Message msg = Message.obtain();
         int messageType = parcel.readInt();
-        ImsLog.d("messageType:" + messageType);
+        ImsLog.d(mSlotId, "messageType:" + messageType);
 
         if (messageType == UceMessage.UCE_IMS_AGENT_CONNECTED_IND) {
             mImsRegistered = true;
@@ -509,35 +518,34 @@ public class UceAgent extends Thread implements IUceJNIListener {
         } else if (messageType == UceMessage.UCE_IMS_AGENT_DISCONNECTED_IND) {
             mImsRegistered = false;
             msg.what = UceMessage.UCE_MSG_IMS_AGENT_DISCONNECTED;
-        }
+        }/*
         else if (messageType == UceMessage.UCE_IMS_AGENT_REFRESHED_IND) {
-            /*
             mImsRegistered = true;
             msg.what = UceMessage.UCE_MSG_IMS_AGENT_REFRESHED;
-             */
             return;
         }
+        */
 
-        ImsLog.i("Registration Status : " + mImsRegistered);
+        ImsLog.i(mSlotId, "Registration Status : " + mImsRegistered);
 
         if (mImsRegistered) {
             int mRadioTechType = parcel.readInt();
-            ImsLog.d("IMS registered");
+            ImsLog.d(mSlotId, "IMS registered");
             msg.arg1 = mRadioTechType;
             msg.obj = (Object)parcel.readLong();
         } else {
-            ImsLog.d("IMS de-registered");
+            ImsLog.d(mSlotId, "IMS de-registered");
         }
         mUceAgentHandler.sendMessage(msg);
     }
 
     @Override
     public void onNetworkStatusMessage(Parcel parcel) {
-        ImsLog.d("");
+        ImsLog.d(mSlotId, "");
         int messageType = parcel.readInt();
         int networkType = parcel.readInt();
         if (messageType == UceMessage.UCE_NETWORK_CHANGED) {
-            ImsLog.i("network type:" + networkType);
+            ImsLog.i(mSlotId, "network type:" + networkType);
             Message msg = Message.obtain();
             msg.what = UceMessage.UCE_MSG_NETWORK_CHANGED;
             msg.arg1 = networkType;
@@ -563,12 +571,11 @@ public class UceAgent extends Thread implements IUceJNIListener {
 
     @Override
     public void onPublishStatusMessage(Parcel parcel) {
-        ImsLog.d("");
         Message msg = Message.obtain();
 
         int messageType = parcel.readInt();
         if (messageType == UceMessage.UCE_PUBLISH_UPDATED_IND) {
-            ImsLog.d("Publish updated");
+            ImsLog.d(mSlotId, "Publish updated");
             msg.what = UceMessage.UCE_MSG_PUBLISH_UPDATED;
             long capability = parcel.readLong();
             int responseCode = parcel.readInt();
@@ -578,9 +585,10 @@ public class UceAgent extends Thread implements IUceJNIListener {
             String etag = parcel.readString();
             int needToRetry = parcel.readInt();
 
-            ImsLog.d("responseCode:" + responseCode + ", reason:" + reason + ", reasonHeaderCause" +
-                    reasonHeaderCause + ", reasonHeaderText:" + reasonHeaderText +
-                    ", capability:" + capability + ", needToRetry:" + needToRetry);
+            ImsLog.d(mSlotId, "responseCode:" + responseCode + ", reason:" + reason
+                    + ", reasonHeaderCause" + reasonHeaderCause + ", reasonHeaderText:"
+                    + reasonHeaderText + ", capability:" + capability + ", needToRetry:"
+                    + needToRetry);
             UceResponseData data = new UceResponseData(responseCode, reason);
             data.setReasonHeaderCause(reasonHeaderCause);
             data.setReasonHeaderText(reasonHeaderText);
@@ -589,7 +597,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
             data.setNeedToRetry(needToRetry);
             msg.obj = data;
         } else { // UceMessage.UCE_UNPUBLISH_IND
-            ImsLog.d("un-published");
+            ImsLog.d(mSlotId, "un-published");
             msg.what = UceMessage.UCE_MSG_UNPUBLISHED;
         }
         mUceAgentHandler.sendMessage(msg);

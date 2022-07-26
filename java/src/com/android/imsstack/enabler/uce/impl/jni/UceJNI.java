@@ -49,10 +49,10 @@ public class UceJNI {
     }
 
     public void init(int nSimSlot) {
-        ImsLog.d("nSimSlot : " + nSimSlot);
+        ImsLog.d(nSimSlot, "");
         if (!mUceJNIImsListenerMap.containsKey(nSimSlot)) {
             long nativeObj = JNIIms.getInterface(INTERFACETYPE_IMS_UCE, nSimSlot);
-            ImsLog.i("mNativeObj: " + nativeObj);
+            ImsLog.i(nSimSlot, "mNativeObj: " + nativeObj);
             mNativeObjMap.put(nSimSlot, nativeObj);
             mUceJNIImsListenerMap.put(nSimSlot, new UceJNIImsListener());
             JNIIms.setListener(nativeObj, mUceJNIImsListenerMap.get(nSimSlot));
@@ -60,11 +60,11 @@ public class UceJNI {
     }
 
     public void release(int nSimSlot) {
-        ImsLog.d("nSimSlot : " + nSimSlot);
+        ImsLog.d(nSimSlot, "");
         if (mUceJNIImsListenerMap.containsKey(nSimSlot)) {
             UceJNIImsListener mUceJNIImsListener = mUceJNIImsListenerMap.get(nSimSlot);
             long nativeObj = mNativeObjMap.get(nSimSlot);
-            ImsLog.i("mNativeObj: " + nativeObj);
+            ImsLog.i(nSimSlot, "mNativeObj: " + nativeObj);
             JNIIms.releaseInterface(nativeObj);
             JNIIms.removeListener(nativeObj, mUceJNIImsListener);
         }
@@ -73,22 +73,22 @@ public class UceJNI {
     }
 
     public void addListener(int nSimSlot, IUceJNIListener mListener, int nMsgType){
-        ImsLog.d("nSimSlot : " + nSimSlot);
+        ImsLog.d(nSimSlot, "");
         UceJNIImsListener mUceJNIImsListener = mUceJNIImsListenerMap.get(nSimSlot);
         if (mUceJNIImsListener == null) {
-            ImsLog.i("mUceJNIImsListener is null");
+            ImsLog.i(nSimSlot, "mUceJNIImsListener is null");
             return;
         }
         mUceJNIImsListener.addListener(mListener, nMsgType);
     }
 
     public void sendMessage(int nSimSlot, Parcel parcel) {
-        ImsLog.d("nSimSlot : " + nSimSlot);
+        ImsLog.d(nSimSlot, "");
         if (parcel == null) {
-            ImsLog.i("parcel is null");
+            ImsLog.i(nSimSlot, "parcel is null");
             return;
         }
-        ImsLog.i("send Message to native.");
+        ImsLog.i(nSimSlot, "send Message to native.");
         byte[] baData = parcel.marshall();
 
         if (mNativeObjMap.containsKey(nSimSlot)) {

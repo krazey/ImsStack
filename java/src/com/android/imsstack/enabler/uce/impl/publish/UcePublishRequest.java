@@ -77,7 +77,8 @@ public class UcePublishRequest {
      *                   this is set to the latest capability.
      */
     public void setRequestInfo(String pidfXml, boolean bAvailability, long capability) {
-        ImsLog.d("setRequestInfo:bAvailability=" + bAvailability + ", capability=" + capability);
+        ImsLog.d(mSlotId, "setRequestInfo:bAvailability=" + bAvailability
+                + ", capability=" + capability);
         mPidfXml = pidfXml;
         mExtended = bAvailability == true ? 1 : 0;
         mCapability = capability;
@@ -89,7 +90,7 @@ public class UcePublishRequest {
      */
     public boolean sendRequest() {
         if (TextUtils.isEmpty(mPidfXml)) {
-            ImsLog.e("pidfXml is empty");
+            ImsLog.e(mSlotId, "pidfXml is empty");
             informCommandError(UceApiConstant.COMMAND_CODE_INVALID_PARAM);
             return false;
         }
@@ -122,8 +123,8 @@ public class UcePublishRequest {
      */
     public void informNetworkResponse(int responseCode, String reason,
         int reasonHdrCause, String reasonHdrText, String eTag) {
-        ImsLog.d("informNetworkResponse:responseCode=" + responseCode +
-            ", reasonHdrCause=" + reasonHdrCause);
+        ImsLog.d(mSlotId, "informNetworkResponse:responseCode=" + responseCode
+                + ", reasonHdrCause=" + reasonHdrCause);
         try {
             if (reasonHdrCause <= 0) {
                 callback.onNetworkResponse(responseCode, reason);
@@ -131,7 +132,7 @@ public class UcePublishRequest {
                 callback.onNetworkResponse(responseCode, reason, reasonHdrCause, reasonHdrText);
             }
         } catch (Exception e) {
-            ImsLog.e("Exception:" + e.toString());
+            ImsLog.e(mSlotId, "Exception:" + e.toString());
         }
         if (!TextUtils.isEmpty(eTag)) {
             if (mPf != null) {
@@ -145,11 +146,11 @@ public class UcePublishRequest {
      * @param code the command error code. it is one of the {@link UceApiConstant}.
      */
     public void informCommandError(int code) {
-        ImsLog.d("informCommandError:code=" + code);
+        ImsLog.d(mSlotId, "informCommandError:code=" + code);
         try {
             callback.onCommandError(code);
         } catch (Exception e) {
-            ImsLog.e("Exception:" + e.toString());
+            ImsLog.e(mSlotId, "Exception:" + e.toString());
         }
     }
 

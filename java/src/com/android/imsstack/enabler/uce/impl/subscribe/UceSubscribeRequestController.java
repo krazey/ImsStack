@@ -87,7 +87,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
     public void setImsRegistrationStatus(boolean imsRegistered) {
         if (mIsImsRegistered != imsRegistered) {
             mIsImsRegistered = imsRegistered;
-            ImsLog.i("IsImsRegistered:" + mIsImsRegistered);
+            ImsLog.i(mSlotId, "IsImsRegistered:" + mIsImsRegistered);
         }
     }
 
@@ -132,7 +132,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
         });
         if (request.sendRequest(queryingUri)) {
             mUceSubscribeRequestMap.put(key, request);
-            ImsLog.d("add key:" + key);
+            ImsLog.d(mSlotId, "add key:" + key);
         }
     }
 
@@ -170,12 +170,12 @@ public class UceSubscribeRequestController implements IUceJNIListener {
         @Override
         public void handleMessage(Message objMessage) {
             if (objMessage == null) {
-                ImsLog.e("Message is null");
+                ImsLog.e(mSlotId, "Message is null");
                 return;
             }
             UceSubscribeMessageHandler objMsgHandler = mMessageHandler.get(objMessage.what);
             if (objMsgHandler == null) {
-                ImsLog.e("message can not be handled.");
+                ImsLog.e(mSlotId, "message can not be handled.");
                 return;
             }
             objMsgHandler.onHandle(objMessage);
@@ -187,7 +187,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                 int requestKey = objMessage.arg1;
                 UceSubscribeRequest request = getSubscribeRequest(requestKey);
                 if (request == null) {
-                    ImsLog.e("Do not find request for Key=" + requestKey);
+                    ImsLog.e(mSlotId, "Do not find request for Key=" + requestKey);
                     return;
                 }
                 UceResponseData data = (UceResponseData)objMessage.obj;
@@ -210,7 +210,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                 int requestKey = objMessage.arg1;
                 UceSubscribeRequest request = getSubscribeRequest(requestKey);
                 if (request == null) {
-                    ImsLog.e("Do not find request for Key=" + requestKey);
+                    ImsLog.e(mSlotId, "Do not find request for Key=" + requestKey);
                     return;
                 }
                 List<String> pidfXmls = (List)objMessage.obj;
@@ -224,7 +224,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                 int requestKey = objMessage.arg1;
                 UceSubscribeRequest request = getSubscribeRequest(requestKey);
                 if (request == null) {
-                    ImsLog.e("Do not find request for Key=" + requestKey);
+                    ImsLog.e(mSlotId, "Do not find request for Key=" + requestKey);
                     return;
                 }
                 int commandErrorCode = objMessage.arg2;
@@ -240,7 +240,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                 int requestKey = objMessage.arg1;
                 UceSubscribeRequest request = getSubscribeRequest(requestKey);
                 if (request == null) {
-                    ImsLog.e("Do not find request for Key=" + requestKey);
+                    ImsLog.e(mSlotId, "Do not find request for Key=" + requestKey);
                     return;
                 }
                 int retryAfterMillsecond = objMessage.arg2;
@@ -258,7 +258,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                 int requestKey = objMessage.arg1;
                 UceSubscribeRequest request = getSubscribeRequest(requestKey);
                 if (request == null) {
-                    ImsLog.e("Do not find request for Key=" + requestKey);
+                    ImsLog.e(mSlotId, "Do not find request for Key=" + requestKey);
                     return;
                 }
                 ArrayList<UceResourceInfo> list = (ArrayList)objMessage.obj;
@@ -268,11 +268,11 @@ public class UceSubscribeRequestController implements IUceJNIListener {
     }
 
     private void sendCommandError(SubscribeResponse cb, int code) {
-        ImsLog.d("sendCommandError:" + code);
+        ImsLog.d(mSlotId, "sendCommandError:" + code);
         try {
             cb.onCommandError(code);
         } catch (Exception e) {
-            ImsLog.e("Exception:" + e.toString());
+            ImsLog.e(mSlotId, "Exception:" + e.toString());
         }
     }
 
@@ -281,9 +281,9 @@ public class UceSubscribeRequestController implements IUceJNIListener {
         try {
             request = mUceSubscribeRequestMap.get(key);
         } catch (ClassCastException e) {
-            ImsLog.e("ClassCastException:" + e.toString());
+            ImsLog.e(mSlotId, "ClassCastException:" + e.toString());
         } catch (NullPointerException e) {
-            ImsLog.e("NullPointerException:" + e.toString());
+            ImsLog.e(mSlotId, "NullPointerException:" + e.toString());
         } finally {
             return request;
         }
@@ -292,13 +292,13 @@ public class UceSubscribeRequestController implements IUceJNIListener {
     private void removeSubscribeRequest(int key) {
         try {
             mUceSubscribeRequestMap.remove(key);
-            ImsLog.d("remove key:" + key);
+            ImsLog.d(mSlotId, "remove key:" + key);
         } catch (ClassCastException e) {
-            ImsLog.e("ClassCastException:" + e.toString());
+            ImsLog.e(mSlotId, "ClassCastException:" + e.toString());
         } catch (NullPointerException e) {
-            ImsLog.e("NullPointerException:" + e.toString());
+            ImsLog.e(mSlotId, "NullPointerException:" + e.toString());
         } catch (UnsupportedOperationException e) {
-            ImsLog.e("UnsupportedOperationException:" + e.toString());
+            ImsLog.e(mSlotId, "UnsupportedOperationException:" + e.toString());
         } finally {
             return;
         }
@@ -310,7 +310,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
         int messageType = parcel.readInt();
         switch (messageType) {
             case UceMessage.UCE_SUBSCRIBE_RESPONSE_IND: {
-                ImsLog.d("UCE_SUBSCRIBE_RESPONSE_IND");
+                ImsLog.d(mSlotId, "UCE_SUBSCRIBE_RESPONSE_IND");
                 msg.what = UceMessage.UCE_MSG_SUBSCRIBE_RESPONSE;
                 int requestKey = parcel.readInt();
                 int responseCode = parcel.readInt();
@@ -318,8 +318,9 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                 int reasonHeaderCause = parcel.readInt();
                 String reasonHeaderText = parcel.readString();
 
-                ImsLog.d("responseCode:" + responseCode + ", reason:" + reason + "reasonHeaderCause"
-                    + reasonHeaderCause + "reasonHeaderText:" + reasonHeaderText);
+                ImsLog.d(mSlotId, "responseCode:" + responseCode + ", reason:" + reason
+                        + "reasonHeaderCause" + reasonHeaderCause
+                        + "reasonHeaderText:" + reasonHeaderText);
 
                 msg.arg1 = requestKey;
                 UceResponseData data = new UceResponseData(responseCode, reason);
@@ -329,14 +330,13 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                 break;
             }
             case UceMessage.UCE_PRESENCE_NOTIFY_IND: {
-                ImsLog.d("UCE_PRESENCE_NOTIFY_IND");
+                ImsLog.d(mSlotId, "UCE_PRESENCE_NOTIFY_IND");
                 msg.what = UceMessage.UCE_MSG_PRESENCE_NOTIFY;
                 int requestKey = parcel.readInt();
                 int count = parcel.readInt();
                 List<String> pidfXmls = new ArrayList<>();
                 for (int i = 0; i < count; i++) {
                     String pidfXml = parcel.readString();
-                    ImsLog.d("order:" + i + ", pidf:" + pidfXml);
                     pidfXmls.add(pidfXml);
                 }
                 msg.arg1 = requestKey;
@@ -344,7 +344,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                 break;
             }
             case UceMessage.UCE_SUBSCRIBE_CMD_ERROR_IND: {
-                ImsLog.d("UCE_SUBSCRIBE_CMD_ERROR_IND");
+                ImsLog.d(mSlotId, "UCE_SUBSCRIBE_CMD_ERROR_IND");
                 msg.what = UceMessage.UCE_MSG_SUBSCRIBE_CMD_ERROR;
                 int requestKey = parcel.readInt();
                 int commandErrorCode = parcel.readInt();
@@ -353,7 +353,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                 break;
             }
             case UceMessage.UCE_SUBSCRIBE_TERMINATED_IND: {
-                ImsLog.d("UCE_SUBSCRIBE_TERMINATED_IND");
+                ImsLog.d(mSlotId, "UCE_SUBSCRIBE_TERMINATED_IND");
                 msg.what = UceMessage.UCE_MSG_SUBSCRIBE_TERMINATED;
                 int requestKey = parcel.readInt();
                 String reason = parcel.readString();
@@ -368,7 +368,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                 break;
             }
             case UceMessage.UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND: {
-                ImsLog.d("UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND");
+                ImsLog.d(mSlotId, "UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND");
                 msg.what = UceMessage.UCE_MSG_SUBSCRIBE_RESOURCE_TERMINATED;
                 int requestKey = parcel.readInt();
                 int count = parcel.readInt();

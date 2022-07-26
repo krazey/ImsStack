@@ -60,20 +60,7 @@ public class UcePublishRequestController implements IUceJNIListener {
     public boolean mIsUseExpiedEtag;
 
     public UcePublishRequestController(int slotId, Looper looper) {
-        mSlotId = slotId;
-        mUcePublishControllerHandler = new UcePublishControllerHandler(this, looper);
-
-        mIsImsRegistered = false;
-        mActiveRequest = null;
-        mPendingRequest = null;
-        mActiveCapability = 0L;
-        mPendingCapability = 0L;
-
-        mUceJNI = UceJNI.getInstance();
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_PUBLISH_RESPONSE_IND);
-        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_PUBLISH_CMD_ERROR_IND);
-
-        mIsUseExpiedEtag = false;
+        this(slotId, UceJNI.getInstance(), looper);
     }
 
     @VisibleForTesting
@@ -86,8 +73,10 @@ public class UcePublishRequestController implements IUceJNIListener {
         mActiveCapability = 0L;
         mPendingCapability = 0L;
 
-        jni.addListener(mSlotId, this, UceMessage.UCE_PUBLISH_RESPONSE_IND);
-        jni.addListener(mSlotId, this, UceMessage.UCE_PUBLISH_CMD_ERROR_IND);
+        mUceJNI = jni;
+
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_PUBLISH_RESPONSE_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_PUBLISH_CMD_ERROR_IND);
 
         mIsUseExpiedEtag = false;
     }
@@ -99,7 +88,7 @@ public class UcePublishRequestController implements IUceJNIListener {
     public void setImsRegistrationStatus(boolean imsRegistered) {
         if (mIsImsRegistered != imsRegistered) {
             mIsImsRegistered = imsRegistered;
-            ImsLog.i("IsImsRegistered:" + mIsImsRegistered);
+            ImsLog.i(mSlotId, "IsImsRegistered:" + mIsImsRegistered);
         }
         if (!mIsImsRegistered) {
             mActiveCapability = 0;
@@ -115,7 +104,7 @@ public class UcePublishRequestController implements IUceJNIListener {
      */
     public void setUseExpiredEtag(boolean useExpiredEtag) {
         mIsUseExpiedEtag = useExpiredEtag;
-        ImsLog.i("mIsUseExpiedEtag:" + mIsUseExpiedEtag);
+        ImsLog.i(mSlotId, "mIsUseExpiedEtag:" + mIsUseExpiedEtag);
     }
 
     /**
@@ -123,7 +112,7 @@ public class UcePublishRequestController implements IUceJNIListener {
      * @param capability the latest device's capabilities
      */
     public void setCapability(long capability) {
-        ImsLog.i("setCapability:" + capability);
+        ImsLog.i(mSlotId, "setCapability:" + capability);
         mActiveCapability = capability;
     }
 
@@ -149,8 +138,8 @@ public class UcePublishRequestController implements IUceJNIListener {
             return;
         }
         long capability = getCapability(pidfXml);
-        ImsLog.d("publishCapabilities:mActiveCapability=" + mActiveCapability + ", newCapability=" +
-                capability);
+        ImsLog.d(mSlotId, "publishCapabilities:mActiveCapability=" + mActiveCapability
+                + ", newCapability=" + capability);
 
         if (mActiveCapability == capability) {
             sendCommandError(cb, UceApiConstant.COMMAND_CODE_NO_CHANGE);
@@ -171,8 +160,8 @@ public class UcePublishRequestController implements IUceJNIListener {
             return;
         }
         long capability = getCapability(pidfXml);
-        ImsLog.d("publishCapabilities:mActiveCapability=" + mActiveCapability + ", newCapability=" +
-                capability);
+        ImsLog.d(mSlotId, "publishCapabilities:mActiveCapability=" + mActiveCapability
+                + ", newCapability=" + capability);
 
         if (mActiveCapability == capability) {
             sendCommandError(cb, UceApiConstant.COMMAND_CODE_NO_CHANGE);
@@ -190,7 +179,7 @@ public class UcePublishRequestController implements IUceJNIListener {
                 mActiveCapability = capability;
             }
         } else {
-            ImsLog.d("publishCapabilities:set pending capability=" + capability);
+            ImsLog.d(mSlotId, "publishCapabilities:set pending capability=" + capability);
             mPendingRequest = active;
             mPendingCapability = capability;
         }
@@ -233,7 +222,7 @@ public class UcePublishRequestController implements IUceJNIListener {
         long newCapability = UceServiceIds.SERVICE_ID_NONE;
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_PRESENCE.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_PRESENCE;
-            ImsLog.d("presence");
+            ImsLog.d(mSlotId, "presence");
         }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_IPCALL.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_IPCALL_VOICE;
@@ -246,7 +235,7 @@ public class UcePublishRequestController implements IUceJNIListener {
                         video.indexOf("</caps:video>"));
                 if (videoValue.equals("true")) {
                     newCapability |= UceServiceIds.SERVICE_ID_IPCALL_VIDEO;
-                    ImsLog.d("ip vioeo call");
+                    ImsLog.d(mSlotId, "ip vioeo call");
                 }
             }
         }
@@ -257,32 +246,32 @@ public class UcePublishRequestController implements IUceJNIListener {
 
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_GEOLOCATION_PUSH.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_GEOLOCATION_PUSH;
-            ImsLog.d("geolocation push");
+            ImsLog.d(mSlotId, "geolocation push");
         }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_SHARED_MAP.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_SHARED_MAP;
-            ImsLog.d("shared map");
+            ImsLog.d(mSlotId, "shared map");
         }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_SHARED_SKETCH.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_SHARED_SKETCH;
-            ImsLog.d("shared sketch");
+            ImsLog.d(mSlotId, "shared sketch");
         }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_POST_CALL.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_POST_CALL;
-            ImsLog.d("post call");
+            ImsLog.d(mSlotId, "post call");
         }
         if (pidfXml.contains(
                 UceServiceIds.ServiceIds.SERVICE_ID_GEOLOCATION_PUSH_VIA_SMS.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_GEOLOCATION_PUSH_VIA_SMS;
-            ImsLog.d("geolocation push via SMS");
+            ImsLog.d(mSlotId, "geolocation push via SMS");
         }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER_VIA_SMS.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_VIA_SMS;
-            ImsLog.d("file transfer via SMS");
+            ImsLog.d(mSlotId, "file transfer via SMS");
         }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_CANCEL_MESSAGE.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_CANCEL_MESSAGE;
-            ImsLog.d("cancel message");
+            ImsLog.d(mSlotId, "cancel message");
         }
         return newCapability;
     }
@@ -322,20 +311,20 @@ public class UcePublishRequestController implements IUceJNIListener {
 
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_STANDALONE_MESSAGING.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_STANDALONE_MESSAGING;
-            ImsLog.d("standalone message");
+            ImsLog.d(mSlotId, "standalone message");
         }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_CHAT_SESSION.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_CHAT_SESSION;
-            ImsLog.d("chat session");
+            ImsLog.d(mSlotId, "chat session");
         }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_IM_SESSION.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_IM_SESSION;
-            ImsLog.d("im session");
+            ImsLog.d(mSlotId, "im session");
         }
         if (pidfXml.contains(
                 UceServiceIds.ServiceIds.SERVICE_ID_FULL_STORE_FORWARD_GROUP_CHAT.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_FULL_STORE_FORWARD_GROUP_CHAT;
-            ImsLog.d("full store forward group chat");
+            ImsLog.d(mSlotId, "full store forward group chat");
         }
         return newCapability;
     }
@@ -347,7 +336,7 @@ public class UcePublishRequestController implements IUceJNIListener {
         }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER_HTTP.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_HTTP;
-            ImsLog.d("file transfer HTTP");
+            ImsLog.d(mSlotId, "file transfer HTTP");
         }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER.getId())) {
             String fileTransfer = pidfXml.substring(pidfXml.indexOf(
@@ -362,13 +351,13 @@ public class UcePublishRequestController implements IUceJNIListener {
                 if (versionValue.equals(
                         UceServiceIds.ServiceIds.SERVICE_ID_FILE_TRANSFER.getVersion())) {
                     newCapability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER;
-                    ImsLog.d("file transfer");
+                    ImsLog.d(mSlotId, "file transfer");
                 }
                 String FileTransferStoreForwardVersion =
                         UceServiceIds.ServiceIds.SERVICE_ID_FT_STORE_FORWARD.getVersion();
                 if (versionValue.equals(FileTransferStoreForwardVersion)) {
                     newCapability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_STORE_FORWARD;
-                    ImsLog.d("file transfer store forward");
+                    ImsLog.d(mSlotId, "file transfer store forward");
                 }
             }
         }
@@ -381,16 +370,16 @@ public class UcePublishRequestController implements IUceJNIListener {
         if (pidfXml.contains(
                 UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_COMMUNICATION_SESSION.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_CHATBOT_COMMUNICATION_SESSION;
-            ImsLog.d("chatbot communication session");
+            ImsLog.d(mSlotId, "chatbot communication session");
         }
         if (pidfXml.contains(
                 UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_STADNALONE_MESSAGING.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_CHATBOT_STADNALONE_MESSAGING;
-            ImsLog.d("chatbot standalone message");
+            ImsLog.d(mSlotId, "chatbot standalone message");
         }
         if (pidfXml.contains(UceServiceIds.ServiceIds.SERVICE_ID_CHATBOT_EXTEND_MESSAGE.getId())) {
             newCapability |= UceServiceIds.SERVICE_ID_CHATBOT_EXTEND_MESSAGE;
-            ImsLog.d("chatbot extend message");
+            ImsLog.d(mSlotId, "chatbot extend message");
         }
         return newCapability;
     }
@@ -409,23 +398,23 @@ public class UcePublishRequestController implements IUceJNIListener {
             if (versionValue.equals(
                     UceServiceIds.ServiceIds.SERVICE_ID_CALL_COMPOSER_V1.getVersion())) {
                 newCapability |= UceServiceIds.SERVICE_ID_CALL_COMPOSER_V1;
-                ImsLog.d("call composer V1");
+                ImsLog.d(mSlotId, "call composer V1");
             }
             if (versionValue.equals(
                     UceServiceIds.ServiceIds.SERVICE_ID_CALL_COMPOSER_V2.getVersion())) {
                 newCapability |= UceServiceIds.SERVICE_ID_CALL_COMPOSER_V2;
-                ImsLog.d("call composer V2");
+                ImsLog.d(mSlotId, "call composer V2");
             }
         }
         return newCapability;
     }
 
     private void sendCommandError(PublishResponse cb, int code) {
-        ImsLog.d("sendCommandError:" + code);
+        ImsLog.d(mSlotId, "sendCommandError:" + code);
         try {
             cb.onCommandError(code);
         } catch (Exception e) {
-            ImsLog.e("Exception:" + e.toString());
+            ImsLog.e(mSlotId, "Exception:" + e.toString());
         }
     }
 
@@ -464,7 +453,7 @@ public class UcePublishRequestController implements IUceJNIListener {
         @Override
         public void handleMessage(Message objMessage) {
             if (objMessage == null) {
-                ImsLog.e("Message is null");
+                ImsLog.e(mSlotId, "Message is null");
                 return;
             }
             UcePublishRequestController controller = mUcePublishControllerRef.get();
@@ -473,7 +462,7 @@ public class UcePublishRequestController implements IUceJNIListener {
             }
             UcePublishMessageHandler objMsgHandler = mMessageHandler.get(objMessage.what);
             if (objMsgHandler == null) {
-                ImsLog.e("message can not be handled.");
+                ImsLog.e(mSlotId, "message can not be handled.");
                 return;
             }
             objMsgHandler.onHandle(objMessage, controller);
@@ -485,7 +474,7 @@ public class UcePublishRequestController implements IUceJNIListener {
                 int requestKey = objMessage.arg1;
                 UcePublishRequest request = controller.getActiveRequest();
                 if (request == null || request.getKey() != requestKey) {
-                    ImsLog.e("Do not find request for Key=" + requestKey);
+                    ImsLog.e(mSlotId, "Do not find request for Key=" + requestKey);
                     return;
                 }
                 UceResponseData data = (UceResponseData) objMessage.obj;
@@ -509,7 +498,7 @@ public class UcePublishRequestController implements IUceJNIListener {
                 int requestKey = objMessage.arg1;
                 UcePublishRequest request = controller.getActiveRequest();
                 if (request == null || request.getKey() != requestKey) {
-                    ImsLog.e("Do not find request for Key=" + requestKey);
+                    ImsLog.e(mSlotId, "Do not find request for Key=" + requestKey);
                     return;
                 }
                 int commandErrorCode = objMessage.arg2;
@@ -537,9 +526,9 @@ public class UcePublishRequestController implements IUceJNIListener {
             String etag = parcel.readString();
             int needToRetry = parcel.readInt();
 
-            ImsLog.d("response:" + responseCode + ", reason:" + reason + ", reasonHeaderCause:" +
-                reasonHeaderCause + ", reasonHeaderText:" + reasonHeaderText + ", etag:" + etag +
-                ", needToRetry:" + needToRetry);
+            ImsLog.d(mSlotId, "response:" + responseCode + ", reason:" + reason
+                    + ", reasonHeaderCause:" + reasonHeaderCause + ", reasonHeaderText:"
+                    + reasonHeaderText + ", etag:" + etag + ", needToRetry:" + needToRetry);
 
             msg.arg1 = requestKey;
             UceResponseData data = new UceResponseData(responseCode, reason);

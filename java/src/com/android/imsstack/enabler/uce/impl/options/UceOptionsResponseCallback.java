@@ -1,8 +1,22 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.enabler.uce.impl.options;
 
 import android.os.Parcel;
 
-import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
 import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
 import com.android.imsstack.enabler.uce.impl.utils.UceUtils;
@@ -12,14 +26,18 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.Set;
 
 public class UceOptionsResponseCallback implements RemoteOptionsCallback{
-    @VisibleForTesting
-    public int mKey = 0;
-    private int mSlotId = -1;
+    public final int mKey;
+    private final int mSlotId;
+    private final UceJNI mUceJNI;
 
     public UceOptionsResponseCallback(int key, int slotId) {
+        this(key, slotId, UceJNI.getInstance());
+    }
+    @VisibleForTesting
+    public UceOptionsResponseCallback(int key, int slotId, UceJNI jni) {
         mKey = key;
         mSlotId = slotId;
-        return;
+        mUceJNI = jni;
     }
 
     @Override
@@ -39,7 +57,7 @@ public class UceOptionsResponseCallback implements RemoteOptionsCallback{
                 parcel.writeLong(UceUtils.getCapabilities(ownCapabilities));
             }
         }
-        UceJNI.getInstance().sendMessage(mSlotId, parcel);
+        mUceJNI.sendMessage(mSlotId, parcel);
     }
 
     @Override
@@ -51,6 +69,6 @@ public class UceOptionsResponseCallback implements RemoteOptionsCallback{
         parcel.writeInt(code); // response code
         parcel.writeString(reason); // reason
         parcel.writeLong(0); // my capabilities
-        UceJNI.getInstance().sendMessage(mSlotId, parcel);
+        mUceJNI.sendMessage(mSlotId, parcel);
     }
 }

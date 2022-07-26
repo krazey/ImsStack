@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.timeout;
@@ -121,12 +122,22 @@ public class UceAgentTest {
         }
     }
 
+    @Test
+    @SmallTest
+    public void test_setListener() throws Exception {
+        mAgent = createUceAgent();
+        mAgent.setImsRegistered(true);
+        mAgent.setListener(listener);
+
+        verify(listener).onRequestPublishCapabilities(anyInt());
+        verifyNoMoreInteractions(listener);
+    }
 
     @Test
     @SmallTest
     public void test_publishCapabilities() throws Exception {
         String pidfXml = "pidfXmlForTest";
-        mAgent = createUceAgent(listener);
+        mAgent = createUceAgent();
 
         mAgent.setPublishController(null);
         mAgent.publishCapabilities(pidfXml, publihsCb);
@@ -146,7 +157,7 @@ public class UceAgentTest {
         Collection<Uri> uris = new ArrayList<>(1);
         uris.add(contact1);
 
-        mAgent = createUceAgent(listener);
+        mAgent = createUceAgent();
 
         mAgent.setSubscribeController(null);
         mAgent.subscribeCapabilities(uris, subscribeCb);
@@ -162,7 +173,8 @@ public class UceAgentTest {
     @Test
     @SmallTest
     public void test_registered() throws Exception {
-        mAgent = createUceAgent(listener);
+        mAgent = createUceAgent();
+        mAgent.setListener(listener);
         mAgent.start();
 
         CountDownLatch lock = new CountDownLatch(1);
@@ -193,14 +205,13 @@ public class UceAgentTest {
         verify(listener, timeout(MAX_WAIT_TIME)).onRequestPublishCapabilities(eq(
                 UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_ENABLED));
         verifyNoMoreInteractions(listener);
-
-        mAgent.interrupt();
     }
 
     @Test
     @SmallTest
     public void test_deRegistered() throws Exception {
-        mAgent = createUceAgent(listener);
+        mAgent = createUceAgent();
+        mAgent.setListener(listener);
         mAgent.start();
 
         CountDownLatch lock = new CountDownLatch(1);
@@ -223,7 +234,112 @@ public class UceAgentTest {
         verify(subscribeController, timeout(MAX_WAIT_TIME)).setImsRegistrationStatus(eq(false));
         verifyNoMoreInteractions(publishController);
         verifyNoMoreInteractions(subscribeController);
-        mAgent.interrupt();
+    }
+
+    @Test
+    @SmallTest
+    public void test_getCapabilityUpdateTriggerType() throws Exception {
+        mAgent = createUceAgent();
+
+        assertEquals(UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_2G,
+                mAgent.getCapabilityUpdateTriggerType(UceConstant.RADIO_TECHNOLOGY_TYPE_GERAN));
+        assertEquals(UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_3G,
+                mAgent.getCapabilityUpdateTriggerType(UceConstant.RADIO_TECHNOLOGY_TYPE_HRPD));
+        assertEquals(UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_3G,
+                mAgent.getCapabilityUpdateTriggerType(UceConstant.RADIO_TECHNOLOGY_TYPE_UTRAN));
+        assertEquals(UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_EHRPD,
+                mAgent.getCapabilityUpdateTriggerType(UceConstant.RADIO_TECHNOLOGY_TYPE_EHRPD));
+        assertEquals(UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_ENABLED,
+                mAgent.getCapabilityUpdateTriggerType(UceConstant.RADIO_TECHNOLOGY_TYPE_LTE));
+        assertEquals(UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_DISABLED,
+                mAgent.getCapabilityUpdateTriggerType(
+                        UceConstant.RADIO_TECHNOLOGY_TYPE_LTE_NO_VOPS));
+        assertEquals(UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_IWLAN,
+                mAgent.getCapabilityUpdateTriggerType(UceConstant.RADIO_TECHNOLOGY_TYPE_WIFI));
+        assertEquals(UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED,
+                mAgent.getCapabilityUpdateTriggerType(UceConstant.RADIO_TECHNOLOGY_TYPE_NR));
+        assertEquals(UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_DISABLED,
+                mAgent.getCapabilityUpdateTriggerType(
+                        UceConstant.RADIO_TECHNOLOGY_TYPE_NR_NO_VOPS));
+    }
+
+    @Test
+    @SmallTest
+    public void test_connectivityChangedFromImsDeregistered() throws Exception {
+        mAgent = createUceAgent();
+        mAgent.setListener(listener);
+        mAgent.start();
+
+        CountDownLatch lock = new CountDownLatch(1);
+        mUceJni.setCountDownLatch(lock);
+        lock.await(10, TimeUnit.SECONDS);
+
+        mAgent.setImsRegistered(false);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(UceMessage.UCE_NETWORK_CHANGED);
+        parcel.writeInt(UceConstant.RADIO_TECHNOLOGY_TYPE_LTE); // network type
+        parcel.setDataPosition(0);
+
+        mUceJni.mUceJniListener.onNetworkStatusMessage(parcel);
+
+        Handler handler = mAgent.getHandler();
+        waitForHandlerActionDelayed(handler, 1000, 0);
+
+        verifyNoMoreInteractions(listener);
+    }
+
+    @Test
+    @SmallTest
+    public void test_connectivityNotChanged() throws Exception {
+        mAgent = createUceAgent();
+        mAgent.setListener(listener);
+        mAgent.start();
+
+        CountDownLatch lock = new CountDownLatch(1);
+        mUceJni.setCountDownLatch(lock);
+        lock.await(10, TimeUnit.SECONDS);
+
+        mAgent.setImsRegistered(true);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(UceMessage.UCE_NETWORK_CHANGED);
+        parcel.writeInt(UceConstant.RADIO_TECHNOLOGY_TYPE_UNKNOWN); // network type
+        parcel.setDataPosition(0);
+
+        mUceJni.mUceJniListener.onNetworkStatusMessage(parcel);
+
+        Handler handler = mAgent.getHandler();
+        waitForHandlerActionDelayed(handler, 1000, 0);
+
+        verifyNoMoreInteractions(listener);
+    }
+
+    @Test
+    @SmallTest
+    public void test_connectivityChanged() throws Exception {
+        mAgent = createUceAgent();
+        mAgent.setListener(listener);
+        mAgent.start();
+
+        CountDownLatch lock = new CountDownLatch(1);
+        mUceJni.setCountDownLatch(lock);
+        lock.await(10, TimeUnit.SECONDS);
+
+        mAgent.setImsRegistered(true);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(UceMessage.UCE_NETWORK_CHANGED);
+        parcel.writeInt(UceConstant.RADIO_TECHNOLOGY_TYPE_LTE); // network type
+        parcel.setDataPosition(0);
+
+        mUceJni.mUceJniListener.onNetworkStatusMessage(parcel);
+
+        Handler handler = mAgent.getHandler();
+        waitForHandlerActionDelayed(handler, 1000, 0);
+
+        verify(listener).onRequestPublishCapabilities(eq(
+                UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_ENABLED));
     }
 
     @Test
@@ -236,7 +352,8 @@ public class UceAgentTest {
         String reasonHeaderText = "testWarning";
         int needToRetry = 0;
 
-        mAgent = createUceAgent(listener);
+        mAgent = createUceAgent();
+        mAgent.setListener(listener);
         mAgent.start();
 
         CountDownLatch lock = new CountDownLatch(1);
@@ -281,13 +398,13 @@ public class UceAgentTest {
  */
        verify(listener, times(1)).onPublishUpdated(eq(responseCode), eq(reason),
                 eq(reasonHeaderCause), eq(reasonHeaderText));
-        mAgent.interrupt();
     }
 
     @Test
     @SmallTest
     public void test_unpublished() throws Exception {
-        mAgent = createUceAgent(listener);
+        mAgent = createUceAgent();
+        mAgent.setListener(listener);
         mAgent.start();
 
         CountDownLatch lock = new CountDownLatch(1);
@@ -310,13 +427,13 @@ public class UceAgentTest {
         verify(listener, timeout(MAX_WAIT_TIME)).onUnPublish();
         verifyNoMoreInteractions(publishController);
         verifyNoMoreInteractions(listener);
-        mAgent.interrupt();
     }
 
     @Test
     @SmallTest
     public void test_receivedOptions() throws Exception {
-        mAgent = createUceAgent(listener);
+        mAgent = createUceAgent();
+        mAgent.setListener(listener);
         mAgent.start();
 
         CountDownLatch lock = new CountDownLatch(1);
@@ -354,13 +471,10 @@ public class UceAgentTest {
                 return null;
             }
         }).when(listener).onRemoteCapabilityRequest(any(), any(), any());
-        mAgent.interrupt();
     }
 
-    private UceAgent createUceAgent(UceEventListener listener) {
-        UceAgent uceAgent = new UceAgent(mContext, "UceTest", SLOT_ID, mUceJni);
-        uceAgent.setListener(listener);
-        return uceAgent;
+    private UceAgent createUceAgent() {
+        return new UceAgent(mContext, "UceTest", SLOT_ID, mUceJni);
     }
 
     private void waitForHandlerActionDelayed(Handler h, long timeoutMillis, long delayMs) {

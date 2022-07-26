@@ -51,7 +51,7 @@ public class UceSubscribeRequest {
         callback = cb;
         mSlotId = slotId;
         mUceJNI = jni;
-        ImsLog.d("key:" + mKey);
+        ImsLog.d(mSlotId, "key:" + mKey);
     }
 
     /**
@@ -60,9 +60,9 @@ public class UceSubscribeRequest {
      *                  requesting the UCE capabilities for.
      */
     public boolean sendRequest(ArrayList<String> remoteUris) {
-        ImsLog.i("");
+        ImsLog.i(mSlotId, "");
         if (remoteUris == null || remoteUris.size() == 0) {
-            ImsLog.e("remoteUris is empty");
+            ImsLog.e(mSlotId, "remoteUris is empty");
             informCommandError(UceApiConstant.COMMAND_CODE_INVALID_PARAM);
             return false;
         }
@@ -92,8 +92,8 @@ public class UceSubscribeRequest {
      */
     public void informNetworkResponse(int responseCode, String reason,
         int reasonHdrCause, String reasonHdrText) {
-        ImsLog.d("informNetworkResponse:responseCode=" + responseCode +
-            ", reasonHdrCause=" + reasonHdrCause);
+        ImsLog.d(mSlotId, "informNetworkResponse:responseCode=" + responseCode
+                + ", reasonHdrCause=" + reasonHdrCause);
         try {
             if (reasonHdrCause == 0) {
                 callback.onNetworkResponse(responseCode, reason);
@@ -101,7 +101,7 @@ public class UceSubscribeRequest {
                 callback.onNetworkResponse(responseCode, reason, reasonHdrCause, reasonHdrText);
             }
         } catch (Exception e) {
-            ImsLog.e("Exception:" + e.toString());
+            ImsLog.e(mSlotId, "Exception:" + e.toString());
         }
     }
 
@@ -110,11 +110,11 @@ public class UceSubscribeRequest {
      * @param code the command error code. it is one of the {@link UceApiConstant}.
      */
     public void informCommandError(int code) {
-        ImsLog.d("informCommandError:code=" + code);
+        ImsLog.d(mSlotId, "informCommandError:code=" + code);
         try {
             callback.onCommandError(code);
         } catch (Exception e) {
-            ImsLog.e("Exception:" + e.toString());
+            ImsLog.e(mSlotId, "Exception:" + e.toString());
         }
     }
 
@@ -125,11 +125,11 @@ public class UceSubscribeRequest {
      *                AOSP Framework.
      */
     public void informCapabilitiesUpdate(List<String> pidfXmls) {
-        ImsLog.d("informCapabilitiesUpdate");
+        ImsLog.d(mSlotId, "informCapabilitiesUpdate");
         try {
             callback.onNotifyCapabilitiesUpdate(pidfXmls);
         } catch (Exception e) {
-            ImsLog.e("Exception:" + e.toString());
+            ImsLog.e(mSlotId, "Exception:" + e.toString());
         }
     }
 
@@ -140,11 +140,12 @@ public class UceSubscribeRequest {
      * wait before retrying, if non-zero.
      */
     public void informTerminate(String reason, int retryAfterSecond) {
-        ImsLog.d("informTerminate:reason=" + reason + ",retryAfterSecond=" + retryAfterSecond);
+        ImsLog.d(mSlotId, "informTerminate:reason=" + reason + ",retryAfterSecond="
+                + retryAfterSecond);
         try {
             callback.onTerminated(reason, TimeUnit.SECONDS.toMillis(retryAfterSecond));
         } catch (Exception e) {
-            ImsLog.e("Exception:" + e.toString());
+            ImsLog.e(mSlotId, "Exception:" + e.toString());
         }
     }
 
@@ -162,7 +163,7 @@ public class UceSubscribeRequest {
         try {
             callback.onResourceTerminated(uriTerminatedReason);
         } catch (Exception e) {
-            ImsLog.e("Exception:" + e.toString());
+            ImsLog.e(mSlotId, "Exception:" + e.toString());
         }
     }
 }
