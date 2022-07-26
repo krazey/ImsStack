@@ -822,7 +822,7 @@ IMS_BOOL MediaSession::OnResponse(IN IMS_UINTP nParam)
 PROTECTED
 IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
 {
-    if (m_pClientListener != NULL)
+    if (m_pClientListener == NULL)
     {
         return IMS_FALSE;
     }
