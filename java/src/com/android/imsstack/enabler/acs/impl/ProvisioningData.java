@@ -98,6 +98,7 @@ public class ProvisioningData {
     }
 
     private final Context mContext;
+    private final int mSubId;
     private final String mFileName;
     private final Characteristic mRoot = new Characteristic(null, "root");
     private boolean mIsComplete;
@@ -110,16 +111,15 @@ public class ProvisioningData {
      */
     public ProvisioningData(Context context, int subId, byte[] data) {
         mContext = context;
+        mSubId = subId;
         mFileName = LOCAL_FILE_NAME_PREFIX + subId + LOCAL_FILE_NAME_POSTFIX;
 
         // copy data
         byte[] rawData = data.clone();
-        mIsComplete = false;
 
-        // parse data
         try {
-            parse(new ByteArrayInputStream(rawData), mRoot);
-        } catch (XmlPullParserException | IOException e) {
+            mIsComplete = parse(new ByteArrayInputStream(rawData), mRoot);
+        } catch (IOException e) {
             ImsLog.i(e.getMessage());
         }
     }
@@ -131,19 +131,10 @@ public class ProvisioningData {
      */
     public ProvisioningData(Context context, int subId) {
         mContext = context;
+        mSubId = subId;
         mFileName = LOCAL_FILE_NAME_PREFIX + subId + LOCAL_FILE_NAME_POSTFIX;
 
-        mIsComplete = false;
-        try {
-            // read data from file
-            File file = new File(mContext.getFilesDir(), mFileName);
-            FileInputStream inputStream = new FileInputStream(file);
-
-            // parse data
-            parse(inputStream, mRoot);
-        } catch (XmlPullParserException | IOException e) {
-            ImsLog.i(e.getMessage());
-        }
+        mIsComplete = initFromFile();
     }
 
     /**
@@ -245,6 +236,102 @@ public class ProvisioningData {
         return value;
     }
 
+
+    /**
+     * compress the gzip format data
+     * @param data byte array has data to compress
+     * @return compressed data or null when operation is failed
+     */
+    public @Nullable byte[] compressGzip(@NonNull byte[] data) {
+        if (data == null || data.length == 0) {
+            return data;
+        }
+        byte[] out = null;
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
+            gzipOutputStream.write(data);
+            gzipOutputStream.close();
+
+            out = outputStream.toByteArray();
+            outputStream.close();
+        } catch (IOException e) {
+            ImsLog.i(e.getMessage());
+        }
+
+        return out;
+    }
+
+    /**
+     * decompress the gzip format data
+     * @param data byte array has data to decompress
+     * @return decompressed data or null when operation is failed
+     */
+    public @Nullable byte[] decompressGzip(@NonNull byte[] data) {
+        if (data == null || data.length == 0) {
+            return data;
+        }
+        byte[] out = null;
+        try {
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
+            byte[] buf = new byte[1024];
+            int size = gzipInputStream.read(buf);
+            while (size >= 0) {
+                outputStream.write(buf, 0, size);
+                size = gzipInputStream.read(buf);
+            }
+            gzipInputStream.close();
+            inputStream.close();
+
+            out = outputStream.toByteArray();
+            outputStream.close();
+        } catch (IOException e) {
+            ImsLog.i(e.getMessage());
+        }
+
+        return out;
+    }
+
+    /**
+     * Store xml parsed data into xml file
+     * @param data data will be stored in file
+     * @return true if the operation is success, otherwise return false
+     */
+    public boolean createXmlFileFromBytes(byte[] data) {
+        try {
+            String fileName = LOCAL_FILE_NAME_PREFIX + mSubId + LOCAL_FILE_NAME_POSTFIX;
+            File file = new File(mContext.getFilesDir(), fileName);
+            FileOutputStream outputStream = new FileOutputStream(file);
+            outputStream.write(data);
+            outputStream.close();
+        } catch (IOException e) {
+            ImsLog.i(e.getMessage());
+            return false;
+        }
+
+        mIsComplete = initFromFile();
+
+        return mIsComplete;
+    }
+
+    /**
+     * delete xml file
+     */
+    public void deleteXmlFile() {
+        String fileName = LOCAL_FILE_NAME_PREFIX + mSubId + LOCAL_FILE_NAME_POSTFIX;
+        File file = new File(mContext.getFilesDir(), fileName);
+        try {
+            if (file != null && file.exists()) {
+                file.delete();
+                ImsLog.i("deleted file name is " + fileName);
+            }
+        } catch (SecurityException e) {
+            ImsLog.i(e.getMessage());
+        }
+    }
+
     /**
      * get file name to be stored
      * @return file name
@@ -274,15 +361,18 @@ public class ProvisioningData {
         return null;
     }
 
-    private void parse(InputStream in, Characteristic root)
-            throws XmlPullParserException, IOException {
+    private boolean parse(InputStream in, Characteristic root) throws IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
             parser.setInput(in, null);
             parser.nextTag();
             readProvisioningDoc(parser, root);
-            mIsComplete = true;
+
+            return true;
+        } catch (XmlPullParserException | IOException e) {
+            ImsLog.i(e.getMessage());
+            return false;
         } finally {
             in.close();
         }
@@ -482,97 +572,19 @@ public class ProvisioningData {
         return false;
     }
 
-
-    /**
-     * compress the gzip format data
-     * @param data byte array has data to compress
-     */
-    @VisibleForTesting
-    public static @Nullable byte[] compressGzip(@NonNull byte[] data) {
-        if (data == null || data.length == 0) {
-            return data;
-        }
-        byte[] out = null;
+    private boolean initFromFile() {
         try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
-            gzipOutputStream.write(data);
-            gzipOutputStream.close();
+            // read data from file
+            File file = new File(mContext.getFilesDir(), mFileName);
+            FileInputStream inputStream = new FileInputStream(file);
 
-            out = outputStream.toByteArray();
-            outputStream.close();
-        } catch (IOException e) {
-            ImsLog.i("Error to compressGzip due to " + e);
-        }
-
-        return out;
-    }
-
-    /**
-     * decompress the gzip format data
-     * @param data byte array has data to decompress
-     */
-    public static @Nullable byte[] decompressGzip(@NonNull byte[] data) {
-        if (data == null || data.length == 0) {
-            return data;
-        }
-        byte[] out = null;
-        try {
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
-            byte[] buf = new byte[1024];
-            int size = gzipInputStream.read(buf);
-            while (size >= 0) {
-                outputStream.write(buf, 0, size);
-                size = gzipInputStream.read(buf);
-            }
-            gzipInputStream.close();
-            inputStream.close();
-
-            out = outputStream.toByteArray();
-            outputStream.close();
-        } catch (IOException e) {
-            ImsLog.i("Error to decompressGzip due to " + e);
-        }
-
-        return out;
-    }
-
-    /**
-     * Store xml parsed data into xml file
-     * @param context Context
-     * @param subId subscriber ID
-     * @param data data will be stored in file
-     * @return true if the operation is success, otherwise return false
-     */
-    public static boolean createXmlFileFromBytes(Context context, int subId, byte[] data) {
-        try {
-            String fileName = LOCAL_FILE_NAME_PREFIX + subId + LOCAL_FILE_NAME_POSTFIX;
-            File file = new File(context.getFilesDir(), fileName);
-            FileOutputStream outputStream = new FileOutputStream(file);
-            outputStream.write(data);
-            outputStream.close();
+            // parse data
+            return parse(inputStream, mRoot);
         } catch (IOException e) {
             ImsLog.i(e.getMessage());
-            return false;
         }
 
-        return true;
-    }
-
-    /**
-     * delete xml file
-     * @param context Context
-     * @param subId subscriber ID
-     */
-    public static void deleteXmlFile(Context context, int subId) {
-        String fileName = LOCAL_FILE_NAME_PREFIX + subId + LOCAL_FILE_NAME_POSTFIX;
-        File file = new File(context.getFilesDir(), fileName);
-        if (file != null && file.exists()) {
-            file.delete();
-            ImsLog.i("deleted file name is " + fileName);
-        }
+        return false;
     }
 
     /**
