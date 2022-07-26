@@ -94,7 +94,6 @@ IMS_BOOL MediaNego::UpdateMediaEnvironment(IN MediaEnvironment* pEnvironment)
     {
         if (m_pAudioNego != IMS_NULL)
         {
-            m_pAudioNego->DestroyProfiles();
             m_pAudioNego->CreateProfiles(m_pMediaEnvironment,
                     MediaConfigUtil::GetAudioConfig(
                             GetSlotId(), m_pMediaEnvironment->eServiceType));

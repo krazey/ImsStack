@@ -34,7 +34,7 @@ class AudioNego : public ImsSlot
 {
 public:
     /**
-     * @brief The calss to store the negotiation attribute of the local and peer
+     * @brief The class to store the negotiation attribute of the local and peer
      *
      */
     class OaModel
@@ -91,7 +91,7 @@ public:
 
 public:
     AudioNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
-    AudioNego(IN const AudioNego& pAudioNego);
+    AudioNego(IN const AudioNego& objAudioNego);
     virtual ~AudioNego();
 
     /**
@@ -101,12 +101,6 @@ public:
      * @param pConfig The configuration to create audio profile
      */
     virtual void CreateProfiles(IN MediaEnvironment* pEnvironment, IN AudioConfiguration* pConfig);
-
-    /**
-     * @brief Destroy a local/peer/negotiate profile
-     *
-     */
-    virtual void DestroyProfiles();
 
     /**
      * @brief Form the SDP with the current profile based on the state
@@ -229,7 +223,7 @@ public:
      */
     virtual IMS_SINT32 GetMediaBandwidth(void);
 
-protected:
+private:
     virtual IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
     virtual IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
@@ -272,15 +266,13 @@ protected:
             IN AudioProfile::Payload* pPayload, IN IMS_BOOL isOfferReceivedCase);
     void RearrangeModeSetByAs(
             OUT AudioProfile::Payload* pPayload, IMS_BOOL bIpV6, IN IMS_SINT32 nAs);
-    MEDIA_DIRECTION UpdateDirectionToMine(
-            IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir, IN IMS_BOOL bIsMtCase);
+    MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
+            IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
     IMS_BOOL MakeCapaNegoProfileFromSdp(
             IN IMediaDescriptor* pDescriptor, OUT AudioProfile::CapaNego* pObjCapaNego);
     IMS_BOOL MakeNegotiatedCapaNegoProfile(IN AudioProfile::CapaNego* pSrcCapaNego,
             IN AudioProfile::CapaNego* pDestCapaNego,
             OUT AudioProfile::CapaNego* pNegotiatedCapaNego);
-
-private:
     OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
 
     IMSList<OaModel*> m_lstOaModel;

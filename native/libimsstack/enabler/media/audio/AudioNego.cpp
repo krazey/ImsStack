@@ -91,24 +91,38 @@ AudioNego::AudioNego(IN const AudioNego& objAudioNego) :
     m_lstOaModel.Append(pNewOaModel);
 
     this->m_pConfig = objAudioNego.m_pConfig;
-
     IMS_TRACE_I("AudioNego() - OA model list size[%d]", m_lstOaModel.GetSize(), 0, 0);
     return;
 }
 
-PUBLIC
-AudioNego::~AudioNego()
+PUBLIC VIRTUAL AudioNego::~AudioNego()
 {
-    IMS_TRACE_I("~AudioNego()", 0, 0, 0);
-    DestroyProfiles();
+    IMS_TRACE_I("~AudioNego() - lstOaModel size[%d]", m_lstOaModel.GetSize(), 0, 0);
+
+    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
+
+    if (pMediaManager != IMS_NULL)
+    {
+        MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+
+        if (pResourceMngr != IMS_NULL)
+        {
+            if (m_objBaseProfile.nDataPort != 0)
+            {
+                pResourceMngr->ReleaseRtpPort(m_objBaseProfile.nDataPort);
+            }
+        }
+    }
 
     while (m_lstOaModel.GetSize() > 0)
     {
         OaModel* pOaModel = m_lstOaModel.GetAt(0);
+
         if (pOaModel != IMS_NULL)
         {
             delete pOaModel;
         }
+
         m_lstOaModel.RemoveAt(0);
     }
 }
@@ -126,39 +140,12 @@ PUBLIC VIRTUAL void AudioNego::CreateProfiles(
     m_pConfig = pConfig;
 
     IMS_TRACE_I("CreateProfiles()", 0, 0, 0);
-    AudioProfileUtil::CreateAudioProfile(&m_objBaseProfile, pEnvironment, pConfig, GetSlotId());
-}
+    AudioProfile* pProfile = AudioProfileUtil::CreateProfile(pEnvironment, pConfig, GetSlotId());
 
-PUBLIC VIRTUAL void AudioNego::DestroyProfiles()
-{
-    IMS_TRACE_D("DestroyProfiles() - base payload size[%d]", m_objBaseProfile.lstPayload.GetSize(),
-            0, 0);
-
-    while (m_objBaseProfile.lstPayload.GetSize() > 0)
+    if (pProfile != IMS_NULL)
     {
-        AudioProfile::Payload* pPayload = m_objBaseProfile.lstPayload.GetAt(0);
-
-        if (pPayload != IMS_NULL)
-        {
-            delete pPayload;
-        }
-
-        m_objBaseProfile.lstPayload.RemoveAt(0);
-    }
-
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-
-    if (pMediaManager != IMS_NULL)
-    {
-        MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
-
-        if (pResourceMngr != IMS_NULL)
-        {
-            if (m_objBaseProfile.nDataPort != 0)
-            {
-                pResourceMngr->ReleaseRtpPort(m_objBaseProfile.nDataPort);
-            }
-        }
+        m_objBaseProfile = *pProfile;
+        delete pProfile;
     }
 }
 
@@ -182,7 +169,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSDP(IN NEGO_STATE eNegoState,
     }
 }
 
-PROTECTED VIRTUAL IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
+PUBLIC VIRTUAL IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir)
 {
     // Handling exception case
@@ -217,7 +204,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionD
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
-    AudioProfileUtil::SetAudioRsRr(pNewOaModel->pLocalProfile, m_pConfig);
+    AudioProfileUtil::SetRtcpRsRr(pNewOaModel->pLocalProfile, m_pConfig);
     m_lstOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
@@ -230,7 +217,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionD
     return bSdpMade;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
+PUBLIC VIRTUAL IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir)
 {
     IMS_TRACE_D("FormAnswer() - eDir[%d]", eDir, 0, 0);
@@ -304,7 +291,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSession
     return bSDPMade;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
+PUBLIC VIRTUAL IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir)
 {
     IMS_TRACE_I("FormReoffer() pDescriptor[%" PFLS_x "], eDir[%d], m_lstOaModel.GetSize[%d]",
@@ -350,6 +337,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessio
             {
                 delete pNewOaModel;
             }
+
             return IMS_FALSE;
         }
 
@@ -392,7 +380,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessio
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
-    AudioProfileUtil::SetAudioRsRr(pNewOaModel->pLocalProfile,
+    AudioProfileUtil::SetRtcpRsRr(pNewOaModel->pLocalProfile,
             MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pEnvironment->eServiceType));
 
     pNewOaModel->pLocalProfile->nDataPort = m_objBaseProfile.nDataPort;
@@ -418,8 +406,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessio
     return bSDPMade;
 }
 
-PUBLIC
-IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState, IN IMS_BOOL bForking,
+PUBLIC VIRTUAL IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState, IN IMS_BOOL bForking,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
         OUT MEDIA_DIRECTION* eDir)
 {
@@ -448,7 +435,7 @@ IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState, IN IMS_BOOL bForking,
     return (*eDir != MEDIA_DIRECTION_INVALID) ? IMS_TRUE : IMS_FALSE;
 }
 
-PROTECTED VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateOffer(
+PUBLIC VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateOffer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     // Handling exception case
@@ -492,7 +479,7 @@ PROTECTED VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateOffer(
     return pNewOaModel->pNegotiatedProfile->eDirection;
 }
 
-PROTECTED VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateAnswer(
+PUBLIC VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateAnswer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     // Handling exception case
@@ -543,7 +530,7 @@ PROTECTED VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     return pNewOaModel->pNegotiatedProfile->eDirection;
 }
 
-PROTECTED VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateReanswer(
+PUBLIC VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateReanswer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     // Handling exception case
@@ -679,8 +666,7 @@ PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
     }
 }
 
-PUBLIC
-IMS_BOOL AudioNego::SetPort(IN IMS_UINT32 nPort)
+PUBLIC VIRTUAL IMS_BOOL AudioNego::SetPort(IN IMS_UINT32 nPort)
 {
     MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
     if (pMediaManager == IMS_NULL)
@@ -721,8 +707,7 @@ IMS_BOOL AudioNego::SetPort(IN IMS_UINT32 nPort)
     return IMS_TRUE;
 }
 
-PUBLIC
-const IPAddress& AudioNego::GetNegotiatedRemoteAddr()
+PUBLIC VIRTUAL const IPAddress& AudioNego::GetNegotiatedRemoteAddr()
 {
     AudioProfile* pProfile = GetNegotiatedPeerProfile();
 
@@ -734,8 +719,7 @@ const IPAddress& AudioNego::GetNegotiatedRemoteAddr()
     return IPAddress::NONE;
 }
 
-PUBLIC
-IMS_UINT32 AudioNego::GetNegotiatedRemotePort()
+PUBLIC VIRTUAL IMS_UINT32 AudioNego::GetNegotiatedRemotePort()
 {
     AudioProfile* pProfile = GetNegotiatedPeerProfile();
 
@@ -747,8 +731,7 @@ IMS_UINT32 AudioNego::GetNegotiatedRemotePort()
     return 0;
 }
 
-PUBLIC
-AudioProfile* AudioNego::GetNegotiatedLocalProfile()
+PUBLIC VIRTUAL AudioProfile* AudioNego::GetNegotiatedLocalProfile()
 {
     OaModel* pOaModel = GetNegotiatedOaModel();
 
@@ -760,8 +743,7 @@ AudioProfile* AudioNego::GetNegotiatedLocalProfile()
     return IMS_NULL;
 }
 
-PUBLIC
-AudioProfile* AudioNego::GetNegotiatedNegoProfile()
+PUBLIC VIRTUAL AudioProfile* AudioNego::GetNegotiatedNegoProfile()
 {
     OaModel* pOaModel = GetNegotiatedOaModel();
 
@@ -773,8 +755,7 @@ AudioProfile* AudioNego::GetNegotiatedNegoProfile()
     return IMS_NULL;
 }
 
-PUBLIC
-AudioProfile* AudioNego::GetNegotiatedPeerProfile()
+PUBLIC VIRTUAL AudioProfile* AudioNego::GetNegotiatedPeerProfile()
 {
     OaModel* pOaModel = GetNegotiatedOaModel();
 
@@ -786,8 +767,7 @@ AudioProfile* AudioNego::GetNegotiatedPeerProfile()
     return IMS_NULL;
 }
 
-PUBLIC
-MEDIA_DIRECTION AudioNego::GetNegotiatedDirection(void)
+PUBLIC VIRTUAL MEDIA_DIRECTION AudioNego::GetNegotiatedDirection(void)
 {
     if (m_lstOaModel.GetSize() > 0)
     {
@@ -806,8 +786,7 @@ MEDIA_DIRECTION AudioNego::GetNegotiatedDirection(void)
     return MEDIA_DIRECTION_INVALID;
 }
 
-PUBLIC
-AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
+PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
 {
     OaModel* pLatestOaModel = GetNegotiatedOaModel();
     if (pLatestOaModel == IMS_NULL)
@@ -903,7 +882,7 @@ AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
     return AUDIO_CODEC_BITRATE_INVALID;
 }
 
-PUBLIC AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)
+PUBLIC VIRTUAL AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)
 {
     if (m_lstOaModel.GetSize() > 0)
     {
@@ -989,8 +968,7 @@ PUBLIC AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)
     return AUDIO_CODEC_NONE;
 }
 
-PUBLIC
-IMS_BOOL AudioNego::HasNegotiatedDtmf(void)
+PUBLIC VIRTUAL IMS_BOOL AudioNego::HasNegotiatedDtmf(void)
 {
     if (m_lstOaModel.GetSize() > 0)
     {
@@ -1050,8 +1028,7 @@ IMS_SINT32 AudioNego::GetNegotiatedRtpPort(void)
     return PORT_NONE;
 }
 
-PUBLIC
-IMS_SINT32 AudioNego::GetMediaBandwidth(void)
+PUBLIC VIRTUAL IMS_SINT32 AudioNego::GetMediaBandwidth(void)
 {
     if (m_lstOaModel.GetSize() > 0)
     {
@@ -1074,7 +1051,7 @@ IMS_SINT32 AudioNego::GetMediaBandwidth(void)
     return -1;
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
 {
@@ -1837,7 +1814,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     return IMS_TRUE;
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor,
         IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
@@ -2528,7 +2505,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
     }
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL AudioNego::GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -2919,7 +2896,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::EvsF
     return IMS_TRUE;
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL AudioNego::FindEvsInProfile(IN AudioProfile* pLocalProfile,
         IN AudioProfile::Payload* pDstPayload, IN IMS_BOOL bIsOfferReceived,
         OUT IMS_UINT32* pBandwidthNegoList, OUT IMS_UINT32* pBitrateNegoList,
@@ -3040,7 +3017,7 @@ IMS_BOOL AudioNego::FindEvsInProfile(IN AudioProfile* pLocalProfile,
     return IMS_FALSE;
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL AudioNego::GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::AmrFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -3126,7 +3103,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::AmrF
     return IMS_TRUE;
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL AudioNego::FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
         IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList)
 {
@@ -3222,7 +3199,7 @@ IMS_BOOL AudioNego::FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile:
     return IMS_FALSE;
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL AudioNego::FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload)
 {
     if (pProfile == IMS_NULL || pPayload == IMS_NULL)
@@ -3265,7 +3242,7 @@ IMS_BOOL AudioNego::FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile:
     return IMS_FALSE;
 }
 
-PROTECTED
+PRIVATE
 IMS_SINT32 AudioNego::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
         IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
         OUT IMS_UINT32* nNegoModeSet)
@@ -3323,7 +3300,7 @@ IMS_SINT32 AudioNego::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
     return nResult;
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL AudioNego::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
         IN AudioProfile::EvsFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
         OUT IMS_UINT32* nNegoBwList, OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList)
@@ -3566,7 +3543,7 @@ IMS_BOOL AudioNego::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
     return IMS_TRUE;
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL AudioNego::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
         IN AudioProfile::EvsFmtp* pDestFmtp, OUT IMS_UINT32* nNegoBwList,
         OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList)
@@ -3707,7 +3684,7 @@ IMS_BOOL AudioNego::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
     return IMS_TRUE;
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL AudioNego::FindTelephoneEventInProfile(
         IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload)
 {
@@ -3743,7 +3720,7 @@ IMS_BOOL AudioNego::FindTelephoneEventInProfile(
     return IMS_FALSE;
 }
 
-PROTECTED IMS_SINT32 AudioNego::FindPayloadIndexFromProfile(IN AString strCodecName,
+PRIVATE IMS_SINT32 AudioNego::FindPayloadIndexFromProfile(IN AString strCodecName,
         IN AudioProfile* pLocalProfile, IN AudioProfile::Payload* pDstPayload,
         IN IMS_BOOL bIsOfferReceived)
 {
@@ -3948,7 +3925,7 @@ PROTECTED IMS_SINT32 AudioNego::FindPayloadIndexFromProfile(IN AString strCodecN
     return -1;
 }
 
-PROTECTED
+PRIVATE
 void AudioNego::RearrangeModeSetByAs(
         OUT AudioProfile::Payload* pPayload, IN IMS_BOOL bIpV6, IN IMS_SINT32 nAs)
 {
@@ -4023,7 +4000,7 @@ void AudioNego::RearrangeModeSetByAs(
     }
 }
 
-PROTECTED
+PRIVATE
 MEDIA_DIRECTION AudioNego::UpdateDirectionToMine(
         IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir, IN IMS_BOOL bIsMtCase)
 {
@@ -4075,7 +4052,7 @@ MEDIA_DIRECTION AudioNego::UpdateDirectionToMine(
     return eNegotiatedDir;
 }
 
-PROTECTED
+PRIVATE
 IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
         IN IMediaDescriptor* pDescriptor, OUT AudioProfile::CapaNego* pObjCapaNego)
 {
@@ -4197,7 +4174,7 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AudioNego::MakeNegotiatedCapaNegoProfile(
+PUBLIC VIRTUAL IMS_BOOL AudioNego::MakeNegotiatedCapaNegoProfile(
         IN AudioProfile::CapaNego* pSrcCapaNego, IN AudioProfile::CapaNego* pDestCapaNego,
         OUT AudioProfile::CapaNego* pNegotiatedCapaNego)
 {
