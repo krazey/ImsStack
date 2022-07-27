@@ -32,6 +32,7 @@
 #include "ImsNetworkConnectionState.h"
 #include "INetworkIpSec.h"
 #include "OsUtil.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceThread.h"
@@ -40,7 +41,6 @@
 #include "network/OsSocketDef.h"
 #include "network/OsSocketMsg.h"
 #include "network/OsSocketService.h"
-#include "system-intf/System.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -131,7 +131,8 @@ void osSocket_SetNetworkForSocket(
         return;
     }
 
-    if (System::GetInstance()->BindSocket(pNc->GetApnType(), hSocket, nSlotId) != 1)
+    if (PlatformContext::GetInstance()->GetSystem()->BindSocket(
+                pNc->GetApnType(), hSocket, nSlotId) != 1)
     {
         IMS_TRACE_D("BindSocket is failed - slotId=%d, apnType=%d, sockFd=%d.", nSlotId,
                 pNc->GetApnType(), hSocket);

@@ -27,13 +27,12 @@
 #include "ImsFdSet.h"
 #include "ImsSocketState.h"
 #include "OsPthread.h"
-#include "PlatformFactory.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "network/OsSocket.h"
 #include "network/OsSocketMsg.h"
 #include "network/OsSocketService.h"
-#include "system-intf/System.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -87,7 +86,8 @@ private:
 PUBLIC
 SocketFdManager::SocketFdManager()
 {
-    m_pFdSetBackup = PlatformFactory::CreateFdSet(IMS_FD_SET);
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    m_pFdSetBackup = piOsFactory->CreateFdSet(IMS_FD_SET);
 
     // __IMS_SOCKET_EVENT__ {
     m_nCtrlPipe[0] = (-1);
@@ -540,7 +540,8 @@ PUBLIC VIRTUAL void OsSocketThread::RunImp()
     IMS_SINT32 nMaxEvent;
     IMS_SINT32 nSignaledCount = 0;
     IMS_SINT32 nSignaledEvents = 0;
-    ImsFdSet* pFdSet = PlatformFactory::CreateFdSet(IMS_FD_SET);
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    ImsFdSet* pFdSet = piOsFactory->CreateFdSet(IMS_FD_SET);
     IMSList<IMS_SOCKET> objSocketHandles;
 
     while (bLoop)

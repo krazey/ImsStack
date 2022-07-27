@@ -16,36 +16,31 @@
 #ifndef SERVICE_THREAD_H_
 #define SERVICE_THREAD_H_
 
+#include "INativeThreadMethods.h"
 #include "IThread.h"
+#include "PlatformService.h"
 
 class IMutex;
 
-class ThreadService
+class ThreadService : public PlatformService
 {
-private:
-    ThreadService();
-    ~ThreadService();
-
 public:
+    ThreadService();
     ThreadService(IN const ThreadService&) = delete;
     ThreadService& operator=(IN const ThreadService&) = delete;
 
-public:
-    inline IThread* Create(IN const AString& strName)
-            __IMS_DEPRECATED__("Use Create(AString,IMS_SINT32) instead")
-    {
-        return Create(strName, IMS_SLOT_0);
-    }
-    IThread* Create(IN const AString& strName, IN IMS_SINT32 nSlotId);
-    // Creates a thread which needs to communicate with the external module (IN & OUT)
-    IThread* CreateEx(IN const AString& strName, IN IMS_SINT32 nSlotId);
-    void Destroy(IN IThread*& piThread);
+protected:
+    virtual ~ThreadService();
 
-    IMS_BOOL Contains(IN const IThread* piThread) const;
-    IMS_BOOL ContainsLocked(IN const IThread* piThread) const;
-    IThread* GetCurrentThread() const;
-    IThread* GetThread(IN const AString& strName) const;
-    IThread* GetThreadLocked(IN const AString& strName) const;
+public:
+    virtual IThread* CreateThread(IN const AString& strName, IN IMS_SINT32 nSlotId);
+    virtual void DestroyThread(IN IThread*& piThread);
+
+    virtual IMS_BOOL Contains(IN const IThread* piThread) const;
+    virtual IMS_BOOL ContainsLocked(IN const IThread* piThread) const;
+    virtual IThread* GetCurrentThread() const;
+    virtual IThread* GetThread(IN const AString& strName) const;
+    virtual IThread* GetThreadLocked(IN const AString& strName) const;
 
     static ThreadService* GetThreadService();
 
@@ -55,6 +50,10 @@ public:
      * If thread is a Framework thread, then it always returns slot-0.
      */
     static IMS_SINT32 GetCurrentSlotId(IN IMS_SINT32 nDefaultSlotId = IMS_SLOT_ANY);
+
+    /** Thread related method to interwork with the lower layer. */
+    static INativeThreadMethods* GetNativeThreadMethods();
+    static void SetNativeThreadMethods(IN INativeThreadMethods* piNativeThreadMethods);
 
 private:
     void LockThreadPool() const;
@@ -66,6 +65,8 @@ private:
     IMutex* m_piLock;
     // List of (IThread*)
     IMSList<IThread*> m_objThreads;
+
+    static INativeThreadMethods* s_piNativeThreadMethods;
 };
 
 #endif

@@ -25,6 +25,9 @@
 class MockILocationProperties : public ILocationProperties
 {
 public:
+    inline MockILocationProperties() {}
+    inline virtual ~MockILocationProperties() {}
+
     MOCK_METHOD(const AString&, GetLatitude, (), (const, override));
     MOCK_METHOD(const AString&, GetLongitude, (), (const, override));
     MOCK_METHOD(const AString&, GetRadius, (), (const, override));
@@ -43,6 +46,9 @@ public:
 class MockILocationInfo : public ILocationInfo
 {
 public:
+    inline MockILocationInfo() {}
+    inline virtual ~MockILocationInfo() {}
+
     MOCK_METHOD(IMS_BOOL, StartLocationInfo, (IN IMS_UINT32 nUpdateIntervalInSec), (override));
     MOCK_METHOD(void, StopLocationInfo, (), (override));
     MOCK_METHOD(ILocationProperties*, GetLocationProperties, (IN IMS_SINT32 nType), (override));
@@ -51,4 +57,4 @@ public:
     MOCK_METHOD(const AString&, GetLastKnownCountry, (), (const, override));
 };
 
-#endif  // MOCK_I_PHONE_INFO_LOCATION_H_
+#endif

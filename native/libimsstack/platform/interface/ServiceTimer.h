@@ -19,23 +19,23 @@
 #include "ITimer.h"
 #include "ImsList.h"
 #include "ImsMessage.h"
+#include "PlatformService.h"
 
 class IMutex;
 
-class TimerService
+class TimerService : public PlatformService
 {
-private:
-    TimerService();
-    ~TimerService();
-
 public:
+    TimerService();
     TimerService(IN const TimerService&) = delete;
     TimerService& operator=(IN const TimerService&) = delete;
 
+protected:
+    virtual ~TimerService();
+
 public:
-    ITimer* CreateTimer();
-    ITimer* CreateTimer(IN IMS_BOOL bAlarmTimer);
-    void DestroyTimer(IN ITimer*& piTimer, IN IMS_BOOL bOnOwnerThread = IMS_TRUE);
+    virtual ITimer* CreateTimer();
+    virtual void DestroyTimer(IN ITimer*& piTimer, IN IMS_BOOL bOnOwnerThread = IMS_TRUE);
 
     void DispatchServiceMessage(IN ImsMessage& objMsg);
 

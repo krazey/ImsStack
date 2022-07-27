@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "PlatformContext.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "device/OsLocationInfo.h"
-#include "system-intf/System.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -116,7 +116,8 @@ PUBLIC VIRTUAL IMS_BOOL OsLocationInfo::StartLocationInfo(IN IMS_UINT32 nUpdateI
         return IMS_TRUE;
     }
 
-    if (System::GetInstance()->StartLocationInfo(nUpdateIntervalInSec, GetSlotId()))
+    if (PlatformContext::GetInstance()->GetSystem()->StartLocationInfo(
+                nUpdateIntervalInSec, GetSlotId()))
     {
         m_bIsStarted = IMS_TRUE;
     }
@@ -135,7 +136,7 @@ PUBLIC VIRTUAL void OsLocationInfo::StopLocationInfo()
         return;
     }
 
-    System::GetInstance()->StopLocationInfo(GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->StopLocationInfo(GetSlotId());
     m_bIsStarted = IMS_FALSE;
 }
 
@@ -149,7 +150,8 @@ PUBLIC VIRTUAL ILocationProperties* OsLocationInfo::GetLocationProperties(IN IMS
         m_pLocationProperties = IMS_NULL;
     }
 
-    if (System::GetInstance()->GetLocationInformation(objLocationInfo, nType, GetSlotId()) == 1)
+    if (PlatformContext::GetInstance()->GetSystem()->GetLocationInformation(
+                objLocationInfo, nType, GetSlotId()) == 1)
     {
         m_pLocationProperties = new LocationProperties();
 
@@ -195,7 +197,7 @@ PUBLIC VIRTUAL ILocationProperties* OsLocationInfo::GetLocationProperties(IN IMS
 
 PUBLIC VIRTUAL IMS_BOOL OsLocationInfo::MakeInstantLocationInfo()
 {
-    return System::GetInstance()->MakeInstantLocationInfo(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->MakeInstantLocationInfo(GetSlotId());
 }
 
 PUBLIC VIRTUAL void OsLocationInfo::SetDefaultLocationProperties(

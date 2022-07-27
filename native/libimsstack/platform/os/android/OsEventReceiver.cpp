@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 #include "OsEventReceiver.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
-#include "system-intf/System.h"
 #include "system-intf/SystemConstants.h"
 
 PUBLIC
@@ -29,21 +29,21 @@ PUBLIC VIRTUAL OsEventReceiver::~OsEventReceiver() {}
 
 PRIVATE VIRTUAL void OsEventReceiver::ResetEvent(IN IMS_SINT32 nEvent)
 {
-    System* pSystem = System::GetInstance();
+    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
 
-    if (pSystem != IMS_NULL)
+    if (piSystem != IMS_NULL)
     {
-        pSystem->ResetEvent(nEvent, GetSlotId());
+        piSystem->ResetEvent(nEvent, GetSlotId());
     }
 }
 
 PRIVATE VIRTUAL void OsEventReceiver::SetEvent(IN IMS_SINT32 nEvent)
 {
-    System* pSystem = System::GetInstance();
+    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
 
-    if (pSystem != IMS_NULL)
+    if (piSystem != IMS_NULL)
     {
-        pSystem->SetEvent(nEvent, GetSlotId());
+        piSystem->SetEvent(nEvent, GetSlotId());
     }
 }
 
@@ -51,11 +51,11 @@ PRIVATE VIRTUAL void OsEventReceiver::SetListener(IN IEventReceiverListener* piL
 {
     m_piListener = piListener;
 
-    System* pSystem = System::GetInstance();
+    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
 
-    if (m_piListener != IMS_NULL && pSystem != IMS_NULL)
+    if (m_piListener != IMS_NULL && piSystem != IMS_NULL)
     {
-        pSystem->AddListener(SystemConstants::CATEGORY_EVENT, this, GetSlotId());
+        piSystem->AddListener(SystemConstants::CATEGORY_EVENT, this, GetSlotId());
     }
 }
 

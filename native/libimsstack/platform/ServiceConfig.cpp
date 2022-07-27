@@ -16,7 +16,7 @@
 #include "ImsCarrierConfig.h"
 #include "ImsMap.h"
 #include "ImsMessageDef.h"
-#include "PlatformFactory.h"
+#include "PlatformContext.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "SystemConfig.h"
@@ -54,7 +54,11 @@ ConfigServicePrivate::~ConfigServicePrivate()
     for (IMS_UINT32 i = 0; i < m_objCarrierConfigs.GetSize(); ++i)
     {
         ImsCarrierConfig* pCc = m_objCarrierConfigs.GetValueAt(i);
-        PlatformFactory::DestroyCarrierConfig(pCc);
+
+        if (pCc != IMS_NULL)
+        {
+            pCc->Destroy();
+        }
     }
 
     m_objCarrierConfigs.Clear();
@@ -72,7 +76,8 @@ ImsCarrierConfig* ConfigServicePrivate::GetCarrierConfig(IN IMS_SINT32 nSlotId)
 
     if (pCc == IMS_NULL)
     {
-        pCc = PlatformFactory::CreateCarrierConfig(nSlotId);
+        IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+        pCc = piOsFactory->CreateCarrierConfig(nSlotId);
 
         m_objCarrierConfigs.SetValue(nSlotId, pCc);
     }
@@ -96,6 +101,17 @@ PUBLIC
 ICarrierConfig* ConfigService::GetCarrierConfig(IN IMS_SINT32 nSlotId)
 {
     return m_pPrivate->GetCarrierConfig(nSlotId);
+}
+
+PUBLIC
+void ConfigService::LoadCarrierConfig(IN IMS_SINT32 nSlotId)
+{
+    ImsCarrierConfig* pCc = m_pPrivate->GetCarrierConfig(nSlotId);
+
+    if (pCc != IMS_NULL)
+    {
+        pCc->LoadConfig();
+    }
 }
 
 PUBLIC
@@ -123,25 +139,8 @@ void ConfigService::DispatchServiceMessage(IN ImsMessage& objMsg)
     }
 }
 
-PUBLIC
-void ConfigService::LoadCarrierConfig(IN IMS_SINT32 nSlotId)
-{
-    ImsCarrierConfig* pCc = m_pPrivate->GetCarrierConfig(nSlotId);
-
-    if (pCc != IMS_NULL)
-    {
-        pCc->LoadConfig();
-    }
-}
-
 PUBLIC GLOBAL ConfigService* ConfigService::GetConfigService()
 {
-    static ConfigService* s_pConfigService = IMS_NULL;
-
-    if (s_pConfigService == IMS_NULL)
-    {
-        s_pConfigService = new ConfigService();
-    }
-
-    return s_pConfigService;
+    return DYNAMIC_CAST(ConfigService*,
+            PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_CONFIG));
 }

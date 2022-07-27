@@ -44,7 +44,7 @@ IMS_BOOL BaseThread::Start(IN const AString& strName, IN IMS_SINT32 nSlotId)
 
     m_strName = strName;
 
-    m_piThread = ThreadService::GetThreadService()->Create(m_strName, nSlotId);
+    m_piThread = ThreadService::GetThreadService()->CreateThread(m_strName, nSlotId);
 
     if (m_piThread == IMS_NULL)
     {
@@ -74,7 +74,7 @@ void BaseThread::Terminate()
     // Method call will not be returned util the current thread is exited in platform layer.
     m_piThread->Deactivate();
 
-    ThreadService::GetThreadService()->Destroy(m_piThread);
+    ThreadService::GetThreadService()->DestroyThread(m_piThread);
     m_piThread = IMS_NULL;
 }
 

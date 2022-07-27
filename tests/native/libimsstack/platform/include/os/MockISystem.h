@@ -1,0 +1,225 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef MOCK_I_SYSTEM_H_
+#define MOCK_I_SYSTEM_H_
+
+#include "AStringArray.h"
+#include "ByteArray.h"
+#include "ISystem.h"
+#include "ISystemListener.h"
+#include "ImsAccessNetworkInfoType.h"
+#include "ImsParcel.h"
+#include "IpSecSaParameter.h"
+
+class MockISystem : public ISystem
+{
+public:
+    inline MockISystem() {}
+    inline virtual ~MockISystem() {}
+
+    MOCK_METHOD(void, Destroy, (), (override));
+    // Add & remove the listener to receive the system events
+    MOCK_METHOD(void, AddListener,
+            (IN IMS_UINT32 nCategory, IN ISystemListener* piListener, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(void, RemoveListener,
+            (IN IMS_UINT32 nCategory, IN ISystemListener* piListener, IN IMS_SINT32 nSlotId),
+            (override));
+
+    ////
+    // Power-related information
+    ////
+    MOCK_METHOD(IMS_SINT32, GetPowerLevel, (), (override));
+
+    ////
+    // Device & UICC-related information
+    ////
+    MOCK_METHOD(IMS_SINT32, GetDeviceId, (OUT AString & strDeviceId, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(IMS_SINT32, GetDeviceSoftwareVersion, (OUT AString & strSv, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(
+            IMS_SINT32, GetExternalStoragePath, (OUT AString & strExternalStoragePath), (override));
+    MOCK_METHOD(IMS_SINT32, GetPhoneNumber, (OUT AString & strPhoneNumber, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(IMS_SINT32, GetSubscriberId, (OUT AString & strImsi, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(IMS_SINT32, GetMcc, (OUT AString & strMcc, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetMnc, (OUT AString & strMnc, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetOperator, (OUT AString & strOperator, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(
+            IMS_SINT32, GetCountry, (OUT AString & strCountry, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetNetworkCountry, (OUT AString & strCountry, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(IMS_SINT32, GetEmergencyNumberListFromSim,
+            (OUT AString & strEnlFromSim, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetEmergencyPriorityFromModem, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_BOOL, IsUiccGbaSupported, (IN IMS_SINT32 nSlotId), (override));
+    // For UICC (ISIM)
+    MOCK_METHOD(AString, GetIsimState, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, ReadIsimFileAttributes, (IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(IMS_SINT32, ReadIsimRecord,
+            (IN IMS_SINT32 nFileId, IN IMS_SINT32 nIndex, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_RESULT, RequestIsimAuthentication,
+            (IN const AString& strNonce, IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId), (override));
+    // For UICC (USIM)
+    MOCK_METHOD(IMS_RESULT, RequestUsimAuthentication,
+            (IN const AString& strNonce, IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId), (override));
+
+    ////
+    // Call-related information
+    ////
+    MOCK_METHOD(IMS_SINT32, GetCallState, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, IsEmergencyNumber, (IN const AString& strNumber, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(IMS_SINT32, GetTtyMode, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetRttMode, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetCallStateInOtherSlot, (IN IMS_SINT32 nSlotId), (override));
+
+    MOCK_METHOD(IMS_SINT32, GetDeviceName, (OUT AString & strDeviceName), (override));
+    MOCK_METHOD(
+            IMS_SINT32, GetDigestSha1, (IN const AString& strIn, OUT AString& strOut), (override));
+
+    ////
+    // Network-related information (mobile)
+    ////
+    MOCK_METHOD(IMS_SINT32, GetNetworkType, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetVoiceNetworkType, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetRoamingState, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetVoiceRoamingType, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetDataRoamingType, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetServiceState, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetVoiceServiceState, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetAccessNetworkInfo,
+            (IN IMS_SINT32 nDefaultNetworkType, OUT IMS_SINT32& nNetworkType,
+                    OUT AStringArray& objAccessNetInfo, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(AStringArray, GetLastAccessNetworkInfo,
+            (IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, ActivateDataConnection, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(IMS_SINT32, DeactivateDataConnection,
+            (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(AString, GetApnName, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetDataConnectionState, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(AStringArray, GetHostByName,
+            (IN const AString& strHost, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nApnType,
+                    IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(
+            IMS_SINT32, GetIfaceId, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(AString, GetIfaceName, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetIpcanCategory, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(AString, GetLocalAddress,
+            (IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(AStringArray, GetPcscfAddresses,
+            (IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_BOOL, IsImsEmergencyCallSupported, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_BOOL, IsImsVoiceCallSupported, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetLteRsrpStrength, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_BOOL, IsLteEmergencyOnly, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_BOOL, IsEmergencyAttachSupported, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_BOOL, IsMobileDataEnabled, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetMocnPlmnInfo, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetMtu, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, BindSocket,
+            (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSockFd, IN IMS_SINT32 nSlotId), (override));
+
+    ////
+    // WiFi-related information
+    ////
+    MOCK_METHOD(AString, GetWifiBssId, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetWifiDetailedState, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetWifiState, (), (override));
+    MOCK_METHOD(AString, GetWifiSsId, (), (override));
+
+    ////
+    // Alarm timer control
+    ////
+    MOCK_METHOD(IMS_SINT32, SetAlarm, (IN IMS_UINT32 nDuration, IN IMS_UINTP nAlarmId), (override));
+    MOCK_METHOD(IMS_SINT32, KillAlarm, (IN IMS_UINTP nAlarmId), (override));
+
+    ////
+    // Configuration-related information
+    ////
+    MOCK_METHOD(IMS_SINT32, GetPreference,
+            (IN const AString& strFileName, IN const AString& strKey, IN IMS_UINT32 nValueType,
+                    IN IMS_SINT32 nSlotId, OUT AString& strValue),
+            (override));
+    MOCK_METHOD(IMS_SINT32, SetPreference,
+            (IN const AString& strFileName, IN const AString& strKey, IN IMS_UINT32 nValueType,
+                    IN const AString& strValue, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(AString, GetPrivateProperty,
+            (IN IMS_BOOL bPersistent, IN const AString& strKey, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, SetPrivateProperty,
+            (IN IMS_BOOL bPersistent, IN const AString& strKey, IN const AString& strValue,
+                    IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(IMS_BOOL, GetCarrierConfig, (IN IMS_SINT32 nSlotId, OUT ImsParcel& objConfig),
+            (override));
+
+    ////
+    // Event control (from native to java)
+    ////
+    MOCK_METHOD(IMS_SINT32, SendEvent,
+            (IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,
+                    IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(IMS_SINT32, SetEvent, (IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, ResetEvent, (IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId), (override));
+
+    ////
+    // WFC information
+    ////
+    MOCK_METHOD(IMS_BOOL, IsWifiCallingEnabled, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetWifiCallingPreferences, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_BOOL, IsWifiCallingProvisioned, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(AString, GetWifiCallingAddressId, (IN IMS_SINT32 nSlotId), (override));
+
+    ////
+    // Location information
+    ////
+    MOCK_METHOD(IMS_BOOL, StartLocationInfo,
+            (IN IMS_UINT32 nUpdateIntervalInSec, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(void, StopLocationInfo, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetLocationInformation,
+            (OUT AStringArray & objLocationInfo, IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(IMS_BOOL, MakeInstantLocationInfo, (IN IMS_SINT32 nSlotId), (override));
+
+    ////
+    // IpSec
+    ////
+    MOCK_METHOD(IMS_SINT32, AddIpSecSaParameter,
+            (IN const IpSecSaParameter& objSaParam, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(void, RemoveIpSecSaParameter, (IN IMS_SINT32 nIpSecId, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(IMS_SINT32, ApplyIpSecSa,
+            (IN IMS_SINT32 nIpSecId, IN IMS_SINT32 nSpi, IN IMS_SINT32 nSocketFd,
+                    IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(void, RemoveIpSecSa,
+            (IN IMS_SINT32 nIpSecId, IN IMS_SINT32 nSpi, IN IMS_SINT32 nSocketFd,
+                    IN IMS_SINT32 nSlotId),
+            (override));
+};
+
+#endif

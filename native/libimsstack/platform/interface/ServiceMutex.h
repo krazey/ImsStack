@@ -18,20 +18,21 @@
 
 #include "AString.h"
 #include "IMutex.h"
+#include "PlatformService.h"
 
-class MutexService
+class MutexService : public PlatformService
 {
-private:
-    MutexService();
-    ~MutexService();
-
 public:
+    MutexService();
     MutexService(IN const MutexService&) = delete;
     MutexService& operator=(IN const MutexService&) = delete;
 
+protected:
+    virtual ~MutexService();
+
 public:
-    IMutex* CreateMutex(IN const AString& strName = AString::ConstNull());
-    void DestroyMutex(IN IMutex*& piMutex);
+    virtual IMutex* CreateMutex(IN const AString& strName = AString::ConstNull());
+    virtual void DestroyMutex(IN IMutex*& piMutex);
 
     static MutexService* GetMutexService();
 };

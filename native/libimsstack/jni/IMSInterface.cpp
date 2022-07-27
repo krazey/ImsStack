@@ -26,6 +26,7 @@
 #include <utils/Log.h>
 #include <utils/threads.h>
 
+#include "ServiceThread.h"
 #include "ServiceTrace.h"
 
 #include "CoreInterfaceFactory.h"
@@ -354,10 +355,31 @@ void JNI_DetachNativeThread()
     }
 }
 
+class NativeThreadMethods : public INativeThreadMethods
+{
+public:
+    inline NativeThreadMethods() {}
+    inline virtual ~NativeThreadMethods() {}
+
+    NativeThreadMethods(const NativeThreadMethods&) = delete;
+    NativeThreadMethods& operator=(const NativeThreadMethods&) = delete;
+
+public:
+    inline void AttachNativeThread(IN const IMS_CHAR* pszName) override
+    {
+        JNI_AttachNativeThread(pszName);
+    }
+
+    inline void DetachNativeThread() override { JNI_DetachNativeThread(); }
+};
+
+static NativeThreadMethods s_objNativeThreadMethods;
+
 static void JNI_Construct(JNIEnv* /*env*/, jobject /*object*/)
 {
     // Memory and basic platform's initialization
     ImsMain::Initialize();
+    ThreadService::SetNativeThreadMethods(&s_objNativeThreadMethods);
 
     // Configure the system configuration on boot-up
     {

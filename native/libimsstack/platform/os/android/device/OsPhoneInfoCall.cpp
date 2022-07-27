@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "device/OsPhoneInfoCall.h"
-#include "system-intf/System.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -30,40 +30,40 @@ PUBLIC VIRTUAL OsPhoneInfoCall::~OsPhoneInfoCall() {}
 
 PUBLIC VIRTUAL IMS_BOOL OsPhoneInfoCall::IsEmergencyNumber(IN const AString& strNumber) const
 {
-    return System::GetInstance()->IsEmergencyNumber(strNumber, GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->IsEmergencyNumber(strNumber, GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_UINT32 OsPhoneInfoCall::GetTtyMode() const
 {
-    return System::GetInstance()->GetTtyMode(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetTtyMode(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_UINT32 OsPhoneInfoCall::GetRttMode() const
 {
-    return System::GetInstance()->GetRttMode(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetRttMode(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsPhoneInfoCall::IsWifiCallingEnabled()
 {
-    return System::GetInstance()->IsWifiCallingEnabled(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->IsWifiCallingEnabled(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_UINT32 OsPhoneInfoCall::GetWifiCallingPreferences()
 {
-    return System::GetInstance()->GetWifiCallingPreferences(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetWifiCallingPreferences(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsPhoneInfoCall::IsWifiCallingProvisioned()
 {
-    return System::GetInstance()->IsWifiCallingProvisioned(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->IsWifiCallingProvisioned(GetSlotId());
 }
 
 PUBLIC VIRTUAL AString OsPhoneInfoCall::GetWifiCallingAddressId()
 {
-    return System::GetInstance()->GetWifiCallingAddressId(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetWifiCallingAddressId(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_SINT32 OsPhoneInfoCall::GetCsCallStateInOtherSlot() const
 {
-    return System::GetInstance()->GetCallStateInOtherSlot(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetCallStateInOtherSlot(GetSlotId());
 }

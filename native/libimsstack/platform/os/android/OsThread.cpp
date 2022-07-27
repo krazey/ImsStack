@@ -26,15 +26,13 @@
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServicePhoneInfo.h"
+#include "ServiceThread.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 
 #define WAIT_TIMEOUT_FOR_IPC 1      // ms
 #define WAIT_TIMEOUT_FOR_RUN 10000  // us
-
-extern void JNI_AttachNativeThread(const char* threadName);
-extern void JNI_DetachNativeThread(void);
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -46,11 +44,19 @@ IMS_PVOID osThread_Run(IN OsThread* pThread)
         return IMS_NULL;
     }
 
-    JNI_AttachNativeThread(pThread->GetName().GetStr());
+    IMS_PVOID pvThread = IMS_NULL;
+    INativeThreadMethods* piNativeThreadMethods = ThreadService::GetNativeThreadMethods();
 
-    IMS_PVOID pvThread = reinterpret_cast<IMS_PVOID>(pThread->Run());
-
-    JNI_DetachNativeThread();
+    if (piNativeThreadMethods != IMS_NULL)
+    {
+        piNativeThreadMethods->AttachNativeThread(pThread->GetName().GetStr());
+        pvThread = reinterpret_cast<IMS_PVOID>(pThread->Run());
+        piNativeThreadMethods->DetachNativeThread();
+    }
+    else
+    {
+        pvThread = reinterpret_cast<IMS_PVOID>(pThread->Run());
+    }
 
     pthread_exit(NULL);
 

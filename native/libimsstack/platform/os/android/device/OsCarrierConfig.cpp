@@ -19,10 +19,11 @@
 #include "AStringBuffer.h"
 #endif
 #include "ImsMessageDef.h"
+#include "OsParcel.h"
+#include "PlatformContext.h"
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
 #include "device/OsCarrierConfig.h"
-#include "system-intf/System.h"
 #include "system-intf/SystemConstants.h"
 
 __IMS_TRACE_TAG_ADAPT__;
@@ -78,14 +79,16 @@ OsCarrierConfig::OsCarrierConfig(IN IMS_SINT32 nSlotId) :
 {
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-    System::GetInstance()->AddListener(SystemConstants::CATEGORY_CONFIG, this, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->AddListener(
+            SystemConstants::CATEGORY_CONFIG, this, GetSlotId());
 }
 
 PUBLIC VIRTUAL OsCarrierConfig::~OsCarrierConfig()
 {
     if (!m_bIsBundle)
     {
-        System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_CONFIG, this, GetSlotId());
+        PlatformContext::GetInstance()->GetSystem()->RemoveListener(
+                SystemConstants::CATEGORY_CONFIG, this, GetSlotId());
     }
 }
 
@@ -98,7 +101,8 @@ OsCarrierConfig::OsCarrierConfig(
 {
     if (!m_bIsBundle)
     {
-        System::GetInstance()->AddListener(SystemConstants::CATEGORY_CONFIG, this, GetSlotId());
+        PlatformContext::GetInstance()->GetSystem()->AddListener(
+                SystemConstants::CATEGORY_CONFIG, this, GetSlotId());
     }
 }
 
@@ -125,14 +129,14 @@ PUBLIC VIRTUAL void OsCarrierConfig::System_NotifyEvent(
 PUBLIC VIRTUAL void OsCarrierConfig::DispatchServiceMessage(
         IN IMS_UINTP /*nWparam*/, IN IMS_UINTP /*nLparam*/)
 {
-    Parcel objConfigParcel;
+    OsParcel objConfig;
 
-    if (System::GetInstance()->GetCarrierConfig(GetSlotId(), objConfigParcel))
+    if (PlatformContext::GetInstance()->GetSystem()->GetCarrierConfig(GetSlotId(), objConfig))
     {
         PersistableBundle objNewConfig;
         status_t status;
 
-        if ((status = objNewConfig.readFromParcel(&objConfigParcel)) != NO_ERROR)
+        if ((status = objNewConfig.readFromParcel(&(objConfig.GetParcel()))) != NO_ERROR)
         {
             IMS_TRACE_E(status, "Getting a carrier-config failed", 0, 0, 0);
             return;
@@ -157,14 +161,14 @@ PUBLIC VIRTUAL void OsCarrierConfig::LoadConfig()
 {
     IMS_TRACE_D("LoadConfig: slotId=%d", GetSlotId(), 0, 0);
 
-    Parcel objConfigParcel;
+    OsParcel objConfig;
 
-    if (System::GetInstance()->GetCarrierConfig(GetSlotId(), objConfigParcel))
+    if (PlatformContext::GetInstance()->GetSystem()->GetCarrierConfig(GetSlotId(), objConfig))
     {
         PersistableBundle objNewConfig;
         status_t status;
 
-        if ((status = objNewConfig.readFromParcel(&objConfigParcel)) != NO_ERROR)
+        if ((status = objNewConfig.readFromParcel(&(objConfig.GetParcel()))) != NO_ERROR)
         {
             IMS_TRACE_E(status, "Getting a carrier-config failed", 0, 0, 0);
             return;

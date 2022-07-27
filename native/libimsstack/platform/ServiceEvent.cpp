@@ -18,7 +18,7 @@
 #include "ImsActivity.h"
 #include "ImsMap.h"
 #include "ImsMessageDef.h"
-#include "PlatformFactory.h"
+#include "PlatformContext.h"
 #include "ServiceEvent.h"
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
@@ -131,11 +131,13 @@ private:
 PUBLIC
 EventHolder::EventHolder(IN IMS_SINT32 nSlotId) :
         m_piLock(IMS_NULL),
-        m_piReceiver(PlatformFactory::CreateEventReceiver(nSlotId)),
+        m_piReceiver(IMS_NULL),
         m_objEventMap(IMSMap<IMS_SINT32, IMSList<EventActivity*>>())
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    m_piReceiver = piOsFactory->CreateEventReceiver(nSlotId);
     m_piReceiver->SetListener(this);
 }
 
@@ -164,7 +166,8 @@ PUBLIC VIRTUAL EventHolder::~EventHolder()
 
     m_piReceiver->SetListener(IMS_NULL);
 
-    PlatformFactory::DestroyEventReceiver(m_piReceiver);
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    piOsFactory->DestroyEventReceiver(m_piReceiver);
 }
 
 PUBLIC
@@ -362,9 +365,12 @@ private:
 
 PUBLIC
 EventServicePrivate::EventServicePrivate() :
-        m_piSender(PlatformFactory::CreateEventSender()),
+        m_piSender(IMS_NULL),
         m_ppHolder(IMS_NULL)
 {
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    m_piSender = piOsFactory->CreateEventSender();
+
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
     m_ppHolder = new EventHolder*[nSimCount];
@@ -392,7 +398,8 @@ PUBLIC VIRTUAL EventServicePrivate::~EventServicePrivate()
         delete[] m_ppHolder;
     }
 
-    PlatformFactory::DestroyEventSender(m_piSender);
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    piOsFactory->DestroyEventSender(m_piSender);
 }
 
 // EventService class
@@ -445,12 +452,6 @@ void EventService::SetUnregisteredEvents(IN IMS_SINT32 nSlotId)
 
 PUBLIC GLOBAL EventService* EventService::GetEventService()
 {
-    static EventService* s_pEventService = IMS_NULL;
-
-    if (s_pEventService == IMS_NULL)
-    {
-        s_pEventService = new EventService();
-    }
-
-    return s_pEventService;
+    return DYNAMIC_CAST(EventService*,
+            PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_EVENT));
 }

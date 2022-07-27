@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "ImsMutex.h"
-#include "PlatformFactory.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
 
@@ -27,7 +27,8 @@ MutexService::~MutexService() {}
 PUBLIC
 IMutex* MutexService::CreateMutex(IN const AString& strName /*= AString::ConstNull()*/)
 {
-    ImsMutex* pMutex = PlatformFactory::CreateMutex(strName);
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    ImsMutex* pMutex = piOsFactory->CreateMutex(strName);
 
     IMS_ASSERT(pMutex != IMS_NULL);
 
@@ -48,12 +49,6 @@ void MutexService::DestroyMutex(IN IMutex*& piMutex)
 
 PUBLIC GLOBAL MutexService* MutexService::GetMutexService()
 {
-    static MutexService* s_pMutexService = IMS_NULL;
-
-    if (s_pMutexService == IMS_NULL)
-    {
-        s_pMutexService = new MutexService();
-    }
-
-    return s_pMutexService;
+    return DYNAMIC_CAST(MutexService*,
+            PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_MUTEX));
 }

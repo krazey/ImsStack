@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 #include "device/OsSubscriberInfo.h"
-#include "system-intf/System.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -31,7 +31,7 @@ PUBLIC VIRTUAL OsSubscriberInfo::~OsSubscriberInfo() {}
 
 PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetPhoneNumber(OUT AString& strPhoneNumber) const
 {
-    System::GetInstance()->GetPhoneNumber(strPhoneNumber, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->GetPhoneNumber(strPhoneNumber, GetSlotId());
 
     IMS_TRACE_D("SubsInfo :: phoneNumber=%s",
             IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? strPhoneNumber.GetStr() : "xxx", 0, 0);
@@ -41,31 +41,31 @@ PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetPhoneNumber(OUT AString& strPhoneNu
 
 PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetMcc(OUT AString& strMcc) const
 {
-    System::GetInstance()->GetMcc(strMcc, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->GetMcc(strMcc, GetSlotId());
     return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetMnc(OUT AString& strMnc) const
 {
-    System::GetInstance()->GetMnc(strMnc, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->GetMnc(strMnc, GetSlotId());
     return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetOperator(OUT AString& strOperator) const
 {
-    System::GetInstance()->GetOperator(strOperator, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->GetOperator(strOperator, GetSlotId());
     return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetCountry(OUT AString& strCountry) const
 {
-    System::GetInstance()->GetCountry(strCountry, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->GetCountry(strCountry, GetSlotId());
     return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetNetworkCountry(OUT AString& strCountry) const
 {
-    System::GetInstance()->GetNetworkCountry(strCountry, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->GetNetworkCountry(strCountry, GetSlotId());
 
     IMS_TRACE_D("SubsInfo :: networkCountry=%s", strCountry.GetStr(), 0, 0);
 
@@ -74,7 +74,7 @@ PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetNetworkCountry(OUT AString& strCoun
 
 PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetSubscriberId(OUT AString& strImsi) const
 {
-    System::GetInstance()->GetSubscriberId(strImsi, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->GetSubscriberId(strImsi, GetSlotId());
 
     IMS_TRACE_D("SubsInfo :: subscriberId(imsi)=%s",
             IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? strImsi.GetStr() : "xxx", 0, 0);
@@ -85,25 +85,26 @@ PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetSubscriberId(OUT AString& strImsi) 
 PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetEmergencyNumberListFromSim(
         OUT AString& strEnlFromSim) const
 {
-    System::GetInstance()->GetEmergencyNumberListFromSim(strEnlFromSim, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->GetEmergencyNumberListFromSim(
+            strEnlFromSim, GetSlotId());
     return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 OsSubscriberInfo::GetEmergencyPriorityFromModem()
 {
-    return System::GetInstance()->GetEmergencyPriorityFromModem(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetEmergencyPriorityFromModem(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::IsUiccGbaSupported()
 {
-    return System::GetInstance()->IsUiccGbaSupported(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->IsUiccGbaSupported(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetPreference(IN const AString& strFileName,
         IN const AString& strKey, OUT AString& strValue,
         IN PREFERENCE_VALUE_ENTYPE eValueType /*= PREFERENCE_VALUE_STRING*/)
 {
-    System::GetInstance()->GetPreference(
+    PlatformContext::GetInstance()->GetSystem()->GetPreference(
             strFileName, strKey, static_cast<IMS_UINT32>(eValueType), GetSlotId(), strValue);
 
     IMS_TRACE_D("SubsInfo :: preference(get)=%s", strValue.GetStr(), 0, 0);
@@ -115,7 +116,7 @@ PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::SetPreference(IN const AString& strFil
         IN const AString& strKey, IN const AString& strValue,
         IN PREFERENCE_VALUE_ENTYPE eValueType /*= PREFERENCE_VALUE_STRING*/)
 {
-    System::GetInstance()->SetPreference(
+    PlatformContext::GetInstance()->GetSystem()->SetPreference(
             strFileName, strKey, static_cast<IMS_UINT32>(eValueType), strValue, GetSlotId());
 
     return IMS_TRUE;

@@ -17,13 +17,15 @@
 #include "ImsSocketState.h"
 #include "OsTimerService.h"
 #include "OsUtil.h"
+#include "PlatformContext.h"
 #include "PlatformProperty.h"
 #include "ServiceMemory.h"
 #include "network/OsSocket.h"
 
 PUBLIC GLOBAL IMS_BOOL PlatformProperty::Initialize()
 {
-    // Initialize IMS heap
+    // Initialize PlatformContext
+    PlatformContext::GetInstance();
 
     // Initialize the network connection state & socket state
     ImsNetworkConnectionState_InitInstance();
@@ -60,14 +62,10 @@ PUBLIC GLOBAL void PlatformProperty::Stop()
 
 PUBLIC GLOBAL void PlatformProperty::Uninitialize()
 {
-    // Uninitialize IMS heap ???
-
     // Uninitialize the other module
     ImsSocketState_ExitInstance();
     ImsNetworkConnectionState_ExitInstance();
-}
 
-PUBLIC GLOBAL IMS_SINT32 PlatformProperty::GetPlatform()
-{
-    return PLATFORM_ANDROID;
+    // Initialize PlatformContext
+    PlatformContext::DestroyInstance();
 }

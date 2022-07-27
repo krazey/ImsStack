@@ -16,9 +16,9 @@
 #ifndef OS_WIFI_CONNECTION_H_
 #define OS_WIFI_CONNECTION_H_
 
+#include "ISystemListener.h"
 #include "ImsNetworkConnection.h"
 #include "OsNetworkConstants.h"
-#include "system-intf/ISystemListener.h"
 
 class IThread;
 class NetworkPolicy;

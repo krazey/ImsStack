@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "PlatformFactory.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceSystemTime.h"
 
@@ -24,7 +24,11 @@ public:
             m_piSysTime(IMS_NULL)
     {
     }
-    inline ~SystemTimeServicePrivate() { PlatformFactory::DestroySystemTime(m_piSysTime); }
+    inline ~SystemTimeServicePrivate()
+    {
+        IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+        piOsFactory->DestroySystemTime(m_piSysTime);
+    }
 
     SystemTimeServicePrivate(IN const SystemTimeServicePrivate&) = delete;
     SystemTimeServicePrivate& operator=(IN const SystemTimeServicePrivate&) = delete;
@@ -34,7 +38,8 @@ public:
     {
         if (m_piSysTime == IMS_NULL)
         {
-            m_piSysTime = PlatformFactory::CreateSystemTime();
+            IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+            m_piSysTime = piOsFactory->CreateSystemTime();
         }
 
         return m_piSysTime;
@@ -64,12 +69,6 @@ ISystemTime* SystemTimeService::GetSystemTime()
 
 PUBLIC GLOBAL SystemTimeService* SystemTimeService::GetSystemTimeService()
 {
-    static SystemTimeService* s_pSystemService = IMS_NULL;
-
-    if (s_pSystemService == IMS_NULL)
-    {
-        s_pSystemService = new SystemTimeService();
-    }
-
-    return s_pSystemService;
+    return DYNAMIC_CAST(SystemTimeService*,
+            PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_SYSTEM_TIME));
 }

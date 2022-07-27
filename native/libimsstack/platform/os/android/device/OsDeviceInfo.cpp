@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 #include "device/OsDeviceInfo.h"
-#include "system-intf/System.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -28,7 +28,7 @@ PUBLIC VIRTUAL OsDeviceInfo::~OsDeviceInfo() {}
 
 PUBLIC VIRTUAL IMS_BOOL OsDeviceInfo::GetDeviceId(IN IMS_SINT32 nSlotId, OUT AString& strId) const
 {
-    IMS_SINT32 nResult = System::GetInstance()->GetDeviceId(strId, nSlotId);
+    IMS_SINT32 nResult = PlatformContext::GetInstance()->GetSystem()->GetDeviceId(strId, nSlotId);
 
     if (strId.Equals("0"))
     {
@@ -44,10 +44,11 @@ PUBLIC VIRTUAL IMS_BOOL OsDeviceInfo::GetDeviceId(IN IMS_SINT32 nSlotId, OUT ASt
 PUBLIC VIRTUAL IMS_BOOL OsDeviceInfo::GetDeviceSoftwareVersion(
         IN IMS_SINT32 nSlotId, OUT AString& strSv) const
 {
-    return System::GetInstance()->GetDeviceSoftwareVersion(strSv, nSlotId) == 1;
+    return PlatformContext::GetInstance()->GetSystem()->GetDeviceSoftwareVersion(strSv, nSlotId) ==
+            1;
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsDeviceInfo::GetDeviceName(OUT AString& strDeviceName) const
 {
-    return System::GetInstance()->GetDeviceName(strDeviceName) == 1;
+    return PlatformContext::GetInstance()->GetSystem()->GetDeviceName(strDeviceName) == 1;
 }

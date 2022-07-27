@@ -18,24 +18,25 @@
 
 #include "ICarrierConfig.h"
 #include "ImsMessage.h"
+#include "PlatformService.h"
 
 class ConfigServicePrivate;
 
-class ConfigService
+class ConfigService : public PlatformService
 {
-private:
+public:
     ConfigService();
-    ~ConfigService();
-
     ConfigService(IN const ConfigService&) = delete;
     ConfigService& operator=(IN const ConfigService&) = delete;
 
+protected:
+    virtual ~ConfigService();
+
 public:
-    ICarrierConfig* GetCarrierConfig(IN IMS_SINT32 nSlotId);
+    virtual ICarrierConfig* GetCarrierConfig(IN IMS_SINT32 nSlotId);
+    virtual void LoadCarrierConfig(IN IMS_SINT32 nSlotId);
 
     void DispatchServiceMessage(IN ImsMessage& objMsg);
-    void LoadCarrierConfig(IN IMS_SINT32 nSlotId);
-
     static ConfigService* GetConfigService();
 
 private:

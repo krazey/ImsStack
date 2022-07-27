@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 #include "OsEventSender.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
-#include "system-intf/System.h"
 
 PUBLIC
 OsEventSender::OsEventSender() {}
@@ -25,10 +25,10 @@ PUBLIC VIRTUAL OsEventSender::~OsEventSender() {}
 PUBLIC VIRTUAL void OsEventSender::SendEvent(
         IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam, IN IMS_SINT32 nSlotId)
 {
-    System* pSystem = System::GetInstance();
+    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
 
-    if (pSystem != IMS_NULL)
+    if (piSystem != IMS_NULL)
     {
-        pSystem->SendEvent(nEvent, nWParam, nLParam, nSlotId);
+        piSystem->SendEvent(nEvent, nWParam, nLParam, nSlotId);
     }
 }

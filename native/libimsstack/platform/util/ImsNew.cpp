@@ -27,7 +27,7 @@
 GLOBAL
 void* operator new(IN IMS_SIZE_T nSize, IN const IMS_CHAR* pszFile, IN IMS_UINT16 nLine)
 {
-    return MemService::GetMemService()->GetMemHeap()->AllocDebug(nSize, nLine, pszFile);
+    return MemService::AllocDebug(nSize, nLine, pszFile);
 }
 
 GLOBAL
@@ -45,7 +45,7 @@ void operator delete(
         return;
     }
 
-    MemService::GetMemService()->GetMemHeap()->FreeDebug(pMem, nLine, pszFile);
+    MemService::FreeDebug(pMem, nLine, pszFile);
 }
 
 GLOBAL
@@ -63,7 +63,7 @@ void operator delete(IN void* pMem) IMS_NO_EXCEPTION
         return;
     }
 
-    MemService::GetMemService()->GetMemHeap()->FreeDebug(pMem, __IMS_LINE__, __IMS_FILE__);
+    MemService::FreeDebug(pMem, __IMS_LINE__, __IMS_FILE__);
 }
 
 GLOBAL
@@ -77,7 +77,7 @@ void operator delete[](IN void* pMem) IMS_NO_EXCEPTION
 GLOBAL
 void* operator new(IN IMS_SIZE_T nSize)
 {
-    return MemService::GetMemService()->GetMemHeap()->Alloc(nSize);
+    return MemService::Alloc(nSize);
 }
 
 GLOBAL
@@ -94,7 +94,7 @@ void operator delete(IN void* pMem) IMS_NO_EXCEPTION
         return;
     }
 
-    MemService::GetMemService()->GetMemHeap()->Free(pMem);
+    MemService::Free(pMem);
 }
 
 GLOBAL

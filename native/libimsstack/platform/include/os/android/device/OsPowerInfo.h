@@ -18,7 +18,7 @@
 #define OS_POWER_INFO_H_
 
 #include "IPhoneInfoPower.h"
-#include "system-intf/ISystemListener.h"
+#include "ISystemListener.h"
 
 class OsPowerInfoPrivate;
 class System;

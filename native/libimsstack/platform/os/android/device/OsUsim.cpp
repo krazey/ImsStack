@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <binder/Parcel.h>
 #include <utils/String8.h>
 
 #include "IDigestAkaListener.h"
 #include "ImsMessageDef.h"
 #include "OsUtil.h"
+#include "PlatformContext.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
 #include "device/OsUsim.h"
-#include "system-intf/System.h"
 #include "system-intf/SystemConstants.h"
 
 __IMS_TRACE_TAG_ADAPT__;
@@ -261,7 +262,7 @@ PROTECTED VIRTUAL IMS_RESULT OsUsimDigestAka::GetAuthResponse(IN const ByteArray
             reinterpret_cast<const IMS_CHAR*>(objChallenge.GetData()), objChallenge.GetLength());
     strNonce = strNonce.ToBase64();
 
-    if (System::GetInstance()->RequestUsimAuthentication(
+    if (PlatformContext::GetInstance()->GetSystem()->RequestUsimAuthentication(
                 strNonce, reinterpret_cast<IMS_SINTP>(this), m_pUsim->GetSlotId()) != IMS_SUCCESS)
     {
         return IMS_FAILURE;
@@ -283,7 +284,8 @@ OsUsim::OsUsim(IN IMS_SINT32 nSlotId) :
 {
     IMS_TRACE_D("Constructor :: USIM%02d", nSlotId, 0, 0);
 
-    System::GetInstance()->AddListener(SystemConstants::CATEGORY_USIM, this, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->AddListener(
+            SystemConstants::CATEGORY_USIM, this, GetSlotId());
 
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 }
@@ -292,7 +294,8 @@ PUBLIC VIRTUAL OsUsim::~OsUsim()
 {
     IMS_TRACE_D("Destructor :: USIM%02d", GetSlotId(), 0, 0);
 
-    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_USIM, this, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->RemoveListener(
+            SystemConstants::CATEGORY_USIM, this, GetSlotId());
 }
 
 PUBLIC

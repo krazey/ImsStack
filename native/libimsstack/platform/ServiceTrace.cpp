@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "ImsTrace.h"
-#include "PlatformFactory.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
@@ -53,7 +53,8 @@ public:
     {
         if (m_pTrace == IMS_NULL)
         {
-            m_pTrace = PlatformFactory::CreateTrace();
+            IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+            m_pTrace = piOsFactory->CreateTrace();
         }
 
         return m_pTrace;
@@ -114,12 +115,6 @@ const IMS_CHAR* TraceService::GetFileName(
 }
 
 PUBLIC
-ITrace* TraceService::GetTrace()
-{
-    return m_pPrivate->GetTrace();
-}
-
-PUBLIC
 const ImsTraceTag& TraceService::GetTraceTag(IN IMS_SINT32 nTag) const
 {
     if ((nTag < 0) || (nTag > IMS_TRACE_TAG_MAX))
@@ -171,16 +166,16 @@ void TraceService::PrintPrivacyLog(IN IMS_SINT32 nCategory, IN const IMS_CHAR* p
             pTrace->EncryptPrivacyLog(_buffer_A3, pszArg3));
 }
 
+PUBLIC
+ITrace* TraceService::GetTrace()
+{
+    return m_pPrivate->GetTrace();
+}
+
 PUBLIC GLOBAL TraceService* TraceService::GetTraceService()
 {
-    static TraceService* s_pTraceService = IMS_NULL;
-
-    if (s_pTraceService == IMS_NULL)
-    {
-        s_pTraceService = new TraceService();
-    }
-
-    return s_pTraceService;
+    return DYNAMIC_CAST(TraceService*,
+            PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_TRACE));
 }
 
 GLOBAL

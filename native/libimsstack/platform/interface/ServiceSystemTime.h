@@ -17,21 +17,22 @@
 #define SERVICE_SYSTEM_TIME_H_
 
 #include "ISystemTime.h"
+#include "PlatformService.h"
 
 class SystemTimeServicePrivate;
 
-class SystemTimeService
+class SystemTimeService : public PlatformService
 {
-private:
-    SystemTimeService();
-    ~SystemTimeService();
-
 public:
+    SystemTimeService();
     SystemTimeService(IN const SystemTimeService&) = delete;
     SystemTimeService& operator=(IN const SystemTimeService&) = delete;
 
+protected:
+    virtual ~SystemTimeService();
+
 public:
-    ISystemTime* GetSystemTime();
+    virtual ISystemTime* GetSystemTime();
 
     static SystemTimeService* GetSystemTimeService();
 

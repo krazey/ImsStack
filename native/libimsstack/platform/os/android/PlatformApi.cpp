@@ -15,8 +15,8 @@
  */
 #include "OsUtil.h"
 #include "PlatformApi.h"
+#include "PlatformContext.h"
 #include "network/OsSocket.h"
-#include "system-intf/System.h"
 
 PUBLIC GLOBAL IMS_BOOL PlatformApi::CheckIpAndPortAvailability(
         IN const IPAddress& objIp, IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType)
@@ -33,11 +33,13 @@ PUBLIC GLOBAL void PlatformApi::SetDebugOn(IN IMS_BOOL bDebugOn)
 PUBLIC GLOBAL AString PlatformApi::GetPrivateProperty(
         IN IMS_BOOL bPersistent, IN const AString& strKey, IN IMS_SINT32 nSlotId)
 {
-    return System::GetInstance()->GetPrivateProperty(bPersistent, strKey, nSlotId);
+    return PlatformContext::GetInstance()->GetSystem()->GetPrivateProperty(
+            bPersistent, strKey, nSlotId);
 }
 
 PUBLIC GLOBAL void PlatformApi::SetPrivateProperty(IN IMS_BOOL bPersistent,
         IN const AString& strKey, IN const AString& strValue, IN IMS_SINT32 nSlotId)
 {
-    System::GetInstance()->SetPrivateProperty(bPersistent, strKey, strValue, nSlotId);
+    PlatformContext::GetInstance()->GetSystem()->SetPrivateProperty(
+            bPersistent, strKey, strValue, nSlotId);
 }

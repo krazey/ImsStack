@@ -16,9 +16,9 @@
 #ifndef OS_TIMER_SERVICE_H_
 #define OS_TIMER_SERVICE_H_
 
+#include "ISystemListener.h"
 #include "ImsList.h"
 #include "OsMutex.h"
-#include "system-intf/ISystemListener.h"
 
 class OsTimer;
 class OsTimerWrapper;

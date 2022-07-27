@@ -26,6 +26,7 @@
 #include "ImsSocketState.h"
 #include "IThread.h"
 #include "OsUtil.h"
+#include "PlatformContext.h"
 #include "ServiceEvent.h"
 #include "ServiceMemory.h"
 #include "ServiceNetworkPolicy.h"
@@ -33,7 +34,6 @@
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 #include "network/OsWifiConnection.h"
-#include "system-intf/System.h"
 #include "system-intf/SystemConstants.h"
 
 __IMS_TRACE_TAG_ADAPT__;
@@ -66,14 +66,16 @@ OsWifiConnection::OsWifiConnection() :
 
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-    System::GetInstance()->AddListener(SystemConstants::CATEGORY_WIFI, this, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->AddListener(
+            SystemConstants::CATEGORY_WIFI, this, GetSlotId());
 }
 
 PUBLIC VIRTUAL OsWifiConnection::~OsWifiConnection()
 {
     IMS_TRACE_D("Destructor :: WiFi connection", 0, 0, 0);
 
-    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_WIFI, this, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->RemoveListener(
+            SystemConstants::CATEGORY_WIFI, this, GetSlotId());
 
     if (m_pPolicy != IMS_NULL)
     {
@@ -199,7 +201,7 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsWifiConnection::Deactivate(
  */
 PRIVATE VIRTUAL void OsWifiConnection::GetAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo)
 {
-    AString strMacAddress = System::GetInstance()->GetWifiBssId();
+    AString strMacAddress = PlatformContext::GetInstance()->GetSystem()->GetWifiBssId();
     IMSList<AString> objTokens = strMacAddress.Split(':');
 
     if (objTokens.GetSize() == ANI_WLAN_MAX_MAC)
@@ -249,7 +251,7 @@ PRIVATE VIRTUAL IMS_BOOL OsWifiConnection::GetExtraInfo(
 {
     if (strType.Equals("mac_address"))
     {
-        strInfo = System::GetInstance()->GetWifiBssId();
+        strInfo = PlatformContext::GetInstance()->GetSystem()->GetWifiBssId();
 
         if (strInfo.GetLength() == 0)
         {
@@ -260,7 +262,7 @@ PRIVATE VIRTUAL IMS_BOOL OsWifiConnection::GetExtraInfo(
     }
     else if (strType.Equals("ssid"))
     {
-        strInfo = System::GetInstance()->GetWifiSsId();
+        strInfo = PlatformContext::GetInstance()->GetSystem()->GetWifiSsId();
 
         IMS_TRACE_D("SSID (%s)", strInfo.GetStr(), 0, 0);
     }
@@ -315,7 +317,7 @@ PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetHostByName(IN const AString& str
 
     // ANDROID_L: android_gethostbynameforiface (KK-OS)
     // ANDROID_P: android_gethostbynamefornet (libc)
-    AStringArray objHostIps = System::GetInstance()->GetHostByName(
+    AStringArray objHostIps = PlatformContext::GetInstance()->GetSystem()->GetHostByName(
             strHostName, nIpVersion, GetApnType(), GetSlotId());
 
     if (objHostIps.IsEmpty())
@@ -386,7 +388,7 @@ PRIVATE VIRTUAL IMS_BOOL OsWifiConnection::IsMobileDataEnabled() const
 
 PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetMtu() const
 {
-    return System::GetInstance()->GetMtu(GetApnType(), GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetMtu(GetApnType(), GetSlotId());
 }
 
 PRIVATE VIRTUAL void OsWifiConnection::SetListener(IN INetworkConnectionListener* piListener)
@@ -806,7 +808,7 @@ EXIT_LookupLocalIpAddress:
     AdjustPreferredLocalAddress();
 
     // Network interface identifier
-    m_nIfaceId = System::GetInstance()->GetIfaceId(GetApnType(), GetSlotId());
+    m_nIfaceId = PlatformContext::GetInstance()->GetSystem()->GetIfaceId(GetApnType(), GetSlotId());
 
     IMS_TRACE_D("WiFi :: IfaceId=%d", m_nIfaceId, 0, 0);
 
@@ -925,7 +927,7 @@ void OsWifiConnection::ClearOnDataDisconnected()
 PRIVATE
 IMS_SINT32 OsWifiConnection::GetWifiState()
 {
-    m_nWifiState = System::GetInstance()->GetWifiState();
+    m_nWifiState = PlatformContext::GetInstance()->GetSystem()->GetWifiState();
 
     return m_nWifiState;
 }
@@ -938,7 +940,7 @@ IMS_SINT32 OsWifiConnection::GetWifiState()
 PRIVATE
 IMS_SINT32 OsWifiConnection::GetWifiDetailedState()
 {
-    m_nWifiDetailedState = System::GetInstance()->GetWifiDetailedState();
+    m_nWifiDetailedState = PlatformContext::GetInstance()->GetSystem()->GetWifiDetailedState();
 
     return m_nWifiDetailedState;
 }

@@ -18,26 +18,27 @@
 
 #include "IEventListener.h"
 #include "ImsEventDef.h"
+#include "PlatformService.h"
 
 class EventServicePrivate;
 
 // Event Service class
-class EventService
+class EventService : public PlatformService
 {
-private:
-    EventService();
-    ~EventService();
-
 public:
+    EventService();
     EventService(IN const EventService&) = delete;
     EventService& operator=(IN const EventService&) = delete;
 
+protected:
+    virtual ~EventService();
+
 public:
-    void AddListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener, IN IMS_SINT32 nSlotId);
-
-    void RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener, IN IMS_SINT32 nSlotId);
-
-    void SendEvent(IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,
+    virtual void AddListener(
+            IN IMS_SINT32 nEvent, IN IEventListener* piListener, IN IMS_SINT32 nSlotId);
+    virtual void RemoveListener(
+            IN IMS_SINT32 nEvent, IN IEventListener* piListener, IN IMS_SINT32 nSlotId);
+    virtual void SendEvent(IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,
             IN IMS_SINT32 nSlotId);
 
     void SetUnregisteredEvents(IN IMS_SINT32 nSlotId);

@@ -17,6 +17,7 @@
 #define SERVICE_NETWORK_POLICY_H_
 
 #include "AString.h"
+#include "PlatformService.h"
 
 class NetworkServicePolicyPrivate;
 
@@ -68,28 +69,23 @@ private:
     IMS_SINT32 m_nApnType;
 };
 
-class NetworkServicePolicy
+class NetworkServicePolicy : public PlatformService
 {
-private:
-    NetworkServicePolicy();
-    ~NetworkServicePolicy();
-
 public:
+    NetworkServicePolicy();
     NetworkServicePolicy(IN const NetworkServicePolicy&) = delete;
     NetworkServicePolicy& operator=(IN const NetworkServicePolicy&) = delete;
 
+protected:
+    virtual ~NetworkServicePolicy();
+
 public:
-    IMS_BOOL AddPolicy(
+    virtual IMS_BOOL AddPolicy(
             IN const AString& strName, IN const NetworkPolicy& objPolicy, IN IMS_SINT32 nSlotId);
-    const NetworkPolicy* GetPolicy(IN const AString& strName, IN IMS_SINT32 nSlotId) const;
-    inline const NetworkPolicy* GetPolicy(IN IMS_SINT32 nApnType)
-            __IMS_DEPRECATED__("Use GetPolicy(IMS_SINT32,IMS_SINT32) instead")
-    {
-        return GetPolicy(nApnType, IMS_SLOT_0);
-    }
-    const NetworkPolicy* GetPolicy(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) const;
-    void RemovePolicy(IN const AString& strName, IN IMS_SINT32 nSlotId);
-    void RemoveAllPolicies(IN IMS_SINT32 nSlotId);
+    virtual const NetworkPolicy* GetPolicy(IN const AString& strName, IN IMS_SINT32 nSlotId) const;
+    virtual const NetworkPolicy* GetPolicy(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) const;
+    virtual void RemovePolicy(IN const AString& strName, IN IMS_SINT32 nSlotId);
+    virtual void RemoveAllPolicies(IN IMS_SINT32 nSlotId);
 
     static NetworkServicePolicy* GetInstance();
 

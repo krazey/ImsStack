@@ -16,9 +16,9 @@
 #include "ImsMessageDef.h"
 #include "OsTimer.h"
 #include "OsTimerService.h"
+#include "PlatformContext.h"
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
-#include "system-intf/System.h"
 #include "system-intf/SystemConstants.h"
 
 __IMS_TRACE_TAG_ADAPT__;
@@ -26,19 +26,22 @@ __IMS_TRACE_TAG_ADAPT__;
 LOCAL
 void osTimerService_AddListener(IN ISystemListener* piListener)
 {
-    System::GetInstance()->AddListener(SystemConstants::CATEGORY_ALARM, piListener, IMS_SLOT_0);
+    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
+    piSystem->AddListener(SystemConstants::CATEGORY_ALARM, piListener, IMS_SLOT_0);
 }
 
 LOCAL
 void osTimerService_RemoveListener(IN ISystemListener* piListener)
 {
-    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_ALARM, piListener, IMS_SLOT_0);
+    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
+    piSystem->RemoveListener(SystemConstants::CATEGORY_ALARM, piListener, IMS_SLOT_0);
 }
 
 LOCAL
 IMS_BOOL osTimerService_KillAlarm(IN IMS_UINTP nTimerId)
 {
-    IMS_SINT32 nResult = System::GetInstance()->KillAlarm(nTimerId);
+    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
+    IMS_SINT32 nResult = piSystem->KillAlarm(nTimerId);
 
     return (nResult == 0) ? IMS_FALSE : IMS_TRUE;
 }
@@ -46,7 +49,8 @@ IMS_BOOL osTimerService_KillAlarm(IN IMS_UINTP nTimerId)
 LOCAL
 IMS_BOOL osTimerService_SetAlarm(IN IMS_UINTP nTimerId, IN IMS_UINT32 nDuration)
 {
-    IMS_SINT32 nResult = System::GetInstance()->SetAlarm(nDuration, nTimerId);
+    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
+    IMS_SINT32 nResult = piSystem->SetAlarm(nDuration, nTimerId);
 
     return (nResult == 0) ? IMS_FALSE : IMS_TRUE;
 }

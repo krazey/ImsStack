@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "PlatformContext.h"
 #include "ServiceTrace.h"
 #include "device/OsWifiWatcher.h"
 #include "network/OsNetworkConstants.h"
 #include "system-intf/SystemConstants.h"
-#include "system-intf/System.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -25,17 +25,20 @@ PUBLIC
 OsWifiWatcher::OsWifiWatcher() :
         m_nWifiState(IWifiWatcher::STATE_DISCONNECTED)
 {
-    System::GetInstance()->AddListener(SystemConstants::CATEGORY_WIFI, this, IMS_SLOT_0);
+    PlatformContext::GetInstance()->GetSystem()->AddListener(
+            SystemConstants::CATEGORY_WIFI, this, IMS_SLOT_0);
 }
 
 PUBLIC VIRTUAL OsWifiWatcher::~OsWifiWatcher()
 {
-    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_WIFI, this, IMS_SLOT_0);
+    PlatformContext::GetInstance()->GetSystem()->RemoveListener(
+            SystemConstants::CATEGORY_WIFI, this, IMS_SLOT_0);
 }
 
 PUBLIC VIRTUAL IMS_SINT32 OsWifiWatcher::GetState()
 {
-    IMS_SINT32 nWifiDetailedState = System::GetInstance()->GetWifiDetailedState();
+    IMS_SINT32 nWifiDetailedState =
+            PlatformContext::GetInstance()->GetSystem()->GetWifiDetailedState();
 
     if ((nWifiDetailedState == WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK) ||
             (nWifiDetailedState == WIFI_NET_DETAILED_STATE_CONNECTED))

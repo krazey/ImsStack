@@ -13,36 +13,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "PlatformFactory.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "ServiceMemory.h"
 
-PRIVATE
-MemService::MemService() {}
-
-PRIVATE
-MemService::~MemService() {}
-
 PUBLIC
-IMemHeap* MemService::GetMemHeap()
+void* MemService::Alloc(IN IMS_SIZE_T nSize)
 {
-    IMemHeap* piHeap = PlatformFactory::GetHeap();
-
-    IMS_ASSERT(piHeap != IMS_NULL);
-
-    return piHeap;
+    return malloc(nSize);
 }
 
-PUBLIC GLOBAL MemService* MemService::GetMemService()
+PUBLIC
+void* MemService::Realloc(IN void* pMem, IN IMS_SIZE_T nSize)
 {
-    static MemService* s_pMemService = IMS_NULL;
+    return realloc(pMem, nSize);
+}
 
-    if (s_pMemService == IMS_NULL)
+PUBLIC
+void MemService::Free(IN void* pMem)
+{
+    if (pMem == IMS_NULL)
     {
-        IMemHeap* piHeap = PlatformFactory::GetHeap();
-        void* pvMemService = piHeap->Alloc(sizeof(MemService));
-
-        s_pMemService = new (pvMemService) MemService();
+        return;
     }
 
-    return s_pMemService;
+    free(pMem);
+    pMem = IMS_NULL;
+}
+
+PUBLIC
+void* MemService::AllocDebug(IN IMS_SIZE_T nSize, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile)
+{
+    (void)nLine;
+    (void)pszFile;
+
+    return Alloc(nSize);
+}
+
+PUBLIC
+void* MemService::ReallocDebug(
+        IN void* pMem, IN IMS_SIZE_T nSize, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile)
+{
+    (void)nLine;
+    (void)pszFile;
+
+    return Realloc(pMem, nSize);
+}
+
+PUBLIC
+void MemService::FreeDebug(IN void* pMem, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile)
+{
+    (void)nLine;
+    (void)pszFile;
+
+    Free(pMem);
 }

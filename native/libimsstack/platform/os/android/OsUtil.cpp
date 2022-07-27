@@ -18,9 +18,9 @@
 
 #include "ImsStrLib.h"
 #include "OsUtil.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "system-intf/System.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -125,7 +125,8 @@ PUBLIC GLOBAL OsUtil* OsUtil::GetInstance()
 
 PRIVATE VIRTUAL void OsUtil::DigestSha1(IN const AString& strIn, OUT AString& strOut)
 {
-    System::GetInstance()->GetDigestSha1(strIn, strOut);
+    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
+    piSystem->GetDigestSha1(strIn, strOut);
 }
 
 PRIVATE VIRTUAL AString OsUtil::GetUuid(IN IMS_SINT32 /*nOption = 0*/)

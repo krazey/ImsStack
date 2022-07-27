@@ -17,10 +17,8 @@
 #define OS_EVENT_RECEIVER_H_
 
 #include "IEventReceiver.h"
+#include "ISystemListener.h"
 #include "ImsSlot.h"
-#include "system-intf/ISystemListener.h"
-
-class System;
 
 class OsEventReceiver : public ImsSlot, public IEventReceiver, public ISystemListener
 {

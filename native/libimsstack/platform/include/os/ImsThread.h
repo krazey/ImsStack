@@ -34,7 +34,7 @@ public:
     virtual IMS_BOOL Create(IN const AString& strName) = 0;
     virtual IMS_ULONG GetThreadId() const = 0;
 
-    inline IMS_BOOL CreateEx(IN const AString& strName, IN IMS_SINT32 nSlotId)
+    inline IMS_BOOL Create(IN const AString& strName, IN IMS_SINT32 nSlotId)
     {
         m_nSlotId = nSlotId;
         return Create(strName);

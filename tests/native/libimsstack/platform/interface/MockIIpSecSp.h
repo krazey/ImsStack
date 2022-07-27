@@ -25,6 +25,9 @@
 class MockIIpSecSp : public IIpSecSp
 {
 public:
+    inline MockIIpSecSp() {}
+    inline virtual ~MockIIpSecSp() {}
+
     MOCK_METHOD(void, SetTransportInfo,
             (IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort, IN const IPAddress& objDstIp,
                     IN IMS_UINT32 nDstPort, IN IMS_UINT32 nTransportProtocol, IN IMS_UINT32 nAction,
@@ -37,4 +40,4 @@ public:
     MOCK_METHOD(void, DoneSp, (), (override));
 };
 
-#endif  // MOCK_I_IP_SEC_SP_H_
+#endif

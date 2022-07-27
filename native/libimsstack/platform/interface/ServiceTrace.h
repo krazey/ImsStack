@@ -17,30 +17,31 @@
 #define SERVICE_TRACE_H_
 
 #include "ITrace.h"
+#include "PlatformService.h"
 
 class TraceServicePrivate;
 
-class TraceService
+class TraceService : public PlatformService
 {
-private:
-    TraceService();
-    ~TraceService();
-
 public:
+    TraceService();
     TraceService(IN const TraceService&) = delete;
     TraceService& operator=(IN const TraceService&) = delete;
+
+protected:
+    virtual ~TraceService();
 
 public:
     const IMS_CHAR* GetFileName(IN const IMS_CHAR* pszFileName) const;
     const IMS_CHAR* GetFileName(
             IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName) const;
-
-    ITrace* GetTrace();
     const ImsTraceTag& GetTraceTag(IN IMS_SINT32 nTag) const;
     void SetOption(IN IMS_UINT32 nOption, IN IMS_UINT32 nModule);
     void PrintPrivacyLog(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
             IN const IMS_CHAR* pszFormat, IN const IMS_CHAR* pszFileName, IN IMS_UINT32 nLine,
             IN const IMS_CHAR* pszArg1, IN const IMS_CHAR* pszArg2, IN const IMS_CHAR* pszArg3);
+
+    virtual ITrace* GetTrace();
 
     static TraceService* GetTraceService();
 

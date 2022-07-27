@@ -16,8 +16,8 @@
 #ifndef OS_WIFI_WATCHER_H_
 #define OS_WIFI_WATCHER_H_
 
+#include "ISystemListener.h"
 #include "IWifiWatcher.h"
-#include "system-intf/ISystemListener.h"
 
 class System;
 

@@ -26,14 +26,17 @@ public:
             ImsSlot(nSlotId)
     {
     }
-    inline virtual ~ImsCarrierConfig() {}
 
     ImsCarrierConfig(IN const ImsCarrierConfig&) = delete;
     ImsCarrierConfig& operator=(IN const ImsCarrierConfig&) = delete;
 
+protected:
+    inline virtual ~ImsCarrierConfig() {}
+
 public:
     virtual void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) = 0;
     virtual void LoadConfig() = 0;
+    inline virtual void Destroy() { delete this; }
 
     inline IMS_BOOL GetBoolean(
             IN const IMS_CHAR* /*pszKey*/, IN IMS_BOOL bDefaultValue = IMS_FALSE) const override

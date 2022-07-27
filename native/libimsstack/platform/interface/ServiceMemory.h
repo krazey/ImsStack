@@ -16,44 +16,41 @@
 #ifndef SERVICE_MEMORY_H_
 #define SERVICE_MEMORY_H_
 
-#include "IMemHeap.h"
 #include "ImsNew.h"
 
 #ifdef IMS_DEBUG_MEM
 
-#define IMS_MEM_Malloc(SIZE) \
-    MemService::GetMemService()->GetMemHeap()->AllocDebug(SIZE, __IMS_LINE__, __IMS_FILE__)
+#define IMS_MEM_Malloc(SIZE)       MemService::AllocDebug(SIZE, __IMS_LINE__, __IMS_FILE__)
 
-#define IMS_MEM_Realloc(MEM, SIZE) \
-    MemService::GetMemService()->GetMemHeap()->ReallocDebug(MEM, SIZE, __IMS_LINE__, __IMS_FILE__)
+#define IMS_MEM_Realloc(MEM, SIZE) MemService::ReallocDebug(MEM, SIZE, __IMS_LINE__, __IMS_FILE__)
 
-#define IMS_MEM_Free(MEM) \
-    MemService::GetMemService()->GetMemHeap()->FreeDebug(MEM, __IMS_LINE__, __IMS_FILE__)
+#define IMS_MEM_Free(MEM)          MemService::FreeDebug(MEM, __IMS_LINE__, __IMS_FILE__)
 
 #else  // IMS_DEBUG_MEM
 
-#define IMS_MEM_Malloc(SIZE) MemService::GetMemService()->GetMemHeap()->Alloc(SIZE)
+#define IMS_MEM_Malloc(SIZE)       MemService::Alloc(SIZE)
 
-#define IMS_MEM_Realloc(MEM, SIZE) MemService::GetMemService()->GetMemHeap()->Realloc(MEM, SIZE)
+#define IMS_MEM_Realloc(MEM, SIZE) MemService::Realloc(MEM, SIZE)
 
-#define IMS_MEM_Free(MEM) MemService::GetMemService()->GetMemHeap()->Free(MEM)
+#define IMS_MEM_Free(MEM)          MemService::Free(MEM)
 
 #endif  // IMS_DEBUG_MEM
 
 class MemService
 {
-private:
-    MemService();
-    ~MemService();
-
 public:
+    MemService() = delete;
     MemService(IN const MemService&) = delete;
     MemService& operator=(IN const MemService&) = delete;
 
 public:
-    IMemHeap* GetMemHeap();
-
-    static MemService* GetMemService();
+    static void* Alloc(IN IMS_SIZE_T nSize);
+    static void* Realloc(IN void* pMem, IN IMS_SIZE_T nSize);
+    static void Free(IN void* pMem);
+    static void* AllocDebug(IN IMS_SIZE_T nSize, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile);
+    static void* ReallocDebug(
+            IN void* pMem, IN IMS_SIZE_T nSize, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile);
+    static void FreeDebug(IN void* pMem, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile);
 };
 
 #endif

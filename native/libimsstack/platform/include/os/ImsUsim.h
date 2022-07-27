@@ -26,9 +26,13 @@ public:
             ImsSlot(nSlotId)
     {
     }
+
+protected:
     inline virtual ~ImsUsim() {}
 
 public:
+    inline virtual void Destroy() { delete this; }
+
     virtual void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) = 0;
 };
 

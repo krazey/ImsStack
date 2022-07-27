@@ -77,7 +77,7 @@ IMS_BOOL UceXmlDocumentHelperThread::Start(IN CONST AString& strName, IN IMS_UIN
         return IMS_TRUE;
     }
 
-    m_piThread = ThreadService::GetThreadService()->Create(m_strThreadName, m_nSimSlot);
+    m_piThread = ThreadService::GetThreadService()->CreateThread(m_strThreadName, m_nSimSlot);
 
     if (m_piThread == IMS_NULL)
     {
@@ -107,7 +107,7 @@ void UceXmlDocumentHelperThread::Terminate()
     Uninitialize();
 
     m_piThread->Deactivate();
-    ThreadService::GetThreadService()->Destroy(m_piThread);
+    ThreadService::GetThreadService()->DestroyThread(m_piThread);
     m_piThread = IMS_NULL;
 }
 

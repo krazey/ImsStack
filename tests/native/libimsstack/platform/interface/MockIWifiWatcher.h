@@ -28,14 +28,20 @@
 class MockIWifiWatcher : public IWifiWatcher
 {
 public:
+    inline MockIWifiWatcher() {}
+    inline virtual ~MockIWifiWatcher() {}
+
     MOCK_METHOD(IMS_SINT32, GetState, (), (override));
 };
 
 class MockIWifiWatcherListener : public IWifiWatcherListener
 {
 public:
+    inline MockIWifiWatcherListener() {}
+    inline virtual ~MockIWifiWatcherListener() {}
+
     MOCK_METHOD(
             void, WifiWatcher_NotifyStateChanged, (IN IWifiWatcher * piWifiWatcher), (override));
 };
 
-#endif  // MOCK_I_WIFI_WATCHER_H_
+#endif

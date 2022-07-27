@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #ifndef MOCK_I_NETWORK_CONNECTION_H_
 #define MOCK_I_NETWORK_CONNECTION_H_
 
@@ -5,14 +20,16 @@
 
 #include "AStringArray.h"
 #include "IIpcan.h"
+#include "INetworkConnection.h"
 #include "INetworkPing.h"
 #include "IpAddress.h"
-
-#include "INetworkConnection.h"
 
 class MockINetworkConnection : public INetworkConnection
 {
 public:
+    inline MockINetworkConnection() {}
+    inline virtual ~MockINetworkConnection() {}
+
     MOCK_METHOD(RESULT_ENTYPE, Activate, (IN IMS_BOOL bEnableApn), (override));
     MOCK_METHOD(RESULT_ENTYPE, Deactivate, (IN IMS_BOOL bDisableApn), (override));
     MOCK_METHOD(void, GetAccessNetworkInfo, (OUT AccessNetworkInfo & objAccessNetInfo), (override));
@@ -61,4 +78,4 @@ public:
             (override));
 };
 
-#endif  // MOCK_I_NETWORK_CONNECTION_H_
+#endif

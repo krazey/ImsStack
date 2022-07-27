@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 #include "network/OsIpcan.h"
 #include "network/OsNetworkConstants.h"
-#include "system-intf/System.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -46,7 +46,7 @@ PROTECTED VIRTUAL void OsIpcan::GetAccessInfo(
 
     IMS_SINT32 nNetworkType = nDefaultNetworkType;
     AStringArray objCellIdentities;
-    System::GetInstance()->GetAccessNetworkInfo(
+    PlatformContext::GetInstance()->GetSystem()->GetAccessNetworkInfo(
             nDefaultNetworkType, nNetworkType, objCellIdentities, nSlotId);
 
     objAni = CreateAccessNetworkInfo(nNetworkType, objCellIdentities);
@@ -54,7 +54,7 @@ PROTECTED VIRTUAL void OsIpcan::GetAccessInfo(
 
 PROTECTED VIRTUAL void OsIpcan::GetAccessInfoForWiFi(OUT AccessNetworkInfo& objAni)
 {
-    AString strMacAddress = System::GetInstance()->GetWifiBssId();
+    AString strMacAddress = PlatformContext::GetInstance()->GetSystem()->GetWifiBssId();
     IMSList<AString> objTokens = strMacAddress.Split(':');
 
     if (objTokens.GetSize() == ANI_WLAN_MAX_MAC)
@@ -91,7 +91,8 @@ PROTECTED VIRTUAL void OsIpcan::GetLastAccessInfo(IN IMS_SINT32 nSlotId,
         OUT AccessNetworkInfo& objAni, OUT AString& strTimestamp, OUT AString& strCellInfoAge)
 {
     AStringArray objCellIdentities =
-            System::GetInstance()->GetLastAccessNetworkInfo(RADIOTECH_TYPE_INVALID, nSlotId);
+            PlatformContext::GetInstance()->GetSystem()->GetLastAccessNetworkInfo(
+                    RADIOTECH_TYPE_INVALID, nSlotId);
 
     // 0 : network type
     // 1 : timestamp as UTC format
@@ -132,7 +133,7 @@ PROTECTED VIRTUAL void OsIpcan::GetLastAccessInfoForWiFi(
 
 PROTECTED VIRTUAL IMS_SINT32 OsIpcan::GetNetworkType(IN IMS_SINT32 nSlotId)
 {
-    return System::GetInstance()->GetNetworkType(nSlotId);
+    return PlatformContext::GetInstance()->GetSystem()->GetNetworkType(nSlotId);
 }
 
 PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(

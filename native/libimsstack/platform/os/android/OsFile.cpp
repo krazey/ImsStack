@@ -22,8 +22,8 @@
 #include <sys/stat.h>
 
 #include "OsFile.h"
+#include "PlatformContext.h"
 #include "ServiceTrace.h"
-#include "system-intf/System.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -432,7 +432,8 @@ PUBLIC VIRTUAL AString OsFileUtil::GetExternalStoragePath() const
 {
     AString strExternalStoragePath = AString::ConstNull();
 
-    System::GetInstance()->GetExternalStoragePath(strExternalStoragePath);
+    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
+    piSystem->GetExternalStoragePath(strExternalStoragePath);
 
     IMS_TRACE_D("GetExternalStoragePath(%s)", strExternalStoragePath.GetStr(), 0, 0);
 

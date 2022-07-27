@@ -29,6 +29,9 @@
 class MockINetworkWatcher : public INetworkWatcher
 {
 public:
+    inline MockINetworkWatcher() {}
+    inline virtual ~MockINetworkWatcher() {}
+
     MOCK_METHOD(IMS_UINT32, GetNetworkStatus, (IN const AString& strProfile), (override));
     MOCK_METHOD(NETRADIO_ENTYPE, GetNetRadioTechType,
             (IN const AString& strProfile, IN IMS_SINT32 nApnType), (override));
@@ -54,8 +57,11 @@ public:
 class MockINetworkWatcherListener : public INetworkWatcherListener
 {
 public:
+    inline MockINetworkWatcherListener() {}
+    inline virtual ~MockINetworkWatcherListener() {}
+
     MOCK_METHOD(
             void, NetworkWatcher_NotifyStatus, (IN INetworkWatcher * piNetworkWatcher), (override));
 };
 
-#endif  // MOCK_I_NETWORK_WATCHER_H_
+#endif

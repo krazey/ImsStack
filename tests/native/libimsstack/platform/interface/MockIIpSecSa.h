@@ -25,6 +25,9 @@
 class MockIIpSecSa : public IIpSecSa
 {
 public:
+    inline MockIIpSecSa() {}
+    inline virtual ~MockIIpSecSa() {}
+
     MOCK_METHOD(void, SetSa,
             (IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort, IN const IPAddress& objDstIp,
                     IN IMS_UINT32 nDstPort, IN IMS_UINT32 nSecurityProtocol, IN IMS_UINT32 nSpi,
@@ -35,4 +38,4 @@ public:
     MOCK_METHOD(void, DoneSa, (), (override));
 };
 
-#endif  // MOCK_I_IP_SEC_SA_H_
+#endif

@@ -19,6 +19,7 @@
 #include "ImsSocketState.h"
 #include "IThread.h"
 #include "OsUtil.h"
+#include "PlatformContext.h"
 #include "ServiceEvent.h"
 #include "ServiceMemory.h"
 #include "ServiceNetworkPolicy.h"
@@ -26,7 +27,6 @@
 #include "ServiceTrace.h"
 #include "network/OsNetworkConnection.h"
 #include "network/OsNetworkConstants.h"
-#include "system-intf/System.h"
 #include "system-intf/SystemConstants.h"
 
 __IMS_TRACE_TAG_ADAPT__;
@@ -78,14 +78,16 @@ OsNetworkConnection::OsNetworkConnection(IN IMS_SINT32 nSlotId) :
 
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-    System::GetInstance()->AddListener(SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->AddListener(
+            SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
 }
 
 PUBLIC VIRTUAL OsNetworkConnection::~OsNetworkConnection()
 {
     IMS_TRACE_D("Destructor :: Mobile network connection", 0, 0, 0);
 
-    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->RemoveListener(
+            SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
 
     if (m_pPolicy != IMS_NULL)
     {
@@ -139,7 +141,8 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
             (bEnableApn && (nApnType == NetworkPolicy::APN_IMS)) ||
             (bEnableApn && (nApnType == NetworkPolicy::APN_INTERNET)))
     {
-        if (System::GetInstance()->ActivateDataConnection(nApnType, GetSlotId()) == 0)
+        if (PlatformContext::GetInstance()->GetSystem()->ActivateDataConnection(
+                    nApnType, GetSlotId()) == 0)
         {
             IMS_TRACE_E(
                     0, "Enabling data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
@@ -206,12 +209,12 @@ PRIVATE VIRTUAL void OsNetworkConnection::GetAccessNetworkInfo(
 
     IMS_SINT32 nNetworkType = nDefaultNetworkType;
     AStringArray objCellIdentities;
-    System::GetInstance()->GetAccessNetworkInfo(
+    PlatformContext::GetInstance()->GetSystem()->GetAccessNetworkInfo(
             nDefaultNetworkType, nNetworkType, objCellIdentities, GetSlotId());
 
     if (nNetworkType == RADIOTECH_TYPE_UNKNOWN)
     {
-        nNetworkType = System::GetInstance()->GetNetworkType(GetSlotId());
+        nNetworkType = PlatformContext::GetInstance()->GetSystem()->GetNetworkType(GetSlotId());
         IMS_TRACE_I("PANI :: network-type (%d)", nNetworkType, 0, 0);
     }
 
@@ -223,7 +226,8 @@ PRIVATE VIRTUAL void OsNetworkConnection::GetLastAccessNetworkInfo(
         OUT AString& strCellInfoAge)
 {
     AStringArray objCellIdentities =
-            System::GetInstance()->GetLastAccessNetworkInfo(RADIOTECH_TYPE_INVALID, GetSlotId());
+            PlatformContext::GetInstance()->GetSystem()->GetLastAccessNetworkInfo(
+                    RADIOTECH_TYPE_INVALID, GetSlotId());
 
     // 0 : network type
     // 1 : timestamp as UTC format
@@ -256,7 +260,8 @@ PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::GetExtraInfo(
 {
     if (strType.Equals("rat"))
     {
-        IMS_SINT32 nRadioType = System::GetInstance()->GetNetworkType(GetSlotId());
+        IMS_SINT32 nRadioType =
+                PlatformContext::GetInstance()->GetSystem()->GetNetworkType(GetSlotId());
 
         if ((nRadioType == RADIOTECH_TYPE_LTE) || (nRadioType == RADIOTECH_TYPE_LTE_CA))
         {
@@ -328,7 +333,7 @@ PRIVATE VIRTUAL IMS_SINT32 OsNetworkConnection::GetHostByName(IN const AString& 
 
     // ANDROID_L: android_gethostbynameforiface (KK-OS)
     // ANDROID_P: android_gethostbynamefornet (libc)
-    AStringArray objHostIps = System::GetInstance()->GetHostByName(
+    AStringArray objHostIps = PlatformContext::GetInstance()->GetSystem()->GetHostByName(
             strHostName, nIpVersion, GetApnType(), GetSlotId());
 
     if (objHostIps.IsEmpty())
@@ -374,8 +379,8 @@ PRIVATE VIRTUAL const AStringArray& OsNetworkConnection::GetPcscfAddress(
         IN IMS_SINT32 nIpVersion /*= 0 (configuration-based)*/)
 {
     m_objPcscfsAddress.RemoveAllElements();
-    m_objPcscfsAddress =
-            System::GetInstance()->GetPcscfAddresses(GetApnType(), nIpVersion, GetSlotId());
+    m_objPcscfsAddress = PlatformContext::GetInstance()->GetSystem()->GetPcscfAddresses(
+            GetApnType(), nIpVersion, GetSlotId());
 
     return m_objPcscfsAddress;
 }
@@ -412,12 +417,12 @@ PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::IsePDGEnabled() const
 
 PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::IsMobileDataEnabled() const
 {
-    return System::GetInstance()->IsMobileDataEnabled(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->IsMobileDataEnabled(GetSlotId());
 }
 
 PRIVATE VIRTUAL IMS_SINT32 OsNetworkConnection::GetMtu() const
 {
-    return System::GetInstance()->GetMtu(GetApnType(), GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetMtu(GetApnType(), GetSlotId());
 }
 
 PRIVATE VIRTUAL void OsNetworkConnection::SetListener(IN INetworkConnectionListener* piListener)
@@ -732,13 +737,15 @@ PUBLIC
 IMS_BOOL OsNetworkConnection::CacheLocalAddress()
 {
     // IPCAN category
-    m_nIpcanCategory = System::GetInstance()->GetIpcanCategory(GetApnType(), GetSlotId());
+    m_nIpcanCategory = PlatformContext::GetInstance()->GetSystem()->GetIpcanCategory(
+            GetApnType(), GetSlotId());
 
     /*
         nIPVersion with -1 is for caching ip address
         and selecting ip version based on configuration in java side
     */
-    AString strIpAddr = System::GetInstance()->GetLocalAddress(GetApnType(), -1, GetSlotId());
+    AString strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
+            GetApnType(), -1, GetSlotId());
 
     if (!m_objLocalAddress.Parse(strIpAddr))
     {
@@ -757,7 +764,8 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
     }
 
     // IPv4 address
-    strIpAddr = System::GetInstance()->GetLocalAddress(GetApnType(), IPAddress::IPV4, GetSlotId());
+    strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
+            GetApnType(), IPAddress::IPV4, GetSlotId());
 
     if (!m_objLocalAddressIpv4.Parse(strIpAddr))
     {
@@ -765,7 +773,8 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
     }
 
     // IPv6 address
-    strIpAddr = System::GetInstance()->GetLocalAddress(GetApnType(), IPAddress::IPV6, GetSlotId());
+    strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
+            GetApnType(), IPAddress::IPV6, GetSlotId());
 
     if (!m_objLocalAddressIpv6.Parse(strIpAddr))
     {
@@ -779,17 +788,18 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
     }
 
     // APN name
-    m_strApn = System::GetInstance()->GetApnName(GetApnType(), GetSlotId());
+    m_strApn = PlatformContext::GetInstance()->GetSystem()->GetApnName(GetApnType(), GetSlotId());
 
     IMS_TRACE_D("Mobile :: LOCAL - IPv4 (%s), IPv6 (%s), APN (%s)",
             m_objLocalAddressIpv4.ToString().GetStr(), m_objLocalAddressIpv6.ToString().GetStr(),
             m_strApn.GetStr());
 
     // Network interface identifier
-    m_nIfaceId = System::GetInstance()->GetIfaceId(GetApnType(), GetSlotId());
+    m_nIfaceId = PlatformContext::GetInstance()->GetSystem()->GetIfaceId(GetApnType(), GetSlotId());
 
     // Network interface name
-    m_strIfaceName = System::GetInstance()->GetIfaceName(GetApnType(), GetSlotId());
+    m_strIfaceName =
+            PlatformContext::GetInstance()->GetSystem()->GetIfaceName(GetApnType(), GetSlotId());
 
     IMS_TRACE_D("Mobile :: IfaceId=%d, IpcanCategory=%d, IfaceName=%s", m_nIfaceId,
             m_nIpcanCategory, m_strIfaceName.GetStr());
@@ -912,7 +922,8 @@ void OsNetworkConnection::ClearOnDataDisconnected()
 PRIVATE
 IMS_SINT32 OsNetworkConnection::GetDataState()
 {
-    m_nDataState = System::GetInstance()->GetDataConnectionState(GetApnType(), GetSlotId());
+    m_nDataState = PlatformContext::GetInstance()->GetSystem()->GetDataConnectionState(
+            GetApnType(), GetSlotId());
 
     return m_nDataState;
 }
@@ -920,7 +931,7 @@ IMS_SINT32 OsNetworkConnection::GetDataState()
 PRIVATE
 void OsNetworkConnection::GetAccessNetworkInfoForWiFi(OUT AccessNetworkInfo& objAccessNetInfo)
 {
-    AString strMacAddress = System::GetInstance()->GetWifiBssId();
+    AString strMacAddress = PlatformContext::GetInstance()->GetSystem()->GetWifiBssId();
     IMSList<AString> objTokens = strMacAddress.Split(':');
 
     if (objTokens.GetSize() == ANI_WLAN_MAX_MAC)
@@ -1135,8 +1146,8 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
 
     // IPv4 address
     IPAddress objIpv4;
-    AString strIpAddr =
-            System::GetInstance()->GetLocalAddress(GetApnType(), IPAddress::IPV4, GetSlotId());
+    AString strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
+            GetApnType(), IPAddress::IPV4, GetSlotId());
 
     if (!objIpv4.Parse(strIpAddr))
     {
@@ -1145,7 +1156,8 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
 
     // IPv6 address
     IPAddress objIpv6;
-    strIpAddr = System::GetInstance()->GetLocalAddress(GetApnType(), IPAddress::IPV6, GetSlotId());
+    strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
+            GetApnType(), IPAddress::IPV6, GetSlotId());
 
     if (!objIpv6.Parse(strIpAddr))
     {
@@ -1169,7 +1181,8 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
     if (bIpUpdated)
     {
         // Default IP address based on configuration
-        strIpAddr = System::GetInstance()->GetLocalAddress(GetApnType(), -1, GetSlotId());
+        strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
+                GetApnType(), -1, GetSlotId());
 
         if (!m_objLocalAddress.Parse(strIpAddr))
         {
@@ -1228,7 +1241,8 @@ IMS_BOOL OsNetworkConnection::Release(IN IMS_BOOL bDisableApn /*= IMS_FALSE*/)
 {
     if (GetApnType() == NetworkPolicy::APN_EMERGENCY)
     {
-        if (System::GetInstance()->DeactivateDataConnection(GetApnType(), GetSlotId()) == 0)
+        if (PlatformContext::GetInstance()->GetSystem()->DeactivateDataConnection(
+                    GetApnType(), GetSlotId()) == 0)
         {
             IMS_TRACE_E(0, "Disable data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
             return IMS_FALSE;
@@ -1241,7 +1255,8 @@ IMS_BOOL OsNetworkConnection::Release(IN IMS_BOOL bDisableApn /*= IMS_FALSE*/)
             IMS_TRACE_D("APN (%s) will be explicitly disabled by the application",
                     GetProfileName().GetStr(), 0, 0);
 
-            if (System::GetInstance()->DeactivateDataConnection(GetApnType(), GetSlotId()) == 0)
+            if (PlatformContext::GetInstance()->GetSystem()->DeactivateDataConnection(
+                        GetApnType(), GetSlotId()) == 0)
             {
                 IMS_TRACE_E(
                         0, "Disable data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);

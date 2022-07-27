@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "ImsFile.h"
-#include "PlatformFactory.h"
+#include "PlatformContext.h"
 #include "ServiceFile.h"
 #include "ServiceMemory.h"
 
@@ -25,7 +25,11 @@ public:
             m_piFileUtil(IMS_NULL)
     {
     }
-    inline ~FileServicePrivate() { PlatformFactory::DestroyFileUtil(m_piFileUtil); }
+    inline ~FileServicePrivate()
+    {
+        IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+        piOsFactory->DestroyFileUtil(m_piFileUtil);
+    }
 
     FileServicePrivate(IN const FileServicePrivate&) = delete;
     FileServicePrivate& operator=(IN const FileServicePrivate&) = delete;
@@ -35,7 +39,8 @@ public:
     {
         if (m_piFileUtil == IMS_NULL)
         {
-            m_piFileUtil = PlatformFactory::CreateFileUtil();
+            IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+            m_piFileUtil = piOsFactory->CreateFileUtil();
         }
 
         return m_piFileUtil;
@@ -63,7 +68,8 @@ FileService::~FileService()
 PUBLIC
 IFile* FileService::CreateFile()
 {
-    ImsFile* pFile = PlatformFactory::CreateFile();
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    ImsFile* pFile = piOsFactory->CreateFile();
 
     IMS_ASSERT(pFile != IMS_NULL);
 
@@ -90,12 +96,6 @@ IFileUtil* FileService::GetFileUtil()
 
 PUBLIC GLOBAL FileService* FileService::GetFileService()
 {
-    static FileService* s_pFileService = IMS_NULL;
-
-    if (s_pFileService == IMS_NULL)
-    {
-        s_pFileService = new FileService();
-    }
-
-    return s_pFileService;
+    return DYNAMIC_CAST(FileService*,
+            PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_FILE));
 }

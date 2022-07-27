@@ -21,22 +21,11 @@
 class PlatformProperty
 {
 public:
-    // Base platform of IMS framework
-    enum
-    {
-        PLATFORM_ANDROID = 1,
-        PLATFORM_WM,
-        PLATFORM_REX
-    };
-
-public:
     static IMS_BOOL Initialize();
     static void InitializeOnImsThread();
     static void Start();
     static void Stop();
     static void Uninitialize();
-
-    static IMS_SINT32 GetPlatform();
 };
 
 #endif

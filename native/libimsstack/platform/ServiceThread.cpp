@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 #include "ImsThread.h"
-#include "PlatformFactory.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
 #include "ServiceThread.h"
+
+PRIVATE GLOBAL INativeThreadMethods* ThreadService::s_piNativeThreadMethods = IMS_NULL;
 
 PRIVATE
 ThreadService::ThreadService()
@@ -35,9 +37,10 @@ ThreadService::~ThreadService()
 }
 
 PUBLIC
-IThread* ThreadService::Create(IN const AString& strName, IN IMS_SINT32 nSlotId)
+IThread* ThreadService::CreateThread(IN const AString& strName, IN IMS_SINT32 nSlotId)
 {
-    ImsThread* pThread = PlatformFactory::CreateThread();
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    ImsThread* pThread = piOsFactory->CreateThread(strName, nSlotId);
 
     IMS_ASSERT(pThread != IMS_NULL);
 
@@ -48,54 +51,14 @@ IThread* ThreadService::Create(IN const AString& strName, IN IMS_SINT32 nSlotId)
 
     // Create a thread and manage it in thread pool.
     LockThreadPool();
-
-    if (!pThread->CreateEx(strName, nSlotId))
-    {
-        delete pThread;
-
-        UnlockThreadPool();
-        return IMS_NULL;
-    }
-
     m_objThreads.Append(pThread);
-
     UnlockThreadPool();
 
     return pThread;
 }
 
 PUBLIC
-IThread* ThreadService::CreateEx(IN const AString& strName, IN IMS_SINT32 nSlotId)
-{
-    ImsThread* pThread = PlatformFactory::CreateThreadEx();
-
-    IMS_ASSERT(pThread != IMS_NULL);
-
-    if (pThread == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
-    // Create a thread and manage it in thread pool.
-    LockThreadPool();
-
-    if (!pThread->CreateEx(strName, nSlotId))
-    {
-        delete pThread;
-
-        UnlockThreadPool();
-        return IMS_NULL;
-    }
-
-    m_objThreads.Append(pThread);
-
-    UnlockThreadPool();
-
-    return pThread;
-}
-
-PUBLIC
-void ThreadService::Destroy(IN IThread*& piThread)
+void ThreadService::DestroyThread(IN IThread*& piThread)
 {
     ImsThread* pThread = DYNAMIC_CAST(ImsThread*, piThread);
 
@@ -180,7 +143,8 @@ IThread* ThreadService::GetCurrentThread() const
     LockThreadPool();
 
     // According to the platform specific API, we will find the current thread ...
-    nCurrentThreadId = PlatformFactory::GetCurrentThreadId();
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    nCurrentThreadId = piOsFactory->GetCurrentThreadId();
 
     if (nCurrentThreadId == 0)
     {
@@ -242,14 +206,8 @@ IThread* ThreadService::GetThreadLocked(IN const AString& strName) const
 
 PUBLIC GLOBAL ThreadService* ThreadService::GetThreadService()
 {
-    static ThreadService* s_pThreadService = IMS_NULL;
-
-    if (s_pThreadService == IMS_NULL)
-    {
-        s_pThreadService = new ThreadService();
-    }
-
-    return s_pThreadService;
+    return DYNAMIC_CAST(ThreadService*,
+            PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_THREAD));
 }
 
 PUBLIC GLOBAL IMS_SINT32 ThreadService::GetCurrentSlotId(
@@ -257,6 +215,17 @@ PUBLIC GLOBAL IMS_SINT32 ThreadService::GetCurrentSlotId(
 {
     IThread* piThread = GetThreadService()->GetCurrentThread();
     return (piThread != IMS_NULL) ? piThread->GetSlotId() : nDefaultSlotId;
+}
+
+PUBLIC GLOBAL INativeThreadMethods* ThreadService::GetNativeThreadMethods()
+{
+    return s_piNativeThreadMethods;
+}
+
+PUBLIC GLOBAL void ThreadService::SetNativeThreadMethods(
+        IN INativeThreadMethods* piNativeThreadMethods)
+{
+    s_piNativeThreadMethods = piNativeThreadMethods;
 }
 
 PRIVATE

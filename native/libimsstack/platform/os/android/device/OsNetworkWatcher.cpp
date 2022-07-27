@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "PlatformContext.h"
 #include "ServiceNetworkPolicy.h"
 #include "ServiceTrace.h"
 #include "device/OsNetworkWatcher.h"
 #include "network/OsNetworkConstants.h"
-#include "system-intf/System.h"
 #include "system-intf/SystemConstants.h"
 
 __IMS_TRACE_TAG_ADAPT__;
@@ -30,14 +30,16 @@ OsNetworkWatcher::OsNetworkWatcher(IN IMS_SINT32 nSlotId) :
         m_eNetDomainType(NW_REPORT_DOMAIN_NOSRV)
 {
     m_eNetDomainType = NW_REPORT_DOMAIN_CSPS;
-    System::GetInstance()->AddListener(SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->AddListener(
+            SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
 
     PostMsgRegisteredThread(GetSlotId());
 }
 
 PUBLIC VIRTUAL OsNetworkWatcher::~OsNetworkWatcher()
 {
-    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->RemoveListener(
+            SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_UINT32 OsNetworkWatcher::GetNetworkStatus(IN const AString& strProfile)
@@ -179,7 +181,8 @@ PUBLIC VIRTUAL NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType()
 
 PUBLIC VIRTUAL NETRADIO_ENTYPE OsNetworkWatcher::GetNetVoiceRadioTechType()
 {
-    IMS_SINT32 nType = System::GetInstance()->GetVoiceNetworkType(GetSlotId());
+    IMS_SINT32 nType =
+            PlatformContext::GetInstance()->GetSystem()->GetVoiceNetworkType(GetSlotId());
 
     NETRADIO_ENTYPE eVoiceNetType = NW_REPORT_RADIO_NOSRV;
 
@@ -465,47 +468,47 @@ void OsNetworkWatcher::UpdateDataConnectionStateChanged(IN IMS_SINT32 nState)
 
 PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetNetworkType()
 {
-    return System::GetInstance()->GetNetworkType(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetNetworkType(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetRoamingState()
 {
-    return System::GetInstance()->GetRoamingState(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetRoamingState(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetVoiceRoamingType()
 {
-    return System::GetInstance()->GetVoiceRoamingType(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetVoiceRoamingType(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetDataRoamingType()
 {
-    return System::GetInstance()->GetDataRoamingType(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetDataRoamingType(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsImsEmergencyCallSupported()
 {
-    return System::GetInstance()->IsImsEmergencyCallSupported(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->IsImsEmergencyCallSupported(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsImsVoiceCallSupported()
 {
-    return System::GetInstance()->IsImsVoiceCallSupported(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->IsImsVoiceCallSupported(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetLteRsrpStrength()
 {
-    return System::GetInstance()->GetLteRsrpStrength(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetLteRsrpStrength(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsLteEmergencyOnly()
 {
-    return System::GetInstance()->IsLteEmergencyOnly(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->IsLteEmergencyOnly(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsEmergencyAttachSupported()
 {
-    return System::GetInstance()->IsEmergencyAttachSupported(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->IsEmergencyAttachSupported(GetSlotId());
 }
 
 /**
@@ -517,7 +520,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsEmergencyAttachSupported()
 PUBLIC
 IMS_SINT32 OsNetworkWatcher::GetServiceStateType()
 {
-    return System::GetInstance()->GetServiceState(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetServiceState(GetSlotId());
 }
 
 /**
@@ -529,12 +532,12 @@ IMS_SINT32 OsNetworkWatcher::GetServiceStateType()
 PUBLIC
 IMS_SINT32 OsNetworkWatcher::GetVoiceServiceStateType()
 {
-    return System::GetInstance()->GetVoiceServiceState(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetVoiceServiceState(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetMocnPlmnInfo()
 {
-    return System::GetInstance()->GetMocnPlmnInfo(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetMocnPlmnInfo(GetSlotId());
 }
 
 PRIVATE GLOBAL const IMS_CHAR* OsNetworkWatcher::RadioTechToString(IN IMS_UINT32 nType)

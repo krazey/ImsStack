@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
@@ -21,7 +22,6 @@
 #include "network/OsIpSecSa.h"
 #include "network/OsIpSecSp.h"
 #include "network/OsNetworkIpSec.h"
-#include "system-intf/System.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -87,7 +87,8 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DestroyAllPolicies()
         {
             const IpSecSaParameter& objSaParam = m_objSaParams.GetValueAt(nIndex);
 
-            System::GetInstance()->RemoveIpSecSaParameter(objSaParam.GetIpSecId(), GetSlotId());
+            PlatformContext::GetInstance()->GetSystem()->RemoveIpSecSaParameter(
+                    objSaParam.GetIpSecId(), GetSlotId());
 
             m_objSaParams.RemoveAt(nIndex);
         }
@@ -139,7 +140,8 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::AddPolicy(IN IIpSecPolicy* piPolicy)
 
     IMS_TRACE_D("SaParameter: %s", objSaParam.ToString().GetStr(), 0, 0);
 
-    if (System::GetInstance()->AddIpSecSaParameter(objSaParam, GetSlotId()) > 0)
+    if (PlatformContext::GetInstance()->GetSystem()->AddIpSecSaParameter(objSaParam, GetSlotId()) >
+            0)
     {
         m_objSaParams.Add(reinterpret_cast<IMS_UINTP>(pPolicy), objSaParam);
     }
@@ -164,7 +166,8 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DeletePolicy(IN IIpSecPolicy* piPolicy)
 
     const IpSecSaParameter& objSaParam = m_objSaParams.GetValueAt(nIndex);
 
-    System::GetInstance()->RemoveIpSecSaParameter(objSaParam.GetIpSecId(), GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->RemoveIpSecSaParameter(
+            objSaParam.GetIpSecId(), GetSlotId());
 
     m_objSaParams.RemoveAt(nIndex);
 
@@ -249,8 +252,9 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(IN ISocket* piSocket
 
             if (bApplyIpSec)
             {
-                if (System::GetInstance()->ApplyIpSecSa(objSaParam.GetIpSecId(), objPolicy.GetSpi(),
-                            piSocket->GetSocketId(), GetSlotId()) > 0)
+                if (PlatformContext::GetInstance()->GetSystem()->ApplyIpSecSa(
+                            objSaParam.GetIpSecId(), objPolicy.GetSpi(), piSocket->GetSocketId(),
+                            GetSlotId()) > 0)
                 {
                     objPolicy.SetSocketId(piSocket->GetSocketId());
                 }
@@ -290,8 +294,9 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(
             if (objPolicy.GetSocketId() == piServerSocket->GetSocketId() &&
                     !objPolicy.HasAcceptedSocketId(piSocket->GetSocketId()))
             {
-                if (System::GetInstance()->ApplyIpSecSa(objSaParam.GetIpSecId(), objPolicy.GetSpi(),
-                            piSocket->GetSocketId(), GetSlotId()) > 0)
+                if (PlatformContext::GetInstance()->GetSystem()->ApplyIpSecSa(
+                            objSaParam.GetIpSecId(), objPolicy.GetSpi(), piSocket->GetSocketId(),
+                            GetSlotId()) > 0)
                 {
                     objPolicy.AddAcceptedSocketId(piSocket->GetSocketId());
                 }
@@ -323,14 +328,14 @@ PUBLIC VIRTUAL void OsNetworkIpSec::RemoveIpSecTransforms(IN IMS_SINT32 nSocketI
 
             if (objPolicy.GetSocketId() == nSocketId)
             {
-                System::GetInstance()->RemoveIpSecSa(
+                PlatformContext::GetInstance()->GetSystem()->RemoveIpSecSa(
                         objSaParam.GetIpSecId(), objPolicy.GetSpi(), nSocketId, GetSlotId());
 
                 objPolicy.SetSocketId(IpSecSaParameter::Policy::SOCKET_NOT_SET);
             }
             else if (objPolicy.HasAcceptedSocketId(nSocketId))
             {
-                System::GetInstance()->RemoveIpSecSa(
+                PlatformContext::GetInstance()->GetSystem()->RemoveIpSecSa(
                         objSaParam.GetIpSecId(), objPolicy.GetSpi(), nSocketId, GetSlotId());
 
                 objPolicy.RemoveAcceptedSocketId(nSocketId);

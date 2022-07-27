@@ -19,7 +19,7 @@
 #include "ImsSocketState.h"
 #include "INetworkIpSec.h"
 #include "PlatformApi.h"
-#include "PlatformFactory.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceThread.h"
@@ -34,8 +34,9 @@ public:
     }
     inline ~NetworkServicePrivate()
     {
-        PlatformFactory::DestroyIpcan(m_piIpcan);
-        PlatformFactory::DestroyNetworkIpSec(m_piIpSec);
+        IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+        piOsFactory->DestroyIpcan(m_piIpcan);
+        piOsFactory->DestroyNetworkIpSec(m_piIpSec);
     }
 
     NetworkServicePrivate(IN const NetworkServicePrivate&) = delete;
@@ -46,7 +47,8 @@ public:
     {
         if (m_piIpcan == IMS_NULL)
         {
-            m_piIpcan = PlatformFactory::CreateIpcan();
+            IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+            m_piIpcan = piOsFactory->CreateIpcan();
         }
 
         return m_piIpcan;
@@ -56,7 +58,8 @@ public:
     {
         if (m_piIpSec == IMS_NULL)
         {
-            m_piIpSec = PlatformFactory::CreateNetworkIpSec();
+            IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+            m_piIpSec = piOsFactory->CreateNetworkIpSec();
         }
 
         return m_piIpSec;
@@ -94,7 +97,8 @@ INetworkConnection* NetworkService::CreateConnection(
         return pConnection;
     }
 
-    pConnection = PlatformFactory::CreateNetworkConnection(strProfileName, nSlotId);
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    pConnection = piOsFactory->CreateNetworkConnection(strProfileName, nSlotId);
 
     IMS_ASSERT(pConnection != IMS_NULL);
 
@@ -123,7 +127,8 @@ INetworkConnection* NetworkService::CreateConnection(IN IMS_SINT32 nApnType, IN 
         return pConnection;
     }
 
-    pConnection = PlatformFactory::CreateNetworkConnection(nApnType, nSlotId);
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    pConnection = piOsFactory->CreateNetworkConnection(nApnType, nSlotId);
 
     IMS_ASSERT(pConnection != IMS_NULL);
 
@@ -184,7 +189,8 @@ ISocket* NetworkService::CreateSocket(IN INetworkConnection* piConnection)
         return IMS_NULL;
     }
 
-    ImsSocket* pSocket = PlatformFactory::CreateSocket();
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    ImsSocket* pSocket = piOsFactory->CreateSocket();
 
     IMS_ASSERT(pSocket != IMS_NULL);
 
@@ -209,7 +215,8 @@ ISocket* NetworkService::CreateSocket(IN const IMS_CHAR* pszProfileName, IN IMS_
         return IMS_NULL;
     }
 
-    ImsSocket* pSocket = PlatformFactory::CreateSocket();
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    ImsSocket* pSocket = piOsFactory->CreateSocket();
 
     IMS_ASSERT(pSocket != IMS_NULL);
 
@@ -234,7 +241,8 @@ ISocket* NetworkService::CreateSslSocket(
         return IMS_NULL;
     }
 
-    ImsSocket* pSocket = PlatformFactory::CreateSslSocket(pCertificate);
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    ImsSocket* pSocket = piOsFactory->CreateSslSocket(pCertificate);
 
     IMS_ASSERT(pSocket != IMS_NULL);
 
@@ -260,7 +268,8 @@ ISocket* NetworkService::CreateSslSocket(
         return IMS_NULL;
     }
 
-    ImsSocket* pSocket = PlatformFactory::CreateSslSocket(pCertificate);
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    ImsSocket* pSocket = piOsFactory->CreateSslSocket(pCertificate);
 
     IMS_ASSERT(pSocket != IMS_NULL);
 
@@ -341,14 +350,8 @@ void NetworkService::DispatchServiceMessage(IN ImsMessage& objMsg)
 
 PUBLIC GLOBAL NetworkService* NetworkService::GetNetworkService()
 {
-    static NetworkService* s_pNetworkService = IMS_NULL;
-
-    if (s_pNetworkService == IMS_NULL)
-    {
-        s_pNetworkService = new NetworkService();
-    }
-
-    return s_pNetworkService;
+    return DYNAMIC_CAST(NetworkService*,
+            PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_NETWORK));
 }
 
 PUBLIC GLOBAL IMS_SINT32 NetworkService::GetSlotId(IN const IPAddress& objIpAddr)

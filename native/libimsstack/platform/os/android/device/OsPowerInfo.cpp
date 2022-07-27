@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "PlatformContext.h"
 #include "ServiceTrace.h"
 #include "device/OsPowerInfo.h"
-#include "system-intf/System.h"
 #include "system-intf/SystemConstants.h"
 
 __IMS_TRACE_TAG_ADAPT__;
@@ -147,12 +147,14 @@ OsPowerInfo::OsPowerInfo() :
         m_pPowerInfoP->SetPowerInfo(this);
     }
 
-    System::GetInstance()->AddListener(SystemConstants::CATEGORY_POWER, this, IMS_SLOT_0);
+    PlatformContext::GetInstance()->GetSystem()->AddListener(
+            SystemConstants::CATEGORY_POWER, this, IMS_SLOT_0);
 }
 
 PUBLIC VIRTUAL OsPowerInfo::~OsPowerInfo()
 {
-    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_POWER, this, IMS_SLOT_0);
+    PlatformContext::GetInstance()->GetSystem()->RemoveListener(
+            SystemConstants::CATEGORY_POWER, this, IMS_SLOT_0);
 
     if (m_pPowerInfoP != IMS_NULL)
     {
@@ -172,7 +174,7 @@ PUBLIC VIRTUAL POWERLEVEL_ENTYPE OsPowerInfo::GetPowerLevel()
 
 PUBLIC VIRTUAL IMS_UINT32 OsPowerInfo::GetPowerValue()
 {
-    return System::GetInstance()->GetPowerLevel();
+    return PlatformContext::GetInstance()->GetSystem()->GetPowerLevel();
 }
 
 PUBLIC VIRTUAL void OsPowerInfo::System_NotifyEvent(

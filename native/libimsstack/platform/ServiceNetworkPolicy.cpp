@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceNetworkPolicy.h"
 #include "SystemConfig.h"
@@ -360,12 +361,6 @@ void NetworkServicePolicy::RemoveAllPolicies(IN IMS_SINT32 nSlotId)
 
 PUBLIC GLOBAL NetworkServicePolicy* NetworkServicePolicy::GetInstance()
 {
-    static NetworkServicePolicy* s_pNetServicePolicy = IMS_NULL;
-
-    if (s_pNetServicePolicy == IMS_NULL)
-    {
-        s_pNetServicePolicy = new NetworkServicePolicy();
-    }
-
-    return s_pNetServicePolicy;
+    return DYNAMIC_CAST(NetworkServicePolicy*,
+            PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_NETWORK_POLICY));
 }

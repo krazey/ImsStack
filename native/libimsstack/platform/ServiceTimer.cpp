@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "ImsTimer.h"
-#include "PlatformFactory.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
 #include "ServiceTimer.h"
@@ -34,7 +34,8 @@ TimerService::~TimerService()
 PUBLIC
 ITimer* TimerService::CreateTimer()
 {
-    ImsTimer* pTimer = PlatformFactory::CreateTimer();
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    ImsTimer* pTimer = piOsFactory->CreateTimer();
 
     IMS_ASSERT(pTimer != IMS_NULL);
 
@@ -43,12 +44,6 @@ ITimer* TimerService::CreateTimer()
     m_piLock->Unlock();
 
     return pTimer;
-}
-
-PUBLIC
-ITimer* TimerService::CreateTimer(IN IMS_BOOL /* bAlarmTimer = IMS_FALSE */)
-{
-    return CreateTimer();
 }
 
 PUBLIC
@@ -137,12 +132,6 @@ void TimerService::DispatchServiceMessage(IN ImsMessage& objMsg)
 // Creates the singleton class and return it
 PUBLIC GLOBAL TimerService* TimerService::GetTimerService()
 {
-    static TimerService* s_pTimerService = IMS_NULL;
-
-    if (s_pTimerService == IMS_NULL)
-    {
-        s_pTimerService = new TimerService();
-    }
-
-    return s_pTimerService;
+    return DYNAMIC_CAST(TimerService*,
+            PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_TIMER));
 }

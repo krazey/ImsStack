@@ -17,6 +17,7 @@
 
 #include "ImsMap.h"
 #include "ImsStrLib.h"
+#include "OsParcel.h"
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
 #include "ServiceTrace.h"
@@ -1285,21 +1286,22 @@ IMS_SINT32 System::SetPrivateProperty(IN IMS_BOOL bPersistent, IN const AString&
 }
 
 PUBLIC
-IMS_BOOL System::GetCarrierConfig(IN IMS_SINT32 nSlotId, OUT android::Parcel& objConfig)
+IMS_BOOL System::GetCarrierConfig(IN IMS_SINT32 nSlotId, OUT ImsParcel& objConfig)
 {
     if (m_pCallback == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
+    OsParcel& objOsConfig = DYNAMIC_CAST(OsParcel&, objConfig);
     android::Parcel in;
 
     in.writeInt32(nSlotId);
     in.writeInt32(SystemConstants::GET_CARRIER_CONFIG);
 
-    if (m_pCallback->SendDataToJava(in, objConfig) == 1)
+    if (m_pCallback->SendDataToJava(in, objOsConfig.GetParcel()) == 1)
     {
-        IMS_SINT32 nStatus = objConfig.readInt32();
+        IMS_SINT32 nStatus = objOsConfig.GetParcel().readInt32();
 
         return nStatus == 1;
     }

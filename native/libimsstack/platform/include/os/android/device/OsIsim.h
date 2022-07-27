@@ -17,9 +17,9 @@
 #define OS_ISIM_H_
 
 #include "IDigestAka.h"
+#include "ISystemListener.h"
 #include "ImsIsim.h"
 #include "ImsMap.h"
-#include "system-intf/ISystemListener.h"
 
 class IDigestAkaListener;
 class IIsimListener;

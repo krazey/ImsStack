@@ -17,23 +17,24 @@
 #define SERVICE_FILE_H_
 
 #include "IFile.h"
+#include "PlatformService.h"
 
 class FileServicePrivate;
 
-class FileService
+class FileService : public PlatformService
 {
-private:
-    FileService();
-    ~FileService();
-
 public:
+    FileService();
     FileService(IN const FileService&) = delete;
     FileService& operator=(IN const FileService&) = delete;
 
+protected:
+    virtual ~FileService();
+
 public:
-    IFile* CreateFile();
-    void DestroyFile(IN IFile*& piFile);
-    IFileUtil* GetFileUtil();
+    virtual IFile* CreateFile();
+    virtual void DestroyFile(IN IFile*& piFile);
+    virtual IFileUtil* GetFileUtil();
 
     static FileService* GetFileService();
 

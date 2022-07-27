@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <binder/Parcel.h>
 #include <utils/String8.h>
 
 #include "IDigestAkaListener.h"
 #include "IIsimListener.h"
 #include "ImsMessageDef.h"
 #include "OsUtil.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
 #include "device/OsIsim.h"
-#include "system-intf/System.h"
 #include "system-intf/SystemConstants.h"
 
 __IMS_TRACE_TAG_ADAPT__;
@@ -493,7 +494,7 @@ PUBLIC VIRTUAL IMS_RESULT OsIsimDigestAka::GetAuthResponse(IN const ByteArray& o
             reinterpret_cast<const IMS_CHAR*>(objChallenge.GetData()), objChallenge.GetLength());
     strNonce = strNonce.ToBase64();
 
-    if (System::GetInstance()->RequestIsimAuthentication(
+    if (PlatformContext::GetInstance()->GetSystem()->RequestIsimAuthentication(
                 strNonce, reinterpret_cast<IMS_SINTP>(this), m_pIsim->GetSlotId()) != IMS_SUCCESS)
     {
         pIsim->NotifyAuthResult(IMS_FAILURE);
@@ -566,7 +567,8 @@ OsIsim::OsIsim(IN IMS_SINT32 nSlotId) :
     // m_objEfContents.Add(EF_ID_IST, IsimEfContent());
     // m_objEfContents.Add(EF_ID_PCSCF, IsimEfContent(IsimEfContent::EF_LINEAR_FIXED));
 
-    System::GetInstance()->AddListener(SystemConstants::CATEGORY_ISIM, this, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->AddListener(
+            SystemConstants::CATEGORY_ISIM, this, GetSlotId());
 
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 }
@@ -575,7 +577,8 @@ PUBLIC VIRTUAL OsIsim::~OsIsim()
 {
     IMS_TRACE_D("Destructor :: ISIM%02d", GetSlotId(), 0, 0);
 
-    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_ISIM, this, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->RemoveListener(
+            SystemConstants::CATEGORY_ISIM, this, GetSlotId());
 }
 
 PUBLIC VIRTUAL void OsIsim::DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
@@ -709,11 +712,6 @@ PUBLIC VIRTUAL IMS_RESULT OsIsim::Init()
         return IMS_SUCCESS;
     }
 
-    if (System::GetInstance() == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
-
     if (m_nState != STATE_IDLE)
     {
         IMS_TRACE_E(0, "Init() can be only invoked in IDLE state; state(%d)", m_nState, 0, 0);
@@ -724,7 +722,8 @@ PUBLIC VIRTUAL IMS_RESULT OsIsim::Init()
     m_nCountForAuthFailed = 0;
 
     // In case that ISIM STATUS is LOADED or NOT_PRESENT
-    IMS_SINT32 nIsimState = ConvertSimStateToEnum(System::GetInstance()->GetIsimState(GetSlotId()));
+    IMS_SINT32 nIsimState = ConvertSimStateToEnum(
+            PlatformContext::GetInstance()->GetSystem()->GetIsimState(GetSlotId()));
 
     if (nIsimState == OsIsimStateParam::STATE_LOADED ||
             nIsimState == OsIsimStateParam::STATE_NOT_PRESENT)
@@ -885,7 +884,8 @@ IMS_RESULT OsIsim::GetFileAttributes(IN IMS_SINT32 nRequiredEFs, IN IMS_SINT32 n
             m_objEfContents.SetValue(nFileId, IsimEfContent(nEFContentType));
         }
 
-        if (System::GetInstance()->ReadIsimFileAttributes(nFileId, GetSlotId()) != IMS_SUCCESS)
+        if (PlatformContext::GetInstance()->GetSystem()->ReadIsimFileAttributes(
+                    nFileId, GetSlotId()) != IMS_SUCCESS)
         {
             return IMS_FAILURE;
         }
@@ -932,8 +932,8 @@ IMS_RESULT OsIsim::GetRecord(IN IMS_SINT32 nFileId)
 
     objContent.SetReadRequested(IMS_TRUE);
 
-    if (System::GetInstance()->ReadIsimRecord(nFileId, objContent.GetIndexToRead(), GetSlotId()) !=
-            IMS_SUCCESS)
+    if (PlatformContext::GetInstance()->GetSystem()->ReadIsimRecord(
+                nFileId, objContent.GetIndexToRead(), GetSlotId()) != IMS_SUCCESS)
     {
         objContent.SetReadRequested(IMS_FALSE);
 
@@ -1171,7 +1171,7 @@ void OsIsim::SetRecord(IN IMS_SINT32 nFileId, IN const IMS_BYTE* pbyData, IN IMS
 
         if (objContent.GetType() == IsimEfContent::EF_LINEAR_FIXED)
         {
-            if (System::GetInstance()->ReadIsimRecord(
+            if (PlatformContext::GetInstance()->GetSystem()->ReadIsimRecord(
                         nFileId, objContent.GetIndexToRead(), GetSlotId()) != IMS_SUCCESS)
             {
                 IMS_TRACE_E(0, "Reading EF(%X) failed", nFileId, 0, 0);

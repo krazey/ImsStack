@@ -25,6 +25,9 @@
 class MockIIpSecPolicy : public IIpSecPolicy
 {
 public:
+    inline MockIIpSecPolicy() {}
+    inline virtual ~MockIIpSecPolicy() {}
+
     MOCK_METHOD(IMS_SINT32, GetId, (), (const, override));
     MOCK_METHOD(IIpSecSp*, CreateSp, (), (override));
     MOCK_METHOD(void, DestroySp, (IN IIpSecSp * piSp), (override));
@@ -34,4 +37,4 @@ public:
     MOCK_METHOD(void, SetListener, (IN IIpSecPolicyListener * piListener), (override));
 };
 
-#endif  // MOCK_I_IP_SEC_POLICY_H_
+#endif

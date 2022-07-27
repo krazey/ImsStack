@@ -20,29 +20,28 @@
 #include "ISystemProperty.h"
 #include "ISystemUtil.h"
 #include "IZLib.h"
+#include "PlatformService.h"
 
-class UtilService
+class UtilService : public PlatformService
 {
-private:
-    UtilService();
-    ~UtilService();
-
 public:
+    UtilService();
     UtilService(IN const UtilService&) = delete;
     UtilService& operator=(IN const UtilService&) = delete;
 
+protected:
+    virtual ~UtilService();
+
 public:
-    IImsPrivateProperty* GetPrivateProperty();
-    ISystemUtil* GetSystemUtil();
-    // LOG_EXCLUDING_SERVER_INFO
-    ISystemProperty* GetSystemProperty();
-    IZLib* GetZLib();
+    virtual IImsPrivateProperty* GetPrivateProperty();
+    virtual ISystemUtil* GetSystemUtil();
+    virtual ISystemProperty* GetSystemProperty();
+    virtual IZLib* GetZLib();
 
     // Sets the debugging flag
     void SetDebugOn(IN IMS_BOOL bDebugOn);
 
     static UtilService* GetUtilService();
-
     // Return value: strOutput (user mode & config-debug-off), strInput (non-user mode)
     static const AString& GetLogString(IN const AString& strInput, IN_OUT AString& strOutput,
             IN IMS_SINT32 nOutSize, IN IMS_CHAR cDelimiter = 0 /* no delimiter */);

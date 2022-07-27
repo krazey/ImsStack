@@ -24,6 +24,9 @@
 class MockISubscriberInfo : public ISubscriberInfo
 {
 public:
+    inline MockISubscriberInfo() {}
+    inline virtual ~MockISubscriberInfo() {}
+
     MOCK_METHOD(IMS_BOOL, GetPhoneNumber, (OUT AString& strPhoneNumber), (const, override));
     MOCK_METHOD(IMS_BOOL, GetMcc, (OUT AString& strMcc), (const, override));
     MOCK_METHOD(IMS_BOOL, GetMnc, (OUT AString& strMnc), (const, override));

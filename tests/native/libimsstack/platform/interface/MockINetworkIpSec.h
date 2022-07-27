@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef MOCK_I_NETWORK_IP_SEC_H_
 #define MOCK_I_NETWORK_IP_SEC_H_
 
 #include <gmock/gmock.h>
 
+#include "IIpSecPolicy.h"
+#include "INetworkIpSec.h"
 #include "ISocket.h"
 #include "SocketAddress.h"
-#include "IIpSecPolicy.h"
-
-#include "INetworkIpSec.h"
 
 class MockINetworkIpSec : public INetworkIpSec
 {
 public:
+    inline MockINetworkIpSec() {}
+    inline virtual ~MockINetworkIpSec() {}
+
     MOCK_METHOD(IIpSecPolicy*, CreatePolicy, (), (override));
     MOCK_METHOD(void, DestroyPolicy, (IN IIpSecPolicy * piPolicy), (override));
     MOCK_METHOD(void, DestroyAllPolicies, (), (override));
@@ -46,4 +47,4 @@ public:
     MOCK_METHOD(void, SetSdbFlushCapability, (IN IMS_BOOL bCapability), (override));
 };
 
-#endif  // MOCK_I_NETWORK_IP_SEC_H_
+#endif

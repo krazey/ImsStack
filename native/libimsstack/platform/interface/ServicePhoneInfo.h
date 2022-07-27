@@ -25,40 +25,35 @@
 #include "IPhoneInfoSubscriber.h"
 #include "IUsim.h"
 #include "IWifiWatcher.h"
+#include "PlatformService.h"
 
 class PhoneInfoServicePrivate;
 
-class PhoneInfoService
+class PhoneInfoService : public PlatformService
 {
-private:
-    PhoneInfoService();
-    ~PhoneInfoService();
-
 public:
+    PhoneInfoService();
     PhoneInfoService(IN const PhoneInfoService&) = delete;
     PhoneInfoService& operator=(IN const PhoneInfoService&) = delete;
 
+protected:
+    virtual ~PhoneInfoService();
+
 public:
+    virtual IDeviceInfo* GetDeviceInfo();
+    virtual IPowerInfo* GetPowerInfo();
+
+    virtual ICallInfo* GetCallInfo(IN IMS_SINT32 nSlotId);
+    virtual ILocationInfo* GetLocationInfo(IN IMS_SINT32 nSlotId);
+    virtual ISubscriberInfo* GetSubscriberInfo(IN IMS_SINT32 nSlotId);
+
+    virtual IIsim* GetIsim(IN IMS_SINT32 nSlotId);
+    virtual IUsim* GetUsim(IN IMS_SINT32 nSlotId);
+
+    virtual INetworkWatcher* GetNetworkWatcher(IN IMS_SINT32 nSlotId);
+    virtual IWifiWatcher* GetWifiWatcher();
+
     void DispatchServiceMessage(IN ImsMessage& objMsg);
-
-    IDeviceInfo* GetDeviceInfo();
-    IPowerInfo* GetPowerInfo();
-
-    ICallInfo* GetCallInfo(IN IMS_SINT32 nSlotId);
-    ILocationInfo* GetLocationInfo(IN IMS_SINT32 nSlotId);
-    ISubscriberInfo* GetSubscriberInfo(IN IMS_SINT32 nSlotId);
-
-    IIsim* GetIsim(IN IMS_SINT32 nSlotId);
-    IUsim* GetUsim(IN IMS_SINT32 nSlotId);
-
-    inline INetworkWatcher* GetNetworkWatcher()
-            __IMS_DEPRECATED__("Use GetNetworkWatcher(IMS_SINT32) instead")
-    {
-        return GetNetworkWatcher(IMS_SLOT_0);
-    }
-    INetworkWatcher* GetNetworkWatcher(IN IMS_SINT32 nSlotId);
-    IWifiWatcher* GetWifiWatcher();
-
     static PhoneInfoService* GetPhoneInfoService();
 
 private:

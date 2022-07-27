@@ -15,7 +15,7 @@
  */
 #include "ImsPrivateProperty.h"
 #include "PlatformApi.h"
-#include "PlatformFactory.h"
+#include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceUtil.h"
 
@@ -38,7 +38,8 @@ IImsPrivateProperty* UtilService::GetPrivateProperty()
 PUBLIC
 ISystemUtil* UtilService::GetSystemUtil()
 {
-    ISystemUtil* piSysUtil = PlatformFactory::GetSystemUtil();
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    ISystemUtil* piSysUtil = piOsFactory->GetSystemUtil();
 
     IMS_ASSERT(piSysUtil != IMS_NULL);
 
@@ -48,7 +49,8 @@ ISystemUtil* UtilService::GetSystemUtil()
 PUBLIC
 ISystemProperty* UtilService::GetSystemProperty()
 {
-    ISystemProperty* piSysProperty = PlatformFactory::GetSystemProperty();
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    ISystemProperty* piSysProperty = piOsFactory->GetSystemProperty();
 
     IMS_ASSERT(piSysProperty != IMS_NULL);
 
@@ -58,7 +60,8 @@ ISystemProperty* UtilService::GetSystemProperty()
 PUBLIC
 IZLib* UtilService::GetZLib()
 {
-    IZLib* piZLib = PlatformFactory::GetZLib();
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    IZLib* piZLib = piOsFactory->GetZLib();
 
     IMS_ASSERT(piZLib != IMS_NULL);
 
@@ -73,14 +76,8 @@ void UtilService::SetDebugOn(IN IMS_BOOL bDebugOn)
 
 PUBLIC GLOBAL UtilService* UtilService::GetUtilService()
 {
-    static UtilService* s_pUtilService = IMS_NULL;
-
-    if (s_pUtilService == IMS_NULL)
-    {
-        s_pUtilService = new UtilService();
-    }
-
-    return s_pUtilService;
+    return DYNAMIC_CAST(UtilService*,
+            PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_UTIL));
 }
 
 /**

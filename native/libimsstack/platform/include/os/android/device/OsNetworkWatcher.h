@@ -16,9 +16,9 @@
 #ifndef OS_NETWORK_WATCHER_H_
 #define OS_NETWORK_WATCHER_H_
 
-#include "ImsSlot.h"
 #include "INetworkWatcher.h"
-#include "system-intf/ISystemListener.h"
+#include "ISystemListener.h"
+#include "ImsSlot.h"
 
 class OsNetworkWatcher : public ImsSlot, public INetworkWatcher, public ISystemListener
 {

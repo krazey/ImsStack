@@ -17,8 +17,8 @@
 #define OS_USIM_H_
 
 #include "IDigestAka.h"
+#include "ISystemListener.h"
 #include "ImsUsim.h"
-#include "system-intf/ISystemListener.h"
 
 class IThread;
 class IDigestAkaListener;
