@@ -362,6 +362,11 @@ protected:
         return m_pAosHandle->m_objFeatureTagList.GetUnavailableFeatures();
     }
 
+    IMS_UINT32 GetBindedUnavailableFeatures()
+    {
+        return m_pAosHandle->m_objBindedFeatureTagList.GetUnavailableFeatures();
+    }
+
     void ProcessUnavailableFeatureChanged() { m_pAosHandle->ProcessUnavailableFeatureChanged(); }
 
     IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock) const
@@ -2918,9 +2923,11 @@ TEST_F(AosHandleTest, ProcessUnavailableFeature_Test)
 
     ProcessUnavailableFeature(ImsAosFeature::MMTEL, IMS_TRUE);
     EXPECT_EQ(GetUnavailableFeatures(), ImsAosFeature::MMTEL);
+    EXPECT_EQ(GetBindedUnavailableFeatures(), ImsAosFeature::MMTEL);
 
     ProcessUnavailableFeature(ImsAosFeature::MMTEL, IMS_FALSE);
     EXPECT_EQ(GetUnavailableFeatures(), ImsAosFeature::NONE);
+    EXPECT_EQ(GetBindedUnavailableFeatures(), ImsAosFeature::NONE);
 }
 
 TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test1)

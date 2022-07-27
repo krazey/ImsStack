@@ -1323,10 +1323,12 @@ void AosHandle::ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bA
     if (bAdd)
     {
         m_objFeatureTagList.AddUnavailableFeature(nFeature);
+        m_objBindedFeatureTagList.AddUnavailableFeature(nFeature);
     }
     else
     {
         m_objFeatureTagList.RemoveUnavailableFeature(nFeature);
+        m_objBindedFeatureTagList.RemoveUnavailableFeature(nFeature);
     }
 }
 
