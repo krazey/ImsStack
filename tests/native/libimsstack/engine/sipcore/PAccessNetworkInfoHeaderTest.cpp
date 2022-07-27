@@ -17,6 +17,11 @@
 
 #include "ImsNew.h"
 #include "MockINetworkConnection.h"
+#include "MockIOsFactory.h"
+#include "MockIPhoneInfoLocation.h"
+#include "MockISystem.h"
+#include "PlatformContext.h"
+#include "TestPhoneInfoService.h"
 
 #include "ISipConfig.h"
 
@@ -24,7 +29,10 @@
 #include "SipProfile.h"
 
 using ::testing::_;
+using ::testing::Eq;
 using ::testing::Invoke;
+using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::StartsWith;
 
 namespace android
@@ -35,8 +43,20 @@ class PAccessNetworkInfoHeaderTest : public ::testing::Test
 public:
     inline PAccessNetworkInfoHeaderTest() :
             m_objMethod(SipMethod::INVITE),
-            m_pSipProfile(new SipProfile())
+            m_pSipProfile(new SipProfile()),
+            m_pPhoneInfoService(new TestPhoneInfoService())
     {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_PHONE_INFO, m_pPhoneInfoService);
+    }
+    inline virtual ~PAccessNetworkInfoHeaderTest()
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
+
+        if (m_pPhoneInfoService != IMS_NULL)
+        {
+            m_pPhoneInfoService->Destroy();
+        }
     }
 
 protected:
@@ -77,9 +97,10 @@ protected:
     SipMethod m_objMethod;
     RcPtr<SipProfile> m_pSipProfile;
     AccessNetworkInfo m_objAni;
+    TestPhoneInfoService* m_pPhoneInfoService;
 };
 
-TEST_F(PAccessNetworkInfoHeaderTest, FormHeader_NetworkConnection_Invalid)
+TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithInvalidTypeOrClass)
 {
     AString strHeader;
 
@@ -89,7 +110,7 @@ TEST_F(PAccessNetworkInfoHeaderTest, FormHeader_NetworkConnection_Invalid)
             IMS_SLOT_0, &m_objNetworkConnection, m_objMethod, m_pSipProfile.Get(), strHeader));
 }
 
-TEST_F(PAccessNetworkInfoHeaderTest, FormHeader_NetworkConnection_Iwlan)
+TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithIwlan)
 {
     AString strHeader;
     AString strExpected("IEEE-802.11;i-wlan-node-id=010203040506");
@@ -100,7 +121,7 @@ TEST_F(PAccessNetworkInfoHeaderTest, FormHeader_NetworkConnection_Iwlan)
     EXPECT_EQ(strHeader, strExpected);
 }
 
-TEST_F(PAccessNetworkInfoHeaderTest, FormHeader_NetworkConnection_Iwlan_InvalidMacAddress)
+TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithIwlanInvalidMacAddress)
 {
     AString strHeader;
     AString strExpected("IEEE-802.11;i-wlan-node-id=000000000000");
@@ -113,7 +134,7 @@ TEST_F(PAccessNetworkInfoHeaderTest, FormHeader_NetworkConnection_Iwlan_InvalidM
     EXPECT_EQ(strHeader, strExpected);
 }
 
-TEST_F(PAccessNetworkInfoHeaderTest, FormHeader_NetworkConnection_Iwlan_LocalTimezone)
+TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithIwlanLocalTimezone)
 {
     AString strHeader;
     AString strExpected("IEEE-802.11;i-wlan-node-id=010203040506;local-time-zone=");
@@ -126,19 +147,47 @@ TEST_F(PAccessNetworkInfoHeaderTest, FormHeader_NetworkConnection_Iwlan_LocalTim
     EXPECT_THAT(strHeader.GetStr(), StartsWith(strExpected.GetStr()));
 }
 
-#if 0  // TODO: enable this code later.
-TEST_F(PAccessNetworkInfoHeaderTest, FormHeader_NetworkConnection_Iwlan_Country)
+TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithIwlanCountry)
 {
+    MockILocationProperties objLocationProperties;
+    AString strCountry("KR");
+
+    ON_CALL(m_pPhoneInfoService->GetMockLocationInfo(),
+            GetLocationProperties(Eq(ILocationInfo::LOCATION_POSITION_N_COUNTRY)))
+            .WillByDefault(Return(&objLocationProperties));
+    ON_CALL(objLocationProperties, GetCountry()).WillByDefault(ReturnRef(strCountry));
+
     AString strHeader;
-    AString strExpected("IEEE-802.11;i-wlan-node-id=010203040506;country=");
+    AString strExpected("IEEE-802.11;i-wlan-node-id=010203040506;country=KR");
 
     m_pSipProfile->SetSipFeatureCaps(m_pSipProfile->GetSipFeatureCaps() |
             ISipConfig::SIP_FEATURE_CAPS_COUNTRY_PARAM_IN_PANI_HEADER);
     SetAccessNetworkInfoForWifi();
     ASSERT_TRUE(PAccessNetworkInfoHeader::FormHeader(
             IMS_SLOT_0, &m_objNetworkConnection, m_objMethod, m_pSipProfile.Get(), strHeader));
-    EXPECT_THAT(strHeader.GetStr(), StartsWith(strExpected.GetStr()));
+    EXPECT_EQ(strHeader, strExpected);
 }
-#endif
+
+TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithIwlanInvalidCountry)
+{
+    MockILocationProperties objLocationProperties;
+    AString strCountry("ZZ");
+
+    ON_CALL(m_pPhoneInfoService->GetMockLocationInfo(),
+            GetLocationProperties(Eq(ILocationInfo::LOCATION_POSITION_N_COUNTRY)))
+            .WillByDefault(Return(&objLocationProperties));
+    ON_CALL(objLocationProperties, GetCountry()).WillByDefault(ReturnRef(strCountry));
+
+    AString strHeader;
+    AString strExpected("IEEE-802.11;i-wlan-node-id=010203040506");
+
+    m_pSipProfile->SetSipFeatureCaps(m_pSipProfile->GetSipFeatureCaps() |
+            ISipConfig::SIP_FEATURE_CAPS_COUNTRY_PARAM_IN_PANI_HEADER);
+    SetAccessNetworkInfoForWifi();
+    ASSERT_TRUE(PAccessNetworkInfoHeader::FormHeader(
+            IMS_SLOT_0, &m_objNetworkConnection, m_objMethod, m_pSipProfile.Get(), strHeader));
+    EXPECT_EQ(strHeader, strExpected);
+    EXPECT_EQ(strCountry, objLocationProperties.GetCountry());
+}
 
 }  // namespace android
