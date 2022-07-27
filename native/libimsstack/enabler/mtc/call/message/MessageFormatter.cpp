@@ -47,9 +47,9 @@ __IMS_TRACE_TAG_COM_MTC__;
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PUBLIC
-MessageFormatter::MessageFormatter(IN IMtcSessionContext& objContext) :
+MessageFormatter::MessageFormatter(IN IMtcSessionContext& objContext, IN ISession& objSession) :
         m_objContext(objContext),
-        m_objSession(objContext.GetISession()),
+        m_objSession(objSession),
         m_piNextMessage(IMS_NULL),
         m_eFormType(FormType::NONE)
 {

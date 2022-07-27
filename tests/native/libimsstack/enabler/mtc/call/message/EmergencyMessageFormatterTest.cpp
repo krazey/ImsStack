@@ -67,7 +67,6 @@ protected:
         ImsList<IMtcExtension*> lstExtensions;
         pExtensionSet = new MtcExtensionSet(lstExtensions);
 
-        ON_CALL(objContext, GetISession).WillByDefault(ReturnRef(objSession));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
@@ -84,7 +83,7 @@ protected:
         ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
 
-        pFormatter = new EmergencyMessageFormatter(objContext);
+        pFormatter = new EmergencyMessageFormatter(objContext, objSession);
     }
 
     virtual void TearDown() override

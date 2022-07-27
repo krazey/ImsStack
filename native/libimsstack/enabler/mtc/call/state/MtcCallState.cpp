@@ -26,11 +26,12 @@
 #include "ISipServerConnection.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
-#include "call/state/MtcCallState.h"
 #include "call/UpdatingInfo.h"
+#include "call/extension/MtcExtensionSet.h"
+#include "call/state/MtcCallState.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
@@ -472,7 +473,7 @@ void MtcCallState::HandleTerminate(IN const CallReasonInfo& objReason)
 {
     m_objContext.GetMediaManager().Terminate();
 
-    MtcSession* pSession = m_objContext.GetSession();
+    IMtcSession* pSession = m_objContext.GetSession();
     if (pSession == IMS_NULL)
     {
         return;
@@ -572,117 +573,10 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
 }
 
 PROTECTED
-ResultSetSdp MtcCallState::SetSdpToSend(
-        IN IMS_BOOL bAllowReOffer, IN ISession* piSession /* = IMS_NULL*/)
-{
-    // TODO: RFC 6337 instead of bAllowReOffer?
-    // Need 'Method'/'Request or Response' information of the message to be sent
-    if (piSession == IMS_NULL)
-    {
-        piSession = GetISession();
-    }
-
-    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    NegotiationState eState = objMediaManager.GetNegotiationState(piSession);
-
-    if (eState == NegotiationState::STATE_OFFER_SENT)
-    {
-        return ResultSetSdp::NO_SDP;
-    }
-
-    if (!bAllowReOffer && eState == NegotiationState::STATE_NEGOTIATED)
-    {
-        IMS_TRACE_D("SetSdpToSend - nothing to update", 0, 0, 0);
-        return ResultSetSdp::NO_SDP;
-    }
-
-    if (objMediaManager.FormSdp(piSession, m_objContext.GetSession()->GetCallType()) == IMS_FAILURE)
-    {
-        IMS_TRACE_D("SetSdpToSend - Form SDP Failed", 0, 0, 0);
-        return ResultSetSdp::FAILURE;
-    }
-
-    IMS_TRACE_D("SetSdpToSend - Set Done", 0, 0, 0);
-
-    // TODO: bFailure to true for failure cases is not in this api?
-    m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_FALSE);
-
-    return ResultSetSdp::SUCCESS;
-}
-
-PROTECTED
 void MtcCallState::RunMedia(IN ISession* piSession, IN IMessage* piMessage)
 {
     IMS_BOOL bEarly = !MessageUtil::IsResponseExist(piSession, SipStatusCode::SC_200);
     m_objContext.GetMediaManager().Run(piSession, piMessage, bEarly);
-}
-
-PROTECTED
-IMS_RESULT MtcCallState::SendProvisionalResponse(IN IMS_BOOL bUserAlert)
-{
-    IMS_BOOL bIncludeSdp =
-            !m_objContext.GetConfigurationProxy().Is(Feature::SEND_180_FOR_INITIAL_INVITE);
-
-    if (bIncludeSdp)
-    {
-        switch (SetSdpToSend(IMS_FALSE))
-        {
-            case ResultSetSdp::NO_SDP:
-                bIncludeSdp = IMS_FALSE;
-                break;
-            case ResultSetSdp::FAILURE:
-                return IMS_FAILURE;
-            case ResultSetSdp::SUCCESS:
-                break;
-        }
-    }
-
-    // TODO: determine the response code based on the configuration for KR carriers?
-    IMS_SINT32 nStatusCode = bUserAlert ? SipStatusCode::SC_180 : SipStatusCode::SC_183;
-
-    return m_objContext.GetSession()->GetMessageSender().SendProvisionalResponse(
-            nStatusCode, IsNeedToReliable(bIncludeSdp), bIncludeSdp, IsCallWaiting());
-}
-
-PROTECTED
-IMS_RESULT MtcCallState::SendEarlyUpdate(IN MtcSession* pMtcSession)
-{
-    IMS_TRACE_D("SendEarlyUpdate", 0, 0, 0);
-
-    if (SetSdpToSend(IMS_TRUE, &pMtcSession->GetISession()) == ResultSetSdp::FAILURE)
-    {
-        return IMS_FAILURE;
-    }
-
-    return pMtcSession->GetMessageSender().SendEarlyUpdate(UpdateType::NORMAL);
-}
-
-PROTECTED
-IMS_RESULT MtcCallState::SendResponseToEarlyUpdate(
-        IN IMS_SINT32 eStatusCode, IN MtcSession* pMtcSession)
-{
-    IMS_TRACE_D("SendResponseToEarlyUpdate", 0, 0, 0);
-
-    // TODO: check status code in SetSdpToSend()?
-    if (SipStatusCode::IsFinalSuccess(eStatusCode) &&
-            SetSdpToSend(IMS_FALSE, &pMtcSession->GetISession()) == ResultSetSdp::FAILURE)
-    {
-        return IMS_FAILURE;
-    }
-
-    return pMtcSession->GetMessageSender().RespondToEarlyUpdate(eStatusCode);
-}
-
-PROTECTED
-IMS_RESULT MtcCallState::SendResponseToPrack(IN IMS_SINT32 eStatusCode)
-{
-    IMS_TRACE_D("SendResponseToPrack", 0, 0, 0);
-    if (SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
-    {
-        return IMS_FAILURE;
-    }
-
-    return m_objContext.GetSession()->GetMessageSender().RespondToPrack(eStatusCode);
 }
 
 PROTECTED
@@ -696,7 +590,7 @@ CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const CallReasonIn
                 &m_objContext.GetSession()->GetISession(), IMS_TRUE);
     }
 
-    m_objContext.GetSession()->GetMessageSender().Reject(objReason);
+    m_objContext.GetSession()->Reject(objReason);
     m_objContext.GetUiNotifier().SendStartFailed(objReason);
     return CallStateName::TERMINATING;
 }
@@ -934,50 +828,6 @@ IMS_BOOL MtcCallState::IsAnswerMandatory(IN ISession* piSession, IN const IMessa
             return IMS_TRUE;
         }
         return IMS_FALSE;
-    }
-
-    return IMS_FALSE;
-}
-
-PROTECTED
-IMS_BOOL MtcCallState::IsCallWaiting() const
-{
-    IMSList<IMtcCall*> lstCalls = m_objContext.GetCallManager().GetCalls();
-
-    for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
-    {
-        IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
-        if (eState == IMtcCall::State::ESTABLISHED || eState == IMtcCall::State::UPDATING)
-        {
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
-}
-
-PROTECTED
-IMS_BOOL MtcCallState::IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const
-{
-    if (!IsRprSupported())
-    {
-        return IMS_FALSE;
-    }
-
-    if (m_objContext.GetSession()->GetExtensionSet().IsRequiredOnRemote(
-            MtcExtensionSet::OPTION_TAG_RPR))
-    {
-        return IMS_TRUE;
-    }
-
-    if (bIncludeSdp)
-    {
-        return IMS_TRUE;
-    }
-
-    if (m_objContext.GetConfigurationProxy().Is(Feature::PRACK_SUPPORTED_FOR_18X))
-    {
-        return IMS_TRUE;
     }
 
     return IMS_FALSE;

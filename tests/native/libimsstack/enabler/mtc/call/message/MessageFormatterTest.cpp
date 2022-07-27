@@ -70,7 +70,6 @@ protected:
 
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
-        ON_CALL(objContext, GetISession).WillByDefault(ReturnRef(objSession));
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
         ON_CALL(objContext, GetCallType).WillByDefault(Return(CallType::VOIP));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
@@ -81,7 +80,7 @@ protected:
         ON_CALL(objSession, GetNextResponse).WillByDefault(Return(&objMessage));
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
 
-        pFormatter = new MessageFormatter(objContext);
+        pFormatter = new MessageFormatter(objContext, objSession);
     }
 
     virtual void TearDown() override

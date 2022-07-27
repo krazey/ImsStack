@@ -15,8 +15,9 @@
  */
 
 #include "call/IMtcCallContext.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "call/MtcUiNotifier.h"
+#include "call/extension/MtcExtensionSet.h"
 #include "call/state/IncomingState.h"
 #include "call/termination/TerminationHandler.h"
 #include "helper/MtcTimerWrapper.h"
@@ -179,12 +180,12 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
 {
     IMS_TRACE_D("SessionEarlyMediaUpdateReceived", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
-    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    IMtcSession* pSession = m_objContext.GetSession();
+    pSession->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
 
     if (!MessageUtil::HasSdp(piMessage))
     {
-        if (m_objContext.GetSession()->GetMessageSender().RespondToEarlyUpdate(
-                    SipStatusCode::SC_200) == IMS_FAILURE)
+        if (m_objContext.GetSession()->RespondToEarlyUpdate(SipStatusCode::SC_200) == IMS_FAILURE)
         {
             m_objContext.GetMediaManager().Terminate();
             m_objContext.GetUiNotifier().SendStartFailed(
@@ -197,15 +198,14 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
 
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
-        if (SendResponseToEarlyUpdate(SipStatusCode::SC_488, m_objContext.GetSession()) ==
-                IMS_FAILURE)
+        if (pSession->RespondToEarlyUpdate(SipStatusCode::SC_488) == IMS_FAILURE)
         {
             return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
         }
         return GetStateName();
     }
 
-    if (SendResponseToEarlyUpdate(SipStatusCode::SC_200, m_objContext.GetSession()) == IMS_FAILURE)
+    if (pSession->RespondToEarlyUpdate(SipStatusCode::SC_200) == IMS_FAILURE)
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
     }
@@ -235,16 +235,18 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPRAckReceived(IN ISession* pi
     IMS_TRACE_D("SessionPRAckReceived", 0, 0, 0);
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
-    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_PRACK, *piMessage);
+    IMtcSession* pSession = m_objContext.GetSession();
+
+    pSession->HandleRequest(IMessage::SESSION_PRACK, *piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
-        SendResponseToPrack(SipStatusCode::SC_200);
+        pSession->RespondToPrack(SipStatusCode::SC_200);
         // According to RFC 6337, UE must send re-offer.
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE));
     }
 
-    if (SendResponseToPrack(SipStatusCode::SC_200) == IMS_FAILURE)
+    if (pSession->RespondToPrack(SipStatusCode::SC_200) == IMS_FAILURE)
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
     }

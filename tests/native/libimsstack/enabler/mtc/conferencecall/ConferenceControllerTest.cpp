@@ -133,7 +133,7 @@ protected:
         ON_CALL(*pMockFactory, CreateEventNotifier(_, _)).WillByDefault(Return(pMockNotifier));
         ON_CALL(*piConferenceCall, GetCallContext()).WillByDefault(ReturnRef(objMockCallContext));
         ON_CALL(objMockCallContext, GetService()).WillByDefault(ReturnRef(objMtcService));
-        MtcSession* pMtcSession = IMS_NULL;
+        IMtcSession* pMtcSession = IMS_NULL;
         ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(pMtcSession));
         ON_CALL(objMockCallManager, GetCallByCallKey(piConferenceCall->GetKey()))
                 .WillByDefault(Return(piConferenceCall));

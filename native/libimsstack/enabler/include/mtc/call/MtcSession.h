@@ -20,6 +20,7 @@
 #include "ImsList.h"
 #include "IMSTypeDef.h"
 #include "call/IMtcCall.h"
+#include "call/IMtcSession.h"
 #include "call/IMtcSessionContext.h"
 #include "call/message/MessageSender.h"
 #include "call/extension/MtcExtensionSet.h"
@@ -40,7 +41,7 @@ class IMtcSipInterfaceFactory;
 class IMtcVonrManager;
 class ISession;
 
-class MtcSession : public IMtcSessionContext
+class MtcSession final : public IMtcSession, public IMtcSessionContext
 {
 public:
     explicit MtcSession(
@@ -49,24 +50,30 @@ public:
     MtcSession(IN const MtcSession&) = delete;
     MtcSession& operator=(IN const MtcSession&) = delete;
 
-    // TODO: temp for Mock. Will be removed once IMtcSession is added.
-    void Init();
-    void Deinit();
+    IMS_RESULT Start() override;
+    IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert) override;
+    IMS_RESULT SendPrack() override;
+    IMS_RESULT RespondToPrack(IN IMS_SINT32 eStatusCode) override;
+    IMS_RESULT SendEarlyUpdate(IN UpdateType eUpdateType) override;
+    IMS_RESULT RespondToEarlyUpdate(IN IMS_SINT32 eStatusCode) override;
+    IMS_RESULT SendAck() override;
+    IMS_RESULT Accept() override;
+    IMS_RESULT Reject(IN const CallReasonInfo& objReason) override;
+    IMS_RESULT Update(IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo,
+            IN IMS_SINT32 eMethod) override;
+    IMS_RESULT AcceptUpdate() override;
+    IMS_RESULT CancelUpdate(IN const CallReasonInfo& objReason) override;
+    IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason) override;
 
-    IMS_RESULT Start();
-    IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason);
+    void HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest) override;
+    void HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse) override;
 
-    void HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest);
-    void HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse);
-
-    inline void SetCallType(IN CallType eCallType) { m_eCallType = eCallType; }  // TODO: tmp method
-
+    inline void SetCallType(IN CallType eCallType) override { m_eCallType = eCallType; }
     inline CallType GetCallType() const override { return m_eCallType; }
+    inline ISession& GetISession() override { return m_objSession; }
+    inline MtcExtensionSet& GetExtensionSet() override { return m_objExtensionSet; }
     inline IMS_BOOL IsVideoCapable() const override { return m_bVideoCapable; }
     inline IMS_BOOL IsRttCapable() const override { return m_bRttCapable; }
-    inline ISession& GetISession() override { return m_objSession; }
-    inline MessageSender& GetMessageSender() override { return m_objMessageSender; }
-    inline MtcExtensionSet& GetExtensionSet() override { return m_objExtensionSet; }
 
     inline IMS_UINTP GetCallKey() const override { return m_objContext.GetCallKey(); }
     inline IMS_BOOL IsHeldByMe() const override { return m_objContext.IsHeldByMe(); }
@@ -76,11 +83,11 @@ public:
     {
         return m_objContext.GetParticipantInfo();
     }
-    inline MtcSession* GetSession(IN const ISession* piSession) const override
+    inline IMtcSession* GetSession(IN const ISession* piSession) const override
     {
         return m_objContext.GetSession(piSession);
     }
-    inline MtcSession* GetSession() const override { return m_objContext.GetSession(); }
+    inline IMtcSession* GetSession() const override { return m_objContext.GetSession(); }
     inline IMtcService& GetService() override { return m_objContext.GetService(); }
     inline MtcUiNotifier& GetUiNotifier() override { return m_objContext.GetUiNotifier(); }
     inline IMtcMediaManager& GetMediaManager() override { return m_objContext.GetMediaManager(); }
@@ -91,11 +98,11 @@ public:
     inline UssiController* GetUssiController() override { return m_objContext.GetUssiController(); }
     inline IMSList<IMtcCall*> GetOtherCalls() override { return m_objContext.GetOtherCalls(); }
     inline UpdatingInfo& GetUpdatingInfo() override { return m_objContext.GetUpdatingInfo(); }
-    MtcSession* CreateSession(IN ISession* piSession) override
+    IMtcSession* CreateSession(IN ISession* piSession) override
     {
         return m_objContext.CreateSession(piSession);
     }
-    MtcSession* CreateSession() override { return m_objContext.CreateSession(); }
+    IMtcSession* CreateSession() override { return m_objContext.CreateSession(); }
     inline IMtcBlockChecker* CreateBlockChecker(IN const IMSList<IMtcBlockRule*>& lstRules) override
     {
         return m_objContext.CreateBlockChecker(lstRules);
@@ -164,6 +171,13 @@ public:
     inline void SetHeldByMe(IN IMS_BOOL bHeldByMe) override { m_objContext.SetHeldByMe(bHeldByMe); }
 
 private:
+    enum class ResultSetSdp
+    {
+        NO_SDP,
+        FAILURE,
+        SUCCESS
+    };
+
     ImsList<IMtcExtension*> GetSupportedExtensions() const;
 
     void UpdateSessionProperty();
@@ -172,9 +186,12 @@ private:
     void UpdateSessionIdFromMessage(IN const IMessage& objMessage);
     void SetInConference(IN const IMessage& objMessage);
     void CheckCallTypeWithRegisteredFeature();
+    ResultSetSdp SetSdpToSend(IN IMS_BOOL bAllowReOffer);
 
     AString GenerateSessionId() const;
     IMS_BOOL IsRegisteredFeature(IMS_UINT32 nFeature);
+    IMS_BOOL IsCallWaiting() const;
+    IMS_BOOL IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const;
 
     IMtcCallContext& m_objContext;
     ISession& m_objSession;

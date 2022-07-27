@@ -30,7 +30,7 @@ class IMtcPreconditionManager;
 class IMtcService;
 class ISession;
 class ISipClientConnection;
-class MtcSession;
+class IMtcSession;
 class MtcSupplementaryService;
 class MtcTimerWrapper;
 class MtcUiNotifier;
@@ -49,8 +49,8 @@ public:
 
     virtual CallInfo& GetCallInfo() = 0;
     virtual ParticipantInfo& GetParticipantInfo() = 0;
-    virtual MtcSession* GetSession(IN const ISession* piSession) const = 0;
-    virtual MtcSession* GetSession() const = 0;
+    virtual IMtcSession* GetSession(IN const ISession* piSession) const = 0;
+    virtual IMtcSession* GetSession() const = 0;
     virtual IMtcService& GetService() = 0;
     virtual MtcUiNotifier& GetUiNotifier() = 0;
     virtual IMtcMediaManager& GetMediaManager() = 0;
@@ -63,8 +63,8 @@ public:
 
     virtual void SetHeldByMe(IN IMS_BOOL bHeldByMe) = 0;
 
-    virtual MtcSession* CreateSession(IN ISession* piSession) = 0;
-    virtual MtcSession* CreateSession() = 0;
+    virtual IMtcSession* CreateSession(IN ISession* piSession) = 0;
+    virtual IMtcSession* CreateSession() = 0;
     virtual IMtcBlockChecker* CreateBlockChecker(IN const IMSList<IMtcBlockRule*>& lstRules) = 0;
     virtual JniCallInfo CreateJniCallInfo() = 0;
     virtual ISipClientConnection* CreateClientConnection(IN IMS_SINT32 nMethod) = 0;

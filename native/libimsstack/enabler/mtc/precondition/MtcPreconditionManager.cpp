@@ -18,7 +18,7 @@
 #include "precondition/MtcPreconditionManager.h"
 #include "precondition/SdpPreconditionHelper.h"
 #include "media/IMtcMediaManager.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "Configuration.h"
 #include "ISubscriberConfig.h"

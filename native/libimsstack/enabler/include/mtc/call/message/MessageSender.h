@@ -30,7 +30,7 @@ struct CallReasonInfo;
 class MessageSender
 {
 public:
-    MessageSender(IN IMtcSessionContext& objContext);
+    MessageSender(IN IMtcSessionContext& objContext, IN ISession& objSession);
     ~MessageSender();
     MessageSender(IN const MessageSender&) = delete;
     MessageSender& operator=(IN const MessageSender&) = delete;

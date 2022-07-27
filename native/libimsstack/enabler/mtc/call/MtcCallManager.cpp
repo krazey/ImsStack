@@ -17,7 +17,6 @@
 #include "call/IMtcCall.h"
 #include "call/MtcCall.h"
 #include "call/MtcCallManager.h"
-#include "call/MtcSession.h"
 #include "call/NullCall.h"
 #include "helper/ICallStateProxy.h"
 #include "interface/mtc/IMtcCallStateListener.h"

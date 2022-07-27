@@ -35,7 +35,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcCall.h"
-#include "call/MtcSession.h"
+#include "call/IMtcSession.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
 #include "ect/IEctReferenceListener.h"

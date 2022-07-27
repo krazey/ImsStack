@@ -18,12 +18,11 @@
 #include "call/state/UpdatingState.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/UpdatingInfo.h"
-#include "call/MockMtcSession.h"
+#include "call/MockIMtcSession.h"
 #include "call/state/MtcCallState.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/ISession.h"
-#include "core/MockIMessage.h"
 #include "core/MockISession.h"
 #include "helper/MtcTimerWrapper.h"
 #include "sipcore/SipMethod.h"
@@ -69,29 +68,16 @@ protected:
 
 TEST_F(UpdatingStateTest, OnExitDoesntSendUpdateIfUpdatingInfoHasPendingUpdateAsDefaultValue)
 {
-    MockIMessage objMessage;
-    MockISession objSession;
-    ON_CALL(objSession, GetNextRequest()).WillByDefault(Return(&objMessage));
-    MockMtcSession objMtcSession(objContext, objSession, CallType::VOIP);
-    ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
-
-    EXPECT_CALL(objSession, UpdateEx(_, _)).Times(0);
+    MockIMtcSession objMtcSession;
+    EXPECT_CALL(objMtcSession, Update(_, _, _)).Times(0);
 
     pUpdatingState->OnExit();
 }
 
 TEST_F(UpdatingStateTest, OnExitDoesntSendUpdateIfUpdatingInfoDoesntHavePendingUpdate)
 {
-    MockIMessage objMessage;
-    MockISession objSession;
-    ON_CALL(objSession, GetNextRequest())
-            .WillByDefault(Return(&objMessage));
-    MockMtcSession objMtcSession(objContext, objSession, CallType::VOIP);
-    ON_CALL(objContext, GetSession())
-            .WillByDefault(Return(&objMtcSession));
-
-    EXPECT_CALL(objSession, UpdateEx(_, _))
-            .Times(0);
+    MockIMtcSession objMtcSession;
+    EXPECT_CALL(objMtcSession, Update(_, _, _)).Times(0);
 
     pUpdatingInfo->SetPendingUpdate(IMS_FALSE);
     pUpdatingState->OnExit();
@@ -99,41 +85,31 @@ TEST_F(UpdatingStateTest, OnExitDoesntSendUpdateIfUpdatingInfoDoesntHavePendingU
 
 TEST_F(UpdatingStateTest, OnExitSendsUpdateIfUpdatingInfoHasPendingUpdate)
 {
-    MockIMessage objMessage;
-    MockISession objSession;
-    ON_CALL(objSession, GetNextRequest())
-            .WillByDefault(Return(&objMessage));
-    MockMtcSession objMtcSession(objContext, objSession, CallType::VOIP);
+    MockIMtcSession objMtcSession;
     ON_CALL(objContext, GetSession())
             .WillByDefault(Return(&objMtcSession));
 
-    EXPECT_CALL(objSession, UpdateEx(SipMethod::INVALID, IMS_TRUE))
-            .Times(1);
+    EXPECT_CALL(objMtcSession, Update(UpdateType::REFRESH, IMS_FALSE, SipMethod::INVALID)).Times(1);
 
     pUpdatingInfo->SetPendingUpdate(IMS_TRUE);
     pUpdatingState->OnExit();
 }
 
-TEST_F(UpdatingStateTest, OnUserResponseTimerExpiredCallsRejectUpdate)
+TEST_F(UpdatingStateTest, OnUserResponseTimerExpiredCallsReject)
 {
     MtcTimerWrapper objTimer;
-    ON_CALL(objContext, GetTimer)
-            .WillByDefault(ReturnRef(objTimer));
-    MockIMessage objMessage;
+    ON_CALL(objContext, GetTimer).WillByDefault(ReturnRef(objTimer));
     MockISession objSession;
-    ON_CALL(objSession, GetNextResponse())
-            .WillByDefault(Return(&objMessage));
     ON_CALL(objSession, GetState())
             .WillByDefault(Return(ISession::STATE_RENEGOTIATING));
 
-    MockMtcSession objMtcSession(objContext, objSession, CallType::VOIP);
+    MockIMtcSession objMtcSession;
     ON_CALL(objMtcSession, GetISession())
             .WillByDefault(ReturnRef(objSession));
     ON_CALL(objContext, GetSession())
             .WillByDefault(Return(&objMtcSession));
 
-    EXPECT_CALL(objSession, RejectEx(_, _))
-            .Times(1);
+    EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE))).Times(1);
 
     pUpdatingState->OnTimerExpired(MtcCallState::TIMER_CONVERT_USER_RESPONSE);
 }
@@ -141,20 +117,13 @@ TEST_F(UpdatingStateTest, OnUserResponseTimerExpiredCallsRejectUpdate)
 TEST_F(UpdatingStateTest, OnRemoteResponseTimerExpiredCallsCancelUpdate)
 {
     MtcTimerWrapper objTimer;
-    ON_CALL(objContext, GetTimer)
-            .WillByDefault(ReturnRef(objTimer));
-    MockIMessage objMessage;
-    MockISession objSession;
-    ON_CALL(objSession, GetNextRequest())
-            .WillByDefault(Return(&objMessage));
+    ON_CALL(objContext, GetTimer).WillByDefault(ReturnRef(objTimer));
 
-    MockMtcSession objMtcSession(objContext, objSession, CallType::VOIP);
-    ON_CALL(objMtcSession, GetISession())
-            .WillByDefault(ReturnRef(objSession));
+    MockIMtcSession objMtcSession;
     ON_CALL(objContext, GetSession())
             .WillByDefault(Return(&objMtcSession));
 
-    EXPECT_CALL(objSession, TerminateEx(IMS_FALSE))
+    EXPECT_CALL(objMtcSession, CancelUpdate(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE)))
             .Times(1);
 
     pUpdatingState->OnTimerExpired(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE);

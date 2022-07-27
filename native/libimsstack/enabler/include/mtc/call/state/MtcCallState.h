@@ -43,13 +43,6 @@ enum class QosLossPolicy;
 struct CallReasonInfo;
 struct ConfUser;
 
-enum class ResultSetSdp
-{
-    NO_SDP,
-    FAILURE,
-    SUCCESS
-};
-
 class MtcCallState : public IMtcCallState
 {
 public:
@@ -184,13 +177,7 @@ protected:
 
     void InitMediaSession(IN MediaInfo* pMediaInfo = IMS_NULL);
     IMS_SINT32 OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage);
-    ResultSetSdp SetSdpToSend(IN IMS_BOOL bAllowReOffer, IN ISession* piSession = IMS_NULL);
     void RunMedia(IN ISession* piSession, IN IMessage* piMessage);
-
-    IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert);
-    IMS_RESULT SendEarlyUpdate(IN MtcSession* pMtcSession);
-    IMS_RESULT SendResponseToEarlyUpdate(IN IMS_SINT32 eStatusCode, IN MtcSession* pMtcSession);
-    IMS_RESULT SendResponseToPrack(IN IMS_SINT32 eStatusCode);
 
     CallStateName RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason);
 
@@ -209,8 +196,6 @@ protected:
     IMS_BOOL IsInvalidOfferAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsAnswerMandatory(IN ISession* piSession, IN const IMessage* piMessage) const;
-    IMS_BOOL IsCallWaiting() const;
-    IMS_BOOL IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const;
 
     // TODO: move these into MtcTimerWrapper? Is it used by All MTC classes?
     void StartTimer(IN IMS_UINT32 nType) const;
