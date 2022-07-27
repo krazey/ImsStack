@@ -210,9 +210,10 @@ public class SscHttpConnectionTest {
     }
 
     @Test
-    public void sendRequest_setExtraHeadersWithBody() {
+    public void sendRequest_setExtraHeadersWithBody() throws Exception {
         String identity = "\"" + mXui + "\"";
         String xmlBody = "This is XML body";
+        when(mMockConnection.getOutputStream()).thenReturn(mMockOutputStream);
         when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING))
                 .thenReturn("ImsClient");

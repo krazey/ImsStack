@@ -19,7 +19,6 @@ package com.android.imsstack.enabler.ssc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.android.imsstack.core.agents.ConfigAgent;
@@ -41,10 +40,8 @@ import org.w3c.dom.NodeList;
 public class SscXmlCreatorTest {
     private static final int SLOT_0 = 0;
 
-    private String mTargetNumber = "+1234567890";
-
     private SscXmlCreator mSscXmlCreator;
-    private SscXmlParser mSscXmlParser;
+    private Document mCachedDoc;
 
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigAgent mMockConfigAgent;
@@ -56,38 +53,891 @@ public class SscXmlCreatorTest {
 
         SscXmlFormat.init(SLOT_0);
         mSscXmlCreator = new FakeSscXmlCreator();
-        mSscXmlParser = new SscXmlParser();
 
         SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
         when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        when(mMockSscUtils.getUriFromNumber(eq(SLOT_0), eq(mTargetNumber)))
-                .thenReturn(mTargetNumber);
+
+        mCachedDoc = getEntireXmlDoc();
+        updateTagsAndRules(mCachedDoc);
     }
 
     @After
     public void tearDown() {
+        SscXmlFormat.clear(SLOT_0);
+        SscConfig.clear(SLOT_0);
+    }
+
+    @Test
+    public void createXml_invalidDocParam() {
+        SscServiceData updateData = getUpdateData(ESsType.CW, SscConstant.ACTION_ACTIVATION);
+
+        Element xml = mSscXmlCreator.createXml(null, updateData);
+
+        assertNull(xml);
+    }
+
+    @Test
+    public void createXml_invalidDataParam() {
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, null);
+
+        assertNull(xml);
+    }
+
+    @Test
+    public void createXml_inavlidEsstypeOfData() {
+        SscServiceData updateData = getUpdateData(ESsType.NONE, SscConstant.ACTION_ACTIVATION);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNull(xml);
+    }
+
+    @Test
+    public void createXml_oip() {
+        SscServiceData updateData = getUpdateData(ESsType.OIP, SscConstant.ACTION_ACTIVATION);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.OIP), xml.getTagName());
+        assertEquals("true", xml.getAttribute(SscXmlFormat.ACTIVE));
+    }
+
+    @Test
+    public void createXml_oirDefaultWhenOperationNotProvisioned() {
+        SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_DEFAULT);
+
+        when(mMockCarrierConfig.getInt(
+                CarrierConfig.Assets.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
+                .thenReturn(SscConfig.OIR_NOT_PROVISIONED);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.OIR), xml.getTagName());
+        assertEquals("false", xml.getAttribute(SscXmlFormat.ACTIVE));
+    }
+
+    @Test
+    public void createXml_oirDefaultWhenOperationTempModeRestricted() {
+        SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_DEFAULT);
+
+        when(mMockCarrierConfig.getInt(
+                CarrierConfig.Assets.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
+                .thenReturn(SscConfig.OIR_TEMP_MODE_RESTRICTED);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.OIR), xml.getTagName());
+        assertEquals("true", xml.getAttribute(SscXmlFormat.ACTIVE));
+
+        Element defaultBehaviour = (Element) xml.getFirstChild();
+        assertNotNull(defaultBehaviour);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.DEFAULT_BEHAVIOUR),
+                defaultBehaviour.getNodeName());
+        assertEquals(SscXmlFormat.PRESENTATION_RESTRICTED, defaultBehaviour.getTextContent());
+    }
+
+    @Test
+    public void createXml_oirDefaultWhenOperationTempModeNotRestricted() {
+        SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_DEFAULT);
+
+        when(mMockCarrierConfig.getInt(
+                CarrierConfig.Assets.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
+                .thenReturn(SscConfig.OIR_TEMP_MODE_ALLOWED);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.OIR), xml.getTagName());
+        assertEquals("true", xml.getAttribute(SscXmlFormat.ACTIVE));
+
+        Element defaultBehaviour = (Element) xml.getFirstChild();
+        assertNotNull(defaultBehaviour);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.DEFAULT_BEHAVIOUR),
+                defaultBehaviour.getNodeName());
+        assertEquals(SscXmlFormat.PRESENTATION_NOT_RESTRICTED, defaultBehaviour.getTextContent());
+    }
+
+    @Test
+    public void createXml_oirDefaultWhenOperationTempModeWithoutDefaultBehaviour() {
+        SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_DEFAULT);
+
+        when(mMockCarrierConfig.getInt(
+                CarrierConfig.Assets.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
+                .thenReturn(SscConfig.OIR_TEMP_MODE_WITHOUT_DEFAULT_BEHAVIOUR);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.OIR), xml.getTagName());
+        assertEquals("true", xml.getAttribute(SscXmlFormat.ACTIVE));
+        assertEquals(0, xml.getChildNodes().getLength());
+    }
+
+    @Test
+    public void createXml_oirInvocation() {
+        SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_INVOCATION);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.OIR), xml.getTagName());
+        assertEquals("true", xml.getAttribute(SscXmlFormat.ACTIVE));
+
+        Element defaultBehaviour = (Element) xml.getFirstChild();
+        assertNotNull(defaultBehaviour);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.DEFAULT_BEHAVIOUR),
+                defaultBehaviour.getNodeName());
+        assertEquals(SscXmlFormat.PRESENTATION_RESTRICTED, defaultBehaviour.getTextContent());
+    }
+
+    @Test
+    public void createXml_oirSuppression() {
+        SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_SUPPRESSION);
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(false);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.OIR), xml.getTagName());
+        assertEquals("false", xml.getAttribute(SscXmlFormat.ACTIVE));
+
+        Element defaultBehaviour = (Element) xml.getFirstChild();
+        assertNotNull(defaultBehaviour);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.DEFAULT_BEHAVIOUR),
+                defaultBehaviour.getNodeName());
+        assertEquals(SscXmlFormat.PRESENTATION_NOT_RESTRICTED, defaultBehaviour.getTextContent());
+    }
+
+    @Test
+    public void createXml_oirSuppressionWhenAlwaysTemporaryMode() {
+        SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_SUPPRESSION);
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(true);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.OIR), xml.getTagName());
+        assertEquals("true", xml.getAttribute(SscXmlFormat.ACTIVE));
+
+        Element defaultBehaviour = (Element) xml.getFirstChild();
+        assertNotNull(defaultBehaviour);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.DEFAULT_BEHAVIOUR),
+                defaultBehaviour.getNodeName());
+        assertEquals(SscXmlFormat.PRESENTATION_NOT_RESTRICTED, defaultBehaviour.getTextContent());
+    }
+
+    @Test
+    public void createXml_oirSuppressionWhenNoDefaultBehaviourInXml() {
+        String xmlData = "<ss:simservs>"
+                + "<ss:originating-identity-presentation-restriction active=\"false\">"
+                + "</ss:originating-identity-presentation-restriction>"
+                + "</ss:simservs>";
+
+        SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_SUPPRESSION);
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(true);
+
+        Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.OIR), xml.getTagName());
+        assertEquals("true", xml.getAttribute(SscXmlFormat.ACTIVE));
+
+        Element defaultBehaviour = (Element) xml.getFirstChild();
+        assertNotNull(defaultBehaviour);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.DEFAULT_BEHAVIOUR),
+                defaultBehaviour.getNodeName());
+        assertEquals(SscXmlFormat.PRESENTATION_NOT_RESTRICTED, defaultBehaviour.getTextContent());
+    }
+
+    @Test
+    public void createXml_tip() {
+        SscServiceData updateData = getUpdateData(ESsType.TIP, SscConstant.ACTION_DEACTIVATION);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TIP), xml.getTagName());
+        assertEquals("false", xml.getAttribute(SscXmlFormat.ACTIVE));
+    }
+
+    @Test
+    public void createXml_tirNotProvisioned() {
+        SscServiceData updateData = getUpdateData(ESsType.TIR, SscConstant.TIR_NOT_PROVISIONED);
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(false);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TIR), xml.getTagName());
+        assertEquals("false", xml.getAttribute(SscXmlFormat.ACTIVE));
+
+        Element defaultBehaviour = (Element) xml.getFirstChild();
+        assertNotNull(defaultBehaviour);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.DEFAULT_BEHAVIOUR),
+                defaultBehaviour.getNodeName());
+        assertEquals(SscXmlFormat.PRESENTATION_NOT_RESTRICTED, defaultBehaviour.getTextContent());
+    }
+
+    @Test
+    public void createXml_tirNotProvisionedWhenAlwaysTemporaryMode() {
+        SscServiceData updateData = getUpdateData(ESsType.TIR, SscConstant.TIR_NOT_PROVISIONED);
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(true);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TIR), xml.getTagName());
+        assertEquals("true", xml.getAttribute(SscXmlFormat.ACTIVE));
+
+        Element defaultBehaviour = (Element) xml.getFirstChild();
+        assertNotNull(defaultBehaviour);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.DEFAULT_BEHAVIOUR),
+                defaultBehaviour.getNodeName());
+        assertEquals(SscXmlFormat.PRESENTATION_NOT_RESTRICTED, defaultBehaviour.getTextContent());
+    }
+
+    @Test
+    public void createXml_tirProvisioned() {
+        SscServiceData updateData = getUpdateData(ESsType.TIR, SscConstant.TIR_PROVISIONED);
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(false);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TIR), xml.getTagName());
+        assertEquals("true", xml.getAttribute(SscXmlFormat.ACTIVE));
+
+        Element defaultBehaviour = (Element) xml.getFirstChild();
+        assertNotNull(defaultBehaviour);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.DEFAULT_BEHAVIOUR),
+                defaultBehaviour.getNodeName());
+        assertEquals(SscXmlFormat.PRESENTATION_RESTRICTED, defaultBehaviour.getTextContent());
+    }
+
+    @Test
+    public void createXml_tirProvisionedWhenNoDefaultBehaviourInXml() {
+        String xmlData = "<ss:simservs>"
+                + "<ss:terminating-identity-presentation-restriction active=\"false\">"
+                + "</ss:terminating-identity-presentation-restriction>"
+                + "</ss:simservs>";
+
+        SscServiceData updateData = getUpdateData(ESsType.TIR, SscConstant.TIR_PROVISIONED);
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(false);
+
+        Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TIR), xml.getTagName());
+        assertEquals("true", xml.getAttribute(SscXmlFormat.ACTIVE));
+
+        Element defaultBehaviour = (Element) xml.getFirstChild();
+        assertNotNull(defaultBehaviour);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.DEFAULT_BEHAVIOUR),
+                defaultBehaviour.getNodeName());
+        assertEquals(SscXmlFormat.PRESENTATION_RESTRICTED, defaultBehaviour.getTextContent());
+    }
+
+    @Test
+    public void createXml_updateCfnrTimer() {
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR_TIMER, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 25);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.NOREPLYTIMER),
+                xml.getTagName());
+        assertEquals("25", xml.getTextContent());
+    }
+
+    @Test
+    public void createXml_updateNoReplyTimerWhenNoNoReplyTimerInXml() {
+        String xmlData = "<ss:simservs>"
+                + "<ss:communication-diversion active=\"true\">"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-unconditional\">"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>"
+                + "</ss:simservs>";
+
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR_TIMER, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 25);
+
+        SscXmlFormat.setIsNoReplyTimerOmitted(SLOT_0, true);
+
+        Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CD), xml.getTagName());
+
+        NodeList nodeList = xml.getChildNodes();
+        assertEquals(2, nodeList.getLength());
+
+        Element ruleSet = (Element) nodeList.item(0);
+        assertEquals(SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.RULESET), ruleSet.getTagName());
+
+        Element noReplyTimer = (Element) nodeList.item(1);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.NOREPLYTIMER),
+                noReplyTimer.getTagName());
+        assertEquals("25", noReplyTimer.getTextContent());
+    }
+
+    @Test
+    public void createXml_updateCfWhenNoMatchingRuleInXml() {
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 0);
+
+        SscXmlFormat.setRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO, SscXmlFormat.CD,
+                SscConstant.CONDITION_CFNR, null);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNull(xml);
+    }
+
+    @Test
+    public void createXml_updateCfActivation() {
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 0);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CONDITIONS), xml.getTagName());
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CFNR));
+        assertEquals(1, ruleCondition.getLength());
+    }
+
+    @Test
+    public void createXml_updateCfActivationForVideo() {
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR, null, SscServiceClassUtil.SERVICE_CLASS_VIDEO, 0);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CONDITIONS), xml.getTagName());
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+
+        NodeList mediaList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.MEDIA));
+        assertEquals(1, mediaList.getLength());
+        assertEquals(SscXmlFormat.VIDEO, mediaList.item(0).getTextContent());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CFNR));
+        assertEquals(1, ruleCondition.getLength());
+    }
+
+    @Test
+    public void createXml_updateCfDeactivation() {
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_DEACTIVATION,
+                SscConstant.CONDITION_CFNR, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 0);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CONDITIONS), xml.getTagName());
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(1, nodeList.getLength());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CFNR));
+        assertEquals(1, ruleCondition.getLength());
+    }
+
+    @Test
+    public void createXml_updateCfRegistrationForAudio() {
+        String target = "+1234567890";
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_REGISTRATION,
+                SscConstant.CONDITION_CFNR, target, SscServiceClassUtil.SERVICE_CLASS_VOICE, 0);
+
+        when(mMockSscUtils.getUriFromNumber(SLOT_0, target)).thenReturn(target);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+        assertEquals("call-diversion-no-reply", xml.getAttribute(SscXmlFormat.ID));
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+
+        NodeList forwardTotList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.FORWARD_TO));
+        assertEquals(1, forwardTotList.getLength());
+
+        Element targetElement = (Element) forwardTotList.item(0).getFirstChild();
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TARGET),
+                targetElement.getTagName());
+        assertEquals(target, targetElement.getTextContent());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CFNR));
+        assertEquals(1, ruleCondition.getLength());
+    }
+
+    @Test
+    public void createXml_updateCfRegistrationForVideo() {
+        String target = "+1234567890";
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_REGISTRATION,
+                SscConstant.CONDITION_CFNR, target, SscServiceClassUtil.SERVICE_CLASS_VIDEO, 0);
+
+        when(mMockSscUtils.getUriFromNumber(SLOT_0, target)).thenReturn(target);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+        assertEquals("call-diversion-no-reply-video", xml.getAttribute(SscXmlFormat.ID));
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+
+        NodeList forwardTotList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.FORWARD_TO));
+        assertEquals(1, forwardTotList.getLength());
+
+        Element targetElement = (Element) forwardTotList.item(0).getFirstChild();
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TARGET),
+                targetElement.getTagName());
+        assertEquals(target, targetElement.getTextContent());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CFNR));
+        assertEquals(1, ruleCondition.getLength());
+
+        NodeList mediaList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.MEDIA));
+        assertEquals(1, mediaList.getLength());
+        assertEquals(SscXmlFormat.VIDEO, mediaList.item(0).getTextContent());
+    }
+
+    @Test
+    public void createXml_updateCfRegistrationWhenNoTargetElementInXml() {
+        String target = "+1234567890";
+        String xmlData = "<ss:simservs>"
+                + "<ss:communication-diversion active=\"true\">"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-not-reachable\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:not-reachable/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>"
+                + "</ss:simservs>";
+
+        when(mMockSscUtils.getUriFromNumber(SLOT_0, target)).thenReturn(target);
+
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_REGISTRATION,
+                SscConstant.CONDITION_CFNRC, target, SscServiceClassUtil.SERVICE_CLASS_NONE, 0);
+
+        Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+        assertEquals("call-diversion-not-reachable", xml.getAttribute(SscXmlFormat.ID));
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+
+        NodeList forwardTotList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.FORWARD_TO));
+        assertEquals(1, forwardTotList.getLength());
+
+        Element targetElement = (Element) forwardTotList.item(0).getFirstChild();
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TARGET),
+                targetElement.getTagName());
+        assertEquals(target, targetElement.getTextContent());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CFNRC));
+        assertEquals(1, ruleCondition.getLength());
+    }
+
+    @Test
+    public void createXml_updateCfRegistrationWhenNoForwardToElementInXml() {
+        String target = "+1234567890";
+        String xmlData = "<ss:simservs>"
+                + "<ss:communication-diversion active=\"true\">"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-not-reachable\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:not-reachable/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>"
+                + "</ss:simservs>";
+
+        when(mMockSscUtils.getUriFromNumber(SLOT_0, target)).thenReturn(target);
+
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_REGISTRATION,
+                SscConstant.CONDITION_CFNRC, target, SscServiceClassUtil.SERVICE_CLASS_NONE, 0);
+
+        Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+        assertEquals("call-diversion-not-reachable", xml.getAttribute(SscXmlFormat.ID));
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+
+        NodeList forwardTotList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.FORWARD_TO));
+        assertEquals(1, forwardTotList.getLength());
+
+        Element targetElement = (Element) forwardTotList.item(0).getFirstChild();
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TARGET),
+                targetElement.getTagName());
+        assertEquals(target, targetElement.getTextContent());
+    }
+
+    @Test
+    public void createXml_updateCfRegistrationWhenNoReplyTimerInRule() {
+        String target = "+1234567890";
+        String xmlData = "<ss:simservs>"
+                + "<ss:communication-diversion active=\"true\">"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-no-reply\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:NoReplyTimer>20</ss:NoReplyTimer>"
+                + "<ss:no-answer/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
+                + "<ss:reveal-served-user-identity-to-caller>false"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>"
+                + "</ss:simservs>";
+
+        SscXmlFormat.setIsNoReplyTimerInRule(SLOT_0, true);
+        when(mMockSscUtils.getUriFromNumber(SLOT_0, target)).thenReturn(target);
+
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_REGISTRATION,
+                SscConstant.CONDITION_CFNR, target, SscServiceClassUtil.SERVICE_CLASS_NONE, 30);
+
+        Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+        assertEquals("call-diversion-no-reply", xml.getAttribute(SscXmlFormat.ID));
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+
+        NodeList forwardTotList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.FORWARD_TO));
+        assertEquals(1, forwardTotList.getLength());
+
+        Element targetElement = (Element) forwardTotList.item(0).getFirstChild();
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TARGET),
+                targetElement.getTagName());
+        assertEquals(target, targetElement.getTextContent());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CFNR));
+        assertEquals(1, ruleCondition.getLength());
+
+        NodeList noReplyTimerList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.NOREPLYTIMER));
+        assertEquals(1, noReplyTimerList.getLength());
+
+        Element noReplyTimer = (Element) noReplyTimerList.item(0);
+        assertEquals("30", noReplyTimer.getTextContent());
+    }
+
+    @Test
+    public void createXml_updateCfErasure() {
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_ERASURE,
+                SscConstant.CONDITION_CFB, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 0);
+
+        when(mMockSscUtils.getUriFromNumber(SLOT_0, null)).thenReturn("");
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+        assertEquals("call-diversion-busy", xml.getAttribute(SscXmlFormat.ID));
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(1, nodeList.getLength());
+
+        NodeList forwardTotList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.FORWARD_TO));
+        assertEquals(1, forwardTotList.getLength());
+
+        Element targetElement = (Element) forwardTotList.item(0).getFirstChild();
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TARGET),
+                targetElement.getTagName());
+        assertEquals("", targetElement.getTextContent());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CFB));
+        assertEquals(1, ruleCondition.getLength());
+    }
+
+    @Test
+    public void createXml_updateIcbEnable() {
+        SscServiceData updateData = getCbUpdateData(ESsType.ICB, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_BAIC, SscServiceClassUtil.SERVICE_CLASS_NONE);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+        assertEquals("call-barring-all-incoming", xml.getAttribute(SscXmlFormat.ID));
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+    }
+
+    @Test
+    public void createXml_updateIcbDisable() {
+        SscServiceData updateData = getCbUpdateData(ESsType.ICB, SscConstant.ACTION_DEACTIVATION,
+                SscConstant.CONDITION_BIC_WR, SscServiceClassUtil.SERVICE_CLASS_NONE);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+        assertEquals("call-barring-incoming-in-roaming", xml.getAttribute(SscXmlFormat.ID));
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(1, nodeList.getLength());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.BIC_WR));
+        assertEquals(1, ruleCondition.getLength());
+    }
+
+    @Test
+    public void createXml_updateOcbEnable() {
+        SscServiceData updateData = getCbUpdateData(ESsType.OCB, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_BAOC, SscServiceClassUtil.SERVICE_CLASS_NONE);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+        assertEquals("call-barring-all-outgoing", xml.getAttribute(SscXmlFormat.ID));
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+    }
+
+    @Test
+    public void createXml_updateOcbDisable() {
+        SscServiceData updateData = getCbUpdateData(ESsType.OCB, SscConstant.ACTION_DEACTIVATION,
+                SscConstant.CONDITION_BOIC, SscServiceClassUtil.SERVICE_CLASS_NONE);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+        assertEquals("call-barring-outgoing-international", xml.getAttribute(SscXmlFormat.ID));
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(1, nodeList.getLength());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.BOIC));
+        assertEquals(1, ruleCondition.getLength());
+    }
+
+    @Test
+    public void createXml_updateCbForAudio() {
+        SscServiceData updateData = getCbUpdateData(ESsType.ICB, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_ACR, SscServiceClassUtil.SERVICE_CLASS_VOICE);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+        assertEquals("call-barring-anonymous-incoming", xml.getAttribute(SscXmlFormat.ID));
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.ACR));
+        assertEquals(1, ruleCondition.getLength());
+    }
+
+    @Test
+    public void createXml_updateCbForVideo() {
+        SscServiceData updateData = getCbUpdateData(ESsType.ICB, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_ACR, SscServiceClassUtil.SERVICE_CLASS_VIDEO);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE), xml.getTagName());
+        assertEquals("call-barring-anonymous-incoming-video", xml.getAttribute(SscXmlFormat.ID));
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+
+        NodeList ruleCondition = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.ACR));
+        assertEquals(1, ruleCondition.getLength());
+
+        NodeList mediaList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.MEDIA));
+        assertEquals(1, mediaList.getLength());
+        assertEquals(SscXmlFormat.VIDEO, mediaList.item(0).getTextContent());
+    }
+
+    @Test
+    public void createXml_updateCwEnable() {
+        SscServiceData updateData = getUpdateData(ESsType.CW, SscConstant.ACTION_ACTIVATION);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CW), xml.getTagName());
+        assertEquals("true", xml.getAttribute(SscXmlFormat.ACTIVE));
+    }
+
+    @Test
+    public void createXml_updateCwDisable() {
+        SscServiceData updateData = getUpdateData(ESsType.CW, SscConstant.ACTION_DEACTIVATION);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CW), xml.getTagName());
+        assertEquals("false", xml.getAttribute(SscXmlFormat.ACTIVE));
     }
 
     @Test
     public void createXml_insertCfWhenNotProvisioned() {
         int condition = SscConstant.CONDITION_CFB;
-        int action = SscConstant.ACTION_ACTIVATION;
         String ruleId = SscXmlFormat.getDefaultRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO,
                 SscXmlFormat.CD, condition);
         Document doc = removeRule(getEntireXmlDoc(), ruleId);
         updateTagsAndRules(doc);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CD, condition, false);
 
-        SscServiceData insertData = getInsertCfData(ESsType.CF, action, condition, null);
-        Element serviceElement = mSscXmlCreator.createXml(doc, insertData);
-        assertNull(serviceElement);
+        SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
+                condition, null, SscServiceClassUtil.SERVICE_CLASS_NONE);
+
+        Element xml = mSscXmlCreator.createXml(doc, insertData);
+
+        assertNull(xml);
+    }
+
+    @Test
+    public void createXml_insertCfWhenNoRulesetInXml() {
+        int condition = SscConstant.CONDITION_CFB;
+        String ruleId = SscXmlFormat.getDefaultRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO,
+                SscXmlFormat.CD, condition);
+        Document doc = removeRuleSet(getEntireXmlDoc());
+        updateTagsAndRules(doc);
+        String ruleConditionTag = SscXmlFormat.getRuleConditionTag(SLOT_0, SscXmlFormat.CD,
+                condition);
+
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+                .thenReturn(true);
+
+        SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
+                condition, null, SscServiceClassUtil.SERVICE_CLASS_NONE);
+
+        Element xml = mSscXmlCreator.createXml(doc, insertData);
+
+        assertNotNull(xml);
+        assertEquals(1, xml.getElementsByTagName(
+                SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.RULESET)).getLength());
+
+        NodeList ruleList = xml.getElementsByTagName(SscXmlFormat.getCpElement(SLOT_0,
+                SscXmlFormat.RULE));
+        assertNotNull(ruleList);
+        Element createdRule = null;
+        for (int i = 0; i < ruleList.getLength(); i++) {
+            Element element = (Element) ruleList.item(i);
+            if (ruleId.equals(element.getAttribute(SscXmlFormat.ID))) {
+                createdRule = element;
+                break;
+            }
+        }
+
+        assertNotNull(createdRule);
+        assertEquals(1, createdRule.getElementsByTagName(
+                SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.CONDITIONS)).getLength());
+        assertEquals(1, createdRule.getElementsByTagName(ruleConditionTag).getLength());
+        assertEquals(0, createdRule.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED)).getLength());
+        assertEquals(0, createdRule.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TARGET)).getLength());
+
+        NodeList mediaNodeList = createdRule.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.MEDIA));
+        assertEquals(0, mediaNodeList.getLength());
     }
 
     @Test
     public void createXml_insertCfbActivationWithoutAudioTag() {
         int condition = SscConstant.CONDITION_CFB;
-        int action = SscConstant.ACTION_ACTIVATION;
-        String targetNumber = null;
         String ruleId = SscXmlFormat.getDefaultRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO,
                 SscXmlFormat.CD, condition);
         Document doc = removeRule(getEntireXmlDoc(), ruleId);
@@ -98,10 +948,11 @@ public class SscXmlCreatorTest {
         SscXmlFormat.setMediaCapability(SLOT_0, SscXmlFormat.SC_CD, SscXmlFormat.MEDIA_TYPE_AUDIO,
                 false);
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
-        SscServiceData insertData = getInsertCfData(ESsType.CF, action, condition, targetNumber);
+        SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
+                condition, null, SscServiceClassUtil.SERVICE_CLASS_VOICE);
         Element xml = mSscXmlCreator.createXml(doc, insertData);
         assertNotNull(xml);
         assertEquals(1, xml.getElementsByTagName(
@@ -134,8 +985,6 @@ public class SscXmlCreatorTest {
     @Test
     public void createXml_insertCfbActivationWithAudioTag() {
         int condition = SscConstant.CONDITION_CFB;
-        int action = SscConstant.ACTION_ACTIVATION;
-        String targetNumber = null;
         String ruleId = SscXmlFormat.getDefaultRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO,
                 SscXmlFormat.CD, condition);
         Document doc = removeRule(getEntireXmlDoc(), ruleId);
@@ -146,10 +995,11 @@ public class SscXmlCreatorTest {
         SscXmlFormat.setMediaCapability(SLOT_0, SscXmlFormat.SC_CD, SscXmlFormat.MEDIA_TYPE_AUDIO,
                 true);
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
-        SscServiceData insertData = getInsertCfData(ESsType.CF, action, condition, targetNumber);
+        SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
+                condition, null, SscServiceClassUtil.SERVICE_CLASS_VOICE);
         Element xml = mSscXmlCreator.createXml(doc, insertData);
         assertNotNull(xml);
         assertEquals(1, xml.getElementsByTagName(
@@ -183,10 +1033,59 @@ public class SscXmlCreatorTest {
     }
 
     @Test
+    public void createXml_insertCfbActivationWithVideoTag() {
+        int condition = SscConstant.CONDITION_CFB;
+        String ruleId = SscXmlFormat.getDefaultRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_VIDEO,
+                SscXmlFormat.CD, condition);
+        Document doc = removeRule(getEntireXmlDoc(), ruleId);
+        updateTagsAndRules(doc);
+        String ruleConditionTag = SscXmlFormat.getRuleConditionTag(SLOT_0, SscXmlFormat.CD,
+                condition);
+        SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CD, condition, true);
+        SscXmlFormat.setMediaCapability(SLOT_0, SscXmlFormat.SC_CD, SscXmlFormat.MEDIA_TYPE_VIDEO,
+                true);
+
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+                .thenReturn(true);
+
+        SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
+                condition, null, SscServiceClassUtil.SERVICE_CLASS_VIDEO);
+        Element xml = mSscXmlCreator.createXml(doc, insertData);
+        assertNotNull(xml);
+        assertEquals(1, xml.getElementsByTagName(
+                SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.RULESET)).getLength());
+
+        NodeList ruleList = xml.getElementsByTagName(SscXmlFormat.getCpElement(SLOT_0,
+                SscXmlFormat.RULE));
+        assertNotNull(ruleList);
+        Element createdRule = null;
+        for (int i = 0; i < ruleList.getLength(); i++) {
+            Element element = (Element) ruleList.item(i);
+            if (ruleId.equals(element.getAttribute(SscXmlFormat.ID))) {
+                createdRule = element;
+                break;
+            }
+        }
+
+        assertNotNull(createdRule);
+        assertEquals(1, createdRule.getElementsByTagName(
+                SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.CONDITIONS)).getLength());
+        assertEquals(1, createdRule.getElementsByTagName(ruleConditionTag).getLength());
+        assertEquals(0, createdRule.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED)).getLength());
+        assertEquals(0, createdRule.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TARGET)).getLength());
+
+        NodeList mediaNodeList = createdRule.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.MEDIA));
+        assertEquals(1, mediaNodeList.getLength());
+        assertEquals(SscXmlFormat.VIDEO, mediaNodeList.item(0).getTextContent());
+    }
+
+    @Test
     public void createXml_insertCfnrRegistration() {
         int condition = SscConstant.CONDITION_CFNR;
-        int action = SscConstant.ACTION_REGISTRATION;
-        String targetNumber = mTargetNumber;
+        String targetNumber = "+1234567890";
         String ruleId = SscXmlFormat.getDefaultRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO,
                 SscXmlFormat.CD, condition);
         Document doc = removeRule(getEntireXmlDoc(), ruleId);
@@ -195,10 +1094,12 @@ public class SscXmlCreatorTest {
                 condition);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CD, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockSscUtils.getUriFromNumber(SLOT_0, targetNumber)).thenReturn(targetNumber);
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
-        SscServiceData insertData = getInsertCfData(ESsType.CF, action, condition, targetNumber);
+        SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_REGISTRATION,
+                condition, targetNumber, SscServiceClassUtil.SERVICE_CLASS_NONE);
         Element xml = mSscXmlCreator.createXml(doc, insertData);
 
         assertNotNull(xml);
@@ -233,18 +1134,17 @@ public class SscXmlCreatorTest {
     @Test
     public void createXml_insertCfuDeactivation() {
         int condition = SscConstant.CONDITION_CFU;
-        int action = SscConstant.ACTION_DEACTIVATION;
-        String targetNumber = null;
         String ruleId = SscXmlFormat.getDefaultRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO,
                 SscXmlFormat.CD, condition);
         Document doc = removeRule(getEntireXmlDoc(), ruleId);
         updateTagsAndRules(doc);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CD, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
-        SscServiceData insertData = getInsertCfData(ESsType.CF, action, condition, targetNumber);
+        SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_DEACTIVATION,
+                condition, null, SscServiceClassUtil.SERVICE_CLASS_NONE);
         Element xml = mSscXmlCreator.createXml(doc, insertData);
 
         assertNotNull(xml);
@@ -278,8 +1178,6 @@ public class SscXmlCreatorTest {
     @Test
     public void createXml_insertCfnrcErasure() {
         int condition = SscConstant.CONDITION_CFNRC;
-        int action = SscConstant.ACTION_ERASURE;
-        String targetNumber = "";
         String ruleId = SscXmlFormat.getDefaultRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO,
                 SscXmlFormat.CD, condition);
         Document doc = removeRule(getEntireXmlDoc(), ruleId);
@@ -288,10 +1186,11 @@ public class SscXmlCreatorTest {
                 condition);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CD, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
-        SscServiceData insertData = getInsertCfData(ESsType.CF, action, condition, targetNumber);
+        SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ERASURE,
+                condition, null, SscServiceClassUtil.SERVICE_CLASS_NONE);
         Element xml = mSscXmlCreator.createXml(doc, insertData);
 
         assertNotNull(xml);
@@ -320,14 +1219,12 @@ public class SscXmlCreatorTest {
         NodeList targetList = createdRule.getElementsByTagName(
                 SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.TARGET));
         assertEquals(1, targetList.getLength());
-        assertEquals(targetNumber, targetList.item(0).getTextContent());
+        assertEquals("", targetList.item(0).getTextContent());
     }
 
     @Test
     public void createXml_insertCfbActivation() {
         int condition = SscConstant.CONDITION_CFB;
-        int action = SscConstant.ACTION_ACTIVATION;
-        String targetNumber = null;
         String ruleId = SscXmlFormat.getDefaultRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO,
                 SscXmlFormat.CD, condition);
         Document doc = removeRule(getEntireXmlDoc(), ruleId);
@@ -336,10 +1233,11 @@ public class SscXmlCreatorTest {
                 condition);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CD, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
-        SscServiceData insertData = getInsertCfData(ESsType.CF, action, condition, targetNumber);
+        SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
+                condition, null, SscServiceClassUtil.SERVICE_CLASS_NONE);
         Element xml = mSscXmlCreator.createXml(doc, insertData);
         assertNotNull(xml);
         assertEquals(1, xml.getElementsByTagName(
@@ -392,7 +1290,7 @@ public class SscXmlCreatorTest {
         updateTagsAndRules(doc);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CB, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCbData(ESsType.ICB, action, condition);
@@ -435,7 +1333,6 @@ public class SscXmlCreatorTest {
     @Test
     public void createXml_insertBoicEnable() {
         int condition = SscConstant.CONDITION_BOIC;
-        int action = SscConstant.STATUS_ENABLE;
         String ruleId = SscXmlFormat.getDefaultRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO,
                 SscXmlFormat.OCB, condition);
         Document doc = removeRule(getEntireXmlDoc(), ruleId);
@@ -444,10 +1341,11 @@ public class SscXmlCreatorTest {
                 condition);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CB, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
-        SscServiceData insertData = getInsertCbData(ESsType.OCB, action, condition);
+        SscServiceData insertData = getInsertCbData(ESsType.OCB, SscConstant.STATUS_ENABLE,
+                condition);
         Element xml = mSscXmlCreator.createXml(doc, insertData);
         assertNotNull(xml);
         assertEquals(1, xml.getElementsByTagName(
@@ -494,7 +1392,7 @@ public class SscXmlCreatorTest {
                 condition);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CB, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCbData(ESsType.ICB, action, condition);
@@ -533,7 +1431,11 @@ public class SscXmlCreatorTest {
     }
 
     private void updateTagsAndRules(Document doc) {
-        mSscXmlParser.updateTagsAndRules(SLOT_0, doc);
+        new SscXmlParser().updateTagsAndRules(SLOT_0, doc);
+    }
+
+    private Document getDocumentFromString(String xml) {
+        return SscXmlGovTest.createDocumentFromString(xml);
     }
 
     private Document getEntireXmlDoc() {
@@ -544,24 +1446,39 @@ public class SscXmlCreatorTest {
         return SscXmlGovTest.removeRule(doc, ruleId);
     }
 
-    private SscServiceData getUpdateData(ESsType ssType, int action, int condition) {
-        return SscXmlGovTest.createUpdateData(ssType, 0, action, condition,
-                SscServiceClassUtil.SERVICE_CLASS_NONE);
+    private Document removeRuleSet(Document document) {
+        return SscXmlGovTest.removeRuleSet(document);
+    }
+
+    private SscServiceData getUpdateData(ESsType ssType, int action) {
+        return SscXmlGovTest.createUpdateData(ssType, 0, action, SscConstant.CONDITION_INVALID,
+                null, SscServiceClassUtil.SERVICE_CLASS_NONE, 0);
+    }
+
+    private SscServiceData getCfUpdateData(ESsType ssType, int action, int condition,
+            String targetNumber, int serviceClass, int noReplyTimer) {
+        return SscXmlGovTest.createUpdateData(ssType, 0, action, condition, targetNumber,
+                serviceClass, noReplyTimer);
+    }
+
+    private SscServiceData getCbUpdateData(ESsType ssType, int action, int condition,
+            int serviceClass) {
+        return SscXmlGovTest.createUpdateData(ssType, 0, action, condition, null,
+                serviceClass, 0);
     }
 
     private SscServiceData getInsertCfData(ESsType ssType, int action, int condition,
-            String targetNumber) {
-        return SscXmlGovTest.createInsertData(ssType, 0, action, condition, targetNumber);
+            String targetNumber, int serviceClass) {
+        return SscXmlGovTest.createInsertData(ssType, 0, action, condition, targetNumber,
+                serviceClass);
     }
 
     private SscServiceData getInsertCbData(ESsType ssType, int action, int condition) {
-        return SscXmlGovTest.createInsertData(ssType, 0, action, condition, null);
+        return SscXmlGovTest.createInsertData(ssType, 0, action, condition, null,
+                SscServiceClassUtil.SERVICE_CLASS_NONE);
     }
 
     private class FakeSscXmlCreator extends SscXmlCreator {
-        private FakeSscXmlCreator() {
-        }
-
         @Override
         protected SscUtils getSscUtils() {
             return mMockSscUtils;

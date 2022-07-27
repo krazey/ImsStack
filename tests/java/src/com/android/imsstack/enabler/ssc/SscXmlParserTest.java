@@ -64,7 +64,7 @@ public class SscXmlParserTest {
 
     @After
     public void tearDown() {
-        SscXmlFormat.reset(SLOT_0);
+        SscXmlFormat.clear(SLOT_0);
     }
 
     @Test

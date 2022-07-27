@@ -100,7 +100,6 @@ public class SscUtils {
                 domain = String.format(Locale.US, "ims.mnc%03d.mcc%03d.3gppnetwork.org",
                         Integer.parseInt(strMnc), Integer.parseInt(strMcc));
             } catch (NumberFormatException e) {
-                e.printStackTrace();
                 ImsLog.e(e.toString());
                 return null;
             }
@@ -181,8 +180,7 @@ public class SscUtils {
 
     protected String getUriFromNumber(int slotId, String number) {
         if (TextUtils.isEmpty(number)) {
-            ImsLog.d("Number is empty !!!");
-            return null;
+            return "";
         }
 
         String domain = null;

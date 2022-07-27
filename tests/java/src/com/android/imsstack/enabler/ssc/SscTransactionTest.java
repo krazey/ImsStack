@@ -594,7 +594,7 @@ public class SscTransactionTest {
 
     private SscServiceData getInsertData(ESsType ssType) {
         return SscXmlGovTest.createInsertData(ssType, mTransactionId, SscConstant.ACTION_ACTIVATION,
-                SscConstant.CONDITION_CFU, null);
+                SscConstant.CONDITION_CFU, null, SscServiceClassUtil.SERVICE_CLASS_NONE);
     }
 
     private void sleepToWaitThreadRun() {
