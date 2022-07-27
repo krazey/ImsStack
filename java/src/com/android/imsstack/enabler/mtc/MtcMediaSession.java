@@ -130,14 +130,6 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     }
 
     /**
-     * Display orientation.
-     */
-    private static final int STATE_NONE = 0x0;
-    private static final int STATE_AUDIO_STARTED = 0x1;
-    private static final int STATE_AUDIO_PAUSED = 0x2;
-    private static final int STATE_MEDIA_STARTED = 0x4;
-
-    /**
      * This surface variables will be accessed by the native layer.
      * It just grabs the object to be enable to access the surface.
      */
@@ -147,7 +139,6 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     private final Object mLock = new Object();
     private Context mContext;
     private Call mCall;
-    private int mState = STATE_NONE;
     private MtcMediaSession.Listener mListener = null;
     private MtcMediaSession.RttListener mRttListener = null;
     private IMediaListener mMediaListener = null;
@@ -198,6 +189,18 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
      */
     public long getCallId() {
         return isMediaSessionValid() ? mCall.getNativeCallId() : 0;
+    }
+
+    /**
+     * Sends dtmf to media session
+     * @param code
+     */
+    public void sendDtmf(char code) {
+        log("sendDtmf :: code=" + code);
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcMedia.SEND_DTMF);
+        parcel.writeByte((byte) code);
+        sendRequest(parcel);
     }
 
     public void setPreviewSurface(Surface surface) {

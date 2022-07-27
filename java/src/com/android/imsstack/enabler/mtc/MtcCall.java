@@ -1071,16 +1071,16 @@ public class MtcCall extends Call implements ConferenceTracker {
         sendRequest(parcel);
     }
 
-    public void sendDtmf(String code, int duration) {
-        log("sendDtmf :: code=" + ImsLog.hiddenString(code) + ", duration=" + duration);
+    /**
+     * Sends dtmf character
+     * @param code a character of dtmf code
+     */
+    public void sendDtmf(char code) {
+        log("sendDtmf :: code=" + code);
 
-        Parcel parcel = Parcel.obtain();
-
-        parcel.writeInt(IUMtcCall.SEND_DTMF);
-        parcel.writeString(code);
-        parcel.writeInt(duration);
-
-        sendRequest(parcel);
+        if (mMediaSession != null) {
+            mMediaSession.sendDtmf(code);
+        }
     }
 
     public void sendRttMessage(String data) {

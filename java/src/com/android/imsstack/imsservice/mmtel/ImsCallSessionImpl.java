@@ -991,7 +991,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     @Override
     public void sendDtmf(char c, Message result) {
         if (ImsCallMediaUtils.isDtmfEvent(c)) {
-            mCall.sendDtmf(String.valueOf(c), 0);
+            mCall.sendDtmf(c);
         } else {
             loge("sendDtmf :: not supported - dtmf=" + c);
         }

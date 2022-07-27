@@ -64,8 +64,9 @@ public:
             IMMEDIA_CASE_ENUM(NOTIFY_PACKET_LOSS);
             IMMEDIA_CASE_ENUM(NOTIFY_JITTER);
             IMMEDIA_CASE_ENUM(NOTIFY_CALL_QUALITY_CHANGE);
-            IMMEDIA_CASE_ENUM(NOTIFY_MEDIA_DETACH);
             IMMEDIA_CASE_ENUM(NOTIFY_QOS_INFO);
+            IMMEDIA_CASE_ENUM(NOTIFY_MEDIA_DETACH);
+            IMMEDIA_CASE_ENUM(SEND_DTMF);
             IMMEDIA_CASE_ENUM(SETSURFACE_CMD);
             IMMEDIA_CASE_ENUM(SELECT_CAMERA_CMD);
             IMMEDIA_CASE_ENUM(CHANGE_CAMERA_ZOOM_CMD);
@@ -146,6 +147,8 @@ public:
     static const IMS_SINT32 NOTIFY_MEDIA_DETACH = IMMEDIA_IND + 12;
     /** notification of session qos callback */
     static const IMS_SINT32 NOTIFY_QOS_INFO = IMMEDIA_IND + 13;
+    /** request from the Ui to send a dtmf digit to the audio session */
+    static const IMS_SINT32 SEND_DTMF = IMMEDIA_IND + 14;
     static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IND_IDX_END = IMMEDIA_IND + 49;
 
     // Notifications for video

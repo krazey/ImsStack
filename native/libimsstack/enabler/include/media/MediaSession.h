@@ -118,6 +118,7 @@ protected:
     IMS_BOOL OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
     IMS_BOOL OnResponse(IN IMS_UINTP pParam);
     IMS_BOOL OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
+    IMS_BOOL OnSendDtmf(IN IMS_UINTP nParam);
     void ReportToClient(IN IMS_SINT32 eError, IN MEDIA_CONTENT_TYPE eMediaType);
 
 protected:
