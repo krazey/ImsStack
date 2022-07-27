@@ -22,7 +22,7 @@ public:
     MOCK_METHOD(IMS_UINT32, GetRetryAfterValue, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
     MOCK_METHOD(
-            const AString&, GetUnknownParameter, (IN CONST AString & strName), (const, override));
+            const AString&, GetUnknownParameter, (IN const AString& strName), (const, override));
     MOCK_METHOD((const IMSMap<AString, AString>&), GetUnknownParameters, (), (const, override));
     MOCK_METHOD(const SipAddress&, GetUri, (), (const, override));
 };

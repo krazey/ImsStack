@@ -11,8 +11,8 @@ class MockIRegInfo : public IRegInfo
 {
 public:
     MOCK_METHOD(
-            IRegInfoRegistration*, GetRegistration, (IN CONST AString & strAOR), (const, override));
-    MOCK_METHOD(IRegInfoRegistration*, GetRegistration, (IN CONST SipAddress & objAOR),
+            IRegInfoRegistration*, GetRegistration, (IN const AString& strAor), (const, override));
+    MOCK_METHOD(IRegInfoRegistration*, GetRegistration, (IN const SipAddress& objAor),
             (const, override));
     MOCK_METHOD(IMSList<IRegInfoRegistration*>, GetRegistrations, (), (const, override));
 };
