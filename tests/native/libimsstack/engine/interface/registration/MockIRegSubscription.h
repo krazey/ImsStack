@@ -24,7 +24,7 @@ public:
     MOCK_METHOD(const IRegInfo*, GetRegInfo, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
     MOCK_METHOD(IMS_RESULT, SetContactParameter,
-            (IN CONST AString & strParameter, IN IMS_SINT32 nOperation), (override));
+            (IN const AString& strParameter, IN IMS_SINT32 nOperation), (override));
     MOCK_METHOD(void, SetExpires, (IN IMS_UINT32 nExpires), (override));
     MOCK_METHOD(void, SetListener, (IN IRegSubscriptionListener * piListener), (override));
     MOCK_METHOD(void, SetRefreshPolicy,

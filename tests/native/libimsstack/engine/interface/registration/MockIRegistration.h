@@ -25,23 +25,23 @@ public:
     MOCK_METHOD(void, SetSipMessageMediator, (IN IMessageMediator * piMediator), (override));
 
     MOCK_METHOD(IMS_BOOL, CreateBinding,
-            (IN CONST AString & strAppId, IN CONST AString& strServiceId), (override));
-    MOCK_METHOD(void, DestroyBinding, (IN CONST AString & strAppId, IN CONST AString& strServiceId),
+            (IN const AString& strAppId, IN const AString& strServiceId), (override));
+    MOCK_METHOD(void, DestroyBinding, (IN const AString& strAppId, IN const AString& strServiceId),
             (override));
     MOCK_METHOD(IRegContact*, CreateContact,
-            (IN CONST IPAddress & objIPA, IN IMS_SINT32 nPort, IN IMS_SINT32 nExpiresPolicy,
+            (IN const IPAddress& objIPA, IN IMS_SINT32 nPort, IN IMS_SINT32 nExpiresPolicy,
                     IN IMS_UINT32 nExpiresValue),
             (override));
     MOCK_METHOD(void, DestroyContact, (IN IRegContact * piContact), (override));
     MOCK_METHOD(
-            void, DestroyContact, (IN CONST IPAddress & objIPA, IN IMS_SINT32 nPort), (override));
-    MOCK_METHOD(IMS_BOOL, Equals, (IN CONST IRegistration * piReg), (const, override));
+            void, DestroyContact, (IN const IPAddress& objIPA, IN IMS_SINT32 nPort), (override));
+    MOCK_METHOD(IMS_BOOL, Equals, (IN const IRegistration* piReg), (const, override));
     MOCK_METHOD(const Credential*, GetCredential, (), (const, override));
     MOCK_METHOD(const SipAddress&, GetAor, (), (const, override));
     MOCK_METHOD(const AStringArray&, GetAssociatedUris, (), (const, override));
     MOCK_METHOD(const SipAddress&, GetAuthorizedAor, (), (const, override));
     MOCK_METHOD(IMSList<IRegContact*>, GetAllContacts, (), (const, override));
-    MOCK_METHOD(IRegContact*, GetContact, (IN CONST IPAddress & objIPA, IN IMS_SINT32 nPort),
+    MOCK_METHOD(IRegContact*, GetContact, (IN const IPAddress& objIPA, IN IMS_SINT32 nPort),
             (const, override));
     MOCK_METHOD(IRegContact*, GetPreferredContact, (), (const, override));
     MOCK_METHOD(IRegParameter*, GetParameter, (), (const, override));
@@ -61,7 +61,7 @@ public:
     MOCK_METHOD(IMS_RESULT, RestoreActiveBindings, (), (override));
     MOCK_METHOD(void, SetActiveBindingsRestorationUsage, (IN IMS_BOOL bEnabled), (override));
     MOCK_METHOD(
-            void, SetAor, (IN CONST SipAddress & objAOR, IN CONST AString& strSubsId), (override));
+            void, SetAor, (IN const SipAddress& objAOR, IN const AString& strSubsId), (override));
     MOCK_METHOD(void, SetListener, (IN IRegistrationListener * piListener), (override));
     MOCK_METHOD(void, SetRefreshPolicy,
             (IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLT,
@@ -73,7 +73,7 @@ public:
     MOCK_METHOD(void, SetFlagForWithinTrustDomain, (IN IMS_BOOL bWithinTrustDomain), (override));
     MOCK_METHOD(void, SetUserIdentityNotifier, (IN IRegUserIdentityNotifier * piUserIdNotifier),
             (override));
-    MOCK_METHOD(void, SetUserInfoForContactHeader, (IN CONST AString & strUserInfo), (override));
+    MOCK_METHOD(void, SetUserInfoForContactHeader, (IN const AString& strUserInfo), (override));
     MOCK_METHOD(IRegSubscription*, CreateSubscription, (IN SipAddress * pResourceUri), (override));
 };
 
