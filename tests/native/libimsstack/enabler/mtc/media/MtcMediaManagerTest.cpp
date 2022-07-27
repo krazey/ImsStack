@@ -15,17 +15,30 @@
  */
 
 #include <gtest/gtest.h>
+#include "call/MockIMtcCallContext.h"
 #include "media/MtcMediaManager.h"
-
-namespace android
-{
 
 class MtcMediaManagerTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MockIMtcCallContext objContext;
+    MtcMediaManager* pMediaManager;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override { pMediaManager = new MtcMediaManager(objContext); }
+
+    virtual void TearDown() override { delete pMediaManager; }
 };
 
-}  // namespace android
+TEST_F(MtcMediaManagerTest, GetStateReturnsIdleInitially)
+{
+    EXPECT_EQ(MediaState::IDLE, pMediaManager->GetState());
+    EXPECT_EQ(MediaState::IDLE, pMediaManager->GetOldState());
+}
+
+TEST_F(MtcMediaManagerTest, TerminateSetsStateToTerminating)
+{
+    pMediaManager->Terminate();
+
+    EXPECT_EQ(MediaState::TERMINATING, pMediaManager->GetState());
+}

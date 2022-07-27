@@ -117,7 +117,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Terminate(IN const CallReasonInfo
 PUBLIC VIRTUAL CallStateName EstablishedState::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
-    m_objContext.GetMediaManager().Terminate();
 
     m_objContext.GetUiNotifier().SendTerminated(IsConferenceCallParticipant()
                     ? CallReasonInfo(CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE)
@@ -201,7 +200,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::UssiTerminated(IN ISession* piSes
     pUssiController->ParseUssiBodyAndCheckResult(
             piMessage->GetMessage(), piMessage->GetMethod().ToInt());
 
-    m_objContext.GetMediaManager().Terminate();
     m_objContext.GetUiNotifier().SendTerminated(TerminationHandler().Handle(*piSession));
 
     return CallStateName::TERMINATING;
@@ -585,8 +583,6 @@ PRIVATE
 CallStateName EstablishedState::TerminateUssiAfterInfoTransaction()
 {
     IMS_TRACE_D("TerminateUssiAfterInfoTransaction", 0, 0, 0);
-
-    m_objContext.GetMediaManager().Terminate();
 
     CallReasonInfo objReason(CODE_UNSPECIFIED);
     m_objContext.GetSession()->Terminate(IMS_TRUE, objReason);

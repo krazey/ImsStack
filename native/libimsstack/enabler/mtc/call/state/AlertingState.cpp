@@ -151,8 +151,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
         // TODO TerminateAndToTerminating() ?
-        m_objContext.GetMediaManager().Terminate();
-
         CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
         pSession->Terminate(IMS_TRUE, objReason);
 
@@ -168,7 +166,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
 PUBLIC VIRTUAL CallStateName AlertingState::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
-    m_objContext.GetMediaManager().Terminate();
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
     if (piMessage == IMS_NULL)
     {
@@ -211,7 +208,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
 PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateFailed(
         IN ISession* /* piSession */)
 {
-    m_objContext.GetMediaManager().Terminate();
     /*
     IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(
             piSession, IMessage::SESSION_EARLY_UPDATE);
@@ -282,7 +278,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionRPRDeliveryFailed(IN ISession
 PUBLIC VIRTUAL CallStateName AlertingState::SessionStartFailed(IN ISession* /* piSession */)
 {
     IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
-    m_objContext.GetMediaManager().Terminate();
     m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT));
 
     return CallStateName::TERMINATING;

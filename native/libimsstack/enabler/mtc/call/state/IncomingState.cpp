@@ -121,7 +121,6 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionTerminated(IN ISession* piSes
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
 
-    m_objContext.GetMediaManager().Terminate();
     m_objContext.GetUiNotifier().SendStartFailed(TerminationHandler().Handle(*piSession));
     return CallStateName::TERMINATING;
 }
@@ -166,7 +165,6 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(
         IN ISession* /* piSession */)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdateFailed", 0, 0, 0);
-    m_objContext.GetMediaManager().Terminate();
     /*
     IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(
             piSession, IMessage::SESSION_EARLY_UPDATE);
@@ -187,7 +185,6 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
     {
         if (m_objContext.GetSession()->RespondToEarlyUpdate(SipStatusCode::SC_200) == IMS_FAILURE)
         {
-            m_objContext.GetMediaManager().Terminate();
             m_objContext.GetUiNotifier().SendStartFailed(
                     CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
             return CallStateName::TERMINATING;

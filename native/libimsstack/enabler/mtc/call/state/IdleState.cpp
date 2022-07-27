@@ -183,7 +183,6 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
 PUBLIC VIRTUAL CallStateName IdleState::Terminate(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("Terminate : reason[%s]", _TRACE_CR_(objReason), 0, 0);
-    m_objContext.GetMediaManager().Terminate();
     m_objContext.GetUiNotifier().SendStartFailed(objReason);
 
     return CallStateName::TERMINATING;
@@ -199,7 +198,6 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
 
         case IMtcBlockChecker::Result::Status::BLOCKED:
             m_pBlockChecker.reset();
-            m_objContext.GetMediaManager().Terminate();
             if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
             {
                 m_objContext.GetSession()->Reject(objResult.objReason);
@@ -321,7 +319,6 @@ CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
     IMS_TRACE_D("ContinueStart", 0, 0, 0);
     if (m_objContext.CreateSession() == IMS_NULL)
     {
-        m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
@@ -332,7 +329,6 @@ CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
 
     if (m_objContext.GetSession()->Start() == IMS_FAILURE)
     {
-        m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
@@ -349,7 +345,6 @@ CallStateName IdleState::ContinueConference(
     IMS_TRACE_D("ContinueConference", 0, 0, 0);
     if (m_objContext.CreateSession() == IMS_NULL)
     {
-        m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
@@ -363,7 +358,6 @@ CallStateName IdleState::ContinueConference(
 
     if (m_objContext.GetSession()->Start() == IMS_FAILURE)
     {
-        m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
@@ -390,7 +384,6 @@ CallStateName IdleState::ContinueStartUssi(IN MediaInfo* pMediaInfo)
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     if (m_objContext.CreateSession() == IMS_NULL)
     {
-        objMediaManager.Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
@@ -400,7 +393,6 @@ CallStateName IdleState::ContinueStartUssi(IN MediaInfo* pMediaInfo)
     if (m_objContext.GetUssiController()->FormStartUssiRequest(
             m_objContext.GetParticipantInfo().GetRemoteNumber()) == IMS_FAILURE)
     {
-        objMediaManager.Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
@@ -411,7 +403,6 @@ CallStateName IdleState::ContinueStartUssi(IN MediaInfo* pMediaInfo)
 
     if (m_objContext.GetSession()->Start() == IMS_FAILURE)
     {
-        objMediaManager.Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
