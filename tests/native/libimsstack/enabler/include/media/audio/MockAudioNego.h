@@ -29,7 +29,6 @@ public:
             AudioNego(nSlotId){};
     MOCK_METHOD(void, CreateProfiles,
             (IN MediaEnvironment * pEnvironment, IN AudioConfiguration* pConfig), (override));
-    MOCK_METHOD(void, DestroyProfiles, (), (override));
     MOCK_METHOD(IMS_BOOL, FormSDP,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir),

@@ -17,7 +17,6 @@
 #ifndef _IMS_AUDIO_NEGO_PROFILE_H_
 #define _IMS_AUDIO_NEGO_PROFILE_H_
 
-/* == INCLUDES ========================================================= */
 #include "IMSTypeDef.h"
 #include "IpAddress.h"
 #include "ImsMap.h"
@@ -47,6 +46,15 @@ public:
             this->strPayloadType = obj.strPayloadType;
             this->nSamplingRate = obj.nSamplingRate;
             this->nChannel = obj.nChannel;
+        }
+
+        RtpMap& operator=(IN const RtpMap& obj)
+        {
+            this->nPayloadNum = obj.nPayloadNum;
+            this->strPayloadType = obj.strPayloadType;
+            this->nSamplingRate = obj.nSamplingRate;
+            this->nChannel = obj.nChannel;
+            return *this;
         }
     };
 
@@ -290,6 +298,7 @@ public:
                 bSendCmr(IMS_FALSE)
         {
         }
+
         EvsFmtp(IN const EvsFmtp& objFmtp)
         {
             this->nPtime = objFmtp.nPtime;
@@ -326,7 +335,7 @@ public:
             this->bShowBrList = objFmtp.bShowBrList;
             this->bShowBwList = objFmtp.bShowBwList;
             this->bSendCmr = objFmtp.bSendCmr;
-        };
+        }
     };
 
 public:
@@ -391,28 +400,7 @@ public:
             }
         }
 
-        ~Payload() { DeleteFmtp(); };
-
-    public:
-        void SetRtpMap(IN const IMS_UINT32 nPayloadNum, IN const AString strPayloadType,
-                IN const IMS_UINT32 nSamplingRate, IN const IMS_SINT32 nChannel)
-        {
-            objRtpMap.nPayloadNum = nPayloadNum;
-            objRtpMap.strPayloadType = strPayloadType;
-            objRtpMap.nSamplingRate = nSamplingRate;
-            objRtpMap.nChannel = nChannel;
-        }
-
-        void SetRtpMap(IN const RtpMap& objMap)
-        {
-            objRtpMap.nPayloadNum = objMap.nPayloadNum;
-            objRtpMap.strPayloadType = objMap.strPayloadType;
-            objRtpMap.nSamplingRate = objMap.nSamplingRate;
-            objRtpMap.nChannel = objMap.nChannel;
-        };
-
-    private:
-        void DeleteFmtp()
+        ~Payload()
         {
             if (this->pFmtp == IMS_NULL)
             {
@@ -433,6 +421,24 @@ public:
                 delete reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(this->pFmtp);
             }
         }
+
+    public:
+        void SetRtpMap(IN const IMS_UINT32 nPayloadNum, IN const AString strPayloadType,
+                IN const IMS_UINT32 nSamplingRate, IN const IMS_SINT32 nChannel)
+        {
+            objRtpMap.nPayloadNum = nPayloadNum;
+            objRtpMap.strPayloadType = strPayloadType;
+            objRtpMap.nSamplingRate = nSamplingRate;
+            objRtpMap.nChannel = nChannel;
+        }
+
+        void SetRtpMap(IN const RtpMap& objMap)
+        {
+            objRtpMap.nPayloadNum = objMap.nPayloadNum;
+            objRtpMap.strPayloadType = objMap.strPayloadType;
+            objRtpMap.nSamplingRate = objMap.nSamplingRate;
+            objRtpMap.nChannel = objMap.nChannel;
+        };
     };
 
     class CapaNego
@@ -549,6 +555,7 @@ public:
         while (lstPayload.GetSize() > 0)
         {
             AudioProfile::Payload* pPayload = lstPayload.GetAt(0);
+
             if (pPayload != IMS_NULL)
             {
                 delete pPayload;

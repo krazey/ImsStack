@@ -65,32 +65,35 @@ const AString AudioProfileUtil::AUDIO_CODEC_BITRATE_STRING[3][9] = {
         {"5.90", "7.20", "8.00",  "9.60",  "13.20", "16.40", "24.40", "0",     "0"    }
 };
 
-PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::CreateAudioProfile(OUT AudioProfile* pAudioProfile,
+PUBLIC
+AudioProfile* AudioProfileUtil::CreateProfile(
         IN MediaEnvironment* pEnvironment, IN AudioConfiguration* pConfig, IN IMS_SINT32 nSlotId)
 {
     IMS_SINT32 nAsOptimal = -1;
     IMS_SINT32 nAsMax = -1;
 
-    if (pEnvironment == IMS_NULL || pConfig == IMS_NULL || pAudioProfile == IMS_NULL ||
-            pEnvironment->pIService == IMS_NULL)
+    if (pEnvironment == IMS_NULL || pConfig == IMS_NULL || pEnvironment->pIService == IMS_NULL)
     {
-        return IMS_FALSE;
+        return IMS_NULL;
     }
-    IMS_TRACE_D("CreateAudioProfile() Entered.", 0, 0, 0);
+
+    IMS_TRACE_D("CreateProfile()", 0, 0, 0);
 
     MediaManager* pMediaManager = MediaManager::GetInstance(nSlotId);
 
     if (pMediaManager == IMS_NULL)
     {
-        return IMS_FALSE;
+        return IMS_NULL;
     }
 
     MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
 
     if (pResourceMngr == IMS_NULL)
     {
-        return IMS_FALSE;
+        return IMS_NULL;
     }
+
+    AudioProfile* pAudioProfile = new AudioProfile();
 
     // Setting IP address
     // In IPv6 system, The MediaLogic have to write a modem IPv6 to "c line" of session level.
@@ -126,8 +129,8 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::CreateAudioProfile(OUT AudioProfile* pA
     }
     pAudioProfile->nControlPort = pAudioProfile->nDataPort + 1;
 
-    IMS_TRACE_D("CreateAudioProfile() objIpAddr[%s], port[%d]",
-            pAudioProfile->objIpAddr.ToCharString(), pAudioProfile->nDataPort, 0);
+    IMS_TRACE_D("CreateProfile() objIpAddr[%s], port[%d]", pAudioProfile->objIpAddr.ToCharString(),
+            pAudioProfile->nDataPort, 0);
 
     pAudioProfile->strTransportType = "RTP/AVP";
 
@@ -163,11 +166,12 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::CreateAudioProfile(OUT AudioProfile* pA
         {
             pAudioProfile->objRtcpXrAttr.bSupportPacketDuplicatedRle = IMS_TRUE;
         }
-        IMS_TRACE_D("CreateAudioProfile() Add RTCP-XR. VoIP[%d], Stat[%d], PLR[%d]",
+
+        IMS_TRACE_D("CreateProfile() Add RTCP-XR. VoIP[%d], Stat[%d], PLR[%d]",
                 pAudioProfile->objRtcpXrAttr.bSupportVoipMatircs,
                 pAudioProfile->objRtcpXrAttr.bSupportStatisticMetrics,
                 pAudioProfile->objRtcpXrAttr.bSupportPacketLossRle);
-        IMS_TRACE_D("CreateAudioProfile() Add RTCP-XR. PDR[%d]",
+        IMS_TRACE_D("CreateProfile() Add RTCP-XR. PDR[%d]",
                 pAudioProfile->objRtcpXrAttr.bSupportPacketDuplicatedRle, 0, 0);
     }
 
@@ -180,20 +184,23 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::CreateAudioProfile(OUT AudioProfile* pA
     for (IMS_UINT32 i = 0; i < pCodecs.GetSize(); i++)
     {
         CodecConfig* pCodecConfig = pCodecs.GetAt(i);
+
         if (pCodecConfig == IMS_NULL)
         {
             IMS_TRACE_D("pCodecConfig is NULL", 0, 0, 0);
             break;
         }
+
         if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_NONE)
         {
-            IMS_TRACE_D("CreateAudioProfile() invalid codec, skip config(%d) - %d", i,
+            IMS_TRACE_D("CreateProfile() invalid codec, skip config(%d) - %d", i,
                     pCodecConfig->GetCodec(), 0);
             continue;
         }
+
         if (pCodecConfig->GetPayloadType() == -1)
         {
-            IMS_TRACE_D("CreateAudioProfile() invalid payload type, skip config(%d) - %d:%s", i,
+            IMS_TRACE_D("CreateProfile() invalid payload type, skip config(%d) - %d:%s", i,
                     pCodecConfig->GetCodec(), ImsCodec::CodecToString(pCodecConfig->GetCodec()));
             continue;
         }
@@ -212,29 +219,32 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::CreateAudioProfile(OUT AudioProfile* pA
                 pAmrFmtp->nOctetAlign = pAmrConfig->GetOctetAlign();
                 pAmrFmtp->bShow_OctetAlign = IMS_TRUE;
             }
+
             if (pConfig->GetModeChangeCapability() != -1)
             {
                 pAmrFmtp->nModeChangeCapability = pConfig->GetModeChangeCapability();
                 pAmrFmtp->bShowModeChangeCapability = IMS_TRUE;
             }
+
             if (pConfig->GetModeChangePeriod() != -1)
             {
                 pAmrFmtp->nModeChangePeriod = pConfig->GetModeChangePeriod();
                 pAmrFmtp->bShowModeChangePeriod = IMS_TRUE;
             }
+
             if (pConfig->GetModeChangeNeighbor() != -1)
             {
                 pAmrFmtp->nModeChangeNeighbor = pConfig->GetModeChangeNeighbor();
                 pAmrFmtp->bShowModeChangeNeighbor = IMS_TRUE;
             }
+
             if (pConfig->GetMaxRed() != -1)
             {
                 pAmrFmtp->nMaxRed = pConfig->GetMaxRed();
                 pAmrFmtp->bShowMaxRed = IMS_TRUE;
             }
-            // TODO_MEDIA 26.114 mentioned it is needed, but no carrier wants this. so block these
-            // for now
-            /*
+            /** TODO: 26.114 mentioned it is needed, but no carrier wants this. so block these
+             for now
             if (pAmrConfig->GetPtime() != -1)
             {
                 pAmrFmtp->nPtime = pConfig->GetPtime();
@@ -267,6 +277,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::CreateAudioProfile(OUT AudioProfile* pA
             IMS_SINT32 nCurrAs;
             nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
                     pAudioProfile->objIpAddr.IsIPv6Address(), pAmrConfig->GetModeSet());
+
             if (nCurrAs > nAsOptimal)
             {
                 nAsOptimal = nCurrAs;
@@ -274,12 +285,13 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::CreateAudioProfile(OUT AudioProfile* pA
 
             nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
                     pAudioProfile->objIpAddr.IsIPv6Address(), pAmrConfig->GetModeSet(), IMS_TRUE);
+
             if (nCurrAs > nAsMax)
             {
                 nAsMax = nCurrAs;
             }
 
-            IMS_TRACE_D("CreateAudioProfile() add payload(%d), codec(%s), SamplingRate(%d)", i,
+            IMS_TRACE_D("CreateProfile() add payload(%d), codec(%s), SamplingRate(%d)", i,
                     ImsCodec::CodecToString(pAmrConfig->GetCodec()), pAmrConfig->GetSamplingRate());
         }
         else if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_TELEPHONE_EVENT ||
@@ -297,7 +309,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::CreateAudioProfile(OUT AudioProfile* pA
             pTelephoneEvent->pFmtp = reinterpret_cast<void*>(pTeFmtp);
             pAudioProfile->lstPayload.Append(pTelephoneEvent);
 
-            IMS_TRACE_D("CreateAudioProfile() add payload(%d),codec(%d), SamplingRate(%d)", i,
+            IMS_TRACE_D("CreateProfile() add payload(%d),codec(%d), SamplingRate(%d)", i,
                     pDtmfConfig->GetCodec(), pDtmfConfig->GetSamplingRate());
         }
         else if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_EVS)
@@ -345,9 +357,8 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::CreateAudioProfile(OUT AudioProfile* pA
                 pEvsFmtp->bShowModeChangeNeighbor = IMS_TRUE;
             }
 
-            // TODO_MEDIA 26.114 mentioned it is needed, but no carrier wants this. so block these
-            // for now
-            /*
+            /** TODO: 26.114 mentioned it is needed, but no carrier wants this. so block these for
+             now
             if (pConfig->GetPtime() != -1)
             {
                 pEvsFmtp->nPtime = pConfig->GetPtime();
@@ -448,7 +459,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::CreateAudioProfile(OUT AudioProfile* pA
                 nAsMax = nCurrAs;
             }
 
-            IMS_TRACE_D("CreateAudioProfile() add payload(%d),codec(%d), SamplingRate(%d)", i,
+            IMS_TRACE_D("CreateProfile() add payload(%d),codec(%d), SamplingRate(%d)", i,
                     pEvsConfig->GetCodec(), 16000);
         }
         else if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_PCMU ||
@@ -481,32 +492,32 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::CreateAudioProfile(OUT AudioProfile* pA
                 nAsMax = nTempBandwidth;
                 nAsOptimal = nTempBandwidth;
             }
+
             pAudioProfile->lstPayload.Append(pPCM_Payload);
 
-            IMS_TRACE_D("CreateAudioProfile() add payload(%d),codec(%d)", i,
-                    pCodecConfig->GetCodec(), 0);
+            IMS_TRACE_D(
+                    "CreateProfile() add payload(%d),codec(%d)", i, pCodecConfig->GetCodec(), 0);
         }
     }
 
-    // Step 5. Setting direction
+    // Setting direction
     pAudioProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
-    // Step 6. Setting ptime & maxptime & bandwidth
+    // Setting ptime & maxptime & bandwidth
     pAudioProfile->nPtime = pConfig->GetPtime();
     pAudioProfile->nMaxPtime = pConfig->GetMaxPtime();
     pAudioProfile->nBandwidthAs = pConfig->GetAsBandwidthKbps();
 
-    SetAudioRsRr(pAudioProfile, pConfig);
-    IMS_TRACE_D("CreateAudioProfile() - nPtime[%d], nMaxPtime[%d]", pAudioProfile->nPtime,
+    SetRtcpRsRr(pAudioProfile, pConfig);
+    IMS_TRACE_D("CreateProfile() - nPtime[%d], nMaxPtime[%d]", pAudioProfile->nPtime,
             pAudioProfile->nMaxPtime, 0);
-    IMS_TRACE_D("CreateAudioProfile() - AS[%d], RR[%d], RS[%d]", pAudioProfile->nBandwidthAs,
+    IMS_TRACE_D("CreateProfile() - AS[%d], RR[%d], RS[%d]", pAudioProfile->nBandwidthAs,
             pAudioProfile->nBandwidthRr, pAudioProfile->nBandwidthRs);
-    IMS_TRACE_D("CreateAudioProfile() Ended. PayloadSize[%d]", pAudioProfile->lstPayload.GetSize(),
-            0, 0);
+    IMS_TRACE_D("CreateProfile() - payloadSize[%d]", pAudioProfile->lstPayload.GetSize(), 0, 0);
 
-    return IMS_TRUE;
+    return pAudioProfile;
 }
 
-PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetAudioRsRr(
+PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpRsRr(
         OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig)
 {
     if (pAudioProfile == IMS_NULL)
@@ -517,7 +528,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetAudioRsRr(
     pAudioProfile->nBandwidthRr = pConfig->GetRrBandwidthBps();
     pAudioProfile->nBandwidthRs = pConfig->GetRsBandwidthBps();
 
-    IMS_TRACE_I("SetAudioRsRr(), Set RS[%d], RR[%d]", pAudioProfile->nBandwidthRs,
+    IMS_TRACE_I("SetRtcpRsRr(), Set RS[%d], RR[%d]", pAudioProfile->nBandwidthRs,
             pAudioProfile->nBandwidthRr, 0);
 
     return IMS_TRUE;
@@ -602,7 +613,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::MakeNegotiatedBandwidth(IN AudioConfigu
         if (pPeerProfile->eDirection != MEDIA_DIRECTION_SEND_RECEIVE)
         {  // Hold Case
             // 3.1 Hold Case
-            SetAudioRsRr(pNegotiatedProfile, pConfig);
+            SetRtcpRsRr(pNegotiatedProfile, pConfig);
         }
         else
         {
@@ -932,7 +943,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
 
     pAudioProfile->nBandwidthAs = pConfig->GetAsBandwidthKbps();
 
-    SetAudioRsRr(pAudioProfile, pConfig);
+    SetRtcpRsRr(pAudioProfile, pConfig);
     IMS_TRACE_D("UpdateAudioProfileBandwidth() update AS[%d]", nAsMax, 0, 0);
 
     return IMS_TRUE;

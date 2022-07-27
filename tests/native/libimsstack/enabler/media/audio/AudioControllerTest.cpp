@@ -61,19 +61,8 @@ protected:
         pSrcAmrPayload->pFmtp = reinterpret_cast<void*>(pSrcAmrFmtp);
         m_pLocalProfile->lstPayload.Append(pSrcAmrPayload);
 
-        m_pPeerProfile = new AudioProfile();
-        AudioProfile::Payload* pDestAmrPayload = new AudioProfile::Payload();
-        pDestAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
-        AudioProfile::AmrFmtp* pDestAmrFmtp = new AudioProfile::AmrFmtp();
-        pDestAmrPayload->pFmtp = reinterpret_cast<void*>(pDestAmrFmtp);
-        m_pPeerProfile->lstPayload.Append(pDestAmrPayload);
-
-        m_pNegoProfile = new AudioProfile();
-        AudioProfile::Payload* pNegoAmrPayload = new AudioProfile::Payload();
-        pNegoAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
-        AudioProfile::AmrFmtp* pNegoAmrFmtp = new AudioProfile::AmrFmtp();
-        pNegoAmrPayload->pFmtp = reinterpret_cast<void*>(pNegoAmrFmtp);
-        m_pNegoProfile->lstPayload.Append(pNegoAmrPayload);
+        m_pPeerProfile = new AudioProfile(*m_pLocalProfile);
+        m_pNegoProfile = new AudioProfile(*m_pLocalProfile);
 
         m_objIpAddr = IPAddress(LOCAL_IP);
         ON_CALL(*m_pAudioNego, GetLocalAddress()).WillByDefault(ReturnRef(m_objIpAddr));
@@ -87,6 +76,7 @@ protected:
     {
         delete m_pController;
         delete m_pAudioNego;
+        delete m_pConfig;
         delete m_pLocalProfile;
         delete m_pPeerProfile;
         delete m_pNegoProfile;
