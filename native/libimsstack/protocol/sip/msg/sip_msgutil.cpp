@@ -22,8 +22,6 @@
 
 #define NAME_CONTENT_TRANSFER_ENCODING "Content-Transfer-Encoding"
 
-SIPHdrAccess* SIPHdrAccess::s_pInstance = SIP_NULL;
-
 SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN] = {
         "Allow",  // 0
         "Allow-Events",
@@ -160,8 +158,6 @@ const SIP_INT16 gaszSipHdrCompactEnum[20] = {SipHeaderBase::ACCEPT_CONTACT,
         SipHeaderBase::REFER_TO, SipHeaderBase::SUBJECT, SipHeaderBase::TO,
         SipHeaderBase::ALLOW_EVENTS, SipHeaderBase::VIA, SipHeaderBase::SESSION_EXPIRES,
         SipHeaderBase::IDENTITY};
-
-SIPHdrAccess* gpHdrAccess = SIP_NULL;
 
 /*****************************************************************************
  * Function name      : SetCharVar
@@ -478,35 +474,30 @@ SIP_INT32 sipGetMimeHdrType(SIP_CHAR* pszHdrName)
     /* go for unknown header check*/
 }
 
-/*****************************************************************************
- * Function name      : SIPHdrAccess :: SIPHdrAccess()
- *
- * Description        : Constructor to Singleton Class SIPHdrAccess.
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
+static HdrLenRecord s_objHdrLenRecord[SIP_MAX_HDR_LEN] = {
+        {0, 0, {{0, {0}}}}
+};
 
-SIPHdrAccess::SIPHdrAccess()
+void SIPHdrAccess::Init()
 {
+    memset(s_objHdrLenRecord, 0, sizeof(s_objHdrLenRecord));
     for (SIP_INT32 nHdrLenIndex = SIP_ZERO; nHdrLenIndex < SIP_MAX_HDR_LEN; nHdrLenIndex++)
     {
         SIP_INT32 nNoOfHdr = SIP_ZERO;
-        objHdrLenRecord[nHdrLenIndex].NoOfEntries = SIP_ZERO;
-        objHdrLenRecord[nHdrLenIndex].Hdrlen = nHdrLenIndex;
+        s_objHdrLenRecord[nHdrLenIndex].NoOfEntries = SIP_ZERO;
+        s_objHdrLenRecord[nHdrLenIndex].Hdrlen = nHdrLenIndex;
 
         for (SIP_INT32 nHdrIndex = SIP_ZERO; nHdrIndex < SipHeaderBase::TYPE_END; nHdrIndex++)
         {
             if (SipPf_Strlen(gaszSipHdr[nHdrIndex]) == nHdrLenIndex)
             {
-                objHdrLenRecord[nHdrLenIndex].NoOfEntries++;
-                objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrType = nHdrIndex;
+                s_objHdrLenRecord[nHdrLenIndex].NoOfEntries++;
+                s_objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrType = nHdrIndex;
 
-                SipPf_Memset(objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrName, 0,
+                SipPf_Memset(s_objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrName, 0,
                         SIP_MAX_HDR_LEN);
 
-                SipPf_Strncpy(objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrName,
+                SipPf_Strncpy(s_objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrName,
                         gaszSipHdr[nHdrIndex], SipPf_Strlen(gaszSipHdr[nHdrIndex]));
                 nNoOfHdr++;
             }
@@ -514,33 +505,6 @@ SIPHdrAccess::SIPHdrAccess()
     }
 }
 
-SIPHdrAccess* SIPHdrAccess::GetInstance()
-{
-    if (s_pInstance == SIP_NULL)
-    {
-        s_pInstance = new SIPHdrAccess();
-    }
-    return s_pInstance;
-}
-
-void SIPHdrAccess::DestroyInstance()
-{
-    if (s_pInstance != SIP_NULL)
-    {
-        delete s_pInstance;
-    }
-    s_pInstance = SIP_NULL;
-}
-
-/*****************************************************************************
- * Function name      : SIPHdrAccess :: GetHdrType
- *
- * Description        : returns Enum corresponding to the received Header
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_INT32 SIPHdrAccess::GetHdrType(const SIP_CHAR* pszRcvdHdrName)
 {
     if (pszRcvdHdrName == SIP_NULL)
@@ -590,12 +554,12 @@ SIP_INT32 SIPHdrAccess::GetHdrType(const SIP_CHAR* pszRcvdHdrName)
         return SipHeaderBase::UNKNOWN;
     }
 
-    for (SIP_INT32 nNoOfHdr = SIP_ZERO; nNoOfHdr < objHdrLenRecord[nlen].NoOfEntries; nNoOfHdr++)
+    for (SIP_INT32 nNoOfHdr = SIP_ZERO; nNoOfHdr < s_objHdrLenRecord[nlen].NoOfEntries; nNoOfHdr++)
     {
-        if (SipPf_Stricmp(objHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrName, pszRcvdHdrName) ==
+        if (SipPf_Stricmp(s_objHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrName, pszRcvdHdrName) ==
                 SIP_ZERO)
         {
-            return objHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrType;
+            return s_objHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrType;
         }
     }
     return SipHeaderBase::UNKNOWN;

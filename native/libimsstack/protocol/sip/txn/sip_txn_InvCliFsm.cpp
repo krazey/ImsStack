@@ -304,7 +304,7 @@ static SIP_BOOL InvCliFsm_CallingStRecv1xxRespEvt(
         {
             SipTxnKey* pRprTxnKey = new SipTxnKey(pMsgIn, pnError);
 
-            if (SipTxnUtil::GetInstance()->AddTxnKey(pRprTxnKey) == SIP_FALSE)
+            if (SipTxnUtil::AddTxnKey(pRprTxnKey) == SIP_FALSE)
             {
                 delete pRprTxnKey;
 
@@ -417,9 +417,8 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt(
         SIP_BOOL bRSeqExist = pMsgIn->HasHeader(SipHeaderBase::RSEQ);
         if (bRSeqExist == SIP_TRUE)
         {
-            SipTxnUtil* pSipTxnUtil = SipTxnUtil::GetInstance();
             SipTxnKey* pTempTxnKey = new SipTxnKey(pMsgIn, pnError);
-            SipTxnKey* pINVTxnKey = pSipTxnUtil->SearchTxnKey(pTempTxnKey);
+            SipTxnKey* pINVTxnKey = SipTxnUtil::SearchTxnKey(pTempTxnKey);
             if (pINVTxnKey != SIP_NULL)
             {
                 pFsmData->eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
@@ -434,7 +433,7 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt(
             }
             else
             {
-                pINVTxnKey = pSipTxnUtil->SearchTxnKey(pTempTxnKey, SIP_FALSE);
+                pINVTxnKey = SipTxnUtil::SearchTxnKey(pTempTxnKey, SIP_FALSE);
                 if (pINVTxnKey != SIP_NULL)
                 {
                     SIP_UINT32 nRseq = pTempTxnKey->GetRSeq();
@@ -458,7 +457,7 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt(
                 }
                 else
                 {
-                    if (pSipTxnUtil->AddTxnKey(pTempTxnKey) == SIP_FALSE)
+                    if (SipTxnUtil::AddTxnKey(pTempTxnKey) == SIP_FALSE)
                     {
                         delete pTempTxnKey;
                         pTempTxnKey = SIP_NULL;
@@ -479,7 +478,7 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv2xxRespEvt(
 {
     (void)pnError;
 
-    SipTxnUtil::GetInstance()->DeleteTxnKey(pTxn->GetTxnKey());
+    SipTxnUtil::DeleteTxnKey(pTxn->GetTxnKey());
 
     /* Fill FSM data for stack manager */
     SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
@@ -496,7 +495,7 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv2xxRespEvt(
 static SIP_BOOL InvCliFsm_ProceedingStRecv3xx6xxRespEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    SipTxnUtil::GetInstance()->DeleteTxnKey(pTxn->GetTxnKey());
+    SipTxnUtil::DeleteTxnKey(pTxn->GetTxnKey());
 
     SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
     SIP_UINT16 nNewTxnState = SIP_ZERO;

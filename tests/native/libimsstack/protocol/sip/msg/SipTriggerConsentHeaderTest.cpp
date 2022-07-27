@@ -183,6 +183,7 @@ TEST_F(SipTriggerConsentHeaderTest, DecodeHdr)
 
     /* Empty header not allowed */
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
     pHeader->SipDelete();
     pHeader = SIP_NULL;
 
@@ -210,6 +211,7 @@ TEST_F(SipTriggerConsentHeaderTest, DecodeHdr)
     /* Decode valid value */
     pValue = (char*)"sip:1111@example.com;target-uri=\"sip:friends@example.com\"";
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
     const int BUFFER_SIZE = 4096;
     char aBuffer[BUFFER_SIZE] = {

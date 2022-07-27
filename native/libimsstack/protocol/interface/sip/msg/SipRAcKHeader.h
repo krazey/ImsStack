@@ -45,9 +45,7 @@ public:
 
     /*set methods*/
     SIP_BOOL SetMethod(const SIP_CHAR* pszMethod);
-    inline SIP_VOID SetResponseNum(SIP_UINT32 nResponseNum) { m_nResponseNum = nResponseNum; }
 
-    inline SIP_VOID SetCSeqNum(SIP_UINT32 nCSeqNum) { m_nCSeqNum = nCSeqNum; }
     /*Get methods*/
 
     inline const SIP_CHAR* GetMethod() const { return m_pszMethod; }

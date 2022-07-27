@@ -138,10 +138,9 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
     {
         SipTxn* pInvSerTxn = SIP_NULL;  // Corresponding INV Txn.
 
-        SipTxnUtil* pSipTxnUtil = SipTxnUtil::GetInstance();
         SIP_UINT32 nRseqNum = GetRSeqNum(pMsgIn, SipHeaderBase::RACK);
         pNewTxnKey->SetRSeq(nRseqNum);
-        SipTxnKey* pINVTxnKey = pSipTxnUtil->SearchTxnKey(pNewTxnKey);
+        SipTxnKey* pINVTxnKey = SipTxnUtil::SearchTxnKey(pNewTxnKey);
 
         if (pINVTxnKey != SIP_NULL)
         {
@@ -155,7 +154,7 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
                             SIP_ZERO, SIP_ZERO);
                     pInvSerTxn->StopTxnTimer();
                 }
-                if (pSipTxnUtil->DeleteTxnKey(pINVTxnKey, SIP_TRUE) == SIP_FALSE)
+                if (SipTxnUtil::DeleteTxnKey(pINVTxnKey, SIP_TRUE) == SIP_FALSE)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                             "NonInvSerFsm_IdleStRecvNonInvReqEvt:Deleting Txn Key from list Failed "
@@ -173,7 +172,7 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
         }
         else
         {
-            pINVTxnKey = pSipTxnUtil->SearchTxnKey(pNewTxnKey, SIP_FALSE);
+            pINVTxnKey = SipTxnUtil::SearchTxnKey(pNewTxnKey, SIP_FALSE);
 
             if (pINVTxnKey != SIP_NULL)
             {

@@ -338,6 +338,7 @@ TEST_F(SipUriTest, DecodeSipUri)
     EXPECT_STREQ("Password", pSipUri->GetPassword());
     EXPECT_STREQ("2001::2", pSipUri->GetHost());
     EXPECT_EQ(8080, pSipUri->GetPort());
+    EXPECT_EQ(2, pSipUri->GetUriParamCount());
 
     SipParameterList* pUriParamList = pSipUri->GetUriParamList();
     ASSERT_TRUE(pUriParamList != nullptr);
@@ -371,6 +372,7 @@ TEST_F(SipUriTest, DecodeSipUri)
     EXPECT_STREQ("Password", pSipUri->GetPassword());
     EXPECT_STREQ("2001::2", pSipUri->GetHost());
     EXPECT_EQ(8080, pSipUri->GetPort());
+    EXPECT_EQ(2, pSipUri->GetHdrParamCount());
 
     SipParameterList* pHeaderParamList = pSipUri->GetHdrParamList();
     ASSERT_TRUE(pHeaderParamList != nullptr);

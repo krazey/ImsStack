@@ -29,6 +29,16 @@ protected:
     virtual void TearDown() override {}
 };
 
+TEST_F(SipUnknownHeaderTest, Constructor)
+{
+    SipUnknownHeader* pUnknownHeader = new SipUnknownHeader();
+    ASSERT_TRUE(pUnknownHeader != nullptr);
+
+    pUnknownHeader->SetHdrType(SipHeaderBase::UNKNOWN);
+    EXPECT_EQ(SipHeaderBase::UNKNOWN, pUnknownHeader->GetHdrType());
+
+    pUnknownHeader->SipDelete();
+}
 TEST_F(SipUnknownHeaderTest, EncodeHdr)
 {
     const int BUFFER_SIZE = 4096;

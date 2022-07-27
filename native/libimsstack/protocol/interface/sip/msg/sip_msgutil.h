@@ -400,18 +400,10 @@ struct HdrLenRecord
 class SIPHdrAccess
 {
 private:
-    static SIPHdrAccess* s_pInstance;
-    HdrLenRecord objHdrLenRecord[SIP_MAX_HDR_LEN];
-
-    SIPHdrAccess();
-    SIPHdrAccess(SIPHdrAccess const& copy);
-
-    SIP_INT32 GetHdrTypeCompact(SIP_CHAR cHdrName);
+    static SIP_INT32 GetHdrTypeCompact(SIP_CHAR cHdrName);
 
 public:
-    static SIPHdrAccess* GetInstance();
-    ~SIPHdrAccess() {}
-    static void DestroyInstance();
-    SIP_INT32 GetHdrType(const SIP_CHAR* pszHdrName);
+    static void Init();
+    static SIP_INT32 GetHdrType(const SIP_CHAR* pszHdrName);
 };
 #endif

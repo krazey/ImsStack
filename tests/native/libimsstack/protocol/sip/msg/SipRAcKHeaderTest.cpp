@@ -81,6 +81,10 @@ TEST_F(SipRAcKHeaderTest, EncodeHdrAndDecodeHdr)
     EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("7183 1 INVITE", &(aBuffer[0]));
     EXPECT_STREQ("7183 1 INVITE", objBuffer.GetCharString());
+
+    EXPECT_EQ(7183, pCopyHeader->GetResponseNum());
+    EXPECT_EQ(1, pCopyHeader->GetCSeqNum());
+    EXPECT_STREQ("INVITE", pCopyHeader->GetMethod());
     pCopyHeader->SipDelete();
 }
 

@@ -26,8 +26,6 @@
 #define MAX__CONTACT_EXPIRES 4294967295
 #define SIP_MAX_HDR_LEN      32
 
-extern SIPHdrAccess* gpHdrAccess;
-
 /******************************************************************************
  * Function name      : sipSkipRwWSP
  *
@@ -109,8 +107,7 @@ SIP_INT32 sipGetUriType(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
  *****************************************************************************/
 SIP_INT32 sipGetHdrType(const SIP_CHAR* pszHdrName)
 {
-    gpHdrAccess = SIPHdrAccess::GetInstance();
-    return gpHdrAccess->GetHdrType(pszHdrName);
+    return SIPHdrAccess::GetHdrType(pszHdrName);
 }
 
 /*****************************************************************************

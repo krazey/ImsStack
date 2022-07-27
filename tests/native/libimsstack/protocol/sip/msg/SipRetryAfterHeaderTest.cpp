@@ -233,6 +233,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     /* delta seconds to retry,empty comment and extra parameter present, success */
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"15();duration=1800", 18));
     EXPECT_STREQ("", pHeader->GetComment());
+    EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
     pCopyHeader = reinterpret_cast<SipRetryAfterHeader*>(
             SipRetryAfterHeader::GetNewObj(SipHeaderBase::RETRY_AFTER_SEC, pHeader));

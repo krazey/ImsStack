@@ -22,6 +22,7 @@
 #include "SipDefTimerUtil.h"
 #include "SipDefLoggerUtil.h"
 #include "SipDefNetworkUtil.h"
+#include "msg/sip_msgutil.h"
 
 static SipUtil *gpUtil = SIP_NULL;
 
@@ -32,6 +33,7 @@ SipUtil::SipUtil()
     m_pLoggerUtil = new SipDefLoggerUtil();
     m_pTimerUtil = new SipDefTimerUtil();
     m_pNetworkUtil = new SipDefNetworkUtil();
+    SIPHdrAccess::Init();
 }
 
 SipUtil::~SipUtil()

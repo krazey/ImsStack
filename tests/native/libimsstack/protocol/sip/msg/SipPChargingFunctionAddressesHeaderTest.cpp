@@ -114,6 +114,7 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, Encode_DecodeHdr)
 
     /* Empty header not allowed */
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
     pHeader->SipDelete();
     pHeader = SIP_NULL;
 
@@ -163,6 +164,7 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, Encode_DecodeHdr)
     /* Decode valid value */
     pValue = (char*)"ccf-2=192.0.8.1;ecf-2=192.0.8.3";
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);

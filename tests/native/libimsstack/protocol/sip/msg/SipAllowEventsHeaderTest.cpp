@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 #include "msg/SipAllowEventsHeader.h"
+#include "SipConfiguration.h"
 
 namespace android
 {
@@ -41,7 +42,8 @@ TEST_F(SipAllowEventsHeaderTest, EncodeHdrAndDecodeHdr)
 
     AStringBuffer objBuffer(256);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE,
+            pHeader->EncodeHdr(&pBuff, SIP_TRUE, SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
 

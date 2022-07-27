@@ -602,6 +602,11 @@ CSeq: 1 INVITE\r\n\
 \r\n";
     EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
     pTxnKey = new SipTxnKey(pTempMsg, &nError);
+    EXPECT_STREQ("990", pTxnKey->GetToTag());
+    EXPECT_STREQ("z9hG4bs8", pTxnKey->GetViaBranchParam());
+    EXPECT_STREQ("pc33.atlanta.com", pTxnKey->GetViaHost());
+    EXPECT_EQ(1, pTxnKey->GetCSeqNum());
+
     /* Calling with different to tag for key comparison to mismatch */
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
     delete pTempMsg;

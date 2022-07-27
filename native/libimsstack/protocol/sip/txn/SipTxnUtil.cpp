@@ -27,27 +27,7 @@
 
 extern SIP_VOID sip_cbk_displayTxnKey(IN SIP_VOID* pvTxnKey);
 
-SipTxnUtil* SipTxnUtil::m_pSipTxnUtil = SIP_NULL;
-
-/*
- * Description        : This function is constructor for class SipTxnUtil
- */
-SipTxnUtil::SipTxnUtil() :
-        m_txnKeyList(SipVector<SipTxnKey*>())
-{
-}
-
-/*
- * Description        : This function gets Class Instance
- */
-SipTxnUtil* SipTxnUtil::GetInstance()
-{
-    if (m_pSipTxnUtil == SIP_NULL)
-    {
-        m_pSipTxnUtil = new SipTxnUtil();
-    }
-    return m_pSipTxnUtil;
-}
+static SipVector<SipTxnKey*> s_txnKeyList;
 
 /*
  * Description        : This function searches the list and return the specific TxnKey
@@ -61,7 +41,7 @@ SipTxnKey* SipTxnUtil::SearchTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckRSeq)
         return SIP_NULL;
     }
 
-    SIP_UINT32 nSize = m_txnKeyList.GetSize();
+    SIP_UINT32 nSize = s_txnKeyList.GetSize();
 
     if (nSize <= SIP_ZERO)
     {
@@ -80,7 +60,7 @@ SipTxnKey* SipTxnUtil::SearchTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckRSeq)
     SIP_UINT16 nIndex = SIP_ZERO;
     while (nIndex < nSize)
     {
-        SipTxnKey* pStoredTxnKey = m_txnKeyList.GetAt(nIndex++);
+        SipTxnKey* pStoredTxnKey = s_txnKeyList.GetAt(nIndex++);
         if (pStoredTxnKey == SIP_NULL)
         {
             pUserTxnkey->SetRules(nStoredRules);
@@ -130,7 +110,7 @@ SIP_BOOL SipTxnUtil::IsTxnKeyMatched(SipTxnKey* pUserTxnkey, SipTxnKey* pStoredT
  */
 SIP_BOOL SipTxnUtil::AddTxnKey(SipTxnKey* pTxnKey)
 {
-    if (m_txnKeyList.Add(pTxnKey) < 0)
+    if (s_txnKeyList.Add(pTxnKey) < 0)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipTxnUtil::AddTxnKey:Adding in list failed",
                 SIP_ZERO, SIP_ZERO);
@@ -149,7 +129,7 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
         return SIP_FALSE;
     }
 
-    SIP_UINT32 nSize = m_txnKeyList.GetSize();
+    SIP_UINT32 nSize = s_txnKeyList.GetSize();
     if (nSize <= SIP_ZERO)
     {
         SIP_DEBUG_WARNING(
@@ -170,7 +150,7 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
     SipTxnKey* pStoredTxnKey = SIP_NULL;
     while (nIndex < nSize)
     {
-        pStoredTxnKey = m_txnKeyList.GetAt(nIndex++);
+        pStoredTxnKey = s_txnKeyList.GetAt(nIndex++);
         if (pStoredTxnKey == SIP_NULL)
         {
             pUserTxnkey->SetRules(nStoredRules);
@@ -184,7 +164,7 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
         {
             sip_cbk_displayTxnKey((SIP_VOID*)pStoredTxnKey);
             pStoredTxnKey->SipDelete();
-            m_txnKeyList.RemoveAt(nIndex - SIP_ONE);
+            s_txnKeyList.RemoveAt(nIndex - SIP_ONE);
             // Check again if further elements matches for the same txn key.
             nIndex--;
             nSize--;

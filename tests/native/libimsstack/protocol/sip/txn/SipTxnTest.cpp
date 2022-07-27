@@ -503,8 +503,12 @@ TEST_F(SipTxnTest, SetUserData)
 
     EXPECT_EQ(SIP_FALSE, pTxn->SetUserData(SIP_NULL));
 
-    EXPECT_EQ(SIP_TRUE, pTxn->SetUserData(new ISipUserData(SIP_NULL)));
+    EXPECT_EQ(SIP_TRUE, pTxn->SetUserData(new ISipUserData()));
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
+    EXPECT_EQ(SipConfiguration::MSG_OPT_ENCODE_NONE, pSipUserData->GetMsgOptions());
+    pSipUserData->SetMsgOptions(SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE);
+    EXPECT_EQ(SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE, pSipUserData->GetMsgOptions());
+    EXPECT_EQ(SIP_FALSE, pSipUserData->GetDeleteFlag());
     EXPECT_EQ(SIP_TRUE, pTxn->SetUserData(pSipUserData));
 
     delete pTxn;
@@ -546,6 +550,7 @@ TEST_F(SipTxnTest, InvalidTxn)
     SipMessage* pInSipMsg = new SipMessage();
     pInSipMsg->SetMessageType(SipMessage::TYPE_INVALID);
     SipTxnKey* pTxnKey = new SipTxnKey(pInSipMsg, &nError);
+    EXPECT_EQ(SipTxn::INVALID_TXN, pTxnKey->GetTxnType());
 
     SipTxn* pTxn = new SipTxn(SipTxn::INVALID_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
 

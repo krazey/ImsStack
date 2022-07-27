@@ -133,7 +133,7 @@ static SIP_BOOL InvSerFsm_ProceedingStSendNon100ProvRespEvt(
     /* Stop existing Txn timer*/
     /* Delete the txn key in the util list*/
     pTxn->StopTxnTimer();
-    SipTxnUtil::GetInstance()->DeleteTxnKey(pTxn->GetTxnKey());
+    SipTxnUtil::DeleteTxnKey(pTxn->GetTxnKey());
 
     // Initialize the retransmission related information
     pTxn->InitRetransmissionInfo();
@@ -163,10 +163,9 @@ static SIP_BOOL InvSerFsm_ProceedingStSendNon100ProvRespEvt(
         SipTxnKey* pTxnKey = new SipTxnKey(pTxn->GetTxnKey(), pnError);
         if (pTxnKey != SIP_NULL)
         {
-            SipTxnUtil* pSipTxnUtil = SipTxnUtil::GetInstance();
             SIP_UINT32 nRseqNum = GetRSeqNum(pMsgIn, SipHeaderBase::RSEQ);
             pTxnKey->SetRSeq(nRseqNum);
-            if (pSipTxnUtil->AddTxnKey(pTxnKey) == SIP_FALSE)
+            if (SipTxnUtil::AddTxnKey(pTxnKey) == SIP_FALSE)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                         "InvSerFsm_ProceedingStSendNon100ProvRespEvt: TxnKey insertion failed",
@@ -210,7 +209,7 @@ static SIP_BOOL InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt(
     /* Stop existing Txn timer*/
     /* Delete the txn key in the util list*/
     pTxn->StopTxnTimer();
-    SipTxnUtil::GetInstance()->DeleteTxnKey(pTxn->GetTxnKey());
+    SipTxnUtil::DeleteTxnKey(pTxn->GetTxnKey());
 
     // Initialize the retransmission related information
     pTxn->InitRetransmissionInfo();
@@ -267,7 +266,7 @@ static SIP_BOOL InvSerFsm_ProceedingStSend2xxSuccessRespEvt(
     /* Stop existing Txn timer*/
     /* Delete the txn key in the util list*/
     pTxn->StopTxnTimer();
-    SipTxnUtil::GetInstance()->DeleteTxnKey(pTxn->GetTxnKey());
+    SipTxnUtil::DeleteTxnKey(pTxn->GetTxnKey());
 
     // Initialize the retransmission related information
     pTxn->InitRetransmissionInfo();

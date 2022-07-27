@@ -28,11 +28,6 @@ class SipTransportBuffer
     SipTransportBuffer(IN const SipTransportBuffer& objRHS);
 
 public:
-    SipTransportBuffer() :
-            m_pSipBuffer(SIP_NULL),
-            m_nSipBufferLen(SIP_ZERO)
-    {
-    }
     SipTransportBuffer(SIP_CHAR* pSipBuffer, SIP_UINT32 nSipBufferLen) :
             m_pSipBuffer(pSipBuffer),
             m_nSipBufferLen(nSipBufferLen)

@@ -154,6 +154,8 @@ TEST_F(SipMessageTest, SetHeader)
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pMessage->SetHeader(pViaHdr));
 
+    ASSERT_TRUE(pMessage->GetMsgHdrs() != nullptr);
+
     EXPECT_TRUE(pMessage->GetHdrObj(SipHeaderBase::CALL_ID) == nullptr);
 
     SipHeaderBase* pHdr = pMessage->GetHdrObj(SipHeaderBase::VIA);
@@ -189,6 +191,7 @@ TEST_F(SipMessageTest, SetMessageBody)
     pSipMsgBody->SipDelete();
 
     EXPECT_EQ(1, pMessage->GetMsgBodyCount());
+    ASSERT_TRUE(pMessage->GetMsgBodyList() != nullptr);
 }
 
 TEST_F(SipMessageTest, SetStatusLine)

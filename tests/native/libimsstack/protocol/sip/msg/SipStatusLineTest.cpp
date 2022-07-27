@@ -105,6 +105,7 @@ TEST_F(SipStatusLineTest, DecodeStatusLine)
     /* sip version, status code and reason phrase present, success */
     EXPECT_EQ(SIP_TRUE, pStatusLine->DecodeStatusLine((char*)"SIP/2.0 480 Unavailable", 23));
     EXPECT_EQ(480, pStatusLine->GetStatusCodeAsInt());
+    EXPECT_STREQ("480", pStatusLine->GetStatusCode());
     EXPECT_STREQ("SIP/2.0", pStatusLine->GetSipVersion());
     EXPECT_STREQ("Unavailable", pStatusLine->GetRsnPhrase());
     pStatusLine->SipDelete();

@@ -37,7 +37,6 @@ public:
     SIP_VOID increment();
     SIP_VOID decrement();
     virtual SIP_VOID SipDelete();
-    /* TEST */ inline SIP_INT16 GetRefCount() const { return m_nRefCount; }
 
 private:
     SipRefBase& operator=(IN const SipRefBase& objRHS);

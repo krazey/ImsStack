@@ -273,7 +273,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
 
     if (SipPf_Strcmp(pNewTxnKey->GetMethod(), CANCEL_METHOD) == SIP_EQUALS)
     {
-        SipTxnUtil::GetInstance()->DeleteTxnKey(pTxn->GetTxnKey());
+        SipTxnUtil::DeleteTxnKey(pTxn->GetTxnKey());
     }
     return SIP_TRUE;
 }

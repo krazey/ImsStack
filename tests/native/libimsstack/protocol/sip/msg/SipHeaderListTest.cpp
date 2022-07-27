@@ -116,6 +116,8 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
     /* Allow empty header allowed, success */
     EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr((char*)"", 0));
     EXPECT_EQ(SIP_FALSE, pHeaderList->EncodeHdr(nullptr));
+    AStringBuffer objBuffer(256);
+    EXPECT_EQ(SIP_TRUE, pHeaderList->Encode(objBuffer, SIP_TRUE));
 
     EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr((char*)"INVITE,ACK,UPDATE,REFER", 26));
 

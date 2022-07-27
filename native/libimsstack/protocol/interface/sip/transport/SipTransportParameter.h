@@ -58,26 +58,8 @@ public:
             delete[] m_pHostAddress;
         }
     }
-    SIP_BOOL GetMulticastEnable() const { return m_bMulticastEnable; }
-
-    SIP_CHAR GetCTTL() const { return m_cTTL; }
-
-    SIP_INT32 GetTranspIpType() const { return m_nTranspIpType; }
 
     SIP_INT32 GetTranspProtocol() const { return m_nTranspProtocol; }
-
-    SIP_CHAR* GetHostAddress() const { return m_pHostAddress; }
-
-    SIP_UINT32 GetSockId() const { return m_nSockId; }
-
-    SIP_UINT16 GetPort() const { return m_nPort; }
-
-    SIP_VOID setMulticastEnable(SIP_BOOL bMulticastEnable)
-    {
-        this->m_bMulticastEnable = bMulticastEnable;
-    }
-
-    SIP_VOID setCTTL(SIP_CHAR cTTL) { this->m_cTTL = cTTL; }
 
     SIP_VOID setTanspIpType(SIP_INT32 nTanspIpType) { this->m_nTranspIpType = nTanspIpType; }
 
@@ -87,8 +69,6 @@ public:
     }
 
     SIP_BOOL setHostAddress(const SIP_CHAR* pHostAddress);
-
-    SIP_VOID setSockId(SIP_UINT32 nSockId) { this->m_nSockId = nSockId; }
 
     SIP_VOID setPort(SIP_UINT16 nPort) { this->m_nPort = nPort; }
 };
