@@ -212,7 +212,9 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
 
         @Override
         public int notifySmsReceived(int token, int format, int messageType, byte[] pdu) {
-            Rlog.d(TAG, "notifySmsReceived");
+            Rlog.d(TAG, "notifySmsReceived format = " + format
+                                       + " token = " + token
+                                       + " messageType = " + messageType);
             try {
                 int messageRef = pdu[2] & 0xff;
                 if (messageType == SmsUtils.TP_SMS_DELIVER) {

@@ -44,7 +44,7 @@ public class SmsRelayLayer {
     private AtomicInteger mToken = new AtomicInteger();
     public Map<Integer, Integer> mMoMRTokenMap = new ConcurrentHashMap<>();
     public Map<Integer, Integer> mMTTokenMRMap = new ConcurrentHashMap<>();
-
+    private static final boolean VDBG = true;
     /**
      * Listener to handle the events sent from SmsRelayLayer
      */
@@ -203,8 +203,7 @@ public class SmsRelayLayer {
         @Override
         public int notifyIncomingMessage(int smsFormat, String encodedData) {
             try {
-                Rlog.d(TAG, "notifyIncomingMessage:");
-                //TODO: Will be Implemented with RP-MR synchronisation CL
+                Rlog.d(TAG, "notifyIncomingMessage: smsFormat = " + smsFormat);
                 int token = 0;
                 int result;
                 Listener listener = mListener;
@@ -214,6 +213,25 @@ public class SmsRelayLayer {
                 }
                 encodedData = encodedData.replaceAll("\\s", "");
                 byte[] pduData = Base64.decode(encodedData, Base64.NO_PADDING);
+                if (VDBG) {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < pduData.length; i++) {
+                        sb.append(String.format("%02X ", pduData[i]));
+                    }
+                    Rlog.i(TAG, "RPDU = " + sb.toString());
+                }
+                if (smsFormat == SmsUtils.FORMAT_INT_3GPP2) {
+                    token = mToken.incrementAndGet();
+                    synchronized (mLock) {
+                        Rlog.i("TAG", "calling notifyRLDataIndication with token = " + token);
+                        result = listener.notifyRLDataIndication(token, smsFormat,
+                                                                 SmsUtils.RP_DATA, pduData);
+                    }
+                    if (result != SmsUtils.RESULT_SUCCESS) {
+                        return MtsController.MT_FAILURE;
+                    }
+                    return MtsController.MT_SUCCESS;
+                }
                 byte[] tpdu = null;
                 SmsRPdu mtData = new SmsRPdu(pduData);
                 Rlog.i(TAG, "rpdu fields: message type ="
@@ -256,7 +274,7 @@ public class SmsRelayLayer {
                         }
                     }
                 }
-                // FIXME: Implementation Pending for RP-ERROR
+                //TODO: Implementation Pending for RP-ERROR
                 return mMtsController.MT_SUCCESS;
             } catch (RuntimeException e) {
                 Rlog.e(TAG, "notifyIncomingMessage Failed " + e.getMessage());

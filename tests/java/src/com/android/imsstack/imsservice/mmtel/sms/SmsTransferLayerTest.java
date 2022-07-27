@@ -18,8 +18,10 @@ package com.android.imsstack.imsservice.mmtel.sms;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.os.HandlerThread;
@@ -28,6 +30,7 @@ import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
+import com.android.internal.util.HexDump;
 
 import org.junit.After;
 import org.junit.Before;
@@ -96,6 +99,24 @@ public class SmsTransferLayerTest {
     }
 
     @Test
+    public void testCdmaPduError() {
+        byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(null);
+
+        assertEquals(newCdmaPdu.length, 0);
+
+    }
+
+    @Test
+    public void testCdmaPduGenerate() {
+        String pduString = "0000021002020702A848D159E24006010008"
+                         + "2300031010D0011410A48CBB366F418F465C"
+                         + "7AF4EECE819E7E1C19000306220707183319";
+        byte[] pdu = HexDump.hexStringToByteArray(pduString);
+        byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(pdu);
+        assertTrue((newCdmaPdu.length > 0) ? true : false);
+    }
+
+    @Test
     public void test_sendMoTPduSuccess() {
         mSmsTransferLayer.sendMoTPdu(1, mSmsFormat, mMessageRef, mSmsc, mTpdu);
         mSmsTransferLayer.sendMoTPdu(2, mSmsFormat, mMessageRef, mSmsc, mTpdu);
@@ -110,12 +131,12 @@ public class SmsTransferLayerTest {
                 eq(mDestinationAddress), eq(mTpdu));
         mProxyListener.notifyRLReportIndication(2, ImsSmsImplBase.SEND_STATUS_OK,
                 SmsManager.RESULT_ERROR_NONE);
-        verify(mSmsRL).sendRPMessage(eq(3), eq(mRpMessageType), eq(mSmsc), eq(mDestinationAddress),
-                eq(mTpdu));
+        verify(mSmsRL, timeout(1000).times(1)).sendRPMessage(eq(3), eq(mRpMessageType), eq(mSmsc),
+                eq(mDestinationAddress), eq(mTpdu));
         mProxyListener.notifyRLReportIndication(3, ImsSmsImplBase.SEND_STATUS_OK,
                 SmsManager.RESULT_ERROR_NONE);
-        verify(mSmsRL).sendRPMessage(eq(4), eq(mRpMessageType), eq(mSmsc), eq(mDestinationAddress),
-                eq(mTpdu));
+        verify(mSmsRL, timeout(1000).times(1)).sendRPMessage(eq(4), eq(mRpMessageType), eq(mSmsc),
+                eq(mDestinationAddress), eq(mTpdu));
     }
 
     private class TestSmsTransferLayer extends SmsTransferLayer {
@@ -146,6 +167,36 @@ public class SmsTransferLayerTest {
     public void test_notifyRLDataIndication() {
         mListener.notifySmsReceived(mToken, mSmsFormat, mRpMessageType, mPdu);
         verify(mListener).notifySmsReceived(mToken, mSmsFormat, mRpMessageType, mPdu);
+    }
+
+    @Test
+    public void test_notifyRLDataIndication_3GPP2() {
+        String pduString = "0000021002020702A848D159E24006010008"
+                         + "2300031010D0011410A48CBB366F418F465C"
+                         + "7AF4EECE819E7E1C19000306220707183319";
+        byte[] pdu = HexDump.hexStringToByteArray(pduString);
+        mProxyListener  = mSmsTransferLayer.getListener();
+        mProxyListener.notifyRLDataIndication(mToken, SmsUtils.FORMAT_INT_3GPP2,
+                                              SmsUtils.RP_DATA, pdu);
+        byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(pdu);
+        verify(mListener).notifySmsReceived(eq(mToken), eq(SmsUtils.FORMAT_INT_3GPP2),
+                                            eq(SmsUtils.TP_SMS_DELIVER), eq(newCdmaPdu));
+    }
+
+    @Test
+    public void test_notifyRLDataIndication_3GPP2_Failure() {
+        //2nd byte of Pdu String has been modified with Invalid parameter ID
+        String invalidPduString = "00FF021002020702A848D159E24006010008"
+                         + "2300031010D0011410A48CBB366F418F465C"
+                         + "7AF4EECE819E7E1C19000306220707183319";
+        byte[] invalidPdu = HexDump.hexStringToByteArray(invalidPduString);
+        mProxyListener  = mSmsTransferLayer.getListener();
+        int result = mProxyListener.notifyRLDataIndication(mToken, SmsUtils.FORMAT_INT_3GPP2,
+                                              SmsUtils.RP_DATA, invalidPdu);
+        byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(invalidPdu);
+        assertEquals(SmsUtils.SMSTL_RESULT_GENERATE_CDMA_PDU_FAILED, result);
+        verify(mListener, times(0)).notifySmsReceived(eq(mToken), eq(SmsUtils.FORMAT_INT_3GPP2),
+                                            eq(SmsUtils.TP_SMS_DELIVER), eq(newCdmaPdu));
     }
 
     @Test

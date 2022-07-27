@@ -26,6 +26,7 @@ import android.util.Base64;
 
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
+import com.android.internal.util.HexDump;
 
 import org.junit.After;
 import org.junit.Before;
@@ -239,20 +240,44 @@ public class SmsRelayLayerTest {
     }
 
     @Test
-    public void test_VerifyMtFailure() {
+    public void test_VerifyMtAckWithInvalidToken() {
+        mProxyListener.notifyIncomingMessage(mSmsFormat,
+                Base64.encodeToString(mMtRpData, Base64.DEFAULT));
+        int token;
         try {
-            mProxyListener.notifyIncomingMessage(mSmsFormat,
-                    Base64.encodeToString(mMtRpData, Base64.DEFAULT));
             Field f = SmsRelayLayer.class.getDeclaredField("mToken");
             f.setAccessible(true);
             AtomicInteger intToken = (AtomicInteger) f.get(mSmsRelayLayer);
-            int token = intToken.get() + 1;
-            int result = mSmsRelayLayer.sendRPMessage(token, SmsUtils.RP_ACK, mSmsc,
-                    mDestinationAddress, mTpdu);
-            assertEquals(SmsUtils.SMSRL_RESULT_TOKEN_DOES_NOT_EXIST, result);
+            token = intToken.get() + 1;
         } catch (Exception e) {
             e.printStackTrace();
+            return;
         }
+        int result = mSmsRelayLayer.sendRPMessage(token, SmsUtils.RP_ACK, mSmsc,
+                    mDestinationAddress, mTpdu);
+        assertEquals(SmsUtils.SMSRL_RESULT_TOKEN_DOES_NOT_EXIST, result);
+    }
+
+    @Test
+    public void test_VerifyMtSuccess_3GPP2() {
+        String pduString = "0000021002020702A848D159E24006010008"
+                         + "2300031010D0011410A48CBB366F418F465C"
+                         + "7AF4EECE819E7E1C19000306220707183319";
+        byte[] pdu = HexDump.hexStringToByteArray(pduString);
+        mProxyListener.notifyIncomingMessage(SmsUtils.FORMAT_INT_3GPP2,
+                Base64.encodeToString(pdu, Base64.DEFAULT));
+        int token = 0;
+        try {
+            Field f = SmsRelayLayer.class.getDeclaredField("mToken");
+            f.setAccessible(true);
+            AtomicInteger intToken = (AtomicInteger) f.get(mSmsRelayLayer);
+            token = intToken.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+        verify(mListener).notifyRLDataIndication(eq(token), eq(SmsUtils.FORMAT_INT_3GPP2),
+                    eq(SmsUtils.RP_DATA), eq(pdu));
     }
 
     @After

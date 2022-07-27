@@ -63,6 +63,7 @@ public class SmsUtils {
     public static final int SMSTL_RESULT_QUEUE_SIZE_EXCEEDED = 9;
     public static final int SMSRL_RESULT_TOKEN_DOES_NOT_EXIST = 10;
     public static final int SMSTL_RESULT_DUPLICATE_TOKEN = 11;
+    public static final int SMSTL_RESULT_GENERATE_CDMA_PDU_FAILED = 12;
 
     public static final int RPDU_ORIGIN_ADDR_LENGTH_INDEX = 2;
     public static final int RPDU_ORIGIN_ADDR_VALUE_INDEX = 3;
