@@ -33,6 +33,7 @@ import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -135,14 +136,11 @@ public class SimAgent implements SimInterface {
         mSubId = MSimUtils.INVALID_SUB_ID;
         mSimCardState = Sim.STATE_UNKNOWN;
         mSimState = Sim.STATE_UNKNOWN;
-        mUst = null;
+        clearSimRecords();
         mListeners.clear();
 
         mIsimState = Sim.ISIM_STATE_UNKNOWN;
-        mIsimIst = null;
-        mIsimDomain = null;
-        mIsimImpi = null;
-        mIsimImpu.clear();
+        clearIsimRecords();
         mIsimListeners.clear();
     }
 
@@ -481,6 +479,10 @@ public class SimAgent implements SimInterface {
         }
     }
 
+    private void clearSimRecords() {
+        mUst = null;
+    }
+
     private void loadSimRecords() {
         TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
 
@@ -488,7 +490,7 @@ public class SimAgent implements SimInterface {
             return;
         }
 
-        String serviceTable = null; /*TODO: tm.getSimServiceTable(Sim.APP_TYPE_USIM)*/
+        String serviceTable = tm.getSimServiceTable(Sim.APP_TYPE_USIM);
 
         mUst = SimUtils.hexStringToBytes(serviceTable);
 
@@ -522,6 +524,9 @@ public class SimAgent implements SimInterface {
 
             if (isSimLoaded()) {
                 loadSimRecords();
+            } else if (mSimState == Sim.STATE_UNKNOWN
+                    || mSimState == Sim.STATE_ABSENT) {
+                clearSimRecords();
             }
 
             // Notifies the applications that the SIM state is changed.
@@ -529,7 +534,8 @@ public class SimAgent implements SimInterface {
         }
     }
 
-    private void updateSimState() {
+    @VisibleForTesting
+    protected void updateSimState() {
         TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
 
         if (tm == null) {
@@ -568,6 +574,13 @@ public class SimAgent implements SimInterface {
         }
     }
 
+    private void clearIsimRecords() {
+        mIsimIst = null;
+        mIsimImpi = null;
+        mIsimDomain = null;
+        mIsimImpu.clear();
+    }
+
     private void loadIsimRecords() {
         TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
 
@@ -575,7 +588,7 @@ public class SimAgent implements SimInterface {
             return;
         }
 
-        String serviceTable = tm.getIsimIst();
+        String serviceTable = tm.getSimServiceTable(Sim.APP_TYPE_ISIM);
         String[] isimImpus = tm.getIsimImpu();
 
         mIsimIst = SimUtils.hexStringToBytes(serviceTable);
@@ -615,6 +628,11 @@ public class SimAgent implements SimInterface {
 
             if (isIsimLoaded()) {
                 loadIsimRecords();
+            } else if (mIsimState == Sim.ISIM_STATE_UNKNOWN
+                    || mIsimState == Sim.ISIM_STATE_NOT_PRESENT
+                    || mIsimState == Sim.ISIM_STATE_NOT_READY
+                    || mIsimState == Sim.ISIM_STATE_REFRESH_STARTED) {
+                clearIsimRecords();
             }
 
             ISystem system = getSystem(getSlotId());
@@ -627,32 +645,6 @@ public class SimAgent implements SimInterface {
 
             // Notifies the applications that the ISIM state is changed.
             notifyIsimStateChanged();
-        }
-    }
-
-    private void updateIsimState() {
-        if (isSimLoaded() && !isIsimLoaded()) {
-            int isimState = getIsimState();
-            int newIsimState = isimState;
-
-            if (isimState == Sim.ISIM_STATE_REFRESH_STARTED) {
-                newIsimState = Sim.ISIM_STATE_REFRESH_COMPLETED;
-            } else {
-                TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
-
-                // The isApplicationOnUicc is a hidden API, so it will be removed
-                // when a formal ISIM interface is adapted.
-                if (tm != null && tm.isApplicationOnUicc(Sim.APP_TYPE_ISIM)) {
-                    newIsimState = Sim.ISIM_STATE_LOADED;
-                } else {
-                    newIsimState = Sim.ISIM_STATE_NOT_PRESENT;
-                }
-            }
-
-            ImsLog.i(getSlotId(), "[SIM] updateIsimState: subId="
-                    + getSubId() + ", state=" + newIsimState);
-
-            setIsimState(newIsimState);
         }
     }
 
@@ -671,8 +663,6 @@ public class SimAgent implements SimInterface {
             } else {
                 TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
 
-                // The isApplicationOnUicc is a hidden API, so it will be removed
-                // when a formal ISIM interface is adapted.
                 if (tm != null && tm.isApplicationOnUicc(Sim.APP_TYPE_ISIM)) {
                     newIsimState = Sim.ISIM_STATE_LOADED;
                 } else {
