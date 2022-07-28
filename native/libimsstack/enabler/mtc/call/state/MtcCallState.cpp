@@ -166,12 +166,10 @@ PUBLIC VIRTUAL CallStateName MtcCallState::HandleSrvccSuccess()
         case CallStateName::OUTGOING:
         case CallStateName::INCOMING:
         case CallStateName::ALERTING:
-            m_objContext.GetMediaManager().Terminate();
             m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_NONE));
             break;
         case CallStateName::ESTABLISHED:
         case CallStateName::UPDATING:
-            m_objContext.GetMediaManager().Terminate();
             m_objContext.GetUiNotifier().SendTerminated(CallReasonInfo(CODE_NONE));
             break;
         case CallStateName::TERMINATING:
@@ -471,8 +469,6 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnMediaFailed(IN CallReasonInfo /* ob
 PROTECTED
 void MtcCallState::HandleTerminate(IN const CallReasonInfo& objReason)
 {
-    m_objContext.GetMediaManager().Terminate();
-
     IMtcSession* pSession = m_objContext.GetSession();
     if (pSession == IMS_NULL)
     {
@@ -582,8 +578,6 @@ void MtcCallState::RunMedia(IN ISession* piSession, IN IMessage* piMessage)
 PROTECTED
 CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason)
 {
-    m_objContext.GetMediaManager().Terminate();
-
     if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)
     {
         m_objContext.GetPreconditionManager().FormPreconditionSdp(

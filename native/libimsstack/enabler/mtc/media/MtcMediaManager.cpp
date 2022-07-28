@@ -55,6 +55,8 @@ PUBLIC VIRTUAL MtcMediaManager::~MtcMediaManager()
 {
     IMS_TRACE_D("~MtcMediaManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
 
+    Terminate();
+
     m_pMediaReportListener = IMS_NULL;
     m_pQosListener = IMS_NULL;
 

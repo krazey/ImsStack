@@ -158,7 +158,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionTerminated(IN ISession* piSes
 
     StopTimer();
 
-    m_objContext.GetMediaManager().Terminate();
     m_objContext.GetUiNotifier().SendTerminated(TerminationHandler().Handle(*piSession));
 
     return CallStateName::TERMINATING;

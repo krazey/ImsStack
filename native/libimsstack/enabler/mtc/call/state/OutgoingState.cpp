@@ -207,7 +207,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
-    m_objContext.GetMediaManager().Terminate();
 
     IMessage* piResponse = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START);
     CallReasonInfo objReason = StartErrorHandler(m_objContext).Handle(piResponse);
@@ -224,7 +223,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
-    m_objContext.GetMediaManager().Terminate();
 
     CallReasonInfo objReason = TerminationHandler().Handle(*piSession);
     OnStartFailed(piSession, objReason);
@@ -634,7 +632,6 @@ void OutgoingState::HandleCancel(IN ISession* piSession, IN const CallReasonInfo
     IMS_TRACE_D("HandleCancel", 0, 0, 0);
     StopTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
 
-    m_objContext.GetMediaManager().Terminate();
     if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)
     {
         m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_TRUE);
@@ -667,6 +664,8 @@ CallStateName OutgoingState::HandleSilentRetry(IN const CallReasonInfo& objReaso
     {
         m_objContext.RemoveSession(&pSession->GetISession());
     }
+
+    m_objContext.GetMediaManager().Terminate();
 
     /* TODO: Policy: retry timer */
     IMS_SINT32 nRetryAfterSecond = objReason.nExtraCode;
@@ -704,7 +703,6 @@ CallStateName OutgoingState::ContinueSilentRetry()
 
     if (pSession->Start() == IMS_FAILURE)
     {
-        m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
         return CallStateName::TERMINATING;
     }
