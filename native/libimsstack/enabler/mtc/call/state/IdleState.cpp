@@ -203,9 +203,11 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
                 m_objContext.GetSession()->Reject(objResult.objReason);
             }
             m_objContext.GetUiNotifier().SendStartFailed(objResult.objReason);
+            // TODO: delete MediaInfo
             return CallStateName::TERMINATING;
 
         case IMtcBlockChecker::Result::Status::PENDING:
+            // TODO: delete MediaInfo if call terminated during being pended
             return GetStateName();
     }
 }
@@ -320,10 +322,12 @@ CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
     if (m_objContext.CreateSession() == IMS_NULL)
     {
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
+        delete pMediaInfo;
         return CallStateName::TERMINATING;
     }
 
     InitMediaSession(pMediaInfo);
+    delete pMediaInfo;
 
     m_objContext.GetPreconditionManager().CreateQos(GetISession());
 

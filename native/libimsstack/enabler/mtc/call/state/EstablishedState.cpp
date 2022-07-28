@@ -63,6 +63,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
         m_objContext.SetHeldByMe(IMS_TRUE);
         m_objContext.GetUiNotifier().SendHeld(&(m_objContext.GetCallInfo()), &objMediaInfo,
                 m_objContext.GetSupplementaryService().GetServices());
+        delete pMediaInfo;
         return GetStateName();
     }
 
@@ -72,6 +73,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
         // TODO
     }
 
+    delete pMediaInfo;
     return CallStateName::UPDATING;
 }
 
@@ -84,6 +86,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Resume(IN MediaInfo* pMediaInfo)
         // TODO
     }
 
+    delete pMediaInfo;
     return CallStateName::UPDATING;
 }
 
@@ -99,6 +102,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Update(
         // TODO
     }
 
+    delete pMediaInfo;
     return CallStateName::UPDATING;
 }
 
