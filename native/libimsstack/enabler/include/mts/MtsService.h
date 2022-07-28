@@ -25,7 +25,6 @@
 #include "ImsService.h"
 #include "IuMts.h"
 #include "IuMtsService.h"
-#include "MtsDef.h"
 
 class IImsAos;
 class JniMtsService;
@@ -41,7 +40,7 @@ class MtsService final :
 {
 public:
     MtsService(IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader);
-    ~MtsService();
+    virtual ~MtsService();
 
     // ICoreServiceListener
     void CoreService_PageMessageReceived(IN ICoreService* piService, IN IPageMessage* piMessage);
@@ -69,18 +68,18 @@ public:
     void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId) override;
     void SendMtResult(IN IMS_BOOL bMtResult) override;
-
     void ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsFormat,
-            IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId);
-    void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData);
+            IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId) override;
+    void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData) override;
+    ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const override;
+    void SetListener(IN IMtsServiceListener* piMtsServiceListener) override;
 
     void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType);
+    IMS_BOOL IsEpdgConnected();
+
+    // TODO: need to check if it is deprecated or not
     void IMSAoSApp_NotifySpecificMessage(
             IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam);
-    IMS_BOOL IsEpdgConnected();
-    ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const;
-    inline MtsDynamicLoader* GetMtsUtils() { return m_pMtsDynamicLoader; }
-    void SetListener(IN IMtsServiceListener* piMtsServiceListener);
 
 private:
     IMS_BOOL AttachJni();

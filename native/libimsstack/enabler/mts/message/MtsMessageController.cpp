@@ -35,8 +35,8 @@
 __IMS_TRACE_TAG_COM_SMS__;
 
 PUBLIC
-MtsMessageController::MtsMessageController(
-        IN IMS_SINT32 nSlotId, IN MtsService* pMtsService, IN MtsDynamicLoader* pMtsDynamicLoader) :
+MtsMessageController::MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService* piMtsService,
+        IN MtsDynamicLoader* pMtsDynamicLoader) :
         m_bProcessingMsg(IMS_FALSE),
         m_nCallTypeMsg(CALL_TYPE_CS),
         m_nCallStateMsg(CALL_STATE_IDLE),
@@ -45,12 +45,12 @@ MtsMessageController::MtsMessageController(
         m_objMsgList(IMSList<IMtsMessage*>()),
         m_objRPAckedMsgs(IMSList<IMtsMessage*>()),
         m_piMtsMessageControllerListener(IMS_NULL),
-        m_pMtsService(pMtsService),
+        m_piMtsService(piMtsService),
         m_pMtsDynamicLoader(pMtsDynamicLoader)
 {
     IMS_TRACE_I("+MtsMessageController [slot_%d]", m_nSlotId, 0, 0);
 
-    m_pMtsService->SetListener(this);
+    m_piMtsService->SetListener(this);
 }
 
 PUBLIC MtsMessageController::~MtsMessageController()
@@ -430,13 +430,13 @@ PUBLIC IMS_BOOL MtsMessageController::IsDeliverMessage(IN IPageMessage* piPageMe
 
 PUBLIC ICoreService* MtsMessageController::GetICoreService(IN IMS_BOOL bEmergency)
 {
-    if (m_pMtsService == IMS_NULL)
+    if (m_piMtsService == IMS_NULL)
     {
         IMS_TRACE_E(0, "m_piMtsService is NULL", 0, 0, 0);
         return IMS_NULL;
     }
 
-    return m_pMtsService->GetICoreService(bEmergency);
+    return m_piMtsService->GetICoreService(bEmergency);
 }
 
 PUBLIC MtsDynamicLoader* MtsMessageController::GetMtsUtils()
@@ -473,7 +473,7 @@ PUBLIC IMS_RESULT MtsMessageController::ReportMoStatus(IN IMS_UINT32 nReason,
 
     IMS_TRACE_I("ReportMoStatus :  %s", acLog, 0, 0);
 
-    m_pMtsService->ReportMoStatus(nReason, eSmsFormat, nRetryAfter, nSeqId);
+    m_piMtsService->ReportMoStatus(nReason, eSmsFormat, nRetryAfter, nSeqId);
 
     return IMS_SUCCESS;
 }
@@ -488,7 +488,7 @@ PUBLIC IMS_UINT32 MtsMessageController::ReportMtSms(
     strData.Attach(reinterpret_cast<const IMS_CHAR*>(pbySmsData), nSmsLength);
     ByteArray objData = strData.ToBase64();
 
-    m_pMtsService->ReportMtSms(eSmsFormat, objData);
+    m_piMtsService->ReportMtSms(eSmsFormat, objData);
 
     // TODO: Call back is being considered
 
@@ -503,9 +503,24 @@ PUBLIC void MtsMessageController::ReportTransmissionResult(
 
     IMS_UINT32 nResultCode = MO_INVALID;
 
-    if ((nResponse == SipStatusCode::SC_200) || (nResponse == SipStatusCode::SC_202))
+    // TODO: needs to convert from SIP ERROR to MO result code by each carrier's requirement
+    switch (nResponse)
     {
-        nResultCode = MO_SUCCESS;
+        case SipStatusCode::SC_200:
+        case SipStatusCode::SC_202:
+            nResultCode = MO_SUCCESS;
+            break;
+
+        case MO_IMS_PERM_FAILURE:
+        case MO_IMS_LIMITEDSMSSVCREGI:
+        case MO_RETRY_CS:
+        case MO_RETRY_CS_OR_SGS:
+            nResultCode = nResponse;
+            break;
+
+        default:
+            nResultCode = MO_IMS_TEMP_FAILURE;
+            break;
     }
 
     ReportMoStatus(nResultCode, eSmsFormat, 0, nSeqId);
@@ -588,7 +603,7 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
         return;
     }
 
-    ICoreService* pMtsICoreService = m_pMtsService->GetICoreService(bEmergency);
+    ICoreService* pMtsICoreService = m_piMtsService->GetICoreService(bEmergency);
     AString strImpu;
 
     if (pMtsICoreService != IMS_NULL)
@@ -659,7 +674,7 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
         return;
     }
 
-    ICoreService* pMtsICoreService = m_pMtsService->GetICoreService(bEmergency);
+    ICoreService* pMtsICoreService = m_piMtsService->GetICoreService(bEmergency);
 
     if (pMtsICoreService == IMS_NULL)
     {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_INTERFACE_MTS_SERVICE_LISTENER_H_
-#define MOCK_INTERFACE_MTS_SERVICE_LISTENER_H_
+#ifndef MOCK_I_MTS_SERVICE_LISTENER_H_
+#define MOCK_I_MTS_SERVICE_LISTENER_H_
 
 #include <gmock/gmock.h>
 #include "IMtsServiceListener.h"

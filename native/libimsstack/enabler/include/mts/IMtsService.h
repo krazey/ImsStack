@@ -17,18 +17,27 @@
 #ifndef INTERFACE_MTS_SERVICE_H_
 #define INTERFACE_MTS_SERVICE_H_
 
-#include "IuMtsService.h"
 #include "MtsDef.h"
 
 class JniMtsService;
+class ICoreService;
+class IMtsServiceListener;
 
 class IMtsService
 {
 public:
+    virtual ~IMtsService() {}
+
     virtual void SetJniMtsService(IN JniMtsService* pJniMtsService) = 0;
     virtual void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId) = 0;
     virtual void SendMtResult(IN IMS_BOOL bMtResult) = 0;
+
+    virtual ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const = 0;
+    virtual void ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsFormat,
+            IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId) = 0;
+    virtual void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData) = 0;
+    virtual void SetListener(IN IMtsServiceListener* piMtsServiceListener) = 0;
 };
 
 #endif

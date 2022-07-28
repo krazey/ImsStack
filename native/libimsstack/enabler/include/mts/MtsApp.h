@@ -52,7 +52,7 @@ public:
     // IMtsCallTrackerListener
     virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
 
-    inline MtsService* GetMtsService() { return m_pMtsService; }
+    inline IMtsService* GetMtsService() { return m_piMtsService; }
     inline MtsMessageController* GetMtsMessageController() { return m_pMtsMessageController; }
     inline MtsDynamicLoader* GetMtsDynamicLoader() { return m_pMtsDynamicLoader; }
     inline MtsServiceState* GetMtsServiceState() { return m_pMtsServiceState; }
@@ -67,7 +67,7 @@ private:
 
 private:
     IMS_SINT32 m_nSlotId;
-    MtsService* m_pMtsService;
+    IMtsService* m_piMtsService;
     MtsMessageController* m_pMtsMessageController;
     MtsDynamicLoader* m_pMtsDynamicLoader;
     MtsServiceState* m_pMtsServiceState;
