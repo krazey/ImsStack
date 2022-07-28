@@ -459,9 +459,8 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* eAudioDi
                 }
                 if (pNegotiatedAudioDescriptor == NULL)
                 {
-                    if (m_pAudioNego->NegotiateSDP(GetNegoState(), m_bForking,
-                                pSession->GetSessionDescriptor(), pDescriptor,
-                                (MEDIA_DIRECTION*)eAudioDir) == IMS_TRUE)
+                    if (m_pAudioNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
+                                pDescriptor, (MEDIA_DIRECTION*)eAudioDir) == IMS_TRUE)
                     {
                         pNegotiatedAudioDescriptor = pDescriptor;
                         errorReason = NO_ERROR;
