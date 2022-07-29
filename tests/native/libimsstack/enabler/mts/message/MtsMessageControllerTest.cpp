@@ -15,30 +15,34 @@
  */
 
 #include <gtest/gtest.h>
-#include "MtsService.h"
+#include "MockIMtsService.h"
 #include "core/IPageMessage.h"
 #include "message/MtsMessageController.h"
 #include "utility/MtsDynamicLoader.h"
+
+using ::testing::_;
 
 namespace android
 {
 
 const IMS_SINT32 SLOT_ID = 0;
+const IMS_SINT32 SEQ_ID = 1;
 
 class MtsMessageControllerTest : public ::testing::Test
 {
 public:
     MtsMessageController* pMtsMessageController;
     MtsDynamicLoader* pMtsDynamicLoader;
-    MtsService* pMtsService;
+    MockIMtsService* pMtsService;
 
 protected:
     virtual void SetUp() override
     {
         pMtsDynamicLoader = new MtsDynamicLoader(SLOT_ID);
         pMtsDynamicLoader->Initialize();
-        pMtsService = new MtsService(SLOT_ID, pMtsDynamicLoader);
-        pMtsMessageController = new MtsMessageController(SLOT_ID, pMtsService, pMtsDynamicLoader);
+        pMtsService = new MockIMtsService();
+        pMtsMessageController =
+                new MtsMessageController(SLOT_ID, pMtsService, pMtsDynamicLoader);
     }
 
     virtual void TearDown() override
@@ -52,6 +56,15 @@ protected:
 TEST_F(MtsMessageControllerTest, Constructor)
 {
     ASSERT_NE(pMtsMessageController, nullptr);
+}
+
+TEST_F(MtsMessageControllerTest, ReportTransmissionResult)
+{
+    EXPECT_CALL(*pMtsService,
+            ReportMoStatus(MO_IMS_TEMP_FAILURE, SmsFormatType::SMSFORMAT_3GPP, _, SEQ_ID))
+            .Times(1);
+    pMtsMessageController->ReportTransmissionResult(
+            SipStatusCode::SC_404, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID);
 }
 
 }  // namespace android

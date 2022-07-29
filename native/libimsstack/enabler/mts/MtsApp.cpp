@@ -41,7 +41,7 @@ PUBLIC
 MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
         ImsApp(MTS_APP_NAME),
         m_nSlotId(nSlotId),
-        m_pMtsService(IMS_NULL),
+        m_piMtsService(IMS_NULL),
         m_pMtsMessageController(IMS_NULL),
         m_pMtsDynamicLoader(IMS_NULL),
         m_pMtsServiceState(IMS_NULL),
@@ -60,10 +60,10 @@ PUBLIC MtsApp::~MtsApp()
     // Remove MtsUtils
     DestroyMtsUtils();
 
-    if (m_pMtsService != IMS_NULL)
+    if (m_piMtsService != IMS_NULL)
     {
-        delete m_pMtsService;
-        m_pMtsService = IMS_NULL;
+        delete m_piMtsService;
+        m_piMtsService = IMS_NULL;
     }
 
     if (m_pMtsMessageController != IMS_NULL)
@@ -162,13 +162,13 @@ PRIVATE void MtsApp::CreateMtsService()
         IMS_TRACE_E(0, "can't make CreateMtsService", 0, 0, 0);
     }
 
-    m_pMtsService = new MtsService(m_nSlotId, m_pMtsDynamicLoader);
+    m_piMtsService = new MtsService(m_nSlotId, m_pMtsDynamicLoader);
 }
 
 PRIVATE void MtsApp::CreateMtsMessageController()
 {
     m_pMtsMessageController =
-            new MtsMessageController(m_nSlotId, m_pMtsService, m_pMtsDynamicLoader);
+            new MtsMessageController(m_nSlotId, m_piMtsService, m_pMtsDynamicLoader);
 }
 
 PRIVATE void MtsApp::CreateMtsUtils()

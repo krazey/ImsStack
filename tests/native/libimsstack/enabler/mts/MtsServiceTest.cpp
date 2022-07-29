@@ -100,9 +100,9 @@ TEST_F(MtsServiceTest, CoreServiceCapabilityQueryReceivedDoesNothing)
 
 TEST_F(MtsServiceTest, ImsAosMonitorConnected)
 {
+    MtsServiceState* pMtsServiceState = pMtsDynamicLoader->GetMtsServiceState();
     pMtsService->ImsAosMonitor_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
-    EXPECT_TRUE(pMtsService->GetMtsUtils()->GetMtsServiceState()->IsServiceConnected(
-            ImsAosFeature::SMSIP));
+    EXPECT_TRUE(pMtsServiceState->IsServiceConnected(ImsAosFeature::SMSIP));
 }
 
 }  // namespace android

@@ -31,7 +31,7 @@ class MtsDynamicLoader;
 class MtsMessageController final : public ImsActivityEx, public IMtsServiceListener
 {
 public:
-    MtsMessageController(IN IMS_SINT32 nSlotID, IN MtsService* pMtsService,
+    MtsMessageController(IN IMS_SINT32 nSlotID, IN IMtsService* piMtsService,
             IN MtsDynamicLoader* pMtsDynamicLoader);
     ~MtsMessageController();
 
@@ -95,7 +95,7 @@ private:
     IMSList<IMtsMessage*> m_objMsgList;
     IMSList<IMtsMessage*> m_objRPAckedMsgs;
     IMtsMessageControllerListener* m_piMtsMessageControllerListener;
-    MtsService* m_pMtsService;
+    IMtsService* m_piMtsService;
     MtsDynamicLoader* m_pMtsDynamicLoader;
 };
 
