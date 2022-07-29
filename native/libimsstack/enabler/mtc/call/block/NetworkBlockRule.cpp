@@ -34,7 +34,7 @@ PUBLIC VIRTUAL NetworkBlockRule::~NetworkBlockRule() {}
 PUBLIC VIRTUAL NetworkBlockRule::Result NetworkBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-    if (IsInEpdg(m_objService) || IsWifiRegistered(m_objService.GetAosConnector()))
+    if (m_objService.IsWlanIpCanType() || m_objService.IsWifiRegistered())
     {
         return Result(Result::Status::UNBLOCKED);
     }
@@ -48,19 +48,4 @@ PUBLIC VIRTUAL NetworkBlockRule::Result NetworkBlockRule::Check(
     IMS_TRACE_I("Check : Network type[%d] is not applicable", nNetworkType, 0, 0);
 
     return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE));
-}
-
-PRIVATE
-IMS_BOOL NetworkBlockRule::IsInEpdg(IN const IMtcService& objService)
-{
-    return objService.IsWlanIpCanType();
-}
-
-PRIVATE
-IMS_BOOL NetworkBlockRule::IsWifiRegistered(IN IMtcAosConnector* pAosConnector)
-{
-    IMS_UINT32 nAosRegisteredNetworkType =
-            pAosConnector ? pAosConnector->GetRegisteredNetworkType() : NW_REPORT_RADIO_INVALID;
-
-    return nAosRegisteredNetworkType == NW_REPORT_RADIO_WLAN;
 }

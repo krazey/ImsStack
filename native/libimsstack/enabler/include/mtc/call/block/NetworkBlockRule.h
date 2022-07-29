@@ -36,9 +36,6 @@ public:
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    IMS_BOOL IsInEpdg(IN const IMtcService& objService);
-    IMS_BOOL IsWifiRegistered(IN IMtcAosConnector* pAosConnector);
-
     const IMtcService& m_objService;
     INetworkWatcher& m_objNetworkWatcher;
 };

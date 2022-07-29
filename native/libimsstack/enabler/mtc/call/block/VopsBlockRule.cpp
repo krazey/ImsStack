@@ -35,7 +35,7 @@ PUBLIC VIRTUAL VopsBlockRule::~VopsBlockRule() {}
 PUBLIC VIRTUAL VopsBlockRule::Result VopsBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-    if (m_objService.IsWlanIpCanType())
+    if (m_objService.IsWifiRegistered())
     {
         return Result(Result::Status::UNBLOCKED);
     }

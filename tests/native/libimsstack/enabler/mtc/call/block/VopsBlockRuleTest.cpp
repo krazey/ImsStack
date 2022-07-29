@@ -56,7 +56,7 @@ protected:
 
 TEST_F(VopsBlockRuleTest, CheckReturnsUnblockedForWfc)
 {
-    ON_CALL(objService, IsWlanIpCanType)
+    ON_CALL(objService, IsWifiRegistered)
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
@@ -69,7 +69,7 @@ TEST_F(VopsBlockRuleTest, CheckReturnsUnblockedForWfc)
 
 TEST_F(VopsBlockRuleTest, CheckReturnsUnblockedIfVopsSupported)
 {
-    ON_CALL(objService, IsWlanIpCanType)
+    ON_CALL(objService, IsWifiRegistered)
             .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
@@ -82,7 +82,7 @@ TEST_F(VopsBlockRuleTest, CheckReturnsUnblockedIfVopsSupported)
 
 TEST_F(VopsBlockRuleTest, CheckReturnsUnblockedIfVopsUnknown)
 {
-    ON_CALL(objService, IsWlanIpCanType)
+    ON_CALL(objService, IsWifiRegistered)
             .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
@@ -95,7 +95,7 @@ TEST_F(VopsBlockRuleTest, CheckReturnsUnblockedIfVopsUnknown)
 
 TEST_F(VopsBlockRuleTest, CheckReturnsBlockedIfVopsNotSupported)
 {
-    ON_CALL(objService, IsWlanIpCanType)
+    ON_CALL(objService, IsWifiRegistered)
             .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))

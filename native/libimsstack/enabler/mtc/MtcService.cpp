@@ -26,6 +26,7 @@
 #include "ImsServiceConfig.h"
 #include "IMtcCallController.h"
 #include "IMtcService.h"
+#include "INetworkWatcher.h"
 #include "IServiceFilterCriteria.h"
 #include "ISipRoutingRejectNotifier.h"
 #include "JniConnectorFactory.h"
@@ -123,6 +124,16 @@ PUBLIC VIRTUAL IMS_BOOL MtcService::IsWlanIpCanType() const
     }
 
     return m_pAosConnector->GetIpcanType() == IIpcan::CATEGORY_WLAN;
+}
+
+PUBLIC VIRTUAL IMS_BOOL MtcService::IsWifiRegistered() const
+{
+    if (m_pAosConnector == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    return m_pAosConnector->GetRegisteredNetworkType() == NW_REPORT_RADIO_WLAN;
 }
 
 PUBLIC VIRTUAL void MtcService::UpdateSrvccState(IN SrvccState eState)

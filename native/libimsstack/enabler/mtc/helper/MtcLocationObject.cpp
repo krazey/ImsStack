@@ -20,7 +20,6 @@
 #include "GeolocationPidfCreator.h"
 #include "IMessage.h"
 #include "IMessageBodyPart.h"
-#include "INetworkWatcher.h"
 #include "ISipMessage.h"
 #include "ISubscriberConfig.h"
 #include "ServiceTrace.h"
@@ -66,15 +65,6 @@ LOCAL IMS_SINT32 GetGeolocationPidfAllowedType(IN IMS_BOOL bEmergency, IN IMS_BO
     }
 }
 
-LOCAL
-IMS_BOOL IsWifiRegistered(IN IMtcAosConnector* pAosConnector)
-{
-    IMS_UINT32 nAosRegisteredNetworkType =
-            pAosConnector ? pAosConnector->GetRegisteredNetworkType() : NW_REPORT_RADIO_INVALID;
-
-    return nAosRegisteredNetworkType == NW_REPORT_RADIO_WLAN;
-}
-
 PUBLIC
 MtcLocationObject::MtcLocationObject(IN IMtcCallContext& objContext) :
         m_objContext(objContext)
@@ -85,8 +75,8 @@ PUBLIC MtcLocationObject::~MtcLocationObject() {}
 
 PUBLIC GLOBAL IMS_BOOL MtcLocationObject::IsGeolocationInfoRequired(IN IMtcCallContext& objContext)
 {
-    IMS_SINT32 nType = GetGeolocationPidfAllowedType(objContext.GetCallInfo().bEmergency,
-            IsWifiRegistered(objContext.GetService().GetAosConnector()));
+    IMS_SINT32 nType = GetGeolocationPidfAllowedType(
+            objContext.GetCallInfo().bEmergency, objContext.GetService().IsWifiRegistered());
 
     return objContext.GetConfigurationProxy().Is(
             Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE, nType);
@@ -166,7 +156,7 @@ IMS_SINT32 MtcLocationObject::GetInformationLevel() const
 {
     return m_objContext.GetConfigurationProxy().GetInt(
             Feature::INFORMATION_LEVEL_OF_GEOLOCATION_PIDF, m_objContext.GetCallInfo().bEmergency,
-            IsWifiRegistered(m_objContext.GetService().GetAosConnector()));
+            m_objContext.GetService().IsWifiRegistered());
 }
 
 PRIVATE

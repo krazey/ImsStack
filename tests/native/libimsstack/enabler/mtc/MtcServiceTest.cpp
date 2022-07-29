@@ -192,6 +192,11 @@ TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalse)
     EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
 }
 
+TEST_F(MtcServiceTest, IsWifiRegisteredReturnsFalseIfAosNotConnected)
+{
+    EXPECT_EQ(pNormalMtcService->IsWifiRegistered(), IMS_FALSE);
+}
+
 TEST_F(MtcServiceTest, GetServiceStatusReturnsActiveAfterAosConnected)
 {
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);

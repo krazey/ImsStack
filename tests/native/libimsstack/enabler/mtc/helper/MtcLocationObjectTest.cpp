@@ -22,7 +22,6 @@
 #include "call/MockIMtcCallContext.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "helper/MockIMtcAosConnector.h"
 #include "helper/MtcLocationObject.h"
 
 using ::testing::Return;
@@ -33,7 +32,6 @@ class MtcLocationObjectTest : public ::testing::Test
 public:
     MockIMtcCallContext objContext;
     MockIMtcService objService;
-    MockIMtcAosConnector objAosConnector;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
     CallInfo objCallInfo;
@@ -77,10 +75,8 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiNorma
 
     objCallInfo.bEmergency = IMS_FALSE;
 
-    ON_CALL(objAosConnector, GetRegisteredNetworkType)
-            .WillByDefault(Return(NW_REPORT_RADIO_WLAN));
-    ON_CALL(objService, GetAosConnector())
-            .WillByDefault(Return(&objAosConnector));
+    ON_CALL(objService, IsWifiRegistered)
+            .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
@@ -95,10 +91,8 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiEmerg
 
     objCallInfo.bEmergency = IMS_TRUE;
 
-    ON_CALL(objAosConnector, GetRegisteredNetworkType)
-            .WillByDefault(Return(NW_REPORT_RADIO_WLAN));
-    ON_CALL(objService, GetAosConnector())
-            .WillByDefault(Return(&objAosConnector));
+    ON_CALL(objService, IsWifiRegistered)
+            .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
@@ -113,10 +107,8 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularN
 
     objCallInfo.bEmergency = IMS_FALSE;
 
-    ON_CALL(objAosConnector, GetRegisteredNetworkType)
-            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
-    ON_CALL(objService, GetAosConnector())
-            .WillByDefault(Return(&objAosConnector));
+    ON_CALL(objService, IsWifiRegistered)
+            .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
@@ -131,10 +123,8 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularE
 
     objCallInfo.bEmergency = IMS_TRUE;
 
-    ON_CALL(objAosConnector, GetRegisteredNetworkType)
-            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
-    ON_CALL(objService, GetAosConnector())
-            .WillByDefault(Return(&objAosConnector));
+    ON_CALL(objService, IsWifiRegistered)
+            .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }

@@ -68,7 +68,6 @@ private:
     IMS_BOOL IsNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const;
     IMS_BOOL IsIpcanResourceUnavailable(IN const IMessage& objMessage) const;
     IMS_BOOL HasEmergencyServiceTypeInBody(IN const IMessage& objMessage) const;
-    IMS_BOOL IsWifiRegistered() const;
 
     void ControlAos(IMS_UINT32 nCommand) const;
     AString GetPathHeader() const;

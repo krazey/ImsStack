@@ -21,7 +21,6 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/block/MockIMtcBlockRule.h"
 #include "call/block/NetworkBlockRule.h"
-#include "helper/MockIMtcAosConnector.h"
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -65,13 +64,8 @@ TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfWifiRegistered)
 {
     ON_CALL(objService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_FALSE));
-
-    MockIMtcAosConnector objAosConnector;
-    ON_CALL(objAosConnector, GetRegisteredNetworkType)
-            .WillByDefault(Return(NW_REPORT_RADIO_WLAN));
-
-    ON_CALL(objService, GetAosConnector)
-            .WillByDefault(Return(&objAosConnector));
+    ON_CALL(objService, IsWifiRegistered)
+            .WillByDefault(Return(IMS_TRUE));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -82,9 +76,8 @@ TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfLte)
 {
     ON_CALL(objService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_FALSE));
-
-    ON_CALL(objService, GetAosConnector)
-            .WillByDefault(Return(nullptr));
+    ON_CALL(objService, IsWifiRegistered)
+            .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objNetworkWatcher, GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_LTE));
@@ -98,9 +91,8 @@ TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfNr)
 {
     ON_CALL(objService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_FALSE));
-
-    ON_CALL(objService, GetAosConnector)
-            .WillByDefault(Return(nullptr));
+    ON_CALL(objService, IsWifiRegistered)
+            .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objNetworkWatcher, GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_NR));
@@ -113,6 +105,8 @@ TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfNr)
 TEST_F(NetworkBlockRuleTest, CheckReturnsBlockedIfNotSupportedNetwork)
 {
     ON_CALL(objService, IsWlanIpCanType)
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsWifiRegistered)
             .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objService, GetAosConnector)
