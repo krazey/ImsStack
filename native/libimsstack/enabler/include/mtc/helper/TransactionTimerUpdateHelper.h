@@ -20,12 +20,12 @@
 #include "IMSTypeDef.h"
 
 class MtcConfigurationProxy;
+class IMtcSessionContext;
 
 class TransactionTimerUpdateHelper
 {
 public:
-    explicit TransactionTimerUpdateHelper(
-            IN IMS_SINT32 nSlotId, IN MtcConfigurationProxy& objConfiguration);
+    explicit TransactionTimerUpdateHelper(IN IMtcSessionContext& objContext);
     virtual ~TransactionTimerUpdateHelper();
     TransactionTimerUpdateHelper(IN const TransactionTimerUpdateHelper&) = delete;
     TransactionTimerUpdateHelper& operator=(IN const TransactionTimerUpdateHelper&) = delete;
@@ -37,9 +37,11 @@ public:
 
 private:
     void UpdateTimer(IN IMS_BOOL bInviteTransaction, IN IMS_SINT32 nValue);
+    IMS_BOOL IsNeedToUpdate() const;
 
     IMS_SINT32 m_nSlotId;
     MtcConfigurationProxy& m_objConfiguration;
+    IMS_BOOL m_bWifi;
 };
 
 #endif

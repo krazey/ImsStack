@@ -337,7 +337,8 @@ CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
         return CallStateName::TERMINATING;
     }
 
-    StartTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
 
     return CallStateName::OUTGOING;
 }
@@ -366,7 +367,8 @@ CallStateName IdleState::ContinueConference(
         return CallStateName::TERMINATING;
     }
 
-    StartTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
 
     return CallStateName::OUTGOING;
 }
@@ -411,7 +413,8 @@ CallStateName IdleState::ContinueStartUssi(IN MediaInfo* pMediaInfo)
         return CallStateName::TERMINATING;
     }
 
-    StartTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
     return CallStateName::OUTGOING;
 }
 

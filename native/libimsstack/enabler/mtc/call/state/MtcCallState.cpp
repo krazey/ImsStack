@@ -849,7 +849,10 @@ IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
     Feature eFeature = Feature::UNKNOWN;
     switch (nType)
     {
-        case TIMER_MO_1XX_WAIT:
+        case TIMER_MO_100_WAIT:
+            eFeature = bNormal ? Feature::MO_CALL_REQUEST_TIMEOUT : Feature::EMERGENCY_T_CALL_TIMER;
+            break;
+        case TIMER_MO_18X_WAIT:
             eFeature = bNormal ? Feature::TIMER_18X : Feature::EMERGENCY_18X_TIMER;
             break;
         case TIMER_MO_NOANSWER:
