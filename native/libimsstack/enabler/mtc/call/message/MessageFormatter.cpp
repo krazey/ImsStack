@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "call/extension/MtcExtensionSet.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcSessionContext.h"
 #include "call/message/MessageFormatter.h"
@@ -79,8 +78,6 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormStartMessage()
     // SetKeepAliveProfile();
     SetCallerIdHeader();
     // SetTipHeader();
-    SetSupportedHeader();
-    SetPreconditionHeader();
     SetPEarlyMediaHeader();
     SetCarrierSpecificHeaders();
 
@@ -104,7 +101,6 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormProvisionalResponseMessage(
     }
 
     SetAlertInfoHeader(bIncludeAlertInfo);
-    SetPreconditionHeader();
     AddSrvccFeature();
     // SetTipHeader();
 
@@ -138,8 +134,6 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormPrackResponseMessage()
         return IMS_FAILURE;
     }
 
-    SetPreconditionHeader();
-
     return IMS_SUCCESS;
 }
 
@@ -155,7 +149,6 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormEarlyUpdateMessage(IN UpdateType
     AString strReason;
     GetUpdateReason(eUpdateType, strReason);
     SetReasonHeader(strReason);
-    SetPreconditionHeader();
 
     return IMS_SUCCESS;
 }
@@ -169,8 +162,6 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormEarlyUpdateResponseMessage()
         return IMS_FAILURE;
     }
 
-    SetPreconditionHeader();
-
     return IMS_SUCCESS;
 }
 
@@ -183,7 +174,6 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAcceptMessage()
         return IMS_FAILURE;
     }
 
-    SetPreconditionHeader();
     SetSrvccContactParameter();
     // SetTipHeader();
     SetCarrierSpecificHeaders();
@@ -246,8 +236,6 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormUpdateMessage(
     GetUpdateReason(eUpdateType, strReason);
     SetReasonHeader(strReason);
     SetAlertInfoHeader(bIncludeAlertInfo);
-    SetSupportedHeader();
-    SetPreconditionHeader();
     SetCarrierSpecificHeaders();
 
     return IMS_SUCCESS;
@@ -262,7 +250,6 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAcceptUpdateMessage()
         return IMS_FAILURE;
     }
 
-    SetPreconditionHeader();
     SetCarrierSpecificHeaders();
 
     return IMS_SUCCESS;
@@ -576,89 +563,6 @@ void MessageFormatter::SetCallerIdHeader()
 //         MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_NONE, ISipHeader::PRIVACY);
 //     }
 // }
-
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
-PRIVATE
-void MessageFormatter::SetSupportedHeader()
-{
-    MessageUtil::AddValueIfNotExists(m_piNextMessage, Sip::STR_100REL, ISipHeader::SUPPORTED);
-
-    if (m_eFormType != FormType::START)
-    {
-        return;
-    }
-
-    MessageUtil::AddValueIfNotExists(m_piNextMessage, MessageUtil::STR_199, ISipHeader::SUPPORTED);
-
-    // IMS_BOOL bHistoryInfo = IMS_FALSE;  // TODO
-    // if (bHistoryInfo)
-    // {
-    //     MessageUtil::AddValueIfNotExists(
-    //             m_piNextMessage, MessageUtil::STR_HISTINFO, ISipHeader::SUPPORTED);
-    // }
-}
-
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
-PRIVATE
-void MessageFormatter::SetPreconditionHeader()
-{
-    if (m_eFormType != FormType::START &&
-            !m_objContext.GetExtensionSet().IsAvailableOnBoth(
-                    MtcExtensionSet::OPTION_TAG_PRECONDITION))
-    {
-        return;
-    }
-
-    IMS_BOOL bInclude = IMS_FALSE;
-    IMS_SINT32 eHeaderType = ISipHeader::SUPPORTED;
-
-    switch (m_eFormType)
-    {
-        case FormType::START:
-        {
-            bInclude = m_objContext.GetExtensionSet().IsAvailableOnLocal(
-                    MtcExtensionSet::OPTION_TAG_PRECONDITION);
-        }
-        break;
-        case FormType::EARLY_UPDATE:
-        {
-            bInclude = IMS_TRUE;
-            eHeaderType = ISipHeader::REQUIRE;  // TODO, B_SEND_UPDATE_WITH_REQUIRE_PRECONDITION
-        }
-        break;
-        case FormType::UPDATE:
-        {
-            bInclude = IMS_TRUE;  // TODO, B_PRECONDITION_SUPPORTED_IN_REINVITE
-        }
-        break;
-        case FormType::PROVISIONAL_RESPONSE:   // FALL_THROUGH
-        case FormType::PRACK_RESPONSE:         // FALL_THROUGH
-        case FormType::EARLY_UPDATE_RESPONSE:  // FALL_THROUGH
-        case FormType::ACCEPT:
-        {
-            bInclude = IMS_TRUE;
-            eHeaderType = ISipHeader::REQUIRE;
-        }
-        break;
-        case FormType::ACCEPT_UPDATE:
-        {
-            bInclude = IMS_TRUE;  // TODO, check condition
-            eHeaderType = ISipHeader::REQUIRE;
-        }
-        break;
-        default:
-            break;
-    }
-
-    if (!bInclude)
-    {
-        return;
-    }
-
-    MessageUtil::AddValueIfNotExists(m_piNextMessage, MessageUtil::STR_PRECONDITION, eHeaderType);
-}
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */

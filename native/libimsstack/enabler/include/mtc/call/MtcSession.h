@@ -66,8 +66,8 @@ public:
     IMS_RESULT CancelUpdate(IN const CallReasonInfo& objReason) override;
     IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason) override;
 
-    void HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest) override;
-    void HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse) override;
+    void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
+    void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 
     inline void SetCallType(IN CallType eCallType) override { m_eCallType = eCallType; }
     inline CallType GetCallType() const override { return m_eCallType; }

@@ -19,7 +19,7 @@
 
 #include "AString.h"
 #include "ImsMap.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "call/message/IMtcMessageHandler.h"
 
 class IMtcExtension;
@@ -28,7 +28,7 @@ class IMtcExtension;
  * Holds a set of extensions supported by the local.
  * It provides the methods to inspect if they are available in the call.
  */
-class MtcExtensionSet final : public IMtcMessageHandler
+class MtcExtensionSet final : public IMtcMessageFormatter, public IMtcMessageHandler
 {
 public:
     static const AString OPTION_TAG_EARLY_DIALOG_TERMINATED;
@@ -38,7 +38,6 @@ public:
     static const AString OPTION_TAG_REPLACES;
     static const AString OPTION_TAG_RPR;
     static const AString OPTION_TAG_TARGET_DIALOG;
-    static const AString OPTION_TAG_TIMER;
 
     explicit MtcExtensionSet(IN const ImsList<IMtcExtension*>& lstExtensions);
     explicit MtcExtensionSet(IN const MtcExtensionSet& objRhs);
@@ -77,17 +76,17 @@ public:
      */
     IMS_BOOL IsSupportRequiredExtensions(IN const IMessage& objMessage) const;
 
-    void FormatRequest(IN IMS_UINT32 nMethod, IN_OUT IMessage& objRequest) override;
-    void FormatResponse(IN IMS_UINT32 nMethod, IN_OUT IMessage& objResponse) override;
-    void HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest) override;
-    void HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse) override;
+    void FormatRequest(IN RequestType eType, IN_OUT IMessage& objRequest) override;
+    void FormatResponse(IN ResponseType eType, IN_OUT IMessage& objResponse) override;
+    void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
+    void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 
 private:
     void CopyFrom(IN const MtcExtensionSet& objRhs);
     void Clear();
     IMtcExtension* CreateExtension(IN const AString& strOptionTag) const;
 
-    IMSMap<AString, IMtcExtension*> m_objExtensions;
+    ImsMap<AString, IMtcExtension*> m_objExtensions;
 };
 
 #endif

@@ -135,7 +135,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
 
-    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_UPDATE, *piMessage);
+    m_objContext.GetSession()->HandleRequest(RequestType::UPDATE, *piMessage);
     m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
     m_objContext.GetUpdatingInfo().SetTargetCallType(
             MessageUtil::GetCallType(piMessage, piSession, IMS_TRUE));

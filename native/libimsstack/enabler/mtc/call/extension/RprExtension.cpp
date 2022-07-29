@@ -15,9 +15,11 @@
  */
 
 #include "IMessage.h"
+#include "ISipHeader.h"
 #include "ServiceTrace.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/RprExtension.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -40,24 +42,33 @@ PUBLIC VIRTUAL IMtcExtension* RprExtension::Clone() const
     return new RprExtension(*this);
 }
 
-PUBLIC VIRTUAL void RprExtension::HandleRequest(
-        IN IMS_UINT32 nMethod, IN const IMessage& objRequest)
+PUBLIC VIRTUAL void RprExtension::FormatRequest(IN RequestType eType, IN_OUT IMessage& objRequest)
 {
-    if (nMethod != IMessage::SESSION_START)
+    if (eType != RequestType::START && eType != RequestType::UPDATE)
     {
         return;
     }
 
-    MtcExtension::HandleRequest(nMethod, objRequest);
+    MessageUtil::AddValueIfNotExists(&objRequest, GetOptionTag(), ISipHeader::SUPPORTED);
+}
+
+PUBLIC VIRTUAL void RprExtension::HandleRequest(IN RequestType eType, IN const IMessage& objRequest)
+{
+    if (eType != RequestType::START)
+    {
+        return;
+    }
+
+    MtcExtension::HandleRequest(eType, objRequest);
 }
 
 PUBLIC VIRTUAL void RprExtension::HandleResponse(
-        IN IMS_UINT32 nMethod, IN const IMessage& objResponse)
+        IN ResponseType eType, IN const IMessage& objResponse)
 {
-    if (nMethod != IMessage::SESSION_START)
+    if (eType != ResponseType::PROVISIONAL_RESPONSE)
     {
         return;
     }
 
-    MtcExtension::HandleResponse(nMethod, objResponse);
+    MtcExtension::HandleResponse(eType, objResponse);
 }

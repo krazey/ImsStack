@@ -19,6 +19,7 @@
 
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
+#include "call/message/IMtcMessageHandler.h"
 
 class IMessage;
 class ISession;
@@ -26,7 +27,7 @@ class MessageSender;
 class MtcExtensionSet;
 struct CallReasonInfo;
 
-class IMtcSession
+class IMtcSession : public IMtcMessageHandler
 {
 public:
     virtual ~IMtcSession() {}
@@ -46,8 +47,8 @@ public:
     virtual IMS_RESULT CancelUpdate(IN const CallReasonInfo& objReason) = 0;
     virtual IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason) = 0;
 
-    virtual void HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest) = 0;
-    virtual void HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse) = 0;
+    void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
+    void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 
     virtual void SetCallType(IN CallType eCallType) = 0;
     virtual CallType GetCallType() const = 0;

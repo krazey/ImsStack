@@ -31,8 +31,10 @@ class RprExtensionTest : public ::testing::Test
 public:
     RprExtension* pExtension;
 
+    MockISipMessage objSipMessage;
     MockISipMessage objSipMessageRequiresRpr;
     MockISipMessage objSipMessageSupportsRpr;
+    MockIMessage objMessage;
     MockIMessage objMessageRequiresRpr;
     MockIMessage objMessageSupportsRpr;
 
@@ -40,6 +42,9 @@ protected:
     virtual void SetUp() override
     {
         pExtension = new RprExtension();
+
+        ON_CALL(objMessage, GetMessage)
+                .WillByDefault(Return(&objSipMessage));
 
         InitMessageRequiresOptionTag(MtcExtensionSet::OPTION_TAG_RPR);
         InitMessageSupportsOptionTag(MtcExtensionSet::OPTION_TAG_RPR);
@@ -102,84 +107,108 @@ TEST_F(RprExtensionTest, GetOptionTag)
             pExtension->GetOptionTag().GetStr());
 }
 
-TEST_F(RprExtensionTest, HandleRequestForSomeMethodDoNothing)
+TEST_F(RprExtensionTest, FormatRequestForSomeMessageDoesNothing)
 {
-    pExtension->HandleRequest(IMessage::SESSION_UPDATE, objMessageRequiresRpr);
+    EXPECT_CALL(objSipMessage, AddHeader(_, _, _))
+            .Times(0);
+
+    pExtension->FormatRequest(RequestType::PRACK, objMessage);
+    pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);
+    pExtension->FormatRequest(RequestType::ACK, objMessage);
+    pExtension->FormatRequest(RequestType::CANCEL_UPDATE, objMessage);
+    pExtension->FormatRequest(RequestType::TERMINATE, objMessage);
+}
+
+TEST_F(RprExtensionTest, FormatRequestForStartMessageSetsSupportedHeader)
+{
+    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, pExtension->GetOptionTag(), _))
+            .Times(1);
+
+    pExtension->FormatRequest(RequestType::START, objMessage);
+}
+
+TEST_F(RprExtensionTest, FormatRequestForUpdateMessageSetsSupportedHeader)
+{
+    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, pExtension->GetOptionTag(), _))
+            .Times(1);
+
+    pExtension->FormatRequest(RequestType::UPDATE, objMessage);
+}
+
+TEST_F(RprExtensionTest, HandleRequestForSomeMessageDoesNothing)
+{
+    pExtension->HandleRequest(RequestType::PRACK, objMessageRequiresRpr);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 
-    pExtension->HandleRequest(IMessage::SESSION_TERMINATE, objMessageRequiresRpr);
+    pExtension->HandleRequest(RequestType::EARLY_UPDATE, objMessageRequiresRpr);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 
-    pExtension->HandleRequest(IMessage::SESSION_ACK, objMessageRequiresRpr);
+    pExtension->HandleRequest(RequestType::ACK, objMessageRequiresRpr);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 
-    pExtension->HandleRequest(IMessage::SESSION_PRACK, objMessageRequiresRpr);
+    pExtension->HandleRequest(RequestType::UPDATE, objMessageRequiresRpr);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 
-    pExtension->HandleRequest(IMessage::SESSION_EARLY_UPDATE, objMessageRequiresRpr);
+    pExtension->HandleRequest(RequestType::CANCEL_UPDATE, objMessageRequiresRpr);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 
-    pExtension->HandleRequest(IMessage::SESSION_CANCEL, objMessageRequiresRpr);
+    pExtension->HandleRequest(RequestType::TERMINATE, objMessageRequiresRpr);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
 
 TEST_F(RprExtensionTest, HandleRequestForRequiringStartMessageUpdatesAvailability)
 {
-    pExtension->HandleRequest(IMessage::SESSION_START, objMessageRequiresRpr);
+    pExtension->HandleRequest(RequestType::START, objMessageRequiresRpr);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_TRUE(pExtension->IsRequiredOnRemote());
 }
 
 TEST_F(RprExtensionTest, HandleRequestForSupportingStartMessageUpdatesAvailability)
 {
-    pExtension->HandleRequest(IMessage::SESSION_START, objMessageSupportsRpr);
+    pExtension->HandleRequest(RequestType::START, objMessageSupportsRpr);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
 
-TEST_F(RprExtensionTest, HandleResponseForSomeMethodDoNothing)
+TEST_F(RprExtensionTest, HandleResponseForSomeMessageDoesNothing)
 {
-    pExtension->HandleResponse(IMessage::SESSION_UPDATE, objMessageRequiresRpr);
+    pExtension->HandleResponse(ResponseType::PRACK_RESPONSE, objMessageRequiresRpr);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 
-    pExtension->HandleResponse(IMessage::SESSION_TERMINATE, objMessageRequiresRpr);
+    pExtension->HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, objMessageRequiresRpr);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 
-    pExtension->HandleResponse(IMessage::SESSION_ACK, objMessageRequiresRpr);
+    pExtension->HandleResponse(ResponseType::ACCEPT, objMessageRequiresRpr);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 
-    pExtension->HandleResponse(IMessage::SESSION_PRACK, objMessageRequiresRpr);
+    pExtension->HandleResponse(ResponseType::REJECT, objMessageRequiresRpr);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 
-    pExtension->HandleResponse(IMessage::SESSION_EARLY_UPDATE, objMessageRequiresRpr);
-    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
-    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
-
-    pExtension->HandleResponse(IMessage::SESSION_CANCEL, objMessageRequiresRpr);
+    pExtension->HandleResponse(ResponseType::ACCEPT_UPDATE, objMessageRequiresRpr);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
 
 TEST_F(RprExtensionTest, HandleResponseForRequiringStartMessageUpdatesAvailability)
 {
-    pExtension->HandleResponse(IMessage::SESSION_START, objMessageRequiresRpr);
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageRequiresRpr);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_TRUE(pExtension->IsRequiredOnRemote());
 }
 
 TEST_F(RprExtensionTest, HandleResponseForSupportingStartMessageUpdatesAvailability)
 {
-    pExtension->HandleResponse(IMessage::SESSION_START, objMessageSupportsRpr);
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageSupportsRpr);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }

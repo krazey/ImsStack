@@ -35,8 +35,9 @@ public:
 
     IMtcExtension* Clone() const override;
 
-    void HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest) override;
-    void HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse) override;
+    void FormatRequest(IN RequestType eType, IN_OUT IMessage& objRequest) override;
+    void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
+    void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 };
 
 #endif

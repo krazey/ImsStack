@@ -86,8 +86,6 @@ private:
     // void SetKeepAliveProfile();
     void SetCallerIdHeader();
     // void SetTipHeader();
-    void SetSupportedHeader();
-    void SetPreconditionHeader();
     void SetPEarlyMediaHeader();
     void SetAlertInfoHeader(IN IMS_BOOL bIncludeAlertInfo);
     void SetReasonHeader(IN const AString& strReason);

@@ -333,7 +333,7 @@ TEST_F(ParticipantInfoTest, HandleRequestDoNothingIfNotStartMethod)
     const AString strInitialRemoteNumber = pParticipantInfo->GetRemoteNumber();
 
     MockIMessage objMessage;
-    pParticipantInfo->HandleRequest(IMessage::SESSION_PRACK, objMessage);
+    pParticipantInfo->HandleRequest(RequestType::PRACK, objMessage);
 
     EXPECT_EQ(strInitialRemoteNumber, pParticipantInfo->GetRemoteNumber());
 }
