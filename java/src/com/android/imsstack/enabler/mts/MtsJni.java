@@ -27,7 +27,7 @@ import com.android.imsstack.jni.JNIIms;
 import com.android.imsstack.jni.JNIImsListener;
 import com.android.imsstack.util.ImsLog;
 
-import com.android.internal.annotations.VisibleForTesting;
+import java.util.HashMap;
 
 public class MtsJni {
     /* JNI Message */
@@ -49,8 +49,9 @@ public class MtsJni {
     protected Handler mHandler = null;
 
     private static MtsJni mMtsJni = null;
-    private long mNativeObj = 0;
-    private MtsJniImsListener mNativeListener = new MtsJniImsListener();
+    private HashMap<Integer, MtsJniImsListener> mMtsJniImsListenerMap =
+            new HashMap<Integer, MtsJniImsListener>();
+    private HashMap<Integer, Long> mNativeObjMap = new HashMap<Integer, Long>();
 
     static public MtsJni getInstance() {
         synchronized (MtsJni.class) {
@@ -62,31 +63,38 @@ public class MtsJni {
     }
 
     public void init(Handler handler, int slotId) {
-        mNativeObj = JNIIms.getInterface(IUIMS.APP_MTS, slotId);
-        ImsLog.d("mNativeObj (" + mNativeObj + ")");
-
-        if (mNativeObj == 0) {
-            throw new IllegalStateException("mNativeObj is zero");
+        ImsLog.d(slotId, "");
+        if (!mMtsJniImsListenerMap.containsKey(slotId)) {
+            long nativeObj = JNIIms.getInterface(IUIMS.APP_MTS, slotId);
+            ImsLog.i(slotId, "mNativeObj: " + nativeObj);
+            mNativeObjMap.put(slotId, nativeObj);
+            mMtsJniImsListenerMap.put(slotId, new MtsJniImsListener());
+            JNIIms.setListener(nativeObj, mMtsJniImsListenerMap.get(slotId));
         }
-
-        JNIIms.setListener(mNativeObj, mNativeListener);
-
         mHandler = handler;
     }
 
-    public void release() {
-        ImsLog.d("");
+    public void release(int slotId) {
+        ImsLog.d(slotId, "");
 
-        if (mNativeObj != 0) {
-            JNIIms.removeListener(mNativeObj, mNativeListener);
-            JNIIms.releaseInterface(mNativeObj);
-            mNativeObj = 0;
+        if (mMtsJniImsListenerMap.containsKey(slotId)) {
+            MtsJniImsListener mMtsJniImsListener = mMtsJniImsListenerMap.get(slotId);
+            long nativeObj = mNativeObjMap.get(slotId);
+            ImsLog.i(slotId, "mNativeObj: " + nativeObj);
+            JNIIms.releaseInterface(nativeObj);
+            JNIIms.removeListener(nativeObj, mMtsJniImsListener);
         }
 
-        mHandler = null;
+        mNativeObjMap.remove(slotId);
+        mMtsJniImsListenerMap.remove(slotId);
+
+        if (mMtsJniImsListenerMap.isEmpty() && mNativeObjMap.isEmpty()) {
+            mHandler = null;
+        }
     }
 
-    public void sendMessage(Parcel parcel) {
+    public void sendMessage(Parcel parcel, int slotId) {
+        ImsLog.d(slotId, "");
         if (parcel == null) {
             ImsLog.i("parcel is null");
             return;
@@ -94,7 +102,9 @@ public class MtsJni {
         ImsLog.i("send Message to native.");
         byte[] baData = parcel.marshall();
 
-        JNIIms.sendData(mNativeObj, baData);
+        if (mNativeObjMap.containsKey(slotId)) {
+            JNIIms.sendData(mNativeObjMap.get(slotId), baData);
+        }
 
         parcel.recycle();
         parcel = null;

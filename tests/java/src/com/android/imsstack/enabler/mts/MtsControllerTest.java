@@ -16,6 +16,9 @@
 
 package com.android.imsstack.enabler.mts;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,18 +29,13 @@ import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mts.MtsJni;
 import com.android.imsstack.util.ImsLog;
 
-import org.junit.Before;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -68,12 +66,12 @@ public class MtsControllerTest {
         };
 
         @Override
-        public void release() {
+        public void release(int slotId) {
             mHandler = null;
         };
 
         @Override
-        public void sendMessage(Parcel parcel) {
+        public void sendMessage(Parcel parcel, int slotId) {
             if (parcel == null) {
                 ImsLog.i("parcel is null");
                 return;
@@ -101,7 +99,7 @@ public class MtsControllerTest {
 
     @After
     public void tearDown() {
-        mMtsJni.release();
+        mMtsJni.release(0);
         mMtsController.cleanup();
     }
 

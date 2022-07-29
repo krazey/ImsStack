@@ -125,7 +125,7 @@ public class MtsController {
     public void cleanup() {
         ImsLog.d("");
 
-        mMtsJni.release();
+        mMtsJni.release(mContext.getSlotId());
 
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
@@ -178,7 +178,7 @@ public class MtsController {
         parcel.writeString(smsData);
         parcel.writeString(targetAddress);
         parcel.writeInt(seqId);
-        mMtsJni.sendMessage(parcel);
+        mMtsJni.sendMessage(parcel, mContext.getSlotId());
         return true;
     }
 
@@ -211,7 +211,7 @@ public class MtsController {
         parcel.writeString(smsData);
         parcel.writeString(targetAddress);
         parcel.writeInt(seqId);
-        mMtsJni.sendMessage(parcel);
+        mMtsJni.sendMessage(parcel, mContext.getSlotId());
         return true;
     }
 
@@ -244,7 +244,7 @@ public class MtsController {
 
         parcel.writeInt(MtsJni.NOTI_MTSENABLER_SEND_MT_RESULT);
         parcel.writeInt(mtResult);
-        mMtsJni.sendMessage(parcel);
+        mMtsJni.sendMessage(parcel, mContext.getSlotId());
         return 0;
     }
 
