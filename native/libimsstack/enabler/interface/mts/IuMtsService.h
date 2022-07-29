@@ -28,4 +28,11 @@ public:
     static const IMS_UINT32 REQUEST_MTS_EXIT_RAT_SELECTION  = MTSENABLER2JAVA + 11;
 };
 
+enum
+{
+    SMSFORMAT_3GPP = 1,
+    SMSFORMAT_3GPP2 = 2,
+    SMSFORMAT_INVALID = 3,
+};
+
 #endif

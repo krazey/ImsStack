@@ -469,7 +469,7 @@ PUBLIC IMS_RESULT MtsMessageController::ReportMoStatus(IN IMS_UINT32 nReason,
 {
     IMS_CHAR acLog[128 + 1] = { 0, };
     IMS_Sprintf(acLog, 128, "reason (%s, %d) , SMS Format (%s) , nSeqId (%d)",
-            PS_MoStatus(MO_SUCCESS), nReason, PS_SmsFormatType(eSmsFormat), nSeqId);
+            PS_MoStatus(nReason), nReason, PS_SmsFormatType(eSmsFormat), nSeqId);
 
     IMS_TRACE_I("ReportMoStatus :  %s", acLog, 0, 0);
 

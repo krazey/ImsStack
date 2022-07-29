@@ -455,11 +455,24 @@ void MtsService::DeInit()
         m_piCoreService = IMS_NULL;
     }
 
+    if (m_piEmergencyCoreService != IMS_NULL)
+    {
+        m_piEmergencyCoreService->Close();
+        m_piEmergencyCoreService = IMS_NULL;
+    }
+
     if (m_piImsAos != IMS_NULL)
     {
         m_piImsAos->SetListener(IMS_NULL);
         m_piImsAos->SetMonitor(IMS_NULL);
         m_piImsAos = IMS_NULL;
+    }
+
+    if (m_piImsEmergencyAos != IMS_NULL)
+    {
+        m_piImsEmergencyAos->SetListener(IMS_NULL);
+        m_piImsEmergencyAos->SetMonitor(IMS_NULL);
+        m_piImsEmergencyAos = IMS_NULL;
     }
 }
 

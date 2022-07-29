@@ -27,6 +27,11 @@ class MtsSipFormUtilsTest : public ::testing::Test
 {
 public:
     MtsSipFormUtils* pMtsSipFormUtils;
+    AString strTargetAddress = "tel:+12345678901";
+    AString strLastIpSmgw = "tel:+12345678902";
+    AString str3gppFormat = "application/vnd.3gpp.sms";
+    AString str3gpp2Format = "application/vnd.3gpp2.sms";
+    AString strRegiInfoContentType = "application/reginfo+xml";
 
 protected:
     virtual void SetUp() override { pMtsSipFormUtils = new MtsSipFormUtils(SLOT_ID); }
@@ -41,8 +46,6 @@ TEST_F(MtsSipFormUtilsTest, Constructor)
 
 TEST_F(MtsSipFormUtilsTest, FormDestination)
 {
-    AString strTargetAddress = "tel:+12345678901";
-    AString strLastIpSmgw = "tel:+12345678902";
     AString strResultAddress;
 
     pMtsSipFormUtils->FormDestination(strTargetAddress, IMS_FALSE, strLastIpSmgw, strResultAddress);
@@ -55,24 +58,19 @@ TEST_F(MtsSipFormUtilsTest, FormDestination)
 TEST_F(MtsSipFormUtilsTest, FormContentTypeEnumToStr)
 {
     EXPECT_STREQ(pMtsSipFormUtils->FormContentTypeEnumToStr(SmsFormatType::SMSFORMAT_3GPP).GetStr(),
-            "application/vnd.3gpp.sms");
+            str3gppFormat.GetStr());
     EXPECT_STREQ(
             pMtsSipFormUtils->FormContentTypeEnumToStr(SmsFormatType::SMSFORMAT_3GPP2).GetStr(),
-            "application/vnd.3gpp2.sms");
+            str3gpp2Format.GetStr());
 }
 
 TEST_F(MtsSipFormUtilsTest, FormContentTypeStrToEnum)
 {
-    AString strTestContentType = "application/vnd.3gpp.sms";
-    EXPECT_EQ(pMtsSipFormUtils->FormContentTypeStrToEnum(strTestContentType),
+    EXPECT_EQ(pMtsSipFormUtils->FormContentTypeStrToEnum(str3gppFormat),
             SmsFormatType::SMSFORMAT_3GPP);
-
-    strTestContentType = "application/vnd.3gpp2.sms";
-    EXPECT_EQ(pMtsSipFormUtils->FormContentTypeStrToEnum(strTestContentType),
+    EXPECT_EQ(pMtsSipFormUtils->FormContentTypeStrToEnum(str3gpp2Format),
             SmsFormatType::SMSFORMAT_3GPP2);
-
-    strTestContentType = "application/reginfo+xml";
-    EXPECT_EQ(pMtsSipFormUtils->FormContentTypeStrToEnum(strTestContentType),
+    EXPECT_EQ(pMtsSipFormUtils->FormContentTypeStrToEnum(strRegiInfoContentType),
             SmsFormatType::SMSFORMAT_INVALID);
 }
 
