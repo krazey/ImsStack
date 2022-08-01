@@ -582,7 +582,7 @@ public class MtcCallTest extends ImsStackTest {
     public void testSendDtmf() {
         mTestMtcCall.createNativeCallObject();
 
-        mTestMtcCall.sendDtmf(mCallee, 1);
+        mTestMtcCall.sendDtmf('1');
         processAllMessages();
 
         assertEquals(IUMtcCall.SEND_DTMF, mCommand);

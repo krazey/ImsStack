@@ -182,11 +182,14 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
         case IMMedia::NOTIFY_HEADER_EXTENSION:
             OnNofityHeaderExtension(nMsg, objParcel);
             break;
+        case IMMedia::NOTIFY_MEDIA_DETACH:
+            OnNotifyMediaDetach(nMsg);
+            break;
         case IMMedia::NOTIFY_QOS_INFO:
             OnNotifyQosInfo(nMsg, objParcel);
             break;
-        case IMMedia::NOTIFY_MEDIA_DETACH:
-            OnNotifyMediaDetach(nMsg);
+        case IMMedia::SEND_DTMF:
+            OnSendDtmf(nMsg, objParcel);
             break;
         case IMMedia::SETSURFACE_CMD:
         case IMMedia::SELECT_CAMERA_CMD:
@@ -336,6 +339,16 @@ void JniMediaSession::OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const android::Parc
 }
 
 PRIVATE
+void JniMediaSession::OnSendDtmf(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+{
+    ImsMediaMsgDtmfParam* pParam = new ImsMediaMsgDtmfParam();
+
+    pParam->m_dtmfCode = objParcel.readByte();
+    pParam->m_nDuration = 0;
+
+    m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
 void JniMediaSession::OnVideoMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
     ImsMediaVideoParam* pParam = new ImsMediaVideoParam();

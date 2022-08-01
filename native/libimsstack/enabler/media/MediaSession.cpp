@@ -784,6 +784,9 @@ IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
         case IMMedia::NOTIFY_QOS_INFO:
             bRet = OnNotify(nMsg, pParam);
             break;
+        case IMMedia::SEND_DTMF:
+            bRet = OnSendDtmf(pParam);
+            break;
         case IMMedia::NOTIFY_CALL_QUALITY_CHANGE:
         case IMMedia::RESPONSE_SESSION_CHANGED:
         case IMMedia::NOTIFY_HEADER_EXTENSION:
@@ -901,6 +904,21 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
         default:
             IMS_TRACE_I("OnNotify() - unhandled case", 0, 0, 0);
             break;
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED
+IMS_BOOL MediaSession::OnSendDtmf(IN IMS_UINTP nParam)
+{
+    ImsMediaMsgDtmfParam* pParam = reinterpret_cast<ImsMediaMsgDtmfParam*>(nParam);
+
+    if (pParam != NULL)
+    {
+        m_objAudioController.SendDtmf(pParam->m_dtmfCode);
+        delete pParam;
+        return IMS_TRUE;
     }
 
     return IMS_FALSE;
