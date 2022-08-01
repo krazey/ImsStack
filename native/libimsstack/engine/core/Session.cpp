@@ -71,7 +71,6 @@ Session::Session(IN Service* pService) :
         m_bTerminatePending(IMS_FALSE),
         m_bUpdateRequestor(IMS_FALSE),
         m_bSdpNonRprAllowed(IMS_FALSE),
-        m_b100TryingNotification(IMS_FALSE),
         m_bTerminateMethodBye(IMS_FALSE),
         m_bSessionUpdateNotificationInProgress(IMS_FALSE),
         m_bImplicitRoutingRequired(IMS_FALSE),
@@ -2341,9 +2340,6 @@ PROTECTED VIRTUAL IMS_BOOL Session::InitInstance()
     {
         m_bSdpNonRprAllowed = pSipConfigV->IsSessionSdpNonRprAllowed();
         bSdpVersionCheck = pSipConfigV->IsSessionSdpVersionCheckSupported();
-
-        // Flag to check if the 100 Trying response should be notified or not
-        m_b100TryingNotification = pSipConfigV->Is100TryingNotificationRequired();
     }
 
     m_pOaState = new SdpOaState(bSdpVersionCheck, IMS_TRUE);
@@ -3856,7 +3852,7 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientCon
 
     if (nStatusCode == SipStatusCode::SC_100)
     {
-        if (m_b100TryingNotification)
+        if (IsConfigurationSet(CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED))
         {
             // INDEX_FOR_PROVISIONAL_RESPONSE_MESSAGE
             IMSList<Message*> objResponses;
