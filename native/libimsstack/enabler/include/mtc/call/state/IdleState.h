@@ -64,17 +64,17 @@ public:
     CallStateName OnUssiAttached() override;
 
 private:
-    CallStateName ContinueStart(IN MediaInfo* pMediaInfo);
-    CallStateName ContinueConference(IN MediaInfo* pMediaInfo, IN IMSList<ConfUser*> lstUsers);
+    CallStateName ContinueStart();
+    CallStateName ContinueConference(IN ImsList<ConfUser*> lstUsers);
     CallStateName ContinueHandleIncoming();
-    CallStateName ContinueStartUssi(IN MediaInfo* pMediaInfo);
+    CallStateName ContinueStartUssi();
 
     AString GenerateSessionId();
-    IMSList<AString> GetEntryUrisFromConferenceUsers(IN const IMSList<ConfUser*>& lstUsers);
+    ImsList<AString> GetEntryUrisFromConferenceUsers(IN const ImsList<ConfUser*>& lstUsers);
     void SetResourceListForConference(
-            IN_OUT IMessage& objMessage, IN IMSList<AString>& lstEntryUris);
-    IMSList<IMtcBlockRule*> GetIncomingCallBlockRules();
-    IMSList<IMtcBlockRule*> GetOutgoingCallBlockRules();
+            IN_OUT IMessage& objMessage, IN ImsList<AString>& lstEntryUris);
+    ImsList<IMtcBlockRule*> GetIncomingCallBlockRules();
+    ImsList<IMtcBlockRule*> GetOutgoingCallBlockRules();
     void SetAcceptContact(IN ISipMessage* piSipMessage);
 
     std::unique_ptr<IMtcBlockChecker> m_pBlockChecker;

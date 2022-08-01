@@ -248,13 +248,13 @@ public:
             eGTTMode(-1)
     {
     }
-    inline MediaInfo(IN const MediaInfo& objRHS) :
-            eADir(objRHS.eADir),
-            eVDir(objRHS.eVDir),
-            eTDir(objRHS.eTDir),
-            eAQuality(objRHS.eAQuality),
-            eVQuality(objRHS.eVQuality),
-            eGTTMode(objRHS.eGTTMode)
+    inline MediaInfo(IN const MediaInfo& objRhs) :
+            eADir(objRhs.eADir),
+            eVDir(objRhs.eVDir),
+            eTDir(objRhs.eTDir),
+            eAQuality(objRhs.eAQuality),
+            eVQuality(objRhs.eVQuality),
+            eGTTMode(objRhs.eGTTMode)
     {
     }
     inline MediaInfo(IN IMS_SINT32 eInitADir, IN IMS_SINT32 eInitVDir, IN IMS_SINT32 eInitTDir,
@@ -270,20 +270,34 @@ public:
     inline ~MediaInfo() {}
 
 public:
-    inline MediaInfo& operator=(IN const MediaInfo& objRHS)
+    inline MediaInfo& operator=(IN const MediaInfo& objRhs)
     {
-        if (this != &objRHS)
+        if (this != &objRhs)
         {
-            eADir = objRHS.eADir;
-            eVDir = objRHS.eVDir;
-            eTDir = objRHS.eTDir;
-            eAQuality = objRHS.eAQuality;
-            eVQuality = objRHS.eVQuality;
-            eGTTMode = objRHS.eGTTMode;
+            eADir = objRhs.eADir;
+            eVDir = objRhs.eVDir;
+            eTDir = objRhs.eTDir;
+            eAQuality = objRhs.eAQuality;
+            eVQuality = objRhs.eVQuality;
+            eGTTMode = objRhs.eGTTMode;
         }
 
         return (*this);
     }
+
+    IMS_BOOL operator==(const MediaInfo& objRhs) const
+    {
+        if (this == &objRhs)
+        {
+            return IMS_TRUE;
+        }
+
+        return eADir == objRhs.eADir && eVDir == objRhs.eVDir && eTDir == objRhs.eTDir &&
+                eAQuality == objRhs.eAQuality && eVQuality == objRhs.eVQuality &&
+                eGTTMode == objRhs.eGTTMode;
+    }
+
+    IMS_BOOL operator!=(const MediaInfo& objRhs) const { return !(*this == objRhs); }
 
 public:
     IMS_SINT32 eADir;

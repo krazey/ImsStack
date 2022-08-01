@@ -516,13 +516,9 @@ ISession* MtcCallState::GetISession()
 }
 
 PROTECTED
-void MtcCallState::InitMediaSession(IN MediaInfo* pMediaInfo /* = IMS_NULL*/)
+void MtcCallState::InitMediaSession()
 {
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    if (pMediaInfo)
-    {
-        objMediaManager.SetMediaInfo(*pMediaInfo);
-    }
 
     objMediaManager.CreateMediaSession(m_objContext.GetUiNotifier().GetJniMediaThread());
 
