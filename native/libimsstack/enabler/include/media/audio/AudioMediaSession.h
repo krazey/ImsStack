@@ -17,7 +17,6 @@
 #ifndef _IMS_AUDIO_MEDIA_SESSION_H_
 #define _IMS_AUDIO_MEDIA_SESSION_H_
 
-// == INCLUDES =============================================================
 #include <AudioConfig.h>
 #include <MediaQualityThreshold.h>
 #include "BaseSession.h"

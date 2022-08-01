@@ -60,10 +60,12 @@ public:
             {
                 delete pLocalProfile;
             }
+
             if (pPeerProfile != IMS_NULL)
             {
                 delete pPeerProfile;
             }
+
             if (pNegotiatedProfile != IMS_NULL)
             {
                 delete pNegotiatedProfile;
@@ -92,6 +94,7 @@ public:
 public:
     AudioNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
     AudioNego(IN const AudioNego& objAudioNego);
+    AudioNego& operator=(IN const AudioNego& obj);
     virtual ~AudioNego();
 
     /**
@@ -121,15 +124,13 @@ public:
      *
      * @param eNegoState The negotiation state which decide how to use the profile from the OA model
      * list
-     * @param bForking The parameter to decide to negotiate as a 1st answer of 2nd answer in forking
-     * session
      * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
      * @param pDescriptor The SDP descriptor instance to negotiate the m=audio level SDP
      * @param eDir The media direction of the SDP
      * @return IMS_BOOL Returns IMS_TRUE when there is no error during SDP negotiation, IMS_FALSE
      * when it is failed to form
      */
-    virtual IMS_BOOL NegotiateSDP(IN NEGO_STATE eNegoState, IN IMS_BOOL bForking,
+    virtual IMS_BOOL NegotiateSDP(IN NEGO_STATE eNegoState,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT MEDIA_DIRECTION* eDir);
 
@@ -224,17 +225,16 @@ public:
     virtual IMS_SINT32 GetMediaBandwidth(void);
 
 private:
-    virtual IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor,
+    void copy(IN const AudioNego* pAudioNego);
+    IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
+            IN MEDIA_DIRECTION eDir);
+    IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
-    virtual IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
+    IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
-    virtual IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
-    virtual MEDIA_DIRECTION NegotiateOffer(
+    MEDIA_DIRECTION NegotiateOffer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-    virtual MEDIA_DIRECTION NegotiateAnswer(
-            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-    virtual MEDIA_DIRECTION NegotiateReanswer(
+    MEDIA_DIRECTION NegotiateAnswer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
     IMS_BOOL MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);

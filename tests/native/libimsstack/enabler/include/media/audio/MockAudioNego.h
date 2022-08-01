@@ -34,9 +34,8 @@ public:
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir),
             (override));
     MOCK_METHOD(IMS_BOOL, NegotiateSDP,
-            (IN NEGO_STATE eNegoState, IN IMS_BOOL bForking,
-                    IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-                    OUT MEDIA_DIRECTION* eDir),
+            (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
+                    IN IMediaDescriptor* pDescriptor, OUT MEDIA_DIRECTION* eDir),
             (override));
     MOCK_METHOD(void, FinalizeSDP,
             (IN ISessionDescriptor * pSessionDescriptor, NEGO_STATE eNegoState), (override));

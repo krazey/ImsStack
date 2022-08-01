@@ -47,52 +47,14 @@ PUBLIC
 AudioNego::AudioNego(IN const AudioNego& objAudioNego) :
         ImsSlot(objAudioNego.GetSlotId())
 {
-    IMS_TRACE_I("AudioNego() - list size[%d]", objAudioNego.m_lstOaModel.GetSize(), 0, 0);
+    copy(&objAudioNego);
+}
 
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-
-    if (pMediaManager == IMS_NULL)
-    {
-        return;
-    }
-
-    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
-
-    if (pResourceMngr != IMS_NULL)
-    {
-        // To release previous used port
-        if (m_objBaseProfile.nDataPort != 0)
-        {
-            pResourceMngr->ReleaseRtpPort(m_objBaseProfile.nDataPort);
-        }
-    }
-
-    m_objBaseProfile = objAudioNego.m_objBaseProfile;
-
-    if (pResourceMngr != IMS_NULL)
-    {
-        // To add port (it would be duplicated)
-        if (m_objBaseProfile.nDataPort != 0)
-        {
-            pResourceMngr->AcquireRtpPort(m_objBaseProfile.nDataPort, m_objBaseProfile.nDataPort);
-        }
-    }
-
-    m_pEnvironment = objAudioNego.m_pEnvironment;
-
-    if (objAudioNego.m_lstOaModel.GetSize() < 1)
-    {
-        return;
-    }
-
-    OaModel* pNewOaModel = new OaModel();
-    OaModel* pOldOaModel = objAudioNego.m_lstOaModel.GetAt(0);
-    pNewOaModel->pLocalProfile = new AudioProfile(*pOldOaModel->pLocalProfile);
-    m_lstOaModel.Append(pNewOaModel);
-
-    this->m_pConfig = objAudioNego.m_pConfig;
-    IMS_TRACE_I("AudioNego() - OA model list size[%d]", m_lstOaModel.GetSize(), 0, 0);
-    return;
+PUBLIC
+AudioNego& AudioNego::operator=(IN const AudioNego& obj)
+{
+    copy(&obj);
+    return *this;
 }
 
 PUBLIC VIRTUAL AudioNego::~AudioNego()
@@ -153,7 +115,8 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSDP(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
         IN MEDIA_DIRECTION eDir)
 {
-    IMS_TRACE_D("FormSDP() eNegoState[%d], eDir[%d]", eNegoState, eDir, 0);
+    IMS_TRACE_D("FormSDP() eNegoState[%d], eDir[%d] lstOaModel size[%d]", eNegoState, eDir,
+            m_lstOaModel.GetSize());
 
     switch (eNegoState)
     {
@@ -169,244 +132,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSDP(IN NEGO_STATE eNegoState,
     }
 }
 
-PUBLIC VIRTUAL IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir)
-{
-    // Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (eDir == MEDIA_DIRECTION_INVALID)
-    {
-        IMS_TRACE_E(0, "FormOffer() - direction invalid", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    IMS_TRACE_D("FormOffer() - eDir[%d]", eDir, 0, 0);
-
-    // Make new Offer/Answer model, and copy source profile
-    OaModel* pNewOaModel = new OaModel();
-
-    if (pNewOaModel == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
-
-    // Modify a direction by Enabler
-    if (eDir > MEDIA_DIRECTION_INVALID)
-    {
-        IMS_TRACE_I("FormOffer() Enforced Set to direction[%d]", eDir, 0, 0);
-        pNewOaModel->pLocalProfile->eDirection = eDir;
-    }
-
-    // Modify a RS/RR by conditions (for RTCP enable/disable)
-    AudioProfileUtil::SetRtcpRsRr(pNewOaModel->pLocalProfile, m_pConfig);
-    m_lstOaModel.Append(pNewOaModel);
-
-    // Make the SDP from profile
-    IMS_BOOL bSdpMade =
-            MakeSdpFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pLocalProfile);
-
-    // Delete Session Level Direction Attribute
-    pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
-
-    return bSdpMade;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir)
-{
-    IMS_TRACE_D("FormAnswer() - eDir[%d]", eDir, 0, 0);
-
-    // Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || m_lstOaModel.GetSize() == 0)
-    {
-        return IMS_FALSE;
-    }
-
-    if (eDir == MEDIA_DIRECTION_INVALID)
-    {
-        IMS_TRACE_E(0, "FormAnswer() - direction invalid", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    // Getting OaModel from list
-    OaModel* pNewOaModel = GetNegotiatedOaModel();
-    if (pNewOaModel == IMS_NULL || pNewOaModel->IsAllProfileExist() == IMS_FALSE)
-    {
-        return IMS_FALSE;
-    }
-
-    /** TODO: move this logic to session level
-    // Compare the media type between base and requested. If it not matched,
-    // re-create a negotiated profile
-    MEDIA_CONTENT_TYPE eBaseWithoutText =
-            (MEDIA_CONTENT_TYPE)MEDIA_TYPE_WITHOUT_TEXT(m_eSessionType);
-    MEDIA_CONTENT_TYPE eRequestedWithoutText = (MEDIA_CONTENT_TYPE)MEDIA_TYPE_WITHOUT_TEXT(eType);
-
-    if (eBaseWithoutText != eRequestedWithoutText)
-    {
-        IMS_TRACE_I("FormAnswer() Media type doesn't matched Base[%d], Requested[%d]",
-                eBaseWithoutText, eRequestedWithoutText, 0);
-
-        *pNewOaModel->pLocalProfile = m_objBaseProfile;
-
-        if (pNewOaModel->pNegotiatedProfile != IMS_NULL)
-        {
-            delete pNewOaModel->pNegotiatedProfile;
-        }
-
-        pNewOaModel->pNegotiatedProfile = new AudioProfile();
-        if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_TRUE,
-                    pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
-        {
-            delete pNewOaModel;
-            return IMS_FALSE;
-        }
-    }*/
-
-    // Modify a direction by Enabler
-    if (eDir > MEDIA_DIRECTION_INVALID)
-    {
-        pNewOaModel->pNegotiatedProfile->eDirection = eDir;
-        IMS_TRACE_I("FormAnswer() - update audio direction[%d]", eDir, 0, 0);
-    }
-
-    pNewOaModel->pLocalProfile->bIsOfferCase = IMS_FALSE;
-
-    // Make the SDP from profile
-    IMS_BOOL bSDPMade =
-            MakeSdpFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pNegotiatedProfile);
-
-    if (pSessionDescriptor->GetDirection() == MEDIA_DIRECTION_INVALID)
-    {
-        // Delete Session Level Direction Attribute
-        pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
-    }
-
-    return bSDPMade;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir)
-{
-    IMS_TRACE_I("FormReoffer() pDescriptor[%" PFLS_x "], eDir[%d], m_lstOaModel.GetSize[%d]",
-            pDescriptor, eDir, m_lstOaModel.GetSize());
-
-    // Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (eDir == MEDIA_DIRECTION_INVALID)
-    {
-        IMS_TRACE_E(0, "FormReoffer() - direction invalid", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (m_pConfig == NULL || m_pEnvironment == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "FormReoffer() - config is not valid", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    // Make new Offer/Answer model, and copy source profile from previous negotiated profile
-    OaModel* pNewOaModel = new OaModel();
-
-    if (pNewOaModel == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (m_lstOaModel.GetSize() == 0)
-    {
-        pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
-    }
-    else
-    {
-        OaModel* pPrevOaModel = GetNegotiatedOaModel();
-
-        if (pPrevOaModel == IMS_NULL)
-        {
-            if (pNewOaModel != NULL)
-            {
-                delete pNewOaModel;
-            }
-
-            return IMS_FALSE;
-        }
-
-        MediaSessionConfig* pMediaSessionConfig =
-                MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
-                        GetSlotId(), m_pEnvironment->eServiceType);
-
-        if (pMediaSessionConfig == IMS_NULL)
-        {
-            return IMS_FALSE;
-        }
-
-        // reuse previous profile when negotiated profile data port is 0
-        if ((pPrevOaModel->pNegotiatedProfile != IMS_NULL &&
-                    pPrevOaModel->pNegotiatedProfile->nDataPort == 0) ||
-                pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_FALSE)
-        {
-            IMS_TRACE_I("FormReoffer() - reuse previous profile, m_bSdpReofferFullCapability[%d]",
-                    pMediaSessionConfig->IsSdpReofferFullCapability(), 0, 0);
-            pNewOaModel->pLocalProfile = new AudioProfile(*pPrevOaModel->pNegotiatedProfile);
-        }
-        else
-        {
-            pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
-
-            // set default AS value when localProfile AS value is 0 in ReOffer case
-            if (pNewOaModel->pLocalProfile->nBandwidthAs <= 0)
-            {
-                IMS_TRACE_I("FormReoffer() - use default AS value", 0, 0, 0);
-                pNewOaModel->pLocalProfile->nBandwidthAs = m_objBaseProfile.nBandwidthAs;
-            }
-        }
-    }
-
-    // Modify a direction by Enabler
-    if (eDir > MEDIA_DIRECTION_INVALID)
-    {
-        IMS_TRACE_I("FormReoffer() Enforced Set to direction[%d]", eDir, 0, 0);
-        pNewOaModel->pLocalProfile->eDirection = eDir;
-    }
-
-    // Modify a RS/RR by conditions (for RTCP enable/disable)
-    AudioProfileUtil::SetRtcpRsRr(pNewOaModel->pLocalProfile,
-            MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pEnvironment->eServiceType));
-
-    pNewOaModel->pLocalProfile->nDataPort = m_objBaseProfile.nDataPort;
-    pNewOaModel->pLocalProfile->nControlPort = m_objBaseProfile.nControlPort;
-
-    // when reoffer case - recover rtcpxr to default in sendrecv case
-    if (m_objBaseProfile.bSupportRtcpXr == IMS_TRUE &&
-            pNewOaModel->pLocalProfile->eDirection == MEDIA_DIRECTION_SEND_RECEIVE)
-    {
-        pNewOaModel->pLocalProfile->bSupportRtcpXr = m_objBaseProfile.bSupportRtcpXr;
-        pNewOaModel->pLocalProfile->objRtcpXrAttr = m_objBaseProfile.objRtcpXrAttr;
-    }
-
-    pNewOaModel->pLocalProfile->bIsOfferCase = IMS_TRUE;
-    m_lstOaModel.Append(pNewOaModel);
-
-    // Make the SDP from profile
-    IMS_BOOL bSDPMade =
-            MakeSdpFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pLocalProfile);
-
-    // Delete Session Level Direction Attribute
-    pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
-    return bSDPMade;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState, IN IMS_BOOL bForking,
+PUBLIC VIRTUAL IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
         OUT MEDIA_DIRECTION* eDir)
 {
@@ -415,7 +141,8 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState, IN IMS
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("NegotiateSDP() NegoState[%d], Forking[%d]", eNegoState, bForking, 0);
+    IMS_TRACE_I("NegotiateSDP() - NegoState[%d], lstOaModel size[%d]", eNegoState,
+            m_lstOaModel.GetSize(), 0);
 
     *eDir = MEDIA_DIRECTION_INVALID;
     switch (eNegoState)
@@ -425,152 +152,13 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState, IN IMS
             *eDir = NegotiateOffer(pSessionDescriptor, pDescriptor);
             break;
         case STATE_OFFER_SENT:
-            *eDir = (bForking == IMS_TRUE) ? NegotiateReanswer(pSessionDescriptor, pDescriptor)
-                                           : NegotiateAnswer(pSessionDescriptor, pDescriptor);
+            *eDir = NegotiateAnswer(pSessionDescriptor, pDescriptor);
             break;
         default:
             break;
     }
 
     return (*eDir != MEDIA_DIRECTION_INVALID) ? IMS_TRUE : IMS_FALSE;
-}
-
-PUBLIC VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateOffer(
-        IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
-{
-    // Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
-    {
-        return MEDIA_DIRECTION_INVALID;
-    }
-
-    IMS_TRACE_I("NegotiateOffer() - local port[%d]", m_objBaseProfile.nDataPort, 0, 0);
-
-    // Make new Offer/Answer model, and copy source profile
-    OaModel* pNewOaModel = new OaModel();
-    pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
-
-    // Make a destination profile from SDP
-    pNewOaModel->pPeerProfile = new AudioProfile();
-
-    if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, pNewOaModel->pPeerProfile) != IMS_TRUE)
-    {
-        delete pNewOaModel;
-        return MEDIA_DIRECTION_INVALID;
-    }
-
-    // Make a negotiated profile from the local and peer profile
-    pNewOaModel->pNegotiatedProfile = new AudioProfile();
-
-    if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_TRUE,
-                pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
-    {
-        delete pNewOaModel;
-        return MEDIA_DIRECTION_INVALID;
-    }
-
-    // add session key in NewOaModel
-    IMS_TRACE_D("NegotiateOffer() - add session key in NewOaModel[%" PFLS_x "]",
-            reinterpret_cast<IMS_SINTP>(pSessionDescriptor), 0, 0);
-    pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
-    m_lstOaModel.Append(pNewOaModel);
-
-    // Return the direction of negotiated profile
-    return pNewOaModel->pNegotiatedProfile->eDirection;
-}
-
-PUBLIC VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateAnswer(
-        IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
-{
-    // Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
-    {
-        return MEDIA_DIRECTION_INVALID;
-    }
-    if (m_lstOaModel.GetSize() < 1)
-    {
-        return MEDIA_DIRECTION_INVALID;
-    }
-
-    IMS_TRACE_I("NegotiateAnswer() Entered", 0, 0, 0);
-
-    // Get the latest OAmodel from list
-    OaModel* pNewOaModel = m_lstOaModel.GetAt(m_lstOaModel.GetSize() - 1);
-    if (pNewOaModel == IMS_NULL)
-    {
-        return MEDIA_DIRECTION_INVALID;
-    }
-
-    // Make a destination profile from SDP
-    pNewOaModel->pPeerProfile = new AudioProfile();
-    if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, pNewOaModel->pPeerProfile) != IMS_TRUE)
-    {
-        delete pNewOaModel;
-        m_lstOaModel.RemoveAt(m_lstOaModel.GetSize() - 1);
-        return MEDIA_DIRECTION_INVALID;
-    }
-
-    // Make a negotiated profile with the local, peer profile
-    pNewOaModel->pNegotiatedProfile = new AudioProfile();
-
-    if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_FALSE,
-                pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
-    {
-        delete pNewOaModel;
-        m_lstOaModel.RemoveAt(m_lstOaModel.GetSize() - 1);
-        return MEDIA_DIRECTION_INVALID;
-    }
-
-    // add session key in NewOaModel
-    IMS_TRACE_D("NegotiateAnswer() - add session key in NewOaModel[%" PFLS_x "]",
-            reinterpret_cast<IMS_SINTP>(pSessionDescriptor), 0, 0);
-    pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
-
-    // Return the direction of negotiated profile
-    return pNewOaModel->pNegotiatedProfile->eDirection;
-}
-
-PUBLIC VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateReanswer(
-        IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
-{
-    // Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
-    {
-        return MEDIA_DIRECTION_INVALID;
-    }
-    if (m_lstOaModel.GetSize() < 1)
-    {
-        return MEDIA_DIRECTION_INVALID;
-    }
-
-    // Make new Offer/Answer model, and copy source profile
-    OaModel* pNewOaModel = new OaModel();
-    pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
-    // Make a destination profile from SDP
-    pNewOaModel->pPeerProfile = new AudioProfile();
-
-    if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, pNewOaModel->pPeerProfile) != IMS_TRUE)
-    {
-        delete pNewOaModel;
-        return MEDIA_DIRECTION_INVALID;
-    }
-
-    // Make a negotiated profile from the local and peer profile
-    pNewOaModel->pNegotiatedProfile = new AudioProfile();
-    if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_FALSE,
-                pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
-    {
-        delete pNewOaModel;
-        return MEDIA_DIRECTION_INVALID;
-    }
-    // add session key in NewOaModel
-    IMS_TRACE_D("NegotiateReanswer() - add session key in NewOaModel[%" PFLS_x "]",
-            reinterpret_cast<IMS_SINTP>(pSessionDescriptor), 0, 0);
-    pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
-    m_lstOaModel.Append(pNewOaModel);
-
-    // Return the direction of negotiated profile
-    return pNewOaModel->pNegotiatedProfile->eDirection;
 }
 
 PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
@@ -795,6 +383,7 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
     }
 
     AudioProfile* pNegotiatedProfile = pLatestOaModel->pNegotiatedProfile;
+
     if (pNegotiatedProfile == IMS_NULL || pNegotiatedProfile->lstPayload.GetSize() == 0)
     {
         return AUDIO_CODEC_BITRATE_MAX;
@@ -1049,6 +638,400 @@ PUBLIC VIRTUAL IMS_SINT32 AudioNego::GetMediaBandwidth(void)
     }
 
     return -1;
+}
+
+PRIVATE
+void AudioNego::copy(IN const AudioNego* pAudioNego)
+{
+    if (pAudioNego == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_I(
+            "copy() - referenced OaModel list size[%d]", pAudioNego->m_lstOaModel.GetSize(), 0, 0);
+
+    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
+
+    if (pMediaManager == IMS_NULL)
+    {
+        return;
+    }
+
+    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+
+    if (pResourceMngr != IMS_NULL)
+    {
+        // To release previous used port
+        if (m_objBaseProfile.nDataPort != 0)
+        {
+            pResourceMngr->ReleaseRtpPort(m_objBaseProfile.nDataPort);
+        }
+    }
+
+    m_objBaseProfile = pAudioNego->m_objBaseProfile;
+
+    if (pResourceMngr != IMS_NULL)
+    {
+        // To add port (it would be duplicated)
+        if (m_objBaseProfile.nDataPort != 0)
+        {
+            pResourceMngr->AcquireRtpPort(m_objBaseProfile.nDataPort, m_objBaseProfile.nDataPort);
+        }
+    }
+
+    m_pEnvironment = pAudioNego->m_pEnvironment;
+
+    if (pAudioNego->m_lstOaModel.IsEmpty() == IMS_FALSE)
+    {
+        OaModel* pNewOaModel = new OaModel();
+        pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
+        m_lstOaModel.Append(pNewOaModel);
+    }
+
+    this->m_pConfig = pAudioNego->m_pConfig;
+    IMS_TRACE_I("copy() - OA model list size[%d]", m_lstOaModel.GetSize(), 0, 0);
+}
+
+PRIVATE
+IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir)
+{
+    // Handling exception case
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    if (eDir == MEDIA_DIRECTION_INVALID)
+    {
+        IMS_TRACE_E(0, "FormOffer() - direction invalid", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    IMS_TRACE_D("FormOffer() - eDir[%d]", eDir, 0, 0);
+
+    // Make new Offer/Answer model, and copy source profile
+    OaModel* pNewOaModel = new OaModel();
+
+    if (pNewOaModel == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
+
+    // Modify a direction by Enabler
+    if (eDir > MEDIA_DIRECTION_INVALID)
+    {
+        IMS_TRACE_I("FormOffer() Enforced Set to direction[%d]", eDir, 0, 0);
+        pNewOaModel->pLocalProfile->eDirection = eDir;
+    }
+
+    // Modify a RS/RR by conditions (for RTCP enable/disable)
+    AudioProfileUtil::SetRtcpRsRr(pNewOaModel->pLocalProfile, m_pConfig);
+    m_lstOaModel.Append(pNewOaModel);
+
+    // Make the SDP from profile
+    IMS_BOOL bSdpMade =
+            MakeSdpFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pLocalProfile);
+
+    // Delete Session Level Direction Attribute
+    pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
+
+    return bSdpMade;
+}
+
+PRIVATE
+IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir)
+{
+    IMS_TRACE_D("FormAnswer() - eDir[%d]", eDir, 0, 0);
+
+    // Handling exception case
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || m_lstOaModel.GetSize() == 0)
+    {
+        return IMS_FALSE;
+    }
+
+    if (eDir == MEDIA_DIRECTION_INVALID)
+    {
+        IMS_TRACE_E(0, "FormAnswer() - direction invalid", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    // Getting OaModel from list
+    OaModel* pNewOaModel = GetNegotiatedOaModel();
+
+    if (pNewOaModel == IMS_NULL || pNewOaModel->IsAllProfileExist() == IMS_FALSE)
+    {
+        return IMS_FALSE;
+    }
+
+    /** TODO: move this logic to session level
+    // Compare the media type between base and requested. If it not matched,
+    // re-create a negotiated profile
+    MEDIA_CONTENT_TYPE eBaseWithoutText =
+            (MEDIA_CONTENT_TYPE)MEDIA_TYPE_WITHOUT_TEXT(m_eSessionType);
+    MEDIA_CONTENT_TYPE eRequestedWithoutText = (MEDIA_CONTENT_TYPE)MEDIA_TYPE_WITHOUT_TEXT(eType);
+
+    if (eBaseWithoutText != eRequestedWithoutText)
+    {
+        IMS_TRACE_I("FormAnswer() Media type doesn't matched Base[%d], Requested[%d]",
+                eBaseWithoutText, eRequestedWithoutText, 0);
+
+        *pNewOaModel->pLocalProfile = m_objBaseProfile;
+
+        if (pNewOaModel->pNegotiatedProfile != IMS_NULL)
+        {
+            delete pNewOaModel->pNegotiatedProfile;
+        }
+
+        pNewOaModel->pNegotiatedProfile = new AudioProfile();
+        if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_TRUE,
+                    pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
+        {
+            delete pNewOaModel;
+            return IMS_FALSE;
+        }
+    }*/
+
+    // Modify a direction by Enabler
+    if (eDir > MEDIA_DIRECTION_INVALID)
+    {
+        pNewOaModel->pNegotiatedProfile->eDirection = eDir;
+        IMS_TRACE_I("FormAnswer() - update audio direction[%d]", eDir, 0, 0);
+    }
+
+    pNewOaModel->pLocalProfile->bIsOfferCase = IMS_FALSE;
+
+    // Make the SDP from profile
+    IMS_BOOL bSDPMade =
+            MakeSdpFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pNegotiatedProfile);
+
+    if (pSessionDescriptor->GetDirection() == MEDIA_DIRECTION_INVALID)
+    {
+        // Delete Session Level Direction Attribute
+        pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
+    }
+
+    return bSDPMade;
+}
+
+PRIVATE
+IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir)
+{
+    IMS_TRACE_I("FormReoffer() pDescriptor[%" PFLS_x "], eDir[%d], m_lstOaModel.GetSize[%d]",
+            pDescriptor, eDir, m_lstOaModel.GetSize());
+
+    // Handling exception case
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    if (eDir == MEDIA_DIRECTION_INVALID)
+    {
+        IMS_TRACE_E(0, "FormReoffer() - direction invalid", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    if (m_pConfig == NULL || m_pEnvironment == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "FormReoffer() - config is not valid", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    // Make new Offer/Answer model, and copy source profile from previous negotiated profile
+    OaModel* pNewOaModel = new OaModel();
+
+    if (pNewOaModel == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_lstOaModel.GetSize() == 0)
+    {
+        pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
+    }
+    else
+    {
+        OaModel* pPrevOaModel = GetNegotiatedOaModel();
+
+        if (pPrevOaModel == IMS_NULL)
+        {
+            if (pNewOaModel != NULL)
+            {
+                delete pNewOaModel;
+            }
+
+            return IMS_FALSE;
+        }
+
+        MediaSessionConfig* pMediaSessionConfig =
+                MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
+                        GetSlotId(), m_pEnvironment->eServiceType);
+
+        if (pMediaSessionConfig == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
+        // reuse previous profile when negotiated profile data port is 0
+        if ((pPrevOaModel->pNegotiatedProfile != IMS_NULL &&
+                    pPrevOaModel->pNegotiatedProfile->nDataPort == 0) ||
+                pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_FALSE)
+        {
+            IMS_TRACE_I("FormReoffer() - reuse previous profile, m_bSdpReofferFullCapability[%d]",
+                    pMediaSessionConfig->IsSdpReofferFullCapability(), 0, 0);
+            pNewOaModel->pLocalProfile = new AudioProfile(*pPrevOaModel->pNegotiatedProfile);
+        }
+        else
+        {
+            pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
+        }
+
+        // set default AS value when localProfile AS value is 0 in ReOffer case
+        if (pNewOaModel->pLocalProfile->nBandwidthAs <= 0)
+        {
+            IMS_TRACE_I("FormReoffer() - use default AS value", 0, 0, 0);
+            pNewOaModel->pLocalProfile->nBandwidthAs = m_objBaseProfile.nBandwidthAs;
+        }
+    }
+
+    // Modify a direction by Enabler
+    if (eDir > MEDIA_DIRECTION_INVALID)
+    {
+        IMS_TRACE_I("FormReoffer() Enforced Set to direction[%d]", eDir, 0, 0);
+        pNewOaModel->pLocalProfile->eDirection = eDir;
+    }
+
+    // Modify a RS/RR by conditions (for RTCP enable/disable)
+    AudioProfileUtil::SetRtcpRsRr(pNewOaModel->pLocalProfile,
+            MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pEnvironment->eServiceType));
+
+    pNewOaModel->pLocalProfile->nDataPort = m_objBaseProfile.nDataPort;
+    pNewOaModel->pLocalProfile->nControlPort = m_objBaseProfile.nControlPort;
+
+    // when reoffer case - recover rtcpxr to default in sendrecv case
+    if (m_objBaseProfile.bSupportRtcpXr == IMS_TRUE &&
+            pNewOaModel->pLocalProfile->eDirection == MEDIA_DIRECTION_SEND_RECEIVE)
+    {
+        pNewOaModel->pLocalProfile->bSupportRtcpXr = m_objBaseProfile.bSupportRtcpXr;
+        pNewOaModel->pLocalProfile->objRtcpXrAttr = m_objBaseProfile.objRtcpXrAttr;
+    }
+
+    pNewOaModel->pLocalProfile->bIsOfferCase = IMS_TRUE;
+    m_lstOaModel.Append(pNewOaModel);
+
+    // Make the SDP from profile
+    IMS_BOOL bSDPMade =
+            MakeSdpFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pLocalProfile);
+
+    // Delete Session Level Direction Attribute
+    pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
+    return bSDPMade;
+}
+
+PRIVATE
+MEDIA_DIRECTION AudioNego::NegotiateOffer(
+        IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
+{
+    // Handling exception case
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    {
+        return MEDIA_DIRECTION_INVALID;
+    }
+
+    IMS_TRACE_I("NegotiateOffer() - local port[%d]", m_objBaseProfile.nDataPort, 0, 0);
+
+    // Make new Offer/Answer model, and copy source profile
+    OaModel* pNewOaModel = new OaModel();
+    pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
+
+    // Make a destination profile from SDP
+    pNewOaModel->pPeerProfile = new AudioProfile();
+
+    if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, pNewOaModel->pPeerProfile) != IMS_TRUE)
+    {
+        delete pNewOaModel;
+        return MEDIA_DIRECTION_INVALID;
+    }
+
+    // Make a negotiated profile from the local and peer profile
+    pNewOaModel->pNegotiatedProfile = new AudioProfile();
+
+    if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_TRUE,
+                pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
+    {
+        delete pNewOaModel;
+        return MEDIA_DIRECTION_INVALID;
+    }
+
+    // add session key in NewOaModel
+    IMS_TRACE_D("NegotiateOffer() - add session key in NewOaModel[%" PFLS_x "]",
+            reinterpret_cast<IMS_SINTP>(pSessionDescriptor), 0, 0);
+    pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
+    m_lstOaModel.Append(pNewOaModel);
+
+    // Return the direction of negotiated profile
+    return pNewOaModel->pNegotiatedProfile->eDirection;
+}
+
+PRIVATE
+MEDIA_DIRECTION AudioNego::NegotiateAnswer(
+        IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
+{
+    // Handling exception case
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    {
+        return MEDIA_DIRECTION_INVALID;
+    }
+
+    if (m_lstOaModel.GetSize() < 1)
+    {
+        return MEDIA_DIRECTION_INVALID;
+    }
+
+    IMS_TRACE_I("NegotiateAnswer() Entered", 0, 0, 0);
+
+    // Get the latest OAmodel from list
+    OaModel* pNewOaModel = m_lstOaModel.GetAt(m_lstOaModel.GetSize() - 1);
+
+    if (pNewOaModel == IMS_NULL)
+    {
+        return MEDIA_DIRECTION_INVALID;
+    }
+
+    // Make a destination profile from SDP
+    pNewOaModel->pPeerProfile = new AudioProfile();
+
+    if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, pNewOaModel->pPeerProfile) != IMS_TRUE)
+    {
+        delete pNewOaModel;
+        m_lstOaModel.RemoveAt(m_lstOaModel.GetSize() - 1);
+        return MEDIA_DIRECTION_INVALID;
+    }
+
+    // Make a negotiated profile with the local, peer profile
+    pNewOaModel->pNegotiatedProfile = new AudioProfile();
+
+    if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_FALSE,
+                pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
+    {
+        delete pNewOaModel;
+        m_lstOaModel.RemoveAt(m_lstOaModel.GetSize() - 1);
+        return MEDIA_DIRECTION_INVALID;
+    }
+
+    // add session key in NewOaModel
+    IMS_TRACE_D("NegotiateAnswer() - add session key in NewOaModel[%" PFLS_x "]",
+            reinterpret_cast<IMS_SINTP>(pSessionDescriptor), 0, 0);
+    pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
+
+    // Return the direction of negotiated profile
+    return pNewOaModel->pNegotiatedProfile->eDirection;
 }
 
 PRIVATE
