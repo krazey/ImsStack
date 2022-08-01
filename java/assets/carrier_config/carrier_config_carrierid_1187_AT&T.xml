@@ -241,9 +241,9 @@
     <int name="emergency_rtt_guard_timer_millis_int" value="-1"/>
     <boolean name="retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
     <int name="prealerting_timer_millis_int" value="-1"/>
-    <int name="policy_for_tcall_timer_expiry_of_volte_call_int" value="0"/>
+    <int name="policy_for_tcall_timer_expiry_of_volte_call_int" value="4"/>
     <int name="policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="0"/>
-    <int name="policy_for_tcall_timer_expiry_of_vowifi_call_int" value="0"/>
+    <int name="policy_for_tcall_timer_expiry_of_vowifi_call_int" value="4"/>
     <string-array name="carrier_specific_sip_headers_string_array" num="0">
     </string-array>
     <boolean name="check_avchange_feature_for_call_converting_capability_bool" value="false"/>
