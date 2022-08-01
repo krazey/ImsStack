@@ -27,7 +27,6 @@ import com.android.imsstack.enabler.mtc.EcbmListener;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,12 +41,9 @@ public class ImsEcbmImplTest {
     private static final String LOG_TAG = "ImsEcbmImplTest";
     private ImsEcbmImpl mImsEcbmImpl;
 
-    @Mock
-    private ICallContext mMockCallContext;
-    @Mock
-    private IECallStateTracker mMockIECallStateTracker;
-    @Mock
-    private IImsEcbmListener mMockListener;
+    @Mock private ICallContext mMockCallContext;
+    @Mock private IECallStateTracker mMockIECallStateTracker;
+    @Mock private IImsEcbmListener mMockListener;
 
     @Before
     public void setUp() throws Exception {
@@ -67,6 +63,12 @@ public class ImsEcbmImplTest {
         EcbmListener mListener = callbackArg.getValue();
         assertNotNull(mListener);
         return mListener;
+    }
+
+    @Test
+    public void test_exitEmergencyCallbackMode() {
+        mImsEcbmImpl.exitEmergencyCallbackMode();
+        verify(mMockIECallStateTracker, Mockito.times(1)).exitEmergencyCallbackMode(false);
     }
 
     @Test

@@ -16,13 +16,8 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.os.DeadObjectException;
@@ -36,7 +31,6 @@ import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsSuppServiceNotification;
-import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.util.Log;
 
@@ -44,24 +38,24 @@ import com.android.imsstack.*;
 import com.android.imsstack.imsservice.mmtel.ImsCallSessionCallback;
 import com.android.imsstack.util.MessageExecutor;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.runner.*;
-import org.junit.runners.JUnit4;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.Mock;
 
 @RunWith(JUnit4.class)
 public class ImsCallSessionCallbackTest {
     private static final String LOG_TAG = "ImsCallSessionCallbackTest";
     private static final int LATCH_WAIT = 0;
     private static final int LATCH_MAX = 1;
-    private static final int WAIT_TIMER= 2000;
+    private static final int WAIT_TIMER = 100;
     private final Object mLock = new Object();
 
     private boolean isMultiParty;
