@@ -298,8 +298,6 @@ public class ApnXcapTest {
     @Test
     public void testHandleDataConnectionFailed() throws Exception {
         int failureCause = 33;
-        replaceInstance(Apn.class, "mDcSettings", mApnXcap, mMockIDcSettings);
-        when(mMockIDcSettings.isPermanentFailure(EApnType.XCAP, failureCause)).thenReturn(true);
 
         // if apn is not requested, ignore event
         assertEquals(mApnXcap.getApnReqState(), EApnReqState.APN_REQUEST_IDLE);
@@ -316,7 +314,7 @@ public class ApnXcapTest {
         mApnXcap.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        verify(mMockIDcNetWatcher, times(1)).notifyPdnConnectionFailed(EApnType.XCAP);
+        verify(mMockIDcNetWatcher, times(1)).notifyPdnConnectionFailed(EApnType.XCAP, failureCause);
     }
 
     private synchronized void replaceInstance(final Class c, final String instanceName,

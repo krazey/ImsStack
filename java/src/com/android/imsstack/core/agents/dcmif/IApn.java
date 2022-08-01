@@ -139,11 +139,6 @@ public interface IApn {
     boolean isESMCausePermanentFailure();
 
     /**
-     *  Resets mESMCausePermanentFailure
-     */
-    void resetESMCausePermanentFailure();
-
-    /**
      * Return cached network of APN
      */
     Network getCachedNetwork();
