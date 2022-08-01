@@ -35,8 +35,8 @@ public:
     void Start(IN IMS_UINT32 nRepeatTime, IN IMS_BOOL bCheckingPong = IMS_TRUE);
     void Stop();
 
-    void SetTransport(IN CONST IPAddress& objSourceIPA, IN IMS_SINT32 nSourcePort,
-            IN CONST IPAddress& objDestIPA, IN IMS_SINT32 nDestPort,
+    void SetTransport(IN const IPAddress& objSourceIPA, IN IMS_SINT32 nSourcePort,
+            IN const IPAddress& objDestIPA, IN IMS_SINT32 nDestPort,
             IN IMS_SINT32 nProtocol = AosKeepAlive::TRANSPORT_UDP);
 
     enum

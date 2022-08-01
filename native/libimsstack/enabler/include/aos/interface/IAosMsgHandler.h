@@ -42,7 +42,7 @@ public:
      * IMS_FALSE             failure. usually because the message is existing in the queue.
      * </table>
      */
-    virtual IMS_BOOL SendEmptyMessageDelayed(IN CONST IAosMsgHandlerListener* piListener,
+    virtual IMS_BOOL SendEmptyMessageDelayed(IN const IAosMsgHandlerListener* piListener,
             IN IMS_SINT32 nMessage, IN IMS_SINT32 nDuration) = 0;
 
     /*
@@ -64,7 +64,7 @@ public:
      * </table>
      */
     virtual void RemoveMessages(
-            IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage) = 0;
+            IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage) = 0;
 
     /*
      * Check if there are any pending posts of messages in the message queue.
@@ -87,7 +87,7 @@ public:
      * </table>
      */
     virtual IMS_BOOL HasMessages(
-            IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage) = 0;
+            IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage) = 0;
 };
 
 #endif  // INTERFACE_AOS_MESSAGE_HANDLER_H_

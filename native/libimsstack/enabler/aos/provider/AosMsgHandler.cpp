@@ -37,7 +37,7 @@ public:
                 this, 0);
     }
 
-    AosMessage(IN CONST IAosMsgHandlerListener* piListener, IN CONST ITimer* piTimer,
+    AosMessage(IN const IAosMsgHandlerListener* piListener, IN const ITimer* piTimer,
             IN IMS_SINT32 nMessage, IN IMS_SINT32 nDuration) :
             piListener(piListener),
             piTimer(piTimer),
@@ -55,7 +55,7 @@ public:
                 this, 0);
     }
 
-    IMS_BOOL IsEqual(IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage)
+    IMS_BOOL IsEqual(IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage)
     {
         if ((!bDead) && (this->piListener == piListener) && (this->nMessage == nMessage))
         {
@@ -137,7 +137,7 @@ Remarks
 */
 PRIVATE
 IMS_BOOL AosMsgHandler::HasMessage(
-        IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage, OUT IMS_SINT32& nAt)
+        IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage, OUT IMS_SINT32& nAt)
 {
     if (objMessages.IsEmpty())
     {
@@ -194,7 +194,7 @@ Remarks
 
 */
 PUBLIC VIRTUAL IMS_BOOL AosMsgHandler::SendEmptyMessageDelayed(
-        IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage,
+        IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage,
         IN IMS_SINT32 nDuration)
 {
     if (nDuration < 0)
@@ -235,7 +235,7 @@ Remarks
 
 */
 PUBLIC VIRTUAL void AosMsgHandler::RemoveMessages(
-        IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage)
+        IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage)
 {
     IMS_SINT32 nAt = (-1);
     if (HasMessage(piListener, nMessage, nAt))
@@ -258,7 +258,7 @@ Remarks
 
 */
 PUBLIC VIRTUAL IMS_BOOL AosMsgHandler::HasMessages(
-        IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage)
+        IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage)
 {
     if (objMessages.IsEmpty())
     {

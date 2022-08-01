@@ -37,7 +37,7 @@ public:
     virtual IMS_SINT32 GetSlotId() const = 0;
     virtual const AString& GetProfileId() const = 0;
 
-    virtual IAosHandle* GetHandle(IN CONST AString& strSrvId) const = 0;
+    virtual IAosHandle* GetHandle(IN const AString& strSrvId) const = 0;
     virtual IAosHandle* GetHandle(IN IMS_UINT32 nServiceType) = 0;
     virtual IMSMap<AString, IAosHandle*>& GetHandles() = 0;
 
@@ -55,7 +55,7 @@ private:
 
     virtual void SetSlotId(IN IMS_SINT32 nSlotId) = 0;
 
-    virtual void AddHandle(IN CONST AString& strSrvId, IN IAosHandle* piHandle) = 0;
+    virtual void AddHandle(IN const AString& strSrvId, IN IAosHandle* piHandle) = 0;
 
     virtual void SetApp(IN IAosApplication* piApp) = 0;
     virtual void SetConnection(IN IAosConnection* piConnection) = 0;

@@ -29,17 +29,17 @@ public:
     virtual ~AosMsgHandler();
 
 public:
-    virtual IMS_BOOL SendEmptyMessageDelayed(IN CONST IAosMsgHandlerListener* piListener,
+    virtual IMS_BOOL SendEmptyMessageDelayed(IN const IAosMsgHandlerListener* piListener,
             IN IMS_SINT32 nMessage, IN IMS_SINT32 nDuration);
     virtual void RemoveMessages(
-            IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage);
+            IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage);
     virtual IMS_BOOL HasMessages(
-            IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage);
+            IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage);
 
     virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
 private:
-    IMS_BOOL HasMessage(IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage,
+    IMS_BOOL HasMessage(IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage,
             OUT IMS_SINT32& nAt);
     ITimer* StartTimer(IN IMS_SINT32 nDuration);
     void StopTimer(IN ITimer* piTimer);

@@ -127,8 +127,8 @@ Remarks
 
 */
 PUBLIC
-void AosKeepAlive::SetTransport(IN CONST IPAddress& objSourceIPA, IN IMS_SINT32 nSourcePort,
-        IN CONST IPAddress& objDestIPA, IN IMS_SINT32 nDestPort,
+void AosKeepAlive::SetTransport(IN const IPAddress& objSourceIPA, IN IMS_SINT32 nSourcePort,
+        IN const IPAddress& objDestIPA, IN IMS_SINT32 nDestPort,
         IN IMS_SINT32 nProtocol /* = AosKeepAlive::TRANSPORT_UDP */)
 {
     piKAHelper->SetTransportTupleS(objSourceIPA, nSourcePort, nProtocol);

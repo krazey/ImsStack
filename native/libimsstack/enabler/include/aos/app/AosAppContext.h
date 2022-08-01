@@ -25,15 +25,15 @@ public:
     virtual ~AosAppContext();
 
 private:
-    AosAppContext(IN CONST AosAppContext& objRHS);
-    AosAppContext& operator=(IN CONST AosAppContext& objRHS);
+    AosAppContext(IN const AosAppContext& objRHS);
+    AosAppContext& operator=(IN const AosAppContext& objRHS);
 
 public:
     virtual IMS_SINT32 GetSlotId() const;
 
     virtual const AString& GetProfileId() const;
 
-    virtual IAosHandle* GetHandle(IN CONST AString& strSrvId) const;
+    virtual IAosHandle* GetHandle(IN const AString& strSrvId) const;
     virtual IAosHandle* GetHandle(IN IMS_UINT32 nServiceType);
     virtual IMSMap<AString, IAosHandle*>& GetHandles();
 
@@ -49,7 +49,7 @@ public:
 private:
     virtual void SetSlotId(IN IMS_SINT32 nSlotId);
 
-    virtual void AddHandle(IN CONST AString& strSrvId, IN IAosHandle* piHandle);
+    virtual void AddHandle(IN const AString& strSrvId, IN IAosHandle* piHandle);
 
     virtual void SetApp(IN IAosApplication* piApp);
     virtual void SetConnection(IN IAosConnection* piConnection);

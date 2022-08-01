@@ -24,13 +24,13 @@ class MockIAosMsgHandler : public IAosMsgHandler
 {
 public:
     MOCK_METHOD(IMS_BOOL, SendEmptyMessageDelayed,
-            (IN CONST IAosMsgHandlerListener * piListener, IN IMS_SINT32 nMessage,
+            (IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage,
                     IN IMS_SINT32 nDuration),
             (override));
     MOCK_METHOD(void, RemoveMessages,
-            (IN CONST IAosMsgHandlerListener * piListener, IN IMS_SINT32 nMessage), (override));
+            (IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage), (override));
     MOCK_METHOD(IMS_BOOL, HasMessages,
-            (IN CONST IAosMsgHandlerListener * piListener, IN IMS_SINT32 nMessage), (override));
+            (IN const IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage), (override));
 };
 
 #endif  // MOCK_I_AOS_MSG_HANDLER_H_
