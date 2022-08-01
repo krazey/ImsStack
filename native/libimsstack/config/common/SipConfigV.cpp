@@ -455,17 +455,6 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("SESSION_EXPIRES :: %d", m_objSession.nSessionExpires, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_SESSION_100TRYING_NOTIFICATION:
-        {
-            if (strValue.GetLength() > 0)
-            {
-                m_objSession.b100TryingNotification = strValue.EqualsIgnoreCase("true");
-            }
-
-            IMS_TRACE_D("SESSION_100TRYING_NOTIFICATION :: %s",
-                    _TRACE_B_(m_objSession.b100TryingNotification), 0, 0);
-            break;
-        }
         case IConfigurable::CP_I_SIP_ALL:
         {
             UpdateAllConfigs();

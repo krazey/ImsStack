@@ -750,17 +750,19 @@ public:
     /// Runtime configuration for session control
     enum
     {
-        CONFIG_NONE = 0x00000000,
+        CONFIG_NONE = 0,
         /// RFC 6337, Section 3.1.1\n
         /// This will be applied for MO signaling.
-        CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE = 0x00000001,
+        CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE = 1 << 0,
         /// This is to avoid the session update failure when the service is disconnected by re-REG.
-        CONFIG_IGNORE_DEREG_ON_SESSION_UPDATE = 0x00000002,
+        CONFIG_IGNORE_DEREG_ON_SESSION_UPDATE = 1 << 1,
         /// This is to override SIP configuration for SDP handling of non-RPR.
-        CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR = 0x00000004,
+        CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR = 1 << 2,
         /// This is to indicate that early session model is supported.\n
         /// ex. VRBT (Video RingBack Tone) for KR operators
-        CONFIG_SUPPORT_EARLY_SESSION_MODEL = 0x00000008
+        CONFIG_SUPPORT_EARLY_SESSION_MODEL = 1 << 3,
+        /// This is to specify whether the 100 Trying response needs to be notified to the enabler.
+        CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED = 1 << 4
     };
 
     /// Index for the most recent response message

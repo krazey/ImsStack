@@ -34,8 +34,6 @@ private:
         IMS_SINT32 nSessionExpires;
         IMS_SINT32 nHeaders;
         IMS_BOOL bNoRefreshByReInvite;
-        // This value will not be managed in the non-volatile memory
-        IMS_BOOL b100TryingNotification;
         IMS_BOOL bSdpVersionCheckSupported;
         IMS_BOOL bSdpNonRprAllowed;
 
@@ -47,7 +45,6 @@ private:
                 nSessionExpires(3600),
                 nHeaders(SESSION_HEADER_ALL),
                 bNoRefreshByReInvite(IMS_FALSE),
-                b100TryingNotification(IMS_FALSE),
                 bSdpVersionCheckSupported(IMS_TRUE),
                 bSdpNonRprAllowed(IMS_FALSE)
         {
@@ -102,10 +99,6 @@ public:
     inline IMS_SINT32 GetSessionRefresher() const { return m_objSession.nRefresher; }
     inline IMS_SINT32 GetSessionMethod() const { return m_objSession.nRefreshMethod; }
     inline IMS_SINT32 GetSessionMinSe() const { return m_objSession.nMinSe; }
-    inline IMS_BOOL Is100TryingNotificationRequired() const
-    {
-        return m_objSession.b100TryingNotification;
-    }
     inline IMS_BOOL IsSessionNoRefreshByReInvite() const
     {
         return m_objSession.bNoRefreshByReInvite;
