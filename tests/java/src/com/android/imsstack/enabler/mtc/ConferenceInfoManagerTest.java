@@ -69,11 +69,10 @@ public class ConferenceInfoManagerTest {
         assertNull(mTestConferenceInfoManager.getConferenceInfo(mCcid + "1"));
 
         mTestConferenceInfoManager.createConferenceInfo(mCcid, mSlotId);
-        assertTrue(ConferenceInfoHelper.addConferenceUser(mCcid, mCcid + "1", mCcid + "2", 1));
+        assertTrue(ConferenceInfoHelper.addConferenceUser(mCcid, mCcid + "1", 1));
 
         assertTrue(mTestConferenceInfoManager.hasConferenceInfo());
-        // TODO : need to be re-considered how to handle 1st param of method below
-        // in the product code.
-        assertNotNull(mTestConferenceInfoManager.getConferenceInfoByUser(1 + "", mCcid + "2"));
+        assertNotNull(mTestConferenceInfoManager.getConferenceInfoByUser(
+                String.valueOf(1), mCcid + "1"));
     }
 }
