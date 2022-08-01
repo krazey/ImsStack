@@ -18,7 +18,6 @@
 #define _MEDIA_MSG_HANDLER_H_
 
 #include "JniMediaSessionThread.h"
-#include "IUMedia.h"
 #include "IMMedia.h"
 
 class MediaMsgHandler

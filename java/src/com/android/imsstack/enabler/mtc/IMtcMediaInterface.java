@@ -34,4 +34,9 @@ public interface IMtcMediaInterface {
      * @param parcel to send
      */
     void sendRequest(Parcel parcel);
+    /**
+     * Notified when the remote party has sent text message via RTT
+     * @param rttMessage String containing the received characters.
+     */
+    void rttMessageReceived(String rttMessage);
 }

@@ -44,7 +44,7 @@ public class MediaConstants {
     public static final int REQUEST_VIDEO_DATA_USAGE      = (IMSMEDIA_VIDEO_REQUEST + 3);
 
     // Requests for text
-    public static final int IMSMEDIA_RTT_REQUEST          = (IMSMEDIA_REQUEST + 75);
+    public static final int IMSMEDIA_RTT_REQUEST          = (IMSMEDIA_REQUEST + 80);
     public static final int REQUEST_SEND_RTT              = (IMSMEDIA_RTT_REQUEST + 1);
 
     // Responses
@@ -66,12 +66,12 @@ public class MediaConstants {
     public static final int NOTIFY_QOS_INFO               = (IMSMEDIA_RESPONSE + 13);
 
     // Notifications for video
-    public static final int IMSMEDIA_VIDEO_RESPONSE       = (IMSMEDIA_RESPONSE + 50);
+    public static final int IMSMEDIA_VIDEO_RESPONSE       = (IMSMEDIA_RESPONSE + 60);
     public static final int NOTIFY_PEER_DIMENSION_CHANGED = (IMSMEDIA_VIDEO_RESPONSE + 1);
     public static final int NOTIFY_VIDEO_DATA_USAGE       = (IMSMEDIA_VIDEO_RESPONSE + 2);
 
     // Notifications for text
-    public static final int IMSMEDIA_RTT_RESPONSE         = (IMSMEDIA_RESPONSE + 75);
+    public static final int IMSMEDIA_RTT_RESPONSE         = (IMSMEDIA_RESPONSE + 80);
     public static final int NOTIFY_RTT_RECEIVED           = (IMSMEDIA_RTT_RESPONSE + 1);
 
     public static final int IMSMEDIA_MAX                  = (IMSMEDIA_RESPONSE + 100);

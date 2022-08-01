@@ -35,8 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.net.DatagramSocket;
 
 /**
- * This manages text session by communicating between ImsStack (media enabler native)
- * and {@link ImsMediaManager}
+ * This manages text session by communicating between ImsStack and {@link ImsMediaManager}
  */
 public class TextSessionHandler  {
 
@@ -205,11 +204,11 @@ public class TextSessionHandler  {
         }
 
         @Override
-        public void onRttReceived(final String text) {
+        public void onRttReceived(final String rttMessage) {
             ImsLog.d("onRttReceived for SessionId[" + getTextSessionId() + "]");
 
             Message.obtain(mTextMessageHandler, MediaConstants.NOTIFY_RTT_RECEIVED,
-                    text).sendToTarget();
+                rttMessage).sendToTarget();
         }
 
         @Override
@@ -260,10 +259,10 @@ public class TextSessionHandler  {
 
             case MediaConstants.REQUEST_SEND_RTT:
             {
-                String text = parcel.readString();
-                ImsLog.v("rtt message = " + text);
+                String rttMessage = parcel.readString();
+                ImsLog.v("rtt message");
 
-                Message.obtain(mTextMessageHandler, requestType, text).sendToTarget();
+                Message.obtain(mTextMessageHandler, requestType, rttMessage).sendToTarget();
             }
                 break;
 
@@ -289,7 +288,7 @@ public class TextSessionHandler  {
 
         if (mTextSession == null) {
             if (mMediaManager.isImsMediaConnected()) {
-                // TODO_MEDIA : ImsQOSManager to be used
+                // TODO MEDIA : ImsQOSManager to be used
                 mRtpSocket = MediaSocket.createDatagramSocket(localIpAddress,
                     localPortNumber);
                 mRtcpSocket = MediaSocket.createDatagramSocket(localIpAddress,
@@ -332,7 +331,7 @@ public class TextSessionHandler  {
     }
 
     private void closeSockets() {
-        // TODO_MEDIA: ImsQOSManager to be used
+        // TODO MEDIA : ImsQOSManager to be used
         MediaSocket.closeDatagramSocket(mRtpSocket);
         mRtpSocket = null;
         MediaSocket.closeDatagramSocket(mRtcpSocket);
@@ -345,9 +344,9 @@ public class TextSessionHandler  {
         }
     }
 
-    private void handleSendRtt(String text) {
+    private void handleSendRtt(String rttMessage) {
         if (mTextSession != null) {
-            mTextSession.sendRtt(text);
+            mTextSession.sendRtt(rttMessage);
         }
     }
 
@@ -379,25 +378,25 @@ public class TextSessionHandler  {
     }
 
     private void handleSessionChanged(int state) {
-        if (mTextSessionCallbackHandler != null) {
+        if (mTextSessionCallbackHandler != null && mTextSession != null) {
             mTextSessionCallbackHandler.sessionChanged(state);
         }
     }
 
     private void handleModifySessionResponse(final TextConfig textConfig, final int result) {
-        if (mTextSessionCallbackHandler != null) {
+        if (mTextSessionCallbackHandler != null && mTextSession != null) {
             mTextSessionCallbackHandler.modifySessionResponse(textConfig, result);
         }
     }
 
-    private void handleRttReceived(final String text) {
-        if (mTextSessionCallbackHandler != null) {
-            mTextSessionCallbackHandler.onRttReceived(text);
+    private void handleRttReceived(final String rttMessage) {
+        if (mTextSessionCallbackHandler != null && mTextSession != null) {
+            mTextSessionCallbackHandler.onRttReceived(rttMessage);
         }
     }
 
     private void handleMediaInactivityNotification(final int packetType) {
-        if (mTextSessionCallbackHandler != null) {
+        if (mTextSessionCallbackHandler != null && mTextSession != null) {
             mTextSessionCallbackHandler.onNotifyMediaInactivity(packetType);
         }
     }

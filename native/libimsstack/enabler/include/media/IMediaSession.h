@@ -20,7 +20,6 @@
 #include "ImsMessage.h"
 #include "AString.h"
 #include "IMediaSessionClientListener.h"
-#include "IUMedia.h"
 #include "ISession.h"
 #include "IMSTypeDef.h"
 #include "MediaEnvironment.h"
