@@ -349,22 +349,7 @@ void AosFeatureTagList::Clear()
 {
     IMS_TRACE_I("Clear", 0, 0, 0);
 
-    if (!m_objFeatureTagList.IsEmpty())
-    {
-        for (IMS_UINT32 i = 0; i < m_objFeatureTagList.GetSize(); ++i)
-        {
-            AosFeatureTag* pFeatureTag = m_objFeatureTagList.GetAt(i);
-
-            if (pFeatureTag != IMS_NULL)
-            {
-                delete pFeatureTag;
-                pFeatureTag = IMS_NULL;
-            }
-        }
-
-        m_objFeatureTagList.Clear();
-    }
-
+    ClearFeatureTags();
     ClearFeatures();
 }
 
@@ -522,7 +507,7 @@ Remarks
 */
 PUBLIC
 IMS_BOOL AosFeatureTagList::HasFeatureTag(
-        IN const AString& strName, IN const AString& strValue) const
+        IN const AString& strName, IN const AString& strValue /* = AString::ConstNull() */) const
 {
     IMS_TRACE_I("HasFeatureTag :: name(%s) , value(%s)", strName.GetStr(), strValue.GetStr(), 0);
 

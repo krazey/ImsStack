@@ -87,7 +87,8 @@ public:
 
     IMS_BOOL HasUnavailableFeature(IN IMS_UINT32 nFeature) const;
     IMS_BOOL HasFeature(IN IMS_UINT32 nFeature) const;
-    IMS_BOOL HasFeatureTag(IN const AString& strName, IN const AString& strValue) const;
+    IMS_BOOL HasFeatureTag(
+            IN const AString& strName, IN const AString& strValue = AString::ConstNull()) const;
 
     void PrintFeatureTagList();
 
@@ -95,5 +96,8 @@ private:
     IMSList<AosFeatureTag*> m_objFeatureTagList;
     IMS_UINT32 m_nFeatures;
     IMS_UINT32 m_nUnavailableFeatures;
+
+private:
+    friend class AosFeatureTagTest;
 };
 #endif  // AOS_FEATURE_TAG_H_
