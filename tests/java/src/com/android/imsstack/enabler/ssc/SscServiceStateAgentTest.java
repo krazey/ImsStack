@@ -86,10 +86,10 @@ public class SscServiceStateAgentTest {
 
     @Test
     public void testSetPdnConnectionFailed() {
-        final boolean input = true;
-        mSscServiceStateAgent.setPdnConnectionFailed(SLOT_0, input);
+        final int smCause = 27;
+        mSscServiceStateAgent.setPdnConnectionFailed(SLOT_0, smCause);
 
-        verify(mockSscServiceState).setPdnConnectionFailed(eq(input));
+        verify(mockSscServiceState).setPdnConnectionFailed(smCause);
     }
 
     @Test

@@ -24,9 +24,6 @@ import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
@@ -40,8 +37,6 @@ public class SscServiceState {
     public static final int EVENT_AIRPLANE_MODE_CHANGED = 1002;
 
     private int mSlotId = -1;
-    private int mCurrentRat = -1;
-    private int mTimerId = -1;
     private int mUtBlockTimerId = -1;
     private int mUtBlockReason = SscConstant.BLOCK_REASON_NONE;
 
@@ -104,17 +99,17 @@ public class SscServiceState {
     }
 
     protected void setErrorResponseCode(int responseCode) {
-        if (SscConfig.isTemporaryErrorCode(mSlotId, responseCode)) {
-            setUtBlock(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP);
-        } else if (SscConfig.isPermanentErrorCode(mSlotId, responseCode)) {
+        if (SscConfig.isPermanentErrorCode(mSlotId, responseCode)) {
             setUtBlock(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM);
+        } else if (SscConfig.isTemporaryErrorCode(mSlotId, responseCode)) {
+            setUtBlock(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP);
         }
     }
 
-    protected void setPdnConnectionFailed(boolean isPermanent) {
-        if (isPermanent) {
+    protected void setPdnConnectionFailed(int smCause) {
+        if (SscConfig.isPermanentBlockSmCause(mSlotId, smCause)) {
             setUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM);
-        } else {
+        } else if (SscConfig.isTemporaryBlockSmCause(mSlotId, smCause)) {
             setUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP);
         }
     }
@@ -315,16 +310,6 @@ public class SscServiceState {
     }
 
     @VisibleForTesting
-    protected IApn getApn(EApnType apnType) {
-        if (apnType == null) {
-            return null;
-        }
-
-        IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-        return (dcapn != null) ? dcapn.getApnControl(apnType.getType()) : null;
-    }
-
-    @VisibleForTesting
     protected IDcNetWatcher getDcNetWatcher() {
         return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
     }
@@ -369,10 +354,6 @@ public class SscServiceState {
                     IDcNetWatcher dcnw = getDcNetWatcher();
                     if (dcnw != null) {
                         if (dcnw.isAirplaneMode()) {
-                            IApn apn = getApn(EApnType.XCAP);
-                            if (apn != null) {
-                                apn.resetESMCausePermanentFailure();
-                            }
                             resetUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM);
                             resetUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP);
                             resetUtBlock(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM);
