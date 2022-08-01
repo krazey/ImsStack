@@ -1,14 +1,18 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20111206  hyunho.shin@              Created
-    </table>
-
-    Description
-
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef _UCE_XML_DOCUMENT_HELPER_THREAD_H_
 #define _UCE_XML_DOCUMENT_HELPER_THREAD_H_
@@ -36,9 +40,9 @@ class UceXmlDocumentHelperThread :
     typedef IMS_BOOL (UceXmlDocumentHelperThread::*msgHandler)(IMSMSG& objMsg);
 
 public:
-    UceXmlDocumentHelperThread(IN CONST AString& strQueryName_, IN IMS_SINT32 nSimSlot = 0);
+    UceXmlDocumentHelperThread(IN const AString& strQueryName_, IN IMS_SINT32 nSimSlot = 0);
     virtual ~UceXmlDocumentHelperThread();
-    IMS_BOOL Start(IN CONST AString& strName, IN IMS_UINT32 _nIndex = 10);
+    IMS_BOOL Start(IN const AString& strName, IN IMS_UINT32 _nIndex = 10);
     void Terminate();
     void SendMsg(IN IMS_UINT32 nMSG, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam);
     virtual IMS_RESULT XmlTransaction_NotifyParsingCompleted(IN IXmlTransaction* piXMLTransaction);
@@ -54,7 +58,7 @@ protected:
 
 private:
     virtual IMS_BOOL Runnable_Run(IN IMSMSG& objMSG);
-    IMS_RESULT XMLDataTokenization(IN CONST ByteArray& objBytes);
+    IMS_RESULT XMLDataTokenization(IN const ByteArray& objBytes);
     IMS_BOOL StartMessageHandler(IMSMSG& objMsg);
     IMS_BOOL TerminateMessageHandler(IMSMSG& objMsg);
     IMS_BOOL ReceivedRlmiNotifyMessageHandler(IMSMSG& objMsg);

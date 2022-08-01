@@ -1,14 +1,18 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20120119  hyunho.shin@               Created
-    </table>
-
-    Description
-
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "subscribe/UceXmlDocumentHelperThread.h"
 
@@ -35,7 +39,7 @@ __IMS_TRACE_TAG_USER_DECL__("UCE");
 
 PUBLIC
 UceXmlDocumentHelperThread::UceXmlDocumentHelperThread(
-        IN CONST AString& strQueryName, IN IMS_SINT32 nSimSlot) :
+        IN const AString& strQueryName, IN IMS_SINT32 nSimSlot) :
         m_nSimSlot(nSimSlot),
         m_nIndex(10),
         m_strQueryName(strQueryName),
@@ -63,7 +67,7 @@ PUBLIC VIRTUAL UceXmlDocumentHelperThread::~UceXmlDocumentHelperThread()
 }
 
 PUBLIC
-IMS_BOOL UceXmlDocumentHelperThread::Start(IN CONST AString& strName, IN IMS_UINT32 nIndex)
+IMS_BOOL UceXmlDocumentHelperThread::Start(IN const AString& strName, IN IMS_UINT32 nIndex)
 {
     m_nIndex = nIndex;
     IMS_CHAR szIndex[10];
@@ -284,7 +288,7 @@ PRIVATE VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::Runnable_Run(IN IMSMSG& obj
     return (this->*(func))(objMSG);
 }
 
-IMS_RESULT UceXmlDocumentHelperThread::XMLDataTokenization(IN CONST ByteArray& objBytes)
+IMS_RESULT UceXmlDocumentHelperThread::XMLDataTokenization(IN const ByteArray& objBytes)
 {
     IMS_TRACE_D("XMLDataTokenization()", 0, 0, 0);
     IXmlRequest* piXMLRequest = IMS_NULL;

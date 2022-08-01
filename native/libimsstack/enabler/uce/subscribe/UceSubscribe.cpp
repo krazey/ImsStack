@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "subscribe/UceSubscribe.h"
 
 #include "AoSAppRequestType.h"
@@ -51,8 +66,8 @@ END_STATE_MSG_MAP()
     Constructor, Destructor, Operator Overloading
 -------------------------------------------------------------------------------------------------
 */
-UceSubscribe::UceSubscribe(IN ICoreService* piCoreService, IN CONST AString& strAppName,
-        IN CONST AString& strManagerName, IN IMS_UINT32 conectedService, IN IMS_SINT32 nSimSlot) :
+UceSubscribe::UceSubscribe(IN ICoreService* piCoreService, IN const AString& strAppName,
+        IN const AString& strManagerName, IN IMS_UINT32 conectedService, IN IMS_SINT32 nSimSlot) :
         ImsActivityEx(AString::ConstNull()),
         m_nKey(0),
         m_piCoreService(piCoreService),
@@ -947,7 +962,7 @@ void UceSubscribe::DestroyXMLDocumentHelperThread()
     }
 }
 
-IMS_BOOL UceSubscribe::CreateSubscription(IN CONST AString& strToURI)
+IMS_BOOL UceSubscribe::CreateSubscription(IN const AString& strToURI)
 {
     IMS_TRACE_D("CreateSubscription:ToURI [%s]", strToURI.GetStr(), 0, 0);
     if (m_piCoreService == IMS_NULL || strToURI == IMS_NULL || strToURI.IsEmpty())
@@ -1150,7 +1165,7 @@ AString UceSubscribe::GetListSubscribeUri()
 }
 
 IMS_BOOL UceSubscribe::SetHeaderForListSubscription(
-        IN_OUT ISipMessage* piSIPMessage, IN CONST AString& strListSubscriptionRequestUri)
+        IN_OUT ISipMessage* piSIPMessage, IN const AString& strListSubscriptionRequestUri)
 {
     IMS_TRACE_D("SetHeaderForListSubscription", 0, 0, 0);
 
@@ -1190,7 +1205,7 @@ IMS_BOOL UceSubscribe::SetHeaderForListSubscription(
 }
 
 IMS_BOOL UceSubscribe::SetContentBody(
-        IN_OUT ISipMessage* piSIPMessage, IN CONST AString& strXMLBody)
+        IN_OUT ISipMessage* piSIPMessage, IN const AString& strXMLBody)
 {
     IMS_TRACE_D("SetContentBody", 0, 0, 0);
     if (piSIPMessage == IMS_NULL || strXMLBody.GetLength() <= 0)
