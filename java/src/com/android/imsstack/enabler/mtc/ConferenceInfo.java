@@ -1,13 +1,18 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20150410    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.imsstack.enabler.mtc;
 
@@ -80,9 +85,6 @@ public final class ConferenceInfo {
 
         // Call-id: when merging two calls, it will used to identify a specific call
         private final String mCallId;
-        // CALL_CONNECTION_ID
-        // Call connection identifier of each calls; used in call merge operation only
-        private int mCallConnectionId = 0;
 
         // It's an universal user id to guarantee the uniqueness of participant
         // in ImsConferenceState. (It's used as key value)
@@ -199,7 +201,7 @@ public final class ConferenceInfo {
          * Call connection identifier to identify a specific call.
          */
         public int getCallConnectionId() {
-            return mCallConnectionId;
+            return Integer.parseInt(getCallId());
         }
 
         /**
@@ -313,13 +315,6 @@ public final class ConferenceInfo {
         }
 
         /**
-         * Call connection identifier.
-         */
-        public void setCallConnectionId(int callConnectionId) {
-            mCallConnectionId = callConnectionId;
-        }
-
-        /**
          * Disconnected cause value.
          */
         public void setDisconnectedCause(int disconnectedCause) {
@@ -377,8 +372,6 @@ public final class ConferenceInfo {
             sb.append(stateToString(mState));
             sb.append(", callId=");
             sb.append(mCallId);
-            sb.append(", callConnectionId=");
-            sb.append(mCallConnectionId);
             sb.append(", id=");
             sb.append(dbgLog(mId));
             sb.append(", idForN=");
@@ -479,18 +472,20 @@ public final class ConferenceInfo {
         return true;
     }
 
-    public boolean addUserForInterimStatus(String callId, int callConnectionId, String uid,
+    /**
+     * Adds Conference user
+     */
+    public boolean addUserForInterimStatus(int callConnectionId, String uid,
             String status, int sipStatusCode, int disconnectedCause) {
+        String callId = String.valueOf(callConnectionId);
+
         if (callId == null) {
             callId = User.DEFAULT_CALL_ID;
         }
 
-        callId = callConnectionId + "";
-
         User user = new User(callId, uid);
 
         user.initForInterimEvent(uid, uid, uid, "", status);
-        user.setCallConnectionId(callConnectionId);
         user.setSIPStatusCode(sipStatusCode);
         user.setDisconnectedCause(disconnectedCause);
 
@@ -499,7 +494,6 @@ public final class ConferenceInfo {
         }
 
         log("addUserForInterimStatus: callId=" + callId
-                + ", callConnectionId=" + callConnectionId
                 + ", uid=" + dbgLog(uid) + ", status=" + status);
 
         return true;

@@ -62,17 +62,13 @@ public final class ConferenceInfoHelper {
             return null;
         }
 
-        if (!ci.addUserForInterimStatus(hostCallId,
-                hostCallConnectionId, hostConfUserId, "", 0, 0)) {
-            loge("User already exists; host - callId=" + hostCallId
-                    + ", callConnectionId=" + hostCallConnectionId
+        if (!ci.addUserForInterimStatus(hostCallConnectionId, hostConfUserId, "", 0, 0)) {
+            loge("User already exists; host - callConnectionId=" + hostCallConnectionId
                     + ", confUserId=" + dbgLog(hostConfUserId));
         }
 
-        if (!ci.addUserForInterimStatus(peerCallId,
-                peerCallConnectionId, peerConfUserId, "", 0, 0)) {
-            loge("User already exists; peer - callId=" + peerCallId
-                    + ", callConnectionId=" + peerCallConnectionId
+        if (!ci.addUserForInterimStatus(peerCallConnectionId, peerConfUserId, "", 0, 0)) {
+            loge("User already exists; peer - callConnectionId=" + peerCallConnectionId
                     + ", confUserId=" + dbgLog(peerConfUserId));
         }
 
@@ -107,7 +103,7 @@ public final class ConferenceInfoHelper {
     }
 
     public static boolean addConferenceUser(String ccid,
-            String peerCallId, String peerConfUserId, int peerCallConnectionId) {
+            String peerConfUserId, int peerCallConnectionId) {
         ConferenceInfo ci = getConferenceInfo(ccid);
 
         if (ci == null) {
@@ -115,10 +111,8 @@ public final class ConferenceInfoHelper {
             return false;
         }
 
-        if (!ci.addUserForInterimStatus(peerCallId,
-                peerCallConnectionId, peerConfUserId, "", 0, 0)) {
-            loge("User already exists; peer - callId=" + peerCallId
-                    + ", callConnectionId=" + peerCallConnectionId
+        if (!ci.addUserForInterimStatus(peerCallConnectionId, peerConfUserId, "", 0, 0)) {
+            loge("User already exists; peer - peerCallConnectionId=" + peerCallConnectionId
                     + ", confUserId=" + dbgLog(peerConfUserId));
         }
 
@@ -286,7 +280,7 @@ public final class ConferenceInfoHelper {
                 }
 
                 // New user detected
-                ci.addUserForInterimStatus(callId, 0, uid, status,
+                ci.addUserForInterimStatus(0, uid, status,
                         sipStatusCode, disconnectedCause);
 
                 log("updateConferenceUser(addInterim) :: userCount=" + ci.getUserCount());

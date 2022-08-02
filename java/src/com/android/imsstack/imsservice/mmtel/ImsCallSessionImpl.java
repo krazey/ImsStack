@@ -449,7 +449,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         if ((ci != null) && (participants != null)) {
             for (int i = 0; i < participants.length; ++i) {
-                ci.addUserForInterimStatus(null, 0, participants[i],
+                ci.addUserForInterimStatus(0, participants[i],
                         ConferenceInfo.User.STATUS_PENDING, 0, 0);
             }
 
@@ -1489,7 +1489,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
                 MtcCallUtils.addUser(usersInfo, 0L, participants[i]);
 
-                ci.addUserForInterimStatus(null, 0, participants[i],
+                ci.addUserForInterimStatus(0, participants[i],
                         ConferenceInfo.User.STATUS_PENDING, 0, 0);
             }
         }
@@ -4751,10 +4751,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
                 // After the first merge, the foreground call will be closed.
                 ConferenceInfoHelper.addConferenceUser(confCallL.getCallId(),
-                        hostCallL.getCallId(), hostCallL.getConferenceUserId(),
+                        hostCallL.getConferenceUserId(),
                         hostCallL.getCallExtraInt(Call.EXTRA_CALL_CONNECTION_ID, 0));
                 ConferenceInfoHelper.addConferenceUser(confCallL.getCallId(),
-                        peerCallL.getCallId(), peerCallL.getConferenceUserId(),
+                        peerCallL.getConferenceUserId(),
                         peerCallL.getCallExtraInt(Call.EXTRA_CALL_CONNECTION_ID, 0));
             } else {
                 // FIXME: After removing one participant and if this user is re-joined,
@@ -4767,7 +4767,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 }
 
                 ConferenceInfoHelper.addConferenceUser(hostCallL.getCallId(),
-                        peerCallL.getCallId(), peerCallL.getConferenceUserId(),
+                        peerCallL.getConferenceUserId(),
                         peerCallL.getCallExtraInt(Call.EXTRA_CALL_CONNECTION_ID, 0));
             }
 
@@ -4818,7 +4818,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             // FIXME: Creates the interim event states
             ConferenceInfoHelper.addConferenceUser(confCallL.getCallId(),
-                    hostCallL.getCallId(), hostCallL.getConferenceUserId(), 0);
+                    hostCallL.getConferenceUserId(), 0);
 
             ConferenceInfo ci = ConferenceInfoHelper.getConferenceInfo(confCallL.getCallId());
 
@@ -4829,7 +4829,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
                 if (participants != null) {
                     for (int i = 0; i < participants.length; ++i) {
-                        ci.addUserForInterimStatus(null, 0, participants[i],
+                        ci.addUserForInterimStatus(0, participants[i],
                                 ConferenceInfo.User.STATUS_PENDING, 0, 0);
                     }
                 }
