@@ -152,7 +152,6 @@ public abstract class Apn extends Handler implements IApn {
     protected ImsNetworkCallback mNetworkCallback = null;
     protected ImsNetworkCallback mNetworkMonitoringCallback = null;
     protected int mApnEmployCount = 0;
-    protected boolean mESMCausePermanentFailure = false;
     protected boolean mIsMonitoringCallbackRegistered = false;
     protected int mSubId = MSimUtils.INVALID_SUB_ID;
     protected ApnSubscriptionListener mSubscriptionListener = null;
@@ -339,11 +338,6 @@ public abstract class Apn extends Handler implements IApn {
     @Override
     public int getApnEmployCount() {
         return mApnEmployCount;
-    }
-
-    @Override
-    public boolean isESMCausePermanentFailure() {
-        return mESMCausePermanentFailure;
     }
 
     @Override

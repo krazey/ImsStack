@@ -287,14 +287,6 @@ public class ApnTest {
     }
 
     @Test
-    public void testEsmCausePermanentFailure() throws Exception {
-        assertFalse(mApn.isESMCausePermanentFailure());
-
-        mApn.mESMCausePermanentFailure = true;
-        assertTrue(mApn.isESMCausePermanentFailure());
-    }
-
-    @Test
     public void testGetCachedNetwork_AllCallbackNull() throws Exception {
         // return null when both NetworkCallback and NetworkMonitoringCallback is null
         assertNull(mApn.mNetworkCallback);

@@ -67,11 +67,6 @@ public class ApnXcap extends Apn {
             return true;
         }
 
-        if (mESMCausePermanentFailure) {
-            ImsLog.w(mSlotId, "permanent apn block because of esm until next bootup.");
-            return false;
-        }
-
         requestNetwork();
         setApnReqState(EApnReqState.APN_REQUEST_DONE);
         setDataState(TelephonyManager.DATA_CONNECTING);
