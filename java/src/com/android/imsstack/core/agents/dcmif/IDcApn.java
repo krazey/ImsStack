@@ -270,33 +270,6 @@ public interface IDcApn extends IDc {
     Network getNetworkByCapability(int apnType);
 
     /**
-     * getNetworkByCapabilityWithTransportType
-     *
-     * This API is mode to get a certain network associated with capability and transport type.
-     * It could be used when the transport type should be considered.
-     * ex. In case of both Wi-Fi and INTERNET PDN are connected.
-     *
-     * @param
-     *         apnType
-     *             EApnType.IMS.getType()
-     *             EApnType.INTERNET.getType()
-     *             EApnType.XCAP.getType()
-     *             EApnType.EMERGENCY.getType()
-     *          transportType
-     *             NetworkCapabilities.TRANSPORT_CELLULAR = 0;
-     *             NetworkCapabilities.TRANSPORT_WIFI = 1;
-     *             NetworkCapabilities.TRANSPORT_BLUETOOTH = 2;
-     *             NetworkCapabilities.TRANSPORT_ETHERNET = 3;
-     *             NetworkCapabilities.TRANSPORT_VPN = 4;
-     *             NetworkCapabilities.TRANSPORT_WIFI_AWARE = 5;
-     *             NetworkCapabilities.TRANSPORT_LOWPAN = 6;
-     *             NetworkCapabilities.TRANSPORT_TEST = 7;
-     * @return
-     *         Network object
-     */
-    Network getNetworkByCapabilityWithTransportType(int apnType, int transportType);
-
-    /**
      * changeApnPermission
      *
      * This API is made to change Apn Permission for operator/service specific.

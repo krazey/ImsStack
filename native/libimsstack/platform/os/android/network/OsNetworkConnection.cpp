@@ -98,9 +98,9 @@ PUBLIC VIRTUAL OsNetworkConnection::~OsNetworkConnection()
 }
 
 PUBLIC VIRTUAL const IPAddress& OsNetworkConnection::GetLocalAddress(
-        IN IMS_SINT32 nIpVersion /*= 0 configuration-based*/) const
+        IN IMS_SINT32 nIpVersion /*= IPAddress::UNKNOWN configuration-based*/) const
 {
-    if (nIpVersion == 0)
+    if (nIpVersion == IPAddress::UNKNOWN)
     {
         return m_objLocalAddress;
     }
@@ -740,10 +740,8 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
     m_nIpcanCategory = PlatformContext::GetInstance()->GetSystem()->GetIpcanCategory(
             GetApnType(), GetSlotId());
 
-    /*
-        nIPVersion with -1 is for caching ip address
-        and selecting ip version based on configuration in java side
-    */
+    // nIPVersion with -1 is for caching ip address
+    // and selecting ip version based on configuration in java side
     AString strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
             GetApnType(), -1, GetSlotId());
 

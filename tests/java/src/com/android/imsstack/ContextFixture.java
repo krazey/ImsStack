@@ -43,7 +43,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -57,7 +56,6 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkPolicyManager;
 import android.net.Uri;
 import android.net.vcn.VcnManager;
@@ -70,7 +68,6 @@ import android.os.PersistableBundle;
 import android.os.SystemConfigManager;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
@@ -341,6 +338,8 @@ public class ContextFixture implements TestFixture<Context> {
                 return Context.TELEPHONY_REGISTRY_SERVICE;
             } else if (serviceClass == NetworkPolicyManager.class) {
                 return Context.NETWORK_POLICY_SERVICE;
+            } else if (serviceClass == WifiManager.class) {
+                return Context.WIFI_SERVICE;
             }
             return super.getSystemServiceName(serviceClass);
         }

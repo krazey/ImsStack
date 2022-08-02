@@ -223,26 +223,6 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     @Override
-    public IDcSettings getSettings() {
-        return mDcSettings;
-    }
-
-    @Override
-    public void setSettings(IDcSettings dcSettings) {
-        this.mDcSettings = dcSettings;
-    }
-
-    @Override
-    public IDcNetWatcher getNetWatcher() {
-        return mDcNetWatcher;
-    }
-
-    @Override
-    public void setNetWatcher(IDcNetWatcher dcNetWatcher) {
-        this.mDcNetWatcher = dcNetWatcher;
-    }
-
-    @Override
     public Context getContext() {
         return mContext;
     }
@@ -324,15 +304,16 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     @Override
-    public void employApn() {
-        mApnEmployCount++;
+    public int employApn() {
+        return ++mApnEmployCount;
     }
 
     @Override
-    public void dismissApn() {
+    public int dismissApn() {
         if (mApnEmployCount > 0) {
             mApnEmployCount--;
         }
+        return mApnEmployCount;
     }
 
     @Override

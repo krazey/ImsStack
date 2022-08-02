@@ -32,30 +32,6 @@ public interface IApn {
     void cleanup();
 
     /**
-     * Set reference of DcSettings object in each apn object.
-     * If Apn object refer to DcSettings object directly, it cause Circular reference.
-     * So, when DcApn set reference of DcSettings to Apn to prevent circular reference.
-     */
-    void setSettings(IDcSettings settings);
-
-    /**
-     * Return DcSettings object.
-     */
-    IDcSettings getSettings();
-
-    /**
-     * Set reference of DcNetWatcher object in each apn object.
-     * If Apn object refer to DcSettings object directly, it cause Circular reference.
-     * So, when DcApn set reference of DcNetWatcher to Apn to prevent circular reference.
-     */
-    void setNetWatcher(IDcNetWatcher netWatcher);
-
-    /**
-     * Return DcNetWatcher object.
-     */
-    IDcNetWatcher getNetWatcher();
-
-    /**
      * Add/Remove Listener to receive ip category chaged event
      */
     void addListener(ApnStateListener listener);
@@ -119,12 +95,12 @@ public interface IApn {
     /**
      * Set to use this apn. This api increase the value of EmployCount.
      */
-    void employApn();
+    int employApn();
 
     /**
      * Set not to use this apn. This api decreate the value of EmployCount.
      */
-    void dismissApn();
+    int dismissApn();
 
     /**
      * Return how many service was registered to use  use this apn.

@@ -83,7 +83,7 @@ import java.lang.reflect.Field;
 public class ApnTest {
     private static final int SLOT_0 = 0;
     static ContextFixture sContext;
-    Apn mApn;
+    FakeApn mApn;
 
     @Mock private Apn.ImsNetworkCallback mMockNetworkCallback;
     @Mock private Apn.ImsNetworkCallback mMockNetworkMonitoringCallback;
@@ -165,18 +165,6 @@ public class ApnTest {
         assertEquals(EApnReqState.APN_REQUEST_IDLE, mApn.getApnReqState());
         verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
                 mApn.mType.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
-    }
-
-    @Test
-    public void testSettingsInterface() throws Exception {
-        mApn.setSettings(mMockIDcSettings);
-        assertEquals(mMockIDcSettings, mApn.getSettings());
-    }
-
-    @Test
-    public void testNetWatcherInterface() throws Exception {
-        mApn.setNetWatcher(mMockIDcNetWatcher);
-        assertEquals(mMockIDcNetWatcher, mApn.getNetWatcher());
     }
 
     @Test
@@ -1065,7 +1053,7 @@ public class ApnTest {
     }
 
     private class FakeApn extends Apn {
-        private FakeApn(Context context, int slotId) {
+        FakeApn(Context context, int slotId) {
             super(context, slotId);
         }
     }

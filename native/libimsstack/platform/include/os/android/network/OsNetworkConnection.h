@@ -61,7 +61,7 @@ public:
 
 public:
     const IPAddress& GetLocalAddress(
-            IN IMS_SINT32 nIpVersion = 0 /*configuration-based*/) const override;
+            IN IMS_SINT32 nIpVersion = IPAddress::UNKNOWN /*configuration-based*/) const override;
 
 private:
     // INetworkConnection class

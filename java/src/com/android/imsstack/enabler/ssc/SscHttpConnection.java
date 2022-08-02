@@ -17,7 +17,6 @@
 package com.android.imsstack.enabler.ssc;
 
 import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.dcm.DcFactory;
@@ -96,12 +95,7 @@ public class SscHttpConnection implements ISscHttpConnection {
             Network nw = null;
             IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
             if (dcGovApnCtrl != null) {
-                if (mApnType.equals(EApnType.INTERNET)) {
-                    nw = dcGovApnCtrl.getNetworkByCapabilityWithTransportType(mApnType.getType(),
-                        NetworkCapabilities.TRANSPORT_CELLULAR);
-                } else {
-                    nw = dcGovApnCtrl.getNetworkByCapability(mApnType.getType());
-                }
+                nw = dcGovApnCtrl.getNetworkByCapability(mApnType.getType());
             }
 
             if (nw == null) {
