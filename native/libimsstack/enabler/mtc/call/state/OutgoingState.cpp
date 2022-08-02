@@ -411,6 +411,12 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* p
 
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDeliveryFailed(IN ISession* piSession)
 {
+    if (m_objContext.GetConfigurationProxy().Is(Feature::IGNORE_PRACK_DELIVERY_FAILURE))
+    {
+        IMS_TRACE_D("SessionPRAckDeliveryFailed : Ignore", 0, 0, 0);
+        return GetStateName();
+    }
+
     IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_PRACK);
     IMS_TRACE_D("SessionPRAckDeliveryFailed statusCode[%d]", nStatusCode, 0, 0);
     CallReasonInfo objReason = CallReasonInfo(
