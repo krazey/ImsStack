@@ -134,11 +134,6 @@ public interface IApn {
     int getApnEmployCount();
 
     /**
-     * Returns mESMCausePermanentFailure (true/false)
-     */
-    boolean isESMCausePermanentFailure();
-
-    /**
      * Return cached network of APN
      */
     Network getCachedNetwork();

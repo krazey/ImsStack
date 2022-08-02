@@ -111,13 +111,9 @@ public class ApnXcapTest {
     public void testConnect() throws Exception {
         // do not handle request to connect because ApnIms is not enabled
         assertFalse(mApnXcap.connect());
-        mApnXcap.mESMCausePermanentFailure = true;
-        // do not handle request to connect if it fails permanently before
-        assertFalse(mApnXcap.connect());
 
         // handle request to connect if ApnIms is enabled
         mApnXcap.employApn();
-        mApnXcap.mESMCausePermanentFailure = false;
         assertTrue(mApnXcap.connect());
         assertEquals(mApnXcap.getApnReqState(), EApnReqState.APN_REQUEST_DONE);
         assertEquals(mApnXcap.getDataState(), TelephonyManager.DATA_CONNECTING);
