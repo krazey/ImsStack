@@ -39,7 +39,7 @@ import android.testing.TestableLooper;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
-import com.android.imsstack.jni.JNIImsListener;
+import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.util.ImsArgs;
 
 import org.junit.After;
@@ -67,7 +67,7 @@ public class MtcCallTest extends ImsStackTest {
     @Mock private MediaInfo mMediaInfo;
     @Mock private MtcJniProxy mMtcJniProxy;
     @Mock private MtcCall mConferenceMtcCall;
-    @Captor ArgumentCaptor<JNIImsListener> mJNIImsListenerCaptor;
+    @Captor ArgumentCaptor<JniImsListener> mJNIImsListenerCaptor;
     private int mCommand;
     private boolean mClearInterface;
     private String mCcid;
@@ -79,12 +79,12 @@ public class MtcCallTest extends ImsStackTest {
     private class TestMtcJniProxy extends MtcJniProxy {
         @Override
         public long getJniInterfaceAndSetListener(
-                int nSlot, int category, JNIImsListener listener) {
+                int nSlot, int category, JniImsListener listener) {
             return (long) 1;
         }
 
         @Override
-        public void releaseJniInterfaceAndrRemoveListener(long nativeObj, JNIImsListener listener) {
+        public void releaseJniInterfaceAndrRemoveListener(long nativeObj, JniImsListener listener) {
             mClearInterface = true;
         }
 

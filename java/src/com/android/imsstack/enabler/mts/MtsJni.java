@@ -23,8 +23,8 @@ import android.os.Parcel;
 
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mts.MtsController;
-import com.android.imsstack.jni.JNIIms;
-import com.android.imsstack.jni.JNIImsListener;
+import com.android.imsstack.jni.JniIms;
+import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.HashMap;
@@ -65,11 +65,11 @@ public class MtsJni {
     public void init(Handler handler, int slotId) {
         ImsLog.d(slotId, "");
         if (!mMtsJniImsListenerMap.containsKey(slotId)) {
-            long nativeObj = JNIIms.getInterface(IUIMS.APP_MTS, slotId);
+            long nativeObj = JniIms.getInterface(IUIMS.APP_MTS, slotId);
             ImsLog.i(slotId, "mNativeObj: " + nativeObj);
             mNativeObjMap.put(slotId, nativeObj);
             mMtsJniImsListenerMap.put(slotId, new MtsJniImsListener());
-            JNIIms.setListener(nativeObj, mMtsJniImsListenerMap.get(slotId));
+            JniIms.setListener(nativeObj, mMtsJniImsListenerMap.get(slotId));
         }
         mHandler = handler;
     }
@@ -81,8 +81,8 @@ public class MtsJni {
             MtsJniImsListener mMtsJniImsListener = mMtsJniImsListenerMap.get(slotId);
             long nativeObj = mNativeObjMap.get(slotId);
             ImsLog.i(slotId, "mNativeObj: " + nativeObj);
-            JNIIms.releaseInterface(nativeObj);
-            JNIIms.removeListener(nativeObj, mMtsJniImsListener);
+            JniIms.releaseInterface(nativeObj);
+            JniIms.removeListener(nativeObj, mMtsJniImsListener);
         }
 
         mNativeObjMap.remove(slotId);
@@ -103,14 +103,14 @@ public class MtsJni {
         byte[] baData = parcel.marshall();
 
         if (mNativeObjMap.containsKey(slotId)) {
-            JNIIms.sendData(mNativeObjMap.get(slotId), baData);
+            JniIms.sendData(mNativeObjMap.get(slotId), baData);
         }
 
         parcel.recycle();
         parcel = null;
     }
 
-    private class MtsJniImsListener implements JNIImsListener {
+    private class MtsJniImsListener implements JniImsListener {
         @Override
         public void onMessage(Parcel parcel) {
             int msgName = parcel.readInt();

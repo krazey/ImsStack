@@ -37,7 +37,7 @@ import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
 import com.android.imsstack.enabler.mtc.dialogs.IUDialogs;
-import com.android.imsstack.jni.JNIImsListener;
+import com.android.imsstack.jni.JniImsListener;
 
 import org.junit.After;
 import org.junit.Before;
@@ -64,12 +64,12 @@ public class MtcAppTest extends ImsStackTest {
     private class TestMtcJniProxy extends MtcJniProxy {
         @Override
         public long getJniInterfaceAndSetListener(
-                int nSlot, int category, JNIImsListener listener) {
+                int nSlot, int category, JniImsListener listener) {
             return (long) 1;
         }
 
         @Override
-        public void releaseJniInterfaceAndrRemoveListener(long nativeObj, JNIImsListener listener) {
+        public void releaseJniInterfaceAndrRemoveListener(long nativeObj, JniImsListener listener) {
         }
 
         @Override

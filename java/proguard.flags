@@ -9,6 +9,6 @@
     native <methods>;
 }
 
--keep public class com.android.imsstack.jni.JNIIms{
+-keep public class com.android.imsstack.jni.JniIms{
     *;
 }

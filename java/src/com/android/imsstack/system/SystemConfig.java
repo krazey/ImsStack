@@ -2,7 +2,7 @@ package com.android.imsstack.system;
 
 import android.os.Parcel;
 
-import com.android.imsstack.jni.JNIIms;
+import com.android.imsstack.jni.JniIms;
 
 /**
  * This class indicates the system configuration.
@@ -178,7 +178,7 @@ public final class SystemConfig {
 
     public static void setConfigurationEvent(int event) {
         // 2nd argument: unused data
-        JNIIms.setConfiguration(event, new byte[] {0});
+        JniIms.setConfiguration(event, new byte[] {0});
     }
 
     public static void setConfiguration(int event, SystemConfig[] scs) {
@@ -223,6 +223,6 @@ public final class SystemConfig {
         p.recycle();
         p = null;
 
-        JNIIms.setConfiguration(event, data);
+        JniIms.setConfiguration(event, data);
     }
 }

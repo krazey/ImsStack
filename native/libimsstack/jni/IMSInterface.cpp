@@ -60,7 +60,7 @@ static jmethodID s_methodSendDataToJavaEx;
 
 // For system configuration on boot-up
 static android::Parcel* s_pParcelForSystemConfigOnBootup = IMS_NULL;
-static const char* s_szClassJniImsPath = "com/android/imsstack/jni/JNIIms";
+static const char* s_szClassJniImsPath = "com/android/imsstack/jni/JniIms";
 
 static JavaVM* s_javaVm = NULL;
 

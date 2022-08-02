@@ -21,7 +21,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.enabler.aos.AosFactory;
-import com.android.imsstack.jni.JNIIms;
+import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.system.SystemConfig;
 import com.android.imsstack.system.SystemInterface;
@@ -220,7 +220,7 @@ public class CommonStarter {
 
         updateSystemConfigForBootup();
 
-        JNIIms.construct();
+        JniIms.construct();
 
         mJNIReady = true;
     }

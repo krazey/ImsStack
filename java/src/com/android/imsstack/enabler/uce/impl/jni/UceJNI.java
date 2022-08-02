@@ -20,8 +20,8 @@ import android.os.Parcel;
 
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
-import com.android.imsstack.jni.JNIIms;
-import com.android.imsstack.jni.JNIImsListener;
+import com.android.imsstack.jni.JniIms;
+import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.ArrayList;
@@ -51,11 +51,11 @@ public class UceJNI {
     public void init(int nSimSlot) {
         ImsLog.d(nSimSlot, "");
         if (!mUceJNIImsListenerMap.containsKey(nSimSlot)) {
-            long nativeObj = JNIIms.getInterface(INTERFACETYPE_IMS_UCE, nSimSlot);
+            long nativeObj = JniIms.getInterface(INTERFACETYPE_IMS_UCE, nSimSlot);
             ImsLog.i(nSimSlot, "mNativeObj: " + nativeObj);
             mNativeObjMap.put(nSimSlot, nativeObj);
             mUceJNIImsListenerMap.put(nSimSlot, new UceJNIImsListener());
-            JNIIms.setListener(nativeObj, mUceJNIImsListenerMap.get(nSimSlot));
+            JniIms.setListener(nativeObj, mUceJNIImsListenerMap.get(nSimSlot));
         }
     }
 
@@ -65,8 +65,8 @@ public class UceJNI {
             UceJNIImsListener mUceJNIImsListener = mUceJNIImsListenerMap.get(nSimSlot);
             long nativeObj = mNativeObjMap.get(nSimSlot);
             ImsLog.i(nSimSlot, "mNativeObj: " + nativeObj);
-            JNIIms.releaseInterface(nativeObj);
-            JNIIms.removeListener(nativeObj, mUceJNIImsListener);
+            JniIms.releaseInterface(nativeObj);
+            JniIms.removeListener(nativeObj, mUceJNIImsListener);
         }
         mNativeObjMap.remove(nSimSlot);
         mUceJNIImsListenerMap.remove(nSimSlot);
@@ -92,14 +92,14 @@ public class UceJNI {
         byte[] baData = parcel.marshall();
 
         if (mNativeObjMap.containsKey(nSimSlot)) {
-            JNIIms.sendData(mNativeObjMap.get(nSimSlot), baData);
+            JniIms.sendData(mNativeObjMap.get(nSimSlot), baData);
         }
 
         parcel.recycle();
         parcel = null;
     }
 
-    private class UceJNIImsListener implements JNIImsListener{
+    private class UceJNIImsListener implements JniImsListener{
         private HashMap<Integer, ArrayList<IUceJNIListener>> mListenersMap =
             new HashMap<Integer, ArrayList<IUceJNIListener>>();
         private Map<Integer, UceJNIMessageHandlerFunc> mMessageHandler =

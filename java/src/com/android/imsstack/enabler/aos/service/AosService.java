@@ -31,8 +31,8 @@ import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.aos.IIAosService;
-import com.android.imsstack.jni.JNIIms;
-import com.android.imsstack.jni.JNIImsListener;
+import com.android.imsstack.jni.JniIms;
+import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.ImsLog;
@@ -68,9 +68,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
         mHandler = new AosServiceHandler();
 
-        mNativeObject = JNIIms.getInterface(IUIMS.AOS_SERVICE, mSlotId);
+        mNativeObject = JniIms.getInterface(IUIMS.AOS_SERVICE, mSlotId);
         if (mNativeObject != 0) {
-            JNIIms.setListener(mNativeObject, mNativeListener);
+            JniIms.setListener(mNativeObject, mNativeListener);
         }
 
         IJNIUpCallEvt jniEvt = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
@@ -94,8 +94,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             return;
         }
 
-        JNIIms.removeListener(mNativeObject, mNativeListener);
-        JNIIms.releaseInterface(mNativeObject);
+        JniIms.removeListener(mNativeObject, mNativeListener);
+        JniIms.releaseInterface(mNativeObject);
         mNativeObject = 0;
         mSlotId = MSimUtils.DEFAULT_SLOT_ID;
     }
@@ -382,7 +382,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         parcel.recycle();
         parcel = null;
 
-        JNIIms.sendData(mNativeObject, data);
+        JniIms.sendData(mNativeObject, data);
     }
 
     private void notifyCapabilitiesChanged() {
@@ -646,7 +646,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
-    private class JNIImsListenerProxy implements JNIImsListener {
+    private class JNIImsListenerProxy implements JniImsListener {
 
         @Override
         public void onMessage(Parcel parcel) {

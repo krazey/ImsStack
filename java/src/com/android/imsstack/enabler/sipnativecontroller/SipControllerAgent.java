@@ -24,8 +24,8 @@ import android.util.SparseArray;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.imsservice.sipcontroller.remote.ISipTransportRemote;
 import com.android.imsstack.imsservice.sipcontroller.remote.SipTransportRemoteListener;
-import com.android.imsstack.jni.JNIIms;
-import com.android.imsstack.jni.JNIImsListener;
+import com.android.imsstack.jni.JniIms;
+import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Set;
@@ -35,7 +35,7 @@ import java.util.Set;
  * Connect SipController and SipNativeController using IsipTransportRemote
  * Start SipNativeController service through JNI
  */
-public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
+public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
     private long mNativeObj = 0;
     private SipTransportRemoteListener mListener = null;
@@ -66,10 +66,10 @@ public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
 
     private void initService(int slotId) {
 
-        long nativeObj = JNIIms.getInterface(IUIMS.APP_SIP_DELEGATE, slotId);
+        long nativeObj = JniIms.getInterface(IUIMS.APP_SIP_DELEGATE, slotId);
         mNativeObj = nativeObj;
         if (nativeObj != 0) {
-            JNIIms.setListener(nativeObj, this);
+            JniIms.setListener(nativeObj, this);
         } else {
             ImsLog.e("nativeObj is 0");
         }
@@ -81,8 +81,8 @@ public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
     @Override
     public void release() {
 
-        JNIIms.removeListener(mNativeObj, this);
-        JNIIms.releaseInterface(mNativeObj);
+        JniIms.removeListener(mNativeObj, this);
+        JniIms.releaseInterface(mNativeObj);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class SipControllerAgent implements ISipTransportRemote, JNIImsListener {
         parcel = null;
 
         if (mNativeObj != 0) {
-            JNIIms.sendData(mNativeObj, baData);
+            JniIms.sendData(mNativeObj, baData);
         }
     }
 

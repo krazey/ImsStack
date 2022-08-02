@@ -27,7 +27,7 @@ import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
 import com.android.imsstack.enabler.mtc.dialogs.IUDialogs;
-import com.android.imsstack.jni.JNIImsListener;
+import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -268,7 +268,7 @@ public class MtcApp implements Closeable {
     }
 
     @VisibleForTesting
-    public JNIImsListener getNativeListener() {
+    public JniImsListener getNativeListener() {
         return mNativeListener;
     }
 
@@ -365,7 +365,7 @@ public class MtcApp implements Closeable {
         ImsLog.i("[GII-MTC] " + s);
     }
 
-    private class JNIImsListenerProxy implements JNIImsListener {
+    private class JNIImsListenerProxy implements JniImsListener {
         @Override
         public void onMessage(Parcel parcel) {
             int msg = parcel.readInt();

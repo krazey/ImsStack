@@ -23,8 +23,8 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.jni.JNIIms;
-import com.android.imsstack.jni.JNIImsListenerEx;
+import com.android.imsstack.jni.JniIms;
+import com.android.imsstack.jni.JniSystemListener;
 import com.android.imsstack.system.SystemConstants;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -38,7 +38,10 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
-public class SystemInterface implements JNIImsListenerEx {
+/**
+ * This class provides the system interfaces to communicate with native and Java layer.
+ */
+public class SystemInterface implements JniSystemListener {
     // Constants--------------------------------------------------
     // Variables--------------------------------------------------
     private static SystemInterface sSystemInterface = new SystemInterface();
@@ -74,10 +77,10 @@ public class SystemInterface implements JNIImsListenerEx {
         if (mNativeObject == 0) {
             sSystemInterface = this;
 
-            mNativeObject = JNIIms.getInterface(
+            mNativeObject = JniIms.getInterface(
                     SystemConstants.SYSTEM_INTERFACE, MSimUtils.DEFAULT_SLOT_ID);
 
-            JNIIms.setListenerEx(mNativeObject, this);
+            JniIms.setSystemListener(mNativeObject, this);
             mDefaultExecutor.start();
 
             if (ImsLog.DBG) {
@@ -92,8 +95,8 @@ public class SystemInterface implements JNIImsListenerEx {
     public void cleanup() {
         if (mNativeObject != 0) {
             mDefaultExecutor = null;
-            JNIIms.removeListenerEx(mNativeObject, this);
-            JNIIms.releaseInterface(mNativeObject);
+            JniIms.removeSystemListener(mNativeObject, this);
+            JniIms.releaseInterface(mNativeObject);
             mNativeObject = 0;
         }
     }
@@ -810,7 +813,7 @@ public class SystemInterface implements JNIImsListenerEx {
         byte[] baData = parcel.marshall();
 
         try {
-            baDataRet = JNIIms.sendDataEx(mNativeObject, baData);
+            baDataRet = JniIms.sendDataEx(mNativeObject, baData);
         } catch (RuntimeException e) {
             ImsLog.e(e.getStackTrace().toString() + " cmd : " + nCmd);
             return;

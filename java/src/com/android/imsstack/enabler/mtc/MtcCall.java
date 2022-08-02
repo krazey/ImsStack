@@ -25,7 +25,7 @@ import android.text.TextUtils;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
-import com.android.imsstack.jni.JNIImsListener;
+import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.util.ImsArgs;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -1581,7 +1581,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
     }
 
-    private class JNIImsListenerProxy implements JNIImsListener {
+    private class JNIImsListenerProxy implements JniImsListener {
         @Override
         public void onMessage(Parcel parcel) {
             byte[] data = parcel.marshall();
