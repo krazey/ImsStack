@@ -149,11 +149,6 @@ PUBLIC VIRTUAL void AosRegStateManager::EnforceUpdateRegistration()
             ? IMS_REGISTRATION_OFFLINE
             : m_nRegDetailState;
 
-    IMS_EVENT_SendEventForSlotId(IMS_EVENT_REGISTRATION,
-            IMS_MAKEPARAM(
-                    ((IsRegistered(m_nReportedRegDetailState)) ? 1 : 0), m_nReportedRegServices),
-            IMS_MAKEPARAM(m_nRegReason, m_nReportedRegDetailState), GetSlotId());
-
     m_nRegReason = 0;
 }
 
@@ -189,11 +184,6 @@ PUBLIC VIRTUAL void AosRegStateManager::UpdateRegistration()
         {
             return;
         }
-
-        IMS_EVENT_SendEventForSlotId(IMS_EVENT_REGISTRATION,
-                IMS_MAKEPARAM(((IsRegistered(m_nReportedRegDetailState)) ? 1 : 0),
-                        m_nReportedRegServices),
-                IMS_MAKEPARAM(nReason, m_nReportedRegDetailState), GetSlotId());
     }
 }
 

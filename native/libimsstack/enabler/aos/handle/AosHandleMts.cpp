@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceEvent.h"
 #include "ServiceTrace.h"
 #include "CarrierConfig.h"
 #include "INetworkWatcher.h"
@@ -129,8 +128,6 @@ PROTECTED VIRTUAL void AosHandleMts::Init()
 
     InitializeSupportedRats();
     AosHandle::Init();
-
-    IMS_EVENT_AddListenerForSlotId(IMS_EVENT_CONFIG_UPDATE, this, m_nSlotId);
 }
 
 /*
@@ -143,8 +140,6 @@ PROTECTED VIRTUAL void AosHandleMts::CleanUp()
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
 
     AosHandle::CleanUp();
-
-    IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_CONFIG_UPDATE, this, m_nSlotId);
 }
 
 /* jryou::TODO

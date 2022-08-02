@@ -17,6 +17,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "ImsEventDef.h"
+
 #include "interface/IAosAppContext.h"
 #include "provider/AosLocationStarter.h"
 
@@ -30,9 +32,6 @@ using ::testing::ReturnNull;
 
 static const IMS_UINT32 DEFAULT_SHORT_UPDATE_INTERVAL = 300;
 static const IMS_UINT32 TIMER_STOP_DELAY = 0;
-static const IMS_UINT32 IMS_EVENT_WFC_SETTING_CHANGED = 0x00040000;
-static const IMS_UINT32 IMS_WFC_ON = 1;
-static const IMS_UINT32 IMS_WFC_OFF = 0;
 
 class AosLocationStarterTest : public ::testing::Test
 {

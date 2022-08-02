@@ -393,13 +393,6 @@ public class VoLteService implements IVoLteService {
         ISystem system = SystemInterface.getInstance().getSystem(mSlotID);
 
         if (ImsGlobal.equalsOperatorCountry(mOperator, mCountry, "ATT", "US")) {
-            if (system != null) {
-                system.notifyEvent(ImsEventDef.IMS_EVENT_MOBILE_DATA_SETTING,
-                        SettingsUtils.isMobileDataEnabled(mContext.getContentResolver()) ?
-                        ImsEventDef.IMS_MOBILE_DATA_SETTING_ON :
-                        ImsEventDef.IMS_MOBILE_DATA_SETTING_OFF, 0);
-            }
-
             // VoLTE initial start case
             updateServiceProvisioned(getSlotID());
 
@@ -418,11 +411,6 @@ public class VoLteService implements IVoLteService {
             system.notifyEvent(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED,
                 SettingsUtils.isWFCImsEnabled(mContext, getSlotID()) ? 1 : 0,
                 SettingsUtils.getWFCImsMode(mContext, getSlotID()));
-
-            system.notifyEvent(ImsEventDef.IMS_EVENT_MOBILE_DATA_SETTING,
-                    SettingsUtils.isMobileDataEnabled(mContext.getContentResolver()) ?
-                    ImsEventDef.IMS_MOBILE_DATA_SETTING_ON :
-                    ImsEventDef.IMS_MOBILE_DATA_SETTING_OFF, 0);
 
             // IMS_RTT {
             if (CapabilityConfigs.isRttEnabled(mSlotID)) {
@@ -638,14 +626,6 @@ public class VoLteService implements IVoLteService {
                     availableServices |= IUIMS.M_APP_SMS;
                 }
             }
-
-            ISystem system = SystemInterface.getInstance().getSystem(mSlotID);
-            if (system == null) {
-                return;
-            }
-
-            system.notifyEvent(ImsEventDef.IMS_EVENT_SERVICE_SETTING,
-                ImsEventDef.IMS_SERVICE_PRESENTITY, availableServices);
         }
     }
 

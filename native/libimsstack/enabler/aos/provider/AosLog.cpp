@@ -614,71 +614,20 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::EventToString(IN IMS_SINT32 nEvent)
         case IMS_EVENT_ROAMING_STATE:
             return "IMS_EVENT_ROAMING_STATE";
 
-        case IMS_EVENT_SERVICE_SETTING:
-            return "IMS_EVENT_SERVICE_SETTING";
-
         case IMS_EVENT_IMS_VOICE_OVER_PS_STATE:
             return "IMS_EVENT_IMS_VOICE_OVER_PS_STATE";
-
-        case IMS_EVENT_UEINITIATED_IMSPDN_DISCONNECTION:
-            return "IMS_EVENT_UEINITIATED_IMSPDN_DISCONNECTION";
-
-        case IMS_EVENT_DATA_MODE:
-            return "IMS_EVENT_DATA_MODE";
 
         case IMS_EVENT_CSCALL_STATE:
             return "IMS_EVENT_CSCALL_STATE";
 
-        case IMS_EVENT_WPS_CALL_STATE:
-            return "IMS_EVENT_WPS_CALL_STATE";
-
-        case IMS_EVENT_RADIO_OFF:
-            return "IMS_EVENT_RADIO_OFF";
-
         case IMS_EVENT_LTE_STATE:
             return "IMS_EVENT_LTE_STATE";
-
-        case IMS_EVENT_VOIP_SETTING:
-            return "IMS_EVENT_VOIP_SETTING";
 
         case IMS_EVENT_WFC_SETTING_CHANGED:
             return "IMS_EVENT_WFC_SETTING_CHANGED";
 
-        case IMS_EVENT_MOBILE_DATA_SETTING:
-            return "IMS_EVENT_MOBILE_DATA_SETTING";
-
-        case IMS_EVENT_VIDEO_SETTING:
-            return "IMS_EVENT_VIDEO_SETTING";
-
-        case IMS_EVENT_VOIP_NETWORK_CAPAVILITY:
-            return "IMS_EVENT_VOIP_NETWORK_CAPAVILITY";
-
-        case IMS_EVENT_REG_PREF_STATE:
-            return "IMS_EVENT_REG_PREF_STATE";
-
-        case IMS_EVENT_OMADM_UPDATED:
-            return "IMS_EVENT_OMADM_UPDATED";
-
-        case IMS_EVENT_NETWORK_CAPABILITY:
-            return "IMS_EVENT_NETWORK_CAPABILITY";
-
-        case IMS_EVENT_ROAMING_PREFERRED_VOICE_CALL_NETWORK:
-            return "IMS_EVENT_ROAMING_PREFERRED_VOICE_CALL_NETWORK";
-
         case IMS_EVENT_VOLTE_SETTING:
             return "IMS_EVENT_VOLTE_SETTING";
-
-        case IMS_EVENT_DATA_ROAMING_SETTING:
-            return "IMS_EVENT_DATA_ROAMING_SETTING";
-
-        case IMS_EVENT_MOBILE_DATA_LIMIT_CHANGED:
-            return "IMS_EVENT_MOBILE_DATA_LIMIT_CHANGED";
-
-        case IMS_EVENT_SYNC_TO_NATIVE:
-            return "IMS_EVENT_SYNC_TO_NATIVE";
-
-        case IMS_EVENT_AVAIL_RAT_INFO_CHANGED:
-            return "IMS_EVENT_AVAIL_RAT_INFO_CHANGED";
 
         default:
             return "__INVALID__";

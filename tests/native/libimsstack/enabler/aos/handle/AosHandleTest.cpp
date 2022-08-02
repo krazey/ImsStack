@@ -1562,9 +1562,7 @@ TEST_F(AosHandleTest, GetBlock_Test)
 
     EXPECT_EQ(GetBlock(IMS_EVENT_ROAMING_STATE), AosHandle::BLOCK_NONE);
     EXPECT_EQ(GetBlock(IMS_EVENT_VOLTE_SETTING), AosHandle::BLOCK_NONE);
-    EXPECT_EQ(GetBlock(IMS_EVENT_VIDEO_SETTING), AosHandle::BLOCK_NONE);
     EXPECT_EQ(GetBlock(IMS_EVENT_WFC_SETTING_CHANGED), AosHandle::BLOCK_NONE);
-    EXPECT_EQ(GetBlock(IMS_EVENT_MOBILE_DATA_SETTING), AosHandle::BLOCK_NONE);
 }
 
 TEST_F(AosHandleTest, GetAosFeature_Test)
@@ -3894,11 +3892,7 @@ TEST_F(AosHandleTest, IsSupportedNetworkTypeForCellular_Test)
 TEST_F(AosHandleTest, Event_NotifyEvent_Test)
 {
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, 1, 0);
-    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_OMADM_UPDATED, 1, 0);
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_ROAMING_STATE, 1, 0);
-    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_ROAMING_PREFERRED_VOICE_CALL_NETWORK, 1, 0);
-    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_CONFIG_UPDATE, 1, 0);
-    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_PHONE_RESTARTED, 1, 0);
 }
 
 TEST_F(AosHandleTest, RegistrationControl_NotifyCapabilitiesChanged_Test)

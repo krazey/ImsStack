@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceEvent.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
@@ -31,11 +30,7 @@ ConfigApp::ConfigApp(IN const AString& strAppName) :
 {
 }
 
-PUBLIC VIRTUAL
-ConfigApp::~ConfigApp()
-{
-    IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_CONFIG_UPDATE, this, GetSlotId());
-}
+PUBLIC VIRTUAL ConfigApp::~ConfigApp() {}
 
 PUBLIC
 void ConfigApp::Start()
@@ -48,7 +43,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigApp::OnMessage(IN ImsMessage& objMsg)
     switch (objMsg.GetName())
     {
         case AMSG_START:
-            IMS_EVENT_AddListenerForSlotId(IMS_EVENT_CONFIG_UPDATE, this, GetSlotId());
+            // no-op
             break;
         default:
             return IMS_FALSE;

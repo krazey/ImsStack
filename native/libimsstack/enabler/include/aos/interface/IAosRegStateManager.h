@@ -16,6 +16,21 @@
 #ifndef INTERFACE_AOS_REG_STATE_MANAGER_H_
 #define INTERFACE_AOS_REG_STATE_MANAGER_H_
 
+#define IMS_REG_OFF                                (0)
+#define IMS_REG_ON                                 (1)
+
+#define IMS_REGISTRATION_INVALID                   (-1)
+#define IMS_REGISTRATION_OFFLINE                   (0)
+#define IMS_REGISTRATION_REGISTERING               (1)
+#define IMS_REGISTRATION_REGISTERED                (2)
+#define IMS_REGISTRATION_REREGISTERING             (3)
+#define IMS_REGISTRATION_DEREGISTERING             (4)
+#define IMS_REGISTRATION_STOP                      (5)
+
+#define IMS_REGISTRATION_SERVICE_NONE              (0)
+
+#define IMS_REGISTRATION_REASON_BLOCK_NOTIFICATION (0x100)
+
 class IAosRegStateManager
 {
 public:

@@ -50,22 +50,11 @@ PRIVATE GLOBAL AString SipDebug::strLog2_1 = AString::ConstNull();
 PUBLIC GLOBAL void SipDebug::Send(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nMsgType,
         IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod, IN IMS_SINT32 nStatusCode /* = 0*/)
 {
-    // EVENT_IMS_DEBUG
-    // wParam
-    //    - HI : Category (SIP - 0, Media - 1, ...)
-    //    - LO (high 1byte) : SIP (REQ - 0, RESP - 1)
-    //    - LO (low 1byte) : DIR (OUT - 0, IN - 1)
-    // lParam
-    //    - HI : Method
-    //    - LO : StatusCode
-
-    if (!CheckIfDebugRequired(nSlotId, nMsgType, nDirection, nMethod, nStatusCode))
-    {
-        return;
-    }
-
-    IMS_EVENT_SendEventForSlotId(IMS_EVENT_DEBUG, ((nMsgType | nDirection) & 0xFFFFFFFF),
-            IMS_MAKEPARAM(nMethod, nStatusCode), nSlotId);
+    (void)nSlotId;
+    (void)nMsgType;
+    (void)nDirection;
+    (void)nMethod;
+    (void)nStatusCode;
 }
 
 // Methods for logging based on release mode
@@ -157,47 +146,6 @@ PUBLIC GLOBAL const AString& SipDebug::GetUri2(IN const AString& strValue)
     AString& strLog = (GetSimSlot() == IMS_SLOT_0) ? strLog2 : strLog2_1;
 
     return UtilService::GetLogString(strValue, strLog, 10);
-}
-
-PRIVATE GLOBAL IMS_BOOL SipDebug::CheckIfDebugRequired(IN IMS_SINT32 /* nSlotId*/,
-        IN IMS_SINT32 nMsgType, IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod,
-        IN IMS_SINT32 nStatusCode)
-{
-    IMS_BOOL bCheckDebugRequired = IMS_FALSE;
-
-    if (bCheckDebugRequired)
-    {
-        (void)nStatusCode;
-
-        if (nMethod == SipMethod::REGISTER)
-        {
-            if ((nMsgType == MSG_RSP) && (nDirection == DIR_IN))
-            {
-                return IMS_TRUE;
-            }
-        }
-        else if ((nMethod == SipMethod::INVITE) || (nMethod == SipMethod::BYE))
-        {
-            if (nMsgType == MSG_REQ)
-            {
-                return IMS_TRUE;
-            }
-        }
-
-        // KT
-        {
-            return ((nMsgType == MSG_RSP) && (nDirection == DIR_IN));
-        }
-    }
-    else
-    {
-        (void)nMsgType;
-        (void)nDirection;
-        (void)nMethod;
-        (void)nStatusCode;
-    }
-
-    return IMS_FALSE;
 }
 
 PRIVATE GLOBAL IMS_SINT32 SipDebug::GetSimSlot()
