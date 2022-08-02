@@ -32,7 +32,7 @@ PUBLIC
 TransactionTimerUpdateHelper::TransactionTimerUpdateHelper(IN IMtcSessionContext& objContext) :
         m_nSlotId(objContext.GetSlotId()),
         m_objConfiguration(objContext.GetConfigurationProxy()),
-        m_bWifi(objContext.GetService().IsWifiRegistered())
+        m_bWifi(objContext.GetService().IsWlanIpCanType())
 {
     IMS_TRACE_I("+TransactionTimerUpdateHelper", 0, 0, 0);
 }

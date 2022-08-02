@@ -41,7 +41,6 @@ public:
     virtual IMS_BOOL IsActive() const = 0;
     virtual IMS_BOOL IsEmergency() const = 0;
     virtual IMS_BOOL IsWlanIpCanType() const = 0;
-    virtual IMS_BOOL IsWifiRegistered() const = 0;
     virtual ServiceStatus GetServiceStatus() const = 0;
     virtual ICoreService* GetICoreService() const = 0;
     virtual IMtcAosConnector* GetAosConnector() const = 0;

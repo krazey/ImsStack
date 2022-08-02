@@ -41,7 +41,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsActive, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergency, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsWlanIpCanType, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsWifiRegistered, (), (const, override));
     MOCK_METHOD(ServiceStatus, GetServiceStatus, (), (const, override));
     MOCK_METHOD(ICoreService*, GetICoreService, (), (const, override));
     MOCK_METHOD(IMtcAosConnector*, GetAosConnector, (), (const, override));

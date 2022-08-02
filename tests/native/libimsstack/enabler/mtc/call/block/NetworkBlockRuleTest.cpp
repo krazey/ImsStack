@@ -60,25 +60,10 @@ TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfInEpdg)
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
-TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfWifiRegistered)
-{
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objService, IsWifiRegistered)
-            .WillByDefault(Return(IMS_TRUE));
-
-    Result objResult = pBlockRule->Check(objListener);
-
-    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
-}
-
 TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfLte)
 {
     ON_CALL(objService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objService, IsWifiRegistered)
-            .WillByDefault(Return(IMS_FALSE));
-
     ON_CALL(objNetworkWatcher, GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_LTE));
 
@@ -91,9 +76,6 @@ TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfNr)
 {
     ON_CALL(objService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objService, IsWifiRegistered)
-            .WillByDefault(Return(IMS_FALSE));
-
     ON_CALL(objNetworkWatcher, GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_NR));
 
@@ -106,9 +88,6 @@ TEST_F(NetworkBlockRuleTest, CheckReturnsBlockedIfNotSupportedNetwork)
 {
     ON_CALL(objService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objService, IsWifiRegistered)
-            .WillByDefault(Return(IMS_FALSE));
-
     ON_CALL(objService, GetAosConnector)
             .WillByDefault(Return(nullptr));
 

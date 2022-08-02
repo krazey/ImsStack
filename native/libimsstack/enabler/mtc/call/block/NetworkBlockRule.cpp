@@ -34,7 +34,7 @@ PUBLIC VIRTUAL NetworkBlockRule::~NetworkBlockRule() {}
 PUBLIC VIRTUAL NetworkBlockRule::Result NetworkBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-    if (m_objService.IsWlanIpCanType() || m_objService.IsWifiRegistered())
+    if (m_objService.IsWlanIpCanType())
     {
         return Result(Result::Status::UNBLOCKED);
     }
