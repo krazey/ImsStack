@@ -86,6 +86,14 @@ protected:
     }
 };
 
+TEST_F(OutgoingStateTest, SessionPRAckDeliveryFailedIgnoredIfConfigOn)
+{
+    ON_CALL(*pConfigurationManager, IsIgnorePrackDeliveryFailure)
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPRAckDeliveryFailed(&objSession));
+}
+
 TEST_F(OutgoingStateTest, HandldB1TimerIsNotHandledIfNoUserTerminateCase)
 {
     EXPECT_CALL(objAosConnector, Control).Times(0);
