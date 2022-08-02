@@ -30,6 +30,7 @@
 #include "call/block/MtcBlockChecker.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/ICallStateProxy.h"
+#include "helper/OperationAsyncRunner.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "sipcore/SipMethod.h"
@@ -59,8 +60,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objPreconditionManager(MtcPreconditionManager(*this)),
         m_objSupplementaryService(MtcSupplementaryService(objContext.GetConfigurationProxy())),
         m_objMessageMediator(MtcMessageMediator(*this)),
-        m_pUssiController(IMS_NULL),
-        m_bRefreshing(IMS_FALSE)
+        m_pUssiController(IMS_NULL)
 {
     IMS_TRACE_D("+MtcCall key[%d]", m_nKey, 0, 0);
 
@@ -1070,14 +1070,17 @@ PUBLIC VIRTUAL void MtcCall::Refresh_NotifyCompleted(IN ISipClientConnection* pi
 {
     IMS_TRACE_D("Refresh_NotifyCompleted key[%d]", m_nKey, 0, 0);
 
-    m_bRefreshing = IMS_FALSE;
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
                 return pState->Refresh_NotifyCompleted(piScc);
             });
 
-    RunPendingOperation();
+    m_objContext.GetAsyncRunner([&]()
+            {
+                return RunPendingOperation();
+            });
+
 }
 
 PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTerminated()
@@ -1088,8 +1091,6 @@ PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTerminated()
             {
                 return pState->Refresh_NotifyTerminated();
             });
-
-    m_bRefreshing = IMS_FALSE;  // TODO: required?
 }
 
 PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh)
@@ -1100,8 +1101,6 @@ PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplici
             {
                 return pState->Refresh_NotifyTimerExpired(bDoImplicitRefresh);
             });
-
-    m_bRefreshing = IMS_TRUE;
 }
 
 PUBLIC VIRTUAL void MtcCall::OnTimerExpired(IN IMS_SINT32 nType)
@@ -1282,6 +1281,23 @@ PUBLIC VIRTUAL void MtcCall::OnMediaFailed(IN CallReasonInfo objReason)
             });
 }
 
+PUBLIC
+void MtcCall::RunPendingOperation()
+{
+    if (IsInUpdating())
+    {
+        return;
+    }
+
+    if (!m_objPendingOperation)
+    {
+        return;
+    }
+
+    m_objStateMachine.RunStateOperation(m_objPendingOperation);
+    m_objPendingOperation = {};
+}
+
 PRIVATE
 CallKey MtcCall::CreateCallKey()
 {
@@ -1347,31 +1363,12 @@ IMS_BOOL MtcCall::IsInUpdating() const
         return IMS_FALSE;
     }
 
-    if (m_bRefreshing)
+    IMtcSession* piMtcSession = GetSession();
+    if (piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress())
     {
-        // TODO: when a new api in ISession is added, use the interface.
         IMS_TRACE_D("IsInOperating :: refreshing", 0, 0, 0);
         return IMS_TRUE;
     }
 
     return IMS_FALSE;
-}
-
-PRIVATE
-void MtcCall::RunPendingOperation()
-{
-    if (IsInUpdating())
-    {
-        return;
-    }
-
-    if (!m_objPendingOperation)
-    {
-        return;
-    }
-
-    // TODO: if session_timer_update_required_in_session_update_by_reinvite_bool is true,
-    // message posting is required.
-    m_objStateMachine.RunStateOperation(m_objPendingOperation);
-    m_objPendingOperation = {};
 }

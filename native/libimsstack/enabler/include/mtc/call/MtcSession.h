@@ -24,6 +24,7 @@
 #include "call/IMtcSessionContext.h"
 #include "call/message/MessageSender.h"
 #include "call/extension/MtcExtensionSet.h"
+#include <functional>
 
 class IMessage;
 class IConferenceManager;
@@ -166,6 +167,10 @@ public:
     inline MtcEmergencyServiceManager* GetEmergencyServiceManager() override
     {
         return m_objContext.GetEmergencyServiceManager();
+    }
+    inline OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) override
+    {
+        return m_objContext.GetAsyncRunner(objOperation);
     }
 
     inline void SetHeldByMe(IN IMS_BOOL bHeldByMe) override { m_objContext.SetHeldByMe(bHeldByMe); }

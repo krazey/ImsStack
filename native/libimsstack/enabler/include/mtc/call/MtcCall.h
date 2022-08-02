@@ -199,6 +199,10 @@ public:
     {
         return m_objContext.GetEmergencyServiceManager();
     }
+    inline OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) override
+    {
+        return m_objContext.GetAsyncRunner(objOperation);
+    }
 
     inline void SetHeldByMe(IN IMS_BOOL bHeldByMe) override { m_bHeldByMe = bHeldByMe; }
 
@@ -249,6 +253,8 @@ public:
     void OnReceivingNetworkToneFailed() override;
     void OnMediaFailed(IN CallReasonInfo objReason) override;
 
+    void RunPendingOperation();
+
 private:
     static IMutex* s_pKeyCreationLock;
 
@@ -256,7 +262,6 @@ private:
     void OnInternalFailure();
     void OnAttached();
     IMS_BOOL IsInUpdating() const;
-    void RunPendingOperation();
 
     IMtcContext& m_objContext;
     IMtcService& m_objService;
@@ -278,8 +283,6 @@ private:
     MtcSupplementaryService m_objSupplementaryService;
     MtcMessageMediator m_objMessageMediator;
     UssiController* m_pUssiController;
-
-    IMS_BOOL m_bRefreshing;
 };
 
 #endif

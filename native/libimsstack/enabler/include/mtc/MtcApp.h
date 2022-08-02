@@ -32,6 +32,7 @@
 #include "vonr/MtcVonrManager.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "conferencecall/ConferenceManager.h"
+#include <functional>
 
 class EctManager;
 class MtcEmergencyServiceManager;
@@ -45,6 +46,7 @@ class IMtcAosConnector;
 class IMtcSipInterfaceFactory;
 class IConferenceManager;
 class IEctManager;
+class OperationAsyncRunner;
 
 class MtcApp : public ImsApp, public IMtcApp, public IMtcContext
 {
@@ -79,6 +81,7 @@ public:
     inline IConferenceManager& GetConferenceManager() override { return m_objConferenceManager; }
     IEctManager* GetEctManager() override;
     MtcEmergencyServiceManager* GetEmergencyServiceManager() override;
+    OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) override;
 
 protected:
     virtual void InitConfiguration();

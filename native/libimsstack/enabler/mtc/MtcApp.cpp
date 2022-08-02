@@ -36,6 +36,8 @@
 #include "configuration/MtcConfigurationManager.h"
 #include "ect/EctManager.h"
 #include "MtcEmergencyServiceManager.h"
+#include "helper/OperationAsyncRunner.h"
+#include <functional>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -137,6 +139,12 @@ PUBLIC VIRTUAL MtcEmergencyServiceManager* MtcApp::GetEmergencyServiceManager()
     }
 
     return m_pEmergencyServiceManager;
+}
+
+PUBLIC VIRTUAL OperationAsyncRunner* MtcApp::GetAsyncRunner(IN std::function<void()> objOperation)
+{
+    // object is deleted by itself
+    return new OperationAsyncRunner(objOperation);
 }
 
 PROTECTED VIRTUAL void MtcApp::InitConfiguration()

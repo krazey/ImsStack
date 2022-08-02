@@ -20,9 +20,11 @@
 #include <gmock/gmock.h>
 #include "ImsTypeDef.h"
 #include "call/IMtcSessionContext.h"
+#include <functional>
 
 class MessageSender;
 class MtcExtensionSet;
+class OperationAsyncRunner;
 class ISession;
 
 class MockIMtcSessionContext : public IMtcSessionContext
@@ -76,6 +78,7 @@ public:
     MOCK_METHOD(IConferenceManager&, GetConferenceManager, (), (override));
     MOCK_METHOD(IEctManager*, GetEctManager, (), (override));
     MOCK_METHOD(MtcEmergencyServiceManager*, GetEmergencyServiceManager, (), (override));
+    MOCK_METHOD(OperationAsyncRunner*, GetAsyncRunner, (IN std::function<void()>), (override));
 };
 
 #endif

@@ -19,6 +19,7 @@
 
 #include "IMSTypeDef.h"
 #include "IMtcService.h"
+#include <functional>
 
 class IMtcDialingPlan;
 class IMtcCallController;
@@ -32,6 +33,7 @@ class IMtcSipInterfaceFactory;
 class IConferenceManager;
 class IEctManager;
 class MtcEmergencyServiceManager;
+class OperationAsyncRunner;
 
 class IMtcContext
 {
@@ -50,6 +52,7 @@ public:
     virtual IConferenceManager& GetConferenceManager() = 0;
     virtual IEctManager* GetEctManager() = 0;
     virtual MtcEmergencyServiceManager* GetEmergencyServiceManager() = 0;
+    virtual OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) = 0;
 };
 
 #endif

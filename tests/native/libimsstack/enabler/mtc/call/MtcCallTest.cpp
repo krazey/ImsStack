@@ -39,6 +39,7 @@
 #include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/OperationAsyncRunner.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
@@ -535,16 +536,15 @@ TEST_F(MtcCallTest, HoldIsPendedIfSessionIsRefreshing)
     MockIMtcCallState* pState = new MockIMtcCallState();
     ON_CALL(*pState, GetStateName)
             .WillByDefault(Return(CallStateName::ESTABLISHED));
-    ON_CALL(*pState, Refresh_NotifyTimerExpired(_))
-            .WillByDefault(Return(CallStateName::ESTABLISHED));
 
+    MockISession objSession;
+    ON_CALL(objSession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(*pState, Hold(_))
             .Times(0);
 
-    IMS_BOOL bDoImplicitRefresh = IMS_FALSE;
     MediaInfo objMediaInfo;
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-    objCall.Refresh_NotifyTimerExpired(bDoImplicitRefresh);
+    objCall.CreateSession(&objSession);
     objCall.Hold(&objMediaInfo);
 }
 
@@ -553,21 +553,35 @@ TEST_F(MtcCallTest, RunPendingOperationByRefreshCompleted)
     MockIMtcCallState* pState = new MockIMtcCallState();
     ON_CALL(*pState, GetStateName)
             .WillByDefault(Return(CallStateName::ESTABLISHED));
-    ON_CALL(*pState, Refresh_NotifyTimerExpired(_))
-            .WillByDefault(Return(CallStateName::ESTABLISHED));
     ON_CALL(*pState, Refresh_NotifyCompleted(_))
             .WillByDefault(Return(CallStateName::ESTABLISHED));
+
+    MockISession objSession;
+    EXPECT_CALL(objSession, IsSessionRefreshInProgress)
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
 
     EXPECT_CALL(*pState, Hold(_))
             .Times(1)
             .WillRepeatedly(Return(CallStateName::ESTABLISHED));
 
-    IMS_BOOL bDoImplicitRefresh = IMS_FALSE;
     MediaInfo objMediaInfo;
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-    objCall.Refresh_NotifyTimerExpired(bDoImplicitRefresh);
+
+    std::function<void()> objOperation = [&]()
+            {
+                return objCall.RunPendingOperation();
+            };
+    OperationAsyncRunner* pRunner = new OperationAsyncRunner(objOperation);
+    ON_CALL(objContext, GetAsyncRunner(_))
+            .WillByDefault(Return(pRunner));
+
+    objCall.CreateSession(&objSession);
     objCall.Hold(&objMediaInfo);
     objCall.Refresh_NotifyCompleted(reinterpret_cast<ISipClientConnection*>(0x1));
+    ImsMessage objMessage(0, 0, 0);
+    pRunner->OnMessage(objMessage);
 }
 
 TEST_F(MtcCallTest, ResumeCallsState)

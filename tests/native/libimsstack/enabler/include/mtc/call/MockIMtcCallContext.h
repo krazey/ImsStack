@@ -22,6 +22,7 @@
 #include "ImsList.h"
 #include "JniCallInfo.h"
 #include "call/IMtcCallContext.h"
+#include <functional>
 
 class IMtcBlockChecker;
 class IMtcBlockRule;
@@ -34,6 +35,7 @@ class IMtcSession;
 class MtcSupplementaryService;
 class MtcTimerWrapper;
 class MtcUiNotifier;
+class OperationAsyncRunner;
 class ParticipantInfo;
 class UpdatingInfo;
 class UssiController;
@@ -86,6 +88,7 @@ public:
     MOCK_METHOD(IConferenceManager&, GetConferenceManager, (), (override));
     MOCK_METHOD(IEctManager*, GetEctManager, (), (override));
     MOCK_METHOD(MtcEmergencyServiceManager*, GetEmergencyServiceManager, (), (override));
+    MOCK_METHOD(OperationAsyncRunner*, GetAsyncRunner, (IN std::function<void()>), (override));
 };
 
 #endif
