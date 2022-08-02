@@ -61,16 +61,18 @@ public class HttpTransaction {
 
     // send HTTPS request
     public static final int REQUEST_HTTPS = 1;
+    // send non-cellular HTTP request using OTP ACS Auth
+    public static final int REQUEST_NON_CELLULAR = 2;
     // send GBA request.
-    public static final int REQUEST_GBA = 2;
+    public static final int REQUEST_GBA = 3;
     // ACS is done.
-    public static final int REQUEST_DONE = 3;
+    public static final int REQUEST_DONE = 4;
 
     private static final int MSG_MIN = 0;
-    private static final int MSG_START = 2;
-    private static final int MSG_STOP = 3;
-    private static final int MSG_RESULT = 4;
-    private static final int MSG_MAX = 7;
+    private static final int MSG_START = 1;
+    private static final int MSG_STOP = 2;
+    private static final int MSG_RESULT = 3;
+    private static final int MSG_MAX = 4;
 
     /**
      * Callback interface for receiving result from the AC HTTP request.
@@ -80,9 +82,9 @@ public class HttpTransaction {
         /**
          * Receive HTTP response to AC HTTP Request.
          *
-         * @param responseCode   the status code in HTTP response
+         * @param responseCode the status code in HTTP response
          * @param responseString the reason phrase in HTTP response
-         * @param xmlData        provisioning data or null
+         * @param xmlData provisioning data or null
          */
         void receivedHttpResponse(int responseCode, String responseString, byte[] xmlData);
 

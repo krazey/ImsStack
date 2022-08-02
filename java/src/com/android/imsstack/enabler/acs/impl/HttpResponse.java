@@ -159,16 +159,19 @@ public class HttpResponse {
      * Gets the header value from an HTTP response.
      *
      * @param headerName header field
-     * @return the value of the header
+     * @return the value of the header or null
      */
     public String getHeader(String headerName) {
+        if (mHttpURLConnection == null) {
+            return null;
+        }
         return mHttpURLConnection.getHeaderField(headerName);
     }
 
     /**
      * Gets the cookie header value from an HTTP response.
      *
-     * @return the cookie header's value
+     * @return the cookie header's value or empty list
      */
     public List<String> getCookies() {
         List<String> cookies = new LinkedList<String>();
@@ -220,6 +223,7 @@ public class HttpResponse {
 
     private boolean hasXML(InputStream inputStream) {
         if (inputStream == null) {
+            ImsLog.d(mSlotId, "didn't received any xml");
             return false;
         }
         if (inputStream.markSupported()) {
@@ -230,7 +234,7 @@ public class HttpResponse {
                     return true;
                 }
             } catch (IOException e) {
-                ImsLog.d(mSlotId, "didn't received any xml");
+                ImsLog.e(mSlotId, e.getMessage());
             }
         }
         return false;
