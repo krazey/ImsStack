@@ -790,6 +790,10 @@ public class CarrierConfig {
                 "audio_rtp_dscp_int";
         public static final String KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL =
                 "audio_show_codec_attribute_modeset_bool";
+        public static final String KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL =
+                "audio_show_codec_attribute_dtx_bool";
+        public static final String KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL =
+                "audio_show_codec_attribute_amrwbio_modeset_bool";
         public static final String KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT =
                 "audio_telephone_event_duration_millis_int";
         public static final String KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY =
@@ -804,7 +808,6 @@ public class CarrierConfig {
                 "audio_rtcpxr_packet_loss_rle_bool";
         public static final String KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL =
                 "audio_rtcpxr_packet_duplicate_rle_bool";
-
         public static final String KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY =
                 "video_rtp_port_range_int_array";
         public static final String KEY_VIDEO_CVO_VALUE_INT =

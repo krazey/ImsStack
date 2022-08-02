@@ -64,6 +64,7 @@ TEST_F(CodecEvsConfigTest, GetConfigDefault)
     CodecEvsConfig* m_pConfig = new CodecEvsConfig(ImsCodec::AUDIO_EVS, 125);
 
     EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);
+    EXPECT_EQ(m_pConfig->GetShowDtx(), IMS_FALSE);
     EXPECT_EQ(m_pConfig->GetDtx(), DEFAULT_DTX);
     EXPECT_EQ(m_pConfig->GetDtxRecv(), DEFAULT_DTX_RECV);
     EXPECT_EQ(m_pConfig->GetHfOnly(), DEFAULT_HF_ONLY);
@@ -72,6 +73,7 @@ TEST_F(CodecEvsConfigTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->GetBwList(), DEFAULT_BW_LIST);
     EXPECT_EQ(m_pConfig->GetCmr(), DEFAULT_CMR);
     EXPECT_EQ(m_pConfig->GetChAwareRecv(), DEFAULT_CH_AW_RECV);
+    EXPECT_EQ(m_pConfig->GetShowAmrwbIoModeSet(), IMS_FALSE);
     EXPECT_EQ(m_pConfig->GetAmrWbIoModeSetList(), DEFAULT_AMRWB_IO_MODESET);
     delete m_pConfig;
 }
@@ -89,6 +91,23 @@ TEST_F(CodecEvsConfigTest, GetEvsChannelId)
 
     EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig, 0));
     EXPECT_EQ(m_pConfig->GetChannel(), nEvsChannelId);
+
+    delete pMockICarrierConfig;
+    delete m_pConfig;
+}
+
+TEST_F(CodecEvsConfigTest, GetShowEvsDtx)
+{
+    CodecEvsConfig* m_pConfig = new CodecEvsConfig(ImsCodec::AUDIO_EVS, 125);
+    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
+    IMS_BOOL bShowEvsDtx = IMS_TRUE;
+
+    ON_CALL(*pMockICarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL, IMS_FALSE))
+            .WillByDefault(Return(bShowEvsDtx));
+
+    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig, 0));
+    EXPECT_EQ(m_pConfig->GetShowDtx(), bShowEvsDtx);
 
     delete pMockICarrierConfig;
     delete m_pConfig;
@@ -248,6 +267,24 @@ TEST_F(CodecEvsConfigTest, GetConfigEvsBitrateList)
 
     EXPECT_EQ(m_pConfig->GetBrList(), 31);
     EXPECT_EQ(m_pConfig->GetBr(), 4);
+
+    delete pMockICarrierConfig;
+    delete m_pConfig;
+}
+
+TEST_F(CodecEvsConfigTest, GetShowEvsAmrWbIoModeSet)
+{
+    CodecEvsConfig* m_pConfig = new CodecEvsConfig(ImsCodec::AUDIO_EVS, 125);
+    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
+    IMS_BOOL bShowEvsAmrWbIoModeSet = IMS_TRUE;
+
+    ON_CALL(*pMockICarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,
+                    IMS_FALSE))
+            .WillByDefault(Return(bShowEvsAmrWbIoModeSet));
+
+    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig, 0));
+    EXPECT_EQ(m_pConfig->GetShowAmrwbIoModeSet(), bShowEvsAmrWbIoModeSet);
 
     delete pMockICarrierConfig;
     delete m_pConfig;

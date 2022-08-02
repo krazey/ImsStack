@@ -23,6 +23,7 @@ PUBLIC
 CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
         CodecConfig(nType_, nPayloadTypeNum_),
         m_nChannel(DEFAULT_CHANNEL),
+        m_bShowDtx(IMS_FALSE),
         m_bDtx(DEFAULT_DTX),
         m_bDtxRecv(DEFAULT_DTX_RECV),
         m_nHfOnly(DEFAULT_HF_ONLY),
@@ -31,6 +32,7 @@ CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeN
         m_nBwList(DEFAULT_BW_LIST),
         m_nCmr(DEFAULT_CMR),
         m_nChAwRecv(DEFAULT_CH_AW_RECV),
+        m_bShowAmrwbIoModeSet(IMS_FALSE),
         m_nAmrWbIoModeSetList(DEFAULT_AMRWB_IO_MODESET)
 {
     IMS_TRACE_D("+CodecEvsConfig Type[%d]", nType_, 0, 0);
@@ -74,6 +76,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     }*/
 
     m_nChannel = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CHANNELS_INT);
+    m_bShowDtx = piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL);
     m_bDtx = piCc->GetBoolean(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_BOOL);
     m_bDtxRecv =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL);
@@ -118,6 +121,8 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     m_nBwList = CheckEvsBandwidthWithBitrate(m_nBwList, m_nBrList);
     m_nCmr = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CMR_INT);
     m_nChAwRecv = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT);
+    m_bShowAmrwbIoModeSet = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL);
     m_nAmrWbIoModeSetList =
             piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_AMRWB_IO_MODE_SET_INT);
 
@@ -334,6 +339,12 @@ IMS_SINT32 CodecEvsConfig::GetChannel() const
 }
 
 PUBLIC
+IMS_BOOL CodecEvsConfig::GetShowDtx() const
+{
+    return m_bShowDtx;
+}
+
+PUBLIC
 IMS_BOOL CodecEvsConfig::GetDtx() const
 {
     return m_bDtx;
@@ -391,6 +402,12 @@ PUBLIC
 IMS_SINT32 CodecEvsConfig::GetChAwareRecv() const
 {
     return m_nChAwRecv;
+}
+
+PUBLIC
+IMS_BOOL CodecEvsConfig::GetShowAmrwbIoModeSet() const
+{
+    return m_bShowAmrwbIoModeSet;
 }
 
 PUBLIC

@@ -161,9 +161,12 @@
         <item value="0"/>
         <item value="4"/>
     </int-array>
+    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
     <boolean name="asset_evs_codec_attribute_dtx_bool" value="false"/>
     <boolean name="asset_evs_codec_attribute_dtx_recv_bool" value="false"/>
     <int name="asset_evs_codec_attribute_bandwidth_int" value="5"/>
     <int name="asset_evs_codec_attribute_cmr_int" value="-2"/>
+    <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
+    <int name="asset_evs_amrwb_io_mode_set_int" value="7"/>
 
 </carrier_config>

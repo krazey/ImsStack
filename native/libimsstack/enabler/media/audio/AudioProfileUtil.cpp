@@ -220,11 +220,21 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 pAmrFmtp->nOctetAlign = pAmrConfig->GetOctetAlign();
                 pAmrFmtp->bShow_OctetAlign = IMS_TRUE;
             }
+            else
+            {
+                pAmrFmtp->nOctetAlign = CodecAmrConfig::DEFAULT_OCTET_ALIGN;
+                pAmrFmtp->bShow_OctetAlign = IMS_FALSE;
+            }
 
             if (pConfig->GetModeChangeCapability() != -1)
             {
                 pAmrFmtp->nModeChangeCapability = pConfig->GetModeChangeCapability();
                 pAmrFmtp->bShowModeChangeCapability = IMS_TRUE;
+            }
+            else
+            {
+                pAmrFmtp->nModeChangeCapability = AudioConfiguration::DEFAULT_MODECHANGE_CAPABILITY;
+                pAmrFmtp->bShowModeChangeCapability = IMS_FALSE;
             }
 
             if (pConfig->GetModeChangePeriod() != -1)
@@ -232,11 +242,21 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 pAmrFmtp->nModeChangePeriod = pConfig->GetModeChangePeriod();
                 pAmrFmtp->bShowModeChangePeriod = IMS_TRUE;
             }
+            else
+            {
+                pAmrFmtp->nModeChangePeriod = AudioConfiguration::DEFAULT_MODECHANGE_PERIOD;
+                pAmrFmtp->bShowModeChangePeriod = IMS_FALSE;
+            }
 
             if (pConfig->GetModeChangeNeighbor() != -1)
             {
                 pAmrFmtp->nModeChangeNeighbor = pConfig->GetModeChangeNeighbor();
                 pAmrFmtp->bShowModeChangeNeighbor = IMS_TRUE;
+            }
+            else
+            {
+                pAmrFmtp->nModeChangeNeighbor = AudioConfiguration::DEFAULT_MODECHANGE_NEIGHBOR;
+                pAmrFmtp->bShowModeChangeNeighbor = IMS_FALSE;
             }
 
             if (pConfig->GetMaxRed() != -1)
@@ -244,15 +264,30 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 pAmrFmtp->nMaxRed = pConfig->GetMaxRed();
                 pAmrFmtp->bShowMaxRed = IMS_TRUE;
             }
+            else
+            {
+                pAmrFmtp->nMaxRed = AudioConfiguration::DEFAULT_MAX_RED;
+                pAmrFmtp->bShowMaxRed = IMS_FALSE;
+            }
             if (pConfig->GetPtime() != -1)
             {
                 pAmrFmtp->nPtime = pConfig->GetPtime();
                 pAmrFmtp->bShowPtime = IMS_TRUE;
             }
+            else
+            {
+                pAmrFmtp->nPtime = AudioConfiguration::DEFAULT_PTIME;
+                pAmrFmtp->bShowPtime = IMS_FALSE;
+            }
             if (pConfig->GetMaxPtime() != -1)
             {
                 pAmrFmtp->nMaxPtime = pConfig->GetMaxPtime();
                 pAmrFmtp->bShowMaxPtime = IMS_TRUE;
+            }
+            else
+            {
+                pAmrFmtp->nMaxPtime = AudioConfiguration::DEFAULT_MAX_PTIME;
+                pAmrFmtp->bShowMaxPtime = IMS_FALSE;
             }
             pAmrFmtp->bSCREnable = pAmrConfig->GetDtx();
 
@@ -322,6 +357,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
 
             // Mode set list
             pEvsFmtp->nModeSetList = pEvsConfig->GetAmrWbIoModeSetList();
+            pEvsFmtp->bShowModeSetList = pEvsConfig->GetShowAmrwbIoModeSet();
             pEvsFmtp->nBrList = pEvsConfig->GetBrList();
             pEvsFmtp->nBwList = pEvsConfig->GetBwList();
 
@@ -355,27 +391,40 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 pEvsFmtp->bShowModeChangeNeighbor = IMS_TRUE;
             }
 
-            /** TODO: 26.114 mentioned it is needed, but no carrier wants this. so block these for
-             now
             if (pConfig->GetPtime() != -1)
             {
                 pEvsFmtp->nPtime = pConfig->GetPtime();
                 pEvsFmtp->bShowPtime = IMS_TRUE;
+            }
+            else
+            {
+                pEvsFmtp->nPtime = AudioConfiguration::DEFAULT_PTIME;
+                pEvsFmtp->bShowPtime = IMS_FALSE;
             }
             if (pConfig->GetMaxPtime() != -1)
             {
                 pEvsFmtp->nMaxPtime = pConfig->GetMaxPtime();
                 pEvsFmtp->bShowMaxPtime = IMS_TRUE;
             }
-            */
+            else
+            {
+                pEvsFmtp->nMaxPtime = AudioConfiguration::DEFAULT_MAX_PTIME;
+                pEvsFmtp->bShowMaxPtime = IMS_FALSE;
+            }
+
             if (pConfig->GetMaxRed() != -1)
             {
                 pEvsFmtp->nMaxRed = pConfig->GetMaxRed();
                 pEvsFmtp->bShowMaxRed = IMS_TRUE;
             }
+            else
+            {
+                pEvsFmtp->nMaxRed = AudioConfiguration::DEFAULT_MAX_RED;
+                pEvsFmtp->bShowMaxRed = IMS_FALSE;
+            }
 
             pEvsFmtp->nDtx = pEvsConfig->GetDtx();
-            pEvsFmtp->bShowDtx = IMS_TRUE;
+            pEvsFmtp->bShowDtx = pEvsConfig->GetShowDtx();
 
             if (pEvsConfig->GetDtxRecv() == IMS_TRUE)  // true or Not Present
             {
@@ -401,6 +450,11 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 pEvsFmtp->nEvsModeSwitch = pEvsConfig->GetEvsModeSwitch();
                 pEvsFmtp->bShowEvsModeSwitch = IMS_TRUE;
             }
+            else
+            {
+                pEvsFmtp->nEvsModeSwitch = CodecEvsConfig::DEFAULT_EVS_MODESWITCH;
+                pEvsFmtp->bShowEvsModeSwitch = IMS_FALSE;
+            }
 
             if (pEvsConfig->GetCmr() == CodecEvsConfig::CMR_NOT_PRESENT)
             {
@@ -421,6 +475,13 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                     pEvsFmtp->nChAwRecv = -1;
                 }
             }
+            else
+            {
+                pEvsFmtp->nChAwRecv = -1;
+            }
+
+            IMS_TRACE_D("EVS - GetShowDtx: %d GetShowAmrwbIoModeSet: %d", pEvsConfig->GetShowDtx(),
+                    pEvsConfig->GetShowAmrwbIoModeSet(), 0);
 
             // set EVS codec fmtp
             AudioProfile::Payload* pEvsPayload = new AudioProfile::Payload();

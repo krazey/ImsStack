@@ -21,5 +21,6 @@
         <item value="1"/>
         <item value="6"/>
     </int-array>
+    <boolean name="media_session_level_bandwidth_bool" value="true"/>
 
 </carrier_config>

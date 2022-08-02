@@ -1227,7 +1227,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             }
 
             // ptime
-            if (pAmrFmtp->nPtime != AudioProfile::AmrFmtp::DEFAULT_PTIME ||
+            if (pAmrFmtp->nPtime != AudioProfile::AmrFmtp::DEFAULT_PTIME &&
                     pAmrFmtp->bShowPtime == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
@@ -1241,7 +1241,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             }
 
             // maxptime
-            if (pAmrFmtp->nMaxPtime != AudioProfile::AmrFmtp::DEFAULT_MAXPTIME ||
+            if (pAmrFmtp->nMaxPtime != AudioProfile::AmrFmtp::DEFAULT_MAXPTIME &&
                     pAmrFmtp->bShowMaxPtime == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
@@ -1273,12 +1273,8 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 continue;
             }
 
-            /** TODO: 26.114 mentioned it is needed, but no carrier wants this. so block these
-             for now*/
-
-            /*
             // ptime
-            if (pEvsFmtp->nPtime != AudioProfile::EvsFmtp::DEFAULT_PTIME ||
+            if (pEvsFmtp->nPtime != AudioProfile::EvsFmtp::DEFAULT_PTIME &&
                     pEvsFmtp->bShowPtime == IMS_TRUE)
             {
                 AString strTemp;
@@ -1286,7 +1282,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
             // maxptime
-            if (pEvsFmtp->nMaxPtime != AudioProfile::EvsFmtp::DEFAULT_MAXPTIME ||
+            if (pEvsFmtp->nMaxPtime != AudioProfile::EvsFmtp::DEFAULT_MAXPTIME &&
                     pEvsFmtp->bShowMaxPtime == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
@@ -1298,7 +1294,6 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strTemp.Sprintf("maxptime=%d", pEvsFmtp->nMaxPtime);
                 strFmtp.Append(strTemp);
             }
-            */
 
             // set dtx
             if (pEvsFmtp->bShowDtx == IMS_TRUE)
@@ -1460,7 +1455,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
             // set mode-set (AMR-IO mode)
-            if (pEvsFmtp->nModeSetList != 0)
+            if (pEvsFmtp->nModeSetList != 0 && pEvsFmtp->bShowModeSetList)
             {
                 if (strFmtp.GetLength() > 0)
                 {

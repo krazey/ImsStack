@@ -115,7 +115,8 @@ public:
                 bShow_RobustSorting(IMS_FALSE),
                 bShowMaxRed(IMS_FALSE),
                 bShowPtime(IMS_FALSE),
-                bShowMaxPtime(IMS_FALSE)
+                bShowMaxPtime(IMS_FALSE),
+                bShowModeSet(IMS_FALSE)
         {
         }
         AmrFmtp(IN const AmrFmtp& objFmtp)
@@ -140,6 +141,7 @@ public:
             this->bShowMaxRed = objFmtp.bShowMaxRed;
             this->bShowPtime = objFmtp.bShowPtime;
             this->bShowMaxPtime = objFmtp.bShowMaxPtime;
+            this->bShowModeSet = objFmtp.bShowModeSet;
         };
 
         AmrFmtp(IN const IMS_UINT32 modeSet, IN const IMS_SINT32 octetAlign,
@@ -158,7 +160,8 @@ public:
                 bShow_RobustSorting(IMS_FALSE),
                 bShowMaxRed(IMS_FALSE),
                 bShowPtime(IMS_FALSE),
-                bShowMaxPtime(IMS_FALSE)
+                bShowMaxPtime(IMS_FALSE),
+                bShowModeSet(IMS_FALSE)
         {
             if (octetAlign > 0)
             {
@@ -260,6 +263,7 @@ public:
         IMS_BOOL bShowBrList;
         IMS_BOOL bShowBwList;
         IMS_BOOL bSendCmr;  // send cmr option
+        IMS_BOOL bShowModeSetList;  // send ModeSetList option
 
     public:
         EvsFmtp() :
@@ -296,7 +300,8 @@ public:
                 bShowModeChangeNeighbor(IMS_FALSE),
                 bShowBrList(IMS_TRUE),
                 bShowBwList(IMS_TRUE),
-                bSendCmr(IMS_FALSE)
+                bSendCmr(IMS_FALSE),
+                bShowModeSetList(IMS_FALSE)
         {
         }
 
@@ -336,6 +341,7 @@ public:
             this->bShowBrList = objFmtp.bShowBrList;
             this->bShowBwList = objFmtp.bShowBwList;
             this->bSendCmr = objFmtp.bSendCmr;
+            this->bShowModeSetList = objFmtp.bShowModeSetList;
         }
     };
 

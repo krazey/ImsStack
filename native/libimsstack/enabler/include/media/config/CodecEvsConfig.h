@@ -138,6 +138,13 @@ public:
      */
     IMS_SINT32 GetChannel() const;
     /**
+     * @brief Get the information whether to include dtx in sdp
+     *
+     * @return IMS_BOOL Return IMS_TRUE Include dtx to sdp
+     * IMS_FALSE Not include dtx to sdp
+     */
+    IMS_BOOL GetShowDtx() const;
+    /**
      * @brief Get the dtx
      *
      * @return IMS_BOOL Return true if dtx is supported
@@ -200,6 +207,13 @@ public:
      */
     IMS_SINT32 GetChAwareRecv() const;
     /**
+     * @brief Get the information whether to include AMRWB-IO modesetlist in sdp
+     *
+     * @return IMS_BOOL Return IMS_TRUE Include AMRWB-IO modesetlist attribute to sdp
+     * IMS_FALSE Not include AMRWB-IO modesetlist attribute to sdp
+     */
+    IMS_BOOL GetShowAmrwbIoModeSet() const;
+    /**
      * @brief Get the amr-wb io mode set list
      *
      * @return IMS_UINT32 Return the amr-wb io modeset list
@@ -222,6 +236,7 @@ private:
 
 private:
     IMS_SINT32 m_nChannel;
+    IMS_BOOL m_bShowDtx;          // Indicate whether dtx attribute to display in SDP
     IMS_BOOL m_bDtx;              // 1(default) is turn on DTX
     IMS_BOOL m_bDtxRecv;          // 1(default) is turn on DTX
     IMS_SINT32 m_nHfOnly;         // 0(default) is both used, other is only hf format used
@@ -230,6 +245,8 @@ private:
     IMS_UINT32 m_nBwList;  // bw has a value from the set: nb, wb, swb, fb, nb-wb, nb-swb, and nb-fb
     IMS_SINT32 m_nCmr;
     IMS_SINT32 m_nChAwRecv;            // -1: disabled / 0(default)
+    IMS_BOOL m_bShowAmrwbIoModeSet;  // Indicate whether AmrwbIoModeSetList attribute to display in
+                                     // SDP
     IMS_UINT32 m_nAmrWbIoModeSetList;  // AMR-WB IO parameter
 };
 #endif  // _CODEC_EVS_CONFIG_H_

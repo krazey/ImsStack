@@ -52,7 +52,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
 
     m_bShowModeSet =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL);
-    IMS_TRACE_D("Create - m_bShowModeSet[%d]", 0, 0, 0);
 
     /** TODO Media - Start - Need to change to carrier configuration bundle later */
     if (m_nCodec == ImsCodec::AUDIO_AMR)
