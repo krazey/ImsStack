@@ -176,13 +176,10 @@ public class CallSettingService implements ICallSettingService {
 
     @Override
     public void notifySystemEvents() {
-        notifySystemEventForMobileData();
-        notifySystemEventForVideoCall();
         notifySystemEventForVoLTE();
         notifySystemEventForVoWIFI();
         notifySystemEventForVoWIFIPreference();
         notifySystemEventForVoWIFIRoaming();
-        notifySystemEventForDataRoamingSettingChanged();
     }
 
     @Override
@@ -823,52 +820,6 @@ public class CallSettingService implements ICallSettingService {
         return SettingsUtils.isDataRoamingEnabled(getContext().getContentResolver());
     }
 
-    private void notifySystemEventForMobileData() {
-        if (mMobileDataSettingObserver == null) {
-            return;
-        }
-
-        ISystem system = SystemInterface.getInstance().getSystem(getSlotId());
-
-        if (system != null) {
-            system.notifyEvent(ImsEventDef.IMS_EVENT_MOBILE_DATA_SETTING, mMobileDataEnabled
-                        ? ImsEventDef.IMS_MOBILE_DATA_SETTING_ON :
-                        ImsEventDef.IMS_MOBILE_DATA_SETTING_OFF, 0);
-        }
-    }
-
-    private void notifySystemEventForVideoCall() {
-        if (mVideoCallSettingObserver == null) {
-            return;
-        }
-
-        ISystem system = SystemInterface.getInstance().getSystem(getSlotId());
-
-        if (system != null) {
-            system.notifyEvent(
-                    ImsEventDef.IMS_EVENT_VIDEO_SETTING,
-                    mVideoCallSet ? ImsEventDef.IMS_VIDEO_SETTING_ON
-                            : ImsEventDef.IMS_VIDEO_SETTING_OFF,
-                    0);
-        }
-    }
-
-    private void notifySystemEventForVideoCallRoaming() {
-        if (mVideoCallRoamingSettingObserver == null) {
-            return;
-        }
-
-        ISystem system = SystemInterface.getInstance().getSystem(getSlotId());
-
-        if (system != null) {
-            system.notifyEvent(
-                    ImsEventDef.IMS_EVENT_VIDEO_SETTING,
-                    mVideoCallRoamingSet ? ImsEventDef.IMS_VIDEO_SETTING_ON
-                            : ImsEventDef.IMS_VIDEO_SETTING_OFF,
-                    0);
-        }
-    }
-
     private void notifySystemEventForVoLTE() {
         if (mVoLTESettingObserver == null) {
             return;
@@ -877,21 +828,10 @@ public class CallSettingService implements ICallSettingService {
         ISystem system = SystemInterface.getInstance().getSystem(getSlotId());
 
         if (system != null) {
-            if (ImsGlobal.isOperator(getSlotId(), "VZW")) {
-                system.notifyEvent(ImsEventDef.IMS_EVENT_VOIP_SETTING,
-                        mVoLTESet ? ImsEventDef.IMS_VOIP_SETTING_ON
-                                : ImsEventDef.IMS_VOIP_SETTING_OFF,
-                        0);
-            } else {
-                system.notifyEvent(ImsEventDef.IMS_EVENT_VOLTE_SETTING,
-                        mVoLTESet ? ImsEventDef.IMS_VOLTE_SETTING_ON
-                                : ImsEventDef.IMS_VOLTE_SETTING_OFF,
-                        0);
-                system.notifyEvent(ImsEventDef.IMS_EVENT_NETWORK_MODE_SETTING,
-                        isNetworkMode3GOnly() ? ImsEventDef.IMS_NETWORK_MODE_OFF
-                                : ImsEventDef.IMS_NETWORK_MODE_ON,
-                        0);
-            }
+            system.notifyEvent(ImsEventDef.IMS_EVENT_VOLTE_SETTING,
+                    mVoLTESet ? ImsEventDef.IMS_VOLTE_SETTING_ON
+                            : ImsEventDef.IMS_VOLTE_SETTING_OFF,
+                    0);
         }
     }
 
@@ -942,35 +882,12 @@ public class CallSettingService implements ICallSettingService {
         ISystem system = SystemInterface.getInstance().getSystem(getSlotId());
 
         if (system != null) {
-            if (ImsGlobal.isOperator(getSlotId(), "VZW")) {
-                system.notifyEvent(
-                        ImsEventDef.IMS_EVENT_ROAMING_PREFERRED_VOICE_CALL_NETWORK,
-                        mVoWIFIRoamingSet ? ImsEventDef.IMS_ROAMING_PREFERRED_WIFI_NETWORK
-                                : ImsEventDef.IMS_ROAMING_PREFERRED_CELLULAR_NETWORK, 0);
-            } else {
-                if (isRoaming()) {
-                    system.notifyEvent(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED,
-                            isVoWIFIEnabled() ? 1 : 0,
-                            mVoWIFIRoamingSet ? ImsEventDef.MODE_WFC_PREFERRED
-                                    : ImsEventDef.MODE_CELLULAR_PREFERRED);
-                }
+            if (isRoaming()) {
+                system.notifyEvent(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED,
+                        isVoWIFIEnabled() ? 1 : 0,
+                        mVoWIFIRoamingSet ? ImsEventDef.MODE_WFC_PREFERRED
+                                : ImsEventDef.MODE_CELLULAR_PREFERRED);
             }
-        }
-    }
-
-    private void notifySystemEventForDataRoamingSettingChanged() {
-        if (mDataRoamingSettingObserver == null) {
-            return;
-        }
-
-        ISystem system = SystemInterface.getInstance().getSystem(getSlotId());
-
-        if (system != null) {
-            system.notifyEvent(
-                    ImsEventDef.IMS_EVENT_DATA_ROAMING_SETTING,
-                    mDataRoamingEnabled ? ImsEventDef.IMS_DATA_ROAMING_ALLOWED
-                            : ImsEventDef.IMS_DATA_ROAMING_DENYED,
-                    0);
         }
     }
 
@@ -999,8 +916,6 @@ public class CallSettingService implements ICallSettingService {
         mMobileDataEnabled = enabled;
 
         mMobileDataSettingRegistrants.notifyResult(Boolean.valueOf(enabled));
-
-        notifySystemEventForMobileData();
     }
 
     private void onVideoCallSetChanged() {
@@ -1022,8 +937,6 @@ public class CallSettingService implements ICallSettingService {
         mVideoCallSet = setValue;
 
         mVideoCallSettingRegistrants.notifyResult(mVideoCallSet);
-
-        notifySystemEventForVideoCall();
     }
 
     private void onVideoCallRoamingSetChanged() {
@@ -1046,8 +959,6 @@ public class CallSettingService implements ICallSettingService {
         mVideoCallRoamingSet = setValue;
 
         mVideoCallRoamingSettingRegistrants.notifyResult(mVideoCallRoamingSet);
-
-        notifySystemEventForVideoCallRoaming();
     }
 
     private boolean isRoaming() {
@@ -1063,28 +974,14 @@ public class CallSettingService implements ICallSettingService {
 
         if (ImsGlobal.isOperator(getSlotId(), "KT")) {
             bValue = getVoLTESetForKT();
-        } else if (ImsGlobal.isOperator(getSlotId(), "VZW")) {
-            nEvent = ImsEventDef.IMS_EVENT_VOIP_SETTING;
-            bValue = isVoLTEEnabled();
         } else {
             bValue = isVoLTEEnabled();
         }
 
-        switch(nEvent) {
-            case ImsEventDef.IMS_EVENT_VOIP_SETTING:
-                if (bValue) {
-                    nParam1 = ImsEventDef.IMS_VOIP_SETTING_ON;
-                } else {
-                    nParam1 = ImsEventDef.IMS_VOIP_SETTING_OFF;
-                }
-                break;
-            default:
-                if (bValue) {
-                    nParam1 = ImsEventDef.IMS_VOLTE_SETTING_ON;
-                } else {
-                    nParam1 = ImsEventDef.IMS_VOLTE_SETTING_OFF;
-                }
-                break;
+        if (bValue) {
+            nParam1 = ImsEventDef.IMS_VOLTE_SETTING_ON;
+        } else {
+            nParam1 = ImsEventDef.IMS_VOLTE_SETTING_OFF;
         }
 
         ImsLog.i(getSlotId(), "volte set changed : " + mVoLTESet + " => " + bValue);
@@ -1152,8 +1049,6 @@ public class CallSettingService implements ICallSettingService {
 
         mDataRoamingEnabled = setValue;
         mDataRoamingSettingRegistrants.notifyResult(mDataRoamingEnabled);
-
-        notifySystemEventForDataRoamingSettingChanged();
     }
 
     private void onRttModeSettingChanged() {

@@ -6,7 +6,6 @@ import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IPreference;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
-import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsLog;
 
@@ -15,6 +14,8 @@ import java.util.List;
 
 public class UICCHelper {
     // Constants--------------------------------------------------
+    private static final int IMS_REG_NOTIFY_STATE_ACTIVE = 1;
+    private static final int IMS_REG_NOTIFY_STATE_INVALID = 2;
     private static final int REG_SUCCESS_RESP = 200;
     private static final int IMPU_LENGTH_MINIMUM = 15;
 
@@ -81,7 +82,7 @@ public class UICCHelper {
         String impu = null;
 
         if (REG_SUCCESS_RESP == regRespCode) {
-            if (reason == ImsEventDef.IMS_REG_NOTIFY_STATE_INVALID) {
+            if (reason == IMS_REG_NOTIFY_STATE_INVALID) {
                 addInfoLength = 0x0;
             } else {
                 if (ImsGlobal.isOperator(nSlotID, "ATT")) {
@@ -133,7 +134,7 @@ public class UICCHelper {
             objImsStatus.write(URI_TLV); // URI_TLV tag = 0x80
             objImsStatus.write(addInfoLength); // URI TLV length
 
-            if (reason == ImsEventDef.IMS_REG_NOTIFY_STATE_ACTIVE) {
+            if (reason == IMS_REG_NOTIFY_STATE_ACTIVE) {
                 byte[] aImpu = impu.getBytes();
                 for (int i = 0; i < aImpu.length; i++) {
                     objImsStatus.write(aImpu[i]);

@@ -508,11 +508,6 @@ PROTECTED VIRTUAL void AosApplication::AddEventListener()
     if (m_nAppType == TYPE_NORMAL)
     {
         IMS_EVENT_AddListenerForSlotId(IMS_EVENT_REG_CONTROL, this, m_nSlotId);
-
-        if (IsRegTypeNormal())
-        {
-            IMS_EVENT_AddListenerForSlotId(IMS_EVENT_IPCAN_HO_NOTIFICATION, this, m_nSlotId);
-        }
     }
 }
 
@@ -521,11 +516,6 @@ PROTECTED VIRTUAL void AosApplication::RemoveEventListener()
     if (m_nAppType == TYPE_NORMAL)
     {
         IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_REG_CONTROL, this, m_nSlotId);
-
-        if (IsRegTypeNormal())
-        {
-            IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_IPCAN_HO_NOTIFICATION, this, m_nSlotId);
-        }
     }
 }
 
@@ -1725,44 +1715,6 @@ PROTECTED VIRTUAL void AosApplication::ProcessDisconnectingState(IN IMS_UINT32 n
     }
 }
 
-PROTECTED VIRTUAL void AosApplication::ProcessIpcanHandoverEvent(
-        IN IMS_UINT32 nResult, IN IMS_UINT32 nPreferredRat)
-{
-    if (nResult == IMS_IPCAN_HANDOVER_FAILURE)
-    {
-        IMS_BOOL bIsRegStopNeeded = IMS_FALSE;
-        IMS_UINT32 nCurrentIpcan = m_piContext->GetConnection()->GetIpcanCategory();
-
-        if (nCurrentIpcan == IIpcan::CATEGORY_WLAN && nPreferredRat == CELLULAR_ONLY)
-        {
-            bIsRegStopNeeded = IMS_TRUE;
-        }
-
-        if (nCurrentIpcan == IIpcan::CATEGORY_MOBILE && nPreferredRat == EPDG_ONLY)
-        {
-            bIsRegStopNeeded = IMS_TRUE;
-        }
-
-        A_IMS_TRACE_I(APPID,
-                "ProcessIpcanHandoverEvent :: ipcan(%d), preferred rat(%d), reg stop needed(%s)",
-                nCurrentIpcan, nPreferredRat, _TRACE_B_(bIsRegStopNeeded));
-
-        if (bIsRegStopNeeded == IMS_TRUE)
-        {
-            if (IsImsCall())
-            {
-                m_pUtil->AddFeature(PENDING_REG_STOP_HELD, m_nRegPending);
-                return;
-            }
-            else
-            {
-                ProcessDisconnectingState();
-                PostMessage(MSG_REG_STOP, 0, 0);
-            }
-        }
-    }
-}
-
 PROTECTED VIRTUAL void AosApplication::ProcessNetworkEvent(
         IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
@@ -2591,10 +2543,6 @@ PROTECTED VIRTUAL void AosApplication::Event_NotifyEvent(
     {
         case IMS_EVENT_REG_CONTROL:
             ProcessRegControlEvent(nWParam, nLParam);
-            break;
-
-        case IMS_EVENT_IPCAN_HO_NOTIFICATION:
-            ProcessIpcanHandoverEvent(nWParam, nLParam);
             break;
 
         case IMS_EVENT_VOICE_SERVICE_STATE:  // FALL-THROUGH

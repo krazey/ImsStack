@@ -1,6 +1,5 @@
 package com.android.imsstack.core.agents;
 
-import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 
@@ -9,9 +8,6 @@ import com.android.imsstack.core.agents.agentif.IVoLteAgent;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.PhoneNumberState;
-import com.android.imsstack.system.IJNIUpCallEvt;
-import com.android.imsstack.system.ImsEventDef;
-import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,25 +73,12 @@ public class PhoneNumberAgent implements IVoLteAgent {
             ImsLog.d(slotID, "");
 
             mSlotId = slotID;
-
-            IJNIUpCallEvt jniEvt = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
-
-            if (jniEvt != null) {
-                jniEvt.registerForObtainPhoneNumber(mPhoneNumberHandler,
-                        ImsEventDef.IMS_EVENT_OBTAIN_PHONE_NUMBER, null);
-            }
         }
 
         public void cleanup() {
             ImsLog.d(mSlotId, "");
 
             if (mPhoneNumberHandler != null) {
-                IJNIUpCallEvt jniEvt = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
-
-                if (jniEvt != null) {
-                    jniEvt.unregisterForObtainPhoneNumber(mPhoneNumberHandler);
-                }
-
                 mPhoneNumberHandler.removeCallbacksAndMessages(null);
             }
         }
@@ -111,48 +94,6 @@ public class PhoneNumberAgent implements IVoLteAgent {
 
         private int getRetryMaxCount() {
             return mRetryMaxCount;
-        }
-
-        private void handleObtainPhoneNumberEvent(Message msg) {
-            AsyncResult ar = (AsyncResult)msg.obj;
-
-            if (ar == null) {
-                return;
-            }
-
-            Message eventMsg = (Message)ar.result;
-
-            if (eventMsg == null) {
-                return;
-            }
-
-            if (eventMsg.arg1 == ImsEventDef.IMS_OBTAIN_PHONE_NUMBER_CLEAR) {
-                ImsLog.d(mSlotId, "clean up obtaining phone number");
-                clearRetryCount();
-                mPhoneNumberHandler.removeMessages(EVENT_OBTAIN_PHONE_NUMBER_RETRY);
-                return;
-            }
-
-            boolean refresh = (eventMsg.arg1 ==
-                    ImsEventDef.IMS_OBTAIN_PHONE_NUMBER_REFRESH) ? true : false;
-
-            int obj = (refresh) ?
-                    ImsEventDef.IMS_PHONE_NUMBER_REFRESH : ImsEventDef.IMS_PHONE_NUMBER_INITIAL;
-
-            clearRetryCount();
-
-            if (refresh) {
-                setRetryMaxCount(15);
-                setRetryInterval(3);
-            } else {
-                setRetryMaxCount(4);
-                setRetryInterval(3);
-            }
-
-            ImsLog.d(mSlotId, "maxCount=" + getRetryMaxCount() + ", retryInterval="
-                    + getRetryInterval() + " (msec)" + ", type=" + obj);
-
-            postMsgDelayed(EVENT_OBTAIN_PHONE_NUMBER_RETRY, obj, getRetryInterval());
         }
 
         private void increaseRetryCount() {
@@ -218,8 +159,7 @@ public class PhoneNumberAgent implements IVoLteAgent {
         }
 
         private void retryForPhoneNumberReadyEvent() {
-            retryForPhoneNumber(true, EVENT_PHONE_NUMBER_READY_RETRY,
-                    ImsEventDef.IMS_PHONE_NUMBER_REFRESH, getRetryInterval());
+            retryForPhoneNumber(true, EVENT_PHONE_NUMBER_READY_RETRY, 1, getRetryInterval());
         }
 
         private void setRetryMaxCount(int count) {
@@ -239,10 +179,6 @@ public class PhoneNumberAgent implements IVoLteAgent {
                 ImsLog.i(mSlotId, "PhoneNumberHandler :: what=" + msg.what);
 
                 switch (msg.what) {
-                    case ImsEventDef.IMS_EVENT_OBTAIN_PHONE_NUMBER:
-                        handleObtainPhoneNumberEvent(msg);
-                        break;
-
                     case EVENT_PHONE_NUMBER_READY_RETRY:
                         retryForPhoneNumberReadyEvent();
                         break;

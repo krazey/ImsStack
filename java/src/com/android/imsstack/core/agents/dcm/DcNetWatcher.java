@@ -1043,20 +1043,10 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     private void handleVoiceRoamingTypeChanged() {
         mVoiceRoamingTypeChangedRegistrants.notifyResult(mVoiceRoamingType);
-
-        mSystem.notifyEvent(
-                ImsEventDef.IMS_EVENT_ROAMING_TYPE,
-                ImsEventDef.IMS_ROAMING_TYPE_VOICE,
-                mVoiceRoamingType);
     }
 
     private void handleDataRoamingTypeChanged() {
         mDataRoamingTypeChangedRegistrants.notifyResult(mDataRoamingType);
-
-        mSystem.notifyEvent(
-                ImsEventDef.IMS_EVENT_ROAMING_TYPE,
-                ImsEventDef.IMS_ROAMING_TYPE_DATA,
-                mDataRoamingType);
     }
 
     private void handleImsNetworkFeature(ServiceState ss) {

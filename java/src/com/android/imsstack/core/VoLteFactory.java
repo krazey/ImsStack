@@ -1,14 +1,12 @@
 package com.android.imsstack.core;
 
 import android.content.Context;
-import android.content.Intent;
 
 import com.android.imsstack.core.agents.LocationAgentManager;
 import com.android.imsstack.core.agents.PhoneNumberAgent;
 import com.android.imsstack.core.agents.agentif.IVoLteAgent;
 import com.android.imsstack.core.service.VoLteService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
-import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.test.ImsTestHelper;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsLog;
@@ -134,8 +132,6 @@ public class VoLteFactory {
         mContext = context;
 
         initAgents();
-
-        sendVoLteStarted();
     }
 
     public void clear() {
@@ -199,10 +195,5 @@ public class VoLteFactory {
         ImsLog.i("");
 
         return new VoLteService(mContext);
-    }
-
-    private void sendVoLteStarted() {
-        ImsLog.i("");
-        mContext.sendBroadcast(new Intent(ImsEventDef.ACTION_IMS_STARTED));
     }
 }

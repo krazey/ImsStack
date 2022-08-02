@@ -154,8 +154,6 @@ public:
     static const AString& GetUri2(IN const AString& strValue);
 
 private:
-    static IMS_BOOL CheckIfDebugRequired(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nMsgType,
-            IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod, IN IMS_SINT32 nStatusCode);
     static IMS_SINT32 GetSimSlot();
 
 public:

@@ -2249,29 +2249,11 @@ PUBLIC VIRTUAL void AosHandle::Event_NotifyEvent(
             }
             break;
 
-        case IMS_EVENT_OMADM_UPDATED:
-            // jryou: This will be added later
-
-            // ProcessDMUpdated(nWParam, nLParam);
-            break;
-
         case IMS_EVENT_ROAMING_STATE:
             // jryou: This will be added later
 
             // ProcessCsRoamingStateChanged(nLParam);
             // ProcessLteRoamingStateChanged(nWParam);
-            break;
-
-        case IMS_EVENT_ROAMING_PREFERRED_VOICE_CALL_NETWORK:
-            // jryou: This will be added later
-
-            // ProcessRoamingPreferenceNetwork(nWParam);
-            break;
-
-        case IMS_EVENT_CONFIG_UPDATE:
-            // jryou: This will be added later
-
-            // if sms over ip
             break;
 
         default:

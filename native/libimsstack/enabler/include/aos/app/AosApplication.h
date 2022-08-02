@@ -191,7 +191,6 @@ protected:
     virtual void ProcessRegFailed_Terminated();
 
     virtual void ProcessDisconnectingState(IN IMS_UINT32 nReason = 0);
-    virtual void ProcessIpcanHandoverEvent(IN IMS_UINT32 nResult, IN IMS_UINT32 nPreferredRat);
     virtual void ProcessNetworkEvent(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
     virtual void ProcessStateStart(IN IMS_UINT32 nTime = 0);
     virtual void ProcessRegControlEvent(IN IMS_UINT32 nType, IN IMS_UINT32 nReason);
