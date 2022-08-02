@@ -402,5 +402,8 @@ protected:
     static const IMS_UINT32 REG_STOP_WAITING_TIME_MILLIS = 1000;
     static const IMS_UINT32 APP_START_WAITING_TIME_MILLIS = 4000;
     static const IMS_UINT32 UNEXPECTED_ERROR_APP_START_WAITING_TIME_MILLIS = 10000;
+
+private:
+    friend class AosApplicationTest;
 };
 #endif  // AOS_APPLICATION_H_

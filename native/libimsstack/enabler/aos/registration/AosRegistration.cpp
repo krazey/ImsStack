@@ -2787,9 +2787,8 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegTerminated()
 
 PROTECTED VIRTUAL void AosRegistration::ProcessRegTerminatedByNotify()
 {
-    // TODO : need the block permanently
     Destroy();
-    ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_TERMINATED);
+    ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_FORBIDDEN);
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessAuthenticationFailed()
