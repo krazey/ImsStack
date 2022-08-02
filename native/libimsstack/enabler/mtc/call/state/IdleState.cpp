@@ -336,7 +336,8 @@ CallStateName IdleState::ContinueStart()
         return CallStateName::TERMINATING;
     }
 
-    StartTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
 
     return CallStateName::OUTGOING;
 }
@@ -364,7 +365,8 @@ CallStateName IdleState::ContinueConference(IN IMSList<ConfUser*> lstUsers)
         return CallStateName::TERMINATING;
     }
 
-    StartTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
 
     return CallStateName::OUTGOING;
 }
@@ -409,7 +411,8 @@ CallStateName IdleState::ContinueStartUssi()
         return CallStateName::TERMINATING;
     }
 
-    StartTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
     return CallStateName::OUTGOING;
 }
 

@@ -333,6 +333,9 @@ void MtcSession::UpdateSessionProperty()
         m_objSession.SetRefreshPolicy(ISession::REFRESH_POLICY_REMAIN_TIME, 0, 0, nInterval);
     }
 
+    m_objSession.SetConfiguration(
+            m_objSession.GetConfiguration() | ISession::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED);
+
     m_objSession.SetImplicitRoutingRequired(IMS_TRUE);
 }
 

@@ -26,6 +26,7 @@ class AString;
 class IDialogEvent;
 class IMessage;
 class IMtcCalContext;
+class IMtcSession;
 class MediaInfo;
 class SuppService;
 enum class QosLossPolicy;
@@ -68,6 +69,8 @@ public:
 
 private:
     void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);
+    IMS_BOOL HandleB1TimerAfterTerminate(IN IMtcSession* piMtcSession,
+            IN const CallReasonInfo& objReason);
     CallStateName HandleSilentRetry(IN const CallReasonInfo& objReason);
     CallStateName ContinueSilentRetry();
     void HandleCountrySpecificServiceUrn(IN IMessage* piMessage);
@@ -78,6 +81,7 @@ private:
 
     IMS_BOOL m_bRemoteAlerted;
     IMS_SINT32 m_nSilentRedialCount;
+    IMS_BOOL m_bTimer100WaitExpired;
 };
 
 #endif

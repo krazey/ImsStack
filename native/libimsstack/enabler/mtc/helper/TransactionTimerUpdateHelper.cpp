@@ -24,14 +24,15 @@
 #include "Configuration.h"
 #include "ServiceConfig.h"
 #include "ICarrierConfig.h"
+#include "call/IMtcSessionContext.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-TransactionTimerUpdateHelper::TransactionTimerUpdateHelper(
-        IN IMS_SINT32 nSlotId, IN MtcConfigurationProxy& objConfiguration) :
-        m_nSlotId(nSlotId),
-        m_objConfiguration(objConfiguration)
+TransactionTimerUpdateHelper::TransactionTimerUpdateHelper(IN IMtcSessionContext& objContext) :
+        m_nSlotId(objContext.GetSlotId()),
+        m_objConfiguration(objContext.GetConfigurationProxy()),
+        m_bWifi(objContext.GetService().IsWifiRegistered())
 {
     IMS_TRACE_I("+TransactionTimerUpdateHelper", 0, 0, 0);
 }
@@ -44,12 +45,20 @@ TransactionTimerUpdateHelper::~TransactionTimerUpdateHelper()
 
 PUBLIC VIRTUAL void TransactionTimerUpdateHelper::SetInviteTransactionTimer()
 {
+    if (IsNeedToUpdate() == IMS_FALSE)
+    {
+        return;
+    }
     IMS_SINT32 nValue = m_objConfiguration.GetInt(Feature::MO_CALL_REQUEST_TIMEOUT);
     UpdateTimer(IMS_TRUE, nValue);
 }
 
 PUBLIC VIRTUAL void TransactionTimerUpdateHelper::ResetInviteTransactionTimer()
 {
+    if (IsNeedToUpdate() == IMS_FALSE)
+    {
+        return;
+    }
     // TODO: read from mtc config...
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
     IMS_SINT32 nValue = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT);
@@ -99,4 +108,14 @@ void TransactionTimerUpdateHelper::UpdateTimer(IN IMS_BOOL bInviteTransaction, I
     {
         IMS_TRACE_E(0, "Update FAIL", 0, 0, 0);
     }
+}
+
+PRIVATE
+IMS_BOOL TransactionTimerUpdateHelper::IsNeedToUpdate() const
+{
+    Feature eFeature = m_bWifi
+            ? Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL
+            : Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL;
+    return m_objConfiguration.GetInt(eFeature) !=
+            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE;
 }

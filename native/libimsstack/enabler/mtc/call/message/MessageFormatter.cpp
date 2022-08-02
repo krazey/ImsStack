@@ -902,6 +902,16 @@ void MessageFormatter::GetTerminateReason(
     switch (objReason.nCode)
     {
         case CODE_USER_TERMINATED:
+            if (objReason.nExtraCode == EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT)
+            {
+                strReason = GetTerminateReason(TerminateType::USER_ENDS_AND_SIP_RESPONSE_TIMEOUT);
+                break;
+            }
+            else if (objReason.nExtraCode == EXTRA_USER_TERMINATED_AND_RTP_TIMEOUT)
+            {
+                strReason = GetTerminateReason(TerminateType::USER_ENDS_CALL_AND_RTP_TIMEOUT);
+                break;
+            }
             strReason = GetTerminateReason(TerminateType::USER_ENDS_CALL);
             break;
         case CODE_MEDIA_NO_DATA:
@@ -920,14 +930,12 @@ void MessageFormatter::GetTerminateReason(
         case CODE_TIMEOUT_NO_ANSWER:
             strReason = GetTerminateReason(TerminateType::CALL_SETUP_TIMEOUT);
             break;
-
         case CODE_EARLYDIALOG_FORKED_TERMINATED_INTERNALONLY:
             strReason = GetTerminateReason(TerminateType::TERMINATING_EARLY_DIALOG);
             break;
         case CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE:
             strReason = GetTerminateReason(TerminateType::CONFERENCE_CALL_JOINED);
             break;
-
         default:
             strReason = AString::ConstNull();
             break;

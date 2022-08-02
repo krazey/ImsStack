@@ -55,7 +55,8 @@ PUBLIC
 OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::OUTGOING, objContext),
         m_bRemoteAlerted(IMS_FALSE),
-        m_nSilentRedialCount(0)
+        m_nSilentRedialCount(0),
+        m_bTimer100WaitExpired(IMS_FALSE)
 {
 }
 
@@ -66,6 +67,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::Terminate(IN const CallReasonInfo& o
     IMS_TRACE_I("Terminate : reason[%s]", _TRACE_CR_(objReason), 0, 0);
 
     IMtcSession* pSession = m_objContext.GetSession();
+    if (HandleB1TimerAfterTerminate(pSession, objReason) == IMS_TRUE)
+    {
+        return CallStateName::TERMINATING;
+    }
+
     if (pSession != IMS_NULL)
     {
         HandleCancel(&pSession->GetISession(), objReason);
@@ -420,7 +426,13 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
     IMS_TRACE_D("SessionProvisionalResponseReceived", 0, 0, 0);
-    StopTimer(TIMER_MO_1XX_WAIT);
+    IMS_SINT32 nStatusCode =
+            MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_START, nIndex);
+    StopTimer(TIMER_MO_100_WAIT);
+    if (SipStatusCode::IsProvisional(nStatusCode))
+    {
+        StopTimer(TIMER_MO_18X_WAIT);
+    }
     StartTimer(TIMER_MO_NOANSWER);
 
     IMessage* piMessage =
@@ -438,8 +450,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
 
-    IMS_SINT32 nStatusCode =
-            MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_START, nIndex);
     // TODO: move to SessionAlerting
     if (nStatusCode == SipStatusCode::SC_180)
     {
@@ -477,7 +487,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
     IMS_TRACE_D("SessionRPRReceived", 0, 0, 0);
-    StopTimer(TIMER_MO_1XX_WAIT);
+    StopTimer(TIMER_MO_100_WAIT);
+    StopTimer(TIMER_MO_18X_WAIT);
 
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
@@ -603,7 +614,11 @@ CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
-        case TIMER_MO_1XX_WAIT:
+        case TIMER_MO_100_WAIT:
+            // it's handled in TransactionTimerUpdateHelper
+            m_bTimer100WaitExpired = IMS_TRUE;
+            return GetStateName();
+        case TIMER_MO_18X_WAIT:
         {
             // TODO: fail reason name.
             CallReasonInfo objReason(CODE_TIMEOUT_1XX_WAITING);
@@ -630,7 +645,8 @@ PRIVATE
 void OutgoingState::HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("HandleCancel", 0, 0, 0);
-    StopTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
+    StopTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+    StopTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
 
     if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)
     {
@@ -642,6 +658,42 @@ void OutgoingState::HandleCancel(IN ISession* piSession, IN const CallReasonInfo
     {
         pSession->Terminate(IMS_FALSE, objReason);
     }
+}
+
+PRIVATE
+IMS_BOOL OutgoingState::HandleB1TimerAfterTerminate(IN IMtcSession* piMtcSession,
+        IN const CallReasonInfo& objReason)
+{
+    if (objReason.nCode != CODE_USER_TERMINATED)
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_bTimer100WaitExpired == IMS_FALSE)
+    {
+        return IMS_FALSE;
+    }
+
+    Feature eFeature = m_objContext.GetService().IsWifiRegistered()
+            ? Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL
+            : Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL;
+    if (m_objContext.GetConfigurationProxy().GetInt(eFeature) !=
+            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_TRACE_D("HandleB1TimerAfterTerminate", 0, 0, 0);
+
+    // To invoke HandleTransactionTimeout() / ControlAos()
+    StartErrorHandler(m_objContext).Handle(IMS_NULL);
+
+    // To set Reason Header.
+    const CallReasonInfo objNewReason(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
+    HandleCancel(&piMtcSession->GetISession(), objNewReason);
+    m_objContext.GetUiNotifier().SendStartFailed(objNewReason);
+
+    return IMS_TRUE;
 }
 
 PRIVATE

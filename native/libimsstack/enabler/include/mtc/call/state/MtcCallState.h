@@ -152,9 +152,8 @@ public:
 
     enum TimerType
     {
-        // TODO: differentiate 100 and 183?
-        // Currently, MTC isn't being notified about 100 Trying response.
-        TIMER_MO_1XX_WAIT,
+        TIMER_MO_100_WAIT,
+        TIMER_MO_18X_WAIT,
         TIMER_MO_NOANSWER,
         TIMER_MT_ALERTING,
 

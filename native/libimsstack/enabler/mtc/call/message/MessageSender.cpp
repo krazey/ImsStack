@@ -32,9 +32,7 @@ MessageSender::MessageSender(IN IMtcSessionContext& objContext, IN ISession& obj
         m_objContext(objContext),
         m_objSession(objSession),
         m_pFormatter(nullptr),
-        m_objTimerUpdateHelper(TransactionTimerUpdateHelper(
-                objContext.GetSlotId(), objContext.GetConfigurationProxy()))
-
+        m_objTimerUpdateHelper(TransactionTimerUpdateHelper(objContext))
 {
     IMS_TRACE_I("+MessageSender", 0, 0, 0);
     CreateFormatter();

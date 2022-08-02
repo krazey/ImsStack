@@ -77,7 +77,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END:
             break;
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE:
-            nReason = CODE_NONE;  // TODO: check requirement. Not working currently
+            ControlAos(ImsAosControl::PCSCF_NEXT);
             break;
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB:
             nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
