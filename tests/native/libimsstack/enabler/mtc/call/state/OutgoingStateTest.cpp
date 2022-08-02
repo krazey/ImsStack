@@ -115,7 +115,7 @@ TEST_F(OutgoingStateTest, HandleB1TimerIsNotHandledIfPolicyIsNotWaitForResponse)
 {
     EXPECT_CALL(objAosConnector, Control).Times(0);
 
-    ON_CALL(objService, IsWifiRegistered)
+    ON_CALL(objService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteCall)
             .WillByDefault(Return(2));
@@ -129,7 +129,7 @@ TEST_F(OutgoingStateTest, HandleB1TimerIsHandled)
 {
     EXPECT_CALL(objAosConnector, Control).Times(1);
 
-    ON_CALL(objService, IsWifiRegistered)
+    ON_CALL(objService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteCall)
             .WillByDefault(Return(1));

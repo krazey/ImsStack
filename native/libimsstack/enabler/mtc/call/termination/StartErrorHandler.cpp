@@ -66,7 +66,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
         return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 
-    Feature eFeature = m_objContext.GetService().IsWifiRegistered()
+    Feature eFeature = m_objContext.GetService().IsWlanIpCanType()
             ? Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL
             : Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL;
 

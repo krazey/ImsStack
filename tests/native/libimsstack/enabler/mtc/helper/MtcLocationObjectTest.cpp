@@ -75,7 +75,7 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiNorma
 
     objCallInfo.bEmergency = IMS_FALSE;
 
-    ON_CALL(objService, IsWifiRegistered)
+    ON_CALL(objService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
@@ -91,7 +91,7 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiEmerg
 
     objCallInfo.bEmergency = IMS_TRUE;
 
-    ON_CALL(objService, IsWifiRegistered)
+    ON_CALL(objService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
@@ -107,7 +107,7 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularN
 
     objCallInfo.bEmergency = IMS_FALSE;
 
-    ON_CALL(objService, IsWifiRegistered)
+    ON_CALL(objService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
@@ -123,7 +123,7 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularE
 
     objCallInfo.bEmergency = IMS_TRUE;
 
-    ON_CALL(objService, IsWifiRegistered)
+    ON_CALL(objService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));

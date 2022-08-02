@@ -680,7 +680,7 @@ IMS_BOOL OutgoingState::HandleB1TimerAfterTerminate(IN IMtcSession* piMtcSession
         return IMS_FALSE;
     }
 
-    Feature eFeature = m_objContext.GetService().IsWifiRegistered()
+    Feature eFeature = m_objContext.GetService().IsWlanIpCanType()
             ? Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL
             : Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL;
     if (m_objContext.GetConfigurationProxy().GetInt(eFeature) !=
