@@ -28,7 +28,6 @@ import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
-import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.util.ImsLog;
@@ -353,24 +352,20 @@ public class SscNetConnection implements ISscNetConnection {
                 return;
             }
 
-            EApnType apnType = (EApnType) ar.result;
-            if (apnType == null) {
+            IDcNetWatcher.NotiObj res = (IDcNetWatcher.NotiObj) ar.result;
+            if (res == null) {
                 return;
             }
 
-            ImsLog.d("ApnType : " + apnType.toString());
-            // Change only for XCAP apn type.
-            if (apnType == EApnType.XCAP) {
-                IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-                IApn apn = (dcapn != null) ? dcapn.getApnControl(apnType.getType()) : null;
-                boolean isPermanentFailure = (apn != null)
-                        ? apn.isESMCausePermanentFailure() : false;
-                // TODO: Need to check KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY
-                SscServiceStateAgent.getInstance().setPdnConnectionFailed(mSlotId,
-                        isPermanentFailure);
+            if (mApnType == EApnType.XCAP && res.eApnType == EApnType.XCAP) {
+                int smCause = res.mSmCause;
+                SscServiceStateAgent.getInstance().setPdnConnectionFailed(mSlotId, smCause);
+                ImsLog.d("smCause : " + smCause);
+
                 if (mSscTransactionHandler != null) {
                     mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_CONNECTION_FAILED);
                 }
+
                 disconnect();
             }
         }
@@ -380,6 +375,7 @@ public class SscNetConnection implements ISscNetConnection {
             if (mSscTransactionHandler != null) {
                 mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_REQUEST_TIMEOUT);
             }
+
             disconnect();
         }
 

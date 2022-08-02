@@ -29,10 +29,12 @@ public interface IDcNetWatcher extends IDc {
     class NotiObj {
         public EApnType   eApnType;
         public EDataState eDataState;
+        public int mSmCause;
 
-        public NotiObj(EApnType apnType, EDataState dataState) {
+        public NotiObj(EApnType apnType, EDataState dataState, int smCause) {
             this.eApnType = apnType;
             this.eDataState = dataState;
+            this.mSmCause = smCause;
         }
     }
 
@@ -248,6 +250,7 @@ public interface IDcNetWatcher extends IDc {
      *                IDcNetWatcher.NotiObj res = (IDcNetWatcher.NotiObj) ar.result;
      *                EApnType apnType = res.eApnType;
      *                EDataState state = res.eDataState;
+     *                int smCause = res.mSmCause;
             }
      * @param
      * @return
@@ -402,7 +405,7 @@ public interface IDcNetWatcher extends IDc {
     void unregisterForPdnConnectionFailed(Handler h);
 
     /**
-     * Notify pdn connection failed event to listeners
+     * Notify pdn connection failed event with sm cause to listeners
      */
-    void notifyPdnConnectionFailed(EApnType eApnType);
+    void notifyPdnConnectionFailed(EApnType eApnType, int smCause);
 }

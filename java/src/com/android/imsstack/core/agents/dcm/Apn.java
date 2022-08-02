@@ -198,7 +198,7 @@ public abstract class Apn extends Handler implements IApn {
 
         Message msg = Message.obtain();
         msg.what = EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDcNetWatcher.NotiObj(mType, EDataState.DATA_STATE_DISCONNECTED);
+        msg.obj = new IDcNetWatcher.NotiObj(mType, EDataState.DATA_STATE_DISCONNECTED, -1);
         handleMessage(msg);
 
         removeCallbacksAndMessages(null);
@@ -344,11 +344,6 @@ public abstract class Apn extends Handler implements IApn {
     @Override
     public boolean isESMCausePermanentFailure() {
         return mESMCausePermanentFailure;
-    }
-
-    @Override
-    public void resetESMCausePermanentFailure() {
-        mESMCausePermanentFailure = false;
     }
 
     @Override
@@ -576,12 +571,12 @@ public abstract class Apn extends Handler implements IApn {
         return true;
     }
 
-    protected void notifyPdnConnectionFailed(EApnType apnType) {
-        ImsLog.i(mSlotId, "apnType : " + apnType);
+    protected void notifyPdnConnectionFailed(EApnType apnType, int smCause) {
+        ImsLog.i(mSlotId, "apnType : " + apnType + ", smCause : " + smCause);
 
         //notify to watcher
         if (mDcNetWatcher != null) {
-            mDcNetWatcher.notifyPdnConnectionFailed(apnType);
+            mDcNetWatcher.notifyPdnConnectionFailed(apnType, smCause);
         }
     }
 
@@ -669,7 +664,7 @@ public abstract class Apn extends Handler implements IApn {
         //notify to apn
         Message msg = Message.obtain();
         msg.what = EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDcNetWatcher.NotiObj(apnType, dataState);
+        msg.obj = new IDcNetWatcher.NotiObj(apnType, dataState, -1);
 
         sendMessage(msg);
     }

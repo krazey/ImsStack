@@ -161,9 +161,6 @@ public class DcSettings implements IDcSettings {
             if (apnType == EApnType.IMS) {
                 permanentFailure = mCarrierConfig.getIntArray(
                         CarrierConfig.Assets.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY);
-            } else if (apnType == EApnType.XCAP) {
-                permanentFailure = mCarrierConfig.getIntArray(
-                        CarrierConfig.ImsSs.KEY_UT_SM_CAUSE_PERMANENT_BLOCK_INT_ARRAY);
             } else {
                 return false;
             }

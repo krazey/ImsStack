@@ -82,14 +82,14 @@ public class SscServiceStateAgent {
         serviceState.setErrorResponseCode(responseCode);
     }
 
-    protected void setPdnConnectionFailed(int slotId, boolean isPermanent) {
+    protected void setPdnConnectionFailed(int slotId, int smCause) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.i("setPdnConnectionFailed()");
             return;
         }
 
-        serviceState.setPdnConnectionFailed(isPermanent);
+        serviceState.setPdnConnectionFailed(smCause);
     }
 
     protected void setDnsQueryFailed(int slotId, boolean input) {

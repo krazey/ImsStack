@@ -189,16 +189,9 @@ public class DcSettingsTest {
                 eq(CarrierConfig.Assets.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY)))
                 .thenReturn(emptyList)
                 .thenReturn(availableList);
-        when(mMockCarrierConfig.getIntArray(
-                eq(CarrierConfig.ImsSs.KEY_UT_SM_CAUSE_PERMANENT_BLOCK_INT_ARRAY)))
-                .thenReturn(emptyList)
-                .thenReturn(availableList);
 
         assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
         assertTrue(mDcSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
-
-        assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.XCAP, permanentFailureCause));
-        assertTrue(mDcSettingsUT.isPermanentFailure(EApnType.XCAP, permanentFailureCause));
 
         assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.INTERNET, permanentFailureCause));
         assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.EMERGENCY, permanentFailureCause));

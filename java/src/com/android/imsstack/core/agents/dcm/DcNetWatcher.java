@@ -522,12 +522,13 @@ public class DcNetWatcher implements IDcNetWatcher {
     // Public methods --------------------------------------------
     /** Only subject class can invoke this API. DO NOT allow to accessed by observer class */
     public void notifyResult(EApnType eApnType, EDataState nDataState) {
-        mStateDataConnectionState.notifyResult(new IDcNetWatcher.NotiObj(eApnType, nDataState));
+        mStateDataConnectionState.notifyResult(new IDcNetWatcher.NotiObj(eApnType, nDataState, -1));
     }
 
     /** notify pdn connection failure */
-    public void notifyPdnConnectionFailed(EApnType eApnType) {
-        mPdnConnectionFailedRegistrants.notifyResult(eApnType);
+    public void notifyPdnConnectionFailed(EApnType eApnType, int smCause) {
+        mPdnConnectionFailedRegistrants.notifyResult(
+                new IDcNetWatcher.NotiObj(eApnType, EDataState.DATA_STATE_CONNECT_FAILED, smCause));
     }
 
     /** Register data state */

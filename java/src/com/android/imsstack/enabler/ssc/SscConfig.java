@@ -138,12 +138,6 @@ public final class SscConfig {
         return getInt(slotId, CarrierConfigManager.ImsSs.KEY_UT_TRANSPORT_TYPE_INT);
     }
 
-    /* TODO: used in a framework
-     * KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL
-     * KEY_UT_SUPPORTED_WHEN_PS_DATA_OFF_BOOL
-     * KEY_UT_SUPPORTED_WHEN_ROAMING_BOOL
-     */
-
     // U-OS CarrierConfig
     public static boolean isSrvRecordsRequired(int slotId) {
         return getBoolean(slotId, CarrierConfig.ImsSs.KEY_XCAP_ROOT_URI_REQUIRES_SRV_QUERY_BOOL);
@@ -154,12 +148,10 @@ public final class SscConfig {
     }
 
     public static int[] getSmCausePermBlock(int slotId) {
-        // TODO: ApnXcap needs to check this
         return getIntArray(slotId, CarrierConfig.ImsSs.KEY_UT_SM_CAUSE_PERMANENT_BLOCK_INT_ARRAY);
     }
 
     public static int[] getSmCauseTempBlock(int slotId) {
-        // TODO: ApnXcap needs to check this
         return getIntArray(slotId, CarrierConfig.ImsSs.KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY);
     }
 
@@ -271,6 +263,31 @@ public final class SscConfig {
 
     public static boolean isTls(int slotId) {
         return getUtTransportType(slotId) == CarrierConfigManager.Ims.PREFERRED_TRANSPORT_TLS;
+    }
+
+    protected static boolean isPermanentBlockSmCause(int slotId, int smCause) {
+        int[] permBlockCauses = getSmCausePermBlock(slotId);
+        if (permBlockCauses == null) {
+            return false;
+        }
+
+        return Arrays.stream(permBlockCauses).anyMatch(value -> {
+            return value == smCause;
+        });
+    }
+
+    protected static boolean isTemporaryBlockSmCause(int slotId, int smCause) {
+        int[] tempBlockCauses = getSmCauseTempBlock(slotId);
+        if (tempBlockCauses == null) {
+            return false;
+        }
+
+        return Arrays.stream(tempBlockCauses).anyMatch(value -> {
+            if (value == 0) {
+                return true;
+            }
+            return value == smCause;
+        });
     }
 
     public static boolean isPermanentErrorCode(int slotId, int responseCode) {

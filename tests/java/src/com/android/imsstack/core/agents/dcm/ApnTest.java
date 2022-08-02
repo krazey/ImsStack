@@ -292,9 +292,6 @@ public class ApnTest {
 
         mApn.mESMCausePermanentFailure = true;
         assertTrue(mApn.isESMCausePermanentFailure());
-
-        mApn.resetESMCausePermanentFailure();
-        assertFalse(mApn.isESMCausePermanentFailure());
     }
 
     @Test
@@ -470,8 +467,8 @@ public class ApnTest {
     public void testNotifyPdnConnectionFailed() throws Exception {
         replaceInstance(Apn.class, "mDcNetWatcher", mApn, mMockIDcNetWatcher);
 
-        mApn.notifyPdnConnectionFailed(mApn.mType);
-        verify(mMockIDcNetWatcher).notifyPdnConnectionFailed(mApn.mType);
+        mApn.notifyPdnConnectionFailed(mApn.mType, 33);
+        verify(mMockIDcNetWatcher).notifyPdnConnectionFailed(mApn.mType, 33);
     }
 
     @Test
@@ -613,7 +610,7 @@ public class ApnTest {
         // handle DATA_STATE_CONNECTED
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDcNetWatcher.NotiObj(mApn.mType, EDataState.DATA_STATE_CONNECTED);
+        msg.obj = new IDcNetWatcher.NotiObj(mApn.mType, EDataState.DATA_STATE_CONNECTED, -1);
         mApn.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
@@ -626,7 +623,7 @@ public class ApnTest {
         // handle DATA_STATE_CONNECT_FAILED
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDcNetWatcher.NotiObj(mApn.mType, EDataState.DATA_STATE_CONNECT_FAILED);
+        msg.obj = new IDcNetWatcher.NotiObj(mApn.mType, EDataState.DATA_STATE_CONNECT_FAILED, -1);
         mApn.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
@@ -654,7 +651,7 @@ public class ApnTest {
         // ignore if radio off is ongoing
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDcNetWatcher.NotiObj(mApn.mType, EDataState.DATA_STATE_CONNECTED);
+        msg.obj = new IDcNetWatcher.NotiObj(mApn.mType, EDataState.DATA_STATE_CONNECTED, -1);
         mApn.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
