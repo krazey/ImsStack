@@ -145,8 +145,9 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
 
     /* multi line encode, success */
     EXPECT_EQ(SIP_TRUE,
-            pCopyHeaderList->EncodeHdr(
-                    &pBuff, SIP_FALSE, SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE));
+            pCopyHeaderList->EncodeHdr(&pBuff, SIP_FALSE,
+                    (SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE |
+                            SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM)));
 
     char* pData = (char*)"INVITE\r\nAllow: ACK\r\nAllow: UPDATE\r\nAllow: REFER";
     EXPECT_STREQ(pData, &(aBuffer[0]));

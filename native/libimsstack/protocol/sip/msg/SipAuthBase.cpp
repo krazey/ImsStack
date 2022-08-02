@@ -267,7 +267,11 @@ SIP_BOOL SipAuthBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         }
         return SIP_FALSE;
     }
-    delete[] pszScheme;
+
+    if (pszScheme != SIP_NULL)
+    {
+        delete[] pszScheme;
+    }
 
     /*Update the temp to start of LWS*/
     pTempPre = pTempPre + SIP_ONE;

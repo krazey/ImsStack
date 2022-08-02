@@ -63,6 +63,7 @@ public:
         METHOD_REFER,
         METHOD_PUBLISH,
         METHOD_END,
+        METHOD_UNKNOWN,
         METHOD_INVALID
     };
 
@@ -134,7 +135,6 @@ public:
         }
         return m_pMsgBodyList;
     }
-    SipMsgBody* GetMessageBody(SIP_INT32 nIndex);
 
     SIP_BOOL SetRequestline(SipRequestLine* pReqLine);
     SIP_BOOL SetHeader(SipHeaderBase* pHdr);

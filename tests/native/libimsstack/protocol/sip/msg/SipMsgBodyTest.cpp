@@ -287,6 +287,10 @@ TEST_F(SipMsgBodyTest, DecodeMIMEMsgBody)
     ASSERT_TRUE(pMessageBody != nullptr);
 
     EXPECT_EQ(SIP_FALSE, pMessageBody->DecodeMIMEMsgBody(nullptr, nullptr));
+    EXPECT_TRUE(pMessageBody->GetContentType() == nullptr);
+    EXPECT_TRUE(pMessageBody->GetMimeHdr(SipHeaderBase::CONTENT_TYPE, 0) == nullptr);
+    EXPECT_TRUE(pMessageBody->GetContentEncoding() == nullptr);
+    EXPECT_TRUE(pMessageBody->GetContentDisposition() == nullptr);
 
     char* pMessage = (char*)"Content-Type: multipart/mixed;boundary=abcxz\r\n\
 \r\n\
@@ -333,6 +337,7 @@ level1 - message body 2\r\n\
     pContentTypeHeader->SipDelete();
 
     SipMsgBodyList* pMsgBobyList = pMessageBody->GetMessageBodyList();
+    ASSERT_TRUE(pMsgBobyList != nullptr);
 
     EXPECT_EQ(3, pMsgBobyList->GetMsgBodyCount());
 
@@ -360,6 +365,19 @@ level1 - message body 2\r\n\
 
     SipMsgBody* pInnerBody1 = pBobyList1->GetBodyByIndex(0);
     ASSERT_TRUE(pInnerBody1 != nullptr);
+
+    pContentTypeHeader = reinterpret_cast<SipContentTypeHeader*>(
+            pInnerBody1->GetMimeHdr(SipHeaderBase::CONTENT_TYPE, 0));
+    ASSERT_TRUE(pContentTypeHeader != nullptr);
+
+    EXPECT_STREQ("application", pContentTypeHeader->GetMediaType());
+    EXPECT_STREQ("test", pContentTypeHeader->GetSubMediaType());
+
+    EXPECT_TRUE(pInnerBody1->GetMimeHdr(SipHeaderBase::CONTENT_DISPOSITION, 0) == nullptr);
+    EXPECT_TRUE(pInnerBody1->GetMimeHdr(SipHeaderBase::CONTENT_ENCODING, 0) == nullptr);
+    EXPECT_TRUE(pInnerBody1->GetMimeHdr(SipHeaderBase::TYPE_INVALID, 0) == nullptr);
+
+    pContentTypeHeader->SipDelete();
 
     EXPECT_STREQ("level2 - message body 1", pInnerBody1->GetBuffer());
     pInnerBody1->SipDelete();
@@ -413,6 +431,31 @@ level1 - message body 2\r\n\
     pBody3->SipDelete();
 
     pMessageBody->SipDelete();
+
+    /* No headers and only message body - single body , success */
+    pMessageBody = new SipMsgBody();
+    ASSERT_TRUE(pMessageBody != nullptr);
+
+    pMessage = (char*)"\r\nlevel1 - message body with no headers\r\n";
+    nLen = strlen(pMessage);
+
+    EXPECT_EQ(SIP_TRUE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen));
+
+    pMsgBobyList = pMessageBody->GetMessageBodyList();
+    ASSERT_TRUE(pMsgBobyList == nullptr);
+
+    EXPECT_STREQ(pMessage, pMessageBody->GetBuffer());
+    pMessageBody->SipDelete();
+
+    /* No proper headers end, fail */
+    pMessageBody = new SipMsgBody();
+    ASSERT_TRUE(pMessageBody != nullptr);
+
+    pMessage = (char*)"Content-Type: multipart/mixed;boundary=abcxz\r\n";
+    nLen = strlen(pMessage);
+
+    EXPECT_EQ(SIP_FALSE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen - 1));
+    pMessageBody->SipDelete();
 }
 
 TEST_F(SipMsgBodyTest, DecodeAndEncodeMessageSummaryMsgBody)
@@ -422,6 +465,7 @@ TEST_F(SipMsgBodyTest, DecodeAndEncodeMessageSummaryMsgBody)
 
     /* Empty message body, fail */
     EXPECT_EQ(SIP_FALSE, pEmptyMessageBody->EncodeMessageSummaryMsgBody(nullptr));
+    EXPECT_EQ(SIP_FALSE, pEmptyMessageBody->DecodeMessageSummaryMsgBody(nullptr, nullptr));
 
     pEmptyMessageBody->SipDelete();
 

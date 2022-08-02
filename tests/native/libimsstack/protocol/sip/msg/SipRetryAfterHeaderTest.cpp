@@ -266,6 +266,15 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"30 sip server overloaded)", 25));
 
     pHeader->SipDelete();
+
+    pHeader = reinterpret_cast<SipRetryAfterHeader*>(
+            SipRetryAfterHeader::GetNewObj(SipHeaderBase::RETRY_AFTER_SEC, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    /* extra invalid string after comment, fail */
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"30(sip server overloaded)InvalidString", 38));
+
+    pHeader->SipDelete();
 }
 
 }  // namespace android

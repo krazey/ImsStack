@@ -689,8 +689,15 @@ TEST_F(SipHeadersTest, EncodeHdrs)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
+    char aShortFormBuffer[BUFFER_SIZE] = {
+            0,
+    };
+    char* pShortFormBuff = &(aShortFormBuffer[0]);
+
     /* Encode headers */
     EXPECT_EQ(SIP_TRUE, pHdrs->EncodeHdrs(&pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
+    EXPECT_EQ(SIP_TRUE,
+            pHdrs->EncodeHdrs(&pShortFormBuff, SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM));
 
     SIP_UINT32 uiLength = pBuff - &(aBuffer[0]);
 
@@ -717,6 +724,38 @@ TEST_F(SipHeadersTest, EncodeHdrs)
     int iHeaderCount = 0;
 
     /* Check encoded buffer has headers as per the order in arHeadersOrder */
+    while ((pucStartPt < pucEndPt) && (bHdrEnd == SIP_FALSE))
+    {
+        SIP_UINT32 uiDecLen = 0;
+
+        sipFindTerminatingCRLF(pucStartPt, pucEndPt, &pucTempPos, &bHdrEnd);
+
+        uiDecLen = pucTempPos - pucStartPt + SIP_ONE;
+
+        SIP_CHAR* pucHdrName = SIP_NULL;
+        SIP_CHAR* pucHdrBody = SIP_NULL;
+
+        pHdrs->DecodeHdrs(pucStartPt, uiDecLen, (SIP_CHAR**)&pucHdrName, &pucHdrBody);
+
+        SIP_INT32 eHdrType = sipGetHdrType(pucHdrName);
+
+        EXPECT_EQ(arHeadersOrder[iHeaderCount], eHdrType);
+        iHeaderCount++;
+
+        pucStartPt = pucTempPos + SIP_THREE;
+        pucTempPos = SIP_NULL;
+    }
+
+    EXPECT_EQ(iHeaderCount + 1, NUM_OF_HEADERS);
+
+    iHeaderCount = 0;
+    bHdrEnd = SIP_FALSE;
+    uiLength = pShortFormBuff - &(aShortFormBuffer[0]);
+    pucStartPt = &(aShortFormBuffer[0]);
+    pucEndPt = pucStartPt + uiLength;
+    pucTempPos = SIP_NULL;
+
+    /* Check encoded short form buffer has headers as per the order in arHeadersOrder */
     while ((pucStartPt < pucEndPt) && (bHdrEnd == SIP_FALSE))
     {
         SIP_UINT32 uiDecLen = 0;

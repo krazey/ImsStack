@@ -230,6 +230,13 @@ UnknownHeaderName1: UnknownHeaderValue1\r\nUnknownHeaderName2: UnknownHeaderValu
     EXPECT_STREQ(pMimeHdrs, &(aBuffer[0]));
 
     pMimeHeaders->SipDelete();
+
+    /* Invalid header with no colon, fail */
+    pMimeHeaders = new SipMIMEHdrs();
+    ASSERT_TRUE(pMimeHeaders != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pMimeHeaders->DecodeMIMEHdrs((char*)"Content-Type", 12));
+    pMimeHeaders->SipDelete();
 }
 
 }  // namespace android

@@ -36,19 +36,15 @@ SipAuthInfoHeader::SipAuthInfoHeader(const SipAuthInfoHeader& objHeader) :
     {
         SipNameValue* pElement = objHeader.m_pAuthInfoList.GetAt(nCount);
 
-        if (pElement == SIP_NULL)
+        if (pElement != SIP_NULL)
         {
-            continue;
+            SipNameValue* pNmVl = new SipNameValue(*pElement);
+
+            if (pNmVl != SIP_NULL)
+            {
+                m_pAuthInfoList.Add(pNmVl);
+            }
         }
-
-        SipNameValue* pNmVl = new SipNameValue(*pElement);
-
-        if (pNmVl == SIP_NULL)
-        {
-            continue;
-        }
-
-        m_pAuthInfoList.Add(pNmVl);
     }
 }
 

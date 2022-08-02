@@ -70,6 +70,7 @@ TEST_F(SipAuthBaseTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
     pHeader->SetParams("realm", "abcd.example.com", SIP_FALSE);
+    pHeader->SetParams("uri", "abc@xyz.com", SIP_TRUE);
 
     SipAuthBase* pCopyHeader = reinterpret_cast<SipAuthBase*>(
             SipAuthBase::GetNewObj(SipHeaderBase::AUTHORIZATION, pHeader));
@@ -86,13 +87,23 @@ TEST_F(SipAuthBaseTest, EncodeAndEncodeHdr)
     EXPECT_STREQ("abcd.example.com", pRealm);
     delete[] pRealm;
 
+    char* pUri = pCopyHeader->GetAuthValue("uri");
+    ASSERT_TRUE(pUri != nullptr);
+    EXPECT_STREQ("\"abc@xyz.com\"", pUri);
+    delete[] pUri;
+
     pRealm = pHeader->GetAuthValue("realm");
     ASSERT_TRUE(pRealm != nullptr);
     EXPECT_STREQ("abcd.example.com", pRealm);
     delete[] pRealm;
 
-    EXPECT_STREQ("Digest realm=abcd.example.com", objBuffer.GetCharString());
-    EXPECT_STREQ("Digest realm=abcd.example.com", &(aBuffer[0]));
+    pUri = pHeader->GetAuthValue("uri");
+    ASSERT_TRUE(pUri != nullptr);
+    EXPECT_STREQ("\"abc@xyz.com\"", pUri);
+    delete[] pUri;
+
+    EXPECT_STREQ("Digest realm=abcd.example.com,uri=\"abc@xyz.com\"", objBuffer.GetCharString());
+    EXPECT_STREQ("Digest realm=abcd.example.com,uri=\"abc@xyz.com\"", &(aBuffer[0]));
 
     pHeader->SipDelete();
     pCopyHeader->SipDelete();
@@ -106,6 +117,7 @@ TEST_F(SipAuthBaseTest, DecodeHdr)
 
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
     EXPECT_EQ(nullptr, pHeader->GetValue());
+    EXPECT_EQ(nullptr, pHeader->GetAuthValue(nullptr));
     EXPECT_EQ(nullptr, pHeader->GetAuthValue("atlanta"));
 
     EXPECT_EQ(SIP_TRUE,
@@ -131,6 +143,14 @@ qop=\"auth\",nonce=\"f84f1cec41e6cbe5aea9c8e88d359\",opaque=\"\", stale=FALSE, a
     delete[] pValue;
 
     EXPECT_EQ(nullptr, pHeader->GetAuthValue("atlanta"));
+
+    pHeader->SipDelete();
+
+    pHeader = reinterpret_cast<SipAuthBase*>(
+            SipAuthBase::GetNewObj(SipHeaderBase::AUTHORIZATION, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"InValidHeaderValue", 18));
 
     pHeader->SipDelete();
 }

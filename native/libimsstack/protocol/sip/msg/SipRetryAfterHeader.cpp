@@ -174,20 +174,14 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    if (SipPf_Atoi_IsZero(pszValue) == SIP_FALSE)
+    if (SipPf_Atoi_Unsigned(pszValue, m_nDeltaSec) == SIP_FALSE)
     {
-        if (SipPf_Atoi_Unsigned(pszValue, m_nDeltaSec) == SIP_FALSE)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr:Retry After value is not valid",
-                    SIP_ZERO, SIP_ZERO);
-            delete[] pszValue;
-            return SIP_FALSE;
-        }
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr:Retry After value is not valid",
+                SIP_ZERO, SIP_ZERO);
+        delete[] pszValue;
+        return SIP_FALSE;
     }
-    else
-    {
-        m_nDeltaSec = SIP_ZERO;
-    }
+
     delete[] pszValue;
 
     return SIP_TRUE;

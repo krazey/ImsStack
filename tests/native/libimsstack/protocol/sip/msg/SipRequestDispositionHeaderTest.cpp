@@ -31,6 +31,24 @@ protected:
     virtual void TearDown() override {}
 };
 
+TEST_F(SipRequestDispositionHeaderTest, CopyConstructor)
+{
+    SipRequestDispositionHeader* pHeader = reinterpret_cast<SipRequestDispositionHeader*>(
+            SipRequestDispositionHeader::GetNewObj(SipHeaderBase::REQUEST_DISPOSITION, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"proxy", 5));
+
+    SipRequestDispositionHeader* pCopyHeader = reinterpret_cast<SipRequestDispositionHeader*>(
+            SipRequestDispositionHeader::GetNewObj(SipHeaderBase::REQUEST_DISPOSITION, pHeader));
+    ASSERT_TRUE(pCopyHeader != nullptr);
+
+    pHeader->SipDelete();
+
+    EXPECT_STREQ("proxy", pCopyHeader->GetValue());
+    pCopyHeader->SipDelete();
+}
+
 TEST_F(SipRequestDispositionHeaderTest, DecodeHdr)
 {
     SipRequestDispositionHeader* pHeader = reinterpret_cast<SipRequestDispositionHeader*>(

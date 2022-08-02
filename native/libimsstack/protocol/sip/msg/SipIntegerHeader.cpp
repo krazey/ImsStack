@@ -95,7 +95,7 @@ SIP_BOOL SipIntegerHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     const SIP_CHAR* pszValue = GetValue();
 
-    if ((pszValue != SIP_NULL) && (SipPf_Atoi_IsZero(pszValue) == SIP_FALSE))
+    if (pszValue != SIP_NULL)
     {
         SIP_UINT32 nValue = SipPf_Atoi(pszValue);
         SIP_INT32 eHeaderType = GetHdrType();

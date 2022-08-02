@@ -237,6 +237,11 @@ SIP_BOOL SipMessage::SetHeader(SipHeaderBase* pHdr)
  *****************************************************************************/
 SIP_BOOL SipMessage::SetMessageBody(SipMsgBody* pMsgBody)
 {
+    if (pMsgBody == SIP_NULL)
+    {
+        return SIP_FALSE;
+    }
+
     if (m_pMsgBodyList == SIP_NULL)
     {
         m_pMsgBodyList = new SipMsgBodyList();
@@ -354,11 +359,6 @@ SIP_INT32 SipMessage::GetMethodType()
             "PUBLISH",
     };
 
-    if ((pszMethod == SIP_NULL) || (SipPf_Strlen(pszMethod) > SIP_MAX_HDR_LEN))
-    {
-        return SipMessage::METHOD_INVALID;
-    }
-
     for (SIP_INT16 nIndex = SIP_ZERO; nIndex < SipMessage::METHOD_END; nIndex++)
     {
         if (SipPf_Stricmp(pszMethod, SipMethodArray[nIndex]) == SIP_ZERO)
@@ -366,7 +366,7 @@ SIP_INT32 SipMessage::GetMethodType()
             return nIndex;
         }
     }
-    return SipMessage::METHOD_INVALID;
+    return SipMessage::METHOD_UNKNOWN;
 }
 
 /******************************************************************************
@@ -683,20 +683,6 @@ SIP_BOOL SipMessage::SetHdrList(SipHeaderList* pHdrList)
 }
 
 /******************************************************************************
- * Function name      : SipMessage::GetMsgBodyCount
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
-SipMsgBody* SipMessage::GetMessageBody(SIP_INT32 nIndex)
-{
-    return (m_pMsgBodyList != SIP_NULL) ? m_pMsgBodyList->GetBodyByIndex(nIndex) : SIP_NULL;
-}
-
-/******************************************************************************
  * Function name      : SipMessage::AppendMessageBody
  *
  * Description     :
@@ -750,7 +736,7 @@ SIP_BOOL SipMessage::EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
 
     SIP_CHAR* pCurrPos = *ppSipMsgBuffer;
 
-    if ((m_eSipMsgType == SipMessage::REQ_TYPE) && (m_pReqLine != SIP_NULL))
+    if (m_eSipMsgType == SipMessage::REQ_TYPE)
     {
         if (m_pReqLine->EncodeRequestLine(&pCurrPos) == SIP_FALSE)
         {
@@ -759,7 +745,7 @@ SIP_BOOL SipMessage::EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
             return SIP_FALSE;
         }
     }
-    else if ((m_eSipMsgType == SipMessage::RESP_TYPE) && (m_pStatusLine != SIP_NULL))
+    else
     {
         if (m_pStatusLine->EncodeStatusLine(&pCurrPos) == SIP_FALSE)
         {
@@ -767,12 +753,6 @@ SIP_BOOL SipMessage::EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
                     ESIPTRACE_MODENCODER, "Encoding status line Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-    }
-    else
-    {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODENCODER, "Request or Status Line not found", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
     }
 
     // Put CRLF at the end of Start Line
@@ -787,7 +767,6 @@ SIP_BOOL SipMessage::EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
     SIP_CHAR* pMsgBody = &(aMsgBody[0]);
     SIP_UINT32 nMsgLen = 0;
 
-    // Set content type header if it is not set
     if (this->m_pMsgBodyList != SIP_NULL)
     {
         /*Set the content type and content length headers before header encoding*/
@@ -850,59 +829,10 @@ SIP_BOOL SipMessage::EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
 SIP_BOOL SipMessage::EncodeMsgBodyAndUpdateContentHdrs(
         SIP_UINT32 nMsgOptions, SIP_CHAR** ppMsgBody, SIP_UINT32& nMsgLen)
 {
-    /*check for content type header and set the new one if not present*/
+    /*check for content type header */
     if (HasHeader(SipHeaderBase::CONTENT_TYPE) == SIP_FALSE)
     {
-        SIP_UINT16 nBodyCount = m_pMsgBodyList->GetMsgBodyCount();
-
-        /*In case there is a single body then take out the
-          content type header from the body and set into the SIP Message*/
-        if (nBodyCount == SIP_ONE)
-        {
-            SipMsgBody* pMsgbody = m_pMsgBodyList->GetBodyByIndex(SIP_ZERO);
-            if (pMsgbody == SIP_NULL)
-            {
-                SIP_DEBUG_WARNING(
-                        ESIPTRACE_MODENCODER, "No body in message body list", SIP_ZERO, SIP_ZERO);
-                return SIP_FALSE;
-            }
-            /*get the content type from the body*/
-            SipContentTypeHeader* pTempContentType = pMsgbody->GetContentType();
-            SipContentTypeHeader* pContentType = new SipContentTypeHeader(*pTempContentType);
-
-            if (pTempContentType != SIP_NULL)
-            {
-                pTempContentType->SipDelete();
-            }
-
-            /*Set the header into the SIP message*/
-            SetHeader(pContentType);
-
-            /*Delete After Setting*/
-            pContentType->SipDelete();
-
-            /*Delete the message body*/
-            pMsgbody->SipDelete();
-        }
-        /*Case of more than one bodies*/
-        else
-        {
-            SipContentTypeHeader* pContentType = new SipContentTypeHeader();
-
-            if (pContentType == SIP_NULL)
-            {
-                SIP_DEBUG_WARNING(
-                        ESIPTRACE_MODENCODER, "Memory allocation Fail", SIP_ZERO, SIP_ZERO);
-                return SIP_FALSE;
-            }
-            pContentType->SetMediaType(MULTIPART);
-            pContentType->SetSubMediaType(MIXED);
-
-            // Addition of boundary parameter is TBD
-
-            SetHeader(pContentType);
-            pContentType->SipDelete();
-        }
+        return SIP_FALSE;
     }
 
     /*Check the content type from message*/
@@ -915,11 +845,13 @@ SIP_BOOL SipMessage::EncodeMsgBodyAndUpdateContentHdrs(
         if (pszSubMediaType == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Content Type Invalid", SIP_ZERO, SIP_ZERO);
+            pContentType->SipDelete();
             return SIP_FALSE;
         }
 
         if (SipPf_Strstr(pszSubMediaType, "message-summary") != SIP_NULL)
         {
+            pContentType->SipDelete();
             SipMsgBody* pBody = m_pMsgBodyList->GetBodyByIndex(SIP_ZERO);
             if (pBody == SIP_NULL)
             {
@@ -940,13 +872,14 @@ SIP_BOOL SipMessage::EncodeMsgBodyAndUpdateContentHdrs(
         {
             /*Get the boundary*/
             SIP_CHAR* pszBoundary = pContentType->GetBoundary();
+            pContentType->SipDelete();
+
             if (m_pMsgBodyList->GetEncodedMessageBody(ppMsgBody, nMsgLen, pszBoundary) == SIP_FALSE)
             {
                 if (pszBoundary != SIP_NULL)
                 {
                     delete[] pszBoundary;
                 }
-                pContentType->SipDelete();
                 return SIP_FALSE;
             }
 
@@ -955,8 +888,6 @@ SIP_BOOL SipMessage::EncodeMsgBodyAndUpdateContentHdrs(
                 delete[] pszBoundary;
             }
         }
-
-        pContentType->SipDelete();
     }
 
     /*Is content-length already present*/
@@ -1016,11 +947,11 @@ SIP_BOOL SipMessage::DecMultiPartBody(
     }
 
     SIP_CHAR* pszBoundary = pContentType->GetBoundary();
+    pContentType->SipDelete();
     if (pszBoundary == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "No boundary in Content Type Hdr", SIP_ZERO, SIP_ZERO);
-        pContentType->SipDelete();
         return SIP_FALSE;
     }
 
@@ -1028,12 +959,10 @@ SIP_BOOL SipMessage::DecMultiPartBody(
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEBody Fail", SIP_ZERO, SIP_ZERO);
         delete[] pszBoundary;
-        pContentType->SipDelete();
         return SIP_FALSE;
     }
 
     delete[] pszBoundary;
-    pContentType->SipDelete();
 
     return SIP_TRUE;
 }
@@ -1358,16 +1287,6 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
     }
     else
     {
-        const SIP_CHAR* pszMType = pContentType->GetMediaType();
-        if (pszMType == SIP_NULL)
-        {
-            SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER, "Wronge Content Type", SIP_ZERO, SIP_ZERO);
-            pContentType->SipDelete();
-            m_pMsgBodyList->SipDelete();
-            m_pMsgBodyList = SIP_NULL;
-            return SIP_FALSE;
-        }
-
         const SIP_CHAR* pszSubMType = pContentType->GetSubMediaType();
         if (pszSubMType == SIP_NULL)
         {
@@ -1384,6 +1303,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                         "DecCompleteMsg:Decode message summary fail", SIP_ZERO, SIP_ZERO);
+                pContentType->SipDelete();
                 m_pMsgBodyList->SipDelete();
                 m_pMsgBodyList = SIP_NULL;
                 return SIP_FALSE;
@@ -1391,6 +1311,16 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         }
         else
         {
+            const SIP_CHAR* pszMType = pContentType->GetMediaType();
+            if (pszMType == SIP_NULL)
+            {
+                SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER, "Wronge Content Type", SIP_ZERO, SIP_ZERO);
+                pContentType->SipDelete();
+                m_pMsgBodyList->SipDelete();
+                m_pMsgBodyList = SIP_NULL;
+                return SIP_FALSE;
+            }
+
             SIP_BOOL bSingleBody = (SIP_BOOL)SipPf_Stricmp(pszMType, MULTIPART);
 
             /*bSingleBody will be false if it is a MIME body*/
@@ -1401,7 +1331,6 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
                 {
                     SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER, "No boundary in Content Type Hdr",
                             SIP_ZERO, SIP_ZERO);
-
                     pContentType->SipDelete();
                     m_pMsgBodyList->SipDelete();
                     m_pMsgBodyList = SIP_NULL;
@@ -1425,6 +1354,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Hdr Decoding fail",
                             SIP_ZERO, SIP_ZERO);
+                    pContentType->SipDelete();
                     m_pMsgBodyList->SipDelete();
                     m_pMsgBodyList = SIP_NULL;
                     return SIP_FALSE;

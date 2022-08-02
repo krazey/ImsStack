@@ -171,6 +171,151 @@ header2: value2\r\n";
     EXPECT_STREQ(pSimpleMsgSummary, &(aBuffer[0]));
 
     pCopyMessageSummary->SipDelete();
+
+    /* Empty buffer, fail */
+    pMessageSummary = new SipMessageSummary();
+    ASSERT_TRUE(pMessageSummary != nullptr);
+
+    pSimpleMsgSummary = (char*)"";
+
+    nLen = strlen(pSimpleMsgSummary);
+
+    EXPECT_EQ(SIP_FALSE,
+            pMessageSummary->DecodeMessageSummary(pSimpleMsgSummary, pSimpleMsgSummary + nLen));
+    pMessageSummary->SipDelete();
+
+    /* No colon present, fail */
+    pMessageSummary = new SipMessageSummary();
+    ASSERT_TRUE(pMessageSummary != nullptr);
+
+    pSimpleMsgSummary = (char*)"Messages-Waiting";
+
+    nLen = strlen(pSimpleMsgSummary);
+
+    EXPECT_EQ(SIP_FALSE,
+            pMessageSummary->DecodeMessageSummary(pSimpleMsgSummary, pSimpleMsgSummary + nLen));
+    pMessageSummary->SipDelete();
+
+    /* No ending CRLF, fail */
+    pMessageSummary = new SipMessageSummary();
+    ASSERT_TRUE(pMessageSummary != nullptr);
+
+    pSimpleMsgSummary = (char*)"Messages-Waiting: Yes";
+
+    nLen = strlen(pSimpleMsgSummary);
+
+    EXPECT_EQ(SIP_FALSE,
+            pMessageSummary->DecodeMessageSummary(pSimpleMsgSummary, pSimpleMsgSummary + nLen));
+    pMessageSummary->SipDelete();
+
+    /* No Messages-Waiting present, fail */
+    pMessageSummary = new SipMessageSummary();
+    ASSERT_TRUE(pMessageSummary != nullptr);
+
+    pSimpleMsgSummary = (char*)"InvalidMessage: yes";
+
+    nLen = strlen(pSimpleMsgSummary);
+
+    EXPECT_EQ(SIP_FALSE,
+            pMessageSummary->DecodeMessageSummary(pSimpleMsgSummary, pSimpleMsgSummary + nLen));
+    pMessageSummary->SipDelete();
+
+    /* Invalid Messages-Waiting value, fail */
+    pMessageSummary = new SipMessageSummary();
+    ASSERT_TRUE(pMessageSummary != nullptr);
+
+    pSimpleMsgSummary = (char*)"Messages-Waiting: Invalid\r\n";
+
+    nLen = strlen(pSimpleMsgSummary);
+
+    EXPECT_EQ(SIP_FALSE,
+            pMessageSummary->DecodeMessageSummary(pSimpleMsgSummary, pSimpleMsgSummary + nLen));
+    pMessageSummary->SipDelete();
+
+    /* Message-Account present but no colon, fail */
+    pMessageSummary = new SipMessageSummary();
+    ASSERT_TRUE(pMessageSummary != nullptr);
+
+    pSimpleMsgSummary = (char*)"Messages-Waiting: Yes\r\n\
+Message-Account";
+
+    nLen = strlen(pSimpleMsgSummary);
+
+    EXPECT_EQ(SIP_FALSE,
+            pMessageSummary->DecodeMessageSummary(pSimpleMsgSummary, pSimpleMsgSummary + nLen));
+    pMessageSummary->SipDelete();
+
+    /* Message-Account present but no CRLF ending, fail */
+    pMessageSummary = new SipMessageSummary();
+    ASSERT_TRUE(pMessageSummary != nullptr);
+
+    pSimpleMsgSummary = (char*)"Messages-Waiting: Yes\r\n\
+Message-Account: sip:abcd@ims.com";
+
+    nLen = strlen(pSimpleMsgSummary);
+
+    EXPECT_EQ(SIP_FALSE,
+            pMessageSummary->DecodeMessageSummary(pSimpleMsgSummary, pSimpleMsgSummary + nLen));
+    pMessageSummary->SipDelete();
+
+    /* header values separated by COMMA, success */
+    pMessageSummary = new SipMessageSummary();
+    ASSERT_TRUE(pMessageSummary != nullptr);
+
+    pSimpleMsgSummary = (char*)"Messages-Waiting: Yes\r\n\
+Message-Account: sip:abcd@ims.com\r\n\
+\r\n\
+Header1: val1,val2,val3\r\n\
+header2: val4,val5\r\n";
+
+    nLen = strlen(pSimpleMsgSummary);
+
+    EXPECT_EQ(SIP_TRUE,
+            pMessageSummary->DecodeMessageSummary(pSimpleMsgSummary, pSimpleMsgSummary + nLen));
+    pMessageSummary->SipDelete();
+
+    /* No ending CRLF for message summary, fail */
+    pMessageSummary = new SipMessageSummary();
+    ASSERT_TRUE(pMessageSummary != nullptr);
+
+    pSimpleMsgSummary = (char*)"Messages-Waiting: No\r\n\
+Fax-Message: 2/4";
+
+    nLen = strlen(pSimpleMsgSummary);
+
+    EXPECT_EQ(SIP_FALSE,
+            pMessageSummary->DecodeMessageSummary(pSimpleMsgSummary, pSimpleMsgSummary + nLen));
+    pMessageSummary->SipDelete();
+
+    /* header values COLON missed, fail */
+    pMessageSummary = new SipMessageSummary();
+    ASSERT_TRUE(pMessageSummary != nullptr);
+
+    pSimpleMsgSummary = (char*)"Messages-Waiting: Yes\r\n\
+Message-Account: sip:abcd@ims.com\r\n\
+\r\n\
+Header1\r\n";
+
+    nLen = strlen(pSimpleMsgSummary);
+
+    EXPECT_EQ(SIP_FALSE,
+            pMessageSummary->DecodeMessageSummary(pSimpleMsgSummary, pSimpleMsgSummary + nLen));
+    pMessageSummary->SipDelete();
+
+    /* No CRLF after header, fail */
+    pMessageSummary = new SipMessageSummary();
+    ASSERT_TRUE(pMessageSummary != nullptr);
+
+    pSimpleMsgSummary = (char*)"Messages-Waiting: Yes\r\n\
+Message-Account: sip:abcd@ims.com\r\n\
+\r\n\
+Header1: value1";
+
+    nLen = strlen(pSimpleMsgSummary);
+
+    EXPECT_EQ(SIP_FALSE,
+            pMessageSummary->DecodeMessageSummary(pSimpleMsgSummary, pSimpleMsgSummary + nLen));
+    pMessageSummary->SipDelete();
 }
 
 }  // namespace android

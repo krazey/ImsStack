@@ -34,14 +34,6 @@ TEST_F(SipMsgBodyListTest, GetEncodedMessageBody)
     SipMsgBodyList* pList = new SipMsgBodyList();
     ASSERT_TRUE(pList != nullptr);
 
-    SipMsgBody* pMessageBody = new SipMsgBody();
-    ASSERT_TRUE(pMessageBody != nullptr);
-
-    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer((char*)"This is body1", 13));
-    EXPECT_EQ(SIP_TRUE, pList->AddBody(pMessageBody));
-
-    pMessageBody->SipDelete();
-
     unsigned int nLen = 0;
 
     const int BUFFER_SIZE = 4096;
@@ -49,6 +41,17 @@ TEST_F(SipMsgBodyListTest, GetEncodedMessageBody)
             0,
     };
     char* pBuff = &(aBuffer[0]);
+
+    /* No message body, success */
+    EXPECT_EQ(SIP_TRUE, pList->GetEncodedMessageBody(&pBuff, nLen, nullptr));
+
+    SipMsgBody* pMessageBody = new SipMsgBody();
+    ASSERT_TRUE(pMessageBody != nullptr);
+
+    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer((char*)"This is body1", 13));
+    EXPECT_EQ(SIP_TRUE, pList->AddBody(pMessageBody));
+
+    pMessageBody->SipDelete();
 
     EXPECT_EQ(SIP_TRUE, pList->GetEncodedMessageBody(&pBuff, nLen));
 
@@ -102,6 +105,9 @@ and no headers and boundary present\r\n";
     EXPECT_STREQ(pSingleBody, pMessageBody->GetBuffer());
 
     pMessageBody->SipDelete();
+
+    pMessageBody = pList->GetBodyByIndex(1);
+    ASSERT_TRUE(pMessageBody == nullptr);
 }
 
 TEST_F(SipMsgBodyListTest, DecodeMessageSummaryBody)
@@ -120,6 +126,19 @@ TEST_F(SipMsgBodyListTest, DecodeMessageSummaryBody)
     ASSERT_TRUE(pMessageBody != nullptr);
 
     pMessageBody->SipDelete();
+    pList->SipDelete();
+
+    /* No value present for Messages-Waiting, fail */
+    pList = new SipMsgBodyList();
+    ASSERT_TRUE(pList != nullptr);
+
+    pMessageSummary = (char*)"Messages-Waiting:\r\n";
+    nLen = strlen(pMessageSummary);
+
+    EXPECT_EQ(SIP_FALSE, pList->DecodeMessageSummaryBody(pMessageSummary, pMessageSummary + nLen));
+
+    pMessageBody->SipDelete();
+    pList->SipDelete();
 }
 
 TEST_F(SipMsgBodyListTest, DecodeMIMEBody)
@@ -158,6 +177,41 @@ Test body 2\r\n\
     EXPECT_STREQ("Test body 2", pMessageBody->GetBuffer());
 
     pMessageBody->SipDelete();
+    pList->SipDelete();
+
+    /* boundary mismatch, fail */
+    pList = new SipMsgBodyList();
+    ASSERT_TRUE(pList != nullptr);
+
+    pMsg = (char*)"--unique-boundary\r\n\
+Content-Type: application/body1\r\n\
+\r\n\
+Test body 1\r\n\
+--unique-boundary\r\n\
+Content-Type: application/body2\r\n\
+\r\n\
+Test body 2\r\n\
+--unique-boundary--\r\n";
+
+    nLen = strlen(pMsg);
+
+    EXPECT_EQ(SIP_FALSE, pList->DecodeMIMEBody(pMsg, pMsg + nLen, (char*)"mismatch-boundary"));
+
+    pMessageBody->SipDelete();
+    pList->SipDelete();
+
+    /* No CRLF present, fail */
+    pList = new SipMsgBodyList();
+    ASSERT_TRUE(pList != nullptr);
+
+    pMsg = (char*)"--unique-boundary";
+
+    nLen = strlen(pMsg);
+
+    EXPECT_EQ(SIP_FALSE, pList->DecodeMIMEBody(pMsg, pMsg + nLen, (char*)"unique-boundary"));
+
+    pMessageBody->SipDelete();
+    pList->SipDelete();
 }
 
 }  // namespace android

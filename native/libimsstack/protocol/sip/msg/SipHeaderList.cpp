@@ -69,10 +69,6 @@ SipHeaderList::SipHeaderList(const SipHeaderList& objHeaderList) :
                     pNewHdrBase->SipDelete();
                 }
             }
-            else
-            {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "GetListObj Fail", SIP_ZERO, SIP_ZERO);
-            }
         }
     }
 }

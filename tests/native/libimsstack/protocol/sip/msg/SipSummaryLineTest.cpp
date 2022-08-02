@@ -34,8 +34,16 @@ TEST_F(SipSummaryLineTest, DecodeAndEncodeSummaryLine)
     SipSummaryLine* pSummaryLine = new SipSummaryLine();
     ASSERT_TRUE(pSummaryLine != nullptr);
 
-    char* pSummary = (char*)"voice-message: 1/3 (0/1)";
+    /* Empty buffer, fail */
+    EXPECT_EQ(SIP_FALSE, pSummaryLine->DecodeSummaryLine(nullptr, nullptr));
+
+    /* No colon present (no value), fail */
+    char* pSummary = (char*)"voice-message";
     int nLen = strlen(pSummary);
+    EXPECT_EQ(SIP_FALSE, pSummaryLine->DecodeSummaryLine(pSummary, pSummary + nLen));
+
+    pSummary = (char*)"voice-message: 1/3 (0/1)";
+    nLen = strlen(pSummary);
 
     EXPECT_EQ(SIP_TRUE, pSummaryLine->DecodeSummaryLine(pSummary, pSummary + nLen));
 
@@ -89,6 +97,28 @@ TEST_F(SipSummaryLineTest, DecodeAndEncodeSummaryLine)
     EXPECT_STREQ(pSummary, &(aBuffer[0]));
 
     pCopySummaryLine->SipDelete();
+
+    /* No SLASH (no old urgent messages), fail */
+    pSummaryLine = new SipSummaryLine();
+    ASSERT_TRUE(pSummaryLine != nullptr);
+
+    pSummary = (char*)"fax-message: 3/4 (1)";
+    nLen = strlen(pSummary);
+
+    EXPECT_EQ(SIP_FALSE, pSummaryLine->DecodeSummaryLine(pSummary, pSummary + nLen));
+
+    pSummaryLine->SipDelete();
+
+    /* No closing paranthesis after old urgent messages, fail */
+    pSummaryLine = new SipSummaryLine();
+    ASSERT_TRUE(pSummaryLine != nullptr);
+
+    pSummary = (char*)"fax-message: 3/4 (1/2";
+    nLen = strlen(pSummary);
+
+    EXPECT_EQ(SIP_FALSE, pSummaryLine->DecodeSummaryLine(pSummary, pSummary + nLen));
+
+    pSummaryLine->SipDelete();
 }
 
 }  // namespace android

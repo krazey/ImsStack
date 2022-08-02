@@ -93,8 +93,8 @@ void SipStackManager::Destruct()
     if (gpStackMngr != SIP_NULL)
     {
         delete gpStackMngr;
+        gpStackMngr = SIP_NULL;
     }
-    return;
 }
 
 /******************************************************************************

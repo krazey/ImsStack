@@ -490,10 +490,28 @@ Content-Length: 0\r\n\
 
     pTranspParam = new SipTransportParameter();
     ASSERT_TRUE(pTranspParam != nullptr);
-    pTranspParam->setTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+    pTranspParam->setTranspProtocol(SipTransportInfo::PROTOCOL_INVALID);
     pTranspParam->setHostAddress("192.168.1.2");
     pTranspParam->setPort(5060);
     pTranspParam->setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+
+    /* Using this call to fill pTranspInfo */
+    EXPECT_EQ(SIP_TRUE,
+            pTranspHandler->OnSendTransp(
+                    pMessage, pTranspParam, pMsg, nLength, &pTranspInfo, &nError));
+
+    pTxn->UpdateTranspInfo(pTranspInfo);
+
+    /* TXN exists/transport info exists and transport param exists.
+       Invalid transp protocol, fail */
+    EXPECT_EQ(SIP_FALSE,
+            pTranspHandler->OnRecvTanspError(
+                    0, pTxnKey, &nTxnStatus, &pNewTranspInfo, nullptr, &nError));
+
+    /* Change transp protocol to TCP */
+    pTranspParam->setTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+
+    pTranspParam->setHostAddress("192.168.1.2");
 
     /* Using this call to fill pTranspInfo */
     EXPECT_EQ(SIP_TRUE,
@@ -514,6 +532,131 @@ Content-Length: 0\r\n\
     ASSERT_TRUE(pMsgSentTransParam != nullptr);
 
     EXPECT_EQ(SipTransportInfo::PROTOCOL_UDP, pMsgSentTransParam->GetTranspProtocol());
+
+    pMessage->SipDelete();
+    pTxn->SipDelete();
+    delete pTranspHandler;
+
+    /* Transport protocol is not TCP/UDP */
+    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/TLS host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n";
+
+    nLength = strlen(pMsg);
+
+    pMessage = new SipMessage();
+    ASSERT_TRUE(pMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+
+    pTxnKey = new SipTxnKey(pMessage, &nError);
+    ASSERT_TRUE(pTxnKey != nullptr);
+
+    pTranspHandler = new SipTransportHandler();
+    ASSERT_TRUE(pTranspHandler != nullptr);
+
+    // clang-format off
+    stCallbacks = {
+            &FetchTxn_Exists,
+            SIP_NULL,
+            SIP_NULL,
+            SIP_NULL,
+            SIP_NULL,
+            SIP_NULL,
+            SIP_NULL,
+            SIP_NULL,
+            SIP_NULL
+        };
+    // clang-format on
+    SipStackCallback_SetCallbacks(stCallbacks);
+
+    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pMessage, nullptr, &nError);
+    ASSERT_TRUE(pTxn != nullptr);
+
+    pTranspParam = new SipTransportParameter();
+    ASSERT_TRUE(pTranspParam != nullptr);
+    pTranspParam->setTranspProtocol(SipTransportInfo::PROTOCOL_TLS);
+    pTranspParam->setHostAddress("192.168.1.2");
+    pTranspParam->setPort(5060);
+    pTranspParam->setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+
+    /* Using this call to fill pTranspInfo */
+    EXPECT_EQ(SIP_TRUE,
+            pTranspHandler->OnSendTransp(
+                    pMessage, pTranspParam, pMsg, nLength, &pTranspInfo, &nError));
+
+    pTxn->UpdateTranspInfo(pTranspInfo);
+
+    /* Transport cannot be changed from TLS to UDP, success */
+    EXPECT_EQ(SIP_TRUE,
+            pTranspHandler->OnRecvTanspError(
+                    0, pTxnKey, &nTxnStatus, &pNewTranspInfo, nullptr, &nError));
+
+    pMessage->SipDelete();
+    pTxn->SipDelete();
+    delete pTranspHandler;
+
+    /* No Via header to update transport header, fail */
+    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n";
+
+    nLength = strlen(pMsg);
+
+    pMessage = new SipMessage();
+    ASSERT_TRUE(pMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+
+    pTxnKey = new SipTxnKey(pMessage, &nError);
+    ASSERT_TRUE(pTxnKey != nullptr);
+
+    pTranspHandler = new SipTransportHandler();
+    ASSERT_TRUE(pTranspHandler != nullptr);
+
+    // clang-format off
+    stCallbacks = {
+            &FetchTxn_Exists,
+            SIP_NULL,
+            SIP_NULL,
+            SIP_NULL,
+            SIP_NULL,
+            SIP_NULL,
+            SIP_NULL,
+            SIP_NULL,
+            SIP_NULL
+        };
+    // clang-format on
+    SipStackCallback_SetCallbacks(stCallbacks);
+
+    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pMessage, nullptr, &nError);
+    ASSERT_TRUE(pTxn != nullptr);
+
+    pTranspParam = new SipTransportParameter();
+    ASSERT_TRUE(pTranspParam != nullptr);
+    pTranspParam->setTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+    pTranspParam->setHostAddress("192.168.1.2");
+    pTranspParam->setPort(5060);
+    pTranspParam->setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+
+    /* Using this call to fill pTranspInfo */
+    EXPECT_EQ(SIP_TRUE,
+            pTranspHandler->OnSendTransp(
+                    pMessage, pTranspParam, pMsg, nLength, &pTranspInfo, &nError));
+
+    pTxn->UpdateTranspInfo(pTranspInfo);
+
+    /* No Via header to update transport, fail */
+    EXPECT_EQ(SIP_FALSE,
+            pTranspHandler->OnRecvTanspError(
+                    0, pTxnKey, &nTxnStatus, &pNewTranspInfo, nullptr, &nError));
 
     pMessage->SipDelete();
     pTxn->SipDelete();

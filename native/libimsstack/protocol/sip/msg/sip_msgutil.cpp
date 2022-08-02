@@ -272,6 +272,13 @@ SIP_BOOL sipFindTerminatingCRLF(
         *ppLocation = pPrevPoint2 - SIP_ONE;
         return SIP_TRUE;
     }
+
+    if (IS_CRLF(*pPrevPoint1, *pStartPoint))
+    {
+        *ppLocation = pPrevPoint1 - SIP_ONE;
+        return SIP_TRUE;
+    }
+
     return SIP_FALSE;
 }
 
