@@ -46,10 +46,7 @@ RefreshHelper::RefreshHelper(IN IRefreshable* piRefreshable, IN IMS_BOOL bRepeat
 
 PUBLIC VIRTUAL RefreshHelper::~RefreshHelper()
 {
-    if (m_piRefreshSc != IMS_NULL)
-    {
-        m_piRefreshSc->Close();
-    }
+    SetConnection(IMS_NULL);
 
     if (m_piTimer != IMS_NULL)
     {
@@ -62,13 +59,7 @@ PUBLIC VIRTUAL RefreshHelper::~RefreshHelper()
 PUBLIC
 void RefreshHelper::AbortConnection()
 {
-    if (m_piRefreshSc == IMS_NULL)
-    {
-        return;
-    }
-
-    m_piRefreshSc->Close();
-    m_piRefreshSc = IMS_NULL;
+    SetConnection(IMS_NULL);
 }
 
 PUBLIC
@@ -106,7 +97,7 @@ PROTECTED VIRTUAL IMS_RESULT RefreshHelper::SendRefreshRequest(IN ISipClientConn
     }
 
     // Update the SIP client connection
-    m_piRefreshSc = piScc;
+    SetConnection(piScc);
 
     return IMS_SUCCESS;
 }
@@ -208,6 +199,17 @@ IMS_BOOL RefreshHelper::ConsumeRemainedTime()
     m_nRemainDuration = 0;
 
     return IMS_TRUE;
+}
+
+PROTECTED
+void RefreshHelper::SetConnection(IN ISipClientConnection* piScc)
+{
+    if (m_piRefreshSc != IMS_NULL)
+    {
+        m_piRefreshSc->Close();
+    }
+
+    m_piRefreshSc = piScc;
 }
 
 PROTECTED
@@ -332,11 +334,7 @@ PRIVATE VIRTUAL void RefreshHelper::ClientConnection_NotifyResponse(
     {
         IMS_SINT32 nMethod = piScc->GetMethod().ToInt();
 
-        if (m_piRefreshSc != IMS_NULL)
-        {
-            piScc->Close();
-            m_piRefreshSc = IMS_NULL;
-        }
+        SetConnection(IMS_NULL);
 
         // Re-submit the session refresh request with the new session interval (Session-Expires)
         if ((nMethod == SipMethod::INVITE) && (nStatusCode == SipStatusCode::SC_422))
@@ -374,11 +372,7 @@ PRIVATE VIRTUAL void RefreshHelper::Error_NotifyError(
         RefreshCompleted(DYNAMIC_CAST(ISipClientConnection*, piSc), nCode);
     }
 
-    if (m_piRefreshSc != IMS_NULL)
-    {
-        piSc->Close();
-        m_piRefreshSc = IMS_NULL;
-    }
+    SetConnection(IMS_NULL);
 }
 
 PRIVATE

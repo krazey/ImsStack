@@ -118,6 +118,7 @@ private:
     inline ISession* GetOwnerSession() const override { return m_piOwnerSession; }
     inline ISession* GetVirtualSession() const override { return IMS_NULL; }
     // }
+    inline IMS_BOOL IsSessionRefreshInProgress() const override { return IMS_FALSE; }
 
 private:
     ISession* m_piOwnerSession;

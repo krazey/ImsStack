@@ -65,6 +65,7 @@ protected:
     void Refreshable_RefreshTerminated();
 
     IMS_BOOL ConsumeRemainedTime();
+    void SetConnection(IN ISipClientConnection* piScc);
     inline IMS_SINT32 GetPolicy() const { return m_nPolicy; }
     inline void SetDuration(IN IMS_SINT32 nDuration) { m_nDuration = nDuration; }
     IMS_BOOL StartRefresh();

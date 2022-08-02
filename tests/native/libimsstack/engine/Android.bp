@@ -51,6 +51,12 @@ cc_test {
     srcs: [
         "**/*.cpp",
     ],
+    local_include_dirs: [
+        "interface",
+        "interface/core",
+        "interface/registration",
+        "interface/sipcore",
+    ],
 
     test_config: "ImsStackNativeEngineTests.xml",
 }

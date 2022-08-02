@@ -16,10 +16,63 @@
 #include <gtest/gtest.h>
 
 #include "CoreService.h"
+#include "MockISipClientConnection.h"
 #include "Session.h"
+#include "SessionRefreshHelper.h"
+
+using ::testing::Return;
 
 namespace android
 {
+
+class TestSessionRefreshHelper : public SessionRefreshHelper
+{
+public:
+    inline TestSessionRefreshHelper(Service* pService, IRefreshable* piRefreshable) :
+            SessionRefreshHelper(pService, piRefreshable)
+    {
+    }
+
+    inline void RefreshCompleted(ISipClientConnection* piScc, IMS_SINT32 nCode /*= 0*/)
+    {
+        SessionRefreshHelper::RefreshCompleted(piScc, nCode);
+    }
+
+    inline void SetRefreshConnection(ISipClientConnection* piScc) { SetConnection(piScc); }
+};
+
+class TestSession : public Session
+{
+public:
+    inline TestSession(IN Service* pService) :
+            Session(pService),
+            m_pTestRefreshHelper(IMS_NULL)
+    {
+    }
+
+    inline SessionRefreshHelper* CreateRefreshHelper() override
+    {
+        if (m_pTestRefreshHelper == IMS_NULL)
+        {
+            m_pTestRefreshHelper = new TestSessionRefreshHelper(GetService(), this);
+        }
+
+        return m_pTestRefreshHelper;
+    }
+
+    inline void RefreshCompleted(ISipClientConnection* piScc, IMS_SINT32 nCode /*= 0*/)
+    {
+        m_pTestRefreshHelper->RefreshCompleted(piScc, nCode);
+    }
+
+    inline void SetRefreshConnection(ISipClientConnection* piScc)
+    {
+        m_pTestRefreshHelper->SetRefreshConnection(piScc);
+    }
+
+public:
+    TestSessionRefreshHelper* m_pTestRefreshHelper;
+};
 
 class SessionTest : public ::testing::Test
 {
@@ -31,19 +84,25 @@ public:
     }
     inline virtual ~SessionTest()
     {
-        if (m_pCoreService != IMS_NULL)
-        {
-            delete m_pCoreService;
-        }
-
         if (m_pSession != IMS_NULL)
         {
             delete m_pSession;
         }
+
+        if (m_pCoreService != IMS_NULL)
+        {
+            delete m_pCoreService;
+        }
     }
 
 protected:
-    virtual void SetUp() override { m_pSession = new Session(m_pCoreService); }
+    virtual void SetUp() override
+    {
+        m_pSession = new TestSession(m_pCoreService);
+
+        SipAddress objUserId("sip:1234@test.ims.com");
+        m_pSession->InitMethod("sip:1234@test.ims.com", "sip:5678@test.ims.com", objUserId);
+    }
 
     virtual void TearDown() override
     {
@@ -56,7 +115,7 @@ protected:
 
 protected:
     CoreService* m_pCoreService;
-    Session* m_pSession;
+    TestSession* m_pSession;
 };
 
 TEST_F(SessionTest, SetConfiguration)
@@ -81,6 +140,23 @@ TEST_F(SessionTest, SetConfiguration)
             (~Session::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
 
     EXPECT_EQ(Session::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE, m_pSession->GetConfiguration());
+}
+
+TEST_F(SessionTest, IsSessionRefreshInProgress)
+{
+    EXPECT_FALSE(m_pSession->IsSessionRefreshInProgress());
+
+    MockISipClientConnection* pScc = new MockISipClientConnection();
+    m_pSession->SetRefreshConnection(pScc);
+
+    EXPECT_TRUE(m_pSession->IsSessionRefreshInProgress());
+
+    m_pSession->RefreshCompleted(pScc, 1);
+    m_pSession->SetRefreshConnection(IMS_NULL);
+
+    EXPECT_FALSE(m_pSession->IsSessionRefreshInProgress());
+
+    delete pScc;
 }
 
 }  // namespace android

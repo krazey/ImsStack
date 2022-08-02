@@ -654,6 +654,13 @@ public:
     virtual ISession* GetVirtualSession() const = 0;
     // }
 
+    /**
+     * @brief Checks if the session refresh is in progress or not.
+     *
+     * @return IMS_TRUE if the session refresh is in progress, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL IsSessionRefreshInProgress() const = 0;
+
 public:
     /// States of ISession
     enum

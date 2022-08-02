@@ -130,6 +130,7 @@ public:
     {
         return (m_nConfigValue & nValue) != 0;
     }
+    IMS_BOOL IsSessionRefreshInProgress() const;
 
 protected:
     // Activity class
@@ -180,6 +181,7 @@ protected:
 
     // Session class
     virtual Session* CreateSession();
+    virtual SessionRefreshHelper* CreateRefreshHelper();
     virtual IMS_RESULT HandleProvisionalResponse(IN ISipClientConnection* piScc);
     virtual IMS_RESULT HandleRequestToUpdate(IN ISipServerConnection* piSsc);
     virtual IMS_RESULT HandleResponseToUpdate(IN ISipClientConnection* piScc);

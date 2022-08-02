@@ -119,6 +119,7 @@ public:
     MOCK_METHOD(ISessionParameter*, GetFailureSdp, (), (const, override));
     MOCK_METHOD(ISession*, GetOwnerSession, (), (const, override));
     MOCK_METHOD(ISession*, GetVirtualSession, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsSessionRefreshInProgress, (), (const, override));
 };
 
 #endif

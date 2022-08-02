@@ -205,6 +205,10 @@ private:
     inline ISession* GetOwnerSession() const override { return IMS_NULL; }
     inline ISession* GetVirtualSession() const override { return m_pVirtualSessionImpl; }
     // }
+    IMS_BOOL IsSessionRefreshInProgress() const override
+    {
+        return m_pSession->IsSessionRefreshInProgress();
+    }
 
     // IOnSessionListener interface
     void OnSession_Alerting(IN Session* pSession) override;

@@ -2024,6 +2024,12 @@ ISessionParameter* Session::GetFailureSdp() const
 }
 // }
 
+PUBLIC
+IMS_BOOL Session::IsSessionRefreshInProgress() const
+{
+    return (m_pRefreshHelper != IMS_NULL) && m_pRefreshHelper->IsRequestPending();
+}
+
 PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN ImsMessage& objMsg)
 {
     switch (objMsg.GetName())
@@ -2351,7 +2357,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::InitInstance()
     }
 
     // Create a session refresh helper
-    m_pRefreshHelper = new SessionRefreshHelper(GetService(), this);
+    m_pRefreshHelper = CreateRefreshHelper();
 
     if (m_pRefreshHelper == IMS_NULL)
     {
@@ -3844,6 +3850,11 @@ PROTECTED VIRTUAL Session* Session::CreateSession()
     }
 
     return pSession;
+}
+
+PROTECTED VIRTUAL SessionRefreshHelper* Session::CreateRefreshHelper()
+{
+    return new SessionRefreshHelper(GetService(), this);
 }
 
 PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientConnection* piScc)
