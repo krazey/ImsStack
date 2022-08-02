@@ -25,6 +25,7 @@
 #include <memory>
 
 class IMtcContext;
+class ISubscriberInfo;
 struct CallInfo;
 
 using NumberFormat = NormalDialingPlan::NumberFormat;
@@ -34,7 +35,7 @@ using Scheme = NormalDialingPlan::Scheme;
 class MtcDialingPlan final : public IMtcDialingPlan
 {
 public:
-    explicit MtcDialingPlan(IN IMtcContext& objContext);
+    explicit MtcDialingPlan(IN IMtcContext& objContext, IN ISubscriberInfo& objSubscriberInfo);
     virtual ~MtcDialingPlan();
     MtcDialingPlan(IN const MtcDialingPlan&) = delete;
     MtcDialingPlan& operator=(IN const MtcDialingPlan&) = delete;
@@ -47,9 +48,11 @@ public:
             IN const AString& strNumber, IN const AString& strServiceUrn) override;
 
 private:
-    IMS_BOOL IsUriForm(IN const AString& strNumber);
+    IMS_BOOL IsUriForm(IN const AString& strNumber) const;
+    AString GetConferenceFactoryUri() const;
+    AString GetMcc() const;
+    AString GetMnc(IN IMS_UINT32 nLength) const;
 
-private:
     struct TemporaryServiceUrn final
     {
     public:
@@ -69,9 +72,9 @@ private:
     };
 
     IMtcContext& m_objContext;
-
     // TODO: no requirement found... try to find the standard again and update the logic.
     std::unique_ptr<TemporaryServiceUrn> m_pTemporaryServiceUrn;
+    ISubscriberInfo& m_objSubscriberInfo;
 };
 
 #endif

@@ -18,7 +18,6 @@
 #include "AString.h"
 #include "ImsTypeDef.h"
 #include "MockIMtcService.h"
-#include "MockIPhoneInfoSubscriber.h"
 #include "aos/IImsAosInfo.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/ParticipantInfo.h"
@@ -44,13 +43,12 @@ class ParticipantInfoTest : public ::testing::Test
 {
 public:
     MockIMtcCallContext objContext;
-    MockISubscriberInfo objSubscriberInfo;
     ParticipantInfo* pParticipantInfo;
 
 protected:
     virtual void SetUp() override
     {
-        pParticipantInfo = new ParticipantInfo(objContext, objSubscriberInfo);
+        pParticipantInfo = new ParticipantInfo(objContext);
     }
 
     virtual void TearDown() override
@@ -173,103 +171,6 @@ TEST_F(ParticipantInfoTest, GetLocalUriReturnsAnonymousIfEmergencyAdminRegistere
 TEST_F(ParticipantInfoTest, GetRemoteNumberReturnsNullInitially)
 {
     EXPECT_TRUE(pParticipantInfo->GetRemoteNumber().IsNull());
-}
-
-TEST_F(ParticipantInfoTest, GetRemoteUriReturnsConferenceUriFromConfig)
-{
-    CallInfo objCallInfo;
-    objCallInfo.bConference = IMS_TRUE;
-    ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objCallInfo));
-
-    MockIMtcConfigurationManager* pConfigurationManager = new MockIMtcConfigurationManager();
-    AString strUri = "sip:some_conference_uri";
-    ON_CALL(*pConfigurationManager, GetConferenceFactoryUri)
-            .WillByDefault(Return(strUri));
-
-    MtcConfigurationProxy objConfigurationProxy(pConfigurationManager);
-    ON_CALL(objContext, GetConfigurationProxy)
-            .WillByDefault(ReturnRef(objConfigurationProxy));
-
-    EXPECT_EQ(strUri, pParticipantInfo->GetRemoteUri());
-}
-
-TEST_F(ParticipantInfoTest, GetRemoteUriReturnsDefaultConferenceUriIfMncIs2Digit)
-{
-    CallInfo objCallInfo;
-    objCallInfo.bConference = IMS_TRUE;
-    ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objCallInfo));
-
-    MockIMtcConfigurationManager* pConfigurationManager = new MockIMtcConfigurationManager();
-    ON_CALL(*pConfigurationManager, GetConferenceFactoryUri)
-            .WillByDefault(Return(AString::ConstEmpty()));
-
-    MtcConfigurationProxy objConfigurationProxy(pConfigurationManager);
-    ON_CALL(objContext, GetConfigurationProxy)
-            .WillByDefault(ReturnRef(objConfigurationProxy));
-
-    const AString strMcc3("123");
-    const AString strMnc2("56");
-    const AString strMnc3("056");
-    ON_CALL(objSubscriberInfo, GetMcc)
-            .WillByDefault(Invoke(
-                    [strMcc3](AString& strMcc)
-                    {
-                        strMcc = strMcc3;
-                        return IMS_TRUE;
-                    }));
-    ON_CALL(objSubscriberInfo, GetMnc)
-            .WillByDefault(Invoke(
-                    [strMnc2](AString& strMnc)
-                    {
-                        strMnc = strMnc2;
-                        return IMS_TRUE;
-                    }));
-
-    AString strUri("sip:mmtel@conf-factory.ims.mnc[MNC].mcc[MCC].3gppnetwork.org");
-    strUri = strUri.Replace("[MCC]", strMcc3).Replace("[MNC]", strMnc3);
-
-    EXPECT_EQ(strUri, pParticipantInfo->GetRemoteUri());
-}
-
-TEST_F(ParticipantInfoTest, GetRemoteUriReturnsDefaultConferenceUriIfMncIs3Digit)
-{
-    CallInfo objCallInfo;
-    objCallInfo.bConference = IMS_TRUE;
-    ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objCallInfo));
-
-    MockIMtcConfigurationManager* pConfigurationManager = new MockIMtcConfigurationManager();
-    ON_CALL(*pConfigurationManager, GetConferenceFactoryUri)
-            .WillByDefault(Return(AString::ConstEmpty()));
-
-    MtcConfigurationProxy objConfigurationProxy(pConfigurationManager);
-    ON_CALL(objContext, GetConfigurationProxy)
-            .WillByDefault(ReturnRef(objConfigurationProxy));
-
-    const AString strMcc3("123");
-    const AString strMnc2("56");
-    const AString strMnc3("056");
-    ON_CALL(objSubscriberInfo, GetMcc)
-            .WillByDefault(Invoke(
-                    [strMcc3](AString& strMcc)
-                    {
-                        strMcc = strMcc3;
-                        return IMS_TRUE;
-                    }));
-    ON_CALL(objSubscriberInfo, GetMnc)
-            .WillByDefault(Invoke(
-                    [strMnc3](AString& strMnc)
-                    {
-                        strMnc = strMnc3;
-                        return IMS_TRUE;
-                    }));
-
-    AString strUri("sip:mmtel@conf-factory.ims.mnc[MNC].mcc[MCC].3gppnetwork.org");
-    strUri = strUri.Replace("[MCC]", strMcc3).Replace("[MNC]", strMnc3);
-
-    EXPECT_EQ(strUri, pParticipantInfo->GetRemoteUri());
 }
 
 TEST_F(ParticipantInfoTest, GetRemoteUriReturnsFromSupplementaryService)

@@ -17,7 +17,9 @@
 #include "ImsIdentity.h"
 #include "ImsAccessNetworkInfoType.h"
 #include "ImsLib.h"
+#include "IPhoneInfoSubscriber.h"
 #include "ServiceNetwork.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 #include "AString.h"
@@ -25,6 +27,8 @@
 #include "SipAddress.h"
 #include "IMtcContext.h"
 #include "call/IMtcCall.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "configuration/ConfigDef.h"
 #include "dialingplan/MtcDialingPlan.h"
 #include "dialingplan/EmergencyDialingPlan.h"
 #include "util/TextParser.h"
@@ -33,9 +37,10 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcDialingPlan::MtcDialingPlan(IN IMtcContext& objContext) :
+MtcDialingPlan::MtcDialingPlan(IN IMtcContext& objContext, IN ISubscriberInfo& objSubscriberInfo) :
         m_objContext(objContext),
-        m_pTemporaryServiceUrn(nullptr)
+        m_pTemporaryServiceUrn(nullptr),
+        m_objSubscriberInfo(objSubscriberInfo)
 {
     IMS_TRACE_I("+MtcDialingPlan", 0, 0, 0);
 }
@@ -77,6 +82,7 @@ AString MtcDialingPlan::GetToUri(IN const AString& strNumber, IN const CallInfo&
     if (objCallInfo.bConference)
     {
         // TODO: creating confrence factory uri also needs to be moved
+        return GetConferenceFactoryUri();
     }
 
     if (objCallInfo.bEmergency)
@@ -96,7 +102,7 @@ void MtcDialingPlan::OnCountrySpecificServiceUrnReceived(
 }
 
 PRIVATE
-IMS_BOOL MtcDialingPlan::IsUriForm(IN const AString& strNumber)
+IMS_BOOL MtcDialingPlan::IsUriForm(IN const AString& strNumber) const
 {
     SipAddress objSipAddress;
     objSipAddress.Create(strNumber);
@@ -109,4 +115,52 @@ IMS_BOOL MtcDialingPlan::IsUriForm(IN const AString& strNumber)
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+AString MtcDialingPlan::GetConferenceFactoryUri() const
+{
+    AString strUri =
+            m_objContext.GetConfigurationProxy().GetStr(Feature::CONFERENCE_FACTORY_URI, 0);
+
+    IMS_TRACE_D("GetConferenceFactoryUri uri from config[%s]", strUri.GetStr(), 0, 0);
+
+    if (strUri.GetLength() <= 0)
+    {
+        strUri = "sip:mmtel@conf-factory.ims.mnc[MNC].mcc[MCC].3gppnetwork.org";
+    }
+    else if (IsUriForm(strUri) == IMS_FALSE)
+    {
+        strUri = strUri.Prepend("sip:");
+    }
+
+    if (strUri.Contains("[MNC") || strUri.Contains("[MCC"))
+    {
+        strUri = strUri.Replace("[MCC]", GetMcc())
+                .Replace("[MNC]", GetMnc(3))
+                .Replace("[MNC2]", GetMnc(2));
+    }
+
+    IMS_TRACE_I("GetConferenceFactoryUri [%s]", strUri.GetStr(), 0, 0);
+    return strUri;
+}
+
+PRIVATE
+AString MtcDialingPlan::GetMcc() const
+{
+    AString strMcc;
+    m_objSubscriberInfo.GetMcc(strMcc);
+    return strMcc;
+}
+
+PRIVATE
+AString MtcDialingPlan::GetMnc(IN IMS_UINT32 nLength) const
+{
+    AString strMnc;
+    m_objSubscriberInfo.GetMnc(strMnc);
+    if (nLength == 3 && strMnc.GetLength() == 2)
+    {
+        strMnc.Prepend("0");
+    }
+    return strMnc;
 }

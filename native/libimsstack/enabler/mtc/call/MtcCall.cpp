@@ -22,7 +22,6 @@
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "ServiceMutex.h"
-#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcSession.h"
@@ -48,8 +47,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_nKey(CreateCallKey()),
         m_bHeldByMe(IMS_FALSE),
         m_objCallInfo(objCallInfo),
-        m_objParticipantInfo(ParticipantInfo(
-                *this, *PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(GetSlotId()))),
+        m_objParticipantInfo(ParticipantInfo(*this)),
         m_pUpdatingInfo(IMS_NULL),
         m_lstSessions(ImsList<IMtcSession*>()),
         m_objPendingOperation(),

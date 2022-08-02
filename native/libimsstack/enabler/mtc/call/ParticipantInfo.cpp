@@ -17,8 +17,6 @@
 #include "ICoreService.h"
 #include "IImsAosInfo.h"
 #include "IMessage.h"
-#include "ImsIdentity.h"
-#include "IPhoneInfoSubscriber.h"
 #include "ISipHeader.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
@@ -40,9 +38,8 @@ const AString ParticipantInfo::ANONYMOUS_DISPLAY_NAME = "Anonymous";
 
 PUBLIC
 ParticipantInfo::ParticipantInfo(
-        IN IMtcCallContext& objContext, IN ISubscriberInfo& objSubscriberInfo) :
+        IN IMtcCallContext& objContext) :
         m_objContext(objContext),
-        m_objSubscriberInfo(objSubscriberInfo),
         m_strRemoteNumber(AString::ConstNull()),
         m_strRemoteUri(AString::ConstNull())
 {
@@ -97,7 +94,7 @@ AString ParticipantInfo::GetRemoteUri() const
 
     if (m_objContext.GetCallInfo().bConference)
     {
-        return GetRemoteUriForConferenceCall();
+        return m_objContext.GetDialingPlan().GetToUri("", m_objContext.GetCallInfo());
     }
 
     const SuppService* pSuppService =
@@ -200,46 +197,4 @@ AString ParticipantInfo::GetLocalUriForEmergencyCall() const
     }
 
     return URI_SET_BY_IMS_ENGINE;
-}
-
-PRIVATE
-AString ParticipantInfo::GetRemoteUriForConferenceCall() const
-{
-    // TODO: this will be moved to DialingPlan.
-    AString strUri =
-            m_objContext.GetConfigurationProxy().GetStr(Feature::CONFERENCE_FACTORY_URI, 0);
-
-    IMS_TRACE_D("GetRemoteUriForConferenceCall uri from config[%s]", strUri.GetStr(), 0, 0);
-
-    if (strUri.GetLength() <= 0)
-    {
-        strUri = "sip:mmtel@conf-factory.ims.mnc[MNC].mcc[MCC].3gppnetwork.org";
-    }
-
-    IMS_TRACE_I("GetRemoteUriForConferenceCall [%s]", strUri.GetStr(), 0, 0);
-
-    // TODO: exception handling: mcc/mnc is empty
-    return strUri.Replace("[MCC]", GetMcc())
-            .Replace("[MNC]", GetMnc(3))
-            .Replace("[MNC2]", GetMnc(2));
-}
-
-PRIVATE
-AString ParticipantInfo::GetMcc() const
-{
-    AString strMcc;
-    m_objSubscriberInfo.GetMcc(strMcc);
-    return strMcc;
-}
-
-PRIVATE
-AString ParticipantInfo::GetMnc(IN IMS_UINT32 nLength) const
-{
-    AString strMnc;
-    m_objSubscriberInfo.GetMnc(strMnc);
-    if (nLength == 3 && strMnc.GetLength() == 2)
-    {
-        strMnc.Prepend("0");
-    }
-    return strMnc;
 }

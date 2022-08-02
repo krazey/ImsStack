@@ -17,7 +17,6 @@
 #include <gtest/gtest.h>
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
-#include "MockIPhoneInfoSubscriber.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/ParticipantInfo.h"
@@ -47,7 +46,6 @@ public:
     MockIMtcService objService;
     MockIMtcImsEventReceiver objImsEventReceiver;
     MockIMtcCallManager objCallManager;
-    MockISubscriberInfo objSubscriberInfo;
     CallInfo objCallInfo;
 
 protected:
@@ -61,7 +59,7 @@ protected:
         ON_CALL(objCallContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
 
-        pParticipantInfo = new ParticipantInfo(objCallContext, objSubscriberInfo);
+        pParticipantInfo = new ParticipantInfo(objCallContext);
         ON_CALL(objCallContext, GetParticipantInfo)
                 .WillByDefault(ReturnRef(*pParticipantInfo));
 

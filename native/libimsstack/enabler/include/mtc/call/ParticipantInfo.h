@@ -23,7 +23,6 @@
 
 class IMessage;
 class IMtcCallContext;
-class ISubscriberInfo;
 
 /**
  * This class stores caller and callee info.
@@ -31,7 +30,7 @@ class ISubscriberInfo;
 class ParticipantInfo final
 {
 public:
-    explicit ParticipantInfo(IN IMtcCallContext& objContext, IN ISubscriberInfo& objSubscriberInfo);
+    explicit ParticipantInfo(IN IMtcCallContext& objContext);
     ~ParticipantInfo();
     ParticipantInfo(IN const ParticipantInfo&) = delete;
     ParticipantInfo& operator=(IN const ParticipantInfo&) = delete;
@@ -53,13 +52,8 @@ private:
 
     AString GetLocalUriForEmergencyCall() const;
     AString GetRemoteNumberFromMessage(IN const IMessage& objMessage) const;
-    AString GetRemoteUriForConferenceCall() const;
-
-    AString GetMcc() const;
-    AString GetMnc(IN IMS_UINT32 nLength) const;
 
     IMtcCallContext& m_objContext;
-    ISubscriberInfo& m_objSubscriberInfo;
 
     AString m_strRemoteNumber;
     AString m_strRemoteUri;

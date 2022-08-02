@@ -18,8 +18,8 @@
 #include "Configuration.h"
 #include "ImsList.h"
 #include "ImsServiceConfig.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
-
 #include "JniConnector.h"
 #include "JniConnectorFactory.h"
 #include "JniMtcCall.h"
@@ -47,7 +47,8 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
         m_objConfigurationProxy(MtcConfigurationProxy(new MtcConfigurationManager())),
         m_lstServices(IMSList<IMtcService*>()),
-        m_objDialingPlan(MtcDialingPlan(*this)),
+        m_objDialingPlan(MtcDialingPlan(*this,
+                *PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId))),
         m_objCallManager(MtcCallManager(*this)),
         m_objCallController(MtcCallController(*this)),
         m_objVonrManager(MtcVonrManager()),
