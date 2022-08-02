@@ -175,7 +175,7 @@ protected:
 
     ISession* GetISession();
 
-    void InitMediaSession(IN MediaInfo* pMediaInfo = IMS_NULL);
+    void InitMediaSession();
     IMS_SINT32 OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage);
     void RunMedia(IN ISession* piSession, IN IMessage* piMessage);
 

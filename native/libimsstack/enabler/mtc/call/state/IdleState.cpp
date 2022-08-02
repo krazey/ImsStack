@@ -76,19 +76,21 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
+    m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
+    delete pMediaInfo;
 
     if (m_objContext.IsUssi())
     {
         m_objOperationAfterBlockCheck = [&]()
         {
-            return ContinueStartUssi(pMediaInfo);
+            return ContinueStartUssi();
         };
     }
     else
     {
         m_objOperationAfterBlockCheck = [&]()
         {
-            return ContinueStart(pMediaInfo);
+            return ContinueStart();
         };
     }
 
@@ -109,10 +111,12 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
     m_objContext.GetCallInfo().bConference = IMS_TRUE;
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
+    m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
+    delete pMediaInfo;
 
     m_objOperationAfterBlockCheck = [&]()
     {
-        return ContinueConference(pMediaInfo, lstUsers);
+        return ContinueConference(lstUsers);
     };
     m_pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
             m_objContext.CreateBlockChecker(GetOutgoingCallBlockRules()));
@@ -128,13 +132,12 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
     m_objContext.GetCallInfo().bConference = IMS_TRUE;
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
+    m_objContext.GetMediaManager().SetMediaInfo(MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_INVALID,
+            DIRECTION_INVALID, AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID));
 
     m_objOperationAfterBlockCheck = [&]()
     {
-        return ContinueConference(
-                new MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_INVALID, DIRECTION_INVALID,
-                        AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID),
-                lstUsers);
+        return ContinueConference(lstUsers);
     };
     m_pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
             m_objContext.CreateBlockChecker(GetOutgoingCallBlockRules()));
@@ -203,11 +206,9 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
                 m_objContext.GetSession()->Reject(objResult.objReason);
             }
             m_objContext.GetUiNotifier().SendStartFailed(objResult.objReason);
-            // TODO: delete MediaInfo
             return CallStateName::TERMINATING;
 
         case IMtcBlockChecker::Result::Status::PENDING:
-            // TODO: delete MediaInfo if call terminated during being pended
             return GetStateName();
     }
 }
@@ -316,18 +317,16 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
 }
 
 PRIVATE
-CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
+CallStateName IdleState::ContinueStart()
 {
     IMS_TRACE_D("ContinueStart", 0, 0, 0);
     if (m_objContext.CreateSession() == IMS_NULL)
     {
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
-        delete pMediaInfo;
         return CallStateName::TERMINATING;
     }
 
-    InitMediaSession(pMediaInfo);
-    delete pMediaInfo;
+    InitMediaSession();
 
     m_objContext.GetPreconditionManager().CreateQos(GetISession());
 
@@ -343,8 +342,7 @@ CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
 }
 
 PRIVATE
-CallStateName IdleState::ContinueConference(
-        IN MediaInfo* pMediaInfo, IN IMSList<ConfUser*> lstUsers)
+CallStateName IdleState::ContinueConference(IN IMSList<ConfUser*> lstUsers)
 {
     IMS_TRACE_D("ContinueConference", 0, 0, 0);
     if (m_objContext.CreateSession() == IMS_NULL)
@@ -356,7 +354,7 @@ CallStateName IdleState::ContinueConference(
     IMSList<AString> lstUris = GetEntryUrisFromConferenceUsers(lstUsers);
     SetResourceListForConference(*GetISession()->GetNextRequest(), lstUris);
 
-    InitMediaSession(pMediaInfo);
+    InitMediaSession();
 
     m_objContext.GetPreconditionManager().CreateQos(GetISession());
 
@@ -382,7 +380,7 @@ CallStateName IdleState::ContinueHandleIncoming()
 }
 
 PRIVATE
-CallStateName IdleState::ContinueStartUssi(IN MediaInfo* pMediaInfo)
+CallStateName IdleState::ContinueStartUssi()
 {
     IMS_TRACE_D("ContinueStartUssi", 0, 0, 0);
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
@@ -392,7 +390,7 @@ CallStateName IdleState::ContinueStartUssi(IN MediaInfo* pMediaInfo)
         return CallStateName::TERMINATING;
     }
 
-    InitMediaSession(pMediaInfo);
+    InitMediaSession();
 
     if (m_objContext.GetUssiController()->FormStartUssiRequest(
             m_objContext.GetParticipantInfo().GetRemoteNumber()) == IMS_FAILURE)

@@ -15,17 +15,177 @@
  */
 
 #include <gtest/gtest.h>
+#include "MockIMtcImsEventReceiver.h"
+#include "MockIMtcService.h"
+#include "MockIPhoneInfoSubscriber.h"
+#include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
+#include "call/ParticipantInfo.h"
+#include "call/block/MockIMtcBlockChecker.h"
 #include "call/state/IdleState.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "dialingplan/MockIMtcDialingPlan.h"
+#include "helper/MtcSupplementaryService.h"
+#include "media/MockIMtcMediaManager.h"
 
-namespace android
-{
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 class IdleStateTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    IdleState* pIdleState;
+    MockIMtcConfigurationManager* pConfigurationManager;
+    MtcConfigurationProxy* pConfigurationProxy;
+    MtcSupplementaryService* pSupplementaryService;
+    ParticipantInfo* pParticipantInfo;
+    MockIMtcCallContext objCallContext;
+    MockIMtcDialingPlan objDialingPlan;
+    MockIMtcMediaManager objMediaManager;
+    MockIMtcService objService;
+    MockIMtcImsEventReceiver objImsEventReceiver;
+    MockIMtcCallManager objCallManager;
+    MockISubscriberInfo objSubscriberInfo;
+    CallInfo objCallInfo;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override
+    {
+        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        ON_CALL(objCallContext, GetConfigurationProxy)
+                .WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
+        ON_CALL(objCallContext, GetSupplementaryService)
+                .WillByDefault(ReturnRef(*pSupplementaryService));
+
+        pParticipantInfo = new ParticipantInfo(objCallContext, objSubscriberInfo);
+        ON_CALL(objCallContext, GetParticipantInfo)
+                .WillByDefault(ReturnRef(*pParticipantInfo));
+
+        ON_CALL(objCallContext, GetDialingPlan)
+                .WillByDefault(ReturnRef(objDialingPlan));
+        ON_CALL(objCallContext, GetCallInfo)
+                .WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objCallContext, GetService)
+                .WillByDefault(ReturnRef(objService));
+        ON_CALL(objCallContext, GetMediaManager)
+                .WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objCallContext, GetImsEventReceiver)
+                .WillByDefault(ReturnRef(objImsEventReceiver));
+        ON_CALL(objCallContext, GetCallManager)
+                .WillByDefault(ReturnRef(objCallManager));
+
+        pIdleState = new IdleState(objCallContext);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pIdleState;
+        delete pConfigurationProxy;
+        delete pSupplementaryService;
+        delete pParticipantInfo;
+    }
 };
 
-}  // namespace android
+TEST_F(IdleStateTest, StartSetsUpCallInfo)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+    MediaInfo* pMediaInfo = new MediaInfo();
+    MockIMtcBlockChecker* pBlockChecker = new MockIMtcBlockChecker();
+    ImsMap<SuppType, SuppService*> objSuppServices;
+    IMS_BOOL bUssi = IMS_FALSE;
+
+    ON_CALL(objCallContext, IsUssi)
+            .WillByDefault(Return(bUssi));
+    ON_CALL(objCallContext, CreateBlockChecker)
+            .WillByDefault(Return(pBlockChecker));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _))
+            .WillByDefault(Return(strTarget));
+
+    pIdleState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+
+    EXPECT_EQ(eCallType, objCallInfo.eInitialCallType);
+    EXPECT_EQ(PeerType::MO, objCallInfo.ePeerType);
+    EXPECT_EQ(bUssi, objCallInfo.bUssi);
+    EXPECT_EQ(IMS_FALSE, objCallInfo.bConference);
+}
+
+TEST_F(IdleStateTest, StartSetsUpParticipantInfo)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+    MediaInfo* pMediaInfo = new MediaInfo();
+    MockIMtcBlockChecker* pBlockChecker = new MockIMtcBlockChecker();
+    ImsMap<SuppType, SuppService*> objSuppServices;
+
+    ON_CALL(objCallContext, IsUssi)
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objCallContext, CreateBlockChecker)
+            .WillByDefault(Return(pBlockChecker));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _))
+            .WillByDefault(Return(strTarget));
+
+    pIdleState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+
+    EXPECT_EQ(strTarget, pParticipantInfo->GetRemoteNumber());
+}
+
+TEST_F(IdleStateTest, StartSetsUpSupplementaryService)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+    MediaInfo* pMediaInfo = new MediaInfo();
+    MockIMtcBlockChecker* pBlockChecker = new MockIMtcBlockChecker();
+
+    SuppType eSuppType = SuppType::GEOLOCATION;
+    ImsMap<SuppType, SuppService*> objSuppServices;
+    objSuppServices.Add(eSuppType, new SuppService());
+
+    ON_CALL(objCallContext, IsUssi)
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objCallContext, CreateBlockChecker)
+            .WillByDefault(Return(pBlockChecker));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _))
+            .WillByDefault(Return(strTarget));
+
+    pIdleState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+
+    EXPECT_NE(nullptr, pSupplementaryService->Get(eSuppType));
+}
+
+TEST_F(IdleStateTest, StartSetsUpMediaManager)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+    MediaInfo* pMediaInfo = new MediaInfo();
+    MockIMtcBlockChecker* pBlockChecker = new MockIMtcBlockChecker();
+    ImsMap<SuppType, SuppService*> objSuppServices;
+
+    ON_CALL(objCallContext, IsUssi)
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objCallContext, CreateBlockChecker)
+            .WillByDefault(Return(pBlockChecker));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _))
+            .WillByDefault(Return(strTarget));
+
+    EXPECT_CALL(objMediaManager, SetMediaInfo(*pMediaInfo))
+            .Times(1);
+
+    pIdleState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+}

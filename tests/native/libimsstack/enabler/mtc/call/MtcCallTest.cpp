@@ -819,6 +819,52 @@ TEST_F(MtcCallTest, HandleIpcanChangedCallsState)
 
 // TODO: IMtcCallContext methods
 
+TEST_F(MtcCallTest, CreateSessionDoNothingIfSessionIsNull)
+{
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    EXPECT_EQ(nullptr, objCall.CreateSession(IMS_NULL));
+}
+
+TEST_F(MtcCallTest, CreateSessionDoNothingIfMtcSessionExists)
+{
+    MockISession objSession;
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.CreateSession(&objSession);
+
+    EXPECT_EQ(nullptr, objCall.CreateSession(&objSession));
+}
+
+TEST_F(MtcCallTest, CreateSessionSetListenersOfSession)
+{
+    MockISession objSession;
+    EXPECT_CALL(objSession, SetListener(_))
+            .Times(1);
+    // 2 times: when init and in MtcSession::~MtcSession
+    EXPECT_CALL(objSession, SetMessageMediator(_))
+            .Times(2);
+    EXPECT_CALL(objSession, SetRefreshListener(_))
+            .Times(2);
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    EXPECT_NE(nullptr, objCall.CreateSession(&objSession));
+}
+
+TEST_F(MtcCallTest, CreateSessionCreatesMtcSession)
+{
+    MockISession objSession;
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    EXPECT_NE(nullptr, objCall.CreateSession(&objSession));
+}
+
 TEST_F(MtcCallTest, GetSlotIdCallsMtcContext)
 {
     ON_CALL(objContext, GetCallStateProxy)
