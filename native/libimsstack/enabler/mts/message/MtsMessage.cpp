@@ -640,7 +640,7 @@ IMS_BOOL MtsMessage::Processing_ReceiveMessage(
 
     MtsSmUtils* pMtsSmUtils = m_pMtsMessageController->GetMtsUtils()->GetMtsSmUtils();
 
-    if (IMS_NULL == piPageMessage)
+    if (piPageMessage == IMS_NULL)
     {
         IMS_TRACE_E(0, "piPageMessage_ is null", 0, 0, 0);
 
@@ -652,7 +652,7 @@ IMS_BOOL MtsMessage::Processing_ReceiveMessage(
 
     IMessage* piMessage = piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
 
-    if (IMS_NULL == piMessage)
+    if (piMessage == IMS_NULL)
     {
         IMS_TRACE_E(0, "Failed to fetch IMessage from IPageMessage", 0, 0, 0);
 
@@ -694,7 +694,7 @@ IMS_BOOL MtsMessage::Processing_ReceiveMessage(
 
     nContentSmsType = pMtsSipFormUtils->FormContentTypeStrToEnum(strContentType);
 
-    if (SmsFormatType::SMSFORMAT_INVALID == nContentSmsType)
+    if (nContentSmsType == SmsFormatType::SMSFORMAT_INVALID)
     {
         piPageMessage->Reject(415, 0);
 

@@ -59,12 +59,12 @@ PRIVATE IMS_UINT32 JniMtsServiceThread::ConvertSmsFormatToInt(IN SmsFormatType e
     switch (eSmsFormat)
     {
         case SmsFormatType::SMSFORMAT_3GPP:
-            return (IMS_UINT32)1;
+            return SMSFORMAT_3GPP;
 
         case SmsFormatType::SMSFORMAT_3GPP2:
-            return (IMS_UINT32)2;
+            return SMSFORMAT_3GPP2;
 
         default:
-            return (IMS_UINT32)3;
+            return SMSFORMAT_INVALID;
     }
 }
