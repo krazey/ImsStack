@@ -33,8 +33,8 @@ class MessageFormatter
 public:
     MessageFormatter(IN IMtcSessionContext& objContext, IN ISession& objSession);
     virtual ~MessageFormatter();
-    MessageFormatter(IN CONST MessageFormatter&) = delete;
-    MessageFormatter& operator=(IN CONST MessageFormatter&) = delete;
+    MessageFormatter(IN const MessageFormatter&) = delete;
+    MessageFormatter& operator=(IN const MessageFormatter&) = delete;
 
 private:
     enum class FormType
@@ -90,7 +90,7 @@ private:
     void SetPreconditionHeader();
     void SetPEarlyMediaHeader();
     void SetAlertInfoHeader(IN IMS_BOOL bIncludeAlertInfo);
-    void SetReasonHeader(IN CONST AString& strReason);
+    void SetReasonHeader(IN const AString& strReason);
     void SetCarrierSpecificHeaders();
 
     IMS_SINT32 GetRejectStatusCode(IN const CallReasonInfo& objReason);

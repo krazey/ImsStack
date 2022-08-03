@@ -115,8 +115,8 @@ public:
     ~QosStatusTable();
 
 private:
-    QosStatusTable(IN CONST QosStatusTable& objRHS);
-    QosStatusTable& operator=(IN CONST QosStatusTable& objRHS);
+    QosStatusTable(IN const QosStatusTable& objRHS);
+    QosStatusTable& operator=(IN const QosStatusTable& objRHS);
 
 public:
     void UpdateStatusTableWithRemoteSdp(IN IMedia* piMedia);

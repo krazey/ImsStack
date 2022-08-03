@@ -691,7 +691,7 @@ void MessageFormatter::SetAlertInfoHeader(IN IMS_BOOL bIncludeAlertInfo)
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PRIVATE
-void MessageFormatter::SetReasonHeader(IN CONST AString& strReason)
+void MessageFormatter::SetReasonHeader(IN const AString& strReason)
 {
     if (strReason.GetLength() < 1)
     {

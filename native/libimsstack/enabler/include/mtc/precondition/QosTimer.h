@@ -30,8 +30,8 @@ public:
     virtual ~QosTimer();
 
 private:
-    QosTimer(IN CONST QosTimer& objRHS);
-    QosTimer& operator=(IN CONST QosTimer& objRHS);
+    QosTimer(IN const QosTimer& objRHS);
+    QosTimer& operator=(IN const QosTimer& objRHS);
 
 public:
     virtual void Timer_TimerExpired(IN ITimer* piExpiredTimer);

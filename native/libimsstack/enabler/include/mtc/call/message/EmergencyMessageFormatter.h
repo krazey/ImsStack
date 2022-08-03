@@ -25,8 +25,8 @@ class EmergencyMessageFormatter : public MessageFormatter
 public:
     EmergencyMessageFormatter(IN IMtcSessionContext& objContext, IN ISession& objSession);
     virtual ~EmergencyMessageFormatter();
-    EmergencyMessageFormatter(IN CONST MessageFormatter&) = delete;
-    EmergencyMessageFormatter& operator=(IN CONST MessageFormatter&) = delete;
+    EmergencyMessageFormatter(IN const MessageFormatter&) = delete;
+    EmergencyMessageFormatter& operator=(IN const MessageFormatter&) = delete;
 
 public:
     virtual IMS_RESULT FormStartMessage() override;

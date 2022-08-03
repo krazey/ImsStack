@@ -34,8 +34,8 @@ public:
     virtual ~UssiController();
 
 private:
-    UssiController(IN CONST UssiController& objRHS);
-    UssiController& operator=(IN CONST UssiController& objRHS);
+    UssiController(IN const UssiController& objRHS);
+    UssiController& operator=(IN const UssiController& objRHS);
 
 public:
     static IMS_BOOL IsNetworkInitiatedUssi(IN IMessage* piMessage);

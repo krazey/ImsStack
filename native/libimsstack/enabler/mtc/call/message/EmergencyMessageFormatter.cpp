@@ -102,7 +102,7 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByUserId()
         return;
     }
 
-    CONST AStringArray& objUserIds = piCoreService->GetUserIdentities();
+    const AStringArray& objUserIds = piCoreService->GetUserIdentities();
     for (IMS_SINT32 i = 0; i < objUserIds.GetCount(); i++)
     {
         SipAddress objSipAddress;
@@ -138,8 +138,8 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByDeviceId()
     PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo()->GetDeviceId(
             m_objContext.GetSlotId(), strImei);
 
-    LOCAL CONST IMS_UINT32 LEN_IMEI_TAC = 8;
-    LOCAL CONST IMS_UINT32 LEN_IMEI_SNR = 6;
+    LOCAL const IMS_UINT32 LEN_IMEI_TAC = 8;
+    LOCAL const IMS_UINT32 LEN_IMEI_SNR = 6;
     strImei = strImei.AlignLeft(LEN_IMEI_TAC + LEN_IMEI_SNR, '0');
 
     AString strValue;
@@ -187,7 +187,7 @@ void EmergencyMessageFormatter::SetSipInstanceFeature()
         return;
     }
 
-    CONST SipParameter* pParameter = piCoreService->GetInstanceParameter();
+    const SipParameter* pParameter = piCoreService->GetInstanceParameter();
     if (pParameter == IMS_NULL)
     {
         return;

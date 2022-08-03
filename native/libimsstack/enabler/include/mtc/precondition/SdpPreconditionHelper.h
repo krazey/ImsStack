@@ -32,7 +32,7 @@ public:
     static void RemovePreconditionSdp(IN ISession* piSession);
     static void FormFailurePreconditionSdp(IN ISession* piSession);
 
-    static IMS_UINT32 GetMediaType(IN CONST SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState);
+    static IMS_UINT32 GetMediaType(IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState);
 
     /* Parsing SDP Utility */
     static IMS_UINT32 GetMediaTypesBySdp(IN ISession* piSession);
