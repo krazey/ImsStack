@@ -70,8 +70,8 @@ public:
     virtual ~MtcPreconditionManager();
 
 private:
-    MtcPreconditionManager(IN CONST MtcPreconditionManager& objRHS);
-    MtcPreconditionManager& operator=(IN CONST MtcPreconditionManager& objRHS);
+    MtcPreconditionManager(IN const MtcPreconditionManager& objRHS);
+    MtcPreconditionManager& operator=(IN const MtcPreconditionManager& objRHS);
 
 public:
     virtual void CreateQos(IN ISession* piSession) override;

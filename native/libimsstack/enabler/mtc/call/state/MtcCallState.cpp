@@ -68,7 +68,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::HandleIncoming(
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::Start(IN CallType /* eCallType */,
-        IN CONST AString& /* strTarget */, IN MediaInfo* /* pMediaInfo */,
+        IN const AString& /* strTarget */, IN MediaInfo* /* pMediaInfo */,
         IN const IMSMap<SuppType, SuppService*>& /* lstSuppServices */)
 {
     return GetStateName();
@@ -139,7 +139,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::Terminate(IN const CallReasonInfo& /*
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::SendDtmf(
-        IN CONST AString& /* strSignal */, IN IMS_SINT32 /* nDuration */)
+        IN const AString& /* strSignal */, IN IMS_SINT32 /* nDuration */)
 {
     return GetStateName();
 }

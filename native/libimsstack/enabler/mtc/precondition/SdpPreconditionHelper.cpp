@@ -458,7 +458,7 @@ PRIVATE GLOBAL void SdpPreconditionHelper::FormConfirmAttribute(
 }
 
 PUBLIC GLOBAL IMS_UINT32 SdpPreconditionHelper::GetMediaType(
-        IN CONST SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState)
+        IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState)
 {
     IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
 

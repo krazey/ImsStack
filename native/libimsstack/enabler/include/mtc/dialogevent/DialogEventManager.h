@@ -45,8 +45,8 @@ public:
     virtual ~DEMngr();
 
 private:
-    DEMngr(IN CONST DEMngr& objRHS);
-    DEMngr& operator=(IN CONST DEMngr& objRHS);
+    DEMngr(IN const DEMngr& objRHS);
+    DEMngr& operator=(IN const DEMngr& objRHS);
 
 public:
     virtual void Init(IN IDEMngrListener* pListener);
