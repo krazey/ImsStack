@@ -139,11 +139,11 @@ public class AcServiceImpl {
             // check compressing
             byte[] data = (byte[]) msg.obj;
             if (msg.arg1 == 1) {
-                data = ProvisioningData.decompressGzip((byte[]) msg.obj);
+                data = mProvisioningData.decompressGzip((byte[]) msg.obj);
             }
 
             // save provisioning data to file
-            ProvisioningData.createXmlFileFromBytes(mContext, mSubId, data);
+            mProvisioningData.createXmlFileFromBytes(data);
 
             // reset ConfigContainer
             resetConfig();
@@ -159,7 +159,7 @@ public class AcServiceImpl {
         @Override
         public int handleMessage(Message msg) {
             // delete xml file includes provisioning data
-            ProvisioningData.deleteXmlFile(mContext, mSubId);
+            mProvisioningData.deleteXmlFile();
 
             // reset ConfigContainer
             resetConfig();
@@ -214,24 +214,27 @@ public class AcServiceImpl {
     private final Handler mHandler;
     private final ConfigContainer mConfigContainer;
     private final int mSlotId;
+    private final int mSubId;
 
     private final Object mObject = new Object();
+    private ProvisioningData mProvisioningData;
     private AcServiceClientInfo mAcServiceClientInfo;
     private RequestInfo mRequestInfo;
 
-    private int mSubId;
     private int mState;
 
     @VisibleForTesting
     public AcServiceImpl(int slotId, int subId, Context context, Looper looper,
+            ProvisioningData provisioningData,
+            CallbackManager callbackManager,
             ConfigContainer configContainer) {
         mSlotId = slotId;
         mSubId = subId;
-        mCallbackManager = new CallbackManager(slotId, subId);
-
-        mHandler = new MessageHandler(looper);
         mContext = context;
 
+        mHandler = new MessageHandler(looper);
+        mProvisioningData = provisioningData;
+        mCallbackManager = callbackManager;
         mConfigContainer = configContainer;
 
         mState = AcService.STATE_TYPE_NONE;
@@ -246,35 +249,57 @@ public class AcServiceImpl {
         mCallbackManager.clear();
     }
 
-    private AcServiceImpl(Context context, int slotId) {
+    private AcServiceImpl(Context context, int slotId, int subId) {
         mSlotId = slotId;
-        mSubId = MSimUtils.getSubId(slotId);
-        mCallbackManager = new CallbackManager(mSlotId, mSubId);
+        mSubId = subId;
+        mContext = context;
 
         HandlerThread handlerThread = new HandlerThread(AcServiceImpl.class.getName());
         handlerThread.start();
-
         mHandler = new MessageHandler(handlerThread.getLooper());
-        mContext = context;
 
+        mProvisioningData = new ProvisioningData(mContext, mSubId);
+        mCallbackManager = new CallbackManager(mSlotId, mSubId);
         mConfigContainer = new ConfigContainer(context, mSlotId, mSubId);
 
         mState = AcService.STATE_TYPE_NONE;
     }
 
     /**
-     * Returns a AcService for phoneId specified and IllegalArgumentException will be
-     * thrown if the phoneId is not valid.
+     * Returns a AcService for phoneId specified.
      * @param context The context of the application.
      * @param slotId The ID of the Phone or SIM Slot that this AcService will use.
      * @return Instance of the AcServiceImpl
      */
     public static AcServiceImpl getInstance(Context context, int slotId) {
         AcServiceImpl acServiceImpl;
+        int subId = MSimUtils.getSubId(slotId);
+
         synchronized (INSTANCES) {
             acServiceImpl = INSTANCES.get(slotId);
             if (acServiceImpl == null) {
-                acServiceImpl = new AcServiceImpl(context, slotId);
+                acServiceImpl = new AcServiceImpl(context, slotId, subId);
+                INSTANCES.put(slotId, acServiceImpl);
+            }
+        }
+
+        return acServiceImpl;
+    }
+
+    /**
+     * Returns a AcService for phoneId specified and this is only for Testing.
+     * @param context The context of the application.
+     * @param slotId The ID of the Phone or SIM Slot that this AcService will use.
+     * @param subId The ID of the Subscription associated with slot ID.
+     * @return Instance of the AcServiceImpl
+     */
+    @VisibleForTesting
+    public static AcServiceImpl getInstance(Context context, int slotId, int subId) {
+        AcServiceImpl acServiceImpl;
+        synchronized (INSTANCES) {
+            acServiceImpl = INSTANCES.get(slotId);
+            if (acServiceImpl == null) {
+                acServiceImpl = new AcServiceImpl(context, slotId, subId);
                 INSTANCES.put(slotId, acServiceImpl);
             }
         }
@@ -307,13 +332,12 @@ public class AcServiceImpl {
      * @return true if the operation is success, or false otherwise.
      */
     public boolean setClientInfo(AcServiceClientInfo clientInfo) {
-        if (clientInfo.isValid()) {
+        if (!clientInfo.isValid()) {
             ImsLog.i(mSlotId, "parameter is not valid");
             return false;
         }
 
-        ImsLog.i(mSlotId, "update clientInfo old : " + mAcServiceClientInfo.toString()
-                + " new : " + clientInfo.toString());
+        ImsLog.i(mSlotId, "update clientInfo : " + clientInfo.toString());
 
         synchronized (mObject) {
             mAcServiceClientInfo = new AcServiceClientInfo(clientInfo);

@@ -167,14 +167,10 @@ public class ProvisioningDataTest {
     @After
     public void tearDown() throws Exception {
         // delete test file
-        ProvisioningData.deleteXmlFile(mContext, mSubId);
-        mProvisioningData = null;
-/*
-        String fileName = LOCAL_FILE_NAME_PREFIX + mSubId + LOCAL_FILE_NAME_POSTFIX;
-        File file = new File(mContext.getFilesDir(), fileName);
-        if (file != null && file.exists()) {
-            file.delete();
-        }*/
+        if (mProvisioningData != null) {
+            mProvisioningData.deleteXmlFile();
+            mProvisioningData = null;
+        }
     }
 
     @Test
@@ -302,31 +298,32 @@ public class ProvisioningDataTest {
     @Test
     @SmallTest
     public void compressAndDecompress_withData() {
-        byte[] compressedData = ProvisioningData.compressGzip(AC_DATA.getBytes());
+        mProvisioningData = new ProvisioningData(mContext, mSubId);
+        byte[] compressedData = mProvisioningData.compressGzip(AC_DATA.getBytes());
         assertFalse(Arrays.equals(compressedData, AC_DATA.getBytes()));
 
-        byte[] decompressedData = ProvisioningData.decompressGzip(compressedData);
+        byte[] decompressedData = mProvisioningData.decompressGzip(compressedData);
         assertTrue(Arrays.equals(decompressedData, AC_DATA.getBytes()));
 
-        assertNull(ProvisioningData.compressGzip(null));
-        assertNull(ProvisioningData.decompressGzip(null));
+        assertNull(mProvisioningData.compressGzip(null));
+        assertNull(mProvisioningData.decompressGzip(null));
 
         byte[] emptyData = new byte[0];
-        byte[] retData = ProvisioningData.compressGzip(emptyData);
+        byte[] retData = mProvisioningData.compressGzip(emptyData);
         assertEquals(emptyData, retData);
     }
 
     @Test
     @SmallTest
     public void createDeleteXmlFile_withData() {
-        boolean result = ProvisioningData.createXmlFileFromBytes(
-                mContext, mSubId, AC_DATA.getBytes());
+        mProvisioningData = new ProvisioningData(mContext, mSubId);
+        boolean result = mProvisioningData.createXmlFileFromBytes(AC_DATA.getBytes());
         assertTrue(result);
 
         String fileName = LOCAL_FILE_NAME_PREFIX + mSubId + LOCAL_FILE_NAME_POSTFIX;
         assertTrue(isExistTestFile(fileName));
 
-        ProvisioningData.deleteXmlFile(mContext, mSubId);
+        mProvisioningData.deleteXmlFile();
         assertFalse(isExistTestFile(fileName));
     }
 
