@@ -20,6 +20,7 @@
 #include "MediaDef.h"
 #include "MediaSessionConfigFactory.h"
 #include "AudioConfiguration.h"
+#include "TextConfiguration.h"
 
 class MediaConfigUtil
 {
@@ -36,6 +37,20 @@ public:
         return MediaSessionConfigFactory::GetInstance()
                 ->FindMediaSessionConfig(nSlotId, type)
                 ->GetAudioConfiguration();
+    }
+
+    /**
+     * @brief Get the TextConfiguration object with given parameter
+     *
+     * @param nSlotId The UICC slot id
+     * @param type MEDIA_SERVICE_TYPE defined in MediaDef.h
+     * @return TextConfiguration*
+     */
+    static TextConfiguration* GetTextConfig(IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE type)
+    {
+        return MediaSessionConfigFactory::GetInstance()
+                ->FindMediaSessionConfig(nSlotId, type)
+                ->GetTextConfiguration();
     }
 };
 

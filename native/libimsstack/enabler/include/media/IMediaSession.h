@@ -28,7 +28,7 @@
 #include "MediaNego.h"
 #include "audio/AudioDef.h"
 #include "video/VideoDef.h"
-// #include "text/TextDef.h" TODO: add implementation later
+#include "text/TextDef.h"
 
 class IMediaSession
 {
@@ -92,14 +92,14 @@ public:
      * @param nNegoID The identification of the session
      * @param pSession The SDP module to put the formed SDP
      * @param eMediaType The type of media
-     * @param eAudioDir The direction of audio m-line in SDP to form
-     * @param eVideoDir The direction of video m-line in SDP to form
-     * @param eTextDir The direction of text m-line in SDP to form
+     * @param nAudioDirection The direction of audio m-line in SDP to form
+     * @param nVideoDirection The direction of video m-line in SDP to form
+     * @param nTextDirection The direction of text m-line in SDP to form
      * @return IMS_BOOL Returns IMS_TRUE when form SDP successfully, IMS_FALSE when it is failed
      */
     virtual IMS_BOOL FormSDP(IN IMS_UINTP nNegoID, OUT ISession* pSession,
-            IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 eAudioDir, IN IMS_SINT32 eVideoDir,
-            IN IMS_SINT32 eTextDir = -1) = 0;
+            IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
+            IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection = -1) = 0;
 
     /**
      * @brief Negotiate the SDP to the target dialog with the direction parameters for each
@@ -108,15 +108,15 @@ public:
      * @param nNegoID The identification of the session
      * @param pSession The SDP module to get the SDP parameter to negotiated
      * @param eMediaType The type of media
-     * @param eAudioDir The direction of audio m-line in SDP to negotiate
-     * @param eVideoDir The direction of video m-line in SDP to negotiate
-     * @param eTextDir The direction of text m-line in SDP to negotiate
+     * @param nAudioDirection The direction of audio m-line in SDP to negotiate
+     * @param nVideoDirection The direction of video m-line in SDP to negotiate
+     * @param nTextDirection The direction of text m-line in SDP to negotiate
      * @param errorReason The error reason when the negotiation is failed
      * @return IMS_BOOL Returns IMS_TRUE when negotiate SDP successfully
      */
     virtual IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID, IN ISession* pSession,
-            OUT IMS_SINT32* eAudioDir, OUT IMS_SINT32* eVideoDir, OUT IMS_SINT32* eTextDir,
-            OUT MediaNego::MediaNegoResult& errorReason) = 0;
+            OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
+            OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason) = 0;
 
     /**
      * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size

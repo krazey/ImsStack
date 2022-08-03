@@ -21,7 +21,7 @@
 #include "MediaDef.h"
 #include "audio/AudioNego.h"
 #include "video/VideoNego.h"
-//#include "text/TextNego.h"    TODO: add porting later
+#include "text/TextNego.h"
 
 class MediaNego : public ImsSlot
 {
@@ -77,28 +77,30 @@ public:
      * @param pSession ISession instance of SDP stack framework to set the formed SDP
      * @param eMediaType The media type to form, it can be audio/video/text defined in
      * MEDIA_CONTENT_TYPE
-     * @param eAudioDir The audio direction to set in the SDP
-     * @param eVideoDir The video direction to set in the SDP
-     * @param eTextDir The text direction to set in the SDP
+     * @param nAudioDirection The audio direction to set in the SDP
+     * @param nVideoDirection The video direction to set in the SDP
+     * @param nTextDirection The text direction to set in the SDP
      * @return IMS_BOOL Returns IMS_TRUE when the form SDP is done successfully and IMS_FALSE when
      * failed with invalid arguments
      */
     IMS_BOOL FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
-            IN IMS_SINT32 eAudioDir, IN IMS_SINT32 eVideoDir, IN IMS_SINT32 eTextDir);
+            IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
+            IN IMS_SINT32 nTextDirection);
 
     /**
      * @brief Create negotiate profile from the SDP received from the network by the given arguments
      *
      * @param pSession ISession instance to get the SDP received
-     * @param eAudioDir The audio direction negotiated
-     * @param eVideoDir The video direction negotiated
-     * @param eTextDir The text direction negotiated
+     * @param nAudioDirection The audio direction negotiated
+     * @param nVideoDirection The video direction negotiated
+     * @param nTextDirection The text direction negotiated
      * @param errorReason The error reason when the negotiation is failed
      * @return IMS_BOOL Returns IMS_TRUE when the negotiation succeed and IMS_FALSE when failed.
      * MediaNegoResult will be set when negotiation failed
      */
-    IMS_BOOL NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* eAudioDir,
-            OUT IMS_SINT32* eVideoDir, OUT IMS_SINT32* eTextDir, OUT MediaNegoResult& errorReason);
+    IMS_BOOL NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* nAudioDirection,
+            OUT IMS_SINT32* nVideoDirection, OUT IMS_SINT32* nTextDirection,
+            OUT MediaNegoResult& errorReason);
 
     /**
      * @brief Deletes invalid negotiation result and unnecessary Audio/Video/TextNego object
@@ -142,11 +144,14 @@ public:
     VideoNego* GetVideoNego() { return m_pVideoNego; }
 
     /**
-     * @brief Get the negotiated audio direction
-     *
-     * @return MEDIA_DIRECTION
+     * @brief Set the TextNego instance
      */
-    MEDIA_DIRECTION GetNegotiatedAudioDirection(void);
+    void SetTextNego(TextNego* pTextNego) { m_pTextNego = pTextNego; }
+
+    /**
+     * @brief Get the TextNego instance
+     */
+    TextNego* GetTextNego() { return m_pTextNego; }
 
     /**
      * @brief Get the media session type
@@ -154,6 +159,13 @@ public:
      * @return MEDIA_CONTENT_TYPE
      */
     MEDIA_CONTENT_TYPE GetSessionType() { return m_eSessionType; }
+
+    /**
+     * @brief Get the negotiated audio direction
+     *
+     * @return MEDIA_DIRECTION
+     */
+    MEDIA_DIRECTION GetNegotiatedAudioDirection(void);
 
     /**
      * @brief Get the negotiated video direction
@@ -184,6 +196,13 @@ public:
     VIDEO_RESOLUTION GetNegotiatedVideoQuality(void);
 
     /**
+     * @brief Get the negotiated text resolution
+     *
+     * @return TEXT_CODEC
+     */
+    TEXT_CODEC GetNegotiatedTextQuality(void);
+
+    /**
      * @brief Get the media descriptor instance
      *
      * @param pIMedia
@@ -209,7 +228,7 @@ protected:
     NEGO_STATE m_eNegoState;
     AudioNego* m_pAudioNego;
     VideoNego* m_pVideoNego;
-    /** TODO: add implementation for text */
+    TextNego* m_pTextNego;
     MediaEnvironment* m_pMediaEnvironment;
     MEDIA_CONTENT_TYPE m_eSessionType;
     IMS_BOOL m_bForking;

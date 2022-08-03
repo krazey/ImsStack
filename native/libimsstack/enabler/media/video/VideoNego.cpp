@@ -232,7 +232,7 @@ PROTECTED VIRTUAL IMS_BOOL VideoNego::FormOffer(IN ISessionDescriptor* pSessionD
     pNewOaModel->pSrcProfile = new VideoProfile(&m_objBaseProfile);
 
     // Step 2. Modify a direction by Enabler
-    if (eDir > MEDIA_DIRECTION_INVALID && eDir < MEDIA_DIRECTION_ACCORDING_TO_NEGO)
+    if (eDir > MEDIA_DIRECTION_INVALID && eDir <= MEDIA_DIRECTION_SEND_RECEIVE)
     {
         IMS_TRACE_I("FormOffer() Enforced Set to direction[%d]", eDir, 0, 0);
         pNewOaModel->pSrcProfile->eDirection = eDir;
@@ -284,7 +284,7 @@ PROTECTED VIRTUAL IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSession
     }
 
     // Step 3. Modify a direction by Enabler
-    if (eDir > MEDIA_DIRECTION_INVALID && eDir < MEDIA_DIRECTION_ACCORDING_TO_NEGO)
+    if (eDir > MEDIA_DIRECTION_INVALID && eDir <= MEDIA_DIRECTION_SEND_RECEIVE)
     {
         IMS_TRACE_D("FormAnswer() Enforced Set to direction[%d]", eDir, 0, 0);
         pNewOaModel->pNegotiatedProfile->eDirection = eDir;
@@ -373,7 +373,7 @@ PROTECTED VIRTUAL IMS_BOOL VideoNego::FormReOffer(IN ISessionDescriptor* pSessio
     }
 
     // Step 3. Modify a direction by Enabler
-    if (eDir > MEDIA_DIRECTION_INVALID && eDir < MEDIA_DIRECTION_ACCORDING_TO_NEGO)
+    if (eDir > MEDIA_DIRECTION_INVALID && eDir <= MEDIA_DIRECTION_SEND_RECEIVE)
     {
         IMS_TRACE_I("FormReOffer() Enforced Set to direction[%d]", eDir, 0, 0);
         pNewOaModel->pSrcProfile->eDirection = eDir;

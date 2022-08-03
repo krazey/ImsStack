@@ -22,6 +22,7 @@
 #include "MediaNego.h"
 #include "audio/AudioController.h"
 #include "video/VideoController.h"
+#include "text/TextController.h"
 #include <mutex>
 
 class MediaSession : public IMediaSessionListener, public IMediaSession
@@ -81,11 +82,11 @@ public:
             IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO);
     virtual IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID);
     virtual IMS_BOOL FormSDP(IN IMS_UINTP nNegoID, OUT ISession* pSession,
-            IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 eAudioDir, IN IMS_SINT32 eVideoDir,
-            IN IMS_SINT32 eTextDir = -1);
+            IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
+            IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection = -1);
     virtual IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID, IN ISession* pSession,
-            OUT IMS_SINT32* eAudioDir, OUT IMS_SINT32* eVideoDir, OUT IMS_SINT32* eTextDir,
-            OUT MediaNego::MediaNegoResult& errorReason);
+            OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
+            OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason);
     virtual void FinalizeSDP(IN IMS_UINTP nNegoID, IN ISession* pSession);
     virtual IMS_BOOL Run(IN IMS_UINTP nNegoID);
     virtual IMS_BOOL Terminate();
@@ -129,6 +130,7 @@ protected:
     IMSMap<IMS_UINTP, MediaNego*> m_objMapMediaNego;
     AudioController m_objAudioController;
     VideoController m_objVideoController;
+    TextController m_objTextController;
     IMS_UINT32 m_nRtpTimer;
     std::mutex m_objMutex;
 };

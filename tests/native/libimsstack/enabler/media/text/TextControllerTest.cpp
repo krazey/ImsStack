@@ -1,0 +1,118 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+#include <ServiceConfig.h>
+#include <text/TextController.h>
+#include <text/MockTextNego.h>
+#include <MockIMediaSessionListener.h>
+
+using ::testing::_;
+using ::testing::AnyNumber;
+using ::testing::Return;
+using ::testing::ReturnRef;
+
+LOCAL IMS_SINT32 DEFAULT_SLOT_ID = 0;
+const AString LOCAL_IP = "127.0.0.1";
+const IMS_UINT32 LOCAL_PORT = 20000;
+
+class TextControllerTest : public ::testing::Test
+{
+public:
+    TextController* m_pController;
+    TextConfiguration* m_pConfig;
+    FakeIMediaSessionListener m_objFakeListener;
+    MockIMediaSessionListener m_objListener;
+    MockTextNego* m_pTextNego;
+
+    TextProfile* m_pLocalProfile;
+    TextProfile* m_pPeerProfile;
+    TextProfile* m_pNegoProfile;
+    IPAddress m_objIpAddr;
+
+protected:
+    virtual void SetUp() override
+    {
+        m_pController = new TextController();
+        m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
+        m_pConfig->Create(ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID));
+        m_pTextNego = new MockTextNego(DEFAULT_SLOT_ID);
+
+        m_objListener.SetDelegate(&m_objFakeListener);
+        m_objListener.DelegateToFake();
+
+        m_pLocalProfile = new TextProfile();
+        TextProfile::Payload* pLocalT140Payload = new TextProfile::Payload();
+        pLocalT140Payload->SetRtpMap(99, "t140", 1000);
+        m_pLocalProfile->lstPayload.Append(pLocalT140Payload);
+
+        TextProfile::Payload* pLocalRedPayload = new TextProfile::Payload();
+        pLocalRedPayload->SetRtpMap(100, "red", 1000);
+        TextProfile::RedFmtp* pLocalRedFmtp = new TextProfile::RedFmtp(3, 99);
+        pLocalRedPayload->pFmtp = reinterpret_cast<void*>(pLocalRedFmtp);
+        m_pLocalProfile->lstPayload.Append(pLocalRedPayload);
+
+        m_pPeerProfile = new TextProfile(*m_pLocalProfile);
+        m_pNegoProfile = new TextProfile(*m_pLocalProfile);
+
+        m_objIpAddr = IPAddress(LOCAL_IP);
+        ON_CALL(*m_pTextNego, GetLocalAddress()).WillByDefault(ReturnRef(m_objIpAddr));
+        ON_CALL(*m_pTextNego, GetLocalPort()).WillByDefault(Return(LOCAL_PORT));
+        ON_CALL(*m_pTextNego, GetNegotiatedLocalProfile()).WillByDefault(Return(m_pLocalProfile));
+        ON_CALL(*m_pTextNego, GetNegotiatedPeerProfile()).WillByDefault(Return(m_pPeerProfile));
+        ON_CALL(*m_pTextNego, GetNegotiatedNegoProfile()).WillByDefault(Return(m_pNegoProfile));
+    }
+
+    virtual void TearDown() override
+    {
+        delete m_pController;
+        delete m_pTextNego;
+        delete m_pLocalProfile;
+        delete m_pPeerProfile;
+        delete m_pNegoProfile;
+    }
+};
+
+TEST_F(TextControllerTest, testCreateSessionFail)
+{
+    EXPECT_EQ(m_pController->CreateSession(nullptr, nullptr), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateLocalAddressFail)
+{
+    EXPECT_EQ(m_pController->UpdateLocalAddress(nullptr), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testOpenSessionFail)
+{
+    EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testCloseSessionFail)
+{
+    EXPECT_EQ(m_pController->CloseSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testModifySession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
+}
