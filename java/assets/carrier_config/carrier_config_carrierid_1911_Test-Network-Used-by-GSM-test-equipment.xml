@@ -22,4 +22,7 @@
         <item value="6"/>
     </int-array>
 
+    <!--Ut/Xcap Config -->
+    <string name="imsss.xcap_auid_prefix_string">/xcap.test.3gpp.com</string>
+
 </carrier_config>
