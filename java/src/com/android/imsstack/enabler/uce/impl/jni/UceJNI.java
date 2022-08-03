@@ -66,7 +66,7 @@ public class UceJNI {
             long nativeObj = mNativeObjMap.get(nSimSlot);
             ImsLog.i(nSimSlot, "mNativeObj: " + nativeObj);
             JniIms.releaseInterface(nativeObj);
-            JniIms.removeListener(nativeObj, mUceJNIImsListener);
+            JniIms.removeListener(nativeObj);
         }
         mNativeObjMap.remove(nSimSlot);
         mUceJNIImsListenerMap.remove(nSimSlot);

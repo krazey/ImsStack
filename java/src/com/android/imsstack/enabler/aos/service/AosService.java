@@ -94,7 +94,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             return;
         }
 
-        JniIms.removeListener(mNativeObject, mNativeListener);
+        JniIms.removeListener(mNativeObject);
         JniIms.releaseInterface(mNativeObject);
         mNativeObject = 0;
         mSlotId = MSimUtils.DEFAULT_SLOT_ID;

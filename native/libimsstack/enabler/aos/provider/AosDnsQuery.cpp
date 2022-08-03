@@ -24,7 +24,7 @@
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
-extern void JNI_DetachNativeThread(void);
+extern void JniDetachNativeThread();
 
 PUBLIC GLOBAL IMS_UINT32 AosDnsQuery::m_nIdentity = 0;
 
@@ -190,7 +190,7 @@ PRIVATE VIRTUAL void AosDnsQueryPrivate::RunImp()
 
     IMS_TRACE_D("AosDnsQueryPrivate :: terminated", 0, 0, 0);
 
-    JNI_DetachNativeThread();
+    JniDetachNativeThread();
 
     if (m_pQueryer != IMS_NULL)
     {

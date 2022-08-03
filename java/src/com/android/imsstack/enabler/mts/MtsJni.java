@@ -82,7 +82,7 @@ public class MtsJni {
             long nativeObj = mNativeObjMap.get(slotId);
             ImsLog.i(slotId, "mNativeObj: " + nativeObj);
             JniIms.releaseInterface(nativeObj);
-            JniIms.removeListener(nativeObj, mMtsJniImsListener);
+            JniIms.removeListener(nativeObj);
         }
 
         mNativeObjMap.remove(slotId);

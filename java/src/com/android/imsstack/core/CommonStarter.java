@@ -220,7 +220,7 @@ public class CommonStarter {
 
         updateSystemConfigForBootup();
 
-        JniIms.construct();
+        JniIms.init();
 
         mJNIReady = true;
     }

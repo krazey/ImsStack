@@ -65,7 +65,7 @@ public class MtcJniProxy {
      */
     public void releaseJniInterfaceAndrRemoveListener(long nativeObj, JniImsListener listener) {
         JniIms.releaseInterface(nativeObj);
-        JniIms.removeListener(nativeObj, listener);
+        JniIms.removeListener(nativeObj);
     }
 
     /**

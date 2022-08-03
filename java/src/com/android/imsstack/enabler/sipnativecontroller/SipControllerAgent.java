@@ -81,7 +81,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     @Override
     public void release() {
 
-        JniIms.removeListener(mNativeObj, this);
+        JniIms.removeListener(mNativeObj);
         JniIms.releaseInterface(mNativeObj);
     }
 

@@ -54,9 +54,12 @@ using namespace android;
 
 __IMS_TRACE_TAG_ADAPT__;
 
+#define JNI_IMS_OK    (0)
+#define JNI_IMS_ERROR (-1)
+
 static jclass s_classJniIms;
 static jmethodID s_methodSendDataToJava;
-static jmethodID s_methodSendDataToJavaEx;
+static jmethodID s_methodSendDataToJavaForSystem;
 
 // For system configuration on boot-up
 static android::Parcel* s_pParcelForSystemConfigOnBootup = IMS_NULL;
@@ -107,24 +110,24 @@ static int SendDataToJava(long nNativeObject, const android::Parcel& objParcel)
         return 0;
     }
 
-    jbyteArray baData = env->NewByteArray(objParcel.dataSize());
-    jbyte* pBuffer = env->GetByteArrayElements(baData, NULL);
+    jbyteArray jData = env->NewByteArray(objParcel.dataSize());
+    jbyte* pBuffer = env->GetByteArrayElements(jData, NULL);
 
     if (pBuffer != NULL)
     {
         memcpy(pBuffer, objParcel.data(), objParcel.dataSize());
 
-        env->ReleaseByteArrayElements(baData, pBuffer, 0);
+        env->ReleaseByteArrayElements(jData, pBuffer, 0);
 
-        env->CallStaticIntMethod(s_classJniIms, s_methodSendDataToJava, jNativeObject, baData);
+        env->CallStaticIntMethod(s_classJniIms, s_methodSendDataToJava, jNativeObject, jData);
     }
 
-    env->DeleteLocalRef(baData);
+    env->DeleteLocalRef(jData);
 
     return 1;
 }
 
-int SendDataToJavaEx(
+int SendDataToJavaForSystem(
         long nNativeObject, const android::Parcel& parcelIn, android::Parcel& parcelOut, int fd)
 {
 #define MAX_LOG_DISPLAY_COUNT 5
@@ -137,13 +140,13 @@ int SendDataToJavaEx(
 
     if (nLogDisplayCount >= MAX_LOG_DISPLAY_COUNT)
     {
-        IMS_TRACE_D("SendDataToJavaEx :: object=%" PFLS_d, nNativeObject, 0, 0);
+        IMS_TRACE_D("SendDataToJavaForSystem :: object=%" PFLS_d, nNativeObject, 0, 0);
         nLogDisplayCount = 0;
     }
 
-    if ((s_classJniIms == NULL) || (s_methodSendDataToJavaEx == NULL))
+    if ((s_classJniIms == NULL) || (s_methodSendDataToJavaForSystem == NULL))
     {
-        IMS_TRACE_E(0, "SendDataToJavaEx : Method is null", 0, 0, 0);
+        IMS_TRACE_E(0, "SendDataToJavaForSystem : Method is null", 0, 0, 0);
         return 0;
     }
 
@@ -151,19 +154,19 @@ int SendDataToJavaEx(
 
     if (jvm->AttachCurrentThread(&env, NULL) != JNI_OK)
     {
-        IMS_TRACE_E(0, "SendDataToJavaEx : AttachCurrentThread fail", 0, 0, 0);
+        IMS_TRACE_E(0, "SendDataToJavaForSystem : AttachCurrentThread fail", 0, 0, 0);
         return 0;
     }
 
-    jbyteArray baResultData = NULL;
-    jbyteArray baMessageData = env->NewByteArray(parcelIn.dataSize());
-    jbyte* pBuffer = env->GetByteArrayElements(baMessageData, NULL);
+    jbyteArray jResultData = NULL;
+    jbyteArray jData = env->NewByteArray(parcelIn.dataSize());
+    jbyte* pBuffer = env->GetByteArrayElements(jData, NULL);
 
     if (pBuffer != NULL)
     {
         memcpy(pBuffer, parcelIn.data(), parcelIn.dataSize());
 
-        env->ReleaseByteArrayElements(baMessageData, pBuffer, 0);
+        env->ReleaseByteArrayElements(jData, pBuffer, 0);
 
         jobject fileDescriptor = null;
 
@@ -173,29 +176,29 @@ int SendDataToJavaEx(
             AFileDescriptor_setFd(env, fileDescriptor, fd);
         }
 
-        baResultData = (jbyteArray)env->CallStaticObjectMethod(s_classJniIms,
-                s_methodSendDataToJavaEx, jNativeObject, baMessageData, fileDescriptor);
+        jResultData = (jbyteArray)env->CallStaticObjectMethod(s_classJniIms,
+                s_methodSendDataToJavaForSystem, jNativeObject, jData, fileDescriptor);
     }
 
-    env->DeleteLocalRef(baMessageData);
+    env->DeleteLocalRef(jData);
 
-    if (baResultData == NULL)
+    if (jResultData == NULL)
     {
-        IMS_TRACE_I("SendDataToJavaEx :: Result is null", 0, 0, 0);
+        IMS_TRACE_I("SendDataToJavaForSystem :: Result is null", 0, 0, 0);
         parcelOut.writeInt32(0);
         parcelOut.setDataPosition(0);
         return 1;
     }
 
-    pBuffer = env->GetByteArrayElements(baResultData, NULL);
+    pBuffer = env->GetByteArrayElements(jResultData, NULL);
 
     if (pBuffer != NULL)
     {
-        int nBuffSize = env->GetArrayLength(baResultData);
+        int nBuffSize = env->GetArrayLength(jResultData);
 
         if (nBuffSize == 0)
         {
-            IMS_TRACE_D("SendDataToJavaEx :: Result(buffer-length) is zero", 0, 0, 0);
+            IMS_TRACE_D("SendDataToJavaForSystem :: Result(buffer-length) is zero", 0, 0, 0);
             parcelOut.writeInt32(1);
         }
         else
@@ -203,15 +206,15 @@ int SendDataToJavaEx(
             parcelOut.setData((const uint8_t*)pBuffer, nBuffSize);
         }
 
-        env->ReleaseByteArrayElements(baResultData, pBuffer, 0);
+        env->ReleaseByteArrayElements(jResultData, pBuffer, 0);
     }
     else
     {
-        IMS_TRACE_D("SendDataToJavaEx :: Result(buffer) is null", 0, 0, 0);
+        IMS_TRACE_D("SendDataToJavaForSystem :: Result(buffer) is null", 0, 0, 0);
         parcelOut.writeInt32(0);
     }
 
-    env->DeleteLocalRef(baResultData);
+    env->DeleteLocalRef(jResultData);
 
     parcelOut.setDataPosition(0);
 
@@ -309,9 +312,9 @@ void SetSystemConfigOnBootup(IN android::Parcel* pParcel)
     s_pParcelForSystemConfigOnBootup = pParcel;
 }
 
-void JNI_AttachNativeThread(const char* threadName)
+void JniAttachNativeThread(const char* threadName)
 {
-    IMS_TRACE_D("JNI_AttachNativeThread: name=%s", threadName, 0, 0);
+    IMS_TRACE_D("JniAttachNativeThread: name=%s", threadName, 0, 0);
 
     JavaVM* jvm = GetJavaVm();
 
@@ -330,14 +333,14 @@ void JNI_AttachNativeThread(const char* threadName)
 
     if (result != JNI_OK)
     {
-        IMS_TRACE_E(0, "JNI_AttachNativeThread: Attach failed - %s(%d)", __IMS_FUNC__, result, 0);
+        IMS_TRACE_E(0, "JniAttachNativeThread: Attach failed - %s(%d)", __IMS_FUNC__, result, 0);
         return;
     }
 }
 
-void JNI_DetachNativeThread()
+void JniDetachNativeThread()
 {
-    IMS_TRACE_D("JNI_DetachNativeThread:", 0, 0, 0);
+    IMS_TRACE_D("JniDetachNativeThread:", 0, 0, 0);
 
     JavaVM* jvm = GetJavaVm();
 
@@ -350,7 +353,7 @@ void JNI_DetachNativeThread()
 
     if (result != JNI_OK)
     {
-        IMS_TRACE_E(0, "JNI_DetachNativeThread : Detach failed", 0, 0, 0);
+        IMS_TRACE_E(0, "JniDetachNativeThread : Detach failed", 0, 0, 0);
         return;
     }
 }
@@ -367,15 +370,15 @@ public:
 public:
     inline void AttachNativeThread(IN const IMS_CHAR* pszName) override
     {
-        JNI_AttachNativeThread(pszName);
+        JniAttachNativeThread(pszName);
     }
 
-    inline void DetachNativeThread() override { JNI_DetachNativeThread(); }
+    inline void DetachNativeThread() override { JniDetachNativeThread(); }
 };
 
 static NativeThreadMethods s_objNativeThreadMethods;
 
-static void JNI_Construct(JNIEnv* /*env*/, jobject /*object*/)
+static void JniIms_nativeInit(JNIEnv* /*env*/, jobject /*object*/)
 {
     // Memory and basic platform's initialization
     ImsMain::Initialize();
@@ -397,30 +400,33 @@ static void JNI_Construct(JNIEnv* /*env*/, jobject /*object*/)
     ImsMain::Start();
 }
 
-static void JNI_Destruct(JNIEnv* /*env*/, jobject /*object*/)
+static void JniIms_nativeDeInit(JNIEnv* /*env*/, jobject /*object*/)
 {
-    IMS_TRACE_I("JNI_Destruct", 0, 0, 0);
+    IMS_TRACE_I("JniIms_nativeDeInit", 0, 0, 0);
 
     ImsMain::Stop();
 
     ImsMain::Uninitialize();
 }
 
-static int JNI_SetConfiguration(JNIEnv* env, jobject /*object*/, jint event, jbyteArray baData)
+static int JniIms_nativeSendCommand(
+        JNIEnv* env, jobject /*object*/, jint cmd, jint slotId, jbyteArray jData)
 {
-    if (event == SystemConfig::EVENT_FEATURE_PERMISSIONS_CHANGED)
+    (void)slotId;
+
+    if (cmd == SystemConfig::EVENT_FEATURE_PERMISSIONS_CHANGED)
     {
-        ImsMain::SetConfiguration(event, 0, IMS_NULL);
-        return 1;
+        ImsMain::SetConfiguration(cmd, 0, IMS_NULL);
+        return JNI_IMS_OK;
     }
 
-    jbyte* pData = env->GetByteArrayElements(baData, NULL);
-    int nDataSize = env->GetArrayLength(baData);
+    jbyte* pData = env->GetByteArrayElements(jData, NULL);
+    int nDataSize = env->GetArrayLength(jData);
 
     if (nDataSize == 0)
     {
-        env->ReleaseByteArrayElements(baData, pData, 0);
-        return 0;
+        env->ReleaseByteArrayElements(jData, pData, 0);
+        return JNI_IMS_ERROR;
     }
 
     android::Parcel* pParcel = new android::Parcel();
@@ -428,15 +434,15 @@ static int JNI_SetConfiguration(JNIEnv* env, jobject /*object*/, jint event, jby
     pParcel->setData((const uint8_t*)pData, nDataSize);
     pParcel->setDataPosition(0);
 
-    env->ReleaseByteArrayElements(baData, pData, 0);
+    env->ReleaseByteArrayElements(jData, pData, 0);
 
     // Keep the system configuration and use it to initialize IMS core
     // if the configuration is for boot-up (Initial start of IMS process).
-    if (event == SystemConfig::EVENT_ON_BOOT)
+    if (cmd == SystemConfig::EVENT_ON_BOOT)
     {
         SetSystemConfigOnBootup(pParcel);
     }
-    else if (event == SystemConfig::EVENT_DEVICE_CONFIG)
+    else if (cmd == SystemConfig::EVENT_DEVICE_CONFIG)
     {
         __DeviceConfig objConfig;
 
@@ -456,45 +462,45 @@ static int JNI_SetConfiguration(JNIEnv* env, jobject /*object*/, jint event, jby
 
         if (nCount == 0)
         {
-            return 0;
+            return JNI_IMS_ERROR;
         }
 
-        ImsMain::SetConfiguration(event, nCount, pSystemConfig);
+        ImsMain::SetConfiguration(cmd, nCount, pSystemConfig);
 
         DestroySystemConfig(pSystemConfig);
     }
 
-    return 1;
+    return JNI_IMS_OK;
 }
 
-static jlong JNI_GetInterface(
-        JNIEnv* /*env*/, jobject /*object*/, jint nInterfaceType, jint nSlotId)
+static jlong JniIms_nativeGetInterface(
+        JNIEnv* /*env*/, jobject /*object*/, jint interfaceType, jint slotId)
 {
     BaseService* pService = IMS_NULL;
 
-    if (nInterfaceType == IUIMS::SYSTEM_INTERFACE)
+    if (interfaceType == IUIMS::SYSTEM_INTERFACE)
     {
-        pService = new JniSystem(SendDataToJavaEx);
+        pService = new JniSystem(SendDataToJavaForSystem);
     }
     else
     {
-        pService = CoreInterfaceFactory::GetInterface(nInterfaceType, SendDataToJava, nSlotId);
+        pService = CoreInterfaceFactory::GetInterface(interfaceType, SendDataToJava, slotId);
     }
 
-    IMS_LOGD("JNI_GetInterface :: interfaceType=%d, object=%" PFLS_d, nInterfaceType,
+    IMS_LOGD("JniIms_nativeGetInterface :: interface=%d, object=%" PFLS_d, interfaceType,
             reinterpret_cast<IMS_SINTP>(pService));
 
     return static_cast<jlong>(reinterpret_cast<long>(pService));
 }
 
-static jint JNI_ReleaseInterface(JNIEnv* /*env*/, jobject /*object*/, jlong jNativeObject)
+static void JniIms_nativeReleaseInterface(JNIEnv* /*env*/, jobject /*object*/, jlong jNativeObject)
 {
     long nNativeObject = INT64_TO_SINTP(jNativeObject);
 
 #if defined(__IMS_CLANG__)
-    IMS_LOGD("JNI_ReleaseInterface :: object=%ld", nNativeObject);
+    IMS_LOGD("JniIms_nativeReleaseInterface :: object=%ld", nNativeObject);
 #else
-    IMS_LOGD("JNI_ReleaseInterface :: object=%" PFLS_d, nNativeObject);
+    IMS_LOGD("JniIms_nativeReleaseInterface :: object=%" PFLS_d, nNativeObject);
 #endif
 
     BaseService* pService = reinterpret_cast<BaseService*>(nNativeObject);
@@ -503,41 +509,39 @@ static jint JNI_ReleaseInterface(JNIEnv* /*env*/, jobject /*object*/, jlong jNat
     {
         delete pService;
     }
-
-    return 1;
 }
 
-static jint JNI_SendData(JNIEnv* env, jobject /*object*/, jlong jNativeObject, jbyteArray baData)
+static jint JniIms_nativeSendData(
+        JNIEnv* env, jobject /*object*/, jlong jNativeObject, jbyteArray jData)
 {
     long nNativeObject = INT64_TO_SINTP(jNativeObject);
 
-    IMS_TRACE_D("JNI_SendData :: object=%" PFLS_d, nNativeObject, 0, 0);
+    IMS_TRACE_D("JniIms_nativeSendData :: object=%" PFLS_d, nNativeObject, 0, 0);
 
     BaseService* pService = reinterpret_cast<BaseService*>(nNativeObject);
 
     if (pService == IMS_NULL)
     {
-        IMS_TRACE_D("JNI_SendData: BaseService is null", 0, 0, 0);
-        return -1;
+        IMS_TRACE_D("JniIms_nativeSendData: BaseService is null", 0, 0, 0);
+        return JNI_IMS_ERROR;
     }
 
-    int nResult;
+    jbyte* pBuff = env->GetByteArrayElements(jData, NULL);
+    int nBuffSize = env->GetArrayLength(jData);
+
     android::Parcel parcel;
-
-    jbyte* pBuff = env->GetByteArrayElements(baData, NULL);
-    int nBuffSize = env->GetArrayLength(baData);
-
     parcel.setData((const uint8_t*)pBuff, nBuffSize);
     parcel.setDataPosition(0);
 
-    nResult = pService->SendData(parcel);
+    int nResult = pService->SendData(parcel);
 
-    env->ReleaseByteArrayElements(baData, pBuff, 0);
+    env->ReleaseByteArrayElements(jData, pBuff, 0);
 
-    return nResult;
+    return (nResult == 1) ? JNI_IMS_OK : JNI_IMS_ERROR;
 }
 
-jbyteArray JNI_SendDataEx(JNIEnv* env, jobject /*object*/, jlong jNativeObject, jbyteArray baData)
+jbyteArray JniIms_nativeSendDataForSystem(
+        JNIEnv* env, jobject /*object*/, jlong jNativeObject, jbyteArray jData)
 {
 #define MAX_LOG_DISPLAY_COUNT 5
 
@@ -548,7 +552,7 @@ jbyteArray JNI_SendDataEx(JNIEnv* env, jobject /*object*/, jlong jNativeObject, 
 
     if (nLogDisplayCount >= MAX_LOG_DISPLAY_COUNT)
     {
-        IMS_TRACE_I("JNI_SendDataEx :: object=%" PFLS_d, nNativeObject, 0, 0);
+        IMS_TRACE_I("JniIms_nativeSendDataForSystem :: object=%" PFLS_d, nNativeObject, 0, 0);
         nLogDisplayCount = 0;
     }
 
@@ -557,21 +561,21 @@ jbyteArray JNI_SendDataEx(JNIEnv* env, jobject /*object*/, jlong jNativeObject, 
 
     if (pService == IMS_NULL)
     {
-        IMS_TRACE_D("JNI_SendDataEx: BaseService is null", 0, 0, 0);
+        IMS_TRACE_D("JniIms_nativeSendDataForSystem: BaseService is null", 0, 0, 0);
     }
     else
     {
         android::Parcel parcel;
 
-        jbyte* pBuff = env->GetByteArrayElements(baData, NULL);
-        int nBuffSize = env->GetArrayLength(baData);
+        jbyte* pBuff = env->GetByteArrayElements(jData, NULL);
+        int nBuffSize = env->GetArrayLength(jData);
 
         parcel.setData((const uint8_t*)pBuff, nBuffSize);
         parcel.setDataPosition(0);
 
         pService->SendData(parcel, parcelOut);
 
-        env->ReleaseByteArrayElements(baData, pBuff, 0);
+        env->ReleaseByteArrayElements(jData, pBuff, 0);
     }
 
     if (parcelOut.dataSize() == 0)  // error case
@@ -585,15 +589,18 @@ jbyteArray JNI_SendDataEx(JNIEnv* env, jobject /*object*/, jlong jNativeObject, 
     return byteArray;
 }
 
-static JNINativeMethod s_jniMethods[] = {
-        {"construct",        "()V",     (void*)JNI_Construct       },
-        {"destruct",         "()V",     (void*)JNI_Destruct        },
-        {"getInterface",     "(II)J",   (void*)JNI_GetInterface    },
-        {"releaseInterface", "(J)I",    (void*)JNI_ReleaseInterface},
-        {"sendData",         "(J[B)I",  (void*)JNI_SendData        },
-        {"sendDataEx",       "(J[B)[B", (void*)JNI_SendDataEx      },
-        {"setConfiguration", "(I[B)I",  (void*)JNI_SetConfiguration},
+// clang-format off
+static JNINativeMethod s_jniImsMethods[] = {
+        /* name, signature, funcPtr */
+        { "nativeInit",              "()V",     (void*)JniIms_nativeInit              },
+        { "nativeDeInit",            "()V",     (void*)JniIms_nativeDeInit            },
+        { "nativeGetInterface",      "(II)J",   (void*)JniIms_nativeGetInterface      },
+        { "nativeReleaseInterface",  "(J)V",    (void*)JniIms_nativeReleaseInterface  },
+        { "nativeSendData",          "(J[B)I",  (void*)JniIms_nativeSendData          },
+        { "nativeSendDataForSystem", "(J[B)[B", (void*)JniIms_nativeSendDataForSystem },
+        { "nativeSendCommand",       "(II[B)I", (void*)JniIms_nativeSendCommand       },
 };
+// clang-format on
 
 int IMSInterface_GetSurface(
         const String8& str8Class, const String8& str8SurfaceName, long& nSurfaceObject)
@@ -676,17 +683,18 @@ jint IMSInterface_OnLoad(JavaVM* vm, JNIEnv* env)
 
     s_classJniIms = (jclass)env->NewGlobalRef(jclassIms);
 
-    if (jniRegisterNativeMethods(env, s_szClassJniImsPath, s_jniMethods, NELEM(s_jniMethods)) < 0)
+    if (jniRegisterNativeMethods(
+                env, s_szClassJniImsPath, s_jniImsMethods, NELEM(s_jniImsMethods)) < 0)
     {
         IMS_LOGE("IMSInterface_OnLoad: RegisterNatives failed");
         return -1;
     }
 
-    s_methodSendDataToJava = env->GetStaticMethodID(s_classJniIms, "sendData2Java", "(J[B)I");
-    s_methodSendDataToJavaEx = env->GetStaticMethodID(
-            s_classJniIms, "sendData2JavaEx", "(J[BLjava/io/FileDescriptor;)[B");
+    s_methodSendDataToJava = env->GetStaticMethodID(s_classJniIms, "sendDataToJava", "(J[B)I");
+    s_methodSendDataToJavaForSystem = env->GetStaticMethodID(
+            s_classJniIms, "sendDataToJavaForSystem", "(J[BLjava/io/FileDescriptor;)[B");
 
-    if ((s_methodSendDataToJava == NULL) || (s_methodSendDataToJavaEx == NULL))
+    if ((s_methodSendDataToJava == NULL) || (s_methodSendDataToJavaForSystem == NULL))
     {
         IMS_LOGE("IMSInterface_OnLoad: GetStaticMethodID failed");
         return -1;

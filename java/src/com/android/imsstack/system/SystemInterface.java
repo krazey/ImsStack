@@ -95,7 +95,7 @@ public class SystemInterface implements JniSystemListener {
     public void cleanup() {
         if (mNativeObject != 0) {
             mDefaultExecutor = null;
-            JniIms.removeSystemListener(mNativeObject, this);
+            JniIms.removeSystemListener(mNativeObject);
             JniIms.releaseInterface(mNativeObject);
             mNativeObject = 0;
         }
@@ -813,7 +813,7 @@ public class SystemInterface implements JniSystemListener {
         byte[] baData = parcel.marshall();
 
         try {
-            baDataRet = JniIms.sendDataEx(mNativeObject, baData);
+            baDataRet = JniIms.sendDataForSystem(mNativeObject, baData);
         } catch (RuntimeException e) {
             ImsLog.e(e.getStackTrace().toString() + " cmd : " + nCmd);
             return;

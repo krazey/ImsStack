@@ -27,6 +27,12 @@ import java.util.Hashtable;
  * or vice versa.
  */
 public class JniIms {
+    /** Indicates the success result of an operation. */
+    public static final int OK = 0;
+    /** A default error code. */
+    public static final int ERROR = -1;
+    /** Error code when there is no matched listener. */
+    public static final int ERROR_NO_LISTENER = -2;
 
     private static Hashtable<Long, JniImsListener> sListeners =
             new Hashtable<Long, JniImsListener>();
@@ -35,47 +41,91 @@ public class JniIms {
 
     /** Native APIs. */
     /** Initialize the native layer. */
-    public static native void construct();
+    private static native void nativeInit();
     /** Deinitialize the native layer. */
-    public static native void destruct();
+    private static native void nativeDeInit();
     /** Creates the native object with a specified interface type and slot-id. */
-    public static native long getInterface(int interfaceType, int slotId);
+    private static native long nativeGetInterface(int interfaceType, int slotId);
     /** Releases the native object. */
-    public static native int releaseInterface(long nativeObj);
+    private static native void nativeReleaseInterface(long nativeObject);
     /** Sends an event from Java to native. */
-    public static native int sendData(long nativeObj, byte[] baData);
+    private static native int nativeSendData(long nativeObject, byte[] data);
     /** Sends a system event from Java to native. */
-    public static native byte[] sendDataEx(long nativeObj, byte[] baData);
+    private static native byte[] nativeSendDataForSystem(long nativeObject, byte[] data);
+    /** Sends a command to control and manage the native logics. */
+    private static native int nativeSendCommand(int cmd, int slotId, byte[] data);
+
+    /**
+     * Defines the wrapper methods to invoke the native methods.
+     */
+
+    /** Initialize the native layer. */
+    public static void init() {
+        nativeInit();
+    }
+
+    /** Deinitialize the native layer. */
+    public static void deinit() {
+        nativeDeInit();
+    }
+
+    /** Creates the native object with a specified interface type and slot-id. */
+    public static long getInterface(int interfaceType, int slotId) {
+        return nativeGetInterface(interfaceType, slotId);
+    }
+
+    /** Releases the native object. */
+    public static void releaseInterface(long nativeObject) {
+        nativeReleaseInterface(nativeObject);
+    }
+
+    /** Sends an event from Java to native. */
+    public static int sendData(long nativeObject, byte[] data) {
+        return nativeSendData(nativeObject, data);
+    }
+
+    /** Sends a system event from Java to native. */
+    public static byte[] sendDataForSystem(long nativeObject, byte[] data) {
+        return nativeSendDataForSystem(nativeObject, data);
+    }
+
+    /** Sends a command to control and manage the native logics. */
+    public static int sendCommand(int cmd, int slotId, byte[] data) {
+        return nativeSendCommand(cmd, slotId, data);
+    }
+
     /** Sets a configuration. */
-    public static native int setConfiguration(int event, byte[] baData);
+    public static int setConfiguration(int event, byte[] data) {
+        return sendCommand(event, -1, data);
+    }
 
     /** Enabler's interface */
     /** Sets the listener to receive an event from native. */
-    public static int setListener(long nativeObj, JniImsListener listener) {
-        if (nativeObj == 0) {
-            return 0;
+    public static int setListener(long nativeObject, JniImsListener listener) {
+        if (nativeObject == 0) {
+            return ERROR;
         }
 
         if (listener == null) {
-            return 0;
+            return ERROR;
         }
 
-        Long key = Long.valueOf(nativeObj);
+        Long key = Long.valueOf(nativeObject);
 
         synchronized (sListeners) {
             sListeners.put(key, listener);
         }
 
-        return 1;
+        return OK;
     }
 
     /** Returns the listener for a specified native object. */
-    public static JniImsListener getListener(long nativeObj) {
-        if (nativeObj == 0) {
+    public static JniImsListener getListener(long nativeObject) {
+        if (nativeObject == 0) {
             return null;
         }
 
-        Long key = Long.valueOf(nativeObj);
+        Long key = Long.valueOf(nativeObject);
 
         JniImsListener listener = null;
 
@@ -87,51 +137,47 @@ public class JniIms {
     }
 
     /** Removes the listener for a specified native object. */
-    public static int removeListener(long nativeObj, JniImsListener listener) {
-        if (nativeObj == 0) {
-            return 0;
+    public static int removeListener(long nativeObject) {
+        if (nativeObject == 0) {
+            return ERROR;
         }
 
-        if (listener == null) {
-            return 0;
-        }
-
-        Long key = Long.valueOf(nativeObj);
+        Long key = Long.valueOf(nativeObject);
 
         synchronized (sListeners) {
             sListeners.remove(key);
         }
 
-        return 1;
+        return OK;
     }
 
     /** System interface */
     /** Sets the listener to receive a system call from native. */
-    public static int setSystemListener(long nativeObj, JniSystemListener systemListener) {
-        if (nativeObj == 0) {
-            return 0;
+    public static int setSystemListener(long nativeObject, JniSystemListener systemListener) {
+        if (nativeObject == 0) {
+            return ERROR;
         }
 
         if (systemListener == null) {
-            return 0;
+            return ERROR;
         }
 
-        Long key = Long.valueOf(nativeObj);
+        Long key = Long.valueOf(nativeObject);
 
         synchronized (sSystemListeners) {
             sSystemListeners.put(key, systemListener);
         }
 
-        return 1;
+        return OK;
     }
 
     /** Returns the listener for a specified native object. */
-    public static JniSystemListener getSystemListener(long nativeObj) {
-        if (nativeObj == 0) {
+    public static JniSystemListener getSystemListener(long nativeObject) {
+        if (nativeObject == 0) {
             return null;
         }
 
-        Long key = Long.valueOf(nativeObj);
+        Long key = Long.valueOf(nativeObject);
 
         JniSystemListener listener = null;
 
@@ -143,51 +189,58 @@ public class JniIms {
     }
 
     /** Removes the listener for a specified native object. */
-    public static int removeSystemListener(long nativeObj, JniSystemListener systemListener) {
-        if (nativeObj == 0) {
-            return 0;
+    public static int removeSystemListener(long nativeObject) {
+        if (nativeObject == 0) {
+            return ERROR;
         }
 
-        Long key = Long.valueOf(nativeObj);
+        Long key = Long.valueOf(nativeObject);
 
         synchronized (sSystemListeners) {
             sSystemListeners.remove(key);
         }
 
-        return 1;
+        return OK;
     }
 
-    /** Send a data from native to Java. */
-    public static int sendData2Java(long nativeObj, byte[] baData) {
-        JniImsListener listener = getListener(nativeObj);
+    /**
+     * Send a data from native to Java.
+     * This is invoked from the native layer.
+     */
+    public static int sendDataToJava(long nativeObject, byte[] data) {
+        JniImsListener listener = getListener(nativeObject);
 
         if (listener == null) {
-            ImsLog.d("No listener :: nativeObject=" + nativeObj);
-            return -1;
+            ImsLog.d("No listener :: nativeObject=" + nativeObject);
+            return ERROR_NO_LISTENER;
         }
 
         Parcel parcel = Parcel.obtain();
-        parcel.unmarshall(baData, 0, baData.length);
+        parcel.unmarshall(data, 0, data.length);
         parcel.setDataPosition(0);
 
         listener.onMessage(parcel);
 
         parcel.recycle();
 
-        return 1;
+        return OK;
     }
 
-    /** Send a data from native to Java for System interface. */
-    public static byte[] sendData2JavaEx(long nativeObj, byte[] baData, FileDescriptor fd) {
-        JniSystemListener listener = getSystemListener(nativeObj);
+    /**
+     * Send a data from native to Java for System interface.
+     * This is invoked from the native layer.
+     */
+    public static byte[] sendDataToJavaForSystem(long nativeObject, byte[] data,
+            FileDescriptor fd) {
+        JniSystemListener listener = getSystemListener(nativeObject);
 
         if (listener == null) {
-            ImsLog.d("No listener :: nativeObject=" + nativeObj);
+            ImsLog.d("No listener :: nativeObject=" + nativeObject);
             return new byte[] {(byte) 0};
         }
 
         Parcel parcel = Parcel.obtain();
-        parcel.unmarshall(baData, 0, baData.length);
+        parcel.unmarshall(data, 0, data.length);
         parcel.setDataPosition(0);
 
         byte[] result = listener.onMessage(parcel, fd);
