@@ -17,8 +17,11 @@
 package com.android.imsstack.imsservice.mmtel.sms;
 
 import static com.android.imsstack.imsservice.mmtel.sms.SmsRLStateMachine.SmsRLState.IDLE;
-import static com.android.imsstack.imsservice.mmtel.sms.SmsRLStateMachine.SmsRLState.WAIT_FOR_RPACK_FROM_NW;
-import static com.android.imsstack.imsservice.mmtel.sms.SmsRLStateMachine.SmsRLState.WAIT_TO_SEND_RPACK_TO_NW;
+import static com.android.imsstack.imsservice.mmtel.sms.SmsRLStateMachine.SmsRLState
+                                                       .WAIT_FOR_RPACK_FROM_NW;
+import static com.android.imsstack.imsservice.mmtel.sms.SmsRLStateMachine.SmsRLState
+                                                       .WAIT_TO_SEND_RPACK_TO_NW;
+import static com.android.imsstack.imsservice.mmtel.sms.SmsUtils.RESULT_SUCCESS;
 import static com.android.imsstack.imsservice.mmtel.sms.SmsUtils.SMSRL_RESULT_INVALID_STATE;
 
 import static org.junit.Assert.assertEquals;
@@ -62,7 +65,9 @@ public class SmsRLStateMachineTest {
     private byte[] mMtRpAck = {03, 01};
     private byte[] mMtRpError = {05, 01, 01, 0x6f};
     private String mDestinationAddress = "0987654321";
-    private String mSmsc = "+19037029920";
+    private String mPsiSmsc = "+19037029920";
+    private String mSmsc = "07912160130300F4";
+    private String mDecodedSmsc = "+12063130004";
     SmsRLStateMachine mSmsRLStateMachine;
 
     private SmsRLStateMachine.SmsRLState mCurrentState;
@@ -90,7 +95,7 @@ public class SmsRLStateMachineTest {
         Handler mHandler = new MessageExecutor("testMachine");
         Mockito.when(mContext.getCallHandler()).thenReturn(mHandler);
         mSmsRLStateMachine = new SmsRLStateMachine(mCurrentState, mToken, mMessageType,
-                mMtsController, mContext, mListener, mDestinationAddress, mHandler);
+                mMtsController, mContext, mListener, mPsiSmsc, mDestinationAddress, mHandler);
     }
 
     @Test
@@ -140,30 +145,48 @@ public class SmsRLStateMachineTest {
 
     @Test
     public void onRPErrorFromTL_AllStateTest() {
-        SmsRPdu mMoRpError = new SmsRPdu(1, SmsUtils.RP_ERROR, mSmsc, 0, mTpdu);
-        int result = mSmsRLStateMachine.onRPErrorFromTL(mMoRpError);
-
+        when(mMtsController.sendMessage(anyInt(), anyString(), anyString(), anyString(),
+                anyInt())).thenReturn(true);
+        SmsRPdu moRpError = new SmsRPdu(1, SmsUtils.RP_ERROR, mSmsc,
+                             SmsRelayLayer.GENERIC_ERROR_CAUSE_VALUE, mTpdu);
+        int result;
         mSmsRLStateMachine.setState(IDLE);
-        result = mSmsRLStateMachine.onRPErrorFromTL(mMoRpError);
+        result = mSmsRLStateMachine.onRPErrorFromTL(moRpError);
         assertEquals(SMSRL_RESULT_INVALID_STATE, result);
         assertEquals(IDLE, mSmsRLStateMachine.getState());
 
         mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
-        result = mSmsRLStateMachine.onRPErrorFromTL(mMoRpError);
+        result = mSmsRLStateMachine.onRPErrorFromTL(moRpError);
         assertEquals(SMSRL_RESULT_INVALID_STATE, result);
         assertEquals(WAIT_FOR_RPACK_FROM_NW, mSmsRLStateMachine.getState());
 
         mSmsRLStateMachine.setState(WAIT_TO_SEND_RPACK_TO_NW);
-        result = mSmsRLStateMachine.onRPErrorFromTL(mMoRpError);
-        assertEquals(SMSRL_RESULT_INVALID_STATE, result);
-        assertEquals(WAIT_TO_SEND_RPACK_TO_NW, mSmsRLStateMachine.getState());
+        byte[] encodedPdu = moRpError.getRpduByteArray();
+        String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
+        result = mSmsRLStateMachine.onRPErrorFromTL(moRpError);
+        verify(mMtsController).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64, mPsiSmsc,
+                mDestinationAddress, moRpError.getMessageRef());
+        assertEquals(RESULT_SUCCESS, result);
+        assertEquals(IDLE, mSmsRLStateMachine.getState());
     }
 
     @Test
     public void onRPErrorFromNetwork_allStateTest() {
-        SmsRPdu mMtRpError = new SmsRPdu(this.mMtRpError);
-        mSmsRLStateMachine.onRPErrorFromNetwork(mMtRpError);
-        // TODO method is not implemented
+        SmsRPdu mtRpError = new SmsRPdu(mMtRpError);
+        int causeCode = mtRpError.getRPCause();
+        mSmsRLStateMachine.setState(IDLE);
+        mSmsRLStateMachine.onRPErrorFromNetwork(mtRpError);
+        assertEquals(IDLE, mSmsRLStateMachine.getState());
+        mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
+        mSmsRLStateMachine.onRPErrorFromNetwork(mtRpError);
+        verify(mListener).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
+                                SmsRPErrorCause.getSendSmsStatusByRPCauseCode(causeCode),
+                                SmsRPErrorCause.getSendSmsStatusReasonByRPCauseCode(causeCode),
+                                causeCode);
+        assertEquals(IDLE, mSmsRLStateMachine.getState());
+        mSmsRLStateMachine.setState(WAIT_TO_SEND_RPACK_TO_NW);
+        mSmsRLStateMachine.onRPErrorFromNetwork(mtRpError);
+        assertEquals(WAIT_TO_SEND_RPACK_TO_NW, mSmsRLStateMachine.getState());
     }
 
     @Test
@@ -171,9 +194,9 @@ public class SmsRLStateMachineTest {
         SmsRPdu mtRpAck = new SmsRPdu(mMtRpAck);
         mSmsRLStateMachine.setState(IDLE);
         mSmsRLStateMachine.onRPAckFromNetwork(mtRpAck);
-        verify(mListener, times(0)).notifyRLReportIndication(mToken,
+        verify(mListener, times(0)).notifyRLReportIndication(mToken, 0,
                 ImsSmsImplBase.SEND_STATUS_OK,
-                SmsManager.RESULT_ERROR_NONE);
+                SmsManager.RESULT_ERROR_NONE, 1);
         assertEquals(IDLE, mCurrentState);
     }
 
@@ -182,9 +205,9 @@ public class SmsRLStateMachineTest {
         SmsRPdu mtRpAck = new SmsRPdu(mMtRpAck);
         mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
         mSmsRLStateMachine.onRPAckFromNetwork(mtRpAck);
-        verify(mListener).notifyRLReportIndication(mToken,
+        verify(mListener).notifyRLReportIndication(mToken, 0,
                 ImsSmsImplBase.SEND_STATUS_OK,
-                SmsManager.RESULT_ERROR_NONE);
+                SmsManager.RESULT_ERROR_NONE, 0);
         assertEquals(IDLE, mCurrentState);
     }
 
@@ -193,15 +216,15 @@ public class SmsRLStateMachineTest {
         SmsRPdu mtRpAck = new SmsRPdu(mMtRpAck);
         mSmsRLStateMachine.setState(WAIT_TO_SEND_RPACK_TO_NW);
         mSmsRLStateMachine.onRPAckFromNetwork(mtRpAck);
-        verify(mListener, times(0)).notifyRLReportIndication(mToken,
+        verify(mListener, times(0)).notifyRLReportIndication(mToken, 0,
                 ImsSmsImplBase.SEND_STATUS_OK,
-                SmsManager.RESULT_ERROR_NONE);
+                SmsManager.RESULT_ERROR_NONE, 0);
     }
 
     @Test
     public void onRpDatafromTL_timerWithOutExpiry_Idle() throws InterruptedException {
         mSmsRLStateMachine.setState(IDLE);
-        when(mMtsController.sendMessage(anyInt(), anyString(), anyString(),
+        when(mMtsController.sendMessage(anyInt(), anyString(), anyString(), anyString(),
                  anyInt())).thenReturn(true);
         SmsRPdu moRPData = new SmsRPdu(1, SmsUtils.RP_DATA, mSmsc, 0, mTpdu);
         byte[] encodedPdu = moRPData.getRpduByteArray();
@@ -209,9 +232,9 @@ public class SmsRLStateMachineTest {
         int result = mSmsRLStateMachine.onRPDataFromTL(moRPData);
 
         verify(mMtsController).sendMessage(eq(SmsUtils.FORMAT_INT_3GPP),
-                eq(pdu64), eq(mDestinationAddress), eq(1));
+                eq(pdu64), eq(mPsiSmsc),
+                eq(mDestinationAddress), eq(1));
         assertEquals(WAIT_FOR_RPACK_FROM_NW, mSmsRLStateMachine.getState());
-
         assertEquals(SmsUtils.RESULT_SUCCESS, result);
     }
 
@@ -247,36 +270,36 @@ public class SmsRLStateMachineTest {
     @Test
     public void onRPAckFromTLTest_Idle() {
         mSmsRLStateMachine.setState(IDLE);
-        SmsRPdu moRpAck = new SmsRPdu(1, SmsUtils.RP_ACK, mDestinationAddress, 0, null);
+        SmsRPdu moRpAck = new SmsRPdu(1, SmsUtils.RP_ACK, mSmsc, 0, null);
 
         byte[] encodedPdu = moRpAck.getRpduByteArray();
         String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
         mSmsRLStateMachine.onRPAckFromTL(moRpAck);
-        verify(mMtsController, times(0)).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64,
-                moRpAck.getDestAddr(), moRpAck.getMessageRef());
+        verify(mMtsController, times(0)).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64, mPsiSmsc,
+                mDestinationAddress, moRpAck.getMessageRef());
     }
 
     @Test
-    public void onRPAckFromTLTest_WaitToSendPPack() {
+    public void onRPAckFromTLTest_WaitToSendRPack() {
         mSmsRLStateMachine.setState(WAIT_TO_SEND_RPACK_TO_NW);
-        SmsRPdu moRpAck = new SmsRPdu(1, SmsUtils.RP_ACK, mDestinationAddress, 0, null);
+        SmsRPdu moRpAck = new SmsRPdu(1, SmsUtils.RP_ACK, mSmsc, 0, null);
 
         byte[] encodedPdu = moRpAck.getRpduByteArray();
         String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
         int result = mSmsRLStateMachine.onRPAckFromTL(moRpAck);
-        verify(mMtsController).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64,
-                moRpAck.getDestAddr(), moRpAck.getMessageRef());
+        verify(mMtsController).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64, mPsiSmsc,
+                mDestinationAddress, moRpAck.getMessageRef());
     }
 
     @Test
     public void onRPAckFromTLTest_WaitForRPACK() {
         mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
-        SmsRPdu moRpAck = new SmsRPdu(1, SmsUtils.RP_ACK, mDestinationAddress, 0, null);
+        SmsRPdu moRpAck = new SmsRPdu(1, SmsUtils.RP_ACK, mSmsc, 0, null);
 
         byte[] encodedPdu = moRpAck.getRpduByteArray();
         String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
         mSmsRLStateMachine.onRPAckFromTL(moRpAck);
-        verify(mMtsController, times(0)).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64,
+        verify(mMtsController, times(0)).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64, mPsiSmsc,
                 moRpAck.getDestAddr(), moRpAck.getMessageRef());
 
     }
@@ -285,9 +308,9 @@ public class SmsRLStateMachineTest {
     public void onTR1TimerExpiredTest_Idle() {
         mSmsRLStateMachine.setState(IDLE);
         mSmsRLStateMachine.onTR1TimerExpired();
-        verify(mListener, times(0)).notifyRLReportIndication(mSmsRLStateMachine.mToken,
+        verify(mListener, times(0)).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
                 ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
-                SmsManager.RESULT_ERROR_GENERIC_FAILURE);
+                SmsManager.RESULT_ERROR_GENERIC_FAILURE, 1);
         assertEquals(IDLE,
                 mSmsRLStateMachine.getState());
     }
@@ -296,9 +319,9 @@ public class SmsRLStateMachineTest {
     public void onTR1TimerExpiredTest_WaitForRPack() {
         mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
         mSmsRLStateMachine.onTR1TimerExpired();
-        verify(mListener).notifyRLReportIndication(mSmsRLStateMachine.mToken,
+        verify(mListener).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
                 ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
-                SmsManager.RESULT_ERROR_GENERIC_FAILURE);
+                SmsManager.RESULT_ERROR_GENERIC_FAILURE, 0);
         assertEquals(IDLE,
                 mSmsRLStateMachine.getState());
     }
@@ -307,9 +330,9 @@ public class SmsRLStateMachineTest {
     public void onTR1TimerExpiredTest_WaitToSendPack() {
         mSmsRLStateMachine.setState(WAIT_TO_SEND_RPACK_TO_NW);
         mSmsRLStateMachine.onTR1TimerExpired();
-        verify(mListener, times(0)).notifyRLReportIndication(mSmsRLStateMachine.mToken,
+        verify(mListener, times(0)).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
                 ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
-                SmsManager.RESULT_ERROR_GENERIC_FAILURE);
+                SmsManager.RESULT_ERROR_GENERIC_FAILURE, 1);
         assertEquals(WAIT_TO_SEND_RPACK_TO_NW,
                 mSmsRLStateMachine.getState());
     }
@@ -335,9 +358,34 @@ public class SmsRLStateMachineTest {
 
     @Test
     public void onSipResponseForRPMessage_allStateTest() {
-        int result = mSmsRLStateMachine.onSipResponseForRPMessage(false, 1);
+
+        mSmsRLStateMachine.setState(IDLE);
+        int result = mSmsRLStateMachine.onSipResponseForRPMessage(false, ImsSmsImplBase
+                                                                    .SEND_STATUS_ERROR_FALLBACK);
+        verify(mListener, times(0)).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
+                                 ImsSmsImplBase.SEND_STATUS_ERROR_FALLBACK,
+                                 SmsManager.RESULT_NETWORK_ERROR, 0);
+
+        assertEquals(IDLE, mSmsRLStateMachine.getState());
         assertEquals(SMSRL_RESULT_INVALID_STATE, result);
-        //TODO method is not implemented
+
+        mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
+        result = mSmsRLStateMachine.onSipResponseForRPMessage(false, ImsSmsImplBase
+                                                                .SEND_STATUS_ERROR_FALLBACK);
+        assertEquals(RESULT_SUCCESS, result);
+        assertEquals(IDLE, mSmsRLStateMachine.getState());
+        verify(mListener).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
+                                 ImsSmsImplBase.SEND_STATUS_ERROR_FALLBACK,
+                                 SmsManager.RESULT_NETWORK_ERROR, 0);
+
+        mSmsRLStateMachine.setState(WAIT_TO_SEND_RPACK_TO_NW);
+        result = mSmsRLStateMachine.onSipResponseForRPMessage(false, ImsSmsImplBase
+                                                                .SEND_STATUS_ERROR_FALLBACK);
+        verify(mListener, times(0)).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
+                                 ImsSmsImplBase.SEND_STATUS_ERROR_FALLBACK,
+                                 SmsManager.RESULT_NETWORK_ERROR, 0);
+        assertEquals(WAIT_TO_SEND_RPACK_TO_NW, mSmsRLStateMachine.getState());
+        assertEquals(SMSRL_RESULT_INVALID_STATE, result);
     }
 
     @After

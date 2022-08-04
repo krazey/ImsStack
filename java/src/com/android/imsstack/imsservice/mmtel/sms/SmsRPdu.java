@@ -243,12 +243,10 @@ public final class SmsRPdu {
             if (DBG) {
                 Rlog.d(TAG, "mr =" + mMessageRef);
             }
-            mOrigAddr = p.getAddress();
-            if (DBG) {
-                Rlog.d(TAG, "origAddr =" + mOrigAddr);
-            }
+            int origAddrLen = p.getByte();
+            if (origAddrLen != 0) mOrigAddr = p.getAddress(origAddrLen);
             int destAddrLen = p.getByte();
-            if (destAddrLen != 0) mDestAddr = p.getAddress();
+            if (destAddrLen != 0) mDestAddr = p.getAddress(destAddrLen);
             mRpUserData = p.getUserData();
             if (mRpUserData == null) {
                 Rlog.e(TAG, "User Data returned null");
@@ -316,11 +314,8 @@ public final class SmsRPdu {
             mCur = 0;
         }
 
-        String getAddress() {
-            int len;
+        String getAddress(int len) {
             String ret;
-            // length of SC Address
-            len = getByte();
             if (len == 0) {
                 // no SC address
                 Rlog.i(TAG, "no sc address: ");

@@ -64,7 +64,7 @@ public class SmsRLStateMachine {
     @VisibleForTesting
     public SmsRLStateMachine(SmsRLState state, int token, int messageType,
                                 MtsController mtsController, ImsCallContext context,
-                                SmsRelayLayer.Listener listener,
+                                SmsRelayLayer.Listener listener, String psiSmsc,
                                 String destinationAddress, Handler handler) {
 
         mCurrentState = SmsRLState.IDLE;
@@ -73,6 +73,7 @@ public class SmsRLStateMachine {
         mContext = context;
         mHandler = handler;
         mListener = listener;
+        mPSISmsc = psiSmsc;
         mDestinationAddress = destinationAddress;
         mToken = token;
     }
