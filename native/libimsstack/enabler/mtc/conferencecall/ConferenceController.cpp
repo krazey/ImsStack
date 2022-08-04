@@ -97,13 +97,13 @@ PUBLIC VIRTUAL void ConferenceController::OnCallStateChanged(
             break;
         case State::ESTABLISHED:
             // TODO: how to distinguish 'started' / 'updated'
-            OnCallUpdated(SESSION_STARTED, nCallKey);
-            // OnCallUpdated(SESSION_UPDATED, nCallKey);
+            OnCallUpdated(CALL_STARTED, nCallKey);
+            // OnCallUpdated(CALL_UPDATED, nCallKey);
             break;
         case State::TERMINATING:
             // TODO: how to distinguish 'start failed' / 'terminated'...
-            OnCallUpdated(SESSION_TERMINATED, nCallKey);
-            // OnCallUpdated(SESSION_STARTFAILED, nCallKey);
+            OnCallUpdated(CALL_TERMINATED, nCallKey);
+            // OnCallUpdated(CALL_STARTFAILED, nCallKey);
             break;
         default:
             break;
@@ -340,7 +340,7 @@ PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConferen
         }
     }
 
-    if (m_objOperationQueue.GetTypeOfCurrentOperation() == CONTROL_OPERATION_TERMINATE_1TO1_SESSION)
+    if (m_objOperationQueue.GetTypeOfCurrentOperation() == CONTROL_OPERATION_TERMINATE_1TO1_CALL)
     {
         if (nKey ==
                 m_objConnectionIdManager.GetCallKey(
@@ -833,7 +833,7 @@ PROTECTED VIRTUAL void ConferenceController::TerminateIndividualCall(IN IMS_UINT
 
     m_objCallManager.GetCallByCallKey(m_objConnectionIdManager.GetCallKey(nConnectionId))
             ->Terminate(CallReasonInfo(CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE, -1));
-    CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_TERMINATE_1TO1_SESSION);
+    CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_TERMINATE_1TO1_CALL);
 }
 
 PROTECTED VIRTUAL void ConferenceController::TerminateConference(IN IMS_SINT32 nTerminateReason)
@@ -870,7 +870,7 @@ void ConferenceController::DoNextOperation()
 
     switch (pOperation->GetType())
     {
-        case CONTROL_OPERATION_CREATE_CONFERENCE_SESSION:
+        case CONTROL_OPERATION_CREATE_CONFERENCE_CALL:
             StartConferenceCall(pOperation);
             break;
         case CONTROL_OPERATION_SUBSCRIBE:
@@ -891,7 +891,7 @@ void ConferenceController::DoNextOperation()
         case CONTROL_OPERATION_NOTIFY_RESULT_TO_UI:
             NotifyCmdResult();
             break;
-        case CONTROL_OPERATION_TERMINATE_1TO1_SESSION:
+        case CONTROL_OPERATION_TERMINATE_1TO1_CALL:
             TerminateIndividualCall(pOperation->GetConnectionId());
             break;
         case CONTROL_OPERATION_TERMINATE_CONFERENCE:
@@ -900,7 +900,7 @@ void ConferenceController::DoNextOperation()
         case CONTROL_OPERATION_DESTROY_CONTROLLER:
             SendClosed();
             break;
-        case CONTROL_OPERATION_NOTIFY_RESULT_TO_UCSESSION:
+        case CONTROL_OPERATION_NOTIFY_RESULT_TO_MTCCALL:
             NotifyResultToConferenceCall();
             break;
 
@@ -971,7 +971,7 @@ PROTECTED VIRTUAL void ConferenceController::OnCallUpdated(
     {
         IMS_TRACE_I("OnCallUpdated : not a conference call state update", 0, 0, 0);
 
-        if (nType == SESSION_TERMINATED)
+        if (nType == CALL_TERMINATED)
         {
             OnIndividualCallTerminated(nCallKey);
         }
@@ -980,14 +980,14 @@ PROTECTED VIRTUAL void ConferenceController::OnCallUpdated(
 
     switch (nType)
     {
-        case SESSION_STARTED:
-            CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION);
+        case CALL_STARTED:
+            CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_CREATE_CONFERENCE_CALL);
             break;
-        case SESSION_STARTFAILED:
+        case CALL_STARTFAILED:
             Recover();
             SendClosed();
             break;
-        case SESSION_TERMINATED:
+        case CALL_TERMINATED:
             Recover();
             if (m_pSubscription && m_pSubscription->GetState() == SubscriptionState::ACTIVE)
             {
@@ -1013,13 +1013,13 @@ PROTECTED VIRTUAL void ConferenceController::OnIndividualCallTerminated(IN IMS_U
 
     CheckNStartFinalSipfragWaitTimer(CONDITION_1TO1_TERMINATED);
 
-    if (m_objOperationQueue.GetTypeOfCurrentOperation() == CONTROL_OPERATION_TERMINATE_1TO1_SESSION)
+    if (m_objOperationQueue.GetTypeOfCurrentOperation() == CONTROL_OPERATION_TERMINATE_1TO1_CALL)
     {
         if (nCallKey ==
                 m_objConnectionIdManager.GetCallKey(
                         m_objOperationQueue.GetCurrentOperation()->GetConnectionId()))
         {
-            CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_TERMINATE_1TO1_SESSION);
+            CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_TERMINATE_1TO1_CALL);
             return;
         }
 
@@ -1050,7 +1050,7 @@ void ConferenceController::NotifyResultToConferenceCall()
 {
     // TODO: resume conference call if held.
     // piConfSession->OnConferenceCompleted(IMS_SUCCESS);
-    CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_NOTIFY_RESULT_TO_UCSESSION);
+    CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_NOTIFY_RESULT_TO_MTCCALL);
 }
 
 PROTECTED

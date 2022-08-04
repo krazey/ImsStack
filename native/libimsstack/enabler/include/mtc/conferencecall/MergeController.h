@@ -45,7 +45,7 @@ protected:
 
 private:
     void ProcessMergeWithoutRefer(IN IMSList<ConfUser*>& objUsers);
-    void UpdateUserStateBySessionTerminated(IN IMS_UINTP nCallKey);
+    void UpdateUserStateByCallTerminated(IN IMS_UINTP nCallKey);
     void RecoverOnCreating();
     void RecoverOnReferring();
     void RecoverOnSubscribing();

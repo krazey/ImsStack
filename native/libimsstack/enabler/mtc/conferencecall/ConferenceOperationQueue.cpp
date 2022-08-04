@@ -242,7 +242,7 @@ void ConferenceOperationQueue::Remove(IN ConferenceOperation* pOperation)
 
         switch (nType)
         {
-            case CONTROL_OPERATION_CREATE_CONFERENCE_SESSION:
+            case CONTROL_OPERATION_CREATE_CONFERENCE_CALL:
                 if (pOperation->GetParam() != pTempOperation->GetParam())
                 {
                     continue;
@@ -279,7 +279,7 @@ void ConferenceOperationQueue::Remove(IN ConferenceOperation* pOperation)
             case CONTROL_OPERATION_NOTIFY_RESULT_TO_UI:
                 // nothing to check.
                 __IMS_FALLTHROUGH__
-            case CONTROL_OPERATION_TERMINATE_1TO1_SESSION:
+            case CONTROL_OPERATION_TERMINATE_1TO1_CALL:
                 if (pOperation->GetConnectionId() != pTempOperation->GetConnectionId())
                 {
                     continue;
@@ -426,8 +426,8 @@ const IMS_CHAR* ConferenceOperationQueue::ConvertOperationToString(IN IMS_SINT32
     {
         case CONTROL_OPERATION_NONE:
             return "CONTROL_OPERATION_NONE";
-        case CONTROL_OPERATION_CREATE_CONFERENCE_SESSION:
-            return "CONTROL_OPERATION_CREATE_CONFERENCE_SESSION";
+        case CONTROL_OPERATION_CREATE_CONFERENCE_CALL:
+            return "CONTROL_OPERATION_CREATE_CONFERENCE_CALL";
         case CONTROL_OPERATION_SUBSCRIBE:
             return "CONTROL_OPERATION_SUBSCRIBE";
         case CONTROL_OPERATION_UNSUBSCRIBE:
@@ -440,14 +440,14 @@ const IMS_CHAR* ConferenceOperationQueue::ConvertOperationToString(IN IMS_SINT32
             return "CONTROL_OPERATION_CHECK_CONNECTED";
         case CONTROL_OPERATION_NOTIFY_RESULT_TO_UI:
             return "CONTROL_OPERATION_NOTIFY_RESULT_TO_UI";
-        case CONTROL_OPERATION_TERMINATE_1TO1_SESSION:
-            return "CONTROL_OPERATION_TERMINATE_1TO1_SESSION";
+        case CONTROL_OPERATION_TERMINATE_1TO1_CALL:
+            return "CONTROL_OPERATION_TERMINATE_1TO1_CALL";
         case CONTROL_OPERATION_TERMINATE_CONFERENCE:
             return "CONTROL_OPERATION_TERMINATE_CONFERENCE";
         case CONTROL_OPERATION_DESTROY_CONTROLLER:
             return "CONTROL_OPERATION_DESTROY_CONTROLLER";
-        case CONTROL_OPERATION_NOTIFY_RESULT_TO_UCSESSION:
-            return "CONTROL_OPERATION_NOTIFY_RESULT_TO_UCSESSION";
+        case CONTROL_OPERATION_NOTIFY_RESULT_TO_MTCCALL:
+            return "CONTROL_OPERATION_NOTIFY_RESULT_TO_MTCCALL";
 
         default:
             return "__INVALID__";

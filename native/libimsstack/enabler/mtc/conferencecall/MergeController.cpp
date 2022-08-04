@@ -74,7 +74,7 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objU
     if (nOldState == STATE_CREATED)
     {
         m_objOperationQueue.CreateNPutWithUsers(
-                CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
+                CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
 
         if (bSubFirstAndRefer == IMS_TRUE &&
                 ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired())
@@ -88,7 +88,7 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objU
     {
         m_objOperationQueue.CreateNPutWithUser(
                 CONTROL_OPERATION_REFER_INVITE, m_objParticipantList.GetConfUsers().GetAt(i));
-        m_objOperationQueue.CreateNPutWithId(CONTROL_OPERATION_TERMINATE_1TO1_SESSION,
+        m_objOperationQueue.CreateNPutWithId(CONTROL_OPERATION_TERMINATE_1TO1_CALL,
                 m_objParticipantList.GetConfUsers().GetAt(i)->nConnectionId);
     }
 
@@ -102,7 +102,7 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objU
             m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
         }
     }
-    m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UCSESSION);
+    m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_MTCCALL);
     m_objOperationQueue.SetAddingOperationSetCompleted();
 }
 
@@ -111,8 +111,8 @@ PROTECTED VIRTUAL void MergeController::StartConferenceCall(
 {
     // TODO: CallType?
     // TODO: factory uri.
-    IMSList<ConfUser*> objTempUser;
-    GetConferenceCall()->StartConference(CallType::VOIP, AString::ConstNull(), objTempUser);
+    IMSList<ConfUser*> objTempUsers;
+    GetConferenceCall()->StartConference(CallType::VOIP, AString::ConstNull(), objTempUsers);
 }
 
 PROTECTED VIRTUAL IMS_BOOL MergeController::IsStartFinalSipfragWaitTimer() const
@@ -142,11 +142,11 @@ PROTECTED VIRTUAL void MergeController::Recover()
 
     switch (m_objOperationQueue.GetTypeOfCurrentOperation())
     {
-        case CONTROL_OPERATION_CREATE_CONFERENCE_SESSION:
+        case CONTROL_OPERATION_CREATE_CONFERENCE_CALL:
             RecoverOnCreating();
             break;
 
-        case CONTROL_OPERATION_TERMINATE_1TO1_SESSION:
+        case CONTROL_OPERATION_TERMINATE_1TO1_CALL:
         case CONTROL_OPERATION_REFER_INVITE:
             RecoverOnReferring();
             break;
@@ -169,7 +169,7 @@ PROTECTED VIRTUAL void MergeController::OnIndividualCallTerminated(IN IMS_UINTP 
 
     if (m_pSubscription == IMS_NULL && ConferenceConfigurationWrapper::IsReferUsed() == IMS_FALSE)
     {
-        UpdateUserStateBySessionTerminated(nCallKey);
+        UpdateUserStateByCallTerminated(nCallKey);
     }
 }
 
@@ -184,16 +184,16 @@ void MergeController::ProcessMergeWithoutRefer(IN IMSList<ConfUser*>& objUsers)
     if (nOldState == STATE_CREATED)
     {
         m_objOperationQueue.CreateNPutWithUsers(
-                CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
+                CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
         m_objOperationQueue.SetAddingOperationSetCompleted();
     }
 }
 
 PRIVATE
-void MergeController::UpdateUserStateBySessionTerminated(IN IMS_UINTP nCallKey)
+void MergeController::UpdateUserStateByCallTerminated(IN IMS_UINTP nCallKey)
 {
-    IMS_TRACE_I("UpdateUserStateBySessionTerminated : key[%d]", nCallKey, 0, 0);
+    IMS_TRACE_I("UpdateUserStateByCallTerminated : key[%d]", nCallKey, 0, 0);
 
     // KDDI
     for (IMS_UINT32 i = 0; i < m_objParticipantList.GetSize(); i++)
@@ -210,7 +210,7 @@ void MergeController::UpdateUserStateBySessionTerminated(IN IMS_UINTP nCallKey)
 
     if (m_objParticipantList.GetConnectedParticipantSize(IMS_TRUE) == 0)
     {
-        IMS_TRACE_D("UpdateUserStateBySessionTerminated : terminate conference by alone", 0, 0, 0);
+        IMS_TRACE_D("UpdateUserStateByCallTerminated : terminate conference by alone", 0, 0, 0);
         m_objOperationQueue.CreateNPutWithReason(
                 CONTROL_OPERATION_TERMINATE_CONFERENCE, CODE_USER_TERMINATED, IMS_TRUE);
     }

@@ -175,10 +175,10 @@ public:
 protected:
     enum
     {
-        SESSION_STARTED = 0,
-        SESSION_STARTFAILED = 1,
-        SESSION_TERMINATED = 2,
-        SESSION_DESTROYED = 3
+        CALL_STARTED = 0,
+        CALL_STARTFAILED = 1,
+        CALL_TERMINATED = 2,
+        CALL_DESTROYED = 3
     };
 
     enum

@@ -85,7 +85,7 @@ PROTECTED VIRTUAL void GroupCallController::ProcessGroupCall(IN IMSList<ConfUser
             CONF_CREATE_START, objCallInfo, objMediaInfo, objUsers, objSuppServices);
 
     m_objOperationQueue.CreateNPutWithStartParam(
-            CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, pParams);
+            CONTROL_OPERATION_CREATE_CONFERENCE_CALL, pParams);
     m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
     m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
 
@@ -120,7 +120,7 @@ PROTECTED VIRTUAL void GroupCallController::Recover()
 
     switch (m_objOperationQueue.GetTypeOfCurrentOperation())
     {
-        case CONTROL_OPERATION_CREATE_CONFERENCE_SESSION:
+        case CONTROL_OPERATION_CREATE_CONFERENCE_CALL:
             RecoverOnCreating();
             break;
         case CONTROL_OPERATION_SUBSCRIBE:

@@ -206,7 +206,7 @@ void ExpandController::ProcessExpand(IN IMSList<ConfUser*>& objUsers)
     if (nReferType == REFER_INVITE_SINGLE)  // SKT
     {
         m_objOperationQueue.CreateNPutWithUsers(
-                CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
+                CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
         m_objOperationQueue.CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE,
                 m_objParticipantList.GetConfUsers().GetAt(nStartIndex));
@@ -268,7 +268,7 @@ PROTECTED VIRTUAL void ExpandController::Recover()
     IMS_TRACE_I("Recover", 0, 0, 0);
     switch (m_objOperationQueue.GetTypeOfCurrentOperation())
     {
-        case CONTROL_OPERATION_CREATE_CONFERENCE_SESSION:
+        case CONTROL_OPERATION_CREATE_CONFERENCE_CALL:
             RecoverOnCreating();
             break;
         case CONTROL_OPERATION_SUBSCRIBE:

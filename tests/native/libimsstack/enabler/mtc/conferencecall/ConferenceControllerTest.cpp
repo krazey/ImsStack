@@ -195,7 +195,7 @@ TEST_F(ConferenceControllerTest, GetIndividualCallStateReturnsJoining)
 TEST_F(ConferenceControllerTest, OnConferenceCallStateEstablished)
 {
     EXPECT_CALL(
-            *pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, _))
+            *pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, _))
             .Times(1);
 
     pController->OnCallStateChanged(
@@ -254,14 +254,14 @@ TEST_F(ConferenceControllerTest, OnIndividualCallStateTerminating)
     const CallKey PARTICIPANT_CALL_KEY = 1000;
     const IMS_UINT32 PARTICIPANT_CONNECTION_ID = 9999;
     ON_CALL(*pMockQueue, GetTypeOfCurrentOperation)
-            .WillByDefault(Return(CONTROL_OPERATION_TERMINATE_1TO1_SESSION));
+            .WillByDefault(Return(CONTROL_OPERATION_TERMINATE_1TO1_CALL));
     ConferenceOperationQueue::ConferenceOperation* pOperation =
             new ConferenceOperationQueue::ConferenceOperation(0, 0);
     pOperation->SetConnectionId(PARTICIPANT_CONNECTION_ID);
     ON_CALL(*pMockQueue, GetCurrentOperation).WillByDefault(Return(pOperation));
     ON_CALL(*pMockIdManager, GetCallKey(PARTICIPANT_CONNECTION_ID))
             .WillByDefault(Return(PARTICIPANT_CALL_KEY));
-    EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_TERMINATE_1TO1_SESSION, _))
+    EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_TERMINATE_1TO1_CALL, _))
             .Times(1);
 
     pController->OnCallStateChanged(
@@ -422,7 +422,7 @@ TEST_F(ConferenceControllerTest, OnOperationReadyWhenNextIsCreateConferenceCall)
 {
     ConferenceOperationQueue::ConferenceOperation* pOperation =
             new ConferenceOperationQueue::ConferenceOperation(
-                    CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, 0);
+                    CONTROL_OPERATION_CREATE_CONFERENCE_CALL, 0);
 
     ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
 

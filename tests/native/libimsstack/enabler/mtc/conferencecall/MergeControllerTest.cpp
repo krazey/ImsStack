@@ -172,15 +172,15 @@ TEST_F(MergeControllerTest, ProcessMergeCommand)
     EXPECT_CALL(*pMockParticipantList, AddUser(pUser2)).Times(1);
 
     EXPECT_CALL(*pMockQueue,
-            CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, _, IMS_FALSE))
+            CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, _, IMS_FALSE))
             .Times(1);
     EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_SUBSCRIBE, _)).Times(1);
     EXPECT_CALL(*pMockQueue, CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE, _, IMS_FALSE))
             .Times(2);
-    EXPECT_CALL(*pMockQueue, CreateNPutWithId(CONTROL_OPERATION_TERMINATE_1TO1_SESSION, _, _))
+    EXPECT_CALL(*pMockQueue, CreateNPutWithId(CONTROL_OPERATION_TERMINATE_1TO1_CALL, _, _))
             .Times(2);
     EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, _)).Times(1);
-    EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UCSESSION, _)).Times(1);
+    EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_MTCCALL, _)).Times(1);
 
     pController->ProcessCommand(IConferenceController::MERGE, objUsers);
 
@@ -205,7 +205,7 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithoutRefer)
     EXPECT_CALL(*pMockParticipantList, AddUser(pUser1)).Times(1);
     EXPECT_CALL(*pMockParticipantList, AddUser(pUser2)).Times(1);
 
-    EXPECT_CALL(*pMockQueue, CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, _, _))
+    EXPECT_CALL(*pMockQueue, CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, _, _))
             .Times(1);
     EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, _)).Times(1);
 
@@ -218,7 +218,7 @@ TEST_F(MergeControllerTest, OnOperationReadyWhenNextCreateConference)
 {
     ConferenceOperationQueue::ConferenceOperation* pOperation =
             new ConferenceOperationQueue::ConferenceOperation(
-                    CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, 0);
+                    CONTROL_OPERATION_CREATE_CONFERENCE_CALL, 0);
     ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
 
     EXPECT_CALL(*piMockConferenceCall, StartConference(_, _, _)).Times(1);
