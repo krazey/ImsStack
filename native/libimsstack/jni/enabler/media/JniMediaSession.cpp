@@ -25,6 +25,7 @@
 #include "JniMediaSession.h"
 #include "JniMediaSessionThread.h"
 #include "SurfaceManager.h"
+#include "TextConfig.h"
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MEDIA");
 
@@ -250,6 +251,12 @@ void JniMediaSession::OnResponses(
         else if (pParam->m_eMediaType == MEDIA_TYPE_VIDEO)
         {
             VideoConfig* pConfig = new VideoConfig();
+            pConfig->readFromParcel(&objParcel);
+            pParam->m_pConfig = pConfig;
+        }
+        else if (pParam->m_eMediaType == MEDIA_TYPE_TEXT)
+        {
+            TextConfig* pConfig = new TextConfig();
             pConfig->readFromParcel(&objParcel);
             pParam->m_pConfig = pConfig;
         }

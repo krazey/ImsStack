@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.media;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.os.Parcel;
@@ -112,47 +114,20 @@ public class TextSessionCallbackHandlerTest {
 
     @Test
     public void testRttReceived() {
-
-        Parcel testParcel = Parcel.obtain();
-
-        testParcel.writeInt(MediaConstants.NOTIFY_RTT_RECEIVED);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
-        testParcel.writeString(MediaTestUtils.RTT_MESSAGE);
-
         mTextSessionCallbackHandler.onRttReceived(MediaTestUtils.RTT_MESSAGE);
-
-        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
-        MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+        verify(mMockMtcMediaSession).rttMessageReceived(eq(MediaTestUtils.RTT_MESSAGE));
     }
 
     @Test
     public void testRttReceivedWithNoText() {
-
-        Parcel testParcel = Parcel.obtain();
-
-        testParcel.writeInt(MediaConstants.NOTIFY_RTT_RECEIVED);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
-        testParcel.writeString("");
-
         mTextSessionCallbackHandler.onRttReceived("");
-
-        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
-        MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+        verify(mMockMtcMediaSession).rttMessageReceived(eq(""));
     }
 
     @Test
     public void testRttReceivedWithTextNull() {
-
-        Parcel testParcel = Parcel.obtain();
-
-        testParcel.writeInt(MediaConstants.NOTIFY_RTT_RECEIVED);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
-        testParcel.writeString("");
-
         mTextSessionCallbackHandler.onRttReceived(null);
-
-        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
-        MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+        verify(mMockMtcMediaSession, never()).rttMessageReceived(null);
     }
 
     @Test

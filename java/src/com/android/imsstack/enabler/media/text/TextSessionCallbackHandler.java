@@ -93,22 +93,16 @@ public class TextSessionCallbackHandler {
     }
 
     /**
-     * Handles text stream received request
+     * Handles text stream received notification
      *
-     * @param text The text string received from the network
+     * @param rttMessage String containing the received characters.
      */
-    public void onRttReceived(@NonNull String text) {
+    public void onRttReceived(@NonNull String rttMessage) {
         ImsLog.v("onRttReceived");
 
-        Parcel parcel = Parcel.obtain();
-        parcel.writeInt(MediaConstants.NOTIFY_RTT_RECEIVED);
-        parcel.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
-        if (text == null) {
-            text = "";
+        if (rttMessage != null) {
+            getMtcMediaInterface().rttMessageReceived(rttMessage);
         }
-        parcel.writeString(text);
-
-        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**

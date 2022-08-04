@@ -22,13 +22,13 @@ import android.view.Surface;
 
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.media.IMediaListener;
-import com.android.imsstack.enabler.media.MediaConstants;
 import com.android.imsstack.enabler.media.MediaFactory;
 import com.android.imsstack.enabler.media.MediaSession;
 import com.android.imsstack.util.ImsLog;
 
 /**
- * class to handles call from videoprovider and invoke jni methods to libimsstack
+ * class to handle calls to or from ImsMedia, ImsService, videoprovider
+ * and invoke jni methods to libimsstack
  */
 public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInterface {
     /**
@@ -250,15 +250,28 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     }
 
     /**
-     * Notify when the received video frame resolution is different with the current resolution.
+     * Notifies when the received video frame resolution is different with the current resolution.
      * @param width width of resolution changed.
      * @param height height of resolution changed.
      */
     public void peerDimensionChanged(final int width, final int height) {
-        ImsLog.d("peerDimensionChanged width[" + width + "] height[" + height + "]");
+        log("peerDimensionChanged width[" + width + "] height[" + height + "]");
 
         mListener.onMediaSessionPeerDimensionsChanged(this, width, height);
     }
+
+    /**
+     * Notifies when the remote party has sent text message via RTT
+     * @param rttMessage String containing the received characters.
+     */
+    public void rttMessageReceived(final String rttMessage) {
+        log("rttMessageReceived");
+        if (mRttListener != null) {
+            mRttListener.onRttMessageReceived(this, rttMessage);
+        }
+    }
+
+    // TODO MEDIA : RTT audio indicator to be implemented
 
     /**
      * CAMERA
@@ -344,61 +357,15 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         }
     }
 
-    public void onMessage(Parcel parcel) {
-        int msg = parcel.readInt();
-
-        if (isMessageForImsMediaManager(msg)) {
-            parcel.setDataPosition(0);
-            onImsMediaManagerMessage(parcel);
-            return;
-        }
-
-        Listener listener = null;
-
-        synchronized (mLock) {
-            listener = mListener;
-        }
-
-        if (listener == null) {
-            log("No listener: " + this);
-            return;
-        }
-
-        switch (msg) {
-            case IUMtcMedia.RTT_TEXT_RECEIVED_IND: {
-                String str = parcel.readString();
-
-                log("RTT_TEXT_RECEIVED_IND :: text=" + str);
-
-                if (mRttListener != null) {
-                    mRttListener.onRttMessageReceived(this, str);
-                }
-            }
-                break;
-
-            case IUMtcMedia.RTT_AUDIO_INDICATION_IND: {
-                boolean status = (parcel.readInt()) > 0;
-
-                log("RTT_AUDIO_INDICATION_IND :: status=" + status);
-
-                if (mRttListener != null) {
-                    mRttListener.onRttAudioIndication(this, status);
-                }
-            }
-                break;
-
-            default:
-                break;
-        }
-    }
-
     public static boolean isMessageForMediaSession(int msg) {
-        return (((msg > IUMtcMedia.IMS_MSG_BASE_MEDIA)
-                && (msg < (IUMtcMedia.IMS_MSG_BASE_MEDIA + 100)))
-                || (isMessageForImsMediaManager(msg)));
+        return ((msg > IUMtcMedia.IMS_MSG_BASE_MEDIA)
+                && (msg < IUMtcMedia.IMS_MSG_MAX_MEDIA));
     }
 
-    private void onImsMediaManagerMessage(Parcel parcel) {
+    /**
+     * Called when Message for Media session is received
+     */
+    public void onMessage(Parcel parcel) {
 
         IMediaListener listener = null;
 
@@ -412,11 +379,6 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         }
 
         listener.onMediaMessage(parcel);
-    }
-
-    private static boolean isMessageForImsMediaManager(int msg) {
-        return (msg > MediaConstants.IMSMEDIA_REQUEST)
-                && (msg < MediaConstants.IMSMEDIA_MAX);
     }
 
     private boolean isCallSessionTerminated() {
@@ -436,13 +398,20 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         }
     }
 
-    public void sendRttMessage(String data) {
+    /**
+     * Sends Rtt message to Media session
+     *
+     * @param rttMessage String containing the characters to be sent.
+     */
+    public void sendRttMessage(final String rttMessage) {
+        log("sendRttMessage");
         Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcMedia.SEND_RTT_CMD);
+        parcel.writeInt(IUMtcMedia.SESSION_TYPE_RTT);
+        parcel.writeString(rttMessage);
+        parcel.setDataPosition(0);
 
-        parcel.writeInt(IUMtcMedia.RTT_TEXT_SEND_CMD);
-        parcel.writeString(data);
-
-        sendRequest(parcel);
+        onMessage(parcel);
     }
 
     public void sendRequest(Parcel parcel) {

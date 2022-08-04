@@ -23,100 +23,15 @@
 #include "IUIMS.h"
 
 //----------------------------------------------------------------------
-// Messages for LGU VT Media
+// Messages for VT Media
 //----------------------------------------------------------------------
 #define IMS_MEDIA_FILENAME_LEN      128
-#define IMS_MEDIA_RTT_MAX_LEN       1025
 
 #define IMS_MEDIA_MSG_REASON        300
 #define IMS_MEDIA_MSG_NOTIFY        400
 
 class IUMedia
 {
-public:
-    static const IMS_SINT32 SETSURFACE_CMD              = (IMS_MSG_BASE_STREAMEDMEDIA + 1);
-    static const IMS_SINT32 FARFRAME_IND                = (IMS_MSG_BASE_STREAMEDMEDIA + 2);
-
-    // for multi-tasking
-    static const IMS_SINT32 PAUSE_CMD                   = (IMS_MSG_BASE_STREAMEDMEDIA + 3);
-    static const IMS_SINT32 PAUSED_IND                  = (IMS_MSG_BASE_STREAMEDMEDIA + 4);
-
-    static const IMS_SINT32 RESUME_CMD                  = (IMS_MSG_BASE_STREAMEDMEDIA + 5);
-    static const IMS_SINT32 RESUMED_IND                 = (IMS_MSG_BASE_STREAMEDMEDIA + 6);
-
-    // add-ons
-    static const IMS_SINT32 SELECT_CAMERA_CMD           = (IMS_MSG_BASE_STREAMEDMEDIA + 7);
-    static const IMS_SINT32 CAMERA_SELECTED_IND         = (IMS_MSG_BASE_STREAMEDMEDIA + 8);
-
-    static const IMS_SINT32 CHANGE_CAMERA_ZOOM_CMD      = (IMS_MSG_BASE_STREAMEDMEDIA + 9);
-    static const IMS_SINT32 CAMERA_ZOOM_CHANGED_IND     = (IMS_MSG_BASE_STREAMEDMEDIA + 10);
-
-    static const IMS_SINT32 CHANGE_CAMERA_BRIGHTNESS_CMD    = (IMS_MSG_BASE_STREAMEDMEDIA + 11);
-    static const IMS_SINT32 CAMERA_BRIGHTNESS_CHANGED_IND   = (IMS_MSG_BASE_STREAMEDMEDIA + 12);
-
-    static const IMS_SINT32 CAPTURE_CMD                 = (IMS_MSG_BASE_STREAMEDMEDIA + 13);
-    static const IMS_SINT32 CAPTURED_IND                = (IMS_MSG_BASE_STREAMEDMEDIA + 14);
-
-    static const IMS_SINT32 START_RECODING_CMD          = (IMS_MSG_BASE_STREAMEDMEDIA + 15);
-    static const IMS_SINT32 RECODING_STARTED_IND        = (IMS_MSG_BASE_STREAMEDMEDIA + 16);
-
-    static const IMS_SINT32 STOP_RECODING_CMD           = (IMS_MSG_BASE_STREAMEDMEDIA + 17);
-    static const IMS_SINT32 RECODING_STOPPED_IND        = (IMS_MSG_BASE_STREAMEDMEDIA + 18);
-
-    static const IMS_SINT32 START_ALTERNATE_IMAGE_CMD   = (IMS_MSG_BASE_STREAMEDMEDIA + 19);
-    static const IMS_SINT32 ALTERNATE_IMAGE_STARTED_IND = (IMS_MSG_BASE_STREAMEDMEDIA + 20);
-
-    static const IMS_SINT32 STOP_ALTERNATE_IMAGE_CMD    = (IMS_MSG_BASE_STREAMEDMEDIA + 21);
-    static const IMS_SINT32 ALTERNATE_IMAGE_STOPPED_IND = (IMS_MSG_BASE_STREAMEDMEDIA + 22);
-
-    static const IMS_SINT32 AUDIO_STOP_CMD              = (IMS_MSG_BASE_STREAMEDMEDIA + 23);
-    static const IMS_SINT32 AUDIO_STARTED_IND           = (IMS_MSG_BASE_STREAMEDMEDIA + 24);
-
-    static const IMS_SINT32 MEDIA_STARTED_IND           = (IMS_MSG_BASE_STREAMEDMEDIA + 25);
-
-    static const IMS_SINT32 UPDATE_DISPLAY_CMD          = (IMS_MSG_BASE_STREAMEDMEDIA + 26);
-    static const IMS_SINT32 DISPLAY_UPDATED_IND         = (IMS_MSG_BASE_STREAMEDMEDIA + 27);
-
-    static const IMS_SINT32 CHANGE_VIEW_SIZE_CMD        = (IMS_MSG_BASE_STREAMEDMEDIA + 28);
-    static const IMS_SINT32 VIEW_SIZE_CHANGED_IND       = (IMS_MSG_BASE_STREAMEDMEDIA + 29);
-
-    static const IMS_SINT32 SWAP_DISPLAY_CMD            = (IMS_MSG_BASE_STREAMEDMEDIA + 30);
-    static const IMS_SINT32 DISPLAY_SWAPPED_IND         = (IMS_MSG_BASE_STREAMEDMEDIA + 31);
-
-    static const IMS_SINT32 AUDIO_START_CMD             = (IMS_MSG_BASE_STREAMEDMEDIA + 32);
-    static const IMS_SINT32 AUDIO_STOPPED_IND           = (IMS_MSG_BASE_STREAMEDMEDIA + 33);
-
-    static const IMS_SINT32 CHANGE_ORIENTATION_CMD      = (IMS_MSG_BASE_STREAMEDMEDIA + 34);
-    static const IMS_SINT32 ORIENTATION_CHANGED_IND     = (IMS_MSG_BASE_STREAMEDMEDIA + 35);
-
-    static const IMS_SINT32 ONSCREEN_DEBUG_INFO_VIDEO   = (IMS_MSG_BASE_STREAMEDMEDIA + 36);
-
-    static const IMS_SINT32 FARFRAME_ORIENTATION_CHANGED = (IMS_MSG_BASE_STREAMEDMEDIA + 37);
-    // INFO to UI about surface 0
-    static const IMS_SINT32 UPDATE_VIDEO_SURFACE_IND    = (IMS_MSG_BASE_STREAMEDMEDIA + 38);
-
-    static const IMS_SINT32 AUDIO_PAUSED_IND            = (IMS_MSG_BASE_STREAMEDMEDIA + 39);
-    // Dynamic Resolution for legacy
-    static const IMS_SINT32 PEER_DIMENSION_CHANGED_IND  = (IMS_MSG_BASE_STREAMEDMEDIA + 40);
-    static const IMS_SINT32 UPDATE_RESOLUTION_CMD       = (IMS_MSG_BASE_STREAMEDMEDIA + 41);
-    // For DCM VT call UI Interface
-    static const IMS_SINT32 START_PREVIEW_CAMERA_CMD    = (IMS_MSG_BASE_STREAMEDMEDIA + 42);
-    static const IMS_SINT32 STOP_PREVIEW_CAMERA_CMD     = (IMS_MSG_BASE_STREAMEDMEDIA + 43);
-    // 1st camera frame received
-    static const IMS_SINT32 CAMERA_FRAME_IND            = (IMS_MSG_BASE_STREAMEDMEDIA + 44);
-
-    static const IMS_SINT32 RTT_TEXT_SEND_CMD           = (IMS_MSG_BASE_STREAMEDMEDIA + 45);
-    static const IMS_SINT32 RTT_TEXT_RECEIVED_IND       = (IMS_MSG_BASE_STREAMEDMEDIA + 46);
-
-    static const IMS_SINT32 RTT_AUDIO_INDICATION_IND    = (IMS_MSG_BASE_STREAMEDMEDIA + 47);
-
-    static const IMS_SINT32 VIDEO_DATA_USAGE_CMD        = (IMS_MSG_BASE_STREAMEDMEDIA + 48);
-    static const IMS_SINT32 VIDEO_DATA_USAGE_INFO_IND   = (IMS_MSG_BASE_STREAMEDMEDIA + 49);
-
-    static const IMS_SINT32 VIDEO_CALL_EFFECT_CMD       = (IMS_MSG_BASE_STREAMEDMEDIA + 50);
-
-    static const IMS_SINT32 UNDEFINED                   = (IMS_MSG_BASE_STREAMEDMEDIA + 99);
-
     // Google_IMS_IF :: VIDEO_CALL_PROVIDER {
 public:
     class ParamValue
@@ -323,15 +238,6 @@ public :
     IMS_UINTP   nSessionID;
     IMS_CHAR    szFile[IMS_MEDIA_FILENAME_LEN];
     IMS_UINT32    nValue;
-};
-
-class IUMediaRttDataParam :
-        public IUEventParam
-{
-public :
-    IMS_UINTP   nSessionID;
-    IMS_UINT32  nSize;
-    IMS_CHAR    szData[IMS_MEDIA_RTT_MAX_LEN];
 };
 
 class IUMediaVideoEffectDataParam :

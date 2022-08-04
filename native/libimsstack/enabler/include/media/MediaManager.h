@@ -17,7 +17,6 @@
 #ifndef _MEDIA_MANAGER_H_
 #define _MEDIA_MANAGER_H_
 
-#include "IUMedia.h"
 #include "ServiceEvent.h"
 #include "IEventListener.h"
 #include "ImsActivityEx.h"

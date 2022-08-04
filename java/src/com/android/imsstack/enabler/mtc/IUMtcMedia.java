@@ -18,33 +18,43 @@ package com.android.imsstack.enabler.mtc;
 
 public class IUMtcMedia {
 
+    public static final int SESSION_TYPE_AUDIO = 0;
+    public static final int SESSION_TYPE_VIDEO = 1;
+    public static final int SESSION_TYPE_RTT = 2;
+
     public static final int IMS_MEDIA_MSG_REASON = 300;
     public static final int IMS_MEDIA_MSG_NOTIFY = 400;
-    public static final int IMS_MSG_BASE_MEDIA = 1500;
+    public static final int IMS_MSG_BASE_MEDIA = 1400;
+    public static final int IMS_MEDIA_MSG_CMD             = IMS_MSG_BASE_MEDIA;
+    public static final int IMS_MEDIA_MSG_IND             = IMS_MEDIA_MSG_CMD + 100;
+    public static final int IMS_MSG_MAX_MEDIA             = IMS_MEDIA_MSG_IND + 100;
+
     /** Audio related command starting index */
-    public static final int IMS_MSG_BASE_MEDIA_AUDIO = IMS_MSG_BASE_MEDIA + 0;
+    public static final int IMS_MSG_BASE_MEDIA_AUDIO_IND = IMS_MEDIA_MSG_IND;
     /** Video related command starting index */
-    public static final int IMS_MSG_BASE_MEDIA_VIDEO = IMS_MSG_BASE_MEDIA + 50;
+    public static final int IMS_MSG_BASE_MEDIA_VIDEO_IND = IMS_MEDIA_MSG_IND + 50;
     /** Text related command starting index */
-    public static final int IMS_MSG_BASE_MEDIA_TEXT = IMS_MSG_BASE_MEDIA + 80;
+    public static final int IMS_MSG_BASE_MEDIA_TEXT_CMD = IMS_MEDIA_MSG_CMD + 80;
+    public static final int IMS_MSG_BASE_MEDIA_TEXT_IND = IMS_MEDIA_MSG_IND + 80;
+
     /** Send dtmf digit value to native */
-    public static final int SEND_DTMF = (IMS_MSG_BASE_MEDIA_AUDIO + 14);
+    public static final int SEND_DTMF = (IMS_MSG_BASE_MEDIA_AUDIO_IND + 14);
     /** Set surface buffer to native */
-    public static final int SETSURFACE_CMD                  = (IMS_MSG_BASE_MEDIA_VIDEO + 1);
+    public static final int SETSURFACE_CMD                  = (IMS_MSG_BASE_MEDIA_VIDEO_IND + 1);
     /** Set camera id to native */
-    public static final int SELECT_CAMERA_CMD               = (IMS_MSG_BASE_MEDIA_VIDEO + 2);
+    public static final int SELECT_CAMERA_CMD               = (IMS_MSG_BASE_MEDIA_VIDEO_IND + 2);
     /** Set camera zoom to native */
-    public static final int CHANGE_CAMERA_ZOOM_CMD          = (IMS_MSG_BASE_MEDIA_VIDEO + 3);
+    public static final int CHANGE_CAMERA_ZOOM_CMD          = (IMS_MSG_BASE_MEDIA_VIDEO_IND + 3);
     /** Set image path to stream in pause state to native  */
-    public static final int SET_PAUSE_IMAGE_CMD             = (IMS_MSG_BASE_MEDIA_VIDEO + 4);
+    public static final int SET_PAUSE_IMAGE_CMD             = (IMS_MSG_BASE_MEDIA_VIDEO_IND + 4);
     /** Set device orientation to native */
-    public static final int CHANGE_ORIENTATION_CMD          = (IMS_MSG_BASE_MEDIA_VIDEO + 5);
-    /** Send RTT text string to native */
-    public static final int RTT_TEXT_SEND_CMD               = (IMS_MSG_BASE_MEDIA_TEXT + 1);
-    /** Send received RTT text from the network to UI */
-    public static final int RTT_TEXT_RECEIVED_IND           = (IMS_MSG_BASE_MEDIA_TEXT + 2);
+    public static final int CHANGE_ORIENTATION_CMD          = (IMS_MSG_BASE_MEDIA_VIDEO_IND + 5);
+    /** Send RTT text string to Media */
+    public static final int SEND_RTT_CMD               = (IMS_MSG_BASE_MEDIA_TEXT_CMD + 1);
+    /** Send received RTT text to UI */
+    public static final int RTT_TEXT_RECEIVED_IND           = (IMS_MSG_BASE_MEDIA_TEXT_IND + 1);
     /** Send audio received indication to UI */
-    public static final int RTT_AUDIO_INDICATION_IND        = (IMS_MSG_BASE_MEDIA_TEXT + 3);
+    public static final int RTT_AUDIO_INDICATION_IND        = (IMS_MSG_BASE_MEDIA_TEXT_IND + 2);
 
     public class Reason {
         /** No error */
