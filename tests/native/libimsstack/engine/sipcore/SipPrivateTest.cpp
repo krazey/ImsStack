@@ -15,26 +15,51 @@
  */
 #include <gtest/gtest.h>
 
+#include "PlatformContext.h"
+#include "TestThreadService.h"
+
 #include "SipError.h"
 #include "SipManager.h"
 #include "SipPrivate.h"
+
+using ::testing::Return;
 
 namespace android
 {
 
 class SipPrivateTest : public ::testing::Test
 {
+public:
+    inline SipPrivateTest() :
+            m_pThreadService(new TestThreadService()),
+            m_nDefaultEncodingOptions(SipPrivate::OPTIONS_E | SipPrivate::OPT_E_FULLFORM)
+    {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_THREAD, m_pThreadService);
+    }
+    inline virtual ~SipPrivateTest()
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
+
+        if (m_pThreadService != IMS_NULL)
+        {
+            delete m_pThreadService;
+        }
+    }
+
 protected:
     virtual void SetUp() override
     {
         SipManager::GetInstance();
-        m_nDefaultEncodingOptions = SipPrivate::OPTIONS_E | SipPrivate::OPT_E_FULLFORM;
         SipPrivate::Init(IMS_SLOT_0, m_nDefaultEncodingOptions);
+
+        ON_CALL(m_pThreadService->GetMockThread(), GetSlotId()).WillByDefault(Return(IMS_SLOT_0));
     }
 
     virtual void TearDown() override {}
 
 protected:
+    TestThreadService* m_pThreadService;
     IMS_SINT32 m_nDefaultEncodingOptions;
 };
 

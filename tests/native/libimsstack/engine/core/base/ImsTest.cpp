@@ -15,18 +15,48 @@
  */
 #include <gtest/gtest.h>
 
+#include "PlatformContext.h"
+#include "TestThreadService.h"
+
 #include "base/Ims.h"
 #include "base/ImsError.h"
+
+using ::testing::Return;
 
 namespace android
 {
 
 class ImsTest : public ::testing::Test
 {
+public:
+    inline ImsTest() :
+            m_pThreadService(new TestThreadService())
+    {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_THREAD, m_pThreadService);
+    }
+    inline virtual ~ImsTest()
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
+
+        if (m_pThreadService != IMS_NULL)
+        {
+            delete m_pThreadService;
+        }
+    }
+
 protected:
-    virtual void SetUp() override { Ims::Init(); }
+    virtual void SetUp() override
+    {
+        Ims::Init();
+
+        ON_CALL(m_pThreadService->GetMockThread(), GetSlotId()).WillByDefault(Return(IMS_SLOT_0));
+    }
 
     virtual void TearDown() override {}
+
+protected:
+    TestThreadService* m_pThreadService;
 };
 
 TEST_F(ImsTest, GetLastError)
