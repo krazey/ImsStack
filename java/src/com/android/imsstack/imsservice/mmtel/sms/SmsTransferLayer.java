@@ -20,9 +20,16 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.telephony.PhoneNumberUtils;
+import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.telephony.TelephonyManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
+import android.text.TextUtils;
 
+import com.android.imsstack.core.agents.Usat;
+import com.android.imsstack.core.agents.UsatInterface;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.uicc.IccUtils;
@@ -54,6 +61,16 @@ public class SmsTransferLayer {
     private HandlerThread mSmsHandlerThread = new HandlerThread("ImsSmsHandlerThread");
     public static final int REQUEST_SEND_NEXT_SMS_TO_RL = 1;
     private static final boolean VDBG = true;
+    private UsatBasedSms mUsatBasedSms = null;
+    public Map<Usat.MoSmsControlCommand, TpduParam> mUsatCmdMessageMap = new ConcurrentHashMap<>();
+
+    /**
+     * Start Index of TP-DestinationAddress after MTI(0th Index), TP-MR(1st), TP-DA length(2nd)
+     * and TON(3rd) bytes
+     */
+    private static final int TP_DA_START_INDEX = 4;
+    private static final int TP_DA_LENGTH_INDEX = 2;
+    private static final int TPDU_LENGTH_BEFORE_DESTINATION_ADDRESS = 3;
 
     /** TP-Failure-Cause (TP-FCS). See TS 23.040 9.2.3.22 */
     public static final int TP_FCS_NONE = 0x00;
@@ -75,7 +92,7 @@ public class SmsTransferLayer {
      * This class contains parameters related to each SMS sent and is required for
      * maintaining the Message details in queue when there are simultaneous SMS requests
      */
-    private class TpduParam{
+    private class TpduParam {
         int mToken;
         byte[] mTpdu;
         String mSmsc;
@@ -139,6 +156,15 @@ public class SmsTransferLayer {
         }
     }
 
+     /**
+     * clears the objects created by this class.
+     */
+    public void clear() {
+        mSmsRL = null;
+        mSmsHandler = null;
+        mUsatBasedSms.dispose();
+    }
+
     public void setListener(SmsTransferLayer.Listener listener) {
         mListener = listener;
     }
@@ -147,16 +173,18 @@ public class SmsTransferLayer {
      * Handles SMS-SUBMIT Message at Transfer Layer and notifies Relay Layer to send RP-DATA
      * @param token sent from framework to track callback for each SMS-SUBMIT message
      * @param smsFormat format of the message
-     * @parm tpMessageRef the TP-MR passed for the SMS-SUBMIT message
+     * @param tpMessageRef the TP-MR passed for the SMS-SUBMIT message
      * @param smsc the Short Message Service Center address
      * @param pdu PDU representing the contents of the message.
      *
      * @return result of processing of outgoing SMS's TPDU
      */
     public int sendMoTPdu(int token, int smsFormat, int tpMessageRef, String smsc, byte[] pdu) {
-        Rlog.d(TAG, "sendMoTPdu");
+        Rlog.d(TAG, "sendMoTPdu : token = " + token
+                                + "tpMessageRef = " + tpMessageRef
+                                + "smsc = " + smsc
+                                + "pdu = " + IccUtils.bytesToHexString(pdu));
         try {
-            int result;
             /* Framework's TPdu Parser expects the TPdu be prepended with SC-Address.
              * else the parser will throw exception. So prepending TPdu with 0,
              * which indicates that there is no SC address and its length is 0.
@@ -169,29 +197,25 @@ public class SmsTransferLayer {
             SmsMessage message = SmsMessage.createFromPdu(frameworkPdu, SmsMessage.FORMAT_3GPP);
             String address = message.getRecipientAddress();
             TpduParam tpduParameters = new TpduParam(token, pdu, smsc, address);
-
-            synchronized (mLock) {
-                if (mTokenMessageMap.size() > MAX_MESSAGE_COUNT) {
-                    Rlog.e(TAG, "sendMoTpdu:Too many messages in queue");
-                    return SmsUtils.SMSTL_RESULT_QUEUE_SIZE_EXCEEDED;
-                }
-                if (mSendSmsQueue.isEmpty()) {
-                    Rlog.i(TAG, "sendMoTpdu:queue is empty  adding token " + token);
-                    mSendSmsQueue.add(token);
-                    mTokenMessageMap.put(token, tpduParameters);
-                    return mSmsRL.sendRPMessage(token, SmsUtils.RP_DATA,
-                            smsc, address, pdu, 0);
-                } else {
-                    if (mTokenMessageMap.containsKey(token)) {
-                        Rlog.e(TAG, "sendMoTpdu: duplicate token - discarding the request");
-                        return SmsUtils.SMSTL_RESULT_DUPLICATE_TOKEN;
-                    }
-                    Rlog.i(TAG, "sendMoTpdu:queue is not  empty  adding token " + token);
-                    mTokenMessageMap.put(token, tpduParameters);
-                    mSendSmsQueue.add(token);
-                    return SmsUtils.RESULT_SUCCESS;
-                }
+            UsatInterface usat = mCallContext.getUsatInterface();
+            mUsatBasedSms = new UsatBasedSms();
+            if (usat != null && usat.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL)) {
+                Rlog.i(TAG, "usat service available");
+                IDcNetWatcher dcnw = mCallContext.getDcNetWatcher();
+                int networkType =  TelephonyManager.NETWORK_TYPE_UNKNOWN;
+                byte[] smscAddrBytes = HexDump.hexStringToByteArray(smsc);
+                int len = smscAddrBytes[0];
+                String rpAddress = PhoneNumberUtils.calledPartyBCDToString(smscAddrBytes, 1,
+                                    len, PhoneNumberUtils.BCD_EXTENDED_TYPE_CALLED_PARTY);
+                Rlog.d(TAG, "sendMoTPdu: rpAddress = " + rpAddress);
+                if (dcnw != null) networkType = dcnw.getNetworkType();
+                mUsatBasedSms.mMoSmsCCmd = usat.createMoSmsControlCommand(
+                    rpAddress, address, networkType, mUsatBasedSms);
+                mUsatCmdMessageMap.put(mUsatBasedSms.mMoSmsCCmd, tpduParameters);
+                usat.sendCommand(mUsatBasedSms.mMoSmsCCmd);
+                return SmsUtils.RESULT_SUCCESS;
             }
+            return enqueueAndSendMessageToRL(tpduParameters);
         } catch (RuntimeException e) {
             Rlog.e(TAG, "SendSms Failed at SmsTransferLayer: " + e.getMessage());
             return SmsUtils.SMSTL_RESULT_EXCEPTION;
@@ -240,11 +264,9 @@ public class SmsTransferLayer {
 
             switch (deliverResult) {
                 case ImsSmsImplBase.DELIVER_STATUS_OK:
-                //case ImsSmsImplBase.STATUS_REPORT_STATUS_OK:
                     cause = TP_FCS_NONE;
                     break;
                 case ImsSmsImplBase.DELIVER_STATUS_ERROR_GENERIC:
-                //case ImsSmsImplBase.STATUS_REPORT_STATUS_ERROR:
                     cause = TP_FCS_UNSPECIFIED_ERROR_CAUSE;
                     break;
                 case ImsSmsImplBase.DELIVER_STATUS_ERROR_NO_MEMORY:
@@ -266,7 +288,201 @@ public class SmsTransferLayer {
             Rlog.e(TAG, "Generating Deliver Report failed: " + ex.toString());
             return null;
         }
+    }
 
+    private class UsatBasedSms implements Usat.Listener {
+        public Usat.MoSmsControlCommand mMoSmsCCmd = null;
+
+        UsatBasedSms() {
+        }
+
+        @Override
+        public void onCommandResponse(Usat.CommandResponse response) {
+            Usat.MoSmsControlCommandResponse cmdRes = (Usat.MoSmsControlCommandResponse) response;
+            Usat.MoSmsControlCommand cmd = (Usat.MoSmsControlCommand) cmdRes.getCommand();
+
+            synchronized (mLock) {
+                if (!cmd.equals(mMoSmsCCmd)) {
+                    Rlog.e(TAG, "Command mismatched - " + cmd);
+                    return;
+                }
+            }
+
+            Rlog.i(TAG, "onCommandResponse :: cmd=" + cmd + ", result=" + cmdRes.getResult()
+                    + ", rpDestAddr=" + cmdRes.getRpDestinationAddress()
+                    + ", rpDestAddr=" + cmdRes.getRpDestinationAddress());
+
+            TpduParam tpduParameters = mUsatCmdMessageMap.get(cmd);
+            if (cmdRes.getResult() == Usat.RESULT_NOT_ALLOWED) {
+                mListener.notifySmsResult(tpduParameters.mToken,
+                                             tpduParameters.mTpdu[1] & 0xff,
+                                             ImsSmsImplBase.SEND_STATUS_ERROR,
+                                             SmsManager.RESULT_OPERATION_NOT_ALLOWED,
+                                             ImsSmsImplBase.RESULT_NO_NETWORK_ERROR);
+                return;
+            }
+
+            String rpDestAddr = cmd.getRpDestinationAddress();
+            String tpDestAddr = cmd.getTpDestinationAddress();
+            byte[] usatTpdu = tpduParameters.mTpdu;
+            String encodedSmsc = tpduParameters.mSmsc;
+
+            if (cmdRes.getResult() == Usat.RESULT_ALLOWED_WITH_MODIFICATION) {
+                rpDestAddr = cmdRes.getRpDestinationAddress();
+                tpDestAddr = cmdRes.getTpDestinationAddress();
+
+                if (!TextUtils.isEmpty(rpDestAddr)) {
+                    byte[] encodedSmscBytes = PhoneNumberUtils
+                                              .networkPortionToCalledPartyBCDWithLength(rpDestAddr);
+                    encodedSmsc = IccUtils.bytesToHexString(encodedSmscBytes);
+                }
+                if (TextUtils.isEmpty(tpDestAddr)) {
+                    // Use the original dialed string if this is not present.
+                    tpDestAddr = cmd.getTpDestinationAddress();
+                } else {
+                    //The TP-Destination-Address byte in TPdu must be modified
+                    byte[] tpDestAddrBytes;
+
+                    tpDestAddrBytes = PhoneNumberUtils.networkPortionToCalledPartyBCD(tpDestAddr);
+
+                    //The length byte of destination address is number of digits in the address
+                    int destAddrLen = calculateTpDestAddrLengthByte(tpDestAddrBytes);
+
+                    //offset after destination address in original Tpdu
+                    int offsetAfterAddress =  calculateIndexAfterTpDestAddr(tpduParameters.mTpdu);
+
+                    //length rest of the original Tpdu after Tp-DestinationAddress
+                    int tpduLenAfterAddress = tpduParameters.mTpdu.length - offsetAfterAddress;
+
+                    ByteArrayOutputStream bo = new ByteArrayOutputStream(
+                                                            TPDU_LENGTH_BEFORE_DESTINATION_ADDRESS
+                                                            + tpDestAddrBytes.length
+                                                            + tpduLenAfterAddress);
+                    //Copy 2 bytes from original TPDU - 1st byte is MTI and 2nd byte is TP-MR
+                    bo.write(tpduParameters.mTpdu, 0, 2);
+
+                    bo.write(destAddrLen);
+
+                    //copy modified destination address in the Tpdu
+                    bo.write(tpDestAddrBytes, 0, tpDestAddrBytes.length);
+
+                    /**
+                     * skip the earlier destination address in original Tpdu
+                     * copy rest of the Tpdu as is after conpying the modified TP-DA
+                     */
+                    bo.write(tpduParameters.mTpdu,  offsetAfterAddress, tpduLenAfterAddress);
+                    usatTpdu = bo.toByteArray();
+                }
+
+            }
+            tpduParameters.mTpdu = usatTpdu;
+            tpduParameters.mDestinationAddress = tpDestAddr;
+            tpduParameters.mSmsc = encodedSmsc;
+
+            enqueueAndSendMessageToRL(tpduParameters);
+
+            synchronized (mLock) {
+                mMoSmsCCmd = null;
+            }
+        }
+
+        public void dispose() {
+            synchronized (mLock) {
+                if (mMoSmsCCmd != null) {
+                    UsatInterface usat = mCallContext.getUsatInterface();
+
+                    if (usat != null) {
+                        usat.cancelCommand(mMoSmsCCmd);
+                    }
+
+                    mMoSmsCCmd = null;
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Calculate the length byte of destination address in Tpdu from encoded Tp-DA
+     * @param tpDestAddrBytes Destination address encoded in BCD
+     * @return the destination address length in BCD digits
+     */
+    public int calculateTpDestAddrLengthByte(byte[] tpDestAddrBytes) {
+        /**
+         * The length Byte of Tp-DA is not the number of bytes in encoded format
+         * It is the number of BCD digits in encoded Format minus the TON byte and pad
+         */
+        //minus TON Byte and since each byte holds 2 digits, multiply the no. of bytes by 2.
+        int destAddrLen = (tpDestAddrBytes.length - 1) * 2;
+
+        /**
+         * if there are odd number of digits , the last byte which consists of only one digit
+         * say 'x', is encoded in hex as fx. f is the padding here and should not be counted in
+         * length byte.
+         */
+         //check if padding is there in the last byte, if yes, subtract the same
+        if ((tpDestAddrBytes[tpDestAddrBytes.length - 1] & 0xf0) == 0xf0) {
+            destAddrLen = destAddrLen - 1;
+        }
+
+        return destAddrLen;
+    }
+
+    /**
+     * Calculates the index after the end of Tp-DestinationAddress
+     * @param tpdu Tpdu in byte array
+     * @return  returns the index after the end of Tp-DestinationAddress
+     */
+    public int calculateIndexAfterTpDestAddr(byte[] tpdu) {
+        /**
+         * calculate the number of bytes of TP_DA in Tpdu
+         * the length byte of Tp-DA indiactes number of BCD digits in address and since 2 BCD
+         * digits forms 1 byte in encoded TP-DA in TPDU, divide the length byte by 2
+         */
+        int tpDAbyteLen = (tpdu[TP_DA_LENGTH_INDEX] + 1) / 2;
+        int indexAfterTpDA = TP_DA_START_INDEX + tpDAbyteLen;
+        return indexAfterTpDA;
+    }
+
+    /**
+     * Inserts Message parameters in queue and map and sends the message to Relay Layer
+     * if queue is empty
+     * @param tpduParameters parametrs related to TPdu which needs to be sent to Relay Layer
+     *
+     * @return result of processing of message in Relay Layer
+     */
+    private int enqueueAndSendMessageToRL(TpduParam tpduParameters) {
+        synchronized (mLock) {
+            if (mTokenMessageMap.size() > MAX_MESSAGE_COUNT) {
+                Rlog.e(TAG, "sendMoTpdu:Too many messages in queue");
+                return SmsUtils.SMSTL_RESULT_QUEUE_SIZE_EXCEEDED;
+            }
+            if (mSendSmsQueue.isEmpty()) {
+                if (VDBG) {
+                    Rlog.d(TAG, "sendMoTpdu:queue is empty  adding token "
+                                    + tpduParameters.mToken
+                                    + " encoded Smsc = " + tpduParameters.mSmsc
+                                    + " tpDestinationAddress = "
+                                    + tpduParameters.mDestinationAddress
+                                    + " tpdu = " + IccUtils.bytesToHexString(tpduParameters.mTpdu));
+                }
+                mSendSmsQueue.add(tpduParameters.mToken);
+                mTokenMessageMap.put(tpduParameters.mToken, tpduParameters);
+                return mSmsRL.sendRPMessage(tpduParameters.mToken, SmsUtils.RP_DATA,
+                        tpduParameters.mSmsc, tpduParameters.mDestinationAddress,
+                        tpduParameters.mTpdu, 0);
+            } else {
+                if (mTokenMessageMap.containsKey(tpduParameters.mToken)) {
+                    Rlog.e(TAG, "sendMoTpdu: duplicate token - discarding the request");
+                    return SmsUtils.SMSTL_RESULT_DUPLICATE_TOKEN;
+                }
+                Rlog.i(TAG, "sendMoTpdu:queue is not  empty  adding token "
+                                                     + tpduParameters.mToken);
+                mTokenMessageMap.put(tpduParameters.mToken, tpduParameters);
+                mSendSmsQueue.add(tpduParameters.mToken);
+                return SmsUtils.RESULT_SUCCESS;
+            }
+        }
     }
 
     private class MessageHandler extends Handler {
@@ -286,7 +502,14 @@ public class SmsTransferLayer {
             switch (msg.what) {
                 case REQUEST_SEND_NEXT_SMS_TO_RL:
                     TpduParam tpduParameters = (TpduParam) msg.obj;
-                    Rlog.i(TAG, "sending token " + tpduParameters.mToken);
+                    if (VDBG) {
+                        Rlog.d(TAG, "sending Message in queue to RL: "
+                                    + tpduParameters.mToken
+                                    + " encoded Smsc = " + tpduParameters.mSmsc
+                                    + " tpDestinationAddress = "
+                                    + tpduParameters.mDestinationAddress
+                                    + " tpdu = " + IccUtils.bytesToHexString(tpduParameters.mTpdu));
+                    }
                     mSmsRL.sendRPMessage(tpduParameters.mToken, SmsUtils.RP_DATA,
                                          tpduParameters.mSmsc, tpduParameters.mDestinationAddress,
                                          tpduParameters.mTpdu, 0);

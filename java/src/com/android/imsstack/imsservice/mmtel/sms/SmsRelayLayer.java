@@ -177,10 +177,7 @@ public class SmsRelayLayer {
                     /* smsc address is passed in encoded format. Extracting the address
                      * string in decoded format and assigning it to TargetAddress
                      */
-                    byte[] targetAddrBytes = HexDump.hexStringToByteArray(smsc);
-                    int len = targetAddrBytes[0];
-                    targetAddress = PhoneNumberUtils.calledPartyBCDToString(targetAddrBytes, 1,
-                                        len, PhoneNumberUtils.BCD_EXTENDED_TYPE_CALLED_PARTY);
+                    targetAddress = decodeSmsc(smsc);
                     Rlog.d(TAG, "sendRPMEssage targetAddress sets to SMsc" + targetAddress);
                 }
                 /* As per b/232048441, if PSI & Smsc is null,
@@ -256,6 +253,12 @@ public class SmsRelayLayer {
         }
     }
 
+    private String decodeSmsc(String smsc) {
+        byte[] targetAddrBytes = HexDump.hexStringToByteArray(smsc);
+        int len = targetAddrBytes[0];
+        return PhoneNumberUtils.calledPartyBCDToString(targetAddrBytes, 1,
+                            len, PhoneNumberUtils.BCD_EXTENDED_TYPE_CALLED_PARTY);
+    }
     /*
      * Increments and returns RP-MR Value
      * @return next RP-MR value

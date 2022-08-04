@@ -80,7 +80,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
     public void clear() {
         sReady = false;
         mSmsTL.setListener(null);
-        mSmsTL = null;
+        mSmsTL.clear();
     }
 
     @Override
@@ -116,6 +116,17 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
                         RESULT_NO_NETWORK_ERROR);
                 return;
 
+            }
+
+            if (smsc == null || smsc.length() == 0) {
+                Rlog.e(TAG, "Smsc is null");
+                onSendSmsResultError(
+                        token,
+                        messageRef,
+                        SEND_STATUS_ERROR,
+                        SmsManager.RESULT_INVALID_SMSC_ADDRESS,
+                        RESULT_NO_NETWORK_ERROR);
+                return;
             }
             result = mSmsTL.sendMoTPdu(token, messageRef, smsFormat, smsc, pdu);
             if (result == SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS) {
