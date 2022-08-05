@@ -13,12 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.core.service.serviceif;
+package com.android.imsstack.core.agents;
 
-import com.android.imsstack.core.agents.IAgent;
-import com.android.imsstack.core.agents.ICallSetting;
-import com.android.imsstack.system.ISystemAPIWifiCalling;
+/**
+ * This provides an interface to monitor the phone state events.
+ */
+public interface IPhoneStateNotifier {
+    /**
+     * Returns the current events to be monitored.
+     */
+    int getEvents();
 
-public interface ICallSettingService extends IService, ICallSetting, ISystemAPIWifiCalling, IAgent {
+    /**
+     * Sets the events which are interested in.
+     */
+    void setEvents(int events);
 
+    /**
+     * Sets the listener to get the events.
+     */
+    void setListener(ImsPhoneStateListener listener);
 }

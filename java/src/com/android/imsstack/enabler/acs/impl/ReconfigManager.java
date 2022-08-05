@@ -20,7 +20,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.IAlarmTimer;
+import com.android.imsstack.core.agents.IAlarmTimer;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 

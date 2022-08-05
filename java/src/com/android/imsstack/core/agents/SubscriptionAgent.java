@@ -27,8 +27,6 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.core.agents.agentif.SubscriptionListener;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.telephony.IccCardConstants;

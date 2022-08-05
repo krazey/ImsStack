@@ -20,8 +20,6 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
-import com.android.imsstack.core.agents.agentif.ITelephonyState;
-import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPITelephonySubscriber;
 import com.android.imsstack.system.SystemInterface;

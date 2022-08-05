@@ -18,7 +18,7 @@ package com.android.imsstack.system;
 import android.os.Parcel;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ICallSetting;
+import com.android.imsstack.core.agents.ICallSetting;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;

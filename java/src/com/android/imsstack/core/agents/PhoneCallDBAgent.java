@@ -18,7 +18,6 @@ package com.android.imsstack.core.agents;
 import android.content.Context;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.core.agents.agentif.IAgent;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPICallInfo;
 import com.android.imsstack.system.SystemInterface;

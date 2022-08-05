@@ -13,12 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.core.service.serviceif;
+package com.android.imsstack.core.agents;
 
-import com.android.imsstack.core.agents.IAgent;
-import com.android.imsstack.core.agents.ICallSetting;
-import com.android.imsstack.system.ISystemAPIWifiCalling;
+/**
+ * This provides an interface to access the information that is related to the device.
+ */
+public interface IDevice extends IAgent {
+    /**
+     * Returns the application directory path if present.
+     */
+    String getApplicationPath(String packageName);
 
-public interface ICallSettingService extends IService, ICallSetting, ISystemAPIWifiCalling, IAgent {
+    /**
+     * Returns device name from 'xxx_device_name' setting database.
+     */
+    String getDeviceName();
 
+    /**
+     * Returns the external storage path if it's already mounted.
+     */
+    String getExternalStoragePath();
 }

@@ -33,7 +33,7 @@ import android.util.SparseArray;
 
 import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ITelephonyState;
+import com.android.imsstack.core.agents.ITelephonyState;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;

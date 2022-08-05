@@ -36,11 +36,11 @@ import android.telephony.VopsSupportInfo;
 
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ICallSetting;
-import com.android.imsstack.core.agents.agentif.IPhoneState;
-import com.android.imsstack.core.agents.agentif.IPhoneStateNotifier;
-import com.android.imsstack.core.agents.agentif.ITelephonyState;
-import com.android.imsstack.core.agents.agentif.ImsPhoneStateListener;
+import com.android.imsstack.core.agents.ICallSetting;
+import com.android.imsstack.core.agents.IPhoneState;
+import com.android.imsstack.core.agents.IPhoneStateNotifier;
+import com.android.imsstack.core.agents.ITelephonyState;
+import com.android.imsstack.core.agents.ImsPhoneStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;

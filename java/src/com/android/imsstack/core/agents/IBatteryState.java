@@ -13,12 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.core.service.serviceif;
+package com.android.imsstack.core.agents;
 
-import com.android.imsstack.core.agents.IAgent;
-import com.android.imsstack.core.agents.ICallSetting;
-import com.android.imsstack.system.ISystemAPIWifiCalling;
+/**
+ * This provides an interface to check and control the battery status of the device.
+ */
+public interface IBatteryState extends IAgent {
+    /**
+     * Returns the battery level.
+     */
+    int getBatteryLevel();
 
-public interface ICallSettingService extends IService, ICallSetting, ISystemAPIWifiCalling, IAgent {
+    /**
+     * Checks if battery level is low or not.
+     */
+    boolean isLowBattery();
 
+    /**
+     * Checks if the device is connected by USB cable or charger.
+     */
+    boolean isPowerPlugged(boolean log);
+
+    /**
+     * Notifies the low battery state to the native.
+     */
+    void notifyLowBatteryState(int slotId);
 }

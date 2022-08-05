@@ -20,7 +20,7 @@ import android.content.Intent;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ISubscription;
+import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;

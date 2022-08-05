@@ -13,12 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.core.service.serviceif;
+package com.android.imsstack.core.agents;
 
-import com.android.imsstack.core.agents.IAgent;
-import com.android.imsstack.core.agents.ICallSetting;
-import com.android.imsstack.system.ISystemAPIWifiCalling;
+import android.content.Context;
 
-public interface ICallSettingService extends IService, ICallSetting, ISystemAPIWifiCalling, IAgent {
+/** This provides a base interface to implement the various agent components. */
+public interface IAgent {
+    /**
+     * Initializes the Agent object.
+     *
+     * @param context The Context object.
+     */
+    void init(Context context);
 
+    /**
+     * Cleans up the Agent object.
+     */
+    void cleanup();
 }

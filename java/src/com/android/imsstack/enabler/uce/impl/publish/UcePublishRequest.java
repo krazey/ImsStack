@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.IPreference;
+import com.android.imsstack.core.agents.IPreference;
 import com.android.imsstack.enabler.uce.impl.define.UceConstant;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
 import com.android.imsstack.enabler.uce.impl.jni.UceJNI;

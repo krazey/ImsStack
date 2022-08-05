@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.core.service.serviceif;
+package com.android.imsstack.core.agents;
 
-import com.android.imsstack.core.agents.IAgent;
-import com.android.imsstack.core.agents.ICallSetting;
-import com.android.imsstack.system.ISystemAPIWifiCalling;
+import android.os.Message;
 
-public interface ICallSettingService extends IService, ICallSetting, ISystemAPIWifiCalling, IAgent {
-
+/**
+ * This is a interface to handler message through hashmap.
+ */
+public interface MsgProcInterface {
+    /**
+     * Processes the specified message.
+     *
+     * @param msg The message to be processed.
+     */
+    void procMsg(Message msg);
 }

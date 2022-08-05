@@ -48,9 +48,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.core.agents.agentif.MsgProcInterface;
-import com.android.imsstack.core.agents.agentif.SubscriptionListener;
+import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.MsgProcInterface;
+import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;

@@ -1,4 +1,18 @@
-
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.imsstack.core.agents;
 
 import android.app.AlarmManager;
@@ -12,14 +26,16 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 
-import com.android.imsstack.core.agents.agentif.IBatteryState;
-import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPIBattery;
+import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 
+/**
+ * This implements an interface to check and control the battery status of the device.
+ */
 public class BatteryStateAgent implements IBatteryState, ISystemAPIBattery {
     // Refer to res (/values/config.xml - config_lowBatteryWarningLevel) in framework
     private static final int LOW_BATTERY_THRESHOLD = 15;

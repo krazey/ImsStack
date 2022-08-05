@@ -19,7 +19,6 @@ import android.content.Context;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 
-import com.android.imsstack.core.agents.agentif.IAgent;
 import com.android.imsstack.util.MSimUtils;
 
 import java.util.ArrayList;

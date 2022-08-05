@@ -33,11 +33,6 @@ import android.os.SystemClock;
 import android.telephony.ServiceState;
 import android.text.TextUtils;
 
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.IAlarmTimer;
-import com.android.imsstack.core.agents.agentif.ILocationAgent;
-import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
-import com.android.imsstack.core.agents.agentif.LocationPolicy;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.aos.AosFactory;

@@ -19,7 +19,7 @@ package com.android.imsstack.core.agents.dcm;
 import android.content.Context;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ICellInfo;
+import com.android.imsstack.core.agents.ICellInfo;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcApn;

@@ -26,8 +26,8 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.core.agents.agentif.SubscriptionListener;
+import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.AppContext;

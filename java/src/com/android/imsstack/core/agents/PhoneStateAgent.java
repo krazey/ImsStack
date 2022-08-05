@@ -30,12 +30,6 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.core.agents.agentif.IPhoneState;
-import com.android.imsstack.core.agents.agentif.IPhoneStateNotifier;
-import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.core.agents.agentif.ImsPhoneStateListener;
-import com.android.imsstack.core.agents.agentif.PhoneCallState;
-import com.android.imsstack.core.agents.agentif.SubscriptionListener;
 import com.android.imsstack.core.agents.internal.PhoneStateEvents;
 import com.android.imsstack.core.agents.internal.PhoneStateNotifier;
 import com.android.imsstack.util.AppContext;

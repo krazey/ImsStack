@@ -18,7 +18,6 @@ package com.android.imsstack.core.agents;
 
 import android.os.PersistableBundle;
 
-import com.android.imsstack.core.agents.agentif.IAgent;
 import com.android.imsstack.core.config.CarrierConfig;
 
 public interface ConfigInterface extends IAgent {

@@ -20,7 +20,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 
-import com.android.imsstack.core.agents.agentif.IWakeLock;
 import com.android.imsstack.system.ISystemAPIWakeLock;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;

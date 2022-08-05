@@ -20,7 +20,7 @@ import android.content.Context;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.IWifiState;
+import com.android.imsstack.core.agents.IWifiState;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.telephony.TelephonyCallStateRegistry;
 import com.android.imsstack.internal.enabler.ImsStateStore;
