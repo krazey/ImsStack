@@ -101,8 +101,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(IN IMS_BOOL bUserA
 {
     IMS_TRACE_D("SendProvisionalResponse", 0, 0, 0);
 
-    IMS_BOOL bIncludeSdp =
-            !m_objContext.GetConfigurationProxy().Is(Feature::SEND_180_FOR_INITIAL_INVITE);
+    IMS_BOOL bIncludeSdp = !IsNeedToRemoveSdpInPr();
 
     if (bIncludeSdp)
     {
@@ -442,8 +441,7 @@ MtcSession::ResultSetSdp MtcSession::SetSdpToSend(IN IMS_BOOL bAllowReOffer)
         return ResultSetSdp::NO_SDP;
     }
 
-    if (objMediaManager.FormSdp(&m_objSession, m_objContext.GetSession()->GetCallType()) ==
-            IMS_FAILURE)
+    if (objMediaManager.FormSdp(&m_objSession, GetCallType()) == IMS_FAILURE)
     {
         IMS_TRACE_D("SetSdpToSend - Form SDP Failed", 0, 0, 0);
         return ResultSetSdp::FAILURE;
@@ -520,5 +518,21 @@ IMS_BOOL MtcSession::IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const
         return IMS_TRUE;
     }
 
+    return IMS_FALSE;
+}
+
+PRIVATE
+IMS_BOOL MtcSession::IsNeedToRemoveSdpInPr() const
+{
+    // This is only for the case of VZW equipment TC.
+    if (m_objContext.GetConfigurationProxy().Is(Feature::SEND_180_FOR_INITIAL_INVITE))
+    {
+        IMS_TRACE_D("IsNeedToRemoveSdpInPr - VZW Test Config On", 0, 0, 0);
+        if (m_objContext.GetMediaManager().GetNegotiationState(&m_objSession) ==
+                STATE_OFFER_RECEIVED)
+        {
+            return IMS_TRUE;
+        }
+    }
     return IMS_FALSE;
 }

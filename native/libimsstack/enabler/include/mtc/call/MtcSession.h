@@ -199,6 +199,7 @@ private:
     IMS_BOOL IsRegisteredFeature(IMS_UINT32 nFeature);
     IMS_BOOL IsCallWaiting() const;
     IMS_BOOL IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const;
+    IMS_BOOL IsNeedToRemoveSdpInPr() const;
 
     IMtcCallContext& m_objContext;
     ISession& m_objSession;
