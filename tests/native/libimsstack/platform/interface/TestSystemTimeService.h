@@ -22,12 +22,21 @@
 class TestSystemTimeService : public SystemTimeService
 {
 public:
-    inline ISystemTime* GetSystemTime() override { return &m_objSystemTime; }
+    inline TestSystemTimeService() :
+            SystemTimeService(),
+            m_piSystemTime(&m_objSystemTime)
+    {
+    }
+
+    inline ISystemTime* GetSystemTime() override { return m_piSystemTime; }
 
     inline MockISystemTime& GetMockSystemTime() { return m_objSystemTime; }
+    inline void SetSystemTime(IN ISystemTime* piSystemTime) { m_piSystemTime = piSystemTime; }
 
 private:
     MockISystemTime m_objSystemTime;
+
+    ISystemTime* m_piSystemTime;
 };
 
 #endif

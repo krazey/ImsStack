@@ -22,16 +22,28 @@
 class TestFileService : public FileService
 {
 public:
-    inline IFile* CreateFile() override { return &m_objFile; }
+    inline TestFileService() :
+            FileService(),
+            m_piFile(&m_objFile),
+            m_piFileUtil(&m_objFileUtil)
+    {
+    }
+
+    inline IFile* CreateFile() override { return m_piFile; }
     inline void DestroyFile(IN IFile*& /*piFile*/) override {}
-    inline IFileUtil* GetFileUtil() override { return &m_objFileUtil; }
+    inline IFileUtil* GetFileUtil() override { return m_piFileUtil; }
 
     inline MockIFile& GetMockFile() { return m_objFile; }
     inline MockIFileUtil& GetMockFileUtil() { return m_objFileUtil; }
+    inline void SetFile(IN IFile* piFile) { m_piFile = piFile; }
+    inline void SetFileUtil(IN IFileUtil* piFileUtil) { m_piFileUtil = piFileUtil; }
 
 private:
     MockIFile m_objFile;
     MockIFileUtil m_objFileUtil;
+
+    IFile* m_piFile;
+    IFileUtil* m_piFileUtil;
 };
 
 #endif

@@ -22,14 +22,25 @@
 class TestTimerService : public TimerService
 {
 public:
-    inline ITimer* CreateTimer() override { return &m_objTimer; }
+    inline TestTimerService() :
+            TimerService(),
+            m_piTimer(&m_objTimer)
+    {
+    }
+
+    inline ITimer* CreateTimer() override { return m_piTimer; }
     inline void DestroyTimer(
             IN ITimer*& /*piTimer*/, IN IMS_BOOL /*bOnOwnerThread = IMS_TRUE*/) override
     {
     }
 
+    inline MockITimer& GetMockTimer() { return m_objTimer; }
+    inline void SetTimer(IN ITimer* piTimer) { m_piTimer = piTimer; }
+
 private:
     MockITimer m_objTimer;
+
+    ITimer* m_piTimer;
 };
 
 #endif
