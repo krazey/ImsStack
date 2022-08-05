@@ -33,10 +33,10 @@ class AosCallTracker :
         public IMtcCallStateListener
 {
 public:
-    AosCallTracker(IN IMS_SINT32 nSlotId_);
+    AosCallTracker(IN IMS_SINT32 nSlotId);
     virtual ~AosCallTracker();
 
-    void SetMtcReady() const override;
+    IMS_BOOL SetMtcReady() const override;
 
     IMS_BOOL IsCsCallActive() const override;
     IMS_BOOL IsNormalCallActive() const override;
@@ -54,12 +54,11 @@ public:
 
 private:
     template <typename T>
-    void AddOrUpdateCall(IN IMSMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue);
+    void AddOrUpdateCall(OUT IMSMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue);
     template <typename T>
-    void RemoveCall(IN IMSMap<CallKey, T>& objCalls, IN CallKey eKey);
+    void RemoveCall(OUT IMSMap<CallKey, T>& objCalls, IN CallKey eKey);
 
     CallState GetConvertedState(IN IMtcCall::State eState);
-    CallType GetConvertedType(IN Type eType);
     CallState GetTotalState(IN IMSMap<CallKey, CallState>& objCalls);
     IMS_UINT32 GetTotalCallType(IN IMSMap<CallKey, CallType>& objCallTypes);
     IMS_BOOL IsExistCallType(IN CallType eCallType) const;
@@ -90,7 +89,7 @@ private:
     static const IMS_CHAR* StateToString(IN CallState eState);
     static const IMS_CHAR* CallTypeToString(IN CallType eType);
 
-    void PrintCallTypes(IN IMS_UINT32 nCallTypes);
+    AString PrintCallTypes(IN IMS_UINT32 nCallTypes);
 
 private:
     IMS_SINT32 m_nSlotId;
@@ -107,6 +106,9 @@ private:
     IMSList<IAosCallTrackerListener*> m_objListeners;
 
     AString m_strTag;
+
+private:
+    friend class AosCallTrackerTest;
 };
 
 #endif  // AOS_CALL_TRACKER_H_

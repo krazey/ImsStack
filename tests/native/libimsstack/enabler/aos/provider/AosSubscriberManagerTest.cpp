@@ -298,7 +298,7 @@ TEST_F(AosSubscriberManagerTest, AddListener_ExistListener)
     EXPECT_EQ(GetSubscriberManagerListeners().GetSize(), 2);
 }
 
-TEST_F(AosSubscriberManagerTest, AddListener_Sussess)
+TEST_F(AosSubscriberManagerTest, AddListener_Success)
 {
     IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();

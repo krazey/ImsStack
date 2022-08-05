@@ -22,7 +22,7 @@ enum class CallState;
 class IAosCallTracker
 {
 public:
-    virtual void SetMtcReady() const = 0;
+    virtual IMS_BOOL SetMtcReady() const = 0;
 
     virtual IMS_BOOL IsCsCallActive() const = 0;
     virtual IMS_BOOL IsNormalCallActive() const = 0;
