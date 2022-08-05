@@ -49,6 +49,58 @@
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
 
     <!-- Media -->
+
+
+    <!-- EVS payload type -->
+    <int-array name="asset_evs_payload_type_int_array" num="1">
+        <item value="111"/>
+    </int-array>
+
+    <!-- AMR NB and WB payload types -->
+    <int-array name="asset_amrwb_payload_type_int_array" num="2">
+        <item value="97"/>
+        <item value="98"/>
+      </int-array>
+
+    <int-array name="asset_amrnb_payload_type_int_array" num="2">
+        <item value="99"/>
+        <item value="100"/>
+    </int-array>
+    <int-array name="asset_dtmfwb_payload_type_int_array" num="1">
+        <item value="101"/>
+    </int-array>
+    <int-array name="asset_dtmfnb_payload_type_int_array" num="1">
+        <item value="102"/>
+    </int-array>
+
+    <int-array name="asset_amrwb_codec_attribute_payload_format_int_array" num="2">
+        <item value="0"/>
+        <item value="1"/>
+    </int-array>
+
+    <int-array name="asset_amrnb_codec_attribute_payload_format_int_array" num="2">
+        <item value="0"/>
+        <item value="1"/>
+    </int-array>
+
+    <!-- EVS Configuration -->
+    <int name="asset_evs_codec_attribute_channels_int" value="1"/>
+    <boolean name="asset_evs_codec_attribute_dtx_bool" value="false"/>
+    <boolean name="asset_evs_codec_attribute_dtx_recv_bool" value="false"/>
+    <int name="asset_evs_codec_attribute_hf_only_int" value="0"/>
+    <int name="asset_evs_codec_attribute_mode_switch_int" value="-1"/>
+
+    <int-array name="asset_evs_codec_attribute_bitrate_int_array" num="2">
+        <item value="0"/>
+        <item value="6"/>
+    </int-array>
+
+    <int name="asset_evs_codec_attribute_bandwidth_int" value="5"/>
+    <int name="asset_codec_attribute_cmr_int" value="-2"/>
+    <int name="asset_evs_codec_attribute_ch_aw_recv_int" value="-1"/>
+    <int name="asset_evs_amrwb_io_mode_set_int" value="-1"/>
+    <int name="asset_codec_attribute_mode_change_capability_int" value="2"/>
+
     <!-- Audio -->
     <boolean name="audio_bw_nego_option_bool" value="true"/>
     <int name="audio_rtp_dscp_int" value="46"/>
@@ -70,10 +122,10 @@
     <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
     <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
     <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
-    <int name="imsvoice.evs_codec_attribute_hf_only_int" value="1"/>
+    <int name="imsvoice.evs_codec_attribute_hf_only_int" value="0"/>
     <!-- <int name="imsvoice.evs_codec_attribute_mode_switch_int" value="0"/> -->
     <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
-        <item value="1"/>
+        <item value="0"/>
         <item value="6"/>
     </int-array>
     <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
