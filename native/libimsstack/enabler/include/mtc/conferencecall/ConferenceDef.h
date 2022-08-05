@@ -18,6 +18,7 @@
 #define CONFERENCE_DEF_H_
 
 #include "MtcDef.h"
+#include "ServiceTrace.h"
 
 //
 enum
@@ -106,6 +107,9 @@ public:
             eCcType(COPYCONTROLTYPE_TO),
             bAnonymize(IMS_FALSE)
     {
+        // TODO: temp for logging / memory leak check.
+        CreateId();
+        IMS_TRACE_MEM("MTC", "+ConfUser [%d]", nId, 0, 0);
     }
     inline ConfUser(IN const ConfUser& objRhs) :
 
@@ -119,8 +123,20 @@ public:
             eCcType(objRhs.eCcType),
             bAnonymize(objRhs.bAnonymize)
     {
+        CreateId();
+        IMS_TRACE_MEM("MTC", "+ConfUser [%d]", nId, 0, 0);
     }
-    inline ~ConfUser() {}
+    inline ~ConfUser()
+    {
+        IMS_TRACE_MEM("MTC", "~ConfUser [%d]", nId, 0, 0);
+    }
+    inline void CreateId()
+    {
+        static IMS_UINT32 snId = 0;
+
+        snId += 1;
+        nId = snId;
+    }
 
     ConfUser& operator=(IN const ConfUser&) = delete;
 
@@ -143,6 +159,7 @@ public:
     IMS_UINT32 eCcType;
     // from NOTIFY about Conference Event package
     IMS_BOOL bAnonymize;
+    IMS_UINT32 nId;
 };
 
 #endif

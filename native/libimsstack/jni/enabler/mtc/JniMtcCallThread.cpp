@@ -200,33 +200,50 @@ void JniMtcCallThread::OnMerged(IN const JniCallInfo& objCallInfo, IN MediaInfo*
 }
 
 PUBLIC
-void JniMtcCallThread::OnMergeFailed(IN const CallReasonInfo& /*objReason*/)
+void JniMtcCallThread::OnMergeFailed(IN const CallReasonInfo& objReason)
 {
-    // TODO:
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::CONF_MERGEFAILED);
+    JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
+    SendData2Java(objParcel);
 }
 
 PUBLIC
 void JniMtcCallThread::OnConferenceParticipantAdded()
 {
-    // TODO:
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::CONF_JOINED);
+    objParcel.writeInt32(1); // success
+    SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniMtcCallThread::OnConferenceParticipantAddFailed(IN const CallReasonInfo& /*objReason*/)
+void JniMtcCallThread::OnConferenceParticipantAddFailed(IN const CallReasonInfo& objReason)
 {
-    // TODO:
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::CONF_JOINED);
+    objParcel.writeInt32(0); // failure
+    JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
+    SendData2Java(objParcel);
 }
 
 PUBLIC
 void JniMtcCallThread::OnConferenceParticipantRemoved()
 {
-    // TODO:
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::CONF_DROPPED);
+    objParcel.writeInt32(1); // success
+    SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniMtcCallThread::OnConferenceParticipantRemoveFailed(IN const CallReasonInfo& /*objReason*/)
+void JniMtcCallThread::OnConferenceParticipantRemoveFailed(IN const CallReasonInfo& objReason)
 {
-    // TODO:
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::CONF_DROPPED);
+    objParcel.writeInt32(0); // failure
+    JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
+    SendData2Java(objParcel);
 }
 
 PUBLIC

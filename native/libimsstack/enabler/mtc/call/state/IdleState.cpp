@@ -132,7 +132,12 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
     m_objContext.GetCallInfo().bConference = IMS_TRUE;
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
-    m_objContext.GetMediaManager().SetMediaInfo(MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_INVALID,
+    IMS_SINT32 nVideoDirection = DIRECTION_INVALID;
+    if (eCallType == CallType::VT)
+    {
+        nVideoDirection = DIRECTION_SEND_RECEIVE;
+    }
+    m_objContext.GetMediaManager().SetMediaInfo(MediaInfo(DIRECTION_SEND_RECEIVE, nVideoDirection,
             DIRECTION_INVALID, AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID));
 
     m_objOperationAfterBlockCheck = [&]()

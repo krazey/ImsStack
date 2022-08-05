@@ -387,10 +387,7 @@ public class MtcConference {
         case IUConf.JOINED:
         {
                 int result = parcel.readInt();
-                CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
-
-                logi("JOINED :: result=" + result
-                        + " " + ((result == 0) ? MtcCallUtils.toString(callReasonInfo) : ""));
+                logi("JOINED :: result=" + result);
 
                 if (result != 0) {
                     mCT.updateConferenceState(this,
@@ -399,6 +396,7 @@ public class MtcConference {
 
                     listener.onCallInviteParticipantsRequestDelivered(this);
                 } else {
+                    CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
                     // FIXME: it needs to add an SIP status code for some scenarios
                     mCT.updateConferenceState(this,
                             ConferenceTracker.EVENT_INVITE_PARTICIPANTS_REQUEST_FAILED,
@@ -412,10 +410,7 @@ public class MtcConference {
         case IUConf.DROPPED:
         {
                 int result = parcel.readInt();
-                CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
-
-                logi("DROPPED :: result=" + result
-                        + " " + ((result == 0) ? MtcCallUtils.toString(callReasonInfo) : ""));
+                logi("DROPPED :: result=" + result);
 
                 if (result != 0) {
                     mCT.updateConferenceState(this,
@@ -424,6 +419,7 @@ public class MtcConference {
 
                     listener.onCallRemoveParticipantsRequestDelivered(this);
                 } else {
+                    CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
                     mCT.updateConferenceState(this,
                             ConferenceTracker.EVENT_REMOVE_PARTICIPANTS_REQUEST_FAILED,
                             ImsArgs.obtain(callReasonInfo, null, null));

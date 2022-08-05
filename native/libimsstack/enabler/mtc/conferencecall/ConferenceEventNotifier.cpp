@@ -49,8 +49,11 @@ void ConferenceEventNotifier::NotifyMerged(IN ConferenceParticipantList& objPart
     IMS_TRACE_I("NotifyMerged", 0, 0, 0);
 
     objParticipantList.Login();
+
+    MediaInfo objMediaInfo;
+    m_objConfCallContext.GetMediaManager().GetMediaInfo(objMediaInfo);
     IMSList<ConfUser*> objUsers = objParticipantList.GetConfUsers();
-    m_objConfCallContext.GetUiNotifier().SendMerged(CloneCallInfo(), CloneMediaInfo(),
+    m_objConfCallContext.GetUiNotifier().SendMerged(IMS_NULL, &objMediaInfo,
             m_objConfCallContext.GetSupplementaryService().GetServices(), objUsers);
 }
 
@@ -173,22 +176,6 @@ void ConferenceEventNotifier::NotifyIndividualCallTerminated(IN CallKey nKey)
             .GetUiNotifier()
             .SendTerminated(
                     CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, CODE_USER_TERMINATED_BY_REMOTE));
-}
-
-PRIVATE
-CallInfo* ConferenceEventNotifier::CloneCallInfo()
-{
-    // TODO: deprecated.
-    return new CallInfo(m_objConfCallContext.GetCallInfo());
-}
-
-PRIVATE
-MediaInfo* ConferenceEventNotifier::CloneMediaInfo()
-{
-    // TODO: deprecated.
-    MediaInfo objMediaInfo;
-    m_objConfCallContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-    return new MediaInfo(objMediaInfo);
 }
 
 PRIVATE

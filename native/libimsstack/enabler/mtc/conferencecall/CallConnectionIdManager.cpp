@@ -59,6 +59,9 @@ PUBLIC VIRTUAL void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCall
     {
         if (eState == State::TERMINATING)
         {
+            // TODO: check if conference call is failed or terminated.
+            // Or, set IsSynchronousCallRequired() false so ConferenceController::Recover()
+            // is called first.
             ClearConnectionIdsInConference(nControllerIndexOfHost);
             return;
         }

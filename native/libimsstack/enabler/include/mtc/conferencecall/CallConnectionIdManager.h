@@ -36,7 +36,7 @@ public:
     void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
     void OnTotalCallStateChanged(IN State eState) override;
-    inline IMS_BOOL IsSynchronousCallRequired() override { return IMS_TRUE; }
+    inline IMS_BOOL IsSynchronousCallRequired() override { return IMS_FALSE; }
 
     void OnConferenceCallStarted(IN IConferenceController* piController, IN IMS_BOOL bStarted);
     void OnConferenceParticipantDisconnected(IN IMS_UINT32 nConnectionId);

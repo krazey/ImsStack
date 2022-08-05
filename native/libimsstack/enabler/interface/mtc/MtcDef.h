@@ -20,6 +20,7 @@
 #include "AString.h"
 #include "ImsTypeDef.h"
 #include "IMtcService.h"
+#include "ServiceTrace.h"
 
 // TODO, MTC BUILD
 #ifndef UNUSED_PARAM
@@ -247,6 +248,9 @@ public:
             eVQuality(0),
             eGTTMode(-1)
     {
+        // TODO: temp for logging / memory leak check.
+        CreateId();
+        IMS_TRACE_MEM("MTC", "+MediaInfo [%d]", nId, 0, 0);
     }
     inline MediaInfo(IN const MediaInfo& objRhs) :
             eADir(objRhs.eADir),
@@ -256,6 +260,8 @@ public:
             eVQuality(objRhs.eVQuality),
             eGTTMode(objRhs.eGTTMode)
     {
+        CreateId();
+        IMS_TRACE_MEM("MTC", "+MediaInfo [%d]", nId, 0, 0);
     }
     inline MediaInfo(IN IMS_SINT32 eInitADir, IN IMS_SINT32 eInitVDir, IN IMS_SINT32 eInitTDir,
             IN IMS_UINT32 eInitAQuality, IN IMS_UINT32 eInitVQuality, IN IMS_SINT32 eInitGTTMode) :
@@ -266,9 +272,20 @@ public:
             eVQuality(eInitVQuality),
             eGTTMode(eInitGTTMode)
     {
+        CreateId();
+        IMS_TRACE_MEM("MTC", "+MediaInfo [%d]", nId, 0, 0);
     }
-    inline ~MediaInfo() {}
+    inline ~MediaInfo()
+    {
+        IMS_TRACE_MEM("MTC", "~MediaInfo [%d]", nId, 0, 0);
+    }
+    inline void CreateId()
+    {
+        static IMS_UINT32 snId = 0;
 
+        snId += 1;
+        nId = snId;
+    }
 public:
     inline MediaInfo& operator=(IN const MediaInfo& objRhs)
     {
@@ -308,6 +325,8 @@ public:
     IMS_UINT32 eVQuality;
 
     IMS_SINT32 eGTTMode;
+
+    IMS_UINT32 nId;
 };
 
 class SuppService

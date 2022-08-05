@@ -18,10 +18,12 @@
 #include "call/IMtcCallManager.h"
 #include "conferencecall/MergeController.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceUtils.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "configuration/ConfigDef.h"
 #include "call/IMtcCallContext.h"
 #include "ImsList.h"
-#include "MtcDef.h"
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "conferencecall/CallConnectionIdManager.h"
 #include "helper/MtcSupplementaryService.h"
@@ -69,12 +71,11 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objU
     IMS_SINT32 nOldState = GetState();
     SetState(STATE_MERGING);
 
-    ClearListForConfUsers(objUsers);
-
     if (nOldState == STATE_CREATED)
     {
         m_objOperationQueue.CreateNPutWithUsers(
                 CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
+        //ClearListForConfUsers(objUsers);
 
         if (bSubFirstAndRefer == IMS_TRUE &&
                 ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired())
@@ -107,12 +108,43 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objU
 }
 
 PROTECTED VIRTUAL void MergeController::StartConferenceCall(
-        IN ConferenceOperationQueue::ConferenceOperation* /*pOperation*/)
+        IN ConferenceOperationQueue::ConferenceOperation* pOperation)
 {
-    // TODO: CallType?
-    // TODO: factory uri.
-    IMSList<ConfUser*> objTempUsers;
-    GetConferenceCall()->StartConference(CallType::VOIP, AString::ConstNull(), objTempUsers);
+    CallType eType = CallType::VOIP;
+    IMS_BOOL bVoip = IMS_FALSE;
+    IMS_BOOL bVt = IMS_FALSE;
+
+    ImsList<ConfUser*> objUsers = pOperation->GetUsers();
+    for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
+    {
+        CallKey nkey = m_objConnectionIdManager.GetCallKey(objUsers.GetAt(i)->nConnectionId);
+        CallType eIndividualType = m_objCallManager.GetCallByCallKey(nkey)->GetCallType();
+
+        if (eIndividualType == CallType::VT ||
+                eIndividualType == CallType::VIDEO_RTT)
+        {
+            bVt = IMS_TRUE;
+        }
+        else
+        {
+            bVoip = IMS_TRUE;
+        }
+    }
+
+    if (bVoip && bVt)
+    {
+        eType = static_cast<CallType>(m_objContext.GetConfigurationProxy().GetInt(
+                Feature::CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED));
+    }
+    else if (bVt)
+    {
+        eType = CallType::VT;
+    }
+
+    IMS_TRACE_D("StartConferenceCall calltype[%d]", eType, 0, 0);
+
+    ClearListForConfUsers(objUsers);
+    GetConferenceCall()->StartConference(eType, AString::ConstNull(), objUsers);
 }
 
 PROTECTED VIRTUAL IMS_BOOL MergeController::IsStartFinalSipfragWaitTimer() const
@@ -187,6 +219,10 @@ void MergeController::ProcessMergeWithoutRefer(IN IMSList<ConfUser*>& objUsers)
                 CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
         m_objOperationQueue.SetAddingOperationSetCompleted();
+    }
+    else
+    {
+        ClearListForConfUsers(objUsers);
     }
 }
 

@@ -370,7 +370,7 @@ void JniMtcCall::MergeToConference(IN const android::Parcel& objParcel)
     IMSList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
     for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
     {
-        IMS_TRACE_D("MergeToConference callid=[%d]", objUsers.GetAt(i)->nConnectionId, 0, 0);
+        IMS_TRACE_D("MergeToConference connectionId=[%d]", objUsers.GetAt(i)->nConnectionId, 0, 0);
     }
     m_objCallController.MergeToConference(m_nCallKey, objUsers);
 }

@@ -61,9 +61,6 @@ public:
     virtual void NotifyIndividualCallTerminated(IN CallKey nKey);
 
 private:
-    CallInfo* CloneCallInfo();
-    MediaInfo* CloneMediaInfo();
-
     void CheckDisconnectedConfUsersInfo(
             IN ConferenceParticipantList& objParticipantList, IN_OUT IMSList<ConfUser*>& objUsers);
 
