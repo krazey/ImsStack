@@ -50,7 +50,7 @@ PUBLIC GLOBAL void Ims::SetLastError(IN IMS_SINT32 nErrorCode)
 {
     IMS_SINT32 nSlotId = IMS_SLOT_0;
 
-    if (SystemConfig::IsMultiImsEnabled() || SystemConfig::IsMultiImsEnabledOnDssv())
+    if (SystemConfig::IsMultiImsEnabled())
     {
         nSlotId = ThreadService::GetCurrentSlotId();
     }
@@ -62,7 +62,7 @@ PUBLIC GLOBAL IMS_SINT32 Ims::GetLastError()
 {
     IMS_SINT32 nSlotId = IMS_SLOT_0;
 
-    if (SystemConfig::IsMultiImsEnabled() || SystemConfig::IsMultiImsEnabledOnDssv())
+    if (SystemConfig::IsMultiImsEnabled())
     {
         nSlotId = ThreadService::GetCurrentSlotId();
     }

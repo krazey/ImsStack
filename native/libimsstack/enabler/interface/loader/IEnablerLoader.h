@@ -13,23 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DeviceConfig.h"
-#include "SystemConfig.h"
+#ifndef INTERFACE_ENABLER_LOADER_H_
+#define INTERFACE_ENABLER_LOADER_H_
 
-PRIVATE GLOBAL IMS_SINT32 SystemConfig::s_nGlobalConfigs = CONFIG_MULTI_IMS;
+#include "ImsTypeDef.h"
 
-PUBLIC GLOBAL IMS_SINT32 SystemConfig::GetMaxSimSlot()
+class IEnablerLoader
 {
-    return DeviceConfig::GetActiveModemCount();
-}
+public:
+    /**
+     * @brief Starts the enablers for the specified slot-id.
+     *
+     * @param nSlotId The slot-id to be started
+     */
+    virtual void StartEnabler(IN IMS_SINT32 nSlotId) = 0;
 
-PUBLIC GLOBAL IMS_BOOL SystemConfig::IsMultiImsEnabled()
-{
-    // As a default, single IMS is required on dual SIM environment.
-    return (s_nGlobalConfigs & CONFIG_MULTI_IMS) != 0;
-}
+    /**
+     * @brief Stops the enablers for the specified slot-id.
+     *
+     * @param nSlotId The slot-id to be stopped
+     */
+    virtual void StopEnabler(IN IMS_SINT32 nSlotId) = 0;
+};
 
-PUBLIC GLOBAL IMS_BOOL SystemConfig::IsMultiSimEnabled()
-{
-    return GetMaxSimSlot() > 1;
-}
+#endif

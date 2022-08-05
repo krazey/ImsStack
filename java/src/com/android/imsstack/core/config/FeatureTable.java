@@ -16,7 +16,6 @@
 package com.android.imsstack.core.config;
 
 import com.android.imsstack.core.config.FeatureConfig;
-import com.android.imsstack.system.SystemConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +26,9 @@ import java.util.List;
  */
 public final class FeatureTable {
     public static class Feature {
-        /** Feature string value for IMS configuration (gims_feature) */
+        /** Feature string value for IMS configuration */
         private String mFeature;
-        /** Feature mask value for SystemConfig */
+        /** Feature mask value for FeatureConfig */
         private int mFeatureMask;
 
         /* package */ Feature(String feature, int featureMask) {
@@ -57,14 +56,14 @@ public final class FeatureTable {
         sServiceFeatureList = new ArrayList<Feature>();
 
         sServiceFeatureList.add(new Feature(
-                FeatureConfig.VOLTE, SystemConfig.FEATURE_S_VOLTE));
+                FeatureConfig.VOLTE, FeatureConfig.FEATURE_S_VOLTE));
         sServiceFeatureList.add(new Feature(
-                FeatureConfig.VOWIFI, SystemConfig.FEATURE_S_VOWIFI));
+                FeatureConfig.VOWIFI, FeatureConfig.FEATURE_S_VOWIFI));
         sServiceFeatureList.add(new Feature(
-                FeatureConfig.VT, SystemConfig.FEATURE_S_VT));
+                FeatureConfig.VT, FeatureConfig.FEATURE_S_VT));
         sServiceFeatureList.add(new Feature(
-                FeatureConfig.SMS, SystemConfig.FEATURE_S_SMS));
+                FeatureConfig.SMS, FeatureConfig.FEATURE_S_SMS));
         sServiceFeatureList.add(new Feature(
-                FeatureConfig.UCE, SystemConfig.FEATURE_S_UCE));
+                FeatureConfig.UCE, FeatureConfig.FEATURE_S_UCE));
     }
 }

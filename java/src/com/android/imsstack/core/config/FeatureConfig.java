@@ -34,6 +34,13 @@ public final class FeatureConfig {
     public static final String SMS = "SMS";
     public static final String UCE = "UCE";
 
+    public static final int FEATURE_S_VOLTE = 1 << 0;
+    public static final int FEATURE_S_VOWIFI = 1 << 1;
+    public static final int FEATURE_S_VT = 1 << 2;
+    public static final int FEATURE_S_SMS = 1 << 3;
+    public static final int FEATURE_S_VOLTE_EMERGENCY = 1 << 4;
+    public static final int FEATURE_S_UCE = 1 << 5;
+
     private static SparseArray<ArrayMap<String, Integer>> sFeatures = new SparseArray<>();
 
     public static synchronized boolean isEnabled(int slotId, String feature) {

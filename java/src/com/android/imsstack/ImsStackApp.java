@@ -26,6 +26,7 @@ import android.telephony.TelephonyManager;
 import android.util.SparseArray;
 
 import com.android.imsstack.core.CommonStarter;
+import com.android.imsstack.core.NativeCommands;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.carrier.CarrierInfo;
@@ -284,29 +285,27 @@ public class ImsStackApp extends Application {
         CommonStarter cs = CommonStarter.getInstance();
 
         if (!cs.isCommonAgentReady()) {
+            cs.createJNI();
             cs.createAgents();
             cs.startAgents(slotId);
-            cs.createJNI();
             cs.setCommonAgentCompleted();
             startVoLteService(slotId);
+            NativeCommands.startEnabler(slotId);
         } else {
             startServices(slotId);
         }
     }
 
     private void startServices(int slotId) {
-        CommonStarter cs = CommonStarter.getInstance();
-        cs.startAgents(slotId);
-
-        updateSystemConfigOnSimLoaded(slotId);
+        CommonStarter.getInstance().startAgents(slotId);
         startVoLteService(slotId);
+        NativeCommands.startEnabler(slotId);
     }
 
     private void stopServices(int slotId) {
         stopVoLteService(slotId);
-
-        CommonStarter cs = CommonStarter.getInstance();
-        cs.stopAgents(slotId);
+        CommonStarter.getInstance().stopAgents(slotId);
+        NativeCommands.stopEnabler(slotId);
     }
 
     private void startVoLteService(int slotId) {
@@ -324,16 +323,6 @@ public class ImsStackApp extends Application {
     private void stopVoLteService(int slotId) {
         Log.i(TAG, "stopVoLTEService(" + slotId + ")");
         VoLteFactory.getInstance().stopService(slotId);
-    }
-
-    private void updateSystemConfigOnSimLoaded(int slotId) {
-        CommonStarter cs = CommonStarter.getInstance();
-
-        if (cs.isCommonAgentReady()) {
-            cs.updateSystemConfigOnSimLoaded(slotId);
-        } else {
-            Log.i(TAG, "updateSystemConfigOnSimLoaded(" + slotId + "): ignored...");
-        }
     }
 
     private void displayCarrierConfigs(int phoneId, int subId) {

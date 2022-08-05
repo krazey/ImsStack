@@ -16,7 +16,7 @@
 #include "ImsProcess.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "SystemConfigManager.h"
+#include "SystemConfig.h"
 
 #include "EnablerFactory.h"
 #include "EnablerLoader.h"
@@ -34,15 +34,11 @@ EnablerLoader::EnablerLoader() :
         m_objEnablerThreads(IMSMap<IMS_SINT32, EnablerThread*>())
 {
     m_pEnablerFactory = new EnablerFactory();
-
-    SystemConfigManager::GetInstance()->AddListener(this);
 }
 
 PRIVATE
 EnablerLoader::~EnablerLoader()
 {
-    SystemConfigManager::GetInstance()->RemoveListener(this);
-
     if (m_pEnablerFactory != IMS_NULL)
     {
         delete m_pEnablerFactory;
@@ -61,6 +57,38 @@ void EnablerLoader::Init()
     for (IMS_SINT32 i = IMS_SLOT_1; i < SystemConfig::GetMaxSimSlot(); ++i)
     {
         CreateAndAddThread(i);
+    }
+}
+
+PUBLIC VIRTUAL void EnablerLoader::StartEnabler(IN IMS_SINT32 nSlotId)
+{
+    IMS_TRACE_I("StartEnabler: slot%d", nSlotId, 0, 0);
+    const IMS_SINT32 nCtrlFlags = EnablerThread::CONTROL_CREATE | EnablerThread::CONTROL_START;
+    EnablerThread* pThread = GetEnablerThread(nSlotId);
+
+    if (pThread != IMS_NULL)
+    {
+        pThread->ControlEnablers(nCtrlFlags);
+    }
+    else
+    {
+        IMS_TRACE_I("EnablerThread(%d) not found", nSlotId, 0, 0);
+    }
+}
+
+PUBLIC VIRTUAL void EnablerLoader::StopEnabler(IN IMS_SINT32 nSlotId)
+{
+    IMS_TRACE_I("StopEnabler: slot%d", nSlotId, 0, 0);
+    const IMS_SINT32 nCtrlFlags = EnablerThread::CONTROL_STOP | EnablerThread::CONTROL_DESTROY;
+    EnablerThread* pThread = GetEnablerThread(nSlotId);
+
+    if (pThread != IMS_NULL)
+    {
+        pThread->ControlEnablers(nCtrlFlags);
+    }
+    else
+    {
+        IMS_TRACE_I("EnablerThread(%d) not found", nSlotId, 0, 0);
     }
 }
 
@@ -92,21 +120,6 @@ EnablerLoader* EnablerLoader::GetInstance()
     }
 
     return s_pEnablerLoader;
-}
-
-PROTECTED VIRTUAL void EnablerLoader::SystemConfig_ConfigurationChanged(
-        IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId /*= IMS_SLOT_ANY*/)
-{
-    IMS_TRACE_I("SystemConfig :: event=%d, slotId=%d", nEvent, nSlotId, 0);
-
-    if (nEvent == SystemConfig::EVENT_ON_BOOT)
-    {
-        // Ignore it on boot-up
-    }
-    else
-    {
-        ControlEnablers(nSlotId);
-    }
 }
 
 PRIVATE
@@ -141,107 +154,6 @@ EnablerThread* EnablerLoader::GetEnablerThread(IN IMS_SINT32 nSlotId) const
     }
 
     return m_objEnablerThreads.GetValueAt(nIndex);
-}
-
-PRIVATE
-void EnablerLoader::ControlEnablers(IN IMS_SINT32 nSlotId)
-{
-    SystemConfigManager* pScm = SystemConfigManager::GetInstance();
-    const SystemConfig* pOldConfig = pScm->GetOldConfig(nSlotId);
-    const SystemConfig* pNewConfig = pScm->GetConfig(nSlotId);
-    IMS_SINT32 nCtrlFlags = EnablerThread::CONTROL_NONE;
-
-    if (SystemConfig::IsOperatorChanged(pOldConfig, pNewConfig))
-    {
-        nCtrlFlags = EnablerThread::CONTROL_ALL;
-
-        if (pNewConfig != IMS_NULL)
-        {
-            if (pNewConfig->GetOperator().GetLength() == 0)
-            {
-                nCtrlFlags = EnablerThread::CONTROL_STOP | EnablerThread::CONTROL_DESTROY;
-            }
-            else if (SystemConfig::IsMultiSimEnabled() && !pNewConfig->IsDds())
-            {
-                nCtrlFlags = EnablerThread::CONTROL_STOP | EnablerThread::CONTROL_DESTROY;
-            }
-            else if (pNewConfig->GetServiceFeatures() == 0)
-            {
-                nCtrlFlags = EnablerThread::CONTROL_STOP | EnablerThread::CONTROL_DESTROY;
-            }
-        }
-    }
-    else if (SystemConfig::IsDdsChanged(pOldConfig, pNewConfig))
-    {
-        if (pNewConfig != IMS_NULL)
-        {
-            if (pNewConfig->GetOperator().GetLength() == 0)
-            {
-                // Operator: old/new empty - do not control enabler threads
-            }
-            else if (pNewConfig->IsDds())
-            {
-                if (pNewConfig->GetServiceFeatures() == 0)
-                {
-                    // No services - do not start enabler thread
-                }
-                else
-                {
-                    nCtrlFlags = EnablerThread::CONTROL_ALL;
-                }
-            }
-            else
-            {
-                nCtrlFlags = EnablerThread::CONTROL_STOP | EnablerThread::CONTROL_DESTROY;
-            }
-        }
-    }
-    else if (SystemConfig::IsServiceFeatureChanged(pOldConfig, pNewConfig))
-    {
-        nCtrlFlags = EnablerThread::CONTROL_ALL;
-
-        // If service features are changed and it's non-DDS slot, then stop the enablers.
-        // SIM1: empty, SIM2: SIM_LOCKED (newly added) : SIM2 is non-DDS when it's in LOADED
-        if (SystemConfig::IsMultiSimEnabled() && !SystemConfig::IsMultiImsEnabled() &&
-                !SystemConfig::IsMultiImsEnabledOnDssv())
-        {
-            if ((pNewConfig != IMS_NULL) && !pNewConfig->IsDds())
-            {
-                nCtrlFlags = EnablerThread::CONTROL_STOP | EnablerThread::CONTROL_DESTROY;
-            }
-        }
-    }
-    else if (SystemConfig::IsSimMobilityChanged(pOldConfig, pNewConfig))
-    {
-        nCtrlFlags = EnablerThread::CONTROL_ALL;
-    }
-    /** Don't stop enablers. It's stopped and started when SIM is inserted.
-    else
-    {
-        bOldNoUicc = (pOldConfig != IMS_NULL) ? pOldConfig->IsNoUicc() : IMS_FALSE;
-        bNewNoUicc = (pNewConfig != IMS_NULL) ? pNewConfig->IsNoUicc() : IMS_TRUE;
-
-        if ((!bOldNoUicc && bNewNoUicc) || (bOldNoUicc && !bNewNoUicc))
-        {
-            nCtrlFlags = EnablerThread::CONTROL_STOP | EnablerThread::CONTROL_START;
-        }
-    }
-    */
-    IMS_BOOL bOldNoUicc = (pOldConfig != IMS_NULL) ? pOldConfig->IsNoUicc() : IMS_FALSE;
-    IMS_BOOL bNewNoUicc = (pNewConfig != IMS_NULL) ? pNewConfig->IsNoUicc() : IMS_TRUE;
-
-    IMS_TRACE_I("ControlEnablers :: flags=%08X, oldNoUicc=%s, newNoUicc=%s",
-            nCtrlFlags, _TRACE_B_(bOldNoUicc), _TRACE_B_(bNewNoUicc));
-
-    if (nCtrlFlags != EnablerThread::CONTROL_NONE)
-    {
-        EnablerThread* pThread = GetEnablerThread(nSlotId);
-
-        if (pThread != IMS_NULL)
-        {
-            pThread->ControlEnablers(nCtrlFlags);
-        }
-    }
 }
 
 PRIVATE GLOBAL ImsAppThread* EnablerLoader::CreateThread(IN void* pvParam)

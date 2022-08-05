@@ -19,7 +19,6 @@
 #include "ServiceMemory.h"
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
-#include "SystemConfigManager.h"
 
 #include "Configuration.h"
 
@@ -58,42 +57,7 @@ PROTECTED VIRTUAL IMS_BOOL EnablerThread::OnStart(IN ImsMessage& objMsg)
 
     ImsAppThread::OnStart(objMsg);
 
-    IMS_BOOL bInitOnStart = IMS_FALSE;
-    const SystemConfig* pSc = SystemConfigManager::GetInstance()->GetConfig(GetSlotId());
-
-    if ((pSc != IMS_NULL) && (pSc->GetOperator().GetLength() > 0))
-    {
-        if (!SystemConfig::IsMultiSimEnabled())
-        {
-            bInitOnStart = IMS_TRUE;
-        }
-        else if (SystemConfig::IsMultiImsEnabled() || SystemConfig::IsMultiImsEnabledOnDssv())
-        {
-            bInitOnStart = IMS_TRUE;
-        }
-        else if (pSc->IsDds())
-        {
-            bInitOnStart = IMS_TRUE;
-        }
-    }
-
     ConfigService::GetConfigService()->LoadCarrierConfig(GetSlotId());
-
-    if (bInitOnStart)
-    {
-        SystemConfigManager::CacheSystemFeatures();
-        Configuration::GetInstance()->InitConfigs(GetSlotId());
-        EngineLoader::Initialize(GetSlotId());
-        InitializeGlobals();
-
-        m_pEnablerFactory->CreateEnablers(GetSlotId());
-
-        if (StartEnablers())
-        {
-            SetState(STATE_ACTIVE);
-            NotifyEnablerStartCompleted();
-        }
-    }
 
     return IMS_TRUE;
 }
@@ -169,14 +133,8 @@ void EnablerThread::ControlEnablersInternal(IN IMS_SINT32 nCtrlFlags)
 
     if (IsControlSet(nCtrlFlags, CONTROL_CREATE))
     {
-        // For hot swap, the system features will be re-calculated
-        // when re-starting the enablers.
-        if (m_nSlotId == IMS_SLOT_0)
-        {
-            SystemConfigManager::CacheSystemFeatures();
-        }
-
         ConfigService::GetConfigService()->LoadCarrierConfig(GetSlotId());
+        // InitConfig?
         Configuration::GetInstance()->RefreshConfigs(GetSlotId());
         EngineLoader::Initialize(GetSlotId());
         InitializeGlobals();

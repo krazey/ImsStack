@@ -37,94 +37,95 @@ import java.util.Arrays;
 
 @RunWith(JUnit4.class)
 public class JniImsTest {
-    private static final int SLOT0 = 0;
     private static final long NATIVE_OBJECT = 100L;
     private static final long SYSTEM_NATIVE_OBJECT = 200L;
 
     @Mock JniImsListener mListener;
     @Mock JniSystemListener mSystemListener;
+    private JniIms mJniIms;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        mJniIms = new JniIms();
     }
 
     @After
     public void tearDown() throws Exception {
-        JniIms.removeListener(NATIVE_OBJECT);
-        JniIms.removeSystemListener(SYSTEM_NATIVE_OBJECT);
+        mJniIms = null;
     }
 
     @Test
     @SmallTest
     public void setListener() throws Exception {
-        assertEquals(JniIms.ERROR, JniIms.setListener(0, mListener));
-        assertEquals(JniIms.ERROR, JniIms.setListener(NATIVE_OBJECT, null));
-        assertEquals(JniIms.OK, JniIms.setListener(NATIVE_OBJECT, mListener));
-        assertEquals(mListener, JniIms.getListener(NATIVE_OBJECT));
+        assertEquals(JniIms.ERROR, mJniIms.setListener(0, mListener));
+        assertEquals(JniIms.ERROR, mJniIms.setListener(NATIVE_OBJECT, null));
+        assertEquals(JniIms.OK, mJniIms.setListener(NATIVE_OBJECT, mListener));
+        assertEquals(mListener, mJniIms.getListener(NATIVE_OBJECT));
     }
 
     @Test
     @SmallTest
     public void getListener() throws Exception {
-        assertNull(JniIms.getListener(0));
-        assertNull(JniIms.getListener(NATIVE_OBJECT));
+        assertNull(mJniIms.getListener(0));
+        assertNull(mJniIms.getListener(NATIVE_OBJECT));
 
-        JniIms.setListener(NATIVE_OBJECT, mListener);
+        mJniIms.setListener(NATIVE_OBJECT, mListener);
 
-        assertEquals(mListener, JniIms.getListener(NATIVE_OBJECT));
+        assertEquals(mListener, mJniIms.getListener(NATIVE_OBJECT));
 
-        JniIms.removeListener(NATIVE_OBJECT);
+        mJniIms.removeListener(NATIVE_OBJECT);
 
-        assertNull(JniIms.getListener(NATIVE_OBJECT));
+        assertNull(mJniIms.getListener(NATIVE_OBJECT));
     }
 
     @Test
     @SmallTest
     public void removeListener() throws Exception {
-        assertEquals(JniIms.ERROR, JniIms.removeListener(0));
-        assertEquals(JniIms.OK, JniIms.removeListener(NATIVE_OBJECT));
+        assertEquals(JniIms.ERROR, mJniIms.removeListener(0));
+        assertEquals(JniIms.OK, mJniIms.removeListener(NATIVE_OBJECT));
 
-        JniIms.setListener(NATIVE_OBJECT, mListener);
+        mJniIms.setListener(NATIVE_OBJECT, mListener);
 
-        assertEquals(JniIms.OK, JniIms.removeListener(NATIVE_OBJECT));
-        assertNull(JniIms.getListener(NATIVE_OBJECT));
+        assertEquals(JniIms.OK, mJniIms.removeListener(NATIVE_OBJECT));
+        assertNull(mJniIms.getListener(NATIVE_OBJECT));
     }
 
     @Test
     @SmallTest
     public void setSystemListener() throws Exception {
-        assertEquals(JniIms.ERROR, JniIms.setSystemListener(0, mSystemListener));
-        assertEquals(JniIms.ERROR, JniIms.setSystemListener(SYSTEM_NATIVE_OBJECT, null));
-        assertEquals(JniIms.OK, JniIms.setSystemListener(SYSTEM_NATIVE_OBJECT, mSystemListener));
-        assertEquals(mSystemListener, JniIms.getSystemListener(SYSTEM_NATIVE_OBJECT));
+        assertEquals(JniIms.ERROR, mJniIms.setSystemListener(0, mSystemListener));
+        assertEquals(JniIms.ERROR, mJniIms.setSystemListener(SYSTEM_NATIVE_OBJECT, null));
+        assertEquals(JniIms.OK, mJniIms.setSystemListener(SYSTEM_NATIVE_OBJECT, mSystemListener));
+        assertEquals(mSystemListener, mJniIms.getSystemListener(SYSTEM_NATIVE_OBJECT));
     }
 
     @Test
     @SmallTest
     public void getSystemListener() throws Exception {
-        assertNull(JniIms.getSystemListener(0));
-        assertNull(JniIms.getSystemListener(SYSTEM_NATIVE_OBJECT));
+        assertNull(mJniIms.getSystemListener(0));
+        assertNull(mJniIms.getSystemListener(SYSTEM_NATIVE_OBJECT));
 
-        JniIms.setSystemListener(SYSTEM_NATIVE_OBJECT, mSystemListener);
+        mJniIms.setSystemListener(SYSTEM_NATIVE_OBJECT, mSystemListener);
 
-        assertEquals(mSystemListener, JniIms.getSystemListener(SYSTEM_NATIVE_OBJECT));
+        assertEquals(mSystemListener, mJniIms.getSystemListener(SYSTEM_NATIVE_OBJECT));
 
-        JniIms.removeSystemListener(SYSTEM_NATIVE_OBJECT);
+        mJniIms.removeSystemListener(SYSTEM_NATIVE_OBJECT);
 
-        assertNull(JniIms.getSystemListener(SYSTEM_NATIVE_OBJECT));
+        assertNull(mJniIms.getSystemListener(SYSTEM_NATIVE_OBJECT));
     }
 
     @Test
     @SmallTest
     public void removeSystemListener() throws Exception {
-        assertEquals(JniIms.ERROR, JniIms.removeSystemListener(0));
-        assertEquals(JniIms.OK, JniIms.removeSystemListener(SYSTEM_NATIVE_OBJECT));
+        assertEquals(JniIms.ERROR, mJniIms.removeSystemListener(0));
+        assertEquals(JniIms.OK, mJniIms.removeSystemListener(SYSTEM_NATIVE_OBJECT));
 
-        JniIms.setSystemListener(SYSTEM_NATIVE_OBJECT, mSystemListener);
+        mJniIms.setSystemListener(SYSTEM_NATIVE_OBJECT, mSystemListener);
 
-        assertEquals(JniIms.OK, JniIms.removeSystemListener(SYSTEM_NATIVE_OBJECT));
-        assertNull(JniIms.getSystemListener(SYSTEM_NATIVE_OBJECT));
+        assertEquals(JniIms.OK, mJniIms.removeSystemListener(SYSTEM_NATIVE_OBJECT));
+        assertNull(mJniIms.getSystemListener(SYSTEM_NATIVE_OBJECT));
     }
 
     @Test
@@ -138,12 +139,13 @@ public class JniImsTest {
 
         assertEquals(JniIms.ERROR_NO_LISTENER, JniIms.sendDataToJava(NATIVE_OBJECT, data));
 
-        JniIms.setListener(NATIVE_OBJECT, mListener);
+        mJniIms.setListener(NATIVE_OBJECT, mListener);
         JniIms.sendDataToJava(NATIVE_OBJECT, data);
 
         verify(mListener).onMessage(any(Parcel.class));
 
-        JniIms.removeListener(NATIVE_OBJECT);
+        mJniIms.removeListener(NATIVE_OBJECT);
+        JniIms.sendDataToJava(NATIVE_OBJECT, data);
 
         verifyNoMoreInteractions(mListener);
     }
@@ -160,12 +162,13 @@ public class JniImsTest {
         byte[] result = JniIms.sendDataToJavaForSystem(SYSTEM_NATIVE_OBJECT, data, null);
         assertTrue(Arrays.equals(result, new byte[] {(byte) 0}));
 
-        JniIms.setSystemListener(SYSTEM_NATIVE_OBJECT, mSystemListener);
+        mJniIms.setSystemListener(SYSTEM_NATIVE_OBJECT, mSystemListener);
         JniIms.sendDataToJavaForSystem(SYSTEM_NATIVE_OBJECT, data, null);
 
         verify(mSystemListener).onMessage(any(Parcel.class), any());
 
-        JniIms.removeSystemListener(SYSTEM_NATIVE_OBJECT);
+        mJniIms.removeSystemListener(SYSTEM_NATIVE_OBJECT);
+        JniIms.sendDataToJavaForSystem(SYSTEM_NATIVE_OBJECT, data, null);
 
         verifyNoMoreInteractions(mSystemListener);
     }

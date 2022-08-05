@@ -13,23 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef NATIVE_COMMANDS_H_
+#define NATIVE_COMMANDS_H_
+
 #include "DeviceConfig.h"
-#include "SystemConfig.h"
 
-PRIVATE GLOBAL IMS_SINT32 SystemConfig::s_nGlobalConfigs = CONFIG_MULTI_IMS;
-
-PUBLIC GLOBAL IMS_SINT32 SystemConfig::GetMaxSimSlot()
+class NativeCommands
 {
-    return DeviceConfig::GetActiveModemCount();
-}
+public:
+    NativeCommands() = delete;
 
-PUBLIC GLOBAL IMS_BOOL SystemConfig::IsMultiImsEnabled()
-{
-    // As a default, single IMS is required on dual SIM environment.
-    return (s_nGlobalConfigs & CONFIG_MULTI_IMS) != 0;
-}
+public:
+    static inline const IMS_SINT32 CMD_SET_DEVICE_CONFIG = 1;
+    static inline const IMS_SINT32 CMD_START_ENABLER = 2;
+    static inline const IMS_SINT32 CMD_STOP_ENABLER = 3;
+};
 
-PUBLIC GLOBAL IMS_BOOL SystemConfig::IsMultiSimEnabled()
-{
-    return GetMaxSimSlot() > 1;
-}
+#endif

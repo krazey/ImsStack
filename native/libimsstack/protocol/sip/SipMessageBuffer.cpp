@@ -26,7 +26,7 @@ SipMessageBuffer::SipMessageBuffer() :
 {
     IMS_MEM_Memset(m_baBuffer, 0x00, MAX_MSG_SIZE);
 
-    if (SystemConfig::IsMultiImsEnabled() || SystemConfig::IsMultiImsEnabledOnDssv())
+    if (SystemConfig::IsMultiImsEnabled())
     {
         IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
@@ -69,7 +69,7 @@ PUBLIC VIRTUAL SipMessageBuffer::~SipMessageBuffer()
 PUBLIC
 IMS_BYTE* SipMessageBuffer::GetBuffer()
 {
-    if (SystemConfig::IsMultiImsEnabled() || SystemConfig::IsMultiImsEnabledOnDssv())
+    if (SystemConfig::IsMultiImsEnabled())
     {
         return GetBuffer(ThreadService::GetCurrentSlotId(IMS_SLOT_0));
     }
@@ -83,7 +83,7 @@ IMS_BYTE* SipMessageBuffer::GetBuffer()
 PUBLIC
 IMS_BYTE* SipMessageBuffer::GetBuffer(IN IMS_SINT32 nSlotId)
 {
-    if (SystemConfig::IsMultiImsEnabled() || SystemConfig::IsMultiImsEnabledOnDssv())
+    if (SystemConfig::IsMultiImsEnabled())
     {
         if (m_ppBuffer != IMS_NULL)
         {

@@ -38,6 +38,16 @@ struct __DeviceConfig
             nWfcEnabled(0)
     {
     }
+
+    __DeviceConfig(IN IMS_SINT32 nActiveModemCount_, IN IMS_SINT32 nImsEmergencyEnabled_,
+            IN IMS_SINT32 nVoLteEnabled_, IN IMS_SINT32 nVtEnabled_, IN IMS_SINT32 nWfcEnabled_) :
+            nActiveModemCount(nActiveModemCount_),
+            nImsEmergencyEnabled(nImsEmergencyEnabled_),
+            nVoLteEnabled(nVoLteEnabled_),
+            nVtEnabled(nVtEnabled_),
+            nWfcEnabled(nWfcEnabled_)
+    {
+    }
 };
 
 class DeviceConfig
@@ -61,7 +71,7 @@ private:
     static void SetConfig(IN const __DeviceConfig& objConfig);
 
 private:
-    friend class ImsMain;
+    friend class NativeCommandsHandler;
 
     static __DeviceConfig s_objConfig;
 };

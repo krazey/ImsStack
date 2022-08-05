@@ -16,14 +16,15 @@
 #ifndef ENABLER_LOADER_H_
 #define ENABLER_LOADER_H_
 
-#include "ISystemConfigListener.h"
 #include "ImsMap.h"
 
+#include "IEnablerLoader.h"
+
+class ImsAppThread;
 class EnablerFactory;
 class EnablerThread;
 
-class EnablerLoader
-    : public ISystemConfigListener
+class EnablerLoader : public IEnablerLoader
 {
 private:
     EnablerLoader();
@@ -35,21 +36,16 @@ public:
 
 public:
     void Init();
+    void StartEnabler(IN IMS_SINT32 nSlotId) override;
+    void StopEnabler(IN IMS_SINT32 nSlotId) override;
 
     static void CreateInstance();
     static void DestroyInstance();
     static EnablerLoader* GetInstance();
 
-protected:
-    // ISystemConfigListener class
-    void SystemConfig_ConfigurationChanged(
-            IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId = IMS_SLOT_ANY) override;
-
 private:
     void CreateAndAddThread(IN IMS_SINT32 nSlotId);
     EnablerThread* GetEnablerThread(IN IMS_SINT32 nSlotId) const;
-
-    void ControlEnablers(IN IMS_SINT32 nSlotId);
 
     static ImsAppThread* CreateThread(IN void* pvParam);
 

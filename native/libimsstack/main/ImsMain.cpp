@@ -13,36 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "DeviceConfig.h"
 #include "ImsProcess.h"
 #include "PlatformProperty.h"
 #include "ServiceTrace.h"
-#include "SystemConfigManager.h"
 
 #include "private/ConfigurationManager.h"
 
 #include "EnablerLoader.h"
 #include "EngineState.h"
 #include "ImsMain.h"
+#include "NativeCommandsHandler.h"
 
-__IMS_TRACE_TAG_USER_DECL__("ImsMain")
+__IMS_TRACE_TAG_USER_DECL__("Main")
 
-PUBLIC GLOBAL void ImsMain::SetConfiguration(
-        IN IMS_SINT32 nEvent, IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig)
-{
-    SystemConfigManager* pScm = SystemConfigManager::GetInstance();
-    pScm->UpdateSystemConfig(nEvent, nCount, pSysConfig);
-
-    if ((nEvent == SystemConfig::EVENT_FEATURE_CHANGED) ||
-            (nEvent == SystemConfig::EVENT_ALL_CONFIGURATION_CHANGED))
-    {
-        // no-op
-    }
-}
-
-PUBLIC GLOBAL void ImsMain::SetDeviceConfig(IN const __DeviceConfig& objConfig)
-{
-    DeviceConfig::SetConfig(objConfig);
-}
+static NativeCommandsHandler s_objCommandsHandler;
 
 PUBLIC GLOBAL void ImsMain::Initialize()
 {
@@ -57,10 +42,8 @@ PUBLIC GLOBAL void ImsMain::Uninitialize()
 PUBLIC GLOBAL void ImsMain::Start()
 {
     InitializeConfigurationManager();
-
     // Starts the platform-specific threads
     PlatformProperty::Start();
-
     ImsProcess* pProcess = ImsProcess::GetInstance();
 
     // Starts the main worker thread
@@ -71,6 +54,7 @@ PUBLIC GLOBAL void ImsMain::Start()
 
     EngineState::Initialize();
     EnablerLoader::GetInstance()->Init();
+    s_objCommandsHandler.SetEnablerLoader(EnablerLoader::GetInstance());
 
     IMS_TRACE_I("ImsMain: start - %s", DeviceConfig::ToString().GetStr(), 0, 0);
 }
@@ -79,11 +63,17 @@ PUBLIC GLOBAL void ImsMain::Stop()
 {
     IMS_TRACE_I("ImsMain: stop", 0, 0, 0);
 
+    s_objCommandsHandler.SetEnablerLoader(IMS_NULL);
+
     EngineState::Uninitialize();
-
     ImsProcess::GetInstance()->Uninitialize();
-
     PlatformProperty::Stop();
+}
+
+PUBLIC GLOBAL void ImsMain::SendCommand(
+        IN IMS_SINT32 nCmd, IN IMS_SINT32 nSlotId, IN IMS_UINTP pnParam)
+{
+    s_objCommandsHandler.OnCommand(nCmd, nSlotId, pnParam);
 }
 
 PRIVATE GLOBAL void ImsMain::InitializeConfigurationManager()

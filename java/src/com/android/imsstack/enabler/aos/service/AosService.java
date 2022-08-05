@@ -31,8 +31,8 @@ import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.aos.IIAosService;
-import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsListener;
+import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.ImsLog;
@@ -68,9 +68,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
         mHandler = new AosServiceHandler();
 
-        mNativeObject = JniIms.getInterface(IUIMS.AOS_SERVICE, mSlotId);
+        mNativeObject = JniImsProxy.getInterface(IUIMS.AOS_SERVICE, mSlotId);
         if (mNativeObject != 0) {
-            JniIms.setListener(mNativeObject, mNativeListener);
+            JniImsProxy.setListener(mNativeObject, mNativeListener);
         }
 
         IJNIUpCallEvt jniEvt = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
@@ -94,8 +94,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             return;
         }
 
-        JniIms.removeListener(mNativeObject);
-        JniIms.releaseInterface(mNativeObject);
+        JniImsProxy.removeListener(mNativeObject);
+        JniImsProxy.releaseInterface(mNativeObject);
         mNativeObject = 0;
         mSlotId = MSimUtils.DEFAULT_SLOT_ID;
     }
@@ -382,7 +382,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         parcel.recycle();
         parcel = null;
 
-        JniIms.sendData(mNativeObject, data);
+        JniImsProxy.sendData(mNativeObject, data);
     }
 
     private void notifyCapabilitiesChanged() {

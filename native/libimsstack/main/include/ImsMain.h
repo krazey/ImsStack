@@ -16,8 +16,7 @@
 #ifndef IMS_MAIN_H_
 #define IMS_MAIN_H_
 
-#include "DeviceConfig.h"
-#include "SystemConfig.h"
+#include "ImsTypeDef.h"
 
 class ImsMain
 {
@@ -25,15 +24,11 @@ public:
     ImsMain() = delete;
 
 public:
-    // For system configuration or re-configuration
-    static void SetConfiguration(
-            IN IMS_SINT32 nEvent, IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig);
-    static void SetDeviceConfig(IN const __DeviceConfig& objConfig);
-
     static void Initialize();
     static void Uninitialize();
     static void Start();
     static void Stop();
+    static void SendCommand(IN IMS_SINT32 nCmd, IN IMS_SINT32 nSlotId, IN IMS_UINTP pnParam);
 
 private:
     static void InitializeConfigurationManager();

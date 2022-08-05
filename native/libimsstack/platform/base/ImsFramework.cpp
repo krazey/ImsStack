@@ -17,7 +17,6 @@
 #include "ImsFramework.h"
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
-#include "SystemConfigManager.h"
 
 PUBLIC
 ImsFramework::ImsFramework() :
@@ -31,7 +30,6 @@ ImsFramework::ImsFramework() :
 PUBLIC VIRTUAL ImsFramework::~ImsFramework()
 {
     MutexService::GetMutexService()->DestroyMutex(m_piLock);
-    SystemConfigManager::GetInstance()->SetProxyThread(IMS_NULL);
 }
 
 PUBLIC
@@ -82,15 +80,10 @@ void ImsFramework::RemoveListener(IN IFrameworkThreadListener* piListener)
 
 PROTECTED VIRTUAL IMS_BOOL ImsFramework::Initialize()
 {
-    SystemConfigManager::CacheSystemFeatures();
-    SystemConfigManager::GetInstance()->SetProxyThread(GetThread());
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL void ImsFramework::Uninitialize()
-{
-    SystemConfigManager::GetInstance()->SetProxyThread(IMS_NULL);
-}
+PROTECTED VIRTUAL void ImsFramework::Uninitialize() {}
 
 PROTECTED VIRTUAL IMS_BOOL ImsFramework::OnStart(IN ImsMessage& objMsg)
 {

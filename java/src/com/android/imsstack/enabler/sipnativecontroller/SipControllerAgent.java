@@ -24,8 +24,8 @@ import android.util.SparseArray;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.imsservice.sipcontroller.remote.ISipTransportRemote;
 import com.android.imsstack.imsservice.sipcontroller.remote.SipTransportRemoteListener;
-import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsListener;
+import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Set;
@@ -66,10 +66,10 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
     private void initService(int slotId) {
 
-        long nativeObj = JniIms.getInterface(IUIMS.APP_SIP_DELEGATE, slotId);
+        long nativeObj = JniImsProxy.getInterface(IUIMS.APP_SIP_DELEGATE, slotId);
         mNativeObj = nativeObj;
         if (nativeObj != 0) {
-            JniIms.setListener(nativeObj, this);
+            JniImsProxy.setListener(nativeObj, this);
         } else {
             ImsLog.e("nativeObj is 0");
         }
@@ -81,8 +81,8 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     @Override
     public void release() {
 
-        JniIms.removeListener(mNativeObj);
-        JniIms.releaseInterface(mNativeObj);
+        JniImsProxy.removeListener(mNativeObj);
+        JniImsProxy.releaseInterface(mNativeObj);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
         parcel = null;
 
         if (mNativeObj != 0) {
-            JniIms.sendData(mNativeObj, baData);
+            JniImsProxy.sendData(mNativeObj, baData);
         }
     }
 

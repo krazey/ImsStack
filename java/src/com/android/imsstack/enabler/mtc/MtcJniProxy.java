@@ -18,8 +18,8 @@ package com.android.imsstack.enabler.mtc;
 
 import android.os.Parcel;
 
-import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsListener;
+import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.util.ImsLog;
 
 /**
@@ -50,9 +50,9 @@ public class MtcJniProxy {
      * @@return a memory address of Native object.
      */
     public long getJniInterfaceAndSetListener(int nSlot, int category, JniImsListener listener) {
-        long nativeObj = JniIms.getInterface(category, nSlot);
+        long nativeObj = JniImsProxy.getInterface(category, nSlot);
         if (nativeObj != 0) {
-            JniIms.setListener(nativeObj, listener);
+            JniImsProxy.setListener(nativeObj, listener);
         }
         return nativeObj;
     }
@@ -64,8 +64,8 @@ public class MtcJniProxy {
      * @param listener that needs to be removed.
      */
     public void releaseJniInterfaceAndrRemoveListener(long nativeObj, JniImsListener listener) {
-        JniIms.releaseInterface(nativeObj);
-        JniIms.removeListener(nativeObj);
+        JniImsProxy.releaseInterface(nativeObj);
+        JniImsProxy.removeListener(nativeObj);
     }
 
     /**
@@ -82,7 +82,7 @@ public class MtcJniProxy {
 
         byte[] baData = parcel.marshall();
 
-        JniIms.sendData(nativeObj, baData);
+        JniImsProxy.sendData(nativeObj, baData);
 
         parcel.recycle();
         parcel = null;

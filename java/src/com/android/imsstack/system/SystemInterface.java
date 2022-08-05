@@ -23,7 +23,7 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.jni.JniIms;
+import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.JniSystemListener;
 import com.android.imsstack.system.SystemConstants;
 import com.android.imsstack.util.ImsLog;
@@ -77,10 +77,10 @@ public class SystemInterface implements JniSystemListener {
         if (mNativeObject == 0) {
             sSystemInterface = this;
 
-            mNativeObject = JniIms.getInterface(
+            mNativeObject = JniImsProxy.getInterface(
                     SystemConstants.SYSTEM_INTERFACE, MSimUtils.DEFAULT_SLOT_ID);
 
-            JniIms.setSystemListener(mNativeObject, this);
+            JniImsProxy.setSystemListener(mNativeObject, this);
             mDefaultExecutor.start();
 
             if (ImsLog.DBG) {
@@ -95,8 +95,8 @@ public class SystemInterface implements JniSystemListener {
     public void cleanup() {
         if (mNativeObject != 0) {
             mDefaultExecutor = null;
-            JniIms.removeSystemListener(mNativeObject);
-            JniIms.releaseInterface(mNativeObject);
+            JniImsProxy.removeSystemListener(mNativeObject);
+            JniImsProxy.releaseInterface(mNativeObject);
             mNativeObject = 0;
         }
     }
@@ -813,7 +813,7 @@ public class SystemInterface implements JniSystemListener {
         byte[] baData = parcel.marshall();
 
         try {
-            baDataRet = JniIms.sendDataForSystem(mNativeObject, baData);
+            baDataRet = JniImsProxy.sendDataForSystem(mNativeObject, baData);
         } catch (RuntimeException e) {
             ImsLog.e(e.getStackTrace().toString() + " cmd : " + nCmd);
             return;

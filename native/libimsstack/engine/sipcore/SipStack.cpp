@@ -17,7 +17,6 @@
 #include "ImsStrLib.h"
 #include "ServiceMemory.h"
 #include "ServiceUtil.h"
-#include "SystemConfigManager.h"
 
 #include "SipConfigProxy.h"
 #include "SipHeader.h"
@@ -188,7 +187,7 @@ LOCAL IMS_BOOL GetParameter(
 
 GLOBAL void Initialize()
 {
-    IMS_SINT32 nSlotId = SystemConfigManager::GetInstance()->GetActiveSlotId();
+    IMS_SINT32 nSlotId = IMS_SLOT_0;
     const ISipConfigV* piSipConfigV = SipConfigProxy::GetSipConfigV(nSlotId);
 
     // For transaction layer handling
@@ -221,7 +220,7 @@ GLOBAL void Initialize()
 
         // TODO - Verify and modify implementation for dualsim hot swap scenarios.
         // SetCompactForm Encoding
-        SIP_BOOL bCompact = (SIP_BOOL)SipConfigProxy::IsCompactFormConfigured(IMS_SLOT_0, NULL);
+        SIP_BOOL bCompact = (SIP_BOOL)SipConfigProxy::IsCompactFormConfigured(nSlotId, NULL);
         pSipConfig->SetShortFormEncoding(bCompact);
 
         // PANI header for ACK message to INVITE failure response

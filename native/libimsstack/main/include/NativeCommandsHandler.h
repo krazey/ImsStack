@@ -13,23 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DeviceConfig.h"
-#include "SystemConfig.h"
+#ifndef NATIVE_COMMANDS_HANDLER_H_
+#define NATIVE_COMMANDS_HANDLER_H_
 
-PRIVATE GLOBAL IMS_SINT32 SystemConfig::s_nGlobalConfigs = CONFIG_MULTI_IMS;
+#include "IEnablerLoader.h"
 
-PUBLIC GLOBAL IMS_SINT32 SystemConfig::GetMaxSimSlot()
+class NativeCommandsHandler
 {
-    return DeviceConfig::GetActiveModemCount();
-}
+public:
+    inline NativeCommandsHandler() :
+            m_piEnablerLoader(IMS_NULL)
+    {
+    }
+    inline virtual ~NativeCommandsHandler() {}
 
-PUBLIC GLOBAL IMS_BOOL SystemConfig::IsMultiImsEnabled()
-{
-    // As a default, single IMS is required on dual SIM environment.
-    return (s_nGlobalConfigs & CONFIG_MULTI_IMS) != 0;
-}
+public:
+    inline void SetEnablerLoader(IN IEnablerLoader* piEnablerLoader)
+    {
+        m_piEnablerLoader = piEnablerLoader;
+    }
+    void OnCommand(IN IMS_SINT32 nCmd, IN IMS_SINT32 nSlotId, IN IMS_UINTP pnParam);
 
-PUBLIC GLOBAL IMS_BOOL SystemConfig::IsMultiSimEnabled()
-{
-    return GetMaxSimSlot() > 1;
-}
+private:
+    IEnablerLoader* m_piEnablerLoader;
+};
+
+#endif

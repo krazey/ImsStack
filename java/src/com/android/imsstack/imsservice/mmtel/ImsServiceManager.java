@@ -28,7 +28,6 @@ import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.core.config.FeatureTable;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
-import com.android.imsstack.system.SystemConfig;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
@@ -540,13 +539,13 @@ public final class ImsServiceManager {
             if ((isub != null) && (isub.isSimAbsent(phoneId) || isub.isSimLocked(phoneId))
                     && ImsUtils.isEmergencyCallEnabledOnServiceRestricted()) {
                 logi("SimAbsentOrLocked: VoLTE is enabled for IMS e-call");
-                serviceFeatures |= SystemConfig.FEATURE_S_VOLTE;
-                serviceFeatures |= SystemConfig.FEATURE_S_VOLTE_EMERGENCY;
+                serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE;
+                serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE_EMERGENCY;
             } else if (ImsConstants.USE_CARRIER_CONFIG
                     && ImsUtils.isDeviceEncryptionModeEnabledAsFDE()) {
                 logi("EncryptionMode: VoLTE is enabled for IMS e-call");
-                serviceFeatures |= SystemConfig.FEATURE_S_VOLTE;
-                serviceFeatures |= SystemConfig.FEATURE_S_VOLTE_EMERGENCY;
+                serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE;
+                serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE_EMERGENCY;
             }
         }
 
@@ -554,8 +553,8 @@ public final class ImsServiceManager {
         // FIXME: Dual VoLTE
         if ((serviceFeatures == 0) && ImsUtils.isEmergencyCallEnabledOnNonVoLteSim()) {
             logi("NonVoLteSim: VoLTE is enabled for IMS e-call");
-            serviceFeatures |= SystemConfig.FEATURE_S_VOLTE;
-            serviceFeatures |= SystemConfig.FEATURE_S_VOLTE_EMERGENCY;
+            serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE;
+            serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE_EMERGENCY;
         }
 
         return serviceFeatures;
@@ -568,15 +567,15 @@ public final class ImsServiceManager {
         logi(serviceCaps.toString());
 
         if (serviceCaps.isVoLteEnabled()) {
-            serviceFeatures |= SystemConfig.FEATURE_S_VOLTE;
+            serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE;
         }
 
         if (serviceCaps.isWfcEnabled()) {
-            serviceFeatures |= SystemConfig.FEATURE_S_VOWIFI;
+            serviceFeatures |= FeatureConfig.FEATURE_S_VOWIFI;
         }
 
         if (serviceCaps.isVtEnabled()) {
-            serviceFeatures |= SystemConfig.FEATURE_S_VT;
+            serviceFeatures |= FeatureConfig.FEATURE_S_VT;
         }
 
         return serviceFeatures;

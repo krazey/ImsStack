@@ -33,6 +33,7 @@
 #include "IUIMS.h"
 #include "ImsMain.h"
 #include "JniSystem.h"
+#include "NativeCommands.h"
 
 using namespace android;
 
@@ -61,8 +62,6 @@ static jclass s_classJniIms;
 static jmethodID s_methodSendDataToJava;
 static jmethodID s_methodSendDataToJavaForSystem;
 
-// For system configuration on boot-up
-static android::Parcel* s_pParcelForSystemConfigOnBootup = IMS_NULL;
 static const char* s_szClassJniImsPath = "com/android/imsstack/jni/JniIms";
 
 static JavaVM* s_javaVm = NULL;
@@ -221,95 +220,73 @@ int SendDataToJavaForSystem(
     return 1;
 }
 
-IMS_BOOL ReadDeviceConfig(IN android::Parcel* pParcel, OUT __DeviceConfig& objConfig)
+IMS_UINTP GetCommandParam(IN JNIEnv* env, IN jint cmd, IN jbyteArray jData)
 {
-    objConfig.nActiveModemCount = pParcel->readInt32();
-    objConfig.nImsEmergencyEnabled = pParcel->readInt32();
-    objConfig.nVoLteEnabled = pParcel->readInt32();
-    objConfig.nVtEnabled = pParcel->readInt32();
-    objConfig.nWfcEnabled = pParcel->readInt32();
+    if (jData == NULL)
+    {
+        return 0;
+    }
 
-    return IMS_TRUE;
+    jbyte* pData = env->GetByteArrayElements(jData, NULL);
+    int nDataLen = env->GetArrayLength(jData);
+
+    if (nDataLen == 0)
+    {
+        env->ReleaseByteArrayElements(jData, pData, 0);
+        return 0;
+    }
+
+    android::Parcel objData;
+
+    objData.setData((const uint8_t*)pData, nDataLen);
+    objData.setDataPosition(0);
+
+    env->ReleaseByteArrayElements(jData, pData, 0);
+
+    IMS_UINTP pnParam = 0;
+
+    switch (cmd)
+    {
+        case NativeCommands::CMD_SET_DEVICE_CONFIG:
+        {
+            __DeviceConfig* pConfig = new __DeviceConfig();
+
+            pConfig->nActiveModemCount = objData.readInt32();
+            pConfig->nImsEmergencyEnabled = objData.readInt32();
+            pConfig->nVoLteEnabled = objData.readInt32();
+            pConfig->nVtEnabled = objData.readInt32();
+            pConfig->nWfcEnabled = objData.readInt32();
+
+            pnParam = reinterpret_cast<IMS_UINTP>(pConfig);
+            break;
+        }
+        default:
+            // no-op
+            break;
+    }
+
+    return pnParam;
 }
 
-__SystemConfig* CreateSystemConfig(IN android::Parcel* pParcel, OUT IMS_SINT32& nCount)
+void ReleaseCommandParam(IN jint cmd, IN IMS_UINTP pnParam)
 {
-    nCount = pParcel->readInt32();
-
-    if (nCount <= 0)
+    if (pnParam == 0)
     {
-        return IMS_NULL;
+        return;
     }
 
-    __SystemConfig* pSystemConfig =
-            reinterpret_cast<__SystemConfig*>(malloc(sizeof(__SystemConfig) * nCount));
-
-    if (pSystemConfig == IMS_NULL)
+    switch (cmd)
     {
-        return IMS_NULL;
+        case NativeCommands::CMD_SET_DEVICE_CONFIG:
+        {
+            __DeviceConfig* pConfig = reinterpret_cast<__DeviceConfig*>(pnParam);
+            delete pConfig;
+            break;
+        }
+        default:
+            // no-op
+            break;
     }
-
-    memset(pSystemConfig, 0, sizeof(__SystemConfig) * nCount);
-
-    android::String16 str16;
-
-    for (int i = 0; i < nCount; ++i)
-    {
-        __SystemConfig* pSc = &pSystemConfig[i];
-
-        pSc->nSlotId = pParcel->readInt32();
-
-        str16 = pParcel->readString16();
-        android::String8 strOperator(str16);
-        strncpy(pSc->acOperator, strOperator.string(), IMS_SC_SIZE_16);
-
-        str16 = pParcel->readString16();
-        android::String8 strCountry(str16);
-        strncpy(pSc->acCountry, strCountry.string(), IMS_SC_SIZE_8);
-
-        str16 = pParcel->readString16();
-        android::String8 strEnablerType(str16);
-        strncpy(pSc->acEnablerType, strEnablerType.string(), IMS_SC_SIZE_16);
-
-        pSc->nExtraInfo = pParcel->readInt32();
-
-        pSc->nFeatures = pParcel->readInt32();
-        pSc->nServiceFeatures = pParcel->readInt32();
-    }
-
-    return pSystemConfig;
-}
-
-void DestroySystemConfig(IN __SystemConfig* pSystemConfig)
-{
-    if (pSystemConfig != IMS_NULL)
-    {
-        free(pSystemConfig);
-    }
-}
-
-__SystemConfig* GetSystemConfigOnBootup(IN int& nCount)
-{
-    __SystemConfig* pConfig = IMS_NULL;
-
-    nCount = 0;
-
-    if (s_pParcelForSystemConfigOnBootup != IMS_NULL)
-    {
-        pConfig = CreateSystemConfig(s_pParcelForSystemConfigOnBootup, nCount);
-    }
-
-    return pConfig;
-}
-
-void SetSystemConfigOnBootup(IN android::Parcel* pParcel)
-{
-    if (s_pParcelForSystemConfigOnBootup != IMS_NULL)
-    {
-        delete s_pParcelForSystemConfigOnBootup;
-    }
-
-    s_pParcelForSystemConfigOnBootup = pParcel;
 }
 
 void JniAttachNativeThread(const char* threadName)
@@ -380,96 +357,25 @@ static NativeThreadMethods s_objNativeThreadMethods;
 
 static void JniIms_nativeInit(JNIEnv* /*env*/, jobject /*object*/)
 {
-    // Memory and basic platform's initialization
+    IMS_LOGD("JniIms_nativeInit");
     ImsMain::Initialize();
     ThreadService::SetNativeThreadMethods(&s_objNativeThreadMethods);
-
-    // Configure the system configuration on boot-up
-    {
-        int nCount = 0;
-        __SystemConfig* pConfig = GetSystemConfigOnBootup(nCount);
-        ImsMain::SetConfiguration(SystemConfig::EVENT_ON_BOOT, nCount, pConfig);
-        SetSystemConfigOnBootup(IMS_NULL);
-
-        if (pConfig != IMS_NULL)
-        {
-            free(pConfig);
-        }
-    }
-
     ImsMain::Start();
 }
 
 static void JniIms_nativeDeInit(JNIEnv* /*env*/, jobject /*object*/)
 {
-    IMS_TRACE_I("JniIms_nativeDeInit", 0, 0, 0);
-
+    IMS_LOGD("JniIms_nativeDeInit");
     ImsMain::Stop();
-
     ImsMain::Uninitialize();
 }
 
 static int JniIms_nativeSendCommand(
         JNIEnv* env, jobject /*object*/, jint cmd, jint slotId, jbyteArray jData)
 {
-    (void)slotId;
-
-    if (cmd == SystemConfig::EVENT_FEATURE_PERMISSIONS_CHANGED)
-    {
-        ImsMain::SetConfiguration(cmd, 0, IMS_NULL);
-        return JNI_IMS_OK;
-    }
-
-    jbyte* pData = env->GetByteArrayElements(jData, NULL);
-    int nDataSize = env->GetArrayLength(jData);
-
-    if (nDataSize == 0)
-    {
-        env->ReleaseByteArrayElements(jData, pData, 0);
-        return JNI_IMS_ERROR;
-    }
-
-    android::Parcel* pParcel = new android::Parcel();
-
-    pParcel->setData((const uint8_t*)pData, nDataSize);
-    pParcel->setDataPosition(0);
-
-    env->ReleaseByteArrayElements(jData, pData, 0);
-
-    // Keep the system configuration and use it to initialize IMS core
-    // if the configuration is for boot-up (Initial start of IMS process).
-    if (cmd == SystemConfig::EVENT_ON_BOOT)
-    {
-        SetSystemConfigOnBootup(pParcel);
-    }
-    else if (cmd == SystemConfig::EVENT_DEVICE_CONFIG)
-    {
-        __DeviceConfig objConfig;
-
-        if (ReadDeviceConfig(pParcel, objConfig))
-        {
-            ImsMain::SetDeviceConfig(objConfig);
-        }
-
-        delete pParcel;
-    }
-    else
-    {
-        int nCount = 0;
-        __SystemConfig* pSystemConfig = CreateSystemConfig(pParcel, nCount);
-
-        delete pParcel;
-
-        if (nCount == 0)
-        {
-            return JNI_IMS_ERROR;
-        }
-
-        ImsMain::SetConfiguration(cmd, nCount, pSystemConfig);
-
-        DestroySystemConfig(pSystemConfig);
-    }
-
+    IMS_UINTP pnParam = GetCommandParam(env, cmd, jData);
+    ImsMain::SendCommand(cmd, slotId, pnParam);
+    ReleaseCommandParam(cmd, pnParam);
     return JNI_IMS_OK;
 }
 

@@ -21,14 +21,12 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.enabler.aos.AosFactory;
-import com.android.imsstack.jni.JniIms;
+import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.system.JNIUpCallEvtManager;
-import com.android.imsstack.system.SystemConfig;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
 
@@ -124,17 +122,7 @@ public class CommonStarter {
         Context context = AppContext.getInstance();
 
         ImsLog.init();
-
-        SystemConfig.setDeviceConfig(
-                MSimUtils.getMaxSimSlot(),
-                true, // imsEmergencyEnabled
-                ImsUtils.isVoLteEnabledByDevice(
-                        context, MSimUtils.DEFAULT_PHONE_ID),
-                ImsUtils.isVtEnabledByDevice(
-                        context, MSimUtils.DEFAULT_PHONE_ID),
-                ImsUtils.isWfcEnabledByDevice(
-                        context, MSimUtils.DEFAULT_PHONE_ID));
-
+        NativeCommands.setDeviceConfig(context);
         SystemInterface.getInstance().init();
 
         AosFactory.getInstance().init();
@@ -218,9 +206,9 @@ public class CommonStarter {
 
         Log.i(TAG, "createJNI");
 
-        updateSystemConfigForBootup();
+        NativeCommands.setDeviceConfig(AppContext.getInstance());
 
-        JniIms.init();
+        JniImsProxy.init();
 
         mJNIReady = true;
     }
@@ -231,16 +219,6 @@ public class CommonStarter {
         }
 
         mCommonAgentReady = true;
-    }
-
-    public void updateSystemConfigForBootup() {
-        Log.i(TAG, "updateSystemConfigForBootup");
-        NativeLoader.setSystemConfigForBootup();
-    }
-
-    public void updateSystemConfigOnSimLoaded(int slotId) {
-        Log.i(TAG, "updateSystemConfigOnSimLoaded(" + slotId + ")");
-        NativeLoader.setSystemConfigForAllConfigurationChanged(slotId, false);
     }
 
     private void notifyPackageReady(int slotId) {
