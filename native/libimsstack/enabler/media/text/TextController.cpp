@@ -58,7 +58,7 @@ IMS_BOOL TextController::HoldSession()
         m_pSession->UpdateMediaQualityThreshold(IMS_TRUE, IMS_TRUE);
         m_pSession->SetMediaQuality();
         m_pSession->HoldRtpConfig();
-        m_pSession->Modify();
+        return m_pSession->Modify();
     }
 
     return IMS_FALSE;
@@ -112,8 +112,7 @@ IMS_BOOL TextController::UpdateSession()
         else
         {
             m_pSession->SetMediaQuality();
-            m_pSession->Modify();
-            return IMS_TRUE;
+            return m_pSession->Modify();
         }
     }
 

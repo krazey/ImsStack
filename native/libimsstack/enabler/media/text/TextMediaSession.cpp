@@ -55,7 +55,6 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegoProfile == IMS_NULL)
     {
-        IMS_TRACE_I("UpdateRtpConfig() - invalid parameter", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -299,7 +298,7 @@ IMS_BOOL TextMediaSession::Modify()
 {
     IMS_TRACE_I("Modify()", 0, 0, 0);
 
-    if (m_piMediaSessionListener != IMS_NULL && m_nState != STATE_IDLE)
+    if (m_piMediaSessionListener != IMS_NULL && m_nState != STATE_NONE)
     {
         ImsMediaMsgConfigParam* pParam = new ImsMediaMsgConfigParam(MEDIA_TYPE_TEXT);
         pParam->m_pConfig = new TextConfig(m_objTextConfig);
@@ -319,6 +318,7 @@ IMS_BOOL TextMediaSession::Modify()
             return IMS_TRUE;
         }
     }
+
     return IMS_FALSE;
 }
 
