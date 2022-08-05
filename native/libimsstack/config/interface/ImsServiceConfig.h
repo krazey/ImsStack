@@ -86,7 +86,7 @@ public:
      * @param objProfile The IMS service profile
      * @return List of the service name from the specified IMS service profile.
      */
-    static IMSList<ImsServiceName> GetServiceNames(IN const ImsServiceProfile& objProfile);
+    static ImsList<ImsServiceName> GetServiceNames(IN const ImsServiceProfile& objProfile);
 };
 
 #endif

@@ -147,10 +147,10 @@ PUBLIC GLOBAL ImsServiceProfile ImsServiceConfig::GetEmergencyServiceProfile()
     return objProfile;
 }
 
-PUBLIC GLOBAL IMSList<ImsServiceName> ImsServiceConfig::GetServiceNames(
+PUBLIC GLOBAL ImsList<ImsServiceName> ImsServiceConfig::GetServiceNames(
         IN const ImsServiceProfile& objProfile)
 {
-    IMSList<ImsServiceName> objServiceNames;
+    ImsList<ImsServiceName> objServiceNames;
 
     for (IMS_SINT32 i = 0; i < objProfile.nCount; i++)
     {
