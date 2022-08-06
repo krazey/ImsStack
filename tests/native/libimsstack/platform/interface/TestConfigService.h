@@ -22,16 +22,28 @@
 class TestConfigService : public ConfigService
 {
 public:
+    inline TestConfigService() :
+            ConfigService(),
+            m_piCarrierConfig(&m_objCarrierConfig)
+    {
+    }
+
     ICarrierConfig* GetCarrierConfig(IN IMS_SINT32 /*nSlotId*/) override
     {
-        return &m_objCarrierConfig;
+        return m_piCarrierConfig;
     }
     void LoadCarrierConfig(IN IMS_SINT32 /*nSlotId*/) override {}
 
     inline MockICarrierConfig& GetMockCarrierConfig() { return m_objCarrierConfig; }
+    inline void SetCarrierConfig(IN ICarrierConfig* piCarrierConfig)
+    {
+        m_piCarrierConfig = piCarrierConfig;
+    }
 
 private:
     MockICarrierConfig m_objCarrierConfig;
+
+    ICarrierConfig* m_piCarrierConfig;
 };
 
 #endif
