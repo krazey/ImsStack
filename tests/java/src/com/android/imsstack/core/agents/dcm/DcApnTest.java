@@ -43,9 +43,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.core.agents.agentif.ISharedState;
-import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.core.agents.agentif.SubscriptionListener;
+import com.android.imsstack.core.agents.ISharedState;
+import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;

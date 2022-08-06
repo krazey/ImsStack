@@ -20,9 +20,9 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.IAlarmTimer;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
-import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;

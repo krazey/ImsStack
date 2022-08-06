@@ -20,7 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ISubscription;
+import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.MSimUtils;

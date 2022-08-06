@@ -13,12 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.core.service.serviceif;
+package com.android.imsstack.core.agents;
 
-import com.android.imsstack.core.agents.IAgent;
-import com.android.imsstack.core.agents.ICallSetting;
-import com.android.imsstack.system.ISystemAPIWifiCalling;
+/**
+ * This provides an interface to control the wake lock while processing SIP signalling.
+ */
+public interface IWakeLock extends IAgent {
+    /**
+     * Sets the device stay on until timer expired.
+     */
+    void acquire(int timeout);
 
-public interface ICallSettingService extends IService, ICallSetting, ISystemAPIWifiCalling, IAgent {
-
+    /**
+     * Sets the device stay on until timer expired when screen is off.
+     */
+    void acquire(int timeout, boolean screenOffOnly);
 }

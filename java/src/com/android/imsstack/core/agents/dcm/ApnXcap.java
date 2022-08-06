@@ -22,7 +22,7 @@ import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 
-import com.android.imsstack.core.agents.agentif.MsgProcInterface;
+import com.android.imsstack.core.agents.MsgProcInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;

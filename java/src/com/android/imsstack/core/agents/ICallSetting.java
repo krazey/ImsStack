@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.android.imsstack.core.agents.agentif;
+package com.android.imsstack.core.agents;
 
 import android.os.Handler;
 
 /**
- * this file is for providing the call setting information
+ * This provides an interface to access, control, and monitor the call settings.
  */
 public interface ICallSetting {
     /** Return VoWifi setting is enabled or not in call setting menu */

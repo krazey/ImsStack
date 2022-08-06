@@ -22,7 +22,7 @@ import android.os.Message;
 import android.os.Parcel;
 
 import com.android.imsstack.core.ICommonPackageListener;
-import com.android.imsstack.core.agents.agentif.ISharedState;
+import com.android.imsstack.core.agents.ISharedState;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;

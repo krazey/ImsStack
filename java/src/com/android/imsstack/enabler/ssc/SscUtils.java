@@ -19,9 +19,9 @@ package com.android.imsstack.enabler.ssc;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ITelephonySubscriber;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
-import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 

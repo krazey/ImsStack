@@ -26,9 +26,9 @@ import android.os.Message;
 import android.os.SystemClock;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.IAlarmTimer;
+import com.android.imsstack.core.agents.ILocationAgent;
 import com.android.imsstack.core.agents.LocationApi;
-import com.android.imsstack.core.agents.agentif.IAlarmTimer;
-import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.GeocoderProxy;
 import com.android.imsstack.util.ImsLog;

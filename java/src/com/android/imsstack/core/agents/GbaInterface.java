@@ -18,8 +18,6 @@ package com.android.imsstack.core.agents;
 
 import android.util.Pair;
 
-import com.android.imsstack.core.agents.agentif.IAgent;
-
 /**
  * Provides the APIs for getting key pair of bootstrapped security association.
  */

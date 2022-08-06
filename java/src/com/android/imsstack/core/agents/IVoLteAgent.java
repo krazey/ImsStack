@@ -13,12 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.core.service.serviceif;
+package com.android.imsstack.core.agents;
 
-import com.android.imsstack.core.agents.IAgent;
-import com.android.imsstack.core.agents.ICallSetting;
-import com.android.imsstack.system.ISystemAPIWifiCalling;
+/**
+ * This provides an interface to start and stop the VoLte agents.
+ */
+public interface IVoLteAgent {
+    /**
+     * Cleans up the Agent object.
+     */
+    void cleanup();
 
-public interface ICallSettingService extends IService, ICallSetting, ISystemAPIWifiCalling, IAgent {
+    /**
+     * Starts the Agent object.
+     *
+     * @param slotId The slot-id to be started.
+     */
+    void start(int slotId);
 
+    /**
+     * Stops the Agent object.
+     *
+     * @param slotId The slot-id to be stopped.
+     */
+    void stop(int slotId);
 }

@@ -29,7 +29,7 @@ import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.AlarmTimerAgent;
 import com.android.imsstack.core.agents.ConfigAgent;
-import com.android.imsstack.core.agents.agentif.IAlarmTimer;
+import com.android.imsstack.core.agents.IAlarmTimer;
 import com.android.imsstack.core.agents.dcm.DcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;

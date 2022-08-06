@@ -26,7 +26,6 @@ import android.os.Message;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;

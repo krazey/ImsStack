@@ -18,8 +18,6 @@ package com.android.imsstack.core.agents;
 import android.content.Context;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.core.agents.agentif.IPhoneState;
-import com.android.imsstack.core.agents.agentif.ITelephonyState;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.system.ISystem;

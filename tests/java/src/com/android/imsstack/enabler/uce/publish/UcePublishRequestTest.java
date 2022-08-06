@@ -27,7 +27,7 @@ import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.core.agents.agentif.IPreference;
+import com.android.imsstack.core.agents.IPreference;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
 import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
 import com.android.imsstack.enabler.uce.impl.publish.UcePublishRequest;

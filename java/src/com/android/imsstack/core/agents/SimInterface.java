@@ -18,8 +18,6 @@ package com.android.imsstack.core.agents;
 
 import android.annotation.NonNull;
 
-import com.android.imsstack.core.agents.agentif.IAgent;
-
 import java.util.List;
 
 /**

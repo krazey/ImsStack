@@ -27,8 +27,8 @@ import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.VoLteFactory;
-import com.android.imsstack.core.agents.agentif.ILocationAgent;
-import com.android.imsstack.core.agents.agentif.ILocationAgentManager;
+import com.android.imsstack.core.agents.ILocationAgent;
+import com.android.imsstack.core.agents.ILocationAgentManager;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
 import com.android.imsstack.system.ISystem;

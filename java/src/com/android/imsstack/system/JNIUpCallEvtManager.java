@@ -20,7 +20,7 @@ import android.os.Registrant;
 import android.os.RegistrantList;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.IBatteryState;
+import com.android.imsstack.core.agents.IBatteryState;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 

@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 import android.os.Handler;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.imsstack.core.agents.agentif.IAlarmTimer;
+import com.android.imsstack.core.agents.IAlarmTimer;
 import com.android.imsstack.enabler.acs.impl.ReconfigManager;
 
 import org.junit.After;

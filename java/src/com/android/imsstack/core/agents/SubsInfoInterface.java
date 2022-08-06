@@ -16,8 +16,6 @@
 
 package com.android.imsstack.core.agents;
 
-import com.android.imsstack.core.agents.agentif.IAgent;
-
 public interface SubsInfoInterface extends IAgent {
     /** Returns the primary IMPU string. */
     String getPrimaryImpu();

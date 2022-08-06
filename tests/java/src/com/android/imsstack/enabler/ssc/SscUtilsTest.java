@@ -24,9 +24,9 @@ import static org.mockito.Mockito.when;
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ITelephonySubscriber;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
-import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.core.config.CarrierConfig;
 
 import org.junit.After;

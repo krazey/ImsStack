@@ -33,7 +33,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
-import com.android.imsstack.core.agents.agentif.ISharedState;
+import com.android.imsstack.core.agents.ISharedState;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
 import com.android.imsstack.enabler.mtc.dialogs.IUDialogs;

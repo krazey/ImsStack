@@ -33,9 +33,9 @@ import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.core.agents.agentif.MsgProcInterface;
-import com.android.imsstack.core.agents.agentif.SubscriptionListener;
+import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.MsgProcInterface;
+import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.DcConstants;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;

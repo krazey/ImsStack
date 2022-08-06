@@ -33,7 +33,6 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.CapabilityConfigs;
-import com.android.imsstack.core.agents.agentif.ICellInfo;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.carrier.CarrierInfo;

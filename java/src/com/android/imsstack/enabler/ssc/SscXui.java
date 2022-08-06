@@ -19,7 +19,7 @@ package com.android.imsstack.enabler.ssc;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.IPreference;
+import com.android.imsstack.core.agents.IPreference;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Locale;

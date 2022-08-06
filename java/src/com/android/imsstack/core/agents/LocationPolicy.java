@@ -1,5 +1,23 @@
-package com.android.imsstack.core.agents.agentif;
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.imsstack.core.agents;
 
+/**
+ * This class defines the rules to obtain the location information.
+ */
 public class LocationPolicy {
     public static final int POLICY_NONE = 0;
     /**
@@ -145,6 +163,9 @@ public class LocationPolicy {
         mValidityPeriod = validityPeriod;
     }
 
+    /**
+     * Resets all the member fields.
+     */
     public void reset() {
         mPolicy = POLICY_NONE;
         mDefaultUpdateInterval = LOCATION_UPDATE_INTERVAL;
@@ -160,6 +181,11 @@ public class LocationPolicy {
         mShape = SHAPE_CIRCLE;
     }
 
+    /**
+     * Sets the location policy from the given object.
+     *
+     * @param lp The location policy to be set.
+     */
     public void set(LocationPolicy lp) {
         mPolicy = lp.mPolicy;
         mDefaultUpdateInterval = lp.mDefaultUpdateInterval;
@@ -175,18 +201,30 @@ public class LocationPolicy {
         mShape = lp.mShape;
     }
 
+    /**
+     * Returns the curren policy.
+     */
     public int getPolicy() {
         return mPolicy;
     }
 
+    /**
+     * Checks whether the specified policy is contained or not.
+     */
     public boolean hasPolicy(int policy) {
         return (mPolicy & policy) == policy;
     }
 
+    /**
+     * Clears the specified policy.
+     */
     public void clearPolicy(int policy) {
         mPolicy &= (~policy);
     }
 
+    /**
+     * Sets the specified policy.
+     */
     public void setPolicy(int policy) {
         mPolicy |= policy;
     }

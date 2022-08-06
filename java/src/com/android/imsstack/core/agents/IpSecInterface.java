@@ -15,7 +15,6 @@
  */
 package com.android.imsstack.core.agents;
 
-import com.android.imsstack.core.agents.agentif.IAgent;
 import com.android.imsstack.system.IpSecSaParameter;
 
 import java.io.FileDescriptor;

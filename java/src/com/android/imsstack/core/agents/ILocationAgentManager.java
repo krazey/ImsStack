@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.core.service.serviceif;
+package com.android.imsstack.core.agents;
 
-import com.android.imsstack.core.agents.IAgent;
-import com.android.imsstack.core.agents.ICallSetting;
-import com.android.imsstack.system.ISystemAPIWifiCalling;
-
-public interface ICallSettingService extends IService, ICallSetting, ISystemAPIWifiCalling, IAgent {
-
+/**
+ * This provides an interface to access the location agent for a specific slot-id.
+ */
+public interface ILocationAgentManager extends IVoLteAgent {
+    /**
+     * Returns the location agent if it exists.
+     */
+    ILocationAgent getAgent(int slotId);
 }

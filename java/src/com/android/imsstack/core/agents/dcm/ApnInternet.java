@@ -20,7 +20,7 @@ import android.content.Context;
 import android.os.Message;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.core.agents.agentif.MsgProcInterface;
+import com.android.imsstack.core.agents.MsgProcInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.util.ImsLog;

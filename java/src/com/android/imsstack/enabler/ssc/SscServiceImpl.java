@@ -27,9 +27,9 @@ import android.telephony.ims.ImsSsInfo;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.SubsInfoInterface;
-import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.core.agents.agentif.SubscriptionListener;
+import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.enabler.ssc.data.CbServiceData;;
 import com.android.imsstack.enabler.ssc.data.CbServiceQueryData;
