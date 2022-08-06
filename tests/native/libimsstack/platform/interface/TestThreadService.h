@@ -22,37 +22,40 @@
 class TestThreadService : public ThreadService
 {
 public:
+    inline TestThreadService() :
+            ThreadService(),
+            m_piThread(&m_objThread)
+    {
+    }
+
     inline IThread* CreateThread(IN const AString& /*strName*/, IN IMS_SINT32 /*nSlotId*/) override
     {
-        return &m_objThread;
+        return m_piThread;
     }
     inline void DestroyThread(IN IThread*& /*piThread*/) override {}
 
     inline IMS_BOOL Contains(IN const IThread* piThread) const override
     {
-        return &m_objThread == piThread;
+        return m_piThread == piThread;
     }
     inline IMS_BOOL ContainsLocked(IN const IThread* piThread) const override
     {
-        return &m_objThread == piThread;
+        return m_piThread == piThread;
     }
-    inline IThread* GetCurrentThread() const override
-    {
-        return const_cast<MockIThread*>(&m_objThread);
-    }
-    inline IThread* GetThread(IN const AString& /*strName*/) const override
-    {
-        return const_cast<MockIThread*>(&m_objThread);
-    }
+    inline IThread* GetCurrentThread() const override { return m_piThread; }
+    inline IThread* GetThread(IN const AString& /*strName*/) const override { return m_piThread; }
     inline IThread* GetThreadLocked(IN const AString& /*strName*/) const override
     {
-        return const_cast<MockIThread*>(&m_objThread);
+        return m_piThread;
     }
 
     inline MockIThread& GetMockThread() { return m_objThread; }
+    inline void SetThread(IN IThread* piThread) { m_piThread = piThread; }
 
 private:
     MockIThread m_objThread;
+
+    IThread* m_piThread;
 };
 
 #endif

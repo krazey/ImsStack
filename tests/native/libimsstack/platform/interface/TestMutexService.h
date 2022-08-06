@@ -22,13 +22,22 @@
 class TestMutexService : public MutexService
 {
 public:
-    inline IMutex* CreateMutex(IN const AString& /*strName*/) override { return &m_objMutex; }
+    inline TestMutexService() :
+            MutexService(),
+            m_piMutex(&m_objMutex)
+    {
+    }
+
+    inline IMutex* CreateMutex(IN const AString& /*strName*/) override { return m_piMutex; }
     inline void DestroyMutex(IN IMutex*& /*piMutex*/) override {}
 
     inline MockIMutex& GetMockMutex() { return m_objMutex; }
+    inline void SetMutex(IN IMutex* piMutex) { m_piMutex = piMutex; }
 
 private:
     MockIMutex m_objMutex;
+
+    IMutex* m_piMutex;
 };
 
 #endif

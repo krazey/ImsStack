@@ -25,21 +25,45 @@
 class TestUtilService : public UtilService
 {
 public:
-    inline IImsPrivateProperty* GetPrivateProperty() override { return &m_objPrivateProperty; }
-    inline ISystemUtil* GetSystemUtil() override { return &m_objSystemUtil; }
-    inline ISystemProperty* GetSystemProperty() override { return &m_objSystemProperty; }
-    inline IZLib* GetZLib() override { return &m_objZLib; }
+    inline TestUtilService() :
+            UtilService(),
+            m_piPrivateProperty(&m_objPrivateProperty),
+            m_piSystemUtil(&m_objSystemUtil),
+            m_piSystemProperty(&m_objSystemProperty),
+            m_piZLib(&m_objZLib)
+    {
+    }
+
+    inline IImsPrivateProperty* GetPrivateProperty() override { return m_piPrivateProperty; }
+    inline ISystemUtil* GetSystemUtil() override { return m_piSystemUtil; }
+    inline ISystemProperty* GetSystemProperty() override { return m_piSystemProperty; }
+    inline IZLib* GetZLib() override { return m_piZLib; }
 
     inline MockIImsPrivateProperty& GetMockPrivateProperty() { return m_objPrivateProperty; }
     inline MockISystemUtil& GetMockSystemUtil() { return m_objSystemUtil; }
     inline MockISystemProperty& GetMockSystemProperty() { return m_objSystemProperty; }
     inline MockIZLib& GetMockZLib() { return m_objZLib; }
+    inline void SetPrivateProperty(IN IImsPrivateProperty* piPrivateProperty)
+    {
+        m_piPrivateProperty = piPrivateProperty;
+    }
+    inline void SetSystemUtil(IN ISystemUtil* piSystemUtil) { m_piSystemUtil = piSystemUtil; }
+    inline void SetSystemProperty(IN ISystemProperty* piSystemProperty)
+    {
+        m_piSystemProperty = piSystemProperty;
+    }
+    inline void SetZLib(IN IZLib* piZLib) { m_piZLib = piZLib; }
 
 private:
     MockIImsPrivateProperty m_objPrivateProperty;
     MockISystemUtil m_objSystemUtil;
     MockISystemProperty m_objSystemProperty;
     MockIZLib m_objZLib;
+
+    IImsPrivateProperty* m_piPrivateProperty;
+    ISystemUtil* m_piSystemUtil;
+    ISystemProperty* m_piSystemProperty;
+    IZLib* m_piZLib;
 };
 
 #endif

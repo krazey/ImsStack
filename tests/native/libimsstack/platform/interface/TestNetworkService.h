@@ -25,46 +25,56 @@
 class TestNetworkService : public NetworkService
 {
 public:
+    inline TestNetworkService() :
+            NetworkService(),
+            m_piConnection(&m_objConnection),
+            m_piSocket(&m_objSocket),
+            m_piSslSocket(&m_objSslSocket),
+            m_piIpcan(&m_objIpcan),
+            m_piIpSec(&m_objIpSec)
+    {
+    }
+
     inline INetworkConnection* CreateConnection(
             IN const AString& /*strProfileName*/, IN IMS_SINT32 /*nSlotId*/) override
     {
-        return &m_objConnection;
+        return m_piConnection;
     }
     inline INetworkConnection* CreateConnection(
             IN IMS_SINT32 /*nApnType*/, IN IMS_SINT32 /*nSlotId*/) override
     {
-        return &m_objConnection;
+        return m_piConnection;
     }
     inline void DestroyConnection(IN INetworkConnection*& /*piConnection*/) override {}
     inline INetworkConnection* FindConnection(
             IN IMS_SINT32 /*nApnType*/, IN IMS_SINT32 /*nSlotId*/) override
     {
-        return &m_objConnection;
+        return m_piConnection;
     }
     inline INetworkConnection* FindConnection(IN const IPAddress& /*objIpAddr*/) override
     {
-        return &m_objConnection;
+        return m_piConnection;
     }
 
     inline ISocket* CreateSocket(IN INetworkConnection* /*piConnection*/) override
     {
-        return &m_objSocket;
+        return m_piSocket;
     }
     inline ISocket* CreateSocket(
             IN const IMS_CHAR* /*pszProfileName*/, IN IMS_SINT32 /*nSlotId*/) override
     {
-        return &m_objSocket;
+        return m_piSocket;
     }
 
     inline ISocket* CreateSslSocket(
             IN INetworkConnection* /*piConnection*/, IN SslCertificate* /*pCertificate*/) override
     {
-        return &m_objSslSocket;
+        return m_piSslSocket;
     }
     inline ISocket* CreateSslSocket(IN const IMS_CHAR* /*pszProfileName*/,
             IN SslCertificate* /*pCertificate*/, IN IMS_SINT32 /*nSlotId*/) override
     {
-        return &m_objSslSocket;
+        return m_piSslSocket;
     }
     inline void DestroySocket(IN ISocket*& /*piSocket*/) override {}
     inline IMS_BOOL CheckIpAndPortAvailability(IN const IPAddress& /*objIpAddr*/,
@@ -73,8 +83,22 @@ public:
         return IMS_TRUE;
     }
 
-    inline IIpcan* GetIpcan() override { return &m_objIpcan; }
-    inline INetworkIpSec* GetIpSec() override { return &m_objIpSec; }
+    inline IIpcan* GetIpcan() override { return m_piIpcan; }
+    inline INetworkIpSec* GetIpSec() override { return m_piIpSec; }
+
+    inline MockINetworkConnection& GetMockConnection() { return m_objConnection; }
+    inline MockISocket& GetMockSocket() { return m_objSocket; }
+    inline MockISocket& GetMockSslSocket() { return m_objSslSocket; }
+    inline MockIIpcan& GetMockIpcan() { return m_objIpcan; }
+    inline MockINetworkIpSec& GetMockIpSec() { return m_objIpSec; }
+    inline void SetConnection(IN INetworkConnection* piConnection)
+    {
+        m_piConnection = piConnection;
+    }
+    inline void SetSocket(IN ISocket* piSocket) { m_piSocket = piSocket; }
+    inline void SetSslSocket(IN ISocket* piSslSocket) { m_piSslSocket = piSslSocket; }
+    inline void SetIpcan(IN IIpcan* piIpcan) { m_piIpcan = piIpcan; }
+    inline void SetIpSec(IN INetworkIpSec* piIpSec) { m_piIpSec = piIpSec; }
 
 private:
     MockINetworkConnection m_objConnection;
@@ -82,6 +106,12 @@ private:
     MockISocket m_objSslSocket;
     MockIIpcan m_objIpcan;
     MockINetworkIpSec m_objIpSec;
+
+    INetworkConnection* m_piConnection;
+    ISocket* m_piSocket;
+    ISocket* m_piSslSocket;
+    IIpcan* m_piIpcan;
+    INetworkIpSec* m_piIpSec;
 };
 
 #endif
