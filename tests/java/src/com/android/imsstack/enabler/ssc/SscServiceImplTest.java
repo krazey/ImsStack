@@ -45,6 +45,7 @@ import com.android.imsstack.enabler.ssc.data.ErrorResponseData;
 import com.android.imsstack.enabler.ssc.data.SscRequestResult;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtServiceStateListener;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtListener;
 
 import org.junit.After;
@@ -85,6 +86,7 @@ public class SscServiceImplTest {
     @Mock private SscTransactionFactory mockSscTransactionFactory;
     @Mock private SscTransaction mockSscTransaction;
     @Mock private UtListener mockUtListener;
+    @Mock private IUtServiceStateListener mMockUtServiceStateListener;
 
     @Captor ArgumentCaptor<SscServiceQueryData> captorQueryData;
     @Captor ArgumentCaptor<SscServiceData> captorUpdateData;
@@ -149,6 +151,14 @@ public class SscServiceImplTest {
     @After
     public void tearDown() {
         mSscServiceImpl.close();
+    }
+
+    @Test
+    public void testServiceStateChanged() {
+        mSscServiceImpl.setServiceStateListener(mMockUtServiceStateListener);
+        mSscServiceImpl.onServiceStateChanged();
+
+        verify(mMockUtServiceStateListener).onServiceStateChanged();
     }
 
     @Test

@@ -17,7 +17,6 @@
 package com.android.imsstack.imsservice.mmtel.ut.base;
 
 import android.content.Context;
-import android.os.Bundle;
 
 /**
  * Provides the Ut interface interworking to get/set the supplementary service configuration.
@@ -93,11 +92,6 @@ public interface UtInterface {
      * Implementation of IImsUt.
      */
     void queryCOLP(int tId);
-
-    /**
-     * Implementation of IImsUt.
-     */
-    void transact(int tId, Bundle ssInfo);
 
     /**
      * Implementation of IImsUt.

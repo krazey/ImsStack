@@ -16,7 +16,6 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
-import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsReasonInfo;
@@ -239,22 +238,6 @@ public final class ImsUtImpl extends ImsUtImplBase {
         UtCommand utCmd = new UtCommand.Builder(mContext, tId, UtCommand.CMD_TIP,
                 SscConstant.ACTION_INTERROGATION, mUtListenerProxy).build();
         utCmd.startTransaction();
-
-        return tId;
-    }
-
-    @Override
-    public int transact(Bundle ssInfo) {
-        if (DBG) {
-            log("transact :: ssInfo=" + ssInfo);
-        }
-
-        if (mUt == null) {
-            return (ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE * (-1));
-        }
-
-        int tId = getTransactionId();
-        mUt.transact(tId, ssInfo);
 
         return tId;
     }
