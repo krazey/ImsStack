@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef AOS_KEEP_ALIVE_H_
 #define AOS_KEEP_ALIVE_H_
 
@@ -26,7 +27,7 @@ class IAosKeepAliveListener;
 class AosKeepAlive : public ISipKeepAliveHelperListener, public ITimerListener
 {
 public:
-    AosKeepAlive(IN IMS_SINT32 nSlotId_);
+    AosKeepAlive(IN IMS_SINT32 nSlotId);
     virtual ~AosKeepAlive();
 
     virtual void SetListener(IN IAosKeepAliveListener* piListener);
@@ -35,8 +36,8 @@ public:
     void Start(IN IMS_UINT32 nRepeatTime, IN IMS_BOOL bCheckingPong = IMS_TRUE);
     void Stop();
 
-    void SetTransport(IN const IPAddress& objSourceIPA, IN IMS_SINT32 nSourcePort,
-            IN const IPAddress& objDestIPA, IN IMS_SINT32 nDestPort,
+    void SetTransport(IN const IPAddress& objSourceIpAddress, IN IMS_SINT32 nSourcePort,
+            IN const IPAddress& objDestIpAddress, IN IMS_SINT32 nDestPort,
             IN IMS_SINT32 nProtocol = AosKeepAlive::TRANSPORT_UDP);
 
     enum
@@ -49,7 +50,7 @@ public:
     };
 
 private:
-    void SendPING();
+    void SendPing();
 
     void SetCheckingPong(IN IMS_BOOL bCheck);
     IMS_BOOL IsPongChecked() const;
@@ -72,19 +73,19 @@ private:
     enum
     {
         TIMER_KEEP_ALIVE = 0,
-        TIMER_PONG_WAT
+        TIMER_PONG_WAIT
     };
 
 private:
-    ISipKeepAliveHelper* piKAHelper;
-    IAosKeepAliveListener* piListener;
-    ITimer* piKeepAliveTimer;
-    ITimer* piPongWATTimer;
-    IMS_UINT32 nKATime;
-    IMS_BOOL bIsPongChecked;
-    IMS_SINT32 nSlotId;
+    ISipKeepAliveHelper* m_piKeepAliveHelper;
+    IAosKeepAliveListener* m_piListener;
+    ITimer* m_piKeepAliveTimer;
+    ITimer* m_piPongWaitTimer;
+    IMS_UINT32 m_nKeepAliveTime;
+    IMS_BOOL m_bIsPongChecked;
+    IMS_SINT32 m_nSlotId;
 
-    AString strTag;
+    AString m_strTag;
 };
 
 class IAosKeepAliveListener
