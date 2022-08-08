@@ -1,12 +1,18 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20131015    hwangoo.park@           Created
-    </table>
-    Description
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.imsstack.imsservice.mmtel;
 
@@ -65,9 +71,12 @@ import com.android.imsstack.imsservice.mmtel.videocall.ImsVideoCallProviderFacto
 import com.android.imsstack.imsservice.mmtel.videocall.base.ImsVideoCallProviderBase;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.SimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class ImsCallSessionImpl extends ImsCallSessionImplBase {
@@ -81,6 +90,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
      * Value: boolean type
      */
     private static final String EXTRA_CALL_CONTROLLED_BY_IMS = "call_controlled_by_ims";
+    public static final int CF_RTT = 0;
+    public static final int CF_TTY = 1;
+    public static final int CF_AUDIO_HOLD_WITH_INACTIVE = 2;
+    public static final int CF_VIDEO_HOLD_WITH_INACTIVE = 3;
+    public static final int CF_TEXT_HOLD_WITH_INACTIVE = 4;
+    public static final int CF_INCOMING_RESUME_EVENT = 5;
 
     private final Object mLock = new Object();
     private final ICallContext mCallContext;
@@ -90,7 +105,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private final CallTracker mCT;
     private final String mCallId;
     private final CallDetails mCallDetails = new CallDetails();
-    private final ImsCallSessionCallback mCallback;
+    private ImsCallSessionCallback mCallback;
     private MtcCall mCall;
     private int mState = ImsCallSessionImplBase.State.IDLE;
     // Local call profile (local capabilities, obtained at call originating or terminating)
@@ -118,8 +133,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private String mCallTransferTarget = null;
     private boolean mIsEctConfirmationRequired = false;
     private ImsCallSessionImpl mTransferRequestedSession = null;
-
-
+    private Map<Integer, Boolean> mCallFeatureCache = new HashMap<Integer, Boolean>();
 
     public ImsCallSessionImpl(ICallContext callContext,
             CallTracker ct, MtcCall call,
@@ -502,9 +516,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             mediaInfo = ImsCallMediaUtils.createMediaInfoFromMediaProfile(profile);
         }
 
-        setRttGttInfo(mediaInfo, profile.isRttCall());
+        boolean isRttCall = false;
+        if (profile != null) {
+            isRttCall = profile.isRttCall();
+        }
 
-        mCall.accept(ImsCallUtils.getCallTypeFromProfile(callType, profile.isRttCall()), mediaInfo);
+        setRttGttInfo(mediaInfo, isRttCall);
+        mCall.accept(ImsCallUtils.getCallTypeFromProfile(callType, isRttCall), mediaInfo);
 
         // Skip a state, ImsCallSessionImplBase.State.ESTABLISHING and REESTABLISHING
         setState(ImsCallSessionImplBase.State.ESTABLISHED);
@@ -590,8 +608,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         } else if (!mCallDetails.is(CallDetails.ON_HOLDING)) {
             mCall.hold(MtcCallUtils.createHoldMedia(
                     mCall.getCallInfo(), mCall.getMediaInfo(),
-                    CallFeature.isVideoDirectionInactiveOnVideoCallHold(slotId),
-                    CallFeature.isTextDirectionInactiveOnRttCallHold(slotId)));
+                    isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE),
+                    isCallFeatureSupported(CF_TEXT_HOLD_WITH_INACTIVE)));
         }
 
         mCallDetails.set(CallDetails.ON_ECT);
@@ -630,8 +648,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         } else if (!mCallDetails.is(CallDetails.ON_HOLDING)) {
             mCall.hold(MtcCallUtils.createHoldMedia(
                     mCall.getCallInfo(), mCall.getMediaInfo(),
-                    CallFeature.isVideoDirectionInactiveOnVideoCallHold(slotId),
-                    CallFeature.isTextDirectionInactiveOnRttCallHold(slotId)));
+                    isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE),
+                    isCallFeatureSupported(CF_TEXT_HOLD_WITH_INACTIVE)));
         }
 
         mCallDetails.set(CallDetails.ON_ECT);
@@ -720,8 +738,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         // Checks if the user is held by the remote party and adjusts the direction if changes
-        if (CallFeature.isCallHoldUsingInactive(mCallContext.getSlotId())
-                || mCall.isOnHeld()) {
+        if (isCallFeatureSupported(CF_AUDIO_HOLD_WITH_INACTIVE) || mCall.isOnHeld()) {
             audioDirection = ImsStreamMediaProfile.DIRECTION_INACTIVE;
         } else {
             // AudioDirection : DIRECTION_INACTIVE or DIRECTION_SEND
@@ -733,8 +750,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             if (mCall.isOnHeld()) {
                 videoDirection = ImsStreamMediaProfile.DIRECTION_INACTIVE;
             } else {
-                if (CallFeature.isVideoDirectionInactiveOnVideoCallHold(
-                        mCallContext.getSlotId())) {
+                if (isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE)) {
                     log("Video direction :: INACTIVE");
                     videoDirection = ImsStreamMediaProfile.DIRECTION_INACTIVE;
                 } else if (mCall.is1WayVideo() || mCall.is1WayVideoByRemoteEnd()) {
@@ -791,7 +807,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             int slotId = mCallContext.getSlotId();
 
             if (mCall.isOnHeld()) {
-                if (CallFeature.isVideoDirectionInactiveOnVideoCallHold(slotId)) {
+                if (isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE)) {
                     videoDirection = ImsStreamMediaProfile.DIRECTION_INACTIVE;
                 } else {
                     videoDirection = ImsStreamMediaProfile.DIRECTION_RECEIVE;
@@ -895,7 +911,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 if (!ImsConferenceHelper.getInstance().extendToConference(
                         mCallContext, users)) {
                     MtcConference conference = MtcCall.getConference(mCall);
-
                     if (conference == null) {
                         return;
                     }
@@ -1039,7 +1054,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void sendRttModifyRequest(ImsCallProfile toProfile) {
-        if (!CallFeature.isRttSupported(mCallContext.getSlotId())) {
+        if (!isCallFeatureSupported(CF_RTT)) {
             mCallback.invokeRttModifyResponseReceived(this,
                     RttModifyStatus.SESSION_MODIFY_REQUEST_INVALID);
             return;
@@ -1086,7 +1101,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void sendRttModifyResponse(boolean isRttOn) {
-        if (!CallFeature.isRttSupported(mCallContext.getSlotId())) {
+        if (!isCallFeatureSupported(CF_RTT)) {
             return;
         }
 
@@ -1111,7 +1126,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void sendRttMessage(String rttMessage) {
-        if (mCall == null || !CallFeature.isRttSupported(mCallContext.getSlotId())) {
+        if (mCall == null || !isCallFeatureSupported(CF_RTT)) {
             loge("sendRttMessage :: session is null or RTT is not supported");
             return;
         }
@@ -1267,6 +1282,60 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             {
                 // LTE: it's not required in the moment.
             }
+        }
+    }
+
+    @VisibleForTesting
+    public ImsCallSessionImpl(ICallContext callContext, CallTracker ct, MtcCall call,
+            String callId, ImsCallProfile profile, boolean isMO,
+            ImsCallSessionCallback callBack) {
+        mCallContext = callContext;
+        mCT = ct;
+        mCall = call;
+        mCallId = createCallId(callId);
+        mCallback = callBack;
+        initCallProfile(profile);
+        mCallDetails.set(CallDetails.MO);
+        mVideoCallSession = new ImsVideoCallSession(mCallContext, this, isMO);
+        mVideoCallProvider = ImsVideoCallProviderFactory.createVideoCallProvider(
+                mVideoCallSession,
+                (call != null) ? call.getMediaSession() : null);
+
+        clearProposedCallProfile();
+    }
+
+    @VisibleForTesting
+    public CallDetails getCallDetails() {
+        return mCallDetails;
+    }
+
+    protected boolean isCallFeatureSupported(int feature) {
+        if (mCallFeatureCache.containsKey(feature)) {
+            return mCallFeatureCache.get(feature);
+        } else {
+            boolean isFeatureSupported = getFeatureSupportedStatus(feature);
+            mCallFeatureCache.put(feature, isFeatureSupported);
+            return isFeatureSupported;
+        }
+    }
+
+    private boolean getFeatureSupportedStatus(int feature) {
+        int slotId = mCallContext.getSlotId();
+        switch (feature) {
+            case CF_RTT:
+                return CallFeature.isRttSupported(slotId);
+            case CF_TTY:
+                return CallFeature.isTtySupported(slotId);
+            case CF_AUDIO_HOLD_WITH_INACTIVE:
+                return CallFeature.isCallHoldUsingInactive(slotId);
+            case CF_VIDEO_HOLD_WITH_INACTIVE:
+                return CallFeature.isVideoDirectionInactiveOnVideoCallHold(slotId);
+            case CF_TEXT_HOLD_WITH_INACTIVE:
+                return CallFeature.isTextDirectionInactiveOnRttCallHold(slotId);
+            case CF_INCOMING_RESUME_EVENT:
+                return CallFeature.isIncomingResumeEventSupported(slotId);
+            default:
+                return false;
         }
     }
 
@@ -1917,8 +1986,9 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private void setRttGttInfo(MediaInfo mi, boolean isRttOn) {
-        boolean isRttSupported = CallFeature.isRttSupported(mCallContext.getSlotId());
-        boolean isTtySupported = CallFeature.isTtySupported(mCallContext.getSlotId());
+        boolean isRttSupported = isCallFeatureSupported(CF_RTT);
+        boolean isTtySupported = isCallFeatureSupported(CF_TTY);
+
         if (isRttSupported && isTtySupported) {
             if (isRttOn) {
                 setRttInfo(mi, isRttOn);
@@ -1933,8 +2003,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private void setGttInfo(MediaInfo mi) {
-        if (!CallFeature.isTtySupported(mCallContext.getSlotId())
-                || mCall.isConference()) {
+        if (!isCallFeatureSupported(CF_TTY) || mCall.isConference()) {
             return;
         }
 
@@ -1982,8 +2051,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private void setRttInfo(MediaInfo mi, boolean isRttOn) {
-        if (!CallFeature.isRttSupported(mCallContext.getSlotId())
-                || mCall.isConference()) {
+        if (isCallFeatureSupported(CF_RTT) || mCall.isConference()) {
             return;
         }
 
@@ -1995,8 +2063,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             int slotId = mCallContext.getSlotId();
 
             if (mCallDetails.is(CallDetails.ON_HOLDING)) {
-                if (CallFeature.isTextDirectionInactiveOnRttCallHold(slotId)
-                        || mCall.isOnHeld()) {
+                if (isCallFeatureSupported(CF_TEXT_HOLD_WITH_INACTIVE) || mCall.isOnHeld()) {
                     rttDirection = MediaInfo.DIRECTION_INACTIVE;
                 } else {
                     rttDirection = MediaInfo.DIRECTION_SEND;
@@ -2004,7 +2071,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
             if (mCallDetails.is(CallDetails.ON_UNHOLDING)) {
                 if (mCall.isOnHeld()) {
-                    if (CallFeature.isTextDirectionInactiveOnRttCallHold(slotId)) {
+                    if (isCallFeatureSupported(CF_TEXT_HOLD_WITH_INACTIVE)) {
                         rttDirection = MediaInfo.DIRECTION_INACTIVE;
                     } else {
                         rttDirection = MediaInfo.DIRECTION_RECEIVE;
@@ -2027,7 +2094,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         logi("TerminationReason=" + mTerminationReason);
     }
 
-    private void setState(int state) {
+    protected void setState(int state) {
         if (mState != state) {
             logi("ImsCallSession :: " + mState + " >> " + state);
 
@@ -2043,7 +2110,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         // FEATURE_CALL_PULL
         String actualCallee = null;
         boolean isRttOn = false;
-        if (CallFeature.isRttSupported(mCallContext.getSlotId())) {
+        if (isCallFeatureSupported(CF_RTT)) {
             isRttOn = profile.getMediaProfile().isRttCall();
         }
 
@@ -2234,7 +2301,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private void updateLocalTtyMode() {
-        if (!CallFeature.isTtySupported(mCallContext.getSlotId())) {
+        if (!isCallFeatureSupported(CF_TTY)) {
             return;
         }
 
@@ -2276,7 +2343,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private boolean isRttChanged(MediaInfo mi) {
-        if (CallFeature.isRttSupported(mCallContext.getSlotId())) {
+        if (isCallFeatureSupported(CF_RTT)) {
             return (mCallProfile.getMediaProfile().isRttCall()
                     != MtcCallUtils.isGttEnabled(mi.GTTMode));
         }
@@ -2316,7 +2383,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     /**
      * This class describes the detail information of this call.
      */
-    private final class CallDetails {
+    @VisibleForTesting
+    protected final class CallDetails {
         public static final int NONE = 0x00000000;
         /**
          * MO call
@@ -3747,7 +3815,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             // This callback can be invoked when UpdateResume is received
             // and accepted during the voice / video call.
-            if (CallFeature.isIncomingResumeEventSupported(mCallContext.getSlotId())
+            if (isCallFeatureSupported(CF_INCOMING_RESUME_EVENT)
                     && !mCallDetails.is(CallDetails.ON_UNHOLDING)) {
                 logi("Ignore onCallResumed() by IncomingResume");
                 // FIXME: is this call required?
@@ -3997,7 +4065,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             // Result of RTT_MODIFY_REQUEST
-            if (CallFeature.isRttSupported(mCallContext.getSlotId())) {
+            if (isCallFeatureSupported(CF_RTT)) {
                 if (mCallDetails.is(CallDetails.RTT_TURNING_ON)) {
                     mCallDetails.clear(CallDetails.RTT_TURNING_ON);
                     log("onCallUpdateFailed :: RTT_TURNING_ON is cleared");
@@ -4065,7 +4133,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             if (ImsCallUtils.isVideoCall(mCallProfile.getCallType())) {
                 if (!call.isOnHeld()
                         && MtcCallUtils.isHoldMediaOnVideoCallByRemoteEnd(mediaInfo,
-                            CallFeature.isVideoDirectionInactiveOnVideoCallHold(slotId))) {
+                            isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE))) {
                     onVideoCallHoldReceived(call, callInfo, mediaInfo, suppInfo);
                     return;
                 } else if (call.isOnHeld()
@@ -4091,7 +4159,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mCallContext, mProposedCallProfile, mediaInfo);
             updateCallExtraForHDVoice(mProposedCallProfile, mediaInfo);
 
-            if (CallFeature.isTtySupported(mCallContext.getSlotId())) {
+            if (isCallFeatureSupported(CF_TTY)) {
                 mProposedCallProfile.setCallExtraInt(
                         ImsCallMediaUtils.MEDIA_TEXT_DIRECTION, mediaInfo.TDir);
                 mProposedCallProfile.setCallExtraInt(MEDIA_GTT_MODE, mediaInfo.GTTMode);
@@ -4116,7 +4184,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             // FIXME: Consider the priority of RTT Upgrade vs. VT Upgrade
-            if (CallFeature.isRttSupported(mCallContext.getSlotId())) {
+            if (isCallFeatureSupported(CF_RTT)) {
                 if (MtcCallUtils.isGttEnabled(mediaInfo.GTTMode)
                         && !MtcCallUtils.isGttEnabled(mCall.getMediaInfo().GTTMode)) {
                     log("onCallUpdateReceived :: RTT upgrade request");
@@ -4244,8 +4312,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 mOperationFailReason = reasonInfo;
                 mCall.resume(MtcCallUtils.createUnholdMedia(
                         mCall.getCallInfo(), mCall.getMediaInfo(),
-                        CallFeature.isVideoDirectionInactiveOnVideoCallHold(
-                            mCallContext.getSlotId())));
+                        isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE)));
                 return;
             }
 
@@ -4334,7 +4401,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         @Override
         public void onCallRttMessageReceived(MtcCall call, String data) {
             if (!call.equals(mCall)
-                    || !CallFeature.isRttSupported(mCallContext.getSlotId())) {
+                    || !isCallFeatureSupported(CF_RTT)) {
                 return;
             }
 
@@ -4350,7 +4417,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         public void onCallRttAudioIndication(MtcCall call,
                 boolean status) {
             if (!call.equals(mCall)
-                    || !CallFeature.isRttSupported(mCallContext.getSlotId())) {
+                    || !isCallFeatureSupported(CF_RTT)) {
                 return;
             }
             if (!mCallProfile.getMediaProfile().isRttCall()) {
@@ -4450,7 +4517,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     logi("onVoiceCallResumeReceived");
 
                     if (call.isOnHold()) {
-                        if (CallFeature.isCallHoldUsingInactive(mCallContext.getSlotId())) {
+                        if (isCallFeatureSupported(CF_AUDIO_HOLD_WITH_INACTIVE)) {
                             mediaInfo.ADir = MediaInfo.DIRECTION_INACTIVE;
                         } else if (mediaInfo.ADir == MediaInfo.DIRECTION_SEND_RECEIVE) {
                             mediaInfo.ADir = MediaInfo.DIRECTION_SEND;
@@ -4466,7 +4533,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         private void onTtyModeReceived(int gttMode, boolean onCallStarted) {
-            if (!CallFeature.isTtySupported(mCallContext.getSlotId())) {
+            if (!isCallFeatureSupported(CF_TTY)) {
                 return;
             }
 
@@ -4494,7 +4561,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         private void onRttChanged(boolean isRttOn, boolean oldRttOn) {
-            if (!CallFeature.isRttSupported(mCallContext.getSlotId())) {
+            if (!isCallFeatureSupported(CF_RTT)) {
                 return;
             }
 
