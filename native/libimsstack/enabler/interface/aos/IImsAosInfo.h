@@ -150,9 +150,9 @@ public:
      * @param nState Indicated the SCBM state.
      *               Possible values are,
      *               IImsAosInfo::SCBM_STARTED
-     *               IImsAosInfo::SCMB_TERMINATED
-     *               IImsAosInfo::SCMB_TERMINATED_BY_ECALL
-     *               IImsAosInfo::SCMB_TERMINATED_BY_ESMS
+     *               IImsAosInfo::SCBM_TERMINATED
+     *               IImsAosInfo::SCBM_TERMINATED_BY_ECALL
+     *               IImsAosInfo::SCBM_TERMINATED_BY_ESMS
      */
     virtual void NotifyScbmState(IN IMS_UINT32 nState) = 0;
 
@@ -202,9 +202,9 @@ public:
     enum
     {
         SCBM_STARTED = 1,
-        SCMB_TERMINATED = 2,
-        SCMB_TERMINATED_BY_ECALL = 3,
-        SCMB_TERMINATED_BY_ESMS = 4
+        SCBM_TERMINATED = 2,
+        SCBM_TERMINATED_BY_ECALL = 3,
+        SCBM_TERMINATED_BY_ESMS = 4
     };
 };
 
