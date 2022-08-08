@@ -214,9 +214,10 @@ PUBLIC VIRTUAL void MtcService::CoreService_UnsolicitedNotifyReceived(
 PUBLIC VIRTUAL void MtcService::CoreService_CapabilityQueryReceived(
         IN ICoreService* piService, IN ICapabilities* piCapabilities)
 {
-    MtcCapabilityQueryHandler::HandleIncomingCapabilityQuery(piService, piCapabilities,
-            ImsServiceConfig::GetAppName(ImsAppId::MTC), m_strServiceName,
-            m_objContext.GetSlotId());
+    IMS_UINT32 nFeatures = m_pAosConnector ? m_pAosConnector->GetFeatures() : 0;
+    MtcCapabilityQueryHandler(m_objContext)
+            .HandleIncomingCapabilityQuery(piService, piCapabilities,
+                    ImsServiceConfig::GetAppName(ImsAppId::MTC), m_strServiceName, nFeatures);
 }
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
@@ -353,7 +354,9 @@ void MtcService::SetServiceFilterCriteria()
     TriggerPoint objInviteTp(objInviteMethod);
     piSfc->AddTriggerPoint(objInviteTp);
 
-    IMS_TRACE_D("SetServiceFilterCriteria", 0, 0, 0);
+    SipMethod objOptionsMethod(SipMethod::OPTIONS);
+    TriggerPoint objOptionsTp(objOptionsMethod);
+    piSfc->AddTriggerPoint(objOptionsTp);
 }
 
 PRIVATE

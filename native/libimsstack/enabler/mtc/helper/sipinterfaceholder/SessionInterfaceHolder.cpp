@@ -74,6 +74,10 @@ ISession* SessionInterfaceHolder::GetISession(
         IN ICoreService* piCoreService, IN const AString& strFrom, IN const AString& strTo)
 {
     IMS_TRACE_D("GetISession", 0, 0, 0);
+    if (piCoreService == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
 
     ISession* piSession = piCoreService->CreateSession(strFrom, strTo);
     m_objISessions.Append(piSession);
