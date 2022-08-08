@@ -112,7 +112,7 @@ protected:
 
     virtual void TearDown() override
     {
-        AosProvider::GetInstance()->SetNConfiguration(m_piOriginConfiguration, 0);
+        AosProvider::GetInstance()->SetNConfiguration(m_piOriginConfiguration);
 
         if (m_pAosBlock)
         {

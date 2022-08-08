@@ -107,7 +107,7 @@ protected:
         EXPECT_CALL(objMockIAosSubscriptionListener, Subscription_StateChanged(_, _))
                 .WillRepeatedly(Return());
 
-        // save origine pointer
+        // save origin pointer
         pOriginAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(
                 static_cast<IAosNConfiguration*>(&objMockAosConfig), SLOT_ID);
