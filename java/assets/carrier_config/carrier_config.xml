@@ -180,18 +180,11 @@
     <int name="imsrtt.text_rr_bandwidth_bps_int" value="300"/>
 
     <!-- Ut/Xcap -->
-    <boolean name="imsss.xcap_root_uri_requires_srv_query_bool" value="false"/>
     <string name="imsss.xcap_auid_prefix_string"></string>
     <int-array name="imsss.ut_sm_cause_permanent_block_int_array" num="0">
     </int-array>
-    <int-array name="imsss.ut_sm_cause_temporary_block_int_array" num="0">
-    </int-array>
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
     </int-array>
-    <int-array name="imsss.ut_http_temporary_error_code_int_array" num="0">
-    </int-array>
-    <int name="imsss.ut_max_retry_count_int" value="0"/>
-    <int name="imsss.ut_temporary_block_timer_min_int" value="1"/>
     <int name="imsss.terminal_based_call_wait_sync_int" value="0"/>
     <boolean name="imsss.terminal_based_call_wait_default_activated_bool" value="true"/>
 
@@ -560,6 +553,13 @@
     <boolean name="sms_use_dialed_number_for_request_uri_bool" value="false"/>
 
     <!-- Ut/Xcap -->
+    <boolean name="imsss.xcap_root_uri_requires_srv_query_bool" value="false"/>
+    <int-array name="imsss.ut_sm_cause_temporary_block_int_array" num="0">
+    </int-array>
+    <int-array name="imsss.ut_http_temporary_error_code_int_array" num="0">
+    </int-array>
+    <int name="imsss.ut_max_retry_count_int" value="0"/>
+    <int name="imsss.ut_temporary_block_timer_min_int" value="1"/>
     <boolean name="ut_support_cf_action_erasure_bool" value="true"/>
     <boolean name="ut_query_cf_all_and_cf_all_conditional_support_bool" value="true"/>
     <int name="ut_oir_network_default_operation_int" value="0"/>

@@ -194,22 +194,12 @@ public class CarrierConfig {
 
     public static class ImsSs {
         public static final String KEY_PREFIX = "imsss.";
-        public static final String KEY_XCAP_ROOT_URI_REQUIRES_SRV_QUERY_BOOL =
-                KEY_PREFIX + "xcap_root_uri_requires_srv_query_bool";
         public static final String KEY_XCAP_AUID_PREFIX_STRING =
                 KEY_PREFIX + "xcap_auid_prefix_string";
         public static final String KEY_UT_SM_CAUSE_PERMANENT_BLOCK_INT_ARRAY =
                 KEY_PREFIX + "ut_sm_cause_permanent_block_int_array";
-        public static final String KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY =
-                KEY_PREFIX + "ut_sm_cause_temporary_block_int_array";
         public static final String KEY_UT_HTTP_PERMANENT_ERROR_CODE_INT_ARRAY =
                 KEY_PREFIX + "ut_http_permanent_error_code_int_array";
-        public static final String KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY =
-                KEY_PREFIX + "ut_http_temporary_error_code_int_array";
-        public static final String KEY_UT_MAX_RETRY_COUNT_INT =
-                KEY_PREFIX + "ut_max_retry_count_int";
-        public static final String KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT =
-                KEY_PREFIX + "ut_temporary_block_timer_min_int";
         public static final String KEY_TERMINAL_BASED_CALL_WAIT_SYNC_INT =
                 KEY_PREFIX + "terminal_based_call_wait_sync_int";
         public static final String KEY_TERMINAL_BASED_CALL_WAIT_DEFAULT_ACTIVATED_BOOL =
@@ -911,6 +901,15 @@ public class CarrierConfig {
                 "sms_use_dialed_number_for_request_uri_bool";
 
         // Ut/Xcap
+        public static final String KEY_XCAP_ROOT_URI_REQUIRES_SRV_QUERY_BOOL =
+                "xcap_root_uri_requires_srv_query_bool";
+        public static final String KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY =
+                "ut_sm_cause_temporary_block_int_array";
+        public static final String KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY =
+                "ut_http_temporary_error_code_int_array";
+        public static final String KEY_UT_MAX_RETRY_COUNT_INT = "ut_max_retry_count_int";
+        public static final String KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT =
+                "ut_temporary_block_timer_min_int";
         public static final String KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL =
                 "ut_support_cf_action_erasure_bool";
         public static final String KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL =

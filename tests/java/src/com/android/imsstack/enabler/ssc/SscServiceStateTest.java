@@ -76,7 +76,7 @@ public class SscServiceStateTest {
                 eq(CarrierConfig.Assets.KEY_UT_TEMPORARY_BLOCK_TIMER_WITH_ANY_REASON_SEC_INT)))
                 .thenReturn(mBlockTimer);
         when(mMockCarrierConfig.getInt(
-                eq(CarrierConfig.ImsSs.KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT)))
+                eq(CarrierConfig.Assets.KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT)))
                 .thenReturn(mBlockTimer);
 
         when(mMockAlarmTimer.getTimerId()).thenReturn(mTimerId);
@@ -105,7 +105,7 @@ public class SscServiceStateTest {
                 eq(CarrierConfig.ImsSs.KEY_UT_HTTP_PERMANENT_ERROR_CODE_INT_ARRAY)))
                 .thenReturn(emptyBlockErrorCodes);
         when(mMockCarrierConfig.getIntArray(
-                eq(CarrierConfig.ImsSs.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY)))
+                eq(CarrierConfig.Assets.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY)))
                 .thenReturn(emptyBlockErrorCodes);
 
         assertEquals(true, mSscServiceState.isUtAvailable());
@@ -119,7 +119,7 @@ public class SscServiceStateTest {
         int[] tempBlockErrorCodes = {480};
         int errorCode = 480;
         when(mMockCarrierConfig.getIntArray(
-                eq(CarrierConfig.ImsSs.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY)))
+                eq(CarrierConfig.Assets.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY)))
                 .thenReturn(tempBlockErrorCodes);
 
         assertEquals(true, mSscServiceState.isUtAvailable());
@@ -152,7 +152,7 @@ public class SscServiceStateTest {
         int[] tempBlockSmCodes = {33};
         int smCause = 33;
         when(mMockCarrierConfig.getIntArray(
-                CarrierConfig.ImsSs.KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY))
+                CarrierConfig.Assets.KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY))
                 .thenReturn(tempBlockSmCodes);
 
         assertEquals(true, mSscServiceState.isUtAvailable());
