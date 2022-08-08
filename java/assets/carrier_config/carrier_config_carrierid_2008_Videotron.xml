@@ -22,6 +22,7 @@
         for Videotron in AOSP, which are 302500, 302510, and 302520. So, it needs further
         verification whether it's working with 510 and 520 UICCs for the FQDN of 500 .  -->
     <string name="imsss.ut_as_server_fqdn_string">xcap.ims.mnc500.mcc302.pub.3gppnetwork.org</string>
-    <int name="imsss.ut_as_server_port_int" value="80"/>
+    <!-- Previous solution was using 8090, and there is no requirements -->
+    <int name="imsss.ut_as_server_port_int" value="8090"/>
     <int name="imsss.ut_transport_type_int" value="1"/>
 </carrier_config>

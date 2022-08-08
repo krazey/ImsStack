@@ -57,4 +57,18 @@
         <item value="10"/>
     </int-array>
     <!-- End BUNDLE -->
+
+    <!-- Ut/Xcap AOSP -->
+    <int name="gba_mode_int" value="1"/>
+    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
+    <int name="imsss.ut_as_server_port_int" value="8090"/>
+    <int name="imsss.ut_transport_type_int" value="1"/>
+
+    <!--Ut/Xcap Config -->
+    <string name="imsss.xcap_auid_prefix_string">/mtasxdms</string>
+
+    <!--Ut/Xcap Assets -->
+    <boolean name="ut_support_cf_action_erasure_bool" value="false"/>
+    <string name="ut_target_address_country_code_replace_to_zero_string">+81</string>
+    <int name="ut_xcap_apn_inactivity_timer_sec_int" value="300"/>
 </carrier_config>
