@@ -43,7 +43,6 @@ static SipStackManager* gpStackMngr = SIP_NULL;
  *****************************************************************************/
 SipStackManager::SipStackManager()
 {
-    SipTrace_Construct(); /* Singleton Tracel Obj, maintained by Trace module*/
     SipUtil_Construct();  /* Singleton Util Obj, maintained by Util module*/
 }
 
@@ -59,7 +58,6 @@ SipStackManager::SipStackManager()
 SipStackManager::~SipStackManager()
 {
     SipUtil_Destruct();
-    SipTrace_Destruct();
 }
 /******************************************************************************
  * Function name        : SipStackManager
@@ -109,20 +107,6 @@ void SipStackManager::Destruct()
 SipUtil* SipStackManager::GetSipUtil()
 {
     return SipUtil_GetInstance();
-}
-
-/******************************************************************************
- * Function name        : GetTrace
- * Description          : Get the Instance of SipTrace ,
- * Return type          : SipTrace
- *
- * Argument             : None
- * Preconditions/
- * Side Effects            : None
- *****************************************************************************/
-SipTrace* SipStackManager::GetTrace()
-{
-    return SipTrace_GetInstance();
 }
 
 /*!

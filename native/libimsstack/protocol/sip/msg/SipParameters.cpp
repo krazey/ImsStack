@@ -19,33 +19,14 @@
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 #include "msg/sip_msgutil.h"
 
-/******************************************************************************
- * Function name      : SipParameterList::Constructor
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipParameterList::SipParameterList() :
         m_objPrmList(SipVector<SipNameValue*>())
 {
 }
 
-/******************************************************************************
- * Function name      : SipParameterList::Constructor
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipParameterList::SipParameterList(const SipParameterList& objPrmList) :
         m_objPrmList(SipVector<SipNameValue*>())
 {
@@ -67,15 +48,6 @@ SipParameterList::SipParameterList(const SipParameterList& objPrmList) :
     }
 }
 
-/******************************************************************************
- * Function name      : SipParameterList::Destructor
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipParameterList::~SipParameterList()
 {
     while (m_objPrmList.IsEmpty() != SIP_TRUE)
@@ -85,15 +57,6 @@ SipParameterList::~SipParameterList()
     }
 }
 
-/******************************************************************************
- * Function name      : SipParameterList::Add
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipParameterList::Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue)
 {
     if (pszName == SIP_NULL)
@@ -142,15 +105,6 @@ SIP_BOOL SipParameterList::Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipParameterList::Remove
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipParameterList::Remove(const SIP_CHAR* pszName)
 {
     if (pszName == SIP_NULL)
@@ -205,15 +159,6 @@ SIP_BOOL SipParameterList::FindElement(
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipParameterList::SetParamValue
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipParameterList::SetParamValue(
         const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_UINT32 nPos)
 {
@@ -269,15 +214,6 @@ SIP_BOOL SipParameterList::SetParamValue(
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipParameterList::GetParamValue
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_CHAR* SipParameterList::GetParamValue(
         const SIP_CHAR* pszName, SIP_UINT32 nPos /*default value is zero*/)
 {
@@ -306,15 +242,6 @@ SIP_CHAR* SipParameterList::GetParamValue(
     return (pszElement != SIP_NULL) ? SipPf_Strdup(pszElement) : SIP_NULL;
 }
 
-/******************************************************************************
- * Function name      : SipParameterList::GetParamNode
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipParameterList::IsParamExists(const SIP_CHAR* pszName, SIP_UINT32* pnPos)
 {
     if (pszName == SIP_NULL)
@@ -327,15 +254,6 @@ SIP_BOOL SipParameterList::IsParamExists(const SIP_CHAR* pszName, SIP_UINT32* pn
     return FindElement(pszName, pNameValue, *pnPos);
 }
 
-/******************************************************************************
- * Function name      : SipParameterList::GetParamNode
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipNameValue* SipParameterList::GetParamNode(const SIP_CHAR* pszName, SIP_UINT32* pnPos)
 {
     if (pszName == SIP_NULL)
@@ -403,15 +321,6 @@ SIP_BOOL SipParameterList::Encode(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter,
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipParameterList::DecUriSipParameterList
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipParameterList::Decode(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR cDelimiter,
         IParameterComponent* pParameterComponent)
 {
@@ -471,15 +380,6 @@ SIP_BOOL SipParameterList::Decode(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipNameValue::SipNameValue
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipNameValue::SipNameValue() :
         m_pszName(SIP_NULL),
         m_valueList(SipVector<SIP_CHAR*>()),
@@ -488,15 +388,6 @@ SipNameValue::SipNameValue() :
 {
 }
 
-/******************************************************************************
- * Function name      : SipNameValue::SipNameValue
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipNameValue::SipNameValue(const SipNameValue& objNmVl) :
         m_pszName(SipPf_Strdup(objNmVl.m_pszName)),
         m_valueList(SipVector<SIP_CHAR*>()),
@@ -519,15 +410,6 @@ SipNameValue::SipNameValue(const SipNameValue& objNmVl) :
     }
 }
 
-/******************************************************************************
- * Function name      : SipNameValue::~SipNameValue
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipNameValue::~SipNameValue()
 {
     if (m_pszName != SIP_NULL)
@@ -770,9 +652,6 @@ SIP_BOOL SipNameValue::Decode(
     return SIP_TRUE;
 }
 
-/*****************************************************************************
-  SipParameters - Class Member Function Implementations
-*****************************************************************************/
 SipParameters::SipParameters() {}
 
 SipParameters::SipParameters(const SipParameters& objParameters) :

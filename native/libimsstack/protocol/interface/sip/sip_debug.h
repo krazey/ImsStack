@@ -21,6 +21,7 @@
 
 #define SIP_DEBUG_ENABLE
 #define DEBUG_MSG_MAX_SIZE 500
+#define SIP_TRACE_MAX_SIZE 2000
 
 #ifdef SIP_DEBUG_ENABLE
 #define SIP_DEBUG_WARNING(a, b, c, d) \
@@ -44,6 +45,25 @@
 #define SIP_TRACE_D(a, b, c)
 #endif
 
+typedef enum _SipEn_TraceModules
+{
+    ESIPTRACE_MODFWK = 0,
+    ESIPTRACE_MODTXN,
+    ESIPTRACE_MODTRANSP,
+    ESIPTRACE_MODENCODER,
+    ESIPTRACE_MODDECODER,
+    ESIPTRACE_MODACCESSOR,
+    ESIPTRACE_MODABNF,
+    ESIPTRACE_MODTIMER,
+    ESIPTRACE_MODHASH,
+    ESIPTRACE_MODLIST,
+    ESIPTRACE_MODMEMORY,
+    ESIPTRACE_MODSTRING,
+    ESIPTRACE_MODALL,
+    ESIPTRACE_MODEND,
+    ESIPTRACE_MODINVALID = SIP_INVALID
+} SipEn_TraceModules;
+
 typedef enum _SipEn_DebugTypes
 {
     ESIPDEBUG_WARNING = SIP_ZERO, /*when set logs expected error
@@ -56,22 +76,6 @@ typedef enum _SipEn_DebugTypes
     ESIPDEBUG_INVALID = SIP_INVALID
 } SipEn_DebugTypes;
 
-/******************************************************************************
- * Function name    : SIP_DEBUG_LOG
- * Description    : This function logs the errors
- *                :
- *
- * Return type    : none
- *
- * Argument      :
- *    [IN]        : pszFilename[IN]  - Filename
- *    [IN]        : iLine[IN]           - Line number in file.
- eError[IN]        - Error
- pszFormat[IN]     - Format String
- *
- * Side Effects    :
- * NOTE             :
- ******************************************************************************/
 void SIP_DEBUG_LOG(
         SIP_UINT32 nCategory, SIP_CHAR* pszFilename, SIP_INT32 nLine, SIP_CHAR* pszFormat, ...);
 

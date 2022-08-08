@@ -17,7 +17,6 @@
 #include "msg/sip_comdef.h"
 #include "SipConfiguration.h"
 #include "transport/SipTransportInfo.h"
-#include "SipTrace.h"
 
 SipTransportInfo::SipTransportInfo(
         SipTransportParameter* pTranspParam, SipTransportBuffer* pTransSipBuffer) :

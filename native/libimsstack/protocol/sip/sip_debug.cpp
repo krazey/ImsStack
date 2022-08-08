@@ -20,22 +20,6 @@
 #include "sip_debug.h"
 #include "SipUtil.h"
 
-/******************************************************************************
- * Function name    : SIP_DEBUG_LOG
- * Description    : This function logs the errors
- *                :
- *
- * Return type    : None
- *
- * Argument      :
- *    [IN]        : pszFilename[IN] - Filename
- *    [IN]        : nLine[IN]       - Line number in file.
- eError[IN]    - Error
- pcFormat[IN]     - Format String
- *
- * Side Effects    :
- * NOTE             :
- ******************************************************************************/
 void SIP_DEBUG_LOG(SIP_UINT32 nCategory, SIP_CHAR* pszFilename, SIP_INT32 nLine,
     SIP_CHAR* pszFormat,...)
 {

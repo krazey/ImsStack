@@ -19,7 +19,6 @@
 #include "msg/sip_msgutil.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 
 extern SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(
@@ -27,30 +26,12 @@ extern SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(
 
 extern SIP_BOOL gHeaderAttributes[SipHeaderBase::TYPE_END][SipHeaderBase::HEADER_ATTRIBUTE_END];
 
-/******************************************************************************
- * Function name      : SipHeaderList::SipHeaderList
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderList::SipHeaderList(SIP_INT32 eHdrType) :
         SipHeaderBase(eHdrType),
         m_headerList(SipVector<SipHeaderBase*>())
 {
 }
 
-/******************************************************************************
- * Function name      : SipHeaderList::SipHeaderList
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderList::SipHeaderList(const SipHeaderList& objHeaderList) :
         SipHeaderBase(objHeaderList)
 {
@@ -73,15 +54,6 @@ SipHeaderList::SipHeaderList(const SipHeaderList& objHeaderList) :
     }
 }
 
-/******************************************************************************
- * Function name      : SipHeaderList::~SipHeaderList
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderList::~SipHeaderList()
 {
     while (m_headerList.IsEmpty() != SIP_TRUE)
@@ -92,29 +64,11 @@ SipHeaderList::~SipHeaderList()
     }
 }
 
-/******************************************************************************
- * Function name      : SipHeaderList::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP_TRUE*/)
 {
     return EncodeHdr(ppCurrPos, bParams, SipConfiguration::MSG_OPT_ENCODE_NONE);
 }
 
-/******************************************************************************
- * Function name      : SipHeaderList::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UINT32 nMsgOptions)
 {
     if (m_headerList.IsEmpty() == SIP_TRUE)
@@ -166,12 +120,10 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
             if ((nMsgOptions & SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM) ==
                     SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM)
             {
-                SIP_TRACE_NORMAL(ESIPTRACE_MODENCODER, "ShortForm Hdr", SIP_ZERO, SIP_ZERO);
                 sipEncodeShortHdrName(pHeader->GetHdrType(), ppCurrPos);
             }
             else
             {
-                SIP_TRACE_NORMAL(ESIPTRACE_MODENCODER, "Fullform Hdr", SIP_ZERO, SIP_ZERO);
                 sipEncodeHdrName(pHeader->GetHdrType(), ppCurrPos, nMsgOptions);
             }
         }
@@ -189,30 +141,12 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipHeaderList::GetListObj
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderBase* SipHeaderList::GetListObj(SipHeaderBase* pHdr)
 {
     SIP_INT32 eHdrType = GetHdrType();
     return gaFactoryArray[eHdrType](eHdrType, pHdr);
 }
 
-/******************************************************************************
- * Function name      : SipHeaderList::AddHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipHeaderList::AddHeader(SipHeaderBase* pHeader)
 {
     if (m_headerList.Add(pHeader) < SIP_ZERO)
@@ -224,15 +158,6 @@ SIP_BOOL SipHeaderList::AddHeader(SipHeaderBase* pHeader)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipHeaderList::InsertHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipHeaderList::InsertHdrAtPos(SipHeaderBase* pHeader, SIP_UINT32 nIndex)
 {
     if (nIndex > m_headerList.GetSize())
@@ -245,15 +170,6 @@ SIP_BOOL SipHeaderList::InsertHdrAtPos(SipHeaderBase* pHeader, SIP_UINT32 nIndex
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipHeaderList::RemoveHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 void SipHeaderList::RemoveHdr(SIP_UINT32 nIndex)
 {
     if (nIndex < m_headerList.GetSize())
@@ -264,15 +180,6 @@ void SipHeaderList::RemoveHdr(SIP_UINT32 nIndex)
     }
 }
 
-/******************************************************************************
- * Function name      : SipHeaderList::Getobj
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderBase* SipHeaderList::GetObj(SIP_UINT32 nIndex)
 {
     if (m_headerList.GetSize() <= nIndex)
@@ -289,15 +196,6 @@ SipHeaderBase* SipHeaderList::GetObj(SIP_UINT32 nIndex)
     return pHdr;
 }
 
-/******************************************************************************
- * Function name      : SipHeaderList::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipHeaderList::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
@@ -372,15 +270,6 @@ SIP_BOOL SipHeaderList::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     return SIP_TRUE;
 }
-/******************************************************************************
- * Function name      : SipHeaderList::SipHeaderList
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 
 SipHeaderBase* SipHeaderList::GetNewListObj(SIP_INT32 eHdr, SipHeaderBase* pHeaderList)
 {

@@ -16,26 +16,24 @@
 #include "msg/SipTimeStampHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/*constructor*/
 SipTimeStampHeader::SipTimeStampHeader() :
         SipHeaderBase(SipHeaderBase::TIMESTAMP),
         m_pszTimeVal(SIP_NULL),
         m_pszDelay(SIP_NULL)
 {
 }
-/*Copy Constructor*/
+
 SipTimeStampHeader::SipTimeStampHeader(const SipTimeStampHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_pszTimeVal(SipPf_Strdup(objHeader.m_pszTimeVal)),
         m_pszDelay(SipPf_Strdup(objHeader.m_pszDelay))
 {
 }
-/*destructor*/
+
 SipTimeStampHeader::~SipTimeStampHeader()
 {
     if (m_pszTimeVal != SIP_NULL)
@@ -50,7 +48,6 @@ SipTimeStampHeader::~SipTimeStampHeader()
     }
 }
 
-/*virtual methods*/
 SIP_BOOL SipTimeStampHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
 {
     if (IsValidHeader() == SIP_FALSE)
@@ -70,16 +67,6 @@ SIP_BOOL SipTimeStampHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams
     return SIP_TRUE;
 }
 
-/*Function for encoding of headers*/
-/******************************************************************************
- * Function name      : SipTimeStampHeader::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipTimeStampHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     /*Encoding of header Value  i.e.
@@ -107,27 +94,16 @@ SIP_BOOL SipTimeStampHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     return SIP_TRUE;
 }
 
-/*Sets */
 SIP_BOOL SipTimeStampHeader::SetTimeVal(const SIP_CHAR* pszTimeVal)
 {
     return SetCharVar(pszTimeVal, m_pszTimeVal);
 }
 
-/*Sets */
 SIP_BOOL SipTimeStampHeader::SetDelay(const SIP_CHAR* pszDelay)
 {
     return SetCharVar(pszDelay, m_pszDelay);
 }
 
-/******************************************************************************
- * Function name      : SipTimeStampHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipTimeStampHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

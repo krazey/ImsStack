@@ -16,7 +16,6 @@
 #include "txn/SipTxn.h"
 #include "msg/SipMessage.h"
 #include "txn/SipTxnHandler.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 #include "txn/sip_txn_fsm.h"
 #include "platform/sip_pf_string.h"
@@ -206,7 +205,7 @@ SIP_BOOL SipTxnHandler::OnRecvTxn(IN SipMessage* pSipMsg, IN SipTxnKey* pTxnKey,
             {
                 /* stack manager to Notifies to Transaction User using registered listener
                    and Delete Txn entry from DB and delete the instance*/
-                SIP_TRACE_NORMAL(
+                SIP_DEBUG_WARNING(
                         ESIPTRACE_MODTXN, "OnRecvTxn: Client Txn Terminated", SIP_ZERO, SIP_ZERO);
             }
         }
@@ -229,7 +228,7 @@ SIP_BOOL SipTxnHandler::OnRecvTxn(IN SipMessage* pSipMsg, IN SipTxnKey* pTxnKey,
             {
                 /* stack manager to Notifies to Transaction User using registered listener
                    and Delete Txn entry from DB and delete the instance*/
-                SIP_TRACE_NORMAL(
+                SIP_DEBUG_WARNING(
                         ESIPTRACE_MODTXN, "OnRecvTxn: Server Txn Terminated", SIP_ZERO, SIP_ZERO);
             }
         }
@@ -364,8 +363,6 @@ SIP_BOOL SipTxnHandler::OnRecvTranspError(
 
         DeleteTxn(pTxnKey);
 
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "OnRecvTranspError: Transaction Terminated\n", SIP_ZERO,
-                SIP_ZERO);
         return SIP_TRUE;
     }
     return SIP_TRUE;
@@ -570,7 +567,6 @@ PRIVATE SIP_INT32 SipTxnHandler::GetTxnType(
         }
     }
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, " TxnType[%s]", gszTxnTypeStr[eTxnType], SIP_ZERO);
     return eTxnType;
 }
 
@@ -903,9 +899,6 @@ PRIVATE SIP_BOOL SipTxnHandler::ValidateRecvTxn(SipMessage* pSipMsg, IN SIP_INT3
     }
 
     *peTxnType = GetTxnType(SipTxn::RECV, eMethodType, eMsgType);
-
-    SIP_TRACE_NORMAL(
-            ESIPTRACE_MODTXN, "ValidateRecvTxn: TxnType[%s]", gszTxnTypeStr[*peTxnType], SIP_ZERO);
 
     if (*peTxnType == SipTxn::INVALID_TXN)
     {

@@ -21,7 +21,6 @@
 #include "SipConfiguration.h"
 
 #include "sip_error.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 
 #include "txn/SipTimeoutData.h"
@@ -64,9 +63,6 @@ static SIP_BOOL NonInvClient_TimeoutHandling(SipTxn* pTxn, SIP_VOID* pvData, SIP
     SIP_INT32 eTranspMsgSentProtocol = pTxn->GetMsgSentProto();
     SIP_UINT32 nMaxDuration = pTxn->GetMaxDuration();
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "NonInvClient_TimeoutHandling: Transport %d, Duration: %d",
-            eTranspMsgSentProtocol, nDurationExpired);
-
     SIP_UINT32 nDuration = SIP_ZERO;
     /* For Unreliable Transport */
     if (eTranspMsgSentProtocol == SipTransportInfo::PROTOCOL_UDP)
@@ -76,9 +72,6 @@ static SIP_BOOL NonInvClient_TimeoutHandling(SipTxn* pTxn, SIP_VOID* pvData, SIP
         if (nDurationExpired >= nMaxDuration)
         {
             /* Stop Retransmissions : May notify StackUSer on Termination of Txn */
-            SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                    "NonInvClient_TimeoutHandling: Txn Ends RextCount %d Duration %d",
-                    pTxn->GetReTxCount(), nDurationExpired);
             pTxn->SetTxnState(SipTxn::NON_INV_CLI_TERMINATED_ST);
             nDuration = SIP_ZERO;  // Transaction to be timedout immediately.
         }
@@ -114,9 +107,6 @@ static SIP_BOOL NonInvClient_TimeoutHandling(SipTxn* pTxn, SIP_VOID* pvData, SIP
     }
     else /* For Relaible Transport */
     {
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                "NonInvClient_TimeoutHandling_E_H: TCP Txn Ends RextCount %d MaxDuration %d",
-                pTxn->GetReTxCount(), nMaxDuration);
         pTxn->SetTxnState(SipTxn::NON_INV_CLI_TERMINATED_ST);
         nDuration = SIP_ZERO;  // Transaction to be timedout immediately.
     }
@@ -145,8 +135,6 @@ static SIP_BOOL NonInvCli_Recv2xx6xxResp(
     pTxn->StopTxnTimer();
 
     SIP_INT32 eTranspMsgSentProtocol = pTxn->GetMsgSentProto();
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "NonInvCli_Recv2xx6xxResp: Transp Protocol %d",
-            eTranspMsgSentProtocol, SIP_ZERO);
 
     /* For Unreliable Transport */
     if (eTranspMsgSentProtocol == SipTransportInfo::PROTOCOL_UDP)
@@ -155,8 +143,6 @@ static SIP_BOOL NonInvCli_Recv2xx6xxResp(
         const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
         SIP_UINT32 nDurationTK = objSipTxnTimers.GetTimerValue(SipTxn::TIMERK);
         SIP_BOOL bStatus = pTxn->StartTxnTimer(SipTxn::TIMERK, nDurationTK, pnError);
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "NonInvCli_Recv2xx6xxResp: Timer start returned",
-                SIP_ZERO, SIP_ZERO);
         if (bStatus == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,

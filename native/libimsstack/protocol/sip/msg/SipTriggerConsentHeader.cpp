@@ -16,7 +16,6 @@
 #include "msg/SipTriggerConsentHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
@@ -37,7 +36,6 @@ SipTriggerConsentHeader::SipTriggerConsentHeader(const SipTriggerConsentHeader& 
     }
 }
 
-/*destructor*/
 SipTriggerConsentHeader::~SipTriggerConsentHeader()
 {
     if (m_pSipUri != SIP_NULL)
@@ -46,7 +44,6 @@ SipTriggerConsentHeader::~SipTriggerConsentHeader()
     }
 }
 
-/*virtual methods*/
 SIP_BOOL SipTriggerConsentHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 {
     if (m_pSipUri == SIP_NULL)
@@ -65,7 +62,6 @@ SIP_BOOL SipTriggerConsentHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bPar
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-/*Function for encoding of headers*/
 SIP_BOOL SipTriggerConsentHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
@@ -109,15 +105,6 @@ SIP_BOOL SipTriggerConsentHeader::SetSipUri(SipUri* pSipUri)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipTriggerConsentHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipTriggerConsentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

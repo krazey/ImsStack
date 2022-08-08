@@ -16,19 +16,16 @@
 #include "msg/SipUserAgentHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/*constructor*/
 SipUserAgentHeader::SipUserAgentHeader(SIP_INT32 eHdrType) :
         SipHeaderBase(eHdrType),
         m_objProductList(SipVector<SIP_CHAR*>())
 {
 }
 
-/*constructor*/
 SipUserAgentHeader::SipUserAgentHeader(const SipUserAgentHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_objProductList(SipVector<SIP_CHAR*>())
@@ -45,7 +42,6 @@ SipUserAgentHeader::SipUserAgentHeader(const SipUserAgentHeader& objHeader) :
     }
 }
 
-/*destructor*/
 SipUserAgentHeader::~SipUserAgentHeader()
 {
     while (m_objProductList.IsEmpty() != SIP_TRUE)
@@ -55,7 +51,6 @@ SipUserAgentHeader::~SipUserAgentHeader()
     }
 }
 
-/*virtual methods*/
 SIP_BOOL SipUserAgentHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
 {
     if (m_objProductList.IsEmpty() == SIP_TRUE)
@@ -81,7 +76,6 @@ SIP_BOOL SipUserAgentHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams
     return SIP_TRUE;
 }
 
-/*Function for encoding of headers*/
 SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (m_objProductList.IsEmpty() == SIP_TRUE)
@@ -105,15 +99,6 @@ SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipUserAgentHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipUserAgentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

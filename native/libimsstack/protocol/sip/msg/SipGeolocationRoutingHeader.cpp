@@ -16,35 +16,16 @@
 #include "msg/SipGeolocationRoutingHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/******************************************************************************
- * Function name      : SipGeolocationRoutingHeader::SipGeolocationRoutingHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipGeolocationRoutingHeader::SipGeolocationRoutingHeader() :
         SipHeaderBase(SipHeaderBase::GEOLOCATION_ROUTING),
         m_pGeoLocationRoutingList(SIP_NULL)
 {
 }
 
-/******************************************************************************
- * Function name      : SipGeolocationRoutingHeader::SipGeolocationRoutingHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipGeolocationRoutingHeader::SipGeolocationRoutingHeader(
         const SipGeolocationRoutingHeader& objHeader) :
         SipHeaderBase(objHeader),
@@ -56,15 +37,6 @@ SipGeolocationRoutingHeader::SipGeolocationRoutingHeader(
     }
 }
 
-/******************************************************************************
- * Function name      : SipGeolocationRoutingHeader::~SipGeolocationRoutingHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipGeolocationRoutingHeader::~SipGeolocationRoutingHeader()
 {
     if (m_pGeoLocationRoutingList != SIP_NULL)
@@ -84,15 +56,6 @@ SIP_BOOL SipGeolocationRoutingHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL 
     return m_pGeoLocationRoutingList->Encode(objBuffer);
 }
 
-/******************************************************************************
- * Function name      : SipGeolocationRoutingHeader::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipGeolocationRoutingHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {

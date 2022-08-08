@@ -16,14 +16,12 @@
 #include "msg/SipWarningHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
 #define MAX_WARN_LEN 12
 
-/*constructor*/
 SipWarningHeader::SipWarningHeader() :
         SipHeaderBase(SipHeaderBase::WARNING),
         m_nWarnCode(SIP_ZERO),
@@ -40,7 +38,6 @@ SipWarningHeader::SipWarningHeader(const SipWarningHeader& objHeader) :
 {
 }
 
-/*destructor*/
 SipWarningHeader::~SipWarningHeader()
 {
     if (m_pszWarnAgent != SIP_NULL)
@@ -55,7 +52,6 @@ SipWarningHeader::~SipWarningHeader()
     }
 }
 
-/*virtual methods*/
 SIP_BOOL SipWarningHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
 {
     if (IsValidHeader() == SIP_FALSE)
@@ -84,7 +80,6 @@ SIP_BOOL SipWarningHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/
     return SIP_TRUE;
 }
 
-/*Function for encoding of headers*/
 SIP_BOOL SipWarningHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (IsValidHeader() == SIP_FALSE)
@@ -125,27 +120,16 @@ SIP_BOOL SipWarningHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
     return SIP_TRUE;
 }
 
-/*Sets the visited nw name*/
 SIP_BOOL SipWarningHeader::SetWarnAgent(const SIP_CHAR* pszWarnAgent)
 {
     return SetCharVar(pszWarnAgent, m_pszWarnAgent);
 }
 
-/*Sets the visited nw name*/
 SIP_BOOL SipWarningHeader::SetWarnText(const SIP_CHAR* pszWarnText)
 {
     return SetCharVar(pszWarnText, m_pszWarnText);
 }
 
-/******************************************************************************
- * Function name      : SipWarningHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipWarningHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

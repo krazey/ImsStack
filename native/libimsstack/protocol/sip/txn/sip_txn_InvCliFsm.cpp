@@ -21,7 +21,6 @@
 #include "SipConfiguration.h"
 
 #include "sip_error.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 
 #include "txn/SipTimeoutData.h"
@@ -72,7 +71,7 @@ static SIP_BOOL sipInvCli_HandleFailureResp(IN SipTxn* pTxn, IN_OUT SipTxnFsmDat
     /* On basis of Transport Start Timer */
     SIP_INT32 eTranspMsgSentProtocol = pTxn->GetMsgSentProto();
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "sipInvCli_HandleFailureResp: Transport %d , TimerD: %d",
+    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "sipInvCli_HandleFailureResp: Transport %d , TimerD: %d",
             eTranspMsgSentProtocol, nDurationTD);
 
     /* For Unreliable Transport */
@@ -210,9 +209,6 @@ static SIP_BOOL InvCliFsm_CallingStTimerA_B_TimeoutEvt(
     SIP_UINT32 nDuration = SIP_ZERO;
     SIP_UINT32 nMaxDuration = pTxn->GetMaxDuration();
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "InvCliFSM_TimerA_B_TimeoutEvt: Transport %d, Duration: %d",
-            eTranspMsgSentProtocol, nDurationExpired);
-
     /* For Unreliable Transport : Restart Timer */
     if (eTranspMsgSentProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
@@ -221,9 +217,6 @@ static SIP_BOOL InvCliFsm_CallingStTimerA_B_TimeoutEvt(
         if (nDurationExpired >= nMaxDuration)
         {
             /* Stop Retransmissions : May notify StackUSer on Termination of Txn */
-            SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                    "TimerA_B_TimeoutEvt: Txn Ends RextCount %d Duration %d", nReTxCount,
-                    nDurationExpired);
             pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
             nDuration = SIP_ZERO;  // Transaction to be timedout immediately.
         }
@@ -246,9 +239,6 @@ static SIP_BOOL InvCliFsm_CallingStTimerA_B_TimeoutEvt(
     }
     else /* For Relaible Transport */
     {
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                "TimerA_B_TimeoutEvt: TCP Txn Ends  RextCount %d MaxDuration %d", nReTxCount,
-                nMaxDuration);
         /* Terminate Transaction */
         pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
         nDuration = SIP_ZERO;  // Transaction to be timedout immediately.
@@ -450,9 +440,6 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt(
                     {
                         pINVTxnKey->SetRSeq(nRseq);
                         pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
-                        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                                "InvCliFsm_ProceedingStSendNon100ProvRespEvt: Rseq is proper.",
-                                SIP_ZERO, SIP_ZERO);
                     }
                 }
                 else

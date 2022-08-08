@@ -18,7 +18,6 @@
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
 #include "sip_error.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 #include "msg/SipAddrSpec.h"
 #include "msg/sip_msgutil.h"
@@ -27,7 +26,6 @@ SIP_CHAR gaszDirectivesArray[SIP_DIRECTIVE_SIZE][SIP_DIRECTIVE_LEN] = {"proxy", 
         "cancel", "no-cancel", "fork", "no-fork", "recurse", "no-recurse", "parallel", "sequential",
         "queue", "no-queue"};
 
-/*constructor*/
 SipRequestDispositionHeader::SipRequestDispositionHeader() :
         SipHeaderBase(SipHeaderBase::REQUEST_DISPOSITION)
 {
@@ -39,18 +37,8 @@ SipRequestDispositionHeader::SipRequestDispositionHeader(
 {
 }
 
-/*destructor*/
 SipRequestDispositionHeader::~SipRequestDispositionHeader() {}
 
-/******************************************************************************
- * Function name      : SipRequestDispositionHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipRequestDispositionHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (SipHeaderBase::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)

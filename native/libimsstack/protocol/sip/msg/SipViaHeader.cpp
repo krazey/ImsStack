@@ -19,20 +19,10 @@
 #include "platform/sip_pf_memory.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "msg/SipViaHeader.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/******************************************************************************
- * Function name      : SipViaHeader::SipViaHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipViaHeader::SipViaHeader() :
         SipHeaderBase(SipHeaderBase::VIA),
         m_pszProtocolName(SIP_NULL),
@@ -43,15 +33,7 @@ SipViaHeader::SipViaHeader() :
         m_eHostType(SipAddrSpec::HOST_NAME)
 {
 }
-/******************************************************************************
- * Function name      : SipViaHeader(SipViaHeader*)
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
+
 SipViaHeader::SipViaHeader(const SipViaHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_pszProtocolName(SipPf_Strdup(objHeader.GetProtocolName())),
@@ -62,16 +44,6 @@ SipViaHeader::SipViaHeader(const SipViaHeader& objHeader) :
         m_eHostType(objHeader.m_eHostType)
 {
 }
-
-/******************************************************************************
- * Function name      : SipViaHeader::~SipViaHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 
 SipViaHeader::~SipViaHeader()
 {
@@ -140,16 +112,6 @@ SIP_BOOL SipViaHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
-
-/******************************************************************************
- * Function name      : SipViaHeader::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 
 SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
@@ -234,71 +196,25 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-/*set methods*/
-/******************************************************************************
- * Function name      : SipViaHeader::SetProtocolName
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipViaHeader::SetProtocolName(const SIP_CHAR* pszProtocolNm)
 {
     return SetCharVar(pszProtocolNm, m_pszProtocolName);
 }
 
-/******************************************************************************
- * Function name      : SipViaHeader::SetProtocolVer
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipViaHeader::SetProtocolVer(const SIP_CHAR* pszProtocolVer)
 {
     return SetCharVar(pszProtocolVer, m_pszProtocolVer);
 }
 
-/******************************************************************************
- * Function name      : SipViaHeader::SetTransport
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipViaHeader::SetTransport(const SIP_CHAR* pszTransport)
 {
     return SetCharVar(pszTransport, m_pszTransport);
 }
 
-/******************************************************************************
- * Function name      : SipViaHeader::SetHost
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipViaHeader::SetHost(const SIP_CHAR* pszHost)
 {
     return SetCharVar(pszHost, m_pszHost);
 }
-/******************************************************************************
- * Function name      : SipViaHeader::SetHost
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 
 SIP_BOOL SipViaHeader::SetPortNum(SIP_UINT16 nPort)
 {
@@ -306,16 +222,6 @@ SIP_BOOL SipViaHeader::SetPortNum(SIP_UINT16 nPort)
     return SIP_TRUE;
 }
 
-/*Get methods*/
-/******************************************************************************
- * Function name      : SipViaHeader::GetBranch
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 const SIP_CHAR* SipViaHeader::GetBranch() const
 {
     SipParameters* pParameters = GetParameters();
@@ -329,15 +235,6 @@ const SIP_CHAR* SipViaHeader::GetBranch() const
     return objParameterList.GetParamValue("branch");
 }
 
-/******************************************************************************
- * Function name      : SipViaHeader::SetRecvdParam
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipViaHeader::SetBranchParam(const SIP_CHAR* pszBranch)
 {
     SipParameters* pParameters = GetParameters();
@@ -362,15 +259,6 @@ SIP_BOOL SipViaHeader::SetBranchParam(const SIP_CHAR* pszBranch)
     return SIP_TRUE;
 }
 
-/*****************************************************************************
- * Function name      : SipViaHeader::DecHostPort
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     /*hostport = host [ COLON port ]
@@ -442,15 +330,6 @@ SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipViaHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipViaHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

@@ -18,7 +18,6 @@
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "sip_error.h"
 #include "msg/SipHeaders.h"
 #include "msg/SipMsgBody.h"
@@ -147,29 +146,11 @@ SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, S
         SIP_NULL                                     //    SipHeaderBase::TYPE_END //120
 };
 
-/******************************************************************************
- * Function name      : SipHeaders::SipHeaders
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaders::SipHeaders()
 {
     memset(m_HeaderArray, SIP_NULL, (SipHeaderBase::TYPE_END + SIP_ONE) * sizeof(SipHeaderBase*));
 }
 
-/******************************************************************************
- * Function name      : SipHeaders::CreateHdrObj
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderBase* SipHeaders::CreateCoreHdrObj(SIP_INT32 eHdrType)
 {
     eHdrType = CheckAndGetHdrEnumType(eHdrType);
@@ -180,15 +161,6 @@ SipHeaderBase* SipHeaders::CreateCoreHdrObj(SIP_INT32 eHdrType)
     return SIP_NULL;
 }
 
-/******************************************************************************
- * Function name      : SipHeaders::SipHeaders
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipHeaders::CopyHdrs(SipHeaders* pHdrs)
 {
     for (SIP_UINT32 nCount = 0; nCount < SipHeaderBase::TYPE_END; nCount++)
@@ -227,15 +199,6 @@ SipHeaders::~SipHeaders()
     }
 }
 
-/******************************************************************************
- * Function name      : SipHeaders::getHdrObj
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderBase* SipHeaders::getHdrObj(SIP_INT32 eHdrType, SIP_UINT16 eIndex)
 {
     if ((eHdrType < SIP_ZERO) || eHdrType >= SipHeaderBase::TYPE_END)
@@ -279,15 +242,6 @@ SIP_VOID SipHeaders::OverWriteHdrObj(IN SipHeaders* pSrcHdrs, IN SIP_BOOL bIgnor
     }
 }
 
-/******************************************************************************
- * Function name      : SipHeaders::getHdrObj
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderBase* SipHeaders::getHdrObj(SIP_INT32 eHdrType)
 {
     if ((eHdrType < SIP_ZERO) || eHdrType >= SipHeaderBase::TYPE_END)
@@ -302,15 +256,6 @@ SipHeaderBase* SipHeaders::getHdrObj(SIP_INT32 eHdrType)
     return SIP_NULL;
 }
 
-/******************************************************************************
- * Function name      : SipHeaders::getNewHdrObj
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderBase* SipHeaders::getNewHdrObj(SIP_INT32 eHdrType)
 {
     eHdrType = CheckAndGetHdrEnumType(eHdrType);
@@ -545,15 +490,6 @@ SIP_BOOL SipHeaders::EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipHeaders:: IsListHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipHeaders::IsListHdr(SIP_INT32 eHdrType)
 {
     if ((eHdrType < SIP_ZERO) || (eHdrType >= SipHeaderBase::TYPE_END))
@@ -564,15 +500,6 @@ SIP_BOOL SipHeaders::IsListHdr(SIP_INT32 eHdrType)
     return (arrSipHeadersType[eHdrType] == 1) ? SIP_TRUE : SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipHeaders::DecodeHdrs
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipHeaders::DecodeHdrs(
         SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName, SIP_CHAR** ppHdrBody)
 {
@@ -696,16 +623,6 @@ SIP_BOOL SipHeaders::DecodeHdrs(
 
     return SIP_TRUE;
 }
-
-/*****************************************************************************
- * Function name      : sipEncodeHdrName
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 
 SIP_BOOL sipEncodeHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos, SIP_UINT32 nMsgOptions)
 {

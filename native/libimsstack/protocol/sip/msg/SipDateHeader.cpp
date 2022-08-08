@@ -15,7 +15,6 @@
  */
 #include "msg/SipDateHeader.h"
 #include "platform/sip_pf_string.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 #include "msg/sip_msgutil.h"
 #include "platform/sip_pf_string.h"
@@ -33,15 +32,6 @@ const SIP_CHAR gaszWeekday[][MAX_WEEK_LEN + SIP_ONE] = {
 const SIP_CHAR gaszMonth[][MAX_MONTH_LEN + SIP_ONE] = {
         "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-/*****************************************************************************
- * Function name      : sipGetWeekDayType
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_INT32 sipGetWeekDayType(SIP_CHAR* pszWeekDay)
 {
     switch (pszWeekDay[0])
@@ -90,15 +80,7 @@ SIP_INT32 sipGetWeekDayType(SIP_CHAR* pszWeekDay)
     }
     return SipDateHeader::UNKNOWN_DAY;
 }
-/*****************************************************************************
- * Function name      : sipGetMonthType
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
+
 SIP_INT32 sipGetMonthType(SIP_CHAR* pszMonth)
 {
     switch (pszMonth[0])
@@ -175,15 +157,6 @@ SIP_INT32 sipGetMonthType(SIP_CHAR* pszMonth)
     return SipDateHeader::UNKNOWN_MONTH;
 }
 
-/******************************************************************************
- * Function name      : SipDateHeader::SipDateHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipDateHeader::SipDateHeader() :
         SipHeaderBase(SipHeaderBase::DATE),
         m_nDate(SIP_ZERO),
@@ -196,26 +169,8 @@ SipDateHeader::SipDateHeader() :
 {
 }
 
-/******************************************************************************
- * Function name      : SipDateHeader::~SipDateHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipDateHeader::~SipDateHeader() {}
 
-/******************************************************************************
- * Function name      : SipDateHeader::~SipDateHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipDateHeader::SipDateHeader(const SipDateHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_nDate(objHeader.m_nDate),
@@ -257,15 +212,6 @@ SIP_BOOL SipDateHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) c
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipDateHeader::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipDateHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (IsValidHeader() == SIP_FALSE)
@@ -303,15 +249,6 @@ SIP_BOOL SipDateHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipDateHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipDateHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*Date: Thu, 21 Feb 2002 13:02:03 GMT*/
@@ -529,15 +466,6 @@ SIP_BOOL SipDateHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipDateHeader::SetDate
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipDateHeader::SetDate(const SIP_UINT16 nDate)
 {
     if ((nDate <= DATE_VAL) && (nDate > SIP_ZERO))
@@ -548,15 +476,6 @@ SIP_BOOL SipDateHeader::SetDate(const SIP_UINT16 nDate)
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipDateHeader::SetMonth
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipDateHeader::SetMonth(SIP_INT32 eMonth)
 {
     if ((eMonth >= SipDateHeader::JANUARY) && (eMonth < SipDateHeader::UNKNOWN_MONTH))
@@ -567,15 +486,6 @@ SIP_BOOL SipDateHeader::SetMonth(SIP_INT32 eMonth)
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipDateHeader::SetYear
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipDateHeader::SetYear(const SIP_UINT16 nYear)
 {
     if (nYear >= YEAR_VAL)
@@ -586,15 +496,6 @@ SIP_BOOL SipDateHeader::SetYear(const SIP_UINT16 nYear)
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipDateHeader::SetHour
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipDateHeader::SetHour(const SIP_UINT16 nHour)
 {
     if (nHour < HOUR_VAL)
@@ -605,15 +506,6 @@ SIP_BOOL SipDateHeader::SetHour(const SIP_UINT16 nHour)
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipDateHeader::SetMinute
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipDateHeader::SetMinute(const SIP_UINT16 nMin)
 {
     if (nMin < TIME_VAL)
@@ -624,15 +516,6 @@ SIP_BOOL SipDateHeader::SetMinute(const SIP_UINT16 nMin)
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipDateHeader::SetSecond
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipDateHeader::SetSecond(const SIP_UINT16 nSec)
 {
     if (nSec < TIME_VAL)
@@ -643,15 +526,6 @@ SIP_BOOL SipDateHeader::SetSecond(const SIP_UINT16 nSec)
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipDateHeader::SetWkDay
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipDateHeader::SetWkDay(SIP_INT32 eWkDay)
 {
     if ((eWkDay >= SipDateHeader::MONDAY) && (eWkDay < SipDateHeader::UNKNOWN_DAY))

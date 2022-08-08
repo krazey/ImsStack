@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "sip_error.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"

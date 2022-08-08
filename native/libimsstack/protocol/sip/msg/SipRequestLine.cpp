@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "sip_pf_datatypes.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_memory.h"
 #include "sip_debug.h"
 #include "sip_error.h"
@@ -24,15 +23,6 @@
 #include "msg/SipMessage.h"
 #include "msg/sip_msgutil.h"
 
-/******************************************************************************
- * Function name      : SipRequestLine::SipRequestLine
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipRequestLine::SipRequestLine() :
         m_pszMethod(SIP_NULL),
         m_pReqUri(SIP_NULL),
@@ -40,15 +30,6 @@ SipRequestLine::SipRequestLine() :
 {
 }
 
-/******************************************************************************
- * Function name      : SipRequestLine::SipRequestLine
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipRequestLine::SipRequestLine(
         SIP_CHAR* pszMethod, SipAddrSpec* pReqUri, const SIP_CHAR* /*pszSipVersion*/) :
         m_pszMethod(SipPf_Strdup(pszMethod)),
@@ -57,15 +38,6 @@ SipRequestLine::SipRequestLine(
 {
 }
 
-/******************************************************************************
- * Function name      : SipRequestLine::SipRequestLine
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipRequestLine::SipRequestLine(const SipRequestLine& objHeader) :
         m_pszMethod(SipPf_Strdup(objHeader.m_pszMethod)),
         m_pReqUri(SIP_NULL),
@@ -77,15 +49,6 @@ SipRequestLine::SipRequestLine(const SipRequestLine& objHeader) :
     }
 }
 
-/******************************************************************************
- * Function name      : SipRequestLine::~SipRequestLine
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipRequestLine::~SipRequestLine()
 {
     if (m_pszMethod != SIP_NULL)
@@ -102,15 +65,6 @@ SipRequestLine::~SipRequestLine()
     }
 }
 
-/******************************************************************************
- * Function name      : SipRequestLine::EncodeRequestLine
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
 {
     /*check for existence of Method, request uri and version */
@@ -153,43 +107,16 @@ SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipRequestLine::SetMethod
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipRequestLine::SetMethod(const SIP_CHAR* pMethod)
 {
     return SetCharVar(pMethod, m_pszMethod);
 }
 
-/******************************************************************************
- * Function name      : SipRequestLine::SetSipVersion
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipRequestLine::SetSipVersion(const SIP_CHAR* pszVer)
 {
     return SetCharVar(pszVer, m_pszSipVersion);
 }
 
-/******************************************************************************
- * Function name      : SipRequestLine::SetReqUri
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipRequestLine::SetReqUri(SipAddrSpec* pAddrSpec)
 {
     if (m_pReqUri != SIP_NULL)
@@ -205,15 +132,6 @@ SIP_BOOL SipRequestLine::SetReqUri(SipAddrSpec* pAddrSpec)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipRequestLine::GetReqUri
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipAddrSpec* SipRequestLine::GetReqUri()
 {
     if (m_pReqUri != SIP_NULL)
@@ -224,15 +142,6 @@ SipAddrSpec* SipRequestLine::GetReqUri()
     return m_pReqUri;
 }
 
-/******************************************************************************
- * Function name      : SipRequestLine::DecodeRequestLine
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     SIP_CHAR* pTempLoc = SIP_NULL;

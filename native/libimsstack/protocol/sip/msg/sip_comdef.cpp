@@ -15,7 +15,6 @@
  */
 #include "msg/sip_comdef.h"
 #include "msg/SipMessage.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
@@ -33,16 +32,6 @@ SIP_UINT32 SipNPower(SIP_UINT16 nBase, SIP_UINT16 nIndex)
     return nRes;
 }
 
-/******************************************************************************
- * Function name    : CheckTxnMadatoryParams
- * Description    : Check Key Parameter to Start a Txn [Friend Function]
- * Return type    : SIP_BOOL
- *          Success/Failure
- * Argument     : pnError: <Out>
- *          Error code.
- * Preconditions/
- * Side Effects    : None
- *****************************************************************************/
 SIP_BOOL CheckTxnMadatoryParams(SipMessage* pSipMsg, SIP_INT32* peMsgType, SIP_INT32* peMethodType)
 {
     SIP_INT32 eMsgType = pSipMsg->GetMsgType();

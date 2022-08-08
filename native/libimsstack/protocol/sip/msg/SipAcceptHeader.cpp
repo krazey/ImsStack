@@ -16,20 +16,10 @@
 #include "msg/SipAcceptHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/******************************************************************************
- * Function name  : SipAcceptHeader::SipAcceptHeader
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SipAcceptHeader::SipAcceptHeader() :
         SipHeaderBase(SipHeaderBase::ACCEPT),
         m_pszMType(SIP_NULL),
@@ -37,15 +27,6 @@ SipAcceptHeader::SipAcceptHeader() :
 {
 }
 
-/******************************************************************************
- * Function name  : SipAcceptHeader::SipAcceptHeader
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SipAcceptHeader::SipAcceptHeader(const SipAcceptHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_pszMType(SipPf_Strdup(objHeader.m_pszMType)),
@@ -53,15 +34,6 @@ SipAcceptHeader::SipAcceptHeader(const SipAcceptHeader& objHeader) :
 {
 }
 
-/******************************************************************************
- * Function name  : SipAcceptHeader::~SipAcceptHeader
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SipAcceptHeader::~SipAcceptHeader()
 {
     if (m_pszMType != SIP_NULL)
@@ -97,15 +69,6 @@ SIP_BOOL SipAcceptHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) con
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name  : SipAcceptHeader::EncodeHdr
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SIP_BOOL SipAcceptHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     if ((m_pszMType == SIP_NULL) && (m_pszMSubType == SIP_NULL))
@@ -131,43 +94,16 @@ SIP_BOOL SipAcceptHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Def
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-/******************************************************************************
- * Function name  : SipAcceptHeader::SetMediaType
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SIP_BOOL SipAcceptHeader::SetMediaType(const SIP_CHAR* pszMType)
 {
     return SetCharVar(pszMType, m_pszMType);
 }
 
-/******************************************************************************
- * Function name  : SipAcceptHeader::SetMediaSubType
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SIP_BOOL SipAcceptHeader::SetMediaSubType(const SIP_CHAR* pszMSubType)
 {
     return SetCharVar(pszMSubType, m_pszMSubType);
 }
 
-/******************************************************************************
- * Function name      : SipAcceptHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipAcceptHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

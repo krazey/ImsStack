@@ -16,59 +16,22 @@
 #include "msg/SipPVisitedNetworkIdHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "msg/sip_msgutil.h"
 
-/******************************************************************************
- * Function name      : SipPVisitedNetworkIdHeader::SipPVisitedNetworkIdHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipPVisitedNetworkIdHeader::SipPVisitedNetworkIdHeader() :
         SipHeaderBase(SipHeaderBase::P_VISITED_NETWORK_ID)
 {
 }
 
-/******************************************************************************
- * Function name      : SipPVisitedNetworkIdHeader::SipPVisitedNetworkIdHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipPVisitedNetworkIdHeader::SipPVisitedNetworkIdHeader(
         const SipPVisitedNetworkIdHeader& objHeader) :
         SipHeaderBase(objHeader)
 {
 }
 
-/******************************************************************************
- * Function name      : SipPVisitedNetworkIdHeader::~SipPVisitedNetworkIdHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipPVisitedNetworkIdHeader::~SipPVisitedNetworkIdHeader() {}
 
-/******************************************************************************
- * Function name      : SipPVisitedNetworkIdHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*Case of nothing is present*/

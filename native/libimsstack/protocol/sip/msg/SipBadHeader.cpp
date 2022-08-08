@@ -16,50 +16,22 @@
 #include "msg/SipBadHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/******************************************************************************
- * Function name      : SipBadHeader::SipBadHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipBadHeader::SipBadHeader() :
         SipHeaderBase(TYPE_INVALID),
         m_pszHdrName(SIP_NULL)
 {
 }
 
-/******************************************************************************
- * Function name      : SipBadHeader::SipBadHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipBadHeader::SipBadHeader(const SipBadHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_pszHdrName(SipPf_Strdup(objHeader.m_pszHdrName))
 {
 }
 
-/******************************************************************************
- * Function name      : SipUnknownHeader::~SipUnknownHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipBadHeader::~SipBadHeader()
 {
     if (m_pszHdrName != SIP_NULL)
@@ -73,15 +45,6 @@ SIP_BOOL SipBadHeader::SetHeaderName(const SIP_CHAR* pszHdrName)
     return SetCharVar(pszHdrName, m_pszHdrName);
 }
 
-/******************************************************************************
- * Function name      : SipUnknownHeader::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipBadHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     (void)ppCurrPos;
@@ -89,15 +52,6 @@ SIP_BOOL SipBadHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipUnknownHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipBadHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     (void)pStartPt;

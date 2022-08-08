@@ -122,9 +122,6 @@ TEST_F(SipStackManagerTest, SendRecvMessage)
     pSipStackManager->GetSipUtil()->RegisterNetwork(new SipTestNetworkUtil());
     pSipStackManager->GetSipUtil()->RegisterTxnListener(new SipTestTxnListener());
 
-    SipTrace* pTrace = pSipStackManager->GetTrace();
-    ASSERT_TRUE(pTrace != nullptr);
-
     // clang-format off
     SipStackCallbacks stCallbacks = {
             &FetchTransactionStub,

@@ -18,12 +18,10 @@
 #include "msg/SipParameters.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 #include "platform/sip_pf_string.h"
 
-/*constructor*/
 SipAuthBase::SipAuthBase(SIP_INT32 eHdrType) :
         SipHeaderBase(eHdrType),
         m_objAuthList(SipVector<SipNameValue*>())
@@ -48,7 +46,6 @@ SipAuthBase::SipAuthBase(const SipAuthBase& objHeader) :
     }
 }
 
-/*destructor*/
 SipAuthBase::~SipAuthBase()
 {
     while (m_objAuthList.IsEmpty() != SIP_TRUE)
@@ -58,7 +55,6 @@ SipAuthBase::~SipAuthBase()
     }
 }
 
-/*virtual methods*/
 SIP_BOOL SipAuthBase::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
 {
     if (IsValidHeader() == SIP_FALSE)
@@ -93,7 +89,6 @@ SIP_BOOL SipAuthBase::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) con
     return SIP_TRUE;
 }
 
-/*Function for encoding of headers*/
 SIP_BOOL SipAuthBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (IsValidHeader() == SIP_FALSE)
@@ -231,15 +226,6 @@ SIP_CHAR* SipAuthBase::GetAuthValue(const SIP_CHAR* pszName)
     return pszVal;
 }
 
-/******************************************************************************
- * Function name      : SipAuthBase::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipAuthBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

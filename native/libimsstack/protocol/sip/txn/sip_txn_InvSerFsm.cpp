@@ -19,7 +19,6 @@
 
 #include "msg/sip_comdef.h"
 #include "sip_error.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 
 #include "txn/SipTimeoutData.h"
@@ -222,10 +221,6 @@ static SIP_BOOL InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt(
     SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
     SIP_INT32 eTranspProtocol = pTranspParam->GetTranspProtocol();
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-            "InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt: Transport %d", eTranspProtocol,
-            SIP_ZERO);
-
     /* For Unreliable Transport : Start Timer G*/
     if (eTranspProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
@@ -406,9 +401,6 @@ static SIP_BOOL InvSerFsm_CompletedStRecvAckReqEvt(
 
     SIP_INT32 eTranspMsgSentProtocol = pTxn->GetMsgSentProto();
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "InvSerFsm_CompletedStRecvAckReqEvt: Transport %d",
-            eTranspMsgSentProtocol, SIP_ZERO);
-
     SIP_UINT16 nNextState;
     SIP_UINT32 nDurationTI = 0;
 
@@ -465,9 +457,6 @@ static SIP_BOOL InvSerFsm_CompletedStTimerG_H_TimeoutEvt(
     SIP_INT32 eTranspMsgSentProtocol = pTxn->GetMsgSentProto();
     SIP_UINT32 nMaxDuration = pTxn->GetMaxDuration();
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "InvSerFsm_CompletedStTimerG_H_TimeoutEvt: Transport %d",
-            eTranspMsgSentProtocol, SIP_ZERO);
-
     SIP_UINT32 nDuration = SIP_ZERO;
     /* For Unreliable Transport */
     if (eTranspMsgSentProtocol == SipTransportInfo::PROTOCOL_UDP)
@@ -477,10 +466,6 @@ static SIP_BOOL InvSerFsm_CompletedStTimerG_H_TimeoutEvt(
         if (nDurationExpired >= nMaxDuration)
         {
             /* Stop Retransmissions : May notify StackUSer on Termination of Txn */
-            SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                    "CompletedStTimerG_H_TimeoutEvt: Txn Ends RextCount %d Duration %d",
-                    pTxn->GetReTxCount(), nDurationExpired);
-
             pTxn->SetTxnState(SipTxn::INV_SER_TERMINATED_ST);
             nDuration = SIP_ZERO;  // Transaction to be timedout immediately.
         }
@@ -502,9 +487,6 @@ static SIP_BOOL InvSerFsm_CompletedStTimerG_H_TimeoutEvt(
     }
     else /* For Relaible Transport */
     {
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                "CompletedStTimerG_H_TimeoutEvt: TCP Txn Ends RextCount %d MaxDuration %d",
-                pTxn->GetReTxCount(), nMaxDuration);
         pTxn->SetTxnState(SipTxn::INV_SER_TERMINATED_ST);
         nDuration = SIP_ZERO;  // Transaction to be timedout immediately.
     }

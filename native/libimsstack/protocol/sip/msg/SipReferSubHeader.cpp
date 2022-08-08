@@ -16,7 +16,6 @@
 #include "msg/SipReferSubHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
@@ -31,18 +30,8 @@ SipReferSubHeader::SipReferSubHeader(const SipReferSubHeader& objHeader) :
 {
 }
 
-/*destructor*/
 SipReferSubHeader::~SipReferSubHeader() {}
 
-/******************************************************************************
- * Function name      : SipReferSubHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipReferSubHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (SipHeaderBase::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)

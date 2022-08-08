@@ -118,21 +118,6 @@ SIP_BOOL sipFindLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
     return SIP_FALSE;
 }
 
-SIP_BOOL sipFindDelimiter(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc,
-        SIP_CHAR cDelimiter)
-{
-    while (pStartPt <= pEndPt)
-    {
-        if (*pStartPt == cDelimiter)
-        {
-            *ppTempLoc = pStartPt - SIP_ONE;
-            return SIP_TRUE;
-        }
-        pStartPt = pStartPt + SIP_ONE;
-    }
-    return SIP_FALSE;
-}
-
 SIP_BOOL sipFindPreDelimiter(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc,
         SIP_CHAR cDelimiter)
 {

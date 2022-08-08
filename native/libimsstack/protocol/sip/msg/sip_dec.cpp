@@ -16,7 +16,6 @@
 #include "msg/sip_msgutil.h"
 #include "sip_pf_datatypes.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
 #include "msg/SipHeaders.h"
@@ -26,15 +25,6 @@
 #define MAX__CONTACT_EXPIRES 4294967295
 #define SIP_MAX_HDR_LEN      32
 
-/******************************************************************************
- * Function name      : sipSkipRwWSP
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_CHAR* sipSkipRwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     /*NULL validation*/
@@ -49,15 +39,6 @@ SIP_CHAR* sipSkipRwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return pEndPt;
 }
 
-/******************************************************************************
- * Function name      : sipFindPostDelimiter
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL sipFindPostDelimiter(
         SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter)
 {
@@ -73,15 +54,6 @@ SIP_BOOL sipFindPostDelimiter(
     return SIP_FALSE;
 }
 
-/*****************************************************************************
- * Function name      : sipGetUriType
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_INT32 sipGetUriType(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     SIP_UINT32 nSize = (pEndPt - pStartPt) + SIP_ONE;
@@ -96,29 +68,11 @@ SIP_INT32 sipGetUriType(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SipUri::SCHEME_ABS;
 }
 
-/*****************************************************************************
- * Function name      : sipGetHdrType
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_INT32 sipGetHdrType(const SIP_CHAR* pszHdrName)
 {
     return SIPHdrAccess::GetHdrType(pszHdrName);
 }
 
-/*****************************************************************************
- * Function name      : CheckAndGetHdrEnumType
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType)
 {
     // support EXPIRES_ANY & EXPIRES_DATE

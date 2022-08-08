@@ -16,14 +16,12 @@
 #include "msg/SipRetryAfterHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
 #define MAX_RETRY_AFTER_LEN 12
 
-/*constructor*/
 SipRetryAfterHeader::SipRetryAfterHeader() :
         SipHeaderBase(SipHeaderBase::RETRY_AFTER_SEC),
         m_nDeltaSec(SIP_ZERO),
@@ -31,7 +29,6 @@ SipRetryAfterHeader::SipRetryAfterHeader() :
 {
 }
 
-/*Copy constructor*/
 SipRetryAfterHeader::SipRetryAfterHeader(const SipRetryAfterHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_nDeltaSec(objHeader.m_nDeltaSec),
@@ -39,7 +36,6 @@ SipRetryAfterHeader::SipRetryAfterHeader(const SipRetryAfterHeader& objHeader) :
 {
 }
 
-/*destructor*/
 SipRetryAfterHeader::~SipRetryAfterHeader()
 {
     if (m_pszComment != SIP_NULL)
@@ -48,7 +44,6 @@ SipRetryAfterHeader::~SipRetryAfterHeader()
     }
 }
 
-/*virtual methods*/
 SIP_BOOL SipRetryAfterHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 {
     objBuffer += m_nDeltaSec;
@@ -63,7 +58,6 @@ SIP_BOOL SipRetryAfterHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams)
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-/*Function for encoding of headers*/
 SIP_BOOL SipRetryAfterHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
@@ -84,21 +78,11 @@ SIP_BOOL SipRetryAfterHeader::EncodeHdr(
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-/*Sets */
 SIP_BOOL SipRetryAfterHeader::SetComment(const SIP_CHAR* pszComment)
 {
     return SetCharVar(pszComment, m_pszComment);
 }
 
-/******************************************************************************
- * Function name      : SipRetryAfterHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

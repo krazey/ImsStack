@@ -16,20 +16,10 @@
 #include "msg/SipIdentityHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/******************************************************************************
- * Function name      : SipIdentityHeader::SipIdentityHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipIdentityHeader::SipIdentityHeader() :
         SipHeaderBase(SipHeaderBase::IDENTITY),
         m_pSignedIdentityDigest(SIP_NULL),
@@ -37,15 +27,6 @@ SipIdentityHeader::SipIdentityHeader() :
 {
 }
 
-/******************************************************************************
- * Function name      : SipIdentityHeader::SipIdentityHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipIdentityHeader::SipIdentityHeader(const SipIdentityHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_pSignedIdentityDigest(SipPf_Strdup(objHeader.m_pSignedIdentityDigest)),
@@ -53,15 +34,6 @@ SipIdentityHeader::SipIdentityHeader(const SipIdentityHeader& objHeader) :
 {
 }
 
-/******************************************************************************
- * Function name      : SipIdentityHeader::~SipIdentityHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipIdentityHeader::~SipIdentityHeader()
 {
     if (m_pSignedIdentityDigest != SIP_NULL)
@@ -106,15 +78,6 @@ SIP_BOOL SipIdentityHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) c
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipIdentityHeader::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipIdentityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
 {
     if (IsValidHeader() == SIP_FALSE)
@@ -143,15 +106,6 @@ SIP_BOOL SipIdentityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-/******************************************************************************
- * Function name      : SipIdentityHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipIdentityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

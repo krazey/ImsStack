@@ -16,7 +16,6 @@
 #include "transport/SipTransportHandler.h"
 #include "transport/SipTransportInfo.h"
 #include "transport/SipTransportParameter.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 #include "platform/sip_pf_string.h"
 #include "sip_error.h"
@@ -66,7 +65,7 @@ SIP_BOOL SipTransportHandler::OnSendTransp(IN SipMessage* pSipMsg,
     /* Input parameter validation */
     if ((pSipMsg == SIP_NULL) || (pTranspParam == SIP_NULL))
     {
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SendMsg invalid params", 0, 0);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SendMsg invalid params", 0, 0);
         return SIP_FALSE;
     }
 
@@ -451,9 +450,6 @@ PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg(
 
         return SIP_FALSE;
     }
-
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTRANSP, "GetTxnKeyFromSipMsg: eMsgType[%d], Method[%d]", eMsgType,
-            eMethodType);
 
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, pnError);
     if (pTxnKey == SIP_NULL)

@@ -17,7 +17,6 @@
 #include "platform/sip_pf_memory.h"
 #include "platform/sip_pf_string.h"
 
-#include "SipTrace.h"
 #include "sip_error.h"
 
 #include "SipConfiguration.h"

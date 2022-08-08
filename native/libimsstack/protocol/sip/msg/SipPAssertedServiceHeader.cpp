@@ -16,14 +16,9 @@
 #include "msg/SipPAssertedServiceHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
 
 SipPAssertedServiceHeader::SipPAssertedServiceHeader() :
         SipHeaderBase(SipHeaderBase::P_ASSERTED_SERVICE)
@@ -35,7 +30,6 @@ SipPAssertedServiceHeader::SipPAssertedServiceHeader(const SipPAssertedServiceHe
 {
 }
 
-/*destructor*/
 SipPAssertedServiceHeader::~SipPAssertedServiceHeader() {}
 
 SIP_BOOL SipPAssertedServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

@@ -16,39 +16,16 @@
 #include "msg/SipAllowEventsHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
-
-/******************************************************************************
- * Function name  : SipAllowEventsHeader::SipAllowEventsHeader
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SipAllowEventsHeader::SipAllowEventsHeader() :
         SipHeaderBase(SipHeaderBase::ALLOW_EVENTS),
         m_pEventTemplateList(SIP_NULL)
 {
 }
 
-/******************************************************************************
- * Function name  : SipAllowEventsHeader::SipAllowEventsHeader
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SipAllowEventsHeader::SipAllowEventsHeader(const SipAllowEventsHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_pEventTemplateList(SIP_NULL)
@@ -59,15 +36,6 @@ SipAllowEventsHeader::SipAllowEventsHeader(const SipAllowEventsHeader& objHeader
     }
 }
 
-/******************************************************************************
- * Function name  : SipAllowEventsHeader::~SipAllowEventsHeader
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SipAllowEventsHeader::~SipAllowEventsHeader()
 {
     if (m_pEventTemplateList != SIP_NULL)
@@ -92,15 +60,6 @@ SIP_BOOL SipAllowEventsHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bPara
                                               : SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name  : SipAllowEventsHeader::EncodeHdr
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SIP_BOOL SipAllowEventsHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     const SIP_CHAR* pszValue = GetValue();
@@ -117,15 +76,6 @@ SIP_BOOL SipAllowEventsHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParam
                                               : SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipAllowEventsHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipAllowEventsHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
