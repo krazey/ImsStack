@@ -18,8 +18,8 @@
 
 #include "ImsList.h"
 #include "ImsMap.h"
+#include "AString.h"
 
-class AString;
 class AosBuildDirector;
 class AosStaticConfig;
 class IAosHandle;
@@ -45,9 +45,9 @@ public:
 
 private:
     void CreateStaticConfig();
-    void CreateAoS();
+    void CreateAos();
     void DestroyStaticConfig();
-    void DestroyAoS();
+    void DestroyAos();
 
     IAosBuilder* AosBuilderFactory();
 
@@ -57,5 +57,8 @@ private:
     IMSMap<AString, IAosAppContext*> m_objAppContext;
     AosBuildDirector* m_pBuildDirector;
     AosStaticConfig* m_pStaticConfig;
+
+private:
+    friend class AosMngrTest;
 };
 #endif  // AOS_MNGR_H_

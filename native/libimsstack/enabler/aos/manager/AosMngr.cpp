@@ -38,7 +38,7 @@ AosMngr::AosMngr(IN IMS_SINT32 nSlotId) :
 {
     CreateStaticConfig();
 
-    CreateAoS();
+    CreateAos();
 
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosMngr = %" PFLS_u "/%" PFLS_x, m_nSlotId,
             sizeof(AosMngr), this);
@@ -49,7 +49,7 @@ PUBLIC VIRTUAL AosMngr::~AosMngr()
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [SLOT%d] AosMngr = %" PFLS_u "/%" PFLS_x, m_nSlotId,
             sizeof(AosMngr), this);
 
-    DestroyAoS();
+    DestroyAos();
 
     DestroyStaticConfig();
 }
@@ -227,7 +227,7 @@ void AosMngr::CreateStaticConfig()
 }
 
 PRIVATE
-void AosMngr::CreateAoS()
+void AosMngr::CreateAos()
 {
     IAosBuilder* piAosBuilder = AosBuilderFactory();
 
@@ -258,7 +258,7 @@ void AosMngr::CreateAoS()
         strLog.Append("]");
     }
 
-    IMS_TRACE_I("[SLOT%d] CreateAoS :: (%s) creation is completed", m_nSlotId, strLog.GetStr(), 0);
+    IMS_TRACE_I("[SLOT%d] CreateAos :: (%s) creation is completed", m_nSlotId, strLog.GetStr(), 0);
     delete piAosBuilder;
 }
 
@@ -273,7 +273,7 @@ void AosMngr::DestroyStaticConfig()
 }
 
 PRIVATE
-void AosMngr::DestroyAoS()
+void AosMngr::DestroyAos()
 {
     if (m_pBuildDirector != IMS_NULL)
     {
