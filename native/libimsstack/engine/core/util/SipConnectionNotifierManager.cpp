@@ -161,25 +161,25 @@ private:
 
     static IMS_BOOL CheckMessageValidity(IN ISipMessage* piSipMsg, OUT AString& strReason);
     static AString CreateConnectionNotifierKey(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort);
-    static void CreateExtraFeatures(IN Service* pService, OUT IMSList<FeatureSet*>& objFeatures);
+    static void CreateExtraFeatures(IN Service* pService, OUT ImsList<FeatureSet*>& objFeatures);
     static void CreatePreferenceHeaders(
-            IN const AStringArray& objAcceptContacts, OUT IMSList<PreferenceHeader*>& objHeaders);
-    static void DestroyExtraFeatures(OUT IMSList<FeatureSet*>& objFeatures);
-    static void DestroyPreferenceHeaders(OUT IMSList<PreferenceHeader*>& objHeaders);
-    static void GetCalleePreferenceSupportedServices(IN const IMSList<Service*>& objServices,
-            IN const SipMethod& objMethod, OUT IMSList<Service*>& objCalleePreferenceServices);
+            IN const AStringArray& objAcceptContacts, OUT ImsList<PreferenceHeader*>& objHeaders);
+    static void DestroyExtraFeatures(OUT ImsList<FeatureSet*>& objFeatures);
+    static void DestroyPreferenceHeaders(OUT ImsList<PreferenceHeader*>& objHeaders);
+    static void GetCalleePreferenceSupportedServices(IN const ImsList<Service*>& objServices,
+            IN const SipMethod& objMethod, OUT ImsList<Service*>& objCalleePreferenceServices);
     static void GetRejectCode(IN ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode,
             IN IMS_SINT32 nLogInfo, OUT SipStatusCode& objStatusCode);
     static void HandleSipRequest(
             IN ISipConnectionNotifier* piScn, IN IMS_BOOL bIsForked = IMS_FALSE);
     static IMS_BOOL HasService(
-            IN const IMSList<Service*>& objServices, IN const Service* pEvaluatedService);
+            IN const ImsList<Service*>& objServices, IN const Service* pEvaluatedService);
     static IMS_BOOL IsCalleePreferenceSupported(
-            IN const IMSList<Service*>& objServices, IN const SipMethod& objMethod);
+            IN const ImsList<Service*>& objServices, IN const SipMethod& objMethod);
     static Service* RouteSipRequest(
             IN ISipServerConnection* piSsc, OUT SipStatusCode& objStatusCode);
     static Service* RouteSipRequestByIfc(
-            IN const IMSList<Service*>& objServices, IN ISipServerConnection* piSsc);
+            IN const ImsList<Service*>& objServices, IN ISipServerConnection* piSsc);
     static void SendResponse(IN ISipConnectionNotifier* piScn, IN ISipServerConnection* piSsc,
             IN IMS_SINT32 nStatusCode, IN const AString& strReasonPhrase = AString::ConstNull(),
             IN IMS_BOOL bDebuggableToTag = IMS_FALSE);
@@ -552,7 +552,7 @@ PRIVATE GLOBAL AString SipConnectionNotifierManagerPrivate::CreateConnectionNoti
 }
 
 PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::CreateExtraFeatures(
-        IN Service* pService, OUT IMSList<FeatureSet*>& objFeatures)
+        IN Service* pService, OUT ImsList<FeatureSet*>& objFeatures)
 {
     if (pService == IMS_NULL)
     {
@@ -574,7 +574,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::CreateExtraFeatures(
 }
 
 PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::CreatePreferenceHeaders(
-        IN const AStringArray& objAcceptContacts, OUT IMSList<PreferenceHeader*>& objHeaders)
+        IN const AStringArray& objAcceptContacts, OUT ImsList<PreferenceHeader*>& objHeaders)
 {
     if (objAcceptContacts.IsEmpty())
     {
@@ -610,7 +610,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::CreatePreferenceHeaders
 }
 
 PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::DestroyExtraFeatures(
-        OUT IMSList<FeatureSet*>& objFeatures)
+        OUT ImsList<FeatureSet*>& objFeatures)
 {
     if (objFeatures.IsEmpty())
     {
@@ -631,7 +631,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::DestroyExtraFeatures(
 }
 
 PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::DestroyPreferenceHeaders(
-        OUT IMSList<PreferenceHeader*>& objHeaders)
+        OUT ImsList<PreferenceHeader*>& objHeaders)
 {
     if (objHeaders.IsEmpty())
     {
@@ -652,8 +652,8 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::DestroyPreferenceHeader
 }
 
 PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::GetCalleePreferenceSupportedServices(
-        IN const IMSList<Service*>& objServices, IN const SipMethod& objMethod,
-        OUT IMSList<Service*>& objCalleePreferenceServices)
+        IN const ImsList<Service*>& objServices, IN const SipMethod& objMethod,
+        OUT ImsList<Service*>& objCalleePreferenceServices)
 {
     // In the moment, OPTIONS method will be only handled for this request.
     if (!objMethod.Equals(SipMethod::OPTIONS))
@@ -888,7 +888,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::HandleSipRequest(
 }
 
 PRIVATE GLOBAL IMS_BOOL SipConnectionNotifierManagerPrivate::HasService(
-        IN const IMSList<Service*>& objServices, IN const Service* pEvaluatedService)
+        IN const ImsList<Service*>& objServices, IN const Service* pEvaluatedService)
 {
     for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
     {
@@ -909,7 +909,7 @@ PRIVATE GLOBAL IMS_BOOL SipConnectionNotifierManagerPrivate::HasService(
 }
 
 PRIVATE GLOBAL IMS_BOOL SipConnectionNotifierManagerPrivate::IsCalleePreferenceSupported(
-        IN const IMSList<Service*>& objServices, IN const SipMethod& objMethod)
+        IN const ImsList<Service*>& objServices, IN const SipMethod& objMethod)
 {
     IMS_BOOL bCalleePreference = IMS_FALSE;
 
@@ -944,7 +944,7 @@ PRIVATE GLOBAL IMS_BOOL SipConnectionNotifierManagerPrivate::IsCalleePreferenceS
 PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
         IN ISipServerConnection* piSsc, OUT SipStatusCode& objStatusCode)
 {
-    IMSList<Service*> objServices = ServiceManager::GetInstance()->GetServices();
+    ImsList<Service*> objServices = ServiceManager::GetInstance()->GetServices();
 
     if (objServices.IsEmpty())
     {
@@ -1045,14 +1045,14 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
         return pService;
     }
 
-    IMSList<Service*> objCalleePreferenceServices;
+    ImsList<Service*> objCalleePreferenceServices;
     GetCalleePreferenceSupportedServices(objServices, objMethod, objCalleePreferenceServices);
 
-    IMSList<PreferenceHeader*> objPreferenceHeaders;
+    ImsList<PreferenceHeader*> objPreferenceHeaders;
     CreatePreferenceHeaders(objAcceptContacts, objPreferenceHeaders);
 
-    IMSList<Service*> objCandidates;
-    IMSList<FeatureSet*> objExtraFeatures;
+    ImsList<Service*> objCandidates;
+    ImsList<FeatureSet*> objExtraFeatures;
     IMS_SINT32* pnScore = new IMS_SINT32[objServices.GetSize()];
 
     for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
@@ -1173,7 +1173,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
 }
 
 PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequestByIfc(
-        IN const IMSList<Service*>& objServices, IN ISipServerConnection* piSsc)
+        IN const ImsList<Service*>& objServices, IN ISipServerConnection* piSsc)
 {
     if (objServices.IsEmpty())
     {
@@ -1207,6 +1207,16 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequestByIf
             continue;
         }
 
+        ServiceFilterCriteria* pSfc = pService->GetFilterCriteria();
+
+        if (pSfc != IMS_NULL)
+        {
+            if (pSfc->IsCalleePreferenceSupported(piSsc->GetMethod()))
+            {
+                nScore += CallerPreference::SCORE_CALLEE_PREFERENCE;
+            }
+        }
+
         if (nScore > nMaxScore)
         {
             nMaxScore = nScore;
@@ -1216,8 +1226,8 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequestByIf
 
     if (pBestService != IMS_NULL)
     {
-        IMS_TRACE_I("iFC :: SERVICE (%s, %s) IS SELECTED", pBestService->GetAppId().GetStr(),
-                pBestService->GetServiceId().GetStr(), 0);
+        IMS_TRACE_I("iFC :: SERVICE ([%s, %s]|%d) IS SELECTED", pBestService->GetAppId().GetStr(),
+                pBestService->GetServiceId().GetStr(), nMaxScore);
     }
 
     return pBestService;
