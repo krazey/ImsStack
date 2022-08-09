@@ -312,17 +312,21 @@ void UceService::EnableCoreService()
 
     if (m_piCoreService != IMS_NULL)
     {
-        IServiceFilterCriteria* piSFC = m_piCoreService->GetFilterCriteria();
-        if (piSFC != IMS_NULL)
+        if (UceConfig::GetInstance()->GetBoolValue(UceConfig::KEY_SUPPORT_OPTIONS, m_nSlotId) ==
+                IMS_TRUE)
         {
-            SipMethod objMethod(SipMethod::OPTIONS);
-            TriggerPoint objTP(objMethod);
+            IServiceFilterCriteria* piSFC = m_piCoreService->GetFilterCriteria();
+            if (piSFC != IMS_NULL)
+            {
+                SipMethod objMethod(SipMethod::OPTIONS);
+                TriggerPoint objTP(objMethod);
 
-            // Sets the trigger point
-            piSFC->AddTriggerPoint(objTP);
+                // Sets the trigger point
+                piSFC->AddTriggerPoint(objTP);
 
-            // Sets the callee preference
-            piSFC->SetCalleePreference(objMethod);
+                // Sets the callee preference
+                piSFC->SetCalleePreference(objMethod);
+            }
         }
         m_piCoreService->SetListener(this);
     }

@@ -143,6 +143,9 @@ IMS_BOOL UceConfig::GetBoolValue(IN KEY_UCE_BOOL eKey, IN IMS_SINT32 nSimSlot)
         case KEY_ENCODE_SUBSCRIBE_BODY:
             bRet = objUceAssetItems->m_bEncodeSubscribeBody;
             break;
+        case KEY_SUPPORT_OPTIONS:
+            bRet = objUceAssetItems->m_bSupportOptions;
+            break;
         case KEY_USE_CONTACT_HEADER_IN_PUBLISH:
             bRet = objUceAssetItems->m_bUseContactHeaderInPublish;
             break;
@@ -271,6 +274,7 @@ void UceConfig::toString(IN IMS_SINT32 nSimSlot)
     IMS_TRACE_D("AnonymousFetchMethod[%d], EncodePublishBody[%d], EncodeSubscribeBody[%d]",
             objUceAssetItems->m_nAnonymousFetchMethod, objUceAssetItems->m_bEncodePublishBody,
             objUceAssetItems->m_bEncodeSubscribeBody);
+    IMS_TRACE_D("SupportOptions[%d]", objUceAssetItems->m_bSupportOptions, 0, 0);
     IMS_TRACE_D("UseContactHeaderInPublish[%d], UseContactHeaderInSubscribe[%d], "
                 "AddVideoTagContactHeaderInPublish[%d]",
             objUceAssetItems->m_bUseContactHeaderInPublish,
@@ -343,6 +347,7 @@ const IMS_CHAR* UceConfig::GetKeyString(IN KEY_UCE_BOOL eKey)
             "KEY_SUBSCRIBE_INDEPENDENT_OF_PUBLISH",
             "KEY_ENCODE_PUBLISH_BODY",
             "KEY_ENCODE_SUBSCRIBE_BODY",
+            "KEY_SUPPORT_OPTIONS",
             "KEY_USE_CONTACT_HEADER_IN_PUBLISH",
             "KEY_USE_CONTACT_HEADER_IN_SUBSCRIBE",
             "KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH",
@@ -398,6 +403,8 @@ void UceConfig::Update(IN ICarrierConfig* piCc, IN IMS_SINT32 nSimSlot)
             piCc->GetBoolean(CarrierConfig::ImsUce::KEY_ENCODE_PUBLISH_BODY_BOOL);
     objUceAssetItems->m_bEncodeSubscribeBody =
             piCc->GetBoolean(CarrierConfig::ImsUce::KEY_ENCODE_SUBSCRIBE_BODY_BOOL);
+    objUceAssetItems->m_bSupportOptions =
+            piCc->GetBoolean(CarrierConfig::ImsUce::KEY_SUPPORT_OPTIONS_BOOL);
     objUceAssetItems->m_bUseContactHeaderInPublish =
             piCc->GetBoolean(CarrierConfig::ImsUce::KEY_USE_CONTACT_HEADER_IN_PUBLISH_BOOL);
     objUceAssetItems->m_bUseContactHeaderInSubscribe =

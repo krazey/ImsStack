@@ -305,6 +305,8 @@ const IMS_CHAR CarrierConfig::ImsUce::KEY_ENCODE_PUBLISH_BODY_BOOL[] =
         KEY_IMS_UCE_PREFIX "encode_publish_body_bool";
 const IMS_CHAR CarrierConfig::ImsUce::KEY_ENCODE_SUBSCRIBE_BODY_BOOL[] =
         KEY_IMS_UCE_PREFIX "encode_subscribe_body_bool";
+const IMS_CHAR CarrierConfig::ImsUce::KEY_SUPPORT_OPTIONS_BOOL[] =
+        KEY_IMS_UCE_PREFIX "support_options";
 const IMS_CHAR CarrierConfig::ImsUce::KEY_USE_SIP_URI_FOR_PRESENCE_SUBSCRIBE_BOOL[] =
         KEY_IMS_UCE_PREFIX "use_sip_uri_for_presence_subscribe_bool";
 const IMS_CHAR CarrierConfig::ImsUce::KEY_USE_EXPIRED_ETAG_BOOL[] =
