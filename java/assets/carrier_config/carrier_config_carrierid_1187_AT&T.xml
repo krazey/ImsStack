@@ -70,6 +70,7 @@
     </int-array>
 
     <boolean name="use_security_server_port_in_reg_contact_of_initial_registration_bool" value="true"/>
+    <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_registration_bool" value="true"/>
     <!-- KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
     <int name="subscription_error_retry_max_count_for_reg_event_with_initial_registration_int" value="1"/>
     <int-array name="subscription_error_code_for_reg_event_with_initial_registration_int_array" num="3">

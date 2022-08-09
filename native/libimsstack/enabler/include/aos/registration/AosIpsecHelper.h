@@ -49,7 +49,6 @@ public:
 
     virtual IMS_BOOL ProcessAuthChallenged(IN IMS_SINT32 nAlgorithm);
     virtual void ProcessRegStarted();
-    virtual void ProcessRegStartFailed();
     virtual IMS_BOOL ProcessRegUpdated();
 
     virtual void InitIpsec();

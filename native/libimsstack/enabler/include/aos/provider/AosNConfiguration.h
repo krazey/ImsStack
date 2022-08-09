@@ -69,6 +69,7 @@ public:
     virtual IMS_BOOL IsSecurityServerPortInRegContactOfInitialRegistrationUsed() const;
     virtual IMS_BOOL IsSecurityServerPortInInitialRegistrationUsed() const;
     virtual IMS_BOOL IsOldSaOnEstablishingSaRemoved() const;
+    virtual IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegistrationDestroyed() const;
     virtual IMS_BOOL IsEmergencyPdnWithEmergencyCallEndReleased() const;
     virtual IMS_BOOL IsSmsOverImsSupported() const;
     virtual IMS_BOOL IsImsOverNrEnabled() const;

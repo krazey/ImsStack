@@ -689,6 +689,9 @@ const IMS_CHAR CarrierConfig::Assets::KEY_USE_SECURITY_SERVER_PORT_IN_INITIAL_RE
 const IMS_CHAR CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL[] =
         "remove_old_sa_on_establishing_sa_bool";
 const IMS_CHAR CarrierConfig::Assets::
+        KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REGISTRATION_BOOL[] =
+                "destroy_unsecure_tcp_socket_on_accomplishing_registration_bool";
+const IMS_CHAR CarrierConfig::Assets::
         KEY_USE_G_GSMA_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[] =
                 "use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_PCSCF_DISCOVERY_METHOD_ROAMING_INT_ARRAY[] =

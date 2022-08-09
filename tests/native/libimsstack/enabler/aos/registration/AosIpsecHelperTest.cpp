@@ -671,7 +671,7 @@ TEST_F(AosIpsecHelperTest, ProcessRegStarted)
     SetIpsec(CURR_IPSEC, pAosOldIpsec);
     SetIpsec(NEW_IPSEC, pAosCurrIpsec);
 
-    EXPECT_CALL(objMockIRegContact, GetExpires()).Times(2).WillRepeatedly(Return(1200));
+    EXPECT_CALL(objMockIRegContact, GetExpires()).Times(3).WillRepeatedly(Return(1200));
 
     // ManagePolicyLifetime()
     IIpSecPolicy* origpiPolicy = GetIpsecPolicy(NEW_IPSEC);
@@ -687,6 +687,24 @@ TEST_F(AosIpsecHelperTest, ProcessRegStarted)
     EXPECT_CALL(objMockINetworkIpsec, DumpPolicy(_)).Times(2);
 
     // CloseUnsecureTCPSocket();
+    // bUnsecureTcpSocketDestroyed = IMS_FALSE
+    EXPECT_CALL(objMockAosConfig, IsUnsecureTcpSocketOnAccomplishingRegistrationDestroyed())
+            .Times(3)
+            .WillOnce(Return(IMS_FALSE))
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    pAosIpsecHelper->ProcessRegStarted();
+
+    // return to origin variable
+    SetIIpsecPolicy(CURR_IPSEC, origpiPolicy);
+    SetIIpsecNetIpsec(CURR_IPSEC, origpiNetIpsec);
+
+    // For 2nd ProcessRegStarted()
+    SetIpsec(OLD_IPSEC, IMS_NULL);
+    SetIpsec(CURR_IPSEC, pAosOldIpsec);
+    SetIpsec(NEW_IPSEC, pAosCurrIpsec);
+
+    // bUnsecureTcpSocketDestroyed = IMS_TRUE
     MockIAosPcscf objMockIAosPcscf;
     EXPECT_CALL(objMockIAosPcscf, GetCurrentPcscf(_, _))
             .Times(2)
@@ -709,7 +727,7 @@ TEST_F(AosIpsecHelperTest, ProcessRegStarted)
     SetIIpsecPolicy(CURR_IPSEC, origpiPolicy);
     SetIIpsecNetIpsec(CURR_IPSEC, origpiNetIpsec);
 
-    // For 2nd ProcessRegStarted()
+    // For 3rd ProcessRegStarted()
     SetIpsec(OLD_IPSEC, IMS_NULL);
     SetIpsec(CURR_IPSEC, pAosOldIpsec);
     SetIpsec(NEW_IPSEC, pAosCurrIpsec);
@@ -728,17 +746,6 @@ TEST_F(AosIpsecHelperTest, ProcessRegStarted)
     SetIpsec(OLD_IPSEC, IMS_NULL);
     SetIpsec(CURR_IPSEC, IMS_NULL);
     SetIpsec(NEW_IPSEC, IMS_NULL);
-}
-
-TEST_F(AosIpsecHelperTest, ProcessRegStartFailed)
-{
-    // CloseUnsecureTCPSocket();
-    MockIAosPcscf objMockIAosPcscf;
-    EXPECT_CALL(objMockIAosPcscf, GetCurrentPcscf(_, _)).Times(1).WillOnce(Return(IMS_FALSE));
-
-    EXPECT_CALL(*pMockAosAppContext, GetPcscf()).Times(1).WillOnce(Return(&objMockIAosPcscf));
-
-    pAosIpsecHelper->ProcessRegStartFailed();
 }
 
 TEST_F(AosIpsecHelperTest, ProcessRegUpdated)

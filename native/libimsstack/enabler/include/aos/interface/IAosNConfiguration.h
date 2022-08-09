@@ -230,6 +230,13 @@ public:
     virtual IMS_BOOL IsOldSaOnEstablishingSaRemoved() const = 0;
 
     /**
+     * @brief Returns whether unsecure tcp socket is destroyed on accomplishing the registration
+     *
+     * @return IMS_BOOL Return wherther to be applied or not
+     */
+    virtual IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegistrationDestroyed() const = 0;
+
+    /**
      * @brief Returns whether emergency PDN shall be released after the E911 call is ended.
      *
      * @return IMS_BOOL Return wherther to be applied or not

@@ -245,6 +245,12 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsOldSaOnEstablishingSaRemoved() cons
     return m_objAsset.bRemoveOldSaOnEstablishingSa;
 }
 
+PUBLIC VIRTUAL IMS_BOOL
+AosNConfiguration::IsUnsecureTcpSocketOnAccomplishingRegistrationDestroyed() const
+{
+    return m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingRegistration;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencyPdnWithEmergencyCallEndReleased() const
 {
     return m_objCarrierConfig.bReleaseEmergencyPdnWithEmergencyCallEnd;
@@ -1266,6 +1272,9 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_USE_SECURITY_SERVER_PORT_IN_INITIAL_REGISTRATION_BOOL);
     m_objAsset.bRemoveOldSaOnEstablishingSa =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL);
+    m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingRegistration =
+            piCc->GetBoolean(CarrierConfig::Assets::
+                            KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REGISTRATION_BOOL);
     m_objAsset.bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType = piCc->GetBoolean(
             CarrierConfig::Assets::
                     KEY_USE_G_GSMA_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL);

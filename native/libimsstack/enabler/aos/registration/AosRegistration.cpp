@@ -4161,11 +4161,6 @@ PROTECTED VIRTUAL void AosRegistration::Registration_StartFailed(IN IMS_SINT32 n
 
     ClearAuthChallengedCount();
 
-    if (IsIpsecSupported())
-    {
-        m_pIpsecHelper->ProcessRegStartFailed();
-    }
-
     nStatusCode = m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse());
 
     switch (nReason)

@@ -55,6 +55,8 @@ public:
             (const, override));
     MOCK_METHOD(IMS_BOOL, IsSecurityServerPortInInitialRegistrationUsed, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsOldSaOnEstablishingSaRemoved, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsUnsecureTcpSocketOnAccomplishingRegistrationDestroyed, (),
+            (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyPdnWithEmergencyCallEndReleased, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsOverNrEnabled, (), (const, override));

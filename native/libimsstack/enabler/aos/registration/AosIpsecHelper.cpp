@@ -305,13 +305,6 @@ PUBLIC VIRTUAL void AosIpsecHelper::ProcessRegStarted()
     CloseUnsecureTCPSocket();
 }
 
-PUBLIC VIRTUAL void AosIpsecHelper::ProcessRegStartFailed()
-{
-    A_IMS_TRACE_I(REGID, "ProcessRegStartFailed()", 0, 0, 0);
-
-    CloseUnsecureTCPSocket();
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::ProcessRegUpdated()
 {
     if (m_pNewIpsec == IMS_NULL)
@@ -572,6 +565,14 @@ void AosIpsecHelper::Destroy()
 PRIVATE
 void AosIpsecHelper::CloseUnsecureTCPSocket()
 {
+    IMS_BOOL bUnsecureTcpSocketDestroyed =
+            GET_N_CONFIG(m_piContext->GetSlotId())
+                    ->IsUnsecureTcpSocketOnAccomplishingRegistrationDestroyed();
+    if (bUnsecureTcpSocketDestroyed == IMS_FALSE)
+    {
+        return;
+    }
+
     if (m_piContext == IMS_NULL)
     {
         return;

@@ -28,6 +28,7 @@ public:
             bUseSecurityServerPortInRegContactOfInitialRegistration(IMS_FALSE),
             bUseSecurityServerPortInInitialRegistration(IMS_FALSE),
             bRemoveOldSaOnEstablishingSa(IMS_FALSE),
+            bDestroyUnsecureTcpSocketOnAccomplishingRegistration(IMS_FALSE),
             bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE),
             objPcscfDiscoveryMethodRoaming(IMSVector<IMS_SINT32>()),
             bHoldRegistrationWhenIpcanChangedWithImsActiveCall(IMS_FALSE),
@@ -85,6 +86,7 @@ public:
     IMS_BOOL bUseSecurityServerPortInRegContactOfInitialRegistration;
     IMS_BOOL bUseSecurityServerPortInInitialRegistration;
     IMS_BOOL bRemoveOldSaOnEstablishingSa;
+    IMS_BOOL bDestroyUnsecureTcpSocketOnAccomplishingRegistration;
     IMS_BOOL bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType;
     IMSVector<IMS_SINT32> objPcscfDiscoveryMethodRoaming;
     IMS_BOOL bHoldRegistrationWhenIpcanChangedWithImsActiveCall;
