@@ -50,7 +50,9 @@ import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
 import com.android.imsstack.enabler.ssc.data.TipServiceData;
 import com.android.imsstack.enabler.ssc.data.TirServiceData;
-import com.android.imsstack.imsservice.mmtel.ut.base.UtInterfaceBase;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtServiceStateListener;
+import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
+import com.android.imsstack.imsservice.mmtel.ut.base.UtListener;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
@@ -58,10 +60,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-/*
-public class SscServiceImpl extends IImsUt.Stub implements Closeable
-*/
-public class SscServiceImpl extends UtInterfaceBase {
+/**
+ * Implementation of UtInterface class that provides query and update APIs for supplementary service
+ * configuration over Ut reference point using XCAP
+ */
+public class SscServiceImpl implements UtInterface {
     private static final int EVENT_UT_TRANSACTION_STARTED = 1001;
     private static final int EVENT_UT_INITIALIZE_MODULES = 1002;
 
@@ -69,6 +72,8 @@ public class SscServiceImpl extends UtInterfaceBase {
     private static final int REQUEST_TYPE_UPDATE = 1;
 
     private Context mContext = null;
+    private UtListener mUtListener = null;
+    private IUtServiceStateListener mUtServiceStateListener = null;
     private SscTransactionFactory mSscTransactionFactory = null;
     private SscTransaction mSscTransaction = null;
 
@@ -131,6 +136,23 @@ public class SscServiceImpl extends UtInterfaceBase {
                 = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION, mSlotId);
         if (subscription != null) {
             subscription.addListener(mDataSubListener);
+        }
+    }
+
+    @Override
+    public void setListener(UtListener listener) {
+        mUtListener = listener;
+    }
+
+    @Override
+    public void setServiceStateListener(IUtServiceStateListener listener) {
+        mUtServiceStateListener = listener;
+    }
+
+    @Override
+    public void onServiceStateChanged() {
+        if (mUtServiceStateListener != null) {
+            mUtServiceStateListener.onServiceStateChanged();
         }
     }
 
