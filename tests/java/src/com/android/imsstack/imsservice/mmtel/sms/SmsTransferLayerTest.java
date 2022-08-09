@@ -146,9 +146,11 @@ public class SmsTransferLayerTest {
     @Test
     public void test_sendReportTPdu() {
         mSmsTransferLayer.sendReportTPdu(mToken, mTlMessageType, mMessageRef, mResult);
+        byte[] deliverReportPdu = mSmsTransferLayer.generateDeliverReportPdu(mResult);
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_ACK), eq(null), eq(null),
-                eq(null), eq(mResult));
+                eq(deliverReportPdu), eq(mResult));
     }
+
     @Test
     public void test_notifyRLDataIndication() {
         mListener.notifySmsReceived(mToken, mSmsFormat, mRpMessageType, mPdu);
@@ -186,6 +188,41 @@ public class SmsTransferLayerTest {
     public void test_notifyRLReportIndication() {
         mListener.notifySmsResult(mToken, 1, mResult, mReason, 0);
         verify(mListener, Mockito.times(1)).notifySmsResult(mToken, 1, mResult, mReason, 0);
+    }
+
+    @Test
+    public void test_generateDeliverReportPdu() throws Exception {
+        byte[] expectedDeliverReport = {0x00, 0x00};
+        byte[] actualDeliverReport = mSmsTransferLayer.generateDeliverReportPdu(
+                ImsSmsImplBase.DELIVER_STATUS_OK);
+        for (int i = 0; i < expectedDeliverReport.length; i++) {
+            assertEquals(expectedDeliverReport[i], actualDeliverReport[i]);
+        }
+
+        byte[] expectedDeliverGenericerrorReport = {0x00,
+                (byte) SmsTransferLayer.TP_FCS_UNSPECIFIED_ERROR_CAUSE, 0x00};
+        byte[] actualDeliverGenericerrorReport = mSmsTransferLayer.generateDeliverReportPdu(
+                ImsSmsImplBase.DELIVER_STATUS_ERROR_GENERIC);
+        for (int i = 0; i < expectedDeliverGenericerrorReport.length; i++) {
+            assertEquals(expectedDeliverGenericerrorReport[i], actualDeliverGenericerrorReport[i]);
+        }
+
+        byte[] expectedDeliverNoMemoryReport = {0x00,
+                (byte) SmsTransferLayer.TP_FCS_MEMORY_CAPACITY_EXCEEDED, 0x00};
+        byte[] actualDeliverNoMemoryReport = mSmsTransferLayer.generateDeliverReportPdu(
+                ImsSmsImplBase.DELIVER_STATUS_ERROR_NO_MEMORY);
+        for (int i = 0; i < expectedDeliverNoMemoryReport.length; i++) {
+            assertEquals(expectedDeliverNoMemoryReport[i], actualDeliverNoMemoryReport[i]);
+        }
+
+        byte[] expectedDeliverRequestNotSupportedReport = {0x00,
+                (byte) SmsTransferLayer.TP_FCS_TPDU_NOT_SUPPORTED, 0x00};
+        byte[] actualDeliverRequestNotSupportedReport = mSmsTransferLayer.generateDeliverReportPdu(
+                ImsSmsImplBase.DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED);
+        for (int i = 0; i < expectedDeliverRequestNotSupportedReport.length; i++) {
+            assertEquals(expectedDeliverRequestNotSupportedReport[i],
+                    actualDeliverRequestNotSupportedReport[i]);
+        }
     }
 
     @After
