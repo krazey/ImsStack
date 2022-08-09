@@ -236,6 +236,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "encode_publish_body_bool";
         public static final String KEY_ENCODE_SUBSCRIBE_BODY_BOOL =
                 KEY_PREFIX + "encode_subscribe_body_bool";
+        public static final String KEY_SUPPORT_OPTIONS_BOOL =
+                KEY_PREFIX + "support_options";
         public static final String KEY_USE_SIP_URI_FOR_PRESENCE_SUBSCRIBE_BOOL =
                 KEY_PREFIX + "use_sip_uri_for_presence_subscribe_bool";
         public static final String KEY_USE_EXPIRED_ETAG_BOOL =

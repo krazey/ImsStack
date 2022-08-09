@@ -329,6 +329,7 @@ public:
         static const IMS_CHAR KEY_ANONYMOUS_FETCH_METHOD_INT[];
         static const IMS_CHAR KEY_ENCODE_PUBLISH_BODY_BOOL[];
         static const IMS_CHAR KEY_ENCODE_SUBSCRIBE_BODY_BOOL[];
+        static const IMS_CHAR KEY_SUPPORT_OPTIONS_BOOL[];
         static const IMS_CHAR KEY_USE_SIP_URI_FOR_PRESENCE_SUBSCRIBE_BOOL[];
         static const IMS_CHAR KEY_USE_EXPIRED_ETAG_BOOL[];
         static const IMS_CHAR KEY_USE_CONTACT_HEADER_IN_PUBLISH_BOOL[];

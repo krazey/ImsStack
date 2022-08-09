@@ -33,6 +33,7 @@ public:
             m_nAnonymousFetchMethod(2),
             m_bEncodePublishBody(IMS_FALSE),
             m_bEncodeSubscribeBody(IMS_FALSE),
+            m_bSupportOptions(IMS_FALSE),
             m_bUseContactHeaderInPublish(IMS_FALSE),
             m_bUseContactHeaderInSubscribe(IMS_FALSE),
             m_bAddVideoTagContactHeaderInPublish(IMS_FALSE),
@@ -70,6 +71,7 @@ public:
     IMS_UINT32 m_nAnonymousFetchMethod;
     IMS_BOOL m_bEncodePublishBody;
     IMS_BOOL m_bEncodeSubscribeBody;
+    IMS_BOOL m_bSupportOptions;
     IMS_BOOL m_bUseContactHeaderInPublish;
     IMS_BOOL m_bUseContactHeaderInSubscribe;
     IMS_BOOL m_bAddVideoTagContactHeaderInPublish;
