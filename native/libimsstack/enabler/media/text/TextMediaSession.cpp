@@ -135,7 +135,9 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
         TextProfile::Payload* pPayload = pNegoProfile->lstPayload.GetAt(nIdxPayload);
 
         if (pPayload == IMS_NULL)
+        {
             continue;
+        }
 
         m_objTextConfig.setTxPayloadTypeNumber((int32_t)pPayload->objRtpMap.nPayloadNum);
         m_objTextConfig.setRxPayloadTypeNumber((int32_t)pPayload->objRtpMap.nPayloadNum);
@@ -147,7 +149,7 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
 
             if (pFmtp == IMS_NULL)
             {
-                IMS_TRACE_E(0, "UpdateProperty() - Invalid pFmtp", 0, 0, 0);
+                IMS_TRACE_E(0, "UpdateRtpConfig() - Invalid pFmtp", 0, 0, 0);
                 continue;
             }
 
@@ -165,7 +167,7 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
         }
         else
         {
-            IMS_TRACE_E(0, "UpdateProperty() - Invalid Payload Type", 0, 0, 0);
+            IMS_TRACE_E(0, "UpdateRtpConfig() - Invalid Payload Type", 0, 0, 0);
             return IMS_FALSE;
         }
     }

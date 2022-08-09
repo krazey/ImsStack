@@ -1192,9 +1192,8 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     // Setting IP of mine
     pNegotiatedProfile->objIpAddress = pLocalProfile->objIpAddress;
 
-    IMS_TRACE_D("MakeNegotiatedProfile() Entered. IPAddr nego[%s] src[%s] PeerPayloadSize[%d]",
-            pNegotiatedProfile->objIpAddress.ToCharString(),
-            pLocalProfile->objIpAddress.ToCharString(), pPeerProfile->lstPayload.GetSize());
+    IMS_TRACE_D("MakeNegotiatedProfile() - local address[%s] PeerPayloadSize[%d]",
+            pLocalProfile->objIpAddress.ToCharString(), pPeerProfile->lstPayload.GetSize(), 0);
 
     // Setting Rtp/RTCP port of mine
     pNegotiatedProfile->nDataPort = pLocalProfile->nDataPort;
@@ -1227,16 +1226,10 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     }
 
     // Compare each payload based destination's profile
-    TextProfile::Payload* pNegotiatedPayload = IMS_NULL;
-    IMSList<TextProfile::Payload*> lstNegotiatedPayloads;
+    IMSList<TextProfile::Payload*> listNegotiatedPayloads;
 
     for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
     {
-        if (pNegotiatedProfile->lstPayload.GetSize() > 0)
-        {
-            break;
-        }
-
         TextProfile::Payload* pPayload = pPeerProfile->lstPayload.GetAt(i);
 
         if (pPayload == IMS_NULL)
@@ -1247,8 +1240,7 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
         if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("t140") ||
                 pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
         {
-            if ((lstNegotiatedPayloads.GetSize() == 0) &&
-                    FindT140InProfile(pLocalProfile, pPayload) == IMS_TRUE)
+            if (FindT140InProfile(pLocalProfile, pPayload) == IMS_TRUE)
             {
                 TextProfile::Payload* pT140 = new TextProfile::Payload();
                 pT140->SetRtpMap(pPayload->objRtpMap);
@@ -1261,19 +1253,14 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
                 }
 
                 pNegotiatedProfile->lstPayload.Append(pT140);
-                lstNegotiatedPayloads.Append(pT140);
+                listNegotiatedPayloads.Append(pT140);
             }
         }
     }
 
-    if (lstNegotiatedPayloads.GetSize() > 0)
-    {
-        pNegotiatedPayload = lstNegotiatedPayloads.GetAt(0);
-    }
-
     IMS_BOOL bRet = IMS_FALSE;
 
-    if (pNegotiatedPayload != IMS_NULL)
+    if (listNegotiatedPayloads.GetSize() > 0)
     {
         // Setting direction
         if (pNegotiatedProfile->nDataPort == 0 || pPeerProfile->nDataPort == 0 ||
@@ -1311,10 +1298,9 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
         }
     }
 
-    IMS_TRACE_D("MakeNegotiatedProfile() Ended. Negotiated - ret[%d], Port[%d], Dir[%d], ", bRet,
-            pNegotiatedProfile->nDataPort, pNegotiatedProfile->eDirection);
-    IMS_TRACE_D("MakeNegotiatedProfile() Ended. Peer - Port[%d], Dir[%d], ",
-            pPeerProfile->nDataPort, pPeerProfile->eDirection, 0);
+    IMS_TRACE_D("MakeNegotiatedProfile() - negotiated payload size[%d], port[%d], direction[%d], ",
+            pNegotiatedProfile->lstPayload.GetSize(), pNegotiatedProfile->nDataPort,
+            pNegotiatedProfile->eDirection);
     return bRet;
 }
 
@@ -1366,9 +1352,9 @@ PRIVATE IMS_BOOL TextNego::FindT140InProfile(
 
         if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("t140"))
         {
-            if ((comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
-                        pPayload->objRtpMap.strPayloadType)) &&
-                    (comparedPayload->objRtpMap.nSamplingRate == pPayload->objRtpMap.nSamplingRate))
+            if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
+                        pPayload->objRtpMap.strPayloadType) &&
+                    comparedPayload->objRtpMap.nSamplingRate == pPayload->objRtpMap.nSamplingRate)
             {
                 IMS_TRACE_D("FindT140InProfile() - Found T140 at [%d], Codec[%s]", i,
                         comparedPayload->objRtpMap.strPayloadType.GetStr(), 0);
@@ -1378,18 +1364,23 @@ PRIVATE IMS_BOOL TextNego::FindT140InProfile(
         }
         else if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
         {
-            if ((comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
-                        pPayload->objRtpMap.strPayloadType)) &&
-                    (comparedPayload->objRtpMap.nSamplingRate == pPayload->objRtpMap.nSamplingRate))
+            if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
+                        pPayload->objRtpMap.strPayloadType) &&
+                    comparedPayload->objRtpMap.nSamplingRate == pPayload->objRtpMap.nSamplingRate)
             {
                 TextProfile::RedFmtp* pComparedFmtp = (TextProfile::RedFmtp*)comparedPayload->pFmtp;
                 TextProfile::RedFmtp* pReceivedFmtp = (TextProfile::RedFmtp*)pPayload->pFmtp;
-                if (pReceivedFmtp == IMS_NULL)
-                    continue;
 
-                if ((pReceivedFmtp->nRedLevel > pComparedFmtp->nRedLevel) ||
-                        (pReceivedFmtp->nRedPayload < 0))
+                if (pReceivedFmtp == IMS_NULL)
+                {
                     continue;
+                }
+
+                if (pReceivedFmtp->nRedLevel > pComparedFmtp->nRedLevel ||
+                        pReceivedFmtp->nRedPayload < 0)
+                {
+                    continue;
+                }
 
                 IMS_TRACE_D("FindT140InProfile() - Found RED at [%d], Codec[%s]", i,
                         comparedPayload->objRtpMap.strPayloadType.GetStr(), 0);
