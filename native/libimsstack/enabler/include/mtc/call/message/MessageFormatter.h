@@ -18,6 +18,7 @@
 #define MTC_MESSAGE_FORMATTER_H_
 
 #include "MtcDef.h"
+#include "call/IMtcCall.h"
 #include "configuration/ConfigDef.h"
 
 class ICoreService;
@@ -56,7 +57,7 @@ private:
     };
 
 public:
-    virtual IMS_RESULT FormStartMessage();
+    virtual IMS_RESULT FormStartMessage(IN CallType eCallType);
     virtual IMS_RESULT FormProvisionalResponseMessage(IN IMS_BOOL bIncludeAlertInfo);
     virtual IMS_RESULT FormPrackMessage();
     virtual IMS_RESULT FormPrackResponseMessage();
@@ -79,7 +80,7 @@ protected:
 
 private:
     void SetPPreferredServiceHeader();
-    void SetAcceptContactHeader();
+    void SetAcceptContactHeader(IN CallType eCallType);
     void SetAcceptHeader();
     void AddSrvccFeature();
     void SetSrvccContactParameter();

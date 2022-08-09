@@ -18,6 +18,7 @@
 #define MTC_EMERGENCY_MESSAGE_FORMATTER_H_
 
 #include "IMtcService.h"
+#include "call/IMtcCall.h"
 #include "call/message/MessageFormatter.h"
 
 class EmergencyMessageFormatter : public MessageFormatter
@@ -29,7 +30,7 @@ public:
     EmergencyMessageFormatter& operator=(IN const MessageFormatter&) = delete;
 
 public:
-    virtual IMS_RESULT FormStartMessage() override;
+    virtual IMS_RESULT FormStartMessage(IN CallType eCallType) override;
 
 private:
     void SetPPreferredIdentityHeader();

@@ -65,7 +65,6 @@ protected:
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
-        ON_CALL(objContext, GetCallType).WillByDefault(Return(CallType::VOIP));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
@@ -113,7 +112,7 @@ TEST_F(MessageSenderTest, CreateSenderWithEmergencyFormatter)
 
 TEST_F(MessageSenderTest, StartNormalCase)
 {
-    IMS_RESULT nResult = pSender->Start();
+    IMS_RESULT nResult = pSender->Start(CallType::VOIP);
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
@@ -122,7 +121,7 @@ TEST_F(MessageSenderTest, StartFormFailure)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT nResult = pSender->Start();
+    IMS_RESULT nResult = pSender->Start(CallType::VOIP);
 
     EXPECT_EQ(nResult, IMS_FAILURE);
 }

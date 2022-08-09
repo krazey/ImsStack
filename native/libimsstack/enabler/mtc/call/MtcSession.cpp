@@ -96,7 +96,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Start()
     m_objContext.GetPreconditionManager().FormPreconditionSdp(&m_objSession, IMS_FALSE);
 
     m_objExtensionSet.FormatRequest(RequestType::START, *m_objSession.GetNextRequest());
-    return m_objMessageSender.Start();
+    return m_objMessageSender.Start(GetCallType());
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(IN IMS_BOOL bUserAlert)

@@ -98,7 +98,7 @@ protected:
 
 TEST_F(EmergencyMessageFormatterTest, FormStartMessageNormalCase)
 {
-    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
@@ -107,7 +107,7 @@ TEST_F(EmergencyMessageFormatterTest, FormStartMessageFailureCase)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
 
     EXPECT_EQ(nResult, IMS_FAILURE);
 }
@@ -116,7 +116,7 @@ TEST_F(EmergencyMessageFormatterTest, GetAoSRegMode)
 {
     ON_CALL(objContext, GetAosConnector).WillByDefault(Return(nullptr));
 
-    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
 
     EXPECT_EQ(nResult, IMS_FAILURE);
 }
@@ -124,11 +124,11 @@ TEST_F(EmergencyMessageFormatterTest, GetAoSRegMode)
 TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeader)
 {
     ON_CALL(objSipMessage, IsHeaderPresent).WillByDefault(Return(IMS_TRUE));
-    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objSipMessage, IsHeaderPresent).WillByDefault(Return(IMS_FALSE));
-    nResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
@@ -143,12 +143,12 @@ TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderByDeviceId)
     ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIpv6));
     ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(nLocalPort));
 
-    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIpv4));
 
-    nResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
@@ -165,17 +165,17 @@ TEST_F(EmergencyMessageFormatterTest, GetLocalIpAddress)
             .WillOnce(Return(nullptr))
             .WillRepeatedly(Return(&objAosConnector));
 
-    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(AString::ConstEmpty()));
 
-    nResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIp));
 
-    nResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
@@ -196,17 +196,17 @@ TEST_F(EmergencyMessageFormatterTest, GetLocalPort)
             .WillOnce(Return(nullptr))
             .WillRepeatedly(Return(&objAosConnector));
 
-    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(nLocalPortZero));
 
-    nResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(nLocalPort));
 
-    nResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
@@ -219,7 +219,7 @@ TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderByUserId)
             .WillOnce(Return(nullptr))
             .WillRepeatedly(Return(&objCoreService));
 
-    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
     AStringArray objUserIdentities;
@@ -227,7 +227,7 @@ TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderByUserId)
     objUserIdentities.AddElement(strUserIdentity);
     ON_CALL(objCoreService, GetUserIdentities).WillByDefault(ReturnRef(objUserIdentities));
 
-    nResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
@@ -241,18 +241,18 @@ TEST_F(EmergencyMessageFormatterTest, SetSipInstanceFeature)
             .WillOnce(Return(nullptr))
             .WillRepeatedly(Return(&objCoreService));
 
-    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objAosConnector, GetRegistrationMode)
             .WillByDefault(Return(IImsAosInfo::REG_MODE_INTERNAL));
 
-    nResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objCoreService, GetInstanceParameter).WillByDefault(Return(nullptr));
 
-    nResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
     SipParameter objParameter;
@@ -260,12 +260,12 @@ TEST_F(EmergencyMessageFormatterTest, SetSipInstanceFeature)
 
     ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(nullptr));
 
-    nResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(pFeatureCaps));
 
-    nResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 

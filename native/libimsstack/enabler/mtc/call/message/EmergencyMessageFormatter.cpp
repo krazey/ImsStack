@@ -49,9 +49,9 @@ PUBLIC VIRTUAL EmergencyMessageFormatter::~EmergencyMessageFormatter()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage()
+PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage(IN CallType eCallType)
 {
-    if (MessageFormatter::FormStartMessage() == IMS_FAILURE)
+    if (MessageFormatter::FormStartMessage(eCallType) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }

@@ -71,7 +71,6 @@ protected:
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
-        ON_CALL(objContext, GetCallType).WillByDefault(Return(CallType::VOIP));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
@@ -112,7 +111,7 @@ protected:
 
 TEST_F(MessageFormatterTest, FormStartMessageNormalCase)
 {
-    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
@@ -121,7 +120,7 @@ TEST_F(MessageFormatterTest, FormStartMessageFailureCase)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
 
     EXPECT_EQ(nResult, IMS_FAILURE);
 }
@@ -133,13 +132,13 @@ TEST_F(MessageFormatterTest, FormStartMessageWithGeolocation)
     ON_CALL(*pConfigurationManager, IsSupportGeolocationPidfInSipInvite)
             .WillByDefault(Return(IMS_FALSE));
 
-    IMS_RESULT nResult = pFormatter->FormStartMessage();
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
     ON_CALL(*pConfigurationManager, IsSupportGeolocationPidfInSipInvite)
             .WillByDefault(Return(IMS_TRUE));
 
-    nResult = pFormatter->FormStartMessage();
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
@@ -371,20 +370,19 @@ TEST_F(MessageFormatterTest, FormTerminateMessageFailureCase)
 
 TEST_F(MessageFormatterTest, SetAcceptContactHeader)
 {
-    ON_CALL(objContext, GetCallType).WillByDefault(Return(CallType::VT));
-    pFormatter->FormStartMessage();
+    pFormatter->FormStartMessage(CallType::VT);
 }
 
 TEST_F(MessageFormatterTest, AddSrvccFeature)
 {
     ON_CALL(objService, GetICoreService).WillByDefault(Return(nullptr));
-    pFormatter->FormStartMessage();
+    pFormatter->FormStartMessage(CallType::VOIP);
 
     MockICoreService objCoreService;
     ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
     FeatureCaps* pFeatureCaps = new FeatureCaps();
     ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(pFeatureCaps));
-    pFormatter->FormStartMessage();
+    pFormatter->FormStartMessage(CallType::VOIP);
 
     ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(nullptr));
     pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
@@ -417,24 +415,24 @@ TEST_F(MessageFormatterTest, SetSrvccContactParameter)
 TEST_F(MessageFormatterTest, SetCallerIdHeader)
 {
     pSupplementaryService->Delete(SuppType::CALLER_ID);
-    pFormatter->FormStartMessage();
+    pFormatter->FormStartMessage(CallType::VOIP);
 
     pSupplementaryService->Add(SuppType::CALLER_ID, CALLERID_RESTRICTED);
     ON_CALL(*pConfigurationManager, GetSessionPrivacyType)
             .WillByDefault(Return(CarrierConfig::ImsVoice::SESSION_PRIVACY_TYPE_HEADER));
-    pFormatter->FormStartMessage();
+    pFormatter->FormStartMessage(CallType::VOIP);
     ON_CALL(*pConfigurationManager, GetSessionPrivacyType)
             .WillByDefault(Return(CarrierConfig::ImsVoice::SESSION_PRIVACY_TYPE_NONE));
-    pFormatter->FormStartMessage();
+    pFormatter->FormStartMessage(CallType::VOIP);
 
     pSupplementaryService->Delete(SuppType::CALLER_ID);
     pSupplementaryService->Add(SuppType::CALLER_ID, CALLERID_IDENTITY);
-    pFormatter->FormStartMessage();
+    pFormatter->FormStartMessage(CallType::VOIP);
 }
 
 TEST_F(MessageFormatterTest, SetPreconditionHeader)
 {
-    pFormatter->FormStartMessage();
+    pFormatter->FormStartMessage(CallType::VOIP);
 
     MockIMtcExtension* pExtension = new MockIMtcExtension();
     const AString strTag = MtcExtensionSet::OPTION_TAG_PRECONDITION;
@@ -449,7 +447,7 @@ TEST_F(MessageFormatterTest, SetPreconditionHeader)
     pFormatter->FormAcceptMessage();
 
     ON_CALL(*pExtension, IsAvailableOnRemote).WillByDefault(Return(IMS_TRUE));
-    pFormatter->FormStartMessage();
+    pFormatter->FormStartMessage(CallType::VOIP);
     pFormatter->FormEarlyUpdateMessage(UpdateType::NORMAL);
     pFormatter->FormUpdateMessage(UpdateType::NORMAL, IMS_TRUE);
     pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
@@ -464,10 +462,10 @@ TEST_F(MessageFormatterTest, SetPreconditionHeader)
 TEST_F(MessageFormatterTest, SetPEarlyMediaHeader)
 {
     objCallInfo.bUssi = IMS_TRUE;
-    pFormatter->FormStartMessage();
+    pFormatter->FormStartMessage(CallType::VOIP);
 
     objCallInfo.bUssi = IMS_FALSE;
-    pFormatter->FormStartMessage();
+    pFormatter->FormStartMessage(CallType::VOIP);
 }
 
 TEST_F(MessageFormatterTest, SetAlertInfoHeader)
@@ -491,7 +489,7 @@ TEST_F(MessageFormatterTest, SetReasonHeader)
 TEST_F(MessageFormatterTest, SetCarrierSpecificHeaders)
 {
     ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader).WillByDefault(Return(IMS_TRUE));
-    pFormatter->FormStartMessage();
+    pFormatter->FormStartMessage(CallType::VOIP);
     pFormatter->FormAcceptMessage();
     pFormatter->FormUpdateMessage(UpdateType::NORMAL, IMS_TRUE);
     pFormatter->FormAcceptUpdateMessage();

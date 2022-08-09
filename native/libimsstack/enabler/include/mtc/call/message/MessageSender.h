@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef MTC_MESSAGE_SENDER_H_
-#define MTC_MESSAGE_SENDER_H_
+#ifndef MESSAGE_SENDER_H_
+#define MESSAGE_SENDER_H_
 
+#include "MtcDef.h"
+#include "SipMethod.h"
+#include "call/IMtcCall.h"
 #include "call/message/MessageFormatter.h"
 #include "helper/TransactionTimerUpdateHelper.h"
-#include "SipMethod.h"
-#include "MtcDef.h"
 #include <memory>
 
 class IMtcSessionContext;
@@ -36,7 +37,7 @@ public:
     MessageSender& operator=(IN const MessageSender&) = delete;
 
 public:
-    IMS_RESULT Start();
+    IMS_RESULT Start(IN CallType eCallType);
     IMS_RESULT SendProvisionalResponse(IN IMS_SINT32 eStatusCode, IN IMS_BOOL bReliable,
             IN IMS_BOOL bIncludeSdp, IN IMS_BOOL bIncludeAlertInfo);
     IMS_RESULT SendPrack();

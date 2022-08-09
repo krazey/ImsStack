@@ -49,9 +49,9 @@ MessageSender::~MessageSender()
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PUBLIC
-IMS_RESULT MessageSender::Start()
+IMS_RESULT MessageSender::Start(IN CallType eCallType)
 {
-    if (m_pFormatter->FormStartMessage() != IMS_SUCCESS)
+    if (m_pFormatter->FormStartMessage(eCallType) != IMS_SUCCESS)
     {
         return IMS_FAILURE;
     }

@@ -64,14 +64,14 @@ PUBLIC VIRTUAL MessageFormatter::~MessageFormatter()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormStartMessage()
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormStartMessage(IN CallType eCallType)
 {
     if (InitVariables(FormType::START) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
-    SetAcceptContactHeader();
+    SetAcceptContactHeader(eCallType);
     SetAcceptHeader();
     SetPPreferredServiceHeader();
     AddSrvccFeature();
@@ -335,7 +335,7 @@ void MessageFormatter::SetPPreferredServiceHeader()
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PRIVATE
-void MessageFormatter::SetAcceptContactHeader()
+void MessageFormatter::SetAcceptContactHeader(IN CallType eCallType)
 {
     AString strAcceptContact;
     strAcceptContact.Append(TextParser::CHAR_ASTERISK);
@@ -346,8 +346,7 @@ void MessageFormatter::SetAcceptContactHeader()
     strAcceptContact.Append(AString(Const3GPP::ICSI_MMTEL).Replace(":", "%3A"));
     strAcceptContact.Append(TextParser::CHAR_DQUOT);
 
-    if (m_objContext.GetCallType() == CallType::VT ||
-            m_objContext.GetCallType() == CallType::VIDEO_RTT)
+    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
     {
         strAcceptContact.Append(TextParser::CHAR_SEMICOLON);
         strAcceptContact.Append(MessageUtil::STR_VIDEO);
