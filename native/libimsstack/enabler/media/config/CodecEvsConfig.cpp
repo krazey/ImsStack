@@ -113,12 +113,19 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
         {
             nBrEnd = objBitrateList.GetAt(1);
         }
+        m_nBrList = ConvertEvsBitrateToList(nBrStart, nBrEnd);
+    }
+    else
+    {
+        m_nBrList = 0;
     }
 
-    m_nBrList = ConvertEvsBitrateToList(nBrStart, nBrEnd);
-
     m_nBwList = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT);
-    m_nBwList = CheckEvsBandwidthWithBitrate(m_nBwList, m_nBrList);
+    if (m_nBwList >= 0)
+    {
+        m_nBwList = CheckEvsBandwidthWithBitrate(m_nBwList, m_nBrList);
+    }
+
     m_nCmr = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CMR_INT);
     m_nChAwRecv = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT);
     m_bShowAmrwbIoModeSet = piCc->GetBoolean(

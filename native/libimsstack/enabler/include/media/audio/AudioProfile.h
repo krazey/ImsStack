@@ -298,8 +298,8 @@ public:
                 bShowModeChangeCapability(IMS_FALSE),
                 bShowModeChangePeriod(IMS_FALSE),
                 bShowModeChangeNeighbor(IMS_FALSE),
-                bShowBrList(IMS_TRUE),
-                bShowBwList(IMS_TRUE),
+                bShowBrList(IMS_FALSE),
+                bShowBwList(IMS_FALSE),
                 bSendCmr(IMS_FALSE),
                 bShowModeSetList(IMS_FALSE)
         {

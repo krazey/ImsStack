@@ -218,7 +218,10 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             if (pAmrConfig->GetOctetAlign() != -1)
             {
                 pAmrFmtp->nOctetAlign = pAmrConfig->GetOctetAlign();
-                pAmrFmtp->bShow_OctetAlign = IMS_TRUE;
+                if (pAmrFmtp->nOctetAlign == 1)
+                {
+                    pAmrFmtp->bShow_OctetAlign = IMS_TRUE;
+                }
             }
             else
             {
@@ -272,7 +275,6 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             if (pConfig->GetPtime() != -1)
             {
                 pAmrFmtp->nPtime = pConfig->GetPtime();
-                pAmrFmtp->bShowPtime = IMS_TRUE;
             }
             else
             {
@@ -282,7 +284,6 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             if (pConfig->GetMaxPtime() != -1)
             {
                 pAmrFmtp->nMaxPtime = pConfig->GetMaxPtime();
-                pAmrFmtp->bShowMaxPtime = IMS_TRUE;
             }
             else
             {
@@ -361,6 +362,26 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             pEvsFmtp->nBrList = pEvsConfig->GetBrList();
             pEvsFmtp->nBwList = pEvsConfig->GetBwList();
 
+            // Bit-rate
+            if (pEvsFmtp->nBrList == 0)
+            {
+                pEvsFmtp->nBrList = CodecEvsConfig::DEFAULT_BR_LIST;
+            }
+            else
+            {
+                pEvsFmtp->bShowBrList = IMS_TRUE;
+            }
+
+            // Bandwidth
+            if (pEvsFmtp->nBwList == -1)
+            {
+                pEvsFmtp->nBwList = CodecEvsConfig::DEFAULT_BW_LIST;
+            }
+            else
+            {
+                pEvsFmtp->bShowBwList = IMS_TRUE;
+            }
+
             if (pConfig->GetModeChangeCapability() == -1)  // Not Present
             {
                 pEvsFmtp->nModeChangeCapability = AudioConfiguration::DEFAULT_MODECHANGE_CAPABILITY;
@@ -394,7 +415,6 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             if (pConfig->GetPtime() != -1)
             {
                 pEvsFmtp->nPtime = pConfig->GetPtime();
-                pEvsFmtp->bShowPtime = IMS_TRUE;
             }
             else
             {
@@ -404,7 +424,6 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             if (pConfig->GetMaxPtime() != -1)
             {
                 pEvsFmtp->nMaxPtime = pConfig->GetMaxPtime();
-                pEvsFmtp->bShowMaxPtime = IMS_TRUE;
             }
             else
             {
