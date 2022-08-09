@@ -19,9 +19,11 @@
 #include <gmock/gmock.h>
 
 #include "AStringArray.h"
+
 #include "SipAddress.h"
 #include "SipSecurityHeader.h"
 #include "SipTimerValues.h"
+
 #include "IRegParameter.h"
 
 class MockIRegParameter : public IRegParameter
