@@ -35,10 +35,12 @@ import com.android.ims.ImsManager;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
+import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.LocalLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 
@@ -52,18 +54,27 @@ public class ImsMmTelService extends MmTelFeature
     private final IContext mIContext;
     private final MmTelFeatureCapabilityListener mFeatureCapabilityListener
             = new MmTelFeatureCapabilityListener();
-    private final MmTelCallListener mCallListener = new MmTelCallListener();
+    protected final MmTelCallListener mCallListener = new MmTelCallListener();
     private boolean mReady = false;
     private CapabilityCallbackProxy mCapabilityCallback;
     private ImsRegistrationTracker mRegTracker;
     private final LocalLog mLocalLog = new LocalLog(LOG_SIZE);
+    private final ImsServiceRecord mServiceRecord;
+    private final ImsServiceRegistry mServiceRegistry;
 
     public ImsMmTelService(IContext context) {
+        this(context, ImsServiceManager.getServiceRecord(context.getPhoneId()),
+                ImsServiceRegistry.getInstance(context.getPhoneId()));
+    }
+
+    @VisibleForTesting
+    public ImsMmTelService(IContext context, ImsServiceRecord sr, ImsServiceRegistry sreg) {
+        int slotId = context.getPhoneId();
         mIContext = context;
-
-        initialize(mIContext.getContext(), mIContext.getSlotId());
-
+        initialize(mIContext.getContext(), slotId);
         setFeatureState(ImsFeature.STATE_INITIALIZING);
+        mServiceRecord = sr;
+        mServiceRegistry = sreg;
     }
 
     public void start() {
@@ -73,17 +84,16 @@ public class ImsMmTelService extends MmTelFeature
             mReady = true;
         }
 
-        ImsServiceRecord sr = ImsServiceManager.getServiceRecord(mIContext.getPhoneId());
+        if (mServiceRecord != null) {
+            mServiceRecord.setListener(this);
 
-        if (sr != null) {
-            sr.setListener(this);
-
-            if (sr.isServiceUp()) {
+            if (mServiceRecord.isServiceUp()) {
                 createCallApp();
                 setFeatureState(ImsFeature.STATE_READY);
+                mServiceRegistry.setMmTelFeature(this);
             }
 
-            mRegTracker = sr.getRegistrationTracker();
+            mRegTracker = mServiceRecord.getRegistrationTracker();
             mRegTracker.setCapabilityUpdateListener(this);
         }
     }
@@ -97,6 +107,7 @@ public class ImsMmTelService extends MmTelFeature
             return;
         }
 
+        mServiceRegistry.setMmTelFeature(null);
         ImsCallApp callApp = getCallApp();
 
         if (callApp != null) {
@@ -114,18 +125,19 @@ public class ImsMmTelService extends MmTelFeature
 
     @Override
     public void onServiceRecordStateChanged() {
-        logi("onServiceRecordStateChanged :: slotId=" + mIContext.getSlotId());
+        logi("onServiceRecordStateChanged :: slotId=" + mIContext.getPhoneId());
 
-        ImsServiceRecord sr = ImsServiceManager.getServiceRecord(mIContext.getPhoneId());
-
-        if (sr != null) {
+        if (mServiceRecord != null) {
             int oldState = getFeatureState();
-            int newState = sr.isServiceUp() ?
-                    ImsFeature.STATE_READY : ImsFeature.STATE_UNAVAILABLE;
+            int newState = mServiceRecord.isServiceUp()
+                    ? ImsFeature.STATE_READY : ImsFeature.STATE_UNAVAILABLE;
 
             if (newState != oldState) {
                 if (newState == ImsFeature.STATE_READY) {
                     createCallApp();
+                    mServiceRegistry.setMmTelFeature(this);
+                } else if (newState == ImsFeature.STATE_UNAVAILABLE) {
+                    mServiceRegistry.setMmTelFeature(null);
                 }
             }
 
@@ -277,14 +289,14 @@ public class ImsMmTelService extends MmTelFeature
 
         logi("onFeatureRemoved");
 
+        int slotId = mIContext.getPhoneId();
         ImsServiceManager sm = ImsServiceManager.getDefault();
-        ImsCallApp callApp = sm.getCallApp(mIContext.getPhoneId());
+        ImsCallApp callApp = sm.getCallApp(slotId);
+        mServiceRegistry.setMmTelFeature(null);
 
         if (callApp != null) {
-            sm.destroyCallApp(mIContext.getPhoneId());
-
-            logi("MmTel - phoneId=" + mIContext.getPhoneId()
-                    + ", appCount=" + sm.getCallAppCount());
+            sm.destroyCallApp(slotId);
+            logi("MmTel - phoneId=" + slotId + ", appCount=" + sm.getCallAppCount());
         }
     }
 
@@ -308,13 +320,15 @@ public class ImsMmTelService extends MmTelFeature
         // Update feature capabilities and IMS registration state
     }
 
-    private ImsCallApp createCallApp() {
+    @VisibleForTesting
+    protected ImsCallApp createCallApp() {
         ImsServiceManager sm = ImsServiceManager.getDefault();
         return sm.createCallApp(mIContext.getPhoneId(),
                 mFeatureCapabilityListener, mCallListener);
     }
 
-    private ImsCallApp getCallApp() {
+    @VisibleForTesting
+    protected ImsCallApp getCallApp() {
         ImsServiceManager sm = ImsServiceManager.getDefault();
         return sm.getCallApp(mIContext.getPhoneId());
     }
@@ -358,7 +372,8 @@ public class ImsMmTelService extends MmTelFeature
         }
     }
 
-    private class MmTelCallListener implements IMmTelCallListener {
+    @VisibleForTesting
+    protected class MmTelCallListener implements IMmTelCallListener {
         @Override
         public void onIncomingCallReceived(ImsCallSessionImplBase session) {
             ImsCallSessionImpl incomingSession = (ImsCallSessionImpl)session;

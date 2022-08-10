@@ -25,7 +25,7 @@ import com.android.imsstack.util.ImsLog;
 
 import java.util.concurrent.Executor;
 
-public final class ImsServiceRecord {
+public class ImsServiceRecord {
     public static interface Listener {
         public void onServiceRecordStateChanged();
     };
