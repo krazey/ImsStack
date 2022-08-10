@@ -54,7 +54,8 @@ private:
 public:
     enum
     {
-        SCORE_INVALID = -1
+        SCORE_INVALID = -1,
+        SCORE_CALLEE_PREFERENCE = 100
     };
 };
 
