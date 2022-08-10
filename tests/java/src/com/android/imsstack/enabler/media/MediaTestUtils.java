@@ -63,8 +63,7 @@ public class MediaTestUtils {
 
     // EvsParams
     private static final byte CHANNEL_AWARE_MODE = 7;
-    private static final boolean USE_HEADER_FULL_ONLY_TX = true;
-    private static final boolean USE_HEADER_FULL_ONLY_RX = false;
+    private static final boolean USE_HEADER_FULL_ONLY = true;
 
     // RtcpConfig
     private static final String CANONICAL_NAME = "name";
@@ -173,8 +172,7 @@ public class MediaTestUtils {
             .setEvsbandwidth(EvsParams.EVS_SUPER_WIDE_BAND)
             .setEvsMode(EvsParams.EVS_MODE_8)
             .setChannelAwareMode(CHANNEL_AWARE_MODE)
-            .setHeaderFullOnlyOnTx(USE_HEADER_FULL_ONLY_TX)
-            .setHeaderFullOnlyOnRx(USE_HEADER_FULL_ONLY_RX)
+            .setHeaderFullOnly(USE_HEADER_FULL_ONLY)
             .build();
     }
 

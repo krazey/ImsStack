@@ -304,11 +304,8 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN AudioProfile* pLocalProfile,
         EvsParams* pEvsParams = new EvsParams();
         pEvsParams->setChannelAwareMode((int8_t)pFmtp->nChAwRecv);
 
-        // tx side
-        pEvsParams->setUseHeaderFullOnlyOnTx((IMS_BOOL)pFmtp->nHfOnly);
-
-        // rx side
-        pEvsParams->setUseHeaderFullOnlyOnRx((IMS_BOOL)pDestFmtp->nHfOnly);
+        // TODO Media : use the Dest HFOnly
+        pEvsParams->setUseHeaderFullOnly((IMS_BOOL)pDestFmtp->nHfOnly);
 
         IMS_SINT32 maxModeSet = AudioProfileUtil::GetLargestModesetInFmtp("EVS", pNegoPayload);
         if (maxModeSet == -1)
@@ -339,9 +336,8 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN AudioProfile* pLocalProfile,
         EvsParams objEvsParams = m_objAudioConfig.getEvsParams();
         IMS_TRACE_D("UpdateRtpConfig() - EvsMode[%d], ChannelAwareMode[%d]",
                 objEvsParams.getEvsMode(), objEvsParams.getChannelAwareMode(), 0);
-        IMS_TRACE_D("UpdateRtpConfig() - UseHeaderFullOnlyOnTx[%d], setUseHeaderFullOnlyOnRx[%d]",
-                objEvsParams.getUseHeaderFullOnlyOnTx(), objEvsParams.getUseHeaderFullOnlyOnRx(),
-                0);
+        IMS_TRACE_D("UpdateRtpConfig() - UseHeaderFullOnly[%d]",
+                objEvsParams.getUseHeaderFullOnly(), 0, 0);
         IMS_TRACE_D("UpdateRtpConfig() - EVS nBandwidth[0x%08x], CodecModeRequest[0x%08x]",
                 objEvsParams.getEvsBandwidth(), m_objAudioConfig.getCodecModeRequest(), 0);
     }
