@@ -366,6 +366,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             if (pEvsFmtp->nBrList == 0)
             {
                 pEvsFmtp->nBrList = CodecEvsConfig::DEFAULT_BR_LIST;
+                pEvsFmtp->bShowBrList = IMS_FALSE;
             }
             else
             {
@@ -376,6 +377,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             if (pEvsFmtp->nBwList == -1)
             {
                 pEvsFmtp->nBwList = CodecEvsConfig::DEFAULT_BW_LIST;
+                pEvsFmtp->bShowBrList = IMS_FALSE;
             }
             else
             {
