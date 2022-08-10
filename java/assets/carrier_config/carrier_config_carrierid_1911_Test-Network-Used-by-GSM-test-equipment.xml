@@ -17,10 +17,56 @@
 <carrier_config>
 
     <!-- MEDIA -->
-    <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
-        <item value="1"/>
-        <item value="6"/>
+    <!-- EVS Payload -->
+    <int-array name="asset_evs_payload_type_int_array" num="1">
+        <item value="125"/>
     </int-array>
+
+     <!-- EVS configuration -->
+    <int name="asset_evs_codec_attribute_channels_int" value="1"/>
+    <int-array name="asset_evs_codec_attribute_bitrate_int_array" num="0">
+    </int-array>
+    <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
+    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
+    <int name="asset_evs_codec_attribute_bandwidth_int" value="-1"/>
+    <int name="asset_evs_codec_attribute_cmr_int" value="-2"/>
+
+    <!-- AMR-WB, AMR-NB Payload -->
+    <int-array name="asset_amrwb_payload_type_int_array" num="1">
+        <item value="115"/>
+    </int-array>
+
+    <int-array name="asset_amrnb_payload_type_int_array" num="1">
+        <item value="97"/>
+    </int-array>
+
+    <int-array name="asset_dtmfwb_payload_type_int_array" num="1">
+        <item value="103"/>
+    </int-array>
+
+    <int-array name="asset_dtmfnb_payload_type_int_array" num="1">
+        <item value="105"/>
+    </int-array>
+
+    <int-array name="asset_amrwb_codec_attribute_payload_format_int_array" num="1">
+        <item value="0"/>
+    </int-array>
+
+    <int-array name="asset_amrnb_codec_attribute_payload_format_int_array" num="1">
+        <item value="0"/>
+    </int-array>
+
+    <int-array name="asset_amr_amrwb_codec_attribute_modeset_int_array" num="0">
+    </int-array>
+
+    <int-array name="asset_amr_amrnb_codec_attribute_modeset_int_array" num="0">
+    </int-array>
+
+    <!-- Media common configuration -->
+    <int name="audio_maxred_int" value="220"/>
+    <int name="asset_codec_attribute_mode_change_capability_int" value="2"/>
+    <int name="audio_ptime_millis_int" value="20"/>
+    <int name="audio_maxptime_millis_int" value="240"/>
     <boolean name="media_session_level_bandwidth_bool" value="true"/>
 
     <!--Ut/Xcap Config -->
