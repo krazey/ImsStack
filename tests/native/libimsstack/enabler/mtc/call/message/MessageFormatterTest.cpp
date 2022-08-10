@@ -15,10 +15,8 @@
  */
 
 #include <gtest/gtest.h>
-#include "call/extension/MockIMtcExtension.h"
-#include "call/extension/MtcExtensionSet.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/message/MessageFormatter.h"
-#include "call/MockIMtcSessionContext.h"
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -50,11 +48,10 @@ public:
     CallInfo objCallInfo;
     MockIMessage objMessage;
     MockISipMessage objSipMessage;
-    MockIMtcSessionContext objContext;
+    MockIMtcCallContext objContext;
     MockIMtcService objService;
     MockISession objSession;
     MockIMtcConfigurationManager* pConfigurationManager;
-    MtcExtensionSet* pExtensionSet;
     MtcConfigurationProxy* pConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
 
@@ -65,16 +62,12 @@ protected:
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
         pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
 
-        ImsList<IMtcExtension*> lstExtensions;
-        pExtensionSet = new MtcExtensionSet(lstExtensions);
-
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
-        ON_CALL(objContext, GetExtensionSet).WillByDefault(ReturnRef(*pExtensionSet));
         ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
         ON_CALL(objSession, GetNextResponse).WillByDefault(Return(&objMessage));
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
@@ -87,7 +80,6 @@ protected:
         delete pFormatter;
         delete pConfigurationProxy;
         delete pSupplementaryService;
-        delete pExtensionSet;
     }
 
     IMS_SINT32 GetRejectStatusCode(IMS_SINT32 nCode, IMS_SINT32 nExtraCode = -1)
@@ -428,35 +420,6 @@ TEST_F(MessageFormatterTest, SetCallerIdHeader)
     pSupplementaryService->Delete(SuppType::CALLER_ID);
     pSupplementaryService->Add(SuppType::CALLER_ID, CALLERID_IDENTITY);
     pFormatter->FormStartMessage(CallType::VOIP);
-}
-
-TEST_F(MessageFormatterTest, SetPreconditionHeader)
-{
-    pFormatter->FormStartMessage(CallType::VOIP);
-
-    MockIMtcExtension* pExtension = new MockIMtcExtension();
-    const AString strTag = MtcExtensionSet::OPTION_TAG_PRECONDITION;
-    ON_CALL(*pExtension, GetOptionTag).WillByDefault(ReturnRef(strTag));
-
-    ImsList<IMtcExtension*> lstExtensions;
-    lstExtensions.Append(pExtension);
-    MtcExtensionSet* pExtensionSet = new MtcExtensionSet(lstExtensions);
-    ON_CALL(objContext, GetExtensionSet).WillByDefault(ReturnRef(*pExtensionSet));
-
-    ON_CALL(*pExtension, IsAvailableOnRemote).WillByDefault(Return(IMS_FALSE));
-    pFormatter->FormAcceptMessage();
-
-    ON_CALL(*pExtension, IsAvailableOnRemote).WillByDefault(Return(IMS_TRUE));
-    pFormatter->FormStartMessage(CallType::VOIP);
-    pFormatter->FormEarlyUpdateMessage(UpdateType::NORMAL);
-    pFormatter->FormUpdateMessage(UpdateType::NORMAL, IMS_TRUE);
-    pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
-    pFormatter->FormPrackResponseMessage();
-    pFormatter->FormEarlyUpdateResponseMessage();
-    pFormatter->FormAcceptMessage();
-    pFormatter->FormAcceptUpdateMessage();
-
-    delete pExtensionSet;
 }
 
 TEST_F(MessageFormatterTest, SetPEarlyMediaHeader)

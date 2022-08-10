@@ -23,6 +23,7 @@
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCall.h"
+#include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/MtcSession.h"
 #include "call/extension/EarlyDialogTerminatedExtension.h"
@@ -58,7 +59,7 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
 
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
     {
-        GetSipInterfaceFactory().GetISessionHolder()->AddISession(&m_objSession);
+        m_objContext.GetSipInterfaceFactory().GetISessionHolder()->AddISession(&m_objSession);
     }
 
     UpdateSessionProperty();
@@ -69,7 +70,7 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
             IsRegisteredFeature(ImsAosFeature::MMTEL) && IsRegisteredFeature(ImsAosFeature::TEXT);
 
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MO &&
-            GetConfigurationProxy().Is(Feature::SUPPORT_SIP_SESSION_ID_HEADER))
+            m_objContext.GetConfigurationProxy().Is(Feature::SUPPORT_SIP_SESSION_ID_HEADER))
     {
         m_strSessionIdHeader = GenerateSessionId();
     }
@@ -82,7 +83,7 @@ PUBLIC VIRTUAL MtcSession::~MtcSession()
     m_objContext.GetPreconditionManager().DestroyQos(&m_objSession);
     m_objSession.SetMessageMediator(IMS_NULL);
     m_objSession.SetRefreshListener(IMS_NULL);
-    GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(&m_objSession);
+    m_objContext.GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(&m_objSession);
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::Start()
@@ -268,7 +269,7 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
 
     if (eType == RequestType::START)
     {
-        if (GetConfigurationProxy().Is(Feature::SUPPORT_SIP_SESSION_ID_HEADER))
+        if (m_objContext.GetConfigurationProxy().Is(Feature::SUPPORT_SIP_SESSION_ID_HEADER))
         {
             UpdateSessionIdFromMessage(objRequest);
         }
@@ -371,11 +372,12 @@ void MtcSession::UpdateCallTypeFromMessage(IN const IMessage& objMessage)
 PRIVATE
 void MtcSession::UpdateCapabilityFromMessage(IN const IMessage& objMessage)
 {
-    if (GetConfigurationProxy().Is(Feature::SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS))
+    if (m_objContext.GetConfigurationProxy().Is(
+                Feature::SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS))
     {
         m_bVideoCapable = IMS_TRUE;
     }
-    else if (GetConfigurationProxy().Is(
+    else if (m_objContext.GetConfigurationProxy().Is(
                      Feature::CARRIER_SPECIFIC_SIP_HEADER, MessageUtil::STR_P_TTA_VOLTE_INFO))
     {
         AString strAvchange;
@@ -486,7 +488,8 @@ AString MtcSession::GenerateSessionId() const
 PRIVATE
 IMS_BOOL MtcSession::IsRegisteredFeature(IMS_UINT32 nFeature)
 {
-    IMtcAosConnector* pAosConnector = GetAosConnector(GetService().GetServiceType());
+    IMtcAosConnector* pAosConnector =
+            m_objContext.GetAosConnector(m_objContext.GetService().GetServiceType());
     if (pAosConnector == IMS_NULL)
     {
         return IMS_FALSE;

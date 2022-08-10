@@ -15,9 +15,8 @@
  */
 
 #include <gtest/gtest.h>
-#include "call/extension/MtcExtensionSet.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/message/MessageSender.h"
-#include "call/MockIMtcSessionContext.h"
 #include "CallReasonInfo.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -45,11 +44,10 @@ public:
     CallInfo objCallInfo;
     MockIMessage objMessage;
     MockISipMessage objSipMessage;
-    MockIMtcSessionContext objContext;
+    MockIMtcCallContext objContext;
     MockIMtcService objService;
     MockICoreService objCoreService;
     MockISession objSession;
-    MtcExtensionSet* pExtensionSet;
     MtcConfigurationProxy* pConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
 
@@ -59,16 +57,12 @@ protected:
         pConfigurationProxy = new MtcConfigurationProxy(new MockIMtcConfigurationManager());
         pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
 
-        ImsList<IMtcExtension*> lstExtensions;
-        pExtensionSet = new MtcExtensionSet(lstExtensions);
-
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
-        ON_CALL(objContext, GetExtensionSet).WillByDefault(ReturnRef(*pExtensionSet));
         ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
         ON_CALL(objSession, GetNextResponse).WillByDefault(Return(&objMessage));
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
@@ -82,7 +76,6 @@ protected:
         delete pSender;
         delete pConfigurationProxy;
         delete pSupplementaryService;
-        delete pExtensionSet;
     }
 };
 
