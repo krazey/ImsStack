@@ -150,8 +150,8 @@ TEST_F(TextConfigurationTest, GetConfigTextBandwidth)
 TEST_F(TextConfigurationTest, GetConfigTextInactivityTimer)
 {
     TextConfiguration* m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
-    IMS_UINT32 nMockTextRtpInactivity = 5;
-    IMS_UINT32 nMockTextRtcpInactivity = 10;
+    IMS_UINT32 nMockTextRtpInactivity = 5000;
+    IMS_UINT32 nMockTextRtcpInactivity = 10000;
 
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
     ON_CALL(*pMockICarrierConfig,
