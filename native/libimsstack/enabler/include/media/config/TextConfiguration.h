@@ -81,7 +81,7 @@ public:
     static const IMS_SINT32 DEFAULT_PAYLOAD_T140 = NEED_TO_CHECK_I;
     static const IMS_SINT32 DEFAULT_PAYLOAD_RED = NEED_TO_CHECK_I;
     static const IMS_SINT32 DEFAULT_TEXT_DSCP = 184;
-    static const IMS_BOOL DEFAULT_EMPTY_REDUNDANT = IMS_FALSE;
+    static const IMS_BOOL DEFAULT_EMPTY_REDUNDANT = IMS_TRUE;
 
 protected:
     virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);

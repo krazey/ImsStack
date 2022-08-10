@@ -362,6 +362,7 @@
     </int-array>
     <int name="asset_t140_payload_type_int" value="111"/>
     <int name="asset_red_payload_type_int" value="112"/>
+    <boolean name="text_codec_empty_redundant_bool" value="false"/>
     <int name="text_codec_redundancy_level_int" value="3"/>
     <int name="text_rtp_inactivity_timer_millis_int" value="-1"/>
     <int name="text_rtcp_inactivity_timer_millis_int" value="20000"/>

@@ -500,16 +500,16 @@
     <boolean name="video_avpf_enable_bool" value="true"/>
     <int name="video_iframe_interval_sec_int" value="1"/>
     <int name="video_send_periodic_sps_pps_int" value="2"/>
-    <int-array name="text_rtp_port_range_int_array" num="2">
-        <item value="50010"/>
-        <item value="50060"/>
-    </int-array>
-    <boolean name="text_codec_empty_redundant_bool" value="false"/>
-    <int name="text_rtp_dscp_int" value="46"/>
     <boolean name="support_multi_config_in_early_session_bool" value="false"/>
     <boolean name="media_session_level_bandwidth_bool" value="false"/>
     <boolean name="sdp_answer_full_capability_bool" value="false"/>
     <boolean name="sdp_reoffer_full_capability_bool" value="true"/>
+    <int-array name="text_rtp_port_range_int_array" num="2">
+        <item value="50010"/>
+        <item value="50060"/>
+    </int-array>
+    <boolean name="text_codec_empty_redundant_bool" value="true"/>
+    <int name="text_rtp_dscp_int" value="46"/>
     <int name="text_codec_redundancy_level_int" value="-1"/>
     <int name="text_rtp_inactivity_timer_millis_int" value="-1"/>
     <int name="text_rtcp_inactivity_timer_millis_int" value="20000"/>
