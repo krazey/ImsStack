@@ -17,15 +17,15 @@
 #ifndef TRANSACTION_TIMER_UPDATE_HELPER_H
 #define TRANSACTION_TIMER_UPDATE_HELPER_H
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class MtcConfigurationProxy;
-class IMtcSessionContext;
+class IMtcCallContext;
 
 class TransactionTimerUpdateHelper
 {
 public:
-    explicit TransactionTimerUpdateHelper(IN IMtcSessionContext& objContext);
+    explicit TransactionTimerUpdateHelper(IN IMtcCallContext& objContext);
     virtual ~TransactionTimerUpdateHelper();
     TransactionTimerUpdateHelper(IN const TransactionTimerUpdateHelper&) = delete;
     TransactionTimerUpdateHelper& operator=(IN const TransactionTimerUpdateHelper&) = delete;

@@ -24,12 +24,12 @@
 #include "Configuration.h"
 #include "ServiceConfig.h"
 #include "ICarrierConfig.h"
-#include "call/IMtcSessionContext.h"
+#include "call/IMtcCallContext.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-TransactionTimerUpdateHelper::TransactionTimerUpdateHelper(IN IMtcSessionContext& objContext) :
+TransactionTimerUpdateHelper::TransactionTimerUpdateHelper(IN IMtcCallContext& objContext) :
         m_nSlotId(objContext.GetSlotId()),
         m_objConfiguration(objContext.GetConfigurationProxy()),
         m_bWifi(objContext.GetService().IsWlanIpCanType())

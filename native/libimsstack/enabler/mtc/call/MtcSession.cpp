@@ -41,11 +41,11 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcSession::MtcSession(
-        IN IMtcCallContext& objContext, IN ISession& objSession, IN CallType eCallType) :
+MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
+        IN CallType eCallType, IN IMessageSender* pMessageSender) :
         m_objContext(objContext),
         m_objSession(objSession),
-        m_objMessageSender(MessageSender(*this, objSession)),
+        m_pMessageSender(std::move(pMessageSender)),
         m_objExtensionSet(GetSupportedExtensions()),
         m_eCallType(eCallType),
         m_bVideoCapable(IMS_FALSE),
@@ -54,6 +54,7 @@ MtcSession::MtcSession(
         m_strSessionIdHeader(AString::ConstNull())
 {
     IMS_TRACE_I("+MtcSession", 0, 0, 0);
+    IMS_ASSERT(m_pMessageSender != IMS_NULL);
 
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
     {
@@ -96,7 +97,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Start()
     m_objContext.GetPreconditionManager().FormPreconditionSdp(&m_objSession, IMS_FALSE);
 
     m_objExtensionSet.FormatRequest(RequestType::START, *m_objSession.GetNextRequest());
-    return m_objMessageSender.Start(GetCallType());
+    return m_pMessageSender->Start(GetCallType());
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(IN IMS_BOOL bUserAlert)
@@ -124,7 +125,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(IN IMS_BOOL bUserA
 
     m_objExtensionSet.FormatResponse(
             ResponseType::PROVISIONAL_RESPONSE, *m_objSession.GetNextResponse());
-    return m_objMessageSender.SendProvisionalResponse(
+    return m_pMessageSender->SendProvisionalResponse(
             nStatusCode, IsNeedToReliable(bIncludeSdp), bIncludeSdp, IsCallWaiting());
 }
 
@@ -139,7 +140,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendPrack()
     }
 
     m_objExtensionSet.FormatRequest(RequestType::PRACK, *m_objSession.GetNextRequest());
-    return m_objMessageSender.SendPrack();
+    return m_pMessageSender->SendPrack();
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::RespondToPrack(IN IMS_SINT32 eStatusCode)
@@ -152,7 +153,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::RespondToPrack(IN IMS_SINT32 eStatusCode)
     }
 
     m_objExtensionSet.FormatResponse(ResponseType::PRACK_RESPONSE, *m_objSession.GetNextResponse());
-    return m_objMessageSender.RespondToPrack(eStatusCode);
+    return m_pMessageSender->RespondToPrack(eStatusCode);
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::SendEarlyUpdate(IN UpdateType eUpdateType)
@@ -165,7 +166,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendEarlyUpdate(IN UpdateType eUpdateType)
     }
 
     m_objExtensionSet.FormatRequest(RequestType::EARLY_UPDATE, *m_objSession.GetNextRequest());
-    return m_objMessageSender.SendEarlyUpdate(eUpdateType);
+    return m_pMessageSender->SendEarlyUpdate(eUpdateType);
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::RespondToEarlyUpdate(IN IMS_SINT32 eStatusCode)
@@ -181,7 +182,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::RespondToEarlyUpdate(IN IMS_SINT32 eStatus
 
     m_objExtensionSet.FormatResponse(
             ResponseType::EARLY_UPDATE_RESPONSE, *m_objSession.GetNextResponse());
-    return m_objMessageSender.RespondToEarlyUpdate(eStatusCode);
+    return m_pMessageSender->RespondToEarlyUpdate(eStatusCode);
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::SendAck()
@@ -194,7 +195,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendAck()
     }
 
     m_objExtensionSet.FormatRequest(RequestType::ACK, *m_objSession.GetNextRequest());
-    return m_objMessageSender.SendAck();
+    return m_pMessageSender->SendAck();
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::Accept()
@@ -208,7 +209,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Accept()
     }
 
     m_objExtensionSet.FormatResponse(ResponseType::ACCEPT, *m_objSession.GetNextResponse());
-    return m_objMessageSender.Accept();
+    return m_pMessageSender->Accept();
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::Reject(IN const CallReasonInfo& objReason)
@@ -216,7 +217,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Reject(IN const CallReasonInfo& objReason)
     IMS_TRACE_D("Reject", 0, 0, 0);
 
     m_objExtensionSet.FormatResponse(ResponseType::REJECT, *m_objSession.GetNextResponse());
-    return m_objMessageSender.Reject(objReason);
+    return m_pMessageSender->Reject(objReason);
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::Update(
@@ -225,7 +226,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Update(
     IMS_TRACE_D("Update", 0, 0, 0);
 
     m_objExtensionSet.FormatRequest(RequestType::UPDATE, *m_objSession.GetNextRequest());
-    return m_objMessageSender.Update(
+    return m_pMessageSender->Update(
             eUpdateType, bIncludeAlertInfo, eMethod, eUpdateType == UpdateType::REFRESH);
 }
 
@@ -234,7 +235,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::AcceptUpdate()
     IMS_TRACE_D("AcceptUpdate", 0, 0, 0);
 
     m_objExtensionSet.FormatResponse(ResponseType::ACCEPT_UPDATE, *m_objSession.GetNextResponse());
-    return m_objMessageSender.AcceptUpdate();
+    return m_pMessageSender->AcceptUpdate();
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::CancelUpdate(IN const CallReasonInfo& objReason)
@@ -242,7 +243,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::CancelUpdate(IN const CallReasonInfo& objR
     IMS_TRACE_D("CancelUpdate", 0, 0, 0);
 
     m_objExtensionSet.FormatRequest(RequestType::CANCEL_UPDATE, *m_objSession.GetNextRequest());
-    return m_objMessageSender.CancelUpdate(objReason);
+    return m_pMessageSender->CancelUpdate(objReason);
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::Terminate(
@@ -258,7 +259,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Terminate(
     m_bTerminated = IMS_TRUE;
 
     m_objExtensionSet.FormatRequest(RequestType::TERMINATE, *m_objSession.GetNextRequest());
-    return m_objMessageSender.Terminate(bUseBye, objReason);
+    return m_pMessageSender->Terminate(bUseBye, objReason);
 }
 
 PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMessage& objRequest)

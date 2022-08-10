@@ -15,10 +15,14 @@
  */
 
 #include <gtest/gtest.h>
+#include "MockIMtcService.h"
+#include "MediaDef.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MtcSession.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
+#include "call/message/MockIMessageSender.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -28,8 +32,6 @@
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
 #include "media/MockIMtcMediaManager.h"
-#include "MockIMtcService.h"
-#include "MediaDef.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 
 using ::testing::_;
@@ -46,6 +48,7 @@ public:
     MockIMtcPreconditionManager objPreconditionManager;
     MockIMtcMediaManager objMediaManager;
     MockISession objSession;
+    MockIMessageSender* pMessageSender;
     MockSessionInterfaceHolder* pSessionInterfaceHolder;
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
     MockIInterfaceHolderListener objInterfaceHolderListener;
@@ -80,7 +83,8 @@ protected:
         ON_CALL(objContext, GetService)
                 .WillByDefault(ReturnRef(objMtcService));
 
-        pMtcSession = new MtcSession(objContext, objSession, CallType::VOIP);
+        pMessageSender = new MockIMessageSender();
+        pMtcSession = new MtcSession(objContext, objSession, CallType::VOIP, pMessageSender);
     }
 
     virtual void TearDown() override
@@ -91,30 +95,27 @@ protected:
     }
 };
 
-TEST_F(MtcSessionTest, SendProvisionalResponse180NotReliableWithoutSdp)
+TEST_F(MtcSessionTest, SendProvisionalResponseSends180NotReliablyWithoutSdp)
 {
     ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
-            .WillByDefault(Return(NegotiationState::STATE_OFFER_RECEIVED));
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objPreconditionManager, FormPreconditionSdp(_, _))
             .WillByDefault(Return());
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCalls)
             .WillByDefault(Return(objCalls));
 
-    MockIMessage objMessage;
-    ON_CALL(objSession, GetNextResponse)
-            .WillByDefault(Return(&objMessage));
-
-    EXPECT_CALL(objSession, SendProvisionalResponse(180, _, _)).Times(1);
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_FALSE))
+            .Times(1);
 
     pMtcSession->SendProvisionalResponse(IMS_TRUE);
 }
 
-TEST_F(MtcSessionTest, SendProvisionalResponse180NotReliableWithSdp)
+TEST_F(MtcSessionTest, SendProvisionalResponseSends180NotReliablyWithSdp)
 {
-    // TODO: this must be RPR by SDP. Once UT is ready, please update.
     ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
@@ -125,39 +126,34 @@ TEST_F(MtcSessionTest, SendProvisionalResponse180NotReliableWithSdp)
     ON_CALL(objCallManager, GetCalls)
             .WillByDefault(Return(objCalls));
 
-    MockIMessage objMessage;
-    ON_CALL(objSession, GetNextResponse)
-            .WillByDefault(Return(&objMessage));
-
-    EXPECT_CALL(objSession, SendProvisionalResponse(180, _, _)).Times(1);
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_TRUE, IMS_FALSE))
+            .Times(1);
 
     pMtcSession->SendProvisionalResponse(IMS_TRUE);
 }
 
-TEST_F(MtcSessionTest, SendProvisionalResponse183NotReliableWithoutSdp)
+TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithoutSdp)
 {
     ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite)
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
-            .WillByDefault(Return(NegotiationState::STATE_OFFER_RECEIVED));
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objPreconditionManager, FormPreconditionSdp(_, _))
             .WillByDefault(Return());
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCalls)
             .WillByDefault(Return(objCalls));
 
-    MockIMessage objMessage;
-    ON_CALL(objSession, GetNextResponse)
-            .WillByDefault(Return(&objMessage));
-
-    EXPECT_CALL(objSession, SendProvisionalResponse(183, _, _)).Times(1);
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_FALSE, IMS_FALSE))
+            .Times(1);
 
     pMtcSession->SendProvisionalResponse(IMS_FALSE);
 }
 
-TEST_F(MtcSessionTest, SendProvisionalResponse183NotReliableWithSdp)
+TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithSdp)
 {
-    // TODO: this must be RPR by SDP. Once UT is ready, please update.
     ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite)
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
@@ -168,11 +164,9 @@ TEST_F(MtcSessionTest, SendProvisionalResponse183NotReliableWithSdp)
     ON_CALL(objCallManager, GetCalls)
             .WillByDefault(Return(objCalls));
 
-    MockIMessage objMessage;
-    ON_CALL(objSession, GetNextResponse)
-            .WillByDefault(Return(&objMessage));
-
-    EXPECT_CALL(objSession, SendProvisionalResponse(183, _, _)).Times(1);
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_TRUE, IMS_FALSE))
+            .Times(1);
 
     pMtcSession->SendProvisionalResponse(IMS_FALSE);
 }

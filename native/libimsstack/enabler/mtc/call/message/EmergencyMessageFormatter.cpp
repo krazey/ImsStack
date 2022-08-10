@@ -26,15 +26,15 @@
 #include "Sip.h"
 #include "SipParameter.h"
 #include "TextParser.h"
+#include "call/IMtcCallContext.h"
 #include "helper/IMtcAosConnector.h"
-#include "call/IMtcSessionContext.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 EmergencyMessageFormatter::EmergencyMessageFormatter(
-        IN IMtcSessionContext& objContext, IN ISession& objSession) :
+        IN IMtcCallContext& objContext, IN ISession& objSession) :
         MessageFormatter(objContext, objSession)
 {
     IMS_TRACE_I("+EmergencyMessageFormatter", 0, 0, 0);

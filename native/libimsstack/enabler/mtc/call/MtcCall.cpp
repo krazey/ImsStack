@@ -28,6 +28,7 @@
 #include "call/MtcCall.h"
 #include "call/MtcSession.h"
 #include "call/block/MtcBlockChecker.h"
+#include "call/message/MessageSender.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/ICallStateProxy.h"
 #include "helper/OperationAsyncRunner.h"
@@ -540,7 +541,8 @@ PUBLIC VIRTUAL IMtcSession* MtcCall::CreateSession(IN ISession* piSession)
     piSession->SetMessageMediator(&m_objMessageMediator);
     piSession->SetRefreshListener(this);
 
-    IMtcSession* pSession = new MtcSession(*this, *piSession, m_objCallInfo.eInitialCallType);
+    IMtcSession* pSession = new MtcSession(*this, *piSession, m_objCallInfo.eInitialCallType,
+            new MessageSender(*this, *piSession));
     m_lstSessions.Append(pSession);
 
     IMS_TRACE_D("CreateSession : Session count[%d]", m_lstSessions.GetSize(), 0, 0);

@@ -17,14 +17,14 @@
 #ifndef MTC_SESSION_H_
 #define MTC_SESSION_H_
 
+#include <memory>
 #include "ImsList.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcSessionContext.h"
-#include "call/message/MessageSender.h"
+#include "call/message/IMessageSender.h"
 #include "call/extension/MtcExtensionSet.h"
-#include <functional>
 
 class IMessage;
 class IConferenceManager;
@@ -45,8 +45,8 @@ class ISession;
 class MtcSession final : public IMtcSession, public IMtcSessionContext
 {
 public:
-    explicit MtcSession(
-            IN IMtcCallContext& objContext, IN ISession& objSession, IN CallType eCallType);
+    explicit MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
+            IN CallType eCallType, IN IMessageSender* pMessageSender);
     virtual ~MtcSession();
     MtcSession(IN const MtcSession&) = delete;
     MtcSession& operator=(IN const MtcSession&) = delete;
@@ -204,7 +204,7 @@ private:
     IMtcCallContext& m_objContext;
     ISession& m_objSession;
 
-    MessageSender m_objMessageSender;
+    std::unique_ptr<IMessageSender> m_pMessageSender;
     MtcExtensionSet m_objExtensionSet;
 
     CallType m_eCallType;
