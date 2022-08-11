@@ -1,13 +1,18 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20141129    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.imsstack.enabler.mtc;
 
@@ -18,6 +23,7 @@ import android.os.RegistrantList;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
+import com.android.internal.annotations.VisibleForTesting;
 
 public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
         implements IServiceStateTracker {
@@ -37,9 +43,9 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
     }
 
     public void clear() {
-        mServiceState = IUMtcService.SERVICE_NONE;
-        mEmergencyServiceState = IUMtcService.SERVICE_NONE;
-        mEmergencyServiceReason = IUMtcService.ES_IDLE_REASON_NONE;
+        setServiceState(IUMtcService.SERVICE_NONE);
+        setEmergencyServiceState(IUMtcService.SERVICE_NONE);
+        setEmergencyServiceReason(IUMtcService.ES_IDLE_REASON_NONE);
     }
 
     /**
@@ -77,8 +83,8 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
     @Override
     public boolean isServiceRegistered(int serviceType) {
         if (serviceType == IUMtcService.SERVICE_EMERGENCY) {
-            return (mEmergencyServiceState == IUMtcService.ES_OPENED)
-                    || (mEmergencyServiceState == IUMtcService.ES_IN_CALL);
+            return isEmergencyServiceState(IUMtcService.ES_OPENED)
+                    || isEmergencyServiceState(IUMtcService.ES_IN_CALL);
         } else {
             int regServiceType = MtcStateUtils.getRegisteredServiceType(
                     mContext.getContext(), mContext.getPhoneId());
@@ -139,12 +145,43 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
 
     private void notifyServiceStateIfEmergencyServiceRegistered(Registrant r) {
         if (isServiceRegistered(IUMtcService.SERVICE_EMERGENCY)
-                || (mEmergencyServiceState == IUMtcService.ES_UNAVAILABLE)) {
+                || isEmergencyServiceState(IUMtcService.ES_UNAVAILABLE)) {
             // To guard timing issue: emergency service is already unavailable
             r.notifyResult(new ImsServiceState(IUIMS.APP_MTC,
                     IUMtcService.SERVICE_EMERGENCY,
                     mEmergencyServiceState, mEmergencyServiceReason));
         }
+    }
+
+    @VisibleForTesting
+    protected void setServiceState(int serviceState) {
+        mServiceState = serviceState;
+    }
+
+    @VisibleForTesting
+    protected void setEmergencyServiceState(int emergencyServiceState) {
+        mEmergencyServiceState = emergencyServiceState;
+    }
+
+    @VisibleForTesting
+    protected void setEmergencyServiceReason(int emergencyServiceReason) {
+        mEmergencyServiceReason = emergencyServiceReason;
+    }
+
+    @VisibleForTesting
+    protected boolean isServiceState(int serviceState) {
+        if (mServiceState == serviceState) {
+            return true;
+        }
+        return false;
+    }
+
+    @VisibleForTesting
+    protected boolean isEmergencyServiceState(int emergencyServiceState) {
+        if (mEmergencyServiceState == emergencyServiceState) {
+            return true;
+        }
+        return false;
     }
 
     private void notifyServiceStateIfServiceRegistered(Registrant r) {
@@ -162,16 +199,16 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
     }
 
     private void updateEmergencyState(int state, int reason) {
-        mEmergencyServiceState = state;
-        mEmergencyServiceReason = reason;
+        setEmergencyServiceState(state);
+        setEmergencyServiceReason(reason);
 
-        if (mEmergencyServiceState == IUMtcService.ES_IDLE) {
-            mEmergencyServiceReason = IUMtcService.ES_IDLE_REASON_NONE;
+        if (isEmergencyServiceState(IUMtcService.ES_IDLE)) {
+            setEmergencyServiceReason(IUMtcService.ES_IDLE_REASON_NONE);
         }
     }
 
     private void updateState(int state) {
-        if (mServiceState == state) {
+        if (isServiceState(state)) {
             // REG. state is not changed; ignore it.
             return;
         }
@@ -181,13 +218,13 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
             return;
         }
 
-        mServiceState = state;
+        setServiceState(state);
 
         // This is not to update the OPENING state when offline-call is supported.
-        if ((mServiceState == IUMtcService.SERVICE_NONE)
-                || (mServiceState == IUMtcService.SERVICE_VOIP)
-                || (mServiceState == IUMtcService.SERVICE_VT)
-                || (mServiceState == IUMtcService.SERVICE_UC)) {
+        if (isServiceState(IUMtcService.SERVICE_NONE)
+                || isServiceState(IUMtcService.SERVICE_VOIP)
+                || isServiceState(IUMtcService.SERVICE_VT)
+                || isServiceState(IUMtcService.SERVICE_UC)) {
             MtcStateUtils.updateRegState(mContext.getContext(),
                     mContext.getSlotId(), mServiceState);
         }
