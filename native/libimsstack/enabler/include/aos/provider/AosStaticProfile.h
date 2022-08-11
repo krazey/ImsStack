@@ -72,6 +72,7 @@ public:
     };
 
     void SetProflieType(IN Type eType);
+    void SetRegistrationFlowId(IN IMS_UINT32 nFlowId);
     void AddService(IN AString strAppId, IN AString strServiceId);
 
     AString& GetId();

@@ -1209,7 +1209,8 @@ void AosRegistration::PrepareRegistration()
 {
     A_IMS_TRACE_I(REGID, "PrepareRegistration", 0, 0, 0);
 
-    if (m_pRegManager->GetRegistration(m_nSlotId, m_nFlowId) != IMS_NULL)
+    if (m_piRegistration != IMS_NULL &&
+            m_pRegManager->GetRegistration(m_nSlotId, m_nFlowId) != IMS_NULL)
     {
         A_IMS_TRACE_I(REGID, "PrepareRegistration :: destroy registration for creating", 0, 0, 0);
 
@@ -1252,16 +1253,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CreateRegistration()
         return IMS_FALSE;
     }
 
-    A_IMS_TRACE_D(REGID, "CreateRegistration :: m_nFlowId (%d), strAoR (%s)", m_nFlowId,
-            m_strPuid.GetStr(), 0);
-
-    if (m_pRegManager->CreateRegistration(m_nFlowId, m_strPuid, IsFakeRegistration()) == IMS_FALSE)
-    {
-        A_IMS_TRACE_I(REGID, "create reg is failed", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    m_piRegistration = m_pRegManager->GetRegistration(m_nSlotId, m_nFlowId);
+    m_piRegistration = GetRegistration();
 
     if (m_piRegistration == IMS_NULL)
     {
@@ -1351,6 +1343,20 @@ PROTECTED VIRTUAL void AosRegistration::DestroyRegistration()
     m_piRegistration = IMS_NULL;
     m_piRegContact = IMS_NULL;
     m_piRegParameter = IMS_NULL;
+}
+
+PROTECTED VIRTUAL IRegistration* AosRegistration::GetRegistration()
+{
+    A_IMS_TRACE_D(REGID, "GetRegistration :: m_nFlowId (%d), strAoR (%s)", m_nFlowId,
+            m_strPuid.GetStr(), 0);
+
+    if (!m_pRegManager->CreateRegistration(m_nFlowId, m_strPuid, IsFakeRegistration()))
+    {
+        A_IMS_TRACE_I(REGID, "create reg is failed", 0, 0, 0);
+        return IMS_NULL;
+    }
+
+    return m_pRegManager->GetRegistration(m_nSlotId, m_nFlowId);
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::StartRegBinding()
@@ -1596,6 +1602,16 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::UpdateNetworkRegFeatureBinding()
 #endif
 }
 
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::Register(IN IMS_SINT32 nMinExpireValue)
+{
+    if (nMinExpireValue > 0)
+    {
+        return (m_piRegistration->Register(nMinExpireValue) == IMS_FAILURE) ? IMS_FALSE : IMS_TRUE;
+    }
+
+    return (m_piRegistration->Register() == IMS_FAILURE) ? IMS_FALSE : IMS_TRUE;
+}
+
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::SendRegister(
         IN IMS_BOOL bRestore /* = IMS_FALSE */, IN IMS_BOOL bInitial /* = IMS_FALSE */)
 {
@@ -1629,7 +1645,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SendRegister(
         m_pIpsecHelper->Create(bInitial || bRestore);
     }
 
-    if (m_piRegistration->Register() == IMS_FAILURE)
+    if (!Register(-1))
     {
         A_IMS_TRACE_I(REGID, "register is failed", 0, 0, 0);
         return IMS_FALSE;
@@ -1664,7 +1680,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SendRegisterEx(
 
     AddOperation_OnSendRegister();
 
-    if (m_piRegistration->Register(nExpireValue) == IMS_FAILURE)
+    if (!Register(nExpireValue))
     {
         A_IMS_TRACE_I(REGID, "register is failed", 0, 0, 0);
         return IMS_FALSE;

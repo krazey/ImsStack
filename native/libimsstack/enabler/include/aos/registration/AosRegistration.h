@@ -169,12 +169,14 @@ protected:
     virtual void PrepareRegistration();
     virtual IMS_BOOL CreateRegistration();
     virtual void DestroyRegistration();
+    virtual IRegistration* GetRegistration();
 
     virtual IMS_BOOL StartRegBinding();
     virtual IMS_BOOL UpdateRegBinding();
     virtual IMS_BOOL UpdateNetworkRegBinding();
     virtual IMS_BOOL UpdateNetworkRegFeatureBinding();
 
+    virtual IMS_BOOL Register(IN IMS_SINT32 nMinExpireValue);
     virtual IMS_BOOL SendRegister(
             IN IMS_BOOL bRestore = IMS_FALSE, IN IMS_BOOL bInitial = IMS_FALSE);
     virtual IMS_BOOL SendRegisterEx(
@@ -554,8 +556,6 @@ protected:
     static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30;  // 30 Sec
 
 private:
-    friend class AosRegistrationTest;
-
     /// IPCAN category being registered
     IMS_SINT32 m_nRegIpcanCategory;
     IMS_UINT32 m_nPdnReactivateWaitTime;
