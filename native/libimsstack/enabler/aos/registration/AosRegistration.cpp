@@ -1839,18 +1839,26 @@ PROTECTED VIRTUAL void AosRegistration::AddFeatureTag(IN IAosHandle* piHandle)
     }
 }
 
-PROTECTED VIRTUAL void AosRegistration::AddFeatureTagForMtc(
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddFeatureTagForMtc(
         IN IMS_UINT32 nRegFeatures, IN IMS_BOOL bFinalFeatureTag)
 {
     // If bFinalFeatureTag is true, the extra header shouldn't be added
     // because it manages as reference count
-    m_pUtil->UpdateFeatureTagOptions(ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO,
-            (nRegFeatures & ImsAosFeature::VIDEO) > 0, m_nSlotId);
 
-    if (((nRegFeatures & ImsAosFeature::TEXT) > 0) && bFinalFeatureTag == IMS_FALSE)
+    IMS_BOOL bFeatureTagUpdated = IMS_FALSE;
+
+    if (m_pUtil->UpdateFeatureTagOptions(ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO,
+                (nRegFeatures & ImsAosFeature::VIDEO) > 0, m_nSlotId))
     {
-        m_piRegContact->AddExtraCapability(AosString::STR_RTT_FEATURE, AString::ConstNull());
+        bFeatureTagUpdated = IMS_TRUE;
     }
+
+    if (m_pUtil->UpdateFeatureTagOptions(ISipConfigV::FEATURE_TAG_MEDIA_STREAM_TEXT,
+                (nRegFeatures & ImsAosFeature::TEXT) > 0, m_nSlotId))
+    {
+        bFeatureTagUpdated = IMS_TRUE;
+    }
+
     if (((nRegFeatures & ImsAosFeature::USSI) > 0) && bFinalFeatureTag == IMS_FALSE)
     {
         m_piRegContact->AddExtraCapability(AosString::STR_USSI_FEATURE, AString::ConstNull());
@@ -1860,10 +1868,12 @@ PROTECTED VIRTUAL void AosRegistration::AddFeatureTagForMtc(
         m_piRegContact->AddHeaderParameter(AosString::STR_VERSTAT_FEATURE);
     }
 
-    if ((nRegFeatures & ImsAosFeature::VIDEO) == 0)
+    if (bFeatureTagUpdated)
     {
         m_piRegContact->RecalculateCallerCapabilities();
     }
+
+    return bFeatureTagUpdated;
 }
 
 PROTECTED VIRTUAL void AosRegistration::RemoveFeatureTag(IN IAosHandle* piHandle)
@@ -1893,16 +1903,25 @@ PROTECTED VIRTUAL void AosRegistration::RemoveFeatureTag(IN IAosHandle* piHandle
     }
 }
 
-PROTECTED VIRTUAL void AosRegistration::RemoveFeatureTagForMtc(IN IMS_UINT32 nRegFeatures)
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::RemoveFeatureTagForMtc(IN IMS_UINT32 nRegFeatures)
 {
+    IMS_BOOL bFeatureTagUpdated = IMS_FALSE;
+
     if ((nRegFeatures & ImsAosFeature::VIDEO) > 0)
     {
-        m_pUtil->UpdateFeatureTagOptions(
-                ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO, IMS_FALSE, m_nSlotId);
+        if (m_pUtil->UpdateFeatureTagOptions(
+                    ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO, IMS_FALSE, m_nSlotId))
+        {
+            bFeatureTagUpdated = IMS_TRUE;
+        }
     }
     if ((nRegFeatures & ImsAosFeature::TEXT) > 0)
     {
-        m_piRegContact->RemoveExtraCapability(AosString::STR_RTT_FEATURE, AString::ConstNull());
+        if (m_pUtil->UpdateFeatureTagOptions(
+                    ISipConfigV::FEATURE_TAG_MEDIA_STREAM_TEXT, IMS_FALSE, m_nSlotId))
+        {
+            bFeatureTagUpdated = IMS_TRUE;
+        }
     }
     if ((nRegFeatures & ImsAosFeature::USSI) > 0)
     {
@@ -1912,6 +1931,8 @@ PROTECTED VIRTUAL void AosRegistration::RemoveFeatureTagForMtc(IN IMS_UINT32 nRe
     {
         m_piRegContact->RemoveHeaderParameter(AosString::STR_VERSTAT_FEATURE);
     }
+
+    return bFeatureTagUpdated;
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::UpdateFeatureTag(IN IAosHandle* piHandle)

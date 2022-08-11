@@ -192,9 +192,9 @@ protected:
     virtual void AddAccesstypeFeatureTag();
 
     virtual void AddFeatureTag(IN IAosHandle* piHandle);
-    virtual void AddFeatureTagForMtc(IN IMS_UINT32 nRegFeatures, IN IMS_BOOL bFinalFeatureTag);
+    virtual IMS_BOOL AddFeatureTagForMtc(IN IMS_UINT32 nRegFeatures, IN IMS_BOOL bFinalFeatureTag);
     virtual void RemoveFeatureTag(IN IAosHandle* piHandle);
-    virtual void RemoveFeatureTagForMtc(IN IMS_UINT32 nRegFeatures);
+    virtual IMS_BOOL RemoveFeatureTagForMtc(IN IMS_UINT32 nRegFeatures);
     virtual IMS_BOOL UpdateFeatureTag(IN IAosHandle* piHandle);
     virtual void UpdateFinalAddFeatureTag();
 

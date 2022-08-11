@@ -20,6 +20,7 @@
 
 class ITimer;
 class ITimerListener;
+class ISipConfigV;
 class ISipMessage;
 class IRegistration;
 
@@ -111,9 +112,14 @@ public:
 
     IMS_BOOL IsWifiTest() const;
 
+    // Test
+    void SetISipConfigV(IN ISipConfigV* piSipConfigV);
+
 private:
     // ( 2^24 * BaseTime ) MUST be bigger than MaxTime
     static const IMS_UINT32 REASONABLE_MAX_FAILURE_COUNT = 24;
+
+    ISipConfigV* m_piSipConfigV;
 
     IMS_BOOL m_bIsMtkChipset;
     IMS_BOOL m_bIsWifiTest;

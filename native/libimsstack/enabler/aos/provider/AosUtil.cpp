@@ -37,6 +37,7 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 PUBLIC
 AosUtil::AosUtil() :
+        m_piSipConfigV(IMS_NULL),
         m_bIsMtkChipset(IMS_FALSE),
         m_bIsWifiTest(IMS_FALSE)
 {
@@ -868,8 +869,16 @@ PUBLIC
 IMS_BOOL AosUtil::UpdateFeatureTagOptions(IN IMS_UINT32 nUpdatedFeatureTags,
         IN IMS_BOOL bIsSupported, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
-    const ISipConfigV* piSipConfigV =
-            Configuration::GetInstance()->GetSipConfig(nSlotId)->GetSipConfigV();
+    const ISipConfigV* piSipConfigV;
+
+    if (m_piSipConfigV != IMS_NULL)
+    {
+        piSipConfigV = m_piSipConfigV;
+    }
+    else
+    {
+        piSipConfigV = Configuration::GetInstance()->GetSipConfig(nSlotId)->GetSipConfigV();
+    }
 
     if (piSipConfigV != IMS_NULL)
     {
@@ -943,4 +952,10 @@ PUBLIC
 IMS_BOOL AosUtil::IsWifiTest() const
 {
     return m_bIsWifiTest;
+}
+
+PUBLIC
+void AosUtil::SetISipConfigV(IN ISipConfigV* piSipConfigV)
+{
+    m_piSipConfigV = piSipConfigV;
 }

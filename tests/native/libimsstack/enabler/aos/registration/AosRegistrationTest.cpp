@@ -23,6 +23,8 @@
 #include "IIpcan.h"
 
 #include "../../../config/interface/ImsServiceConfig.h"
+#include "../../../config/interface/common/MockIConfigurable.h"
+#include "../../../config/interface/common/MockISipConfigV.h"
 #include "../../../engine/interface/sipcore/MockISipMessage.h"
 #include "../../../engine/interface/registration/MockIRegistration.h"
 #include "../../../engine/interface/registration/MockIRegContact.h"
@@ -84,6 +86,7 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, Reconfig);
     FRIEND_TEST(AosRegistrationTest, RequestCmd);
     FRIEND_TEST(AosRegistrationTest, CheckBool);
+    FRIEND_TEST(AosRegistrationTest, FeatureTagForMtc);
 
 public:
     inline void SetMockIRegistration(IN IRegistration* piRegistration)
@@ -114,6 +117,8 @@ public:
         }
     }
 
+    inline void SetISipConfigV(ISipConfigV* piSipConfigV) { m_pUtil->SetISipConfigV(piSipConfigV); }
+
 private:
     IRegistration* piMockRegistration;
 };
@@ -126,6 +131,8 @@ public:
     IAosNConfiguration* m_piAosNConfiguration;
     IAosService* m_piAosService;
 
+    MockISipConfigV m_objMockISipConfigV;
+    MockIConfigurable m_objMockIConfigurable;
     MockISipMessage m_objMockISipMessage;
     MockIRegistration m_objMockIRegistration;
     MockIRegContact m_objMockIRegContact;
@@ -220,6 +227,20 @@ protected:
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(&m_objMockAosINetTracker));
 
+        EXPECT_CALL(m_objMockISipConfigV, GetConfigurable())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(&m_objMockIConfigurable));
+
+        EXPECT_CALL(m_objMockIConfigurable, AddListener(_, _))
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IMS_TRUE));
+
+        EXPECT_CALL(m_objMockIConfigurable, RemoveListener(_, _)).Times(AnyNumber());
+
+        EXPECT_CALL(m_objMockIConfigurable, Update(_, _))
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IMS_TRUE));
+
         EXPECT_CALL(m_objMockIRegistration, Register(_))
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(IMS_SUCCESS));
@@ -227,6 +248,8 @@ protected:
         EXPECT_CALL(m_objMockIRegistration, Deregister())
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(IMS_SUCCESS));
+
+        EXPECT_CALL(m_objMockIRegContact, RecalculateCallerCapabilities()).Times(AnyNumber());
     }
 
     virtual void TearDown() override
@@ -317,7 +340,6 @@ TEST_F(AosRegistrationTest, StartAndDestroy)
     EXPECT_CALL(m_objMockIRegContact, AddExtraCapability(_, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIRegContact, RecalculateCallerCapabilities()).Times(AnyNumber());
     EXPECT_CALL(m_objMockIRegContact, AddHeaderParameter(_, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
@@ -548,7 +570,6 @@ TEST_F(AosRegistrationTest, Reconfig)
     EXPECT_CALL(m_objMockIRegistration, DestroyBinding(_, _)).Times(AnyNumber());
 
     EXPECT_CALL(m_objMockIRegContact, RemoveService(_, _)).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIRegContact, RecalculateCallerCapabilities()).Times(AnyNumber());
 
     // Reconfig()
     m_pTestAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
@@ -591,7 +612,6 @@ TEST_F(AosRegistrationTest, RequestCmd)
 
     m_pTestAosRegistration->RequestCmd(IAosRegistration::CMD_INIT_AWT);
 
-    EXPECT_CALL(m_objMockIRegContact, RecalculateCallerCapabilities()).Times(AnyNumber());
     m_pTestAosRegistration->RequestCmd(IAosRegistration::CMD_REFRESH_REGINFO);
 
     EXPECT_CALL(
@@ -667,4 +687,33 @@ TEST_F(AosRegistrationTest, CheckBool)
     EXPECT_FALSE(m_pTestAosRegistration->IsAppReady());
 
     m_pTestAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+}
+
+TEST_F(AosRegistrationTest, FeatureTagForMtc)
+{
+    m_pTestAosRegistration->SetISipConfigV(static_cast<ISipConfigV*>(&m_objMockISipConfigV));
+
+    m_pTestAosRegistration->SetIRegContact(static_cast<IRegContact*>(&m_objMockIRegContact));
+
+    EXPECT_CALL(m_objMockISipConfigV, GetFeatureTagOptions())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(ISipConfigV::FEATURE_TAG_MEDIA_STREAM));
+
+    EXPECT_TRUE(m_pTestAosRegistration->AddFeatureTagForMtc(ImsAosFeature::VIDEO, IMS_FALSE));
+    EXPECT_TRUE(m_pTestAosRegistration->AddFeatureTagForMtc(ImsAosFeature::TEXT, IMS_FALSE));
+    EXPECT_TRUE(m_pTestAosRegistration->AddFeatureTagForMtc(
+            ImsAosFeature::VIDEO | ImsAosFeature::TEXT, IMS_FALSE));
+
+    EXPECT_CALL(m_objMockISipConfigV, GetFeatureTagOptions())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO |
+                    ISipConfigV::FEATURE_TAG_MEDIA_STREAM_TEXT));
+
+    EXPECT_TRUE(m_pTestAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::VIDEO));
+    EXPECT_TRUE(m_pTestAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::TEXT));
+    EXPECT_TRUE(m_pTestAosRegistration->RemoveFeatureTagForMtc(
+            ImsAosFeature::VIDEO | ImsAosFeature::TEXT));
+
+    m_pTestAosRegistration->SetIRegContact(IMS_NULL);
+    m_pTestAosRegistration->SetISipConfigV(IMS_NULL);
 }
