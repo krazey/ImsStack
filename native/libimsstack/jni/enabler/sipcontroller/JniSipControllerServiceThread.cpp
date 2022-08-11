@@ -16,12 +16,12 @@
 
 #include "JniSipControllerServiceThread.h"
 
-#include "IUSipControllerService.h"
+#include "IURcsMessageService.h"
 #include "ImsMessageDef.h"
 #include "ServiceTrace.h"
 #include "ServiceMemory.h"
 
-__IMS_TRACE_TAG_USER_DECL__("IMS_SIPCONTROLLER");
+__IMS_TRACE_TAG_USER_DECL__("IMS_SNC");
 
 PRIVATE
 JniSipControllerServiceThread::JniSipControllerServiceThread() :
@@ -29,7 +29,7 @@ JniSipControllerServiceThread::JniSipControllerServiceThread() :
         m_pfnSendDataToJava(NULL)
 {
     IMS_TRACE_I("+JniSipControllerServiceThread : ", 0, 0, 0);
-    IMS_TRACE_MEM("SIP_MSG", "IM_M : JniSipControllerServiceThread = %" PFLS_u,
+    IMS_TRACE_MEM("SNC_MSG", "IM_M : JniSipControllerServiceThread = %" PFLS_u,
             sizeof(JniSipControllerServiceThread), 0, 0);
 }
 
@@ -41,7 +41,7 @@ PUBLIC GLOBAL ImsAppThread* JniSipControllerServiceThread::GetInstance()
 PUBLIC VIRTUAL JniSipControllerServiceThread::~JniSipControllerServiceThread()
 {
     IMS_TRACE_I("-JniSipControllerServiceThread : ", 0, 0, 0);
-    IMS_TRACE_MEM("SIP_MSG", "IM_F : JniSipControllerServiceThread = %" PFLS_u,
+    IMS_TRACE_MEM("SNC_MSG", "IM_F : JniSipControllerServiceThread = %" PFLS_u,
             sizeof(JniSipControllerServiceThread), 0, 0);
 }
 
@@ -96,9 +96,9 @@ void JniSipControllerServiceThread::HandleMsg(IN IMSMSG& objMSG)
 
     switch (objMSG.nMSG)
     {
-        case IUSipControllerService::MESSAGERECEIVED_IND:
+        case IUSncService::MESSAGERECEIVED_IND:
         {
-            IUMessageParam* pParam = reinterpret_cast<IUMessageParam*>(objMSG.nLparam);
+            IUSncMessageParam* pParam = reinterpret_cast<IUSncMessageParam*>(objMSG.nLparam);
 
             WriteStringToParcel(pParam->pszStartLine, parcel);
             WriteStringToParcel(pParam->pszHeaderSection, parcel);
@@ -109,17 +109,17 @@ void JniSipControllerServiceThread::HandleMsg(IN IMSMSG& objMSG)
             WriteStringToParcel(pParam->pszCallIdParameter, parcel);
         }
         break;
-        case IUSipControllerService::MESSAGESENT_IND:
+        case IUSncService::MESSAGESENT_IND:
         {
-            IUSipControllerSentMessageIndParam* pParam =
-                    reinterpret_cast<IUSipControllerSentMessageIndParam*>(objMSG.nLparam);
+            IUSncSentMessageIndParam* pParam =
+                    reinterpret_cast<IUSncSentMessageIndParam*>(objMSG.nLparam);
             parcel.writeString16(android::String16(pParam->szTId));
         }
         break;
-        case IUSipControllerService::SENDMESSAGEFAILURE_IND:
+        case IUSncService::SENDMESSAGEFAILURE_IND:
         {
-            IUSipControllerSendFailureIndParam* pParam =
-                    reinterpret_cast<IUSipControllerSendFailureIndParam*>(objMSG.nLparam);
+            IUSncSendFailureIndParam* pParam =
+                    reinterpret_cast<IUSncSendFailureIndParam*>(objMSG.nLparam);
             parcel.writeString16(android::String16(pParam->szTId));
         }
         break;

@@ -32,7 +32,7 @@ public class SipControllerInternalMsgDef {
     // Send Message
     public static final int SENDMESSAGE_CMD                 = (IMS_MSG_SIP_DELEGATE + 11);
     // Colse Ongoing Session
-    public static final int CLOSEONGOINGSESSION_CMD         = (IMS_MSG_SIP_DELEGATE + 12);
+    public static final int CLOSESESSION_CMD                = (IMS_MSG_SIP_DELEGATE + 12);
     // Notify Error that Received Message from Native
     public static final int NOTIFYMESSAGERECEIVEERROR_CMD   = (IMS_MSG_SIP_DELEGATE + 13);
     // Received Message

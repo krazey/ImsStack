@@ -19,30 +19,31 @@
 #include <utils/String8.h>
 #include "EnablerUtils.h"
 #include "ImsProcess.h"
-#include "IUSipControllerService.h"
+#include "IURcsMessageService.h"
 #include "JniSipControllerService.h"
 #include "JniSipControllerServiceThread.h"
 #include "ServiceMemory.h"
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_USER_DECL__("IMS_SIPCONTROLLER");
+__IMS_TRACE_TAG_USER_DECL__("IMS_SNC");
 
-JniSipControllerService::JniSipControllerService(
-        Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot /*= 0*/) :
+JniSipControllerService::JniSipControllerService(Jni_SendDataToJava pfnSendDataToJava,
+        IMS_SINTP _nSessionId, IN IMS_UINT32 nSimSlot /*= 0*/) :
         m_nSlotId(nSimSlot),
         m_strTarget(AString::ConstNull()),
-        m_strThreadName(AString::ConstNull())
+        m_strThreadName(AString::ConstNull()),
+        m_nSessionId(_nSessionId)
 {
     IMS_TRACE_D("JniSipControllerService = %" PFLS_u, sizeof(JniSipControllerService), 0, 0);
 
     m_strTarget = EnablerUtils::GetEnablerThreadName(m_nSlotId);
-    m_strTarget.Append(".RCSMessageService");
+    m_strTarget.Append(".RcsMessageService");
     IMS_TRACE_D("JniSipControllerService [%s]", m_strTarget.GetStr(), 0, 0);
 
     if (pfnSendDataToJava != NULL)
     {
-        m_strThreadName.Sprintf("JniAosServiceThread_%d", m_nSlotId);
+        m_strThreadName.Sprintf("JniSipControllerServiceThread_%d", m_nSessionId /*m_nSlotId*/);
         LoadThread(m_strThreadName);
 
         if (m_pJniSipControllerServiceThread != NULL)
@@ -50,9 +51,10 @@ JniSipControllerService::JniSipControllerService(
             m_pJniSipControllerServiceThread->SetCallback(
                     reinterpret_cast<IMS_UINTP>(this), pfnSendDataToJava);
 
-            IUSipControllerOpenCmdParam* pParam = new IUSipControllerOpenCmdParam();
-            IMSMSG objMSG(IUSipControllerService::OPENMESSAGE_CMD, 0,
-                    reinterpret_cast<IMS_UINTP>(pParam));
+            IUSncOpenCmdParam* pParam = new IUSncOpenCmdParam();
+            pParam->nSessionID = m_nSessionId;
+            IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, m_strThreadName.GetStr());
+            IMSMSG objMSG(IUSncService::OPENMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
             MessageService::PostMessage(m_strTarget, objMSG);
         }
         else
@@ -72,10 +74,14 @@ JniSipControllerService::~JniSipControllerService()
         ImsProcess::GetInstance()->UnloadAppThread(m_strThreadName);
         m_pJniSipControllerServiceThread = NULL;
     }
+    IUSncCloseSessionCmdParam* pParam = new IUSncCloseSessionCmdParam();
+    pParam->nSessionID = m_nSessionId;
+    IMSMSG objMSG(IUSncService::CLOSESESSION_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
+    MessageService::PostMessage(m_strTarget, objMSG);
 }
 
 PRIVATE
-void JniSipControllerService::LoadThread(IN CONST AString& strThreadName)
+void JniSipControllerService::LoadThread(IN const AString& strThreadName)
 {
     if (strThreadName.GetLength() <= 0)
     {
@@ -110,33 +116,38 @@ void JniSipControllerService::HandleMessage(int nMsg, const Parcel& pParcel)
 
     switch (nMsg)
     {
-        case IUSipControllerService::SENDMESSAGE_CMD:
+        case IUSncService::SENDMESSAGE_CMD:
         {
-            IUMessageParam* pParam = makeSendMessageParamFromParcel(pParcel);
-            IMSMSG objMSG(IUSipControllerService::SENDMESSAGE_CMD, 0,
-                    reinterpret_cast<IMS_UINTP>(pParam));
+            IUSncMessageParam* pParam = makeSendMessageParamFromParcel(pParcel);
+            pParam->nSessionID = m_nSessionId;
+            IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, m_strThreadName.GetStr());
+            IMSMSG objMSG(IUSncService::SENDMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
             MessageService::PostMessage(m_strTarget, objMSG);
         }
         break;
-        case IUSipControllerService::CLOSEONGOINGSESSION_CMD:
+        case IUSncService::CLOSESESSION_CMD:
         {
-            IUSipControllerCloseOnGoingSessionCmdParam* pParam =
-                    new IUSipControllerCloseOnGoingSessionCmdParam();
-
+            IUSncCloseSessionCmdParam* pParam = new IUSncCloseSessionCmdParam();
+            pParam->nSessionID = m_nSessionId;
+            IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, m_strThreadName.GetStr());
             ConvertString(pParcel.readString16(), strDest);
-            pParam->pszCloseOngoingSession = strDest.GetStr();
-            IMSMSG objMSG(IUSipControllerService::CLOSEONGOINGSESSION_CMD, 0,
+            IMS_StrCpy(pParam->szCallId, IMS_SOLUTION_URI_LEN, strDest.GetStr());
+            IMSMSG objMSG(IUSncService::CLOSESESSION_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
+            MessageService::PostMessage(m_strTarget, objMSG);
+        }
+        break;
+        case IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD:
+        {
+            IUSncNotifyErrorCmdParam* pParam = new IUSncNotifyErrorCmdParam();
+            pParam->nSessionID = m_nSessionId;
+            IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, m_strThreadName.GetStr());
+            ConvertString(pParcel.readString16(), strDest);
+            IMS_StrCpy(pParam->szTId, IMS_SOLUTION_URI_LEN, strDest.GetStr());
+            IMSMSG objMSG(IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD, 0,
                     reinterpret_cast<IMS_UINTP>(pParam));
             MessageService::PostMessage(m_strTarget, objMSG);
         }
         break;
-        case IUSipControllerService::NOTIFYMESSAGERECEIVEERROR_CMD:
-        {
-            IMSMSG objMSG(IUSipControllerService::NOTIFYMESSAGERECEIVEERROR_CMD, 0, 0);
-            MessageService::PostMessage(m_strTarget, objMSG);
-        }
-        break;
-
         default:
             IMS_TRACE_E(0, "HandleMsg : Can't analysis message, name %d\n", nMsg, 0, 0);
             break;
@@ -144,13 +155,11 @@ void JniSipControllerService::HandleMessage(int nMsg, const Parcel& pParcel)
 }
 
 PRIVATE
-IUMessageParam* JniSipControllerService::makeSendMessageParamFromParcel(
+IUSncMessageParam* JniSipControllerService::makeSendMessageParamFromParcel(
         const android::Parcel& objParcel)
 {
     AString strDest = AString::ConstEmpty();
-    IUMessageParam* pParam = new IUMessageParam();
-
-    ConvertString(objParcel.readString16(), strDest);
+    IUSncMessageParam* pParam = new IUSncMessageParam();
 
     ConvertString(objParcel.readString16(), strDest);
     pParam->pszStartLine =

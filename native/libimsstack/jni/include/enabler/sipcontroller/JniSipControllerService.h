@@ -20,22 +20,23 @@
 #include "BaseService.h"
 
 class JniSipControllerServiceThread;
-class IUMessageParam;
+class IUSncMessageParam;
 
 using namespace android;
 
 class JniSipControllerService : public BaseService
 {
 public:
-    JniSipControllerService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot = 0);
+    JniSipControllerService(Jni_SendDataToJava pfnSendDataToJava, IMS_SINTP _nSessionId,
+            IN IMS_UINT32 nSimSlot = 0);
     virtual ~JniSipControllerService();
 
     virtual int SendData(const Parcel& pParcel);
 
 private:
     void HandleMessage(int nMsg, const Parcel& pParcel);
-    void LoadThread(IN CONST AString& strThreadName);
-    IUMessageParam* makeSendMessageParamFromParcel(const android::Parcel& objParcel);
+    void LoadThread(IN const AString& strThreadName);
+    IUSncMessageParam* makeSendMessageParamFromParcel(const android::Parcel& objParcel);
     void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
 
 private:
@@ -43,6 +44,7 @@ private:
     IMS_UINT32 m_nSlotId;
     AString m_strTarget;
     AString m_strThreadName;
+    IMS_SINTP m_nSessionId;
 };
 
 #endif  // JNI_SIP_CONTROLLER_SERVICE_H_
