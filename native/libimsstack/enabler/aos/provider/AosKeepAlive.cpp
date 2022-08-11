@@ -69,7 +69,11 @@ PUBLIC
 void AosKeepAlive::Start(IN IMS_UINT32 nRepeatTime, IN IMS_BOOL bCheckingPong /* = IMS_TRUE */)
 {
     A_IMS_TRACE_I(AOSTAG, "Start :: keep alive time(%d)", nRepeatTime, 0, 0);
-    m_piKeepAliveHelper->SetListener(this);
+
+    if (m_piKeepAliveHelper != IMS_NULL)
+    {
+        m_piKeepAliveHelper->SetListener(this);
+    }
 
     SendPing();
 
@@ -92,24 +96,40 @@ void AosKeepAlive::Stop()
 {
     A_IMS_TRACE_I(AOSTAG, "Stop", 0, 0, 0);
 
-    m_piKeepAliveHelper->SetListener(IMS_NULL);
+    if (m_piKeepAliveHelper != IMS_NULL)
+    {
+        m_piKeepAliveHelper->SetListener(IMS_NULL);
+    }
+
     m_nKeepAliveTime = 0;
     ClearTimer();
 }
 
 PUBLIC
-void AosKeepAlive::SetTransport(IN const IPAddress& objSourceIpAddress, IN IMS_SINT32 nSourcePort,
-        IN const IPAddress& objDestIpAddress, IN IMS_SINT32 nDestPort,
+IMS_BOOL AosKeepAlive::SetTransport(IN const IPAddress& objSourceIpAddress,
+        IN IMS_SINT32 nSourcePort, IN const IPAddress& objDestIpAddress, IN IMS_SINT32 nDestPort,
         IN IMS_SINT32 nProtocol /* = AosKeepAlive::TRANSPORT_UDP */)
 {
+    if (m_piKeepAliveHelper == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
     m_piKeepAliveHelper->SetTransportTupleS(objSourceIpAddress, nSourcePort, nProtocol);
     m_piKeepAliveHelper->SetTransportTupleD(objDestIpAddress, nDestPort);
+
+    return IMS_TRUE;
 }
 
 PRIVATE
 void AosKeepAlive::SendPing()
 {
     A_IMS_TRACE_I(AOSTAG, "SendPing", 0, 0, 0);
+
+    if (m_piKeepAliveHelper == IMS_NULL)
+    {
+        return;
+    }
 
     static const ByteArray objCrlf("\r\n\r\n");
     m_piKeepAliveHelper->SendPacket(objCrlf);
@@ -136,7 +156,9 @@ void AosKeepAlive::ProcessKeepAliveTimerExpired()
     StartTimer(TIMER_KEEP_ALIVE, m_nKeepAliveTime);
 
     if (IsPongChecked())
+    {
         StartTimer(TIMER_PONG_WAIT, PONG_WAIT_TIME);
+    }
 
     SendPing();
 }

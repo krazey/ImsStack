@@ -36,7 +36,7 @@ public:
     void Start(IN IMS_UINT32 nRepeatTime, IN IMS_BOOL bCheckingPong = IMS_TRUE);
     void Stop();
 
-    void SetTransport(IN const IPAddress& objSourceIpAddress, IN IMS_SINT32 nSourcePort,
+    IMS_BOOL SetTransport(IN const IPAddress& objSourceIpAddress, IN IMS_SINT32 nSourcePort,
             IN const IPAddress& objDestIpAddress, IN IMS_SINT32 nDestPort,
             IN IMS_SINT32 nProtocol = AosKeepAlive::TRANSPORT_UDP);
 
@@ -86,6 +86,9 @@ private:
     IMS_SINT32 m_nSlotId;
 
     AString m_strTag;
+
+private:
+    friend class AosKeepAliveTest;
 };
 
 class IAosKeepAliveListener
