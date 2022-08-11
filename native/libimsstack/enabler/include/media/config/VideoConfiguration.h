@@ -69,7 +69,7 @@ public:
     static const IMS_SINT32 DEFAULT_TMMBR_BR_LEVEL = 5;
     static const IMS_SINT32 DEFAULT_TMMBR_UP_LEVEL = 1;
     static const IMS_SINT32 DEFAULT_I_FRAME_INTERVAL = 1;
-    static const IMS_SINT32 DEFAULT_CHANNEL = 1;
+    static const IMS_SINT32 DEFAULT_CHANNEL = 0;
     static const IMS_SINT32 DEFAULT_VIDEO_SAMPLING_RATE = 90000;
 
 public:

@@ -51,7 +51,7 @@ public:
     /**
      * @brief Get the channel
      *
-     * @return IMS_SINT32 Return the channel id - default : 1
+     * @return IMS_SINT32 Return the channel id - default : 0
      */
     IMS_SINT32 GetChannel() const;
     /**
@@ -129,7 +129,7 @@ public:
         INTERLEAVED_MODE = 2,
     };
 
-    static const IMS_SINT32 DEFAULT_CHANNEL = 1;
+    static const IMS_SINT32 DEFAULT_CHANNEL = 0;
     static const IMS_SINT32 DEFAULT_RESOLUTION_WIDTH = 240;
     static const IMS_SINT32 DEFAULT_RESOLUTION_HEIGHT = 320;
     static const IMS_SINT32 DEFAULT_FRAMERATE = 15;
