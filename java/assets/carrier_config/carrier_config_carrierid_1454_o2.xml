@@ -21,4 +21,20 @@
     <int name="imsemergency.preferred_emergency_registration_int" value="1"/>
     <int name="registration_out_of_service_policy_int" value="1"/>
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+
+    <!-- Ut/Xcap AOSP -->
+    <int name="gba_mode_int" value="1"/>
+    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
+    <!-- Previous solution was using 80 and TCP, but O2 requirement is TLS -->
+    <int name="imsss.ut_as_server_port_int" value="443"/>
+    <int name="imsss.ut_transport_type_int" value="3"/>
+
+    <!--Ut/Xcap Config -->
+    <int-array name="imsss.ut_sm_cause_permanent_block_int_array" num="2">
+        <item value="27"/>
+        <item value="33"/>
+    </int-array>
+    <int-array name="imsss.ut_http_permanent_error_code_int_array" num="1">
+        <item value="403"/>
+    </int-array>
 </carrier_config>
