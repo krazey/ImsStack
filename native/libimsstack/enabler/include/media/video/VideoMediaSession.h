@@ -17,7 +17,6 @@
 #ifndef _IMS_VIDEO_MEDIA_SESSION_H_
 #define _IMS_VIDEO_MEDIA_SESSION_H_
 
-// == INCLUDES =============================================================
 #include <MediaQualityThreshold.h>
 #include <VideoConfig.h>
 #include "BaseSession.h"
@@ -32,11 +31,21 @@ class VideoMediaSession : public BaseSession
 public:
     enum
     {
+        /** The state that video session created and no operation is on going */
         STATE_IDLE = 0,
+        /** The state that video session created and camera is running in preview mode and no
+           rx/rtcp streaming is on going */
         STATE_PREVIEW,
+        /** The state that video session is running tx with camera recording streaming, rx
+           displaying rtp from the network and rtcp is running by the configuration  */
         STATE_RECORDING,
+        /** The state that video session is running with paused image streaming and has the same rx,
+           rtcp streaming with STATE_RECORDING */
         STATE_PAUSE_IMAGE,
+        /** The state that video session is running same with rx, rtcp streaming with
+           STATE_RECORDING but tx streaming is disabled */
         STATE_RENDERING,
+        /** The state that video session is running only rtcp streaming */
         STATE_PAUSED,
     };
 
@@ -46,43 +55,82 @@ public:
     virtual ~VideoMediaSession();
     void SetConfig(IN VideoConfiguration* pConfig);
 
-    /*
-     * Set VideoConfig for libimsmedia from src/dest/negotiated profile
-     * @param pSrcProfile : local profile of the SDP negotiation
-     * @param pDestProfile : peer profile of the SDP negotiation
+    /**
+     * @brief Set VideoConfig for libimsmedia from src/dest/negotiated profile
+     * @param pLocalProfile : local profile of the SDP negotiation
+     * @param pPeerProfile : peer profile of the SDP negotiation
      * @param pNegoProfile : negotiated profile of the SDP negotiation
      * return IMS_BOOL : false for error, true for successful
      */
-    IMS_BOOL UpdateRtpConfig(IN VideoProfile* pSrcProfile, IN VideoProfile* pDestProfile,
+    IMS_BOOL UpdateRtpConfig(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
             IN VideoProfile* pNegoProfile);
-    IMS_BOOL IsDirectionHold();
-    void HoldRtpConfig();
-    IMS_BOOL UpdateMediaQualityThreshold(IN IMS_BOOL bIsHold, IN VideoProfile* pVideoProfile);
-    IMS_BOOL UpdateLocalEndPoint(IN VideoProfile* pNegoProfile);
-    void UpdateLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort);
-    IMS_BOOL OnVideoMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
 
-    /*
-     * request OPEN_SESSION with updated VideoConfig
+    /**
+     * @brief
+     *
+     * @return IMS_BOOL
      */
+    IMS_BOOL IsDirectionHold();
+
+    /**
+     * @brief
+     *
+     */
+    void HoldRtpConfig();
+
+    /**
+     * @brief
+     *
+     * @param bIsHold
+     * @param bEnableRtcp
+     * @return IMS_BOOL
+     */
+    IMS_BOOL UpdateMediaQualityThreshold(IN IMS_BOOL bIsHold, IN IMS_BOOL bEnableRtcp);
+
+    /**
+     * @brief
+     *
+     * @param pNegoProfile
+     * @return IMS_BOOL
+     */
+    IMS_BOOL UpdateLocalEndPoint(IN VideoProfile* pNegoProfile);
+
+    /**
+     * @brief
+     *
+     * @param objLocalAddr
+     * @param nPort
+     */
+    void UpdateLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort);
+
+    /**
+     * @brief
+     *
+     * @param nMsg
+     * @param pParam
+     * @return IMS_BOOL
+     */
+    IMS_BOOL OnMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
+
+    /** request OPEN_SESSION with updated VideoConfig */
     IMS_BOOL Open();
 
-    /*
-     * request MODIFY_SESSION with updated VideoConfig
-     */
+    /** request MODIFY_SESSION with updated VideoConfig */
     IMS_BOOL Modify();
 
-    /*
-     * request CLOSE_SESSION with updated VideoConfig
-     */
+    /** request CLOSE_SESSION with updated VideoConfig */
     IMS_BOOL Close();
 
-    /*
-     * request SET_MEDIA_QUALITY with Video Media qualityThreshold
-     */
+    /** request SET_MEDIA_QUALITY with Video Media qualityThreshold */
     IMS_BOOL SetMediaQuality();
+
+    /** Get local port number */
     IMS_SINT32 GetLocalPort();
+
+    /** Get remote port number */
     IMS_SINT32 GetRemotePort();
+
+    /** Get camera id */
     IMS_SINT32 GetCameraId();
 
 private:
@@ -93,7 +141,6 @@ private:
     IMS_BOOL OnChangeOrientation(IN IMS_UINTP pParam);
     void SetStateFromVideoMode(IN IMS_SINT32 mode);
 
-protected:
     VideoConfiguration* m_pConfig;
     VideoConfig m_objVideoConfig;
     MediaQualityThreshold m_objMediaQualityThreshold;

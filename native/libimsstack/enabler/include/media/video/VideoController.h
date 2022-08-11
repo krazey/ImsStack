@@ -29,18 +29,91 @@ public:
     VideoController();
     ~VideoController();
     IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
+
+    /**
+     * @brief Get the given session with nego id is in hold state
+     *
+     * @param nNegoId The identification of VideoMediaSession
+     * @return IMS_BOOL Returns IMS_TRUE when the target session is in hold state, IMS_FALSE in it
+     * is in live state
+     */
     IMS_BOOL IsHoldSession();
+
+    /**
+     * @brief Transition the all VideoMediaSession instances to hold
+     *
+     * @return IMS_BOOL Returns IMS_TRUE when the changing to hold successfully
+     */
     IMS_BOOL HoldSession();
-    void CreateSession(IMediaSessionListener* pListener, VideoConfiguration* pConfig);
+
+    /**
+     * @brief Create a VideoMediaSession instance with given parameters
+     *
+     * @param pListener A listener to IMediaSession
+     * @param pConfig The configuration instance
+     * @return IMS_BOOL Returns IMS_TRUE when the session created successfully, IMS_FALSE when it is
+     * failed with invalid arguments
+     */
+    IMS_BOOL CreateSession(IMediaSessionListener* pListener, VideoConfiguration* pConfig);
+
+    /**
+     * @brief Send openSession message from the given id of the VideoMediaSession instance
+     *
+     * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
+     * failed to send
+     */
     IMS_BOOL OpenSession();
+
+    /**
+     * @brief Update session and send modifySesion of confirmConfig based on the update condition
+     *
+     * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
+     * failed to send
+     */
     IMS_BOOL UpdateSession();
+
+    /**
+     * @brief Send closeSession message to java
+     *
+     * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
+     * failed to send
+     *
+     */
     IMS_BOOL CloseSession();
-    void UpdateLocalAddress(IN VideoNego* pNego);
-    void UpdateRtpConfig(IN VideoNego* pNego);
-    void UpdateQualityThreshold(IN VideoNego* pNego);
+
+    /**
+     * @brief Update local address from the parameters of the negotiation profile
+     *
+     * @return IMS_BOOL Returns IMS_TRUE when updates successfully, IMS_FALSE when it is
+     * failed to update
+     */
+    IMS_BOOL UpdateLocalAddress(IN VideoNego* pNego);
+
+    /**
+     * @brief Update rtp config parameters from the negotiation profile
+     *
+     * @return IMS_BOOL Returns IMS_TRUE when updates successfully, IMS_FALSE when it is
+     * failed to update
+     */
+    IMS_BOOL UpdateRtpConfig(IN VideoNego* pNego);
+
+    /**
+     * @brief Update MediaQualityThreshold and send message to java
+     *
+     * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
+     * failed to send
+     */
+    IMS_BOOL UpdateQualityThreshold(IN VideoNego* pNego);
+
+    /**
+     * @brief Check there is a session opened
+     *
+     * @return IMS_BOOL Return IMS_TRUE when there is a session created
+     */
+    IMS_BOOL IsSessionOpened();
 
 private:
-    VideoMediaSession* m_pVideoSession;
+    VideoMediaSession* m_pSession;
     IPAddress m_objLocalAddr;
     IMS_UINT32 m_nPort;
 };

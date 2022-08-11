@@ -68,7 +68,7 @@ void MediaNego::Create(IN MEDIA_SERVICE_TYPE eServiceType)
 {
     IMS_TRACE_D("Create Enter eServiceType[%d]", eServiceType, 0, 0);
     m_pAudioNego = new AudioNego(GetSlotId());
-    m_pVideoNego = VideoNego::Create(GetSlotId(), eServiceType);
+    m_pVideoNego = new VideoNego(GetSlotId());
     m_pTextNego = new TextNego(GetSlotId());
 }
 
@@ -106,9 +106,9 @@ IMS_BOOL MediaNego::UpdateMediaEnvironment(IN MediaEnvironment* pEnvironment)
 
         if (m_pVideoNego != IMS_NULL)
         {
-            m_pVideoNego->DestroyProfiles();
-            m_pVideoNego->SetMediaEnvironment(m_pMediaEnvironment);
-            m_pVideoNego->CreateProfiles(m_pMediaEnvironment);
+            m_pVideoNego->CreateProfiles(m_pMediaEnvironment,
+                    MediaConfigUtil::GetVideoConfig(
+                            GetSlotId(), m_pMediaEnvironment->eServiceType));
         }
 
         if (m_pTextNego != IMS_NULL)
@@ -142,7 +142,7 @@ IMS_BOOL MediaNego::Forking(IN MediaNego* pMediaNego)
 
     if (m_pVideoNego != IMS_NULL)
     {
-        m_pVideoNego->Copy(pMediaNego->GetVideoNego());
+        *m_pVideoNego = *pMediaNego->GetVideoNego();
     }
 
     if (m_pTextNego != IMS_NULL)
@@ -390,10 +390,11 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
 
     if (pDescriptorForVideo != IMS_NULL)
     {
-        m_pVideoNego->SetSessionType(m_eSessionType);
-
         if (m_pVideoNego->FormSDP(GetNegoState(), pSession->GetSessionDescriptor(),
-                    pDescriptorForVideo, eMediaType, (MEDIA_DIRECTION)nVideoDirection) == IMS_FALSE)
+                    pDescriptorForVideo, (MEDIA_DIRECTION)nVideoDirection,
+                    MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO) == IMS_FALSE
+                            ? IMS_TRUE
+                            : IMS_FALSE) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "MediaNego::FormSDP() - Forming a m line of video is failed", 0, 0, 0);
             return IMS_FALSE;
@@ -424,7 +425,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
 
         if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
         {
-            IMS_SINT32 nTmpAS = m_pVideoNego->GetMediaBandwidth();
+            IMS_SINT32 nTmpAS = m_pTextNego->GetMediaBandwidth();
 
             if (nTmpAS > 0)
             {
@@ -481,11 +482,6 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* nAudioDi
     }
 
     SetSessionType(pSession);
-
-    if (m_pVideoNego != IMS_NULL)
-    {
-        m_pVideoNego->SetSessionType(m_eSessionType);
-    }
 
     // get a list of media line
     IMSList<IMedia*> lstIMedia = pSession->GetMedia();
@@ -566,9 +562,9 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* nAudioDi
 
                 if (pNegotiatedVideoDescriptor == NULL)
                 {
-                    if (m_pVideoNego->NegotiateSDP(GetNegoState(), m_bForking,
-                                pSession->GetSessionDescriptor(), pDescriptor,
-                                (MEDIA_DIRECTION*)nVideoDirection) == IMS_TRUE)
+                    if (m_pVideoNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
+                                pDescriptor,
+                                reinterpret_cast<MEDIA_DIRECTION*>(nVideoDirection)) == IMS_TRUE)
                     {
                         pNegotiatedVideoDescriptor = pDescriptor;
                         errorReason = NO_ERROR;
@@ -744,8 +740,7 @@ void MediaNego::FinalizeSDP(IN ISession* pSession)
 
     if (m_pVideoNego != IMS_NULL)
     {
-        m_pVideoNego->FinalizeSDP(
-                reinterpret_cast<IMS_SINTP>(pSession->GetSessionDescriptor()), m_eNegoState);
+        m_pVideoNego->FinalizeSDP(pSession->GetSessionDescriptor(), m_eNegoState);
 
         if (m_pVideoNego->GetNegotiatedResolution() != VIDEO_RESOLUTION_INVALID)
             bNegotiated = IMS_TRUE;

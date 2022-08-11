@@ -40,6 +40,20 @@ public:
     }
 
     /**
+     * @brief Get the VideoConfiguration object with given parameter
+     *
+     * @param nSlotId The UICC slot id
+     * @param type MEDIA_SERVICE_TYPE defined in MediaDef.h
+     * @return VideoConfiguration*
+     */
+    static VideoConfiguration* GetVideoConfig(IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE type)
+    {
+        return MediaSessionConfigFactory::GetInstance()
+                ->FindMediaSessionConfig(nSlotId, type)
+                ->GetVideoConfiguration();
+    }
+
+    /**
      * @brief Get the TextConfiguration object with given parameter
      *
      * @param nSlotId The UICC slot id

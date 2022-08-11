@@ -176,9 +176,10 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
 
     VideoNego* pVideoNego = pMediaNego->GetVideoNego();
 
-    if (pVideoNego != IMS_NULL)
+    if (pVideoNego != IMS_NULL && MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
     {
-        m_objVideoController.CreateSession(this, pVideoNego->GetConfig());
+        m_objVideoController.CreateSession(
+                this, MediaConfigUtil::GetVideoConfig(m_nSlotId, m_pEnvironment->eServiceType));
     }
 
     TextNego* pTextNego = pMediaNego->GetTextNego();
@@ -244,7 +245,8 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSDP(IN IMS_UINTP nNegoId, OUT ISession
     // video
     if (pMediaNego->GetVideoNego() != IMS_NULL && IS_VALID_MEDIA_DIRECTION(nVideoDirection))
     {
-        m_objVideoController.CreateSession(this, pMediaNego->GetVideoNego()->GetConfig());
+        m_objVideoController.CreateSession(
+                this, MediaConfigUtil::GetVideoConfig(m_nSlotId, m_pEnvironment->eServiceType));
         m_objVideoController.UpdateLocalAddress(pMediaNego->GetVideoNego());
         m_objVideoController.OpenSession();
     }
@@ -292,7 +294,8 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSDP(IN IMS_UINTP nNegoId, IN ISes
         // video
         if (pMediaNego->GetVideoNego() != IMS_NULL && IS_VALID_MEDIA_DIRECTION(*nVideoDirection))
         {
-            m_objVideoController.CreateSession(this, pMediaNego->GetVideoNego()->GetConfig());
+            m_objVideoController.CreateSession(
+                    this, MediaConfigUtil::GetVideoConfig(m_nSlotId, m_pEnvironment->eServiceType));
             m_objVideoController.UpdateLocalAddress(pMediaNego->GetVideoNego());
             m_objVideoController.OpenSession();
         }
@@ -364,9 +367,12 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
     m_objAudioController.UpdateQualityThreshold(nNegoId, pMediaNego->GetAudioNego());
     m_objAudioController.UpdateSession(nNegoId);
 
-    m_objVideoController.UpdateRtpConfig(pMediaNego->GetVideoNego());
-    m_objVideoController.UpdateQualityThreshold(pMediaNego->GetVideoNego());
-    m_objVideoController.UpdateSession();
+    if (m_objVideoController.IsSessionOpened() == IMS_TRUE)
+    {
+        m_objVideoController.UpdateRtpConfig(pMediaNego->GetVideoNego());
+        m_objVideoController.UpdateQualityThreshold(pMediaNego->GetVideoNego());
+        m_objVideoController.UpdateSession();
+    }
 
     m_objTextController.UpdateRtpConfig(pMediaNego->GetTextNego());
     m_objTextController.UpdateQualityThreshold(pMediaNego->GetTextNego());

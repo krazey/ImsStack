@@ -17,51 +17,45 @@
 #ifndef _IMS_VIDEO_NEGO_H_
 #define _IMS_VIDEO_NEGO_H_
 
-// == INCLUDES =========================================================
 #include "ImsSlot.h"
 #include "media/IMedia.h"
 #include "ISession.h"
-
 #include "MediaDef.h"
 #include "video/VideoDef.h"
 #include "MediaEnvironment.h"
-
 #include "config/VideoConfiguration.h"
 #include "video/VideoProfile.h"
-#include "video/VideoProfileConfigurer.h"
-
-class MediaSession;
+#include "video/VideoProfileUtil.h"
 
 class VideoNego : ImsSlot
 {
-    // == INNER CLASS ================================================================
 public:
     class OaModel
     {
     public:
-        VideoProfile* pSrcProfile;
-        VideoProfile* pDestProfile;
+        VideoProfile* pLocalProfile;
+        VideoProfile* pPeerProfile;
         VideoProfile* pNegotiatedProfile;
         IMS_SINTP nSessionDescriptorKey;
         IMS_BOOL bConfirmedSession;
 
     public:
         OaModel() :
-                pSrcProfile(IMS_NULL),
-                pDestProfile(IMS_NULL),
+                pLocalProfile(IMS_NULL),
+                pPeerProfile(IMS_NULL),
                 pNegotiatedProfile(IMS_NULL),
                 nSessionDescriptorKey(0),
                 bConfirmedSession(IMS_FALSE){};
         ~OaModel()
         {
-            if (pSrcProfile != IMS_NULL)
+            if (pLocalProfile != IMS_NULL)
             {
-                delete pSrcProfile;
+                delete pLocalProfile;
             }
 
-            if (pDestProfile != IMS_NULL)
+            if (pPeerProfile != IMS_NULL)
             {
-                delete pDestProfile;
+                delete pPeerProfile;
             }
 
             if (pNegotiatedProfile != IMS_NULL)
@@ -77,7 +71,7 @@ public:
     public:
         IMS_BOOL IsAllProfileExist()
         {
-            if (pSrcProfile != IMS_NULL && pDestProfile != IMS_NULL &&
+            if (pLocalProfile != IMS_NULL && pPeerProfile != IMS_NULL &&
                     pNegotiatedProfile != IMS_NULL)
             {
                 return IMS_TRUE;
@@ -89,87 +83,161 @@ public:
         };
     };
 
-    // == Constructor, Destructor, Operator Overloading ========================================
 public:
-    static VideoNego* Create(IN IMS_SINT32 nSlotID = IMS_SLOT_0,
-            IN MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT);
-    virtual ~VideoNego();
-    void Copy(IN VideoNego* pVideoNego);
-
-private:
-    VideoNego(IN IMS_SINT32 nSlotID = IMS_SLOT_0);
+    VideoNego(IN const IMS_SINT32 nSlotID = IMS_SLOT_0);
     VideoNego(IN const VideoNego& obj);
     VideoNego& operator=(IN const VideoNego& obj);
+    virtual ~VideoNego();
 
-    // == PUBLIC METHOD ==============================================================
-public:
-    virtual void CreateProfiles(IN MediaEnvironment* pEnvironment);
+    /**
+     * @brief Create a base local/peer/negotiate profile with given configuration
+     *
+     * @param pEnvironment The MediaEnvironment
+     * @param pConfig The configuration to create audio profile
+     */
+    virtual void CreateProfiles(IN MediaEnvironment* pEnvironment, IN VideoConfiguration* pConfig);
     virtual void DestroyProfiles();
-    virtual void SetMediaEnvironment(IN MediaEnvironment* pEnvironment);
-    virtual void SetSessionType(IN MEDIA_CONTENT_TYPE eSessionType);
-    VideoConfiguration* GetConfig();
-    // -- Negotiation APIs -------------------------------------------------------------------------
+    /**
+     * @brief Form the SDP with the current profile based on the state
+     *
+     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
+     * list
+     * @param pSessionDescriptor The SDP descriptor instance to form the session level SDP
+     * @param pDescriptor The SDP descriptor instance to form the m=text level SDP
+     * @param eDir The media direction of the SDP
+     * @param bDisable if it is IMS_TRUE, set the port number to zero
+     * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
+     * it is failed to form
+     */
     virtual IMS_BOOL FormSDP(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
-            IN MEDIA_DIRECTION eDir);
-    virtual IMS_BOOL NegotiateSDP(NEGO_STATE eNegoState, IN IMS_BOOL bForking,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
+
+    /**
+     * @brief Negotiate the SDP and make the negotiate profile based on the nego state
+     *
+     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
+     * list
+     * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
+     * @param pDescriptor The SDP descriptor instance to negotiate the m=text level SDP
+     * @param eDir The media direction of the SDP
+     * @return IMS_BOOL Returns IMS_TRUE when there is no error during SDP negotiation, IMS_FALSE
+     * when it is failed to form
+     */
+    virtual IMS_BOOL NegotiateSDP(IN NEGO_STATE eNegoState,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT MEDIA_DIRECTION* eDir);
 
-    virtual void FinalizeSDP(IN IMS_SINTP nSessionDescriptorKey, NEGO_STATE eNegoState);
+    /**
+     * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
+     *
+     * @param pSessionDescriptor The SDP descriptor instance to access session level SDP
+     * @param eNegoState The current negotiation state to decide to remove the OA model item
+     */
+    virtual void FinalizeSDP(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
 
-    // -- Additional function APIs
-    // -------------------------------------------------------------------------
-    IMS_BOOL SetPort(IN IMS_UINT32 nPort);
-    IPAddress GetLocalAddr() { return m_objBaseProfile.objIpAddr; };
-    IMS_UINT32 GetLocalPort() { return m_objBaseProfile.nDataPort; };
-    IPAddress GetNegotiatedRemoteAddr();
-    IMS_UINT32 GetNegotiatedRemotePort();
-    IMS_BOOL GetNegotiatedCvoResult();
-    // -- Condition checking APIs
-    // -------------------------------------------------------------------------
-    OaModel* GetNegotiatedOaModel(IN IMS_BOOL bCheckConfirmed = IMS_FALSE);
-    IMS_BOOL GetNegotiatedProfileSet(OUT VideoProfile*& pSrcProfile,
-            OUT VideoProfile*& pDestProfile, OUT VideoProfile*& pNegotiatedProfile);
-    VideoProfile* GetNegotiatedDestProfile();
-    MEDIA_DIRECTION GetNegotiatedDirection();
-    VIDEO_RESOLUTION GetNegotiatedResolution(IN IMS_BOOL bCheckConfirmed = IMS_FALSE);
-    IMS_SINT32 GetNegotiatedRtpPort();
-    IMS_SINT32 GetMediaBandwidth();
-    IMS_BOOL GetWidthHeightFromResolutionId(
-            IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight);
-    VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
+    /**
+     * @brief Set the local port number of the VideoProfile
+     *
+     * @param nPort The port number
+     * @return IMS_BOOL IMS_TRUE when the port number is unique and valid, IMS_FALSE when it is
+     * invalid port number which is already reserved
+     */
+    virtual IMS_BOOL SetPort(IN IMS_UINT32 nPort);
 
-    // == PROTECTED METHOD ==========================================================
+    /**
+     * @brief Get the local ip address
+     *
+     * @return const IPAddress& The local ip address
+     */
+    virtual const IPAddress& GetLocalAddress() { return m_objBaseProfile.objIpAddress; };
+
+    /**
+     * @brief Get the local port number
+     *
+     * @return IMS_UINT32 The local port number
+     */
+    virtual IMS_UINT32 GetLocalPort() { return m_objBaseProfile.nDataPort; };
+
+    /**
+     * @brief Get the negotiated remote ip address
+     *
+     * @return const IPAddress& The ip address
+     */
+    virtual const IPAddress& GetNegotiatedRemoteAddress();
+
+    /**
+     * @brief Get the negotiated remote port number
+     *
+     * @return IMS_UINT32 The port number
+     */
+    virtual IMS_UINT32 GetNegotiatedRemotePort();
+
+    /**
+     * @brief Get the negotiated local profile object
+     */
+    virtual VideoProfile* GetNegotiatedLocalProfile();
+
+    /**
+     * @brief Get the negotiated negotiated profile object
+     */
+    virtual VideoProfile* GetNegotiatedNegoProfile();
+
+    /**
+     * @brief Get the negotiated peer profile object
+     */
+    virtual VideoProfile* GetNegotiatedPeerProfile();
+
+    /**
+     * @brief Get the negotiated audio direction
+     */
+    virtual MEDIA_DIRECTION GetNegotiatedDirection();
+
+    /**
+     * @brief Get the Negotiated video resolution
+     *
+     * @return VIDEO_RESOLUTION
+     */
+    virtual VIDEO_RESOLUTION GetNegotiatedResolution();
+
+    /**
+     * @brief Get the Negotiated rtp port number
+     *
+     * @return IMS_SINT32
+     */
+    virtual IMS_SINT32 GetNegotiatedRtpPort();
+
+    /**
+     * @brief Get the negotiated bandwidth
+     *
+     * @return IMS_SINT32
+     */
+    virtual IMS_SINT32 GetMediaBandwidth();
+
 private:
-    virtual IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
-            IN MEDIA_DIRECTION eDir);
-    virtual IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
-            IN MEDIA_DIRECTION eDir);
-    virtual IMS_BOOL FormReOffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
-            IN MEDIA_DIRECTION eDir);
-    virtual MEDIA_DIRECTION NegotiateOffer(
+    void Copy(IN const VideoNego* pVideoNego);
+    IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
+            IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
+    IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
+    IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
+    MEDIA_DIRECTION NegotiateOffer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-    virtual MEDIA_DIRECTION NegotiateAnswer(
+    MEDIA_DIRECTION NegotiateAnswer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-    virtual MEDIA_DIRECTION NegotiateReanswer(
+    MEDIA_DIRECTION NegotiateReanswer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
     IMS_BOOL MakeSdpFromProfile(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile);
     IMS_BOOL MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor,
             IN IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
-    virtual IMS_BOOL MakeNegotiatedPayload(IN VideoProfile::Payload* pSrcPayload,
-            IN VideoProfile::Payload* pDstPayload, IN VideoConfiguration* pConfig,
-            OUT VideoProfile::Payload* pNegoPayload);
-    virtual IMS_BOOL MakeNegotiatedProfile(IN VideoProfile* pSrcProfile,
-            IN VideoProfile* pDestProfile, IN IMS_BOOL bIsOfferReceived,
-            OUT VideoProfile* pNegotiatedProfile);
+    IMS_BOOL MakeNegotiatedPayload(IN VideoProfile::Payload* pLocalPayload,
+            IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload* pNegoPayload);
+    IMS_BOOL MakeNegotiatedProfile(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
+            IN IMS_BOOL bIsOfferReceived, OUT VideoProfile* pNegotiatedProfile);
     IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT VideoProfile::AvcFmtp* pFmtp);
     IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT VideoProfile::HevcFmtp* pFmtp);
-    virtual VideoProfile::Payload* FindPayloadInProfile(
+    VideoProfile::Payload* FindPayloadInProfile(
             IN VideoProfile* pProfile, IN VideoProfile::Payload* pPayload);
     IMS_SINT32 FindPayloadIndexFromProfile(
             IN VideoProfile* pProfile, IN VideoProfile::Payload* pPayload);
@@ -192,21 +260,32 @@ private:
             OUT AString& strImageAttr);
     IMS_BOOL MakeFrameSizeLine(IN IMS_UINT32 nPayloadType, IN VIDEO_RESOLUTION eResolutionId,
             OUT AString& strFrameSize);
-    // -- CapaNego API ---------------------------------------------------------------
     IMS_BOOL MakeCapaNegoProfileFromSdp(
             IN IMediaDescriptor* pDescriptor, OUT VideoProfile::CapaNego* pObjCapaNego);
-    virtual IMS_BOOL MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaNego* pSrcCapaNego,
+    IMS_BOOL MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaNego* pSrcCapaNego,
             IN VideoProfile::CapaNego* pDestCapaNego,
             OUT VideoProfile::CapaNego* pNegotiatedCapaNego);
     IMS_BOOL CheckAvpfFromProfile(IN VideoProfile* pProfile);
     IMS_BOOL GetAvpfFromAttributes_EX(IN IMediaDescriptor* pMediaDescriptor,
             IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr);
+    OaModel* GetNegotiatedOaModel();
 
-    // == PROTECTED VARIABLE ==========================================================
-private:
-    IMSList<OaModel*> m_lstOaModel;
+    /**
+     * @brief Get the width and height from video resolution enum id
+     *
+     * @param eResolutionId The enum of video resolution set
+     * @param pnWidth The width of video resolution
+     * @param pnHeight The height of video resolution
+     * @return IMS_BOOL
+     */
+    IMS_BOOL GetWidthHeightFromResolutionId(
+            IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight);
+    VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
+
+    IMSList<OaModel*> m_listOaModel;
     VideoProfile m_objBaseProfile;
-    MediaEnvironment* m_pMediaEnvironment;
+    MediaEnvironment* m_pEnvironment;
+    VideoConfiguration* m_pConfig;
     MEDIA_CONTENT_TYPE m_eSessionType;
     IMS_BOOL m_bNegotiatedCvoResult;
 };

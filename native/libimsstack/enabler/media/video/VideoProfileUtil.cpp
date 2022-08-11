@@ -21,45 +21,41 @@
 #include "config/CodecHevcConfig.h"
 #include "config/VideoConfiguration.h"
 #include "video/VideoDef.h"
-#include "video/VideoProfileConfigurer.h"
+#include "video/VideoProfileUtil.h"
 #include "MediaManager.h"
 
-// == DEFINES =========================================================
 __IMS_TRACE_TAG_USER_DECL__("MED.PC");
 
-PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfile* pVideoProfile,
+PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
         IN MediaEnvironment* pEnvironment, IN VideoConfiguration* pConfig, IN IMS_SINT32 nSlotId)
 {
     IMS_SINT32 nMaxAS = -1;
     IMS_SINT32 nMaxFramerate = -1;
 
-    if (pEnvironment == IMS_NULL || pConfig == IMS_NULL || pVideoProfile == IMS_NULL ||
-            pEnvironment->pIService == IMS_NULL)
+    if (pEnvironment == IMS_NULL || pConfig == IMS_NULL || pEnvironment->pIService == IMS_NULL)
     {
-        return IMS_FALSE;
+        return IMS_NULL;
     }
-    IMS_TRACE_D("CreateVideoProfile() Entered.", 0, 0, 0);
+
+    IMS_TRACE_D("CreateProfile()", 0, 0, 0);
 
     MediaManager* pMediaManager = MediaManager::GetInstance(nSlotId);
+
     if (pMediaManager == IMS_NULL)
     {
-        return IMS_FALSE;
+        return IMS_NULL;
     }
 
     MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+
     if (pResourceMngr == IMS_NULL)
     {
-        return IMS_FALSE;
+        return IMS_NULL;
     }
-    //
-    // Step 1. Setting IP from IService
-    pVideoProfile->objIpAddr = pEnvironment->pIService->GetIpAddress();
 
-    //
-    // Step 2. Setting RTP/RTCP port from resource manager
-    //
+    VideoProfile* pVideoProfile = new VideoProfile();
+    pVideoProfile->objIpAddress = pEnvironment->pIService->GetIpAddress();
 
-    // To reuse port in case of re-creation
     if (pVideoProfile->nDataPort > 0)
     {
         pVideoProfile->nDataPort =
@@ -69,14 +65,12 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
     {
         pVideoProfile->nDataPort = pResourceMngr->AcquireRtpPort(pConfig);
     }
+
     pVideoProfile->nControlPort = pVideoProfile->nDataPort + 1;
 
-    IMS_TRACE_D("CreateVideoProfile() objIpAddr[%s], port[%d]",
-            pVideoProfile->objIpAddr.ToCharString(), pVideoProfile->nDataPort, 0);
+    IMS_TRACE_D("CreateProfile() objIpAddress[%s], port[%d]",
+            pVideoProfile->objIpAddress.ToCharString(), pVideoProfile->nDataPort, 0);
 
-    //
-    // Step 3. Setting profile type
-    //
     if (pConfig->IsVideoAvpfEnabled() && pConfig->GetSdpOfferCapNegoForAvpf() == 0)
     {
         pVideoProfile->strTransportType = "RTP/AVPF";
@@ -86,25 +80,13 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
         pVideoProfile->strTransportType = "RTP/AVP";
     }
 
-    while (pVideoProfile->lstPayload.GetSize() > 0)
-    {
-        VideoProfile::Payload* pPayload = pVideoProfile->lstPayload.GetAt(0);
-        if (pPayload != IMS_NULL)
-        {
-            delete pPayload;
-        }
-        pVideoProfile->lstPayload.RemoveAt(0);
-    }
-
-    //
-    // Step 4. Setting each payload and bandwidth
-    //
     IMSList<CodecConfig*> pCodecs;
     pCodecs = pConfig->GetCodecConfigs();
 
     for (IMS_UINT32 i = 0; i < pCodecs.GetSize(); i++)
     {
         CodecConfig* pCodecConfig = pCodecs.GetAt(i);
+
         if (pCodecConfig == IMS_NULL)
         {
             IMS_TRACE_D("pCodecConfig is NULL", 0, 0, 0);
@@ -113,14 +95,14 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
 
         if (pCodecConfig->GetCodec() == ImsCodec::VIDEO_NONE)
         {
-            IMS_TRACE_D("CreateVideoProfile() invalid codec, skip config(%d) - %d", i,
+            IMS_TRACE_D("CreateProfile() invalid codec, skip config(%d) - %d", i,
                     pCodecConfig->GetCodec(), 0);
             continue;
         }
 
         if (pCodecConfig->GetPayloadType() == -1)
         {
-            IMS_TRACE_D("CreateVideoProfile() invalid payload type, skip config(%d) - %d:%s", i,
+            IMS_TRACE_D("CreateProfile() invalid payload type, skip config(%d) - %d:%s", i,
                     pCodecConfig->GetCodec(), ImsCodec::CodecToString(pCodecConfig->GetCodec()));
             continue;
         }
@@ -137,6 +119,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
                 delete pAvcFmtp;
                 continue;
             }
+
             pVideoProfile->nFrameRate = pAvcConfig->GetFramerate();
             pAvcFmtp->nFrameRate = pAvcConfig->GetFramerate();
             pAvcFmtp->eResolution = GetResolutionFromWidthHeight(
@@ -148,7 +131,8 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
             pAvcFmtp->nLevel = GetAvcLevelFromProfileLevelId(pAvcConfig->GetProfileLevelId());
 
             pbAvc4SpropParameterSets = pAvcConfig->GetSpropParameterSets().GetStr();
-            /* TODO_MEDIA later sprop need to find a way to get SpropPramaterSets
+
+            /** TODO: later sprop need to find a way to get SpropPramaterSets
             pbAvc4SpropParameterSets = GetAvcSpropParameterSets(
                     pAvcFmtp->eResolution, pAvcFmtp->nProfile, pAvcFmtp->nLevel);
             */
@@ -229,18 +213,18 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
                     pAvcPayload->objRtcpFbAttr.bFirSupported = IMS_TRUE;
                 }
 
-                IMS_TRACE_D("CreateVideoProfile() AVPF. bNACK[%d], bTMMBR[%d], bPLI[%d]",
+                IMS_TRACE_D("CreateProfile() AVPF. bNACK[%d], bTMMBR[%d], bPLI[%d]",
                         pAvcPayload->objRtcpFbAttr.bNackSupported,
                         pAvcPayload->objRtcpFbAttr.bTmmbrSupported,
                         pAvcPayload->objRtcpFbAttr.bPliSupported);
-                IMS_TRACE_D("CreateVideoProfile() AVPF. bFIR[%d], bTRR_Int[%d], nTrr-int[%d]",
+                IMS_TRACE_D("CreateProfile() AVPF. bFIR[%d], bTRR_Int[%d], nTrr-int[%d]",
                         pAvcPayload->objRtcpFbAttr.bFirSupported,
                         pAvcPayload->objRtcpFbAttr.bTrrSupported,
                         pAvcPayload->objRtcpFbAttr.nTrrInt);
 
                 if (pAvcPayload->objRtcpFbAttr.bTmmbrSupported == IMS_TRUE)
                 {
-                    IMS_TRACE_D("CreateVideoProfile() TMMBR Supported", 0, 0, 0);
+                    IMS_TRACE_D("CreateProfile() TMMBR Supported", 0, 0, 0);
                 }
             }
 
@@ -255,13 +239,12 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
                 nMaxFramerate = pAvcConfig->GetFramerate();
             }
 
-            IMS_TRACE_D("CreateVideoProfile() add payload(%d) - %s", i,
+            IMS_TRACE_D("CreateProfile() add payload(%d) - %s", i,
                     ImsCodec::CodecToString(pAvcConfig->GetCodec()), 0);
         }
         else if (pCodecConfig->GetCodec() == ImsCodec::VIDEO_HEVC)
         {
-            /** TODO - need to update later for HEVC */
-            /*
+            /** TODO: need to update later for HEVC
             CodecHevcConfig* pHevcConfig = reinterpret_cast<CodecHevcConfig*>(pCodecConfig);
 
             VideoProfile::HevcFmtp* pHevcFmtp = new VideoProfile::HevcFmtp();
@@ -343,16 +326,16 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
                     pHevcPayload->objRtcpFbAttr.bFirSupported = IMS_TRUE;
                 }
 
-                IMS_TRACE_D("CreateVideoProfile() AVPF. bNACK[%d], bTMMBR[%d], bPLI[%d]",
+                IMS_TRACE_D("CreateProfile() AVPF. bNACK[%d], bTMMBR[%d], bPLI[%d]",
                         pHevcPayload->objRtcpFbAttr.bNackSupported,
                         pHevcPayload->objRtcpFbAttr.bTmmbrSupported,
                         pHevcPayload->objRtcpFbAttr.bPliSupported);
-                IMS_TRACE_D("CreateVideoProfile() AVPF. bFIR[%d]",
+                IMS_TRACE_D("CreateProfile() AVPF. bFIR[%d]",
                         pHevcPayload->objRtcpFbAttr.bFirSupported, 0, 0);
 
                 if (pHevcPayload->objRtcpFbAttr.bTmmbrSupported == IMS_TRUE)
                 {
-                    IMS_TRACE_D("CreateVideoProfile() TMMBR Supported", 0, 0, 0);
+                    IMS_TRACE_D("CreateProfile() TMMBR Supported", 0, 0, 0);
                 }
             }
 
@@ -367,27 +350,28 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
                 nMaxFramerate = pHevcConfig->GetFramerate();
             }
 
-            IMS_TRACE_D("CreateVideoProfile() add payload(%d) - %s", i,
+            IMS_TRACE_D("CreateProfile() add payload(%d) - %s", i,
                     ImsCodec::CodecToString(pHevcConfig->GetCodec()), 0);
             */
         }
     }
 
-    // Step 5. Setting direction, candidate, framerate, as/rr/rs
+    // 5. Setting direction, candidate, framerate, as/rr/rs
     pVideoProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
 
-    // Step 6. Setting CVO
+    // 6. Setting CVO
     pVideoProfile->nCvoId = pConfig->GetCvoId();
 
     // framerate is in CodecAvc/HevcConfig
     pVideoProfile->nBandwidthAs = pConfig->GetAsBandwidthKbps();
     SetVideoRsRr(pVideoProfile, pConfig);
 
-    IMS_TRACE_D("CreateVideoProfile - AS[%d], RR[%d], RS[%d]", pVideoProfile->nBandwidthAs,
+    IMS_TRACE_D("CreateProfile - AS[%d], RR[%d], RS[%d]", pVideoProfile->nBandwidthAs,
             pVideoProfile->nBandwidthRr, pVideoProfile->nBandwidthRs);
 
     IMS_SINT32 nTCap = 0;
     IMS_SINT32 nAcap = 0;
+
     if (pConfig->IsVideoAvpfEnabled() == IMS_TRUE)
     {
         AString strTemp = "";
@@ -438,9 +422,9 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
         }
 
         IMS_SINT32 nCapaNegoForAvpfOption = pConfig->GetSdpOfferCapNegoForAvpf();
+
         // 1 - CAPNEG_OFFER_WITHOUT_ACAP
         // 2 - CAPNEG_OFFER_WITH_ACAP
-
         if (nCapaNegoForAvpfOption > MediaConfiguration::CAPNEG_OFFER_NONE)
         {
             pVideoProfile->bSupportCapaNegoForAvpf = IMS_TRUE;
@@ -475,34 +459,31 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
         }
     }
 
-    IMS_TRACE_D("CreateVideoProfile - bSupportAvpf[%d], bSupportCapaNegoForAvpf[%d]",
+    IMS_TRACE_D("CreateProfile - bSupportAvpf[%d], bSupportCapaNegoForAvpf[%d]",
             pVideoProfile->bSupportAvpf, pVideoProfile->bSupportCapaNegoForAvpf, 0);
-    IMS_TRACE_D("CreateVideoProfile - AS[%d], RR[%d], RS[%d]", pVideoProfile->nBandwidthAs,
+    IMS_TRACE_D("CreateProfile - AS[%d], RR[%d], RS[%d]", pVideoProfile->nBandwidthAs,
             pVideoProfile->nBandwidthRr, pVideoProfile->nBandwidthRs);
-    IMS_TRACE_D("CreateVideoProfile - PayloadSize[%d]", pVideoProfile->lstPayload.GetSize(), 0, 0);
+    IMS_TRACE_D("CreateProfile - PayloadSize[%d]", pVideoProfile->lstPayload.GetSize(), 0, 0);
 
-    return IMS_TRUE;
+    return pVideoProfile;
 }
 
-/*!
- *  @brief      UpdateAudioProfile
- *  @details    UpdateAudioProfile for IP changes or IP setting latency
- */
-PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::UpdateVideoProfile(
+PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::UpdateVideoProfile(
         OUT VideoProfile* pVideoProfile, IN MediaEnvironment* pEnvironment)
 {
     if (pEnvironment == IMS_NULL || pVideoProfile == IMS_NULL)
     {
         return IMS_FALSE;
     }
-    IMS_TRACE_D("UpdateVideoProfile() Entered.", 0, 0, 0);
 
-    pVideoProfile->objIpAddr = pEnvironment->pIService->GetIpAddress();
+    IMS_TRACE_D("UpdateVideoProfile()", 0, 0, 0);
+
+    pVideoProfile->objIpAddress = pEnvironment->pIService->GetIpAddress();
 
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL void VideoProfileConfigurer::GetWidthHeightFromResolution(
+PUBLIC GLOBAL void VideoProfileUtil::GetWidthHeightFromResolution(
         VIDEO_RESOLUTION eResolution, IMS_UINT32* nWidth, IMS_UINT32* nHeight)
 {
     switch (eResolution)
@@ -581,7 +562,7 @@ PUBLIC GLOBAL void VideoProfileConfigurer::GetWidthHeightFromResolution(
             eResolution, *nWidth, *nHeight);
 }
 
-PUBLIC GLOBAL VIDEO_RESOLUTION VideoProfileConfigurer::GetResolutionFromWidthHeight(
+PUBLIC GLOBAL VIDEO_RESOLUTION VideoProfileUtil::GetResolutionFromWidthHeight(
         IN IMS_UINT32 nWidth, IN IMS_UINT32 nHeight)
 {
     if (nWidth == 176 && nHeight == 144)
@@ -654,53 +635,7 @@ PUBLIC GLOBAL VIDEO_RESOLUTION VideoProfileConfigurer::GetResolutionFromWidthHei
     }
 }
 
-/** TODO_MEDIA later sprop
-PRIVATE
-const IMS_CHAR* VideoProfileConfigurer::GetAvcSpropParameterSets(
-        IN VIDEO_RESOLUTION eResolution, IN VIDEO_PROFILE_AVC eProfileId, IN IMS_SINT32 nLevel)
-{
-    IMS_UINT32 nProfile;
-    IMS_UINT32 nWidth = 0;
-    IMS_UINT32 nHeight = 0;
-
-    IMS_MEM_Memset(m_strAvcSpropParameterSet, 0, sizeof(m_strAvcSpropParameterSet));
-
-    GetWidthHeightFromResolution(eResolution, &nWidth, &nHeight);
-
-    if (nWidth == 0 || nHeight == 0)
-    {
-        IMS_TRACE_E(0, "GetAvcSpropParameterSets INVALID Resolution[%d]", eResolution, 0, 0);
-        return m_strAvcSpropParameterSet;
-    }
-
-    switch (eProfileId)
-    {
-        case AVC_PROFILE_CB:
-            nProfile = (IMS_UINT32)MMPF_AVC_PROFILE_CONSTRAINED_BASELINE;
-            break;
-        case AVC_PROFILE_B:
-            nProfile = (IMS_UINT32)MMPF_AVC_PROFILE_BASELINE;
-            break;
-        case AVC_PROFILE_M:
-        case AVC_PROFILE_E:
-            nProfile = (IMS_UINT32)MMPF_AVC_PROFILE_MAIN;
-            break;
-        case AVC_PROFILE_H:
-            nProfile = (IMS_UINT32)MMPF_AVC_PROFILE_HIGH;
-            break;
-        default:
-            nProfile = (IMS_UINT32)MMPF_AVC_PROFILE_BASELINE;
-            break;
-    }
-
-    MMPFBoardConfigInfo::GetSpropParameterSet(
-            nWidth, nHeight, nProfile, (IMS_UINT32)nLevel, m_strAvcSpropParameterSet);
-
-    return m_strAvcSpropParameterSet;
-}
-*/
-
-PUBLIC GLOBAL VIDEO_PROFILE_AVC VideoProfileConfigurer::GetAvcProfileFromProfileLevelId(
+PUBLIC GLOBAL VIDEO_PROFILE_AVC VideoProfileUtil::GetAvcProfileFromProfileLevelId(
         const AString& strProfileLevelId)
 {
     // Table 5.  Combinations of profile_idc and profile-iop (RFC 6184)
@@ -788,7 +723,7 @@ PUBLIC GLOBAL VIDEO_PROFILE_AVC VideoProfileConfigurer::GetAvcProfileFromProfile
     return nReProfile;
 }
 
-PUBLIC GLOBAL IMS_UINT32 VideoProfileConfigurer::GetAvcLevelFromProfileLevelId(
+PUBLIC GLOBAL IMS_UINT32 VideoProfileUtil::GetAvcLevelFromProfileLevelId(
         const AString& strProfileLevelId)
 {
     IMS_UINT32 nLevel = 12;
@@ -834,45 +769,8 @@ PUBLIC GLOBAL IMS_UINT32 VideoProfileConfigurer::GetAvcLevelFromProfileLevelId(
 
     return nLevel;
 }
-/** TODO_MEDIA video sprop
-PUBLIC GLOBAL const IMS_CHAR* VideoProfileConfigurer::GetHevcSpropParameterSets(
-        IN VIDEO_RESOLUTION eResolution, IN VIDEO_PROFILE_HEVC eProfileId, IN IMS_SINT32 nLevel)
-{
-    IMS_UINT32 nProfile;
-    IMS_UINT32 nWidth = 0;
-    IMS_UINT32 nHeight = 0;
 
-    IMS_MEM_Memset(m_strHevcSpropParameterSet, 0, sizeof(m_strHevcSpropParameterSet));
-
-    GetWidthHeightFromResolution(eResolution, &nWidth, &nHeight);
-
-    if (nWidth == 0 || nHeight == 0)
-    {
-        IMS_TRACE_E(0, "GetHevcSpropParameterSets INVALID resolution(%d)", eResolution, 0, 0);
-
-        return m_strHevcSpropParameterSet;
-    }
-
-    switch (eProfileId)
-    {
-        case HEVC_PROFILE_MAIN:
-            nProfile = (IMS_UINT32)MMPF_HEVC_MAIN_LEVEL_4;
-            break;
-        case HEVC_PROFILE_MAIN10:
-            nProfile = (IMS_UINT32)MMPF_HEVC_MAIN_LEVEL_4;
-            break;
-        default:
-            nProfile = (IMS_UINT32)MMPF_HEVC_MAIN_LEVEL_4;
-            break;
-    }
-
-    // MMPFBoardConfigInfo::GetHevcConfigFrameSet(
-    //         nWidth, nHeight, nProfile, (IMS_UINT32)nLevel, m_strHevcSpropParameterSet);
-
-    return m_strHevcSpropParameterSet;
-}
-*/
-PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::SetVideoRsRr(
+PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::SetVideoRsRr(
         OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pConfig)
 {
     if (pVideoProfile == IMS_NULL)
@@ -889,10 +787,9 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::SetVideoRsRr(
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::MakeNegotiatedBandwidth(
-        IN VideoConfiguration* pConfig, IN VideoProfile* pSrcProfile, IN VideoProfile* pDestProfile,
-        IN IMS_BOOL bIsOfferReceived, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
-        OUT VideoProfile* pNegotiatedProfile)
+PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::MakeNegotiatedBandwidth(IN VideoConfiguration* pConfig,
+        IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
+        IN IMS_SINT32 nAsValueOfNegoticatedCodec, OUT VideoProfile* pNegotiatedProfile)
 {
     if (bIsOfferReceived == IMS_FALSE)
     {
@@ -900,16 +797,16 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::MakeNegotiatedBandwidth(
         // 1. Set AS Value
         // Exception Handling (b= AS line is not included in Answer SDP)
 
-        pNegotiatedProfile->nBandwidthAs = (pDestProfile->nBandwidthAs > 0)
-                ? pDestProfile->nBandwidthAs
-                : pSrcProfile->nBandwidthAs;
+        pNegotiatedProfile->nBandwidthAs = (pPeerProfile->nBandwidthAs > 0)
+                ? pPeerProfile->nBandwidthAs
+                : pLocalProfile->nBandwidthAs;
 
         // 2. Set RS/RR Value
         // 2.1 Exception Handling (b=RS/RR line is not included in Answer SDP)
         if (pNegotiatedProfile->nBandwidthRs < 0 || pNegotiatedProfile->nBandwidthRr < 0)
         {
-            pNegotiatedProfile->nBandwidthRs = pSrcProfile->nBandwidthRs;
-            pNegotiatedProfile->nBandwidthRr = pSrcProfile->nBandwidthRr;
+            pNegotiatedProfile->nBandwidthRs = pLocalProfile->nBandwidthRs;
+            pNegotiatedProfile->nBandwidthRr = pLocalProfile->nBandwidthRr;
 
             IMS_TRACE_D("MakeNegotiatedBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
                     pNegotiatedProfile->nBandwidthAs, pNegotiatedProfile->nBandwidthRs,
@@ -922,19 +819,19 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::MakeNegotiatedBandwidth(
         // if RS/RR is used for RTCP Nego value
         if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE)
         {
-            pNegotiatedProfile->nBandwidthRs = pDestProfile->nBandwidthRs;
-            pNegotiatedProfile->nBandwidthRr = pDestProfile->nBandwidthRr;
+            pNegotiatedProfile->nBandwidthRs = pPeerProfile->nBandwidthRs;
+            pNegotiatedProfile->nBandwidthRr = pPeerProfile->nBandwidthRr;
         }
         else
         {
-            pNegotiatedProfile->nBandwidthRs = pSrcProfile->nBandwidthRs;
-            pNegotiatedProfile->nBandwidthRr = pSrcProfile->nBandwidthRr;
+            pNegotiatedProfile->nBandwidthRs = pLocalProfile->nBandwidthRs;
+            pNegotiatedProfile->nBandwidthRr = pLocalProfile->nBandwidthRr;
         }
     }
     else
     {
         // MT's Bandwidth Setting
-        pNegotiatedProfile->nBandwidthAs = pSrcProfile->nBandwidthAs;
+        pNegotiatedProfile->nBandwidthAs = pLocalProfile->nBandwidthAs;
         // 1. Set Negotiated AS Value
         if (nAsValueOfNegoticatedCodec > 0)
         {
@@ -943,26 +840,26 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::MakeNegotiatedBandwidth(
             // if GetBandwidthNegoOption is BW_OPTION_NEGOTIATED_VALUE, use lower AS value
             if (pConfig->GetBandwidthNegoOption() ==
                             MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE &&
-                    nAsValueOfNegoticatedCodec > pDestProfile->nBandwidthAs &&
-                    pDestProfile->nBandwidthAs > 0)
+                    nAsValueOfNegoticatedCodec > pPeerProfile->nBandwidthAs &&
+                    pPeerProfile->nBandwidthAs > 0)
             {
-                pNegotiatedProfile->nBandwidthAs = pDestProfile->nBandwidthAs;
+                pNegotiatedProfile->nBandwidthAs = pPeerProfile->nBandwidthAs;
             }
         }
 
-        if (pDestProfile->nBandwidthAs > pSrcProfile->nBandwidthAs)
+        if (pPeerProfile->nBandwidthAs > pLocalProfile->nBandwidthAs)
         {
-            pNegotiatedProfile->nBandwidthAs = pSrcProfile->nBandwidthAs;
+            pNegotiatedProfile->nBandwidthAs = pLocalProfile->nBandwidthAs;
         }
         else
         {
-            pNegotiatedProfile->nBandwidthAs = pDestProfile->nBandwidthAs;
+            pNegotiatedProfile->nBandwidthAs = pPeerProfile->nBandwidthAs;
         }
 
         // 3. Set RS/RR Value
-        if (pDestProfile->eDirection != MEDIA_DIRECTION_SEND_RECEIVE &&
-                pDestProfile->eDirection != MEDIA_DIRECTION_RECEIVE &&
-                pDestProfile->eDirection != MEDIA_DIRECTION_SEND)
+        if (pPeerProfile->eDirection != MEDIA_DIRECTION_SEND_RECEIVE &&
+                pPeerProfile->eDirection != MEDIA_DIRECTION_RECEIVE &&
+                pPeerProfile->eDirection != MEDIA_DIRECTION_SEND)
         {
             // 3.1 Hold Case
             SetVideoRsRr(pNegotiatedProfile, pConfig);
@@ -973,8 +870,8 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::MakeNegotiatedBandwidth(
             // 3.2.1 Exception Handling (b=RS/RR line is not included in Answer SDP)
             if (pNegotiatedProfile->nBandwidthRs < 0 || pNegotiatedProfile->nBandwidthRr < 0)
             {
-                pNegotiatedProfile->nBandwidthRs = pSrcProfile->nBandwidthRs;
-                pNegotiatedProfile->nBandwidthRr = pSrcProfile->nBandwidthRr;
+                pNegotiatedProfile->nBandwidthRs = pLocalProfile->nBandwidthRs;
+                pNegotiatedProfile->nBandwidthRr = pLocalProfile->nBandwidthRr;
 
                 IMS_TRACE_D("MakeNegotiatedBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
                         pNegotiatedProfile->nBandwidthAs, pNegotiatedProfile->nBandwidthRs,
@@ -987,14 +884,14 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::MakeNegotiatedBandwidth(
             if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE)
             {
                 // only use rtcp when rtcp state is enable
-                pNegotiatedProfile->nBandwidthRs = pDestProfile->nBandwidthRs;
-                pNegotiatedProfile->nBandwidthRr = pDestProfile->nBandwidthRr;
+                pNegotiatedProfile->nBandwidthRs = pPeerProfile->nBandwidthRs;
+                pNegotiatedProfile->nBandwidthRr = pPeerProfile->nBandwidthRr;
             }
             else
             {
                 // default case (RS/RR is not negotiated value)
-                pNegotiatedProfile->nBandwidthRs = pSrcProfile->nBandwidthRs;
-                pNegotiatedProfile->nBandwidthRr = pSrcProfile->nBandwidthRr;
+                pNegotiatedProfile->nBandwidthRs = pLocalProfile->nBandwidthRs;
+                pNegotiatedProfile->nBandwidthRr = pLocalProfile->nBandwidthRr;
             }
         }
     }

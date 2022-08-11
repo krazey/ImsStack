@@ -61,7 +61,7 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN IMSMap<IMS_UINTP, MediaNego*>* pMedi
 
             if (pVideoNego != IMS_NULL)
             {
-                if (pVideoNego->GetNegotiatedRemoteAddr().ToString().Equals(strIpAddr) &&
+                if (pVideoNego->GetNegotiatedRemoteAddress().ToString().Equals(strIpAddr) &&
                         pVideoNego->GetNegotiatedRemotePort() == nPort)
                 {
                     nNegoId = pMediaNegoMap->GetKeyAt(nIndex);
