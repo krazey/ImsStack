@@ -43,8 +43,8 @@ public class MediaTestUtils {
     public static final int JITTER = 100;
 
     // AudioConfig
-    private static final String REMOTE_RTP_ADDRESS = "2401:4900:4b88:94fd:2:2:666c:7803";
-    private static final int REMOTE_RTP_PORT = 26468;
+    public static final String REMOTE_RTP_ADDRESS = "2401:4900:4b88:94fd:2:2:666c:7803";
+    public static final int REMOTE_RTP_PORT = 26468;
     private static final byte DSCP = 46;
     private static final byte RX_PAYLOAD = 99;
     private static final byte TX_PAYLOAD = 97;
