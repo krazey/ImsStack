@@ -142,7 +142,7 @@ private:
     void SetStateFromVideoMode(IN IMS_SINT32 mode);
 
     VideoConfiguration* m_pConfig;
-    VideoConfig m_objVideoConfig;
+    VideoConfig m_objConfig;
     MediaQualityThreshold m_objMediaQualityThreshold;
     IPAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
@@ -150,6 +150,7 @@ private:
     IMS_SINT32 m_nCameraZoom;
     IMS_BOOL m_bPreviewSurfaceSet;
     IMS_BOOL m_bDisplaySurfaceSet;
+    IMS_SINT32 m_nPrevDirection;
 };
 
 #endif /* End of _IMS_VIDEO_MEDIA_SESSION_H_*/
