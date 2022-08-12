@@ -15,7 +15,6 @@
  */
 #include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
-#include "SipTrace.h"
 #include "sip_error.h"
 #include "sip_debug.h"
 #include "platform/sip_pf_string.h"
@@ -311,7 +310,7 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
     {
         if (SipPf_Stricmp(m_pszViaBranchParam, pGeneratedKey->m_pszViaBranchParam) != SIP_EQUALS)
         {
-            SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "txn-comparison: not-match >> Via branch", SIP_ZERO,
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "txn-comparison: not-match >> Via branch", SIP_ZERO,
                     SIP_ZERO);
             return SIP_NOT_MATCH;
         }
@@ -319,7 +318,7 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
 
     if (m_nCseqNum != pGeneratedKey->m_nCseqNum)
     {
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "txn-comparison: not-match >> CSeq (s:%d, g:%d)",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "txn-comparison: not-match >> CSeq (s:%d, g:%d)",
                 m_nCseqNum, pGeneratedKey->m_nCseqNum);
         return SIP_NOT_MATCH;
     }
@@ -330,7 +329,7 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
     {
         if (SipPf_Strcmp(m_pszMethod, pGeneratedKey->m_pszMethod) != SIP_EQUALS)
         {
-            SIP_TRACE_NORMAL(
+            SIP_DEBUG_WARNING(
                     ESIPTRACE_MODTXN, "txn-comparison: not-match >> method", SIP_ZERO, SIP_ZERO);
             return SIP_NOT_MATCH;
         }
@@ -356,14 +355,14 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
 
     if (SipPf_Strcmp(m_pszCallId, pGeneratedKey->m_pszCallId) != SIP_EQUALS)
     {
-        SIP_TRACE_NORMAL(
+        SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "txn-comparison: not-match >> call-id", SIP_ZERO, SIP_ZERO);
         return SIP_NOT_MATCH;
     }
 
     if (SipPf_Stricmp(m_pszFromTag, pGeneratedKey->m_pszFromTag) != SIP_EQUALS)
     {
-        SIP_TRACE_NORMAL(
+        SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "txn-comparison: not-match >> from-tag", SIP_ZERO, SIP_ZERO);
         return SIP_NOT_MATCH;
     }
@@ -375,7 +374,7 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
         {
             if (SipPf_Stricmp(m_pszToTag, pGeneratedKey->m_pszToTag) != SIP_EQUALS)
             {
-                SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "txn-comparison: not-match >> to-tag", SIP_ZERO,
+                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "txn-comparison: not-match >> to-tag", SIP_ZERO,
                         SIP_ZERO);
                 return SIP_NOT_MATCH;
             }
@@ -391,8 +390,9 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
         {
             if (m_nRSeqNum != pGeneratedKey->m_nRSeqNum)
             {
-                SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "txn-comparison: not-match >> RSeq (s:%d, g:%d)",
-                        m_nRSeqNum, pGeneratedKey->m_nRSeqNum);
+                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
+                        "txn-comparison: not-match >> RSeq (s:%d, g:%d)", m_nRSeqNum,
+                        pGeneratedKey->m_nRSeqNum);
                 return SIP_NOT_MATCH;
             }
         }
@@ -426,14 +426,14 @@ SIP_INT32 SipTxnKey::CompareKeysForRPR(SipTxnKey* pGeneratedKey)
 
     if (SipPf_Strcmp(m_pszCallId, pGeneratedKey->m_pszCallId) != SIP_EQUALS)
     {
-        SIP_TRACE_NORMAL(
+        SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "rpr-txn-comparison: not-match >> call-id", SIP_ZERO, SIP_ZERO);
         return SIP_NOT_MATCH;
     }
 
     if (SipPf_Stricmp(m_pszFromTag, pGeneratedKey->m_pszFromTag) != SIP_EQUALS)
     {
-        SIP_TRACE_NORMAL(
+        SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "rpr-txn-comparison: not-match >> from-tag", SIP_ZERO, SIP_ZERO);
         return SIP_NOT_MATCH;
     }
@@ -444,7 +444,7 @@ SIP_INT32 SipTxnKey::CompareKeysForRPR(SipTxnKey* pGeneratedKey)
         {
             if (SipPf_Stricmp(m_pszToTag, pGeneratedKey->m_pszToTag) != SIP_EQUALS)
             {
-                SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "rpr-txn-comparison: not-match >> to-tag",
+                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "rpr-txn-comparison: not-match >> to-tag",
                         SIP_ZERO, SIP_ZERO);
                 return SIP_NOT_MATCH;
             }
@@ -457,7 +457,7 @@ SIP_INT32 SipTxnKey::CompareKeysForRPR(SipTxnKey* pGeneratedKey)
         {
             if (m_nRSeqNum != pGeneratedKey->m_nRSeqNum)
             {
-                SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
+                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                         "rpr-txn-comparison: not-match >> RSeq (s:%d, g:%d)", m_nRSeqNum,
                         pGeneratedKey->m_nRSeqNum);
                 return SIP_NOT_MATCH;

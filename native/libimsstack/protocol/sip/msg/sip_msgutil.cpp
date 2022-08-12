@@ -159,15 +159,6 @@ const SIP_INT16 gaszSipHdrCompactEnum[20] = {SipHeaderBase::ACCEPT_CONTACT,
         SipHeaderBase::ALLOW_EVENTS, SipHeaderBase::VIA, SipHeaderBase::SESSION_EXPIRES,
         SipHeaderBase::IDENTITY};
 
-/*****************************************************************************
- * Function name      : SetCharVar
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_BOOL SetCharVar(const SIP_CHAR* pszSource, SIP_CHAR*& pszDestination)
 {
     if (pszSource == SIP_NULL)
@@ -189,15 +180,6 @@ SIP_BOOL SetCharVar(const SIP_CHAR* pszSource, SIP_CHAR*& pszDestination)
     return SIP_TRUE;
 }
 
-/*****************************************************************************
- * Function name      : HasSpace
- *
- * Description        : Returns SUCCESS if the character string has Space
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_BOOL HasSpace(const SIP_CHAR* pszValue)
 {
     while (*pszValue)
@@ -211,30 +193,12 @@ SIP_BOOL HasSpace(const SIP_CHAR* pszValue)
     return SIP_FALSE;
 }
 
-/*****************************************************************************
- * Function name      : sipGetMsgType
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_INT32 sipGetMsgType(SIP_CHAR* pszStartPoint)
 {
     return (SipPf_Strncmp(SIP_SIPVER, pszStartPoint, SIP_FOUR) == 0) ? SipMessage::RESP_TYPE
                                                                      : SipMessage::REQ_TYPE;
 }
 
-/*****************************************************************************
- * Function name      : sipFindTerminatingCRLF
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_BOOL sipFindTerminatingCRLF(
         SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint, SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd)
 {
@@ -282,16 +246,6 @@ SIP_BOOL sipFindTerminatingCRLF(
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : sipFindActualPos
- *
- * Description     : this Api will find the delimiter and Remove LWS form
- *                    both the Side
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL sipFindActualPos(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempPre,
         SIP_CHAR** ppTempNext, SIP_CHAR cDelimiter)
 {
@@ -336,10 +290,6 @@ SIP_BOOL sipFindActualPos(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTem
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name  : SipEnc_UpdateCurrPos
- * Description     :  This api will update the current position of the sip msg
- *****************************************************************************/
 SIP_VOID SipEnc_UpdateCurrPos(IN_OUT SIP_CHAR** ppMsgBuffer)
 {
     while (**ppMsgBuffer != '\0')
@@ -348,15 +298,6 @@ SIP_VOID SipEnc_UpdateCurrPos(IN_OUT SIP_CHAR** ppMsgBuffer)
     }
 }
 
-/******************************************************************************
- * Function name      : sipFindCRLF
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL sipFindCrlf(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
 {
     SIP_CHAR* pNext1Pt = pStartPt + SIP_ONE;
@@ -373,15 +314,6 @@ SIP_BOOL sipFindCrlf(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : sipFindBodyEnd
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_CHAR* sipFindBodyEnd(
         SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd)
 {
@@ -420,15 +352,6 @@ SIP_CHAR* sipFindBodyEnd(
     return SIP_NULL;
 }
 
-/*****************************************************************************
- * Function name      : sipGetMIMEHdrType
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_INT32 sipGetMimeHdrType(SIP_CHAR* pszHdrName)
 {
     if (pszHdrName == SIP_NULL)

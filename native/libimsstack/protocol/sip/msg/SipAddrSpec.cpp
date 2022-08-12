@@ -18,7 +18,6 @@
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
 #include "sip_error.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 #include "msg/SipHeaderBase.h"
 #include "msg/SipMessage.h"
@@ -27,15 +26,6 @@
 #define SIP_SIP_ENC  "sip:"
 #define SIP_SIPS_ENC "sips:"
 
-/******************************************************************************
- * Function name      : SipUri::SipUri
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipUri::SipUri() :
         m_pszUser(SIP_NULL),
         m_pszPassword(SIP_NULL),
@@ -47,15 +37,6 @@ SipUri::SipUri() :
 {
 }
 
-/******************************************************************************
- * Function name      : SipUri::SipUri
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipUri::SipUri(const SipUri& objSipUri) :
         m_pszUser(SipPf_Strdup(objSipUri.m_pszUser)),
         m_pszPassword(SipPf_Strdup(objSipUri.m_pszPassword)),
@@ -76,15 +57,6 @@ SipUri::SipUri(const SipUri& objSipUri) :
     }
 }
 
-/******************************************************************************
- * Function name      : SipUri::~SipUri
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipUri::~SipUri()
 {
     if (m_pszUser != SIP_NULL)
@@ -166,43 +138,16 @@ SIP_BOOL SipUri::IsValidComponent(const SIP_CHAR* pszComponent) const
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipUri::SetUser
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipUri::SetUser(const SIP_CHAR* pszUser)
 {
     return SetCharVar(pszUser, m_pszUser);
 }
 
-/******************************************************************************
- * Function name      : SipUri::SetPassword
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipUri::SetPassword(const SIP_CHAR* pszPass)
 {
     return SetCharVar(pszPass, m_pszPassword);
 }
 
-/******************************************************************************
- * Function name      : SipUri::GetUriType
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipParameterList* SipUri::GetUriParamList()
 {
     if (m_pUriParamList != SIP_NULL)
@@ -212,15 +157,6 @@ SipParameterList* SipUri::GetUriParamList()
     return m_pUriParamList;
 }
 
-/******************************************************************************
- * Function name      : SipUri::GetHdrParamList
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipParameterList* SipUri::GetHdrParamList()
 {
     if (m_pUriHdrParamList != SIP_NULL)
@@ -230,15 +166,6 @@ SipParameterList* SipUri::GetHdrParamList()
     return m_pUriHdrParamList;
 }
 
-/******************************************************************************
- * Function name      : SipUri::RemoveHdrParam
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipUri::RemoveHdrParam(const SIP_CHAR* pszName)
 {
     if (m_pUriHdrParamList != SIP_NULL)
@@ -320,8 +247,6 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 
         SIP_UINT32 nSize = objHeaders.GetSize();
 
-        SIP_TRACE_NORMAL(ESIPTRACE_MODENCODER, "Encode: URI headers=%d", nSize, SIP_ZERO);
-
         for (SIP_UINT32 i = SIP_ZERO; i < nSize; i++)
         {
             SipNameValue* pNameValue = objHeaders.GetAt(i);
@@ -345,9 +270,6 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return SIP_TRUE;
 }
 
-/********************************************************************************
-  Encode a sip uri
- ********************************************************************************/
 #define MAX_PORT_LEN 20
 SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
 {
@@ -448,8 +370,6 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
 
         SIP_UINT32 nSize = sipList.GetSize();
 
-        SIP_TRACE_NORMAL(ESIPTRACE_MODENCODER, "List Size %d", nSize, SIP_ZERO);
-
         for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
         {
             SipNameValue* pParamNamValue = sipList.GetAt(nCount);
@@ -471,15 +391,6 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-/*****************************************************************************
- * Function name      : SipUri::DecUserInfo
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_BOOL SipUri::DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     /* check for userinfo = ( user / telephone-subscriber ) [ ":" password ] "@" */
@@ -514,15 +425,6 @@ SIP_BOOL SipUri::DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-/*****************************************************************************
- * Function name      : SipUri::DecHostPort
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     /*hostport = host [ ":" port ]
@@ -611,15 +513,6 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipUri::DecodeSipUri
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
@@ -705,16 +598,6 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     return SIP_TRUE;
 }
 
-/*SipAddrSpec class implementation*/
-/******************************************************************************
- * Function name      : SipAddrSpec::SipAddrSpec
- *
- * Description       :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipAddrSpec::SipAddrSpec() :
         m_eUriType(SipUri::SCHEME_SIP),
         m_pSipUri(SIP_NULL),
@@ -722,15 +605,6 @@ SipAddrSpec::SipAddrSpec() :
 {
 }
 
-/******************************************************************************
- * Function name      : SipAddrSpec::SipAddrSpec
- *
- * Description       :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipAddrSpec::SipAddrSpec(const SipAddrSpec& objAddressSpec) :
         m_eUriType(objAddressSpec.m_eUriType),
         m_pSipUri(SIP_NULL),
@@ -742,15 +616,6 @@ SipAddrSpec::SipAddrSpec(const SipAddrSpec& objAddressSpec) :
     }
 }
 
-/******************************************************************************
- * Function name      : SipAddrSpec::~SipAddrSpec
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipAddrSpec::~SipAddrSpec()
 {
     if (m_pSipUri != SIP_NULL)
@@ -763,15 +628,6 @@ SipAddrSpec::~SipAddrSpec()
     }
 }
 
-/******************************************************************************
- * Function name      : SipAddrSpec::SetAbsUri
- *
- * Description       :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipAddrSpec::SetAbsUri(const SIP_CHAR* pszSipUri)
 {
     return SetCharVar(pszSipUri, m_pszAbsUri);
@@ -818,15 +674,6 @@ SIP_BOOL SipAddrSpec::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipAddrSpec::EncodeAddrSpec
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipAddrSpec::EncodeAddrSpec(SIP_CHAR** ppCurrPos) const
 {
     if (m_pSipUri != SIP_NULL)
@@ -863,15 +710,6 @@ SIP_BOOL SipAddrSpec::EncodeAddrSpec(SIP_CHAR** ppCurrPos) const
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipAddrSpec::DecodeAddrSpec
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipAddrSpec::DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*Validate the input prm*/
@@ -935,7 +773,6 @@ SIP_BOOL SipAddrSpec::DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     return SIP_TRUE;
 }
 
-/*SipNameAddr Class implementation*/
 SipNameAddr::SipNameAddr() :
         m_pszDispName(SIP_NULL),
         m_pAddrSpec(SIP_NULL)
@@ -982,15 +819,6 @@ SIP_BOOL SipNameAddr::SetAddrSpec(SipAddrSpec* pSipAddrSpec)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipNameAddr::SetDisplayName
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipNameAddr::SetDisplayName(const SIP_CHAR* pszDisplayName)
 {
     return SetCharVar(pszDisplayName, m_pszDispName);
@@ -1029,15 +857,6 @@ SIP_BOOL SipNameAddr::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipNameAddr::GetName
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipNameAddr::EncodeNameAddr(SIP_CHAR** ppCurrPos)
 {
     if (m_pAddrSpec == SIP_NULL)
@@ -1072,15 +891,6 @@ SIP_BOOL SipNameAddr::EncodeNameAddr(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipNameAddr::DecodeNameAddr
- *
- * Description   :Function for decoding
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipNameAddr::DecodeNameAddr(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     if (pStartPt == pEndPt)

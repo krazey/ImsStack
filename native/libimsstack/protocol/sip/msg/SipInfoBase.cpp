@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "msg/SipInfoBase.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 #include "msg/sip_msgutil.h"
 #include "platform/sip_pf_string.h"
@@ -23,29 +22,12 @@ SipInfoBase::SipInfoBase(SIP_INT32 eHdrType) :
         SipHeaderBase(eHdrType)
 {
 }
-/******************************************************************************
- * Function name      : SipInfoBase::SipInfoBase
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
+
 SipInfoBase::SipInfoBase(const SipInfoBase& objHeader) :
         SipHeaderBase(objHeader)
 {
 }
 
-/******************************************************************************
- * Function name      : SipInfoBase::~SipInfoBase
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipInfoBase::~SipInfoBase() {}
 
 SIP_BOOL SipInfoBase::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
@@ -65,15 +47,6 @@ SIP_BOOL SipInfoBase::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipInfoBase::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipInfoBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     const SIP_CHAR* pszValue = GetValue();
@@ -98,15 +71,6 @@ SIP_BOOL SipInfoBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-/******************************************************************************
- * Function name      : SipInfoBase::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipInfoBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

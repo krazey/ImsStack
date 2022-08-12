@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "SipTrace.h"
+
 #include "sip_error.h"
 #include "sip_debug.h"
 #include "platform/sip_pf_string.h"
@@ -100,6 +100,8 @@ SIP_BOOL SipTxnUtil::IsTxnKeyMatched(SipTxnKey* pUserTxnkey, SipTxnKey* pStoredT
 
     if (pStoredTxnKey->CompareKeysForRPR(pUserTxnkey) != SIP_MATCHES)
     {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipTxnUtil::CompareKeysForRPR Not matched",
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

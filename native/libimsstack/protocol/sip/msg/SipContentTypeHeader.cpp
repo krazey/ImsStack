@@ -16,20 +16,10 @@
 #include "msg/SipContentTypeHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/******************************************************************************
- * Function name      : SipContentTypeHeader::SipContentTypeHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipContentTypeHeader::SipContentTypeHeader() :
         SipHeaderBase(SipHeaderBase::CONTENT_TYPE),
         m_pszMType(SIP_NULL),
@@ -37,15 +27,6 @@ SipContentTypeHeader::SipContentTypeHeader() :
 {
 }
 
-/******************************************************************************
- * Function name      : SipContentTypeHeader::SipContentTypeHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipContentTypeHeader::SipContentTypeHeader(const SipContentTypeHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_pszMType(SipPf_Strdup(objHeader.m_pszMType)),
@@ -53,15 +34,6 @@ SipContentTypeHeader::SipContentTypeHeader(const SipContentTypeHeader& objHeader
 {
 }
 
-/******************************************************************************
- * Function name      : SipContentTypeHeader::~SipContentTypeHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipContentTypeHeader::~SipContentTypeHeader()
 {
     if (m_pszMType != SIP_NULL)
@@ -78,8 +50,8 @@ SIP_BOOL SipContentTypeHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams
 {
     if ((m_pszMType == SIP_NULL) || (m_pszMSubType == SIP_NULL))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Missing media type or sub-type", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Missing media type or sub-type", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -90,15 +62,6 @@ SIP_BOOL SipContentTypeHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipContentTypeHeader::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipContentTypeHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
@@ -119,42 +82,16 @@ SIP_BOOL SipContentTypeHeader::EncodeHdr(
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-/******************************************************************************
- * Function name      : SipContentTypeHeader::SetMediaType
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipContentTypeHeader::SetMediaType(const SIP_CHAR* pszMtype)
 {
     return SetCharVar(pszMtype, m_pszMType);
 }
-/******************************************************************************
- * Function name      : SipContentTypeHeader::SetMediaType
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
+
 SIP_BOOL SipContentTypeHeader::SetSubMediaType(const SIP_CHAR* pszMSubtype)
 {
     return SetCharVar(pszMSubtype, m_pszMSubType);
 }
 
-/******************************************************************************
- * Function name      : SipContentTypeHeader::GetBoundary
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_CHAR* SipContentTypeHeader::GetBoundary()
 {
     SipParameters* pParameters = GetParameters();
@@ -177,16 +114,6 @@ SIP_CHAR* SipContentTypeHeader::GetBoundary()
     delete[] pszVal;
     return pszStripDquoteVal;
 }
-
-/******************************************************************************
- * Function name      :SipContentTypeHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 
 SIP_BOOL SipContentTypeHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
@@ -244,16 +171,6 @@ SIP_BOOL SipContentTypeHeader::IsValidHeader() const
     }
     return SIP_TRUE;
 }
-
-/******************************************************************************
- * Function name      : SipContentTypeHeader::GetNewObj
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 
 SipHeaderBase* SipContentTypeHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {

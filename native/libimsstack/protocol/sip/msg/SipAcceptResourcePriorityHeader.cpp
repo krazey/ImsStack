@@ -16,26 +16,9 @@
 #include "msg/SipAcceptResourcePriorityHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "msg/sip_msgutil.h"
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
-
-/******************************************************************************
- * Function name  : SipAcceptResourcePriorityHeader::SipAcceptResourcePriorityHeader
- *
- * Description   : Default Constructor for SipAcceptResourcePriorityHeader Class
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SipAcceptResourcePriorityHeader::SipAcceptResourcePriorityHeader() :
         SipHeaderBase(SipHeaderBase::ACCEPT_RESOURCE_PRIORITY),
         m_pszNameSpace(SIP_NULL),
@@ -43,15 +26,6 @@ SipAcceptResourcePriorityHeader::SipAcceptResourcePriorityHeader() :
 {
 }
 
-/******************************************************************************
- * Function name  : SipAcceptResourcePriorityHeader::SipAcceptResourcePriorityHeader
- *
- * Description   : Copy Constructor for SipAcceptResourcePriorityHeader Class
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SipAcceptResourcePriorityHeader::SipAcceptResourcePriorityHeader(
         const SipAcceptResourcePriorityHeader& objHeader) :
         SipHeaderBase(objHeader),
@@ -59,15 +33,7 @@ SipAcceptResourcePriorityHeader::SipAcceptResourcePriorityHeader(
         m_pszRPriority(SipPf_Strdup(objHeader.m_pszRPriority))
 {
 }
-/******************************************************************************
- * Function name  : SipAcceptResourcePriorityHeader::~SipAcceptResourcePriorityHeader
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
+
 SipAcceptResourcePriorityHeader::~SipAcceptResourcePriorityHeader()
 {
     if (m_pszNameSpace != SIP_NULL)
@@ -105,15 +71,6 @@ SIP_BOOL SipAcceptResourcePriorityHeader::Encode(
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name  : SipAcceptResourcePriorityHeader::EncodeHdr
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SIP_BOOL SipAcceptResourcePriorityHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
@@ -142,43 +99,16 @@ SIP_BOOL SipAcceptResourcePriorityHeader::EncodeHdr(
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name  : SipAcceptResourcePriorityHeader::SetNameSpace
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SIP_BOOL SipAcceptResourcePriorityHeader::SetNameSpace(const SIP_CHAR* pszNameSpace)
 {
     return SetCharVar(pszNameSpace, m_pszNameSpace);
 }
 
-/******************************************************************************
- * Function name  : SipAcceptResourcePriorityHeader::SetSeq
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SIP_BOOL SipAcceptResourcePriorityHeader::SetRPriority(const SIP_CHAR* pszRPriority)
 {
     return SetCharVar(pszRPriority, m_pszRPriority);
 }
 
-/******************************************************************************
- * Function name      : SipAcceptResourcePriorityHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipAcceptResourcePriorityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

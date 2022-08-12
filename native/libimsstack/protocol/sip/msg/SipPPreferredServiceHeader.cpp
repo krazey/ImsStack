@@ -16,7 +16,6 @@
 #include "msg/SipPPreferredServiceHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"

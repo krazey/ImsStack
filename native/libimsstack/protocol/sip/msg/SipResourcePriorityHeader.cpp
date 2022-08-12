@@ -16,19 +16,9 @@
 #include "msg/SipResourcePriorityHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "msg/sip_msgutil.h"
 
-/******************************************************************************
- * Function name      : SipResourcePriorityHeader::SipResourcePriorityHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipResourcePriorityHeader::SipResourcePriorityHeader() :
         SipHeaderBase(SipHeaderBase::RESOURCE_PRIORITY),
         m_pszNameSpace(SIP_NULL),
@@ -36,30 +26,13 @@ SipResourcePriorityHeader::SipResourcePriorityHeader() :
 {
 }
 
-/******************************************************************************
- * Function name      : SipResourcePriorityHeader::SipResourcePriorityHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipResourcePriorityHeader::SipResourcePriorityHeader(const SipResourcePriorityHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_pszNameSpace(SipPf_Strdup(objHeader.m_pszNameSpace)),
         m_pszRPriority(SipPf_Strdup(objHeader.m_pszRPriority))
 {
 }
-/******************************************************************************
- * Function name      : SipResourcePriorityHeader::~SipResourcePriorityHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
+
 SipResourcePriorityHeader::~SipResourcePriorityHeader()
 {
     if (m_pszNameSpace != SIP_NULL)
@@ -87,15 +60,6 @@ SIP_BOOL SipResourcePriorityHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipResourcePriorityHeader::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipResourcePriorityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (IsValidHeader() == SIP_FALSE)
@@ -114,43 +78,16 @@ SIP_BOOL SipResourcePriorityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*b
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipResourcePriorityHeader::SetNameSpace
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipResourcePriorityHeader::SetNameSpace(const SIP_CHAR* pszNameSpace)
 {
     return SetCharVar(pszNameSpace, m_pszNameSpace);
 }
 
-/******************************************************************************
- * Function name      : SipResourcePriorityHeader::SetSeq
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipResourcePriorityHeader::SetRPriority(const SIP_CHAR* pszRPriority)
 {
     return SetCharVar(pszRPriority, m_pszRPriority);
 }
 
-/******************************************************************************
- * Function name      : SipResourcePriorityHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipResourcePriorityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

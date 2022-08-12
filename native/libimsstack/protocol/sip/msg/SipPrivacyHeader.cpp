@@ -13,36 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipPrivacyHeader.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
+#include "msg/SipPrivacyHeader.h"
 #include "msg/sip_msgutil.h"
 #include "platform/sip_pf_string.h"
 
-/******************************************************************************
- * Function name      : SipPrivacyHeader::SipPrivacyHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipPrivacyHeader::SipPrivacyHeader() :
         SipHeaderBase(SipHeaderBase::PRIVACY),
         m_objPrivacyList(SipVector<SIP_CHAR*>())
 {
 }
 
-/******************************************************************************
- * Function name      : SipPrivacyHeader::SipPrivacyHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipPrivacyHeader::SipPrivacyHeader(const SipPrivacyHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_objPrivacyList(SipVector<SIP_CHAR*>())
@@ -59,15 +40,6 @@ SipPrivacyHeader::SipPrivacyHeader(const SipPrivacyHeader& objHeader) :
     }
 }
 
-/******************************************************************************
- * Function name      : SipPrivacyHeader::~SipPrivacyHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipPrivacyHeader::~SipPrivacyHeader()
 {
     while (m_objPrivacyList.IsEmpty() != SIP_TRUE)
@@ -102,15 +74,6 @@ SIP_BOOL SipPrivacyHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipPrivacyHeader::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipPrivacyHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     SIP_UINT32 nCount = m_objPrivacyList.GetSize();
@@ -134,33 +97,6 @@ SIP_BOOL SipPrivacyHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipPrivacyHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
-/*SIP_BOOL SipPrivacyHeader::DecodeHdr
-  (
-  SIP_CHAR   * pStartPt,
-  SIP_UINT32  nDecLen
-  )
-  {
-  return SIP_TRUE;
-  }*/
-
-/******************************************************************************
- * Function name      : SipPrivacyHeader::SetPrivacy
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipPrivacyHeader::AddPrivacy(const SIP_CHAR* pszPrivacy)
 {
     SIP_CHAR* pszTempPrivacy = SIP_NULL;
@@ -171,15 +107,6 @@ SIP_BOOL SipPrivacyHeader::AddPrivacy(const SIP_CHAR* pszPrivacy)
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipMinSEHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipPrivacyHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*"Privacy" HCOLON priv-value *(";" priv-value)*/

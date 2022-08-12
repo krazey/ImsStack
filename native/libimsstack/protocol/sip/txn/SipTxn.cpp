@@ -18,7 +18,6 @@
 
 #include "SipConfiguration.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "SipUtil.h"
 #include "platform/sip_pf_string.h"
 #include "txn/SipTimeoutData.h"
@@ -91,8 +90,6 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSip
         m_nCurrentDuration(SIP_ZERO)
 {
     m_eTxnType = eTxnType;
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "+SipTxn Newly Add m_eTxnType[%d] eTxnType[%d]", m_eTxnType,
-            eTxnType);
     m_pTxnKey = new SipTxnKey(pTxnKey, pnError);
 
     if ((pSipTxnTimerContext != SIP_NULL) && (pSipTxnTimerContext->pTxnSipTxnTimers != SIP_NULL))
@@ -123,8 +120,6 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSip
 
 SipTxn::~SipTxn()
 {
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SipTxn Destructor[%x]", this, 0);
-
     if (m_pTranspInfo != SIP_NULL)
     {
         delete m_pTranspInfo;
@@ -159,9 +154,6 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
     {
         case SipTxn::INV_CLI_TXN:
         {
-            SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SipTxn::InvokeFsm:InvCliTxn [%s][%s]",
-                    szInvClientTxnFsmSt[m_nTxnState], szInvClientTxnFsmEvt[nEvent]);
-
             if (gpfSipInvClientTxnFsm[nTxnState][nEvent](this, pvData, pnError) == SIP_FALSE)
             {
                 SIP_DEBUG_WARNING(
@@ -173,9 +165,6 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
 
         case SipTxn::INV_SER_TXN:
         {
-            SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SipTxn::InvokeFsm:InvSerTxn [%s][%s]",
-                    szInvSerTxnFsmSt[m_nTxnState], szInvSerTxnFsmEvt[nEvent]);
-
             if (gpfSipInvSerTxnFsm[nTxnState][nEvent](this, pvData, pnError) == SIP_FALSE)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "gpfSipInvSerTxnFsm Fails", SIP_ZERO, SIP_ZERO);
@@ -186,9 +175,6 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
 
         case SipTxn::NON_INV_CLI_TXN:
         {
-            SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SipTxn::InvokeFsm:NonInvCliTxn [%s][%s]",
-                    szNonInvClientTxnFsmSt[m_nTxnState], szNonInvClientTxnFsmEvt[nEvent]);
-
             if (gpfSipNonInvClientTxnFsm[nTxnState][nEvent](this, pvData, pnError) == SIP_FALSE)
             {
                 SIP_DEBUG_WARNING(
@@ -200,9 +186,6 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
 
         case SipTxn::NON_INV_SER_TXN:
         {
-            SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SipTxn::InvokeFsm:NonInvSerTxn [%s][%s]",
-                    szSipNonInvSerTxnFsmSt[m_nTxnState], szSipNonInvSerTxnFsmEvt[nEvent]);
-
             if (gpfSipNonInvSerTxnFsm[nTxnState][nEvent](this, pvData, pnError) == SIP_FALSE)
             {
                 SIP_DEBUG_WARNING(
@@ -228,8 +211,6 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
 */
 SIP_BOOL SipTxn::AbortTxn()
 {
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SipTxn::AbortTxn Invoked", 0, 0);
-
     SipUtil* pUtil = SipUtil_GetInstance();
     if (pUtil == SIP_NULL)
     {
@@ -269,7 +250,7 @@ SIP_BOOL SipTxn::StartTxnTimer(SIP_UINT32 eTimerType, SIP_UINT32 nDuration, SIP_
 
         if (pUtil == SIP_NULL)
         {
-            SIP_TRACE_NORMAL(
+            SIP_DEBUG_WARNING(
                     ESIPTRACE_MODTXN, "SipTxn::StartTxnTimer:pUtil is NULL ", SIP_ZERO, SIP_ZERO);
             delete pTimeoutData;
             return SIP_FALSE;
@@ -279,7 +260,7 @@ SIP_BOOL SipTxn::StartTxnTimer(SIP_UINT32 eTimerType, SIP_UINT32 nDuration, SIP_
 
         if (pTimer == SIP_NULL)
         {
-            SIP_TRACE_NORMAL(
+            SIP_DEBUG_WARNING(
                     ESIPTRACE_MODTXN, "SipTxn::StartTxnTimer:pTimer is NULL ", SIP_ZERO, SIP_ZERO);
             delete pTimeoutData;
             return SIP_FALSE;
@@ -295,9 +276,6 @@ SIP_BOOL SipTxn::StartTxnTimer(SIP_UINT32 eTimerType, SIP_UINT32 nDuration, SIP_
             return SIP_FALSE;
         }
 
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SipTxn::StartTxnTimer[%s,%d]",
-                szSipTxnTimer[eTimerType], nDuration);
-
         m_eTimerType = (SIP_INT32)eTimerType;
         m_nCurrentDuration = nDuration;
     }
@@ -305,9 +283,6 @@ SIP_BOOL SipTxn::StartTxnTimer(SIP_UINT32 eTimerType, SIP_UINT32 nDuration, SIP_
     {
         m_eTimerType = (SIP_INT32)eTimerType;
         m_nCurrentDuration = nDuration;
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                "SipTxn::StartTxnTimer, nDuration is zero, invoke FSM directly.", SIP_ZERO,
-                SIP_ZERO);
         /*make the timer id null & pass null as timer id in callback
           function to avoid Timer ID Mismatch in callback function*/
         SetTimerId(SIP_NULL);
@@ -326,7 +301,7 @@ SIP_BOOL SipTxn::StopTxnTimer()
     SipUtil* pUtil = SipUtil_GetInstance();
     if (pUtil == SIP_NULL)
     {
-        SIP_TRACE_NORMAL(
+        SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "SipTxn::StopTxnTimer:pUtil is NULL ", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
@@ -334,7 +309,7 @@ SIP_BOOL SipTxn::StopTxnTimer()
     ISipTimerUtil* pTimer = pUtil->GetTimer();
     if (pTimer == SIP_NULL)
     {
-        SIP_TRACE_NORMAL(
+        SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "SipTxn::StopTxnTimer:pTimer is NULL ", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
@@ -578,7 +553,6 @@ SipTransportInfo* SipTxn::GetTranspInfo()
 
 ISipUserData* SipTxn::GetUserData()
 {
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SipTxn::GetUserData Called", SIP_ZERO, SIP_ZERO);
     return m_pUserData;
 }
 
@@ -612,8 +586,6 @@ SIP_BOOL SipTxn::SetUserData(ISipUserData* pUserData)
     {
         return SIP_FALSE;
     }
-
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SipTxn::SetUserData Called", SIP_ZERO, SIP_ZERO);
 
     if (m_pUserData != SIP_NULL)
     {
@@ -691,9 +663,6 @@ SIP_VOID SipTxn::SetRespCode(SIP_UINT16 nRespCode)
 
 SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, SIP_VOID* pvTimerId)
 {
-    SIP_TRACE_NORMAL(
-            ESIPTRACE_MODTXN, "\n***CbkTxnTimeout --> Processing Started***", SIP_ZERO, SIP_ZERO);
-
     SipTimeoutData* pTimeoutData = (SipTimeoutData*)pvobjTimeoutData;
     if (pTimeoutData == SIP_NULL)
     {
@@ -731,7 +700,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, SIP_VOID* pvTimerId)
 
     if (pvTimerId != pTxn->GetTimerId())
     {
-        SIP_TRACE_NORMAL(
+        SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "CbkTxnTimeout --> Timer ID Mismatch", SIP_ZERO, SIP_ZERO);
 
         delete pTimeoutData;
@@ -768,7 +737,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, SIP_VOID* pvTimerId)
         delete pTimeoutData;
         pTxn->SipDelete();
 
-        SIP_TRACE_NORMAL(
+        SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "***CbkTxnTimeout --> TxnTerminated***\n", SIP_ZERO, SIP_ZERO);
         return;
     }
@@ -900,7 +869,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, SIP_VOID* pvTimerId)
         delete pTimeoutData;
         pTxn->SipDelete();
 
-        SIP_TRACE_NORMAL(
+        SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "***CbkTxnTimeout --> TxnTerminated***\n", SIP_ZERO, SIP_ZERO);
         return;
     }
@@ -932,8 +901,6 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, SIP_VOID* pvTimerId)
     {
         pTxn->SipDelete();
     }
-
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "CbkTxnTimeout Processing Done", SIP_ZERO, SIP_ZERO);
 }
 
 SIP_VOID SipTxn_RemoveFromTxnPool(SipTxnKey* pTxnKey)

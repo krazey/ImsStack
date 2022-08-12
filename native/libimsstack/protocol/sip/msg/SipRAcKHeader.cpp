@@ -18,20 +18,9 @@
 #include "platform/sip_pf_memory.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "msg/SipRAcKHeader.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
-
-/******************************************************************************
- * Function name      : SipRAcKHeader::SipRAcKHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 
 SipRAcKHeader::SipRAcKHeader() :
         SipHeaderBase(SipHeaderBase::RACK),
@@ -40,15 +29,6 @@ SipRAcKHeader::SipRAcKHeader() :
         m_pszMethod(SIP_NULL)
 {
 }
-/******************************************************************************
- * Function name      : SipRAcKHeader(SipRAcKHeader*)
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 
 SipRAcKHeader::SipRAcKHeader(const SipRAcKHeader& objHeader) :
         SipHeaderBase(objHeader),
@@ -57,16 +37,6 @@ SipRAcKHeader::SipRAcKHeader(const SipRAcKHeader& objHeader) :
         m_pszMethod(SipPf_Strdup(objHeader.m_pszMethod))
 {
 }
-
-/******************************************************************************
- * Function name      : SipRAcKHeader::~SipRAcKHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 
 SipRAcKHeader::~SipRAcKHeader()
 {
@@ -92,16 +62,6 @@ SIP_BOOL SipRAcKHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) c
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipRAcKHeader::EncodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
-
 SIP_BOOL SipRAcKHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (m_pszMethod == SIP_NULL)
@@ -116,32 +76,11 @@ SIP_BOOL SipRAcKHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
     return SIP_TRUE;
 }
 
-/*set methods*/
-/******************************************************************************
- * Function name      : SipRAcKHeader::SetProtocolName
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipRAcKHeader::SetMethod(const SIP_CHAR* pszMethod)
 {
     return SetCharVar(pszMethod, m_pszMethod);
 }
 
-/*Get methods*/
-
-/******************************************************************************
- * Function name      : SipRAcKHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipRAcKHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

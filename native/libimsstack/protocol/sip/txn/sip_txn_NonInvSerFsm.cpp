@@ -21,7 +21,6 @@
 #include "SipConfiguration.h"
 
 #include "sip_error.h"
-#include "SipTrace.h"
 #include "sip_debug.h"
 
 #include "txn/SipTimeoutData.h"
@@ -53,8 +52,6 @@ static SIP_BOOL NonInvSer_Send2xx6xxResp(
     SIP_UINT32 nDurationTJ = objSipTxnTimers.GetTimerValue(SipTxn::TIMERJ);
 
     SIP_INT32 eTranspMsgSentProtocol = pTransparam->GetTranspProtocol();
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "NonInvSer_Send2xx6xxResp: Transport %d, TimerJ %d",
-            eTranspMsgSentProtocol, nDurationTJ);
 
     /* For Unreliable Transport : Start Timer J*/
     if (eTranspMsgSentProtocol == SipTransportInfo::PROTOCOL_UDP)
@@ -149,9 +146,6 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
             {
                 if (pInvSerTxn != SIP_NULL)
                 {
-                    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                            "NonInvSerFsm_IdleStRecvNonInvReqEvt: FETCH Success Stopping Timer.",
-                            SIP_ZERO, SIP_ZERO);
                     pInvSerTxn->StopTxnTimer();
                 }
                 if (SipTxnUtil::DeleteTxnKey(pINVTxnKey, SIP_TRUE) == SIP_FALSE)

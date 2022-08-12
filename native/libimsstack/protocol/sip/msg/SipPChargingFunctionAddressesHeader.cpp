@@ -16,7 +16,6 @@
 #include "msg/SipPChargingFunctionAddressesHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
@@ -38,7 +37,6 @@ SipPChargingFunctionAddressesHeader::SipPChargingFunctionAddressesHeader(
     }
 }
 
-/*destructor*/
 SipPChargingFunctionAddressesHeader::~SipPChargingFunctionAddressesHeader()
 {
     if (m_pChargeAddr != SIP_NULL)
@@ -47,7 +45,6 @@ SipPChargingFunctionAddressesHeader::~SipPChargingFunctionAddressesHeader()
     }
 }
 
-/*virtual methods*/
 SIP_BOOL SipPChargingFunctionAddressesHeader::Encode(
         AStringBuffer& objBuffer, SIP_BOOL bParams) const
 {
@@ -65,7 +62,6 @@ SIP_BOOL SipPChargingFunctionAddressesHeader::Encode(
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-/*Function for encoding of headers*/
 SIP_BOOL SipPChargingFunctionAddressesHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
@@ -88,15 +84,6 @@ SIP_BOOL SipPChargingFunctionAddressesHeader::EncodeHdr(
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-/******************************************************************************
- * Function name      : SipPChargingFunctionAddressesHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipPChargingFunctionAddressesHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

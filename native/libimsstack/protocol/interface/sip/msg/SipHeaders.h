@@ -94,27 +94,8 @@ private:
     SIP_BOOL EncodeContentHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
 };
 
-/******************************************************************************
- * Function name      : sipEncodeHdrName
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
-
 SIP_BOOL sipEncodeHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos, SIP_UINT32 nMsgOptions);
 
-/******************************************************************************
- * Function name      : sipEncodeHdrName
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_BOOL sipEncodeShortHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos);
 
 #endif  //__SIP_HEADERS_H__

@@ -16,7 +16,6 @@
 #include "msg/sip_msgutil.h"
 #include "sip_pf_datatypes.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
 #include "msg/SipHeaders.h"

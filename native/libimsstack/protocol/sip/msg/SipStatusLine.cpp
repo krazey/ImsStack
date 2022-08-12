@@ -15,7 +15,6 @@
  */
 #include "msg/SipStatusLine.h"
 #include "sip_pf_datatypes.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_memory.h"
 #include "sip_debug.h"
 #include "sip_error.h"
@@ -133,15 +132,6 @@ SIP_UINT16 SipStatusLine::GetStatusCodeAsInt() const
     return (m_pszStatusCode != SIP_NULL) ? SipPf_Atoi(m_pszStatusCode) : SIP_SC_INVALID;
 }
 
-/******************************************************************************
- * Function name      : SipStatusLine::DecodeStatusLine
- *
- * Description     :
- *
- * Preconditions          SIP_CHAR   * pStartPt,
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipStatusLine::DecodeStatusLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;

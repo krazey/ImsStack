@@ -21,7 +21,6 @@
 #include "msg/sip_comdef.h"
 #include "sip_abnfUtil.h"
 #include "msg/SipHeaderBase.h"
-#include "SipTrace.h"
 #include "sip_error.h"
 
 #define SIP_SIP_VERSION "SIP/2.0"
@@ -201,170 +200,38 @@
 
 #define SIP_DIRECTIVE_LEN  11
 
-/******************************************************************************
- * Function name      : SetCharVar
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
-
 SIP_BOOL SetCharVar(const SIP_CHAR* pszValue, SIP_CHAR*& pszVar);
-/******************************************************************************
- * Function name      : HasSpace
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
+
 SIP_BOOL HasSpace(const SIP_CHAR* pszValue);
 
-/*****************************************************************************
- * Function name      : sipGetMsgType
- *
- * Description        :
- *
- * Preconditions      :     Accept
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_INT32 sipGetMsgType(SIP_CHAR* pStartPoint);
 
-/*****************************************************************************
- * Function name      : sipFindTerminatingCRLF
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_BOOL sipFindTerminatingCRLF(
         SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint, SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd);
 
-/******************************************************************************
- * Function name      : sipSkipFwSP
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_CHAR* sipSkipFwSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
-/******************************************************************************
- * Function name      : sipSkipRwSP
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_CHAR* sipSkipRwSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
-/******************************************************************************
- * Function name      : sipSkipFwWSP
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_CHAR* sipSkipFwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
-/******************************************************************************
- * Function name      : sipSkipRwWSP
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_CHAR* sipSkipRwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
-
-/*****************************************************************************
- * Function name      : sipSkipFwLWS
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 
 SIP_CHAR* sipSkipFwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
-/******************************************************************************
- * Function name      : sipFindPostDelimiter
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL sipFindPostDelimiter(
         SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter);
 
-/******************************************************************************
- * Function name      : sipFindPreDelimiter
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL sipFindPreDelimiter(
         SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter);
 
-/******************************************************************************
- * Function name      : sipFindActualPos
- *
- * Description     : this Api will find the delimiter and Remove LWS form
- *                    both the Side
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL sipFindActualPos(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempPre,
         SIP_CHAR** ppTempNext, SIP_CHAR cDelimiter);
 
-/******************************************************************************
- * Function name  : SipEnc_UpdateCurrPos
- * Description     :  This api will update the current position of the sip msg
- *****************************************************************************/
 SIP_VOID SipEnc_UpdateCurrPos(SIP_CHAR** ppMsgBuffer /*in -out param*/);
 
-/*****************************************************************************
- * Function name      : sipGetUriType
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_INT32 sipGetUriType(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
-/*****************************************************************************
- * Function name      : sipGetHdrType
- *
- * Description        :
- *
- * Preconditions      :
- *
- * Side Effects          : none
- *****************************************************************************/
 SIP_INT32 sipGetHdrType(const SIP_CHAR* pszHdrName);
 
 SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType);

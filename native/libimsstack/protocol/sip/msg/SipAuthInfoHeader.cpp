@@ -16,7 +16,6 @@
 #include "msg/SipAuthInfoHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
@@ -140,15 +139,6 @@ const SipNameValue* SipAuthInfoHeader::GetAiInfoVal(SIP_UINT32 nIndex /*default 
     return SIP_NULL;
 }
 
-/******************************************************************************
- * Function name      : SipAuthInfoHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipAuthInfoHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

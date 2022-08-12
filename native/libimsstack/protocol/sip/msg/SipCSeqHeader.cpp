@@ -16,21 +16,11 @@
 #include "msg/SipCSeqHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 #include "msg/sip_msgutil.h"
 
 #define MAX_CSEQ_LEN 12
 
-/******************************************************************************
- * Function name  : SipCSeqHeader::SipCSeqHeader
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SipCSeqHeader::SipCSeqHeader() :
         SipHeaderBase(SipHeaderBase::CSEQ),
         m_pszMethod(SIP_NULL),
@@ -38,30 +28,13 @@ SipCSeqHeader::SipCSeqHeader() :
 {
 }
 
-/******************************************************************************
- * Function name  : SipCSeqHeader::SipCSeqHeader
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SipCSeqHeader::SipCSeqHeader(const SipCSeqHeader& objHeader) :
         SipHeaderBase(objHeader),
         m_pszMethod(SipPf_Strdup(objHeader.m_pszMethod)),
         m_nSeq(objHeader.m_nSeq)
 {
 }
-/******************************************************************************
- * Function name  : SipCSeqHeader::~SipCSeqHeader
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
+
 SipCSeqHeader::~SipCSeqHeader()
 {
     if (m_pszMethod != SIP_NULL)
@@ -85,15 +58,6 @@ SIP_BOOL SipCSeqHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) c
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name  : SipCSeqHeader::EncodeHdr
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SIP_BOOL SipCSeqHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (IsValidHeader() == SIP_FALSE)
@@ -116,29 +80,11 @@ SIP_BOOL SipCSeqHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name  : SipCSeqHeader::SetMethod
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SIP_BOOL SipCSeqHeader::SetMethod(const SIP_CHAR* pszMethod)
 {
     return SetCharVar(pszMethod, m_pszMethod);
 }
 
-/******************************************************************************
- * Function name      : SipCSeqHeader::DecodeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipCSeqHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)

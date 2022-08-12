@@ -19,7 +19,6 @@
 #include "sip_pf_datatypes.h"
 #include "msg/sip_comdef.h"
 #include "msg/SipMessage.h"
-#include "SipTrace.h"
 #include "txn/SipTxnKey.h"
 #include "transport/SipTransportInfo.h"
 
@@ -37,7 +36,6 @@ class SipStackManager
 public:
     virtual ~SipStackManager();
     SipUtil* GetSipUtil();
-    SipTrace* GetTrace();
     static SipStackManager* GetInstance();
     static void Destruct();
 

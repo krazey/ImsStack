@@ -18,7 +18,6 @@
 #include "platform/sip_pf_string.h"
 #include "sip_debug.h"
 #include "sip_error.h"
-#include "SipTrace.h"
 
 #define MAX_LEN 20
 

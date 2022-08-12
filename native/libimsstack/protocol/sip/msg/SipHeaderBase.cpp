@@ -18,7 +18,6 @@
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "msg/sip_msgutil.h"
 
 SIP_BOOL gHeaderAttributes[SipHeaderBase::TYPE_END][SipHeaderBase::HEADER_ATTRIBUTE_END] = {
@@ -139,9 +138,6 @@ SIP_BOOL gHeaderAttributes[SipHeaderBase::TYPE_END][SipHeaderBase::HEADER_ATTRIB
         {SIP_FALSE},  // SESSION_ID
 };
 
-/****************************************************************************
-SipHeaderBase - Class Member Function Implementations
-*****************************************************************************/
 SipHeaderBase::SipHeaderBase(SIP_INT32 eHdrType) :
         m_eHdrType(eHdrType),
         m_pszValue(SIP_NULL),
@@ -401,9 +397,6 @@ SipHeaderBase* SipHeaderBase::GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pH
     return new SipHeaderBase(eHeaderType);
 }
 
-/****************************************************************************
-  SipNameAddrHeader - Class Member Function Implementations
-*****************************************************************************/
 SipNameAddrHeader::SipNameAddrHeader(SIP_INT32 eHdrType) :
         SipHeaderBase(eHdrType),
         m_pNameAddr(SIP_NULL)

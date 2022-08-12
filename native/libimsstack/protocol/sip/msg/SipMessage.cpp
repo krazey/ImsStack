@@ -19,21 +19,11 @@
 #include "platform/sip_pf_memory.h"
 
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "sip_error.h"
 
 #include "msg/SipMessage.h"
 #include "msg/SipMsgBody.h"
 
-/******************************************************************************
- * Function name      : SipMessage::SipMessage
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMessage::SipMessage() :
         m_eSipMsgType(SipMessage::TYPE_INVALID),
         m_pReqLine(SIP_NULL),
@@ -49,15 +39,6 @@ SipMessage::SipMessage() :
     m_objHdrs = new SipHeaders();
 }
 
-/******************************************************************************
- * Function name      : SipMessage::SipMessage
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMessage::SipMessage(SIP_INT32 eSipMsgType) :
         m_eSipMsgType(eSipMsgType),
         m_pReqLine(SIP_NULL),
@@ -73,15 +54,6 @@ SipMessage::SipMessage(SIP_INT32 eSipMsgType) :
     m_objHdrs = new SipHeaders();
 }
 
-/******************************************************************************
- * Function name      : SipMessage::SipMessage
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMessage::SipMessage(const SipMessage& objSipMsg) :
         m_eSipMsgType(objSipMsg.m_eSipMsgType),
         m_pReqLine(SIP_NULL),
@@ -121,15 +93,6 @@ SipMessage::SipMessage(const SipMessage& objSipMsg) :
 #endif
 }
 
-/******************************************************************************
- * Function name      : SipMessage::~SipMessage
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMessage::~SipMessage()
 {
     if (m_pReqLine != SIP_NULL)
@@ -156,15 +119,6 @@ SipMessage::~SipMessage()
 #endif
 }
 
-/******************************************************************************
- * Function name      : SipMessage::SetRequestline
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessage::SetRequestline(SipRequestLine* pReqLine)
 {
     if (m_pReqLine != SIP_NULL)
@@ -175,28 +129,12 @@ SIP_BOOL SipMessage::SetRequestline(SipRequestLine* pReqLine)
     m_pReqLine = pReqLine;
     return SIP_TRUE;
 }
-/******************************************************************************
- * Function name      : SipMessage::RemoveHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
+
 SIP_BOOL SipMessage::RemoveHdr(SIP_INT32 eHdrType)
 {
     return m_objHdrs->RemoveHdr(eHdrType);
 }
-/******************************************************************************
- * Function name      : SipMessage::SetHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
+
 SIP_BOOL SipMessage::SetHeader(SipHeaderBase* pHdr)
 {
     if (pHdr == SIP_NULL)
@@ -226,15 +164,6 @@ SIP_BOOL SipMessage::SetHeader(SipHeaderBase* pHdr)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMessage::SetMessageBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessage::SetMessageBody(SipMsgBody* pMsgBody)
 {
     if (pMsgBody == SIP_NULL)
@@ -249,30 +178,12 @@ SIP_BOOL SipMessage::SetMessageBody(SipMsgBody* pMsgBody)
     return m_pMsgBodyList->AddBody(pMsgBody);
 }
 
-/******************************************************************************
- * Function name      : SipMessage::SetMessageType
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessage::SetMessageType(SIP_INT32 eMsgType)
 {
     m_eSipMsgType = eMsgType;
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMessage::SetStatusLine
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessage::SetStatusLine(SipStatusLine* pStatusLine)
 {
     if (m_pStatusLine != SIP_NULL)
@@ -284,15 +195,6 @@ SIP_BOOL SipMessage::SetStatusLine(SipStatusLine* pStatusLine)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMessage::AppendHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessage::AppendHeader(SipHeaderBase* pHdr)
 {
     if (m_objHdrs->AppendHdr(pHdr) == SIP_FALSE)
@@ -303,16 +205,6 @@ SIP_BOOL SipMessage::AppendHeader(SipHeaderBase* pHdr)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMessage::InsertHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : noneGLOBAL IMS_BOOL InsertHeader(IN SipHeaderBase* pstHeader,
-                                             IN IMS_UINT32 nIndex,IN_OUT SipMessage *&pstMessage)
- *****************************************************************************/
 SIP_BOOL SipMessage::InsertHeader(SipHeaderBase* pHdr, SIP_UINT32 nIndex)
 {
     if (m_objHdrs->InsertHdr(pHdr, nIndex) == SIP_FALSE)
@@ -322,16 +214,6 @@ SIP_BOOL SipMessage::InsertHeader(SipHeaderBase* pHdr, SIP_UINT32 nIndex)
     }
     return SIP_TRUE;
 }
-
-/******************************************************************************
- * Function name      : SipMessage::GetMethodType
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 
 SIP_INT32 SipMessage::GetMethodType()
 {
@@ -369,15 +251,6 @@ SIP_INT32 SipMessage::GetMethodType()
     return SipMessage::METHOD_UNKNOWN;
 }
 
-/******************************************************************************
- * Function name      : SipMessage::GetMethod
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 const SIP_CHAR* SipMessage::GetMethod()
 {
     if (SipMessage::REQ_TYPE == m_eSipMsgType)
@@ -406,29 +279,11 @@ const SIP_CHAR* SipMessage::GetMethod()
     return pszMethod;
 }
 
-/******************************************************************************
- * Function name      : SipMessage::GetHdrObj
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderBase* SipMessage::GetHdrObj(SIP_INT32 eHdrType)
 {
     return m_objHdrs->getHdrObj(eHdrType, SIP_ZERO);
 }
 
-/******************************************************************************
- * Function name      : SipMessage::HasHeader
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessage::HasHeader(SIP_INT32 eHdrType) const
 {
     SipHeaderBase* pHdrBase = m_objHdrs->getHdrObj(eHdrType);
@@ -440,15 +295,6 @@ SIP_BOOL SipMessage::HasHeader(SIP_INT32 eHdrType) const
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : IsReqLineExists
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessage::IsReqLineExists()
 {
     SipRequestLine* pReqLine = GetReqLine();
@@ -460,15 +306,6 @@ SIP_BOOL SipMessage::IsReqLineExists()
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : IsStatusLineExists
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessage::IsStatusLineExists()
 {
     SipStatusLine* pStatusLine = GetStatusLine();
@@ -479,16 +316,6 @@ SIP_BOOL SipMessage::IsStatusLineExists()
     }
     return SIP_FALSE;
 }
-
-/******************************************************************************
- * Function name      : HasMandatoryHdrs
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 
 #ifdef SIP_BADMESSAGE_PARSING
 SIP_BOOL SipMessage::HasMandatoryHdrs()
@@ -534,16 +361,6 @@ SIP_BOOL SipMessage::HasMandatoryHdrs()
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : GetBadHeaderCount
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
-
 SIP_INT32 SipMessage::GetBadHeaderCount() const
 {
     if (m_pBadHdrList != SIP_NULL)
@@ -555,29 +372,10 @@ SIP_INT32 SipMessage::GetBadHeaderCount() const
     return 0;
 }
 
-/******************************************************************************
- * Function name      : GetBadHdrs
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderList* SipMessage::GetBadHdrs()
 {
     return m_pBadHdrList;
 }
-
-/******************************************************************************
- * Function name      : DeleteBadHdrList
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 
 SIP_VOID SipMessage::DeleteBadHdrList()
 {
@@ -588,15 +386,7 @@ SIP_VOID SipMessage::DeleteBadHdrList()
     }
 }
 #endif
-/******************************************************************************
- * Function name      : HasMIMEMessageBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
+
 SIP_BOOL SipMessage::HasMIMEMessageBody()
 {
     SipContentTypeHeader* pHdr =
@@ -613,15 +403,6 @@ SIP_BOOL SipMessage::HasMIMEMessageBody()
     return (nResult == SIP_ZERO) ? SIP_TRUE : SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : HasSDPMessageBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessage::HasSDPMessageBody()
 {
     SipContentTypeHeader* pHdr =
@@ -638,15 +419,6 @@ SIP_BOOL SipMessage::HasSDPMessageBody()
     return (nResult == SIP_ZERO) ? SIP_TRUE : SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipMessage::GetHdrList
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderList* SipMessage::GetHdrList(SIP_INT32 eHdrType)
 {
     return (SipHeaders::IsListHdr(eHdrType) == SIP_TRUE)
@@ -654,15 +426,6 @@ SipHeaderList* SipMessage::GetHdrList(SIP_INT32 eHdrType)
             : SIP_NULL;
 }
 
-/******************************************************************************
- * Function name      : SipMessage::SetHdrList
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessage::SetHdrList(SipHeaderList* pHdrList)
 {
     SIP_UINT32 nListSize = pHdrList->GetSize();
@@ -682,43 +445,16 @@ SIP_BOOL SipMessage::SetHdrList(SipHeaderList* pHdrList)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMessage::AppendMessageBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessage::AppendMessageBody(SipMsgBody* pMsgBody)
 {
     return SetMessageBody(pMsgBody);
 }
 
-/******************************************************************************
- * Function name      : SipMessage::GetMessageBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMsgBody* SipMessage::GetMsgBody(SIP_UINT32 nPos)
 {
     return (m_pMsgBodyList != SIP_NULL) ? m_pMsgBodyList->GetBodyByIndex(nPos) : SIP_NULL;
 }
 
-/******************************************************************************
- * Function name  : SipMessage::EncodeMsg
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SIP_BOOL SipMessage::EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
         SIP_UINT32* pSipMsgLength, /* in-out parameter*/ SIP_UINT32 nMsgOptions)
 {
@@ -757,9 +493,6 @@ SIP_BOOL SipMessage::EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
 
     // Put CRLF at the end of Start Line
     SIP_ENC_CRLF(pCurrPos);
-
-    SIP_TRACE_MESSAGE(ESIPTRACE_MODENCODER, "SipEnc_SipMsg:Encoded Msg(Start line) - %s",
-            *ppSipMsgBuffer, SIP_ZERO);
 
     SIP_CHAR aMsgBody[SIP_MAX_MSG_SIZE] = {
             0,
@@ -1205,7 +938,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
     SipUnknownHeader* pContentLen = GetUnknownHdrObj(SipHeaderBase::CONTENT_LENGTH);
     if (pContentLen == SIP_NULL)
     {
-        SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER, "No Body present in message", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "No Body present in message", SIP_ZERO, SIP_ZERO);
         return SIP_TRUE;
     }
 
@@ -1220,7 +953,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
 
     if (nContentLen == SIP_ZERO)
     {
-        SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER, "No message body", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "No message body", SIP_ZERO, SIP_ZERO);
         return SIP_TRUE;
     }
 
@@ -1290,7 +1023,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         const SIP_CHAR* pszSubMType = pContentType->GetSubMediaType();
         if (pszSubMType == SIP_NULL)
         {
-            SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER, "Wronge Content Type", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Wronge Content Type", SIP_ZERO, SIP_ZERO);
             pContentType->SipDelete();
             m_pMsgBodyList->SipDelete();
             m_pMsgBodyList = SIP_NULL;
@@ -1314,7 +1047,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
             const SIP_CHAR* pszMType = pContentType->GetMediaType();
             if (pszMType == SIP_NULL)
             {
-                SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER, "Wronge Content Type", SIP_ZERO, SIP_ZERO);
+                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Wronge Content Type", SIP_ZERO, SIP_ZERO);
                 pContentType->SipDelete();
                 m_pMsgBodyList->SipDelete();
                 m_pMsgBodyList = SIP_NULL;
@@ -1329,7 +1062,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
                 SIP_CHAR* pszBoundary = pContentType->GetBoundary();
                 if (pszBoundary == SIP_NULL)
                 {
-                    SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER, "No boundary in Content Type Hdr",
+                    SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "No boundary in Content Type Hdr",
                             SIP_ZERO, SIP_ZERO);
                     pContentType->SipDelete();
                     m_pMsgBodyList->SipDelete();

@@ -18,22 +18,12 @@
 #include "msg/SipMessage.h"
 #include "platform/sip_pf_memory.h"
 #include "sip_debug.h"
-#include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 
 #define MAX_BODY_SIZE 1500
 
 extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
 
-/******************************************************************************
- * Function name      : SipMIMEHdrs::SipMIMEHdrs()
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMIMEHdrs::SipMIMEHdrs() :
         m_pContentType(SIP_NULL),
         m_pContentEncoding(SIP_NULL),
@@ -42,15 +32,6 @@ SipMIMEHdrs::SipMIMEHdrs() :
 {
 }
 
-/******************************************************************************
- * Function name      : SipMIMEHdrs::SipMIMEHdrs()
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMIMEHdrs::SipMIMEHdrs(const SipMIMEHdrs& objMimeHdr) :
         m_pContentType(SIP_NULL),
         m_pContentEncoding(SIP_NULL),
@@ -78,15 +59,6 @@ SipMIMEHdrs::SipMIMEHdrs(const SipMIMEHdrs& objMimeHdr) :
     }
 }
 
-/******************************************************************************
- * Function name      : SipMIMEHdrs::~SipMIMEHdrs
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMIMEHdrs::~SipMIMEHdrs()
 {
     if (m_pContentType != SIP_NULL)
@@ -169,15 +141,6 @@ SipHeaderBase* SipMIMEHdrs::GetUnknownHdr(SIP_UINT32 nIndex)
     return (m_pUnKnownHdrList != SIP_NULL) ? m_pUnKnownHdrList->GetObj(nIndex) : SIP_NULL;
 }
 
-/******************************************************************************
- * Function name      : SipMIMEHdrs::getNewMIMEHdrObj
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderBase* SipMIMEHdrs::getMimeHdrObj(SIP_INT32 eIndex)
 {
     switch (eIndex)
@@ -215,15 +178,6 @@ SipHeaderBase* SipMIMEHdrs::getMimeHdrObj(SIP_INT32 eIndex)
     }
 }
 
-/******************************************************************************
- * Function name      : SipMIMEHdrs::getNewMIMEHdrObj
- *
- * Description     : To be used only in decoder for creating MIME headers
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderBase* SipMIMEHdrs::getNewMIMEHdrObj(SIP_INT32 eHdrType)
 {
     switch (eHdrType)
@@ -261,15 +215,6 @@ SipHeaderBase* SipMIMEHdrs::getNewMIMEHdrObj(SIP_INT32 eHdrType)
     }
 }
 
-/******************************************************************************
- * Function name      :SipMIMEHdrs::EncodeMIMEHdrs
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMIMEHdrs::EncodeMIMEHdrs(SIP_CHAR** ppCurrPos)
 {
     SIP_INT32 nHdr = SipMIMEHdrs::CONTENT_TYPE;
@@ -300,15 +245,6 @@ SIP_BOOL SipMIMEHdrs::EncodeMIMEHdrs(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMIMEHdrs::DecodeMIMEHdrs
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == 0)
@@ -419,15 +355,7 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     return SIP_TRUE;
 }
-/******************************************************************************
- * Function name      : SipMsgBody::SipMsgBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
+
 SipMsgBody::SipMsgBody() :
         m_eBodyType(SINGLE_BODY),
         m_pMIMEHdrs(SIP_NULL),
@@ -439,15 +367,6 @@ SipMsgBody::SipMsgBody() :
 {
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::SipMsgBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMsgBody::SipMsgBody(SIP_INT32 eBodyType) :
         m_eBodyType(SINGLE_BODY),
         m_pMIMEHdrs(SIP_NULL),
@@ -469,15 +388,6 @@ SipMsgBody::SipMsgBody(SIP_INT32 eBodyType) :
     }
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::SipUri
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMsgBody::SipMsgBody(const SipMsgBody& objMsgBody) :
         m_eBodyType(objMsgBody.m_eBodyType),
         m_pMIMEHdrs(SIP_NULL),
@@ -509,15 +419,6 @@ SipMsgBody::SipMsgBody(const SipMsgBody& objMsgBody) :
     }
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::~SipMsgBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMsgBody::~SipMsgBody()
 {
     if (m_pMIMEHdrs != SIP_NULL)
@@ -540,15 +441,6 @@ SipMsgBody::~SipMsgBody()
     }
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::EncodeMsgBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMsgBody::EncodeSingleMsgBody(SIP_CHAR** ppCurrPos)
 {
     if (m_pBuffer == SIP_NULL)
@@ -566,15 +458,6 @@ SIP_BOOL SipMsgBody::EncodeSingleMsgBody(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::EncodeMIMEMsgBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMsgBody::EncodeMIMEMsgBody(SIP_CHAR** ppCurrPos)
 {
     /*Check for message body list*/
@@ -613,15 +496,6 @@ SIP_BOOL SipMsgBody::EncodeMIMEMsgBody(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::DecodeMessageSummaryMsgBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMsgBody::EncodeMessageSummaryMsgBody(SIP_CHAR** ppCurrPos)
 {
     if (m_pMessageSummary == SIP_NULL)
@@ -666,15 +540,6 @@ SIP_BOOL SipMsgBody::EncodeBody(SIP_CHAR** ppCurrPos)
                                                       : EncodeMIMEMsgBody(ppCurrPos);
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::DecodeSingleMsgBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMsgBody::DecodeSingleMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     SIP_UINT32 nSize = pEndPt - pStartPt;
@@ -697,15 +562,6 @@ SIP_BOOL SipMsgBody::DecodeSingleMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::DecodeMIMEMsgBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     if (pStartPt == SIP_NULL)
@@ -771,7 +627,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     const SIP_CHAR* pszMType = pContentType->GetMediaType();
     if (pszMType == SIP_NULL)
     {
-        SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER, "Wronge Content Type", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Wronge Content Type", SIP_ZERO, SIP_ZERO);
         pContentType->SipDelete();
         return SIP_FALSE;
     }
@@ -783,7 +639,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         SIP_CHAR* pszBoundary = pContentType->GetBoundary();
         if (pszBoundary == SIP_NULL)
         {
-            SIP_TRACE_NORMAL(
+            SIP_DEBUG_WARNING(
                     ESIPTRACE_MODDECODER, "No boundary in Content Type Hdr", SIP_ZERO, SIP_ZERO);
             pContentType->SipDelete();
             return SIP_FALSE;
@@ -823,15 +679,6 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::DecodeMessageSummaryMsgBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMsgBody::DecodeMessageSummaryMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     if (m_pMessageSummary == SIP_NULL)
@@ -852,15 +699,6 @@ SIP_BOOL SipMsgBody::DecodeMessageSummaryMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* p
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::SetContentType
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMsgBody::SetMimeHdr(SipHeaderBase* pHdrBase)
 {
     if (m_pMIMEHdrs == SIP_NULL)
@@ -870,15 +708,6 @@ SIP_BOOL SipMsgBody::SetMimeHdr(SipHeaderBase* pHdrBase)
     return m_pMIMEHdrs->SetMimeHdrs(pHdrBase);
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::SetMsgBuffer
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMsgBody::SetMsgBuffer(const SIP_CHAR* pMsgBuffer, SIP_UINT32 nBufLen)
 {
     if (pMsgBuffer != SIP_NULL)
@@ -900,15 +729,6 @@ SIP_BOOL SipMsgBody::SetMsgBuffer(const SIP_CHAR* pMsgBuffer, SIP_UINT32 nBufLen
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::GetMessageBodyList
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMsgBodyList* SipMsgBody::GetMessageBodyList()
 {
     if (m_pBodyList != SIP_NULL)
@@ -918,15 +738,6 @@ SipMsgBodyList* SipMsgBody::GetMessageBodyList()
     return m_pBodyList;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::GetContentType
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipContentTypeHeader* SipMsgBody::GetContentType()
 {
     if (m_pMIMEHdrs != SIP_NULL)
@@ -938,15 +749,6 @@ SipContentTypeHeader* SipMsgBody::GetContentType()
     return SIP_NULL;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::GetContentEncoding
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderBase* SipMsgBody::GetContentEncoding()
 {
     if (m_pMIMEHdrs != SIP_NULL)
@@ -957,15 +759,6 @@ SipHeaderBase* SipMsgBody::GetContentEncoding()
     return SIP_NULL;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::GetContentDisposition
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderBase* SipMsgBody::GetContentDisposition()
 {
     if (m_pMIMEHdrs != SIP_NULL)
@@ -976,15 +769,6 @@ SipHeaderBase* SipMsgBody::GetContentDisposition()
     return SIP_NULL;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::GetMimeHdr
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipHeaderBase* SipMsgBody::GetMimeHdr(SIP_INT32 eHdrType, SIP_UINT32 nIndex)
 {
     if (m_pMIMEHdrs != SIP_NULL)
@@ -1011,15 +795,6 @@ SipHeaderBase* SipMsgBody::GetMimeHdr(SIP_INT32 eHdrType, SIP_UINT32 nIndex)
     return SIP_NULL;
 }
 
-/******************************************************************************
- * Function name      :SipMsgBody::IsMessageBodySDP();
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMsgBody::IsMessageBodySDP()
 {
     SipContentTypeHeader* pHdr = GetContentType();
@@ -1033,15 +808,6 @@ SIP_BOOL SipMsgBody::IsMessageBodySDP()
     return (nResult == SIP_ZERO) ? SIP_TRUE : SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBody::GetMsgBuffer
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMsgBody::GetMsgBuffer(SIP_CHAR** ppMsgBuffer)
 {
     if (m_pBuffer != SIP_NULL)
@@ -1062,15 +828,6 @@ SIP_BOOL SipMsgBody::GetMsgBuffer(SIP_CHAR** ppMsgBuffer)
     return SIP_FALSE;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBodyList::SipMsgBodyList
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMsgBodyList::SipMsgBodyList() :
         m_objBodyList(SipVector<SipMsgBody*>())
 {
@@ -1086,15 +843,6 @@ SipMsgBodyList::~SipMsgBodyList()
     }
 }
 
-/******************************************************************************
- * Function name      : SipMsgBodyList::SipMsgBodyList
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SipMsgBodyList::SipMsgBodyList(const SipMsgBodyList& objMsgBodyList) :
         m_objBodyList(SipVector<SipMsgBody*>())
 {
@@ -1120,15 +868,6 @@ SipMsgBodyList::SipMsgBodyList(const SipMsgBodyList& objMsgBodyList) :
     }
 }
 
-/******************************************************************************
- * Function name  : SipMsgBodyList::EncodeBody
- *
- * Description   :
- *
- * Preconditions  :
- *
- * Side Effects  : none
- *****************************************************************************/
 SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, SIP_CHAR* pszBoundary)
 {
     SIP_UINT32 nNumBodies = m_objBodyList.GetSize();
@@ -1225,15 +964,6 @@ SipMsgBody* SipMsgBodyList::GetBodyByIndex(SIP_UINT32 nIndex)
     return SIP_NULL;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBodyList::DecodeSingleBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMsgBodyList::DecodeSingleBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     /*single body support*/
@@ -1264,15 +994,6 @@ SIP_BOOL SipMsgBodyList::DecodeSingleBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMsgBodyList::DecodeMIMEBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMsgBodyList::DecodeMIMEBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary)
 {
     /*Boundary check*/
@@ -1475,15 +1196,6 @@ SipMessageSummary::~SipMessageSummary()
     }
 }
 
-/******************************************************************************
- * Function name      : SipMessageSummary::EncodeMessageSummaryMsgBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessageSummary::EncodeMessageSummary(SIP_CHAR** ppCurrPos)
 {
     SIP_CHAR* pBody = *ppCurrPos;
@@ -1582,15 +1294,6 @@ SIP_BOOL SipMessageSummary::EncodeMessageSummary(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-/******************************************************************************
- * Function name      : SipMessageSummary::DecodeMessageSummaryMsgBody
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
 SIP_BOOL SipMessageSummary::DecodeMessageSummary(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     SIP_UINT32 nSize = pEndPt - pStartPt + SIP_ONE;
