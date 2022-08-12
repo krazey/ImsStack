@@ -34,61 +34,62 @@ public class HttpResponse {
     /**
      * Defines the response to be processed for ACS operation
      */
-    public enum HttpResponseType {
-        CODE_UNDEFINED(0, "UnDefined"),
-        CODE_INTERNAL_ERROR(1, "Internal Error"),
-        CODE_UNREACHABLE_ERROR(2, "Unreachable Error"),
-        CODE_200_OK(200, "OK"),
-        CODE_401_UNAUTHORIZED(401, "Unauthorized"),
-        CODE_403_FORBIDDEN(403, "Forbidden"),
-        CODE_409_CONFLICT(403, "Conflict"),
-        CODE_500_INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
-        CODE_503_RETRY_AFTER(503, "Retry after"),
-        CODE_511_NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required");
 
-        private int mResponseCode;
-        private String mReasonPhrase;
-
-        HttpResponseType(int responseCode, String reasonPhrase) {
-            mResponseCode = responseCode;
-            mReasonPhrase = reasonPhrase;
-        }
-
-        /**
-         * Change the defined response code to handle the Http response code for ACS
-         *
-         * @param slotId SIM slot ID
-         * @param responseCode the HTTP response code
-         * @return the defined HTTP response code
-         */
-        public static HttpResponseType getEnum(int slotId, int responseCode) {
-            for (HttpResponseType response : HttpResponseType.values()) {
-                if (response.getResponseCode() == responseCode) {
-                    return response;
-                }
-            }
-            ImsLog.d(slotId, "UnDefined " + responseCode);
-            return CODE_UNDEFINED;
-        }
-
-        /**
-         * Gets the response code from an HTTP response message.
-         *
-         * @return the HTTP response code
-         */
-        public int getResponseCode() {
-            return mResponseCode;
-        }
-
-        /**
-         * Gets the reason phrase from an HTTP response message.
-         *
-         * @return the HTTP reason phrase
-         */
-        public String getReasonPhrase() {
-            return mReasonPhrase;
-        }
-    }
+//    public enum HttpResponseType {
+//        CODE_UNDEFINED(0, "UnDefined"),
+//        CODE_INTERNAL_ERROR(1, "Internal Error"),
+//        CODE_UNREACHABLE_ERROR(2, "Unreachable Error"),
+//        CODE_200_OK(200, "OK"),
+//        CODE_401_UNAUTHORIZED(401, "Unauthorized"),
+//        CODE_403_FORBIDDEN(403, "Forbidden"),
+//        CODE_409_CONFLICT(403, "Conflict"),
+//        CODE_500_INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
+//        CODE_503_RETRY_AFTER(503, "Retry after"),
+//        CODE_511_NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required");
+//
+//        private int mResponseCode;
+//        private String mReasonPhrase;
+//
+//        HttpResponseType(int responseCode, String reasonPhrase) {
+//            mResponseCode = responseCode;
+//            mReasonPhrase = reasonPhrase;
+//        }
+//
+//        /**
+//         * Change the defined response code to handle the Http response code for ACS
+//         *
+//         * @param slotId SIM slot ID
+//         * @param responseCode the HTTP response code
+//         * @return the defined HTTP response code
+//         */
+//        public static HttpResponseType getEnum(int slotId, int responseCode) {
+//            for (HttpResponseType response : HttpResponseType.values()) {
+//                if (response.getResponseCode() == responseCode) {
+//                    return response;
+//                }
+//            }
+//            ImsLog.d(slotId, "UnDefined " + responseCode);
+//            return CODE_UNDEFINED;
+//        }
+//
+//        /**
+//         * Gets the response code from an HTTP response message.
+//         *
+//         * @return the HTTP response code
+//         */
+//        public int getResponseCode() {
+//            return mResponseCode;
+//        }
+//
+//        /**
+//         * Gets the reason phrase from an HTTP response message.
+//         *
+//         * @return the HTTP reason phrase
+//         */
+//        public String getReasonPhrase() {
+//            return mReasonPhrase;
+//        }
+//    }
 
     private final int mSlotId;
     private final HttpURLConnection mHttpURLConnection;
@@ -113,12 +114,13 @@ public class HttpResponse {
      * @return the HTTP response code
      */
     public int getResponseCode() {
-        // need to check
-        if (mResponse != HttpResponseType.CODE_UNDEFINED.getResponseCode()) {
-            return mResponse;
-        }
+//        // need to check
+//        if (mResponse != HttpResponseType.CODE_UNDEFINED.getResponseCode()) {
+//            return mResponse;
+//        }
 
-        mResponse = HttpResponseType.CODE_INTERNAL_ERROR.getResponseCode();
+        mResponse = HttpTransaction.RESULT_TYPE_INTERNAL_ERROR;
+        //HttpResponseType.CODE_INTERNAL_ERROR.getResponseCode();
         if (mHttpURLConnection != null) {
             try {
                 mResponse = mHttpURLConnection.getResponseCode();
@@ -135,7 +137,7 @@ public class HttpResponse {
     /**
      * Gets the body from an HTTP response.
      *
-     * @return the HTTP body
+     * @return the HTTP body or null
      */
     public byte[] getBody() {
         if (mHttpURLConnection == null) {
@@ -219,6 +221,31 @@ public class HttpResponse {
         } else {
             ImsLog.d(mSlotId, "no Cookies");
         }
+    }
+
+    /**
+     * Get value from Retry-After header of 503 response.
+     *
+     * @return retryAfter value for sec
+     */
+    public int getRetryAfter() {
+        int retryAfter = 0;
+        String header = getHeader("Retry-After");
+
+        if (header != null) {
+            String[] tokens = header.split(";");
+
+            if (tokens.length > 0) {
+                try {
+                    retryAfter = Integer.parseInt(tokens[0]);
+                } catch (NumberFormatException e) {
+                    ImsLog.e(mSlotId, e.getMessage());
+                }
+            }
+        }
+
+        ImsLog.d(mSlotId, "retry after " + retryAfter + " header " + header);
+        return retryAfter;
     }
 
     private boolean hasXML(InputStream inputStream) {

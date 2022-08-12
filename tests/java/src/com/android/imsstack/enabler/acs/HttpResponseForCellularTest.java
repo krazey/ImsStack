@@ -175,6 +175,37 @@ public class HttpResponseForCellularTest {
 
     @Test
     @SmallTest
+    public void testHandle503Response() throws Exception {
+        // received 503 & retry after header x
+        doReturn(503).when(mHttpResponse).getResponseCode();
+        mHttpResponseForCellular.handle(mHttpResponse);
+
+        // msg what: REQUEST_DONE, arg1: 503, arg2 : 0
+        ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
+        verify(mHandler, times(1))
+                .sendMessageAtTime(captor.capture(), anyLong());
+        assertEquals(REQUEST_DONE, captor.getValue().what);
+        assertEquals(503, captor.getValue().arg1);
+        assertEquals(0, captor.getValue().arg2);
+
+        verifyNoMoreInteractions(mHandler);
+
+        // received 503 & retry after header exist
+        doReturn(1000).when(mHttpResponse).getRetryAfter();
+        mHttpResponseForCellular.handle(mHttpResponse);
+
+        // msg what: REQUEST_DONE, arg1: 503, arg2 : 1000
+        verify(mHandler, times(2))
+                .sendMessageAtTime(captor.capture(), anyLong());
+        assertEquals(REQUEST_DONE, captor.getValue().what);
+        assertEquals(503, captor.getValue().arg1);
+        assertEquals(1000, captor.getValue().arg2);
+
+        verifyNoMoreInteractions(mHandler);
+    }
+
+    @Test
+    @SmallTest
     public void testHandle511Response() throws Exception {
         // exist cookie header & received 511
         doReturn(511).when(mHttpResponse).getResponseCode();

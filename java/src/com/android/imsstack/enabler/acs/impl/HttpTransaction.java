@@ -54,25 +54,29 @@ public class HttpTransaction {
     /** @hide */
     @IntDef(prefix = {"REQUEST_"}, value = {
             REQUEST_HTTPS,
+            REQUEST_NON_CELLULAR,
             REQUEST_GBA,
+            REQUEST_DONE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RequestType {}
 
+    // minimum msg
+    public static final int MSG_MIN = 0;
+    // start msg
+    public static final int MSG_START = 1;
+    // stop msg
+    public static final int MSG_STOP = 2;
     // send HTTPS request
-    public static final int REQUEST_HTTPS = 1;
+    public static final int REQUEST_HTTPS = 3;
     // send non-cellular HTTP request using OTP ACS Auth
-    public static final int REQUEST_NON_CELLULAR = 2;
+    public static final int REQUEST_NON_CELLULAR = 4;
     // send GBA request.
-    public static final int REQUEST_GBA = 3;
+    public static final int REQUEST_GBA = 5;
     // ACS is done.
-    public static final int REQUEST_DONE = 4;
-
-    private static final int MSG_MIN = 0;
-    private static final int MSG_START = 1;
-    private static final int MSG_STOP = 2;
-    private static final int MSG_RESULT = 3;
-    private static final int MSG_MAX = 4;
+    public static final int REQUEST_DONE = 6;
+    // maximum msg
+    public static final int MSG_MAX = 7;
 
     /**
      * Callback interface for receiving result from the AC HTTP request.
@@ -101,7 +105,7 @@ public class HttpTransaction {
         int handleMessage(Message msg);
     }
 
-    //Thread
+    // Thread
     private final class MessageHandler extends Handler {
         MessageHandler(Looper looper) {
             super(looper);
@@ -123,7 +127,7 @@ public class HttpTransaction {
                 {
                     put(MSG_START, mMsgFuncStart);
                     put(MSG_STOP, mMsgFuncStop);
-                    put(MSG_RESULT, mMsgFuncResult);
+                    put(REQUEST_DONE, mMsgFuncRequestDone);
                 }
             };
 
@@ -143,10 +147,23 @@ public class HttpTransaction {
         }
     };
 
-    private final MessageFunction mMsgFuncResult = new MessageFunction() {
+    private final MessageFunction mMsgFuncRequestDone = new MessageFunction() {
         @Override
         public int handleMessage(Message msg) {
             Callback cb = mCallback;
+
+            // TODO : need to update
+            int responseCode = msg.arg1;
+            byte[] acData = msg.obj != null ? (byte[]) msg.obj : null;
+            // retryAfter value also include callback param.
+            int retryAfter = msg.arg2;
+            if (100 <= responseCode && responseCode <= 600) {
+                // received http response
+                cb.receivedHttpResponse(responseCode, null, acData);
+            } else {
+                // internal error or unreachable error
+                cb.receivedNonHttpResponse(responseCode);
+            }
 
             return 0;
         }

@@ -69,6 +69,9 @@ public class HttpResponseForCellular {
             case 401:
                 handle401Response(httpResponse);
                 break;
+            case 503:
+                handle503Response(httpResponse);
+                break;
             case 511:
                 handle511response(httpResponse);
                 break;
@@ -148,7 +151,17 @@ public class HttpResponseForCellular {
 
     private void handle401Response(HttpResponse httpResponse) {
         ImsLog.d(mSlotId, "Http " + httpResponse.toString());
-        //TODO : handle 401 case
+        // TODO : handle 401 case
+        // 0. this device didn't support authentication ?
+        // 1. consider WWW-Authenticate header , -> GBA or EAP-AKA
+        // HttpResponse.getHeader("WWW-Authenticate");
+        // 2. carrier config wzw : EAP-AKA ...
+    }
+
+    private void handle503Response(HttpResponse httpResponse) {
+        ImsLog.d(mSlotId, "Http " + httpResponse.toString());
+        sendNextProgressMsg(HttpTransaction.REQUEST_DONE, httpResponse.getResponseCode(),
+                httpResponse.getRetryAfter(), null, 0);
     }
 
     private void handle511response(HttpResponse httpResponse) {
