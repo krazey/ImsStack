@@ -1,13 +1,18 @@
 /*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20150410    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.imsstack.enabler.mtc;
 
@@ -33,7 +38,10 @@ public final class ConferenceInfoHelper {
         }
     }
 
-    public static ConferenceInfo createConferenceInfo(String ccid, int slotId) {
+    /**
+     * Creates ConferenceInfo instance if not existed.
+     */
+    public static ConferenceInfo createConferenceInfo(String ccid) {
         if (ccid == null) {
             // Special case: it's for the initial merge operation.
             ccid = ConferenceInfo.IMMATURE_CCID;
@@ -44,32 +52,9 @@ public final class ConferenceInfoHelper {
 
         if (ci == null) {
             // Create a new ConferenceInfo
-            ci = cim.createConferenceInfo(ccid, slotId);
+            ci = cim.createConferenceInfo(ccid);
         } else if (ConferenceInfo.IMMATURE_CCID.equals(ccid)) {
             log("Immature ConferenceInfo already exists");
-        }
-
-        return ci;
-    }
-
-    public static ConferenceInfo createConferenceInfo(String ccid,
-            String hostCallId, String hostConfUserId, int hostCallConnectionId,
-            String peerCallId, String peerConfUserId, int peerCallConnectionId,
-            int slotId) {
-        ConferenceInfo ci = createConferenceInfo(ccid, slotId);
-
-        if (ci == null) {
-            return null;
-        }
-
-        if (!ci.addUserForInterimStatus(hostCallConnectionId, hostConfUserId, "", 0, 0)) {
-            loge("User already exists; host - callConnectionId=" + hostCallConnectionId
-                    + ", confUserId=" + dbgLog(hostConfUserId));
-        }
-
-        if (!ci.addUserForInterimStatus(peerCallConnectionId, peerConfUserId, "", 0, 0)) {
-            loge("User already exists; peer - callConnectionId=" + peerCallConnectionId
-                    + ", confUserId=" + dbgLog(peerConfUserId));
         }
 
         return ci;

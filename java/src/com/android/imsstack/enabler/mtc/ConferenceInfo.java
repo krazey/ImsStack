@@ -116,17 +116,6 @@ public final class ConferenceInfo {
         private boolean mStatusChanged = false;
         private Listener mListener;
 
-        public User(String callId) {
-            mCallId = callId;
-
-            UUID uuid = UUID.randomUUID();
-            mUuid = (uuid != null) ? uuid.toString() : "";
-
-            if (ImsLog.isDebuggable()) {
-                log("User :: callId=" + mCallId + ", uuid=" + mUuid);
-            }
-        }
-
         public User(String callId, String id) {
             mCallId = callId;
             mId = id;
@@ -150,22 +139,6 @@ public final class ConferenceInfo {
             mUserEntity = userEntity;
             mEndpointEntity = endpointEntity;
             mDisplayText = displayText;
-
-            if (!TextUtils.isEmpty(status)) {
-                updateStatus(status);
-            }
-
-            setState(STATE_EVENT);
-        }
-
-        public void init(String id, String userEntity, String endpointEntity,
-                String displayText, String status) {
-            mId = id;
-            mUserEntity = userEntity;
-            mEndpointEntity = endpointEntity;
-            mDisplayText = displayText;
-
-            updateIdForNative(id);
 
             if (!TextUtils.isEmpty(status)) {
                 updateStatus(status);
@@ -411,14 +384,12 @@ public final class ConferenceInfo {
         }
     }
 
-    private int mSlotId;
     // Call identifier of the conference focus
     private String mCcid;
     private List<User> mUsers = new ArrayList<User>();
 
-    public ConferenceInfo(String ccid, int slotId) {
+    public ConferenceInfo(String ccid) {
         mCcid = ccid;
-        mSlotId = slotId;
     }
 
     @Override
@@ -432,22 +403,6 @@ public final class ConferenceInfo {
         sb.append(" ]");
 
         return sb.toString();
-    }
-
-    public boolean addUser(String callId, String uid) {
-        if (callId == null) {
-            callId = User.DEFAULT_CALL_ID;
-        }
-
-        User user = new User(callId, uid);
-
-        synchronized(mUsers) {
-            mUsers.add(user);
-        }
-
-        log("addUser: callId=" + callId + ", uid=" + dbgLog(uid));
-
-        return true;
     }
 
     public boolean addUser(String callId, String uid, String userEntity,
@@ -654,7 +609,6 @@ public final class ConferenceInfo {
         if (!user.isInitialized()
                 || (user.isInterim()
                     && !isInterimUser(callId, uid, userEntity, endpointEntity))) {
-            String oldUid = user.getId();
             user.updateIdForNative(uid);
             user.init(userEntity, endpointEntity, displayText, status);
         } else {

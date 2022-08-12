@@ -375,7 +375,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         // ConferenceInfo: to manage the participants in the conference call
         if (isConference()) {
-            ConferenceInfoHelper.createConferenceInfo(getCallId(), mContext.getSlotId());
+            ConferenceInfoHelper.createConferenceInfo(getCallId());
         }
 
         logi(toString());
@@ -550,7 +550,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                 if (jniConfCallId == 0) {
                     setAdhocGroup();
                     // ConferenceInfo: to manage the participants in the conference call
-                    ConferenceInfoHelper.createConferenceInfo(getCallId(), mContext.getSlotId());
+                    ConferenceInfoHelper.createConferenceInfo(getCallId());
                 } else {
                     MtcCall confCall = createAndSetMtcCallForConference(
                             jniConfCallId, callInfo, mediaInfo, suppInfo);
@@ -574,7 +574,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
                 if (jniConfCallId == 0) {
                     // ConferenceInfo: to manage the participants in the conference call
-                    ConferenceInfoHelper.createConferenceInfo(getCallId(), mContext.getSlotId());
+                    ConferenceInfoHelper.createConferenceInfo(getCallId());
                 } else {
                     MtcCall confCall = createAndSetMtcCallForConference(
                             jniConfCallId, callInfo, mediaInfo, suppInfo);
@@ -788,7 +788,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         setCallExtraBoolean(EXTRA_CONFERENCE, true);
         // ConferenceInfo: to manage the participants in the conference call
-        ConferenceInfoHelper.createConferenceInfo(getCallId(), mContext.getSlotId());
+        ConferenceInfoHelper.createConferenceInfo(getCallId());
 
         Parcel parcel = Parcel.obtain();
 
@@ -1857,7 +1857,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             // ConferenceInfo: to manage the participants in the conference call
             if (isConference()) {
-                ConferenceInfoHelper.createConferenceInfo(getCallId(), mContext.getSlotId());
+                ConferenceInfoHelper.createConferenceInfo(getCallId());
             }
 
             setVideoState(mediaInfo);
