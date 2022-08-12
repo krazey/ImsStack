@@ -215,6 +215,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             pAmrFmtp->nModeSetList = pAmrConfig->GetModeSetList();
             pAmrFmtp->bShowModeSet = pAmrConfig->GetShowModeSet();
 
+            pAmrFmtp->bShow_OctetAlign = IMS_FALSE;
             if (pAmrConfig->GetOctetAlign() != -1)
             {
                 pAmrFmtp->nOctetAlign = pAmrConfig->GetOctetAlign();
@@ -226,7 +227,6 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             else
             {
                 pAmrFmtp->nOctetAlign = CodecAmrConfig::DEFAULT_OCTET_ALIGN;
-                pAmrFmtp->bShow_OctetAlign = IMS_FALSE;
             }
 
             if (pConfig->GetModeChangeCapability() != -1)
