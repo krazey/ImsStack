@@ -206,7 +206,6 @@ public:
                                                                           : m_nRegSubExpiration;
     }
 
-    IMS_BOOL CreateDefaultServiceConfig();
     inline const SipConfigV* GetServiceConfig() const { return m_pSipConfigV; }
 
 protected:

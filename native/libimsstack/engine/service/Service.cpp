@@ -212,8 +212,7 @@ PUBLIC VIRTUAL IMS_BOOL Service::CreateConfig(IN const AppConfig& objAppConfig)
     return IMS_TRUE;
 }
 
-PUBLIC
-ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
+PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
         IN const SipAddress* pTo, IN const SipMethod& objMethod,
         IN IMS_BOOL bPrivacy /*= IMS_FALSE*/)
 {
@@ -462,8 +461,7 @@ ISipClientConnection* Service::CreateConnection(IN const SipAddress* pFrom,
     return piScc;
 }
 
-PUBLIC
-ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
+PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
         IN const SipMethod& objMethod, IN IMS_BOOL bPrivacy /*= IMS_FALSE*/)
 {
     (void)bPrivacy;
@@ -674,8 +672,7 @@ ISipClientConnection* Service::CreateConnection(IN ISipDialog* piDialog,
     return piScc;
 }
 
-PUBLIC
-ISipClientConnection* Service::CreateCancelConnection(IN ISipClientConnection* piScc)
+PUBLIC VIRTUAL ISipClientConnection* Service::CreateCancelConnection(IN ISipClientConnection* piScc)
 {
     if (piScc == IMS_NULL)
     {
@@ -710,9 +707,8 @@ ISipClientConnection* Service::CreateCancelConnection(IN ISipClientConnection* p
     return piCancelScc;
 }
 
-PUBLIC
-IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode,
-        IN const AString& strPhrase /*= AString::ConstNull()*/,
+PUBLIC VIRTUAL IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piSsc,
+        IN IMS_SINT32 nStatusCode, IN const AString& strPhrase /*= AString::ConstNull()*/,
         IN IMS_BOOL bPrivacy /*= IMS_FALSE*/)
 {
     IMS_TRACE_I("Service::CreateResponse() - Method (%s), Status Code (%d)",
@@ -863,8 +859,7 @@ IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT
     return IMS_TRUE;
 }
 
-PUBLIC
-IMS_BOOL Service::InitAck(IN ISipClientConnection* piScc)
+PUBLIC VIRTUAL IMS_BOOL Service::InitAck(IN ISipClientConnection* piScc)
 {
     if (piScc->InitAck() != IMS_SUCCESS)
     {
@@ -1843,7 +1838,7 @@ PROTECTED VIRTUAL void Service::RegBinding_OnActive()
 {
     IMS_TRACE_D("Service (%s) :: OnActive()", m_strServiceId.GetStr(), 0, 0);
 
-    m_bImsConnected = IMS_TRUE;
+    SetImsConnected(IMS_TRUE);
 
     UpdateAuthorizedUserIds();
     // SIP_TXN_N_DIALOG_HANDLING_ON_NO_REG
@@ -1857,12 +1852,12 @@ PROTECTED VIRTUAL void Service::RegBinding_OnDestroy()
 {
     IMS_TRACE_D("Service (%s) :: OnDestroy()", m_strServiceId.GetStr(), 0, 0);
 
-    if (m_bImsConnected)
+    if (IsImsConnected())
     {
         NotifyError(ImsError::SERVICE_CLOSED);
     }
 
-    m_bImsConnected = IMS_FALSE;
+    SetImsConnected(IMS_FALSE);
     m_piRegBinding = IMS_NULL;
 }
 
@@ -1910,12 +1905,12 @@ PROTECTED VIRTUAL void Service::RegBinding_OnTerminated()
 {
     IMS_TRACE_D("Service (%s) :: OnTerminated()", m_strServiceId.GetStr(), 0, 0);
 
-    if (m_bImsConnected)
+    if (IsImsConnected())
     {
         NotifyError(ImsError::SERVICE_CLOSED);
     }
 
-    m_bImsConnected = IMS_FALSE;
+    SetImsConnected(IMS_FALSE);
 }
 
 PROTECTED

@@ -80,6 +80,7 @@ SipConfig::SipConfig(IN IMS_SINT32 nSlotId) :
         m_pSipConfigV(IMS_NULL),
         m_pConfigurable(IMS_NULL)
 {
+    m_pSipConfigV = new SipConfigV(nSlotId);
     m_pConfigurable = new Configurable(this);
 }
 
@@ -117,23 +118,30 @@ PUBLIC VIRTUAL IMS_BOOL SipConfig::Init()
     ICarrierConfig* piCc = GetCarrierConfig();
     piCc->AddListener(this);
 
-    return ConfigBase::Init();
+    IMS_BOOL bInitResult = ConfigBase::Init();
+
+    if (!m_pSipConfigV->Init())
+    {
+        IMS_TRACE_E(0, "Loading a service specific SIP config failed", 0, 0, 0);
+        bInitResult = IMS_FALSE;
+    }
+
+    // Update TCP related timer values based on a default SIP configuration
+    // if it's not provisioned
+    UpdateTcpTimerValues();
+
+    return bInitResult;
 }
 
 PUBLIC VIRTUAL void SipConfig::Refresh()
 {
     ReadFrom();
 
-    if (m_pSipConfigV != IMS_NULL)
-    {
-        m_pSipConfigV->Refresh();
+    m_pSipConfigV->Refresh();
 
-        UpdateTcpTimerValues();
-    }
-    else
-    {
-        CreateDefaultServiceConfig();
-    }
+    // Update TCP related timer values based on a default SIP configuration
+    // if it's not provisioned
+    UpdateTcpTimerValues();
 }
 
 PUBLIC
@@ -152,39 +160,6 @@ IMS_SINT32 SipConfig::GetTimerValueT2() const
 
     return (pSipConfigV != IMS_NULL) ? pSipConfigV->GetTimerValueT2()
                                      : SipConfigV::DEFAULT_TIMER_T2;
-}
-
-PUBLIC
-IMS_BOOL SipConfig::CreateDefaultServiceConfig()
-{
-    if (m_pSipConfigV != IMS_NULL)
-    {
-        IMS_TRACE_D("Default SIP config is already created", 0, 0, 0);
-        return IMS_TRUE;
-    }
-
-    m_pSipConfigV = new SipConfigV(GetSlotId());
-
-    if (m_pSipConfigV == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "SipConfigV is null", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (!m_pSipConfigV->Init())
-    {
-        IMS_TRACE_E(0, "Loading SIP config failed", 0, 0, 0);
-
-        delete m_pSipConfigV;
-        m_pSipConfigV = IMS_NULL;
-        return IMS_FALSE;
-    }
-
-    // Update TCP related timer values based on a default SIP configuration
-    // if it's not provisioned
-    UpdateTcpTimerValues();
-
-    return IMS_TRUE;
 }
 
 PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()

@@ -64,21 +64,19 @@ public:
     /**
      * @brief Sends a capability request to a remote endpoint.
      *
-     * @param bSdpInRequest Flag to indicate if SDP needs to be included
-     *                      in the capability query request
-     * @param bContactInRequest Flag to indicate if Contact header needs to be include
-     *                          in the capability query request
-     * @param bCheckSupport Flag to indicate if the media property needs to be evaluated
-     *                      when forming a capability SDP.\n
-     *                      The media properties are the following:
-     *                          StreamAudio, StreamVideo, Framed.\n
-     *                      Its default value sets to TRUE according to the specification maybe.
+     * @param nFlags Flags indicating that which information should be added
+     *               or checked for a capability request\n
+     *               The value is bitwise OR of
+     *                   #FLAG_ADD_CONTACT_HEADER
+     *                   #FLAG_ADD_ALL_REGISTERED_FEATURES_IN_CONTACT_HEADER
+     *                   #FLAG_ADD_SDP_BODY_PART
+     *                   #FLAG_CHECK_MEDIA_CAPABILITIES
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT QueryCapabilities(IN IMS_BOOL bSdpInRequest,
-            IN IMS_BOOL bContactInRequest = IMS_TRUE, IN IMS_BOOL bCheckSupport = IMS_TRUE) = 0;
+    virtual IMS_RESULT QueryCapabilities(IN IMS_SINT32 nFlags = FLAG_REQUEST_DEFAULT) = 0;
 
-    virtual IMS_RESULT QueryCapabilitiesEx() = 0;
+    virtual IMS_RESULT QueryCapabilitiesEx()
+            __IMS_DEPRECATED__("Use QueryCapabilities(IMS_SINT32) instead") = 0;
 
     /**
      * @brief Sets a listener for this ICapabilities, replacing any previous ICapabilitiesListener.
@@ -93,17 +91,16 @@ public:
      * @brief Sends a successful final response to an incoming capability query
      *        from a remote endpoint.
      *
-     * @param bFeatureInContact Flag to indicate if the feature-parameter will be included
-     *                          in Contact header.\n This field is for VSC service.
-     * @param bCheckSupport Flag to indicate if the media property needs to be evaluated
-     *                      when forming a capability SDP.\n
-     *                      The media properties are the following:
-     *                          StreamAudio, StreamVideo, Framed.\n
-     *                      Its default value sets to TRUE according to the specification maybe.
+     * @param nFlags Flags indicating that which information should be added
+     *               or checked for a successful response\n
+     *               The value is bitwise OR of
+     *                   #FLAG_ADD_CONTACT_HEADER
+     *                   #FLAG_ADD_ALL_REGISTERED_FEATURES_IN_CONTACT_HEADER
+     *                   #FLAG_ADD_SDP_BODY_PART
+     *                   #FLAG_CHECK_MEDIA_CAPABILITIES
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT Accept(
-            IN IMS_BOOL bFeatureInContact = IMS_TRUE, IN IMS_BOOL bCheckSupport = IMS_TRUE) = 0;
+    virtual IMS_RESULT Accept(IN IMS_SINT32 nFlags = FLAG_RESPONSE_DEFAULT) = 0;
 
     /**
      * @brief Sends a successful final response to an incoming capability query
@@ -114,7 +111,7 @@ public:
      *
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT AcceptEx() = 0;
+    virtual IMS_RESULT AcceptEx() __IMS_DEPRECATED__("Use Accept(IMS_SINT32) instead") = 0;
 
     /**
      * @brief Sends a failure final response to an incoming capability query
@@ -133,6 +130,28 @@ public:
         STATE_INACTIVE = 1,
         STATE_PENDING = 2,
         STATE_ACTIVE = 3
+    };
+
+    /// Optional flags for forming SIP message such as Contact header, SDP body parts, and so on.
+    enum
+    {
+        FLAG_NONE = 0,
+        /// Flag indicating whether or not a Contact header should be added.
+        FLAG_ADD_CONTACT_HEADER = 1 << 0,
+        /// Flag indicating whether or not a Contact header should contain all the feature tags
+        /// which were used for the same IMS registration.
+        /// This is available when FLAG_ADD_CONTACT_HEADER is set.
+        FLAG_ADD_ALL_REGISTERED_FEATURES_IN_CONTACT_HEADER = 1 << 1,
+        /// Flag indicating whether or not a SDP body part should be added.
+        FLAG_ADD_SDP_BODY_PART = 1 << 2,
+        /// Flag indicating whether or not the media capabilities should be checked
+        /// while forming a SDP body part.
+        /// This is available when FLAG_ADD_SDP_BODY_PART is set.
+        FLAG_CHECK_MEDIA_CAPABILITIES = 1 << 3,
+
+        FLAG_REQUEST_DEFAULT = FLAG_ADD_CONTACT_HEADER,
+        FLAG_RESPONSE_DEFAULT =
+                FLAG_ADD_CONTACT_HEADER | FLAG_ADD_ALL_REGISTERED_FEATURES_IN_CONTACT_HEADER,
     };
 };
 

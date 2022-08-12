@@ -39,13 +39,9 @@ public:
     IMSList<AString> GetRemoteUserIdentities() const;
     inline IMS_SINT32 GetState() const { return m_nState; }
     IMS_BOOL HasCapabilities(IN const AString& strConnection) const;
-    IMS_RESULT QueryCapabilities(IN IMS_BOOL bSdpInRequest,
-            IN IMS_BOOL bContactInRequest = IMS_TRUE, IN IMS_BOOL bCheckSupport = IMS_TRUE);
-    IMS_RESULT QueryCapabilitiesEx();
+    IMS_RESULT QueryCapabilities(IN IMS_SINT32 nFlags = FLAG_REQUEST_DEFAULT);
     inline void SetListener(IN IOnCapabilitiesListener* piListener) { m_piListener = piListener; }
-    IMS_RESULT Accept(
-            IN IMS_BOOL bFeatureInContact = IMS_TRUE, IN IMS_BOOL bCheckSupport = IMS_TRUE);
-    IMS_RESULT AcceptEx();
+    IMS_RESULT Accept(IN IMS_SINT32 nFlags = FLAG_RESPONSE_DEFAULT);
     IMS_RESULT Reject(IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nRetryAfter = 0);
 
     static IMS_RESULT HandleOptionsRequestWithinDialog(
@@ -65,10 +61,14 @@ protected:
 
 private:
     IMS_BOOL CreateContactHeader(OUT AString& strContactHeader, OUT IMS_BOOL& bIsContactGruu,
-            IN IMS_BOOL bWithFeature = IMS_TRUE) const;
-    IMS_BOOL CreateSdp(OUT AString& strSdp, IN IMS_BOOL bCheckSupport = IMS_TRUE,
+            IN IMS_BOOL bIncludeAllFeatures = IMS_TRUE) const;
+    IMS_BOOL CreateSdp(OUT AString& strSdp, IN IMS_BOOL bCheckMediaCapability = IMS_TRUE,
             IN IMS_BOOL bRequest = IMS_FALSE) const;
     void HandleCapabilities(IN ISipClientConnection* piScc);
+    inline IMS_BOOL HasFlag(IN IMS_SINT32 nFlags, IN IMS_SINT32 nFlag) const
+    {
+        return (nFlags & nFlag) == nFlag;
+    }
     IMS_BOOL ParseConnectionName(IN const AString& strConnection, OUT AString& strAppId,
             OUT AString& strServiceId) const;
     void SetState(IN IMS_SINT32 nState);
@@ -90,6 +90,30 @@ public:
         STATE_ACTIVE = 3
     };
 
+    /// Optional flags for forming SIP message such as Contact header, SDP body parts, and so on.
+    enum
+    {
+        FLAG_NONE = 0,
+        /// Flag indicating whether or not a Contact header should be added.
+        FLAG_ADD_CONTACT_HEADER = 1 << 0,
+        /// Flag indicating whether or not a Contact header should contain all the feature tags
+        /// which were used for the same IMS registration.
+        /// This is available when FLAG_ADD_CONTACT_HEADER is set.
+        FLAG_ADD_ALL_REGISTERED_FEATURES_IN_CONTACT_HEADER = 1 << 1,
+        /// Flag indicating whether or not a SDP body part should be added.
+        FLAG_ADD_SDP_BODY_PART = 1 << 2,
+        /// Flag indicating whether or not the media capabilities should be checked
+        /// while forming a SDP body part.
+        /// This is available when FLAG_ADD_SDP_BODY_PART is set.
+        FLAG_CHECK_MEDIA_CAPABILITIES = 1 << 3,
+
+        FLAG_REQUEST_DEFAULT = FLAG_ADD_CONTACT_HEADER,
+        FLAG_RESPONSE_DEFAULT =
+                FLAG_ADD_CONTACT_HEADER | FLAG_ADD_ALL_REGISTERED_FEATURES_IN_CONTACT_HEADER,
+    };
+
+    static const IMS_CHAR DEFAULT_MEDIA_TYPE[];
+
 protected:
     enum
     {
@@ -100,8 +124,6 @@ protected:
     };
 
 private:
-    static const IMS_CHAR DEFAULT_MEDIA_TYPE[];
-
     IMS_SINT32 m_nState;
     IMSList<AString> m_objRemoteUserIdentities;
     IOnCapabilitiesListener* m_piListener;

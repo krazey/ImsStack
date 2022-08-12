@@ -285,11 +285,6 @@ void ConfigurationHolder::InitConfigs(IN IMS_SINT32 nId)
         {
             IMS_TRACE_E(0, "Creating a sip config. failed", 0, 0, 0);
         }
-
-        if (!m_pSipConfig->CreateDefaultServiceConfig())
-        {
-            IMS_TRACE_E(0, "Creating a default service-specific sip config. failed", 0, 0, 0);
-        }
     }
 
     //

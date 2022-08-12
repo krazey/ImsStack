@@ -28,6 +28,9 @@
 class MockISipMessage : public ISipMessage
 {
 public:
+    inline MockISipMessage() {}
+    inline virtual ~MockISipMessage() {}
+
     MOCK_METHOD(void, Destroy, (), (override));
 
     MOCK_METHOD(ISipMessage*, Clone, (), (const, override));
@@ -40,7 +43,7 @@ public:
             (const, override));
     MOCK_METHOD(IMS_SINT32, GetHeaderCount, (IN IMS_SINT32 nType, IN const AString& strName),
             (const, override));
-    MOCK_METHOD(IMSList<AString>, GetHeaders, (IN IMS_SINT32 nType, IN const AString& strName),
+    MOCK_METHOD(ImsList<AString>, GetHeaders, (IN IMS_SINT32 nType, IN const AString& strName),
             (const, override));
     MOCK_METHOD(const SipMethod&, GetMethod, (), (const, override));
     MOCK_METHOD(const AString&, GetReasonPhrase, (), (const, override));
@@ -56,9 +59,9 @@ public:
             (override));
     MOCK_METHOD(ISipMessageBodyPart*, CreateBodyPart, (), (override));
     MOCK_METHOD(ISipMessageBodyPart*, CreateSdpBodyPart, (), (override));
-    MOCK_METHOD(IMSList<ISipMessageBodyPart*>, GetBodyParts, (), (const, override));
+    MOCK_METHOD(ImsList<ISipMessageBodyPart*>, GetBodyParts, (), (const, override));
     MOCK_METHOD(ISipMessageBodyPart*, GetSdpBodyPart, (), (const, override));
-    MOCK_METHOD(IMSList<ISipMessageBodyPart*>, GetSdpBodyParts, (), (const, override));
+    MOCK_METHOD(ImsList<ISipMessageBodyPart*>, GetSdpBodyParts, (), (const, override));
     MOCK_METHOD(IMS_RESULT, CopyHeadersAndBodyParts, (IN const ISipMessage* piSipMsg), (override));
     MOCK_METHOD(IMS_BOOL, IsHeaderPresent, (IN IMS_SINT32 nType, IN const AString& strName),
             (const, override));

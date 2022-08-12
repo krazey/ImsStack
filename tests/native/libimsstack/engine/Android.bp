@@ -16,6 +16,8 @@
 cc_library_headers {
     name: "libimsstack_test_engine_headers",
     export_include_dirs: [
+        "include/core",
+        "include/registration",
         "interface",
         "interface/core",
         "interface/registration",
@@ -53,6 +55,9 @@ cc_test {
         "**/*.cpp",
     ],
     local_include_dirs: [
+        "include",
+        "include/core",
+        "include/registration",
         "interface",
         "interface/core",
         "interface/registration",

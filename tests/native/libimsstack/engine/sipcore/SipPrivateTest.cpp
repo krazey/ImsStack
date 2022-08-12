@@ -52,8 +52,6 @@ protected:
     {
         SipManager::GetInstance();
         SipPrivate::Init(IMS_SLOT_0, m_nDefaultEncodingOptions);
-
-        ON_CALL(m_pThreadService->GetMockThread(), GetSlotId()).WillByDefault(Return(IMS_SLOT_0));
     }
 
     virtual void TearDown() override {}

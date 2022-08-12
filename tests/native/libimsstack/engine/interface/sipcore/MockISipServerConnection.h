@@ -18,6 +18,7 @@
 #define MOCK_I_SIP_SERVER_CONNECTION_H_
 
 #include <gmock/gmock.h>
+
 #include "ImsTypeDef.h"
 #include "ISipServerConnection.h"
 
@@ -32,6 +33,9 @@ class SipProfile;
 class MockISipServerConnection : public ISipServerConnection
 {
 public:
+    inline MockISipServerConnection() {}
+    inline virtual ~MockISipServerConnection() {}
+
     MOCK_METHOD(IMS_RESULT, InitResponse, (IN IMS_SINT32 nStatusCode), (override));
     MOCK_METHOD(IMS_RESULT, SetReasonPhrase, (IN const AString& strReasonPhrase), (override));
     MOCK_METHOD(IMS_BOOL, IsSameTransaction, (IN const ISipServerConnection* piOngoingSsc),

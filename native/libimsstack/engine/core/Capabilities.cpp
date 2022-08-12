@@ -163,8 +163,7 @@ PUBLIC VIRTUAL IMS_BOOL Capabilities::HasCapabilities(IN const AString& strConne
 }
 
 PUBLIC
-IMS_RESULT Capabilities::QueryCapabilities(IN IMS_BOOL bSdpInRequest,
-        IN IMS_BOOL bContactInRequest /*= IMS_TRUE*/, IN IMS_BOOL bCheckSupport /*= IMS_TRUE*/)
+IMS_RESULT Capabilities::QueryCapabilities(IN IMS_SINT32 nFlags /*= FLAG_REQUEST_DEFAULT*/)
 {
     if (!IsServiceOpen())
     {
@@ -216,7 +215,7 @@ IMS_RESULT Capabilities::QueryCapabilities(IN IMS_BOOL bSdpInRequest,
 #endif
 
     // Sets Contact header with all the service's capability in this device.
-    if (bContactInRequest)
+    if (HasFlag(nFlags, FLAG_ADD_CONTACT_HEADER))
     {
         AString strContactHeader;
         IMS_BOOL bIsContactGruu = IMS_FALSE;
@@ -239,12 +238,12 @@ IMS_RESULT Capabilities::QueryCapabilities(IN IMS_BOOL bSdpInRequest,
     }
 
     // Set SDP
-    if (bSdpInRequest)
+    if (HasFlag(nFlags, FLAG_ADD_SDP_BODY_PART))
     {
         // Create SDP for the response to OPTIONS request
         AString strSdp;
 
-        if (!CreateSdp(strSdp, bCheckSupport, IMS_TRUE))
+        if (!CreateSdp(strSdp, HasFlag(nFlags, FLAG_CHECK_MEDIA_CAPABILITIES), IMS_TRUE))
         {
             IMS_TRACE_E(0, "Creating SDP message for OPTIONS request failed", 0, 0, 0);
             goto EXIT_QueryCapabilities;
@@ -276,57 +275,7 @@ EXIT_QueryCapabilities:
     return IMS_FAILURE;
 }
 
-PUBLIC
-IMS_RESULT Capabilities::QueryCapabilitiesEx()
-{
-    if (!IsServiceOpen())
-    {
-        Ims::SetLastError(ImsError::SERVICE_CLOSED);
-        return IMS_FAILURE;
-    }
-
-    if (GetState() != STATE_INACTIVE)
-    {
-        Ims::SetLastError(ImsError::ILLEGAL_STATE);
-        return IMS_FAILURE;
-    }
-
-    // Create new connection and get SipMessage
-    ISipDialog* piDialog = GetDialog();
-    ISipClientConnection* piScc = IMS_NULL;
-
-    if (piDialog == IMS_NULL)
-    {
-        piScc = CreateConnection(SipMethod(SipMethod::OPTIONS));
-    }
-    else
-    {
-        piScc = CreateConnection(piDialog, SipMethod(SipMethod::OPTIONS));
-    }
-
-    if (piScc == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "Creating an OPTIONS SIP connection failed", 0, 0, 0);
-        return IMS_FAILURE;
-    }
-
-    // Send OPTIONS request to the network
-    if (!SendNUpdateRequest(IMessage::CAPABILITIES_QUERY, piScc))
-    {
-        goto EXIT_QueryCapabilities;
-    }
-
-    SetState(STATE_PENDING);
-
-    return IMS_SUCCESS;
-
-EXIT_QueryCapabilities:
-    piScc->Close();
-    return IMS_FAILURE;
-}
-
-PUBLIC VIRTUAL IMS_RESULT Capabilities::Accept(
-        IN IMS_BOOL bFeatureInContact /*= IMS_TRUE*/, IN IMS_BOOL bCheckSupport /*= IMS_TRUE*/)
+PUBLIC VIRTUAL IMS_RESULT Capabilities::Accept(IN IMS_SINT32 nFlags /*= FLAG_RESPONSE_DEFAULT*/)
 {
     if (!IsServiceOpen())
     {
@@ -356,11 +305,14 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Accept(
     // Now, the variable, piSIPMsg will be used for OPTIONS response message
     ISipMessage* piSipMsg = piSsc->GetMessage();
 
-    // Sets Accept header
-    if (piSipMsg->PrependHeader(ISipHeader::ACCEPT, DEFAULT_MEDIA_TYPE) != IMS_SUCCESS)
+    if (HasFlag(nFlags, FLAG_ADD_SDP_BODY_PART))
     {
-        IMS_TRACE_E(0, "Setting Accept header failed", 0, 0, 0);
-        return IMS_FAILURE;
+        // Sets Accept header
+        if (piSipMsg->PrependHeader(ISipHeader::ACCEPT, DEFAULT_MEDIA_TYPE) != IMS_SUCCESS)
+        {
+            IMS_TRACE_E(0, "Setting Accept header failed", 0, 0, 0);
+            return IMS_FAILURE;
+        }
     }
 
     // Accept-Encoding headers
@@ -368,89 +320,50 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Accept(
     // Supported headers
 
     // Sets Contact header with all the service's capability in this device.
-    AString strContactHeader;
-    IMS_BOOL bIsContactGruu = IMS_FALSE;
-
-    if (CreateContactHeader(strContactHeader, bIsContactGruu, bFeatureInContact))
+    if (HasFlag(nFlags, FLAG_ADD_CONTACT_HEADER))
     {
-        if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
-        {
-            IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
-            return IMS_FAILURE;
-        }
+        AString strContactHeader;
+        IMS_BOOL bIsContactGruu = IMS_FALSE;
 
-        const AString strGruu(Sip::STR_GRUU);
-
-        if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
+        if (CreateContactHeader(strContactHeader, bIsContactGruu,
+                    HasFlag(nFlags, FLAG_ADD_ALL_REGISTERED_FEATURES_IN_CONTACT_HEADER)))
         {
-            piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
+            if (piSipMsg->SetHeader(ISipHeader::CONTACT_NORMAL, strContactHeader) != IMS_SUCCESS)
+            {
+                IMS_TRACE_E(0, "Setting Contact header failed", 0, 0, 0);
+                return IMS_FAILURE;
+            }
+
+            const AString strGruu(Sip::STR_GRUU);
+
+            if (bIsContactGruu && !piSipMsg->IsOptionSupported(strGruu))
+            {
+                piSipMsg->AddHeader(ISipHeader::SUPPORTED, strGruu);
+            }
         }
     }
 
     // Create SDP for the response to OPTIONS request
-    AString strSdp;
-
-    if (!CreateSdp(strSdp, bCheckSupport))
+    if (HasFlag(nFlags, FLAG_ADD_SDP_BODY_PART))
     {
-        IMS_TRACE_E(0, "Creating SDP message for OPTIONS response failed", 0, 0, 0);
-        return IMS_FAILURE;
+        AString strSdp;
+
+        if (!CreateSdp(strSdp, HasFlag(nFlags, FLAG_CHECK_MEDIA_CAPABILITIES)))
+        {
+            IMS_TRACE_E(0, "Creating SDP message for OPTIONS response failed", 0, 0, 0);
+            return IMS_FAILURE;
+        }
+
+        ISipMessageBodyPart* piSipBodyPart = piSipMsg->CreateSdpBodyPart();
+
+        if (piSipBodyPart == IMS_NULL)
+        {
+            return IMS_FAILURE;
+        }
+
+        piSipBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, DEFAULT_MEDIA_TYPE);
+        piSipBodyPart->SetContent(strSdp);
     }
-
-    ISipMessageBodyPart* piSipBodyPart = piSipMsg->CreateSdpBodyPart();
-
-    if (piSipBodyPart == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
-
-    piSipBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, DEFAULT_MEDIA_TYPE);
-    piSipBodyPart->SetContent(strSdp);
-
-    if (!SendNUpdateResponse(IMessage::CAPABILITIES_QUERY, piSsc))
-    {
-        IMS_TRACE_E(0, "Accepting Capabilities failed", 0, 0, 0);
-        return IMS_FAILURE;
-    }
-
-    SetState(STATE_ACTIVE);
-
-    // Destroy SIP transaction
-    CloseConnection(IMessage::CAPABILITIES_QUERY);
-
-    return IMS_SUCCESS;
-}
-
-PUBLIC VIRTUAL IMS_RESULT Capabilities::AcceptEx()
-{
-    if (!IsServiceOpen())
-    {
-        Ims::SetLastError(ImsError::SERVICE_CLOSED);
-        return IMS_FAILURE;
-    }
-
-    if (GetState() != STATE_PENDING)
-    {
-        Ims::SetLastError(ImsError::ILLEGAL_STATE);
-        return IMS_FAILURE;
-    }
-
-    ISipServerConnection* piSsc = GetServerConnection(IMessage::CAPABILITIES_QUERY);
-
-    if (piSsc == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
-
-    // Send a 200 OK to OPTIONS request
-    if (CreateResponse(piSsc, SipStatusCode::SC_200) == IMS_FALSE)
-    {
-        IMS_TRACE_E(0, "Initializing the response to OPTIONS request failed", 0, 0, 0);
-    }
-
-    // Accept header
-    // Accept-Encoding headers
-    // Accept-Language headers
-    // Supported headers
 
     if (!SendNUpdateResponse(IMessage::CAPABILITIES_QUERY, piSsc))
     {
@@ -807,13 +720,14 @@ PRIVATE VIRTUAL void Capabilities::NotifySipError(
 
 PRIVATE
 IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
-        OUT IMS_BOOL& bIsContactGruu, IN IMS_BOOL bWithFeature /*= IMS_TRUE*/) const
+        OUT IMS_BOOL& bIsContactGruu, IN IMS_BOOL bIncludeAllFeatures /*= IMS_TRUE*/) const
 {
-    IMSList<Service*> objServices = ServiceManager::GetInstance()->GetServices(GetSlotId());
     CallerCapability objCc(0);
 
-    if (bWithFeature)
+    if (bIncludeAllFeatures)
     {
+        ImsList<Service*> objServices = ServiceManager::GetInstance()->GetServices(GetSlotId());
+
         // Collects the feature parameters for Contact header
         for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
         {
@@ -832,9 +746,9 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
     AString strContact(AString::ConstNull());
     Service* pService = GetService();
     IMS_BOOL bGruuSupported =
-            SipConfigProxy::IsGruuConfigured(GetSlotId(), GetService()->GetSipProfile());
+            SipConfigProxy::IsGruuConfigured(GetSlotId(), pService->GetSipProfile());
 
-    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), GetService()->GetSipProfile()))
+    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), pService->GetSipProfile()))
     {
         SipAddress objContact;
         // 4 Consider the Privacy information (temp-gruu)
@@ -892,7 +806,8 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
 }
 
 PRIVATE
-IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp, IN IMS_BOOL bCheckSupport /*= IMS_TRUE*/,
+IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp,
+        IN IMS_BOOL bCheckMediaCapability /*= IMS_TRUE*/,
         IN IMS_BOOL bRequest /*= IMS_FALSE*/) const
 {
     IPAddress objLocalAddress = GetService()->GetIpAddress();
@@ -932,7 +847,8 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp, IN IMS_BOOL bCheckSupport 
         CollectSdpFieldsFromRegistry(
                 pAppConfig, bRequest, CapProperty::SECTOR_SESSION, objSessionSdpFields);
 
-        if ((!bCheckSupport) || (bCheckSupport && pAppConfig->IsStreamMediaAudioSupported()))
+        if (!bCheckMediaCapability ||
+                (bCheckMediaCapability && pAppConfig->IsStreamMediaAudioSupported()))
         {
             bStreamAudioSupported = IMS_TRUE;
 
@@ -942,7 +858,8 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp, IN IMS_BOOL bCheckSupport 
                     pAppConfig, bRequest, CapProperty::SECTOR_STREAM_AUDIO, objAudioSdpFields);
         }
 
-        if ((!bCheckSupport) || (bCheckSupport && pAppConfig->IsStreamMediaVideoSupported()))
+        if (!bCheckMediaCapability ||
+                (bCheckMediaCapability && pAppConfig->IsStreamMediaVideoSupported()))
         {
             bStreamVideoSupported = IMS_TRUE;
 
@@ -952,7 +869,8 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp, IN IMS_BOOL bCheckSupport 
                     pAppConfig, bRequest, CapProperty::SECTOR_STREAM_VIDEO, objVideoSdpFields);
         }
 
-        if ((!bCheckSupport) || (bCheckSupport && pAppConfig->IsFramedMediaSupported()))
+        if (!bCheckMediaCapability ||
+                (bCheckMediaCapability && pAppConfig->IsFramedMediaSupported()))
         {
             bFramedMediaSupported = IMS_TRUE;
 
@@ -996,6 +914,12 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp, IN IMS_BOOL bCheckSupport 
 
     const MediaConfig* pMediaConfig =
             ConfigurationManager::GetInstance()->GetMediaConfig(GetSlotId());
+
+    if (pMediaConfig == IMS_NULL)
+    {
+        // No media configuration.
+        return IMS_TRUE;
+    }
 
     // Form a SDP in case of StreamAudio
     if (bStreamAudioSupported)

@@ -64,25 +64,23 @@ private:
     {
         return m_pCapabilities->HasCapabilities(strConnection);
     }
-    inline IMS_RESULT QueryCapabilities(IN IMS_BOOL bSdpInRequest,
-            IN IMS_BOOL bContactInRequest = IMS_TRUE, IN IMS_BOOL bCheckSupport = IMS_TRUE) override
+    inline IMS_RESULT QueryCapabilities(IN IMS_SINT32 nFlags = FLAG_REQUEST_DEFAULT) override
     {
-        return m_pCapabilities->QueryCapabilities(bSdpInRequest, bContactInRequest, bCheckSupport);
+        return m_pCapabilities->QueryCapabilities(nFlags);
     }
     inline IMS_RESULT QueryCapabilitiesEx() override
     {
-        return m_pCapabilities->QueryCapabilitiesEx();
+        return m_pCapabilities->QueryCapabilities(FLAG_NONE);
     }
     inline void SetListener(IN ICapabilitiesListener* piListener) override
     {
         m_piListener = piListener;
     }
-    inline IMS_RESULT Accept(
-            IN IMS_BOOL bFeatureInContact = IMS_TRUE, IN IMS_BOOL bCheckSupport = IMS_TRUE) override
+    inline IMS_RESULT Accept(IN IMS_SINT32 nFlags = FLAG_RESPONSE_DEFAULT) override
     {
-        return m_pCapabilities->Accept(bFeatureInContact, bCheckSupport);
+        return m_pCapabilities->Accept(nFlags);
     }
-    inline IMS_RESULT AcceptEx() override { return m_pCapabilities->AcceptEx(); }
+    inline IMS_RESULT AcceptEx() override { return m_pCapabilities->Accept(FLAG_NONE); }
     inline IMS_RESULT Reject(IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nRetryAfter = 0) override
     {
         return m_pCapabilities->Reject(nStatusCode, nRetryAfter);

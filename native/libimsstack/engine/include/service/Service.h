@@ -85,15 +85,16 @@ public:
     {
         // The subclass MUST implement this method to handle an incoming OPTIONS request
     }
-
-    ISipClientConnection* CreateConnection(IN const SipAddress* pFrom, IN const SipAddress* pTo,
-            IN const SipMethod& objMethod, IN IMS_BOOL bPrivacy = IMS_FALSE);
-    ISipClientConnection* CreateConnection(IN ISipDialog* piDialog, IN const SipMethod& objMethod,
+    virtual ISipClientConnection* CreateConnection(IN const SipAddress* pFrom,
+            IN const SipAddress* pTo, IN const SipMethod& objMethod,
             IN IMS_BOOL bPrivacy = IMS_FALSE);
-    ISipClientConnection* CreateCancelConnection(IN ISipClientConnection* piScc);
-    IMS_BOOL CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode,
+    virtual ISipClientConnection* CreateConnection(IN ISipDialog* piDialog,
+            IN const SipMethod& objMethod, IN IMS_BOOL bPrivacy = IMS_FALSE);
+    virtual ISipClientConnection* CreateCancelConnection(IN ISipClientConnection* piScc);
+    virtual IMS_BOOL CreateResponse(IN_OUT ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode,
             IN const AString& strPhrase = AString::ConstNull(), IN IMS_BOOL bPrivacy = IMS_FALSE);
-    IMS_BOOL InitAck(IN ISipClientConnection* piScc);
+    virtual IMS_BOOL InitAck(IN ISipClientConnection* piScc);
+
     IMS_BOOL Equals(IN const Service* pService) const;
     IMS_UINT32 EvaluateFilterCriteria(IN const ISipMessage* piSipMsg) const;
     inline const AString& GetServiceId() const { return m_strServiceId; }
@@ -204,6 +205,7 @@ protected:
         // The subclass MUST implement this method to handle new incoming SIP requests
         return IMS_FALSE;
     }
+    inline void SetImsConnected(IN IMS_BOOL bImsConnected) { m_bImsConnected = bImsConnected; }
 
     void FormContactHeader(IN const SipMethod& objMethod, IN IMS_BOOL bPrivacy,
             IN IMS_BOOL bRequest, OUT AString& strContact, OUT IMS_BOOL& bIsContactGruu) const;

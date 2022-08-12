@@ -46,12 +46,7 @@ public:
     }
 
 protected:
-    virtual void SetUp() override
-    {
-        Ims::Init();
-
-        ON_CALL(m_pThreadService->GetMockThread(), GetSlotId()).WillByDefault(Return(IMS_SLOT_0));
-    }
+    virtual void SetUp() override { Ims::Init(); }
 
     virtual void TearDown() override {}
 
