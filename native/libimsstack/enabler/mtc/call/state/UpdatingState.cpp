@@ -146,8 +146,10 @@ PUBLIC VIRTUAL CallStateName UpdatingState::Terminate(IN const CallReasonInfo& o
 
     // SetTerminateCodeForInvitedSessionToConf
 
-    HandleTerminate(objReason);
-    m_objContext.GetUiNotifier().SendTerminated(objReason);
+    const CallReasonInfo objTerminateReason = GetAudioInactivityReasonOnTermination(objReason);
+
+    HandleTerminate(objTerminateReason);
+    m_objContext.GetUiNotifier().SendTerminated(objTerminateReason);
 
     return CallStateName::TERMINATING;
 }

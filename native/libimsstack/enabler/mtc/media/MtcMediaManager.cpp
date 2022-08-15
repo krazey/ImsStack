@@ -44,6 +44,7 @@ MtcMediaManager::MtcMediaManager(IN IMtcCallContext& objContext) :
         m_pMediaInfo(new MediaInfo()),
         m_pOldMediaInfo(new MediaInfo()),
         m_bLocalTone(IMS_FALSE),
+        m_bAudioInactive(IMS_FALSE),
         m_piMediaSession(IMS_NULL),
         m_eState(MediaState::IDLE),
         m_eOldState(MediaState::IDLE)
@@ -90,6 +91,11 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportTy
             SetState(MediaState::TERMINATED);
             break;
         case REPORT_DATA_RECEIVE_FAILED:
+            if (eReportedMediaType == MEDIATYPE_AUDIO)
+            {
+                IMS_TRACE_D("MediaSession_Notify : audio blocked", 0, 0, 0);
+                m_bAudioInactive = IMS_TRUE;
+            }
             m_pMediaReportListener->OnReceivingMediaDataFailed(
                     eReportedMediaType, eMediaProtocolType);
             break;
@@ -666,6 +672,11 @@ PUBLIC VIRTUAL PemType MtcMediaManager::GetPemType(IN ISession* piSession)
 PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioMediaActivated()
 {
     return (m_pMediaInfo->eADir != DIRECTION_INACTIVE) ? IMS_TRUE : IMS_FALSE;
+}
+
+PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioInactive()
+{
+    return m_bAudioInactive;
 }
 
 PRIVATE

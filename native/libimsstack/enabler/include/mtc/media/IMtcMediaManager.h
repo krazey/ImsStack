@@ -200,6 +200,8 @@ public:
     virtual IMS_BOOL IsAudioQualityHd() = 0;
     virtual PemType GetPemType(IN ISession* piSession) = 0;
     virtual IMS_BOOL IsAudioMediaActivated() = 0;
+
+    virtual IMS_BOOL IsAudioInactive() = 0;
 };
 
 enum class MediaState

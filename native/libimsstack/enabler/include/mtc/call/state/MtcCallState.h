@@ -208,6 +208,7 @@ protected:
 
     IMS_BOOL IsCallEndNeededByAudioInactivity(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) const;
+    CallReasonInfo GetAudioInactivityReasonOnTermination(IN const CallReasonInfo& objReason);
 
     IMtcCallContext& m_objContext;
 

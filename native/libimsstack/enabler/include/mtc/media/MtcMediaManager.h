@@ -125,6 +125,8 @@ public:
     virtual PemType GetPemType(IN ISession* piSession) override;  // remove..?
     virtual IMS_BOOL IsAudioMediaActivated() override;
 
+    virtual IMS_BOOL IsAudioInactive() override;
+
 private:
     void SetState(IN MediaState eState);
     void FinalizeMediaInfo(IN IMS_UINTP nNegoId);
@@ -148,6 +150,7 @@ private:
     MediaInfo* m_pMediaInfo;
     MediaInfo* m_pOldMediaInfo;
     IMS_BOOL m_bLocalTone;
+    IMS_BOOL m_bAudioInactive;
     IMediaSession* m_piMediaSession;
     MediaState m_eState;
     MediaState m_eOldState;

@@ -15,19 +15,40 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include "call/MockIMtcCallContext.h"
 #include "media/MtcMediaManager.h"
+#include "media/MockIMediaReportEventListener.h"
+
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
+
+LOCAL CallKey DEFAULT_CALL_KEY = 1;
 
 class MtcMediaManagerTest : public ::testing::Test
 {
 public:
     MockIMtcCallContext objContext;
     MtcMediaManager* pMediaManager;
+    MockIMediaReportEventListener* pListener;
 
 protected:
-    virtual void SetUp() override { pMediaManager = new MtcMediaManager(objContext); }
+    virtual void SetUp() override
+    {
+        ON_CALL(objContext, GetCallKey).WillByDefault(Return(DEFAULT_CALL_KEY));
+        pListener = new MockIMediaReportEventListener();
 
-    virtual void TearDown() override { delete pMediaManager; }
+        pMediaManager = new MtcMediaManager(objContext);
+
+        pMediaManager->SetMediaReportEventListener(pListener);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pMediaManager;
+        delete pListener;
+    }
 };
 
 TEST_F(MtcMediaManagerTest, GetStateReturnsIdleInitially)
@@ -41,4 +62,36 @@ TEST_F(MtcMediaManagerTest, TerminateSetsStateToTerminating)
     pMediaManager->Terminate();
 
     EXPECT_EQ(MediaState::TERMINATING, pMediaManager->GetState());
+}
+
+TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithSuccessReport)
+{
+    pMediaManager->MediaSession_Notify(REPORT_SUCCESS);
+
+    EXPECT_EQ(MediaState::STARTED, pMediaManager->GetState());
+}
+
+TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithCloseSessionReport)
+{
+    pMediaManager->MediaSession_Notify(REPORT_CLOSE_SESSION);
+
+    EXPECT_EQ(MediaState::TERMINATED, pMediaManager->GetState());
+}
+
+TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithDataReceivedFailedReport)
+{
+    EXPECT_CALL(*pListener, OnReceivingMediaDataFailed(_, _)).Times(2);
+
+    pMediaManager->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED);
+    EXPECT_EQ(IMS_FALSE, pMediaManager->IsAudioInactive());
+
+    pMediaManager->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED, MEDIA_TYPE_AUDIO);
+    EXPECT_EQ(IMS_TRUE, pMediaManager->IsAudioInactive());
+}
+
+TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithVideoLowestBitRateReport)
+{
+    EXPECT_CALL(*pListener, OnVideoLowestBitRate).Times(1);
+
+    pMediaManager->MediaSession_Notify(REPORT_VIDEO_LOWEST_BIT_RATE);
 }

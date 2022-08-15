@@ -970,3 +970,22 @@ IMS_BOOL MtcCallState::IsCallEndNeededByAudioInactivity(
 
     return bNeedToEnd;
 }
+
+PROTECTED
+CallReasonInfo MtcCallState::GetAudioInactivityReasonOnTermination(
+        IN const CallReasonInfo& objReason)
+{
+    if (objReason.nCode != CODE_USER_TERMINATED)
+    {
+        return objReason;
+    }
+
+    if (m_objContext.GetMediaManager().IsAudioInactive() == IMS_FALSE)
+    {
+        return objReason;
+    }
+
+    IMS_TRACE_D("GetAudioInactivityReasonOnTermination", 0, 0, 0);
+
+    return CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_RTP_TIMEOUT);
+}

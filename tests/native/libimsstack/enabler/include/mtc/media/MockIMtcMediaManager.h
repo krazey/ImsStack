@@ -82,6 +82,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsAudioQualityHd, (), (override));
     MOCK_METHOD(PemType, GetPemType, (IN ISession * piSession), (override));
     MOCK_METHOD(IMS_BOOL, IsAudioMediaActivated, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsAudioInactive, (), (override));
 };
 
 #endif

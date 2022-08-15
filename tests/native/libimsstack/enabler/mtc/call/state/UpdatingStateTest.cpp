@@ -15,16 +15,18 @@
  */
 
 #include <gtest/gtest.h>
-#include "call/state/UpdatingState.h"
 #include "call/MockIMtcCallContext.h"
-#include "call/UpdatingInfo.h"
 #include "call/MockIMtcSession.h"
+#include "call/MtcUiNotifier.h"
 #include "call/state/MtcCallState.h"
+#include "call/state/UpdatingState.h"
+#include "call/UpdatingInfo.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/ISession.h"
 #include "core/MockISession.h"
 #include "helper/MtcTimerWrapper.h"
+#include "media/MockIMtcMediaManager.h"
 #include "sipcore/SipMethod.h"
 
 using ::testing::_;
@@ -40,6 +42,8 @@ public:
     UpdatingInfo* pUpdatingInfo;
     UpdatingState* pUpdatingState;
     CallInfo objCallInfo;
+    MockIMtcMediaManager objMediaManager;
+    MockIMtcSession objMtcSession;
 
 protected:
     virtual void SetUp() override
@@ -56,6 +60,11 @@ protected:
         ON_CALL(objContext, GetUpdatingInfo)
                 .WillByDefault(ReturnRef(*pUpdatingInfo));
 
+        ON_CALL(objContext, GetMediaManager)
+                .WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objContext, GetSession())
+                .WillByDefault(Return(&objMtcSession));
+
         pUpdatingState = new UpdatingState(objContext);
     }
 
@@ -68,7 +77,6 @@ protected:
 
 TEST_F(UpdatingStateTest, OnExitDoesntSendUpdateIfUpdatingInfoHasPendingUpdateAsDefaultValue)
 {
-    MockIMtcSession objMtcSession;
     EXPECT_CALL(objMtcSession, Update(_, _, _)).Times(0);
 
     pUpdatingState->OnExit();
@@ -76,7 +84,6 @@ TEST_F(UpdatingStateTest, OnExitDoesntSendUpdateIfUpdatingInfoHasPendingUpdateAs
 
 TEST_F(UpdatingStateTest, OnExitDoesntSendUpdateIfUpdatingInfoDoesntHavePendingUpdate)
 {
-    MockIMtcSession objMtcSession;
     EXPECT_CALL(objMtcSession, Update(_, _, _)).Times(0);
 
     pUpdatingInfo->SetPendingUpdate(IMS_FALSE);
@@ -85,10 +92,6 @@ TEST_F(UpdatingStateTest, OnExitDoesntSendUpdateIfUpdatingInfoDoesntHavePendingU
 
 TEST_F(UpdatingStateTest, OnExitSendsUpdateIfUpdatingInfoHasPendingUpdate)
 {
-    MockIMtcSession objMtcSession;
-    ON_CALL(objContext, GetSession())
-            .WillByDefault(Return(&objMtcSession));
-
     EXPECT_CALL(objMtcSession, Update(UpdateType::REFRESH, IMS_FALSE, SipMethod::INVALID)).Times(1);
 
     pUpdatingInfo->SetPendingUpdate(IMS_TRUE);
@@ -103,11 +106,8 @@ TEST_F(UpdatingStateTest, OnUserResponseTimerExpiredCallsReject)
     ON_CALL(objSession, GetState())
             .WillByDefault(Return(ISession::STATE_RENEGOTIATING));
 
-    MockIMtcSession objMtcSession;
     ON_CALL(objMtcSession, GetISession())
             .WillByDefault(ReturnRef(objSession));
-    ON_CALL(objContext, GetSession())
-            .WillByDefault(Return(&objMtcSession));
 
     EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE))).Times(1);
 
@@ -119,12 +119,35 @@ TEST_F(UpdatingStateTest, OnRemoteResponseTimerExpiredCallsCancelUpdate)
     MtcTimerWrapper objTimer;
     ON_CALL(objContext, GetTimer).WillByDefault(ReturnRef(objTimer));
 
-    MockIMtcSession objMtcSession;
-    ON_CALL(objContext, GetSession())
-            .WillByDefault(Return(&objMtcSession));
-
     EXPECT_CALL(objMtcSession, CancelUpdate(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE)))
             .Times(1);
 
     pUpdatingState->OnTimerExpired(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE);
+}
+
+TEST_F(UpdatingStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
+{
+    MtcUiNotifier* pUiNotifier = new MtcUiNotifier(objContext);
+    ON_CALL(objContext, GetUiNotifier).WillByDefault(ReturnRef(*pUiNotifier));
+
+    EXPECT_CALL(objMediaManager, IsAudioInactive)
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    CallReasonInfo objTerminateReason(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_RTP_TIMEOUT);
+    EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, objTerminateReason)).Times(1);
+
+    CallReasonInfo objReason(CODE_USER_TERMINATED);
+    pUpdatingState->Terminate(objReason);
+
+    EXPECT_CALL(objMediaManager, IsAudioInactive)
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+
+    objTerminateReason.nExtraCode = -1;
+    EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, objTerminateReason)).Times(1);
+
+    pUpdatingState->Terminate(objReason);
+
+    delete pUiNotifier;
 }

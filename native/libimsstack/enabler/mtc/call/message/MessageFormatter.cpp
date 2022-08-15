@@ -905,14 +905,16 @@ void MessageFormatter::GetTerminateReason(
             if (objReason.nExtraCode == EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT)
             {
                 strReason = GetTerminateReason(TerminateType::USER_ENDS_AND_SIP_RESPONSE_TIMEOUT);
-                break;
             }
             else if (objReason.nExtraCode == EXTRA_USER_TERMINATED_AND_RTP_TIMEOUT)
             {
                 strReason = GetTerminateReason(TerminateType::USER_ENDS_CALL_AND_RTP_TIMEOUT);
-                break;
             }
-            strReason = GetTerminateReason(TerminateType::USER_ENDS_CALL);
+
+            if (strReason.GetLength() <= 0)
+            {
+                strReason = GetTerminateReason(TerminateType::USER_ENDS_CALL);
+            }
             break;
         case CODE_MEDIA_NO_DATA:
             strReason = GetTerminateReason(TerminateType::RTP_TIMEOUT);

@@ -15,17 +15,64 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
+#include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcSession.h"
+#include "call/MtcUiNotifier.h"
 #include "call/state/EstablishedState.h"
+#include "media/MockIMtcMediaManager.h"
+
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace android
 {
 
 class EstablishedStateTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    EstablishedState* pEstablishedState;
+    MockIMtcCallContext objMockCallContext;
+    MockIMtcMediaManager objMockMediaManager;
+    MockIMtcSession objMockMtcSession;
+    MtcUiNotifier* pUiNotifier;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override
+    {
+        ON_CALL(objMockCallContext, GetMediaManager).WillByDefault(ReturnRef(objMockMediaManager));
+        ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMockMtcSession));
+
+        pUiNotifier = new MtcUiNotifier(objMockCallContext);
+        ON_CALL(objMockCallContext, GetUiNotifier).WillByDefault(ReturnRef(*pUiNotifier));
+
+        pEstablishedState = new EstablishedState(objMockCallContext);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pUiNotifier;
+        delete pEstablishedState;
+    }
 };
+
+TEST_F(EstablishedStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
+{
+    CallInfo objCallInfo;
+    ON_CALL(objMockCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+
+    EXPECT_CALL(objMockMediaManager, IsAudioInactive)
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMockMtcSession, Terminate(_, _)).Times(2);
+
+    CallReasonInfo objReason(CODE_USER_TERMINATED);
+    pEstablishedState->Terminate(objReason);
+    pEstablishedState->Terminate(objReason);
+}
 
 }  // namespace android

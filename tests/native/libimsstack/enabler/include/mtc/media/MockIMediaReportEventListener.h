@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_MEDIA_REPORT_EVENT_LISTENER_H_
-#define INTERFACE_MEDIA_REPORT_EVENT_LISTENER_H_
+#ifndef MOCK_I_MEDIA_REPORT_EVENT_LISTENER_H_
+#define MOCK_I_MEDIA_REPORT_EVENT_LISTENER_H_
 
+#include <gmock/gmock.h>
 #include "ImsTypeDef.h"
-#include "CallReasonInfo.h"
+#include "media/IMediaReportEventListener.h"
 
-class IMediaReportEventListener
+class MockIMediaReportEventListener : public IMediaReportEventListener
 {
 public:
-    virtual ~IMediaReportEventListener(){};
-    virtual void OnReceivingMediaDataFailed(
-            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) = 0;
-    virtual void OnVideoLowestBitRate() = 0;
-    virtual void OnReceivingNetworkToneStarted() = 0;
-    virtual void OnReceivingNetworkToneFailed() = 0;
-    virtual void OnMediaFailed(IN CallReasonInfo objReason) = 0;
+    MOCK_METHOD(void, OnReceivingMediaDataFailed,
+            (IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType), (override));
+    MOCK_METHOD(void, OnVideoLowestBitRate, (), (override));
+    MOCK_METHOD(void, OnReceivingNetworkToneStarted, (), (override));
+    MOCK_METHOD(void, OnReceivingNetworkToneFailed, (), (override));
+    MOCK_METHOD(void, OnMediaFailed, (IN CallReasonInfo objReason), (override));
 };
 
 #endif
