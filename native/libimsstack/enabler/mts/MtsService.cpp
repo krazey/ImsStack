@@ -249,16 +249,7 @@ void MtsService::ImsAos_Connected(IN IMS_UINT32 /*nFeatures*/, IN IMS_UINT32 /*n
         return;
     }
 
-    MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-
-    if (pMtsServiceState != IMS_NULL)
-    {
-        pMtsServiceState->OnImsConnected();
-    }
-    else
-    {
-        IMS_TRACE_E(0, "pMtsServiceState is null", 0, 0, 0);
-    }
+    m_pMtsDynamicLoader->GetMtsServiceState()->OnImsConnected();
 
     if (m_pE911SmsInfo != IMS_NULL)
     {
@@ -282,12 +273,7 @@ void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
         return;
     }
 
-    MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-
-    if (pMtsServiceState != IMS_NULL)
-    {
-        pMtsServiceState->OnImsDisconnected(nReason);
-    }
+    m_pMtsDynamicLoader->GetMtsServiceState()->OnImsDisconnected(nReason);
 }
 
 PUBLIC
@@ -301,12 +287,7 @@ void MtsService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
         return;
     }
 
-    MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-
-    if (pMtsServiceState != IMS_NULL)
-    {
-        pMtsServiceState->OnImsDisconnecting(nReason);
-    }
+    m_pMtsDynamicLoader->GetMtsServiceState()->OnImsDisconnecting(nReason);
 }
 
 PUBLIC
@@ -320,12 +301,7 @@ void MtsService::ImsAos_Suspended(IN IMS_UINT32 nReason)
         return;
     }
 
-    MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-
-    if (pMtsServiceState != IMS_NULL)
-    {
-        pMtsServiceState->OnImsSuspended(nReason);
-    }
+    m_pMtsDynamicLoader->GetMtsServiceState()->OnImsSuspended(nReason);
 }
 
 PUBLIC
@@ -339,12 +315,7 @@ void MtsService::ImsAos_Resumed()
         return;
     }
 
-    MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-
-    if (pMtsServiceState != IMS_NULL)
-    {
-        pMtsServiceState->OnImsResumed();
-    }
+    m_pMtsDynamicLoader->GetMtsServiceState()->OnImsResumed();
 }
 
 PUBLIC
@@ -357,12 +328,7 @@ void MtsService::IMSAoSApp_NotifySpecificMessage(
         return;
     }
 
-    MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-
-    if (pMtsServiceState != IMS_NULL)
-    {
-        pMtsServiceState->NotifySpecificMessage(nMsg, nWparam, nLparam);
-    }
+    m_pMtsDynamicLoader->GetMtsServiceState()->NotifySpecificMessage(nMsg, nWparam, nLparam);
 }
 
 PUBLIC
@@ -376,12 +342,7 @@ void MtsService::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 
         return;
     }
 
-    MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-
-    if (pMtsServiceState != IMS_NULL)
-    {
-        pMtsServiceState->SetConnectedServices(nServices);
-    }
+    m_pMtsDynamicLoader->GetMtsServiceState()->SetConnectedServices(nServices);
 }
 
 PUBLIC

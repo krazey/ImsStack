@@ -40,6 +40,7 @@ public:
     MOCK_METHOD(void, ReportMtSms, (IN SmsFormatType eSmsFormat, IN const ByteArray& objData),
             (override));
     MOCK_METHOD(void, SetListener, (IN IMtsServiceListener * piMtsServiceListener), (override));
+    MOCK_METHOD(void, RequestRegistrationRecovery, (IN IMS_SINT32 nRecoveryType), (override));
 };
 
 #endif

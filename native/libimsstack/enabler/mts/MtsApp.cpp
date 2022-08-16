@@ -117,37 +117,6 @@ PUBLIC VIRTUAL void MtsApp::Stop()
     }
 }
 
-PUBLIC VIRTUAL void MtsApp::MtsMessageController_NoTransaction()
-{
-    IMS_TRACE_I("MtsMessageController_NoTransaction", 0, 0, 0);
-
-    if (m_pMtsServiceState == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "Fail to get MtsServiceState instance", 0, 0, 0);
-        return;
-    }
-
-    /*
-     * TODO: check why SmsOverIp update is needed here
-     * If it does not need, then remove
-     */
-    IMS_BOOL bSmsOverIpNetwork = IMS_TRUE;
-
-    if (bSmsOverIpNetwork)
-    {
-        m_pMtsServiceState->SetSmsOverIpState(IMS_TRUE);
-    }
-    else
-    {
-        m_pMtsServiceState->SetSmsOverIpState(IMS_FALSE);
-    }
-
-    if (m_pMtsMessageController != IMS_NULL)
-    {
-        m_pMtsMessageController->DeregisterNoTransactionListener(this);
-    }
-}
-
 PUBLIC VIRTUAL void MtsApp::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
     IMS_TRACE_I("CallTracker_StateChanged : nType[%d], nState[%d]", nType, nState, 0);
@@ -167,6 +136,8 @@ PRIVATE void MtsApp::CreateMtsService()
 
 PRIVATE void MtsApp::CreateMtsMessageController()
 {
+    IMS_TRACE_I("CreateMtsMessageController [slot_%d]", m_nSlotId, 0, 0);
+
     m_pMtsMessageController =
             new MtsMessageController(m_nSlotId, m_piMtsService, m_pMtsDynamicLoader);
 }
@@ -176,18 +147,7 @@ PRIVATE void MtsApp::CreateMtsUtils()
     IMS_TRACE_I("CreateMtsUtils [slot_%d]", m_nSlotId, 0, 0);
 
     m_pMtsDynamicLoader = new MtsDynamicLoader(m_nSlotId);
-
-    if (m_pMtsDynamicLoader != IMS_NULL)
-    {
-        m_pMtsDynamicLoader->Initialize();
-        MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-        m_pMtsServiceState = pMtsServiceState;
-    }
-
-    if (m_pMtsDynamicLoader == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "m_pMtsDynamicLoader is NULL", 0, 0, 0);
-    }
+    m_pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
 }
 
 PRIVATE void MtsApp::DestroyMtsUtils()
@@ -211,12 +171,6 @@ PRIVATE void MtsApp::GetSmOverIpConfigInfo()
     IMS_TRACE_I("GetSmOverIpConfigInfo", 0, 0, 0);
 
     MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-
-    if (pMtsServiceState == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "Fail to get MtsServiceState instance", 0, 0, 0);
-        return;
-    }
 
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
     IMS_BOOL bSmsOverIpNetwork =

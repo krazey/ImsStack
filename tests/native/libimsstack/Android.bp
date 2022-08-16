@@ -54,6 +54,7 @@ cc_test {
     local_include_dirs: [
         "enabler/include/aos",
         "enabler/include/mtc",
+        "enabler/include/mts",
         "enabler/include/media",
     ],
     header_libs: [

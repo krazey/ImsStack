@@ -19,7 +19,6 @@
 
 #include "IMtsApp.h"
 #include "IMtsCallTrackerListener.h"
-#include "IMtsMessageControllerListener.h"
 #include "MtsServiceState.h"
 #include "ImsApp.h"
 #include "ImsService.h"
@@ -32,11 +31,7 @@ class MtsMessageController;
 class MtsService;
 class MtsServiceState;
 
-class MtsApp :
-        public ImsApp,
-        public IMtsApp,
-        public IMtsCallTrackerListener,
-        public IMtsMessageControllerListener
+class MtsApp : public ImsApp, public IMtsApp, public IMtsCallTrackerListener
 {
 public:
     MtsApp(IN IMS_SINT32 nSlotId);
@@ -45,9 +40,6 @@ public:
     // IMtsApp
     virtual void Start() override;
     virtual void Stop() override;
-
-    // IMtsMessageControllerListener
-    virtual void MtsMessageController_NoTransaction();
 
     // IMtsCallTrackerListener
     virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState);

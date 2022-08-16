@@ -18,57 +18,32 @@
 #define MTS_MESSAGE_CONTROLLER_H_
 
 #include "ICoreService.h"
+#include "IPageMessageListener.h"
 #include "ImsActivityEx.h"
 #include "IuMts.h"
 #include "MtsDef.h"
 #include "MtsService.h"
 
 class IMtsMessage;
-class IMtsMessageControllerListener;
 class IPageMessage;
 class MtsDynamicLoader;
 
-class MtsMessageController final : public ImsActivityEx, public IMtsServiceListener
+class MtsMessageController final :
+        public ImsActivityEx,
+        public IPageMessageListener,
+        public IMtsServiceListener
 {
 public:
     MtsMessageController(IN IMS_SINT32 nSlotID, IN IMtsService* piMtsService,
             IN MtsDynamicLoader* pMtsDynamicLoader);
     ~MtsMessageController();
 
-    void DestroyMtsMessage();
-
-    void Add(IN IMtsMessage* piMtsMessage);
-    void Remove(IN IMtsMessage* piMtsMessage);
-    IMtsMessage* Search(IN const AString& strDestination);
-    IMtsMessage* Search(IN const AString& strDestination, IN IMS_SINT32 nMti);
-    IMtsMessage* Search(IN IMS_SINT32 nMessageReference,
-            IN MtsTransactionType eMessageType = MtsTransactionType::MESSAGE_TYPE_RECEIVE);
-
-    void RegisterNoTransactionListener(IN IMtsMessageControllerListener* piListener);
-    void DeregisterNoTransactionListener(IN IMtsMessageControllerListener* piListener);
-    IMS_BOOL HasMessageSendingReceiving();
     void TerminateAllPendingMessages(IN IMS_BOOL bIs1xCallTerm);
     void TerminateAllPendingMessagesEx(IN IMS_UINT32 nReason);
 
-    const AString& GetLastIpsmgwAddr();
-    void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
-
-    IMS_BOOL IsDeliverMessage(IN IPageMessage* piPageMessage);
-    ICoreService* GetICoreService(IN IMS_BOOL bEmergency);
-    MtsDynamicLoader* GetMtsUtils();
-
-    void SetCallStateType(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
-    IMS_BOOL IsEmergencyCalling();
-
-    IMS_RESULT ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsFormat,
-            IN IMS_UINT8 nRetryAfter = 0, IN IMS_SINT32 nSeqId = -1);
-    IMS_UINT32 ReportMtSms(
-            IN SmsFormatType eSmsFormat, IN IMS_UINT32 nSmsLength, IN const IMS_BYTE* pbySmsData);
-
-    void ReportTransmissionResult(
-            IN IMS_UINT32 nResponse, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
-    void ReportTransmissionFailureWithRetryTime(
-            IN SmsFormatType eSmsFormat, IN const IMS_UINT8 nRetryTime, IN IMS_SINT32 nSeqId = -1);
+    // IPageMessageListener
+    void PageMessageDelivered(IN IPageMessage* piPageMessage) override;
+    void PageMessageDeliveryFailed(IN IPageMessage* piPageMessage) override;
 
     // IMtsServiceListener
     virtual void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
@@ -79,22 +54,70 @@ private:
     // ImsActivityEx
     IMS_BOOL OnMessage(IN IMSMSG& objMSG);
 
+    void DestroyMtsMessage();
+    void Add(IN IMtsMessage* piMtsMessage);
+    void Remove(IN IMtsMessage* piMtsMessage);
+    IMtsMessage* Search(IN const AString& strDestination);
+    IMtsMessage* Search(IN IPageMessage* piPageMessage);
+    IMtsMessage* Search(IN const AString& strDestination, IN IMS_SINT32 nMti);
+    IMtsMessage* Search(IN IMS_SINT32 nMessageReference,
+            IN MtsTransactionType eMessageType = MtsTransactionType::MESSAGE_TYPE_RECEIVE);
+
     void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bEmergency);
     void SendMtsMessage(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency);
+    IMS_RESULT ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsFormat,
+            IN IMS_UINT8 nRetryAfter = 0, IN IMS_SINT32 nSeqId = -1);
+    IMS_UINT32 ReportMtSms(
+            IN SmsFormatType eSmsFormat, IN IMS_UINT32 nSmsLength, IN const IMS_BYTE* pbySmsData);
+
+    IMS_BOOL ConstructSendMessage(IN IMessage* piMessage, IN const ByteArray& objSms,
+            IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergency);
+    IMS_BOOL FormDestinationByMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, OUT AString& strDestination);
+    IMS_BOOL ProcessReceivedMessage(
+            IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage, OUT ByteArray& objSms);
+    void ReportTransmissionResult(
+            IN IMS_UINT32 nResponse, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
+    void ReportTransmissionFailureWithRetryTime(
+            IN SmsFormatType eSmsFormat, IN const IMS_UINT8 nRetryTime, IN IMS_SINT32 nSeqId = -1);
+    IMS_BOOL RespondReceivedMessage(IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage,
+            IN IMS_UINT32 nMtResult, IN IMS_BOOL bAdded);
+    void Retry_MtsMessageInPending(IN IMtsMessage* piMtsMessage);
+
+    void CleanMtsMessage(IN IMtsMessage* piMtsMessage);
+    void CleanOperatorMtsMessage(IN IMS_SINT32 nMrOfRp);
+    void TerminateMessage(IN IMtsMessage* piMtsMessage, IN IMS_BOOL bIs1xCallTerm);
+    void TerminateMessageEx(IN IMtsMessage* piMtsMessage, IN IMS_UINT32 nReason);
+
+    const AString& GetLastIpsmgwAddr();
+    void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
+
+    AString GetPreviousCallId(IN const ByteArray& objSms);
+    IMS_SINT32 GetRetryAfterValue(IN IMessage* piMessage);
+    IMS_BOOL GetSmsgwFromReceivedMessage(
+            IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
+    void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri) const;
+    void GetUserPartFromUris(IN const AString& strUri, OUT AString& strUserPart) const;
+    IMS_BOOL IsDeliverMessage(IN IPageMessage* piPageMessage);
+    IMS_BOOL IsReceivedMessage(IN IMtsMessage* piMtsMessage);
+    void SetMessageInfo(IN IPageMessage* piPageMessage, IN const ByteArray& objSms,
+            IN SmsFormatType eSmsFormat, IN const AString& strDestination,
+            IN MtsTransactionType eMessageType, OUT IMtsMessage* piMtsMessage);
     void UpdateRPAckMap(IN IPageMessage* piPageMessage);
 
-public:
-    IMS_BOOL m_bProcessingMsg;
-    IMS_UINT32 m_nCallTypeMsg;
-    IMS_UINT32 m_nCallStateMsg;
+    // TODO: Need to check if these methods are deprecated for SCBM/ECBM feature
+    void SetCallStateType(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
+    IMS_BOOL IsEmergencyCalling();
 
 private:
+    IMS_BOOL m_bProcessingMsg;
+    IMS_UINT32 m_nCallStateMsg;
+    IMS_UINT32 m_nCallTypeMsg;
     IMS_SINT32 m_nSlotId;
     AString m_strLastRcvIpsmgwAddr;
     IMSList<IMtsMessage*> m_objMsgList;
     IMSList<IMtsMessage*> m_objRPAckedMsgs;
-    IMtsMessageControllerListener* m_piMtsMessageControllerListener;
     IMtsService* m_piMtsService;
     MtsDynamicLoader* m_pMtsDynamicLoader;
 };

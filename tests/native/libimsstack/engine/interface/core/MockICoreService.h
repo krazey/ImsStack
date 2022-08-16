@@ -33,6 +33,8 @@ class ISubscription;
 class MockICoreService : public ICoreService
 {
 public:
+    virtual ~MockICoreService() {}
+
     // IConnection
     MOCK_METHOD(void, Close, (), (override));
 

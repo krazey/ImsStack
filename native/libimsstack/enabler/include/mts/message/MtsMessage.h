@@ -17,91 +17,58 @@
 #ifndef MTS_MESSAGE_H_
 #define MTS_MESSAGE_H_
 
-#include "IMessage.h"
-#include "IPageMessageListener.h"
-#include "base/IMessageMediator.h"
 #include "message/IMtsMessage.h"
-#include "message/MtsMessageController.h"
 
-class MtsMessage final : public IMtsMessage, public IPageMessageListener, public IMessageMediator
+class MtsMessage final : public IMtsMessage
 {
 public:
-    MtsMessage(IN IMS_SINT32 nSlotId, IN MtsMessageController* pMtsMessageController,
-            IN IMS_BOOL bEmergency);
+    MtsMessage(IN IMS_SINT32 nSlotId);
     virtual ~MtsMessage();
 
     // IMtsMessage
-    void SendMessage(IN IPageMessage* piPageMessage, IN const AString& strDestination,
-            IN SmsFormatType eSmsFormat, IN const ByteArray& objSms) override;
-    void ReceiveMessage(IN IPageMessage* piPageMessage, IN const AString& strImpu) override;
-    void Retry_MtsMessageInPending() override;
-    IMS_BOOL IsReceivedMessage() override;
-    AString& GetDestination() override;
-    IMS_SINT32 GetMessageReference() override;
-    IMS_BOOL IsProcessingMtsMessage() override;
-    void SetProcessingMtsMessage() override;
-    void ResetProcessingMtsMessage() override;
-    IPageMessage* GetPageMessage() override;
-    void TerminateMessage(IN IMS_BOOL bIs1xCallTerm) override;
-    void TerminateMessageEx(IN IMS_UINT32 nReason) override;
-    void SetSeqId(IN IMS_SINT32 nSeqId) override;
-    void PrintMsgInfo() override;
-    IMS_SINT32 GetMti() override;
+    inline AString& GetDestination() override { return m_strDestination; }
+    inline void SetDestination(IN const AString& strDestination) override
+    {
+        m_strDestination = strDestination;
+    }
+    inline AString& GetImpu() override { return m_strImpu; }
+    inline void SetImpu(IN const AString& strImpu) override { m_strImpu = strImpu; }
+    inline IMS_SINT32 GetMessageReference() override { return m_nMrOfRp; }
+    inline void SetMessageReference(IN IMS_SINT32 nMrOfRp) override { m_nMrOfRp = nMrOfRp; }
+    inline IMS_SINT32 GetMti() override { return m_nMti; }
+    inline void SetMti(IN IMS_SINT32 nMti) override { m_nMti = nMti; }
+    inline IPageMessage* GetPageMessage() override { return m_piPageMessage; }
+    inline void SetPageMessage(IN IPageMessage* piPageMessage) override
+    {
+        m_piPageMessage = piPageMessage;
+    }
+    inline IMS_SINT32 GetSeqId() override { return m_nSeqId; }
+    inline void SetSeqId(IN IMS_SINT32 nSeqId) override { m_nSeqId = nSeqId; }
+    inline IMS_SINT32 GetSlotId() override { return m_nSlotId; }
+    inline void SetSlotId(IN IMS_SINT32 nSlotId) override { m_nSlotId = nSlotId; }
+    inline SmsFormatType GetSmsFormat() override { return m_eSmsFormat; }
+    inline void SetSmsFormat(IN SmsFormatType eSmsFormat) override { m_eSmsFormat = eSmsFormat; }
+    inline IMS_SINT32 GetSmSize() override { return m_nSmSize; }
+    inline void SetSmSize(IN IMS_SINT32 nSmSize) override { m_nSmSize = nSmSize; }
+    inline MtsTransactionType GetTransactionType() override { return m_eTransactionType; }
+    inline void SetTransactionType(IN MtsTransactionType eTransactionType) override
+    {
+        m_eTransactionType = eTransactionType;
+    }
 
-    // IPageMessageListener
-    void PageMessageDelivered(IN IPageMessage* piPageMessage) override;
-    void PageMessageDeliveryFailed(IN IPageMessage* piPageMessage) override;
-
-    // IMessageMediator
-    IMS_RESULT MessageMediator_AdjustMessage(
-            IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage) override;
-
-    IMS_BOOL ConstructSendMessage(IN IMessage* piMessage, IN const ByteArray& objSms,
-            IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergency);
-    AString GetPreviousCallId(IN const ByteArray& objSms);
-    void SetSendMsgInfo(IN const ByteArray& objSms, IN SmsFormatType eSmsFormat);
-    IMS_BOOL HandleDeliveryResponse(IN IMessage* piMessage);
-    void DeliveryFailed_PageMessageNull();
-    void DeliveryFailed_TimerF();
-    void DeliveryFailed_MessageNull();
-    IMS_BOOL Result_ReceiveMessage(
-            IN IPageMessage* piPageMessage, IMS_UINT32 nMtResult, IMS_BOOL bAdded);
-    IMS_BOOL Processing_ReceiveMessage(
-            IN IPageMessage* piPageMessage, IN const AString& strImpu, OUT ByteArray& objSms);
-    IMS_SINT32 GetSlotId();
-    void CleanMtsMessagewithReportResponse(
-            IN IMS_UINT32 nResponse, IN IMS_BOOL bSendToAos = IMS_FALSE, IN IMS_UINT32 nType = 0);
-    void CleanMtsMessage();
-    void CleanOperatorMtsMessage();
-
-private:
-    void SetDestination(IN const AString& strDestination);
-    SmsFormatType GetContentType() const;
-    void GetUserPartFromUris(IN const AString& strUri, OUT AString& strUserPart) const;
-    IMS_BOOL GetSmsgwFromReceivedMessage(
-            IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
-    void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri) const;
-
-    IMS_SINT32 GetRetryAfterValue(IN IMessage* piMessage);
-    void ReportTransmissionResultToMessageController(
-            IN IMS_UINT32 nResponse, IN SmsFormatType eSmsFormat);
+    void PrintInfo() override;
 
 private:
     IPageMessage* m_piPageMessage;
     AString m_strDestination;
-    IMS_BOOL m_bEmergency;
-
-    // SMS Msg Info
-    SmsFormatType m_nSmsFormat;
-    IMS_SINT32 m_nMrOfRp;
-    MtsTransactionType m_eSmsTrxType;
-    IMS_SINT32 m_nMti;
-    IMS_SINT32 m_nSmSize;
-
-    IMS_SINT32 m_nSeqId;
     AString m_strImpu;
-    IMS_UINT32 m_nSlotId;
-    MtsMessageController* m_pMtsMessageController;
+    IMS_SINT32 m_nMrOfRp;
+    IMS_SINT32 m_nMti;
+    IMS_SINT32 m_nSeqId;
+    IMS_SINT32 m_nSlotId;
+    IMS_SINT32 m_nSmSize;
+    SmsFormatType m_eSmsFormat;
+    MtsTransactionType m_eTransactionType;
 };
 
 #endif

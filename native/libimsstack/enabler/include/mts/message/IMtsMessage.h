@@ -27,22 +27,28 @@ class IMtsMessage
 public:
     virtual ~IMtsMessage(){};
 
-    virtual void SendMessage(IN IPageMessage* piPageMessage, IN const AString& strDestination,
-            IN SmsFormatType eSmsFormat, IN const ByteArray& objSMS) = 0;
-    virtual void ReceiveMessage(IN IPageMessage* piPageMessage, IN const AString& strIMPU) = 0;
-    virtual void Retry_MtsMessageInPending() = 0;
-    virtual IMS_BOOL IsReceivedMessage() = 0;
     virtual AString& GetDestination() = 0;
+    virtual void SetDestination(IN const AString& strDestination) = 0;
+    virtual AString& GetImpu() = 0;
+    virtual void SetImpu(IN const AString& strImpu) = 0;
     virtual IMS_SINT32 GetMessageReference() = 0;
-    virtual IMS_BOOL IsProcessingMtsMessage() = 0;
-    virtual void SetProcessingMtsMessage() = 0;
-    virtual void ResetProcessingMtsMessage() = 0;
-    virtual IPageMessage* GetPageMessage() = 0;
-    virtual void TerminateMessage(IN IMS_BOOL bIs1xCallTerm) = 0;
-    virtual void TerminateMessageEx(IN IMS_UINT32 nReason) = 0;
-    virtual void SetSeqId(IN IMS_SINT32 nSeqId) = 0;
-    virtual void PrintMsgInfo() = 0;
+    virtual void SetMessageReference(IMS_SINT32 nMrOfRp) = 0;
     virtual IMS_SINT32 GetMti() = 0;
+    virtual void SetMti(IMS_SINT32 nMti) = 0;
+    virtual IPageMessage* GetPageMessage() = 0;
+    virtual void SetPageMessage(IPageMessage* piPageMessage) = 0;
+    virtual IMS_SINT32 GetSeqId() = 0;
+    virtual void SetSeqId(IN IMS_SINT32 nSeqId) = 0;
+    virtual IMS_SINT32 GetSlotId() = 0;
+    virtual void SetSlotId(IN IMS_SINT32 nSlotId) = 0;
+    virtual SmsFormatType GetSmsFormat() = 0;
+    virtual void SetSmsFormat(SmsFormatType eSmsFormat) = 0;
+    virtual IMS_SINT32 GetSmSize() = 0;
+    virtual void SetSmSize(IMS_SINT32 nSmSize) = 0;
+    virtual MtsTransactionType GetTransactionType() = 0;
+    virtual void SetTransactionType(MtsTransactionType eTransactionType) = 0;
+
+    virtual void PrintInfo() = 0;
 };
 
 #endif

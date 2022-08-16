@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_MTS_MESSAGE_CONTROLLER_LISTENER_H_
-#define INTERFACE_MTS_MESSAGE_CONTROLLER_LISTENER_H_
+#ifndef MOCK_I_MESSAGE_BODY_PART_H_
+#define MOCK_I_MESSAGE_BODY_PART_H_
 
-class IMtsMessageControllerListener
+#include <gmock/gmock.h>
+
+#include "IMessageBodyPart.h"
+
+class MockIMessageBodyPart : public IMessageBodyPart
 {
 public:
-    virtual void MtsMessageController_NoTransaction() = 0;
+    virtual ~MockIMessageBodyPart() {}
+
+    MOCK_METHOD(const ByteArray&, GetContent, (), (const, override));
+    MOCK_METHOD(AString, GetHeader, (IN const AString& strName), (const, override));
+    MOCK_METHOD(IMS_RESULT, SetContent, (IN const ByteArray& objContent), (override));
+    MOCK_METHOD(IMS_RESULT, SetHeader, (IN const AString& strName, IN const AString& strValue),
+            (override));
 };
 
-#endif
+#endif  // MOCK_I_MESSAGE_BODY_PART_H_

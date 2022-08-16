@@ -33,6 +33,7 @@ MtsDynamicLoader::MtsDynamicLoader(IN IMS_SINT32 nSlotId) :
         m_pMtsTimer(IMS_NULL)
 {
     IMS_TRACE_D("+MtsDynamicLoader [slot_%d]", m_nSlotId, 0, 0);
+    Initialize();
 }
 
 PUBLIC

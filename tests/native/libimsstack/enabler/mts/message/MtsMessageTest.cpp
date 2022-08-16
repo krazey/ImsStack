@@ -20,12 +20,95 @@
 namespace android
 {
 
+const IMS_SINT32 SLOT_ID = 0;
+
 class MtsMessageTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MtsMessage* pMtsMessage;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override { pMtsMessage = new MtsMessage(SLOT_ID); }
+
+    virtual void TearDown() override { delete pMtsMessage; }
 };
+
+TEST_F(MtsMessageTest, Constructor)
+{
+    ASSERT_NE(pMtsMessage, nullptr);
+}
+
+TEST_F(MtsMessageTest, GetterAndSetterForDestination)
+{
+    AString strDestination("TargetAddress");
+    pMtsMessage->SetDestination(strDestination);
+
+    EXPECT_STREQ(strDestination.GetStr(), pMtsMessage->GetDestination().GetStr());
+}
+
+TEST_F(MtsMessageTest, GetterAndSetterForImpu)
+{
+    AString strImpu("FakeImpu");
+    pMtsMessage->SetImpu(strImpu);
+
+    EXPECT_STREQ(strImpu.GetStr(), pMtsMessage->GetImpu().GetStr());
+}
+
+TEST_F(MtsMessageTest, GetterAndSetterForMessageReference)
+{
+    IMS_SINT32 nMrOfRp = 0;
+    pMtsMessage->SetMessageReference(nMrOfRp);
+
+    EXPECT_EQ(nMrOfRp, pMtsMessage->GetMessageReference());
+}
+
+TEST_F(MtsMessageTest, GetterAndSetterForMti)
+{
+    IMS_SINT32 nMti = 0;
+    pMtsMessage->SetMti(nMti);
+
+    EXPECT_EQ(nMti, pMtsMessage->GetMti());
+}
+
+// TODO: Need to improve
+TEST_F(MtsMessageTest, GetterAndSetterForPageMessage)
+{
+    IPageMessage* piPageMessage = IMS_NULL;
+    pMtsMessage->SetPageMessage(piPageMessage);
+
+    EXPECT_EQ(piPageMessage, pMtsMessage->GetPageMessage());
+}
+
+TEST_F(MtsMessageTest, GetterAndSetterForSeqId)
+{
+    IMS_SINT32 nSeqId = 0;
+    pMtsMessage->SetSeqId(nSeqId);
+
+    EXPECT_EQ(nSeqId, pMtsMessage->GetSeqId());
+}
+
+TEST_F(MtsMessageTest, GetterAndSetterForSlotId)
+{
+    IMS_SINT32 nSlotId = 0;
+    pMtsMessage->SetSlotId(nSlotId);
+
+    EXPECT_EQ(nSlotId, pMtsMessage->GetSlotId());
+}
+
+TEST_F(MtsMessageTest, GetterAndSetterForSmsFormat)
+{
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    pMtsMessage->SetSmsFormat(eSmsFormat);
+
+    EXPECT_EQ(eSmsFormat, pMtsMessage->GetSmsFormat());
+}
+
+TEST_F(MtsMessageTest, GetterAndSetterForTransactionType)
+{
+    MtsTransactionType eTransactionType = MtsTransactionType::MESSAGE_TYPE_RECEIVE;
+    pMtsMessage->SetTransactionType(eTransactionType);
+
+    EXPECT_EQ(eTransactionType, pMtsMessage->GetTransactionType());
+}
 
 }  // namespace android

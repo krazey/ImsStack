@@ -138,24 +138,24 @@ AString MtsSipFormUtils::FormContentTypeEnumToStr(IN SmsFormatType nType)
 PUBLIC
 SmsFormatType MtsSipFormUtils::FormContentTypeStrToEnum(IN const AString& strContentType)
 {
-    SmsFormatType nType = SmsFormatType::SMSFORMAT_INVALID;
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_INVALID;
 
     if (IMS_TRUE == strContentType.MakeLower().Contains("application/vnd.3gpp.sms"))
     {
-        nType = SmsFormatType::SMSFORMAT_3GPP;
+        eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
     }
     else if (IMS_TRUE == strContentType.MakeLower().Contains("application/vnd.3gpp2.sms"))
     {
-        nType = SmsFormatType::SMSFORMAT_3GPP2;
+        eSmsFormat = SmsFormatType::SMSFORMAT_3GPP2;
     }
     else
     {
         IMS_TRACE_E(0, "This ContentType Str (%s) is not supported", strContentType.GetStr(), 0, 0);
     }
 
-    IMS_TRACE_D("FormContentTypeStrToEnum (%s) to (%d)", strContentType.GetStr(), nType, 0);
+    IMS_TRACE_D("FormContentTypeStrToEnum (%s) to (%d)", strContentType.GetStr(), eSmsFormat, 0);
 
-    return nType;
+    return eSmsFormat;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::IsTelUrlParam(IN const AString& strParam) const

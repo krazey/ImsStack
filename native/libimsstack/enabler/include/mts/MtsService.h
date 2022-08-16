@@ -73,8 +73,8 @@ public:
     void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData) override;
     ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const override;
     void SetListener(IN IMtsServiceListener* piMtsServiceListener) override;
+    void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType) override;
 
-    void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType);
     IMS_BOOL IsEpdgConnected();
 
     // TODO: need to check if it is deprecated or not

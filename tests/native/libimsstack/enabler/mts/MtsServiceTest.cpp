@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include "IIpcan.h"
 #include "ImsAosParameter.h"
-#include "MockIMtsServiceListener.h"
+#include "../include/mts/MockIMtsServiceListener.h"
 #include "MtsService.h"
 #include "core/MockICoreService.h"
 #include "core/MockIReference.h"

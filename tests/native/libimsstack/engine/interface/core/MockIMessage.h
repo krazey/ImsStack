@@ -28,6 +28,8 @@ class ISipMessage;
 class MockIMessage : public IMessage
 {
 public:
+    virtual ~MockIMessage() {}
+
     MOCK_METHOD(IMS_RESULT, AddHeader, (IN const AString& strName, IN const AString& strValue),
             (override));
     MOCK_METHOD(IMessageBodyPart*, CreateBodyPart, (), (override));
