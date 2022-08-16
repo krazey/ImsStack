@@ -28,6 +28,7 @@ import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SimUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -52,14 +53,15 @@ public class UsatAgent extends Handler implements UsatInterface {
 
     /** Call control by USIM */
     private static final int TAG_CALL_CONTROL = 0xD4;
-    /** Address: 0x06 */
+    /** Address: 0x06 or 0x86 */
     private static final int TAG_ADDRESS = 0x06;
-    /** Address: 0x86 */
     private static final int TAG_ADDRESS_1 = 0x86;
     /** SS string: 0x09 or 0x89 */
     private static final int TAG_SS_STRING = 0x09;
+    private static final int TAG_SS_STRING_1 = 0x89;
     /** USSD string: 0x0A or 0x8A */
     private static final int TAG_USSD_STRING = 0x0A;
+    private static final int TAG_USSD_STRING_1 = 0x8A;
     /** Location information: 0x13 or 0x93 */
     private static final int TAG_LOCATION_INFORMATION = 0x13;
     /** Media type: 0x7E or 0xFE */
@@ -433,7 +435,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                 final int tag = object.tag;
                 final byte[] value = object.value;
 
-                if (tag == TAG_ADDRESS || tag == (TAG_ADDRESS | 0x80)) {
+                if (tag == TAG_ADDRESS || tag == TAG_ADDRESS_1) {
                     ccType = Usat.CALL_CONTROL_TYPE_MO_CALL;
 
                     if (value.length != 0) {
@@ -441,7 +443,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                                 value, 0, value.length,
                                 PhoneNumberUtils.BCD_EXTENDED_TYPE_EF_ADN);
                     }
-                } else if (tag == TAG_SS_STRING || tag == (TAG_SS_STRING | 0x80)) {
+                } else if (tag == TAG_SS_STRING || tag == TAG_SS_STRING_1) {
                     ccType = Usat.CALL_CONTROL_TYPE_SS;
 
                     if (value.length != 0) {
@@ -449,7 +451,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                                 value, 0, value.length,
                                 PhoneNumberUtils.BCD_EXTENDED_TYPE_EF_ADN);
                     }
-                } else if (tag == TAG_USSD_STRING || tag == (TAG_USSD_STRING | 0x80)) {
+                } else if (tag == TAG_USSD_STRING || tag == TAG_USSD_STRING_1) {
                     ccType = Usat.CALL_CONTROL_TYPE_USSD;
 
                     try {
@@ -578,14 +580,14 @@ public class UsatAgent extends Handler implements UsatInterface {
             return null;
         }
 
-        int responseResult = (result.data != null && result.data.length > 0)
-                ? (result.data[0] & 0xFF) : -1;
-
-        int cmdResult = 0;
-        String[] addresses = null;
         if (!result.isOk()) {
             return new Usat.MoSmsControlCommandResponse(cmd, Usat.RESULT_NOT_ALLOWED, null, null);
         }
+
+        String[] addresses = new String[] { null, null };
+        int responseResult = (result.data != null && result.data.length > 0)
+                ? (result.data[0] & 0xFF) : -1;
+        int cmdResult = 0;
 
         if (responseResult == 0x00) {
             cmdResult = Usat.RESULT_ALLOWED;
@@ -602,8 +604,6 @@ public class UsatAgent extends Handler implements UsatInterface {
             }
 
             ImsLog.i(getSlotId(), "USAT: response data objects size = " + dataObjects.size());
-
-            addresses = new String[] { null, null };
 
             for (int i = 0; i < dataObjects.size(); i++) {
                 if (i == 2) break;
@@ -806,7 +806,8 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @return A response data from UICC.
      */
     private @NonNull String sendEnvelopeWithStatus(String content) {
-        TelephonyManager tm = AppContext.getTelephonyManager(getSlotId());
+        int subId = MSimUtils.getSubId(getSlotId());
+        TelephonyManager tm = AppContext.getTelephonyManager(subId);
         return (tm != null) ? tm.sendEnvelopeWithStatus(content) : "";
     }
 

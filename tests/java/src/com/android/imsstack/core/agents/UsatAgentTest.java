@@ -17,12 +17,22 @@
 package com.android.imsstack.core.agents;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import android.content.Context;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.imsstack.ContextFixture;
 import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.SimUtils;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -31,85 +41,69 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockitoSession;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
 
 @RunWith(JUnit4.class)
 public class UsatAgentTest {
-    private MockitoSession mMockitoSession;
-    private UsatAgent mUsatAgent;
-    private String mTargetNumber = "9902219632";
-    private String mSmscDestAddress = "+9876543";
-    private String mSmscOriginAddress = "942563084";
-    private String mOriginAddress = "995588443322";
-    private String mDialedString = "123456";
-    private byte[] mSmstpdu = new byte[] {0, 10, 50, 15};
-    private static final int LATCH_MAX = 1;
-    private static final int WAIT_TIMER = 5000;
-    private final Object mLock = new Object();
-    private Usat.CommandResponse mExpectedResult;
+    private static final int MAX_SIM_SLOT = 1;
+    private static final int SLOT0 = 0;
+    private static final int[] SUB_ID = { 1 };
+    private static final int WAIT_TIMER_MILLIS = 2000;
+    private static final byte[] USIM_SERVICE_TABLE =
+            SimUtils.hexStringToBytes("000000FF0000000000000000FF");
+    private static final int WAIT_TIME_FOR_LISTENER = 40; // milli-seconds
+    private static final String SEND_ENVELOPE_OK = "9000";
+    private static final String SEND_ENVELOPE_ERROR = "9300";
+    /** MO SMS control */
+    private static final byte[] SMS_TPDU = new byte[] {0, 10, 50, 15};
+    private static final String TARGET_NUMBER = "9902219632";
+    private static final String SMSC_DEST_ADDRESS = "+9876543";
+    private static final String SMSC_ORIGIN_ADDRESS = "942563084";
+    private static final String ORIGIN_ADDRESS = "995588443322";
+    /** Call control */
+    private static final String DIALED_STRING = "1234567890";
 
-    @Mock SimInterface mSimInterface;
-    @Mock static Context sApplicationContext;
+    private static ContextFixture sContext = null;
+
     @Mock TelephonyManager mTelephonyManager;
-    private Usat.Listener mListener;
-
-    private static final CountDownLatch[] sLatches = new CountDownLatch[LATCH_MAX];
-    static {
-        for (int i = 0; i < LATCH_MAX; i++) {
-            sLatches[i] = new CountDownLatch(1);
-        }
-    }
-
-    public boolean callingTestLatchCountdown(int latchIndex, int waitMs) {
-        boolean complete = false;
-        try {
-            CountDownLatch latch;
-            synchronized (mLock) {
-                latch = sLatches[latchIndex];
-            }
-            complete = latch.await(waitMs, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-             //complete == false
-        }
-        synchronized (mLock) {
-            sLatches[latchIndex] = new CountDownLatch(1);
-        }
-        return complete;
-    }
-
-    public void countDownLatch(int latchIndex) {
-        synchronized (mLock) {
-            sLatches[latchIndex].countDown();
-        }
-    }
+    @Mock SimInterface mSimInterface;
+    @Mock Usat.Listener mListener;
+    private UsatAgent mUsatAgent;
 
     @BeforeClass
     public static void setUpOnce() {
-        sApplicationContext = Mockito.mock(Context.class);
-        AppContext.init(sApplicationContext);
+        sContext = new ContextFixture();
+        AppContext.init(sContext.getTestDouble());
     }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mTelephonyManager = Mockito.mock(TelephonyManager.class);
-        mSimInterface = Mockito.mock(SimInterface.class);
+
+        SubscriptionManager sm =
+                sContext.getTestDouble().getSystemService(SubscriptionManager.class);
+        when(sm.getSubscriptionIds(anyInt())).thenReturn(SUB_ID);
+
+        mTelephonyManager = sContext.getTestDouble().getSystemService(TelephonyManager.class);
+        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
+        when(mTelephonyManager.getActiveModemCount()).thenReturn(MAX_SIM_SLOT);
+
+        when(mSimInterface.getSlotId()).thenReturn(SLOT0);
+
         mUsatAgent = new UsatAgent(mSimInterface);
-        Usat.Listener listener = new Usat.Listener() {
-            @Override
-            public void onCommandResponse(Usat.CommandResponse response) {
-                mExpectedResult = response;
-                synchronized (mLock) {
-                    mLock.notifyAll();
-                }
-            }
-        };
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        if (mUsatAgent != null) {
+            mUsatAgent.removeCallbacksAndMessages(null);
+        }
+        mUsatAgent = null;
+        mListener = null;
     }
 
     @AfterClass
@@ -118,96 +112,221 @@ public class UsatAgentTest {
     }
 
     @Test
-    public void test_createMoSmsControlCommand() {
-        Usat.MoSmsControlCommand cmd = new Usat.MoSmsControlCommand(1, mListener, mTargetNumber,
-                mSmscDestAddress, TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(cmd, mUsatAgent.createMoSmsControlCommand(mTargetNumber, mSmscDestAddress,
-                TelephonyManager.NETWORK_TYPE_LTE , mListener));
+    @SmallTest
+    public void createCallControlCommand() {
+        Usat.CallControlCommand cmd = mUsatAgent.createCallControlCommand(
+                Usat.CALL_CONTROL_TYPE_MO_CALL, DIALED_STRING,
+                TelephonyManager.NETWORK_TYPE_LTE, Usat.MEDIA_TYPE_VIDEO, mListener);
+
+        assertNotEquals(0, cmd.getCid());
+        assertEquals(Usat.SERVICE_CALL_CONTROL, cmd.getServiceType());
+        assertFalse(cmd.isAborted());
+        assertEquals(mListener, cmd.getListener());
+        assertEquals(Usat.CALL_CONTROL_TYPE_MO_CALL, cmd.getCcType());
+        assertEquals(DIALED_STRING, cmd.getDialedString());
+        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, cmd.getNetworkType());
+        assertEquals(Usat.MEDIA_TYPE_VIDEO, cmd.getMediaType());
     }
 
     @Test
-    public void test_createSmsPpDownloadCommand() {
-        Usat.SmsPpDownloadCommand cmd = new Usat.SmsPpDownloadCommand(1, mListener,
-                mSmscOriginAddress, true, mSmstpdu, mOriginAddress);
-        assertEquals(cmd, mUsatAgent.createSmsPpDownloadCommand(mSmscOriginAddress, true, mSmstpdu,
-                mOriginAddress, mListener));
+    @SmallTest
+    public void createMoSmsControlCommand() {
+        Usat.MoSmsControlCommand cmd = mUsatAgent.createMoSmsControlCommand(TARGET_NUMBER,
+                SMSC_DEST_ADDRESS, TelephonyManager.NETWORK_TYPE_LTE, mListener);
+
+        assertNotEquals(0, cmd.getCid());
+        assertEquals(Usat.SERVICE_MO_SMS_CONTROL, cmd.getServiceType());
+        assertFalse(cmd.isAborted());
+        assertEquals(mListener, cmd.getListener());
+        assertEquals(TARGET_NUMBER, cmd.getRpDestinationAddress());
+        assertEquals(SMSC_DEST_ADDRESS, cmd.getTpDestinationAddress());
+        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, cmd.getNetworkType());
     }
 
     @Test
-    public void test_isServiceAvailableDefaultValue() {
-        assertEquals(false, mUsatAgent.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL));
-        assertEquals(false, mUsatAgent.isServiceAvailable(Usat.SERVICE_DATA_DOWNLOAD_VIA_SMS_PP));
+    @SmallTest
+    public void createSmsPpDownloadCommand() {
+        Usat.SmsPpDownloadCommand cmd = mUsatAgent.createSmsPpDownloadCommand(SMSC_ORIGIN_ADDRESS,
+                true, SMS_TPDU, ORIGIN_ADDRESS, mListener);
+
+        assertNotEquals(0, cmd.getCid());
+        assertEquals(Usat.SERVICE_DATA_DOWNLOAD_VIA_SMS_PP, cmd.getServiceType());
+        assertFalse(cmd.isAborted());
+        assertEquals(mListener, cmd.getListener());
+        assertEquals(SMSC_ORIGIN_ADDRESS, cmd.getRpOriginatingAddress());
+        assertEquals(ORIGIN_ADDRESS, cmd.getOriginatingAddress());
+        assertTrue(Arrays.equals(SMS_TPDU, cmd.getTpdu()));
     }
 
     @Test
-    public void test_sendCommandForPpDownload() {
-        Usat.Command cmd = new Usat.SmsPpDownloadCommand(Usat.RESULT_DATA_DOWNLOAD_ERROR, mListener,
-                mSmscOriginAddress, true, mSmstpdu, mOriginAddress);
+    @SmallTest
+    public void isServiceAvailable_noUsimServiceTable() {
+        when(mSimInterface.getUsimServiceTable()).thenReturn(null);
+
+        assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_CALL_CONTROL));
+        assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL));
+        assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_DATA_DOWNLOAD_VIA_SMS_PP));
+        assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_MEDIA_TYPE_SUPPORT));
+    }
+
+    @Test
+    @SmallTest
+    public void isServiceAvailable_notSupported() {
+        when(mSimInterface.getUsimServiceTable()).thenReturn(new byte[] { (byte) 0 });
+
+        assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_CALL_CONTROL));
+        assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL));
+        assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_DATA_DOWNLOAD_VIA_SMS_PP));
+        assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_MEDIA_TYPE_SUPPORT));
+    }
+
+    @Test
+    @SmallTest
+    public void isServiceAvailable_supported() {
+        when(mSimInterface.getUsimServiceTable()).thenReturn(USIM_SERVICE_TABLE);
+
+        assertTrue(mUsatAgent.isServiceAvailable(Usat.SERVICE_CALL_CONTROL));
+        assertTrue(mUsatAgent.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL));
+        assertTrue(mUsatAgent.isServiceAvailable(Usat.SERVICE_DATA_DOWNLOAD_VIA_SMS_PP));
+        assertTrue(mUsatAgent.isServiceAvailable(Usat.SERVICE_MEDIA_TYPE_SUPPORT));
+    }
+
+    @Test
+    @SmallTest
+    public void cancelCommand() {
+        Usat.CallControlCommand cmd = mUsatAgent.createCallControlCommand(
+                Usat.CALL_CONTROL_TYPE_MO_CALL, DIALED_STRING,
+                TelephonyManager.NETWORK_TYPE_LTE, Usat.MEDIA_TYPE_VIDEO, mListener);
+
+        mUsatAgent.cancelCommand(cmd);
+
+        assertFalse(cmd.isAborted());
+
+        mUsatAgent.sendCommand(cmd);
+        mUsatAgent.cancelCommand(cmd);
+
+        assertTrue(cmd.isAborted());
+    }
+
+    @Test
+    @SmallTest
+    public void sendCommand_callControlAllowed() {
+        when(mTelephonyManager.sendEnvelopeWithStatus(any())).thenReturn(SEND_ENVELOPE_OK);
+
+        Usat.CallControlCommand cmd = mUsatAgent.createCallControlCommand(
+                Usat.CALL_CONTROL_TYPE_MO_CALL, DIALED_STRING,
+                TelephonyManager.NETWORK_TYPE_LTE, Usat.MEDIA_TYPE_VIDEO, mListener);
+        ArgumentCaptor<Usat.CommandResponse> cmdResponseCaptor =
+                ArgumentCaptor.forClass(Usat.CommandResponse.class);
 
         mUsatAgent.sendCommand(cmd);
 
-        Usat.CommandResponse cmdResponse = new Usat.SmsPpDownloadCommandResponse(cmd,
-                Usat.RESULT_DATA_DOWNLOAD_ERROR, mSmstpdu);
+        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
+                .onCommandResponse(cmdResponseCaptor.capture());
 
-        synchronized (mLock) {
-            try {
-                mLock.wait(WAIT_TIMER);
-            } catch (InterruptedException ie) {
-            }
-        }
-
-        if (mExpectedResult != null) {
-            assertEquals(mExpectedResult.getResult(), cmdResponse.getResult());
-            assertEquals(mExpectedResult.getCommand(), cmdResponse.getCommand());
-        }
+        Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
+        assertEquals(Usat.RESULT_ALLOWED, cmdResponse.getResult());
+        assertEquals(cmd, cmdResponse.getCommand());
     }
 
     @Test
-    public void test_sendCommandForMoSms() {
-        Usat.Command cmd = new Usat.MoSmsControlCommand(Usat.RESULT_NOT_ALLOWED, mListener,
-                mTargetNumber, mSmscDestAddress, TelephonyManager.NETWORK_TYPE_LTE);
+    @SmallTest
+    public void sendCommand_callControlNotAllowed() {
+        when(mTelephonyManager.sendEnvelopeWithStatus(any())).thenReturn(SEND_ENVELOPE_ERROR);
+
+        Usat.CallControlCommand cmd = mUsatAgent.createCallControlCommand(
+                Usat.CALL_CONTROL_TYPE_MO_CALL, DIALED_STRING,
+                TelephonyManager.NETWORK_TYPE_LTE, Usat.MEDIA_TYPE_VIDEO, mListener);
+        ArgumentCaptor<Usat.CommandResponse> cmdResponseCaptor =
+                ArgumentCaptor.forClass(Usat.CommandResponse.class);
 
         mUsatAgent.sendCommand(cmd);
 
-        Usat.CommandResponse cmdResponse = new Usat.MoSmsControlCommandResponse(cmd,
-                Usat.RESULT_NOT_ALLOWED, mTargetNumber, mSmscDestAddress);
+        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
+                .onCommandResponse(cmdResponseCaptor.capture());
 
-        synchronized (mLock) {
-            try {
-                mLock.wait(WAIT_TIMER);
-            } catch (InterruptedException ie) {
-            }
-        }
-
-        if (mExpectedResult != null) {
-            assertEquals(mExpectedResult.getResult(), cmdResponse.getResult());
-            assertEquals(mExpectedResult.getCommand(), cmdResponse.getCommand());
-        }
+        Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
+        assertEquals(Usat.RESULT_NOT_ALLOWED, cmdResponse.getResult());
+        assertEquals(cmd, cmdResponse.getCommand());
     }
 
-    private boolean isSimCardPresent() {
-        return mTelephonyManager.getPhoneType() != TelephonyManager.PHONE_TYPE_NONE
-            && mTelephonyManager.getSimState() != TelephonyManager.SIM_STATE_ABSENT;
-    }
-
-    /**
-     * Tests the TelephonyManager.sendEnvelopeWithStatus() API. This makes a call to
-     * sendEnvelopeWithStatus() API and expects a SecurityException.
-     */
     @Test
-    public void sendEnvelopeWithStatus_test() {
-        try {
-            if (isSimCardPresent()) {
-                String result = mTelephonyManager.sendEnvelopeWithStatus("");
-                fail("Expected SecurityException.");
-            }
-        } catch (SecurityException expected) {
-        }
+    @SmallTest
+    public void sendCommand_smsPpDownloadOk() {
+        when(mTelephonyManager.sendEnvelopeWithStatus(any())).thenReturn(SEND_ENVELOPE_OK);
+
+        Usat.SmsPpDownloadCommand cmd = mUsatAgent.createSmsPpDownloadCommand(SMSC_ORIGIN_ADDRESS,
+                true, SMS_TPDU, ORIGIN_ADDRESS, mListener);
+        ArgumentCaptor<Usat.CommandResponse> cmdResponseCaptor =
+                ArgumentCaptor.forClass(Usat.CommandResponse.class);
+
+        mUsatAgent.sendCommand(cmd);
+
+        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
+                .onCommandResponse(cmdResponseCaptor.capture());
+
+        Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
+        assertEquals(Usat.RESULT_DATA_DOWNLOAD_OK, cmdResponse.getResult());
+        assertEquals(cmd, cmdResponse.getCommand());
     }
 
-    @After
-    public void tearDown() throws Exception {
-        mUsatAgent = null;
-        mTelephonyManager = null;
+    @Test
+    @SmallTest
+    public void sendCommand_smsPpDownloadError() {
+        when(mTelephonyManager.sendEnvelopeWithStatus(any())).thenReturn(SEND_ENVELOPE_ERROR);
+
+        Usat.SmsPpDownloadCommand cmd = mUsatAgent.createSmsPpDownloadCommand(SMSC_ORIGIN_ADDRESS,
+                true, SMS_TPDU, ORIGIN_ADDRESS, mListener);
+        ArgumentCaptor<Usat.CommandResponse> cmdResponseCaptor =
+                ArgumentCaptor.forClass(Usat.CommandResponse.class);
+
+        mUsatAgent.sendCommand(cmd);
+
+        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
+                .onCommandResponse(cmdResponseCaptor.capture());
+
+        Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
+        assertEquals(Usat.RESULT_DATA_DOWNLOAD_ERROR, cmdResponse.getResult());
+        assertEquals(cmd, cmdResponse.getCommand());
+    }
+
+    @Test
+    @SmallTest
+    public void sendCommand_moSmsControlAllowed() {
+        when(mTelephonyManager.sendEnvelopeWithStatus(any())).thenReturn(SEND_ENVELOPE_OK);
+
+        Usat.MoSmsControlCommand cmd = mUsatAgent.createMoSmsControlCommand(TARGET_NUMBER,
+                SMSC_DEST_ADDRESS, TelephonyManager.NETWORK_TYPE_LTE, mListener);
+        ArgumentCaptor<Usat.CommandResponse> cmdResponseCaptor =
+                ArgumentCaptor.forClass(Usat.CommandResponse.class);
+
+        mUsatAgent.sendCommand(cmd);
+
+        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
+                .onCommandResponse(cmdResponseCaptor.capture());
+
+        Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
+        assertEquals(Usat.RESULT_ALLOWED, cmdResponse.getResult());
+        assertEquals(cmd, cmdResponse.getCommand());
+    }
+
+    @Test
+    @SmallTest
+    public void sendCommand_moSmsControlNotAllowed() {
+        when(mTelephonyManager.sendEnvelopeWithStatus(any())).thenReturn(SEND_ENVELOPE_ERROR);
+
+        Usat.MoSmsControlCommand cmd = mUsatAgent.createMoSmsControlCommand(TARGET_NUMBER,
+                SMSC_DEST_ADDRESS, TelephonyManager.NETWORK_TYPE_LTE, mListener);
+        ArgumentCaptor<Usat.CommandResponse> cmdResponseCaptor =
+                ArgumentCaptor.forClass(Usat.CommandResponse.class);
+
+        mUsatAgent.sendCommand(cmd);
+
+        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
+                .onCommandResponse(cmdResponseCaptor.capture());
+
+        Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
+        assertEquals(Usat.RESULT_NOT_ALLOWED, cmdResponse.getResult());
+        assertEquals(cmd, cmdResponse.getCommand());
     }
 }
