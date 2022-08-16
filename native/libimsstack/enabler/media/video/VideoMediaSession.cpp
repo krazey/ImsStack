@@ -73,8 +73,8 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
     VideoProfile::Payload* pDestPayload;
     VideoProfile::Payload* pNegoPayload;
 
-    IMS_TRACE_D("UpdateRtpConfig() - nNegotiated nDestPIndex[%d], nSrcIndex[%d]",
-            pPeerProfile->nNegotiatedPayloadIndex, pLocalProfile->nNegotiatedPayloadIndex, 0);
+    IMS_TRACE_D("UpdateRtpConfig() - nNegotiated nPeerPayloadIndex[%d], nNegoPayloadIndex[%d]",
+            pPeerProfile->nNegotiatedPayloadIndex, pNegoProfile->nNegotiatedPayloadIndex, 0);
 
     if (pNegoProfile->nNegotiatedPayloadIndex < 0)
     {
