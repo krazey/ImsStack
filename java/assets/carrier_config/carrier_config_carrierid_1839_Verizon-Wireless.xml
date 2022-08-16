@@ -165,7 +165,8 @@
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
     <int name="policy_for_local_ringback_tone_with_180_response_int" value="2"/>
     <int name="imsvoice.call_max_count_int" value="2"/>
-    <int name="imsvt.convert_remote_response_timer_millis_int" value="55000"/>
+    <int name="imsvt.convert_remote_response_timer_millis_int" value="60000"/>
+    <int name="imsvt.convert_user_response_timer_millis_int" value="55000"/>
     <int name="sip_status_code_for_rejecting_call_type_change_int" value="603"/>
     <boolean name="set_video_text_feature_exclusively_in_contact_header_by_session_type_bool" value="true"/>
     <boolean name="check_server_outage_reason_for_vxlte_call_bool" value="true"/>
