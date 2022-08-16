@@ -45,11 +45,11 @@ public class ConferenceInfoManagerTest {
 
     @Test
     public void testConferenceInfoManager() {
-        mTestConferenceInfoManager.createConferenceInfo("", mSlotId);
+        mTestConferenceInfoManager.createConferenceInfo("");
 
         assertFalse(mTestConferenceInfoManager.hasConferenceInfo());
 
-        mTestConferenceInfoManager.createConferenceInfo(mCcid, mSlotId);
+        mTestConferenceInfoManager.createConferenceInfo(mCcid);
 
         assertTrue(mTestConferenceInfoManager.hasConferenceInfo());
         assertNotNull(mTestConferenceInfoManager.getConferenceInfo(mCcid));
@@ -59,8 +59,8 @@ public class ConferenceInfoManagerTest {
         assertFalse(mTestConferenceInfoManager.hasConferenceInfo());
         assertNull(mTestConferenceInfoManager.getConferenceInfo(mCcid));
 
-        mTestConferenceInfoManager.createConferenceInfo(mCcid, mSlotId);
-        mTestConferenceInfoManager.createConferenceInfo(mCcid + "1", mSlotId + 1);
+        mTestConferenceInfoManager.createConferenceInfo(mCcid);
+        mTestConferenceInfoManager.createConferenceInfo(mCcid + "1");
 
         mTestConferenceInfoManager.destroyAllConferenceInfos();
 
@@ -68,7 +68,7 @@ public class ConferenceInfoManagerTest {
         assertNull(mTestConferenceInfoManager.getConferenceInfo(mCcid));
         assertNull(mTestConferenceInfoManager.getConferenceInfo(mCcid + "1"));
 
-        mTestConferenceInfoManager.createConferenceInfo(mCcid, mSlotId);
+        mTestConferenceInfoManager.createConferenceInfo(mCcid);
         assertTrue(ConferenceInfoHelper.addConferenceUser(mCcid, mCcid + "1", 1));
 
         assertTrue(mTestConferenceInfoManager.hasConferenceInfo());

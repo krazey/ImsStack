@@ -37,7 +37,10 @@ public final class ConferenceInfoManager {
         return sConferenceInfoManager;
     }
 
-    public ConferenceInfo createConferenceInfo(String ccid, int slotId) {
+    /**
+     * Creates ConferenceInfo instance if not existed.
+     */
+    public ConferenceInfo createConferenceInfo(String ccid) {
         if (TextUtils.isEmpty(ccid)) {
             return null;
         }
@@ -48,7 +51,7 @@ public final class ConferenceInfoManager {
             return ci;
         }
 
-        ci = new ConferenceInfo(ccid, slotId);
+        ci = new ConferenceInfo(ccid);
 
         synchronized(mConferenceInfos) {
             mConferenceInfos.add(ci);
