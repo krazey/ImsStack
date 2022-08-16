@@ -130,7 +130,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
     IMS_TRACE_D("SessionEarlyMediaUpdated", 0, 0, 0);
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
-    m_objContext.GetSession()->HandleResponse(IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    m_objContext.GetSession()->HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
@@ -179,7 +179,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
     IMS_TRACE_D("SessionEarlyMediaUpdateReceived", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
     IMtcSession* pSession = m_objContext.GetSession();
-    pSession->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    pSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
     if (!MessageUtil::HasSdp(piMessage))
     {
@@ -234,7 +234,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPRAckReceived(IN ISession* pi
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
     IMtcSession* pSession = m_objContext.GetSession();
 
-    pSession->HandleRequest(IMessage::SESSION_PRACK, *piMessage);
+    pSession->HandleRequest(RequestType::PRACK, *piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {

@@ -173,7 +173,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
     IMtcSession* pSession = m_objContext.GetSession(piSession);
 
     m_objContext.GetTimer().StopAll();
-    m_objContext.GetSession(piSession)->HandleResponse(IMessage::SESSION_START, *piMessage);
+    m_objContext.GetSession(piSession)->HandleResponse(
+            ResponseType::PROVISIONAL_RESPONSE, *piMessage);
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
 
     if (m_objContext.GetCallInfo().bConference)
@@ -242,7 +243,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
 
-    m_objContext.GetSession(piSession)->HandleResponse(IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    m_objContext.GetSession(piSession)->HandleResponse(
+            ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     objMediaManager.UpdatePemType(piSession, piMessage);
@@ -283,7 +285,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
 
-    pSession->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    pSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
     // TODO: which operator requires this?
     // m_objContext.GetTimer().Start(TIMER_MO_NOANSWER, 60000);
@@ -354,7 +356,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* p
 
     UpdatePreconditionCapability(piSession, piMessage);
 
-    pSession->HandleResponse(IMessage::SESSION_PRACK, *piMessage);
+    pSession->HandleResponse(ResponseType::PRACK_RESPONSE, *piMessage);
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
 
@@ -443,7 +445,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
-    m_objContext.GetSession(piSession)->HandleResponse(IMessage::SESSION_START, *piMessage);
+    m_objContext.GetSession(piSession)->HandleResponse(
+            ResponseType::PROVISIONAL_RESPONSE, *piMessage);
 
     if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
     {
@@ -500,7 +503,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
 
-    pSession->HandleResponse(IMessage::SESSION_START, *piMessage);
+    pSession->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, *piMessage);
 
     if (m_objContext.GetConfigurationProxy().Is(
             Feature::STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY) &&

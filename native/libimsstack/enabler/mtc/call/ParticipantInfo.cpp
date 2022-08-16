@@ -142,9 +142,9 @@ void ParticipantInfo::UpdateFromRemoteNumber(IN const AString& strRemoteNumber)
             m_objContext.GetDialingPlan().GetToUri(strRemoteNumber, m_objContext.GetCallInfo());
 }
 
-PUBLIC void ParticipantInfo::HandleRequest(IN IMS_UINT32 eMethod, IN const IMessage& objRequest)
+PUBLIC void ParticipantInfo::HandleRequest(IN RequestType eType, IN const IMessage& objRequest)
 {
-    if (eMethod != IMessage::SESSION_START)
+    if (eType != RequestType::START)
     {
         return;
     }
@@ -155,6 +155,11 @@ PUBLIC void ParticipantInfo::HandleRequest(IN IMS_UINT32 eMethod, IN const IMess
 
     IMS_TRACE_D("HandleRequest : Remote URI[%s] Number[%s]", m_strRemoteUri.GetStr(),
             m_strRemoteNumber.GetStr(), 0);
+}
+
+PUBLIC void ParticipantInfo::HandleResponse(
+        IN ResponseType /* eType */, IN const IMessage& /* objRequest */)
+{
 }
 
 PRIVATE AString ParticipantInfo::GetRemoteNumberFromMessage(IN const IMessage& objMessage) const

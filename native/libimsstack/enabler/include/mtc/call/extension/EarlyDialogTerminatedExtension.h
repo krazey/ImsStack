@@ -14,31 +14,28 @@
  * limitations under the License.
  */
 
-#ifndef PRECONDITION_EXTENSION_H_
-#define PRECONDITION_EXTENSION_H_
+#ifndef EARLY_DIALOG_TERMINATED_EXTENSION_H_
+#define EARLY_DIALOG_TERMINATED_EXTENSION_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "call/extension/MtcExtension.h"
 
 class IMessage;
 
 /**
- * This class represents the precondition extension.
+ * This class represents the 199 extension.
  */
-class PreconditionExtension final : public MtcExtension
+class EarlyDialogTerminatedExtension final : public MtcExtension
 {
 public:
-    explicit PreconditionExtension();
-    explicit PreconditionExtension(IN const PreconditionExtension& objRhs);
-    virtual ~PreconditionExtension();
-    PreconditionExtension& operator=(IN const PreconditionExtension&) = delete;
+    explicit EarlyDialogTerminatedExtension();
+    explicit EarlyDialogTerminatedExtension(IN const EarlyDialogTerminatedExtension& objRhs);
+    virtual ~EarlyDialogTerminatedExtension();
+    EarlyDialogTerminatedExtension& operator=(IN const EarlyDialogTerminatedExtension&) = delete;
 
     IMtcExtension* Clone() const override;
 
     void FormatRequest(IN RequestType eType, IN_OUT IMessage& objRequest) override;
-    void FormatResponse(IN ResponseType eType, IN_OUT IMessage& objResponse) override;
-    void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
-    void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 };
 
 #endif

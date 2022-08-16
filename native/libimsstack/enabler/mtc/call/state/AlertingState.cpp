@@ -145,7 +145,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_ACK);
     IMtcSession* pSession = m_objContext.GetSession();
 
-    pSession->HandleRequest(IMessage::SESSION_ACK, *piMessage);
+    pSession->HandleRequest(RequestType::ACK, *piMessage);
 
     // TODO: need to check NegotiationState::STATE_OFFER_SENT?
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
@@ -185,7 +185,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
     IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_EARLY_UPDATE);
     IMtcSession* pSession = m_objContext.GetSession();
 
-    pSession->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    pSession->HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
@@ -224,7 +224,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN I
     // FIXME: It's same as IncomingState except QoS check and UI notifying
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
-    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    m_objContext.GetSession()->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
@@ -251,7 +251,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionPRAckReceived(IN ISession* pi
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
-    pSession->HandleRequest(IMessage::SESSION_PRACK, *piMessage);
+    pSession->HandleRequest(RequestType::PRACK, *piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
@@ -311,7 +311,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::UssiStarted(IN ISession* piSession)
 {
     IMS_TRACE_D("UssiStarted - ACK received", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_ACK);
-    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_ACK, *piMessage);
+    m_objContext.GetSession()->HandleRequest(RequestType::ACK, *piMessage);
 
     UssiResult objResult = m_objContext.GetUssiController()->ParseUssiBodyAndCheckResult(
             piMessage->GetMessage(), piMessage->GetMethod().ToInt());

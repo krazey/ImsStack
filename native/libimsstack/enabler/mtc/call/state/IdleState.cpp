@@ -164,8 +164,8 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
     }
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
-    pSession->HandleRequest(IMessage::SESSION_START, *piMessage);
-    m_objContext.GetParticipantInfo().HandleRequest(IMessage::SESSION_START, *piMessage);
+    pSession->HandleRequest(RequestType::START, *piMessage);
+    m_objContext.GetParticipantInfo().HandleRequest(RequestType::START, *piMessage);
     m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
 
     if (!pSession->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
@@ -300,9 +300,9 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
     ISession* piSession = GetISession();
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
-    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_START, *piMessage);
+    m_objContext.GetSession()->HandleRequest(RequestType::START, *piMessage);
     m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
-    m_objContext.GetParticipantInfo().HandleRequest(IMessage::SESSION_START, *piMessage);
+    m_objContext.GetParticipantInfo().HandleRequest(RequestType::START, *piMessage);
 
     if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
     {

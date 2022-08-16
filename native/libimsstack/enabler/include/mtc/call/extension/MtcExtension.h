@@ -39,10 +39,10 @@ public:
     IMS_BOOL IsRequiredOnRemote() const override;
     const AString& GetOptionTag() const override;
 
-    void FormatRequest(IN IMS_UINT32 nMethod, IN_OUT IMessage& objRequest) override;
-    void FormatResponse(IN IMS_UINT32 nMethod, IN_OUT IMessage& objResponse) override;
-    void HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest) override;
-    void HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse) override;
+    void FormatRequest(IN RequestType eType, IN_OUT IMessage& objRequest) override;
+    void FormatResponse(IN ResponseType eType, IN_OUT IMessage& objResponse) override;
+    void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
+    void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 
 private:
     void UpdateFromRequireAndSupportedHeader(IN const IMessage& objMessage);

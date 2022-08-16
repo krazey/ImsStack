@@ -62,23 +62,23 @@ PUBLIC VIRTUAL const AString& MtcExtension::GetOptionTag() const
 }
 
 PUBLIC VIRTUAL void MtcExtension::FormatRequest(
-        IN IMS_UINT32 /* nMethod */, IN_OUT IMessage& /* objRequest */)
+        IN RequestType /* eType */, IN_OUT IMessage& /* objRequest */)
 {
 }
 
 PUBLIC VIRTUAL void MtcExtension::FormatResponse(
-        IN IMS_UINT32 /* nMethod */, IN_OUT IMessage& /* objResponse */)
+        IN ResponseType /* eType */, IN_OUT IMessage& /* objResponse */)
 {
 }
 
 PUBLIC VIRTUAL void MtcExtension::HandleRequest(
-        IN IMS_UINT32 /* nMethod */, IN const IMessage& objRequest)
+        IN RequestType /* eType */, IN const IMessage& objRequest)
 {
     UpdateFromRequireAndSupportedHeader(objRequest);
 }
 
 PUBLIC VIRTUAL void MtcExtension::HandleResponse(
-        IN IMS_UINT32 /* nMethod */, IN const IMessage& objResponse)
+        IN ResponseType /* eType */, IN const IMessage& objResponse)
 {
     UpdateFromRequireAndSupportedHeader(objResponse);
 }

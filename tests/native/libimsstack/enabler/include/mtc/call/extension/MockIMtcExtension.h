@@ -33,13 +33,13 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRequiredOnRemote, (), (const, override));
     MOCK_METHOD(const AString&, GetOptionTag, (), (const, override));
 
-    MOCK_METHOD(
-            void, FormatRequest, (IN IMS_UINT32 nMethod, IN_OUT IMessage& objRequest), (override));
-    MOCK_METHOD(void, FormatResponse, (IN IMS_UINT32 nMethod, IN_OUT IMessage& objResponse),
+    MOCK_METHOD(void, FormatRequest, (IN RequestType eType, IN_OUT IMessage& objRequest),
             (override));
-    MOCK_METHOD(void, HandleRequest, (IN IMS_UINT32 nMethod, IN const IMessage& objRequest),
+    MOCK_METHOD(void, FormatResponse, (IN ResponseType eType, IN_OUT IMessage& objResponse),
             (override));
-    MOCK_METHOD(void, HandleResponse, (IN IMS_UINT32 nMethod, IN const IMessage& objResponse),
+    MOCK_METHOD(void, HandleRequest, (IN RequestType eType, IN const IMessage& objRequest),
+            (override));
+    MOCK_METHOD(void, HandleResponse, (IN ResponseType eType, IN const IMessage& objResponse),
             (override));
 };
 

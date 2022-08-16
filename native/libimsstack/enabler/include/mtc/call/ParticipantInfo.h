@@ -18,7 +18,8 @@
 #define CALLER_INFO_H_
 
 #include "AString.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
+#include "call/message/IMtcMessageHandler.h"
 #include "helper/MtcSupplementaryService.h"
 
 class IMessage;
@@ -27,7 +28,7 @@ class IMtcCallContext;
 /**
  * This class stores caller and callee info.
  */
-class ParticipantInfo final
+class ParticipantInfo final : public IMtcMessageHandler
 {
 public:
     explicit ParticipantInfo(IN IMtcCallContext& objContext);
@@ -43,7 +44,9 @@ public:
     OipType GetOipType() const;
 
     void UpdateFromRemoteNumber(IN const AString& strRemoteNumber);
-    void HandleRequest(IN IMS_UINT32 eMethod, IN const IMessage& objRequest);
+
+    void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
+    void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 
 private:
     static const AString URI_SET_BY_IMS_ENGINE;

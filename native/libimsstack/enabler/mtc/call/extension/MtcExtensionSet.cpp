@@ -30,7 +30,6 @@ const AString MtcExtensionSet::OPTION_TAG_PRECONDITION = "precondition";
 const AString MtcExtensionSet::OPTION_TAG_REPLACES = "replaces";
 const AString MtcExtensionSet::OPTION_TAG_RPR = "100rel";
 const AString MtcExtensionSet::OPTION_TAG_TARGET_DIALOG = "tdialog";
-const AString MtcExtensionSet::OPTION_TAG_TIMER = "timer";
 
 PUBLIC
 MtcExtensionSet::MtcExtensionSet(IN const ImsList<IMtcExtension*>& lstExtensions)
@@ -107,38 +106,38 @@ IMS_BOOL MtcExtensionSet::IsSupportRequiredExtensions(IN const IMessage& pMessag
 }
 
 PUBLIC VIRTUAL void MtcExtensionSet::FormatRequest(
-        IN IMS_UINT32 nMethod, IN_OUT IMessage& objRequest)
+        IN RequestType eType, IN_OUT IMessage& objRequest)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objExtensions.GetSize(); nIndex++)
     {
-        m_objExtensions.GetValueAt(nIndex)->FormatRequest(nMethod, objRequest);
+        m_objExtensions.GetValueAt(nIndex)->FormatRequest(eType, objRequest);
     }
 }
 
 PUBLIC VIRTUAL void MtcExtensionSet::FormatResponse(
-        IN IMS_UINT32 nMethod, IN_OUT IMessage& objResponse)
+        IN ResponseType eType, IN_OUT IMessage& objResponse)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objExtensions.GetSize(); nIndex++)
     {
-        m_objExtensions.GetValueAt(nIndex)->FormatResponse(nMethod, objResponse);
+        m_objExtensions.GetValueAt(nIndex)->FormatResponse(eType, objResponse);
     }
 }
 
 PUBLIC VIRTUAL void MtcExtensionSet::HandleRequest(
-        IN IMS_UINT32 nMethod, IN const IMessage& objRequest)
+        IN RequestType eType, IN const IMessage& objRequest)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objExtensions.GetSize(); nIndex++)
     {
-        m_objExtensions.GetValueAt(nIndex)->HandleRequest(nMethod, objRequest);
+        m_objExtensions.GetValueAt(nIndex)->HandleRequest(eType, objRequest);
     }
 }
 
 PUBLIC VIRTUAL void MtcExtensionSet::HandleResponse(
-        IN IMS_UINT32 nMethod, IN const IMessage& objResponse)
+        IN ResponseType eType, IN const IMessage& objResponse)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objExtensions.GetSize(); nIndex++)
     {
-        m_objExtensions.GetValueAt(nIndex)->HandleResponse(nMethod, objResponse);
+        m_objExtensions.GetValueAt(nIndex)->HandleResponse(eType, objResponse);
     }
 }
 

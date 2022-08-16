@@ -26,7 +26,7 @@ class AString;
  * This class represents an extension for mmtel call. It stores whether the extension is available
  * in the call. And adds corresponding option tag to the message to be sent.
  */
-class IMtcExtension : public IMtcMessageHandler
+class IMtcExtension : public IMtcMessageFormatter, public IMtcMessageHandler
 {
 public:
     virtual ~IMtcExtension() {}

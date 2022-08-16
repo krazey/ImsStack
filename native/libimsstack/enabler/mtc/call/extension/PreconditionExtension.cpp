@@ -15,6 +15,7 @@
  */
 
 #include "IMessage.h"
+#include "ISipHeader.h"
 #include "SipMethod.h"
 #include "ServiceTrace.h"
 #include "call/extension/MtcExtensionSet.h"
@@ -42,28 +43,79 @@ PUBLIC VIRTUAL IMtcExtension* PreconditionExtension::Clone() const
     return new PreconditionExtension(*this);
 }
 
-PUBLIC VIRTUAL void PreconditionExtension::HandleRequest(
-        IN IMS_UINT32 nMethod, IN const IMessage& objRequest)
+PUBLIC VIRTUAL void PreconditionExtension::FormatRequest(
+        IN RequestType eType, IN_OUT IMessage& objRequest)
 {
-    if (nMethod != IMessage::SESSION_START && nMethod != IMessage::SESSION_EARLY_UPDATE &&
-            nMethod != IMessage::SESSION_PRACK)
+    if (eType != RequestType::START && !IsAvailableOnRemote())
     {
         return;
     }
 
-    if (nMethod != IMessage::SESSION_START && !MessageUtil::HasSdp(&objRequest))
+    IMS_SINT32 eHeaderType = ISipHeader::SUPPORTED;
+    switch (eType)
+    {
+        case RequestType::START:
+            break;
+
+        case RequestType::UPDATE:
+            // TODO, B_PRECONDITION_SUPPORTED_IN_REINVITE
+            break;
+
+        case RequestType::EARLY_UPDATE:
+            eHeaderType = ISipHeader::REQUIRE;  // TODO, B_SEND_UPDATE_WITH_REQUIRE_PRECONDITION
+            break;
+
+        case RequestType::PRACK:
+        case RequestType::ACK:
+        case RequestType::CANCEL_UPDATE:
+        case RequestType::TERMINATE:
+            return;
+
+        default:
+            IMS_TRACE_E(0, "FormatRequest : Invalid message type[%d]", eType, 0, 0);
+            return;
+    }
+
+    MessageUtil::AddValueIfNotExists(&objRequest, GetOptionTag(), eHeaderType);
+}
+
+PUBLIC VIRTUAL void PreconditionExtension::FormatResponse(
+        IN ResponseType eType, IN_OUT IMessage& objResponse)
+{
+    if (!IsAvailableOnRemote())
+    {
+        return;
+    }
+    if (eType == ResponseType::REJECT)
+    {
+        return;
+    }
+
+    MessageUtil::AddValueIfNotExists(&objResponse, GetOptionTag(), ISipHeader::REQUIRE);
+}
+
+PUBLIC VIRTUAL void PreconditionExtension::HandleRequest(
+        IN RequestType eType, IN const IMessage& objRequest)
+{
+    if (eType != RequestType::START && eType != RequestType::EARLY_UPDATE &&
+            eType != RequestType::PRACK)
+    {
+        return;
+    }
+
+    if (eType != RequestType::START && !MessageUtil::HasSdp(&objRequest))
     {
         IMS_TRACE_D("HandleRequest : Don't check precondition feature without SDP.", 0, 0, 0);
         return;
     }
 
-    MtcExtension::HandleRequest(nMethod, objRequest);
+    MtcExtension::HandleRequest(eType, objRequest);
 }
 
 PUBLIC VIRTUAL void PreconditionExtension::HandleResponse(
-        IN IMS_UINT32 nMethod, IN const IMessage& objResponse)
+        IN ResponseType eType, IN const IMessage& objResponse)
 {
-    if (nMethod != IMessage::SESSION_START)
+    if (eType != ResponseType::PROVISIONAL_RESPONSE)
     {
         return;
     }
@@ -74,5 +126,5 @@ PUBLIC VIRTUAL void PreconditionExtension::HandleResponse(
         return;
     }
 
-    MtcExtension::HandleResponse(nMethod, objResponse);
+    MtcExtension::HandleResponse(eType, objResponse);
 }

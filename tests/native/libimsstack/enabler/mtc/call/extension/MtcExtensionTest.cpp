@@ -125,48 +125,48 @@ TEST_F(MtcExtensionTest, GetOptionTag)
             pExtension->GetOptionTag().GetStr());
 }
 
-TEST_F(MtcExtensionTest, FormatRequestDoNothing)
+TEST_F(MtcExtensionTest, FormatRequestDoesNothing)
 {
-    pExtension->FormatRequest(IMessage::SESSION_START, objMessageRequiresSomeOptionTag);
+    pExtension->FormatRequest(RequestType::START, objMessageRequiresSomeOptionTag);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 
-    pExtension->FormatRequest(IMessage::SESSION_START, objMessageSupportsSomeOptionTag);
+    pExtension->FormatRequest(RequestType::START, objMessageSupportsSomeOptionTag);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 }
 
-TEST_F(MtcExtensionTest, FormatResponseDoNothing)
+TEST_F(MtcExtensionTest, FormatResponseDoesNothing)
 {
-    pExtension->FormatResponse(IMessage::SESSION_START, objMessageRequiresSomeOptionTag);
+    pExtension->FormatResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageRequiresSomeOptionTag);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 
-    pExtension->FormatResponse(IMessage::SESSION_START, objMessageSupportsSomeOptionTag);
+    pExtension->FormatResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageSupportsSomeOptionTag);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 }
 
 TEST_F(MtcExtensionTest, HandleRequestForRequiringMessageUpdatesAvailability)
 {
-    pExtension->HandleRequest(IMessage::SESSION_START, objMessageRequiresSomeOptionTag);
+    pExtension->HandleRequest(RequestType::START, objMessageRequiresSomeOptionTag);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_TRUE(pExtension->IsRequiredOnRemote());
 }
 
 TEST_F(MtcExtensionTest, HandleRequestForSupportingMessageUpdatesAvailability)
 {
-    pExtension->HandleRequest(IMessage::SESSION_START, objMessageSupportsSomeOptionTag);
+    pExtension->HandleRequest(RequestType::START, objMessageSupportsSomeOptionTag);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
 
 TEST_F(MtcExtensionTest, HandleResponseForRequiringMessageUpdatesAvailability)
 {
-    pExtension->HandleResponse(IMessage::SESSION_START, objMessageRequiresSomeOptionTag);
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageRequiresSomeOptionTag);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_TRUE(pExtension->IsRequiredOnRemote());
 }
 
 TEST_F(MtcExtensionTest, HandleResponseForSupportingMessageUpdatesAvailability)
 {
-    pExtension->HandleResponse(IMessage::SESSION_START, objMessageSupportsSomeOptionTag);
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageSupportsSomeOptionTag);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
