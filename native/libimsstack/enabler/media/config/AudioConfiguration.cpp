@@ -18,6 +18,7 @@
 #include "ImsVector.h"
 #include "config/ImsCodec.h"
 #include "config/AudioConfiguration.h"
+#include "config/MediaSessionConfig.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
@@ -26,6 +27,7 @@ __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 PUBLIC
 AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         MediaConfiguration(eSessionType),
+        m_bEvsSupported(IMS_FALSE),
         m_nAudioPtime(DEFAULT_PTIME),
         m_nAudioMaxPtime(DEFAULT_MAX_PTIME),
         m_nAudioMaxRed(DEFAULT_MAX_RED),
@@ -84,6 +86,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL);
 
     // Audio Configuration attributes
+    m_bEvsSupported = piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_EVS_SUPPORT_BOOL);
     m_nAudioPtime = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_PTIME_MILLIS_INT);
     m_nAudioMaxPtime = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT);
     m_nAudioMaxRed = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT);
@@ -230,9 +233,10 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
     IMS_UINT32 nCodecCnt = 0;
     AString strTemp;
 
-    if (objEvsPayloadType.GetSize() > 0)
+    if (m_bEvsSupported == IMS_TRUE && objEvsPayloadType.GetSize() > 0)
     {
-        // nCodecCnt = MakeEachCodecs(piCc, ImsCodec::AUDIO_EVS, nCodecCnt, objEvsPayloadType);
+        nCodecCnt = MakeEachCodecs(piCc, ImsCodec::AUDIO_EVS, nCodecCnt, objEvsPayloadType);
+        IMS_TRACE_D("CreateCodecConfigs - Read Evs Codecs", 0, 0, 0);
         /**  TODO: evs is not supported for now */
     }
     if (objAmrwbPayloadType.GetSize() > 0)
@@ -265,8 +269,8 @@ PROTECTED VIRTUAL void AudioConfiguration::ToDebugString() const
             m_nAudioMaxPtime, m_nAudioMaxRed);
     IMS_TRACE_D("m_bAudioBwNegoOptionEnabled[%d], m_nAudioRtpDscp[%d], DTMFDuration[%d]",
             m_bAudioBwNegoOptionEnabled, m_nAudioRtpDscp, m_nDtmfDuration);
-    IMS_TRACE_D("jitter_buffer_min[%d], jitter_buffer_max[%d]", m_nJitterBufferMinSize,
-            m_nJitterBufferMaxSize, 0);
+    IMS_TRACE_D("jitter_buffer_min[%d], jitter_buffer_max[%d], Evs_Supported[%d]",
+            m_nJitterBufferMinSize, m_nJitterBufferMaxSize, m_bEvsSupported);
     IMS_TRACE_D("jitter_buffer_adjust_time[%d], jitter_buffer_step_size[%d]",
             m_nJitterBufferAdjustTime, m_nJitterBufferStepSize, 0);
     IMS_TRACE_D("m_bAudioRtcpxrEnabled[%d], m_bAudioRtcpxrStatisticsEnabled[%d]",
@@ -287,6 +291,12 @@ PROTECTED VIRTUAL void AudioConfiguration::ToDebugString() const
     {
         ToDebugStringCodecs(objCodecConfigs.GetAt(i));
     }
+}
+
+PUBLIC
+IMS_BOOL AudioConfiguration::IsEvsSupported() const
+{
+    return m_bEvsSupported;
 }
 
 PUBLIC

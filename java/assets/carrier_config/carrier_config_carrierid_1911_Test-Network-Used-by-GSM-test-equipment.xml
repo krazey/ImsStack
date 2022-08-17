@@ -17,6 +17,7 @@
 <carrier_config>
 
     <!-- MEDIA -->
+
     <!-- EVS Payload -->
     <int-array name="asset_evs_payload_type_int_array" num="1">
         <item value="125"/>
@@ -63,6 +64,7 @@
     </int-array>
 
     <!-- Media common configuration -->
+    <boolean name="audio_evs_support_bool" value="true"/>
     <int name="audio_maxred_int" value="220"/>
     <int name="asset_codec_attribute_mode_change_capability_int" value="2"/>
     <int name="audio_ptime_millis_int" value="20"/>
