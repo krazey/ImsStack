@@ -196,6 +196,7 @@
         <item value="2"/>
         <item value="4"/>
     </int-array>
+    <boolean name="use_carrier_specific_contact_header_for_options_response_bool" value="true"/>
     <boolean name="use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="true"/>
 
     <!-- MTC terminate reason -->
