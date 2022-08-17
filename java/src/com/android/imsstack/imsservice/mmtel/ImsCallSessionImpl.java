@@ -2051,7 +2051,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private void setRttInfo(MediaInfo mi, boolean isRttOn) {
-        if (isCallFeatureSupported(CF_RTT) || mCall.isConference()) {
+        if (!isCallFeatureSupported(CF_RTT) || mCall.isConference()) {
             return;
         }
 
