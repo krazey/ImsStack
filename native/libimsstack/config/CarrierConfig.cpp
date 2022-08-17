@@ -1167,6 +1167,24 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT[] =
         "sms_request_uri_type_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[] =
         "sms_use_dialed_number_for_request_uri_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY[] =
+        "sms_permanent_error_codes_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_EXPIRY_TIMER_F_INT[] =
+        "sms_policy_for_expiry_timer_f_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_403_RESPONSE_INT[] =
+        "sms_policy_for_403_response_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_404_RESPONSE_INT[] =
+        "sms_policy_for_404_response_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_406_RESPONSE_INT[] =
+        "sms_policy_for_406_response_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_408_RESPONSE_INT[] =
+        "sms_policy_for_408_response_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_500_RESPONSE_INT[] =
+        "sms_policy_for_500_response_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_503_RESPONSE_INT[] =
+        "sms_policy_for_503_response_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_504_RESPONSE_INT[] =
+        "sms_policy_for_504_response_int";
 
 // Uce
 const IMS_CHAR CarrierConfig::Assets::KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[] =

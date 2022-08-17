@@ -33,7 +33,7 @@
 #include "MtsService.h"
 #include "message/MtsMessageController.h"
 
-__IMS_TRACE_TAG_COM_SMS__;
+__IMS_TRACE_TAG_COM_MTS__;
 
 LOCAL const IMS_CHAR MTS_APP_NAME[] = "MtsApp";
 

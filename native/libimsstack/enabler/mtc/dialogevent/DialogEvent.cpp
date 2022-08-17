@@ -38,7 +38,7 @@
 #include "dialogevent/DialogEvent.h"
 #include "dialogevent/DialogEventManager.h"
 
-__IMS_TRACE_TAG_COM_UC__;
+__IMS_TRACE_TAG_COM_MTC__;
 
 /* ------------------------------------------------------------------------------------------------
     Constructor, Destructor

@@ -125,6 +125,13 @@
         <item value="999"/> <!-- All cases -->
     </int-array>
 
+    <!-- Mts -->
+    <int-array name="sms_permanent_error_codes_int_array" num="1">
+        <item value="0"/>
+    </int-array>
+    <int name="sms_policy_for_expiry_timer_f_int" value="8"/>
+    <int name="sms_policy_for_504_response_int" value="8"/>
+
     <!-- Media -->
     <int name="audio_maxred_int" value="0"/>
     <boolean name="audio_bw_nego_option_bool" value="true"/>

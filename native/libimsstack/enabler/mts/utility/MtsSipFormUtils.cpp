@@ -27,7 +27,7 @@
 #include "helper/dialing/MtsDialingPlan.h"
 #include "utility/MtsSipFormUtils.h"
 
-__IMS_TRACE_TAG_COM_SMS__;
+__IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsSipFormUtils::MtsSipFormUtils(IN IMS_SINT32 nSlotId) :

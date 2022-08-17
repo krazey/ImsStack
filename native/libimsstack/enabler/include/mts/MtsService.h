@@ -68,12 +68,12 @@ public:
     void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId) override;
     void SendMtResult(IN IMS_BOOL bMtResult) override;
-    void ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsFormat,
+    void ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
             IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId) override;
     void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData) override;
     ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const override;
     void SetListener(IN IMtsServiceListener* piMtsServiceListener) override;
-    void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType) override;
+    void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) override;
 
     IMS_BOOL IsEpdgConnected();
 

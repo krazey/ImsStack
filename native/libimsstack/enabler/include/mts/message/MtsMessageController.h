@@ -23,18 +23,21 @@
 #include "IuMts.h"
 #include "MtsDef.h"
 #include "MtsService.h"
+#include "message/IMtsErrorHandlerListener.h"
 
 class IMtsMessage;
 class IPageMessage;
 class MtsDynamicLoader;
+class IMtsErrorHandler;
 
 class MtsMessageController final :
         public ImsActivityEx,
         public IPageMessageListener,
-        public IMtsServiceListener
+        public IMtsServiceListener,
+        public IMtsErrorHandlerListener
 {
 public:
-    MtsMessageController(IN IMS_SINT32 nSlotID, IN IMtsService* piMtsService,
+    MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService* piMtsService,
             IN MtsDynamicLoader* pMtsDynamicLoader);
     ~MtsMessageController();
 
@@ -46,9 +49,12 @@ public:
     void PageMessageDeliveryFailed(IN IPageMessage* piPageMessage) override;
 
     // IMtsServiceListener
-    virtual void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
+    void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
-    virtual void NotifyMtSms(IN IPageMessage* piMessage) override;
+    void NotifyMtSms(IN IPageMessage* piMessage) override;
+
+    // IMtsErrorHandlerListener
+    void NotifyControlAos(IMS_UINT32 nCommand) override;
 
 private:
     // ImsActivityEx
@@ -66,7 +72,7 @@ private:
     void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bEmergency);
     void SendMtsMessage(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency);
-    IMS_RESULT ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsFormat,
+    IMS_RESULT ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
             IN IMS_UINT8 nRetryAfter = 0, IN IMS_SINT32 nSeqId = -1);
     IMS_UINT32 ReportMtSms(
             IN SmsFormatType eSmsFormat, IN IMS_UINT32 nSmsLength, IN const IMS_BYTE* pbySmsData);
@@ -78,7 +84,7 @@ private:
     IMS_BOOL ProcessReceivedMessage(
             IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage, OUT ByteArray& objSms);
     void ReportTransmissionResult(
-            IN IMS_UINT32 nResponse, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
+            IN IMS_SINT32 nResponse, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
     void ReportTransmissionFailureWithRetryTime(
             IN SmsFormatType eSmsFormat, IN const IMS_UINT8 nRetryTime, IN IMS_SINT32 nSeqId = -1);
     IMS_BOOL RespondReceivedMessage(IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage,
@@ -119,6 +125,7 @@ private:
     IMSList<IMtsMessage*> m_objMsgList;
     IMSList<IMtsMessage*> m_objRPAckedMsgs;
     IMtsService* m_piMtsService;
+    IMtsErrorHandler* m_piMtsErrorHandler;
     MtsDynamicLoader* m_pMtsDynamicLoader;
 };
 

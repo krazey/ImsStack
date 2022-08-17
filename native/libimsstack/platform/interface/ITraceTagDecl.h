@@ -66,13 +66,12 @@
 
 //// MTC
 //// enabler -> mtc
-#define __IMS_TRACE_TAG_COM_UC__       __IMS_TRACE_TAG__(MTC)
 #define __IMS_TRACE_TAG_COM_MTC__      __IMS_TRACE_TAG__(MTC)
 #define __IMS_TRACE_TAG_MTC__          __IMS_TRACE_TAG__(MTC)
 
 //// MTS
 //// enabler -> mts
-#define __IMS_TRACE_TAG_COM_SMS__      __IMS_TRACE_TAG__(MTS)
+#define __IMS_TRACE_TAG_COM_MTS__      __IMS_TRACE_TAG__(MTS)
 #define __IMS_TRACE_TAG_MTS__          __IMS_TRACE_TAG__(MTS)
 
 //// UCE

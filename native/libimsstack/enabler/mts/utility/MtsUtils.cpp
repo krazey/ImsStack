@@ -21,15 +21,7 @@
 #include "ImsStrLib.h"
 #include "utility/MtsUtils.h"
 
-
-__IMS_TRACE_TAG_COM_SMS__;
-
-PUBLIC GLOBAL const IMS_CHAR MtsUtils::PROPERTY_RIL_ECCLIST[] = "ril.ecclist";
-
-PUBLIC GLOBAL const IMS_CHAR MtsUtils::PROPERTY_FEATURESET_SMSTO911[] =
-        "persist.product.xxx.sms.smsto911.enable";
-
-const IMS_CHAR MtsUtils::PROPERTY_SCBM_MODE[] = "persist.product.xxx.sms.smsto911.scbm.state";
+__IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsUtils::MtsUtils() :

@@ -26,7 +26,7 @@
 #include "utility/MtsStrName.h"
 #include "utility/MtsDynamicLoader.h"
 
-__IMS_TRACE_TAG_COM_SMS__;
+__IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :

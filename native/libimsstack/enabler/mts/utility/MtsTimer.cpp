@@ -17,7 +17,7 @@
 #include "ServiceTrace.h"
 #include "utility/MtsTimer.h"
 
-__IMS_TRACE_TAG_COM_SMS__;
+__IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsTimer::MtsTimer() :

@@ -77,6 +77,11 @@ enum
     SMS_MTI_NONE = -1
 };
 
+enum
+{
+    MTS_REG_RECOVERY_POLICY_NONE = -1
+};
+
 // RP Data Unit type in 3GPP SMS
 enum
 {
