@@ -128,6 +128,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::FormSDP(IN NEGO_STATE eNegoState,
 {
     IMS_TRACE_I("FormSDP() - NegoState[%d], lstOaModel size[%d]", eNegoState,
             m_listOaModel.GetSize(), 0);
+    IMS_TRACE_I("FormSDP() - eDirection[%d], bDisable[%d]", eDirection, bDisable, 0);
 
     switch (eNegoState)
     {
@@ -151,8 +152,8 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::NegotiateSDP(NEGO_STATE eNegoState,
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("NegotiateSDP() - NegoState[%d], lstOaModel size[%d]", eNegoState,
-            m_listOaModel.GetSize(), 0);
+    IMS_TRACE_I("NegotiateSDP() - NegoState[%d], lstOaModel size[%d] eDirection[%d]", eNegoState,
+            m_listOaModel.GetSize(), eDirection);
 
     *eDirection = MEDIA_DIRECTION_INVALID;
 
@@ -592,7 +593,7 @@ PRIVATE IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor
         return IMS_FALSE;
     }
 
-    if (eDirection == MEDIA_DIRECTION_INVALID)
+    if (eDirection == MEDIA_DIRECTION_INVALID && bDisable != IMS_TRUE)
     {
         IMS_TRACE_E(0, "FormAnswer() - direction invalid", 0, 0, 0);
         return IMS_FALSE;
@@ -639,8 +640,9 @@ PRIVATE IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor
 PRIVATE IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable)
 {
-    IMS_TRACE_I("FormReoffer() - pDescriptor[%" PFLS_x "], eDirection[%d], OaModel Size(%d)",
+    IMS_TRACE_I("FormReoffer() - pDescriptor[%" PFLS_x "], eDirection[%d], OaModel Size[%d]",
             pDescriptor, eDirection, m_listOaModel.GetSize());
+    IMS_TRACE_I("FormReoffer() - bDisable[%d]", bDisable, 0, 0);
 
     // Handling exception case
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
@@ -648,7 +650,7 @@ PRIVATE IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescripto
         return IMS_FALSE;
     }
 
-    if (eDirection == MEDIA_DIRECTION_INVALID)
+    if (eDirection == MEDIA_DIRECTION_INVALID && bDisable != IMS_TRUE)
     {
         IMS_TRACE_E(0, "FormReoffer() - direction invalid", 0, 0, 0);
         return IMS_FALSE;
