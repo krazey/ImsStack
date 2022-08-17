@@ -82,7 +82,7 @@ SIP_BOOL SipInfoBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTemp = SIP_NULL;
 
-    if (sipFindPostDelimiter(pStartPt, pEndPt, &pTemp, LEFT_ANGLE) == SIP_FALSE)
+    if (SipFindPostDelimiter(pStartPt, pEndPt, &pTemp, LEFT_ANGLE) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -90,12 +90,12 @@ SIP_BOOL SipInfoBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = pTemp;
     pTemp = SIP_NULL;
 
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTemp, RIGHT_ANGLE) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTemp, RIGHT_ANGLE) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pszValue = sipCreateString(pStartPt, pTemp);
+    SIP_CHAR* pszValue = SipCreateString(pStartPt, pTemp);
     if (SetValue(pszValue) == SIP_FALSE)
     {
         if (pszValue != SIP_NULL)
@@ -109,10 +109,10 @@ SIP_BOOL SipInfoBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_INT32 nLen = pTemp - pStartPt;
     pStartPt = pTemp + SIP_TWO;
 
-    pStartPt = sipSkipFwLWS(pStartPt, pEndPt);
+    pStartPt = SipSkipFwLWS(pStartPt, pEndPt);
     pTemp = SIP_NULL;
 
-    if (sipFindPostDelimiter(pStartPt, pEndPt, &pTemp, SIP_SEMI) &&
+    if (SipFindPostDelimiter(pStartPt, pEndPt, &pTemp, SIP_SEMI) &&
             ((*pStartPt) == SIP_SEMI) == SIP_TRUE)
     {
         return DecodeHeaderParameters(pTemp, pEndPt, SIP_SEMI);

@@ -43,10 +43,10 @@ SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nD
     }
 
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    sipSkipFwLWS(pStartPt, pEndPt);
+    SipSkipFwLWS(pStartPt, pEndPt);
 
     // validate urn:urn-7 mandatory prefix
-    SIP_CHAR* pszTempString = sipCreateString(pStartPt, pStartPt + SIP_NINE);
+    SIP_CHAR* pszTempString = SipCreateString(pStartPt, pStartPt + SIP_NINE);
     if (SipPf_Stricmp("urn:urn-7:", pszTempString) != SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -68,7 +68,7 @@ SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nD
     SIP_CHAR* pTempPre = SIP_NULL;
     SIP_CHAR* pTempNext = SIP_NULL;
     // Find First dot and validate SubService Id
-    if (sipFindActualPos(pTempCurr, pEndPt, &pTempPre, &pTempNext, SIP_DOT) == SIP_TRUE)
+    if (SipFindActualPos(pTempCurr, pEndPt, &pTempPre, &pTempNext, SIP_DOT) == SIP_TRUE)
     {
         while (pTempNext <= pEndPt)
         {
@@ -100,7 +100,7 @@ SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nD
     }
 
     // create the service and copy
-    SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
     if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(

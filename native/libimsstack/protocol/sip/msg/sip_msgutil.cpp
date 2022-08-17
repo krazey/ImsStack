@@ -180,141 +180,75 @@ SIP_BOOL SetCharVar(const SIP_CHAR* pszSource, SIP_CHAR*& pszDestination)
     return SIP_TRUE;
 }
 
-SIP_BOOL HasSpace(const SIP_CHAR* pszValue)
-{
-    while (*pszValue)
-    {
-        if (*pszValue == ' ')
-        {
-            return SIP_TRUE;
-        }
-        pszValue++;
-    }
-    return SIP_FALSE;
-}
-
-SIP_INT32 sipGetMsgType(SIP_CHAR* pszStartPoint)
+SIP_INT32 SipGetMsgType(SIP_CHAR* pszStartPoint)
 {
     return (SipPf_Strncmp(SIP_SIPVER, pszStartPoint, SIP_FOUR) == 0) ? SipMessage::RESP_TYPE
                                                                      : SipMessage::REQ_TYPE;
 }
 
-SIP_BOOL sipFindTerminatingCRLF(
-        SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint, SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd)
+SIP_INT32 SipGetUriType(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
-    /* To check two consecutive CRLF */
-    SIP_UINT32 nStrlen = pEndPoint - pStartPoint;
-    if (nStrlen < SIP_THREE)
+    SIP_UINT32 nSize = (pEndPt - pStartPt) + SIP_ONE;
+    if (SipPf_Memcmp(pStartPt, SIP_SIP, nSize) == 0)
     {
-        return SIP_FALSE;
+        return SipUri::SCHEME_SIP;
     }
-    SIP_CHAR* pPrevPoint2 = pStartPoint;
-    SIP_CHAR* pPrevPoint1 = pStartPoint + SIP_ONE;
-    pStartPoint = pStartPoint + SIP_TWO;
-    /*Check for CRLF*/
-    SIP_CHAR* pNextPoint = pStartPoint + SIP_ONE;
+    else if (SipPf_Memcmp(pStartPt, SIP_SIPS, nSize) == 0)
+    {
+        return SipUri::SCHEME_SIPS;
+    }
+    return SipUri::SCHEME_ABS;
+}
 
-    while (pNextPoint <= pEndPoint)
+SIP_INT32 SipGetHdrType(const SIP_CHAR* pszHdrName)
+{
+    return SIPHdrAccess::GetHdrType(pszHdrName);
+}
+
+SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType)
+{
+    // support EXPIRES_ANY & EXPIRES_DATE
+    if ((nType == SipHeaderBase::EXPIRES_ANY) || (nType == SipHeaderBase::EXPIRES_DATE))
     {
-        if (IS_CRLF(*pPrevPoint2, *pPrevPoint1) && (IS_WSP(*pStartPoint) == SIP_FALSE))
-        {
-            *ppLocation = pPrevPoint2 - SIP_ONE;
-            if (IS_CRLF(*pStartPoint, *pNextPoint))
-            {
-                *pbHdrEnd = SIP_TRUE;
-            }
-            return SIP_TRUE;
-        }
-        pPrevPoint2 = pPrevPoint1;
-        pPrevPoint1 = pStartPoint;
-        pStartPoint++;
-        pNextPoint = pStartPoint + SIP_ONE;
+        nType = SipHeaderBase::EXPIRES_SEC;
+    }  // support CONTACT_ANY & CONTACT_WILD
+    else if ((nType == SipHeaderBase::CONTACT_ANY) || (nType == SipHeaderBase::CONTACT_WILD))
+    {
+        nType = SipHeaderBase::CONTACT;
+    }  // Support for Retry-After Any & Sec header
+    else if ((nType == SipHeaderBase::RETRY_AFTER_ANY) ||
+            (nType == SipHeaderBase::RETRY_AFTER_DATE))
+    {
+        nType = SipHeaderBase::RETRY_AFTER_SEC;
     }
-    /*Check For one CRLF at Extream End*/
-    if (IS_CRLF(*pPrevPoint2, *pPrevPoint1) && (IS_WSP(*pStartPoint) == SIP_FALSE))
+
+    return nType;
+}
+
+#ifdef SIP_STRICT_PARSING
+SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+{
+    SIP_CHAR* pTempLoc = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+
+    /*Find the Start of header parm*/
+    if (SipFindPostDelimiter(pStartPt, pEndPt, &pTempLoc, QMARK) == SIP_FALSE)
     {
-        *ppLocation = pPrevPoint2 - SIP_ONE;
         return SIP_TRUE;
     }
 
-    if (IS_CRLF(*pPrevPoint1, *pStartPoint))
+    pStartPt = pTempLoc;
+    pTempLoc = SIP_NULL;
+
+    if (SipFindPostDelimiter(pStartPt, pEndPt, &pTempLoc, PERCENT) == SIP_FALSE)
     {
-        *ppLocation = pPrevPoint1 - SIP_ONE;
         return SIP_TRUE;
     }
-
     return SIP_FALSE;
 }
+#endif
 
-SIP_BOOL sipFindActualPos(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempPre,
-        SIP_CHAR** ppTempNext, SIP_CHAR cDelimiter)
-{
-    SIP_BOOL bDQuote = SIP_FALSE;
-    SIP_CHAR* pPrevPt = pStartPt;
-    SIP_CHAR* pStartTemp = pStartPt;
-
-    while (pStartPt <= pEndPt)
-    {
-        /*Preventing the case of Feature Prm and quoted text*/
-        if ((*pStartPt == DQUOTE) && (*pPrevPt != BACKSLASH))
-        {
-            bDQuote = (SIP_BOOL)!bDQuote;
-        }
-        if (*pStartPt == cDelimiter)
-        {
-            /*for the case of quoted string we have to
-              prevent returning in case of " ," and " ;" */
-            if (bDQuote == SIP_FALSE)
-            {
-                *ppTempPre = pStartPt - SIP_ONE;
-                *ppTempNext = pStartPt + SIP_ONE;
-
-                /*remove the LWS from Back*/
-                if (cDelimiter != RIGHT_ANGLE)
-                {
-                    *ppTempPre = sipSkipRwLWS(pStartTemp, *ppTempPre);
-                }
-                /*remove the LWS from start*/
-                if (cDelimiter != LEFT_ANGLE)
-                {
-                    *ppTempNext = sipSkipFwLWS(*ppTempNext, pEndPt);
-                }
-
-                /*Remove the LWS form both the side to get the actual pos*/
-                return SIP_TRUE;
-            }
-        }
-        pPrevPt = pStartPt;
-        pStartPt = pStartPt + SIP_ONE;
-    }
-    return SIP_FALSE;
-}
-
-SIP_VOID SipEnc_UpdateCurrPos(IN_OUT SIP_CHAR** ppMsgBuffer)
-{
-    while (**ppMsgBuffer != '\0')
-    {
-        (*ppMsgBuffer)++;
-    }
-}
-
-SIP_BOOL sipFindCrlf(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
-{
-    SIP_CHAR* pNext1Pt = pStartPt + SIP_ONE;
-    while (pNext1Pt <= pEndPt)
-    {
-        if (IS_CRLF(*pStartPt, *pNext1Pt))
-        {
-            *ppTempLoc = pStartPt - SIP_ONE;
-            return SIP_TRUE;
-        }
-        pStartPt++;
-        pNext1Pt++;
-    }
-    return SIP_FALSE;
-}
-
-SIP_CHAR* sipFindBodyEnd(
+SIP_CHAR* SipFindBodyEnd(
         SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd)
 {
     if (pStartPt == SIP_NULL)
@@ -352,7 +286,7 @@ SIP_CHAR* sipFindBodyEnd(
     return SIP_NULL;
 }
 
-SIP_INT32 sipGetMimeHdrType(SIP_CHAR* pszHdrName)
+SIP_INT32 SipGetMimeHdrType(SIP_CHAR* pszHdrName)
 {
     if (pszHdrName == SIP_NULL)
     {

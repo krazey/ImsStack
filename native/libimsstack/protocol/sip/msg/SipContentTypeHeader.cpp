@@ -127,13 +127,13 @@ SIP_BOOL SipContentTypeHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pTempPre = SIP_NULL;
     SIP_CHAR* pTempNext = SIP_NULL;
     /*Find the SLASH*/
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SLASH missing in Accept", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszMType = sipCreateString(pStartPt, pTempPre);
+    m_pszMType = SipCreateString(pStartPt, pTempPre);
     if (m_pszMType == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -144,12 +144,12 @@ SIP_BOOL SipContentTypeHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pTempNext = SIP_NULL;
     pTempPre = SIP_NULL;
 
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_FALSE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_FALSE)
     {
         pTempPre = pEndPt;
     }
 
-    m_pszMSubType = sipCreateString(pStartPt, pTempPre);
+    m_pszMSubType = SipCreateString(pStartPt, pTempPre);
     if (m_pszMSubType == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
@@ -191,7 +191,7 @@ SIP_CHAR* SipContentTypeHeader::StripDQUOTE(const SIP_CHAR* pszStr)
     const SIP_CHAR* pEndPtr = pszStr + nStrLen - SIP_ONE;
     if (IS_DQUOTE(*pszStr) && IS_DQUOTE(*pEndPtr))
     {
-        return sipCreateString(pszStr + SIP_ONE, pEndPtr - SIP_ONE);
+        return SipCreateString(pszStr + SIP_ONE, pEndPtr - SIP_ONE);
     }
     return SIP_NULL;
 }

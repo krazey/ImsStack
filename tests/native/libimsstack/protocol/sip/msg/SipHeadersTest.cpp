@@ -82,13 +82,13 @@ TEST_F(SipHeadersTest, CopyHdrs)
     EXPECT_EQ(SIP_TRUE, pNewHdrs->CopyHdrs(pHdrs));
 
     SipIntegerHeader* pMaxForwardsNewHdr = reinterpret_cast<SipIntegerHeader*>(
-            pNewHdrs->getHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
+            pNewHdrs->GetHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
     ASSERT_TRUE(pMaxForwardsNewHdr != nullptr);
     EXPECT_EQ(70, pMaxForwardsNewHdr->GetValueInt());
     pMaxForwardsNewHdr->SipDelete();
 
     SipViaHeader* pViaNewHdr =
-            reinterpret_cast<SipViaHeader*>(pNewHdrs->getHdrObj(SipHeaderBase::VIA, 0));
+            reinterpret_cast<SipViaHeader*>(pNewHdrs->GetHdrObj(SipHeaderBase::VIA, 0));
     ASSERT_TRUE(pViaNewHdr != nullptr);
     const char* pViaTransport = pViaNewHdr->GetTransport();
     EXPECT_STREQ("TCP", pViaTransport);
@@ -130,7 +130,7 @@ TEST_F(SipHeadersTest, CloneHdrObject)
     pViaCloneHdr->SipDelete();
 }
 
-TEST_F(SipHeadersTest, getHdrObj)
+TEST_F(SipHeadersTest, GetHdrObj)
 {
     SipHeaderBase* pMaxForwardsHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS);
     ASSERT_TRUE(pMaxForwardsHdr != nullptr);
@@ -152,25 +152,25 @@ TEST_F(SipHeadersTest, getHdrObj)
     pMaxForwardsHdr->SipDelete();
     pViaHdr->SipDelete();
 
-    pMaxForwardsHdr = pHdrs->getHdrObj(SipHeaderBase::MAX_FORWARDS, 0);
+    pMaxForwardsHdr = pHdrs->GetHdrObj(SipHeaderBase::MAX_FORWARDS, 0);
     EXPECT_TRUE(pMaxForwardsHdr != nullptr);
     pMaxForwardsHdr->SipDelete();
 
-    SipHeaderBase* pUserAgentHdr = pHdrs->getHdrObj(SipHeaderBase::USER_AGENT, 0);
+    SipHeaderBase* pUserAgentHdr = pHdrs->GetHdrObj(SipHeaderBase::USER_AGENT, 0);
     EXPECT_TRUE(pUserAgentHdr == nullptr);
 
-    pViaHdr = pHdrs->getHdrObj(SipHeaderBase::VIA, 0);
+    pViaHdr = pHdrs->GetHdrObj(SipHeaderBase::VIA, 0);
     ASSERT_TRUE(pViaHdr != nullptr);
     pViaHdr->SipDelete();
 
-    pViaHdr = pHdrs->getHdrObj(SipHeaderBase::VIA, 5);
+    pViaHdr = pHdrs->GetHdrObj(SipHeaderBase::VIA, 5);
     EXPECT_TRUE(pViaHdr == nullptr);
 
-    SipHeaderBase* pSecurityClientHdr = pHdrs->getHdrObj(SipHeaderBase::SECURITY_CLIENT, 0);
+    SipHeaderBase* pSecurityClientHdr = pHdrs->GetHdrObj(SipHeaderBase::SECURITY_CLIENT, 0);
     EXPECT_TRUE(pSecurityClientHdr == nullptr);
 
-    EXPECT_TRUE(nullptr == pHdrs->getHdrObj(SipHeaderBase::TYPE_END));
-    EXPECT_TRUE(nullptr == pHdrs->getHdrObj(SipHeaderBase::TYPE_INVALID));
+    EXPECT_TRUE(nullptr == pHdrs->GetHdrObj(SipHeaderBase::TYPE_END));
+    EXPECT_TRUE(nullptr == pHdrs->GetHdrObj(SipHeaderBase::TYPE_INVALID));
 
     delete pHdrs;
 }
@@ -257,7 +257,7 @@ TEST_F(SipHeadersTest, OverWriteHdrObj)
     pHdrs->OverWriteHdrObj(pNewHdrs, SIP_FALSE);
 
     SipUnknownHeader* pOverwriteHdr =
-            reinterpret_cast<SipUnknownHeader*>(pHdrs->getHdrObj(SipHeaderBase::UNKNOWN, 0));
+            reinterpret_cast<SipUnknownHeader*>(pHdrs->GetHdrObj(SipHeaderBase::UNKNOWN, 0));
     ASSERT_TRUE(pOverwriteHdr != nullptr);
     EXPECT_STREQ("UnknownHeaderNewName", pOverwriteHdr->GetHeaderName());
     EXPECT_STREQ("UnknownHeaderNewValue", pOverwriteHdr->GetHeaderValue());
@@ -274,7 +274,7 @@ TEST_F(SipHeadersTest, OverWriteHdrObj)
     pHdrs->OverWriteHdrObj(pNewHdrs, SIP_FALSE);
 
     pOverwriteHdr =
-            reinterpret_cast<SipUnknownHeader*>(pHdrs->getHdrObj(SipHeaderBase::UNKNOWN, 0));
+            reinterpret_cast<SipUnknownHeader*>(pHdrs->GetHdrObj(SipHeaderBase::UNKNOWN, 0));
     ASSERT_TRUE(pOverwriteHdr != nullptr);
     EXPECT_STREQ("UnknownHeaderUpdatedName", pOverwriteHdr->GetHeaderName());
     EXPECT_STREQ("UnknownHeaderUpdatedValue", pOverwriteHdr->GetHeaderValue());
@@ -284,7 +284,7 @@ TEST_F(SipHeadersTest, OverWriteHdrObj)
     delete pNewHdrs;
 }
 
-TEST_F(SipHeadersTest, getHdrObj_Index)
+TEST_F(SipHeadersTest, GetHdrObj_Index)
 {
     SipHeaderBase* pMaxForwardsHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS);
     ASSERT_TRUE(pMaxForwardsHdr != nullptr);
@@ -306,31 +306,31 @@ TEST_F(SipHeadersTest, getHdrObj_Index)
     pMaxForwardsHdr->SipDelete();
     pViaHdr->SipDelete();
 
-    pMaxForwardsHdr = pHdrs->getHdrObj(SipHeaderBase::MAX_FORWARDS);
+    pMaxForwardsHdr = pHdrs->GetHdrObj(SipHeaderBase::MAX_FORWARDS);
     ASSERT_TRUE(pMaxForwardsHdr != nullptr);
     pMaxForwardsHdr->SipDelete();
 
-    SipHeaderBase* pUserAgentHdr = pHdrs->getHdrObj(SipHeaderBase::USER_AGENT);
+    SipHeaderBase* pUserAgentHdr = pHdrs->GetHdrObj(SipHeaderBase::USER_AGENT);
     EXPECT_TRUE(pUserAgentHdr == nullptr);
 
-    pViaHdr = pHdrs->getHdrObj(SipHeaderBase::VIA);
+    pViaHdr = pHdrs->GetHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
     pViaHdr->SipDelete();
 
-    EXPECT_TRUE(nullptr == pHdrs->getHdrObj(SipHeaderBase::TYPE_END));
-    EXPECT_TRUE(nullptr == pHdrs->getHdrObj(SipHeaderBase::TYPE_INVALID));
+    EXPECT_TRUE(nullptr == pHdrs->GetHdrObj(SipHeaderBase::TYPE_END));
+    EXPECT_TRUE(nullptr == pHdrs->GetHdrObj(SipHeaderBase::TYPE_INVALID));
 
     pMaxForwardsHdr->SipDelete();
     delete pHdrs;
 }
 
-TEST_F(SipHeadersTest, getNewHdrObj)
+TEST_F(SipHeadersTest, GetNewHdrObj)
 {
     SipHeaders* pHdrs = new SipHeaders();
     ASSERT_TRUE(pHdrs != nullptr);
 
-    EXPECT_TRUE(nullptr == pHdrs->getNewHdrObj(SipHeaderBase::TYPE_END));
-    EXPECT_TRUE(nullptr == pHdrs->getNewHdrObj(SipHeaderBase::TYPE_INVALID));
+    EXPECT_TRUE(nullptr == pHdrs->GetNewHdrObj(SipHeaderBase::TYPE_END));
+    EXPECT_TRUE(nullptr == pHdrs->GetNewHdrObj(SipHeaderBase::TYPE_INVALID));
 
     SipIntegerHeader* pMaxForwardsHdr = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS));
@@ -343,16 +343,16 @@ TEST_F(SipHeadersTest, getNewHdrObj)
     pMaxForwardsHdr->SipDelete();
 
     pMaxForwardsHdr =
-            reinterpret_cast<SipIntegerHeader*>(pHdrs->getNewHdrObj(SipHeaderBase::MAX_FORWARDS));
+            reinterpret_cast<SipIntegerHeader*>(pHdrs->GetNewHdrObj(SipHeaderBase::MAX_FORWARDS));
     ASSERT_TRUE(pMaxForwardsHdr != nullptr);
     EXPECT_EQ(70, pMaxForwardsHdr->GetValueInt());
     pMaxForwardsHdr->SipDelete();
 
-    SipHeaderBase* pUserAgentHdr = pHdrs->getNewHdrObj(SipHeaderBase::USER_AGENT);
+    SipHeaderBase* pUserAgentHdr = pHdrs->GetNewHdrObj(SipHeaderBase::USER_AGENT);
     ASSERT_TRUE(pUserAgentHdr != nullptr);
     pUserAgentHdr->SipDelete();
 
-    SipHeaderBase* pViaHdr = pHdrs->getNewHdrObj(SipHeaderBase::VIA);
+    SipHeaderBase* pViaHdr = pHdrs->GetNewHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
     pViaHdr->SipDelete();
 
@@ -378,13 +378,13 @@ TEST_F(SipHeadersTest, RemoveHdr)
     pMaxForwardsHdr->SipDelete();
 
     pMaxForwardsHdr =
-            reinterpret_cast<SipIntegerHeader*>(pHdrs->getNewHdrObj(SipHeaderBase::MAX_FORWARDS));
+            reinterpret_cast<SipIntegerHeader*>(pHdrs->GetNewHdrObj(SipHeaderBase::MAX_FORWARDS));
     ASSERT_TRUE(pMaxForwardsHdr != nullptr);
     EXPECT_EQ(70, pMaxForwardsHdr->GetValueInt());
     pMaxForwardsHdr->SipDelete();
 
     EXPECT_EQ(SIP_TRUE, pHdrs->RemoveHdr(SipHeaderBase::MAX_FORWARDS));
-    EXPECT_TRUE(nullptr == pHdrs->getHdrObj(SipHeaderBase::MAX_FORWARDS));
+    EXPECT_TRUE(nullptr == pHdrs->GetHdrObj(SipHeaderBase::MAX_FORWARDS));
 
     delete pHdrs;
 }
@@ -415,13 +415,13 @@ TEST_F(SipHeadersTest, SetHdr)
     pViaHdr->SipDelete();
 
     SipIntegerHeader* pMaxForwardsCheckHdr =
-            reinterpret_cast<SipIntegerHeader*>(pHdrs->getHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
+            reinterpret_cast<SipIntegerHeader*>(pHdrs->GetHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
     ASSERT_TRUE(pMaxForwardsCheckHdr != nullptr);
     EXPECT_EQ(70, pMaxForwardsCheckHdr->GetValueInt());
     pMaxForwardsCheckHdr->SipDelete();
 
     SipViaHeader* pViaCheckHdr =
-            reinterpret_cast<SipViaHeader*>(pHdrs->getHdrObj(SipHeaderBase::VIA, 0));
+            reinterpret_cast<SipViaHeader*>(pHdrs->GetHdrObj(SipHeaderBase::VIA, 0));
     ASSERT_TRUE(pViaCheckHdr != nullptr);
     const char* pBuff = pViaCheckHdr->GetTransport();
     EXPECT_STREQ("TCP", pBuff);
@@ -445,12 +445,12 @@ TEST_F(SipHeadersTest, SetHdr)
     pViaNewHdr->SipDelete();
 
     pMaxForwardsCheckHdr =
-            reinterpret_cast<SipIntegerHeader*>(pHdrs->getHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
+            reinterpret_cast<SipIntegerHeader*>(pHdrs->GetHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
     ASSERT_TRUE(pMaxForwardsCheckHdr != nullptr);
     EXPECT_EQ(90, pMaxForwardsCheckHdr->GetValueInt());
     pMaxForwardsCheckHdr->SipDelete();
 
-    pViaCheckHdr = reinterpret_cast<SipViaHeader*>(pHdrs->getHdrObj(SipHeaderBase::VIA, 0));
+    pViaCheckHdr = reinterpret_cast<SipViaHeader*>(pHdrs->GetHdrObj(SipHeaderBase::VIA, 0));
     ASSERT_TRUE(pViaCheckHdr != nullptr);
     pBuff = pViaCheckHdr->GetTransport();
     EXPECT_STREQ("UDP", pBuff);
@@ -483,13 +483,13 @@ TEST_F(SipHeadersTest, AppendHdr)
     pViaHdr->SipDelete();
 
     SipIntegerHeader* pMaxForwardsCheckHdr =
-            reinterpret_cast<SipIntegerHeader*>(pHdrs->getHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
+            reinterpret_cast<SipIntegerHeader*>(pHdrs->GetHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
     ASSERT_TRUE(pMaxForwardsCheckHdr != nullptr);
     EXPECT_EQ(70, pMaxForwardsCheckHdr->GetValueInt());
     pMaxForwardsCheckHdr->SipDelete();
 
     SipViaHeader* pViaCheckHdr =
-            reinterpret_cast<SipViaHeader*>(pHdrs->getHdrObj(SipHeaderBase::VIA, 0));
+            reinterpret_cast<SipViaHeader*>(pHdrs->GetHdrObj(SipHeaderBase::VIA, 0));
     ASSERT_TRUE(pViaCheckHdr != nullptr);
     const char* pBuff = pViaCheckHdr->GetTransport();
     EXPECT_STREQ("TCP", pBuff);
@@ -513,18 +513,18 @@ TEST_F(SipHeadersTest, AppendHdr)
     pViaNewHdr->SipDelete();
 
     pMaxForwardsCheckHdr =
-            reinterpret_cast<SipIntegerHeader*>(pHdrs->getHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
+            reinterpret_cast<SipIntegerHeader*>(pHdrs->GetHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
     ASSERT_TRUE(pMaxForwardsCheckHdr != nullptr);
     EXPECT_EQ(90, pMaxForwardsCheckHdr->GetValueInt());
     pMaxForwardsCheckHdr->SipDelete();
 
-    pViaCheckHdr = reinterpret_cast<SipViaHeader*>(pHdrs->getHdrObj(SipHeaderBase::VIA, 0));
+    pViaCheckHdr = reinterpret_cast<SipViaHeader*>(pHdrs->GetHdrObj(SipHeaderBase::VIA, 0));
     ASSERT_TRUE(pViaCheckHdr != nullptr);
     pBuff = pViaCheckHdr->GetTransport();
     EXPECT_STREQ("TCP", pBuff);
     pViaCheckHdr->SipDelete();
 
-    pViaCheckHdr = reinterpret_cast<SipViaHeader*>(pHdrs->getHdrObj(SipHeaderBase::VIA, 1));
+    pViaCheckHdr = reinterpret_cast<SipViaHeader*>(pHdrs->GetHdrObj(SipHeaderBase::VIA, 1));
     ASSERT_TRUE(pViaCheckHdr != nullptr);
     pBuff = pViaCheckHdr->GetTransport();
     EXPECT_STREQ("UDP", pBuff);
@@ -557,13 +557,13 @@ TEST_F(SipHeadersTest, InsertHdr)
     pViaHdr->SipDelete();
 
     SipIntegerHeader* pMaxForwardsCheckHdr =
-            reinterpret_cast<SipIntegerHeader*>(pHdrs->getHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
+            reinterpret_cast<SipIntegerHeader*>(pHdrs->GetHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
     ASSERT_TRUE(pMaxForwardsCheckHdr != nullptr);
     EXPECT_EQ(70, pMaxForwardsCheckHdr->GetValueInt());
     pMaxForwardsCheckHdr->SipDelete();
 
     SipViaHeader* pViaCheckHdr =
-            reinterpret_cast<SipViaHeader*>(pHdrs->getHdrObj(SipHeaderBase::VIA, 0));
+            reinterpret_cast<SipViaHeader*>(pHdrs->GetHdrObj(SipHeaderBase::VIA, 0));
     ASSERT_TRUE(pViaCheckHdr != nullptr);
     const char* pBuff = pViaCheckHdr->GetTransport();
     EXPECT_STREQ("TCP", pBuff);
@@ -587,18 +587,18 @@ TEST_F(SipHeadersTest, InsertHdr)
     pViaNewHdr->SipDelete();
 
     pMaxForwardsCheckHdr =
-            reinterpret_cast<SipIntegerHeader*>(pHdrs->getHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
+            reinterpret_cast<SipIntegerHeader*>(pHdrs->GetHdrObj(SipHeaderBase::MAX_FORWARDS, 0));
     ASSERT_TRUE(pMaxForwardsCheckHdr != nullptr);
     EXPECT_EQ(90, pMaxForwardsCheckHdr->GetValueInt());
     pMaxForwardsCheckHdr->SipDelete();
 
-    pViaCheckHdr = reinterpret_cast<SipViaHeader*>(pHdrs->getHdrObj(SipHeaderBase::VIA, 0));
+    pViaCheckHdr = reinterpret_cast<SipViaHeader*>(pHdrs->GetHdrObj(SipHeaderBase::VIA, 0));
     ASSERT_TRUE(pViaCheckHdr != nullptr);
     pBuff = pViaCheckHdr->GetTransport();
     EXPECT_STREQ("UDP", pBuff);
     pViaCheckHdr->SipDelete();
 
-    pViaCheckHdr = reinterpret_cast<SipViaHeader*>(pHdrs->getHdrObj(SipHeaderBase::VIA, 1));
+    pViaCheckHdr = reinterpret_cast<SipViaHeader*>(pHdrs->GetHdrObj(SipHeaderBase::VIA, 1));
     ASSERT_TRUE(pViaCheckHdr != nullptr);
     pBuff = pViaCheckHdr->GetTransport();
     EXPECT_STREQ("TCP", pBuff);
@@ -728,7 +728,7 @@ TEST_F(SipHeadersTest, EncodeHdrs)
     {
         SIP_UINT32 uiDecLen = 0;
 
-        sipFindTerminatingCRLF(pucStartPt, pucEndPt, &pucTempPos, &bHdrEnd);
+        SipFindTerminatingCRLF(pucStartPt, pucEndPt, &pucTempPos, &bHdrEnd);
 
         uiDecLen = pucTempPos - pucStartPt + SIP_ONE;
 
@@ -737,7 +737,7 @@ TEST_F(SipHeadersTest, EncodeHdrs)
 
         pHdrs->DecodeHdrs(pucStartPt, uiDecLen, (SIP_CHAR**)&pucHdrName, &pucHdrBody);
 
-        SIP_INT32 eHdrType = sipGetHdrType(pucHdrName);
+        SIP_INT32 eHdrType = SipGetHdrType(pucHdrName);
 
         EXPECT_EQ(arHeadersOrder[iHeaderCount], eHdrType);
         iHeaderCount++;
@@ -760,7 +760,7 @@ TEST_F(SipHeadersTest, EncodeHdrs)
     {
         SIP_UINT32 uiDecLen = 0;
 
-        sipFindTerminatingCRLF(pucStartPt, pucEndPt, &pucTempPos, &bHdrEnd);
+        SipFindTerminatingCRLF(pucStartPt, pucEndPt, &pucTempPos, &bHdrEnd);
 
         uiDecLen = pucTempPos - pucStartPt + SIP_ONE;
 
@@ -769,7 +769,7 @@ TEST_F(SipHeadersTest, EncodeHdrs)
 
         pHdrs->DecodeHdrs(pucStartPt, uiDecLen, (SIP_CHAR**)&pucHdrName, &pucHdrBody);
 
-        SIP_INT32 eHdrType = sipGetHdrType(pucHdrName);
+        SIP_INT32 eHdrType = SipGetHdrType(pucHdrName);
 
         EXPECT_EQ(arHeadersOrder[iHeaderCount], eHdrType);
         iHeaderCount++;
@@ -795,7 +795,7 @@ TEST_F(SipHeadersTest, DecodeHdrs)
     EXPECT_STREQ("Content-Type", pszHeaderName);
     ASSERT_TRUE(nullptr != pszHeaderBody);
     EXPECT_STREQ("application/sdp", pszHeaderBody);
-    SipHeaderBase* pContentTypeHdr = pHdrs->getHdrObj(SipHeaderBase::CONTENT_TYPE);
+    SipHeaderBase* pContentTypeHdr = pHdrs->GetHdrObj(SipHeaderBase::CONTENT_TYPE);
     ASSERT_TRUE(nullptr != pContentTypeHdr);
     pContentTypeHdr->SipDelete();
     delete[] pszHeaderName;
@@ -811,7 +811,7 @@ TEST_F(SipHeadersTest, DecodeHdrs)
     EXPECT_STREQ("UnknownHeaderName", pszHeaderName);
     ASSERT_TRUE(nullptr != pszHeaderBody);
     EXPECT_STREQ("UnknownHeaderBody", pszHeaderBody);
-    SipHeaderBase* pUnknownHdr = pHdrs->getHdrObj(SipHeaderBase::UNKNOWN);
+    SipHeaderBase* pUnknownHdr = pHdrs->GetHdrObj(SipHeaderBase::UNKNOWN);
     ASSERT_TRUE(nullptr != pUnknownHdr);
     pUnknownHdr->SipDelete();
     delete[] pszHeaderName;
@@ -827,7 +827,7 @@ TEST_F(SipHeadersTest, DecodeHdrs)
     EXPECT_STREQ("UnknownHeaderName", pszHeaderName);
     ASSERT_TRUE(nullptr != pszHeaderBody);
     EXPECT_STREQ("UnknownHeaderBody", pszHeaderBody);
-    pUnknownHdr = pHdrs->getHdrObj(SipHeaderBase::UNKNOWN);
+    pUnknownHdr = pHdrs->GetHdrObj(SipHeaderBase::UNKNOWN);
     ASSERT_TRUE(nullptr != pUnknownHdr);
     pUnknownHdr->SipDelete();
     delete[] pszHeaderName;
@@ -856,7 +856,7 @@ TEST_F(SipHeadersTest, DecodeHdrs)
     delete pHdrs;
 }
 
-TEST_F(SipHeadersTest, sipEncodeShortHdrName)
+TEST_F(SipHeadersTest, SipEncodeShortHdrName)
 {
     const int BUFFER_SIZE = 64;
     char aBuff[BUFFER_SIZE] = {
@@ -865,123 +865,124 @@ TEST_F(SipHeadersTest, sipEncodeShortHdrName)
     char* pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_FALSE, sipEncodeShortHdrName(SipHeaderBase::TYPE_INVALID, &pBuff));
+    EXPECT_EQ(SIP_FALSE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::TYPE_INVALID, &pBuff));
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_FALSE, sipEncodeShortHdrName(SipHeaderBase::TYPE_END, &pBuff));
+    EXPECT_EQ(SIP_FALSE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::TYPE_END, &pBuff));
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::VIA, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::VIA, &pBuff));
     EXPECT_STREQ("v: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::TO, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::TO, &pBuff));
     EXPECT_STREQ("t: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::FROM, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::FROM, &pBuff));
     EXPECT_STREQ("f: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::CALL_ID, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::CALL_ID, &pBuff));
     EXPECT_STREQ("i: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::CONTACT, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::CONTACT, &pBuff));
     EXPECT_STREQ("m: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::CONTACT_WILD, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::CONTACT_WILD, &pBuff));
     EXPECT_STREQ("m: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::CONTACT_ANY, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::CONTACT_ANY, &pBuff));
     EXPECT_STREQ("m: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::CONTENT_TYPE, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::CONTENT_TYPE, &pBuff));
     EXPECT_STREQ("c: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::CONTENT_LENGTH, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::CONTENT_LENGTH, &pBuff));
     EXPECT_STREQ("l: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::ACCEPT_CONTACT, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::ACCEPT_CONTACT, &pBuff));
     EXPECT_STREQ("a: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::SESSION_EXPIRES, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::SESSION_EXPIRES, &pBuff));
     EXPECT_STREQ("x: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::SUPPORTED, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::SUPPORTED, &pBuff));
     EXPECT_STREQ("k: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::REQUEST_DISPOSITION, &pBuff));
+    EXPECT_EQ(SIP_TRUE,
+            SipHeaders::SipEncodeShortHdrName(SipHeaderBase::REQUEST_DISPOSITION, &pBuff));
     EXPECT_STREQ("d: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::REFERRED_BY, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::REFERRED_BY, &pBuff));
     EXPECT_STREQ("b: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::REFER_TO, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::REFER_TO, &pBuff));
     EXPECT_STREQ("r: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::CONTENT_ENCODING, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::CONTENT_ENCODING, &pBuff));
     EXPECT_STREQ("e: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::SUBJECT, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::SUBJECT, &pBuff));
     EXPECT_STREQ("s: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::REJECT_CONTACT, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::REJECT_CONTACT, &pBuff));
     EXPECT_STREQ("j: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::EVENT, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::EVENT, &pBuff));
     EXPECT_STREQ("o: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::ALLOW_EVENTS, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::ALLOW_EVENTS, &pBuff));
     EXPECT_STREQ("u: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::IDENTITY, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::IDENTITY, &pBuff));
     EXPECT_STREQ("y: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::IDENTITY_INFO, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::IDENTITY_INFO, &pBuff));
     EXPECT_STREQ("n: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, sipEncodeShortHdrName(SipHeaderBase::ALLOW, &pBuff));
+    EXPECT_EQ(SIP_TRUE, SipHeaders::SipEncodeShortHdrName(SipHeaderBase::ALLOW, &pBuff));
     EXPECT_STREQ("Allow: ", &aBuff[0]);
     pBuff = &aBuff[0];
 }
@@ -996,7 +997,7 @@ TEST_F(SipHeadersTest, IsListHdr)
     EXPECT_EQ(SIP_TRUE, objHeaders.IsListHdr(SipHeaderBase::VIA));
 }
 
-TEST_F(SipHeadersTest, sipEncodeHdrName)
+TEST_F(SipHeadersTest, SipEncodeHdrName)
 {
     const int BUFFER_SIZE = 64;
     char aBuff[BUFFER_SIZE] = {
@@ -1007,22 +1008,23 @@ TEST_F(SipHeadersTest, sipEncodeHdrName)
     memset(pBuff, 0, BUFFER_SIZE);
 
     EXPECT_EQ(SIP_FALSE,
-            sipEncodeHdrName(
+            SipHeaders::SipEncodeHdrName(
                     SipHeaderBase::TYPE_INVALID, &pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
     EXPECT_EQ(SIP_FALSE,
-            sipEncodeHdrName(
+            SipHeaders::SipEncodeHdrName(
                     SipHeaderBase::TYPE_END, &pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_TRUE,
-            sipEncodeHdrName(SipHeaderBase::ALLOW, &pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
+            SipHeaders::SipEncodeHdrName(
+                    SipHeaderBase::ALLOW, &pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
     EXPECT_STREQ("Allow: ", &aBuff[0]);
     pBuff = &aBuff[0];
 
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_TRUE,
-            sipEncodeHdrName(
+            SipHeaders::SipEncodeHdrName(
                     SipHeaderBase::EVENT, &pBuff, SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM));
     EXPECT_STREQ("o: ", &aBuff[0]);
     pBuff = &aBuff[0];

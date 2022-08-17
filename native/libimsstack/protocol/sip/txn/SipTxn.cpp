@@ -673,7 +673,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, SIP_VOID* pvTimerId)
 
     SipTxnKey* pTxnKey = pTimeoutData->GetTxnKey();
     SipTxn* pTxn = SIP_NULL;
-    SIP_BOOL bTxnExist = sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
+    SIP_BOOL bTxnExist = Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
             TXN_OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn));
 
     if (bTxnExist == SIP_YES)
@@ -694,7 +694,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, SIP_VOID* pvTimerId)
         return;
     }
 
-    pTxn->increment();
+    pTxn->Increment();
 
     /* Timer Id is no longer valid. So remove from Transaction Object */
 
@@ -908,7 +908,7 @@ SIP_VOID SipTxn_RemoveFromTxnPool(SipTxnKey* pTxnKey)
     SipTxn* pTempTxn = SIP_NULL;
     SipTxnKey* pTempTxnKey = SIP_NULL;
 
-    if (sip_cbk_releaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_REMOVE,
+    if (Sip_Cbk_ReleaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_REMOVE,
                 reinterpret_cast<SIP_VOID**>(&pTempTxnKey),
                 reinterpret_cast<SIP_VOID**>(&pTempTxn)) == SIP_FALSE)
     {

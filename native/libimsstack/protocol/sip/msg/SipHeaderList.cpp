@@ -120,11 +120,11 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
             if ((nMsgOptions & SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM) ==
                     SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM)
             {
-                sipEncodeShortHdrName(pHeader->GetHdrType(), ppCurrPos);
+                SipHeaders::SipEncodeShortHdrName(pHeader->GetHdrType(), ppCurrPos);
             }
             else
             {
-                sipEncodeHdrName(pHeader->GetHdrType(), ppCurrPos, nMsgOptions);
+                SipHeaders::SipEncodeHdrName(pHeader->GetHdrType(), ppCurrPos, nMsgOptions);
             }
         }
         else if (nCount < nSize)
@@ -154,7 +154,7 @@ SIP_BOOL SipHeaderList::AddHeader(SipHeaderBase* pHeader)
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Adding in list failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    pHeader->increment();
+    pHeader->Increment();
     return SIP_TRUE;
 }
 
@@ -166,7 +166,7 @@ SIP_BOOL SipHeaderList::InsertHdrAtPos(SipHeaderBase* pHeader, SIP_UINT32 nIndex
     }
 
     m_headerList.InsertAt(pHeader, nIndex);
-    pHeader->increment();
+    pHeader->Increment();
     return SIP_TRUE;
 }
 
@@ -190,7 +190,7 @@ SipHeaderBase* SipHeaderList::GetObj(SIP_UINT32 nIndex)
     SipHeaderBase* pHdr = m_headerList.GetAt(nIndex);
     if (pHdr != SIP_NULL)
     {
-        pHdr->increment();
+        pHdr->Increment();
     }
 
     return pHdr;
@@ -237,7 +237,7 @@ SIP_BOOL SipHeaderList::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         SIP_CHAR* pTempPre = SIP_NULL;
         SIP_CHAR* pTempNext = SIP_NULL;
 
-        if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, COMMA) == SIP_FALSE)
+        if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, COMMA) == SIP_FALSE)
         {
             pTempPre = pEndPt;
             pTempNext = pEndPt;

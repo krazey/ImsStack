@@ -849,23 +849,23 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
     SipTransportParameter objTranspParam;
 
     /* Fill transport details */
-    objTranspParam.setHostAddress(objFarEnd.GetIpAddress().ToString().GetStr());
-    objTranspParam.setPort(objFarEnd.GetPort());
-    objTranspParam.setTranspProtocol(objFarEnd.GetProtocol());
+    objTranspParam.SetHostAddress(objFarEnd.GetIpAddress().ToString().GetStr());
+    objTranspParam.SetPort(objFarEnd.GetPort());
+    objTranspParam.SetTranspProtocol(objFarEnd.GetProtocol());
 
     if (objFarEnd.GetIpAddress().IsIPv4Address() == IMS_TRUE)
     {
-        objTranspParam.setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+        objTranspParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV4);
     }
     else
     {
-        objTranspParam.setTanspIpType(SipTransportInfo::NETWORK_IPV6);
+        objTranspParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV6);
     }
 
     /* Prepare User data */
     ISipUserData objUserData;
     ::SipTxnKey* pTxnKey = IMS_NULL;
-    SipEn_TxnStatus eTxnStatus = ETXNSTATUS_INVALID;
+    IMS_SINT32 eTxnStatus = SipTxn::STATUS_INVALID;
     IMS_UINT16 nError = 0;
     IMS_SINT32 nEncodingOptions = SipPrivate::GetEncodingOptions();
     IMS_UINT32 nMsgOptions = SipConfiguration::MSG_OPT_ENCODE_NONE;
@@ -888,17 +888,17 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
 
     switch (eTxnStatus)
     {
-        case ETXNSTATUS_NEWREQRECVD:
+        case SipTxn::STATUS_NEW_REQ_RECVD:
         {
             IMS_TRACE_I("__UAC__ :: _____ NEW REQUEST _____", 0, 0, 0);
             break;
         }
-        case ETXNSTATUS_VALIDMESSAGE:
+        case SipTxn::STATUS_VALID_MESSAGE:
         {
             IMS_TRACE_I("__UAC__ :: _____ VALID MESSAGE _____", 0, 0, 0);
             break;
         }
-        case ETXNSTATUS_2XX_STRAYRESP:
+        case SipTxn::STATUS_2XX_STRAY_RESP:
         {
             IMS_TRACE_I("__UAC__ :: _____STRAY 2XX RESPONSE _____", 0, 0, 0);
             if (!SipAckPackage::HandleStray2xx(pSipMsg))
@@ -907,29 +907,29 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
             }
             return SipPrivate::MESSAGE_DISCARDED;
         }
-        case ETXNSTATUS_IGNOREREQ:
+        case SipTxn::STATUS_IGNORE_REQ:
         {
             IMS_TRACE_I("__UAC__ :: _____ IGNORE REQUEST _____", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
-        case ETXNSTATUS_IGNORERESP:
+        case SipTxn::STATUS_IGNORE_RESP:
         {
             IMS_TRACE_I("__UAC__ :: _____ IGNORE RESPONSE _____", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
-        case ETXNSTATUS_STRAYRESP:
+        case SipTxn::STATUS_STRAY_RESP:
         {
             IMS_TRACE_I("__UAC__ :: _____ STRAY RESPONSE _____", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
-        case ETXNSTATUS_RETRANSMISSION:
+        case SipTxn::STATUS_RETRANSMISSION:
         {
             IMS_TRACE_I("__UAC__ :: _____ REMOTE RETRANSMISSION _____", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
-        case ETXNSTATUS_ERRORONSEND:     // FALL-THROUGH
-        case ETXNSTATUS_INVALIDMESSAGE:  // FALL-THROUGH
-        case ETXNSTATUS_INVALID:
+        case SipTxn::STATUS_ERROR_ON_SEND:    // FALL-THROUGH
+        case SipTxn::STATUS_INVALID_MESSAGE:  // FALL-THROUGH
+        case SipTxn::STATUS_INVALID:
         {
             IMS_TRACE_I("__UAC__ :: _____ PROCESSING FAILED _____", 0, 0, 0);
             return SipPrivate::MESSAGE_FAILED;

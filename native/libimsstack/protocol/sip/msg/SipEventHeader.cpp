@@ -119,7 +119,7 @@ SIP_BOOL SipEventHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pTempPre = SIP_NULL;
     SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
@@ -129,12 +129,12 @@ SIP_BOOL SipEventHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
 
     SIP_CHAR* pTempPos = SIP_NULL;
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_DOT) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_DOT) == SIP_FALSE)
     {
         pTempPos = pEndPt;
     }
 
-    SIP_CHAR* pszEvent = sipCreateString(pStartPt, pTempPos);
+    SIP_CHAR* pszEvent = SipCreateString(pStartPt, pTempPos);
     if (SetValue(pszEvent) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);

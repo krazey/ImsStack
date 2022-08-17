@@ -16,7 +16,6 @@
 #ifndef __SIP_TXN_HANDLER_H__
 #define __SIP_TXN_HANDLER_H__
 
-#include "txn/sip_txn_common.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnFsmData.h"
 #include "txn/SipTxnInfo.h"
@@ -31,7 +30,7 @@ public:
 
 private:
     /* Based on Send/Receiving, Method and Request/Respose type Transaction is returnred */
-    SIP_INT32 GetTxnType(SIP_INT32 eMsgDir, /* ETXN_SEND or ETXN_RECV */
+    SIP_INT32 GetTxnType(SIP_INT32 eMsgDir, /* SEND or RECV */
             SIP_INT32 eMethodType, SIP_INT32 eMsgType);
 
     SIP_BOOL GetTxnObjFromDb(

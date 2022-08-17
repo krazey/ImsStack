@@ -141,13 +141,13 @@ SIP_BOOL SipWarningHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTempLoc = SIP_NULL;
 
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr: Space Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pszWarnCode = sipCreateString(pStartPt, pTempLoc);
+    SIP_CHAR* pszWarnCode = SipCreateString(pStartPt, pTempLoc);
     if (pszWarnCode == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -168,13 +168,13 @@ SIP_BOOL SipWarningHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = pTempLoc + SIP_TWO;
     pTempLoc = SIP_NULL;
     /*Find the endpoint of Warn Agent*/
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr: Space Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszWarnAgent = sipCreateString(pStartPt, pTempLoc);
+    m_pszWarnAgent = SipCreateString(pStartPt, pTempLoc);
     if (m_pszWarnAgent == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -184,7 +184,7 @@ SIP_BOOL SipWarningHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     /*Update the start point to the start of Warn text*/
     pStartPt = pTempLoc + SIP_TWO;
-    m_pszWarnText = sipCreateString(pStartPt, pEndPt);
+    m_pszWarnText = SipCreateString(pStartPt, pEndPt);
     if (m_pszWarnText == SIP_NULL)
     {
         SIP_DEBUG_WARNING(

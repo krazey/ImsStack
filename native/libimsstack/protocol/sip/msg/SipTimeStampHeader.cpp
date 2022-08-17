@@ -115,12 +115,12 @@ SIP_BOOL SipTimeStampHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTempPre = SIP_NULL;
     /*Find the LWS i.e. End of Transport*/
-    if (sipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
+    if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
         pTempPre = pEndPt;
     }
 
-    m_pszTimeVal = sipCreateString(pStartPt, pTempPre);
+    m_pszTimeVal = SipCreateString(pStartPt, pTempPre);
     if (m_pszTimeVal == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -132,8 +132,8 @@ SIP_BOOL SipTimeStampHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     {
         /*point to the start of the LWS*/
         pTempPre = pTempPre + SIP_ONE;
-        pStartPt = sipSkipFwLWS(pTempPre, pEndPt);
-        m_pszDelay = sipCreateString(pStartPt, pEndPt);
+        pStartPt = SipSkipFwLWS(pTempPre, pEndPt);
+        m_pszDelay = SipCreateString(pStartPt, pEndPt);
         if (m_pszDelay == SIP_NULL)
         {
             SIP_DEBUG_WARNING(

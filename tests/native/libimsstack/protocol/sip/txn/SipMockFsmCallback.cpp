@@ -28,7 +28,7 @@ SIP_BOOL MockFsm_FetchTransaction(
         }
         if (*ppvTxn != SIP_NULL)
         {
-            ((SipTxn*)*ppvTxn)->decrement();
+            ((SipTxn*)*ppvTxn)->Decrement();
         }
 
         ((SipTxnKey*)pvTxnKey)->SipDelete();

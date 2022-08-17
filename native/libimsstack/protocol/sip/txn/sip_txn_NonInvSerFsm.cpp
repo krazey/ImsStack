@@ -17,7 +17,6 @@
 #include "platform/sip_pf_memory.h"
 #include "platform/sip_pf_string.h"
 
-#include "msg/sip_comdef.h"
 #include "SipConfiguration.h"
 
 #include "sip_error.h"
@@ -91,7 +90,7 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
         return SIP_FALSE;
     }
 
-    if (sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), TXN_OPT_CREATE, SIP_NULL,
+    if (Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), TXN_OPT_CREATE, SIP_NULL,
                 reinterpret_cast<SIP_VOID**>(&pTxn)) == SIP_FALSE)
     {
         delete pNewTxnKey;
@@ -102,7 +101,7 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
     }
 
     /* TxnObj is added to hash, hence increment ref count */
-    pTxn->increment();
+    pTxn->Increment();
 
     SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
     /* Set user data in Txn Obj */
@@ -135,13 +134,13 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
     {
         SipTxn* pInvSerTxn = SIP_NULL;  // Corresponding INV Txn.
 
-        SIP_UINT32 nRseqNum = GetRSeqNum(pMsgIn, SipHeaderBase::RACK);
+        SIP_UINT32 nRseqNum = SipMessage::GetRSeqNum(pMsgIn, SipHeaderBase::RACK);
         pNewTxnKey->SetRSeq(nRseqNum);
         SipTxnKey* pINVTxnKey = SipTxnUtil::SearchTxnKey(pNewTxnKey);
 
         if (pINVTxnKey != SIP_NULL)
         {
-            if (sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pINVTxnKey), TXN_OPT_FETCH,
+            if (Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pINVTxnKey), TXN_OPT_FETCH,
                         SIP_NULL, reinterpret_cast<SIP_VOID**>(&pInvSerTxn)) == SIP_TRUE)
             {
                 if (pInvSerTxn != SIP_NULL)

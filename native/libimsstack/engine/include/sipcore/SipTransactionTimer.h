@@ -32,7 +32,7 @@ public:
     void Stop(OUT SipTimeoutData*& pData);
 
     static void FreeTimer(IN void* pvTimerHandle);
-    static void TimerExpired(IN SipEn_TimerType enTimerType);
+    static void TimerExpired(IN IMS_SINT32 enTimerType);
 
 private:
     // ITimerListener

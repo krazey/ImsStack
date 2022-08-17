@@ -281,12 +281,12 @@ const SIP_CHAR* SipMessage::GetMethod()
 
 SipHeaderBase* SipMessage::GetHdrObj(SIP_INT32 eHdrType)
 {
-    return m_objHdrs->getHdrObj(eHdrType, SIP_ZERO);
+    return m_objHdrs->GetHdrObj(eHdrType, SIP_ZERO);
 }
 
 SIP_BOOL SipMessage::HasHeader(SIP_INT32 eHdrType) const
 {
-    SipHeaderBase* pHdrBase = m_objHdrs->getHdrObj(eHdrType);
+    SipHeaderBase* pHdrBase = m_objHdrs->GetHdrObj(eHdrType);
     if (pHdrBase != SIP_NULL)
     {
         pHdrBase->SipDelete();
@@ -422,7 +422,7 @@ SIP_BOOL SipMessage::HasSDPMessageBody()
 SipHeaderList* SipMessage::GetHdrList(SIP_INT32 eHdrType)
 {
     return (SipHeaders::IsListHdr(eHdrType) == SIP_TRUE)
-            ? (SipHeaderList*)m_objHdrs->getHdrObj(eHdrType)
+            ? (SipHeaderList*)m_objHdrs->GetHdrObj(eHdrType)
             : SIP_NULL;
 }
 
@@ -672,7 +672,7 @@ SIP_BOOL SipMessage::DecMultiPartBody(
     }
 
     SipContentTypeHeader* pContentType =
-            (SipContentTypeHeader*)m_objHdrs->getHdrObj(SipHeaderBase::CONTENT_TYPE);
+            (SipContentTypeHeader*)m_objHdrs->GetHdrObj(SipHeaderBase::CONTENT_TYPE);
     if (pContentType == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Content Type Not present", SIP_ZERO, SIP_ZERO);
@@ -723,7 +723,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
     SIP_BOOL bHdrEnd = SIP_FALSE;
     SIP_CHAR* pTempPos = SIP_NULL;
 
-    if (sipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd) == SIP_FALSE)
+    if (SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecCompleteMsg:Incomplete Message", SIP_ZERO, SIP_ZERO);
@@ -736,14 +736,14 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
 
     /*Now determine for request line or status line*/
     /*Find the first token*/
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SPACE) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecCompleteMsg:Invalid Start Line", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_INT32 eMsgType = sipGetMsgType(pStartPt);
+    SIP_INT32 eMsgType = SipGetMsgType(pStartPt);
     SIP_UINT32 nDecLen = pEndPt - pStartPt + SIP_ONE;
 
     if (eMsgType == SipMessage::REQ_TYPE)
@@ -810,7 +810,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         /*find next terminating CRLF*/
         nDecLen = SIP_ZERO;
         // Fail condition to be added
-        if (sipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd) == SIP_FALSE)
+        if (SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODDECODER, "DecCompleteMsg:Incomplete Message", SIP_ZERO, SIP_ZERO);
@@ -854,7 +854,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         else
         {
 #ifdef SIP_BADMESSAGE_PARSING
-            SIP_INT32 eHdrType = sipGetHdrType(pszHdrName);
+            SIP_INT32 eHdrType = SipGetHdrType(pszHdrName);
 
             switch (eHdrType)
             {
@@ -913,7 +913,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
     /*Check for CSeq Method Match*/
     if (m_pReqLine != SIP_NULL)
     {
-        SipCSeqHeader* pCSeq = (SipCSeqHeader*)m_objHdrs->getHdrObj(SipHeaderBase::CSEQ);
+        SipCSeqHeader* pCSeq = (SipCSeqHeader*)m_objHdrs->GetHdrObj(SipHeaderBase::CSEQ);
         if (pCSeq != SIP_NULL)
         {
             const SIP_CHAR* pszMethod_ReqLine = m_pReqLine->GetMethod();
@@ -981,7 +981,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
     }
 
     // Check Content-Encoding header
-    SipHeaderBase* pContEnc = m_objHdrs->getHdrObj(SipHeaderBase::CONTENT_ENCODING, SIP_ZERO);
+    SipHeaderBase* pContEnc = m_objHdrs->GetHdrObj(SipHeaderBase::CONTENT_ENCODING, SIP_ZERO);
     if (pContEnc != SIP_NULL)
     {
         const SIP_CHAR* encType = pContEnc->GetValue();
@@ -1004,7 +1004,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
     }
 
     SipContentTypeHeader* pContentType =
-            (SipContentTypeHeader*)m_objHdrs->getHdrObj(SipHeaderBase::CONTENT_TYPE);
+            (SipContentTypeHeader*)m_objHdrs->GetHdrObj(SipHeaderBase::CONTENT_TYPE);
     if (pContentType == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -1291,4 +1291,102 @@ SipHeaderBase* SipMessage::GetHeader(SIP_INT32 nType, SIP_UINT32 nIndex)
         pHdrList->SipDelete();
     }
     return pHdr;
+}
+
+SIP_BOOL SipMessage::CheckTxnMandatoryParams(
+        SipMessage* pSipMsg, SIP_INT32* peMsgType, SIP_INT32* peMethodType)
+{
+    SIP_INT32 eMsgType = pSipMsg->GetMsgType();
+    if (eMsgType == SipMessage::TYPE_INVALID)
+    {
+        return SIP_FALSE;
+    }
+
+    SIP_INT32 eMethodType = pSipMsg->GetMethodType();
+
+    if (eMethodType == SipMessage::METHOD_INVALID)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "Invalid Method Type(%d != %d)", eMethodType,
+                pSipMsg->GetMethodType());
+        return SIP_FALSE;
+    }
+
+    /* Step 1: Check for Mandatory Headers for Transaction key */
+    /* Check for To Hdr */
+    if (pSipMsg->HasHeader(SipHeaderBase::TO) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "'To' Hdr not Found", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+    else if (pSipMsg->HasHeader(SipHeaderBase::FROM) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "'From' Hdr not Found", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+    else if (pSipMsg->HasHeader(SipHeaderBase::CSEQ) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "'CSeq' Hdr not Found", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+    else if (pSipMsg->HasHeader(SipHeaderBase::CALL_ID) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "'CallID' Hdr not Found", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+    else if (pSipMsg->HasHeader(SipHeaderBase::VIA) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "'Via' Hdr not Found", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    /* Step 2: Check for Request line */
+    if (eMsgType == SipMessage::REQ_TYPE)
+    {
+        if (pSipMsg->IsReqLineExists() == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "IsReqLineExists Fails", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+    }
+    else
+    {
+        if (pSipMsg->IsStatusLineExists() == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "IsStatusLineExists Fails", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+    }
+    *peMsgType = eMsgType;
+    *peMethodType = eMethodType;
+
+    return SIP_TRUE;
+}
+
+SIP_UINT32 SipMessage::GetRSeqNum(SipMessage* pMessage, SIP_INT32 eHdrType)
+{
+    SIP_UINT32 nRSeqNum = 0;
+
+    if (pMessage != SIP_NULL &&
+            (eHdrType == SipHeaderBase::RSEQ || eHdrType == SipHeaderBase::RACK))
+    {
+        SipHeaderBase* pHeader = pMessage->GetHeader(eHdrType, 0);
+
+        if (pHeader != SIP_NULL)
+        {
+            if (eHdrType == SipHeaderBase::RSEQ)
+            {
+                SipIntegerHeader* pRSeq = (SipIntegerHeader*)pHeader;
+                nRSeqNum = pRSeq->GetValueInt();
+            }
+            else
+            {
+                SipRAcKHeader* pRAck = (SipRAcKHeader*)pHeader;
+                nRSeqNum = pRAck->GetResponseNum();
+            }
+
+            pHeader->SipDelete();
+        }
+    }
+
+    return nRSeqNum;
 }

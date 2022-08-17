@@ -17,7 +17,6 @@
 #define __SIP_STACK_MANAGER_H__
 
 #include "sip_pf_datatypes.h"
-#include "msg/sip_comdef.h"
 #include "msg/SipMessage.h"
 #include "txn/SipTxnKey.h"
 #include "transport/SipTransportInfo.h"

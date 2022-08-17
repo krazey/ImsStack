@@ -16,7 +16,7 @@
 #ifndef __SIP_TXN_FSM_H__
 #define __SIP_TXN_FSM_H__
 
-#include "txn/sip_txn_common.h"
+#include "txn/SipTxn.h"
 
 /* Invite Client FSM */
 extern SIP_BOOL (

@@ -17,7 +17,6 @@
 #define __SIP_TXN_UTIL_H__
 
 #include "sip_pf_datatypes.h"
-#include "msg/sip_comdef.h"
 #include "msg/SipMessage.h"
 
 class SipTxnUtil

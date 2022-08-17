@@ -16,7 +16,105 @@
 #include "sip_abnfUtil.h"
 #include "platform/sip_pf_memory.h"
 
-SIP_CHAR* sipSkipRwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_BOOL HasSpace(const SIP_CHAR* pszValue)
+{
+    while (*pszValue)
+    {
+        if (*pszValue == ' ')
+        {
+            return SIP_TRUE;
+        }
+        pszValue++;
+    }
+    return SIP_FALSE;
+}
+
+SIP_CHAR* SipSkipRwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+{
+    /*NULL validation*/
+    if ((pStartPt == SIP_NULL) || (pEndPt == SIP_NULL))
+    {
+        return SIP_NULL;
+    }
+    while ((pEndPt > pStartPt) && IS_WSP(*pEndPt))
+    {
+        pEndPt--;
+    }
+    return pEndPt;
+}
+
+SIP_BOOL SipFindActualPos(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempPre,
+        SIP_CHAR** ppTempNext, SIP_CHAR cDelimiter)
+{
+    SIP_BOOL bDQuote = SIP_FALSE;
+    SIP_CHAR* pPrevPt = pStartPt;
+    SIP_CHAR* pStartTemp = pStartPt;
+
+    while (pStartPt <= pEndPt)
+    {
+        /*Preventing the case of Feature Prm and quoted text*/
+        if ((*pStartPt == DQUOTE) && (*pPrevPt != BACKSLASH))
+        {
+            bDQuote = (SIP_BOOL)!bDQuote;
+        }
+        if (*pStartPt == cDelimiter)
+        {
+            /*for the case of quoted string we have to
+              prevent returning in case of " ," and " ;" */
+            if (bDQuote == SIP_FALSE)
+            {
+                *ppTempPre = pStartPt - SIP_ONE;
+                *ppTempNext = pStartPt + SIP_ONE;
+
+                /*remove the LWS from Back*/
+                if (cDelimiter != RIGHT_ANGLE)
+                {
+                    *ppTempPre = SipSkipRwLWS(pStartTemp, *ppTempPre);
+                }
+                /*remove the LWS from start*/
+                if (cDelimiter != LEFT_ANGLE)
+                {
+                    *ppTempNext = SipSkipFwLWS(*ppTempNext, pEndPt);
+                }
+
+                /*Remove the LWS form both the side to get the actual pos*/
+                return SIP_TRUE;
+            }
+        }
+        pPrevPt = pStartPt;
+        pStartPt = pStartPt + SIP_ONE;
+    }
+    return SIP_FALSE;
+}
+
+SIP_VOID SipEnc_UpdateCurrPos(IN_OUT SIP_CHAR** ppMsgBuffer)
+{
+    while (**ppMsgBuffer != '\0')
+    {
+        (*ppMsgBuffer)++;
+    }
+}
+
+SIP_BOOL SipFindLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
+{
+    SIP_CHAR* pNext1Pt = pStartPt + SIP_ONE;
+    SIP_CHAR* pNext2Pt = pStartPt + SIP_TWO;
+
+    while (((pNext2Pt <= pEndPt) || (IS_WSP(*pStartPt))))
+    {
+        if ((IS_WSP(*pStartPt) || ((IS_CRLF(*pStartPt, *pNext1Pt) && (IS_WSP(*pNext2Pt))))))
+        {
+            *ppTempLoc = pStartPt - SIP_ONE;
+            return SIP_TRUE;
+        }
+        pStartPt++;
+        pNext1Pt = pStartPt + SIP_ONE;
+        pNext2Pt = pStartPt + SIP_TWO;
+    }
+    return SIP_FALSE;
+}
+
+SIP_CHAR* SipSkipRwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     if ((pStartPt == SIP_NULL) || (pEndPt == SIP_NULL))
     {
@@ -46,27 +144,7 @@ SIP_CHAR* sipSkipRwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return pBuffTemp;
 }
 
-SIP_CHAR* sipCreateString(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
-{
-    /*Validate the input*/
-    if (pEndPt < pStartPt)
-    {
-        return SIP_NULL;
-    }
-    /*Take one extraa memory for NULL*/
-    SIP_UINT32 nSize = (pEndPt - pStartPt) + SIP_TWO;
-    SIP_CHAR* pString =  new SIP_CHAR[nSize];
-    if (pString == SIP_NULL)
-    {
-        return pString;
-    }
-    SipPf_Memset(pString, SIP_NULL, nSize);
-    /*Leave the last point as NULL*/
-    SipPf_Memcpy(pString, pStartPt,(nSize -SIP_ONE));
-    return pString;
-}
-
-SIP_CHAR* sipSkipFwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_CHAR* SipSkipFwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     /*    LWS = [*WSP   CRLF]   1*WSP  ; linear whitespace  */
 
@@ -98,28 +176,23 @@ SIP_CHAR* sipSkipFwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return pBuffTemp;
 }
 
-SIP_BOOL sipFindLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
+SIP_BOOL SipFindPostDelimiter(
+        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter)
 {
-    SIP_CHAR* pNext1Pt = pStartPt + SIP_ONE;
-    SIP_CHAR* pNext2Pt = pStartPt + SIP_TWO;
-
-    while (((pNext2Pt <= pEndPt) || (IS_WSP(*pStartPt))))
+    while (pStartPt <= pEndPt)
     {
-        if ((IS_WSP(*pStartPt) ||
-                ((IS_CRLF(*pStartPt, *pNext1Pt) && (IS_WSP(*pNext2Pt))))))
+        if (*pStartPt == cDelimiter)
         {
-            *ppTempLoc = pStartPt - SIP_ONE;
+            *ppTempLoc = pStartPt + SIP_ONE;
             return SIP_TRUE;
         }
-        pStartPt++;
-        pNext1Pt = pStartPt + SIP_ONE;
-        pNext2Pt = pStartPt + SIP_TWO;
+        pStartPt = pStartPt + SIP_ONE;
     }
     return SIP_FALSE;
 }
 
-SIP_BOOL sipFindPreDelimiter(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc,
-        SIP_CHAR cDelimiter)
+SIP_BOOL SipFindPreDelimiter(
+        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter)
 {
     SIP_BOOL bDQuote = SIP_FALSE;
     SIP_CHAR* pPrevPt = pStartPt;
@@ -147,10 +220,93 @@ SIP_BOOL sipFindPreDelimiter(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** pp
     return SIP_FALSE;
 }
 
+SIP_CHAR* SipCreateString(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
+{
+    /*Validate the input*/
+    if (pEndPt < pStartPt)
+    {
+        return SIP_NULL;
+    }
+    /*Take one extraa memory for NULL*/
+    SIP_UINT32 nSize = (pEndPt - pStartPt) + SIP_TWO;
+    SIP_CHAR* pString = new SIP_CHAR[nSize];
+    if (pString == SIP_NULL)
+    {
+        return pString;
+    }
+    SipPf_Memset(pString, SIP_NULL, nSize);
+    /*Leave the last point as NULL*/
+    SipPf_Memcpy(pString, pStartPt, (nSize - SIP_ONE));
+    return pString;
+}
+
+SIP_BOOL SipFindCrlf(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
+{
+    SIP_CHAR* pNext1Pt = pStartPt + SIP_ONE;
+    while (pNext1Pt <= pEndPt)
+    {
+        if (IS_CRLF(*pStartPt, *pNext1Pt))
+        {
+            *ppTempLoc = pStartPt - SIP_ONE;
+            return SIP_TRUE;
+        }
+        pStartPt++;
+        pNext1Pt++;
+    }
+    return SIP_FALSE;
+}
+
+SIP_BOOL SipFindTerminatingCRLF(
+        SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint, SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd)
+{
+    /* To check two consecutive CRLF */
+    SIP_UINT32 nStrlen = pEndPoint - pStartPoint;
+    if (nStrlen < SIP_THREE)
+    {
+        return SIP_FALSE;
+    }
+    SIP_CHAR* pPrevPoint2 = pStartPoint;
+    SIP_CHAR* pPrevPoint1 = pStartPoint + SIP_ONE;
+    pStartPoint = pStartPoint + SIP_TWO;
+    /*Check for CRLF*/
+    SIP_CHAR* pNextPoint = pStartPoint + SIP_ONE;
+
+    while (pNextPoint <= pEndPoint)
+    {
+        if (IS_CRLF(*pPrevPoint2, *pPrevPoint1) && (IS_WSP(*pStartPoint) == SIP_FALSE))
+        {
+            *ppLocation = pPrevPoint2 - SIP_ONE;
+            if (IS_CRLF(*pStartPoint, *pNextPoint))
+            {
+                *pbHdrEnd = SIP_TRUE;
+            }
+            return SIP_TRUE;
+        }
+        pPrevPoint2 = pPrevPoint1;
+        pPrevPoint1 = pStartPoint;
+        pStartPoint++;
+        pNextPoint = pStartPoint + SIP_ONE;
+    }
+    /*Check For one CRLF at Extream End*/
+    if (IS_CRLF(*pPrevPoint2, *pPrevPoint1) && (IS_WSP(*pStartPoint) == SIP_FALSE))
+    {
+        *ppLocation = pPrevPoint2 - SIP_ONE;
+        return SIP_TRUE;
+    }
+
+    if (IS_CRLF(*pPrevPoint1, *pStartPoint))
+    {
+        *ppLocation = pPrevPoint1 - SIP_ONE;
+        return SIP_TRUE;
+    }
+
+    return SIP_FALSE;
+}
+
 SIP_CHAR* SkipConsecutiveCRLFs(SIP_CHAR* pStartPt)
 {
-    while ((pStartPt != SIP_NULL && (pStartPt+1) != SIP_NULL)
-        && (IS_CRLF(*pStartPt, *(pStartPt+1))))
+    while ((pStartPt != SIP_NULL && (pStartPt + 1) != SIP_NULL) &&
+            (IS_CRLF(*pStartPt, *(pStartPt + 1))))
     {
         pStartPt = pStartPt + SIP_TWO;
     }

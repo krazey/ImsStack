@@ -367,29 +367,29 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
 
     if (nType == SipTransportAddress::PROTOCOL_TCP)
     {
-        objTranspParam.setTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+        objTranspParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
     }
     else if (nType == SipTransportAddress::PROTOCOL_TLS)
     {
-        objTranspParam.setTranspProtocol(SipTransportInfo::PROTOCOL_TLS);
+        objTranspParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_TLS);
     }
     else
     {
-        objTranspParam.setTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+        objTranspParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
     }
 
     const SipTransportAddress& objTAddr = m_pTransport->GetAddress(SipTransport::TA_FAR);
 
-    objTranspParam.setHostAddress(objTAddr.GetIpAddress().ToString().GetStr());
-    objTranspParam.setPort((IMS_UINT16)objTAddr.GetPort());
+    objTranspParam.SetHostAddress(objTAddr.GetIpAddress().ToString().GetStr());
+    objTranspParam.SetPort((IMS_UINT16)objTAddr.GetPort());
 
     if (objTAddr.GetIpAddress().IsIPv4Address() == IMS_TRUE)
     {
-        objTranspParam.setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+        objTranspParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV4);
     }
     else
     {
-        objTranspParam.setTanspIpType(SipTransportInfo::NETWORK_IPV6);
+        objTranspParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV6);
     }
 
     // Prepare User Data
@@ -548,7 +548,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
             m_pTxnKey = pTxnKey;
         }
 
-        if (m_pTxnKey->GetTxnType() == ETXN_INVSERTXN)
+        if (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN)
         {
             // If the method is INVITE, then store the txn key in the InvTxnKey.
             // This will be used when the application calls AbortCall().

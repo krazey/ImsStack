@@ -79,10 +79,10 @@ protected:
 
         pTranspParam = new SipTransportParameter();
         ASSERT_TRUE(pTranspParam != nullptr);
-        pTranspParam->setTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
-        pTranspParam->setHostAddress("192.168.1.2");
-        pTranspParam->setPort(5060);
-        pTranspParam->setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+        pTranspParam->SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+        pTranspParam->SetHostAddress("192.168.1.2");
+        pTranspParam->SetPort(5060);
+        pTranspParam->SetTanspIpType(SipTransportInfo::NETWORK_IPV4);
 
         /* Using this call to fill pTranspInfo */
         EXPECT_EQ(SIP_TRUE,
@@ -166,10 +166,10 @@ Content-Length: 0\r\n\
             objTranspHandler.OnSendTransp(pMessage, nullptr, pMsg, nLength, &pTranspInfo, &nError));
 
     SipTransportParameter objTranspParam;
-    objTranspParam.setTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
-    objTranspParam.setHostAddress("192.168.1.2");
-    objTranspParam.setPort(5060);
-    objTranspParam.setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+    objTranspParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+    objTranspParam.SetHostAddress("192.168.1.2");
+    objTranspParam.SetPort(5060);
+    objTranspParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV4);
 
     /* Pass valid input, success */
     EXPECT_EQ(SIP_TRUE,
@@ -490,10 +490,10 @@ Content-Length: 0\r\n\
 
     pTranspParam = new SipTransportParameter();
     ASSERT_TRUE(pTranspParam != nullptr);
-    pTranspParam->setTranspProtocol(SipTransportInfo::PROTOCOL_INVALID);
-    pTranspParam->setHostAddress("192.168.1.2");
-    pTranspParam->setPort(5060);
-    pTranspParam->setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+    pTranspParam->SetTranspProtocol(SipTransportInfo::PROTOCOL_INVALID);
+    pTranspParam->SetHostAddress("192.168.1.2");
+    pTranspParam->SetPort(5060);
+    pTranspParam->SetTanspIpType(SipTransportInfo::NETWORK_IPV4);
 
     /* Using this call to fill pTranspInfo */
     EXPECT_EQ(SIP_TRUE,
@@ -509,9 +509,9 @@ Content-Length: 0\r\n\
                     0, pTxnKey, &nTxnStatus, &pNewTranspInfo, nullptr, &nError));
 
     /* Change transp protocol to TCP */
-    pTranspParam->setTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+    pTranspParam->SetTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
 
-    pTranspParam->setHostAddress("192.168.1.2");
+    pTranspParam->SetHostAddress("192.168.1.2");
 
     /* Using this call to fill pTranspInfo */
     EXPECT_EQ(SIP_TRUE,
@@ -579,10 +579,10 @@ Content-Length: 0\r\n\
 
     pTranspParam = new SipTransportParameter();
     ASSERT_TRUE(pTranspParam != nullptr);
-    pTranspParam->setTranspProtocol(SipTransportInfo::PROTOCOL_TLS);
-    pTranspParam->setHostAddress("192.168.1.2");
-    pTranspParam->setPort(5060);
-    pTranspParam->setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+    pTranspParam->SetTranspProtocol(SipTransportInfo::PROTOCOL_TLS);
+    pTranspParam->SetHostAddress("192.168.1.2");
+    pTranspParam->SetPort(5060);
+    pTranspParam->SetTanspIpType(SipTransportInfo::NETWORK_IPV4);
 
     /* Using this call to fill pTranspInfo */
     EXPECT_EQ(SIP_TRUE,
@@ -641,10 +641,10 @@ Content-Length: 0\r\n\
 
     pTranspParam = new SipTransportParameter();
     ASSERT_TRUE(pTranspParam != nullptr);
-    pTranspParam->setTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
-    pTranspParam->setHostAddress("192.168.1.2");
-    pTranspParam->setPort(5060);
-    pTranspParam->setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+    pTranspParam->SetTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+    pTranspParam->SetHostAddress("192.168.1.2");
+    pTranspParam->SetPort(5060);
+    pTranspParam->SetTanspIpType(SipTransportInfo::NETWORK_IPV4);
 
     /* Using this call to fill pTranspInfo */
     EXPECT_EQ(SIP_TRUE,

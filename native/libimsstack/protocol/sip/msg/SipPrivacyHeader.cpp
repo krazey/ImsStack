@@ -122,12 +122,12 @@ SIP_BOOL SipPrivacyHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     {
         SIP_CHAR* pTempPos = SIP_NULL;
 
-        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_SEMI) == SIP_FALSE)
+        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_SEMI) == SIP_FALSE)
         {
             pTempPos = pEndPt;
         }
 
-        SIP_CHAR* pszPrivacy = sipCreateString(pStartPt, pTempPos);
+        SIP_CHAR* pszPrivacy = SipCreateString(pStartPt, pTempPos);
         if (pszPrivacy == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -150,7 +150,7 @@ SIP_BOOL SipPrivacyHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         else
         {
             pStartPt = pTempPos + SIP_TWO;
-            pStartPt = sipSkipFwLWS(pStartPt, pEndPt);
+            pStartPt = SipSkipFwLWS(pStartPt, pEndPt);
             if (pStartPt > pEndPt)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,

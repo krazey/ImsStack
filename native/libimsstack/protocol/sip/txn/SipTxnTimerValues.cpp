@@ -18,7 +18,6 @@
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "txn/SipTxn.h"
-#include "txn/sip_txn_common.h"
 #include "txn/SipTxnTimerValues.h"
 
 SipTxnTimerValues::SipTxnTimerValues() :

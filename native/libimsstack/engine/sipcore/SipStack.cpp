@@ -35,7 +35,7 @@
 __IMS_TRACE_TAG_SIP__;
 
 extern void SipStackTxnLayer_Initialize();
-extern SIP_VOID sip_cbk_onTimerExpired(IN ISipUserData* pUserData, IN IMS_SINT32 eTimerType);
+extern SIP_VOID Sip_Cbk_OnTimerExpired(IN ISipUserData* pUserData, IN IMS_SINT32 eTimerType);
 
 class SipNetworkUtil : public ISipNetworkUtil
 {
@@ -97,7 +97,7 @@ public:
     SIP_BOOL TxnTimeout(ISipUserData* pUserData, IMS_SINT32 eTimerType)
     {
         IMS_TRACE_I("TxnTimeout", 0, 0, 0);
-        sip_cbk_onTimerExpired(pUserData, eTimerType);
+        Sip_Cbk_OnTimerExpired(pUserData, eTimerType);
         return SIP_TRUE;
     }
 
@@ -710,7 +710,7 @@ GLOBAL SipHeaderBase* DecodeHeader(
 
     if (nType == SipHeaderBase::UNKNOWN && (strName.GetLength() != 0))
     {
-        SIP_INT32 nUnknownType = sipGetHdrType(strName.GetStr());
+        SIP_INT32 nUnknownType = SipGetHdrType(strName.GetStr());
 
         if (nUnknownType != SipHeaderBase::TYPE_INVALID)
         {
@@ -1168,7 +1168,7 @@ GLOBAL IMS_BOOL IsUnknownHeader(IN_OUT IMS_SINT32& nType, IN const AString& strN
 {
     if (strName.GetLength() != 0)
     {
-        nType = sipGetHdrType(strName.GetStr());
+        nType = SipGetHdrType(strName.GetStr());
     }
 
     return (nType == ISipHeader::UNKNOWN);
@@ -2131,7 +2131,7 @@ GLOBAL SipAddrSpec* GetAddrSpec(
         return IMS_NULL;
     }
 
-    SipHeaderBase* pHeader = pMessage->GetMsgHdrs()->getHdrObj(nType, nIndex);
+    SipHeaderBase* pHeader = pMessage->GetMsgHdrs()->GetHdrObj(nType, nIndex);
 
     if (pHeader == IMS_NULL)
     {
@@ -3072,7 +3072,7 @@ GLOBAL IMS_BOOL GetSubscriptionStateHeader(IN ::SipMessage* pMessage, OUT AStrin
 GLOBAL SipHeaderBase* GetUnknownHeader(
         IN ::SipMessage* pMessage, IN const AString& strName, IN IMS_UINT32 nIndex /*= 0*/)
 {
-    IMS_SINT32 nType = sipGetHdrType(strName.GetStr());
+    IMS_SINT32 nType = SipGetHdrType(strName.GetStr());
     return GetHeader(pMessage, nType, nIndex);
 }
 
@@ -4016,7 +4016,7 @@ GLOBAL IMS_BOOL SetUnknownHeader(
         return IMS_FALSE;
     }
 
-    pHeader->SetHdrType(sipGetHdrType(strName.GetStr()));
+    pHeader->SetHdrType(SipGetHdrType(strName.GetStr()));
 
     return SetHeader(pHeader, pMessage);
 }
@@ -4535,7 +4535,7 @@ GLOBAL void TerminateTransaction(IN ::SipTxnKey* pTxnKey)
     SipStackManager::GetInstance()->TerminateTxn(pTxnKey);
 }
 
-GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN SipEn_TimerType eTimerType)
+GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN IMS_SINT32 eTimerType)
 {
     // clang-format off
     static const IMS_CHAR* acTimerType[] = {
@@ -4568,7 +4568,7 @@ GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN SipTimeoutData* pData)
         return "__INVALID__";
     }
 
-    return GetTimerTypeAsString(static_cast<SipEn_TimerType>(pData->GetTimerType()));
+    return GetTimerTypeAsString(pData->GetTimerType());
 }
 
 GLOBAL void InvokeTimerCallback(
@@ -4606,55 +4606,55 @@ GLOBAL void SetTimerValues(IN SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnCo
     if (pTv->IsSet(SipTimerValues::TIMER_T1))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_T1;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMER1, pTv->GetValue(SipTimerValues::TIMER_T1));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER1, pTv->GetValue(SipTimerValues::TIMER_T1));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_T2))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_T2;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMER2, pTv->GetValue(SipTimerValues::TIMER_T2));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER2, pTv->GetValue(SipTimerValues::TIMER_T2));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_B))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_B;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERB, pTv->GetValue(SipTimerValues::TIMER_B));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMERB, pTv->GetValue(SipTimerValues::TIMER_B));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_D))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_D;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERD, pTv->GetValue(SipTimerValues::TIMER_D));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMERD, pTv->GetValue(SipTimerValues::TIMER_D));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_F))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_F;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERF, pTv->GetValue(SipTimerValues::TIMER_F));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMERF, pTv->GetValue(SipTimerValues::TIMER_F));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_H))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_H;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERH, pTv->GetValue(SipTimerValues::TIMER_H));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMERH, pTv->GetValue(SipTimerValues::TIMER_H));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_I))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_I;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERI, pTv->GetValue(SipTimerValues::TIMER_I));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMERI, pTv->GetValue(SipTimerValues::TIMER_I));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_J))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_J;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERJ, pTv->GetValue(SipTimerValues::TIMER_J));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMERJ, pTv->GetValue(SipTimerValues::TIMER_J));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_K))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_K;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERK, pTv->GetValue(SipTimerValues::TIMER_K));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMERK, pTv->GetValue(SipTimerValues::TIMER_K));
     }
 
     pTxnContext->pSipTimerContext->nTimerOptions = nTxnTimerOptions;

@@ -122,7 +122,7 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             return SIP_FALSE;
         }
 
-        if (sipFindLWS(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
+        if (SipFindLWS(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
         {
             pTempPos = pEndPt;
         }
@@ -135,7 +135,7 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             pTempPos = pCommentEnd;
         }
 
-        SIP_CHAR* pszUserAgent = sipCreateString(pStartPt, pTempPos);
+        SIP_CHAR* pszUserAgent = SipCreateString(pStartPt, pTempPos);
         if (pszUserAgent == SIP_NULL)
         {
             SIP_DEBUG_WARNING(
@@ -158,7 +158,7 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         else
         {
             pTempPos = pTempPos + SIP_ONE;
-            pStartPt = sipSkipFwLWS(pTempPos, pEndPt);
+            pStartPt = SipSkipFwLWS(pTempPos, pEndPt);
             pTempPos = SIP_NULL;
         }
     }

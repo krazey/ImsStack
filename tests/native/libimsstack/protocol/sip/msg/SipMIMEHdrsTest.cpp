@@ -38,11 +38,11 @@ TEST_F(SipMIMEHdrsTest, SetAndGetHeaders)
     EXPECT_EQ(0, pMimeHeaders->GetUnknownHdrCount());
 
     /* All mime headers nnull in new empty object */
-    EXPECT_TRUE(pMimeHeaders->getMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE) == nullptr);
-    EXPECT_TRUE(pMimeHeaders->getMimeHdrObj(SipMIMEHdrs::CONTENT_ENCODING) == nullptr);
-    EXPECT_TRUE(pMimeHeaders->getMimeHdrObj(SipMIMEHdrs::CONTENT_DISPOSITION) == nullptr);
-    EXPECT_TRUE(pMimeHeaders->getMimeHdrObj(SipMIMEHdrs::UNKNOWN) == nullptr);
-    EXPECT_TRUE(pMimeHeaders->getMimeHdrObj(SipMIMEHdrs::INVALID) == nullptr);
+    EXPECT_TRUE(pMimeHeaders->GetMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE) == nullptr);
+    EXPECT_TRUE(pMimeHeaders->GetMimeHdrObj(SipMIMEHdrs::CONTENT_ENCODING) == nullptr);
+    EXPECT_TRUE(pMimeHeaders->GetMimeHdrObj(SipMIMEHdrs::CONTENT_DISPOSITION) == nullptr);
+    EXPECT_TRUE(pMimeHeaders->GetMimeHdrObj(SipMIMEHdrs::UNKNOWN) == nullptr);
+    EXPECT_TRUE(pMimeHeaders->GetMimeHdrObj(SipMIMEHdrs::INVALID) == nullptr);
 
     EXPECT_EQ(SIP_FALSE, pMimeHeaders->SetMimeHdrs(nullptr));
 
@@ -90,54 +90,54 @@ TEST_F(SipMIMEHdrsTest, SetAndGetHeaders)
     pHeader = pCopyMimeHeaders->GetUnknownHdr(1);
     EXPECT_TRUE(pHeader == nullptr);
 
-    pHeader = pCopyMimeHeaders->getMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE);
+    pHeader = pCopyMimeHeaders->GetMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE);
     EXPECT_TRUE(pHeader != nullptr);
     pHeader->SipDelete();
 
-    pHeader = pCopyMimeHeaders->getMimeHdrObj(SipMIMEHdrs::CONTENT_ENCODING);
+    pHeader = pCopyMimeHeaders->GetMimeHdrObj(SipMIMEHdrs::CONTENT_ENCODING);
     EXPECT_TRUE(pHeader != nullptr);
     pHeader->SipDelete();
 
-    pHeader = pCopyMimeHeaders->getMimeHdrObj(SipMIMEHdrs::CONTENT_DISPOSITION);
+    pHeader = pCopyMimeHeaders->GetMimeHdrObj(SipMIMEHdrs::CONTENT_DISPOSITION);
     EXPECT_TRUE(pHeader != nullptr);
     pHeader->SipDelete();
 
-    pHeader = pCopyMimeHeaders->getMimeHdrObj(SipMIMEHdrs::UNKNOWN);
+    pHeader = pCopyMimeHeaders->GetMimeHdrObj(SipMIMEHdrs::UNKNOWN);
     EXPECT_TRUE(pHeader != nullptr);
     pHeader->SipDelete();
 
     pCopyMimeHeaders->SipDelete();
 
-    /* Get new mime header with getNewMIMEHdrObj */
+    /* Get new mime header with GetNewMIMEHdrObj */
     pMimeHeaders = new SipMIMEHdrs();
     ASSERT_TRUE(pMimeHeaders != nullptr);
 
-    pHeader = pMimeHeaders->getNewMIMEHdrObj(SipHeaderBase::CONTENT_TYPE);
+    pHeader = pMimeHeaders->GetNewMIMEHdrObj(SipHeaderBase::CONTENT_TYPE);
     EXPECT_TRUE(pHeader != nullptr);
 
     /* Content type header already created, should not create new header */
-    pHeader = pMimeHeaders->getNewMIMEHdrObj(SipHeaderBase::CONTENT_TYPE);
+    pHeader = pMimeHeaders->GetNewMIMEHdrObj(SipHeaderBase::CONTENT_TYPE);
     EXPECT_TRUE(pHeader != nullptr);
 
-    pHeader = pMimeHeaders->getNewMIMEHdrObj(SipHeaderBase::CONTENT_ENCODING);
+    pHeader = pMimeHeaders->GetNewMIMEHdrObj(SipHeaderBase::CONTENT_ENCODING);
     EXPECT_TRUE(pHeader != nullptr);
 
     /* Content encoding header already created, should not create new header */
-    pHeader = pMimeHeaders->getNewMIMEHdrObj(SipHeaderBase::CONTENT_ENCODING);
+    pHeader = pMimeHeaders->GetNewMIMEHdrObj(SipHeaderBase::CONTENT_ENCODING);
     EXPECT_TRUE(pHeader != nullptr);
 
-    pHeader = pMimeHeaders->getNewMIMEHdrObj(SipHeaderBase::CONTENT_DISPOSITION);
+    pHeader = pMimeHeaders->GetNewMIMEHdrObj(SipHeaderBase::CONTENT_DISPOSITION);
     EXPECT_TRUE(pHeader != nullptr);
 
     /* Content disposition header already created, should not create new header */
-    pHeader = pMimeHeaders->getNewMIMEHdrObj(SipHeaderBase::CONTENT_DISPOSITION);
+    pHeader = pMimeHeaders->GetNewMIMEHdrObj(SipHeaderBase::CONTENT_DISPOSITION);
     EXPECT_TRUE(pHeader != nullptr);
 
-    pHeader = pMimeHeaders->getNewMIMEHdrObj(SipHeaderBase::UNKNOWN);
+    pHeader = pMimeHeaders->GetNewMIMEHdrObj(SipHeaderBase::UNKNOWN);
     EXPECT_TRUE(pHeader != nullptr);
 
     /* Unknowd header already created, should return same header */
-    pHeader = pMimeHeaders->getNewMIMEHdrObj(SipHeaderBase::UNKNOWN);
+    pHeader = pMimeHeaders->GetNewMIMEHdrObj(SipHeaderBase::UNKNOWN);
     EXPECT_TRUE(pHeader != nullptr);
 
     pMimeHeaders->SipDelete();

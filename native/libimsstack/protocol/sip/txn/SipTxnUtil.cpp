@@ -25,7 +25,7 @@
 
 #include "IMSTypeDef.h"
 
-extern SIP_VOID sip_cbk_displayTxnKey(IN SIP_VOID* pvTxnKey);
+extern SIP_VOID Sip_Cbk_DisplayTxnKey(IN SIP_VOID* pvTxnKey);
 
 static SipVector<SipTxnKey*> s_txnKeyList;
 
@@ -164,7 +164,7 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
 
         if (IsTxnKeyMatched(pUserTxnkey, pStoredTxnKey) == SIP_TRUE)
         {
-            sip_cbk_displayTxnKey((SIP_VOID*)pStoredTxnKey);
+            Sip_Cbk_DisplayTxnKey((SIP_VOID*)pStoredTxnKey);
             pStoredTxnKey->SipDelete();
             s_txnKeyList.RemoveAt(nIndex - SIP_ONE);
             // Check again if further elements matches for the same txn key.

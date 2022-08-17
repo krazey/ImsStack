@@ -353,7 +353,7 @@ SIP_BOOL SipHeaderBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pTempPre = SIP_NULL;
     SIP_CHAR* pTempNext = SIP_NULL;
     /*First Check the presence of params i.e. ";" and decode if present*/
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
@@ -363,7 +363,7 @@ SIP_BOOL SipHeaderBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         pEndPt = pTempPre;
     }
     /*Now Decode the Value*/
-    SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
 
     if ((m_eHdrType == SipHeaderBase::ACCEPT_CONTACT) ||
             (m_eHdrType == SipHeaderBase::FEATURE_CAPS) ||
@@ -437,7 +437,7 @@ SIP_BOOL SipNameAddrHeader::SetAddrSpec(SipAddrSpec* pAddrSpec)
     m_pNameAddr->m_pAddrSpec = pAddrSpec;
     if (pAddrSpec)
     {
-        pAddrSpec->increment();
+        pAddrSpec->Increment();
     }
 
     return SIP_TRUE;
@@ -447,7 +447,7 @@ SipNameAddr* SipNameAddrHeader::GetNameAddr()
 {
     if (m_pNameAddr != SIP_NULL)
     {
-        m_pNameAddr->increment();
+        m_pNameAddr->Increment();
         return m_pNameAddr;
     }
     return SIP_NULL;
@@ -513,7 +513,7 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     if (GetHdrType() == SipHeaderBase::CONTACT)
     {
-        pEndPt = sipSkipRwLWS(pStartPt, pEndPt);
+        pEndPt = SipSkipRwLWS(pStartPt, pEndPt);
 
         if ((pStartPt == pEndPt) && (*pStartPt == ASTERISK))
         {
@@ -530,7 +530,7 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pTempPre = SIP_NULL;
     SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, RIGHT_ANGLE) == SIP_TRUE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, RIGHT_ANGLE) == SIP_TRUE)
     {
         if (m_pNameAddr->DecodeNameAddr(pStartPt, pTempPre) == SIP_FALSE)
         {
@@ -539,7 +539,7 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
         pStartPt = pTempNext;
         pTempNext = SIP_NULL;
-        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempNext, SIP_SEMI) == SIP_TRUE)
+        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempNext, SIP_SEMI) == SIP_TRUE)
         {
             pTempNext = pTempNext + SIP_TWO;
         }
@@ -547,7 +547,7 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     else
     {
         SIP_INT32 nLen = nDecLen;
-        if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+        if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
         {
             nLen = pTempPre - pStartPt + SIP_ONE;
         }

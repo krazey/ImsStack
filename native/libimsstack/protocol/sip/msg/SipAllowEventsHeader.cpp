@@ -88,12 +88,12 @@ SIP_BOOL SipAllowEventsHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pTempPos = SIP_NULL;
 
     /*Case of having event template*/
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_DOT) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_DOT) == SIP_FALSE)
     {
         pTempPos = pEndPt;
     }
 
-    SIP_CHAR* pszValue = sipCreateString(pStartPt, pTempPos);
+    SIP_CHAR* pszValue = SipCreateString(pStartPt, pTempPos);
     if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);

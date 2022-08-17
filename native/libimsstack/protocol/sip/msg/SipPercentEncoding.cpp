@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/sip_msgutil.h"
-#include "sip_pf_datatypes.h"
-#include "sip_debug.h"
+#include "msg/SipPercentEncoding.h"
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
-#include "msg/SipHeaders.h"
+#include "sip_abnfUtil.h"
 
 SIP_CHAR* SipPercentEncoding::DoPercentDecoding(SIP_CHAR* pszString)
 {

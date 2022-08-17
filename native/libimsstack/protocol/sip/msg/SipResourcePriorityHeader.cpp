@@ -99,7 +99,7 @@ SIP_BOOL SipResourcePriorityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDe
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTempPre = SIP_NULL;
 
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, SIP_DOT) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, SIP_DOT) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipResourcePriorityHeader::DecodeHdr: Dot missing in ResourcePriority", SIP_ZERO,
@@ -107,7 +107,7 @@ SIP_BOOL SipResourcePriorityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDe
         return SIP_FALSE;
     }
 
-    m_pszNameSpace = sipCreateString(pStartPt, pTempPre);
+    m_pszNameSpace = SipCreateString(pStartPt, pTempPre);
     if (m_pszNameSpace == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -116,7 +116,7 @@ SIP_BOOL SipResourcePriorityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDe
     }
 
     pStartPt = pTempPre + SIP_TWO;
-    m_pszRPriority = sipCreateString(pStartPt, pEndPt);
+    m_pszRPriority = SipCreateString(pStartPt, pEndPt);
     if (m_pszRPriority == SIP_NULL)
     {
         SIP_DEBUG_WARNING(

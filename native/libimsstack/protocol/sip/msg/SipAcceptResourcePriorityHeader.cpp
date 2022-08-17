@@ -120,13 +120,13 @@ SIP_BOOL SipAcceptResourcePriorityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTempPre = SIP_NULL;
 
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, SIP_DOT) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, SIP_DOT) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Dot missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszNameSpace = sipCreateString(pStartPt, pTempPre);
+    m_pszNameSpace = SipCreateString(pStartPt, pTempPre);
     if (m_pszNameSpace == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -135,7 +135,7 @@ SIP_BOOL SipAcceptResourcePriorityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT
 
     pStartPt = pTempPre + SIP_TWO;
 
-    m_pszRPriority = sipCreateString(pStartPt, pEndPt);
+    m_pszRPriority = SipCreateString(pStartPt, pEndPt);
     if (m_pszRPriority == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);

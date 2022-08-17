@@ -152,7 +152,7 @@ SipParameterList* SipUri::GetUriParamList()
 {
     if (m_pUriParamList != SIP_NULL)
     {
-        m_pUriParamList->increment();
+        m_pUriParamList->Increment();
     }
     return m_pUriParamList;
 }
@@ -161,7 +161,7 @@ SipParameterList* SipUri::GetHdrParamList()
 {
     if (m_pUriHdrParamList != SIP_NULL)
     {
-        m_pUriHdrParamList->increment();
+        m_pUriHdrParamList->Increment();
     }
     return m_pUriHdrParamList;
 }
@@ -397,10 +397,10 @@ SIP_BOOL SipUri::DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 
     SIP_CHAR* pTempPos = SIP_NULL;
     /* Decode password part in userinfo */
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_TRUE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_TRUE)
     {
         SIP_CHAR* pPasswordStart = pTempPos + SIP_TWO;
-        SIP_CHAR* pszPassword = sipCreateString(pPasswordStart, pEndPt);
+        SIP_CHAR* pszPassword = SipCreateString(pPasswordStart, pEndPt);
         if (pszPassword == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -413,7 +413,7 @@ SIP_BOOL SipUri::DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         pEndPt = pTempPos;
     }
     /* Decode ( user   /   telephone-subscriber ) part in userinfo */
-    SIP_CHAR* pszUser = sipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszUser = SipCreateString(pStartPt, pEndPt);
     if (pszUser == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -443,23 +443,23 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     SIP_CHAR* pTempPos = SIP_NULL;
 
     /* IPV6 is enclosed in between '[' and ']', get start and end point of Ipv6 address*/
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, LEFT_SQUARE) == SIP_TRUE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, LEFT_SQUARE) == SIP_TRUE)
     {
         m_eHostType = SipAddrSpec::HOST_IPV6;
         pStartPt = pTempPos + SIP_TWO;
         pTempPos = SIP_NULL;
-        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, RIGHT_SQUARE) == SIP_FALSE)
+        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, RIGHT_SQUARE) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Host[IPV6]", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
-    else if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    else if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
     {
         pTempPos = pEndPt;
     }
     /* Host : Hostname or IPv4 or IPv6 */
-    m_pszHost = sipCreateString(pStartPt, pTempPos);
+    m_pszHost = SipCreateString(pStartPt, pTempPos);
     if (m_pszHost == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -484,10 +484,10 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 
     pStartPt = pTempPos;
     /* Port number */
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_TRUE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_TRUE)
     {
         pTempPos = pTempPos + SIP_TWO;
-        SIP_CHAR* pszPort = sipCreateString(pTempPos, pEndPt);
+        SIP_CHAR* pszPort = SipCreateString(pTempPos, pEndPt);
         if (pszPort == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -529,7 +529,7 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pTempPos = SIP_NULL;
 
     /* Decode user:password part in SIP URI */
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, ATRATE) == SIP_TRUE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, ATRATE) == SIP_TRUE)
     {
         if (DecUserInfo(pStartPt, pTempPos) == SIP_FALSE)
         {
@@ -539,7 +539,7 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         pStartPt = pTempPos + SIP_TWO;
     }
     /* Decode headers part in SIP URI */
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, QMARK) == SIP_TRUE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, QMARK) == SIP_TRUE)
     {
         SIP_CHAR* pHeaderStart = pTempPos + SIP_TWO;
 
@@ -564,7 +564,7 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         pTempPos = SIP_NULL;
     }
     /* Decode uri-parameters part in SIP URI */
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_SEMI) == SIP_TRUE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_SEMI) == SIP_TRUE)
     {
         SIP_CHAR* pUriParamStart = pTempPos + SIP_TWO;
 
@@ -637,7 +637,7 @@ SipUri* SipAddrSpec::GetSipUri()
 {
     if (m_pSipUri != SIP_NULL)
     {
-        m_pSipUri->increment();
+        m_pSipUri->Increment();
     }
     return m_pSipUri;
 }
@@ -722,14 +722,14 @@ SIP_BOOL SipAddrSpec::DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTempPos = SIP_NULL;
 
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "No URI scheme", SIP_ZERO, SIP_ZERO);
         m_eUriType = SipUri::SCHEME_ABS;
     }
     else
     {
-        m_eUriType = sipGetUriType(pStartPt, pTempPos);
+        m_eUriType = SipGetUriType(pStartPt, pTempPos);
     }
 
     /*CAse of Sip or Sips URI*/
@@ -762,7 +762,7 @@ SIP_BOOL SipAddrSpec::DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
     else
     {
-        m_pszAbsUri = sipCreateString(pStartPt, pEndPt);
+        m_pszAbsUri = SipCreateString(pStartPt, pEndPt);
         if (m_pszAbsUri == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
@@ -805,7 +805,7 @@ SipAddrSpec* SipNameAddr::GetAddrSpec()
 {
     if (m_pAddrSpec != SIP_NULL)
     {
-        m_pAddrSpec->increment();
+        m_pAddrSpec->Increment();
     }
     return m_pAddrSpec;
 }
@@ -902,7 +902,7 @@ SIP_BOOL SipNameAddr::DecodeNameAddr(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     SIP_CHAR* pTempPre = SIP_NULL;
     SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, LEFT_ANGLE) == SIP_FALSE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, LEFT_ANGLE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Left Angle Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -910,7 +910,7 @@ SIP_BOOL SipNameAddr::DecodeNameAddr(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     /*Case of display Name present*/
     if (pStartPt <= pTempPre)
     {
-        m_pszDispName = sipCreateString(pStartPt, pTempPre);
+        m_pszDispName = SipCreateString(pStartPt, pTempPre);
         if (m_pszDispName == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);

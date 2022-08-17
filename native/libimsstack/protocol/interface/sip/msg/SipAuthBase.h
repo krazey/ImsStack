@@ -17,7 +17,6 @@
 #define __SIP_AUTH_BASE_H__
 
 #include "msg/SipHeaderBase.h"
-#include "msg/sip_comdef.h"
 
 class SipAuthBase : public SipHeaderBase
 {
