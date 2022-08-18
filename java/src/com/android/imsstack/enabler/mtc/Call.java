@@ -126,9 +126,9 @@ public class Call implements Closeable {
 
     public Call(IBaseContext context, int index, String logTag) {
         mContext = context;
-        mNativeCallObject = 0;
-
+        mCallId = createCallId();
         mCallIndex = index;
+        mNativeCallObject = 0;
 
         if (logTag.isEmpty()) {
             mLogTag = createLogTag();
@@ -345,7 +345,6 @@ public class Call implements Closeable {
 
     protected void updateNativeCallObject(long nativeCallObject) {
         mNativeCallObject = nativeCallObject;
-        mCallId = createCallId();
     }
 
     protected String createCallId() {

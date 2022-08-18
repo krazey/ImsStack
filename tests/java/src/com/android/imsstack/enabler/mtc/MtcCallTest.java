@@ -585,7 +585,7 @@ public class MtcCallTest extends ImsStackTest {
         mTestMtcCall.sendDtmf('1');
         processAllMessages();
 
-        assertEquals(IUMtcCall.SEND_DTMF, mCommand);
+        verify(mMtcMediaSession, times(1)).sendDtmf('1');
     }
 
     @Test
@@ -821,5 +821,10 @@ public class MtcCallTest extends ImsStackTest {
 
         verify(mListener, times(1)).onCallPushRequestFailed(
                 eq(mTestMtcCallWithMockJniProxy), any());
+    }
+
+    @Test
+    public void testGetCallId() {
+        assertNotNull(mTestMtcCall.getCallId());
     }
 }
