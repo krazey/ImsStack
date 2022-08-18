@@ -15,10 +15,8 @@
  */
 
 #include <gtest/gtest.h>
-#include "call/extension/MockIMtcExtension.h"
-#include "call/extension/MtcExtensionSet.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/message/EmergencyMessageFormatter.h"
-#include "call/MockIMtcSessionContext.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockICoreService.h"
@@ -46,13 +44,12 @@ public:
     CallInfo objCallInfo;
     MockIMessage objMessage;
     MockISipMessage objSipMessage;
-    MockIMtcSessionContext objContext;
+    MockIMtcCallContext objContext;
     MockIMtcService objService;
     MockISession objSession;
     MockICoreService objCoreService;
     MockIMtcConfigurationManager* pConfigurationManager;
     MockIMtcAosConnector objAosConnector;
-    MtcExtensionSet* pExtensionSet;
     MtcConfigurationProxy* pConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
     FeatureCaps* pFeatureCaps;
@@ -64,13 +61,10 @@ protected:
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
         pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
         pFeatureCaps = new FeatureCaps();
-        ImsList<IMtcExtension*> lstExtensions;
-        pExtensionSet = new MtcExtensionSet(lstExtensions);
 
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
-        ON_CALL(objContext, GetExtensionSet).WillByDefault(ReturnRef(*pExtensionSet));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetAosConnector).WillByDefault(Return(&objAosConnector));
@@ -91,7 +85,6 @@ protected:
         delete pFormatter;
         delete pConfigurationProxy;
         delete pSupplementaryService;
-        delete pExtensionSet;
         delete pFeatureCaps;
     }
 };
