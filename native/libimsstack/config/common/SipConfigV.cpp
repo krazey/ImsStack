@@ -229,7 +229,12 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_SESSION_EXPIRES_TIMER_SEC_INT);
 
     m_objSession.nHeaders = SESSION_HEADER_SESSION_EXPIRES | SESSION_HEADER_MIN_SE |
-            SESSION_HEADER_CHECK_SESSION_EXPIRES | SESSION_HEADER_LOCAL_TIMER_REQUIRED;
+            SESSION_HEADER_CHECK_SESSION_EXPIRES;
+
+    if (piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL))
+    {
+        m_objSession.nHeaders |= SESSION_HEADER_LOCAL_TIMER_REQUIRED;
+    }
 
     m_objSession.bNoRefreshByReInvite = !piCc->GetBoolean(CarrierConfig::Assets::
                     KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL);

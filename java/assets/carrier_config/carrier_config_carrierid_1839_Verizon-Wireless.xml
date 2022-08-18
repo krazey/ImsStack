@@ -23,6 +23,7 @@
     <boolean name="use_reset_when_closing_sip_tcp_connection_bool" value="true"/>
     <boolean name="set_sdp_direction_attribute_for_removed_media_bool" value="true"/>
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
+    <boolean name="support_local_session_timer_bool" value="true"/>
     <boolean name="support_ecbm_for_volte_bool" value="true"/>
     <boolean name="support_ecbm_for_vowifi_bool" value="true"/>
 

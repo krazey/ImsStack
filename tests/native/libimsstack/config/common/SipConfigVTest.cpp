@@ -15,7 +15,17 @@
  */
 #include <gtest/gtest.h>
 
+#include "MockICarrierConfig.h"
+#include "PlatformContext.h"
+#include "TestConfigService.h"
+
+#include "CarrierConfig.h"
+
 #include "private/SipConfigV.h"
+
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRoundRobin;
 
 namespace android
 {
@@ -24,16 +34,38 @@ class SipConfigVTest : public ::testing::Test
 {
 public:
     SipConfigVTest();
+    virtual ~SipConfigVTest() {}
 
 protected:
-    virtual void SetUp() override {}
-    virtual void TearDown() override {}
+    virtual void SetUp() override
+    {
+        m_pConfigService = new TestConfigService();
+
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, m_pConfigService);
+
+        ON_CALL(m_pConfigService->GetMockCarrierConfig(), AddListener(_)).WillByDefault(Return());
+        ON_CALL(m_pConfigService->GetMockCarrierConfig(), RemoveListener(_))
+                .WillByDefault(Return());
+    }
+    virtual void TearDown() override
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+
+        if (m_pConfigService != IMS_NULL)
+        {
+            delete m_pConfigService;
+            m_pConfigService = IMS_NULL;
+        }
+    }
 
 protected:
+    TestConfigService* m_pConfigService;
     AStringArray m_objAllowMethods;
 };
 
-SipConfigVTest::SipConfigVTest()
+SipConfigVTest::SipConfigVTest() :
+        m_pConfigService(IMS_NULL)
 {
     m_objAllowMethods.AddElement("INVITE");
     m_objAllowMethods.AddElement("BYE");
@@ -61,6 +93,27 @@ TEST_F(SipConfigVTest, Refresh)
     objListener.CarrierConfig_NotifyConfigChanged(IMS_SLOT_0);
     const AStringArray& objAllowMethodsForRefresh = objSipConfigV.GetAllowMethods();
     EXPECT_EQ(m_objAllowMethods.GetElements(), objAllowMethodsForRefresh.GetElements());
+}
+
+TEST_F(SipConfigVTest, GetSessionHeaders)
+{
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL, _))
+            .WillByDefault(ReturnRoundRobin({IMS_FALSE, IMS_TRUE}));
+
+    SipConfigV objSipConfigV(IMS_SLOT_0);
+    objSipConfigV.Init();
+
+    IMS_SINT32 nDefaultSessionHeaders = SipConfigV::SESSION_HEADER_SESSION_EXPIRES |
+            SipConfigV::SESSION_HEADER_MIN_SE | SipConfigV::SESSION_HEADER_CHECK_SESSION_EXPIRES;
+    EXPECT_EQ(objSipConfigV.GetSessionHeaders(), nDefaultSessionHeaders);
+
+    // Refresh
+    ICarrierConfigListener& objListener = DYNAMIC_CAST(ICarrierConfigListener&, objSipConfigV);
+    objListener.CarrierConfig_NotifyConfigChanged(IMS_SLOT_0);
+
+    nDefaultSessionHeaders |= SipConfigV::SESSION_HEADER_LOCAL_TIMER_REQUIRED;
+    EXPECT_EQ(objSipConfigV.GetSessionHeaders(), nDefaultSessionHeaders);
 }
 
 }  // namespace android

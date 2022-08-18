@@ -682,6 +682,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_BOOL[]
         "hide_mac_address_in_pani_header_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_BOOL[] =
         "support_country_param_in_pani_header_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL[] =
+        "support_local_session_timer_bool";
 // Aos
 const IMS_CHAR CarrierConfig::Assets::
         KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INITIAL_REGISTRATION_BOOL[] =

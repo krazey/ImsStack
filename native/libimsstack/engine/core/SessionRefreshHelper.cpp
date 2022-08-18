@@ -39,7 +39,8 @@ PUBLIC
 SessionRefreshHelper::SessionRefreshHelper(IN Service* pService, IN IRefreshable* piRefreshable) :
         RefreshHelper(piRefreshable, IMS_FALSE),
         m_nMinSe(0),
-        m_nSessionInterval(0),
+        m_nSessionTimerDuration(0),
+        m_nLocalSessionTimerDuration(0),
         m_nRefresher(REFRESHER_NONE),
         m_nRefreshRequest(SipMethod::INVALID),
         m_bUpdateMethodAllowed(IMS_FALSE),
@@ -51,9 +52,12 @@ SessionRefreshHelper::SessionRefreshHelper(IN Service* pService, IN IRefreshable
 
     if (pSipConfigV != IMS_NULL)
     {
-        m_nSessionInterval = pSipConfigV->GetSessionExpires();
+        m_nSessionTimerDuration = pSipConfigV->GetSessionExpires();
         m_nRefresher = pSipConfigV->GetSessionRefresher();
         m_nSipHeaders = pSipConfigV->GetSessionHeaders();
+
+        IMS_TRACE_I("SessionRefreshHelper: duration=%d, refresher=%d, sipHeaderOptions=%08x",
+                m_nSessionTimerDuration, m_nRefresher, m_nSipHeaders);
     }
 }
 
@@ -170,11 +174,11 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeader(IN ISipConnectio
             }
 
             // Set a Session-Expires header field
-            if ((m_nSessionInterval > 0) && IsSessionExpiresHeaderRequired())
+            if (HasSessionTimerDuration() && IsSessionExpiresHeaderRequired())
             {
                 AString strSessionExpires;
 
-                strSessionExpires.SetNumber(m_nSessionInterval);
+                strSessionExpires.SetNumber(GetSessionTimerDuration());
 
                 // Set the refresher parameter in the Session-Expires header field
                 if ((m_nRefresher == REFRESHER_LOCAL) || (m_nRefresher == REFRESHER_REMOTE))
@@ -230,8 +234,7 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeader(IN ISipConnectio
 
         if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
-            // Set a Session-Expires header field
-            if (m_nSessionInterval > 0)
+            if (m_nSessionTimerDuration > 0)
             {
                 // Require header SHALL include the timer option tag
                 if (IsRequireHeaderRequired() || (m_nRefresher == REFRESHER_REMOTE) ||
@@ -245,12 +248,22 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeader(IN ISipConnectio
                     }
                 }
             }
+            else if (m_nLocalSessionTimerDuration > 0)
+            {
+                // Set a Supported header field
+                if (piSipMsg->AddHeader(ISipHeader::SUPPORTED, STR_TIMER) != IMS_SUCCESS)
+                {
+                    IMS_TRACE_E(0, "Adding Supported header failed", 0, 0, 0);
+                    return IMS_FALSE;
+                }
+            }
 
-            if ((m_nSessionInterval > 0) && IsSessionExpiresHeaderRequired())
+            // Set a Session-Expires header field
+            if (HasSessionTimerDuration() && IsSessionExpiresHeaderRequired())
             {
                 AString strSessionExpires;
 
-                strSessionExpires.SetNumber(m_nSessionInterval);
+                strSessionExpires.SetNumber(GetSessionTimerDuration());
 
                 if ((m_nRefresher == REFRESHER_LOCAL) || (m_nRefresher == REFRESHER_REMOTE))
                 {
@@ -309,7 +322,8 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
     IMS_SINT32 nBackupRefresher = m_nRefresher;
     IMS_SINT32 nBackupRefreshRequest = m_nRefreshRequest;
     IMS_SINT32 nBackupMinSe = m_nMinSe;
-    IMS_SINT32 nBackupSessionInterval = m_nSessionInterval;
+    IMS_SINT32 nBackupSessionTimerDuration = m_nSessionTimerDuration;
+    IMS_SINT32 nBackupLocalSessionTimerDuration = m_nLocalSessionTimerDuration;
 
     if (objMethod.Equals(SipMethod::UPDATE) &&
             (piDialog->GetState() == ISipDialog::STATE_CONFIRMED))
@@ -337,10 +351,8 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
     if (pSipConfigV == IMS_NULL)
     {
         // Restore the parameter values
-        m_nRefresher = nBackupRefresher;
-        m_nRefreshRequest = nBackupRefreshRequest;
-        m_nMinSe = nBackupMinSe;
-        m_nSessionInterval = nBackupSessionInterval;
+        SetSessionRefreshParameters(nBackupRefresher, nBackupRefreshRequest, nBackupMinSe,
+                nBackupSessionTimerDuration, nBackupLocalSessionTimerDuration);
         return IMS_FALSE;
     }
 
@@ -352,10 +364,8 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
         if (piSipMsg->AddHeader(ISipHeader::SUPPORTED, STR_TIMER) != IMS_SUCCESS)
         {
             // Restore the parameter values
-            m_nRefresher = nBackupRefresher;
-            m_nRefreshRequest = nBackupRefreshRequest;
-            m_nMinSe = nBackupMinSe;
-            m_nSessionInterval = nBackupSessionInterval;
+            SetSessionRefreshParameters(nBackupRefresher, nBackupRefreshRequest, nBackupMinSe,
+                    nBackupSessionTimerDuration, nBackupLocalSessionTimerDuration);
 
             IMS_TRACE_E(0, "Adding Supported header failed", 0, 0, 0);
             return IMS_FALSE;
@@ -384,10 +394,9 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
                 if (piSipMsg->SetHeader(ISipHeader::MIN_SE, strMinSe) != IMS_SUCCESS)
                 {
                     // Restore the parameter values
-                    m_nRefresher = nBackupRefresher;
-                    m_nRefreshRequest = nBackupRefreshRequest;
-                    m_nMinSe = nBackupMinSe;
-                    m_nSessionInterval = nBackupSessionInterval;
+                    SetSessionRefreshParameters(nBackupRefresher, nBackupRefreshRequest,
+                            nBackupMinSe, nBackupSessionTimerDuration,
+                            nBackupLocalSessionTimerDuration);
 
                     IMS_TRACE_E(0, "Setting Min-SE header failed", 0, 0, 0);
                     return IMS_FALSE;
@@ -409,11 +418,11 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
             }
 
             // Set a Session-Expires header field
-            if ((m_nSessionInterval > 0) && IsSessionExpiresHeaderRequired())
+            if (HasSessionTimerDuration() && IsSessionExpiresHeaderRequired())
             {
                 AString strSessionExpires;
 
-                strSessionExpires.SetNumber(m_nSessionInterval);
+                strSessionExpires.SetNumber(GetSessionTimerDuration());
 
                 // Set the refresher parameter in the Session-Expires header field
                 if ((m_nRefresher == REFRESHER_LOCAL) || (m_nRefresher == REFRESHER_REMOTE))
@@ -436,10 +445,9 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
                         IMS_SUCCESS)
                 {
                     // Restore the parameter values
-                    m_nRefresher = nBackupRefresher;
-                    m_nRefreshRequest = nBackupRefreshRequest;
-                    m_nMinSe = nBackupMinSe;
-                    m_nSessionInterval = nBackupSessionInterval;
+                    SetSessionRefreshParameters(nBackupRefresher, nBackupRefreshRequest,
+                            nBackupMinSe, nBackupSessionTimerDuration,
+                            nBackupLocalSessionTimerDuration);
 
                     IMS_TRACE_E(0, "Setting Session-Expires header failed", 0, 0, 0);
                     return IMS_FALSE;
@@ -469,10 +477,8 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
             if (piSipMsg->SetHeader(ISipHeader::MIN_SE, strMinSe) != IMS_SUCCESS)
             {
                 // Restore the parameter values
-                m_nRefresher = nBackupRefresher;
-                m_nRefreshRequest = nBackupRefreshRequest;
-                m_nMinSe = nBackupMinSe;
-                m_nSessionInterval = nBackupSessionInterval;
+                SetSessionRefreshParameters(nBackupRefresher, nBackupRefreshRequest, nBackupMinSe,
+                        nBackupSessionTimerDuration, nBackupLocalSessionTimerDuration);
 
                 IMS_TRACE_E(0, "Setting Min-SE header failed", 0, 0, 0);
                 return IMS_FALSE;
@@ -481,8 +487,7 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
 
         if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
-            // Set a Session-Expires header field
-            if (m_nSessionInterval > 0)
+            if (m_nSessionTimerDuration > 0)
             {
                 // Require header SHALL include the timer option tag
                 if (IsRequireHeaderRequired() || (m_nRefresher == REFRESHER_REMOTE) ||
@@ -492,22 +497,36 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
                     if (piSipMsg->AddHeader(ISipHeader::REQUIRE, STR_TIMER) != IMS_SUCCESS)
                     {
                         // Restore the parameter values
-                        m_nRefresher = nBackupRefresher;
-                        m_nRefreshRequest = nBackupRefreshRequest;
-                        m_nMinSe = nBackupMinSe;
-                        m_nSessionInterval = nBackupSessionInterval;
+                        SetSessionRefreshParameters(nBackupRefresher, nBackupRefreshRequest,
+                                nBackupMinSe, nBackupSessionTimerDuration,
+                                nBackupLocalSessionTimerDuration);
 
                         IMS_TRACE_E(0, "Adding Require header failed", 0, 0, 0);
                         return IMS_FALSE;
                     }
                 }
             }
+            else if (m_nLocalSessionTimerDuration > 0)
+            {
+                // Set a Supported header field
+                if (piSipMsg->AddHeader(ISipHeader::SUPPORTED, STR_TIMER) != IMS_SUCCESS)
+                {
+                    // Restore the parameter values
+                    SetSessionRefreshParameters(nBackupRefresher, nBackupRefreshRequest,
+                            nBackupMinSe, nBackupSessionTimerDuration,
+                            nBackupLocalSessionTimerDuration);
 
-            if ((m_nSessionInterval > 0) && IsSessionExpiresHeaderRequired())
+                    IMS_TRACE_E(0, "Adding Supported header failed", 0, 0, 0);
+                    return IMS_FALSE;
+                }
+            }
+
+            // Set a Session-Expires header field
+            if (HasSessionTimerDuration() && IsSessionExpiresHeaderRequired())
             {
                 AString strSessionExpires;
 
-                strSessionExpires.SetNumber(m_nSessionInterval);
+                strSessionExpires.SetNumber(GetSessionTimerDuration());
 
                 if ((m_nRefresher == REFRESHER_LOCAL) || (m_nRefresher == REFRESHER_REMOTE))
                 {
@@ -529,10 +548,9 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
                         IMS_SUCCESS)
                 {
                     // Restore the parameter values
-                    m_nRefresher = nBackupRefresher;
-                    m_nRefreshRequest = nBackupRefreshRequest;
-                    m_nMinSe = nBackupMinSe;
-                    m_nSessionInterval = nBackupSessionInterval;
+                    SetSessionRefreshParameters(nBackupRefresher, nBackupRefreshRequest,
+                            nBackupMinSe, nBackupSessionTimerDuration,
+                            nBackupLocalSessionTimerDuration);
 
                     IMS_TRACE_E(0, "Setting Session-Expires header failed", 0, 0, 0);
                     return IMS_FALSE;
@@ -542,10 +560,8 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
     }
 
     // Restore the parameter values
-    m_nRefresher = nBackupRefresher;
-    m_nRefreshRequest = nBackupRefreshRequest;
-    m_nMinSe = nBackupMinSe;
-    m_nSessionInterval = nBackupSessionInterval;
+    SetSessionRefreshParameters(nBackupRefresher, nBackupRefreshRequest, nBackupMinSe,
+            nBackupSessionTimerDuration, nBackupLocalSessionTimerDuration);
 
     return IMS_TRUE;
 }
@@ -666,15 +682,8 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
             // session timer was in use through the value of session-interval & Min-SE).
             // If yes, reset the value of these two parameters, so that further requests
             // which originate from this UA goes without "Session-Expires" header.
-            if (m_nSessionInterval != 0)
-            {
-                m_nSessionInterval = 0;
-            }
-
-            if (m_nMinSe != 0)
-            {
-                m_nMinSe = 0;
-            }
+            m_nSessionTimerDuration = 0;
+            m_nMinSe = 0;
         }
 
         UpdateProperties(piSc, bTimerOptionSupported, IMS_FALSE);
@@ -693,20 +702,20 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
 
         IMS_SINT32 nConfigMinSe = pSipConfigV->GetSessionMinSe();
 
-        if ((m_nSessionInterval != 0) &&
-                ((nConfigMinSe > m_nSessionInterval) || (m_nMinSe > m_nSessionInterval)))
+        if ((m_nSessionTimerDuration != 0) &&
+                ((nConfigMinSe > m_nSessionTimerDuration) || (m_nMinSe > m_nSessionTimerDuration)))
         {
             if (bTimerOptionSupported)
             {
                 // Once a 422 response is sent, the session timer should be turned off
-                m_nSessionInterval = 0;
-                SetDuration(m_nSessionInterval);
+                m_nSessionTimerDuration = 0;
+                SetDuration(0);
 
                 return RESULT_REJECT_422;
             }
             else
             {
-                m_nSessionInterval = nConfigMinSe;
+                m_nSessionTimerDuration = nConfigMinSe;
 
                 if (m_nMinSe > nConfigMinSe)
                 {
@@ -715,7 +724,7 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
             }
         }
 
-        SetDuration(m_nSessionInterval);
+        SetDuration(GetSessionTimerDuration());
 
         // Checks if Allow header contains UPDATE method
         m_bUpdateMethodAllowed = IMS_FALSE;
@@ -746,10 +755,10 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
         if (nStatusCode == SipStatusCode::SC_422)
         {
             // Once a 422 response is sent, the session timer should be turned off
-            m_nSessionInterval = 0;
+            m_nSessionTimerDuration = 0;
             UpdateProperties(piSc, bTimerOptionSupported, IMS_FALSE);
 
-            SetDuration(m_nSessionInterval);
+            SetDuration(GetSessionTimerDuration());
         }
         else if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
@@ -758,7 +767,7 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
 
             UpdateProperties(piSc, bTimerOptionSupported, IMS_FALSE);
 
-            SetDuration(m_nSessionInterval);
+            SetDuration(GetSessionTimerDuration());
 
             // If the response being sent is 200 OK, then start the session timer
             // after modifying the session timer state.
@@ -1379,7 +1388,7 @@ void SessionRefreshHelper::UpdateProperties(IN const ISipConnection* piSc,
         }
 
         IMS_BOOL bOk = IMS_FALSE;
-        m_nSessionInterval = piHeader->GetValue().ToInt32(&bOk);
+        m_nSessionTimerDuration = piHeader->GetValue().ToInt32(&bOk);
 
         if (!bOk)
         {
@@ -1540,11 +1549,14 @@ void SessionRefreshHelper::UpdateProperties(IN const ISipConnection* piSc,
             (!bSent && (piSipMsg->GetType() == ISipMessage::TYPE_RESPONSE) &&
                     (piSipMsg->GetStatusCode() == SipStatusCode::SC_422));
 
-    if (bSessionIntervalChangeable && (m_nMinSe > m_nSessionInterval))
+    if (bSessionIntervalChangeable && (m_nMinSe > m_nSessionTimerDuration))
     {
-        IMS_TRACE_I("SessionTimer(notSupport or 422) :: %d >> %d", m_nSessionInterval, m_nMinSe, 0);
-        m_nSessionInterval = m_nMinSe;
+        IMS_TRACE_I("SessionTimer(notSupport or 422) :: %d >> %d", m_nSessionTimerDuration,
+                m_nMinSe, 0);
+        m_nSessionTimerDuration = m_nMinSe;
     }
+
+    m_nLocalSessionTimerDuration = 0;
 
     //// To handle other optional cases for session refresh...
     if (IsLocalSessionTimerRequired() && !bSent &&
@@ -1578,17 +1590,29 @@ void SessionRefreshHelper::UpdateProperties(IN const ISipConnection* piSc,
 
             if (pSipConfigV != IMS_NULL)
             {
-                m_nSessionInterval = pSipConfigV->GetSessionExpires();
+                m_nLocalSessionTimerDuration = pSipConfigV->GetSessionExpires();
 
-                if ((m_nMinSe > 0) && (m_nSessionInterval > m_nMinSe))
+                if ((m_nMinSe > 0) && (m_nLocalSessionTimerDuration > m_nMinSe))
                 {
-                    m_nSessionInterval = m_nMinSe;
+                    m_nLocalSessionTimerDuration = m_nMinSe;
                 }
 
                 IMS_TRACE_D("Remote endpoint is not requesting the session timer,"
                             " but local endpoint supports it (%d:%d)",
-                        m_nSessionInterval, m_nMinSe, 0);
+                        m_nLocalSessionTimerDuration, m_nMinSe, 0);
             }
         }
     }
+}
+
+PRIVATE
+void SessionRefreshHelper::SetSessionRefreshParameters(IN IMS_SINT32 nRefresher,
+        IN IMS_SINT32 nRefreshRequest, IN IMS_SINT32 nMinSe, IN IMS_SINT32 nSessionTimerDuration,
+        IN IMS_SINT32 nLocalSessionTimerDuration)
+{
+    m_nRefresher = nRefresher;
+    m_nRefreshRequest = nRefreshRequest;
+    m_nMinSe = nMinSe;
+    m_nSessionTimerDuration = nSessionTimerDuration;
+    m_nLocalSessionTimerDuration = nLocalSessionTimerDuration;
 }
