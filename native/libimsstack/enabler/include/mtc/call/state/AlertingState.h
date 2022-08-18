@@ -62,7 +62,7 @@ public:
     CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     CallStateName UssiStarted(IN ISession* piSession) override;
 
-    CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
+    CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
 private:

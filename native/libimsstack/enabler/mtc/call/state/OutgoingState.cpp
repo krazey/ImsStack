@@ -603,7 +603,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingNetworkToneFailed()
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName OutgoingState::OnMediaFailed(IN CallReasonInfo objReason)
+PUBLIC VIRTUAL CallStateName OutgoingState::OnMediaFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
 

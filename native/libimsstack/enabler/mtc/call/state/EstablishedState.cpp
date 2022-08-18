@@ -331,7 +331,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnVideoLowestBitRate()
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName EstablishedState::OnMediaFailed(IN CallReasonInfo objReason)
+PUBLIC VIRTUAL CallStateName EstablishedState::OnMediaFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
 

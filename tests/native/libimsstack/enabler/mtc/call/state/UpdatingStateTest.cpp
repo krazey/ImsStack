@@ -151,3 +151,15 @@ TEST_F(UpdatingStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
 
     delete pUiNotifier;
 }
+
+TEST_F(UpdatingStateTest, OnMediaFailed)
+{
+    MtcUiNotifier* pUiNotifier = new MtcUiNotifier(objContext);
+    ON_CALL(objContext, GetUiNotifier).WillByDefault(ReturnRef(*pUiNotifier));
+    EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, CallReasonInfo(CODE_MEDIA_INIT_FAILED)))
+            .Times(1);
+
+    pUpdatingState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
+
+    delete pUiNotifier;
+}

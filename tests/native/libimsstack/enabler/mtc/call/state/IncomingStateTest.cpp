@@ -15,17 +15,57 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcSession.h"
+#include "call/MtcUiNotifier.h"
 #include "call/state/IncomingState.h"
+#include "precondition/MockIMtcPreconditionManager.h"
+
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace android
 {
 
 class IncomingStateTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    IncomingState* pIncomingState;
+    MockIMtcCallContext objCallContext;
+    MockIMtcPreconditionManager objPreconditionManager;
+    MtcUiNotifier* pUiNotifier;
+    MockIMtcSession objMtcSession;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override
+    {
+        ON_CALL(objCallContext, GetPreconditionManager)
+                .WillByDefault(ReturnRef(objPreconditionManager));
+
+        ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
+
+        pUiNotifier = new MtcUiNotifier(objCallContext);
+        ON_CALL(objCallContext, GetUiNotifier).WillByDefault(ReturnRef(*pUiNotifier));
+
+        pIncomingState = new IncomingState(objCallContext);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pUiNotifier;
+        delete pIncomingState;
+    }
 };
+
+TEST_F(IncomingStateTest, OnMediaFailed)
+{
+    EXPECT_CALL(objPreconditionManager, FormPreconditionSdp).Times(0);
+
+    EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_MEDIA_INIT_FAILED))).Times(1);
+
+    pIncomingState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
+}
 
 }  // namespace android

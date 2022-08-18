@@ -28,6 +28,7 @@
 #include "core/MockISession.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MtcTimerWrapper.h"
+#include "precondition/MockIMtcPreconditionManager.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -44,6 +45,7 @@ public:
     MockIMtcService objService;
     MockIMtcAosConnector objAosConnector;
     MockISession objSession;
+    MockIMtcPreconditionManager objPreconditionManager;
     CallInfo objCallInfo;
     MtcTimerWrapper objTimer;
     MtcUiNotifier* pNotifier;
@@ -74,6 +76,9 @@ protected:
 
         ON_CALL(objMtcSession, GetISession)
                 .WillByDefault(ReturnRef(objSession));
+
+        ON_CALL(objCallContext, GetPreconditionManager)
+                .WillByDefault(ReturnRef(objPreconditionManager));
 
         pOutgoingState = new OutgoingState(objCallContext);
     }
@@ -137,4 +142,20 @@ TEST_F(OutgoingStateTest, HandleB1TimerIsHandled)
     pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_100_WAIT);
     const CallReasonInfo objReason(CODE_USER_TERMINATED);
     pOutgoingState->Terminate(objReason);
+}
+
+TEST_F(OutgoingStateTest, OnMediaFailed)
+{
+    EXPECT_CALL(objPreconditionManager, FormPreconditionSdp).Times(0);
+
+    MockIMtcSession* pMtcSession = new MockIMtcSession();
+    ON_CALL(objCallContext, GetSession(_)).WillByDefault(Return(pMtcSession));
+
+    EXPECT_CALL(*pMtcSession, Terminate(_, CallReasonInfo(CODE_MEDIA_INIT_FAILED))).Times(1);
+
+    EXPECT_CALL(objSession, GetPreviousResponse(_)).Times(0);
+
+    pOutgoingState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
+
+    delete pMtcSession;
 }

@@ -250,7 +250,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnReceivingMediaDataFailed(
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::OnMediaFailed(IN CallReasonInfo objReason)
+PUBLIC VIRTUAL CallStateName UpdatingState::OnMediaFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
 

@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-
+#include "CallReasonInfo.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MtcUiNotifier.h"
@@ -73,6 +73,14 @@ TEST_F(EstablishedStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
     CallReasonInfo objReason(CODE_USER_TERMINATED);
     pEstablishedState->Terminate(objReason);
     pEstablishedState->Terminate(objReason);
+}
+
+TEST_F(EstablishedStateTest, OnMediaFailed)
+{
+    EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, CallReasonInfo(CODE_MEDIA_INIT_FAILED)))
+            .Times(1);
+
+    pEstablishedState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
 }
 
 }  // namespace android

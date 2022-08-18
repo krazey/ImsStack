@@ -95,3 +95,10 @@ TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithVideoLowestBitRateReport)
 
     pMediaManager->MediaSession_Notify(REPORT_VIDEO_LOWEST_BIT_RATE);
 }
+
+TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithMediaDetachReport)
+{
+    EXPECT_CALL(*pListener, OnMediaFailed(CallReasonInfo(CODE_MEDIA_UNSPECIFIED))).Times(1);
+
+    pMediaManager->MediaSession_Notify(REPORT_MEDIA_DETACH);
+}

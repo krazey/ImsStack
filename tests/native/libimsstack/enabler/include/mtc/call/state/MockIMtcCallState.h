@@ -145,7 +145,7 @@ public:
     MOCK_METHOD(CallStateName, OnVideoLowestBitRate, (), (override));
     MOCK_METHOD(CallStateName, OnReceivingNetworkToneStarted, (), (override));
     MOCK_METHOD(CallStateName, OnReceivingNetworkToneFailed, (), (override));
-    MOCK_METHOD(CallStateName, OnMediaFailed, (IN CallReasonInfo objReason), (override));
+    MOCK_METHOD(CallStateName, OnMediaFailed, (IN const CallReasonInfo& objReason), (override));
 };
 
 #endif

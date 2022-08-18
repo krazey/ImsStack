@@ -148,7 +148,7 @@ public:
     CallStateName OnVideoLowestBitRate() override;
     CallStateName OnReceivingNetworkToneStarted() override;
     CallStateName OnReceivingNetworkToneFailed() override;
-    CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
+    CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
 
     enum TimerType
     {

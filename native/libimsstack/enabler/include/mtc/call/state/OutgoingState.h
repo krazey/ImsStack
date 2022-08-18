@@ -65,7 +65,7 @@ public:
 
     CallStateName OnReceivingNetworkToneStarted() override;
     CallStateName OnReceivingNetworkToneFailed() override;
-    CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
+    CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
 
 private:
     void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);

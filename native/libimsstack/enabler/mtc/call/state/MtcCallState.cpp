@@ -461,7 +461,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnReceivingNetworkToneFailed()
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::OnMediaFailed(IN CallReasonInfo /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::OnMediaFailed(IN const CallReasonInfo& /* objReason */)
 {
     return GetStateName();
 }

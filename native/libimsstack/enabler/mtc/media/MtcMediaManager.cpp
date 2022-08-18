@@ -114,6 +114,9 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportTy
         case REPORT_NW_TONE_RTP_RECEIVE_FAILED:
             HandleReceivingNetworkToneFailed();
             break;
+        case REPORT_MEDIA_DETACH:
+            m_pMediaReportListener->OnMediaFailed(CallReasonInfo(CODE_MEDIA_UNSPECIFIED));
+            break;
         default:
             break;
     }

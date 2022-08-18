@@ -29,7 +29,7 @@ public:
     virtual void OnVideoLowestBitRate() = 0;
     virtual void OnReceivingNetworkToneStarted() = 0;
     virtual void OnReceivingNetworkToneFailed() = 0;
-    virtual void OnMediaFailed(IN CallReasonInfo objReason) = 0;
+    virtual void OnMediaFailed(IN const CallReasonInfo& objReason) = 0;
 };
 
 #endif

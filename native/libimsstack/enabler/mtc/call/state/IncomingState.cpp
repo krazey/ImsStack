@@ -276,8 +276,8 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionRPRDeliveryFailed(IN ISession
     return RejectIncomingAndToTerminating(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT));
 }
 
-PUBLIC VIRTUAL CallStateName IncomingState::OnMediaFailed(IN CallReasonInfo objReason)
+PUBLIC VIRTUAL CallStateName IncomingState::OnMediaFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
-    return RejectIncomingAndToTerminating(CallReasonInfo(objReason));
+    return RejectIncomingAndToTerminating(objReason);
 }

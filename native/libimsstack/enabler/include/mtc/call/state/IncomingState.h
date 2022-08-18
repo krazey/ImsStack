@@ -58,7 +58,7 @@ public:
     CallStateName SessionPRAckReceived(IN ISession* piSession) override;
     CallStateName SessionRPRDeliveryFailed(IN ISession* piSession) override;
 
-    CallStateName OnMediaFailed(IN CallReasonInfo objReason) override;
+    CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
 };
 
 #endif

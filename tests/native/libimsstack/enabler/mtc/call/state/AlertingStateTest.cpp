@@ -42,11 +42,13 @@ public:
     MockIMessage objMockIMessage;
     MockISipMessage objMockISipMessage;
     MockIMtcCallContext objMockCallContext;
-    MockIMtcConfigurationManager objMockConfigurationManager;
+    MockIMtcConfigurationManager* pMockConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
     MockIMtcService objMockService;
     MockIMtcMediaManager objMockMediaManager;
     MockIMtcPreconditionManager objMockPreconditionManager;
+    MockIMtcSession objMtcSession;
+    MtcUiNotifier* pUiNotifier;
 
 protected:
     virtual void SetUp() override
@@ -54,7 +56,8 @@ protected:
         ON_CALL(objMockISession, GetPreviousRequest(_)).WillByDefault(Return(&objMockIMessage));
         ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
 
-        pConfigurationProxy = new MtcConfigurationProxy(&objMockConfigurationManager);
+        pMockConfigurationManager = new MockIMtcConfigurationManager();
+        pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
         ON_CALL(objMockCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
@@ -68,7 +71,9 @@ protected:
         ON_CALL(objMockCallContext, GetPreconditionManager)
                 .WillByDefault(ReturnRef(objMockPreconditionManager));
 
-        MtcUiNotifier* pUiNotifier = new MtcUiNotifier(objMockCallContext);
+        ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
+
+        pUiNotifier = new MtcUiNotifier(objMockCallContext);
         ON_CALL(objMockCallContext, GetUiNotifier).WillByDefault(ReturnRef(*pUiNotifier));
 
         // ON_CALL(objMockCallContext, GetISession)
@@ -77,7 +82,12 @@ protected:
         pAlertingState = new AlertingState(objMockCallContext);
     }
 
-    virtual void TearDown() override {}
+    virtual void TearDown() override
+    {
+        delete pAlertingState;
+        delete pConfigurationProxy;
+        delete pUiNotifier;
+    }
 };
 
 TEST_F(AlertingStateTest, AcceptIsCalledWhenUpdateIsNotSentBySrvcc)
@@ -85,9 +95,6 @@ TEST_F(AlertingStateTest, AcceptIsCalledWhenUpdateIsNotSentBySrvcc)
     ON_CALL(objMockISession, GetPreviousResponse(_)).WillByDefault(Return(&objMockIMessage));
 
     ON_CALL(objMockIMessage, GetState).WillByDefault(Return(IMessage::STATE_SENT));
-
-    MockIMtcSession objMtcSession;
-    ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
 
     ImsList<AString> objReasons;
     ON_CALL(objMockISipMessage, GetHeaders(_, _)).WillByDefault(Return(objReasons));
@@ -105,13 +112,19 @@ TEST_F(AlertingStateTest, NoAcceptIsCalledWhenUpdateIsSentBySrvcc)
 
     ON_CALL(objMockIMessage, GetState).WillByDefault(Return(IMessage::STATE_SENT));
 
-    MockIMtcSession objMtcSession;
-    ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
-
     ImsList<AString> objReasons;
     objReasons.Append(MessageUtil::STR_REASON_HANDOVER_CANCELLED);
     ON_CALL(objMockISipMessage, GetHeaders(_, _)).WillByDefault(Return(objReasons));
 
     EXPECT_CALL(objMtcSession, Accept).Times(0);
     pAlertingState->SessionEarlyMediaUpdated(&objMockISession);
+}
+
+TEST_F(AlertingStateTest, OnMediaFailed)
+{
+    EXPECT_CALL(objMockPreconditionManager, FormPreconditionSdp).Times(0);
+
+    EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_MEDIA_INIT_FAILED))).Times(1);
+
+    pAlertingState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
 }

@@ -142,7 +142,7 @@ public:
     virtual CallStateName OnVideoLowestBitRate() = 0;
     virtual CallStateName OnReceivingNetworkToneStarted() = 0;
     virtual CallStateName OnReceivingNetworkToneFailed() = 0;
-    virtual CallStateName OnMediaFailed(IN CallReasonInfo objReason) = 0;
+    virtual CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) = 0;
 };
 
 #endif

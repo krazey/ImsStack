@@ -1270,7 +1270,7 @@ PUBLIC VIRTUAL void MtcCall::OnReceivingNetworkToneFailed()
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::OnMediaFailed(IN CallReasonInfo objReason)
+PUBLIC VIRTUAL void MtcCall::OnMediaFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("OnMediaFailed : key[%d]", m_nKey, 0, 0);
 

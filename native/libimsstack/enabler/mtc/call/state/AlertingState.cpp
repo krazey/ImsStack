@@ -326,15 +326,11 @@ PUBLIC VIRTUAL CallStateName AlertingState::UssiStarted(IN ISession* piSession)
     return CallStateName::ESTABLISHED;
 }
 
-PUBLIC VIRTUAL CallStateName AlertingState::OnMediaFailed(IN CallReasonInfo objReason)
+PUBLIC VIRTUAL CallStateName AlertingState::OnMediaFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
 
-    if (objReason.nCode == CODE_MEDIA_INIT_FAILED)
-    {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
-    }
-    return GetStateName();
+    return RejectIncomingAndToTerminating(objReason);
 }
 
 PUBLIC VIRTUAL CallStateName AlertingState::Terminate(IN const CallReasonInfo& objReason)

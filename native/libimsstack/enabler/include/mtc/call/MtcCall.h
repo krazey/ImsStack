@@ -253,7 +253,7 @@ public:
     void OnVideoLowestBitRate() override;
     void OnReceivingNetworkToneStarted() override;
     void OnReceivingNetworkToneFailed() override;
-    void OnMediaFailed(IN CallReasonInfo objReason) override;
+    void OnMediaFailed(IN const CallReasonInfo& objReason) override;
 
     void RunPendingOperation();
 

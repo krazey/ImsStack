@@ -29,7 +29,7 @@ public:
     MOCK_METHOD(void, OnVideoLowestBitRate, (), (override));
     MOCK_METHOD(void, OnReceivingNetworkToneStarted, (), (override));
     MOCK_METHOD(void, OnReceivingNetworkToneFailed, (), (override));
-    MOCK_METHOD(void, OnMediaFailed, (IN CallReasonInfo objReason), (override));
+    MOCK_METHOD(void, OnMediaFailed, (IN const CallReasonInfo& objReason), (override));
 };
 
 #endif
