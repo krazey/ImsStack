@@ -87,8 +87,6 @@ public:
     SIP_BOOL DecodeMIMEBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary);
     /*Function for decoding of headers*/
     SIP_BOOL DecodeSingleBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
-
-    SIP_BOOL DecodeMessageSummaryBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 };
 
 class SipMsgBody : public SipRefBase
@@ -97,10 +95,7 @@ public:
     enum
     {
         SINGLE_BODY,
-        MULTI_PART_MIXED_BODY,
-        MULTI_PART_ALT_BODY,
-        UNKNOWN_BODY,
-        MESSAGE_SUMMARY_BODY,
+        MULTI_PART_BODY,
         INVALID_BODY
     };
 
@@ -109,8 +104,6 @@ private:
     SIP_INT32 m_eBodyType;
     /*Set of Mime Headers*/
     SipMIMEHdrs* m_pMIMEHdrs;
-    /* Set for Message Summary*/
-    SipMessageSummary* m_pMessageSummary;
     /* Msg body buffer*/
     SIP_CHAR* m_pBuffer;
     /* Content Buffer Length*/
@@ -134,16 +127,12 @@ public:
 
     SIP_BOOL EncodeMIMEMsgBody(SIP_CHAR** ppCurrPos);
 
-    SIP_BOOL EncodeMessageSummaryMsgBody(SIP_CHAR** ppCurrPos);
-
     SIP_BOOL EncodeBody(SIP_CHAR** ppCurrPos);
 
     /*Function for decoding*/
     SIP_BOOL DecodeSingleMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
     SIP_BOOL DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
-
-    SIP_BOOL DecodeMessageSummaryMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
     inline SIP_BOOL IsMimeEncoding() const { return m_bEncodeMime; }
     /*Set Methods*/
@@ -178,50 +167,6 @@ public:
 
     inline SIP_CHAR* GetBuffer() const { return m_pBuffer; }
     inline SIP_UINT32 GetBufferLength() const { return m_nBufLen; }
-};
-
-class SipSummaryLine;
-class SipMessageSummary : public SipRefBase
-{
-    SIP_INT32 m_nStatus;
-    SipAddrSpec* m_pAddrSpec;
-    SipVector<SipSummaryLine*> m_objSummaryLineList; /* List of SummaryLine Class*/
-    SipVector<SipNameValue*> m_objNameValueList;     // List of Name Values
-
-public:
-    enum
-    {
-        MSG_WAITING_NO = 0,
-        MSG_WAITING_YES
-    };
-    SipMessageSummary();
-    SipMessageSummary(const SipMessageSummary& objMessageSummary);
-    virtual ~SipMessageSummary();
-
-    SIP_BOOL EncodeMessageSummary(SIP_CHAR** ppCurrPos);
-
-    SIP_BOOL DecodeMessageSummary(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
-};
-
-class SipSummaryLine : public SipRefBase
-{
-    SIP_CHAR* pMedia;            /* Media Type */
-    SIP_INT32 newMessages;       /* no of new Messages */
-    SIP_INT32 oldMessages;       /* no of old Messages */
-    SIP_INT32 newUrgentMessages; /* no of new Urgent Messages */
-    SIP_INT32 oldUrgentMessages; /* no of old Urgent Messages */
-
-public:
-    SipSummaryLine();
-    SipSummaryLine(const SipSummaryLine& objSummaryLine);
-    ~SipSummaryLine();
-    inline const SIP_CHAR* GetMedia() const { return pMedia; }
-    SIP_INT32 GetNewMessages() const { return newMessages; }
-    inline SIP_INT32 GetOldMessages() const { return oldMessages; }
-    inline SIP_INT32 GetNewUrgentMessages() const { return newUrgentMessages; }
-    inline SIP_INT32 GetOldUrgentMessages() const { return oldUrgentMessages; }
-    SIP_BOOL EncodeSummaryLine(SIP_CHAR** ppCurrPos);
-    SIP_BOOL DecodeSummaryLine(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 };
 
 #endif  //__SIP_MSG_BODY_H__
