@@ -56,6 +56,12 @@ protected:
     IMS_BOOL IsSessionTimerUpdateRequiredByReInvite() const override;
 
 private:
+    inline IMS_SINT32 GetSessionTimerDuration() const
+    {
+        return (m_nSessionTimerDuration > 0) ? m_nSessionTimerDuration
+                                             : m_nLocalSessionTimerDuration;
+    }
+    inline IMS_BOOL HasSessionTimerDuration() const { return GetSessionTimerDuration() > 0; }
     inline IMS_BOOL IsLocalSessionTimerRequired() const
     {
         return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_LOCAL_TIMER_REQUIRED) != 0);
@@ -71,7 +77,7 @@ private:
     }
     inline IMS_BOOL IsRequireHeaderRequired() const
     {
-        return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_TIMER_OPTION) != 0);
+        return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_REQUIRE_TIMER_OPTION) != 0);
     }
     inline IMS_BOOL IsSessionExpiresHeaderRequired() const
     {
@@ -115,6 +121,10 @@ private:
         }
     }
 
+    void SetSessionRefreshParameters(IN IMS_SINT32 nRefresher, IN IMS_SINT32 nRefreshRequest,
+            IN IMS_SINT32 nMinSe, IN IMS_SINT32 nSessionTimerDuration,
+            IN IMS_SINT32 nLocalSessionTimerDuration);
+
 public:
     enum
     {
@@ -138,7 +148,11 @@ private:
     static const IMS_CHAR STR_UAS[];
 
     IMS_SINT32 m_nMinSe;
-    IMS_SINT32 m_nSessionInterval;
+    IMS_SINT32 m_nSessionTimerDuration;
+    // This duration is only used when the local session timer is required
+    // even though the remote end doesn't support the session timer or
+    // support the session timer, but doesn't specify the Session-Expires header.
+    IMS_SINT32 m_nLocalSessionTimerDuration;
     IMS_SINT32 m_nRefresher;
     IMS_SINT32 m_nRefreshRequest;
     IMS_BOOL m_bUpdateMethodAllowed;

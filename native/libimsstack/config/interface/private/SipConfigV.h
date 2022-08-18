@@ -178,7 +178,7 @@ public:
         /// For header forming
         SESSION_HEADER_SESSION_EXPIRES = 0x01,
         SESSION_HEADER_MIN_SE = 0x02,
-        SESSION_HEADER_TIMER_OPTION = 0x04,
+        SESSION_HEADER_REQUIRE_TIMER_OPTION = 0x04,
         /// For header checking in MT
         /// (to check if the peer supports the session timer extension or not)
         SESSION_HEADER_CHECK_SESSION_EXPIRES = 0x10,
