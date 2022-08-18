@@ -104,7 +104,6 @@ void JniSipControllerServiceThread::HandleMsg(IN IMSMSG& objMSG)
             WriteStringToParcel(pParam->pszHeaderSection, parcel);
             parcel.writeInt32(pParam->nContentLength);
             WriteStringToParcel(pParam->pszContent, parcel);
-            WriteStringToParcel(pParam->pszContent, parcel);
             WriteStringToParcel(pParam->pszViaBranchParameter, parcel);
             WriteStringToParcel(pParam->pszCallIdParameter, parcel);
         }
@@ -126,6 +125,14 @@ void JniSipControllerServiceThread::HandleMsg(IN IMSMSG& objMSG)
         default:
             IMS_TRACE_E(0, "HandleMsg : Can't analysis message, name %d\n", objMSG.nMSG, 0, 0);
             break;
+    }
+    if (m_pfnSendDataToJava != NULL)
+    {
+        m_pfnSendDataToJava(m_nNativeObj, parcel);
+    }
+    else
+    {
+        IMS_TRACE_E(0, "HandleMsg : Callback is NULL\n", 0, 0, 0);
     }
 }
 

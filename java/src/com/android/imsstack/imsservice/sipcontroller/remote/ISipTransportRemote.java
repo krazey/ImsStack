@@ -25,40 +25,60 @@ import java.util.Set;
  * The interface to send the sip transport requests to IMS stack.
  */
 public interface ISipTransportRemote {
+
     /**
      * Send the SipMessage requested by app
      * @param message sip message to send
      * @param configVersion configuration version used by client
-     * @param subId subscription Id.
      */
-    void sendMessage(@NonNull SipMessage message, long configVersion, int subId);
+    void sendMessage(@NonNull SipMessage message, long configVersion);
+
     /**
      * Close the ongoing session
      * @param callId id for which session to be closed
-     * @param subId subscription Id.
      */
-    void closeOngoingSession(@NonNull String callId, int subId);
+    void closeOngoingSession(@NonNull String callId);
+
+    /**
+     * The remote application has received the SIP message and is processing it.
+     * @param viaTransactionId The Transaction ID found in the via header field of the
+     *                         previously sent {@link SipMessage}.
+     */
+    void notifyMessageReceived(@NonNull String viaTransactionId);
+
     /**
      * Sip message is not received due to some error
      * @param viaTransactionId of the message which is not received by the app
-     * @param subId subscription Id.
+     * @param reason The reason why the message was not correctly received.
      */
-    void notifyMessageReceiveError(@NonNull String viaTransactionId, int subId);
+    void notifyMessageReceiveError(@NonNull String viaTransactionId, int reason);
+
     /**
      * Add sip transport listener to get the update from IMS core.
      * @param listener object used to notify the events
-     * @param subId subscription Id.
      */
-    void setSipTransportListener(@NonNull SipTransportRemoteListener listener ,
-            int subId);
+    void setSipTransportListener(@NonNull SipTransportRemoteListener listener);
 
      /**
      * Called by the framework to request that the ImsService perform the network
      * registration of all SIP delegates associated with this ImsService.
      * @param featureTags The RCS FeatureTags for Registration
-     * @param subId subscription Id.
      */
-    void updateSipDelegateRegistration(@NonNull Set<String> featureTags, int subId);
+    void updateSipDelegateRegistration(@NonNull Set<String> featureTags);
+
+    /**
+     * Called by the framework to request that the ImsService perform the network
+     * deregistration of all SIP delegates associated with this ImsService.
+     * <p>
+     * This is typically called in situations where the user has changed the
+     * configuration of the device (for example, the default messaging application)
+     * and the framework is reconfiguring the tags associated with each IMS
+     * application.
+     * <p>
+     * This should not affect the registration of features managed by the
+     * ImsService itself, such as feature tags related to MMTEL registration.
+     */
+    void triggerSipDelegateDeregistration();
 
     /**
      * Release from SipController(Java) if the delegate is terminated or Jni is not used.

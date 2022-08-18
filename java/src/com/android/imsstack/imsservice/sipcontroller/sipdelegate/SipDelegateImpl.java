@@ -140,7 +140,7 @@ public class SipDelegateImpl implements SipDelegate , ISipDelegateIncomingMessag
                         addActiveSipDelegate(message.getCallIdParameter(), this);
                 //make native API call to send the message.
                 serviceRecord.getSipTransport().getISipTransportRemote().
-                        sendMessage(message, configVersion, mSlotId);
+                        sendMessage(message, configVersion);
             }else {
                 Log.i(LOG_TAG, "SipDelegate does not support requested feature tag");
             }
@@ -193,7 +193,7 @@ public class SipDelegateImpl implements SipDelegate , ISipDelegateIncomingMessag
             ISipTransportRemote nativeSipController =
                     serviceRecord.getSipTransport().getISipTransportRemote();
             if (nativeSipController != null) {
-                nativeSipController.notifyMessageReceiveError(viaTransactionId,mSlotId);
+                nativeSipController.notifyMessageReceiveError(viaTransactionId, reason);
             } else {
                 Log.d(LOG_TAG, "nativeSipController is null");
             }

@@ -16,6 +16,8 @@
 
 package com.android.imsstack.imsservice.sipcontroller.remote;
 
+import static android.telephony.ims.SipDelegateManager.MESSAGE_FAILURE_REASON_INVALID_HEADER_FIELDS;
+
 import android.annotation.NonNull;
 import android.telephony.ims.DelegateRegistrationState;
 import android.telephony.ims.SipDelegateConfiguration;
@@ -74,7 +76,7 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
                         serviceRecord.getSipTransport().getISipTransportRemote();
                 if (nativeSipController != null) {
                     nativeSipController.notifyMessageReceiveError(message.getViaBranchParameter(),
-                            subId);
+                            MESSAGE_FAILURE_REASON_INVALID_HEADER_FIELDS);
                 } else {
                     Log.d(LOG_TAG, "nativeSipController is null");
                 }
