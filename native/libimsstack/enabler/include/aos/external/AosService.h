@@ -30,16 +30,16 @@ public:
     AosService(IN IMS_SINT32 nSlotId);
     virtual ~AosService();
 
-    void SetJniAosService(IN JniAosService* pJniAosService) override;
+    IMS_BOOL SetJniAosService(IN JniAosService* pJniAosService) override;
 
-    void AddListener(IN IAosRegistrationControlListener* piListener) override;
-    void RemoveListener(IN IAosRegistrationControlListener* piListener) override;
+    IMS_BOOL AddListener(IN IAosRegistrationControlListener* piListener) override;
+    IMS_BOOL RemoveListener(IN IAosRegistrationControlListener* piListener) override;
 
-    void AddListener(IN IAosServiceSettingListener* piListener) override;
-    void RemoveListener(IN IAosServiceSettingListener* piListener) override;
+    IMS_BOOL AddListener(IN IAosServiceSettingListener* piListener) override;
+    IMS_BOOL RemoveListener(IN IAosServiceSettingListener* piListener) override;
 
-    void AddListener(IN IAosServicePhoneListener* piListener) override;
-    void RemoveListener(IN IAosServicePhoneListener* piListener) override;
+    IMS_BOOL AddListener(IN IAosServicePhoneListener* piListener) override;
+    IMS_BOOL RemoveListener(IN IAosServicePhoneListener* piListener) override;
 
     /// Java -> Native
     void UpdateSipDelegateRegistration() override;
@@ -74,36 +74,37 @@ public:
     void NotifyPreciseCallState(IN IMS_SINT32 nState) override;
 
     // Native -> Java
-    void NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
+    IMS_BOOL NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
             IN const IMSList<AString>& objFeatureTags) override;
 
-    void NotifyRegistering(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
+    IMS_BOOL NotifyRegistering(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
             IN const IMSList<AString>& objFeatureTags) override;
 
-    void NotifyDeregistered(IN AosReasonCode eReason) override;
-    void NotifyTechnologyChangeFailed(
+    IMS_BOOL NotifyDeregistered(IN AosReasonCode eReason) override;
+    IMS_BOOL NotifyTechnologyChangeFailed(
             IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) override;
-    void NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris) override;
-    void NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
+    IMS_BOOL NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris) override;
+    IMS_BOOL NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
             IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;
 
-    void NotifyAosIsimState(IN AosIsimState eState) override;
-    void NotifyRegEventState(IN AosRegEvent eState) override;
-    void RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand) override;
-    void RequestWifiService(IN IMS_BOOL bIsOn) override;
+    IMS_BOOL NotifyAosIsimState(IN AosIsimState eState) override;
+    IMS_BOOL NotifyRegEventState(IN AosRegEvent eState) override;
+    IMS_BOOL RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand) override;
+    IMS_BOOL RequestWifiService(IN IMS_BOOL bIsOn) override;
 
     IMSMap<IMS_UINT32, IMS_UINT32>& GetCapabilities() override;
     IMS_UINT32 GetCapabilitiesForNetwork(AosNetworkType eNetworkType) override;
     IMS_BOOL IsSupportCapabilitiesForNetwork(
             AosNetworkType eNetworkType, AosCapability eCapability) override;
 
+    static AString PrintCapabilities(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities);
+    static const IMS_CHAR* NetworkTypeToString(IN IMS_SINT32 nType);
+    static const AString CapabilitiesToString(IN IMS_UINT32 nCapabilities);
+
 private:
     void Init();
     void CleanUp();
     IMS_BOOL Attach();
-    static void PrintCapabilities(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities);
-    static const IMS_CHAR* NetworkTypeToString(IN IMS_SINT32 nType);
-    static const AString CapabilitiesToString(IN IMS_UINT32 nCapabilities);
 
 private:
     IMS_SINT32 m_nSlotId;
