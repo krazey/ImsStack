@@ -289,7 +289,7 @@ PUBLIC IMS_BOOL TextNego::SetPort(IN IMS_UINT32 nPort)
 }
 
 PUBLIC
-const IPAddress& TextNego::GetNegotiatedRemoteAddr()
+const IPAddress& TextNego::GetNegotiatedRemoteAddress()
 {
     TextProfile* pProfile = GetNegotiatedPeerProfile();
 

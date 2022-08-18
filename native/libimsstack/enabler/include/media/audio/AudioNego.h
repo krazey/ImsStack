@@ -170,7 +170,7 @@ public:
      *
      * @return const IPAddress& The ip address
      */
-    virtual const IPAddress& GetNegotiatedRemoteAddr();
+    virtual const IPAddress& GetNegotiatedRemoteAddress();
 
     /**
      * @brief Get the negotiated remote port number

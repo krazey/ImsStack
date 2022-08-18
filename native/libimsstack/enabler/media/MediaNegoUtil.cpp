@@ -37,6 +37,7 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN IMSMap<IMS_UINTP, MediaNego*>* pMedi
     MediaNego* pMediaNego = IMS_NULL;
     AudioNego* pAudioNego = IMS_NULL;
     VideoNego* pVideoNego = IMS_NULL;
+    TextNego* pTextNego = IMS_NULL;
 
     do
     {
@@ -48,7 +49,7 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN IMSMap<IMS_UINTP, MediaNego*>* pMedi
 
             if (pAudioNego != IMS_NULL)
             {
-                if (pAudioNego->GetNegotiatedRemoteAddr().ToString().Equals(strIpAddr) &&
+                if (pAudioNego->GetNegotiatedRemoteAddress().ToString().Equals(strIpAddr) &&
                         pAudioNego->GetNegotiatedRemotePort() == nPort)
                 {
                     nNegoId = pMediaNegoMap->GetKeyAt(nIndex);
@@ -66,6 +67,19 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN IMSMap<IMS_UINTP, MediaNego*>* pMedi
                 {
                     nNegoId = pMediaNegoMap->GetKeyAt(nIndex);
                     eMediaType = MEDIA_TYPE_VIDEO;
+                    return IMS_TRUE;
+                }
+            }
+
+            pTextNego = pMediaNego->GetTextNego();
+
+            if (pTextNego != IMS_NULL)
+            {
+                if (pTextNego->GetNegotiatedRemoteAddress().ToString().Equals(strIpAddr) &&
+                        pTextNego->GetNegotiatedRemotePort() == nPort)
+                {
+                    nNegoId = pMediaNegoMap->GetKeyAt(nIndex);
+                    eMediaType = MEDIA_TYPE_TEXT;
                     return IMS_TRUE;
                 }
             }
