@@ -24,7 +24,7 @@
 class ICoreService;
 class IFeatureCaps;
 class IMessage;
-class IMtcSessionContext;
+class IMtcCallContext;
 class ISession;
 class AString;
 struct CallReasonInfo;
@@ -32,7 +32,7 @@ struct CallReasonInfo;
 class MessageFormatter
 {
 public:
-    MessageFormatter(IN IMtcSessionContext& objContext, IN ISession& objSession);
+    MessageFormatter(IN IMtcCallContext& objContext, IN ISession& objSession);
     virtual ~MessageFormatter();
     MessageFormatter(IN const MessageFormatter&) = delete;
     MessageFormatter& operator=(IN const MessageFormatter&) = delete;
@@ -103,7 +103,7 @@ private:
     IMS_RESULT SetNextMessage();
 
 protected:
-    IMtcSessionContext& m_objContext;
+    IMtcCallContext& m_objContext;
     ISession& m_objSession;
     IMessage* m_piNextMessage;
 

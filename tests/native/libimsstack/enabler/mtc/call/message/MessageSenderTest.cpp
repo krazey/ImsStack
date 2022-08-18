@@ -268,7 +268,8 @@ TEST_F(MessageSenderTest, SendAckFormFailure)
 
 TEST_F(MessageSenderTest, UpdateNormalCase)
 {
-    IMS_RESULT nResult = pSender->Update(UpdateType::NORMAL, IMS_TRUE);
+    IMS_RESULT nResult =
+            pSender->Update(UpdateType::NORMAL, IMS_TRUE, SipMethod::INVITE, IMS_FALSE);
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
@@ -277,7 +278,8 @@ TEST_F(MessageSenderTest, UpdateFormFailure)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
 
-    IMS_RESULT nResult = pSender->Update(UpdateType::NORMAL, IMS_TRUE);
+    IMS_RESULT nResult =
+            pSender->Update(UpdateType::NORMAL, IMS_TRUE, SipMethod::INVITE, IMS_FALSE);
 
     EXPECT_EQ(nResult, IMS_FAILURE);
 }

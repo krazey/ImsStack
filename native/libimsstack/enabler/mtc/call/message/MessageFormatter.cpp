@@ -15,7 +15,7 @@
  */
 
 #include "call/IMtcCall.h"
-#include "call/IMtcSessionContext.h"
+#include "call/IMtcCallContext.h"
 #include "call/message/MessageFormatter.h"
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
@@ -46,7 +46,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PUBLIC
-MessageFormatter::MessageFormatter(IN IMtcSessionContext& objContext, IN ISession& objSession) :
+MessageFormatter::MessageFormatter(IN IMtcCallContext& objContext, IN ISession& objSession) :
         m_objContext(objContext),
         m_objSession(objSession),
         m_piNextMessage(IMS_NULL),

@@ -15,7 +15,7 @@
  */
 
 #include "call/message/EmergencyMessageFormatter.h"
-#include "call/IMtcSessionContext.h"
+#include "call/IMtcCallContext.h"
 #include "CallReasonInfo.h"
 #include "ISession.h"
 #include "call/message/MessageSender.h"
@@ -28,7 +28,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PUBLIC
-MessageSender::MessageSender(IN IMtcSessionContext& objContext, IN ISession& objSession) :
+MessageSender::MessageSender(IN IMtcCallContext& objContext, IN ISession& objSession) :
         m_objContext(objContext),
         m_objSession(objSession),
         m_pFormatter(nullptr),
@@ -40,8 +40,7 @@ MessageSender::MessageSender(IN IMtcSessionContext& objContext, IN ISession& obj
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC
-MessageSender::~MessageSender()
+PUBLIC VIRTUAL MessageSender::~MessageSender()
 {
     IMS_TRACE_I("~MessageSender", 0, 0, 0);
 }
@@ -185,7 +184,7 @@ IMS_RESULT MessageSender::SendAck()
 ------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::Update(IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo,
-        IN IMS_SINT32 eMethod /*= SipMethod::INVITE*/, IN IMS_BOOL bSessionRefresh /*= IMS_FALSE*/)
+        IN IMS_SINT32 eMethod, IN IMS_BOOL bSessionRefresh)
 {
     if (m_pFormatter->FormUpdateMessage(eUpdateType, bIncludeAlertInfo) != IMS_SUCCESS)
     {

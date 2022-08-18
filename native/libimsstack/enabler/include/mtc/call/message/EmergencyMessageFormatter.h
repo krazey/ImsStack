@@ -24,7 +24,7 @@
 class EmergencyMessageFormatter : public MessageFormatter
 {
 public:
-    EmergencyMessageFormatter(IN IMtcSessionContext& objContext, IN ISession& objSession);
+    EmergencyMessageFormatter(IN IMtcCallContext& objContext, IN ISession& objSession);
     virtual ~EmergencyMessageFormatter();
     EmergencyMessageFormatter(IN const MessageFormatter&) = delete;
     EmergencyMessageFormatter& operator=(IN const MessageFormatter&) = delete;
