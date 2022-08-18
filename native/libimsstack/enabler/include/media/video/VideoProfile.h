@@ -392,11 +392,16 @@ public:
             bSupportCapaNegoForAvpf(IMS_FALSE),
             nNegotiatedPayloadIndex(-1){};
 
-    VideoProfile(IN const VideoProfile& objProfile) { copy(&objProfile); }
+    VideoProfile(IN const VideoProfile& objProfile)
+    {
+        copy(&objProfile);
+        nNegotiatedPayloadIndex = -1;
+    }
 
     VideoProfile& operator=(IN const VideoProfile& obj)
     {
         copy(&obj);
+        nNegotiatedPayloadIndex = -1;
         return *this;
     }
 

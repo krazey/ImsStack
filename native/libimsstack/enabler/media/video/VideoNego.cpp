@@ -1610,6 +1610,8 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
     if (pNegotiatedProfile->nDataPort == 0 || pPeerProfile->nDataPort == 0)
     {
         *pNegotiatedProfile = *pLocalProfile;
+        pNegotiatedProfile->nDataPort = 0;
+        pNegotiatedProfile->nNegotiatedPayloadIndex = -1;
 
         IMS_TRACE_D("MakeNegotiatedProfile() - ZERO Port. DO NOT Use the video[%d][%d],\
                 But nego is successful",
