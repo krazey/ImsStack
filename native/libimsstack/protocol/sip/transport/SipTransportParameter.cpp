@@ -50,7 +50,7 @@ SipTransportParameter::SipTransportParameter(
     m_pHostAddress = SipPf_Strdup(pHostAddress);
 }
 
-SIP_BOOL SipTransportParameter::setHostAddress(const SIP_CHAR* pHostAddress)
+SIP_BOOL SipTransportParameter::SetHostAddress(const SIP_CHAR* pHostAddress)
 {
     if (m_pHostAddress != SIP_NULL)
     {

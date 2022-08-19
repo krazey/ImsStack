@@ -33,7 +33,7 @@ GLOBAL void SipStackCallback_SetCallbacks(IN const SipStackCallbacks& objCallbac
 }
 
 // Implements the function prototypes for SIP stack transaction layer
-GLOBAL SIP_BOOL sip_cbk_fetchTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
+GLOBAL SIP_BOOL Sip_Cbk_FetchTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
         OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn)
 {
     if (s_objSipStackCallbacks.pfnFetchTransaction == IMS_NULL)
@@ -44,7 +44,7 @@ GLOBAL SIP_BOOL sip_cbk_fetchTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOp
     return (s_objSipStackCallbacks.pfnFetchTransaction)(pvTxnKey, nOption, ppvOutTxnKey, ppvTxn);
 }
 
-GLOBAL SIP_BOOL sip_cbk_releaseTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
+GLOBAL SIP_BOOL Sip_Cbk_ReleaseTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
         OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn)
 {
     if (s_objSipStackCallbacks.pfnReleaseTransaction == IMS_NULL)
@@ -55,7 +55,7 @@ GLOBAL SIP_BOOL sip_cbk_releaseTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 n
     return (s_objSipStackCallbacks.pfnReleaseTransaction)(pvTxnKey, nOption, ppvOutTxnKey, ppvTxn);
 }
 
-GLOBAL SIP_BOOL sip_cbk_startTimer(IN SIP_UINT32 nDuration, IN SipTimerCallback pfnTimerCallback,
+GLOBAL SIP_BOOL Sip_Cbk_StartTimer(IN SIP_UINT32 nDuration, IN SipTimerCallback pfnTimerCallback,
         IN SIP_VOID* pvData, IN SIP_VOID** ppvHandle)
 {
     if (s_objSipStackCallbacks.pfnStartTimer == IMS_NULL)
@@ -66,7 +66,7 @@ GLOBAL SIP_BOOL sip_cbk_startTimer(IN SIP_UINT32 nDuration, IN SipTimerCallback 
     return (s_objSipStackCallbacks.pfnStartTimer)(nDuration, pfnTimerCallback, pvData, ppvHandle);
 }
 
-GLOBAL SIP_BOOL sip_cbk_stopTimer(IN SIP_VOID* pvHandle, IN SIP_VOID** ppvData)
+GLOBAL SIP_BOOL Sip_Cbk_StopTimer(IN SIP_VOID* pvHandle, IN SIP_VOID** ppvData)
 {
     if (s_objSipStackCallbacks.pfnStopTimer == IMS_NULL)
     {
@@ -76,7 +76,7 @@ GLOBAL SIP_BOOL sip_cbk_stopTimer(IN SIP_VOID* pvHandle, IN SIP_VOID** ppvData)
     return (s_objSipStackCallbacks.pfnStopTimer)(pvHandle, ppvData);
 }
 
-GLOBAL SIP_VOID sip_cbk_onTimerExpired(IN ISipUserData* pUserData, IN SIP_INT32 enTimerType)
+GLOBAL SIP_VOID Sip_Cbk_OnTimerExpired(IN ISipUserData* pUserData, IN SIP_INT32 enTimerType)
 {
     if (s_objSipStackCallbacks.pfnOnTimerExpired == IMS_NULL)
     {
@@ -86,7 +86,7 @@ GLOBAL SIP_VOID sip_cbk_onTimerExpired(IN ISipUserData* pUserData, IN SIP_INT32 
     return (s_objSipStackCallbacks.pfnOnTimerExpired)(pUserData, enTimerType);
 }
 
-GLOBAL SIP_VOID* sip_cbk_createAckRequest(IN SIP_VOID* pvRespMsg, IN ISipUserData* pUserData)
+GLOBAL SIP_VOID* Sip_Cbk_CreateAckRequest(IN SIP_VOID* pvRespMsg, IN ISipUserData* pUserData)
 {
     if (s_objSipStackCallbacks.pfnCreateAckRequest == IMS_NULL)
     {
@@ -96,7 +96,7 @@ GLOBAL SIP_VOID* sip_cbk_createAckRequest(IN SIP_VOID* pvRespMsg, IN ISipUserDat
     return (s_objSipStackCallbacks.pfnCreateAckRequest)(pvRespMsg, pUserData);
 }
 
-GLOBAL SIP_VOID sip_cbk_preProcessMessageSentByStack(
+GLOBAL SIP_VOID Sip_Cbk_PreProcessMessageSentByStack(
         IN SIP_VOID* pvSipMsg, IN ISipUserData* pUserData)
 {
     if (s_objSipStackCallbacks.pfnPreProcessMessageSentByStack == IMS_NULL)
@@ -107,7 +107,7 @@ GLOBAL SIP_VOID sip_cbk_preProcessMessageSentByStack(
     (s_objSipStackCallbacks.pfnPreProcessMessageSentByStack)(pvSipMsg, pUserData);
 }
 
-GLOBAL SIP_VOID sip_cbk_postProcessMessageSentByStack(IN SIP_VOID* pvSipMsg, IN SIP_CHAR* pBuffer,
+GLOBAL SIP_VOID Sip_Cbk_PostProcessMessageSentByStack(IN SIP_VOID* pvSipMsg, IN SIP_CHAR* pBuffer,
         IN SIP_UINT32 nBufferLen, IN ISipUserData* pUserData)
 {
     if (s_objSipStackCallbacks.pfnPostProcessMessageSentByStack == IMS_NULL)
@@ -119,7 +119,7 @@ GLOBAL SIP_VOID sip_cbk_postProcessMessageSentByStack(IN SIP_VOID* pvSipMsg, IN 
             pvSipMsg, pBuffer, nBufferLen, pUserData);
 }
 
-GLOBAL SIP_VOID sip_cbk_displayTxnKey(IN SIP_VOID* pvTxnKey)
+GLOBAL SIP_VOID Sip_Cbk_DisplayTxnKey(IN SIP_VOID* pvTxnKey)
 {
     if (s_objSipStackCallbacks.pfnDisplayTxnKey == IMS_NULL)
     {

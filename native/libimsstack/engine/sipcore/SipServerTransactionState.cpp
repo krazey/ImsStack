@@ -167,17 +167,17 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
     const SipTransportAddress& objFarEnd = m_pTransport->GetAddress(SipTransport::TA_FAR);
 
     SipTransportParameter objTranspParam;
-    objTranspParam.setHostAddress(objFarEnd.GetIpAddress().ToString().GetStr());
-    objTranspParam.setPort(objFarEnd.GetPort());
-    objTranspParam.setTranspProtocol(objFarEnd.GetProtocol());
+    objTranspParam.SetHostAddress(objFarEnd.GetIpAddress().ToString().GetStr());
+    objTranspParam.SetPort(objFarEnd.GetPort());
+    objTranspParam.SetTranspProtocol(objFarEnd.GetProtocol());
 
     if (objFarEnd.GetIpAddress().IsIPv4Address() == IMS_TRUE)
     {
-        objTranspParam.setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+        objTranspParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV4);
     }
     else
     {
-        objTranspParam.setTanspIpType(SipTransportInfo::NETWORK_IPV6);
+        objTranspParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV6);
     }
 
     /* Prepare User data */
@@ -203,7 +203,7 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
     /* BSP_TODO::
     To send internal 100 Trying on received of new INVITE, user data is required otherwise
     Send2Nw APIs will Fail */
-    SipEn_TxnStatus eTxnStatus = ETXNSTATUS_INVALID;
+    IMS_SINT32 eTxnStatus = SipTxn::STATUS_INVALID;
     ::SipTxnKey* pTxnKey = IMS_NULL;
     IMS_UINT16 nError = 0;
     IMS_SINT32 nEncodingOptions = SipPrivate::GetEncodingOptions();
@@ -245,44 +245,44 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
 
     switch (eTxnStatus)
     {
-        case ETXNSTATUS_NEWREQRECVD:
+        case SipTxn::STATUS_NEW_REQ_RECVD:
         {
             IMS_TRACE_I("__UAS__ :: _____ NEW REQUEST _____", 0, 0, 0);
             break;
         }
-        case ETXNSTATUS_VALIDMESSAGE:
+        case SipTxn::STATUS_VALID_MESSAGE:
         {
             IMS_TRACE_I("__UAS__ :: _____ VALID MESSAGE _____", 0, 0, 0);
             break;
         }
-        case ETXNSTATUS_IGNOREREQ:
+        case SipTxn::STATUS_IGNORE_REQ:
         {
             IMS_TRACE_I("__UAS__ :: _____ IGNORE REQUEST _____", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
-        case ETXNSTATUS_IGNORERESP:
+        case SipTxn::STATUS_IGNORE_RESP:
         {
             IMS_TRACE_I("__UAS__ :: _____ IGNORE RESPONSE _____", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
-        case ETXNSTATUS_STRAYRESP:
+        case SipTxn::STATUS_STRAY_RESP:
         {
             IMS_TRACE_I("__UAS__ :: _____ STRAY RESPONSE _____", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
-        case ETXNSTATUS_RETRANSMISSION:
+        case SipTxn::STATUS_RETRANSMISSION:
         {
             IMS_TRACE_I("__UAS__ :: _____ REMOTE RETRANSMISSION _____", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
-        case ETXNSTATUS_ERRORONSEND:     // FALL-THROUGH
-        case ETXNSTATUS_INVALIDMESSAGE:  // FALL-THROUGH
-        case ETXNSTATUS_INVALID:
+        case SipTxn::STATUS_ERROR_ON_SEND:    // FALL-THROUGH
+        case SipTxn::STATUS_INVALID_MESSAGE:  // FALL-THROUGH
+        case SipTxn::STATUS_INVALID:
         {
             IMS_TRACE_I("__UAS__ :: _____ PROCESSING FAILED _____", 0, 0, 0);
             return SipPrivate::MESSAGE_FAILED;
         }
-        case ETXNSTATUS_STRAYPRACK:
+        case SipTxn::STATUS_STRAY_PRACK:
         {
             IMS_TRACE_I("__UAS__ :: _____ STRAY PRACK RECEIVED _____", 0, 0, 0);
             return SipPrivate::MESSAGE_INVALID_481;
@@ -300,11 +300,11 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
 
     if (m_pTxnKey != IMS_NULL)
     {
-        if (m_pTxnKey->GetTxnType() == ETXN_INVSERTXN)
+        if (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN)
         {
             m_nClass = CLASS_INVITE;
         }
-        else if (m_pTxnKey->GetTxnType() == ETXN_NONINVSERTXN)
+        else if (m_pTxnKey->GetTxnType() == SipTxn::NON_INV_SER_TXN)
         {
             m_nClass = CLASS_REGULAR;
         }
@@ -314,7 +314,7 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
     /* NOTE::
     If the message is an ACK request for non-2xx response to INVITE request,
     then stack drop the message by returning ignore request */
-    if ((m_pTxnKey != IMS_NULL) && (m_pTxnKey->GetTxnType() == ETXN_INVSERTXN))
+    if ((m_pTxnKey != IMS_NULL) && (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN))
     {
         SipMethod objMethod = SipStack::GetMethod(m_pSipMsg);
 

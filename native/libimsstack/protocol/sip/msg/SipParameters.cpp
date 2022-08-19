@@ -335,7 +335,7 @@ SIP_BOOL SipParameterList::Decode(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR
         SIP_CHAR* pTempPos = SIP_NULL;
         SIP_CHAR* pTempNext = SIP_NULL;
 
-        if (sipFindActualPos(pStartPt, pEndPt, &pTempPos, &pTempNext, cDelimiter) == SIP_FALSE)
+        if (SipFindActualPos(pStartPt, pEndPt, &pTempPos, &pTempNext, cDelimiter) == SIP_FALSE)
         {
             pTempPos = pEndPt;
         }
@@ -564,12 +564,12 @@ SIP_BOOL SipNameValue::Decode(
     SIP_CHAR* pTempPos = SIP_NULL;
     SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPos, &pTempNext, EQUAL) == SIP_FALSE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPos, &pTempNext, EQUAL) == SIP_FALSE)
     {
         pTempPos = pEndPt;
     }
 
-    m_pszName = sipCreateString(pStartPt, pTempPos);
+    m_pszName = SipCreateString(pStartPt, pTempPos);
     if (m_pszName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -587,7 +587,7 @@ SIP_BOOL SipNameValue::Decode(
                         ((pParameterComponent->GetComponentType() == IParameterComponent::URI) &&
                                 (pParameterComponent->IsValidComponent(m_pszName) == SIP_TRUE))))
         {
-            SIP_CHAR* pszValue = sipCreateString(pszValuePtr, pEndPt);
+            SIP_CHAR* pszValue = SipCreateString(pszValuePtr, pEndPt);
             if (pszValue == SIP_NULL)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -616,12 +616,12 @@ SIP_BOOL SipNameValue::Decode(
                 SIP_CHAR* pszValue = SIP_NULL;
                 pTempPos = SIP_NULL;
 
-                if (sipFindPreDelimiter(pszValuePtr, pEndPt, &pTempPos, COMMA) == SIP_FALSE)
+                if (SipFindPreDelimiter(pszValuePtr, pEndPt, &pTempPos, COMMA) == SIP_FALSE)
                 {
                     pTempPos = pEndPt;
                 }
 
-                pszValue = sipCreateString(pszValuePtr, pTempPos);
+                pszValue = SipCreateString(pszValuePtr, pTempPos);
                 if (pszValue == SIP_NULL)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,

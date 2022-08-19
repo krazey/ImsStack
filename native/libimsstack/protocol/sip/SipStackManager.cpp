@@ -15,7 +15,6 @@
  */
 #include "sip_pf_datatypes.h"
 #include "platform/sip_pf_memory.h"
-#include "msg/sip_comdef.h"
 #include "txn/SipTxn.h"
 #include "transport/SipTransportInfo.h"
 #include "SipStackManager.h"
@@ -25,9 +24,9 @@
 #include "SipUtil.h"
 #include "SipMessageBuffer.h"
 
-extern SIP_VOID sip_cbk_preProcessMessageSentByStack(
+extern SIP_VOID Sip_Cbk_PreProcessMessageSentByStack(
         IN SIP_VOID* pSipMsg, IN ISipUserData* pUserData);
-extern SIP_VOID sip_cbk_postProcessMessageSentByStack(IN SIP_VOID* pSipMsg, IN SIP_CHAR* pBuffer,
+extern SIP_VOID Sip_Cbk_PostProcessMessageSentByStack(IN SIP_VOID* pSipMsg, IN SIP_CHAR* pBuffer,
         IN SIP_UINT32 nBufferLen, IN ISipUserData* pUserData);
 
 static SipStackManager* gpStackMngr = SIP_NULL;
@@ -504,7 +503,7 @@ stack user must process this request and can decide whether to ignore or not
         }
 
         // Notify SIP message sent by stack to the application for a proper handling
-        sip_cbk_preProcessMessageSentByStack(
+        Sip_Cbk_PreProcessMessageSentByStack(
                 reinterpret_cast<SIP_VOID*>(objTxnInfo.m_pSendSipMsg), objTxnInfo.m_pUserData);
 
         /* BSP_TODO:
@@ -520,7 +519,7 @@ stack user must process this request and can decide whether to ignore or not
 
         SipTransportBuffer* pTransBuffer = pTranspInfo->GetTranspSipBuffer();
 
-        sip_cbk_postProcessMessageSentByStack(reinterpret_cast<SIP_VOID*>(objTxnInfo.m_pSendSipMsg),
+        Sip_Cbk_PostProcessMessageSentByStack(reinterpret_cast<SIP_VOID*>(objTxnInfo.m_pSendSipMsg),
                 (pTransBuffer != SIP_NULL) ? pTransBuffer->GetSipBuffer() : SIP_NULL,
                 (pTransBuffer != SIP_NULL) ? pTransBuffer->GetSipBufferLen() : 0,
                 objTxnInfo.m_pUserData);

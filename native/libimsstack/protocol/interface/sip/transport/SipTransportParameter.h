@@ -59,16 +59,16 @@ public:
 
     SIP_INT32 GetTranspProtocol() const { return m_nTranspProtocol; }
 
-    SIP_VOID setTanspIpType(SIP_INT32 nTanspIpType) { this->m_nTranspIpType = nTanspIpType; }
+    SIP_VOID SetTanspIpType(SIP_INT32 nTanspIpType) { this->m_nTranspIpType = nTanspIpType; }
 
-    SIP_VOID setTranspProtocol(SIP_INT32 nTranspProtocol)
+    SIP_VOID SetTranspProtocol(SIP_INT32 nTranspProtocol)
     {
         this->m_nTranspProtocol = nTranspProtocol;
     }
 
-    SIP_BOOL setHostAddress(const SIP_CHAR* pHostAddress);
+    SIP_BOOL SetHostAddress(const SIP_CHAR* pHostAddress);
 
-    SIP_VOID setPort(SIP_UINT16 nPort) { this->m_nPort = nPort; }
+    SIP_VOID SetPort(SIP_UINT16 nPort) { this->m_nPort = nPort; }
 };
 
 #endif  //__SIP_TRANSPORT_PARAMETER_H__

@@ -17,7 +17,6 @@
 #include "platform/sip_pf_memory.h"
 #include "platform/sip_pf_string.h"
 
-#include "msg/sip_comdef.h"
 #include "SipConfiguration.h"
 
 #include "sip_error.h"
@@ -178,7 +177,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
         return SIP_FALSE;
     }
 
-    SIP_BOOL bStatus = sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey),
+    SIP_BOOL bStatus = Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey),
             TXN_OPT_CREATE, SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn));
 
     if (bStatus == SIP_FALSE)
@@ -192,7 +191,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
     }
 
     /* TxnObj is added to hash, hence increment ref count */
-    pTxn->increment();
+    pTxn->Increment();
 
     /* Start Timer
        1. Retx Timer : for UDP only

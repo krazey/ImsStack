@@ -276,24 +276,24 @@ SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 
     SIP_CHAR* pTempPre = SIP_NULL;
     /*check for IPV6 address*/
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, LEFT_SQUARE) == SIP_TRUE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, LEFT_SQUARE) == SIP_TRUE)
     {
         m_eHostType = SipAddrSpec::HOST_IPV6;
         pStartPt = pTempPre + SIP_ONE;
         pTempPre = SIP_NULL;
-        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, RIGHT_SQUARE) == SIP_FALSE)
+        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, RIGHT_SQUARE) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Host[IPV6]", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pTempPre = pTempPre + SIP_ONE;
     }
-    else if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, COLON) == SIP_FALSE)
+    else if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, COLON) == SIP_FALSE)
     {
         pTempPre = pEndPt;
     }
 
-    m_pszHost = sipCreateString(pStartPt, pTempPre);
+    m_pszHost = SipCreateString(pStartPt, pTempPre);
     if (m_pszHost == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -314,10 +314,10 @@ SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     pStartPt = pTempPre;
     pTempPre = SIP_NULL;
 
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, COLON) == SIP_TRUE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, COLON) == SIP_TRUE)
     {
         pTempPre = pTempPre + SIP_TWO;
-        SIP_CHAR* pszPort = sipCreateString(pTempPre, pEndPt);
+        SIP_CHAR* pszPort = SipCreateString(pTempPre, pEndPt);
         if (pszPort == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -345,13 +345,13 @@ SIP_BOOL SipViaHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Search for the Protocol Name End*/
     /*sent-protocol = protocol-name SLASH protocol-version SLASH transport */
     /*Find First SLASH with Skipped LWS from both side*/
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecodeHdr: Protocol Name Missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_pszProtocolName = sipCreateString(pStartPt, pTempPre);
+    m_pszProtocolName = SipCreateString(pStartPt, pTempPre);
     if (m_pszProtocolName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -366,13 +366,13 @@ SIP_BOOL SipViaHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pTempNext = SIP_NULL;
 
     /*Find Next SLASH with Skipped LWS from both side*/
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecodeHdr: Protocol Version Missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_pszProtocolVer = sipCreateString(pStartPt, pTempPre);
+    m_pszProtocolVer = SipCreateString(pStartPt, pTempPre);
     if (m_pszProtocolVer == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -386,13 +386,13 @@ SIP_BOOL SipViaHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pTempNext = SIP_NULL;
 
     /*Find the LWS i.e. End of Transport*/
-    if (sipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
+    if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecodeHdr: LWS missing in Via", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_pszTransport = sipCreateString(pStartPt, pTempPre);
+    m_pszTransport = SipCreateString(pStartPt, pTempPre);
     if (m_pszTransport == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipViaHeader::DecodeHdr: Memory Allocation Failed",
@@ -403,12 +403,12 @@ SIP_BOOL SipViaHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Skip Fw LWS And Get the Start of Sent by
       i.e. sent-by = host [ COLON port ]  */
     pTempPre = pTempPre + SIP_ONE;
-    pStartPt = sipSkipFwLWS(pTempPre, pEndPt);
+    pStartPt = SipSkipFwLWS(pTempPre, pEndPt);
     pTempPre = SIP_NULL;
     pTempNext = SIP_NULL;
 
     /*Now check for the Via Prm*/
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_FALSE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_FALSE)
     {
         pTempPre = pEndPt;
     }

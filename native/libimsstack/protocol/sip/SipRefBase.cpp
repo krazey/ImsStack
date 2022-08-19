@@ -22,12 +22,12 @@ SipRefBase::SipRefBase()
 
 SipRefBase::~SipRefBase() {}
 
-SIP_VOID SipRefBase::increment()
+SIP_VOID SipRefBase::Increment()
 {
     m_nRefCount++;
 }
 
-SIP_VOID SipRefBase::decrement()
+SIP_VOID SipRefBase::Decrement()
 {
     m_nRefCount--;
 }

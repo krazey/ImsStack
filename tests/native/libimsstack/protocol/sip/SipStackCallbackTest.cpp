@@ -17,28 +17,28 @@
 
 #include "SipStackCallback.h"
 
-extern SIP_BOOL sip_cbk_fetchTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
+extern SIP_BOOL Sip_Cbk_FetchTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
         OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
 
-extern SIP_BOOL sip_cbk_releaseTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
+extern SIP_BOOL Sip_Cbk_ReleaseTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
         OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
 
-extern SIP_BOOL sip_cbk_startTimer(IN SIP_UINT32 nDuration, IN SipTimerCallback pfnTimerCallback,
+extern SIP_BOOL Sip_Cbk_StartTimer(IN SIP_UINT32 nDuration, IN SipTimerCallback pfnTimerCallback,
         IN SIP_VOID* pvData, IN SIP_VOID** ppvHandle);
 
-extern SIP_BOOL sip_cbk_stopTimer(IN SIP_VOID* pvHandle, IN SIP_VOID** ppvData);
+extern SIP_BOOL Sip_Cbk_StopTimer(IN SIP_VOID* pvHandle, IN SIP_VOID** ppvData);
 
-extern SIP_VOID sip_cbk_onTimerExpired(IN ISipUserData* pUserData, IN SIP_INT32 enTimerType);
+extern SIP_VOID Sip_Cbk_OnTimerExpired(IN ISipUserData* pUserData, IN SIP_INT32 enTimerType);
 
-extern SIP_VOID* sip_cbk_createAckRequest(IN SIP_VOID* pvRespMsg, IN ISipUserData* pUserData);
+extern SIP_VOID* Sip_Cbk_CreateAckRequest(IN SIP_VOID* pvRespMsg, IN ISipUserData* pUserData);
 
-extern SIP_VOID sip_cbk_preProcessMessageSentByStack(
+extern SIP_VOID Sip_Cbk_PreProcessMessageSentByStack(
         IN SIP_VOID* pvSipMsg, IN ISipUserData* pUserData);
 
-extern SIP_VOID sip_cbk_postProcessMessageSentByStack(IN SIP_VOID* pvSipMsg, IN SIP_CHAR* pBuffer,
+extern SIP_VOID Sip_Cbk_PostProcessMessageSentByStack(IN SIP_VOID* pvSipMsg, IN SIP_CHAR* pBuffer,
         IN SIP_UINT32 nBufferLen, IN ISipUserData* pUserData);
 
-extern SIP_VOID sip_cbk_displayTxnKey(IN SIP_VOID* pvTxnKey);
+extern SIP_VOID Sip_Cbk_DisplayTxnKey(IN SIP_VOID* pvTxnKey);
 
 namespace android
 {
@@ -89,16 +89,16 @@ protected:
 
 TEST_F(SipStackCallbackTest, CheckCallbacks)
 {
-    EXPECT_EQ(SIP_FALSE, sip_cbk_fetchTransaction(nullptr, 0, nullptr, nullptr));
-    EXPECT_EQ(SIP_FALSE, sip_cbk_releaseTransaction(nullptr, 0, nullptr, nullptr));
-    EXPECT_EQ(SIP_FALSE, sip_cbk_startTimer(0, nullptr, nullptr, nullptr));
-    EXPECT_EQ(SIP_FALSE, sip_cbk_stopTimer(nullptr, nullptr));
-    sip_cbk_createAckRequest(nullptr, nullptr);
-    sip_cbk_preProcessMessageSentByStack(nullptr, nullptr);
-    sip_cbk_postProcessMessageSentByStack(nullptr, nullptr, 0, nullptr);
-    sip_cbk_displayTxnKey(nullptr);
-    sip_cbk_onTimerExpired(nullptr, 0);
-    sip_cbk_displayTxnKey(nullptr);
+    EXPECT_EQ(SIP_FALSE, Sip_Cbk_FetchTransaction(nullptr, 0, nullptr, nullptr));
+    EXPECT_EQ(SIP_FALSE, Sip_Cbk_ReleaseTransaction(nullptr, 0, nullptr, nullptr));
+    EXPECT_EQ(SIP_FALSE, Sip_Cbk_StartTimer(0, nullptr, nullptr, nullptr));
+    EXPECT_EQ(SIP_FALSE, Sip_Cbk_StopTimer(nullptr, nullptr));
+    Sip_Cbk_CreateAckRequest(nullptr, nullptr);
+    Sip_Cbk_PreProcessMessageSentByStack(nullptr, nullptr);
+    Sip_Cbk_PostProcessMessageSentByStack(nullptr, nullptr, 0, nullptr);
+    Sip_Cbk_DisplayTxnKey(nullptr);
+    Sip_Cbk_OnTimerExpired(nullptr, 0);
+    Sip_Cbk_DisplayTxnKey(nullptr);
 
     // clang-format off
     SipStackCallbacks stCallbacks = {
@@ -115,16 +115,16 @@ TEST_F(SipStackCallbackTest, CheckCallbacks)
     // clang-format on
     SipStackCallback_SetCallbacks(stCallbacks);
 
-    EXPECT_EQ(SIP_TRUE, sip_cbk_fetchTransaction(nullptr, 0, nullptr, nullptr));
-    EXPECT_EQ(SIP_TRUE, sip_cbk_releaseTransaction(nullptr, 0, nullptr, nullptr));
-    EXPECT_EQ(SIP_TRUE, sip_cbk_startTimer(0, nullptr, nullptr, nullptr));
-    EXPECT_EQ(SIP_TRUE, sip_cbk_stopTimer(nullptr, nullptr));
-    sip_cbk_createAckRequest(nullptr, nullptr);
-    sip_cbk_preProcessMessageSentByStack(nullptr, nullptr);
-    sip_cbk_postProcessMessageSentByStack(nullptr, nullptr, 0, nullptr);
-    sip_cbk_displayTxnKey(nullptr);
-    sip_cbk_onTimerExpired(nullptr, 0);
-    sip_cbk_displayTxnKey(nullptr);
+    EXPECT_EQ(SIP_TRUE, Sip_Cbk_FetchTransaction(nullptr, 0, nullptr, nullptr));
+    EXPECT_EQ(SIP_TRUE, Sip_Cbk_ReleaseTransaction(nullptr, 0, nullptr, nullptr));
+    EXPECT_EQ(SIP_TRUE, Sip_Cbk_StartTimer(0, nullptr, nullptr, nullptr));
+    EXPECT_EQ(SIP_TRUE, Sip_Cbk_StopTimer(nullptr, nullptr));
+    Sip_Cbk_CreateAckRequest(nullptr, nullptr);
+    Sip_Cbk_PreProcessMessageSentByStack(nullptr, nullptr);
+    Sip_Cbk_PostProcessMessageSentByStack(nullptr, nullptr, 0, nullptr);
+    Sip_Cbk_DisplayTxnKey(nullptr);
+    Sip_Cbk_OnTimerExpired(nullptr, 0);
+    Sip_Cbk_DisplayTxnKey(nullptr);
 }
 
 }  // namespace android

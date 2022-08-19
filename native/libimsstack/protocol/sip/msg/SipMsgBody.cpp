@@ -97,7 +97,7 @@ SIP_BOOL SipMIMEHdrs::SetMimeHdrs(SipHeaderBase* pHdr)
                 m_pContentType->SipDelete();
             }
             m_pContentType = (SipContentTypeHeader*)pHdr;
-            pHdr->increment();
+            pHdr->Increment();
             break;
 
         case SipHeaderBase::CONTENT_DISPOSITION:
@@ -106,7 +106,7 @@ SIP_BOOL SipMIMEHdrs::SetMimeHdrs(SipHeaderBase* pHdr)
                 m_pContentDisposition->SipDelete();
             }
             m_pContentDisposition = pHdr;
-            pHdr->increment();
+            pHdr->Increment();
             break;
 
         case SipHeaderBase::CONTENT_ENCODING:
@@ -115,7 +115,7 @@ SIP_BOOL SipMIMEHdrs::SetMimeHdrs(SipHeaderBase* pHdr)
                 m_pContentEncoding->SipDelete();
             }
             m_pContentEncoding = pHdr;
-            pHdr->increment();
+            pHdr->Increment();
             break;
         case SipHeaderBase::UNKNOWN:
         {
@@ -141,35 +141,35 @@ SipHeaderBase* SipMIMEHdrs::GetUnknownHdr(SIP_UINT32 nIndex)
     return (m_pUnKnownHdrList != SIP_NULL) ? m_pUnKnownHdrList->GetObj(nIndex) : SIP_NULL;
 }
 
-SipHeaderBase* SipMIMEHdrs::getMimeHdrObj(SIP_INT32 eIndex)
+SipHeaderBase* SipMIMEHdrs::GetMimeHdrObj(SIP_INT32 eIndex)
 {
     switch (eIndex)
     {
         case CONTENT_TYPE:
             if (m_pContentType != SIP_NULL)
             {
-                m_pContentType->increment();
+                m_pContentType->Increment();
             }
             return m_pContentType;
 
         case CONTENT_ENCODING:
             if (m_pContentEncoding != SIP_NULL)
             {
-                m_pContentEncoding->increment();
+                m_pContentEncoding->Increment();
             }
             return m_pContentEncoding;
 
         case CONTENT_DISPOSITION:
             if (m_pContentDisposition != SIP_NULL)
             {
-                m_pContentDisposition->increment();
+                m_pContentDisposition->Increment();
             }
             return m_pContentDisposition;
 
         case UNKNOWN:
             if (m_pUnKnownHdrList != SIP_NULL)
             {
-                m_pUnKnownHdrList->increment();
+                m_pUnKnownHdrList->Increment();
             }
             return m_pUnKnownHdrList;
 
@@ -178,7 +178,7 @@ SipHeaderBase* SipMIMEHdrs::getMimeHdrObj(SIP_INT32 eIndex)
     }
 }
 
-SipHeaderBase* SipMIMEHdrs::getNewMIMEHdrObj(SIP_INT32 eHdrType)
+SipHeaderBase* SipMIMEHdrs::GetNewMIMEHdrObj(SIP_INT32 eHdrType)
 {
     switch (eHdrType)
     {
@@ -221,12 +221,12 @@ SIP_BOOL SipMIMEHdrs::EncodeMIMEHdrs(SIP_CHAR** ppCurrPos)
 
     while (nHdr < SipMIMEHdrs::END)
     {
-        SipHeaderBase* pTemp = getMimeHdrObj(nHdr);
+        SipHeaderBase* pTemp = GetMimeHdrObj(nHdr);
         if (pTemp != SIP_NULL)
         {
             if (pTemp->GetHdrType() != SipHeaderBase::UNKNOWN)
             {
-                sipEncodeHdrName(
+                SipHeaders::SipEncodeHdrName(
                         pTemp->GetHdrType(), ppCurrPos, SipConfiguration::MSG_OPT_ENCODE_NONE);
             }
 
@@ -257,7 +257,7 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     /*Get the position previous to ":"*/
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecodeMIMEHdrs: colon not found", SIP_ZERO, SIP_ZERO);
@@ -265,13 +265,13 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
 
     SIP_CHAR* pTempNext = pTempPos + SIP_TWO;
-    pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
+    pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
 
     /*skip the WSP form back*/
-    pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+    pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
 
     /*Create  the header name*/
-    SIP_CHAR* pszHdrName = sipCreateString(pStartPt, pTempPos);
+    SIP_CHAR* pszHdrName = SipCreateString(pStartPt, pTempPos);
     if (pszHdrName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEHdrs: Memory Allocation failed",
@@ -280,14 +280,14 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
 
     /*this will return the type of header on passing name*/
-    SIP_INT32 eHdrType = sipGetMimeHdrType(pszHdrName);
+    SIP_INT32 eHdrType = SipGetMimeHdrType(pszHdrName);
 
     /*Free the header name*/
     /*Get the header object*/
-    SipHeaderBase* pHeader = getNewMIMEHdrObj(eHdrType);
+    SipHeaderBase* pHeader = GetNewMIMEHdrObj(eHdrType);
     if (pHeader == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEHdrs: getNewMIMEHdrObj failed", SIP_ZERO,
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEHdrs: GetNewMIMEHdrObj failed", SIP_ZERO,
                 SIP_ZERO);
         delete[] pszHdrName;
         return SIP_FALSE;
@@ -313,7 +313,7 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         }
         delete[] pszHdrName;
 
-        SIP_CHAR* pszHdrValue = sipCreateString(pTempNext, pEndPt);
+        SIP_CHAR* pszHdrValue = SipCreateString(pTempNext, pEndPt);
         if (pszHdrValue == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
@@ -594,7 +594,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         SIP_UINT32 nDecLen = SIP_ZERO;
         SIP_CHAR* pTempPos = SIP_NULL;
         // Fail condition to be added
-        sipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd);
+        SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd);
         nDecLen = pTempPos - pStartPt + SIP_ONE;
 
         if (m_pMIMEHdrs->DecodeMIMEHdrs(pStartPt, nDecLen) == SIP_FALSE)
@@ -617,7 +617,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     pStartPt = pStartPt + SIP_TWO;
     /*Now Get Type of Body*/
     SipContentTypeHeader* pContentType = SIP_STATIC_CAST(
-            SipContentTypeHeader*, m_pMIMEHdrs->getMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE));
+            SipContentTypeHeader*, m_pMIMEHdrs->GetMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE));
     if (pContentType == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -733,7 +733,7 @@ SipMsgBodyList* SipMsgBody::GetMessageBodyList()
 {
     if (m_pBodyList != SIP_NULL)
     {
-        m_pBodyList->increment();
+        m_pBodyList->Increment();
     }
     return m_pBodyList;
 }
@@ -743,7 +743,7 @@ SipContentTypeHeader* SipMsgBody::GetContentType()
     if (m_pMIMEHdrs != SIP_NULL)
     {
         return SIP_DYNAMIC_CAST(
-                SipContentTypeHeader*, m_pMIMEHdrs->getMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE));
+                SipContentTypeHeader*, m_pMIMEHdrs->GetMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE));
     }
 
     return SIP_NULL;
@@ -753,7 +753,7 @@ SipHeaderBase* SipMsgBody::GetContentEncoding()
 {
     if (m_pMIMEHdrs != SIP_NULL)
     {
-        return m_pMIMEHdrs->getMimeHdrObj(SipMIMEHdrs::CONTENT_ENCODING);
+        return m_pMIMEHdrs->GetMimeHdrObj(SipMIMEHdrs::CONTENT_ENCODING);
     }
 
     return SIP_NULL;
@@ -763,7 +763,7 @@ SipHeaderBase* SipMsgBody::GetContentDisposition()
 {
     if (m_pMIMEHdrs != SIP_NULL)
     {
-        return m_pMIMEHdrs->getMimeHdrObj(SipMIMEHdrs::CONTENT_DISPOSITION);
+        return m_pMIMEHdrs->GetMimeHdrObj(SipMIMEHdrs::CONTENT_DISPOSITION);
     }
 
     return SIP_NULL;
@@ -776,13 +776,13 @@ SipHeaderBase* SipMsgBody::GetMimeHdr(SIP_INT32 eHdrType, SIP_UINT32 nIndex)
         switch (eHdrType)
         {
             case SipHeaderBase::CONTENT_TYPE:
-                return m_pMIMEHdrs->getMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE);
+                return m_pMIMEHdrs->GetMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE);
 
             case SipHeaderBase::CONTENT_DISPOSITION:
-                return m_pMIMEHdrs->getMimeHdrObj(SipMIMEHdrs::CONTENT_DISPOSITION);
+                return m_pMIMEHdrs->GetMimeHdrObj(SipMIMEHdrs::CONTENT_DISPOSITION);
 
             case SipHeaderBase::CONTENT_ENCODING:
-                return m_pMIMEHdrs->getMimeHdrObj(SipMIMEHdrs::CONTENT_ENCODING);
+                return m_pMIMEHdrs->GetMimeHdrObj(SipMIMEHdrs::CONTENT_ENCODING);
 
             case SipHeaderBase::UNKNOWN:
                 return m_pMIMEHdrs->GetUnknownHdr(nIndex);
@@ -949,7 +949,7 @@ SIP_BOOL SipMsgBodyList::AddBody(SipMsgBody* pBody)
     {
         return SIP_FALSE;
     }
-    pBody->increment();
+    pBody->Increment();
     return SIP_TRUE;
 }
 
@@ -958,7 +958,7 @@ SipMsgBody* SipMsgBodyList::GetBodyByIndex(SIP_UINT32 nIndex)
     if (nIndex < m_objBodyList.GetSize())
     {
         SipMsgBody* pBody = m_objBodyList.GetAt(nIndex);
-        pBody->increment();
+        pBody->Increment();
         return pBody;
     }
     return SIP_NULL;
@@ -1015,9 +1015,9 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SI
     SIP_CHAR* pszTempBoundary = SIP_NULL;
     SIP_CHAR* pTempPos = SIP_NULL;
 
-    if (sipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_TRUE)
+    if (SipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_TRUE)
     {
-        pszTempBoundary = sipCreateString(pStartPt, pTempPos);
+        pszTempBoundary = SipCreateString(pStartPt, pTempPos);
         if (pszTempBoundary == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -1045,7 +1045,7 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SI
     /*Update the start point till the start of boundary*/
     pStartPt = pStartPt + nBoundaryLen + SIP_ONE;
     /*Update the Start point to the Start Of headers*/
-    pStartPt = sipSkipFwLWS(pStartPt, pEndPt);
+    pStartPt = SipSkipFwLWS(pStartPt, pEndPt);
 
     SIP_BOOL bBodyEnd = SIP_FALSE;
     while ((pStartPt <= pEndPt) && (bBodyEnd == SIP_FALSE))
@@ -1057,7 +1057,7 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SI
                     "SipMsgBodyList::DecodeMIMEBody:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        SIP_CHAR* pTempEnd = sipFindBodyEnd(pStartPt, pEndPt, pszBoundary, bBodyEnd);
+        SIP_CHAR* pTempEnd = SipFindBodyEnd(pStartPt, pEndPt, pszBoundary, bBodyEnd);
 
         if (pMsgBody->DecodeMIMEMsgBody(pStartPt, pTempEnd) == SIP_FALSE)
         {
@@ -1308,7 +1308,7 @@ SIP_BOOL SipMessageSummary::DecodeMessageSummary(SIP_CHAR* pStartPt, SIP_CHAR* p
     // Message Waiting = yes/no
     SIP_CHAR* pTempPos = SIP_NULL;
 
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipMessageSummary::DecodeMessageSummaryMsgBody: COLON Not Found", SIP_ZERO,
@@ -1317,11 +1317,11 @@ SIP_BOOL SipMessageSummary::DecodeMessageSummary(SIP_CHAR* pStartPt, SIP_CHAR* p
     }
 
     SIP_CHAR* pTempNext = pTempPos + SIP_TWO;
-    pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
+    pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
     /*skip the WSP form back*/
-    pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+    pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
 
-    SIP_CHAR* pTempStr = sipCreateString(pStartPt, pTempPos);
+    SIP_CHAR* pTempStr = SipCreateString(pStartPt, pTempPos);
     if (pTempStr == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -1341,7 +1341,7 @@ SIP_BOOL SipMessageSummary::DecodeMessageSummary(SIP_CHAR* pStartPt, SIP_CHAR* p
     pTempStr = SIP_NULL;
     pStartPt = pTempNext;
 
-    if (sipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
+    if (SipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipMessageSummary::DecodeMessageSummaryMsgBody: CRLF Not Found", SIP_ZERO,
@@ -1349,11 +1349,11 @@ SIP_BOOL SipMessageSummary::DecodeMessageSummary(SIP_CHAR* pStartPt, SIP_CHAR* p
         return SIP_FALSE;
     }
 
-    pStartPt = sipSkipFwLWS(pTempNext, pEndPt);
+    pStartPt = SipSkipFwLWS(pTempNext, pEndPt);
     /*skip the WSP form back*/
-    pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+    pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
 
-    pTempStr = sipCreateString(pStartPt, pTempPos);
+    pTempStr = SipCreateString(pStartPt, pTempPos);
     if (pTempStr == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -1386,7 +1386,7 @@ SIP_BOOL SipMessageSummary::DecodeMessageSummary(SIP_CHAR* pStartPt, SIP_CHAR* p
 
     if ((pStartPt < pEndPt) && !(IS_CR(*pStartPt) && IS_LF(*(pStartPt + SIP_ONE))))
     {
-        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "SipMessageSummary::DecodeMessageSummaryMsgBody: COLON Not Found", SIP_ZERO,
@@ -1395,11 +1395,11 @@ SIP_BOOL SipMessageSummary::DecodeMessageSummary(SIP_CHAR* pStartPt, SIP_CHAR* p
         }
 
         pTempNext = pTempPos + SIP_TWO;
-        pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
+        pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
         /*skip the WSP form back*/
-        pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+        pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
 
-        pTempStr = sipCreateString(pStartPt, pTempPos);
+        pTempStr = SipCreateString(pStartPt, pTempPos);
         if (pTempStr == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -1420,14 +1420,14 @@ SIP_BOOL SipMessageSummary::DecodeMessageSummary(SIP_CHAR* pStartPt, SIP_CHAR* p
         delete[] pTempStr;
         pStartPt = pTempNext;
 
-        if (sipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
+        if (SipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "SipMessageSummary::DecodeMessageSummaryMsgBody: CRLF Not Found", SIP_ZERO,
                     SIP_ZERO);
             return SIP_FALSE;
         }
-        pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+        pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
         m_pAddrSpec = new SipAddrSpec();
         if (m_pAddrSpec == SIP_NULL)
         {
@@ -1446,7 +1446,7 @@ SIP_BOOL SipMessageSummary::DecodeMessageSummary(SIP_CHAR* pStartPt, SIP_CHAR* p
             return SIP_FALSE;
         }
         pTempNext = pTempPos + SIP_THREE;
-        pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
+        pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
         pStartPt = pTempNext;
     }
 label:
@@ -1459,14 +1459,14 @@ label:
             break;
         }
 
-        if (sipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
+        if (SipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "SipMessageSummary::DecodeMessageSummaryMsgBody: CRLF Not Found", SIP_ZERO,
                     SIP_ZERO);
             return SIP_FALSE;
         }
-        pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+        pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
         SipSummaryLine* pSummary = new SipSummaryLine();
         if (pSummary == SIP_NULL)
         {
@@ -1494,7 +1494,7 @@ label:
             return SIP_FALSE;
         }
         pTempNext = pTempPos + SIP_THREE;
-        pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
+        pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
         pStartPt = pTempNext;
     }
 
@@ -1506,7 +1506,7 @@ label:
     // Name Value Validation
     while (pStartPt < pEndPt)
     {
-        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "SipMessageSummary::DecodeMessageSummaryMsgBody: CRLF Not Found", SIP_ZERO,
@@ -1514,11 +1514,11 @@ label:
             return SIP_FALSE;
         }
 
-        pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+        pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
         pTempNext = pTempPos + SIP_TWO;
-        pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
+        pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
 
-        pTempStr = sipCreateString(pStartPt, pTempPos);
+        pTempStr = SipCreateString(pStartPt, pTempPos);
         if (pTempStr == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -1538,17 +1538,17 @@ label:
         pNmVl->m_pszName = pTempStr;
         pStartPt = pTempNext;
 
-        while (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COMMA))
+        while (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COMMA))
         {
-            if (sipFindCrlf(pStartPt, pTempPos, &pTempPos))
+            if (SipFindCrlf(pStartPt, pTempPos, &pTempPos))
             {
                 break;
             }
-            pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+            pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
             pTempNext = pTempPos + SIP_TWO;
-            pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
+            pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
 
-            pTempStr = sipCreateString(pStartPt, pTempPos);
+            pTempStr = SipCreateString(pStartPt, pTempPos);
             if (pTempStr == SIP_NULL)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -1568,7 +1568,7 @@ label:
             pStartPt = pTempNext;
         }
 
-        if (sipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
+        if (SipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "SipMessageSummary::DecodeMessageSummaryMsgBody: CRLF Not Found", SIP_ZERO,
@@ -1576,10 +1576,10 @@ label:
             delete pNmVl;
             return SIP_FALSE;
         }
-        pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+        pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
         pTempNext = pTempPos + SIP_THREE;
-        pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
-        pTempStr = sipCreateString(pStartPt, pTempPos);
+        pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
+        pTempStr = SipCreateString(pStartPt, pTempPos);
         if (pTempStr == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -1697,7 +1697,7 @@ SIP_BOOL SipSummaryLine::DecodeSummaryLine(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     }
 
     SIP_CHAR* pTempPos = SIP_NULL;
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipSummaryLine :: DecodeSummaryLine: COLON Not Found", SIP_ZERO, SIP_ZERO);
@@ -1705,11 +1705,11 @@ SIP_BOOL SipSummaryLine::DecodeSummaryLine(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     }
 
     SIP_CHAR* pTempNext = pTempPos + SIP_TWO;
-    pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
+    pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
     /*skip the WSP form back*/
-    pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+    pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
 
-    SIP_CHAR* pTempStr = sipCreateString(pStartPt, pTempPos);
+    SIP_CHAR* pTempStr = SipCreateString(pStartPt, pTempPos);
     if (pTempStr == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -1720,17 +1720,17 @@ SIP_BOOL SipSummaryLine::DecodeSummaryLine(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     pMedia = pTempStr;
 
     pStartPt = pTempNext;
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SLASH) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SLASH) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipSummaryLine :: DecodeSummaryLine: COLON Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     pTempNext = pTempPos + SIP_TWO;
-    pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
-    pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+    pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
+    pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
 
-    pTempStr = sipCreateString(pStartPt, pTempPos);
+    pTempStr = SipCreateString(pStartPt, pTempPos);
     if (pTempStr == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -1744,15 +1744,15 @@ SIP_BOOL SipSummaryLine::DecodeSummaryLine(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 
     pStartPt = pTempNext;
 
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, LPARAN) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, LPARAN) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipSummaryLine :: DecodeSummaryLine: PARAN Not Found", SIP_ZERO, SIP_ZERO);
         pTempPos = pEndPt;
     }
 
-    pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
-    pTempStr = sipCreateString(pStartPt, pTempPos);
+    pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
+    pTempStr = SipCreateString(pStartPt, pTempPos);
     if (pTempStr == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -1770,20 +1770,20 @@ SIP_BOOL SipSummaryLine::DecodeSummaryLine(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     }
 
     pTempNext = pTempPos + SIP_TWO;
-    pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
+    pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
 
     pStartPt = pTempNext;
     if (pStartPt < pEndPt)
     {
-        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SLASH) == SIP_FALSE)
+        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SLASH) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "SipSummaryLine :: DecodeSummaryLine: COLON Not Found", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+        pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
 
-        pTempStr = sipCreateString(pStartPt, pTempPos);
+        pTempStr = SipCreateString(pStartPt, pTempPos);
         if (pTempStr == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -1795,18 +1795,18 @@ SIP_BOOL SipSummaryLine::DecodeSummaryLine(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         newUrgentMessages = SipPf_Atoi(pTempStr);
         delete[] pTempStr;
         pTempNext = pTempPos + SIP_TWO;
-        pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
+        pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
         pStartPt = pTempNext;
 
-        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, RPARAN) == SIP_FALSE)
+        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, RPARAN) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "SipSummaryLine :: DecodeSummaryLine: COLON Not Found", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
+        pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
 
-        pTempStr = sipCreateString(pStartPt, pTempPos);
+        pTempStr = SipCreateString(pStartPt, pTempPos);
         if (pTempStr == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -1818,12 +1818,12 @@ SIP_BOOL SipSummaryLine::DecodeSummaryLine(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         oldUrgentMessages = SipPf_Atoi(pTempStr);
         delete[] pTempStr;
         pTempNext = pTempPos + SIP_THREE;
-        pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
+        pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
     }
     else
     {
         pTempNext = pTempPos + SIP_TWO;
-        pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
+        pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
     }
     if (pTempNext < pEndPt)
     {

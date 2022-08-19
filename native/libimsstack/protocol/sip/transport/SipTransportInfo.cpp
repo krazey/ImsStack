@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "sip_pf_datatypes.h"
-#include "msg/sip_comdef.h"
 #include "SipConfiguration.h"
 #include "transport/SipTransportInfo.h"
 

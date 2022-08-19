@@ -396,7 +396,7 @@ SIP_BOOL SipTxnHandler::TerminateTxn(SipTxnKey* pTxnKey)
     SipTxn* pTxn = SIP_NULL;
     SipTxnKey* pOutTxnKey = SIP_NULL;
     SIP_BOOL bTxnExist =
-            sip_cbk_releaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_REMOVE,
+            Sip_Cbk_ReleaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_REMOVE,
                     reinterpret_cast<SIP_VOID**>(&pOutTxnKey), reinterpret_cast<SIP_VOID**>(&pTxn));
 
     if (bTxnExist == SIP_FALSE)
@@ -444,7 +444,7 @@ SIP_BOOL SipTxnHandler::DeleteTxn(SipTxnKey* pTxnKey)
     SipTxn* pTxn = SIP_NULL;
     SipTxnKey* pOutTxnKey = SIP_NULL;
     SIP_BOOL bTxnExist =
-            sip_cbk_releaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_REMOVE,
+            Sip_Cbk_ReleaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_REMOVE,
                     reinterpret_cast<SIP_VOID**>(&pOutTxnKey), reinterpret_cast<SIP_VOID**>(&pTxn));
 
     if (bTxnExist == SIP_FALSE)
@@ -497,7 +497,7 @@ SIP_BOOL SipTxnHandler::UpdateTxnDetails(
         return SIP_FALSE;
     }
 
-    pTxn->increment();
+    pTxn->Increment();
     pTxn->UpdateTranspInfo(pTranspInfo);
     pTxn->SipDelete();
     return SIP_TRUE;
@@ -573,7 +573,7 @@ PRIVATE SIP_INT32 SipTxnHandler::GetTxnType(
 PRIVATE SIP_BOOL SipTxnHandler::GetTxnObjFromDb(
         SipTxnKey* pTxnKey, SipTxn** ppTxn, SIP_BOOL* pbTxnExist, SIP_UINT16* pnError)
 {
-    SIP_BOOL bTxnExist = sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
+    SIP_BOOL bTxnExist = Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
             TXN_OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(ppTxn));
 
     if ((bTxnExist == SIP_YES) && (*ppTxn == SIP_NULL))
@@ -593,7 +593,7 @@ PRIVATE SIP_BOOL SipTxnHandler::GetTxnObjFromDb(SipTxnKey* pTxnKey, SipTxn** ppT
         SipTxnKey** ppOutTxnKey, SIP_BOOL* pbTxnExist, SIP_UINT16* pnError)
 {
     SIP_BOOL bTxnExist =
-            sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_FETCH,
+            Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_FETCH,
                     reinterpret_cast<SIP_VOID**>(ppOutTxnKey), reinterpret_cast<SIP_VOID**>(ppTxn));
 
     if ((bTxnExist == SIP_YES) && (*ppTxn == SIP_NULL))
@@ -683,7 +683,7 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnSend(IN SIP_INT32 eTxnType, IN Si
                 ESIPTRACE_MODTXN, "HandleClientTxnRecv:No Txn Exists", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    pTxn->increment();
+    pTxn->Increment();
 
     SIP_UINT16 nStatusCode = pTxnFsmData->m_pSipMsgIn->GetStatusCode();
     SIP_UINT16 nEvent;
@@ -756,7 +756,7 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleClientTxnRecv(IN SIP_INT32 eTxnType, IN Si
         return SIP_FALSE;
     }
 
-    pTxn->increment();
+    pTxn->Increment();
 
     /* Received Response : Generate Event based on response code */
     SIP_UINT16 nStatusCode = pTxnFsmData->m_pSipMsgIn->GetStatusCode();
@@ -802,7 +802,7 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnRecv(IN SIP_INT32 eTxnType, IN Si
 
     if (pTxn != SIP_NULL)
     {
-        pTxn->increment();
+        pTxn->Increment();
     }
 
     SIP_UINT16 nEvent = SIP_ZERO;
@@ -891,9 +891,9 @@ PRIVATE SIP_BOOL SipTxnHandler::ValidateRecvTxn(SipMessage* pSipMsg, IN SIP_INT3
     SIP_INT32 eMethodType = SipMessage::METHOD_INVALID;
 
     /* Check if it's proper to start Transaction Ref: RFC 3261 8.1.1.*/
-    if (CheckTxnMadatoryParams(pSipMsg, &eMsgType, &eMethodType) == SIP_FALSE)
+    if (SipMessage::CheckTxnMandatoryParams(pSipMsg, &eMsgType, &eMethodType) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "ValidateRecvTxn: CheckTxnMadatoryParams fails\n",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "ValidateRecvTxn: CheckTxnMandatoryParams fails\n",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
@@ -916,9 +916,9 @@ PRIVATE SIP_BOOL SipTxnHandler::ValidateSendTxn(IN SipMessage* pSipMsg, OUT SIP_
     SIP_INT32 eMethodType = SipMessage::METHOD_INVALID;
 
     /* Check if it's proper to start Transaction Ref: RFC 3261 8.1.1.*/
-    if (CheckTxnMadatoryParams(pSipMsg, &eMsgType, &eMethodType) == SIP_FALSE)
+    if (SipMessage::CheckTxnMandatoryParams(pSipMsg, &eMsgType, &eMethodType) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxnHandler: CheckTxnMadatoryParams fails\n",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxnHandler: CheckTxnMandatoryParams fails\n",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }

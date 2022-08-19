@@ -16,15 +16,23 @@
 #ifndef __SIP_TXN_H__
 #define __SIP_TXN_H__
 
-#include "txn/sip_txn_common.h"
+#include "txn/SipTxn.h"
 #include "ISipUserData.h"
 #include "SipTimerContext.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnTimerValues.h"
-#include "msg/sip_comdef.h"
 #include "msg/SipMessage.h"
 #include "SipRefBase.h"
 #include "transport/SipTransportInfo.h"
+
+#define TXN_OPT_FETCH  0
+#define TXN_OPT_CREATE 1
+#define TXN_OPT_REMOVE 2
+
+extern SIP_BOOL Sip_Cbk_FetchTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
+        OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
+extern SIP_BOOL Sip_Cbk_ReleaseTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
+        OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
 
 class SipTxn : public SipRefBase
 {

@@ -117,21 +117,6 @@ TEST_F(SipHeaderBaseTest, IsValidHeader)
     }
 }
 
-/*Protected method: need to check
-TEST_F(SipHeaderBaseTest, FindComment) {
-    char *pBuff = (char*)"header value with (comment (inside))";
-    char *pEndBuff = pBuff + 36 - SIP_ONE;
-    char *pStartOfComment = SIP_NULL;
-    char *pEndofComment = SIP_NULL;
-
-    SipHeaderBase *pHeader = SipHeaders::CreateCoreHdrObj(SipHeaderBase::USER_AGENT);
-    ASSERT_TRUE(pHeader != nullptr);
-
-    EXPECT_EQ(SIP_TRUE, pHeader->FindComment(pBuff, pEndBuff, pStartOfComment, pEndofComment));
-    char *pComment = sipCreateString(pStartOfComment, pEndofComment);
-    EXPECT_STREQ("comment (inside)", pComment);
-}*/
-
 TEST_F(SipHeaderBaseTest, SetValue)
 {
     SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ALLOW, nullptr);

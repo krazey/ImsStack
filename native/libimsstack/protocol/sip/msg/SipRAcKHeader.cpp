@@ -92,14 +92,14 @@ SIP_BOOL SipRAcKHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTempPre = SIP_NULL;
 
-    if (sipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
+    if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecodeHdr: LWS missing in RAcK", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pszResponseNum = sipCreateString(pStartPt, pTempPre);
+    SIP_CHAR* pszResponseNum = SipCreateString(pStartPt, pTempPre);
     if (pszResponseNum == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -113,18 +113,18 @@ SIP_BOOL SipRAcKHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Skip Fw LWS And Get the Start of CSeq Num
       i.e. sent-by = host [ COLON port ]  */
     pTempPre = pTempPre + SIP_ONE;  // point to the start of LWS
-    pStartPt = sipSkipFwLWS(pTempPre, pEndPt);
+    pStartPt = SipSkipFwLWS(pTempPre, pEndPt);
     pTempPre = SIP_NULL;
 
     /*Now find the end of CSeq Num*/
-    if (sipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
+    if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecodeHdr: LWS missing in RAcK", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pszCSeqNum = sipCreateString(pStartPt, pTempPre);
+    SIP_CHAR* pszCSeqNum = SipCreateString(pStartPt, pTempPre);
     if (pszCSeqNum == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -137,10 +137,10 @@ SIP_BOOL SipRAcKHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     /*Update the start point*/
     pTempPre = pTempPre + SIP_ONE;  // point to the start of LWS
-    pStartPt = sipSkipFwLWS(pTempPre, pEndPt);
+    pStartPt = SipSkipFwLWS(pTempPre, pEndPt);
     pTempPre = SIP_NULL;
 
-    m_pszMethod = sipCreateString(pStartPt, pEndPt);
+    m_pszMethod = SipCreateString(pStartPt, pEndPt);
     if (m_pszMethod == SIP_NULL)
     {
         SIP_DEBUG_WARNING(

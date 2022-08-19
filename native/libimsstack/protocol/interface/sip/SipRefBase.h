@@ -20,8 +20,8 @@
 
 /**
   This is a base class for all classes that intend to implement reference counting.
-  increment() function should be used when either reference is getting stored
-  and decrement() function should be used when either reference is permanently deleted.
+  Increment() function should be used when either reference is getting stored
+  and Decrement() function should be used when either reference is permanently deleted.
   SipDelete() should always be used to delete the derived class objects. This ensure that
   objects which have reference in other modules shall not be deleted.
  */
@@ -34,8 +34,8 @@ protected:
 public:
     SipRefBase();
     virtual ~SipRefBase();
-    SIP_VOID increment();
-    SIP_VOID decrement();
+    SIP_VOID Increment();
+    SIP_VOID Decrement();
     virtual SIP_VOID SipDelete();
 
 private:

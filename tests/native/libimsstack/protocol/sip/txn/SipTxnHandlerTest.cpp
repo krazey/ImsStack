@@ -428,7 +428,7 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_ResponseMsg)
             pTxnHandler->OnSendTxn(
                     pRespSipMsg, pSipTranspParam, pSipUserData, &pTxnKey, pTxnInfo, &nError));
 
-    SipCSeqHeader* pCSeq = (SipCSeqHeader*)pRespSipMsg->GetHdrObj(ESIPHDR_CSEQ);
+    SipCSeqHeader* pCSeq = (SipCSeqHeader*)pRespSipMsg->GetHdrObj(SipHeaderBase::CSEQ);
 
     if (pCSeq != IMS_NULL)
     {

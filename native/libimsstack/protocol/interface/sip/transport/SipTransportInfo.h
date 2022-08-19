@@ -17,7 +17,7 @@
 #define __SIP_TRANSPORT_INFO_H__
 
 #include "sip_pf_datatypes.h"
-#include "msg/sip_comdef.h"
+#include "msg/sip_msgutil.h"
 #include "ISipUserData.h"
 #include "transport/SipTransportParameter.h"
 #include "transport/SipTransportBuffer.h"

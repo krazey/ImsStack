@@ -161,19 +161,14 @@ LOCAL SIP_VOID SIPStackTxnLayer_DisplayTxnKey(IN SIP_VOID* pvTxnKey)
 
 LOCAL SIP_VOID SIPStackTxnLayer_OnTimerExpired(IN ISipUserData* pUserData, IN IMS_SINT32 nTimerType)
 {
-    SipEn_TimerType eTimerType = static_cast<SipEn_TimerType>(nTimerType);
-    /* TimerE--> non-INV retx
-       ETXN_TIMERA --> INV retx
-       ETXN_TIMERG --> INV response retx
-    */
     SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
 
     // Clear user data to avoid double memory free by aborting the transaction
     // when SIP transaction timer is expired.
     pUserData->SetUserData(IMS_NULL);
 
-    if ((eTimerType == ETXN_TIMERD) || (eTimerType == ETXN_TIMERI) || (eTimerType == ETXN_TIMERJ) ||
-            (eTimerType == ETXN_TIMERK))
+    if ((nTimerType == SipTxn::TIMERD) || (nTimerType == SipTxn::TIMERI) ||
+            (nTimerType == SipTxn::TIMERJ) || (nTimerType == SipTxn::TIMERK))
     {
         // CSM moving from "Completed" to "Terminated".
         // This is a normal case and ignore these cases.
@@ -181,7 +176,7 @@ LOCAL SIP_VOID SIPStackTxnLayer_OnTimerExpired(IN ISipUserData* pUserData, IN IM
         return;
     }
 
-    SipTransactionTimer::TimerExpired(eTimerType);
+    SipTransactionTimer::TimerExpired(nTimerType);
 
     if (pTxnContext != IMS_NULL)
     {

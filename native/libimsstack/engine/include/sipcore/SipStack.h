@@ -107,7 +107,7 @@ inline void AddReference(IN_OUT T& pObject)
 {
     if (pObject != IMS_NULL)
     {
-        pObject->increment();
+        pObject->Increment();
     }
 }
 template <typename T>
@@ -115,7 +115,7 @@ inline void RemoveReference(IN_OUT T& pObject)
 {
     if (pObject != IMS_NULL)
     {
-        pObject->decrement();
+        pObject->Decrement();
     }
 }
 template <typename T>
@@ -371,7 +371,7 @@ GLOBAL void FreeTxn(IN SipTxn*& pTxn);
 GLOBAL void TerminateTransaction(IN ::SipTxnKey* pTxnKey);
 
 // APIs for SIP transaction timer
-GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN SipEn_TimerType eTimerType);
+GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN IMS_SINT32 eTimerType);
 GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN SipTimeoutData* pData);
 GLOBAL void InvokeTimerCallback(
         IN SipTimerCallback pfnCallback, IN SipTimeoutData* pData, IN IMS_PVOID pvExtraParam);

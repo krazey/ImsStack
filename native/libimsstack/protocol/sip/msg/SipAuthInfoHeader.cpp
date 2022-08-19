@@ -153,7 +153,7 @@ SIP_BOOL SipAuthInfoHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     {
         SIP_CHAR* pTempPos = SIP_NULL;
 
-        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COMMA) == SIP_FALSE)
+        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COMMA) == SIP_FALSE)
         {
             pTempPos = pEndPt;
         }

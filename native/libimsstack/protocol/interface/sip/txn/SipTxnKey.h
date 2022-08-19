@@ -17,7 +17,6 @@
 #define __SIP_TXN_KEY_H__
 
 #include "sip_pf_datatypes.h"
-#include "msg/sip_comdef.h"
 #include "msg/SipMessage.h"
 
 /* Transaction Key Used to Match Response to Request vice versa */

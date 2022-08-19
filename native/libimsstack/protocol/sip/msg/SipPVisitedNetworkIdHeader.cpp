@@ -46,7 +46,7 @@ SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nD
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTempPre = SIP_NULL;
     SIP_CHAR* pTempNext = SIP_NULL;
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
@@ -71,7 +71,7 @@ SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nD
         pEndPt = pEndPt - SIP_ONE;
     }
     //-----------------------------------------------------------------------------
-    SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
     if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(

@@ -20,7 +20,7 @@
 
 #include "ISipTimerUtil.h"
 #include "ISipUserData.h"
-#include "txn/sip_txn_common.h"
+#include "txn/SipTxn.h"
 
 // Definition of function prototypes for SIP stack transaction layer
 typedef SIP_BOOL (*SipStack_FetchTransaction)(

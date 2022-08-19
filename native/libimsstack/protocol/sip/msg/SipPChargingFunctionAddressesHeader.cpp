@@ -98,7 +98,7 @@ SIP_BOOL SipPChargingFunctionAddressesHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_
     SIP_CHAR* pTempNext = SIP_NULL;
     /*Header value is the first node of SipParameterList
       and the other Node will contain SIP parameter*/
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {

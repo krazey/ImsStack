@@ -237,13 +237,13 @@ SIP_BOOL SipAuthBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTempPre = SIP_NULL;
 
-    if (sipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
+    if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "LWS not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pszScheme = sipCreateString(pStartPt, pTempPre);
+    SIP_CHAR* pszScheme = SipCreateString(pStartPt, pTempPre);
     if (SetValue(pszScheme) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
@@ -262,14 +262,14 @@ SIP_BOOL SipAuthBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Update the temp to start of LWS*/
     pTempPre = pTempPre + SIP_ONE;
     /*Skip the LWS*/
-    pStartPt = sipSkipFwLWS(pTempPre, pEndPt);
+    pStartPt = SipSkipFwLWS(pTempPre, pEndPt);
     pTempPre = SIP_NULL;
 
     while (pStartPt < pEndPt)
     {
         SIP_CHAR* pTempNext = SIP_NULL;
 
-        if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, COMMA) == SIP_FALSE)
+        if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, COMMA) == SIP_FALSE)
         {
             pTempPre = pEndPt;
             pTempNext = pEndPt;

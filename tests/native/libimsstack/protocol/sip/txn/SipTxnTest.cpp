@@ -35,7 +35,7 @@ SIP_BOOL MockTxn_FetchTransaction(
         if ((ppvTxn != SIP_NULL) && (*ppvTxn != SIP_NULL))
         {
             objTxnList.Add((SipTxn*)*ppvTxn);
-            ((SipTxn*)*ppvTxn)->decrement();
+            ((SipTxn*)*ppvTxn)->Decrement();
         }
 
         ((SipTxnKey*)pvTxnKey)->SipDelete();

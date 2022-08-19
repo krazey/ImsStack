@@ -106,7 +106,7 @@ PUBLIC GLOBAL void SipTransactionTimer::FreeTimer(IN void* pvTimerHandle)
     }
 }
 
-PUBLIC GLOBAL void SipTransactionTimer::TimerExpired(IN SipEn_TimerType eTimerType)
+PUBLIC GLOBAL void SipTransactionTimer::TimerExpired(IN IMS_SINT32 eTimerType)
 {
     (void)eTimerType;
 

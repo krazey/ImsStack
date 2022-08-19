@@ -138,10 +138,10 @@ TEST_F(SipStackManagerTest, SendRecvMessage)
     SipStackCallback_SetCallbacks(stCallbacks);
 
     SipTransportParameter objTransportParam;
-    objTransportParam.setTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
-    objTransportParam.setHostAddress("192.168.1.2");
-    objTransportParam.setPort(5060);
-    objTransportParam.setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+    objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+    objTransportParam.SetHostAddress("192.168.1.2");
+    objTransportParam.SetPort(5060);
+    objTransportParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV4);
 
     ISipUserData objUserData(SIP_NULL);
 
@@ -207,7 +207,7 @@ Content-Length: 0\r\n\
 \r\n";
 
     nLength = strlen(pRespMsg);
-    int eTxnStatus = ETXNSTATUS_INVALID;
+    int eTxnStatus = SipTxn::STATUS_INVALID;
 
     SipMessage* pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
@@ -283,7 +283,7 @@ Content-Length: 0\r\n\
     ASSERT_TRUE(pMessage != nullptr);
     EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
 
-    objTransportParam.setTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+    objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
 
     nError = 0;
     pTxnKey = SIP_NULL;
@@ -309,7 +309,7 @@ Content-Length: 0\r\n\
 \r\n";
 
     nLength = strlen(pRespMsg);
-    eTxnStatus = ETXNSTATUS_INVALID;
+    eTxnStatus = SipTxn::STATUS_INVALID;
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
@@ -323,7 +323,7 @@ Content-Length: 0\r\n\
 
     pRespSipMessage->SipDelete();
 
-    objTransportParam.setTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+    objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
     /* Invite client with fail response receive, response with failure ACK - End */
 
     /* Invite server check for send receive - Start */
@@ -362,7 +362,7 @@ Content-Length: 0\r\n\
 \r\n";
 
     nLength = strlen(pRespMsg);
-    eTxnStatus = ETXNSTATUS_INVALID;
+    eTxnStatus = SipTxn::STATUS_INVALID;
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
@@ -461,7 +461,7 @@ Content-Length: 0\r\n\
     ASSERT_TRUE(pMessage != nullptr);
     EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
 
-    objTransportParam.setTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+    objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
 
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(
@@ -484,7 +484,7 @@ Content-Length: 0\r\n\
 \r\n";
 
     nLength = strlen(pRespMsg);
-    eTxnStatus = ETXNSTATUS_INVALID;
+    eTxnStatus = SipTxn::STATUS_INVALID;
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
@@ -510,7 +510,7 @@ Content-Length: 0\r\n\
 \r\n";
 
     nLength = strlen(pRespMsg);
-    eTxnStatus = ETXNSTATUS_INVALID;
+    eTxnStatus = SipTxn::STATUS_INVALID;
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
@@ -522,7 +522,7 @@ Content-Length: 0\r\n\
 
     EXPECT_EQ(SipTxn::STATUS_STRAY_RESP, eTxnStatus);
 
-    objTransportParam.setTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+    objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
 
     pRespSipMessage->SipDelete();
 
@@ -576,7 +576,7 @@ Content-Length: 0\r\n\
 \r\n";
 
     nLength = strlen(pRespMsg);
-    eTxnStatus = ETXNSTATUS_INVALID;
+    eTxnStatus = SipTxn::STATUS_INVALID;
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
@@ -600,7 +600,7 @@ Content-Length: 0\r\n\
 \r\n";
 
     nLength = strlen(pRespMsg);
-    eTxnStatus = ETXNSTATUS_INVALID;
+    eTxnStatus = SipTxn::STATUS_INVALID;
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
@@ -653,10 +653,10 @@ TEST_F(SipStackManagerTest, OnRecvTanspError)
     SipStackCallback_SetCallbacks(stCallbacks);
 
     SipTransportParameter objTransportParam;
-    objTransportParam.setTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
-    objTransportParam.setHostAddress("192.168.1.2");
-    objTransportParam.setPort(5060);
-    objTransportParam.setTanspIpType(SipTransportInfo::NETWORK_IPV4);
+    objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+    objTransportParam.SetHostAddress("192.168.1.2");
+    objTransportParam.SetPort(5060);
+    objTransportParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV4);
 
     ISipUserData objUserData(SIP_NULL);
 

@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 
 #include "txn/SipTxn.h"
-#include "txn/sip_txn_common.h"
 #include "txn/SipTxnTimerValues.h"
 
 namespace android

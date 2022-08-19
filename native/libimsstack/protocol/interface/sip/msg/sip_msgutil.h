@@ -17,14 +17,47 @@
 #define __SIP_MSGUTIL_H__
 
 #include "sip_pf_datatypes.h"
-
-#include "msg/sip_comdef.h"
 #include "sip_abnfUtil.h"
 #include "msg/SipHeaderBase.h"
-#include "sip_error.h"
 
 #define SIP_SIP_VERSION "SIP/2.0"
 #define ZERO            "0"
+
+#define INVITE_METHOD                 "INVITE"
+#define ACK_METHOD                    "ACK"
+#define OPTION_METHOD                 "OPTIONS"
+#define BYE_METHOD                    "BYE"
+#define CANCEL_METHOD                 "CANCEL"
+#define REGISTER_METHOD               "REGISTER"
+#define INFO_METHOD                   "INFO"
+#define PRACK_METHOD                  "PRACK"
+#define SUBSCRIBE_METHOD              "SUBSCRIBE"
+#define NOTIFY_METHOD                 "NOTIFY"
+#define UPDATE_METHOD                 "UPDATE"
+#define MESSAGE_METHOD                "MESSAGE"
+#define REFER_METHOD                  "REFER"
+#define PUBLISH_METHOD                "PUBLISH"
+#define SIP_SIPVERSION                "SIP/2.0"
+
+#define SIP_SC_INVALID                0
+#define SIP_SC_100                    100
+#define SIP_SC_200                    200
+#define SIP_SC_300                    300
+#define SIP_SC_400                    400
+#define SIP_SC_500                    500
+#define SIP_SC_600                    600
+#define SIP_SC_MAX                    700
+
+#define SIP_PROVISIONAL_RESP(usRC)    (((usRC) >= (SIP_SC_100)) && ((usRC) < (SIP_SC_200)))
+#define SIP_SUCCESSFUL_RESP(usRC)     (((usRC) >= (SIP_SC_200)) && ((usRC) < (SIP_SC_300)))
+#define SIP_REDIRECTION_RESP(usRC)    (((usRC) >= (SIP_SC_300)) && ((usRC) < (SIP_SC_400)))
+#define SIP_CLIENT_FAILURE_RESP(usRC) (((usRC) >= (SIP_SC_400)) && ((usRC) < (SIP_SC_500)))
+#define SIP_SERVER_FAILURE_RESP(usRC) (((usRC) >= (SIP_SC_500)) && ((usRC) < (SIP_SC_600)))
+#define SIP_GLOBAL_FAILURE_RESP(usRC) (((usRC) >= (SIP_SC_600)) && ((usRC) < (SIP_SC_MAX)))
+
+/* For all response except for SIP successful response */
+#define SIP_FAILURE_RESP(usRC)        ((usRC) >= (SIP_SC_300))
+#define SIP_NONPROVISIONAL_RESP(usRC) ((usRC) >= (SIP_SC_200))
 
 #define SIP_ENC_SP(pC) \
     *(pC) = 32;        \
@@ -202,48 +235,21 @@
 
 SIP_BOOL SetCharVar(const SIP_CHAR* pszValue, SIP_CHAR*& pszVar);
 
-SIP_BOOL HasSpace(const SIP_CHAR* pszValue);
+SIP_INT32 SipGetMsgType(SIP_CHAR* pStartPoint);
 
-SIP_INT32 sipGetMsgType(SIP_CHAR* pStartPoint);
+SIP_INT32 SipGetUriType(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
-SIP_BOOL sipFindTerminatingCRLF(
-        SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint, SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd);
-
-SIP_CHAR* sipSkipFwSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
-
-SIP_CHAR* sipSkipRwSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
-
-SIP_CHAR* sipSkipFwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
-
-SIP_CHAR* sipSkipRwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
-
-SIP_CHAR* sipSkipFwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
-
-SIP_BOOL sipFindPostDelimiter(
-        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter);
-
-SIP_BOOL sipFindPreDelimiter(
-        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter);
-
-SIP_BOOL sipFindActualPos(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempPre,
-        SIP_CHAR** ppTempNext, SIP_CHAR cDelimiter);
-
-SIP_VOID SipEnc_UpdateCurrPos(SIP_CHAR** ppMsgBuffer /*in -out param*/);
-
-SIP_INT32 sipGetUriType(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
-
-SIP_INT32 sipGetHdrType(const SIP_CHAR* pszHdrName);
+SIP_INT32 SipGetHdrType(const SIP_CHAR* pszHdrName);
 
 SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType);
 #ifdef SIP_STRICT_PARSING
 SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 #endif
-SIP_BOOL sipFindCrlf(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc);
 
-SIP_CHAR* sipFindBodyEnd(
+SIP_CHAR* SipFindBodyEnd(
         SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd);
 
-SIP_INT32 sipGetMimeHdrType(SIP_CHAR* pszHdrName);
+SIP_INT32 SipGetMimeHdrType(SIP_CHAR* pszHdrName);
 
 const SIP_INT16 arrSipHeadersType[SipHeaderBase::TYPE_END + 1] = {1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0,
         0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,

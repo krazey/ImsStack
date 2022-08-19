@@ -43,10 +43,10 @@ SIP_BOOL SipPAssertedServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDe
     }
 
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    sipSkipFwLWS(pStartPt, pEndPt);
+    SipSkipFwLWS(pStartPt, pEndPt);
 
     // validate the service id value
-    SIP_CHAR* pszTempString = sipCreateString(pStartPt, pStartPt + SIP_NINE);
+    SIP_CHAR* pszTempString = SipCreateString(pStartPt, pStartPt + SIP_NINE);
     if (SipPf_Stricmp("urn:urn-7:", pszTempString) != SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -73,7 +73,7 @@ SIP_BOOL SipPAssertedServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDe
     SIP_CHAR* pTempPre = SIP_NULL;
     SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (sipFindActualPos(pTempCurr, pEndPt, &pTempPre, &pTempNext, SIP_DOT) == SIP_TRUE)
+    if (SipFindActualPos(pTempCurr, pEndPt, &pTempPre, &pTempNext, SIP_DOT) == SIP_TRUE)
     {
         nTopLevelIDLen = pTempPre - pTempCurr + 1;
     }
@@ -124,7 +124,7 @@ SIP_BOOL SipPAssertedServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDe
     }
 
     // create and copy the service id
-    SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
     if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,

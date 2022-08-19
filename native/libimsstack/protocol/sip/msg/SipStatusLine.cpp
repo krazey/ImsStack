@@ -137,14 +137,14 @@ SIP_BOOL SipStatusLine::DecodeStatusLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTempLoc = SIP_NULL;
 
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipStatusLine::DecodeStatusLine: Space Not Found",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszSipVersion = sipCreateString(pStartPt, pTempLoc);
+    m_pszSipVersion = SipCreateString(pStartPt, pTempLoc);
     if (m_pszSipVersion == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -156,14 +156,14 @@ SIP_BOOL SipStatusLine::DecodeStatusLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = pTempLoc + SIP_TWO;
     pTempLoc = SIP_NULL;
     /*Find the endpoint of status code*/
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipStatusLine::DecodeStatusLine: Space Not Found",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszStatusCode = sipCreateString(pStartPt, pTempLoc);
+    m_pszStatusCode = SipCreateString(pStartPt, pTempLoc);
     if (m_pszStatusCode == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -173,7 +173,7 @@ SIP_BOOL SipStatusLine::DecodeStatusLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     /*Update the start point to the start of reason phrase*/
     pStartPt = pTempLoc + SIP_TWO;
-    m_pszRsnPhrase = sipCreateString(pStartPt, pEndPt);
+    m_pszRsnPhrase = SipCreateString(pStartPt, pEndPt);
     if (m_pszRsnPhrase == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,

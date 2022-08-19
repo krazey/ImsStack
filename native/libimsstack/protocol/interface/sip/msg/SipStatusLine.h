@@ -17,7 +17,6 @@
 #define __SIP_STATUS_LINE_H__
 
 #include "SipRefBase.h"
-#include "msg/sip_comdef.h"
 
 class SipStatusLine : public SipRefBase
 {

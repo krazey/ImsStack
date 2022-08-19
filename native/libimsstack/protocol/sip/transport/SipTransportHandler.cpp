@@ -253,7 +253,7 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey
         return SIP_FALSE;
     }
 
-    pTxn->increment();
+    pTxn->Increment();
 
     SipTransportInfo* pTranspInfo = pTxn->GetTranspInfo();
     if (pTranspInfo == SIP_NULL)
@@ -305,7 +305,7 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey
         }
 
         /* Change Protocol in Transport Information */
-        pMsgSentTransParam->setTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+        pMsgSentTransParam->SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
 
         *peTxnStatus = SipTxn::STATUS_RETRANSMISSION;
 
@@ -443,10 +443,10 @@ PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg(
     SIP_INT32 eMethodType = SipMessage::METHOD_INVALID;
 
     /* Check if it's proper to start Transaction Ref: RFC 3261 8.1.1.*/
-    if (CheckTxnMadatoryParams(pSipMsg, &eMsgType, &eMethodType) == SIP_FALSE)
+    if (SipMessage::CheckTxnMandatoryParams(pSipMsg, &eMsgType, &eMethodType) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTRANSP,
-                "GetTxnKeyFromSipMsg: CheckTxnMadatoryParams fails\n", SIP_ZERO, SIP_ZERO);
+                "GetTxnKeyFromSipMsg: CheckTxnMandatoryParams fails\n", SIP_ZERO, SIP_ZERO);
 
         return SIP_FALSE;
     }
@@ -479,7 +479,7 @@ PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg(
 PRIVATE SIP_BOOL SipTransportHandler::GetTxnObjFromDb(IN SipTxnKey* pTxnKey, OUT SipTxn** ppTxn,
         OUT SIP_BOOL* pbTxnExist, OUT SIP_UINT16* pnError)
 {
-    SIP_BOOL bTxnExist = sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
+    SIP_BOOL bTxnExist = Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
             TXN_OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(ppTxn));
 
     if ((bTxnExist == SIP_YES) && (*ppTxn == SIP_NULL))

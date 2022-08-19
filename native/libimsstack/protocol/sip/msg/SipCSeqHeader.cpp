@@ -96,13 +96,13 @@ SIP_BOOL SipCSeqHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTempPre = SIP_NULL;
 
-    if (sipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
+    if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "LWS missing in Cseq", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pszSeq = sipCreateString(pStartPt, pTempPre);
+    SIP_CHAR* pszSeq = SipCreateString(pStartPt, pTempPre);
     if (pszSeq == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -119,9 +119,9 @@ SIP_BOOL SipCSeqHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     delete[] pszSeq;
 
     pTempPre = pTempPre + SIP_ONE;
-    pStartPt = sipSkipFwLWS(pTempPre, pEndPt);
+    pStartPt = SipSkipFwLWS(pTempPre, pEndPt);
 
-    m_pszMethod = sipCreateString(pStartPt, pEndPt);
+    m_pszMethod = SipCreateString(pStartPt, pEndPt);
     if (m_pszMethod == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);

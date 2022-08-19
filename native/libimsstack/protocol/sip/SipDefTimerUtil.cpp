@@ -18,18 +18,12 @@
 #include "SipDefTimerUtil.h"
 #include "ServiceTimer.h"
 
-extern SIP_BOOL sip_cbk_startTimer(IN SIP_UINT32 nDuration,
-        IN SipTimerCallback pfnTimerCallback, IN SIP_VOID* pvData, IN SIP_VOID** ppvHandle);
-extern SIP_BOOL sip_cbk_stopTimer(IN SIP_VOID* pvHandle, IN SIP_VOID** ppvData);
+extern SIP_BOOL Sip_Cbk_StartTimer(IN SIP_UINT32 nDuration, IN SipTimerCallback pfnTimerCallback,
+        IN SIP_VOID* pvData, IN SIP_VOID** ppvHandle);
+extern SIP_BOOL Sip_Cbk_StopTimer(IN SIP_VOID* pvHandle, IN SIP_VOID** ppvData);
 
-SipDefTimerUtil::SipDefTimerUtil()
-{
-
-}
-SipDefTimerUtil::~SipDefTimerUtil()
-{
-
-}
+SipDefTimerUtil::SipDefTimerUtil() {}
+SipDefTimerUtil::~SipDefTimerUtil() {}
 
 SIP_BOOL SipDefTimerUtil::StartTimer(SIP_VOID** ppvTimerId, SIP_UINT32 nDuration,
         SIP_UINT16 nResetFlag, SipTimerCallback pfnTimerCallback, SIP_VOID* pvData)
@@ -41,8 +35,7 @@ SIP_BOOL SipDefTimerUtil::StartTimer(SIP_VOID** ppvTimerId, SIP_UINT32 nDuration
 
     (void)nResetFlag;
 
-    return sip_cbk_startTimer(nDuration, pfnTimerCallback, pvData, ppvTimerId);
-
+    return Sip_Cbk_StartTimer(nDuration, pfnTimerCallback, pvData, ppvTimerId);
 }
 SIP_VOID* SipDefTimerUtil::StopTimer(SIP_VOID* pvTimerId)
 {
@@ -52,7 +45,7 @@ SIP_VOID* SipDefTimerUtil::StopTimer(SIP_VOID* pvTimerId)
     }
 
     SIP_VOID* pvData = SIP_NULL;
-    sip_cbk_stopTimer(pvTimerId, &pvData);
+    Sip_Cbk_StopTimer(pvTimerId, &pvData);
 
     return pvData;
 }

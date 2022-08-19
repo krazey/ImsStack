@@ -84,7 +84,7 @@ SipUri* SipTriggerConsentHeader::GetSipUri()
 {
     if (m_pSipUri != SIP_NULL)
     {
-        m_pSipUri->increment();
+        m_pSipUri->Increment();
         return m_pSipUri;
     }
     return SIP_NULL;
@@ -100,7 +100,7 @@ SIP_BOOL SipTriggerConsentHeader::SetSipUri(SipUri* pSipUri)
     {
         m_pSipUri->SipDelete();
     }
-    pSipUri->increment();
+    pSipUri->Increment();
     m_pSipUri = pSipUri;
     return SIP_TRUE;
 }
@@ -128,7 +128,7 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecL
     SIP_CHAR* pTempPre = SIP_NULL;
     SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
@@ -152,9 +152,9 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecL
     // skip "sip:" from the user name
     SIP_CHAR* pszSIPScheme = SIP_NULL;
 
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pszSIPScheme, COLON) == SIP_TRUE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pszSIPScheme, COLON) == SIP_TRUE)
     {
-        SIP_CHAR* pszTempScheme = sipCreateString(pStartPt, pszSIPScheme);
+        SIP_CHAR* pszTempScheme = SipCreateString(pStartPt, pszSIPScheme);
         if (SipPf_Stricmp(pszTempScheme, "sip") == SIP_ZERO)
         {
             pStartPt = pszSIPScheme + 2;

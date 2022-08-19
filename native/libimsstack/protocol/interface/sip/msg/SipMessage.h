@@ -131,7 +131,7 @@ public:
     {
         if (m_pMsgBodyList)
         {
-            m_pMsgBodyList->increment();
+            m_pMsgBodyList->Increment();
         }
         return m_pMsgBodyList;
     }
@@ -148,7 +148,7 @@ public:
     {
         if (m_pReqLine != SIP_NULL)
         {
-            m_pReqLine->increment();
+            m_pReqLine->Increment();
         }
         return m_pReqLine;
     }
@@ -156,7 +156,7 @@ public:
     {
         if (m_pStatusLine != SIP_NULL)
         {
-            m_pStatusLine->increment();
+            m_pStatusLine->Increment();
         }
         return m_pStatusLine;
     }
@@ -195,5 +195,10 @@ public:
     SIP_UINT16 GetStatusCode() const;
 
     SipHeaderBase* GetHeader(SIP_INT32 nType, SIP_UINT32 nIndex);
+
+    static SIP_BOOL CheckTxnMandatoryParams(
+            SipMessage* pSipMsg, SIP_INT32* peMsgType, SIP_INT32* peMethodType);
+
+    static SIP_UINT32 GetRSeqNum(SipMessage* pSipMsg, SIP_INT32 eHdrType);
 };
 #endif  //__SIP_MESSAGE_H__

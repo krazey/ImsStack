@@ -127,7 +127,7 @@ SIP_BOOL SipRequestLine::SetReqUri(SipAddrSpec* pAddrSpec)
     if (pAddrSpec)
     {
         m_pReqUri = pAddrSpec;
-        m_pReqUri->increment();
+        m_pReqUri->Increment();
     }
     return SIP_TRUE;
 }
@@ -136,7 +136,7 @@ SipAddrSpec* SipRequestLine::GetReqUri()
 {
     if (m_pReqUri != SIP_NULL)
     {
-        m_pReqUri->increment();
+        m_pReqUri->Increment();
     }
 
     return m_pReqUri;
@@ -148,14 +148,14 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     /*find first space i.e. end of Method*/
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipRequestLine::DecodeRequestLine: Space Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Create a NULL terminated String of Method*/
-    m_pszMethod = sipCreateString(pStartPt, pTempLoc);
+    m_pszMethod = SipCreateString(pStartPt, pTempLoc);
     if (m_pszMethod == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -168,7 +168,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     pStartPt = pTempLoc + SIP_TWO;
     pTempLoc = SIP_NULL;
     /*find Second space i.e. end of Req URI*/
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipRequestLine::DecodeRequestLine: Space Not Found", SIP_ZERO, SIP_ZERO);
@@ -205,7 +205,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     /*Take the ptr to the start of  Sip Version*/
     pStartPt = pTempLoc + SIP_TWO;
     pTempLoc = SIP_NULL;
-    m_pszSipVersion = sipCreateString(pStartPt, pEndPt);
+    m_pszSipVersion = SipCreateString(pStartPt, pEndPt);
     if (m_pszSipVersion == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,

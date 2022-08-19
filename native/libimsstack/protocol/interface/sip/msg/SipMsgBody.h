@@ -51,7 +51,7 @@ public:
 
     SIP_BOOL DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
-    SipHeaderBase* getNewMIMEHdrObj(SIP_INT32 eHdrType);
+    SipHeaderBase* GetNewMIMEHdrObj(SIP_INT32 eHdrType);
 
     SipHeaderBase* GetUnknownHdr(SIP_UINT32 nIndex);
     inline SIP_UINT32 GetUnknownHdrCount() const
@@ -61,7 +61,7 @@ public:
 
     SIP_BOOL SetMimeHdrs(SipHeaderBase* pHdr);
 
-    SipHeaderBase* getMimeHdrObj(SIP_INT32 eIndex);
+    SipHeaderBase* GetMimeHdrObj(SIP_INT32 eIndex);
 };
 
 /*Class for message body list*/

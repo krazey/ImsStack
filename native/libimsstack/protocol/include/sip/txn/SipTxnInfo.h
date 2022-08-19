@@ -16,7 +16,7 @@
 #ifndef _SIP_TXN_INFO_H
 #define _SIP_TXN_INFO_H
 
-#include "txn/sip_txn_common.h"
+#include "txn/SipTxn.h"
 
 #include "msg/SipMessage.h"
 

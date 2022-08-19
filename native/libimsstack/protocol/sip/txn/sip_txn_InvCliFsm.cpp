@@ -17,7 +17,6 @@
 #include "platform/sip_pf_memory.h"
 #include "platform/sip_pf_string.h"
 
-#include "msg/sip_comdef.h"
 #include "SipConfiguration.h"
 
 #include "sip_error.h"
@@ -36,7 +35,7 @@
 /* Timer D value */
 #define SIP_32Sec 32000
 
-extern SIP_VOID* sip_cbk_createAckRequest(IN SIP_VOID* pvRespMsg, IN ISipUserData* pUserData);
+extern SIP_VOID* Sip_Cbk_CreateAckRequest(IN SIP_VOID* pvRespMsg, IN ISipUserData* pUserData);
 
 static SIP_BOOL InvCliFsm_NullFxn(IN SipTxn* pTxn, IN SIP_VOID* pvData, OUT SIP_UINT16* pnError)
 {
@@ -51,7 +50,7 @@ static SIP_BOOL sipInvCli_HandleFailureResp(IN SipTxn* pTxn, IN_OUT SipTxnFsmDat
         OUT SIP_UINT16* pNewTxnState, OUT SIP_UINT16* pnError)
 {
     SipMessage* pSipAckMsg = reinterpret_cast<SipMessage*>(
-            sip_cbk_createAckRequest(pFsmData->m_pSipMsgIn, pTxn->GetUserData()));
+            Sip_Cbk_CreateAckRequest(pFsmData->m_pSipMsgIn, pTxn->GetUserData()));
 
     if (pSipAckMsg == SIP_NULL)
     {
@@ -115,7 +114,7 @@ static SIP_BOOL InvCliFsm_IdleStSendInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
         return SIP_FALSE;
     }
 
-    if (sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), TXN_OPT_CREATE, SIP_NULL,
+    if (Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), TXN_OPT_CREATE, SIP_NULL,
                 reinterpret_cast<SIP_VOID**>(&pTxn)) == SIP_FALSE)
     {
         delete pNewTxnKey;
@@ -125,7 +124,7 @@ static SIP_BOOL InvCliFsm_IdleStSendInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
     }
 
     /* TxnObj is added to hash, hence increment ref count */
-    pTxn->increment();
+    pTxn->Increment();
 
     /* Start Timers
        1. Retx Timer : Retransmission Timer for UDP only
@@ -227,7 +226,7 @@ static SIP_BOOL InvCliFsm_CallingStTimerA_B_TimeoutEvt(
                intervals that double after each transmission.
             */
             nReTxCount = nReTxCount + SIP_ONE;
-            SIP_UINT32 nPow2 = SipNPower(SIP_TWO, nReTxCount);
+            SIP_UINT32 nPow2 = SIP_ONE << nReTxCount;
             nDuration = nPow2 * nT1Val;
 
             // Update the timer duration.

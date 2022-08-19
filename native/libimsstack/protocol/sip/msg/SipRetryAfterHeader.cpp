@@ -105,7 +105,7 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
         if ((pCommentEnd == SIP_NULL) || ((pTempPre + 1) > pCommentEnd))
         {
@@ -136,7 +136,7 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         }
         else
         {
-            m_pszComment = sipCreateString(pCommentStart + SIP_ONE, pCommentEnd - SIP_ONE);
+            m_pszComment = SipCreateString(pCommentStart + SIP_ONE, pCommentEnd - SIP_ONE);
         }
 
         if (m_pszComment == SIP_NULL)
@@ -148,9 +148,9 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         pEndPt = pCommentStart - 1;
     }
 
-    pEndPt = sipSkipRwLWS(pStartPt, pEndPt);
+    pEndPt = SipSkipRwLWS(pStartPt, pEndPt);
     /*Now decode the delta sec value*/
-    SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
     if (pszValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
