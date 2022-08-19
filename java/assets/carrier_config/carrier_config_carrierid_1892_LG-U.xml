@@ -161,6 +161,7 @@
     <int name="ims.request_uri_type_int" value="0"/>
     <boolean name="maintain_multiple_early_sessions_by_forking_bool" value="true"/>
     <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="false"/>
+    <boolean name="imsvt.video_qos_precondition_supported_bool" value="false"/>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
     <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="true"/>
     <boolean name="imsvoice.prack_supported_for_18x_bool" value="false"/>
