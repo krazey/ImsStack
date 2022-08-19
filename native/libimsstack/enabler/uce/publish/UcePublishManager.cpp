@@ -1837,6 +1837,7 @@ IMS_BOOL UcePublishManager::ProcessExponentialRetryResponseScenario()
             m_objExponentialRetryTimeSec.GetAt(m_nExponentialRetryCount);
     if (StartTimer(TIMER_EXPONENTIAL, nExponentialRetryTimeSec))
     {
+        DestroyPublication();
         if (GetState() == PUBLISHING)
         {
             SetState(ON);
@@ -1960,11 +1961,13 @@ void UcePublishManager::StopTimer(INTERNAL_TIMER eTimer)
 
 void UcePublishManager::HandleExponentialRetryTimer()
 {
-    IMS_TRACE_I("HandleExponentialRetryTimer:Current State[%d]", StateToString(m_eState), 0, 0);
+    IMS_TRACE_I("HandleExponentialRetryTimer:Current State[%s]", StateToString(m_eState), 0, 0);
     if (GetState() == PUBLISHING || GetState() == ON)
     {
+        m_strEtag = AString::ConstEmpty();
         if (RetryPublish(INITIAL) == IMS_TRUE)
         {
+            SetState(PUBLISHING);
             return;
         }
     }
