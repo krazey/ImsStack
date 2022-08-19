@@ -1060,14 +1060,12 @@ IMS_BOOL UcePublishManager::StateREFRESHING_RefreshFailed(IN IMSMSG& objMsg)
             SetState(PUBLISHING);
             return IMS_TRUE;
         }
-        if (m_pPendingPublicationData != IMS_NULL)
-        {
-            SetState(ON);
-            SendPendingPublishRequest();
-        }
         else
         {
-            SetState(PUBLISHED);
+            if (m_pPendingPublicationData != IMS_NULL)
+            {
+                SendPendingPublishRequest();
+            }
         }
     }
     return IMS_TRUE;
@@ -1122,18 +1120,44 @@ IMS_BOOL UcePublishManager::StateALL_Terminated(IN IMSMSG& objMsg)
 {
     (void)objMsg;
     IMS_TRACE_I("StateALL_Terminated:current State[%s]", StateToString(m_eState), 0, 0);
-    StopTimer(TIMER_ALL);
     DestroyPublication();
     switch (GetState())
     {
         case PUBLISHING:
             SendPublishCommandErrorInd(m_nKey, IUUceService::COMMAND_CODE_GENERIC_FAILURE);
+            StopTimer(TIMER_ALL);
             break;
         case REFRESHING:
             SendPublishResponseInd(m_nKey, SipStatusCode::SC_504, "Server Time-out", 0, "", "");
+            switch (UceConfig::GetInstance()->GetPublishRetryType(
+                    SipStatusCode::SC_699, m_nSimSlot))
+            {
+                case UceConfig::IMMEDIATELY:
+                    if (!ProcessImmediatelyRetryResponseScenario())
+                    {
+                        StopTimer(TIMER_ALL);
+                    }
+                    break;
+                case UceConfig::RETRY:
+                    if (!ProcessRetryResponseScenario())
+                    {
+                        StopTimer(TIMER_ALL);
+                    }
+                    break;
+                case UceConfig::EXPONENTIAL:
+                    if (!ProcessExponentialRetryResponseScenario())
+                    {
+                        StopTimer(TIMER_ALL);
+                    }
+                    break;
+                default:
+                    StopTimer(TIMER_ALL);
+                    break;
+            }
             break;
         case TERMINATING:
             SendPublishResponseInd(m_nKey, SipStatusCode::SC_504, "Server Time-out", 0, "", "");
+            StopTimer(TIMER_ALL);
             break;
         default:
             break;
@@ -1678,6 +1702,7 @@ IMS_BOOL UcePublishManager::Process403Scenario()
         IMSMSG objMsg(
                 AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
         MessageService::PostMessage(m_strAppName, objMsg);
+        IMS_TRACE_D("Send Register Recovery message to the App", 0, 0, 0);
         return IMS_TRUE;
     }
     for (IMS_UINT32 i = 0; i < objReasonList.GetSize(); i++)
@@ -1692,6 +1717,7 @@ IMS_BOOL UcePublishManager::Process403Scenario()
     }
     IMSMSG objMsg(AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
     MessageService::PostMessage(m_strAppName, objMsg);
+    IMS_TRACE_D("Send Register Recovery message to the App", 0, 0, 0);
     return IMS_TRUE;
 }
 
@@ -1743,6 +1769,7 @@ IMS_BOOL UcePublishManager::ProcessImmediatelyRetryResponseScenario()
         IMS_TRACE_I("ProcessImmediatelyRetryResponseScenario:over max "
                     "ImmediatelyRetryMaxCount",
                 0, 0, 0);
+        SetState(ON);
         return IMS_FALSE;
     }
     if (GetState() == PUBLISHING)
@@ -1761,6 +1788,7 @@ IMS_BOOL UcePublishManager::ProcessImmediatelyRetryResponseScenario()
             return IMS_TRUE;
         }
     }
+    SetState(ON);
     return IMS_FALSE;
 }
 
@@ -1770,6 +1798,7 @@ IMS_BOOL UcePublishManager::ProcessRetryResponseScenario()
                                  UceConfig::KEY_RETRY_PUBLISH_RESPONSE_MAX_COUNT, m_nSimSlot))
     {
         IMS_TRACE_I("ProcessRetryResponseScenario:over max RetryMaxCount", 0, 0, 0);
+        SetState(ON);
         return IMS_FALSE;
     }
     if (StartTimer(TIMER_RETRY,
@@ -1779,6 +1808,7 @@ IMS_BOOL UcePublishManager::ProcessRetryResponseScenario()
         m_nRetryCount++;
         return IMS_TRUE;
     }
+    SetState(ON);
     return IMS_FALSE;
 }
 
@@ -1791,6 +1821,7 @@ IMS_BOOL UcePublishManager::ProcessExponentialRetryResponseScenario()
         if (m_nExponentialRetryCount >= nExponentialRetryMaxCount)
         {
             IMS_TRACE_I("ProcessExponentialRetryResponseScenario:over max MaxCount", 0, 0, 0);
+            SetState(ON);
             return IMS_FALSE;
         }
     }
@@ -1806,9 +1837,14 @@ IMS_BOOL UcePublishManager::ProcessExponentialRetryResponseScenario()
             m_objExponentialRetryTimeSec.GetAt(m_nExponentialRetryCount);
     if (StartTimer(TIMER_EXPONENTIAL, nExponentialRetryTimeSec))
     {
+        if (GetState() == PUBLISHING)
+        {
+            SetState(ON);
+        }
         m_nExponentialRetryCount++;
         return IMS_TRUE;
     }
+    SetState(ON);
     return IMS_FALSE;
 }
 
@@ -1925,7 +1961,7 @@ void UcePublishManager::StopTimer(INTERNAL_TIMER eTimer)
 void UcePublishManager::HandleExponentialRetryTimer()
 {
     IMS_TRACE_I("HandleExponentialRetryTimer:Current State[%d]", StateToString(m_eState), 0, 0);
-    if (GetState() == PUBLISHING)
+    if (GetState() == PUBLISHING || GetState() == ON)
     {
         if (RetryPublish(INITIAL) == IMS_TRUE)
         {

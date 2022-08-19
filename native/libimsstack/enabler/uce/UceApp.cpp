@@ -42,7 +42,6 @@ __IMS_TRACE_TAG_USER_DECL__("UCE");
 UceApp::UceApp(IN const IMS_SINT32 nSlotId, IN const AString& strAppName) :
         ImsApp(strAppName),
         m_nSlotId(nSlotId),
-        m_strAppName(strAppName),
         m_eAoSStatus(AOS_DISCONNECTED),
         m_piImsAos(IMS_NULL),
         m_piNetWatcherInfo(IMS_NULL),
@@ -51,6 +50,7 @@ UceApp::UceApp(IN const IMS_SINT32 nSlotId, IN const AString& strAppName) :
         m_eCurrentNetwork(eUCE_RAT_INVALID),
         m_pUceService(IMS_NULL)
 {
+    m_strAppName = GetName();
     IMS_TRACE_D("UCE_M : UceApp = %" PFLS_u, sizeof(UceApp), 0, 0);
     IMS_TRACE_I("UceApp - strName (%s)", strAppName.GetStr(), 0, 0);
     m_strAppID = ImsServiceConfig::GetAppName(ImsAppId::UCE);
@@ -561,7 +561,7 @@ void UceApp::NotifyRATChanged()
 PRIVATE
 void UceApp::EnableAllAoSApps()
 {
-    IMS_TRACE_I("EnableAllAoSApps", 0, 0, 0);
+    IMS_TRACE_I("EnableAllAoSApps.AppName[%s]", m_strAppName.GetStr(), 0, 0);
 
     IMSList<IImsAos*> objImsAosList = ImsAos::GetImsAosList(m_strAppID, m_strServiceID, m_nSlotId);
 
@@ -620,7 +620,6 @@ AString UceApp::GetUceAppName(IN IMS_SINT32 nSlotId)
     // AString strName;
     // strName.Sprintf("%s%02d", GetPrefixForMultiApp(), nSlotId);
     AString strName(GetPrefixForMultiApp());
-
     return strName;
 }
 
