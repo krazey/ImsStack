@@ -36,16 +36,16 @@ enum class AosPcscfOrder;
 class IAosService
 {
 public:
-    virtual void SetJniAosService(IN JniAosService* pJniAosService) = 0;
+    virtual IMS_BOOL SetJniAosService(IN JniAosService* pJniAosService) = 0;
 
-    virtual void AddListener(IN IAosRegistrationControlListener* piListener) = 0;
-    virtual void RemoveListener(IN IAosRegistrationControlListener* piListener) = 0;
+    virtual IMS_BOOL AddListener(IN IAosRegistrationControlListener* piListener) = 0;
+    virtual IMS_BOOL RemoveListener(IN IAosRegistrationControlListener* piListener) = 0;
 
-    virtual void AddListener(IN IAosServiceSettingListener* piListener) = 0;
-    virtual void RemoveListener(IN IAosServiceSettingListener* piListener) = 0;
+    virtual IMS_BOOL AddListener(IN IAosServiceSettingListener* piListener) = 0;
+    virtual IMS_BOOL RemoveListener(IN IAosServiceSettingListener* piListener) = 0;
 
-    virtual void AddListener(IN IAosServicePhoneListener* piListener) = 0;
-    virtual void RemoveListener(IN IAosServicePhoneListener* piListener) = 0;
+    virtual IMS_BOOL AddListener(IN IAosServicePhoneListener* piListener) = 0;
+    virtual IMS_BOOL RemoveListener(IN IAosServicePhoneListener* piListener) = 0;
 
     /**
      * AosService(Java) -> IAosRegistrationControlListener(Native)
@@ -99,7 +99,7 @@ public:
      * @see class ImsAosFeature
      * @see class AosNetworkType
      */
-    virtual void NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
+    virtual IMS_BOOL NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
             IN const IMSList<AString>& objFeatureTags) = 0;
 
     /**
@@ -111,8 +111,8 @@ public:
      * @see class ImsAosFeature
      * @see class NetworkType
      */
-    virtual void NotifyRegistering(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const IMSList<AString>& objFeatureTags) = 0;
+    virtual IMS_BOOL NotifyRegistering(IN AosNetworkType eNetworkType,
+            IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags) = 0;
 
     /**
      * Notify the application that the device is disconnected from the IMS network.
@@ -120,7 +120,7 @@ public:
      * @param eReason associated with why registration was disconnected.
      * @see class AosReasonCode
      */
-    virtual void NotifyDeregistered(IN AosReasonCode eReason) = 0;
+    virtual IMS_BOOL NotifyDeregistered(IN AosReasonCode eReason) = 0;
 
     /**
      * Notify the framework that the handover from the current radio technology to the other
@@ -131,7 +131,7 @@ public:
      * @see class AosNetworkType
      * @see class android.telephony.DataFailCause
      */
-    virtual void NotifyTechnologyChangeFailed(
+    virtual IMS_BOOL NotifyTechnologyChangeFailed(
             IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) = 0;
 
     /**
@@ -141,7 +141,7 @@ public:
      * @param objUris is type of const IMSList<AString>&, the network provisioned
      * public user identities.
      */
-    virtual void NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris) = 0;
+    virtual IMS_BOOL NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris) = 0;
 
     /**
      * This method is called when capability update fails after
@@ -154,7 +154,7 @@ public:
      * @see class AosNetworkType
      * @see class AosReasonCode
      */
-    virtual void NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
+    virtual IMS_BOOL NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
             IN AosNetworkType eNetworkType, IN AosReasonCode eReason) = 0;
 
     /**
@@ -164,7 +164,7 @@ public:
      * @param nState is type of AosIsimState.
      * @see enum class AosIsimState
      */
-    virtual void NotifyAosIsimState(IN AosIsimState eState) = 0;
+    virtual IMS_BOOL NotifyAosIsimState(IN AosIsimState eState) = 0;
 
     /**
      * Notify the application that Reg event state.
@@ -173,7 +173,7 @@ public:
      * @param nState is type of AosRegEvent.
      * @see enum class AosRegEvent
      */
-    virtual void NotifyRegEventState(IN AosRegEvent eState) = 0;
+    virtual IMS_BOOL NotifyRegEventState(IN AosRegEvent eState) = 0;
 
     /**
      * Request the application to phone number retry.
@@ -182,7 +182,7 @@ public:
      * @param nCommand is type of AosPhoneNumberRetryCommand.
      * @see enum AosPhoneNumberRetryCommand
      */
-    virtual void RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand) = 0;
+    virtual IMS_BOOL RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand) = 0;
 
     /**
      * Request the application to Wifi on or off.
@@ -190,7 +190,7 @@ public:
      *
      * @param bIsOn {@code IMS_TRUE} if on, {@code IMS_FALSE} if off.
      */
-    virtual void RequestWifiService(IN IMS_BOOL bIsOn) = 0;
+    virtual IMS_BOOL RequestWifiService(IN IMS_BOOL bIsOn) = 0;
 
     /**
      * Returns capabilities.
