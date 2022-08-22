@@ -31,7 +31,7 @@
     <!-- Ut/Xcap AOSP - Ut not supported -->
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
 
-    <!--Ut/Xcap Assets -->
+    <!-- Ut/Xcap Assets -->
     <int name="ut_oir_network_default_operation_int" value="1"/>
 
     <int-array name="imsvoice.srvcc_type_int_array" num="3">

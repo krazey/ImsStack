@@ -22,7 +22,7 @@
     <int name="imsss.ut_as_server_port_int" value="8090"/>
     <int name="imsss.ut_transport_type_int" value="1"/>
 
-    <!--Ut/Xcap Config -->
+    <!-- Ut/Xcap Config -->
     <!-- AUID prefix is from previous solution. No requirements -->
     <string name="imsss.xcap_auid_prefix_string">/MYSERVICE</string>
 </carrier_config>

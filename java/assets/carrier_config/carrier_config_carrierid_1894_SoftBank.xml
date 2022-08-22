@@ -39,6 +39,6 @@
     <int name="imsss.ut_as_server_port_int" value="443"/>
     <int name="imsss.ut_transport_type_int" value="3"/>
 
-    <!--Ut/Xcap Assets -->
+    <!-- Ut/Xcap Assets -->
     <string name="ut_target_address_country_code_replace_to_zero_string">+81</string>
 </carrier_config>
