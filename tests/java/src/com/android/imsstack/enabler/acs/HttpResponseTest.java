@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.acs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -37,6 +38,10 @@ import org.mockito.MockitoAnnotations;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class HttpResponseTest {
     private static final int SLOT_ID = 0;
@@ -92,5 +97,48 @@ public class HttpResponseTest {
         doReturn(true).when(mInputStream).markSupported();
         doReturn(-1).when(mInputStream).read();
         assertNull(mHttpResponse.getBody());
+    }
+
+    @Test
+    @SmallTest
+    public void testGetCookies() throws Exception {
+        List<String> cookies = new LinkedList<String>();
+        cookies.add("");
+        Map<String, List<String>> headerMap = new HashMap<>();
+        headerMap.put("Set-Cookie", cookies);
+        doReturn(headerMap).when(mHttpURLConnection).getHeaderFields();
+        assertEquals(new LinkedList<String>(), mHttpResponse.getCookies());
+
+        cookies.clear();
+        cookies.add("abcd");
+        headerMap.put("Set-Cookie", cookies);
+        assertEquals(cookies, mHttpResponse.getCookies());
+        verify(mHttpURLConnection, times(2))
+                .getHeaderFields();
+    }
+
+    @Test
+    @SmallTest
+    public void testSetCookies() throws Exception {
+        List<String> cookies = new LinkedList<String>();
+        cookies.add("abcd");
+        mHttpResponse.setCookies(cookies);
+        verify(mHttpURLConnection, times(1))
+                .setRequestProperty(eq("Cookie"), eq("abcd"));
+    }
+
+    @Test
+    @SmallTest
+    public void testGetRetryAfter() throws Exception {
+        // when number format exception is occurred, return default value
+        doReturn("2147483648").when(mHttpURLConnection).getHeaderField("Retry-After");
+        assertEquals(0, mHttpResponse.getRetryAfter());
+
+        // return available value
+        doReturn("1000").when(mHttpURLConnection).getHeaderField("Retry-After");
+
+        assertEquals(1000, mHttpResponse.getRetryAfter());
+        verify(mHttpURLConnection, times(2))
+                .getHeaderField(eq("Retry-After"));
     }
 }

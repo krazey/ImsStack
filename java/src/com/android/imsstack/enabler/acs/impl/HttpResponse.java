@@ -158,19 +158,6 @@ public class HttpResponse {
     }
 
     /**
-     * Gets the header value from an HTTP response.
-     *
-     * @param headerName header field
-     * @return the value of the header or null
-     */
-    public String getHeader(String headerName) {
-        if (mHttpURLConnection == null) {
-            return null;
-        }
-        return mHttpURLConnection.getHeaderField(headerName);
-    }
-
-    /**
      * Gets the cookie header value from an HTTP response.
      *
      * @return the cookie header's value or empty list
@@ -246,6 +233,14 @@ public class HttpResponse {
 
         ImsLog.d(mSlotId, "retry after " + retryAfter + " header " + header);
         return retryAfter;
+    }
+
+    private String getHeader(String headerName) {
+        if (mHttpURLConnection == null) {
+            ImsLog.d(mSlotId, "mHttpURLConnection is null");
+            return null;
+        }
+        return mHttpURLConnection.getHeaderField(headerName);
     }
 
     private boolean hasXML(InputStream inputStream) {
