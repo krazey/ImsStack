@@ -574,52 +574,22 @@ SIP_BOOL SipMessage::EncodeMsgBodyAndUpdateContentHdrs(
 
     if (pContentType != SIP_NULL)
     {
-        const SIP_CHAR* pszSubMediaType = pContentType->GetSubMediaType();
-        if (pszSubMediaType == SIP_NULL)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Content Type Invalid", SIP_ZERO, SIP_ZERO);
-            pContentType->SipDelete();
-            return SIP_FALSE;
-        }
+        /*Get the boundary*/
+        SIP_CHAR* pszBoundary = pContentType->GetBoundary();
+        pContentType->SipDelete();
 
-        if (SipPf_Strstr(pszSubMediaType, "message-summary") != SIP_NULL)
+        if (m_pMsgBodyList->GetEncodedMessageBody(ppMsgBody, nMsgLen, pszBoundary) == SIP_FALSE)
         {
-            pContentType->SipDelete();
-            SipMsgBody* pBody = m_pMsgBodyList->GetBodyByIndex(SIP_ZERO);
-            if (pBody == SIP_NULL)
-            {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Msg Body NULL", SIP_ZERO, SIP_ZERO);
-                return SIP_FALSE;
-            }
-            SIP_CHAR* pBuffStart = *ppMsgBody;
-            if (pBody->EncodeMessageSummaryMsgBody(&pBuffStart) == SIP_FALSE)
-            {
-                SIP_DEBUG_WARNING(
-                        ESIPTRACE_MODENCODER, "Encode message-summary fail", SIP_ZERO, SIP_ZERO);
-                return SIP_FALSE;
-            }
-            pBody->SipDelete();
-            nMsgLen = SipPf_Strlen(*ppMsgBody);
-        }
-        else
-        {
-            /*Get the boundary*/
-            SIP_CHAR* pszBoundary = pContentType->GetBoundary();
-            pContentType->SipDelete();
-
-            if (m_pMsgBodyList->GetEncodedMessageBody(ppMsgBody, nMsgLen, pszBoundary) == SIP_FALSE)
-            {
-                if (pszBoundary != SIP_NULL)
-                {
-                    delete[] pszBoundary;
-                }
-                return SIP_FALSE;
-            }
-
             if (pszBoundary != SIP_NULL)
             {
                 delete[] pszBoundary;
             }
+            return SIP_FALSE;
+        }
+
+        if (pszBoundary != SIP_NULL)
+        {
+            delete[] pszBoundary;
         }
     }
 
@@ -763,7 +733,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
             return SIP_FALSE;
         }
     }
-    else if (eMsgType == SipMessage::RESP_TYPE)
+    else
     {
         m_pStatusLine = new SipStatusLine();
         if (m_pStatusLine == SIP_NULL)
@@ -779,12 +749,6 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
                     SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-    }
-    else
-    {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecCompleteMsg:Message Type Invalid", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
     }
 
     /*set the message type in message object*/
@@ -964,6 +928,13 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         return SIP_FALSE;
     }
 
+    if (HasHeader(SipHeaderBase::CONTENT_TYPE) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
+                "DecCompleteMsg:Message body present without content type", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
     /*Now Check for MIME or Single Body*/
     // If body list already present, free it
     if (m_pMsgBodyList != SIP_NULL)
@@ -1003,12 +974,31 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         }
     }
 
+    SIP_BOOL bSingleBody = SIP_TRUE;
     SipContentTypeHeader* pContentType =
             (SipContentTypeHeader*)m_objHdrs->GetHdrObj(SipHeaderBase::CONTENT_TYPE);
-    if (pContentType == SIP_NULL)
+
+    if (pContentType != SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecCompleteMsg: No Content-Type header", SIP_ZERO, SIP_ZERO);
+        const SIP_CHAR* pszMType = pContentType->GetMediaType();
+        if (pszMType == SIP_NULL)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Wrong Content Type", SIP_ZERO, SIP_ZERO);
+            pContentType->SipDelete();
+            m_pMsgBodyList->SipDelete();
+            m_pMsgBodyList = SIP_NULL;
+            return SIP_FALSE;
+        }
+
+        bSingleBody = (SipPf_Stricmp(pszMType, MULTIPART) == SIP_ZERO) ? SIP_FALSE : SIP_TRUE;
+        if (bSingleBody == SIP_TRUE)
+        {
+            pContentType->SipDelete();
+        }
+    }
+
+    if (bSingleBody == SIP_TRUE)
+    {
         if (m_pMsgBodyList->DecodeSingleBody(pStartPt, pEndPt) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Decode single body fail",
@@ -1020,82 +1010,28 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
     }
     else
     {
-        const SIP_CHAR* pszSubMType = pContentType->GetSubMediaType();
-        if (pszSubMType == SIP_NULL)
+        SIP_CHAR* pszBoundary = pContentType->GetBoundary();
+        pContentType->SipDelete();
+
+        if (pszBoundary == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Wronge Content Type", SIP_ZERO, SIP_ZERO);
-            pContentType->SipDelete();
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "No boundary in Content Type Hdr", SIP_ZERO, SIP_ZERO);
             m_pMsgBodyList->SipDelete();
             m_pMsgBodyList = SIP_NULL;
             return SIP_FALSE;
         }
 
-        if (SipPf_Strstr(pszSubMType, "message-summary") != SIP_NULL)
+        if (m_pMsgBodyList->DecodeMIMEBody(pStartPt, pEndPt, pszBoundary) == SIP_FALSE)
         {
-            if (m_pMsgBodyList->DecodeMessageSummaryBody(pStartPt, pEndPt) == SIP_FALSE)
-            {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                        "DecCompleteMsg:Decode message summary fail", SIP_ZERO, SIP_ZERO);
-                pContentType->SipDelete();
-                m_pMsgBodyList->SipDelete();
-                m_pMsgBodyList = SIP_NULL;
-                return SIP_FALSE;
-            }
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Decode MIME body fail",
+                    SIP_ZERO, SIP_ZERO);
+            delete[] pszBoundary;
+            m_pMsgBodyList->SipDelete();
+            m_pMsgBodyList = SIP_NULL;
+            return SIP_FALSE;
         }
-        else
-        {
-            const SIP_CHAR* pszMType = pContentType->GetMediaType();
-            if (pszMType == SIP_NULL)
-            {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Wronge Content Type", SIP_ZERO, SIP_ZERO);
-                pContentType->SipDelete();
-                m_pMsgBodyList->SipDelete();
-                m_pMsgBodyList = SIP_NULL;
-                return SIP_FALSE;
-            }
-
-            SIP_BOOL bSingleBody = (SIP_BOOL)SipPf_Stricmp(pszMType, MULTIPART);
-
-            /*bSingleBody will be false if it is a MIME body*/
-            if (bSingleBody == SIP_FALSE)
-            {
-                SIP_CHAR* pszBoundary = pContentType->GetBoundary();
-                if (pszBoundary == SIP_NULL)
-                {
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "No boundary in Content Type Hdr",
-                            SIP_ZERO, SIP_ZERO);
-                    pContentType->SipDelete();
-                    m_pMsgBodyList->SipDelete();
-                    m_pMsgBodyList = SIP_NULL;
-                    return SIP_FALSE;
-                }
-                if (m_pMsgBodyList->DecodeMIMEBody(pStartPt, pEndPt, pszBoundary) == SIP_FALSE)
-                {
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Hdr Decoding fail",
-                            SIP_ZERO, SIP_ZERO);
-                    delete[] pszBoundary;
-                    pContentType->SipDelete();
-                    m_pMsgBodyList->SipDelete();
-                    m_pMsgBodyList = SIP_NULL;
-                    return SIP_FALSE;
-                }
-                delete[] pszBoundary;
-            }
-            else
-            {
-                if (m_pMsgBodyList->DecodeSingleBody(pStartPt, pEndPt) == SIP_FALSE)
-                {
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Hdr Decoding fail",
-                            SIP_ZERO, SIP_ZERO);
-                    pContentType->SipDelete();
-                    m_pMsgBodyList->SipDelete();
-                    m_pMsgBodyList = SIP_NULL;
-                    return SIP_FALSE;
-                }
-            }
-        }
-
-        pContentType->SipDelete();
+        delete[] pszBoundary;
     }
 
     return SIP_TRUE;

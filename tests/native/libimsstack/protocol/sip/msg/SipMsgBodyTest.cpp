@@ -102,7 +102,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     pEmptyMessageBody->SipDelete();
 
     /* Level - 1 Start */
-    SipMsgBody* pMessageBodyLevel1 = new SipMsgBody(SipMsgBody::MULTI_PART_MIXED_BODY);
+    SipMsgBody* pMessageBodyLevel1 = new SipMsgBody(SipMsgBody::MULTI_PART_BODY);
     ASSERT_TRUE(pMessageBodyLevel1 != nullptr);
 
     /* Level - 1 Headers */
@@ -114,7 +114,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     pContentTypeHeader->SipDelete();
 
     /* Level - 2 Start */
-    SipMsgBody* pMessageBodyLevel2 = new SipMsgBody(SipMsgBody::MULTI_PART_MIXED_BODY);
+    SipMsgBody* pMessageBodyLevel2 = new SipMsgBody(SipMsgBody::MULTI_PART_BODY);
     ASSERT_TRUE(pMessageBodyLevel2 != nullptr);
 
     /* Level - 2 Headers */
@@ -233,7 +233,7 @@ TEST_F(SipMsgBodyTest, EncodeBody)
     EXPECT_STREQ("single body", pMessageBody->GetBuffer());
     pMessageBody->SipDelete();
 
-    pMessageBody = new SipMsgBody(SipMsgBody::MULTI_PART_MIXED_BODY);
+    pMessageBody = new SipMsgBody(SipMsgBody::MULTI_PART_BODY);
     ASSERT_TRUE(pMessageBody != nullptr);
 
     SipContentTypeHeader* pContentTypeHeader = reinterpret_cast<SipContentTypeHeader*>(
@@ -456,44 +456,6 @@ level1 - message body 2\r\n\
 
     EXPECT_EQ(SIP_FALSE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen - 1));
     pMessageBody->SipDelete();
-}
-
-TEST_F(SipMsgBodyTest, DecodeAndEncodeMessageSummaryMsgBody)
-{
-    SipMsgBody* pEmptyMessageBody = new SipMsgBody();
-    ASSERT_TRUE(pEmptyMessageBody != nullptr);
-
-    /* Empty message body, fail */
-    EXPECT_EQ(SIP_FALSE, pEmptyMessageBody->EncodeMessageSummaryMsgBody(nullptr));
-    EXPECT_EQ(SIP_FALSE, pEmptyMessageBody->DecodeMessageSummaryMsgBody(nullptr, nullptr));
-
-    pEmptyMessageBody->SipDelete();
-
-    SipMsgBody* pMessageBody = new SipMsgBody(SipMsgBody::MESSAGE_SUMMARY_BODY);
-    ASSERT_TRUE(pMessageBody != nullptr);
-
-    char* pMessageSummary = (char*)"Messages-Waiting: No\r\n";
-    int nLen = strlen(pMessageSummary);
-
-    EXPECT_EQ(SIP_TRUE,
-            pMessageBody->DecodeMessageSummaryMsgBody(pMessageSummary, pMessageSummary + nLen - 1));
-
-    SipMsgBody* pCopyMessageBody = new SipMsgBody(*pMessageBody);
-    ASSERT_TRUE(pCopyMessageBody != nullptr);
-
-    pMessageBody->SipDelete();
-
-    const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
-            0,
-    };
-    char* pBuff = &(aBuffer[0]);
-
-    EXPECT_EQ(SIP_TRUE, pCopyMessageBody->EncodeMessageSummaryMsgBody(&pBuff));
-
-    EXPECT_STREQ("Messages-Waiting: No\r\n", &(aBuffer[0]));
-
-    pCopyMessageBody->SipDelete();
 }
 
 }  // namespace android

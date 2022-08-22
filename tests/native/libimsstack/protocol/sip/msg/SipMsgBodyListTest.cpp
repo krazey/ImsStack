@@ -110,37 +110,6 @@ and no headers and boundary present\r\n";
     ASSERT_TRUE(pMessageBody == nullptr);
 }
 
-TEST_F(SipMsgBodyListTest, DecodeMessageSummaryBody)
-{
-    SipMsgBodyList* pList = new SipMsgBodyList();
-    ASSERT_TRUE(pList != nullptr);
-
-    char* pMessageSummary = (char*)"Messages-Waiting: No\r\n";
-    int nLen = strlen(pMessageSummary);
-
-    EXPECT_EQ(SIP_TRUE, pList->DecodeMessageSummaryBody(pMessageSummary, pMessageSummary + nLen));
-
-    EXPECT_EQ(1, pList->GetMsgBodyCount());
-
-    SipMsgBody* pMessageBody = pList->GetBodyByIndex(0);
-    ASSERT_TRUE(pMessageBody != nullptr);
-
-    pMessageBody->SipDelete();
-    pList->SipDelete();
-
-    /* No value present for Messages-Waiting, fail */
-    pList = new SipMsgBodyList();
-    ASSERT_TRUE(pList != nullptr);
-
-    pMessageSummary = (char*)"Messages-Waiting:\r\n";
-    nLen = strlen(pMessageSummary);
-
-    EXPECT_EQ(SIP_FALSE, pList->DecodeMessageSummaryBody(pMessageSummary, pMessageSummary + nLen));
-
-    pMessageBody->SipDelete();
-    pList->SipDelete();
-}
-
 TEST_F(SipMsgBodyListTest, DecodeMIMEBody)
 {
     SipMsgBodyList* pList = new SipMsgBodyList();

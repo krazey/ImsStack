@@ -617,7 +617,7 @@ Messages-Waiting: No\r\n";
     pMessageBody = pCopyMessage->GetMsgBody(0);
     ASSERT_TRUE(pMessageBody != nullptr);
 
-    EXPECT_EQ(SipMsgBody::MESSAGE_SUMMARY_BODY, pMessageBody->GetBodyType());
+    EXPECT_EQ(SipMsgBody::SINGLE_BODY, pMessageBody->GetBodyType());
 
     pMessageBody->SipDelete();
 
@@ -987,6 +987,24 @@ Content-Length: 0\r\n\
 
     EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecCompleteMsg(pMsg, strlen(pMsg)));
     EXPECT_EQ(SIP_FALSE, pDecodeMessage->HasMandatoryHdrs());
+
+    pDecodeMessage->SipDelete();
+
+    /* With message body and no content-type header, fail */
+    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/TCP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 23\r\n\
+\r\n\
+Messages-Waiting: yes\r\n";
+
+    pDecodeMessage = new SipMessage();
+    ASSERT_TRUE(pDecodeMessage != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 }
