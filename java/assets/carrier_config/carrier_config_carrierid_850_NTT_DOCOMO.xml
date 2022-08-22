@@ -70,7 +70,6 @@
     <int name="imsvoice.ringing_timer_millis_int" value="180000"/>
     <int name="imsvoice.ringback_timer_millis_int" value="180000"/>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
-    <int name="imsvoice.mo_call_request_timeout_millis_int" value="8000"/>
     <int name="imsvoice.18x_timer_millis_int" value="-1"/>
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="403"/>
     <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="486"/>
