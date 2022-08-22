@@ -64,7 +64,8 @@
 
     <!-- Media -->
     <boolean name="audio_hold_with_direction_inactive_bool" value="true"/>
-    <int-array name="imsvoice.audio_port_rtp_int_array" num="2">
+    <boolean name="sdp_reoffer_full_capability_bool" value="true"/>
+    <int-array name="audio_rtp_port_range_int_array" num="2">
         <item value="1230"/>
         <item value="1236"/>
     </int-array>
@@ -128,7 +129,7 @@
     <!-- <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="1"/> -->
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
 
-    <int-array name="imsvt.video_port_rtp_int_array" num="2">
+    <int-array name="video_rtp_port_range_int_array" num="2">
         <item value="1254"/>
         <item value="1254"/>
     </int-array>
@@ -142,11 +143,6 @@
     <string-array name="imsvt.video_codec_image_attr_string_array" num="1">
         <item value="send [x=480,y=640] recv [x=480,y=640] "/>
     </string-array>
-    <boolean name="imsvt.video_avpf_trr_bool" value="false"/>
-    <boolean name="imsvt.video_avpf_nack_bool" value="false"/>
-    <boolean name="imsvt.video_avpf_tmmbr_bool" value="false"/>
-    <boolean name="imsvt.video_avpf_pli_bool" value="false"/>
-    <boolean name="imsvt.video_avpf_fir_bool" value="false"/>
     <int-array name="imsvt.h264_payload_type_int_array" num="1">
         <item value="104"/>
     </int-array>

@@ -35,4 +35,7 @@
     </int-array>
     <!--Ut/Xcap Assets -->
     <int name="ut_oir_network_default_operation_int" value="1"/>
+
+    <!-- Media -->
+    <boolean name="sdp_reoffer_full_capability_bool" value="true"/>
 </carrier_config>
