@@ -115,105 +115,6 @@ protected:
     }
 };
 
-TEST_F(MtcCallTest, CallKeyIsValidInitially)
-{
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
-    NullCall objNullCall;
-
-    EXPECT_NE(objNullCall.GetKey(), objCall.GetKey());
-}
-
-TEST_F(MtcCallTest, CallKeysAreNotOverlapped)
-{
-    MtcCall objCall1(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
-    MtcCall objCall2(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
-
-    EXPECT_NE(objCall1.GetKey(), objCall2.GetKey());
-}
-
-TEST_F(MtcCallTest, HandleIncomingCallsState)
-{
-    MockISession objSession;
-    JniMtcServiceThread* pServiceThread = reinterpret_cast<JniMtcServiceThread*>(0x1);
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleIncoming(&objSession, pServiceThread))
-            .Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.HandleIncoming(&objSession, pServiceThread);
-}
-
-TEST_F(MtcCallTest, HandleIncomingCallsStateForUssi)
-{
-    MockISipMessage objUssiSipMessage;
-    AString strRecvInfo(UssiConstants::HEADER_RECVINFO);
-    ImsList<AString> lstRecvInfoHeaders;
-    lstRecvInfoHeaders.Append(UssiConstants::HEADER_USSD_PACKAGE);
-    ON_CALL(objUssiSipMessage, GetHeaders(ISipHeader::UNKNOWN, strRecvInfo))
-            .WillByDefault(Return(lstRecvInfoHeaders));
-    ImsList<AString> lstAcceptHeaders;
-    lstAcceptHeaders.Append(UssiConstants::HEADER_APPLICATION_USSDXML);
-    ON_CALL(objUssiSipMessage, GetHeaders(ISipHeader::ACCEPT, _))
-            .WillByDefault(Return(lstAcceptHeaders));
-
-    MockIMessage objUssiMessage;
-    ON_CALL(objUssiMessage, GetMessage)
-            .WillByDefault(Return(&objUssiSipMessage));
-
-    MockISession objSession;
-    ON_CALL(objSession, GetPreviousRequest(_))
-            .WillByDefault(Return(&objUssiMessage));
-
-    JniMtcServiceThread* pServiceThread = reinterpret_cast<JniMtcServiceThread*>(0x1);
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleIncomingUssi(&objSession, pServiceThread))
-            .Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.HandleIncoming(&objSession, pServiceThread);
-}
-
-TEST_F(MtcCallTest, HandleIncomingFailsIfSessionIsNull)
-{
-    JniMtcServiceThread* pServiceThread = reinterpret_cast<JniMtcServiceThread*>(0x1);
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleIncoming(_, _))
-            .Times(0);
-    EXPECT_CALL(*pState, OnInternalFailure)
-            .Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.HandleIncoming(IMS_NULL, pServiceThread);
-}
-
-TEST_F(MtcCallTest, HandleIncomingFailsIfServiceThreadIsNull)
-{
-    MockISession objSession;
-    EXPECT_CALL(objSession, Reject(SipStatusCode::SC_488))
-            .Times(1);
-
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(&objSession))
-            .Times(1);
-    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession, _))
-            .Times(1);
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleIncoming(_, _))
-            .Times(0);
-    EXPECT_CALL(*pState, OnInternalFailure)
-            .Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.HandleIncoming(&objSession, IMS_NULL);
-}
-
 TEST_F(MtcCallTest, AttachSetUiNotifierThreads)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
@@ -407,6 +308,89 @@ TEST_F(MtcCallTest, StartConference3CallsState)
     objCall.StartConference(eCallType, strTarget, lstUsers);
 }
 
+TEST_F(MtcCallTest, HandleIncomingCallsState)
+{
+    MockISession objSession;
+    JniMtcServiceThread* pServiceThread = reinterpret_cast<JniMtcServiceThread*>(0x1);
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, HandleIncoming(&objSession, pServiceThread))
+            .Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.HandleIncoming(&objSession, pServiceThread);
+}
+
+TEST_F(MtcCallTest, HandleIncomingCallsStateForUssi)
+{
+    MockISipMessage objUssiSipMessage;
+    AString strRecvInfo(UssiConstants::HEADER_RECVINFO);
+    ImsList<AString> lstRecvInfoHeaders;
+    lstRecvInfoHeaders.Append(UssiConstants::HEADER_USSD_PACKAGE);
+    ON_CALL(objUssiSipMessage, GetHeaders(ISipHeader::UNKNOWN, strRecvInfo))
+            .WillByDefault(Return(lstRecvInfoHeaders));
+    ImsList<AString> lstAcceptHeaders;
+    lstAcceptHeaders.Append(UssiConstants::HEADER_APPLICATION_USSDXML);
+    ON_CALL(objUssiSipMessage, GetHeaders(ISipHeader::ACCEPT, _))
+            .WillByDefault(Return(lstAcceptHeaders));
+
+    MockIMessage objUssiMessage;
+    ON_CALL(objUssiMessage, GetMessage)
+            .WillByDefault(Return(&objUssiSipMessage));
+
+    MockISession objSession;
+    ON_CALL(objSession, GetPreviousRequest(_))
+            .WillByDefault(Return(&objUssiMessage));
+
+    JniMtcServiceThread* pServiceThread = reinterpret_cast<JniMtcServiceThread*>(0x1);
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, HandleIncomingUssi(&objSession, pServiceThread))
+            .Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.HandleIncoming(&objSession, pServiceThread);
+}
+
+TEST_F(MtcCallTest, HandleIncomingFailsIfSessionIsNull)
+{
+    JniMtcServiceThread* pServiceThread = reinterpret_cast<JniMtcServiceThread*>(0x1);
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, HandleIncoming(_, _))
+            .Times(0);
+    EXPECT_CALL(*pState, OnInternalFailure)
+            .Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.HandleIncoming(IMS_NULL, pServiceThread);
+}
+
+TEST_F(MtcCallTest, HandleIncomingFailsIfServiceThreadIsNull)
+{
+    MockISession objSession;
+    EXPECT_CALL(objSession, Reject(SipStatusCode::SC_488))
+            .Times(1);
+
+    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(&objSession))
+            .Times(1);
+    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession, _))
+            .Times(1);
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, HandleIncoming(_, _))
+            .Times(0);
+    EXPECT_CALL(*pState, OnInternalFailure)
+            .Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.HandleIncoming(&objSession, IMS_NULL);
+}
+
 TEST_F(MtcCallTest, HandleUserAlertCallsState)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
@@ -418,7 +402,7 @@ TEST_F(MtcCallTest, HandleUserAlertCallsState)
     objCall.HandleUserAlert();
 }
 
-TEST_F(MtcCallTest, HandleUserAlertDoNothingForUssi)
+TEST_F(MtcCallTest, HandleUserAlertDoesNothingForUssi)
 {
     objCallInfo.bUssi = IMS_TRUE;
 
@@ -831,9 +815,25 @@ TEST_F(MtcCallTest, HandleIpcanChangedCallsState)
     objCall.HandleIpcanChanged();
 }
 
+TEST_F(MtcCallTest, GetKeyReturnsValidKeyInitially)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    NullCall objNullCall;
+
+    EXPECT_NE(objNullCall.GetKey(), objCall.GetKey());
+}
+
+TEST_F(MtcCallTest, GetKeyReturnsNotOverlappingKey)
+{
+    MtcCall objCall1(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    MtcCall objCall2(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_NE(objCall1.GetKey(), objCall2.GetKey());
+}
+
 // TODO: IMtcCallContext methods
 
-TEST_F(MtcCallTest, CreateSessionDoNothingIfSessionIsNull)
+TEST_F(MtcCallTest, CreateSessionDoesNothingIfSessionIsNull)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
@@ -841,7 +841,7 @@ TEST_F(MtcCallTest, CreateSessionDoNothingIfSessionIsNull)
     EXPECT_EQ(nullptr, objCall.CreateSession(IMS_NULL));
 }
 
-TEST_F(MtcCallTest, CreateSessionDoNothingIfMtcSessionExists)
+TEST_F(MtcCallTest, CreateSessionDoesNothingIfMtcSessionExists)
 {
     MockISession objSession;
 
