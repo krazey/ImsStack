@@ -33,6 +33,7 @@
 #include "../../../enabler/interface/aos/ImsAosParameter.h"
 
 #include "interface/MockIAosAppContext.h"
+#include "interface/MockIAosBlock.h"
 #include "interface/MockIAosConnection.h"
 #include "interface/MockIAosHandle.h"
 #include "interface/MockIAosNConfiguration.h"
@@ -87,6 +88,7 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, RequestCmd);
     FRIEND_TEST(AosRegistrationTest, CheckBool);
     FRIEND_TEST(AosRegistrationTest, FeatureTagForMtc);
+    FRIEND_TEST(AosRegistrationTest, BlockChanged);
 
 public:
     inline void SetMockIRegistration(IN IRegistration* piRegistration)
@@ -138,6 +140,7 @@ public:
     MockIRegContact m_objMockIRegContact;
     MockIRegParameter m_objMockIRegParameter;
     MockIAosAppContext m_objMockIAosAppContext;
+    MockIAosBlock m_objMockIAosBlock;
     MockIAosConnection m_objMockIAosConnection;
     MockIAosHandle m_objMockIAosHandle;
     MockIAosNConfiguration m_objMockAosIAosNConfiguration;
@@ -226,6 +229,10 @@ protected:
         EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(&m_objMockAosINetTracker));
+
+        EXPECT_CALL(m_objMockIAosAppContext, GetBlock())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(&m_objMockIAosBlock));
 
         EXPECT_CALL(m_objMockISipConfigV, GetConfigurable())
                 .Times(AnyNumber())
@@ -716,4 +723,24 @@ TEST_F(AosRegistrationTest, FeatureTagForMtc)
 
     m_pTestAosRegistration->SetIRegContact(IMS_NULL);
     m_pTestAosRegistration->SetISipConfigV(IMS_NULL);
+}
+
+TEST_F(AosRegistrationTest, BlockChanged)
+{
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosBlock, IsCleared(_))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    m_pTestAosRegistration->SetAppReady(IMS_TRUE);
+
+    EXPECT_FALSE(m_pTestAosRegistration->IsBlocked());
+
+    m_pTestAosRegistration->AosRegistration::Block_Changed();
+
+    EXPECT_TRUE(m_pTestAosRegistration->IsBlocked());
+    EXPECT_FALSE(m_pTestAosRegistration->IsTransactionStarted());
 }
