@@ -70,5 +70,8 @@ protected:
     IMS_BOOL m_bLimitedMode;
 
     AString m_strTag;
+
+private:
+    friend class AosRegStateManagerTest;
 };
 #endif  // AOS_REG_STATE_MANAGER_H_
