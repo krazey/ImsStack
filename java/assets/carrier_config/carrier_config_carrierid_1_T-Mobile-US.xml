@@ -132,7 +132,7 @@
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
     <int name="imsss.ut_transport_type_int" value="3"/>
 
-    <!--Ut/Xcap Assets -->
+    <!-- Ut/Xcap Assets -->
     <int name="ut_oir_network_default_operation_int" value="1"/>
 
     <!-- MTC default -->

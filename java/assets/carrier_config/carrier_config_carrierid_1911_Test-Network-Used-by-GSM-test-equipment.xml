@@ -69,7 +69,7 @@
     <int name="audio_maxptime_millis_int" value="240"/>
     <boolean name="media_session_level_bandwidth_bool" value="true"/>
 
-    <!--Ut/Xcap Config -->
+    <!-- Ut/Xcap Config -->
     <string name="imsss.xcap_auid_prefix_string">/xcap.test.3gpp.com</string>
 
 </carrier_config>

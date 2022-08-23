@@ -24,7 +24,7 @@
         <item value="1"/>
     </int-array>
 
-    <!--Ut/Xcap Assets -->
+    <!-- Ut/Xcap Assets -->
     <int name="ut_oir_network_default_operation_int" value="1"/>
 
     <!-- USSD overIMS if volte registered -->

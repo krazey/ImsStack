@@ -33,6 +33,6 @@
     <int-array name="imsss.xcap_over_ut_supported_rats_int_array" num="1">
         <item value="3"/>
     </int-array>
-    <!--Ut/Xcap Assets -->
+    <!-- Ut/Xcap Assets -->
     <int name="ut_oir_network_default_operation_int" value="1"/>
 </carrier_config>
