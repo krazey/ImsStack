@@ -3156,7 +3156,7 @@ TEST_F(AosHandleTest, StateConnecting_Test1)
 
 TEST_F(AosHandleTest, StateConnecting_Test2)
 {
-    // Test2: HANDLE_MSG_BLOCK_STATUS, Handle not blocked
+    // Test2: HANDLE_MSG_BLOCK_STATUS, Handle not blocked, feature tag not changed
     // Expectation: state-connecting, request type-attach, no call reconfig(), no need to notify.
 
     SetHandleState(AosHandle::STATE_CONNECTING);
@@ -3176,7 +3176,35 @@ TEST_F(AosHandleTest, StateConnecting_Test2)
 
 TEST_F(AosHandleTest, StateConnecting_Test3)
 {
-    // Test3: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg binded
+    // Test3: HANDLE_MSG_BLOCK_STATUS, Handle not blocked, feature tag changed
+    // Expectation: state-connecting, request type-attach, call reconfig(), no need to notify.
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    AosFeatureTagList objTestFeatureTagList, objTestBindedFeatureTagList;
+    objTestFeatureTagList.AddFeature(
+            ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::TEXT);
+    objTestBindedFeatureTagList.AddFeature(ImsAosFeature::MMTEL | ImsAosFeature::VIDEO);
+
+    SetFeatureTagList(objTestFeatureTagList);
+    SetBindedFeatureTagList(objTestBindedFeatureTagList);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
+
+    IMSMSG objMSG(0 /*HANDLE_MSG_BLOCK_STATUS*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::ATTACH);
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnecting_Test4)
+{
+    // Test4: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg binded
     // Expectation: clear suspended reason, state-connected, need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTING);
@@ -3194,9 +3222,9 @@ TEST_F(AosHandleTest, StateConnecting_Test3)
     EXPECT_TRUE(GetNotify());
 }
 
-TEST_F(AosHandleTest, StateConnecting_Test4)
+TEST_F(AosHandleTest, StateConnecting_Test5)
 {
-    // Test4: HANDLE_MSG_APP_STATUS, APP_DISCONNECTED
+    // Test5: HANDLE_MSG_APP_STATUS, APP_DISCONNECTED
     // Expectation: need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTING);
@@ -3207,9 +3235,9 @@ TEST_F(AosHandleTest, StateConnecting_Test4)
     EXPECT_TRUE(GetNotify());
 }
 
-TEST_F(AosHandleTest, StateConnecting_Test5)
+TEST_F(AosHandleTest, StateConnecting_Test6)
 {
-    // Test5: HANDLE_MSG_APP_STATUS, APP_DISCONNECTING
+    // Test6: HANDLE_MSG_APP_STATUS, APP_DISCONNECTING
     // Expectation: no need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTING);
@@ -3264,7 +3292,7 @@ TEST_F(AosHandleTest, StateConnected_Test2)
 
 TEST_F(AosHandleTest, StateConnected_Test3)
 {
-    // Test3: HANDLE_MSG_BLOCK_STATUS, Handle not blocked
+    // Test3: HANDLE_MSG_BLOCK_STATUS, Handle not blocked, feature tag not changed
     // Expectation: state-connected, request type-attach, no call reconfig(), no need to notify.
 
     SetHandleState(AosHandle::STATE_CONNECTED);
@@ -3284,7 +3312,35 @@ TEST_F(AosHandleTest, StateConnected_Test3)
 
 TEST_F(AosHandleTest, StateConnected_Test4)
 {
-    // Test4: HANDLE_MSG_APP_STATUS, APP_DISCONNECTED
+    // Test4: HANDLE_MSG_BLOCK_STATUS, Handle not blocked, feature tag changed
+    // Expectation: state-connecting, request type-attach, call reconfig(), no need to notify.
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    AosFeatureTagList objTestFeatureTagList, objTestBindedFeatureTagList;
+    objTestFeatureTagList.AddFeature(
+            ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::TEXT);
+    objTestBindedFeatureTagList.AddFeature(ImsAosFeature::MMTEL | ImsAosFeature::VIDEO);
+
+    SetFeatureTagList(objTestFeatureTagList);
+    SetBindedFeatureTagList(objTestBindedFeatureTagList);
+
+    EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
+
+    IMSMSG objMSG(0 /*HANDLE_MSG_BLOCK_STATUS*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_CONNECTING);
+    EXPECT_EQ(m_pAosHandle->GetRequestType(), IAosHandle::ATTACH);
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnected_Test5)
+{
+    // Test5: HANDLE_MSG_APP_STATUS, APP_DISCONNECTED
     // Expectation: state-connecting, need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTED);
@@ -3296,9 +3352,9 @@ TEST_F(AosHandleTest, StateConnected_Test4)
     EXPECT_TRUE(GetNotify());
 }
 
-TEST_F(AosHandleTest, StateConnected_Test5)
+TEST_F(AosHandleTest, StateConnected_Test6)
 {
-    // Test5: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg not binded, handle blocked
+    // Test6: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg not binded, handle blocked
     // Expectation: state-disconnected, need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTED);
@@ -3312,9 +3368,9 @@ TEST_F(AosHandleTest, StateConnected_Test5)
     EXPECT_TRUE(GetNotify());
 }
 
-TEST_F(AosHandleTest, StateConnected_Test6)
+TEST_F(AosHandleTest, StateConnected_Test7)
 {
-    // Test6: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg not binded, handle not blocked
+    // Test7: HANDLE_MSG_APP_STATUS, APP_CONNECTED, Reg not binded, handle not blocked
     // Expectation: state-connecting, need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTED);
@@ -3328,9 +3384,9 @@ TEST_F(AosHandleTest, StateConnected_Test6)
     EXPECT_TRUE(GetNotify());
 }
 
-TEST_F(AosHandleTest, StateConnected_Test7)
+TEST_F(AosHandleTest, StateConnected_Test8)
 {
-    // Test7: HANDLE_MSG_APP_STATUS, APP_DISCONNECTING
+    // Test8: HANDLE_MSG_APP_STATUS, APP_DISCONNECTING
     // Expectation: state-disconnecting, need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTED);
@@ -3341,9 +3397,9 @@ TEST_F(AosHandleTest, StateConnected_Test7)
     EXPECT_TRUE(GetNotify());
 }
 
-TEST_F(AosHandleTest, StateConnected_Test8)
+TEST_F(AosHandleTest, StateConnected_Test9)
 {
-    // Test8: HANDLE_MSG_APP_STATUS, APP_UPDATING
+    // Test9: HANDLE_MSG_APP_STATUS, APP_UPDATING
     // Expectation: no need to notify
 
     SetHandleState(AosHandle::STATE_CONNECTED);
