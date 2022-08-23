@@ -648,14 +648,6 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* nAudioDi
     else
     {
         *nVideoDirection = MEDIA_DIRECTION_INVALID;
-
-        // Check whether video is mandatory for session negotiation
-        if (MEDIA_IS_CONTAINED_THIS_TYPE(m_eSessionType, MEDIA_TYPE_VIDEO))
-        {
-            IMS_TRACE_E(0, "NegotiateSDP() - m line of video is failed", 0, 0, 0);
-            errorReason = ERROR_NO_VIDEO;
-            return IMS_FALSE;
-        }
     }
 
     // Text nego result
@@ -670,13 +662,6 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* nAudioDi
     else
     {
         *nTextDirection = MEDIA_DIRECTION_INVALID;
-
-        if (MEDIA_IS_CONTAINED_THIS_TYPE(m_eSessionType, MEDIA_TYPE_TEXT))
-        {
-            IMS_TRACE_E(0, "NegotiateSDP() - m line of text is failed", 0, 0, 0);
-            errorReason = ERROR_NO_VIDEO;
-            return IMS_FALSE;
-        }
     }
 
     if (*nAudioDirection == MEDIA_DIRECTION_INVALID &&

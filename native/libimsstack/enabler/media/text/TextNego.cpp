@@ -583,7 +583,7 @@ PRIVATE IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
         return IMS_FALSE;
     }
 
-    if (eDir == MEDIA_DIRECTION_INVALID)
+    if (eDir == MEDIA_DIRECTION_INVALID && bDisable != IMS_TRUE)
     {
         IMS_TRACE_E(0, "FormAnswer() - direction invalid", 0, 0, 0);
         return IMS_FALSE;
@@ -679,13 +679,15 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     IMS_TRACE_I("FormReoffer() - pDescriptor[%" PFLS_x "], eDir[%d], OaModel Size(%d)", pDescriptor,
             eDir, m_listOaModel.GetSize());
 
+    IMS_TRACE_D("TextNego - FormReoffer() - eDir[%d] bDisable[%d]", eDir, bDisable, 0);
+
     // Handling exception case
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    if (eDir == MEDIA_DIRECTION_INVALID)
+    if (eDir == MEDIA_DIRECTION_INVALID && bDisable != IMS_TRUE)
     {
         IMS_TRACE_E(0, "FormReoffer() - direction invalid", 0, 0, 0);
         return IMS_FALSE;
@@ -1135,7 +1137,9 @@ PRIVATE IMS_BOOL TextNego::MakeProfileFromSDP(IN ISessionDescriptor* pSessionDes
                             "[%d]",
                         pSDPCodec->GetPayloadType(), j, pRedFmtp->nRedPayload);
                 if (pSDPCodec->GetPayloadType() == pRedFmtp->nRedPayload)
+                {
                     bRedSubPTExist = IMS_TRUE;
+                }
             }
 
             if (bRedSubPTExist == IMS_FALSE)
@@ -1283,6 +1287,15 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     }
     else
     {
+        // TODO: need to change this if condition later
+        if (pNegotiatedProfile->nDataPort == 0 || pPeerProfile->nDataPort == 0 ||
+                pNegotiatedProfile->lstPayload.GetSize() == 0)
+        {
+            pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
+            bRet = IMS_TRUE;  // TODO: need to check later
+            IMS_TRACE_D("eDirection: %d bRet:%d", pNegotiatedProfile->eDirection, bRet, 0);
+        }
+
         if (pLocalProfile->lstPayload.GetSize() > 0)
         {
             IMS_TRACE_D("MakeNegotiatedProfile() - no negotiated payload. use the LocalProfile and "
