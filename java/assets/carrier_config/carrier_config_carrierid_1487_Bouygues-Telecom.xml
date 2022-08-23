@@ -22,4 +22,9 @@
         <item value="1"/>
     </int-array>
 
+    <!-- Ut/Xcap AOSP -->
+    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
+    <!-- Previous solution was using 80 as a port, but Bouygues' requirement is 4000 -->
+    <int name="imsss.ut_as_server_port_int" value="4000"/>
+
 </carrier_config>
