@@ -32,6 +32,7 @@ import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 import java.util.Map;
@@ -175,6 +176,16 @@ public final class ImsServiceManager {
 
     public ImsCallApp getCallApp(int phoneId) {
         return mCallApps.get(phoneId);
+    }
+
+    @VisibleForTesting
+    protected  ConcurrentHashMap<Integer, ImsCallApp> getCallAppMap() {
+        return mCallApps;
+    }
+
+    @VisibleForTesting
+    protected ConcurrentHashMap<Integer, ImsServiceRecord> getServiceRecordMap() {
+        return mServiceRecords;
     }
 
     public ImsCallApp getCallAppByPhoneId(int phoneId) {
