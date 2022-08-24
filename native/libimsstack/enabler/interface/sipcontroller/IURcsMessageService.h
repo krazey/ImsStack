@@ -18,6 +18,7 @@
 #define INTERFACE_UI_SIP_CONTROLLER_SERVICEH_
 
 #include "AString.h"
+#include "ByteArray.h"
 #include "ImsMessageDef.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
@@ -71,6 +72,63 @@ public:
     IMS_CHAR szThread[IMS_SOLUTION_MSG_SOURCE_LEN + 1];
 };
 
+class IUSncSendMessageParam : public IUSncSessionData
+{
+public:
+    inline IUSncSendMessageParam()
+    {
+        IMS_TRACE_MEM("SNC_MSG", "IM_M : IUSncSendMessageParam = %" PFLS_u,
+                sizeof(IUSncSendMessageParam), 0, 0);
+        pszStartLine = IMS_NULL;
+        pszHeaderSection = IMS_NULL;
+        nContentLength = 0;
+        pszContent = IMS_NULL;
+        pszMethod = IMS_NULL;
+        pszFromParameter = IMS_NULL;
+        pszToParameter = IMS_NULL;
+        nType = 0;
+    }
+    inline ~IUSncSendMessageParam()
+    {
+        IMS_TRACE_MEM("SNC_MSG", "IM_F : IUSncSendMessageParam = %" PFLS_u,
+                sizeof(IUSncSendMessageParam), 0, 0);
+        if (pszStartLine != IMS_NULL)
+        {
+            IMS_MEM_Free(pszStartLine);
+        }
+        if (pszHeaderSection != IMS_NULL)
+        {
+            IMS_MEM_Free(pszHeaderSection);
+        }
+        if (pszContent != IMS_NULL)
+        {
+            IMS_MEM_Free(pszContent);
+        }
+        if (pszMethod != IMS_NULL)
+        {
+            IMS_MEM_Free(pszMethod);
+        }
+        if (pszFromParameter != IMS_NULL)
+        {
+            IMS_MEM_Free(pszFromParameter);
+        }
+        if (pszToParameter != IMS_NULL)
+        {
+            IMS_MEM_Free(pszToParameter);
+        }
+    }
+
+public:
+    IMS_CHAR* pszStartLine;
+    IMS_CHAR* pszHeaderSection;
+    IMS_SINT32 nContentLength;
+    IMS_CHAR* pszContent;
+    IMS_CHAR* pszMethod;
+    IMS_CHAR* pszFromParameter;
+    IMS_CHAR* pszToParameter;
+    IMS_SINT32 nType;
+};
+
 class IUSncMessageParam : public IUSncSessionData
 {
 public:
@@ -82,8 +140,6 @@ public:
         pszHeaderSection = IMS_NULL;
         nContentLength = 0;
         pszContent = IMS_NULL;
-        pszViaBranchParameter = IMS_NULL;
-        pszCallIdParameter = IMS_NULL;
     }
     inline ~IUSncMessageParam()
     {
@@ -101,23 +157,13 @@ public:
         {
             IMS_MEM_Free(pszContent);
         }
-        if (pszViaBranchParameter != IMS_NULL)
-        {
-            IMS_MEM_Free(pszViaBranchParameter);
-        }
-        if (pszCallIdParameter != IMS_NULL)
-        {
-            IMS_MEM_Free(pszCallIdParameter);
-        }
     }
 
 public:
     IMS_CHAR* pszStartLine;
     IMS_CHAR* pszHeaderSection;
-    IMS_CHAR nContentLength;
+    IMS_SINT32 nContentLength;
     IMS_CHAR* pszContent;
-    IMS_CHAR* pszViaBranchParameter;
-    IMS_CHAR* pszCallIdParameter;
 };
 
 class IUSncOpenCmdParam : public IUSncSessionData

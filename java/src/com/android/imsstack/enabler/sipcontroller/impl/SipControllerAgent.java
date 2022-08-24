@@ -60,6 +60,9 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     private int mSubId = MSimUtils.INVALID_SUB_ID;
     private SipTransportRemoteListener mListener = null;
     private static final SparseArray<SipControllerAgent> sAgentArray = new SparseArray<>();
+    private static String sStartLineString;
+    private static String sHeaderSectionString;
+    private static byte[] sConBytes;
 
     // HashMap stores viaTransactionId(key)/SipMessage for every sip message to send
     // The Message in the map is removed
@@ -292,7 +295,8 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     }
 
     private void messageReceived(Parcel parcel) throws Exception {
-        SipMessage message = SipMessage.CREATOR.createFromParcel(parcel);
+        convertParcelToString(parcel);
+        SipMessage message = new SipMessage(sStartLineString, sHeaderSectionString, sConBytes);
 
         String branch = SipMessageParsingUtils.getTransactionId(message.getHeaderSection());
         String callId = SipMessageParsingUtils.getCallId(message.getHeaderSection());
@@ -332,7 +336,24 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
         parcel.writeString(message.getHeaderSection());
         parcel.writeInt(message.getContent().length);
         parcel.writeByteArray(message.getContent());
-        parcel.writeString(message.getViaBranchParameter());
-        parcel.writeString(message.getCallIdParameter());
+        String[] method = message.getStartLine().split(" ");
+        parcel.writeString(method[0]);
+        parcel.writeString(SipMessageParsingUtils.getFromTag(message.getHeaderSection()));
+        parcel.writeString(SipMessageParsingUtils.getToTag(message.getHeaderSection()));
+
+        if (SipMessageParsingUtils.isSipRequest(message.getStartLine())) {
+            parcel.writeInt(0);
+        } else if (SipMessageParsingUtils.isSipResponse(message.getStartLine())) {
+            parcel.writeInt(1);
+        } else {
+            ImsLog.e("Method is invalid");
+        }
+    }
+
+    private static void convertParcelToString(Parcel parcel) {
+        sStartLineString = parcel.readString();
+        sHeaderSectionString = parcel.readString();
+        sConBytes = new byte[parcel.readInt()];
+        parcel.readByteArray(sConBytes);
     }
 }

@@ -55,7 +55,6 @@ END_STATE_MSG_MAP()
 BEGIN_STATE_MSG_MAP(RcsMessageTracker, TERMINATED)
 END_STATE_MSG_MAP()
 
-// MO
 PUBLIC
 RcsMessageTracker::RcsMessageTracker(ISipConnectionFactory* _piscf, IN IMS_SINT32 nSimSlot) :
         ImsStateMachine(INITIATED),
@@ -69,8 +68,6 @@ RcsMessageTracker::RcsMessageTracker(ISipConnectionFactory* _piscf, IN IMS_SINT3
             "SNC_MSG", "IM_M : RcsMessageTracker = %" PFLS_u, sizeof(RcsMessageTracker), 0, 0);
     IMS_TRACE_I("RcsMessageTracker", 0, 0, 0);
 
-    (void)m_piscf;
-    (void)m_piscc;
     (void)m_nSimSlot;
 }
 
@@ -111,7 +108,12 @@ PUBLIC
 void RcsMessageTracker::Abort(IN IMS_SINT32 nReason, IN const IMS_BOOL bNeedAnswer /* = IMS_TRUE*/)
 {
     IMS_TRACE_I("Abort : reason[%d]", nReason, 0, 0);
-    (void)bNeedAnswer;
+    // ToDo
+    if (GetState() != TERMINATED && bNeedAnswer == IMS_TRUE)
+    {
+        // NotifyMessageSendResult(nReason);
+    }
+    SetState(TERMINATED);
 }
 
 PUBLIC
@@ -138,7 +140,30 @@ PRIVATE
 IMS_BOOL RcsMessageTracker::StateINITIATED_SendMessage(IN IMSMSG& objMSG)
 {
     IMS_TRACE_D("StateINITIATED_SendMessage", 0, 0, 0);
-    (void)objMSG;
+    IUSncSendMessageParam* pParam = REINTERPRET_CAST(IUSncSendMessageParam*, objMSG.nLparam);
+    if (SendMessage(pParam) == IMS_SUCCESS)
+    {
+        SetState(SENDING);
+    }
+    else
+    {
+        SetState(TERMINATED);
+        IUSncSendFailureIndParam* pFailureParam =
+                REINTERPRET_CAST(IUSncSendFailureIndParam*, objMSG.nLparam);
+        /*
+        Error Cases
+            IUSncService::OPENMESSAGE_CMD:
+            IUSncService::SENDMESSAGE_CMD:
+            IUSncService::CLOSESESSION_CMD:
+            IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD:
+        */
+        // Internal Tracker Obj is Null.
+        pFailureParam->nReason = IURcsMessageFailureReason::MESSAGE_FAILURE_REASON_UNKNOWN;
+        // ToDo
+        // pFailureParam->szTId = ;
+        IMS_SINT32 nMsg = objMSG.GetName();
+        PostNotification(nMsg, reinterpret_cast<IMS_UINTP>(pFailureParam));
+    }
     return IMS_TRUE;
 }
 
@@ -146,7 +171,13 @@ PRIVATE
 IMS_BOOL RcsMessageTracker::StateINITIATED_NotifyReceiveError(IN IMSMSG& objMSG)
 {
     IMS_TRACE_D("StateINITIATED_SendMessage", 0, 0, 0);
-    (void)objMSG;
+    IUSncNotifyErrorCmdParam* pParam = REINTERPRET_CAST(IUSncNotifyErrorCmdParam*, objMSG.nLparam);
+
+    // When the application’s SipDelegateConnection is unreachable due to the application crashing.
+    // Send Error Response from Framework
+
+    NotifyReceiveError(pParam);
+
     return IMS_TRUE;
 }
 
@@ -154,7 +185,8 @@ PRIVATE
 IMS_BOOL RcsMessageTracker::StateSENDING_Sent(IN IMSMSG& objMSG)
 {
     IMS_TRACE_D("StateSENDING_Sent", 0, 0, 0);
-    (void)objMSG;
+    IUSncSentMessageIndParam* pParam = REINTERPRET_CAST(IUSncSentMessageIndParam*, objMSG.nLparam);
+    PostNotification(IUSncService::SENDMESSAGEFAILURE_IND, reinterpret_cast<IMS_UINTP>(pParam));
     return IMS_TRUE;
 }
 
@@ -162,15 +194,80 @@ PRIVATE
 IMS_BOOL RcsMessageTracker::StateSENDING_SendFailed(IN IMSMSG& objMSG)
 {
     IMS_TRACE_D("StateSENDING_SendFailed", 0, 0, 0);
-    (void)objMSG;
+    IUSncSendFailureIndParam* pParam = REINTERPRET_CAST(IUSncSendFailureIndParam*, objMSG.nLparam);
+    PostNotification(IUSncService::SENDMESSAGEFAILURE_IND, reinterpret_cast<IMS_UINTP>(pParam));
     return IMS_TRUE;
 }
 
 PRIVATE
-IMS_RESULT RcsMessageTracker::SendMessage(IN IUSncMessageParam* pParam)
+IMS_RESULT RcsMessageTracker::SendMessage(IN IUSncSendMessageParam* pParam)
 {
     IMS_TRACE_D("SendMessage()", 0, 0, 0);
+    SetState(SENDING);
     (void)pParam;
+    // ex)
+    if (m_piscf == IMS_NULL)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (pParam->nType == ISipMessage::TYPE_REQUEST)
+    {
+        SendRequest(pParam);
+    }
+    else if (pParam->nType == ISipMessage::TYPE_RESPONSE)
+    {
+        CreateResponse();
+    }
+    else
+    {
+        return IMS_FAILURE;
+    }
+    return IMS_SUCCESS;
+}
+
+PRIVATE
+IMS_RESULT RcsMessageTracker::SendRequest(IN IUSncSendMessageParam* pParam)
+{
+    (void)pParam;
+
+    m_piscc = m_piscf->CreateClientConnection(
+            /*IN const SipMethod& objMethod*/ IMS_NULL,
+            /*IN const SipAddress* pFrom*/ IMS_NULL,
+            /*IN const SipAddress* pTo*/ IMS_NULL);
+
+    m_piscc->SetListener(this);
+    ISipMessage* piMessage = m_piscc->GetMessage();
+    piMessage->CopyHeadersAndBodyParts(IMS_NULL);
+
+    IMS_RESULT result = m_piscc->Send();
+
+    if (result != IMS_SUCCESS)
+    {
+        IUSncSendFailureIndParam* pFailureParam = new IUSncSendFailureIndParam();
+        pFailureParam->nReason = IURcsMessageFailureReason::MESSAGE_FAILURE_REASON_UNKNOWN;
+
+        // ToDo
+        IMS_StrCpy(pFailureParam->szTId, IMS_SOLUTION_MSG_SOURCE_LEN, "viaTransactionId");
+        IMSMSG objMSG(MESSAGE_SENDFAILED, 0, reinterpret_cast<IMS_UINTP>(pFailureParam));
+
+        HandleMessage(objMSG);
+        return IMS_FAILURE;
+    }
+
+    IUSncSentMessageIndParam* pSentParam = new IUSncSentMessageIndParam();
+
+    // ToDo
+    IMS_StrCpy(pSentParam->szTId, IMS_SOLUTION_MSG_SOURCE_LEN, "viaTransactionId");
+    IMSMSG objMSG(MESSAGE_SENT, 0, reinterpret_cast<IMS_UINTP>(pSentParam));
+
+    HandleMessage(objMSG);
+    return IMS_SUCCESS;
+}
+
+PRIVATE
+IMS_RESULT RcsMessageTracker::CreateResponse()
+{
     return IMS_SUCCESS;
 }
 
@@ -187,6 +284,7 @@ PUBLIC
 VIRTUAL void RcsMessageTracker::ClientConnection_NotifyResponse(
         IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc)
 {
-    (void)piScc;
     (void)piForkedScc;
+    ISipMessage* isMessage = piScc->GetMessage();
+    isMessage->GetStatusCode();
 }

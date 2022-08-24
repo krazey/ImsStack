@@ -104,8 +104,6 @@ void JniSipControllerServiceThread::HandleMsg(IN IMSMSG& objMSG)
             WriteStringToParcel(pParam->pszHeaderSection, parcel);
             parcel.writeInt32(pParam->nContentLength);
             WriteStringToParcel(pParam->pszContent, parcel);
-            WriteStringToParcel(pParam->pszViaBranchParameter, parcel);
-            WriteStringToParcel(pParam->pszCallIdParameter, parcel);
         }
         break;
         case IUSncService::MESSAGESENT_IND:

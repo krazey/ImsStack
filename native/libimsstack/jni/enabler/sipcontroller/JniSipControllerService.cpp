@@ -118,7 +118,7 @@ void JniSipControllerService::HandleMessage(int nMsg, const Parcel& pParcel)
     {
         case IUSncService::SENDMESSAGE_CMD:
         {
-            IUSncMessageParam* pParam = makeSendMessageParamFromParcel(pParcel);
+            IUSncSendMessageParam* pParam = makeSendMessageParamFromParcel(pParcel);
             pParam->nSessionID = m_nSessionId;
             IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, m_strThreadName.GetStr());
             IMSMSG objMSG(IUSncService::SENDMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
@@ -155,11 +155,11 @@ void JniSipControllerService::HandleMessage(int nMsg, const Parcel& pParcel)
 }
 
 PRIVATE
-IUSncMessageParam* JniSipControllerService::makeSendMessageParamFromParcel(
+IUSncSendMessageParam* JniSipControllerService::makeSendMessageParamFromParcel(
         const android::Parcel& objParcel)
 {
     AString strDest = AString::ConstEmpty();
-    IUSncMessageParam* pParam = new IUSncMessageParam();
+    IUSncSendMessageParam* pParam = new IUSncSendMessageParam();
 
     ConvertString(objParcel.readString16(), strDest);
     pParam->pszStartLine =
@@ -170,6 +170,7 @@ IUSncMessageParam* JniSipControllerService::makeSendMessageParamFromParcel(
     pParam->pszHeaderSection =
             static_cast<IMS_CHAR*>(IMS_MEM_Malloc(sizeof(IMS_CHAR) * (strDest.GetLength() + 1)));
     IMS_StrCpy(pParam->pszHeaderSection, strDest.GetLength(), strDest.GetStr());
+
     pParam->nContentLength = objParcel.readInt32();
 
     ConvertString(objParcel.readString16(), strDest);
@@ -178,14 +179,21 @@ IUSncMessageParam* JniSipControllerService::makeSendMessageParamFromParcel(
     IMS_StrCpy(pParam->pszContent, strDest.GetLength(), strDest.GetStr());
 
     ConvertString(objParcel.readString16(), strDest);
-    pParam->pszViaBranchParameter =
+    pParam->pszMethod =
             static_cast<IMS_CHAR*>(IMS_MEM_Malloc(sizeof(IMS_CHAR) * (strDest.GetLength() + 1)));
-    IMS_StrCpy(pParam->pszViaBranchParameter, strDest.GetLength(), strDest.GetStr());
+    IMS_StrCpy(pParam->pszMethod, strDest.GetLength(), strDest.GetStr());
 
     ConvertString(objParcel.readString16(), strDest);
-    pParam->pszCallIdParameter =
+    pParam->pszFromParameter =
             static_cast<IMS_CHAR*>(IMS_MEM_Malloc(sizeof(IMS_CHAR) * (strDest.GetLength() + 1)));
-    IMS_StrCpy(pParam->pszCallIdParameter, strDest.GetLength(), strDest.GetStr());
+    IMS_StrCpy(pParam->pszFromParameter, strDest.GetLength(), strDest.GetStr());
+
+    ConvertString(objParcel.readString16(), strDest);
+    pParam->pszToParameter =
+            static_cast<IMS_CHAR*>(IMS_MEM_Malloc(sizeof(IMS_CHAR) * (strDest.GetLength() + 1)));
+    IMS_StrCpy(pParam->pszToParameter, strDest.GetLength(), strDest.GetStr());
+
+    pParam->nType = objParcel.readInt32();
     return pParam;
 }
 
