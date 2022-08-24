@@ -66,6 +66,8 @@
 
     <!-- Ut/Xcap Config -->
     <string name="imsss.xcap_auid_prefix_string">/mtasxdms</string>
+    <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
+    </int-array>
 
     <!-- Ut/Xcap Assets -->
     <boolean name="ut_support_cf_action_erasure_bool" value="false"/>
