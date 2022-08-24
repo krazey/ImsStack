@@ -61,14 +61,14 @@ public:
     MOCK_METHOD(MtcSupplementaryService&, GetSupplementaryService, (), (override));
     MOCK_METHOD(UpdatingInfo&, GetUpdatingInfo, (), (override));
     MOCK_METHOD(UssiController*, GetUssiController, (), (override));
-    MOCK_METHOD(IMSList<IMtcCall*>, GetOtherCalls, (), (override));
+    MOCK_METHOD(ImsList<IMtcCall*>, GetOtherCalls, (), (override));
     MOCK_METHOD(void, SetHeldByMe, (IMS_BOOL), (override));
     MOCK_METHOD(IMtcSession*, CreateSession, (IN ISession * piSession), (override));
     MOCK_METHOD(IMtcSession*, CreateSession, (), (override));
-    MOCK_METHOD(IMtcBlockChecker*, CreateBlockChecker, (IN const IMSList<IMtcBlockRule*>& lstRules),
+    MOCK_METHOD(IMtcBlockChecker*, CreateBlockChecker, (IN const ImsList<IMtcBlockRule*>& lstRules),
             (override));
     MOCK_METHOD(JniCallInfo, CreateJniCallInfo, (), (override));
-    MOCK_METHOD(ISipClientConnection*, CreateClientConnection, (IN IMS_SINT32 nMethod), (override));
+    MOCK_METHOD(ISipClientConnection*, CreateClientConnection, (IN SipMethod eMethod), (override));
     MOCK_METHOD(void, RemoveSession, (IN const ISession* piSession), (override));
     MOCK_METHOD(void, RemoveInactiveSessions, (IN const ISession* piActiveSession), (override));
     MOCK_METHOD(void, DeleteUpdatingInfo, (), (override));

@@ -149,7 +149,7 @@ public:
     IMtcSession* CreateSession() override;
     IMtcBlockChecker* CreateBlockChecker(IN const ImsList<IMtcBlockRule*>& lstRules) override;
     JniCallInfo CreateJniCallInfo() override;
-    ISipClientConnection* CreateClientConnection(IN IMS_SINT32 nMethod) override;
+    ISipClientConnection* CreateClientConnection(IN SipMethod eMethod) override;
     void RemoveSession(IN const ISession* piSession) override;
     void RemoveInactiveSessions(IN const ISession* piActiveSession) override;
     void DeleteUpdatingInfo() override;
