@@ -24,7 +24,7 @@
 #include "vonr/IMtcVonrListener.h"
 #include "CallReasonInfo.h"
 
-__IMS_TRACE_TAG_COM_UC__;
+__IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 UCVoNRForQct::UCVoNRForQct(IN IMS_UINT32 nSlotId, IN IMtcVonrListener* piListener) :

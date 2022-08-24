@@ -21,7 +21,7 @@
 #include "MtsFactory.h"
 #include "utility/MtsUtils.h"
 
-__IMS_TRACE_TAG_COM_SMS__;
+__IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsFactory::MtsFactory()

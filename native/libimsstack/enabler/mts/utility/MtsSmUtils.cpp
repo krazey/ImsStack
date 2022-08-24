@@ -19,7 +19,7 @@
 #include "ImsStrLib.h"
 #include "utility/MtsSmUtils.h"
 
-__IMS_TRACE_TAG_COM_SMS__;
+__IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsSmUtils::MtsSmUtils()

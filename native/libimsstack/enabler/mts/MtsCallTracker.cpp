@@ -21,7 +21,7 @@
 #include "MtsCallTracker.h"
 #include "MtsStringDef.h"
 
-__IMS_TRACE_TAG_COM_SMS__;
+__IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsCallTracker::MtsCallTracker(IN IMS_SINT32 nSlotId) :

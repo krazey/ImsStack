@@ -1026,6 +1026,15 @@ public:
         // Mts
         static const IMS_CHAR KEY_SMS_REQUEST_URI_TYPE_INT[];
         static const IMS_CHAR KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[];
+        static const IMS_CHAR KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_EXPIRY_TIMER_F_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_403_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_404_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_406_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_408_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_500_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_503_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_504_RESPONSE_INT[];
 
         // Uce
         static const IMS_CHAR KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[];

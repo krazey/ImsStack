@@ -19,7 +19,7 @@
 #include "ServiceTrace.h"
 #include "message/MtsMessage.h"
 
-__IMS_TRACE_TAG_COM_SMS__;
+__IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsMessage::MtsMessage(IN IMS_SINT32 nSlotId) :

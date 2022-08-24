@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ServiceConfig.h"
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
@@ -28,11 +29,12 @@
 #include "MtsStringDef.h"
 #include "MtsService.h"
 #include "message/IMtsMessage.h"
+#include "message/MtsErrorHandler.h"
 #include "message/MtsMessage.h"
 #include "message/MtsMessageController.h"
 #include "utility/MtsDynamicLoader.h"
 
-__IMS_TRACE_TAG_COM_SMS__;
+__IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsMessageController::MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService* piMtsService,
@@ -45,11 +47,15 @@ MtsMessageController::MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService
         m_objMsgList(IMSList<IMtsMessage*>()),
         m_objRPAckedMsgs(IMSList<IMtsMessage*>()),
         m_piMtsService(piMtsService),
+        m_piMtsErrorHandler(IMS_NULL),
         m_pMtsDynamicLoader(pMtsDynamicLoader)
 {
     IMS_TRACE_I("+MtsMessageController [slot_%d]", m_nSlotId, 0, 0);
 
     m_piMtsService->SetListener(this);
+    m_piMtsErrorHandler =
+            new MtsErrorHandler(ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId));
+    m_piMtsErrorHandler->SetListener(this);
 }
 
 PUBLIC MtsMessageController::~MtsMessageController()
@@ -57,6 +63,8 @@ PUBLIC MtsMessageController::~MtsMessageController()
     IMS_TRACE_I("~MtsMessageController [slot_%d]", m_nSlotId, 0, 0);
 
     DestroyMtsMessage();
+    m_piMtsErrorHandler->SetListener(IMS_NULL);
+    delete m_piMtsErrorHandler;
 }
 
 PUBLIC void MtsMessageController::TerminateAllPendingMessages(IN IMS_BOOL bIs1xCallTerm)
@@ -195,9 +203,8 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
     if (objResponses.GetSize() == 0)
     {
         IMS_TRACE_E(0, "IMS Internal Error!! No received responses in the page message!!", 0, 0, 0);
-        // Here is any failure response is good enough, 480 Temporarily Unavailable is sufficient.
-        ReportTransmissionResult(
-                SipStatusCode::SC_480, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
+        IMS_SINT32 nResult = m_piMtsErrorHandler->Handle();
+        ReportTransmissionResult(nResult, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
         CleanMtsMessage(piMtsMessage);
         return;
     }
@@ -207,17 +214,15 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
     {
         IMS_TRACE_E(0, "No received responses at the last index (%d) in the page message!!",
                 objResponses.GetSize() - 1, 0, 0);
-
-        // Here is any failure response is good enough, 480 Temporarily Unavailable is sufficient.
-        ReportTransmissionResult(
-                SipStatusCode::SC_480, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
+        IMS_SINT32 nResult = m_piMtsErrorHandler->Handle();
+        ReportTransmissionResult(nResult, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
         CleanMtsMessage(piMtsMessage);
         return;
     }
 
     // report failure send results.
-    ReportTransmissionResult(
-            piMessage->GetStatusCode(), piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
+    IMS_SINT32 nResult = m_piMtsErrorHandler->Handle(piMessage);
+    ReportTransmissionResult(nResult, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
 
     IMS_SINT32 nMti = piMtsMessage->GetMti();
     if (nMti == SMS_3GPP_MTI_RP_ACK_FROM_MS || nMti == SMS_3GPP_MTI_RP_ERROR_FROM_MS)
@@ -232,7 +237,7 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
     return;
 }
 
-PUBLIC VIRTUAL void MtsMessageController::NotifyMoSms(IN SmsFormatType eSmsFormat,
+PUBLIC void MtsMessageController::NotifyMoSms(IN SmsFormatType eSmsFormat,
         IN const ByteArray& objData, IN const AString& strAddress, IN IMS_SINT32 nSeqId,
         IN IMS_BOOL bEmergency)
 {
@@ -241,11 +246,16 @@ PUBLIC VIRTUAL void MtsMessageController::NotifyMoSms(IN SmsFormatType eSmsForma
     SendMtsMessage(eSmsFormat, objData, strAddress, nSeqId, bEmergency);
 }
 
-PUBLIC VIRTUAL void MtsMessageController::NotifyMtSms(IN IPageMessage* piMessage)
+PUBLIC void MtsMessageController::NotifyMtSms(IN IPageMessage* piMessage)
 {
     IMS_TRACE_I("NotifyMtSms", 0, 0, 0);
 
     ReceiveMtsMessage(piMessage, IMS_FALSE);
+}
+
+PUBLIC void MtsMessageController::NotifyControlAos(IN IMS_UINT32 nCommand)
+{
+    m_piMtsService->RequestRegistrationRecovery(nCommand);
 }
 
 PRIVATE IMS_BOOL MtsMessageController::OnMessage(IN IMSMSG& /*objMSG*/)
@@ -703,7 +713,7 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
     m_pMtsDynamicLoader->GetMtsSmUtils()->PrintSmsDataBurst(objData);
 }
 
-PRIVATE IMS_RESULT MtsMessageController::ReportMoStatus(IN IMS_UINT32 nReason,
+PRIVATE IMS_RESULT MtsMessageController::ReportMoStatus(IN IMS_SINT32 nReason,
         IN SmsFormatType eSmsFormat, IN IMS_UINT8 nRetryAfter /* = 0 */,
         IN IMS_SINT32 nSeqId /* = -1 */)
 {
@@ -921,12 +931,12 @@ IMS_BOOL MtsMessageController::ProcessReceivedMessage(
 }
 
 PRIVATE void MtsMessageController::ReportTransmissionResult(
-        IN IMS_UINT32 nResponse, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId /*= -1*/)
+        IN IMS_SINT32 nResponse, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId /*= -1*/)
 {
     IMS_TRACE_I("ReportTransmissionResult : nResponse[%d] eSmsFormat[%s]", nResponse,
             PS_SmsFormatType(eSmsFormat), 0);
 
-    IMS_UINT32 nResultCode = MO_INVALID;
+    IMS_SINT32 nResultCode = MO_INVALID;
 
     // TODO: needs to convert from SIP ERROR to MO result code by each carrier's requirement
     switch (nResponse)

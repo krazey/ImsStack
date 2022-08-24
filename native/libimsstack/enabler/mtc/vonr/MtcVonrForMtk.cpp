@@ -24,7 +24,7 @@
 #include "vonr/MtcVonr.h"
 #include "vonr/IMtcVonrListener.h"
 
-__IMS_TRACE_TAG_COM_UC__;
+__IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 UCVoNRForMtk::UCVoNRForMtk(IN IMS_UINT32 nSlotId, IN IMtcVonrListener* piListener) :

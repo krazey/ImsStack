@@ -559,6 +559,16 @@
     <!-- Mts -->
     <int name="sms_request_uri_type_int" value="-1"/>
     <boolean name="sms_use_dialed_number_for_request_uri_bool" value="false"/>
+    <int-array name="sms_permanent_error_codes_int_array" num="0">
+    </int-array>
+    <int name="sms_policy_for_expiry_timer_f_int" value="-1"/>
+    <int name="sms_policy_for_403_response_int" value="-1"/>
+    <int name="sms_policy_for_404_response_int" value="-1"/>
+    <int name="sms_policy_for_406_response_int" value="-1"/>
+    <int name="sms_policy_for_408_response_int" value="-1"/>
+    <int name="sms_policy_for_500_response_int" value="-1"/>
+    <int name="sms_policy_for_503_response_int" value="-1"/>
+    <int name="sms_policy_for_504_response_int" value="-1"/>
 
     <!-- Ut/Xcap -->
     <boolean name="imsss.xcap_root_uri_requires_srv_query_bool" value="false"/>

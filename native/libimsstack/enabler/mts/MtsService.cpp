@@ -39,7 +39,7 @@
 #include "utility/MtsDynamicLoader.h"
 #include "utility/MtsUtils.h"
 
-__IMS_TRACE_TAG_COM_SMS__;
+__IMS_TRACE_TAG_COM_MTS__;
 
 MtsService::MtsService(IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader) :
         ImsService(AString::ConstNull()),
@@ -138,7 +138,7 @@ void MtsService::SendMtResult(IN IMS_BOOL bMtResult)
 }
 
 PUBLIC
-void MtsService::ReportMoStatus(IN IMS_UINT32 nReason, IN SmsFormatType eSmsFormat,
+void MtsService::ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
         IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId)
 {
     IMS_TRACE_I("ReportMoStatus", 0, 0, 0);
@@ -355,7 +355,7 @@ void MtsService::ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 }
 
 PUBLIC
-void MtsService::RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType)
+void MtsService::RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType)
 {
     if (m_piImsAos != IMS_NULL)
     {
