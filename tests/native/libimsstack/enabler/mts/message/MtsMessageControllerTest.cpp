@@ -161,10 +161,10 @@ TEST_F(MtsMessageControllerTest, NotifyMtSms)
 
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strContentType = "application/vnd.3gpp.sms";
-    AString strTargetAddress = "sip:+12345678901@mts.google.com";
+    AString strTargetAddress = "sip:+12345678901@ims.google.com";
     SipAddress objSipAddress;
     objSipAddress.Create(strTargetAddress);
-    AString strHeaders = "<sip:+12345678901@mts.google.com>,<sip:+12345678902@mts.google.com>";
+    AString strHeaders = "<sip:+12345678901@ims.google.com>,<sip:+12345678902@ims.google.com>";
     IMSList<AString> objHeaders = strHeaders.Split(TextParser::CHAR_COMMA);
     IMSList<IMessageBodyPart*> objMessageBodies = IMSList<IMessageBodyPart*>();
     objMessageBodies.Append(pMockMessageBodyPart);

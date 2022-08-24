@@ -48,10 +48,11 @@ public class MtsControllerTest {
     @Mock MtsController.Listener mMockMtsControllerListener = new MtsController.Listener();
 
     // test configurations
-    private int smsFormat = 1;
-    private String targetAddress = "tel:+1234567890";
-    private String encodedSmsData = "Encoded SMS RP-DATA";
-    private int seqId = 1;
+    private int mSmsFormat = 1;
+    private String mPsiSmsc = "sip:+12345678901@ims.google.com";
+    private String mDialedNumber = "tel:+12345678901";
+    private String mEncodedSmsData = "Encoded SMS RP-DATA";
+    private int mSeqId = 1;
 
     private TestMtsJni mMtsJni;
 
@@ -106,7 +107,7 @@ public class MtsControllerTest {
     @Test
     public void testBasicOperation_sendMessage() {
         boolean result = mMtsController.sendMessage(
-                smsFormat, targetAddress, encodedSmsData, seqId);
+                mSmsFormat, mPsiSmsc, mDialedNumber, mEncodedSmsData, mSeqId);
 
         Bundle bundle = new Bundle();
         bundle.putInt(MtsController.REPORTMOSTATUS_REASON, MtsController.MO_SUCCESS);
@@ -125,15 +126,15 @@ public class MtsControllerTest {
 
         // reason, smsFormat, retryafter, seqid
         verify(mMockMtsControllerListener).notifyStatusForOutgoingMessage(
-                eq(MtsController.MO_SUCCESS), eq(smsFormat), eq(0), eq(seqId));
+                eq(MtsController.MO_SUCCESS), eq(mSmsFormat), eq(0), eq(mSeqId));
     }
 
     @Test
     public void testBasicOperation_receiveMessage() {
         Message msg = Message.obtain();
         msg.what = MtsController.REQUEST_REPORT_MT_SMS;
-        msg.arg1 = smsFormat;
-        msg.obj = encodedSmsData;
+        msg.arg1 = mSmsFormat;
+        msg.obj = mEncodedSmsData;
 
         Handler handler = mMtsController.getHandler();
         handler.sendMessage(msg);
@@ -141,7 +142,7 @@ public class MtsControllerTest {
         waitForHandlerActionDelayed(handler, 1000, 0);
 
         verify(mMockMtsControllerListener).notifyIncomingMessage(
-                eq(smsFormat), eq(encodedSmsData));
+                eq(mSmsFormat), eq(mEncodedSmsData));
     }
 
     private void waitForHandlerActionDelayed(Handler handler, long timeoutMillis, long delayMs) {
