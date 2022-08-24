@@ -1751,7 +1751,7 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
             }
             else
             {
-                // Don't care - already connecting
+                ProcessFeatureTagChange();
             }
             break;
 
@@ -1827,7 +1827,7 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
             }
             else
             {
-                // Don't care
+                ProcessFeatureTagChange();
             }
             break;
 
