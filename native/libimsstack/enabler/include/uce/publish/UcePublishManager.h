@@ -21,6 +21,7 @@
 #include "IPublicationListener.h"
 #include "ITimer.h"
 #include "base/IMessageMediator.h"
+#include "base/IRefreshListener.h"
 
 #define GET_MESSAGE_FROM_RESPONSE IMS_TRUE
 #define GET_MESSAGE_FOR_REQUEST   IMS_FALSE
@@ -31,6 +32,7 @@
 class ICoreService;
 class IPublication;
 class ISipMessage;
+class ISipClientConnection;
 
 class IPublicationData  // internal Param
 {
@@ -69,6 +71,7 @@ public:
 
 class UcePublishManager :
         public IPublicationListener,
+        public IRefreshListener,
         public ITimerListener,
         public IMessageMediator,
         public ImsStateMachine
@@ -128,6 +131,12 @@ protected:
     virtual void PublicationRefreshCompleted(IN IPublication* piPublication);
     // IPublicationListener - end
 
+    // IRefreshListener - start
+    virtual void Refresh_NotifyCompleted(IN ISipClientConnection* piScc);
+    virtual void Refresh_NotifyTerminated();
+    virtual void Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh);
+    // IRefreshListener - end
+
     // IDLE
     virtual IMS_BOOL StateIDLE_PublishRequested(IN IMSMSG& objMsg);
     virtual IMS_BOOL StateIDLE_AoSConnected(IN IMSMSG& objMsg);
@@ -151,6 +160,7 @@ protected:
     virtual IMS_BOOL StateREFRESHING_AoSDisConnected(IN IMSMSG& objMsg);
     virtual IMS_BOOL StateREFRESHING_Refreshed(IN IMSMSG& objMsg);
     virtual IMS_BOOL StateREFRESHING_RefreshFailed(IN IMSMSG& objMsg);
+    virtual IMS_BOOL StateREFRESHING_RefreshFailedWithNoResponse(IN IMSMSG& objMsg);
     // TERMINATING
     virtual IMS_BOOL StateTERMINATING_PublishRequested(IN IMSMSG& objMsg);
     virtual IMS_BOOL StateTERMINATING_AoSDisconnected(IN IMSMSG& objMsg);
@@ -215,6 +225,7 @@ protected:
         PUBLISH_REFRESH_STARTED,
         PUBLISH_REFRESHED,
         PUBLISH_REFRESH_FAILED,
+        PUBLISH_REFRESH_NO_RESPONSE,
         TIMER_EXPIRED,
         AOS_CONNECTED,
         AOS_DISCONNECTED,

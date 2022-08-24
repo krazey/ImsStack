@@ -19,6 +19,7 @@
 #include "ICoreService.h"
 #include "IMessage.h"
 #include "IPublication.h"
+#include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "IUce.h"
@@ -87,6 +88,8 @@ STATE_MSG_ENTRY(PUBLISH_FAILED, &UcePublishManager::StateREFRESHING_RefreshFaile
 STATE_MSG_ENTRY(PUBLISH_TERMINATED, &UcePublishManager::StateALL_Terminated)
 STATE_MSG_ENTRY(PUBLISH_REFRESHED, &UcePublishManager::StateREFRESHING_Refreshed)
 STATE_MSG_ENTRY(PUBLISH_REFRESH_FAILED, &UcePublishManager::StateREFRESHING_RefreshFailed)
+STATE_MSG_ENTRY(PUBLISH_REFRESH_NO_RESPONSE,
+        &UcePublishManager::StateREFRESHING_RefreshFailedWithNoResponse)
 STATE_MSG_ENTRY(SERVICE_CLOSED, &UcePublishManager::StateALL_Terminated)
 END_STATE_MSG_MAP()
 
@@ -581,6 +584,33 @@ void UcePublishManager::PublicationRefreshCompleted(IN IPublication* piPublicati
         OnStateMessage(objMsg);
     }
 }
+
+void UcePublishManager::Refresh_NotifyCompleted(IN ISipClientConnection* piScc)
+{
+    if (piScc == IMS_NULL)
+    {
+        return;
+    }
+    IMS_SINT32 responseCode = piScc->GetStatusCode();
+    IMS_TRACE_D("Refresh_NotifyCompleted:response code[%d]", responseCode, 0, 0);
+    // no response
+    if (responseCode == 0)
+    {
+        IMSMSG objMsg(PUBLISH_REFRESH_NO_RESPONSE, 0, 0);
+        OnStateMessage(objMsg);
+    }
+}
+
+void UcePublishManager::Refresh_NotifyTerminated()
+{
+    IMS_TRACE_D("Refresh_NotifyTerminated", 0, 0, 0);
+}
+
+void UcePublishManager::Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh)
+{
+    IMS_TRACE_D("Refresh_NotifyTimerExpired", 0, 0, 0);
+    (void)bDoImplicitRefresh;
+}
 /*-----------------------------------------------------------------------------------/
     State Machine
 ------------------------------------------------------------------------------------*/
@@ -1071,6 +1101,64 @@ IMS_BOOL UcePublishManager::StateREFRESHING_RefreshFailed(IN IMSMSG& objMsg)
     return IMS_TRUE;
 }
 
+IMS_BOOL UcePublishManager::StateREFRESHING_RefreshFailedWithNoResponse(IN IMSMSG& objMsg)
+{
+    (void)objMsg;
+    IMS_TRACE_I("StateREFRESHING_RefreshFailedWithNoResponse", 0, 0, 0);
+
+    StopTimer(TIMER_ALL);
+    IMS_SINT32 nResponseCode = 0;
+
+    if (m_bReceivedUnPublishRequest == IMS_TRUE)
+    {
+        // case that received aos-disconnecting during publish
+        m_bReceivedUnPublishRequest = IMS_FALSE;
+        ClearPendingPublishRequest();
+        SendUnpublishedInd();
+        if (CreatePublication() == IMS_FALSE)
+        {
+            SetState(ON);
+            return IMS_TRUE;
+        }
+        if (Unpublish() == IMS_FALSE)
+        {
+            DestroyPublication();
+            SetState(ON);
+            return IMS_TRUE;
+        }
+        SetState(TERMINATING);
+        return IMS_TRUE;
+    }
+
+    switch (UceConfig::GetInstance()->GetPublishRetryType(nResponseCode, m_nSimSlot))
+    {
+        case UceConfig::IMMEDIATELY:
+            if (ProcessImmediatelyRetryResponseScenario())
+            {
+                return IMS_TRUE;
+            }
+            break;
+        case UceConfig::RETRY:
+            if (ProcessRetryResponseScenario())
+            {
+                return IMS_TRUE;
+            }
+            break;
+        case UceConfig::EXPONENTIAL:
+            if (ProcessExponentialRetryResponseScenario())
+            {
+                return IMS_TRUE;
+            }
+            break;
+        default:
+            break;
+    }
+    StopTimer(TIMER_ALL);
+    SendPublishResponseInd(m_nKey, SipStatusCode::SC_504, "Server Time-out", 0, "", "");
+    SetState(ON);
+    return IMS_TRUE;
+}
+
 IMS_BOOL UcePublishManager::StateTERMINATING_PublishRequested(IN IMSMSG& objMsg)
 {
     IMS_TRACE_I("StateTERMINATING_PublishRequested", 0, 0, 0);
@@ -1129,31 +1217,7 @@ IMS_BOOL UcePublishManager::StateALL_Terminated(IN IMSMSG& objMsg)
             break;
         case REFRESHING:
             SendPublishResponseInd(m_nKey, SipStatusCode::SC_504, "Server Time-out", 0, "", "");
-            switch (UceConfig::GetInstance()->GetPublishRetryType(
-                    SipStatusCode::SC_699, m_nSimSlot))
-            {
-                case UceConfig::IMMEDIATELY:
-                    if (!ProcessImmediatelyRetryResponseScenario())
-                    {
-                        StopTimer(TIMER_ALL);
-                    }
-                    break;
-                case UceConfig::RETRY:
-                    if (!ProcessRetryResponseScenario())
-                    {
-                        StopTimer(TIMER_ALL);
-                    }
-                    break;
-                case UceConfig::EXPONENTIAL:
-                    if (!ProcessExponentialRetryResponseScenario())
-                    {
-                        StopTimer(TIMER_ALL);
-                    }
-                    break;
-                default:
-                    StopTimer(TIMER_ALL);
-                    break;
-            }
+            StopTimer(TIMER_ALL);
             break;
         case TERMINATING:
             SendPublishResponseInd(m_nKey, SipStatusCode::SC_504, "Server Time-out", 0, "", "");
@@ -1163,9 +1227,6 @@ IMS_BOOL UcePublishManager::StateALL_Terminated(IN IMSMSG& objMsg)
             break;
     }
     ClearPendingPublishRequest();
-    m_nImmediatelyRetryCount = 0;
-    m_nRetryCount = 0;
-    m_nExponentialRetryCount = 0;
     SetState(ON);
     return IMS_TRUE;
 }
@@ -1351,6 +1412,7 @@ IMS_BOOL UcePublishManager::CreatePublication()
 
     IMS_TRACE_I("CreatePublication:Publication is created", 0, 0, 0);
     m_piPublication->SetListener(this);
+    m_piPublication->SetRefreshListener(this);
     if (UceConfig::GetInstance()->GetBoolValue(
                 UceConfig::KEY_USE_CONTACT_HEADER_IN_PUBLISH, m_nSimSlot) == IMS_TRUE)
     {
@@ -1698,11 +1760,10 @@ IMS_BOOL UcePublishManager::Process403Scenario()
     IMSList<AString> objReasonList = piMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
     if (objReasonList.IsEmpty() == IMS_TRUE)
     {
-        IMS_TRACE_D("No Reason header present", 0, 0, 0);
+        IMS_TRACE_D("No Reason header present.Send Register Recovery message to the App", 0, 0, 0);
         IMSMSG objMsg(
                 AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
         MessageService::PostMessage(m_strAppName, objMsg);
-        IMS_TRACE_D("Send Register Recovery message to the App", 0, 0, 0);
         return IMS_TRUE;
     }
     for (IMS_UINT32 i = 0; i < objReasonList.GetSize(); i++)
@@ -1838,7 +1899,7 @@ IMS_BOOL UcePublishManager::ProcessExponentialRetryResponseScenario()
     if (StartTimer(TIMER_EXPONENTIAL, nExponentialRetryTimeSec))
     {
         DestroyPublication();
-        if (GetState() == PUBLISHING)
+        if (GetState() == PUBLISHING || GetState() == REFRESHING)
         {
             SetState(ON);
         }
