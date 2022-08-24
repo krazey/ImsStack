@@ -26,22 +26,9 @@
     <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
 
     <!-- Ut/Xcap AOSP -->
-    <int name="gba_mode_int" value="1"/>
-    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
     <!-- Previous solution was using 80 and TCP, but need to check actual operation with requirement
     Mandatory TLS : Usage of encrypted communication, e.g. using TLS 1.2 or higher, is mandatory for
     all vendor applications that are sending data to a remote party. -->
     <int name="imsss.ut_as_server_port_int" value="443"/>
     <int name="imsss.ut_transport_type_int" value="3"/>
-
-    <!-- Ut/Xcap Config -->
-    <int-array name="imsss.ut_sm_cause_permanent_block_int_array" num="7">
-        <item value="8"/>
-        <item value="27"/>
-        <item value="28"/>
-        <item value="29"/>
-        <item value="30"/>
-        <item value="32"/>
-        <item value="33"/>
-    </int-array>
 </carrier_config>

@@ -22,10 +22,8 @@
     <int name="imsss.ut_transport_type_int" value="1"/>
 
     <!-- Ut/Xcap Assets -->
-    <int-array name="imsss.ut_http_temporary_error_code_int_array" num="4">
+    <int-array name="imsss.ut_http_temporary_error_code_int_array" num="3">
         <item value="0"/>
-        <!-- 403 isn't in Telus requirement. It is from previous solution -->
-        <item value="403"/>
         <item value="404"/>
         <item value="599"/>
     </int-array>

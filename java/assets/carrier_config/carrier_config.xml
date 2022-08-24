@@ -183,7 +183,8 @@
     <string name="imsss.xcap_auid_prefix_string"></string>
     <int-array name="imsss.ut_sm_cause_permanent_block_int_array" num="0">
     </int-array>
-    <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
+    <int-array name="imsss.ut_http_permanent_error_code_int_array" num="1">
+        <item value="403"/>
     </int-array>
     <int name="imsss.terminal_based_call_wait_sync_int" value="0"/>
     <boolean name="imsss.terminal_based_call_wait_default_activated_bool" value="true"/>
