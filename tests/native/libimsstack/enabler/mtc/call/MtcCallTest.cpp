@@ -25,6 +25,7 @@
 #include "MtcDef.h"
 #include "../../interface/mtc/MockIMtcCallController.h"
 #include "call/IMtcCall.h"
+#include "call/IMtcSession.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MtcCall.h"
 #include "call/NullCall.h"
@@ -831,6 +832,60 @@ TEST_F(MtcCallTest, GetKeyReturnsNotOverlappingKey)
     EXPECT_NE(objCall1.GetKey(), objCall2.GetKey());
 }
 
+TEST_F(MtcCallTest, GetCallTypeReturnsInitialCallTypeWhenNoSessionExists)
+{
+    objCallInfo.eInitialCallType = CallType::VIDEO_RTT;
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_EQ(objCallInfo.eInitialCallType, objCall.GetCallType());
+}
+
+TEST_F(MtcCallTest, GetCallTypeReturnsCallTypeOfLastSession)
+{
+    MockISession objSession1;
+    MockISession objSession2;
+
+    objCallInfo.eInitialCallType = CallType::VOIP;
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
+    IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
+    pMtcSession1->SetCallType(CallType::RTT);
+    pMtcSession2->SetCallType(CallType::VIDEO_RTT);
+
+    EXPECT_EQ(pMtcSession2->GetCallType(), objCall.GetCallType());
+}
+
+TEST_F(MtcCallTest, GetStateReturnsIdleInitially)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_EQ(CallStateName::IDLE, objCall.GetState());
+}
+
+TEST_F(MtcCallTest, GetStateReturnsChangedState)
+{
+    const CallStateName eChangedState = CallStateName::ESTABLISHED;
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    ON_CALL(*pState, GetStateName)
+            .WillByDefault(Return(eChangedState));
+    ON_CALL(*pState, HandleUserAlert)
+            .WillByDefault(Return(eChangedState));
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+    objCall.HandleUserAlert();
+
+    EXPECT_EQ(eChangedState, objCall.GetState());
+}
+
+TEST_F(MtcCallTest, GetCallContextReturnsThis)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_EQ(&objCall, &objCall.GetCallContext());
+}
+
 // TODO: IMtcCallContext methods
 
 TEST_F(MtcCallTest, CreateSessionDoesNothingIfSessionIsNull)
@@ -1053,6 +1108,29 @@ TEST_F(MtcCallTest, GetEmergencyServiceManagerCallsMtcContext)
             .Times(1);
 
     objCall.GetEmergencyServiceManager();
+}
+
+TEST_F(MtcCallTest, GetAsyncRunnerCallsMtcContext)
+{
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+    std::function<void()> objAnyOperation;
+
+    EXPECT_CALL(objContext, GetAsyncRunner(_))
+            .Times(1);
+
+    objCall.GetAsyncRunner(objAnyOperation);
+}
+
+TEST_F(MtcCallTest, GetWifiTestModeCallsMtcContext)
+{
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    EXPECT_CALL(objContext, IsWifiTestMode)
+            .Times(1);
+
+    objCall.IsWifiTestMode();
 }
 
 TEST_F(MtcCallTest, SetHeldByMeSetsHeldByMe)
