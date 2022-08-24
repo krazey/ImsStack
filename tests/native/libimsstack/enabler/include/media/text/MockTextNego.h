@@ -43,7 +43,7 @@ public:
     MOCK_METHOD(IMS_BOOL, SetPort, (IN IMS_UINT32 nPort), (override));
     MOCK_METHOD(const IPAddress&, GetLocalAddress, (), (override));
     MOCK_METHOD(IMS_UINT32, GetLocalPort, (), (override));
-    MOCK_METHOD(const IPAddress&, GetNegotiatedRemoteAddr, (), (override));
+    MOCK_METHOD(const IPAddress&, GetNegotiatedRemoteAddress, (), (override));
     MOCK_METHOD(IMS_UINT32, GetNegotiatedRemotePort, (), (override));
     MOCK_METHOD(TextProfile*, GetNegotiatedLocalProfile, (), (override));
     MOCK_METHOD(TextProfile*, GetNegotiatedNegoProfile, (), (override));
