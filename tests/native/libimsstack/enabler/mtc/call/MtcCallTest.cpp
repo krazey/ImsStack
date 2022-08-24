@@ -61,6 +61,12 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::Unused;
 
+// SipMethod
+MATCHER_P(IsEqualSipMethod, method, "")
+{
+    return arg.Equals(method);
+}
+
 class MtcCallTest : public ::testing::Test
 {
 public:
@@ -886,7 +892,152 @@ TEST_F(MtcCallTest, GetCallContextReturnsThis)
     EXPECT_EQ(&objCall, &objCall.GetCallContext());
 }
 
-// TODO: IMtcCallContext methods
+TEST_F(MtcCallTest, GetCallKeyReturnsKey)
+{
+    MtcCall objCall1(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    MtcCall objCall2(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_EQ(objCall1.GetKey(), objCall1.GetCallKey());
+    EXPECT_EQ(objCall2.GetKey(), objCall2.GetCallKey());
+}
+
+TEST_F(MtcCallTest, IsHeldByMeInitiallyReturnsFalse)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_EQ(IMS_FALSE, objCall.IsHeldByMe());
+}
+
+TEST_F(MtcCallTest, IsUssiReturnsFalseIfNotUssi)
+{
+    objCallInfo.bUssi = IMS_FALSE;
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_EQ(IMS_FALSE, objCall.IsUssi());
+}
+
+TEST_F(MtcCallTest, IsUssiReturnsTrueIfUssi)
+{
+    objCallInfo.bUssi = IMS_TRUE;
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_EQ(IMS_TRUE, objCall.IsUssi());
+}
+
+TEST_F(MtcCallTest, GetCallInfoReturnsCallInfo)
+{
+    objCallInfo.bConference = !objCallInfo.bConference;
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_EQ(objCallInfo, objCall.GetCallInfo());
+}
+
+TEST_F(MtcCallTest, GetParticipantInfoReturnsNotNull)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_NE(nullptr, &objCall.GetParticipantInfo());
+}
+
+TEST_F(MtcCallTest, GetSessionWithISessionInitiallyReturnsNull)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    MockISession objSession;
+
+    EXPECT_EQ(nullptr, objCall.GetSession(&objSession));
+}
+
+TEST_F(MtcCallTest, GetSessionWithISessionReturnsMatchingSession)
+{
+    MockISession objSession1;
+    MockISession objSession2;
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
+    IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
+
+    EXPECT_EQ(pMtcSession1, objCall.GetSession(&objSession1));
+    EXPECT_EQ(pMtcSession2, objCall.GetSession(&objSession2));
+}
+
+TEST_F(MtcCallTest, GetSessionInitiallyReturnsNull)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_EQ(nullptr, objCall.GetSession());
+}
+
+TEST_F(MtcCallTest, GetSessionReturnsLastSession)
+{
+    MockISession objSession1;
+    MockISession objSession2;
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
+    IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
+
+    EXPECT_NE(pMtcSession1, objCall.GetSession());
+    EXPECT_EQ(pMtcSession2, objCall.GetSession());
+}
+
+TEST_F(MtcCallTest, GetServiceReturnsGivenService)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_EQ(&objService, &objCall.GetService());
+}
+
+TEST_F(MtcCallTest, GetUiNotifierReturnsNotNull)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_NE(nullptr, &objCall.GetUiNotifier());
+}
+
+TEST_F(MtcCallTest, GetMediaManagerReturnsNotNull)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_NE(nullptr, &objCall.GetMediaManager());
+}
+
+TEST_F(MtcCallTest, GetPreconditionManagerReturnsNotNull)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_NE(nullptr, &objCall.GetPreconditionManager());
+}
+
+TEST_F(MtcCallTest, GetUssiControllerInitiallyReturnsNull)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_EQ(nullptr, objCall.GetUssiController());
+}
+
+TEST_F(MtcCallTest, GetOtherCallsReturnsExcludingMe)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    MockIMtcCallManager objCallManager;
+    EXPECT_CALL(objCallManager, GetCallsExcluding(objCall.GetKey()))
+            .Times(1);
+
+    ON_CALL(objContext, GetCallManager)
+            .WillByDefault(ReturnRef(objCallManager));
+
+    objCall.GetOtherCalls();
+}
+
+TEST_F(MtcCallTest, GetUpdatingInfoReturnsSameNotNullInstance)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    UpdatingInfo& objUpdatingInfo = objCall.GetUpdatingInfo();
+
+    EXPECT_NE(nullptr, &objUpdatingInfo);
+    EXPECT_EQ(&objUpdatingInfo, &objCall.GetUpdatingInfo());
+}
 
 TEST_F(MtcCallTest, CreateSessionDoesNothingIfSessionIsNull)
 {
@@ -932,6 +1083,203 @@ TEST_F(MtcCallTest, CreateSessionCreatesMtcSession)
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
     EXPECT_NE(nullptr, objCall.CreateSession(&objSession));
+}
+
+TEST_F(MtcCallTest, CreateBlockCheckerReturnsNotNull)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    ImsList<IMtcBlockRule*> lstSomeRules;
+
+    EXPECT_NE(nullptr, objCall.CreateBlockChecker(lstSomeRules));
+}
+
+TEST_F(MtcCallTest, CreateJniCallInfoReturnsMatchingWithCallInfo)
+{
+    objCallInfo.eInitialCallType = CallType::VT;
+    objCallInfo.bEmergency = !objCallInfo.bEmergency;
+    objCallInfo.bOffline = !objCallInfo.bOffline;
+    objCallInfo.bUssi = !objCallInfo.bUssi;
+    objCallInfo.bConference = !objCallInfo.bConference;
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
+
+    EXPECT_EQ(objService.GetServiceType(), objJniCallInfo.eServiceType);
+    EXPECT_EQ(objCall.GetCallType(), objJniCallInfo.eCallType);
+    EXPECT_EQ(objCallInfo.bEmergency, objJniCallInfo.bEmergency);
+    EXPECT_EQ(objCallInfo.bOffline, objJniCallInfo.bOffline);
+    EXPECT_EQ(objCallInfo.bUssi, objJniCallInfo.bUssi);
+    EXPECT_EQ(objCallInfo.bConference, objJniCallInfo.bConference);
+}
+
+TEST_F(MtcCallTest, CreateJniCallInfoReturnsConferenceSubscribeFalse)
+{
+    ON_CALL(*pConfigurationManager, GetConferenceSubscribeType)
+            .WillByDefault(Return(-1)); // Subscription is not required
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
+
+    EXPECT_EQ(IMS_FALSE, objJniCallInfo.bConferenceSubscriptionRequired);
+}
+
+TEST_F(MtcCallTest, CreateJniCallInfoReturnsConferenceSubscribeTrueIfInDialog)
+{
+    ON_CALL(*pConfigurationManager, GetConferenceSubscribeType)
+            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
+
+    EXPECT_EQ(IMS_TRUE, objJniCallInfo.bConferenceSubscriptionRequired);
+}
+
+TEST_F(MtcCallTest, CreateJniCallInfoReturnsConferenceSubscribeTrueIfOutDialog)
+{
+    ON_CALL(*pConfigurationManager, GetConferenceSubscribeType)
+            .WillByDefault(
+                    Return(CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG));
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
+
+    EXPECT_EQ(IMS_TRUE, objJniCallInfo.bConferenceSubscriptionRequired);
+}
+
+TEST_F(MtcCallTest, CreateJniCallInfoInitiallyReturnsFalseCapability)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
+
+    EXPECT_EQ(IMS_FALSE, objJniCallInfo.bRttCapable);
+    EXPECT_EQ(IMS_FALSE, objJniCallInfo.bVideoCapable);
+}
+
+TEST_F(MtcCallTest, CreateJniCallInfoReturnsCapabilityOfSession)
+{
+    MockISession objSession;
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    IMtcSession* pSession = objCall.CreateSession(&objSession);
+    JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
+
+    EXPECT_EQ(pSession->IsRttCapable(), objJniCallInfo.bRttCapable);
+    EXPECT_EQ(pSession->IsVideoCapable(), objJniCallInfo.bVideoCapable);
+}
+
+TEST_F(MtcCallTest, CreateClientConnectionReturnsNullIfNoSessionExists)
+{
+    const SipMethod eAnyMethod = SipMethod::INVITE;
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_EQ(nullptr, objCall.CreateClientConnection(eAnyMethod));
+}
+
+TEST_F(MtcCallTest, CreateClientConnectionReturnsNullIfISessionReturnsNull)
+{
+    const SipMethod eAnyMethod = SipMethod::INVITE;
+
+    MockISipClientConnection objClientConnection;
+    MockISession objSession;
+    EXPECT_CALL(objSession, CreateTransaction(IsEqualSipMethod(eAnyMethod)))
+            .Times(1)
+            .WillOnce(Return(nullptr));
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));\
+    objCall.CreateSession(&objSession);
+
+    EXPECT_EQ(nullptr, objCall.CreateClientConnection(eAnyMethod));
+}
+
+TEST_F(MtcCallTest, CreateClientConnectionReturnsConnectionFromISession)
+{
+    const SipMethod eAnyMethod = SipMethod::INVITE;
+
+    MockISipClientConnection objClientConnection;
+    MockISession objSession;
+    EXPECT_CALL(objSession, CreateTransaction(IsEqualSipMethod(eAnyMethod)))
+            .Times(1)
+            .WillOnce(Return(&objClientConnection));
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));\
+    objCall.CreateSession(&objSession);
+
+    EXPECT_EQ(&objClientConnection, objCall.CreateClientConnection(eAnyMethod));
+}
+
+TEST_F(MtcCallTest, RemoveSessionDoesNothingIfNoMatchingSession)
+{
+    MockISession objSession1;
+    MockISession objSession2;
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    objCall.CreateSession(&objSession1);
+
+    objCall.RemoveSession(&objSession2);
+
+    EXPECT_NE(nullptr, objCall.GetSession(&objSession1));
+}
+
+TEST_F(MtcCallTest, RemoveSessionRemovesMatchingSession)
+{
+    MockISession objSession1;
+    MockISession objSession2;
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    objCall.CreateSession(&objSession1);
+    objCall.CreateSession(&objSession2);
+
+    objCall.RemoveSession(&objSession2);
+
+    EXPECT_NE(nullptr, objCall.GetSession(&objSession1));
+    EXPECT_EQ(nullptr, objCall.GetSession(&objSession2));
+}
+
+TEST_F(MtcCallTest, RemoveInactiveSessionsDoesNothingIfActiveSessionNotFound)
+{
+    MockISession objSession1;
+    MockISession objSession2;
+    MockISession objActiveSession;
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    objCall.CreateSession(&objSession1);
+    objCall.CreateSession(&objSession2);
+
+    objCall.RemoveInactiveSessions(&objActiveSession);
+
+    EXPECT_NE(nullptr, objCall.GetSession(&objSession1));
+    EXPECT_NE(nullptr, objCall.GetSession(&objSession2));
+}
+
+TEST_F(MtcCallTest, RemoveInactiveSessionsRemovesOthersIfActiveSessionFound)
+{
+    MockISession objSession1;
+    MockISession objSession2;
+    MockISession objActiveSession;
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    objCall.CreateSession(&objSession1);
+    objCall.CreateSession(&objActiveSession);
+    objCall.CreateSession(&objSession2);
+
+    objCall.RemoveInactiveSessions(&objActiveSession);
+
+    EXPECT_EQ(nullptr, objCall.GetSession(&objSession1));
+    EXPECT_EQ(nullptr, objCall.GetSession(&objSession2));
+    EXPECT_NE(nullptr, objCall.GetSession(&objActiveSession));
+}
+
+TEST_F(MtcCallTest, DeleteUpdatingInfoDeletesPreviousOne)
+{
+    const CallType eChangedCallType = CallType::VT;
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    objCall.GetUpdatingInfo().SetTargetCallType(eChangedCallType);
+
+    objCall.DeleteUpdatingInfo();
+
+    EXPECT_NE(eChangedCallType, objCall.GetUpdatingInfo().GetTargetCallType());
 }
 
 TEST_F(MtcCallTest, GetSlotIdCallsMtcContext)
