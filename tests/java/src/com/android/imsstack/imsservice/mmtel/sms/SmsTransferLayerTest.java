@@ -18,15 +18,21 @@ package com.android.imsstack.imsservice.mmtel.sms;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.os.HandlerThread;
 import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
+import com.android.imsstack.core.agents.Usat;
+import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.internal.util.HexDump;
@@ -37,8 +43,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 @RunWith(JUnit4.class)
 public class SmsTransferLayerTest {
     private static final String TAG = "[GII-SmsTL Test] ";
@@ -47,19 +55,36 @@ public class SmsTransferLayerTest {
     @Mock ImsCallContext mImsCallContext;
     @Mock SmsTransferLayer.Listener mListener;
     @Mock SmsRelayLayer mSmsRL;
+    @Mock private UsatInterface mMockUsatInterface;
+    @Mock private Usat.MoSmsControlCommandResponse mMockUsatCmdRes;
     @Mock MtsController.Listener mMockMtsControllerListener = new MtsController.Listener();
+    @Mock private Usat.MoSmsControlCommand mMoSmsCCmd;
+    @Captor ArgumentCaptor<String> mRpAddrCaptor;
+    @Captor ArgumentCaptor<String> mTpAddrCaptor;
+    @Captor ArgumentCaptor<Usat.Listener> mUsatListenerCaptor;
+
     private static final long MAX_WAIT_TIME_MS = 10000;
     private TestSmsTransferLayer mSmsTransferLayer;
     private SmsTransferLayer.SmsRLListenerProxy mProxyListener;
     private int mToken = 1;
     private int mSmsFormat = SmsUtils.FORMAT_INT_3GPP;
     private int mMessageRef = 1;
-    private String mSmsc = "+19037029920";
+    //private String mSmsc = "+19037029920";
+    private String mSmsc = "0791190791700590";
+    private String mDecodedSmsc = "+917019075009";
     private String mDestinationAddress = "90008000*100";
     private byte[] mPdu = { 21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66,
             (byte) 0xB2, 99, (byte) 0x6C, 26, 03 };
     private byte[] mTpdu = {01, 06, (byte) 0x0C, (byte) 0x81, (byte) 0x09, 00, (byte) 0x08, 00, 26,
             00, 00, 00, 06, 53, (byte) 0x6A,  (byte) 0x90, (byte) 0x5A, (byte) 0x9D, 02};
+    //private String mTpduString = "01060A817856341200000666B2996C2603";
+    private String mTpduString = "01060A817856341200000006536A905A9D02";
+    private String mDestAddr = "8765432100";
+    private String mUsatTpDestAddr = "1234567890";
+    private String mEncodedRpDestAddr = "07812160130300F4";
+    private String mUsatRpDestAddr = "12063130004";
+    //private String mUsatRpDestAddr = "07912160130300F4";
+    private String mUsatTpduString = "01060A812143658709000006536A905A9D02";
     private int mTlMessageType = SmsUtils.TP_SMS_DELIVER;
     private int mResult = ImsSmsImplBase.SEND_STATUS_OK;
     private int mRpMessageType = SmsUtils.RP_DATA;
@@ -70,6 +95,11 @@ public class SmsTransferLayerTest {
     @Before
     public void setUp() throws Exception {
         mImsCallContext = Mockito.mock(ImsCallContext.class);
+        MockitoAnnotations.initMocks(this);
+        when(mImsCallContext.getUsatInterface()).thenReturn(mMockUsatInterface);
+        when(mMockUsatInterface.createMoSmsControlCommand(anyString(), anyString(), anyInt(),
+                any())).thenReturn(mMoSmsCCmd);
+        when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_ALLOWED);
         mSmsRL = Mockito.mock(SmsRelayLayer.class);
         mSmsTransferLayer = new TestSmsTransferLayer(mImsCallContext, mSmsRL);
         mListener = Mockito.mock(SmsTransferLayer.Listener.class);
@@ -92,6 +122,115 @@ public class SmsTransferLayerTest {
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_ACK), eq(mSmsc), eq(null),
                 eq(mPdu), eq(1));
     }
+    @Test
+    public void test_sendMoTPdu_USAT_RESULT_ALLOWED() {
+        when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL)).thenReturn(true);
+        when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_ALLOWED);
+        when(mMockUsatCmdRes.getCommand()).thenReturn(mMoSmsCCmd);
+        byte[] tpdu = HexDump.hexStringToByteArray(mTpduString);
+        mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.FORMAT_INT_3GPP, mMessageRef, mSmsc, tpdu);
+        verify(mMockUsatInterface).createMoSmsControlCommand(mRpAddrCaptor.capture(),
+                                                             mTpAddrCaptor.capture(), anyInt(),
+                                                             mUsatListenerCaptor.capture());
+        verify(mMockUsatInterface).sendCommand(any());
+        String rpAddr = mRpAddrCaptor.getValue();
+        assertEquals(mDecodedSmsc, rpAddr);
+        String tpAddr = mTpAddrCaptor.getValue();
+        assertEquals(mDestAddr, tpAddr);
+
+        Usat.Listener usatListener = mUsatListenerCaptor.getValue();
+        assertNotNull(usatListener);
+        when(mMoSmsCCmd.getRpDestinationAddress()).thenReturn(rpAddr);
+        when(mMoSmsCCmd.getTpDestinationAddress()).thenReturn(tpAddr);
+        usatListener.onCommandResponse(mMockUsatCmdRes);
+        verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_DATA), eq(mSmsc), eq(tpAddr),
+                eq(tpdu), eq(STATUS_RESULT_NA));
+    }
+
+    @Test
+    public void test_sendMoTPdu_USAT_RESULT_ALLOWED_WITH_MODIFICATION() throws Exception  {
+        when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL)).thenReturn(true);
+        when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_ALLOWED_WITH_MODIFICATION);
+        when(mMockUsatCmdRes.getCommand()).thenReturn(mMoSmsCCmd);
+        mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.FORMAT_INT_3GPP,
+                                             mMessageRef, mSmsc,
+                                             HexDump.hexStringToByteArray(mTpduString));
+        verify(mMockUsatInterface).createMoSmsControlCommand(mRpAddrCaptor.capture(),
+                                                             mTpAddrCaptor.capture(), anyInt(),
+                                                             mUsatListenerCaptor.capture());
+        verify(mMockUsatInterface).sendCommand(any());
+
+        String rpAddr = mRpAddrCaptor.getValue();
+        assertEquals(mDecodedSmsc, rpAddr);
+        String tpAddr = mTpAddrCaptor.getValue();
+        assertEquals(mDestAddr, tpAddr);
+
+        Usat.Listener usatListener = mUsatListenerCaptor.getValue();
+        assertNotNull(usatListener);
+        when(mMoSmsCCmd.getRpDestinationAddress()).thenReturn(rpAddr);
+        when(mMoSmsCCmd.getTpDestinationAddress()).thenReturn(tpAddr);
+        when(mMockUsatCmdRes.getRpDestinationAddress()).thenReturn(mUsatRpDestAddr);
+        when(mMockUsatCmdRes.getTpDestinationAddress()).thenReturn(mUsatTpDestAddr);
+        usatListener.onCommandResponse(mMockUsatCmdRes);
+        byte[] usatTpdu = HexDump.hexStringToByteArray(mUsatTpduString);
+        verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_DATA), eq(mEncodedRpDestAddr),
+                             eq(mUsatTpDestAddr), eq(usatTpdu), eq(STATUS_RESULT_NA));
+    }
+
+    @Test
+    public void test_sendMoTPdu_USAT_RESULT_NOT_ALLOWED() {
+        when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL)).thenReturn(true);
+        when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_NOT_ALLOWED);
+        when(mMockUsatCmdRes.getCommand()).thenReturn(mMoSmsCCmd);
+        byte[] tpdu = HexDump.hexStringToByteArray(mTpduString);
+        mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.FORMAT_INT_3GPP, mMessageRef, mSmsc, tpdu);
+        verify(mMockUsatInterface).createMoSmsControlCommand(mRpAddrCaptor.capture(),
+                                                             mTpAddrCaptor.capture(), anyInt(),
+                                                             mUsatListenerCaptor.capture());
+        verify(mMockUsatInterface).sendCommand(any());
+
+        String rpAddr = mRpAddrCaptor.getValue();
+        assertEquals(mDecodedSmsc, rpAddr);
+        String tpAddr = mTpAddrCaptor.getValue();
+        assertEquals(mDestAddr, tpAddr);
+
+        Usat.Listener usatListener = mUsatListenerCaptor.getValue();
+        assertNotNull(usatListener);
+
+        usatListener.onCommandResponse(mMockUsatCmdRes);
+        verify(mListener, Mockito.times(1)).notifySmsResult(mToken, tpdu[1] & 0xff,
+                                                            ImsSmsImplBase.SEND_STATUS_ERROR,
+                                                            SmsManager.RESULT_INTERNAL_ERROR,
+                                                            ImsSmsImplBase.RESULT_NO_NETWORK_ERROR);
+
+    }
+
+    @Test
+    public void test_calculateTpDestAddrLengthByte() {
+        //for odd number of digits
+        byte[] tpDestAddrBytes = HexDump.hexStringToByteArray("9112345678F9");
+        int len = mSmsTransferLayer.calculateTpDestAddrLengthByte(tpDestAddrBytes);
+        assertEquals(len, 9);
+
+        //for even number of Digits
+        tpDestAddrBytes = HexDump.hexStringToByteArray("911234567899");
+        len = mSmsTransferLayer.calculateTpDestAddrLengthByte(tpDestAddrBytes);
+        assertEquals(len, 10);
+    }
+
+    @Test
+    public void test_calculateIndexAfterTpDestAddr() {
+        //without padding in TP-DA
+        byte[] tpdu1 = HexDump.hexStringToByteArray("01060A817856341200000006536A905A9D02");
+        //with padding in TP-DA
+        byte[] tpdu2 = HexDump.hexStringToByteArray("01060781214365F7000006536A905A9D02");
+
+        int index1 = mSmsTransferLayer.calculateIndexAfterTpDestAddr(tpdu1);
+        int index2 = mSmsTransferLayer.calculateIndexAfterTpDestAddr(tpdu2);
+        assertEquals(index1, 9);
+        assertEquals(index2, 8);
+    }
+
     @Test
     public void testCdmaPduError() {
         byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(null);
