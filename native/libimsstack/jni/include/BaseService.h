@@ -21,12 +21,15 @@
 #include "EnablerUtils.h"
 #include "ImsMessage.h"
 #include "ImsProcess.h"
+#include "IJniEnabler.h"
+
+class IJniEnablerThread;
 
 typedef int (*Jni_SendDataToJava)(long nNativeObject, const android::Parcel& pParcel);
 typedef int (*JniSystem_SendDataToJava)(
         long nNativeObject, const android::Parcel& in, android::Parcel& out, int fileDescriptor);
 
-class BaseService : public ImsMessage::IMessageCallback
+class BaseService : public IJniEnabler
 {
 public:
     inline virtual ~BaseService() {}
@@ -35,6 +38,9 @@ public:
     {
         return 0;
     }
+
+    inline void NotifyNativeEnablerSet() override {}
+    inline IJniEnablerThread* GetJniThread() const { return IMS_NULL; }
 
 protected:
     inline void MessageCallback_OnMessage(IN ImsMessage& objMsg) override
