@@ -585,7 +585,7 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     return objJniCallInfo;
 }
 
-PUBLIC VIRTUAL ISipClientConnection* MtcCall::CreateClientConnection(IN IMS_SINT32 nMethod)
+PUBLIC VIRTUAL ISipClientConnection* MtcCall::CreateClientConnection(IN SipMethod eMethod)
 {
     IMtcSession* pSession = GetSession();
     if (!pSession)
@@ -594,7 +594,7 @@ PUBLIC VIRTUAL ISipClientConnection* MtcCall::CreateClientConnection(IN IMS_SINT
     }
 
     ISipClientConnection* piSipClientConnection =
-            pSession->GetISession().CreateTransaction(nMethod);
+            pSession->GetISession().CreateTransaction(eMethod);
 
     if (piSipClientConnection)
     {

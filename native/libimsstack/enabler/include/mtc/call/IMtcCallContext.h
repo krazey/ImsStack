@@ -18,10 +18,11 @@
 #define INTERFACE_MTC_CALL_CONTEXT_H_
 
 #include "ImsList.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "IMtcCall.h"
 #include "IMtcContext.h"
 #include "JniCallInfo.h"
+#include "sipcore/SipMethod.h"
 
 class IMtcBlockChecker;
 class IMtcBlockRule;
@@ -59,15 +60,15 @@ public:
     virtual MtcSupplementaryService& GetSupplementaryService() = 0;
     virtual UpdatingInfo& GetUpdatingInfo() = 0;
     virtual UssiController* GetUssiController() = 0;
-    virtual IMSList<IMtcCall*> GetOtherCalls() = 0;
+    virtual ImsList<IMtcCall*> GetOtherCalls() = 0;
 
     virtual void SetHeldByMe(IN IMS_BOOL bHeldByMe) = 0;
 
     virtual IMtcSession* CreateSession(IN ISession* piSession) = 0;
     virtual IMtcSession* CreateSession() = 0;
-    virtual IMtcBlockChecker* CreateBlockChecker(IN const IMSList<IMtcBlockRule*>& lstRules) = 0;
+    virtual IMtcBlockChecker* CreateBlockChecker(IN const ImsList<IMtcBlockRule*>& lstRules) = 0;
     virtual JniCallInfo CreateJniCallInfo() = 0;
-    virtual ISipClientConnection* CreateClientConnection(IN IMS_SINT32 nMethod) = 0;
+    virtual ISipClientConnection* CreateClientConnection(IN SipMethod eMethod) = 0;
 
     virtual void RemoveSession(IN const ISession* piSession) = 0;
     virtual void RemoveInactiveSessions(IN const ISession* piActiveSession) = 0;
