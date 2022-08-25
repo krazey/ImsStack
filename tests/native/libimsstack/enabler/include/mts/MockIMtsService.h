@@ -25,7 +25,6 @@ class MockIMtsService : public IMtsService
 public:
     virtual ~MockIMtsService() {}
 
-    MOCK_METHOD(void, SetJniMtsService, (IN JniMtsService * pJniMtsService), (override));
     MOCK_METHOD(void, SendMoSms,
             (IN SmsFormatType eSmsFormat, IN const ByteArray& objData, IN const AString& strAddress,
                     IN IMS_SINT32 nSeqId),
@@ -41,6 +40,8 @@ public:
             (override));
     MOCK_METHOD(void, SetListener, (IN IMtsServiceListener * piMtsServiceListener), (override));
     MOCK_METHOD(void, RequestRegistrationRecovery, (IN IMS_UINT32 nRecoveryType), (override));
+
+    MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));
 };
 
 #endif

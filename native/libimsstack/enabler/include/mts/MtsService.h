@@ -27,8 +27,7 @@
 #include "IuMtsService.h"
 
 class IImsAos;
-class JniMtsService;
-class JniMtsServiceThread;
+class IJniMtsServiceThread;
 class MtsDynamicLoader;
 
 class MtsService final :
@@ -64,7 +63,6 @@ public:
     void ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
 
     // IMtsService
-    void SetJniMtsService(IN JniMtsService* pJniMtsService) override;
     void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId) override;
     void SendMtResult(IN IMS_BOOL bMtResult) override;
@@ -75,6 +73,8 @@ public:
     void SetListener(IN IMtsServiceListener* piMtsServiceListener) override;
     void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) override;
 
+    inline void NotifyJniEnablerSet() override {}
+
     IMS_BOOL IsEpdgConnected();
 
     // TODO: need to check if it is deprecated or not
@@ -82,7 +82,8 @@ public:
             IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam);
 
 private:
-    IMS_BOOL AttachJni();
+    void AttachJni();
+    IJniMtsServiceThread* GetJniThread();
     void AttachAos();
     void AttachCoreService();
     void Init();
@@ -95,7 +96,6 @@ private:
     ICoreService* m_piCoreService;
     ICoreService* m_piEmergencyCoreService;
     IMtsServiceListener* m_piMtsServiceListener;
-    JniMtsService* m_pJniMtsService;
     MtsDynamicLoader* m_pMtsDynamicLoader;
     EmergencySmsSendRequestInfo* m_pE911SmsInfo;
 };

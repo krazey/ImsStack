@@ -24,13 +24,12 @@
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
 #include "IIpcan.h"
+#include "IJniMtsServiceThread.h"
 #include "ImsAos.h"
 #include "ImsAosParameter.h"
 #include "ImsServiceConfig.h"
 #include "IuMts.h"
-#include "JniConnectorFactory.h"
-#include "JniMtsService.h"
-#include "JniMtsServiceThread.h"
+#include "JniEnablerConnector.h"
 #include "MtsApp.h"
 #include "MtsFactory.h"
 #include "MtsService.h"
@@ -50,7 +49,6 @@ MtsService::MtsService(IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLo
         m_piCoreService(IMS_NULL),
         m_piEmergencyCoreService(IMS_NULL),
         m_piMtsServiceListener(IMS_NULL),
-        m_pJniMtsService(IMS_NULL),
         m_pMtsDynamicLoader(pMtsDynamicLoader),
         m_pE911SmsInfo(IMS_NULL)
 {
@@ -63,14 +61,10 @@ MtsService::~MtsService()
 {
     IMS_TRACE_I("~MtsService [slot_%d]", m_nSlotId, 0, 0);
 
-    if (m_pJniMtsService != IMS_NULL) {
-        m_pJniMtsService->SetMtsService(IMS_NULL);
-    }
+    JniEnablerConnector::GetInstance().SetNativeEnabler(
+            m_nSlotId, EnablerType::MTS_SERVICE, IMS_NULL);
 
     DeInit();
-
-    JniConnectorFactory::GetInstance()->GetMtsServiceConnector(m_nSlotId)->SetEnablerService(
-            IMS_NULL);
 }
 
 PUBLIC
@@ -83,21 +77,6 @@ PUBLIC VIRTUAL
 void MtsService::SetListener(IN IMtsServiceListener* piMtsServiceListener)
 {
     m_piMtsServiceListener = piMtsServiceListener;
-}
-
-PUBLIC VIRTUAL
-void MtsService::SetJniMtsService(IN JniMtsService* pJniMtsService)
-{
-    IMS_TRACE_I("SetJniMtsService", 0, 0, 0);
-
-    JniMtsService* pOldJniMtsService = m_pJniMtsService;
-
-    m_pJniMtsService = pJniMtsService;
-
-    if (pOldJniMtsService == IMS_NULL)
-    {
-        m_pJniMtsService->SetMtsService(this);
-    }
 }
 
 PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
@@ -143,10 +122,10 @@ void MtsService::ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsForm
 {
     IMS_TRACE_I("ReportMoStatus", 0, 0, 0);
 
-    if (AttachJni())
+    IJniMtsServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
     {
-        m_pJniMtsService->GetThread()->ReportMoStatus(
-                nReason, eSmsFormat, nRetryAfter, nSeqId, m_nSlotId);
+        piJniThread->ReportMoStatus(nReason, eSmsFormat, nRetryAfter, nSeqId, m_nSlotId);
     }
 }
 
@@ -155,9 +134,10 @@ void MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& ob
 {
     IMS_TRACE_I("ReportMtSms", 0, 0, 0);
 
-    if (AttachJni())
+    IJniMtsServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
     {
-        m_pJniMtsService->GetThread()->ReportMtSms(eSmsFormat, objData, m_nSlotId);
+        piJniThread->ReportMtSms(eSmsFormat, objData, m_nSlotId);
     }
 }
 
@@ -438,30 +418,23 @@ void MtsService::DeInit()
 }
 
 PRIVATE
-IMS_BOOL MtsService::AttachJni()
+void MtsService::AttachJni()
 {
-    if (m_pJniMtsService)
+    JniEnablerConnector::GetInstance().SetNativeEnabler(m_nSlotId, EnablerType::MTS_SERVICE, this);
+}
+
+PRIVATE
+IJniMtsServiceThread* MtsService::GetJniThread()
+{
+    IJniEnabler* piJniEnabler =
+            JniEnablerConnector::GetInstance().GetJniEnabler(m_nSlotId, EnablerType::MTS_SERVICE);
+    if (piJniEnabler == IMS_NULL)
     {
-        return IMS_TRUE;
+        IMS_TRACE_E(0, "JniMtsServiceThread is null", 0, 0, 0);
+        return IMS_NULL;
     }
 
-    IMS_BOOL bIsAttached = IMS_FALSE;
-    m_pJniMtsService =
-            JniConnectorFactory::GetInstance()->GetMtsServiceConnector(m_nSlotId)->GetJniService();
-
-    if (m_pJniMtsService)
-    {
-        m_pJniMtsService->SetMtsService(this);
-        bIsAttached = IMS_TRUE;
-    }
-    else
-    {
-        JniConnectorFactory::GetInstance()
-                ->GetMtsServiceConnector(m_nSlotId)->SetEnablerService(this);
-    }
-
-    IMS_TRACE_I("AttachJni : bIsAttached[%s]", _TRACE_B_(bIsAttached), 0, 0);
-    return bIsAttached;
+    return reinterpret_cast<IJniMtsServiceThread*>(piJniEnabler->GetJniThread());
 }
 
 PRIVATE

@@ -2,9 +2,10 @@
 #define JNI_MTS_SERVICE_H_
 
 #include "BaseService.h"
-#include "JniMtsServiceThread.h"
 
+class IJniEnablerThread;
 class IMtsService;
+class JniMtsServiceThread;
 
 class JniMtsService : public BaseService
 {
@@ -12,22 +13,22 @@ public:
     JniMtsService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId);
     virtual ~JniMtsService();
     virtual int SendData(const android::Parcel& objParcel) override;
-    void SetMtsService(IN IMtsService* piMtsService);
-    JniMtsServiceThread* GetThread() const;
+
+    inline void NotifyNativeEnablerSet() override {}
+    IJniEnablerThread* GetJniThread() const override;
 
 protected:
     void HandleMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel) override;
 
 private:
-    IMS_BOOL Attach();
+    void Attach();
+    IMtsService* GetNativeService();
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
     void TriggerSendMoSms(IN const android::Parcel& objParcel);
     void NotifyMtResult(IN const android::Parcel& objParcel);
 
 private:
     IMS_SINT32 m_nSlotId;
-    AString m_strThreadName;
-    IMtsService* m_piMtsService;
     JniMtsServiceThread* m_pJniMtsServiceThread;
 };
 
