@@ -25,4 +25,7 @@
         <item value="5"/>
         <item value="6"/>
     </int-array>
+
+    <!-- Ut/Xcap Assets -->
+    <int name="ut_xcap_apn_inactivity_timer_sec_int" value="240"/>
 </carrier_config>
