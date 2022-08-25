@@ -21,7 +21,7 @@
 #include "ServiceTrace.h"
 #include "ImsProcess.h"
 
-#include "JniConnectorFactory.h"
+#include "JniEnablerConnector.h"
 #include "JniMediaSession.h"
 #include "JniMediaSessionThread.h"
 #include "SurfaceManager.h"
@@ -37,29 +37,27 @@ JniMediaSession::JniMediaSession(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS
         m_pThread(IMS_NULL),
         m_strThreadName(AString::ConstNull()),
         m_nSlotId(nSlotId),
-        m_piMediaManager(IMS_NULL),
         m_nCallKey(nCallKey)
 {
     IMS_TRACE_D("+JniMediaSession SlotId[%d], nCallKey[%d]", m_nSlotId, nCallKey, 0);
 
     Initialize(pfnSendDataToJava, nNativeObject);
-    m_piMediaManager = JniConnectorFactory::GetInstance()
-                               ->GetMediaSessionConnector(m_nSlotId)
-                               ->GetEnablerService();
-
-    SetJniMediaSessionThread();
+    JniEnablerConnector::GetInstance().SetJniEnabler(
+            m_nSlotId, EnablerType::MEDIA_SESSION, DYNAMIC_CAST(IJniEnabler*, this), m_nCallKey);
 }
 
 JniMediaSession::~JniMediaSession()
 {
     IMS_TRACE_D("~JniMediaSession", 0, 0, 0);
 
+    JniEnablerConnector::GetInstance().SetJniEnabler(
+            m_nSlotId, EnablerType::MEDIA_SESSION, IMS_NULL, m_nCallKey);
+
     if (m_pThread != IMS_NULL)
     {
         ImsProcess::GetInstance()->UnloadAppThread(m_strThreadName);
         m_pThread = IMS_NULL;
     }
-    SetJniMediaSessionThread();
 }
 
 PUBLIC VIRTUAL int JniMediaSession::SendData(const android::Parcel& objParcel)
@@ -111,16 +109,15 @@ void JniMediaSession::SetMtcCallId(IN IMS_SINTP nCallKey)
     m_nCallKey = nCallKey;
 }
 
+PUBLIC VIRTUAL void JniMediaSession::NotifyNativeEnablerSet()
+{
+    // TODO: send pending messages if needed.
+}
+
 PUBLIC
 IJniEnablerThread* JniMediaSession::GetJniThread() const
 {
     return DYNAMIC_CAST(IJniEnablerThread*, m_pThread);
-}
-
-PUBLIC
-JniMediaSessionThread* JniMediaSession::GetThread()
-{
-    return m_pThread;
 }
 
 PUBLIC GLOBAL IMS_BOOL JniMediaSession::IsMediaMessage(IN IMS_SINT32 nMsg)
@@ -147,16 +144,9 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
 {
     IMS_TRACE_D("HandleMessage() MSG[%d]", nMsg, 0, 0);
 
-    if (m_piMediaManager == IMS_NULL)
+    if (GetMediaManager() == IMS_NULL)
     {
-        m_piMediaManager = JniConnectorFactory::GetInstance()
-                                   ->GetMediaSessionConnector(m_nSlotId)
-                                   ->GetEnablerService();
-    }
-
-    if (m_piMediaManager == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "HandleMessage() m_piMediaManager is not exist", 0, 0, 0);
+        IMS_TRACE_E(0, "HandleMessage() IMediaManager is not exist", 0, 0, 0);
         return;
     }
 
@@ -211,12 +201,10 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
 }
 
 PRIVATE
-void JniMediaSession::SetJniMediaSessionThread()
+IMediaManager* JniMediaSession::GetMediaManager()
 {
-    if (m_piMediaManager != IMS_NULL)
-    {
-        m_piMediaManager->SetJniMediaSessionThread(m_nCallKey, m_pThread);
-    }
+    return DYNAMIC_CAST(IMediaManager*, JniEnablerConnector::GetInstance().GetNativeEnabler(
+            m_nSlotId, EnablerType::MEDIA_SESSION));
 }
 
 PRIVATE
@@ -273,7 +261,7 @@ void JniMediaSession::OnResponses(
         pParam->m_eResult = objParcel.readInt32();
     }
 
-    m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
 PRIVATE
@@ -285,7 +273,7 @@ void JniMediaSession::OnNofityMediaInactitivy(
     pParam->m_eMediaType = ConvertToMediaType(static_cast<SessionType>(objParcel.readInt32()));
     pParam->m_eMediaProtocolType = static_cast<ProtocolType>(objParcel.readInt32());
 
-    m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
 PRIVATE
@@ -296,7 +284,7 @@ void JniMediaSession::OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const android:
     pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
     pParam->m_nResponse = objParcel.readInt32();
 
-    m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
 PRIVATE
@@ -333,7 +321,7 @@ void JniMediaSession::OnNofityHeaderExtension(
 PRIVATE
 void JniMediaSession::OnNotifyMediaDetach(IN IMS_SINT32 nMsg)
 {
-    m_piMediaManager->SendMessage(nMsg, m_nCallKey, IMS_NULL);
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, IMS_NULL);
 }
 
 PRIVATE
@@ -348,7 +336,7 @@ void JniMediaSession::OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const android::Parc
     pParam->m_nPort = objParcel.readInt32();
     pParam->m_bResult = (IMS_BOOL)objParcel.readBool();
 
-    m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
 PRIVATE
@@ -359,14 +347,14 @@ void JniMediaSession::OnSendDtmf(IN IMS_SINT32 nMsg, IN const android::Parcel& o
     pParam->m_dtmfCode = objParcel.readByte();
     pParam->m_nDuration = 0;
 
-    m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
 void JniMediaSession::OnVideoMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
     ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
     pParam->nValue = objParcel.readInt32();
-    m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
 PRIVATE

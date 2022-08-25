@@ -231,10 +231,6 @@ void JniMtcCall::Attach()
     // TODO: create JniMediaSession in Java thread? Currently, it's done in Enabler thread.
     m_pJniMediaSession = new JniMediaSession(
             m_pfnSendDataToJava, m_nSlotId, m_nCallKey, reinterpret_cast<IMS_SINTP>(this));
-
-    // TODO: temp for media change.
-    JniEnablerConnector::GetInstance().SetJniEnabler(
-            m_nSlotId, EnablerType::MEDIA_SESSION, m_pJniMediaSession, m_nCallKey);
     m_objCallController.Attach(m_nCallKey);
 }
 

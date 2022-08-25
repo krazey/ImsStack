@@ -19,7 +19,8 @@
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
 #include "IMMedia.h"
-#include "JniConnectorFactory.h"
+#include "JniEnablerConnector.h"
+#include "IJniEnabler.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.MM");
 
@@ -39,8 +40,8 @@ MediaManager::MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId) :
         m_pResourceMngr = new MediaResourceMngr(m_nSlotId);
     }
 
-    JniConnectorFactory::GetInstance()->GetMediaSessionConnector(m_nSlotId)->SetEnablerService(
-            static_cast<IMediaManager*>(this));
+    JniEnablerConnector::GetInstance().SetNativeEnabler(
+            m_nSlotId, EnablerType::MEDIA_SESSION, DYNAMIC_CAST(INativeEnabler*, this));
 }
 
 PRIVATE VIRTUAL MediaManager::~MediaManager()
@@ -69,6 +70,9 @@ PRIVATE VIRTUAL MediaManager::~MediaManager()
         IMS_TRACE_E(0, "~MediaManager() - MediaSession IS NOT released. Size[%d]",
                 m_lstSessionNode.GetSize(), 0, 0);
     }
+
+    JniEnablerConnector::GetInstance().SetNativeEnabler(
+            m_nSlotId, EnablerType::MEDIA_SESSION, IMS_NULL);
 }
 
 PUBLIC
@@ -111,20 +115,9 @@ MediaMsgHandler* MediaManager::GetHandler(IN IMS_SINTP nCallKey)
     return pSessionNode->pMessageHandler;
 }
 
-PUBLIC VIRTUAL void MediaManager::SetJniMediaSessionThread(
-        IN IMS_SINTP nCallKey, IN IJniMediaSessionThread* pThread)
-{
-    MediaMsgHandler* pHandler = GetHandler(nCallKey);
-
-    if (pHandler != IMS_NULL)
-    {
-        pHandler->SetJniMediaSessionThread(pThread);
-    }
-}
-
 PUBLIC
 MediaSession* MediaManager::CreateSession(
-        IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey, IN IJniMediaSessionThread* pThread)
+        IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey)
 {
     IMS_TRACE_D("CreateSession() - CallKey[%d], nService[%d]", nCallKey, nService, 0);
 
@@ -135,13 +128,7 @@ MediaSession* MediaManager::CreateSession(
         return IMS_NULL;
     }
 
-    MediaMsgHandler* pHandler = new MediaMsgHandler();
-
-    if (pHandler != IMS_NULL && pThread != IMS_NULL)
-    {
-        pHandler->SetJniMediaSessionThread(pThread);
-    }
-
+    MediaMsgHandler* pHandler = new MediaMsgHandler(m_nSlotId, nCallKey);
     MediaSessionNode* pSessionNode = new MediaSessionNode(nCallKey, pSession, pHandler);
     m_lstSessionNode.Append(pSessionNode);
 
