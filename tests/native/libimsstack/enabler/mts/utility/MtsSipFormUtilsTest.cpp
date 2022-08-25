@@ -91,7 +91,7 @@ TEST_F(MtsSipFormUtilsTest, IsNumberFormat)
     strTestDial = "+12345678901";
     EXPECT_TRUE(pMtsSipFormUtils->IsNumberFormat(strTestDial) == IMS_TRUE);
 
-    strTestDial = "+12345678901@google.com";
+    strTestDial = "+12345678901@ims.google.com";
     EXPECT_TRUE(pMtsSipFormUtils->IsNumberFormat(strTestDial) == IMS_FALSE);
 
     strTestDial = "#32#1234567890";

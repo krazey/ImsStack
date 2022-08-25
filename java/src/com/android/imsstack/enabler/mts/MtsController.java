@@ -157,38 +157,13 @@ public class MtsController {
         return mHandler;
     }
 
-    public boolean sendMessage(int smsFormat, String smsData, String targetAddress, int seqId) {
-        ImsLog.d("smsFormat : " + smsFormat + ", encodedDataLength = " + smsData
-                + ", complexData = " + targetAddress + ", seqId = " + seqId );
-
-        if (smsData == null || targetAddress == null) {
-            processNotifySendMoSmsError(smsFormat, seqId);
-            return false;
-        }
-
-        Parcel parcel = Parcel.obtain();
-        if (parcel == null) {
-            ImsLog.e("parcel is null");
-            processNotifySendMoSmsError(smsFormat, seqId);
-            return false;
-        }
-
-        parcel.writeInt(MtsJni.NOTI_MTSENABLER_SEND_MO_SMS);
-        parcel.writeInt(smsFormat);
-        parcel.writeString(smsData);
-        parcel.writeString(targetAddress);
-        parcel.writeInt(seqId);
-        mMtsJni.sendMessage(parcel, mContext.getSlotId());
-        return true;
-    }
-
     public boolean sendMessage(
             int smsFormat, String smsData, String psiSmsc, String dialedNumber, int seqId) {
-        ImsLog.d("smsFormat : " + smsFormat + ", encodedDataLength = " + smsData
+        ImsLog.d("smsFormat : " + smsFormat + ", encodedDataLength = " + smsData.length()
                 + ", psiSmsc = " + psiSmsc + ", dialedNumber = " + dialedNumber
                 + ", seqId = " + seqId );
 
-        if (smsData == null || (dialedNumber == null && psiSmsc == null)) {
+        if (smsData == null || psiSmsc == null) {
             processNotifySendMoSmsError(smsFormat, seqId);
             return false;
         }
@@ -203,7 +178,12 @@ public class MtsController {
         String targetAddress = psiSmsc;
 
         if (mUseDialedNumber) {
-            targetAddress = dialedNumber;
+            if (dialedNumber == null) {
+                processNotifySendMoSmsError(smsFormat, seqId);
+                return false;
+            } else {
+                targetAddress = dialedNumber;
+            }
         }
 
         parcel.writeInt(MtsJni.NOTI_MTSENABLER_SEND_MO_SMS);

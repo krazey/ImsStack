@@ -100,17 +100,6 @@ IMS_BOOL MtsUtils::IsEccNumber(IN const AString& strDstAddr, IMS_SINT32 nSlotId)
         return IMS_TRUE;
     }
 
-    AString strEccListStr = "";
-    IMSList<AString> eccList = strEccListStr.Split(',');
-
-    for (IMS_UINT32 i = 0; i < eccList.GetSize(); i++)
-    {
-        if (eccList.GetAt(i).Equals(strDstAddr))
-        {
-            bIsEccNumber = IMS_TRUE;
-            break;
-        }
-    }
     return bIsEccNumber;
 }
 
