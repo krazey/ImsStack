@@ -18,6 +18,7 @@
 
 #include "BaseService.h"
 
+class IJniEnablerThread;
 class JniAosServiceThread;
 class IAosService;
 
@@ -30,13 +31,14 @@ public:
     virtual int SendData(const android::Parcel& objParcel) override;
 
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
-    void SetAosService(IN IAosService* piAosService);
 
-    JniAosServiceThread* GetThread();
+    inline void NotifyNativeEnablerSet() override {}
+    IJniEnablerThread* GetJniThread() const override;
 
 private:
     virtual void HandleMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel) override;
-    IMS_BOOL Attach();
+    void Attach();
+    IAosService* GetNativeService();
     void UpdateSipDelegateRegistration(IN const android::Parcel& objParcel);
     void TriggerSipDelegateDeregistration(IN const android::Parcel& objParcel);
     void TriggerFullNetworkRegistration(IN const android::Parcel& objParcel);
@@ -68,8 +70,6 @@ private:
 
 private:
     IMS_SINT32 m_nSlotId;
-    AString m_strThreadName;
-    IAosService* m_piAosService;
     JniAosServiceThread* m_pJniAosServiceThread;
 };
 

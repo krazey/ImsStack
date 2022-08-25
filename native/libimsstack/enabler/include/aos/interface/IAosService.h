@@ -20,9 +20,9 @@
 #include "ImsMap.h"
 #include "interface/IAosServicePhoneListener.h"
 #include "interface/IAosServiceSettingListener.h"
+#include "INativeEnabler.h"
 
 class IAosRegistrationControlListener;
-class JniAosService;
 
 enum class AosReasonCode;
 enum class AosNetworkType;
@@ -33,11 +33,9 @@ enum class AosPhoneNumberRetryCommand;
 enum class AosRegRequestType;
 enum class AosPcscfOrder;
 
-class IAosService
+class IAosService : public INativeEnabler
 {
 public:
-    virtual IMS_BOOL SetJniAosService(IN JniAosService* pJniAosService) = 0;
-
     virtual IMS_BOOL AddListener(IN IAosRegistrationControlListener* piListener) = 0;
     virtual IMS_BOOL RemoveListener(IN IAosRegistrationControlListener* piListener) = 0;
 

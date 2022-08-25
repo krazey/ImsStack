@@ -26,8 +26,7 @@ __IMS_TRACE_TAG_USER_DECL__("JNI.AOS");
 
 PUBLIC
 JniAosServiceThread::JniAosServiceThread() :
-        BaseServiceThread(),
-        m_nSlotId(0)
+        BaseServiceThread()
 {
     IMS_TRACE_D("+JniAosServiceThread", 0, 0, 0);
 }

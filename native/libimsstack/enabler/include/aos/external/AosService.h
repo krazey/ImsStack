@@ -21,16 +21,13 @@
 class IAosRegistrationControlListener;
 class IAosServiceSettingListener;
 class IAosServicePhoneListener;
-class JniAosService;
-class JniAosServiceThread;
+class IJniAosServiceThread;
 
 class AosService : public IAosService
 {
 public:
     AosService(IN IMS_SINT32 nSlotId);
     virtual ~AosService();
-
-    IMS_BOOL SetJniAosService(IN JniAosService* pJniAosService) override;
 
     IMS_BOOL AddListener(IN IAosRegistrationControlListener* piListener) override;
     IMS_BOOL RemoveListener(IN IAosRegistrationControlListener* piListener) override;
@@ -97,6 +94,8 @@ public:
     IMS_BOOL IsSupportCapabilitiesForNetwork(
             AosNetworkType eNetworkType, AosCapability eCapability) override;
 
+    inline void NotifyJniEnablerSet() override {}
+
     static AString PrintCapabilities(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities);
     static const IMS_CHAR* NetworkTypeToString(IN IMS_SINT32 nType);
     static const AString CapabilitiesToString(IN IMS_UINT32 nCapabilities);
@@ -104,7 +103,8 @@ public:
 private:
     void Init();
     void CleanUp();
-    IMS_BOOL Attach();
+    void Attach();
+    IJniAosServiceThread* GetJniThread();
 
 private:
     IMS_SINT32 m_nSlotId;
@@ -116,8 +116,6 @@ private:
 
     // <AosNetworkType, AosCapability>
     IMSMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
-
-    JniAosService* m_pJniAosService;
 };
 
 #endif  // AOS_SERVICE_H_

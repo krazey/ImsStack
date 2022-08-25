@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 #include "ServiceTrace.h"
-#include "JniAosService.h"
-#include "JniAosServiceThread.h"
-#include "JniConnectorFactory.h"
+#include "JniEnablerConnector.h"
+#include "IJniAosServiceThread.h"
 #include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosServicePhoneListener.h"
 #include "interface/IAosServiceSettingListener.h"
@@ -33,8 +32,7 @@ AosService::AosService(IN IMS_SINT32 nSlotId) :
         m_objAosRegistrationControlListeners(IMSList<IAosRegistrationControlListener*>()),
         m_objAosServiceSettingListeners(IMSList<IAosServiceSettingListener*>()),
         m_objAosServicePhoneListeners(IMSList<IAosServicePhoneListener*>()),
-        m_objCapabilities(IMSMap<IMS_UINT32, IMS_UINT32>()),
-        m_pJniAosService(IMS_NULL)
+        m_objCapabilities(IMSMap<IMS_UINT32, IMS_UINT32>())
 {
     IMS_TRACE_I("+AosService [slot_%d]", m_nSlotId, 0, 0);
     Init();
@@ -44,20 +42,10 @@ PUBLIC VIRTUAL AosService::~AosService()
 {
     IMS_TRACE_I("~AosService [slot_%d]", m_nSlotId, 0, 0);
 
-    if (m_pJniAosService)
-    {
-        m_pJniAosService->SetAosService(IMS_NULL);
-    }
+    JniEnablerConnector::GetInstance().SetNativeEnabler(
+            m_nSlotId, EnablerType::AOS_SERVICE, IMS_NULL);
 
     CleanUp();
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosService::SetJniAosService(IN JniAosService* pJniAosService)
-{
-    IMS_TRACE_I("SetJniAosService", 0, 0, 0);
-    m_pJniAosService = pJniAosService;
-
-    return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosService::AddListener(IN IAosRegistrationControlListener* piListener)
@@ -546,9 +534,10 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistered(IN AosNetworkType eNetworkT
         IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags)
 {
     IMS_TRACE_I("NotifyRegistered", 0, 0, 0);
-    if (Attach())
+    IJniAosServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
     {
-        m_pJniAosService->GetThread()->NotifyRegistered(
+        piJniThread->NotifyRegistered(
                 static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits, objFeatureTags);
     }
 
@@ -559,9 +548,10 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistering(IN AosNetworkType eNetwork
         IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags)
 {
     IMS_TRACE_I("NotifyRegistering", 0, 0, 0);
-    if (Attach())
+    IJniAosServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
     {
-        m_pJniAosService->GetThread()->NotifyRegistering(
+        piJniThread->NotifyRegistering(
                 static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits, objFeatureTags);
     }
 
@@ -571,9 +561,10 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistering(IN AosNetworkType eNetwork
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyDeregistered(IN AosReasonCode eReason)
 {
     IMS_TRACE_I("NotifyDeregistered", 0, 0, 0);
-    if (Attach())
+    IJniAosServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
     {
-        m_pJniAosService->GetThread()->NotifyDeregistered(static_cast<IMS_SINT32>(eReason));
+        piJniThread->NotifyDeregistered(static_cast<IMS_SINT32>(eReason));
     }
 
     return IMS_TRUE;
@@ -583,9 +574,10 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyTechnologyChangeFailed(
         IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode)
 {
     IMS_TRACE_I("NotifyTechnologyChangeFailed", 0, 0, 0);
-    if (Attach())
+    IJniAosServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
     {
-        m_pJniAosService->GetThread()->NotifyTechnologyChangeFailed(
+        piJniThread->NotifyTechnologyChangeFailed(
                 static_cast<IMS_SINT32>(eNetworkType), nCauseCode);
     }
 
@@ -595,9 +587,10 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyTechnologyChangeFailed(
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris)
 {
     IMS_TRACE_I("NotifyAssociatedUriChanged", 0, 0, 0);
-    if (Attach())
+    IJniAosServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
     {
-        m_pJniAosService->GetThread()->NotifyAssociatedUriChanged(objUris);
+        piJniThread->NotifyAssociatedUriChanged(objUris);
     }
 
     return IMS_TRUE;
@@ -607,11 +600,11 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyCapabilitiesUpdateFailed(
         IN AosCapability eCapabilities, IN AosNetworkType eNetworkType, IN AosReasonCode eReason)
 {
     IMS_TRACE_I("NotifyCapabilitiesUpdateFailed", 0, 0, 0);
-    if (Attach())
+    IJniAosServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
     {
-        m_pJniAosService->GetThread()->NotifyCapabilitiesUpdateFailed(
-                static_cast<IMS_UINT32>(eCapabilities), static_cast<IMS_SINT32>(eNetworkType),
-                static_cast<IMS_SINT32>(eReason));
+        piJniThread->NotifyCapabilitiesUpdateFailed(static_cast<IMS_UINT32>(eCapabilities),
+                static_cast<IMS_SINT32>(eNetworkType), static_cast<IMS_SINT32>(eReason));
     }
 
     return IMS_TRUE;
@@ -620,9 +613,10 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyCapabilitiesUpdateFailed(
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyAosIsimState(IN AosIsimState eState)
 {
     IMS_TRACE_I("NotifyAosIsimState", 0, 0, 0);
-    if (Attach())
+    IJniAosServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
     {
-        m_pJniAosService->GetThread()->NotifyAosIsimState(static_cast<IMS_SINT32>(eState));
+        piJniThread->NotifyAosIsimState(static_cast<IMS_SINT32>(eState));
     }
 
     return IMS_TRUE;
@@ -631,9 +625,10 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyAosIsimState(IN AosIsimState eState)
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegEventState(IN AosRegEvent eState)
 {
     IMS_TRACE_I("NotifyRegEventState", 0, 0, 0);
-    if (Attach())
+    IJniAosServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
     {
-        m_pJniAosService->GetThread()->NotifyRegEventState(static_cast<IMS_SINT32>(eState));
+        piJniThread->NotifyRegEventState(static_cast<IMS_SINT32>(eState));
     }
 
     return IMS_TRUE;
@@ -642,9 +637,10 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegEventState(IN AosRegEvent eState)
 PUBLIC VIRTUAL IMS_BOOL AosService::RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand)
 {
     IMS_TRACE_I("RequestPhoneNumberRetry", 0, 0, 0);
-    if (Attach())
+    IJniAosServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
     {
-        m_pJniAosService->GetThread()->RequestPhoneNumberRetry(static_cast<IMS_SINT32>(eCommand));
+        piJniThread->RequestPhoneNumberRetry(static_cast<IMS_SINT32>(eCommand));
     }
 
     return IMS_TRUE;
@@ -653,9 +649,10 @@ PUBLIC VIRTUAL IMS_BOOL AosService::RequestPhoneNumberRetry(IN AosPhoneNumberRet
 PUBLIC VIRTUAL IMS_BOOL AosService::RequestWifiService(IN IMS_BOOL bIsOn)
 {
     IMS_TRACE_I("RequestWifiService", 0, 0, 0);
-    if (Attach())
+    IJniAosServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
     {
-        m_pJniAosService->GetThread()->RequestWifiService(bIsOn);
+        piJniThread->RequestWifiService(bIsOn);
     }
 
     return IMS_TRUE;
@@ -788,28 +785,21 @@ void AosService::CleanUp()
 }
 
 PRIVATE
-IMS_BOOL AosService::Attach()
+void AosService::Attach()
 {
-    IMS_BOOL bIsAttached = IMS_FALSE;
+    JniEnablerConnector::GetInstance().SetNativeEnabler(m_nSlotId, EnablerType::AOS_SERVICE, this);
+}
 
-    if (m_pJniAosService)
+PRIVATE
+IJniAosServiceThread* AosService::GetJniThread()
+{
+    IJniEnabler* piJniEnabler =
+            JniEnablerConnector::GetInstance().GetJniEnabler(m_nSlotId, EnablerType::AOS_SERVICE);
+    if (piJniEnabler == IMS_NULL)
     {
-        return IMS_TRUE;
+        IMS_TRACE_E(0, "JniAosServiceThread is null", 0, 0, 0);
+        return IMS_NULL;
     }
 
-    m_pJniAosService =
-            JniConnectorFactory::GetInstance()->GetAosServiceConnector(m_nSlotId)->GetJniService();
-    if (m_pJniAosService)
-    {
-        m_pJniAosService->SetAosService(static_cast<IAosService*>(this));
-        bIsAttached = IMS_TRUE;
-    }
-    else
-    {
-        JniConnectorFactory::GetInstance()->GetAosServiceConnector(m_nSlotId)->SetEnablerService(
-                static_cast<IAosService*>(this));
-    }
-
-    IMS_TRACE_I("Attach() :: %s", _TRACE_B_(bIsAttached), 0, 0);
-    return bIsAttached;
+    return reinterpret_cast<IJniAosServiceThread*>(piJniEnabler->GetJniThread());
 }

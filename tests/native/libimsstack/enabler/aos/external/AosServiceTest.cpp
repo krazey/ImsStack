@@ -51,11 +51,6 @@ protected:
     }
 };
 
-TEST_F(AosServiceTest, SetJniAosService)
-{
-    EXPECT_TRUE(m_pAosService->SetJniAosService(IMS_NULL));
-}
-
 TEST_F(AosServiceTest, AddListener_IAosRegistrationControlListener)
 {
     MockIAosRegistrationControlListener objMockListener1;

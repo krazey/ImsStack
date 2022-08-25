@@ -40,21 +40,7 @@ protected:
             delete m_pJniAosServiceThread;
         }
     }
-
-    IMS_SINT32 GetSlotId() { return m_pJniAosServiceThread->m_nSlotId; }
 };
-
-TEST_F(JniAosServiceThreadTest, SetSlotId)
-{
-    m_pJniAosServiceThread->SetSlotId(0);
-    EXPECT_EQ(GetSlotId(), 0);
-
-    m_pJniAosServiceThread->SetSlotId(1);
-    EXPECT_EQ(GetSlotId(), 1);
-
-    m_pJniAosServiceThread->SetSlotId(2);
-    EXPECT_EQ(GetSlotId(), 2);
-}
 
 TEST_F(JniAosServiceThreadTest, NotifyRegistered)
 {
