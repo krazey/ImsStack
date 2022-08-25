@@ -1574,7 +1574,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedPayload(IN VideoProfile::Payload* pLoc
         return IMS_FALSE;
     }
 
-    *pNegoPayload = *pPeerPayload;
+    *pNegoPayload = *pLocalPayload;
     pNegoPayload->bIncludeFrameSize = pLocalPayload->bIncludeFrameSize;
     pNegoPayload->bIncludeImageAttr = pLocalPayload->bIncludeImageAttr;
 
@@ -1685,14 +1685,14 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
     VideoProfile::Payload* pTmpPayload = IMS_NULL;
     VideoProfile::Payload* pMatchedPeerPayload = IMS_NULL;
 
-    for (IMS_UINT32 nDstIndex = 0; nDstIndex < pPeerProfile->lstPayload.GetSize(); nDstIndex++)
+    for (IMS_UINT32 nPeerIndex = 0; nPeerIndex < pPeerProfile->lstPayload.GetSize(); nPeerIndex++)
     {
         if (pNegotiatedProfile->lstPayload.GetSize() > 0)
         {
             break;
         }
 
-        pPeerPayload = pPeerProfile->lstPayload.GetAt(nDstIndex);
+        pPeerPayload = pPeerProfile->lstPayload.GetAt(nPeerIndex);
 
         if (pPeerPayload == IMS_NULL)
         {
@@ -1702,10 +1702,11 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
         if (pPeerPayload->objRtpMap.strPayloadType.Equals("H264"))
         {
             // start source profile loop
-            for (IMS_UINT32 nSrcIndex = 0; nSrcIndex < pLocalProfile->lstPayload.GetSize();
-                    nSrcIndex++)
+            for (IMS_UINT32 nLocalIndex = 0; nLocalIndex < pLocalProfile->lstPayload.GetSize();
+                    nLocalIndex++)
             {
-                pLocalPayload = pLocalProfile->lstPayload.GetAt(nSrcIndex);
+                pLocalPayload = pLocalProfile->lstPayload.GetAt(nLocalIndex);
+
                 if (pLocalPayload == IMS_NULL)
                 {
                     continue;
@@ -1715,34 +1716,35 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                 if (pLocalPayload->objRtpMap.strPayloadType.Equals("H264"))
                 {
                     // FMTP compare
-                    VideoProfile::AvcFmtp* pSrcFmtp = (VideoProfile::AvcFmtp*)pLocalPayload->pFmtp;
-                    VideoProfile::AvcFmtp* pDstFmtp = (VideoProfile::AvcFmtp*)pPeerPayload->pFmtp;
+                    VideoProfile::AvcFmtp* pLocalFmtp =
+                            (VideoProfile::AvcFmtp*)pLocalPayload->pFmtp;
+                    VideoProfile::AvcFmtp* pPeerFmtp = (VideoProfile::AvcFmtp*)pPeerPayload->pFmtp;
 
-                    if (pSrcFmtp == IMS_NULL || pDstFmtp == IMS_NULL)
+                    if (pLocalFmtp == IMS_NULL || pPeerFmtp == IMS_NULL)
                     {
                         continue;
                     }
 
                     IMS_TRACE_D("MakeNegotiatedProfile() profileLevelID[%s]<->profileLevelID[%s]",
-                            pSrcFmtp->strProfileLevelId.GetStr(),
-                            pDstFmtp->strProfileLevelId.GetStr(), 0);
+                            pLocalFmtp->strProfileLevelId.GetStr(),
+                            pPeerFmtp->strProfileLevelId.GetStr(), 0);
 
-                    IMS_TRACE_D("MakeNegotiatedProfile() Level[%d]<->Level[%d]", pSrcFmtp->nLevel,
-                            pDstFmtp->nLevel, 0);
+                    IMS_TRACE_D("MakeNegotiatedProfile() Level[%d]<->Level[%d]", pLocalFmtp->nLevel,
+                            pPeerFmtp->nLevel, 0);
                     IMS_TRACE_D("MakeNegotiatedProfile() Profile[%d]<->Profile[%d]",
-                            pSrcFmtp->nProfile, pDstFmtp->nProfile, 0);
+                            pLocalFmtp->nProfile, pPeerFmtp->nProfile, 0);
 
                     // same level is adapt first, reject higher level
-                    if (pSrcFmtp->nLevel < pDstFmtp->nLevel)
+                    if (pLocalFmtp->nLevel < pPeerFmtp->nLevel)
                     {
                         IMS_TRACE_D("MakeNegotiatedProfile( NOT MATCHED AVC Level[%d]<->[%d]",
-                                pSrcFmtp->nLevel, pDstFmtp->nLevel, 0);
+                                pLocalFmtp->nLevel, pPeerFmtp->nLevel, 0);
 
                         if (pTmpPayload == IMS_NULL)
                         {
                             IMS_TRACE_D("MakeNegotiatedProfile() Accept Highest Temp Src \
                                     profileLevelID[%s]",
-                                    pSrcFmtp->strProfileLevelId.GetStr(), 0, 0);
+                                    pLocalFmtp->strProfileLevelId.GetStr(), 0, 0);
                             pTmpPayload = pLocalPayload;
                             pMatchedPeerPayload = pPeerPayload;
                         }
@@ -1751,13 +1753,13 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                     }
                     else
                     {
-                        if (pSrcFmtp->nLevel != pDstFmtp->nLevel)
+                        if (pLocalFmtp->nLevel != pPeerFmtp->nLevel)
                         {
                             // if find matching level fmtp, skip unmatched level payload
                             VideoProfile::Payload* pPotentialPayload = IMS_NULL;
                             IMS_BOOL bFoundPayload = IMS_FALSE;
 
-                            for (IMS_UINT32 nIndex = nSrcIndex;
+                            for (IMS_UINT32 nIndex = nLocalIndex;
                                     nIndex < pLocalProfile->lstPayload.GetSize(); nIndex++)
                             {
                                 pPotentialPayload = pLocalProfile->lstPayload.GetAt(nIndex);
@@ -1768,8 +1770,8 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                                             (VideoProfile::AvcFmtp*)pPotentialPayload->pFmtp;
 
                                     // check level and payload
-                                    if (pPotentialFmtp->nLevel == pDstFmtp->nLevel &&
-                                            pPotentialFmtp->eResolution == pDstFmtp->eResolution)
+                                    if (pPotentialFmtp->nLevel == pPeerFmtp->nLevel &&
+                                            pPotentialFmtp->eResolution == pPeerFmtp->eResolution)
                                     {
                                         bFoundPayload = IMS_TRUE;
                                         break;
@@ -1784,7 +1786,7 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                         }
                     }
 
-                    if (pDstFmtp->eResolution == VIDEO_RESOLUTION_NOT_USED)
+                    if (pPeerFmtp->eResolution == VIDEO_RESOLUTION_NOT_USED)
                     {
                         VIDEO_RESOLUTION eTempResolution = GetNegotiatedResolution();
 
@@ -1793,32 +1795,32 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                         {
                             IMS_TRACE_D("MakeNegotiatedProfile() - Far Resolution is not \
                                     specified[%d] -> Temp use Prev. Negotiated Resolution[%d]",
-                                    pDstFmtp->eResolution, eTempResolution, 0);
-                            pDstFmtp->eResolution = eTempResolution;
+                                    pPeerFmtp->eResolution, eTempResolution, 0);
+                            pPeerFmtp->eResolution = eTempResolution;
                         }
                         else
                         {
                             IMS_TRACE_D("MakeNegotiatedProfile() - Far Resolution is not \
                                     specified[%d] -> Temp use Src Resolution[%d]",
-                                    pDstFmtp->eResolution, pDstFmtp->eResolution, 0);
+                                    pPeerFmtp->eResolution, pPeerFmtp->eResolution, 0);
 
-                            pDstFmtp->eResolution = pSrcFmtp->eResolution;
+                            pPeerFmtp->eResolution = pLocalFmtp->eResolution;
                         }
                     }
 
-                    if (pSrcFmtp->eResolution != pDstFmtp->eResolution)
+                    if (pLocalFmtp->eResolution != pPeerFmtp->eResolution)
                     {
                         IMS_TRACE_D("MakeNegotiatedProfile() NOT MATCHED Avc Resolution[%d]<->[%d]",
-                                pSrcFmtp->eResolution, pDstFmtp->eResolution, 0);
+                                pLocalFmtp->eResolution, pPeerFmtp->eResolution, 0);
 
-                        if (pSrcFmtp->nLevel >= pDstFmtp->nLevel)
+                        if (pLocalFmtp->nLevel >= pPeerFmtp->nLevel)
                         {
                             // Keep 1st payload(resolution mismatched) to be used
                             // when no strictly matched resolution is found
                             if (pTmpPayload == IMS_NULL)
                             {
                                 IMS_TRACE_D("MakeNegotiatedProfile() - Keep profileLevelID[%s]",
-                                        pSrcFmtp->strProfileLevelId.GetStr(), 0, 0);
+                                        pLocalFmtp->strProfileLevelId.GetStr(), 0, 0);
                                 pTmpPayload = pLocalPayload;
                                 pMatchedPeerPayload = pPeerPayload;
                             }
@@ -1831,7 +1833,7 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                             {
                                 IMS_TRACE_D("MakeNegotiatedProfile() - Keep dynamic resolution \
                                         profileLevelID[%s]",
-                                        pSrcFmtp->strProfileLevelId.GetStr(), 0, 0);
+                                        pLocalFmtp->strProfileLevelId.GetStr(), 0, 0);
                                 pTmpPayload = pLocalPayload;
                                 pMatchedPeerPayload = pPeerPayload;
                             }
@@ -1841,7 +1843,7 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
 
                     IMS_TRACE_D("MakeNegotiatedProfile() - Matched payload found, \
                             Profile[%d], Level[%d], Resolution[%d]",
-                            pSrcFmtp->nProfile, pSrcFmtp->nLevel, pSrcFmtp->eResolution);
+                            pLocalFmtp->nProfile, pLocalFmtp->nLevel, pLocalFmtp->eResolution);
 
                     // make nego payload
                     VideoProfile::Payload* pNegoPayload = new VideoProfile::Payload();
@@ -1912,8 +1914,8 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
 
                     if (pPeerProfile->nNegotiatedPayloadIndex == -1)
                     {
-                        pPeerProfile->nNegotiatedPayloadIndex = nDstIndex;
-                        pLocalProfile->nNegotiatedPayloadIndex = nSrcIndex;
+                        pPeerProfile->nNegotiatedPayloadIndex = nPeerIndex;
+                        pLocalProfile->nNegotiatedPayloadIndex = nLocalIndex;
 
                         // MT case : change src PT# to dest PT#
                         if (bIsOfferReceived == IMS_TRUE &&
@@ -1943,10 +1945,10 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
         else if (pPeerPayload->objRtpMap.strPayloadType.Equals("H265"))
         {
             // start source profile loop
-            for (IMS_UINT32 nSrcIndex = 0; nSrcIndex < pLocalProfile->lstPayload.GetSize();
-                    nSrcIndex++)
+            for (IMS_UINT32 nLocalIndex = 0; nLocalIndex < pLocalProfile->lstPayload.GetSize();
+                    nLocalIndex++)
             {
-                pLocalPayload = pLocalProfile->lstPayload.GetAt(nSrcIndex);
+                pLocalPayload = pLocalProfile->lstPayload.GetAt(nLocalIndex);
                 if (pLocalPayload == IMS_NULL)
                 {
                     continue;
@@ -1956,35 +1958,36 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                 if (pLocalPayload->objRtpMap.strPayloadType.Equals("H265"))
                 {
                     // FMTP compare
-                    VideoProfile::HevcFmtp* pSrcFmtp =
+                    VideoProfile::HevcFmtp* pLocalFmtp =
                             (VideoProfile::HevcFmtp*)pLocalPayload->pFmtp;
-                    VideoProfile::HevcFmtp* pDstFmtp = (VideoProfile::HevcFmtp*)pPeerPayload->pFmtp;
-                    if (pSrcFmtp == IMS_NULL || pDstFmtp == IMS_NULL)
+                    VideoProfile::HevcFmtp* pPeerFmtp =
+                            (VideoProfile::HevcFmtp*)pPeerPayload->pFmtp;
+                    if (pLocalFmtp == IMS_NULL || pPeerFmtp == IMS_NULL)
                     {
                         continue;
                     }
 
                     IMS_TRACE_D("MakeNegotiatedProfile() - profileId[%d]<->profileId[%d]",
-                            pSrcFmtp->nProfile, pDstFmtp->nProfile, 0);
+                            pLocalFmtp->nProfile, pPeerFmtp->nProfile, 0);
 
                     // same level is adapt first, reject higher level
-                    if (pSrcFmtp->nLevel < pDstFmtp->nLevel)
+                    if (pLocalFmtp->nLevel < pPeerFmtp->nLevel)
                     {
                         IMS_TRACE_D("MakeNegotiatedProfile() - NOT MATCHED HEVC Level[%d]<->[%d]",
-                                pSrcFmtp->nLevel, pDstFmtp->nLevel, 0);
+                                pLocalFmtp->nLevel, pPeerFmtp->nLevel, 0);
 
                         if (pTmpPayload == IMS_NULL)
                         {
                             IMS_TRACE_D("MakeNegotiatedProfile() - Accept Highest Temp Src \
                                     profileID[%d]",
-                                    pSrcFmtp->nProfile, 0, 0);
+                                    pLocalFmtp->nProfile, 0, 0);
                             pTmpPayload = pLocalPayload;
                             pMatchedPeerPayload = pPeerPayload;
                         }
                         continue;
                     }
 
-                    if (pDstFmtp->eResolution == VIDEO_RESOLUTION_NOT_USED)
+                    if (pPeerFmtp->eResolution == VIDEO_RESOLUTION_NOT_USED)
                     {
                         VIDEO_RESOLUTION eTempResolution = GetNegotiatedResolution();
 
@@ -1993,32 +1996,32 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                         {
                             IMS_TRACE_D("MakeNegotiatedProfile() - Far Resolution is not \
                                     specified[%d] -> Temp use Prev. Negotiated Resolution[%d]",
-                                    pDstFmtp->eResolution, eTempResolution, 0);
-                            pDstFmtp->eResolution = eTempResolution;
+                                    pPeerFmtp->eResolution, eTempResolution, 0);
+                            pPeerFmtp->eResolution = eTempResolution;
                         }
                         else
                         {
                             IMS_TRACE_D("MakeNegotiatedProfile() - Far Resolution is not \
                                     specified[%d] -> Temp use Src Resolution[%d]",
-                                    pDstFmtp->eResolution, pDstFmtp->eResolution, 0);
-                            pDstFmtp->eResolution = pSrcFmtp->eResolution;
+                                    pPeerFmtp->eResolution, pPeerFmtp->eResolution, 0);
+                            pPeerFmtp->eResolution = pLocalFmtp->eResolution;
                         }
                     }
 
-                    if (pSrcFmtp->eResolution != pDstFmtp->eResolution)
+                    if (pLocalFmtp->eResolution != pPeerFmtp->eResolution)
                     {
                         IMS_TRACE_D("MakeNegotiatedProfile() - NOT MATCHED HEVC Resolution\
                                 [%d]<->[%d]",
-                                pSrcFmtp->eResolution, pDstFmtp->eResolution, 0);
+                                pLocalFmtp->eResolution, pPeerFmtp->eResolution, 0);
 
-                        if (pSrcFmtp->nLevel >= pDstFmtp->nLevel)
+                        if (pLocalFmtp->nLevel >= pPeerFmtp->nLevel)
                         {
                             // Keep 1st payload(resolution mismatched) to be used
                             // when no strictly matched resolution is found
                             if (pTmpPayload == IMS_NULL)
                             {
                                 IMS_TRACE_D("MakeNegotiatedProfile() - Keep profile[%d]",
-                                        pSrcFmtp->nProfile, 0, 0);
+                                        pLocalFmtp->nProfile, 0, 0);
                                 pTmpPayload = pLocalPayload;
                                 pMatchedPeerPayload = pPeerPayload;
                             }
@@ -2031,7 +2034,7 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                             {
                                 IMS_TRACE_D("MakeNegotiatedProfile() - Keep dynamic resolution \
                                         profileID[%d]",
-                                        pSrcFmtp->nProfile, 0, 0);
+                                        pLocalFmtp->nProfile, 0, 0);
                                 pTmpPayload = pLocalPayload;
                                 pMatchedPeerPayload = pPeerPayload;
                             }
@@ -2041,7 +2044,7 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
 
                     IMS_TRACE_D("MakeNegotiatedProfile() - Matched payload found, \
                             Profile[%d], Level[%d], Resolution[%d]",
-                            pSrcFmtp->nProfile, pSrcFmtp->nLevel, pSrcFmtp->eResolution);
+                            pLocalFmtp->nProfile, pLocalFmtp->nLevel, pLocalFmtp->eResolution);
 
                     // make nego payload
                     VideoProfile::Payload* pNegoPayload = new VideoProfile::Payload();
@@ -2097,8 +2100,8 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
 
                     if (pPeerProfile->nNegotiatedPayloadIndex == -1)
                     {
-                        pPeerProfile->nNegotiatedPayloadIndex = nDstIndex;
-                        pLocalProfile->nNegotiatedPayloadIndex = nSrcIndex;
+                        pPeerProfile->nNegotiatedPayloadIndex = nPeerIndex;
+                        pLocalProfile->nNegotiatedPayloadIndex = nLocalIndex;
 
                         // MT case : change src PT# to dest PT#
                         if (bIsOfferReceived == IMS_TRUE &&
@@ -2164,17 +2167,17 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                 IMS_BOOL bFoundResol = IMS_FALSE;
 
                 // first decide with source profile payload
-                for (IMS_UINT32 nSrcIndex = 0; nSrcIndex < pLocalProfile->lstPayload.GetSize();
-                        nSrcIndex++)
+                for (IMS_UINT32 nLocalIndex = 0; nLocalIndex < pLocalProfile->lstPayload.GetSize();
+                        nLocalIndex++)
                 {
                     VideoProfile::Payload* pLocalPayload =
-                            pLocalProfile->lstPayload.GetAt(nSrcIndex);
-                    VideoProfile::AvcFmtp* pTempSrcFmtp =
+                            pLocalProfile->lstPayload.GetAt(nLocalIndex);
+                    VideoProfile::AvcFmtp* pTempLocalFmtp =
                             reinterpret_cast<VideoProfile::AvcFmtp*>(pLocalPayload->pFmtp);
 
-                    if (pTempSrcFmtp->nLevel <= pAvcFmtp->nLevel)
+                    if (pTempLocalFmtp->nLevel <= pAvcFmtp->nLevel)
                     {
-                        pAvcFmtp->eResolution = pTempSrcFmtp->eResolution;
+                        pAvcFmtp->eResolution = pTempLocalFmtp->eResolution;
                         bFoundResol = IMS_TRUE;
                         break;
                     }
@@ -2304,9 +2307,9 @@ VIRTUAL IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                     return IMS_FALSE;
                 }
 
-                VideoProfile::HevcFmtp* pTempSrcFmtp =
+                VideoProfile::HevcFmtp* pTempLocalFmtp =
                         reinterpret_cast<VideoProfile::HevcFmtp*>(pMatchedPeerPayload->pFmtp);
-                fmtp->eResolution = pTempSrcFmtp->eResolution;
+                fmtp->eResolution = pTempLocalFmtp->eResolution;
 
                 if (pPeerProfile->nNegotiatedPayloadIndex == -1)
                 {
