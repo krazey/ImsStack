@@ -20,7 +20,7 @@
 #include "BaseService.h"
 
 class JniSipControllerServiceThread;
-class IUSncMessageParam;
+class IUSncSendMessageParam;
 
 using namespace android;
 
@@ -36,7 +36,7 @@ public:
 private:
     void HandleMessage(int nMsg, const Parcel& pParcel);
     void LoadThread(IN const AString& strThreadName);
-    IUSncMessageParam* makeSendMessageParamFromParcel(const android::Parcel& objParcel);
+    IUSncSendMessageParam* makeSendMessageParamFromParcel(const android::Parcel& objParcel);
     void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
 
 private:

@@ -21,6 +21,7 @@
 #include "config/IMConstants.h"
 #include "ImsServiceConfig.h"
 
+#include "ServiceMemory.h"
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
 #include "SipMethod.h"
@@ -34,6 +35,7 @@
 #include "ISipConnectionFactory.h"
 #include "ISipConnectionFactoryListener.h"
 #include "ISipHeader.h"
+#include "ISipMessage.h"
 #include "IURcsMessageService.h"
 #include "IURcsMessageConstant.h"
 
@@ -294,6 +296,23 @@ IMS_BOOL RcsMessageService::RegisterIMServiceTag()
     return IMS_FALSE;
 }
 
+PRIVATE
+void RcsMessageService::convertMessage(ISipMessage* message)
+{
+    IUSncMessageParam* pOutParam = new IUSncMessageParam();
+    // StartLine
+    AString startLine = message->ToByteArray(ISipMessage::OPT_START_LINE).ToString();
+    pOutParam->pszStartLine = startLine.GetStr();
+
+    // HeaderSection
+    AString headerSection = message->ToByteArray(ISipMessage::OPT_HEADER_PART).ToString();
+    pOutParam->pszHeaderSection = headerSection.GetStr();
+
+    // BodyContent
+    AString objContent = message->ToByteArray(ISipMessage::OPT_BODY_PART).ToString();
+    pOutParam->pszContent = objContent.GetStr();
+}
+
 IMS_BOOL RcsMessageService::HandleOpenMSG(IN IMSMSG& objMSG)
 {
     IMS_TRACE_D("HandleOpenMSG()", 0, 0, 0);
@@ -423,14 +442,19 @@ VIRTUAL IMS_SINT32 RcsMessageService::DirectCoreService_TransactionReceived(
 {
     IMS_TRACE_I("DirectCoreService_TransactionReceived()", 0, 0, 0);
 
-    // ToDo
-    (void)piScf;
-
     if (m_piCoreService != piService)
     {
         IMS_TRACE_E(0, "SERVICE MISMATCHED", 0, 0, 0);
         return m_piCoreService->RESULT_DIRECT_TXN_NOT_HANDLED;
     }
+
+    ISipServerConnection* piSsc = piScf->GetNewServerConnection();
+    ISipDialog* piDialog = piSsc->GetDialog();
+    piScf->SetDialog(piDialog);
+    piScf->SetSscForCancel(piSsc);
+
+    ISipMessage* piMessage = piSsc->GetMessage();
+    convertMessage(piMessage);
 
     return m_piCoreService->RESULT_DIRECT_TXN_HANDLED;
 }
@@ -441,8 +465,14 @@ VIRTUAL void RcsMessageService::ConnectionFactory_NotifyRequest(
         IN ISipConnectionFactory* piScFactory, IN ISipServerConnection* piSsc)
 {
     IMS_TRACE_I("ConnectionFactory_NotifyRequest()", 0, 0, 0);
-
-    // ToDo
     (void)piScFactory;
-    (void)piSsc;
+
+    ISipMessage* piMessage = piSsc->GetMessage();
+
+    if (piMessage == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SIPMessage is null!", 0, 0, 0);
+        return;
+    }
+    convertMessage(piMessage);
 }

@@ -62,7 +62,7 @@ TEST_F(RcsMessageServiceTest, HandleSessionMSG)
 {
     IMS_TRACE_D("HandleSessionMSG", 0, 0, 0);
 
-    IUSncMessageParam* pParam = new IUSncMessageParam();
+    IUSncSendMessageParam* pParam = new IUSncSendMessageParam();
     IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, sThread.GetStr());
 
     IMSMSG objSessionCmdMsg(IUSncService::SENDMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));

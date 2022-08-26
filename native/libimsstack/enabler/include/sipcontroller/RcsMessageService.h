@@ -22,10 +22,10 @@
 #include "ISipConnectionFactoryListener.h"
 #include "ImsService.h"
 #include "IMSTypeDef.h"
+#include "ISipMessage.h"
 #include "RcsMessageRepository.h"
 
 class RcsMessageTracker;
-
 class RcsMessageService :
         public ImsService,
         public IDirectCoreServiceListener,
@@ -43,6 +43,7 @@ private:
     void HandleErrorCase(IN IMSMSG& objMSG);
     void PostNotification(IN IMS_SINT32 nMSG, IN IMS_UINTP npParam);
     IMS_BOOL RegisterIMServiceTag();
+    void convertMessage(ISipMessage* message);
 
 public:
     IMS_BOOL HandleOpenMSG(IN IMSMSG& objMSG);

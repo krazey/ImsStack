@@ -58,7 +58,9 @@ private:
     IMS_BOOL StateSENDING_Sent(IN IMSMSG& objMSG);
     IMS_BOOL StateSENDING_SendFailed(IN IMSMSG& objMSG);
 
-    IMS_RESULT SendMessage(IN IUSncMessageParam* pParam);
+    IMS_RESULT SendMessage(IN IUSncSendMessageParam* pParam);
+    IMS_RESULT SendRequest(IN IUSncSendMessageParam* pParam);
+    IMS_RESULT CreateResponse();
     IMS_RESULT NotifyReceiveError(IN IUSncNotifyErrorCmdParam* pParam);
 
 public:
