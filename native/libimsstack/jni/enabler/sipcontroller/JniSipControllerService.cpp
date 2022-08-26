@@ -148,6 +148,20 @@ void JniSipControllerService::HandleMessage(int nMsg, const Parcel& pParcel)
             MessageService::PostMessage(m_strTarget, objMSG);
         }
         break;
+        case IUSncControl::UPDATESIPREGISTRATION_CMD:
+        {
+            // TODO : hakjunc
+            IMS_TRACE_E(
+                    0, "HandleMsg : UPDATESIPREGISTRATION_CMD by hakjunc, name %d\n", nMsg, 0, 0);
+        }
+        break;
+        case IUSncControl::TRIGGERSIPDEREGISTRATION_CMD:
+        {
+            // TODO : hakjunc
+            IMS_TRACE_E(0, "HandleMsg : TRIGGERSIPDEREGISTRATION_CMD by hakjunc, name %d\n", nMsg,
+                    0, 0);
+        }
+        break;
         default:
             IMS_TRACE_E(0, "HandleMsg : Can't analysis message, name %d\n", nMsg, 0, 0);
             break;

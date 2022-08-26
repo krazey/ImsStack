@@ -40,4 +40,17 @@ public class SipControllerInternalMsgDef {
     public static final int MESSAGESENT_IND                 = (IMS_MSG_SIP_DELEGATE + 22);
     // Receive that Send Message Failure
     public static final int SENDMESSAGEFAILURE_IND          = (IMS_MSG_SIP_DELEGATE + 23);
+
+
+    public static final int REGISTRATION_CMD = (IMS_MSG_SIP_DELEGATE + 100);
+
+    // Update sip registration
+    public static final int UPDATESIPREGISTRATION_CMD = (REGISTRATION_CMD + 1);
+    // Trigger sip de-registration
+    public static final int TRIGGERSIPDEREGISTRATION_CMD = (REGISTRATION_CMD + 2);
+
+    // received registration update
+    public static final int ONREGISTRATIONUPDATED_IND = (REGISTRATION_CMD + 11);
+    // received configuration update
+    public static final int ONCONFIGURATIONUPDATED_IND = (REGISTRATION_CMD + 21);
 }

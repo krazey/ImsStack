@@ -120,6 +120,20 @@ void JniSipControllerServiceThread::HandleMsg(IN IMSMSG& objMSG)
             parcel.writeString16(android::String16(pParam->szTId));
         }
         break;
+        case IUSncControl::ONREGISTRATIONUPDATED_IND:
+        {
+            // TODO : hakjunc
+            IMS_TRACE_E(0, "HandleMsg : ONREGISTRATIONUPDATED_IND by hakjunc,  name %d\n",
+                    objMSG.nMSG, 0, 0);
+        }
+        break;
+        case IUSncControl::ONCONFIGURATIONUPDATED_IND:
+        {
+            // TODO : hakjunc
+            IMS_TRACE_E(0, "HandleMsg : ONCONFIGURATIONUPDATED_IND by hakjunc, name %d\n",
+                    objMSG.nMSG, 0, 0);
+        }
+        break;
         default:
             IMS_TRACE_E(0, "HandleMsg : Can't analysis message, name %d\n", objMSG.nMSG, 0, 0);
             break;

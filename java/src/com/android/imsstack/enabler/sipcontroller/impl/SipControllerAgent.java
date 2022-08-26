@@ -31,6 +31,8 @@ import static android.telephony.ims.SipDelegateManager.MESSAGE_FAILURE_REASON_UN
 
 import android.annotation.NonNull;
 import android.os.Parcel;
+import android.telephony.ims.DelegateRegistrationState;
+import android.telephony.ims.SipDelegateConfiguration;
 import android.telephony.ims.SipMessage;
 import android.util.SparseArray;
 
@@ -44,7 +46,9 @@ import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.SipMessageParsingUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.IntStream;
 
@@ -240,12 +244,18 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     @Override
     public void updateSipDelegateRegistration(@NonNull Set<String> featureTags) {
         //TODO
-
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(SipControllerInternalMsgDef.UPDATESIPREGISTRATION_CMD);
+        parcel.writeStringArray((String[]) featureTags.toArray());
+        sendMessageToJNI(parcel);
     }
 
     @Override
-    public void triggerSipDelegateDeregistration() {
+    public void triggerSipDelegateDeRegistration() {
         //TODO
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(SipControllerInternalMsgDef.TRIGGERSIPDEREGISTRATION_CMD);
+        sendMessageToJNI(parcel);
     }
 
     private void sendMessageToJNI(Parcel parcel) {
@@ -283,6 +293,14 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
                 }
                 case SipControllerInternalMsgDef.SENDMESSAGEFAILURE_IND: {
                     messageSendFailure(parcel);
+                    break;
+                }
+                case SipControllerInternalMsgDef.ONREGISTRATIONUPDATED_IND: {
+                    registrationUpdated(parcel);
+                    break;
+                }
+                case SipControllerInternalMsgDef.ONCONFIGURATIONUPDATED_IND: {
+                    configurationUpdated(parcel);
                     break;
                 }
                 default:
@@ -329,6 +347,20 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
         }
 
         mListener.onMessageSendFailure(transactionId, sipReason, mSubId);
+    }
+
+    private void registrationUpdated(Parcel parcel) throws Exception {
+        Set<String> featureTags = new HashSet<>(Arrays.asList(parcel.readStringArray()));
+        DelegateRegistrationState registrationState = new DelegateRegistrationState.Builder()
+                .addRegisteredFeatureTags(featureTags)
+                .build();
+        mListener.updateRegistration(registrationState, mSubId);
+    }
+
+    private void configurationUpdated(Parcel parcel) throws Exception {
+        SipDelegateConfiguration configuration = new SipDelegateConfiguration();
+        // TODO : add configuration values by hakjunc
+        mListener.updateConfiguration(configuration, mSubId);
     }
 
     private static void convertSipMessageToParcel(SipMessage message, Parcel parcel) {

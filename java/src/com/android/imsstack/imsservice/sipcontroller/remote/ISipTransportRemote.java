@@ -78,7 +78,7 @@ public interface ISipTransportRemote {
      * This should not affect the registration of features managed by the
      * ImsService itself, such as feature tags related to MMTEL registration.
      */
-    void triggerSipDelegateDeregistration();
+    void triggerSipDelegateDeRegistration();
 
     /**
      * Release from SipController(Java) if the delegate is terminated or Jni is not used.
