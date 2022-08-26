@@ -12,6 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+cc_library_headers {
+    name: "libimsstack_test_enabler_headers",
+    export_include_dirs: [
+        "interface",
+        "interface/aos",
+        "interface/mtc",
+    ],
+}
+
 cc_defaults {
     name: "imsstack_native_test_enabler_defaults",
     defaults: [
@@ -24,6 +33,7 @@ cc_defaults {
         "libimsstack_platform_headers",
         "libimsstack_protocol_headers",
         "libimsmedia_config_headers",
+        "libimsstack_test_enabler_headers",
         "libimsstack_test_engine_headers",
         "libimsstack_test_platform_headers",
     ],

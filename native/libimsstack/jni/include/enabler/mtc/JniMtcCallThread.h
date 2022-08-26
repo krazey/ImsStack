@@ -19,7 +19,6 @@
 
 #include "BaseService.h"
 #include "BaseServiceThread.h"
-#include "call/ParticipantInfo.h"
 #include "MtcDef.h"
 #include <binder/Parcel.h>
 #include "ImsMap.h"
@@ -81,7 +80,7 @@ public:
 
     void OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN const JniCallInfo& objCallInfo,
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN ParticipantInfo* pParticipantInfo) override;
+            IN OipType eOipType, IN const AString& strRemoteNumber) override;
 
     void OnInformationNotificationReceived(IN IMS_UINT32 nType, IN const AString strValue,
             IN IMS_SINT32 nValue, IN IMS_BOOL bValue) override;

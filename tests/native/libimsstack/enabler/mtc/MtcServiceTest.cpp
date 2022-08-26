@@ -34,7 +34,7 @@
 #include "core/MockIMessage.h"
 #include "core/IPageMessage.h"
 #include "service/IReasonInfo.h"
-#include "../../interface/mtc/MockIMtcCallController.h"
+#include "MockIMtcCallController.h"
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 

@@ -22,6 +22,7 @@ cc_test {
     ],
     include_dirs: [
         "packages/modules/ImsStack/tests/native/libimsstack/enabler/include/mtc",
+        "packages/modules/ImsStack/tests/native/libimsstack/enabler/interface/mtc",
     ],
     test_config: "ImsStackNativeEnablerMtcTests.xml",
 }

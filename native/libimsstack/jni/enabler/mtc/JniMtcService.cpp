@@ -20,6 +20,7 @@
 #include "EnablerUtils.h"
 
 #include "IuMtcService.h"
+#include "IMtcService.h"
 #include "JniMtcService.h"
 #include "JniMtcServiceThread.h"
 #include "JniEnablerConnector.h"

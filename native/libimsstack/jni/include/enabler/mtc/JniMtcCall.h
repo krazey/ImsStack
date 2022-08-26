@@ -18,7 +18,7 @@
 #define JNI_MTC_CALL_H_
 
 #include "BaseService.h"
-#include "JniMediaSession.h"
+#include "../media/JniMediaSession.h"
 #include "JniMtcCallThread.h"
 #include "IuMtcCall.h"
 #include "call/IMtcCall.h"
@@ -28,7 +28,7 @@
 class IMtcCallController;
 class IJniEnablerThread;
 
-class JniMtcCall final : public BaseService
+class JniMtcCall : public BaseService
 {
 public:
     JniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId = 0);
