@@ -40,6 +40,7 @@ public class ImsCallApp extends ImsApp {
     private ImsCallManager mCallManager = null;
     private ImsEcbmImpl mEcbm = null;
     private ImsSmsImpl mSms = null;
+    private ImsMultiEndpointImpl mMultiEndpoint = null;
     private ImsUtImpl mUt = null;
     private boolean mInitCompleted = false;
 
@@ -78,6 +79,11 @@ public class ImsCallApp extends ImsApp {
         if (mSms != null) {
             mSms.dispose();
             mSms = null;
+        }
+
+        if (mMultiEndpoint != null) {
+            mMultiEndpoint.dispose();
+            mMultiEndpoint = null;
         }
 
         if (mUt != null) {
@@ -289,6 +295,18 @@ public class ImsCallApp extends ImsApp {
             mSms = new ImsSmsImpl(mCallContext);
         }
         return mSms;
+    }
+
+    /**
+     * Creates the object of ImsMultiEndpointImpl
+     * @return Returns the object of MultiEndPoint
+     */
+    public ImsMultiEndpointImpl getMultiEndpointInterface() {
+        if (mMultiEndpoint == null) {
+            mMultiEndpoint = new ImsMultiEndpointImpl(mCallContext);
+        }
+
+        return mMultiEndpoint;
     }
 
     public ImsUtImpl getUtInterface() {

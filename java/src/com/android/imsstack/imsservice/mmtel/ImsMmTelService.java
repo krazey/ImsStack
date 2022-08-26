@@ -250,8 +250,14 @@ public class ImsMmTelService extends MmTelFeature
 
     @Override
     public ImsMultiEndpointImplBase getMultiEndpoint() {
-        logi("ImsMultiEndpoint is not supported yet for slot " + mIContext.getSlotId());
-        return super.getMultiEndpoint();
+        if (!isReady()) {
+            log("Service not ready - getMultiEndpointInterface");
+            return super.getMultiEndpoint();
+        }
+
+        ImsCallApp callApp = getCallApp();
+
+        return (callApp != null) ? callApp.getMultiEndpointInterface() : null;
     }
 
     @Override
@@ -417,9 +423,14 @@ public class ImsMmTelService extends MmTelFeature
         }
 
         @Override
-        public void onImsDialogStateChanged(List<ImsExternalCallState> externalCallDialogs) {
+        public void onImsExternalCallStateChanged(List<ImsExternalCallState> imsExternalCallState) {
             ImsCallApp callApp = getCallApp();
-            //FIXME: updateDialogState to multiendpoint
+            ImsMultiEndpointImpl multiEndpoint =
+                    (callApp != null) ? callApp.getMultiEndpointInterface() : null;
+
+            if (multiEndpoint != null) {
+                multiEndpoint.updateDialogState(imsExternalCallState);
+            }
         }
     }
 

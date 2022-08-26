@@ -29,11 +29,13 @@ import static org.mockito.Mockito.when;
 
 import android.telecom.TelecomManager;
 import android.telephony.ims.ImsCallProfile;
+import android.telephony.ims.ImsExternalCallState;
 import android.telephony.ims.aidl.IImsMmTelListener;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 import android.telephony.ims.feature.MmTelFeature.MmTelCapabilities;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.telephony.ims.stub.ImsEcbmImplBase;
+import android.telephony.ims.stub.ImsMultiEndpointImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsSmsImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
@@ -52,6 +54,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RunWith(JUnit4.class)
@@ -64,7 +68,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     private ImsCallApp mMockImsCallApp;
     private IImsMmTelListener mMockMmTelListener;
     private ImsServiceManager mServiceManager;
-    private TestImsMmTelService mMmTelFeatrure;
+    private TestImsMmTelService mMmTelFeature;
     private MessageExecutor mExecutor;
 
     @Before
@@ -80,16 +84,16 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         mMockMmTelListener = Mockito.mock(IImsMmTelListener.class);
 
         mServiceManager = new ImsServiceManager(mContext, mExecutor);
-        mMmTelFeatrure = createMmTelService(mMockServiceRecord);
+        mMmTelFeature = createMmTelService(mMockServiceRecord);
         mExecutor = new MessageExecutor(ImsMmTelService.class.getSimpleName());
         when(mMockImsContext.getExecutor()).thenReturn(mExecutor);
-        mMmTelFeatrure.setDefaultExecutor(mExecutor);
-        mMmTelFeatrure.getBinder().setListener(mMockMmTelListener);
+        mMmTelFeature.setDefaultExecutor(mExecutor);
+        mMmTelFeature.getBinder().setListener(mMockMmTelListener);
     }
 
     @After
     public void tearDown() throws Exception {
-        mMmTelFeatrure = null;
+        mMmTelFeature = null;
         mServiceManager.getServiceRecordMap().clear();
         ImsServiceManager.setDefault(null);
         mServiceManager = null;
@@ -99,13 +103,13 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     public void testStart() {
         when(mMockServiceRecord.getRegistrationTracker()).thenReturn(mMockRegTracker);
         when(mMockServiceRecord.isServiceUp()).thenReturn(false);
-        mMmTelFeatrure.start();
+        mMmTelFeature.start();
         verify(mMockServiceRecord, times(1)).setListener(any(ImsMmTelService.class));
         verify(mMockServiceRegistry, never()).setMmTelFeature(any(ImsMmTelService.class));
         verify(mMockRegTracker, times(1)).setCapabilityUpdateListener(any(ImsMmTelService.class));
 
         when(mMockServiceRecord.isServiceUp()).thenReturn(true);
-        mMmTelFeatrure.start();
+        mMmTelFeature.start();
         verify(mMockServiceRecord, times(2)).setListener(any(ImsMmTelService.class));
         verify(mMockServiceRegistry).setMmTelFeature(any(ImsMmTelService.class));
         verify(mMockRegTracker, times(2)).setCapabilityUpdateListener(any(ImsMmTelService.class));
@@ -114,57 +118,57 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     @Test
     public void testBinderDied() {
         mMockImsCallApp = null;
-        mMmTelFeatrure = createMmTelService(null);
-        mMmTelFeatrure.start();
-        mMmTelFeatrure.binderDied();
+        mMmTelFeature = createMmTelService(null);
+        mMmTelFeature.start();
+        mMmTelFeature.binderDied();
         verify(mMockServiceRegistry, times(1)).setMmTelFeature(null);
 
         mMockImsCallApp = Mockito.mock(ImsCallApp.class);
-        mMmTelFeatrure.binderDied();
+        mMmTelFeature.binderDied();
         verify(mMockServiceRegistry, times(2)).setMmTelFeature(null);
         verify(mMockImsCallApp).onBinderDied();
     }
 
     @Test
     public void testOnServiceRecordStateChanged() {
-        mMmTelFeatrure = createMmTelService(null);
-        mMmTelFeatrure.onServiceRecordStateChanged();
+        mMmTelFeature = createMmTelService(null);
+        mMmTelFeature.onServiceRecordStateChanged();
         verify(mMockServiceRegistry, never()).setMmTelFeature(null);
 
         mMockServiceRecord = Mockito.mock(ImsServiceRecord.class);
-        mMmTelFeatrure = createMmTelService(mMockServiceRecord);
+        mMmTelFeature = createMmTelService(mMockServiceRecord);
         when(mMockServiceRecord.isServiceUp()).thenReturn(true);
-        mMmTelFeatrure.onServiceRecordStateChanged();
+        mMmTelFeature.onServiceRecordStateChanged();
         verify(mMockServiceRegistry).setMmTelFeature(any(ImsMmTelService.class));
 
         when(mMockServiceRecord.isServiceUp()).thenReturn(false);
-        mMmTelFeatrure.onServiceRecordStateChanged();
+        mMmTelFeature.onServiceRecordStateChanged();
         verify(mMockServiceRegistry).setMmTelFeature(null);
     }
 
     @Test
     public void testQueryCapabilityConfiguration() {
-        boolean result = mMmTelFeatrure.queryCapabilityConfiguration(
+        boolean result = mMmTelFeature.queryCapabilityConfiguration(
                 MmTelCapabilities.CAPABILITY_TYPE_VOICE,
                 ImsRegistrationImplBase.REGISTRATION_TECH_NONE);
         assertFalse(result);
 
-        result = mMmTelFeatrure.queryCapabilityConfiguration(
+        result = mMmTelFeature.queryCapabilityConfiguration(
                 MmTelCapabilities.CAPABILITY_TYPE_VOICE,
                 ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
         assertTrue(result);
 
-        result = mMmTelFeatrure.queryCapabilityConfiguration(
+        result = mMmTelFeature.queryCapabilityConfiguration(
                 MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
                 ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
         assertTrue(result);
 
-        result = mMmTelFeatrure.queryCapabilityConfiguration(
+        result = mMmTelFeature.queryCapabilityConfiguration(
                 MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
                 ImsRegistrationImplBase.REGISTRATION_TECH_NONE);
         assertFalse(result);
 
-        result = mMmTelFeatrure.queryCapabilityConfiguration(
+        result = mMmTelFeature.queryCapabilityConfiguration(
                 MmTelCapabilities.CAPABILITY_TYPE_SMS,
                 ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
         assertFalse(result);
@@ -172,7 +176,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
 
     @Test
     public void testChangeEnabledCapabilities() {
-        mMmTelFeatrure.changeEnabledCapabilities(null, null);
+        mMmTelFeature.changeEnabledCapabilities(null, null);
         verify(mMockRegTracker, never()).changeCapabilities(any(), any());
 
         CapabilityChangeRequest capabilityRequest = new CapabilityChangeRequest();
@@ -184,30 +188,30 @@ public class ImsMmTelServiceTest extends ImsStackTest {
 
         when(mMockServiceRecord.getRegistrationTracker()).thenReturn(mMockRegTracker);
         when(mMockServiceRecord.isServiceUp()).thenReturn(false);
-        mMmTelFeatrure.start();
-        mMmTelFeatrure.changeEnabledCapabilities(capabilityRequest, null);
+        mMmTelFeature.start();
+        mMmTelFeature.changeEnabledCapabilities(capabilityRequest, null);
         verify(mMockRegTracker).changeCapabilities(any(), any());
     }
 
     @Test
     public void testCreateCallProfile() {
         ImsCallProfile imsCallProfile = new ImsCallProfile();
-        ImsCallProfile callProfile = mMmTelFeatrure.createCallProfile(
+        ImsCallProfile callProfile = mMmTelFeature.createCallProfile(
                 ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VOICE);
         assertNull(callProfile);
 
-        mMmTelFeatrure = createMmTelService(null);
-        mMmTelFeatrure.start();
+        mMmTelFeature = createMmTelService(null);
+        mMmTelFeature.start();
         when(mMockImsCallApp.createCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE)).thenReturn(imsCallProfile);
-        callProfile = mMmTelFeatrure.createCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+        callProfile = mMmTelFeature.createCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE);
         verify(mMockImsCallApp).createCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE);
         assertNotNull(callProfile);
 
         mMockImsCallApp = null;
-        callProfile = mMmTelFeatrure.createCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+        callProfile = mMmTelFeature.createCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE);
         assertNull(callProfile);
     }
@@ -216,17 +220,17 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     public void testCreateCallSession() {
         ImsCallSessionImpl callSesison = Mockito.mock(ImsCallSessionImpl.class);
         ImsCallProfile imsCallProfile = new ImsCallProfile();
-        ImsCallSessionImplBase session = mMmTelFeatrure.createCallSession(imsCallProfile);
+        ImsCallSessionImplBase session = mMmTelFeature.createCallSession(imsCallProfile);
         assertNull(session);
 
-        mMmTelFeatrure = createMmTelService(null);
-        mMmTelFeatrure.start();
+        mMmTelFeature = createMmTelService(null);
+        mMmTelFeature.start();
         when(mMockImsCallApp.createCallSession(imsCallProfile)).thenReturn(callSesison);
-        session = mMmTelFeatrure.createCallSession(imsCallProfile);
+        session = mMmTelFeature.createCallSession(imsCallProfile);
         assertNotNull(session);
 
         mMockImsCallApp = null;
-        session = mMmTelFeatrure.createCallSession(imsCallProfile);
+        session = mMmTelFeature.createCallSession(imsCallProfile);
         assertNull(session);
     }
 
@@ -234,42 +238,42 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     public void testGetUt() {
         ImsUtImplBase utImplBase = null;
         ImsUtImpl utImpl = new ImsUtImpl(mMockCallContext);
-        assertNull(mMmTelFeatrure.getUt());
+        assertNull(mMmTelFeature.getUt());
 
-        mMmTelFeatrure = createMmTelService(null);
-        mMmTelFeatrure.start();
+        mMmTelFeature = createMmTelService(null);
+        mMmTelFeature.start();
         when(mMockImsCallApp.getUtInterface()).thenReturn(utImpl);
-        utImplBase = mMmTelFeatrure.getUt();
+        utImplBase = mMmTelFeature.getUt();
         assertNotNull(utImplBase);
 
         mMockImsCallApp = null;
-        assertNull(mMmTelFeatrure.getUt());
+        assertNull(mMmTelFeature.getUt());
     }
 
     @Test
     public void testGetEcbm() {
         ImsEcbmImplBase ecbmImplBase = null;
         ImsEcbmImpl ecbmImpl = new ImsEcbmImpl(mMockCallContext);
-        assertNull(mMmTelFeatrure.getEcbm());
+        assertNull(mMmTelFeature.getEcbm());
 
-        mMmTelFeatrure = createMmTelService(null);
-        mMmTelFeatrure.start();
+        mMmTelFeature = createMmTelService(null);
+        mMmTelFeature.start();
         when(mMockImsCallApp.getEcbmInterface()).thenReturn(ecbmImpl);
-        ecbmImplBase = mMmTelFeatrure.getEcbm();
+        ecbmImplBase = mMmTelFeature.getEcbm();
         assertNotNull(ecbmImplBase);
 
         mMockImsCallApp = null;
-        assertNull(mMmTelFeatrure.getEcbm());
+        assertNull(mMmTelFeature.getEcbm());
     }
 
     @Test
     public void testSetUiTtyMode() {
-        mMmTelFeatrure.setUiTtyMode(TelecomManager.TTY_MODE_OFF, null);
+        mMmTelFeature.setUiTtyMode(TelecomManager.TTY_MODE_OFF, null);
         verify(mMockImsCallApp, never()).setTtyMode(TelecomManager.TTY_MODE_OFF);
 
-        mMmTelFeatrure = createMmTelService(null);
-        mMmTelFeatrure.start();
-        mMmTelFeatrure.setUiTtyMode(TelecomManager.TTY_MODE_OFF, null);
+        mMmTelFeature = createMmTelService(null);
+        mMmTelFeature.start();
+        mMmTelFeature.setUiTtyMode(TelecomManager.TTY_MODE_OFF, null);
         verify(mMockImsCallApp).setTtyMode(TelecomManager.TTY_MODE_OFF);
     }
 
@@ -278,32 +282,48 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         ImsSmsImplBase smsImplBase = null;
         SmsTransferLayer smsTransFerLayer = Mockito.mock(SmsTransferLayer.class);
         ImsSmsImpl smsImpl = new ImsSmsImpl(mMockCallContext, smsTransFerLayer);
-        smsImplBase = mMmTelFeatrure.getSmsImplementation();
+        smsImplBase = mMmTelFeature.getSmsImplementation();
         assertNull(smsImplBase);
 
-        mMmTelFeatrure = createMmTelService(null);
-        mMmTelFeatrure.start();
+        mMmTelFeature = createMmTelService(null);
+        mMmTelFeature.start();
         when(mMockImsCallApp.getSmsInterface()).thenReturn(smsImpl);
-        smsImplBase = mMmTelFeatrure.getSmsImplementation();
+        smsImplBase = mMmTelFeature.getSmsImplementation();
         assertNotNull(smsImplBase);
 
         mMockImsCallApp = null;
-        assertNull(mMmTelFeatrure.getSmsImplementation());
+        assertNull(mMmTelFeature.getSmsImplementation());
+    }
+
+    @Test
+    public void testGetMultiEndpoint() {
+        ImsMultiEndpointImpl multiEndpointImpl = new ImsMultiEndpointImpl(mMockCallContext);
+        ImsMultiEndpointImplBase multiEndpointImplBase = mMmTelFeature.getMultiEndpoint();
+        assertNotNull(multiEndpointImplBase);
+
+        mMmTelFeature = createMmTelService(null);
+        mMmTelFeature.start();
+        when(mMockImsCallApp.getMultiEndpointInterface()).thenReturn(multiEndpointImpl);
+        multiEndpointImplBase = mMmTelFeature.getMultiEndpoint();
+        assertNotNull(multiEndpointImplBase);
+
+        mMockImsCallApp = null;
+        assertNull(mMmTelFeature.getMultiEndpoint());
     }
 
     @Test
     public void testOnFeatureRemoved() {
-        mMmTelFeatrure.onFeatureRemoved();
+        mMmTelFeature.onFeatureRemoved();
         verify(mMockServiceRegistry, never()).setMmTelFeature(null);
 
         ConcurrentHashMap<Integer, ImsCallApp> callApps;
         callApps = mServiceManager.getCallAppMap();
         callApps.put(0, mMockImsCallApp);
-        mMmTelFeatrure = createMmTelService(null);
-        mMmTelFeatrure.start();
+        mMmTelFeature = createMmTelService(null);
+        mMmTelFeature.start();
         ImsServiceManager.setDefault(mServiceManager);
         when(mMockImsContext.getPhoneId()).thenReturn(0);
-        mMmTelFeatrure.onFeatureRemoved();
+        mMmTelFeature.onFeatureRemoved();
         verify(mMockServiceRegistry).setMmTelFeature(null);
         callApps.clear();
     }
@@ -314,7 +334,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         ImsServiceManager.setDefault(serviceManager);
         when(mMockImsContext.getPhoneId()).thenReturn(0);
         mMockImsCallApp = null;
-        mMmTelFeatrure.onFeatureReady();
+        mMmTelFeature.onFeatureReady();
         assertNotNull(mMockImsCallApp);
         ImsServiceManager.setDefault(null);
     }
@@ -323,23 +343,32 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     public void testOnIncomingCallReceived() {
         final ImsCallSessionImpl callSesison;
         assertThrows(IllegalArgumentException.class,
-                () ->  mMmTelFeatrure.makeIncomingCall(null));
+                () ->  mMmTelFeature.makeIncomingCall(null));
 
         callSesison = Mockito.mock(ImsCallSessionImpl.class);
         mMockImsCallApp =  null;
         assertThrows(IllegalArgumentException.class,
-                () ->  mMmTelFeatrure.makeIncomingCall(callSesison));
+                () ->  mMmTelFeature.makeIncomingCall(callSesison));
 
         mMockImsCallApp = Mockito.mock(ImsCallApp.class);
         when(callSesison.getProperty(ImsCallProfile.EXTRA_USSD)).thenReturn(null);
-        mMmTelFeatrure.makeIncomingCall(callSesison);
+        mMmTelFeature.makeIncomingCall(callSesison);
         verify(mMockImsCallApp, times(1)).takeCallSession(callSesison);
         verify(callSesison, times(1)).alertUser();
 
         when(callSesison.getProperty(ImsCallProfile.EXTRA_USSD)).thenReturn("true");
-        mMmTelFeatrure.makeIncomingCall(callSesison);
+        mMmTelFeature.makeIncomingCall(callSesison);
         verify(mMockImsCallApp, times(2)).takeCallSession(callSesison);
         verify(callSesison, times(1)).alertUser();
+    }
+
+    @Test
+    public void testOnImsExternalCallStateChanged() {
+        ImsMultiEndpointImpl mockMultiEndpointImpl = Mockito.mock(ImsMultiEndpointImpl.class);
+        when(mMockImsCallApp.getMultiEndpointInterface()).thenReturn(mockMultiEndpointImpl);
+        List<ImsExternalCallState> states = new ArrayList<ImsExternalCallState>();
+        mMmTelFeature.onStateChange(states);
+        verify(mockMultiEndpointImpl).updateDialogState(states);
     }
 
     private TestImsMmTelService createMmTelService(ImsServiceRecord sr) {
@@ -371,6 +400,10 @@ public class ImsMmTelServiceTest extends ImsStackTest {
 
         public void makeIncomingCall(ImsCallSessionImpl callSesison) {
             mCallListener.onIncomingCallReceived(callSesison);
+        }
+
+        public void onStateChange(List<ImsExternalCallState> imsExternalCallStates) {
+            mCallListener.onImsExternalCallStateChanged(imsExternalCallStates);
         }
 
         protected ImsCallApp createCallApp() {
