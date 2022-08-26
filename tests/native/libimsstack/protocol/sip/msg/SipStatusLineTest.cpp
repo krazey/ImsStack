@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "sip_abnfUtil.h"
 #include "msg/SipStatusLine.h"
+#include "msg/sip_msgutil.h"
 
 namespace android
 {
@@ -96,6 +97,11 @@ TEST_F(SipStatusLineTest, DecodeStatusLine)
     EXPECT_EQ(SIP_FALSE, pStatusLine->DecodeStatusLine((char*)"", 0));
     /* only sip version present, fail */
     EXPECT_EQ(SIP_FALSE, pStatusLine->DecodeStatusLine((char*)"SIP/2.0", 7));
+    EXPECT_EQ(SIP_SC_INVALID, pStatusLine->GetStatusCodeAsInt());
+    SIP_INT16 nStatusCode;
+    EXPECT_FALSE(pStatusLine->GetStatusCode(&nStatusCode));
+    EXPECT_EQ(0, nStatusCode);
+
     /* reason phrase missing, fail */
     EXPECT_EQ(SIP_FALSE, pStatusLine->DecodeStatusLine((char*)"SIP/2.0 480", 11));
     pStatusLine->SipDelete();

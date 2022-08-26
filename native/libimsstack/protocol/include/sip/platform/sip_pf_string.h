@@ -56,8 +56,6 @@ SIP_INT32 SipPf_Atoi(const SIP_CHAR* pszSource);
 
 SIP_BOOL SipPf_Atoi_Unsigned(const SIP_CHAR* pszStr, SIP_UINT32& nValue);
 
-SIP_BOOL SipPf_Atoi_IsZero(const SIP_CHAR* pszStr);
-
 SIP_CHAR* SipPf_Strrchr(SIP_CHAR* pszSource, SIP_CHAR cChar);
 
 SIP_CHAR* SipPf_StripFileName(SIP_CHAR* pszFileName);

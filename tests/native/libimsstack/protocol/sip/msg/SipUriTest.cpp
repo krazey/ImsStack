@@ -322,6 +322,8 @@ TEST_F(SipUriTest, DecodeSipUri)
     EXPECT_STREQ("Password", pSipUri->GetPassword());
     EXPECT_STREQ("2001::2", pSipUri->GetHost());
     EXPECT_EQ(8080, pSipUri->GetPort());
+    EXPECT_EQ(0, pSipUri->GetUriParamCount());
+    EXPECT_EQ(0, pSipUri->GetHdrParamCount());
 
     pSipUri->SipDelete();
 

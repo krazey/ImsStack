@@ -85,6 +85,7 @@ SIP_BOOL Mock_FetchTransaction(
             }
             case SipMessage::TYPE_INVALID:
                 ((SipTxnKey*)pvTxnKey)->CompareKeys(SIP_NULL);
+                ((SipTxnKey*)pvTxnKey)->CompareKeysForRPR(SIP_NULL);
                 return SIP_FALSE;
             case SipMessage::RESP_TYPE:
             {

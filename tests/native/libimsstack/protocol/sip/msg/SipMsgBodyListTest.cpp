@@ -117,7 +117,7 @@ TEST_F(SipMsgBodyListTest, DecodeMIMEBody)
 
     EXPECT_EQ(SIP_FALSE, pList->DecodeMIMEBody(nullptr, nullptr, nullptr));
 
-    char* pMsg = (char*)"--unique-boundary\r\n\
+    char* pMsg = (char*)"\r\n--unique-boundary\r\n\
 Content-Type: application/body1\r\n\
 \r\n\
 Test body 1\r\n\

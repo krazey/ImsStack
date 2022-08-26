@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "sip_abnfUtil.h"
 #include "msg/SipMessage.h"
+#include "msg/sip_msgutil.h"
 
 namespace android
 {
@@ -1007,6 +1008,30 @@ Messages-Waiting: yes\r\n";
     EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
+
+    /* With compact form of header name & few other headers, success */
+    pMsg = (char*)"SIP/2.0 500 Internal Server Error\r\n\
+v: SIP/2.0/TCP host;branch=test-br\r\n\
+f: <sip:user@host>;tag=abcd\r\n\
+t: <sip:userA@host>\r\n\
+i: callid\r\n\
+CSeq: 1 INVITE\r\n\
+Expires: 1344\r\n\
+Feature-Caps: *;+g.3gpp.atcf=\"<tel:9999>\"\r\n\
+Retry-After: 5\r\n\
+z: unknown\r\n\
+qwertyuioasdfghjklzxcvbnmqwetyydfgh: badheader\r\n\
+l: 0\r\n\
+\r\n";
+    pDecodeMessage = new SipMessage();
+    ASSERT_TRUE(pDecodeMessage != nullptr);
+
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecCompleteMsg(pMsg, strlen(pMsg)));
+
+    pDecodeMessage->SipDelete();
+
+    /* Calling GetHdrType with null header name, fail */
+    EXPECT_EQ(SipHeaderBase::TYPE_INVALID, SipGetHdrType(SIP_NULL));
 }
 
 }  // namespace android

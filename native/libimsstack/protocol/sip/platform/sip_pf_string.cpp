@@ -288,25 +288,6 @@ SIP_BOOL SipPf_Atoi_Unsigned(const SIP_CHAR* pszStr, SIP_UINT32& nValue)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipPf_Atoi_IsZero(const SIP_CHAR* pszStr)
-{
-    if (pszStr == SIP_NULL)
-    {
-        return SIP_FALSE;
-    }
-
-    SIP_UINT32 nStrLen = SipPf_Strlen(pszStr);
-
-    for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nStrLen; ++nIndex)
-    {
-        if (pszStr[nIndex] != '0')
-        {
-            return SIP_FALSE;
-        }
-    }
-    return SIP_TRUE;
-}
-
 SIP_CHAR* SipPf_Strrchr(SIP_CHAR* pszSrc, SIP_CHAR cChar)
 {
     SIP_CHAR* pszDest = SIP_NULL;

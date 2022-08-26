@@ -19,6 +19,7 @@
 #include "txn/SipTxn.h"
 #include "txn/sip_txn_fsm.h"
 #include "txn/SipTxnFsmData.h"
+#include "txn/SipTxnUtil.h"
 #include "transport/SipTransportInfo.h"
 #include "SipStackCallback.h"
 #include "txn/SipTimeoutData.h"
@@ -132,36 +133,96 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_IdleState)
                                          pTxn, pTxnFsmData, &nError));
 
     delete pTxn;
-    delete pSipTranspParam;
     delete pTxnFsmData;
     delete pTxnKey;
-
-    pSipTranspParam = new SipTransportParameter(
-            (SIP_CHAR*)"192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
 
     SipMessage* pTempSipMsg = new SipMessage();
     pTempSipMsg->SetMessageType(SipMessage::RESP_TYPE);
 
-    char* pMsg = (char*)"PRACK sip:user@host SIP/2.0\r\n\
+    char* pMsg = (char*)"SIP/2.0 183 Ringing\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
-To: <sip:userA@host>\r\n\
-Call-ID: 1332\r\n\
+To: <sip:userA@host>;tag=too\r\n\
+Call-ID: 13459809802\r\n\
+CSeq: 1 INVITE\r\n\
+RSeq: 2\r\n\
+\r\n";
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+
+    pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
+
+    /*Calling Invite Server with 183 msg in proceeding state to add RPR txn key in SipTxnUtil */
+    pTxnKey = new SipTxnKey(pTempSipMsg, &nError);
+    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pTempSipMsg, SIP_NULL, &nError);
+    EXPECT_EQ(SIP_FALSE,
+            gpfSipInvSerTxnFsm[SipTxn::INV_SER_PROCEEDING_ST]
+                              [SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT](
+                                      pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvSerTxnFsm[SipTxn::INV_SER_PROCEEDING_ST]
+                              [SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT](
+                                      pTxn, pTxnFsmData, &nError));
+    delete pTxn;
+    delete pTempSipMsg;
+    delete pTxnKey;
+    delete pTxnFsmData;
+
+    pTempSipMsg = new SipMessage();
+    pTempSipMsg->SetMessageType(SipMessage::RESP_TYPE);
+
+    pMsg = (char*)"PRACK sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>;tag=too\r\n\
+Call-ID: 13459809802\r\n\
 CSeq: 2 PRACK\r\n\
-RAck: 209 2 INVITE\r\n\
+RAck: 562 1 INVITE\r\n\
 \r\n";
 
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
 
+    nError = 0;
     pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pTempSipMsg, &nError);
     pTxn = new SipTxn(SipTxn::NON_INV_SER_TXN, pTxnKey, pTempSipMsg, SIP_NULL, &nError);
-    /* Calling fsm with PRACK msg on idle state */
+    /* Calling fsm with PRACK msg on idle state to not match with above 183 message */
     EXPECT_EQ(SIP_TRUE,
             gpfSipNonInvSerTxnFsm[SipTxn::NON_INV_SER_IDLE_ST]
                                  [SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT](
                                          pTxn, pTxnFsmData, &nError));
 
+    delete pTempSipMsg;
+    delete pTxnFsmData;
+    delete pTxnKey;
+    delete pTxn;
+
+    pTempSipMsg = new SipMessage();
+    pTempSipMsg->SetMessageType(SipMessage::RESP_TYPE);
+
+    pMsg = (char*)"PRACK sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>;tag=too\r\n\
+Call-ID: 13459809802\r\n\
+CSeq: 2 PRACK\r\n\
+RAck: 2 1 INVITE\r\n\
+\r\n";
+
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+
+    nError = 0;
+    pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
+    pTxnKey = new SipTxnKey(pTempSipMsg, &nError);
+    pTxn = new SipTxn(SipTxn::NON_INV_SER_TXN, pTxnKey, pTempSipMsg, SIP_NULL, &nError);
+
+    /* Calling fsm with PRACK msg on idle state to match with above 183 message */
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipNonInvSerTxnFsm[SipTxn::NON_INV_SER_IDLE_ST]
+                                 [SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT](
+                                         pTxn, pTxnFsmData, &nError));
+
+    /* Calling Search txn key with null */
+    SipTxnUtil::SearchTxnKey(SIP_NULL, SIP_FALSE);
     delete pTxn;
     delete pSipUserData;
     delete pSipTranspParam;

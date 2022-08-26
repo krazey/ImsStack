@@ -72,6 +72,8 @@ TEST_F(SipMIMEHdrsTest, SetAndGetHeaders)
     EXPECT_EQ(SIP_TRUE, pMimeHeaders->SetMimeHdrs(pContentEncodingHeader));
     pContentEncodingHeader->SipDelete();
 
+    ASSERT_TRUE(nullptr == pMimeHeaders->GetUnknownHdr(0));
+
     SipUnknownHeader* pUnknownHeader = reinterpret_cast<SipUnknownHeader*>(
             SipUnknownHeader::GetNewObj(SipHeaderBase::UNKNOWN, nullptr));
     ASSERT_TRUE(pUnknownHeader != nullptr);
@@ -208,7 +210,27 @@ TEST_F(SipMIMEHdrsTest, DecodeMIMEHdrs)
 
     EXPECT_EQ(SIP_FALSE, pMimeHeaders->DecodeMIMEHdrs((char*)"", 0));
 
-    char* pMimeHeader = (char*)"Content-Type: mediaType/mediaSubType";
+    char* pMimeHeader = (char*)"Content-Length: 33";
+    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, strlen(pMimeHeader)));
+
+    EXPECT_EQ(SIP_FALSE, pMimeHeaders->DecodeMIMEHdrs((char*)"c: text", 7));
+
+    pMimeHeader = (char*)"Content-Language: fr";
+    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, strlen(pMimeHeader)));
+    pMimeHeaders->SipDelete();
+
+    pMimeHeaders = new SipMIMEHdrs();
+    ASSERT_TRUE(pMimeHeaders != nullptr);
+
+    pMimeHeader = (char*)"Content-Transfer-Encoding: base64";
+    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, strlen(pMimeHeader)));
+
+    pMimeHeaders->SipDelete();
+
+    pMimeHeaders = new SipMIMEHdrs();
+    ASSERT_TRUE(pMimeHeaders != nullptr);
+
+    pMimeHeader = (char*)"Content-Type: mediaType/mediaSubType";
     EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, strlen(pMimeHeader)));
 
     pMimeHeader = (char*)"UnknownHeaderName1: UnknownHeaderValue1";

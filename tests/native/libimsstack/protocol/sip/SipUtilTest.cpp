@@ -59,7 +59,16 @@ TEST_F(SipUtilTest, UtilityTest)
     pUtil = SipUtil_GetInstance();
     ASSERT_TRUE(pUtil != nullptr);
 
+    /* Calling again to verify new object is not created */
+    SipUtil_Construct();
+    ASSERT_TRUE(pUtil == SipUtil_GetInstance());
+
     EXPECT_TRUE(pUtil->GetTimer() != nullptr);
+    /* Calling Start & Stop Timer will all null values */
+    ISipTimerUtil* pSipTimerUtil = pUtil->GetTimer();
+    EXPECT_FALSE(pSipTimerUtil->StartTimer(SIP_NULL, 0, 0, SIP_NULL, SIP_NULL));
+    ASSERT_TRUE(pSipTimerUtil->StopTimer(SIP_NULL) == nullptr);
+
     EXPECT_TRUE(pUtil->GetLogger() != nullptr);
     EXPECT_TRUE(pUtil->GetNetwork() != nullptr);
     EXPECT_TRUE(pUtil->GetTxnListener() == nullptr);
@@ -71,6 +80,12 @@ TEST_F(SipUtilTest, UtilityTest)
 
     ISipTxnListener* pTxnListener = new SipTransactionListener();
     ASSERT_TRUE(pTxnListener != nullptr);
+    pUtil->RegisterTxnListener(pTxnListener);
+    EXPECT_TRUE(pTxnListener == pUtil->GetTxnListener());
+
+    /* Calling RegisterTxnListener again to verify first time set txn listener
+    is deleted and then set second time set txn listener */
+    pTxnListener = new SipTransactionListener();
     pUtil->RegisterTxnListener(pTxnListener);
     EXPECT_TRUE(pTxnListener == pUtil->GetTxnListener());
 

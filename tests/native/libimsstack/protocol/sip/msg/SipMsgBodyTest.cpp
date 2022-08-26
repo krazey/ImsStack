@@ -287,6 +287,7 @@ TEST_F(SipMsgBodyTest, DecodeMIMEMsgBody)
     ASSERT_TRUE(pMessageBody != nullptr);
 
     EXPECT_EQ(SIP_FALSE, pMessageBody->DecodeMIMEMsgBody(nullptr, nullptr));
+    EXPECT_EQ(0, pMessageBody->GetUnknownHdrCount());
     EXPECT_TRUE(pMessageBody->GetContentType() == nullptr);
     EXPECT_TRUE(pMessageBody->GetMimeHdr(SipHeaderBase::CONTENT_TYPE, 0) == nullptr);
     EXPECT_TRUE(pMessageBody->GetContentEncoding() == nullptr);

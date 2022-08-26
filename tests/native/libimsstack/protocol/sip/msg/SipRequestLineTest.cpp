@@ -46,6 +46,15 @@ TEST_F(SipRequestLineTest, CopyConstructor)
     pRequestLine->SetReqUri(pSipAddrSpec);
     pSipAddrSpec->SipDelete();
 
+    pSipAddrSpec = new SipAddrSpec();
+    ASSERT_TRUE(pSipAddrSpec != nullptr);
+
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec((char*)"sip:user@host", 13));
+
+    /* Calling SetReqUri again to verify already set uri is deleted and assigned new uri */
+    pRequestLine->SetReqUri(pSipAddrSpec);
+    pSipAddrSpec->SipDelete();
+
     SipRequestLine* pCopyRequestLine = new SipRequestLine(*pRequestLine);
     ASSERT_TRUE(pCopyRequestLine != nullptr);
 

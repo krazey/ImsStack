@@ -28,6 +28,20 @@ protected:
     virtual void TearDown() override {}
 };
 
+TEST_F(SipResourcePriorityHeaderTest, CopyConstructor)
+{
+    SipResourcePriorityHeader* pHeader = reinterpret_cast<SipResourcePriorityHeader*>(
+            SipResourcePriorityHeader::GetNewObj(SipHeaderBase::RESOURCE_PRIORITY, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    SipResourcePriorityHeader* pCopyHeader = reinterpret_cast<SipResourcePriorityHeader*>(
+            SipResourcePriorityHeader::GetNewObj(SipHeaderBase::RESOURCE_PRIORITY, pHeader));
+    ASSERT_TRUE(pCopyHeader != nullptr);
+
+    pHeader->SipDelete();
+    pCopyHeader->SipDelete();
+}
+
 TEST_F(SipResourcePriorityHeaderTest, EncodeAndEncodeHdr)
 {
     SipResourcePriorityHeader* pHeader = reinterpret_cast<SipResourcePriorityHeader*>(

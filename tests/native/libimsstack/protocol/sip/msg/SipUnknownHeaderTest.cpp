@@ -59,6 +59,7 @@ TEST_F(SipUnknownHeaderTest, EncodeHdr)
     EXPECT_EQ(SIP_TRUE, pUnknownHeader->SetHeaderValue("UnknownHeaderValue"));
     EXPECT_EQ(SIP_FALSE, pUnknownHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pUnknownHeader->Encode(objBuffer, SIP_FALSE));
+    EXPECT_EQ(SIP_FALSE, pUnknownHeader->IsValidHeader());
 
     EXPECT_EQ(SIP_TRUE, pUnknownHeader->SetHeaderName("UnknownHeaderName"));
     EXPECT_EQ(SIP_TRUE, pUnknownHeader->EncodeHdr(&pBuff));
