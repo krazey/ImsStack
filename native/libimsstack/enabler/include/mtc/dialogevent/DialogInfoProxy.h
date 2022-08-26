@@ -18,16 +18,18 @@
 #define DIALOG_INFO_UPDATER_H_
 
 #include "AString.h"
+#include "JniExternalCall.h"
 
-class DialogInfoUpdater
+class DialogInfoProxy
 {
 public:
-    explicit DialogInfoUpdater();
-    ~DialogInfoUpdater();
-    DialogInfoUpdater(IN const DialogInfoUpdater&) = delete;
-    DialogInfoUpdater& operator=(IN const DialogInfoUpdater&) = delete;
+    explicit DialogInfoProxy();
+    ~DialogInfoProxy();
+    DialogInfoProxy(IN const DialogInfoProxy&) = delete;
+    DialogInfoProxy& operator=(IN const DialogInfoProxy&) = delete;
 
     const AString& Update(IN const AString& strEventPackage);
+    ImsList<JniExternalCall*> GetJniExternalCalls() const;
 
 private:
     void Clear();

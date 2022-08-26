@@ -19,9 +19,11 @@
 
 #include "AString.h"
 #include "ImsMap.h"
+#include "MtcDef.h"
 
 class Dialog;
 class IElement;
+struct JniExternalCall;
 
 class DialogInfo
 {
@@ -32,20 +34,30 @@ public:
     DialogInfo& operator=(IN const DialogInfo&) = delete;
 
     IMS_RESULT Update(IN IElement* piElementDialogInfo);
+    ImsList<JniExternalCall*> GetJniExternalCalls() const;
 
     inline IMS_UINT32 GetState() const { return m_nState; }
     inline IMS_UINT32 GetVersion() const { return m_nVersion; }
     inline AString& GetEntity() { return m_strEntity; }
 
+    static IElement* GetSubElement(IN const IElement* piElement, IN const IMS_CHAR* pszElement);
+    static AString& GetSubElementValue(IN const IElement* piElement, IN const IMS_CHAR* pszElement,
+            OUT AString& strElementValue);
     static AString& GetElementValue(IN const IElement* piElement, OUT AString& strElementValue);
-    static IMS_BOOL IsMandatoryElementExist(
-            IN const IElement* piElement, IN const IMS_CHAR* pszElement);
-    static IMS_BOOL IsMandatoryAttrExist(IN const IElement* piElement, IN const IMS_CHAR* pszAttr);
+    static IMS_BOOL IsElementExist(IN const IElement* piElement, IN const IMS_CHAR* pszElement);
+    static IMS_BOOL IsAttrExist(IN const IElement* piElement, IN const IMS_CHAR* pszAttrName);
 
 private:
     IMS_UINT32 ConvertState(IN const AString& strState);
     void Clear();
     IMS_SLONG GetIndexOfKeyHasSameId(IN const AString& strDialogId);
+    AString GetDialogId(Dialog* pDialog) const;
+    AString GetDialogRemoteAddress(Dialog* pDialog) const;
+    AString GetDialogLocalAddress(Dialog* pDialog) const;
+    IMS_BOOL IsPullableDialog(Dialog* pDialog) const;
+    IMS_UINT32 GetDialogCallState(Dialog* pDialog) const;
+    IMS_UINT32 GetDialogCallType(Dialog* pDialog) const;
+    IMS_BOOL IsHeldDialog(Dialog* pDialog) const;
 
 public:
     enum
@@ -53,35 +65,6 @@ public:
         STATE_FULL = 1,
         STATE_PARTIAL = 2,
     };
-
-    static const IMS_CHAR ELEMENT_DIALOG_INFO[];
-    static const IMS_CHAR ATTR_DIALOG_INFO_VERSION[];
-    static const IMS_CHAR ATTR_DIALOG_INFO_STATE[];
-    static const IMS_CHAR ATTR_DIALOG_INFO_ENTITY[];
-    static const IMS_CHAR ELEMENT_DIALOG[];
-    static const IMS_CHAR ATTR_DIALOG_ID[];
-    static const IMS_CHAR ATTR_DIALOG_CALL_ID[];
-    static const IMS_CHAR ATTR_DIALOG_LOCAL_TAG[];
-    static const IMS_CHAR ATTR_DIALOG_REMOTE_TAG[];
-    static const IMS_CHAR ATTR_DIALOG_DIRECTION[];
-    static const IMS_CHAR ELEMENT_STATE[];
-    static const IMS_CHAR ATTR_STATE_EVENT[];
-    static const IMS_CHAR ATTR_STATE_CDOE[];
-    static const IMS_CHAR ELEMENT_DURATIOIN[];
-    static const IMS_CHAR ELEMENT_REPLACES[];
-    static const IMS_CHAR ATTR_REPLACES_CALL_ID[];
-    static const IMS_CHAR ATTR_REPLACES_LOCAL_TAG[];
-    static const IMS_CHAR ATTR_REPLACES_REMOTE_TAG[];
-    static const IMS_CHAR ELEMENT_REFERRED_BY[];
-    static const IMS_CHAR ATTR_NAMEADDR_DISPLAY_NAME[];
-    static const IMS_CHAR ELEMENT_LOCAL[];
-    static const IMS_CHAR ELEMENT_REMOTE[];
-    static const IMS_CHAR ELEMENT_IDENTITY[];
-    static const IMS_CHAR ELEMENT_TARGET[];
-    static const IMS_CHAR ATTR_TARGET_URI[];
-    static const IMS_CHAR ELEMENT_PARAM[];
-    static const IMS_CHAR ATTR_PARAM_PNAME[];
-    static const IMS_CHAR ATTR_PARAM_PVAL[];
 
 private:
     ImsList<Dialog*> m_objDialogs;
@@ -99,7 +82,7 @@ public:
     public:
         explicit State() :
                 m_nEvent(EVENT_IDLE),
-                m_strCode(0),
+                m_nCode(0),
                 m_nState(STATE_IDLE)
         {
         }
@@ -117,19 +100,15 @@ public:
         enum
         {
             STATE_IDLE = 0,
-
             STATE_TRYING = 1,
             STATE_PROCEEDING = 2,
             STATE_EARLY = 3,
             STATE_CONFIRMED = 4,
             STATE_TERMINATED = 5,
-
-            STATE_ONHOLD = 6,
         };
         enum
         {
             EVENT_IDLE = 0,
-
             EVENT_CANCELLED = 1,
             EVENT_REJECTED = 2,
             EVENT_REPLACED = 3,
@@ -143,7 +122,7 @@ public:
         friend class DialogInfo;
 
         IMS_UINT32 m_nEvent;
-        IMS_UINT32 m_strCode;
+        IMS_UINT32 m_nCode;
 
         IMS_UINT32 m_nState;
     };
@@ -196,7 +175,7 @@ public:
     {
     public:
         explicit Target() :
-                m_objTarget(ImsMap<AString, AString>()),
+                m_objParamMap(ImsMap<AString, AString>()),
                 m_strUri(AString::ConstNull())
         {
         }
@@ -204,12 +183,12 @@ public:
         Target(IN const Target&) = delete;
         Target& operator=(IN const Target&) = delete;
 
-        IMS_RESULT Update(IN const IElement* piElementTarget);
+        void Update(IN const IElement* piElementTarget);
 
     private:
         friend class DialogInfo;
 
-        ImsMap<AString, AString> m_objTarget;
+        ImsMap<AString, AString> m_objParamMap;
         AString m_strUri;
         // session-description
         // cseq
@@ -220,7 +199,7 @@ public:
     public:
         explicit Participant() :
                 m_objIdentity(NameAddr()),
-                m_objtartget(Target())
+                m_objTarget(Target())
         {
         }
         ~Participant(){};
@@ -233,9 +212,34 @@ public:
         friend class DialogInfo;
 
         NameAddr m_objIdentity;
-        Target m_objtartget;
+        Target m_objTarget;
         // session-description
         // cseq
+    };
+
+    class ExtraInfo final
+    {
+    public:
+        explicit ExtraInfo() :
+                m_strExclusive(AString::ConstNull()),
+                m_objMediaInfo(MediaInfo())
+        {
+        }
+        ~ExtraInfo(){};
+        ExtraInfo(IN const ExtraInfo&) = delete;
+        ExtraInfo& operator=(IN const ExtraInfo&) = delete;
+
+        void Update(IN const IElement* piElementDialog);
+
+    private:
+        void HandleMediaInfo(IN const IElement* piElementDialog);
+        IMS_SINT32 ConvertMediaDirection(IN const AString& strState);
+
+    private:
+        friend class DialogInfo;
+
+        AString m_strExclusive;
+        MediaInfo m_objMediaInfo;
     };
 
 public:
@@ -246,6 +250,7 @@ public:
             m_objReferredBy(NameAddr()),
             m_objLocal(Participant()),
             m_objRemote(Participant()),
+            m_objExtraInfo(ExtraInfo()),
             m_strId(AString::ConstNull()),
             m_strCallId(AString::ConstNull()),
             m_strLocalTag(AString::ConstNull()),
@@ -280,6 +285,8 @@ private:
     // route-set
     Participant m_objLocal;
     Participant m_objRemote;
+
+    ExtraInfo m_objExtraInfo;
 
     AString m_strId;
     AString m_strCallId;
