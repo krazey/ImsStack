@@ -20,7 +20,7 @@
 #include "ImsProcess.h"
 #include "JniAosServiceThread.h"
 #include "JniAosService.h"
-#include "JniConnectorFactory.h"
+#include "JniEnablerConnector.h"
 #include "IIAosService.h"
 #include "IAosService.h"
 
@@ -30,8 +30,6 @@ __IMS_TRACE_TAG_USER_DECL__("JNI.AOS");
 
 JniAosService::JniAosService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
-        m_strThreadName(AString::ConstNull()),
-        m_piAosService(IMS_NULL),
         m_pJniAosServiceThread(IMS_NULL)
 {
     IMS_TRACE_D("+JniAosService SlotId[%d]", m_nSlotId, 0, 0);
@@ -43,14 +41,11 @@ JniAosService::~JniAosService()
 {
     IMS_TRACE_D("~JniAosService SlotId[%d]", m_nSlotId, 0, 0);
 
-    if (m_piAosService)
-    {
-        m_piAosService->SetJniAosService(IMS_NULL);
-    }
+    JniEnablerConnector::GetInstance().SetJniEnabler(m_nSlotId, EnablerType::AOS_SERVICE, IMS_NULL);
 
     if (m_pJniAosServiceThread != IMS_NULL)
     {
-        ImsProcess::GetInstance()->UnloadAppThread(m_strThreadName);
+        ImsProcess::GetInstance()->UnloadAppThread(m_pJniAosServiceThread->GetName());
         m_pJniAosServiceThread = IMS_NULL;
     }
 }
@@ -80,7 +75,8 @@ void JniAosService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
         return;
     }
 
-    m_strThreadName.Sprintf("JniAosServiceThread_%d", m_nSlotId);
+    AString strThreadName;
+    strThreadName.Sprintf("JniAosServiceThread_%d", m_nSlotId);
 
     IMS_TRACE_D("Initialize()", 0, 0, 0);
     auto fnEntry = []() -> BaseThread*
@@ -88,9 +84,9 @@ void JniAosService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
         return new JniAosServiceThread();
     };
 
-    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry, m_nSlotId);
+    ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, m_nSlotId);
     m_pJniAosServiceThread =
-            (JniAosServiceThread*)(ImsProcess::GetInstance()->GetThread(m_strThreadName));
+            (JniAosServiceThread*)(ImsProcess::GetInstance()->GetThread(strThreadName));
 
     if (m_pJniAosServiceThread == IMS_NULL)
     {
@@ -98,23 +94,14 @@ void JniAosService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
         return;
     }
 
-    m_pJniAosServiceThread->SetSlotId(m_nSlotId);
     m_pJniAosServiceThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pfnSendDataToJava);
 
     Attach();
 }
 
-PUBLIC
-void JniAosService::SetAosService(IN IAosService* piAosService)
+PUBLIC VIRTUAL IJniEnablerThread* JniAosService::GetJniThread() const
 {
-    IMS_TRACE_D("SetAosService()", 0, 0, 0);
-    m_piAosService = piAosService;
-}
-
-PUBLIC
-JniAosServiceThread* JniAosService::GetThread()
-{
-    return m_pJniAosServiceThread;
+    return DYNAMIC_CAST(IJniEnablerThread*, m_pJniAosServiceThread);
 }
 
 PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
@@ -225,48 +212,37 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
 }
 
 PRIVATE
-IMS_BOOL JniAosService::Attach()
+void JniAosService::Attach()
 {
-    IMS_BOOL bIsAttached = IMS_FALSE;
+    IMS_TRACE_I("Attach()", 0, 0, 0);
+    JniEnablerConnector::GetInstance().SetJniEnabler(m_nSlotId, EnablerType::AOS_SERVICE, this);
+}
 
-    if (m_piAosService)
-    {
-        IMS_TRACE_D("Attach()::Attached", 0, 0, 0);
-        return IMS_TRUE;
-    }
-
-    m_piAosService = JniConnectorFactory::GetInstance()
-                             ->GetAosServiceConnector(m_nSlotId)
-                             ->GetEnablerService();
-    if (m_piAosService)
-    {
-        m_piAosService->SetJniAosService(this);
-        bIsAttached = IMS_TRUE;
-    }
-    else
-    {
-        JniConnectorFactory::GetInstance()->GetAosServiceConnector(m_nSlotId)->SetJniService(this);
-    }
-
-    IMS_TRACE_I("Attach() :: %s", _TRACE_B_(bIsAttached), 0, 0);
-    return bIsAttached;
+PRIVATE
+IAosService* JniAosService::GetNativeService()
+{
+    return DYNAMIC_CAST(IAosService*,
+            JniEnablerConnector::GetInstance().GetNativeEnabler(
+                    m_nSlotId, EnablerType::AOS_SERVICE));
 }
 
 PRIVATE
 void JniAosService::UpdateSipDelegateRegistration(IN const Parcel& /*objParcel*/)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->UpdateSipDelegateRegistration();
+        piAosService->UpdateSipDelegateRegistration();
     }
 }
 
 PRIVATE
 void JniAosService::TriggerSipDelegateDeregistration(IN const Parcel& /*objParcel*/)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->TriggerSipDelegateDeregistration();
+        piAosService->TriggerSipDelegateDeregistration();
     }
 }
 
@@ -277,9 +253,10 @@ void JniAosService::TriggerFullNetworkRegistration(IN const Parcel& objParcel)
     AString strSipReason;
     ConvertString(objParcel.readString16(), strSipReason);
 
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->TriggerFullNetworkRegistration(nSipCode, strSipReason);
+        piAosService->TriggerFullNetworkRegistration(nSipCode, strSipReason);
     }
 }
 
@@ -294,18 +271,20 @@ void JniAosService::NotifyCapabilitiesChanged(IN const Parcel& objParcel)
         objCapabilities.Add(objParcel.readInt32(), objParcel.readInt32());
     }
 
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyCapabilitiesChanged(objCapabilities);
+        piAosService->NotifyCapabilitiesChanged(objCapabilities);
     }
 }
 
 PRIVATE
 void JniAosService::ControlRegistration(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->ControlRegistration(
+        piAosService->ControlRegistration(
                 objParcel.readInt32(), objParcel.readInt32(), objParcel.readInt32());
     }
 }
@@ -313,171 +292,190 @@ void JniAosService::ControlRegistration(IN const android::Parcel& objParcel)
 PRIVATE
 void JniAosService::NotifyAirplaneSetting(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyAirplaneSetting(objParcel.readInt32());
+        piAosService->NotifyAirplaneSetting(objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyDataRoamingSetting(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyDataRoamingSetting(objParcel.readInt32());
+        piAosService->NotifyDataRoamingSetting(objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyMobileDataSetting(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyMobileDataSetting(objParcel.readInt32());
+        piAosService->NotifyMobileDataSetting(objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyRoamingPreferredVoiceNetwork(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyRoamingPreferredVoiceNetwork(objParcel.readInt32());
+        piAosService->NotifyRoamingPreferredVoiceNetwork(objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyServiceSetting(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyServiceSetting(objParcel.readInt32(), objParcel.readInt32());
+        piAosService->NotifyServiceSetting(objParcel.readInt32(), objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyTtySetting(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyTtySetting(objParcel.readInt32());
+        piAosService->NotifyTtySetting(objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyVideoSetting(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyVideoSetting(objParcel.readInt32());
+        piAosService->NotifyVideoSetting(objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyVolteSetting(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyVolteSetting(objParcel.readInt32());
+        piAosService->NotifyVolteSetting(objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyWfcSetting(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyWfcSetting(objParcel.readInt32());
+        piAosService->NotifyWfcSetting(objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyAosStart(IN const android::Parcel& /*objParcel*/)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyAosStart();
+        piAosService->NotifyAosStart();
     }
 }
 
 PRIVATE
 void JniAosService::NotifyIpcanHandoverFailure(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyIpcanHandoverFailure(objParcel.readInt32(), objParcel.readInt32());
+        piAosService->NotifyIpcanHandoverFailure(objParcel.readInt32(), objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyIsimState(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyIsimState(objParcel.readInt32());
+        piAosService->NotifyIsimState(objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyLocationInfo(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyLocationInfo(objParcel.readInt32());
+        piAosService->NotifyLocationInfo(objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyMobileDataLimit(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyMobileDataLimit(objParcel.readInt32());
+        piAosService->NotifyMobileDataLimit(objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyNetworkVideoCapability(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyNetworkVideoCapability(objParcel.readInt32());
+        piAosService->NotifyNetworkVideoCapability(objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyPhoneNumberState(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyPhoneNumberState(objParcel.readInt32(), objParcel.readInt32());
+        piAosService->NotifyPhoneNumberState(objParcel.readInt32(), objParcel.readInt32());
     }
 }
 
 PRIVATE
 void JniAosService::NotifyPlmnChanged(IN const android::Parcel& /*objParcel*/)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyPlmnChanged();
+        piAosService->NotifyPlmnChanged();
     }
 }
 
 PRIVATE
 void JniAosService::NotifyPowerOff(IN const android::Parcel& /*objParcel*/)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyPowerOff();
+        piAosService->NotifyPowerOff();
     }
 }
 
 PRIVATE
 void JniAosService::NotifyPreciseCallState(IN const android::Parcel& objParcel)
 {
-    if (Attach())
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
     {
-        m_piAosService->NotifyPreciseCallState(objParcel.readInt32());
+        piAosService->NotifyPreciseCallState(objParcel.readInt32());
     }
 }
 

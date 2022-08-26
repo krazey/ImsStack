@@ -28,7 +28,6 @@
 class MockIAosService : public IAosService
 {
 public:
-    MOCK_METHOD(IMS_BOOL, SetJniAosService, (IN JniAosService * pJniAosService), (override));
     MOCK_METHOD(
             IMS_BOOL, AddListener, (IN IAosRegistrationControlListener * piListener), (override));
     MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosRegistrationControlListener * piListener),
@@ -94,6 +93,8 @@ public:
     MOCK_METHOD(IMS_UINT32, GetCapabilitiesForNetwork, (AosNetworkType eNetworkType), (override));
     MOCK_METHOD(IMS_BOOL, IsSupportCapabilitiesForNetwork,
             (AosNetworkType eNetworkType, AosCapability eCapability), (override));
+
+    MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));
 };
 
 #endif  // MOCK_I_AOS_SERVICE_H_
