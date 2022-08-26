@@ -15,17 +15,18 @@
  */
 
 #include "helper/IMtcAosConnector.h"
+#include "IJniMtcServiceThread.h"
+#include "IJniEnabler.h"
 #include "ImsAosParameter.h"
+#include "JniEnablerConnector.h"
 #include "MtcEmergencyServiceManager.h"
 #include "ServiceTrace.h"
-#include "JniMtcServiceThread.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcEmergencyServiceManager::MtcEmergencyServiceManager(IN IMtcContext& objContext) :
         m_objContext(objContext),
-        m_pServiceThread(IMS_NULL),
         m_eState(IuMtcService::EmergencyServiceState::IDLE)
 {
     IMS_TRACE_I("+MtcEmergencyServiceManager", 0, 0, 0);
@@ -134,13 +135,25 @@ void MtcEmergencyServiceManager::NotifyEmergencyServiceChanged(IN IMS_SINT32 eRe
 {
     IMS_TRACE_D("NotifyEmergencyServiceChanged :: %d, %d", m_eState, eReason, 0);
 
-    if (m_pServiceThread == IMS_NULL)
+    // TODO: make GetJniServiceThread() in IMtcService?
+    IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
+            m_objContext.GetSlotId(), EnablerType::MTC_SERVICE);
+    if (piJniEnabler == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "JniMtcServiceThread is null", 0, 0, 0);
+        return;
+    }
+
+    IJniMtcServiceThread* piServiceThread =
+            reinterpret_cast<IJniMtcServiceThread*>(piJniEnabler->GetJniThread());
+
+    if (piServiceThread == IMS_NULL)
     {
         return;
     }
 
     ServiceType eServiceType = ServiceType::EMERGENCY;
 
-    m_pServiceThread->OnEmergencyServiceChanged(static_cast<IMS_SINT32>(m_eState), -1,
+    piServiceThread->OnEmergencyServiceChanged(static_cast<IMS_SINT32>(m_eState), -1,
             static_cast<IMS_SINT32>(eServiceType));
 }

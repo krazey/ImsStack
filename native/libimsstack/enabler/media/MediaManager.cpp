@@ -112,7 +112,7 @@ MediaMsgHandler* MediaManager::GetHandler(IN IMS_SINTP nCallKey)
 }
 
 PUBLIC VIRTUAL void MediaManager::SetJniMediaSessionThread(
-        IN IMS_SINTP nCallKey, IN JniMediaSessionThread* pThread)
+        IN IMS_SINTP nCallKey, IN IJniMediaSessionThread* pThread)
 {
     MediaMsgHandler* pHandler = GetHandler(nCallKey);
 
@@ -124,7 +124,7 @@ PUBLIC VIRTUAL void MediaManager::SetJniMediaSessionThread(
 
 PUBLIC
 MediaSession* MediaManager::CreateSession(
-        IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey, IN JniMediaSessionThread* pThread)
+        IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey, IN IJniMediaSessionThread* pThread)
 {
     IMS_TRACE_D("CreateSession() - CallKey[%d], nService[%d]", nCallKey, nService, 0);
 

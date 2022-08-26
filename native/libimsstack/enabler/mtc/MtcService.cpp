@@ -29,9 +29,8 @@
 #include "INetworkWatcher.h"
 #include "IServiceFilterCriteria.h"
 #include "ISipRoutingRejectNotifier.h"
-#include "JniConnectorFactory.h"
-#include "JniMtcService.h"
-#include "JniMtcServiceThread.h"
+#include "JniEnablerConnector.h"
+#include "IJniMtcServiceThread.h"
 #include "MtcEmergencyServiceManager.h"
 #include "MtcService.h"
 #include "ServiceTrace.h"
@@ -55,7 +54,6 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_pAosConnector(IMS_NULL),
         m_pAosEventHandler(IMS_NULL),
         m_pSrvccEventHandler(IMS_NULL),
-        m_pJniService(IMS_NULL),
         m_pRoutingRejectHandler(IMS_NULL),
         m_bTerminalBasedCallWaitingEnabled(IMS_TRUE/*m_objContext.GetConfigurationProxy().Is(
                 Feature::TERMINAL_BASED_CALL_WAIT_DEFAULT_ENABLED)*/)
@@ -67,18 +65,11 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
 PUBLIC VIRTUAL MtcService::~MtcService()
 {
     IMS_TRACE_I("~MtcService [slot_%d][type:%d]", m_objContext.GetSlotId(), m_eType, 0);
-    if (m_pJniService)
-    {
-        m_pJniService->SetMtcService(IMS_NULL);
-        m_pJniService = IMS_NULL;
-    }
 
     if (m_eType == ServiceType::NORMAL)
     {
-        // TODO: temp to fix crash issue
-        JniConnectorFactory::GetInstance()
-                ->GetMtcServiceConnector(m_objContext.GetSlotId())
-                ->SetEnablerService(IMS_NULL);
+        JniEnablerConnector::GetInstance().SetNativeEnabler(
+                m_objContext.GetSlotId(), EnablerType::MTC_SERVICE, IMS_NULL);
     }
 
     if (m_piCoreService)
@@ -137,26 +128,6 @@ PUBLIC VIRTUAL void MtcService::UpdateSrvccState(IN SrvccState eState)
     m_pAosEventHandler->SetOnSrvcc(eState == SrvccState::STARTED);
 }
 
-PUBLIC VIRTUAL void MtcService::SetJniService(IN JniMtcService* pJniService)
-{
-    m_pJniService = pJniService;
-    if (pJniService)
-    {
-        IMS_TRACE_I("SetJniService [slot_%d]", m_objContext.GetSlotId(), 0, 0);
-        m_objContext.GetEmergencyServiceManager()->SetJniServiceThread(m_pJniService->GetThread());
-    }
-    else
-    {
-        IMS_TRACE_I("SetJniService Null [slot_%d]", m_objContext.GetSlotId(), 0, 0);
-        m_objContext.GetEmergencyServiceManager()->SetJniServiceThread(IMS_NULL);
-
-        // TODO: temp to fix crash issue
-        JniConnectorFactory::GetInstance()
-                ->GetMtcServiceConnector(m_objContext.GetSlotId())
-                ->SetEnablerService(IMS_NULL);
-    }
-}
-
 PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(
         IN IMS_BOOL bProvisioned, IN IMS_BOOL bEnabled)
 {
@@ -184,15 +155,7 @@ PUBLIC VIRTUAL void MtcService::CoreService_SessionInvitationReceived(
 {
     (void)piService;
     IMS_TRACE_I("CoreService_SessionInvitationReceived", 0, 0, 0);
-
-    if (m_pJniService == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "m_pJniService is NULL", 0, 0, 0);
-        m_objContext.GetCallController().HandleIncoming(this, piSession, IMS_NULL);
-        return;
-    }
-
-    m_objContext.GetCallController().HandleIncoming(this, piSession, m_pJniService->GetThread());
+    m_objContext.GetCallController().HandleIncoming(this, piSession);
 }
 
 PUBLIC VIRTUAL void MtcService::CoreService_CapabilityQueryReceived(
@@ -206,9 +169,9 @@ PUBLIC VIRTUAL void MtcService::CoreService_CapabilityQueryReceived(
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
 {
+    IMS_TRACE_I("ImsAos_Connected", 0, 0, 0);
     m_eStatus = ServiceStatus::SERVICE_ACTIVE;
-    m_pAosEventHandler->OnConnected(nFeatures, nIpcan,
-            m_pJniService ? m_pJniService->GetThread() : IMS_NULL,
+    m_pAosEventHandler->OnConnected(nFeatures, nIpcan, GetJniThread(),
             m_objContext.GetEmergencyServiceManager(), m_objContext.GetCallController());
     SetAosReady(IMS_TRUE);
 }
@@ -223,8 +186,7 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 PUBLIC VIRTUAL void MtcService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 {
     m_eStatus = ServiceStatus::SERVICE_IDLE;
-    m_pAosEventHandler->OnDisconnected(nReason, m_objContext.GetCallController(),
-            m_pJniService ? m_pJniService->GetThread() : IMS_NULL,
+    m_pAosEventHandler->OnDisconnected(nReason, m_objContext.GetCallController(), GetJniThread(),
             m_objContext.GetEmergencyServiceManager());
 }
 
@@ -258,10 +220,8 @@ void MtcService::Init()
 
     if (m_eType == ServiceType::NORMAL)
     {
-        // TODO: emergency service connector.
-        JniConnectorFactory::GetInstance()
-                ->GetMtcServiceConnector(m_objContext.GetSlotId())
-                ->SetEnablerService(this);
+        JniEnablerConnector::GetInstance().SetNativeEnabler(
+                m_objContext.GetSlotId(), EnablerType::MTC_SERVICE, this);
     }
 
     m_pAosEventHandler = new MtcAosEventHandler(*this, m_objContext.GetConfigurationProxy());
@@ -326,6 +286,20 @@ void MtcService::AttachAosInterface()
     }
     piImsAos->SetListener(this);
     m_pAosConnector = new MtcAosConnector(*piImsAos, *(piImsAos->GetAosInfo()));
+}
+
+PRIVATE
+IJniMtcServiceThread* MtcService::GetJniThread()
+{
+    IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
+            m_objContext.GetSlotId(), EnablerType::MTC_SERVICE);
+    if (piJniEnabler == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "JniMtcServiceThread is null", 0, 0, 0);
+        return IMS_NULL;
+    }
+
+    return reinterpret_cast<IJniMtcServiceThread*>(piJniEnabler->GetJniThread());
 }
 
 PRIVATE

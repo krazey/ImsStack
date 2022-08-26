@@ -19,12 +19,12 @@
 
 #include "IMtcService.h"
 #include "call/IMtcCall.h"
+#include "INativeEnabler.h"
 
-class JniMtcCallThread;
 enum class KeyType;
 union Key;
 
-class IMtcCallController
+class IMtcCallController : public INativeEnabler
 {
 public:
     virtual ~IMtcCallController() {}
@@ -61,25 +61,15 @@ public:
      * @param nCallKey Key of the call to be manipulated.
      * @param pJniMtcCallThread Interface to send messages to the Java layer.
      */
-    virtual void Attach(IN CallKey nCallKey, IN JniMtcCallThread* pJniMtcCallThread,
-            IN JniMediaSessionThread* pJniMediaThread) = 0;
-
-    /**
-     * Disconnects from the interface to interact with the Java layer.
-     *
-     * @param nCallKey Key of the call to be manipulated.
-     */
-    virtual void Detach(IN CallKey nCallKey) = 0;
+    virtual void Attach(IN CallKey nCallKey) = 0;
 
     /**
      * Creates a call to handle the incoming call.
      *
      * @param pService Service of the incoming call.
      * @param piSession Session of the incoming call.
-     * @param pServiceThread JNI to be notified the incoming call.
      */
-    virtual void HandleIncoming(IN IMtcService* pService, IN ISession* piSession,
-            IN JniMtcServiceThread* pServiceThread) = 0;
+    virtual void HandleIncoming(IN IMtcService* pService, IN ISession* piSession) = 0;
 
     /**
      * Sets the call information to start the outgoing call.

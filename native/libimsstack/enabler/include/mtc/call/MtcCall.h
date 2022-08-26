@@ -61,8 +61,6 @@ class IMtcVonrManager;
 class IMutex;
 class IReference;
 class ISession;
-class JniMediaSessionThread;
-class JniMtcCallThread;
 class MessageSender;
 class MtcConfigurationProxy;
 class UssiController;
@@ -89,9 +87,7 @@ public:
     MtcCall(IN const MtcCall&) = delete;
     MtcCall& operator=(IN const MtcCall&) = delete;
 
-    void Attach(IN JniMtcCallThread* pJniMtcCallThread,
-            IN JniMediaSessionThread* pJniMediaThread) override;
-    void Detach() override;
+    void Attach() override;
 
     void Start(IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
@@ -100,7 +96,7 @@ public:
             IN const ImsList<ConfUser*>& lstUsers) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& objUsers) override;
-    void HandleIncoming(IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
+    void HandleIncoming(IN ISession* piSession) override;
     void HandleUserAlert() override;
     void Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     void Reject(IN const CallReasonInfo& objReason) override;

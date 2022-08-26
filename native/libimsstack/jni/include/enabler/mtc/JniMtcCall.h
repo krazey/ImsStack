@@ -23,8 +23,10 @@
 #include "IuMtcCall.h"
 #include "call/IMtcCall.h"
 #include "ImsMap.h"
+#include "IJniEnabler.h"
 
 class IMtcCallController;
+class IJniEnablerThread;
 
 class JniMtcCall final : public BaseService
 {
@@ -35,12 +37,14 @@ public:
     virtual IMS_SINT32 SendData(IN const android::Parcel& objParcel) override;
     void Initialize();
 
-    JniMtcCallThread* GetThread();
+    IJniEnablerThread* GetJniThread() const override;
+    inline void NotifyNativeEnablerSet() override {}
 
 protected:
     void HandleMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel) override;
 
 private:
+    IMtcCallController& GetCallController();
     void Attach();
     void Attach(IN const android::Parcel& objParcel);
     void Open(IN const android::Parcel& objParcel);
@@ -71,7 +75,6 @@ private:
 private:
     JniMtcCallThread* m_pThread;
     Jni_SendDataToJava m_pfnSendDataToJava;
-    AString m_strThreadName;
     IMS_SINT32 m_nSlotId;
     IMtcCallController& m_objCallController;
     CallKey m_nCallKey;

@@ -38,7 +38,7 @@ public:
      *
      * @param pThread
      */
-    virtual void SetJniMediaSessionThread(IN JniMediaSessionThread* pThread);
+    virtual void SetJniMediaSessionThread(IN IJniMediaSessionThread* pThread);
 
     /**
      * @brief
@@ -60,6 +60,6 @@ public:
 
 private:
     AString m_strListenerThread;
-    JniMediaSessionThread* m_pThread;
+    IJniMediaSessionThread* m_pThread;
 };
 #endif /* _MEDIA_MSG_HANDLER_H_ */

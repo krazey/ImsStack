@@ -30,8 +30,7 @@ __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
 
 PUBLIC
 JniMtcServiceThread::JniMtcServiceThread() :
-        BaseServiceThread(),
-        m_nSlotId(0)
+        BaseServiceThread()
 {
     IMS_TRACE_D("+JniMtcServiceThread", 0, 0, 0);
 }
@@ -79,4 +78,3 @@ void JniMtcServiceThread::OnPreIncomingCallReceived(IN IMS_ULONG nCallKey)
 
     SendData2Java(objParcel);
 }
-

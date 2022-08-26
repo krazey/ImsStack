@@ -287,33 +287,15 @@ TEST_F(MtcCallControllerTest, OpenReturnsCreatedCallKey)
 
 TEST_F(MtcCallControllerTest, AttachAttachesTargetCall)
 {
-    JniMtcCallThread* pJniCallThread = reinterpret_cast<JniMtcCallThread*>(0x1);
-    JniMediaSessionThread* pJniMediaThread = reinterpret_cast<JniMediaSessionThread*>(0x2);
-
     CallKey nCallKey = 1;
     MockIMtcCall* pCall = CreateMockIMtcCall(nCallKey);
-    EXPECT_CALL(*pCall, Attach(pJniCallThread, pJniMediaThread))
+    EXPECT_CALL(*pCall, Attach())
             .Times(1);
 
     ON_CALL(objCallManager, GetCallByCallKey(nCallKey))
             .WillByDefault(Return(pCall));
 
-    pCallController->Attach(nCallKey, pJniCallThread, pJniMediaThread);
-
-    delete pCall;
-}
-
-TEST_F(MtcCallControllerTest, DetachDetachesTargetCall)
-{
-    CallKey nCallKey = 1;
-    MockIMtcCall* pCall = CreateMockIMtcCall(nCallKey);
-    EXPECT_CALL(*pCall, Detach())
-            .Times(1);
-
-    ON_CALL(objCallManager, GetCallByCallKey(nCallKey))
-            .WillByDefault(Return(pCall));
-
-    pCallController->Detach(nCallKey);
+    pCallController->Attach(nCallKey);
 
     delete pCall;
 }
@@ -331,23 +313,22 @@ TEST_F(MtcCallControllerTest, HandleIncomingCreatesCall)
             .Times(1)
             .WillRepeatedly(Return(&objCall));
 
-    pCallController->HandleIncoming(&objService, IMS_NULL, IMS_NULL);
+    pCallController->HandleIncoming(&objService, IMS_NULL);
 }
 
 TEST_F(MtcCallControllerTest, HandleIncomingCallsTargetCall)
 {
     MockIMtcService objService;
     ISession* pSession = reinterpret_cast<ISession*>(0x1);
-    JniMtcServiceThread* pJniServiceThread = reinterpret_cast<JniMtcServiceThread*>(0x2);
 
     MockIMtcCall objCall;
-    EXPECT_CALL(objCall, HandleIncoming(pSession, pJniServiceThread))
+    EXPECT_CALL(objCall, HandleIncoming(pSession))
             .Times(1);
 
     ON_CALL(objCallManager, CreateCall(_, _))
             .WillByDefault(Return(&objCall));
 
-    pCallController->HandleIncoming(&objService, pSession, pJniServiceThread);
+    pCallController->HandleIncoming(&objService, pSession);
 }
 
 TEST_F(MtcCallControllerTest, StartCallsTargetCall)

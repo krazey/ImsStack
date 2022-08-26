@@ -19,17 +19,17 @@
 
 #include "IMSTypeDef.h"
 #include "helper/ISrvccStateListener.h"
+#include "INativeEnabler.h"
 
 class AString;
 class ICoreService;
-class JniMtcService;
 class IMtcAosConnector;
 class ISrvccStateListener;
 enum class ServiceStatus;
 enum class ServiceType;
 enum class SrvccState;
 
-class IMtcService
+class IMtcService : public INativeEnabler
 {
 public:
     virtual ~IMtcService() {}
@@ -46,7 +46,6 @@ public:
     virtual IMtcAosConnector* GetAosConnector() const = 0;
 
     virtual void UpdateSrvccState(IN SrvccState eState) = 0;
-    virtual void SetJniService(IN JniMtcService* pJniService) = 0;
     virtual void SetTerminalBasedCallWaiting(IN IMS_BOOL bProvisioned, IN IMS_BOOL bEnabled) = 0;
     virtual IMS_BOOL IsTerminalBasedCallWaitingEnabled() const = 0;
     virtual void OpenEmergencyService() = 0;

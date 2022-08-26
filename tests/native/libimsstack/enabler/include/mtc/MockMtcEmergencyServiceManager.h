@@ -22,7 +22,7 @@
 #include "MtcEmergencyServiceManager.h"
 #include "IMtcService.h"
 
-class JniMtcServiceThread;
+class IJniMtcServiceThread;
 
 class MockMtcEmergencyServiceManager : public MtcEmergencyServiceManager
 {
@@ -32,7 +32,6 @@ public:
     {
     }
 
-    MOCK_METHOD(void, SetJniServiceThread, (IN JniMtcServiceThread*), (override));
     MOCK_METHOD(void, OpenEmergencyService, (), (override));
     MOCK_METHOD(void, HandleServiceStatus, (IN ServiceStatus), (override));
 };

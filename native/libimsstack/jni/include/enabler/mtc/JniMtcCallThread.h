@@ -23,75 +23,72 @@
 #include "MtcDef.h"
 #include <binder/Parcel.h>
 #include "ImsMap.h"
+#include "IJniMtcCallThread.h"
 
-struct JniCallInfo;
-struct CallReasonInfo;
 class MediaInfo;
 class SuppService;
+struct CallReasonInfo;
 struct ConfUser;
+struct JniCallInfo;
 
-class JniMtcCallThread final : public BaseServiceThread
+class JniMtcCallThread final : public BaseServiceThread, public IJniMtcCallThread
 {
 public:
     JniMtcCallThread();
     virtual ~JniMtcCallThread();
 
-    inline void SetSlotId(IN IMS_SINT32 nSlotId) { m_nSlotId = nSlotId; }
-
     void OnStarted(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void OnStartFailed(IN const CallReasonInfo& objReason);
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
+    void OnStartFailed(IN const CallReasonInfo& objReason) override;
     void OnProgressing(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN IMS_BOOL bAlerted = IMS_FALSE);
+            IN IMS_BOOL bAlerted = IMS_FALSE) override;
     void OnHeld(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void OnHoldFailed(IN const CallReasonInfo& objReason);
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
+    void OnHoldFailed(IN const CallReasonInfo& objReason) override;
     void OnResumed(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void OnResumeFailed(IN const CallReasonInfo& objReason);
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
+    void OnResumeFailed(IN const CallReasonInfo& objReason) override;
     void OnHeldBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices);
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
     void OnResumedBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void OnTerminated(IN const CallReasonInfo& objReason);
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
+    void OnTerminated(IN const CallReasonInfo& objReason) override;
     void OnIncomingResume(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices);
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
     void OnIncomingUpdate(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices);
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
     void OnUpdated(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void OnUpdateFailed(IN const CallReasonInfo& objReason);
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
+    void OnUpdateFailed(IN const CallReasonInfo& objReason) override;
     void OnUpdatedBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices);
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
 
     void OnMerged(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN const IMSList<ConfUser*>& objUsers);
-    void OnMergeFailed(IN const CallReasonInfo& objReason);
-    void OnConferenceParticipantAdded();
-    void OnConferenceParticipantAddFailed(IN const CallReasonInfo& objReason);
-    void OnConferenceParticipantRemoved();
-    void OnConferenceParticipantRemoveFailed(IN const CallReasonInfo& objReason);
+            IN const IMSList<ConfUser*>& objUsers) override;
+    void OnMergeFailed(IN const CallReasonInfo& objReason) override;
+    void OnConferenceParticipantAdded() override;
+    void OnConferenceParticipantAddFailed(IN const CallReasonInfo& objReason) override;
+    void OnConferenceParticipantRemoved() override;
+    void OnConferenceParticipantRemoveFailed(IN const CallReasonInfo& objReason) override;
     void OnConferenceInfoChanged(IN const AString& strDisplayText, IN const AString strSubject,
-            IN IMS_UINT32 nUserCount, IN IMS_UINT32 nMaxUserCount, IN const AString& strHost);
-    void OnConferenceParticipantsInfoChanged(IN const IMSList<ConfUser*>& objUsers);
+            IN IMS_UINT32 nUserCount, IN IMS_UINT32 nMaxUserCount,
+            IN const AString& strHost) override;
+    void OnConferenceParticipantsInfoChanged(IN const IMSList<ConfUser*>& objUsers) override;
 
-    void OnEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason);
+    void OnEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
 
     void OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN const JniCallInfo& objCallInfo,
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN ParticipantInfo* pParticipantInfo);
+            IN ParticipantInfo* pParticipantInfo) override;
 
     void OnInformationNotificationReceived(IN IMS_UINT32 nType, IN const AString strValue,
-            IN IMS_SINT32 nValue, IN IMS_BOOL bValue);
+            IN IMS_SINT32 nValue, IN IMS_BOOL bValue) override;
 
 private:
     void SetCallDetails(IN_OUT android::Parcel& objParcel, IN const JniCallInfo& objCallInfo,
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-
-private:
-    IMS_SINT32 m_nSlotId;
 };
 
 #endif

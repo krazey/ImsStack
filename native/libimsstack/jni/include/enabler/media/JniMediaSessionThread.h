@@ -21,10 +21,11 @@
 #include <MediaQualityThreshold.h>
 #include "BaseServiceThread.h"
 #include "IMMedia.h"
+#include "IJniMediaSessionThread.h"
 
 using namespace android::telephony::imsmedia;
 
-class JniMediaSessionThread final : public BaseServiceThread
+class JniMediaSessionThread final : public BaseServiceThread, public IJniMediaSessionThread
 {
 public:
     JniMediaSessionThread();

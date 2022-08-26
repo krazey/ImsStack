@@ -20,6 +20,8 @@
 #include "ImsList.h"
 #include "IMSTypeDef.h"
 
+class IJniMediaSessionThread;
+
 class IMediaManager
 {
 public:
@@ -30,8 +32,8 @@ public:
      * @param nCallKey The unique identification of call session
      * @param pThread The instance of JniMediaSessionThread
      */
-    virtual void SetJniMediaSessionThread(IN IMS_SINTP nCallKey,
-            IN JniMediaSessionThread* pThread) = 0;
+    virtual void SetJniMediaSessionThread(
+            IN IMS_SINTP nCallKey, IN IJniMediaSessionThread* pThread) = 0;
 
     /**
      * @brief Sends a message from java layer through jni interface

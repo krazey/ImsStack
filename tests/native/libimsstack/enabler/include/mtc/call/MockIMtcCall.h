@@ -29,9 +29,6 @@
 class IDialogEvent;
 class IMtcCallContext;
 class ISession;
-class JniMediaSessionThread;
-class JniMtcCallThread;
-class JniMtcServiceThread;
 class MediaInfo;
 class SuppService;
 enum class UpdateType;
@@ -43,10 +40,7 @@ class MockIMtcCall : public IMtcCall
 public:
     ~MockIMtcCall() {}
 
-    MOCK_METHOD(void, Attach,
-            (IN JniMtcCallThread * pJniMtcCallThread, IN JniMediaSessionThread* pJniMediaThread),
-            (override));
-    MOCK_METHOD(void, Detach, (), (override));
+    MOCK_METHOD(void, Attach, (), (override));
     MOCK_METHOD(void, Start,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
                     (IN const ImsMap<SuppType, SuppService*>& objSuppServices)),
@@ -60,8 +54,7 @@ public:
             (IN CallType eCallType, IN const AString& strTarget,
                     IN const ImsList<ConfUser*>& objUsers),
             (override));
-    MOCK_METHOD(void, HandleIncoming,
-            (IN ISession * piSession, IN JniMtcServiceThread* pServiceThread), (override));
+    MOCK_METHOD(void, HandleIncoming, (IN ISession * piSession), (override));
     MOCK_METHOD(void, HandleUserAlert, (), (override));
     MOCK_METHOD(void, Accept, (IN CallType eCallType, IN MediaInfo* pMediaInfo), (override));
     MOCK_METHOD(void, Reject, (IN const CallReasonInfo& objReason), (override));

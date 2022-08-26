@@ -29,7 +29,6 @@
 class AString;
 class IMessage;
 class IMtcCallContext;
-class JniMtcServiceThread;
 class MediaInfo;
 class SuppService;
 struct ConfUser;
@@ -53,14 +52,12 @@ public:
             IN const ImsList<ConfUser*>& lstUsers) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& lstUsers) override;
-    CallStateName HandleIncoming(
-            IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
+    CallStateName HandleIncoming(IN ISession* piSession) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
     CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult) override;
     CallStateName OnAttached() override;
 
-    CallStateName HandleIncomingUssi(
-            IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
+    CallStateName HandleIncomingUssi(IN ISession* piSession) override;
     CallStateName OnUssiAttached() override;
 
 private:

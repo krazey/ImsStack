@@ -25,6 +25,7 @@
 #include "MediaResourceMngr.h"
 #include "IMediaManager.h"
 
+class IJniMediaSessionThread;
 class JniMediaSession;
 
 class MediaManager : public ImsActivityEx, public IMediaManager
@@ -54,7 +55,8 @@ public:
     static MediaManager* GetInstance(IN IMS_SINT32 nSlotId = 0);
     static AString GetThreadName(IN IMS_SINT32 nSlotId);
     MediaMsgHandler* GetHandler(IN IMS_SINTP nCallKey);
-    virtual void SetJniMediaSessionThread(IN IMS_SINTP nCallKey, IN JniMediaSessionThread* pThread);
+    virtual void SetJniMediaSessionThread(
+            IN IMS_SINTP nCallKey, IN IJniMediaSessionThread* pThread);
     virtual void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
 
     /**
@@ -68,7 +70,7 @@ public:
      * @return MediaSession* created MediaSession instance
      */
     MediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP callKey,
-            IN JniMediaSessionThread* pThread);
+            IN IJniMediaSessionThread* pThread);
 
     /**
      * @brief Destroys the MediaSession instance

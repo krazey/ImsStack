@@ -30,8 +30,6 @@ class ISession;
 class ISipClientConnection;
 class ISipConnection;
 class ISipServerConnection;
-class JniMediaSessionThread;
-class JniMtcServiceThread;
 class MediaInfo;
 class MtcSession;
 enum class QosLossPolicy;
@@ -56,8 +54,7 @@ public:
             IN const ImsList<ConfUser*>& lstUsers) = 0;
     virtual CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& lstUsers) = 0;
-    virtual CallStateName HandleIncoming(
-            IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) = 0;
+    virtual CallStateName HandleIncoming(IN ISession* piSession) = 0;
     virtual CallStateName HandleUserAlert() = 0;
     virtual CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
     virtual CallStateName Reject(IN const CallReasonInfo& objReason) = 0;
@@ -75,8 +72,7 @@ public:
     virtual CallStateName HandleSrvccFailure(IN UpdateType eUpdateType) = 0;
     virtual CallStateName HandleIpcanChanged() = 0;
 
-    virtual CallStateName HandleIncomingUssi(
-            IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) = 0;
+    virtual CallStateName HandleIncomingUssi(IN ISession* piSession) = 0;
     virtual CallStateName OnUssiAttached() = 0;
     virtual CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
     virtual CallStateName UssiStarted(IN ISession* piSession) = 0;

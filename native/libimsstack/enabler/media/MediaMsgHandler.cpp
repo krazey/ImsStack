@@ -40,7 +40,7 @@ void MediaMsgHandler::SetListener(IN CONST AString& strName)
 }
 
 PUBLIC
-void MediaMsgHandler::SetJniMediaSessionThread(IN JniMediaSessionThread* pThread)
+void MediaMsgHandler::SetJniMediaSessionThread(IN IJniMediaSessionThread* pThread)
 {
     m_pThread = pThread;
 }

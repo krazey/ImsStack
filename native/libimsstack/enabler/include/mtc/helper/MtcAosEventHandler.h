@@ -25,7 +25,7 @@ class AString;
 class IMtcCallController;
 class MtcConfigurationProxy;
 class IMtcService;
-class JniMtcServiceThread;
+class IJniMtcServiceThread;
 class MtcEmergencyServiceManager;
 
 class MtcAosEventHandler
@@ -38,12 +38,12 @@ public:
     MtcAosEventHandler& operator=(IN const MtcAosEventHandler&) = delete;
 
     virtual void OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
-            IN JniMtcServiceThread* pServiceThread,
+            IN IJniMtcServiceThread* pServiceThread,
             IN MtcEmergencyServiceManager* pEmergencyServiceManager,
             IN IMtcCallController& objCallController);
     virtual void OnDisconnecting(IN IMS_UINT32 nReason, IN IMtcCallController& objCallController);
     virtual void OnDisconnected(IN IMS_UINT32 nReason, IN IMtcCallController& objCallController,
-            IN JniMtcServiceThread* pServiceThread,
+            IN IJniMtcServiceThread* pServiceThread,
             IN MtcEmergencyServiceManager* pEmergencyServiceManager);
     virtual void OnSuspended(IN IMS_UINT32 nReason, IN IMtcCallController& objCallController);
     virtual void OnResumed();

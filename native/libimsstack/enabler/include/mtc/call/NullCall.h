@@ -24,7 +24,6 @@
 
 class AString;
 class ISession;
-class JniMtcServiceThread;
 class MediaInfo;
 class SuppService;
 struct CallReasonInfo;
@@ -41,8 +40,7 @@ public:
     NullCall(IN const NullCall&) = delete;
     NullCall& operator=(IN const NullCall&) = delete;
 
-    inline void Attach(IN JniMtcCallThread*, IN JniMediaSessionThread*) override {}
-    inline void Detach() override {}
+    inline void Attach() override {}
 
     inline void Start(IN CallType, IN const AString&, IN MediaInfo*,
             IN const ImsMap<SuppType, SuppService*>&) override
@@ -57,7 +55,7 @@ public:
             IN CallType, IN const AString&, IN const ImsList<ConfUser*>&) override
     {
     }
-    inline void HandleIncoming(IN ISession*, IN JniMtcServiceThread*) override {}
+    inline void HandleIncoming(IN ISession*) override {}
     inline void HandleUserAlert() override {}
     inline void Accept(IN CallType, IN MediaInfo*) override {}
     inline void Reject(IN const CallReasonInfo&) override {}

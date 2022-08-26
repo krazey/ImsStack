@@ -17,8 +17,6 @@
 #include <memory>
 #include <gtest/gtest.h>
 #include "CallReasonInfo.h"
-#include "JniMtcCallThread.h"
-#include "JniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
@@ -44,7 +42,6 @@
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
-#include "media/JniMediaSessionThread.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/MockISipClientConnection.h"
 #include "sipcore/MockISipConnection.h"
@@ -122,20 +119,6 @@ protected:
     }
 };
 
-TEST_F(MtcCallTest, AttachSetUiNotifierThreads)
-{
-    MockIMtcCallState* pState = new MockIMtcCallState();
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-    JniMtcCallThread* pJniMtcCallThread = reinterpret_cast<JniMtcCallThread*>(0x1);
-    JniMediaSessionThread* pJniMediaSessionThread = reinterpret_cast<JniMediaSessionThread*>(0x2);
-
-    objCall.Attach(pJniMtcCallThread, pJniMediaSessionThread);
-
-    EXPECT_EQ(pJniMtcCallThread, objCall.GetUiNotifier().GetJniCallThread());
-    EXPECT_EQ(pJniMediaSessionThread, objCall.GetUiNotifier().GetJniMediaThread());
-}
-
 TEST_F(MtcCallTest, AttachNotCallsStateForMo)
 {
     objCallInfo.ePeerType = PeerType::MO;
@@ -147,10 +130,8 @@ TEST_F(MtcCallTest, AttachNotCallsStateForMo)
             .Times(0);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-    JniMtcCallThread* pJniMtcCallThread = reinterpret_cast<JniMtcCallThread*>(0x1);
-    JniMediaSessionThread* pJniMediaSessionThread = reinterpret_cast<JniMediaSessionThread*>(0x2);
 
-    objCall.Attach(pJniMtcCallThread, pJniMediaSessionThread);
+    objCall.Attach();
 }
 
 TEST_F(MtcCallTest, AttachCallsStateForMt)
@@ -162,10 +143,8 @@ TEST_F(MtcCallTest, AttachCallsStateForMt)
             .Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-    JniMtcCallThread* pJniMtcCallThread = reinterpret_cast<JniMtcCallThread*>(0x1);
-    JniMediaSessionThread* pJniMediaSessionThread = reinterpret_cast<JniMediaSessionThread*>(0x2);
 
-    objCall.Attach(pJniMtcCallThread, pJniMediaSessionThread);
+    objCall.Attach();
 }
 
 TEST_F(MtcCallTest, AttachCallsStateForMtUssi)
@@ -178,37 +157,8 @@ TEST_F(MtcCallTest, AttachCallsStateForMtUssi)
             .Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-    JniMtcCallThread* pJniMtcCallThread = reinterpret_cast<JniMtcCallThread*>(0x1);
-    JniMediaSessionThread* pJniMediaSessionThread = reinterpret_cast<JniMediaSessionThread*>(0x2);
 
-    objCall.Attach(pJniMtcCallThread, pJniMediaSessionThread);
-}
-
-TEST_F(MtcCallTest, AttachFailsIfJniMtcCallThreadIsNull)
-{
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, OnInternalFailure)
-            .Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-    JniMediaSessionThread* pJniMediaSessionThread = reinterpret_cast<JniMediaSessionThread*>(0x2);
-
-    objCall.Attach(IMS_NULL, pJniMediaSessionThread);
-}
-
-TEST_F(MtcCallTest, DetachUnsetUiNotifierCallThread)
-{
-    MockIMtcCallState* pState = new MockIMtcCallState();
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-    JniMtcCallThread* pJniMtcCallThread = reinterpret_cast<JniMtcCallThread*>(0x1);
-    JniMediaSessionThread* pJniMediaSessionThread = reinterpret_cast<JniMediaSessionThread*>(0x2);
-    objCall.Attach(pJniMtcCallThread, pJniMediaSessionThread);
-
-    objCall.Detach();
-
-    EXPECT_EQ(IMS_NULL, objCall.GetUiNotifier().GetJniCallThread());
-    EXPECT_EQ(pJniMediaSessionThread, objCall.GetUiNotifier().GetJniMediaThread());
+    objCall.Attach();
 }
 
 TEST_F(MtcCallTest, StartCallsState)
@@ -318,15 +268,14 @@ TEST_F(MtcCallTest, StartConference3CallsState)
 TEST_F(MtcCallTest, HandleIncomingCallsState)
 {
     MockISession objSession;
-    JniMtcServiceThread* pServiceThread = reinterpret_cast<JniMtcServiceThread*>(0x1);
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleIncoming(&objSession, pServiceThread))
+    EXPECT_CALL(*pState, HandleIncoming(&objSession))
             .Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.HandleIncoming(&objSession, pServiceThread);
+    objCall.HandleIncoming(&objSession);
 }
 
 TEST_F(MtcCallTest, HandleIncomingCallsStateForUssi)
@@ -350,52 +299,26 @@ TEST_F(MtcCallTest, HandleIncomingCallsStateForUssi)
     ON_CALL(objSession, GetPreviousRequest(_))
             .WillByDefault(Return(&objUssiMessage));
 
-    JniMtcServiceThread* pServiceThread = reinterpret_cast<JniMtcServiceThread*>(0x1);
-
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleIncomingUssi(&objSession, pServiceThread))
+    EXPECT_CALL(*pState, HandleIncomingUssi(&objSession))
             .Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.HandleIncoming(&objSession, pServiceThread);
+    objCall.HandleIncoming(&objSession);
 }
 
 TEST_F(MtcCallTest, HandleIncomingFailsIfSessionIsNull)
 {
-    JniMtcServiceThread* pServiceThread = reinterpret_cast<JniMtcServiceThread*>(0x1);
-
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleIncoming(_, _))
+    EXPECT_CALL(*pState, HandleIncoming(_))
             .Times(0);
     EXPECT_CALL(*pState, OnInternalFailure)
             .Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.HandleIncoming(IMS_NULL, pServiceThread);
-}
-
-TEST_F(MtcCallTest, HandleIncomingFailsIfServiceThreadIsNull)
-{
-    MockISession objSession;
-    EXPECT_CALL(objSession, Reject(SipStatusCode::SC_488))
-            .Times(1);
-
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(&objSession))
-            .Times(1);
-    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession, _))
-            .Times(1);
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleIncoming(_, _))
-            .Times(0);
-    EXPECT_CALL(*pState, OnInternalFailure)
-            .Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.HandleIncoming(&objSession, IMS_NULL);
+    objCall.HandleIncoming(IMS_NULL);
 }
 
 TEST_F(MtcCallTest, HandleUserAlertCallsState)
@@ -1914,7 +1837,7 @@ TEST_F(MtcCallTest, SessionForkedResponseReceivedFailsIfSessionIsNull)
             .Times(1);
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleIncoming(_, _))
+    EXPECT_CALL(*pState, HandleIncoming(_))
             .Times(0);
     EXPECT_CALL(*pState, OnInternalFailure)
             .Times(1);
@@ -1936,7 +1859,7 @@ TEST_F(MtcCallTest, SessionForkedResponseReceivedFailsIfForkedSessionIsNull)
             .Times(1);
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleIncoming(_, _))
+    EXPECT_CALL(*pState, HandleIncoming(_))
             .Times(0);
     EXPECT_CALL(*pState, OnInternalFailure)
             .Times(1);

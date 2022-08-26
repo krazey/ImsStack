@@ -61,8 +61,7 @@ PUBLIC VIRTUAL void MtcCallState::OnEnter() {}
 
 PUBLIC VIRTUAL void MtcCallState::OnExit() {}
 
-PUBLIC VIRTUAL CallStateName MtcCallState::HandleIncoming(
-        IN ISession* /* piSession */, IN JniMtcServiceThread* /*pServiceThread*/)
+PUBLIC VIRTUAL CallStateName MtcCallState::HandleIncoming(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
@@ -189,8 +188,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::HandleIpcanChanged()
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::HandleIncomingUssi(
-        IN ISession* /* piSession */, IN JniMtcServiceThread* /* pServiceThread */)
+PUBLIC VIRTUAL CallStateName MtcCallState::HandleIncomingUssi(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
@@ -520,7 +518,7 @@ void MtcCallState::InitMediaSession()
 {
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
 
-    objMediaManager.CreateMediaSession(m_objContext.GetUiNotifier().GetJniMediaThread());
+    objMediaManager.CreateMediaSession();
 
     objMediaManager.CreateMediaProfile(
             &m_objContext.GetSession()->GetISession(), IMS_FALSE, IMS_TRUE);

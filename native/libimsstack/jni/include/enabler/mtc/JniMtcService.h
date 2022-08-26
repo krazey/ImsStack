@@ -19,9 +19,11 @@
 
 #include "BaseService.h"
 #include "IMSTypeDef.h"
-#include "JniMtcServiceThread.h"
+#include "IJniEnabler.h"
 
 class IMtcService;
+class IJniEnablerThread;
+class JniMtcServiceThread;
 
 class JniMtcService : public BaseService
 {
@@ -33,24 +35,22 @@ public:
 
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
 
-    void SetMtcService(IN IMtcService* piMtcService);
-
-    JniMtcServiceThread* GetThread();
+    inline void NotifyNativeEnablerSet() override {}
+    IJniEnablerThread* GetJniThread() const override;
 
 protected:
     void HandleMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel) override;
 
 private:
     void Attach();
+    IMtcService* GetNativeService();
     void NotifySrvccStateChanged(IN const android::Parcel& objParcel);
     void SetTerminalBasedCallWaiting(IN const android::Parcel& objParcel);
     void OpenEmergencyService(IN const android::Parcel& objParcel);
 
 private:
     JniMtcServiceThread* m_pThread;
-    AString m_strThreadName;
     IMS_SINT32 m_nSlotId;
-    IMtcService* m_piMtcService;
 };
 
 #endif

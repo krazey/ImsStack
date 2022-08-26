@@ -24,7 +24,6 @@ class IMediaQosEventListener;
 class IMediaReportEventListener;
 class IMessage;
 class ISession;
-class JniMediaSessionThread;
 class MediaInfo;
 enum class CallType;
 enum class MediaState;
@@ -60,9 +59,8 @@ public:
     /**
      * @brief This method is to create a media session for the operation related to Media. And set
      *        the media environment which has NetworkType, ServiceType, and CoreService.
-     * @param pJniMediaThread It is delivered to MediaManager for connecting JNI and native Media.
      */
-    virtual void CreateMediaSession(IN JniMediaSessionThread* pJniMediaThread) = 0;
+    virtual void CreateMediaSession() = 0;
 
     /**
      * @brief This method is to destroy a media session through MediaManager.

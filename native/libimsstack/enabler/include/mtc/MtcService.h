@@ -29,11 +29,10 @@
 #include "MtcRoutingRejectHandler.h"
 #include "helper/MtcAosConnector.h"
 
-class JniMtcService;
-class JniMtcServiceThread;
 class IMtcAosConnector;
 class MtcAosEventHandler;
 class SrvccEventHandler;
+class IJniMtcServiceThread;
 
 class MtcService :
         public ImsService,
@@ -61,13 +60,14 @@ public:
     inline IMtcAosConnector* GetAosConnector() const override { return m_pAosConnector; }
 
     void UpdateSrvccState(IN SrvccState eState) override;
-    void SetJniService(IN JniMtcService* pJniService) override;
     void SetTerminalBasedCallWaiting(IN IMS_BOOL bProvisioned, IN IMS_BOOL bEnabled) override;
     IMS_BOOL IsTerminalBasedCallWaitingEnabled() const override
     {
         return m_bTerminalBasedCallWaitingEnabled;
     }
     void OpenEmergencyService() override;
+
+    inline void NotifyJniEnablerSet() override {}
 
     // ICoreServiceListener implementation
     inline void CoreService_PageMessageReceived(
@@ -99,6 +99,7 @@ private:
     AString GetServiceName(IN ServiceType eType) const;
     void AttachCoreServiceInterface();
     void AttachAosInterface();
+    IJniMtcServiceThread* GetJniThread();
     void SetServiceFilterCriteria();
     void SetAosReady(IN IMS_BOOL);
 
@@ -111,7 +112,6 @@ protected:
     MtcAosConnector* m_pAosConnector;
     MtcAosEventHandler* m_pAosEventHandler;
     SrvccEventHandler* m_pSrvccEventHandler;
-    JniMtcService* m_pJniService;
     MtcRoutingRejectHandler* m_pRoutingRejectHandler;
     IMS_BOOL m_bTerminalBasedCallWaitingEnabled;
 };

@@ -27,9 +27,6 @@
 class IMtcCallManager;
 class IMtcContext;
 class ISession;
-class JniMediaSessionThread;
-class JniMtcCallThread;
-class JniMtcServiceThread;
 enum class KeyType;
 struct ConfUser;
 union Key;
@@ -46,15 +43,14 @@ public:
     MtcCallController(IN const MtcCallController&) = delete;
     MtcCallController& operator=(IN const MtcCallController&) = delete;
 
+    inline void NotifyJniEnablerSet() override {}
+
     void TerminateCalls(
             IN KeyType eKeyType, IN Key nKey, IN const CallReasonInfo& objReason) override;
     void RemoveCalls(IN KeyType eKeyType, IN Key nKey) override;
     CallKey Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo) override;
-    void Attach(IN CallKey nCallKey, IN JniMtcCallThread* pJniMtcCallThread,
-            IN JniMediaSessionThread* pJniMediaThread) override;
-    void Detach(IN CallKey nCallKey) override;
-    void HandleIncoming(IN IMtcService* pService, IN ISession* piSession,
-            IN JniMtcServiceThread* pServiceThread) override;
+    void Attach(IN CallKey nCallKey) override;
+    void HandleIncoming(IN IMtcService* pService, IN ISession* piSession) override;
     void Start(IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN IDialogEvent* pDialog) override;

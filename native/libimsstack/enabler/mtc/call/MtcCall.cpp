@@ -85,21 +85,12 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
     m_objPendingOperation = {};
 }
 
-PUBLIC VIRTUAL void MtcCall::HandleIncoming(
-        IN ISession* piSession, IN JniMtcServiceThread* pServiceThread)
+PUBLIC VIRTUAL void MtcCall::HandleIncoming(IN ISession* piSession)
 {
     IMS_TRACE_I("HandleIncoming : key[%d]", m_nKey, 0, 0);
 
-    if (piSession == IMS_NULL || pServiceThread == IMS_NULL)
+    if (piSession == IMS_NULL)
     {
-        if (piSession != IMS_NULL)
-        {
-            IMS_TRACE_E(0, "pServiceThread is NULL", 0, 0, 0);
-            // based on 3GPP 24.237 8.2
-            piSession->Reject(SipStatusCode::SC_488);
-            GetSipInterfaceFactory().GetISessionHolder()->AddISession(piSession);
-            GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(piSession);
-        }
         OnInternalFailure();
         return;
     }
@@ -111,7 +102,7 @@ PUBLIC VIRTUAL void MtcCall::HandleIncoming(
         m_objStateMachine.RunStateOperation(
                 [&](IMtcCallState* pState)
                 {
-                    return pState->HandleIncomingUssi(piSession, pServiceThread);
+                    return pState->HandleIncomingUssi(piSession);
                 });
     }
     else
@@ -119,36 +110,19 @@ PUBLIC VIRTUAL void MtcCall::HandleIncoming(
         m_objStateMachine.RunStateOperation(
                 [&](IMtcCallState* pState)
                 {
-                    return pState->HandleIncoming(piSession, pServiceThread);
+                    return pState->HandleIncoming(piSession);
                 });
     }
 }
 
-PUBLIC VIRTUAL void MtcCall::Attach(
-        IN JniMtcCallThread* pJniMtcCallThread, IN JniMediaSessionThread* pJniMediaThread)
+PUBLIC VIRTUAL void MtcCall::Attach()
 {
     IMS_TRACE_I("Attach : key[%d]", m_nKey, 0, 0);
-
-    if (pJniMtcCallThread == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
-
-    // TODO: will be removed and JniConnector will provide the getters.
-    m_objUiNotifier.SetJniCallThread(pJniMtcCallThread);
-    m_objUiNotifier.SetJniMediaThread(pJniMediaThread);
 
     if (m_objCallInfo.ePeerType == PeerType::MT)
     {
         OnAttached();
     }
-}
-
-PUBLIC VIRTUAL void MtcCall::Detach()
-{
-    IMS_TRACE_I("Detach : key[%d]", m_nKey, 0, 0);
-    m_objUiNotifier.SetJniCallThread(IMS_NULL);
 }
 
 PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strTarget,

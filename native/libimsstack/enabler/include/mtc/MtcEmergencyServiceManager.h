@@ -20,8 +20,6 @@
 #include "IMtcContext.h"
 #include "IuMtcService.h"
 
-class JniMtcServiceThread;
-
 class MtcEmergencyServiceManager
 {
 public:
@@ -30,10 +28,6 @@ public:
     MtcEmergencyServiceManager(IN const MtcEmergencyServiceManager&) = delete;
     MtcEmergencyServiceManager& operator=(IN const MtcEmergencyServiceManager&) = delete;
 
-    virtual inline void SetJniServiceThread(IN JniMtcServiceThread* pThread)
-    {
-        m_pServiceThread = pThread;
-    }
     virtual void OpenEmergencyService();
     virtual void HandleServiceStatus(IN ServiceStatus eStatus);
 
@@ -47,9 +41,7 @@ private:
 
 private:
     IMtcContext& m_objContext;
-    JniMtcServiceThread* m_pServiceThread;
     IuMtcService::EmergencyServiceState m_eState;
-
 };
 
 #endif

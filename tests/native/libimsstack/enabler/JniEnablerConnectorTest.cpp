@@ -19,9 +19,7 @@
 #include "interface/MockIJniEnabler.h"
 #include "interface/MockINativeEnabler.h"
 
-using ::testing::_;
 using ::testing::Return;
-using ::testing::ReturnRef;
 
 namespace android
 {

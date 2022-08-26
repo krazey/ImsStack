@@ -66,7 +66,7 @@ public:
     virtual void RestoreMediaInfo() override;
 
     /* MediaSession */
-    virtual void CreateMediaSession(IN JniMediaSessionThread* pJniMediaThread) override;
+    virtual void CreateMediaSession() override;
     virtual void DestroyMediaSession() override;
 
     /* Media Profile */

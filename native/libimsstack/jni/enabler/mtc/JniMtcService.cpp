@@ -20,16 +20,16 @@
 #include "EnablerUtils.h"
 
 #include "IuMtcService.h"
-#include "JniConnectorFactory.h"
 #include "JniMtcService.h"
 #include "JniMtcServiceThread.h"
+#include "JniEnablerConnector.h"
+#include "IJniEnablerThread.h"
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
 
 JniMtcService::JniMtcService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId) :
         m_pThread(IMS_NULL),
-        m_nSlotId(nSlotId),
-        m_piMtcService(IMS_NULL)
+        m_nSlotId(nSlotId)
 {
     IMS_TRACE_D("+JniMtcService SlotId[%d]", m_nSlotId, 0, 0);
 
@@ -40,16 +40,11 @@ JniMtcService::~JniMtcService()
 {
     IMS_TRACE_D("~JniMtcService", 0, 0, 0);
 
-    if (m_pThread != IMS_NULL)
+    if (m_pThread)
     {
-        ImsProcess::GetInstance()->UnloadAppThread(m_strThreadName);
-        m_pThread = IMS_NULL;
+        ImsProcess::GetInstance()->UnloadAppThread(m_pThread->GetName());
     }
-
-    if (m_piMtcService)
-    {
-        m_piMtcService->SetJniService(IMS_NULL);
-    }
+    JniEnablerConnector::GetInstance().SetJniEnabler(m_nSlotId, EnablerType::MTC_SERVICE, IMS_NULL);
 }
 
 PUBLIC VIRTUAL int JniMtcService::SendData(IN const android::Parcel& objParcel)
@@ -75,15 +70,16 @@ void JniMtcService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
     {
         return;
     }
-    m_strThreadName.Sprintf("JniMtcServiceThread_%08" PFLS_x, reinterpret_cast<IMS_SINTP>(this));
+    AString strThreadName;
+    strThreadName.Sprintf("JniMtcServiceThread_%08" PFLS_x, reinterpret_cast<IMS_SINTP>(this));
 
     IMS_TRACE_D("Initialize()", 0, 0, 0);
     auto fnEntry = []() -> BaseThread*
     {
         return new JniMtcServiceThread();
     };
-    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry, m_nSlotId);
-    m_pThread = (JniMtcServiceThread*)(ImsProcess::GetInstance()->GetThread(m_strThreadName));
+    ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, m_nSlotId);
+    m_pThread = (JniMtcServiceThread*)(ImsProcess::GetInstance()->GetThread(strThreadName));
 
     if (m_pThread == IMS_NULL)
     {
@@ -91,21 +87,15 @@ void JniMtcService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
         return;
     }
     IMS_TRACE_D("Initialize()", 0, 0, 0);
-    m_pThread->SetSlotId(m_nSlotId);
     m_pThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pfnSendDataToJava);
     Attach();
 }
 
 PUBLIC
-void JniMtcService::SetMtcService(IN IMtcService* piMtcService)
+IJniEnablerThread* JniMtcService::GetJniThread() const
 {
-    m_piMtcService = piMtcService;
-}
-
-PUBLIC
-JniMtcServiceThread* JniMtcService::GetThread()
-{
-    return m_pThread;
+    IMS_TRACE_D("GetJniThread()", 0, 0, 0);
+    return DYNAMIC_CAST(IJniEnablerThread*, m_pThread);
 }
 
 PROTECTED VIRTUAL void JniMtcService::HandleMessage(
@@ -132,37 +122,47 @@ PROTECTED VIRTUAL void JniMtcService::HandleMessage(
 PRIVATE
 void JniMtcService::Attach()
 {
-    if (m_piMtcService)
-    {
-        IMS_TRACE_E(0, "duplicated Attaching", 0, 0, 0);
-        return;
-    }
+    JniEnablerConnector::GetInstance().SetJniEnabler(m_nSlotId, EnablerType::MTC_SERVICE, this);
+}
 
-    m_piMtcService = JniConnectorFactory::GetInstance()
-                             ->GetMtcServiceConnector(m_nSlotId)
-                             ->GetEnablerService();
-    if (m_piMtcService)
-    {
-        m_piMtcService->SetJniService(this);
-    }
+PRIVATE
+IMtcService* JniMtcService::GetNativeService()
+{
+    return DYNAMIC_CAST(IMtcService*, JniEnablerConnector::GetInstance().GetNativeEnabler(
+            m_nSlotId, EnablerType::MTC_SERVICE));
 }
 
 PRIVATE
 void JniMtcService::NotifySrvccStateChanged(IN const android::Parcel& objParcel)
 {
-    m_piMtcService->UpdateSrvccState(static_cast<SrvccState>(objParcel.readInt32()));
+    IMtcService* piNativeService = GetNativeService();
+    if (piNativeService == IMS_NULL)
+    {
+        return;
+    }
+    piNativeService->UpdateSrvccState(static_cast<SrvccState>(objParcel.readInt32()));
 }
 
 PRIVATE
 void JniMtcService::SetTerminalBasedCallWaiting(IN const android::Parcel& objParcel)
 {
+    IMtcService* piNativeService = GetNativeService();
+    if (piNativeService == IMS_NULL)
+    {
+        return;
+    }
     IMS_BOOL bProvisioned = (objParcel.readInt32() == 1) ? IMS_TRUE : IMS_FALSE;
     IMS_BOOL bEnabled = (objParcel.readInt32() == 1) ? IMS_TRUE : IMS_FALSE;
-    m_piMtcService->SetTerminalBasedCallWaiting(bProvisioned, bEnabled);
+    piNativeService->SetTerminalBasedCallWaiting(bProvisioned, bEnabled);
 }
 
 PRIVATE
 void JniMtcService::OpenEmergencyService(IN const android::Parcel& /* objParcel */)
 {
-    m_piMtcService->OpenEmergencyService();
+    IMtcService* piNativeService = GetNativeService();
+    if (piNativeService == IMS_NULL)
+    {
+        return;
+    }
+    piNativeService->OpenEmergencyService();
 }

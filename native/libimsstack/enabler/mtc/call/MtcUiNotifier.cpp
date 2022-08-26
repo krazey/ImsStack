@@ -16,19 +16,18 @@
 
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
-#include "JniMtcCallThread.h"
-#include "JniMtcServiceThread.h"
+#include "IJniMtcCallThread.h"
 #include "call/IMtcCallContext.h"
 #include "call/MtcUiNotifier.h"
 #include "ServiceTrace.h"
+#include "JniEnablerConnector.h"
+#include "IJniMtcServiceThread.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcUiNotifier::MtcUiNotifier(IN IMtcCallContext& objContext) :
-        m_objContext(objContext),
-        m_pCallThread(IMS_NULL),
-        m_pServiceThread(IMS_NULL)
+        m_objContext(objContext)
 {
 }
 
@@ -38,13 +37,24 @@ MtcUiNotifier::~MtcUiNotifier() {}
 PUBLIC
 void MtcUiNotifier::SendPreIncomingCallReceived(IN CallKey nKey)
 {
-    if (!m_pServiceThread)
+    IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
+            m_objContext.GetSlotId(), EnablerType::MTC_SERVICE);
+    if (piJniEnabler == IMS_NULL)
     {
-        IMS_TRACE_E(0, "SendPreIncomingCallReceived : Not available", 0, 0, 0);
+        IMS_TRACE_E(0, "JniMtcService is null", 0, 0, 0);
         return;
     }
 
-    m_pServiceThread->OnPreIncomingCallReceived(nKey);
+    IJniMtcServiceThread* piServiceThread =
+            reinterpret_cast<IJniMtcServiceThread*>(piJniEnabler->GetJniThread());
+
+    if (piServiceThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "JniMtcServiceThread is null", 0, 0, 0);
+        return;
+    }
+
+    piServiceThread->OnPreIncomingCallReceived(nKey);
 }
 
 PUBLIC
@@ -52,7 +62,8 @@ void MtcUiNotifier::SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCa
         IN MediaInfo& objMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
         IN ParticipantInfo& objParticipantInfo)
 {
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         IMS_TRACE_E(0, "SendIncomingCallReceived : Not available", 0, 0, 0);
         return;
@@ -61,7 +72,7 @@ void MtcUiNotifier::SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCa
     JniCallInfo objJniCallInfo = m_objContext.CreateJniCallInfo();
     objJniCallInfo.bUssi = objCallInfo.bUssi;
 
-    m_pCallThread->OnIncomingCallReceived(
+    piThread->OnIncomingCallReceived(
             nKey, objJniCallInfo, &objMediaInfo, objSuppServices, &objParticipantInfo);
 }
 
@@ -71,12 +82,13 @@ void MtcUiNotifier::SendStarted(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMed
 {
     IMS_TRACE_I("SendStarted", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnStarted(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnStarted(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -84,12 +96,13 @@ void MtcUiNotifier::SendStartFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendStartFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnStartFailed(objReason);
+    piThread->OnStartFailed(objReason);
 }
 
 PUBLIC
@@ -99,12 +112,13 @@ void MtcUiNotifier::SendProgressing(IN CallInfo* /* pCallInfo */, IN MediaInfo* 
 {
     IMS_TRACE_I("SendProgressing", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnProgressing(
+    piThread->OnProgressing(
             m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices, bAlerted);
 }
 
@@ -114,12 +128,13 @@ void MtcUiNotifier::SendHeld(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaI
 {
     IMS_TRACE_I("SendHeld", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnHeld(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnHeld(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -127,12 +142,13 @@ void MtcUiNotifier::SendHoldFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendHoldFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnHoldFailed(objReason);
+    piThread->OnHoldFailed(objReason);
 }
 
 PUBLIC
@@ -141,12 +157,13 @@ void MtcUiNotifier::SendResumed(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMed
 {
     IMS_TRACE_I("SendResumed", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnResumed(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnResumed(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -154,12 +171,13 @@ void MtcUiNotifier::SendResumeFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendResumeFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnResumeFailed(objReason);
+    piThread->OnResumeFailed(objReason);
 }
 
 PUBLIC
@@ -168,12 +186,13 @@ void MtcUiNotifier::SendHeldBy(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMedi
 {
     IMS_TRACE_I("SendHeldBy", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnHeldBy(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnHeldBy(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -182,12 +201,13 @@ void MtcUiNotifier::SendResumedBy(IN CallInfo* /* pCallInfo */, IN MediaInfo* pM
 {
     IMS_TRACE_I("SendResumedBy", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnResumedBy(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnResumedBy(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -195,12 +215,13 @@ void MtcUiNotifier::SendTerminated(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendTerminated : %s", _TRACE_CR_(objReason), 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnTerminated(objReason);
+    piThread->OnTerminated(objReason);
 }
 
 PUBLIC
@@ -209,12 +230,13 @@ void MtcUiNotifier::SendIncomingResume(IN CallInfo* /* pCallInfo */, IN MediaInf
 {
     IMS_TRACE_I("SendIncomingResume", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnIncomingResume(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnIncomingResume(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -223,7 +245,8 @@ void MtcUiNotifier::SendIncomingUpdate(IN CallType eCallTypeToUpdate, IN CallInf
 {
     IMS_TRACE_I("SendIncomingUpdate", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
@@ -231,7 +254,7 @@ void MtcUiNotifier::SendIncomingUpdate(IN CallType eCallTypeToUpdate, IN CallInf
     JniCallInfo objJniCallInfo = m_objContext.CreateJniCallInfo();
     objJniCallInfo.eCallType = eCallTypeToUpdate;
 
-    m_pCallThread->OnIncomingUpdate(objJniCallInfo, pMediaInfo, objSuppServices);
+    piThread->OnIncomingUpdate(objJniCallInfo, pMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -240,12 +263,13 @@ void MtcUiNotifier::SendUpdated(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMed
 {
     IMS_TRACE_I("SendUpdated", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnUpdated(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnUpdated(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -253,12 +277,13 @@ void MtcUiNotifier::SendUpdateFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendUpdateFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnUpdateFailed(objReason);
+    piThread->OnUpdateFailed(objReason);
 }
 
 PUBLIC
@@ -267,12 +292,13 @@ void MtcUiNotifier::SendUpdatedBy(IN CallInfo* /* pCallInfo */, IN MediaInfo* pM
 {
     IMS_TRACE_I("SendUpdatedBy", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnUpdatedBy(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnUpdatedBy(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -283,12 +309,13 @@ void MtcUiNotifier::SendNotifyInfo(IN IMS_UINT32 eType,
     IMS_TRACE_I("SendNotifyInfo : Type[%d]", eType, 0, 0);
     IMS_TRACE_D("SendNotifyInfo : [%s][%d][%s]", strValue.GetStr(), nValue, _TRACE_B_(bValue));
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnInformationNotificationReceived(eType, strValue, nValue, bValue);
+    piThread->OnInformationNotificationReceived(eType, strValue, nValue, bValue);
 }
 
 PUBLIC
@@ -297,7 +324,8 @@ void MtcUiNotifier::SendExpanded(IN CallInfo* /*pCallInfo*/, IN MediaInfo* /*pMe
 {
     IMS_TRACE_I("SendExpanded", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
@@ -308,7 +336,8 @@ void MtcUiNotifier::SendExpandFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendExpandFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
@@ -321,7 +350,8 @@ void MtcUiNotifier::SendExpandedBy(IN CallInfo* /*pCallInfo*/, IN MediaInfo* /*p
 {
     IMS_TRACE_I("SendExpandedBy", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
@@ -334,13 +364,13 @@ void MtcUiNotifier::SendMerged(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMedi
 {
     IMS_TRACE_I("SendMerged", 0, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnMerged(
-            m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices, lstConfUser);
+    piThread->OnMerged(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices, lstConfUser);
 }
 
 PUBLIC
@@ -348,12 +378,13 @@ void MtcUiNotifier::SendMergeFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendMergeFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnMergeFailed(objReason);
+    piThread->OnMergeFailed(objReason);
 }
 
 PUBLIC
@@ -361,18 +392,19 @@ void MtcUiNotifier::SendJoined(IN IMS_BOOL bResult, IN const CallReasonInfo& obj
 {
     IMS_TRACE_I("SendJoined : Result[%s] %s", _TRACE_B_(bResult), _TRACE_CR_(objReason), 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
     if (bResult)
     {
-        m_pCallThread->OnConferenceParticipantAdded();
+        piThread->OnConferenceParticipantAdded();
     }
     else
     {
-        m_pCallThread->OnConferenceParticipantAddFailed(objReason);
+        piThread->OnConferenceParticipantAddFailed(objReason);
     }
 }
 
@@ -381,18 +413,19 @@ void MtcUiNotifier::SendDropped(IN IMS_BOOL bResult, IN const CallReasonInfo& ob
 {
     IMS_TRACE_I("SendDropped : Result[%s] %s", _TRACE_B_(bResult), _TRACE_CR_(objReason), 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
     if (bResult)
     {
-        m_pCallThread->OnConferenceParticipantRemoved();
+        piThread->OnConferenceParticipantRemoved();
     }
     else
     {
-        m_pCallThread->OnConferenceParticipantRemoveFailed(objReason);
+        piThread->OnConferenceParticipantRemoveFailed(objReason);
     }
 }
 
@@ -401,12 +434,13 @@ void MtcUiNotifier::SendNotifyUsersInfo(IN IMSList<ConfUser*>& lstConfUser)
 {
     IMS_TRACE_I("SendNotifyUsersInfo : Size[%d]", lstConfUser.GetSize(), 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnConferenceParticipantsInfoChanged(lstConfUser);
+    piThread->OnConferenceParticipantsInfoChanged(lstConfUser);
 }
 
 PUBLIC
@@ -417,12 +451,13 @@ void MtcUiNotifier::SendNotifyConfInfo(IN AString strDisplayText, IN AString str
     IMS_TRACE_D(
             "SendNotifyConfInfo : [%d][%d][%s]", nMaxUserCount, nUserCount, strHostEntity.GetStr());
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 
-    m_pCallThread->OnConferenceInfoChanged(
+    piThread->OnConferenceInfoChanged(
             strDisplayText, strSubject, nUserCount, nMaxUserCount, strHostEntity);
 }
 
@@ -433,7 +468,8 @@ void MtcUiNotifier::SendReplacedBy(IN CallInfo* /*pCallInfo*/, IN MediaInfo* /*p
 {
     IMS_TRACE_I("SendReplacedBy : Key[%" PFLS_u "]", nKey, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
@@ -444,11 +480,12 @@ void MtcUiNotifier::SendEctCompleted(IN IMS_RESULT nResult, IN const CallReasonI
 {
     IMS_TRACE_I("SendECTCompleted : Result[%d]", nResult, 0, 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
-    m_pCallThread->OnEctCompleted(nResult, objReason);
+    piThread->OnEctCompleted(nResult, objReason);
 }
 
 PUBLIC
@@ -457,20 +494,23 @@ void MtcUiNotifier::SendCallPushCompleted(IN IMS_BOOL bResult, IN const CallReas
     IMS_TRACE_I(
             "SendCallPushCompleted : Result[%s] %s", _TRACE_B_(bResult), _TRACE_CR_(objReason), 0);
 
-    if (!IsAvailableToSend())
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
     {
         return;
     }
 }
 
 PRIVATE
-IMS_BOOL MtcUiNotifier::IsAvailableToSend()
+IJniMtcCallThread* MtcUiNotifier::GetCallThread()
 {
-    if (m_pCallThread == IMS_NULL)
+    IJniEnabler* piJniMtcCall = JniEnablerConnector::GetInstance().GetJniEnabler(
+            m_objContext.GetSlotId(), EnablerType::MTC_CALL, m_objContext.GetCallKey());
+    if (piJniMtcCall == IMS_NULL)
     {
-        IMS_TRACE_E(0, "IsAvailableToSend : Not available", 0, 0, 0);
-        return IMS_FALSE;
+        IMS_TRACE_D("GetCallThread no JniMtcCall", 0, 0, 0);
+        return IMS_NULL;
     }
 
-    return IMS_TRUE;
+    return reinterpret_cast<IJniMtcCallThread*>(piJniMtcCall->GetJniThread());
 }

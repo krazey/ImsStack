@@ -136,14 +136,6 @@ protected:
     }
 };
 
-TEST_F(MtcServiceTest, NoCrashOnSetJniServiceWithNull)
-{
-    EXPECT_CALL(*pMockEmergencyManager, SetJniServiceThread(IMS_NULL))
-            .Times(1);
-
-    pNormalMtcService->SetJniService(IMS_NULL);
-}
-
 TEST_F(MtcServiceTest, GetServiceTypeReturnsNormal)
 {
     EXPECT_EQ(pNormalMtcService->GetServiceType(), ServiceType::NORMAL);
@@ -352,16 +344,6 @@ TEST_F(MtcServiceTest, CoreServiceServiceClosedDoesNothing)
     IReasonInfo* piReasonInfo = reinterpret_cast<IReasonInfo*>(FAKE_ADDRESS);
     pNormalMtcService->CoreService_ServiceClosed(&objMockCoreService, piReasonInfo);
     EXPECT_EQ(pNormalMtcService->GetServiceStatus(), eOldStatus);
-}
-
-TEST_F(MtcServiceTest, CoreServiceInvitationReceivedRejectCallByNoJniService)
-{
-    MockISession objMockSession;
-    EXPECT_CALL(objMockCallController, HandleIncoming(_, &objMockSession, IMS_NULL))
-            .Times(1);
-
-    pNormalMtcService->CoreService_SessionInvitationReceived(&objMockCoreService,
-            &objMockSession);
 }
 
 TEST_F(MtcServiceTest, CoreServiceCapabilityQueryReceivedCallsQueryHandler)

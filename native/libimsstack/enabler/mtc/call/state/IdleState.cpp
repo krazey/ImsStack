@@ -19,7 +19,6 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "IuMtcService.h"
-#include "JniMtcServiceThread.h"
 #include "MediaDef.h"
 #include "MtcDef.h"
 #include "ServicePhoneInfo.h"
@@ -149,11 +148,9 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(
     return OnBlockChecked(m_pBlockChecker->Check());
 }
 
-PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
-        IN ISession* piSession, IN JniMtcServiceThread* pServiceThread)
+PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(IN ISession* piSession)
 {
     IMS_TRACE_D("HandleIncoming", 0, 0, 0);
-    m_objContext.GetUiNotifier().SetJniServiceThread(pServiceThread);
     m_objContext.GetCallInfo().eInitialCallType = CallType::UNKNOWN;
     m_objContext.GetCallInfo().ePeerType = PeerType::MT;
 
@@ -259,16 +256,12 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     return CallStateName::INCOMING;
 }
 
-PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(
-        IN ISession* piSession, IN JniMtcServiceThread* pServiceThread)
+PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(IN ISession* piSession)
 {
     IMS_TRACE_D("HandleIncomingUssi", 0, 0, 0);
 
     m_objContext.GetCallInfo().ePeerType = PeerType::MT;
     m_objContext.GetCallInfo().bUssi = IMS_TRUE;
-
-    m_objContext.GetUiNotifier().SetJniServiceThread(pServiceThread);
-
     m_objContext.CreateSession(piSession);
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);

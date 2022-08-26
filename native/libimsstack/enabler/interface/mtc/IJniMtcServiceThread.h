@@ -13,25 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef INTERFACE_JNI_MTC_SERVICE_THREAD_H_
+#define INTERFACE_JNI_MTC_SERVICE_THREAD_H_
 
-#ifndef JNI_MTC_SERVICE_THREAD_H_
-#define JNI_MTC_SERVICE_THREAD_H_
+#include "ImsTypeDef.h"
+#include "IJniEnablerThread.h"
 
-#include "BaseServiceThread.h"
-#include "MtcDef.h"
-#include "ImsMap.h"
-#include "IJniMtcServiceThread.h"
-
-class JniMtcServiceThread final : public BaseServiceThread, public IJniMtcServiceThread
+class IJniMtcServiceThread : public IJniEnablerThread
 {
 public:
-    JniMtcServiceThread();
-    virtual ~JniMtcServiceThread();
+    virtual ~IJniMtcServiceThread() {}
 
-    void OnServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason) override;  // enum class
-    void OnEmergencyServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason,
-            IN IMS_SINT32 eServiceType) override;  // enum class
-    void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) override;
+    virtual void OnServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason) = 0;
+    virtual void OnEmergencyServiceChanged(
+            IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason, IN IMS_SINT32 eServiceType) = 0;
+    virtual void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) = 0;
 };
 
 #endif

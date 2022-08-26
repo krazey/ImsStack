@@ -35,8 +35,6 @@ class ISession;
 class ISipClientConnection;
 class ISipConnection;
 class ISipServerConnection;
-class JniMediaSessionThread;
-class JniMtcServiceThread;
 class MediaInfo;
 class MtcSession;
 enum class QosLossPolicy;
@@ -63,8 +61,7 @@ public:
             IN const ImsList<ConfUser*>& lstUsers) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& lstUsers) override;
-    CallStateName HandleIncoming(
-            IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
+    CallStateName HandleIncoming(IN ISession* piSession) override;
     CallStateName HandleUserAlert() override;
     CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     CallStateName Reject(IN const CallReasonInfo& objReason) override;
@@ -82,8 +79,7 @@ public:
     CallStateName HandleSrvccFailure(IN UpdateType eUpdateType) override;
     CallStateName HandleIpcanChanged() override;
 
-    CallStateName HandleIncomingUssi(
-            IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
+    CallStateName HandleIncomingUssi(IN ISession* piSession) override;
     CallStateName OnUssiAttached() override;
     CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     CallStateName UssiStarted(IN ISession* piSession) override;

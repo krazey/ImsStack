@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef JNI_MTC_SERVICE_THREAD_H_
-#define JNI_MTC_SERVICE_THREAD_H_
+#ifndef MOCK_I_JNI_MTC_SERVICE_THREAD_H_
+#define MOCK_I_JNI_MTC_SERVICE_THREAD_H_
 
-#include "BaseServiceThread.h"
-#include "MtcDef.h"
-#include "ImsMap.h"
+#include <gmock/gmock.h>
+
 #include "IJniMtcServiceThread.h"
 
-class JniMtcServiceThread final : public BaseServiceThread, public IJniMtcServiceThread
+class MockIJniMtcServiceThread : public IJniMtcServiceThread
 {
 public:
-    JniMtcServiceThread();
-    virtual ~JniMtcServiceThread();
+    inline virtual ~MockIJniMtcServiceThread() {}
 
-    void OnServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason) override;  // enum class
-    void OnEmergencyServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason,
-            IN IMS_SINT32 eServiceType) override;  // enum class
-    void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) override;
+    MOCK_METHOD(void, OnServiceChanged, (IN IMS_SINT32, IN IMS_SINT32), (override));
+    MOCK_METHOD(void, OnEmergencyServiceChanged, (IN IMS_SINT32, IN IMS_SINT32, IN IMS_SINT32),
+            (override));
+    MOCK_METHOD(void, OnPreIncomingCallReceived, (IN IMS_ULONG), (override));
 };
 
 #endif

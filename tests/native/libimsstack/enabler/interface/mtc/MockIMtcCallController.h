@@ -26,9 +26,6 @@
 #include "call/IMtcCall.h"
 
 class ISession;
-class JniMediaSessionThread;
-class JniMtcCallThread;
-class JniMtcServiceThread;
 enum class KeyType;
 struct ConfUser;
 union Key;
@@ -40,15 +37,9 @@ public:
             (IN KeyType eKeyType, IN Key nKey, IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(void, RemoveCalls, (IN KeyType eKeyType, IN Key nKey), (override));
     MOCK_METHOD(CallKey, Open, (IN ServiceType eServiceType, IN CallInfo& objCallInfo), (override));
-    MOCK_METHOD(void, Attach,
-            (IN CallKey nCallKey, IN JniMtcCallThread* pJniMtcCallThread,
-                    IN JniMediaSessionThread* pJniMediaThread),
-            (override));
-    MOCK_METHOD(void, Detach, (IN CallKey nCallKey), (override));
+    MOCK_METHOD(void, Attach, (IN CallKey nCallKey), (override));
     MOCK_METHOD(void, HandleIncoming,
-            (IN IMtcService* pService, IN ISession* piSession,
-                    IN JniMtcServiceThread* pServiceThread),
-            (override));
+            (IN IMtcService* pService, IN ISession* piSession), (override));
     MOCK_METHOD(void, Start,
             (IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
                     IN MediaInfo* pMediaInfo,
@@ -85,6 +76,9 @@ public:
             (override));
     MOCK_METHOD(void, Transfer, (IN CallKey nCallKey, IN const AString& strTarget), (override));
     MOCK_METHOD(void, HandleIpcanChanged, (), (override));
+
+    // IEnablerService interface
+    MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));
 };
 
 #endif

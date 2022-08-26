@@ -25,9 +25,7 @@
 
 class IMtcCallContext;
 class ParticipantInfo;
-class JniMediaSessionThread;
-class JniMtcCallThread;
-class JniMtcServiceThread;
+class IJniMtcCallThread;
 class MediaInfo;
 class SuppService;
 struct CallInfo;
@@ -36,6 +34,7 @@ struct ConfUser;
 
 // TODO: remove unused parameter
 // TODO: get SuppService from the context
+// TODO: make all apis to return a result and let MtcCall logic handle the result.
 
 class MtcUiNotifier final
 {
@@ -44,13 +43,6 @@ public:
     ~MtcUiNotifier();
     MtcUiNotifier(IN const MtcUiNotifier&) = delete;
     MtcUiNotifier& operator=(IN const MtcUiNotifier&) = delete;
-
-    // _JNI_MTC_
-    inline void SetJniCallThread(IN JniMtcCallThread* pThread) { m_pCallThread = pThread; }
-    inline void SetJniServiceThread(IN JniMtcServiceThread* pThread) { m_pServiceThread = pThread; }
-    inline void SetJniMediaThread(IN JniMediaSessionThread* pThread) { m_pMediaThread = pThread; }
-    inline JniMtcCallThread* GetJniCallThread() { return m_pCallThread; }
-    inline JniMediaSessionThread* GetJniMediaThread() { return m_pMediaThread; }
 
     void SendPreIncomingCallReceived(IN CallKey nKey);
     void SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCallInfo,
@@ -105,13 +97,8 @@ public:
     void SendCallPushCompleted(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason);
 
 private:
-    IMS_BOOL IsAvailableToSend();
-
+    IJniMtcCallThread* GetCallThread();
     IMtcCallContext& m_objContext;
-
-    JniMtcCallThread* m_pCallThread;
-    JniMtcServiceThread* m_pServiceThread;
-    JniMediaSessionThread* m_pMediaThread;
 };
 
 #endif

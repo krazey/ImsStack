@@ -26,7 +26,6 @@
 #include "MtcDef.h"
 #include "ussi/UssiConstants.h"
 #include "IuMtcService.h"
-#include "JniMtcCallThread.h"
 #include "conferencecall/IConferenceController.h"
 #include "conferencecall/IConferenceManager.h"
 #include "IMtcContext.h"
@@ -123,26 +122,16 @@ CallKey MtcCallController::Open(IN ServiceType eServiceType, IN CallInfo& objCal
 }
 
 PUBLIC
-void MtcCallController::Attach(IN CallKey nCallKey, IN JniMtcCallThread* pJniMtcCallThread,
-        IN JniMediaSessionThread* pJniMediaThread)
+void MtcCallController::Attach(IN CallKey nCallKey)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->Attach(pJniMtcCallThread, pJniMediaThread);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Attach();
 }
 
 PUBLIC
-void MtcCallController::Detach(IN CallKey nCallKey)
-{
-    IMtcCall* piMtcCall = m_objCallManager.GetCallByCallKey(nCallKey);
-    piMtcCall->Detach();
-}
-
-PUBLIC
-void MtcCallController::HandleIncoming(
-        IN IMtcService* pService, IN ISession* piSession, IN JniMtcServiceThread* pServiceThread)
+void MtcCallController::HandleIncoming(IN IMtcService* pService, IN ISession* piSession)
 {
     CallInfo objCallInfo;
-    m_objCallManager.CreateCall(pService->GetServiceType(), objCallInfo)
-            ->HandleIncoming(piSession, pServiceThread);
+    m_objCallManager.CreateCall(pService->GetServiceType(), objCallInfo)->HandleIncoming(piSession);
 }
 
 PUBLIC

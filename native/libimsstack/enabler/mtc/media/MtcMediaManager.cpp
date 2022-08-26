@@ -32,6 +32,9 @@
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "utility/MessageUtil.h"
+#include "IJniEnabler.h"
+#include "JniEnablerConnector.h"
+#include "IJniMediaSessionThread.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -248,7 +251,7 @@ PUBLIC VIRTUAL void MtcMediaManager::RestoreMediaInfo()
     SetMediaInfo(objOldMediaInfo);
 }
 
-PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession(IN JniMediaSessionThread* pJniMediaThread)
+PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession()
 {
     MediaManager* pMediaManager = MediaManager::GetInstance(m_objContext.GetSlotId());
     if (!pMediaManager)
@@ -260,8 +263,13 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession(IN JniMediaSessionThread
     MEDIA_SERVICE_TYPE eMediaServiceType = MtcMediaUtil::GetMediaServiceType(eServiceType);
     IMS_TRACE_D("CreateMediaSession", 0, 0, 0);
 
+    // TODO: temp for media change.
+    IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
+            m_objContext.GetSlotId(), EnablerType::MEDIA_SESSION, m_objContext.GetCallKey());
+    IJniMediaSessionThread* pMediaThread =
+            reinterpret_cast<IJniMediaSessionThread*>(piJniEnabler->GetJniThread());
     m_piMediaSession = pMediaManager->CreateSession(
-            eMediaServiceType, m_objContext.GetCallKey(), pJniMediaThread);
+            eMediaServiceType, m_objContext.GetCallKey(), pMediaThread);
 
     if (m_piMediaSession == IMS_NULL)
     {

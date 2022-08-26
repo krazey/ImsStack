@@ -23,7 +23,6 @@
 
 class AString;
 class ICoreService;
-class JniMtcService;
 class IMtcAosConnector;
 class ISrvccStateListener;
 enum class ServiceStatus;
@@ -45,11 +44,13 @@ public:
     MOCK_METHOD(ICoreService*, GetICoreService, (), (const, override));
     MOCK_METHOD(IMtcAosConnector*, GetAosConnector, (), (const, override));
     MOCK_METHOD(void, UpdateSrvccState, (IN SrvccState eState), (override));
-    MOCK_METHOD(void, SetJniService, (IN JniMtcService* pJniService), (override));
     MOCK_METHOD(void, SetTerminalBasedCallWaiting, (IN IMS_BOOL bProvisioned, IN IMS_BOOL bEnabled),
             (override));
     MOCK_METHOD(IMS_BOOL, IsTerminalBasedCallWaitingEnabled, (), (const, override));
     MOCK_METHOD(void, OpenEmergencyService, (), (override));
+
+    // IEnablerService
+    MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));
 };
 
 #endif

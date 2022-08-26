@@ -22,6 +22,8 @@
 #include "JniMediaSessionThread.h"
 #include "IMediaManager.h"
 
+class IJniEnablerThread;
+
 class JniMediaSession : public BaseService
 {
 public:
@@ -32,6 +34,7 @@ public:
     virtual int SendData(const android::Parcel& objParcel) override;
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINTP nNativeObject);
     void SetMtcCallId(IN IMS_SINTP nCallKey);
+    IJniEnablerThread* GetJniThread() const override;
     JniMediaSessionThread* GetThread();
     static IMS_BOOL IsMediaMessage(IN IMS_SINT32 nMsg);
 

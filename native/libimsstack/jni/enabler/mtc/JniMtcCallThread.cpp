@@ -29,8 +29,7 @@ __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
 
 PUBLIC
 JniMtcCallThread::JniMtcCallThread() :
-        BaseServiceThread(),
-        m_nSlotId(0)
+        BaseServiceThread()
 {
     IMS_TRACE_D("+JniMtcCallThread", 0, 0, 0);
 }

@@ -16,7 +16,7 @@
 
 #include "ImsTypeDef.h"
 #include "ServiceTrace.h"
-#include "JniMtcServiceThread.h"
+#include "IJniMtcServiceThread.h"
 #include "IMtcCallController.h"
 #include "AString.h"
 #include "IIpcan.h"
@@ -48,7 +48,7 @@ MtcAosEventHandler::~MtcAosEventHandler()
 
 PUBLIC
 void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
-        IN JniMtcServiceThread* pServiceThread,
+        IN IJniMtcServiceThread* pServiceThread,
         IN MtcEmergencyServiceManager* pEmergencyServiceManager,
         IN IMtcCallController& objCallController)
 {
@@ -68,6 +68,7 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
     {
         if (pServiceThread)
         {
+            IMS_TRACE_I("OnConnected pServiceThread is not null", 0, 0, 0);
             pServiceThread->OnServiceChanged(nMmtelConnected + nVideoConnected, 0);
         }
         // TODO: this must be called when registration is refreshed?
@@ -103,7 +104,7 @@ void MtcAosEventHandler::OnDisconnecting(
 
 PUBLIC
 void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
-        IN IMtcCallController& objCallController, IN JniMtcServiceThread* pServiceThread,
+        IN IMtcCallController& objCallController, IN IJniMtcServiceThread* pServiceThread,
         IN MtcEmergencyServiceManager* pEmergencyServiceManager)
 {
     IMS_TRACE_I("OnDisconnected emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),

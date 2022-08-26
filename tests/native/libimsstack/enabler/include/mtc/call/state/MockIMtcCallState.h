@@ -30,7 +30,6 @@ class ISession;
 class ISipClientConnection;
 class ISipConnection;
 class ISipServerConnection;
-class JniMtcServiceThread;
 class MediaInfo;
 enum class QosLossPolicy;
 struct CallReasonInfo;
@@ -55,8 +54,7 @@ public:
             (IN CallType eCallType, IN const AString& strTarget,
                     IN const ImsList<ConfUser*>& lstUsers),
             (override));
-    MOCK_METHOD(CallStateName, HandleIncoming,
-            (IN ISession* piSession, IN JniMtcServiceThread* pServiceThread), (override));
+    MOCK_METHOD(CallStateName, HandleIncoming, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, HandleUserAlert, (), (override));
     MOCK_METHOD(
             CallStateName, Accept, (IN CallType eCallType, IN MediaInfo* pMediaInfo), (override));
@@ -78,8 +76,7 @@ public:
     MOCK_METHOD(CallStateName, HandleSrvccSuccess, (), (override));
     MOCK_METHOD(CallStateName, HandleSrvccFailure, (IN UpdateType eUpdateType), (override));
     MOCK_METHOD(CallStateName, HandleIpcanChanged, (), (override));
-    MOCK_METHOD(CallStateName, HandleIncomingUssi,
-            (IN ISession* piSession, IN JniMtcServiceThread* pServiceThread), (override));
+    MOCK_METHOD(CallStateName, HandleIncomingUssi, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, OnUssiAttached, (), (override));
     MOCK_METHOD(CallStateName, AcceptUssi, (IN CallType eCallType, IN MediaInfo* pMediaInfo),
             (override));

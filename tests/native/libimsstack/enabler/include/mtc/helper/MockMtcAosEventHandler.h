@@ -23,7 +23,7 @@
 class IMtcCallController;
 class MtcConfigurationProxy;
 class IMtcService;
-class JniMtcServiceThread;
+class IJniMtcServiceThread;
 class MtcEmergencyServiceManager;
 
 class MockMtcAosEventHandler : public MtcAosEventHandler
@@ -35,11 +35,11 @@ public:
     {
     }
     ~MockMtcAosEventHandler() {}
-    MOCK_METHOD(void, OnConnected, (IN IMS_UINT32, IN IMS_UINT32, IN JniMtcServiceThread*,
+    MOCK_METHOD(void, OnConnected, (IN IMS_UINT32, IN IMS_UINT32, IN IJniMtcServiceThread*,
             IN MtcEmergencyServiceManager*, IN IMtcCallController&), (override));
     MOCK_METHOD(void, OnDisconnecting, (IN IMS_UINT32, IN IMtcCallController&), (override));
     MOCK_METHOD(void, OnDisconnected, (IN IMS_UINT32, IN IMtcCallController&,
-            IN JniMtcServiceThread*, IN MtcEmergencyServiceManager*), (override));
+            IN IJniMtcServiceThread*, IN MtcEmergencyServiceManager*), (override));
     MOCK_METHOD(void, OnSuspended, (IN IMS_UINT32, IN IMtcCallController&), (override));
     MOCK_METHOD(void, OnResumed, (), (override));
     MOCK_METHOD(void, OnServiceConnected, (IN IMS_UINT32, IN IMS_UINT32), (override));

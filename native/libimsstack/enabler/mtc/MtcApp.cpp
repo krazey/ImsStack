@@ -21,8 +21,7 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
-#include "JniConnector.h"
-#include "JniConnectorFactory.h"
+#include "JniEnablerConnector.h"
 #include "JniMtcCall.h"
 #include "IMtcService.h"
 #include "MtcApp.h"
@@ -75,6 +74,7 @@ PUBLIC VIRTUAL MtcApp::~MtcApp()
 {
     IMS_TRACE_I("~MtcApp [slot_%d]", m_nSlotId, 0, 0);
     MtcContextRepository::GetInstance()->RemoveContext(m_nSlotId);
+    JniEnablerConnector::GetInstance().SetNativeEnabler(m_nSlotId, EnablerType::MTC_CALL, IMS_NULL);
 }
 
 PUBLIC VIRTUAL void MtcApp::Start()
@@ -167,8 +167,8 @@ PROTECTED VIRTUAL void MtcApp::CreateServices()
 PROTECTED VIRTUAL void MtcApp::InitCallManager()
 {
     m_objCallManager.Init();
-    JniConnectorFactory::GetInstance()->GetMtcCallConnector(m_nSlotId)->SetEnablerService(
-            &GetCallController());
+    JniEnablerConnector::GetInstance().SetNativeEnabler(
+            m_nSlotId, EnablerType::MTC_CALL, &GetCallController());
 }
 
 PROTECTED VIRTUAL void MtcApp::DestroyServices()
