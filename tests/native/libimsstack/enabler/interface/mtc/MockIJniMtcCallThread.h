@@ -27,7 +27,6 @@
 #include "IJniMtcCallThread.h"
 
 class SuppService;
-class ParticipantInfo;
 struct CallReasonInfo;
 struct JniCallInfo;
 
@@ -77,7 +76,7 @@ public:
 
     MOCK_METHOD(void, OnEctCompleted, (IN IMS_RESULT, IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, OnIncomingCallReceived, (IN IMS_UINTP, IN const JniCallInfo&, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&), IN ParticipantInfo*), (override));
+            (IN const ImsMap<SuppType, SuppService*>&), IN OipType, IN const AString&), (override));
     MOCK_METHOD(void, OnInformationNotificationReceived, (IN IMS_UINT32, IN const AString,
             IN IMS_SINT32, IN IMS_BOOL), (override));
 };

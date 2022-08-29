@@ -22,15 +22,19 @@
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "JniEnablerConnector.h"
-#include "../../interface/mtc/MockIJniMtcCallThread.h"
-#include "../../interface/mtc/MockIJniMtcServiceThread.h"
-#include "../../interface/MockIJniEnabler.h"
+#include "MockIJniMtcCallThread.h"
+#include "MockIJniMtcServiceThread.h"
+#include "MockIJniEnabler.h"
 #include "call/MockIMtcCallContext.h"
 #include "JniCallInfo.h"
 #include "conferencecall/ConferenceDef.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "helper/MtcSupplementaryService.h"
 
 using ::testing::_;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace android
 {
@@ -100,14 +104,22 @@ TEST_F(MtcUiNotifierTest, SendPreIncomingCallReceived)
 
 TEST_F(MtcUiNotifierTest, SendIncomingCallReceived)
 {
-    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _))
+    MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
+    ON_CALL(objMockContext, GetConfigurationProxy)
+            .WillByDefault(ReturnRef(objConfigurationProxy));
+
+    MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
+    ON_CALL(objMockContext, GetSupplementaryService)
+            .WillByDefault(ReturnRef(objSupplementaryService));
+
+    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _))
             .Times(1);
 
     pNotifier->SendIncomingCallReceived(
             CALL_KEY, objCallInfo, objMediaInfo, objSuppServices, *pParticipantInfo);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _))
+    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _))
             .Times(0);
     pNotifier->SendIncomingCallReceived(
             CALL_KEY, objCallInfo, objMediaInfo, objSuppServices, *pParticipantInfo);

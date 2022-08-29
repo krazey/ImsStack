@@ -53,7 +53,11 @@ public:
         IMS_SLONG nIndex = m_objJniEnablers.GetIndexOfKey(nKey);
         if (nIndex < 0)
         {
-            m_objJniEnablers.Add(nKey, piJniEnabler);
+            // in unit test case, this can be null
+            if (piJniEnabler != IMS_NULL)
+            {
+                m_objJniEnablers.Add(nKey, piJniEnabler);
+            }
         }
         else
         {

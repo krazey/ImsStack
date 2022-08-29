@@ -276,8 +276,8 @@ void JniMtcCallThread::OnEctCompleted(IN IMS_RESULT nResult, IN const CallReason
 
 void JniMtcCallThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey,
         IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-        IN ParticipantInfo* pParticipantInfo)
+        IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
+        IN const AString& strRemoteNumber)
 {
     IMS_TRACE_D("OnIncomingCallReceived", 0, 0, 0);
     Parcel objParcel;
@@ -287,11 +287,11 @@ void JniMtcCallThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey,
     JniMtcUtils::WriteCallInfoToParcel(objCallInfo, objParcel);
     JniMtcUtils::WriteMediaInfoToParcel(pMediaInfo, objParcel);
 
-    /* Display Info  // TODO: ParticipantInfo to be included in CallInfo? */
+    /* Display Info */
     // Need to set callee number when the "child number" is used.
-    objParcel.writeInt32(static_cast<IMS_SINT32>(pParticipantInfo->GetOipType()));
+    objParcel.writeInt32(static_cast<IMS_SINT32>(eOipType));
     objParcel.writeString16(android::String16(AString::ConstNull().GetStr()));
-    objParcel.writeString16(android::String16(pParticipantInfo->GetRemoteNumber().GetStr()));
+    objParcel.writeString16(android::String16(strRemoteNumber.GetStr()));
 
     /* Supp Info */
     JniMtcUtils::WriteSuppServicesToParcel(objSuppServices, objParcel);

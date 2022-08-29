@@ -19,6 +19,7 @@
 #include "IJniMtcCallThread.h"
 #include "call/IMtcCallContext.h"
 #include "call/MtcUiNotifier.h"
+#include "call/ParticipantInfo.h"
 #include "ServiceTrace.h"
 #include "JniEnablerConnector.h"
 #include "IJniMtcServiceThread.h"
@@ -72,8 +73,8 @@ void MtcUiNotifier::SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCa
     JniCallInfo objJniCallInfo = m_objContext.CreateJniCallInfo();
     objJniCallInfo.bUssi = objCallInfo.bUssi;
 
-    piThread->OnIncomingCallReceived(
-            nKey, objJniCallInfo, &objMediaInfo, objSuppServices, &objParticipantInfo);
+    piThread->OnIncomingCallReceived(nKey, objJniCallInfo, &objMediaInfo, objSuppServices,
+            objParticipantInfo.GetOipType(), objParticipantInfo.GetRemoteNumber());
 }
 
 PUBLIC

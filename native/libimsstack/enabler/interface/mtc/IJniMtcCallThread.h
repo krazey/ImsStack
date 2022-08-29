@@ -24,7 +24,6 @@
 #include "IJniEnablerThread.h"
 
 class SuppService;
-class ParticipantInfo;
 struct CallReasonInfo;
 struct JniCallInfo;
 
@@ -77,7 +76,7 @@ public:
 
     virtual void OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN const JniCallInfo& objCallInfo,
             IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-            IN ParticipantInfo* pParticipantInfo) = 0;
+            IN OipType eOipType, IN const AString& strRemoteNumber) = 0;
 
     virtual void OnInformationNotificationReceived(IN IMS_UINT32 nType, IN const AString strValue,
             IN IMS_SINT32 nValue, IN IMS_BOOL bValue) = 0;

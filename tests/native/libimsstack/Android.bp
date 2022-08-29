@@ -56,6 +56,9 @@ cc_test {
         "enabler/include/mtc",
         "enabler/include/mts",
         "enabler/include/media",
+        "enabler/interface",
+        "enabler/interface/aos",
+        "enabler/interface/mtc",
     ],
     header_libs: [
         "libimsstack_config_headers",
@@ -69,6 +72,7 @@ cc_test {
         "libimsmedia_config_headers",
     ] + [
         "libimsstack_test_config_headers",
+        "libimsstack_test_enabler_headers",
         "libimsstack_test_engine_headers",
         "libimsstack_test_platform_headers",
     ],
