@@ -37,7 +37,7 @@ PUBLIC VideoMediaSession::VideoMediaSession(IN IMS_SINT32 nSlotId) :
         m_objMediaQualityThreshold(MediaQualityThreshold()),
         m_objLocalAddress(IPAddress::IPv6NONE),
         m_nLocalPort(0),
-        m_nCameraId(-1),
+        m_nCameraId(CAMERA_ID_NONE),
         m_nCameraZoom(-1),
         m_bPreviewSurfaceSet(IMS_FALSE),
         m_bDisplaySurfaceSet(IMS_FALSE),
@@ -476,13 +476,15 @@ IMS_BOOL VideoMediaSession::OnMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
 PUBLIC
 IMS_BOOL VideoMediaSession::Open()
 {
-    IMS_TRACE_I("Open()", 0, 0, 0);
+    IMS_TRACE_I("Open() - cameraId[%d]", m_nCameraId, 0, 0);
 
     if (m_piMediaSessionListener != IMS_NULL)
     {
         ImsMediaMsgOpenConfigParam* pParam = new ImsMediaMsgOpenConfigParam(MEDIA_TYPE_VIDEO);
         pParam->m_objLocalAddress = m_objLocalAddress;
         pParam->m_nLocalPort = m_nLocalPort;
+        m_objConfig.setVideoMode(VideoConfig::VIDEO_MODE_PREVIEW);
+        m_objConfig.setCameraId(m_nCameraId);
         pParam->m_pConfig = new VideoConfig(m_objConfig);
 
         if (m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
@@ -644,6 +646,7 @@ IMS_BOOL VideoMediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
     if (param != NULL)
     {
         IMS_TRACE_I("OnSelectCameraCmd() - camera id[%d]", param->nValue, 0, 0);
+
         if (m_nCameraId != param->nValue)
         {
             m_nCameraId = param->nValue;

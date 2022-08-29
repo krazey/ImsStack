@@ -110,7 +110,7 @@ IMS_BOOL VideoController::OpenSession()
     IMS_TRACE_D("OpenSession()", 0, 0, 0);
 
     if (m_pSession != IMS_NULL && m_pSession->GetState() == VideoMediaSession::STATE_IDLE &&
-            m_pSession->GetCameraId() >= 0)
+            m_pSession->GetCameraId() != VideoMediaSession::CAMERA_ID_NONE)
     {
         m_pSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
         return m_pSession->Open();

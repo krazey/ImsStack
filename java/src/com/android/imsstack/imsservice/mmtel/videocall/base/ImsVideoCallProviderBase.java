@@ -42,7 +42,7 @@ import java.util.List;
 
 public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         implements IVideoCallSession.EventListener {
-    protected static final int CAMERA_ID_NONE = 99;
+    protected static final int CAMERA_ID_NONE = -1;
 
     protected static final int CALL_STATE_IDLE = 0;
     // Originating call is started
