@@ -46,9 +46,7 @@ import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.SipMessageParsingUtils;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.IntStream;
 
@@ -350,17 +348,15 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     }
 
     private void registrationUpdated(Parcel parcel) throws Exception {
-        Set<String> featureTags = new HashSet<>(Arrays.asList(parcel.readStringArray()));
-        DelegateRegistrationState registrationState = new DelegateRegistrationState.Builder()
-                .addRegisteredFeatureTags(featureTags)
-                .build();
+        DelegateRegistrationState registrationState =
+                DelegateRegistrationState.CREATOR.createFromParcel(parcel);
         mListener.updateRegistration(registrationState, mSubId);
     }
 
     private void configurationUpdated(Parcel parcel) throws Exception {
-        //SipDelegateConfiguration configuration = new SipDelegateConfiguration();
-        // TODO : create and add configuration values by hakjunc
-        //mListener.updateConfiguration(configuration, mSubId);
+        SipDelegateConfiguration configuration =
+                SipDelegateConfiguration.CREATOR.createFromParcel(parcel);
+        mListener.updateConfiguration(configuration, mSubId);
     }
 
     private static void convertSipMessageToParcel(SipMessage message, Parcel parcel) {
