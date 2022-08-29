@@ -358,9 +358,9 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     }
 
     private void configurationUpdated(Parcel parcel) throws Exception {
-        SipDelegateConfiguration configuration = new SipDelegateConfiguration();
-        // TODO : add configuration values by hakjunc
-        mListener.updateConfiguration(configuration, mSubId);
+        //SipDelegateConfiguration configuration = new SipDelegateConfiguration();
+        // TODO : create and add configuration values by hakjunc
+        //mListener.updateConfiguration(configuration, mSubId);
     }
 
     private static void convertSipMessageToParcel(SipMessage message, Parcel parcel) {
