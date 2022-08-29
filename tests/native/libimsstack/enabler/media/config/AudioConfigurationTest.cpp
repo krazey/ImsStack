@@ -76,6 +76,7 @@ protected:
 TEST_F(AudioConfigurationTest, GetConfigDefault)
 {
     AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
+    EXPECT_EQ(m_pConfig->IsEvsSupported(), IMS_FALSE);
     EXPECT_EQ(m_pConfig->GetPtime(), DEFAULT_PTIME);
     EXPECT_EQ(m_pConfig->GetMaxPtime(), DEFAULT_MAX_PTIME);
     EXPECT_EQ(m_pConfig->GetMaxRed(), DEFAULT_MAX_RED);
@@ -116,6 +117,8 @@ TEST_F(AudioConfigurationTest, GetConfigTest)
     m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
 
     EXPECT_TRUE(m_pConfig->Create(m_piCc));
+    EXPECT_EQ(m_pConfig->IsEvsSupported(),
+            GetBoolean(CarrierConfig::Assets::KEY_AUDIO_EVS_SUPPORT_BOOL));
     EXPECT_EQ(m_pConfig->GetPtime(), GetInt(CarrierConfig::Assets::KEY_AUDIO_PTIME_MILLIS_INT));
     EXPECT_EQ(
             m_pConfig->GetMaxPtime(), GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT));

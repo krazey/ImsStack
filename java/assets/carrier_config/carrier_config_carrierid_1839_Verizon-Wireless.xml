@@ -291,9 +291,8 @@
     <int name="imsvt.video_as_bandwidth_kbps_int" value="425"/>
     <int name="imsvt.video_rs_bandwidth_bps_int" value="800"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="2400"/>
-
+    <boolean name="audio_evs_support_bool" value="true"/>
     <boolean name="audio_bw_nego_option_bool" value="true"/>
-
     <int-array name="asset_evs_payload_type_int_array" num="1">
         <item value="109"/>
     </int-array>

@@ -565,8 +565,6 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT[] =
         KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_user_reject";
 // Media
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "media_anbr_capability_in_modem_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "audio_jitter_buffer_size_int_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY[] =
@@ -1092,6 +1090,9 @@ const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL[] =
 const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_RTP_DSCP_INT[] = "text_rtp_dscp_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL[] =
         "support_multi_config_in_early_session_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_EVS_SUPPORT_BOOL[] = "audio_evs_support_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL[] =
+        "media_anbr_capability_in_modem_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL[] =
         "media_session_level_bandwidth_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL[] =

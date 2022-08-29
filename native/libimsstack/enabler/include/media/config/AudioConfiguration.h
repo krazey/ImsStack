@@ -53,6 +53,13 @@ public:
      */
     virtual IMS_BOOL Update(IN ICarrierConfig* piCc);
     /**
+     * @brief Get whether EVS codec is supported
+     *
+     * @return IMS_BOOL Return true if evs is supported
+     * Return false if evs is not supported
+     */
+    IMS_BOOL IsEvsSupported() const;
+    /**
      * @brief Get the ptime (recommended length of time in milliseconds represented by the media in
      * a packet)
      *
@@ -221,6 +228,7 @@ protected:
     virtual void ToDebugString() const;
 
 private:
+    IMS_BOOL m_bEvsSupported;
     IMS_SINT32 m_nAudioPtime;
     IMS_SINT32 m_nAudioMaxPtime;
     IMS_SINT32 m_nAudioMaxRed;

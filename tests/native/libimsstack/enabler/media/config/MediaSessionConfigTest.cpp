@@ -70,7 +70,7 @@ TEST_F(MediaSessionConfigTest, GetConfigTest)
     EXPECT_EQ(m_pConfig->IsSessionLevelBandwidth(),
             GetBoolean(CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL));
     EXPECT_EQ(m_pConfig->IsAnbrSupported(),
-            GetBoolean(CarrierConfig::ImsVoice::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL));
+            GetBoolean(CarrierConfig::Assets::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL));
     EXPECT_EQ(m_pConfig->IsSupportMultiConfigInEarlySession(),
             GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL));
     EXPECT_EQ(m_pConfig->IsSdpReofferFullCapability(),

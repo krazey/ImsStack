@@ -102,6 +102,7 @@
     <int name="asset_codec_attribute_mode_change_capability_int" value="2"/>
 
     <!-- Audio -->
+    <boolean name="audio_evs_support_bool" value="true"/>
     <boolean name="audio_bw_nego_option_bool" value="true"/>
     <int name="audio_rtp_dscp_int" value="46"/>
     <int-array name="audio_rtp_port_range_int_array" num="2">

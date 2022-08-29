@@ -360,8 +360,6 @@ public class CarrierConfig {
         public static final String KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT =
                 KEY_PREFIX + "call_reject_reason_phrase_user_reject";
         // Media
-        public static final String KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL =
-                KEY_PREFIX + "media_anbr_capability_in_modem_bool";
         public static final String KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY =
                 KEY_PREFIX + "audio_jitter_buffer_size_int_array";
         public static final String KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY =
@@ -828,6 +826,10 @@ public class CarrierConfig {
                 "text_rtp_dscp_int";
         public static final String KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL =
                 "support_multi_config_in_early_session_bool";
+        public static final String KEY_AUDIO_EVS_SUPPORT_BOOL =
+                "audio_evs_support_bool";
+        public static final String KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL =
+                "media_anbr_capability_in_modem_bool";
         public static final String KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL =
                 "media_session_level_bandwidth_bool";
         public static final String KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL =

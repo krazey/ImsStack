@@ -49,6 +49,7 @@
         <item value="49152"/>
         <item value="65535"/>
     </int-array>
+    <boolean name="audio_evs_support_bool" value="true"/>
 
     <!-- TODO Media - to testcases-->
     <int-array name="asset_evs_payload_type_int_array" num="1">
