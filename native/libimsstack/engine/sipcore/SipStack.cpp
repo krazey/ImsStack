@@ -777,14 +777,21 @@ GLOBAL SipHeaderBase* DecodeHeader(
 GLOBAL IMS_BOOL DecodeMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
         IN IMS_SINT32 nOptions, OUT ::SipMessage*& pMessage)
 {
-    (void)nOptions;
-
     if (pMessage == IMS_NULL)
     {
         pMessage = new ::SipMessage();
     }
 
-    if (pMessage->DecCompleteMsg((SIP_CHAR*)pBuffer, nBuffLen) == SIP_FALSE)
+    if (nOptions == SipPrivate::OPTIONS_D_PARTIAL)
+    {
+        if (pMessage->DecodeFragmentMsg((SIP_CHAR*)pBuffer, nBuffLen) == SIP_FALSE)
+        {
+            pMessage->SipDelete();
+            pMessage = IMS_NULL;
+            return IMS_FALSE;
+        }
+    }
+    else if (pMessage->DecCompleteMsg((SIP_CHAR*)pBuffer, nBuffLen) == SIP_FALSE)
     {
         pMessage->SipDelete();
         pMessage = IMS_NULL;
