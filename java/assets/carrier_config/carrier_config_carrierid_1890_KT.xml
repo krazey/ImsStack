@@ -45,7 +45,7 @@
     </int-array>
 
     <!-- Media -->
-    <int-array name="imsvoice.audio_port_rtp_int_array" num="2">
+    <int-array name="audio_rtp_port_range_int_array" num="2">
         <item value="49152"/>
         <item value="65535"/>
     </int-array>
@@ -107,7 +107,7 @@
     <!-- <int name="imsvoice.codec_attribute_cmr_int" value="0"/> -->
     <!-- <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="1"/> -->
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
-    <int-array name="imsvt.video_port_rtp_int_array" num="2">
+    <int-array name="video_rtp_port_range_int_array" num="2">
         <item value="49154"/>
         <item value="65535"/>
     </int-array>
