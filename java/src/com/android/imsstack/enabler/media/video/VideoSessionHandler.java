@@ -53,6 +53,8 @@ public class VideoSessionHandler {
     private IMtcMediaVideoCallProvider mMtcMediaVideoCallProvider;
     private final VideoMessageHandler mVideoMessageHandler;
     private boolean mPreviewSurfaceSet, mDisplaySurfaceSet;
+    private String mLocalIpAddress;
+    private int mLocalPortNumber;
 
     public VideoSessionHandler(
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface,
@@ -113,7 +115,7 @@ public class VideoSessionHandler {
             switch (msg.what) {
                 case MediaConstants.REQUEST_OPEN_SESSION:
                 {
-                    handleVideoOpenSession((String) msg.obj, msg.arg1);
+                    handleVideoOpenSession((VideoConfig) msg.obj);
                 }
                     break;
 
@@ -312,14 +314,13 @@ public class VideoSessionHandler {
             /** Requests (ImsStack -> ImsMedia) */
             case MediaConstants.REQUEST_OPEN_SESSION:
             {
-                String localIpAddress = parcel.readString();
-                int localPortNumber = parcel.readInt();
-                ImsLog.v("localIpAddress= " + localIpAddress
-                        + " localPortNumber= " + localPortNumber);
+                mLocalIpAddress = parcel.readString();
+                mLocalPortNumber = parcel.readInt();
+                VideoConfig videoConfig = VideoConfig.CREATOR.createFromParcel(parcel);
+                ImsLog.v("localIpAddress= " + mLocalIpAddress
+                        + " localPortNumber= " + mLocalPortNumber);
 
-                Message.obtain(
-                        mVideoMessageHandler, requestType, localPortNumber, UNUSED, localIpAddress)
-                        .sendToTarget();
+                Message.obtain(mVideoMessageHandler, requestType, videoConfig).sendToTarget();
             }
                 break;
 
@@ -359,14 +360,14 @@ public class VideoSessionHandler {
         }
     }
 
-    private void handleVideoOpenSession(String localIpAddress, int localPortNumber) {
+    private void handleVideoOpenSession(VideoConfig videoConfig) {
 
         if (mVideoSession == null) {
             if (mMediaManager.isImsMediaConnected()) {
                 // TODO_MEDIA : ImsQOSManager to be used
-                mRtpSocket = MediaSocket.createDatagramSocket(localIpAddress, localPortNumber);
+                mRtpSocket = MediaSocket.createDatagramSocket(mLocalIpAddress, mLocalPortNumber);
                 mRtcpSocket =
-                        MediaSocket.createDatagramSocket(localIpAddress, (localPortNumber + 1));
+                        MediaSocket.createDatagramSocket(mLocalIpAddress, (mLocalPortNumber + 1));
 
                 if (mRtpSocket == null || mRtcpSocket == null) {
                     ImsLog.e("socket creation failed");
@@ -380,7 +381,7 @@ public class VideoSessionHandler {
                 mPreviewSurfaceSet = true;
                 mDisplaySurfaceSet = true;
                 mMediaManager.openSession(mRtpSocket, mRtcpSocket,
-                        ImsMediaSession.SESSION_TYPE_VIDEO, null, mVideoSessionCallback);
+                        ImsMediaSession.SESSION_TYPE_VIDEO, videoConfig, mVideoSessionCallback);
             } else {
                 ImsLog.d("ImsMediaManager is not ready");
                 if (mVideoSessionCallbackHandler != null) {
