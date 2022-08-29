@@ -17,6 +17,9 @@
 package com.android.imsstack.imsservice.mmtel.sms;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import com.android.internal.util.HexDump;
 
 import org.junit.After;
 import org.junit.Before;
@@ -31,29 +34,40 @@ public class SmsRPduTest {
     private SmsRPdu mMoRpAck;
     private SmsRPdu mMoRpError;
     private SmsRPdu mMoRpSmma;
-    private SmsRPdu mExpectedMtRpData;
-    private SmsRPdu mExpectedMtRpAck;
-    private SmsRPdu mExpectedMtRpError;
+    private SmsRPdu mSmsRPduMtRpData;
+    private SmsRPdu mSmsRPduMtRpAck;
+    private SmsRPdu mSmsRPduMtRpError;
+    private SmsRPdu mSmsRPduMtRpAckWithRpUserData;
+    private SmsRPdu mSmsRPduMtRpErrorWithRpUserData;;
+    private SmsRPdu mSmsRPduMtRpAckwithInvalidIEI;
+    private SmsRPdu mSmsRPduMtRpErrorWithDiagnostics;
 
     private int mMessageRef = 0x01;
     private int mMessageType; // = SmsUtils.RP_DATA;
-    private String mDestinationAddress = "+19037029920";
+    private String mDestinationAddress = "07919130079229F0";
     private String mOrigAddr = null;
     private int mCause = 0;
-    private byte[] mUserData = {21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66,
-            (byte) 0xB2, 99, (byte) 0x6C, 26, 03};
-    private byte[] mMoExpectedRpData = {00, 01, 00, 07, (byte) 0x91, (byte) 0x91, 0x30, 07,
-            (byte) 0x92, 0x29, (byte) 0xF0, 0x12, 21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00,
-            00, 06, 66, (byte) 0xB2, 99, (byte) 0x6C, 26, 03};
-    private byte[] mMoExpectedRpAck = {02, 01};
-    private byte[] mMoExpectedRpError = {04, 01, 01, 0x6f};
-
-    private byte[] mMtRpData = {01, 01, 07, (byte) 0x91, 91, 30, 07, 92, 29, (byte) 0xF0, 00, 12,
-            21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66, (byte) 0xB2, 99,
-            (byte) 0x6C, 26, 03};
-    private byte[] mMtRpAck = {03, 01};
-    private byte[] mMtRpError = {05, 01, 01, 0x6f};
-    private byte[] mMoExpectedRpSmma = {0x06, 0x01};
+    private byte[] mUserData = HexDump.hexStringToByteArray("21110A81785634121000"
+                                                                + "000666B2996C2603");
+    private byte[] mMoExpectedRpData = HexDump.hexStringToByteArray("00010007919130079229F0"
+                                                        + "1221110A81785634121000000666B2996C2603");
+    private byte[] mMoExpectedRpAck = HexDump.hexStringToByteArray("0201");
+    private byte[] mMoExpectedRpError = HexDump.hexStringToByteArray("0401016f");
+    private byte[] mMtRpData = HexDump.hexStringToByteArray("010107919130079229F000122111"
+                                                            + "0A81785634121000000666B2996C2603");
+    private byte[] mMtRpAck = HexDump.hexStringToByteArray("0301");
+    private byte[] mMtRpError = HexDump.hexStringToByteArray("0501016f");
+    private byte[] mMtRpAckWithRpUserData = HexDump.hexStringToByteArray("0301410A01"
+                                                                        + "C20022905002058322");
+    private byte[] mMtRpErrorWithRpUserData = HexDump.hexStringToByteArray("0509016F410A"
+                                                                        + "01C20022905002058322");
+    private byte[] mMtRpErrorWithDiagnostics = HexDump.hexStringToByteArray("0509036F6F6F"
+                                                                            + "410A01C200229"
+                                                                            + "05002058322");
+    private byte[] mMtRpAckWithoutIEI = HexDump.hexStringToByteArray("03010A01"
+                                                                    + "C20022905002058322");
+    private byte[] mMtRpUserData = HexDump.hexStringToByteArray("01C20022905002058322");
+    private byte[] mMoExpectedRpSmma = HexDump.hexStringToByteArray("0601");
 
     @Before
     public void setUp() throws Exception {
@@ -63,16 +77,20 @@ public class SmsRPduTest {
         mMoRpError = new SmsRPdu(mMessageRef, SmsUtils.RP_ERROR, null,
                 SmsRPdu.RP_CAUSE_PROTOCOL_UNSPECIFIED, null);
         mMoRpSmma = new SmsRPdu(mMessageRef, SmsUtils.RP_SMMA, null, 0, null);
-        mExpectedMtRpData = new SmsRPdu(mMtRpData);
-        mExpectedMtRpAck = new SmsRPdu(mMtRpAck);
-        mExpectedMtRpError = new SmsRPdu(mMtRpError);
+        mSmsRPduMtRpData = new SmsRPdu(mMtRpData);
+        mSmsRPduMtRpAck = new SmsRPdu(mMtRpAck);
+        mSmsRPduMtRpError = new SmsRPdu(mMtRpError);
+        mSmsRPduMtRpAckWithRpUserData = new SmsRPdu(mMtRpAckWithRpUserData);
+        mSmsRPduMtRpErrorWithRpUserData = new SmsRPdu(mMtRpErrorWithRpUserData);
+        mSmsRPduMtRpAckwithInvalidIEI = new SmsRPdu(mMtRpAckWithoutIEI);
+        mSmsRPduMtRpErrorWithDiagnostics = new SmsRPdu(mMtRpErrorWithDiagnostics);
     }
 
     @Test
     public void test_getMessageType() {
-        assertEquals(SmsUtils.RP_DATA, mExpectedMtRpData.getMessageType());
-        assertEquals(SmsUtils.RP_ACK, mExpectedMtRpAck.getMessageType());
-        assertEquals(SmsUtils.RP_ERROR, mExpectedMtRpError.getMessageType());
+        assertEquals(SmsUtils.RP_DATA, mSmsRPduMtRpData.getMessageType());
+        assertEquals(SmsUtils.RP_ACK, mSmsRPduMtRpAck.getMessageType());
+        assertEquals(SmsUtils.RP_ERROR, mSmsRPduMtRpError.getMessageType());
     }
 
     @Test
@@ -87,14 +105,44 @@ public class SmsRPduTest {
 
     @Test
     public void test_getMessageRef() {
-        assertEquals(mMessageRef, mExpectedMtRpData.getMessageRef());
-        assertEquals(mMessageRef, mExpectedMtRpAck.getMessageRef());
-        assertEquals(mMessageRef, mExpectedMtRpError.getMessageRef());
+        assertEquals(mMessageRef, mSmsRPduMtRpData.getMessageRef());
+        assertEquals(mMessageRef, mSmsRPduMtRpAck.getMessageRef());
+        assertEquals(mMessageRef, mSmsRPduMtRpError.getMessageRef());
     }
 
     @Test
     public void test_getUserData() {
-        assertEquals(mUserData, mMoRpData.getUserData());
+        byte[] actual = mMoRpData.getUserData();
+        for (int i = 0; i < mUserData.length; i++) {
+            assertEquals(mUserData[i], actual[i]);
+        }
+        //assertEquals(mUserData, mMoRpData.getUserData());
+        actual = mSmsRPduMtRpData.getUserData();
+        for (int i = 0; i < mUserData.length; i++) {
+            assertEquals(mUserData[i], actual[i]);
+        }
+        actual = mSmsRPduMtRpAckWithRpUserData.getUserData();
+        for (int i = 0; i < mMtRpUserData.length; i++) {
+            assertEquals(mMtRpUserData[i], actual[i]);
+        }
+        actual = mSmsRPduMtRpErrorWithRpUserData.getUserData();
+        for (int i = 0; i < mMtRpUserData.length; i++) {
+            assertEquals(mMtRpUserData[i], actual[i]);
+        }
+        actual = mSmsRPduMtRpErrorWithDiagnostics.getUserData();
+        for (int i = 0; i < mMtRpUserData.length; i++) {
+            assertEquals(mMtRpUserData[i], actual[i]);
+        }
+        assertNull(mSmsRPduMtRpAckwithInvalidIEI.getUserData());
+    }
+
+    @Test
+    public void test_getRPCause() {
+        assertEquals(SmsRPdu.RP_CAUSE_PROTOCOL_UNSPECIFIED, mSmsRPduMtRpError.getRPCause());
+        assertEquals(SmsRPdu.RP_CAUSE_PROTOCOL_UNSPECIFIED,
+                        mSmsRPduMtRpErrorWithRpUserData.getRPCause());
+        assertEquals(SmsRPdu.RP_CAUSE_PROTOCOL_UNSPECIFIED,
+                        mSmsRPduMtRpErrorWithDiagnostics.getRPCause());
     }
 
     @Test
@@ -131,9 +179,9 @@ public class SmsRPduTest {
 
     @After
     public void tearDown() throws Exception {
-        mExpectedMtRpData = null;
-        mExpectedMtRpAck = null;
-        mExpectedMtRpError = null;
+        mSmsRPduMtRpData = null;
+        mSmsRPduMtRpAck = null;
+        mSmsRPduMtRpAck = null;
         mMoExpectedRpData = null;
         mMoExpectedRpAck = null;
         mMoExpectedRpError = null;

@@ -19,8 +19,8 @@ package com.android.imsstack.imsservice.mmtel.sms;
 
 import android.telephony.PhoneNumberUtils;
 
+import com.android.imsstack.util.ImsLog;
 import com.android.internal.util.HexDump;
-import com.android.telephony.Rlog;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -30,9 +30,10 @@ import java.util.Arrays;
  **/
 public final class SmsRPdu {
     private static final String TAG = "[GII-SmsPdu] ";
-    private static final boolean DBG = false;
+    rivate static final boolean DBG = ImsLog.isDebuggable();
     private static final int MAX_RPDU_LENGTH = 248;
-    private static final int MAX_TPDU_LENGTH = 234;
+    //Max RP-UserData Length excluding IEI and Length bytes
+    private static final int MAX_TPDU_LENGTH = 232;
 
     // Message Type Indicator(MTI) byte As per 3GPP 24.011 section. 8.2.2
     public static final byte MO_RP_DATA_MTI = 0x00;
@@ -128,7 +129,7 @@ public final class SmsRPdu {
                 mRpdu = getRpSmmaPdu();
                 break;
             default:
-                Rlog.e(TAG, "Unsupported message type");
+                loge("Unsupported message type");
                 break;
         }
     }
@@ -137,6 +138,7 @@ public final class SmsRPdu {
      *  Encoding RP-Data as Per 3GPP 24.011, Section 7.3.1.2
      */
     private byte[] getRpDataPdu() {
+        log("getRpDataPdu");
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
         byte[] destinationAddress = HexDump.hexStringToByteArray(mDestAddr);
         if (destinationAddress == null || destinationAddress.length == 0) {
@@ -160,6 +162,7 @@ public final class SmsRPdu {
      *  Encoding RP-Ack as Per 3GPP 24.011, Section 7.3.3
      */
     private byte[] getRpAckPdu() {
+        log("getRpAckPdu");
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
         bo.write(MO_RP_ACK_MTI);
         bo.write((byte) mMessageRef);
@@ -177,6 +180,7 @@ public final class SmsRPdu {
      *  Encoding RP-Error as Per 3GPP 24.011, Section 7.3.4
      */
     private byte[] getRpErrorPdu() {
+        log("getRpErrorPdu");
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
         bo.write(MO_RP_ERROR_MTI);
         bo.write((byte) mMessageRef);
@@ -199,6 +203,7 @@ public final class SmsRPdu {
      *  Encoding RP-Data as Per 3GPP 24.011, Section 7.3.2
      */
     private byte[] getRpSmmaPdu() {
+        log("getRpSmmaPdu");
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
         bo.write(MO_RP_SMMA_MTI);
 
@@ -217,7 +222,7 @@ public final class SmsRPdu {
         //RP-MTI is a 3-bit field from least significant bit
         mMessageTypeInd = (byte) (firstByte & 0x7);
 
-        Rlog.i(TAG, "SMS Mti: " + mMessageTypeInd);
+        logi("SMS Mti: " + mMessageTypeInd);
         switch (mMessageTypeInd) {
                 // RP-Message-Type-Indicator 24.011 Seection 8.2.2
             case MT_RP_DATA_MTI:
@@ -241,21 +246,22 @@ public final class SmsRPdu {
         try {
             mMessageRef = p.getByte();
             if (DBG) {
-                Rlog.d(TAG, "mr =" + mMessageRef);
+                log("mr =" + mMessageRef);
             }
-            int origAddrLen = p.getByte();
-            if (origAddrLen != 0) mOrigAddr = p.getAddress(origAddrLen);
-            int destAddrLen = p.getByte();
-            if (destAddrLen != 0) mDestAddr = p.getAddress(destAddrLen);
-            mRpUserData = p.getUserData();
+            mOrigAddr = p.getAddress();
+            if (DBG) {
+                log("parseRpData :: originating Address =" + ImsLog.hiddenString(mOrigAddr));
+            }
+            mDestAddr = p.getAddress();
+            mRpUserData = p.getUserDataForRpData();
             if (mRpUserData == null) {
-                Rlog.e(TAG, "User Data returned null");
+                loge("parseRpData :: User Data returned null");
                 return;
             }
         } catch (RuntimeException ex) {
             mOrigAddr = null;
             mRpUserData = null;
-            Rlog.e(TAG, "RP Data parsing failed: " + ex.toString());
+            loge("parseRpData :: RP Data parsing failed: " + ex.toString());
         }
     }
 
@@ -263,23 +269,18 @@ public final class SmsRPdu {
         try {
             mMessageRef = p.getByte();
             if (DBG) {
-                Rlog.d(TAG, "mr =" + mMessageRef);
+                log("parseRpError :: mr =" + mMessageRef);
             }
             int causeLen = p.getByte();
             mRpCause = p.getByte();
-            if (causeLen > 1) {
-                // FIXME: handle Disgnostic information
-            }
-            int index = p.getIndex();
+            //Ignore and skip the diagnostic information if any and check for RP-UserData
+            int index = p.getIndex() + causeLen - 1;
             if (mRpdu.length <= index) return;
-            mRpUserData = p.getUserData();
-            if (mRpUserData == null) {
-                Rlog.e(TAG, "User Data returned null");
-                return;
-            }
+            for (int i = 1; i < causeLen; i++) p.getByte();
+            mRpUserData = p.getUserDataForRpAckOrRpError();
         } catch (RuntimeException ex) {
             mRpUserData = null;
-            Rlog.e(TAG, "RP Error parsing failed: " + ex.toString());
+            loge("parseRpError failed: " + ex.toString());
         }
     }
 
@@ -287,21 +288,15 @@ public final class SmsRPdu {
         try {
             mMessageRef = p.getByte();
             if (DBG) {
-                Rlog.d(TAG, "mr =" + mMessageRef);
+                log("parseRpAck :: mr =" + mMessageRef);
             }
 
             if (mRpdu.length <= 2) return;
 
-            mRpUserData = p.getUserData();
-
-            if (mRpUserData == null) {
-                Rlog.e(TAG, "User Data returned null");
-                return;
-            }
-
+            mRpUserData = p.getUserDataForRpAckOrRpError();
         } catch (RuntimeException ex) {
             mRpUserData = null;
-            Rlog.e(TAG, "RP Ack parsing failed: " + ex.toString());
+            loge("parseRpAck failed: " + ex.toString());
         }
     }
 
@@ -314,11 +309,14 @@ public final class SmsRPdu {
             mCur = 0;
         }
 
-        String getAddress(int len) {
+        String getAddress() {
+            int len;
             String ret;
+            // length of SC Address
+            len = getByte();
             if (len == 0) {
                 // no SC address
-                Rlog.i(TAG, "no sc address: ");
+                logi("getAddress :: no sc address");
                 ret = null;
             } else {
                 // SC address
@@ -329,10 +327,10 @@ public final class SmsRPdu {
                                     len,
                                     PhoneNumberUtils.BCD_EXTENDED_TYPE_CALLED_PARTY);
                     if (DBG) {
-                        Rlog.d(TAG, "sc address: " + ret);
+                        log("getAddress :: sc address = " + ImsLog.hiddenString(ret));
                     }
                 } catch (RuntimeException tr) {
-                    Rlog.e(TAG, "invalid SC address: " + tr.toString());
+                    loge("getAddress :: invalid SC address: " + tr.toString());
                     ret = null;
                 }
             }
@@ -348,17 +346,46 @@ public final class SmsRPdu {
             return mCur;
         }
 
-        byte[] getUserData() {
+        byte[] getUserDataForRpData() {
             byte[] ud = null;
             int udlen = getByte();
-            int octetLen = 1 + (udlen + 1) / 2;
-            if (octetLen > MAX_TPDU_LENGTH) {
-                Rlog.e(TAG, "TPDU Length exceeds Max Length");
+            if (udlen > MAX_TPDU_LENGTH) {
+                loge("TPDU Length exceeds Max Length");
                 return null;
             }
-            ud = Arrays.copyOfRange(mPdu, mCur, mPdu.length);
+            ud = Arrays.copyOfRange(mPdu, mCur, mCur + udlen);
             mCur += ud.length;
             return ud;
         }
+
+        byte[] getUserDataForRpAckOrRpError() {
+            byte[] ud = null;
+            //For RP-Ack and RPError the RP-UserData starts with Identifier 0x41(49)
+            int udIdentifier = getByte();
+            if (udIdentifier != RP_UD_IEI) {
+                loge("getUserDataForRpAckOrRpError :: Invalid RP-UserData IEI");
+                return null;
+            }
+            int udlen = getByte();
+            if (udlen > MAX_TPDU_LENGTH) {
+                loge("getUserDataForRpAckOrRpError :: TPDU Length exceeds Max Length");
+                return null;
+            }
+            ud = Arrays.copyOfRange(mPdu, mCur, mCur + udlen);
+            mCur += ud.length;
+            return ud;
+        }
+    }
+
+    private static void log(String s) {
+        ImsLog.d(TAG + s);
+    }
+
+    private static void loge(String s) {
+        ImsLog.e(TAG + s);
+    }
+
+    private static void logi(String s) {
+        ImsLog.i(TAG + s);
     }
 }
