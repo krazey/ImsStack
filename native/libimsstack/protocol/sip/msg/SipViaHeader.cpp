@@ -15,13 +15,10 @@
  */
 #include "IpAddress.h"
 #include "msg/SipAddrSpec.h"
-#include "platform/sip_pf_string.h"
-#include "platform/sip_pf_memory.h"
-#include "sip_error.h"
-#include "sip_debug.h"
+#include "platform/SipString.h"
+#include "SipDebug.h"
 #include "msg/SipViaHeader.h"
-#include "SipConfiguration.h"
-#include "msg/sip_msgutil.h"
+#include "msg/SipMsgUtil.h"
 
 SipViaHeader::SipViaHeader() :
         SipHeaderBase(SipHeaderBase::VIA),

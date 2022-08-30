@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sip_pf_datatypes.h"
 #include "msg/SipHeaderList.h"
 #include "msg/SipMessage.h"
-#include "msg/sip_msgutil.h"
-#include "sip_error.h"
-#include "sip_debug.h"
-#include "platform/sip_pf_string.h"
+#include "msg/SipMsgUtil.h"
+#include "SipDebug.h"
+#include "platform/SipString.h"
 
 extern SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(
         SIP_INT32, SipHeaderBase*);

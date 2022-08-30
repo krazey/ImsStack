@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
-#include "msg/sip_msgutil.h"
+#include "msg/SipMsgUtil.h"
 #include "msg/SipRequestDispositionHeader.h"
 
 extern SIP_CHAR gaszDirectivesArray[SIP_DIRECTIVE_SIZE][SIP_DIRECTIVE_LEN];

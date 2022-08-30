@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 #include "msg/SipParameters.h"
-#include "msg/SipAddrSpec.h"
-#include "msg/SipRequestLine.h"
-#include "platform/sip_pf_string.h"
-#include "platform/sip_pf_memory.h"
-#include "sip_debug.h"
-#include "sip_debug.h"
-#include "msg/sip_msgutil.h"
+#include "platform/SipString.h"
+#include "SipDebug.h"
+#include "msg/SipMsgUtil.h"
 
 SipParameterList::SipParameterList() :
         m_objPrmList(SipVector<SipNameValue*>())

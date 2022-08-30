@@ -13,23 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sip_pf_datatypes.h"
-#include "platform/sip_pf_memory.h"
-#include "platform/sip_pf_string.h"
-
-#include "SipConfiguration.h"
-
-#include "sip_error.h"
-#include "sip_debug.h"
+#include "SipDatatypes.h"
+#include "SipDebug.h"
+#include "SipStackError.h"
 
 #include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnFsmData.h"
 #include "txn/SipTxnTimerValues.h"
-
-#include "SipConfiguration.h"
-#include "SipUtil.h"
 #include "txn/SipTxnUtil.h"
 
 /* Timer D value */

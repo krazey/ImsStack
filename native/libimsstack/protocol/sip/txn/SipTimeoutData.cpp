@@ -15,7 +15,7 @@
  */
 #include "txn/SipTxn.h"
 #include "txn/SipTimeoutData.h"
-#include "sip_error.h"
+#include "SipStackError.h"
 
 SipTimeoutData::SipTimeoutData()
 {

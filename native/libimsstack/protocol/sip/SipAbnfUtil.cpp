@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sip_abnfUtil.h"
-#include "platform/sip_pf_memory.h"
+#include "SipAbnfUtil.h"
+#include "platform/SipMemory.h"
 
 SIP_BOOL HasSpace(const SIP_CHAR* pszValue)
 {

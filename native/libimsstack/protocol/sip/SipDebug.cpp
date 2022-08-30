@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sip_pf_datatypes.h"
-#include "platform/sip_pf_memory.h"
-#include "platform/sip_pf_string.h"
+#include "platform/SipString.h"
 
-#include "sip_debug.h"
+#include "SipDebug.h"
 #include "SipUtil.h"
 
 void SIP_DEBUG_LOG(SIP_UINT32 nCategory, SIP_CHAR* pszFilename, SIP_INT32 nLine,

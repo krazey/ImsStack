@@ -16,7 +16,7 @@
 #ifndef __SIP_REF_BASE_H__
 #define __SIP_REF_BASE_H__
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 
 /**
   This is a base class for all classes that intend to implement reference counting.

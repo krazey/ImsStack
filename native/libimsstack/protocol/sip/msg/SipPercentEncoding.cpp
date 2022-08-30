@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 #include "msg/SipPercentEncoding.h"
-#include "platform/sip_pf_string.h"
-#include "platform/sip_pf_memory.h"
-#include "sip_abnfUtil.h"
+#include "platform/SipString.h"
+#include "platform/SipMemory.h"
+#include "SipAbnfUtil.h"
 
 SIP_CHAR* SipPercentEncoding::DoPercentDecoding(SIP_CHAR* pszString)
 {

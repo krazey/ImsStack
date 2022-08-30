@@ -16,8 +16,7 @@
 #ifndef __SIP_DEBUG_H__
 #define __SIP_DEBUG_H__
 
-#include "sip_pf_datatypes.h"
-#include "sip_error.h"
+#include "SipDatatypes.h"
 
 #define SIP_DEBUG_ENABLE
 #define DEBUG_MSG_MAX_SIZE 500

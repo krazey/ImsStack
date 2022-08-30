@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
-#include "sip_abnfUtil.h"
+#include "SipAbnfUtil.h"
 #include "msg/SipAddrSpec.h"
 #include "msg/SipRequestLine.h"
 

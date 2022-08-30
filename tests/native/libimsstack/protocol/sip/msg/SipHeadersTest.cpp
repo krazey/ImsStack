@@ -15,7 +15,7 @@
  */
 #include <gtest/gtest.h>
 #include "msg/SipHeaders.h"
-#include "msg/sip_msgutil.h"
+#include "msg/SipMsgUtil.h"
 
 namespace android
 {

@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 #include "msg/SipStatusLine.h"
-#include "sip_pf_datatypes.h"
-#include "platform/sip_pf_memory.h"
-#include "sip_debug.h"
-#include "sip_error.h"
-#include "platform/sip_pf_string.h"
+#include "SipDatatypes.h"
+#include "SipDebug.h"
+#include "platform/SipString.h"
 #include "msg/SipMessage.h"
-#include "msg/sip_msgutil.h"
+#include "msg/SipMsgUtil.h"
 
 SipStatusLine::SipStatusLine(const SIP_CHAR* pszStatusCode, const SIP_CHAR* pszRsnPhrase) :
         m_pszSipVersion(SipPf_Strdup(SIP_SIPVER)),

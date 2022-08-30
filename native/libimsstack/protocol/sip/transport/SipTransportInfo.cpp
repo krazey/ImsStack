@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sip_pf_datatypes.h"
-#include "SipConfiguration.h"
 #include "transport/SipTransportInfo.h"
 
 SipTransportInfo::SipTransportInfo(

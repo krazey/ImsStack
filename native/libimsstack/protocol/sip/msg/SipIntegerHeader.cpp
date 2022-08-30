@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 #include "msg/SipIntegerHeader.h"
-#include "msg/sip_msgutil.h"
-#include "platform/sip_pf_string.h"
-#include "sip_debug.h"
-#include "sip_error.h"
+#include "msg/SipMsgUtil.h"
+#include "platform/SipString.h"
+#include "SipDebug.h"
 
 #define MAX_LEN 20
 

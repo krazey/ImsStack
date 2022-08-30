@@ -16,7 +16,7 @@
 #ifndef __ISIPTIMERUTIL_H__
 #define __ISIPTIMERUTIL_H__
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 
 typedef SIP_VOID (*SipTimerCallback)(SIP_VOID* pvData, SIP_VOID* pvTimerId);
 

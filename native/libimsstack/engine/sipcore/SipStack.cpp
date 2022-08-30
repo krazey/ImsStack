@@ -29,7 +29,7 @@
 #include "SipTxnKey.h"
 #include "SipUtil.h"
 #include "SipUtils.h"
-#include "msg/sip_msgutil.h"
+#include "msg/SipMsgUtil.h"
 #include "txn/SipTimeoutData.h"
 
 __IMS_TRACE_TAG_SIP__;

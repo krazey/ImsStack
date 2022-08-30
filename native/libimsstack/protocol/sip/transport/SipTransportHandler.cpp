@@ -16,11 +16,10 @@
 #include "transport/SipTransportHandler.h"
 #include "transport/SipTransportInfo.h"
 #include "transport/SipTransportParameter.h"
-#include "sip_debug.h"
-#include "platform/sip_pf_string.h"
-#include "sip_error.h"
-#include "platform/sip_pf_memory.h"
-#include "SipUtil.h"
+#include "SipDebug.h"
+#include "SipStackError.h"
+#include "platform/SipString.h"
+#include "platform/SipMemory.h"
 
 /*****************************************************************************
   Macro

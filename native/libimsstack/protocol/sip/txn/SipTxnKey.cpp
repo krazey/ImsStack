@@ -15,10 +15,9 @@
  */
 #include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
-#include "sip_error.h"
-#include "sip_debug.h"
-#include "platform/sip_pf_string.h"
-#include "platform/sip_pf_memory.h"
+#include "SipStackError.h"
+#include "SipDebug.h"
+#include "platform/SipString.h"
 
 SipTxnKey::SipTxnKey() :
         m_nRSeqNum(SIP_ZERO),

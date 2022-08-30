@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 #include "txn/SipTxn.h"
-#include "txn/sip_txn_fsm.h"
+#include "txn/SipTxnFsm.h"
 
 #include "SipConfiguration.h"
-#include "sip_debug.h"
+#include "SipDebug.h"
 #include "SipUtil.h"
-#include "platform/sip_pf_string.h"
+#include "platform/SipString.h"
 #include "txn/SipTimeoutData.h"
-#include "msg/sip_msgutil.h"
+#include "SipStackError.h"
 
 #ifdef SIP_TRACE_ENABLE
 static SIP_CHAR szInvClientTxnFsmSt[SipTxn::INV_CLI_INVALID_ST + 1][SIP_15] = {

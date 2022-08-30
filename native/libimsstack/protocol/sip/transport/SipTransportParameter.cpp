@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "platform/sip_pf_string.h"
+#include "platform/SipString.h"
 #include "transport/SipTransportParameter.h"
 
 SipTransportParameter::SipTransportParameter(SipTransportParameter* pTranspParam) :

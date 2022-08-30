@@ -16,7 +16,7 @@
 #ifndef __SIP_ABNFUTIL_H__
 #define __SIP_ABNFUTIL_H__
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 
 #define SPACE                      ' '
 #define COLON                      ':'

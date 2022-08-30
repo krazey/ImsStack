@@ -16,7 +16,7 @@
 #ifndef __ISIP_DEFNETWORKUTIL_H__
 #define __ISIP_DEFNETWORKUTIL_H__
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 #include "ISipNetworkUtil.h"
 
 class SipDefNetworkUtil : public ISipNetworkUtil

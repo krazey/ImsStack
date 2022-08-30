@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
-#include "sip_abnfUtil.h"
+#include "SipAbnfUtil.h"
 #include "msg/SipStatusLine.h"
-#include "msg/sip_msgutil.h"
+#include "msg/SipMsgUtil.h"
 
 namespace android
 {

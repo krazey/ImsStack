@@ -18,7 +18,7 @@
 
 #include "AStringBuffer.h"
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 #include "SipRefBase.h"
 #include "msg/SipParameters.h"
 #include "msg/IParameterComponent.h"

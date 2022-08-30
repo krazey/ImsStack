@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sip_error.h"
-#include "sip_debug.h"
-#include "platform/sip_pf_string.h"
+#include "SipDebug.h"
+#include "platform/SipString.h"
 #include "SipConfiguration.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnTimerValues.h"

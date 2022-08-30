@@ -16,7 +16,7 @@
 #ifndef __SIP_MSG_BODY_H__
 #define __SIP_MSG_BODY_H__
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 #include "SipRefBase.h"
 #include "msg/SipContentTypeHeader.h"
 #include "msg/SipHeaderList.h"

@@ -17,9 +17,9 @@
 #define __STACK_HEADERS_H__
 
 #include "msg/SipHeaderBase.h"
-#include "sip_debug.h"
+#include "SipDebug.h"
 #include "msg/SipMsgBody.h"
-#include "msg/sip_msgutil.h"
+#include "msg/SipMsgUtil.h"
 #include "SipStackManager.h"
 #include "SipContextUtils.h"
 #include "SipConfiguration.h"

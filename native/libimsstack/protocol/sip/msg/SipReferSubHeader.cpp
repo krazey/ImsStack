@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 #include "msg/SipReferSubHeader.h"
-#include "sip_error.h"
-#include "sip_debug.h"
-#include "platform/sip_pf_string.h"
-#include "SipConfiguration.h"
-#include "msg/sip_msgutil.h"
+#include "SipDebug.h"
+#include "platform/SipString.h"
 
 SipReferSubHeader::SipReferSubHeader() :
         SipHeaderBase(SipHeaderBase::REFER_SUB)

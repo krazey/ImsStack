@@ -15,7 +15,7 @@
  */
 #include <gtest/gtest.h>
 #include "msg/SipHeaderBase.h"
-#include "sip_abnfUtil.h"
+#include "SipAbnfUtil.h"
 
 namespace android
 {

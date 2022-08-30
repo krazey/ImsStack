@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sip_debug.h"
+#include "SipDebug.h"
 #include "msg/SipPrivacyHeader.h"
-#include "msg/sip_msgutil.h"
-#include "platform/sip_pf_string.h"
+#include "msg/SipMsgUtil.h"
+#include "platform/SipString.h"
 
 SipPrivacyHeader::SipPrivacyHeader() :
         SipHeaderBase(SipHeaderBase::PRIVACY),

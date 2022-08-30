@@ -16,7 +16,7 @@
 #ifndef __SIP_HEADERS_H__
 #define __SIP_HEADERS_H__
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 #include "SipRefBase.h"
 #include "msg/SipHeaderBase.h"
 #include "msg/SipHeaderList.h"

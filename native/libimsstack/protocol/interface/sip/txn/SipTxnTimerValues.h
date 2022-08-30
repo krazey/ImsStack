@@ -16,7 +16,7 @@
 #ifndef _SIP_TXN_TIMER_VALUES_H
 #define _SIP_TXN_TIMER_VALUES_H
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 
 class SipTxnTimerValues
 {

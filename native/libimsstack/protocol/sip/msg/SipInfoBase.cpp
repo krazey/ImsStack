@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 #include "msg/SipInfoBase.h"
-#include "sip_debug.h"
-#include "msg/sip_msgutil.h"
-#include "platform/sip_pf_string.h"
+#include "SipDebug.h"
+#include "msg/SipMsgUtil.h"
+#include "platform/SipString.h"
 
 SipInfoBase::SipInfoBase(SIP_INT32 eHdrType) :
         SipHeaderBase(eHdrType)

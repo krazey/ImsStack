@@ -16,11 +16,11 @@
 #include "txn/SipTxn.h"
 #include "msg/SipMessage.h"
 #include "txn/SipTxnHandler.h"
-#include "sip_debug.h"
-#include "txn/sip_txn_fsm.h"
-#include "platform/sip_pf_string.h"
+#include "SipDebug.h"
+#include "txn/SipTxnFsm.h"
 #include "SipUtil.h"
-#include "SipContextUtils.h"
+#include "SipStackError.h"
+#include "SipTxnContext.h"
 
 #ifdef SIP_TRACE_ENABLE
 static SIP_CHAR gszTxnTypeStr[SipTxn::INVALID_TXN + 1][SIP_20] = {

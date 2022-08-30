@@ -17,7 +17,7 @@
 #include "msg/SipHeaders.h"
 #include "msg/SipIntegerHeader.h"
 #include "msg/SipParameters.h"
-#include "msg/sip_msgutil.h"
+#include "msg/SipMsgUtil.h"
 
 namespace android
 {

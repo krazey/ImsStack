@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 #include "msg/SipWarningHeader.h"
-#include "sip_error.h"
-#include "sip_debug.h"
-#include "platform/sip_pf_string.h"
-#include "SipConfiguration.h"
-#include "msg/sip_msgutil.h"
+#include "SipDebug.h"
+#include "platform/SipString.h"
+#include "msg/SipMsgUtil.h"
 
 #define MAX_WARN_LEN 12
 

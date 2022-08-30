@@ -25,7 +25,7 @@
 #include "SipStackManager.h"
 #include "SipStatusCode.h"
 #include "SipTxnKey.h"
-#include "sip_error.h"
+#include "SipStackError.h"
 #include "msg/SipMessage.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"

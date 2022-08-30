@@ -16,7 +16,7 @@
 #ifndef __ISIPLOGGERUTIL_H__
 #define __ISIPLOGGERUTIL_H__
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 
 class ISipLoggerUtil
 {

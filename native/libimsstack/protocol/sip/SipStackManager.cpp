@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sip_pf_datatypes.h"
-#include "platform/sip_pf_memory.h"
+#include "platform/SipMemory.h"
 #include "txn/SipTxn.h"
 #include "transport/SipTransportInfo.h"
 #include "SipStackManager.h"
 #include "txn/SipTxnHandler.h"
 #include "transport/SipTransportHandler.h"
-#include "sip_debug.h"
+#include "SipDebug.h"
 #include "SipUtil.h"
 #include "SipMessageBuffer.h"
 

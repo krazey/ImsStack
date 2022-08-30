@@ -18,7 +18,7 @@
 
 #include <assert.h>
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 #include "msg/SipParameters.h"
 #include "msg/SipAddrSpec.h"
 #include "SipPercentEncoding.h"

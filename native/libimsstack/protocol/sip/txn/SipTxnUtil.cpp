@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-#include "sip_error.h"
-#include "sip_debug.h"
-#include "platform/sip_pf_string.h"
-#include "platform/sip_pf_memory.h"
-
+#include "SipDebug.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnUtil.h"
-#include "msg/sip_msgutil.h"
-
-#include "IMSTypeDef.h"
 
 extern SIP_VOID Sip_Cbk_DisplayTxnKey(IN SIP_VOID* pvTxnKey);
 

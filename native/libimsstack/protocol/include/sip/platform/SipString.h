@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __SIP_PF_STRING_H__
-#define __SIP_PF_STRING_H__
+#ifndef __SIP_STRING_H__
+#define __SIP_STRING_H__
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,4 +60,4 @@ SIP_CHAR* SipPf_Strrchr(SIP_CHAR* pszSource, SIP_CHAR cChar);
 
 SIP_CHAR* SipPf_StripFileName(SIP_CHAR* pszFileName);
 
-#endif /*__SIP_PF_STRING_H__ */
+#endif /*__SIP_STRING_H__ */

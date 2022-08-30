@@ -15,13 +15,9 @@
  */
 #include "IpAddress.h"
 #include "msg/SipAddrSpec.h"
-#include "platform/sip_pf_string.h"
-#include "platform/sip_pf_memory.h"
-#include "sip_error.h"
-#include "sip_debug.h"
-#include "msg/SipHeaderBase.h"
-#include "msg/SipMessage.h"
-#include "msg/sip_msgutil.h"
+#include "platform/SipString.h"
+#include "SipDebug.h"
+#include "msg/SipMsgUtil.h"
 
 #define SIP_SIP_ENC  "sip:"
 #define SIP_SIPS_ENC "sips:"

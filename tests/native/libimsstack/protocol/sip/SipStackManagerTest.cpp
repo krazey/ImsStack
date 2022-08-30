@@ -23,7 +23,7 @@
 #include "SipStackCallback.h"
 #include "SipTxnContext.h"
 #include "SipUtil.h"
-#include "sip_error.h"
+#include "SipStackError.h"
 
 SipTxn* pTxn = SIP_NULL;
 

@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipAddrSpec.h"
-#include "platform/sip_pf_string.h"
-#include "platform/sip_pf_memory.h"
-#include "sip_error.h"
-#include "sip_debug.h"
+#include "platform/SipString.h"
+#include "SipDebug.h"
 #include "msg/SipRAcKHeader.h"
-#include "SipConfiguration.h"
-#include "msg/sip_msgutil.h"
+#include "msg/SipMsgUtil.h"
 
 SipRAcKHeader::SipRAcKHeader() :
         SipHeaderBase(SipHeaderBase::RACK),

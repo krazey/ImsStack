@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sip_debug.h"
-#include "platform/sip_pf_memory.h"
-#include "platform/sip_pf_string.h"
-#include "msg/sip_msgutil.h"
+#include "SipDebug.h"
+#include "platform/SipMemory.h"
+#include "platform/SipString.h"
+#include "msg/SipMsgUtil.h"
 #include "msg/SipMessage.h"
 #include <ctype.h>
 

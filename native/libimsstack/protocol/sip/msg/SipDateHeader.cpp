@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 #include "msg/SipDateHeader.h"
-#include "platform/sip_pf_string.h"
-#include "sip_debug.h"
-#include "msg/sip_msgutil.h"
-#include "platform/sip_pf_string.h"
+#include "platform/SipString.h"
+#include "SipDebug.h"
+#include "msg/SipMsgUtil.h"
 
 #define MAX_WEEK_LEN  3
 #define MAX_MONTH_LEN 3

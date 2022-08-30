@@ -13,12 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sip_pf_datatypes.h"
-#include "platform/sip_pf_memory.h"
-#include "platform/sip_pf_string.h"
-
-#include "sip_error.h"
-
 #include "SipConfiguration.h"
 
 // 3GPP-based timer intervals

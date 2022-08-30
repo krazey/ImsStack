@@ -16,7 +16,7 @@
 #ifndef __SIP_TRANSPORT_BUFFER_H__
 #define __SIP_TRANSPORT_BUFFER_H__
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 
 class SipTransportBuffer
 {

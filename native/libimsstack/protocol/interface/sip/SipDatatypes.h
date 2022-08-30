@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _SIP_PF_DATATYPES_H_
-#define _SIP_PF_DATATYPES_H_
+#ifndef _SIP_DATATYPES_H_
+#define _SIP_DATATYPES_H_
 
 #define SIP_NULL             (0)
 #define SIP_INVALID          -1
@@ -157,4 +157,4 @@ typedef unsigned int SIP_SIZE_T;
 
 #endif  // defined(__LP64__)
 
-#endif  //_SIP_PF_DATATYPES_H_
+#endif  //_SIP_DATATYPES_H_

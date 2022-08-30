@@ -17,7 +17,7 @@
 
 #include "SipUtil.h"
 #include "txn/SipTxn.h"
-#include "txn/sip_txn_fsm.h"
+#include "txn/SipTxnFsm.h"
 #include "txn/SipTxnFsmData.h"
 #include "txn/SipTxnUtil.h"
 #include "transport/SipTransportInfo.h"

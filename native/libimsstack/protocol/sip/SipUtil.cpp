@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sip_pf_datatypes.h"
-#include "platform/sip_pf_string.h"
+#include "SipDatatypes.h"
 
 #include "SipUtil.h"
-#include "sip_error.h"
 
 #include "SipDefTimerUtil.h"
 #include "SipDefLoggerUtil.h"
 #include "SipDefNetworkUtil.h"
-#include "msg/sip_msgutil.h"
+#include "msg/SipMsgUtil.h"
 
 static SipUtil *gpUtil = SIP_NULL;
 

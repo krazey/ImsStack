@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __SIP_ERROR_H__
-#define __SIP_ERROR_H__
+#ifndef __SIP_STACK_ERROR_H__
+#define __SIP_STACK_ERROR_H__
 
 #define SIP_ERRORCODES_START     100
 #define SIP_ERRORCODES_GAP       100
@@ -323,4 +323,4 @@ typedef enum _SipEn_ErrorTypes
     ETXN_INVALID = -1
 } SipEn_ErrorTypes;
 
-#endif  //__SIP_ERROR_H__
+#endif  //__SIP_STACK_ERROR_H__

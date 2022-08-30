@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipHeaderBase.h"
 #include "msg/SipAuthBase.h"
 #include "msg/SipParameters.h"
-#include "sip_error.h"
-#include "sip_debug.h"
-#include "SipConfiguration.h"
-#include "msg/sip_msgutil.h"
-#include "platform/sip_pf_string.h"
+#include "SipDebug.h"
+#include "msg/SipMsgUtil.h"
+#include "platform/SipString.h"
 
 SipAuthBase::SipAuthBase(SIP_INT32 eHdrType) :
         SipHeaderBase(eHdrType),

@@ -21,7 +21,6 @@
 #include "msg/SipHeaders.h"
 #include "msg/SipMsgBody.h"
 #include "msg/SipRequestLine.h"
-#include "SipConfiguration.h"
 #ifdef SIP_BADMESSAGE_PARSING
 #include "msg/SipBadHeader.h"
 #endif

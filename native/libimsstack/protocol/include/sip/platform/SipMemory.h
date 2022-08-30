@@ -13,23 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sip_pf_datatypes.h"
-#include "platform/sip_pf_memory.h"
-#include <malloc.h>
-#include <memory.h>
-#include <string.h>
+#ifndef __SIP_MEMORY_H__
+#define __SIP_MEMORY_H__
 
-SIP_VOID SipPf_Memset(SIP_VOID* pvMem_block, SIP_UCHAR uChars, SIP_SIZE_T nSize)
-{
-    memset(pvMem_block, uChars, nSize);
-}
+#include "SipDatatypes.h"
 
-SIP_VOID SipPf_Memcpy(SIP_VOID* pvMem_Dest, const SIP_VOID* pvMem_Source, SIP_SIZE_T nSize)
-{
-    memcpy(pvMem_Dest, pvMem_Source, nSize);
-}
+SIP_VOID SipPf_Memset(SIP_VOID* pvMem_block, SIP_UCHAR cChars, SIP_SIZE_T nSize);
 
-SIP_UINT32 SipPf_Memcmp(const SIP_VOID* pvMem1, const SIP_VOID* pvMem2, SIP_SIZE_T nSize)
-{
-    return (memcmp(pvMem1, pvMem2, nSize));
-}
+SIP_VOID SipPf_Memcpy(SIP_VOID* pvMem_Dest, const SIP_VOID* pvMem_Source, SIP_SIZE_T nSize);
+
+SIP_UINT32 SipPf_Memcmp(const SIP_VOID* pvMem1, const SIP_VOID* pvMem2, SIP_SIZE_T nSize);
+
+#endif /*__SIP_MEMORY_H__*/

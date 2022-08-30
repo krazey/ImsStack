@@ -16,7 +16,7 @@
 #ifndef __ISIPNETWORKUTIL_H__
 #define __ISIPNETWORKUTIL_H__
 
-#include "sip_pf_datatypes.h"
+#include "SipDatatypes.h"
 #include "ISipUserData.h"
 #include "transport/SipTransportBuffer.h"
 #include "transport/SipTransportParameter.h"
