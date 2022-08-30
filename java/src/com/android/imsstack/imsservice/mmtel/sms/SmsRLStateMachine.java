@@ -23,6 +23,7 @@ import android.util.Base64;
 
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
+import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.ByteArrayOutputStream;
@@ -41,11 +42,24 @@ public class SmsRLStateMachine {
     public int mMessageType;
     public int mRetryCount = 0;
     public SmsRPdu mRPduData;
-    private Runnable mTR1TimerHandler = null;
-    private Runnable mTR2TimerHandler = null;
     public String mPSISmsc;
     public String mDestinationAddress;
     public int mTpMr;
+
+    protected Runnable mTR1TimerHandler = new Runnable() {
+        @Override
+        public void run() {
+            onTR1TimerExpired();
+        }
+    };
+
+    protected Runnable mTR2TimerHandler = new Runnable() {
+        @Override
+        public void run() {
+            onTR2TimerExpired();
+        }
+    };
+
 
     public SmsRLStateMachine(int token, int messageType, MtsController mtsController,
                                     ImsCallContext context, SmsRelayLayer.Listener listener,
@@ -196,12 +210,7 @@ public class SmsRLStateMachine {
                     Rlog.e(TAG, "Listener is null");
                     return SmsUtils.SMSRL_RESULT_FAILURE;
                 }
-                smsRLStateMachine.mTR2TimerHandler = new Runnable() {
-                    @Override
-                    public void run() {
-                        smsRLStateMachine.onTR2TimerExpired();
-                    }
-                };
+
                 /** Framework's TPdu Parser expects the TPdu be prepended with SC-Address.
                  * else the parser will throw exception. So prepending TPdu with
                  * RP-OriginatingAdrress.
@@ -263,12 +272,7 @@ public class SmsRLStateMachine {
                     return SmsUtils.SMSRL_RESULT_MTS_CONTROLLER_FAILED;
                 }
                 smsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
-                smsRLStateMachine.mTR1TimerHandler = new Runnable() {
-                    @Override
-                    public void run() {
-                        smsRLStateMachine.onTR1TimerExpired();
-                    }
-                };
+
                 if (smsRLStateMachine.mHandler != null) {
                     //set TR1 timer
                     smsRLStateMachine.mHandler.postDelayed(smsRLStateMachine.mTR1TimerHandler,
