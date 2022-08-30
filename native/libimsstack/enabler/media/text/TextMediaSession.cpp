@@ -106,24 +106,13 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
             m_objTextConfig.getRemoteAddress().c_str(), m_objTextConfig.getRemotePort(),
             m_objTextConfig.getMediaDirection());
 
-    RtcpConfig* pRtcpConfig = new RtcpConfig();
-    pRtcpConfig->setCanonicalName(android::String8("Canonical_Name")); /** TODO_MEDIA */
-    pRtcpConfig->setTransmitPort(pNegoProfile->nControlPort);
+    RtcpConfig objRtcpConfig;
+    objRtcpConfig.setCanonicalName(android::String8("Canonical_Name")); /** TODO_MEDIA */
+    objRtcpConfig.setTransmitPort(pNegoProfile->nControlPort);
+    objRtcpConfig.setIntervalSec(pNegoProfile->nRtcpInterval);
+    objRtcpConfig.setRtcpXrBlockTypes(0);
+    m_objTextConfig.setRtcpConfig(objRtcpConfig);
 
-    if (pNegoProfile->nBandwidthRs == 0 && pNegoProfile->nBandwidthRr == 0)
-    {
-        pRtcpConfig->setIntervalSec(0);
-    }
-    else
-    {
-        pRtcpConfig->setIntervalSec(pNegoProfile->nRtcpInterval);
-    }
-
-    pRtcpConfig->setRtcpXrBlockTypes(0);
-    m_objTextConfig.setRtcpConfig(*pRtcpConfig);
-    delete pRtcpConfig;
-
-    RtcpConfig objRtcpConfig = m_objTextConfig.getRtcpConfig();
     IMS_TRACE_D("UpdateRtpConfig() - RTCP CanonicalName[%s], RtcpXrBlockTypes[%d]",
             objRtcpConfig.getCanonicalName().c_str(), objRtcpConfig.getRtcpXrBlockTypes(), 0);
     IMS_TRACE_D("UpdateRtpConfig() - RTCP TransmitPort[%d], IntervalSec[%d]",
@@ -173,6 +162,10 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
     }
 
     m_objTextConfig.setKeepRedundantLevel(pLocalProfile->bKeepRedLevel);
+
+    IMS_TRACE_D("UpdateRtpConfig() - CodecType[%d], RedPayload[%d], RedLevel[%d]",
+            m_objTextConfig.getCodecType(), m_objTextConfig.getRedundantPayload(),
+            m_objTextConfig.getRedundantLevel());
     return IMS_TRUE;
 }
 

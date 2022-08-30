@@ -747,7 +747,7 @@ PRIVATE MEDIA_DIRECTION VideoNego::NegotiateOffer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    // Make a negotiated profile from Src&Dest profile
+    // Make a negotiated profile from Local & Peer profile
     pNewOaModel->pNegotiatedProfile = new VideoProfile();
 
     if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_TRUE,
@@ -798,7 +798,7 @@ PRIVATE MEDIA_DIRECTION VideoNego::NegotiateAnswer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    // Make a negotiated profile from Src&Dest profile
+    // Make a negotiated profile from Local & Peer profile
     pNewOaModel->pNegotiatedProfile = new VideoProfile();
     if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_FALSE,
                 pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
