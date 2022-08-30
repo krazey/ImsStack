@@ -29,6 +29,7 @@ cc_test {
         "libimsstack_platform_headers",
         "libimsstack_platform_os_android_system-intf_headers",
         "libimsstack_test_enabler_headers",
+        "libimsstack_test_platform_headers",
         "libimsmedia_config_headers",
     ],
     static_libs: [
