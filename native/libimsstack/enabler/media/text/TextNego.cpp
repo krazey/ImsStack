@@ -785,6 +785,7 @@ PRIVATE MEDIA_DIRECTION TextNego::NegotiateOffer(
 
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = new TextProfile();
+
     if (MakeProfileFromSDP(pSessionDescriptor, pDescriptor, pNewOaModel->pPeerProfile) != IMS_TRUE)
     {
         IMS_TRACE_E(0, "NegotiateOffer() - MakeProfileFromSDP failed", 0, 0, 0);
@@ -792,8 +793,9 @@ PRIVATE MEDIA_DIRECTION TextNego::NegotiateOffer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    // Make a negotiated profile from Src&Dest profile
+    // Make a negotiated profile from Local & Peer profile
     pNewOaModel->pNegotiatedProfile = new TextProfile();
+
     if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_TRUE,
                 pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
     {
@@ -847,7 +849,7 @@ MEDIA_DIRECTION TextNego::NegotiateAnswer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    // Make a negotiated profile from Src&Dest profile
+    // Make a negotiated profile from Local & Peer profile
     pNewOaModel->pNegotiatedProfile = new TextProfile();
 
     if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_FALSE,
@@ -1309,6 +1311,11 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
         {
             IMS_TRACE_E(0, "There's no Payload in LocalProfile", 0, 0, 0);
         }
+    }
+
+    if (pNegotiatedProfile->nBandwidthRs != 0 || pNegotiatedProfile->nBandwidthRr != 0)
+    {
+        pNegotiatedProfile->nRtcpInterval = pLocalProfile->nRtcpInterval;
     }
 
     IMS_TRACE_D("MakeNegotiatedProfile() - negotiated payload size[%d], port[%d], direction[%d], ",
