@@ -141,15 +141,14 @@ IMS_BOOL UpdatingInfo::IsResumedBy()
 PUBLIC
 IMS_BOOL UpdatingInfo::IsNeedToAlert()
 {
+    if (IsModified())
+    {
+        return IMS_TRUE;
+    }
+
     if (IsHeldBy() || IsResumedBy())
     {
         return IMS_FALSE;
-    }
-
-    ISession& objSession = m_objContext.GetSession()->GetISession();
-    if (GetCurrentCallType() != m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession))
-    {
-        return IMS_TRUE;
     }
 
     if (m_objNegotiatedInfo.eVDir != m_objAlertingInfo.eVDir)
@@ -207,6 +206,25 @@ IMS_BOOL UpdatingInfo::IsModified()
     }
 
     return IMS_FALSE;
+}
+
+PUBLIC
+void UpdatingInfo::AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo)
+{
+    if (objMediaInfo.eADir != DIRECTION_INVALID)
+    {
+        objMediaInfo.eADir = m_objAlertingInfo.eADir;
+    }
+
+    if (objMediaInfo.eVDir != DIRECTION_INVALID)
+    {
+        objMediaInfo.eVDir = m_objAlertingInfo.eVDir;
+    }
+
+    if (objMediaInfo.eTDir != DIRECTION_INVALID)
+    {
+        objMediaInfo.eTDir = m_objAlertingInfo.eTDir;
+    }
 }
 
 PRIVATE

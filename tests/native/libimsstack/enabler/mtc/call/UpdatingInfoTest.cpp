@@ -445,6 +445,30 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfCallTypeIsChanged)
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsNeedToAlert());
 }
 
+TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfCallTypeIsChangedAndResumedBySimultaneously)
+{
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
+    objModifiedInfo.eADir = DIRECTION_INVALID;
+    objModifyingInfo.eADir = DIRECTION_INVALID;
+
+    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
+    objAlertingInfo.eADir = DIRECTION_SEND_RECEIVE;
+
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsResumedBy());
+
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VOIP));
+
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsNeedToAlert());
+}
+
 TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsChanging)
 {
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
