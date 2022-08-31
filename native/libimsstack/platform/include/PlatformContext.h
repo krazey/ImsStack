@@ -43,6 +43,7 @@ public:
         SERVICE_EVENT,
         SERVICE_NETWORK,
         SERVICE_NETWORK_POLICY,
+        SERVICE_RADIO,
         SERVICE_MAX
     };
 
