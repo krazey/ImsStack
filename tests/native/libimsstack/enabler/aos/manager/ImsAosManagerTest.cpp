@@ -50,6 +50,7 @@ TEST_F(ImsAosManagerTest, GetImsAos)
 TEST_F(ImsAosManagerTest, GetImsAosList)
 {
     EXPECT_EQ(IMSList<IImsAos*>(), pImsAosManager->GetImsAosList("ims.app.mtc", "ims.service.mtc"));
+    EXPECT_EQ(IMSList<IImsAos*>(), pImsAosManager->GetImsAosList("ims.app.mtc"));
 }
 
 TEST_F(ImsAosManagerTest, OnMessage)
