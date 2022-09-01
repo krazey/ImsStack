@@ -24,6 +24,9 @@ import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.enabler.mtc.MtcApp;
+import com.android.imsstack.imsservice.mmtel.ImsCallApp;
+import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
@@ -37,6 +40,7 @@ public final class ImsTestHelper {
     private static ImsTestHelper sImsTestHelper = null;
 
     private static final String INTENT_AOS_TEST = "com.android.imsstack.action.INTENT_AOS_TEST";
+    private static final String INTENT_SRVCC_TEST = "com.android.imsstack.action.INTENT_SRVCC_TEST";
 
     private Context mContext;
     private ImsTestHelperReceiver mReceiver;
@@ -69,6 +73,7 @@ public final class ImsTestHelper {
 
         public ImsTestHelperReceiver() {
             mIntentFilter.addAction(INTENT_AOS_TEST);
+            mIntentFilter.addAction(INTENT_SRVCC_TEST);
         }
 
         public IntentFilter getFilter() {
@@ -89,6 +94,8 @@ public final class ImsTestHelper {
                 } else if (strEvent.equalsIgnoreCase("vops")) {
                     sendVopsChanged(intent.getIntExtra("state", 0));
                 }
+            } else if (action.equals(INTENT_SRVCC_TEST)) {
+                sendSrvccEvent(intent.getIntExtra("type", -1));
             }
         }
 
@@ -153,6 +160,23 @@ public final class ImsTestHelper {
             ImsLog.d("sendVopsChanged :: nState=" + nState);
 
             iSystem.notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE, nState, 0);
+        }
+
+        //SRVCC
+        private void sendSrvccEvent(int state) {
+            ImsLog.d("sendSrvccEvent :: nState=" + state);
+
+            ImsServiceManager sm = ImsServiceManager.getDefault();
+            ImsCallApp callApp = sm.getCallApp(0);
+            if (callApp == null) {
+                return;
+            }
+
+            MtcApp mtcApp = callApp.getCallManager().getMtcApp();
+            if (mtcApp == null) {
+                return;
+            }
+            mtcApp.notifySrvccStateChanged(state);
         }
     }
 }
