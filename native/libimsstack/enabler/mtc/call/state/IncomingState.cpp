@@ -45,16 +45,6 @@ PUBLIC VIRTUAL IncomingState::~IncomingState()
     IMS_TRACE_D("~IncomingState", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL CallStateName IncomingState::HandleSrvccSuccess()
-{
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL CallStateName IncomingState::HandleSrvccFailure(IN UpdateType /* eUpdateType */)
-{
-    return GetStateName();
-}
-
 PUBLIC VIRTUAL CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
@@ -280,4 +270,22 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnMediaFailed(IN const CallReasonInf
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
     return RejectIncomingAndToTerminating(objReason);
+}
+
+PROTECTED VIRTUAL CallStateName IncomingState::SendUpdateBySrvcc(IN UpdateType eType)
+{
+    IMtcSession* piMtcSession = m_objContext.GetSession();
+    if (piMtcSession == IMS_NULL)
+    {
+        return GetStateName();
+    }
+
+    ISession& objSession = piMtcSession->GetISession();
+
+    if (m_objContext.GetMediaManager().GetNegotiationState(&objSession) ==
+            NegotiationState::STATE_NEGOTIATED)
+    {
+        piMtcSession->SendEarlyUpdate(eType);
+    }
+    return GetStateName();
 }

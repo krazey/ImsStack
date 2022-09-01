@@ -34,6 +34,7 @@
 #include "call/state/MtcCallState.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "helper/IMtcAosConnector.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
@@ -153,32 +154,6 @@ PUBLIC VIRTUAL CallStateName MtcCallState::StartConference(IN CallType /* eCallT
 
 PUBLIC VIRTUAL CallStateName MtcCallState::StartConference(IN CallType /* eCallType */,
         IN const AString& /* strTarget */, IN const ImsList<ConfUser*>& /* lstUsers */)
-{
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL CallStateName MtcCallState::HandleSrvccSuccess()
-{
-    switch (GetStateName())
-    {
-        case CallStateName::IDLE:
-        case CallStateName::OUTGOING:
-        case CallStateName::INCOMING:
-        case CallStateName::ALERTING:
-            m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_NONE));
-            break;
-        case CallStateName::ESTABLISHED:
-        case CallStateName::UPDATING:
-            m_objContext.GetUiNotifier().SendTerminated(CallReasonInfo(CODE_NONE));
-            break;
-        case CallStateName::TERMINATING:
-            break;
-    }
-
-    return CallStateName::TERMINATING;
-}
-
-PUBLIC VIRTUAL CallStateName MtcCallState::HandleSrvccFailure(IN UpdateType /* eUpdateType */)
 {
     return GetStateName();
 }
@@ -462,6 +437,26 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnReceivingNetworkToneFailed()
 PUBLIC VIRTUAL CallStateName MtcCallState::OnMediaFailed(IN const CallReasonInfo& /* objReason */)
 {
     return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::OnSrvccStateUpdated(IN SrvccState eState)
+{
+    switch (eState)
+    {
+        case SrvccState::IDLE:
+            return GetStateName();
+        case SrvccState::STARTED:
+            return HandleSrvccStarted();
+        case SrvccState::SUCCEEDED:
+        {
+            const CallReasonInfo objReason(CODE_LOCAL_VCC_ON_PROGRESSING);
+            return Terminate(objReason);
+        }
+        case SrvccState::FAILED:
+            return SendUpdateBySrvcc(UpdateType::SRVCC_RECOVERED_FAILURE);
+        case SrvccState::CANCELED:
+            return SendUpdateBySrvcc(UpdateType::SRVCC_RECOVERED_CANCEL);
+    }
 }
 
 PROTECTED
@@ -986,4 +981,21 @@ CallReasonInfo MtcCallState::GetAudioInactivityReasonOnTermination(
     IMS_TRACE_D("GetAudioInactivityReasonOnTermination", 0, 0, 0);
 
     return CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_RTP_TIMEOUT);
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsNeedToIgnoreStartFailure() const
+{
+    if (m_objContext.GetService().GetSrvccState() != SrvccState::STARTED)
+    {
+        return IMS_FALSE;
+    }
+
+    IMtcAosConnector* pConnector = m_objContext.GetService().GetAosConnector();
+    if (pConnector == IMS_NULL || pConnector->IsImsConnected() == IMS_TRUE)
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
 }

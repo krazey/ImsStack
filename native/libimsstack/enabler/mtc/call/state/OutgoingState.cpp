@@ -81,25 +81,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::Terminate(IN const CallReasonInfo& o
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL CallStateName OutgoingState::HandleSrvccFailure(IN UpdateType eUpdateType)
-{
-    IMtcSession* pSession = m_objContext.GetSession();
-    if (pSession == IMS_NULL)
-    {
-        return GetStateName();
-    }
-
-    if (m_objContext.GetMediaManager().GetNegotiationState(&pSession->GetISession()) !=
-            NegotiationState::STATE_NEGOTIATED)
-    {
-        return GetStateName();
-    }
-
-    pSession->SendEarlyUpdate(eUpdateType);
-
-    return GetStateName();
-}
-
 PUBLIC VIRTUAL CallStateName OutgoingState::QosReserved(
         IN ISession* piSession, IN IMS_UINT32 eMediaType)
 {
@@ -214,6 +195,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
+
+    if (IsNeedToIgnoreStartFailure())
+    {
+        return GetStateName();
+    }
 
     IMessage* piResponse = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START);
     CallReasonInfo objReason = StartErrorHandler(m_objContext).Handle(piResponse);
@@ -616,6 +602,24 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnMediaFailed(IN const CallReasonInf
     OnStartFailed(piSession, objReason);
 
     return CallStateName::TERMINATING;
+}
+
+PROTECTED VIRTUAL CallStateName OutgoingState::SendUpdateBySrvcc(IN UpdateType eType)
+{
+    IMtcSession* piMtcSession = m_objContext.GetSession();
+    if (piMtcSession == IMS_NULL)
+    {
+        return GetStateName();
+    }
+
+    ISession& objSession = piMtcSession->GetISession();
+
+    if (m_objContext.GetMediaManager().GetNegotiationState(&objSession) ==
+            NegotiationState::STATE_NEGOTIATED)
+    {
+        piMtcSession->SendEarlyUpdate(eType);
+    }
+    return GetStateName();
 }
 
 PUBLIC

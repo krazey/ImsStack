@@ -22,7 +22,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockISrvccStateListener.h"
 #include "helper/MockMtcAosEventHandler.h"
-#include "helper/MockSrvccEventHandler.h"
+#include "helper/MockSrvccStateManager.h"
 #include "ImsAosParameter.h"
 #include "IIpcan.h"
 #include "call/MockIMtcCallManager.h"
@@ -65,10 +65,10 @@ public:
         m_pAosEventHandler = pAosEventHandler;
     }
 
-    inline void ReplaceSrvccEventHandler(IN SrvccEventHandler* pSrvccEventHandler)
+    inline void ReplaceSrvccStateManager(IN SrvccStateManager* pSrvccStateManager)
     {
-        delete m_pSrvccEventHandler;
-        m_pSrvccEventHandler = pSrvccEventHandler;
+        delete m_pSrvccStateManager;
+        m_pSrvccStateManager = pSrvccStateManager;
     }
 };
 
@@ -85,7 +85,7 @@ public:
     MockIMtcCallController objMockCallController;
     MockICoreService objMockCoreService;
     MockMtcAosEventHandler* pMockAosEventHandler;
-    MockSrvccEventHandler* pMockSrvccEventHandler;
+    MockSrvccStateManager* pMockSrvccStateManager;
 
     MtcService* pNormalMtcService;
     MtcService* pEmergencyMtcService;
@@ -130,8 +130,8 @@ protected:
         pMockAosEventHandler = new MockMtcAosEventHandler(*pService, *pConfigurationProxy);
         pService->ReplaceAosEventHandler(pMockAosEventHandler);
 
-        pMockSrvccEventHandler = new MockSrvccEventHandler(objMockContext);
-        pService->ReplaceSrvccEventHandler(pMockSrvccEventHandler);
+        pMockSrvccStateManager = new MockSrvccStateManager();
+        pService->ReplaceSrvccStateManager(pMockSrvccStateManager);
         return pService;
     }
 };
@@ -146,9 +146,9 @@ TEST_F(MtcServiceTest, AddSrvccStateListenerThenBeingNotified)
     MockISrvccStateListener* pSrvccListener = new MockISrvccStateListener();
     pNormalMtcService->AddSrvccStateListener(pSrvccListener);
 
-    EXPECT_CALL(*pSrvccListener, OnStateUpdated(SrvccState::STARTED))
+    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::STARTED))
             .Times(1);
-    EXPECT_CALL(*pSrvccListener, OnStateUpdated(SrvccState::SUCCEEDED))
+    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::SUCCEEDED))
             .Times(1);
     EXPECT_CALL(*pMockAosEventHandler, SetOnSrvcc(IMS_TRUE))
             .Times(1);
@@ -165,7 +165,7 @@ TEST_F(MtcServiceTest, RemoveSrvccStateListenerThenNotBeingNotified)
     pNormalMtcService->AddSrvccStateListener(pSrvccListener);
     pNormalMtcService->RemoveSrvccStateListener(pSrvccListener);
 
-    EXPECT_CALL(*pSrvccListener, OnStateUpdated(SrvccState::STARTED)).Times(0);
+    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::STARTED)).Times(0);
 
     pNormalMtcService->UpdateSrvccState(SrvccState::STARTED);
 }
@@ -293,6 +293,14 @@ TEST_F(MtcServiceTest, GetAosConnectorReturnsNull)
 {
     // TODO: mocking IImsAos
     EXPECT_EQ(pNormalMtcService->GetAosConnector(), nullptr);
+}
+
+TEST_F(MtcServiceTest, GetSrvccStateReturnsValueFromSrvccStateManager)
+{
+    ON_CALL(*pMockSrvccStateManager, GetState)
+            .WillByDefault(Return(SrvccState::STARTED));
+
+    EXPECT_EQ(pNormalMtcService->GetSrvccState(), SrvccState::STARTED);
 }
 
 TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)

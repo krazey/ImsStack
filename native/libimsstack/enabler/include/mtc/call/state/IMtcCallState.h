@@ -68,8 +68,6 @@ public:
     virtual CallStateName CancelUpdate(IN const CallReasonInfo& objReason) = 0;
     virtual CallStateName Terminate(IN const CallReasonInfo& objReason) = 0;
     virtual CallStateName SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) = 0;
-    virtual CallStateName HandleSrvccSuccess() = 0;
-    virtual CallStateName HandleSrvccFailure(IN UpdateType eUpdateType) = 0;
     virtual CallStateName HandleIpcanChanged() = 0;
 
     virtual CallStateName HandleIncomingUssi(IN ISession* piSession) = 0;
@@ -139,6 +137,7 @@ public:
     virtual CallStateName OnReceivingNetworkToneStarted() = 0;
     virtual CallStateName OnReceivingNetworkToneFailed() = 0;
     virtual CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) = 0;
+    virtual CallStateName OnSrvccStateUpdated(IN SrvccState eState) = 0;
 };
 
 #endif

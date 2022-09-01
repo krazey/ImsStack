@@ -128,12 +128,6 @@ public:
     // Sends USSD. Does nothing if the call isn't a USSI call.
     virtual void SendUssd(IN const AString& strUssd) = 0;
 
-    // Notifies that the SRVCC was successful.
-    virtual void HandleSrvccSuccess() = 0;
-
-    // Notifies that the SRVCC fails.
-    virtual void HandleSrvccFailure(IN UpdateType eUpdateType) = 0;
-
     // handles changing RAT during call.
     virtual void HandleIpcanChanged() = 0;
 

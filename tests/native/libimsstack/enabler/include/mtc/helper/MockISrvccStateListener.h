@@ -25,7 +25,7 @@ class MockISrvccStateListener : public ISrvccStateListener
 {
 public:
     virtual ~MockISrvccStateListener() {}
-    MOCK_METHOD(void, OnStateUpdated, (IN SrvccState), (override));
+    MOCK_METHOD(void, OnSrvccStateUpdated, (IN SrvccState), (override));
 };
 
 #endif

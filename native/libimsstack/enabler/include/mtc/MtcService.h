@@ -28,10 +28,10 @@
 #include "IMtcService.h"
 #include "MtcRoutingRejectHandler.h"
 #include "helper/MtcAosConnector.h"
+#include "helper/SrvccStateManager.h"
 
 class IMtcAosConnector;
 class MtcAosEventHandler;
-class SrvccEventHandler;
 class IJniMtcServiceThread;
 
 class MtcService :
@@ -58,6 +58,7 @@ public:
     inline ServiceStatus GetServiceStatus() const override { return m_eStatus; }
     inline ICoreService* GetICoreService() const override { return m_piCoreService; }
     inline IMtcAosConnector* GetAosConnector() const override { return m_pAosConnector; }
+    inline SrvccState GetSrvccState() const override { return m_pSrvccStateManager->GetState(); }
 
     void UpdateSrvccState(IN SrvccState eState) override;
     void SetTerminalBasedCallWaiting(IN IMS_BOOL bProvisioned, IN IMS_BOOL bEnabled) override;
@@ -111,7 +112,7 @@ protected:
     ICoreService* m_piCoreService;
     MtcAosConnector* m_pAosConnector;
     MtcAosEventHandler* m_pAosEventHandler;
-    SrvccEventHandler* m_pSrvccEventHandler;
+    SrvccStateManager* m_pSrvccStateManager;
     MtcRoutingRejectHandler* m_pRoutingRejectHandler;
     IMS_BOOL m_bTerminalBasedCallWaitingEnabled;
 };

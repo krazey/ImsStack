@@ -31,6 +31,7 @@
 #include "call/message/MessageSender.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/ICallStateProxy.h"
+#include "helper/ISrvccStateListener.h"
 #include "helper/OperationAsyncRunner.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
@@ -68,11 +69,14 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
     m_objTimer.SetListener(this);
     m_objPreconditionManager.SetListener(this);
     m_objMediaManager.SetMediaReportEventListener(this);
+    m_objService.AddSrvccStateListener(this);
 }
 
 PUBLIC VIRTUAL MtcCall::~MtcCall()
 {
     IMS_TRACE_D("~MtcCall key[%d]", m_nKey, 0, 0);
+
+    m_objService.RemoveSrvccStateListener(this);
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
     {
@@ -415,28 +419,6 @@ PUBLIC VIRTUAL void MtcCall::SendUssd(IN const AString& strUssd)
             [&](IMtcCallState* pState)
             {
                 return pState->SendUssd(strUssd);
-            });
-}
-
-PUBLIC VIRTUAL void MtcCall::HandleSrvccSuccess()
-{
-    IMS_TRACE_I("HandleSrvccSuccess : key[%d]", m_nKey, 0, 0);
-
-    m_objStateMachine.RunStateOperation(
-            [&](IMtcCallState* pState)
-            {
-                return pState->HandleSrvccSuccess();
-            });
-}
-
-PUBLIC VIRTUAL void MtcCall::HandleSrvccFailure(IN UpdateType eUpdateType)
-{
-    IMS_TRACE_I("HandleSrvccFailure : key[%d]", m_nKey, 0, 0);
-
-    m_objStateMachine.RunStateOperation(
-            [&](IMtcCallState* pState)
-            {
-                return pState->HandleSrvccFailure(eUpdateType);
             });
 }
 
@@ -1254,6 +1236,17 @@ PUBLIC VIRTUAL void MtcCall::OnMediaFailed(IN const CallReasonInfo& objReason)
             [&](IMtcCallState* pState)
             {
                 return pState->OnMediaFailed(objReason);
+            });
+}
+
+PUBLIC VIRTUAL void MtcCall::OnSrvccStateUpdated(IN SrvccState eState)
+{
+    IMS_TRACE_I("OnSrvccStateUpdated : key[%d]", m_nKey, 0, 0);
+
+    m_objStateMachine.RunStateOperation(
+            [&](IMtcCallState* pState)
+            {
+                return pState->OnSrvccStateUpdated(eState);
             });
 }
 

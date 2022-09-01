@@ -44,8 +44,6 @@ public:
     CallStateName HandleUserAlert() override;
     CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     CallStateName Reject(IN const CallReasonInfo& objReason) override;
-    CallStateName HandleSrvccSuccess() override;
-    CallStateName HandleSrvccFailure(IN UpdateType eUpdateType) override;
 
     CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
@@ -64,6 +62,9 @@ public:
 
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
+
+protected:
+    CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
 
 private:
     IMS_BOOL IsUpdateBySrvcc(IN ISession* piSession) const;

@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-#ifndef SRVCC_EVENT_HANDLER_H_
-#define SRVCC_EVENT_HANDLER_H_
+#ifndef SRVCC_STATE_MANAGER_H_
+#define SRVCC_STATE_MANAGER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "ImsList.h"
 #include "helper/ISrvccStateListener.h"
 
 class IMtcContext;
 
-class SrvccEventHandler
+class SrvccStateManager
 {
 public:
-    SrvccEventHandler(IN IMtcContext& objContext);
-    virtual ~SrvccEventHandler();
-    SrvccEventHandler(IN const SrvccEventHandler&) = delete;
-    SrvccEventHandler& operator=(IN const SrvccEventHandler&) = delete;
+    SrvccStateManager();
+    virtual ~SrvccStateManager();
+    SrvccStateManager(IN const SrvccStateManager&) = delete;
+    SrvccStateManager& operator=(IN const SrvccStateManager&) = delete;
 
     virtual void AddListener(IN ISrvccStateListener* piListener);
     virtual void RemoveListener(IN ISrvccStateListener* piListener);
 
     virtual void UpdateSrvccState(IN SrvccState eState);
 
-private:
-    void NotifyListeners();
-    void HandleCalls();
+    inline virtual SrvccState GetState() { return m_eState; }
 
 private:
-    IMtcContext& m_objContext;
+    void NotifyListeners();
+
+private:
     SrvccState m_eState;
     IMSList<ISrvccStateListener*> m_objListeners;
 };

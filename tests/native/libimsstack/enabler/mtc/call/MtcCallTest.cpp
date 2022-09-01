@@ -37,6 +37,7 @@
 #include "core/MockIReference.h"
 #include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
+#include "helper/ISrvccStateListener.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/OperationAsyncRunner.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
@@ -708,30 +709,6 @@ TEST_F(MtcCallTest, SendUssdCallsState)
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
     objCall.SendUssd(strUssd);
-}
-
-TEST_F(MtcCallTest, HandleSrvccSuccessCallsState)
-{
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleSrvccSuccess)
-            .Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.HandleSrvccSuccess();
-}
-
-TEST_F(MtcCallTest, HandleSrvccFailureCallsState)
-{
-    UpdateType eUpdateType = UpdateType::NORMAL;
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleSrvccFailure(eUpdateType))
-            .Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.HandleSrvccFailure(eUpdateType);
 }
 
 TEST_F(MtcCallTest, HandleIpcanChangedCallsState)
@@ -2362,4 +2339,17 @@ TEST_F(MtcCallTest, OnMediaFailedCallsState)
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
     objCall.OnMediaFailed(objReason);
+}
+
+TEST_F(MtcCallTest, OnSrvccStateUpdatedCallsState)
+{
+    SrvccState eAnyState = SrvccState::STARTED;
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, OnSrvccStateUpdated(eAnyState))
+            .Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.OnSrvccStateUpdated(eAnyState);
 }

@@ -43,9 +43,6 @@ public:
     IncomingState(IN const IncomingState&) = delete;
     IncomingState& operator=(IN const IncomingState&) = delete;
 
-    CallStateName HandleSrvccSuccess() override;
-    CallStateName HandleSrvccFailure(IN UpdateType eUpdateType) override;
-
     CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
 
     CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
@@ -59,6 +56,9 @@ public:
     CallStateName SessionRPRDeliveryFailed(IN ISession* piSession) override;
 
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
+
+protected:
+    CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
 };
 
 #endif

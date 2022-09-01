@@ -227,6 +227,11 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Update(
 {
     IMS_TRACE_D("Update", 0, 0, 0);
 
+    if (SetSdpToSend(IMS_TRUE) == ResultSetSdp::FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
     m_objExtensionSet.FormatRequest(RequestType::UPDATE, *m_objSession.GetNextRequest());
     return m_pMessageSender->Update(
             eUpdateType, bIncludeAlertInfo, eMethod, eUpdateType == UpdateType::REFRESH);

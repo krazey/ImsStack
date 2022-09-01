@@ -49,7 +49,10 @@ public:
     CallStateName OnReceivingMediaDataFailed(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
-    CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction);
+    CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
+
+protected:
+    CallStateName HandleSrvccStarted() override;
 
 private:
     IMS_RESULT HandleSdpAnswer();

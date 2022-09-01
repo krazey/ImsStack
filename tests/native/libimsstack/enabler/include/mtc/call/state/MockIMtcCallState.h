@@ -73,8 +73,6 @@ public:
     MOCK_METHOD(CallStateName, Terminate, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(CallStateName, SendDtmf, (IN const AString& strSignal, IN IMS_SINT32 nDuration),
             (override));
-    MOCK_METHOD(CallStateName, HandleSrvccSuccess, (), (override));
-    MOCK_METHOD(CallStateName, HandleSrvccFailure, (IN UpdateType eUpdateType), (override));
     MOCK_METHOD(CallStateName, HandleIpcanChanged, (), (override));
     MOCK_METHOD(CallStateName, HandleIncomingUssi, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, OnUssiAttached, (), (override));
@@ -143,6 +141,7 @@ public:
     MOCK_METHOD(CallStateName, OnReceivingNetworkToneStarted, (), (override));
     MOCK_METHOD(CallStateName, OnReceivingNetworkToneFailed, (), (override));
     MOCK_METHOD(CallStateName, OnMediaFailed, (IN const CallReasonInfo& objReason), (override));
+    MOCK_METHOD(CallStateName, OnSrvccStateUpdated, (SrvccState eState), (override));
 };
 
 #endif

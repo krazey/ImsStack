@@ -38,7 +38,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/MtcCapabilityQueryHandler.h"
-#include "helper/SrvccEventHandler.h"
+#include "helper/SrvccStateManager.h"
 #include "helper/MtcAosEventHandler.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -53,7 +53,7 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_piCoreService(IMS_NULL),
         m_pAosConnector(IMS_NULL),
         m_pAosEventHandler(IMS_NULL),
-        m_pSrvccEventHandler(IMS_NULL),
+        m_pSrvccStateManager(IMS_NULL),
         m_pRoutingRejectHandler(IMS_NULL),
         m_bTerminalBasedCallWaitingEnabled(IMS_TRUE/*m_objContext.GetConfigurationProxy().Is(
                 Feature::TERMINAL_BASED_CALL_WAIT_DEFAULT_ENABLED)*/)
@@ -90,7 +90,7 @@ PUBLIC VIRTUAL MtcService::~MtcService()
     }
 
     delete m_pAosEventHandler;
-    delete m_pSrvccEventHandler;
+    delete m_pSrvccStateManager;
 
     if (m_pRoutingRejectHandler)
     {
@@ -103,12 +103,12 @@ PUBLIC VIRTUAL MtcService::~MtcService()
 
 PUBLIC VIRTUAL void MtcService::AddSrvccStateListener(IN ISrvccStateListener* piListener)
 {
-    m_pSrvccEventHandler->AddListener(piListener);
+    m_pSrvccStateManager->AddListener(piListener);
 }
 
 PUBLIC VIRTUAL void MtcService::RemoveSrvccStateListener(IN ISrvccStateListener* piListener)
 {
-    m_pSrvccEventHandler->RemoveListener(piListener);
+    m_pSrvccStateManager->RemoveListener(piListener);
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcService::IsWlanIpCanType() const
@@ -124,7 +124,7 @@ PUBLIC VIRTUAL IMS_BOOL MtcService::IsWlanIpCanType() const
 PUBLIC VIRTUAL void MtcService::UpdateSrvccState(IN SrvccState eState)
 {
     IMS_TRACE_I("UpdateSrvccState", 0, 0, 0);
-    m_pSrvccEventHandler->UpdateSrvccState(eState);
+    m_pSrvccStateManager->UpdateSrvccState(eState);
     m_pAosEventHandler->SetOnSrvcc(eState == SrvccState::STARTED);
 }
 
@@ -225,7 +225,7 @@ void MtcService::Init()
     }
 
     m_pAosEventHandler = new MtcAosEventHandler(*this, m_objContext.GetConfigurationProxy());
-    m_pSrvccEventHandler = new SrvccEventHandler(m_objContext);
+    m_pSrvccStateManager = new SrvccStateManager();
 
     AttachCoreServiceInterface();
     AttachAosInterface();

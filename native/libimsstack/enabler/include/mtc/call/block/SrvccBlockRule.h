@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_SRVCC_EVENT_HANDLER_
-#define MOCK_SRVCC_EVENT_HANDLER_
+#ifndef SRVCC_BLOCK_RULE_H_
+#define SRVCC_BLOCK_RULE_H_
 
-#include <gmock/gmock.h>
 #include "ImsTypeDef.h"
-#include "helper/SrvccEventHandler.h"
+#include "call/block/IMtcBlockRule.h"
 
-class IMtcContext;
-
-class MockSrvccEventHandler : public SrvccEventHandler
+class SrvccBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit MockSrvccEventHandler(IN IMtcContext& objContext) :
-            SrvccEventHandler(objContext)
-    {
-    }
-    ~MockSrvccEventHandler() {}
-    MOCK_METHOD(void, AddListener, (IN ISrvccStateListener*), (override));
-    MOCK_METHOD(void, RemoveListener, (IN ISrvccStateListener*), (override));
-    MOCK_METHOD(void, UpdateSrvccState, (IN SrvccState), (override));
+    explicit SrvccBlockRule(IN SrvccState eState);
+    virtual ~SrvccBlockRule();
+    SrvccBlockRule(IN const SrvccBlockRule&) = delete;
+    SrvccBlockRule& operator=(IN const SrvccBlockRule&) = delete;
+
+    Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
+
+private:
+    SrvccState m_eSrvccState;
 };
 
 #endif
