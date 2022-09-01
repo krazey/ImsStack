@@ -16,39 +16,47 @@
 
 #include "IElement.h"
 #include "INodeList.h"
+#include "JniExternalCall.h"
 #include "ServiceTrace.h"
+#include "call/IMtcCall.h"
 #include "dialogevent/DialogInfo.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ELEMENT_DIALOG_INFO[] = "dialog-info";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_DIALOG_INFO_VERSION[] = "version";  // mandatory
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_DIALOG_INFO_STATE[] = "state";      // mandatory
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_DIALOG_INFO_ENTITY[] = "entity";    // mandatory
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ELEMENT_DIALOG[] = "dialog";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_DIALOG_ID[] = "id";  // mandatory
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_DIALOG_CALL_ID[] = "call-id";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_DIALOG_LOCAL_TAG[] = "local-tag";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_DIALOG_REMOTE_TAG[] = "remote-tag";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_DIALOG_DIRECTION[] = "direction";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ELEMENT_STATE[] = "state";  // mandatory
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_STATE_EVENT[] = "event";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_STATE_CDOE[] = "code";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ELEMENT_DURATIOIN[] = "duration";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ELEMENT_REPLACES[] = "replaces";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_REPLACES_CALL_ID[] = "call-id";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_REPLACES_LOCAL_TAG[] = "local-tag";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_REPLACES_REMOTE_TAG[] = "remote-tag";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ELEMENT_REFERRED_BY[] = "referred-by";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_NAMEADDR_DISPLAY_NAME[] = "display-name";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ELEMENT_LOCAL[] = "local";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ELEMENT_REMOTE[] = "remote";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ELEMENT_IDENTITY[] = "identity";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ELEMENT_TARGET[] = "target";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_TARGET_URI[] = "uri";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ELEMENT_PARAM[] = "param";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_PARAM_PNAME[] = "pname";
-PUBLIC GLOBAL const IMS_CHAR DialogInfo::ATTR_PARAM_PVAL[] = "pval";
+LOCAL const IMS_CHAR ATTR_DIALOG_INFO_VERSION[] = "version";  // mandatory
+LOCAL const IMS_CHAR ATTR_DIALOG_INFO_STATE[] = "state";      // mandatory
+LOCAL const IMS_CHAR ATTR_DIALOG_INFO_ENTITY[] = "entity";    // mandatory
+LOCAL const IMS_CHAR ELEMENT_DIALOG[] = "dialog";
+LOCAL const IMS_CHAR ATTR_DIALOG_ID[] = "id";  // mandatory
+LOCAL const IMS_CHAR ATTR_DIALOG_CALL_ID[] = "call-id";
+LOCAL const IMS_CHAR ATTR_DIALOG_LOCAL_TAG[] = "local-tag";
+LOCAL const IMS_CHAR ATTR_DIALOG_REMOTE_TAG[] = "remote-tag";
+LOCAL const IMS_CHAR ATTR_DIALOG_DIRECTION[] = "direction";
+LOCAL const IMS_CHAR ELEMENT_STATE[] = "state";  // mandatory
+LOCAL const IMS_CHAR ATTR_STATE_EVENT[] = "event";
+LOCAL const IMS_CHAR ATTR_STATE_CDOE[] = "code";
+LOCAL const IMS_CHAR ELEMENT_DURATIOIN[] = "duration";
+LOCAL const IMS_CHAR ELEMENT_REPLACES[] = "replaces";
+LOCAL const IMS_CHAR ATTR_REPLACES_CALL_ID[] = "call-id";
+LOCAL const IMS_CHAR ATTR_REPLACES_LOCAL_TAG[] = "local-tag";
+LOCAL const IMS_CHAR ATTR_REPLACES_REMOTE_TAG[] = "remote-tag";
+LOCAL const IMS_CHAR ELEMENT_REFERRED_BY[] = "referred-by";
+LOCAL const IMS_CHAR ATTR_NAMEADDR_DISPLAY_NAME[] = "display-name";
+LOCAL const IMS_CHAR ELEMENT_LOCAL[] = "local";
+LOCAL const IMS_CHAR ELEMENT_REMOTE[] = "remote";
+LOCAL const IMS_CHAR ELEMENT_IDENTITY[] = "identity";
+LOCAL const IMS_CHAR ELEMENT_TARGET[] = "target";
+LOCAL const IMS_CHAR ATTR_TARGET_URI[] = "uri";
+LOCAL const IMS_CHAR ELEMENT_PARAM[] = "param";
+LOCAL const IMS_CHAR ATTR_PARAM_PNAME[] = "pname";
+LOCAL const IMS_CHAR ATTR_PARAM_PVAL[] = "pval";
+LOCAL const IMS_CHAR TARGET_PARAM_SIP_RENDERING[] = "+sip.rendering";
+
+LOCAL const IMS_CHAR EXTRA_ELEMENT_EXCLUSIVE[] = "exclusive";
+LOCAL const IMS_CHAR EXTRA_ELEMENT_MEDIAATTRIBUTES[] = "mediaAttributes";
+LOCAL const IMS_CHAR EXTRA_ELEMENT_MEDIATYPE[] = "mediaType";
+LOCAL const IMS_CHAR EXTRA_ELEMENT_MEDIADIRECTION[] = "mediaDirection";
+LOCAL const IMS_CHAR EXTRA_ELEMENT_PORT0[] = "port0";
 
 PUBLIC
 DialogInfo::DialogInfo() :
@@ -72,9 +80,9 @@ IMS_RESULT DialogInfo::Update(IN IElement* piElementDialogInfo)
 {
     IMS_TRACE_I("+Update", 0, 0, 0);
 
-    if (!IsMandatoryAttrExist(piElementDialogInfo, ATTR_DIALOG_INFO_VERSION) ||
-            !IsMandatoryAttrExist(piElementDialogInfo, ATTR_DIALOG_INFO_STATE) ||
-            !IsMandatoryAttrExist(piElementDialogInfo, ATTR_DIALOG_INFO_ENTITY))
+    if (!IsAttrExist(piElementDialogInfo, ATTR_DIALOG_INFO_VERSION) ||
+            !IsAttrExist(piElementDialogInfo, ATTR_DIALOG_INFO_STATE) ||
+            !IsAttrExist(piElementDialogInfo, ATTR_DIALOG_INFO_ENTITY))
     {
         IMS_TRACE_E(0, "mandatory value is not existed", 0, 0, 0);
         return IMS_FAILURE;
@@ -84,8 +92,7 @@ IMS_RESULT DialogInfo::Update(IN IElement* piElementDialogInfo)
     m_nState = ConvertState(piElementDialogInfo->GetAttribute(ATTR_DIALOG_INFO_STATE));
     m_strEntity = piElementDialogInfo->GetAttribute(ATTR_DIALOG_INFO_ENTITY);
 
-    INodeList* piNodeListdialog =
-            piElementDialogInfo->GetElementsByTagName(DialogInfo::ELEMENT_DIALOG);
+    INodeList* piNodeListdialog = piElementDialogInfo->GetElementsByTagName(ELEMENT_DIALOG);
 
     if (piNodeListdialog->GetLength() == 0)
     {
@@ -115,7 +122,7 @@ IMS_RESULT DialogInfo::Update(IN IElement* piElementDialogInfo)
 
         if (nIndex != -1)
         {
-            delete m_objDialogs.GetValueAt(nIndex);
+            delete m_objDialogs.GetAt(nIndex);
             m_objDialogs.RemoveAt(nIndex);
         }
 
@@ -125,6 +132,61 @@ IMS_RESULT DialogInfo::Update(IN IElement* piElementDialogInfo)
 
     IMS_TRACE_I("Update : done", 0, 0, 0);
     return IMS_SUCCESS;
+}
+
+PUBLIC
+ImsList<JniExternalCall*> DialogInfo::GetJniExternalCalls() const
+{
+    ImsList<JniExternalCall*> objJniExternalCalls;
+
+    for (IMS_UINT32 index = 0; index < m_objDialogs.GetSize(); index++)
+    {
+        Dialog* pDialog = m_objDialogs.GetAt(index);
+
+        if (pDialog == IMS_NULL)
+        {
+            continue;
+        }
+
+        JniExternalCall* pJniExternalCall = new JniExternalCall();
+
+        pJniExternalCall->m_strCallId = GetDialogId(pDialog);
+        pJniExternalCall->m_strAddress = GetDialogRemoteAddress(pDialog);
+        pJniExternalCall->m_strLocalAddress = GetDialogLocalAddress(pDialog);
+        pJniExternalCall->m_bIsPullable = IsPullableDialog(pDialog);
+        pJniExternalCall->m_nCallState = GetDialogCallState(pDialog);
+        pJniExternalCall->m_nCallType = GetDialogCallType(pDialog);
+        pJniExternalCall->m_bIsHeld = IsHeldDialog(pDialog);
+
+        objJniExternalCalls.Append(pJniExternalCall);
+    }
+
+    return objJniExternalCalls;
+}
+
+PUBLIC GLOBAL IElement* DialogInfo::GetSubElement(
+        IN const IElement* piElement, IN const IMS_CHAR* pszElement)
+{
+    INode* piNode = piElement->GetFirstChild();
+
+    while (piNode != IMS_NULL)
+    {
+        const AString& strName = piNode->GetLocalName();
+        IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
+
+        if (strName.EqualsIgnoreCase(pszElement))
+        {
+            return piElement;
+        }
+        piNode = piNode->GetNextSibling();
+    }
+    return IMS_NULL;
+}
+
+PUBLIC GLOBAL AString& DialogInfo::GetSubElementValue(
+        IN const IElement* piElement, IN const IMS_CHAR* pszElement, OUT AString& strElementValue)
+{
+    return GetElementValue(GetSubElement(piElement, pszElement), strElementValue);
 }
 
 PUBLIC GLOBAL AString& DialogInfo::GetElementValue(
@@ -140,13 +202,12 @@ PUBLIC GLOBAL AString& DialogInfo::GetElementValue(
             IMS_TRACE_I("GetElementValue : value=(%s)", strElementValue.GetStr(), 0, 0);
             return strElementValue;
         }
-
         piNode = piNode->GetNextSibling();
     }
     return strElementValue;
 }
 
-PUBLIC GLOBAL IMS_BOOL DialogInfo::IsMandatoryElementExist(
+PUBLIC GLOBAL IMS_BOOL DialogInfo::IsElementExist(
         IN const IElement* piElement, IN const IMS_CHAR* pszElement)
 {
     INode* piNode = piElement->GetFirstChild();
@@ -164,10 +225,10 @@ PUBLIC GLOBAL IMS_BOOL DialogInfo::IsMandatoryElementExist(
     return IMS_FALSE;
 }
 
-PUBLIC GLOBAL IMS_BOOL DialogInfo::IsMandatoryAttrExist(
-        IN const IElement* piElement, IN const IMS_CHAR* pszAttr)
+PUBLIC GLOBAL IMS_BOOL DialogInfo::IsAttrExist(
+        IN const IElement* piElement, IN const IMS_CHAR* pszAttrName)
 {
-    if (piElement->GetAttribute(pszAttr).GetLength() > 0)
+    if (piElement->GetAttribute(pszAttrName).GetLength() > 0)
     {
         return IMS_TRUE;
     }
@@ -197,7 +258,7 @@ void DialogInfo::Clear()
 
     for (IMS_UINT32 index = 0; index < nSize; index++)
     {
-        delete m_objDialogs.GetValueAt(index);
+        delete m_objDialogs.GetAt(index);
     }
 
     m_objDialogs.Clear();
@@ -212,7 +273,7 @@ IMS_SLONG DialogInfo::GetIndexOfKeyHasSameId(IN const AString& strDialogId)
 
     for (IMS_UINT32 index = 0; index < nSize; index++)
     {
-        if (strDialogId.Equals(m_objDialogs.GetValueAt(index)->m_strId))
+        if (strDialogId.Equals(m_objDialogs.GetAt(index)->m_strId))
         {
             return (IMS_SLONG)index;
         }
@@ -221,24 +282,96 @@ IMS_SLONG DialogInfo::GetIndexOfKeyHasSameId(IN const AString& strDialogId)
     return -1;
 }
 
+PRIVATE
+AString DialogInfo::GetDialogId(Dialog* pDialog) const
+{
+    return pDialog->m_strId;
+}
+
+PRIVATE
+AString DialogInfo::GetDialogRemoteAddress(Dialog* pDialog) const
+{
+    return pDialog->m_objRemote.m_objIdentity.m_strUri;
+}
+
+PRIVATE
+AString DialogInfo::GetDialogLocalAddress(Dialog* pDialog) const
+{
+    return pDialog->m_objLocal.m_objIdentity.m_strUri;
+}
+
+PRIVATE
+IMS_BOOL DialogInfo::IsPullableDialog(Dialog* pDialog) const
+{
+    if (GetDialogCallState(pDialog) == Dialog::State::STATE_CONFIRMED &&
+            pDialog->m_objExtraInfo.m_strExclusive.EqualsIgnoreCase("false") &&
+            (pDialog->m_objExtraInfo.m_objMediaInfo.eAQuality == AUDIO_QUALITY_AMR_WB &&
+                    pDialog->m_objExtraInfo.m_objMediaInfo.eADir == DIRECTION_SEND_RECEIVE))
+    {
+        if (pDialog->m_objExtraInfo.m_objMediaInfo.eVQuality == VIDEO_QUALITY_NONE ||
+                pDialog->m_objExtraInfo.m_objMediaInfo.eVQuality == VIDEO_QUALITY_NOTUSED)
+        {
+            return IMS_TRUE;
+        }
+        else if (pDialog->m_objExtraInfo.m_objMediaInfo.eVQuality == VIDEO_QUALITY_QVGA_PR &&
+                pDialog->m_objExtraInfo.m_objMediaInfo.eVDir == DIRECTION_SEND_RECEIVE)
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE
+IMS_UINT32 DialogInfo::GetDialogCallState(Dialog* pDialog) const
+{
+    return pDialog->m_objState.m_nState;
+}
+
+PRIVATE
+IMS_UINT32 DialogInfo::GetDialogCallType(Dialog* pDialog) const
+{
+    if (pDialog->m_objExtraInfo.m_objMediaInfo.eAQuality == AUDIO_QUALITY_AMR_WB)
+    {
+        if (pDialog->m_objExtraInfo.m_objMediaInfo.eVQuality == VIDEO_QUALITY_QVGA_PR)
+        {
+            return static_cast<IMS_UINT32>(CallType::VT);
+        }
+        else
+        {
+            return static_cast<IMS_UINT32>(CallType::VOIP);
+        }
+    }
+
+    return static_cast<IMS_UINT32>(CallType::UNKNOWN);
+}
+
+PRIVATE
+IMS_BOOL DialogInfo::IsHeldDialog(Dialog* pDialog) const
+{
+    AString strPval = pDialog->m_objLocal.m_objTarget.m_objParamMap.GetValue(
+            AString(TARGET_PARAM_SIP_RENDERING));
+    return strPval.EqualsIgnoreCase("false");
+}
+
 PUBLIC
 IMS_RESULT Dialog::Update(IN IElement* piElementDialog)
 {
     IMS_TRACE_I("+Update", 0, 0, 0);
 
-    if (!DialogInfo::IsMandatoryAttrExist(piElementDialog, DialogInfo::ATTR_DIALOG_ID) ||
-            !DialogInfo::IsMandatoryElementExist(piElementDialog, DialogInfo::ELEMENT_STATE))
+    if (!DialogInfo::IsAttrExist(piElementDialog, ATTR_DIALOG_ID) ||
+            !DialogInfo::IsElementExist(piElementDialog, ELEMENT_STATE))
     {
-        IMS_TRACE_I("mandatory value is not existed", 0, 0, 0);
+        IMS_TRACE_I("Update : mandatory value is not existed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    m_strId = piElementDialog->GetAttribute(DialogInfo::ATTR_DIALOG_ID);
-    m_strCallId = piElementDialog->GetAttribute(DialogInfo::ATTR_DIALOG_CALL_ID);
-    m_strLocalTag = piElementDialog->GetAttribute(DialogInfo::ATTR_DIALOG_LOCAL_TAG);
-    m_strRemoteTag = piElementDialog->GetAttribute(DialogInfo::ATTR_DIALOG_REMOTE_TAG);
-    m_nDirection =
-            ConvertDirection(piElementDialog->GetAttribute(DialogInfo::ATTR_DIALOG_DIRECTION));
+    m_strId = piElementDialog->GetAttribute(ATTR_DIALOG_ID);
+    m_strCallId = piElementDialog->GetAttribute(ATTR_DIALOG_CALL_ID);
+    m_strLocalTag = piElementDialog->GetAttribute(ATTR_DIALOG_LOCAL_TAG);
+    m_strRemoteTag = piElementDialog->GetAttribute(ATTR_DIALOG_REMOTE_TAG);
+    m_nDirection = ConvertDirection(piElementDialog->GetAttribute(ATTR_DIALOG_DIRECTION));
 
     INode* piNode = piElementDialog->GetFirstChild();
 
@@ -247,11 +380,11 @@ IMS_RESULT Dialog::Update(IN IElement* piElementDialog)
         const AString& strName = piNode->GetLocalName();
         IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
 
-        if (strName.EqualsIgnoreCase(DialogInfo::ELEMENT_STATE))
+        if (strName.EqualsIgnoreCase(ELEMENT_STATE))
         {
             m_objState.Update(piElement);
         }
-        else if (strName.EqualsIgnoreCase(DialogInfo::ELEMENT_DURATIOIN))
+        else if (strName.EqualsIgnoreCase(ELEMENT_DURATIOIN))
         {
             AString strDuration;
             if (DialogInfo::GetElementValue(piElement, strDuration).GetLength() > 0)
@@ -259,29 +392,31 @@ IMS_RESULT Dialog::Update(IN IElement* piElementDialog)
                 m_nDuration = strDuration.ToInt32();
             }
         }
-        else if (strName.EqualsIgnoreCase(DialogInfo::ELEMENT_REPLACES))
+        else if (strName.EqualsIgnoreCase(ELEMENT_REPLACES))
         {
             m_objReplaces.Update(piElement);
         }
-        else if (strName.EqualsIgnoreCase(DialogInfo::ELEMENT_REFERRED_BY))
+        else if (strName.EqualsIgnoreCase(ELEMENT_REFERRED_BY))
         {
             m_objReferredBy.Update(piElement);
         }
-        else if (strName.EqualsIgnoreCase(DialogInfo::ELEMENT_LOCAL))
+        else if (strName.EqualsIgnoreCase(ELEMENT_LOCAL))
         {
             m_objLocal.Update(piElement);
         }
-        else if (strName.EqualsIgnoreCase(DialogInfo::ELEMENT_REMOTE))
+        else if (strName.EqualsIgnoreCase(ELEMENT_REMOTE))
         {
             m_objRemote.Update(piElement);
         }
         else
         {
-            IMS_TRACE_E(0, "invalid element", 0, 0, 0);
+            IMS_TRACE_E(0, "Update : remain element [%s]", strName.GetStr(), 0, 0);
         }
         piNode = DYNAMIC_CAST(INode*, piElement);
         piNode = piNode->GetNextSibling();
     }
+
+    m_objExtraInfo.Update(piElementDialog);
 
     IMS_TRACE_I("Update : done", 0, 0, 0);
     return IMS_SUCCESS;
@@ -308,8 +443,8 @@ IMS_UINT32 Dialog::ConvertDirection(IN const AString& strState)
 PUBLIC
 void Dialog::State::Update(IN const IElement* piElementState)
 {
-    m_nEvent = ConvertDialogStateEvent(piElementState->GetAttribute(DialogInfo::ATTR_STATE_EVENT));
-    m_strCode = piElementState->GetAttribute(DialogInfo::ATTR_STATE_CDOE).ToInt32();
+    m_nEvent = ConvertDialogStateEvent(piElementState->GetAttribute(ATTR_STATE_EVENT));
+    m_nCode = piElementState->GetAttribute(ATTR_STATE_CDOE).ToInt32();
 
     AString strState;
     if (DialogInfo::GetElementValue(piElementState, strState).GetLength() > 0)
@@ -389,15 +524,15 @@ IMS_UINT32 Dialog::State::ConvertDialogStateEvent(IN const AString& strStateEven
 PUBLIC
 void Dialog::Replaces::Update(IN const IElement* piElementReplaces)
 {
-    m_strCallId = piElementReplaces->GetAttribute(DialogInfo::ATTR_REPLACES_CALL_ID);
-    m_strLocalTag = piElementReplaces->GetAttribute(DialogInfo::ATTR_REPLACES_LOCAL_TAG);
-    m_strRemoteTag = piElementReplaces->GetAttribute(DialogInfo::ATTR_REPLACES_REMOTE_TAG);
+    m_strCallId = piElementReplaces->GetAttribute(ATTR_REPLACES_CALL_ID);
+    m_strLocalTag = piElementReplaces->GetAttribute(ATTR_REPLACES_LOCAL_TAG);
+    m_strRemoteTag = piElementReplaces->GetAttribute(ATTR_REPLACES_REMOTE_TAG);
 }
 
 PUBLIC
 void Dialog::NameAddr::Update(IN const IElement* piElementNameaddr)
 {
-    m_strDisplay = piElementNameaddr->GetAttribute(DialogInfo::ATTR_NAMEADDR_DISPLAY_NAME);
+    m_strDisplay = piElementNameaddr->GetAttribute(ATTR_NAMEADDR_DISPLAY_NAME);
 
     AString strUri;
     if (DialogInfo::GetElementValue(piElementNameaddr, strUri).GetLength() > 0)
@@ -416,13 +551,13 @@ void Dialog::Participant::Update(IN const IElement* piElementParticipant)
         const AString& strName = piNode->GetLocalName();
         IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
 
-        if (strName.EqualsIgnoreCase(DialogInfo::ELEMENT_IDENTITY))
+        if (strName.EqualsIgnoreCase(ELEMENT_IDENTITY))
         {
             m_objIdentity.Update(piElement);
         }
-        else if (strName.EqualsIgnoreCase(DialogInfo::ELEMENT_TARGET))
+        else if (strName.EqualsIgnoreCase(ELEMENT_TARGET))
         {
-            m_objtartget.Update(piElement);
+            m_objTarget.Update(piElement);
         }
         else
         {
@@ -433,19 +568,20 @@ void Dialog::Participant::Update(IN const IElement* piElementParticipant)
 }
 
 PUBLIC
-IMS_RESULT Dialog::Target::Update(IN const IElement* piElementTarget)
+void Dialog::Target::Update(IN const IElement* piElementTarget)
 {
     INode* piNode = piElementTarget->GetFirstChild();
 
     while (piNode != IMS_NULL)
     {
         const AString& strName = piNode->GetLocalName();
-        IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
 
-        if (strName.EqualsIgnoreCase(DialogInfo::ELEMENT_PARAM))
+        if (strName.EqualsIgnoreCase(ELEMENT_PARAM))
         {
-            m_objTarget.Add(piElement->GetAttribute(DialogInfo::ATTR_PARAM_PNAME),
-                    piElement->GetAttribute(DialogInfo::ATTR_PARAM_PVAL));
+            IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
+            AString strPname = piElement->GetAttribute(ATTR_PARAM_PNAME);
+            AString strval = piElement->GetAttribute(ATTR_PARAM_PVAL);
+            m_objParamMap.Add(strPname, strval);
         }
         else
         {
@@ -454,7 +590,119 @@ IMS_RESULT Dialog::Target::Update(IN const IElement* piElementTarget)
         piNode = piNode->GetNextSibling();
     }
 
-    m_strUri = piElementTarget->GetAttribute(DialogInfo::ATTR_TARGET_URI);
+    m_strUri = piElementTarget->GetAttribute(ATTR_TARGET_URI);
+}
 
-    return IMS_SUCCESS;
+PUBLIC
+void Dialog::ExtraInfo::Update(IN const IElement* piElementDialog)
+{
+    INode* piNode = piElementDialog->GetFirstChild();
+
+    while (piNode != IMS_NULL)
+    {
+        const AString& strName = piNode->GetLocalName();
+        IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
+
+        if (strName.Contains(EXTRA_ELEMENT_EXCLUSIVE))
+        {
+            AString strExclusive;
+            if (DialogInfo::GetElementValue(piElement, strExclusive).GetLength() > 0)
+            {
+                m_strExclusive = strExclusive;
+            }
+        }
+        else if (strName.EqualsIgnoreCase(ELEMENT_LOCAL))
+        {
+            HandleMediaInfo(piElement);
+        }
+
+        piNode = DYNAMIC_CAST(INode*, piElement);
+        piNode = piNode->GetNextSibling();
+    }
+}
+
+PRIVATE
+void Dialog::ExtraInfo::HandleMediaInfo(IN const IElement* piElementLocal)
+{
+    INode* piNode = piElementLocal->GetFirstChild();
+
+    while (piNode != IMS_NULL)
+    {
+        const AString& strName = piNode->GetLocalName();
+        IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
+
+        if (strName.EqualsIgnoreCase(EXTRA_ELEMENT_MEDIAATTRIBUTES))
+        {
+            AString strMediaType;
+            if (DialogInfo::GetSubElementValue(piElement, EXTRA_ELEMENT_MEDIATYPE, strMediaType)
+                            .GetLength() > 0)
+            {
+                AString strMediaDirection;
+                if (strMediaType.EqualsIgnoreCase("audio"))
+                {
+                    if (DialogInfo::IsElementExist(piElement, EXTRA_ELEMENT_PORT0))
+                    {
+                        m_objMediaInfo.eAQuality = AUDIO_QUALITY_NOTUSED;
+                    }
+                    else
+                    {
+                        m_objMediaInfo.eAQuality = AUDIO_QUALITY_AMR_WB;
+                    }
+
+                    if (DialogInfo::GetSubElementValue(
+                                piElement, EXTRA_ELEMENT_MEDIADIRECTION, strMediaDirection)
+                                    .GetLength() > 0)
+                    {
+                        m_objMediaInfo.eADir = ConvertMediaDirection(strMediaDirection);
+                    }
+                }
+                else if (strMediaType.EqualsIgnoreCase("video"))
+                {
+                    if (DialogInfo::IsElementExist(piElement, EXTRA_ELEMENT_PORT0))
+                    {
+                        m_objMediaInfo.eVQuality = VIDEO_QUALITY_NOTUSED;
+                    }
+                    else
+                    {
+                        m_objMediaInfo.eVQuality = VIDEO_QUALITY_QVGA_PR;
+                    }
+
+                    if (DialogInfo::GetSubElementValue(
+                                piElement, EXTRA_ELEMENT_MEDIADIRECTION, strMediaDirection)
+                                    .GetLength() > 0)
+                    {
+                        m_objMediaInfo.eVDir = ConvertMediaDirection(strMediaDirection);
+                    }
+                }
+            }
+        }
+
+        piNode = DYNAMIC_CAST(INode*, piElement);
+        piNode = piNode->GetNextSibling();
+    }
+}
+
+PRIVATE
+IMS_SINT32 Dialog::ExtraInfo::ConvertMediaDirection(IN const AString& strMediaDirection)
+{
+    if (strMediaDirection.EqualsIgnoreCase("sendrecv"))
+    {
+        return DIRECTION_SEND_RECEIVE;
+    }
+    else if (strMediaDirection.EqualsIgnoreCase("sendonly"))
+    {
+        return DIRECTION_SEND;
+    }
+    else if (strMediaDirection.EqualsIgnoreCase("recvonly"))
+    {
+        return DIRECTION_RECEIVE;
+    }
+    else if (strMediaDirection.EqualsIgnoreCase("inactive"))
+    {
+        return DIRECTION_INACTIVE;
+    }
+    else
+    {
+        return DIRECTION_INVALID;
+    }
 }

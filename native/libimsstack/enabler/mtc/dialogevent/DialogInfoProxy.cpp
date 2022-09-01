@@ -20,26 +20,28 @@
 #include "IElement.h"
 #include "ServiceTrace.h"
 #include "dialogevent/DialogInfo.h"
-#include "dialogevent/DialogInfoUpdater.h"
+#include "dialogevent/DialogInfoProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
+LOCAL const IMS_CHAR ELEMENT_DIALOG_INFO[] = "dialog-info";
+
 PUBLIC
-DialogInfoUpdater::DialogInfoUpdater() :
+DialogInfoProxy::DialogInfoProxy() :
         m_objDialogInfos(ImsList<DialogInfo*>())
 {
-    IMS_TRACE_I("+DialogInfoUpdater", 0, 0, 0);
+    IMS_TRACE_I("+DialogInfoProxy", 0, 0, 0);
 }
 
 PUBLIC
-DialogInfoUpdater::~DialogInfoUpdater()
+DialogInfoProxy::~DialogInfoProxy()
 {
-    IMS_TRACE_I("~DialogInfoUpdater", 0, 0, 0);
+    IMS_TRACE_I("~DialogInfoProxy", 0, 0, 0);
     Clear();
 }
 
 PUBLIC
-const AString& DialogInfoUpdater::Update(IN const AString& strEventPackage)
+const AString& DialogInfoProxy::Update(IN const AString& strEventPackage)
 {
     IMS_TRACE_I("Update", 0, 0, 0);
 
@@ -70,7 +72,7 @@ const AString& DialogInfoUpdater::Update(IN const AString& strEventPackage)
     }
 
     const AString& strDialogInfo = piElement->GetTagName();
-    if (!strDialogInfo.EqualsIgnoreCase(DialogInfo::ELEMENT_DIALOG_INFO))
+    if (!strDialogInfo.EqualsIgnoreCase(ELEMENT_DIALOG_INFO))
     {
         IMS_TRACE_E(0, "Root element (%s) is not matched in 'dialog-info'", strDialogInfo.GetStr(),
                 0, 0);
@@ -83,7 +85,7 @@ const AString& DialogInfoUpdater::Update(IN const AString& strEventPackage)
 
     if (pNewDialogInfo->Update(piElement) == IMS_FAILURE)
     {
-        IMS_TRACE_I("UpdateDialogInfo failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Update DialogInfo failed", 0, 0, 0);
         delete pNewDialogInfo;
         return AString::ConstNull();
     }
@@ -93,7 +95,7 @@ const AString& DialogInfoUpdater::Update(IN const AString& strEventPackage)
 
     if (nIndex != -1)
     {
-        DialogInfo* pOldDialogInfo = m_objDialogInfos.GetValueAt(nIndex);
+        DialogInfo* pOldDialogInfo = m_objDialogInfos.GetAt(nIndex);
         delete pOldDialogInfo;
         m_objDialogInfos.RemoveAt(nIndex);
     }
@@ -107,8 +109,27 @@ const AString& DialogInfoUpdater::Update(IN const AString& strEventPackage)
     return strDialogInfoEntity;
 }
 
+PUBLIC ImsList<JniExternalCall*> DialogInfoProxy::GetJniExternalCalls() const
+{
+    ImsList<JniExternalCall*> objJniExternalCalls;
+
+    for (IMS_UINT32 index = 0; index < m_objDialogInfos.GetSize(); index++)
+    {
+        DialogInfo* pDialogInfo = m_objDialogInfos.GetAt(index);
+
+        if (pDialogInfo == IMS_NULL)
+        {
+            continue;
+        }
+
+        objJniExternalCalls.AppendList(pDialogInfo->GetJniExternalCalls());
+    }
+
+    return objJniExternalCalls;
+}
+
 PRIVATE
-void DialogInfoUpdater::Clear()
+void DialogInfoProxy::Clear()
 {
     IMS_UINT32 nSize = m_objDialogInfos.GetSize();
 
@@ -116,14 +137,14 @@ void DialogInfoUpdater::Clear()
 
     for (IMS_UINT32 index = 0; index < nSize; index++)
     {
-        delete m_objDialogInfos.GetValueAt(index);
+        delete m_objDialogInfos.GetAt(index);
     }
 
     m_objDialogInfos.Clear();
 }
 
 PRIVATE
-IMS_SLONG DialogInfoUpdater::GetIndexOfKeyHasSameId(IN const AString& strDialogInfoEntity)
+IMS_SLONG DialogInfoProxy::GetIndexOfKeyHasSameId(IN const AString& strDialogInfoEntity)
 {
     IMS_UINT32 nSize = m_objDialogInfos.GetSize();
 
@@ -131,7 +152,7 @@ IMS_SLONG DialogInfoUpdater::GetIndexOfKeyHasSameId(IN const AString& strDialogI
 
     for (IMS_UINT32 index = 0; index < nSize; index++)
     {
-        if (strDialogInfoEntity.Equals(m_objDialogInfos.GetValueAt(index)->GetEntity()))
+        if (strDialogInfoEntity.Equals(m_objDialogInfos.GetAt(index)->GetEntity()))
         {
             return (IMS_SLONG)index;
         }
