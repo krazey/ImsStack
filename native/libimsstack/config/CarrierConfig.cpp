@@ -1054,6 +1054,10 @@ const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT[] = "audio_maxred_int
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT[] = "audio_rtp_dscp_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL[] =
         "audio_show_codec_attribute_modeset_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY[] =
+        "audio_amrwb_codec_attribute_default_modeset_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_AMRNB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY[] =
+        "audio_amrnb_codec_attribute_default_modeset_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL[] =
         "audio_show_codec_attribute_dtx_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL[] =

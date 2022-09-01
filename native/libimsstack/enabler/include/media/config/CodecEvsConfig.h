@@ -220,6 +220,12 @@ public:
      */
     IMS_UINT32 GetAmrWbIoModeSetList() const;
     /**
+     * @brief Get the amr-wb io default mode set list
+     *
+     * @return IMS_UINT32 Return the amr-wb io default modeset list
+     */
+    IMS_UINT32 GetDefaultModeSetList() const;
+    /**
      * @brief Get the amr-wb io mode set
      *
      * @return IMS_SINT32 Return the amr-wb io modeset
@@ -248,5 +254,6 @@ private:
     IMS_BOOL m_bShowAmrwbIoModeSet;  // Indicate whether AmrwbIoModeSetList attribute to display in
                                      // SDP
     IMS_UINT32 m_nAmrWbIoModeSetList;  // AMR-WB IO parameter
+    IMS_UINT32 m_nDefaultRtpModeSet;   // default mode-set for EVS AMR-WB IO mode
 };
 #endif  // _CODEC_EVS_CONFIG_H_

@@ -246,11 +246,12 @@ private:
             OUT IMS_UINT32* pBitrateNegoList, OUT IMS_UINT32* pModeSetNegoList);
     IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::AmrFmtp* pFmtp);
     IMS_BOOL FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList);
+            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList,
+            OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
     IMS_BOOL FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
     IMS_SINT32 CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
             IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-            OUT IMS_UINT32* nNegoModeSet);
+            OUT IMS_UINT32* nNegoModeSet, OUT IMS_UINT32* nNegoDefaultRtpModeSet);
     IMS_BOOL CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
             IN AudioProfile::EvsFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
             OUT IMS_UINT32* nNegoBwList, OUT IMS_UINT32* nNegoBrList,

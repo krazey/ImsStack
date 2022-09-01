@@ -59,6 +59,7 @@ TEST_F(CodecAmrConfigTest, GetConfigDefault)
 
     EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);
     EXPECT_EQ(m_pConfig->GetModeSetList(), DEFAULT_MODESET_AMR_WB);
+    EXPECT_EQ(m_pConfig->GetDefaultModeSetList(), DEFAULT_MODESET_AMR_WB);
     EXPECT_EQ(m_pConfig->GetShowModeSet(), IMS_FALSE);
     EXPECT_EQ(m_pConfig->GetOctetAlign(), DEFAULT_OCTET_ALIGN);
     EXPECT_EQ(m_pConfig->GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMRWB);
@@ -168,8 +169,47 @@ TEST_F(CodecAmrConfigTest, GetConfigModeSetListAsset)
 
     EXPECT_EQ(m_pConfig_amrnb->GetModeSetList(), 149);
     EXPECT_EQ(m_pConfig_amrnb->GetModeSet(), 7);
-    delete m_pConfig_amrnb;
 
+    delete m_pConfig_amrnb;
+    delete pMockICarrierConfig;
+}
+
+TEST_F(CodecAmrConfigTest, GetConfigDefaultModeSetListAsset)
+{
+    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
+    CodecAmrConfig* m_pConfig_amrwb = new CodecAmrConfig(ImsCodec::AUDIO_AMR_WB, 99);
+    IMSVector<IMS_SINT32> objCodecAttributeDefaultModesetWb;
+    objCodecAttributeDefaultModesetWb.Push(0);
+    objCodecAttributeDefaultModesetWb.Push(1);
+    objCodecAttributeDefaultModesetWb.Push(2);
+
+    ON_CALL(*pMockICarrierConfig,
+            GetIntArray(CarrierConfig::Assets::
+                            KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY))
+            .WillByDefault(Return(objCodecAttributeDefaultModesetWb));
+
+    EXPECT_TRUE(m_pConfig_amrwb->Create(pMockICarrierConfig, 0));
+
+    EXPECT_EQ(m_pConfig_amrwb->GetDefaultModeSetList(), 7);
+    delete m_pConfig_amrwb;
+
+    CodecAmrConfig* m_pConfig_amrnb = new CodecAmrConfig(ImsCodec::AUDIO_AMR, 100);
+    IMSVector<IMS_SINT32> objCodecAttributeDefaultModesetNb;
+    objCodecAttributeDefaultModesetNb.Push(0);
+    objCodecAttributeDefaultModesetNb.Push(2);
+    objCodecAttributeDefaultModesetNb.Push(4);
+    objCodecAttributeDefaultModesetNb.Push(7);
+
+    ON_CALL(*pMockICarrierConfig,
+            GetIntArray(CarrierConfig::Assets::
+                            KEY_AUDIO_AMRNB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY))
+            .WillByDefault(Return(objCodecAttributeDefaultModesetNb));
+
+    EXPECT_TRUE(m_pConfig_amrnb->Create(pMockICarrierConfig, 0));
+
+    EXPECT_EQ(m_pConfig_amrnb->GetDefaultModeSetList(), 149);
+
+    delete m_pConfig_amrnb;
     delete pMockICarrierConfig;
 }
 

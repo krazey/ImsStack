@@ -67,6 +67,12 @@ public:
      */
     IMS_UINT32 GetModeSetList() const;
     /**
+     * @brief Get the default mode-set list
+     *
+     * @return IMS_UINT32 Return the audio codec default mode-set list
+     */
+    IMS_UINT32 GetDefaultModeSetList() const;
+    /**
      * @brief Get the information whether to include AMR codec modeset in sdp
      *
      * @return IMS_BOOL Return IMS_TRUE Include modeset attribute to sdp
@@ -150,6 +156,7 @@ private:
     IMS_SINT32 m_nChannel;
     IMS_BOOL m_bShowModeSet;
     IMS_UINT32 m_nModeSetList;  // 0 means support all mode set
+    IMS_UINT32 m_nDefaultModeSetList;  // 0 means support all mode set
     IMS_SINT32 m_nOctetAlign;
     IMS_SINT32 m_nSamplingRate;
     IMS_BOOL m_bDtx;

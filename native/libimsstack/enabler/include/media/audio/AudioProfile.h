@@ -63,6 +63,7 @@ public:
     {
     public:
         IMS_UINT32 nModeSetList;
+        IMS_UINT32 nDefaultRtpModeSet;
         IMS_BOOL bSCREnable;
 
         enum
@@ -100,6 +101,7 @@ public:
     public:
         AmrFmtp() :
                 nModeSetList(0),
+                nDefaultRtpModeSet(0),
                 bSCREnable(IMS_FALSE),
                 nOctetAlign(DEFAULT_OCTCTALIGN),
                 nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
@@ -122,6 +124,7 @@ public:
         AmrFmtp(IN const AmrFmtp& objFmtp)
         {
             this->nModeSetList = objFmtp.nModeSetList;
+            this->nDefaultRtpModeSet = objFmtp.nDefaultRtpModeSet;
             this->bSCREnable = objFmtp.bSCREnable;
             this->nOctetAlign = objFmtp.nOctetAlign;
             this->nModeChangeCapability = objFmtp.nModeChangeCapability;
@@ -147,6 +150,7 @@ public:
         AmrFmtp(IN const IMS_UINT32 modeSet, IN const IMS_SINT32 octetAlign,
                 IN const IMS_SINT32 modeChangeCapability) :
                 nModeSetList(modeSet),
+                nDefaultRtpModeSet(modeSet),
                 bSCREnable(IMS_TRUE),
                 nOctetAlign(octetAlign),
                 nModeChangeCapability(modeChangeCapability),
@@ -245,6 +249,7 @@ public:
         IMS_SINT32 nReceivedChAwRecv;
         // AMR-WB IO parameter
         IMS_UINT32 nModeSetList;
+        IMS_UINT32 nDefaultRtpModeSet;
         IMS_SINT32 nModeChangeCapability;
         IMS_SINT32 nModeChangePeriod;
         IMS_SINT32 nModeChangeNeighbor;
@@ -284,6 +289,7 @@ public:
                 nChAwRecv(DEFAULT_CHANNEL_AWMODE),
                 nReceivedChAwRecv(DEFAULT_CHANNEL_AWMODE),
                 nModeSetList(DEFAULT_MODESETLIST),
+                nDefaultRtpModeSet(DEFAULT_MODESETLIST),
                 nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
                 nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
                 nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
@@ -324,6 +330,7 @@ public:
             this->nChAwRecv = objFmtp.nChAwRecv;
             this->nReceivedChAwRecv = objFmtp.nReceivedChAwRecv;
             this->nModeSetList = objFmtp.nModeSetList;
+            this->nDefaultRtpModeSet = objFmtp.nDefaultRtpModeSet;
             this->nModeChangeCapability = objFmtp.nModeChangeCapability;
             this->nModeChangePeriod = objFmtp.nModeChangePeriod;
             this->nModeChangeNeighbor = objFmtp.nModeChangeNeighbor;

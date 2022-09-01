@@ -253,22 +253,8 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN AudioProfile* pLocalProfile,
         }
 
         AmrParams* pAmrParams = new AmrParams();
-        IMS_SINT32 maxModeSet = -1;
-        if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
-        {
-            maxModeSet = AudioProfileUtil::GetLargestModesetInFmtp("AMR-WB", pNegoPayload);
-        }
-        else
-        {
-            maxModeSet = AudioProfileUtil::GetLargestModesetInFmtp("AMR", pNegoPayload);
-        }
-
-        if (maxModeSet == -1)
-        {
-            maxModeSet = 0;
-        }
-
-        pAmrParams->setAmrMode((int32_t) static_cast<AmrParams::AmrMode>(maxModeSet));
+        pAmrParams->setAmrMode((int32_t)AudioProfileUtil::GetModesetList(
+                pNegoPayload->objRtpMap.strPayloadType, pNegoPayload));
 
         // AMR padding mode
         pAmrParams->setOctetAligned(pFmtp->nOctetAlign);
@@ -307,17 +293,14 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN AudioProfile* pLocalProfile,
         // TODO Media : use the Dest HFOnly
         pEvsParams->setUseHeaderFullOnly((IMS_BOOL)pDestFmtp->nHfOnly);
 
-        IMS_SINT32 maxModeSet = AudioProfileUtil::GetLargestModesetInFmtp("EVS", pNegoPayload);
-        if (maxModeSet == -1)
-        {
-            maxModeSet = 0;
-        }
+        IMS_SINT32 modeSet = AudioProfileUtil::GetModesetList("EVS", pNegoPayload);
+
         // evs primary mode conversion
         if (pFmtp->nEvsModeSwitch == 0)
         {  // evs primary mode
-            maxModeSet += EvsParams::EVS_MODE_9;
+            modeSet += EvsParams::EVS_MODE_9;
         }
-        pEvsParams->setEvsMode((int32_t) static_cast<EvsParams::EvsMode>(maxModeSet));
+        pEvsParams->setEvsMode((int32_t)modeSet);
 
         // update bandwidth
         IMS_SINT32 nEvsBandwidth = pFmtp->nBwList;

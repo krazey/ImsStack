@@ -26,6 +26,7 @@ CodecAmrConfig::CodecAmrConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeN
         m_nChannel(DEFAULT_CHANNEL),
         m_bShowModeSet(IMS_FALSE),
         m_nModeSetList(DEFAULT_MODESET_AMR_WB),
+        m_nDefaultModeSetList(DEFAULT_MODESET_AMR_WB),
         m_nOctetAlign(DEFAULT_OCTET_ALIGN),
         m_nSamplingRate(DEFAULT_SAMPLING_RATE_AMRWB),
         m_bDtx(DEFAULT_AMR_DTX)
@@ -43,6 +44,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     IMS_TRACE_D("Create - nCodec[%d %s]", m_nCodec, ImsCodec::CodecToString(m_nCodec), 0);
 
     IMSVector<IMS_SINT32> objCodecAttributeModeset;
+    IMSVector<IMS_SINT32> objCodecAttributeDefaultModeset;
 
     if (piCc == IMS_NULL)
     {
@@ -78,6 +80,8 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
 
         objCodecAttributeModeset = piCc->GetIntArray(
                 CarrierConfig::Assets::KEY_ASSET_AMR_AMRNB_CODEC_ATTRIBUTE_MODESET_INT_ARRAY);
+        objCodecAttributeDefaultModeset = piCc->GetIntArray(
+                CarrierConfig::Assets::KEY_AUDIO_AMRNB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY);
     }
     else if (m_nCodec == ImsCodec::AUDIO_AMR_WB)
     {
@@ -103,6 +107,8 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
 
         objCodecAttributeModeset = piCc->GetIntArray(
                 CarrierConfig::Assets::KEY_ASSET_AMR_AMRWB_CODEC_ATTRIBUTE_MODESET_INT_ARRAY);
+        objCodecAttributeDefaultModeset = piCc->GetIntArray(
+                CarrierConfig::Assets::KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY);
     }
 
     m_nModeSetList = 0;
@@ -121,6 +127,22 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     }
     /** TODO Media - End - Need to change to carrier configuration bundle later */
 
+    m_nDefaultModeSetList = 0;
+    IMS_SINT32 nDefaultModeSetNum = objCodecAttributeDefaultModeset.GetSize();
+
+    for (IMS_SINT32 i = 0; i < nDefaultModeSetNum; i++)
+    {
+        IMS_SINT32 nModeSet = objCodecAttributeDefaultModeset.GetAt(i);
+        if (nModeSet < 0)
+        {
+            IMS_TRACE_D("Invalid ModeSet value", 0, 0, 0);
+            break;
+        }
+        m_nDefaultModeSetList = (m_nDefaultModeSetList | (1 << nModeSet));
+    }
+    IMS_TRACE_D("nDefaultModeSetNum: %d m_nDefaultModeSetList: %d", nDefaultModeSetNum,
+            m_nDefaultModeSetList, 0);
+
     if (m_nCodec == ImsCodec::AUDIO_AMR && m_nSamplingRate == 16000)
     {
         m_nCodec = ImsCodec::AUDIO_AMR_WB;
@@ -135,6 +157,7 @@ PUBLIC VIRTUAL void CodecAmrConfig::ToDebugString() const
     CodecConfig::ToDebugString();
     IMS_TRACE_D("m_nChannel(%d), mode-set(0x%04x), m_nOctetAlign(%d)", m_nChannel, m_nModeSetList,
             m_nOctetAlign);
+    IMS_TRACE_D("default mode-set(0x%04x)", m_nDefaultModeSetList, 0, 0);
     IMS_TRACE_D("m_nSamplingRate(%d), m_bDtx(%d), m_bShowModeSet(%d)", m_nSamplingRate, m_bDtx,
             m_bShowModeSet);
 }
@@ -184,6 +207,12 @@ PUBLIC
 IMS_UINT32 CodecAmrConfig::GetModeSetList() const
 {
     return m_nModeSetList;
+}
+
+PUBLIC
+IMS_UINT32 CodecAmrConfig::GetDefaultModeSetList() const
+{
+    return m_nDefaultModeSetList;
 }
 
 PUBLIC

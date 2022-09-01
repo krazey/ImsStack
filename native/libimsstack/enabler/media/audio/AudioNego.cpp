@@ -1996,6 +1996,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
 
     IMS_BOOL bProperNegotiatedTe = IMS_FALSE;
     IMS_UINT32 nNegoModeSetList = 0;
+    IMS_UINT32 nNegoDefaultRtpModeSet = 0;
     IMS_UINT32 BandwidthNegoList;
     IMS_UINT32 BitrateNegoList;
     IMS_UINT32 ModeSetNegoList;
@@ -2014,8 +2015,8 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
         {
             if ((templstNegotiatedPayloads.GetSize() == 0) &&
-                    FindAmrInProfile(pLocalProfile, pPayload, bIsOfferReceived,
-                            &nNegoModeSetList) == IMS_TRUE)
+                    FindAmrInProfile(pLocalProfile, pPayload, bIsOfferReceived, &nNegoModeSetList,
+                            &nNegoDefaultRtpModeSet) == IMS_TRUE)
             {
                 AudioProfile::Payload* pAMR = new AudioProfile::Payload();
                 pAMR->SetRtpMap(pPayload->objRtpMap);
@@ -2071,7 +2072,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
         {
             if ((lstNegotiatedPayloads.GetSize() == 0) &&
                     FindAmrInProfile(pLocalProfile, pDestPayload, bIsOfferReceived,
-                            &nNegoModeSetList) == IMS_TRUE)
+                            &nNegoModeSetList, &nNegoDefaultRtpModeSet) == IMS_TRUE)
             {
                 AudioProfile::Payload* pAMR = new AudioProfile::Payload();
                 pAMR->SetRtpMap(pDestPayload->objRtpMap);
@@ -2085,6 +2086,8 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp(
                         *reinterpret_cast<AudioProfile::AmrFmtp*>(pDestPayload->pFmtp));
                 pAmrFmtp->nModeSetList = nNegoModeSetList;
+                pAmrFmtp->nDefaultRtpModeSet = nNegoDefaultRtpModeSet;
+
                 pAmrFmtp->bSCREnable = pSrc_Fmtp->bSCREnable;
 
                 pAmrFmtp->bShowModeChangeCapability = pSrc_Fmtp->bShowModeChangeCapability;
@@ -3071,7 +3074,8 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::AmrF
 
 PRIVATE
 IMS_BOOL AudioNego::FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-        IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList)
+        IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList,
+        OUT IMS_UINT32* pnNegoDefaultRtpModeSet)
 {
     if (pProfile == IMS_NULL || pPayload == IMS_NULL)
     {
@@ -3079,6 +3083,7 @@ IMS_BOOL AudioNego::FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile:
     }
 
     IMS_UINT32 nTempNegoModeSetList = 0;
+    IMS_UINT32 nTempDefaultNegoModeSetList = 0;
     IMS_BOOL bModeSetFound = IMS_FALSE;
 
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
@@ -3116,11 +3121,12 @@ IMS_BOOL AudioNego::FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile:
 
             /** Fix for AMR Open Offer In case of MO, mode-set from MT could be mismatched Keep
             negotiated mode-set and try to find exact one */
-            IMS_SINT32 nCompareResult = CompareModeSet(
-                    pCompareFmtp, pReceivedFmtp, bIsOfferReceived, pnNegoModeSetList);
+            IMS_SINT32 nCompareResult = CompareModeSet(pCompareFmtp, pReceivedFmtp,
+                    bIsOfferReceived, pnNegoModeSetList, pnNegoDefaultRtpModeSet);
 
             if (nCompareResult == -1)
             {
+                IMS_TRACE_D("FindAmrInProfile() nCompareResult - not match", 0, 0, 0);
                 continue;  // mismatched
             }
             else if (nCompareResult == 0)  // similarly matched
@@ -3128,6 +3134,7 @@ IMS_BOOL AudioNego::FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile:
                 if (bModeSetFound == IMS_FALSE)
                 {
                     nTempNegoModeSetList = *pnNegoModeSetList;
+                    nTempDefaultNegoModeSetList = *pnNegoDefaultRtpModeSet;
                     bModeSetFound = IMS_TRUE;
                     IMS_TRACE_I("FindAmrInProfile() Local/Peer is not exactly matched\
                             [0x%04x][0x%04x] =>[0x%04x]. Try next",
@@ -3155,9 +3162,11 @@ IMS_BOOL AudioNego::FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile:
     if (bModeSetFound == IMS_TRUE)
     {
         *pnNegoModeSetList = nTempNegoModeSetList;
+        *pnNegoDefaultRtpModeSet = nTempDefaultNegoModeSetList;
 
-        IMS_TRACE_D("FindAmrInProfile() Found Similar AMR with nModeSetList[0x%04x]",
-                *pnNegoModeSetList, 0, 0);
+        IMS_TRACE_D("FindAmrInProfile() Found Similar AMR with nModeSetList[0x%04x], "
+                    "nDefaultModeSetList[0x%04x]",
+                *pnNegoModeSetList, *pnNegoDefaultRtpModeSet, 0);
 
         return IMS_TRUE;
     }
@@ -3211,10 +3220,12 @@ IMS_BOOL AudioNego::FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile:
 PRIVATE
 IMS_SINT32 AudioNego::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
         IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-        OUT IMS_UINT32* nNegoModeSet)
+        OUT IMS_UINT32* nNegoModeSet, OUT IMS_UINT32* nNegoDefaultRtpModeSet)
 {
     IMS_TRACE_I("CompareModeSet() - Src modeSet[0x%04x] Dest modeSet[0x%04x], bIsOfferReceived[%d]",
             pSrcFmtp->nModeSetList, pDestFmtp->nModeSetList, bIsOfferReceived);
+    IMS_TRACE_I("CompareModeSet() - Src defaultmodeSet[0x%04x] Dest defaultmodeSet[0x%04x]",
+            pSrcFmtp->nDefaultRtpModeSet, pDestFmtp->nDefaultRtpModeSet, 0);
 
     IMS_SINT32 nResult = 1;  // -1 : no matched, 0 : similar, 1 : exactly matched
 
@@ -3231,6 +3242,7 @@ IMS_SINT32 AudioNego::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
         else
         {
             *nNegoModeSet = 0;  // MO, MT both has no mode-set
+            *nNegoDefaultRtpModeSet = pSrcFmtp->nDefaultRtpModeSet;
         }
     }
     else  // MO Case
@@ -3238,6 +3250,7 @@ IMS_SINT32 AudioNego::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
         if ((pSrcFmtp->nModeSetList == 0) && (pDestFmtp->nModeSetList == 0))
         {
             *nNegoModeSet = 0;
+            *nNegoDefaultRtpModeSet = pSrcFmtp->nDefaultRtpModeSet;
         }
         else if ((pSrcFmtp->nModeSetList != 0) && (pDestFmtp->nModeSetList != 0))
         {
@@ -3261,7 +3274,8 @@ IMS_SINT32 AudioNego::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
     }
 
     IMS_TRACE_I(
-            "CompareModeSet() Result[%d] Negotiated modeSet[0x%04x]", nResult, *nNegoModeSet, 0);
+            "CompareModeSet() Result[%d] Negotiated modeSet[0x%04x] nNegoDefaultRtpModeSet[0x%04x]",
+            nResult, *nNegoModeSet, *nNegoDefaultRtpModeSet);
 
     return nResult;
 }
@@ -3717,6 +3731,7 @@ PRIVATE IMS_SINT32 AudioNego::FindPayloadIndexFromProfile(IN AString strCodecNam
                         comparedPayload->objRtpMap.strPayloadType.Equals("AMR-WB"))
                 {
                     IMS_UINT32 pnNegoModeSetList = 0;
+                    IMS_UINT32 pnNegoDefaultRtpModeSet = 0;
                     AudioProfile::AmrFmtp* pCompareFmtp =
                             (AudioProfile::AmrFmtp*)comparedPayload->pFmtp;
                     AudioProfile::AmrFmtp* pReceivedFmtp =
@@ -3760,8 +3775,8 @@ PRIVATE IMS_SINT32 AudioNego::FindPayloadIndexFromProfile(IN AString strCodecNam
                     // In case of MO, mode-set from MT could be mismatched
                     // => Keep negotiated mode-set and try to find exact one
 
-                    IMS_SINT32 nCompareResult = CompareModeSet(
-                            pCompareFmtp, pReceivedFmtp, bIsOfferReceived, &pnNegoModeSetList);
+                    IMS_SINT32 nCompareResult = CompareModeSet(pCompareFmtp, pReceivedFmtp,
+                            bIsOfferReceived, &pnNegoModeSetList, &pnNegoDefaultRtpModeSet);
                     if (nCompareResult == -1)
                     {
                         continue;  // mismatched

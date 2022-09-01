@@ -792,6 +792,10 @@ public class CarrierConfig {
                 "audio_show_codec_attribute_dtx_bool";
         public static final String KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL =
                 "audio_show_codec_attribute_amrwbio_modeset_bool";
+        public static final String KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY =
+                "audio_amrwb_codec_attribute_default_modeset_int_array";
+        public static final String KEY_AUDIO_AMRNB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY =
+                "audio_amrnb_codec_attribute_default_modeset_int_array";
         public static final String KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT =
                 "audio_telephone_event_duration_millis_int";
         public static final String KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY =

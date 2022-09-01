@@ -33,7 +33,8 @@ CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeN
         m_nCmr(DEFAULT_CMR),
         m_nChAwRecv(DEFAULT_CH_AW_RECV),
         m_bShowAmrwbIoModeSet(IMS_FALSE),
-        m_nAmrWbIoModeSetList(DEFAULT_AMRWB_IO_MODESET)
+        m_nAmrWbIoModeSetList(DEFAULT_AMRWB_IO_MODESET),
+        m_nDefaultRtpModeSet(DEFAULT_AMRWB_IO_MODESET)
 {
     IMS_TRACE_D("+CodecEvsConfig Type[%d]", nType_, 0, 0);
 }
@@ -133,10 +134,14 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     m_nAmrWbIoModeSetList =
             piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_AMRWB_IO_MODE_SET_INT);
 
+    m_nDefaultRtpModeSet = piCc->GetInt(
+            CarrierConfig::Assets::KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY);
+
     IMS_TRACE_D("Create - EvsCodecConfig - m_nCmr: %d m_nChAwRecv: %d m_nAmrWbIoModeSetList: %d",
             m_nCmr, m_nChAwRecv, m_nAmrWbIoModeSetList);
     IMS_TRACE_D("Create - EvsCodecConfig - nBrStart: %d nBrEnd: %d m_nBwList: %d", nBrStart, nBrEnd,
             m_nBwList);
+    IMS_TRACE_D("Create - EvsCodecConfig - m_nDefaultRtpModeSet: %d", m_nDefaultRtpModeSet, 0, 0);
 
     /** TODO - to access bundle for EVS - later */
     /* m_nBwList = piCcBundle->GetInt(
@@ -421,6 +426,12 @@ PUBLIC
 IMS_UINT32 CodecEvsConfig::GetAmrWbIoModeSetList() const
 {
     return m_nAmrWbIoModeSetList;
+}
+
+PUBLIC
+IMS_UINT32 CodecEvsConfig::GetDefaultModeSetList() const
+{
+    return m_nDefaultRtpModeSet;
 }
 
 PUBLIC
