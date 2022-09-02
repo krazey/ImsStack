@@ -1448,26 +1448,7 @@ PRIVATE MEDIA_DIRECTION TextNego::UpdateDirectionToMine(IN MEDIA_DIRECTION ePeer
 
     if (bIsMtCase == IMS_FALSE)
     {
-        // direction check strictly
-        if (eLocalDirection == MEDIA_DIRECTION_SEND &&
-                (ePeerDirection == MEDIA_DIRECTION_SEND ||
-                        ePeerDirection == MEDIA_DIRECTION_SEND_RECEIVE))
-        {
-            return MEDIA_DIRECTION_INVALID;
-        }
-
-        else if (eLocalDirection == MEDIA_DIRECTION_RECEIVE &&
-                (ePeerDirection == MEDIA_DIRECTION_RECEIVE ||
-                        ePeerDirection == MEDIA_DIRECTION_SEND_RECEIVE))
-        {
-            return MEDIA_DIRECTION_INVALID;
-        }
-
-        else if (eLocalDirection == MEDIA_DIRECTION_INACTIVE &&
-                (ePeerDirection != MEDIA_DIRECTION_INACTIVE))
-        {
-            return MEDIA_DIRECTION_INVALID;
-        }
+        eNegotiatedDir = eLocalDirection;
     }
 
     return eNegotiatedDir;
