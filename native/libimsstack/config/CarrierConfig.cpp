@@ -178,24 +178,22 @@ const IMS_CHAR CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY[] =
         KEY_IMS_PREFIX "pcscf_discovery_method_int_array";
 
 // Aos
-const IMS_CHAR CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY[] =
-        KEY_IMS_PREFIX "ims_identity_priority_int_array";
-const IMS_CHAR CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT[] =
-        KEY_IMS_PREFIX "isim_index_for_impu_int";
-const IMS_CHAR CarrierConfig::Ims::KEY_UPDATE_REGISTRATION_WITH_RAT_CHANGE_INT_ARRAY[] =
-        KEY_IMS_PREFIX "update_registration_with_rat_change_int_array";
-const IMS_CHAR CarrierConfig::Ims::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT[] =
-        KEY_IMS_PREFIX "refresh_geolocation_timeout_millis_int";
-const IMS_CHAR CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL[] =
-        KEY_IMS_PREFIX "unsubscribe_registration_event_package_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_EVENT_FOR_CAT_REQUIRED_BOOL[] =
         KEY_IMS_PREFIX "registration_event_for_cat_required_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL[] =
+        KEY_IMS_PREFIX "unsubscribe_registration_event_package_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT[] =
+        KEY_IMS_PREFIX "isim_index_for_impu_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_PREFERRED_IMS_DSCP_INT[] =
         KEY_IMS_PREFIX "preferred_ims_dscp_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT[] =
         KEY_IMS_PREFIX "registration_preferred_accesstype_feature_tag_int";
+const IMS_CHAR CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY[] =
+        KEY_IMS_PREFIX "ims_identity_priority_int_array";
 const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY[] =
         KEY_IMS_PREFIX "registration_permanent_error_code_int_array";
+const IMS_CHAR CarrierConfig::Ims::KEY_UPDATE_REGISTRATION_WITH_RAT_CHANGE_INT_ARRAY[] =
+        KEY_IMS_PREFIX "update_registration_with_rat_change_int_array";
 
 //// ImsEmergency
 #define KEY_IMS_EMERGENCY_PREFIX "imsemergency."

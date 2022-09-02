@@ -28,23 +28,25 @@
     </int-array>
 
     <!-- Aos -->
+    <boolean name="ims.registration_event_for_cat_required_bool" value="false"/>
+    <boolean name="ims.unsubscribe_registration_event_package_bool" value="false"/>
+    <int name="ims.isim_index_for_impu_int" value="1"/>
+    <int name="ims.preferred_ims_dscp_int" value="0"/>
+    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="1"/>
     <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="0">
     </int-array>
-    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="false"/>
-    <boolean name="imssms.support_limited_admin_sms_mode_bool" value="false"/>
     <int-array name="ims.ims_identity_priority_int_array" num="2">
         <item value="0"/>
         <item value="1"/>
     </int-array>
-    <int name="ims.isim_index_for_impu_int" value="1"/>
+    <int-array name="ims.registration_permanent_error_code_int_array" num="0">
+    </int-array>
     <int-array name="ims.update_registration_with_rat_change_int_array" num="0">
     </int-array>
-    <boolean name="ims.unsubscribe_registration_event_package_bool" value="false"/>
-    <boolean name="ims.registration_event_for_cat_required_bool" value="false"/>
-    <int name="imswfc.registration_private_header_int" value="0"/>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="false"/>
     <int name="imsemergency.preferred_emergency_registration_int" value="2"/>
-    <int name="ims.preferred_ims_dscp_int" value="0"/>
-    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="1"/>
+    <boolean name="imssms.support_limited_admin_sms_mode_bool" value="false"/>
+    <int name="imswfc.registration_private_header_int" value="0"/>
 
     <!-- Mtc -->
     <int name="imsvoice.18x_timer_millis_int" value="32000"/>
@@ -266,11 +268,8 @@
     <int name="registration_out_of_service_policy_int" value="0"/>
     <boolean name="video_over_wifi_supported_without_voice_bool" value="false"/>
     <boolean name="cdmaless_feature_tag_required_bool" value="false"/>
-    <int-array name="ims.registration_permanent_error_code_int_array" num="0">
-    </int-array>
     <int-array name="registration_permanent_error_max_count_int_array" num="0">
     </int-array>
-    <boolean name="ims.ims_single_registration_required_bool" value="false"/>
     <int name="ims_preferred_iptype_int" value="1"/>
     <int name="ims_signalling_dscp_int" value="46"/>
     <int name="registration_actual_wait_time_policy_int" value="0"/>
