@@ -470,8 +470,8 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
 }
 
 PUBLIC
-IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* nAudioDirection,
-        OUT IMS_SINT32* nVideoDirection, OUT IMS_SINT32* nTextDirection,
+IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDirection,
+        OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection,
         OUT MediaNegoResult& errorReason)
 {
     IMS_TRACE_I("NegotiateSDP(): pSession[%" PFLS_x "]", pSession, 0, 0);
@@ -542,12 +542,9 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* nAudioDi
 
                 if (pNegotiatedAudioDescriptor == NULL)
                 {
-                    if (m_pAudioNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
-                                pDescriptor, (MEDIA_DIRECTION*)nAudioDirection) == IMS_TRUE)
-                    {
-                        pNegotiatedAudioDescriptor = pDescriptor;
-                        errorReason = NO_ERROR;
-                    }
+                    m_pAudioNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
+                            pDescriptor, nAudioDirection);
+                    pNegotiatedAudioDescriptor = pDescriptor;
                 }
                 else  // Negotiated descriptor is already exist
                 {
@@ -562,13 +559,9 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* nAudioDi
 
                 if (pNegotiatedVideoDescriptor == NULL)
                 {
-                    if (m_pVideoNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
-                                pDescriptor,
-                                reinterpret_cast<MEDIA_DIRECTION*>(nVideoDirection)) == IMS_TRUE)
-                    {
-                        pNegotiatedVideoDescriptor = pDescriptor;
-                        errorReason = NO_ERROR;
-                    }
+                    m_pVideoNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
+                            pDescriptor, nVideoDirection);
+                    pNegotiatedVideoDescriptor = pDescriptor;
                 }
                 else  // Negotiated descriptor is already exist
                 {
@@ -583,13 +576,9 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* nAudioDi
 
                 if (pNegotiatedTextDescriptor == NULL)
                 {
-                    if (m_pTextNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
-                                pDescriptor,
-                                reinterpret_cast<MEDIA_DIRECTION*>(nTextDirection)) == IMS_TRUE)
-                    {
-                        pNegotiatedTextDescriptor = pDescriptor;
-                        errorReason = NO_ERROR;
-                    }
+                    m_pTextNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
+                            pDescriptor, nTextDirection);
+                    pNegotiatedTextDescriptor = pDescriptor;
                 }
                 else  // Negotiated descriptor is already exist
                 {
@@ -626,7 +615,7 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* nAudioDi
     }
     else
     {
-        *nAudioDirection = MEDIA_DIRECTION_INVALID;
+        nAudioDirection = MEDIA_DIRECTION_INVALID;
 
         if (MEDIA_IS_CONTAINED_THIS_TYPE(m_eSessionType, MEDIA_TYPE_AUDIO))
         {
@@ -636,37 +625,8 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* nAudioDi
         }
     }
 
-    // Video nego result
-    if (pNegotiatedVideoDescriptor != IMS_NULL)
-    {
-        if (m_pVideoNego->GetNegotiatedRtpPort() <= 0 ||
-                GetNegotiatedVideoQuality() == VIDEO_RESOLUTION_NOT_USED)
-        {
-            *nVideoDirection = MEDIA_DIRECTION_INVALID;
-        }
-    }
-    else
-    {
-        *nVideoDirection = MEDIA_DIRECTION_INVALID;
-    }
-
-    // Text nego result
-    if (pNegotiatedTextDescriptor != IMS_NULL)
-    {
-        if (m_pTextNego->GetNegotiatedRtpPort() <= 0 ||
-                GetNegotiatedTextQuality() == TEXT_CODEC_NOT_USED)
-        {
-            *nTextDirection = MEDIA_DIRECTION_INVALID;
-        }
-    }
-    else
-    {
-        *nTextDirection = MEDIA_DIRECTION_INVALID;
-    }
-
-    if (*nAudioDirection == MEDIA_DIRECTION_INVALID &&
-            *nVideoDirection == MEDIA_DIRECTION_INVALID &&
-            *nTextDirection == MEDIA_DIRECTION_INVALID)
+    if (nAudioDirection == MEDIA_DIRECTION_INVALID && nVideoDirection == MEDIA_DIRECTION_INVALID &&
+            nTextDirection == MEDIA_DIRECTION_INVALID)
     {
         IMS_TRACE_E(0, "NegotiateSDP() - There's NO negotiated media", 0, 0, 0);
         errorReason = ERROR_NO_CODEC_MATCHED;
@@ -691,8 +651,8 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* nAudioDi
     }
 
     IMS_TRACE_D("NegotiateSDP() - NegoState[%d]", GetNegoState(), 0, 0);
-    IMS_TRACE_D("NegotiateSDP() - AudioDir[%d], VideoDir[%d], TextDir[%d]", *nAudioDirection,
-            *nVideoDirection, *nTextDirection);
+    IMS_TRACE_D("NegotiateSDP() - AudioDir[%d], VideoDir[%d], TextDir[%d]", nAudioDirection,
+            nVideoDirection, nTextDirection);
     IMS_TRACE_D("NegotiateSDP() - AudioQuality[%d], VideoQuality[%d], TextQuality[%d]",
             GetNegotiatedAudioQuality(), GetNegotiatedVideoQuality(), GetNegotiatedTextQuality());
 

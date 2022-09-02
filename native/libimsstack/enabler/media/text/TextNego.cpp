@@ -125,34 +125,24 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::FormSDP(IN NEGO_STATE eNegoState,
     }
 }
 
-PUBLIC IMS_BOOL TextNego::NegotiateSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL void TextNego::NegotiateSDP(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-        OUT MEDIA_DIRECTION* eDir)
+        OUT IMS_SINT32& nDirection)
 {
-    if (eDir == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_TRACE_I("NegotiateSDP() - NegoState[%d], lstOaModel size[%d]", eNegoState,
-            m_listOaModel.GetSize(), 0);
-
-    *eDir = MEDIA_DIRECTION_INVALID;
+    nDirection = MEDIA_DIRECTION_INVALID;
 
     switch (eNegoState)
     {
         case STATE_IDLE:
         case STATE_NEGOTIATED:
-            *eDir = NegotiateOffer(pSessionDescriptor, pDescriptor);
+            nDirection = NegotiateOffer(pSessionDescriptor, pDescriptor);
             break;
         case STATE_OFFER_SENT:
-            *eDir = NegotiateAnswer(pSessionDescriptor, pDescriptor);
+            nDirection = NegotiateAnswer(pSessionDescriptor, pDescriptor);
             break;
         default:
             break;
     }
-
-    return (*eDir != MEDIA_DIRECTION_INVALID) ? IMS_TRUE : IMS_FALSE;
 }
 
 PUBLIC VIRTUAL void TextNego::FinalizeSDP(
@@ -770,7 +760,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     return MakeSDPFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pLocalProfile);
 }
 
-PRIVATE MEDIA_DIRECTION TextNego::NegotiateOffer(
+PRIVATE IMS_SINT32 TextNego::NegotiateOffer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
@@ -812,8 +802,7 @@ PRIVATE MEDIA_DIRECTION TextNego::NegotiateOffer(
     return pNewOaModel->pNegotiatedProfile->eDirection;
 }
 
-PRIVATE
-MEDIA_DIRECTION TextNego::NegotiateAnswer(
+PRIVATE IMS_SINT32 TextNego::NegotiateAnswer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
@@ -1223,6 +1212,11 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
 
         pNegotiatedProfile->objIpAddress = objLocalIPAddr;
         pNegotiatedProfile->nDataPort = 0;
+
+        IMS_TRACE_D("MakeNegotiatedProfile() - ZERO Port. DO NOT Use the text[%d][%d],\
+                But nego is successful",
+                pNegotiatedProfile->nDataPort, pPeerProfile->nDataPort, 0);
+        return IMS_TRUE;
     }
 
     if (m_pConfig == IMS_NULL)

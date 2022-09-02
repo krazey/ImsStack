@@ -120,12 +120,10 @@ public:
      * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
      * @param pDescriptor The SDP descriptor instance to negotiate the m=text level SDP
      * @param eDir The media direction of the SDP
-     * @return IMS_BOOL Returns IMS_TRUE when there is no error during SDP negotiation, IMS_FALSE
-     * when it is failed to form
      */
-    virtual IMS_BOOL NegotiateSDP(IN NEGO_STATE eNegoState,
+    virtual void NegotiateSDP(IN const NEGO_STATE eNegoState,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-            OUT MEDIA_DIRECTION* eDir);
+            OUT IMS_SINT32& eDir);
 
     /**
      * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
@@ -221,11 +219,9 @@ private:
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
     IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
-    MEDIA_DIRECTION NegotiateOffer(
+    IMS_SINT32 NegotiateOffer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-    MEDIA_DIRECTION NegotiateAnswer(
-            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-    MEDIA_DIRECTION NegotiateReanswer(
+    IMS_SINT32 NegotiateAnswer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
     IMS_BOOL MakeSdpFromProfile(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile);

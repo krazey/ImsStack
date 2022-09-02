@@ -34,9 +34,9 @@ public:
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
                     IN IMS_BOOL bDisable),
             (override));
-    MOCK_METHOD(IMS_BOOL, NegotiateSDP,
+    MOCK_METHOD(void, NegotiateSDP,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
-                    IN IMediaDescriptor* pDescriptor, OUT MEDIA_DIRECTION* eDir),
+                    IN IMediaDescriptor* pDescriptor, OUT IMS_SINT32& nDirection),
             (override));
     MOCK_METHOD(void, FinalizeSDP,
             (IN ISessionDescriptor * pSessionDescriptor, NEGO_STATE eNegoState), (override));

@@ -278,7 +278,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSDP(IN IMS_UINTP nNegoId, IN ISes
         return IMS_FALSE;
     }
 
-    if (pMediaNego->NegotiateSDP(pSession, nAudioDirection, nVideoDirection, nTextDirection,
+    if (pMediaNego->NegotiateSDP(pSession, *nAudioDirection, *nVideoDirection, *nTextDirection,
                 errorReason) == IMS_TRUE)
     {
         IMS_TRACE_I("NegotiateSDP() - DIR = Audio[%d], Video[%d], Text[%d]", *nAudioDirection,

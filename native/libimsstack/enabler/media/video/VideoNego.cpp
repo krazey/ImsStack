@@ -143,34 +143,24 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::FormSDP(IN NEGO_STATE eNegoState,
     }
 }
 
-PUBLIC VIRTUAL IMS_BOOL VideoNego::NegotiateSDP(NEGO_STATE eNegoState,
+PUBLIC VIRTUAL void VideoNego::NegotiateSDP(NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-        OUT MEDIA_DIRECTION* eDirection)
+        OUT IMS_SINT32& nDirection)
 {
-    if (eDirection == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_TRACE_I("NegotiateSDP() - NegoState[%d], lstOaModel size[%d] eDirection[%d]", eNegoState,
-            m_listOaModel.GetSize(), eDirection);
-
-    *eDirection = MEDIA_DIRECTION_INVALID;
+    nDirection = MEDIA_DIRECTION_INVALID;
 
     switch (eNegoState)
     {
         case STATE_IDLE:
         case STATE_NEGOTIATED:
-            *eDirection = NegotiateOffer(pSessionDescriptor, pDescriptor);
+            nDirection = NegotiateOffer(pSessionDescriptor, pDescriptor);
             break;
         case STATE_OFFER_SENT:
-            *eDirection = NegotiateAnswer(pSessionDescriptor, pDescriptor);
+            nDirection = NegotiateAnswer(pSessionDescriptor, pDescriptor);
             break;
         default:
             break;
     }
-
-    return (*eDirection != MEDIA_DIRECTION_INVALID) ? IMS_TRUE : IMS_FALSE;
 }
 
 PUBLIC VIRTUAL void VideoNego::FinalizeSDP(
@@ -723,7 +713,7 @@ PRIVATE IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescripto
     return MakeSdpFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pLocalProfile);
 }
 
-PRIVATE MEDIA_DIRECTION VideoNego::NegotiateOffer(
+PRIVATE IMS_SINT32 VideoNego::NegotiateOffer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     // Handling exception case
@@ -767,7 +757,7 @@ PRIVATE MEDIA_DIRECTION VideoNego::NegotiateOffer(
     return pNewOaModel->pNegotiatedProfile->eDirection;
 }
 
-PRIVATE MEDIA_DIRECTION VideoNego::NegotiateAnswer(
+PRIVATE IMS_SINT32 VideoNego::NegotiateAnswer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     // Handling exception case

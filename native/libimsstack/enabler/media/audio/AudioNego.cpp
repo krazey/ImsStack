@@ -132,33 +132,24 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSDP(IN NEGO_STATE eNegoState,
     }
 }
 
-PUBLIC VIRTUAL IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL void AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-        OUT MEDIA_DIRECTION* eDir)
+        OUT IMS_SINT32& nDirection)
 {
-    if (eDir == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
+    nDirection = MEDIA_DIRECTION_INVALID;
 
-    IMS_TRACE_I("NegotiateSDP() - NegoState[%d], lstOaModel size[%d]", eNegoState,
-            m_lstOaModel.GetSize(), 0);
-
-    *eDir = MEDIA_DIRECTION_INVALID;
     switch (eNegoState)
     {
         case STATE_IDLE:
         case STATE_NEGOTIATED:
-            *eDir = NegotiateOffer(pSessionDescriptor, pDescriptor);
+            nDirection = NegotiateOffer(pSessionDescriptor, pDescriptor);
             break;
         case STATE_OFFER_SENT:
-            *eDir = NegotiateAnswer(pSessionDescriptor, pDescriptor);
+            nDirection = NegotiateAnswer(pSessionDescriptor, pDescriptor);
             break;
         default:
             break;
     }
-
-    return (*eDir != MEDIA_DIRECTION_INVALID) ? IMS_TRUE : IMS_FALSE;
 }
 
 PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
