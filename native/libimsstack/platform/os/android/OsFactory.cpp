@@ -28,6 +28,7 @@
 #include "ServiceMemory.h"
 #include "device/OsCarrierConfig.h"
 #include "device/OsDeviceInfo.h"
+#include "device/OsImsRadio.h"
 #include "device/OsIsim.h"
 #include "device/OsLocationInfo.h"
 #include "device/OsNetworkWatcher.h"
@@ -389,4 +390,9 @@ PUBLIC VIRTUAL ImsUsim* OsFactory::CreateUsim(IN IMS_SINT32 nSlotId)
 PUBLIC VIRTUAL ImsCarrierConfig* OsFactory::CreateCarrierConfig(IN IMS_SINT32 nSlotId)
 {
     return new OsCarrierConfig(nSlotId);
+}
+
+PUBLIC VIRTUAL ImsRadio* OsFactory::CreateImsRadio(IN IMS_SINT32 nSlotId)
+{
+    return new OsImsRadio(nSlotId);
 }

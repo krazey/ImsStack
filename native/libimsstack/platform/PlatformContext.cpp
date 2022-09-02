@@ -18,6 +18,7 @@
 #include "ServiceConfig.h"
 #include "ServiceEvent.h"
 #include "ServiceFile.h"
+#include "ServiceImsRadio.h"
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
 #include "ServiceNetwork.h"
@@ -263,6 +264,9 @@ PlatformService* PlatformContext::GetDefaultService(IN PlatformServiceType eType
             break;
         case SERVICE_NETWORK_POLICY:
             pService = new NetworkServicePolicy();
+            break;
+        case SERVICE_RADIO:
+            pService = new ImsRadioService();
             break;
         default:
             // no-op

@@ -23,6 +23,7 @@
 #include "OsMutex.h"
 #include "OsThread.h"
 #include "ServiceConfig.h"
+#include "ServiceImsRadio.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServicePhoneInfo.h"
@@ -519,6 +520,9 @@ PROTECTED VIRTUAL void OsThread::OnSystemMessage(IN ImsMessage& objMsg)
         case IMS_MSG_CONFIGURATION:
             ConfigService::GetConfigService()->DispatchServiceMessage(objMsg);
             break;
+        case IMS_MSG_RADIO:
+            ImsRadioService::GetImsRadioService()->DispatchServiceMessage(objMsg);
+            break;
     }
 }
 
@@ -550,5 +554,5 @@ PROTECTED GLOBAL IMS_BOOL OsThread::IsSystemMessage(IN IMS_SINT32 nMsg)
     return ((nMsg == IMS_MSG_NETWORK) || (nMsg == IMS_MSG_SOCKET) || (nMsg == IMS_MSG_BATTERY) ||
             (nMsg == IMS_MSG_NETWORK_STATUS) || (nMsg == IMS_MSG_TIMER) ||
             (nMsg == IMS_MSG_CONFIGURATION) || (nMsg == IMS_MSG_WIFI_STATUS) ||
-            (nMsg == IMS_MSG_ISIM) || (nMsg == IMS_MSG_USIM));
+            (nMsg == IMS_MSG_ISIM) || (nMsg == IMS_MSG_USIM) || (nMsg == IMS_MSG_RADIO));
 }

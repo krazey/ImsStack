@@ -40,6 +40,7 @@ class ImsFile;
 class ImsIsim;
 class ImsMutex;
 class ImsNetworkConnection;
+class ImsRadio;
 class ImsThread;
 class ImsTimer;
 class ImsTrace;
@@ -116,6 +117,8 @@ public:
     virtual ImsIsim* CreateIsim(IN IMS_SINT32 nSlotId) = 0;
     virtual ImsUsim* CreateUsim(IN IMS_SINT32 nSlotId) = 0;
     virtual ImsCarrierConfig* CreateCarrierConfig(IN IMS_SINT32 nSlotId) = 0;
+
+    virtual ImsRadio* CreateImsRadio(IN IMS_SINT32 nSlotId) = 0;
 };
 
 #endif

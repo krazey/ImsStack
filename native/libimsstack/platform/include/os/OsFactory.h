@@ -97,6 +97,8 @@ public:
     ImsIsim* CreateIsim(IN IMS_SINT32 nSlotId) override;
     ImsUsim* CreateUsim(IN IMS_SINT32 nSlotId) override;
     ImsCarrierConfig* CreateCarrierConfig(IN IMS_SINT32 nSlotId) override;
+
+    ImsRadio* CreateImsRadio(IN IMS_SINT32 nSlotId) override;
 };
 
 #endif

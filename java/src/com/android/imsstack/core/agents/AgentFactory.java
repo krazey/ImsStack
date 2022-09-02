@@ -221,6 +221,7 @@ public final class AgentFactory {
                 agents.put(IpSecInterface.class, new IpSecAgent(slotId));
                 agents.put(SubsInfoInterface.class, new SubsInfoAgent(slotId));
                 agents.put(GbaInterface.class, new GbaAgent(slotId));
+                agents.put(ImsRadioInterface.class, new ImsRadioAgent(slotId));
             }
         }
     }
