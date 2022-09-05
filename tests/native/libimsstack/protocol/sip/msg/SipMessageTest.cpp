@@ -484,6 +484,50 @@ TEST_F(SipMessageTest, DecodeFragmentMsg)
 
     pDecodeMessage->SipDelete();
 
+    /* Only response line with 2 CRLFs, success */
+    pMsg = (char*)"SIP/2.0 200 OK\r\n\r\n";
+
+    pDecodeMessage = new SipMessage();
+    ASSERT_TRUE(pDecodeMessage != nullptr);
+
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
+
+    pDecodeMessage->SipDelete();
+
+    /* Only response line with 3 CRLFs, fail */
+    pMsg = (char*)"SIP/2.0 200 OK\r\n\r\n\r\n";
+
+    pDecodeMessage = new SipMessage();
+    ASSERT_TRUE(pDecodeMessage != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
+
+    pDecodeMessage->SipDelete();
+
+    /* response line with 2 CRLFs and a header, fail */
+    pMsg = (char*)"SIP/2.0 200 OK\r\n\
+\r\n\
+Call-ID: callid\r\n";
+
+    pDecodeMessage = new SipMessage();
+    ASSERT_TRUE(pDecodeMessage != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
+
+    pDecodeMessage->SipDelete();
+
+    /* response line with 2 CRLFs and a message body, fail */
+    pMsg = (char*)"SIP/2.0 200 OK\r\n\
+\r\n\
+Hello!";
+
+    pDecodeMessage = new SipMessage();
+    ASSERT_TRUE(pDecodeMessage != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
+
+    pDecodeMessage->SipDelete();
+
     /* Invalid request line, fail */
     pMsg = (char*)"INVITE SIP/2.0\r\n";
 
@@ -549,6 +593,16 @@ TEST_F(SipMessageTest, DecodeFragmentMsg)
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n";
+
+    pDecodeMessage = new SipMessage();
+    ASSERT_TRUE(pDecodeMessage != nullptr);
+
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
+
+    pDecodeMessage->SipDelete();
+
+    /* One header ending with 2 CRLFs, success */
+    pMsg = (char*)"Via: SIP/2.0/TCP host;branch=test-br\r\n\r\n";
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
