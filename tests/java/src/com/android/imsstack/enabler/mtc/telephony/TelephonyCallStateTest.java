@@ -19,47 +19,31 @@ package com.android.imsstack.enabler.mtc.telephony;
 import static org.junit.Assert.assertEquals;
 
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.android.imsstack.enabler.mtc.telephony.TelephonyCallState;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class TelephonyCallStateTest {
-    private int mState = TelephonyManager.CALL_STATE_IDLE;
-    private String mIncomingNumber = "";
-    private TelephonyCallState mTelephonyCallState;
-    public static final String TAG = "TelephonyCallStateTest";
-
-    @Before
-    public void setUp() throws Exception {
-         Log.d(TAG, " Unit Test for TelephonyCallState");
-         mTelephonyCallState = new TelephonyCallState();
-    }
-
-    /**
-     *  Possible call state values
-     *      TelephonyManager#CALL_STATE_IDLE (0)
-     *      TelephonyManager#CALL_STATE_RINGING (1)
-     *      TelephonyManager#CALL_STATE_OFFHOOK (2)
-     */
-    @Test
-    public void getCallState_test(){
-        assertEquals(mState, mTelephonyCallState.getState());
-    }
 
     @Test
-    public void getIncomingNumber_test(){
-        assertEquals(mIncomingNumber, mTelephonyCallState.getIncomingNumber());
-    }
+    public void testCallStateAndIncomingNumber() {
+        int state = TelephonyManager.CALL_STATE_IDLE;
+        String incomingNumber = "1234";
 
-    @After
-    public void tearDown() throws Exception {
-        mTelephonyCallState = null;
+        TelephonyCallState callState = new TelephonyCallState();
+        callState.setState(state);
+        assertEquals(state, callState.getState());
+        callState.setIncomingNumber(incomingNumber);
+        assertEquals(incomingNumber, callState.getIncomingNumber());
+
+        state = TelephonyManager.CALL_STATE_OFFHOOK;
+        incomingNumber = "5678";
+        callState = new TelephonyCallState(state, incomingNumber);
+        assertEquals(state, callState.getState());
+        assertEquals(incomingNumber, callState.getIncomingNumber());
     }
 }
