@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.util.Base64;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -75,7 +76,7 @@ public class MtsController {
          * 3 - MT_SMS_FORMAT_FAILURE
          * 4 - MT_SMS_NODATA_FAILURE
          */
-        public int notifyIncomingMessage(int smsFormat, String encodedData) {
+        public int notifyIncomingMessage(int smsFormat, byte[] pduData) {
             // no-op
             return MT_FAILURE;
         }
@@ -158,12 +159,13 @@ public class MtsController {
     }
 
     public boolean sendMessage(
-            int smsFormat, String smsData, String psiSmsc, String dialedNumber, int seqId) {
-        ImsLog.d("smsFormat : " + smsFormat + ", encodedDataLength = " + smsData.length()
+            int smsFormat, byte[] smsData, String psiSmsc, String dialedNumber, int seqId) {
+        ImsLog.d("smsFormat : " + smsFormat + ", smsDataLength = " + smsData.length
                 + ", psiSmsc = " + psiSmsc + ", dialedNumber = " + dialedNumber
                 + ", seqId = " + seqId );
+        String encodedPdu = Base64.encodeToString(smsData, Base64.DEFAULT);
 
-        if (smsData == null || psiSmsc == null) {
+        if (encodedPdu == null || psiSmsc == null) {
             processNotifySendMoSmsError(smsFormat, seqId);
             return false;
         }
@@ -188,7 +190,7 @@ public class MtsController {
 
         parcel.writeInt(MtsJni.NOTI_MTSENABLER_SEND_MO_SMS);
         parcel.writeInt(smsFormat);
-        parcel.writeString(smsData);
+        parcel.writeString(encodedPdu);
         parcel.writeString(targetAddress);
         parcel.writeInt(seqId);
         mMtsJni.sendMessage(parcel, mContext.getSlotId());
@@ -255,8 +257,9 @@ public class MtsController {
                 case REQUEST_REPORT_MT_SMS:
                     int smsFormat = msg.arg1;
                     String encodedData = (String)msg.obj;
-                    int mtResult = -1;
-                    mtResult = mListener.notifyIncomingMessage(smsFormat, encodedData);
+                    encodedData = encodedData.replaceAll("\\s", "");
+                    byte[] pduData = Base64.decode(encodedData, Base64.NO_PADDING);
+                    int mtResult = mListener.notifyIncomingMessage(smsFormat, pduData);
                     notifySendMtResult(mtResult);
                     break;
 

@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.util.Base64;
 
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mts.MtsJni;
@@ -51,7 +52,8 @@ public class MtsControllerTest {
     private int mSmsFormat = 1;
     private String mPsiSmsc = "sip:+12345678901@ims.google.com";
     private String mDialedNumber = "tel:+12345678901";
-    private String mEncodedSmsData = "Encoded SMS RP-DATA";
+    private String mEncodedData = "Encoded SMS RP-DATA";
+    private byte[] mPduData = new byte[] {0, 10, 50, 15};
     private int mSeqId = 1;
 
     private TestMtsJni mMtsJni;
@@ -107,7 +109,7 @@ public class MtsControllerTest {
     @Test
     public void testBasicOperation_sendMessage() {
         boolean result = mMtsController.sendMessage(
-                mSmsFormat, mPsiSmsc, mDialedNumber, mEncodedSmsData, mSeqId);
+                mSmsFormat, mPduData, mPsiSmsc, mDialedNumber, mSeqId);
 
         Bundle bundle = new Bundle();
         bundle.putInt(MtsController.REPORTMOSTATUS_REASON, MtsController.MO_SUCCESS);
@@ -134,7 +136,9 @@ public class MtsControllerTest {
         Message msg = Message.obtain();
         msg.what = MtsController.REQUEST_REPORT_MT_SMS;
         msg.arg1 = mSmsFormat;
-        msg.obj = mEncodedSmsData;
+        msg.obj = mEncodedData;
+        mEncodedData = mEncodedData.replaceAll("\\s", "");
+        byte[] pduData = Base64.decode(mEncodedData, Base64.NO_PADDING);
 
         Handler handler = mMtsController.getHandler();
         handler.sendMessage(msg);
@@ -142,7 +146,7 @@ public class MtsControllerTest {
         waitForHandlerActionDelayed(handler, 1000, 0);
 
         verify(mMockMtsControllerListener).notifyIncomingMessage(
-                eq(mSmsFormat), eq(mEncodedSmsData));
+                eq(mSmsFormat), eq(pduData));
     }
 
     private void waitForHandlerActionDelayed(Handler handler, long timeoutMillis, long delayMs) {

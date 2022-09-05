@@ -25,6 +25,7 @@ import static com.android.imsstack.imsservice.mmtel.sms.SmsUtils.RESULT_SUCCESS;
 import static com.android.imsstack.imsservice.mmtel.sms.SmsUtils.SMSRL_RESULT_INVALID_STATE;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,7 +36,6 @@ import static org.mockito.Mockito.when;
 import android.os.Handler;
 import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
-import android.util.Base64;
 
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
@@ -164,30 +164,29 @@ public class SmsRLStateMachineTest {
 
     @Test
     public void onRPErrorFromTL_AllStateTest() {
-        when(mMtsController.sendMessage(anyInt(), anyString(), anyString(), anyString(),
+        when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(),
                 anyInt())).thenReturn(true);
         SmsRPdu moRpError = new SmsRPdu(1, SmsUtils.RP_ERROR, mSmsc,
                              SmsRelayLayer.GENERIC_ERROR_CAUSE_VALUE, mTpdu);
         byte[] encodedPdu = moRpError.getRpduByteArray();
-        String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
         int result;
         mSmsRLStateMachine.setState(IDLE);
         result = mSmsRLStateMachine.onRPErrorFromTL(moRpError);
         assertEquals(SMSRL_RESULT_INVALID_STATE, result);
         assertEquals(IDLE, mSmsRLStateMachine.getState());
-        verify(mMtsController, times(0)).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64, mPsiSmsc,
+        verify(mMtsController, times(0)).sendMessage(SmsUtils.FORMAT_INT_3GPP, encodedPdu, mPsiSmsc,
                 mDestinationAddress, moRpError.getMessageRef());
 
         mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
         result = mSmsRLStateMachine.onRPErrorFromTL(moRpError);
         assertEquals(SMSRL_RESULT_INVALID_STATE, result);
         assertEquals(WAIT_FOR_RPACK_FROM_NW, mSmsRLStateMachine.getState());
-        verify(mMtsController, times(0)).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64, mPsiSmsc,
+        verify(mMtsController, times(0)).sendMessage(SmsUtils.FORMAT_INT_3GPP, encodedPdu, mPsiSmsc,
                 mDestinationAddress, moRpError.getMessageRef());
 
         mSmsRLStateMachine.setState(WAIT_TO_SEND_RPACK_TO_NW);
         result = mSmsRLStateMachine.onRPErrorFromTL(moRpError);
-        verify(mMtsController, times(1)).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64, mPsiSmsc,
+        verify(mMtsController, times(1)).sendMessage(SmsUtils.FORMAT_INT_3GPP, encodedPdu, mPsiSmsc,
                 mDestinationAddress, moRpError.getMessageRef());
         assertEquals(RESULT_SUCCESS, result);
         assertEquals(IDLE, mSmsRLStateMachine.getState());
@@ -257,15 +256,14 @@ public class SmsRLStateMachineTest {
     @Test
     public void onRpDatafromTL_timerWithOutExpiry_Idle() throws InterruptedException {
         mSmsRLStateMachine.setState(IDLE);
-        when(mMtsController.sendMessage(anyInt(), anyString(), anyString(), anyString(),
+        when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(),
                  anyInt())).thenReturn(true);
         SmsRPdu moRPData = new SmsRPdu(1, SmsUtils.RP_DATA, mSmsc, 0, mTpdu);
         byte[] encodedPdu = moRPData.getRpduByteArray();
-        String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
         int result = mSmsRLStateMachine.onRPDataFromTL(moRPData);
 
         verify(mMtsController).sendMessage(eq(SmsUtils.FORMAT_INT_3GPP),
-                eq(pdu64), eq(mPsiSmsc),
+                eq(encodedPdu), eq(mPsiSmsc),
                 eq(mDestinationAddress), eq(1));
         assertEquals(WAIT_FOR_RPACK_FROM_NW, mSmsRLStateMachine.getState());
         assertEquals(SmsUtils.RESULT_SUCCESS, result);
@@ -302,9 +300,8 @@ public class SmsRLStateMachineTest {
         SmsRPdu moRpAck = new SmsRPdu(1, SmsUtils.RP_ACK, mSmsc, 0, null);
 
         byte[] encodedPdu = moRpAck.getRpduByteArray();
-        String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
         mSmsRLStateMachine.onRPAckFromTL(moRpAck);
-        verify(mMtsController, times(0)).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64, mPsiSmsc,
+        verify(mMtsController, times(0)).sendMessage(SmsUtils.FORMAT_INT_3GPP, encodedPdu, mPsiSmsc,
                 mDestinationAddress, moRpAck.getMessageRef());
     }
 
@@ -314,9 +311,8 @@ public class SmsRLStateMachineTest {
         SmsRPdu moRpAck = new SmsRPdu(1, SmsUtils.RP_ACK, mSmsc, 0, null);
 
         byte[] encodedPdu = moRpAck.getRpduByteArray();
-        String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
         int result = mSmsRLStateMachine.onRPAckFromTL(moRpAck);
-        verify(mMtsController).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64, mPsiSmsc,
+        verify(mMtsController).sendMessage(SmsUtils.FORMAT_INT_3GPP, encodedPdu, mPsiSmsc,
                 mDestinationAddress, moRpAck.getMessageRef());
     }
 
@@ -326,9 +322,8 @@ public class SmsRLStateMachineTest {
         SmsRPdu moRpAck = new SmsRPdu(1, SmsUtils.RP_ACK, mSmsc, 0, null);
 
         byte[] encodedPdu = moRpAck.getRpduByteArray();
-        String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
         mSmsRLStateMachine.onRPAckFromTL(moRpAck);
-        verify(mMtsController, times(0)).sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64, mPsiSmsc,
+        verify(mMtsController, times(0)).sendMessage(SmsUtils.FORMAT_INT_3GPP, encodedPdu, mPsiSmsc,
                 moRpAck.getDestAddr(), moRpAck.getMessageRef());
 
     }

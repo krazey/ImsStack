@@ -92,14 +92,14 @@ void MtsSmUtils::PrintSmsDataBurst(IN const ByteArray& objSmsData)
         return;
     }
 
-    IMS_CHAR szTemp[3] = {
+    IMS_CHAR szTemp[4] = {
             0,
     };
     AString strSmsMsg = AString::ConstNull();
 
     for (IMS_SINT32 i = 0; i < objSmsData.GetLength(); i++)
     {
-        IMS_Sprintf(szTemp, 2, "%2X", objSmsData[i]);
+        IMS_Sprintf(szTemp, 4, "%02X ", objSmsData[i]);
 
         strSmsMsg += szTemp;
     }

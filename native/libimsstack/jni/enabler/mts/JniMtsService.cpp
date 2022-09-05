@@ -130,10 +130,10 @@ PRIVATE
 void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
 {
     IMS_UINT32 nSmsFormat_ = objParcel.readInt32();
-    android::String8 strEncodedData(objParcel.readString16());
+    android::String8 strEncodedPdu(objParcel.readString16());
     android::String8 strAddress_(objParcel.readString16());
     IMS_SINT32 nSeqId = objParcel.readInt32();
-    AString strData = AString::FromBase64(strEncodedData.string());
+    AString strData = AString::FromBase64(strEncodedPdu.string());
     ByteArray objData(reinterpret_cast<const IMS_BYTE*>(strData.GetStr()),
             static_cast<IMS_SINT32>(strData.GetLength()));
     AString strAddress = strAddress_.string();

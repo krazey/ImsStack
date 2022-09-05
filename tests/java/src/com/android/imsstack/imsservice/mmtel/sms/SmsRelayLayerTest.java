@@ -20,6 +20,7 @@ import static com.android.imsstack.imsservice.mmtel.sms.SmsRLStateMachine.SmsRLS
                                                         .WAIT_FOR_RPACK_FROM_NW;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -29,7 +30,6 @@ import static org.mockito.Mockito.when;
 
 import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
-import android.util.Base64;
 
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
@@ -96,7 +96,6 @@ public class SmsRelayLayerTest {
     private byte[] mMtRpAckFailCase = {03, 02};
     private byte[] mDeliverPdu = {20, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66,
             (byte) 0xB2, 99, (byte) 0x6C, 26, 03};
-    private String mEncodedData = Base64.encodeToString(mMtRpData, Base64.DEFAULT);
 
     @Before
     public void setUp() throws Exception {
@@ -124,7 +123,7 @@ public class SmsRelayLayerTest {
     @Test
     public void test_VerifyMoSuccess()
             throws NoSuchFieldException, IllegalAccessException {
-        when(mMtsController.sendMessage(anyInt(), anyString(), anyString(), anyString(),
+        when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(),
                 anyInt())).thenReturn(true);
         when(mImsCallContext.getSubId()).thenReturn(-1);
         mSmsRelayLayer.sendRPMessage(mToken, mRpType, mSmsc, mDestinationAddress, mTpdu,
@@ -135,16 +134,14 @@ public class SmsRelayLayerTest {
         int rpDataMR = rpMR.get();
         SmsRPdu pdu = new SmsRPdu(rpDataMR, mRpType, mSmsc, 0, mTpdu);
         byte[] expectedMoRpData = pdu.getRpduByteArray();
-        String pdu64 = Base64.encodeToString(expectedMoRpData, Base64.DEFAULT);
         verify(mMtsController, timeout(1000).times(1)).sendMessage(eq(mSmsFormat),
-                                        eq(pdu64), eq(mDecodedSmsc),
+                                        eq(expectedMoRpData), eq(mDecodedSmsc),
                                         eq(mDestinationAddress), eq(rpDataMR));
         assertEquals(WAIT_FOR_RPACK_FROM_NW, mSmsRelayLayer.mSmsRLStateMachine.getState());
         byte[] mtRpAck = new byte[2];
         mtRpAck[0] = SmsRPdu.MT_RP_ACK_MTI;
         mtRpAck[1] = (byte) (rpDataMR & 0xff);
-        mProxyListener.notifyIncomingMessage(mSmsFormat,
-                                             Base64.encodeToString(mtRpAck, Base64.DEFAULT));
+        mProxyListener.notifyIncomingMessage(mSmsFormat, mtRpAck);
         int tpMR = mTpdu[1] & 0xff;
         verify(mListener).notifyRLReportIndication(eq(mToken), eq(tpMR),
                     eq(ImsSmsImplBase.SEND_STATUS_OK), eq(SmsManager.RESULT_ERROR_NONE),
@@ -158,8 +155,7 @@ public class SmsRelayLayerTest {
         int rpDataMR1, rpDataMR2;
         SmsRPdu pdu;
         byte[] expectedMoRpData;
-        String pdu64;
-        when(mMtsController.sendMessage(anyInt(), anyString(), anyString(), anyString(),
+        when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(),
                                         anyInt())).thenReturn(true);
         when(mImsCallContext.getSubId()).thenReturn(-1);
         mSmsRelayLayer.sendRPMessage(1, mRpType, mSmsc, mDestinationAddress, mTpdu,
@@ -174,19 +170,16 @@ public class SmsRelayLayerTest {
         rpDataMR2 = rpDataMR1 + 1;
         pdu = new SmsRPdu(rpDataMR1, mRpType, mSmsc, 0, mTpdu);
         expectedMoRpData = pdu.getRpduByteArray();
-        pdu64 = Base64.encodeToString(expectedMoRpData, Base64.DEFAULT);
-        verify(mMtsController).sendMessage(eq(mSmsFormat), eq(pdu64), eq(mDecodedSmsc),
+        verify(mMtsController).sendMessage(eq(mSmsFormat), eq(expectedMoRpData), eq(mDecodedSmsc),
                                            eq(mDestinationAddress), eq(rpDataMR1));
         pdu = new SmsRPdu(rpDataMR2, mRpType, mSmsc, 0, mTpdu);
         expectedMoRpData = pdu.getRpduByteArray();
-        pdu64 = Base64.encodeToString(expectedMoRpData, Base64.DEFAULT);
-        verify(mMtsController).sendMessage(eq(mSmsFormat), eq(pdu64), eq(mDecodedSmsc),
+        verify(mMtsController).sendMessage(eq(mSmsFormat), eq(expectedMoRpData), eq(mDecodedSmsc),
                                            eq(mDestinationAddress), eq(rpDataMR2));
         byte[] mtRpAck1 = new byte[2];
         mtRpAck1[0] = SmsRPdu.MT_RP_ACK_MTI;
         mtRpAck1[1] = (byte) (rpDataMR1 & 0xff);
-        mProxyListener.notifyIncomingMessage(mSmsFormat,
-                Base64.encodeToString(mtRpAck1, Base64.DEFAULT));
+        mProxyListener.notifyIncomingMessage(mSmsFormat, mtRpAck1);
         int tpMR = mTpdu[1] & 0xff;
         verify(mListener).notifyRLReportIndication(eq(1), eq(tpMR),
                 eq(ImsSmsImplBase.SEND_STATUS_OK),
@@ -194,8 +187,7 @@ public class SmsRelayLayerTest {
         byte[] mtRpAck2 = new byte[2];
         mtRpAck2[0] = SmsRPdu.MT_RP_ACK_MTI;
         mtRpAck2[1] = (byte) (rpDataMR2 & 0xff);
-        mProxyListener.notifyIncomingMessage(mSmsFormat,
-                Base64.encodeToString(mtRpAck2, Base64.DEFAULT));
+        mProxyListener.notifyIncomingMessage(mSmsFormat, mtRpAck2);
         verify(mListener).notifyRLReportIndication(eq(2), eq(tpMR),
                                 eq(ImsSmsImplBase.SEND_STATUS_OK),
                                 eq(SmsManager.RESULT_ERROR_NONE), eq(sSuccessCause));
@@ -215,16 +207,14 @@ public class SmsRelayLayerTest {
         byte[] mtRpAck = new byte[2];
         mtRpAck[0] = SmsRPdu.MT_RP_ACK_MTI;
         mtRpAck[1] = (byte) (rpDataMR & 0xff);
-        int result = mProxyListener.notifyIncomingMessage(mSmsFormat,
-                Base64.encodeToString(mtRpAck, Base64.DEFAULT));
+        int result = mProxyListener.notifyIncomingMessage(mSmsFormat, mtRpAck);
         assertEquals(mMtsController.MT_FAILURE, result);
     }
 
     @Test
     public void test_VerifyMtSuccess() throws NoSuchFieldException, IllegalAccessException {
         when(mImsCallContext.getSubId()).thenReturn(-1);
-        mProxyListener.notifyIncomingMessage(mSmsFormat,
-                Base64.encodeToString(mMtRpData, Base64.DEFAULT));
+        mProxyListener.notifyIncomingMessage(mSmsFormat, mMtRpData);
         SmsRPdu mtPdu = new SmsRPdu(mMtRpData);
         String origAddr = mtPdu.getOrigAddr();
         //fetching generated token
@@ -237,8 +227,7 @@ public class SmsRelayLayerTest {
                 eq(SmsUtils.RP_DATA), eq(mFrameworkPdu));
         mSmsRelayLayer.sendRPMessage(token, SmsUtils.RP_ACK, null, null,
                                      null, ImsSmsImplBase.DELIVER_STATUS_OK);
-        String pdu64 = Base64.encodeToString(mMoRpAck, Base64.DEFAULT);
-        verify(mMtsController).sendMessage(eq(mSmsFormat), eq(pdu64), eq(origAddr), eq(origAddr),
+        verify(mMtsController).sendMessage(eq(mSmsFormat), eq(mMoRpAck), eq(origAddr), eq(origAddr),
                                              eq(rpDataMR));
     }
 
@@ -246,8 +235,7 @@ public class SmsRelayLayerTest {
     public void test_VerifyMultipleMtSuccess() throws NoSuchFieldException,
                                                  IllegalAccessException {
         when(mImsCallContext.getSubId()).thenReturn(-1);
-        mProxyListener.notifyIncomingMessage(mSmsFormat,
-                Base64.encodeToString(mMtRpData, Base64.DEFAULT));
+        mProxyListener.notifyIncomingMessage(mSmsFormat, mMtRpData);
         SmsRPdu mtPdu = new SmsRPdu(mMtRpData);
         //fetching generated token
         Field f = SmsRelayLayer.class.getDeclaredField("mToken");
@@ -255,8 +243,7 @@ public class SmsRelayLayerTest {
         AtomicInteger intToken = (AtomicInteger) f.get(mSmsRelayLayer);
         int token1 = intToken.get();
         int rpDataMR1 = mMtRpData[1] & 0xff;
-        mProxyListener.notifyIncomingMessage(mSmsFormat,
-                Base64.encodeToString(mMtRpData2, Base64.DEFAULT));
+        mProxyListener.notifyIncomingMessage(mSmsFormat, mMtRpData2);
         int token2 = intToken.get();
         int rpDataMR2 = mMtRpData2[1] & 0xff;
         verify(mListener).notifyRLDataIndication(eq(token1), eq(mSmsFormat),
@@ -268,24 +255,21 @@ public class SmsRelayLayerTest {
         byte[] moRpAck1 = new byte[2];
         moRpAck1[0] = SmsRPdu.MO_RP_ACK_MTI;
         moRpAck1[1] = (byte) (rpDataMR1 & 0xff);
-        String pdu64 = Base64.encodeToString(moRpAck1, Base64.DEFAULT);
-        verify(mMtsController).sendMessage(eq(mSmsFormat), eq(pdu64), eq(mtPdu.getOrigAddr()),
+        verify(mMtsController).sendMessage(eq(mSmsFormat), eq(moRpAck1), eq(mtPdu.getOrigAddr()),
                                              eq(mtPdu.getOrigAddr()), eq(rpDataMR1));
         mSmsRelayLayer.sendRPMessage(token2, SmsUtils.RP_ACK, mSmsc, mDestinationAddress,
                                      null, ImsSmsImplBase.DELIVER_STATUS_OK);
         byte[] moRpAck2 = new byte[2];
         moRpAck2[0] = SmsRPdu.MO_RP_ACK_MTI;
         moRpAck2[1] = (byte) (rpDataMR2 & 0xff);
-        pdu64 = Base64.encodeToString(moRpAck2, Base64.DEFAULT);
-        verify(mMtsController).sendMessage(eq(mSmsFormat), eq(pdu64), eq(mtPdu.getOrigAddr()),
+        verify(mMtsController).sendMessage(eq(mSmsFormat), eq(moRpAck2), eq(mtPdu.getOrigAddr()),
                                              eq(mtPdu.getOrigAddr()), eq(rpDataMR2));
     }
 
     @Test
     public void test_VerifyMtAckWithInvalidToken() {
         when(mImsCallContext.getSubId()).thenReturn(-1);
-        mProxyListener.notifyIncomingMessage(mSmsFormat,
-                Base64.encodeToString(mMtRpData, Base64.DEFAULT));
+        mProxyListener.notifyIncomingMessage(mSmsFormat, mMtRpData);
         int token;
         try {
             Field f = SmsRelayLayer.class.getDeclaredField("mToken");
@@ -307,8 +291,7 @@ public class SmsRelayLayerTest {
                 + "2300031010D0011410A48CBB366F418F465C"
                 + "7AF4EECE819E7E1C19000306220707183319";
         byte[] pdu = HexDump.hexStringToByteArray(pduString);
-        mProxyListener.notifyIncomingMessage(SmsUtils.FORMAT_INT_3GPP2,
-                Base64.encodeToString(pdu, Base64.DEFAULT));
+        mProxyListener.notifyIncomingMessage(SmsUtils.FORMAT_INT_3GPP2, pdu);
         int token = 0;
         try {
             Field f = SmsRelayLayer.class.getDeclaredField("mToken");

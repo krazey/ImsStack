@@ -19,7 +19,6 @@ package com.android.imsstack.imsservice.mmtel.sms;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
-import android.util.Base64;
 
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
@@ -313,7 +312,7 @@ public class SmsRelayLayer {
         }
 
         @Override
-        public int notifyIncomingMessage(int smsFormat, String encodedData) {
+        public int notifyIncomingMessage(int smsFormat, byte[] pduData) {
             try {
                 Rlog.d(TAG, "notifyIncomingMessage: smsFormat = " + smsFormat);
                 int token = 0;
@@ -323,8 +322,6 @@ public class SmsRelayLayer {
                     Rlog.e(TAG, "Listener is null");
                     return mMtsController.MT_FAILURE;
                 }
-                encodedData = encodedData.replaceAll("\\s", "");
-                byte[] pduData = Base64.decode(encodedData, Base64.NO_PADDING);
                 if (VDBG) {
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < pduData.length; i++) {
@@ -384,11 +381,16 @@ public class SmsRelayLayer {
                                                      mtData.getOrigAddr(), rpCause,
                                                      null);
                             byte[] encodedPdu = rpErrorPdu.getRpduByteArray();
-                            String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
-                            Rlog.i(TAG, "base 64 Encoded RPDU: " + pdu64);
+                            if (VDBG) {
+                                StringBuilder sb = new StringBuilder();
+                                for (int i = 0; i < encodedPdu.length; i++) {
+                                    sb.append(String.format("%02X ", encodedPdu[i]));
+                                }
+                                Rlog.i(TAG, "RPDU = " + sb.toString());
+                            }
                             boolean res = false;
                             res =  mMtsController.sendMessage(SmsUtils.FORMAT_INT_3GPP,
-                                                    pdu64, mtData.getOrigAddr(),
+                                                    encodedPdu, mtData.getOrigAddr(),
                                                     targetAddress, mtData.getMessageRef());
 
                             if (!res) {
@@ -435,11 +437,16 @@ public class SmsRelayLayer {
                                                    mtData.getOrigAddr(), rpCause,
                                                    null);
                     byte[] encodedPdu = rpErrorPdu.getRpduByteArray();
-                    String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
-                    Rlog.i(TAG, "base 64 Encoded RPDU: " + pdu64);
+                    if (VDBG) {
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < encodedPdu.length; i++) {
+                            sb.append(String.format("%02X ", encodedPdu[i]));
+                        }
+                        Rlog.i(TAG, "RPDU = " + sb.toString());
+                    }
                     boolean res = false;
                     res =  mMtsController.sendMessage(SmsUtils.FORMAT_INT_3GPP,
-                                                    pdu64, mtData.getOrigAddr(),
+                                                    encodedPdu, mtData.getOrigAddr(),
                                                     targetAddress,
                                                     mtData.getMessageRef());
 

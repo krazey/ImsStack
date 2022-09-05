@@ -717,7 +717,9 @@ PRIVATE IMS_RESULT MtsMessageController::ReportMoStatus(IN IMS_SINT32 nReason,
         IN SmsFormatType eSmsFormat, IN IMS_UINT8 nRetryAfter /* = 0 */,
         IN IMS_SINT32 nSeqId /* = -1 */)
 {
-    IMS_CHAR acLog[128 + 1] = { 0, };
+    IMS_CHAR acLog[128 + 1] = {
+            0,
+    };
     IMS_Sprintf(acLog, 128, "reason (%s, %d) , SMS Format (%s) , nSeqId (%d)",
             PS_MoStatus(nReason), nReason, PS_SmsFormatType(eSmsFormat), nSeqId);
 

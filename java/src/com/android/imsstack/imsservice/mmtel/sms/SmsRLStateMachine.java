@@ -19,11 +19,9 @@ import android.os.Handler;
 import android.telephony.Rlog;
 import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
-import android.util.Base64;
 
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
-import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.ByteArrayOutputStream;
@@ -259,10 +257,13 @@ public class SmsRLStateMachine {
                     Rlog.e(TAG, "mMtsController is null");
                     return SmsUtils.SMSRL_RESULT_FAILURE;
                 }
-                String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
-                Rlog.i(TAG, "base 64 Encoded RPDU: " + pdu64);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < encodedPdu.length; i++) {
+                    sb.append(String.format("%02X ", encodedPdu[i]));
+                }
+                Rlog.i(TAG, "RPDU = " + sb.toString());
                 boolean result = smsRLStateMachine.mMtsController.sendMessage(
-                                                SmsUtils.FORMAT_INT_3GPP, pdu64,
+                                                SmsUtils.FORMAT_INT_3GPP, encodedPdu,
                                                 smsRLStateMachine.mPSISmsc,
                                                 smsRLStateMachine.mDestinationAddress,
                                                     moRPData.getMessageRef());
@@ -374,14 +375,15 @@ public class SmsRLStateMachine {
                     Rlog.e(TAG, "mMtsController is null");
                     return SmsUtils.SMSRL_RESULT_FAILURE;
                 }
-
-
-                String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
-                Rlog.i(TAG, "base 64 Encoded RPDU: " + pdu64);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < encodedPdu.length; i++) {
+                    sb.append(String.format("%02X ", encodedPdu[i]));
+                }
+                Rlog.i(TAG, "RPDU = " + sb.toString());
                 Rlog.i(TAG, "dialled number: " + smsRLStateMachine.mDestinationAddress);
                 Rlog.i(TAG, "PSI/SMSC: " + smsRLStateMachine.mPSISmsc);
                 boolean result = smsRLStateMachine.mMtsController
-                                            .sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64,
+                                            .sendMessage(SmsUtils.FORMAT_INT_3GPP, encodedPdu,
                                             smsRLStateMachine.mPSISmsc,
                                             smsRLStateMachine.mDestinationAddress,
                                                          mtRPAck.getMessageRef());
@@ -409,12 +411,15 @@ public class SmsRLStateMachine {
                     Rlog.i(TAG, "Encoding Failed");
                     return SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED;
                 }
-                String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
-                Rlog.i(TAG, "base 64 Encoded RPDU: " + pdu64);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < encodedPdu.length; i++) {
+                    sb.append(String.format("%02X ", encodedPdu[i]));
+                }
+                Rlog.i(TAG, "RPDU = " + sb.toString());
                 Rlog.i(TAG, "dialled number: " + smsRLStateMachine.mDestinationAddress);
                 Rlog.i(TAG, "PSI/SMSC: " + smsRLStateMachine.mPSISmsc);
                 boolean result = smsRLStateMachine.mMtsController
-                                                  .sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64,
+                                                  .sendMessage(SmsUtils.FORMAT_INT_3GPP, encodedPdu,
                                                              smsRLStateMachine.mPSISmsc,
                                                              smsRLStateMachine.mDestinationAddress,
                                                              mtRPError.getMessageRef());
