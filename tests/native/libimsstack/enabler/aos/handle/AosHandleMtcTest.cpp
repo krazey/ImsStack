@@ -110,6 +110,19 @@ protected:
 
         EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(_, _)).Times(AnyNumber());
 
+        EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IMS_TRUE));
+
+        EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IMS_FALSE));
+
+        EXPECT_CALL(m_objMockIAosNConfiguration,
+                IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IMS_FALSE));
+
         m_pAosHandleMtc = new AosHandleMtc(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
                 strAppId, strServiceId, nServiceType);
 
@@ -159,6 +172,10 @@ protected:
     }
 
     IMS_UINT32 GetHoldingVopsState() { return m_pAosHandleMtc->m_nHoldingVopsState; }
+
+    void SetVopsState(IN IMS_UINT32 nState) { m_pAosHandleMtc->m_nVopsState = nState; }
+
+    IMS_UINT32 GetVopsState() { return m_pAosHandleMtc->m_nVopsState; }
 
     IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nBlock)
     {
@@ -215,7 +232,10 @@ protected:
 
     void InitializeFeatureTags() { m_pAosHandleMtc->InitializeFeatureTags(); }
 
-    void UpdateFeatureTags() { m_pAosHandleMtc->UpdateFeatureTags(); }
+    void UpdateGGsmaRcsTelephonyFeatureTag()
+    {
+        m_pAosHandleMtc->UpdateGGsmaRcsTelephonyFeatureTag();
+    }
 
     IMS_BOOL ProcessImsSuspended(IN IMS_UINT32 nReason)
     {
@@ -291,14 +311,26 @@ protected:
         m_pAosHandleMtc->ProcessVopsStateChanged(nState);
     }
 
-    IMS_BOOL ProcessUnavailableFeatureForVops(IN IMS_UINT32 nState)
-    {
-        return m_pAosHandleMtc->ProcessUnavailableFeatureForVops(nState);
-    }
-
     void SetDataConnected(IN IMS_BOOL bConnected)
     {
         m_pAosHandleMtc->m_bDataConnected = bConnected;
+    }
+
+    void ReevaluateUnavailableFeature() { m_pAosHandleMtc->ReevaluateUnavailableFeature(); }
+
+    void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked)
+    {
+        m_pAosHandleMtc->ProcessFeatureBlock(nFeature, bBlocked);
+    }
+
+    IMS_UINT32 GetVoiceBlockReasonForIpcan()
+    {
+        return m_pAosHandleMtc->GetVoiceBlockReasonForIpcan();
+    }
+
+    IMS_UINT32 GetVideoBlockReasonForIpcan()
+    {
+        return m_pAosHandleMtc->GetVideoBlockReasonForIpcan();
     }
 };
 
@@ -366,7 +398,7 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test3)
     // Test3: call type is normal / call state is offhook
     // Expectation: do nothing
 
-    m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_CS, CallState::RINGING);
+    m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::OFFHOOK);
 }
 
 TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test4)
@@ -380,23 +412,16 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test4)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    IMSVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
+            .WillRepeatedly(Return(IMS_FALSE));
 
     EXPECT_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+    SetNetworkType(NW_REPORT_RADIO_LTE);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -406,6 +431,8 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test4)
 
     m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
 
+    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::MMTEL));
+    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::VIDEO));
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 }
 
@@ -413,76 +440,23 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test5)
 {
     // Test5: Holding vops for call test 2.
     //        call type is normal / call state is idle / vops holt for call
-    //        / unavailable feature policy for vops / no unavailable feature
-    // Expectation: Add vops block to main blocks
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    SetHoldingVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
-
-    m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
-
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
-}
-
-TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test6)
-{
-    // Test6: Holding vops for call test 3.
-    //        call type is normal / call state is idle / vops holt for call
-    //        / unavailable feature policy for vops / unavailable feature mmtel/video
+    //        / unavailable feature policy for vops
     // Expectation: No add vops block to main blocks
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
+            .WillRepeatedly(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+    SetNetworkType(NW_REPORT_RADIO_LTE);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -492,12 +466,14 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test6)
 
     m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
 
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::MMTEL));
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::VIDEO));
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 }
 
-TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test7)
+TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test6)
 {
-    // Test7: vzw vowifi feature tag test. Idle -> Offhook -> Idle
+    // Test6: vzw vowifi feature tag test. Idle -> Offhook -> Idle
     // Expectation: "cs" in idle, "cs,volte" in offhook
 
     AddFeature(ImsAosFeature::VIDEO);
@@ -585,14 +561,9 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test1)
     m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(1);
 
-    IMSVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
+            .WillRepeatedly(Return(IMS_FALSE));
 
     m_pAosHandleMtc->NetTracker_StatusChanged();
 
@@ -602,7 +573,7 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test1)
 
 TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test2)
 {
-    // Test2: Srv In, Network changed to GSM
+    // Test2: Srv In, Network changed to 2G(GSM)
     // Expectation: Set SUSPEND_NO_LTE_COVERAGE, call ImsAos_Suspended()
 
     SetNetSrvIn(IMS_TRUE);
@@ -629,10 +600,9 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test2)
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(ImsAosReason::SUSPEND_NO_RAT_COVERAGE))
             .Times(1);
 
-    IMSVector<IMS_SINT32> objPolicy;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
+            .WillRepeatedly(Return(IMS_FALSE));
 
     m_pAosHandleMtc->NetTracker_StatusChanged();
 
@@ -674,14 +644,85 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test3)
     EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NONE);
 }
 
+TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test4)
+{
+    // Test4: Srv In, Network changed to 3G(WCDMA) / Unavailable feature policy is existed
+    // Expectation: Set SUSPEND_NO_LTE_COVERAGE, call ImsAos_Suspended()
+
+    SetNetSrvIn(IMS_TRUE);
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetDataConnected(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_WCDMA));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosConnection, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IAosConnection::STATE_ACTIVE));
+
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(ImsAosReason::SUSPEND_NO_RAT_COVERAGE))
+            .Times(1);
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();
+
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NO_LTE_COVERAGE);
+}
+
+TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test5)
+{
+    // Test5: Srv In, Network changed to 3G(WCDMA) / No unavailable feature policy
+    // Expectation: Suspended reason NONE (cleared when detach), call ImsAos_Suspended()
+
+    SetNetSrvIn(IMS_TRUE);
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetDataConnected(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_WCDMA));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosConnection, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IAosConnection::STATE_ACTIVE));
+
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(ImsAosReason::SUSPEND_NO_RAT_COVERAGE))
+            .Times(1);
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();
+
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::NONE);
+}
+
 TEST_F(AosHandleMtcTest, InitializeServiceBlock_Test)
 {
     // Expectation: Set m_bBlocked depending on AosHandleMtc::IsHandleBlocked()
-
-    IMSVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
 
     AddBlock(AosHandle::BLOCK_VOPS);
     InitializeServiceBlock();
@@ -696,11 +737,6 @@ TEST_F(AosHandleMtcTest, InitializeServiceFeature_Test1)
 {
     // Test1: All support
     // Expectation: MMTEL, VIDEO, TEXT, VERSTAT, USSI
-
-    IMSVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported())
             .Times(AnyNumber())
@@ -727,11 +763,6 @@ TEST_F(AosHandleMtcTest, InitializeServiceFeature_Test2)
 {
     // Test2: No support
     // Expectation: no features
-
-    IMSVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
 
     AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
     AddBlock(AosHandle::BLOCK_VILTE_CAPABILITY);
@@ -787,33 +818,9 @@ TEST_F(AosHandleMtcTest, InitializeFeatureTags_Test)
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagList));
 }
 
-TEST_F(AosHandleMtcTest, UpdateFeatureTags_Test1)
+TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test1)
 {
-    // Test1: No use +g.gsma.rcs.telephony as available voice call type
-    // Expectation: Do nothing. No change in feature tag list.
-
-    AddFeature(ImsAosFeature::MMTEL);
-    AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-    AddFeatureTag("+g.gsma.rcs.telephony", "volte");
-
-    AosFeatureTagList objExpectedFeatureTagList;
-    objExpectedFeatureTagList.AddFeature(ImsAosFeature::MMTEL);
-    objExpectedFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-    objExpectedFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    UpdateFeatureTags();
-
-    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagList));
-}
-
-TEST_F(AosHandleMtcTest, UpdateFeatureTags_Test2)
-{
-    // Test2: vzw vowifi "cs" feature tag for call test. Idle -> Offhook -> Idle
+    // Test1: vzw vowifi "cs" feature tag for call test. Idle -> Offhook -> Idle
     // Expectation: "cs" in idle, "cs,volte" in offhook
 
     AddFeature(ImsAosFeature::VIDEO);
@@ -850,16 +857,16 @@ TEST_F(AosHandleMtcTest, UpdateFeatureTags_Test2)
             .Times(AnyNumber())
             .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
 
-    UpdateFeatureTags();
+    UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListOffhook));
 
-    UpdateFeatureTags();
+    UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListIdle));
 }
 
-TEST_F(AosHandleMtcTest, UpdateFeatureTags_Test3)
+TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test2)
 {
-    // Test3: VZW VoWiFi IMS Registration Table Test - Wifi Only.
+    // Test2: VZW VoWiFi IMS Registration Table Test - Wifi Only.
     // Expectation: "cs,volte" if mmtel / "cs" if no mmtel but video / none if no mmtel and video
 
     AddFeature(ImsAosFeature::MMTEL);
@@ -901,24 +908,24 @@ TEST_F(AosHandleMtcTest, UpdateFeatureTags_Test3)
 
     // Video
     RemoveFeature(ImsAosFeature::MMTEL);
-    UpdateFeatureTags();
+    UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListVideo));
 
     // Mmtel
     AddFeature(ImsAosFeature::MMTEL);
-    UpdateFeatureTags();
+    UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListMmtel));
 
     // No mmtel and video
     RemoveFeature(ImsAosFeature::MMTEL);
     RemoveFeature(ImsAosFeature::VIDEO);
-    UpdateFeatureTags();
+    UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoFeature));
 }
 
-TEST_F(AosHandleMtcTest, UpdateFeatureTags_Test4)
+TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test3)
 {
-    // Test4: VZW VoWiFi IMS Registration Table Test - CS Roam + Wifi
+    // Test3: VZW VoWiFi IMS Registration Table Test - CS Roam + Wifi
     // Expectation: "cs,volte" if mmtel / "cs" if no mmtel but video / none if no mmtel and video
 
     AddFeature(ImsAosFeature::MMTEL);
@@ -960,18 +967,18 @@ TEST_F(AosHandleMtcTest, UpdateFeatureTags_Test4)
 
     // Video
     RemoveFeature(ImsAosFeature::MMTEL);
-    UpdateFeatureTags();
+    UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListVideo));
 
     // Mmtel
     AddFeature(ImsAosFeature::MMTEL);
-    UpdateFeatureTags();
+    UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListMmtel));
 
     // No mmtel and video
     RemoveFeature(ImsAosFeature::MMTEL);
     RemoveFeature(ImsAosFeature::VIDEO);
-    UpdateFeatureTags();
+    UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoFeature));
 }
 
@@ -1240,11 +1247,6 @@ TEST_F(AosHandleMtcTest, Init_CleanUp_Test)
     EXPECT_CALL(m_objMockIAosCallTracker, SetListener(_)).Times(1);
     EXPECT_CALL(m_objMockIAosCallTracker, RemoveListener(_)).Times(1);
 
-    IMSVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-
     EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
@@ -1340,195 +1342,51 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test4)
 
 TEST_F(AosHandleMtcTest, IsHandleBlocked_Test5)
 {
-    // Test5: Epdg not enabled, BLOCK_NONE, BLOCK_VOPS or BLOCK_VOLTE_CAPABILITY
-    //        no unavailable feature tag
-    // Expectation: return true if BLOCK_VOPS or BLOCK_VOLTE_CAPABILITY else return false
-
-    IMSVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
+    // Test5: Epdg not enabled
+    // Expectation: return true if BLOCK_VOPS or BLOCK_VOLTE_CAPABILITY or BLOCK_NETWORK
+    //              else return false
 
     AddBlock(AosHandle::BLOCK_VOPS);
+    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_NETWORK);
     EXPECT_TRUE(IsHandleBlocked());
 
     RemoveBlock(AosHandle::BLOCK_VOPS);
-    EXPECT_FALSE(IsHandleBlocked());
-
-    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
     EXPECT_TRUE(IsHandleBlocked());
-}
 
-TEST_F(AosHandleMtcTest, IsHandleBlocked_Test6)
-{
-    // Test6: Epdg not enabled, BLOCK_VOPS & BLOCK_VOLTE_CAPABILITY,
-    //        No unavailable feature tag,
-    // Expectation: return true
-
-    AddBlock(AosHandle::BLOCK_VOPS);
-    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
-
-    IMSVector<IMS_SINT32> objFeature;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
+    RemoveBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
     EXPECT_TRUE(IsHandleBlocked());
-}
 
-TEST_F(AosHandleMtcTest, IsHandleBlocked_Test7)
-{
-    // Test7: Epdg not enabled, BLOCK_VOPS & BLOCK_VOLTE_CAPABILITY,
-    //        unavailable feature tag = MMTEL,
-    //        unavailable feature tag policy = other than vops and capability
-    // Expectation: return true
-
-    AddBlock(AosHandle::BLOCK_VOPS);
-    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_3G);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_TRUE(IsHandleBlocked());
-}
-
-TEST_F(AosHandleMtcTest, IsHandleBlocked_Test8)
-{
-    // Test8: Epdg not enabled, BLOCK_VOPS
-    //        unavailable feature tag = MMTEL,
-    //        unavailable feature tag policy = vops
-    // Expectation: return false
-
-    AddBlock(AosHandle::BLOCK_VOPS);
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
+    RemoveBlock(AosHandle::BLOCK_NETWORK);
     EXPECT_FALSE(IsHandleBlocked());
 }
 
-TEST_F(AosHandleMtcTest, IsHandleBlocked_Test9)
+TEST_F(AosHandleMtcTest, ProcessFeatureBlock_Test)
 {
-    // Test9: Epdg not enabled, BLOCK_VOLTE_CAPABILITY
-    //        unavailable feature tag = MMTEL,
-    //        unavailable feature tag policy = capability
-    // Expectation: return false
-
-    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
+            .WillRepeatedly(Return(IMS_TRUE));
 
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
+            .WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_FALSE(IsHandleBlocked());
-}
+    AosFeatureTagList objExpectedFeatureTagListNoMmtel;
+    AosFeatureTagList objExpectedFeatureTagListMmtel;
+    objExpectedFeatureTagListMmtel.AddFeature(ImsAosFeature::MMTEL);
+    objExpectedFeatureTagListMmtel.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+    objExpectedFeatureTagListMmtel.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
 
-TEST_F(AosHandleMtcTest, IsHandleBlocked_Test10)
-{
-    // Test10: Epdg not enabled, BLOCK_VOPS & BLOCK_VOLTE_CAPABILITY,
-    //        unavailable feature tag = MMTEL,
-    //        unavailable feature tag policy = vops
-    // Expectation: return true
+    EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetFeatures(), ImsAosFeature::NONE);
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoMmtel));
 
-    AddBlock(AosHandle::BLOCK_VOPS);
-    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+    ProcessFeatureBlock(ImsAosFeature::MMTEL, IMS_FALSE);
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListMmtel));
 
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_TRUE(IsHandleBlocked());
-}
-
-TEST_F(AosHandleMtcTest, IsHandleBlocked_Test11)
-{
-    // Test11: Epdg not enabled, BLOCK_VOPS & BLOCK_VOLTE_CAPABILITY,
-    //        unavailable feature tag = MMTEL,
-    //        unavailable feature tag policy = capability
-    // Expectation: return true
-
-    AddBlock(AosHandle::BLOCK_VOPS);
-    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_TRUE(IsHandleBlocked());
-}
-
-TEST_F(AosHandleMtcTest, IsHandleBlocked_Test12)
-{
-    // Test12: Epdg not enabled, BLOCK_VOPS & BLOCK_VOLTE_CAPABILITY,
-    //        unavailable feature tag = MMTEL,
-    //        unavailable feature tag policy = vops & capability
-    // Expectation: return false
-
-    AddBlock(AosHandle::BLOCK_VOPS);
-    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS);
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_FALSE(IsHandleBlocked());
+    ProcessFeatureBlock(ImsAosFeature::MMTEL, IMS_TRUE);
+    EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetFeatures(), ImsAosFeature::NONE);
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoMmtel));
 }
 
 TEST_F(AosHandleMtcTest, ProcessBlockChanged_Test1)
@@ -1583,8 +1441,8 @@ TEST_F(AosHandleMtcTest, ProcessBlockChanged_Test3)
 
 TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test1)
 {
-    // Test1: no capability(LTE,IWLAN,NR), Current network=GSM
-    // Expectation: set none capa for the network. No block.
+    // Test1: No capability(LTE,IWLAN,NR), Unsupported network(GSM)
+    // Expectation: Set none capa for all networks. No block.
 
     IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
 
@@ -1595,20 +1453,19 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test1)
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
+    SetNetworkType(NW_REPORT_RADIO_GSM);
 
     ProcessCapabilitiesChanged(objNewCapabilities);
 
     EXPECT_FALSE(IsHandleBlockedBase());
     EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
+    EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetUnavailableFeatures(), ImsAosFeature::NONE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test2)
 {
-    // Test2: no capability(LTE,IWLAN,NR), Current network=LTE, no unavailable policy for capa.
-    // Expectation: block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY,
+    // Test2: No capability(LTE,IWLAN,NR), Current network=LTE
+    // Expectation: block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY
     //              set none capa for the network.
 
     IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
@@ -1620,22 +1477,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test2)
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_3G);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_SMS);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
+    SetNetworkType(NW_REPORT_RADIO_LTE);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -1651,12 +1493,13 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test2)
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
     EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
+    EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetUnavailableFeatures(), ImsAosFeature::NONE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test3)
 {
-    // Test3: no capability(LTE,IWLAN,NR), Current network=WLAN, no unavailable policy for capa.
-    // Expectation: block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY,
+    // Test3: no capability(LTE,IWLAN,NR), Current network=WLAN
+    // Expectation: block BLOCK_VOWIFI_CAPABILITY, BLOCK_VIWIFI_CAPABILITY,
     //              set none capa for the network.
 
     IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
@@ -1668,22 +1511,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test3)
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_WLAN));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_3G);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_SMS);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
+    SetNetworkType(NW_REPORT_RADIO_WLAN);
 
     SetEpdgEnabled(IMS_TRUE);
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
@@ -1700,473 +1528,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test3)
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
     EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
-}
-
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test4)
-{
-    // Test4: no capability(LTE), Current network=LTE,
-    //        unavailable policy for capa, unavailable feature voice/video capa.
-    // Expectation: block none, set new capa for the network.
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objExpectedCapabilities;
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    ProcessCapabilitiesChanged(objNewCapabilities);
-
-    EXPECT_FALSE(IsHandleBlockedBase());
-    EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
-}
-
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test5)
-{
-    // Test5: no capability(LTE), Current network=LTE,
-    //        unavailable policy for capa, no unavailable feature.
-    // Expectation: block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY,
-    //              set new capa for the network.
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objExpectedCapabilities;
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_SMS);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    ProcessCapabilitiesChanged(objNewCapabilities);
-
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
-}
-
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test6)
-{
-    // Test6: no capability(IWLAN), Current network=WLAN,
-    //        unavailable policy for capa, no unavailable feature.
-    // Expectation: block BLOCK_VOWIFI_CAPABILITY, BLOCK_VIWIFI_CAPABILITY,
-    //              set new capa for the network.
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objExpectedCapabilities;
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    SetEpdgEnabled(IMS_TRUE);
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_WLAN));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_SMS);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    ProcessCapabilitiesChanged(objNewCapabilities);
-
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
-    EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
-}
-
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test7)
-{
-    // Test7: capability change to sms only(LTE), Current network=LTE, no unavailable policy.
-    // Expectation: block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY,
-    //              set new capa for the network.
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::SMS));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    ProcessCapabilitiesChanged(objNewCapabilities);
-
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objNewCapabilities));
-}
-
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test8)
-{
-    // Test8: capability change to sms only(IWLAN), Current network=WLAN, no unavailable policy.
-    // Expectation: block BLOCK_VOWIFI_CAPABILITY, BLOCK_VIWIFI_CAPABILITY,
-    //              set new capa for the network.
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::SMS));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    SetEpdgEnabled(IMS_TRUE);
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_WLAN));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    ProcessCapabilitiesChanged(objNewCapabilities);
-
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
-    EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objNewCapabilities));
-}
-
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test9)
-{
-    // Test9: capability change to sms only(LTE), Current network=LTE,
-    //        unavailable policy for capa, no unavailable feature.
-    // Expectation: block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY,
-    //              set new capa for the network.
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::SMS));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_SMS);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    ProcessCapabilitiesChanged(objNewCapabilities);
-
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objNewCapabilities));
-}
-
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test10)
-{
-    // Test10: capability change to sms only(IWLAN), Current network=WLAN,
-    //        unavailable policy for capa, no unavailable feature.
-    // Expectation: block BLOCK_VOWIFI_CAPABILITY, BLOCK_VIWIFI_CAPABILITY,
-    //              set new capa for the network.
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::SMS));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    SetEpdgEnabled(IMS_TRUE);
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_WLAN));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_SMS);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    ProcessCapabilitiesChanged(objNewCapabilities);
-
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
-    EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objNewCapabilities));
-}
-
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test11)
-{
-    // Test11: capability change to sms only(LTE), Current network=LTE,
-    //        unavailable policy for capa, unavailable feature for voice/video.
-    // Expectation: block none, set new capa for the network.
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::SMS));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    ProcessCapabilitiesChanged(objNewCapabilities);
-
-    EXPECT_FALSE(IsHandleBlockedBase());
-    EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objNewCapabilities));
-}
-
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test12)
-{
-    // Test12: capability change to sms only(IWLAN), Current network=WLAN,
-    //        unavailable policy for capa, unavailable feature for voice/video.
-    // Expectation: block none, set new capa for the network.
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::SMS));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    SetEpdgEnabled(IMS_TRUE);
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_WLAN));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    ProcessCapabilitiesChanged(objNewCapabilities);
-
-    EXPECT_FALSE(IsHandleBlockedBase());
-    EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objNewCapabilities));
+    EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetUnavailableFeatures(), ImsAosFeature::NONE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test1)
@@ -2184,10 +1546,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test1)
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetCapabilities(objCapabilities);
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+    SetNetworkType(NW_REPORT_RADIO_LTE);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -2198,15 +1557,9 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test1)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    IMSVector<IMS_SINT32> objPolicy;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
+            .WillRepeatedly(Return(IMS_FALSE));
 
     ProcessNetworkChanged();
     EXPECT_FALSE(IsHandleBlockedBase());
@@ -2227,11 +1580,8 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test2)
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetCapabilities(objCapabilities);
-
     SetEpdgEnabled(IMS_TRUE);
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_WLAN));
+    SetNetworkType(NW_REPORT_RADIO_WLAN);
 
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
             .Times(AnyNumber())
@@ -2250,16 +1600,9 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test2)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    IMSVector<IMS_SINT32> objPolicy;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
+            .WillRepeatedly(Return(IMS_FALSE));
     ProcessNetworkChanged();
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
 }
@@ -2279,10 +1622,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test3)
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetCapabilities(objCapabilities);
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_NR));
+    SetNetworkType(NW_REPORT_RADIO_NR);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -2293,15 +1633,9 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test3)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    IMSVector<IMS_SINT32> objPolicy;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
+            .WillRepeatedly(Return(IMS_FALSE));
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsAvailableWithoutVoiceCapability())
             .Times(AnyNumber())
@@ -2315,102 +1649,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test3)
 TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test4)
 {
     // Test4: Capa=(LTE:voice,video / IWLAN:none / NR:none), network=NR
-    //        unavailable policy for capa, unavailable feature for sms
-    // Expectation: block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
-    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-
-    SetCapabilities(objCapabilities);
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_NR));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_SMS);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    ProcessNetworkChanged();
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
-}
-
-TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test5)
-{
-    // Test5: Capa=(LTE:voice,video / IWLAN:none / NR:none), network=WLAN
-    //        unavailable policy for capa, unavailable feature for sms
-    // Expectation: block BLOCK_VOWIFI_CAPABILITY, BLOCK_VIWIFI_CAPABILITY
-
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
-    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::VOICE) |
-                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
-    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
-
-    SetCapabilities(objCapabilities);
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_WLAN));
-
-    SetEpdgEnabled(IMS_TRUE);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_SMS);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    ProcessNetworkChanged();
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
-}
-
-TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test6)
-{
-    // Test6: Capa=(LTE:voice,video / IWLAN:none / NR:none), network=NR
-    //        unavailable policy for capa, unavailable feature for mmtel/video
+    //        unavailable feature policy is existed.
     // Expectation: block none
 
     IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
@@ -2423,10 +1662,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test6)
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetCapabilities(objCapabilities);
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_NR));
+    SetNetworkType(NW_REPORT_RADIO_NR);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -2437,27 +1673,189 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test6)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
+            .WillRepeatedly(Return(IMS_TRUE));
 
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+    ProcessNetworkChanged();
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+}
+
+TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test5)
+{
+    // Test5: Video mismatch check / LTE->3G->LTE->3G->LTE
+    //        Video changed while on 3G
+    //        unavailable feature policy is existed.
+    // Expectation: Video blocked after network changed to LTE again. No block network on 3G.
+
+    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilitiesVoiceVideo;
+    objCapabilitiesVoiceVideo.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+
+    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilitiesVoice;
+    objCapabilitiesVoice.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    SetNetworkType(NW_REPORT_RADIO_WCDMA);
+    ProcessNetworkChanged();
+    EXPECT_FALSE(IsHandleBlockedBase());
+
+    ProcessCapabilitiesChanged(objCapabilitiesVoice);
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    ProcessNetworkChanged();
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+
+    SetNetworkType(NW_REPORT_RADIO_WCDMA);
+    ProcessNetworkChanged();
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+
+    ProcessCapabilitiesChanged(objCapabilitiesVoiceVideo);
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    ProcessNetworkChanged();
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+}
+
+TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test6)
+{
+    // Test6: Capa=(LTE:voice,video / IWLAN:video / NR:none), no unavailable policy, network=2G
+    // Expectation: No block network
+
+    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
+    SetCapabilities(objCapabilities);
+    SetNetworkType(NW_REPORT_RADIO_GSM);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsAvailableWithoutVoiceCapability())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
 
     ProcessNetworkChanged();
     EXPECT_FALSE(IsHandleBlockedBase());
 }
 
+TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test7)
+{
+    // Test7: Capa=(LTE:voice,video / IWLAN:video / NR:none), unavailable policy, network=2G
+    // Expectation: No block network
+
+    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
+    SetCapabilities(objCapabilities);
+    SetNetworkType(NW_REPORT_RADIO_GSM);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsAvailableWithoutVoiceCapability())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    ProcessNetworkChanged();
+    EXPECT_FALSE(IsHandleBlockedBase());
+}
+
+TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test8)
+{
+    // Test8: Capa=(LTE:voice,video / IWLAN:video / NR:none), no unavailable policy, network=3G
+    // Expectation: Block network on 3G but LTE
+
+    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
+    SetCapabilities(objCapabilities);
+    SetNetworkType(NW_REPORT_RADIO_WCDMA);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsAvailableWithoutVoiceCapability())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    ProcessNetworkChanged();
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_NETWORK));
+
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    ProcessNetworkChanged();
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_NETWORK));
+}
+
 TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test1)
 {
     // Test1: call active
-    // Expectation: set/reset HoldingVopsState as the state
+    // Expectation: set/reset m_nHoldingVopsState as the state
+    //              No change m_nVopsState
 
     EXPECT_CALL(m_objMockIAosCallTracker, IsNormalCallActive())
             .Times(AnyNumber())
@@ -2465,29 +1863,31 @@ TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test1)
 
     ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
     EXPECT_EQ(GetHoldingVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 
     ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED);
     EXPECT_EQ(GetHoldingVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 }
 
 TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test2)
 {
-    // Test2: call idle, no unavailalble policy
+    // Test2: call idle, no unavailalble policy, network=LTE
     // Expectation: set/reset block BLOCK_VOPS as the state
+    //              set/reset m_nVopsState as the state
+    //              No change m_nHoldingVopsState
 
     EXPECT_CALL(m_objMockIAosCallTracker, IsNormalCallActive())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    IMSVector<IMS_SINT32> objPolicy;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
+    SetNetworkType(NW_REPORT_RADIO_LTE);
 
-    IMSVector<IMS_SINT32> objFeature;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
+            .WillRepeatedly(Return(IMS_FALSE));
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -2499,69 +1899,28 @@ TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test2)
             .WillRepeatedly(Return(IMS_FALSE));
 
     ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    EXPECT_EQ(GetHoldingVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 
     ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_EQ(GetHoldingVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 }
 
 TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test3)
 {
-    // Test3: call idle, unavailalble policy for vops, no unavailable feature.
-    // Expectation: set/reset block BLOCK_VOPS as the state
-
-    EXPECT_CALL(m_objMockIAosCallTracker, IsNormalCallActive())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
-
-    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED);
-    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
-}
-
-TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test4)
-{
-    // Test4: call idle, unavailalble policy for vops, no unavailable feature.
+    // Test3: call idle, unavailalble feature policy is existed
     // Expectation: no block BLOCK_VOPS
 
     EXPECT_CALL(m_objMockIAosCallTracker, IsNormalCallActive())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    IMSVector<IMS_SINT32> objPolicy;
-    objPolicy.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPolicy));
-
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
+            .WillRepeatedly(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -2579,47 +1938,117 @@ TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test4)
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 }
 
-TEST_F(AosHandleMtcTest, ProcessUnavailableFeatureForVops_Test1)
+TEST_F(AosHandleMtcTest, ReevaluateUnavailableFeature_Test1)
 {
-    // Test1: no unavailable feature
-    // Expectation: return false regardless of the arg.
+    // Test1: Vops change / Video Capable
+    // Expectation: Add/Remove mmtel, video to/from unavailable feature / No block vops
+    //              Notify to AosRegistration if unavailable feature is changed
 
-    IMSVector<IMS_SINT32> objFeature;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
+            .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_FALSE(ProcessUnavailableFeatureForVops(IMS_VOICE_OVER_PS_NOT_SUPPORTED));
-    EXPECT_FALSE(ProcessUnavailableFeatureForVops(IMS_VOICE_OVER_PS_SUPPORTED));
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(
+            m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
+            .Times(2);
+
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::MMTEL));
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::VIDEO));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::MMTEL));
+    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::VIDEO));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 }
 
-TEST_F(AosHandleMtcTest, ProcessUnavailableFeatureForVops_Test2)
+TEST_F(AosHandleMtcTest, ReevaluateUnavailableFeature_Test2)
 {
-    // Test2: unavailable feature for invalid
-    // Expectation: return false regardless of the arg.
+    // Test2: Vops change / Video NOT capable
+    // Expectation: Add/Remove mmtel to/from unavailable feature / No block vops
+    //              Notify to AosRegistration if unavailable feature is changed
 
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(0);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
+            .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_FALSE(ProcessUnavailableFeatureForVops(IMS_VOICE_OVER_PS_NOT_SUPPORTED));
-    EXPECT_FALSE(ProcessUnavailableFeatureForVops(IMS_VOICE_OVER_PS_SUPPORTED));
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilitiesVoice;
+    objCapabilitiesVoice.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(
+            m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
+            .Times(2);
+
+    ProcessCapabilitiesChanged(objCapabilitiesVoice);
+
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::MMTEL));
+    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::VIDEO));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::MMTEL));
+    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::VIDEO));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 }
 
-TEST_F(AosHandleMtcTest, ProcessUnavailableFeatureForVops_Test3)
+TEST_F(AosHandleMtcTest, ReevaluateUnavailableFeature_Test3)
 {
-    // Test3: unavailable feature for mmtel/video
-    // Expectation: return true regardless of the arg.
+    // Test3: Network change
+    // Expectation: Unavailable feature on 3G but LTE / No block network on 3G
+    //              Notify to AosRegistration if unavailable feature is changed
 
-    IMSVector<IMS_SINT32> objFeature;
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-    objFeature.Add(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeature));
+            .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_TRUE(ProcessUnavailableFeatureForVops(IMS_VOICE_OVER_PS_NOT_SUPPORTED));
-    EXPECT_TRUE(ProcessUnavailableFeatureForVops(IMS_VOICE_OVER_PS_SUPPORTED));
+    SetNetworkType(NW_REPORT_RADIO_HSPA);
+
+    EXPECT_CALL(
+            m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
+            .Times(2);
+
+    ProcessNetworkChanged();
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::MMTEL));
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::VIDEO));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_NETWORK));
+
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    ProcessNetworkChanged();
+    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::MMTEL));
+    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::VIDEO));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_NETWORK));
+}
+
+TEST_F(AosHandleMtcTest, GetVoiceBlockReasonForIpcan_Test)
+{
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    EXPECT_EQ(GetVoiceBlockReasonForIpcan(), AosHandle::BLOCK_VOLTE_CAPABILITY);
+
+    SetNetworkType(NW_REPORT_RADIO_WLAN);
+    EXPECT_EQ(GetVoiceBlockReasonForIpcan(), AosHandle::BLOCK_VOWIFI_CAPABILITY);
+}
+
+TEST_F(AosHandleMtcTest, GetVideoBlockReasonForIpcan_Test)
+{
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    EXPECT_EQ(GetVideoBlockReasonForIpcan(), AosHandle::BLOCK_VILTE_CAPABILITY);
+
+    SetNetworkType(NW_REPORT_RADIO_WLAN);
+    EXPECT_EQ(GetVideoBlockReasonForIpcan(), AosHandle::BLOCK_VIWIFI_CAPABILITY);
 }

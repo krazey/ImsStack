@@ -116,23 +116,28 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, 
                         "CallTracker_StateChanged :: handle vops block , state (%d)",
                         m_nHoldingVopsState, 0, 0);
 
-                if (!IsUnavailableFeaturePolicy(
-                            CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS) ||
-                        !ProcessUnavailableFeatureForVops(m_nHoldingVopsState))
+                m_nVopsState = m_nHoldingVopsState;
+                m_nHoldingVopsState = IMS_VOICE_OVER_PS_SUPPORTED;
+
+                if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+                {
+                    ReevaluateUnavailableFeature();
+                }
+                else
                 {
                     ProcessBlock(BLOCK_VOPS, IMS_TRUE);
                 }
-
-                m_nHoldingVopsState = IMS_VOICE_OVER_PS_SUPPORTED;
             }
         }
     }
 
-    if (eState == CallState::IDLE || eState == CallState::OFFHOOK)
+    if (GET_N_CONFIG(m_nSlotId)->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
     {
-        // VZW Req. - VZ_REQ_VOWIFI_6258874, VZ_REQ_VOWIFI_6258951
-        UpdateFeatureTags();
-        ProcessFeatureTagChange();
+        if (eState == CallState::IDLE || eState == CallState::OFFHOOK)
+        {
+            UpdateGGsmaRcsTelephonyFeatureTag();
+            ProcessFeatureTagChange();
+        }
     }
 }
 
@@ -180,9 +185,9 @@ PUBLIC VIRTUAL void AosHandleMtc::NetTracker_StatusChanged()
             ProcessImsSuspended(AosReason::SUSPEND_NO_LTE_COVERAGE);
         }
 
-        ProcessNetworkChanged();
-
         m_nNetworkType = nCurrNetworkType;
+
+        ProcessNetworkChanged();
     }
 }
 
@@ -247,59 +252,10 @@ PROTECTED VIRTUAL void AosHandleMtc::InitializeFeatureTags()
 {
     AosHandle::InitializeFeatureTags();
 
-    UpdateFeatureTags();
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void AosHandleMtc::UpdateFeatureTags()
-{
-    AosHandle::UpdateFeatureTags();
-
-    /* VZW Req. - VZ_REQ_IMS_22939, VZ_REQ_VOWIFI_6230394
-                  VZ_REQ_VOWIFI_6258874, VZ_REQ_VOWIFI_6258951
-    */
     if (GET_N_CONFIG(m_nSlotId)->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
     {
-        IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
-        if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
-        {
-            if (m_objBindedFeatureTagList.HasFeatureTag("+g.gsma.rcs.telephony", "\"cs\""))
-            {
-                m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
-                m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-                m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
-            }
-        }
-        else
-        {
-            if (m_objFeatureTagList.HasFeature(ImsAosFeature::MMTEL))
-            {
-                m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
-                m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-                m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
-            }
-            else
-            {
-                m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "cs");
-                m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "volte");
-
-                if (GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
-                {
-                    if (m_objFeatureTagList.HasFeature(ImsAosFeature::VIDEO) && IsEpdgEnabled() &&
-                            !IsSupportedNetworkTypeForCellular(GetMobileNetworkType()))
-                    {
-                        m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
-                    }
-                }
-            }
-        }
+        UpdateGGsmaRcsTelephonyFeatureTag();
     }
-
-    m_objFeatureTagList.PrintFeatureTagList();
 }
 
 /*
@@ -487,7 +443,10 @@ PROTECTED VIRTUAL void AosHandleMtc::Init()
 
     AosHandle::Init();
 
-    IMS_EVENT_AddListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
+    if (!GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled())
+    {
+        IMS_EVENT_AddListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
+    }
 
     IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCallTracker != IMS_NULL)
@@ -538,23 +497,23 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
         return bBlocked;
     }
 
-    IMS_UINT32 nBlocks = (BLOCK_VOPS | BLOCK_VOLTE_CAPABILITY);
+    return AosHandle::IsHandleBlocked(BLOCK_VOLTE_CAPABILITY | BLOCK_VOPS | BLOCK_NETWORK);
+}
 
-    if (GET_N_CONFIG(m_nSlotId)->GetRegWithFeatureTagUnavailable().GetSize() > 0)
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL void AosHandleMtc::ProcessFeatureBlock(
+        IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked)
+{
+    AosHandle::ProcessFeatureBlock(nFeature, bBlocked);
+
+    if (GET_N_CONFIG(m_nSlotId)->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
     {
-        if (IsUnavailableFeaturePolicy(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS))
-        {
-            nBlocks &= ~(BLOCK_VOPS);
-        }
-
-        if (IsUnavailableFeaturePolicy(
-                    CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY))
-        {
-            nBlocks &= ~(BLOCK_VOLTE_CAPABILITY);
-        }
+        UpdateGGsmaRcsTelephonyFeatureTag();
     }
-
-    return AosHandle::IsHandleBlocked(nBlocks);
 }
 
 /*
@@ -586,124 +545,34 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
     A_IMS_TRACE_I(APPPROFILE, "ProcessCapabilitiesChanged :: Size[%d]",
             objNewCapabilities.GetSize(), 0, 0);
 
-    IMS_UINT32 nCurrentRat = GetNetworkType();
-
     for (IMS_UINT32 i = 0; i < m_objCapabilities.GetSize(); i++)
     {
-        IMS_UINT32 nNetworkType = m_objCapabilities.GetKeyAt(i);
+        IMS_UINT32 nCapaNetworkType = m_objCapabilities.GetKeyAt(i);
 
         // Network type is not existed in the new capabilities (=no capabilities)
-        if (objNewCapabilities.GetIndexOfKey(nNetworkType) < 0)
+        if (objNewCapabilities.GetIndexOfKey(nCapaNetworkType) < 0)
         {
-            if (IsNetworkTypeMatchedToRat(nNetworkType, nCurrentRat))
-            {
-                if (IsUnavailableFeaturePolicy(
-                            CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY))
-                {
-                    IMS_BOOL bProceeded = IMS_FALSE;
-
-                    if (IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL))
-                    {
-                        ProcessUnavailableFeature(ImsAosFeature::MMTEL, IMS_TRUE);
-                        bProceeded = IMS_TRUE;
-                    }
-                    else
-                    {
-                        ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ? BLOCK_VOWIFI_CAPABILITY
-                                                                           : BLOCK_VOLTE_CAPABILITY,
-                                IMS_TRUE);
-                    }
-
-                    if (IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO))
-                    {
-                        ProcessUnavailableFeature(ImsAosFeature::VIDEO, IMS_TRUE);
-                        bProceeded = IMS_TRUE;
-                    }
-                    else
-                    {
-                        ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
-                                                                           : BLOCK_VILTE_CAPABILITY,
-                                IMS_TRUE);
-                    }
-
-                    if (bProceeded)
-                    {
-                        ProcessUnavailableFeatureChanged();
-                    }
-                }
-                else
-                {
-                    ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ? BLOCK_VOWIFI_CAPABILITY
-                                                                       : BLOCK_VOLTE_CAPABILITY,
-                            IMS_TRUE);
-
-                    ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
-                                                                       : BLOCK_VILTE_CAPABILITY,
-                            IMS_TRUE);
-                }
-            }
-
-            m_objCapabilities.SetValue(nNetworkType, static_cast<IMS_UINT32>(AosCapability::NONE));
+            m_objCapabilities.SetValue(
+                    nCapaNetworkType, static_cast<IMS_UINT32>(AosCapability::NONE));
             continue;
         }
 
-        IMS_UINT32 nNewCapabilities = objNewCapabilities.GetValue(nNetworkType);
+        IMS_UINT32 nNewCapabilities = objNewCapabilities.GetValue(nCapaNetworkType);
 
         A_IMS_TRACE_D(APPPROFILE, "ProcessCapabilitiesChanged :: \
-                nNetworkType[%d], nNewCapabilities[%d], nCurrentRat[%s]",
-                nNetworkType, nNewCapabilities, RadioTypeToString(nCurrentRat));
+                nCapaNetworkType[%d], nNewCapabilities[%d], m_nNetworkType[%s]",
+                nCapaNetworkType, nNewCapabilities, RadioTypeToString(m_nNetworkType));
 
-        if (IsNetworkTypeMatchedToRat(nNetworkType, nCurrentRat))
-        {
-            if (IsUnavailableFeaturePolicy(
-                        CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY))
-            {
-                IMS_BOOL bProceeded = IMS_FALSE;
+        m_objCapabilities.SetValue(nCapaNetworkType, nNewCapabilities);
+    }
 
-                if (IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL))
-                {
-                    ProcessUnavailableFeature(ImsAosFeature::MMTEL,
-                            !IsCapabilityExisted(nNewCapabilities, AosCapability::VOICE));
-                    bProceeded = IMS_TRUE;
-                }
-                else
-                {
-                    ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ? BLOCK_VOWIFI_CAPABILITY
-                                                                       : BLOCK_VOLTE_CAPABILITY,
-                            !IsCapabilityExisted(nNewCapabilities, AosCapability::VOICE));
-                }
+    if (IsSupportedNetworkType(m_nNetworkType))
+    {
+        ProcessBlock(GetVoiceBlockReasonForIpcan(),
+                !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VOICE));
 
-                if (IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO))
-                {
-                    ProcessUnavailableFeature(ImsAosFeature::VIDEO,
-                            !IsCapabilityExisted(nNewCapabilities, AosCapability::VIDEO));
-                    bProceeded = IMS_TRUE;
-                }
-                else
-                {
-                    ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
-                                                                       : BLOCK_VILTE_CAPABILITY,
-                            !IsCapabilityExisted(nNewCapabilities, AosCapability::VIDEO));
-                }
-
-                if (bProceeded)
-                {
-                    ProcessUnavailableFeatureChanged();
-                }
-            }
-            else
-            {
-                ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ? BLOCK_VOWIFI_CAPABILITY
-                                                                   : BLOCK_VOLTE_CAPABILITY,
-                        !IsCapabilityExisted(nNewCapabilities, AosCapability::VOICE));
-
-                ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
-                                                                   : BLOCK_VILTE_CAPABILITY,
-                        !IsCapabilityExisted(nNewCapabilities, AosCapability::VIDEO));
-            }
-        }
-
-        m_objCapabilities.SetValue(nNetworkType, nNewCapabilities);
+        ProcessBlock(GetVideoBlockReasonForIpcan(),
+                !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VIDEO));
     }
 }
 
@@ -714,73 +583,39 @@ Remarks
 */
 PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
 {
-    IMS_UINT32 nNewNetwork = GetNetworkType();
-    IMS_UINT32 nCapabilities = static_cast<IMS_UINT32>(AosCapability::NONE);
-
-    switch (nNewNetwork)
+    if (IsSupportedNetworkType(m_nNetworkType))
     {
-        case NW_REPORT_RADIO_LTE:
-            nCapabilities =
-                    m_objCapabilities.GetValue(static_cast<IMS_UINT32>(AosNetworkType::LTE));
-            break;
-
-        case NW_REPORT_RADIO_NR:
-            nCapabilities = m_objCapabilities.GetValue(static_cast<IMS_UINT32>(AosNetworkType::NR));
-            break;
-
-        case NW_REPORT_RADIO_WLAN:
-            nCapabilities =
-                    m_objCapabilities.GetValue(static_cast<IMS_UINT32>(AosNetworkType::IWLAN));
-            break;
-
-        default:
-            return;
-    }
-
-    if (IsUnavailableFeaturePolicy(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY))
-    {
-        IMS_BOOL bProceeded = IMS_FALSE;
-
-        if (IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL))
+        if (AosHandle::IsHandleBlocked(BLOCK_NETWORK))
         {
-            ProcessUnavailableFeature(ImsAosFeature::MMTEL,
-                    !IsCapabilityExisted(nCapabilities, AosCapability::VOICE));
-            bProceeded = IMS_TRUE;
+            ProcessBlock(BLOCK_NETWORK, IMS_FALSE);
+        }
+
+        IMS_BOOL bIsVoiceCapable =
+                IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VOICE);
+        IMS_BOOL bIsVideoCapable =
+                IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VIDEO);
+
+        if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+        {
+            ReevaluateUnavailableFeature();
+            ProcessBlock(GetVideoBlockReasonForIpcan(), !bIsVideoCapable);
         }
         else
         {
-            ProcessBlock((nNewNetwork == NW_REPORT_RADIO_WLAN) ? BLOCK_VOWIFI_CAPABILITY
-                                                               : BLOCK_VOLTE_CAPABILITY,
-                    !IsCapabilityExisted(nCapabilities, AosCapability::VOICE));
+            ProcessBlock(GetVoiceBlockReasonForIpcan(), !bIsVoiceCapable);
+            ProcessBlock(GetVideoBlockReasonForIpcan(), !bIsVideoCapable);
         }
-
-        if (IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO))
+    }
+    else if (Is3G(m_nNetworkType))
+    {
+        if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
         {
-            ProcessUnavailableFeature(ImsAosFeature::VIDEO,
-                    !IsCapabilityExisted(nCapabilities, AosCapability::VIDEO));
-            bProceeded = IMS_TRUE;
+            ReevaluateUnavailableFeature();
         }
         else
         {
-            ProcessBlock((nNewNetwork == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
-                                                               : BLOCK_VILTE_CAPABILITY,
-                    !IsCapabilityExisted(nCapabilities, AosCapability::VIDEO));
+            ProcessBlock(BLOCK_NETWORK, IMS_TRUE);
         }
-
-        if (bProceeded)
-        {
-            ProcessUnavailableFeatureChanged();
-        }
-    }
-    else
-    {
-        ProcessBlock((nNewNetwork == NW_REPORT_RADIO_WLAN) ? BLOCK_VOWIFI_CAPABILITY
-                                                           : BLOCK_VOLTE_CAPABILITY,
-                !IsCapabilityExisted(nCapabilities, AosCapability::VOICE));
-
-        ProcessBlock((nNewNetwork == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
-                                                           : BLOCK_VILTE_CAPABILITY,
-                !IsCapabilityExisted(nCapabilities, AosCapability::VIDEO));
     }
 }
 
@@ -813,15 +648,16 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nStat
         }
     }
 
-    if (IsUnavailableFeaturePolicy(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS))
-    {
-        if (ProcessUnavailableFeatureForVops(nState))
-        {
-            return;
-        }
-    }
+    m_nVopsState = nState;
 
-    ProcessBlock(BLOCK_VOPS, (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED));
+    if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+    {
+        ReevaluateUnavailableFeature();
+    }
+    else
+    {
+        ProcessBlock(BLOCK_VOPS, (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED));
+    }
 }
 
 /*
@@ -829,27 +665,103 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nStat
 Remarks
 
 */
-PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::ProcessUnavailableFeatureForVops(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosHandleMtc::ReevaluateUnavailableFeature()
 {
-    IMS_BOOL bProceeded = IMS_FALSE;
+    IMS_BOOL bIsVoiceUnavailable = IMS_FALSE;
+    IMS_BOOL bIsVideoUnavailable = IMS_FALSE;
+    IMS_UINT32 nOldUnavailableFeature = m_objFeatureTagList.GetUnavailableFeatures();
 
-    IMSVector<IMS_SINT32>& objConfigFeatures =
-            GET_N_CONFIG(m_nSlotId)->GetRegWithFeatureTagUnavailable();
-
-    for (IMS_UINT32 i = 0; i < objConfigFeatures.GetSize(); i++)
+    if (IsSupportedNetworkTypeForCellular(m_nNetworkType))
     {
-        IMS_UINT32 nAosFeature = ConvertToAosFeature(objConfigFeatures.GetAt(i));
-        if (IsServiceFeature(nAosFeature))
+        if (!GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled())
         {
-            ProcessUnavailableFeature(nAosFeature, (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED));
-            bProceeded = IMS_TRUE;
+            bIsVoiceUnavailable = (m_nVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED);
         }
     }
+    else if (Is3G(m_nNetworkType))
+    {
+        bIsVoiceUnavailable = IMS_TRUE;
+    }
+    else
+    {
+        return;
+    }
 
-    if (bProceeded)
+    bIsVideoUnavailable =
+            bIsVoiceUnavailable && !AosHandle::IsHandleBlocked(GetVideoBlockReasonForIpcan());
+
+    A_IMS_TRACE_D(APPPROFILE,
+            "ReevaluateUnavailableFeature :: bIsVoiceUnavailable(%s), bIsVideoUnavailable(%s)",
+            _TRACE_B_(bIsVoiceUnavailable), _TRACE_B_(bIsVideoUnavailable), 0);
+
+    ProcessUnavailableFeature(ImsAosFeature::MMTEL, bIsVoiceUnavailable);
+    ProcessUnavailableFeature(ImsAosFeature::VIDEO, bIsVideoUnavailable);
+
+    if (nOldUnavailableFeature != m_objFeatureTagList.GetUnavailableFeatures())
     {
         ProcessUnavailableFeatureChanged();
     }
+}
 
-    return bProceeded;
+/*
+
+Remarks
+
+*/
+PRIVATE
+void AosHandleMtc::UpdateGGsmaRcsTelephonyFeatureTag()
+{
+    /* VZW Req. - VZ_REQ_IMS_22939, VZ_REQ_VOWIFI_6230394
+                  VZ_REQ_VOWIFI_6258874, VZ_REQ_VOWIFI_6258951
+    */
+
+    IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+    if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
+    {
+        if (m_objBindedFeatureTagList.HasFeatureTag("+g.gsma.rcs.telephony", "\"cs\""))
+        {
+            m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+        }
+    }
+    else
+    {
+        if (m_objFeatureTagList.HasFeature(ImsAosFeature::MMTEL))
+        {
+            m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+        }
+        else
+        {
+            m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "cs");
+            m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "volte");
+
+            if (GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
+            {
+                if (m_objFeatureTagList.HasFeature(ImsAosFeature::VIDEO) && IsEpdgEnabled() &&
+                        !IsSupportedNetworkTypeForCellular(GetMobileNetworkType()))
+                {
+                    m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+                }
+            }
+        }
+    }
+
+    m_objFeatureTagList.PrintFeatureTagList();
+}
+
+PRIVATE
+IMS_UINT32 AosHandleMtc::GetVoiceBlockReasonForIpcan()
+{
+    return (m_nNetworkType == NW_REPORT_RADIO_WLAN) ? BLOCK_VOWIFI_CAPABILITY
+                                                    : BLOCK_VOLTE_CAPABILITY;
+}
+
+PRIVATE
+IMS_UINT32 AosHandleMtc::GetVideoBlockReasonForIpcan()
+{
+    return (m_nNetworkType == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
+                                                    : BLOCK_VILTE_CAPABILITY;
 }

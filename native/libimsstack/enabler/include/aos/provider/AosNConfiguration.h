@@ -89,6 +89,7 @@ public:
     virtual IMS_BOOL IsContactUriValidationChecked() const;
     virtual IMS_BOOL IsUserInfoInContactSupported() const;
     virtual IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const;
+    virtual IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const;
 
     virtual IMS_UINT32 GetRegistrationRetryBaseTime();
     virtual IMS_UINT32 GetRegistrationRetryMaxTime();
@@ -155,8 +156,6 @@ public:
     virtual IMSVector<IMS_SINT32>& GetRegPermanentErrMaxCount();
     virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime();
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime();
-    virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailable();
-    virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailablePolicy();
     virtual IMSVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime();
     virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithPcscfDiscovery();
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithInitRegWithAvailablePcscf();
@@ -184,7 +183,6 @@ private:
     AosNotifyTerminatedForRegEventWithInitialRegistrationBundle m_objNotifyTerminated;
 
     AosRegistrationErrorCodeWithRetryAfterTimeBundle m_objRegErrCodeWithRetryAfterTime;
-    AosRegistrationWithFeatureTagUnavailableBundle m_objRegWithFeatureTagUnavailable;
     AosRegistrationRetryBundle m_objRegRetry;
     AosRegistrationRetryIntervalBundle m_objRegRetryInterval;
 

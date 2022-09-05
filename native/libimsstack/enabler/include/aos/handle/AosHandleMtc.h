@@ -39,8 +39,6 @@ protected:
     virtual void InitializeServiceFeature();
     virtual void InitializeFeatureTags();
 
-    virtual void UpdateFeatureTags();
-
     virtual IMS_BOOL ProcessImsSuspended(IN IMS_UINT32 nReason = 0);
     virtual IMS_BOOL ProcessImsResumed(IN IMS_UINT32 nReason = 0);
 
@@ -53,12 +51,19 @@ protected:
 
     virtual IMS_BOOL IsHandleBlocked() const;
 
+    virtual void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked);
     virtual void ProcessBlockChanged();
     virtual void ProcessCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
     virtual void ProcessNetworkChanged();
     virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState);
-    virtual IMS_BOOL ProcessUnavailableFeatureForVops(IN IMS_UINT32 nState);
+
+    virtual void ReevaluateUnavailableFeature();
+
+private:
+    void UpdateGGsmaRcsTelephonyFeatureTag();
+    IMS_UINT32 GetVoiceBlockReasonForIpcan();
+    IMS_UINT32 GetVideoBlockReasonForIpcan();
 
 private:
     friend class AosHandleMtcTest;

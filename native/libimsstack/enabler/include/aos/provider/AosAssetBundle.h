@@ -186,23 +186,4 @@ public:
     IMSVector<IMS_SINT32> objReregistrationErrorCodeWithRetryAfterTime;
 };
 
-struct AosRegistrationWithFeatureTagUnavailableBundle
-{
-public:
-    AosRegistrationWithFeatureTagUnavailableBundle() :
-            objRegistrationWithFeatureTagUnavailable(IMSVector<IMS_SINT32>()),
-            objRegistrationWithFeatureTagUnavailablePolicy(IMSVector<IMS_SINT32>())
-    {
-    }
-
-    AosRegistrationWithFeatureTagUnavailableBundle(
-            IN const AosRegistrationWithFeatureTagUnavailableBundle&) = delete;
-    AosRegistrationWithFeatureTagUnavailableBundle& operator=(
-            IN const AosRegistrationWithFeatureTagUnavailableBundle&) = delete;
-
-public:
-    IMSVector<IMS_SINT32> objRegistrationWithFeatureTagUnavailable;
-    IMSVector<IMS_SINT32> objRegistrationWithFeatureTagUnavailablePolicy;
-};
-
 #endif  // AOS_ASSET_BUNDLE_H_

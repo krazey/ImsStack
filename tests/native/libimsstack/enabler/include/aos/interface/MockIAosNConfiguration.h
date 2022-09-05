@@ -81,6 +81,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsContactUriValidationChecked, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUserInfoInContactSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegRequiredAfterImsCallEndOnRegHeld, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsRegWithFeatureTagUnavailableSupported, (), (const, override));
 
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryBaseTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryMaxTime, (), (override));
@@ -145,8 +146,6 @@ public:
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegPermanentErrMaxCount, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithRetryAfterTime, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeWithRetryAfterTime, (), (override));
-    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegWithFeatureTagUnavailable, (), (override));
-    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegWithFeatureTagUnavailablePolicy, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetEmergencyPcscfRetryWaitTime, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithPcscfDiscovery, (), (override));
     MOCK_METHOD(

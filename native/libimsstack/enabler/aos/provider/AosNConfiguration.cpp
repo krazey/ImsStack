@@ -34,7 +34,6 @@ AosNConfiguration::AosNConfiguration() :
         m_objMmtelProvisioning(AosMmtelRequiresProvisioningBundle()),
         m_objNotifyTerminated(AosNotifyTerminatedForRegEventWithInitialRegistrationBundle()),
         m_objRegErrCodeWithRetryAfterTime(AosRegistrationErrorCodeWithRetryAfterTimeBundle()),
-        m_objRegWithFeatureTagUnavailable(AosRegistrationWithFeatureTagUnavailableBundle()),
         m_objRegRetry(AosRegistrationRetryBundle()),
         m_objRegRetryInterval(AosRegistrationRetryIntervalBundle()),
         m_objReregErrPolicyCall(AosReregistrationErrorPolicyDuringCallBundle()),
@@ -370,6 +369,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRequiredAfterImsCallEndOnRegHeld
     return m_objAsset.bRequireRegAfterImsCallEndOnRegHeld;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithFeatureTagUnavailableSupported() const
+{
+    return m_objAsset.bSupportRegWithFeatureTagUnavailable;
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);
@@ -679,16 +683,6 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithRetryA
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeWithRetryAfterTime()
 {
     return m_objRegErrCodeWithRetryAfterTime.objReregistrationErrorCodeWithRetryAfterTime;
-}
-
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegWithFeatureTagUnavailable()
-{
-    return m_objRegWithFeatureTagUnavailable.objRegistrationWithFeatureTagUnavailable;
-}
-
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegWithFeatureTagUnavailablePolicy()
-{
-    return m_objRegWithFeatureTagUnavailable.objRegistrationWithFeatureTagUnavailablePolicy;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetEmergencyPcscfRetryWaitTime()
@@ -1009,38 +1003,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
 #endif
     }
 
-    // AosRegistrationWithFeatureTagUnavailableBundle
-    piCcBundle = piCc->GetBundle(
-            CarrierConfig::Assets::KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE);
-    if (piCcBundle != IMS_NULL)
-    {
-        m_objRegWithFeatureTagUnavailable
-                .objRegistrationWithFeatureTagUnavailable = piCcBundle->GetIntArray(
-                CarrierConfig::Assets::KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_INT_ARRAY);
-        m_objRegWithFeatureTagUnavailable.objRegistrationWithFeatureTagUnavailablePolicy =
-                piCcBundle->GetIntArray(CarrierConfig::Assets::
-                                KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_POLICY_INT_ARRAY);
-        piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
-#ifdef __IMS_DEBUG__
-        IMS_UINT32 nSize = m_objRegWithFeatureTagUnavailable
-                                   .objRegistrationWithFeatureTagUnavailable.GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue = m_objRegWithFeatureTagUnavailable
-                                        .objRegistrationWithFeatureTagUnavailable.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "RWFTU(%d), ", nValue, 0, 0);
-        }
-        nSize = m_objRegWithFeatureTagUnavailable.objRegistrationWithFeatureTagUnavailablePolicy
-                        .GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue = m_objRegWithFeatureTagUnavailable
-                                        .objRegistrationWithFeatureTagUnavailablePolicy.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "RWFTUP(%d), ", nValue, 0, 0);
-        }
-#endif
-    }
     // AosNotifyTerminatedForRegEventWithInitialRegistrationBundle
     piCcBundle = piCc->GetBundle(CarrierConfig::Assets::
                     KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE);
@@ -1310,6 +1272,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL);
     m_objAsset.bSupportContactUserInfo =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_CONTACT_USER_INFO_BOOL);
+    m_objAsset.bSupportRegWithFeatureTagUnavailable = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL);
     m_objAsset.bSupportVerstatForRegistration =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REGISTRATION_BOOL);
     m_objAsset.bUpdateRegistrationWithCountryChange = piCc->GetBoolean(

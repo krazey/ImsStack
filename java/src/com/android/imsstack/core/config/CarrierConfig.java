@@ -464,6 +464,8 @@ public class CarrierConfig {
                 "registration_contact_validation_bool";
         public static final String KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL =
                 "remove_old_sa_on_establishing_sa_bool";
+        public static final String KEY_REQUIRE_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
+                "require_reg_after_ims_call_end_on_reg_held_bool";
         public static final String KEY_REQUIRED_EMERGENCY_REGISTRATION_IN_ROAMING_BOOL =
                 "required_emergency_registration_in_roaming_bool";
         public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL =
@@ -472,14 +474,14 @@ public class CarrierConfig {
                 "required_volte_block_by_airplane_mode_bool";
         public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =
                 "required_wfc_block_by_airplane_mode_bool";
-        public static final String KEY_REQUIRE_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
-                "require_reg_after_ims_call_end_on_reg_held_bool";
         public static final String KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL =
                 "sip_over_ipsec_enabled_in_roaming_bool";
         public static final String KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL =
                 "sms_over_ims_available_without_voice_capability_bool";
         public static final String KEY_SUPPORT_CONTACT_USER_INFO_BOOL =
                 "support_contact_user_info_bool";
+        public static final String KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL =
+                "support_reg_with_feature_tag_unavailable_bool";
         public static final String KEY_SUPPORT_VERSTAT_FOR_REGISTRATION_BOOL =
                 "support_verstat_for_registration_bool";
         public static final String KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL =
@@ -644,14 +646,6 @@ public class CarrierConfig {
                 "registration_error_code_with_retry_after_time_int_array";
         public static final String KEY_REREGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY =
                 "reregistration_error_code_with_retry_after_time_int_array";
-        // }
-        // Bundle {
-        public static final String KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE =
-                "registration_with_feature_tag_unavailable_bundle";
-        public static final String KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_INT_ARRAY =
-                "registration_with_feature_tag_unavailable_int_array";
-        public static final String KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_POLICY_INT_ARRAY =
-                "registration_with_feature_tag_unavailable_policy_int_array";
         // }
         // Bundle {
         public static final String
@@ -1420,7 +1414,6 @@ public class CarrierConfig {
         // KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE
         // KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE
         // KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE
-        // KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE
         // KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE
         // KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE
 
@@ -1511,16 +1504,6 @@ public class CarrierConfig {
         setBundle(mConfig,
                 Assets.KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE,
                 REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE_KEYS);
-
-        final String[] REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE_KEYS =
-            {
-                Assets.KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_INT_ARRAY,
-                Assets.KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_POLICY_INT_ARRAY
-            };
-
-        setBundle(mConfig,
-                Assets.KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE,
-                REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE_KEYS);
 
         final String[] notifyTerminatedForRegEventWithInitRegBundleKeys = {
                 Assets.KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT,

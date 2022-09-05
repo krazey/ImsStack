@@ -808,6 +808,7 @@ public:
         static const IMS_CHAR KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL[];
         static const IMS_CHAR KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT[];
         static const IMS_CHAR KEY_SUPPORT_CONTACT_USER_INFO_BOOL[];
+        static const IMS_CHAR KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL[];
         static const IMS_CHAR KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT[];
         static const IMS_CHAR KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[];
         static const IMS_CHAR KEY_REG_ERROR_CODES_WITH_PCSCF_DISCOVERY_INT_ARRAY[];
@@ -878,11 +879,6 @@ public:
         static const IMS_CHAR KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_ONLY_DEFINED_BOOL[];
         static const IMS_CHAR KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY[];
         static const IMS_CHAR KEY_REREGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY[];
-        // }
-        // Bundle {
-        static const IMS_CHAR KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE[];
-        static const IMS_CHAR KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_INT_ARRAY[];
-        static const IMS_CHAR KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_POLICY_INT_ARRAY[];
         // }
         // Bundle {
         static const IMS_CHAR
@@ -1163,14 +1159,6 @@ public:
             CLEAR_REASON_WIFI_CHANGED = 4,
             CLEAR_REASON_VOLTE_SETTING = 5,
             CLEAR_REASON_WFC_SETTING = 6
-        };
-
-        // Registration With Feature Tag Unavailable
-        enum
-        {
-            UNAVAILABLE_FEATURE_TYPE_MMTEL = 1,
-            UNAVAILABLE_FEATURE_TYPE_VIDEO = 2,
-            UNAVAILABLE_FEATURE_TYPE_SMS = 3
         };
 
         // Registration With Feature Tag Policy Unavailable
