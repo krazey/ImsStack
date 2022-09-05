@@ -25,11 +25,13 @@
 
      <!-- EVS configuration -->
     <int name="asset_evs_codec_attribute_channels_int" value="1"/>
-    <int-array name="asset_evs_codec_attribute_bitrate_int_array" num="0">
+    <int-array name="asset_evs_codec_attribute_bitrate_int_array" num="2">
+        <item value="0"/>
+        <item value="6"/>
     </int-array>
     <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
-    <int name="asset_evs_codec_attribute_bandwidth_int" value="-1"/>
+    <int name="asset_evs_codec_attribute_bandwidth_int" value="5"/>
     <int name="asset_evs_codec_attribute_cmr_int" value="-2"/>
 
     <!-- AMR-WB, AMR-NB Payload -->
@@ -64,11 +66,12 @@
     </int-array>
 
     <!-- Media common configuration -->
-    <boolean name="audio_evs_support_bool" value="true"/>
     <int name="audio_maxred_int" value="220"/>
     <int name="asset_codec_attribute_mode_change_capability_int" value="2"/>
     <int name="audio_ptime_millis_int" value="20"/>
     <int name="audio_maxptime_millis_int" value="240"/>
+    <boolean name="audio_evs_support_bool" value="true"/>
+    <boolean name="sdp_reoffer_full_capability_bool" value="true"/>
     <boolean name="media_session_level_bandwidth_bool" value="true"/>
 
     <!-- Ut/Xcap Config -->
