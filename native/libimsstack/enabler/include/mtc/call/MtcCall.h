@@ -37,6 +37,7 @@
 #include "call/state/MtcCallStateMachine.h"
 #include "call/UpdatingInfo.h"
 #include "helper/IMtcTimerListener.h"
+#include "helper/ISrvccStateListener.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMediaReportEventListener.h"
@@ -78,7 +79,8 @@ class MtcCall final :
         public IMtcCallStateWatcher,
         public ISipClientConnectionListener,
         public ISipErrorListener,
-        public IMediaReportEventListener
+        public IMediaReportEventListener,
+        public ISrvccStateListener
 {
 public:
     MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo,
@@ -111,8 +113,6 @@ public:
     void Terminate(IN const CallReasonInfo& objReason) override;
     void SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) override;
     void SendUssd(IN const AString& strUssd) override;
-    void HandleSrvccSuccess() override;
-    void HandleSrvccFailure(IN UpdateType eUpdateType) override;
     void HandleIpcanChanged() override;
 
     inline CallKey GetKey() const override { return m_nKey; }
@@ -250,6 +250,8 @@ public:
     void OnReceivingNetworkToneStarted() override;
     void OnReceivingNetworkToneFailed() override;
     void OnMediaFailed(IN const CallReasonInfo& objReason) override;
+
+    void OnSrvccStateUpdated(IN SrvccState eState) override;
 
     void RunPendingOperation();
 

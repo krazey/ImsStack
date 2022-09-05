@@ -41,8 +41,6 @@ public:
 
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
-    CallStateName HandleSrvccFailure(IN UpdateType eUpdateType) override;
-
     CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
 
@@ -66,6 +64,9 @@ public:
     CallStateName OnReceivingNetworkToneStarted() override;
     CallStateName OnReceivingNetworkToneFailed() override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
+
+protected:
+    CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
 
 private:
     void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);

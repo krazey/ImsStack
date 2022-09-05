@@ -55,6 +55,9 @@ public:
     CallStateName HandleIpcanChanged() override;
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction);
 
+protected:
+    CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
+
 private:
     IMS_RESULT HandleUpdate(
             IN UpdateType eUpdateType, IN CallType eCallType, IN MediaInfo* pMediaInfo);

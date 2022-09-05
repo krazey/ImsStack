@@ -28,6 +28,7 @@
 #include "core/MockISession.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MtcTimerWrapper.h"
+#include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 
 using ::testing::_;
@@ -45,7 +46,8 @@ public:
     MockIMtcService objService;
     MockIMtcAosConnector objAosConnector;
     MockISession objSession;
-    MockIMtcPreconditionManager objPreconditionManager;
+    MockIMtcMediaManager objMockMediaManager;
+    MockIMtcPreconditionManager objPreconditionManager;    
     CallInfo objCallInfo;
     MtcTimerWrapper objTimer;
     MtcUiNotifier* pNotifier;
@@ -70,6 +72,8 @@ protected:
                 .WillByDefault(ReturnRef(objService));
         ON_CALL(objCallContext, GetTimer)
                 .WillByDefault(ReturnRef(objTimer));
+        ON_CALL(objCallContext, GetMediaManager)
+                .WillByDefault(ReturnRef(objMockMediaManager));
 
         ON_CALL(objService, GetAosConnector)
                 .WillByDefault(Return(&objAosConnector));
@@ -158,4 +162,22 @@ TEST_F(OutgoingStateTest, OnMediaFailed)
     pOutgoingState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
 
     delete pMtcSession;
+}
+
+TEST_F(OutgoingStateTest, SendUpdateBySrvccByCanceled)
+{
+    ON_CALL(objMockMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SRVCC_RECOVERED_CANCEL)).Times(1);
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->OnSrvccStateUpdated(SrvccState::CANCELED));
+}
+
+TEST_F(OutgoingStateTest, SendUpdateBySrvccByFailed)
+{
+    ON_CALL(objMockMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SRVCC_RECOVERED_FAILURE)).Times(1);
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->OnSrvccStateUpdated(SrvccState::FAILED));
 }

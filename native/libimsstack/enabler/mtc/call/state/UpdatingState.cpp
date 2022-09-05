@@ -281,6 +281,21 @@ PUBLIC VIRTUAL CallStateName UpdatingState::QosReserveFailed(
     return GetStateName();
 }
 
+PROTECTED VIRTUAL CallStateName UpdatingState::HandleSrvccStarted()
+{
+    IMS_TRACE_D("HandleSrvccStarted", 0, 0, 0);
+    const CallReasonInfo objReason(CODE_LOCAL_VCC_ON_PROGRESSING);
+    if (m_objContext.GetUpdatingInfo().IsModifier())  // TODO: proper condition?
+    {
+        return CancelUpdate(objReason);
+    }
+    else
+    {
+        return RejectUpdate(objReason);
+    }
+    return GetStateName();
+}
+
 PRIVATE
 IMS_RESULT UpdatingState::HandleSdpAnswer()
 {
@@ -343,14 +358,6 @@ IMS_RESULT UpdatingState::SendUpdate()
     m_objContext.GetMediaManager().SetMediaInfo(m_objContext.GetUpdatingInfo().GetModifyingInfo());
 
     IMtcSession* pSession = m_objContext.GetSession();
-    if (m_objContext.GetMediaManager().FormSdp(
-            &pSession->GetISession(), pSession->GetCallType()) == IMS_FAILURE)
-    {
-        // TODO
-    }
-
-    m_objContext.GetPreconditionManager().FormPreconditionSdp(
-            &(pSession->GetISession()), IMS_FALSE);
 
     if (pSession->Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE) == IMS_FAILURE)
     {

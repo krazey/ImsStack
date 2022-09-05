@@ -44,6 +44,7 @@ public:
     CallInfo objCallInfo;
     MockIMtcMediaManager objMediaManager;
     MockIMtcSession objMtcSession;
+    MockISession objSession;
 
 protected:
     virtual void SetUp() override
@@ -55,6 +56,9 @@ protected:
 
         ON_CALL(objContext, GetCallInfo)
                 .WillByDefault(ReturnRef(objCallInfo));
+
+        ON_CALL(objMtcSession, GetISession())
+                .WillByDefault(ReturnRef(objSession));
 
         pUpdatingInfo = new UpdatingInfo();
         ON_CALL(objContext, GetUpdatingInfo)
@@ -162,4 +166,33 @@ TEST_F(UpdatingStateTest, OnMediaFailed)
     pUpdatingState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
 
     delete pUiNotifier;
+}
+
+TEST_F(UpdatingStateTest, HandleSrvccStartedAsModifier)
+{
+    pUpdatingInfo->SetModifier();
+    MtcTimerWrapper objTimer;
+    ON_CALL(objContext, GetTimer)
+            .WillByDefault(ReturnRef(objTimer));
+
+    const CallReasonInfo objReason(CODE_LOCAL_VCC_ON_PROGRESSING);
+    EXPECT_CALL(objMtcSession, CancelUpdate(objReason))
+            .Times(1);
+
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->OnSrvccStateUpdated(SrvccState::STARTED));
+}
+
+TEST_F(UpdatingStateTest, HandleSrvccStartedAsNotModifier)
+{
+    ON_CALL(objSession, GetState())
+            .WillByDefault(Return(ISession::STATE_REESTABLISHING));
+    MtcTimerWrapper objTimer;
+    ON_CALL(objContext, GetTimer)
+            .WillByDefault(ReturnRef(objTimer));
+
+    const CallReasonInfo objReason(CODE_LOCAL_VCC_ON_PROGRESSING);
+    EXPECT_CALL(objMtcSession, Reject(objReason))
+            .Times(1);
+
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->OnSrvccStateUpdated(SrvccState::STARTED));
 }

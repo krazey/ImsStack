@@ -20,15 +20,16 @@
 #include "call/MtcUiNotifier.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
+#include "helper/ISrvccStateListener.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "MockIMtcService.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "utility/MessageUtil.h"
-#include "../../../engine/interface/core/MockIMessage.h"
-#include "../../../engine/interface/core/MockISession.h"
-#include "../../../engine/interface/sipcore/MockISipMessage.h"
+#include "core/MockIMessage.h"
+#include "core/MockISession.h"
+#include "sipcore/MockISipMessage.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -76,8 +77,8 @@ protected:
         pUiNotifier = new MtcUiNotifier(objMockCallContext);
         ON_CALL(objMockCallContext, GetUiNotifier).WillByDefault(ReturnRef(*pUiNotifier));
 
-        // ON_CALL(objMockCallContext, GetISession)
-        //         .WillByDefault(ReturnRef(objMockISession));
+        ON_CALL(objMtcSession, GetISession)
+                .WillByDefault(ReturnRef(objMockISession));
 
         pAlertingState = new AlertingState(objMockCallContext);
     }
@@ -127,4 +128,22 @@ TEST_F(AlertingStateTest, OnMediaFailed)
     EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_MEDIA_INIT_FAILED))).Times(1);
 
     pAlertingState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
+}
+
+TEST_F(AlertingStateTest, SendUpdateBySrvccByCanceled)
+{
+    ON_CALL(objMockMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SRVCC_RECOVERED_CANCEL)).Times(1);
+
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->OnSrvccStateUpdated(SrvccState::CANCELED));
+}
+
+TEST_F(AlertingStateTest, SendUpdateBySrvccByFailed)
+{
+    ON_CALL(objMockMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SRVCC_RECOVERED_FAILURE)).Times(1);
+
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->OnSrvccStateUpdated(SrvccState::FAILED));
 }

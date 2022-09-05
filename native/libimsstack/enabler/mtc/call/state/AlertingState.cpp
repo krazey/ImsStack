@@ -96,16 +96,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::Reject(IN const CallReasonInfo& objR
     return RejectIncomingAndToTerminating(objReason);
 }
 
-PUBLIC VIRTUAL CallStateName AlertingState::HandleSrvccSuccess()
-{
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL CallStateName AlertingState::HandleSrvccFailure(IN UpdateType /* eUpdateType */)
-{
-    return GetStateName();
-}
-
 PUBLIC VIRTUAL CallStateName AlertingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
@@ -278,6 +268,11 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionRPRDeliveryFailed(IN ISession
 PUBLIC VIRTUAL CallStateName AlertingState::SessionStartFailed(IN ISession* /* piSession */)
 {
     IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
+    if (IsNeedToIgnoreStartFailure())
+    {
+        return GetStateName();
+    }
+
     m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT));
 
     return CallStateName::TERMINATING;
@@ -341,6 +336,24 @@ PUBLIC VIRTUAL CallStateName AlertingState::Terminate(IN const CallReasonInfo& o
     m_objContext.GetUiNotifier().SendTerminated(objReason);
 
     return CallStateName::TERMINATING;
+}
+
+PROTECTED VIRTUAL CallStateName AlertingState::SendUpdateBySrvcc(IN UpdateType eType)
+{
+    IMtcSession* piMtcSession = m_objContext.GetSession();
+    if (piMtcSession == IMS_NULL)
+    {
+        return GetStateName();
+    }
+
+    ISession& objSession = piMtcSession->GetISession();
+
+    if (m_objContext.GetMediaManager().GetNegotiationState(&objSession) ==
+            NegotiationState::STATE_NEGOTIATED)
+    {
+        piMtcSession->SendEarlyUpdate(eType);
+    }
+    return GetStateName();
 }
 
 PRIVATE

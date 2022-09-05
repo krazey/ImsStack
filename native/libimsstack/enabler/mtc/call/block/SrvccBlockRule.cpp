@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_SRVCC_STATE_LISTENER_H_
-#define INTERFACE_SRVCC_STATE_LISTENER_H_
+#include "call/block/SrvccBlockRule.h"
+#include "ServiceTrace.h"
 
-#include "IMSTypeDef.h"
-#include "IMtcService.h"
+__IMS_TRACE_TAG_COM_MTC__;
 
-enum class SrvccState
+PUBLIC
+SrvccBlockRule::SrvccBlockRule(IN SrvccState eState) :
+        m_eSrvccState(eState)
 {
-    IDLE = -1,
-    STARTED,
-    SUCCEEDED,
-    FAILED,
-    CANCELED
-};
+}
 
-class ISrvccStateListener
+PUBLIC VIRTUAL SrvccBlockRule::~SrvccBlockRule() {}
+
+PUBLIC VIRTUAL SrvccBlockRule::Result SrvccBlockRule::Check(
+        IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-public:
-    virtual ~ISrvccStateListener() {}  // for Unit Test
-    virtual void OnSrvccStateUpdated(IN SrvccState eState) = 0;
-};
-
-#endif
+    if (m_eSrvccState == SrvccState::STARTED)
+    {
+        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_VCC_ON_PROGRESSING));
+    }
+    return Result(Result::Status::UNBLOCKED);
+}

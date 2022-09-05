@@ -36,12 +36,15 @@ public:
     MockICallStateProxy objCallStateProxy;
     MtcConfigurationProxy* pConfigurationProxy;
     MtcCallManager* pCallManager;
+    MockIMtcService objService;
 
 protected:
     virtual void SetUp() override
     {
         ON_CALL(objContext, GetCallStateProxy)
                 .WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objContext, GetServiceByType(_))
+                .WillByDefault(Return(&objService));
 
         pConfigurationProxy = new MtcConfigurationProxy(new MockIMtcConfigurationManager());
         ON_CALL(objContext, GetConfigurationProxy)
@@ -67,10 +70,6 @@ TEST_F(MtcCallManagerTest, InitRegistersThisToCallStateProxy)
 
 TEST_F(MtcCallManagerTest, CreateCallReturnsNewCall)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo;
     IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 
@@ -79,10 +78,6 @@ TEST_F(MtcCallManagerTest, CreateCallReturnsNewCall)
 
 TEST_F(MtcCallManagerTest, CreateCallAddsNewCallToList)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo;
     IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 
@@ -91,7 +86,6 @@ TEST_F(MtcCallManagerTest, CreateCallAddsNewCallToList)
 
 TEST_F(MtcCallManagerTest, CreateCallReturnsNullCallIfServiceIsNull)
 {
-    MockIMtcService objService;
     ON_CALL(objContext, GetServiceByType(_))
             .WillByDefault(Return(nullptr));
 
@@ -103,7 +97,6 @@ TEST_F(MtcCallManagerTest, CreateCallReturnsNullCallIfServiceIsNull)
 
 TEST_F(MtcCallManagerTest, CreateCallNotAddsNullCallIfServiceIsNull)
 {
-    MockIMtcService objService;
     ON_CALL(objContext, GetServiceByType(_))
             .WillByDefault(Return(nullptr));
 
@@ -115,10 +108,6 @@ TEST_F(MtcCallManagerTest, CreateCallNotAddsNullCallIfServiceIsNull)
 
 TEST_F(MtcCallManagerTest, RemoveCallRemovesMatchingCall)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo;
     IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 
@@ -128,10 +117,6 @@ TEST_F(MtcCallManagerTest, RemoveCallRemovesMatchingCall)
 
 TEST_F(MtcCallManagerTest, RemoveCallNotRemovesCallIfNoMatchingCall)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo;
     IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 
@@ -143,10 +128,6 @@ TEST_F(MtcCallManagerTest, RemoveCallNotRemovesCallIfNoMatchingCall)
 
 TEST_F(MtcCallManagerTest, GetCallByCallKeyReturnsMatchingCall)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo;
     IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 
@@ -155,10 +136,6 @@ TEST_F(MtcCallManagerTest, GetCallByCallKeyReturnsMatchingCall)
 
 TEST_F(MtcCallManagerTest, GetCallByCallKeyReturnsNullCallIfNoMatchingCall)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo;
     IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 
@@ -177,10 +154,6 @@ TEST_F(MtcCallManagerTest, GetCallsReturnsEmptyCallListInitially)
 
 TEST_F(MtcCallManagerTest, GetCallsExcludingReturnsCallListOfMatchingCall)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo;
     IMtcCall* pCall1 = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
     IMtcCall* pCall2 = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
@@ -192,10 +165,6 @@ TEST_F(MtcCallManagerTest, GetCallsExcludingReturnsCallListOfMatchingCall)
 
 TEST_F(MtcCallManagerTest, GetCallsByTypeReturnsCallListOfMatchingCall)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo1;
     objCallInfo1.eInitialCallType = CallType::VOIP;
     IMtcCall* pVoipCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo1);
@@ -225,19 +194,19 @@ TEST_F(MtcCallManagerTest, GetCallsByServiceTypeReturnsCallListOfMatchingCall)
 
     CallInfo objCallInfo;
     IMtcCall* pNormalCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
-    pCallManager->CreateCall(ServiceType::EMERGENCY, objCallInfo);
+    IMtcCall* pEmergencyCall = pCallManager->CreateCall(ServiceType::EMERGENCY, objCallInfo);
 
     IMSList<IMtcCall*> lstResult = pCallManager->GetCallsByServiceType(ServiceType::NORMAL);
     EXPECT_EQ(1, lstResult.GetSize());
     EXPECT_EQ(pNormalCall, lstResult.GetAt(0));
+
+    // to delete MtcCall before MockIMtcService is deleted
+    pCallManager->RemoveCall(pNormalCall->GetKey());
+    pCallManager->RemoveCall(pEmergencyCall->GetKey());
 }
 
 TEST_F(MtcCallManagerTest, GetCallsInConferenceReturnsCallListOfMatchingCall)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo1;
     objCallInfo1.bConference = IMS_TRUE;
     IMtcCall* pConferenceCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo1);
@@ -253,10 +222,6 @@ TEST_F(MtcCallManagerTest, GetCallsInConferenceReturnsCallListOfMatchingCall)
 
 TEST_F(MtcCallManagerTest, GetCallsByStateReturnsCallListOfMatchingCall)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo;
     IMtcCall* pIdleCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 
@@ -271,10 +236,6 @@ TEST_F(MtcCallManagerTest, GetCallsByStateReturnsCallListOfMatchingCall)
 
 TEST_F(MtcCallManagerTest, OnCallStateChangedDoNothingIfNotTerminating)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo;
     IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 
@@ -309,10 +270,6 @@ TEST_F(MtcCallManagerTest, OnCallStateChangedDoNothingIfNotTerminating)
 
 TEST_F(MtcCallManagerTest, OnCallStateChangedRemoveCallIfTerminating)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo;
     IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 
@@ -327,10 +284,6 @@ TEST_F(MtcCallManagerTest, OnCallStateChangedRemoveCallIfTerminating)
 
 TEST_F(MtcCallManagerTest, OnTotalCallStateChangedDoNothing)
 {
-    MockIMtcService objService;
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(&objService));
-
     CallInfo objCallInfo;
     pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 

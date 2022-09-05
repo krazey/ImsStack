@@ -26,6 +26,7 @@
 #include "call/block/CallTypeBlockRule.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/block/MtcBlockChecker.h"
+#include "call/block/SrvccBlockRule.h"
 #include "call/state/EstablishedState.h"
 #include "call/termination/TerminationHandler.h"
 #include "conferencecall/IConferenceManager.h"
@@ -377,6 +378,20 @@ PUBLIC VIRTUAL CallStateName EstablishedState::QosReserveFailed(
     return GetStateName();
 }
 
+PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateType eType)
+{
+    IMtcSession* piMtcSession = m_objContext.GetSession();
+    if (piMtcSession == IMS_NULL)
+    {
+        return GetStateName();
+    }
+
+    piMtcSession->Update(eType, IMS_FALSE, SipMethod::UPDATE);
+
+    // TODO: check if state transition has no issue.
+    return CallStateName::UPDATING;
+}
+
 PRIVATE
 IMS_RESULT EstablishedState::HandleUpdate(
         IN UpdateType eUpdateType, IN CallType eCallType, IN MediaInfo* pMediaInfo)
@@ -582,6 +597,7 @@ IMSList<IMtcBlockRule*> EstablishedState::GetCallUpdateBlockRules() const
     IMSList<IMtcBlockRule*> lstRules;
     lstRules.Append(new CallTypeBlockRule(
             m_objContext, m_objContext.GetUpdatingInfo().GetTargetCallType()));
+    lstRules.Append(new SrvccBlockRule(m_objContext.GetService().GetSrvccState()));
     return lstRules;
 }
 

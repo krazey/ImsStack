@@ -22,6 +22,7 @@
 #include "call/MtcUiNotifier.h"
 #include "call/state/EstablishedState.h"
 #include "media/MockIMtcMediaManager.h"
+#include "core/MockISession.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -38,15 +39,21 @@ public:
     MockIMtcMediaManager objMockMediaManager;
     MockIMtcSession objMockMtcSession;
     MtcUiNotifier* pUiNotifier;
+    MockISession objMockISession;
 
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objMockCallContext, GetMediaManager).WillByDefault(ReturnRef(objMockMediaManager));
-        ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMockMtcSession));
+        ON_CALL(objMockCallContext, GetMediaManager)
+                .WillByDefault(ReturnRef(objMockMediaManager));
+        ON_CALL(objMockCallContext, GetSession())
+                .WillByDefault(Return(&objMockMtcSession));
+        ON_CALL(objMockMtcSession, GetISession)
+                .WillByDefault(ReturnRef(objMockISession));
 
         pUiNotifier = new MtcUiNotifier(objMockCallContext);
-        ON_CALL(objMockCallContext, GetUiNotifier).WillByDefault(ReturnRef(*pUiNotifier));
+        ON_CALL(objMockCallContext, GetUiNotifier)
+                .WillByDefault(ReturnRef(*pUiNotifier));
 
         pEstablishedState = new EstablishedState(objMockCallContext);
     }
@@ -81,6 +88,25 @@ TEST_F(EstablishedStateTest, OnMediaFailed)
             .Times(1);
 
     pEstablishedState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
+}
+
+TEST_F(EstablishedStateTest, SendUpdateBySrvccByCanceled)
+{
+    EXPECT_CALL(objMockMtcSession,
+            Update(UpdateType::SRVCC_RECOVERED_CANCEL, IMS_FALSE, SipMethod::UPDATE))
+            .Times(1);
+
+    EXPECT_EQ(CallStateName::UPDATING,
+            pEstablishedState->OnSrvccStateUpdated(SrvccState::CANCELED));
+}
+
+TEST_F(EstablishedStateTest, SendUpdateBySrvccByFailed)
+{
+    EXPECT_CALL(objMockMtcSession,
+            Update(UpdateType::SRVCC_RECOVERED_FAILURE, IMS_FALSE, SipMethod::UPDATE))
+            .Times(1);
+
+    EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->OnSrvccStateUpdated(SrvccState::FAILED));
 }
 
 }  // namespace android

@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_SRVCC_STATE_LISTENER_H_
-#define INTERFACE_SRVCC_STATE_LISTENER_H_
+#ifndef MOCK_SRVCC_STATE_MANAGER_
+#define MOCK_SRVCC_STATE_MANAGER_
 
-#include "IMSTypeDef.h"
-#include "IMtcService.h"
+#include <gmock/gmock.h>
+#include "ImsTypeDef.h"
+#include "helper/SrvccStateManager.h"
 
-enum class SrvccState
-{
-    IDLE = -1,
-    STARTED,
-    SUCCEEDED,
-    FAILED,
-    CANCELED
-};
-
-class ISrvccStateListener
+class MockSrvccStateManager : public SrvccStateManager
 {
 public:
-    virtual ~ISrvccStateListener() {}  // for Unit Test
-    virtual void OnSrvccStateUpdated(IN SrvccState eState) = 0;
+    explicit MockSrvccStateManager() :
+            SrvccStateManager()
+    {
+    }
+    ~MockSrvccStateManager() {}
+    MOCK_METHOD(void, AddListener, (IN ISrvccStateListener*), (override));
+    MOCK_METHOD(void, RemoveListener, (IN ISrvccStateListener*), (override));
+    MOCK_METHOD(void, UpdateSrvccState, (IN SrvccState), (override));
+    MOCK_METHOD(SrvccState, GetState, (), (override));
 };
 
 #endif

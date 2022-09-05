@@ -44,6 +44,7 @@ public:
     virtual ServiceStatus GetServiceStatus() const = 0;
     virtual ICoreService* GetICoreService() const = 0;
     virtual IMtcAosConnector* GetAosConnector() const = 0;
+    virtual SrvccState GetSrvccState() const = 0;
 
     virtual void UpdateSrvccState(IN SrvccState eState) = 0;
     virtual void SetTerminalBasedCallWaiting(IN IMS_BOOL bProvisioned, IN IMS_BOOL bEnabled) = 0;

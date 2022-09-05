@@ -75,8 +75,7 @@ public:
     CallStateName CancelUpdate(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
     CallStateName SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) override;
-    CallStateName HandleSrvccSuccess() override;
-    CallStateName HandleSrvccFailure(IN UpdateType eUpdateType) override;
+
     CallStateName HandleIpcanChanged() override;
 
     CallStateName HandleIncomingUssi(IN ISession* piSession) override;
@@ -145,6 +144,7 @@ public:
     CallStateName OnReceivingNetworkToneStarted() override;
     CallStateName OnReceivingNetworkToneFailed() override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
+    CallStateName OnSrvccStateUpdated(IN SrvccState eState) override;
 
     enum TimerType
     {
@@ -165,6 +165,12 @@ public:
     };
 
 protected:
+    inline virtual CallStateName HandleSrvccStarted() { return GetStateName(); }
+    inline virtual CallStateName SendUpdateBySrvcc(IN UpdateType /*eType*/)
+    {
+        return GetStateName();
+    };
+
     void HandleTerminate(IN const CallReasonInfo& objReason);
     void NotifyHoldResumeState();
 
@@ -205,6 +211,7 @@ protected:
     IMS_BOOL IsCallEndNeededByAudioInactivity(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) const;
     CallReasonInfo GetAudioInactivityReasonOnTermination(IN const CallReasonInfo& objReason);
+    IMS_BOOL IsNeedToIgnoreStartFailure() const;
 
     IMtcCallContext& m_objContext;
 
