@@ -114,8 +114,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "isim_index_for_impu_int";
         public static final String KEY_UPDATE_REGISTRATION_WITH_RAT_CHANGE_INT_ARRAY =
                 KEY_PREFIX + "update_registration_with_rat_change_int_array";
-        public static final String KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT =
-                KEY_PREFIX + "refresh_geolocation_timeout_millis_int";
         public static final String KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL =
                 KEY_PREFIX + "unsubscribe_registration_event_package_bool";
         public static final String KEY_REGISTRATION_EVENT_FOR_CAT_REQUIRED_BOOL =
@@ -158,6 +156,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_invite_18x_timer_millis_int";
         public static final String KEY_EMERGENCY_PROVISIONAL_TO_FINAL_RESPONSE_TIMER_MILLIS_INT =
                 KEY_PREFIX + "emergency_provisional_to_final_response_timer_millis_int";
+        public static final String KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT =
+                KEY_PREFIX + "refresh_geolocation_timeout_millis_int";
         // Aos
         public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL =
                 KEY_PREFIX + "release_emergency_pdn_with_emergency_call_end_bool";

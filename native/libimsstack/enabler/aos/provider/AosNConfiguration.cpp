@@ -1201,8 +1201,6 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL);
     m_objCarrierConfig.nRegistrationSubscribeExpiryTimerSec =
             piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT);
-    m_objCarrierConfig.objGeolocationPidfInSipRegisterSupport = piCc->GetIntArray(
-            CarrierConfig::Ims::KEY_GEOLOCATION_PIDF_IN_SIP_REGISTER_SUPPORT_INT_ARRAY);
 
     // temp code
     IMSVector<IMS_SINT32> objTemp =
@@ -1237,30 +1235,33 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
 
     /* carrier_config */
     /// ims.
-    m_objCarrierConfig.objImsIdentityPriority =
-            piCc->GetIntArray(CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY);
-    m_objCarrierConfig.nIsimIndexForImpu =
-            piCc->GetInt(CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT);
-    m_objCarrierConfig.objUpdateRegistrationWithRatChange = piCc->GetIntArray(
-            CarrierConfig::Ims::KEY_UPDATE_REGISTRATION_WITH_RAT_CHANGE_INT_ARRAY);
-    m_objCarrierConfig.bUnsubscribeRegistrationEventPackage =
-            piCc->GetBoolean(CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL);
     m_objCarrierConfig.bRegistrationEventForCatRequired =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_REGISTRATION_EVENT_FOR_CAT_REQUIRED_BOOL);
+    m_objCarrierConfig.bUnsubscribeRegistrationEventPackage =
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL);
+    m_objCarrierConfig.nIsimIndexForImpu =
+            piCc->GetInt(CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT);
     m_objCarrierConfig.nPreferredImsDscp =
             piCc->GetInt(CarrierConfig::Ims::KEY_PREFERRED_IMS_DSCP_INT);
     m_objCarrierConfig.nRegistrationPreferredAccesstypeFeatureTag =
             piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT);
+    m_objCarrierConfig.objGeolocationPidfInSipRegisterSupport = piCc->GetIntArray(
+            CarrierConfig::Ims::KEY_GEOLOCATION_PIDF_IN_SIP_REGISTER_SUPPORT_INT_ARRAY);
+    m_objCarrierConfig.objImsIdentityPriority =
+            piCc->GetIntArray(CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY);
     m_objCarrierConfig.objRegistrationPermanentErrorCode =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY);
-    /// imssms.
-    m_objCarrierConfig.bSupportLimitedAdminSmsMode =
-            piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL);
+    m_objCarrierConfig.objUpdateRegistrationWithRatChange = piCc->GetIntArray(
+            CarrierConfig::Ims::KEY_UPDATE_REGISTRATION_WITH_RAT_CHANGE_INT_ARRAY);
+
     /// imsemergency.
     m_objCarrierConfig.bReleaseEmergencyPdnWithEmergencyCallEnd = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL);
     m_objCarrierConfig.nPreferredEmergencyRegistration =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT);
+    /// imssms.
+    m_objCarrierConfig.bSupportLimitedAdminSmsMode =
+            piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL);
     /// imswfc.
     m_objCarrierConfig.nRegistrationPrivateHeader =
             piCc->GetInt(CarrierConfig::ImsWfc::KEY_REGISTRATION_PRIVATE_HEADER_INT);
