@@ -24,9 +24,10 @@ import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
-import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.imsservice.mmtel.ImsCallApp;
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
+import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
+import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
@@ -172,11 +173,13 @@ public final class ImsTestHelper {
                 return;
             }
 
-            MtcApp mtcApp = callApp.getCallManager().getMtcApp();
-            if (mtcApp == null) {
+            MmTelFeatureRegistry mmtelFeatureRegistry = ImsServiceRegistry.getInstance(
+                    callApp.getPhoneId()).getMmTelFeatureRegistry();
+
+            if (mmtelFeatureRegistry == null) {
                 return;
             }
-            mtcApp.notifySrvccStateChanged(state);
+            mmtelFeatureRegistry.setSrvccState(state);
         }
     }
 }
