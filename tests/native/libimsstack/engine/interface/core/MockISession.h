@@ -39,6 +39,8 @@ class Replaces;
 class MockISession : public ISession
 {
 public:
+    virtual ~MockISession() {}
+
     // IMethod
     MOCK_METHOD(void, Destroy, (), (override));
     MOCK_METHOD(void, SetMessageMediator, (IN IMessageMediator* piMediator), (override));
