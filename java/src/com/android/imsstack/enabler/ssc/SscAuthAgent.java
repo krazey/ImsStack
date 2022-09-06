@@ -178,6 +178,11 @@ public class SscAuthAgent implements ISscAuthAgent {
     public void setIsCredentialInfoUpdated(boolean updated) {
         ImsLog.d(mSlotId, "setIsCredentialInfoUpdated() " + updated);
         mIsCredentialInfoUpdated = updated;
+
+        if (!mIsCredentialInfoUpdated) {
+            mCipherSuite = "";
+            mSSCAuthCredentials.clear();
+        }
     }
 
     @Override
@@ -199,6 +204,21 @@ public class SscAuthAgent implements ISscAuthAgent {
         private int mNc = 0;
 
         private boolean mQopExist = false;
+
+        private void clear() {
+            mUsername = null;
+            mPassword = null;
+            mRealm = null;
+            mNonce = null;
+            mQop = null;
+            mUri = null;
+            mResponse = null;
+            mCnonce = null;
+            mOpaque = null;
+            mAlgorithm = null;
+            mNc = 0;
+            mQopExist = false;
+        }
 
         private boolean calculateResponse(String method, String body) {
             if (TextUtils.isEmpty(mUsername)) {

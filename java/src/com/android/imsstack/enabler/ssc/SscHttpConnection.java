@@ -156,13 +156,13 @@ public class SscHttpConnection implements ISscHttpConnection {
 
             authAgent.setCipherSuite(getCipherSuiteFromConn());
 
-            String authnticateHeader = mConnection.getHeaderField("WWW-Authenticate");
-            if (authnticateHeader != null) { // 401 Case
-                authAgent.parse(authnticateHeader);
-            } else { // authnticateHeader is null
-                authnticateHeader = mConnection.getHeaderField("Authentication-Info");
-                if (authnticateHeader != null) { // 2XX case
-                    authAgent.parse(authnticateHeader);
+            String authHeader = mConnection.getHeaderField("WWW-Authenticate");
+            if (authHeader != null) { // 401 Case
+                authAgent.parse(authHeader);
+            } else { // authHeader is null
+                authHeader = mConnection.getHeaderField("Authentication-Info");
+                if (authHeader != null) { // 2XX case
+                    authAgent.parse(authHeader);
                 }
             }
 
