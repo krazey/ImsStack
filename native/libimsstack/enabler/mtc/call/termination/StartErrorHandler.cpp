@@ -122,7 +122,7 @@ CallReasonInfo StartErrorHandler::HandleResponse(IN const IMessage& objMessage) 
     {
         return Handle6xxResponse(objMessage);
     }
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR);
+    return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
 }
 
 PRIVATE
@@ -136,7 +136,7 @@ CallReasonInfo StartErrorHandler::Handle3xxResponse(IN const IMessage& objMessag
             return Handle380Response(objMessage);
     }
 
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
+    return CallReasonInfo(CODE_SIP_REDIRECTED, GetDefaultExtraCode(objMessage));
 }
 
 PRIVATE
@@ -171,49 +171,69 @@ CallReasonInfo StartErrorHandler::Handle4xxResponse(IN const IMessage& objMessag
 
     switch (nStatusCode)
     {
+        case SipStatusCode::SC_400:
+            return CallReasonInfo(CODE_SIP_BAD_REQUEST, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_401:
-            return CallReasonInfo(
-                    CODE_SIP_CLIENT_ERROR, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(CODE_SIP_CLIENT_ERROR, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_403:
             return Handle403Response();
         case SipStatusCode::SC_404:
             return Handle404Response();
+        case SipStatusCode::SC_405:
+            return CallReasonInfo(CODE_SIP_METHOD_NOT_ALLOWED, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_406:
-            return CallReasonInfo(
-                    CODE_SIP_NOT_ACCEPTABLE, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_407:
             return Handle407Response();
         case SipStatusCode::SC_408:
+            return CallReasonInfo(CODE_SIP_REQUEST_TIMEOUT, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_410:
+            return CallReasonInfo(CODE_SIP_NOT_REACHABLE, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_413:
             return CallReasonInfo(
-                    CODE_SIP_REQUEST_TIMEOUT, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+                    CODE_SIP_REQUEST_ENTITY_TOO_LARGE, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_414:
+            return CallReasonInfo(CODE_SIP_REQUEST_URI_TOO_LARGE, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_415:
         case SipStatusCode::SC_416:
-            return CallReasonInfo(
-                    CODE_SIP_NOT_SUPPORTED, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+        case SipStatusCode::SC_420:
+            return CallReasonInfo(CODE_SIP_NOT_SUPPORTED, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_421:
+            // re-INVITE should be sent with the extension of Require header using Supported header
+            return CallReasonInfo(CODE_SIP_EXTENSION_REQUIRED, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_422:
             // re-INVITE is sent by the engine without notification if it has Min-SE header
-            return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+            // so, if there is no Min-SE header, CODE_SIP_INTERVAL_TOO_BRIEF will be used
+            return CallReasonInfo(CODE_SIP_INTERVAL_TOO_BRIEF, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_480:
-            return CallReasonInfo(CODE_SIP_TEMPORARILY_UNAVAILABLE,
-                    MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_TEMPORARILY_UNAVAILABLE, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_481:
+            return CallReasonInfo(
+                    CODE_SIP_TRANSACTION_DOES_NOT_EXIST, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_482:
+            return CallReasonInfo(CODE_SIP_LOOP_DETECTED, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_483:
+            return CallReasonInfo(CODE_SIP_TOO_MANY_HOPS, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_484:
-            return CallReasonInfo(
-                    CODE_SIP_BAD_ADDRESS, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(CODE_SIP_BAD_ADDRESS, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_485:
+            return CallReasonInfo(CODE_SIP_AMBIGUOUS, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_486:
-            return CallReasonInfo(
-                    CODE_SIP_BUSY, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(CODE_SIP_BUSY, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_487:
-            return CallReasonInfo(
-                    CODE_SIP_REQUEST_CANCELLED, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(CODE_SIP_REQUEST_CANCELLED, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_488:
-            return CallReasonInfo(
-                    CODE_SIP_NOT_ACCEPTABLE, MessageUtil::GetCauseFromReasonHeader(&objMessage));
-        case SipStatusCode::SC_499:
-            return CallReasonInfo(
-                    CODE_SIP_NOT_REACHABLE, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_491:
+            return CallReasonInfo(CODE_SIP_REQUEST_PENDING, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_493:
+            return CallReasonInfo(CODE_SIP_UNDECIPHERABLE, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_499:  // only for SKT VT
+            return CallReasonInfo(CODE_SIP_NOT_REACHABLE, GetDefaultExtraCode(objMessage));
     }
 
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
+    return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
 }
 
 PRIVATE
@@ -247,7 +267,7 @@ CallReasonInfo StartErrorHandler::Handle404Response() const
     }
     else
     {
-        return CallReasonInfo(CODE_SIP_NOT_FOUND);
+        return CallReasonInfo(CODE_SIP_NOT_FOUND, SipStatusCode::SC_404);
     }
 }
 
@@ -260,7 +280,8 @@ CallReasonInfo StartErrorHandler::Handle407Response() const
     }
     else
     {
-        return CallReasonInfo(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_407);
+        // TODO: an initial INVITE must be sent with Authorization.
+        return CallReasonInfo(CODE_SIP_PROXY_AUTHENTICATION_REQUIRED, SipStatusCode::SC_407);
     }
 }
 
@@ -274,16 +295,19 @@ CallReasonInfo StartErrorHandler::Handle5xxResponse(IN const IMessage& objMessag
         case SipStatusCode::SC_500:
             return Handle500Response(objMessage);
         case SipStatusCode::SC_501:
+            return CallReasonInfo(CODE_SIP_SERVER_INTERNAL_ERROR, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_502:
-            return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
+            return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_503:
             return Handle503Response(objMessage);
         case SipStatusCode::SC_504:
             return Handle504Response(objMessage);
         case SipStatusCode::SC_505:
         case SipStatusCode::SC_513:
+            return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_580:
-            return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
+            // remote precondition failure case
+            return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
     }
 
     return Handle500Response(objMessage);
@@ -297,13 +321,11 @@ CallReasonInfo StartErrorHandler::Handle500Response(IN const IMessage& objMessag
         if (IsIpcanResourceUnavailable(objMessage))
         {
             // TS 24.229 5.1.3.1: There's the method to examine headers but no further behavior.
-            return CallReasonInfo(
-                    CODE_SIP_SERVER_ERROR, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
         }
     }
 
-    return CallReasonInfo(
-            CODE_SIP_SERVER_ERROR, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+    return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
 }
 
 PRIVATE
@@ -317,8 +339,7 @@ CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessag
         return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 
-    return CallReasonInfo(
-            CODE_SIP_SERVER_ERROR, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+    return CallReasonInfo(CODE_SIP_SERVICE_UNAVAILABLE, GetDefaultExtraCode(objMessage));
 }
 
 PRIVATE
@@ -351,7 +372,7 @@ CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessag
         }
     }
 
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_504);
+    return CallReasonInfo(CODE_SIP_SERVER_TIMEOUT, GetDefaultExtraCode(objMessage));
 }
 
 PRIVATE
@@ -361,12 +382,28 @@ CallReasonInfo StartErrorHandler::Handle6xxResponse(IN const IMessage& objMessag
 
     switch (nStatusCode)
     {
+        case SipStatusCode::SC_600:
+            return CallReasonInfo(CODE_SIP_BUSY, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_603:
-            return CallReasonInfo(
-                    CODE_SIP_USER_REJECTED, MessageUtil::GetCauseFromReasonHeader(&objMessage));
+            return CallReasonInfo(CODE_SIP_USER_REJECTED, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_604:
+            return CallReasonInfo(CODE_SIP_NOT_REACHABLE, GetDefaultExtraCode(objMessage));
+        case SipStatusCode::SC_606:
+            return CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, GetDefaultExtraCode(objMessage));
     }
 
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
+    return CallReasonInfo(CODE_SIP_GLOBAL_ERROR, GetDefaultExtraCode(objMessage));
+}
+
+PRIVATE
+IMS_SINT32 StartErrorHandler::GetDefaultExtraCode(IN const IMessage& objMessage) const
+{
+    IMS_SINT32 nExtraCode = MessageUtil::GetCauseFromReasonHeader(&objMessage);
+    if (nExtraCode == -1)
+    {
+        nExtraCode = objMessage.GetStatusCode();
+    }
+    return nExtraCode;
 }
 
 PRIVATE

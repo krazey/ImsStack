@@ -114,7 +114,6 @@ public class ImsCallUtils {
     public static final String EXTRA_SUBADDRESS = "subaddress";
 
     private static final Hashtable<Integer, Integer> sMtcReasonToImsReason;
-    private static final Hashtable<Integer, Integer> sReasonToSIPStatusCode;
     private static final Hashtable<Integer, String> sUserStatusToString;
 
     public static ImsCallProfile cloneCallProfile(final ImsCallProfile profile) {
@@ -435,8 +434,7 @@ public class ImsCallUtils {
         }*/
             return extraCode;
         } else {
-            Integer sipCode = sReasonToSIPStatusCode.get(reason);
-            return (sipCode != null) ? sipCode.intValue() : ImsReasonInfo.CODE_UNSPECIFIED;
+            return ImsReasonInfo.CODE_UNSPECIFIED;
         }
     }
 
@@ -979,40 +977,70 @@ public class ImsCallUtils {
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_NETWORK_RESP_TIMEOUT,
                 ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT);
 
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_SERVER_ERROR,
-                ImsReasonInfo.CODE_SIP_SERVER_ERROR);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REDIRECTED,
+                ImsReasonInfo.CODE_SIP_REDIRECTED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_BAD_REQUEST,
+                ImsReasonInfo.CODE_SIP_BAD_REQUEST);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_FORBIDDEN,
                 ImsReasonInfo.CODE_SIP_FORBIDDEN);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_NOT_FOUND,
                 ImsReasonInfo.CODE_SIP_NOT_FOUND);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_NOT_SUPPORTED,
                 ImsReasonInfo.CODE_SIP_NOT_SUPPORTED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REQUEST_TIMEOUT,
+                ImsReasonInfo.CODE_SIP_REQUEST_TIMEOUT);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_TEMPORARILY_UNAVAILABLE,
                 ImsReasonInfo.CODE_SIP_TEMPRARILY_UNAVAILABLE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_BAD_ADDRESS,
                 ImsReasonInfo.CODE_SIP_BAD_ADDRESS);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_BUSY,
                 ImsReasonInfo.CODE_SIP_BUSY);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_USER_REJECTED,
-                ImsReasonInfo.CODE_SIP_USER_REJECTED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REQUEST_CANCELLED,
                 ImsReasonInfo.CODE_SIP_REQUEST_CANCELLED);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_BAD_REQUEST,
-                ImsReasonInfo.CODE_SIP_BAD_REQUEST);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_NOT_ACCEPTABLE,
                 ImsReasonInfo.CODE_SIP_NOT_ACCEPTABLE);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REQUEST_TIMEOUT,
-                ImsReasonInfo.CODE_SIP_REQUEST_TIMEOUT);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_NOT_REACHABLE,
                 ImsReasonInfo.CODE_SIP_NOT_REACHABLE);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REDIRECTED,
-                ImsReasonInfo.CODE_SIP_REDIRECTED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_CLIENT_ERROR,
                 ImsReasonInfo.CODE_SIP_CLIENT_ERROR);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_TRANSACTION_DOES_NOT_EXIST,
+                ImsReasonInfo.CODE_SIP_TRANSACTION_DOES_NOT_EXIST);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_SERVER_INTERNAL_ERROR,
+                ImsReasonInfo.CODE_SIP_SERVER_INTERNAL_ERROR);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE,
                 ImsReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_SERVER_TIMEOUT,
+                ImsReasonInfo.CODE_SIP_SERVER_TIMEOUT);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_SERVER_ERROR,
+                ImsReasonInfo.CODE_SIP_SERVER_ERROR);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_USER_REJECTED,
+                ImsReasonInfo.CODE_SIP_USER_REJECTED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_GLOBAL_ERROR,
+                ImsReasonInfo.CODE_SIP_GLOBAL_ERROR);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_METHOD_NOT_ALLOWED,
+                ImsReasonInfo.CODE_SIP_METHOD_NOT_ALLOWED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_PROXY_AUTHENTICATION_REQUIRED,
+                ImsReasonInfo.CODE_SIP_PROXY_AUTHENTICATION_REQUIRED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REQUEST_ENTITY_TOO_LARGE,
+                ImsReasonInfo.CODE_SIP_REQUEST_ENTITY_TOO_LARGE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REQUEST_URI_TOO_LARGE,
+                ImsReasonInfo.CODE_SIP_REQUEST_URI_TOO_LARGE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_EXTENSION_REQUIRED,
+                ImsReasonInfo.CODE_SIP_EXTENSION_REQUIRED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_INTERVAL_TOO_BRIEF,
+                ImsReasonInfo.CODE_SIP_INTERVAL_TOO_BRIEF);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_CALL_OR_TRANS_DOES_NOT_EXIST,
+                ImsReasonInfo.CODE_SIP_CALL_OR_TRANS_DOES_NOT_EXIST);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_LOOP_DETECTED,
+                ImsReasonInfo.CODE_SIP_LOOP_DETECTED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_TOO_MANY_HOPS,
+                ImsReasonInfo.CODE_SIP_TOO_MANY_HOPS);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_AMBIGUOUS,
+                ImsReasonInfo.CODE_SIP_AMBIGUOUS);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REQUEST_PENDING,
                 ImsReasonInfo.CODE_SIP_REQUEST_PENDING);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_UNDECIPHERABLE,
+                ImsReasonInfo.CODE_SIP_UNDECIPHERABLE);
 
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CALL_WAITING_DISABLED,
                 ImsReasonInfo.CODE_REJECT_ONGOING_CALL_WAITING_DISABLED);
@@ -1038,43 +1066,6 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_QOS_FAILURE,
                 ImsReasonInfo.CODE_REJECT_QOS_FAILURE);
-
-        // Reason codes: from reason code to SIP status code
-        sReasonToSIPStatusCode = new Hashtable<Integer, Integer>();
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_CALL_BARRED, 403);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_FORBIDDEN, 403);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_SERVER_ERROR, 500);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_NOT_FOUND, 404);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_NOT_SUPPORTED, 415);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_TEMPORARILY_UNAVAILABLE, 480);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_BAD_ADDRESS, 484);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_BUSY, 486);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_USER_REJECTED, 603);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_REQUEST_CANCELLED, 487);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_BAD_REQUEST, 400);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_NOT_ACCEPTABLE, 406);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_REQUEST_TIMEOUT, 408);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_NOT_REACHABLE, 410);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_REDIRECTED, 302);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_CLIENT_ERROR, 401);
-        sReasonToSIPStatusCode.put(
-                CallReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE, 503);
 
         // User's status: from user status (int) to user status (string)
         sUserStatusToString = new Hashtable<Integer, String>();
