@@ -51,9 +51,7 @@ public:
             nRegistrationRetryMaxTimerMillis(1800000),
             bRegistrationEventPackageSupported(IMS_TRUE),
             nRegistrationSubscribeExpiryTimerSec(600000),
-            objGeolocationPidfInSipRegisterSupport(IMSVector<IMS_SINT32>()),
             objSupportedRats(IMSVector<IMS_SINT32>()),
-            objRegistrationPermanentErrorCode(IMSVector<IMS_SINT32>()),
             bCarrierVolteRoamingAvailable(IMS_TRUE),
             bSmsOverImsSupported(IMS_TRUE),
             objSmsOverImsSupportedRats(IMSVector<IMS_SINT32>()),
@@ -61,18 +59,20 @@ public:
             objEmergencyOverImsSupportedRats(IMSVector<IMS_SINT32>()),
             nEmergencyRegistrationTimerMillis(10000),
             nRefreshGeolocationTimeoutMillis(5000),
-            objImsIdentityPriority(IMSVector<IMS_SINT32>()),
-            nIsimIndexForImpu(1),
-            objUpdateRegistrationWithRatChange(IMSVector<IMS_SINT32>()),
-            bUnsubscribeRegistrationEventPackage(IMS_FALSE),
             bRegistrationEventForCatRequired(IMS_FALSE),
+            bUnsubscribeRegistrationEventPackage(IMS_FALSE),
+            nIsimIndexForImpu(1),
             nPreferredImsDscp(CarrierConfig::Ims::PREFERRED_DSCP_NONE),
             nRegistrationPreferredAccesstypeFeatureTag(
                     CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED),
-            bSupportLimitedAdminSmsMode(IMS_FALSE),
+            objGeolocationPidfInSipRegisterSupport(IMSVector<IMS_SINT32>()),
+            objImsIdentityPriority(IMSVector<IMS_SINT32>()),
+            objRegistrationPermanentErrorCode(IMSVector<IMS_SINT32>()),
+            objUpdateRegistrationWithRatChange(IMSVector<IMS_SINT32>()),
             bReleaseEmergencyPdnWithEmergencyCallEnd(IMS_FALSE),
             nPreferredEmergencyRegistration(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
+            bSupportLimitedAdminSmsMode(IMS_FALSE),
             nRegistrationPrivateHeader(0)
     {
         // temp setting
@@ -113,9 +113,7 @@ public:
     IMS_SINT32 nRegistrationRetryMaxTimerMillis;
     IMS_BOOL bRegistrationEventPackageSupported;
     IMS_SINT32 nRegistrationSubscribeExpiryTimerSec;
-    IMSVector<IMS_SINT32> objGeolocationPidfInSipRegisterSupport;
     IMSVector<IMS_SINT32> objSupportedRats;
-    IMSVector<IMS_SINT32> objRegistrationPermanentErrorCode;
 
     /// imsvoice.
     IMS_BOOL bCarrierVolteRoamingAvailable;
@@ -138,20 +136,22 @@ public:
 
     /* carrier_config */
     /// ims
-    IMSVector<IMS_SINT32> objImsIdentityPriority;
-    IMS_SINT32 nIsimIndexForImpu;
-    IMSVector<IMS_SINT32> objUpdateRegistrationWithRatChange;
-    IMS_BOOL bUnsubscribeRegistrationEventPackage;
     IMS_BOOL bRegistrationEventForCatRequired;
+    IMS_BOOL bUnsubscribeRegistrationEventPackage;
+    IMS_SINT32 nIsimIndexForImpu;
     IMS_SINT32 nPreferredImsDscp;
     IMS_SINT32 nRegistrationPreferredAccesstypeFeatureTag;
-
-    /// imssms.
-    IMS_BOOL bSupportLimitedAdminSmsMode;
+    IMSVector<IMS_SINT32> objGeolocationPidfInSipRegisterSupport;
+    IMSVector<IMS_SINT32> objImsIdentityPriority;
+    IMSVector<IMS_SINT32> objRegistrationPermanentErrorCode;
+    IMSVector<IMS_SINT32> objUpdateRegistrationWithRatChange;
 
     /// imsemergency.
     IMS_BOOL bReleaseEmergencyPdnWithEmergencyCallEnd;
     IMS_SINT32 nPreferredEmergencyRegistration;
+
+    /// imssms.
+    IMS_BOOL bSupportLimitedAdminSmsMode;
 
     /// imswfc.
     IMS_SINT32 nRegistrationPrivateHeader;

@@ -170,6 +170,7 @@ private:
 
     void InitBundle(IN const ICarrierConfig* piCc);
     void InitConfig(IN const ICarrierConfig* piCc);
+    void InitAssetsConfig(IN const ICarrierConfig* piCc);
     void InitIpsecAlgorithm(IN const ICarrierConfig* piCc);
 
 private:
@@ -202,5 +203,8 @@ private:
     IMSList<IAosNConfigurationListener*> m_objListeners;
 
     AString m_strLogTag;
+
+private:
+    friend class AosNConfigurationTest;
 };
 #endif  // AOS_NCONFIGURATION_H_
