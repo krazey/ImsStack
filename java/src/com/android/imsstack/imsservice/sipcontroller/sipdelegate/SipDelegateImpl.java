@@ -36,6 +36,7 @@ import com.android.internal.telephony.SipMessageParsingUtils;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * The{@link SipDelegate} interface implementation to interact with framework.
@@ -69,22 +70,25 @@ public class SipDelegateImpl implements SipDelegate, ISipDelegateIncomingMessage
      */
     private final ArraySet<FeatureTagState> mSipDelegateDeregisteringTags = new ArraySet<>();
     private final ArraySet<FeatureTagState> mSipDelegateDeregisteredTags = new ArraySet<>();
+    private Executor mCallBackExecutor;
 
     /**
      * Constructor for sip delegate
      *
      * @param delegateRequestData provide the data required to create sip delegate
      */
-    public SipDelegateImpl(SipDelegateRequestData delegateRequestData, int slodId) {
+    public SipDelegateImpl(SipDelegateRequestData delegateRequestData, int slodId,
+            Executor callBackExecutor) {
         mSlotId = slodId;
         mDelegateRequestData = delegateRequestData;
+        mCallBackExecutor = callBackExecutor;
     }
     //START SipDelegate interface implementation
 
     /**
      * Send the sip message requested by framework to IMS network through native/sip stack.
      *
-     * @param message       The SIP message to be sent over the operator’s network.
+     * @param message The SIP message to be sent over the operator’s network.
      * @param configVersion The SipDelegateImsConfiguration version used to construct the
      * SipMessage. See {@link SipDelegateConfiguration} for more information.
      * If the version specified here does not match the most recently constructed
@@ -102,6 +106,7 @@ public class SipDelegateImpl implements SipDelegate, ISipDelegateIncomingMessage
 
         //TODO check RCS is registered or not. Get native API to know RCS is registered or not.
         if (false) {
+
             //RCS is not registered then
             onMessageSendFailure(viaTransactionId,
                     SipDelegateManager.MESSAGE_FAILURE_REASON_NOT_REGISTERED);
@@ -206,6 +211,19 @@ public class SipDelegateImpl implements SipDelegate, ISipDelegateIncomingMessage
             mViaTransactionIds.remove(viaTransactionId);
             mViaTransactionIdAndCallId.remove(viaTransactionId);
         }
+        //make native call successful received message response from app.
+        ImsServiceRecord serviceRecord = ImsServiceManager.getServiceRecord(mSlotId);
+        ISipTransportRemote remoteSipTransport;
+        if (serviceRecord != null) {
+            remoteSipTransport = serviceRecord.getSipTransport().getISipTransportRemote();
+            if (remoteSipTransport != null) {
+                remoteSipTransport.notifyMessageReceived(viaTransactionId);
+            } else {
+                Log.e(LOG_TAG, "remoteSipTransport is null");
+            }
+        } else {
+            Log.e(LOG_TAG, "serviceRecord is null");
+        }
     }
 
     /**
@@ -242,7 +260,9 @@ public class SipDelegateImpl implements SipDelegate, ISipDelegateIncomingMessage
     @Override
     public void onMessageReceived(SipMessage message) {
         Log.i(LOG_TAG, "onMessageReceived");
-        mDelegateRequestData.getDelegateMessageCallback().onMessageReceived(message);
+        mCallBackExecutor.execute(() -> {
+            mDelegateRequestData.getDelegateMessageCallback().onMessageReceived(message);
+        });
     }
 
     /**
@@ -253,7 +273,9 @@ public class SipDelegateImpl implements SipDelegate, ISipDelegateIncomingMessage
     @Override
     public void onMessageSent(String viaTransactionId) {
         Log.i(LOG_TAG, "onMessageSent:" + viaTransactionId);
-        mDelegateRequestData.getDelegateMessageCallback().onMessageSent(viaTransactionId);
+        mCallBackExecutor.execute(() -> {
+            mDelegateRequestData.getDelegateMessageCallback().onMessageSent(viaTransactionId);
+        });
     }
 
     /**
@@ -261,13 +283,15 @@ public class SipDelegateImpl implements SipDelegate, ISipDelegateIncomingMessage
      *
      * @param viaTransactionId The Transaction ID found in the via header field of the previously
      * sent {@link SipMessage}.
-     * @param reason           The reason for the failure.
+     * @param reason The reason for the failure.
      */
     @Override
     public void onMessageSendFailure(String viaTransactionId, int reason) {
         Log.i(LOG_TAG, "onMessageSendFailure:" + viaTransactionId);
-        mDelegateRequestData.getDelegateMessageCallback().onMessageSendFailure(viaTransactionId,
-                reason);
+        mCallBackExecutor.execute(() -> {
+            mDelegateRequestData.getDelegateMessageCallback().onMessageSendFailure(viaTransactionId,
+                    reason);
+        });
     }
     // END ISipTransportIncomingMessageNotifier interface implementation
     //START Public methods
@@ -277,8 +301,10 @@ public class SipDelegateImpl implements SipDelegate, ISipDelegateIncomingMessage
      *
      * @param updatedConfig received from the ims core
      */
-    public void updateSipDelegateConfig(@NonNull SipDelegateConfiguration updatedConfig) {
-        mDelegateRequestData.getDelegateStateCallback().onConfigurationChanged(updatedConfig);
+    public void updateSipDelegateConfig(@NonNull SipDelegateConfiguration updatedConfig){
+        mCallBackExecutor.execute(() -> {
+            mDelegateRequestData.getDelegateStateCallback().onConfigurationChanged(updatedConfig);
+        });
     }
 
     /**
@@ -314,8 +340,10 @@ public class SipDelegateImpl implements SipDelegate, ISipDelegateIncomingMessage
                     + sipDelegateRegistrationState.getDeregisteringFeatureTags());
         }
         //update the registration change related to this sip delegate.
-        mDelegateRequestData.getDelegateStateCallback().
-                onFeatureTagRegistrationChanged(sipDelegateRegistrationState);
+        mCallBackExecutor.execute(() -> {
+            mDelegateRequestData.getDelegateStateCallback()
+                    .onFeatureTagRegistrationChanged(sipDelegateRegistrationState);
+        });
     }
     //END Public methods
     //START Getter methods

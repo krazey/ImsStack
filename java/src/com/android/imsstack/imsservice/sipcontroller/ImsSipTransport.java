@@ -30,8 +30,10 @@ import android.telephony.ims.stub.SipTransportImplBase;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.imsstack.enabler.sipcontroller.impl.SipControllerAgent;
 import com.android.imsstack.imsservice.mmtel.ImsRegistrationImpl;
 import com.android.imsstack.imsservice.sipcontroller.remote.ISipTransportRemote;
+import com.android.imsstack.imsservice.sipcontroller.remote.SipTransportRemoteListener;
 import com.android.imsstack.imsservice.sipcontroller.sipdelegate.ActiveSipDelegateManager;
 import com.android.imsstack.imsservice.sipcontroller.sipdelegate.SipDelegateImpl;
 import com.android.imsstack.imsservice.sipcontroller.sipdelegate.SipDelegateRequestData;
@@ -72,6 +74,7 @@ public class ImsSipTransport extends SipTransportImplBase {
     private ArraySet<String> mSipTransportRegisteredTags = new ArraySet<>();
     private final ArraySet<FeatureTagState> mSipTransportDeregisteringTags = new ArraySet<>();
     private final ArraySet<FeatureTagState> mSipTransportDeregisteredTags = new ArraySet<>();
+    private SipTransportRemoteListener mRemoteListener;
 
     //START constructor methods
 
@@ -266,7 +269,10 @@ public class ImsSipTransport extends SipTransportImplBase {
         } else {
             Log.w(LOG_TAG, "mImsRegistrationBaseImpl is null");
         }
-        //TODO SipTransportController initialization
+        //SipTransportController initialization
+        mISipTransportRemote = SipControllerAgent.getInstance(mSlotId);
+        mRemoteListener = new SipTransportRemoteListener();
+        mISipTransportRemote.setSipTransportListener(mRemoteListener);
     }
 
     /**
@@ -286,8 +292,8 @@ public class ImsSipTransport extends SipTransportImplBase {
                 request.getFeatureTags(), delegateStateCallback, delegateMessageCallback);
         Set<FeatureTagState> deniedTags = mActiveSipDelegateManager.
                 getDeniedTagListFromRequest(request.getFeatureTags());
-
-        SipDelegateImpl sipDelegate = new SipDelegateImpl(delegateRequestData, mSlotId);
+        SipDelegateImpl sipDelegate = new SipDelegateImpl(delegateRequestData, mSlotId,
+                mCallBackExecutor);
         mActiveSipDelegateManager.addActiveSipDelegate(sipDelegate);
         mCallBackExecutor.execute(() -> {
             delegateStateCallback.onCreated(sipDelegate, deniedTags);

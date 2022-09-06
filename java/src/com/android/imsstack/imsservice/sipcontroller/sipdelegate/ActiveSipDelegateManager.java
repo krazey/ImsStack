@@ -16,6 +16,7 @@
 package com.android.imsstack.imsservice.sipcontroller.sipdelegate;
 
 import android.telephony.ims.FeatureTagState;
+import android.telephony.ims.SipDelegateConfiguration;
 import android.telephony.ims.SipDelegateManager;
 import android.telephony.ims.stub.SipDelegate;
 import android.util.Log;
@@ -73,11 +74,26 @@ public class ActiveSipDelegateManager {
     public synchronized void addActiveSipDelegate(SipDelegateImpl sipDelegate) {
         Log.i(LOG_TAG, "addActiveSipDelegate:" + sipDelegate);
         mActiveSipDelegateList.add(sipDelegate);
+        updateConfiguration(sipDelegate);
+    }
+
+    /**
+     * update Configuration for sip delegate
+     * @param sipDelegate delegate objected to be managed by delegate manager.
+     */
+    public void updateConfiguration(SipDelegateImpl sipDelegate) {
         ImsServiceRecord serviceRecord = ImsServiceManager.getServiceRecord(mSlotId);
         if (serviceRecord != null && sipDelegate != null) {
-            sipDelegate.updateSipDelegateConfig(
-                    serviceRecord.getSipTransport().getSipTransportConfig());
+            SipDelegateConfiguration configuration =
+                    serviceRecord.getSipTransport().getSipTransportConfig();
+            if (configuration != null) {
+                sipDelegate.updateSipDelegateConfig(configuration);
+            } else {
+                Log.e(LOG_TAG, "updateConfiguration is null " + configuration);
+            }
         }
+        //TODO :  onConfigurationChanged should be called as soon as the
+        //   {@link SipDelegate} has access to these configuration parameters
     }
 
     /**
@@ -107,6 +123,7 @@ public class ActiveSipDelegateManager {
         } else {
             Log.e(LOG_TAG, "destroySipDelegate object not found");
         }
+        //TODO Release the resources if there is no SipDelegate release()
         return false;
     }
 
@@ -241,4 +258,15 @@ public class ActiveSipDelegateManager {
         Log.i(LOG_TAG, "onGoingSessions:" + onGoingSessions);
         return onGoingSessions;
     }
+
+     /** when All sip delegate is destroyed/terminated
+     * Notify stack to Release resources
+     */
+    private void release() {
+        if (mActiveSipDelegateList.isEmpty()) {
+            ImsServiceRecord record = ImsServiceManager.getServiceRecord(mSlotId);
+            record.getSipTransport().getISipTransportRemote().release(mSlotId);
+        }
+    }
+
 }
