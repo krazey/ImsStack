@@ -363,6 +363,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
         case BLOCK_TEMPORARY_DATA_DEACTIVATED:
             return "TEMPORARY_DATA_DEACTIVATED";
 
+        case BLOCK_IMS_SERVICE_DISABLED:
+            return "IMS_SERVICE_DISABLED";
+
         case BLOCK_CELLULAR_AIRPLANE_MODE_ON:
             return "CELLULAR_AIRPLANE_MODE_ON";
 

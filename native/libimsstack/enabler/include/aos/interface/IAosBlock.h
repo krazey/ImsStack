@@ -51,8 +51,10 @@ typedef enum
     BLOCK_TTY_MODE_ON,
     /// PDN is block temporarily with timer
     BLOCK_TEMPORARY_DATA_DEACTIVATED,
+    /// IMS service is disabled
+    BLOCK_IMS_SERVICE_DISABLED,
     /// End common Block reason
-    BLOCK_END = BLOCK_TEMPORARY_DATA_DEACTIVATED,
+    BLOCK_END = BLOCK_IMS_SERVICE_DISABLED,
 
     /// Start cellular Block reason
     BLOCK_CELLULAR_START,

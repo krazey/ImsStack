@@ -464,6 +464,33 @@ IMS_BOOL AosApplication::IsRegStateUpdatedByNrLteRatChange() const
     return IsRegTypeNormal();
 }
 
+PROTECTED
+IMS_BOOL AosApplication::IsPdnDisconnectRequired() const
+{
+    if (IsAllDetached())
+    {
+        return IMS_TRUE;
+    }
+
+    if (m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
+    {
+        return IMS_TRUE;
+    }
+
+    switch (m_nOffReason)
+    {
+        case AoSReason::IMS_DISABLED:  // FALL-THROUGH
+        case AoSReason::POWER_OFF:     // FALL-THROUGH
+        case AoSReason::DATA_PERMANENTLY_FAILED:
+            return IMS_TRUE;
+
+        default:
+            break;
+    }
+
+    return IMS_FALSE;
+}
+
 PROTECTED VIRTUAL void AosApplication::CreateAosCondition()
 {
     if (m_nAppType == TYPE_NORMAL)
@@ -718,8 +745,7 @@ PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = Ao
 
     m_piRegistration->Destroy();
 
-    if (nOffReason == AoSReason::IMS_DISABLED || nOffReason == AoSReason::POWER_OFF ||
-            nOffReason == AoSReason::DATA_PERMANENTLY_FAILED || IsAllDetached())
+    if (IsPdnDisconnectRequired())
     {
         ProcessPdnDisconnect();
         ClearOffReason();
@@ -2613,8 +2639,32 @@ PROTECTED VIRTUAL void AosApplication::Timer_TimerExpired(IN ITimer* piTimer)
 }
 
 PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
-        IN AosRegRequestType eType, IN AosPcscfOrder /* eOrder */, IN AosControlCause /* eCause */)
+        IN AosRegRequestType eType, IN AosPcscfOrder /* eOrder */, IN AosControlCause eCause)
 {
+    if (eCause == AosControlCause::IMS_SERVICE)
+    {
+        IMS_BOOL bImsServiceBlocked = m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED);
+
+        if (eType == AosRegRequestType::START)
+        {
+            if (bImsServiceBlocked)
+            {
+                m_pCondition->ResetBlock(BLOCK_IMS_SERVICE_DISABLED);
+            }
+        }
+        else if (eType == AosRegRequestType::STOP)
+        {
+            if (!bImsServiceBlocked)
+            {
+                ProcessDisconnectingState();
+                PostMessage(MSG_REG_STOP, 0, 0);
+                m_pCondition->SetBlock(BLOCK_IMS_SERVICE_DISABLED, IMS_FALSE);
+            }
+        }
+
+        return;
+    }
+
     if (eType == AosRegRequestType::START)
     {
         // TODO: impl. except CURRENT

@@ -31,6 +31,7 @@ import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.aos.IIAosService;
+import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.system.IJNIUpCallEvt;
@@ -55,6 +56,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private final Set<IAosInfoListener> mAosInfoListeners =
             new CopyOnWriteArraySet<IAosInfoListener>();
 
+    final ImsServiceRegistryListener mListener = new ImsServiceRegistryListener();
+
     private CapabilityPairs mCapabilityPairs;
 
     private long mNativeObject = 0;
@@ -77,9 +80,15 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         if (jniEvt != null) {
             jniEvt.registerForNativeBootComplete(mHandler, EVENT_NATIVE_BOOT_COMPLETED, null);
         }
+
+        ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
+        isr.addListener(mListener);
     }
 
     public void stop() {
+        ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
+        isr.removeListener(mListener);
+
         if (mHandler != null) {
             IJNIUpCallEvt jniEvt = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
             if (jniEvt != null) {
@@ -348,6 +357,11 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
+    private boolean isImsEnabled() {
+        ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
+        return isr.isImsEnabled();
+    }
+
     private void sendRequest(int message, boolean isTrue) {
         Parcel parcel = Parcel.obtain();
 
@@ -403,6 +417,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
 
         sendRequest(parcel);
+    }
+
+    private void notifyImsServiceChanged() {
+        controlRegistration((isImsEnabled()) ? IAosRegistration.RequestType.START :
+                IAosRegistration.RequestType.STOP, IAosRegistration.Pcscf.CURRENT,
+                IAosRegistration.Cause.IMS_SERVICE);
     }
 
     private void adjustCapabilities(CapabilityPairs pairs) {
@@ -616,6 +636,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         private void handleNativeBootCompleted() {
             ImsLog.d(mSlotId, "");
             notifyCapabilitiesChanged();
+            notifyImsServiceChanged();
 
             SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
 
@@ -643,6 +664,13 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                         break;
                 }
             }
+        }
+    }
+
+    private class ImsServiceRegistryListener implements ImsServiceRegistry.Listener {
+        @Override
+        public void onImsOnOffChanged() {
+            notifyImsServiceChanged();
         }
     }
 

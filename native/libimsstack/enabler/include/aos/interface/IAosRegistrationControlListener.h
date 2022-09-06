@@ -77,7 +77,8 @@ enum class AosControlCause
 {
     UNKNOWN = 0,
     DATA = 1,
-    RADIO = 2
+    RADIO = 2,
+    IMS_SERVICE = 3
 };
 
 #endif  // INTERFACE_AOS_REGISTRATION_CONTROL_LISTENER_H_

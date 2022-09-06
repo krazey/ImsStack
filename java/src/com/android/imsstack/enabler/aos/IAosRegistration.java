@@ -122,6 +122,7 @@ public interface IAosRegistration {
         public static final int UNKNOWN = 0;
         public static final int DATA = 1;
         public static final int RADIO = 2;
+        public static final int IMS_SERVICE = 3;
     }
 
     /**
