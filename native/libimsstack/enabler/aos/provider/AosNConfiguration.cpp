@@ -730,6 +730,7 @@ PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS
     }
 
     InitConfig(piCc);
+    InitAssetsConfig(piCc);
     InitBundle(piCc);
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
@@ -763,6 +764,7 @@ PRIVATE VIRTUAL void AosNConfiguration::Init(IN IN IMS_SINT32 nSlotId /* = IMS_S
     piCc->AddListener(this);
 
     InitConfig(piCc);
+    InitAssetsConfig(piCc);
     InitBundle(piCc);
 }
 
@@ -1265,7 +1267,11 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
     /// imswfc.
     m_objCarrierConfig.nRegistrationPrivateHeader =
             piCc->GetInt(CarrierConfig::ImsWfc::KEY_REGISTRATION_PRIVATE_HEADER_INT);
-    /// asset
+}
+
+PRIVATE
+void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
+{
     m_objAsset.bUseSecurityServerPortInRegContactOfInitialRegistration = piCc->GetBoolean(
             CarrierConfig::Assets::
                     KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INITIAL_REGISTRATION_BOOL);
