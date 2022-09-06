@@ -198,6 +198,9 @@
     <boolean name="use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="true"/>
     <int name="eps_fallback_watchdog_time_millis_int" value="6000"/>
     <int name="send_udp_keep_alive_interval_time_millis_int" value="2000"/>
+    <boolean name="one_way_video_call_by_local_end_supported_bool" value="false"/>
+    <boolean name="one_way_video_call_by_remote_end_supported_bool" value="false"/>
+    <boolean name="notify_conf_state_when_anonymous_user_bool" value="true"/>
 
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">USER;text=&quot;User Triggered&quot;</string>

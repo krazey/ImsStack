@@ -251,6 +251,15 @@ public final class AgentFactory {
         }
     }
 
+    @VisibleForTesting
+    public void setAgentsForSlot(IAgent agent, Class<?> agentName, int slotId) {
+        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.valueAt(slotId);
+
+        if (agents != null) {
+            agents.put(agentName, agent);
+        }
+    }
+
     public void destroyAgentsForSlot(int slotId) {
         ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.valueAt(slotId);
 

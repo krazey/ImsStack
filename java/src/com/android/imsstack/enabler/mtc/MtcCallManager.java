@@ -18,11 +18,12 @@ package com.android.imsstack.enabler.mtc;
 
 import android.content.Context;
 
-import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.IWifiState;
 import com.android.imsstack.enabler.IBaseContext;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.mtc.telephony.TelephonyCallStateRegistry;
+import com.android.imsstack.imsservice.mmtel.ImsRegistrationTracker;
+import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
+import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
 import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.util.ImsLog;
 
@@ -614,15 +615,20 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
     }
 
     private boolean isImsRegisteredOnWifi() {
-        IWifiState ws = (IWifiState)AgentFactory.getAgent(AgentFactory.WIFI_STATE);
+        boolean isNetworkTypeWifi = false;
+        ImsServiceRecord serviceRecord = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
+        ImsRegistrationTracker regTracker = (serviceRecord != null)
+                ? serviceRecord.getRegistrationTracker() : null;
 
-        if (!ImsGlobal.isWfcEnabled(mContext.getContext(), mContext.getSlotId())) {
-            return false;
-        } else if (ws != null && (!ws.isWifiConnected())) {
-            return false;
+        if ((regTracker != null) && (regTracker.isCallRegistered())) {
+            int regNetworkType = regTracker.getRegisteredNetworkType();
+
+            if (regNetworkType == IAosRegistrationListener.NetworkType.IWLAN) {
+                isNetworkTypeWifi = true;
+            }
         }
 
-        return ImsStateStore.getRegState(mContext.getPhoneId()).isNetworkTypeWifi();
+        return isNetworkTypeWifi;
     }
 
     private void updateConnectedCallOnWifi(final Call call, int state, String dbgString) {

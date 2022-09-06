@@ -122,5 +122,33 @@ public class CallFeatureTest {
                 .thenReturn(false);
         assertTrue(CallFeature.isTextDirectionInactiveOnRttCallHold(SLOT_ID));
         assertFalse(CallFeature.isTextDirectionInactiveOnRttCallHold(SLOT_ID));
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL))
+                .thenReturn(true)
+                .thenReturn(false);
+        assertTrue(CallFeature.isDynamicVideoQualitySupported(SLOT_ID));
+        assertFalse(CallFeature.isDynamicVideoQualitySupported(SLOT_ID));
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_ONE_WAY_VIDEO_BY_LOCAL_END_SUPPORTED_BOOL))
+                .thenReturn(true)
+                .thenReturn(false);
+        assertTrue(CallFeature.isOneWayVideoCallByLocalEndSupported(SLOT_ID));
+        assertFalse(CallFeature.isOneWayVideoCallByLocalEndSupported(SLOT_ID));
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_ONE_WAY_VIDEO_BY_REMOTE_END_SUPPORTED_BOOL))
+                .thenReturn(true)
+                .thenReturn(false);
+        assertTrue(CallFeature.isOneWayVideoCallByRemoteEndSupported(SLOT_ID));
+        assertFalse(CallFeature.isOneWayVideoCallByRemoteEndSupported(SLOT_ID));
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL))
+                .thenReturn(true)
+                .thenReturn(false);
+        assertTrue(CallFeature.isNotifyConfStateWhenAnonymousUser(SLOT_ID));
+        assertFalse(CallFeature.isNotifyConfStateWhenAnonymousUser(SLOT_ID));
     }
 }

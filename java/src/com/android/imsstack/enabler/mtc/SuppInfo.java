@@ -56,6 +56,7 @@ public class SuppInfo implements Parcelable {
     public static final int TYPE_CALLING_NUM_VERIFICATION   = 15; // int
     public static final int TYPE_VRBT                       = 16; // boolean
     public static final int TYPE_TIP                        = 17; // int, String
+    public static final int TYPE_GEOLOCATION                = 18; // boolean
 
     // CallerID
     public static final int CALLERID_NONE           = 0;

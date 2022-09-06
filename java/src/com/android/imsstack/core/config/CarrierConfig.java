@@ -572,7 +572,6 @@ public class CarrierConfig {
                 "vowifi_sub_error_code_for_init_reg_int_array";
         public static final String KEY_WFC_SUB_ERR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY =
                 "wfc_sub_err_code_by_missing_911_address_int_array";
-
         // Bundle {
         public static final String KEY_EXTRA_REG_ERR_BUNDLE =
                 "extra_reg_err_bundle";
@@ -753,6 +752,18 @@ public class CarrierConfig {
                 "eps_fallback_watchdog_time_millis_int";
         public static final String KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT =
                 "send_udp_keep_alive_interval_time_millis_int";
+        public static final String KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL =
+                "suppinfo_cdiv_cause_required_bool";
+        public static final String KEY_ONE_WAY_VIDEO_BY_LOCAL_END_SUPPORTED_BOOL =
+                "one_way_video_call_by_local_end_supported_bool";
+        public static final String KEY_ONE_WAY_VIDEO_BY_REMOTE_END_SUPPORTED_BOOL =
+                "one_way_video_call_by_remote_end_supported_bool";
+        public static final String KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL =
+                "notify_conf_state_when_anonymous_user_bool";
+        public static final String KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_TYPE_INT =
+                "geolocation_policy_for_location_based_call";
+        public static final String KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY =
+                "location_based_number_list_int_array";
 
         // Media
         public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =
@@ -827,6 +838,8 @@ public class CarrierConfig {
                 "text_rtp_inactivity_timer_millis_int";
         public static final String KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT =
                 "text_rtcp_inactivity_timer_millis_int";
+        public static final String KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL =
+                "dynamic_video_quality_supported_bool";
 
         // TODO - Media Codec for Test
         public static final String KEY_ASSET_EVS_PAYLOAD_TYPE_INT_ARRAY =

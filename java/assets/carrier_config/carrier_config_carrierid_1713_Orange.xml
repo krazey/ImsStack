@@ -18,31 +18,12 @@
     <!-- Carrier configurations -->
     <!-- Mtc Assets -->
     <int name="geolocation_policy_for_location_based_call" value="9"/>
-    <int-array name="location_based_number_list_int_array" num="11">
-        <item value="112"/>
-        <item value="15"/>
-        <item value="17"/>
-        <item value="18"/>
-        <item value="115"/>
-        <item value="119"/>
-        <item value="191"/>
-        <item value="196"/>
-        <item value="197"/>
-        <item value="116000"/>
-        <item value="116117"/>
+    <int-array name="location_based_number_list_int_array" num="5">
+         <item value="112"/>
+         <item value="150"/>
+         <item value="155"/>
+         <item value="158"/>
+         <item value="159"/>
     </int-array>
-
-    <!-- Ut/Xcap Config -->
-    <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
-    </int-array>
-
-    <!-- Ut/Xcap Assets -->
-    <int-array name="ut_sm_cause_temporary_block_int_array" value="1"/>
-        <item value="0"/>
-    </int-array>
-    <int-array name="ut_http_temporary_error_code_int_array" value="1"/>
-        <item value="403"/>
-    </int-array>
-    <int name="ut_temporary_block_timer_min_int" value="240"/>
 
 </carrier_config>

@@ -23,6 +23,7 @@ import android.telephony.ims.ImsStreamMediaProfile;
 import android.util.Size;
 
 import com.android.imsstack.core.ImsGlobal;
+import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.MtcCallUtils;
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
@@ -266,7 +267,8 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
 
     private boolean isDynamicVideoQualitySupportedOnSessionModification() {
         IVideoCallSession callSession = getVideoCallSession();
-        return ImsGlobal.isOperator(callSession.getCallContext().getSlotId(), "RJIL");
+        return CallFeature.isDynamicVideoQualitySupported(
+                    callSession.getCallContext().getSlotId());
     }
 
     private Handler getCallHandler() {

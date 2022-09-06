@@ -18,7 +18,9 @@ package com.android.imsstack.imsservice.mmtel;
 import android.os.Bundle;
 import android.telephony.ims.ImsCallProfile;
 
-import com.android.imsstack.core.ImsGlobal;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 
@@ -38,26 +40,19 @@ public final class ImsSuppInfoUtils {
 
     public static void addCallExtraForApp(ICallContext context,
             final SuppInfo suppInfo, ImsCallProfile outProfile) {
-        // Common
-
-        // Operator specific operations
-        if (ImsGlobal.isOperator(context.getSlotId(), "ATT")) {
-            ATT.addCallExtraForApp(suppInfo, outProfile);
+        if (getConfigInterface(context.getSlotId()).getCarrierConfig()
+                .getBoolean(CarrierConfig.Assets.KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL)) {
+            setCallExtraInt(suppInfo, SuppInfo.TYPE_CDIV_CAUSE,
+                    ImsCallUtils.EXTRA_CDIV_CAUSE, outProfile);
         }
     }
 
     public static void addSuppInfoForIms(ICallContext context,
             final ImsCallProfile profile, SuppInfo outSuppInfo) {
-        // Common
-
-        // Operator specific operations
-        if (ImsGlobal.isOperator(context.getSlotId(), "ATT")) {
-            ATT.addSuppInfoForIms(profile, outSuppInfo);
-        } else if (ImsGlobal.isOperator(context.getSlotId(), "DCM")) {
-            DCM.addSuppInfoForIms(profile, outSuppInfo);
-        } else {
-            // TODO: Global / Canada enablers
-            Global.addSuppInfoForIms(profile, outSuppInfo);
+        Bundle callExtras = profile.getCallExtras();
+        if (hasCallExtra(callExtras, EXTRA_GEOLOCATION)) {
+            outSuppInfo.addService_bool(SuppInfo.TYPE_GEOLOCATION,
+                    getCallExtraBoolean(callExtras, EXTRA_GEOLOCATION, true));
         }
     }
 
@@ -73,67 +68,6 @@ public final class ImsSuppInfoUtils {
 
     public static String getCallExtraNameForString(ICallContext context,int suppInfo) {
         return null;
-    }
-
-    public static class ATT {
-        public static void addCallExtraForApp(final SuppInfo suppInfo,
-                ImsCallProfile outProfile) {
-            setCallExtraInt(suppInfo, SuppInfo.TYPE_CDIV_CAUSE,
-                    ImsCallUtils.EXTRA_CDIV_CAUSE, outProfile);
-        }
-
-        public static void addSuppInfoForIms(final ImsCallProfile profile,
-                SuppInfo outSuppInfo) {
-        }
-    }
-
-    public static class DCM {
-        /** boolean */
-        public static final int SUPP_TYPE_SUBADDRESS = 101;
-
-        public static void addSuppInfoForIms(final ImsCallProfile profile,
-                SuppInfo outSuppInfo) {
-            Bundle oemCallExtras = profile.getCallExtras().getBundle(
-                        ImsCallProfile.EXTRA_OEM_EXTRAS);
-
-            // Checks if subaddress is set or not
-            boolean isSubaddress = getCallExtraBoolean(
-                    oemCallExtras, ImsCallUtils.EXTRA_SUBADDRESS, false);
-
-            if (isSubaddress) {
-                outSuppInfo.addService_bool(SUPP_TYPE_SUBADDRESS, true);
-            }
-        }
-    }
-
-    public static class Global {
-        /** boolean */
-        public static final int SUPP_TYPE_GEOLOCATION = 101;
-
-        public static void addSuppInfoForIms(final ImsCallProfile profile,
-                SuppInfo outSuppInfo) {
-            Bundle callExtras = profile.getCallExtras();
-
-            if (hasCallExtra(callExtras, EXTRA_GEOLOCATION)) {
-                outSuppInfo.addService_bool(SUPP_TYPE_GEOLOCATION,
-                        getCallExtraBoolean(callExtras, EXTRA_GEOLOCATION, true));
-            }
-        }
-    }
-
-    public static class Canada {
-        /** boolean */
-        public static final int SUPP_TYPE_GEOLOCATION = 101;
-
-        public static void addSuppInfoForIms(final ImsCallProfile profile,
-                SuppInfo outSuppInfo) {
-            Bundle callExtras = profile.getCallExtras();
-
-            if (hasCallExtra(callExtras, EXTRA_GEOLOCATION)) {
-                outSuppInfo.addService_bool(SUPP_TYPE_GEOLOCATION,
-                        getCallExtraBoolean(callExtras, EXTRA_GEOLOCATION, true));
-            }
-        }
     }
 
     private static String getCallExtra(Bundle callExtras,
@@ -208,5 +142,9 @@ public final class ImsSuppInfoUtils {
                 outProfile.getCallExtras().remove(key);
             }
         }
+    }
+
+    private static ConfigInterface getConfigInterface(int slotId) {
+        return AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId);
     }
 }

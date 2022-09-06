@@ -161,12 +161,7 @@ public class ImsCallApp extends ImsApp {
                 }
             });
 
-        if (mRegTracker.isCallRegistered()
-                && ImsRegUtils.isImsRegisteredOnWifi(mCallContext)) {
-            initializeImsStates(MtcStateUtils.INIT_CALL_STATE);
-        } else {
-            initializeImsStates(MtcStateUtils.INIT_ALL);
-        }
+        initializeImsStates(MtcStateUtils.INIT_ALL);
     }
 
     public void bindCallApp() {
