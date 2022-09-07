@@ -26,7 +26,6 @@
 #include "app/AosAppContext.h"
 #include "provider/AosCallTracker.h"
 #include "connection/AosConnection.h"
-#include "provider/AosMsgHandler.h"
 #include "provider/AosNConfiguration.h"
 #include "network/AosNetTracker.h"
 #include "provider/AosProvider.h"
@@ -144,7 +143,6 @@ void AosBuildDirector::ConstructProvider()
     piConfig->Init(m_nSlotId);
     AosProvider::GetInstance()->SetNConfiguration(piConfig, m_nSlotId);
 
-    AosProvider::GetInstance()->SetMsgHandler(m_piBuilder->BuildMsgHandler(), m_nSlotId);
     AosProvider::GetInstance()->SetService(m_piBuilder->BuildService(m_nSlotId), m_nSlotId);
     AosProvider::GetInstance()->SetSubscriberManager(
             m_piBuilder->BuildSubscriberManager(m_nSlotId), m_nSlotId);
@@ -223,13 +221,6 @@ void AosBuildDirector::DestructProvider()
     {
         AosProvider::GetInstance()->SetService(IMS_NULL, m_nSlotId);
         delete DYNAMIC_CAST(AosService*, piService);
-    }
-
-    IAosMsgHandler* piMsgHandler = AosProvider::GetInstance()->GetMsgHandler(m_nSlotId);
-    if (piMsgHandler != IMS_NULL)
-    {
-        AosProvider::GetInstance()->SetMsgHandler(IMS_NULL, m_nSlotId);
-        delete DYNAMIC_CAST(AosMsgHandler*, piMsgHandler);
     }
 
     IAosNConfiguration* piNc = AosProvider::GetInstance()->GetNConfiguration(m_nSlotId);

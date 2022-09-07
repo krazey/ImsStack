@@ -40,7 +40,6 @@ public:
     /// AoSProvider
     virtual IAosCallTracker* BuildCallTracker(IN IMS_SINT32 nSlotId);
     virtual IAosRegStateManager* BuildRegStateManager();
-    virtual IAosMsgHandler* BuildMsgHandler();
     virtual IAosService* BuildService(IN IMS_SINT32 nSlotId);
     virtual IAosSubscriberManager* BuildSubscriberManager(IN IMS_SINT32 nSlotId);
     virtual IAosRetryRepository* BuildRetryRepository(IN IMS_SINT32 nSlotId);

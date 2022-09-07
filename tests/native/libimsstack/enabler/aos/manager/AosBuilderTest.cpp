@@ -43,7 +43,6 @@
 #include "provider/AosProvider.h"
 #include "provider/AosRegStateManager.h"
 #include "provider/AosStaticProfile.h"
-#include "provider/AosMsgHandler.h"
 #include "provider/AosNConfiguration.h"
 #include "provider/AosSubscriberManager.h"
 #include "provider/AosRetryRepository.h"
@@ -241,13 +240,6 @@ TEST_F(AosBuilderTest, BuildRegStateManager)
             static_cast<AosRegStateManager*>(pAosBuilder->BuildRegStateManager());
     ASSERT_TRUE(pAosRegStateManager != nullptr);
     delete pAosRegStateManager;
-}
-
-TEST_F(AosBuilderTest, BuildMsgHandler)
-{
-    AosMsgHandler* pAosMsgHandler = static_cast<AosMsgHandler*>(pAosBuilder->BuildMsgHandler());
-    ASSERT_TRUE(pAosMsgHandler != nullptr);
-    delete pAosMsgHandler;
 }
 
 TEST_F(AosBuilderTest, BuildService)

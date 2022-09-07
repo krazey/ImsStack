@@ -37,7 +37,6 @@
 #include "provider/AosCallTracker.h"
 #include "provider/AosRegStateManager.h"
 #include "provider/AosStaticProfile.h"
-#include "provider/AosMsgHandler.h"
 #include "provider/AosNConfiguration.h"
 #include "provider/AosSubscriberManager.h"
 #include "provider/AosRetryRepository.h"
@@ -184,13 +183,6 @@ PUBLIC VIRTUAL IAosCallTracker* AosBuilder::BuildCallTracker(IN IMS_SINT32 nSlot
 PUBLIC VIRTUAL IAosRegStateManager* AosBuilder::BuildRegStateManager()
 {
     return new AosRegStateManager();
-}
-
-PUBLIC VIRTUAL IAosMsgHandler* AosBuilder::BuildMsgHandler()
-{
-    IMS_TRACE_D("BuildMsgHandler", 0, 0, 0);
-
-    return new AosMsgHandler();
 }
 
 PUBLIC VIRTUAL IAosService* AosBuilder::BuildService(IN IMS_SINT32 nSlotId)
