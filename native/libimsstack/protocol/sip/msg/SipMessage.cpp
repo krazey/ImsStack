@@ -777,6 +777,20 @@ SIP_BOOL SipMessage::DecodeFragmentMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLe
     if ((m_pStatusLine != SIP_NULL) || (m_pReqLine != SIP_NULL))
     {
         pStartPt = pTempPos + SIP_THREE;
+
+        if (bHdrEnd == SIP_TRUE)
+        {
+            pStartPt = pStartPt + SIP_TWO;
+
+            if (pStartPt < pEndPt)
+            {
+                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
+                        "DecodeFragmentMsg:invalid empty line present", SIP_ZERO, SIP_ZERO);
+                return SIP_FALSE;
+            }
+
+            return SIP_TRUE;
+        }
     }
 
     if (pStartPt >= pEndPt)
