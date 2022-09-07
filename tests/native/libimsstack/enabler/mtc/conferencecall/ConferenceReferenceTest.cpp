@@ -66,7 +66,7 @@ public:
     MockIMtcSipInterfaceFactory* pMockInterfaceFactory;
     MockReferenceInterfaceHolder* pMockReferenceInterfaceHolder;
     MockIInterfaceHolderListener* pMockHolderListener;
-    MockIMtcConfigurationManager objMockConfigurationManager;
+    MockIMtcConfigurationManager* pMockConfigurationManager;
     MockCallConnectionIdManager* pMockConnectionIdManager;
     MockIMtcCallManager objMockCallManager;
     MockIMtcCall* pMockConferenceCall;
@@ -88,7 +88,8 @@ protected:
     {
         MtcContextRepository::GetInstance()->AddContext(SLOT_ID, &objMockContext);
 
-        pConfigurationProxy = new MtcConfigurationProxy(&objMockConfigurationManager);
+        pMockConfigurationManager = new MockIMtcConfigurationManager();
+        pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
         ON_CALL(objMockContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
@@ -125,6 +126,7 @@ protected:
         delete pMockReferenceInterfaceHolder;
         delete pMockHolderListener;
         delete pMockConnectionIdManager;
+        delete pConfigurationProxy;
     }
 
     void CreateReference(IN ConfUser* pUser)
@@ -210,7 +212,7 @@ TEST_F(ConferenceReferenceTest, Constructor)
 
 TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndSubsSupported)
 {
-    ON_CALL(objMockConfigurationManager, IsSupportConferenceReferSubscribe)
+    ON_CALL(*pMockConfigurationManager, IsSupportConferenceReferSubscribe)
             .WillByDefault(Return(IMS_TRUE));
 
     MockIReference* pMockReference = new MockIReference();
@@ -222,7 +224,7 @@ TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndSubsSupported)
 
 TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndNoSubsSupported)
 {
-    ON_CALL(objMockConfigurationManager, IsSupportConferenceReferSubscribe)
+    ON_CALL(*pMockConfigurationManager, IsSupportConferenceReferSubscribe)
             .WillByDefault(Return(IMS_FALSE));
 
     MockIReference* pMockReference = new MockIReference();
@@ -300,7 +302,7 @@ TEST_F(ConferenceReferenceTest, OnReferenceTerminated)
 
 TEST_F(ConferenceReferenceTest, SendInviteWithSingleUser)
 {
-    ON_CALL(objMockConfigurationManager, IsConferenceReferToUriSourcePaid)
+    ON_CALL(*pMockConfigurationManager, IsConferenceReferToUriSourcePaid)
             .WillByDefault(Return(IMS_TRUE));
 
     MockIReference* pMockReference = new MockIReference();
