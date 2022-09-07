@@ -24,18 +24,14 @@ public:
         NONE = 0,
 
         SRV_OUT = 1,
-        CS_CONNECTED,
-        DATA_OFF,
         POWER_OFF,
         BAD_BATTERY,
         AIRPLANE_MODE,
         NO_LTE_COVERAGE,
         SERVICE_POLICY,
         SERVICE_BLOCKED,
-        LTE_SUSPENDED,
         IMS_DISABLED,
         TTYMODEON,
-        INSTANTANEOUS_OFFLINE,
         NOT_SPECIFIED,
 
         IP_CHANGED = 20,
@@ -44,21 +40,13 @@ public:
         DATA_PERMANENTLY_FAILED,
 
         REG_FAILURE = 30,
-        REG_FAILED_LIMITED_SERVICE,
         REG_REFRESH_FORBIDDEN,
-        REG_FORBIDDEN,
-        REG_BANNED,
-        REG_AUTH_FAIL,
         REG_TERMINATED,
         REG_TERMINATED_EXPIRE,
         INITIAL_REG_REQUESTED,
         PCSCF_DISCOVERY_FAILED,
-        REG_FAILED_INTERNAL_ERROR,
 
         UNKNOWN,
-
-        // Operator Specific Reason 200 ~
-        OPERATOR = 200,
     };
 
     // Flags for suspend reason

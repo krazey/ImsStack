@@ -1234,12 +1234,6 @@ TEST_F(AosHandleTest, SetReason_Test)
     SetReason(AosReason::SRV_OUT);
     EXPECT_EQ(GetReason(), AosReason::SRV_OUT);
 
-    SetReason(AosReason::CS_CONNECTED);
-    EXPECT_EQ(GetReason(), AosReason::CS_CONNECTED);
-
-    SetReason(AosReason::DATA_OFF);
-    EXPECT_EQ(GetReason(), AosReason::DATA_OFF);
-
     SetReason(AosReason::POWER_OFF);
     EXPECT_EQ(GetReason(), AosReason::POWER_OFF);
 
@@ -1258,17 +1252,11 @@ TEST_F(AosHandleTest, SetReason_Test)
     SetReason(AosReason::SERVICE_BLOCKED);
     EXPECT_EQ(GetReason(), AosReason::SERVICE_BLOCKED);
 
-    SetReason(AosReason::LTE_SUSPENDED);
-    EXPECT_EQ(GetReason(), AosReason::LTE_SUSPENDED);
-
     SetReason(AosReason::IMS_DISABLED);
     EXPECT_EQ(GetReason(), AosReason::IMS_DISABLED);
 
     SetReason(AosReason::TTYMODEON);
     EXPECT_EQ(GetReason(), AosReason::TTYMODEON);
-
-    SetReason(AosReason::INSTANTANEOUS_OFFLINE);
-    EXPECT_EQ(GetReason(), AosReason::INSTANTANEOUS_OFFLINE);
 
     SetReason(AosReason::NOT_SPECIFIED);
     EXPECT_EQ(GetReason(), AosReason::NOT_SPECIFIED);
@@ -1288,20 +1276,8 @@ TEST_F(AosHandleTest, SetReason_Test)
     SetReason(AosReason::REG_FAILURE);
     EXPECT_EQ(GetReason(), AosReason::REG_FAILURE);
 
-    SetReason(AosReason::REG_FAILED_LIMITED_SERVICE);
-    EXPECT_EQ(GetReason(), AosReason::REG_FAILED_LIMITED_SERVICE);
-
     SetReason(AosReason::REG_REFRESH_FORBIDDEN);
     EXPECT_EQ(GetReason(), AosReason::REG_REFRESH_FORBIDDEN);
-
-    SetReason(AosReason::REG_FORBIDDEN);
-    EXPECT_EQ(GetReason(), AosReason::REG_FORBIDDEN);
-
-    SetReason(AosReason::REG_BANNED);
-    EXPECT_EQ(GetReason(), AosReason::REG_BANNED);
-
-    SetReason(AosReason::REG_AUTH_FAIL);
-    EXPECT_EQ(GetReason(), AosReason::REG_AUTH_FAIL);
 
     SetReason(AosReason::REG_TERMINATED);
     EXPECT_EQ(GetReason(), AosReason::REG_TERMINATED);
@@ -1315,14 +1291,8 @@ TEST_F(AosHandleTest, SetReason_Test)
     SetReason(AosReason::PCSCF_DISCOVERY_FAILED);
     EXPECT_EQ(GetReason(), AosReason::PCSCF_DISCOVERY_FAILED);
 
-    SetReason(AosReason::REG_FAILED_INTERNAL_ERROR);
-    EXPECT_EQ(GetReason(), AosReason::REG_FAILED_INTERNAL_ERROR);
-
     SetReason(AosReason::UNKNOWN);
     EXPECT_EQ(GetReason(), AosReason::UNKNOWN);
-
-    SetReason(AosReason::OPERATOR);
-    EXPECT_EQ(GetReason(), AosReason::OPERATOR);
 }
 
 TEST_F(AosHandleTest, ClearSuspendedReason_Test)
@@ -1365,12 +1335,8 @@ TEST_F(AosHandleTest, GetImsAosReason_Test)
     EXPECT_EQ(GetImsAosReason(AosReason::REG_TERMINATED), ImsAosReason::REG_TERMINATED);
     EXPECT_EQ(GetImsAosReason(AosReason::INITIAL_REG_REQUESTED), ImsAosReason::REG_NEW_REQUIRED);
 
-    EXPECT_EQ(GetImsAosReason(AosReason::CS_CONNECTED), ImsAosReason::NOT_SPECIFIED);
-    EXPECT_EQ(GetImsAosReason(AosReason::DATA_OFF), ImsAosReason::NOT_SPECIFIED);
-    EXPECT_EQ(GetImsAosReason(AosReason::LTE_SUSPENDED), ImsAosReason::NOT_SPECIFIED);
     EXPECT_EQ(GetImsAosReason(AosReason::IMS_DISABLED), ImsAosReason::NOT_SPECIFIED);
     EXPECT_EQ(GetImsAosReason(AosReason::TTYMODEON), ImsAosReason::NOT_SPECIFIED);
-    EXPECT_EQ(GetImsAosReason(AosReason::INSTANTANEOUS_OFFLINE), ImsAosReason::NOT_SPECIFIED);
 }
 
 TEST_F(AosHandleTest, GetImsAosReasonForSuspend_Test)
