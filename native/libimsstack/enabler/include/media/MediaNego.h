@@ -48,18 +48,11 @@ public:
     ~MediaNego();
 
     /**
-     * @brief Creates MediaNego instance with given service type
+     * @brief Creates MediaNego instance with given parameter
      *
-     * @param eServiceType The service type defined in MEDIA_SERVICE_TYPE
+     * @param pMediaEnvironment The instance of network connection information
      */
-    void Create(IN MEDIA_SERVICE_TYPE eServiceType);
-
-    /**
-     * @brief Updates the Media environment instance created from the client
-     *
-     * @param pMediaEnvironment The instance to set
-     */
-    IMS_BOOL UpdateMediaEnvironment(IN MediaEnvironment* pMediaEnvironment);
+    void CreateProfile(IN MediaEnvironment* pMediaEnvironment);
 
     /**
      * @brief Creates MediaNego object copied from the existing MediaNego instance

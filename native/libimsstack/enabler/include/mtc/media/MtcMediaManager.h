@@ -49,9 +49,6 @@ public: /* IMediaSessionClientListener */
     virtual void MediaSession_NotifyQos(IN IMS_UINTP nNegoId, IN IMS_BOOL bSuccess,
             IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) override;
 
-    virtual void MediaSession_RTPInfo(IN IMediaRTPInfoMsgParam* pMsg) override;
-    virtual void MediaSession_DRAInfo(IN IMediaDRAMsgParam* pMsg) override;
-
 public:
     virtual void SetMediaReportEventListener(IN IMediaReportEventListener* pListener) override;
     virtual void SetQosListener(IN IMediaQosEventListener* pListener) override;

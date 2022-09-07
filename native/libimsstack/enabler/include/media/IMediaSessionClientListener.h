@@ -54,8 +54,5 @@ public:
      */
     virtual void MediaSession_NotifyQos(IMS_UINTP nNegoId, IMS_BOOL bSuccess,
             MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) = 0;
-
-    virtual void MediaSession_RTPInfo(IN IMediaRTPInfoMsgParam* pMsg) = 0;
-    virtual void MediaSession_DRAInfo(IN IMediaDRAMsgParam* pMsg) = 0;
 };
 #endif /* _INTERFACE_MEDIA_SESSION_LISTENER_H_ */

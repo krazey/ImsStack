@@ -64,61 +64,28 @@ MediaNego::~MediaNego()
 }
 
 PUBLIC
-void MediaNego::Create(IN MEDIA_SERVICE_TYPE eServiceType)
+void MediaNego::CreateProfile(IN MediaEnvironment* pMediaEnvironment)
 {
-    IMS_TRACE_D("Create Enter eServiceType[%d]", eServiceType, 0, 0);
+    if (pMediaEnvironment == NULL)
+    {
+        return;
+    }
+
+    m_pMediaEnvironment = pMediaEnvironment;
+
+    IMS_TRACE_D("CreateProfile() - eServiceType[%d]", pMediaEnvironment->eServiceType, 0, 0);
     m_pAudioNego = new AudioNego(GetSlotId());
     m_pVideoNego = new VideoNego(GetSlotId());
     m_pTextNego = new TextNego(GetSlotId());
-}
 
-PUBLIC
-IMS_BOOL MediaNego::UpdateMediaEnvironment(IN MediaEnvironment* pEnvironment)
-{
-    IMS_BOOL bNeedToCreateProfile = IMS_FALSE;
+    m_pAudioNego->CreateProfiles(m_pMediaEnvironment,
+            MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
 
-    if (pEnvironment == IMS_NULL)
-    {
-        IMS_TRACE_I("SetMediaEnvironment() - invalid pEnvironment", 0, 0, 0);
-        return IMS_FALSE;
-    }
+    m_pVideoNego->CreateProfiles(m_pMediaEnvironment,
+            MediaConfigUtil::GetVideoConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
 
-    IMS_TRACE_D("SetMediaEnvironment() -  eNetworkType[%d], eServiceType[%d]",
-            (IMS_UINT16)pEnvironment->eNetworkType, pEnvironment->eServiceType, 0);
-
-    if (m_pMediaEnvironment == IMS_NULL ||
-            (m_pMediaEnvironment->eServiceType != pEnvironment->eServiceType) ||
-            (m_pMediaEnvironment->eNetworkType != pEnvironment->eNetworkType))
-    {
-        bNeedToCreateProfile = IMS_TRUE;
-    }
-
-    m_pMediaEnvironment = pEnvironment;
-
-    if (bNeedToCreateProfile == IMS_TRUE)
-    {
-        if (m_pAudioNego != IMS_NULL)
-        {
-            m_pAudioNego->CreateProfiles(m_pMediaEnvironment,
-                    MediaConfigUtil::GetAudioConfig(
-                            GetSlotId(), m_pMediaEnvironment->eServiceType));
-        }
-
-        if (m_pVideoNego != IMS_NULL)
-        {
-            m_pVideoNego->CreateProfiles(m_pMediaEnvironment,
-                    MediaConfigUtil::GetVideoConfig(
-                            GetSlotId(), m_pMediaEnvironment->eServiceType));
-        }
-
-        if (m_pTextNego != IMS_NULL)
-        {
-            m_pTextNego->CreateProfiles(m_pMediaEnvironment,
-                    MediaConfigUtil::GetTextConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
-        }
-    }
-
-    return IMS_TRUE;
+    m_pTextNego->CreateProfiles(m_pMediaEnvironment,
+            MediaConfigUtil::GetTextConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
 }
 
 PUBLIC

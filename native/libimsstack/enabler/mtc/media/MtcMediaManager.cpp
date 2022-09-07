@@ -148,18 +148,6 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyQos(IN IMS_UINTP nNegoId
             MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaType));
 }
 
-PUBLIC VIRTUAL void MtcMediaManager::MediaSession_RTPInfo(IN IMediaRTPInfoMsgParam* pMsg)
-{
-    IMS_TRACE_D("MediaSession_RTPInfo", 0, 0, 0);
-    UNUSED_PARAM(pMsg);
-}
-
-PUBLIC VIRTUAL void MtcMediaManager::MediaSession_DRAInfo(IN IMediaDRAMsgParam* pMsg)
-{
-    IMS_TRACE_D("MediaSession_DRAInfo", 0, 0, 0);
-    UNUSED_PARAM(pMsg);
-}
-
 PUBLIC VIRTUAL void MtcMediaManager::SetMediaReportEventListener(
         IN IMediaReportEventListener* pListener)
 {

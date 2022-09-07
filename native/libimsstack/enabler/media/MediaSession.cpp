@@ -104,16 +104,20 @@ PUBLIC VIRTUAL void MediaSession::SetMtcListener(
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::SetEnvironment(IN MediaEnvironment* pEnvironment)
 {
-    if (pEnvironment == NULL)
+    if (pEnvironment == IMS_NULL)
     {
         return IMS_FALSE;
     }
+
+    IMS_TRACE_I("SetEnvironment() - CallKey[%d], eServiceType[%d]", m_nCallKey,
+            pEnvironment->eServiceType, 0);
 
     if (pEnvironment->eServiceType == MEDIA_SERVICE_EMERGENCY &&
             pEnvironment->pIService != IMS_NULL)
     {
         IMS_BOOL bIsIPv6 = pEnvironment->pIService->GetIpAddress().IsIPv6Address();
         MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
+
         if (pMediaManager != IMS_NULL)
         {
             pMediaManager->GetResourceManager()->UpdatePdnResource(
@@ -121,35 +125,13 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::SetEnvironment(IN MediaEnvironment* pEnvir
         }
     }
 
-    // Set the precondition
-    IMS_BOOL bNeedToCreateProfile = IMS_FALSE;
-
-    if (m_pEnvironment == IMS_NULL)
+    if (m_pEnvironment != IMS_NULL)
     {
-        IMS_TRACE_I("SetEnvironment() - CallKey[%d], eServiceType[%d]", m_nCallKey,
-                pEnvironment->eServiceType, 0);
-        m_pEnvironment = pEnvironment;
-        bNeedToCreateProfile = IMS_TRUE;
-    }
-    else if (m_pEnvironment->eServiceType != pEnvironment->eServiceType ||
-            m_pEnvironment->eNetworkType != pEnvironment->eNetworkType)
-    {
-        IMS_TRACE_I("SetEnvironment() - CallKey[%d], eServiceType[%d]->[%d]", m_nCallKey,
-                m_pEnvironment->eServiceType, pEnvironment->eServiceType);
         delete m_pEnvironment;
-        m_pEnvironment = pEnvironment;
-        bNeedToCreateProfile = IMS_TRUE;
     }
 
-    if (bNeedToCreateProfile == IMS_TRUE)
-    {
-        for (IMS_UINT32 nIndex = 0; nIndex < m_objMapMediaNego.GetSize(); nIndex++)
-        {
-            MediaNego* pMediaNego = m_objMapMediaNego.GetValueAt(nIndex);
-            pMediaNego->UpdateMediaEnvironment(m_pEnvironment);
-        }
-    }
-    return IMS_TRUE;  // do it later
+    m_pEnvironment = pEnvironment;
+    return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
@@ -168,7 +150,7 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
 
     AudioNego* pAudioNego = pMediaNego->GetAudioNego();
 
-    if (pAudioNego != NULL)
+    if (pAudioNego != IMS_NULL)
     {
         m_objAudioController.CreateSession(this, nMediaNego,
                 MediaConfigUtil::GetAudioConfig(m_nSlotId, m_pEnvironment->eServiceType));
@@ -184,7 +166,7 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
 
     TextNego* pTextNego = pMediaNego->GetTextNego();
 
-    if (pTextNego != IMS_NULL)
+    if (pTextNego != IMS_NULL && MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
     {
         m_objTextController.CreateSession(
                 this, MediaConfigUtil::GetTextConfig(m_nSlotId, m_pEnvironment->eServiceType));
@@ -659,8 +641,7 @@ MediaNego* MediaSession::CreateMediaNego(IN IMS_UINTP nNegoId)
         return IMS_NULL;
     }
 
-    pMediaNego->Create(m_pEnvironment->eServiceType);
-    pMediaNego->UpdateMediaEnvironment(m_pEnvironment);
+    pMediaNego->CreateProfile(m_pEnvironment);
 
     // Copy Existed Media Nego with nego id
     if (nNegoId != 0)
@@ -874,7 +855,7 @@ IMS_BOOL MediaSession::OnResponse(IN IMS_UINTP nParam)
 {
     ImsMediaResponseConfigParam* pParam = reinterpret_cast<ImsMediaResponseConfigParam*>(nParam);
 
-    if (pParam != NULL)
+    if (pParam != IMS_NULL)
     {
         IMS_TRACE_I("OnResponse() - eMediaType[%d], eResult[%d]", pParam->m_eMediaType,
                 pParam->m_eResult, 0);
@@ -888,7 +869,7 @@ IMS_BOOL MediaSession::OnResponse(IN IMS_UINTP nParam)
 PROTECTED
 IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
 {
-    if (m_pClientListener == NULL)
+    if (m_pClientListener == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -900,7 +881,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
             ImsMediaResponseConfigParam* pParam =
                     reinterpret_cast<ImsMediaResponseConfigParam*>(nParam);
 
-            if (pParam != NULL)
+            if (pParam != IMS_NULL)
             {
                 IMS_TRACE_I("OnNotify() - eMediaType[%d]", pParam->m_eMediaType, 0, 0);
                 m_pClientListener->MediaSession_Notify(
@@ -915,7 +896,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
             ImsMediaNotifyInactivityParam* pParam =
                     reinterpret_cast<ImsMediaNotifyInactivityParam*>(nParam);
 
-            if (pParam != NULL)
+            if (pParam != IMS_NULL)
             {
                 IMS_TRACE_I("OnNotify() - eMediaProtocolType[%d], eMediaType[%d]",
                         pParam->m_eMediaType, pParam->m_eMediaProtocolType, 0);
@@ -940,7 +921,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
         {
             ImsMediaNotifyQosParam* pParam = reinterpret_cast<ImsMediaNotifyQosParam*>(nParam);
 
-            if (pParam != NULL)
+            if (pParam != IMS_NULL)
             {
                 IPAddress objIpAddr = pParam->m_objIpAddr;
                 IMS_SINT32 nPort = pParam->m_nPort;
@@ -952,13 +933,15 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                 ImsMediaBasicSessionInfoParam* pBasicSessionInfo =
                         GetBasicSessionInfofromRemoteArress(objIpAddr.ToString(), nPort);
 
-                if (pBasicSessionInfo != IMS_NULL)
+                if (pBasicSessionInfo == IMS_NULL)
                 {
-                    m_pClientListener->MediaSession_NotifyQos(
-                            pBasicSessionInfo->m_nNegoId, bResult, pParam->m_eMediaType);
-                    delete pBasicSessionInfo;
+                    delete pParam;
+                    return IMS_FALSE;
                 }
 
+                m_pClientListener->MediaSession_NotifyQos(
+                        pBasicSessionInfo->m_nNegoId, bResult, pParam->m_eMediaType);
+                delete pBasicSessionInfo;
                 delete pParam;
                 return IMS_TRUE;
             }
@@ -977,7 +960,7 @@ IMS_BOOL MediaSession::OnSendDtmf(IN IMS_UINTP nParam)
 {
     ImsMediaMsgDtmfParam* pParam = reinterpret_cast<ImsMediaMsgDtmfParam*>(nParam);
 
-    if (pParam != NULL)
+    if (pParam != IMS_NULL)
     {
         m_objAudioController.SendDtmf(pParam->m_dtmfCode);
         delete pParam;

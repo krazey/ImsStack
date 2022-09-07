@@ -42,7 +42,7 @@ PUBLIC TextMediaSession::TextMediaSession(IN IMS_SINT32 nSlotId) :
 
 PUBLIC VIRTUAL TextMediaSession::~TextMediaSession()
 {
-    IMS_TRACE_I("~TextMediaSession()", 0, 0, 0);
+    IMS_TRACE_I("~TextMediaSession() - state[%d]", GetState(), 0, 0);
 }
 
 PUBLIC void TextMediaSession::SetConfig(TextConfiguration* pConfig)
