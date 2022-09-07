@@ -485,9 +485,9 @@ TEST_F(MtcCallTest, RunPendingOperationByRefreshCompleted)
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
     std::function<void()> objOperation = [&]()
-            {
-                return objCall.RunPendingOperation();
-            };
+    {
+        return objCall.RunPendingOperationIfPossible();
+    };
     OperationAsyncRunner* pRunner = new OperationAsyncRunner(objOperation);
     ON_CALL(objContext, GetAsyncRunner(_))
             .WillByDefault(Return(pRunner));

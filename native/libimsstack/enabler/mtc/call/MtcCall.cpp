@@ -49,13 +49,14 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objService(objService),
         m_nKey(CreateCallKey()),
         m_bHeldByMe(IMS_FALSE),
+        m_bRunningPendingOperation(IMS_FALSE),
         m_objCallInfo(objCallInfo),
         m_objParticipantInfo(ParticipantInfo(*this)),
         m_pUpdatingInfo(IMS_NULL),
         m_lstSessions(ImsList<IMtcSession*>()),
-        m_objPendingOperation(),
         m_objStateMachine(
                 MtcCallStateMachine(*this, CallStateName::IDLE, std::move(pStateFactory), this)),
+        m_objPendingOperationHolder(),
         m_objTimer(MtcTimerWrapper()),
         m_objUiNotifier(MtcUiNotifier(*this)),
         m_objMediaManager(MtcMediaManager(*this)),
@@ -86,7 +87,6 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
     m_lstSessions.Clear();
 
     delete m_pUssiController;
-    m_objPendingOperation = {};
 }
 
 PUBLIC VIRTUAL void MtcCall::HandleIncoming(IN ISession* piSession)
@@ -243,12 +243,13 @@ PUBLIC VIRTUAL void MtcCall::Hold(IN MediaInfo* pMediaInfo)
         return;
     }
 
-    if (IsInUpdating())
+    if (m_objPendingOperationHolder.IsNeedToAdd(GetState(), *this))
     {
-        m_objPendingOperation = [pMediaInfo](IMtcCallState* pState)
-        {
-            return pState->Hold(pMediaInfo);
-        };
+        m_objPendingOperationHolder.PushPendingOperation(
+                [pMediaInfo](IMtcCallState* pState)
+                {
+                    return pState->Hold(pMediaInfo);
+                });
         return;
     }
 
@@ -269,12 +270,13 @@ PUBLIC VIRTUAL void MtcCall::Resume(IN MediaInfo* pMediaInfo)
         return;
     }
 
-    if (IsInUpdating())
+    if (m_objPendingOperationHolder.IsNeedToAdd(GetState(), *this))
     {
-        m_objPendingOperation = [pMediaInfo](IMtcCallState* pState)
-        {
-            return pState->Resume(pMediaInfo);
-        };
+        m_objPendingOperationHolder.PushPendingOperation(
+                [pMediaInfo](IMtcCallState* pState)
+                {
+                    return pState->Resume(pMediaInfo);
+                });
         return;
     }
 
@@ -323,12 +325,13 @@ PUBLIC VIRTUAL void MtcCall::Update(IN CallType eCallType, IN MediaInfo* pMediaI
         return;
     }
 
-    if (IsInUpdating())
+    if (m_objPendingOperationHolder.IsNeedToAdd(GetState(), *this))
     {
-        m_objPendingOperation = [eCallType, pMediaInfo](IMtcCallState* pState)
-        {
-            return pState->Update(eCallType, pMediaInfo);
-        };
+        m_objPendingOperationHolder.PushPendingOperation(
+                [eCallType, pMediaInfo](IMtcCallState* pState)
+                {
+                    return pState->Update(eCallType, pMediaInfo);
+                });
         return;
     }
 
@@ -425,6 +428,16 @@ PUBLIC VIRTUAL void MtcCall::SendUssd(IN const AString& strUssd)
 PUBLIC VIRTUAL void MtcCall::HandleIpcanChanged()
 {
     IMS_TRACE_I("HandleIpcanChanged", 0, 0, 0);
+
+    if (m_objPendingOperationHolder.IsNeedToAdd(GetState(), *this))
+    {
+        m_objPendingOperationHolder.PushPendingOperation(
+                [](IMtcCallState* pState)
+                {
+                    return pState->HandleIpcanChanged();
+                });
+        return;
+    }
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
@@ -1034,11 +1047,7 @@ PUBLIC VIRTUAL void MtcCall::Refresh_NotifyCompleted(IN ISipClientConnection* pi
                 return pState->Refresh_NotifyCompleted(piScc);
             });
 
-    m_objContext.GetAsyncRunner([&]()
-            {
-                return RunPendingOperation();
-            });
-
+    RunPendingOperationIfPossible();
 }
 
 PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTerminated()
@@ -1124,7 +1133,7 @@ PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
             "OnStateTransition : key[%d] state[%d]", m_nKey, static_cast<IMS_SINT32>(eState), 0);
 
     GetCallStateProxy().UpdateCallState(m_nKey, eState, GetCallType(), m_objCallInfo.bEmergency);
-    RunPendingOperation();
+    RunPendingOperationIfPossible();
 }
 
 PUBLIC VIRTUAL void MtcCall::ClientConnection_NotifyResponse(
@@ -1250,21 +1259,35 @@ PUBLIC VIRTUAL void MtcCall::OnSrvccStateUpdated(IN SrvccState eState)
             });
 }
 
-PUBLIC
-void MtcCall::RunPendingOperation()
+PUBLIC void MtcCall::RunPendingOperationIfPossible()
 {
-    if (IsInUpdating())
-    {
-        return;
-    }
+    IMS_TRACE_I(
+            "RunPendingOperationIfPossible : state[%d]", static_cast<IMS_SINT32>(GetState()), 0, 0);
 
-    if (!m_objPendingOperation)
+    if (GetState() == CallStateName::ESTABLISHED && !m_bRunningPendingOperation)
     {
-        return;
-    }
+        m_bRunningPendingOperation = IMS_TRUE;
 
-    m_objStateMachine.RunStateOperation(m_objPendingOperation);
-    m_objPendingOperation = {};
+        while (m_objPendingOperationHolder.HasPendingOperation() &&
+                GetState() == CallStateName::ESTABLISHED)
+        {
+            if (m_objPendingOperationHolder.IsNeedToAdd(CallStateName::ESTABLISHED, *this))
+            {
+                m_objContext.GetAsyncRunner(
+                        [&]()
+                        {
+                            return RunPendingOperationIfPossible();
+                        });
+                break;
+            }
+            else
+            {
+                m_objStateMachine.RunStateOperation(
+                        m_objPendingOperationHolder.PopPendingOperation());
+            }
+        }
+        m_bRunningPendingOperation = IMS_FALSE;
+    }
 }
 
 PRIVATE
@@ -1314,30 +1337,4 @@ void MtcCall::OnAttached()
                     return pState->OnAttached();
                 });
     }
-}
-
-PRIVATE
-IMS_BOOL MtcCall::IsInUpdating() const
-{
-    CallStateName eState = GetState();
-
-    if (eState == CallStateName::UPDATING)
-    {
-        IMS_TRACE_D("IsInOperating :: updating", 0, 0, 0);
-        return IMS_TRUE;
-    }
-
-    if (eState != CallStateName::ESTABLISHED)
-    {
-        return IMS_FALSE;
-    }
-
-    IMtcSession* piMtcSession = GetSession();
-    if (piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress())
-    {
-        IMS_TRACE_D("IsInOperating :: refreshing", 0, 0, 0);
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
 }

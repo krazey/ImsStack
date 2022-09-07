@@ -28,6 +28,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
+#include "call/MtcPendingOperationHolder.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "call/block/IMtcBlockChecker.h"
@@ -253,7 +254,7 @@ public:
 
     void OnSrvccStateUpdated(IN SrvccState eState) override;
 
-    void RunPendingOperation();
+    void RunPendingOperationIfPossible();
 
 private:
     static IMutex* s_pKeyCreationLock;
@@ -261,7 +262,6 @@ private:
     CallKey CreateCallKey();
     void OnInternalFailure();
     void OnAttached();
-    IMS_BOOL IsInUpdating() const;
 
     IMtcContext& m_objContext;
     IMtcService& m_objService;
@@ -269,13 +269,14 @@ private:
     CallKey m_nKey;
 
     IMS_BOOL m_bHeldByMe;
+    IMS_BOOL m_bRunningPendingOperation;
 
     CallInfo m_objCallInfo;
     ParticipantInfo m_objParticipantInfo;
     UpdatingInfo* m_pUpdatingInfo;
     ImsList<IMtcSession*> m_lstSessions;
-    std::function<IMtcCall::State(IMtcCallState*)> m_objPendingOperation;
     MtcCallStateMachine m_objStateMachine;
+    MtcPendingOperationHolder m_objPendingOperationHolder;
     MtcTimerWrapper m_objTimer;
     MtcUiNotifier m_objUiNotifier;
     MtcMediaManager m_objMediaManager;
