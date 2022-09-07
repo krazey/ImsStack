@@ -15,14 +15,22 @@
  */
 
 #include <gtest/gtest.h>
+#include "CallReasonInfo.h"
+#include "CarrierConfig.h"
+#include "ImsAosParameter.h"
+#include "MockIMtcService.h"
+#include "call/IMtcCall.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockIMessage.h"
-#include "call/IMtcCall.h"
-#include "call/MockIMtcCallContext.h"
-#include "CallReasonInfo.h"
+#include "helper/MockIMtcAosConnector.h"
+#include "sipcore/ISipHeader.h"
+#include "sipcore/MockISipMessage.h"
+#include "sipcore/SipStatusCode.h"
 
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -33,40 +41,400 @@ class StartErrorHandlerTest : public ::testing::Test
 {
 public:
     MockIMtcCallContext objCallContext;
+    MockIMtcService objMtcService;
+    MockIMtcAosConnector objAosConnector;
     MockIMessage objMessage;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
+    CallInfo objCallInfo;
+
+    StartErrorHandler* pHandler;
 
 protected:
     virtual void SetUp() override
     {
+        ON_CALL(objCallContext, GetService)
+                .WillByDefault(ReturnRef(objMtcService));
+        ON_CALL(objMtcService, GetAosConnector)
+                .WillByDefault(Return(&objAosConnector));
+
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        ON_CALL(objCallContext, GetCallInfo)
+                .WillByDefault(ReturnRef(objCallInfo));
+
+        pHandler = new StartErrorHandler(objCallContext);
     }
 
-    virtual void TearDown() override { delete pConfigurationProxy; }
+    virtual void TearDown() override
+    {
+        delete pConfigurationProxy;
+        delete pHandler;
+    }
+
+    void SetMessageCode(IN IMS_SINT32 nStatusCode)
+    {
+        ON_CALL(objMessage, GetStatusCode)
+                .WillByDefault(Return(nStatusCode));
+    }
+
+    void SetCsfbConfig(IN IMS_SINT32 nStatusCode)
+    {
+        ON_CALL(*pConfigurationManager, IsRejectCodeForCsfb(nStatusCode))
+                .WillByDefault(Return(IMS_TRUE));
+    }
+
+    void SetTcallTimerConfig(IN IMS_SINT32 nPolicy)
+    {
+        ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteCall)
+                .WillByDefault(Return(nPolicy));
+        ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVowifiCall)
+                .WillByDefault(Return(nPolicy));
+    }
+
+    IMS_BOOL CheckHandleResult(IN IMS_SINT32 nCode)
+    {
+        CallReasonInfo objResult = pHandler->Handle(&objMessage);
+        return objResult.nCode == nCode;
+    }
+
+    IMS_BOOL CheckHandleResult(IN IMS_SINT32 nCode, IN IMS_SINT32 nExtraCode)
+    {
+        CallReasonInfo objResult = pHandler->Handle(&objMessage);
+        return objResult.nCode == nCode && objResult.nExtraCode == nExtraCode;
+    }
 };
 
-TEST_F(StartErrorHandlerTest, HandleReturnsCsfbReasonIf701IsIncludedInCsfbConfiguration)
+TEST_F(StartErrorHandlerTest, HandleReturnsCsfbByTransactionTimeoutOfEcc)
 {
-    const IMS_SINT32 REJECT_CODE = 701;
+    objCallInfo.bEmergency = IMS_TRUE;
+    SetMessageCode(SipStatusCode::SC_INVALID);
 
-    ON_CALL(*pConfigurationManager, IsRejectCodeForCsfb(REJECT_CODE))
+    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+}
+
+TEST_F(StartErrorHandlerTest, HandleReturnsCsfbByNullIMessageOfEcc)
+{
+    objCallInfo.bEmergency = IMS_TRUE;
+    CallReasonInfo objResult = pHandler->Handle(IMS_NULL);
+    EXPECT_TRUE(objResult.nCode == CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+}
+
+TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoLte)
+{
+    SetMessageCode(SipStatusCode::SC_INVALID);
+    ON_CALL(objMtcService, IsWlanIpCanType)
+            .WillByDefault(Return(IMS_FALSE));
+
+    SetTcallTimerConfig(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END);
+    EXPECT_CALL(objAosConnector, Control(_))
+            .Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT));
+
+    SetTcallTimerConfig(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT))
+            .Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT));
+
+    SetTcallTimerConfig(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB);
+    EXPECT_CALL(objAosConnector, Control(_))
+            .Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+
+    SetTcallTimerConfig(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE);
+    EXPECT_CALL(objAosConnector, Control(_))
+            .Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+
+    SetTcallTimerConfig(
+            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE))
+            .Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT));
+
+    SetTcallTimerConfig(
+            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT))
+            .Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT));
+
+    SetTcallTimerConfig(
+            CarrierConfig::ImsVoice::
+                    MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB))
+            .Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+}
+
+TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
+{
+    SetMessageCode(SipStatusCode::SC_INVALID);
+    ON_CALL(objMtcService, IsWlanIpCanType)
             .WillByDefault(Return(IMS_TRUE));
 
-    CallInfo objCallInfo;  // bEmergency is false.
-    ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+    SetTcallTimerConfig(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END);
+    EXPECT_CALL(objAosConnector, Control(_))
+            .Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT));
 
-    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(REJECT_CODE));
+    SetTcallTimerConfig(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT))
+            .Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT));
 
-    StartErrorHandler objHandler(objCallContext);
-    CallReasonInfo objResult = objHandler.Handle(&objMessage);
+    SetTcallTimerConfig(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB);
+    EXPECT_CALL(objAosConnector, Control(_))
+            .Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
 
-    EXPECT_EQ(
-            CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL),
-            objResult);
+    SetTcallTimerConfig(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE);
+    EXPECT_CALL(objAosConnector, Control(_))
+            .Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+
+    SetTcallTimerConfig(
+            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE))
+            .Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT));
+
+    SetTcallTimerConfig(
+            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT))
+            .Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT));
+
+    SetTcallTimerConfig(
+            CarrierConfig::ImsVoice::
+                    MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB))
+            .Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+}
+
+TEST_F(StartErrorHandlerTest, HandleReturnsCsfbIfStatuscodeIsIncludedInCsfbConfiguration)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_380;
+    SetMessageCode(ANY_REJECT_CODE);
+    SetCsfbConfig(ANY_REJECT_CODE);
+
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+}
+
+TEST_F(StartErrorHandlerTest, Handle3xxResponses)
+{
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_300;
+    SetMessageCode(ANY_REJECT_CODE);
+
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, ANY_REJECT_CODE));
+}
+
+TEST_F(StartErrorHandlerTest, Handle380Response)
+{
+    // TODO: more tests
+    SetMessageCode(SipStatusCode::SC_380);
+    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+}
+
+TEST_F(StartErrorHandlerTest, Handle4xxResponses)
+{
+    SetMessageCode(SipStatusCode::SC_400);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_BAD_REQUEST, SipStatusCode::SC_400));
+
+    SetMessageCode(SipStatusCode::SC_401);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_CLIENT_ERROR, SipStatusCode::SC_401));
+
+    SetMessageCode(SipStatusCode::SC_405);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_METHOD_NOT_ALLOWED, SipStatusCode::SC_405));
+
+    SetMessageCode(SipStatusCode::SC_406);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_ACCEPTABLE, SipStatusCode::SC_406));
+
+    SetMessageCode(SipStatusCode::SC_408);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REQUEST_TIMEOUT, SipStatusCode::SC_408));
+
+    SetMessageCode(SipStatusCode::SC_410);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_REACHABLE, SipStatusCode::SC_410));
+
+    SetMessageCode(SipStatusCode::SC_413);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REQUEST_ENTITY_TOO_LARGE, SipStatusCode::SC_413));
+
+    SetMessageCode(SipStatusCode::SC_414);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REQUEST_URI_TOO_LARGE, SipStatusCode::SC_414));
+
+    SetMessageCode(SipStatusCode::SC_415);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_SUPPORTED, SipStatusCode::SC_415));
+
+    SetMessageCode(SipStatusCode::SC_416);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_SUPPORTED, SipStatusCode::SC_416));
+
+    SetMessageCode(SipStatusCode::SC_420);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_SUPPORTED, SipStatusCode::SC_420));
+
+    SetMessageCode(SipStatusCode::SC_421);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_EXTENSION_REQUIRED, SipStatusCode::SC_421));
+
+    SetMessageCode(SipStatusCode::SC_422);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_INTERVAL_TOO_BRIEF, SipStatusCode::SC_422));
+
+    SetMessageCode(SipStatusCode::SC_480);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_TEMPORARILY_UNAVAILABLE, SipStatusCode::SC_480));
+
+    SetMessageCode(SipStatusCode::SC_481);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_TRANSACTION_DOES_NOT_EXIST, SipStatusCode::SC_481));
+
+    SetMessageCode(SipStatusCode::SC_482);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_LOOP_DETECTED, SipStatusCode::SC_482));
+
+    SetMessageCode(SipStatusCode::SC_483);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_TOO_MANY_HOPS, SipStatusCode::SC_483));
+
+    SetMessageCode(SipStatusCode::SC_484);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_BAD_ADDRESS, SipStatusCode::SC_484));
+
+    SetMessageCode(SipStatusCode::SC_485);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_AMBIGUOUS, SipStatusCode::SC_485));
+
+    SetMessageCode(SipStatusCode::SC_486);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_BUSY, SipStatusCode::SC_486));
+
+    SetMessageCode(SipStatusCode::SC_487);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REQUEST_CANCELLED, SipStatusCode::SC_487));
+
+    SetMessageCode(SipStatusCode::SC_488);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_ACCEPTABLE, SipStatusCode::SC_488));
+
+    SetMessageCode(SipStatusCode::SC_491);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REQUEST_PENDING, SipStatusCode::SC_491));
+
+    SetMessageCode(SipStatusCode::SC_493);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_UNDECIPHERABLE, SipStatusCode::SC_493));
+
+    SetMessageCode(SipStatusCode::SC_499);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_REACHABLE, SipStatusCode::SC_499));
+
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_412;
+    SetMessageCode(ANY_REJECT_CODE);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, ANY_REJECT_CODE));
+}
+
+TEST_F(StartErrorHandlerTest, Handle403Response)
+{
+    SetMessageCode(SipStatusCode::SC_403);
+    ON_CALL(*pConfigurationManager, GetPolicyFor403ResponseForInvite)
+                .WillByDefault(Return(CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL));
+    EXPECT_CALL(objAosConnector, Control(_))
+            .Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
+
+    ON_CALL(*pConfigurationManager, GetPolicyFor403ResponseForInvite)
+                .WillByDefault(Return(
+                CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL_AND_RECOVER_REGISTRATION));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE))
+            .Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
+
+    ON_CALL(*pConfigurationManager, GetPolicyFor403ResponseForInvite)
+                .WillByDefault(Return(
+                CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REFRESH))
+            .Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
+}
+
+TEST_F(StartErrorHandlerTest, Handle404Response)
+{
+    SetMessageCode(SipStatusCode::SC_404);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_FOUND, SipStatusCode::SC_404));
+
+    objCallInfo.bUssi = IMS_TRUE;
+    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+}
+
+TEST_F(StartErrorHandlerTest, Handle407Response)
+{
+    SetMessageCode(SipStatusCode::SC_407);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_PROXY_AUTHENTICATION_REQUIRED, SipStatusCode::SC_407));
+
+    objCallInfo.bEmergency = IMS_TRUE;
+    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+}
+
+TEST_F(StartErrorHandlerTest, Handle5xxResponses)
+{
+    SetMessageCode(SipStatusCode::SC_501);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_INTERNAL_ERROR, SipStatusCode::SC_501));
+
+    SetMessageCode(SipStatusCode::SC_502);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_502));
+
+    SetMessageCode(SipStatusCode::SC_505);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_505));
+
+    SetMessageCode(SipStatusCode::SC_513);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_513));
+
+    SetMessageCode(SipStatusCode::SC_580);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_580));
+}
+
+TEST_F(StartErrorHandlerTest, Handle500Response)
+{
+    // TODO: more tests
+    SetMessageCode(SipStatusCode::SC_500);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_500));
+}
+
+TEST_F(StartErrorHandlerTest, Handle503Response)
+{
+    // TODO: more tests
+    SetMessageCode(SipStatusCode::SC_503);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503));
+}
+
+TEST_F(StartErrorHandlerTest, Handle504Response)
+{
+    // TODO: more tests
+    SetMessageCode(SipStatusCode::SC_504);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+}
+
+TEST_F(StartErrorHandlerTest, Handle6xxResponses)
+{
+    SetMessageCode(SipStatusCode::SC_600);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_BUSY, SipStatusCode::SC_600));
+
+    SetMessageCode(SipStatusCode::SC_603);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_USER_REJECTED, SipStatusCode::SC_603));
+
+    SetMessageCode(SipStatusCode::SC_604);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_REACHABLE, SipStatusCode::SC_604));
+
+    SetMessageCode(SipStatusCode::SC_606);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_ACCEPTABLE, SipStatusCode::SC_606));
+
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_699;
+    SetMessageCode(ANY_REJECT_CODE);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_GLOBAL_ERROR, ANY_REJECT_CODE));
+}
+
+TEST_F(StartErrorHandlerTest, ExtraCodeIsSetByReasonHeader)
+{
+    ImsList<AString> objHeaders;
+    AString strReasonHeaderName = "Reason";
+    objHeaders.Append("Reason: SIP;cause=12345;text=\"any resason\"");
+    MockISipMessage objSipMessage;
+    ON_CALL(objMessage, GetMessage)
+            .WillByDefault(Return(&objSipMessage));
+    ON_CALL(objSipMessage, GetHeaders(ISipHeader::UNKNOWN, strReasonHeaderName))
+            .WillByDefault(Return(objHeaders));
+
+    SetMessageCode(SipStatusCode::SC_300);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, 12345));
 }
 
 }  // namespace android

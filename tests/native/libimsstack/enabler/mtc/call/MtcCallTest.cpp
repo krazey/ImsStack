@@ -1086,7 +1086,7 @@ TEST_F(MtcCallTest, CreateClientConnectionReturnsNullIfISessionReturnsNull)
             .Times(1)
             .WillOnce(Return(nullptr));
 
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));\
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
     objCall.CreateSession(&objSession);
 
     EXPECT_EQ(nullptr, objCall.CreateClientConnection(eAnyMethod));

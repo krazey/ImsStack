@@ -63,6 +63,7 @@ private:
 
     CallReasonInfo Handle6xxResponse(IN const IMessage& objMessage) const;
 
+    IMS_SINT32 GetDefaultExtraCode(IN const IMessage& objMessage) const;
     IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage) const;
     IMS_BOOL IsRetry1xRequiredForNormalCall(IN const IMessage& objMessage) const;
     IMS_BOOL IsNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const;
