@@ -28,4 +28,13 @@ protected:
     virtual void TearDown() override {}
 };
 
+TEST_F(ConferenceUtilsTest, GetUserPart)
+{
+    AString strAnyUri = "<sip:anyname1;userparam@ims.google.com>;anyheaderparam";
+    AString strUserPart;
+
+    ConferenceUtils::GetUserPart(strAnyUri, strUserPart);
+    EXPECT_STREQ("anyname1", strUserPart.GetStr());
+}
+
 }  // namespace android

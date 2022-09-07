@@ -25,6 +25,7 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
+// this can move into MessageUtil
 PUBLIC GLOBAL const AString& ConferenceUtils::GetUserPart(
         IN const AString& strUri, OUT AString& strUserPart)
 {
