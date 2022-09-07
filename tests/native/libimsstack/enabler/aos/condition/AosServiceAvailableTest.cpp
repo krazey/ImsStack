@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "AoSReason.h"
+#include "AosReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosServiceAvailableListener.h"
@@ -324,8 +324,8 @@ TEST_F(AosServiceAvailableTest, RequestCommand)
     pAosServiceAvailable->SetListener(static_cast<IAosServiceAvailableListener*>(&objIListener3));
     EXPECT_EQ(GetListeners().GetSize(), 3);
 
-    RequestCommand(AosCondition::REQUEST_STOP, AoSReason::NOT_SPECIFIED);
-    RequestCommand(AosCondition::REQUEST_DESTROY, AoSReason::NOT_SPECIFIED);
-    RequestCommand(AosCondition::REQUEST_RECOVER, AoSReason::NOT_SPECIFIED);
-    RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AoSReason::NOT_SPECIFIED);
+    RequestCommand(AosCondition::REQUEST_STOP, AosReason::NOT_SPECIFIED);
+    RequestCommand(AosCondition::REQUEST_DESTROY, AosReason::NOT_SPECIFIED);
+    RequestCommand(AosCondition::REQUEST_RECOVER, AosReason::NOT_SPECIFIED);
+    RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AosReason::NOT_SPECIFIED);
 }

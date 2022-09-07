@@ -27,7 +27,7 @@ public:
         // AoSRegMode class
         STATE_REGISTRATION_MODE,
 
-        // AoSReason class
+        // AosReason class
         STATE_IMS_DISCONNECTED_REASON,
         STATE_IMS_SUSPENDED_REASON,
 

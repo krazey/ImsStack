@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "AoSReason.h"
+#include "AosReason.h"
 #include "CarrierConfig.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
@@ -553,7 +553,7 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test1)
 
     SetNetSrvIn(IMS_TRUE);
     SetHandleState(AosHandle::STATE_CONNECTED);
-    SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    SetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
     SetDataConnected(IMS_TRUE);
     AddBlock(AosHandle::BLOCK_VILTE_CAPABILITY);
 
@@ -596,7 +596,7 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test1)
 
     m_pAosHandleMtc->NetTracker_StatusChanged();
 
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NONE);
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
 }
 
@@ -636,7 +636,7 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test2)
 
     m_pAosHandleMtc->NetTracker_StatusChanged();
 
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NO_LTE_COVERAGE);
 }
 
 TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test3)
@@ -671,7 +671,7 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test3)
 
     m_pAosHandleMtc->NetTracker_StatusChanged();
 
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NONE);
 }
 
 TEST_F(AosHandleMtcTest, InitializeServiceBlock_Test)
@@ -982,7 +982,7 @@ TEST_F(AosHandleMtcTest, ProcessImsSuspended_Test1)
 
     SetHandleState(AosHandle::STATE_DISCONNECTED);
     EXPECT_FALSE(ProcessImsSuspended(0));
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NONE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessImsSuspended_Test2)
@@ -992,7 +992,7 @@ TEST_F(AosHandleMtcTest, ProcessImsSuspended_Test2)
 
     SetHandleState(AosHandle::STATE_CONNECTED);
     EXPECT_FALSE(ProcessImsSuspended(0));
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NONE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NONE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessImsSuspended_Test3)
@@ -1005,12 +1005,12 @@ TEST_F(AosHandleMtcTest, ProcessImsSuspended_Test3)
     m_pAosHandleMtc->SetListener(IMS_NULL);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(_)).Times(0);
 
-    EXPECT_FALSE(ProcessImsSuspended(AoSReason::SUSPEND_NO_SERVICE));
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+    EXPECT_FALSE(ProcessImsSuspended(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NO_SERVICE);
 
-    EXPECT_FALSE(ProcessImsSuspended(AoSReason::SUSPEND_NO_LTE_COVERAGE));
+    EXPECT_FALSE(ProcessImsSuspended(AosReason::SUSPEND_NO_LTE_COVERAGE));
     EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(),
-            (AoSReason::SUSPEND_NO_SERVICE | AoSReason::SUSPEND_NO_LTE_COVERAGE));
+            (AosReason::SUSPEND_NO_SERVICE | AosReason::SUSPEND_NO_LTE_COVERAGE));
 }
 
 TEST_F(AosHandleMtcTest, ProcessImsSuspended_Test4)
@@ -1023,12 +1023,12 @@ TEST_F(AosHandleMtcTest, ProcessImsSuspended_Test4)
     m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(_)).Times(2);
 
-    EXPECT_TRUE(ProcessImsSuspended(AoSReason::SUSPEND_NO_SERVICE));
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+    EXPECT_TRUE(ProcessImsSuspended(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NO_SERVICE);
 
-    EXPECT_TRUE(ProcessImsSuspended(AoSReason::SUSPEND_NO_LTE_COVERAGE));
+    EXPECT_TRUE(ProcessImsSuspended(AosReason::SUSPEND_NO_LTE_COVERAGE));
     EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(),
-            (AoSReason::SUSPEND_NO_SERVICE | AoSReason::SUSPEND_NO_LTE_COVERAGE));
+            (AosReason::SUSPEND_NO_SERVICE | AosReason::SUSPEND_NO_LTE_COVERAGE));
 }
 
 TEST_F(AosHandleMtcTest, ProcessImsResumed_Test1)
@@ -1037,10 +1037,10 @@ TEST_F(AosHandleMtcTest, ProcessImsResumed_Test1)
     // Expectation: suspended reason is not reset, return false
 
     SetHandleState(AosHandle::STATE_DISCONNECTED);
-    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+    SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
 
-    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+    EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NO_SERVICE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessImsResumed_Test2)
@@ -1050,7 +1050,7 @@ TEST_F(AosHandleMtcTest, ProcessImsResumed_Test2)
 
     SetHandleState(AosHandle::STATE_CONNECTED);
 
-    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
+    EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
 }
 
 TEST_F(AosHandleMtcTest, ProcessImsResumed_Test3)
@@ -1059,10 +1059,10 @@ TEST_F(AosHandleMtcTest, ProcessImsResumed_Test3)
     // Expectation: still suspended, return false
 
     SetHandleState(AosHandle::STATE_CONNECTED);
-    SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    SetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
 
-    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_CS_CALL));
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_CS_CALL));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NO_LTE_COVERAGE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessImsResumed_Test4)
@@ -1071,14 +1071,14 @@ TEST_F(AosHandleMtcTest, ProcessImsResumed_Test4)
     // Expectation: still suspended, no callback, return false
 
     SetHandleState(AosHandle::STATE_CONNECTED);
-    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
-    SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
+    SetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
 
     m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(0);
 
-    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NO_LTE_COVERAGE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessImsResumed_Test5)
@@ -1087,12 +1087,12 @@ TEST_F(AosHandleMtcTest, ProcessImsResumed_Test5)
     // Expectation: no suspended reason, no callback, return false
 
     SetHandleState(AosHandle::STATE_CONNECTED);
-    SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    SetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
 
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(0);
 
-    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_LTE_COVERAGE));
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::NONE);
+    EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_NO_LTE_COVERAGE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::NONE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessImsResumed_Test6)
@@ -1101,7 +1101,7 @@ TEST_F(AosHandleMtcTest, ProcessImsResumed_Test6)
     // Expectation: no suspended reason, callback, return true
 
     SetHandleState(AosHandle::STATE_CONNECTED);
-    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+    SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
 
     EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
             .Times(AnyNumber())
@@ -1110,8 +1110,8 @@ TEST_F(AosHandleMtcTest, ProcessImsResumed_Test6)
     m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(1);
 
-    EXPECT_TRUE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::NONE);
+    EXPECT_TRUE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::NONE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessImsResumed_Test7)
@@ -1120,7 +1120,7 @@ TEST_F(AosHandleMtcTest, ProcessImsResumed_Test7)
     // Expectation: suspended reason changed to SUSPEND_NO_LTE_COVERAGE, no callback, return false
 
     SetHandleState(AosHandle::STATE_CONNECTED);
-    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+    SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
 
     EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
             .Times(AnyNumber())
@@ -1129,8 +1129,8 @@ TEST_F(AosHandleMtcTest, ProcessImsResumed_Test7)
     m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(0);
 
-    EXPECT_FALSE(ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE));
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NO_LTE_COVERAGE);
 }
 
 TEST_F(AosHandleMtcTest, CheckSuspended_Test1)
@@ -1149,7 +1149,7 @@ TEST_F(AosHandleMtcTest, CheckSuspended_Test1)
             .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
 
     CheckSuspended();
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NO_SERVICE);
 
     EXPECT_FALSE(GetNetSrvIn());
     EXPECT_EQ(GetNetworkType(), NW_REPORT_RADIO_LTE);
@@ -1172,7 +1172,7 @@ TEST_F(AosHandleMtcTest, CheckSuspended_Test2)
 
     CheckSuspended();
     EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(),
-            (AoSReason::SUSPEND_NO_SERVICE | AoSReason::SUSPEND_NO_LTE_COVERAGE));
+            (AosReason::SUSPEND_NO_SERVICE | AosReason::SUSPEND_NO_LTE_COVERAGE));
 
     EXPECT_FALSE(GetNetSrvIn());
     EXPECT_EQ(GetNetworkType(), NW_REPORT_RADIO_GSM);
@@ -1194,7 +1194,7 @@ TEST_F(AosHandleMtcTest, CheckSuspended_Test3)
             .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
 
     CheckSuspended();
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::NONE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::NONE);
 
     EXPECT_TRUE(GetNetSrvIn());
     EXPECT_EQ(GetNetworkType(), NW_REPORT_RADIO_LTE);
@@ -1204,25 +1204,25 @@ TEST_F(AosHandleMtcTest, SetSuspendedReason_ResetSuspendedReason_Test)
 {
     // Expectation: Only SUSPEND_NO_SERVICE and SUSPEND_NO_LTE_COVERAGE are allowed to be set/reset.
 
-    SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_SERVICE);
+    SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NO_SERVICE);
 
-    SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    SetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
     EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(),
-            (AoSReason::SUSPEND_NO_SERVICE | AoSReason::SUSPEND_NO_LTE_COVERAGE));
+            (AosReason::SUSPEND_NO_SERVICE | AosReason::SUSPEND_NO_LTE_COVERAGE));
 
-    SetSuspendedReason(AoSReason::SUSPEND_CS_CALL);
+    SetSuspendedReason(AosReason::SUSPEND_CS_CALL);
     EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(),
-            (AoSReason::SUSPEND_NO_SERVICE | AoSReason::SUSPEND_NO_LTE_COVERAGE));
+            (AosReason::SUSPEND_NO_SERVICE | AosReason::SUSPEND_NO_LTE_COVERAGE));
 
-    ResetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    ResetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NO_LTE_COVERAGE);
 
-    ResetSuspendedReason(AoSReason::SUSPEND_CS_CALL);
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::SUSPEND_NO_LTE_COVERAGE);
+    ResetSuspendedReason(AosReason::SUSPEND_CS_CALL);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NO_LTE_COVERAGE);
 
-    ResetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AoSReason::NONE);
+    ResetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::NONE);
 }
 
 TEST_F(AosHandleMtcTest, Init_CleanUp_Test)

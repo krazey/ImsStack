@@ -16,7 +16,7 @@
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceNetwork.h"
-#include "AoSReason.h"
+#include "AosReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosNConfiguration.h"
@@ -209,7 +209,7 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleRoamingChanged(IN IMS_UINT32
     {
         if (m_bRoamingState)
         {
-            RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AoSReason::NOT_SPECIFIED);
+            RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AosReason::NOT_SPECIFIED);
             m_piBlock->SetBlockReason(BLOCK_WIFI_ROAMING);
         }
         else

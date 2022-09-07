@@ -16,7 +16,7 @@
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
-#include "AoSReason.h"
+#include "AosReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
@@ -81,7 +81,7 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UI
 
     if (m_bRoamingState)
     {
-        RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AoSReason::NOT_SPECIFIED);
+        RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AosReason::NOT_SPECIFIED);
 
         if (m_piBlock != IMS_NULL)
         {
@@ -129,7 +129,7 @@ void AosServiceAvailableCellular::HandleVopsChanged(IN IMS_UINT32 nState)
 
     if (m_bVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
-        RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AoSReason::NOT_SPECIFIED);
+        RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AosReason::NOT_SPECIFIED);
         if (m_piBlock != IMS_NULL)
         {
             m_piBlock->SetBlockReason(BLOCK_CELLULAR_VOPS_OFF);

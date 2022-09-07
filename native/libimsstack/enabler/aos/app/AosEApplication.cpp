@@ -19,7 +19,7 @@
 #include "CarrierConfig.h"
 #include "ImsAosParameter.h"
 #include "AoSAppRequestType.h"
-#include "AoSReason.h"
+#include "AosReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosConnection.h"
@@ -85,7 +85,7 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
             else
             {
                 A_IMS_TRACE_D(APPID, "PDN is not connected", 0, 0, 0);
-                ProcessCleanAll(AoSReason::DATA_DISCONNECTED);
+                ProcessCleanAll(AosReason::DATA_DISCONNECTED);
             }
             break;
 
@@ -220,7 +220,7 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateReady_Connection(IN IMSMSG& obj
             break;
 
         case CONNECTION_DEACTIVATED:
-            ProcessCleanAll(AoSReason::DATA_DISCONNECTED);
+            ProcessCleanAll(AosReason::DATA_DISCONNECTED);
             break;
 
         default:
@@ -242,29 +242,29 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateReady_Condition(IN IMSMSG& /* o
 
 PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_StateUpdating(IN IMS_UINT32 /* nReason */)
 {
-    ProcessCleanAll(AoSReason::REG_FAILURE);
+    ProcessCleanAll(AosReason::REG_FAILURE);
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_StateConnecting(
         IN IMS_UINT32 /* nReason */)
 {
-    ProcessCleanAll(AoSReason::REG_FAILURE);
+    ProcessCleanAll(AosReason::REG_FAILURE);
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_StateConnected(IN IMS_UINT32 /* nReason */)
 {
-    ProcessCleanAll(AoSReason::REG_FAILURE);
+    ProcessCleanAll(AosReason::REG_FAILURE);
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated_StateDisconnecting(
         IN IMS_UINT32 /* nReason */)
 {
-    ProcessCleanAll(AoSReason::REG_FAILURE);
+    ProcessCleanAll(AosReason::REG_FAILURE);
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessConnectionDeactivated(IN IMS_UINT32 /* nReason */)
 {
-    ProcessCleanAll(AoSReason::DATA_DISCONNECTED);
+    ProcessCleanAll(AosReason::DATA_DISCONNECTED);
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated(IN IMS_UINT32 nReason)
@@ -282,7 +282,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated(IN IMS_UINT32 n
     switch (nReason)
     {
         case AosConnector::REASON_IP_CHANGED:
-            ProcessCleanAll(AoSReason::IP_CHANGED);
+            ProcessCleanAll(AosReason::IP_CHANGED);
             break;
 
         default:
@@ -299,12 +299,12 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegSucceeded(IN IMS_UINT32 nReaso
 
 PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_Start(IN IMS_UINT32 /* nReason */)
 {
-    ProcessCleanAll(AoSReason::REG_FAILURE);
+    ProcessCleanAll(AosReason::REG_FAILURE);
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_Update(IN IMS_UINT32 /* nReason */)
 {
-    ProcessCleanAll(AoSReason::REG_FAILURE);
+    ProcessCleanAll(AosReason::REG_FAILURE);
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessAppActivatedTimerExpired()
@@ -329,7 +329,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessAppConnectedTimerExpired()
     }
     else
     {
-        ProcessCleanAll(AoSReason::DATA_DISCONNECTED);
+        ProcessCleanAll(AosReason::DATA_DISCONNECTED);
     }
 }
 

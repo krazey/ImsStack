@@ -20,7 +20,7 @@
 #include "ImsMessage.h"
 #include "INetworkWatcher.h"
 
-#include "AoSReason.h"
+#include "AosReason.h"
 #include "AoSAppRequestType.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
@@ -98,8 +98,8 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
         m_piMonitor(IMS_NULL),
         m_piInfo(IMS_NULL),
         m_piWifiWatcher(IMS_NULL),
-        m_nReason(AoSReason::NONE),
-        m_nSuspendedReason(AoSReason::SUSPEND_NONE),
+        m_nReason(AosReason::NONE),
+        m_nSuspendedReason(AosReason::SUSPEND_NONE),
         m_bBlocked(IMS_FALSE),
         m_nBlocks(BLOCK_NONE),
         m_nHoldingBlocksForMobile(BLOCK_NONE),
@@ -508,7 +508,7 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsSuspended()
 {
     A_IMS_TRACE_D(APPPROFILE, "IsImsSuspended :: reason(%x)", m_nSuspendedReason, 0, 0);
 
-    return (m_nSuspendedReason != AoSReason::SUSPEND_NONE);
+    return (m_nSuspendedReason != AosReason::SUSPEND_NONE);
 }
 
 /*
@@ -606,12 +606,12 @@ PUBLIC VIRTUAL void AosHandle::NetTracker_StatusChanged()
         // IN Service
         if (bCurrSrvIn)
         {
-            ProcessImsResumed(AoSReason::SUSPEND_NO_SERVICE);
+            ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE);
         }
         // OUT service
         else
         {
-            ProcessImsSuspended(AoSReason::SUSPEND_NO_SERVICE);
+            ProcessImsSuspended(AosReason::SUSPEND_NO_SERVICE);
         }
 
         m_bNetSrvIn = bCurrSrvIn;
@@ -765,7 +765,7 @@ PROTECTED
 void AosHandle::ClearSuspendedReason()
 {
     A_IMS_TRACE_D(APPPROFILE, "ClearSuspendedReason", 0, 0, 0);
-    m_nSuspendedReason = AoSReason::SUSPEND_NONE;
+    m_nSuspendedReason = AosReason::SUSPEND_NONE;
 }
 
 /*
@@ -834,34 +834,34 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
 
     switch (nAosReason)
     {
-        case AoSReason::NONE:
+        case AosReason::NONE:
             break;
-        case AoSReason::BAD_BATTERY:  // FALL-THROUGH
-        case AoSReason::POWER_OFF:
+        case AosReason::BAD_BATTERY:  // FALL-THROUGH
+        case AosReason::POWER_OFF:
             nImsAosReason = ImsAosReason::POWER_OFF;
             break;
-        case AoSReason::AIRPLANE_MODE:  // FALL-THROUGH
-        case AoSReason::DATA_DISCONNECTED:
+        case AosReason::AIRPLANE_MODE:  // FALL-THROUGH
+        case AosReason::DATA_DISCONNECTED:
             nImsAosReason = ImsAosReason::DATA_DISCONNECTED;
             break;
-        case AoSReason::NO_LTE_COVERAGE:
+        case AosReason::NO_LTE_COVERAGE:
             nImsAosReason = ImsAosReason::NO_RAT_COVERAGE;
             break;
-        case AoSReason::SERVICE_POLICY:
+        case AosReason::SERVICE_POLICY:
             nImsAosReason = ImsAosReason::SERVICE_POLICY;
             break;
-        case AoSReason::SERVICE_BLOCKED:
+        case AosReason::SERVICE_BLOCKED:
             nImsAosReason = ImsAosReason::SERVICE_BLOCKED;
             break;
-        case AoSReason::SRV_OUT:
+        case AosReason::SRV_OUT:
             nImsAosReason = ImsAosReason::OUT_OF_SERVICE;
             break;
-        case AoSReason::REG_REFRESH_FORBIDDEN:  // FALL-THROUGH
-        case AoSReason::REG_TERMINATED_EXPIRE:  // FALL-THROUGH
-        case AoSReason::REG_TERMINATED:
+        case AosReason::REG_REFRESH_FORBIDDEN:  // FALL-THROUGH
+        case AosReason::REG_TERMINATED_EXPIRE:  // FALL-THROUGH
+        case AosReason::REG_TERMINATED:
             nImsAosReason = ImsAosReason::REG_TERMINATED;
             break;
-        case AoSReason::INITIAL_REG_REQUESTED:
+        case AosReason::INITIAL_REG_REQUESTED:
             nImsAosReason = ImsAosReason::REG_NEW_REQUIRED;
             break;
         default:
@@ -884,12 +884,12 @@ IMS_UINT32 AosHandle::GetImsAosReasonForSuspend(IN IMS_UINT32 nAosReason)
 
     switch (nAosReason)
     {
-        case AoSReason::SUSPEND_NONE:
+        case AosReason::SUSPEND_NONE:
             break;
-        case AoSReason::SUSPEND_NO_SERVICE:
+        case AosReason::SUSPEND_NO_SERVICE:
             nImsAosReason = ImsAosReason::SUSPEND_OUT_OF_SERVICE;
             break;
-        case AoSReason::SUSPEND_NO_LTE_COVERAGE:
+        case AosReason::SUSPEND_NO_LTE_COVERAGE:
             nImsAosReason = ImsAosReason::SUSPEND_NO_RAT_COVERAGE;
             break;
         default:
@@ -2170,7 +2170,7 @@ PROTECTED VIRTUAL void AosHandle::CheckSuspended()
 
     if (bCurrSrvIn == IMS_FALSE)
     {
-        m_nSuspendedReason |= AoSReason::SUSPEND_NO_SERVICE;
+        m_nSuspendedReason |= AosReason::SUSPEND_NO_SERVICE;
     }
 
     m_bNetSrvIn = bCurrSrvIn;
@@ -2183,9 +2183,9 @@ Remarks
 */
 PROTECTED VIRTUAL void AosHandle::SetSuspendedReason(IN IMS_UINT32 nReason)
 {
-    if (nReason == AoSReason::SUSPEND_NO_SERVICE)
+    if (nReason == AosReason::SUSPEND_NO_SERVICE)
     {
-        m_nSuspendedReason |= AoSReason::SUSPEND_NO_SERVICE;
+        m_nSuspendedReason |= AosReason::SUSPEND_NO_SERVICE;
     }
 }
 
@@ -2196,9 +2196,9 @@ Remarks
 */
 PROTECTED VIRTUAL void AosHandle::ResetSuspendedReason(IN IMS_UINT32 nReason)
 {
-    if (nReason == AoSReason::SUSPEND_NO_SERVICE)
+    if (nReason == AosReason::SUSPEND_NO_SERVICE)
     {
-        m_nSuspendedReason &= ~(AoSReason::SUSPEND_NO_SERVICE);
+        m_nSuspendedReason &= ~(AosReason::SUSPEND_NO_SERVICE);
     }
 }
 

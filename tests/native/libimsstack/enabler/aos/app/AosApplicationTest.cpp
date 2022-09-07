@@ -210,9 +210,9 @@ TEST_F(AosApplicationTest, IsPdnDisconnectRequired)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    m_pTestAosApplication->SetOffReason(AoSReason::IMS_DISABLED);
+    m_pTestAosApplication->SetOffReason(AosReason::IMS_DISABLED);
     EXPECT_TRUE(m_pTestAosApplication->IsPdnDisconnectRequired());
 
-    m_pTestAosApplication->SetOffReason(AoSReason::NONE);
+    m_pTestAosApplication->SetOffReason(AosReason::NONE);
     EXPECT_FALSE(m_pTestAosApplication->IsPdnDisconnectRequired());
 }

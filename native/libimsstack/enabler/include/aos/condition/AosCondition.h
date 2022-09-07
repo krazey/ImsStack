@@ -76,7 +76,7 @@ public:
         REQUEST_RECOVER,
         REQUEST_PDN_DISCONNECT
     };
-    // eReason : AoSReason
+    // eReason : AosReason
 
     enum
     {

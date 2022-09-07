@@ -19,7 +19,7 @@
 #include "CarrierConfig.h"
 #include "INetworkWatcher.h"
 
-#include "AoSReason.h"
+#include "AosReason.h"
 
 #include "IImsAosListener.h"
 #include "interface/IAosAppContext.h"
@@ -171,13 +171,13 @@ PUBLIC VIRTUAL void AosHandleMtc::NetTracker_StatusChanged()
         if (IsSupportedNetworkType(nCurrNetworkType))
         {
             A_IMS_TRACE_I(APPPROFILE, "NetTracker_StatusChanged :: LTE/NR/WLAN Coverage", 0, 0, 0);
-            ProcessImsResumed(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+            ProcessImsResumed(AosReason::SUSPEND_NO_LTE_COVERAGE);
         }
         // 4G/5G/WLAN to 3G, etc
         else
         {
             A_IMS_TRACE_I(APPPROFILE, "NetTracker_StatusChanged :: Out Of LTE Coverage", 0, 0, 0);
-            ProcessImsSuspended(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+            ProcessImsSuspended(AosReason::SUSPEND_NO_LTE_COVERAGE);
         }
 
         ProcessNetworkChanged();
@@ -316,13 +316,13 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::ProcessImsSuspended(IN IMS_UINT32 nReas
 
     A_IMS_TRACE_I(APPPROFILE, "ProcessImsSuspended :: nReason(%d)", nReason, 0, 0);
 
-    if (nReason == AoSReason::SUSPEND_NO_SERVICE)
+    if (nReason == AosReason::SUSPEND_NO_SERVICE)
     {
-        SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+        SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
     }
-    else if (nReason == AoSReason::SUSPEND_NO_LTE_COVERAGE)
+    else if (nReason == AosReason::SUSPEND_NO_LTE_COVERAGE)
     {
-        SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+        SetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
     }
     else
     {
@@ -363,25 +363,25 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::ProcessImsResumed(IN IMS_UINT32 nReason
 
     A_IMS_TRACE_I(APPPROFILE, "ProcessImsResumed :: nReason(%d)", nReason, 0, 0);
 
-    if (nReason == AoSReason::SUSPEND_NO_LTE_COVERAGE)
+    if (nReason == AosReason::SUSPEND_NO_LTE_COVERAGE)
     {
-        ResetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+        ResetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
     }
-    else if (nReason == AoSReason::SUSPEND_NO_SERVICE)
+    else if (nReason == AosReason::SUSPEND_NO_SERVICE)
     {
-        ResetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+        ResetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
 
         IMS_UINT32 nCurrNetworkType = GetNetworkType();
 
         if (IsSupportedNetworkType(nCurrNetworkType))
         {
             A_IMS_TRACE_I(APPPROFILE, "ProcessImsResumed :: Srv In, LTE or NR", 0, 0, 0);
-            ResetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+            ResetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
         }
         else
         {
             A_IMS_TRACE_I(APPPROFILE, "ProcessImsResumed :: Srv In, But Not LTE", 0, 0, 0);
-            SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+            SetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
         }
 
         m_nNetworkType = nCurrNetworkType;
@@ -427,7 +427,7 @@ PROTECTED VIRTUAL void AosHandleMtc::CheckSuspended()
 
     if (bCurrSrvIn == IMS_FALSE)
     {
-        SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
+        SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
     }
 
     IMS_UINT32 nCurrNetworkType = GetNetworkType();
@@ -435,7 +435,7 @@ PROTECTED VIRTUAL void AosHandleMtc::CheckSuspended()
     if (!IsSupportedNetworkType(nCurrNetworkType))
     {
         A_IMS_TRACE_I(APPPROFILE, "IMS_CONNECTED, but Network is not in LTE or NR", 0, 0, 0);
-        SetSuspendedReason(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+        SetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
     }
 
     m_bNetSrvIn = bCurrSrvIn;
@@ -449,13 +449,13 @@ Remarks
 */
 PROTECTED VIRTUAL void AosHandleMtc::SetSuspendedReason(IN IMS_UINT32 nReason)
 {
-    if (nReason == AoSReason::SUSPEND_NO_SERVICE)
+    if (nReason == AosReason::SUSPEND_NO_SERVICE)
     {
-        m_nSuspendedReason |= AoSReason::SUSPEND_NO_SERVICE;
+        m_nSuspendedReason |= AosReason::SUSPEND_NO_SERVICE;
     }
-    else if (nReason == AoSReason::SUSPEND_NO_LTE_COVERAGE)
+    else if (nReason == AosReason::SUSPEND_NO_LTE_COVERAGE)
     {
-        m_nSuspendedReason |= AoSReason::SUSPEND_NO_LTE_COVERAGE;
+        m_nSuspendedReason |= AosReason::SUSPEND_NO_LTE_COVERAGE;
     }
 }
 
@@ -466,13 +466,13 @@ Remarks
 */
 PROTECTED VIRTUAL void AosHandleMtc::ResetSuspendedReason(IN IMS_UINT32 nReason)
 {
-    if (nReason == AoSReason::SUSPEND_NO_SERVICE)
+    if (nReason == AosReason::SUSPEND_NO_SERVICE)
     {
-        m_nSuspendedReason &= ~(AoSReason::SUSPEND_NO_SERVICE);
+        m_nSuspendedReason &= ~(AosReason::SUSPEND_NO_SERVICE);
     }
-    else if (nReason == AoSReason::SUSPEND_NO_LTE_COVERAGE)
+    else if (nReason == AosReason::SUSPEND_NO_LTE_COVERAGE)
     {
-        m_nSuspendedReason &= ~(AoSReason::SUSPEND_NO_LTE_COVERAGE);
+        m_nSuspendedReason &= ~(AosReason::SUSPEND_NO_LTE_COVERAGE);
     }
 }
 

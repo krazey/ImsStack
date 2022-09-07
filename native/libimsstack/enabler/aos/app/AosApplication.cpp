@@ -110,7 +110,7 @@ AosApplication::AosApplication(IN IAosAppContext* piAppContext, IN AString& strA
         m_piPdnBlockedTimer(IMS_NULL),
         m_strAppId(strAppId),
         m_nAppType(TYPE_NORMAL),
-        m_nOffReason(AoSReason::NONE),
+        m_nOffReason(AosReason::NONE),
         m_nRat(NW_REPORT_RADIO_INVALID),
         m_eRegType(AosRegistrationType::NORMAL),
         m_nReportState(APP_DISCONNECTED),
@@ -321,7 +321,7 @@ PUBLIC VIRTUAL void AosApplication::NotifyPublishState(IN IMS_BOOL bStart)
 PROTECTED
 void AosApplication::ClearOffReason()
 {
-    m_nOffReason = AoSReason::NONE;
+    m_nOffReason = AosReason::NONE;
 }
 
 PROTECTED
@@ -479,9 +479,9 @@ IMS_BOOL AosApplication::IsPdnDisconnectRequired() const
 
     switch (m_nOffReason)
     {
-        case AoSReason::IMS_DISABLED:  // FALL-THROUGH
-        case AoSReason::POWER_OFF:     // FALL-THROUGH
-        case AoSReason::DATA_PERMANENTLY_FAILED:
+        case AosReason::IMS_DISABLED:  // FALL-THROUGH
+        case AosReason::POWER_OFF:     // FALL-THROUGH
+        case AosReason::DATA_PERMANENTLY_FAILED:
             return IMS_TRUE;
 
         default:
@@ -664,7 +664,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsReconfigHandleChanged()
 PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRequestCmdHeldByCondition(
         IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason)
 {
-    if (nReason == AoSReason::POWER_OFF)
+    if (nReason == AosReason::POWER_OFF)
     {
         return IMS_FALSE;
     }
@@ -727,7 +727,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRegUpdatedByNrLteRatChange()
     return (bLte && bNr);
 }
 
-PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = AoSReason::NONE */)
+PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = AosReason::NONE */)
 {
     A_IMS_TRACE_I(APPID, "CleanAll", 0, 0, 0);
 
@@ -738,7 +738,7 @@ PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = Ao
 
     ClearTimers();
 
-    if (nOffReason != AoSReason::DATA_CONNECTION_MAINTAIN)
+    if (nOffReason != AosReason::DATA_CONNECTION_MAINTAIN)
     {
         ClearConnection();
     }
@@ -973,11 +973,11 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegRecovery(IN IMSMSG& objMsg)
         case STATE_CONNECTED:   // FALL-THROUGH
         case STATE_UPDATING:
         {
-            IMS_UINT32 nAosReason = AoSReason::NONE;
+            IMS_UINT32 nAosReason = AosReason::NONE;
             if (nReason == AoSRegRecoveryType::PCSCF_CHANGE ||
                     nReason == AoSRegRecoveryType::KEEP_DATA_CONNECTION)
             {
-                nAosReason = AoSReason::DATA_CONNECTION_MAINTAIN;
+                nAosReason = AosReason::DATA_CONNECTION_MAINTAIN;
             }
             CleanAll(nAosReason);
             SetAppState(STATE_CONNECTING);
@@ -1600,11 +1600,11 @@ PROTECTED VIRTUAL void AosApplication::ProcessConnectionDeactivated(IN IMS_UINT3
     if (nReason == AosConnector::REASON_PERMANENTLY_FAILED)
     {
         m_pCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED, IMS_FALSE);
-        CleanAll(AoSReason::DATA_PERMANENTLY_FAILED);
+        CleanAll(AosReason::DATA_PERMANENTLY_FAILED);
     }
     else
     {
-        CleanAll(AoSReason::DATA_DISCONNECTED);
+        CleanAll(AosReason::DATA_DISCONNECTED);
     }
 
     Report_StateChanged(IMS_FALSE);
@@ -1627,7 +1627,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessConnectionUpdated(IN IMS_UINT32 nR
     switch (nReason)
     {
         case AosConnector::REASON_IP_CHANGED:
-            CleanAll(AoSReason::IP_CHANGED);
+            CleanAll(AosReason::IP_CHANGED);
             Report_StateChanged(IMS_FALSE);
             ProcessStateStart();
             break;
@@ -1697,7 +1697,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegSucceeded(IN IMS_UINT32 /* nRea
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_Start(IN IMS_UINT32 /* nReason */)
 {
-    SetOffReason(AoSReason::REG_FAILURE);
+    SetOffReason(AosReason::REG_FAILURE);
     Report_StateChanged(IMS_FALSE);
 }
 
@@ -1705,13 +1705,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_Update(IN IMS_UINT32 /* 
 {
     if (m_piRegistration->IsRefreshing())
     {
-        SetOffReason(AoSReason::REG_FAILURE);
+        SetOffReason(AosReason::REG_FAILURE);
         Report_StateChanged(IMS_FALSE);
     }
     else
     {
         SetAppState(STATE_CONNECTING);
-        SetOffReason(AoSReason::REG_FAILURE);
+        SetOffReason(AosReason::REG_FAILURE);
         Report_StateChanged();
     }
 }
@@ -1724,7 +1724,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_Terminated()
     }
     else
     {
-        SetOffReason(AoSReason::REG_TERMINATED);
+        SetOffReason(AosReason::REG_TERMINATED);
         SetAppState(STATE_CONNECTING);
         Report_StateChanged();
         m_pUtil->AddFeature(PENDING_REG_RECOVERY_HELD, m_nRegPending);
@@ -1827,7 +1827,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegInternalFailed(IN IMS_UINT32 nR
     }
     else
     {
-        CleanAll(AoSReason::REG_FAILURE);
+        CleanAll(AosReason::REG_FAILURE);
     }
 
     Report_StateChanged(IMS_FALSE);
@@ -1839,7 +1839,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegAuthenticationFailed()
 {
     m_pCondition->SetBlock(BLOCK_AUTHENTICATION_FAILED);
 
-    CleanAll(AoSReason::IMS_DISABLED);
+    CleanAll(AosReason::IMS_DISABLED);
     Report_StateChanged(IMS_FALSE);
 
     // TODO: PLMN block after checking configuration
@@ -1847,7 +1847,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegAuthenticationFailed()
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegTerminated()
 {
-    CleanAll(AoSReason::REG_TERMINATED);
+    CleanAll(AosReason::REG_TERMINATED);
     Report_StateChanged(IMS_FALSE);
 
     ProcessStateStart(UNEXPECTED_ERROR_APP_START_WAITING_TIME_MILLIS);
@@ -1902,7 +1902,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessReconfigTimerExpired()
 
         if (m_piRegistration->IsRegistered())
         {
-            SetOffReason(AoSReason::SERVICE_POLICY);
+            SetOffReason(AosReason::SERVICE_POLICY);
             SetAppState(STATE_DISCONNECTING);
             Report_StateChanged();
             PostMessage(MSG_REG_STOP, 0, 0);
@@ -1912,7 +1912,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessReconfigTimerExpired()
         {
             m_pCondition->SetBlock(BLOCK_ENABLER_DETACHED);
 
-            CleanAll(AoSReason::SERVICE_POLICY);
+            CleanAll(AosReason::SERVICE_POLICY);
             Report_StateChanged();
         }
 

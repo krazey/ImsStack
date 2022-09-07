@@ -16,7 +16,7 @@
 #include "ServiceEvent.h"
 #include "ServiceTrace.h"
 #include "ServiceNetworkPolicy.h"
-#include "AoSReason.h"
+#include "AosReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosConnection.h"
 #include "interface/IAosConditionListener.h"
@@ -713,7 +713,7 @@ void AosCondition::ProcessAirPlaneEvent(IN IMS_BOOL bIsOn)
 
     if (bIsOn)
     {
-        RequestCommand(REQUEST_STOP, AoSReason::AIRPLANE_MODE);
+        RequestCommand(REQUEST_STOP, AosReason::AIRPLANE_MODE);
 
         if (IsClearReason(IAosNConfiguration::ClearReason::AIRPLANE))
         {
@@ -726,7 +726,7 @@ void AosCondition::ProcessAirPlaneEvent(IN IMS_BOOL bIsOn)
 PRIVATE
 void AosCondition::ProcessPowerEvent()
 {
-    RequestCommand(REQUEST_STOP, AoSReason::POWER_OFF);
+    RequestCommand(REQUEST_STOP, AosReason::POWER_OFF);
     ProcessBlockReason(IMS_TRUE, BLOCK_POWER_OFF);
 }
 
@@ -782,7 +782,7 @@ void AosCondition::ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT3
     }
     else if (eState == ServiceSetting::OFF)
     {
-        RequestCommand(REQUEST_PDN_DISCONNECT, AoSReason::IMS_DISABLED);
+        RequestCommand(REQUEST_PDN_DISCONNECT, AosReason::IMS_DISABLED);
         ProcessBlockReason(IMS_TRUE, BLOCK_IMS_DISABLED);
     }
 }
@@ -797,7 +797,7 @@ void AosCondition::ProcessTtyEvent(IN IMS_BOOL bIsOn)
     {
         if (m_bIsTtyOn)
         {
-            RequestCommand(REQUEST_STOP, AoSReason::TTYMODEON);
+            RequestCommand(REQUEST_STOP, AosReason::TTYMODEON);
             ProcessBlockReason(IMS_TRUE, BLOCK_TTY_MODE_ON);
         }
     }

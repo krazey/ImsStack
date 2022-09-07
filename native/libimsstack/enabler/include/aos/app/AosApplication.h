@@ -22,7 +22,7 @@
 #include "ITimer.h"
 
 #include "interface/AosInternalMsgDef.h"
-#include "AoSReason.h"
+#include "AosReason.h"
 #include "interface/IAosApplication.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosCallTrackerListener.h"
@@ -130,7 +130,7 @@ protected:
     virtual IMS_BOOL IsRegUpdatedByNrLteRatChange();
 
     // Clean
-    virtual void CleanAll(IN IMS_UINT32 nOffReason = AoSReason::NONE);
+    virtual void CleanAll(IN IMS_UINT32 nOffReason = AosReason::NONE);
     virtual void ClearConnection();
 
     virtual IMS_UINT32 GetReportState();

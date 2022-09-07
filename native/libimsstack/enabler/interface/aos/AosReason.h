@@ -16,7 +16,7 @@
 #ifndef AOS_REASON_H_
 #define AOS_REASON_H_
 
-class AoSReason
+class AosReason
 {
 public:
     enum
