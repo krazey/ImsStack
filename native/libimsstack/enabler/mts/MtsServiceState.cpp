@@ -23,7 +23,6 @@
 #include "utility/MtsDynamicLoader.h"
 #include "MtsServiceState.h"
 #include "message/MtsMessageController.h"
-#include "utility/MtsStrName.h"
 #include "utility/MtsDynamicLoader.h"
 
 __IMS_TRACE_TAG_COM_MTS__;

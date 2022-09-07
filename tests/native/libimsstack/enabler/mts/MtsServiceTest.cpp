@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "IIpcan.h"
 #include "ImsAosParameter.h"
+#include "ImsAosReason.h"
 #include "../include/mts/MockIMtsServiceListener.h"
 #include "MtsService.h"
 #include "core/MockICoreService.h"
@@ -34,6 +35,7 @@ class MtsServiceTest : public ::testing::Test
 {
 public:
     MockICoreService objMockCoreService;
+    MtsMessageController* pMtsMessageController;
     MtsDynamicLoader* pMtsDynamicLoader;
     MtsService* pMtsService;
 
@@ -43,10 +45,12 @@ protected:
         pMtsDynamicLoader = new MtsDynamicLoader(SLOT_ID);
         pMtsDynamicLoader->Initialize();
         pMtsService = new MtsService(SLOT_ID, pMtsDynamicLoader);
+        pMtsMessageController = new MtsMessageController(SLOT_ID, pMtsService, pMtsDynamicLoader);
     }
 
     virtual void TearDown() override
     {
+        delete pMtsMessageController;
         delete pMtsDynamicLoader;
         delete pMtsService;
     }
@@ -103,6 +107,59 @@ TEST_F(MtsServiceTest, ImsAosMonitorConnected)
     MtsServiceState* pMtsServiceState = pMtsDynamicLoader->GetMtsServiceState();
     pMtsService->ImsAosMonitor_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     EXPECT_TRUE(pMtsServiceState->IsServiceConnected(ImsAosFeature::SMSIP));
+}
+
+TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosConnected)
+{
+    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
+    pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
+    EXPECT_EQ(pMtsDynamicLoader->GetMtsServiceState()->GetServiceState(), STATE_READY);
+}
+
+TEST_F(MtsServiceTest, GetServiceStateReturnsNotreadyAfterAosConnecting)
+{
+    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
+    pMtsDynamicLoader->GetMtsServiceState()->SetMtsMessageController(pMtsMessageController);
+    pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
+    pMtsService->ImsAos_Disconnected(ImsAosReason::NONE);
+    pMtsService->ImsAos_Connecting();
+    EXPECT_EQ(pMtsDynamicLoader->GetMtsServiceState()->GetServiceState(), STATE_NOTREADY);
+}
+
+TEST_F(MtsServiceTest, GetServiceStateReturnsNotreadyAfterAosDisconnected)
+{
+    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
+    pMtsDynamicLoader->GetMtsServiceState()->SetMtsMessageController(pMtsMessageController);
+    pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
+    pMtsService->ImsAos_Disconnected(ImsAosReason::NONE);
+    EXPECT_EQ(pMtsDynamicLoader->GetMtsServiceState()->GetServiceState(), STATE_NOTREADY);
+}
+
+TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosDisconnecting)
+{
+    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
+    pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
+    pMtsService->ImsAos_Disconnecting(ImsAosReason::NONE);
+    EXPECT_EQ(pMtsDynamicLoader->GetMtsServiceState()->GetServiceState(), STATE_READY);
+}
+
+TEST_F(MtsServiceTest, GetServiceStateReturnsLimitedAfterAosSuspended)
+{
+    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
+    pMtsDynamicLoader->GetMtsServiceState()->SetMtsMessageController(pMtsMessageController);
+    pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
+    pMtsService->ImsAos_Suspended(ImsAosReason::NONE);
+    EXPECT_EQ(pMtsDynamicLoader->GetMtsServiceState()->GetServiceState(), STATE_LIMITED);
+}
+
+TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosResumed)
+{
+    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
+    pMtsDynamicLoader->GetMtsServiceState()->SetMtsMessageController(pMtsMessageController);
+    pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
+    pMtsService->ImsAos_Suspended(ImsAosReason::NONE);
+    pMtsService->ImsAos_Resumed();
+    EXPECT_EQ(pMtsDynamicLoader->GetMtsServiceState()->GetServiceState(), STATE_READY);
 }
 
 }  // namespace android

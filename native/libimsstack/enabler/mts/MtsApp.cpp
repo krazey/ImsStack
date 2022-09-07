@@ -25,7 +25,6 @@
 #include "IPageMessage.h"
 #include "IuMts.h"
 
-#include "utility/MtsStrName.h"
 #include "utility/MtsDynamicLoader.h"
 
 #include "MtsApp.h"

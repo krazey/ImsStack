@@ -33,15 +33,11 @@ public:
     void StartTimer(IN MtsTimerType eType, IN IMS_SINT32 nDuration);
     void StopTimer(IN MtsTimerType eType);
 
-    inline IMS_BOOL IsScbm() { return m_bIsScbm; }
-    inline void SetScbmState(IN IMS_BOOL bIsScbm) { m_bIsScbm = bIsScbm; }
-
     inline void SetListener(IN ITimerListener* piListener) { m_piTimerListener = piListener; }
 
 private:
     IMSMap<MtsTimerType, ITimer*> m_objTimers;
     ITimerListener* m_piTimerListener;
-    IMS_BOOL m_bIsScbm;
 };
 
 #endif

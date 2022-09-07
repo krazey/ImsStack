@@ -136,24 +136,6 @@ AString MtsDialingPlan::Translate(IN const AString& strTargetAddress,
     return strURI;
 }
 
-PUBLIC
-void MtsDialingPlan::SetDialingPolicy(IN IMS_SINT32 nPolicy)
-{
-    m_nDialingPolicy = nPolicy;
-}
-
-PUBLIC
-void MtsDialingPlan::SetNetworkProfile(IN const AString& strNetworkProfile)
-{
-    m_strNetworkProfile = strNetworkProfile;
-}
-
-PUBLIC
-void MtsDialingPlan::SetScheme(IN const AString& strScheme)
-{
-    m_strScheme = strScheme;
-}
-
 PRIVATE
 AccessNetworkInfo* MtsDialingPlan::GetAccessNetworkInfo(IN_OUT AccessNetworkInfo& objAni)
 {

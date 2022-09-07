@@ -107,7 +107,7 @@ public class MtsControllerTest {
     }
 
     @Test
-    public void testBasicOperation_sendMessage() {
+    public void testBasicOperation_sendMessage_SUCCESS() {
         boolean result = mMtsController.sendMessage(
                 mSmsFormat, mPduData, mPsiSmsc, mDialedNumber, mSeqId);
 
@@ -129,6 +129,33 @@ public class MtsControllerTest {
         // reason, smsFormat, retryafter, seqid
         verify(mMockMtsControllerListener).notifyStatusForOutgoingMessage(
                 eq(MtsController.MO_SUCCESS), eq(mSmsFormat), eq(0), eq(mSeqId));
+    }
+
+    @Test
+    public void testBasicOperation_sendMessage_TEMP_FAILURE() {
+        String tempPsiSmsc = ""; // ERROR-CASE
+
+        boolean result = mMtsController.sendMessage(
+                mSmsFormat, mPduData, tempPsiSmsc, mDialedNumber, mSeqId);
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(MtsController.REPORTMOSTATUS_REASON, MtsController.MO_IMS_TEMP_FAILURE);
+        bundle.putInt(MtsController.REPORTMOSTATUS_SMSFORMAT, 1);
+        bundle.putInt(MtsController.REPORTMOSTATUS_RETRYAFTER, 0);
+        bundle.putInt(MtsController.REPORTMOSTATUS_SEQID, 1);
+
+        Message msg = Message.obtain();
+        msg.what = MtsController.REQUEST_REPORT_MO_STATUS;
+        msg.obj = bundle;
+
+        Handler handler = mMtsController.getHandler();
+        handler.sendMessage(msg);
+
+        waitForHandlerActionDelayed(handler, 1000, 0);
+
+        // reason, smsFormat, retryafter, seqid
+        verify(mMockMtsControllerListener).notifyStatusForOutgoingMessage(
+                eq(MtsController.MO_IMS_TEMP_FAILURE), eq(mSmsFormat), eq(0), eq(mSeqId));
     }
 
     @Test

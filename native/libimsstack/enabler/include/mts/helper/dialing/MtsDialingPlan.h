@@ -31,12 +31,14 @@ public:
             IN IMS_BOOL bUssi = IMS_FALSE);
 
     inline IMS_SINT32 GetDialingPolicy() const { return m_nDialingPolicy; }
+    inline void SetDialingPolicy(IN IMS_SINT32 nPolicy) { m_nDialingPolicy = nPolicy; }
     inline const AString& GetNetworkProfile() const { return m_strNetworkProfile; }
+    inline void SetNetworkProfile(IN const AString& strNetworkProfile)
+    {
+        m_strNetworkProfile = strNetworkProfile;
+    }
     inline const AString& GetScheme() const { return m_strScheme; }
-
-    void SetDialingPolicy(IN IMS_SINT32 nPolicy);
-    void SetNetworkProfile(IN const AString& strNetworkProfile);
-    void SetScheme(IN const AString& strScheme);
+    inline void SetScheme(IN const AString& strScheme) { m_strScheme = strScheme; }
 
 private:
     // For geo-local number format

@@ -75,4 +75,17 @@ TEST_F(MtsDialingPlanTest, Translate)
     EXPECT_TRUE(strResult.Contains(SIP_URI_SCHEME));
 }
 
+TEST_F(MtsDialingPlanTest, GetterSetterNetworkProfile)
+{
+    AString strNetworkProfile = "Sms over IP";
+    pMtsDialingPlan->SetNetworkProfile(strNetworkProfile);
+    EXPECT_STREQ(strNetworkProfile.GetStr(), pMtsDialingPlan->GetNetworkProfile().GetStr());
+}
+
+TEST_F(MtsDialingPlanTest, GetterSetterDialingPolicy)
+{
+    pMtsDialingPlan->SetDialingPolicy(ImsIdentity::DIALING_POLICY_GEO_LOCAL);
+    EXPECT_EQ(ImsIdentity::DIALING_POLICY_GEO_LOCAL, pMtsDialingPlan->GetDialingPolicy());
+}
+
 }  // namespace android

@@ -20,7 +20,6 @@
 #include "MtsServiceState.h"
 #include "utility/MtsSipFormUtils.h"
 #include "utility/MtsSmUtils.h"
-#include "utility/MtsStrName.h"
 #include "utility/MtsTimer.h"
 
 class MtsDynamicLoader final
@@ -34,19 +33,16 @@ public:
     inline MtsServiceState* GetMtsServiceState() { return m_pMtsServiceState; }
     inline MtsSipFormUtils* GetMtsSipFormUtils() { return m_pMtsSipFormUtils; }
     inline MtsSmUtils* GetMtsSmUtils() { return m_pMtsSmUtils; }
-    inline MtsStrName* GetMtsStrName() { return m_pMtsStrName; }
     inline MtsTimer* GetMtsTimer() { return m_pMtsTimer; }
 
 private:
     void DestroyAll();
 
 private:
-    // TODO: m_pMtsStrName is deprecated, It should be removed
     IMS_SINT32 m_nSlotId;
     MtsServiceState* m_pMtsServiceState;
     MtsSipFormUtils* m_pMtsSipFormUtils;
     MtsSmUtils* m_pMtsSmUtils;
-    MtsStrName* m_pMtsStrName;
     MtsTimer* m_pMtsTimer;
 };
 

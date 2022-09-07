@@ -56,10 +56,10 @@ TEST_F(MtsDynamicLoaderTest, CreateMtsSmUtilsAfterInitialize)
     ASSERT_NE(pMtsDynamicLoader->GetMtsSmUtils(), nullptr);
 }
 
-TEST_F(MtsDynamicLoaderTest, CreateMtsStrNameAfterInitialize)
+TEST_F(MtsDynamicLoaderTest, CreateMtsTimerAfterInitialize)
 {
     pMtsDynamicLoader->Initialize();
-    ASSERT_NE(pMtsDynamicLoader->GetMtsStrName(), nullptr);
+    ASSERT_NE(pMtsDynamicLoader->GetMtsTimer(), nullptr);
 }
 
 }  // namespace android
