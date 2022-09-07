@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 
@@ -147,6 +148,24 @@ public class SuppInfo implements Parcelable {
         objSuppService.add(service);
 
     }
+
+    /**
+     * This method is to set and service values
+     *
+     * @param type   service type
+     * @param value  service string value
+     * @param strvar service bool value
+     */
+    @VisibleForTesting
+    public void addService_int_str(int type, int value, String strvar) {
+        SuppService service = new SuppService();
+        service.type = type;
+        service.strValue = strvar;
+        service.intValue = value;
+        service.boolValue = true;
+        objSuppService.add(service);
+    }
+
     public int getServiceSize() {
 
         ImsLog.i("getServiceSize : [" + objSuppService.size() + "]");
