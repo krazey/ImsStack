@@ -33,5 +33,5 @@ public interface IMmTelCallListener {
     /**
      * This is invoked when IMS dialog state is changed.
      */
-    void onImsDialogStateChanged(List<ImsExternalCallState> externalCallDialogs);
+    void onImsExternalCallStateChanged(List<ImsExternalCallState> imsExternalCallState);
 }
