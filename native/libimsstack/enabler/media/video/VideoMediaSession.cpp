@@ -64,67 +64,44 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         return IMS_FALSE;
     }
 
-    if (pNegoProfile->lstPayload.GetSize() == 0 || pPeerProfile->lstPayload.GetSize() == 0)
+    if (pLocalProfile->lstPayload.GetSize() == 0 || pNegoProfile->lstPayload.GetSize() == 0 ||
+            pPeerProfile->lstPayload.GetSize() == 0)
     {
         return IMS_FALSE;
     }
 
-    // Get Negotiated Payload from negotiated Payload index...
-    VideoProfile::Payload* pDestPayload;
+    VideoProfile::Payload* pLocalPayload;
     VideoProfile::Payload* pNegoPayload;
 
-    IMS_TRACE_D("UpdateRtpConfig() - nNegotiated nPeerPayloadIndex[%d], nNegoPayloadIndex[%d]",
-            pPeerProfile->nNegotiatedPayloadIndex, pNegoProfile->nNegotiatedPayloadIndex, 0);
+    IMS_TRACE_D("UpdateRtpConfig() - nNegotiated nPeerPayloadIndex[%d], nLocalPayloadIndex[%d]",
+            pPeerProfile->nNegotiatedPayloadIndex, pLocalProfile->nNegotiatedPayloadIndex, 0);
 
-    if (pNegoProfile->nNegotiatedPayloadIndex < 0)
+    if (pLocalProfile->nNegotiatedPayloadIndex < 0)
     {
-        pNegoPayload = pNegoProfile->lstPayload.GetAt(0);
+        pLocalPayload = pLocalProfile->lstPayload.GetAt(0);
     }
     else
     {
-        pNegoPayload = pNegoProfile->lstPayload.GetAt(pNegoProfile->nNegotiatedPayloadIndex);
+        pLocalPayload = pLocalProfile->lstPayload.GetAt(pLocalProfile->nNegotiatedPayloadIndex);
     }
 
-    if (pPeerProfile->nNegotiatedPayloadIndex < 0)
-    {
-        pDestPayload = pPeerProfile->lstPayload.GetAt(0);
-    }
-    else
-    {
-        pDestPayload = pPeerProfile->lstPayload.GetAt(pPeerProfile->nNegotiatedPayloadIndex);
-    }
+    pNegoPayload = pNegoProfile->lstPayload.GetAt(0);
 
-    if (pNegoPayload == IMS_NULL || pDestPayload == IMS_NULL)
+    if (pLocalPayload == IMS_NULL || pNegoPayload == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
     // Setting the network properties
     UpdateLocalEndPoint(pNegoProfile);
-
-    if (pLocalProfile->nNegotiatedPayloadIndex < 0)
-    {
-        m_objConfig.setTxPayloadTypeNumber((int32_t)pNegoPayload->objRtpMap.nPayloadNum);
-    }
-    else
-    {
-        VideoProfile::Payload* pLocalPayload =
-                pLocalProfile->lstPayload.GetAt(pLocalProfile->nNegotiatedPayloadIndex);
-
-        if (pLocalPayload == IMS_NULL)
-        {
-            return IMS_FALSE;
-        }
-
-        m_objConfig.setTxPayloadTypeNumber((int32_t)pLocalPayload->objRtpMap.nPayloadNum);
-    }
-
+    m_objConfig.setTxPayloadTypeNumber(pLocalPayload->objRtpMap.nPayloadNum);
+    m_objConfig.setRxPayloadTypeNumber(pNegoPayload->objRtpMap.nPayloadNum);
     // remote network parameters
     m_objConfig.setRemoteAddress(android::String8(pPeerProfile->objIpAddress.ToString().GetStr()));
     m_objConfig.setRemotePort(pPeerProfile->nDataPort);
     m_objConfig.setDscp(m_pConfig->GetVideoDscp());
     m_objConfig.setMaxMtuBytes(1500);
-    m_objConfig.setRxPayloadTypeNumber(pDestPayload->objRtpMap.nPayloadNum);
+
     MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlodId);
 
     if (pMediaManager != IMS_NULL)
