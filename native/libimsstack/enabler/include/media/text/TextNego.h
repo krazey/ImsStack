@@ -108,11 +108,13 @@ public:
      * @param pDescriptor The SDP descriptor instance to form the m=text level SDP
      * @param eDir The media direction of the SDP
      * @param bDisable if it is IMS_TRUE, set the port number to zero
+     * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
      * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
      * it is failed to form
      */
     virtual IMS_BOOL FormSDP(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+            IN IMS_BOOL bEnforceReofferMode);
 
     /**
      * @brief Negotiate the SDP and make the negotiate profile based on the nego state
@@ -214,7 +216,8 @@ private:
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
     IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+            IN IMS_BOOL bEnforceReofferMode);
     IMS_SINT32 NegotiateOffer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
     IMS_SINT32 NegotiateAnswer(

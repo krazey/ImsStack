@@ -195,12 +195,15 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::DestroyProfile(IMS_UINTP nNegoId)
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSDP(IN IMS_UINTP nNegoId, OUT ISession* pSession,
         IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
-        IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection)
+        IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection,
+        IN IMS_BOOL bEnforceReofferMode)
 {
     IMS_TRACE_I("FormSDP() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "], eMediaType[%d]", nNegoId,
             pSession, eMediaType);
     IMS_TRACE_I("FormSDP() - DIR = Audio[%d], Video[%d], Text[%d]", nAudioDirection,
             nVideoDirection, nTextDirection);
+    IMS_TRACE_D("FormSDP() - eMediaType [%d], EnforceReofferMode[%d]", eMediaType,
+            bEnforceReofferMode, 0);
 
     MediaNego* pMediaNego = FindMediaNego(nNegoId);
 
@@ -210,8 +213,8 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSDP(IN IMS_UINTP nNegoId, OUT ISession
         return IMS_FALSE;
     }
 
-    if (pMediaNego->FormSDP(pSession, eMediaType, nAudioDirection, nVideoDirection,
-                nTextDirection) == IMS_FALSE)
+    if (pMediaNego->FormSDP(pSession, eMediaType, nAudioDirection, nVideoDirection, nTextDirection,
+                bEnforceReofferMode) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "FormSDP() - FormSDP Failed", 0, 0, 0);
         return IMS_FALSE;

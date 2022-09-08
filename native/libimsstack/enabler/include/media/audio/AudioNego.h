@@ -113,11 +113,13 @@ public:
      * @param pSessionDescriptor The SDP descriptor instance to form the session level SDP
      * @param pDescriptor The SDP descriptor instance to form the m=audio level SDP
      * @param eDir The media direction of the SDP
+     * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
      * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
      * it is failed to form
      */
     virtual IMS_BOOL FormSDP(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
+            IN IMS_BOOL bEnforceReofferMode);
 
     /**
      * @brief Negotiate the SDP and make the negotiate profile based on the nego state
@@ -229,7 +231,8 @@ private:
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
     IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
+            IN IMS_BOOL bEnforceReofferMode);
     MEDIA_DIRECTION NegotiateOffer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
     MEDIA_DIRECTION NegotiateAnswer(

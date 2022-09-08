@@ -122,11 +122,14 @@ IMS_BOOL MediaNego::Forking(IN MediaNego* pMediaNego)
 
 PUBLIC
 IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
-        IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection)
+        IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection,
+        IN IMS_BOOL bEnforceReofferMode)
 {
     IMS_TRACE_I("FormSDP(): eMediaType[%d], eNegoState[%x]", eMediaType, m_eNegoState, 0);
     IMS_TRACE_I("FormSDP() - DIR = Audio[%d], Video[%d], Text[%d]", nAudioDirection,
             nVideoDirection, nTextDirection);
+    IMS_TRACE_D("FormSDP() - eMediaType [%d], bEnforceReofferMode[%d]", eMediaType,
+            bEnforceReofferMode, 0);
 
     if (m_pMediaEnvironment == IMS_NULL)
     {
@@ -339,7 +342,8 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
     if (pDescriptorForAudio != IMS_NULL)
     {
         if (m_pAudioNego->FormSDP(GetNegoState(), pSession->GetSessionDescriptor(),
-                    pDescriptorForAudio, (MEDIA_DIRECTION)nAudioDirection) == IMS_FALSE)
+                    pDescriptorForAudio, (MEDIA_DIRECTION)nAudioDirection,
+                    bEnforceReofferMode) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "FormSDP() - Forming a m line of audio is failed", 0, 0, 0);
             return IMS_FALSE;
@@ -361,7 +365,8 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                     pDescriptorForVideo, (MEDIA_DIRECTION)nVideoDirection,
                     MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO) == IMS_FALSE
                             ? IMS_TRUE
-                            : IMS_FALSE) == IMS_FALSE)
+                            : IMS_FALSE,
+                    bEnforceReofferMode) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "MediaNego::FormSDP() - Forming a m line of video is failed", 0, 0, 0);
             return IMS_FALSE;
@@ -384,7 +389,8 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                     pDescriptorForText, (MEDIA_DIRECTION)nTextDirection,
                     MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT) == IMS_FALSE
                             ? IMS_TRUE
-                            : IMS_FALSE) == IMS_FALSE)
+                            : IMS_FALSE,
+                    bEnforceReofferMode) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "MediaNego::FormSDP() - Forming a m line of text is failed", 0, 0, 0);
             return IMS_FALSE;

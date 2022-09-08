@@ -73,12 +73,13 @@ public:
      * @param nAudioDirection The audio direction to set in the SDP
      * @param nVideoDirection The video direction to set in the SDP
      * @param nTextDirection The text direction to set in the SDP
+     * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
      * @return IMS_BOOL Returns IMS_TRUE when the form SDP is done successfully and IMS_FALSE when
      * failed with invalid arguments
      */
     IMS_BOOL FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
             IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
-            IN IMS_SINT32 nTextDirection);
+            IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode);
 
     /**
      * @brief Create negotiate profile from the SDP received from the network by the given arguments

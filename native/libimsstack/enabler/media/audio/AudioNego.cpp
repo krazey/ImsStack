@@ -113,10 +113,11 @@ PUBLIC VIRTUAL void AudioNego::CreateProfiles(
 
 PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSDP(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
-        IN MEDIA_DIRECTION eDir)
+        IN MEDIA_DIRECTION eDir, IN IMS_BOOL bEnforceReofferMode)
 {
     IMS_TRACE_D("FormSDP() eNegoState[%d], eDir[%d] lstOaModel size[%d]", eNegoState, eDir,
             m_lstOaModel.GetSize());
+    IMS_TRACE_D("FormSDP() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
 
     switch (eNegoState)
     {
@@ -125,7 +126,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSDP(IN NEGO_STATE eNegoState,
         case STATE_OFFER_RECEIVED:
             return FormAnswer(pSessionDescriptor, pDescriptor, eDir);
         case STATE_NEGOTIATED:
-            return FormReoffer(pSessionDescriptor, pDescriptor, eDir);
+            return FormReoffer(pSessionDescriptor, pDescriptor, eDir, bEnforceReofferMode);
         default:
             IMS_TRACE_E(0, "FormSDP fail eNegoState[%d]", eNegoState, 0, 0);
             return IMS_FALSE;
@@ -811,10 +812,11 @@ IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
 
 PRIVATE
 IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir)
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bEnforceReofferMode)
 {
     IMS_TRACE_I("FormReoffer() pDescriptor[%" PFLS_x "], eDir[%d], m_lstOaModel.GetSize[%d]",
             pDescriptor, eDir, m_lstOaModel.GetSize());
+    IMS_TRACE_D("FormReoffer() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
 
     // Handling exception case
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
@@ -871,16 +873,32 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
         // reuse previous profile when negotiated profile data port is 0
         if ((pPrevOaModel->pNegotiatedProfile != IMS_NULL &&
-                    pPrevOaModel->pNegotiatedProfile->nDataPort == 0) ||
-                pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_FALSE)
+                    pPrevOaModel->pNegotiatedProfile->nDataPort == 0))
         {
-            IMS_TRACE_I("FormReoffer() - reuse previous profile, m_bSdpReofferFullCapability[%d]",
-                    pMediaSessionConfig->IsSdpReofferFullCapability(), 0, 0);
             pNewOaModel->pLocalProfile = new AudioProfile(*pPrevOaModel->pNegotiatedProfile);
         }
         else
         {
-            pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
+            if (bEnforceReofferMode == IMS_TRUE)
+            {
+                pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
+            }
+            else
+            {
+                IMS_TRACE_I(
+                        "FormReoffer() - reuse previous profile, m_bSdpReofferFullCapability[%d]",
+                        pMediaSessionConfig->IsSdpReofferFullCapability(), 0, 0);
+
+                if (pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_TRUE)
+                {
+                    pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
+                }
+                else
+                {
+                    pNewOaModel->pLocalProfile =
+                            new AudioProfile(*pPrevOaModel->pNegotiatedProfile);
+                }
+            }
         }
 
         // set default AS value when localProfile AS value is 0 in ReOffer case
