@@ -58,4 +58,67 @@ public class SmsRPErrorCauseTest {
         assertEquals(SmsManager.RESULT_ERROR_GENERIC_FAILURE,
                 SmsRPErrorCause.getSendSmsStatusReasonByRPCauseCode(43));
     }
+
+    @Test
+    public void test_getSendSmsStatusBySmsErrorCause() {
+        assertEquals(ImsSmsImplBase.SEND_STATUS_OK,
+                SmsRPErrorCause.getSendSmsStatusBySmsErrorCause(SmsRPErrorCause.SMS_NO_ERROR));
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
+                SmsRPErrorCause.getSendSmsStatusBySmsErrorCause(SmsRPErrorCause.SMS_TEMP_FAILURE));
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR,
+                SmsRPErrorCause.getSendSmsStatusBySmsErrorCause(SmsRPErrorCause.SMS_RESERVED));
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_FALLBACK,
+                SmsRPErrorCause.getSendSmsStatusBySmsErrorCause(
+                SmsRPErrorCause.SMS_NW_OUT_OF_ORDER));
+    }
+
+    @Test
+    public void test_getSendSmsStatusReasonBySendErrorCode() {
+        assertEquals(SmsManager.RESULT_ERROR_NO_SERVICE,
+                SmsRPErrorCause.getSendSmsStatusReasonBySendErrorCode(
+                SmsRPErrorCause.SMS_UNKNOWN_SUBSCRIBER));
+        assertEquals(SmsManager.RESULT_ERROR_GENERIC_FAILURE,
+                SmsRPErrorCause.getSendSmsStatusReasonBySendErrorCode(
+                SmsRPErrorCause.SMS_UNALLOCATED_NUMBER));
+        assertEquals(SmsManager.RESULT_INVALID_ARGUMENTS,
+                SmsRPErrorCause.getSendSmsStatusReasonBySendErrorCode(
+                SmsRPErrorCause.SMS_INCORRECT_MESSAGE));
+        assertEquals(SmsManager.RESULT_NETWORK_ERROR,
+                SmsRPErrorCause.getSendSmsStatusReasonBySendErrorCode(
+                SmsRPErrorCause.SMS_NW_OUT_OF_ORDER));
+        assertEquals(SmsManager.RESULT_NETWORK_REJECT,
+                SmsRPErrorCause.getSendSmsStatusReasonBySendErrorCode(
+                SmsRPErrorCause.SMS_TRANSFER_REJECTED));
+        assertEquals(SmsManager.RESULT_NO_RESOURCES,
+                SmsRPErrorCause.getSendSmsStatusReasonBySendErrorCode(
+                SmsRPErrorCause.SMS_RESOURCES_UNAVAILABLE));
+        assertEquals(SmsManager.RESULT_REQUEST_NOT_SUPPORTED,
+                SmsRPErrorCause.getSendSmsStatusReasonBySendErrorCode(
+                SmsRPErrorCause.SMS_MESSAGE_TYPE_NOT_IMPLEMENTED));
+        assertEquals(SmsManager.RESULT_ERROR_NONE,
+                SmsRPErrorCause.getSendSmsStatusReasonBySendErrorCode(
+                SmsRPErrorCause.SMS_NO_ERROR));
+        assertEquals(SmsManager.RESULT_ERROR_GENERIC_FAILURE,
+                SmsRPErrorCause.getSendSmsStatusReasonBySendErrorCode(
+                SmsRPErrorCause.SMS_TEMP_FAILURE));
+    }
+
+    @Test
+    public void test_getSmsErrorCauseByRPErrorCause() {
+        assertEquals(SmsRPErrorCause.SMS_OPERATOR_BARRING,
+                SmsRPErrorCause.getSmsErrorCauseByRPErrorCause(8));
+        assertEquals(SmsRPErrorCause.SMS_TEMP_FAILURE,
+                SmsRPErrorCause.getSmsErrorCauseByRPErrorCause(41));
+        assertEquals(SmsRPErrorCause.SMS_MESSAGE_INCOMPATIBLE_WITH_STATE,
+                SmsRPErrorCause.getSmsErrorCauseByRPErrorCause(98));
+        assertEquals(SmsRPErrorCause.SMS_IE_NOT_EXISTENT,
+                SmsRPErrorCause.getSmsErrorCauseByRPErrorCause(99));
+        assertEquals(SmsRPErrorCause.SMS_PROTOCOL_ERROR,
+                SmsRPErrorCause.getSmsErrorCauseByRPErrorCause(111));
+        assertEquals(SmsRPErrorCause.SMS_INTERWORKING_ERROR,
+                SmsRPErrorCause.getSmsErrorCauseByRPErrorCause(127));
+        assertEquals(SmsRPErrorCause.SMS_TEMP_FAILURE,
+                SmsRPErrorCause.getSmsErrorCauseByRPErrorCause(-1));
+    }
 }
+
