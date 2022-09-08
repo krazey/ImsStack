@@ -312,8 +312,36 @@ public class ImsRegistrationTrackerTest {
 
     @Test
     public void testchangeCapabilities_null() {
+        assertEquals(null, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        mRegTracker.changeCapabilities(null, null);
+        assertEquals(null, mRegTracker.createCapabilityPairsFromCapabilities());
+
         mRegTracker.changeCapabilities(new ArrayList<>(), new ArrayList<>());
         assertEquals(null, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        List<CapabilityPair> disableCapabilities = new ArrayList<>();
+        disableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+        disableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImpl.REGISTRATION_TECH_IWLAN));
+
+        mRegTracker.changeCapabilities(new ArrayList<>(), disableCapabilities);
+        assertEquals(null, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        List<CapabilityPair> enableCapabilities = new ArrayList<>();
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+
+        mRegTracker.changeCapabilities(enableCapabilities, disableCapabilities);
+
+        CapabilityPairs capabilityPairs = new CapabilityPairs(
+                IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.Capability.VOICE);
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
     }
 
     @Test

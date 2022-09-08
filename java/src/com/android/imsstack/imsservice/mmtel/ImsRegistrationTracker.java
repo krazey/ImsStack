@@ -205,6 +205,8 @@ public class ImsRegistrationTracker {
         CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
         if (capabilityPairs != null) {
             mRegTracker.changeCapabilities(capabilityPairs);
+        } else {
+            mRegTracker.changeCapabilities(new CapabilityPairs());
         }
     }
 
