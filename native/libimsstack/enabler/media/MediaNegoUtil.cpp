@@ -27,7 +27,7 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN IMSMap<IMS_UINTP, MediaNego*>* pMedi
         IN AString strIpAddr, IN IMS_SINT32 nPort, OUT IMS_UINTP& nNegoId,
         OUT MEDIA_CONTENT_TYPE& eMediaType)
 {
-    if (pMediaNegoMap == IMS_NULL)
+    if (pMediaNegoMap == IMS_NULL || pMediaNegoMap->IsEmpty())
     {
         return IMS_FALSE;
     }
@@ -39,7 +39,7 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN IMSMap<IMS_UINTP, MediaNego*>* pMedi
     VideoNego* pVideoNego = IMS_NULL;
     TextNego* pTextNego = IMS_NULL;
 
-    do
+    for (nIndex = 0; nIndex < pMediaNegoMap->GetSize(); nIndex++)
     {
         pMediaNego = pMediaNegoMap->GetValueAt(nIndex);
 
@@ -84,9 +84,7 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN IMSMap<IMS_UINTP, MediaNego*>* pMedi
                 }
             }
         }
-
-        nIndex++;
-    } while (pMediaNego != IMS_NULL);
+    }
 
     return IMS_FALSE;
 }

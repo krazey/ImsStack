@@ -48,7 +48,7 @@ PUBLIC VideoMediaSession::VideoMediaSession(IN IMS_SINT32 nSlotId) :
 
 PUBLIC VIRTUAL VideoMediaSession::~VideoMediaSession()
 {
-    IMS_TRACE_I("~VideoMediaSession()", 0, 0, 0);
+    IMS_TRACE_I("~VideoMediaSession() - state[%d]", GetState(), 0, 0);
 }
 
 PUBLIC void VideoMediaSession::SetConfig(VideoConfiguration* pConfig)
