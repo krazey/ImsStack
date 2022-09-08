@@ -21,7 +21,6 @@
 #include "ImsTypeDef.h"
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosLocationStarter.h"
-#include "interface/IAosMsgHandler.h"
 #include "interface/IAosRegStateManager.h"
 #include "interface/IAosRetryRepository.h"
 #include "interface/IAosService.h"
@@ -33,7 +32,6 @@
 
 #include "interface/MockIAosCallTracker.h"
 #include "interface/MockIAosLocationStarter.h"
-#include "interface/MockIAosMsgHandler.h"
 #include "interface/MockIAosRegStateManager.h"
 #include "interface/MockIAosRetryRepository.h"
 #include "interface/MockIAosService.h"
@@ -108,17 +106,6 @@ TEST_F(AosProviderTest, SetLocationStarter)
 
     EXPECT_TRUE(piAosLocationStarter != nullptr);
     EXPECT_THAT(piAosLocationStarter, TypedEq<IAosLocationStarter*>(piAosLocationStarter));
-}
-
-TEST_F(AosProviderTest, SetMsgHandler)
-{
-    MockIAosMsgHandler objMockIAosMsgHandler;
-    m_pAosProvider->SetMsgHandler(static_cast<IAosMsgHandler*>(&objMockIAosMsgHandler));
-
-    IAosMsgHandler* piAosMsgHandler = m_pAosProvider->GetMsgHandler();
-
-    EXPECT_TRUE(piAosMsgHandler != nullptr);
-    EXPECT_THAT(piAosMsgHandler, TypedEq<IAosMsgHandler*>(piAosMsgHandler));
 }
 
 TEST_F(AosProviderTest, SetRegStateManager)

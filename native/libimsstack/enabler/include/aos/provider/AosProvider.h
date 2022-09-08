@@ -21,7 +21,6 @@
 class IMutex;
 class IAosCallTracker;
 class IAosLocationStarter;
-class IAosMsgHandler;
 class IAosNConfiguration;
 class IAosRegStateManager;
 class IAosService;
@@ -51,7 +50,6 @@ public:
 
     IAosCallTracker* GetCallTracker(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosLocationStarter* GetLocationStarter(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IAosMsgHandler* GetMsgHandler(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosNConfiguration* GetNConfiguration(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosRegStateManager* GetRegStateManager(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosService* GetService(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
@@ -60,7 +58,6 @@ public:
 
     void SetCallTracker(IN IAosCallTracker* piCt, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetLocationStarter(IN IAosLocationStarter* piLs, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    void SetMsgHandler(IN IAosMsgHandler* piMh, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetNConfiguration(IN IAosNConfiguration* piNc, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetRegStateManager(IN IAosRegStateManager* piRsm, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetService(IN IAosService* piService, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
@@ -76,7 +73,6 @@ private:
         inline ProviderParam() :
                 m_piCallTracker(IMS_NULL),
                 m_piLocationStarter(IMS_NULL),
-                m_piMsgHandler(IMS_NULL),
                 m_piNConfiguration(IMS_NULL),
                 m_piRegStateManager(IMS_NULL),
                 m_piService(IMS_NULL),
@@ -89,7 +85,6 @@ private:
     public:
         IAosCallTracker* m_piCallTracker;
         IAosLocationStarter* m_piLocationStarter;
-        IAosMsgHandler* m_piMsgHandler;
         IAosNConfiguration* m_piNConfiguration;
         IAosRegStateManager* m_piRegStateManager;
         IAosService* m_piService;

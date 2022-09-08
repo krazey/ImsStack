@@ -18,7 +18,6 @@
 #include "SystemConfig.h"
 
 #include "interface/IAosCallTracker.h"
-#include "interface/IAosMsgHandler.h"
 #include "interface/IAosLocationStarter.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosRegStateManager.h"
@@ -103,12 +102,6 @@ IAosLocationStarter* AosProvider::GetLocationStarter(IN IMS_SINT32 nSlotId /* = 
 }
 
 PUBLIC
-IAosMsgHandler* AosProvider::GetMsgHandler(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
-{
-    return m_objParam.GetValue(nSlotId)->m_piMsgHandler;
-}
-
-PUBLIC
 IAosNConfiguration* AosProvider::GetNConfiguration(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     return m_objParam.GetValue(nSlotId)->m_piNConfiguration;
@@ -164,18 +157,6 @@ void AosProvider::SetLocationStarter(
         {
             piLs->SetSlotId(nSlotId);
         }
-    }
-}
-
-PUBLIC
-void AosProvider::SetMsgHandler(IN IAosMsgHandler* piMh, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
-{
-    LockGuard objLock(m_piLock);
-
-    ProviderParam* pParam = m_objParam.GetValue(nSlotId);
-    if (pParam != IMS_NULL)
-    {
-        pParam->m_piMsgHandler = piMh;
     }
 }
 

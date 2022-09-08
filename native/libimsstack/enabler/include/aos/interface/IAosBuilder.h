@@ -33,7 +33,6 @@ class IAosSubscriber;
 class IAosPcscf;
 class IAosCallTracker;
 class IAosRegStateManager;
-class IAosMsgHandler;
 class IAosService;
 class IAosSubscriberManager;
 class IAosNConfiguration;
@@ -59,7 +58,6 @@ public:
     /// AoSProvider
     virtual IAosCallTracker* BuildCallTracker(IN IMS_SINT32 nSlotId) = 0;
     virtual IAosRegStateManager* BuildRegStateManager() = 0;
-    virtual IAosMsgHandler* BuildMsgHandler() = 0;
     virtual IAosService* BuildService(IN IMS_SINT32 nSlotId) = 0;
     virtual IAosSubscriberManager* BuildSubscriberManager(IN IMS_SINT32 nSlotId) = 0;
     virtual IAosRetryRepository* BuildRetryRepository(IN IMS_SINT32 nSlotId) = 0;
