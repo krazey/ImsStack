@@ -32,7 +32,8 @@ class ISipMessage;
 class MtcRoutingRejectHandler final : public ISipRoutingRejectListener
 {
 public:
-    explicit MtcRoutingRejectHandler(IN IMtcContext& objContext);
+    explicit MtcRoutingRejectHandler(
+            IN IMtcContext& objContext, IN INetworkWatcher& objNetworkWatcher);
     ~MtcRoutingRejectHandler();
     MtcRoutingRejectHandler(const MtcRoutingRejectHandler&) = delete;
     MtcRoutingRejectHandler& operator=(const MtcRoutingRejectHandler&) = delete;
@@ -46,6 +47,7 @@ private:
     SipStatusCode GetRoutingRejectCodeForInvite(IN const SipStatusCode& objDefaultStatusCode) const;
 
     IMtcContext& m_objContext;
+    INetworkWatcher& m_objNetworkWatcher;
 };
 
 #endif

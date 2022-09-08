@@ -26,13 +26,13 @@
 #include "ImsServiceConfig.h"
 #include "IMtcCallController.h"
 #include "IMtcService.h"
-#include "INetworkWatcher.h"
 #include "IServiceFilterCriteria.h"
 #include "ISipRoutingRejectNotifier.h"
 #include "JniEnablerConnector.h"
 #include "IJniMtcServiceThread.h"
 #include "MtcEmergencyServiceManager.h"
 #include "MtcService.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipFactory.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -233,7 +233,9 @@ void MtcService::Init()
     if (m_objContext.GetConfigurationProxy().Is(Feature::
             USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION))
     {
-        m_pRoutingRejectHandler = new MtcRoutingRejectHandler(m_objContext);
+        m_pRoutingRejectHandler = new MtcRoutingRejectHandler(m_objContext,
+                *PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(
+                        m_objContext.GetSlotId()));
 
         ISipRoutingRejectNotifier* piRoutingRejectNotifier =
                 SipFactory::GetRoutingRejectNotifier(m_objContext.GetSlotId());
