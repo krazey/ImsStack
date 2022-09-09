@@ -30,7 +30,7 @@ import java.util.Arrays;
  **/
 public final class SmsRPdu {
     private static final String TAG = "[GII-SmsPdu] ";
-    rivate static final boolean DBG = ImsLog.isDebuggable();
+    private static final boolean DBG = ImsLog.isDebuggable();
     private static final int MAX_RPDU_LENGTH = 248;
     //Max RP-UserData Length excluding IEI and Length bytes
     private static final int MAX_TPDU_LENGTH = 232;
