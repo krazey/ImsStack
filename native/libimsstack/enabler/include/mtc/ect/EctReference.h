@@ -25,12 +25,12 @@ class IMtcCall;
 class IMtcContext;
 class IEctReferenceListener;
 
-class EctReference final : public IReferenceListener
+class EctReference : public IReferenceListener
 {
 public:
     explicit EctReference(IN IMtcContext& objContext, IN CallKey nTransfereeKey,
             IN IEctReferenceListener& objListener);
-    ~EctReference();
+    virtual ~EctReference();
     EctReference(IN const EctReference&) = delete;
     EctReference& operator=(IN const EctReference&) = delete;
 
@@ -41,8 +41,8 @@ public:
     void ReferenceNotify(IN IReference* piReference, IN IMessage* piNotify) override;
     void ReferenceTerminated(IN IReference* piReference) override;
 
-    IMS_RESULT SendInvite(IN CallKey nTransferTargetKey);
-    IMS_RESULT SendInvite(IN const AString& strTransferTarget);
+    virtual IMS_RESULT SendInvite(IN CallKey nTransferTargetKey);
+    virtual IMS_RESULT SendInvite(IN const AString& strTransferTarget);
     IMS_UINT32 GetResponseCode() const;
 
 private:

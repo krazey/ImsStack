@@ -15,17 +15,126 @@
  */
 
 #include <gtest/gtest.h>
+#include "MockIMtcContext.h"
+#include "MockITimer.h"
+#include "PlatformContext.h"
+#include "TestTimerService.h"
+#include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
+#include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
+#include "call/MockIMtcUiNotifier.h"
 #include "ect/EctController.h"
+#include "ect/EctFactory.h"
+#include "ect/MockIEctControllerListener.h"
+#include "sipcore/SipStatusCode.h"
+
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
+
+LOCAL CallKey TRANSFEREE_KEY = 200;
 
 namespace android
 {
 
 class EctControllerTest : public ::testing::Test
 {
+public:
+    inline EctControllerTest() :
+            pController(IMS_NULL),
+            pTimerService(new TestTimerService()),
+            objTimer(pTimerService->GetMockTimer())
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, pTimerService);
+    }
+    inline virtual ~EctControllerTest()
+    {
+        delete pController;
+        delete pTimerService;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
+    }
+
+    EctController* pController;
+    TestTimerService* pTimerService;
+    EctFactory objFactory;
+
+    MockIMtcContext objContext;
+    MockITimer& objTimer;
+    MockIEctControllerListener objListener;
+    MockIMtcCallManager objCallManager;
+    MockIMtcUiNotifier objNotifier;
+    MockIMtcCall objTransfereeCall;
+    MockIMtcCallContext objTransfereeCallContext;
+
 protected:
-    virtual void SetUp() override {}
+    virtual void SetUp() override
+    {
+        ON_CALL(objContext, GetCallManager)
+                .WillByDefault(ReturnRef(objCallManager));
+        ON_CALL(objCallManager, GetCallByCallKey(TRANSFEREE_KEY))
+                .WillByDefault(Return(&objTransfereeCall));
+        ON_CALL(objTransfereeCall, GetCallContext)
+                .WillByDefault(ReturnRef(objTransfereeCallContext));
+        ON_CALL(objTransfereeCall, GetKey)
+                .WillByDefault(Return(TRANSFEREE_KEY));
+        ON_CALL(objTransfereeCallContext, GetUiNotifier)
+                .WillByDefault(ReturnRef(objNotifier));
+
+        pController = new EctController(objContext, TRANSFEREE_KEY, objListener, objFactory);
+    }
 
     virtual void TearDown() override {}
 };
+
+TEST_F(EctControllerTest, OnReferenceStartedDoesNothing)
+{
+    EXPECT_CALL(objListener, OnEctCompleted)
+            .Times(0);
+    EXPECT_CALL(objTimer, KillTimer)
+            .Times(0);
+
+    pController->OnReferenceStarted();
+}
+
+TEST_F(EctControllerTest, OnReferenceStartFailedNotifiesFailure)
+{
+    EXPECT_CALL(objListener, OnEctCompleted);
+    EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)));
+
+    pController->OnReferenceStartFailed();
+}
+
+TEST_F(EctControllerTest, OnReferenceUpdatedSuccessNotifiesSuccess)
+{
+    SipStatusCode eAnyFianlSuccess = SipStatusCode::SC_202;
+    EXPECT_CALL(objListener, OnEctCompleted);
+    EXPECT_CALL(objNotifier, SendEctCompleted(IMS_SUCCESS, CallReasonInfo(CODE_USER_TERMINATED)));
+    EXPECT_CALL(objTransfereeCall,
+            Terminate(CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_ECT)));
+
+    pController->OnReferenceUpdated(eAnyFianlSuccess);
+}
+
+TEST_F(EctControllerTest, OnReferenceUpdatedFailureNotifiesFailure)
+{
+    SipStatusCode eAnyFianlFailure = SipStatusCode::SC_415;
+    EXPECT_CALL(objListener, OnEctCompleted);
+    EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)));
+
+    pController->OnReferenceUpdated(eAnyFianlFailure);
+}
+
+TEST_F(EctControllerTest, TimerExpiredDoesNothingBeforeStartTimer)
+{
+    EXPECT_CALL(objListener, OnEctCompleted)
+            .Times(0);
+    EXPECT_CALL(objNotifier, SendEctCompleted(_, _))
+            .Times(0);
+    EXPECT_CALL(objTimer, KillTimer)
+            .Times(0);
+
+    pController->Timer_TimerExpired(&objTimer);
+}
 
 }  // namespace android

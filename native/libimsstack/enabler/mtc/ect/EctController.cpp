@@ -17,8 +17,9 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "ect/EctController.h"
-#include "ect/IEctControllerListener.h"
+#include "ect/EctFactory.h"
 #include "ect/EctReference.h"
+#include "ect/IEctControllerListener.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "IMtcContext.h"
@@ -33,15 +34,16 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 EctController::EctController(
-        IN IMtcContext& objContext, IN CallKey nCallKey, IN IEctControllerListener& objListener) :
+        IN IMtcContext& objContext, IN CallKey nCallKey, IN IEctControllerListener& objListener,
+                IN EctFactory& objFactory) :
         m_objContext(objContext),
         m_nTransfereeKey(nCallKey),
         m_objListener(objListener),
+        m_objFactory(objFactory),
         m_pReference(nullptr),
         m_piTimer(IMS_NULL)
 {
     IMS_TRACE_D("+EctController", 0, 0, 0);
-    StartTimer();
 }
 
 PUBLIC
@@ -96,13 +98,14 @@ IMtcCall* EctController::GetTransferee() const
         // TODO: What to do?
     }
 
-    return m_objContext.GetCallManager().GetCallByCallKey(m_nTransfereeKey);
+    return piTransferee;
 }
 
 PROTECTED VIRTUAL void EctController::OnCompleted()
 {
     NotifyResult(IMS_SUCCESS, CODE_USER_TERMINATED);
     TerminateTransfereeCall();
+    StopTimer();
     m_objListener.OnEctCompleted();
 }
 
@@ -110,6 +113,7 @@ PROTECTED VIRTUAL void EctController::OnFailed()
 {
     // TODO: Recover()?
     NotifyResult(IMS_FAILURE, CODE_USER_TERMINATED);
+    StopTimer();
     m_objListener.OnEctCompleted();
 }
 
@@ -117,7 +121,7 @@ PROTECTED
 void EctController::NotifyResult(
         IN IMS_RESULT nResult, IN IMS_SINT32 nReason /* = CODE_NONE*/) const
 {
-    IMS_TRACE_D("NotifyResult", 0, 0, 0);
+    IMS_TRACE_D("NotifyResult [%d]", nResult, 0, 0);
     // TODO: is reason meaningful? what kind of reason to be used for ECT failure?
     IMtcUiNotifier& objNotifier = GetTransferee()->GetCallContext().GetUiNotifier();
     objNotifier.SendEctCompleted(nResult, CallReasonInfo(nReason));
@@ -128,7 +132,7 @@ void EctController::CreateReference()
 {
     IMS_TRACE_I("CreateReference", 0, 0, 0);
 
-    m_pReference = std::make_unique<EctReference>(m_objContext, m_nTransfereeKey, *this);
+    m_pReference = m_objFactory.CreateReference(m_objContext, m_nTransfereeKey, *this);
 }
 
 PROTECTED

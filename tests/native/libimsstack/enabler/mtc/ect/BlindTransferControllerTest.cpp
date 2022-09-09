@@ -15,17 +15,183 @@
  */
 
 #include <gtest/gtest.h>
+#include "ImsList.h"
+#include "MockIMtcContext.h"
+#include "MockITimer.h"
+#include "PlatformContext.h"
+#include "TestTimerService.h"
+#include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
+#include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
+#include "call/MockIMtcUiNotifier.h"
 #include "ect/BlindTransferController.h"
+#include "ect/EctFactory.h"
+#include "ect/MockEctReference.h"
+#include "ect/MockIEctControllerListener.h"
+#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
+#include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/MockReferenceInterfaceHolder.h"
+#include "sipcore/SipStatusCode.h"
+
+//EctController::TIME_WAIT_OPERATION_COMPLETE
+LOCAL IMS_UINT32 TIME_WAIT_OPERATION_COMPLETE = 3000;
+
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
+
+LOCAL CallKey TRANSFEREE_KEY = 200;
+LOCAL AString ANY_TARGET_NUMBER = "12345";
 
 namespace android
 {
 
 class BlindTransferControllerTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    inline BlindTransferControllerTest() :
+            pController(IMS_NULL),
+            pTimerService(new TestTimerService()),
+            objTimer(pTimerService->GetMockTimer()),
+            pMockReferenceInterfaceHolder(IMS_NULL)
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, pTimerService);
+    }
+    inline virtual ~BlindTransferControllerTest()
+    {
+        delete pController;
+        delete pTimerService;
+        delete pMockReferenceInterfaceHolder;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
+    }
 
-    virtual void TearDown() override {}
+    BlindTransferController* pController;
+    TestTimerService* pTimerService;
+    EctFactory objFactory;
+    std::unique_ptr<MockEctReference> pReference;
+
+    MockIMtcContext objContext;
+    MockITimer& objTimer;
+    MockIEctControllerListener objListener;
+    MockIMtcCallManager objCallManager;
+    MockIMtcUiNotifier objNotifier;
+    MockIMtcCall objTransfereeCall;
+    MockIMtcCallContext objTransfereeCallContext;
+    MockIMtcSipInterfaceFactory objMockInterfaceFactory;
+    MockReferenceInterfaceHolder* pMockReferenceInterfaceHolder;
+    MockIInterfaceHolderListener objMockHolderListener;
+    ImsList<IMtcCall*> objManagedCalls;
+
+protected:
+    virtual void SetUp() override
+    {
+        ON_CALL(objContext, GetCallManager)
+                .WillByDefault(ReturnRef(objCallManager));
+        ON_CALL(objCallManager, GetCallByCallKey(TRANSFEREE_KEY))
+                .WillByDefault(Return(&objTransfereeCall));
+        ON_CALL(objTransfereeCall, GetCallContext)
+                .WillByDefault(ReturnRef(objTransfereeCallContext));
+        ON_CALL(objTransfereeCall, GetKey)
+                .WillByDefault(Return(TRANSFEREE_KEY));
+        ON_CALL(objTransfereeCallContext, GetUiNotifier)
+                .WillByDefault(ReturnRef(objNotifier));
+
+        pController = new BlindTransferController(
+                objContext, TRANSFEREE_KEY, objListener, objFactory);
+    }
+
+    virtual void TearDown() override
+    {
+        objManagedCalls.Clear();
+    }
+
+    MockEctReference* GetMockReference()
+    {
+        // For ~EctReference()
+        ON_CALL(objContext, GetSipInterfaceFactory)
+                .WillByDefault(ReturnRef(objMockInterfaceFactory));
+        pMockReferenceInterfaceHolder = new MockReferenceInterfaceHolder(objMockHolderListener);
+        ON_CALL(objMockInterfaceFactory, GetIReferenceHolder)
+                .WillByDefault(Return(pMockReferenceInterfaceHolder));
+        ON_CALL(*pMockReferenceInterfaceHolder, ReleaseIReference(_, _))
+                .WillByDefault(Return());
+
+        pReference = std::make_unique<MockEctReference>(objContext, TRANSFEREE_KEY, *pController);
+        MockEctReference* pRawPtr = pReference.get();
+        objFactory.SetReference(std::move(pReference));
+        return pRawPtr;
+    }
 };
+
+TEST_F(BlindTransferControllerTest, TransferFailsIfCallCountIsNotOne)
+{
+    ON_CALL(objCallManager, GetCalls)
+            .WillByDefault(Return(objManagedCalls));
+
+    EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)))
+            .Times(1);
+    pController->Transfer(ANY_TARGET_NUMBER);
+
+    MockIMtcCall objCall;
+    objManagedCalls.Append(&objCall);
+    objManagedCalls.Append(&objCall);
+    ON_CALL(objCallManager, GetCalls)
+            .WillByDefault(Return(objManagedCalls));
+    EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)))
+            .Times(1);
+    pController->Transfer(ANY_TARGET_NUMBER);
+}
+
+TEST_F(BlindTransferControllerTest, TransferFailsIfSendingReferenceFailed)
+{
+    objManagedCalls.Append(&objTransfereeCall);
+    ON_CALL(objCallManager, GetCalls)
+            .WillByDefault(Return(objManagedCalls));
+
+    ON_CALL(*GetMockReference(), SendInvite(ANY_TARGET_NUMBER))
+            .WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)))
+            .Times(1);
+
+    pController->Transfer(ANY_TARGET_NUMBER);
+}
+
+TEST_F(BlindTransferControllerTest, SuccessfulTransferStartsTimer)
+{
+    objManagedCalls.Append(&objTransfereeCall);
+    ON_CALL(objCallManager, GetCalls)
+            .WillByDefault(Return(objManagedCalls));
+
+    ON_CALL(*GetMockReference(), SendInvite(ANY_TARGET_NUMBER))
+            .WillByDefault(Return(IMS_SUCCESS));
+
+    EXPECT_CALL(objTimer, SetTimer(TIME_WAIT_OPERATION_COMPLETE, _))
+            .Times(1);
+
+    pController->Transfer(ANY_TARGET_NUMBER);
+}
+
+TEST_F(BlindTransferControllerTest, OnReferenceStartedNotifiesCompleted)
+{
+    objManagedCalls.Append(&objTransfereeCall);
+    ON_CALL(objCallManager, GetCalls)
+                .WillByDefault(Return(objManagedCalls));
+
+    ON_CALL(*GetMockReference(), SendInvite(ANY_TARGET_NUMBER))
+            .WillByDefault(Return(IMS_SUCCESS));
+
+    pController->Transfer(ANY_TARGET_NUMBER);
+
+    EXPECT_CALL(objListener, OnEctCompleted);
+    EXPECT_CALL(objNotifier, SendEctCompleted(IMS_SUCCESS, CallReasonInfo(CODE_USER_TERMINATED)));
+    EXPECT_CALL(objTransfereeCall,
+            Terminate(CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_ECT)));
+    EXPECT_CALL(objTimer, KillTimer)
+            .Times(1);
+
+    pController->OnReferenceStarted();
+}
 
 }  // namespace android

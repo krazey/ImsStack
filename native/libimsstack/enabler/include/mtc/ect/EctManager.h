@@ -21,11 +21,12 @@
 #include "ect/IEctControllerListener.h"
 #include "ect/IEctManager.h"
 #include "ect/EctController.h"
-#include "helper/ObjectAsyncDestroyer.h"
+#include "ect/EctFactory.h"
+#include <memory>
 
 class IMtcContext;
 
-class EctManager final : public IEctControllerListener, public IEctManager
+class EctManager : public IEctControllerListener, public IEctManager
 {
 public:
     explicit EctManager(IN IMtcContext& objContext);
@@ -35,12 +36,17 @@ public:
 
     void OnEctCompleted() override;
 
-    void Transfer(IN CallKey nCallKey, IN const AString& strNumber) override;
+    IMS_RESULT Transfer(IN CallKey nCallKey, IN const AString& strNumber) override;
+
+    inline IEctManager::State GetState() override { return m_eState; }
+
+protected:
+    EctFactory m_objEctFactory;
 
 private:
     IMtcContext& m_objContext;
-    EctController* m_pController;
-    ObjectAsyncDestroyer<EctController> m_objDestroyer;
+    IEctManager::State m_eState;
+    std::unique_ptr<EctController> m_pController;
 };
 
 #endif

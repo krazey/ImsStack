@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_ECT_MANAGER_H_
-#define INTERFACE_ECT_MANAGER_H_
+#ifndef MOCK_BLIND_CONTROLLER_H_
+#define MOCK_BLIND_CONTROLLER_H_
 
+#include <gmock/gmock.h>
+#include "AString.h"
+#include "IMtcContext.h"
 #include "call/IMtcCall.h"
+#include "ect/BlindTransferController.h"
+#include "ect/EctFactory.h"
 
-class IEctManager
+class MockBlindTransferController: public BlindTransferController
 {
 public:
-    enum class State
+    explicit MockBlindTransferController(IN IMtcContext& objContext, IN CallKey nCallKey,
+            IN IEctControllerListener& objListener, IN EctFactory& objFactory) :
+            BlindTransferController(objContext, nCallKey, objListener, objFactory)
     {
-        IDLE,
-        BLIND_TRANSFERRING,
-        CONSULTATIVE_TRANSFERRING
-    };
+    }
+    ~MockBlindTransferController() {}
 
-    virtual ~IEctManager() {}
-
-    virtual IMS_RESULT Transfer(IN CallKey nCallKey, IN const AString& strNumber) = 0;
-    virtual State GetState() = 0;
+    MOCK_METHOD(void, Transfer, (IN const AString&), (override));
 };
 
 #endif

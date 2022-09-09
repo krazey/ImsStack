@@ -29,8 +29,9 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 BlindTransferController::BlindTransferController(
-        IN IMtcContext& objContext, IN CallKey nCallKey, IN IEctControllerListener& objListener) :
-        EctController(objContext, nCallKey, objListener)
+        IN IMtcContext& objContext, IN CallKey nCallKey, IN IEctControllerListener& objListener,
+                IN EctFactory& objFactory) :
+        EctController(objContext, nCallKey, objListener, objFactory)
 {
     IMS_TRACE_D("+BlindTransferController", 0, 0, 0);
 }
@@ -50,7 +51,6 @@ PUBLIC VIRTUAL void BlindTransferController::OnReferenceStarted()
 PUBLIC VIRTUAL void BlindTransferController::Transfer(IN const AString& strNumber)
 {
     IMS_TRACE_D("Transfer - blind [%s]", strNumber.GetStr(), 0, 0);
-
     if (IsValid() == IMS_FALSE)
     {
         OnFailed();
@@ -63,6 +63,8 @@ PUBLIC VIRTUAL void BlindTransferController::Transfer(IN const AString& strNumbe
         OnFailed();
         return;
     }
+
+    StartTimer();
 }
 
 PROTECTED VIRTUAL IMS_BOOL BlindTransferController::IsValid() const

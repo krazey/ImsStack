@@ -22,18 +22,20 @@
 #include "ect/IEctReferenceListener.h"
 #include "CallReasonInfo.h"
 #include "ITimer.h"
+#include "sipcore/SipStatusCode.h"
 #include <memory>
 
 class IMtcContext;
 class IMtcCall;
 class IEctControllerListener;
+class EctFactory;
 class EctReference;
 
 class EctController : public IEctReferenceListener, public ITimerListener
 {
 public:
     explicit EctController(IN IMtcContext& objContext, IN CallKey nCallKey,
-            IN IEctControllerListener& objListener);
+            IN IEctControllerListener& objListener, IN EctFactory& objFactory);
     virtual ~EctController();
     EctController(IN const EctController&) = delete;
     EctController& operator=(IN const EctController&) = delete;
@@ -67,6 +69,7 @@ protected:
     IMtcContext& m_objContext;
     CallKey m_nTransfereeKey;
     IEctControllerListener& m_objListener;
+    EctFactory& m_objFactory;
     std::unique_ptr<EctReference> m_pReference;
     ITimer* m_piTimer;
 };

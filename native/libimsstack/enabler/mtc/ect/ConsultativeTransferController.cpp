@@ -29,8 +29,9 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 ConsultativeTransferController::ConsultativeTransferController(
-        IN IMtcContext& objContext, IN CallKey nCallKey, IN IEctControllerListener& objListener) :
-        EctController(objContext, nCallKey, objListener),
+        IN IMtcContext& objContext, IN CallKey nCallKey, IN IEctControllerListener& objListener,
+                IN EctFactory& objFactory) :
+        EctController(objContext, nCallKey, objListener, objFactory),
         m_nTransferTargetKey(IMtcCall::CALL_KEY_INVALID)
 {
     IMS_TRACE_D("+ConsultativeTransferController", 0, 0, 0);
@@ -45,6 +46,7 @@ ConsultativeTransferController::~ConsultativeTransferController()
 PUBLIC VIRTUAL void ConsultativeTransferController::Transfer()
 {
     IMS_TRACE_D("Transfer - consultative", 0, 0, 0);
+
     if (IsValid() == IMS_FALSE)
     {
         OnFailed();
@@ -58,6 +60,8 @@ PUBLIC VIRTUAL void ConsultativeTransferController::Transfer()
         OnFailed();
         return;
     }
+
+    StartTimer();
 }
 
 PROTECTED VIRTUAL IMS_BOOL ConsultativeTransferController::IsValid() const

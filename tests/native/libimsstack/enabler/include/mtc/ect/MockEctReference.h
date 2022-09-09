@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_ECT_MANAGER_H_
-#define INTERFACE_ECT_MANAGER_H_
+#ifndef MOCK_ECT_REFERENCE_H_
+#define MOCK_ECT_REFERENCE_H_
 
+#include <gmock/gmock.h>
+#include "AString.h"
 #include "call/IMtcCall.h"
+#include "ect/EctReference.h"
 
-class IEctManager
+class IEctReferenceListener;
+
+class MockEctReference: public EctReference
 {
 public:
-    enum class State
+    explicit MockEctReference(IN IMtcContext& objContext, IN CallKey nTransfereeKey,
+            IN IEctReferenceListener& objListener) :
+            EctReference(objContext, nTransfereeKey, objListener)
     {
-        IDLE,
-        BLIND_TRANSFERRING,
-        CONSULTATIVE_TRANSFERRING
-    };
+    }
+    virtual ~MockEctReference() {}
 
-    virtual ~IEctManager() {}
-
-    virtual IMS_RESULT Transfer(IN CallKey nCallKey, IN const AString& strNumber) = 0;
-    virtual State GetState() = 0;
+    MOCK_METHOD(IMS_RESULT, SendInvite, (IN CallKey), (override));
+    MOCK_METHOD(IMS_RESULT, SendInvite, (IN const AString&), (override));
 };
 
 #endif

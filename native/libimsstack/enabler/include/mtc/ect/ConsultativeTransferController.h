@@ -27,7 +27,7 @@ class ConsultativeTransferController : public EctController
 {
 public:
     explicit ConsultativeTransferController(IN IMtcContext& objContext, IN CallKey nCallKey,
-            IN IEctControllerListener& objListener);
+            IN IEctControllerListener& objListener, IN EctFactory& objFactory);
     virtual ~ConsultativeTransferController();
     ConsultativeTransferController(IN const ConsultativeTransferController&) = delete;
     ConsultativeTransferController& operator=(IN const ConsultativeTransferController&) = delete;
