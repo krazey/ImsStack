@@ -412,8 +412,8 @@ public class SmsRelayLayer {
                             }
                             boolean res = false;
                             res =  mMtsController.sendMessage(SmsUtils.FORMAT_INT_3GPP,
-                                                    encodedPdu, mtData.getOrigAddr(),
-                                                    targetAddress, mtData.getMessageRef());
+                                                    encodedPdu, targetAddress,
+                                                    mtData.getOrigAddr(), mtData.getMessageRef());
 
                             if (!res) {
                                 loge("Failed to send RP-Error");
@@ -465,8 +465,9 @@ public class SmsRelayLayer {
                     }
                     boolean res = false;
                     res =  mMtsController.sendMessage(SmsUtils.FORMAT_INT_3GPP,
-                                                    encodedPdu, mtData.getOrigAddr(),
+                                                    encodedPdu,
                                                     targetAddress,
+                                                    mtData.getOrigAddr(),
                                                     mtData.getMessageRef());
 
                     if (!res) loge("Failed to send RP-ERROR");
