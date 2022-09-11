@@ -68,34 +68,28 @@ public class SmsRelayLayerTest {
     private String mDestinationAddress = "6503907941";
     private int mStatusResultNA = 0;
     private static int sSuccessCause = 0;
-    private byte[] mTpdu = {21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66,
-            (byte) 0xB2, 99, (byte) 0x6C, 26, 03};
-    private byte[] mMtRpData = {01, 01, 07, (byte) 0x91, (byte) 0x91, 30, 07, (byte) 0x92, 29,
-            (byte) 0xF0, 00, 12, 21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66,
-            (byte) 0xB2, (byte) 0x99, (byte) 0x6C, 26, 03};
-    private byte[] mMtRpData2 = {01, 02, 07, (byte) 0x91, (byte) 0x91, 30, 07, (byte) 0x92, 29,
-            (byte) 0xF0, 00, 12,
-            21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66, (byte) 0xB2, (byte) 0x99,
-            (byte) 0x6C,
-            26, 03};
+    private byte[] mTpdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
+    private byte[] mMtRpData = HexDump.hexStringToByteArray("010107919130079229"
+                                                        + "F0001221110A81785634121000000666"
+                                                        + "B2996C2603");
+    private byte[] mMtRpData2 = HexDump.hexStringToByteArray("010207919130079229F00012"
+                                                                + "21110A81785634121000000666B299"
+                                                                + "6C2603");
 
     //TPDU sent to framework(Smsc Address + mTpdu)
-    private byte[] mFrameworkPdu = {07, (byte) 0x91, (byte) 0x91, 30, 07, (byte) 0x92, 29,
-            (byte) 0xF0, 21, 11,
-            (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66, (byte) 0xB2, (byte) 0x99,
-            (byte) 0x6C, 26, 03};
-    private byte[] mMoRpData = {00, 01, 00, 07, (byte) 0x91, (byte) 0x91, 0x30, 07,
-            (byte) 0x92, 0x29, (byte) 0xF0, 0x12, 21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00,
-            00,
-            06, 66, (byte) 0xB2, 99, (byte) 0x6C, 26, 03};
-    private byte[] mMoRpAck = {02, 01};
-    private byte[] mMoRpError = {04, 01, 01, 0x6f};
-    private byte[] mMtRpAck = {03, 01};
-    private byte[] mMtRpError = {05, 01, 01, 0x6f};
-    private byte[] mMoRpSmma = {0x06, 0x01};
-    private byte[] mMtRpAckFailCase = {03, 02};
-    private byte[] mDeliverPdu = {20, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66,
-            (byte) 0xB2, 99, (byte) 0x6C, 26, 03};
+    private byte[] mFrameworkPdu = HexDump.hexStringToByteArray("07919130079229F02111"
+                                                            + "0A81785634121000000666B2996C2603");
+    private byte[] mMoRpData = HexDump.hexStringToByteArray("0001000791913007"
+                                                            + "9229F01221110A81785634121000"
+                                                            + "000666B2996C2603");
+    private byte[] mMoRpAck = HexDump.hexStringToByteArray("0201");
+    private byte[] mMoRpError = HexDump.hexStringToByteArray("0401016f");
+    private byte[] mMtRpAck = HexDump.hexStringToByteArray("0301");
+    private byte[] mMtRpError = HexDump.hexStringToByteArray("0501016f");
+    private byte[] mMoRpSmma = HexDump.hexStringToByteArray("0601");
+    private byte[] mMtRpAckFailCase = HexDump.hexStringToByteArray("0302");
+    private byte[] mDeliverPdu = HexDump.hexStringToByteArray("20110A81785634121000000666"
+                                                                + "B2996C2603");
 
     @Before
     public void setUp() throws Exception {

@@ -40,6 +40,7 @@ import android.telephony.ims.stub.ImsSmsImplBase;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.util.MessageExecutor;
+import com.android.internal.util.HexDump;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -59,31 +60,26 @@ public class SmsRLStateMachineTest {
     @Mock
     MtsController mMtsController;
     private Handler mHandler = null;
-
     int mMessageType = 2;
-    private byte[] mMoRpAck = {02, 01};
-    private byte[] mMoRpError = {04, 01, 01, 0x6f};
-    private byte[] mMtRpAck = {03, 01};
-    private byte[] mMtRpError = {05, 01, 01, 0x6f};
+    private byte[] mMoRpAck = HexDump.hexStringToByteArray("0201");
+    private byte[] mMoRpError = HexDump.hexStringToByteArray("0401016f");
+    private byte[] mMtRpAck = HexDump.hexStringToByteArray("0301");
+    private byte[] mMtRpError = HexDump.hexStringToByteArray("0501016f");
     private String mDestinationAddress = "0987654321";
     private String mPsiSmsc = "+19037029920";
     private String mSmsc = "07912160130300F4";
     private String mDecodedSmsc = "+12063130004";
     SmsRLStateMachine mSmsRLStateMachine;
-
     private SmsRLStateMachine.SmsRLState mCurrentState;
-    private byte[] mMtRpData = {01, 01, 07, (byte) 0x91, 91, 30, 07, 92, 29, (byte) 0xF0, 00, 12,
-            21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66, (byte) 0xB2, 99,
-            (byte) 0x6C, 26, 03};
+    private byte[] mMtRpData = HexDump.hexStringToByteArray("010107919130079229"
+                                                        + "F0001221110A81785634121000000666"
+                                                        + "B2996C2603");
     private int mToken = 1;
     private int mRpType = SmsUtils.RP_DATA;
-
-    private byte[] mTpdu = {21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66,
-            (byte) 0xB2, 99, (byte) 0x6C, 26, 03};
-
-    private byte[] mMoRpData = {00, 01, 00, 07, (byte) 0x91, (byte) 0x91, 0x30, 07,
-            (byte) 0x92, 0x29, (byte) 0xF0, 0x12, 21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00,
-            00, 06, 66, (byte) 0xB2, 99, (byte) 0x6C, 26, 03};
+    private byte[] mTpdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
+    private byte[] mMoRpData = HexDump.hexStringToByteArray("0001000791913007"
+                                                            + "9229F01221110A81785634121000"
+                                                            + "000666B2996C2603");
 
 
     @Before

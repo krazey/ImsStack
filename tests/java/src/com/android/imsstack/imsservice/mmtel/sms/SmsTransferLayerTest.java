@@ -69,21 +69,16 @@ public class SmsTransferLayerTest {
     private int mToken = 1;
     private int mSmsFormat = SmsUtils.FORMAT_INT_3GPP;
     private int mMessageRef = 1;
-    //private String mSmsc = "+19037029920";
     private String mSmsc = "0791190791700590";
     private String mDecodedSmsc = "+917019075009";
-    private String mDestinationAddress = "90008000*100";
-    private byte[] mPdu = { 21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66,
-            (byte) 0xB2, 99, (byte) 0x6C, 26, 03 };
-    private byte[] mTpdu = {01, 06, (byte) 0x0C, (byte) 0x81, (byte) 0x09, 00, (byte) 0x08, 00, 26,
-            00, 00, 00, 06, 53, (byte) 0x6A,  (byte) 0x90, (byte) 0x5A, (byte) 0x9D, 02};
-    //private String mTpduString = "01060A817856341200000666B2996C2603";
+    private String mDestinationAddress = "900080006200";
+    private byte[] mPdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
+    private byte[] mTpdu = HexDump.hexStringToByteArray("01060C81090008002600000006536A905A9D02");
     private String mTpduString = "01060A817856341200000006536A905A9D02";
     private String mDestAddr = "8765432100";
     private String mUsatTpDestAddr = "1234567890";
     private String mEncodedRpDestAddr = "07812160130300F4";
     private String mUsatRpDestAddr = "12063130004";
-    //private String mUsatRpDestAddr = "07912160130300F4";
     private String mUsatTpduString = "01060A812143658709000006536A905A9D02";
     private int mTlMessageType = SmsUtils.TP_SMS_DELIVER;
     private int mResult = ImsSmsImplBase.SEND_STATUS_OK;
@@ -115,7 +110,7 @@ public class SmsTransferLayerTest {
     }
     @Test
     public void test_sendMoTPdu() {
-        assertEquals(SmsUtils.SMSTL_RESULT_EXCEPTION, mSmsTransferLayer.sendMoTPdu(mToken,
+        assertEquals(SmsUtils.RESULT_SUCCESS, mSmsTransferLayer.sendMoTPdu(mToken,
                 mSmsFormat, mMessageRef, mSmsc, mPdu));
         mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.RP_ACK, mMessageRef, mSmsc, mPdu);
         mSmsRL.sendRPMessage(mToken, SmsUtils.RP_ACK, mSmsc, null, mPdu, 1);
@@ -200,7 +195,7 @@ public class SmsTransferLayerTest {
         usatListener.onCommandResponse(mMockUsatCmdRes);
         verify(mListener, Mockito.times(1)).notifySmsResult(mToken, tpdu[1] & 0xff,
                                                             ImsSmsImplBase.SEND_STATUS_ERROR,
-                                                            SmsManager.RESULT_INTERNAL_ERROR,
+                                                            SmsManager.RESULT_OPERATION_NOT_ALLOWED,
                                                             ImsSmsImplBase.RESULT_NO_NETWORK_ERROR);
 
     }
