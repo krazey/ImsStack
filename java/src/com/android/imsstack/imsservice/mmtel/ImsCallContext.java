@@ -57,6 +57,7 @@ import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.Executor;
 
@@ -83,6 +84,19 @@ public class ImsCallContext implements ICallContext {
         mServiceStateTracker = new MtcServiceStateTracker(this);
 
         mMtcApp = new MtcApp(this);
+        mMtcApp.setServiceStateListener(mServiceStateTracker);
+    }
+
+    @VisibleForTesting
+    public ImsCallContext(Context context, Executor executor, ImsApp app,
+            WfcSettingTracker wfcsettingtracker, MtcServiceStateTracker stateTracker,
+            MtcApp mMtcapp) {
+        mContext = context;
+        mExecutor = executor;
+        mApp = app;
+        mWfcSettingTracker = wfcsettingtracker;
+        mServiceStateTracker = stateTracker;
+        mMtcApp = mMtcapp;
         mMtcApp.setServiceStateListener(mServiceStateTracker);
     }
 
