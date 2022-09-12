@@ -98,6 +98,11 @@ public final class AgentFactory {
         return sAgents.get(agentType);
     }
 
+    @VisibleForTesting
+    public static void setDefaultAgent(int agentType, IAgent agent) {
+        sAgents.put(agentType, agent);
+    }
+
     public static synchronized IAgent getAgent(int agentType, int slotId) {
         HashMap<Integer, IAgent> agents = sAgentSlots.get(slotId);
 

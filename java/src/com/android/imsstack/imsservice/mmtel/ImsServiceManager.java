@@ -39,12 +39,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
-public final class ImsServiceManager {
+public class ImsServiceManager {
     private static ImsServiceManager sServiceManager;
     private final Context mContext;
     private final Executor mExecutor;
-    private final SubscriptionListenerProxy mSubscriptionListener;
-    private final CommonPackageListener mCommonPackageListener;
+    protected final SubscriptionListenerProxy mSubscriptionListener;
+    protected final CommonPackageListener mCommonPackageListener;
     // PhoneId -> ImsServiceRecord
     private ConcurrentHashMap<Integer, ImsServiceRecord> mServiceRecords
             = new ConcurrentHashMap<Integer, ImsServiceRecord>(4, 0.9f, 1);
@@ -55,7 +55,7 @@ public final class ImsServiceManager {
     // Operator changed by hotswap
     private String[] mOperator = new String[MSimUtils.getMaxSimSlot()];
     private String[] mCountry = new String[MSimUtils.getMaxSimSlot()];
-    private int[] mServiceFeatures = new int[MSimUtils.getMaxSimSlot()];
+    protected int[] mServiceFeatures = new int[MSimUtils.getMaxSimSlot()];
     private int[] mVoLteServiceFeatures = new int[MSimUtils.getMaxSimSlot()];
 
     public ImsServiceManager(Context context, Executor executor) {
@@ -136,9 +136,7 @@ public final class ImsServiceManager {
                 mVoLteServiceFeatures[phoneId] = getVoLteServiceFeatures(phoneId);
             }
 
-            callApp = new ImsCallApp(phoneId, mContext, mExecutor,
-                    isr.getRegistrationTracker(), featureCapabilityListener, callListener);
-
+            callApp = createCallAppInternal(phoneId, isr, featureCapabilityListener, callListener);
             addCallApp(phoneId, callApp);
             setCallAppForServiceRecord(callApp.getPhoneId(), callApp);
 
@@ -176,6 +174,14 @@ public final class ImsServiceManager {
 
     public ImsCallApp getCallApp(int phoneId) {
         return mCallApps.get(phoneId);
+    }
+
+    @VisibleForTesting
+    protected ImsCallApp createCallAppInternal(int phoneId, ImsServiceRecord isr,
+            IMmTelFeatureCapabilityListener featureCapabilityListener,
+            IMmTelCallListener callListener) {
+        return new ImsCallApp(phoneId, mContext, mExecutor, isr.getRegistrationTracker(),
+                featureCapabilityListener, callListener);
     }
 
     @VisibleForTesting
@@ -241,11 +247,8 @@ public final class ImsServiceManager {
             return;
         }
 
-        Map.Entry<String, ImsCallApp>[] entries
-                = mCallApps.entrySet().toArray(new Map.Entry[getCallAppCount()]);
-
-        for (Map.Entry<String, ImsCallApp> entry : entries) {
-            ImsCallApp callApp = (ImsCallApp)entry.getValue();
+        for (Map.Entry<Integer, ImsCallApp> entry : mCallApps.entrySet()) {
+            ImsCallApp callApp = entry.getValue();
 
             if (callApp != null) {
                 callApp.close();
@@ -426,41 +429,6 @@ public final class ImsServiceManager {
         if (ImsConstants.USE_CARRIER_CONFIG) {
             return;
         }
-
-        int serviceFeatures = getVoLteServiceFeatures(phoneId);
-
-        if (ImsConstants.USE_CARRIER_CONFIG
-                && MSimUtils.isMultiSimEnabled()
-                && !isMultiImsEnabled()
-                && (serviceFeatures != 0)
-                && (getDefaultPhoneId() != phoneId)) {
-            logi("NonDDS: VoLTE will be disabled; phoneId=" + phoneId
-                    + ", serviceFeatures=0x" + Integer.toHexString(serviceFeatures));
-            serviceFeatures = 0;
-        }
-
-        logi("checkImsServiceAvailabilityAndBroadcastServiceUpDown :: phoneId=" + phoneId
-                + ", serviceFeatures=0x" + Integer.toHexString(serviceFeatures));
-
-        ImsServiceRecord isr = getServiceRecordInternal(phoneId);
-
-        if (isr != null) {
-            if (serviceFeatures > 0) {
-                if (!isr.isServiceUp()) {
-                    isr.broadcastServiceUp();
-                }
-            } else {
-                if (!isMultiImsEnabled()) {
-                    ImsCallApp callApp = isr.getCallApp();
-                    if (callApp != null) {
-                        callApp.unbindCallApp();
-                    }
-                }
-                // Do not bindCallApp twice when operator is changed
-                mOperator[phoneId] = null;
-                isr.broadcastServiceDown();
-            }
-        }
     }
 
     // Operator changed by hotswap
@@ -540,7 +508,7 @@ public final class ImsServiceManager {
         }
     }
 
-    private int getVoLteServiceFeatures(int phoneId) {
+    protected int getVoLteServiceFeatures(int phoneId) {
         int serviceFeatures = getVoLteServiceFeaturesFromPlatformConfig(phoneId);
 
         // VOLTE_EMERGENCY_CALLING
@@ -645,8 +613,14 @@ public final class ImsServiceManager {
         return features;
     }
 
-    private static boolean isMultiImsEnabled() {
+    @VisibleForTesting
+    protected boolean isMultiImsEnabled() {
         return MSimUtils.isMultiImsEnabled();
+    }
+
+    @VisibleForTesting
+    protected int getPhoneIdFromMSimUtils(int subId) {
+        return MSimUtils.getPhoneId(subId);
     }
 
     private static void log(String s) {
@@ -657,7 +631,7 @@ public final class ImsServiceManager {
         ImsLog.i("[GII-IMPL] " + s);
     }
 
-    private final class SubscriptionListenerProxy extends SubscriptionListener {
+    protected final class SubscriptionListenerProxy extends SubscriptionListener {
         public SubscriptionListenerProxy() {
             log("SubscriptionListenerProxy :: phoneId=" + getActivePhoneId());
         }
@@ -683,13 +657,13 @@ public final class ImsServiceManager {
         @Override
         public void onDefaultSubscriptionChanged(int subId) {
             logi("onDefaultSubscriptionChanged :: subId=" + subId);
-            setDefaultPhoneId(MSimUtils.getPhoneId(subId));
+            setDefaultPhoneId(getPhoneIdFromMSimUtils(subId));
         }
 
         @Override
         public void onDefaultDataSubscriptionChanged(int subId) {
             logi("onDefaultDataSubscriptionChanged :: subId=" + subId);
-            setDefaultPhoneId(MSimUtils.getPhoneId(subId));
+            setDefaultPhoneId(getPhoneIdFromMSimUtils(subId));
         }
 
         @Override
@@ -702,7 +676,7 @@ public final class ImsServiceManager {
         }
     }
 
-    private class CommonPackageListener implements ICommonPackageListener {
+    protected class CommonPackageListener implements ICommonPackageListener {
         public CommonPackageListener() {
         }
 
