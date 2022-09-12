@@ -130,6 +130,21 @@ public:
     {
         IMS_TRACE_MEM("MTC", "~ConfUser [%d]", nId, 0, 0);
     }
+
+    IMS_BOOL operator==(const ConfUser& objRhs) const
+    {
+        if (this == &objRhs)
+        {
+            return IMS_TRUE;
+        }
+
+        return nConnectionId == objRhs.nConnectionId && strTarget == objRhs.strTarget &&
+                strUserEntity == objRhs.strUserEntity && strEpEntity == objRhs.strEpEntity &&
+                strDisplayName == objRhs.strDisplayName && eStatus == objRhs.eStatus &&
+                eStatusCode == objRhs.eStatusCode && eCcType == objRhs.eCcType &&
+                bAnonymize == objRhs.bAnonymize;
+    }
+
     inline void CreateId()
     {
         static IMS_UINT32 snId = 0;

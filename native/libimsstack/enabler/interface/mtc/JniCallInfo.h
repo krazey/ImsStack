@@ -71,6 +71,21 @@ public:
         return *this;
     }
 
+    IMS_BOOL operator==(const JniCallInfo& objRhs) const
+    {
+        if (this == &objRhs)
+        {
+            return IMS_TRUE;
+        }
+
+        return eServiceType == objRhs.eServiceType && eCallType == objRhs.eCallType &&
+                bEmergency == objRhs.bEmergency && bOffline == objRhs.bOffline &&
+                bUssi == objRhs.bUssi && bConference == objRhs.bConference &&
+                bConferenceEnabled == objRhs.bConferenceEnabled &&
+                bConferenceSubscriptionRequired == objRhs.bConferenceSubscriptionRequired &&
+                bRttCapable == objRhs.bRttCapable && bVideoCapable == objRhs.bVideoCapable;
+    }
+
 public:
     ServiceType eServiceType;
     CallType eCallType;

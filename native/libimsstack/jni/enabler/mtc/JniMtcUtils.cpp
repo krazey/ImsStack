@@ -17,7 +17,9 @@
 #define IMS_STL_USE
 #include "AString.h"
 #include "CallReasonInfo.h"
-#include "IMSTypeDef.h"
+#include "ImsList.h"
+#include "ImsMap.h"
+#include "ImsTypeDef.h"
 #include "JniCallInfo.h"
 #include "JniMtcUtils.h"
 #include "MtcDef.h"
@@ -68,10 +70,10 @@ PUBLIC GLOBAL MediaInfo* JniMtcUtils::ReadMediaInfo(IN const Parcel& objParcel)
     return pMediaInfo;
 }
 
-PUBLIC GLOBAL IMSMap<SuppType, SuppService*> JniMtcUtils::ReadSupplementaryService(
+PUBLIC GLOBAL ImsMap<SuppType, SuppService*> JniMtcUtils::ReadSupplementaryService(
         IN const Parcel& objParcel)
 {
-    IMSMap<SuppType, SuppService*> objSupp;
+    ImsMap<SuppType, SuppService*> objSupp;
 
     IMS_UINT32 nSuppService = objParcel.readInt32();
     for (IMS_UINT32 index = 0; index < nSuppService; index++)
@@ -87,9 +89,9 @@ PUBLIC GLOBAL IMSMap<SuppType, SuppService*> JniMtcUtils::ReadSupplementaryServi
     return objSupp;
 }
 
-PUBLIC GLOBAL IMSList<ConfUser*> JniMtcUtils::ReadConferenceParticipants(IN const Parcel& objParcel)
+PUBLIC GLOBAL ImsList<ConfUser*> JniMtcUtils::ReadConferenceParticipants(IN const Parcel& objParcel)
 {
-    IMSList<ConfUser*> objUsers;
+    ImsList<ConfUser*> objUsers;
     IMS_UINT32 nUsersSize = objParcel.readInt32();
     for (IMS_UINT32 index = 0; index < nUsersSize; index++)
     {
@@ -146,7 +148,7 @@ PUBLIC GLOBAL void JniMtcUtils::WriteMediaInfoToParcel(
 }
 
 PUBLIC GLOBAL void JniMtcUtils::WriteSuppServicesToParcel(
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN_OUT Parcel& objParcel)
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN_OUT Parcel& objParcel)
 {
     IMS_UINT32 nSuppService = objSuppServices.GetSize();
 
@@ -163,7 +165,7 @@ PUBLIC GLOBAL void JniMtcUtils::WriteSuppServicesToParcel(
 }
 
 PUBLIC GLOBAL void JniMtcUtils::WriteConfUsersToParcel(
-        IN const IMSList<ConfUser*>& objUsers, IN_OUT android::Parcel& objParcel)
+        IN const ImsList<ConfUser*>& objUsers, IN_OUT android::Parcel& objParcel)
 {
     IMS_UINT32 nUsersSize = objUsers.GetSize();
 
@@ -183,31 +185,6 @@ PUBLIC GLOBAL void JniMtcUtils::WriteConfUsersToParcel(
         objParcel.writeInt32(pUser->bAnonymize);
     }
 }
-
-/*
-PUBLIC GLOBAL void JniMtcUtils::WriteDialogInfoToParcel(
-        IN DialogInfo* pInfo, IN_OUT Parcel& objParcel)
-{
-    objParcel.writeString16(String16(pInfo->aStrID.GetStr()));
-
-    objParcel.writeInt32(pInfo->eState);
-    objParcel.writeInt32(pInfo->eReason);
-    objParcel.writeInt32(pInfo->eCode);
-
-    objParcel.writeString16(String16(pInfo->aStrLocalName.GetStr()));
-    objParcel.writeString16(String16(pInfo->aStrLocalNumber.GetStr()));
-
-    objParcel.writeString16(String16(pInfo->aStrRemoteName.GetStr()));
-    objParcel.writeString16(String16(pInfo->aStrRemoteNumber.GetStr()));
-
-    IMS_SINT32 bInitiator = (pInfo->bInitiator) ? 1 : 0;
-    objParcel.writeInt32(bInitiator);
-    IMS_SINT32 bIsConf = (pInfo->bConference) ? 1 : 0;
-    objParcel.writeInt32(bIsConf);
-    IMS_SINT32 bEnablePull = (pInfo->bEnablePull) ? 1 : 0;
-    objParcel.writeInt32(bEnablePull);
-}
-*/
 
 PUBLIC GLOBAL void JniMtcUtils::WriteCallReasonInfoToParcel(
         IN const CallReasonInfo& objReason, IN_OUT Parcel& objParcel)
