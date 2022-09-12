@@ -122,7 +122,7 @@ public:
 
     inline void SetMaxUserCount(IN IMS_SINT32 nMaxUserCount) { m_nMaxUserCount = nMaxUserCount; }
 
-    inline IMS_SINT32 GetMaxUserCount() const { return m_nMaxUserCount; }
+    inline virtual IMS_SINT32 GetMaxUserCount() const { return m_nMaxUserCount; }
 
     virtual void AddUser(IN const ConfUser* pConfUser);
     virtual void RemoveUser(IN const ConfUser* pConfUser);

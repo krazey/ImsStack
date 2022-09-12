@@ -36,7 +36,7 @@ public:
     MOCK_METHOD(void, SetXmlVersion, (IN IMS_SINT32 nVersion), ());
     MOCK_METHOD(IMS_SINT32, GetXmlVersion, (), (const));
     MOCK_METHOD(void, SetMaxUserCount, (IN IMS_SINT32 nMaxUserCount), ());
-    MOCK_METHOD(IMS_SINT32, GetMaxUserCount, (), (const));
+    MOCK_METHOD(IMS_SINT32, GetMaxUserCount, (), (const, override));
     MOCK_METHOD(void, AddUser, (IN const ConfUser* pConfUser), (override));
     MOCK_METHOD(void, RemoveUser, (IN const ConfUser* pConfUser), (override));
     MOCK_METHOD(
