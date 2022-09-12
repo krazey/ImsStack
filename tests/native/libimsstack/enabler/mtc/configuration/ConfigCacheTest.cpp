@@ -16,16 +16,62 @@
 
 #include <gtest/gtest.h>
 #include "configuration/ConfigCache.h"
+#include "configuration/ConfigDef.h"
 
 namespace android
 {
 
 class ConfigCacheTest : public ::testing::Test
 {
+public:
+    ConfigCache objConfigCache;
+
 protected:
     virtual void SetUp() override {}
 
     virtual void TearDown() override {}
 };
+
+TEST_F(ConfigCacheTest, PutAndGetBoolCacheAndReset)
+{
+    Feature eAnyFeature = Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE;
+    IMS_BOOL bAnyBooleanValue = IMS_TRUE;
+    objConfigCache.PutCache(eAnyFeature, bAnyBooleanValue);
+    EXPECT_EQ(bAnyBooleanValue, objConfigCache.GetBooleanCache(eAnyFeature));
+
+    EXPECT_FALSE(objConfigCache.IsEmpty());
+    EXPECT_TRUE(objConfigCache.HasBooleanCache(eAnyFeature));
+    objConfigCache.ResetCache(eAnyFeature);
+    EXPECT_TRUE(objConfigCache.IsEmpty());
+    EXPECT_FALSE(objConfigCache.HasBooleanCache(eAnyFeature));
+}
+
+TEST_F(ConfigCacheTest, PutAndGetIntegerCacheAndReset)
+{
+    Feature eAnyFeature = Feature::REQUEST_URI_TYPE;
+    IMS_SINT32 nAnyIntegerValue = 12345;
+    objConfigCache.PutCache(eAnyFeature, nAnyIntegerValue);
+    EXPECT_EQ(nAnyIntegerValue, objConfigCache.GetIntegerCache(eAnyFeature));
+
+    EXPECT_FALSE(objConfigCache.IsEmpty());
+    EXPECT_TRUE(objConfigCache.HasIntegerCache(eAnyFeature));
+    objConfigCache.ResetCache(eAnyFeature);
+    EXPECT_TRUE(objConfigCache.IsEmpty());
+    EXPECT_FALSE(objConfigCache.HasIntegerCache(eAnyFeature));
+}
+
+TEST_F(ConfigCacheTest, PutAndGetStringCacheAndReset)
+{
+    Feature eAnyFeature = Feature::CONFERENCE_FACTORY_URI;
+    const AString& strAnyStringValue = "12345";
+    objConfigCache.PutCache(eAnyFeature, strAnyStringValue);
+    EXPECT_STREQ(strAnyStringValue.GetStr(), objConfigCache.GetStringCache(eAnyFeature).GetStr());
+
+    EXPECT_FALSE(objConfigCache.IsEmpty());
+    EXPECT_TRUE(objConfigCache.HasStringCache(eAnyFeature));
+    objConfigCache.ResetCache(eAnyFeature);
+    EXPECT_TRUE(objConfigCache.IsEmpty());
+    EXPECT_FALSE(objConfigCache.HasStringCache(eAnyFeature));
+}
 
 }  // namespace android

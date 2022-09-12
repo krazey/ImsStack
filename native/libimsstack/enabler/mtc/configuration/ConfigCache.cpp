@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
+#include "AString.h"
+#include "ImsMap.h"
+#include "ImsTypeDef.h"
 #include "ServiceTrace.h"
 #include "configuration/ConfigCache.h"
+#include "configuration/ConfigDef.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MTC");
 
 PUBLIC
 ConfigCache::ConfigCache() :
-        m_objBooleanCache(IMSMap<Feature, IMS_BOOL>()),
-        m_objIntegerCache(IMSMap<Feature, IMS_SINT32>()),
-        m_objStringCache(IMSMap<Feature, AString>())
+        m_objBooleanCache(ImsMap<Feature, IMS_BOOL>()),
+        m_objIntegerCache(ImsMap<Feature, IMS_SINT32>()),
+        m_objStringCache(ImsMap<Feature, AString>())
 {
     IMS_TRACE_I("+ConfigCache", 0, 0, 0);
 }
@@ -37,19 +41,19 @@ PUBLIC VIRTUAL ConfigCache::~ConfigCache()
 }
 
 PUBLIC
-void ConfigCache::PutCache(IN Feature eFeature, IN IMS_SINT32 nValue)
-{
-    IMS_TRACE_I("PutCache. Feature = [%d] value=[%d]", eFeature, nValue, 0);
-
-    m_objIntegerCache.SetValue(eFeature, nValue);
-}
-
-PUBLIC
 void ConfigCache::PutCache(IN Feature eFeature, IN IMS_BOOL bValue)
 {
     IMS_TRACE_I("PutCache. Feature = [%d] value=[%s]", eFeature, _TRACE_B_(bValue), 0);
 
     m_objBooleanCache.SetValue(eFeature, bValue);
+}
+
+PUBLIC
+void ConfigCache::PutCache(IN Feature eFeature, IN IMS_SINT32 nValue)
+{
+    IMS_TRACE_I("PutCache. Feature = [%d] value=[%d]", eFeature, nValue, 0);
+
+    m_objIntegerCache.SetValue(eFeature, nValue);
 }
 
 PUBLIC
