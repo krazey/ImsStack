@@ -20,7 +20,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Registrant;
@@ -53,6 +52,7 @@ import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 /** This class is for providing the network information */
 public class DcNetWatcher implements IDcNetWatcher {
@@ -87,8 +87,10 @@ public class DcNetWatcher implements IDcNetWatcher {
     private IDcSettings mDcSettings;
 
     private DcNetWatcherReceiver mDcNetWatcherReceiver = null;
-    private Handler mDcNetWatcherHandler;
-    private DcNetWatcherPhoneStateListener mPhoneStateListener = null;
+    @VisibleForTesting
+    protected Handler mDcNetWatcherHandler;
+    @VisibleForTesting
+    protected DcNetWatcherPhoneStateListener mPhoneStateListener = null;
 
     private RegistrantList mStateDataConnectionState = new RegistrantList();
     private RegistrantList mDataServiceStateChangedRegistrants = new RegistrantList();
@@ -123,8 +125,10 @@ public class DcNetWatcher implements IDcNetWatcher {
     private boolean mAirplaneMode = false;
 
     // RAT in TelephonyManager for sync with ServiceState
-    private int mRatFromTm = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-    private int mVoiceRatFromTm = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    @VisibleForTesting
+    protected int mRatFromTm = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    @VisibleForTesting
+    protected int mVoiceRatFromTm = TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
     // IMS voice over PS Session Supported
     private boolean mImsVops = false;
@@ -324,13 +328,13 @@ public class DcNetWatcher implements IDcNetWatcher {
         return false;
     }
 
-    // Call state (CS/VoLTE/VT) in TelephonyManager
+    // CS Call state in TelephonyManager
     @Override
     public int getCallState() {
         return mCallState;
     }
 
-    // precise Call state (CS/VoLTE/VT) in TelephonyManager
+    // precise CS Call state in TelephonyManager
     @Override
     public int getPreciseCallState() {
         return mPreciseCallState;
@@ -714,6 +718,26 @@ public class DcNetWatcher implements IDcNetWatcher {
         return 0;
     }
 
+    private int getRadioTechCategory(int radioTech) {
+        if (is4G(radioTech)) {
+            return RAT_4G;
+        } else if (is3G(radioTech)) {
+            return RAT_3G;
+        } else if (is5G(radioTech)) {
+            return RAT_5G;
+        } else if (isEhrpd(radioTech)) {
+            return RAT_EHRPD;
+        } else if (is1xRtt(radioTech)) {
+            return RAT_1XRTT;
+        } else if (is2G(radioTech)) {
+            return RAT_2G;
+        } else if (isEvdo(radioTech)) {
+            return RAT_EVDO;
+        }
+
+        return 0;
+    }
+
     private static boolean getDataRoaming(ServiceState ss) {
         return getDataRoamingType(ss) != ServiceState.ROAMING_TYPE_NOT_ROAMING;
     }
@@ -973,25 +997,7 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     // Voice Radio Tech
     private void handleVoiceRadioTechChanged() {
-        int radioTech = 0;
-
-        if (is4G(mVoiceRat)) {
-            radioTech = RAT_4G;
-        } else if (is3G(mVoiceRat)) {
-            radioTech = RAT_3G;
-        } else if (is5G(mVoiceRat)) {
-            radioTech = RAT_5G;
-        } else if (isEhrpd(mVoiceRat)) {
-            radioTech = RAT_EHRPD;
-        } else if (is1xRtt(mVoiceRat)) {
-            radioTech = RAT_1XRTT;
-        } else if (is2G(mVoiceRat)) {
-            radioTech = RAT_2G;
-        } else if (isEvdo(mVoiceRat)) {
-            radioTech = RAT_EVDO;
-        } else {
-            radioTech = 0;
-        }
+        int radioTech = getRadioTechCategory(mVoiceRat);
 
         mVoiceRatChangedRegistrants.notifyResult(Integer.valueOf(radioTech));
         mSystem.notifyVoiceNetworkTypeChanged(radioTech);
@@ -1293,8 +1299,8 @@ public class DcNetWatcher implements IDcNetWatcher {
                 mAosInfo.notifyPreciseCallState(mPreciseCallState);
             } else {
                 // If Background Call is not present, post ForegroundCallState to AoSCallTracker
-                if (mPreciseCallState != callState.getForegroundCallState()) {
-                    mPreciseCallState = callState.getForegroundCallState();
+                if (mPreciseCallState != nForegroundCallState) {
+                    mPreciseCallState = nForegroundCallState;
                     mPreciseCsCallStatusChangedRegistrants.notifyResult(
                             Integer.valueOf(mPreciseCallState));
                     mAosInfo.notifyPreciseCallState(mPreciseCallState);
@@ -1313,39 +1319,26 @@ public class DcNetWatcher implements IDcNetWatcher {
     // -----------------------------------------------------------
     private class DcNetWatcherHandler extends Handler {
         public void handleMessage(Message msg) {
-            if (msg == null) {
-                ImsLog.d(mSlotId, "Message is null");
-                return;
+            if (msg != null) {
+                ImsLog.i(mSlotId, "Message(" + msg.what + ")");
+
+                switch (msg.what) {
+                    case EVENT_AIRPLANE_MODE_CHANGED:
+                        handleAirplaneModeChanged(msg);
+                        break;
+                    case EVENT_VOLTE_LTE_STATE_INFO:
+                        handleVolteLteStateInfo(msg);
+                        break;
+                    case EVENT_NATIVE_BOOT_COMPLETED:
+                        handleNativeBootCompleted(msg);
+                        break;
+                    case EVENT_NR_REGISTRATION_INFO:
+                        handleNrRegistrationInfo(msg.arg1, msg.arg2);
+                        break;
+                    default:
+                        break;
+                }
             }
-
-            ImsLog.i(mSlotId, "Message(" + msg.what + ")");
-
-            switch (msg.what) {
-                case EVENT_AIRPLANE_MODE_CHANGED:
-                    handleAirplaneModeChanged(msg);
-                    break;
-                case EVENT_VOLTE_LTE_STATE_INFO:
-                    handleVolteLteStateInfo(msg);
-                    break;
-                case EVENT_NATIVE_BOOT_COMPLETED:
-                    handleNativeBootCompleted(msg);
-                    break;
-                case EVENT_NR_REGISTRATION_INFO:
-                    handleNrRegistrationInfo(msg.arg1, msg.arg2);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private int getIntFromMessage(Message msg) {
-            AsyncResult ar = (AsyncResult) msg.obj;
-            if (ar == null) {
-                return -1;
-            }
-
-            Integer result = (Integer) ar.result;
-            return (result.intValue() > 0) ? 1 : 0;
         }
 
         private void handleAirplaneModeChanged(Message msg) {
@@ -1407,20 +1400,12 @@ public class DcNetWatcher implements IDcNetWatcher {
 
                 mAirplaneMode = state;
 
-                IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
-                if (aosInfo != null) {
-                    aosInfo.notifyAirplaneSetting(mAirplaneMode);
+                if (mAosInfo != null) {
+                    mAosInfo.notifyAirplaneSetting(mAirplaneMode);
                 }
 
-                ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
-                if (system == null) {
-                    return;
-                }
-
-                if (mAirplaneMode) {
-                    system.notifyAirplaneModeChanged(1);
-                } else {
-                    system.notifyAirplaneModeChanged(0);
+                if (mSystem != null) {
+                    mSystem.notifyAirplaneModeChanged(mAirplaneMode ? 1 : 0);
                 }
 
                 // Notify the state changed to the applications
@@ -1459,20 +1444,12 @@ public class DcNetWatcher implements IDcNetWatcher {
         }
 
         private void handleNativeBootCompleted(Message msg) {
-            IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
-            if (aosInfo != null) {
-                aosInfo.notifyAirplaneSetting(mAirplaneMode);
+            if (mAosInfo != null) {
+                mAosInfo.notifyAirplaneSetting(mAirplaneMode);
             }
 
-            ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
-            if (system == null) {
-                return;
-            }
-
-            if (mAirplaneMode) {
-                system.notifyAirplaneModeChanged(1);
-            } else {
-                system.notifyAirplaneModeChanged(0);
+            if (mSystem != null) {
+                mSystem.notifyAirplaneModeChanged(mAirplaneMode ? 1 : 0);
             }
 
             // roaming state
