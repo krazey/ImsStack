@@ -23,12 +23,16 @@
 #include "AString.h"
 #include "conferencecall/ConferenceInfoUpdater.h"
 
+class ConferenceFactory;
 class ConferenceParticipantList;
 
 class MockConferenceInfoUpdater : public ConferenceInfoUpdater
 {
 public:
-    explicit MockConferenceInfoUpdater() {}
+    explicit MockConferenceInfoUpdater(IN ConferenceFactory& objFactory) :
+            ConferenceInfoUpdater(objFactory)
+    {
+    }
     ~MockConferenceInfoUpdater() {}
     MOCK_METHOD(IMS_UINT32, Update,
             (IN ConferenceParticipantList * pParticipantList, IN const AString& strEventPackage),

@@ -18,6 +18,7 @@
 #include "SipAddress.h"
 #include "SipParameter.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceConst.h"
 #include "conferencecall/ConferenceDef.h"
@@ -27,8 +28,9 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-ConferenceInfoUpdater::ConferenceInfoUpdater() :
+ConferenceInfoUpdater::ConferenceInfoUpdater(IN ConferenceFactory& objFactory) :
         m_pConferenceInfo(IMS_NULL),
+        m_objFactory(objFactory),
         m_pParticipantList(IMS_NULL),
         m_nInfoState(ConferenceInfo::STATE_INVALID),
         m_nCurrentMatchPolicy(MATCH_POLICY_NOT_DEFINED),
@@ -95,7 +97,7 @@ IMS_UINT32 ConferenceInfoUpdater::Update(
 PROTECTED
 IMS_RESULT ConferenceInfoUpdater::ParseConferenceInfo(IN const AString& strEventPackage)
 {
-    m_pConferenceInfo = new ConferenceInfo();
+    m_pConferenceInfo = m_objFactory.CreateInfo();
     IMS_BOOL bResult = m_pConferenceInfo->Parse(strEventPackage);
 
     return bResult ? IMS_SUCCESS : IMS_FAILURE;
@@ -194,7 +196,7 @@ IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN IMS_UINT32 nPolicy)
     m_nCurrentMatchPolicy = nPolicy;
     IMS_BOOL bCompleted = IMS_TRUE;
 
-    IMSList<ConferenceInfo::User*> objUsers;
+    ImsList<ConferenceInfo::User*> objUsers;
     if (m_objNotMatchedUsers.IsEmpty())
     {
         // initial attempt case.
@@ -526,6 +528,7 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByUserEntity(IN const Conferenc
         ConferenceUtils::GetUserPart(
                 m_pParticipantList->GetAt(i)->GetUserEntity(), strParticipantUserEntity);
 
+        IMS_TRACE_I("FindParticipantByUserEntity : [%s]", strParticipantUserEntity.GetStr(), 0, 0);
         if (!IsSamePrivacyUri(strParticipantUserEntity, strUserEntity))
         {
             continue;
@@ -560,27 +563,6 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByUserEntity(IN const Conferenc
     }
 
     return nLocalParticipantIndex;
-}
-
-PROTECTED
-void ConferenceInfoUpdater::DetermineMatchingPolicy()
-{
-    // TODO: remove this function.
-    // NOT USED.
-    m_nCurrentMatchPolicy = MATCH_POLICY_NOT_DEFINED;
-
-    IMSList<ConferenceInfo::User*> objUsers = m_pConferenceInfo->GetUsers();
-    for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
-    {
-        if (HasLegId(objUsers.GetAt(i)->GetEntity()))
-        {
-            m_nCurrentMatchPolicy = MATCH_POLICY_ORDER_LEG_ID;
-            break;
-        }
-    }
-
-    IMS_TRACE_I("DetermineMatchingPolicy : policy=[%s] <<<<<",
-            ConvertPolicyToString(m_nCurrentMatchPolicy), 0, 0);
 }
 
 PROTECTED
@@ -731,13 +713,6 @@ IMS_BOOL ConferenceInfoUpdater::IsSamePrivacyUri(
 }
 
 PROTECTED
-IMS_BOOL ConferenceInfoUpdater::IsAllParticipantUpdated() const
-{
-    // TODO: remove this function.
-    return IMS_FALSE;
-}
-
-PROTECTED
 IMS_BOOL ConferenceInfoUpdater::IsInvalidStatusUpdate(
         IN IMS_UINT32 nParticipantIndex, IN const ConferenceInfo::User* pUser) const
 {
@@ -772,7 +747,7 @@ IMS_BOOL ConferenceInfoUpdater::IsInvalidStatusUpdate(
     {
         if (IsConnectedStatusCategory(nOldStatus) && !IsConnectedStatusCategory(nNewStatus))
         {
-            IMSList<ConferenceInfo::User*> objSameEntityUsers = GetSameUserEntities(pUser);
+            ImsList<ConferenceInfo::User*> objSameEntityUsers = GetSameUserEntities(pUser);
             for (IMS_UINT32 i = 0; i < objSameEntityUsers.GetSize(); i++)
             {
                 if (IsConnectedStatusCategory(
@@ -800,13 +775,13 @@ IMS_BOOL ConferenceInfoUpdater::IsInvalidStatusUpdate(
 }
 
 PROTECTED
-IMSList<ConferenceInfo::User*> ConferenceInfoUpdater::GetSameUserEntities(
+ImsList<ConferenceInfo::User*> ConferenceInfoUpdater::GetSameUserEntities(
         IN const ConferenceInfo::User* pUser) const
 {
     const AString& strUserEntity = pUser->GetEntity();
 
-    const IMSList<ConferenceInfo::User*> objUsers = m_pConferenceInfo->GetUsers();
-    IMSList<ConferenceInfo::User*> objSameEntityUsers;
+    const ImsList<ConferenceInfo::User*> objUsers = m_pConferenceInfo->GetUsers();
+    ImsList<ConferenceInfo::User*> objSameEntityUsers;
 
     for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
     {

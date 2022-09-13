@@ -22,6 +22,7 @@
 #include "conferencecall/ConferenceSubscription.h"
 #include "call/IMtcCall.h"
 
+class ConferenceFactory;
 class ConferenceParticipantList;
 class ISession;
 class ICoreService;
@@ -33,9 +34,9 @@ class MockConferenceSubscription : public ConferenceSubscription
 {
 public:
     explicit MockConferenceSubscription(IN IMtcContext& objContext, IN CallKey nConfCallKey,
-            IN ConferenceParticipantList& objList,
-            IN IConferenceSubscriptionListener& objListener) :
-            ConferenceSubscription(objContext, nConfCallKey, objList, objListener)
+            IN ConferenceParticipantList& objList, IN IConferenceSubscriptionListener& objListener,
+            IN ConferenceFactory& objFactory) :
+            ConferenceSubscription(objContext, nConfCallKey, objList, objListener, objFactory)
     {
     }
     ~MockConferenceSubscription() {}

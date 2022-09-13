@@ -145,7 +145,8 @@ protected:
     MockConferenceSubscription* CreateSubscription(MockIConferenceSubscriptionListener& objListener)
     {
         MockConferenceSubscription* pSubscription = new MockConferenceSubscription(
-                objMockContext, CONFERENCE_CALL_KEY, *pMockParticipantList, objListener);
+                objMockContext, CONFERENCE_CALL_KEY, *pMockParticipantList, objListener,
+                *pMockFactory);
         ON_CALL(*pMockFactory, CreateSubscription(_, _, _)).WillByDefault(Return(pSubscription));
         ON_CALL(*pSubscription, GetState).WillByDefault(Return(SubscriptionState::ACTIVE));
 

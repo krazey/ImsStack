@@ -20,12 +20,13 @@
 #include "MtcDef.h"
 #include "conferencecall/ConferenceInfo.h"
 
+class ConferenceFactory;
 class ConferenceParticipantList;
 
 class ConferenceInfoUpdater
 {
 public:
-    explicit ConferenceInfoUpdater();
+    explicit ConferenceInfoUpdater(IN ConferenceFactory& objFactory);
     virtual ~ConferenceInfoUpdater();
     ConferenceInfoUpdater(IN const ConferenceInfoUpdater&) = delete;
     ConferenceInfoUpdater& operator=(IN const ConferenceInfoUpdater&) = delete;
@@ -51,7 +52,6 @@ protected:
     IMS_SINT32 FindParticipantByReferToUri(IN const ConferenceInfo::User* pUser);
     IMS_SINT32 FindParticipantByUserEntity(IN const ConferenceInfo::User* pUser);
 
-    void DetermineMatchingPolicy();
     IMS_UINT32 GetMatchingScore(IN const AString& strUriA, IN const AString& strUriB) const;
     IMS_UINT32 GetMatchingCount(IN const AString& strUriA, IN const AString& strUriB) const;
 
@@ -63,7 +63,6 @@ protected:
     IMS_BOOL IsLocalUri(IN const AString& strUserEntity) const;
     IMS_BOOL IsAnonymousUri(IN const AString& strUserEntity) const;
     IMS_BOOL IsSamePrivacyUri(IN const AString& strUriA, IN const AString& strUriB) const;
-    IMS_BOOL IsAllParticipantUpdated() const;
     IMS_BOOL IsInvalidStatusUpdate(
             IN IMS_UINT32 nParticipantIndex, IN const ConferenceInfo::User* pUser) const;
     IMSList<ConferenceInfo::User*> GetSameUserEntities(IN const ConferenceInfo::User* pUser) const;
@@ -101,6 +100,7 @@ public:
 
 private:
     ConferenceInfo* m_pConferenceInfo;
+    ConferenceFactory& m_objFactory;
     ConferenceParticipantList* m_pParticipantList;
     IMS_UINT32 m_nInfoState;
     IMS_UINT32 m_nCurrentMatchPolicy;

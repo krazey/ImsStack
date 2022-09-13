@@ -21,6 +21,7 @@
 #include "conferencecall/IConferenceSubscriptionListener.h"
 #include "call/IMtcCall.h"
 
+class ConferenceFactory;
 class ConferenceParticipantList;
 class ISession;
 class ICoreService;
@@ -32,7 +33,8 @@ class ConferenceSubscription : public ISubscriptionListener
 {
 public:
     explicit ConferenceSubscription(IN IMtcContext& objContext, IN CallKey nConfCallKey,
-            IN ConferenceParticipantList& objList, IN IConferenceSubscriptionListener& objListener);
+            IN ConferenceParticipantList& objList, IN IConferenceSubscriptionListener& objListener,
+            IN ConferenceFactory& objFactory);
     virtual ~ConferenceSubscription();
     ConferenceSubscription(IN const ConferenceSubscription&) = delete;
     ConferenceSubscription& operator=(IN const ConferenceSubscription&) = delete;
@@ -70,6 +72,7 @@ private:
 
     IMtcContext& m_objContext;
     CallKey m_nConfCallKey;
+    ConferenceFactory& m_objFactory;
     ConferenceParticipantList& m_objList;
     IConferenceSubscriptionListener& m_objListener;
     AString m_strTo;
