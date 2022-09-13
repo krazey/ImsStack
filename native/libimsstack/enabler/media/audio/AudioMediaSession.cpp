@@ -364,15 +364,18 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN AudioProfile* pLocalProfile,
 
         if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
         {
-            m_objAudioConfig.setDtmfPayloadTypeNumber(pPayload->objRtpMap.nPayloadNum);
+            m_objAudioConfig.setTxDtmfPayloadTypeNumber(pPayload->objRtpMap.nPayloadNum);
+            m_objAudioConfig.setRxDtmfPayloadTypeNumber(pPayload->objRtpMap.nPayloadNum);
             m_objAudioConfig.setDtmfsamplingRateKHz(pPayload->objRtpMap.nSamplingRate / 1000);
             break;
         }
     }
 
-    IMS_TRACE_D("UpdateRtpConfig() - DtmfPayloadTypeNumber[%d], DtmfsamplingRateKHz[%d]",
-            m_objAudioConfig.getDtmfPayloadTypeNumber(), m_objAudioConfig.getDtmfsamplingRateKHz(),
-            0);
+    IMS_TRACE_D("UpdateRtpConfig() - DtmfTxPayloadTypeNumber[%d],"
+                "DtmfRxPayloadTypeNumber[%d],DtmfsamplingRateKHz[%d] ",
+            m_objAudioConfig.getTxDtmfPayloadTypeNumber(),
+            m_objAudioConfig.getRxDtmfPayloadTypeNumber(),
+            m_objAudioConfig.getDtmfsamplingRateKHz());
 
     return IMS_TRUE;
 }
