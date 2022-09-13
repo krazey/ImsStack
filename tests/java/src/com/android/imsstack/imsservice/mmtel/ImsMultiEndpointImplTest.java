@@ -38,7 +38,7 @@ import java.util.List;
 @RunWith(JUnit4.class)
 public class ImsMultiEndpointImplTest {
     private ImsMultiEndpointImpl mImsMultiEndpointImpl;
-    private List<ImsExternalCallState> mImsExternalCallState;
+    private List<ImsExternalCallState> mImsExternalCallStates;
 
     @Mock ICallContext mICallContext;
     @Mock IImsExternalCallStateListener mListener;
@@ -47,7 +47,7 @@ public class ImsMultiEndpointImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mImsMultiEndpointImpl = new ImsMultiEndpointImpl(mICallContext);
-        mImsExternalCallState = new ArrayList<ImsExternalCallState>();
+        mImsExternalCallStates = new ArrayList<ImsExternalCallState>();
         mImsMultiEndpointImpl.getIImsMultiEndpoint().setListener(mListener);
     }
 
@@ -59,14 +59,14 @@ public class ImsMultiEndpointImplTest {
 
     @Test
     public void test_requestImsExternalCallStateInfo() throws Exception {
-        mImsMultiEndpointImpl.updateDialogState(mImsExternalCallState);
+        mImsMultiEndpointImpl.updateDialogState(mImsExternalCallStates);
         mImsMultiEndpointImpl.requestImsExternalCallStateInfo();
-        verify(mListener, times(2)).onImsExternalCallStateUpdate(mImsExternalCallState);
+        verify(mListener, times(2)).onImsExternalCallStateUpdate(mImsExternalCallStates);
     }
 
     @Test
     public void test_updateDialogState() throws Exception {
-        mImsMultiEndpointImpl.updateDialogState(mImsExternalCallState);
-        verify(mListener).onImsExternalCallStateUpdate(mImsExternalCallState);
+        mImsMultiEndpointImpl.updateDialogState(mImsExternalCallStates);
+        verify(mListener).onImsExternalCallStateUpdate(mImsExternalCallStates);
     }
 }
