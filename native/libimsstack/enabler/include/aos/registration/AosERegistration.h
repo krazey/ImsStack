@@ -16,6 +16,7 @@
 #ifndef AOS_E_REGISTRATION_H_
 #define AOS_E_REGISTRATION_H_
 
+#include "IEventListener.h"
 #include "registration/AosRegistration.h"
 
 class EmergencyModeInfo
@@ -75,7 +76,7 @@ public:
             IN IMS_BOOL bExplicitUpdate = IMS_TRUE) final;
     void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) final;
 
-private:
+protected:
     IMS_BOOL OnMessage(IN IMSMSG& objMsg) final;
 
     void Init() final;
