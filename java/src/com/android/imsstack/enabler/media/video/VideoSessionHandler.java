@@ -161,6 +161,12 @@ public class VideoSessionHandler {
                 }
                     break;
 
+                case MediaConstants.RESPONSE_SESSION_CLOSED:
+                {
+                    handleVideoSessionClosed();
+                }
+                    break;
+
                 case MediaConstants.RESPONSE_SESSION_CHANGED:
                 {
                     handleVideoSessionChanged(msg.arg1);
@@ -233,6 +239,14 @@ public class VideoSessionHandler {
 
             Message.obtain(mVideoMessageHandler, MediaConstants.RESPONSE_OPEN_SESSION,
                     error, UNUSED, null).sendToTarget();
+        }
+
+        @Override
+        public void onSessionClosed() {
+            ImsLog.d("onSessionClosed for SessionId[" + getVideoSessionId() + "]");
+
+            Message.obtain(mVideoMessageHandler, MediaConstants.RESPONSE_SESSION_CLOSED)
+                    .sendToTarget();
         }
 
         @Override
@@ -402,8 +416,6 @@ public class VideoSessionHandler {
 
         if (mVideoSession != null) {
             mMediaManager.closeSession(mVideoSession);
-            closeSockets();
-            mVideoSession = null;
         }
     }
 
@@ -486,6 +498,12 @@ public class VideoSessionHandler {
         if (mVideoSessionCallbackHandler != null) {
             mVideoSessionCallbackHandler.openSessionResponse(result);
         }
+    }
+
+    private void handleVideoSessionClosed() {
+        closeSockets();
+        mVideoSession = null;
+        mVideoSessionId = 0;
     }
 
     private void handleVideoSessionChanged(int state) {

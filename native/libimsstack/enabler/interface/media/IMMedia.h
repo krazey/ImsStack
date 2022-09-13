@@ -131,24 +131,26 @@ public:
     static const IMS_SINT32 RESPONSE_ADD_CONFIG = IMMEDIA_IND + 4;
     /** response of confirmConfig request  */
     static const IMS_SINT32 RESPONSE_CONFIRM_CONFIG = IMMEDIA_IND + 5;
+    /** response of closeSession request  */
+    static const IMS_SINT32 RESPONSE_SESSION_CLOSED = IMMEDIA_IND + 6;
     /** notification of first packet received in the target session during the streaming */
-    static const IMS_SINT32 NOTIFY_FIRST_PACKET = IMMEDIA_IND + 6;
+    static const IMS_SINT32 NOTIFY_FIRST_PACKET = IMMEDIA_IND + 11;
     /** notification of rtp extended header received */
-    static const IMS_SINT32 NOTIFY_HEADER_EXTENSION = IMMEDIA_IND + 7;
+    static const IMS_SINT32 NOTIFY_HEADER_EXTENSION = IMMEDIA_IND + 12;
     /** notification of rtp/rtcp packet inacitivity detected */
-    static const IMS_SINT32 NOTIFY_MEDIA_INACTIVITY = IMMEDIA_IND + 8;
+    static const IMS_SINT32 NOTIFY_MEDIA_INACTIVITY = IMMEDIA_IND + 13;
     /** notification of packet loss detected */
-    static const IMS_SINT32 NOTIFY_PACKET_LOSS = IMMEDIA_IND + 9;
+    static const IMS_SINT32 NOTIFY_PACKET_LOSS = IMMEDIA_IND + 14;
     /** notification of jitter over threshold detected */
-    static const IMS_SINT32 NOTIFY_JITTER = IMMEDIA_IND + 10;
+    static const IMS_SINT32 NOTIFY_JITTER = IMMEDIA_IND + 15;
     /** notification of media call quality changed */
-    static const IMS_SINT32 NOTIFY_CALL_QUALITY_CHANGE = IMMEDIA_IND + 11;
+    static const IMS_SINT32 NOTIFY_CALL_QUALITY_CHANGE = IMMEDIA_IND + 16;
     /** notification of the ImsMedia process disconnected  */
-    static const IMS_SINT32 NOTIFY_MEDIA_DETACH = IMMEDIA_IND + 12;
+    static const IMS_SINT32 NOTIFY_MEDIA_DETACH = IMMEDIA_IND + 17;
     /** notification of session qos callback */
-    static const IMS_SINT32 NOTIFY_QOS_INFO = IMMEDIA_IND + 13;
+    static const IMS_SINT32 NOTIFY_QOS_INFO = IMMEDIA_IND + 18;
     /** request from the Ui to send a dtmf digit to the audio session */
-    static const IMS_SINT32 SEND_DTMF = IMMEDIA_IND + 14;
+    static const IMS_SINT32 SEND_DTMF = IMMEDIA_IND + 19;
     static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IND_IDX_END = IMMEDIA_IND + 49;
 
     // Notifications for video

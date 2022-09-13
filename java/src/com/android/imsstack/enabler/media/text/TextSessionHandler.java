@@ -137,6 +137,12 @@ public class TextSessionHandler  {
                 }
                     break;
 
+                case MediaConstants.RESPONSE_SESSION_CLOSED:
+                {
+                    handleTextSessionClosed();
+                }
+                    break;
+
                 case MediaConstants.RESPONSE_SESSION_CHANGED:
                 {
                     handleSessionChanged(msg.arg1);
@@ -184,6 +190,14 @@ public class TextSessionHandler  {
 
             Message.obtain(mTextMessageHandler, MediaConstants.RESPONSE_OPEN_SESSION,
                     error, UNUSED, null).sendToTarget();
+        }
+
+        @Override
+        public void onSessionClosed() {
+            ImsLog.d("onSessionClosed for SessionId[" + getTextSessionId() + "]");
+
+            Message.obtain(mTextMessageHandler, MediaConstants.RESPONSE_SESSION_CLOSED)
+                    .sendToTarget();
         }
 
         @Override
@@ -325,8 +339,6 @@ public class TextSessionHandler  {
     private void handleTextCloseSession() {
         if (mTextSession != null) {
             mMediaManager.closeSession(mTextSession);
-            closeSockets();
-            mTextSession = null;
         }
     }
 
@@ -375,6 +387,12 @@ public class TextSessionHandler  {
         if (mTextSessionCallbackHandler != null) {
             mTextSessionCallbackHandler.openSessionResponse(result);
         }
+    }
+
+    private void handleTextSessionClosed() {
+        closeSockets();
+        mTextSession = null;
+        mTextSessionId = 0;
     }
 
     private void handleSessionChanged(int state) {
