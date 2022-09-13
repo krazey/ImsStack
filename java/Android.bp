@@ -63,7 +63,7 @@ android_app {
     ],
     static_libs:[
         // TODO: move this to libs after API review
-        "android.telephony.imsmedia",
+        "ImsMediaFramework",
     ],
     libs: [
         "ims-common",
