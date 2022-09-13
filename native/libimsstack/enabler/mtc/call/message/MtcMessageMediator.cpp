@@ -78,6 +78,11 @@ AString MtcMessageMediator::GetContactHeaderWithoutFeatureTag(IN const AString& 
 
     ISipHeader* piHeader =
             SipParsingHelper::CreateHeader(ISipHeader::CONTACT_NORMAL, m_strOriginalContactHeader);
+    if (!piHeader)
+    {
+        return m_strOriginalContactHeader;
+    }
+
     piHeader->RemoveParameter(strFeatureTag);
     AString strModifiedHeader = piHeader->GetHeaderValue();
     piHeader->Destroy();
