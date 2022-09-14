@@ -176,6 +176,7 @@ public:
     AStringArray m_objPcscfs;
     IMSList<IMS_SINT32> m_objPcscfPorts;
     IMSVector<IMS_SINT32> m_objWaitTime;
+    IMSMap<AString, IAosHandle*> m_objHandles;
 
 protected:
     virtual void SetUp() override
@@ -384,13 +385,12 @@ protected:
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(m_strHeader));
 
-        IMSMap<AString, IAosHandle*> objHandles;
         const IMSList<AosServiceProfile*>& objProfiles = m_pAosStaticProfile->GetServiceProfiles();
         AosServiceProfile* pServiceProfile = IMS_NULL;
         if (objProfiles.GetSize() > 0)
         {
             pServiceProfile = objProfiles.GetAt(0);
-            objHandles.Add(pServiceProfile->GetServiceId(), &m_objMockIAosHandle);
+            m_objHandles.Add(pServiceProfile->GetServiceId(), &m_objMockIAosHandle);
             EXPECT_CALL(m_objMockIAosHandle, GetAppId())
                     .Times(AnyNumber())
                     .WillRepeatedly(ReturnRef(pServiceProfile->GetAppId()));
@@ -401,7 +401,7 @@ protected:
 
         EXPECT_CALL(m_objMockIAosAppContext, GetHandles())
                 .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(objHandles));
+                .WillRepeatedly(ReturnRef(m_objHandles));
 
         EXPECT_CALL(m_objMockIAosHandle, GetRequestType())
                 .Times(AnyNumber())
