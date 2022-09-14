@@ -1,0 +1,61 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef INTERFACE_MTS_SERVICE_STATE_H_
+#define INTERFACE_MTS_SERVICE_STATE_H_
+
+#include "ImsTypeDef.h"
+
+class IImsRadioConnectionListener;
+class IImsRadioTrafficPriorityListener;
+
+class IMtsServiceState
+{
+public:
+    virtual ~IMtsServiceState() {}
+
+    // MtsMessageController
+    virtual IMS_BOOL IsMoServiceBlocked() const = 0;
+    virtual IMS_BOOL IsMtServiceBlocked() const = 0;
+    virtual IMS_BOOL IsTemporaryServiceBlocked() const = 0;
+
+    // MtsService
+    virtual IMS_BOOL IsImsTrafficAllowed(IN IMS_UINT32 nTrafficType) = 0;
+    virtual void StartImsTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nAccessNetworkType,
+            IN IImsRadioConnectionListener* piListener) = 0;
+    virtual void TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason) = 0;
+    virtual void AddListenerForTrafficPriority(
+            IN IImsRadioTrafficPriorityListener* piListener) = 0;
+    virtual void RemoveListenerForTrafficPriority(
+            IN IImsRadioTrafficPriorityListener* piListener) = 0;
+    virtual void StartRadioGuardTimer(IN IMS_UINT32 nTrafficType) = 0;
+    virtual IMS_BOOL IsRadioGuardTimerActive(IN IMS_UINT32 nTrafficType) = 0;
+
+    virtual IMS_SINT32 GetServiceState() = 0;
+    virtual IMS_BOOL IsServiceConnected(IN IMS_UINT32 nService) = 0;
+    virtual void NotifySpecificMessage(
+            IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam) = 0;
+    virtual void OnImsConnected() = 0;
+    virtual void OnImsDisconnected(IN IMS_UINT32 nReason) = 0;
+    virtual void OnImsDisconnecting(IN IMS_UINT32 nReason) = 0;
+    virtual void OnImsSuspended(IN IMS_UINT32 nReason) = 0;
+    virtual void OnImsResumed() = 0;
+    virtual void SetConnectedServices(IN IMS_UINT32 nServices) = 0;
+    virtual void SetImsRegConnected(IN IMS_BOOL bConnected) = 0;
+    virtual void SetSmsOverIpState(IN IMS_BOOL bState) = 0;
+};
+
+#endif

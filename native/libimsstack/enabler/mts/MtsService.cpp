@@ -16,41 +16,38 @@
 
 #include "Connector.h"
 #include "ICoreService.h"
-#include "IMessage.h"
-#include "ImsCore.h"
-#include "IPageMessage.h"
-#include "IServiceFilterCriteria.h"
-#include "ISipHeader.h"
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
 #include "IIpcan.h"
 #include "IJniMtsServiceThread.h"
+#include "IMtsServiceListener.h"
+#include "IServiceFilterCriteria.h"
+#include "ISipHeader.h"
 #include "ImsAos.h"
 #include "ImsAosParameter.h"
+#include "ImsCore.h"
 #include "ImsServiceConfig.h"
-#include "IuMts.h"
 #include "JniEnablerConnector.h"
-#include "MtsApp.h"
-#include "MtsFactory.h"
 #include "MtsService.h"
-#include "ServiceTrace.h"
-#include "ServiceMessage.h"
-#include "utility/MtsDynamicLoader.h"
-#include "utility/MtsUtils.h"
+#include "MtsServiceState.h"
+#include "MtsStringDef.h"
+#include "ServicePhoneInfo.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
-MtsService::MtsService(IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader) :
+MtsService::MtsService(IN IMS_SINT32 nSlotId) :
         ImsService(AString::ConstNull()),
+        m_bEmergencyActived(IMS_FALSE),
         m_piImsAos(IMS_NULL),
         m_piImsEmergencyAos(IMS_NULL),
+        m_piNetWatcherInfo(IMS_NULL),
         m_strAppId(ImsServiceConfig::GetAppName(ImsAppId::MTS)),
         m_nSlotId(nSlotId),
         m_piCoreService(IMS_NULL),
         m_piEmergencyCoreService(IMS_NULL),
         m_piMtsServiceListener(IMS_NULL),
-        m_pMtsDynamicLoader(pMtsDynamicLoader),
-        m_pE911SmsInfo(IMS_NULL)
+        m_piMtsServiceState(new MtsServiceState(m_nSlotId)),
+        m_pSmsInfo(IMS_NULL)
 {
     IMS_TRACE_I("+MtsService [slot_%d]", m_nSlotId, 0, 0);
     Init();
@@ -73,8 +70,7 @@ ICoreService* MtsService::GetICoreService(IN IMS_BOOL bEmergency) const
     return bEmergency ? m_piEmergencyCoreService : m_piCoreService;
 }
 
-PUBLIC VIRTUAL
-void MtsService::SetListener(IN IMtsServiceListener* piMtsServiceListener)
+PUBLIC VIRTUAL void MtsService::SetListener(IN IMtsServiceListener* piMtsServiceListener)
 {
     m_piMtsServiceListener = piMtsServiceListener;
 }
@@ -84,35 +80,47 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN const 
 {
     IMS_TRACE_I("SendMoSms", 0, 0, 0);
 
-    if (MtsUtils::GetInstance()->IsEccNumber(strAddress, m_nSlotId) == IMS_TRUE)
+    if (m_pSmsInfo != IMS_NULL)
     {
-        // TODO: Request SMS RAT SELECTION
+        delete m_pSmsInfo;
+    }
+
+    m_pSmsInfo = new SmsSendRequestInfo();
+
+    m_pSmsInfo->eSmsFormat = eSmsFormat;
+    m_pSmsInfo->strAddress = strAddress.GetStr();
+    m_pSmsInfo->objSmsData = objData;
+    m_pSmsInfo->nSeqId = nSeqId;
+    m_pSmsInfo->bEmergency = IMS_FALSE;
+
+    if (IsEccNumber(strAddress) == IMS_TRUE)
+    {
+        // TODO(Mts): Request SMS RAT SELECTION
+        m_pSmsInfo->bEmergency = IMS_TRUE;
         m_piImsEmergencyAos->Control(ImsAosControl::REGISTER_START);
 
-        if (m_pE911SmsInfo != IMS_NULL)
-        {
-            delete m_pE911SmsInfo;
-            m_pE911SmsInfo = IMS_NULL;
-        }
+        // Wait until the Emergency REGISTRATION Procedure done
+        return;
+    }
 
-        m_pE911SmsInfo = new EmergencySmsSendRequestInfo();
+    if (m_piMtsServiceState->IsRadioGuardTimerActive(IImsRadio::TRAFFIC_TYPE_SMS))
+    {
+        m_piMtsServiceListener->NotifyMoSms(eSmsFormat, objData, strAddress, nSeqId, IMS_FALSE);
+        m_piMtsServiceState->StartRadioGuardTimer(IImsRadio::TRAFFIC_TYPE_SMS);
 
-        m_pE911SmsInfo->eSmsFormat = eSmsFormat;
-        m_pE911SmsInfo->strAddress = strAddress.GetStr();
-        m_pE911SmsInfo->objSmsData = objData;
-        m_pE911SmsInfo->nSeqId = nSeqId;
+        delete m_pSmsInfo;
+        m_pSmsInfo = IMS_NULL;
     }
     else
     {
-        m_piMtsServiceListener->NotifyMoSms(eSmsFormat, objData, strAddress, nSeqId, IMS_FALSE);
+        CheckRadioTraffic(IImsRadio::TRAFFIC_TYPE_SMS);
     }
 }
 
-PUBLIC VIRTUAL
-void MtsService::SendMtResult(IN IMS_BOOL bMtResult)
+PUBLIC VIRTUAL void MtsService::SendMtResult(IN IMS_BOOL bMtResult)
 {
     IMS_TRACE_I("SendMtResult", 0, 0, 0);
-    // TODO: Call back is being considered
+    // TODO(Mts): Call back is being considered
     (void)bMtResult;
 }
 
@@ -147,7 +155,17 @@ void MtsService::CoreService_PageMessageReceived(
 {
     IMS_TRACE_I("CoreService_PageMessageReceived : SMS message has been received", 0, 0, 0);
 
-    if (!((piService == m_piCoreService) || (piService == m_piEmergencyCoreService)))
+    IMS_UINT32 nTrafficType;
+
+    if (piService == m_piCoreService)
+    {
+        nTrafficType = IImsRadio::TRAFFIC_TYPE_SMS;
+    }
+    else if (piService == m_piEmergencyCoreService)
+    {
+        nTrafficType = IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS;
+    }
+    else
     {
         IMS_TRACE_E(0, "CoreService_PageMessageReceived : not my ICoreService", 0, 0, 0);
         return;
@@ -159,6 +177,10 @@ void MtsService::CoreService_PageMessageReceived(
         return;
     }
 
+    IMS_UINT32 nAccessNetworkType =
+            ConvertToAccessNetworkType(nTrafficType, m_piNetWatcherInfo->GetNetworkType());
+    m_piMtsServiceState->StartImsTraffic(nTrafficType, nAccessNetworkType, this);
+    m_piMtsServiceState->StartRadioGuardTimer(nTrafficType);
     m_piMtsServiceListener->NotifyMtSms(piMessage);
 }
 
@@ -219,23 +241,20 @@ void MtsService::CoreService_CapabilityQueryReceived(
 }
 
 PUBLIC
-void MtsService::ImsAos_Connected(IN IMS_UINT32 /*nFeatures*/, IN IMS_UINT32 /*nIpcan*/)
+void MtsService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
 {
     IMS_TRACE_I("ImsAos_Connected : m_nSlotId[%d]", m_nSlotId, 0, 0);
+    (void)nFeatures;
+    (void)nIpcan;
 
-    if (m_pMtsDynamicLoader == IMS_NULL)
+    m_piMtsServiceState->OnImsConnected();
+
+    if (!(m_bEmergencyActived) && (m_piImsEmergencyAos->IsImsConnected() == IMS_TRUE))
     {
-        IMS_TRACE_E(0, "m_pMtsDynamicLoader is null", 0, 0, 0);
-        return;
-    }
-
-    m_pMtsDynamicLoader->GetMtsServiceState()->OnImsConnected();
-
-    if (m_pE911SmsInfo != IMS_NULL)
-    {
-        m_piMtsServiceListener->NotifyMoSms(m_pE911SmsInfo->eSmsFormat, m_pE911SmsInfo->objSmsData,
-                m_pE911SmsInfo->strAddress, m_pE911SmsInfo->nSeqId, IMS_TRUE);
-        delete m_pE911SmsInfo;
+        if ((m_pSmsInfo != IMS_NULL) && m_pSmsInfo->bEmergency)
+        {
+            CheckRadioTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS);
+        }
     }
 }
 
@@ -247,13 +266,14 @@ void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 {
     IMS_TRACE_I("ImsAos_Disconnected : Reason[%d]", nReason, 0, 0);
 
-    if (m_pMtsDynamicLoader == IMS_NULL)
+    if (m_piImsEmergencyAos->IsImsConnected() == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "m_pMtsDynamicLoader is null", 0, 0, 0);
-        return;
+        m_bEmergencyActived = IMS_FALSE;
     }
 
-    m_pMtsDynamicLoader->GetMtsServiceState()->OnImsDisconnected(nReason);
+    m_piMtsServiceState->OnImsDisconnected(nReason);
+    // if ims data connection is disconnected, terminate all pending messages.
+    m_piMtsServiceListener->OnDisconnected();
 }
 
 PUBLIC
@@ -261,13 +281,7 @@ void MtsService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 {
     IMS_TRACE_I("ImsAos_Disconnecting : Reason[%d]", nReason, 0, 0);
 
-    if (m_pMtsDynamicLoader == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "m_pMtsDynamicLoader is null", 0, 0, 0);
-        return;
-    }
-
-    m_pMtsDynamicLoader->GetMtsServiceState()->OnImsDisconnecting(nReason);
+    m_piMtsServiceState->OnImsDisconnecting(nReason);
 }
 
 PUBLIC
@@ -275,13 +289,8 @@ void MtsService::ImsAos_Suspended(IN IMS_UINT32 nReason)
 {
     IMS_TRACE_I("ImsAos_Suspended : Reason[%d]", nReason, 0, 0);
 
-    if (m_pMtsDynamicLoader == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "m_pMtsDynamicLoader is null", 0, 0, 0);
-        return;
-    }
-
-    m_pMtsDynamicLoader->GetMtsServiceState()->OnImsSuspended(nReason);
+    m_piMtsServiceState->OnImsSuspended(nReason);
+    m_piMtsServiceListener->OnSuspended();
 }
 
 PUBLIC
@@ -289,26 +298,14 @@ void MtsService::ImsAos_Resumed()
 {
     IMS_TRACE_I("ImsAos_Resumed", 0, 0, 0);
 
-    if (m_pMtsDynamicLoader == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "m_pMtsDynamicLoader is null", 0, 0, 0);
-        return;
-    }
-
-    m_pMtsDynamicLoader->GetMtsServiceState()->OnImsResumed();
+    m_piMtsServiceState->OnImsResumed();
 }
 
 PUBLIC
 void MtsService::IMSAoSApp_NotifySpecificMessage(
         IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam)
 {
-    if (m_pMtsDynamicLoader == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "m_pMtsDynamicLoader is null", 0, 0, 0);
-        return;
-    }
-
-    m_pMtsDynamicLoader->GetMtsServiceState()->NotifySpecificMessage(nMsg, nWparam, nLparam);
+    m_piMtsServiceState->NotifySpecificMessage(nMsg, nWparam, nLparam);
 }
 
 PUBLIC
@@ -316,13 +313,7 @@ void MtsService::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 
 {
     IMS_TRACE_I("ImsAosMonitor_Connected : nServices[%08x] ", nServices, 0, 0);
 
-    if (m_pMtsDynamicLoader == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "m_pMtsDynamicLoader is null", 0, 0, 0);
-        return;
-    }
-
-    m_pMtsDynamicLoader->GetMtsServiceState()->SetConnectedServices(nServices);
+    m_piMtsServiceState->SetConnectedServices(nServices);
 }
 
 PUBLIC
@@ -335,6 +326,66 @@ void MtsService::ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 }
 
 PUBLIC
+void MtsService::ImsRadio_OnConnectionFailed(
+        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis)
+{
+    IMS_TRACE_I("ImsRadio_OnConnectionFailed", 0, 0, 0);
+    /*
+     * TODO(Mts): Consider of nFailureReason, nCauseCode and nWaitTimeMillis
+     *            if there are some further required actions
+     */
+    (void)nFailureReason;
+    (void)nCauseCode;
+    (void)nWaitTimeMillis;
+
+    if (m_pSmsInfo != IMS_NULL)
+    {
+        ReportMoStatus(MO_IMS_TEMP_FAILURE, m_pSmsInfo->eSmsFormat, 0, m_pSmsInfo->nSeqId);
+        delete m_pSmsInfo;
+        m_pSmsInfo = IMS_NULL;
+    }
+    else
+    {
+        IMS_TRACE_E(0, "m_pSmsInfo is null", 0, 0, 0);
+    }
+}
+
+PUBLIC
+void MtsService::ImsRadio_OnConnectionSetupPrepared()
+{
+    IMS_TRACE_I("ImsRadio_OnConnectionSetupPrepared", 0, 0, 0);
+
+    if (m_pSmsInfo != IMS_NULL)
+    {
+        IMS_UINT32 nTrafficType = IImsRadio::TRAFFIC_TYPE_SMS;
+
+        if (m_pSmsInfo->bEmergency)
+        {
+            nTrafficType = IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS;
+        }
+
+        m_piMtsServiceListener->NotifyMoSms(m_pSmsInfo->eSmsFormat, m_pSmsInfo->objSmsData,
+                m_pSmsInfo->strAddress, m_pSmsInfo->nSeqId, m_pSmsInfo->bEmergency);
+        m_piMtsServiceState->StartRadioGuardTimer(nTrafficType);
+
+        delete m_pSmsInfo;
+        m_pSmsInfo = IMS_NULL;
+    }
+    else
+    {
+        IMS_TRACE_E(0, "m_pSmsInfo is null", 0, 0, 0);
+    }
+}
+
+PUBLIC
+void MtsService::ImsRadio_OnTrafficPriorityChanged()
+{
+    IMS_TRACE_I("ImsRadio_OnTrafficPriorityChanged", 0, 0, 0);
+
+    // TODO(Mts): Need to implement
+}
+
+PUBLIC
 void MtsService::RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType)
 {
     if (m_piImsAos != IMS_NULL)
@@ -344,76 +395,6 @@ void MtsService::RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType)
     else
     {
         IMS_TRACE_E(0, "m_piImsAos is null", 0, 0, 0);
-    }
-}
-
-PUBLIC
-IMS_BOOL MtsService::IsEpdgConnected()
-{
-    IMS_SINT32 nReportedIpcan = IIpcan::CATEGORY_MOBILE;
-    IMS_BOOL bIsEpdg = IMS_FALSE;
-    IMS_TRACE_I("IsEpdgConnected", 0, 0, 0);
-
-    if (m_piImsAos != IMS_NULL)
-    {
-        nReportedIpcan = m_piImsAos->GetAosInfo()->GetIpcanType();
-    }
-    else
-    {
-        IMS_TRACE_E(0, "m_piImsAos is null", 0, 0, 0);
-    }
-
-    if (nReportedIpcan == IIpcan::CATEGORY_WLAN)
-    {
-        IMS_TRACE_I("IsEpdgConnected : bIsEpdg is true", 0, 0, 0);
-        bIsEpdg = IMS_TRUE;
-    }
-    else
-    {
-        IMS_TRACE_I("IsEpdgConnected : bIsEpdg is false (! IPCAN_WLAN)", 0, 0, 0);
-    }
-
-    return bIsEpdg;
-}
-
-PRIVATE
-void MtsService::Init()
-{
-    IMS_TRACE_I("Init", 0, 0, 0);
-
-    AttachJni();
-    AttachAos();
-    AttachCoreService();
-}
-
-PRIVATE
-void MtsService::DeInit()
-{
-    IMS_TRACE_I("DeInit", 0, 0, 0);
-    if (m_piCoreService != IMS_NULL)
-    {
-        m_piCoreService->Close();
-        m_piCoreService = IMS_NULL;
-    }
-
-    if (m_piEmergencyCoreService != IMS_NULL)
-    {
-        m_piEmergencyCoreService->Close();
-        m_piEmergencyCoreService = IMS_NULL;
-    }
-
-    if (m_piImsAos != IMS_NULL)
-    {
-        m_piImsAos->SetListener(IMS_NULL);
-        m_piImsAos->SetMonitor(IMS_NULL);
-        m_piImsAos = IMS_NULL;
-    }
-
-    if (m_piImsEmergencyAos != IMS_NULL)
-    {
-        m_piImsEmergencyAos->SetListener(IMS_NULL);
-        m_piImsEmergencyAos->SetMonitor(IMS_NULL);
-        m_piImsEmergencyAos = IMS_NULL;
     }
 }
 
@@ -449,6 +430,10 @@ void MtsService::AttachAos()
         m_piImsAos->SetListener(this);
         m_piImsAos->SetMonitor(this);
     }
+    else
+    {
+        IMS_TRACE_E(0, "AttachAos : m_piImsAos is null", 0, 0, 0);
+    }
 
     // Get the emergency-type interface of AoS and register as the listener.
     m_piImsEmergencyAos = ImsAos::GetImsAos(
@@ -459,11 +444,9 @@ void MtsService::AttachAos()
         m_piImsEmergencyAos->SetListener(this);
         m_piImsEmergencyAos->SetMonitor(this);
     }
-
-    if (m_piImsEmergencyAos == IMS_NULL || m_piImsAos == IMS_NULL)
+    else
     {
-        IMS_TRACE_E(0, "AttachAos : m_piImsAos or m_piImsEmergencyAos is null", 0, 0, 0);
-        return;
+        IMS_TRACE_E(0, "AttachAos : m_piImsEmergencyAos is null", 0, 0, 0);
     }
 }
 
@@ -501,6 +484,10 @@ void MtsService::AttachCoreService()
         }
         //// iFC -- ends
     }
+    else
+    {
+        IMS_TRACE_E(0, "AttachCoreService : m_piCoreService is null", 0, 0, 0);
+    }
 
     // Get the emergency-type ICoreService and register as the listener.
     AString strEmergencyServiceId("serviceId=");
@@ -533,11 +520,149 @@ void MtsService::AttachCoreService()
         }
         //// iFC -- ends
     }
-
-    if (m_piCoreService == IMS_NULL || m_piEmergencyCoreService == IMS_NULL)
+    else
     {
-        IMS_TRACE_E(0, "AttachCoreService : m_piCoreService or m_piEmergencyCoreService is null", 0,
-                0, 0);
-        return;
+        IMS_TRACE_E(0, "AttachCoreService : m_piEmergencyCoreService is null", 0, 0, 0);
+    }
+}
+
+PRIVATE
+void MtsService::CheckRadioTraffic(IN IMS_UINT32 nTrafficType)
+{
+    IMS_TRACE_I("CheckRadioTraffic", 0, 0, 0);
+
+    if (m_piMtsServiceState->IsImsTrafficAllowed(nTrafficType))
+    {
+        IMS_UINT32 nAccessNetworkType =
+                ConvertToAccessNetworkType(nTrafficType, m_piNetWatcherInfo->GetNetworkType());
+        m_piMtsServiceState->StartImsTraffic(nTrafficType, nAccessNetworkType, this);
+    }
+    else
+    {
+        ReportMoStatus(MO_IMS_TEMP_FAILURE, m_pSmsInfo->eSmsFormat, 0, m_pSmsInfo->nSeqId);
+        delete m_pSmsInfo;
+        m_pSmsInfo = IMS_NULL;
+    }
+}
+
+PRIVATE
+IMS_UINT32 MtsService::ConvertToAccessNetworkType(
+        IN IMS_UINT32 nTrafficType, IN IMS_SINT32 nReportedNetwork)
+{
+    IMS_TRACE_I("ConvertToAccessNetworkType : nTrafficType[%s], nReportedNetwork[%s]",
+            PS_TrafficType(nTrafficType), PS_RadioTechType(nReportedNetwork), 0);
+
+    IMS_UINT32 nReportedIpcan = IIpcan::CATEGORY_MOBILE;
+
+    if (nTrafficType == IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS)
+    {
+        if (m_piImsEmergencyAos != IMS_NULL)
+        {
+            nReportedIpcan = m_piImsEmergencyAos->GetAosInfo()->GetIpcanType();
+        }
+        else
+        {
+            IMS_TRACE_E(0, "m_piImsEmergencyAos is null", 0, 0, 0);
+        }
+    }
+    else
+    {
+        if (m_piImsAos != IMS_NULL)
+        {
+            nReportedIpcan = m_piImsAos->GetAosInfo()->GetIpcanType();
+        }
+        else
+        {
+            IMS_TRACE_E(0, "m_piImsAos is null", 0, 0, 0);
+        }
+    }
+
+    if (nReportedIpcan == IIpcan::CATEGORY_WLAN)
+    {
+        return IImsRadio::ACCESS_NETWORK_TYPE_IWLAN;
+    }
+
+    switch (nReportedNetwork)
+    {
+        case INetworkWatcher::RADIOTECH_TYPE_HSPA:
+        case INetworkWatcher::RADIOTECH_TYPE_HSPAP:
+        case INetworkWatcher::RADIOTECH_TYPE_UMTS:
+            return IImsRadio::ACCESS_NETWORK_TYPE_UTRAN;
+
+        case INetworkWatcher::RADIOTECH_TYPE_LTE:
+            return IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN;
+
+        case INetworkWatcher::RADIOTECH_TYPE_NR:
+            return IImsRadio::ACCESS_NETWORK_TYPE_NGRAN;
+
+        default:
+            return IImsRadio::ACCESS_NETWORK_TYPE_UNKNOWN;
+    }
+}
+
+PRIVATE
+IMS_BOOL MtsService::IsEccNumber(IN const AString& strDstAddr)
+{
+    if (PhoneInfoService::GetPhoneInfoService()->GetCallInfo(m_nSlotId)->IsEmergencyNumber(
+                strDstAddr))
+    {
+        IMS_TRACE_I("IsEccNumber : This Number( %s ) is a ECC Number from PhoneInfoService",
+                strDstAddr.GetStr(), 0, 0);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE
+void MtsService::Init()
+{
+    IMS_TRACE_I("Init", 0, 0, 0);
+
+    AttachJni();
+    AttachAos();
+    AttachCoreService();
+
+    m_piNetWatcherInfo = PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotId);
+}
+
+PRIVATE
+void MtsService::DeInit()
+{
+    IMS_TRACE_I("DeInit", 0, 0, 0);
+    if (m_piCoreService != IMS_NULL)
+    {
+        m_piCoreService->Close();
+        m_piCoreService = IMS_NULL;
+    }
+
+    if (m_piEmergencyCoreService != IMS_NULL)
+    {
+        m_piEmergencyCoreService->Close();
+        m_piEmergencyCoreService = IMS_NULL;
+    }
+
+    if (m_piImsAos != IMS_NULL)
+    {
+        m_piImsAos->SetListener(IMS_NULL);
+        m_piImsAos->SetMonitor(IMS_NULL);
+        m_piImsAos = IMS_NULL;
+    }
+
+    if (m_piImsEmergencyAos != IMS_NULL)
+    {
+        m_piImsEmergencyAos->SetListener(IMS_NULL);
+        m_piImsEmergencyAos->SetMonitor(IMS_NULL);
+        m_piImsEmergencyAos = IMS_NULL;
+    }
+
+    if (m_piMtsServiceState != IMS_NULL)
+    {
+        delete m_piMtsServiceState;
+    }
+
+    if (m_pSmsInfo != IMS_NULL)
+    {
+        delete m_pSmsInfo;
     }
 }

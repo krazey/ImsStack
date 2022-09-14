@@ -17,8 +17,9 @@
 #ifndef MTS_SM_UTIL_H_
 #define MTS_SM_UTIL_H_
 
-#include "ByteArray.h"
 #include "MtsDef.h"
+
+class ByteArray;
 
 class MtsSmUtils final
 {

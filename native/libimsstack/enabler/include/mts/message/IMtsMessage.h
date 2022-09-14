@@ -17,7 +17,6 @@
 #ifndef INTERFACE_MTS_MESSAGE_H_
 #define INTERFACE_MTS_MESSAGE_H_
 
-#include "ByteArray.h"
 #include "MtsDef.h"
 
 class IPageMessage;

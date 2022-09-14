@@ -15,17 +15,13 @@
  */
 
 #include "ServiceTrace.h"
-
-#include "MtsServiceState.h"
 #include "utility/MtsDynamicLoader.h"
-#include "utility/MtsSipFormUtils.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsDynamicLoader::MtsDynamicLoader(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
-        m_pMtsServiceState(IMS_NULL),
         m_pMtsSipFormUtils(IMS_NULL),
         m_pMtsSmUtils(IMS_NULL),
         m_pMtsTimer(IMS_NULL)
@@ -45,7 +41,6 @@ void MtsDynamicLoader::Initialize()
 {
     IMS_TRACE_D("Initialize : nSlotId[%d]", m_nSlotId, 0, 0);
 
-    m_pMtsServiceState = new MtsServiceState(m_nSlotId);
     m_pMtsSipFormUtils = new MtsSipFormUtils(m_nSlotId);
     m_pMtsSmUtils = new MtsSmUtils();
     m_pMtsTimer = new MtsTimer();
@@ -55,12 +50,6 @@ PRIVATE
 void MtsDynamicLoader::DestroyAll()
 {
     IMS_TRACE_I("DestroyAll : nSlotId[%d]", m_nSlotId, 0, 0);
-
-    if (m_pMtsServiceState != IMS_NULL)
-    {
-        delete m_pMtsServiceState;
-        m_pMtsServiceState = IMS_NULL;
-    }
 
     if (m_pMtsSipFormUtils != IMS_NULL)
     {

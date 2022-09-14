@@ -22,13 +22,14 @@
 
 enum class SmsFormatType;
 
-class EmergencySmsSendRequestInfo
+class SmsSendRequestInfo
 {
 public:
     SmsFormatType eSmsFormat;
     AString strAddress;
     ByteArray objSmsData;
     IMS_SINT32 nSeqId;
+    IMS_BOOL bEmergency;
 };
 
 enum class MtsTimerType
@@ -112,7 +113,7 @@ enum
 
 enum
 {
-    EXPIRED_TIME_SCBM = 300000  // 5min, 300s, 300000ms
+    MTS_RADIO_GUARD_TIME = 1000
 };
 
 // Call type

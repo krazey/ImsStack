@@ -48,19 +48,12 @@ TEST_F(MtsAppTest, CreateUtilsAfterStart)
 {
     pMtsApp->Start();
     ASSERT_NE(pMtsApp->GetMtsDynamicLoader(), nullptr);
-    ASSERT_NE(pMtsApp->GetMtsServiceState(), nullptr);
 }
 
 TEST_F(MtsAppTest, CreateMtsMessageControllerAfterStart)
 {
     pMtsApp->Start();
     ASSERT_NE(pMtsApp->GetMtsMessageController(), nullptr);
-}
-
-TEST_F(MtsAppTest, CreateMtsCallTrackerAfterStart)
-{
-    pMtsApp->Start();
-    ASSERT_NE(pMtsApp->GetMtsCallTracker(), nullptr);
 }
 
 }  // namespace android

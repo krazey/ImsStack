@@ -18,20 +18,13 @@
 #define MTS_APP_H_
 
 #include "IMtsApp.h"
-#include "IMtsCallTrackerListener.h"
-#include "MtsServiceState.h"
 #include "ImsApp.h"
-#include "ImsService.h"
-#include "utility/MtsDynamicLoader.h"
 
-class IMtsCallTracker;
-class MtsCallTracker;
+class IMtsService;
 class MtsDynamicLoader;
 class MtsMessageController;
-class MtsService;
-class MtsServiceState;
 
-class MtsApp : public ImsApp, public IMtsApp, public IMtsCallTrackerListener
+class MtsApp : public IMtsApp, public ImsApp
 {
 public:
     MtsApp(IN IMS_SINT32 nSlotId);
@@ -41,29 +34,20 @@ public:
     virtual void Start() override;
     virtual void Stop() override;
 
-    // IMtsCallTrackerListener
-    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
-
     inline IMtsService* GetMtsService() { return m_piMtsService; }
-    inline MtsMessageController* GetMtsMessageController() { return m_pMtsMessageController; }
     inline MtsDynamicLoader* GetMtsDynamicLoader() { return m_pMtsDynamicLoader; }
-    inline MtsServiceState* GetMtsServiceState() { return m_pMtsServiceState; }
-    inline MtsCallTracker* GetMtsCallTracker() { return m_pCallTracker; }
+    inline MtsMessageController* GetMtsMessageController() { return m_pMtsMessageController; }
 
 private:
-    void CreateMtsService();
     void CreateMtsMessageController();
+    void CreateMtsService();
     void CreateMtsUtils();
-    void DestroyMtsUtils();
-    void GetSmOverIpConfigInfo();
 
 private:
     IMS_SINT32 m_nSlotId;
     IMtsService* m_piMtsService;
-    MtsMessageController* m_pMtsMessageController;
     MtsDynamicLoader* m_pMtsDynamicLoader;
-    MtsServiceState* m_pMtsServiceState;
-    MtsCallTracker* m_pCallTracker;
+    MtsMessageController* m_pMtsMessageController;
 };
 
 #endif

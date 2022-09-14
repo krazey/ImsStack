@@ -18,12 +18,18 @@
 #include "IIpcan.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
-#include "../include/mts/MockIMtsServiceListener.h"
 #include "MtsService.h"
+#include "MtsServiceState.h"
+#include "MtsDef.h"
 #include "core/MockICoreService.h"
 #include "core/MockIReference.h"
 #include "core/IPageMessage.h"
+#include "message/MtsMessageController.h"
 #include "utility/MtsDynamicLoader.h"
+#include "../include/mts/MockIMtsServiceListener.h"
+#include "../../interface/aos/MockIImsAos.h"
+
+using ::testing::Return;
 
 namespace android
 {
@@ -38,14 +44,21 @@ public:
     MtsMessageController* pMtsMessageController;
     MtsDynamicLoader* pMtsDynamicLoader;
     MtsService* pMtsService;
+    MockIImsAos* pMockIImsAos;
+    MockIImsAos* pMockIImsEmergencyAos;
 
 protected:
     virtual void SetUp() override
     {
         pMtsDynamicLoader = new MtsDynamicLoader(SLOT_ID);
         pMtsDynamicLoader->Initialize();
-        pMtsService = new MtsService(SLOT_ID, pMtsDynamicLoader);
+        pMtsService = new MtsService(SLOT_ID);
         pMtsMessageController = new MtsMessageController(SLOT_ID, pMtsService, pMtsDynamicLoader);
+        pMockIImsAos = new MockIImsAos();
+        pMockIImsEmergencyAos = new MockIImsAos();
+
+        pMtsService->SetIImsAos(pMockIImsAos);
+        pMtsService->SetIImsEmergencyAos(pMockIImsEmergencyAos);
     }
 
     virtual void TearDown() override
@@ -104,62 +117,74 @@ TEST_F(MtsServiceTest, CoreServiceCapabilityQueryReceivedDoesNothing)
 
 TEST_F(MtsServiceTest, ImsAosMonitorConnected)
 {
-    MtsServiceState* pMtsServiceState = pMtsDynamicLoader->GetMtsServiceState();
     pMtsService->ImsAosMonitor_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
-    EXPECT_TRUE(pMtsServiceState->IsServiceConnected(ImsAosFeature::SMSIP));
+    EXPECT_TRUE(pMtsService->GetIMtsServiceState()->IsServiceConnected(ImsAosFeature::SMSIP));
 }
 
 TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosConnected)
 {
-    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
+    ON_CALL(*pMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+
+    pMtsService->GetIMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
     pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
-    EXPECT_EQ(pMtsDynamicLoader->GetMtsServiceState()->GetServiceState(), STATE_READY);
+    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_READY);
 }
 
 TEST_F(MtsServiceTest, GetServiceStateReturnsNotreadyAfterAosConnecting)
 {
-    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
-    pMtsDynamicLoader->GetMtsServiceState()->SetMtsMessageController(pMtsMessageController);
+    pMtsService->SetIImsEmergencyAos(pMockIImsEmergencyAos);
+    ON_CALL(*pMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+
+    pMtsService->GetIMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
     pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Disconnected(ImsAosReason::NONE);
     pMtsService->ImsAos_Connecting();
-    EXPECT_EQ(pMtsDynamicLoader->GetMtsServiceState()->GetServiceState(), STATE_NOTREADY);
+    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_NOTREADY);
 }
 
 TEST_F(MtsServiceTest, GetServiceStateReturnsNotreadyAfterAosDisconnected)
 {
-    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
-    pMtsDynamicLoader->GetMtsServiceState()->SetMtsMessageController(pMtsMessageController);
+    pMtsService->SetIImsEmergencyAos(pMockIImsEmergencyAos);
+    ON_CALL(*pMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+
+    pMtsService->GetIMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
     pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Disconnected(ImsAosReason::NONE);
-    EXPECT_EQ(pMtsDynamicLoader->GetMtsServiceState()->GetServiceState(), STATE_NOTREADY);
+    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_NOTREADY);
 }
 
 TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosDisconnecting)
 {
-    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
+    pMtsService->SetIImsEmergencyAos(pMockIImsEmergencyAos);
+    ON_CALL(*pMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+
+    pMtsService->GetIMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
     pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Disconnecting(ImsAosReason::NONE);
-    EXPECT_EQ(pMtsDynamicLoader->GetMtsServiceState()->GetServiceState(), STATE_READY);
+    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_READY);
 }
 
 TEST_F(MtsServiceTest, GetServiceStateReturnsLimitedAfterAosSuspended)
 {
-    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
-    pMtsDynamicLoader->GetMtsServiceState()->SetMtsMessageController(pMtsMessageController);
+    pMtsService->SetIImsEmergencyAos(pMockIImsEmergencyAos);
+    ON_CALL(*pMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+
+    pMtsService->GetIMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
     pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Suspended(ImsAosReason::NONE);
-    EXPECT_EQ(pMtsDynamicLoader->GetMtsServiceState()->GetServiceState(), STATE_LIMITED);
+    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_LIMITED);
 }
 
 TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosResumed)
 {
-    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
-    pMtsDynamicLoader->GetMtsServiceState()->SetMtsMessageController(pMtsMessageController);
+    pMtsService->SetIImsEmergencyAos(pMockIImsEmergencyAos);
+    ON_CALL(*pMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+
+    pMtsService->GetIMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
     pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Suspended(ImsAosReason::NONE);
     pMtsService->ImsAos_Resumed();
-    EXPECT_EQ(pMtsDynamicLoader->GetMtsServiceState()->GetServiceState(), STATE_READY);
+    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_READY);
 }
 
 }  // namespace android

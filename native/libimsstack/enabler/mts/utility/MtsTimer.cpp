@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "utility/MtsTimer.h"
 
@@ -21,7 +22,7 @@ __IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsTimer::MtsTimer() :
-        m_objTimers(IMSMap<MtsTimerType, ITimer*>()),
+        m_objTimers(ImsMap<MtsTimerType, ITimer*>()),
         m_piTimerListener(IMS_NULL)
 {
     IMS_TRACE_D("+MtsTimer", 0, 0, 0);

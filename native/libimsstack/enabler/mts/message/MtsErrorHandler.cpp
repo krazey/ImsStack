@@ -15,9 +15,9 @@
  */
 
 #include "CarrierConfig.h"
+#include "ICarrierConfig.h"
 #include "ImsAosParameter.h"
 #include "MtsDef.h"
-#include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "core/IMessage.h"

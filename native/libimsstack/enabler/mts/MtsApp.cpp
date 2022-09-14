@@ -15,22 +15,13 @@
  */
 
 #include "Configuration.h"
-#include "ServiceConfig.h"
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-#include "ServicePhoneInfo.h"
-#include "SystemConfig.h"
-
 #include "ImsServiceConfig.h"
-#include "IPageMessage.h"
-#include "IuMts.h"
-
-#include "utility/MtsDynamicLoader.h"
-
 #include "MtsApp.h"
-#include "MtsCallTracker.h"
 #include "MtsService.h"
+#include "IMtsServiceState.h"
+#include "ServiceTrace.h"
 #include "message/MtsMessageController.h"
+#include "utility/MtsDynamicLoader.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
@@ -41,10 +32,8 @@ MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
         ImsApp(MTS_APP_NAME),
         m_nSlotId(nSlotId),
         m_piMtsService(IMS_NULL),
-        m_pMtsMessageController(IMS_NULL),
         m_pMtsDynamicLoader(IMS_NULL),
-        m_pMtsServiceState(IMS_NULL),
-        m_pCallTracker(IMS_NULL)
+        m_pMtsMessageController(IMS_NULL)
 {
     IMS_TRACE_I("+MtsApp [slot_%d]", m_nSlotId, 0, 0);
 
@@ -56,8 +45,11 @@ PUBLIC MtsApp::~MtsApp()
 {
     IMS_TRACE_I("~MtsApp [slot_%d]", m_nSlotId, 0, 0);
 
-    // Remove MtsUtils
-    DestroyMtsUtils();
+    if (m_pMtsDynamicLoader != IMS_NULL)
+    {
+        delete m_pMtsDynamicLoader;
+        m_pMtsDynamicLoader = IMS_NULL;
+    }
 
     if (m_piMtsService != IMS_NULL)
     {
@@ -69,12 +61,6 @@ PUBLIC MtsApp::~MtsApp()
     {
         delete m_pMtsMessageController;
         m_pMtsMessageController = IMS_NULL;
-    }
-
-    if (m_pCallTracker != IMS_NULL)
-    {
-        delete m_pCallTracker;
-        m_pCallTracker = IMS_NULL;
     }
 }
 
@@ -93,32 +79,16 @@ PUBLIC VIRTUAL void MtsApp::Start()
     // 3. MtsMessageController
     /*===================*/
     CreateMtsMessageController();
-
-    // 4. Update IP Config & Make MtsServiceState
-    GetSmOverIpConfigInfo();
-
-    m_pCallTracker = new MtsCallTracker(m_nSlotId);
-    m_pCallTracker->AddListener(this);
 }
 
 PUBLIC VIRTUAL void MtsApp::Stop()
 {
     IMS_TRACE_I("SMS Stop [slot_%d]", m_nSlotId, 0, 0);
 
-    if (m_pMtsServiceState != IMS_NULL)
+    if (m_piMtsService != IMS_NULL)
     {
-        m_pMtsServiceState->SetImsRegConnected(IMS_FALSE);
+        m_piMtsService->GetIMtsServiceState()->SetImsRegConnected(IMS_FALSE);
     }
-
-    if (m_pCallTracker != IMS_NULL)
-    {
-        m_pCallTracker->RemoveListener(this);
-    }
-}
-
-PUBLIC VIRTUAL void MtsApp::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
-{
-    IMS_TRACE_I("CallTracker_StateChanged : nType[%d], nState[%d]", nType, nState, 0);
 }
 
 PRIVATE void MtsApp::CreateMtsService()
@@ -130,7 +100,7 @@ PRIVATE void MtsApp::CreateMtsService()
         IMS_TRACE_E(0, "can't make CreateMtsService", 0, 0, 0);
     }
 
-    m_piMtsService = new MtsService(m_nSlotId, m_pMtsDynamicLoader);
+    m_piMtsService = new MtsService(m_nSlotId);
 }
 
 PRIVATE void MtsApp::CreateMtsMessageController()
@@ -146,55 +116,4 @@ PRIVATE void MtsApp::CreateMtsUtils()
     IMS_TRACE_I("CreateMtsUtils [slot_%d]", m_nSlotId, 0, 0);
 
     m_pMtsDynamicLoader = new MtsDynamicLoader(m_nSlotId);
-    m_pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-}
-
-PRIVATE void MtsApp::DestroyMtsUtils()
-{
-    IMS_TRACE_I("DestroyMtsUtils", 0, 0, 0);
-
-    if (m_pMtsServiceState != IMS_NULL)
-    {
-        m_pMtsServiceState = IMS_NULL;
-    }
-
-    if (m_pMtsDynamicLoader != IMS_NULL)
-    {
-        delete m_pMtsDynamicLoader;
-        m_pMtsDynamicLoader = IMS_NULL;
-    }
-}
-
-PRIVATE void MtsApp::GetSmOverIpConfigInfo()
-{
-    IMS_TRACE_I("GetSmOverIpConfigInfo", 0, 0, 0);
-
-    MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
-    IMS_BOOL bSmsOverIpNetwork =
-            piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL);
-
-    // TODO: need to check whether Mts should consider KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY
-    IMSVector<IMS_SINT32> objSupportedRats =
-            piCc->GetIntArray(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY);
-
-    IMS_TRACE_I("GetSmOverIpConfigInfo : bSmsOverIpNetwork[%d]", bSmsOverIpNetwork, 0, 0);
-
-    for (IMS_UINT32 i = 0; i < objSupportedRats.GetSize(); ++i)
-    {
-        IMS_SINT32 nValue = objSupportedRats.GetAt(i);
-        IMS_TRACE_I("GetSmOverIpConfigInfo : objSupportedRats[%d][%d]", i, nValue, 0);
-    }
-
-    pMtsServiceState->SetMtsMessageController(m_pMtsMessageController);
-
-    if (bSmsOverIpNetwork)
-    {
-        pMtsServiceState->SetSmsOverIpState(IMS_TRUE);
-    }
-    else
-    {
-        pMtsServiceState->SetSmsOverIpState(IMS_FALSE);
-    }
 }

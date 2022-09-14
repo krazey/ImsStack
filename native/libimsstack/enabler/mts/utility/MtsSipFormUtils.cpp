@@ -15,15 +15,12 @@
  */
 
 #include "AString.h"
-#include "Configuration.h"
+#include "CarrierConfig.h"
 #include "ImsLib.h"
-#include "ImsStrLib.h"
 #include "IpAddress.h"
 #include "MtsDef.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
-#include "SipAddress.h"
-#include "SipParameter.h"
 #include "helper/dialing/MtsDialingPlan.h"
 #include "utility/MtsSipFormUtils.h"
 
@@ -213,7 +210,7 @@ PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::IsNumberFormat(IN const AString& strDia
 
 PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::IsIpAddress(IN const AString& strIp) const
 {
-    IPAddress objHost;
+    IpAddress objHost;
 
     if (objHost.Parse(strIp))
     {

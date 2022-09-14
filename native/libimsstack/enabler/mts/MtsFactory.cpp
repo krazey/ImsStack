@@ -19,7 +19,6 @@
 #include "MtsApp.h"
 #include "IMtsApp.h"
 #include "MtsFactory.h"
-#include "utility/MtsUtils.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
@@ -27,7 +26,7 @@ PUBLIC
 MtsFactory::MtsFactory()
 {
     IMS_TRACE_D("MtsFactory", 0, 0, 0);
-    m_objMtsApp = IMSMap<IMS_SINT32, IMtsApp*>();
+    m_objMtsApp = ImsMap<IMS_SINT32, IMtsApp*>();
 }
 
 PUBLIC

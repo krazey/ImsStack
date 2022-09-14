@@ -14,38 +14,115 @@
  * limitations under the License.
  */
 
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-#include "ImsAos.h"
+#include "CarrierConfig.h"
+#include "ServiceConfig.h"
+#include "ServiceImsRadio.h"
+#include "ServiceTimer.h"
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
+#include "ImsAos.h"
 #include "ImsAosParameter.h"
-#include "utility/MtsDynamicLoader.h"
+#include "MtsStringDef.h"
 #include "MtsServiceState.h"
-#include "message/MtsMessageController.h"
-#include "utility/MtsDynamicLoader.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :
         m_nMtsServiceState(STATE_INIT),
-        m_bIsImsConnected(IMS_FALSE),
-        m_bIsAosRegModAdmin(IMS_FALSE),
-        m_bIsImsSuspend(IMS_FALSE),
-        m_bIsSmsOverIpConf(IMS_FALSE),
-        m_bIsTemporaryBlocked(IMS_FALSE),
+        m_bImsConnected(IMS_FALSE),
+        m_bAosRegModAdmin(IMS_FALSE),
+        m_bImsSuspend(IMS_FALSE),
+        m_bSmsOverIpConf(IMS_FALSE),
+        m_bTemporaryBlocked(IMS_FALSE),
         m_nConnectedServices(ImsAosService::NONE),
         m_nSlotId(nSlotId),
-        m_pMtsMessageController(IMS_NULL)
+        m_piImsRadio(IMS_NULL),
+        m_piEmergencyRadioGuardTimer(IMS_NULL),
+        m_piRadioGuardTimer(IMS_NULL)
 {
     IMS_TRACE_I("+MtsServiceState [slot_%d]", m_nSlotId, 0, 0);
+
+    Init();
 }
 
 PUBLIC
 MtsServiceState::~MtsServiceState()
 {
     IMS_TRACE_I("~MtsServiceState [slot_%d]", m_nSlotId, 0, 0);
+
+    DeInit();
+}
+
+PUBLIC void MtsServiceState::Timer_TimerExpired(IN ITimer* piTimer)
+{
+    IMS_TRACE_I("Timer_TimerExpired", 0, 0, 0);
+
+    if (piTimer == IMS_NULL)
+    {
+        return;
+    }
+    else if (piTimer == m_piRadioGuardTimer)
+    {
+        StopImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS);
+    }
+    else if (piTimer == m_piEmergencyRadioGuardTimer)
+    {
+        StopImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS);
+    }
+    else
+    {
+        IMS_TRACE_I("Timer_TimerExpired : can't find the expired timer", 0, 0, 0);
+        return;
+    }
+
+    StopRadioGuardTimer(piTimer);
+}
+
+PUBLIC
+void MtsServiceState::StartRadioGuardTimer(IN IMS_UINT32 nTrafficType)
+{
+    IMS_TRACE_I("StartRadioGuardTimer : nTrafficType[%s]", PS_TrafficType(nTrafficType), 0, 0);
+
+    if (nTrafficType == IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS)
+    {
+        if (m_piEmergencyRadioGuardTimer != IMS_NULL)
+        {
+            TimerService::GetTimerService()->DestroyTimer(m_piEmergencyRadioGuardTimer);
+        }
+
+        m_piEmergencyRadioGuardTimer = TimerService::GetTimerService()->CreateTimer();
+        m_piEmergencyRadioGuardTimer->SetTimer(MTS_RADIO_GUARD_TIME, this);
+    }
+    else
+    {
+        if (m_piRadioGuardTimer != IMS_NULL)
+        {
+            TimerService::GetTimerService()->DestroyTimer(m_piRadioGuardTimer);
+        }
+
+        m_piRadioGuardTimer = TimerService::GetTimerService()->CreateTimer();
+        m_piRadioGuardTimer->SetTimer(MTS_RADIO_GUARD_TIME, this);
+    }
+}
+
+PUBLIC
+IMS_BOOL MtsServiceState::IsRadioGuardTimerActive(IN IMS_UINT32 nTrafficType)
+{
+    IMS_BOOL bResult;
+
+    if (nTrafficType == IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS)
+    {
+        bResult = (m_piEmergencyRadioGuardTimer != IMS_NULL) ? IMS_TRUE : IMS_FALSE;
+    }
+    else
+    {
+        bResult = (m_piRadioGuardTimer != IMS_NULL) ? IMS_TRUE : IMS_FALSE;
+    }
+
+    IMS_TRACE_I("IsRadioGuardTimerActive : bResult[%s]", _TRACE_B_(bResult), 0, 0);
+
+    return bResult;
 }
 
 PUBLIC
@@ -53,24 +130,24 @@ void MtsServiceState::SetImsRegConnected(IN IMS_BOOL bConnected)
 {
     IMS_UINT32 nType = IImsAosInfo::REG_MODE_UNKNOWN;
 
-    IMS_TRACE_I("MtsServiceState::SetImsRegConnected() m_bIsImsConnected(%s)/bConnected(%s)",
-            _TRACE_B_(m_bIsImsConnected), _TRACE_B_(bConnected), 0);
+    IMS_TRACE_I("SetImsRegConnected : m_bImsConnected[%s]/bConnected[%s]",
+            _TRACE_B_(m_bImsConnected), _TRACE_B_(bConnected), 0);
 
-    if (m_bIsImsConnected == bConnected)
+    if (m_bImsConnected == bConnected)
     {
         return;
     }
 
-    m_bIsImsConnected = bConnected;
+    m_bImsConnected = bConnected;
 
-    if (m_bIsImsConnected)
+    if (m_bImsConnected)
     {
         IImsAos* piImsAos =
                 ImsAos::GetImsAos(AString("ims.app.mts"), AString("ims.service.mts"), m_nSlotId);
 
         if (piImsAos == IMS_NULL)
         {
-            IMS_TRACE_E(0, "MtsServiceState:: Fail to get AoSApp", 0, 0, 0);
+            IMS_TRACE_E(0, "Fail to get AoSApp", 0, 0, 0);
             return;
         }
 
@@ -78,43 +155,21 @@ void MtsServiceState::SetImsRegConnected(IN IMS_BOOL bConnected)
 
         if (IImsAosInfo::REG_MODE_ADMIN == nType)
         {
-            m_bIsAosRegModAdmin = IMS_TRUE;
+            m_bAosRegModAdmin = IMS_TRUE;
         }
         else
         {
-            m_bIsAosRegModAdmin = IMS_FALSE;
+            m_bAosRegModAdmin = IMS_FALSE;
 
             if (IImsAosInfo::REG_MODE_UNKNOWN == nType)
             {
-                IMS_TRACE_I("MtsServiceState:: IMS Reg Mod is UNKNOWN!!", 0, 0, 0);
+                IMS_TRACE_I("IMS Reg Mod is UNKNOWN!!", 0, 0, 0);
             }
         }
     }
 
-    IMS_TRACE_I("MtsServiceState:: IMS Reg State (%s), IMS Admin Reg (%s)",
-            _TRACE_B_(m_bIsImsConnected), _TRACE_B_(m_bIsAosRegModAdmin), 0);
-
-    UpdateServiceState();
-}
-
-// TODO: consider of utilizing this method for VZW E911 SMS case
-PUBLIC
-void MtsServiceState::SetImsRegConnected(IN IMS_BOOL /*bConnected*/, IMS_BOOL /*bIsEmergencyType*/)
-{
-    IMS_TRACE_I("MtsServiceState::SetImsRegConnected() For Only VZW", 0, 0, 0);
-}
-
-PUBLIC
-void MtsServiceState::SetImsSuspendState(IN IMS_BOOL bState)
-{
-    if (m_bIsImsSuspend == bState)
-    {
-        return;
-    }
-
-    m_bIsImsSuspend = bState;  // if IMSAoSApp_OnImsSuspended. block mo service
-
-    IMS_TRACE_I("MtsServiceState:: IMS Suspend State is (%s)", _TRACE_B_(m_bIsImsSuspend), 0, 0);
+    IMS_TRACE_I("SetImsRegConnected : IMS Reg State [%s], IMS Admin Reg [%s]",
+            _TRACE_B_(m_bImsConnected), _TRACE_B_(m_bAosRegModAdmin), 0);
 
     UpdateServiceState();
 }
@@ -122,38 +177,17 @@ void MtsServiceState::SetImsSuspendState(IN IMS_BOOL bState)
 PUBLIC
 void MtsServiceState::SetSmsOverIpState(IN IMS_BOOL bState)
 {
-    if (m_bIsSmsOverIpConf == bState)
+    if (m_bSmsOverIpConf == bState)
     {
         return;
     }
 
-    m_bIsSmsOverIpConf = bState;
+    m_bSmsOverIpConf = bState;
 
-    IMS_TRACE_I("MtsServiceState:: Sms Over IP Network State is (%s)",
-            _TRACE_B_(m_bIsSmsOverIpConf), 0, 0);
+    IMS_TRACE_I("SetSmsOverIpState : Sms Over IP Network State is [%s]",
+            _TRACE_B_(m_bSmsOverIpConf), 0, 0);
 
     UpdateServiceState();
-}
-
-PUBLIC
-void MtsServiceState::SetTemporaryServiceBlocked(IN IMS_BOOL bBlocked)
-{
-    m_bIsTemporaryBlocked = bBlocked;
-
-    IMS_TRACE_I("MtsServiceState:: Service Blocked State is (%s)", _TRACE_B_(m_bIsTemporaryBlocked),
-            0, 0);
-}
-
-PUBLIC
-void MtsServiceState::SetMtsMessageController(IN MtsMessageController* pMtsMessageController)
-{
-    m_pMtsMessageController = pMtsMessageController;
-}
-
-PUBLIC
-void MtsServiceState::SetMtsServiceState(IN IMS_SINT32 nServiceState)
-{
-    m_nMtsServiceState = nServiceState;
 }
 
 PUBLIC
@@ -171,7 +205,7 @@ void MtsServiceState::SetConnectedServices(IN IMS_UINT32 nServices)
 PUBLIC
 void MtsServiceState::OnImsConnected()
 {
-    IMS_TRACE_I("MtsServiceState::OnImsConnected()", 0, 0, 0);
+    IMS_TRACE_I("OnImsConnected", 0, 0, 0);
 
     SetImsRegConnected(IMS_TRUE);
 }
@@ -179,35 +213,29 @@ void MtsServiceState::OnImsConnected()
 PUBLIC
 void MtsServiceState::OnImsDisconnected(IN IMS_UINT32 nReason)
 {
-    IMS_TRACE_I("MtsServiceState::OnImsDisconnected() Reason is (%d)", nReason, 0, 0);
+    IMS_TRACE_I("OnImsDisconnected : Reason is (%d)", nReason, 0, 0);
 
     SetImsSuspendState(IMS_FALSE);
     SetImsRegConnected(IMS_FALSE);
-
-    // if ims data connection is disconnected, terminate all pending messages.
-    m_pMtsMessageController->TerminateAllPendingMessages(IMS_FALSE);
 }
 
 PUBLIC
 void MtsServiceState::OnImsDisconnecting(IN IMS_UINT32 nReason)
 {
-    IMS_TRACE_I("MtsServiceState::OnImsDisconnecting() Reason is (%d)", nReason, 0, 0);
+    IMS_TRACE_I("OnImsDisconnecting : Reason is (%d)", nReason, 0, 0);
 }
 
 PUBLIC
 void MtsServiceState::OnImsSuspended(IN IMS_UINT32 nReason)
 {
-    IMS_TRACE_I("MtsServiceState::OnImsSuspended() Reason is (%d)", nReason, 0, 0);
+    IMS_TRACE_I("OnImsSuspended : Reason is (%d)", nReason, 0, 0);
     SetImsSuspendState(IMS_TRUE);
-
-    IMS_TRACE_I("Mts transaction permanent failure", 0, 0, 0);
-    m_pMtsMessageController->TerminateAllPendingMessages(IMS_TRUE);
 }
 
 PUBLIC
 void MtsServiceState::OnImsResumed()
 {
-    IMS_TRACE_I("MtsServiceState::OnImsResumed()", 0, 0, 0);
+    IMS_TRACE_I("OnImsResumed", 0, 0, 0);
 
     SetImsSuspendState(IMS_FALSE);
 }
@@ -220,7 +248,7 @@ void MtsServiceState::NotifySpecificMessage(
     (void)nWparam;
     (void)nLparam;
 
-    IMS_TRACE_I("MtsServiceState::NotifySpecificMessage()", 0, 0, 0);
+    IMS_TRACE_I("NotifySpecificMessage", 0, 0, 0);
 }
 
 PUBLIC
@@ -228,9 +256,9 @@ IMS_SINT32 MtsServiceState::GetServiceState()
 {
     IMS_SINT32 nState = STATE_NOTREADY;
 
-    if (m_bIsImsConnected)
+    if (m_bImsConnected)
     {
-        if (m_bIsImsSuspend || (!m_bIsSmsOverIpConf) || m_bIsAosRegModAdmin)
+        if (m_bImsSuspend || (!m_bSmsOverIpConf) || m_bAosRegModAdmin)
         {
             nState = STATE_LIMITED;
         }
@@ -240,6 +268,8 @@ IMS_SINT32 MtsServiceState::GetServiceState()
         }
     }
 
+    IMS_TRACE_I("GetServiceState : nState(%d)", nState, 0, 0);
+
     return nState;
 }
 
@@ -248,7 +278,8 @@ void MtsServiceState::UpdateServiceState()
 {
     IMS_SINT32 nTempState = GetServiceState();
 
-    IMS_TRACE_I("nTempState(%d) m_nMtsServiceState(%d)", nTempState, m_nMtsServiceState, 0);
+    IMS_TRACE_I("UpdateServiceState : nTempState(%d) m_nMtsServiceState(%d)", nTempState,
+            m_nMtsServiceState, 0);
 
     if (nTempState != m_nMtsServiceState)
     {
@@ -257,19 +288,170 @@ void MtsServiceState::UpdateServiceState()
 }
 
 PUBLIC
-IMS_BOOL MtsServiceState::IsMoServiceBlocked()
+IMS_BOOL MtsServiceState::IsMoServiceBlocked() const
 {
-    return (GetMtsServiceState() != STATE_READY);
+    return (m_nMtsServiceState != STATE_READY);
 }
 
 PUBLIC
-IMS_BOOL MtsServiceState::IsMtServiceBlocked()
+IMS_BOOL MtsServiceState::IsMtServiceBlocked() const
 {
-    return (GetMtsServiceState() == STATE_NOTREADY);
+    return (m_nMtsServiceState == STATE_NOTREADY);
 }
 
 PUBLIC
-IMS_BOOL MtsServiceState::IsTemporaryServiceBlocked()
+IMS_BOOL MtsServiceState::IsTemporaryServiceBlocked() const
 {
-    return m_bIsTemporaryBlocked;
+    return m_bTemporaryBlocked;
+}
+
+PUBLIC
+IMS_BOOL MtsServiceState::IsImsTrafficAllowed(IN IMS_UINT32 nTrafficType)
+{
+    IMS_BOOL bResult = m_piImsRadio->IsImsTrafficAllowed(nTrafficType);
+
+    IMS_TRACE_I("IsImsTrafficAllowed : nTrafficType[%s], bResult[%s]",
+            PS_TrafficType(nTrafficType), _TRACE_B_(bResult), 0);
+
+    return bResult;
+}
+
+PUBLIC
+void MtsServiceState::StartImsTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nAccessNetworkType,
+        IN IImsRadioConnectionListener* piListener)
+{
+    IMS_TRACE_I("StartImsTraffic : nTrafficType[%s]", PS_TrafficType(nTrafficType), 0, 0);
+
+    m_piImsRadio->StartImsTraffic(nTrafficType, nAccessNetworkType, piListener);
+}
+
+PUBLIC
+void MtsServiceState::TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason)
+{
+    IMS_TRACE_I("TriggerEpsFallback", 0, 0, 0);
+
+    m_piImsRadio->TriggerEpsFallback(nEpsfbReason);
+}
+
+PUBLIC
+void MtsServiceState::AddListenerForTrafficPriority(
+        IN IImsRadioTrafficPriorityListener* piListener)
+{
+    IMS_TRACE_I("AddListenerForTrafficPriority", 0, 0, 0);
+
+    m_piImsRadio->AddListenerForTrafficPriority(piListener);
+}
+
+PUBLIC
+void MtsServiceState::RemoveListenerForTrafficPriority(
+        IN IImsRadioTrafficPriorityListener* piListener)
+{
+    IMS_TRACE_I("RemoveListenerForTrafficPriority", 0, 0, 0);
+
+    m_piImsRadio->RemoveListenerForTrafficPriority(piListener);
+}
+
+PRIVATE
+void MtsServiceState::Init()
+{
+    IMS_TRACE_I("Init", 0, 0, 0);
+
+    m_piImsRadio = ImsRadioService::GetImsRadioService()->GetImsRadio(m_nSlotId);
+
+    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    IMS_BOOL bSmsOverIpNetwork =
+            piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL);
+
+    // TODO(Mts): Check whether Mts should consider KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY
+    IMSVector<IMS_SINT32> objSupportedRats =
+            piCc->GetIntArray(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY);
+
+    IMS_TRACE_I("GetSmOverIpConfigInfo : bSmsOverIpNetwork[%d]", bSmsOverIpNetwork, 0, 0);
+
+    for (IMS_UINT32 i = 0; i < objSupportedRats.GetSize(); ++i)
+    {
+        IMS_SINT32 nValue = objSupportedRats.GetAt(i);
+        IMS_TRACE_I("GetSmOverIpConfigInfo : objSupportedRats[%d][%d]", i, nValue, 0);
+    }
+
+    if (bSmsOverIpNetwork)
+    {
+        SetSmsOverIpState(IMS_TRUE);
+    }
+    else
+    {
+        SetSmsOverIpState(IMS_FALSE);
+    }
+}
+
+PRIVATE
+void MtsServiceState::DeInit()
+{
+    IMS_TRACE_I("DeInit", 0, 0, 0);
+
+    if (m_piRadioGuardTimer != IMS_NULL)
+    {
+        TimerService::GetTimerService()->DestroyTimer(m_piRadioGuardTimer);
+    }
+
+    if (m_piEmergencyRadioGuardTimer != IMS_NULL)
+    {
+        TimerService::GetTimerService()->DestroyTimer(m_piRadioGuardTimer);
+    }
+}
+
+PRIVATE
+void MtsServiceState::SetImsSuspendState(IN IMS_BOOL bState)
+{
+    if (m_bImsSuspend == bState)
+    {
+        return;
+    }
+
+    m_bImsSuspend = bState;  // if IMSAoSApp_OnImsSuspended. block mo service
+
+    IMS_TRACE_I("SetImsSuspendState : IMS Suspend State is [%s]", _TRACE_B_(m_bImsSuspend), 0, 0);
+
+    UpdateServiceState();
+}
+
+PRIVATE
+void MtsServiceState::SetMtsServiceState(IN IMS_SINT32 nServiceState)
+{
+    m_nMtsServiceState = nServiceState;
+}
+
+PRIVATE
+void MtsServiceState::SetTemporaryServiceBlocked(IN IMS_BOOL bBlocked)
+{
+    m_bTemporaryBlocked = bBlocked;
+
+    IMS_TRACE_I("SetTemporaryServiceBlocked : Service Blocked State is [%s]",
+            _TRACE_B_(m_bTemporaryBlocked), 0, 0);
+}
+
+PRIVATE
+void MtsServiceState::StopImsTraffic(IN IMS_UINT32 nTrafficType)
+{
+    IMS_TRACE_I("StopImsTraffic : nTrafficType[%s]", PS_TrafficType(nTrafficType), 0, 0);
+
+    m_piImsRadio->StopImsTraffic(nTrafficType);
+}
+
+PRIVATE
+void MtsServiceState::StopRadioGuardTimer(IN ITimer* piTimer)
+{
+    if (m_piEmergencyRadioGuardTimer == piTimer)
+    {
+        IMS_TRACE_I("StopRadioGuardTimer : m_piEmergencyRadioGuardTimer", 0, 0, 0);
+        m_piEmergencyRadioGuardTimer = IMS_NULL;
+    }
+    else if (m_piRadioGuardTimer == piTimer)
+    {
+        IMS_TRACE_I("StopRadioGuardTimer : m_piRadioGuardTimer", 0, 0, 0);
+        m_piRadioGuardTimer = IMS_NULL;
+    }
+
+    piTimer->KillTimer();
+    TimerService::GetTimerService()->DestroyTimer(piTimer);
 }
