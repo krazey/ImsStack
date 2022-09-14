@@ -809,8 +809,35 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
     ISipMessage* piMessage = GetISIPMessage(GET_MESSAGE_FROM_RESPONSE);
     if (piMessage == IMS_NULL)
     {
-        IMS_TRACE_I("StatePUBLISHING_Failed:ISipMessage is null", 0, 0, 0);
-        SendPublishCommandErrorInd(m_nKey, IUUceService::COMMAND_CODE_GENERIC_FAILURE);
+        IMS_TRACE_I("StatePUBLISHING_Failed:No response case.", 0, 0, 0);
+        if (m_nKey != 0)
+        {
+            SendPublishCommandErrorInd(m_nKey, IUUceService::COMMAND_CODE_GENERIC_FAILURE);
+        }
+        switch (UceConfig::GetInstance()->GetPublishRetryType(0, m_nSimSlot))
+        {
+            case UceConfig::IMMEDIATELY:
+                if (ProcessImmediatelyRetryResponseScenario())
+                {
+                    return IMS_TRUE;
+                }
+                break;
+            case UceConfig::RETRY:
+                if (ProcessRetryResponseScenario())
+                {
+                    return IMS_TRUE;
+                }
+                break;
+            case UceConfig::EXPONENTIAL:
+                if (ProcessExponentialRetryResponseScenario())
+                {
+                    return IMS_TRUE;
+                }
+                break;
+            default:
+                break;
+        }
+        StopTimer(TIMER_ALL);
         SetState(ON);
         return IMS_TRUE;
     }
@@ -2022,7 +2049,8 @@ void UcePublishManager::StopTimer(INTERNAL_TIMER eTimer)
 
 void UcePublishManager::HandleExponentialRetryTimer()
 {
-    IMS_TRACE_I("HandleExponentialRetryTimer:Current State[%s]", StateToString(m_eState), 0, 0);
+    IMS_TRACE_I("HandleExponentialRetryTimer:Current State[%s], m_nExponentialRetryCount[%d]",
+            StateToString(m_eState), m_nExponentialRetryCount, 0);
     if (GetState() == PUBLISHING || GetState() == ON)
     {
         m_strEtag = AString::ConstEmpty();
@@ -2045,7 +2073,8 @@ void UcePublishManager::HandleExponentialRetryTimer()
 
 void UcePublishManager::HandleRetryTimer()
 {
-    IMS_TRACE_I("HandleRetryTimer:Current State[%d]", StateToString(m_eState), 0, 0);
+    IMS_TRACE_I("HandleRetryTimer:Current State[%d], m_nRetryCount[%d]", StateToString(m_eState),
+            m_nRetryCount, 0);
     if (GetState() == PUBLISHING)
     {
         if (RetryPublish(INITIAL) == IMS_TRUE)
