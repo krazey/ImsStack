@@ -294,12 +294,13 @@ public class ImsCallApp extends ImsApp {
         if (mSms == null) {
             mSms = new ImsSmsImpl(mCallContext);
         }
+
         return mSms;
     }
 
     /**
      * Creates the object of ImsMultiEndpointImpl
-     * @return Returns the object of MultiEndPoint
+     * @return Returns the object of MultiEndpoint
      */
     public ImsMultiEndpointImpl getMultiEndpointInterface() {
         if (mMultiEndpoint == null) {
