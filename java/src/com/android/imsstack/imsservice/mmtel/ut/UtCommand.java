@@ -26,8 +26,8 @@ import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.ssc.SscConstant;
 import com.android.imsstack.enabler.ssc.SscServiceClassUtil;
-import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
-import com.android.imsstack.imsservice.mmtel.ut.base.UtListener;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtListener;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.SimUtils;
 
@@ -59,10 +59,10 @@ public final class UtCommand {
     private int mClirMode = SscConstant.OIR_DEFAULT; // for OIR
     private int mColrPresentation = SscConstant.TIR_UNKNOWN; // for TIR
 
-    private final UtListener mListener;
+    private final IUtListener mListener;
 
     private UtCommand(IBaseContext context, int transactionId, int command, int action,
-            UtListener listener) {
+            IUtListener listener) {
         mContext = context;
         mTransactionId = transactionId;
         mCommand = command;
@@ -111,7 +111,7 @@ public final class UtCommand {
     private void doUtTransaction() {
         log("doUtTransaction()");
 
-        UtInterface ut = UtFactory.getInstance().getUtInterface(mContext.getSlotId());
+        IUtInterface ut = UtFactory.getInstance().getUtInterface(mContext.getSlotId());
         if (ut == null) {
             sendFailResponse(ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE, null);
             return;
@@ -301,7 +301,7 @@ public final class UtCommand {
         private final UtCommand mUtCommand;
 
         public Builder(IBaseContext context, int transactionId, int command, int action,
-                UtListener listener) {
+                IUtListener listener) {
             mUtCommand = new UtCommand(context, transactionId, command, action, listener);
         }
 

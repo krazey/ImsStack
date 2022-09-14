@@ -17,14 +17,14 @@
 package com.android.imsstack.imsservice.mmtel.ut;
 
 import com.android.imsstack.enabler.ssc.SscServiceImpl;
-import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 public final class UtFactory {
     @VisibleForTesting
     protected static UtFactory sUtFactory = new UtFactory();
-    private final UtInterface[] mUtInterface = new UtInterface[MSimUtils.getMaxSimSlot()];
+    private final IUtInterface[] mUtInterface = new IUtInterface[MSimUtils.getMaxSimSlot()];
 
     @VisibleForTesting
     protected UtFactory() {
@@ -37,7 +37,10 @@ public final class UtFactory {
         return sUtFactory;
     }
 
-    public UtInterface getUtInterface(int slotId) {
+    /**
+     * Object of IUtInterface is fetched.
+     */
+    public IUtInterface getUtInterface(int slotId) {
         if (slotId < 0 || slotId >= mUtInterface.length) {
             return null;
         }
@@ -58,7 +61,7 @@ public final class UtFactory {
     }
 
     @VisibleForTesting
-    protected void setUtInterfaceForSlot(int slotId, UtInterface sscServiceImpl) {
+    protected void setUtInterfaceForSlot(int slotId, IUtInterface sscServiceImpl) {
         if (mUtInterface[slotId] != null) {
             mUtInterface[slotId].close();
         }

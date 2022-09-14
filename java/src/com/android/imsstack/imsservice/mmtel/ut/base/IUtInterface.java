@@ -22,7 +22,7 @@ import android.content.Context;
  * Provides the Ut interface interworking to get/set the supplementary service configuration.
  * {link @IImsUt}
  */
-public interface UtInterface {
+public interface IUtInterface {
     /**
      * Provide current Ut service availability
      */
@@ -36,7 +36,7 @@ public interface UtInterface {
     /**
      * Set listener for Ut operation result
      */
-    void setListener(UtListener listener);
+    void setListener(IUtListener listener);
 
     /**
      * Set listener to listen to Ut service state change
@@ -51,7 +51,7 @@ public interface UtInterface {
     /**
      * Implementation of IImsUt.
      */
-    public void close();
+    void close();
 
     /**
      * Implementation of IImsUt.

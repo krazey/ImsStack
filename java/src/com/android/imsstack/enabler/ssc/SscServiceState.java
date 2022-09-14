@@ -26,7 +26,7 @@ import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
-import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -315,7 +315,7 @@ public class SscServiceState {
     }
 
     private void updateUtServiceFeature() {
-        UtInterface utInterface = UtFactory.getInstance().getUtInterface(mSlotId);
+        IUtInterface utInterface = UtFactory.getInstance().getUtInterface(mSlotId);
         if (utInterface != null) {
             utInterface.onServiceStateChanged();
         }

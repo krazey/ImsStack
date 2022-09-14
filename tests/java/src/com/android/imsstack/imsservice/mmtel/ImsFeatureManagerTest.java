@@ -31,7 +31,7 @@ import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
-import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,7 +52,7 @@ public class ImsFeatureManagerTest {
     @Mock IBaseContext mMockBaseContext;
     @Mock IContext mMockContext;
     @Mock IMmTelFeatureCapabilityListener mMockFeatureCapabilityListener;
-    @Mock UtInterface mMockUt;
+    @Mock IUtInterface mMockUt;
 
     @Before
     public void setUp() {

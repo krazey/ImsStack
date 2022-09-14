@@ -35,8 +35,8 @@ import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.ssc.SscConstant;
 import com.android.imsstack.enabler.ssc.SscServiceClassUtil;
 import com.android.imsstack.imsservice.mmtel.ImsUtImpl;
-import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
-import com.android.imsstack.imsservice.mmtel.ut.base.UtListener;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtListener;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
@@ -62,8 +62,8 @@ public class UtCommandTest {
     @Mock private IBaseContext mMockBaseContext;
     @Mock private UsatInterface mMockUsatInterface;
     @Mock private Usat.CallControlCommandResponse mMockUsatCmdRes;
-    @Mock private UtListener mMockUtListener;
-    @Mock private UtInterface mMockUtInterface;
+    @Mock private IUtListener mMockUtListener;
+    @Mock private IUtInterface mMockUtInterface;
 
     @Captor ArgumentCaptor<ImsReasonInfo> mReasonInfoCaptor;
     @Captor ArgumentCaptor<String> mStringCaptor;

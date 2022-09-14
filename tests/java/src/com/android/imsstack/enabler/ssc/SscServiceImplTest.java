@@ -45,8 +45,8 @@ import com.android.imsstack.enabler.ssc.data.ErrorResponseData;
 import com.android.imsstack.enabler.ssc.data.SscRequestResult;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtListener;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtServiceStateListener;
-import com.android.imsstack.imsservice.mmtel.ut.base.UtListener;
 
 import org.junit.After;
 import org.junit.Before;
@@ -85,7 +85,7 @@ public class SscServiceImplTest {
     @Mock private SscServiceState mockSscServiceState;
     @Mock private SscTransactionFactory mockSscTransactionFactory;
     @Mock private SscTransaction mockSscTransaction;
-    @Mock private UtListener mockUtListener;
+    @Mock private IUtListener mMockUtListener;
     @Mock private IUtServiceStateListener mMockUtServiceStateListener;
 
     @Captor ArgumentCaptor<SscServiceQueryData> captorQueryData;
@@ -128,7 +128,7 @@ public class SscServiceImplTest {
                 eq(CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL))).thenReturn(true);
 
         mSscServiceImpl.start(mockContext);
-        mSscServiceImpl.setListener(mockUtListener);
+        mSscServiceImpl.setListener(mMockUtListener);
         mSscServiceImpl.setSscTransactionFactory(mockSscTransactionFactory);
 
         SscServiceStateAgent.getInstance().setSscServiceState(SLOT_0, mockSscServiceState);
@@ -169,7 +169,7 @@ public class SscServiceImplTest {
         mSscServiceImpl.queryCallForward(tId, SscConstant.CONDITION_CFU, "");
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
         verifyNoMoreInteractions(mockSscTransaction);
     }
 
@@ -186,7 +186,7 @@ public class SscServiceImplTest {
         processEntireXmlDocQueryAsFailure();
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
@@ -210,7 +210,7 @@ public class SscServiceImplTest {
         processEntireXmlDocQueryAsFailure();
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
@@ -232,7 +232,7 @@ public class SscServiceImplTest {
         processEntireXmlDocQueryAsFailure();
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
@@ -256,7 +256,7 @@ public class SscServiceImplTest {
                 queryCondition);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationCallBarringQueried(eq(tId), captorSsInfos.capture());
+        verify(mMockUtListener).utConfigurationCallBarringQueried(eq(tId), captorSsInfos.capture());
 
         ImsSsInfo[] cbInfos = captorSsInfos.getValue();
         assertNotNull(cbInfos);
@@ -281,7 +281,7 @@ public class SscServiceImplTest {
                 queryCondition);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationCallBarringQueried(eq(tId), captorSsInfos.capture());
+        verify(mMockUtListener).utConfigurationCallBarringQueried(eq(tId), captorSsInfos.capture());
 
         ImsSsInfo[] cbInfos = captorSsInfos.getValue();
         assertNotNull(cbInfos);
@@ -302,7 +302,7 @@ public class SscServiceImplTest {
         processEntireXmlDocQueryAsFailure();
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -318,7 +318,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_BOIC);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -332,7 +332,7 @@ public class SscServiceImplTest {
                 invalidServiceClass);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
         verifyNoMoreInteractions(mockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
@@ -349,7 +349,7 @@ public class SscServiceImplTest {
                 SscServiceClassUtil.SERVICE_CLASS_NONE);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
         verifyNoMoreInteractions(mockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
@@ -368,7 +368,7 @@ public class SscServiceImplTest {
                 queryCondition);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationCallForwardQueried(eq(tId), captorCfInfos.capture());
+        verify(mMockUtListener).utConfigurationCallForwardQueried(eq(tId), captorCfInfos.capture());
 
         ImsCallForwardInfo[] cfInfos = captorCfInfos.getValue();
         assertNotNull(cfInfos);
@@ -404,7 +404,7 @@ public class SscServiceImplTest {
                     c);
 
             mLooper.processAllMessages();
-            verify(mockUtListener).utConfigurationCallForwardQueried(eq(tId), any());
+            verify(mMockUtListener).utConfigurationCallForwardQueried(eq(tId), any());
             verify(mockSscTransaction, atLeast(responseCount)).close();
             responseCount++;
         }
@@ -420,7 +420,7 @@ public class SscServiceImplTest {
         processEntireXmlDocQueryAsFailure();
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -435,7 +435,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFU);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -451,7 +451,7 @@ public class SscServiceImplTest {
         mSscServiceImpl.queryCallForward(tId, SscConstant.CONDITION_CFA, "");
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
         verifyNoMoreInteractions(mockSscTransaction);
     }
 
@@ -463,7 +463,7 @@ public class SscServiceImplTest {
         mSscServiceImpl.queryCallForward(tId, invalidCondition, "");
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
         verifyNoMoreInteractions(mockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
@@ -480,7 +480,7 @@ public class SscServiceImplTest {
         processGetTransactionAsSuccess(ESsType.CW, SscConstant.EVENT_SSC_QUERY_CW, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationCallWaitingQueried(eq(tId), captorSsInfos.capture());
+        verify(mMockUtListener).utConfigurationCallWaitingQueried(eq(tId), captorSsInfos.capture());
 
         ImsSsInfo[] cwInfos = captorSsInfos.getValue();
         assertNotNull(cwInfos);
@@ -500,7 +500,7 @@ public class SscServiceImplTest {
         processGetTransactionAsFailure(ESsType.CW, SscConstant.EVENT_SSC_QUERY_CW, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
         verify(mockSscTransaction).close();
     }
 
@@ -513,7 +513,7 @@ public class SscServiceImplTest {
         processGetTransactionAsSuccess(ESsType.OIR, SscConstant.EVENT_SSC_QUERY_OIR, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener)
+        verify(mMockUtListener)
                 .lineIdentificationSupplementaryServiceResponse(eq(tId), captorSsInfo.capture());
 
         ImsSsInfo ssInfo = captorSsInfo.getValue();
@@ -535,7 +535,7 @@ public class SscServiceImplTest {
         processGetTransactionAsFailure(ESsType.OIR, SscConstant.EVENT_SSC_QUERY_OIR, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
         verify(mockSscTransaction).close();
     }
 
@@ -548,7 +548,7 @@ public class SscServiceImplTest {
         processGetTransactionAsSuccess(ESsType.OIP, SscConstant.EVENT_SSC_QUERY_OIP, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener)
+        verify(mMockUtListener)
                 .lineIdentificationSupplementaryServiceResponse(eq(tId), captorSsInfo.capture());
 
         ImsSsInfo ssInfo = captorSsInfo.getValue();
@@ -569,7 +569,7 @@ public class SscServiceImplTest {
         processGetTransactionAsFailure(ESsType.OIP, SscConstant.EVENT_SSC_QUERY_OIP, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
         verify(mockSscTransaction).close();
     }
 
@@ -583,7 +583,7 @@ public class SscServiceImplTest {
         processGetTransactionAsSuccess(ESsType.TIR, SscConstant.EVENT_SSC_QUERY_TIR, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener)
+        verify(mMockUtListener)
                 .lineIdentificationSupplementaryServiceResponse(eq(tId), captorSsInfo.capture());
 
         ImsSsInfo ssInfo = captorSsInfo.getValue();
@@ -605,7 +605,7 @@ public class SscServiceImplTest {
         processGetTransactionAsFailure(ESsType.TIR, SscConstant.EVENT_SSC_QUERY_TIR, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
         verify(mockSscTransaction).close();
     }
 
@@ -618,7 +618,7 @@ public class SscServiceImplTest {
         processGetTransactionAsSuccess(ESsType.TIP, SscConstant.EVENT_SSC_QUERY_TIP, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener)
+        verify(mMockUtListener)
                 .lineIdentificationSupplementaryServiceResponse(eq(tId), captorSsInfo.capture());
 
         ImsSsInfo ssInfo = captorSsInfo.getValue();
@@ -639,7 +639,7 @@ public class SscServiceImplTest {
         processGetTransactionAsFailure(ESsType.TIP, SscConstant.EVENT_SSC_QUERY_TIP, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationQueryFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
         verify(mockSscTransaction).close();
     }
 
@@ -654,7 +654,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_BIC_WR);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -674,7 +674,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_BAIC);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -688,7 +688,7 @@ public class SscServiceImplTest {
         processEntireXmlDocQueryAsFailure();
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -704,7 +704,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_BIC_WR);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -718,7 +718,7 @@ public class SscServiceImplTest {
                 invalidAction, null, SscServiceClassUtil.SERVICE_CLASS_NONE, null);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
         verifyNoMoreInteractions(mockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
@@ -735,7 +735,7 @@ public class SscServiceImplTest {
                 SscConstant.STATUS_ENABLE, null, invalidServiceClass, null);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
         verifyNoMoreInteractions(mockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
@@ -752,7 +752,7 @@ public class SscServiceImplTest {
                 SscConstant.STATUS_ENABLE, null, SscServiceClassUtil.SERVICE_CLASS_NONE, null);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
         verifyNoMoreInteractions(mockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
@@ -772,7 +772,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFNRC);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -792,7 +792,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFNR);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -813,7 +813,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFB);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -835,7 +835,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFNR_TIMER);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -857,7 +857,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFNL);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -876,7 +876,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFNR_TIMER);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -894,7 +894,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFNR);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -918,7 +918,7 @@ public class SscServiceImplTest {
         }
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -932,7 +932,7 @@ public class SscServiceImplTest {
         processEntireXmlDocQueryAsFailure();
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -948,7 +948,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFB);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
         verify(mockSscTransaction).close();
         verifyNoMoreInteractions(mockSscTransaction);
     }
@@ -964,7 +964,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFB, null, 0, 20);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
         verifyNoMoreInteractions(mockSscTransaction);
     }
 
@@ -977,7 +977,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFB, null, 0, 20);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
         verifyNoMoreInteractions(mockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
@@ -994,7 +994,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFB, null, 0, invalidTimer);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
         verifyNoMoreInteractions(mockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
@@ -1011,7 +1011,7 @@ public class SscServiceImplTest {
                 0, 20);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
         verifyNoMoreInteractions(mockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
@@ -1028,7 +1028,7 @@ public class SscServiceImplTest {
         processPutTransactionAsSuccess(ESsType.CW, SscConstant.EVENT_SSC_UPDATE_CW, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
     }
 
@@ -1041,7 +1041,7 @@ public class SscServiceImplTest {
         processPutTransactionAsFailure(ESsType.CW, SscConstant.EVENT_SSC_UPDATE_CW, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
         verify(mockSscTransaction).close();
     }
 
@@ -1054,7 +1054,7 @@ public class SscServiceImplTest {
         processPutTransactionAsSuccess(ESsType.OIR, SscConstant.EVENT_SSC_UPDATE_OIR, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
     }
 
@@ -1067,7 +1067,7 @@ public class SscServiceImplTest {
         processPutTransactionAsFailure(ESsType.OIR, SscConstant.EVENT_SSC_UPDATE_OIR, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
         verify(mockSscTransaction).close();
     }
 
@@ -1080,7 +1080,7 @@ public class SscServiceImplTest {
         processPutTransactionAsSuccess(ESsType.OIP, SscConstant.EVENT_SSC_UPDATE_OIP, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
     }
 
@@ -1093,7 +1093,7 @@ public class SscServiceImplTest {
         processPutTransactionAsFailure(ESsType.OIP, SscConstant.EVENT_SSC_UPDATE_OIP, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
         verify(mockSscTransaction).close();
     }
 
@@ -1106,7 +1106,7 @@ public class SscServiceImplTest {
         processPutTransactionAsSuccess(ESsType.TIR, SscConstant.EVENT_SSC_UPDATE_TIR, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
     }
 
@@ -1119,7 +1119,7 @@ public class SscServiceImplTest {
         processPutTransactionAsFailure(ESsType.TIR, SscConstant.EVENT_SSC_UPDATE_TIR, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
         verify(mockSscTransaction).close();
     }
 
@@ -1132,7 +1132,7 @@ public class SscServiceImplTest {
         processPutTransactionAsSuccess(ESsType.TIP, SscConstant.EVENT_SSC_UPDATE_TIP, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verify(mockSscTransaction).close();
     }
 
@@ -1145,7 +1145,7 @@ public class SscServiceImplTest {
         processPutTransactionAsFailure(ESsType.TIP, SscConstant.EVENT_SSC_UPDATE_TIP, -1);
 
         mLooper.processAllMessages();
-        verify(mockUtListener).utConfigurationUpdateFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
         verify(mockSscTransaction).close();
     }
 

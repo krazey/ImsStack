@@ -28,8 +28,8 @@ import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.ssc.SscConstant;
 import com.android.imsstack.imsservice.mmtel.ut.UtCommand;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
-import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
-import com.android.imsstack.imsservice.mmtel.ut.base.UtListener;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtListener;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Arrays;
@@ -39,8 +39,8 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
     private final IBaseContext mContext;
     private ImsUtListener mListener = null;
-    private UtInterface mUt = null;
-    private UtListener mUtListenerProxy = null;
+    private IUtInterface mUt = null;
+    private IUtListener mUtListenerProxy = null;
     private int mTransactionId = 1;
 
     public ImsUtImpl(IBaseContext context) {
@@ -71,7 +71,7 @@ public final class ImsUtImpl extends ImsUtImplBase {
         mUt = null;
     }
 
-    public UtInterface getUtInterface() {
+    public IUtInterface getUtInterface() {
         return mUt;
     }
 
@@ -450,9 +450,9 @@ public final class ImsUtImpl extends ImsUtImplBase {
         ImsLog.d("[GII-IMPL] " + s);
     }
 
-    private class UtListenerProxy extends UtListener {
+    private class UtListenerProxy implements IUtListener {
         @Override
-        public void utConfigurationUpdated(final int id) {
+        public void utConfigurationUpdated(int id) {
             if (mListener == null) {
                 return;
             }
@@ -470,7 +470,7 @@ public final class ImsUtImpl extends ImsUtImplBase {
         }
 
         @Override
-        public void utConfigurationUpdateFailed(final int id, final ImsReasonInfo reasonInfo) {
+        public void utConfigurationUpdateFailed(int id, ImsReasonInfo reasonInfo) {
             if (mListener == null) {
                 return;
             }
@@ -488,7 +488,7 @@ public final class ImsUtImpl extends ImsUtImplBase {
         }
 
         @Override
-        public void lineIdentificationSupplementaryServiceResponse(final int id, ImsSsInfo ssInfo) {
+        public void lineIdentificationSupplementaryServiceResponse(int id, ImsSsInfo ssInfo) {
             if (mListener == null) {
                 return;
             }
@@ -506,7 +506,7 @@ public final class ImsUtImpl extends ImsUtImplBase {
         }
 
         @Override
-        public void utConfigurationCallBarringQueried(final int id, final ImsSsInfo[] cbInfo) {
+        public void utConfigurationCallBarringQueried(int id, ImsSsInfo[] cbInfo) {
             if (mListener == null) {
                 return;
             }
@@ -524,8 +524,7 @@ public final class ImsUtImpl extends ImsUtImplBase {
         }
 
         @Override
-        public void utConfigurationCallForwardQueried(final int id,
-                final ImsCallForwardInfo[] cfInfo) {
+        public void utConfigurationCallForwardQueried(int id, ImsCallForwardInfo[] cfInfo) {
             if (mListener == null) {
                 return;
             }
@@ -543,7 +542,7 @@ public final class ImsUtImpl extends ImsUtImplBase {
         }
 
         @Override
-        public void utConfigurationCallWaitingQueried(final int id, final ImsSsInfo[] cwInfo) {
+        public void utConfigurationCallWaitingQueried(int id, ImsSsInfo[] cwInfo) {
             if (mListener == null) {
                 return;
             }
@@ -561,7 +560,7 @@ public final class ImsUtImpl extends ImsUtImplBase {
         }
 
         @Override
-        public void utConfigurationQueryFailed(final int id, final ImsReasonInfo reasonInfo) {
+        public void utConfigurationQueryFailed(int id, ImsReasonInfo reasonInfo) {
             if (mListener == null) {
                 return;
             }

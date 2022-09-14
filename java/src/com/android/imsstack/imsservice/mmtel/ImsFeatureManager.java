@@ -25,15 +25,15 @@ import com.android.imsstack.core.agents.IWifiState;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtServiceStateListener;
-import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
 import com.android.imsstack.util.ImsLog;
 
 public class ImsFeatureManager {
     private final Object mLock = new Object();
     private final IBaseContext mContext;
     private final IMmTelFeatureCapabilityListener mFeatureCapabilityListener;
-    private UtInterface mUt;
+    private IUtInterface mUt;
     private NetworkTracker mNetworkTracker;
     private ImsRegistrationTracker mRegTracker;
     private MmTelFeature.MmTelCapabilities mMmTelCapabilities
@@ -72,7 +72,10 @@ public class ImsFeatureManager {
         }
     }
 
-    public void setUtInterface(UtInterface ut) {
+    /**
+     * IUtInterface is set for Ut operation.
+     */
+    public void setUtInterface(IUtInterface ut) {
         if (mUt != null) {
             mUt.setServiceStateListener(null);
         }
