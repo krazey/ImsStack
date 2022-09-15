@@ -166,6 +166,12 @@ public class AudioSessionHandler  {
                 }
                     break;
 
+                case MediaConstants.RESPONSE_SESSION_CLOSED:
+                {
+                    handleSessionClosed();
+                }
+                    break;
+
                 case MediaConstants.RESPONSE_SESSION_CHANGED:
                 {
                     handleSessionChanged(msg.arg1);
@@ -255,6 +261,14 @@ public class AudioSessionHandler  {
 
             Message.obtain(mAudioMessageHandler, MediaConstants.RESPONSE_OPEN_SESSION,
                     error, UNUSED, null).sendToTarget();
+        }
+
+        @Override
+        public void onSessionClosed() {
+            ImsLog.d("onSessionClosed for SessionId[" + getAudioSessionId() + "]");
+
+            Message.obtain(mAudioMessageHandler, MediaConstants.RESPONSE_SESSION_CLOSED)
+                    .sendToTarget();
         }
 
         @Override
@@ -468,8 +482,6 @@ public class AudioSessionHandler  {
     private void handleAudioCloseSession() {
         if (mAudioSession != null) {
             mMediaManager.closeSession(mAudioSession);
-            closeSockets();
-            mAudioSession = null;
         }
     }
 
@@ -552,6 +564,12 @@ public class AudioSessionHandler  {
         if (mAudioSessionCallbackHandler != null) {
             mAudioSessionCallbackHandler.openSessionResponse(result);
         }
+    }
+
+    private void handleSessionClosed() {
+        closeSockets();
+        mAudioSession = null;
+        mAudioSessionId = 0;
     }
 
     private void handleSessionChanged(int state) {

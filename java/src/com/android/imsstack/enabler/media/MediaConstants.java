@@ -54,16 +54,17 @@ public class MediaConstants {
     public static final int RESPONSE_MODIFY_SESSION       = (IMSMEDIA_RESPONSE + 3);
     public static final int RESPONSE_ADD_CONFIG           = (IMSMEDIA_RESPONSE + 4);
     public static final int RESPONSE_CONFIRM_CONFIG       = (IMSMEDIA_RESPONSE + 5);
+    public static final int RESPONSE_SESSION_CLOSED       = (IMSMEDIA_RESPONSE + 6);
 
     // Notifications
-    public static final int NOTIFY_FIRST_PACKET           = (IMSMEDIA_RESPONSE + 6);
-    public static final int NOTIFY_HEADER_EXTENSION       = (IMSMEDIA_RESPONSE + 7);
-    public static final int NOTIFY_MEDIA_INACTIVITY       = (IMSMEDIA_RESPONSE + 8);
-    public static final int NOTIFY_PACKET_LOSS            = (IMSMEDIA_RESPONSE + 9);
-    public static final int NOTIFY_JITTER                 = (IMSMEDIA_RESPONSE + 10);
-    public static final int NOTIFY_CALL_QUALITY_CHANGE    = (IMSMEDIA_RESPONSE + 11);
-    public static final int NOTIFY_MEDIA_DETACH           = (IMSMEDIA_RESPONSE + 12);
-    public static final int NOTIFY_QOS_INFO               = (IMSMEDIA_RESPONSE + 13);
+    public static final int NOTIFY_FIRST_PACKET           = (IMSMEDIA_RESPONSE + 11);
+    public static final int NOTIFY_HEADER_EXTENSION       = (IMSMEDIA_RESPONSE + 12);
+    public static final int NOTIFY_MEDIA_INACTIVITY       = (IMSMEDIA_RESPONSE + 13);
+    public static final int NOTIFY_PACKET_LOSS            = (IMSMEDIA_RESPONSE + 14);
+    public static final int NOTIFY_JITTER                 = (IMSMEDIA_RESPONSE + 15);
+    public static final int NOTIFY_CALL_QUALITY_CHANGE    = (IMSMEDIA_RESPONSE + 16);
+    public static final int NOTIFY_MEDIA_DETACH           = (IMSMEDIA_RESPONSE + 17);
+    public static final int NOTIFY_QOS_INFO               = (IMSMEDIA_RESPONSE + 18);
 
     // Notifications for video
     public static final int IMSMEDIA_VIDEO_RESPONSE       = (IMSMEDIA_RESPONSE + 60);
