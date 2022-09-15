@@ -42,7 +42,7 @@ android_test {
         "mockito-target-extended-minus-junit4",
         "testables",
         // TODO: move this to libs after API review
-        "android.telephony.imsmedia",
+        "ImsMediaFramework",
     ],
 
     platform_apis: true,
