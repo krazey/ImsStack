@@ -34,7 +34,7 @@ class ISipClientConnection;
 class IMtcSession;
 class MtcSupplementaryService;
 class MtcTimerWrapper;
-class MtcUiNotifier;
+class IMtcUiNotifier;
 class ParticipantInfo;
 class UpdatingInfo;
 class UssiController;
@@ -53,7 +53,7 @@ public:
     virtual IMtcSession* GetSession(IN const ISession* piSession) const = 0;
     virtual IMtcSession* GetSession() const = 0;
     virtual IMtcService& GetService() = 0;
-    virtual MtcUiNotifier& GetUiNotifier() = 0;
+    virtual IMtcUiNotifier& GetUiNotifier() = 0;
     virtual IMtcMediaManager& GetMediaManager() = 0;
     virtual IMtcPreconditionManager& GetPreconditionManager() = 0;
     virtual MtcTimerWrapper& GetTimer() = 0;

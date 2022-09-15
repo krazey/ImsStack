@@ -27,7 +27,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
-#include "call/MtcUiNotifier.h"
+#include "call/IMtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "call/UpdatingInfo.h"
 #include "call/extension/MtcExtensionSet.h"

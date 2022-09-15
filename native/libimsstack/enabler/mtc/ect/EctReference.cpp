@@ -26,13 +26,10 @@
 #include "ISipHeader.h"
 #include "SipStatusCode.h"
 #include "SipHeaderName.h"
-
 #include "IMtcService.h"
 #include "IMtcContext.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "utility/MessageUtil.h"
-#include "configuration/ConfigDef.h"
-#include "configuration/MtcConfigurationProxy.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcSession.h"
@@ -68,7 +65,6 @@ PUBLIC EctReference::~EctReference()
 PUBLIC VIRTUAL void EctReference::ReferenceDelivered(IN IReference* piReference)
 {
     IMS_TRACE_I("ReferenceDelivered", 0, 0, 0);
-    return m_objListener.OnReferenceStarted();
 
     IMessage* piReferMessage = piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
 
@@ -131,11 +127,6 @@ PUBLIC VIRTUAL IMS_RESULT EctReference::SendInvite(IN CallKey nTransferTargetKey
     IMtcCall* piTransferTargetCall =
             m_objContext.GetCallManager().GetCallByCallKey(nTransferTargetKey);
 
-    if (piTransferTargetCall == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
-
     return SendRefer(GetReferToUri(piTransferTargetCall), piTransferTargetCall);
 }
 
@@ -191,6 +182,7 @@ IMS_RESULT EctReference::SendRefer(
 
     if (m_piReference == IMS_NULL)
     {
+        IMS_TRACE_E(0, "piReference is null", 0, 0, 0);
         return IMS_FAILURE;
     }
     m_piReference->SetListener(this);
@@ -207,14 +199,8 @@ IMS_RESULT EctReference::SendRefer(
 PRIVATE
 AString EctReference::GetReferToUri(IN const IMtcCall* piTransferTargetCall) const
 {
-    // Send Refer with Session..
-    if (piTransferTargetCall == IMS_NULL)
-    {
-        return AString::ConstNull();
-    }
     AString strUri;
-    UriFormatter::GetReferToForInvite(strUri, piTransferTargetCall->GetCallContext());
-    return strUri;
+    return UriFormatter::GetReferToForInvite(strUri, piTransferTargetCall->GetCallContext());
 }
 
 PRIVATE

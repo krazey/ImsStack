@@ -25,7 +25,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "call/MtcUiNotifier.h"
+#include "call/IMtcUiNotifier.h"
 #include "CallReasonInfo.h"
 #include <memory>
 
@@ -119,7 +119,7 @@ void EctController::NotifyResult(
 {
     IMS_TRACE_D("NotifyResult", 0, 0, 0);
     // TODO: is reason meaningful? what kind of reason to be used for ECT failure?
-    MtcUiNotifier& objNotifier = GetTransferee()->GetCallContext().GetUiNotifier();
+    IMtcUiNotifier& objNotifier = GetTransferee()->GetCallContext().GetUiNotifier();
     objNotifier.SendEctCompleted(nResult, CallReasonInfo(nReason));
 }
 

@@ -34,7 +34,7 @@ class ISipClientConnection;
 class IMtcSession;
 class MtcSupplementaryService;
 class MtcTimerWrapper;
-class MtcUiNotifier;
+class IMtcUiNotifier;
 class OperationAsyncRunner;
 class ParticipantInfo;
 class UpdatingInfo;
@@ -54,7 +54,7 @@ public:
     MOCK_METHOD(IMtcSession*, GetSession, (IN const ISession* piSession), (const, override));
     MOCK_METHOD(IMtcSession*, GetSession, (), (const, override));
     MOCK_METHOD(IMtcService&, GetService, (), (override));
-    MOCK_METHOD(MtcUiNotifier&, GetUiNotifier, (), (override));
+    MOCK_METHOD(IMtcUiNotifier&, GetUiNotifier, (), (override));
     MOCK_METHOD(IMtcMediaManager&, GetMediaManager, (), (override));
     MOCK_METHOD(IMtcPreconditionManager&, GetPreconditionManager, (), (override));
     MOCK_METHOD(MtcTimerWrapper&, GetTimer, (), (override));

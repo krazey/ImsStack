@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-#include "call/IMtcCallContext.h"
-#include "call/IMtcUiNotifier.h"
-#include "call/state/TerminatingState.h"
-#include "helper/MtcTimerWrapper.h"
-#include "ServiceTrace.h"
+#ifndef MOCK_I_ECT_CONTROLLER_LISTENER_H_
+#define MOCK_I_ECT_CONTROLLER_LISTENER_H_
 
-__IMS_TRACE_TAG_COM_MTC__;
+#include <gmock/gmock.h>
+#include "ect/IEctControllerListener.h"
 
-PUBLIC
-TerminatingState::TerminatingState(IN IMtcCallContext& objContext) :
-        MtcCallState(CallStateName::TERMINATING, objContext)
+class MockIEctControllerListener : public IEctControllerListener
 {
-}
+public:
+    virtual ~MockIEctControllerListener() {}
 
-PUBLIC VIRTUAL TerminatingState::~TerminatingState() {}
+    MOCK_METHOD(void, OnEctCompleted, (), (override));
+};
+
+#endif

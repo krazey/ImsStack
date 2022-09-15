@@ -20,7 +20,7 @@
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "call/MtcUiNotifier.h"
+#include "call/IMtcUiNotifier.h"
 #include "conferencecall/ConferenceParticipantList.h"
 #include "conferencecall/CallConnectionIdManager.h"
 #include "media/IMtcMediaManager.h"

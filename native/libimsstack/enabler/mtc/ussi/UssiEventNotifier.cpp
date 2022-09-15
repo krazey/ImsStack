@@ -17,7 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "call/IMtcCallContext.h"
-#include "call/MtcUiNotifier.h"
+#include "call/IMtcUiNotifier.h"
 #include "ussi/UssiDef.h"
 #include "ussi/UssiEventNotifier.h"
 

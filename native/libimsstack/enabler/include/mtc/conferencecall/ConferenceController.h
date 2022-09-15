@@ -21,7 +21,7 @@
 #include "SipStatusCode.h"
 #include "conferencecall/IConferenceSubscriptionListener.h"
 #include "conferencecall/IConferenceReferenceListener.h"
-#include "call/MtcUiNotifier.h"
+#include "call/IMtcUiNotifier.h"
 #include "conferencecall/IConferenceControllerListener.h"
 #include "conferencecall/IConferenceController.h"
 #include "conferencecall/IConferenceOperationQueueListener.h"

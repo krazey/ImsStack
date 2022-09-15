@@ -129,7 +129,7 @@ public:
     IMtcSession* GetSession(IN const ISession* piSession) const override;
     IMtcSession* GetSession() const override;
     inline IMtcService& GetService() override { return m_objService; }
-    inline MtcUiNotifier& GetUiNotifier() override { return m_objUiNotifier; }
+    inline IMtcUiNotifier& GetUiNotifier() override { return m_objUiNotifier; }
     inline IMtcMediaManager& GetMediaManager() override { return m_objMediaManager; }
     inline IMtcPreconditionManager& GetPreconditionManager() override
     {

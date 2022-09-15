@@ -18,7 +18,7 @@
 #include "ServiceTrace.h"
 #include "ServicePhoneInfo.h"
 
-#include "call/MtcUiNotifier.h"
+#include "call/IMtcUiNotifier.h"
 #include "MtcDef.h"
 #include "vonr/MtcVonrForQct.h"
 #include "vonr/IMtcVonrListener.h"

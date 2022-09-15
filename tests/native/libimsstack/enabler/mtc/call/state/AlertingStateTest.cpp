@@ -17,9 +17,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "call/state/AlertingState.h"
-#include "call/MtcUiNotifier.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
+#include "call/MockIMtcUiNotifier.h"
 #include "helper/ISrvccStateListener.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
@@ -49,7 +49,7 @@ public:
     MockIMtcMediaManager objMockMediaManager;
     MockIMtcPreconditionManager objMockPreconditionManager;
     MockIMtcSession objMtcSession;
-    MtcUiNotifier* pUiNotifier;
+    MockIMtcUiNotifier objUiNotifier;
 
 protected:
     virtual void SetUp() override
@@ -74,8 +74,7 @@ protected:
 
         ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
 
-        pUiNotifier = new MtcUiNotifier(objMockCallContext);
-        ON_CALL(objMockCallContext, GetUiNotifier).WillByDefault(ReturnRef(*pUiNotifier));
+        ON_CALL(objMockCallContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
 
         ON_CALL(objMtcSession, GetISession)
                 .WillByDefault(ReturnRef(objMockISession));
@@ -87,7 +86,6 @@ protected:
     {
         delete pAlertingState;
         delete pConfigurationProxy;
-        delete pUiNotifier;
     }
 };
 

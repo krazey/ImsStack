@@ -17,7 +17,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
-#include "call/MtcUiNotifier.h"
+#include "call/IMtcUiNotifier.h"
 #include "call/state/AlertingState.h"
 #include "call/termination/CancelHandler.h"
 #include "call/termination/TerminationHandler.h"

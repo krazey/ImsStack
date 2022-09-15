@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
-#include "call/MtcUiNotifier.h"
+#include "call/MockIMtcUiNotifier.h"
 #include "call/state/IncomingState.h"
 #include "core/MockISession.h"
 #include "helper/ISrvccStateListener.h"
@@ -38,7 +38,7 @@ public:
     IncomingState* pIncomingState;
     MockIMtcCallContext objCallContext;
     MockIMtcPreconditionManager objPreconditionManager;
-    MtcUiNotifier* pUiNotifier;
+    MockIMtcUiNotifier objUiNotifier;
     MockIMtcSession objMtcSession;
     MockISession objMockISession;
     MockIMtcMediaManager objMockMediaManager;
@@ -52,8 +52,7 @@ protected:
         ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objMockISession));
 
-        pUiNotifier = new MtcUiNotifier(objCallContext);
-        ON_CALL(objCallContext, GetUiNotifier).WillByDefault(ReturnRef(*pUiNotifier));
+        ON_CALL(objCallContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
 
         ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMockMediaManager));
 
@@ -62,7 +61,6 @@ protected:
 
     virtual void TearDown() override
     {
-        delete pUiNotifier;
         delete pIncomingState;
     }
 };

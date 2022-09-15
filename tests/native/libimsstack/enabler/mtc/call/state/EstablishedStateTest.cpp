@@ -19,7 +19,7 @@
 #include "CallReasonInfo.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
-#include "call/MtcUiNotifier.h"
+#include "call/MockIMtcUiNotifier.h"
 #include "call/state/EstablishedState.h"
 #include "media/MockIMtcMediaManager.h"
 #include "core/MockISession.h"
@@ -38,7 +38,7 @@ public:
     MockIMtcCallContext objMockCallContext;
     MockIMtcMediaManager objMockMediaManager;
     MockIMtcSession objMockMtcSession;
-    MtcUiNotifier* pUiNotifier;
+    MockIMtcUiNotifier objUiNotifier;
     MockISession objMockISession;
 
 protected:
@@ -51,16 +51,14 @@ protected:
         ON_CALL(objMockMtcSession, GetISession)
                 .WillByDefault(ReturnRef(objMockISession));
 
-        pUiNotifier = new MtcUiNotifier(objMockCallContext);
         ON_CALL(objMockCallContext, GetUiNotifier)
-                .WillByDefault(ReturnRef(*pUiNotifier));
+                .WillByDefault(ReturnRef(objUiNotifier));
 
         pEstablishedState = new EstablishedState(objMockCallContext);
     }
 
     virtual void TearDown() override
     {
-        delete pUiNotifier;
         delete pEstablishedState;
     }
 };

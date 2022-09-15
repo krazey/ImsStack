@@ -28,7 +28,7 @@
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
-#include "call/MtcUiNotifier.h"
+#include "call/IMtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "call/block/CallCountBlockRule.h"
 #include "call/block/CallTypeBlockRule.h"

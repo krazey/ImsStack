@@ -41,7 +41,6 @@
 #include "call/IMtcSession.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "media/MockIMtcMediaManager.h"
-#include "call/MtcUiNotifier.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -62,26 +61,28 @@ public:
     MockIMtcContext objMockContext;
     MockIConferenceReferenceListener objMockListener;
     MtcConfigurationProxy* pConfigurationProxy;
-    MockICallStateProxy objMockCallStateProxy;
-    MockIMtcSipInterfaceFactory* pMockInterfaceFactory;
-    MockReferenceInterfaceHolder* pMockReferenceInterfaceHolder;
-    MockIInterfaceHolderListener* pMockHolderListener;
     MockIMtcConfigurationManager* pMockConfigurationManager;
+    MockICallStateProxy objMockCallStateProxy;
+    MockIMtcSipInterfaceFactory objMockInterfaceFactory;
+    MockReferenceInterfaceHolder* pMockReferenceInterfaceHolder;
+    MockIInterfaceHolderListener objMockHolderListener;
     MockCallConnectionIdManager* pMockConnectionIdManager;
     MockIMtcCallManager objMockCallManager;
-    MockIMtcCall* pMockConferenceCall;
-    MockIMtcCall* pMockJoiningCall;
+    MockIMtcCall objMockConferenceCall;
+    MockIMtcCall objMockJoiningCall;
     MockIMtcCallContext objMockConfCallContext;
     MockIMtcCallContext objMockJoiningCallContext;
     MockIMtcService objMockService;
     MockIMtcMediaManager objMockMediaManager;
     MockIMtcPreconditionManager objMockPreconditionManager;
     CallInfo objCallInfo;
+    ConfUser objUser;
 
-    MockISession* pMockConfSession;
-    MockIMtcSession* pMockConfMtcSession;
-    MockISession* pMockJoiningSession;
-    MockIMtcSession* pMockJoiningMtcSession;
+    MockISession objMockConfSession;
+    MockIMtcSession objMockConfMtcSession;
+    MockISession objMockJoiningSession;
+    MockIMtcSession objMockJoiningMtcSession;
+    MockIReference objMockReference;
 
 protected:
     virtual void SetUp() override
@@ -97,92 +98,81 @@ protected:
         ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
         // ON_CALL(objMockContext, GetServiceByType).WillByDefault(ReturnRef(objMockCallManager));
 
-        pMockInterfaceFactory = new MockIMtcSipInterfaceFactory();
         ON_CALL(objMockContext, GetSipInterfaceFactory)
-                .WillByDefault(ReturnRef(*pMockInterfaceFactory));
+                .WillByDefault(ReturnRef(objMockInterfaceFactory));
 
-        pMockHolderListener = new MockIInterfaceHolderListener();
-        pMockReferenceInterfaceHolder = new MockReferenceInterfaceHolder(*pMockHolderListener);
-        ON_CALL(*pMockInterfaceFactory, GetIReferenceHolder)
+        pMockReferenceInterfaceHolder = new MockReferenceInterfaceHolder(objMockHolderListener);
+        ON_CALL(objMockInterfaceFactory, GetIReferenceHolder)
                 .WillByDefault(Return(pMockReferenceInterfaceHolder));
 
         pMockConnectionIdManager = new MockCallConnectionIdManager(objMockContext);
         ON_CALL(*pMockConnectionIdManager, GetCallKey(JOINGING_CALL_ID))
                 .WillByDefault(Return(JOINING_CALL_KEY));
 
-        // TODO: when multiple ConfUser logic is added, this should be updated
-        ConfUser* pUser = new ConfUser();
-        pUser->strUserEntity = "sip:testUser@ims.google.com";
-        pUser->nConnectionId = JOINGING_CALL_ID;
-
         CreateCalls();
-        CreateReference(pUser);
+        CreateReference();
     }
 
     virtual void TearDown() override
     {
         delete pConferenceReference;
-        delete pMockInterfaceFactory;
-        delete pMockReferenceInterfaceHolder;
-        delete pMockHolderListener;
-        delete pMockConnectionIdManager;
         delete pConfigurationProxy;
+        delete pMockReferenceInterfaceHolder;
+        delete pMockConnectionIdManager;
     }
 
-    void CreateReference(IN ConfUser* pUser)
+    void CreateReference()
     {
+        // TODO: when multiple ConfUser logic is added, this should be updated
+        objUser.strUserEntity = "sip:testUser@ims.google.com";
+        objUser.nConnectionId = JOINGING_CALL_ID;
+
         pConferenceReference = new ConferenceReference(
-                objMockContext, CONFERENCE_CALL_KEY, pUser, objMockListener);
+                objMockContext, CONFERENCE_CALL_KEY, &objUser, objMockListener);
     }
 
     void CreateCalls()
     {
         // conference call
-        pMockConferenceCall = new MockIMtcCall();
-        ON_CALL(*pMockConferenceCall, GetKey).WillByDefault(Return(CONFERENCE_CALL_KEY));
+        ON_CALL(objMockConferenceCall, GetKey).WillByDefault(Return(CONFERENCE_CALL_KEY));
 
         ON_CALL(objMockCallManager, GetCallByCallKey(CONFERENCE_CALL_KEY))
-                .WillByDefault(Return(pMockConferenceCall));
+                .WillByDefault(Return(&objMockConferenceCall));
 
-        ON_CALL(*pMockConferenceCall, GetCallContext())
+        ON_CALL(objMockConferenceCall, GetCallContext())
                 .WillByDefault(ReturnRef(objMockConfCallContext));
 
         SetUpCallContext(objMockConfCallContext);
 
-        pMockConfSession = new MockISession();  // TODO: delete
-        pMockConfMtcSession = new MockIMtcSession();
-        ON_CALL(*pMockConfMtcSession, GetISession()).WillByDefault(ReturnRef(*pMockConfSession));
+        ON_CALL(objMockConfMtcSession, GetISession()).WillByDefault(ReturnRef(objMockConfSession));
 
-        ON_CALL(objMockConfCallContext, GetSession()).WillByDefault(Return(pMockConfMtcSession));
+        ON_CALL(objMockConfCallContext, GetSession()).WillByDefault(Return(&objMockConfMtcSession));
 
-        ON_CALL(*pMockConfMtcSession, GetISession()).WillByDefault(ReturnRef(*pMockConfSession));
+        ON_CALL(objMockConfMtcSession, GetISession()).WillByDefault(ReturnRef(objMockConfSession));
 
         // joining call
-        pMockJoiningCall = new MockIMtcCall();
-        ON_CALL(*pMockJoiningCall, GetKey).WillByDefault(Return(JOINING_CALL_KEY));
+        ON_CALL(objMockJoiningCall, GetKey).WillByDefault(Return(JOINING_CALL_KEY));
 
         ON_CALL(objMockCallManager, GetCallByCallKey(JOINING_CALL_KEY))
-                .WillByDefault(Return(pMockJoiningCall));
+                .WillByDefault(Return(&objMockJoiningCall));
 
-        ON_CALL(*pMockJoiningCall, GetCallContext())
+        ON_CALL(objMockJoiningCall, GetCallContext())
                 .WillByDefault(ReturnRef(objMockJoiningCallContext));
 
         SetUpCallContext(objMockJoiningCallContext);
 
-        pMockJoiningSession = new MockISession();  // TODO: delete
-        pMockJoiningMtcSession = new MockIMtcSession();
-        ON_CALL(*pMockJoiningMtcSession, GetISession())
-                .WillByDefault(ReturnRef(*pMockJoiningSession));
+        ON_CALL(objMockJoiningMtcSession, GetISession())
+                .WillByDefault(ReturnRef(objMockJoiningSession));
 
         ON_CALL(objMockJoiningCallContext, GetSession())
-                .WillByDefault(Return(pMockJoiningMtcSession));
+                .WillByDefault(Return(&objMockJoiningMtcSession));
 
-        ON_CALL(*pMockJoiningMtcSession, GetISession())
-                .WillByDefault(ReturnRef(*pMockJoiningSession));
+        ON_CALL(objMockJoiningMtcSession, GetISession())
+                .WillByDefault(ReturnRef(objMockJoiningSession));
 
         IMSList<AString> lstAddresses;
         lstAddresses.Append("sip:testUri@ims.google.com");
-        ON_CALL(*pMockJoiningSession, GetRemoteUserId).WillByDefault(Return(lstAddresses));
+        ON_CALL(objMockJoiningSession, GetRemoteUserId).WillByDefault(Return(lstAddresses));
     }
 
     void SetUpCallContext(IN MockIMtcCallContext& objMockCallContext)
@@ -198,9 +188,6 @@ protected:
 
         ON_CALL(objMockCallContext, GetConfigurationProxy())
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
-
-        MtcUiNotifier* pUiNotifier = new MtcUiNotifier(objMockCallContext);
-        ON_CALL(objMockCallContext, GetUiNotifier).WillByDefault(ReturnRef(*pUiNotifier));
     }
 };
 
@@ -215,11 +202,9 @@ TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndSubsSupported)
     ON_CALL(*pMockConfigurationManager, IsSupportConferenceReferSubscribe)
             .WillByDefault(Return(IMS_TRUE));
 
-    MockIReference* pMockReference = new MockIReference();
-
     EXPECT_CALL(objMockListener, OnReferenceStarted(_)).Times(1);
 
-    pConferenceReference->ReferenceDelivered(pMockReference);
+    pConferenceReference->ReferenceDelivered(&objMockReference);
 }
 
 TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndNoSubsSupported)
@@ -227,36 +212,28 @@ TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndNoSubsSupported)
     ON_CALL(*pMockConfigurationManager, IsSupportConferenceReferSubscribe)
             .WillByDefault(Return(IMS_FALSE));
 
-    MockIReference* pMockReference = new MockIReference();
-
-    MockIMessage* pMockMessage = new MockIMessage();
-    ON_CALL(*pMockReference, GetPreviousResponse(IMessage::REFERENCE_REFER))
-            .WillByDefault(Return(pMockMessage));
-    ON_CALL(*pMockMessage, GetStatusCode).WillByDefault(Return(200));
+    MockIMessage objMockMessage;
+    ON_CALL(objMockReference, GetPreviousResponse(IMessage::REFERENCE_REFER))
+            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetStatusCode).WillByDefault(Return(200));
 
     EXPECT_CALL(objMockListener, OnReferenceStarted(_)).Times(1);
 
-    pConferenceReference->ReferenceDelivered(pMockReference);
-    // delete pMockReference;
-    // delete pMockMessage;
+    pConferenceReference->ReferenceDelivered(&objMockReference);
 }
 
 TEST_F(ConferenceReferenceTest, OnReferenceDeliveryFailed)
 {
-    MockIReference* pMockReference = new MockIReference();
-
     EXPECT_CALL(objMockListener, OnReferenceStartFailed(_)).Times(1);
 
-    pConferenceReference->ReferenceDeliveryFailed(pMockReference);
-    // delete pMockReference;
+    pConferenceReference->ReferenceDeliveryFailed(&objMockReference);
 }
 
 TEST_F(ConferenceReferenceTest, OnReferenceNotifyWithStateActive)
 {
-    MockIReference* pMockReference = new MockIReference();
-    MockIMessage* pMockMessage = new MockIMessage();
+    MockIMessage objMockMessage;
     MockISipMessage objMockISipMessage;
-    ON_CALL(*pMockMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
+    ON_CALL(objMockMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
 
     ImsList<AString> objSubStates;
     objSubStates.Append("active");
@@ -264,17 +241,14 @@ TEST_F(ConferenceReferenceTest, OnReferenceNotifyWithStateActive)
 
     EXPECT_CALL(objMockListener, OnReferenceUpdated(_, _, ReferSubscriptionState::ACTIVE)).Times(1);
 
-    pConferenceReference->ReferenceNotify(pMockReference, pMockMessage);
-    // delete pMockReference;
-    // delete pMockMessage;
+    pConferenceReference->ReferenceNotify(&objMockReference, &objMockMessage);
 }
 
 TEST_F(ConferenceReferenceTest, OnReferenceNotifyWithStateTerminated)
 {
-    MockIReference* pMockReference = new MockIReference();
-    MockIMessage* pMockMessage = new MockIMessage();
+    MockIMessage objMockMessage;
     MockISipMessage objMockISipMessage;
-    ON_CALL(*pMockMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
+    ON_CALL(objMockMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
 
     ImsList<AString> objSubStates;
     objSubStates.Append("terminated");
@@ -283,21 +257,16 @@ TEST_F(ConferenceReferenceTest, OnReferenceNotifyWithStateTerminated)
     EXPECT_CALL(objMockListener, OnReferenceUpdated(_, _, ReferSubscriptionState::TERMINATED))
             .Times(1);
 
-    pConferenceReference->ReferenceNotify(pMockReference, pMockMessage);
-    // delete pMockReference;
-    // delete pMockMessage;
+    pConferenceReference->ReferenceNotify(&objMockReference, &objMockMessage);
 }
 
 TEST_F(ConferenceReferenceTest, OnReferenceTerminated)
 {
-    MockIReference* pMockReference = new MockIReference();
-
     EXPECT_CALL(objMockListener,
             OnReferenceUpdated(pConferenceReference, _, ReferSubscriptionState::TERMINATED))
             .Times(1);
 
-    pConferenceReference->ReferenceTerminated(pMockReference);
-    // delete pMockReference;
+    pConferenceReference->ReferenceTerminated(&objMockReference);
 }
 
 TEST_F(ConferenceReferenceTest, SendInviteWithSingleUser)
@@ -305,12 +274,11 @@ TEST_F(ConferenceReferenceTest, SendInviteWithSingleUser)
     ON_CALL(*pMockConfigurationManager, IsConferenceReferToUriSourcePaid)
             .WillByDefault(Return(IMS_TRUE));
 
-    MockIReference* pMockReference = new MockIReference();
     ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, _))
-            .WillByDefault(Return(pMockReference));
+            .WillByDefault(Return(&objMockReference));
 
     AString strSessionId = "12345";
-    ON_CALL(*pMockJoiningSession, GetSessionId()).WillByDefault(ReturnRef(strSessionId));
+    ON_CALL(objMockJoiningSession, GetSessionId()).WillByDefault(ReturnRef(strSessionId));
 
     // TODO: let UriFormatter returns test uri
     AString strReferToUri = "sip:testuri@ims.google.com";

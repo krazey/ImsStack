@@ -26,7 +26,7 @@
 #include "IDocument.h"
 #include "ITimer.h"
 
-#include "call/MtcUiNotifier.h"
+#include "call/IMtcUiNotifier.h"
 #include "IMtcApp.h"
 #include "IMtcService.h"
 #include "call/IMtcCall.h"

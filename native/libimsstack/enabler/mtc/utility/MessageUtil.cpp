@@ -1003,8 +1003,6 @@ PUBLIC GLOBAL IMS_SINT32 MessageUtil::GetStatusCodeInNotify(IN IMessage* piMessa
 
         ByteArray objContent;
         objContent = piBodyPart->GetContent();
-        objContent.Append(TextParser::CHAR_CR);
-        objContent.Append(TextParser::CHAR_LF);
 
         ISipMessage* piSipFrag = SipParsingHelper::CreateMessage(objContent);
         if (piSipFrag == IMS_NULL)

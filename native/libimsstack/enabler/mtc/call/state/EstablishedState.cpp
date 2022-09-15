@@ -21,7 +21,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
-#include "call/MtcUiNotifier.h"
+#include "call/IMtcUiNotifier.h"
 #include "call/UpdatingInfo.h"
 #include "call/block/CallTypeBlockRule.h"
 #include "call/block/IMtcBlockChecker.h"

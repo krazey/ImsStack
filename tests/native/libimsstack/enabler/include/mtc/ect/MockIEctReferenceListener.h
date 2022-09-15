@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-#include "call/IMtcCallContext.h"
-#include "call/IMtcUiNotifier.h"
-#include "call/state/TerminatingState.h"
-#include "helper/MtcTimerWrapper.h"
-#include "ServiceTrace.h"
+#ifndef MOCK_I_ECT_REFERENCE_LISTENER_H_
+#define MOCK_I_ECT_REFERENCE_LISTENER_H_
 
-__IMS_TRACE_TAG_COM_MTC__;
+#include <gmock/gmock.h>
+#include "ect/IEctReferenceListener.h"
+#include "sipcore/SipStatusCode.h"
 
-PUBLIC
-TerminatingState::TerminatingState(IN IMtcCallContext& objContext) :
-        MtcCallState(CallStateName::TERMINATING, objContext)
+class MockIEctReferenceListener : public IEctReferenceListener
 {
-}
+public:
+    virtual ~MockIEctReferenceListener() {}
 
-PUBLIC VIRTUAL TerminatingState::~TerminatingState() {}
+    MOCK_METHOD(void, OnReferenceStarted, (), (override));
+    MOCK_METHOD(void, OnReferenceStartFailed, (), (override));
+    MOCK_METHOD(void, OnReferenceUpdated, (IN SipStatusCode), (override));
+};
+
+#endif

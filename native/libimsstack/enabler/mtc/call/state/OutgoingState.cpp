@@ -32,7 +32,7 @@
 #include "ServiceTrace.h"
 #include "call/IMtcSession.h"
 #include "helper/MtcTimerWrapper.h"
-#include "call/MtcUiNotifier.h"
+#include "call/IMtcUiNotifier.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/state/OutgoingState.h"
 #include "call/termination/EarlyUpdateErrorHandler.h"

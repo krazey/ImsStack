@@ -20,7 +20,7 @@
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
-#include "call/MtcUiNotifier.h"
+#include "call/MockIMtcUiNotifier.h"
 #include "call/state/MtcCallState.h"
 #include "call/state/OutgoingState.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -47,10 +47,10 @@ public:
     MockIMtcAosConnector objAosConnector;
     MockISession objSession;
     MockIMtcMediaManager objMockMediaManager;
-    MockIMtcPreconditionManager objPreconditionManager;    
+    MockIMtcPreconditionManager objPreconditionManager;
     CallInfo objCallInfo;
     MtcTimerWrapper objTimer;
-    MtcUiNotifier* pNotifier;
+    MockIMtcUiNotifier objNotifier;
 
 protected:
     virtual void SetUp() override
@@ -60,9 +60,8 @@ protected:
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
-        pNotifier = new MtcUiNotifier(objCallContext);
         ON_CALL(objCallContext, GetUiNotifier)
-                .WillByDefault(ReturnRef(*pNotifier));
+                .WillByDefault(ReturnRef(objNotifier));
 
         ON_CALL(objCallContext, GetSession())
                 .WillByDefault(Return(&objMtcSession));
@@ -91,7 +90,6 @@ protected:
     {
         delete pOutgoingState;
         delete pConfigurationProxy;
-        delete pNotifier;
     }
 };
 

@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
-#include "call/MtcUiNotifier.h"
+#include "call/MockIMtcUiNotifier.h"
 #include "call/state/MtcCallState.h"
 #include "call/state/UpdatingState.h"
 #include "call/UpdatingInfo.h"
@@ -45,6 +45,7 @@ public:
     MockIMtcMediaManager objMediaManager;
     MockIMtcSession objMtcSession;
     MockISession objSession;
+    MockIMtcUiNotifier objUiNotifier;
 
 protected:
     virtual void SetUp() override
@@ -56,6 +57,9 @@ protected:
 
         ON_CALL(objContext, GetCallInfo)
                 .WillByDefault(ReturnRef(objCallInfo));
+
+        ON_CALL(objContext, GetUiNotifier)
+                .WillByDefault(ReturnRef(objUiNotifier));
 
         ON_CALL(objMtcSession, GetISession())
                 .WillByDefault(ReturnRef(objSession));
@@ -131,9 +135,6 @@ TEST_F(UpdatingStateTest, OnRemoteResponseTimerExpiredCallsCancelUpdate)
 
 TEST_F(UpdatingStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
 {
-    MtcUiNotifier* pUiNotifier = new MtcUiNotifier(objContext);
-    ON_CALL(objContext, GetUiNotifier).WillByDefault(ReturnRef(*pUiNotifier));
-
     EXPECT_CALL(objMediaManager, IsAudioInactive)
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -152,20 +153,14 @@ TEST_F(UpdatingStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
     EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, objTerminateReason)).Times(1);
 
     pUpdatingState->Terminate(objReason);
-
-    delete pUiNotifier;
 }
 
 TEST_F(UpdatingStateTest, OnMediaFailed)
 {
-    MtcUiNotifier* pUiNotifier = new MtcUiNotifier(objContext);
-    ON_CALL(objContext, GetUiNotifier).WillByDefault(ReturnRef(*pUiNotifier));
     EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, CallReasonInfo(CODE_MEDIA_INIT_FAILED)))
             .Times(1);
 
     pUpdatingState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
-
-    delete pUiNotifier;
 }
 
 TEST_F(UpdatingStateTest, HandleSrvccStartedAsModifier)
