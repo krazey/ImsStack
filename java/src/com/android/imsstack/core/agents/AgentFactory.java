@@ -20,6 +20,7 @@ import android.util.ArrayMap;
 import android.util.SparseArray;
 
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,6 +109,19 @@ public final class AgentFactory {
         }
 
         return getAgent(agentType);
+    }
+
+    @VisibleForTesting
+    public void setAgent(Class<?> clazz, IAgent agent, int slotId) {
+        if (slotId < 0 || slotId >= mAgentsForSlot.size()) {
+            return;
+        }
+
+        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.valueAt(slotId);
+
+        synchronized (mLock) {
+            agents.put(clazz, agent);
+        }
     }
 
     public static synchronized void createAgents(Context context, int slotId) {
