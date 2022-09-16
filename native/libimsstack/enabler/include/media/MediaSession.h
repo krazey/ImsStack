@@ -99,6 +99,7 @@ public:
     virtual void SetOptions(
             IN IMS_UINTP nNegoId, IN OptionType type, IN IMS_SINT32 param1, IN IMS_SINT32 param2);
     virtual void SetNetworkToneRTPTimer(IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer);
+    virtual IMS_BOOL NotifySrvccStatus(IN MEDIA_SRVCC_STATUS nStatus);
     virtual IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
 
 protected:

@@ -180,6 +180,15 @@ public:
      */
     IMS_UINT32 GetAudioSessionSize();
 
+    /**
+     * @brief Set and update the media direction of the audio session
+     *
+     * @param eDirection The direction to update the stream
+     * @param bRestore If this set IMS_TRUE, update media direction with previous one
+     * @return IMS_TRUE if the update stream is completed
+     */
+    IMS_BOOL UpdateMediaDirection(IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bRestore = IMS_FALSE);
+
 private:
     AudioMediaSession* FindAudioSession(IN IMS_UINTP nNegoId = IMS_NULL);
     void ClearSession();

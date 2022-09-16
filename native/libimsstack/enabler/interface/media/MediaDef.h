@@ -134,6 +134,20 @@ typedef enum _REPORT_TYPE
     REPORT_NOTUSED
 } REPORT_TYPE;
 
+enum MEDIA_SRVCC_STATUS
+{
+    /** SRVCC has no status defined */
+    MEDIA_SRVCC_IDLE = -1,
+    /** SRVCC is in started state */
+    MEDIA_SRVCC_STARTED,
+    /** SRVCC is finished successfully */
+    MEDIA_SRVCC_SUCCEED,
+    /** SRVCC has been failed */
+    MEDIA_SRVCC_FAILED,
+    /** SRVCC transition has been canceled */
+    MEDIA_SRVCC_CANCELED
+};
+
 #define MEDIA_IS_CONTAINED_THIS_TYPE(eDst, eSrc) ((eDst & eSrc) != 0)
 #define MEDIA_TYPE_WITHOUT_TEXT(eSrc)            (eSrc & (~MEDIA_TYPE_TEXT))
 
@@ -144,15 +158,15 @@ typedef enum _REPORT_TYPE
 #define IS_VALID_MEDIA_DIRECTION(eDir) \
     ((eDir >= MEDIA_DIRECTION_INACTIVE) && (eDir <= MEDIA_DIRECTION_SEND_RECEIVE))
 
-#define MEDIA_DIRECTION_IS_AUDIO_RUNNABLE(eDir) \
-    ((eDir == MEDIA_DIRECTION_RECEIVE) || (eDir == MEDIA_DIRECTION_SEND_RECEIVE))
+#define MEDIA_DIRECTION_IS_AUDIO_RUNNABLE(eDir)                                     \
+    ((eDir == MEDIA_DIRECTION_RECEIVE) || (eDir == MEDIA_DIRECTION_SEND_RECEIVE) || \
+            (eDir == MEDIA_DIRECTION_SEND))
 #define MEDIA_DIRECTION_IS_VIDEO_RUNNABLE(eDir) \
     ((MEDIA_DIRECTION_RECEIVE <= eDir) && (eDir <= MEDIA_DIRECTION_SEND_RECEIVE))
 #define MEDIA_DIRECTION_IS_TEXT_RUNNABLE(eDir) \
     ((eDir == MEDIA_DIRECTION_RECEIVE) || (eDir == MEDIA_DIRECTION_SEND_RECEIVE))
 
-#define MEDIA_DIRECTION_IS_AUDIO_HOLD(eDir) \
-    ((eDir == MEDIA_DIRECTION_SEND) || (eDir == MEDIA_DIRECTION_INACTIVE))
+#define MEDIA_DIRECTION_IS_AUDIO_HOLD(eDir) (eDir != MEDIA_DIRECTION_SEND_RECEIVE)
 #define MEDIA_DIRECTION_IS_VIDEO_HOLD(eDir) (eDir == MEDIA_DIRECTION_INACTIVE)
 #define MEDIA_DIRECTION_IS_TEXT_HOLD(eDir) \
     ((eDir == MEDIA_DIRECTION_SEND) || (eDir == MEDIA_DIRECTION_INACTIVE))

@@ -50,7 +50,7 @@ IMS_BOOL AudioController::IsHoldSession(IN IMS_UINTP nNegoId)
 
     if (pAudioSession != IMS_NULL)
     {
-        return pAudioSession->IsDirectionHold();
+        return MEDIA_DIRECTION_IS_AUDIO_HOLD(pAudioSession->GetMediaDirection());
     }
 
     return IMS_FALSE;
@@ -67,8 +67,22 @@ IMS_BOOL AudioController::HoldSession()
     {
         pAudioSession->UpdateMediaQualityThreshold(IMS_TRUE, IMS_FALSE);
         pAudioSession->SetMediaQuality();
-        pAudioSession->HoldRtpConfig();
-        pAudioSession->Modify();
+
+        switch (pAudioSession->GetMediaDirection())
+        {
+            case MEDIA_DIRECTION_INVALID:
+            case MEDIA_DIRECTION_INACTIVE:
+                return IMS_TRUE;
+            case MEDIA_DIRECTION_RECEIVE:
+            case MEDIA_DIRECTION_SEND:
+                pAudioSession->SetMediaDirection(MEDIA_DIRECTION_INACTIVE);
+                pAudioSession->Modify();
+                break;
+            case MEDIA_DIRECTION_SEND_RECEIVE:
+                pAudioSession->SetMediaDirection(MEDIA_DIRECTION_RECEIVE);
+                pAudioSession->Modify();
+                break;
+        }
     }
 
     return IMS_FALSE;
@@ -391,6 +405,35 @@ PUBLIC
 IMS_UINT32 AudioController::GetAudioSessionSize()
 {
     return m_listAudioSession.GetSize();
+}
+
+PUBLIC
+IMS_BOOL AudioController::UpdateMediaDirection(MEDIA_DIRECTION eDirection, IMS_BOOL bRestore)
+{
+    IMS_BOOL bRet = IMS_FALSE;
+
+    for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
+    {
+        AudioMediaSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
+
+        if (pAudioSession == IMS_NULL || pAudioSession->GetState() == AudioMediaSession::STATE_NONE)
+        {
+            continue;
+        }
+
+        if (bRestore)
+        {
+            pAudioSession->SetMediaDirection(pAudioSession->GetPrevMediaDirection());
+            bRet = pAudioSession->Modify();
+        }
+        else
+        {
+            pAudioSession->SetMediaDirection(eDirection);
+            bRet = pAudioSession->Modify();
+        }
+    }
+
+    return bRet;
 }
 
 PRIVATE
