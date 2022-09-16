@@ -361,6 +361,9 @@
         <item value="0"/>
         <item value="4"/>
     </int-array>
+    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
+    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="1250"/>
+    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="3750"/>
     <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
     <!-- <int name="imsvoice.codec_attribute_cmr_int" value="0"/> -->
     <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>

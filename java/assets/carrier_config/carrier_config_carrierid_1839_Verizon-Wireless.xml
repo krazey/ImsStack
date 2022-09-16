@@ -353,6 +353,9 @@
     <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <int name="asset_evs_amrwb_io_mode_set_int" value="7"/>
 
+    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="38"/>
+    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="800"/>
+    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2400"/>
     <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
     <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
     <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>

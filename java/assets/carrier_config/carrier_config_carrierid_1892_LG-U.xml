@@ -115,6 +115,9 @@
     <int name="asset_evs_amrwb_io_mode_set_int" value="7"/>
     <int name="asset_codec_attribute_mode_change_capability_int" value="2"/>
 
+    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
+    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
+    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>
     <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
     <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
     <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
