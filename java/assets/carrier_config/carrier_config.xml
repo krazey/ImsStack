@@ -251,70 +251,75 @@
     <boolean name="support_ecbm_for_vowifi_bool" value="false"/>
 
     <!-- Aos -->
-    <boolean name="use_security_server_port_in_reg_contact_of_initial_registration_bool" value="false"/>
-    <boolean name="use_security_server_port_in_initial_registration_bool" value="false"/>
-    <boolean name="remove_old_sa_on_establishing_sa_bool" value="false"/>
-    <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_registration_bool" value="false"/>
-    <boolean name="use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="false"/>
-    <int-array name="pcscf_discovery_method_roaming_int_array" num="1">
-        <item value="0"/>
-    </int-array>
-    <boolean name="hold_registration_when_ipcan_changed_with_ims_active_call_bool" value="false"/>
-    <boolean name="support_verstat_for_registration_bool" value="false"/>
-    <boolean name="no_initial_registration_on_pcscf_change_bool" value="false"/>
-    <boolean name="emergency_call_based_on_p_associated_uri_of_normal_registration_bool" value="false"/>
-    <boolean name="sip_over_ipsec_enabled_in_roaming_bool" value="true"/>
-    <boolean name="registration_contact_validation_bool" value="false"/>
-    <int name="registration_out_of_service_policy_int" value="0"/>
-    <boolean name="video_over_wifi_supported_without_voice_bool" value="false"/>
     <boolean name="cdmaless_feature_tag_required_bool" value="false"/>
-    <int-array name="registration_permanent_error_max_count_int_array" num="0">
-    </int-array>
+    <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_registration_bool" value="false"/>
+    <boolean name="disable_t3482_for_emergency_bool" value="false"/>
+    <boolean name="emergency_call_based_on_p_associated_uri_of_normal_registration_bool" value="false"/>
+    <boolean name="hold_registration_when_ipcan_changed_with_ims_active_call_bool" value="false"/>
+    <boolean name="ignore_vops_for_volte_enable_bool" value="true"/>
+    <boolean name="ims_deregister_on_3g_networks_bool" value="false"/>
+    <boolean name="no_initial_registration_on_pcscf_change_bool" value="false"/>
+    <boolean name="registration_contact_validation_bool" value="false"/>
+    <boolean name="remove_old_sa_on_establishing_sa_bool" value="false"/>
+    <boolean name="required_emergency_registration_in_roaming_bool" value="false"/>
+    <boolean name="required_volte_block_by_setting_bool" value="false"/>
+    <boolean name="required_volte_block_by_airplane_mode_bool" value="false"/>
+    <boolean name="required_wfc_block_by_airplane_mode_bool" value="false"/>
+    <boolean name="require_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
+    <boolean name="sip_over_ipsec_enabled_in_roaming_bool" value="true"/>
+    <boolean name="sms_over_ims_available_without_voice_capability_bool" value="true"/>
+    <boolean name="support_contact_user_info_bool" value="true"/>
+    <boolean name="support_verstat_for_registration_bool" value="false"/>
+    <boolean name="update_registration_with_country_change_bool" value="false"/>
+    <boolean name="use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="false"/>
+    <boolean name="use_security_server_port_in_initial_registration_bool" value="false"/>
+    <boolean name="use_security_server_port_in_reg_contact_of_initial_registration_bool" value="false"/>
+    <boolean name="use_wfc_country_code_availability_check_bool" value="false"/>
+    <boolean name="video_over_wifi_supported_without_voice_bool" value="false"/>
+
+    <int name="contact_user_info_policy_for_non_register_message_int" value="1"/>
+    <int name="emergency_preferred_iptype_int" value="1"/>
+    <int name="geolocation_pidf_forming_policy_int" value="1"/>
     <int name="ims_preferred_iptype_int" value="1"/>
     <int name="ims_signalling_dscp_int" value="46"/>
     <int name="registration_actual_wait_time_policy_int" value="0"/>
-    <boolean name="disable_t3482_for_emergency_bool" value="false"/>
+    <int name="registration_out_of_service_policy_int" value="0"/>
+    <int name="registration_pcscf_update_policy_int" value="0"/>
+    <int name="registration_retry_count_reset_policy_int" value="0"/>
     <int name="registration_timer_for_emergency_call_millis_int" value="0"/>
-    <boolean name="update_registration_with_country_change_bool" value="false"/>
-    <boolean name="ignore_vops_for_volte_enable_bool" value="true"/>
-    <boolean name="sms_over_ims_available_without_voice_capability_bool" value="true"/>
-    <boolean name="ims_deregister_on_3g_networks_bool" value="false"/>
-    <boolean name="required_emergency_registration_in_roaming_bool" value="false"/>
+    <int name="sip_message_threshold_for_transport_change_int" value="200"/>
+
     <int-array name="clear_permanent_pdn_failure_int_array" num="3">
         <item value="0"/>
         <item value="1"/>
         <item value="2"/>
     </int-array>
-    <boolean name="use_wfc_country_code_availability_check_bool" value="false"/>
-    <boolean name="required_volte_block_by_setting_bool" value="false"/>
-    <boolean name="required_volte_block_by_airplane_mode_bool" value="false"/>
-    <boolean name="required_wfc_block_by_airplane_mode_bool" value="false"/>
-    <int-array name="supported_roaming_rats_int_array" num="0">
-    </int-array>
-    <int name="emergency_preferred_iptype_int" value="1"/>
-    <int name="sip_message_threshold_for_transport_change_int" value="200"/>
-    <int-array name="permanent_pdn_failure_int_array" num="0">
-    </int-array>
     <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="0">
     </int-array>
-    <int name="registration_retry_count_reset_policy_int" value="0"/>
-    <int-array name="subscription_error_code_for_stopping_by_expiration_time_int_array" num="0">
+    <int-array name="pcscf_discovery_method_roaming_int_array" num="1">
+        <item value="0"/>
     </int-array>
-    <int-array name="subscription_error_code_for_reg_event_with_initial_registration_with_next_pcscf_int_array" num="0">
+    <int-array name="permanent_pdn_failure_int_array" num="0">
     </int-array>
-    <int-array name="wfc_reg_event_error_code_by_missing_911_address_int_array" num="0">
-    </int-array>
-    <int name="registration_pcscf_update_policy_int" value="0"/>
-    <boolean name="support_contact_user_info_bool" value="true"/>
-    <int name="contact_user_info_policy_for_non_register_message_int" value="1"/>
-    <int name="geolocation_pidf_forming_policy_int" value="1"/>
     <int-array name="reg_error_codes_with_pcscf_discovery_int_array" num="0">
     </int-array>
-    <int-array name="rereg_error_codes_with_init_reg_with_available_pcscf_int_array" num="0">
+    <int-array name="registration_permanent_error_max_count_int_array" num="0">
     </int-array>
     <int-array name="rereg_error_codes_with_ims_pdn_reactivation_int_array" num="0">
     </int-array>
-    <boolean name="require_reg_after_ims_call_end_on_reg_held_bool" value="false"/>
+    <int-array name="rereg_error_codes_with_init_reg_with_available_pcscf_int_array" num="0">
+    </int-array>
+    <int-array name="subscription_error_code_for_reg_event_with_initial_registration_with_next_pcscf_int_array" num="0">
+    </int-array>
+    <int-array name="subscription_error_code_for_stopping_by_expiration_time_int_array" num="0">
+    </int-array>
+    <int-array name="supported_roaming_rats_int_array" num="0">
+    </int-array>
+    <int-array name="vowifi_subscription_error_code_with_initial_registration_int_array" num="0">
+    </int-array>
+    <int-array name="wfc_reg_event_error_code_by_missing_911_address_int_array" num="0">
+    </int-array>
+
     <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
     <int name="specific_registration_error_final_type_int" value="0"/>
     <int name="specific_registration_error_policy_int" value="0"/>
@@ -357,8 +362,7 @@
     </int-array>
     <int-array name="reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array" num="0">
     </int-array>
-    <int-array name="vowifi_subscription_error_code_with_initial_registration_int_array" num="0">
-    </int-array>
+
     <!-- End BUNDLE -->
     <!-- KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
     <int name="subscription_error_retry_max_count_for_reg_event_with_initial_registration_int" value="0"/>
