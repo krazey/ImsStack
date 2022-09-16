@@ -52,7 +52,7 @@ void ConferenceEventNotifier::NotifyMerged(IN ConferenceParticipantList& objPart
 
     MediaInfo objMediaInfo;
     m_objConfCallContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-    IMSList<ConfUser*> objUsers = objParticipantList.GetConfUsers();
+    ImsList<ConfUser*> objUsers = objParticipantList.GetConfUsers();
     m_objConfCallContext.GetUiNotifier().SendMerged(IMS_NULL, &objMediaInfo,
             m_objConfCallContext.GetSupplementaryService().GetServices(), objUsers);
 }
@@ -153,7 +153,7 @@ void ConferenceEventNotifier::NotifyUsersInfo(IN ConferenceParticipantList& objP
     IMS_TRACE_I("NotifyUsersInfo", 0, 0, 0);
     objParticipantList.Login();
 
-    IMSList<ConfUser*> objUsers = objParticipantList.GetConfUsers();
+    ImsList<ConfUser*> objUsers = objParticipantList.GetConfUsers();
     m_objConfCallContext.GetUiNotifier().SendNotifyUsersInfo(objUsers);
     CheckDisconnectedConfUsersInfo(objParticipantList, objUsers);
 }
@@ -170,17 +170,13 @@ void ConferenceEventNotifier::NotifyIndividualCallTerminated(IN CallKey nKey)
         return;
     }
 
-    m_objConfCallContext.GetCallManager()
-            .GetCallByCallKey(nKey)
-            ->GetCallContext()
-            .GetUiNotifier()
-            .SendTerminated(
-                    CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, CODE_USER_TERMINATED_BY_REMOTE));
+    piCall->GetCallContext().GetUiNotifier().SendTerminated(
+            CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, CODE_USER_TERMINATED_BY_REMOTE));
 }
 
 PRIVATE
 void ConferenceEventNotifier::CheckDisconnectedConfUsersInfo(
-        IN ConferenceParticipantList& objParticipantList, IN_OUT IMSList<ConfUser*>& /*objUsers*/)
+        IN ConferenceParticipantList& objParticipantList, IN_OUT ImsList<ConfUser*>& /*objUsers*/)
 {
     for (IMS_SINT32 i = (objParticipantList.GetSize() - 1); i >= 0; i--)
     {

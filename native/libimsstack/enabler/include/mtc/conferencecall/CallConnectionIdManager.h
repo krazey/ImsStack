@@ -39,7 +39,7 @@ public:
     inline IMS_BOOL IsSynchronousCallRequired() override { return IMS_FALSE; }
 
     void OnConferenceCallStarted(IN IConferenceController* piController, IN IMS_BOOL bStarted);
-    void OnConferenceParticipantDisconnected(IN IMS_UINT32 nConnectionId);
+    virtual void OnConferenceParticipantDisconnected(IN IMS_UINT32 nConnectionId);
 
     IMS_SINT32 GetIndex(IN CallKey nKey);
     virtual CallKey GetCallKey(IN IMS_UINT32 nConnectionId);

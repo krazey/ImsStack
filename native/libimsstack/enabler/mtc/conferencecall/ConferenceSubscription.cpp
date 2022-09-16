@@ -37,6 +37,7 @@
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceConst.h"
@@ -48,9 +49,11 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 ConferenceSubscription::ConferenceSubscription(IN IMtcContext& objContext, IN CallKey nConfCallKey,
-        IN ConferenceParticipantList& objList, IN IConferenceSubscriptionListener& objListener) :
+        IN ConferenceParticipantList& objList, IN IConferenceSubscriptionListener& objListener,
+        IN ConferenceFactory& objFactory) :
         m_objContext(objContext),
         m_nConfCallKey(nConfCallKey),
+        m_objFactory(objFactory),
         m_objList(objList),
         m_objListener(objListener),
         m_strTo(AString::ConstNull()),
@@ -352,7 +355,7 @@ void ConferenceSubscription::UpdateConferenceInfo(IN IMessage* piNotify)
     }
 
     // TODO: only one updater?
-    ConferenceInfoUpdater* pInfoUpdater = new ConferenceInfoUpdater();
+    ConferenceInfoUpdater* pInfoUpdater = m_objFactory.CreateInfoUpdater();
     IMS_UINT32 nResult = pInfoUpdater->Update(&m_objList, strEventPackage);
 
     HandleUpdateResult(nResult);

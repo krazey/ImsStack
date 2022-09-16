@@ -27,19 +27,19 @@ class IElement;
 class ConferenceInfo
 {
 public:
-    class ConferenceDescription final
+    class ConferenceDescription
     {
     public:
         inline explicit ConferenceDescription() :
                 nMaxUserCount(DEFAULT_MAX_USER_COUNT)
         {
         }
-        inline ~ConferenceDescription() {}
+        inline virtual ~ConferenceDescription() {}
         ConferenceDescription(IN const ConferenceDescription&) = delete;
         ConferenceDescription& operator=(IN const ConferenceDescription&) = delete;
 
     public:
-        inline IMS_UINT32 GetMaxUserCount() const { return nMaxUserCount; }
+        inline virtual IMS_UINT32 GetMaxUserCount() const { return nMaxUserCount; }
 
     private:
         friend class ConferenceInfo;
@@ -51,43 +51,43 @@ public:
         // available-media
     };
 
-    class HostInfo final
+    class HostInfo
     {
     public:
         inline explicit HostInfo() :
                 strDisplayText(AString::ConstNull()),
-                objUris(IMSList<AString>())
+                objUris(ImsList<AString>())
         {
         }
-        inline ~HostInfo() {}
+        inline virtual ~HostInfo() {}
         HostInfo(IN const HostInfo&) = delete;
         HostInfo& operator=(IN const HostInfo&) = delete;
 
     public:
-        inline const AString& GetDisplayText() const { return strDisplayText; }
-        inline const IMSList<AString> GetUris() const { return objUris; }
+        inline virtual const AString& GetDisplayText() const { return strDisplayText; }
+        inline virtual const ImsList<AString> GetUris() const { return objUris; }
 
     private:
         friend class ConferenceInfo;
 
         AString strDisplayText;
         // str web-page
-        IMSList<AString> objUris;
+        ImsList<AString> objUris;
     };
 
-    class ConferenceState final
+    class ConferenceState
     {
     public:
         inline explicit ConferenceState() :
                 nUserCount(0)
         {
         }
-        inline ~ConferenceState() {}
+        inline virtual ~ConferenceState() {}
         ConferenceState(IN const ConferenceState&) = delete;
         ConferenceState& operator=(IN const ConferenceState&) = delete;
 
     public:
-        inline IMS_UINT32 GetUserCount() const { return nUserCount; }
+        inline virtual IMS_UINT32 GetUserCount() const { return nUserCount; }
 
     private:
         friend class ConferenceInfo;
@@ -97,10 +97,10 @@ public:
         // boolean locaked
     };
 
-    class User final
+    class User
     {
     public:
-        class EndPoint final
+        class EndPoint
         {
         public:
             inline explicit EndPoint() :
@@ -110,15 +110,15 @@ public:
                     nStatus(STATUS_IDLE)
             {
             }
-            inline ~EndPoint() {}
+            inline virtual ~EndPoint() {}
             EndPoint(IN const EndPoint&) = delete;
             EndPoint& operator=(IN const EndPoint&) = delete;
 
         public:
-            inline const AString& GetEntity() const { return strEntity; }
-            inline IMS_UINT32 GetState() const { return nState; }
-            inline const AString& GetDisplayText() const { return strDisplayText; }
-            inline IMS_UINT32 GetStatus() const { return nStatus; }
+            inline virtual const AString& GetEntity() const { return strEntity; }
+            inline virtual IMS_UINT32 GetState() const { return nState; }
+            inline virtual const AString& GetDisplayText() const { return strDisplayText; }
+            inline virtual IMS_UINT32 GetStatus() const { return nStatus; }
 
         private:
             friend class ConferenceInfo;
@@ -134,7 +134,7 @@ public:
             // disconnection-info
         };
 
-        class Media final
+        class Media
         {
         public:
             inline explicit Media() :
@@ -145,18 +145,18 @@ public:
                     nStatus(CONF_MEDIA_STATUS_SENDRECV)
             {
             }
-            inline ~Media() {}
+            inline virtual ~Media() {}
 
         private:
             Media(IN const Media&) = delete;
             Media& operator=(IN const Media&) = delete;
 
         public:
-            inline IMS_UINT32 GetId() const { return nId; }
-            inline const AString& GetDisplayText() const { return strDisplayText; }
-            inline IMS_UINT32 GetType() const { return nType; }
-            inline const AString& GetLabel() const { return strLabel; }
-            inline IMS_UINT32 GetStatus() const { return nStatus; }
+            inline virtual IMS_UINT32 GetId() const { return nId; }
+            inline virtual const AString& GetDisplayText() const { return strDisplayText; }
+            inline virtual IMS_UINT32 GetType() const { return nType; }
+            inline virtual const AString& GetLabel() const { return strLabel; }
+            inline virtual IMS_UINT32 GetStatus() const { return nStatus; }
 
         private:
             friend class ConferenceInfo;
@@ -176,15 +176,15 @@ public:
                 strDisplayText(AString::ConstNull())
         {
         }
-        ~User();
+        virtual ~User();
         User(IN const User&) = delete;
         User& operator=(IN const User&) = delete;
 
     public:
-        inline const AString& GetEntity() const { return strEntity; }
-        inline IMS_UINT32 GetState() const { return nState; }
-        inline const AString& GetDisplayText() const { return strDisplayText; }
-        inline const IMSList<EndPoint*>& GetEndPoints() const { return objEndPoints; }
+        inline virtual const AString& GetEntity() const { return strEntity; }
+        inline virtual IMS_UINT32 GetState() const { return nState; }
+        inline virtual const AString& GetDisplayText() const { return strDisplayText; }
+        inline virtual const ImsList<EndPoint*>& GetEndPoints() const { return objEndPoints; }
 
     private:
         friend class ConferenceInfo;
@@ -192,7 +192,7 @@ public:
         AString strEntity;
         IMS_UINT32 nState;
         AString strDisplayText;
-        IMSList<EndPoint*> objEndPoints;
+        ImsList<EndPoint*> objEndPoints;
         // associated-aors
         // roles
         // languares
@@ -201,20 +201,20 @@ public:
 public:
     explicit ConferenceInfo();
     explicit ConferenceInfo(IN const AString& strConferenceInfo);
-    ~ConferenceInfo();
+    virtual ~ConferenceInfo();
     ConferenceInfo(IN const ConferenceInfo&) = delete;
     ConferenceInfo& operator=(IN const ConferenceInfo&) = delete;
 
 public:
-    const ConferenceDescription& GetConferenceDescription() const;
-    const HostInfo& GetHostInfo() const;
-    const ConferenceState& GetConferenceState() const;
-    const IMSList<User*>& GetUsers() const;
+    virtual const ConferenceDescription& GetConferenceDescription() const;
+    virtual const HostInfo& GetHostInfo() const;
+    virtual const ConferenceState& GetConferenceState() const;
+    virtual const ImsList<User*>& GetUsers() const;
 
-    inline IMS_UINT32 GetState() const { return m_nState; }
-    inline IMS_SINT32 GetVersion() const { return m_nVersion; }
+    virtual inline IMS_UINT32 GetState() const { return m_nState; }
+    virtual inline IMS_SINT32 GetVersion() const { return m_nVersion; }
 
-    IMS_BOOL Parse(IN const AString& strConferenceInfoPackage);
+    virtual IMS_BOOL Parse(IN const AString& strConferenceInfoPackage);
 
 private:
     void CreateConferenceInfo(IN const IElement* piElement);
@@ -231,8 +231,8 @@ private:
 
     const IElement* GetSubElement(
             IN const IElement* piElement, IN const IMS_CHAR* pszSubElementName);
-    const IMSList<IElement*>& GetSubElements(IN const IElement* piElement,
-            IN const IMS_CHAR* pszSubElementName, OUT IMSList<IElement*>& objSubElements);
+    const ImsList<IElement*>& GetSubElements(IN const IElement* piElement,
+            IN const IMS_CHAR* pszSubElementName, OUT ImsList<IElement*>& objSubElements);
     const AString& GetSubElementValue(IN const IElement* piElement,
             IN const IMS_CHAR* pszSubElementName, OUT AString& strSubElementValue);
 
@@ -279,7 +279,7 @@ private:
     ConferenceDescription m_objConferenceDescription;
     HostInfo m_objHostInfo;
     ConferenceState m_objConferenceState;
-    IMSList<User*> m_objUsers;
+    ImsList<User*> m_objUsers;
 
     IMS_UINT32 m_nState;
     IMS_SINT32 m_nVersion;

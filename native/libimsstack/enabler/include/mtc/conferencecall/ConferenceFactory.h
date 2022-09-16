@@ -20,16 +20,18 @@
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
-class IConferenceReference;
-class ConferenceSubscription;
-class IMtcContext;
-class ConferenceParticipantList;
-class IConferenceSubscriptionListener;
-class IConferenceReferenceListener;
 class CallConnectionIdManager;
-class IMtcCallContext;
-class ConferenceOperationQueue;
 class ConferenceEventNotifier;
+class ConferenceInfo;
+class ConferenceInfoUpdater;
+class ConferenceOperationQueue;
+class ConferenceParticipantList;
+class ConferenceSubscription;
+class IConferenceReference;
+class IConferenceReferenceListener;
+class IConferenceSubscriptionListener;
+class IMtcCallContext;
+class IMtcContext;
 
 class ConferenceFactory
 {
@@ -49,6 +51,8 @@ public:
     virtual ConferenceOperationQueue* CreateOperationQueue();
     virtual ConferenceEventNotifier* CreateEventNotifier(IN IMtcCallContext& objConfCallContext,
             IN CallConnectionIdManager& objConnectionIdManager);
+    virtual ConferenceInfoUpdater* CreateInfoUpdater();
+    virtual ConferenceInfo* CreateInfo();
 
 private:
     IMtcContext& m_objContext;

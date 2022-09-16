@@ -17,6 +17,8 @@
 #include "ServiceTrace.h"
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "conferencecall/ConferenceFactory.h"
+#include "conferencecall/ConferenceInfo.h"
+#include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "conferencecall/ConferenceParticipantList.h"
 #include "conferencecall/ConferenceReference.h"
@@ -43,7 +45,7 @@ PUBLIC VIRTUAL ConferenceSubscription* ConferenceFactory::CreateSubscription(
         IN CallKey nConfCallKey, IN ConferenceParticipantList& objList,
         IN IConferenceSubscriptionListener& objListener)
 {
-    return new ConferenceSubscription(m_objContext, nConfCallKey, objList, objListener);
+    return new ConferenceSubscription(m_objContext, nConfCallKey, objList, objListener, *this);
 }
 
 PUBLIC VIRTUAL IConferenceReference* ConferenceFactory::CreateReference(IN CallKey nConfCallKey,
@@ -72,4 +74,14 @@ PUBLIC VIRTUAL ConferenceEventNotifier* ConferenceFactory::CreateEventNotifier(
         IN IMtcCallContext& objConfCallContext, IN CallConnectionIdManager& objConnectionIdManager)
 {
     return new ConferenceEventNotifier(objConfCallContext, objConnectionIdManager);
+}
+
+PUBLIC VIRTUAL ConferenceInfoUpdater* ConferenceFactory::CreateInfoUpdater()
+{
+    return new ConferenceInfoUpdater(*this);
+}
+
+PUBLIC VIRTUAL ConferenceInfo* ConferenceFactory::CreateInfo()
+{
+    return new ConferenceInfo();
 }
