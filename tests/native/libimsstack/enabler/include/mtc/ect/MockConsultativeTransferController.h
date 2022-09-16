@@ -18,7 +18,6 @@
 #define MOCK_CONSULTATIVE_CONTROLLER_H_
 
 #include <gmock/gmock.h>
-#include "AString.h"
 #include "IMtcContext.h"
 #include "call/IMtcCall.h"
 #include "ect/ConsultativeTransferController.h"
