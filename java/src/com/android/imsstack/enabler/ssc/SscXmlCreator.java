@@ -537,7 +537,26 @@ public class SscXmlCreator {
                         data.getCondition());
             }
 
-            return updateRuleElement(doc, slotId, ruleId, data.getState());
+            Element cbRuleElement = updateRuleElement(doc, slotId, ruleId, data.getState());
+            if (cbRuleElement == null) {
+                return null;
+            }
+
+            String allowTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.ALLOW);
+            Element allowElement = getElementByTagName(cbRuleElement, allowTag);
+            if (allowElement == null) {
+                allowElement = doc.createElement(allowTag);
+                String actionsTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.ACTIONS);
+                Element actionsElement = getElementByTagName(cbRuleElement, actionsTag);
+                if (actionsElement == null) {
+                    actionsElement = doc.createElement(actionsTag);
+                    cbRuleElement.appendChild(actionsElement);
+                }
+                actionsElement.appendChild(allowElement);
+            }
+            allowElement.setTextContent("false");
+
+            return cbRuleElement;
         }
 
         private Element createCbRuleAndRuleSet(Document doc, SscServiceData data) {
@@ -560,15 +579,6 @@ public class SscXmlCreator {
             if (cbRuleElement == null) {
                 return null;
             }
-
-            String actionTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.ACTIONS);
-            Element actionElement = doc.createElement(actionTag);
-            cbRuleElement.appendChild(actionElement);
-
-            String allowTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.ALLOW);
-            Element allowElement = doc.createElement(allowTag);
-            allowElement.setTextContent("false");
-            actionElement.appendChild(allowElement);
 
             return cbServiceElement;
         }
