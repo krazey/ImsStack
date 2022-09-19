@@ -89,6 +89,8 @@ protected:
         delete pIdManager;
         delete pNotifier;
         delete pAnyReason;
+        delete pParticipantList;
+        delete pParticipant;
     }
 
     void SetUpMockParticipantList()

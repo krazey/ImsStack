@@ -21,7 +21,6 @@
 #include "MockIMtcContext.h"
 #include "helper/MockICallStateProxy.h"
 
-using ::testing::Return;
 using ::testing::ReturnRef;
 
 LOCAL IMS_SINT32 SLOT_ID = 0;

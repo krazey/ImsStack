@@ -51,7 +51,7 @@ namespace android
 
 LOCAL CallKey CONFERENCE_CALL_KEY = 100;
 LOCAL CallKey JOINING_CALL_KEY = 101;
-LOCAL IMS_UINT32 JOINGING_CALL_ID = 1000;
+LOCAL IMS_UINT32 JOINING_CALL_ID = 1000;
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
 class ConferenceReferenceTest : public ::testing::Test
@@ -106,7 +106,7 @@ protected:
                 .WillByDefault(Return(pMockReferenceInterfaceHolder));
 
         pMockConnectionIdManager = new MockCallConnectionIdManager(objMockContext);
-        ON_CALL(*pMockConnectionIdManager, GetCallKey(JOINGING_CALL_ID))
+        ON_CALL(*pMockConnectionIdManager, GetCallKey(JOINING_CALL_ID))
                 .WillByDefault(Return(JOINING_CALL_KEY));
 
         CreateCalls();
@@ -125,7 +125,7 @@ protected:
     {
         // TODO: when multiple ConfUser logic is added, this should be updated
         objUser.strUserEntity = "sip:testUser@ims.google.com";
-        objUser.nConnectionId = JOINGING_CALL_ID;
+        objUser.nConnectionId = JOINING_CALL_ID;
 
         pConferenceReference = new ConferenceReference(
                 objMockContext, CONFERENCE_CALL_KEY, &objUser, objMockListener);
