@@ -77,4 +77,7 @@
     <!-- Ut/Xcap Config -->
     <string name="imsss.xcap_auid_prefix_string">/xcap.test.3gpp.com</string>
 
+    <!-- Ut/Xcap Assets -->
+    <boolean name="ut_oir_tir_always_temporary_mode_bool" value="false"/>
+
 </carrier_config>
