@@ -110,8 +110,11 @@ PUBLIC VIRTUAL void TextNego::CreateProfiles(
 
 PUBLIC VIRTUAL IMS_BOOL TextNego::FormSDP(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
-        IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable)
+        IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode)
 {
+    IMS_TRACE_D("FormSDP() - eDir[%d], bDisable[%d] EnforceReofferMode[%d]", eDir, bDisable,
+            bEnforceReofferMode);
+
     switch (eNegoState)
     {
         case STATE_IDLE:
@@ -119,7 +122,8 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::FormSDP(IN NEGO_STATE eNegoState,
         case STATE_OFFER_RECEIVED:
             return FormAnswer(pSessionDescriptor, pDescriptor, eDir, bDisable);
         case STATE_NEGOTIATED:
-            return FormReoffer(pSessionDescriptor, pDescriptor, eDir, bDisable);
+            return FormReoffer(
+                    pSessionDescriptor, pDescriptor, eDir, bDisable, bEnforceReofferMode);
         default:
             return IMS_FALSE;
     }
@@ -664,12 +668,14 @@ PRIVATE IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
 
 PRIVATE
 IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable)
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+        IN IMS_BOOL bEnforceReofferMode)
 {
     IMS_TRACE_I("FormReoffer() - pDescriptor[%" PFLS_x "], eDir[%d], OaModel Size(%d)", pDescriptor,
             eDir, m_listOaModel.GetSize());
 
-    IMS_TRACE_D("TextNego - FormReoffer() - eDir[%d] bDisable[%d]", eDir, bDisable, 0);
+    IMS_TRACE_D("TextNego - FormReoffer() - eDir[%d] bDisable[%d] EnforceReofferMode[%d]", eDir,
+            bDisable, bEnforceReofferMode);
 
     // Handling exception case
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
@@ -700,20 +706,40 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             return IMS_FALSE;
         }
 
-        if (pPrevOaModel->pNegotiatedProfile->lstPayload.GetSize() == 0)
+        MediaSessionConfig* pMediaSessionConfig =
+                MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
+                        GetSlotId(), m_pEnvironment->eServiceType);
+
+        if (pMediaSessionConfig == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
+        if (pPrevOaModel->pNegotiatedProfile->lstPayload.GetSize() == 0 ||
+                bEnforceReofferMode == IMS_TRUE)
         {
             pNewOaModel->pLocalProfile = new TextProfile(m_objBaseProfile);
+            IMS_TRACE_I("TextNego::FormReOffer() - Fullcapa - enforce reoffer[%d]",
+                    bEnforceReofferMode, 0, 0);
         }
         else
         {
-            if (m_objBaseProfile.lstPayload.GetSize() > 0)
+            if (pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_TRUE)
             {
-                IMS_TRACE_I("FormReoffer() - Fullcapa", 0, 0, 0);
-                pNewOaModel->pLocalProfile = new TextProfile(m_objBaseProfile);
+                if (m_objBaseProfile.lstPayload.GetSize() > 0)
+                {
+                    IMS_TRACE_I("FormReoffer() - Fullcapa", 0, 0, 0);
+                    pNewOaModel->pLocalProfile = new TextProfile(m_objBaseProfile);
+                }
+                else
+                {
+                    // this case is only for reoffer but no src profile payload existed
+                    IMS_TRACE_I("FormReoffer() - src profile is empty, use nego profile", 0, 0, 0);
+                    pNewOaModel->pLocalProfile = new TextProfile(*pPrevOaModel->pNegotiatedProfile);
+                }
             }
             else
             {
-                // this case is only for reoffer but no src profile payload existed
                 IMS_TRACE_I("FormReoffer() - src profile is empty, use nego profile", 0, 0, 0);
                 pNewOaModel->pLocalProfile = new TextProfile(*pPrevOaModel->pNegotiatedProfile);
             }

@@ -124,11 +124,12 @@ PUBLIC VIRTUAL void VideoNego::DestroyProfiles()
 
 PUBLIC VIRTUAL IMS_BOOL VideoNego::FormSDP(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
-        IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable)
+        IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode)
 {
     IMS_TRACE_I("FormSDP() - NegoState[%d], lstOaModel size[%d]", eNegoState,
             m_listOaModel.GetSize(), 0);
     IMS_TRACE_I("FormSDP() - eDirection[%d], bDisable[%d]", eDirection, bDisable, 0);
+    IMS_TRACE_D("FormSDP() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
 
     switch (eNegoState)
     {
@@ -137,7 +138,8 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::FormSDP(IN NEGO_STATE eNegoState,
         case STATE_OFFER_RECEIVED:
             return FormAnswer(pSessionDescriptor, pDescriptor, eDirection, bDisable);
         case STATE_NEGOTIATED:
-            return FormReoffer(pSessionDescriptor, pDescriptor, eDirection, bDisable);
+            return FormReoffer(
+                    pSessionDescriptor, pDescriptor, eDirection, bDisable, bEnforceReofferMode);
         default:
             return IMS_FALSE;
     }
@@ -628,11 +630,13 @@ PRIVATE IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor
 }
 
 PRIVATE IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable)
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable,
+        IN IMS_BOOL bEnforceReofferMode)
 {
     IMS_TRACE_I("FormReoffer() - pDescriptor[%" PFLS_x "], eDirection[%d], OaModel Size[%d]",
             pDescriptor, eDirection, m_listOaModel.GetSize());
-    IMS_TRACE_I("FormReoffer() - bDisable[%d]", bDisable, 0, 0);
+    IMS_TRACE_I("FormReoffer() - bDisable[%d] EnforceReofferMode[%d]", bDisable,
+            bEnforceReofferMode, 0);
 
     // Handling exception case
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
@@ -656,6 +660,10 @@ PRIVATE IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescripto
         return IMS_FALSE;
     }
 
+    MediaSessionConfig* pMediaSessionConfig =
+            MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
+                    GetSlotId(), m_pEnvironment->eServiceType);
+
     if (m_listOaModel.GetSize() == 0)
     {
         pNewOaModel->pLocalProfile = new VideoProfile(m_objBaseProfile);
@@ -673,11 +681,38 @@ PRIVATE IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescripto
         if (pPrevOaModel->pNegotiatedProfile != IMS_NULL &&
                 pPrevOaModel->pNegotiatedProfile->nDataPort == 0 && bDisable == IMS_TRUE)
         {
-            pNewOaModel->pLocalProfile = new VideoProfile(*pPrevOaModel->pNegotiatedProfile);
+            if (pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_TRUE)
+            {
+                IMS_TRACE_D("VideoNego::FormReOffer() - Try to Full Capability", 0, 0, 0);
+                pNewOaModel->pLocalProfile = new VideoProfile(m_objBaseProfile);
+            }
+            else
+            {
+                IMS_TRACE_D("VideoNego::FormReOffer() - Try to Negotiated Capability", 0, 0, 0);
+                pNewOaModel->pLocalProfile = new VideoProfile(*pPrevOaModel->pNegotiatedProfile);
+            }
         }
         else
         {
-            pNewOaModel->pLocalProfile = new VideoProfile(m_objBaseProfile);
+            // pNewOaModel->pLocalProfile = new VideoProfile(m_objBaseProfile);  //org
+            if (bEnforceReofferMode == IMS_TRUE)
+            {
+                pNewOaModel->pLocalProfile = new VideoProfile(m_objBaseProfile);
+            }
+            else
+            {
+                if (pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_TRUE)
+                {
+                    IMS_TRACE_D("VideoNego::FormReOffer() - Try to Full Capability", 0, 0, 0);
+                    pNewOaModel->pLocalProfile = new VideoProfile(m_objBaseProfile);
+                }
+                else
+                {
+                    IMS_TRACE_D("VideoNego::FormReOffer() - Try to Negotiated Capability", 0, 0, 0);
+                    pNewOaModel->pLocalProfile =
+                            new VideoProfile(*pPrevOaModel->pNegotiatedProfile);
+                }
+            }
         }
     }
 

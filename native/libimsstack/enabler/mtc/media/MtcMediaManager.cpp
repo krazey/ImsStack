@@ -364,7 +364,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN Ca
     MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromCallType(eCallType);
 
     IMS_BOOL bResult = m_piMediaSession->FormSDP(GetMediaNegoId(piSession), piSession, eContents,
-            m_pMediaInfo->eADir, m_pMediaInfo->eVDir, m_pMediaInfo->eTDir);
+            m_pMediaInfo->eADir, m_pMediaInfo->eVDir, m_pMediaInfo->eTDir, IMS_FALSE);
 
     if (!bResult)
     {

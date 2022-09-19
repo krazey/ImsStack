@@ -83,7 +83,8 @@ public:
     virtual IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID);
     virtual IMS_BOOL FormSDP(IN IMS_UINTP nNegoID, OUT ISession* pSession,
             IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
-            IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection = -1);
+            IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection = -1,
+            IN IMS_BOOL bEnforceReofferMode = IMS_FALSE);
     virtual IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID, IN ISession* pSession,
             OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
             OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason);

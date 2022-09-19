@@ -31,7 +31,8 @@ public:
             (IN MediaEnvironment * pEnvironment, IN AudioConfiguration* pConfig), (override));
     MOCK_METHOD(IMS_BOOL, FormSDP,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
-                    OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir),
+                    OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
+                    IN IMS_BOOL bEnforceReofferMode),
             (override));
     MOCK_METHOD(void, NegotiateSDP,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,

@@ -32,7 +32,7 @@ public:
     MOCK_METHOD(IMS_BOOL, FormSDP,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
-                    IN IMS_BOOL bDisable),
+                    IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode),
             (override));
     MOCK_METHOD(void, NegotiateSDP,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,

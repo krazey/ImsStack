@@ -94,11 +94,13 @@ public:
      * @param nAudioDirection The direction of audio m-line in SDP to form
      * @param nVideoDirection The direction of video m-line in SDP to form
      * @param nTextDirection The direction of text m-line in SDP to form
+     * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
      * @return IMS_BOOL Returns IMS_TRUE when form SDP successfully, IMS_FALSE when it is failed
      */
     virtual IMS_BOOL FormSDP(IN IMS_UINTP nNegoID, OUT ISession* pSession,
             IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
-            IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection = -1) = 0;
+            IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection = -1,
+            IN IMS_BOOL bEnforceReofferMode = IMS_FALSE) = 0;
 
     /**
      * @brief Negotiate the SDP to the target dialog with the direction parameters for each
