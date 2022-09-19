@@ -24,8 +24,10 @@
         <item value="1"/>
     </int-array>
 
-    <!-- Ut/Xcap Assets -->
-    <int name="ut_oir_network_default_operation_int" value="1"/>
+    <!-- Ut/Xcap AOSP -->
+    <int name="imsss.ut_as_server_port_int" value="8090"/>
+    <!-- Ut/Xcap Config -->
+    <string name="imsss.xcap_auid_prefix_string">/MyService</string>
 
     <!-- USSD overIMS if volte registered -->
     <int name="carrier_ussd_method_int" value="1"/>
