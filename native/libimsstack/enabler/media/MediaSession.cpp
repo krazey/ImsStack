@@ -622,6 +622,27 @@ PUBLIC VIRTUAL void MediaSession::SetNetworkToneRTPTimer(
     m_nRtpTimer = nRtpTimer;
 }
 
+PUBLIC VIRTUAL IMS_BOOL MediaSession::NotifySrvccStatus(IN MEDIA_SRVCC_STATUS nStatus)
+{
+    IMS_TRACE_I("NotifySrvccStatus() - nStatus[%d]", nStatus, 0, 0);
+
+    switch (nStatus)
+    {
+        default:
+        case MEDIA_SRVCC_IDLE:
+            break;
+        case MEDIA_SRVCC_STARTED:
+            return m_objAudioController.UpdateMediaDirection(MEDIA_DIRECTION_INVALID);
+        case MEDIA_SRVCC_SUCCEED:
+            return m_objAudioController.CloseSession();
+        case MEDIA_SRVCC_FAILED:
+        case MEDIA_SRVCC_CANCELED:
+            return m_objAudioController.UpdateMediaDirection(MEDIA_DIRECTION_INVALID, IMS_TRUE);
+    }
+
+    return IMS_FALSE;
+}
+
 PUBLIC VIRTUAL IMS_BOOL MediaSession::SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
 {
     return OnMessage(nMsg, pParam);
@@ -698,7 +719,7 @@ IMS_BOOL MediaSession::DeleteMediaNego(IN IMS_UINTP nNegoId)
 
     if (nIndex < 0)
     {
-        IMS_TRACE_E(0, "DeleteMediaNego() - invalid nNegoId[%d]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "DeleteMediaNego() - invalid nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return IMS_FALSE;
     }
 

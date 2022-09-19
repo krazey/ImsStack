@@ -208,6 +208,15 @@ public:
             IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer) = 0;
 
     /**
+     * @brief Notify the srvcc status to MediaSession to update media stream
+     *
+     * @param nStatus The status defined in MediaDef.h
+     * @return IMS_TRUE when the status update is done in right state. The status of the
+     * AudioMediaSession is invalid, returns IMS_FALSE.
+     */
+    virtual IMS_BOOL NotifySrvccStatus(IN MEDIA_SRVCC_STATUS nStatus) = 0;
+
+    /**
      * @brief Send the message event to the Audio/Video/TextMediaSession
      *
      * @param nMsg The message type

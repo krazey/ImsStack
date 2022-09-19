@@ -78,17 +78,19 @@ public:
             IN AudioProfile* pNegoProfile);
 
     /**
-     * @brief Check the media direction is a hold type
-     *
-     * @return IMS_BOOL Returns IMS_TRUE when is it hold type, IMS_FALSE if it is not
+     * @brief Get the media direction configured most recently
      */
-    IMS_BOOL IsDirectionHold();
+    MEDIA_DIRECTION GetMediaDirection();
 
     /**
-     * @brief Set the RtpConfig parameters for hold state
-     *
+     * @brief Set the media direction
      */
-    void HoldRtpConfig();
+    void SetMediaDirection(IN MEDIA_DIRECTION eDirection);
+
+    /**
+     * @brief Get the previous media direction
+     */
+    MEDIA_DIRECTION GetPrevMediaDirection();
 
     /**
      * @brief Update MediaQualityThreshold parameters and send it to the java
@@ -160,6 +162,7 @@ protected:
     IPAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
     IMSList<IMS_UINTP> m_listNegoId;
+    MEDIA_DIRECTION m_nPrevMediaDirection;
 };
 
 #endif /* End of _IMS_AUDIO_MEDIA_SESSION_H_*/

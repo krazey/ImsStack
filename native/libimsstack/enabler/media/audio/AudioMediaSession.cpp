@@ -394,18 +394,57 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN AudioProfile* pLocalProfile,
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::IsDirectionHold()
+MEDIA_DIRECTION AudioMediaSession::GetMediaDirection()
 {
     IMS_UINT32 nDirection = m_objAudioConfig.getMediaDirection();
-    IMS_TRACE_D("IsDirectionHold() - m_objAudioConfig direction[%d]", nDirection, 0, 0);
-    return (nDirection == (IMS_UINT32)RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE) ? IMS_FALSE
-                                                                               : IMS_TRUE;
+
+    switch (nDirection)
+    {
+        case RtpConfig::MEDIA_DIRECTION_NO_FLOW:
+            return MEDIA_DIRECTION_INVALID;
+        case RtpConfig::MEDIA_DIRECTION_SEND_ONLY:
+            return MEDIA_DIRECTION_SEND;
+        case RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY:
+            return MEDIA_DIRECTION_RECEIVE;
+        case RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE:
+            return MEDIA_DIRECTION_SEND_RECEIVE;
+        case RtpConfig::MEDIA_DIRECTION_INACTIVE:
+            return MEDIA_DIRECTION_INACTIVE;
+    }
+
+    return MEDIA_DIRECTION_INVALID;
 }
 
 PUBLIC
-void AudioMediaSession::HoldRtpConfig()
+void AudioMediaSession::SetMediaDirection(IN MEDIA_DIRECTION eDirection)
 {
-    m_objAudioConfig.setMediaDirection((int32_t)RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
+    IMS_TRACE_D("SetMediaDirection() - eDirection[%d]", eDirection, 0, 0);
+    m_nPrevMediaDirection = GetMediaDirection();
+
+    switch (eDirection)
+    {
+        case MEDIA_DIRECTION_INVALID:
+            m_objAudioConfig.setMediaDirection(RtpConfig::MEDIA_DIRECTION_NO_FLOW);
+            break;
+        case MEDIA_DIRECTION_SEND:
+            m_objAudioConfig.setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_ONLY);
+            break;
+        case MEDIA_DIRECTION_RECEIVE:
+            m_objAudioConfig.setMediaDirection(RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
+            break;
+        case MEDIA_DIRECTION_SEND_RECEIVE:
+            m_objAudioConfig.setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+            break;
+        case MEDIA_DIRECTION_INACTIVE:
+            m_objAudioConfig.setMediaDirection(RtpConfig::MEDIA_DIRECTION_INACTIVE);
+            break;
+    }
+}
+
+PUBLIC
+MEDIA_DIRECTION AudioMediaSession::GetPrevMediaDirection()
+{
+    return m_nPrevMediaDirection;
 }
 
 PUBLIC
@@ -506,7 +545,7 @@ IMS_BOOL AudioMediaSession::Modify()
 
         if (bResult == IMS_TRUE)
         {
-            if (IsDirectionHold())
+            if (MEDIA_DIRECTION_IS_AUDIO_HOLD(GetMediaDirection()))
             {
                 m_nState = STATE_PAUSED;
             }
