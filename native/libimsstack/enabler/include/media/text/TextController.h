@@ -98,6 +98,13 @@ public:
     IMS_BOOL UpdateLocalAddress(IN TextNego* pNego);
 
     /**
+     * @brief Update AccessNetwork information in the RtpConfig
+     *
+     * @param nAccessNetwork : AccessNetwork information
+     */
+    void UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork);
+
+    /**
      * @brief Update MediaQualityThreshold and send message to java
      *
      * @param pNego The negotiated profile to get the negotiated parameter

@@ -184,6 +184,14 @@ void TextMediaSession::HoldRtpConfig()
 }
 
 PUBLIC
+void TextMediaSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
+{
+    m_objTextConfig.setAccessNetwork(nAccessNetwork);
+    IMS_TRACE_D(
+            "UpdateAccessNetwork() - accessNetwork[%d]", m_objTextConfig.getAccessNetwork(), 0, 0);
+}
+
+PUBLIC
 IMS_BOOL TextMediaSession::UpdateMediaQualityThreshold(IN IMS_BOOL bIsHold, IN IMS_BOOL bEnableRtcp)
 {
     if (bIsHold == IMS_TRUE)

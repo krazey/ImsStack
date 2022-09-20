@@ -66,7 +66,7 @@ public:
     virtual void NotifyWifiEarlyRouteSetup(IN IMS_UINT32 nNetworkInferfaceID);
     virtual IMediaConnectionWatcher* GetMediaConnectionWatcher();
     virtual IMS_BOOL GetMediaConnectionWatcherInfo(IN IPAddress& objIpAddress,
-            OUT IMS_BOOL& bWIFICondition, OUT IMS_UINT32& nNetworkInterfaceId);
+            OUT IMS_SINT32& nMediaConnectionType, OUT IMS_UINT32& nNetworkInterfaceId);
     virtual IMS_UINT32 GetRtpFragmentSize(IN IPAddress& objIpAddress);
     // == PRIVATE METHOD ============================================================
     virtual INetworkConnection* GetNetConnection(IN MEDIA_SERVICE_TYPE eServiceType);

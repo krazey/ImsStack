@@ -27,13 +27,35 @@ class IMediaConnectionWatcher
 public:
     enum
     {
-        MEDIA_CONNECTION_INVALID = -1,
-
-        MEDIA_CONNECTION_MOBILE,
-        MEDIA_CONNECTION_MOBILE_EPDG,
-        MEDIA_CONNECTION_WIFI,
-
-        MEDIA_CONNECTION_MAX = -1,
+        /**
+         * Unknown access network
+         */
+        UNKNOWN = 0,
+        /**
+         * GSM EDGE Radio Access Network
+         */
+        GERAN,
+        /**
+         * Universal Terrestrial Radio Access Network
+         */
+        UTRAN,
+        /**
+         * Evolved Universal Terrestrial Radio Access Network
+         */
+        EUTRAN,
+        /**
+         * CDMA 2000 network
+         */
+        CDMA2000,
+        /**
+         * Interworking Wireless LAN
+         */
+        IWLAN,
+        /**
+         * Next-Generation Radio Access Network (NGRAN).
+         * Note NGRAN is only for standalone mode. Non-standalone mode uses AccessNetwork EUTRAN.
+         */
+        NGRAN,
     };
 
 public:

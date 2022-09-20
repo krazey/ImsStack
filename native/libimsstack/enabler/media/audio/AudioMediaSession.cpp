@@ -171,8 +171,9 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN AudioProfile* pLocalProfile,
             0);
     IMS_TRACE_D("UpdateRtpConfig() - RemoteAddress[%s], RemotePort[%d]",
             m_objAudioConfig.getRemoteAddress().c_str(), m_objAudioConfig.getRemotePort(), 0);
-    IMS_TRACE_D("UpdateRtpConfig() - Dscp[%d], , MediaDirection[%d]", m_objAudioConfig.getDscp(),
-            m_objAudioConfig.getMediaDirection(), 0);
+    IMS_TRACE_D("UpdateRtpConfig() - Dscp[%d], , MediaDirection[%d] , AccessNetwork[%d]",
+            m_objAudioConfig.getDscp(), m_objAudioConfig.getMediaDirection(),
+            m_objAudioConfig.getAccessNetwork());
 
     // RTCP
     RtcpConfig* pRtcpConfig = new RtcpConfig();
@@ -428,6 +429,14 @@ PUBLIC
 MEDIA_DIRECTION AudioMediaSession::GetPrevMediaDirection()
 {
     return m_nPrevMediaDirection;
+}
+
+PUBLIC
+void AudioMediaSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
+{
+    m_objAudioConfig.setAccessNetwork(nAccessNetwork);
+    IMS_TRACE_D(
+            "UpdateAccessNetwork() - accessNetwork[%d]", m_objAudioConfig.getAccessNetwork(), 0, 0);
 }
 
 PUBLIC

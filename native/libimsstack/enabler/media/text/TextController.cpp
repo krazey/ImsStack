@@ -174,6 +174,17 @@ IMS_BOOL TextController::UpdateRtpConfig(IN TextNego* pNego)
 }
 
 PUBLIC
+void TextController::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
+{
+    IMS_TRACE_I("UpdateAccessNetwork() - accessNetwork[%d]", nAccessNetwork, 0, 0);
+
+    if (m_pSession != IMS_NULL)
+    {
+        m_pSession->UpdateAccessNetwork(nAccessNetwork);
+    }
+}
+
+PUBLIC
 IMS_BOOL TextController::UpdateQualityThreshold(IN TextNego* pNego)
 {
     IMS_TRACE_I("UpdateQualityThreshold()", 0, 0, 0);
