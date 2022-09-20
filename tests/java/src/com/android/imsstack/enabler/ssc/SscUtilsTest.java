@@ -22,9 +22,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.telephony.CarrierConfigManager;
+import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.ITelephonySubscriber;
+import com.android.imsstack.core.agents.ImsRadioInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -445,6 +447,34 @@ public class SscUtilsTest {
         String uri = mSscUtils.getUriFromNumber(SLOT_0, "+81234567890");
 
         assertEquals("tel:0234567890;phone-context=operator.com", uri);
+    }
+
+    @Test
+    public void convertToImsRadioNetworkType() {
+        assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_IWLAN,
+                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_IWLAN));
+
+        assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN,
+                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_UMTS));
+        assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN,
+                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_HSDPA));
+        assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN,
+                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_HSUPA));
+        assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN,
+                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_HSPA));
+        assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN,
+                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_HSPAP));
+        assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN,
+                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_TD_SCDMA));
+
+        assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_EUTRAN,
+                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_LTE));
+
+        assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_NGRAN,
+                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_NR));
+
+        assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UNKNOWN,
+                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_UNKNOWN));
     }
 
     private class FakeSscUtils extends SscUtils {

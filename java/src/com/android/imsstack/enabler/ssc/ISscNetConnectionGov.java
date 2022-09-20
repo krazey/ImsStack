@@ -53,6 +53,11 @@ public interface ISscNetConnectionGov {
     void disconnect(int slotId);
 
     /**
+     * Call getNetworkType() of SscNetConnection for a given slotId
+     */
+    int getNetworkType(int slotId);
+
+    /**
      * Call setCallbackHandler() of SscNetConnection for a given slotId
      */
     void setCallbackHandler(int slotId, Handler handler);
