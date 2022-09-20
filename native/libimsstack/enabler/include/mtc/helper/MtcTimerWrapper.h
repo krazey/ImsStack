@@ -23,22 +23,22 @@
 
 class IMtcTimerListener;
 
-class MtcTimerWrapper final : public ITimerListener
+class MtcTimerWrapper : public ITimerListener
 {
 public:
     explicit MtcTimerWrapper();
-    ~MtcTimerWrapper();
+    virtual ~MtcTimerWrapper();
     MtcTimerWrapper(IN const MtcTimerWrapper&) = delete;
     MtcTimerWrapper& operator=(IN const MtcTimerWrapper&) = delete;
 
     // ITimerListener implementation
     virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
-    void SetListener(IN IMtcTimerListener* piListener);
-    void Start(IN IMS_UINT32 eType, IN IMS_SINT32 nDuration);
-    void Stop(IN IMS_UINT32 eType);
-    void StopAll();
-    IMS_BOOL IsActive(IN IMS_UINT32 eType);
+    virtual void SetListener(IN IMtcTimerListener* piListener);
+    virtual void Start(IN IMS_UINT32 eType, IN IMS_SINT32 nDuration);
+    virtual void Stop(IN IMS_UINT32 eType);
+    virtual void StopAll();
+    virtual IMS_BOOL IsActive(IN IMS_UINT32 eType);
 
     struct MtcTimer
     {
@@ -64,7 +64,7 @@ public:
 
 private:
     // TODO: IMSMap<type, timer> would be better.
-    IMSList<MtcTimer*> m_lstTimers;
+    ImsList<MtcTimer*> m_lstTimers;
     IMtcTimerListener* m_piListener;
 };
 
