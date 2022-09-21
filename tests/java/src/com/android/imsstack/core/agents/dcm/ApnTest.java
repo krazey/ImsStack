@@ -579,7 +579,7 @@ public class ApnTest {
     @Test
     public void testHandleIpcanCategory_NotHandledApnType() throws Exception {
         // Do no handle IPCAN cagegory change when apn type is not ims or emergency
-        mApn.mType = EApnType.XCAP;
+        mApn.mType = EApnType.INTERNET;
         assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
         assertFalse(mApn.handleIpcanCategory(TelephonyManager.NETWORK_TYPE_IWLAN));
         assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
