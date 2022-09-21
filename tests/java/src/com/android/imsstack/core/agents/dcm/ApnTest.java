@@ -300,6 +300,15 @@ public class ApnTest {
     }
 
     @Test
+    public void testToString() throws Exception {
+        String expectation = ", ApnType= " + mApn.mType
+                + ", DataState= " + mApn.mDataState
+                + ", APNState= " + mApn.mAPNState;
+
+        assertEquals(expectation, mApn.toString());
+    }
+
+    @Test
     public void testRegisterCallback() throws Exception {
         replaceInstance(Apn.class, "mNetworkMonitoringCallback", mApn,
                 mMockNetworkMonitoringCallback);
@@ -532,18 +541,6 @@ public class ApnTest {
         mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
         mApn.updateDataState();
         assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mDataState);
-    }
-
-    @Test
-    public void testUpdateNetworkType() throws Exception {
-        when(mSubscriptionManager.getSubscriptionIds(anyInt())).thenReturn(null);
-        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
-        when(mTelephonyManager.getDataNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_IWLAN);
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mApn.mNetworkType);
-        mApn.updateNetworkType();
-        assertEquals(TelephonyManager.NETWORK_TYPE_IWLAN, mApn.mNetworkType);
     }
 
     @Test

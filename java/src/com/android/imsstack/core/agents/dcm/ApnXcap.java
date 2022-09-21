@@ -140,7 +140,6 @@ public class ApnXcap extends Apn {
                 return;
             }
 
-            mIpcanCategory = getIpcanCategory(mNetworkType);
             ImsLog.i(mSlotId, "IP Connectivity Access Network : " + mIpcanCategory);
 
             // Check to get Ipv6

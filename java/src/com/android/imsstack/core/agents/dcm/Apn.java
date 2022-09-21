@@ -52,7 +52,6 @@ import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
@@ -595,17 +594,6 @@ public abstract class Apn extends Handler implements IApn {
             }
             sendDataStateUpdateMessage(mType, EDataState.convertIntTypeToEnum(
                     (EDataState.convertFromTMtoImsType(mDataState))));
-        }
-    }
-
-    protected void updateNetworkType() {
-        ImsLog.i(mSlotId, "Update connected data network type");
-
-        TelephonyManager tm = AppContext.getTelephonyManager(MSimUtils.getSubId(mSlotId));
-        if (tm != null) {
-            mNetworkType = tm.getDataNetworkType();
-        } else {
-            ImsLog.i(mSlotId, "TelephonyManager is null");
         }
     }
 
@@ -1295,6 +1283,11 @@ public abstract class Apn extends Handler implements IApn {
                         }
                     }
                     if (mNetworkType != networkType) {
+                        if (mNetworkType == TelephonyManager.NETWORK_TYPE_UNKNOWN
+                                || isIpcanChanged(networkType)) {
+                            handleIpcanCategory(networkType);
+                        }
+
                         // update network type
                         ImsLog.i(mSlotId, "network type :: " + mNetworkType + " >> " + networkType);
                         mNetworkType = networkType;
@@ -1340,7 +1333,6 @@ public abstract class Apn extends Handler implements IApn {
         private void handleHandoverSuccess(int networkType) {
             ImsLog.i(mSlotId, "handleHandoverSuccess");
             notifyHandoverInfoChanged(HANDOVER_SUCCESS, networkType, DataFailCause.NONE);
-            handleIpcanCategory(networkType);
         }
 
         private void handleHandoverFailure(int networkType, int causeCode) {

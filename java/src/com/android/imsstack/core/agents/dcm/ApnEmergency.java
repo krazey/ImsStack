@@ -129,12 +129,6 @@ public class ApnEmergency extends Apn {
                         + ", apn string = " + mApnString + ", network type = " + mNetworkType);
 
                 setDataState(curDataState);
-
-                if (mNetworkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
-                    updateNetworkType();
-                }
-                handleIpcanCategory(mNetworkType);
-
                 sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_CONNECTED);
             }
         }
