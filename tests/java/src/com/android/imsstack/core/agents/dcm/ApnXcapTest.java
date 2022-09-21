@@ -38,6 +38,7 @@ import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
+import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
@@ -151,6 +152,7 @@ public class ApnXcapTest {
     @Test
     public void testHandleNetworkAvailable() throws Exception {
         replaceInstance(Apn.class, "mDcApn", mApnXcap, mMockIDcApn);
+        replaceInstance(Apn.class, "mNetworkType", mApnXcap, TelephonyManager.NETWORK_TYPE_IWLAN);
         when(mMockIDcApn.getLocalAddress(EApnType.XCAP.getType(), 1)).thenReturn(null);
 
         // if apn is not requested, ignore event
@@ -176,7 +178,8 @@ public class ApnXcapTest {
         mApnXcap.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
         mTestableLooper.processAllMessages();
 
-        assertEquals(mApnXcap.getDataState(), TelephonyManager.DATA_CONNECTED);
+        assertEquals(TelephonyManager.DATA_CONNECTED, mApnXcap.getDataState());
+        assertEquals(IApn.IPCAN_CATEGORY_WLAN, mApnXcap.getIpcanCategory());
         verify(mMockIDcNetWatcher, times(1)).notifyResult(
                 EApnType.XCAP, EDataState.DATA_STATE_CONNECTED);
         verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(

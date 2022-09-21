@@ -646,7 +646,8 @@ public abstract class Apn extends Handler implements IApn {
 
     protected boolean handleIpcanCategory(int networkType) {
         if ((mType.getType() != DcConstants.TYPE_IMS)
-                && (mType.getType() != DcConstants.TYPE_EMERGENCY)) {
+                && (mType.getType() != DcConstants.TYPE_EMERGENCY)
+                && (mType.getType() != DcConstants.TYPE_XCAP)) {
             return false;
         }
 
