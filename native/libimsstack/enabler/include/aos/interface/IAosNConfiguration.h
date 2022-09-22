@@ -1085,7 +1085,7 @@ public:
 
     /**
      * @brief Indicate the list of error responses. It shall not attempt any more IMS registrations
-     *        until power cycled, switched in and out of aireplane mode.
+     *        until power cycled, switched in and out of airplane mode.
      *
      * @return vector permanent error code list
      */

@@ -15,7 +15,20 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Carrier configurations -->
+    <!-- Ims General -->
+    <boolean name="support_country_param_in_pani_header_bool" value="true"/>
+
+    <!-- Aos -->
+    <int-array name="ims.ims_identity_priority_int_array" num="1">
+        <item value="1"/>
+    </int-array>
+    <int-array name="ims.registration_permanent_error_code_int_array" num="1">
+        <item value="403"/>
+    </int-array>
+    <int name="imswfc.registration_private_header_int" value="2"/>
+    <boolean name="ims_deregister_on_3g_networks_bool" value="true"/>
+    <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
+    <int name="registration_retry_min_count_int" value="3"/>
 
     <!-- Ut/Xcap AOSP -->
     <!-- Previous solution was using 80 and TCP, but VDF AU requirements support both TCP and TLS,
