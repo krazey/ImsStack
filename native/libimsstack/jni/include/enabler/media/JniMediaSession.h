@@ -21,6 +21,7 @@
 #include "IMSTypeDef.h"
 #include "JniMediaSessionThread.h"
 #include "IMediaManager.h"
+#include "IJniEnabler.h"
 
 class IJniEnablerThread;
 
@@ -34,8 +35,8 @@ public:
     virtual int SendData(const android::Parcel& objParcel) override;
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINTP nNativeObject);
     void SetMtcCallId(IN IMS_SINTP nCallKey);
+    void NotifyNativeEnablerSet() override;
     IJniEnablerThread* GetJniThread() const override;
-    JniMediaSessionThread* GetThread();
     static IMS_BOOL IsMediaMessage(IN IMS_SINT32 nMsg);
 
 protected:
@@ -44,6 +45,7 @@ protected:
 
 private:
     void SetJniMediaSessionThread();
+    IMediaManager* GetMediaManager();
     MEDIA_CONTENT_TYPE ConvertToMediaType(IN SessionType eSessiontype);
     void OnResponses(
             IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig, IN const android::Parcel& objParcel);
@@ -61,7 +63,6 @@ private:
     JniMediaSessionThread* m_pThread;
     AString m_strThreadName;
     IMS_SINT32 m_nSlotId;
-    IMediaManager* m_piMediaManager;
     IMS_SINTP m_nCallKey;
 };
 

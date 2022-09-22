@@ -17,13 +17,14 @@
 #ifndef _MEDIA_MSG_HANDLER_H_
 #define _MEDIA_MSG_HANDLER_H_
 
-#include "JniMediaSessionThread.h"
 #include "IMMedia.h"
+
+class IJniMediaSessionThread;
 
 class MediaMsgHandler
 {
 public:
-    MediaMsgHandler();
+    MediaMsgHandler(IN IMS_SINT32 nSlotId, IN IMS_SINTP nCallKey);
     virtual ~MediaMsgHandler();
 
     /**
@@ -32,20 +33,6 @@ public:
      * @param strName The thread name of JniMediaSession is using in this call
      */
     virtual void SetListener(IN const AString& strName);
-
-    /**
-     * @brief Set the JniMediaSessionThread instance to get the message from the jni layer
-     *
-     * @param pThread
-     */
-    virtual void SetJniMediaSessionThread(IN IJniMediaSessionThread* pThread);
-
-    /**
-     * @brief
-     *
-     * @return IMS_BOOL
-     */
-    virtual IMS_BOOL IsAvailableToSend();
 
     /**
      * @brief Send jni request message to media service
@@ -59,7 +46,10 @@ public:
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam);
 
 private:
+    IJniMediaSessionThread* GetJniThread();
+
+    IMS_SINT32 m_nSlotId;
     AString m_strListenerThread;
-    IJniMediaSessionThread* m_pThread;
+    IMS_SINTP m_nCallKey; // TODO: IMS_ULONG
 };
 #endif /* _MEDIA_MSG_HANDLER_H_ */

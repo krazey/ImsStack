@@ -25,9 +25,6 @@
 #include "MediaResourceMngr.h"
 #include "IMediaManager.h"
 
-class IJniMediaSessionThread;
-class JniMediaSession;
-
 class MediaManager : public ImsActivityEx, public IMediaManager
 {
 public:
@@ -55,8 +52,9 @@ public:
     static MediaManager* GetInstance(IN IMS_SINT32 nSlotId = 0);
     static AString GetThreadName(IN IMS_SINT32 nSlotId);
     MediaMsgHandler* GetHandler(IN IMS_SINTP nCallKey);
-    virtual void SetJniMediaSessionThread(
-            IN IMS_SINTP nCallKey, IN IJniMediaSessionThread* pThread);
+
+    // TODO: temp inline. move to cpp
+    inline void NotifyJniEnablerSet() override {}
     virtual void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
 
     /**
@@ -66,11 +64,9 @@ public:
      * @param nService service type, normal or emergency
      * @param callKey The key to identify the call session, each MediaSession has a unique key to
      * match with the call session
-     * @param pThread jni thread instance for message communication
      * @return MediaSession* created MediaSession instance
      */
-    MediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP callKey,
-            IN IJniMediaSessionThread* pThread);
+    MediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP callKey);
 
     /**
      * @brief Destroys the MediaSession instance
