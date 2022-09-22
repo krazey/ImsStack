@@ -54,13 +54,13 @@ CallReasonInfo TerminationHandler::GetCallReasonInfoFromSessionTerminationReason
             return CallReasonInfo(CODE_SIP_REQUEST_TIMEOUT, nTerminationReason);
 
         case ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT:
-            return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, nTerminationReason);
+            return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE);
 
         case ISession::TERMINATION_REASON_REFRESH_TIMEOUT:
-            return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, nTerminationReason);
+            return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE);
 
         case ISession::TERMINATION_REASON_SERVICE_CLOSED:
-            return CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE, nTerminationReason);
+            return CallReasonInfo(CODE_LOCAL_NOT_REGISTERED, nTerminationReason);
     }
 
     return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nTerminationReason);

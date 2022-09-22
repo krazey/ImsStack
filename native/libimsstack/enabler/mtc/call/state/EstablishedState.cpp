@@ -71,7 +71,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
     if (HandleUpdate(UpdateType::HOLD, m_objContext.GetSession()->GetCallType(), pMediaInfo) ==
             IMS_FAILURE)
     {
-        // TODO
+        // TODO: CODE_SUPP_SVC_FAILED
     }
 
     delete pMediaInfo;
@@ -84,7 +84,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Resume(IN MediaInfo* pMediaInfo)
     if (HandleUpdate(UpdateType::RESUME, m_objContext.GetSession()->GetCallType(), pMediaInfo) ==
             IMS_FAILURE)
     {
-        // TODO
+        // TODO: CODE_SUPP_SVC_FAILED
     }
 
     delete pMediaInfo;
@@ -100,7 +100,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Update(
 
     if (HandleUpdate(UpdateType::SESSION, eCallType, pMediaInfo) == IMS_FAILURE)
     {
-        // TODO
+        // TODO: CODE_SESSION_MODIFICATION_FAILED
     }
 
     delete pMediaInfo;

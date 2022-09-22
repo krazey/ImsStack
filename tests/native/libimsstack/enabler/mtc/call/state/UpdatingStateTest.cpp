@@ -170,7 +170,7 @@ TEST_F(UpdatingStateTest, HandleSrvccStartedAsModifier)
     ON_CALL(objContext, GetTimer)
             .WillByDefault(ReturnRef(objTimer));
 
-    const CallReasonInfo objReason(CODE_LOCAL_VCC_ON_PROGRESSING);
+    const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
     EXPECT_CALL(objMtcSession, CancelUpdate(objReason))
             .Times(1);
 
@@ -185,7 +185,7 @@ TEST_F(UpdatingStateTest, HandleSrvccStartedAsNotModifier)
     ON_CALL(objContext, GetTimer)
             .WillByDefault(ReturnRef(objTimer));
 
-    const CallReasonInfo objReason(CODE_LOCAL_VCC_ON_PROGRESSING);
+    const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
     EXPECT_CALL(objMtcSession, Reject(objReason))
             .Times(1);
 

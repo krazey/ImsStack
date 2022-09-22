@@ -449,7 +449,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnSrvccStateUpdated(IN SrvccState eSt
             return HandleSrvccStarted();
         case SrvccState::SUCCEEDED:
         {
-            const CallReasonInfo objReason(CODE_LOCAL_VCC_ON_PROGRESSING);
+            const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
             return Terminate(objReason);
         }
         case SrvccState::FAILED:
@@ -567,7 +567,8 @@ void MtcCallState::RunMedia(IN ISession* piSession, IN IMessage* piMessage)
 PROTECTED
 CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason)
 {
-    if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)
+    if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED || // TODO: remove?
+            objReason.nCode == CODE_REJECT_QOS_FAILURE)
     {
         m_objContext.GetPreconditionManager().FormPreconditionSdp(
                 &m_objContext.GetSession()->GetISession(), IMS_TRUE);

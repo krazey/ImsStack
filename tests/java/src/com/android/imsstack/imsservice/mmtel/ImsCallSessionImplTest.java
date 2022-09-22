@@ -265,7 +265,8 @@ public class ImsCallSessionImplTest {
 
         mImsCallSession.setState(ImsCallSessionImplBase.State.RENEGOTIATING);
         mImsCallSession.reject(ImsReasonInfo.CODE_LOCAL_ILLEGAL_STATE);
-        verify(mMockMtcCall, times(1)).reject(CallReasonInfo.CODE_USER_DECLINE);
+        verify(mMockMtcCall, times(1)).reject(
+                CallReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION);
         assertEquals(mImsCallSession.getState(), ImsCallSessionImplBase.State.ESTABLISHED);
 
         mImsCallSession.setState(ImsCallSessionImplBase.State.NEGOTIATING);

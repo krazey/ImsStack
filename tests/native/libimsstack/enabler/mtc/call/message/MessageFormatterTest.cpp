@@ -473,9 +473,8 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
     ON_CALL(*pConfigurationManager, GetIncomingCallRejectCodeForUserDecline)
             .WillByDefault(Return(nTestStatusCode));
     EXPECT_EQ(GetRejectStatusCode(CODE_USER_DECLINE), nTestStatusCode);
-    EXPECT_EQ(GetRejectStatusCode(CODE_USER_NOANSWER), SipStatusCode::SC_603);
-    EXPECT_EQ(GetRejectStatusCode(CODE_LOW_BATTERY), SipStatusCode::SC_603);
-    EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_CALL_END_UNSPECIFIED), SipStatusCode::SC_603);
+    EXPECT_EQ(GetRejectStatusCode(CODE_USER_NOANSWER), SipStatusCode::SC_486);
+    EXPECT_EQ(GetRejectStatusCode(CODE_LOW_BATTERY), SipStatusCode::SC_486);
     EXPECT_EQ(
             GetRejectStatusCode(CODE_REJECT_ONGOING_CALL_WAITING_DISABLED), SipStatusCode::SC_486);
     EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_SERVICE_UNAVAILABLE), SipStatusCode::SC_480);
@@ -496,11 +495,10 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
             SipStatusCode::SC_488);
     EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_606),
             SipStatusCode::SC_606);
-    EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_ONGOING_CALL_UPDATE), SipStatusCode::SC_486);
-    EXPECT_EQ(GetRejectStatusCode(CODE_SESSION_INTERNAL_ERROR), SipStatusCode::SC_480);
+    EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_ONGOING_CALL_UPGRADE), SipStatusCode::SC_486);
+    EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_INTERNAL_ERROR), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED),
             SipStatusCode::SC_580);
-    EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_MEDIA_INIT_FAILED), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_MEDIA_NOT_ACCEPTABLE), SipStatusCode::SC_488);
     ON_CALL(*pConfigurationManager, GetIncomingCallRejectCodeForNoAnswer)
@@ -522,7 +520,7 @@ TEST_F(MessageFormatterTest, GetRejectPhrase)
     EXPECT_EQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_SETUP), strTestPhrase);
     EXPECT_EQ(GetRejectPhrase(CODE_REJECT_MAX_CALL_LIMIT_REACHED), strTestPhrase);
     EXPECT_EQ(GetRejectPhrase(CODE_TIMEOUT_NO_ANSWER), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_UPDATE), strTestPhrase);
+    EXPECT_EQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_UPGRADE), strTestPhrase);
     EXPECT_EQ(GetRejectPhrase(CODE_MEDIA_NOT_ACCEPTABLE), strTestPhrase);
 }
 
@@ -559,7 +557,7 @@ TEST_F(MessageFormatterTest, SetTerminateReason)
     objReasonInfo.nCode = CODE_TIMEOUT_NO_ANSWER;
     pFormatter->FormTerminateMessage(objReasonInfo);
 
-    objReasonInfo.nCode = CODE_EARLYDIALOG_FORKED_TERMINATED_INTERNALONLY;
+    objReasonInfo.nCode = CODE_INTERNAL_EARLYDIALOG_FORKED_TERMINATED;
     pFormatter->FormTerminateMessage(objReasonInfo);
 
     objReasonInfo.nCode = CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE;

@@ -225,7 +225,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (!mCallDetails.is(CallDetails.MO)
                     && (state < ImsCallSessionImplBase.State.ESTABLISHED)) {
-                mCall.reject(CallReasonInfo.CODE_LOCAL_CALL_END_UNSPECIFIED);
+                mCall.reject(CallReasonInfo.CODE_UNSPECIFIED);
             } else if (state < ImsCallSessionImplBase.State.NEGOTIATING) {
                 // To avoid timing issue
                 SystemClock.sleep(10);
@@ -234,10 +234,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
                 if ((state > ImsCallSessionImplBase.State.INITIATED)
                         && (state < ImsCallSessionImplBase.State.TERMINATING)) {
-                    mCall.terminate(CallReasonInfo.CODE_LOCAL_CALL_END_UNSPECIFIED);
+                    mCall.terminate(CallReasonInfo.CODE_UNSPECIFIED);
                 }
             } else if (state < ImsCallSessionImplBase.State.TERMINATING) {
-                mCall.terminate(CallReasonInfo.CODE_LOCAL_CALL_END_UNSPECIFIED);
+                mCall.terminate(CallReasonInfo.CODE_UNSPECIFIED);
             }
 
             // CALL_CONNECTION_ID
@@ -566,7 +566,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         if (state == ImsCallSessionImplBase.State.RENEGOTIATING) {
-            mCall.reject(CallReasonInfo.CODE_USER_DECLINE);
+            mCall.reject(CallReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION);
             setState(ImsCallSessionImplBase.State.ESTABLISHED);
         } else {
             mCall.reject(ImsCallUtils.getRejectCallReasonInfoCodeFromImsReasonInfo(reason));
@@ -1911,7 +1911,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             @Override
             public void run() {
                 log(dbgLog);
-                call.reject((reason != 0) ? reason : CallReasonInfo.CODE_USER_DECLINE);
+                call.reject((reason != 0) ? reason :
+                        CallReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION);
             }
         });
     }
@@ -2706,7 +2707,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             if ((mCall != null) && (mListenerProxy != null)
                     && (getState() != ImsCallSessionImplBase.State.TERMINATED)) {
                 // ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE
-                int code = CallReasonInfo.CODE_SESSION_INTERNAL_ERROR;
+                int code = CallReasonInfo.CODE_REJECT_INTERNAL_ERROR;
                 int extraCode = 0;
                 int slotId = mCallContext.getSlotId();
 
@@ -2742,7 +2743,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             if ((mCall != null) && (mListenerProxy != null)
                     && (getState() != ImsCallSessionImplBase.State.TERMINATED)) {
                 // ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE
-                int code = CallReasonInfo.CODE_SESSION_INTERNAL_ERROR;
+                int code = CallReasonInfo.CODE_REJECT_INTERNAL_ERROR;
                 int extraCode = 0;
 
                 if (MtcCallUtils.isEmergencyServiceStateForCSRetry(
@@ -4146,7 +4147,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             // GLARE_CONDITION: between call mode changes
             if (mVideoCallSession.isSessionModificationInProgress()) {
                 rejectSessionUpdateAsync(call,
-                        CallReasonInfo.CODE_REJECT_ONGOING_CALL_UPDATE,
+                        CallReasonInfo.CODE_REJECT_ONGOING_CALL_UPGRADE,
                         "onCallUpdateReceived :: SessionModification-InProgress");
                 return;
             }
@@ -4238,7 +4239,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 }
             }
 
-            rejectSessionUpdateAsync(call, CallReasonInfo.CODE_REJECT_ONGOING_CALL_UPDATE,
+            rejectSessionUpdateAsync(call, CallReasonInfo.CODE_REJECT_ONGOING_CALL_UPGRADE,
                     "onCallUpdateResumeReceived");
         }
 
@@ -4703,7 +4704,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     logi("SessionModificationRequest :: rejected by multiple calls");
 
                     try {
-                        reject(ImsReasonInfo.CODE_USER_DECLINE);
+                        reject(ImsReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION);
                         mLocalCallProfile.setCallExtraBoolean(EXTRA_CALL_CONTROLLED_BY_IMS, true);
                         return true;
                     } catch (Throwable t) {
@@ -5095,7 +5096,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                         @Override
                         public void run() {
                             oldCall.terminate(
-                                    CallReasonInfo.CODE_LOCAL_CALL_END_UNSPECIFIED);
+                                    CallReasonInfo.CODE_UNSPECIFIED);
                         }
                     });
                 }
@@ -5178,7 +5179,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 postAndRunTask(new Runnable() {
                     @Override
                     public void run() {
-                        oldCall.terminate(CallReasonInfo.CODE_LOCAL_CALL_END_UNSPECIFIED);
+                        oldCall.terminate(CallReasonInfo.CODE_UNSPECIFIED);
                     }
                 });
             }

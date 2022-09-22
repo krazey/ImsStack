@@ -42,7 +42,8 @@ protected:
 
 TEST_F(EarlyUpdateErrorHandlerTest, HandleNullMessageReturnsTimeout)
 {
-    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT), objHandler.Handle(IMS_NULL));
+    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE),
+            objHandler.Handle(IMS_NULL));
 }
 
 TEST_F(EarlyUpdateErrorHandlerTest, HandleMessageWithInvalidStatusCodeReturnsTimeout)
@@ -50,7 +51,8 @@ TEST_F(EarlyUpdateErrorHandlerTest, HandleMessageWithInvalidStatusCodeReturnsTim
     ON_CALL(objSipMessage, GetStatusCode)
             .WillByDefault(Return(SipStatusCode::SC_INVALID));
 
-    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT), objHandler.Handle(&objMessage));
+    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE),
+            objHandler.Handle(&objMessage));
 }
 
 TEST_F(EarlyUpdateErrorHandlerTest, Handle3xx4xx5xx6xxMessageReturnsInternalErrorWithCode)
@@ -61,7 +63,7 @@ TEST_F(EarlyUpdateErrorHandlerTest, Handle3xx4xx5xx6xxMessageReturnsInternalErro
         ON_CALL(objMessage, GetStatusCode)
                 .WillByDefault(Return(nStatusCode));
 
-        EXPECT_EQ(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR, nStatusCode),
+        EXPECT_EQ(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, nStatusCode),
                 objHandler.Handle(&objMessage));
     }
 }

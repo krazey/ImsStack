@@ -466,8 +466,10 @@ public class ImsCallUtils {
                 return CallReasonInfo.CODE_LOW_BATTERY;
             case ImsReasonInfo.CODE_USER_IGNORE:
                 return CallReasonInfo.CODE_USER_IGNORE;
+            case ImsReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION:
+                return CallReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION;
             default:
-                return CallReasonInfo.CODE_LOCAL_CALL_END_UNSPECIFIED;
+                return CallReasonInfo.CODE_UNSPECIFIED;
         }
     }
 
@@ -530,7 +532,7 @@ public class ImsCallUtils {
             case ImsReasonInfo.CODE_LOW_BATTERY:
                 return CallReasonInfo.CODE_LOCAL_LOW_BATTERY;
             default:
-                return CallReasonInfo.CODE_LOCAL_CALL_END_UNSPECIFIED;
+                return CallReasonInfo.CODE_UNSPECIFIED;
         }
     }
 
@@ -895,88 +897,54 @@ public class ImsCallUtils {
     static {
         // Reason codes: from MtcCall to ImsCall
         sMtcReasonToImsReason = new Hashtable<Integer, Integer>();
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_NONE,
-                ImsReasonInfo.CODE_UNSPECIFIED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_UNSPECIFIED,
                 ImsReasonInfo.CODE_UNSPECIFIED);
-
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE,
-                ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NOT_REGISTERED,
-                ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_ILLEGAL_ARGUMENT,
+                ImsReasonInfo.CODE_LOCAL_ILLEGAL_ARGUMENT);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_ILLEGAL_STATE,
+                ImsReasonInfo.CODE_LOCAL_ILLEGAL_STATE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_INTERNAL_ERROR,
+                ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE,
+                ImsReasonInfo.CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_POWER_OFF,
                 ImsReasonInfo.CODE_LOCAL_POWER_OFF);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_LOW_BATTERY,
                 ImsReasonInfo.CODE_LOCAL_LOW_BATTERY);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOW_BATTERY,
-                ImsReasonInfo.CODE_LOW_BATTERY);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_END_UNSPECIFIED,
-                ImsReasonInfo.CODE_UNSPECIFIED);
-
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
                 ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NETWORK_NO_LTE_COVERAGE,
                 ImsReasonInfo.CODE_LOCAL_NETWORK_NO_LTE_COVERAGE);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_WIFI_LOST,
-                ImsReasonInfo.CODE_WIFI_LOST);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NETWORK_ROAMING,
-                ImsReasonInfo.CODE_LOCAL_NETWORK_ROAMING);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NETWORK_IP_CHANGED,
-                ImsReasonInfo.CODE_LOCAL_NETWORK_IP_CHANGED);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_CALL_BARRED,
-                ImsReasonInfo.CODE_CALL_BARRED);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_ACCESS_CLASS_BLOCKED,
-                ImsReasonInfo.CODE_ACCESS_CLASS_BLOCKED);
-
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_TERMINATED,
-                ImsReasonInfo.CODE_USER_TERMINATED);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_TERMINATED_BY_REMOTE,
-                ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_DECLINE,
-                ImsReasonInfo.CODE_USER_DECLINE);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_NOANSWER,
-                ImsReasonInfo.CODE_USER_NOANSWER);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_IGNORE,
-                ImsReasonInfo.CODE_USER_IGNORE);
-
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE,
+                ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NOT_REGISTERED,
+                ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_EXCEEDED,
+                ImsReasonInfo.CODE_LOCAL_CALL_EXCEEDED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_BUSY,
+                ImsReasonInfo.CODE_LOCAL_CALL_BUSY);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_DECLINE,
+                ImsReasonInfo.CODE_LOCAL_CALL_DECLINE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_VCC_ON_PROGRESSING,
+                ImsReasonInfo.CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED,
+                ImsReasonInfo.CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
                 ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED,
                 ImsReasonInfo.CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_NO_CSFB_IN_CS_ROAM,
-                ImsReasonInfo.CODE_NO_CSFB_IN_CS_ROAM);
-
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_ANSWERED_ELSEWHERE,
-                ImsReasonInfo.CODE_ANSWERED_ELSEWHERE);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECTED_ELSEWHERE,
-                ImsReasonInfo.CODE_REJECTED_ELSEWHERE);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED,
-                ImsReasonInfo.CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_CALL_END_CAUSE_CALL_PULL,
-                ImsReasonInfo.CODE_CALL_END_CAUSE_CALL_PULL);
-
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MEDIA_INIT_FAILED,
-                ImsReasonInfo.CODE_MEDIA_INIT_FAILED);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MEDIA_NOT_ACCEPTABLE,
-                ImsReasonInfo.CODE_MEDIA_NOT_ACCEPTABLE);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MEDIA_NO_DATA,
-                ImsReasonInfo.CODE_MEDIA_NO_DATA);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MEDIA_UNSPECIFIED,
-                ImsReasonInfo.CODE_MEDIA_UNSPECIFIED);
-
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SESSION_INTERNAL_ERROR,
-                ImsReasonInfo.CODE_UNSPECIFIED);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE,
-                ImsReasonInfo.CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_TERMINATED,
+                ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_HO_NOT_FEASIBLE,
+                ImsReasonInfo.CODE_LOCAL_HO_NOT_FEASIBLE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_TIMEOUT_1XX_WAITING,
                 ImsReasonInfo.CODE_TIMEOUT_1XX_WAITING);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_TIMEOUT_NO_ANSWER,
                 ImsReasonInfo.CODE_TIMEOUT_NO_ANSWER);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE,
                 ImsReasonInfo.CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_NETWORK_RESP_TIMEOUT,
-                ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT);
-
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_CALL_BARRED,
+                ImsReasonInfo.CODE_CALL_BARRED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REDIRECTED,
                 ImsReasonInfo.CODE_SIP_REDIRECTED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_BAD_REQUEST,
@@ -989,7 +957,7 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_SIP_NOT_SUPPORTED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_REQUEST_TIMEOUT,
                 ImsReasonInfo.CODE_SIP_REQUEST_TIMEOUT);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_TEMPORARILY_UNAVAILABLE,
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_TEMPRARILY_UNAVAILABLE,
                 ImsReasonInfo.CODE_SIP_TEMPRARILY_UNAVAILABLE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_BAD_ADDRESS,
                 ImsReasonInfo.CODE_SIP_BAD_ADDRESS);
@@ -1041,31 +1009,94 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_SIP_REQUEST_PENDING);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_UNDECIPHERABLE,
                 ImsReasonInfo.CODE_SIP_UNDECIPHERABLE);
-
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MEDIA_INIT_FAILED,
+                ImsReasonInfo.CODE_MEDIA_INIT_FAILED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MEDIA_NO_DATA,
+                ImsReasonInfo.CODE_MEDIA_NO_DATA);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MEDIA_NOT_ACCEPTABLE,
+                ImsReasonInfo.CODE_MEDIA_NOT_ACCEPTABLE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MEDIA_UNSPECIFIED,
+                ImsReasonInfo.CODE_MEDIA_UNSPECIFIED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_TERMINATED,
+                ImsReasonInfo.CODE_USER_TERMINATED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_NOANSWER,
+                ImsReasonInfo.CODE_USER_NOANSWER);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_IGNORE,
+                ImsReasonInfo.CODE_USER_IGNORE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_DECLINE,
+                ImsReasonInfo.CODE_USER_DECLINE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOW_BATTERY,
+                ImsReasonInfo.CODE_LOW_BATTERY);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_BLACKLISTED_CALL_ID,
+                ImsReasonInfo.CODE_BLACKLISTED_CALL_ID);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_TERMINATED_BY_REMOTE,
+                ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION,
+                ImsReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_USER_CANCELLED_SESSION_MODIFICATION,
+                ImsReasonInfo.CODE_USER_CANCELLED_SESSION_MODIFICATION);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SESSION_MODIFICATION_FAILED,
+                ImsReasonInfo.CODE_SESSION_MODIFICATION_FAILED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MULTIENDPOINT_NOT_SUPPORTED,
+                ImsReasonInfo.CODE_MULTIENDPOINT_NOT_SUPPORTED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_ANSWERED_ELSEWHERE,
+                ImsReasonInfo.CODE_ANSWERED_ELSEWHERE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_CALL_PULL_OUT_OF_SYNC,
+                ImsReasonInfo.CODE_CALL_PULL_OUT_OF_SYNC);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_CALL_END_CAUSE_CALL_PULL,
+                ImsReasonInfo.CODE_CALL_END_CAUSE_CALL_PULL);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECTED_ELSEWHERE,
+                ImsReasonInfo.CODE_REJECTED_ELSEWHERE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SUPP_SVC_FAILED,
+                ImsReasonInfo.CODE_SUPP_SVC_FAILED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SUPP_SVC_CANCELLED,
+                ImsReasonInfo.CODE_SUPP_SVC_CANCELLED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SUPP_SVC_REINVITE_COLLISION,
+                ImsReasonInfo.CODE_SUPP_SVC_REINVITE_COLLISION);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED,
+                ImsReasonInfo.CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REMOTE_CALL_DECLINE,
+                ImsReasonInfo.CODE_REMOTE_CALL_DECLINE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_WIFI_LOST,
+                ImsReasonInfo.CODE_WIFI_LOST);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_NETWORK_RESP_TIMEOUT,
+                ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_ACCESS_CLASS_BLOCKED,
+                ImsReasonInfo.CODE_ACCESS_CLASS_BLOCKED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_ALTERNATE_EMERGENCY_CALL,
+                ImsReasonInfo.CODE_SIP_ALTERNATE_EMERGENCY_CALL);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_UNKNOWN,
+                ImsReasonInfo.CODE_REJECT_UNKNOWN);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CALL_WAITING_DISABLED,
                 ImsReasonInfo.CODE_REJECT_ONGOING_CALL_WAITING_DISABLED);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_VT_TTY_NOT_ALLOWED,
-                ImsReasonInfo.CODE_REJECT_VT_TTY_NOT_ALLOWED);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_E911_CALL,
-                ImsReasonInfo.CODE_REJECT_ONGOING_E911_CALL);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_MAX_CALL_LIMIT_REACHED,
-                ImsReasonInfo.CODE_REJECT_MAX_CALL_LIMIT_REACHED);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_BUSY,
-                ImsReasonInfo.CODE_LOCAL_CALL_BUSY);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_UNSUPPORTED_SIP_HEADERS,
-                ImsReasonInfo.CODE_REJECT_UNSUPPORTED_SIP_HEADERS);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CALL_SETUP,
-                ImsReasonInfo.CODE_REJECT_ONGOING_CALL_SETUP);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CS_CALL,
-                ImsReasonInfo.CODE_REJECT_ONGOING_CS_CALL);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_CALL_ON_OTHER_SUB,
                 ImsReasonInfo.CODE_REJECT_CALL_ON_OTHER_SUB);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_EXCEEDED,
-                ImsReasonInfo.CODE_LOCAL_CALL_EXCEEDED);
-        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED,
-                ImsReasonInfo.CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_SERVICE_NOT_REGISTERED,
+                ImsReasonInfo.CODE_REJECT_SERVICE_NOT_REGISTERED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_CALL_TYPE_NOT_ALLOWED,
+                ImsReasonInfo.CODE_REJECT_CALL_TYPE_NOT_ALLOWED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_E911_CALL,
+                ImsReasonInfo.CODE_REJECT_ONGOING_E911_CALL);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CALL_SETUP,
+                ImsReasonInfo.CODE_REJECT_ONGOING_CALL_SETUP);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_MAX_CALL_LIMIT_REACHED,
+                ImsReasonInfo.CODE_REJECT_MAX_CALL_LIMIT_REACHED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_UNSUPPORTED_SIP_HEADERS,
+                ImsReasonInfo.CODE_REJECT_UNSUPPORTED_SIP_HEADERS);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CALL_TRANSFER,
+                ImsReasonInfo.CODE_REJECT_ONGOING_CALL_TRANSFER);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_INTERNAL_ERROR,
+                ImsReasonInfo.CODE_REJECT_INTERNAL_ERROR);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_QOS_FAILURE,
                 ImsReasonInfo.CODE_REJECT_QOS_FAILURE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_VT_TTY_NOT_ALLOWED,
+                ImsReasonInfo.CODE_REJECT_VT_TTY_NOT_ALLOWED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CALL_UPGRADE,
+                ImsReasonInfo.CODE_REJECT_ONGOING_CALL_UPGRADE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CONFERENCE_CALL,
+                ImsReasonInfo.CODE_REJECT_ONGOING_CONFERENCE_CALL);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CS_CALL,
+                ImsReasonInfo.CODE_REJECT_ONGOING_CS_CALL);
 
         // User's status: from user status (int) to user status (string)
         sUserStatusToString = new Hashtable<Integer, String>();

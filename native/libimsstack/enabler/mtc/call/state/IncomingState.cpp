@@ -108,7 +108,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(
             piSession, IMessage::SESSION_EARLY_UPDATE);
     TODO: failure handler
     */
-    m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
+    m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     return CallStateName::TERMINATING;
 }
 
@@ -130,7 +130,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
 
     if (pSession->RespondToEarlyUpdate(SipStatusCode::SC_200) == IMS_FAILURE)
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
 
     RunMedia(piSession, piMessage);
@@ -171,7 +171,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPRAckReceived(IN ISession* pi
 
     if (pSession->RespondToPrack(SipStatusCode::SC_200) == IMS_FAILURE)
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
 
     RunMedia(piSession, piMessage);
@@ -199,7 +199,8 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPRAckReceived(IN ISession* pi
 PUBLIC VIRTUAL CallStateName IncomingState::SessionRPRDeliveryFailed(IN ISession* /* piSession*/)
 {
     IMS_TRACE_D("SessionRPRDeliveryFailed", 0, 0, 0);
-    return RejectIncomingAndToTerminating(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT));
+    return RejectIncomingAndToTerminating(
+            CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK));
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionStartFailed(IN ISession* /* piSession */)
@@ -210,7 +211,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionStartFailed(IN ISession* /* p
         return GetStateName();
     }
 
-    m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT));
+    m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR));
 
     return CallStateName::TERMINATING;
 }
@@ -265,7 +266,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::QosReserveFailed(
     if (eNextAction == QosLossPolicy::RELEASE)
     {
         return RejectIncomingAndToTerminating(
-                CallReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED));
+                CallReasonInfo(CODE_REJECT_QOS_FAILURE));
     }
 
     if (eNextAction == QosLossPolicy::MODIFY)

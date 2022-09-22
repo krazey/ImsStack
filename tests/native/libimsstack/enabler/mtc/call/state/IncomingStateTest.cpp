@@ -180,7 +180,7 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedInvokesIncomingCallReceived)
 
 TEST_F(IncomingStateTest, SessionEarlyMediaUpdateFailedNotifiesStartFailed)
 {
-    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR)));
     EXPECT_EQ(CallStateName::TERMINATING,
             pIncomingState->SessionEarlyMediaUpdateFailed(&objISession));
 }
@@ -230,7 +230,7 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateReceivedRejectsCallIfSendingRes
             .Times(1)
             .WillOnce(Return(IMS_FAILURE));
 
-    const CallReasonInfo objReason(CODE_SESSION_INTERNAL_ERROR);
+    const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
     EXPECT_EQ(CallStateName::TERMINATING,
@@ -303,7 +303,7 @@ TEST_F(IncomingStateTest, SessionPRAckReceivedInvokesRespondToPrackAndSendsIncom
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200))
             .Times(1)
             .WillOnce(Return(IMS_FAILURE));
-    const CallReasonInfo objReason(CODE_SESSION_INTERNAL_ERROR);
+    const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
     EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->SessionPRAckReceived(&objISession));
@@ -335,7 +335,7 @@ TEST_F(IncomingStateTest, SessionPRAckReceivedInvokesRejectIncomingIfOfferAnswer
 
 TEST_F(IncomingStateTest, SessionRPRDeliveryFailedRejectsIncomingCall)
 {
-    const CallReasonInfo objReason(CODE_NETWORK_RESP_TIMEOUT);
+    const CallReasonInfo objReason(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
 
