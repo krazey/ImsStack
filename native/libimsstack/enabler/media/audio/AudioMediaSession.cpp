@@ -298,7 +298,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN AudioProfile* pLocalProfile,
         // evs primary mode conversion
         if (pFmtp->nEvsModeSwitch == 0)
         {  // evs primary mode
-            modeSet += EvsParams::EVS_MODE_9;
+            modeSet = modeSet << 9;
         }
         pEvsParams->setEvsMode((int32_t)modeSet);
 
