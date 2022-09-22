@@ -75,6 +75,13 @@ public:
     void HoldRtpConfig();
 
     /**
+     * @brief Update AccessNetwork information in the RtpConfig
+     *
+     * @param nAccessNetwork : AccessNetwork information
+     */
+    void UpdateAccessNetwork(IMS_UINT32 nAccessNetwork);
+
+    /**
      * @brief Update MediaQualityThreshold parameters and send it to the java
      *
      * @param bIsHold If it is IMS_TRUE, it has to set for the hold state

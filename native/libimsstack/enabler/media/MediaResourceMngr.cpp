@@ -295,11 +295,10 @@ IMediaConnectionWatcher* MediaResourceMngr::GetMediaConnectionWatcher()
 
 PUBLIC
 IMS_BOOL MediaResourceMngr::GetMediaConnectionWatcherInfo(IN IPAddress& objIpAddress,
-        OUT IMS_BOOL& bWIFICondition, OUT IMS_UINT32& nNetworkInterfaceId)
+        OUT IMS_SINT32& nMediaConnectionType, OUT IMS_UINT32& nNetworkInterfaceId)
 {
     IMediaConnectionWatcher* piMediaConnectionWatcher = IMS_NULL;
     INetworkConnection* piNetConnection = IMS_NULL;
-    IMS_SINT32 nMediaConnectionType = IMediaConnectionWatcher::MEDIA_CONNECTION_INVALID;
     IMS_BOOL bRet = IMS_FALSE;
 
     if (objIpAddress.IsNoneAddress())
@@ -312,29 +311,12 @@ IMS_BOOL MediaResourceMngr::GetMediaConnectionWatcherInfo(IN IPAddress& objIpAdd
     if (piMediaConnectionWatcher == IMS_NULL)
     {
         IMS_TRACE_E(0, "GetMediaConnectionWatcherInfo() - NULL", 0, 0, 0);
-        bWIFICondition = IMS_FALSE;
         nNetworkInterfaceId = 0;
         return bRet;
     }
 
     piMediaConnectionWatcher->GetMediaConnectionType(
             objIpAddress, piNetConnection, nMediaConnectionType, nNetworkInterfaceId);
-    switch (nMediaConnectionType)
-    {
-        case IMediaConnectionWatcher::MEDIA_CONNECTION_MOBILE_EPDG:
-        case IMediaConnectionWatcher::MEDIA_CONNECTION_WIFI:
-            bWIFICondition = IMS_TRUE;
-            bRet = IMS_TRUE;
-            break;
-        case IMediaConnectionWatcher::MEDIA_CONNECTION_MOBILE:
-            bWIFICondition = IMS_FALSE;
-            bRet = IMS_TRUE;
-            break;
-        default:
-            bWIFICondition = IMS_FALSE;
-            bRet = IMS_FALSE;
-            break;
-    }
 
     return bRet;
 }

@@ -86,6 +86,7 @@ PUBLIC GLOBAL MediaConnectionWatcher* MediaConnectionWatcher::GetMediaConnection
     if (g_pMapMediaConnectionWatcher == IMS_NULL)
     {
         g_pMapMediaConnectionWatcher = new IMSMap<IMS_SINT32, MediaConnectionWatcher*>();
+        IMS_TRACE_I("GetMediaConnectionWatcher() created for SlotId[%d]", nSlotId, 0, 0);
     }
 
     if (g_pMapMediaConnectionWatcher->GetIndexOfKey(nSlotId) < 0)
@@ -108,7 +109,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaConnectionWatcher::GetMediaConnectionType(IN AStrin
     {
         IMS_TRACE_E(0, "CreateSessionGetMediaConnectionType() - PDN is NULL", 0, 0, 0);
         nNetworkInterfaceId = 0;
-        nMediaConnectionType = MEDIA_CONNECTION_INVALID;
+        nMediaConnectionType = UNKNOWN;
         bRet = IMS_FALSE;
         goto EXIT_GetMediaConnectionType_PDN;
     }
@@ -118,7 +119,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaConnectionWatcher::GetMediaConnectionType(IN AStrin
     {
         IMS_TRACE_E(0, "CreateSessionGetMediaConnectionType() - piNetConnction is NULL", 0, 0, 0);
         nNetworkInterfaceId = 0;
-        nMediaConnectionType = MEDIA_CONNECTION_INVALID;
+        nMediaConnectionType = UNKNOWN;
         bRet = IMS_FALSE;
         goto EXIT_GetMediaConnectionType_PDN;
     }
@@ -149,7 +150,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaConnectionWatcher::GetMediaConnectionType(IN IPAddr
     if (objIpAddress.IsNoneAddress() || objIpAddress.IsUnknownAddress())
     {
         nNetworkInterfaceId = 0;
-        nMediaConnectionType = MEDIA_CONNECTION_INVALID;
+        nMediaConnectionType = UNKNOWN;
         bRet = IMS_FALSE;
         goto EXIT_GetMediaConnectionType_IPADDR;
     }
@@ -160,7 +161,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaConnectionWatcher::GetMediaConnectionType(IN IPAddr
     {
         IMS_TRACE_E(0, "GetMediaConnectionType() - piNetConnction is NULL", 0, 0, 0);
         nNetworkInterfaceId = 0;
-        nMediaConnectionType = MEDIA_CONNECTION_INVALID;
+        nMediaConnectionType = UNKNOWN;
         bRet = IMS_FALSE;
         goto EXIT_GetMediaConnectionType_IPADDR;
     }
@@ -174,7 +175,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaConnectionWatcher::GetMediaConnectionType(IN IPAddr
         nMediaConnectionType = pNetConnectionWatcher->GetMediaConnectionType();
     }
 
-    IMS_TRACE_I("GetMediaConnectionType() - (objIpAddress(%s)) = %s /  %d",
+    IMS_TRACE_I("GetMediaConnectionType() - (objIpAddress(%s)) = %s /  NetworkInterfaceId[%d]",
             objIpAddress.ToString().GetStr(), printNetworkType(nMediaConnectionType),
             nNetworkInterfaceId);
 
@@ -192,7 +193,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaConnectionWatcher::GetMediaConnectionType(
     if (piNetConnection == IMS_NULL)
     {
         IMS_TRACE_E(0, "GetMediaConnectionType() - piNetConnction is NULL", 0, 0, 0);
-        nMediaConnectionType = MEDIA_CONNECTION_INVALID;
+        nMediaConnectionType = UNKNOWN;
         nNetworkInterfaceId = 0;
         bRet = IMS_FALSE;
         goto EXIT_GetMediaConnectionType_INETCON;
@@ -613,34 +614,38 @@ Exit_CalculateRtpFragmentSize_NetWatcher:
 PRIVATE GLOBAL IMS_SINT32 MediaConnectionWatcher::convertNetworkType(
         IN INetworkConnection* piNetConnection)
 {
-    AString strRAT = AString::ConstNull();
-
     if (piNetConnection == IMS_NULL)
     {
-        return MEDIA_CONNECTION_INVALID;
+        return UNKNOWN;
     }
+
+    AString strRAT = AString::ConstNull();
+    IMS_SINT32 NetworkType = UNKNOWN;
 
     // 1st Condition : WIFI
     piNetConnection->GetExtraInfo(AString("rat"), strRAT);
-    if (strRAT.EqualsIgnoreCase(AString("WiFi")))
+    // IMS_TRACE_D("convertNetworkType() - strRAT(%s)", strRAT.GetStr(), 0, 0);
+    if (strRAT.EqualsIgnoreCase(AString("WiFi")) || piNetConnection->IsePDGEnabled())
     {
-        return MEDIA_CONNECTION_WIFI;
+        NetworkType = IWLAN;
     }
-
-    // 2nd Condition : Mobile EPDG
-    if (piNetConnection->IsePDGEnabled())
+    else if (strRAT.EqualsIgnoreCase(AString("LTE")))
     {
-        return MEDIA_CONNECTION_MOBILE_EPDG;
+        NetworkType = EUTRAN;
     }
-
-    // 3rd Condition : LTE or 3G or NR
-    if (strRAT.EqualsIgnoreCase(AString("LTE")) || strRAT.EqualsIgnoreCase(AString("3G")) ||
-            strRAT.EqualsIgnoreCase(AString("NR")))
+    else if (strRAT.EqualsIgnoreCase(AString("NR")))
     {
-        return MEDIA_CONNECTION_MOBILE;
+        NetworkType = NGRAN;
     }
-
-    return MEDIA_CONNECTION_INVALID;
+    else if (strRAT.EqualsIgnoreCase(AString("3G")))
+    {
+        NetworkType = UTRAN;
+    }
+    else if (strRAT.EqualsIgnoreCase(AString("2G")))
+    {
+        NetworkType = GERAN;
+    }
+    return NetworkType;
 }
 
 PRIVATE GLOBAL const IMS_CHAR* MediaConnectionWatcher::printNetworkType(
@@ -648,21 +653,29 @@ PRIVATE GLOBAL const IMS_CHAR* MediaConnectionWatcher::printNetworkType(
 {
     switch (nMediaConnectionType)
     {
-        case MEDIA_CONNECTION_MOBILE:
-            return "MEDIA_CONNECTION_MOBILE";
-        case MEDIA_CONNECTION_WIFI:
-            return "MEDIA_CONNECTION_WIFI";
-        case MEDIA_CONNECTION_MOBILE_EPDG:
-            return "MEDIA_CONNECTION_MOBILE_EPDG";
+        case UNKNOWN:
+            return "UNKNOWN";
+        case GERAN:
+            return "GERAN";
+        case UTRAN:
+            return "UTRAN";
+        case EUTRAN:
+            return "EUTRAN";
+        case CDMA2000:
+            return "CDMA2000";
+        case IWLAN:
+            return "IWLAN";
+        case NGRAN:
+            return "NGRAN";
         default:
-            return "MEDIA_CONNECTION_INVALID";
+            return "UNKNOWN";
     }
 }
 
 PUBLIC
 MediaConnectionWatcher::NetConnectionWatcher::NetConnectionWatcher() :
         m_piNetConnection(IMS_NULL),
-        m_nMediaConnectionType(MEDIA_CONNECTION_INVALID),
+        m_nMediaConnectionType(UNKNOWN),
         m_nMtuSize(0)
 {
     IMS_TRACE_D("NetConnectionWatcher()", 0, 0, 0);
@@ -782,39 +795,6 @@ IMS_UINT32 MediaConnectionWatcher::NetConnectionWatcher::GetListenerLength()
 }
 
 PUBLIC
-void MediaConnectionWatcher::NetConnectionWatcher::NotifyWifiEarlyRouteSetupChanged(
-        IN IMS_SINT32 nMtuSize)
-{
-    IMS_TRACE_D("NotifyWifiEarlyRouteSetupChanged - Listener Size(%d) MtuSize(%d)",
-            m_objListeners.GetSize(), nMtuSize, 0);
-
-    setMtuSize(nMtuSize);
-    if (m_nMediaConnectionType == MEDIA_CONNECTION_MOBILE_EPDG)
-    {
-        IMS_TRACE_E(0, "NotifyWifiEarlyRouteSetupChanged - Already ePDG", 0, 0, 0);
-        return;
-    }
-
-    IMediaConnectionWatcherListener* piListener = IMS_NULL;
-    m_nMediaConnectionType = MEDIA_CONNECTION_MOBILE_EPDG;
-
-    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); i++)
-    {
-        piListener = m_objListeners.GetAt(i);
-
-        IMS_TRACE_D("NotifyWifiEarlyRouteSetupChanged() - \
-                Listener Size(%d) Call Listener(%d)",
-                m_objListeners.GetSize(), i, 0);
-
-        if (piListener != IMS_NULL)
-        {
-            IMS_TRACE_D("NotifyWifiEarlyRouteSetupChanged()", 0, 0, 0);
-            piListener->NotifyWifiEarlyRouteSetup(m_piNetConnection->GetIfaceId());
-        }
-    }
-}
-
-PUBLIC
 IMS_SINT32 MediaConnectionWatcher::NetConnectionWatcher::GetMtuSize()
 {
     if (m_piNetConnection == IMS_NULL)
@@ -840,7 +820,7 @@ PUBLIC VIRTUAL void MediaConnectionWatcher::NetConnectionWatcher::NetworkConnect
     if (piNetConnection == IMS_NULL)
     {
         IMS_TRACE_E(0, "Connection_Connected() - piNetConnction NULL", 0, 0, 0);
-        m_nMediaConnectionType = MEDIA_CONNECTION_INVALID;
+        m_nMediaConnectionType = UNKNOWN;
         return;
     }
 
@@ -874,7 +854,7 @@ PUBLIC VIRTUAL void MediaConnectionWatcher::NetConnectionWatcher::NetworkConnect
     (void)nErrorCode;
     IMS_TRACE_D("Connection_Disconnected()", 0, 0, 0);
     // Do Nothing
-    m_nMediaConnectionType = MEDIA_CONNECTION_INVALID;
+    m_nMediaConnectionType = UNKNOWN;
     setMtuSize(0);
 
     return;
@@ -889,7 +869,7 @@ MediaConnectionWatcher::NetConnectionWatcher::NetworkConnection_OnConnectionFail
 
     IMS_TRACE_D("Connection_ConnectionFailed()", 0, 0, 0);
     // Do Nothing
-    m_nMediaConnectionType = MEDIA_CONNECTION_INVALID;
+    m_nMediaConnectionType = UNKNOWN;
     setMtuSize(0);
 
     return;
@@ -904,7 +884,7 @@ PUBLIC VIRTUAL void MediaConnectionWatcher::NetConnectionWatcher::NetworkConnect
     if (piNetConnection == IMS_NULL)
     {
         IMS_TRACE_E(0, "Connection_IpChanged() - piNetConnction NULL", 0, 0, 0);
-        m_nMediaConnectionType = MEDIA_CONNECTION_INVALID;
+        m_nMediaConnectionType = UNKNOWN;
         return;
     }
 
@@ -945,7 +925,7 @@ PUBLIC VIRTUAL void MediaConnectionWatcher::NetConnectionWatcher::NetworkConnect
     if (piNetConnection == IMS_NULL)
     {
         IMS_TRACE_E(0, "Connection_IpcanCatChanged() - piNetConnction NULL", 0, 0, 0);
-        m_nMediaConnectionType = MEDIA_CONNECTION_INVALID;
+        m_nMediaConnectionType = UNKNOWN;
         return;
     }
 
@@ -963,7 +943,7 @@ PUBLIC VIRTUAL void MediaConnectionWatcher::NetConnectionWatcher::NetworkConnect
     }
     m_nMediaConnectionType = convertNetworkType(m_piNetConnection);
 
-    if (m_nMediaConnectionType == MEDIA_CONNECTION_INVALID)
+    if (m_nMediaConnectionType == UNKNOWN)
     {
         IMS_TRACE_D("Connection_IpcanCatChanged() - connection Type is invalid", 0, 0, 0);
         setMtuSize(0);

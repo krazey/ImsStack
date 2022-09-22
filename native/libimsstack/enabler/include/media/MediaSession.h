@@ -124,6 +124,9 @@ protected:
     IMS_BOOL OnSendDtmf(IN IMS_UINTP nParam);
     void ReportToClient(IN IMS_SINT32 eError, IN MEDIA_CONTENT_TYPE eMediaType);
 
+private:
+    IPAddress GetAndroidIP();
+
 protected:
     IMS_UINT32 m_nSlotId;
     IMS_SINTP m_nCallKey;

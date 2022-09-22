@@ -334,32 +334,42 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
         return IMS_FALSE;
     }
 
+    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
+
+    if (pMediaManager == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "Run() - No MediaManager", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
     if (IsHoldSession(nNegoId) != IMS_TRUE)
     {
         IMS_TRACE_D("Run() - Need to hold active Session except callKey[%d]", m_nCallKey, 0, 0);
-        MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
-
-        if (pMediaManager == IMS_NULL)
-        {
-            IMS_TRACE_E(0, "Run() - No MediaManager", 0, 0, 0);
-            return IMS_FALSE;
-        }
-
         pMediaManager->OtherSessionHold(m_nCallKey);
     }
 
+    // set Access Network
+    IMS_UINT32 nNetworkInterfaceID = 0;
+    IMS_SINT32 accessNetwork = 0;
+    IpAddress objIPAddress = GetAndroidIP();
+    pMediaManager->GetResourceManager()->GetMediaConnectionWatcherInfo(
+            objIPAddress, accessNetwork, nNetworkInterfaceID);
+
     m_objAudioController.UpdateRtpConfig(nNegoId, pMediaNego->GetAudioNego());
+    m_objAudioController.UpdateAccessNetwork(nNegoId, accessNetwork);
     m_objAudioController.UpdateQualityThreshold(nNegoId, pMediaNego->GetAudioNego());
     m_objAudioController.UpdateSession(nNegoId);
 
     if (m_objVideoController.IsSessionOpened() == IMS_TRUE)
     {
         m_objVideoController.UpdateRtpConfig(pMediaNego->GetVideoNego());
+        m_objVideoController.UpdateAccessNetwork(accessNetwork);
         m_objVideoController.UpdateQualityThreshold(pMediaNego->GetVideoNego());
         m_objVideoController.UpdateSession();
     }
 
     m_objTextController.UpdateRtpConfig(pMediaNego->GetTextNego());
+    m_objTextController.UpdateAccessNetwork(accessNetwork);
     m_objTextController.UpdateQualityThreshold(pMediaNego->GetTextNego());
     m_objTextController.UpdateSession();
 
@@ -1008,4 +1018,14 @@ void MediaSession::ReportToClient(IN IMS_SINT32 eError, IN MEDIA_CONTENT_TYPE eM
             m_pClientListener->MediaSession_NotifyFailures(REPORT_FAILURE, eError, eMediaType);
         }
     }
+}
+
+PRIVATE IpAddress MediaSession::GetAndroidIP()
+{
+    if (m_pEnvironment != IMS_NULL && m_pEnvironment->pIService != IMS_NULL)
+    {
+        return m_pEnvironment->pIService->GetIpAddress();
+    }
+
+    return IpAddress();
 }

@@ -40,7 +40,6 @@ private:
         void SetMediaConnectionType(IN IMS_SINT32 nMediaConnectionType);
         IMS_BOOL SetINetConnection(IN INetworkConnection* piNetConnection);
         IMS_UINT32 GetListenerLength();
-        void NotifyWifiEarlyRouteSetupChanged(IN IMS_SINT32 nMtuSize);
         IMS_SINT32 GetMtuSize();
 
     public:

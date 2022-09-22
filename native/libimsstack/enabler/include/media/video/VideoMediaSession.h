@@ -79,6 +79,13 @@ public:
     void HoldRtpConfig();
 
     /**
+     * @brief Update AccessNetwork information in the RtpConfig
+     *
+     * @param nAccessNetwork : AccessNetwork information
+     */
+    void UpdateAccessNetwork(IMS_UINT32 nAccessNetwork);
+
+    /**
      * @brief
      *
      * @param bIsHold

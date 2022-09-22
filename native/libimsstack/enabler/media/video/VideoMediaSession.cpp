@@ -337,6 +337,13 @@ void VideoMediaSession::HoldRtpConfig()
 }
 
 PUBLIC
+void VideoMediaSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
+{
+    m_objConfig.setAccessNetwork(nAccessNetwork);
+    IMS_TRACE_D("UpdateAccessNetwork() - accessNetwork[%d]", m_objConfig.getAccessNetwork(), 0, 0);
+}
+
+PUBLIC
 IMS_BOOL VideoMediaSession::UpdateMediaQualityThreshold(
         IN IMS_BOOL bIsHold, IN IMS_BOOL bEnableRtcp)
 {

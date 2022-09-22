@@ -98,6 +98,13 @@ public:
     IMS_BOOL UpdateRtpConfig(IN VideoNego* pNego);
 
     /**
+     * @brief Update AccessNetwork information in the RtpConfig
+     *
+     * @param nAccessNetwork : AccessNetwork information
+     */
+    void UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork);
+
+    /**
      * @brief Update MediaQualityThreshold and send message to java
      *
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is

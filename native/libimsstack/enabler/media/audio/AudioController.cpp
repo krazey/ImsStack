@@ -364,6 +364,20 @@ IMS_BOOL AudioController::UpdateRtpConfig(IN IMS_UINTP nNegoId, IN AudioNego* pN
 }
 
 PUBLIC
+void AudioController::UpdateAccessNetwork(IN IMS_UINTP nNegoId, IN IMS_UINT32 accessNetwork)
+{
+    IMS_TRACE_I("UpdateAccessNetwork() - nNegoId[%" PFLS_x "], accessNetwork[%d]", nNegoId,
+            accessNetwork, 0);
+
+    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+
+    if (pAudioSession != IMS_NULL)
+    {
+        pAudioSession->UpdateAccessNetwork(accessNetwork);
+    }
+}
+
+PUBLIC
 IMS_BOOL AudioController::UpdateLocalAddress(IN AudioNego* pNego)
 {
     if (pNego == IMS_NULL)
