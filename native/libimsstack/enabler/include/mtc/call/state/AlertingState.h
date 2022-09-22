@@ -44,9 +44,10 @@ public:
     CallStateName HandleUserAlert() override;
     CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     CallStateName Reject(IN const CallReasonInfo& objReason) override;
+    CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
-    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
-    CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
+    CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName UssiStarted(IN ISession* piSession) override;
 
     CallStateName SessionStarted(IN ISession* piSession) override;
     CallStateName SessionTerminated(IN ISession* piSession) override;
@@ -57,11 +58,11 @@ public:
     CallStateName SessionRPRDeliveryFailed(IN ISession* piSession) override;
     CallStateName SessionStartFailed(IN ISession* piSession) override;
 
-    CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    CallStateName UssiStarted(IN ISession* piSession) override;
+    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
+
+    CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
 
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
-    CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
 protected:
     CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
