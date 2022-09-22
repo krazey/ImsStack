@@ -393,6 +393,13 @@ public:
     virtual IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const = 0;
 
     /**
+     * @brief Flag indicating reg includes feature tag even though the feature is not available.
+     *
+     * @return IMS_BOOL Return wherther the feature tag is included.
+     */
+    virtual IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5
@@ -1106,23 +1113,6 @@ public:
      * @return vector error code list
      */
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime() = 0;
-
-    /**
-     * @brief Indicate the feature tags list that is included in registration
-     *        even though feature is not available.
-     *
-     * @return vector feature tags list
-     * @see FixedFeature
-     */
-    virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailable() = 0;
-
-    /**
-     * @brief Indicate the policy to include feature tag even though feature is not available.
-     *
-     * @return vector policy list
-     * @see FixPolicy
-     */
-    virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailablePolicy() = 0;
 
     /**
      * @brief Indicate the list of the time seconds waiting after the emergency registration is

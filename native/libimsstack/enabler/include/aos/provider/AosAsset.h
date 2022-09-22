@@ -68,6 +68,7 @@ public:
             bUpdateRegistrationWithCountryChange(IMS_FALSE),
             nRegistrationPcscfUpdatePolicy(0),
             bSupportContactUserInfo(IMS_TRUE),
+            bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
             nContactUserInfoPolicyForNonRegisterMessage(
                     CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_DEFAULT),
             nGeolocationPidfFormingPolicy(
@@ -125,6 +126,7 @@ public:
     IMS_BOOL bUpdateRegistrationWithCountryChange;
     IMS_SINT32 nRegistrationPcscfUpdatePolicy;
     IMS_BOOL bSupportContactUserInfo;
+    IMS_BOOL bSupportRegWithFeatureTagUnavailable;
     IMS_SINT32 nContactUserInfoPolicyForNonRegisterMessage;
     IMS_SINT32 nGeolocationPidfFormingPolicy;
     IMSVector<IMS_SINT32> objRegErrorCodesWithPcscfDiscovery;

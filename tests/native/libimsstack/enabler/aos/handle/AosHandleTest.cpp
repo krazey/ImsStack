@@ -260,6 +260,12 @@ protected:
         return m_pAosHandle->IsCapabilityExisted(nCapabilities, eCapability);
     }
 
+    IMS_BOOL IsCapabilityExistedForNetworkType(
+            IN IMS_UINT32 nNetworkType, IN AosCapability eCapability) const
+    {
+        return m_pAosHandle->IsCapabilityExistedForNetworkType(nNetworkType, eCapability);
+    }
+
     IMS_BOOL IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat) const
     {
         return m_pAosHandle->IsNetworkTypeMatchedToRat(nNetworkType, nRat);
@@ -282,11 +288,6 @@ protected:
     IMS_UINT32 GetBlock(IN IMS_UINT32 nEvent) { return m_pAosHandle->GetBlock(nEvent); }
 
     IMS_UINT32 GetAosFeature(IN IMS_UINT32 nBlock) { return m_pAosHandle->GetAosFeature(nBlock); }
-
-    IMS_UINT32 ConvertToAosFeature(IN IMS_UINT32 nConfigFeature)
-    {
-        return m_pAosHandle->ConvertToAosFeature(nConfigFeature);
-    }
 
     void SetRegFeatureTagRequired(IN IMS_BOOL bRequired)
     {
@@ -379,16 +380,6 @@ protected:
         return m_pAosHandle->IsBlockForWifi(nBlock);
     }
 
-    IMS_BOOL IsUnavailableFeature(IN IMS_SINT32 nConfigFeature) const
-    {
-        return m_pAosHandle->IsUnavailableFeature(nConfigFeature);
-    }
-
-    IMS_BOOL IsUnavailableFeaturePolicy(IN IMS_SINT32 nPolicy) const
-    {
-        return m_pAosHandle->IsUnavailableFeaturePolicy(nPolicy);
-    }
-
     IMS_BOOL IsBlocked() const { return m_pAosHandle->m_bBlocked; }
 
     void InitializeFeatureTags() { m_pAosHandle->InitializeFeatureTags(); }
@@ -397,8 +388,6 @@ protected:
     {
         return m_pAosHandle->m_objFeatureTagList.HasFeatureTag(strName, strValue);
     }
-
-    void UpdateFeatureTags() { m_pAosHandle->UpdateFeatureTags(); }
 
     IMS_BOOL AddFeatureTag(IN const AString& strName)
     {
@@ -441,11 +430,6 @@ protected:
         m_pAosHandle->ProcessVopsStateChanged(nState);
     }
 
-    IMS_BOOL ProcessUnavailableFeatureForVops(IN IMS_UINT32 nState)
-    {
-        return m_pAosHandle->ProcessUnavailableFeatureForVops(nState);
-    }
-
     IMS_BOOL IsSupportedNetworkType(IN IMS_UINT32 nType) const
     {
         return m_pAosHandle->IsSupportedNetworkType(nType);
@@ -473,6 +457,17 @@ protected:
     {
         m_pAosHandle->m_piWifiWatcher = piWifiWatcher;
     }
+
+    IMSMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_pAosHandle->m_objCapabilities; }
+
+    void SetCapabilities(IN IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
+    {
+        m_pAosHandle->m_objCapabilities = objNewCapabilities;
+    }
+
+    void ReevaluateUnavailableFeature() { m_pAosHandle->ReevaluateUnavailableFeature(); }
+
+    IMS_BOOL Is3G(IN IMS_UINT32 nNetworkType) { return m_pAosHandle->Is3G(nNetworkType); }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -1445,6 +1440,29 @@ TEST_F(AosHandleTest, IsCapabilityExisted_Test)
     EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::PRESENCE_UCE));
 }
 
+TEST_F(AosHandleTest, IsCapabilityExistedForNetworkType_Test)
+{
+    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
+    SetCapabilities(objCapabilities);
+
+    EXPECT_TRUE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_LTE, AosCapability::VOICE));
+    EXPECT_TRUE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_LTE, AosCapability::VIDEO));
+    EXPECT_FALSE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VOICE));
+    EXPECT_TRUE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VIDEO));
+    EXPECT_FALSE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_NR, AosCapability::VOICE));
+    EXPECT_FALSE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_NR, AosCapability::VIDEO));
+    EXPECT_FALSE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_GSM, AosCapability::VOICE));
+    EXPECT_FALSE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_GSM, AosCapability::VIDEO));
+}
+
 TEST_F(AosHandleTest, IsNetworkTypeMatchedToRat_Test)
 {
     EXPECT_TRUE(IsNetworkTypeMatchedToRat(0, NW_REPORT_RADIO_LTE));
@@ -1544,17 +1562,6 @@ TEST_F(AosHandleTest, GetAosFeature_Test)
     EXPECT_EQ(GetAosFeature(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION), ImsAosFeature::SMSIP);
 
     EXPECT_EQ(GetAosFeature(AosHandle::BLOCK_NONE), ImsAosFeature::NONE);
-}
-
-TEST_F(AosHandleTest, ConvertToAosFeature_Test)
-{
-    EXPECT_EQ(ConvertToAosFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL),
-            ImsAosFeature::MMTEL);
-    EXPECT_EQ(ConvertToAosFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO),
-            ImsAosFeature::VIDEO);
-    EXPECT_EQ(ConvertToAosFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_SMS),
-            ImsAosFeature::SMSIP);
-    EXPECT_EQ(ConvertToAosFeature(0), ImsAosFeature::NONE);
 }
 
 TEST_F(AosHandleTest, ReevaluateBlocks_Test1)
@@ -3009,41 +3016,6 @@ TEST_F(AosHandleTest, IsBlockForWifi_Test)
     ClearHoldingBlocksPolicyForMobile();
 }
 
-TEST_F(AosHandleTest, IsUnavailableFeature_Test)
-{
-    // Expectation: Return true if the config feature is existed in unavailable feature list.
-    // Else return false.
-
-    IMSVector<IMS_SINT32> objRegistrationWithFeatureTagUnavailable;
-    objRegistrationWithFeatureTagUnavailable.Add(
-            CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegistrationWithFeatureTagUnavailable));
-
-    EXPECT_TRUE(IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_MMTEL));
-    EXPECT_FALSE(IsUnavailableFeature(CarrierConfig::Assets::UNAVAILABLE_FEATURE_TYPE_VIDEO));
-}
-
-TEST_F(AosHandleTest, IsUnavailableFeaturePolicy_Test)
-{
-    // Expectation: Return true if the policy is existed in unavailable feature policy list.
-    // Else return false.
-
-    IMSVector<IMS_SINT32> objRegistrationWithFeatureTagUnavailablePolicy;
-    objRegistrationWithFeatureTagUnavailablePolicy.Add(
-            CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegWithFeatureTagUnavailablePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegistrationWithFeatureTagUnavailablePolicy));
-
-    EXPECT_TRUE(IsUnavailableFeaturePolicy(CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_VOPS));
-    EXPECT_FALSE(IsUnavailableFeaturePolicy(
-            CarrierConfig::Assets::UNAVAILABLE_FEATURE_POLICY_CAPABILITY));
-}
-
 TEST_F(AosHandleTest, StateDisconnected_Test1)
 {
     // Test1: HANDLE_MSG_BLOCK_STATUS, Handle not blocked
@@ -3580,20 +3552,6 @@ TEST_F(AosHandleTest, InitializeFeatureTags_Test)
     EXPECT_FALSE(HasFeatureTag("+cdmaless", AString::ConstNull()));
 }
 
-TEST_F(AosHandleTest, UpdateFeatureTags_Test)
-{
-    // Expectation: Clear feature tags if no features
-    ClearFeatureTagList();
-
-    AddFeatureTag("+cdmaless");
-    EXPECT_TRUE(HasFeatureTag("+cdmaless", AString::ConstNull()));
-
-    UpdateFeatureTags();
-    EXPECT_FALSE(HasFeatureTag("+cdmaless", AString::ConstNull()));
-
-    ClearFeatureTagList();
-}
-
 TEST_F(AosHandleTest, ProcessImsSuspended_Test1)
 {
     // Test1: ims not connected
@@ -3875,6 +3833,11 @@ TEST_F(AosHandleTest, CallTracker_StateChanged_Test)
     m_pAosHandle->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
 }
 
+TEST_F(AosHandleTest, ReevaluateUnavailableFeature_Test)
+{
+    ReevaluateUnavailableFeature();
+}
+
 TEST_F(AosHandleTest, ProcessCapabilitiesChanged_Test)
 {
     ProcessCapabilitiesChanged(IMSMap<IMS_UINT32, IMS_UINT32>());
@@ -3887,12 +3850,7 @@ TEST_F(AosHandleTest, ProcessNetworkChanged_Test)
 
 TEST_F(AosHandleTest, ProcessVopsStateChanged_Test)
 {
-    ProcessVopsStateChanged(00);
-}
-
-TEST_F(AosHandleTest, ProcessUnavailableFeatureForVops_Test)
-{
-    ProcessUnavailableFeatureForVops(0);
+    ProcessVopsStateChanged(0);
 }
 
 TEST_F(AosHandleTest, IsSupportedNetworkType_Test)
@@ -3911,10 +3869,19 @@ TEST_F(AosHandleTest, IsSupportedNetworkTypeForCellular_Test)
     EXPECT_FALSE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_CDMA));
 }
 
+TEST_F(AosHandleTest, Is3G_Test)
+{
+    EXPECT_TRUE(Is3G(NW_REPORT_RADIO_WCDMA));
+    EXPECT_TRUE(Is3G(NW_REPORT_RADIO_HSPA));
+    EXPECT_FALSE(Is3G(NW_REPORT_RADIO_GSM));
+    EXPECT_FALSE(Is3G(NW_REPORT_RADIO_EDGE));
+}
+
 TEST_F(AosHandleTest, Event_NotifyEvent_Test)
 {
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, 1, 0);
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_ROAMING_STATE, 1, 0);
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, 0, 0);
 }
 
 TEST_F(AosHandleTest, RegistrationControl_NotifyCapabilitiesChanged_Test)

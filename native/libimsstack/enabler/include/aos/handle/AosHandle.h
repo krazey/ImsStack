@@ -157,17 +157,16 @@ public:
         // Capabilities
         BLOCK_VOLTE_CAPABILITY = 0x1,
         BLOCK_VILTE_CAPABILITY = 0x2,
-        BLOCK_SMS_CAPABILITY = 0x4,
+        BLOCK_VOWIFI_CAPABILITY = 0x4,
+        BLOCK_VIWIFI_CAPABILITY = 0x8,
+        BLOCK_SMS_CAPABILITY = 0x10,
 
         // Network
-        BLOCK_VOPS = 0x8,
+        BLOCK_VOPS = 0x20,
+        BLOCK_NETWORK = 0x40,
 
         // DM
-        BLOCK_SMS_OVER_IP_NETWORK_INDICATION = 0x10,
-
-        // VoWiFi
-        BLOCK_VOWIFI_CAPABILITY = 0x20,
-        BLOCK_VIWIFI_CAPABILITY = 0x40
+        BLOCK_SMS_OVER_IP_NETWORK_INDICATION = 0x80
     };
 
 protected:
@@ -187,6 +186,8 @@ protected:
     IMS_BOOL IsEpdgEnabled() const;
     IMS_BOOL IsEqualNetworkType(IN IMS_UINT32 nType, IN AosNetworkType eType) const;
     IMS_BOOL IsCapabilityExisted(IN IMS_UINT32 nCapabilities, IN AosCapability eCapability) const;
+    IMS_BOOL IsCapabilityExistedForNetworkType(
+            IN IMS_UINT32 nNetworkType, IN AosCapability eCapability) const;
     IMS_BOOL IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat) const;
     IMS_BOOL IsServiceFeature(IN IMS_UINT32 nFeature) const;
     IMS_BOOL IsWifiConnected();
@@ -197,15 +198,12 @@ protected:
     IMS_UINT32 GetBlock(IN IMS_UINT32 nEvent);
     IMS_UINT32 GetAosFeature(IN IMS_UINT32 nBlock);
 
-    IMS_UINT32 ConvertToAosFeature(IN IMS_UINT32 nConfigFeature);
-
     void AddBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks);
     void RemoveBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks);
     void SetBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks, IN IMS_BOOL bAdd);
 
     IMS_BOOL PreProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded);
     void ProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded, IN IMS_BOOL bPreProcess = IMS_TRUE);
-    void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked);
     IMS_BOOL ProcessCheckBlock(IN IMS_BOOL bRunStateMachine = IMS_TRUE);
     void ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bAdd);
     void ProcessUnavailableFeatureChanged();
@@ -227,14 +225,14 @@ protected:
 
     virtual IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock) const;
     virtual IMS_BOOL IsBlockForWifi(IN IMS_UINT32 nBlock) const;
-    virtual IMS_BOOL IsUnavailableFeature(IN IMS_SINT32 nConfigFeature) const;
-    virtual IMS_BOOL IsUnavailableFeaturePolicy(IN IMS_SINT32 nPolicy) const;
 
+    virtual void ReevaluateUnavailableFeature();
+
+    virtual void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked);
     virtual void ProcessCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
     virtual void ProcessNetworkChanged();
     virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState);
-    virtual IMS_BOOL ProcessUnavailableFeatureForVops(IN IMS_UINT32 nState);
 
     // State Machine
     virtual IMS_BOOL StateDisconnected(IN IMSMSG& objMSG);
@@ -250,8 +248,6 @@ protected:
     virtual void InitializeServiceFeature();
     virtual void InitializeFeatureTags();
 
-    virtual void UpdateFeatureTags();
-
     virtual IMS_BOOL ProcessImsSuspended(IN IMS_UINT32 nReason = 0);
     virtual IMS_BOOL ProcessImsResumed(IN IMS_UINT32 nReason = 0);
 
@@ -260,6 +256,7 @@ protected:
     virtual void ResetSuspendedReason(IN IMS_UINT32 nReason);
 
     virtual void ReportRegState();
+    virtual IMS_BOOL Is3G(IN IMS_UINT32 nNetworkType) const;
 
     static const IMS_CHAR* StateToString(IN IMS_UINT32 nState);
     static const IMS_CHAR* MsgToString(IN IMS_UINT32 nMsg);
@@ -315,6 +312,7 @@ protected:
     IMS_UINT32 m_nHoldingBlocksForMobile;
     IMS_UINT32 m_nHoldingBlocksForWifi;
     IMS_UINT32 m_nHoldingVopsState;
+    IMS_UINT32 m_nVopsState;
 
     IMSMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
     IMSList<IMS_UINT32> m_objServiceFeatures;

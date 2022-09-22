@@ -50,6 +50,7 @@
     <boolean name="ims.registration_event_for_cat_required_bool" value="true"/>
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
     <boolean name="support_contact_user_info_bool" value="false"/>
+    <boolean name="support_reg_with_feature_tag_unavailable_bool" value="true"/>
 
    <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
      <int-array name="specific_registration_error_code_int_array" num="2">
@@ -82,15 +83,6 @@
      <int-array name="permanent_pdn_failure_int_array" num="2">
         <item value="28"/>
         <item value="33"/>
-    </int-array>
-
-    <!-- KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE -->
-    <int-array name="registration_with_feature_tag_unavailable_int_array" num="1">
-        <item value="1"/>
-    </int-array>
-    <int-array name="registration_with_feature_tag_unavailable_policy_int_array" num="2">
-        <item value="1"/>
-        <item value="2"/>
     </int-array>
 
     <!-- Uce -->
