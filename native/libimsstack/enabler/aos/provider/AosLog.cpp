@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 #include "ServiceTrace.h"
+#include "ImsAosParameter.h"
 #include "ImsEventDef.h"
 #include "IRegistration.h"
-#include "AoSAppRequestType.h"
 #include "provider/AosLog.h"
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");
@@ -38,6 +38,7 @@ public:
     // Message
     enum
     {
+        // State-Machine MSG
         MSG_CONDITION = AOSMSG_SERVICE_INTERNAL,
         MSG_CONNECTION,
         MSG_REGISTRATION,
@@ -56,6 +57,7 @@ public:
         MSG_REG_EXCHANGE,
         MSG_AC_CONFIGURED,
         MSG_PCSCF_RECOVER,
+        MSG_SCSCF_RESTORATION,
         MSG_OTHERS
     };
 
@@ -71,7 +73,19 @@ public:
         PENDING_REG_STOP_HELD = 0x2,
 
         // APP PENDING
-        PENDING_APP_DESTROY_HELD = 0x4
+        PENDING_APP_DESTROY_HELD = 0x4,
+
+        // REG RECONFIG PENDING
+        PENDING_REG_RECONFIG_HELD = 0x8,
+
+        // After CSFB
+        PENDING_REG_AFTER_CSFB_COMPLETE = 0x10,
+
+        // IPCAN PENDING
+        PENDING_IPCAN_HELD = 0x20,
+
+        // REG UPDATE PENDING
+        PENDING_REG_UPDATE_HELD = 0x40
     };
 
     // Timer
@@ -136,7 +150,8 @@ public:
         PENDING_RECONFIG = 0x4,
         PENDING_UPDATE_HELD_BY_CALL = 0x8,
 
-        PENDING_SUBSCRIPTION = 0x10
+        PENDING_SUBSCRIPTION = 0x10,
+        PENDING_TERMINATED = 0x20
     };
 
     enum
@@ -229,6 +244,12 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppMessageToString(IN IMS_UINT32 nType)
         case Application::MSG_PCSCF_RECOVER:
             return "MSG_PCSCF_RECOVER";
 
+        case Application::MSG_SCSCF_RESTORATION:
+            return "MSG_SCSCF_RESTORATION";
+
+        case Application::MSG_OTHERS:
+            return "MSG_OTHERS";
+
         default:
             return "__INVALID__";
     }
@@ -252,6 +273,18 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppPendingToString(IN IMS_UINT32 nType)
         case Application::PENDING_APP_DESTROY_HELD:
             return "PENDING_APP_DESTROY_HELD";
 
+        case Application::PENDING_REG_RECONFIG_HELD:
+            return "PENDING_REG_RECONFIG_HELD";
+
+        case Application::PENDING_REG_AFTER_CSFB_COMPLETE:
+            return "PENDING_REG_AFTER_CSFB_COMPLETE";
+
+        case Application::PENDING_IPCAN_HELD:
+            return "PENDING_IPCAN_HELD";
+
+        case Application::PENDING_REG_UPDATE_HELD:
+            return "PENDING_REG_UPDATE_HELD";
+
         default:
             return "__INVALID__";
     }
@@ -266,53 +299,44 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppRequestToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
-        case AoSAppRequest::COMMAND_REGISTER:
-            return "COMMAND_REGISTER";
+        case ImsAosControl::REGISTER_START:
+            return "REGISTER_START";
 
-        case AoSAppRequest::COMMAND_REGISTER_RECOVERY:
-            return "COMMAND_REGISTER_RECOVERY";
+        case ImsAosControl::REGISTER_START_WITH_WLAN:
+            return "REGISTER_START_WITH_WLAN";
 
-        case AoSAppRequest::COMMAND_REGISTER_STOP:
-            return "COMMAND_REGISTER_STOP";
+        case ImsAosControl::REGISTER_REFRESH:
+            return "REGISTER_REFRESH";
 
-        case AoSAppRequest::COMMAND_REGISTER_NEXT_PCSCF:
-            return "COMMAND_REGISTER_NEXT_PCSCF";
+        case ImsAosControl::REGISTER_STOP:
+            return "REGISTER_STOP";
 
-        case AoSAppRequest::COMMAND_REGISTER_REFRESH:
-            return "COMMAND_REGISTER_REFRESH";
+        case ImsAosControl::REGISTER_STOP_BY_ROAMING:
+            return "REGISTER_STOP_BY_ROAMING";
 
-        case AoSAppRequest::COMMAND_SET_CALL_FALLBACK:
-            return "COMMAND_SET_CALL_FALLBACK";
+        case ImsAosControl::REGISTER_REINITIATE:
+            return "REGISTER_REINITIATE";
 
-        case AoSAppRequest::COMMAND_SET_PUBLISH_STARTED:
-            return "COMMAND_SET_PUBLISH_STARTED";
+        case ImsAosControl::REGISTER_REINITIATE_BY_CSFB:
+            return "REGISTER_REINITIATE_BY_CSFB";
 
-        case AoSAppRequest::COMMAND_SET_PUBLISH_TERMINATED:
-            return "COMMAND_SET_PUBLISH_TERMINATED";
+        case ImsAosControl::PCSCF_NEXT:
+            return "PCSCF_NEXT";
 
-        case AoSAppRequest::COMMAND_SET_UNBLOCK_AC_INCOMPLTED:
-            return "COMMAND_SET_UNBLOCK_AC_INCOMPLTED";
+        case ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY:
+            return "PCSCF_NEXT_WITH_DISCOVERY";
 
-        case AoSAppRequest::COMMAND_SET_BLOCK_AC_INCOMPLTED:
-            return "COMMAND_SET_BLOCK_AC_INCOMPLTED";
+        case ImsAosControl::RETRY_COUNT_INCREASE:
+            return "RETRY_COUNT_INCREASE";
 
-        case AoSAppRequest::COMMAND_SET_AC_CONFIGURED:
-            return "COMMAND_SET_AC_CONFIGURED";
+        case ImsAosControl::UPDATE_SIP_DELEGATE_REGISTRATION:
+            return "UPDATE_SIP_DELEGATE_REGISTRATION";
 
-        case AoSAppRequest::COMMAND_FAKE_E_REGISTER:
-            return "COMMAND_FAKE_E_REGISTER";
+        case ImsAosControl::TRIGGER_SIP_DELEGATE_DEREGISTRATION:
+            return "TRIGGER_SIP_DELEGATE_DEREGISTRATION";
 
-        case AoSAppRequest::COMMAND_HANDLE_INSTANTANEOUS_OFFLINE:
-            return "COMMAND_NO_RTP_PING_CHECK";
-
-        case AoSAppRequest::COMMAND_NO_RTP_PING_CHECK:
-            return "COMMAND_NO_RTP_PING_CHECK";
-
-        case AoSAppRequest::COMMAND_REGINFO_UPDATE:
-            return "COMMAND_REGINFO_UPDATE";
-
-        case AoSAppRequest::COMMAND_SERVICE_CONTROL:
-            return "COMMAND_SERVICE_CONTROL";
+        case ImsAosControl::TRIGGER_FULL_NETWORK_REGISTRATION:
+            return "TRIGGER_FULL_NETWORK_REGISTRATION";
 
         default:
             return "__INVALID__";
@@ -471,17 +495,23 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegPendingToString(IN IMS_UINT32 nType)
         case Registration::PENDING_NONE:
             return "PENDING_NONE";
 
-        case Registration::PENDING_RECONFIG:
-            return "PENDING_RECONFIG";
-
         case Registration::PENDING_TRANSACTION:
             return "PENDING_TRANSACTION";
+
+        case Registration::PENDING_UPDATE:
+            return "PENDING_UPDATE";
+
+        case Registration::PENDING_RECONFIG:
+            return "PENDING_RECONFIG";
 
         case Registration::PENDING_UPDATE_HELD_BY_CALL:
             return "PENDING_UPDATE_HELD_BY_CALL";
 
         case Registration::PENDING_SUBSCRIPTION:
             return "PENDING_SUBSCRIPTION";
+
+        case Registration::PENDING_TERMINATED:
+            return "PENDING_TERMINATED";
 
         default:
             return "__INVALID__";

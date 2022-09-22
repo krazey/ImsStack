@@ -62,8 +62,6 @@ protected:
         }
     }
 
-    void SetMtkChipset(IN IMS_BOOL bIsMtkChipset) { pAosUtil->m_bIsMtkChipset = bIsMtkChipset; }
-
     void SetWiFiTest(IN IMS_BOOL bIsWifiTest) { pAosUtil->m_bIsWifiTest = bIsWifiTest; }
 };
 
@@ -582,11 +580,6 @@ TEST_F(AosUtilTest, checkNetworkType)
 
 TEST_F(AosUtilTest, checkSet)
 {
-    SetMtkChipset(IMS_TRUE);
-    EXPECT_TRUE(pAosUtil->IsMtkChipset());
-    SetMtkChipset(IMS_FALSE);
-    EXPECT_FALSE(pAosUtil->IsMtkChipset());
-
     SetWiFiTest(IMS_TRUE);
     EXPECT_TRUE(pAosUtil->IsWifiTest());
     SetWiFiTest(IMS_FALSE);

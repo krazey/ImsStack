@@ -449,6 +449,11 @@ IMS_BOOL AosApplication::IsTimerRunning(IN IMS_UINT32 nType) const
         return (m_piAppTerminatedTimer != IMS_NULL);
     }
 
+    if (nType == TIMER_PDN_BLOCKED)
+    {
+        return (m_piPdnBlockedTimer != IMS_NULL);
+    }
+
     return IMS_FALSE;
 }
 

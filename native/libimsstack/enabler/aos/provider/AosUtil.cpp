@@ -38,13 +38,8 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 PUBLIC
 AosUtil::AosUtil() :
         m_piSipConfigV(IMS_NULL),
-        m_bIsMtkChipset(IMS_FALSE),
         m_bIsWifiTest(IMS_FALSE)
 {
-    m_bIsMtkChipset =
-            UtilService::GetUtilService()->GetSystemProperty()->GetChipsetVendor().EqualsIgnoreCase(
-                    "MediaTek");
-
     m_bIsWifiTest = (UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
                              ImsPrivateProperties::Persistent::KEY_WIFI_TEST, 0) == 1);
 
@@ -919,12 +914,6 @@ IMS_BOOL AosUtil::UpdateFeatureTagOptions(IN IMS_UINT32 nUpdatedFeatureTags,
     }
 
     return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL AosUtil::IsMtkChipset() const
-{
-    return m_bIsMtkChipset;
 }
 
 PUBLIC

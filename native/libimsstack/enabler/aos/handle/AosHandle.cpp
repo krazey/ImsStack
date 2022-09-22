@@ -831,12 +831,10 @@ Remarks
 PROTECTED
 IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
 {
-    IMS_UINT32 nImsAosReason = ImsAosReason::NONE;
+    IMS_UINT32 nImsAosReason = ImsAosReason::NOT_SPECIFIED;
 
     switch (nAosReason)
     {
-        case AosReason::NONE:
-            break;
         case AosReason::BAD_BATTERY:  // FALL-THROUGH
         case AosReason::POWER_OFF:
             nImsAosReason = ImsAosReason::POWER_OFF;
@@ -866,7 +864,6 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
             nImsAosReason = ImsAosReason::REG_NEW_REQUIRED;
             break;
         default:
-            nImsAosReason = ImsAosReason::NOT_SPECIFIED;
             break;
     }
 
