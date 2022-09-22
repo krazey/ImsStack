@@ -27,10 +27,11 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockIMessage.h"
 #include "helper/MockIMtcAosConnector.h"
+#include "internal/Ims3gpp.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipStatusCode.h"
-#include "utility/MessageUtils.h"
+#include "utility/MockIMessageUtils.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -49,7 +50,7 @@ public:
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
     CallInfo objCallInfo;
-    MessageUtils objMessageUtils;
+    MockIMessageUtils objMessageUtils;
 
     StartErrorHandler* pHandler;
 
@@ -59,6 +60,8 @@ protected:
         MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objCallContext);
         ON_CALL(objCallContext, GetMessageUtils)
                 .WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objMessageUtils, GetCauseFromReasonHeader)
+                .WillByDefault(Return(-1));
         ON_CALL(objCallContext, GetService)
                 .WillByDefault(ReturnRef(objMtcService));
         ON_CALL(objMtcService, GetAosConnector)
@@ -111,6 +114,14 @@ protected:
     {
         CallReasonInfo objResult = pHandler->Handle(&objMessage);
         return objResult.nCode == nCode && objResult.nExtraCode == nExtraCode;
+    }
+
+    IMS_BOOL CheckHandleResult(IN IMS_SINT32 nCode, IN IMS_SINT32 nExtraCode,
+            IN const AString& strExtraMessage)
+    {
+        CallReasonInfo objResult = pHandler->Handle(&objMessage);
+        return objResult.nCode == nCode && objResult.nExtraCode == nExtraCode &&
+                objResult.strExtraMessage.Equals(strExtraMessage);
     }
 };
 
@@ -221,9 +232,9 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
     EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
 }
 
-TEST_F(StartErrorHandlerTest, HandleReturnsCsfbIfStatuscodeIsIncludedInCsfbConfiguration)
+TEST_F(StartErrorHandlerTest, HandleReturnsCsfbIfStatusCodeIsIncludedInCsfbConfiguration)
 {
-    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_380;
+    const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_408;
     SetMessageCode(ANY_REJECT_CODE);
     SetCsfbConfig(ANY_REJECT_CODE);
 
@@ -231,18 +242,41 @@ TEST_F(StartErrorHandlerTest, HandleReturnsCsfbIfStatuscodeIsIncludedInCsfbConfi
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
-TEST_F(StartErrorHandlerTest, Handle3xxResponses)
+TEST_F(StartErrorHandlerTest, HandleRedirectionBy3xxResponses)
 {
     const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_300;
     SetMessageCode(ANY_REJECT_CODE);
 
+    AString strAnyContactUri("sip:anyContactUri");
+    ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(strAnyContactUri));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED, ANY_REJECT_CODE, strAnyContactUri));
+
+    ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(""));
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, ANY_REJECT_CODE));
+
+    SetCsfbConfig(ANY_REJECT_CODE);
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
 TEST_F(StartErrorHandlerTest, Handle380Response)
 {
-    // TODO: more tests
     SetMessageCode(SipStatusCode::SC_380);
+
+    ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(&objMessage, ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(EXTRA_CODE_EMERGENCYSERVICE_INVALID));
+
+    // TODO: MockIms3gpp is required. HasEmergencyServiceTypeInBody always returns false
+    Ims3gpp objIms3gpp;
+    ON_CALL(objMessageUtils, GetIms3gppFromBody(&objMessage, _))
+            .WillByDefault(ReturnRef(objIms3gpp));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, SipStatusCode::SC_380));
+
+    SetCsfbConfig(SipStatusCode::SC_380);
     EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
 }
 
@@ -311,9 +345,6 @@ TEST_F(StartErrorHandlerTest, Handle4xxResponses)
     SetMessageCode(SipStatusCode::SC_487);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_REQUEST_CANCELLED, SipStatusCode::SC_487));
 
-    SetMessageCode(SipStatusCode::SC_488);
-    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_ACCEPTABLE, SipStatusCode::SC_488));
-
     SetMessageCode(SipStatusCode::SC_491);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_REQUEST_PENDING, SipStatusCode::SC_491));
 
@@ -368,6 +399,23 @@ TEST_F(StartErrorHandlerTest, Handle407Response)
 
     objCallInfo.bEmergency = IMS_TRUE;
     EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+}
+
+TEST_F(StartErrorHandlerTest, Handle488Response)
+{
+    SetMessageCode(SipStatusCode::SC_488);
+    ON_CALL(objMessageUtils, HasSdp(&objMessage))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED, SipStatusCode::SC_488, AString::ConstNull()));
+
+    ON_CALL(objMessageUtils, HasSdp(&objMessage))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_ACCEPTABLE, SipStatusCode::SC_488));
+
+    SetCsfbConfig(SipStatusCode::SC_488);
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
 TEST_F(StartErrorHandlerTest, Handle5xxResponses)
@@ -430,17 +478,12 @@ TEST_F(StartErrorHandlerTest, Handle6xxResponses)
 
 TEST_F(StartErrorHandlerTest, ExtraCodeIsSetByReasonHeader)
 {
-    ImsList<AString> objHeaders;
-    AString strReasonHeaderName = "Reason";
-    objHeaders.Append("Reason: SIP;cause=12345;text=\"any resason\"");
-    MockISipMessage objSipMessage;
-    ON_CALL(objMessage, GetMessage)
-            .WillByDefault(Return(&objSipMessage));
-    ON_CALL(objSipMessage, GetHeaders(ISipHeader::UNKNOWN, strReasonHeaderName))
-            .WillByDefault(Return(objHeaders));
+    IMS_SINT32 nAnyCause = 12345;
+    ON_CALL(objMessageUtils, GetCauseFromReasonHeader)
+            .WillByDefault(Return(nAnyCause));
 
-    SetMessageCode(SipStatusCode::SC_300);
-    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, 12345));
+    SetMessageCode(SipStatusCode::SC_603);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_USER_REJECTED, nAnyCause));
 }
 
 }  // namespace android

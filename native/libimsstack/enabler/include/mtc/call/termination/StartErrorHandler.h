@@ -50,11 +50,13 @@ private:
 
     CallReasonInfo Handle3xxResponse(IN const IMessage& objMessage) const;
     CallReasonInfo Handle380Response(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleRedirection(IN const IMessage& objMessage) const;
 
     CallReasonInfo Handle4xxResponse(IN const IMessage& objMessage) const;
     CallReasonInfo Handle403Response() const;
     CallReasonInfo Handle404Response() const;
     CallReasonInfo Handle407Response() const;
+    CallReasonInfo Handle488Response(IN const IMessage& objMessage) const;
 
     CallReasonInfo Handle5xxResponse(IN const IMessage& objMessage) const;
     CallReasonInfo Handle500Response(IN const IMessage& objMessage) const;
@@ -66,6 +68,7 @@ private:
     IMS_SINT32 GetDefaultExtraCode(IN const IMessage& objMessage) const;
     IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage) const;
     IMS_BOOL IsRetry1xRequiredForNormalCall(IN const IMessage& objMessage) const;
+    IMS_BOOL IsConditionCheckRequiredBeforeRetry1x(IN const IMessage& objMessage) const;
     IMS_BOOL IsNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const;
     IMS_BOOL IsIpcanResourceUnavailable(IN const IMessage& objMessage) const;
     IMS_BOOL HasEmergencyServiceTypeInBody(IN const IMessage& objMessage) const;

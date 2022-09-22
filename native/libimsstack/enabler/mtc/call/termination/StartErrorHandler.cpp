@@ -48,7 +48,13 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
         return HandleTransactionTimeout();
     }
 
-    if (!m_objContext.GetCallInfo().bEmergency && IsRetry1xRequiredForNormalCall(*piMessage))
+    if (m_objContext.GetCallInfo().bEmergency)
+    {
+        return HandleResponse(*piMessage);
+    }
+
+    if (IsConditionCheckRequiredBeforeRetry1x(*piMessage) == IMS_FALSE &&
+            IsRetry1xRequiredForNormalCall(*piMessage))
     {
         return CallReasonInfo(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
@@ -132,8 +138,34 @@ CallReasonInfo StartErrorHandler::Handle3xxResponse(IN const IMessage& objMessag
 
     switch (nStatusCode)
     {
+        case SipStatusCode::SC_300:
+        case SipStatusCode::SC_301:
+        case SipStatusCode::SC_302:
+        case SipStatusCode::SC_305:
+            return HandleRedirection(objMessage);
         case SipStatusCode::SC_380:
             return Handle380Response(objMessage);
+    }
+
+    return CallReasonInfo(CODE_SIP_REDIRECTED, GetDefaultExtraCode(objMessage));
+}
+
+PRIVATE
+CallReasonInfo StartErrorHandler::HandleRedirection(IN const IMessage& objMessage) const
+{
+    AString strContact;
+    MessageUtil::GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL, strContact);
+    if (strContact.GetLength() > 0)
+    {
+        // TODO: silent redial with the Contact header to be implemented
+        return CallReasonInfo(
+                CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED, GetDefaultExtraCode(objMessage), strContact);
+    }
+
+    if (IsRetry1xRequiredForNormalCall(objMessage))
+    {
+        return CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
 
     return CallReasonInfo(CODE_SIP_REDIRECTED, GetDefaultExtraCode(objMessage));
@@ -147,9 +179,8 @@ CallReasonInfo StartErrorHandler::Handle380Response(IN const IMessage& objMessag
     if (eSosType != EXTRA_CODE_EMERGENCYSERVICE_INVALID &&
             IsNonUeDetectableEmergencyCall(objMessage))
     {
-        // TODO : need to modify this after emergency domain selection policy is decided.
-        return CallReasonInfo(
-                CODE_LOCAL_CALL_CS_RETRY_REQUIRED /*FAIL_REASON_SESSION_RETRY_R_RAT*/, eSosType);
+        // TODO : verify CODE_SIP_ALTERNATE_EMERGENCY_CALL and update.
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, eSosType);
     }
 
     if (HasEmergencyServiceTypeInBody(objMessage))
@@ -158,10 +189,13 @@ CallReasonInfo StartErrorHandler::Handle380Response(IN const IMessage& objMessag
         // Call app will retry according to the UX scenario.
         return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_NORMAL);
     }
-    else
+
+    if (IsRetry1xRequiredForNormalCall(objMessage))
     {
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+        return CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
+    return CallReasonInfo(CODE_SIP_REDIRECTED, GetDefaultExtraCode(objMessage));
 }
 
 PRIVATE
@@ -224,7 +258,7 @@ CallReasonInfo StartErrorHandler::Handle4xxResponse(IN const IMessage& objMessag
         case SipStatusCode::SC_487:
             return CallReasonInfo(CODE_SIP_REQUEST_CANCELLED, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_488:
-            return CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, GetDefaultExtraCode(objMessage));
+            return Handle488Response(objMessage);
         case SipStatusCode::SC_491:
             return CallReasonInfo(CODE_SIP_REQUEST_PENDING, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_493:
@@ -286,6 +320,25 @@ CallReasonInfo StartErrorHandler::Handle407Response() const
 }
 
 PRIVATE
+CallReasonInfo StartErrorHandler::Handle488Response(IN const IMessage& objMessage) const
+{
+    if (MessageUtil::HasSdp(&objMessage))
+    {
+        // TODO: silent redial with the SDP to be implemented
+        AString strSdp;
+        return CallReasonInfo(CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED, SipStatusCode::SC_488, strSdp);
+    }
+
+    if (IsRetry1xRequiredForNormalCall(objMessage))
+    {
+        return CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+    }
+
+    return CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, GetDefaultExtraCode(objMessage));
+}
+
+PRIVATE
 CallReasonInfo StartErrorHandler::Handle5xxResponse(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
@@ -336,7 +389,12 @@ CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessag
     if (nRetryAfter > 0)
     {
         // TODO: Set block and CSFB for nRetryAfter duration
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+    }
+
+    if (IsRetry1xRequiredForNormalCall(objMessage))
+    {
+        return CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
 
     return CallReasonInfo(CODE_SIP_SERVICE_UNAVAILABLE, GetDefaultExtraCode(objMessage));
@@ -369,7 +427,14 @@ CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessag
                     ControlAos(ImsAosControl::REGISTER_REINITIATE);
                     break;
             }
+            return CallReasonInfo(CODE_SIP_SERVER_TIMEOUT, GetDefaultExtraCode(objMessage));
         }
+    }
+
+    if (IsRetry1xRequiredForNormalCall(objMessage))
+    {
+        return CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
 
     return CallReasonInfo(CODE_SIP_SERVER_TIMEOUT, GetDefaultExtraCode(objMessage));
@@ -420,8 +485,28 @@ IMS_BOOL StartErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage) c
 PRIVATE
 IMS_BOOL StartErrorHandler::IsRetry1xRequiredForNormalCall(IN const IMessage& objMessage) const
 {
-    IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-    return m_objContext.GetConfigurationProxy().Is(Feature::REJECT_CODE_FOR_CSFB, nStatusCode);
+    return m_objContext.GetConfigurationProxy().Is(
+            Feature::REJECT_CODE_FOR_CSFB, objMessage.GetStatusCode());
+}
+
+PRIVATE
+IMS_BOOL StartErrorHandler::IsConditionCheckRequiredBeforeRetry1x(
+        IN const IMessage& objMessage) const
+{
+    switch (objMessage.GetStatusCode())
+    {
+        case SipStatusCode::SC_300:
+        case SipStatusCode::SC_301:
+        case SipStatusCode::SC_302:
+        case SipStatusCode::SC_305:
+        case SipStatusCode::SC_380:
+        case SipStatusCode::SC_488:
+        case SipStatusCode::SC_503:
+        case SipStatusCode::SC_504:
+            return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
 
 PRIVATE
