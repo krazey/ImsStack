@@ -105,8 +105,6 @@ public:
     IMS_BOOL UpdateFeatureTagOptions(IN IMS_UINT32 nUpdatedFeatureTags, IN IMS_BOOL bIsSupported,
             IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
-    IMS_BOOL IsMtkChipset() const;
-
     IMS_BOOL IsSupportedNetworkType(IN IMS_UINT32 nType) const;
     IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const;
 
@@ -121,7 +119,6 @@ private:
 
     ISipConfigV* m_piSipConfigV;
 
-    IMS_BOOL m_bIsMtkChipset;
     IMS_BOOL m_bIsWifiTest;
 
 private:

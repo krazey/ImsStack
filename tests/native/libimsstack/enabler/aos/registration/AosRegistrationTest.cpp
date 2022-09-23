@@ -74,13 +74,12 @@ class TestAosRegistration : public AosRegistration
 {
     inline TestAosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId) :
             AosRegistration(piAppContext, strRegId),
-            piMockRegistration(IMS_NULL)
+            m_piMockRegistration(IMS_NULL)
     {
     }
 
-    inline virtual IRegistration* GetRegistration() { return piMockRegistration; }
-
     friend class AosRegistrationTest;
+    FRIEND_TEST(AosRegistrationTest, StartAndDestroy);
     FRIEND_TEST(AosRegistrationTest, CheckMode);
     FRIEND_TEST(AosRegistrationTest, Stop);
     FRIEND_TEST(AosRegistrationTest, Update);
@@ -90,10 +89,13 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, FeatureTagForMtc);
     FRIEND_TEST(AosRegistrationTest, BlockChanged);
 
+protected:
+    inline virtual IRegistration* GetRegistration() { return m_piMockRegistration; }
+
 public:
     inline void SetMockIRegistration(IN IRegistration* piRegistration)
     {
-        piMockRegistration = piRegistration;
+        m_piMockRegistration = piRegistration;
     }
 
     inline void SetIRegistration(IN IRegistration* piRegistration)
@@ -122,7 +124,7 @@ public:
     inline void SetISipConfigV(ISipConfigV* piSipConfigV) { m_pUtil->SetISipConfigV(piSipConfigV); }
 
 private:
-    IRegistration* piMockRegistration;
+    IRegistration* m_piMockRegistration;
 };
 
 class AosRegistrationTest : public ::testing::Test
@@ -267,11 +269,13 @@ protected:
         if (m_pTestAosRegistration)
         {
             delete m_pTestAosRegistration;
+            m_pTestAosRegistration = IMS_NULL;
         }
 
         if (m_pAosStaticProfile)
         {
             delete m_pAosStaticProfile;
+            m_pAosStaticProfile = IMS_NULL;
         }
     }
 };
@@ -437,9 +441,12 @@ TEST_F(AosRegistrationTest, StartAndDestroy)
             .Times(AnyNumber())
             .WillRepeatedly(Return(static_cast<IMS_UINT32>(AosNetworkType::LTE)));
 
-    // Start()
+    // TEST_F : Start - StopTimer, CheckRadioReadyAndSetTxnPending
+    // , CreateRegistration - PrepareRegistration (IsIpsecInit, DestroySocket)
+    // , SetRetryTime, SetAor (IsFakeRegistration, )
     m_pTestAosRegistration->SetMockIRegistration(
             static_cast<IRegistration*>(&m_objMockIRegistration));
+
     m_pTestAosRegistration->Start();
     EXPECT_EQ(m_pTestAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
 

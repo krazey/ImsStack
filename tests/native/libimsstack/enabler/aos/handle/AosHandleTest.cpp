@@ -1316,7 +1316,7 @@ TEST_F(AosHandleTest, GetAppState_Test)
 
 TEST_F(AosHandleTest, GetImsAosReason_Test)
 {
-    EXPECT_EQ(GetImsAosReason(AosReason::NONE), ImsAosReason::NONE);
+    EXPECT_EQ(GetImsAosReason(AosReason::NONE), ImsAosReason::NOT_SPECIFIED);
     EXPECT_EQ(GetImsAosReason(AosReason::BAD_BATTERY), ImsAosReason::POWER_OFF);
     EXPECT_EQ(GetImsAosReason(AosReason::POWER_OFF), ImsAosReason::POWER_OFF);
     EXPECT_EQ(GetImsAosReason(AosReason::AIRPLANE_MODE), ImsAosReason::DATA_DISCONNECTED);
