@@ -55,7 +55,10 @@ public:
     MOCK_METHOD(IMS_BOOL, IsLocalTone, (), (override));
     MOCK_METHOD(MediaState, GetState, (), (override));
     MOCK_METHOD(MediaState, GetOldState, (), (override));
-    MOCK_METHOD(IMS_RESULT, FormSdp, (IN ISession * piSession, IN CallType eCallType), (override));
+    MOCK_METHOD(IMS_RESULT, FormSdp,
+            (IN ISession * piSession, IN CallType eCallType,
+                    IN IMS_BOOL bAnswerForOfferlessReInvite),
+            (override));
     MOCK_METHOD(NegotiationResult, NegotiateSdp, (IN ISession * piSession), (override));
     MOCK_METHOD(void, RestoreSdp, (IN ISession * piSession), (override));
     MOCK_METHOD(void, UpdatePemType, (IN ISession * piSession, IN IMessage* piMessage), (override));

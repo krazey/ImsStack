@@ -343,7 +343,8 @@ PUBLIC VIRTUAL MediaState MtcMediaManager::GetOldState()
     return m_eOldState;
 }
 
-PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN CallType eCallType)
+PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN CallType eCallType,
+        IN IMS_BOOL bAnswerForOfferlessReInvite /* = IMS_FALSE*/)
 {
     if (GetNegotiationState(piSession) == NegotiationState::STATE_OFFER_SENT)
     {
@@ -355,7 +356,8 @@ PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN Ca
     MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromCallType(eCallType);
 
     IMS_BOOL bResult = m_piMediaSession->FormSDP(GetMediaNegoId(piSession), piSession, eContents,
-            m_pMediaInfo->eADir, m_pMediaInfo->eVDir, m_pMediaInfo->eTDir, IMS_FALSE);
+            m_pMediaInfo->eADir, m_pMediaInfo->eVDir, m_pMediaInfo->eTDir,
+            bAnswerForOfferlessReInvite);
 
     if (!bResult)
     {

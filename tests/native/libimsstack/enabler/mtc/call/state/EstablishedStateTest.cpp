@@ -16,13 +16,23 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+
 #include "CallReasonInfo.h"
+#include "ImsTypeDef.h"
+#include "MtcContextRepository.h"
+
+#include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
 #include "call/state/EstablishedState.h"
-#include "media/MockIMtcMediaManager.h"
+#include "call/UpdatingInfo.h"
+#include "core/MockIMessage.h"
 #include "core/MockISession.h"
+#include "media/MockIMtcMediaManager.h"
+#include "precondition/MockIMtcPreconditionManager.h"
+#include "sipcore/SipMethod.h"
+#include "utility/MockIMessageUtils.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -105,6 +115,46 @@ TEST_F(EstablishedStateTest, SendUpdateBySrvccByFailed)
             .Times(1);
 
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->OnSrvccStateUpdated(SrvccState::FAILED));
+}
+
+TEST_F(EstablishedStateTest, SendOfferWithFullCapaOnResponseToReInvite)
+{
+    MockIMessage* piMessage = new MockIMessage();
+    ON_CALL(objMockISession, GetPreviousRequest(_)).WillByDefault(Return(piMessage));
+
+    UpdatingInfo* pUpdatingInfo = new UpdatingInfo();
+    ON_CALL(objMockCallContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
+
+    MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objMockCallContext);
+
+    MockIMessageUtils objMessageUtils;
+    ON_CALL(objMockCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+    ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
+
+    ON_CALL(objMessageUtils, HasSdp(piMessage)).WillByDefault(Return(IMS_FALSE));
+
+    SipMethod objSipMethod(SipMethod::INVITE);
+    ON_CALL(*piMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+
+    ON_CALL(objMockCallContext, IsHeldByMe).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objMockMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+
+    EXPECT_CALL(objMockMediaManager, FormSdp(&objMockISession, CallType::VOIP, IMS_TRUE))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+
+    MockIMtcPreconditionManager objMockPreconditionManager;
+    ON_CALL(objMockCallContext, GetPreconditionManager)
+            .WillByDefault(ReturnRef(objMockPreconditionManager));
+    EXPECT_CALL(objMockPreconditionManager, FormPreconditionSdp(_, IMS_FALSE)).Times(1);
+
+    EXPECT_CALL(objMockMtcSession, AcceptUpdate()).Times(1).WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
+
+    delete piMessage;
+    delete pUpdatingInfo;
 }
 
 }  // namespace android

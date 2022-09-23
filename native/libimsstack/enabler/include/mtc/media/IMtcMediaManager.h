@@ -96,7 +96,8 @@ public:
      * @param eCallType To deliver MEDIA_CONTENT_TYPE as a parameter for the media interface API.
      * @return It returns the result of forming SDP attributes - IMS_SUCCESS or IMS_FAILURE.
      */
-    virtual IMS_RESULT FormSdp(IN ISession* piSession, IN CallType eCallType) = 0;
+    virtual IMS_RESULT FormSdp(IN ISession* piSession, IN CallType eCallType,
+            IN IMS_BOOL bAnswerForOfferlessReInvite = IMS_FALSE) = 0;
 
     /**
      * @brief This method calls the media interface API to negotiate SDP.

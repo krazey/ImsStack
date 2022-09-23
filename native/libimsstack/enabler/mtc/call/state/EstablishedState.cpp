@@ -501,7 +501,8 @@ IMS_RESULT EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
     AdjustDirectionWithHeldByMe(bWithoutOffer);
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    if (objMediaManager.FormSdp(&(pSession->GetISession()), pSession->GetCallType()) == IMS_FAILURE)
+    if (objMediaManager.FormSdp(
+                &(pSession->GetISession()), pSession->GetCallType(), bWithoutOffer) == IMS_FAILURE)
     {
         // TODO
     }

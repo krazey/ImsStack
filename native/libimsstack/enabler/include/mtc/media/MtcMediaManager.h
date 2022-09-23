@@ -19,7 +19,7 @@
 
 #include "IMediaSession.h"
 #include "IMessage.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "IUMedia.h"
 #include "MediaDef.h"
 #include "MtcDef.h"
@@ -81,7 +81,8 @@ public:
     virtual MediaState GetOldState() override;
 
     /* Handling SDP */
-    virtual IMS_RESULT FormSdp(IN ISession* piSession, IN CallType eCallType) override;
+    virtual IMS_RESULT FormSdp(IN ISession* piSession, IN CallType eCallType,
+            IN IMS_BOOL bAnswerForOfferlessReInvite = IMS_FALSE) override;
     virtual NegotiationResult NegotiateSdp(IN ISession* piSession) override;
     virtual void RestoreSdp(IN ISession* piSession) override;
     void FinalizeSdp(IN ISession* piSession);
