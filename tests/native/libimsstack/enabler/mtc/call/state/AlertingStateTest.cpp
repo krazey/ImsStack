@@ -510,6 +510,15 @@ TEST_F(AlertingStateTest, OnMediaFailed)
     pAlertingState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
 }
 
+TEST_F(AlertingStateTest, TerminateInvokesTerminate)
+{
+    const CallReasonInfo objAnyReason(CODE_USER_DECLINE);
+
+    EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, objAnyReason));
+    EXPECT_CALL(objUiNotifier, SendTerminated(objAnyReason));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->Terminate(objAnyReason));
+}
+
 TEST_F(AlertingStateTest, SendUpdateBySrvccByCanceled)
 {
     ON_CALL(objMediaManager, GetNegotiationState(_))

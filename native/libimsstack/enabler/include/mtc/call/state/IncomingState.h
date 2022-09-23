@@ -43,10 +43,7 @@ public:
     IncomingState(IN const IncomingState&) = delete;
     IncomingState& operator=(IN const IncomingState&) = delete;
 
-    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
-
-    CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
-    CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
+    CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
     CallStateName SessionTerminated(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) override;
@@ -54,6 +51,12 @@ public:
     CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession) override;
     CallStateName SessionPRAckReceived(IN ISession* piSession) override;
     CallStateName SessionRPRDeliveryFailed(IN ISession* piSession) override;
+    CallStateName SessionStartFailed(IN ISession* piSession) override;
+
+    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
+
+    CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
+    CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
 
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
 

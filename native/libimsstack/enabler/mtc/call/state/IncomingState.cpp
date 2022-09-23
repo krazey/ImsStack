@@ -45,66 +45,14 @@ PUBLIC VIRTUAL IncomingState::~IncomingState()
     IMS_TRACE_D("~IncomingState", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
+PUBLIC VIRTUAL CallStateName IncomingState::Terminate(IN const CallReasonInfo& objReason)
 {
-    switch (nType)
-    {
-        // TODO: introduce a new guard timer just in case? otherwise, delete this function.
-        default:
-            break;
-    }
+    IMS_TRACE_D("Terminate", 0, 0, 0);
 
-    return GetStateName();
-}
+    HandleTerminate(objReason);
+    m_objContext.GetUiNotifier().SendTerminated(objReason);
 
-PUBLIC VIRTUAL CallStateName IncomingState::QosReserved(
-        IN ISession* piSession, IN IMS_UINT32 eMediaType)
-{
-    if (!m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
-                MtcExtensionSet::OPTION_TAG_RPR))
-    {
-        return GetStateName();
-    }
-
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
-    if (piMessage == IMS_NULL)
-    {
-        IMS_TRACE_D("QosReserved : UE doesn't receive PRACK.", 0, 0, 0);
-        return GetStateName();
-    }
-
-    IMS_TRACE_D("QosReserved : Media[%d] is reserved.", eMediaType, 0, 0);
-
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession))
-            ? QosCheckType::ALL_STATUS
-            : QosCheckType::LOCAL_STATUS;
-    if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
-    {
-        return GetStateName();
-    }
-
-    SendIncomingCallReceived();
-    return CallStateName::ALERTING;
-}
-
-PUBLIC VIRTUAL CallStateName IncomingState::QosReserveFailed(
-        IN ISession* piSession, IN QosLossPolicy eNextAction)
-{
-    IMS_TRACE_D("QosReserveFailed", 0, 0, 0);
-    if (eNextAction == QosLossPolicy::RELEASE)
-    {
-        return RejectIncomingAndToTerminating(
-                CallReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED));
-    }
-
-    if (eNextAction == QosLossPolicy::MODIFY)
-    {
-        // TODO: downgrade to voip. send early update or send re-INVITE after call establishment.
-        UNUSED_PARAM(piSession);
-    }
-
-    return GetStateName();
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionTerminated(IN ISession* piSession)
@@ -170,18 +118,6 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
     IMtcSession* pSession = m_objContext.GetSession();
     pSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
-
-    if (!MessageUtil::HasSdp(piMessage))
-    {
-        if (m_objContext.GetSession()->RespondToEarlyUpdate(SipStatusCode::SC_200) == IMS_FAILURE)
-        {
-            m_objContext.GetUiNotifier().SendStartFailed(
-                    CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
-            return CallStateName::TERMINATING;
-        }
-
-        return GetStateName();
-    }
 
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
@@ -264,6 +200,81 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionRPRDeliveryFailed(IN ISession
 {
     IMS_TRACE_D("SessionRPRDeliveryFailed", 0, 0, 0);
     return RejectIncomingAndToTerminating(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT));
+}
+
+PUBLIC VIRTUAL CallStateName IncomingState::SessionStartFailed(IN ISession* /* piSession */)
+{
+    IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
+    if (IsNeedToIgnoreStartFailure())
+    {
+        return GetStateName();
+    }
+
+    m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT));
+
+    return CallStateName::TERMINATING;
+}
+
+PUBLIC VIRTUAL CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
+{
+    switch (nType)
+    {
+        // TODO: introduce a new guard timer just in case? otherwise, delete this function.
+        default:
+            break;
+    }
+
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName IncomingState::QosReserved(
+        IN ISession* piSession, IN IMS_UINT32 eMediaType)
+{
+    if (!m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
+                MtcExtensionSet::OPTION_TAG_RPR))
+    {
+        return GetStateName();
+    }
+
+    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
+    if (piMessage == IMS_NULL)
+    {
+        IMS_TRACE_D("QosReserved : UE doesn't receive PRACK.", 0, 0, 0);
+        return GetStateName();
+    }
+
+    IMS_TRACE_D("QosReserved : Media[%d] is reserved.", eMediaType, 0, 0);
+
+    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession))
+            ? QosCheckType::ALL_STATUS
+            : QosCheckType::LOCAL_STATUS;
+    if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
+    {
+        return GetStateName();
+    }
+
+    SendIncomingCallReceived();
+    return CallStateName::ALERTING;
+}
+
+PUBLIC VIRTUAL CallStateName IncomingState::QosReserveFailed(
+        IN ISession* piSession, IN QosLossPolicy eNextAction)
+{
+    IMS_TRACE_D("QosReserveFailed", 0, 0, 0);
+    if (eNextAction == QosLossPolicy::RELEASE)
+    {
+        return RejectIncomingAndToTerminating(
+                CallReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED));
+    }
+
+    if (eNextAction == QosLossPolicy::MODIFY)
+    {
+        // TODO: downgrade to voip. send early update or send re-INVITE after call establishment.
+        UNUSED_PARAM(piSession);
+    }
+
+    return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::OnMediaFailed(IN const CallReasonInfo& objReason)
