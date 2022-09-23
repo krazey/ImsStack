@@ -25,7 +25,15 @@ public abstract class ImsApp {
         mPhoneId = phoneId;
     }
 
+    /**
+     * Clear objects created within session.
+     */
     public abstract void close();
+
+    /**
+     * Clear all sessions and initialize Ims state to default.
+     */
+    public abstract void onBinderDied();
 
     public final int getPhoneId() {
         return mPhoneId;
@@ -39,14 +47,6 @@ public abstract class ImsApp {
      */
     public boolean isConnected(int serviceType, int callType) {
         return false;
-    }
-
-    public void onBinderDied() {
-        // no-op
-    }
-
-    protected static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
     }
 
     protected static void logi(String s) {
