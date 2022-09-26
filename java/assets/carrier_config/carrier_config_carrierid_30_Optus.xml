@@ -15,7 +15,26 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Carrier configurations -->
+    <!-- Ims General -->
+    <boolean name="support_country_param_in_pani_header_bool" value="true"/>
+
+    <!-- Aos -->
+    <int-array name="ims.ims_identity_priority_int_array" num="1">
+        <item value="1"/>
+    </int-array>
+    <int-array name="ims.registration_permanent_error_code_int_array" num="1">
+        <item value="403"/>
+    </int-array>
+    <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
+    <int name="registration_retry_default_policy_int" value="1"/>
+
+    <!-- KEY_REGISTRATION_RETRY_BUNDLE -->
+    <int-array name="registration_retry_error_code_with_different_pcscf_int_array" num="4">
+        <item value="403"/>
+        <item value="500"/>
+        <item value="503"/>
+        <item value="504"/>
+    </int-array>
 
     <!-- Ut/Xcap Assets -->
     <boolean name="ut_display_error_phrase_with_409_error_bool" value="true"/>
